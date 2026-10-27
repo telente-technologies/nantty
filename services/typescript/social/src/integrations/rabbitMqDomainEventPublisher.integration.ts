@@ -2,7 +2,7 @@ import { connect, type ConfirmChannel } from "amqplib";
 
 import type { DomainEventPublisher, PublishableDomainEvent } from "../interfaces/domainEventPublisher.interface.js";
 
-export const domainEventsExchange = "zudomart.events";
+export const domainEventsExchange = "nantty.events";
 
 export type AmqpPublishChannel = Pick<ConfirmChannel, "publish" | "waitForConfirms" | "on" | "close">;
 
@@ -70,7 +70,7 @@ export function createRabbitMqDomainEventPublisher(url: string, connectFn: AmqpC
             type: event.eventType,
             contentType: "application/json",
             timestamp: Math.floor(Date.now() / 1000),
-            headers: { "x-zudomart-subject": event.subject, "x-zudomart-schema": "envelope.v1" },
+            headers: { "x-nantty-subject": event.subject, "x-nantty-schema": "envelope.v1" },
           });
         }
         await open.waitForConfirms();

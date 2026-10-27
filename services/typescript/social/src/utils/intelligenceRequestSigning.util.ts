@@ -4,7 +4,7 @@ export function signIntelligenceRequest(secret: string, method: string, path: st
   const timestamp = Math.floor(nowMilliseconds / 1000).toString();
   const nonce = randomBytes(18).toString("base64url");
   const canonical = ["v1", method, path, timestamp, nonce, createHash("sha256").update(body, "utf8").digest("hex")].join("\n");
-  return { "content-type": "application/json", "x-zudo-timestamp": timestamp, "x-zudo-nonce": nonce, "x-zudo-signature": `v1=${createHmac("sha256", secret).update(canonical, "utf8").digest("hex")}` };
+  return { "content-type": "application/json", "x-nantty-timestamp": timestamp, "x-nantty-nonce": nonce, "x-nantty-signature": `v1=${createHmac("sha256", secret).update(canonical, "utf8").digest("hex")}` };
 }
 
 export interface CircuitBreaker {

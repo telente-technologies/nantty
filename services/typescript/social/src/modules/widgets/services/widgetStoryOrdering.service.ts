@@ -20,5 +20,5 @@ export function orderWidgetStoryPeople(people: readonly WidgetStoryPerson[], lim
 }
 
 export function storyDeepLink(userId: string): string {
-  return `zudomart://stories/${encodeURIComponent(userId)}`;
+  return `nantty://stories/${encodeURIComponent(userId)}`;
 }

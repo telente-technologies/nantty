@@ -46,7 +46,7 @@ describe("intelligence clip ranker", () => {
     expect(ranked[1]?.boostMultiplier).toBe(1.08);
     const [url, init] = fetchImplementation.mock.calls[0] as unknown as [URL, RequestInit];
     expect(url.pathname).toBe("/v1/clips/rank");
-    expect((init.headers as Record<string, string>)["x-zudo-signature"]).toMatch(/^v1=/);
+    expect((init.headers as Record<string, string>)["x-nantty-signature"]).toMatch(/^v1=/);
   });
 
   it.each([

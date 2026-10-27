@@ -25,7 +25,7 @@ function commentsRouter() {
 
 async function status(router: ReturnType<typeof createRouter>, method: string, path: string, signedIn = true): Promise<number> {
   const query = Object.fromEntries(new URL(`http://local${path}`).searchParams);
-  const { response } = await router.dispatch(createRequestContext({ method: method as never, url: path, path: path.split("?")[0], query, headers: signedIn ? { "x-zudomart-account-id": ownerId } : {} }));
+  const { response } = await router.dispatch(createRequestContext({ method: method as never, url: path, path: path.split("?")[0], query, headers: signedIn ? { "x-nantty-account-id": ownerId } : {} }));
   return response.status;
 }
 

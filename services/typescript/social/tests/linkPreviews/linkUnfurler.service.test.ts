@@ -46,8 +46,8 @@ describe("link preview parsing", () => {
 
   it("strips tracking parameters when normalising and skips internal links", () => {
     expect(normalizeUrlForCache("HTTPS://Example.com:443/a?utm_source=x&b=2&a=1#top")).toBe("https://example.com/a?a=1&b=2");
-    expect(findFirstExternalUrlInText("see https://app.zudomart.com/p/shoe-1 and https://news.example/a.")).toBe("https://news.example/a");
-    expect(findFirstExternalUrlInText("only https://zudomart.com/ada")).toBeNull();
+    expect(findFirstExternalUrlInText("see https://app.nantty.com/p/shoe-1 and https://news.example/a.")).toBe("https://news.example/a");
+    expect(findFirstExternalUrlInText("only https://nantty.com/ada")).toBeNull();
   });
 });
 
@@ -62,9 +62,9 @@ describe("createLinkUnfurler", () => {
         : { finalUrl: new URL(url), status: 200, contentType: "text/html", body: Buffer.from(articleHtml) };
     };
     const stored: string[] = [];
-    const unfurler = createLinkUnfurler({ db, fetcher, clock: { now: () => new Date("2026-10-04T10:00:00Z") }, imageStore: { storeImage: async (_bytes, type) => { stored.push(type); return { mediaId: "0192f000-0000-7000-8000-000000000001", url: "https://media.zudomart.com/m/1/display.jpg" }; } } });
+    const unfurler = createLinkUnfurler({ db, fetcher, clock: { now: () => new Date("2026-10-04T10:00:00Z") }, imageStore: { storeImage: async (_bytes, type) => { stored.push(type); return { mediaId: "0192f000-0000-7000-8000-000000000001", url: "https://media.nantty.com/m/1/display.jpg" }; } } });
     const preview = await unfurler.attachLinkPreviewToPost("post-1", "Read this https://techcabal.com/2026/10/article?utm_campaign=x");
-    expect(preview).toMatchObject({ title: "Lagos tech week & more", domain: "techcabal.com", imageUrl: "https://media.zudomart.com/m/1/display.jpg", imageMediaId: "0192f000-0000-7000-8000-000000000001" });
+    expect(preview).toMatchObject({ title: "Lagos tech week & more", domain: "techcabal.com", imageUrl: "https://media.nantty.com/m/1/display.jpg", imageMediaId: "0192f000-0000-7000-8000-000000000001" });
     expect(stored).toEqual(["image/jpeg"]);
     expect(attached.get("post-1")).toEqual(preview);
     await unfurler.resolveLinkPreview("https://techcabal.com/2026/10/article");
@@ -96,11 +96,11 @@ describe("createLinkUnfurler", () => {
     expect(cache.size).toBe(0);
   });
 
-  it("does not unfurl Zudomart links", async () => {
+  it("does not unfurl Nantty links", async () => {
     const { db } = createFakeDatabase();
     let calls = 0;
     const fetcher: SafeFetcher = async () => { calls += 1; throw new Error("unexpected"); };
-    expect(await createLinkUnfurler({ db, fetcher, clock: { now: () => new Date() } }).resolveLinkPreview("https://app.zudomart.com/ada")).toBeNull();
+    expect(await createLinkUnfurler({ db, fetcher, clock: { now: () => new Date() } }).resolveLinkPreview("https://app.nantty.com/ada")).toBeNull();
     expect(calls).toBe(0);
   });
 });

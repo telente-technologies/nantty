@@ -1,7 +1,7 @@
-export const nanttyPostLinkHosts: readonly string[] = ["nantty.com", "www.nantty.com", "app.nantty.com", "zudomart.com", "www.zudomart.com", "app.zudomart.com", "zudomart.app", "www.zudomart.app"];
+export const nanttyPostLinkHosts: readonly string[] = ["nantty.com", "www.nantty.com", "app.nantty.com", "nantty.com", "www.nantty.com", "app.nantty.com", "nantty.app", "www.nantty.app"];
 
 /** @deprecated Use nanttyPostLinkHosts; legacy links remain accepted. */
-export const zudomartPostLinkHosts = nanttyPostLinkHosts;
+export const nanttyPostLinkHosts = nanttyPostLinkHosts;
 
 const urlPattern = /https?:\/\/[^\s<>"']+/gi;
 const trailingPunctuationPattern = /[.,!?;:)\]}'"]+$/;

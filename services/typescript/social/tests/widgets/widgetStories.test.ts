@@ -70,7 +70,7 @@ describe("stories widget", () => {
     expect(chidi?.hasUnseen).toBe(true);
     expect(chidi?.storyCount).toBe(2);
     expect(chidi?.thumbnailUrl).toBeNull();
-    expect(chidi?.deepLink).toBe("zudomart://stories/chidi");
+    expect(chidi?.deepLink).toBe("nantty://stories/chidi");
     expect(payload.people[2]?.hasUnseen).toBe(false);
   });
 

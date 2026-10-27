@@ -67,7 +67,7 @@ export function createIdentityDirectory(client: IdentityReadClient, logger: Logg
       } catch (error) {
         if (!mentionPrivacyUnavailableLogged) {
           mentionPrivacyUnavailableLogged = true;
-          logger.warn("mention privacy is unreadable: grant SELECT (who_can_mention_me) on users.privacy_settings to zudomart_readers", { error: error instanceof Error ? error.message : String(error) });
+          logger.warn("mention privacy is unreadable: grant SELECT (who_can_mention_me) on users.privacy_settings to nantty_readers", { error: error instanceof Error ? error.message : String(error) });
         }
       }
       return result;

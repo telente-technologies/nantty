@@ -3,7 +3,7 @@ import { createPublicKey, verify } from "node:crypto";
 import { unprocessable } from "../../../errors/social.error.js";
 import type { WireSignedPreKey } from "../models/messagingKeys.model.js";
 
-const signedPreKeyLabel = Buffer.from("zudomart-signed-prekey-v1", "utf8");
+const signedPreKeyLabel = Buffer.from("nantty-signed-prekey-v1", "utf8");
 
 function decodeKey(value: string, length: number): Buffer | null {
   const bytes = Buffer.from(value, "base64");

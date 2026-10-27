@@ -29,7 +29,7 @@ describe("host circuit breaker", () => {
 
 describe("production placeholder secrets", () => {
   it("refuses local-only values in production only", () => {
-    expect(collectPlaceholderSecretProblems({ NODE_ENV: "production", SOCIAL_INTERNAL_TOKEN: "local-only-social-internal-token-0123456789", DATABASE_URL: "postgres://svc_social:svc_social_local_only@db/zudomart", PORT: "8105" })).toHaveLength(2);
+    expect(collectPlaceholderSecretProblems({ NODE_ENV: "production", SOCIAL_INTERNAL_TOKEN: "local-only-social-internal-token-0123456789", DATABASE_URL: "postgres://svc_social:svc_social_local_only@db/nantty", PORT: "8105" })).toHaveLength(2);
     expect(collectPlaceholderSecretProblems({ NODE_ENV: "production", SOCIAL_INTERNAL_TOKEN: "a".repeat(40) })).toEqual([]);
     expect(collectPlaceholderSecretProblems({ SOCIAL_INTERNAL_TOKEN: "local-only-social-internal-token-0123456789" })).toEqual([]);
   });

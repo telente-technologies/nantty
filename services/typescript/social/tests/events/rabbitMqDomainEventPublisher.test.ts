@@ -36,8 +36,8 @@ describe("RabbitMQ domain event publisher", () => {
     const channel = new FakeChannel();
     const publisher = createRabbitMqDomainEventPublisher("amqp://test", async () => new FakeConnection(channel));
     await publisher.publishDomainEvents([event]);
-    expect(channel.published[0]).toMatchObject({ exchange: "zudomart.events", routingKey: "post.created" });
-    expect(channel.published[0]?.options).toMatchObject({ persistent: true, mandatory: true, messageId: "0190-evt", type: "post.created", headers: { "x-zudomart-subject": "post-1", "x-zudomart-schema": "envelope.v1" } });
+    expect(channel.published[0]).toMatchObject({ exchange: "nantty.events", routingKey: "post.created" });
+    expect(channel.published[0]?.options).toMatchObject({ persistent: true, mandatory: true, messageId: "0190-evt", type: "post.created", headers: { "x-nantty-subject": "post-1", "x-nantty-schema": "envelope.v1" } });
     expect(JSON.parse(channel.published[0]?.body ?? "{}")).toEqual(event.payload);
   });
 

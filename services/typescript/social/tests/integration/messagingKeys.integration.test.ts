@@ -22,7 +22,7 @@ function deviceRegistration(oneTimePreKeys: number) {
   const signedPreKey = rawKey(generateKeyPairSync("x25519").publicKey);
   const keyId = Buffer.alloc(4);
   keyId.writeUInt32BE(7);
-  const signature = sign(null, Buffer.concat([Buffer.from("zudomart-signed-prekey-v1"), keyId, signedPreKey]), identity.privateKey);
+  const signature = sign(null, Buffer.concat([Buffer.from("nantty-signed-prekey-v1"), keyId, signedPreKey]), identity.privateKey);
   return {
     registrationId: 42, identityKey: rawKey(identity.publicKey).toString("base64"),
     signedPreKey: { keyId: 7, publicKey: signedPreKey.toString("base64"), signature: signature.toString("base64") },

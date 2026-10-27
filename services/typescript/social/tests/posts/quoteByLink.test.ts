@@ -14,7 +14,7 @@ const targetId = "0192f0a0-0000-7000-8000-0000000000d1";
 const secondTargetId = "0192f0a0-0000-7000-8000-0000000000d2";
 const quoteOfTargetId = "0192f0a0-0000-7000-8000-0000000000d3";
 const commentedPostId = "0192f0a0-0000-7000-8000-0000000000d4";
-const link = (id: string, host = "app.zudomart.com") => `https://${host}/post/${id}`;
+const link = (id: string, host = "app.nantty.com") => `https://${host}/post/${id}`;
 
 function setup(extraPosts: Row[] = []) {
   const store = createMemoryStore({
@@ -52,15 +52,15 @@ describe("repost by link", () => {
 
   it("keeps a link in the middle of the text but still quotes it", async () => {
     const { post } = setup();
-    const view = await post(`Look ${link(targetId, "www.zudomart.com")} right?`);
-    expect(view.text).toBe(`Look ${link(targetId, "www.zudomart.com")} right?`);
+    const view = await post(`Look ${link(targetId, "www.nantty.com")} right?`);
+    expect(view.text).toBe(`Look ${link(targetId, "www.nantty.com")} right?`);
     expect(view.resharedFrom?.id).toBe(targetId);
   });
 
   it.each([
     ["a foreign domain", link(targetId, "evil.io")],
-    ["a lookalike domain", link(targetId, "zudomart.com.evil.io")],
-    ["a malformed id", "https://zudomart.com/post/abc123"],
+    ["a lookalike domain", link(targetId, "nantty.com.evil.io")],
+    ["a malformed id", "https://nantty.com/post/abc123"],
     ["a link to a comment", `${link(targetId)}?comment=${secondTargetId}`],
   ])("leaves %s as plain text", async (_label, url) => {
     const { post, target } = setup();

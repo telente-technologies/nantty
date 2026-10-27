@@ -72,7 +72,7 @@ describe("quotes inside comments", () => {
   it("counts the quote, notifies the quoted author and undoes the count on delete", async () => {
     const store = setup();
     const quoted = () => store.posts.find((row) => row["id"] === quotedId) as Row;
-    const comment = await createCreateCommentHandler(store.context)({ authorId: viewerId, postId, text: `see https://zudomart.com/post/${quotedId}`, parentCommentId: undefined, mentions: undefined });
+    const comment = await createCreateCommentHandler(store.context)({ authorId: viewerId, postId, text: `see https://nantty.com/post/${quotedId}`, parentCommentId: undefined, mentions: undefined });
     expect(quoted()).toMatchObject({ quoteCount: 1, repostCount: 0 });
     expect(payloads(store, "post.reshared")).toEqual([expect.objectContaining({ originalAuthorId: otherUser, originalPostId: quotedId, surface: "comment", commentId: comment.id, isQuote: true, url: `/post/${postId}?comment=${comment.id}` })]);
     await createDeleteCommentHandler(store.context)({ actorId: viewerId, commentId: comment.id });
@@ -84,7 +84,7 @@ describe("quotes inside comments", () => {
   it("marks the quote notification muted when the quoted author muted their post", async () => {
     const store = setup();
     await createSetPostNotificationMuteHandler(store.context)({ actorId: otherUser, postId: quotedId, muted: true });
-    await createCreateCommentHandler(store.context)({ authorId: viewerId, postId, text: `https://zudomart.com/post/${quotedId}`, parentCommentId: undefined, mentions: undefined });
+    await createCreateCommentHandler(store.context)({ authorId: viewerId, postId, text: `https://nantty.com/post/${quotedId}`, parentCommentId: undefined, mentions: undefined });
     expect(payloads(store, "post.reshared")[0]?.["notificationsMuted"]).toBe(true);
   });
 });

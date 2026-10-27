@@ -21,7 +21,7 @@ describe("intelligence feed ranker", () => {
     expect(ranked.map((item) => item.postId)).toEqual(["a", "b"]);
     expect(ranked[0]?.explanations?.[0]?.code).toBe("trending_topic");
     const [, init] = fetchImplementation.mock.calls[0] as unknown as [URL, RequestInit];
-    expect((init.headers as Record<string, string>)["x-zudo-signature"]).toMatch(/^v1=/);
+    expect((init.headers as Record<string, string>)["x-nantty-signature"]).toMatch(/^v1=/);
   });
 
   it("falls back to the deterministic order when Python is slower than the timeout", async () => {
