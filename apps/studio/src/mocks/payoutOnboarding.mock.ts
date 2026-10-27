@@ -14,7 +14,7 @@ interface PayoutOnboardingRecord {
 
 const CREATION_DELAY_MS = 6_000;
 const REVIEW_DELAY_MS = 12_000;
-const holder = globalThis as typeof globalThis & { __zudomartStudioPayoutOnboarding?: PayoutOnboardingRecord };
+const holder = globalThis as typeof globalThis & { __nanttyStudioPayoutOnboarding?: PayoutOnboardingRecord };
 
 const blank = (): PayoutOnboardingState => ({
   role: "creator", status: "not_started", currentStep: "identity", completedSteps: [], requiresBusinessStep: false, requiresDocumentStep: false, legalName: null, idType: null, idLast4: null,
@@ -23,7 +23,7 @@ const blank = (): PayoutOnboardingState => ({
 });
 
 function read(): PayoutOnboardingRecord {
-  return (holder.__zudomartStudioPayoutOnboarding ??= { state: blank(), idNumber: "", legalName: "", identitySavedAt: null, creationFailed: false, submittedAt: null, linkFailedOnce: false });
+  return (holder.__nanttyStudioPayoutOnboarding ??= { state: blank(), idNumber: "", legalName: "", identitySavedAt: null, creationFailed: false, submittedAt: null, linkFailedOnce: false });
 }
 
 const normalize = (name: string) => name.toUpperCase().replace(/[^A-Z ]/g, "").split(/\s+/).filter(Boolean).sort().join(" ");

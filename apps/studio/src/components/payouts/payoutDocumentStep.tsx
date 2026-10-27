@@ -11,7 +11,7 @@ import type { PayoutOnboardingState } from "@/types/payoutOnboarding.type";
 import styles from "./payoutOnboarding.module.css";
 import { PayoutStepFrame } from "./payoutStepFrame";
 
-export const PAYOUT_VERIFICATION_CHANNEL = "zudomart-payout-verification";
+export const PAYOUT_VERIFICATION_CHANNEL = "nantty-payout-verification";
 const wait = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 interface PayoutDocumentStepProps {
@@ -27,7 +27,7 @@ export function PayoutDocumentStep({ state, stepNumber, stepCount, onChanged }: 
   const open = useMutation({
     mutationFn: payoutOnboardingService.createDocumentLink,
     onSuccess: (link) => {
-      window.open(link.url, "zudomart-payout-verification", "popup,width=520,height=760");
+      window.open(link.url, "nantty-payout-verification", "popup,width=520,height=760");
       void onChanged();
     },
   });

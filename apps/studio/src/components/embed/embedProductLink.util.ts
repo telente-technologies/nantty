@@ -6,7 +6,7 @@ export function readProductIdFromNanttyLink(input: string): string | null {
   let path: string;
   try {
     const parsed = new URL(text);
-    if (!/(^|\.)(?:nantty|zudomart)\.com$/.test(parsed.hostname) && parsed.hostname !== "localhost") return null;
+    if (!/(^|\.)(?:nantty|nantty)\.com$/.test(parsed.hostname) && parsed.hostname !== "localhost") return null;
     path = parsed.pathname;
   } catch {
     return /^[A-Za-z0-9_.~-]{1,100}$/.test(text) ? text : null;

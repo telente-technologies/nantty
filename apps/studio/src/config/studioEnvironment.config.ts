@@ -1,7 +1,7 @@
 const productionSessionSecretPattern = /^[0-9a-f]{64}$/i;
 const sessionSecretPlaceholder = "replace-with-64-random-hex-characters";
 const isProductionRuntime = process.env.NODE_ENV === "production";
-const developmentOnlySessionSecret = "zudomart-studio-development-only-secret-never-use-in-production";
+const developmentOnlySessionSecret = "nantty-studio-development-only-secret-never-use-in-production";
 
 export function readStudioApiBaseUrl(): string {
   const configuredUrl = process.env.STUDIO_API_URL ?? (isProductionRuntime ? "" : "http://localhost:8080");
