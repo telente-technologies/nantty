@@ -1,6 +1,6 @@
-# Zudomart Intelligence
+# Nantty Intelligence
 
-Python service that owns every algorithmic part of Zudomart: feed and clip ranking, social proof,
+Python service that owns every algorithmic part of Nantty: feed and clip ranking, social proof,
 recommendations, ads (targeting, auction, pacing, ad load), trending, search re-ranking, fraud/risk
 scoring, experiments, and the offline training pipeline.
 
@@ -97,7 +97,7 @@ generations every 64 half-lives so floats never overflow.
 ```bash
 uv sync
 cp .env.example .env            # set INTELLIGENCE_SHARED_SECRET (any non-empty value in development)
-uv run zudomart-intelligence-serve
+uv run nantty-intelligence-serve
 ```
 
 Without `INTELLIGENCE_REDIS_URL` the service uses an in-memory feature store (development only).
@@ -106,11 +106,11 @@ With `INTELLIGENCE_ENVIRONMENT=development` interactive docs are at `/docs`.
 ## Training
 
 ```bash
-uv run zudomart-intelligence-pipeline --storage ./data generate-synthetic-data --users 40 --sessions-per-user 4
-uv run zudomart-intelligence-pipeline --storage ./data --registry ./model_registry train --model all
-uv run zudomart-intelligence-pipeline --storage ./data --registry ./model_registry train --model feed_engagement --force-activation
-uv run zudomart-intelligence-pipeline --storage ./data --registry ./model_registry activate --model feed_engagement --version 20260929T122750Z-7de672a5
-uv run zudomart-intelligence-pipeline --storage ./data --registry ./model_registry compact --skip-newer-than-days 1
+uv run nantty-intelligence-pipeline --storage ./data generate-synthetic-data --users 40 --sessions-per-user 4
+uv run nantty-intelligence-pipeline --storage ./data --registry ./model_registry train --model all
+uv run nantty-intelligence-pipeline --storage ./data --registry ./model_registry train --model feed_engagement --force-activation
+uv run nantty-intelligence-pipeline --storage ./data --registry ./model_registry activate --model feed_engagement --version 20260929T122750Z-7de672a5
+uv run nantty-intelligence-pipeline --storage ./data --registry ./model_registry compact --skip-newer-than-days 1
 ```
 
 Without `--storage/--registry` the CLI uses `INTELLIGENCE_EVENT_STORAGE_URI` (local path or `s3://`)
@@ -127,8 +127,8 @@ artifacts trained with a different scikit-learn version are refused.
 Cron example:
 
 ```cron
-15 2 * * *  cd /app && zudomart-intelligence-pipeline compact
-30 2 * * *  cd /app && zudomart-intelligence-pipeline train --model all
+15 2 * * *  cd /app && nantty-intelligence-pipeline compact
+30 2 * * *  cd /app && nantty-intelligence-pipeline train --model all
 ```
 
 ## Environment variables
@@ -177,7 +177,7 @@ that finishes in seconds.
 ## Docker
 
 ```bash
-docker build -t zudomart-intelligence services/python/intelligence
+docker build -t nantty-intelligence services/python/intelligence
 ```
 
 The image runs as a non-root user (code owned by root, only `data/` and `model_registry/` writable) with only runtime dependencies. Audio fingerprinting is pure
@@ -186,7 +186,7 @@ numpy/scipy, so no ffmpeg or other system package is needed in this image (the T
 ```yaml
 services:
   intelligence:
-    image: zudomart-intelligence
+    image: nantty-intelligence
     env_file: services/python/intelligence/.env
     environment:
       INTELLIGENCE_REDIS_URL: redis://redis:6379/3

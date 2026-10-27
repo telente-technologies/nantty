@@ -1644,7 +1644,7 @@ wheels = [
 ]
 
 [[package]]
-name = "zudomart-intelligence"
+name = "nantty-intelligence"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

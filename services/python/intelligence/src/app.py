@@ -21,7 +21,7 @@ def create_application(
     container = build_application_container(resolved_settings, feature_backend)
     documentation_enabled = resolved_settings.environment == "development"
     application = FastAPI(
-        title="Zudomart Intelligence",
+        title="Nantty Intelligence",
         version="1.0.0",
         lifespan=build_application_lifespan(container, start_background_tasks),
         docs_url="/docs" if documentation_enabled else None,

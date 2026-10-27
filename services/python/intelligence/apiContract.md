@@ -1,4 +1,4 @@
-# Zudomart Intelligence API Contract (v1)
+# Nantty Intelligence API Contract (v1)
 
 This is the authoritative contract between the callers (ts-social, ts-search, ts-media, go-ads,
 go-users, go-moderation) and the Python intelligence service (`services/python/intelligence`). The Pydantic DTOs in `src/modules/*/dtos/*.py`, `src/dtos/` and `src/events/` are the source

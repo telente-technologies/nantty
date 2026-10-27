@@ -22,7 +22,7 @@ TRAINABLE_MODEL_NAMES = [*CLASSIFIER_TRAINING_SPECIFICATIONS, "item_similarity"]
 
 
 def build_argument_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="zudomart-intelligence-pipeline")
+    parser = argparse.ArgumentParser(prog="nantty-intelligence-pipeline")
     parser.add_argument("--storage", help="local dataset directory overriding INTELLIGENCE_EVENT_STORAGE_URI")
     parser.add_argument("--registry", help="model registry directory overriding INTELLIGENCE_MODEL_REGISTRY_PATH")
     subcommands = parser.add_subparsers(dest="command", required=True)
