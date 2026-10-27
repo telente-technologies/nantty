@@ -34,7 +34,7 @@ CREATE TABLE "help_topics" (
     "helpful_count" INTEGER NOT NULL DEFAULT 0,
     "not_helpful_count" INTEGER NOT NULL DEFAULT 0,
     "related_questions" INTEGER NOT NULL DEFAULT 0,
-    "updated_by_name" TEXT NOT NULL DEFAULT 'Zudomart',
+    "updated_by_name" TEXT NOT NULL DEFAULT 'Nantty',
     "published_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,

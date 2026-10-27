@@ -33,7 +33,7 @@ Changing your username also changes your profile link. See [Sharing your profile
 
 ## Your birthday
 
-You give your date of birth when you sign up. It isn't on your profile and isn't shown publicly. It's used for age rules and your birthday celebration. See [Celebrations](/help/getting-started/celebrations-birthdays-and-zudoversary). There's no screen to change it yet, so if it's wrong, [contact support](/help/contact-support/contact-support).
+You give your date of birth when you sign up. It isn't on your profile and isn't shown publicly. It's used for age rules and your birthday celebration. See [Celebrations](/help/getting-started/celebrations-birthdays-and-nanttyversary). There's no screen to change it yet, so if it's wrong, [contact support](/help/contact-support/contact-support).
 
 ## How your name appears
 

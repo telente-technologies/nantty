@@ -4,14 +4,14 @@ import { requesterId, otherRequesterId } from "../fakes/supportHarness.fake.js";
 import { internalToken, startSupportTestServer } from "../fakes/httpTestServer.fake.js";
 
 let server: Awaited<ReturnType<typeof startSupportTestServer>>;
-const asUser = (accountId: string) => ({ "x-zudomart-account-id": accountId, "content-type": "application/json" });
+const asUser = (accountId: string) => ({ "x-nantty-account-id": accountId, "content-type": "application/json" });
 const post = (path: string, body: unknown, headers: Record<string, string> = {}) => fetch(`${server.baseUrl}${path}`, { method: "POST", body: JSON.stringify(body), headers: { "content-type": "application/json", ...headers } });
 
 beforeAll(async () => {
   server = await startSupportTestServer();
   const category = await server.harness.helpStore.findCategoryBySlug("buying-and-orders");
-  await server.harness.helpStore.createTopic({ categoryId: category!.id, slug: "how-escrow-protects-you", locale: "en", title: "How escrow protects you", summary: "Payments wait in escrow.", bodyMarkdown: "## Escrow\n\nYour payment waits in escrow until you confirm delivery.", tags: ["escrow"], status: "published", origin: "seed", sourceTicketId: null, seedKey: null, seedHash: null, editorName: "Zudomart", relatedTopicIds: [] });
-  await server.harness.helpStore.createTopic({ categoryId: category!.id, slug: "draft-topic", locale: "en", title: "A draft topic nobody sees", summary: "", bodyMarkdown: "Not ready for readers yet at all.", tags: [], status: "draft", origin: "editorial", sourceTicketId: null, seedKey: null, seedHash: null, editorName: "Zudomart", relatedTopicIds: [] });
+  await server.harness.helpStore.createTopic({ categoryId: category!.id, slug: "how-escrow-protects-you", locale: "en", title: "How escrow protects you", summary: "Payments wait in escrow.", bodyMarkdown: "## Escrow\n\nYour payment waits in escrow until you confirm delivery.", tags: ["escrow"], status: "published", origin: "seed", sourceTicketId: null, seedKey: null, seedHash: null, editorName: "Nantty", relatedTopicIds: [] });
+  await server.harness.helpStore.createTopic({ categoryId: category!.id, slug: "draft-topic", locale: "en", title: "A draft topic nobody sees", summary: "", bodyMarkdown: "Not ready for readers yet at all.", tags: [], status: "draft", origin: "editorial", sourceTicketId: null, seedKey: null, seedHash: null, editorName: "Nantty", relatedTopicIds: [] });
 });
 
 afterAll(async () => server.stop());
@@ -34,7 +34,7 @@ describe("public help content", () => {
 
   it("serves old help slugs through canonical topics", async () => {
     const category = await server.harness.helpStore.findCategoryBySlug("buying-and-orders");
-    for (const [canonical, legacy] of [["what-is-nantty", "what-is-zudomart"], ["owed-to-nantty", "owed-to-zudomart"]] as const) {
+    for (const [canonical, legacy] of [["what-is-nantty", "what-is-nantty"], ["owed-to-nantty", "owed-to-nantty"]] as const) {
       const created = await server.harness.helpStore.createTopic({ categoryId: category!.id, slug: canonical, locale: "en", title: canonical, summary: "Brand help topic.", bodyMarkdown: "This is the current help topic content.", tags: [], status: "published", origin: "seed", sourceTicketId: null, seedKey: null, seedHash: null, editorName: "Nantty", relatedTopicIds: [] });
       const response = await fetch(`${server.baseUrl}/api/v1/help/topics/${legacy}`);
       expect(response.status).toBe(200);
@@ -73,7 +73,7 @@ describe("tickets need an account", () => {
 describe("staff endpoints", () => {
   it("reject missing, wrong-audience and under-privileged tokens", async () => {
     expect((await fetch(`${server.baseUrl}/api/v1/admin/support/tickets`)).status).toBe(401);
-    const wrongAudience = await server.signStaffToken("adm_9", "Mallory", ["support:tickets"], "zudomart-api");
+    const wrongAudience = await server.signStaffToken("adm_9", "Mallory", ["support:tickets"], "nantty-api");
     expect((await fetch(`${server.baseUrl}/api/v1/admin/support/tickets`, { headers: { authorization: `Bearer ${wrongAudience}` } })).status).toBe(401);
     const marketing = await server.signStaffToken("adm_8", "Mark", ["marketing:email"]);
     expect((await fetch(`${server.baseUrl}/api/v1/admin/support/tickets`, { headers: { authorization: `Bearer ${marketing}` } })).status).toBe(403);

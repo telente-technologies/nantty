@@ -1,7 +1,7 @@
 ---
 title: Birthday balloons and your Nantty anniversary
 summary: On your birthday, balloons can appear on your profile, and on each anniversary of joining you get a Nantty anniversary celebration with highlights from your year.
-tags: birthday, anniversary, zudoversary, celebration, balloons, milestones, account anniversary
+tags: birthday, anniversary, nanttyversary, celebration, balloons, milestones, account anniversary
 related: edit-your-profile, notification-settings, settings-overview, privacy-settings, notifications-faq
 ---
 
@@ -19,7 +19,7 @@ Each year on the day you joined, you see a **Happy Nantty anniversary!** celebra
 
 ## Choose how you're told
 
-- **App**: **Settings > Notification**, then **Milestones: push** ("Birthdays and Zudoversaries, like your account anniversary") and **Milestones: email** ("A celebration email on your Zudoversary").
+- **App**: **Settings > Notification**, then **Milestones: push** ("Birthdays and Nanttyversaries, like your account anniversary") and **Milestones: email** ("A celebration email on your Nanttyversary").
 - **Web**: **app.nantty.com > Settings > Milestones**, with **Push notifications** and **Email**.
 
 ## Good to know

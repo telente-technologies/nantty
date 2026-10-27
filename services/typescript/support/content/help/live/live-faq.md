@@ -2,7 +2,7 @@
 title: Live FAQ
 summary: Quick answers about watching, hosting, gifts, Nantty Points, rankings, battles, OBS and live safety.
 tags: live faq, live questions, livestream help, gifts questions, nantty points questions, go live problem
-related: going-live, watch-a-live, gifts-and-coins-on-live, zudopoints, live-rankings, live-safety
+related: going-live, watch-a-live, gifts-and-coins-on-live, nanttypoints, live-rankings, live-safety
 ---
 
 ## Who can go live?
@@ -23,7 +23,7 @@ You buy coins and send gifts. Gifts are final. See [Sending gifts on a live](/he
 
 ## Are Nantty Points money?
 
-No. Nantty Points are never money. You can't buy, sell, withdraw or exchange them. See [Nantty Points](/help/live/zudopoints).
+No. Nantty Points are never money. You can't buy, sell, withdraw or exchange them. See [Nantty Points](/help/live/nanttypoints).
 
 ## What is the ring around the host's picture?
 

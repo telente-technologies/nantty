@@ -2,7 +2,7 @@
 title: Top supporters on a live
 summary: Every live has its own Top supporters list, ranked by the Nantty Points viewers earn from gifting, watching, liking, sharing and following.
 tags: top supporters, leaderboard, top gifters, supporter ranking, live leaderboard, fan ranking
-related: zudopoints, live-rankings, gifts-and-coins-on-live, watch-a-live, live-faq
+related: nanttypoints, live-rankings, gifts-and-coins-on-live, watch-a-live, live-faq
 ---
 
 Each live has a supporters leaderboard that shows who is backing the streamer most on that live.
@@ -27,7 +27,7 @@ You earn points by:
 - **Sharing**: 5 points, once per live
 - **Following** the host: 10 points, once per live
 
-Daily limits apply to non-gift actions. See [Nantty Points](/help/live/zudopoints) for the full rules.
+Daily limits apply to non-gift actions. See [Nantty Points](/help/live/nanttypoints) for the full rules.
 
 Your own points on a live show in a small pill on screen.
 

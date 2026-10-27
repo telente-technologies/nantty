@@ -42,20 +42,20 @@ describe("ticket lifecycle", () => {
     harness.media.add({ id: theirs, ownerId: otherRequesterId, purpose: "chat", kind: "image", status: "ready" });
     harness.media.add({ id: failed, ownerId: requesterId, purpose: "chat", kind: "image", status: "rejected" });
     await expect(openTicket(harness, { attachmentUrls: ["https://evil.example/photo.jpg"] })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
-    await expect(openTicket(harness, { attachmentUrls: ["https://media.zudomart.com/u/1/photo.jpg"] })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
-    await expect(openTicket(harness, { attachmentUrls: [`https://media.zudomart.com/m/${theirs}/display.jpg`] })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
-    await expect(openTicket(harness, { attachmentUrls: [`https://media.zudomart.com/m/${failed}/display.jpg`] })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
-    await expect(openTicket(harness, { attachmentUrls: [`https://media.zudomart.com/m/${crypto.randomUUID()}/display.jpg`] })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
-    const url = `https://media.zudomart.com/m/${mine}/display.jpg`;
-    const ticket = await openTicket(harness, { attachmentUrls: [url, `https://media.zudomart.com/m/${mine}/thumb.jpg`] });
-    expect(ticket.messages[0]?.attachments).toEqual([{ url, contentType: "image/jpeg" }, { url: `https://media.zudomart.com/m/${mine}/thumb.jpg`, contentType: "image/jpeg" }]);
-    await expect(handlePostCustomerReply(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, text: "Another one", attachmentUrls: [`https://media.zudomart.com/m/${theirs}/display.jpg`] })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
+    await expect(openTicket(harness, { attachmentUrls: ["https://media.nantty.com/u/1/photo.jpg"] })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
+    await expect(openTicket(harness, { attachmentUrls: [`https://media.nantty.com/m/${theirs}/display.jpg`] })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
+    await expect(openTicket(harness, { attachmentUrls: [`https://media.nantty.com/m/${failed}/display.jpg`] })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
+    await expect(openTicket(harness, { attachmentUrls: [`https://media.nantty.com/m/${crypto.randomUUID()}/display.jpg`] })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
+    const url = `https://media.nantty.com/m/${mine}/display.jpg`;
+    const ticket = await openTicket(harness, { attachmentUrls: [url, `https://media.nantty.com/m/${mine}/thumb.jpg`] });
+    expect(ticket.messages[0]?.attachments).toEqual([{ url, contentType: "image/jpeg" }, { url: `https://media.nantty.com/m/${mine}/thumb.jpg`, contentType: "image/jpeg" }]);
+    await expect(handlePostCustomerReply(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, text: "Another one", attachmentUrls: [`https://media.nantty.com/m/${theirs}/display.jpg`] })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
   });
 
   it("refuses attachments when the media service is not configured, but still accepts plain messages", async () => {
     const harness = await createSupportHarness();
     const { media: _unused, ...withoutMedia } = harness.ticketDependencies;
-    await expect(handleCreateSupportTicket(withoutMedia, { accountId: requesterId, category: "payment", subject: "Refund", message: "My refund has not arrived yet at all.", attachmentUrls: ["https://media.zudomart.com/m/0b6a3c9e-5a2d-4c3b-9f00-1d2e3f4a5b6c/a.jpg"], linkedReference: null, channel: "form", idempotencyKey: null })).rejects.toMatchObject({ status: 503 });
+    await expect(handleCreateSupportTicket(withoutMedia, { accountId: requesterId, category: "payment", subject: "Refund", message: "My refund has not arrived yet at all.", attachmentUrls: ["https://media.nantty.com/m/0b6a3c9e-5a2d-4c3b-9f00-1d2e3f4a5b6c/a.jpg"], linkedReference: null, channel: "form", idempotencyKey: null })).rejects.toMatchObject({ status: 503 });
     expect((await openTicket(harness)).messages[0]?.attachments).toEqual([]);
   });
 

@@ -12,7 +12,7 @@ You control which notifications reach your phone and inbox. Here's what each set
 1. Go to **Profile > More (top right) > Settings > Notification**.
 2. Tap **Push notifications** to switch it **ON** or **OFF** for this account.
 3. Tap **System notification settings** to open your phone's settings for Nantty. There you can turn off sounds, banners or lock-screen previews.
-4. Under **Milestones: push** and **Milestones: email**, choose whether to hear about birthdays and Zudoversaries.
+4. Under **Milestones: push** and **Milestones: email**, choose whether to hear about birthdays and Nanttyversaries.
 
 ## On the web
 

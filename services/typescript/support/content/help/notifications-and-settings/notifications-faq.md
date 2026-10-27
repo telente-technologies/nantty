@@ -55,4 +55,4 @@ If you're 18 or over, switch on **Show sensitive content without warning** in **
 
 ## How do I stop birthday balloons on my profile?
 
-Switch off **Birthday balloons** in **Settings > Privacy & Data**. See [Birthday balloons and your Nantty anniversary](/help/getting-started/celebrations-birthdays-and-zudoversary).
+Switch off **Birthday balloons** in **Settings > Privacy & Data**. See [Birthday balloons and your Nantty anniversary](/help/getting-started/celebrations-birthdays-and-nanttyversary).

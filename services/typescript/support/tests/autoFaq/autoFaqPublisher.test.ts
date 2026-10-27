@@ -17,7 +17,7 @@ async function resolvedTicket(harness: Harness, subject: string, question: strin
 
 async function seedTopic(harness: Harness, title: string, body: string, tags: string[] = []) {
   const category = await harness.helpStore.findCategoryBySlug("buying-and-orders");
-  return harness.helpStore.createTopic({ categoryId: category!.id, slug: title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-$/, ""), locale: "en", title, summary: "", bodyMarkdown: body, tags, status: "published", origin: "seed", sourceTicketId: null, seedKey: null, seedHash: null, editorName: "Zudomart", relatedTopicIds: [] });
+  return harness.helpStore.createTopic({ categoryId: category!.id, slug: title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-$/, ""), locale: "en", title, summary: "", bodyMarkdown: body, tags, status: "published", origin: "seed", sourceTicketId: null, seedKey: null, seedHash: null, editorName: "Nantty", relatedTopicIds: [] });
 }
 
 describe("auto-FAQ from resolved tickets", () => {
@@ -47,12 +47,12 @@ describe("auto-FAQ from resolved tickets", () => {
 
   it("strips off-site markdown links a customer slipped into an auto-published topic", async () => {
     const harness = await createSupportHarness();
-    const question = "How do I verify my store account? The email said [verify here](//zudo-verify.top/login) and [Sign In](/\\evil.top) too.";
+    const question = "How do I verify my store account? The email said [verify here](//nantty-verify.top/login) and [Sign In](/\\evil.top) too.";
     const ticket = await resolvedTicket(harness, "How do I verify my store account?", question, "Open Settings and tap Verification. Then follow the steps shown and see [the guide](/help/selling/verification).");
     const outcome = await harness.publisher.publishFromResolvedTicket(ticket);
     const topic = await harness.helpStore.findTopicById(outcome.topicId!);
     expect(topic?.bodyMarkdown).not.toMatch(/\]\((?!\/help\/)/);
-    expect(topic?.bodyMarkdown).not.toContain("zudo-verify");
+    expect(topic?.bodyMarkdown).not.toContain("nantty-verify");
     expect(topic?.bodyMarkdown).toContain("verify here");
     expect(topic?.bodyMarkdown).toContain("[the guide](/help/selling/verification)");
   });

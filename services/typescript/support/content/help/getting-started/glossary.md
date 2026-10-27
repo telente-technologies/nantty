@@ -33,7 +33,7 @@ See [Verification levels](/help/checkmarks-and-verification/verification-levels)
 ## Coins, points and rewards
 
 - **Coins**: bought with money to send gifts on lives. Coins aren't cash. See [Buying coins](/help/payments-and-wallet/buy-coins).
-- **Nantty Points**: points that rank supporters in a live. They're never money. See [Nantty Points](/help/live/zudopoints).
+- **Nantty Points**: points that rank supporters in a live. They're never money. See [Nantty Points](/help/live/nanttypoints).
 - **Store rewards**: store credit a seller gives you on completed orders, to spend only at that store. See [Using store rewards](/help/buying-and-orders/store-rewards-for-buyers).
 
 ## Creators and promotion

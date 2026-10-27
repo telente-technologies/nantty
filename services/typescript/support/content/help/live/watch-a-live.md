@@ -2,7 +2,7 @@
 title: Watching a live
 summary: Find lives, join, chat, react, gift and share. You can watch without an account, but you need to sign in to take part.
 tags: watch live, join live, livestream, live now, live chat, comment on live, how to watch
-related: gifts-and-coins-on-live, zudopoints, supporters-leaderboard, live-rankings, browsing-as-a-guest, live-faq
+related: gifts-and-coins-on-live, nanttypoints, supporters-leaderboard, live-rankings, browsing-as-a-guest, live-faq
 ---
 
 Anyone can watch public lives on Nantty, in the app or on the web at **app.nantty.com**.
@@ -23,7 +23,7 @@ Anyone can watch public lives on Nantty, in the app or on the web at **app.nantt
 - **Share**: open the live's options and choose **Send in chat**, **Share with people** or **Copy link**.
 - **Join the stage**: if the host invites you, tap **Join stage**. See [Guests and battles](/help/live/live-guests-and-battles).
 
-Watching, liking, sharing, following and gifting all earn you Nantty Points on that live. See [Nantty Points](/help/live/zudopoints).
+Watching, liking, sharing, following and gifting all earn you Nantty Points on that live. See [Nantty Points](/help/live/nanttypoints).
 
 ## Leave a live
 

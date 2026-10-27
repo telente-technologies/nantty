@@ -66,7 +66,7 @@ describe("personal data scrubber", () => {
   });
 
   it("removes handles, links, IP addresses and dates", () => {
-    const text = scrub("Seller @funke.naturals posted https://zudomart.com/funke?ref=abc from 192.168.1.20 on 03/10/2026 and www.example.com");
+    const text = scrub("Seller @funke.naturals posted https://nantty.com/funke?ref=abc from 192.168.1.20 on 03/10/2026 and www.example.com");
     expect(text).not.toMatch(/funke|192\.168|03\/10|example/);
   });
 

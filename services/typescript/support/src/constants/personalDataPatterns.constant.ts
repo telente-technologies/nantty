@@ -49,11 +49,11 @@ export const dashSignaturePattern = /(^|\n)\s*[-–—]{1,2}\s*[A-Z][\p{L}'-]+(?
 export const capitalisedPairPattern = /(?<![.!?]\s|^|\n)\b([A-Z][\p{Ll}'-]+)\s+([A-Z][\p{Ll}'-]+)(?:\s+([A-Z][\p{Ll}'-]+))?/gu;
 
 export const platformVocabulary: ReadonlySet<string> = new Set([
-  "zudomart", "studio", "ads", "manager", "help", "centre", "center", "creator", "program", "programme", "seller", "dashboard", "settings", "privacy",
+  "nantty", "studio", "ads", "manager", "help", "centre", "center", "creator", "program", "programme", "seller", "dashboard", "settings", "privacy",
   "data", "account", "profile", "blue", "gold", "black", "checkmark", "premium", "pro", "business", "free", "plan", "plans", "store", "rewards",
   "flutterwave", "apple", "google", "play", "app", "web", "mobile", "android", "ios", "iphone", "chat", "chats", "live", "lives", "clips", "clip",
   "stories", "story", "feed", "posts", "post", "mart", "orders", "order", "details", "cart", "checkout", "escrow", "wallet", "coins", "coin",
-  "zudopoints", "gifts", "gift", "battles", "battle", "goals", "obs", "streaming", "software", "payouts", "payout", "withdrawals", "withdrawal",
+  "nanttypoints", "gifts", "gift", "battles", "battle", "goals", "obs", "streaming", "software", "payouts", "payout", "withdrawals", "withdrawal",
   "bank", "transfer", "card", "ussd", "notifications", "notification", "appearance", "dark", "mode", "light", "terms", "service", "policy",
   "cookie", "community", "guidelines", "contact", "support", "report", "reports", "requests", "request", "spam", "passcode", "streaks", "streak",
   "boost", "boosts", "campaign", "campaigns", "delivery", "shipping", "dispute", "disputes", "refund", "refunds", "subscriptions", "subscription",

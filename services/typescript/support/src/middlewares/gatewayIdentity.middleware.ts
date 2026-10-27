@@ -2,8 +2,8 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { createResponseContext, type HttpMiddleware, type HttpRequestContext } from "@zudojs/http";
 
-export const identitySignatureHeaderName = "x-zudomart-identity-signature";
-const signedIdentityHeaderNames = ["x-zudomart-account-id", "x-zudomart-session-id", "x-zudomart-age-bracket", "x-zudomart-viewer"] as const;
+export const identitySignatureHeaderName = "x-nantty-identity-signature";
+const signedIdentityHeaderNames = ["x-nantty-account-id", "x-nantty-session-id", "x-nantty-age-bracket", "x-nantty-viewer"] as const;
 const maximumSignatureAgeSeconds = 60;
 
 export function readGatewayIdentitySecretsFromEnvironment(problems: string[]): readonly string[] {

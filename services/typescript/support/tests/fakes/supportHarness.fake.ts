@@ -40,7 +40,7 @@ export async function createSupportHarness(options: { readonly writerResponds?: 
   };
   const writer = new RecordingWriter(options.writerResponds ?? true);
   const media = new FakeMediaDirectory();
-  const ticketDependencies: TicketModuleDependencies = { store: ticketStore, clock, identity, mediaPublicBaseUrls: ["https://media.zudomart.com"], media };
+  const ticketDependencies: TicketModuleDependencies = { store: ticketStore, clock, identity, mediaPublicBaseUrls: ["https://media.nantty.com"], media };
   return {
     clock, ticketStore, helpStore, identity, writer, ticketDependencies, media,
     publisher: new AutoFaqPublisher({ helpStore, writer }),

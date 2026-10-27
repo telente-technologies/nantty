@@ -1,7 +1,7 @@
-export const accountIdHeaderName = "x-zudomart-account-id";
+export const accountIdHeaderName = "x-nantty-account-id";
 export const internalTokenHeaderName = "x-internal-token";
 export const idempotencyKeyHeaderName = "idempotency-key";
-export const staffAccessAudience = "zudomart-admin";
+export const staffAccessAudience = "nantty-admin";
 export const defaultLocale = "en";
 export const defaultPageSize = 20;
 export const maximumPageSize = 100;
