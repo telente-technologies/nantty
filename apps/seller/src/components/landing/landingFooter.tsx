@@ -1,8 +1,6 @@
 import Link from "next/link";
 
-import { ThemeSwitcher } from "@nantty/web-kit";
-
-import { NanttyWordmark } from "@nantty/web-kit";
+import { NanttyWordmark, ThemeSwitcher } from "@nantty/web-kit";
 import { contactEmailDisplayText, contactMailtoHref } from "@/config/siteMetadata.config";
 
 import styles from "./landingFooter.module.css";
@@ -23,7 +21,7 @@ export function LandingFooter({ marketingSiteUrl, adsManagerUrl }: { readonly ma
           <span className={styles.wordmark}>
             <NanttyWordmark productLabel="Dashboard" tone="onDark" height={22} withSymbol />
           </span>
-          <p>Sell from anywhere with the app. Run your business with the dashboard. Free for every Nantty seller. Nigeria first.</p>
+          <p className={styles.brandLine}>Sell from anywhere with the app. Run your business with the dashboard. Free for every Nantty seller. Nigeria first.</p>
           <a href={contactMailtoHref} className={styles.emailLink}>
             {contactEmailDisplayText}
           </a>
@@ -49,9 +47,7 @@ export function LandingFooter({ marketingSiteUrl, adsManagerUrl }: { readonly ma
         <p>Online orders are paid into escrow and released after delivery.</p>
         <ThemeSwitcher label="Colour theme" className={styles.themeSwitcher} />
       </div>
-      <p className={styles.giantWordmark} aria-hidden="true">
-        dashboard
-      </p>
+      <p className={styles.giantWordmark} aria-hidden="true">Nantty</p>
     </footer>
   );
 }

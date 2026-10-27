@@ -7,7 +7,7 @@ import { readMarketingSiteUrl } from "@/config/siteMetadata.config";
 
 import styles from "@/components/auth/authForms.module.css";
 
-export const metadata: Metadata = { title: "Sign in" };
+export const metadata: Metadata = { title: "Sign in", robots: { index: false, follow: false } };
 
 const demoAccounts = [
   { identifier: "adaeze@ifelifestyle.ng", description: "Owner · Business plan" },

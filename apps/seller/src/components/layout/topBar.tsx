@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 
-import { ThemeSwitcher, NanttyLogoMark } from "@nantty/web-kit";
+import { ThemeAwareNanttyWordmark, ThemeSwitcher } from "@nantty/web-kit";
 
 import { CompactWorkspaceSwitcher } from "@/components/layout/compactWorkspaceSwitcher";
 import { StoreSwitcher } from "@/components/layout/storeSwitcher";
@@ -31,7 +32,7 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
     <header className={`${styles.topBar} noPrint`}>
       <IconButton iconName="textIndent24" label="Open navigation" className={styles.menuButton} onClick={onOpenNavigation} />
       <Link href="/dashboard" className={styles.compactBrand} aria-label="Nantty Dashboard overview">
-        <NanttyLogoMark size={28} />
+        <ThemeAwareNanttyWordmark productLabel="Dashboard" height={24} collapseToMarkOnSmallScreens />
       </Link>
       <div className={styles.wideOnly}>
         <StoreSwitcher />
@@ -64,7 +65,7 @@ export function TopBar({ onOpenNavigation, onOpenCommandPalette }: { readonly on
       <ThemeSwitcher iconOnly label="Colour theme" className={styles.themeSwitcher} />
       <div className={styles.account}>
         <span className={styles.avatar} aria-hidden="true">
-          {displayName.slice(0, 1).toUpperCase()}
+          {sessionView?.user.avatarUrl ? <Image src={sessionView.user.avatarUrl} width={32} height={32} unoptimized alt="" className={styles.avatarImage} /> : displayName.slice(0, 1).toUpperCase()}
         </span>
         <span className={styles.accountText}>
           <span className={styles.accountName}>{displayName}</span>

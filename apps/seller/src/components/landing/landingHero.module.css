@@ -252,18 +252,53 @@
 }
 
 @media (max-width: 600px) {
+  .hero {
+    padding-top: var(--space-7);
+  }
+
+  .layout {
+    gap: var(--space-7);
+  }
+
+  .copy {
+    gap: var(--space-5);
+  }
+
+  .heading {
+    font-size: clamp(2.1rem, 9.5vw, 2.8rem);
+  }
+
   .signInPill {
     flex-direction: column;
     align-items: stretch;
     border-radius: 18px;
   }
 
+  .tabletFrame,
   .escrowChip {
     display: none;
   }
 
   .stage {
-    min-height: 260px;
+    min-height: 0;
+    padding: var(--space-5) 0 var(--space-6);
+  }
+
+  .stagePanel {
+    inset: 0 calc(-1 * var(--landing-gutter));
+    border-radius: 20px 20px 0 0;
+  }
+
+  .browserFrame {
+    width: 100%;
+  }
+
+  .offlineChip {
+    position: relative;
+    top: auto;
+    right: auto;
+    max-width: none;
+    margin-top: var(--space-3);
   }
 }
 

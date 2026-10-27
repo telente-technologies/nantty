@@ -25,6 +25,10 @@
   line-height: 1.55;
 }
 
+.brandLine {
+  color: var(--blue-100);
+}
+
 .wordmark {
   color: var(--deep-ink);
 }
@@ -38,6 +42,8 @@
 
 .emailLink:hover {
   color: var(--yellow-500);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .linkGroups {
@@ -60,8 +66,10 @@
   gap: 10px;
 }
 
-.linkList a {
+.linkList a,
+.linkList button {
   color: var(--blue-100);
+  text-decoration: none;
 }
 
 .linkList button {
@@ -73,8 +81,11 @@
   cursor: not-allowed;
 }
 
-.linkList a:hover {
+.linkList a:hover,
+.linkList a:focus-visible {
   color: var(--yellow-500);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .bottomRow {
@@ -99,16 +110,18 @@
   --color-elevated: var(--deep-hairline-strong);
   --color-text: var(--deep-ink);
   --color-text-muted: var(--deep-ink-muted);
+  --color-focus: var(--yellow-500);
   --shadow-card: none;
 }
 
 .giantWordmark {
-  margin: var(--space-6) 0 -0.24em;
-  color: var(--color-brand);
-  font-size: min(19vw, 18rem);
-  font-weight: 750;
-  letter-spacing: -0.06em;
-  line-height: 0.9;
+  width: min(92%, 1280px);
+  margin: var(--space-7) auto -0.18em;
+  color: var(--blue-500);
+  font-size: clamp(5rem, 22vw, 19rem);
+  font-weight: 800;
+  letter-spacing: -0.075em;
+  line-height: 0.86;
   text-align: center;
   white-space: nowrap;
   user-select: none;
@@ -121,5 +134,29 @@
 
   .linkGroups {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 759px) {
+  .topRow {
+    gap: var(--space-8);
+  }
+
+  .bottomRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .giantWordmark {
+    width: 100%;
+    font-size: 23vw;
+  }
+}
+
+@media (max-width: 339px) {
+  .linkGroups {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
   }
 }

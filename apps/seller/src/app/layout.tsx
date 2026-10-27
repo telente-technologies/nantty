@@ -3,7 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
-import { ConfirmDialogHost, ConnectionStatus, ThemeInitScript, ThemeProvider, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@nantty/web-kit";
+import { ConfirmDialogHost, ConnectionStatus, StaticThemeScript, ThemeInitScript, ThemeProvider, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@nantty/web-kit";
 
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
 import { SellerSessionProvider } from "@/components/session/sellerSessionProvider";
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   description: "Run your Nantty business: products, inventory, app orders, customers, analytics, payouts and team in one place.",
   applicationName: dashboardProductName,
   manifest: "/manifest.webmanifest",
-  robots: process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1" ? { index: true, follow: true } : { index: false, follow: false },
+  robots: { index: false, follow: false },
   openGraph: { type: "website", siteName: dashboardProductName, title: dashboardProductName, url: "/", locale: "en_NG" },
   icons: { icon: [{ url: "/brand/nantty-icon.png", type: "image/png" }], apple: "/brand/nantty-icon.png" },
   formatDetection: { telephone: false },
@@ -40,8 +40,9 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   if (process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1") {
     return (
-      <html lang="en-NG" className={`${interFont.variable} ${receiptFont.variable}`} data-theme="light">
-        <body><ThemeProvider initialPreference="light">{children}</ThemeProvider></body>
+      <html lang="en-NG" className={`${interFont.variable} ${receiptFont.variable}`} suppressHydrationWarning>
+        <head><StaticThemeScript /></head>
+        <body><ThemeProvider initialPreference="system">{children}</ThemeProvider></body>
       </html>
     );
   }

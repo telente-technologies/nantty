@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { NanttyWordmark } from "@nantty/web-kit";
+import { ThemeAwareNanttyWordmark } from "@nantty/web-kit";
 
 import { FeaturePlanBadge } from "@/components/billing/planGate";
 import { useSellerSession } from "@/components/session/sellerSessionProvider";
@@ -14,7 +14,7 @@ import { useInboxUnreadCount } from "@/hooks/useInboxUnreadCount.hook";
 import styles from "./sidebarNavigation.module.css";
 
 export function DashboardWordmark({ height = 22, withSymbol = true }: { readonly height?: number; readonly withSymbol?: boolean }) {
-  return <NanttyWordmark productLabel="Dashboard" tone="onDark" height={height} withSymbol={withSymbol} />;
+  return <ThemeAwareNanttyWordmark productLabel="Dashboard" height={height} collapseToMarkOnSmallScreens={!withSymbol} />;
 }
 
 export function SidebarNavigation({ groups, isOpenOnSmallScreens, onNavigate }: { readonly groups: NavigationGroup[]; readonly isOpenOnSmallScreens: boolean; readonly onNavigate: () => void }) {

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { DashboardWordmark } from "@/components/layout/sidebarNavigation";
+import { ThemeAwareNanttyWordmark, ThemeSwitcher } from "@nantty/web-kit";
 import { landingNavigationLinks } from "@/constants/landingContent.constant";
 
 import styles from "./landingHeader.module.css";
@@ -12,6 +12,7 @@ import { PrelaunchLoginAction } from "./prelaunchLoginAction";
 export function LandingHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     function updateScrolledState() {
@@ -25,7 +26,10 @@ export function LandingHeader() {
   useEffect(() => {
     if (!isMenuOpen) return;
     function closeMenuOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setIsMenuOpen(false);
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
     }
     document.addEventListener("keydown", closeMenuOnEscape);
     return () => document.removeEventListener("keydown", closeMenuOnEscape);
@@ -35,7 +39,7 @@ export function LandingHeader() {
     <header className={`${styles.header} ${hasScrolled ? styles.scrolled : ""}`}>
       <div className={styles.pill}>
         <Link href="/" className={styles.brand} aria-label="Nantty Dashboard home">
-          <DashboardWordmark withSymbol />
+          <ThemeAwareNanttyWordmark productLabel="Dashboard" height={30} collapseToMarkOnSmallScreens />
         </Link>
         <nav aria-label="Main" className={styles.desktopNavigation}>
           <ul>
@@ -48,10 +52,11 @@ export function LandingHeader() {
             ))}
           </ul>
         </nav>
+        <ThemeSwitcher iconOnly label="Colour theme" className={styles.desktopThemeSwitcher} />
         <PrelaunchLoginAction className={styles.signInButton}>
           Sign in
         </PrelaunchLoginAction>
-        <button type="button" className={styles.menuButton} aria-expanded={isMenuOpen} aria-controls="landing-mobile-menu" onClick={() => setIsMenuOpen((wasOpen) => !wasOpen)}>
+        <button ref={menuButtonRef} type="button" className={styles.menuButton} aria-expanded={isMenuOpen} aria-controls="landing-mobile-menu" onClick={() => setIsMenuOpen((wasOpen) => !wasOpen)}>
           <span className="visuallyHidden">{isMenuOpen ? "Close menu" : "Open menu"}</span>
           <span className={styles.menuBars} aria-hidden="true" />
         </button>
@@ -68,9 +73,12 @@ export function LandingHeader() {
             ))}
           </ul>
         </nav>
-        <PrelaunchLoginAction className={styles.mobileSignIn}>
-          Sign in with your Nantty account
-        </PrelaunchLoginAction>
+        <div className={styles.mobileMenuBottom}>
+          <ThemeSwitcher label="Colour theme" showLabel iconOnly className={styles.mobileThemeSwitcher} />
+          <PrelaunchLoginAction className={styles.mobileSignIn}>
+            Sign in with your Nantty account
+          </PrelaunchLoginAction>
+        </div>
       </div>
     </header>
   );

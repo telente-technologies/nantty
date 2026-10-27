@@ -22,7 +22,8 @@ export const metadata: Metadata = {
   description: "The Nantty App lets you sell from anywhere. Nantty Dashboard is where you run your business: products, inventory, app orders with escrow, customers, analytics, marketing, payouts, team and reports. Free for every Nantty seller.",
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
-  openGraph: { type: "website", title: "Nantty Dashboard", description: "Run your Nantty business from one screen. Free for every seller — upgrade to Pro or Business when you grow.", url: "/", images: [{ url: "/screenshots/dashboardOverview.webp", width: 2880, height: 1800, alt: "Nantty Dashboard home" }] },
+  openGraph: { type: "website", siteName: "Nantty Dashboard", locale: "en_NG", title: "Nantty Dashboard", description: "Run your Nantty business from one screen. Free for every seller — upgrade to Pro or Business when you grow.", url: "/", images: [{ url: "/screenshots/dashboardOverview.webp", width: 2880, height: 1800, alt: "Nantty Dashboard home" }] },
+  twitter: { card: "summary_large_image", title: "Nantty Dashboard", description: "Run your Nantty business from one screen. Free for every seller — upgrade to Pro or Business when you grow.", images: ["/screenshots/dashboardOverview.webp"] },
 };
 
 export default async function LandingPage() {
