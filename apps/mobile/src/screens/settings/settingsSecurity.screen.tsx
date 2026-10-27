@@ -6,7 +6,7 @@ import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup"
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { DownloadSimple24Icon, Fingerprint24Icon, LockKey24Icon, Prohibit24Icon } from "@/components/icons";
 import { useAccountSettingsQuery, useUpdateAccountSettingsMutation } from "@/components/settings/settingsQueries.hook";
-import { buildContactMailtoUrl, ZUDOMART_EMAIL_ADDRESSES } from "@/constants/contactEmails.constant";
+import { buildContactMailtoUrl, NANTTY_EMAIL_ADDRESSES } from "@/constants/contactEmails.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 
 export function SettingsSecurityScreen({ navigation }: MainScreenProps<"SettingsSecurity">) {
@@ -48,7 +48,7 @@ export function SettingsSecurityScreen({ navigation }: MainScreenProps<"Settings
         actionTitle="Request my data"
         onAction={() => {
           setOpenSheet(null);
-          Linking.openURL(buildContactMailtoUrl("Data export request", ZUDOMART_EMAIL_ADDRESSES.privacy));
+          Linking.openURL(buildContactMailtoUrl("Data export request", NANTTY_EMAIL_ADDRESSES.privacy));
         }}
         onClose={() => setOpenSheet(null)}
       />

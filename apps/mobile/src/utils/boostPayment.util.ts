@@ -15,7 +15,7 @@ const BOOST_ERROR_MESSAGES: Record<string, string> = {
   FREE_BOOST_NOT_AVAILABLE: "Free boosts come with Premium. You can still boost this post by card or bank transfer.",
   FREE_BOOST_USED: "You've already used this month's free boost. You can boost by card or bank transfer instead.",
   FREE_BOOST_TOO_LARGE: "This boost is bigger than your free boost covers. Pick a smaller package or pay by card.",
-  PAYMENT_METHOD_NOT_AVAILABLE_IN_APP: "Paying from your earnings is available on zudomart.com. In the app, pay by card or bank transfer, or from your ad balance.",
+  PAYMENT_METHOD_NOT_AVAILABLE_IN_APP: "Paying from your earnings is available on nantty.com. In the app, pay by card or bank transfer, or from your ad balance.",
   INSUFFICIENT_AD_BALANCE: "Your ad balance doesn't cover this. Pay by card or bank transfer, or lower the budget.",
   DESTINATION_NOT_OWNED: "You can only promote a post, product, profile or store you own or manage.",
   DESTINATION_UNAVAILABLE: "This can't be promoted right now because it's suspended or no longer active.",
