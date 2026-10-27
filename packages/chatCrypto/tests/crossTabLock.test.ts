@@ -61,12 +61,12 @@ describe("several tabs sharing one key store", () => {
     const requested: string[] = [];
     try {
       Object.defineProperty(globalThis, "navigator", { value: {}, configurable: true });
-      expect(createWebLocksMutex("zudomart-test")).toBeUndefined();
+      expect(createWebLocksMutex("nantty-test")).toBeUndefined();
       const navigatorLike = { locks: { request: (name: string, _options: unknown, callback: () => Promise<unknown>) => (requested.push(name), callback()) } };
       Object.defineProperty(globalThis, "navigator", { value: navigatorLike, configurable: true });
-      const lock = createWebLocksMutex("zudomart-test");
+      const lock = createWebLocksMutex("nantty-test");
       expect(await lock?.(async () => 7)).toBe(7);
-      expect(requested).toEqual(["zudomart-test"]);
+      expect(requested).toEqual(["nantty-test"]);
     } finally {
       if (original === undefined) Reflect.deleteProperty(globalThis, "navigator");
       else Object.defineProperty(globalThis, "navigator", original);

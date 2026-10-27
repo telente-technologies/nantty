@@ -68,7 +68,7 @@ function withLinkPreview(result: DecryptionResult, sealed: unknown): DecryptionR
 const retryableFailures = new Set<ChatCryptoErrorCode>(["DUPLICATE_MESSAGE", "NO_SENDER_KEY"]);
 const readinessRecheckMilliseconds = 10 * 60_000;
 const mailboxRecheckMilliseconds = 3_000;
-const payloadAssociatedData = (userId: string, deviceId: string) => utf8Encode(`zudomart-payload-v1|${userId}|${deviceId}`);
+const payloadAssociatedData = (userId: string, deviceId: string) => utf8Encode(`nantty-payload-v1|${userId}|${deviceId}`);
 const addressKey = (device: { readonly userId: string; readonly deviceId: string }) => `${device.userId}:${device.deviceId}`;
 
 export class ChatCryptoClient {

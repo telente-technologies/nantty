@@ -22,7 +22,7 @@ export interface OneTimePreKey {
 
 export const maximumKeyId = 0x7fffffff;
 
-const signedPreKeyMessage = (keyId: number, publicKey: Bytes) => concatBytes(utf8Encode("zudomart-signed-prekey-v1"), writeUint32(keyId), publicKey);
+const signedPreKeyMessage = (keyId: number, publicKey: Bytes) => concatBytes(utf8Encode("nantty-signed-prekey-v1"), writeUint32(keyId), publicKey);
 
 function randomUint31(random: RandomSource): number {
   const bytes = random(4);

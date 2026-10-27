@@ -2,7 +2,7 @@ import { concatBytes, decodeBase64, encodeBase64, utf8Decode, utf8Encode } from 
 import { type ChatLinkPreview, sanitizeLinkPreview } from "./payload";
 import { type RandomSource, aeadKeyLength, aeadNonceLength, openAead, sealAead } from "./primitives";
 
-const linkPreviewAssociatedData = utf8Encode("zudomart-link-preview-v1");
+const linkPreviewAssociatedData = utf8Encode("nantty-link-preview-v1");
 export const maximumSealedLinkPreviewLength = 8_192;
 
 export function sealLinkPreview(preview: ChatLinkPreview, random: RandomSource): { readonly key: string; readonly sealed: string } | null {

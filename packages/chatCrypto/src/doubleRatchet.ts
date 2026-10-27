@@ -46,7 +46,7 @@ const rememberedRemoteRatchetKeys = 8;
 export const headerLength = 40;
 
 const kdfRoot = (rootKey: Bytes, agreement: Bytes): [Bytes, Bytes] => {
-  const output = deriveKey(agreement, rootKey, "ZudomartRatchetv1", 64);
+  const output = deriveKey(agreement, rootKey, "NanttyRatchetv1", 64);
   return [output.slice(0, 32), output.slice(32)];
 };
 
@@ -60,7 +60,7 @@ export function decodeHeader(bytes: Bytes): RatchetHeader {
 }
 
 function messageKeyMaterial(messageKey: Bytes): { key: Bytes; nonce: Bytes } {
-  const material = deriveKey(messageKey, zeroSalt, "ZudomartMessageKeysv1", 44);
+  const material = deriveKey(messageKey, zeroSalt, "NanttyMessageKeysv1", 44);
   return { key: material.slice(0, 32), nonce: material.slice(32) };
 }
 

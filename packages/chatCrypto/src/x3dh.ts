@@ -21,7 +21,7 @@ export interface X3dhInitiation extends X3dhResult {
   readonly baseKey: KeyPair;
 }
 
-const x3dhInfo = "ZudomartX3DHv1";
+const x3dhInfo = "NanttyX3DHv1";
 const domainSeparator = new Uint8Array(32).fill(0xff);
 
 const deriveSharedSecret = (agreements: readonly Bytes[]) => deriveKey(concatBytes(domainSeparator, ...agreements), zeroSalt, x3dhInfo, 32);

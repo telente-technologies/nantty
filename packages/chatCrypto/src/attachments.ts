@@ -3,7 +3,7 @@ import { ChatCryptoError } from "./errors";
 import { type RandomSource, aeadKeyLength, aeadNonceLength, defaultRandomSource, openAead, sealAead, sha256Digest } from "./primitives";
 import { sanitizeVoiceNoteWaveform } from "./voiceNoteWaveform";
 
-export const encryptedAttachmentMimeType = "application/vnd.zudomart.encrypted";
+export const encryptedAttachmentMimeType = "application/vnd.nantty.encrypted";
 export const maximumThumbnailLength = 6_000;
 
 export interface AttachmentPointer {
@@ -22,7 +22,7 @@ export interface AttachmentPointer {
 
 export type AttachmentDetails = Omit<AttachmentPointer, "key" | "digest" | "sizeBytes">;
 
-const attachmentAssociatedData = new TextEncoder().encode("zudomart-attachment-v1");
+const attachmentAssociatedData = new TextEncoder().encode("nantty-attachment-v1");
 
 export function encryptAttachment(plaintext: Uint8Array, details: AttachmentDetails, random: RandomSource = defaultRandomSource): { readonly blob: Uint8Array; readonly pointer: AttachmentPointer; readonly sha256Hex: string } {
   const key = random(aeadKeyLength);

@@ -15,7 +15,7 @@ export interface GroupAttributes {
 }
 
 export const maximumSealedGroupAttributesLength = 16_384;
-const groupAttributesAssociatedData = utf8Encode("zudomart-group-attributes-v1");
+const groupAttributesAssociatedData = utf8Encode("nantty-group-attributes-v1");
 const isString = (value: unknown): value is string => typeof value === "string";
 
 export function createGroupKey(random: RandomSource): string {

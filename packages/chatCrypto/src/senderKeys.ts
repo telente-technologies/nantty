@@ -39,10 +39,10 @@ const maximumSenderKeySkip = 2000;
 const maximumSenderKeyStates = 4;
 
 const chainStep = (chainKey: Bytes): [Bytes, Bytes] => [hmacSha256(chainKey, new Uint8Array([1])), hmacSha256(chainKey, new Uint8Array([2]))];
-const groupAssociatedData = (conversationId: string, senderUserId: string, senderDeviceId: string) => utf8Encode(`zudomart-group-v1|${conversationId}|${senderUserId}|${senderDeviceId}`);
+const groupAssociatedData = (conversationId: string, senderUserId: string, senderDeviceId: string) => utf8Encode(`nantty-group-v1|${conversationId}|${senderUserId}|${senderDeviceId}`);
 
 function groupMessageKeys(messageKey: Bytes) {
-  const material = deriveKey(messageKey, zeroSalt, "ZudomartSenderKeyv1", 44);
+  const material = deriveKey(messageKey, zeroSalt, "NanttySenderKeyv1", 44);
   return { key: material.slice(0, 32), nonce: material.slice(32) };
 }
 
