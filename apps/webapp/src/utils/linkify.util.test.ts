@@ -9,9 +9,9 @@ describe("splitTextByUrls", () => {
   });
 
   it("links https and www addresses and trims punctuation", () => {
-    const segments = splitTextByUrls("Read https://example.com/a. Then www.zudomart.com/p/x!");
-    assert.deepEqual(segments.filter((segment) => segment.href).map((segment) => segment.href), ["https://example.com/a", "https://www.zudomart.com/p/x"]);
-    assert.equal(segments.map((segment) => segment.text).join(""), "Read https://example.com/a. Then www.zudomart.com/p/x!");
+    const segments = splitTextByUrls("Read https://example.com/a. Then www.nantty.com/p/x!");
+    assert.deepEqual(segments.filter((segment) => segment.href).map((segment) => segment.href), ["https://example.com/a", "https://www.nantty.com/p/x"]);
+    assert.equal(segments.map((segment) => segment.text).join(""), "Read https://example.com/a. Then www.nantty.com/p/x!");
   });
 
   it("never produces a non-web href", () => {

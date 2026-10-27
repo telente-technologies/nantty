@@ -1,4 +1,4 @@
-const feedScrollStorageKey = "zudomart.webapp.feedScrollY";
+const feedScrollStorageKey = "nantty.webapp.feedScrollY";
 
 export function rememberFeedScrollPosition(scrollY: number): void {
   try {

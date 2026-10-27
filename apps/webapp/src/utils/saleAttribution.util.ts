@@ -14,7 +14,7 @@ interface AttributionStorage {
   setItem(key: string, value: string): void;
 }
 
-const storageKey = "zudomart.saleAttributions";
+const storageKey = "nantty.saleAttributions";
 const defaultWindowMilliseconds = 30 * 86_400_000;
 const maximumRememberedProducts = 50;
 const attributionSources: readonly SaleAttributionSource[] = ["post", "clip", "live", "link"];
@@ -62,7 +62,7 @@ export function appendAffiliateParameter(path: string, affiliateLinkId: string |
   return affiliateLinkId && /^[A-Za-z0-9_-]{1,80}$/.test(affiliateLinkId) ? `${path}${path.includes("?") ? "&" : "?"}aff=${affiliateLinkId}` : path;
 }
 
-const visitorIdKey = "zudomart.visitorId";
+const visitorIdKey = "nantty.visitorId";
 
 export function readOrCreateVisitorId(storage = browserStorage()): string | null {
   try {

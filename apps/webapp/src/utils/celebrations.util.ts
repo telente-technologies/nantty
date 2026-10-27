@@ -17,7 +17,7 @@ export function birthdayMessage(name: string, age: number): { title: string; mes
 }
 
 export function anniversaryMessage(years: number): { title: string; message: string } {
-  const title = `Happy ${ordinal(years)} Zudoversary!`;
+  const title = `Happy ${ordinal(years)} Nanttyversary!`;
   return { title, message: `${title} Thanks for being part of Nantty for ${years === 1 ? "1 year" : `${years} years`}.` };
 }
 

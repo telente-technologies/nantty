@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-export const embedResizeMessageType = "zudomart:embed:resize";
+export const embedResizeMessageType = "nantty:embed:resize";
 export const embedMinimumHeight = 64;
 export const embedMaximumHeight = 2400;
 

@@ -52,10 +52,10 @@ describe("live room video", () => {
 
 describe("live video under the CSP", () => {
   it("recognises a socket blocked by the content security policy", () => {
-    assert.equal(readUrlHost("wss://livekit.zudomart.com"), "livekit.zudomart.com");
-    assert.equal(isBlockedUriForHost("wss://livekit.zudomart.com/rtc?access_token=x", "livekit.zudomart.com"), true);
-    assert.equal(isBlockedUriForHost("https://evil.example/x", "livekit.zudomart.com"), false);
-    assert.equal(isBlockedUriForHost("inline", "livekit.zudomart.com"), false);
-    assert.equal(isBlockedUriForHost("wss://livekit.zudomart.com", ""), false);
+    assert.equal(readUrlHost("wss://livekit.nantty.com"), "livekit.nantty.com");
+    assert.equal(isBlockedUriForHost("wss://livekit.nantty.com/rtc?access_token=x", "livekit.nantty.com"), true);
+    assert.equal(isBlockedUriForHost("https://evil.example/x", "livekit.nantty.com"), false);
+    assert.equal(isBlockedUriForHost("inline", "livekit.nantty.com"), false);
+    assert.equal(isBlockedUriForHost("wss://livekit.nantty.com", ""), false);
   });
 });

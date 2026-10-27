@@ -23,7 +23,7 @@ export interface EmbedProductCard {
 }
 
 export const embedResizeScript =
-  '(function(){var m=location.hash.match(/frame=([A-Za-z0-9_-]{8,64})/);if(!m||window.parent===window)return;var f=m[1];function s(){window.parent.postMessage({type:"zudomart:embed:resize",frame:f,height:Math.ceil(document.documentElement.scrollHeight)},"*")}s();if(window.ResizeObserver){new ResizeObserver(s).observe(document.body)}window.addEventListener("load",s)})();';
+  '(function(){var m=location.hash.match(/frame=([A-Za-z0-9_-]{8,64})/);if(!m||window.parent===window)return;var f=m[1];function s(){window.parent.postMessage({type:"nantty:embed:resize",frame:f,height:Math.ceil(document.documentElement.scrollHeight)},"*")}s();if(window.ResizeObserver){new ResizeObserver(s).observe(document.body)}window.addEventListener("load",s)})();';
 
 const themeVariables: Readonly<Record<EmbedTheme, string>> = {
   light: "--bg:#ffffff;--surface:#f0f2fa;--text:#0a0a14;--muted:#5b5b6b;--border:#e4e6f2;--brand:#3a2bff;--on-brand:#ffffff;--brand-hover:#3024d2;--danger:#b91c1c",

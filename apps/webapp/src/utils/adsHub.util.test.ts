@@ -37,9 +37,9 @@ describe("payment option states", () => {
   const option = (method: BoostPaymentOption["method"], available = true, reason: string | null = null): BoostPaymentOption => ({ method, available, reasonCode: available ? null : "X", reason });
 
   it("shows the server's reason for an unavailable option and never makes it selectable", () => {
-    const state = describePaymentOption(option("balance", false, "Pay from your earnings on zudomart.com"), context, format);
+    const state = describePaymentOption(option("balance", false, "Pay from your earnings on nantty.com"), context, format);
     assert.equal(state.selectable, false);
-    assert.equal(state.note, "Pay from your earnings on zudomart.com");
+    assert.equal(state.note, "Pay from your earnings on nantty.com");
   });
 
   it("blocks ad credit and the free boost when the quote is above what they cover", () => {

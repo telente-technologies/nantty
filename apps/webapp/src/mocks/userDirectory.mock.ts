@@ -69,7 +69,7 @@ const DIRECTORY_USER_SEEDS: readonly DirectoryUserSeed[] = [
   { key: "u_23", name: "Chioma Obi", username: "chioma.bakes", bio: "Cakes that taste as good as they look 🎂 Orders in Owerri", followers: 7050, following: 640, posts: 355, joinedAt: "2024-09-01T00:00:00.000Z" },
   { key: "u_24", name: "Ibrahim Sani", username: "ibrahim.sani", bio: "Hiking Obudu one step at a time ⛰️", followers: 1430, following: 280, posts: 96, joinedAt: "2025-06-02T00:00:00.000Z" },
   { key: "u_gov", name: "Demo State Ministry of Trade", username: "demostatetrade", bio: "Fictional demo government account. Consumer-protection tips for online shoppers and small businesses.", followers: 88400, following: 3, posts: 61, joinedAt: "2024-09-09T00:00:00.000Z" },
-  { key: "u_25", name: "Nantty Support", username: "zudomart", bio: "Official help desk. We never ask for your password or card PIN.", followers: 58200, following: 12, posts: 140, joinedAt: "2024-04-01T00:00:00.000Z" },
+  { key: "u_25", name: "Nantty Support", username: "nantty", bio: "Official help desk. We never ask for your password or card PIN.", followers: 58200, following: 12, posts: 140, joinedAt: "2024-04-01T00:00:00.000Z" },
 ];
 
 const CREATOR_USER_IDS = new Set<DirectoryUserId>(["u_me", "u_9", "u_10", "u_12", "u_13", "u_18"]);

@@ -32,7 +32,7 @@ function StatusBlock({ title, text, tone = "muted" }: { readonly title: string; 
   );
 }
 
-const APP_PAYMENT_RETURN_URL = "zudomart://payments/return";
+const APP_PAYMENT_RETURN_URL = "nantty://payments/return";
 const readAppReturnUrl = (value: string | null) => (value === APP_PAYMENT_RETURN_URL ? value : null);
 
 export function IdentityVerificationHub() {

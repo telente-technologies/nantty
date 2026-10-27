@@ -5,9 +5,9 @@ import { buildContentSecurityPolicyHeaderValue, readLiveKitOrigins } from "../se
 
 describe("runtime content security policy", () => {
   it("allows only the configured LiveKit host", () => {
-    assert.deepEqual(readLiveKitOrigins("wss://livekit.staging.zudomart.com"), ["wss://livekit.staging.zudomart.com", "https://livekit.staging.zudomart.com"]);
+    assert.deepEqual(readLiveKitOrigins("wss://livekit.staging.nantty.com"), ["wss://livekit.staging.nantty.com", "https://livekit.staging.nantty.com"]);
     assert.deepEqual(readLiveKitOrigins("ws://192.168.1.20:7880"), ["ws://192.168.1.20:7880", "http://192.168.1.20:7880"]);
-    assert.ok(readLiveKitOrigins("wss://zudo.livekit.cloud").includes("wss://*.livekit.cloud"));
+    assert.ok(readLiveKitOrigins("wss://nantty.livekit.cloud").includes("wss://*.livekit.cloud"));
   });
 
   it("fails safe when LiveKit is unset or malformed", () => {
@@ -18,8 +18,8 @@ describe("runtime content security policy", () => {
 
   it("reads the env when the request arrives, not when the module loads", () => {
     const previous = process.env.WEBAPP_LIVEKIT_URL;
-    process.env.WEBAPP_LIVEKIT_URL = "wss://livekit.prod.zudomart.com";
-    assert.match(buildContentSecurityPolicyHeaderValue(), /connect-src [^;]*wss:\/\/livekit\.prod\.zudomart\.com/);
+    process.env.WEBAPP_LIVEKIT_URL = "wss://livekit.prod.nantty.com";
+    assert.match(buildContentSecurityPolicyHeaderValue(), /connect-src [^;]*wss:\/\/livekit\.prod\.nantty\.com/);
     process.env.WEBAPP_LIVEKIT_URL = "";
     assert.doesNotMatch(buildContentSecurityPolicyHeaderValue(), /livekit/);
     if (previous === undefined) delete process.env.WEBAPP_LIVEKIT_URL;

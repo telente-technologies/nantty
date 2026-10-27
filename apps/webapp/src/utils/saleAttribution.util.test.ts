@@ -31,7 +31,7 @@ describe("sale attribution memory", () => {
     const storage = memoryStorage();
     rememberSaleAttribution("p1", { source: "banner" as never, id: "x" }, Date.now() + 1000, storage);
     assert.equal(readSaleAttribution("p1", storage), null);
-    storage.setItem("zudomart.saleAttributions", "{not json");
+    storage.setItem("nantty.saleAttributions", "{not json");
     assert.equal(readSaleAttribution("p1", storage), null);
   });
 

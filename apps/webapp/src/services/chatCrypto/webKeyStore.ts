@@ -1,6 +1,6 @@
 import { type ChatCryptoStorage, type KeyValueStore, type Sealer, SealedKeyValueStore } from "@nantty/chat-crypto";
 
-const databaseName = "zudomart-chat-crypto";
+const databaseName = "nantty-chat-crypto";
 const storeNames = ["secrets", "records", "wrapping"] as const;
 type StoreName = (typeof storeNames)[number];
 

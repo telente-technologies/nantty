@@ -39,7 +39,7 @@ export const EMPTY_COMPOSER_DRAFT: ComposerDraft = {
   location: null,
 };
 
-const draftStorageKey = (viewerId: string, quoteSlot?: string | null) => (quoteSlot ? `zudomart.composerDraft.${viewerId}.quote.${quoteSlot}` : `zudomart.composerDraft.${viewerId}`);
+const draftStorageKey = (viewerId: string, quoteSlot?: string | null) => (quoteSlot ? `nantty.composerDraft.${viewerId}.quote.${quoteSlot}` : `nantty.composerDraft.${viewerId}`);
 
 export const isComposerDraftEmpty = (draft: ComposerDraft) =>
   draft.text.trim() === "" && draft.tagged.length === 0 && draft.products.length === 0 && draft.sensitiveLabels.length === 0 && draft.location === null && !draft.quotedPostId;

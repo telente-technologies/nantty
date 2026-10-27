@@ -28,7 +28,7 @@ describe("quotes in the comment section mocks", () => {
   it("lists button and link quotes in the original's comments and thread, and the Quotes filter", async () => {
     const original = await publish("original thought");
     const viaButton = await publish("my take", original.id);
-    const viaLink = await publish(`hot take https://app.zudomart.com/post/${original.id}`);
+    const viaLink = await publish(`hot take https://app.nantty.com/post/${original.id}`);
     assert.equal(viaLink.text, "hot take");
     assert.equal(viaLink.resharedFrom?.id, original.id);
     const comments = await everyItem<CommentWithReplies | QuoteThreadItem>(`/api/v1/posts/${original.id}/comments`);

@@ -57,7 +57,7 @@ export const convertMediaAssetToPostMedia = (asset: MediaAsset & { readonly type
 export const mediaMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/media/uploads", ({ body }) => {
     const request = body as CreateUploadSessionRequest;
-    const isEncryptedChatAttachment = request.mimeType === "application/vnd.zudomart.encrypted" && (request.purpose === "chat" || request.purpose === "voice");
+    const isEncryptedChatAttachment = request.mimeType === "application/vnd.nantty.encrypted" && (request.purpose === "chat" || request.purpose === "voice");
     const isSupportedMimeType = isEncryptedChatAttachment || ["image/", "video/", "audio/"].some((prefix) => request.mimeType.startsWith(prefix));
     if (!isSupportedMimeType) {
       throw new ApiError(415, "Unsupported media type", "UNSUPPORTED_MEDIA_TYPE");

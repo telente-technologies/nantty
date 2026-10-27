@@ -16,7 +16,7 @@ import { SideNavigation } from "./sideNavigation";
 import { TopBar } from "./topBar";
 import { useShellBadgeCounts } from "./useShellBadgeCounts.hook";
 
-const desktopNavCollapsedStorageKey = "zudomart.webapp.desktopNavCollapsed";
+const desktopNavCollapsedStorageKey = "nantty.webapp.desktopNavCollapsed";
 const desktopMediaQuery = "(min-width: 1024px)";
 
 function readStoredDesktopCollapse(): boolean {

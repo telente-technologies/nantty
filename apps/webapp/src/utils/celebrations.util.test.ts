@@ -20,8 +20,8 @@ describe("celebration copy", () => {
     assert.equal(birthdayMessage("Ada Obi", 25).message, "Happy 25th birthday, Ada! Wishing you an amazing year ahead from all of us at Nantty.");
   });
 
-  it("writes the Zudoversary message", () => {
-    assert.equal(anniversaryMessage(2).message, "Happy 2nd Zudoversary! Thanks for being part of Nantty for 2 years.");
+  it("writes the Nanttyversary message", () => {
+    assert.equal(anniversaryMessage(2).message, "Happy 2nd Nanttyversary! Thanks for being part of Nantty for 2 years.");
     assert.ok(anniversaryMessage(1).message.endsWith("for 1 year."));
   });
 });

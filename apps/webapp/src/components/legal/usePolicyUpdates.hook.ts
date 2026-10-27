@@ -8,7 +8,7 @@ import { privacyService } from "@/services/privacy.service";
 import { legalService } from "@/services/legal.service";
 import type { PolicyVersionSummary } from "@/types/policyUpdate.type";
 
-const dismissedStorageKey = "zudomart.webapp.dismissedPolicyBanners";
+const dismissedStorageKey = "nantty.webapp.dismissedPolicyBanners";
 const acceptanceQueryKey = ["legal", "acceptances"] as const;
 
 function readDismissedIds(): string[] {

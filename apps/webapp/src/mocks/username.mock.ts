@@ -12,14 +12,14 @@ const DAYS_BETWEEN_USERNAME_CHANGES = 30;
 const CHANGES_ALLOWED_PER_YEAR = 3;
 
 const EXACT_ONLY_RESERVED_USERNAMES = new Set(["all"]);
-const RESERVED_USERNAMES = new Set(["admin", "support", "zudomart", "official", "help", "security", "verify", "payments", "escrow", "staff", "moderator", "root", "billing", "news"]);
+const RESERVED_USERNAMES = new Set(["admin", "support", "nantty", "official", "help", "security", "verify", "payments", "escrow", "staff", "moderator", "root", "billing", "news"]);
 const WITHHELD_USERNAMES = new Set(["lagosstategovt", "cbn", "efcc"]);
 const RECENTLY_RELEASED_USERNAMES = new Set(["enyodev", "mayweda_dev"]);
 
 const usernameChangesByUserId = new Map<string, number[]>([["u_me", [Date.now() - 200 * DAY_IN_MS]]]);
 
 export const generateAutomaticUsername = (seed: string) => {
-  const letters = seed.split("@")[0]!.toLowerCase().replace(/[^a-z]/g, "").slice(0, 12) || "zudo";
+  const letters = seed.split("@")[0]!.toLowerCase().replace(/[^a-z]/g, "").slice(0, 12) || "nantty";
   return `${letters}${Math.floor(100 + Math.random() * 900)}`;
 };
 
@@ -28,7 +28,7 @@ const takenUsernames = () => new Set([...directoryUsers.map((user) => user.usern
 const SUGGESTION_SUFFIXES = ["_01", "2026", "_x", ".99", "_ng", "7"];
 
 export function buildUsernameSuggestions(rawUsername: string): string[] {
-  const base = rawUsername.trim().toLowerCase().replace(/[^a-z0-9._]/g, "").slice(0, 20) || "zudo";
+  const base = rawUsername.trim().toLowerCase().replace(/[^a-z0-9._]/g, "").slice(0, 20) || "nantty";
   const taken = takenUsernames();
   return SUGGESTION_SUFFIXES.map((suffix) => `${base}${suffix}`.slice(0, 30))
     .filter((candidate) => isValidUsername(candidate) && !taken.has(candidate) && !WITHHELD_USERNAMES.has(candidate) && !RECENTLY_RELEASED_USERNAMES.has(candidate))
@@ -78,8 +78,8 @@ function buildPolicy(): UsernamePolicy {
 export const usernameMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/auth/username-available", ({ query }) => checkAvailability(query.get("username") ?? "")),
   createMockRoute("GET", "/api/v1/auth/username-suggestion", ({ query }) => {
-    let suggestion = generateAutomaticUsername(query.get("seed") ?? "zudo");
-    while (!checkAvailability(suggestion).available) suggestion = generateAutomaticUsername(query.get("seed") ?? "zudo");
+    let suggestion = generateAutomaticUsername(query.get("seed") ?? "nantty");
+    while (!checkAvailability(suggestion).available) suggestion = generateAutomaticUsername(query.get("seed") ?? "nantty");
     return { username: suggestion };
   }),
   createMockRoute("GET", "/api/v1/users/me/username-policy", () => buildPolicy()),

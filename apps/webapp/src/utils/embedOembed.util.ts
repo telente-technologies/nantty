@@ -6,7 +6,7 @@ export interface OembedTarget {
   readonly id: string;
 }
 
-const knownSiteHosts = new Set(["nantty.com", "www.nantty.com", "web.nantty.com", "creator.nantty.com", "ads.nantty.com", "zudomart.com", "www.zudomart.com", "app.zudomart.com"]);
+const knownSiteHosts = new Set(["nantty.com", "www.nantty.com", "web.nantty.com", "creator.nantty.com", "ads.nantty.com", "nantty.com", "www.nantty.com", "app.nantty.com"]);
 
 export function readOembedTarget(rawUrl: string | null, siteOrigin: string): OembedTarget | null {
   if (rawUrl === null || rawUrl.length > 2048) return null;

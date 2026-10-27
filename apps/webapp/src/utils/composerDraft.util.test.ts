@@ -28,7 +28,7 @@ describe("composer drafts", () => {
     assert.equal(readQuoteParam(""), null);
     assert.equal(readQuoteParam(null), null);
     const storage = memoryStorage();
-    storage.setItem("zudomart.composerDraft.u_me", JSON.stringify({ text: "x", quotedPostId: "<script>" }));
+    storage.setItem("nantty.composerDraft.u_me", JSON.stringify({ text: "x", quotedPostId: "<script>" }));
     assert.equal(readSavedComposerDraft(storage, "u_me")?.quotedPostId, null);
   });
 
@@ -46,7 +46,7 @@ describe("composer drafts", () => {
     const storage = memoryStorage();
     saveComposerDraft(storage, "u_me", EMPTY_COMPOSER_DRAFT);
     assert.equal(storage.values.size, 0);
-    storage.setItem("zudomart.composerDraft.u_me", "{not json");
+    storage.setItem("nantty.composerDraft.u_me", "{not json");
     assert.equal(readSavedComposerDraft(storage, "u_me"), null);
     const blocked = { getItem: () => { throw new Error("SecurityError"); }, setItem: () => { throw new Error("QuotaExceeded"); }, removeItem: () => { throw new Error("SecurityError"); } };
     assert.equal(readSavedComposerDraft(blocked, "u_me"), null);

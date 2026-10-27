@@ -15,7 +15,7 @@ const directory = createHttpKeyDirectory({
   isNotFound: (error) => error instanceof WebappRequestError && error.status === 404,
 });
 
-const crossTabLock = createWebLocksMutex("zudomart-chat-crypto");
+const crossTabLock = createWebLocksMutex("nantty-chat-crypto");
 const getClient = () => (client ??= new ChatCryptoClient({ storage: createWebChatCryptoStorage(), directory, ...(crossTabLock === undefined ? {} : { lock: crossTabLock }) }));
 
 export interface EncryptionRecipients {

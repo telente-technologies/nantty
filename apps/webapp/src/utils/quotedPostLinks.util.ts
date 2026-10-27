@@ -1,6 +1,6 @@
 import type { Post, QuotedPostSummary } from "@/types";
 
-const POST_LINK_HOSTS = ["nantty.com", "www.nantty.com", "web.nantty.com", "creator.nantty.com", "zudomart.com", "www.zudomart.com", "app.zudomart.com", "zudomart.app", "www.zudomart.app"];
+const POST_LINK_HOSTS = ["nantty.com", "www.nantty.com", "web.nantty.com", "creator.nantty.com", "nantty.com", "www.nantty.com", "app.nantty.com", "nantty.app", "www.nantty.app"];
 const POST_PATH_KINDS = ["post", "posts", "clip", "clips"];
 const COMMENT_QUERY_KEYS = ["comment", "commentid", "reply"];
 const URL_PATTERN = /https?:\/\/[^\s<>"']+/gi;

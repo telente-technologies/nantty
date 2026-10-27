@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 
 import { readHostedCheckoutUrl } from "./hostedCheckout.util";
 
-const origin = "https://zudomart.com";
+const origin = "https://nantty.com";
 
 describe("readHostedCheckoutUrl", () => {
   it("prefers the provider-neutral checkoutUrl and allows only Flutterwave's hosts", () => {

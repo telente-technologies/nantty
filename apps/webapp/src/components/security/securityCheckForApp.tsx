@@ -7,7 +7,7 @@ import { TurnstileWidget } from "./turnstileWidget";
 import styles from "./humanVerificationDialog.module.css";
 
 const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
-const allowedReturnPrefix = "zudomart://security-check";
+const allowedReturnPrefix = "nantty://security-check";
 
 function SecurityCheckContent() {
   const searchParams = useSearchParams();

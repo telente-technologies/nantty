@@ -19,7 +19,7 @@ interface SocialSignInBody {
 function buildDemoIdentityToken(provider: SocialProvider): string {
   const encodeSegment = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
   const issuedAt = Math.floor(Date.now() / 1000);
-  return [encodeSegment({ alg: "none", typ: "JWT" }), encodeSegment({ sub: `zudomart-demo-${provider}`, aud: provider, iat: issuedAt, exp: issuedAt + 900 }), encodeSegment({ demo: true })].join(".");
+  return [encodeSegment({ alg: "none", typ: "JWT" }), encodeSegment({ sub: `nantty-demo-${provider}`, aud: provider, iat: issuedAt, exp: issuedAt + 900 }), encodeSegment({ demo: true })].join(".");
 }
 
 export async function POST(request: NextRequest) {

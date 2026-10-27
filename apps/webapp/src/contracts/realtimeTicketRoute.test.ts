@@ -124,8 +124,8 @@ describe("webapp realtime ticket route", () => {
   });
 
   it("allows the realtime origin in connect-src from config", () => {
-    assert.equal(readRealtimeConnectOrigin("wss://rt.zudomart.com/ws", undefined), "wss://rt.zudomart.com");
-    assert.equal(readRealtimeConnectOrigin(undefined, "https://api.zudomart.com"), "wss://api.zudomart.com");
+    assert.equal(readRealtimeConnectOrigin("wss://rt.nantty.com/ws", undefined), "wss://rt.nantty.com");
+    assert.equal(readRealtimeConnectOrigin(undefined, "https://api.nantty.com"), "wss://api.nantty.com");
     assert.equal(readRealtimeConnectOrigin("not a url", undefined), "");
   });
 });

@@ -32,7 +32,7 @@ export const identityVerificationMocks: MockRoute[] = [
     if (!input.consentAccepted) throw new ApiError(400, "Accept the biometric consent first");
     if (!verificationCase) throw new ApiError(404, "That verification was not found");
     verificationCase = { ...verificationCase, status: "processing", consentGiven: true };
-    return { mode: "web_integration", token: "mock-token", product: "enhanced_document_verification", jobId: "job_mock", partnerId: "0000", environment: "sandbox", callbackUrl: "https://api.zudomart.com/api/v1/webhooks/smile-id" };
+    return { mode: "web_integration", token: "mock-token", product: "enhanced_document_verification", jobId: "job_mock", partnerId: "0000", environment: "sandbox", callbackUrl: "https://api.nantty.com/api/v1/webhooks/smile-id" };
   }),
 ];
 

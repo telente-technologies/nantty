@@ -17,7 +17,7 @@ import { presentPaymentProblem, readPaymentProblemCode } from "@/utils/paymentPr
 
 import styles from "@/components/actions/actionDialogs.module.css";
 
-export const coinPurchaseReturnPathStorageKey = "zudomart.coins.returnPath";
+export const coinPurchaseReturnPathStorageKey = "nantty.coins.returnPath";
 
 export function CoinPurchaseDialog({ isOpen, onClose, coinsNeeded }: { readonly isOpen: boolean; readonly onClose: () => void; readonly coinsNeeded?: number }) {
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);

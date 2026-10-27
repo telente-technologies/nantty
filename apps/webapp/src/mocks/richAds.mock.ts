@@ -1,6 +1,6 @@
 import type { AdCard, Post, SponsoredPlacement } from "@/types";
 
-const MOCK_REDIRECT_BASE = "https://api.zudomart.com/api/v1/ads/r";
+const MOCK_REDIRECT_BASE = "https://api.nantty.com/api/v1/ads/r";
 
 const placementFor = (post: Post, overrides: Partial<SponsoredPlacement>): SponsoredPlacement => ({
   campaignId: post.sponsored?.campaignId ?? `cmp_${post.id}`,
@@ -42,14 +42,14 @@ function buildAppInstallAd(source: Post): Post {
       destination: { type: "app_store" },
       clickLinks: { cta: `${MOCK_REDIRECT_BASE}/mock-install` },
       app: {
-        appName: "Zudo Companion",
+        appName: "Nantty Companion",
         iconUrl: source.media[0]?.url ?? null,
         rating: 4.6,
-        iosStoreUrl: "https://apps.apple.com/ng/app/zudo-companion/id1000000000",
-        androidStoreUrl: "https://play.google.com/store/apps/details?id=com.zudomart.companion",
+        iosStoreUrl: "https://apps.apple.com/ng/app/nantty-companion/id1000000000",
+        androidStoreUrl: "https://play.google.com/store/apps/details?id=com.nantty.companion",
         webFallbackUrl: "https://nantty.com/app",
-        iosDeepLink: "zudocompanion://home",
-        androidDeepLink: "zudocompanion://home",
+        iosDeepLink: "nanttycompanion://home",
+        androidDeepLink: "nanttycompanion://home",
       },
     }),
   };

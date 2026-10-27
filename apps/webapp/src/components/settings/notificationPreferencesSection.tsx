@@ -39,14 +39,14 @@ export function NotificationPreferencesSection() {
       {heading}
       <ConsentToggleRow
         label="Push notifications"
-        description="Birthdays and Zudoversaries, like your account anniversary."
+        description="Birthdays and Nanttyversaries, like your account anniversary."
         enabled={update.variables?.push ?? row.push}
         disabled={update.isPending}
         onChange={(push) => update.mutate({ push })}
       />
       <ConsentToggleRow
         label="Email"
-        description="A celebration email on your Zudoversary."
+        description="A celebration email on your Nanttyversary."
         enabled={update.variables?.email ?? row.email}
         disabled={update.isPending}
         onChange={(email) => update.mutate({ email })}

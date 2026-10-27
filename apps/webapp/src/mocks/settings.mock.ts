@@ -9,7 +9,7 @@ import { buildAddressFromInput } from "./geo.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 let settings: AccountSettings = {
-  email: me.email ?? "testzudomart@yahoo.com",
+  email: me.email ?? "testnantty@yahoo.com",
   phone: null,
   theme: "light",
   language: "en",

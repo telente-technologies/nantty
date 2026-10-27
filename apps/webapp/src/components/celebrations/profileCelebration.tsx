@@ -24,7 +24,7 @@ export function ProfileCelebration({ user, isSelf }: { readonly user: User; read
   if (!user.birthdayToday && !user.anniversaryToday) return null;
   return (
     <>
-      {user.anniversaryToday ? <span className={styles.badge}>Zudoversary</span> : null}
+      {user.anniversaryToday ? <span className={styles.badge}>Nanttyversary</span> : null}
       {user.birthdayToday ? <FloatingBalloons height={260} /> : null}
     </>
   );

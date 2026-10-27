@@ -1,7 +1,7 @@
 const productionSessionSecretPattern = /^[0-9a-f]{64}$/i;
 const sessionSecretPlaceholder = "replace-with-64-random-hex-characters";
 const isProductionRuntime = process.env.NODE_ENV === "production";
-const developmentOnlySessionSecret = "zudomart-webapp-development-only-secret-never-use-in-production";
+const developmentOnlySessionSecret = "nantty-webapp-development-only-secret-never-use-in-production";
 
 export function readWebappApiBaseUrl(): string {
   const configuredUrl = process.env.WEBAPP_API_URL ?? (isProductionRuntime ? "" : "http://localhost:8080");

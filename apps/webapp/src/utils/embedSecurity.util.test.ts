@@ -6,7 +6,7 @@ import { buildEmbedLoaderScript } from "./embedLoader.util";
 import { embedResizeScript } from "./embedMarkup.util";
 import { buildEmbedContentSecurityPolicy, buildEmbedResponseHeaders, EmbedRateLimiter, EmbedResponseCache, hashInlineScriptForCsp, readEmbedResizeHeight } from "./embedSecurity.util";
 
-const origin = "https://app.zudomart.com";
+const origin = "https://app.nantty.com";
 
 describe("embed response headers", () => {
   it("allow framing anywhere but lock everything else down, with no cookies", () => {
@@ -30,7 +30,7 @@ describe("embed response headers", () => {
 
 describe("resize messages", () => {
   it("accept only the matching frame from the embed origin or the sandboxed null origin", () => {
-    const message = { type: "zudomart:embed:resize", frame: "abc12345", height: 321.4 };
+    const message = { type: "nantty:embed:resize", frame: "abc12345", height: 321.4 };
     assert.equal(readEmbedResizeHeight(message, "abc12345", "null", origin), 321);
     assert.equal(readEmbedResizeHeight(message, "abc12345", origin, origin), 321);
     assert.equal(readEmbedResizeHeight(message, "abc12345", "https://evil.example", origin), null);
@@ -67,11 +67,11 @@ describe("loader script", () => {
 
   it("ignores resize messages from a wrong origin, another window or a guessed frame id", () => {
     const { iframe, frame, contentWindow, send } = runLoader();
-    send(contentWindow, "https://evil.example", { type: "zudomart:embed:resize", frame, height: 999 });
-    send({}, "null", { type: "zudomart:embed:resize", frame, height: 999 });
-    send(contentWindow, "null", { type: "zudomart:embed:resize", frame: "guess", height: 999 });
+    send(contentWindow, "https://evil.example", { type: "nantty:embed:resize", frame, height: 999 });
+    send({}, "null", { type: "nantty:embed:resize", frame, height: 999 });
+    send(contentWindow, "null", { type: "nantty:embed:resize", frame: "guess", height: 999 });
     assert.equal(iframe.style.height, "");
-    send(contentWindow, "null", { type: "zudomart:embed:resize", frame, height: 412 });
+    send(contentWindow, "null", { type: "nantty:embed:resize", frame, height: 412 });
     assert.equal(iframe.style.height, "412px");
   });
 });

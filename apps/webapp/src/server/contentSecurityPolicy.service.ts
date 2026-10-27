@@ -20,7 +20,7 @@ function readOriginOrEmpty(configuredUrl: string | undefined): string {
 function readMediaUploadOrigins(): string[] {
   const listed = (readRuntimeEnv("WEBAPP_UPLOAD_ORIGINS") ?? "").split(",").map((origin) => readOriginOrEmpty(origin.trim()));
   const publicEndpoint = readOriginOrEmpty(readRuntimeEnv("S3_PUBLIC_ENDPOINT") ?? (isDevelopmentBuild ? "http://localhost:18333" : undefined));
-  const bucket = readRuntimeEnv("MEDIA_QUARANTINE_BUCKET") ?? "zudomart-media-quarantine";
+  const bucket = readRuntimeEnv("MEDIA_QUARANTINE_BUCKET") ?? "nantty-media-quarantine";
   const region = readRuntimeEnv("S3_REGION") ?? "eu-west-1";
   const awsBucketOrigin = publicEndpoint === "" ? `https://${bucket}.s3.${region}.amazonaws.com` : "";
   return [...new Set([...listed, publicEndpoint, awsBucketOrigin].filter(Boolean))];
