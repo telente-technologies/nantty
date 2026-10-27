@@ -37,8 +37,8 @@ defmodule RealtimeWeb.ClientSocketTest do
 
   defp token(jwk, account_id, session_id) do
     claims = %{
-      "iss" => "https://auth.zudomart.test",
-      "aud" => ["zudomart-realtime"],
+      "iss" => "https://auth.nantty.test",
+      "aud" => ["nantty-realtime"],
       "scope" => "realtime",
       "sub" => account_id,
       "sid" => session_id,

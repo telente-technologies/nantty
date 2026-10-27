@@ -77,7 +77,7 @@ defmodule Realtime.Events.AmqpConsumerTest do
   end
 
   defp deliver(pid, tag, body, attempt \\ 0) do
-    headers = if attempt > 0, do: [{"x-zudomart-attempt", :long, attempt}], else: :undefined
+    headers = if attempt > 0, do: [{"x-nantty-attempt", :long, attempt}], else: :undefined
     meta = %{delivery_tag: tag, headers: headers, message_id: "m-#{tag}", type: "gift.sent"}
     send(pid, {:basic_deliver, body, meta})
   end
@@ -101,8 +101,8 @@ defmodule Realtime.Events.AmqpConsumerTest do
   test "schedules the first retry tier when the broadcast fails" do
     pid = start_consumer()
     deliver(pid, 3, envelope("e-2", "explode"))
-    assert_receive {:published, "zudomart.retry", "realtime-domain-events.retry.30s", options}
-    assert {"x-zudomart-attempt", :long, 1} in options[:headers]
+    assert_receive {:published, "nantty.retry", "realtime-domain-events.retry.30s", options}
+    assert {"x-nantty-attempt", :long, 1} in options[:headers]
     assert options[:message_id] == "m-3"
     assert_receive {:acked, 3}
   end

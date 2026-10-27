@@ -14,7 +14,7 @@ if config_env() != :test do
   config :realtime, :access_token,
     jwks_url: System.get_env("AUTH_JWKS_URL", "http://localhost:8101/.well-known/jwks.json"),
     issuer: System.get_env("AUTH_TOKEN_ISSUER", "http://localhost:8101"),
-    audience: System.get_env("REALTIME_TOKEN_AUDIENCE", "zudomart-realtime"),
+    audience: System.get_env("REALTIME_TOKEN_AUDIENCE", "nantty-realtime"),
     scope: "realtime"
 end
 
@@ -37,7 +37,7 @@ if config_env() != :test do
 end
 
 if config_env() != :test do
-  local_rabbitmq_url = "amqp://realtime:realtime-local-only@localhost:5672/zudomart"
+  local_rabbitmq_url = "amqp://realtime:realtime-local-only@localhost:5672/nantty"
 
   config :realtime, :amqp,
     enabled: System.get_env("REALTIME_AMQP_ENABLED", "true") != "false",

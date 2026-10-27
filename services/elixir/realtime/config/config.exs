@@ -9,7 +9,7 @@ config :realtime, RealtimeWeb.Endpoint,
 config :realtime, :access_token,
   jwks_url: "",
   issuer: "http://localhost:8101",
-  audience: "zudomart-realtime",
+  audience: "nantty-realtime",
   scope: "realtime"
 
 config :realtime, :live_internal, url: "", token: ""

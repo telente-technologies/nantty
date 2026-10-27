@@ -7,8 +7,8 @@ config :realtime, RealtimeWeb.Endpoint,
 
 config :realtime, :access_token,
   jwks_url: "",
-  issuer: "https://auth.zudomart.test",
-  audience: "zudomart-realtime",
+  issuer: "https://auth.nantty.test",
+  audience: "nantty-realtime",
   scope: "realtime"
 
 config :logger, level: :warning

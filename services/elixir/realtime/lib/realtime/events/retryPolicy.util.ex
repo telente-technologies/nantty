@@ -1,8 +1,8 @@
 defmodule Realtime.Events.RetryPolicy do
-  @retry_exchange "zudomart.retry"
+  @retry_exchange "nantty.retry"
   @maximum_delivery_attempts 5
-  @attempt_header "x-zudomart-attempt"
-  @last_error_header "x-zudomart-last-error"
+  @attempt_header "x-nantty-attempt"
+  @last_error_header "x-nantty-last-error"
   @tiers ["30s", "2m", "10m", "30m"]
 
   def retry_exchange, do: @retry_exchange

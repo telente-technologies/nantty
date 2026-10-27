@@ -15,8 +15,8 @@ defmodule Realtime.Auth.AccessTokenVerifierTest do
 
   defp sign(private_jwk, claims) do
     base = %{
-      "iss" => "https://auth.zudomart.test",
-      "aud" => ["zudomart-realtime"],
+      "iss" => "https://auth.nantty.test",
+      "aud" => ["nantty-realtime"],
       "scope" => "realtime",
       "sub" => "account-1",
       "sid" => "session-1",
@@ -47,7 +47,7 @@ defmodule Realtime.Auth.AccessTokenVerifierTest do
 
     assert {:error, _} =
              AccessTokenVerifier.verify_access_token_and_extract_principal(
-               sign(jwk, %{"aud" => ["zudomart-admin"]})
+               sign(jwk, %{"aud" => ["nantty-admin"]})
              )
 
     assert {:error, _} =
@@ -59,7 +59,7 @@ defmodule Realtime.Auth.AccessTokenVerifierTest do
   } do
     assert {:error, _} =
              AccessTokenVerifier.verify_access_token_and_extract_principal(
-               sign(jwk, %{"aud" => ["zudomart-api"], "scope" => nil})
+               sign(jwk, %{"aud" => ["nantty-api"], "scope" => nil})
              )
 
     assert {:error, _} =
@@ -69,7 +69,7 @@ defmodule Realtime.Auth.AccessTokenVerifierTest do
 
     assert {:error, _} =
              AccessTokenVerifier.verify_access_token_and_extract_principal(
-               sign(jwk, %{"aud" => ["zudomart-widgets"], "scope" => "realtime"})
+               sign(jwk, %{"aud" => ["nantty-widgets"], "scope" => "realtime"})
              )
 
     assert {:error, _} =

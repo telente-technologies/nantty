@@ -10,7 +10,7 @@ defmodule Realtime.Events.RetryPolicyTest do
 
   test "reads the attempt header and replaces broker death headers on retry" do
     headers = [
-      {"x-zudomart-attempt", :long, 2},
+      {"x-nantty-attempt", :long, 2},
       {"x-death", :array, []},
       {"traceparent", :longstr, "t"}
     ]
@@ -18,7 +18,7 @@ defmodule Realtime.Events.RetryPolicyTest do
     assert RetryPolicy.attempt_from_headers(headers) == 2
     assert RetryPolicy.attempt_from_headers(:undefined) == 0
     retry = RetryPolicy.headers_for_retry(headers, 3, :boom)
-    assert {"x-zudomart-attempt", :long, 3} in retry
+    assert {"x-nantty-attempt", :long, 3} in retry
     assert {"traceparent", :longstr, "t"} in retry
     refute Enum.any?(retry, fn {name, _type, _value} -> name == "x-death" end)
     assert RetryPolicy.retry_queue_name("q", "2m") == "q.retry.2m"
