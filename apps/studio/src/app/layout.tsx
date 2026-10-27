@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
-import { ThemeInitScript, ThemeProvider, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@nantty/web-kit";
+import { StaticThemeScript, ThemeInitScript, ThemeProvider, parseThemePreference, readHtmlThemeAttribute, themeCookieName, themeViewport } from "@nantty/web-kit";
 
 import { readPublicSiteUrl } from "@/config/studioEnvironment.config";
 import { deriveCsrfTokenForSession } from "@/server/signedCookie.service";
@@ -18,10 +18,26 @@ export const metadata: Metadata = {
   title: { default: "Nantty Studio", template: "%s · Nantty Studio" },
   description: "Go live on Nantty: talk, music, gaming and more, with OBS, overlays, gifts and analytics.",
   applicationName: "Nantty Studio",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "en_NG",
+    siteName: "Nantty Studio",
+    title: "Nantty Studio — the creator studio for going live",
+    description: "A creator home for going live on Nantty, with OBS support, overlays, audience tools and creator analytics.",
+    url: "/",
+    images: [{ url: "/photos/creatorMicPortrait.webp", width: 1000, height: 1400, alt: "A creator speaking into a studio microphone" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nantty Studio — the creator studio for going live",
+    description: "A creator home for going live on Nantty, with OBS support, overlays, audience tools and creator analytics.",
+    images: ["/photos/creatorMicPortrait.webp"],
+  },
   manifest: "/manifest.webmanifest",
   icons: { icon: [{ url: "/brand/nantty-icon.png", type: "image/png" }], apple: "/brand/nantty-icon.png" },
   formatDetection: { telephone: false },
-  robots: process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1" ? { index: true, follow: true } : { index: false, follow: false },
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
@@ -34,8 +50,9 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   if (process.env.NANTTY_CLOUDFLARE_PRELAUNCH === "1") {
     return (
-      <html lang="en-NG" className={interFont.variable} data-theme="light">
-        <body><ThemeProvider initialPreference="light">{children}</ThemeProvider></body>
+      <html lang="en-NG" className={interFont.variable} suppressHydrationWarning>
+        <head><StaticThemeScript /></head>
+        <body><ThemeProvider initialPreference="system">{children}</ThemeProvider></body>
       </html>
     );
   }

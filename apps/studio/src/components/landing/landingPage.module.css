@@ -21,9 +21,21 @@
   overflow-x: clip;
   font-size: var(--fs-16);
   line-height: 1.5;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 :global(:root[data-theme="dark"]) .page {
+  --color-bg: #202228;
+  --color-surface: #25272e;
+  --color-elevated: #2d3038;
+  --color-sunken: #292c33;
+  --color-text: #f1f2f4;
+  --color-text-muted: #bec1c8;
+  --color-text-subtle: #a9adb5;
+  --color-border: #3d414a;
+  --color-border-strong: #50545e;
+  --color-surface-hover: #31343c;
   --deep-surface: #110d3d;
   --landing-wash-accent: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
   --landing-screen-shadow: 0 0 0 1px var(--color-border), 0 24px 50px -20px rgb(0 0 0 / 0.75);
@@ -32,6 +44,16 @@
 
 @media (prefers-color-scheme: dark) {
   :global(:root:not([data-theme="light"])) .page {
+    --color-bg: #202228;
+    --color-surface: #25272e;
+    --color-elevated: #2d3038;
+    --color-sunken: #292c33;
+    --color-text: #f1f2f4;
+    --color-text-muted: #bec1c8;
+    --color-text-subtle: #a9adb5;
+    --color-border: #3d414a;
+    --color-border-strong: #50545e;
+    --color-surface-hover: #31343c;
     --deep-surface: #110d3d;
     --landing-wash-accent: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
     --landing-screen-shadow: 0 0 0 1px var(--color-border), 0 24px 50px -20px rgb(0 0 0 / 0.75);
@@ -45,7 +67,7 @@
 
 .section {
   padding: var(--landing-section-space) var(--landing-gutter);
-  scroll-margin-top: 72px;
+  scroll-margin-top: 96px;
 }
 
 .inner {
@@ -149,6 +171,10 @@
 }
 
 @media (max-width: 420px) {
+  .page {
+    --landing-section-space: 64px;
+  }
+
   .primaryAction,
   .secondaryAction,
   .yellowAction {

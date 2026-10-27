@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { NanttyWordmark } from "@nantty/web-kit";
+import { ThemeAwareNanttyWordmark, ThemeSwitcher } from "@nantty/web-kit";
 
 import { landingNavigationLinks } from "./landingContent.constant";
 import { PrelaunchLoginAction } from "./prelaunchLoginAction";
@@ -43,7 +43,7 @@ export function LandingHeader() {
     <header className={`${styles.header} ${hasScrolled ? styles.scrolled : ""}`}>
       <div className={styles.pill}>
         <Link href="/" className={styles.brand} aria-label="Nantty Studio home">
-          <NanttyWordmark productLabel="Studio" tone="onDark" withSymbol />
+          <ThemeAwareNanttyWordmark productLabel="Studio" height={30} collapseToMarkOnSmallScreens />
         </Link>
         <nav aria-label="Main" className={styles.desktopNavigation}>
           <ul>
@@ -56,6 +56,7 @@ export function LandingHeader() {
             ))}
           </ul>
         </nav>
+        <ThemeSwitcher iconOnly label="Colour theme" className={styles.themeSwitcher} />
         <PrelaunchLoginAction className={styles.signInButton}>
           Sign in
         </PrelaunchLoginAction>
@@ -76,6 +77,7 @@ export function LandingHeader() {
             ))}
           </ul>
         </nav>
+        <ThemeSwitcher label="Colour theme" showLabel className={styles.mobileThemeSwitcher} />
         <PrelaunchLoginAction className={styles.mobileSignIn}>
           Sign in with your Nantty account
         </PrelaunchLoginAction>

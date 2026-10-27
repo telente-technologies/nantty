@@ -8,34 +8,51 @@
 .pill {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: 10px;
+  min-width: 0;
   max-width: var(--landing-width);
   margin-inline: auto;
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  padding: 7px 8px 7px 14px;
   border-radius: var(--radius-pill);
-  background: var(--deep-glass);
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
   -webkit-backdrop-filter: saturate(1.4) blur(14px);
   backdrop-filter: saturate(1.4) blur(14px);
-  box-shadow: inset 0 0 0 1px var(--deep-hairline);
-  color: var(--deep-ink);
+  box-shadow: inset 0 0 0 1px var(--color-border), var(--landing-lift-soft);
+  color: var(--color-text);
   transition: box-shadow 200ms ease;
 }
 
 .scrolled .pill {
-  box-shadow: inset 0 0 0 1px var(--deep-hairline), var(--shadow-float);
+  box-shadow: inset 0 0 0 1px var(--color-border), var(--shadow-float);
 }
 
 .brand {
-  color: var(--deep-ink);
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: var(--color-text);
+  white-space: nowrap;
 }
 
 .brand:hover {
   text-decoration: none;
 }
 
+.themeSwitcher {
+  flex: none;
+  margin-left: auto;
+}
+
+@media (max-width: 699px) {
+  .themeSwitcher {
+    display: none;
+  }
+}
+
 .desktopNavigation {
   display: none;
   margin-left: auto;
+  min-width: 0;
 }
 
 .desktopNavigation ul {
@@ -47,14 +64,14 @@
   display: inline-block;
   padding: 10px 14px;
   border-radius: var(--radius-pill);
-  color: var(--deep-ink-muted);
+  color: var(--color-text-muted);
   font-size: 0.9375rem;
   font-weight: 550;
 }
 
 .navigationLink:hover {
-  background: var(--deep-hairline);
-  color: var(--deep-ink);
+  background: var(--color-surface-hover);
+  color: var(--color-text);
   text-decoration: none;
 }
 
@@ -70,7 +87,9 @@
 }
 
 .signInButton:hover {
-  background: var(--deep-ink);
+  background: var(--yellow-500);
+  color: var(--blue-900);
+  filter: brightness(1.06);
   text-decoration: none;
 }
 
@@ -89,6 +108,7 @@
   width: 44px;
   height: 44px;
   margin-left: auto;
+  flex: none;
   border: 0;
   border-radius: 50%;
   background: var(--yellow-500);
@@ -127,13 +147,13 @@
 
 .mobileMenu {
   position: fixed;
-  inset: 76px 0 0;
+  inset: 0;
   z-index: 49;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: var(--space-7) var(--landing-gutter) var(--space-8);
+  gap: var(--space-6);
+  padding: 94px var(--landing-gutter) max(28px, env(safe-area-inset-bottom));
   background: var(--color-brand-solid);
 }
 
@@ -143,11 +163,26 @@
 
 .mobileLink {
   display: block;
-  padding: 6px 0;
+  padding: 4px 0;
   color: var(--deep-ink);
   font-size: clamp(2.2rem, 10vw, 3rem);
   font-weight: 800;
   letter-spacing: -0.045em;
+}
+
+.mobileThemeSwitcher {
+  --color-sunken: rgb(255 255 255 / 0.1);
+  --color-border: rgb(255 255 255 / 0.28);
+  --color-elevated: var(--yellow-500);
+  --color-text: var(--blue-900);
+  --color-text-muted: var(--deep-ink-muted);
+  --color-focus: var(--yellow-500);
+  --shadow-card: none;
+  margin-top: auto;
+}
+
+.mobileThemeSwitcher legend {
+  color: var(--deep-ink-muted);
 }
 
 .mobileLink:hover {
@@ -166,10 +201,15 @@
   font-weight: 700;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1120px) {
   .desktopNavigation,
   .signInButton {
     display: flex;
+  }
+
+  .themeSwitcher {
+    display: flex;
+    margin-left: 0;
   }
 
   .menuButton,
@@ -178,19 +218,18 @@
   }
 }
 
-.brand :global(svg) {
-  display: block;
-}
-
 .signInButton:focus-visible,
 .menuButton:focus-visible,
-.navigationLink:focus-visible {
+.navigationLink:focus-visible,
+.brand:focus-visible,
+.mobileLink:focus-visible,
+.mobileSignIn:focus-visible {
   box-shadow: 0 0 0 2px var(--blue-900), 0 0 0 4px var(--yellow-500);
 }
 
-@media (min-width: 900px) and (max-width: 1060px) {
+@media (min-width: 1120px) and (max-width: 1249px) {
   .navigationLink {
-    padding: 10px 10px;
+    padding: 10px 9px;
     font-size: 0.875rem;
   }
 }

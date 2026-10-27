@@ -19,14 +19,19 @@ const monoFont = JetBrains_Mono({ subsets: ["latin"], display: "swap", variable:
 export const metadata: Metadata = {
   title: { absolute: "Nantty Studio: the creator studio for going live" },
   description:
-    "Go live from your phone or OBS, bring up to 10 creators on stage, battle for gifts, run overlays and moderation, and get paid to your bank. Studio is for Nantty Creator Program members: talk, music, gaming, education and IRL.",
+    "A creator home for going live on Nantty, with OBS support, overlays, audience tools and creator analytics. Studio is for Nantty Creator Program members: talk, music, gaming, education and IRL.",
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Nantty Studio",
-    description: "The creator studio for going live on Nantty: phone or OBS, multi-guest battles, gifts, subscriptions and payouts to your bank.",
+    type: "website",
+    locale: "en_NG",
+    siteName: "Nantty Studio",
+    title: "Nantty Studio — the creator studio for going live",
+    description: "A creator home for going live on Nantty, with OBS support, overlays, audience tools and creator analytics.",
+    url: "/",
     images: [{ url: "/photos/creatorMicPortrait.webp", width: 1000, height: 1400, alt: "A creator speaking into a studio microphone" }],
   },
+  twitter: { card: "summary_large_image", title: "Nantty Studio — the creator studio for going live", description: "A creator home for going live on Nantty, with OBS support, overlays, audience tools and creator analytics.", images: ["/photos/creatorMicPortrait.webp"] },
 };
 
 export default function LandingPage() {

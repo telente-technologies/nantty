@@ -8,7 +8,7 @@ import { buildContactMailtoLink, contactEmailDisplayText } from "@/constants/con
 
 import styles from "@/components/auth/loginForm.module.css";
 
-export const metadata: Metadata = { title: "Sign in" };
+export const metadata: Metadata = { title: "Sign in", robots: { index: false, follow: false } };
 
 export default function StudioLoginPage() {
   return (

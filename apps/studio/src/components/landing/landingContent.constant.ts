@@ -1,6 +1,6 @@
 import type { LandingIconName } from "./landingIcons";
 
-export const zudomartMainSiteUrl = process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://nantty.com";
+export const nanttyMainSiteUrl = process.env.NEXT_PUBLIC_MARKETING_SITE_URL ?? "https://nantty.com";
 
 export const landingNavigationLinks = [
   { href: "#go-live", label: "Go live" },
