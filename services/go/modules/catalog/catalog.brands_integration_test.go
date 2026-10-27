@@ -14,7 +14,7 @@ import (
 type fakeSigner struct{}
 
 func (fakeSigner) SignedUrl(_ context.Context, mediaId, _, _ string) (string, time.Time, error) {
-	return "https://private.zudomart.test/" + mediaId, time.Now().Add(10 * time.Minute), nil
+	return "https://private.nantty.test/" + mediaId, time.Now().Add(10 * time.Minute), nil
 }
 
 func TestBrandsCanBeCreatedFollowedAndShopped(t *testing.T) {

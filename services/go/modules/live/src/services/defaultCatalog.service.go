@@ -39,8 +39,8 @@ var defaultGiftSeeds = []seedGift{
 	{"premium", 20, "golden_crown", "Golden Crown", 500, "golden-crown-v1", 4000}, {"premium", 21, "luxury_car", "Luxury Car", 1000, "luxury-car-v1", 4500},
 	{"premium", 22, "private_jet", "Private Jet", 2000, "private-jet-v1", 5000}, {"premium", 23, "treasure_chest", "Treasure Chest", 1500, "treasure-chest-v1", 4500},
 	{"premium", 24, "diamond_shower", "Diamond Shower", 2500, "diamond-shower-v1", 5000}, {"premium", 25, "golden_rain", "Golden Rain", 3000, "golden-rain-v1", 5000},
-	{"premium", 26, "supernova", "Supernova", 4000, "supernova-v1", 5000}, {"legendary", 30, "zudo_galaxy", "Zudo Galaxy", 10000, "zudo-galaxy-v1", 6500},
-	{"legendary", 31, "zudo_king", "Zudo King", 20000, "zudo-king-v1", 7000}, {"legendary", 32, "zudo_empire", "Zudo Empire", 30000, "zudo-empire-v1", 7000},
+	{"premium", 26, "supernova", "Supernova", 4000, "supernova-v1", 5000}, {"legendary", 30, "nantty_galaxy", "Nantty Galaxy", 10000, "nantty-galaxy-v1", 6500},
+	{"legendary", 31, "nantty_king", "Nantty King", 20000, "nantty-king-v1", 7000}, {"legendary", 32, "nantty_empire", "Nantty Empire", 30000, "nantty-empire-v1", 7000},
 }
 
 type seedPointsRule struct {

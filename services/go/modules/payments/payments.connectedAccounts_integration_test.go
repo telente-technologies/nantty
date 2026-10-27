@@ -51,7 +51,7 @@ func TestCheckoutNeedsAReadySellerAndAVerifiedBuyerEmail(t *testing.T) {
 		t.Fatalf("checkout: %d %s", started.Status, started.Raw)
 	}
 	transaction := harness.Flutterwave.TransactionByReference(started.Body["reference"].(string))
-	if transaction == nil || transaction.AmountMinor != 250_000 || transaction.Email != "user-"+buyer[:8]+"@zudomart.test" {
+	if transaction == nil || transaction.AmountMinor != 250_000 || transaction.Email != "user-"+buyer[:8]+"@nantty.test" {
 		t.Fatalf("one hosted Flutterwave checkout for the order, in the buyer's name: %+v", transaction)
 	}
 }

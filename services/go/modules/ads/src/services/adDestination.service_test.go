@@ -12,7 +12,7 @@ import (
 func ptr(value string) *string { return &value }
 
 func installApp() *types.CreativeApp {
-	return &types.CreativeApp{AppName: "Zudo", IosStoreUrl: "https://apps.apple.com/ng/app/zudo/id1", AndroidStoreUrl: "https://play.google.com/store/apps/details?id=com.zudo", WebFallbackUrl: "https://zudo.example/get"}
+	return &types.CreativeApp{AppName: "Nantty", IosStoreUrl: "https://apps.apple.com/ng/app/nantty/id1", AndroidStoreUrl: "https://play.google.com/store/apps/details?id=com.nantty", WebFallbackUrl: "https://nantty.example/get"}
 }
 
 func TestSelectAppLinkByPlatform(t *testing.T) {
@@ -34,18 +34,18 @@ func TestSelectAppLinkByPlatform(t *testing.T) {
 }
 
 func TestStoreUrlAndDeepLinkValidation(t *testing.T) {
-	if !ValidIosStoreUrl("https://apps.apple.com/ng/app/zudo/id1") || ValidIosStoreUrl("https://evil.example/app/x") || ValidIosStoreUrl("http://apps.apple.com/app/x") {
+	if !ValidIosStoreUrl("https://apps.apple.com/ng/app/nantty/id1") || ValidIosStoreUrl("https://evil.example/app/x") || ValidIosStoreUrl("http://apps.apple.com/app/x") {
 		t.Fatal("ios store url validation is wrong")
 	}
-	if !ValidAndroidStoreUrl("https://play.google.com/store/apps/details?id=com.zudo") || ValidAndroidStoreUrl("https://play.google.com/store/apps/details") || ValidAndroidStoreUrl("market://details?id=a") {
+	if !ValidAndroidStoreUrl("https://play.google.com/store/apps/details?id=com.nantty") || ValidAndroidStoreUrl("https://play.google.com/store/apps/details") || ValidAndroidStoreUrl("market://details?id=a") {
 		t.Fatal("android store url validation is wrong")
 	}
-	for _, bad := range []string{"javascript://x", "https://zudo.example", "data://x", "zudo:/x", "zudo://a b"} {
+	for _, bad := range []string{"javascript://x", "https://nantty.example", "data://x", "nantty:/x", "nantty://a b"} {
 		if ValidDeepLink(bad) {
 			t.Fatalf("%q must not be a valid deep link", bad)
 		}
 	}
-	if !ValidDeepLink("zudoapp://open/promo") {
+	if !ValidDeepLink("nanttyapp://open/promo") {
 		t.Fatal("custom scheme deep link should be valid")
 	}
 }
@@ -53,7 +53,7 @@ func TestStoreUrlAndDeepLinkValidation(t *testing.T) {
 func TestResolveClickTargetUsesOnlyApprovedDestinations(t *testing.T) {
 	creative := types.Creative{Type: "single", Destination: types.CreativeDestination{Type: "url", Url: ptr("https://shop.example/p?x=1"), Utm: &types.CreativeUtm{Campaign: "spring"}}}
 	target, err := ResolveClickTarget(creative, 0, "web")
-	if err != nil || !strings.HasPrefix(target, "https://shop.example/p?") || !strings.Contains(target, "utm_campaign=spring") || !strings.Contains(target, "utm_source=zudomart") || !strings.Contains(target, "x=1") {
+	if err != nil || !strings.HasPrefix(target, "https://shop.example/p?") || !strings.Contains(target, "utm_campaign=spring") || !strings.Contains(target, "utm_source=nantty") || !strings.Contains(target, "x=1") {
 		t.Fatalf("unexpected target %q err %v", target, err)
 	}
 	install := types.Creative{Type: "app_install", App: installApp(), Destination: types.CreativeDestination{Type: "app_store"}}
@@ -61,7 +61,7 @@ func TestResolveClickTargetUsesOnlyApprovedDestinations(t *testing.T) {
 		t.Fatalf("android viewer got %q", target)
 	}
 	post := types.Creative{Type: "promoted_post", Destination: types.CreativeDestination{Type: "post", TargetId: ptr("p1")}}
-	if target, _ := ResolveClickTarget(post, 0, "ios"); target != "zudomart://post/p1" {
+	if target, _ := ResolveClickTarget(post, 0, "ios"); target != "nantty://post/p1" {
 		t.Fatalf("promoted post target %q", target)
 	}
 	broken := types.Creative{Destination: types.CreativeDestination{Type: "url", Url: ptr("http://insecure.example")}}
@@ -80,7 +80,7 @@ func TestCarouselClickResolvesPerCardAndRejectsBadIndex(t *testing.T) {
 		{Destination: types.CreativeDestination{Type: "url", Url: ptr("https://a.example/")}},
 		{Destination: types.CreativeDestination{Type: "product", TargetId: ptr("prod-2")}},
 	}}
-	if target, _ := ResolveClickTarget(creative, 1, "web"); target != "zudomart://product/prod-2" {
+	if target, _ := ResolveClickTarget(creative, 1, "web"); target != "nantty://product/prod-2" {
 		t.Fatalf("card 1 target %q", target)
 	}
 	for _, index := range []int{-1, 2, 99} {
@@ -128,12 +128,12 @@ func TestClickTokenCannotBeForgedOrReusedAsImpressionToken(t *testing.T) {
 }
 
 func TestClickTargetsAreOnlyHttpsOrTheAppScheme(t *testing.T) {
-	for _, safe := range []string{"https://shop.example.com/sale?utm_source=zudomart", "zudomart://product/p1", "zudomart://messages"} {
+	for _, safe := range []string{"https://shop.example.com/sale?utm_source=nantty", "nantty://product/p1", "nantty://messages"} {
 		if !IsSafeClickTarget(safe) {
 			t.Fatalf("%q should be allowed", safe)
 		}
 	}
-	for _, unsafe := range []string{"", "http://shop.example.com", "//evil.example.com", "javascript:alert(1)", "https://user:pass@evil.example.com", "zudomart://x\"><script>", "intent://evil"} {
+	for _, unsafe := range []string{"", "http://shop.example.com", "//evil.example.com", "javascript:alert(1)", "https://user:pass@evil.example.com", "nantty://x\"><script>", "intent://evil"} {
 		if IsSafeClickTarget(unsafe) {
 			t.Fatalf("%q must be refused", unsafe)
 		}

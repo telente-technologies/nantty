@@ -24,7 +24,7 @@ func TestDatabaseUrl() string {
 	if configured := os.Getenv("MONEY_TEST_DATABASE_URL"); configured != "" {
 		return configured
 	}
-	return "postgres://zudomart:zudomart@localhost:15432/zudomart_test?sslmode=disable"
+	return "postgres://nantty:nantty@localhost:15432/nantty_test?sslmode=disable"
 }
 
 func OpenTestDatabaseOrSkip(t *testing.T) *sql.DB {

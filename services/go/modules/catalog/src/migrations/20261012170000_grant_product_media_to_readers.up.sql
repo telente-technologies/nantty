@@ -1,1 +1,1 @@
-GRANT SELECT ("product_id", "url", "kind", "position") ON "product_media" TO zudomart_readers;
+GRANT SELECT ("product_id", "url", "kind", "position") ON "product_media" TO nantty_readers;

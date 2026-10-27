@@ -29,7 +29,7 @@ func CoinPackPrices(coins int64, channel string) map[string]int64 {
 }
 
 func DefaultStoreCoinProductId(tier string) string {
-	return "com.zudomart.app.coins.tier" + tier
+	return "com.nantty.app.coins.tier" + tier
 }
 
 type CreatorSubscriptionBand struct {

@@ -40,7 +40,7 @@ func (harness *adminHarness) inviteAndSignIn(inviter *signedInStaff, body map[st
 
 func TestDepartmentTemplatesCustomRolesAndUnionOfPermissions(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	root := harness.signedInSuperadmin("root.rbac@zudomart.com")
+	root := harness.signedInSuperadmin("root.rbac@nantty.com")
 
 	roles := harness.expect("GET", "/api/v1/admin/roles", nil, bearer(root.token), http.StatusOK)["items"].([]any)
 	templates := map[string]string{}
@@ -59,7 +59,7 @@ func TestDepartmentTemplatesCustomRolesAndUnionOfPermissions(t *testing.T) {
 	harness.expect("POST", "/api/v1/admin/roles", map[string]any{"name": "refund desk", "permissions": []string{"orders:read"}, "reason": "duplicate name"}, root.withStepUp(harness), http.StatusConflict)
 
 	staff, created := harness.inviteAndSignIn(root, map[string]any{
-		"email": "multi@zudomart.com", "name": "Multi Role", "role": "ADMIN", "roleIds": []string{templates["Support"], custom["id"].(string)}, "permissions": []string{"audit:read"}, "reason": "joins support and refunds",
+		"email": "multi@nantty.com", "name": "Multi Role", "role": "ADMIN", "roleIds": []string{templates["Support"], custom["id"].(string)}, "permissions": []string{"audit:read"}, "reason": "joins support and refunds",
 	})
 	view := created["admin"].(map[string]any)
 	permissions := map[string]bool{}
@@ -80,22 +80,22 @@ func TestDepartmentTemplatesCustomRolesAndUnionOfPermissions(t *testing.T) {
 
 	if audit := harness.expect("GET", "/api/v1/admin/audit?action=admin.created", nil, bearer(staff.token), http.StatusOK)["data"].([]any); len(audit) != 1 {
 		t.Fatalf("unexpected audit %v", audit)
-	} else if entry := audit[0].(map[string]any); entry["actor"].(map[string]any)["name"] != "Root" || entry["reason"] != "joins support and refunds" || entry["target"].(map[string]any)["label"] != "multi@zudomart.com" || entry["stepUpVerified"] != true {
+	} else if entry := audit[0].(map[string]any); entry["actor"].(map[string]any)["name"] != "Root" || entry["reason"] != "joins support and refunds" || entry["target"].(map[string]any)["label"] != "multi@nantty.com" || entry["stepUpVerified"] != true {
 		t.Fatalf("every audit entry carries the staff name, target, reason and step-up flag: %v", entry)
 	}
 }
 
 func TestAdminsCannotGrantWhatTheyLackOrTouchSuperadmins(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	root := harness.signedInSuperadmin("root.guard@zudomart.com")
-	manager, _ := harness.inviteAndSignIn(root, map[string]any{"email": "manager@zudomart.com", "name": "Manager", "role": "ADMIN", "permissions": []string{"staff:manage", "audit:read"}, "reason": "staff manager"})
+	root := harness.signedInSuperadmin("root.guard@nantty.com")
+	manager, _ := harness.inviteAndSignIn(root, map[string]any{"email": "manager@nantty.com", "name": "Manager", "role": "ADMIN", "permissions": []string{"staff:manage", "audit:read"}, "reason": "staff manager"})
 
-	unheld := harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "greedy@zudomart.com", "name": "Greedy", "role": "ADMIN", "permissions": []string{"ledger:read"}, "reason": "needs ledger"}, manager.withStepUp(harness), http.StatusForbidden)
+	unheld := harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "greedy@nantty.com", "name": "Greedy", "role": "ADMIN", "permissions": []string{"ledger:read"}, "reason": "needs ledger"}, manager.withStepUp(harness), http.StatusForbidden)
 	if unheld["code"] != "CANNOT_GRANT_UNHELD_PERMISSION" {
 		t.Fatalf("unexpected %v", unheld)
 	}
-	harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "ok.grant@zudomart.com", "name": "Fine", "role": "SUPPORT", "permissions": []string{"audit:read"}, "reason": "audit access only"}, manager.withStepUp(harness), http.StatusCreated)
-	noSuper := harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "boss@zudomart.com", "name": "Boss", "role": "SUPERADMIN", "reason": "wants to be boss"}, manager.withStepUp(harness), http.StatusForbidden)
+	harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "ok.grant@nantty.com", "name": "Fine", "role": "SUPPORT", "permissions": []string{"audit:read"}, "reason": "audit access only"}, manager.withStepUp(harness), http.StatusCreated)
+	noSuper := harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "boss@nantty.com", "name": "Boss", "role": "SUPERADMIN", "reason": "wants to be boss"}, manager.withStepUp(harness), http.StatusForbidden)
 	if noSuper["code"] != "ADMINS_CANNOT_CREATE_SUPERADMINS" {
 		t.Fatalf("unexpected %v", noSuper)
 	}
@@ -104,22 +104,22 @@ func TestAdminsCannotGrantWhatTheyLackOrTouchSuperadmins(t *testing.T) {
 		t.Fatalf("unexpected %v", noEdit)
 	}
 	harness.expect("POST", "/api/v1/admin/admins/"+root.id+"/suspend", map[string]string{"reason": "cut off the boss"}, manager.withStepUp(harness), http.StatusForbidden)
-	harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "bad@zudomart.com", "name": "Bad", "role": "ADMIN", "permissions": []string{"not:a-permission"}, "reason": "unknown key"}, manager.withStepUp(harness), http.StatusBadRequest)
+	harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "bad@nantty.com", "name": "Bad", "role": "ADMIN", "permissions": []string{"not:a-permission"}, "reason": "unknown key"}, manager.withStepUp(harness), http.StatusBadRequest)
 }
 
 func TestSecondSuperadminApprovalSettingAndSessionKilling(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	root := harness.signedInSuperadmin("root.second@zudomart.com")
-	manager, _ := harness.inviteAndSignIn(root, map[string]any{"email": "manager.second@zudomart.com", "name": "Manager", "role": "ADMIN", "permissions": []string{"staff:manage"}, "reason": "staff manager"})
+	root := harness.signedInSuperadmin("root.second@nantty.com")
+	manager, _ := harness.inviteAndSignIn(root, map[string]any{"email": "manager.second@nantty.com", "name": "Manager", "role": "ADMIN", "permissions": []string{"staff:manage"}, "reason": "staff manager"})
 	if settings := harness.expect("GET", "/api/v1/admin/staff-settings", nil, bearer(root.token), http.StatusOK); settings["requireSecondSuperadminApproval"] != true {
 		t.Fatalf("the second superadmin approval defaults to on: %v", settings)
 	}
-	pending := harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "second.super@zudomart.com", "name": "Second", "role": "SUPERADMIN", "reason": "second superadmin"}, root.withStepUp(harness), http.StatusCreated)
+	pending := harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "second.super@nantty.com", "name": "Second", "role": "SUPERADMIN", "reason": "second superadmin"}, root.withStepUp(harness), http.StatusCreated)
 	if pending["admin"].(map[string]any)["status"] != "PENDING_APPROVAL" || pending["invitationSentTo"] != nil {
 		t.Fatalf("a new superadmin waits for approval: %v", pending)
 	}
 	pendingId := pending["admin"].(map[string]any)["id"].(string)
-	harness.expect("POST", "/api/v1/admin/auth/login", map[string]string{"email": "second.super@zudomart.com", "password": adminPassword}, nil, http.StatusUnauthorized)
+	harness.expect("POST", "/api/v1/admin/auth/login", map[string]string{"email": "second.super@nantty.com", "password": adminPassword}, nil, http.StatusUnauthorized)
 	harness.expect("POST", "/api/v1/admin/admins/"+pendingId+"/approve", map[string]string{"reason": "a manager cannot approve"}, manager.withStepUp(harness), http.StatusForbidden)
 	harness.expect("PUT", "/api/v1/admin/staff-settings", map[string]any{"requireSecondSuperadminApproval": false, "reason": "a manager cannot change this"}, manager.withStepUp(harness), http.StatusForbidden)
 	same := harness.expect("POST", "/api/v1/admin/admins/"+pendingId+"/approve", map[string]string{"reason": "approving my own request"}, root.withStepUp(harness), http.StatusConflict)
@@ -127,9 +127,9 @@ func TestSecondSuperadminApprovalSettingAndSessionKilling(t *testing.T) {
 		t.Fatalf("unexpected %v", same)
 	}
 
-	harness.bootstrapSuperadmin("other.root@zudomart.com")
-	otherSession, otherSecret := harness.enrollAndSignIn("other.root@zudomart.com", strongPassword)
-	other := &signedInStaff{token: harness.signInWithMfa("other.root@zudomart.com", strongPassword, otherSecret, 0)["accessToken"].(string), secret: otherSecret, id: otherSession["staff"].(map[string]any)["id"].(string)}
+	harness.bootstrapSuperadmin("other.root@nantty.com")
+	otherSession, otherSecret := harness.enrollAndSignIn("other.root@nantty.com", strongPassword)
+	other := &signedInStaff{token: harness.signInWithMfa("other.root@nantty.com", strongPassword, otherSecret, 0)["accessToken"].(string), secret: otherSecret, id: otherSession["staff"].(map[string]any)["id"].(string)}
 	approved := harness.expect("POST", "/api/v1/admin/admins/"+pendingId+"/approve", map[string]string{"reason": "verified in person"}, other.withStepUp(harness), http.StatusOK)
 	if approved["admin"].(map[string]any)["status"] != "INVITED" || approved["admin"].(map[string]any)["approvedByName"] == nil {
 		t.Fatalf("unexpected %v", approved)
@@ -137,12 +137,12 @@ func TestSecondSuperadminApprovalSettingAndSessionKilling(t *testing.T) {
 	harness.expect("POST", "/api/v1/admin/admins/"+pendingId+"/approve", map[string]string{"reason": "approving a second time"}, other.withStepUp(harness), http.StatusConflict)
 	harness.expect("PUT", "/api/v1/admin/staff-settings", map[string]any{"requireSecondSuperadminApproval": false, "reason": "small team"}, bearer(root.token), http.StatusForbidden)
 	harness.expect("PUT", "/api/v1/admin/staff-settings", map[string]any{"requireSecondSuperadminApproval": false, "reason": "small team"}, root.withStepUp(harness), http.StatusOK)
-	direct := harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "direct.super@zudomart.com", "name": "Direct", "role": "SUPERADMIN", "reason": "no approval needed now"}, root.withStepUp(harness), http.StatusCreated)
+	direct := harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "direct.super@nantty.com", "name": "Direct", "role": "SUPERADMIN", "reason": "no approval needed now"}, root.withStepUp(harness), http.StatusCreated)
 	if direct["admin"].(map[string]any)["status"] != "INVITED" {
 		t.Fatalf("with the setting off a superadmin is invited at once: %v", direct)
 	}
 
-	victim, _ := harness.inviteAndSignIn(root, map[string]any{"email": "victim@zudomart.com", "name": "Victim", "role": "SUPPORT", "permissions": []string{"audit:read"}, "reason": "support agent"})
+	victim, _ := harness.inviteAndSignIn(root, map[string]any{"email": "victim@nantty.com", "name": "Victim", "role": "SUPPORT", "permissions": []string{"audit:read"}, "reason": "support agent"})
 	harness.expect("GET", "/api/v1/admin/audit", nil, bearer(victim.token), http.StatusOK)
 	suspended := harness.expect("POST", "/api/v1/admin/admins/"+victim.id+"/suspend", map[string]string{"reason": "investigating misuse"}, root.withStepUp(harness), http.StatusOK)
 	if suspended["admin"].(map[string]any)["status"] != "SUSPENDED" {
@@ -164,7 +164,7 @@ func TestSecondSuperadminApprovalSettingAndSessionKilling(t *testing.T) {
 
 func TestAuditCsvExportNeutralisesFormulasAndIsItselfAudited(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	root := harness.signedInSuperadmin("root.csv@zudomart.com")
+	root := harness.signedInSuperadmin("root.csv@nantty.com")
 	harness.expect("POST", "/api/v1/admin/roles", map[string]any{"name": "Formula role", "permissions": []string{"orders:read"}, "reason": "=HYPERLINK(\"http://evil\")"}, root.withStepUp(harness), http.StatusCreated)
 	export := harness.call("GET", "/api/v1/admin/audit/export?format=csv&action=role.created", nil, bearer(root.token))
 	if export.status != http.StatusOK || !strings.Contains(string(export.raw), "'=HYPERLINK") || strings.Contains(string(export.raw), ",=HYPERLINK") {

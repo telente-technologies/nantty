@@ -57,7 +57,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (dtos.LiveNowWi
 		host := participants[row.HostID]
 		payload.Lives = append(payload.Lives, dtos.LiveNowWidgetItem{
 			Id: row.ID.String(), HostId: row.HostID.String(), HostName: host.Name, HostUsername: host.Username, HostAvatarUrl: host.AvatarUrl,
-			Title: row.Title, Viewers: row.Viewers, StartedAt: widgets.FormatWidgetTime(row.StartedAt), DeepLink: "zudomart://live/" + row.ID.String(),
+			Title: row.Title, Viewers: row.Viewers, StartedAt: widgets.FormatWidgetTime(row.StartedAt), DeepLink: "nantty://live/" + row.ID.String(),
 		})
 	}
 	return payload, nil

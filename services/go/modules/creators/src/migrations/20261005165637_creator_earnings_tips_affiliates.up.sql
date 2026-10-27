@@ -41,4 +41,4 @@ CREATE INDEX "tiptransaction_creator_user_id_created_at" ON "tip_transactions" (
 -- create index "tiptransaction_sender_user_id_idempotency_key" to table: "tip_transactions"
 CREATE UNIQUE INDEX "tiptransaction_sender_user_id_idempotency_key" ON "tip_transactions" ("sender_user_id", "idempotency_key");
 -- let identity read violation history for eligibility
-GRANT SELECT ("user_id", "created_at") ON "creator_violations" TO zudomart_readers;
+GRANT SELECT ("user_id", "created_at") ON "creator_violations" TO nantty_readers;

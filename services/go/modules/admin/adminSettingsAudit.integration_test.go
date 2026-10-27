@@ -41,7 +41,7 @@ func (harness *adminHarness) signedInSuperadminWithStepUp(email string) (accessT
 
 func TestSettingsWritesNeedStepUpVersionAndValidValues(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("config@zudomart.com")
+	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("config@nantty.com")
 
 	listed := harness.expect("GET", "/api/v1/admin/config", nil, bearer(accessToken), http.StatusOK)
 	listedKeys := map[string]bool{}
@@ -123,7 +123,7 @@ func TestPublicAndInternalSettingReads(t *testing.T) {
 
 func TestAuditLogIsWrittenSearchableAndExportable(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("auditor@zudomart.com")
+	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("auditor@nantty.com")
 	harness.expect("PUT", "/api/v1/admin/config/creator.requirements", map[string]any{
 		"value":           map[string]any{"minimumFollowers": 50, "minimumAccountAgeDays": 7, "minimumOriginalPosts": 1, "maximumRecentStrikes": 0, "strikeLookbackDays": 30, "requireVerifiedEmail": true},
 		"expectedVersion": 1, "reason": "lower the bar for launch",
@@ -190,7 +190,7 @@ func TestAuditLogIsWrittenSearchableAndExportable(t *testing.T) {
 
 func TestMoneyLimitSettingsNeedStepUpAndAreValidatedOnSave(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("limits@zudomart.com")
+	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("limits@nantty.com")
 	path := "/api/v1/admin/config/seller.debtLimits"
 	current := harness.expect("GET", path, nil, bearer(accessToken), http.StatusOK)
 	raised := map[string]any{"baseMinor": map[string]any{"unverified": 2_000_000, "payoutVerified": 5_000_000, "identityVerified": 20_000_000}, "outsideNigeriaPercent": 50, "trustedSellerAgeDays": 90, "trustedSellerCleanDays": 90, "currencyOverridesMinor": map[string]any{}}

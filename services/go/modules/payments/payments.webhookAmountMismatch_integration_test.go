@@ -18,7 +18,7 @@ func TestAnUnderpaidChargeWebhookIsDeadLetteredForFinanceInsteadOfMarkedProcesse
 	skipIntegrationWhenShort(t)
 	harness := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
 	token := harness.Tokens.UserAccessToken(uuid.NewString())
-	reference := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", token, "", map[string]any{"returnTo": "https://zudomart.test/pay/return"}).Body["reference"].(string)
+	reference := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", token, "", map[string]any{"returnTo": "https://nantty.test/pay/return"}).Body["reference"].(string)
 	alertsBefore := services.PaymentAlertCount("webhookDeadLettered")
 	underpaid := harness.Flutterwave.SeedSuccessfulCharge(reference, 4_000, "NGN")
 	body, headers := harness.Flutterwave.ChargeWebhook(underpaid)

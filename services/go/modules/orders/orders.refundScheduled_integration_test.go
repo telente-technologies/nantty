@@ -23,7 +23,7 @@ func TestARefundScheduledByEscrowIsShownAsScheduledAndCompletesOnTheRefundEvent(
 		t.Fatalf("issue: %d %v", status, created)
 	}
 	data, _ := json.Marshal(map[string]any{"escrowId": uuid.NewString(), "orderId": orderId.String(), "status": "held", "pendingRefund": map[string]any{"id": uuid.NewString(), "amountMinor": 120_000, "currency": "NGN", "full": false}})
-	envelope, _ := json.Marshal(map[string]any{"id": uuid.NewString(), "type": "escrow.refundScheduled", "source": "zudomart.escrow", "subject": orderId.String(), "schemaVersion": 1, "occurredAt": "2026-10-12T10:00:00Z", "data": json.RawMessage(data)})
+	envelope, _ := json.Marshal(map[string]any{"id": uuid.NewString(), "type": "escrow.refundScheduled", "source": "nantty.escrow", "subject": orderId.String(), "schemaVersion": 1, "occurredAt": "2026-10-12T10:00:00Z", "data": json.RawMessage(data)})
 	handler := services.MoneyEventHandler{Container: harness.module.Container}
 	ctx := context.Background()
 	for range 2 {

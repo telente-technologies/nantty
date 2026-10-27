@@ -1,1 +1,1 @@
-GRANT SELECT ("id") ON "account_suspensions" TO zudomart_readers;
+GRANT SELECT ("id") ON "account_suspensions" TO nantty_readers;

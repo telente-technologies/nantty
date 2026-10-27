@@ -1,1 +1,1 @@
-REVOKE SELECT ("id", "status") ON "order_groups" FROM zudomart_readers;
+REVOKE SELECT ("id", "status") ON "order_groups" FROM nantty_readers;

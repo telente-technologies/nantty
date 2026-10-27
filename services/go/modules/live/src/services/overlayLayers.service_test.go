@@ -14,7 +14,7 @@ func validLayer(identifier string) types.OverlayLayer {
 }
 
 func TestValidateOverlayLayersAcceptsAWellFormedScene(t *testing.T) {
-	source := "https://cdn.zudomart.com/logo.png"
+	source := "https://cdn.nantty.com/logo.png"
 	logo := validLayer("logo")
 	logo.Type, logo.Src = "image", &source
 	if err := ValidateOverlayLayers([]types.OverlayLayer{validLayer("a"), logo}); err != nil {

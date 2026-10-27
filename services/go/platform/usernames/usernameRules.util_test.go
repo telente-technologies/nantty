@@ -27,7 +27,7 @@ func TestNormalizeAndFormat(t *testing.T) {
 
 func TestReservedAndConfusableNamesAreBlocked(t *testing.T) {
 	rules := SystemReservedRules()
-	blocked := []string{"admin", "admin_ng", "zudomart", "my.zudomart.shop", "paypa1", "g00gle", "googlehq", "official.google", "supp0rt", "rnicrosoft", "Zud0mart"}
+	blocked := []string{"admin", "admin_ng", "nantty", "my.nantty.shop", "paypa1", "g00gle", "googlehq", "official.google", "supp0rt", "rnicrosoft", "Zud0mart"}
 	for _, name := range blocked {
 		if _, found := FindMatchingReservedRule(NormalizeRequestedUsername(name), rules); !found {
 			t.Errorf("%q should be blocked", name)

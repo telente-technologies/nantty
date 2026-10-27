@@ -100,6 +100,6 @@ func TestAnniversarySchedulerEmitsTheEmailEventOncePerYear(t *testing.T) {
 	}
 	view := harness.expect("GET", "/api/v1/users/me/celebrations", token, nil, http.StatusOK)
 	if anniversary := view["anniversary"].(map[string]any); anniversary["today"] != true || anniversary["years"].(float64) != 2 {
-		t.Fatalf("second zudoversary: %v", anniversary)
+		t.Fatalf("second nanttyversary: %v", anniversary)
 	}
 }

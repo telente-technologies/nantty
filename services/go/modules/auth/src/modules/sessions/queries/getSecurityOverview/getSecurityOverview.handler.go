@@ -45,7 +45,7 @@ func (application Handler) Execute(ctx context.Context, query Query) (SecurityOv
 
 func DescribeUserAgent(userAgent string) (string, string) {
 	lowered := strings.ToLower(userAgent)
-	if strings.Contains(lowered, "zudomart") || strings.Contains(lowered, "nantty") || strings.Contains(lowered, "okhttp") || strings.Contains(lowered, "cfnetwork") || strings.Contains(lowered, "expo") {
+	if strings.Contains(lowered, "nantty") || strings.Contains(lowered, "nantty") || strings.Contains(lowered, "okhttp") || strings.Contains(lowered, "cfnetwork") || strings.Contains(lowered, "expo") {
 		platform := "phone"
 		if strings.Contains(lowered, "iphone") || strings.Contains(lowered, "ios") || strings.Contains(lowered, "cfnetwork") {
 			platform = "iPhone"

@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	FakeIssuer          = "https://auth.zudomart.test"
-	FakeAccountAudience = "zudomart-api"
+	FakeIssuer          = "https://auth.nantty.test"
+	FakeAccountAudience = "nantty-api"
 )
 
 type FakeTokenService struct {
@@ -92,7 +92,7 @@ func (service *FakeTokenService) SignAccountTokensWithStepUpForTest(t testing.TB
 	if err != nil {
 		t.Fatal(err)
 	}
-	stepUpToken, err = service.sign("zudomart-user-step-up", accountId, sessionId, []string{"buyer"}, 5*time.Minute)
+	stepUpToken, err = service.sign("nantty-user-step-up", accountId, sessionId, []string{"buyer"}, 5*time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}

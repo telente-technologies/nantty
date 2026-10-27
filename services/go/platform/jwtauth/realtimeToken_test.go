@@ -12,7 +12,7 @@ import (
 func TestRealtimeTokenIsRejectedByEveryHttpEndpoint(t *testing.T) {
 	verifier, key, _ := widgetFixture(t)
 	realtime := signWidgetTestToken(t, key, RealtimeTokenAudience, RealtimeTokenScope, "rt-1", "session-1", time.Now().Add(time.Minute))
-	sameAudienceScoped := signWidgetTestToken(t, key, "zudomart-api", RealtimeTokenScope, "rt-2", "session-1", time.Now().Add(time.Minute))
+	sameAudienceScoped := signWidgetTestToken(t, key, "nantty-api", RealtimeTokenScope, "rt-2", "session-1", time.Now().Add(time.Minute))
 	for name, token := range map[string]string{"realtime audience": realtime, "access audience with a scope claim": sameAudienceScoped} {
 		t.Run(name, func(t *testing.T) {
 			if _, err := verifier.VerifyAccessTokenAndExtractPrincipal(context.Background(), token); !errors.Is(err, ErrInvalidAccessToken) {

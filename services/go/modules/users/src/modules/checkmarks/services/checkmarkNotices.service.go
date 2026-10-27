@@ -8,7 +8,7 @@ import (
 	"nantty/modules/users/src/generated/ent"
 )
 
-const checkmarkAppealUrl = "https://zudomart.com/settings/verification"
+const checkmarkAppealUrl = "https://nantty.com/settings/verification"
 
 type CheckmarkNotice struct {
 	AccountId        string   `json:"accountId"`

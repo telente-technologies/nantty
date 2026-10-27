@@ -15,7 +15,7 @@ func TestAdsServiceStartsAndTracksAccountTopUpsThroughTheInternalApi(t *testing.
 	harness := startWalletHarness(t, true)
 	member, adAccount := uuid.NewString(), "acct-"+uuid.NewString()[:8]
 	internal := http.Header{"X-Internal-Token": {strings.Repeat("w", 32)}}
-	body := map[string]any{"userId": member, "amount": map[string]any{"amountMinor": 500_000, "currency": "NGN"}, "returnTo": "https://zudomart.test/pay/return"}
+	body := map[string]any{"userId": member, "amount": map[string]any{"amountMinor": 500_000, "currency": "NGN"}, "returnTo": "https://nantty.test/pay/return"}
 	path := "/api/v1/internal/ads/accounts/" + adAccount + "/top-ups"
 	if forged := harness.Call(http.MethodPost, path, "", "ads-top-up-0001", body); forged.Status != http.StatusUnauthorized {
 		t.Fatalf("top-up without the internal token: %d", forged.Status)

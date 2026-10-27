@@ -121,19 +121,19 @@ func TestCreatorSubscriptionBoughtInTheAppStoreRenewsAndClawsBackOnRefund(t *tes
 	}
 	intent := start(creator, planId, "k1")
 	subscriptionId := intent["subscriptionId"].(string)
-	if intent["productId"] != "zudomart.creatorsub.tier_1000.s1.monthly" || intent["appAccountToken"] != subscriptionId || start(creator, planId, "k1")["subscriptionId"] != subscriptionId {
+	if intent["productId"] != "nantty.creatorsub.tier_1000.s1.monthly" || intent["appAccountToken"] != subscriptionId || start(creator, planId, "k1")["subscriptionId"] != subscriptionId {
 		t.Fatalf("intent %v", intent)
 	}
 
 	periodEnd := harness.clock.AddDate(0, 1, 0).Truncate(time.Second)
 	apple.remember("receipt-1", interfaces.VerifiedStorePurchase{
-		StoreTransactionId: "t1", OriginalTransactionId: "o1", ProductId: "zudomart.creatorsub.tier_1000.s1.monthly", PriceMinor: 150_000, Currency: "NGN",
+		StoreTransactionId: "t1", OriginalTransactionId: "o1", ProductId: "nantty.creatorsub.tier_1000.s1.monthly", PriceMinor: 150_000, Currency: "NGN",
 		Environment: "sandbox", PurchasedAt: harness.clock, ExpiresAt: &periodEnd, IsSubscription: true, AccountToken: subscriptionId,
 	})
 	redeem := func(key string) map[string]any {
 		key = "receipt-" + key
 		response := harness.Call(http.MethodPost, "/api/v1/creator-subscriptions/store-receipts", fanToken, key,
-			map[string]any{"platform": "ios", "productId": "zudomart.creatorsub.tier_1000.s1.monthly", "receipt": "receipt-1", "transactionId": "t1"})
+			map[string]any{"platform": "ios", "productId": "nantty.creatorsub.tier_1000.s1.monthly", "receipt": "receipt-1", "transactionId": "t1"})
 		if response.Status != http.StatusOK {
 			t.Fatalf("redeem %d %s", response.Status, response.Raw)
 		}
@@ -148,23 +148,23 @@ func TestCreatorSubscriptionBoughtInTheAppStoreRenewsAndClawsBackOnRefund(t *tes
 	}
 	intruder := harness.Tokens.UserAccessToken(uuid.NewString())
 	stolen := harness.Call(http.MethodPost, "/api/v1/creator-subscriptions/store-receipts", intruder, "receipt-intruder",
-		map[string]any{"platform": "ios", "productId": "zudomart.creatorsub.tier_1000.s1.monthly", "receipt": "receipt-1", "transactionId": "t1"})
+		map[string]any{"platform": "ios", "productId": "nantty.creatorsub.tier_1000.s1.monthly", "receipt": "receipt-1", "transactionId": "t1"})
 	if stolen.Status != http.StatusUnprocessableEntity || stolen.Body["code"] != "STORE_PURCHASE_NOT_LINKED" {
 		t.Fatalf("someone else's receipt is refused: %d %s", stolen.Status, stolen.Raw)
 	}
 	pricier := periodEnd
 	apple.remember("receipt-wrong-tier", interfaces.VerifiedStorePurchase{
-		StoreTransactionId: "t-wrong", OriginalTransactionId: "o1", ProductId: "zudomart.creatorsub.tier_500.s1.monthly", PriceMinor: 80_000, Currency: "NGN",
+		StoreTransactionId: "t-wrong", OriginalTransactionId: "o1", ProductId: "nantty.creatorsub.tier_500.s1.monthly", PriceMinor: 80_000, Currency: "NGN",
 		PurchasedAt: harness.clock, ExpiresAt: &pricier, IsSubscription: true, AccountToken: subscriptionId,
 	})
 	if cheaper := harness.Call(http.MethodPost, "/api/v1/creator-subscriptions/store-receipts", fanToken, "receipt-wrong-tier",
-		map[string]any{"platform": "ios", "productId": "zudomart.creatorsub.tier_500.s1.monthly", "receipt": "receipt-wrong-tier"}); cheaper.Body["code"] != "STORE_RECEIPT_MISMATCH" {
+		map[string]any{"platform": "ios", "productId": "nantty.creatorsub.tier_500.s1.monthly", "receipt": "receipt-wrong-tier"}); cheaper.Body["code"] != "STORE_RECEIPT_MISMATCH" {
 		t.Fatalf("a cheaper tier can't unlock this plan: %d %s", cheaper.Status, cheaper.Raw)
 	}
 	if earned := harness.creatorEarnings(creator); earned != 84_000 {
 		t.Fatalf("refused receipts post nothing, got %d", earned)
 	}
-	if second := start(otherCreator, otherPlanId, "k2"); second["productId"] != "zudomart.creatorsub.tier_1000.s2.monthly" {
+	if second := start(otherCreator, otherPlanId, "k2"); second["productId"] != "nantty.creatorsub.tier_1000.s2.monthly" {
 		t.Fatalf("a second creator at the same tier takes the next slot: %v", second)
 	}
 	if cancel := harness.Call(http.MethodPost, "/api/v1/creator-subscriptions/"+subscriptionId+"/cancel", fanToken, "", nil); cancel.Body["code"] != "MANAGE_IN_STORE" {
@@ -172,7 +172,7 @@ func TestCreatorSubscriptionBoughtInTheAppStoreRenewsAndClawsBackOnRefund(t *tes
 	}
 
 	notify := func(notice fakeStoreNotice) {
-		notice.Original, notice.Product = "o1", "zudomart.creatorsub.tier_1000.s1.monthly"
+		notice.Original, notice.Product = "o1", "nantty.creatorsub.tier_1000.s1.monthly"
 		raw, _ := json.Marshal(notice)
 		if response := harness.Call(http.MethodPost, "/webhooks/store-notifications/apple_iap", "", "", raw); response.Status != http.StatusOK {
 			t.Fatalf("notification %s: %d %s", notice.Kind, response.Status, response.Raw)

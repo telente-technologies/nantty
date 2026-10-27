@@ -9,7 +9,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	moneyv1 "nantty/contracts/gen/go/nantty/money/v1"
 	"nantty/modules/creators/src/configs"
 	"nantty/modules/creators/src/container"
 	"nantty/modules/creators/src/migrations"

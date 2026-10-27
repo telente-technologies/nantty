@@ -96,7 +96,7 @@ func (gateway *PaymentGateway) CreatePendingPaymentIntentInTransaction(ctx conte
 	return view, nil
 }
 
-const callbackUrlMetadataKey = "zudomartCallbackUrl"
+const callbackUrlMetadataKey = "nanttyCallbackUrl"
 
 func (gateway *PaymentGateway) OpenProviderCheckoutForIntent(ctx context.Context, intentId uuid.UUID) (models.PaymentIntentView, error) {
 	// A replay can reach here while the first request is still waiting on the provider. Serialize the

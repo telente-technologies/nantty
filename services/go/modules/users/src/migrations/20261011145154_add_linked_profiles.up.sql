@@ -10,4 +10,4 @@ CREATE UNIQUE INDEX "linked_profile_store_or_business" ON "linked_profiles" ("ac
 CREATE INDEX "linkedprofile_account_id_status" ON "linked_profiles" ("account_id", "status");
 -- create index "linkedprofile_kind_profile_id" to table: "linked_profiles"
 CREATE UNIQUE INDEX "linkedprofile_kind_profile_id" ON "linked_profiles" ("kind", "profile_id");
-GRANT SELECT ("publishing_held") ON "profiles" TO zudomart_readers;
+GRANT SELECT ("publishing_held") ON "profiles" TO nantty_readers;

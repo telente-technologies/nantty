@@ -65,9 +65,9 @@ func SignIntelligenceRequest(request *http.Request, path string, body []byte, se
 	mac := hmac.New(sha256.New, []byte(secret))
 	mac.Write([]byte("v1\n" + request.Method + "\n" + path + "\n" + timestamp + "\n" + nonceText + "\n" + hex.EncodeToString(bodyHash[:])))
 	request.Header.Set("content-type", "application/json")
-	request.Header.Set("x-zudo-timestamp", timestamp)
-	request.Header.Set("x-zudo-nonce", nonceText)
-	request.Header.Set("x-zudo-signature", "v1="+hex.EncodeToString(mac.Sum(nil)))
+	request.Header.Set("x-nantty-timestamp", timestamp)
+	request.Header.Set("x-nantty-nonce", nonceText)
+	request.Header.Set("x-nantty-signature", "v1="+hex.EncodeToString(mac.Sum(nil)))
 }
 
 func (advisor IntelligenceAudioMatchAdvisor) MatchCopyrightAudio(ctx context.Context, claimId, referenceMediaId string, targetMediaIds []string) (AudioMatchAdviceResult, error) {

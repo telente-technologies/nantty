@@ -11,8 +11,8 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	commonv1 "nantty/contracts/gen/go/zudomart/common/v1"
-	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	commonv1 "nantty/contracts/gen/go/nantty/common/v1"
+	moneyv1 "nantty/contracts/gen/go/nantty/money/v1"
 	"nantty/modules/escrow/src/generated/ent"
 	"nantty/modules/escrow/src/generated/ent/escrow"
 	"nantty/modules/escrow/src/modules/escrows"
@@ -132,7 +132,7 @@ func convertApiErrorToStatus(err error) error {
 	case http.StatusBadGateway, http.StatusServiceUnavailable:
 		code = codes.Unavailable
 	}
-	detailed, detailError := status.New(code, apiError.Message).WithDetails(&errdetails.ErrorInfo{Reason: apiError.Code, Domain: "money.zudomart.com", Metadata: encodeErrorDetails(apiError.Details)})
+	detailed, detailError := status.New(code, apiError.Message).WithDetails(&errdetails.ErrorInfo{Reason: apiError.Code, Domain: "money.nantty.com", Metadata: encodeErrorDetails(apiError.Details)})
 	if detailError != nil {
 		return status.Error(code, apiError.Message)
 	}

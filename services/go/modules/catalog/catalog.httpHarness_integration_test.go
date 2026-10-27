@@ -92,7 +92,7 @@ func startHttpHarness(t *testing.T) *httpHarness {
 	audit, follows := &fakeAudit{}, &fakeStoreFollows{followers: map[uuid.UUID]int{}}
 	collaborators := src.Collaborators{StoreFollows: follows,
 		Verifier: verifier(identitytest.FakeAccountAudience), Audit: audit, Identity: fakeIdentity{},
-		Staff: container.StaffVerifiers{Access: verifier("zudomart-admin"), StepUp: verifier("zudomart-admin-step-up")},
+		Staff: container.StaffVerifiers{Access: verifier("nantty-admin"), StepUp: verifier("nantty-admin-step-up")},
 	}
 	module := startAgainstFreshSchemaWith(t, collaborators, func(settings *configs.CatalogSettings) { settings.InternalApiToken = harnessInternalToken })
 	directory := &fakeDirectory{profiles: map[uuid.UUID]usersdirectory.ProfileName{}}

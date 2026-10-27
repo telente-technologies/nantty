@@ -21,5 +21,5 @@ CREATE TABLE "creator_subscription_plans" ("id" uuid NOT NULL, "created_at" time
 -- create index "creatorsubscriptionplan_creator_id_created_at" to table: "creator_subscription_plans"
 CREATE INDEX "creatorsubscriptionplan_creator_id_created_at" ON "creator_subscription_plans" ("creator_id", "created_at");
 -- grant subscriber access reads to other services
-DO $$ BEGIN EXECUTE format('GRANT USAGE ON SCHEMA %I TO zudomart_readers', current_schema()); END $$;
-GRANT SELECT ("subscriber_id", "creator_id", "status", "current_period_end") ON "creator_subscriptions" TO zudomart_readers;
+DO $$ BEGIN EXECUTE format('GRANT USAGE ON SCHEMA %I TO nantty_readers', current_schema()); END $$;
+GRANT SELECT ("subscriber_id", "creator_id", "status", "current_period_end") ON "creator_subscriptions" TO nantty_readers;

@@ -1,1 +1,1 @@
-REVOKE SELECT ("email_verified_at") ON "accounts" FROM zudomart_readers;
+REVOKE SELECT ("email_verified_at") ON "accounts" FROM nantty_readers;

@@ -11,8 +11,8 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	commonv1 "nantty/contracts/gen/go/zudomart/common/v1"
-	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	commonv1 "nantty/contracts/gen/go/nantty/common/v1"
+	moneyv1 "nantty/contracts/gen/go/nantty/money/v1"
 	"nantty/modules/wallet/src/modules/adBalances/dtos"
 	"nantty/modules/wallet/src/modules/adBalances/services"
 	"nantty/platform/httpserver"
@@ -81,7 +81,7 @@ func (controller AdsMoneyGrpcController) convertError(ctx context.Context, err e
 }
 
 func statusWithReason(code codes.Code, reason, message string) error {
-	described, err := status.New(code, message).WithDetails(&errdetails.ErrorInfo{Reason: reason, Domain: "money.zudomart.com"})
+	described, err := status.New(code, message).WithDetails(&errdetails.ErrorInfo{Reason: reason, Domain: "money.nantty.com"})
 	if err != nil {
 		return status.Error(code, message)
 	}

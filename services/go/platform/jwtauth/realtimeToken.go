@@ -3,7 +3,7 @@ package jwtauth
 import "time"
 
 const (
-	RealtimeTokenAudience          = "zudomart-realtime"
+	RealtimeTokenAudience          = "nantty-realtime"
 	RealtimeTokenScope             = "realtime"
 	RealtimeTokenDefaultTimeToLive = 90 * time.Second
 	RealtimeTokenMinimumTimeToLive = 30 * time.Second

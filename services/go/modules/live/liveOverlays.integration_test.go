@@ -16,7 +16,7 @@ func toJson(value any) string {
 func sampleLayers() []map[string]any {
 	return []map[string]any{
 		{"id": "layer_a", "type": "text", "name": "Lower third", "x": 64, "y": 900, "width": 720, "height": 96, "zIndex": 10, "opacity": 0.95, "text": "Hello", "fontSize": 44, "color": "#ffffff", "background": "#0b1752", "radius": 8},
-		{"id": "layer_b", "type": "image", "name": "Logo", "x": 1690, "y": 48, "width": 180, "height": 180, "zIndex": 20, "opacity": 1, "src": "https://cdn.zudomart.com/logo.png"},
+		{"id": "layer_b", "type": "image", "name": "Logo", "x": 1690, "y": 48, "width": 180, "height": 180, "zIndex": 20, "opacity": 1, "src": "https://cdn.nantty.com/logo.png"},
 	}
 }
 

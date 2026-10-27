@@ -44,8 +44,8 @@ import (
 )
 
 const (
-	testAudience      = "zudomart-api"
-	testIssuer        = "https://auth.zudomart.test"
+	testAudience      = "nantty-api"
+	testIssuer        = "https://auth.nantty.test"
 	moneyInternalAuth = "internal-test-token-0123456789abcdef"
 )
 
@@ -74,7 +74,7 @@ func TestGiftSentThroughLiveChargesRealMoneyAndWritesBothOutboxRows(t *testing.T
 
 	liveDatabaseUrl := os.Getenv("LIVE_TEST_DATABASE_URL")
 	if liveDatabaseUrl == "" {
-		liveDatabaseUrl = "postgres://zudomart:zudomart@localhost:15432/zudomart_live_test?sslmode=disable"
+		liveDatabaseUrl = "postgres://nantty:nantty@localhost:15432/nantty_live_test?sslmode=disable"
 	}
 	liveAdministrator, err := postgres.OpenDatabaseAndVerifyConnection(ctx, liveDatabaseUrl, postgres.DefaultPoolSettings())
 	if err != nil {

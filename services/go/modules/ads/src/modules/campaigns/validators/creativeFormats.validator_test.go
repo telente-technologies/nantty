@@ -62,9 +62,9 @@ func TestCarouselCardFieldsAreValidated(t *testing.T) {
 }
 
 func appInstall() types.CreativeInput {
-	return types.CreativeInput{Format: "feed_post", Type: "app_install", Source: types.CreativeSource{Type: "upload", Id: "u"}, Headline: "Get Zudo", CallToAction: "install",
+	return types.CreativeInput{Format: "feed_post", Type: "app_install", Source: types.CreativeSource{Type: "upload", Id: "u"}, Headline: "Get Nantty", CallToAction: "install",
 		Destination: types.CreativeDestination{Type: "app_store"},
-		App:         &types.CreativeApp{AppName: "Zudo", IosStoreUrl: "https://apps.apple.com/ng/app/zudo/id1", AndroidStoreUrl: "https://play.google.com/store/apps/details?id=com.zudo", IosDeepLink: "zudo://open"}}
+		App:         &types.CreativeApp{AppName: "Nantty", IosStoreUrl: "https://apps.apple.com/ng/app/nantty/id1", AndroidStoreUrl: "https://play.google.com/store/apps/details?id=com.nantty", IosDeepLink: "nantty://open"}}
 }
 
 func TestAppInstallStoreLinksAreValidated(t *testing.T) {

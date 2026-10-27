@@ -1,8 +1,8 @@
-module zudomart/modules/live
+module nantty/modules/live
 
 go 1.26.7
 
-require zudomart/platform v0.0.0
+require nantty/platform v0.0.0
 
 require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
@@ -32,4 +32,4 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 )
 
-replace zudomart/platform => ../../platform
+replace nantty/platform => ../../platform

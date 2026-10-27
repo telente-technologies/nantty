@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	CreatorStoreProductPrefix = "zudomart.creatorsub."
+	CreatorStoreProductPrefix = "nantty.creatorsub."
 	CreatorStoreSlots         = 5
 	creatorYearlyMonths       = 10
 )

@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	moneyv1 "nantty/contracts/gen/go/nantty/money/v1"
 	"nantty/modules/creators/src/generated/ent/creatorearning"
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )

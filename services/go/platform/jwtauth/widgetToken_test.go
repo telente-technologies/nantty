@@ -52,7 +52,7 @@ func (registry *fakeWidgetRegistry) ForgetWidgetTokens(_ context.Context, sessio
 
 func signWidgetTestToken(t *testing.T, key jwk.Key, audience, scope, tokenId, sessionId string, expiresAt time.Time) string {
 	t.Helper()
-	token, err := jwt.NewBuilder().Issuer("https://auth.zudomart.test").Subject("user-1").Audience([]string{audience}).
+	token, err := jwt.NewBuilder().Issuer("https://auth.nantty.test").Subject("user-1").Audience([]string{audience}).
 		JwtID(tokenId).IssuedAt(time.Now()).Expiration(expiresAt).Claim("sid", sessionId).Claim("scope", scope).Build()
 	if err != nil {
 		t.Fatal(err)
@@ -67,7 +67,7 @@ func signWidgetTestToken(t *testing.T, key jwk.Key, audience, scope, tokenId, se
 func widgetFixture(t *testing.T) (*AccessTokenVerifier, jwk.Key, *fakeWidgetRegistry) {
 	t.Helper()
 	signingKey, publicSet := createSigningKeyAndPublicSet(t, "key-1")
-	verifier := NewAccessTokenVerifierFromKeySetProvider(func(context.Context) (jwk.Set, error) { return publicSet, nil }, "https://auth.zudomart.test", "zudomart-api")
+	verifier := NewAccessTokenVerifierFromKeySetProvider(func(context.Context) (jwk.Set, error) { return publicSet, nil }, "https://auth.nantty.test", "nantty-api")
 	registry := newFakeWidgetRegistry()
 	RegisterSessionDenylist(registry)
 	t.Cleanup(func() { RegisterSessionDenylist(nil) })
@@ -100,7 +100,7 @@ func TestWidgetEndpointAcceptsWidgetAndSessionTokens(t *testing.T) {
 		wantScope string
 	}{
 		"widget token":  {signWidgetTestToken(t, key, WidgetTokenAudience, WidgetTokenScope, "widget-1", "session-1", time.Now().Add(time.Hour)), WidgetPrincipalScope},
-		"session token": {signTestToken(t, key, "zudomart-api", time.Now().Add(time.Minute), "session-1"), ""},
+		"session token": {signTestToken(t, key, "nantty-api", time.Now().Add(time.Minute), "session-1"), ""},
 	}
 	for name, testCase := range cases {
 		t.Run(name, func(t *testing.T) {

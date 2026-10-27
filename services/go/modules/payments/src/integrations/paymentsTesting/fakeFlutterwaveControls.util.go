@@ -18,7 +18,7 @@ func (fake *FakeFlutterwave) BaseUrl() string { return fake.Server.URL + "/v3" }
 func (fake *FakeFlutterwave) Settings() integrations.FlutterwaveSettings {
 	return integrations.FlutterwaveSettings{
 		BaseUrl: fake.BaseUrl(), SecretKey: FakeFlutterwaveSecretKey, WebhookHash: FakeFlutterwaveWebhookHash, MerchantId: FakeFlutterwaveMerchantId,
-		MaximumAttempts: 3, RenewalRedirectUrl: "https://zudomart.test/pay/return", CheckoutTitle: "Zudomart",
+		MaximumAttempts: 3, RenewalRedirectUrl: "https://nantty.test/pay/return", CheckoutTitle: "Nantty",
 	}
 }
 

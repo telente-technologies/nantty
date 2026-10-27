@@ -39,7 +39,7 @@ func ReadIdentityVerificationSettingsFromEnvironment(reader *platformconfig.Envi
 		SmileIdEnvironment:        environment,
 		SmileIdCallbackUrl:        reader.ReadStringOrDefault("SMILE_ID_CALLBACK_URL", ""),
 		SmileIdBaseUrl:            reader.ReadStringOrDefault("SMILE_ID_BASE_URL", baseUrl),
-		PrivacyPolicyUrl:          reader.ReadStringOrDefault("VERIFICATION_PRIVACY_POLICY_URL", "https://zudomart.com/legal/privacy"),
+		PrivacyPolicyUrl:          reader.ReadStringOrDefault("VERIFICATION_PRIVACY_POLICY_URL", "https://nantty.com/legal/privacy"),
 		ConsentVersion:            reader.ReadStringOrDefault("VERIFICATION_BIOMETRIC_CONSENT_VERSION", "2026-10-04"),
 		DocumentFingerprintKey:    reader.ReadStringOrDefault("VERIFICATION_DOCUMENT_FINGERPRINT_KEY", ""),
 		IntelligenceUrl:           reader.ReadStringOrDefault("INTELLIGENCE_URL", ""),
@@ -47,6 +47,6 @@ func ReadIdentityVerificationSettingsFromEnvironment(reader *platformconfig.Envi
 		IntelligenceTimeout:       reader.ReadDurationOrDefault("USERS_INTELLIGENCE_TIMEOUT", 2*time.Second),
 		EligibilityRecheckEvery:   reader.ReadDurationOrDefault("VERIFICATION_ELIGIBILITY_RECHECK_EVERY", 24*time.Hour),
 		EligibilityWorkerInterval: reader.ReadDurationOrDefault("VERIFICATION_ELIGIBILITY_WORKER_INTERVAL", time.Hour),
-		WebAppBaseUrl:             reader.ReadStringOrDefault("WEB_APP_BASE_URL", "https://zudomart.com"),
+		WebAppBaseUrl:             reader.ReadStringOrDefault("WEB_APP_BASE_URL", "https://nantty.com"),
 	}
 }

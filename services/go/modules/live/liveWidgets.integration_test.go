@@ -47,7 +47,7 @@ func TestLiveNowWidgetListsOnlyFollowedHostsTheViewerMayWatch(t *testing.T) {
 		t.Fatalf("expected only the followed, unblocked, watchable live, got %v", lives)
 	}
 	entry := lives[0].(map[string]any)
-	if entry["id"] != followedLive || entry["hostId"] != followed.id.String() || entry["deepLink"] != "zudomart://live/"+followedLive {
+	if entry["id"] != followedLive || entry["hostId"] != followed.id.String() || entry["deepLink"] != "nantty://live/"+followedLive {
 		t.Fatalf("unexpected widget entry %v", entry)
 	}
 	harness.expect("GET", "/api/v1/widgets/live-now", &viewer, "", nil, http.StatusOK)

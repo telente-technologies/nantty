@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	AccessAudience   = "zudomart-admin"
-	StepUpAudience   = "zudomart-admin-step-up"
+	AccessAudience   = "nantty-admin"
+	StepUpAudience   = "nantty-admin-step-up"
 	StepUpHeader     = "X-Step-Up-Token"
 	SuperadminRole   = "superadmin"
 	AdminRole        = "admin"

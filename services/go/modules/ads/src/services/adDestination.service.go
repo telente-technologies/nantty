@@ -99,7 +99,7 @@ func ApplyUtm(raw string, utm *types.CreativeUtm) (string, error) {
 			query.Set(key, value)
 		}
 	}
-	set("utm_source", utm.Source, "zudomart")
+	set("utm_source", utm.Source, "nantty")
 	set("utm_medium", utm.Medium, "paid")
 	set("utm_campaign", utm.Campaign, "")
 	set("utm_content", utm.Content, "")
@@ -142,10 +142,10 @@ func internalLink(destination types.CreativeDestination) (string, bool) {
 	switch destination.Type {
 	case "post", "product", "store", "profile":
 		if destination.TargetId != nil && *destination.TargetId != "" {
-			return "zudomart://" + destination.Type + "/" + url.PathEscape(*destination.TargetId), true
+			return "nantty://" + destination.Type + "/" + url.PathEscape(*destination.TargetId), true
 		}
 	case "messages":
-		return "zudomart://messages", true
+		return "nantty://messages", true
 	}
 	return "", false
 }
@@ -168,7 +168,7 @@ func resolveDestination(destination types.CreativeDestination, app *types.Creati
 }
 
 func IsSafeClickTarget(target string) bool {
-	if strings.HasPrefix(target, "zudomart://") {
+	if strings.HasPrefix(target, "nantty://") {
 		return deepLinkPattern.MatchString(target)
 	}
 	_, ok := ValidateHttpsUrl(target)

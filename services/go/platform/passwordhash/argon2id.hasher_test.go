@@ -38,7 +38,7 @@ func TestTheTimingDummyIsRandomPerProcessAndMatchesNoGuessablePassword(t *testin
 	if first.dummyPasswordHash == "" || first.dummyPasswordHash == second.dummyPasswordHash {
 		t.Fatal("each hasher needs its own random dummy hash")
 	}
-	if matches, _ := first.VerifyPasswordAgainstArgon2idHash("zudomart-timing-equaliser-1", first.dummyPasswordHash); matches {
+	if matches, _ := first.VerifyPasswordAgainstArgon2idHash("nantty-timing-equaliser-1", first.dummyPasswordHash); matches {
 		t.Fatal("the old published dummy password must not match")
 	}
 }

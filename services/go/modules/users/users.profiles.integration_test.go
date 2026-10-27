@@ -28,7 +28,7 @@ func TestProfileLifecyclePrivacyAndMedia(t *testing.T) {
 	updated := harness.expect("PATCH", "/api/v1/users/me", adaToken, map[string]any{
 		"name": "Ada King", "bio": "First programmer", "isPrivate": true, "avatarMediaId": mediaId, "bannerUrl": "https://cdn.example.com/banner.png",
 	}, http.StatusOK)
-	if updated["name"] != "Ada King" || updated["isPrivate"] != true || updated["avatarUrl"] != "https://media.zudomart.test/"+mediaId || updated["bannerUrl"] != "https://cdn.example.com/banner.png" {
+	if updated["name"] != "Ada King" || updated["isPrivate"] != true || updated["avatarUrl"] != "https://media.nantty.test/"+mediaId || updated["bannerUrl"] != "https://cdn.example.com/banner.png" {
 		t.Fatalf("unexpected update %v", updated)
 	}
 	harness.expect("PATCH", "/api/v1/users/me", adaToken, map[string]any{"avatarMediaId": "users/someone-else/avatar/x.png"}, http.StatusUnprocessableEntity)

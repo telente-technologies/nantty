@@ -11,7 +11,7 @@ func applicationBody(categoryId string) map[string]any {
 	return map[string]any{
 		"storeName": "Ada Fabrics", "categoryId": categoryId, "description": "Handmade ankara", "phone": "+234 801 234 5678",
 		"addressLine": "12 Allen Avenue", "city": "Ikeja", "state": "Lagos",
-		"identityDocument": map[string]any{"documentType": "nin_slip", "documentNumber": "12345678901", "documentPhotoUrl": "https://media.zudomart.com/kyc/nin.jpg"},
+		"identityDocument": map[string]any{"documentType": "nin_slip", "documentNumber": "12345678901", "documentPhotoUrl": "https://media.nantty.com/kyc/nin.jpg"},
 		"payoutAccount":    map[string]any{"bankCode": "058", "accountNumber": "0123456789"},
 	}
 }

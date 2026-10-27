@@ -15,7 +15,7 @@ func TestConcurrentSettlementRunsCreditAPaymentIntoTheMainBalanceOnce(t *testing
 	skipIntegrationWhenShort(t)
 	harness := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
 	token := harness.Tokens.UserAccessToken(uuid.NewString())
-	reference := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", token, "", map[string]any{"returnTo": "https://zudomart.test/pay/return"}).Body["reference"].(string)
+	reference := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", token, "", map[string]any{"returnTo": "https://nantty.test/pay/return"}).Body["reference"].(string)
 	harness.Flutterwave.CompleteCheckout(reference, 0, 0, "card")
 	if completed := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups/"+reference+"/complete", token, "", map[string]any{}); completed.Status != http.StatusOK {
 		t.Fatalf("complete: %d %s", completed.Status, completed.Raw)

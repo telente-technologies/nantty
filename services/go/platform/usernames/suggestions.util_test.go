@@ -21,7 +21,7 @@ func TestBuildSuggestionCandidatesAreValidUniqueAndUnreserved(t *testing.T) {
 }
 
 func TestBuildSuggestionCandidatesFallBackWhenSeedsAreUnusable(t *testing.T) {
-	for _, candidate := range BuildSuggestionCandidates([]string{"", "!!", "zudomart"}, SystemReservedRules(), 2026) {
+	for _, candidate := range BuildSuggestionCandidates([]string{"", "!!", "nantty"}, SystemReservedRules(), 2026) {
 		if len(candidate) < MinimumLength || len(candidate) > MaximumLength {
 			t.Fatalf("bad fallback %q", candidate)
 		}

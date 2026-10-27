@@ -182,7 +182,7 @@ func (ledger *Ledger) persistReconciliationRun(ctx context.Context, client *ent.
 }
 
 func enqueueLedgerOutboxEvent(ctx context.Context, client *ent.Client, eventType, subject string, occurredAt time.Time, data any) error {
-	event, err := events.BuildOutboxEventWithEnvelope(eventType, "zudomart.ledger", subject, 1, occurredAt, data)
+	event, err := events.BuildOutboxEventWithEnvelope(eventType, "nantty.ledger", subject, 1, occurredAt, data)
 	if err != nil {
 		return err
 	}

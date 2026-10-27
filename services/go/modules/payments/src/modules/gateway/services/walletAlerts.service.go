@@ -26,8 +26,8 @@ func PaymentAlertCount(name string) int64 {
 func (gateway *PaymentGateway) RecordPaymentAlertMetric(ctx context.Context, name string, attributes ...any) {
 	counter, _ := paymentAlertCounters.LoadOrStore(name, &atomic.Int64{})
 	total := counter.(*atomic.Int64).Add(1)
-	fields := append([]any{"metric", "zudomart.payments." + name, "value", 1, "total", total, "_aws", map[string]any{
-		"CloudWatchMetrics": []map[string]any{{"Namespace": "Zudomart/Payments", "Dimensions": [][]string{{}}, "Metrics": []map[string]string{{"Name": name, "Unit": "Count"}}}},
+	fields := append([]any{"metric", "nantty.payments." + name, "value", 1, "total", total, "_aws", map[string]any{
+		"CloudWatchMetrics": []map[string]any{{"Namespace": "Nantty/Payments", "Dimensions": [][]string{{}}, "Metrics": []map[string]string{{"Name": name, "Unit": "Count"}}}},
 	}, name, 1}, attributes...)
 	gateway.Container.Resources.Logger.ErrorContext(ctx, "payment alert", fields...)
 }

@@ -111,7 +111,7 @@ func TestEveryWorkQueueHasRetryQueuesThatReturnToItAndADeadLetterQueue(t *testin
 func TestEventsExchangeKeepsUnroutedEventsAndServicesCannotChangeTopology(t *testing.T) {
 	definitions := loadLocalDefinitions(t)
 	for _, exchange := range definitions.Exchanges {
-		if exchange.Name == DomainEventsExchange && (exchange.Type != "topic" || exchange.Arguments["alternate-exchange"] != "zudomart.unrouted") {
+		if exchange.Name == DomainEventsExchange && (exchange.Type != "topic" || exchange.Arguments["alternate-exchange"] != "nantty.unrouted") {
 			t.Fatalf("events exchange must be a topic exchange with an alternate exchange: %+v", exchange)
 		}
 		if exchange.Name == JobsExchange && exchange.Type != "direct" {
@@ -119,7 +119,7 @@ func TestEventsExchangeKeepsUnroutedEventsAndServicesCannotChangeTopology(t *tes
 		}
 	}
 	for _, permission := range definitions.Permissions {
-		if permission.User != "zudomart" && permission.Configure != "^$" {
+		if permission.User != "nantty" && permission.Configure != "^$" {
 			t.Fatalf("%s may not declare or delete resources", permission.User)
 		}
 	}

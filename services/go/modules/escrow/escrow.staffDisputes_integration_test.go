@@ -56,7 +56,7 @@ func TestStaffDisputeViewHasPartiesEscrowSlaAndAcceptsTheConsoleResolveBody(t *t
 	buyer, orderId := uuid.NewString(), uuid.NewString()
 	harness.registerCheckout(buyer, map[string]int64{orderId: 1_000_000})
 	harness.payAndSettle(buyer, orderId)
-	opened := harness.Call(http.MethodPost, "/api/v1/orders/"+orderId+"/disputes", harness.Tokens.UserAccessToken(buyer), "staff-view-dispute-1", map[string]any{"reason": "damaged", "description": "Torn", "evidenceUrls": []string{"https://cdn.zudomart.test/a.jpg"}})
+	opened := harness.Call(http.MethodPost, "/api/v1/orders/"+orderId+"/disputes", harness.Tokens.UserAccessToken(buyer), "staff-view-dispute-1", map[string]any{"reason": "damaged", "description": "Torn", "evidenceUrls": []string{"https://cdn.nantty.test/a.jpg"}})
 	disputeId, orderReference := opened.Body["id"].(string), opened.Body["orderReference"].(string)
 	seller := harness.Tokens.UserAccessToken(sellerForOrder(orderId))
 	harness.Call(http.MethodPost, "/api/v1/disputes/"+disputeId+"/messages", seller, "staff-view-reply-1", map[string]any{"text": "It left intact", "attachmentUrls": []string{}})

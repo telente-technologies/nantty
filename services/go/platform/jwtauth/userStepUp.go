@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	UserStepUpAudience = "zudomart-user-step-up"
+	UserStepUpAudience = "nantty-user-step-up"
 	UserStepUpHeader   = "X-Step-Up-Token"
 )
 

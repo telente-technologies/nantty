@@ -16,7 +16,7 @@ import (
 
 func (harness *subscriptionsHarness) offerCheckout(account offerAccount, planId, claimId string) paymentstesting.HarnessResponse {
 	harness.T.Helper()
-	body := map[string]any{"profileId": account.profileId, "planId": planId, "offerClaimId": claimId, "returnTo": "https://zudomart.com/pay/return"}
+	body := map[string]any{"profileId": account.profileId, "planId": planId, "offerClaimId": claimId, "returnTo": "https://nantty.com/pay/return"}
 	return harness.Call(http.MethodPost, "/api/v1/subscriptions/checkout", account.token, "", body, http.Header{"X-Client-Platform": {"web"}})
 }
 

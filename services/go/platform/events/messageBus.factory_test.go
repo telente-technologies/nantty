@@ -9,7 +9,7 @@ import (
 
 func TestRabbitMqIsTheDefaultEventBus(t *testing.T) {
 	t.Setenv("EVENT_BUS", "")
-	t.Setenv("RABBITMQ_URL", "amqp://go-identity:secret@localhost:5672/zudomart")
+	t.Setenv("RABBITMQ_URL", "amqp://go-identity:secret@localhost:5672/nantty")
 	publisher, err := CreateDomainEventPublisherFromEnvironment(context.Background(), MessageBusSelection{DeployableName: "go-identity", Logger: discardLogger()})
 	if err != nil {
 		t.Fatal(err)

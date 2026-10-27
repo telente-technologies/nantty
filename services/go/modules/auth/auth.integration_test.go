@@ -59,7 +59,7 @@ func startAuthModuleAgainstFreshSchema(t *testing.T, adjustments ...func(*config
 	t.Helper()
 	databaseUrl := os.Getenv("AUTH_TEST_DATABASE_URL")
 	if databaseUrl == "" {
-		databaseUrl = "postgres://zudomart:zudomart@localhost:15432/zudomart_test?sslmode=disable"
+		databaseUrl = "postgres://nantty:nantty@localhost:15432/nantty_test?sslmode=disable"
 	}
 	ctx := context.Background()
 	administrator, err := postgres.OpenDatabaseAndVerifyConnection(ctx, databaseUrl, postgres.DefaultPoolSettings())
@@ -73,7 +73,7 @@ func startAuthModuleAgainstFreshSchema(t *testing.T, adjustments ...func(*config
 	t.Cleanup(func() { dropSchemaAndClose(administrator, schema) })
 	settings := configs.AuthSettings{
 		Environment: "test", DatabaseUrl: databaseUrl, DatabaseSchema: schema,
-		TokenIssuer: "https://auth.zudomart.test", TokenAudience: "zudomart-api",
+		TokenIssuer: "https://auth.nantty.test", TokenAudience: "nantty-api",
 		AccessTokenTimeToLive: 15 * time.Minute, RefreshTokenTimeToLive: 24 * time.Hour, SessionMaximumLifetime: 48 * time.Hour,
 		SigningKeyRotationInterval: 24 * time.Hour, SigningKeyEncryptionKey: bytes.Repeat([]byte{1}, 32), OneTimeCodePepper: bytes.Repeat([]byte{2}, 32),
 		OneTimeCodeTimeToLive: 5 * time.Minute, OneTimeCodeMaximumAttempts: 5, OneTimeCodeResendCooldown: time.Minute, VerifiedDestinationTokenTtl: 15 * time.Minute,

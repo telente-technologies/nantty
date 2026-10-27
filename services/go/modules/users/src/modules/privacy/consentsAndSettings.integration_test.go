@@ -170,7 +170,7 @@ func TestStaffPublishesPolicyVersionAndOlderConsentNeedsRenewal(t *testing.T) {
 	harness := startPrivacyHarness(t)
 	_, token := harness.newAccount("renewal")
 	harness.expect("PUT", "/api/v1/users/me/consents", token, map[string]any{"decisions": map[string]bool{"analytics": true}}, http.StatusOK)
-	body := map[string]any{"kind": "privacy_policy", "version": "2.0", "effectiveAt": harness.clock.now().Add(time.Hour).UTC().Format(time.RFC3339), "summary": "Adds a new processor", "contentUrl": "https://zudomart.com/privacy/2.0"}
+	body := map[string]any{"kind": "privacy_policy", "version": "2.0", "effectiveAt": harness.clock.now().Add(time.Hour).UTC().Format(time.RFC3339), "summary": "Adds a new processor", "contentUrl": "https://nantty.com/privacy/2.0"}
 
 	harness.expect("POST", "/api/v1/admin/policy-versions", "", body, http.StatusUnauthorized)
 	readOnly, readOnlyStepUp, _ := harness.tokens.SignStaffTokensForTest(t, "admin", []string{"privacy.policies.read"})

@@ -27,7 +27,7 @@ func EnqueueOutboxEventInTransaction(ctx context.Context, tx *ent.Tx, eventType,
 		Exec(ctx)
 }
 
-const EventSource = "zudomart.live"
+const EventSource = "nantty.live"
 
 type EntOutboxStore struct {
 	Client *ent.Client

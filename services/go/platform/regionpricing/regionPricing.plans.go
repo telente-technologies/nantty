@@ -34,7 +34,7 @@ var defaultMonthlyPlanPrices = map[string]map[string]monthlyPair{
 }
 
 func DefaultStoreProductId(planCode, interval string) string {
-	return "com.zudomart.app." + planCode + "." + map[string]string{"month": "monthly", "year": "yearly"}[interval]
+	return "com.nantty.app." + planCode + "." + map[string]string{"month": "monthly", "year": "yearly"}[interval]
 }
 
 func defaultStoreProductIds(planCode string) map[string]string {

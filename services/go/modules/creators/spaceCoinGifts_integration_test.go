@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	moneyv1 "nantty/contracts/gen/go/nantty/money/v1"
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 )
 

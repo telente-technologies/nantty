@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	TestTokenIssuer   = "https://auth.zudomart.test"
-	TestTokenAudience = "zudomart-api"
+	TestTokenIssuer   = "https://auth.nantty.test"
+	TestTokenAudience = "nantty-api"
 )
 
 type TestTokenAuthority struct {

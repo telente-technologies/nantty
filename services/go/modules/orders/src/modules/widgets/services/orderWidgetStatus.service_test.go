@@ -26,7 +26,7 @@ func TestOrderWidgetStatusForCoversTheDeliveryJourney(t *testing.T) {
 			t.Fatalf("%s/%s rider=%v = %+v, want %s", testCase.status, testCase.delivery, testCase.rider, got, testCase.want)
 		}
 	}
-	if OrderDeepLink("abc") != "zudomart://orders/abc" {
+	if OrderDeepLink("abc") != "nantty://orders/abc" {
 		t.Fatal("unexpected deep link")
 	}
 }

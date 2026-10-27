@@ -55,8 +55,8 @@ func TestProvisioningUriCarriesTheEncodedSecret(t *testing.T) {
 	if err != nil || len(secret) != SecretBytes {
 		t.Fatalf("secret: %v", err)
 	}
-	uri := BuildProvisioningUri("Zudomart", "ada@zudomart.com", secret)
-	if !strings.HasPrefix(uri, "otpauth://totp/Zudomart:ada@zudomart.com?") && !strings.HasPrefix(uri, "otpauth://totp/Zudomart%3Aada@zudomart.com?") {
+	uri := BuildProvisioningUri("Nantty", "ada@nantty.com", secret)
+	if !strings.HasPrefix(uri, "otpauth://totp/Nantty:ada@nantty.com?") && !strings.HasPrefix(uri, "otpauth://totp/Nantty%3Aada@nantty.com?") {
 		t.Fatalf("unexpected uri %s", uri)
 	}
 	if !strings.Contains(uri, "secret="+EncodeSecretForAuthenticatorApps(secret)) {

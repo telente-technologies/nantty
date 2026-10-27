@@ -13,7 +13,7 @@ func TestCardVerificationChargeIsRefundedAsSoonAsTheCardIsSaved(t *testing.T) {
 	skipIntegrationWhenShort(t)
 	harness := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
 	token := harness.Tokens.UserAccessToken(uuid.NewString())
-	started := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", token, "", map[string]any{"returnTo": "https://zudomart.test/pay/return"})
+	started := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", token, "", map[string]any{"returnTo": "https://nantty.test/pay/return"})
 	if started.Status != http.StatusCreated {
 		t.Fatalf("setup: %d %s", started.Status, started.Raw)
 	}
@@ -35,7 +35,7 @@ func TestASecondChargeOnACardVerificationIsRefundedOnceAndTheFirstIsNotRefundedA
 	skipIntegrationWhenShort(t)
 	harness := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
 	token := harness.Tokens.UserAccessToken(uuid.NewString())
-	reference := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", token, "", map[string]any{"returnTo": "https://zudomart.test/pay/return"}).Body["reference"].(string)
+	reference := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", token, "", map[string]any{"returnTo": "https://nantty.test/pay/return"}).Body["reference"].(string)
 	harness.Flutterwave.CompleteCheckout(reference, 0, 0, "card")
 	if completed := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups/"+reference+"/complete", token, "", map[string]any{}); completed.Status != http.StatusOK {
 		t.Fatalf("complete: %d %s", completed.Status, completed.Raw)

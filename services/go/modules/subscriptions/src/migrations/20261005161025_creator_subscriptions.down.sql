@@ -1,4 +1,4 @@
-REVOKE SELECT ON "creator_subscriptions" FROM zudomart_readers;
+REVOKE SELECT ON "creator_subscriptions" FROM nantty_readers;
 -- reverse: create index "creatorsubscriptionplan_creator_id_created_at" to table: "creator_subscription_plans"
 DROP INDEX "creatorsubscriptionplan_creator_id_created_at";
 -- reverse: create "creator_subscription_plans" table

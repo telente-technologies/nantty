@@ -1,1 +1,1 @@
-REVOKE SELECT ("created_at") ON "creator_subscriptions" FROM zudomart_readers;
+REVOKE SELECT ("created_at") ON "creator_subscriptions" FROM nantty_readers;

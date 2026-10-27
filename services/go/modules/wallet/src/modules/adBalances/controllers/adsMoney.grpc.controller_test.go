@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	commonv1 "nantty/contracts/gen/go/zudomart/common/v1"
+	commonv1 "nantty/contracts/gen/go/nantty/common/v1"
 )
 
 func TestBoostRequestsAreValidatedBeforeTouchingTheLedger(t *testing.T) {

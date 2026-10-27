@@ -52,7 +52,7 @@ func NewSubscriptionsContainer(resources loaders.MoneyModuleResources, settings 
 			Database: resources.Database, UsersSchema: firstSet(settings.UsersSchema, "users"), CreatorsSchema: firstSet(settings.CreatorsSchema, "creators"),
 			SocialSchema: firstSet(settings.SocialSchema, "social"), TolerateMissing: !settings.Money.IsProduction(),
 		},
-		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.subscriptions"},
+		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "nantty.subscriptions"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Now:         time.Now,
 		schemaConfig: ent.SchemaConfig{

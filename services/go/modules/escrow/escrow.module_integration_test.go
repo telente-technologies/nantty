@@ -138,7 +138,7 @@ func TestDisputeFreezesEscrowAndPartialResolutionRefundsThroughTheProvider(t *te
 	token := harness.Tokens.UserAccessToken(buyer)
 	seller := harness.Tokens.UserAccessToken(sellerForOrder(orderId))
 
-	opened := harness.Call(http.MethodPost, "/api/v1/orders/"+orderId+"/disputes", token, "dispute-key-1", map[string]any{"reason": "damaged", "description": "Torn on arrival", "evidenceUrls": []string{"https://cdn.zudomart.test/a.jpg"}})
+	opened := harness.Call(http.MethodPost, "/api/v1/orders/"+orderId+"/disputes", token, "dispute-key-1", map[string]any{"reason": "damaged", "description": "Torn on arrival", "evidenceUrls": []string{"https://cdn.nantty.test/a.jpg"}})
 	if opened.Status != http.StatusCreated || opened.Body["status"] != "awaiting_seller" || len(opened.Body["statusHistory"].([]any)) != 2 {
 		t.Fatalf("open dispute: %d %v", opened.Status, opened.Body)
 	}

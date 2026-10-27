@@ -1,1 +1,1 @@
-REVOKE SELECT ("phone_hash") ON "accounts" FROM zudomart_readers;
+REVOKE SELECT ("phone_hash") ON "accounts" FROM nantty_readers;

@@ -33,6 +33,6 @@ func OrderWidgetStatusFor(status, deliveryStatus string, riderAssigned bool) Ord
 	return OrderWidgetStatus{"other", "Order update"}
 }
 
-func OrderDeepLink(orderId string) string { return "zudomart://orders/" + orderId }
+func OrderDeepLink(orderId string) string { return "nantty://orders/" + orderId }
 
-const SellerDashboardDeepLink = "zudomart://seller/dashboard"
+const SellerDashboardDeepLink = "nantty://seller/dashboard"

@@ -14,11 +14,11 @@ import (
 func escrowEnvelope(eventType string, orderId uuid.UUID, data map[string]any) []byte {
 	data["orderId"] = orderId.String()
 	encoded, _ := json.Marshal(data)
-	envelope, _ := json.Marshal(map[string]any{"id": uuid.NewString(), "type": eventType, "source": "zudomart.escrow", "subject": orderId.String(), "schemaVersion": 1, "occurredAt": "2026-10-17T10:00:00Z", "data": json.RawMessage(encoded)})
+	envelope, _ := json.Marshal(map[string]any{"id": uuid.NewString(), "type": eventType, "source": "nantty.escrow", "subject": orderId.String(), "schemaVersion": 1, "occurredAt": "2026-10-17T10:00:00Z", "data": json.RawMessage(encoded)})
 	return envelope
 }
 
-func TestARefundAfterPayoutThatKeepsZudomartsFeesCompletesTheOrderRefund(t *testing.T) {
+func TestARefundAfterPayoutThatKeepsNanttysFeesCompletesTheOrderRefund(t *testing.T) {
 	harness := startAdminHarness(t, "released")
 	orderId := harness.seedOrder("ZM-ADM-0090", "completed")
 	handler := services.MoneyEventHandler{Container: harness.module.Container}
@@ -29,7 +29,7 @@ func TestARefundAfterPayoutThatKeepsZudomartsFeesCompletesTheOrderRefund(t *test
 	}
 	group := harness.module.Container.Client.OrderGroup.GetX(ctx, orderId)
 	if group.RefundedMinor != 291_300 || group.PaymentStatus != "refunded" || group.Status != "refunded" {
-		t.Fatalf("the refund is complete although Zudomart kept its fees: refunded %d, payment %s, status %s", group.RefundedMinor, group.PaymentStatus, group.Status)
+		t.Fatalf("the refund is complete although Nantty kept its fees: refunded %d, payment %s, status %s", group.RefundedMinor, group.PaymentStatus, group.Status)
 	}
 }
 

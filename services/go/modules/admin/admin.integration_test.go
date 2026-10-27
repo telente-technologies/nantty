@@ -68,7 +68,7 @@ func startAdminModuleAgainstFreshSchema(t *testing.T) *adminHarness {
 	t.Helper()
 	databaseUrl := os.Getenv("ADMIN_TEST_DATABASE_URL")
 	if databaseUrl == "" {
-		databaseUrl = "postgres://zudomart:zudomart@localhost:15432/zudomart_test?sslmode=disable"
+		databaseUrl = "postgres://nantty:nantty@localhost:15432/nantty_test?sslmode=disable"
 	}
 	ctx := context.Background()
 	administrator, err := postgres.OpenDatabaseAndVerifyConnection(ctx, databaseUrl, postgres.DefaultPoolSettings())
@@ -83,10 +83,10 @@ func startAdminModuleAgainstFreshSchema(t *testing.T) *adminHarness {
 	fakeToken := identitytest.NewFakeTokenService(t)
 	identityports.Default.RegisterStaffTokenService(fakeToken)
 	settings := configs.AdminSettings{
-		Environment: "test", DatabaseUrl: databaseUrl, DatabaseSchema: schema, TotpEncryptionKey: bytes.Repeat([]byte{3}, 32), TotpIssuerLabel: "Zudomart",
+		Environment: "test", DatabaseUrl: databaseUrl, DatabaseSchema: schema, TotpEncryptionKey: bytes.Repeat([]byte{3}, 32), TotpIssuerLabel: "Nantty",
 		StaffRefreshTokenTtl: 12 * time.Hour, InvitationTtl: 72 * time.Hour, StepUpTtl: 5 * time.Minute, LoginChallengeTtl: 5 * time.Minute,
 		MaximumFailedPasswords: 5, LockoutDuration: 15 * time.Minute, InternalApiToken: strings.Repeat("i", 32), DeliveryMode: "log",
-		WebAuthn: configs.WebAuthnSettings{RelyingPartyId: "localhost", RelyingPartyName: "Zudomart Admin", Origins: []string{"http://localhost:3400"}},
+		WebAuthn: configs.WebAuthnSettings{RelyingPartyId: "localhost", RelyingPartyName: "Nantty Admin", Origins: []string{"http://localhost:3400"}},
 	}
 	logs, publisher := &lockedBuffer{}, &events.RecordingPublisher{}
 	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(logs, nil)), Health: health.NewRegistryForService("admin-test")}

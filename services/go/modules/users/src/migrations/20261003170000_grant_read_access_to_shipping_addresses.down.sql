@@ -1,1 +1,1 @@
-REVOKE SELECT ON "shipping_addresses" FROM zudomart_readers;
+REVOKE SELECT ON "shipping_addresses" FROM nantty_readers;

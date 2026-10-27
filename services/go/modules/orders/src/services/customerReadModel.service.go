@@ -28,7 +28,7 @@ type CustomerView struct {
 	Name                 string             `json:"name"`
 	Phone                *string            `json:"phone"`
 	Email                *string            `json:"email"`
-	ZudomartUsername     *string            `json:"zudomartUsername"`
+	NanttyUsername     *string            `json:"nanttyUsername"`
 	City                 *string            `json:"city"`
 	Tags                 []string           `json:"tags"`
 	Notes                []CustomerNoteView `json:"notes"`
@@ -58,7 +58,7 @@ func BuildCustomers(groups []*ent.OrderGroup, currency money.CurrencyCode) []Cus
 			order = append(order, group.BuyerAccountID)
 		}
 		username, name, phone := group.BuyerUsername, group.BuyerName, group.Address.Phone
-		view.Name, view.ZudomartUsername, view.Phone = name, &username, &phone
+		view.Name, view.NanttyUsername, view.Phone = name, &username, &phone
 		if city := firstNonEmpty(group.Address.CityName, group.Address.AdminAreaName); city != "" {
 			view.City = &city
 		}
@@ -112,7 +112,7 @@ func FilterAndSortCustomers(customers []CustomerView, text, kind, sortKey string
 }
 
 func customerMatches(customer CustomerView, text string) bool {
-	for _, candidate := range []string{customer.Name, derefText(customer.ZudomartUsername), derefText(customer.Phone), derefText(customer.City), derefText(customer.Email)} {
+	for _, candidate := range []string{customer.Name, derefText(customer.NanttyUsername), derefText(customer.Phone), derefText(customer.City), derefText(customer.Email)} {
 		if strings.Contains(strings.ToLower(candidate), text) {
 			return true
 		}

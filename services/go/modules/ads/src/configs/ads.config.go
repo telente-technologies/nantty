@@ -93,18 +93,18 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 		CreatorShareBps:        int64(reader.ReadIntegerOrDefault("ADS_CREATOR_SHARE_BPS", 4000)),
 		DomainEventsTopicArn:   reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
 		AccessTokenJwksUrl:     reader.ReadStringOrDefault("AUTH_JWKS_URL", "http://localhost:8101/.well-known/jwks.json"),
-		TokenIssuer:            reader.ReadStringOrDefault("AUTH_TOKEN_ISSUER", "https://auth.zudomart.com"),
-		TokenAudience:          reader.ReadStringOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
+		TokenIssuer:            reader.ReadStringOrDefault("AUTH_TOKEN_ISSUER", "https://auth.nantty.com"),
+		TokenAudience:          reader.ReadStringOrDefault("AUTH_TOKEN_AUDIENCE", "nantty-api"),
 		StaffJwksUrl:           reader.ReadStringOrDefault("ADS_STAFF_JWKS_URL", "http://localhost:8103/.well-known/staff-jwks.json"),
-		StaffTokenIssuer:       reader.ReadStringOrDefault("ADS_STAFF_TOKEN_ISSUER", "https://admin.zudomart.com"),
+		StaffTokenIssuer:       reader.ReadStringOrDefault("ADS_STAFF_TOKEN_ISSUER", "https://admin.nantty.com"),
 		RedisUrl:               reader.ReadStringOrDefault("ADS_REDIS_URL", ""),
 		AdTokenActiveKeyId:     reader.ReadStringOrDefault("ADS_TOKEN_ACTIVE_KEY_ID", "k1"),
 		AdTokenTimeToLive:      reader.ReadDurationOrDefault("ADS_TOKEN_TTL", 24*time.Hour),
 		IntelligenceUrl:        reader.ReadStringOrDefault("INTELLIGENCE_URL", ""),
 		IntelligenceSecret:     reader.ReadStringOrDefault("INTELLIGENCE_SHARED_SECRET", ""),
 		IntelligenceTimeout:    reader.ReadDurationOrDefault("ADS_INTELLIGENCE_TIMEOUT", 80*time.Millisecond),
-		MediaBaseUrl:           reader.ReadStringOrDefault("ADS_MEDIA_URL", "https://cdn.zudomart.com/media"),
-		PublicBaseUrl:          reader.ReadStringOrDefault("ADS_PUBLIC_URL", "https://api.zudomart.com"),
+		MediaBaseUrl:           reader.ReadStringOrDefault("ADS_MEDIA_URL", "https://cdn.nantty.com/media"),
+		PublicBaseUrl:          reader.ReadStringOrDefault("ADS_PUBLIC_URL", "https://api.nantty.com"),
 		IdentityInternalUrl:    reader.ReadStringOrDefault("IDENTITY_INTERNAL_URL", ""),
 		IdentityInternalToken:  reader.ReadStringOrDefault("IDENTITY_INTERNAL_TOKEN", ""),
 		BlockedDomains:         reader.ReadCommaSeparatedListOrDefault("ADS_BLOCKED_DOMAINS", []string{}),
@@ -143,8 +143,8 @@ func ReadAdsSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) Ad
 	settings.MoneyInternalToken = reader.ReadStringOrDefault("ADS_MONEY_INTERNAL_TOKEN", "")
 	settings.MoneyHttpUrl = reader.ReadStringOrDefault("ADS_MONEY_HTTP_URL", "")
 	settings.MoneyHttpToken = reader.ReadStringOrDefault("ADS_MONEY_HTTP_TOKEN", reader.ReadStringOrDefault("MONEY_INTERNAL_API_TOKEN", ""))
-	settings.AdsAppUrl = reader.ReadStringOrDefault("ADS_APP_URL", "https://ads.zudomart.com")
-	settings.VerifyUrl = reader.ReadStringOrDefault("ADS_VERIFY_URL", "https://zudomart.com/wallet/payouts")
+	settings.AdsAppUrl = reader.ReadStringOrDefault("ADS_APP_URL", "https://ads.nantty.com")
+	settings.VerifyUrl = reader.ReadStringOrDefault("ADS_VERIFY_URL", "https://nantty.com/wallet/payouts")
 	settings.AdminInternalUrl = reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", "")
 	settings.AdminInternalToken = reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", "")
 	settings.AssetsCorsOrigins = reader.ReadCommaSeparatedListOrDefault("ADS_ASSETS_CORS_ORIGINS", []string{})

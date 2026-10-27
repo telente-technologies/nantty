@@ -64,7 +64,7 @@ func TestDocumentsRequiredAccountGetsAHostedLinkAndTheWebhookMovesItToReview(t *
 	harness.Payments.Application.Container.Documents = verifier
 	link := harness.Call(http.MethodPost, "/api/v1/payments/payout-onboarding/me/document-link", token, "", nil)
 	again := harness.Call(http.MethodPost, "/api/v1/payments/payout-onboarding/me/document-link", token, "", nil)
-	if link.Status != http.StatusOK || link.Body["returnUrl"] != "https://zudomart.test/seller/verification/return" || link.Body["expiresAt"] == nil || again.Body["url"] != link.Body["url"] || verifier.sessions.Load() != 1 {
+	if link.Status != http.StatusOK || link.Body["returnUrl"] != "https://nantty.test/seller/verification/return" || link.Body["expiresAt"] == nil || again.Body["url"] != link.Body["url"] || verifier.sessions.Load() != 1 {
 		t.Fatalf("document link: %d %s / %s", link.Status, link.Raw, again.Raw)
 	}
 	if other := harness.Call(http.MethodPost, "/api/v1/payments/payout-onboarding/me/document-link", harness.Tokens.UserAccessToken(uuid.NewString()), "", nil); other.Status != http.StatusConflict {

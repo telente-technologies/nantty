@@ -23,7 +23,7 @@ func TestCreatorTodayWidgetHidesAmountsAndOnlyAcceptsWidgetScopeOnWidgetRoutes(t
 	if status != http.StatusOK || hidden["earningsToday"] != nil || hidden["amountsHidden"] != true {
 		t.Fatalf("hidden amounts must not leave the server: %d %v", status, hidden)
 	}
-	if _, outsider := harness.call(http.MethodGet, "/api/v1/widgets/creator-today", harness.tokens.UserWidgetToken(fan), "", nil); outsider["creatorProgramMember"] != false || outsider["deepLink"] != "zudomart://creator" {
+	if _, outsider := harness.call(http.MethodGet, "/api/v1/widgets/creator-today", harness.tokens.UserWidgetToken(fan), "", nil); outsider["creatorProgramMember"] != false || outsider["deepLink"] != "nantty://creator" {
 		t.Fatalf("non-members get an invitation, not data: %v", outsider)
 	}
 	for _, path := range []string{"/api/v1/creators/dashboard", "/api/v1/creators/earnings", "/api/v1/creators/me"} {

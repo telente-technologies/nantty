@@ -37,7 +37,7 @@ func main() {
 func diffEntSchemaAgainstReplayedMigrations(directory *sqltool.GolangMigrateDir, name string) error {
 	devDatabaseUrl := os.Getenv("ATLAS_DEV_DATABASE_URL")
 	if devDatabaseUrl == "" {
-		devDatabaseUrl = "postgres://zudomart:zudomart@localhost:15432/atlas_dev?sslmode=disable&search_path=public"
+		devDatabaseUrl = "postgres://nantty:nantty@localhost:15432/atlas_dev?sslmode=disable&search_path=public"
 	}
 	return entmigrate.NamedDiff(context.Background(), devDatabaseUrl, name,
 		schema.WithDir(directory),

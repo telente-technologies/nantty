@@ -33,8 +33,8 @@ import (
 )
 
 const (
-	testIssuer        = "https://auth.zudomart.test"
-	testAudience      = "zudomart-api"
+	testIssuer        = "https://auth.nantty.test"
+	testAudience      = "nantty-api"
 	testSecret        = "secret-only-for-local-development-0001"
 	testInternalToken = "internal-token-only-for-live-tests-0123"
 )
@@ -99,7 +99,7 @@ func startLiveModuleAgainstFreshSchema(t *testing.T) *liveHarness {
 	t.Helper()
 	databaseUrl := os.Getenv("LIVE_TEST_DATABASE_URL")
 	if databaseUrl == "" {
-		databaseUrl = "postgres://zudomart:zudomart@localhost:15432/zudomart_live_test?sslmode=disable"
+		databaseUrl = "postgres://nantty:nantty@localhost:15432/nantty_live_test?sslmode=disable"
 	}
 	ctx := context.Background()
 	administrator, err := postgres.OpenDatabaseAndVerifyConnection(ctx, databaseUrl, postgres.DefaultPoolSettings())

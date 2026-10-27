@@ -113,7 +113,7 @@ func TestWebCoinPurchaseCreditsOnceAndAppClientsMustUseInAppPurchase(t *testing.
 		t.Fatalf("web packages: %v", packages.Body)
 	}
 	appPackages := harness.Call(http.MethodGet, "/api/v1/coins/packages", "", "", nil, http.Header{"X-Client-Platform": {"ios"}})
-	if iosPack := appPackages.Body["data"].([]any)[0].(map[string]any); iosPack["purchaseChannel"] != "store_iap" || iosPack["clientPlatform"] != "ios" || iosPack["coins"].(float64) != 100 || iosPack["storeProductId"] != "com.zudomart.app.coins.tier1" {
+	if iosPack := appPackages.Body["data"].([]any)[0].(map[string]any); iosPack["purchaseChannel"] != "store_iap" || iosPack["clientPlatform"] != "ios" || iosPack["coins"].(float64) != 100 || iosPack["storeProductId"] != "com.nantty.app.coins.tier1" {
 		t.Fatalf("app packages: %v", appPackages.Body)
 	}
 	if blocked := harness.Call(http.MethodPost, "/api/v1/coins/purchases", token, "app-web-key", map[string]any{"packageId": "web-coins-1"}, http.Header{"X-Client-Platform": {"android"}, "CloudFront-Viewer-Country": {"NG"}}); blocked.Status != http.StatusConflict {
@@ -192,7 +192,7 @@ func TestInAppPurchaseBooksTheStoreFeeAndARefundClawsBackOrFlagsTheShortfall(t *
 	harness := startWalletHarness(t, true)
 	buyer := uuid.NewString()
 	token := harness.Tokens.UserAccessToken(buyer)
-	receipt := map[string]any{"platform": "ios", "productId": "com.zudomart.app.coins.tier3", "receipt": "valid-receipt", "transactionId": "apple-txn-1"}
+	receipt := map[string]any{"platform": "ios", "productId": "com.nantty.app.coins.tier3", "receipt": "valid-receipt", "transactionId": "apple-txn-1"}
 	redeemed := harness.Call(http.MethodPost, "/api/v1/coins/iap/receipts", token, "iap-key-1", receipt)
 	if redeemed.Status != http.StatusCreated || redeemed.Body["balance"].(float64) != 1000 {
 		t.Fatalf("redeem: %d %s", redeemed.Status, redeemed.Raw)

@@ -38,7 +38,7 @@ var prefixTerms = []string{
 	"airforce", "customs", "immigration", "efcc", "inec", "nnpc", "nafdac", "statehouse", "centralbank",
 }
 
-var containsTerms = []string{"zudomart", "zudopay"}
+var containsTerms = []string{"nantty", "nanttypay"}
 
 var wellKnownBrands = []string{
 	"google", "apple", "facebook", "instagram", "meta", "whatsapp", "tiktok", "twitter", "youtube", "snapchat", "linkedin", "telegram",

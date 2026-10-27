@@ -178,9 +178,9 @@ func TestGoogleSignInCreatesLinksAndRejectsBadTokens(t *testing.T) {
 }
 
 func TestSocialSignInLinksToExistingVerifiedEmailAndReportsNotConfigured(t *testing.T) {
-	provider := startFakeIdentityProvider(t, "https://appleid.apple.com", "app.zudomart.ios")
+	provider := startFakeIdentityProvider(t, "https://appleid.apple.com", "app.nantty.ios")
 	harness := startAuthModuleAgainstFreshSchema(t, func(settings *configs.AuthSettings) {
-		settings.AppleClientIds = []string{"app.zudomart.ios"}
+		settings.AppleClientIds = []string{"app.nantty.ios"}
 		settings.AppleJwksUrl = provider.jwksUrl
 	})
 	registered := harness.registerAccountAndLogIn("linked@example.com", "linkedpass1")

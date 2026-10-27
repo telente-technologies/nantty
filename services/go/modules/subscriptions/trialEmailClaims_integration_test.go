@@ -19,8 +19,8 @@ func TestOneTrialPerEmailAcrossAccounts(t *testing.T) {
 			secondProfile: {ProfileId: secondProfile, OwnerUserId: second, ProfileType: "business", DisplayName: "Ada Fabrics Again", CountryCode: "NG"},
 		},
 		Accounts: map[string]repositories.AccountSignals{
-			first:  {CreatedAt: aged, EmailVerified: true, Email: "ada@zudomart.test"},
-			second: {CreatedAt: aged, EmailVerified: true, Email: " Ada@Zudomart.test "},
+			first:  {CreatedAt: aged, EmailVerified: true, Email: "ada@nantty.test"},
+			second: {CreatedAt: aged, EmailVerified: true, Email: " Ada@Nantty.test "},
 		},
 	}
 	harness := startSubscriptionsHarness(t, identity)

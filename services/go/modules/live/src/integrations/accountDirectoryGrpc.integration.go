@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 
-	authv1 "nantty/contracts/gen/go/zudomart/auth/v1"
+	authv1 "nantty/contracts/gen/go/nantty/auth/v1"
 	"nantty/modules/live/src/interfaces"
 )
 

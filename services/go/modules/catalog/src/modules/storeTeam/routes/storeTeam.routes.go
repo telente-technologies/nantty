@@ -15,7 +15,7 @@ func MountStoreTeamRoutes(mux *http.ServeMux, deployed *container.Container) {
 	searchUsers := middlewares.StoreMember(deployed, "dashboard:view", false)(team.SearchNanttyUsers)
 	mux.Handle("GET /api/v1/seller/nantty-users", searchUsers)
 	// Keep the old endpoint as a compatibility alias for existing clients.
-	mux.Handle("GET /api/v1/seller/zudomart-users", searchUsers)
+	mux.Handle("GET /api/v1/seller/nantty-users", searchUsers)
 	mux.Handle("GET /api/v1/seller/staff/candidates", staffManager(team.SearchStaffCandidates))
 	mux.Handle("GET /api/v1/seller/staff", staffManager(team.ListStaff))
 	mux.Handle("POST /api/v1/seller/staff", middlewares.StoreMemberFeatureWithOptionalKey(deployed, "staff:manage", "team")(team.AddStaff))

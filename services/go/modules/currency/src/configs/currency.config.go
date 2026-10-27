@@ -20,8 +20,8 @@ func ReadCurrencySettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 		DatabaseUrl:          reader.ReadRequiredString("CURRENCY_DATABASE_URL"),
 		DatabaseSchema:       reader.ReadStringOrDefault("CURRENCY_DATABASE_SCHEMA", "currency"),
 		DomainEventsTopicArn: reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
-		TokenIssuer:          reader.ReadStringOrDefault("CURRENCY_TOKEN_ISSUER", "https://auth.zudomart.com"),
-		TokenAudience:        reader.ReadStringOrDefault("CURRENCY_TOKEN_AUDIENCE", "zudomart-api"),
+		TokenIssuer:          reader.ReadStringOrDefault("CURRENCY_TOKEN_ISSUER", "https://auth.nantty.com"),
+		TokenAudience:        reader.ReadStringOrDefault("CURRENCY_TOKEN_AUDIENCE", "nantty-api"),
 		TrustedCountryHeader: reader.ReadStringOrDefault("CURRENCY_TRUSTED_COUNTRY_HEADER", "CloudFront-Viewer-Country"),
 	}
 }

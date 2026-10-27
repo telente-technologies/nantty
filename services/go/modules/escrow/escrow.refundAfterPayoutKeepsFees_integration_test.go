@@ -34,7 +34,7 @@ func (harness *escrowHarness) lastOutboxData(eventType string) map[string]any {
 	return decoded
 }
 
-func TestARefundAfterTheSellerWasPaidReturnsOnlyTheSellersPortionAndKeepsZudomartsFees(t *testing.T) {
+func TestARefundAfterTheSellerWasPaidReturnsOnlyTheSellersPortionAndKeepsNanttysFees(t *testing.T) {
 	harness := startEscrowHarness(t)
 	buyer, orderId := uuid.NewString(), uuid.NewString()
 	harness.registerCheckout(buyer, map[string]int64{orderId: 1_000_000})
@@ -62,7 +62,7 @@ func TestARefundAfterTheSellerWasPaidReturnsOnlyTheSellersPortionAndKeepsZudomar
 		t.Fatalf("escrow records the seller's portion as refunded: %d %s", clawed.RefundedMinor, clawed.Status)
 	}
 	if harness.balance(ledgermodels.PlatformEscrowFeeRevenueAccount("NGN")) != feeRevenueBefore || harness.balance(ledgermodels.RefundedProcessingFeesExpenseAccount("NGN")) != 0 {
-		t.Fatalf("Zudomart's escrow fee and processing fee are not refunded: %v", harness.NonZeroBalances())
+		t.Fatalf("Nantty's escrow fee and processing fee are not refunded: %v", harness.NonZeroBalances())
 	}
 	breakdown, _ := harness.lastOutboxData("escrow.clawedBack")["refundBreakdown"].(map[string]any)
 	if breakdown == nil || breakdown["refundedToBuyer"].(map[string]any)["amountMinor"].(float64) != float64(sellerPortion) ||

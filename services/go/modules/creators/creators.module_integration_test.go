@@ -21,7 +21,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 
-	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	moneyv1 "nantty/contracts/gen/go/nantty/money/v1"
 	"nantty/modules/creators/src"
 	"nantty/modules/creators/src/configs"
 	programservices "nantty/modules/creators/src/modules/creatorProgram/services"

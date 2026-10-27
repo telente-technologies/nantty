@@ -27,21 +27,21 @@ func auditActions(harness *adminHarness, token, query string) []string {
 
 func TestRecoveryCodesAreIssuedOnEnrollmentSingleUseAndRegeneratedWithStepUp(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	harness.bootstrapSuperadmin("recovery@zudomart.com")
-	session, secret := harness.enrollAndSignIn("recovery@zudomart.com", strongPassword)
+	harness.bootstrapSuperadmin("recovery@nantty.com")
+	session, secret := harness.enrollAndSignIn("recovery@nantty.com", strongPassword)
 	codes := session["recoveryCodes"].([]any)
 	if len(codes) != 8 {
 		t.Fatalf("enrollment returns eight recovery codes, got %v", codes)
 	}
 	signInWithCode := func(code string, status int) map[string]any {
-		challenge := harness.expect("POST", "/api/v1/admin/auth/login", map[string]string{"email": "recovery@zudomart.com", "password": strongPassword}, nil, http.StatusOK)
+		challenge := harness.expect("POST", "/api/v1/admin/auth/login", map[string]string{"email": "recovery@nantty.com", "password": strongPassword}, nil, http.StatusOK)
 		return harness.expect("POST", "/api/v1/admin/auth/mfa/verify", map[string]string{"challengeToken": challenge["challengeToken"].(string), "code": code}, nil, status)
 	}
 	signedIn := signInWithCode(codes[0].(string), http.StatusOK)
 	signInWithCode(codes[0].(string), http.StatusUnauthorized)
 	accessToken := signedIn["accessToken"].(string)
 	account := harness.expect("GET", "/api/v1/admin/account", nil, bearer(accessToken), http.StatusOK)
-	if account["recoveryCodesRemaining"] != float64(7) || account["account"].(map[string]any)["email"] != "recovery@zudomart.com" {
+	if account["recoveryCodesRemaining"] != float64(7) || account["account"].(map[string]any)["email"] != "recovery@nantty.com" {
 		t.Fatalf("unexpected account %v", account)
 	}
 	if denied := harness.expect("POST", "/api/v1/admin/account/recovery-codes/regenerate", nil, bearer(accessToken), http.StatusForbidden); denied["code"] != "STEP_UP_REQUIRED" {
@@ -62,9 +62,9 @@ func TestRecoveryCodesAreIssuedOnEnrollmentSingleUseAndRegeneratedWithStepUp(t *
 
 func TestOwnSessionsAreListedRevokedAndAudited(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	harness.bootstrapSuperadmin("sessions@zudomart.com")
-	first, secret := harness.enrollAndSignIn("sessions@zudomart.com", strongPassword)
-	second := harness.signInWithMfa("sessions@zudomart.com", strongPassword, secret, 0)
+	harness.bootstrapSuperadmin("sessions@nantty.com")
+	first, secret := harness.enrollAndSignIn("sessions@nantty.com", strongPassword)
+	second := harness.signInWithMfa("sessions@nantty.com", strongPassword, secret, 0)
 	token := second["accessToken"].(string)
 	sessions := harness.expect("GET", "/api/v1/admin/account/sessions", nil, bearer(token), http.StatusOK)["data"].([]any)
 	if len(sessions) != 2 {
@@ -90,8 +90,8 @@ func TestOwnSessionsAreListedRevokedAndAudited(t *testing.T) {
 
 func TestPasskeysRegisterSignInStepUpAndAreRemovedOnMfaReset(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	root := harness.signedInSuperadmin("root.passkeys@zudomart.com")
-	member, _ := harness.inviteAndSignIn(root, map[string]any{"email": "keys@zudomart.com", "name": "Keys", "role": "ADMIN", "permissions": []string{"audit:read"}, "reason": "passkey user"})
+	root := harness.signedInSuperadmin("root.passkeys@nantty.com")
+	member, _ := harness.inviteAndSignIn(root, map[string]any{"email": "keys@nantty.com", "name": "Keys", "role": "ADMIN", "permissions": []string{"audit:read"}, "reason": "passkey user"})
 	passkey := newSoftPasskey(t)
 	harness.expect("POST", "/api/v1/admin/account/passkeys/options", nil, bearer(member.token), http.StatusForbidden)
 	withStepUp := member.withStepUp(harness)
@@ -102,7 +102,7 @@ func TestPasskeysRegisterSignInStepUpAndAreRemovedOnMfaReset(t *testing.T) {
 	}
 	harness.expect("POST", "/api/v1/admin/account/passkeys", map[string]any{"label": "Replay", "credential": passkey.register(options)}, withStepUp, http.StatusConflict)
 
-	challenge := harness.expect("POST", "/api/v1/admin/auth/login", map[string]string{"email": "keys@zudomart.com", "password": adminPassword}, nil, http.StatusOK)
+	challenge := harness.expect("POST", "/api/v1/admin/auth/login", map[string]string{"email": "keys@nantty.com", "password": adminPassword}, nil, http.StatusOK)
 	if challenge["passkeyAvailable"] != true {
 		t.Fatalf("login advertises the passkey: %v", challenge)
 	}
@@ -135,8 +135,8 @@ func TestPasskeysRegisterSignInStepUpAndAreRemovedOnMfaReset(t *testing.T) {
 
 func TestIpAllowListIsEnforcedAtLoginAndOnEveryStaffRequest(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	root := harness.signedInSuperadmin("root.network@zudomart.com")
-	member, _ := harness.inviteAndSignIn(root, map[string]any{"email": "office@zudomart.com", "name": "Office", "role": "ADMIN", "permissions": []string{"audit:read"}, "reason": "office only"})
+	root := harness.signedInSuperadmin("root.network@nantty.com")
+	member, _ := harness.inviteAndSignIn(root, map[string]any{"email": "office@nantty.com", "name": "Office", "role": "ADMIN", "permissions": []string{"audit:read"}, "reason": "office only"})
 	path := "/api/v1/admin/admins/" + member.id
 	harness.expect("PATCH", path, map[string]any{"ipAllowList": []string{"300.0.0.1"}, "reason": "office network"}, root.withStepUp(harness), http.StatusBadRequest)
 	updated := harness.expect("PATCH", path, map[string]any{"ipAllowList": []string{"203.0.113.0/24"}, "reason": "office network"}, root.withStepUp(harness), http.StatusOK)["admin"].(map[string]any)
@@ -148,7 +148,7 @@ func TestIpAllowListIsEnforcedAtLoginAndOnEveryStaffRequest(t *testing.T) {
 	}
 	harness.expect("GET", "/api/v1/admin/auth/me", nil, withAddress(bearer(member.token), "203.0.113.40"), http.StatusOK)
 	harness.expect("GET", "/api/v1/admin/auth/me", nil, withAddress(bearer(member.token), "::ffff:203.0.113.41"), http.StatusOK)
-	login := map[string]string{"email": "office@zudomart.com", "password": adminPassword}
+	login := map[string]string{"email": "office@nantty.com", "password": adminPassword}
 	harness.expect("POST", "/api/v1/admin/auth/login", login, map[string]string{"X-Real-Ip": "198.51.100.9"}, http.StatusForbidden)
 	harness.expect("POST", "/api/v1/admin/auth/login", login, map[string]string{"X-Real-Ip": "203.0.113.40"}, http.StatusOK)
 	harness.expect("GET", "/api/v1/admin/auth/me", nil, withAddress(bearer(root.token), "198.51.100.9"), http.StatusOK)
@@ -170,7 +170,7 @@ func TestIpAllowListIsEnforcedAtLoginAndOnEveryStaffRequest(t *testing.T) {
 
 func TestMutationsWithoutTheirOwnAuditAreRecordedByTheCatchAll(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	root := harness.signedInSuperadmin("root.catchall@zudomart.com")
+	root := harness.signedInSuperadmin("root.catchall@nantty.com")
 	harness.expect("PATCH", "/api/v1/admin/users/me/preferences", map[string]string{"theme": "purple"}, bearer(root.token), http.StatusBadRequest)
 	harness.expect("PATCH", "/api/v1/admin/users/me/preferences", map[string]string{"theme": "dark"}, bearer(root.token), http.StatusNoContent)
 	consent := map[string]any{"policyVersion": "0.1-draft", "decidedAt": "2026-10-05T10:00:00Z", "categories": map[string]bool{"analytics": true, "personalization": false, "advertising": false}, "source": "web_banner"}
@@ -191,7 +191,7 @@ func TestMutationsWithoutTheirOwnAuditAreRecordedByTheCatchAll(t *testing.T) {
 
 func TestConfigurationVersionsAreListedAndRestoredWithStepUp(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("versions@zudomart.com")
+	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("versions@nantty.com")
 	path := "/api/v1/admin/config/username-rules"
 	original := harness.expect("GET", path, nil, bearer(accessToken), http.StatusOK)
 	if original["updatedBy"].(map[string]any)["name"] != "System" || original["isArchived"] != false || original["changeReason"] != "initial defaults" {
@@ -221,8 +221,8 @@ func TestConfigurationVersionsAreListedAndRestoredWithStepUp(t *testing.T) {
 
 func TestOverviewMetricsNeedMetricsReadAndDegradeWithoutSources(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	root := harness.signedInSuperadmin("root.metrics@zudomart.com")
-	member, _ := harness.inviteAndSignIn(root, map[string]any{"email": "auditor.metrics@zudomart.com", "name": "Auditor", "role": "ADMIN", "permissions": []string{"audit:read"}, "reason": "no metrics"})
+	root := harness.signedInSuperadmin("root.metrics@nantty.com")
+	member, _ := harness.inviteAndSignIn(root, map[string]any{"email": "auditor.metrics@nantty.com", "name": "Auditor", "role": "ADMIN", "permissions": []string{"audit:read"}, "reason": "no metrics"})
 	harness.expect("GET", "/api/v1/admin/metrics/overview?range=7d", nil, bearer(member.token), http.StatusForbidden)
 	harness.expect("GET", "/api/v1/admin/metrics/overview?range=90d", nil, bearer(root.token), http.StatusBadRequest)
 	metrics := harness.expect("GET", "/api/v1/admin/metrics/overview?range=24h", nil, bearer(root.token), http.StatusOK)
@@ -233,8 +233,8 @@ func TestOverviewMetricsNeedMetricsReadAndDegradeWithoutSources(t *testing.T) {
 
 func TestStaffPasswordsFollowTheFullPolicyWhenAcceptingInvitations(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	root := harness.signedInSuperadmin("root.passwords@zudomart.com")
-	harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "adaeze@zudomart.com", "name": "Adaeze Obi", "role": "ADMIN", "permissions": []string{"audit:read"}, "reason": "new hire"}, root.withStepUp(harness), http.StatusCreated)
+	root := harness.signedInSuperadmin("root.passwords@nantty.com")
+	harness.expect("POST", "/api/v1/admin/admins", map[string]any{"email": "adaeze@nantty.com", "name": "Adaeze Obi", "role": "ADMIN", "permissions": []string{"audit:read"}, "reason": "new hire"}, root.withStepUp(harness), http.StatusCreated)
 	token := harness.lastLoggedInvitationToken()
 	weak := harness.expect("POST", "/api/v1/admin/auth/accept-invitation", map[string]string{"token": token, "password": "adaeze-lantern-81"}, nil, http.StatusBadRequest)
 	if issues := weak["issues"].([]any); len(issues) != 2 {

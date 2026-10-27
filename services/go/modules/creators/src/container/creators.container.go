@@ -42,7 +42,7 @@ func NewCreatorsContainer(resources loaders.MoneyModuleResources, settings confi
 			LiveSchema: orDefault(settings.LiveSchema, "live"), CatalogSchema: orDefault(settings.CatalogSchema, "catalog"), InventorySchema: orDefault(settings.InventorySchema, "inventory"),
 			SocialUrl: settings.SocialInternalUrl, SocialToken: settings.SocialInternalToken, TolerateMissing: !settings.Money.IsProduction(),
 		},
-		Outbox: ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.creators"},
+		Outbox: ledgerevents.OutboxTable{Schema: schema, Source: "nantty.creators"},
 		Now:    time.Now,
 		schemaConfig: ent.SchemaConfig{
 			AffiliateAttributedSale: schema, AffiliateCommission: schema, AffiliateCommissionReversal: schema, AffiliateLink: schema, AffiliateLinkVisit: schema, AffiliateOrderVoid: schema, AffiliateProductCommission: schema, AffiliateProgramSetting: schema, BattleSettlement: schema, CreatorAffiliation: schema, CreatorBrandDeal: schema, CreatorEarning: schema,

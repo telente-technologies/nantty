@@ -52,7 +52,7 @@ func NewWalletContainer(resources loaders.MoneyModuleResources, settings configs
 		Audit:     audit,
 		Resources: resources, Settings: settings, Payments: payments, Encryptor: encryptor,
 		Ledger:      ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
-		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.wallet"},
+		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "nantty.wallet"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Currency: utils.RegionHeaderCurrencyResolver{
 			DefaultCurrency: settings.DefaultCurrency, TrustedCountryHeader: settings.TrustedCountryHeader, AccessVerifier: resources.AccessVerifier,

@@ -209,7 +209,7 @@ func (fake *FakeFlutterwave) SeedSuccessfulCharge(reference string, amountMinor 
 	defer fake.mutex.Unlock()
 	id := fake.newId()
 	transaction := &FakeFlwTransaction{
-		Id: id, TxRef: reference, FlwRef: fmt.Sprintf("FLW-SEED-%d", id), Email: "seeded@zudomart.test", AmountMinor: amountMinor, Currency: currency,
+		Id: id, TxRef: reference, FlwRef: fmt.Sprintf("FLW-SEED-%d", id), Email: "seeded@nantty.test", AmountMinor: amountMinor, Currency: currency,
 		Status: "successful", PaymentType: "card", CreatedAt: time.Now().UTC(),
 	}
 	fake.Transactions[id] = transaction

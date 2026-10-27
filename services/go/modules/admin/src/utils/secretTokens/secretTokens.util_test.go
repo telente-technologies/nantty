@@ -21,7 +21,7 @@ func TestStaffPasswordPolicyListsEveryProblem(t *testing.T) {
 		{"repeats a character", "Quartz-Laaaaantern-81", []string{"Avoid repeating the same character."}},
 	}
 	for _, testCase := range cases {
-		problems := FindStaffPasswordProblems(testCase.password, "opsdesk@zudomart.com", "Adaeze Obi")
+		problems := FindStaffPasswordProblems(testCase.password, "opsdesk@nantty.com", "Adaeze Obi")
 		if len(problems) != len(testCase.want) {
 			t.Errorf("%s: got %v, want %v", testCase.name, problems, testCase.want)
 			continue
@@ -35,7 +35,7 @@ func TestStaffPasswordPolicyListsEveryProblem(t *testing.T) {
 	if AssertStaffPasswordMeetsPolicy("weak", "a@b.co", "") == nil {
 		t.Fatal("weak passwords are rejected")
 	}
-	if problems := FindStaffPasswordProblems("Quartz-Obi-Lantern-81", "x@zudomart.com", "Obi Ada"); len(problems) != 0 {
+	if problems := FindStaffPasswordProblems("Quartz-Obi-Lantern-81", "x@nantty.com", "Obi Ada"); len(problems) != 0 {
 		t.Fatal("name parts shorter than four characters are ignored")
 	}
 }

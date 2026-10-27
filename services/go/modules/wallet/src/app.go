@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	moneyv1 "nantty/contracts/gen/go/nantty/money/v1"
 	sellerreserves "nantty/modules/ledger/src/modules/sellerReserves"
 	adbalancecontrollers "nantty/modules/wallet/src/modules/adBalances/controllers"
 	adbalancedtos "nantty/modules/wallet/src/modules/adBalances/dtos"

@@ -134,7 +134,7 @@ func TestCardCheckRefundWithLostReplyIsNotSentTwice(t *testing.T) {
 	t.Cleanup(func() { paymentservices.CardVerificationRefundRetryDelays = previous })
 	harness := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
 	token := harness.Tokens.UserAccessToken(uuid.NewString())
-	started := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", token, "", map[string]any{"returnTo": "https://zudomart.test/pay/return"})
+	started := harness.Call(http.MethodPost, "/api/v1/payments/saved-cards/setups", token, "", map[string]any{"returnTo": "https://nantty.test/pay/return"})
 	if started.Status != http.StatusCreated {
 		t.Fatalf("setup: %d %s", started.Status, started.Raw)
 	}

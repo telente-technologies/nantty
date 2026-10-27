@@ -1,4 +1,4 @@
-REVOKE SELECT ON "creator_violations" FROM zudomart_readers;
+REVOKE SELECT ON "creator_violations" FROM nantty_readers;
 -- reverse: create index "tiptransaction_sender_user_id_idempotency_key" to table: "tip_transactions"
 DROP INDEX "tiptransaction_sender_user_id_idempotency_key";
 -- reverse: create index "tiptransaction_creator_user_id_created_at" to table: "tip_transactions"

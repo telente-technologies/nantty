@@ -13,7 +13,7 @@ import (
 	"nantty/modules/payments/src/interfaces"
 )
 
-const GooglePlayPushTokenHeader = "X-Zudomart-Push-Token"
+const GooglePlayPushTokenHeader = "X-Nantty-Push-Token"
 
 type GooglePlayProductPrice struct {
 	AmountMinor int64

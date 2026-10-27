@@ -264,9 +264,9 @@ func (h *harness) callInternal(t *testing.T, path string, body any, wantStatus i
 	mac.Write([]byte("v1\nPOST\n" + path + "\n" + timestamp + "\n" + nonce + "\n" + hex.EncodeToString(bodyHash[:])))
 	request, _ := http.NewRequest("POST", h.server.URL+path, bytes.NewReader(encoded))
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("x-zudo-timestamp", timestamp)
-	request.Header.Set("x-zudo-nonce", nonce)
-	request.Header.Set("x-zudo-signature", "v1="+hex.EncodeToString(mac.Sum(nil)))
+	request.Header.Set("x-nantty-timestamp", timestamp)
+	request.Header.Set("x-nantty-nonce", nonce)
+	request.Header.Set("x-nantty-signature", "v1="+hex.EncodeToString(mac.Sum(nil)))
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		t.Fatal(err)

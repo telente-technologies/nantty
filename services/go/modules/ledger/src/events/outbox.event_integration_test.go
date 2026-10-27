@@ -16,7 +16,7 @@ import (
 func TestStuckEventKeepsRetryingPastTheAlertThresholdAndIsDeliveredWhenTheBrokerRecovers(t *testing.T) {
 	database := moneytesting.OpenTestDatabaseOrSkip(t)
 	schema := moneytesting.CreateFreshSchemaWithMigrations(t, database, "outbox", migrations.Files)
-	table := OutboxTable{Schema: schema, Source: "zudomart.test"}
+	table := OutboxTable{Schema: schema, Source: "nantty.test"}
 	ctx := context.Background()
 	err := databases.RunInMoneyTransaction(ctx, database, func(ctx context.Context, transaction *sql.Tx) error {
 		for _, subject := range []string{"poison", "healthy-1", "healthy-2"} {

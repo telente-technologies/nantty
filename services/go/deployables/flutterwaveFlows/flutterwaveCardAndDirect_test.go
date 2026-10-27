@@ -80,7 +80,7 @@ func TestCardBuyerRefundedBeforeSettlementGetsTheCardRefundAndAfterSettlementGet
 		t.Fatalf("refund must unlock the order in the buyer's wallet, available %d", available)
 	}
 	if destination := harness.refundDestinationAnnounced(late); destination != "wallet" {
-		t.Fatalf("the buyer is told the refund is in their Zudomart wallet, got %q", destination)
+		t.Fatalf("the buyer is told the refund is in their Nantty wallet, got %q", destination)
 	}
 	harness.assertWalletMatchesProvider(buyer)
 	harness.AssertLedgerHealthy()

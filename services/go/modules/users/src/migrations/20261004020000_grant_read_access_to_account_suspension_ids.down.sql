@@ -1,1 +1,1 @@
-REVOKE SELECT ("id") ON "account_suspensions" FROM zudomart_readers;
+REVOKE SELECT ("id") ON "account_suspensions" FROM nantty_readers;

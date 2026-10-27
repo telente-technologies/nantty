@@ -53,10 +53,10 @@ func (controller CreatorWidgetController) CreatorToday(writer http.ResponseWrite
 
 func (controller CreatorWidgetController) buildCreatorToday(ctx context.Context, creatorId, currency string, hidden bool) (CreatorTodayWidgetPayload, error) {
 	now := controller.Money.Container.Now().UTC()
-	payload := CreatorTodayWidgetPayload{AmountsHidden: hidden, DeepLink: "zudomart://creator/dashboard", GeneratedAt: now.Format(time.RFC3339)}
+	payload := CreatorTodayWidgetPayload{AmountsHidden: hidden, DeepLink: "nantty://creator/dashboard", GeneratedAt: now.Format(time.RFC3339)}
 	dashboard, err := controller.Money.BuildDashboard(ctx, creatorId, "today", currency)
 	if errors.Is(err, services.ErrCreatorProgramOnly) {
-		payload.DeepLink = "zudomart://creator"
+		payload.DeepLink = "nantty://creator"
 		return payload, nil
 	}
 	if err != nil {

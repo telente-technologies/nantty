@@ -12,7 +12,7 @@ import (
 
 func TestRequireUserStepUpAcceptsOnlyAFreshTokenForTheSameSession(t *testing.T) {
 	signingKey, publicSet := createSigningKeyAndPublicSet(t, "key-1")
-	verifier := NewAccessTokenVerifierFromKeySetProvider(func(context.Context) (jwk.Set, error) { return publicSet, nil }, "https://auth.zudomart.test", "zudomart-api")
+	verifier := NewAccessTokenVerifierFromKeySetProvider(func(context.Context) (jwk.Set, error) { return publicSet, nil }, "https://auth.nantty.test", "nantty-api")
 	cases := []struct {
 		name   string
 		header string
@@ -22,7 +22,7 @@ func TestRequireUserStepUpAcceptsOnlyAFreshTokenForTheSameSession(t *testing.T) 
 		{"missing header", "", http.StatusForbidden},
 		{"expired step-up", signTestToken(t, signingKey, UserStepUpAudience, time.Now().Add(-time.Hour), "session-1"), http.StatusForbidden},
 		{"another session", signTestToken(t, signingKey, UserStepUpAudience, time.Now().Add(time.Minute), "session-2"), http.StatusForbidden},
-		{"plain access token", signTestToken(t, signingKey, "zudomart-api", time.Now().Add(time.Minute), "session-1"), http.StatusForbidden},
+		{"plain access token", signTestToken(t, signingKey, "nantty-api", time.Now().Add(time.Minute), "session-1"), http.StatusForbidden},
 	}
 	guarded := RequireUserStepUp(verifier)(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) { writer.WriteHeader(http.StatusNoContent) }))
 	for _, testCase := range cases {

@@ -140,7 +140,7 @@ func TestBusinessAlreadyOnItsOwnGoldCantJoinAndCoveredBusinessCantBuyGoldAlone(t
 	ctx := context.Background()
 	client.Subscription.Create().SetProfileID(owner.businesses[2]).SetProfileType("business").SetOwnerUserID(owner.userId).SetPlanCode("gold_only").SetInterval("month").
 		SetChannel("web_checkout").SetStatus("active").SetListAmountMinor(300_000).SetAmountMinor(300_000).SetCurrency("NGN").SetCreatedAt(time.Now()).ExecX(ctx)
-	body := map[string]any{"profileIds": owner.businesses, "interval": "month", "returnTo": "https://zudomart.com/pay/return"}
+	body := map[string]any{"profileIds": owner.businesses, "interval": "month", "returnTo": "https://nantty.com/pay/return"}
 	if response := harness.Call(http.MethodPost, "/api/v1/subscriptions/gold-for-businesses/checkout", owner.token, "", body); response.Body["code"] != "PROFILE_ALREADY_HAS_GOLD" {
 		t.Fatalf("a business with its own Gold: %d %s", response.Status, response.Raw)
 	}

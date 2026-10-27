@@ -45,9 +45,9 @@ func (denylist *fakeDenylist) RevokeSessions(_ context.Context, sessionIds []str
 func verifierWithFreshKey(t *testing.T) (*AccessTokenVerifier, func(sessionId string) string) {
 	t.Helper()
 	signingKey, publicSet := createSigningKeyAndPublicSet(t, "key-1")
-	verifier := NewAccessTokenVerifierFromKeySetProvider(func(context.Context) (jwk.Set, error) { return publicSet, nil }, "https://auth.zudomart.test", "zudomart-api")
+	verifier := NewAccessTokenVerifierFromKeySetProvider(func(context.Context) (jwk.Set, error) { return publicSet, nil }, "https://auth.nantty.test", "nantty-api")
 	sign := func(sessionId string) string {
-		return signTestToken(t, signingKey, "zudomart-api", time.Now().Add(10*time.Minute), sessionId)
+		return signTestToken(t, signingKey, "nantty-api", time.Now().Add(10*time.Minute), sessionId)
 	}
 	return verifier, sign
 }

@@ -33,7 +33,7 @@ func NewEscrowContainer(resources loaders.MoneyModuleResources, settings configs
 	return &Container{
 		Resources: resources, Settings: settings, Payments: payments,
 		Ledger:      ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
-		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.escrow"},
+		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "nantty.escrow"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Parties:     ledgerrepositories.PartyDirectory{Database: resources.Database, AccountSchema: settings.Money.AccountSchema, CatalogSchema: settings.Money.CatalogSchema, Logger: resources.Logger},
 		Now:         time.Now,

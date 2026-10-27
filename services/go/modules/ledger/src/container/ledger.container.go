@@ -20,7 +20,7 @@ func NewLedgerContainer(resources loaders.MoneyModuleResources, settings loaders
 	return &Container{
 		Resources: resources, Settings: settings,
 		Ledger: services.NewLedgerInSchema(settings.DatabaseSchema),
-		Outbox: events.OutboxTable{Schema: settings.DatabaseSchema, Source: "zudomart.ledger"},
+		Outbox: events.OutboxTable{Schema: settings.DatabaseSchema, Source: "nantty.ledger"},
 		Now:    time.Now,
 	}
 }

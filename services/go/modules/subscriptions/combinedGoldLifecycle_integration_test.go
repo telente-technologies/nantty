@@ -39,7 +39,7 @@ func TestCombinedGoldLifecycleAddRemoveRenewRejectAndPremiumLapse(t *testing.T) 
 	ctx := context.Background()
 	client := harness.module.Billing.Container.Client(harness.Database)
 	b := owner.businesses
-	started := harness.combinedGold(owner, "checkout", map[string]any{"profileIds": b[:3], "interval": "month", "expectedTotalMinor": 792_000, "returnTo": "https://zudomart.com/pay/return"})
+	started := harness.combinedGold(owner, "checkout", map[string]any{"profileIds": b[:3], "interval": "month", "expectedTotalMinor": 792_000, "returnTo": "https://nantty.com/pay/return"})
 	if amountOf(started, "price") != 792_000 {
 		t.Fatalf("checkout: %v", started)
 	}

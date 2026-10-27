@@ -47,7 +47,7 @@ func ReadSubscriptionsSettingsFromEnvironment(reader *platformconfig.Environment
 		BillingJobsQueue:       reader.ReadStringOrDefault("SUBSCRIPTION_BILLING_QUEUE", "jobs-subscription-billing"),
 		CreatorsSchema:         reader.ReadStringOrDefault("CREATORS_DATABASE_SCHEMA", "creators"),
 		SocialSchema:           reader.ReadStringOrDefault("SUBSCRIPTIONS_SOCIAL_SCHEMA", "social"),
-		PublicWebBaseUrl:       strings.TrimRight(reader.ReadStringOrDefault("PUBLIC_WEB_BASE_URL", "https://zudomart.com"), "/"),
+		PublicWebBaseUrl:       strings.TrimRight(reader.ReadStringOrDefault("PUBLIC_WEB_BASE_URL", "https://nantty.com"), "/"),
 		OfferLinkKey:           reader.ReadStringOrDefault("SUBSCRIPTION_OFFER_LINK_KEY", ""),
 	}
 	if settings.OfferLinkKey == "" {

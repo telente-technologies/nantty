@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	moneyv1 "nantty/contracts/gen/go/nantty/money/v1"
 	"nantty/modules/live/src/interfaces"
 )
 
@@ -87,7 +87,7 @@ func TestTranslateSpaceCoinGiftErrors(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.reason, func(t *testing.T) {
 			base := status.New(test.code, "safe service message")
-			detailed, err := base.WithDetails(&errdetails.ErrorInfo{Reason: test.reason, Domain: "money.zudomart.com"})
+			detailed, err := base.WithDetails(&errdetails.ErrorInfo{Reason: test.reason, Domain: "money.nantty.com"})
 			if err != nil {
 				t.Fatalf("WithDetails() error = %v", err)
 			}

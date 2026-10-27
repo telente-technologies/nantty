@@ -47,7 +47,7 @@ func startGooglePlayFixtureServer(t *testing.T, productFixture string) (*GoogleP
 	t.Cleanup(server.Close)
 	account := strings.ReplaceAll(string(readGooglePlayFixture(t, "serviceAccount.json")), "TOKEN_URI", server.URL+"/token")
 	verifier, err := NewGooglePlayVerifier(GooglePlaySettings{
-		PackageName: "com.zudomart.app", ServiceAccountJson: []byte(account), ApiBaseUrl: server.URL, PushToken: "push-secret",
+		PackageName: "com.nantty.app", ServiceAccountJson: []byte(account), ApiBaseUrl: server.URL, PushToken: "push-secret",
 		ProductPrices:          map[string]GooglePlayProductPrice{"coins.pack.1500": {AmountMinor: 150000, Currency: "NGN"}, "blue.monthly": {AmountMinor: 250000, Currency: "NGN"}},
 		SubscriptionProductIds: []string{"blue.monthly"},
 	})

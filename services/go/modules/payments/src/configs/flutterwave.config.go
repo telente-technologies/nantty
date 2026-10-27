@@ -46,7 +46,7 @@ func ReadFlutterwaveSettings(reader *platformconfig.EnvironmentReader) Flutterwa
 
 func ReadWalletSettings(reader *platformconfig.EnvironmentReader) WalletSettings {
 	return WalletSettings{
-		AliasEmailDomain:             reader.ReadStringOrDefault("WALLET_ALIAS_EMAIL_DOMAIN", "wallets.zudomart.com"),
+		AliasEmailDomain:             reader.ReadStringOrDefault("WALLET_ALIAS_EMAIL_DOMAIN", "wallets.nantty.com"),
 		PsaCountries:                 reader.ReadCommaSeparatedListOrDefault("WALLET_PSA_COUNTRIES", []string{"NG"}),
 		DepositFeeBps:                int64(reader.ReadIntegerOrDefault("WALLET_DEPOSIT_FEE_BPS", 50)),
 		DepositFeeCaps:               loaders.ParseCurrencyAmountMap(reader.ReadStringOrDefault("WALLET_DEPOSIT_FEE_CAPS", "NGN:100000")),

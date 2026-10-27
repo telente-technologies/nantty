@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	WidgetTokenAudience        = "zudomart-widgets"
+	WidgetTokenAudience        = "nantty-widgets"
 	WidgetTokenScope           = "widgets:read"
 	WidgetPrincipalScope       = "widgets"
 	widgetTokenCurrentPrefix   = "auth:widget-token:"

@@ -75,7 +75,7 @@ func (signer testAppleSigner) sign(t *testing.T, payload any) string {
 
 func creatorTransaction(transactionId string) map[string]any {
 	return map[string]any{
-		"transactionId": transactionId, "originalTransactionId": "orig-1", "bundleId": "com.zudomart.app", "productId": "zudomart.creatorsub.tier_1000.s1.monthly",
+		"transactionId": transactionId, "originalTransactionId": "orig-1", "bundleId": "com.nantty.app", "productId": "nantty.creatorsub.tier_1000.s1.monthly",
 		"purchaseDate": time.Date(2026, 9, 21, 0, 0, 0, 0, time.UTC).UnixMilli(), "expiresDate": time.Date(2026, 10, 21, 0, 0, 0, 0, time.UTC).UnixMilli(),
 		"price": 1_500_000, "currency": "NGN", "environment": "Sandbox", "type": "Auto-Renewable Subscription", "appAccountToken": "0199A3F2-0000-7000-8000-000000000001",
 	}
@@ -83,7 +83,7 @@ func creatorTransaction(transactionId string) map[string]any {
 
 func TestAppleCreatorSubscriptionReceiptsCarryTheAccountTokenAndPrice(t *testing.T) {
 	signer := newTestAppleSigner(t)
-	verifier, err := NewAppleAppStoreVerifier(AppleAppStoreSettings{BundleId: "com.zudomart.app", Environment: "Sandbox", RootCertificatesPem: signer.rootPem})
+	verifier, err := NewAppleAppStoreVerifier(AppleAppStoreSettings{BundleId: "com.nantty.app", Environment: "Sandbox", RootCertificatesPem: signer.rootPem})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,7 +100,7 @@ func TestAppleCreatorSubscriptionReceiptsCarryTheAccountTokenAndPrice(t *testing
 
 	notify := func(notificationType, subtype string) interfaces.StoreRefundNotification {
 		payload := map[string]any{"notificationType": notificationType, "subtype": subtype, "notificationUUID": notificationType + subtype,
-			"data": map[string]any{"bundleId": "com.zudomart.app", "signedTransactionInfo": signer.sign(t, creatorTransaction("tx-2"))}}
+			"data": map[string]any{"bundleId": "com.nantty.app", "signedTransactionInfo": signer.sign(t, creatorTransaction("tx-2"))}}
 		raw, _ := json.Marshal(map[string]string{"signedPayload": signer.sign(t, payload)})
 		notification, err := verifier.VerifySignedRefundNotification(context.Background(), raw, nil)
 		if err != nil {

@@ -18,7 +18,7 @@ var (
 	FeatureKinds      = []string{"HERO_BANNER", "PROMO_BANNER", "FEATURED_COLLECTION", "FEATURED_STORE"}
 	TargetTypes       = []string{"CATEGORY", "COLLECTION", "STORE", "PRODUCT", "URL"}
 	Collections       = []string{"sales_of_the_day", "featured_brands", "new_arrivals"}
-	zudomartUrlFormat = regexp.MustCompile(`^https://([a-z0-9-]+\.)*zudomart\.com(/|$)`)
+	nanttyUrlFormat = regexp.MustCompile(`^https://([a-z0-9-]+\.)*nantty\.com(/|$)`)
 )
 
 type FeatureFields struct {
@@ -96,8 +96,8 @@ func checkFields(settings configs.CatalogSettings, fields FeatureFields, issues 
 	}
 	switch fields.TargetType {
 	case "URL":
-		if !zudomartUrlFormat.MatchString(fields.TargetValue) || len(fields.TargetValue) > 200 {
-			issues.Add("targetValue", "Links must be https:// addresses on zudomart.com.")
+		if !nanttyUrlFormat.MatchString(fields.TargetValue) || len(fields.TargetValue) > 200 {
+			issues.Add("targetValue", "Links must be https:// addresses on nantty.com.")
 		}
 	case "COLLECTION":
 		if !slices.Contains(Collections, fields.TargetValue) {

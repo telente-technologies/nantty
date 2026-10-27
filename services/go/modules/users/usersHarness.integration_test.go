@@ -74,7 +74,7 @@ func startUsersModuleAgainstFreshSchema(t *testing.T) *usersTestHarness {
 	t.Helper()
 	databaseUrl := os.Getenv("USERS_TEST_DATABASE_URL")
 	if databaseUrl == "" {
-		databaseUrl = "postgres://zudomart:zudomart@localhost:15432/zudomart_test?sslmode=disable"
+		databaseUrl = "postgres://nantty:nantty@localhost:15432/nantty_test?sslmode=disable"
 	}
 	ctx := context.Background()
 	administrator, err := postgres.OpenDatabaseAndVerifyConnection(ctx, databaseUrl, postgres.DefaultPoolSettings())
@@ -111,7 +111,7 @@ func startUsersModuleAgainstFreshSchema(t *testing.T) *usersTestHarness {
 		Environment: "test", DatabaseUrl: databaseUrl, DatabaseSchema: schema, TokenIssuer: identitytest.FakeIssuer, TokenAudience: identitytest.FakeAccountAudience,
 		UsernameChangeCooldown: 30 * 24 * time.Hour, UsernameMaximumChangesYear: 3, UsernameQuarantine: 120 * 24 * time.Hour,
 		CatalogSchema:      schema + "_catalog",
-		MediaPublicBaseUrl: "https://media.zudomart.test", MediaUploadBaseUrl: "https://upload.zudomart.test", MediaUploadSigningKey: bytes.Repeat([]byte{3}, 32), MediaUploadIntentTimeToLive: 10 * time.Minute,
+		MediaPublicBaseUrl: "https://media.nantty.test", MediaUploadBaseUrl: "https://upload.nantty.test", MediaUploadSigningKey: bytes.Repeat([]byte{3}, 32), MediaUploadIntentTimeToLive: 10 * time.Minute,
 		AddressPhoneKey: bytes.Repeat([]byte{4}, 32),
 		Privacy: configs.PrivacySettings{
 			ExportBucket: "users-test-exports", ExportRegion: "eu-west-1", ExportDownloadLinkTtl: time.Minute, ExportArchiveTtl: time.Hour,

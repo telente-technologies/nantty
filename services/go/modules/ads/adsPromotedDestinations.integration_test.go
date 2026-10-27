@@ -102,7 +102,7 @@ func TestStoresAndProfilesCanBeBoostedOnlyByThoseWhoManageThem(t *testing.T) {
 	ownership.allow("store", storeId, manager.id.String())
 	ownership.allow("store", suspendedStoreId, owner.id.String())
 	ownership.allow("profile", owner.id.String(), owner.id.String())
-	logo := "https://cdn.zudomart.com/logo.png"
+	logo := "https://cdn.nantty.com/logo.png"
 	directory.put(interfaces.PromotedDestination{Kind: "store", Id: storeId, Name: "Folake Fabrics", Handle: "folakefabrics", AvatarUrl: &logo, Verified: true, Available: true}, owner.id.String())
 	directory.put(interfaces.PromotedDestination{Kind: "store", Id: suspendedStoreId, Name: "Closed Shop", Handle: "closedshop", Available: false}, owner.id.String())
 	directory.put(interfaces.PromotedDestination{Kind: "profile", Id: owner.id.String(), Name: "Folake", Handle: "folake", Private: true, Available: true}, owner.id.String())

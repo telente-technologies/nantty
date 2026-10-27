@@ -36,7 +36,7 @@ func Normalize(code string) string {
 
 func DeriveHashKey(masterKey []byte) []byte {
 	mac := hmac.New(sha256.New, masterKey)
-	mac.Write([]byte("zudomart-admin-recovery-codes"))
+	mac.Write([]byte("nantty-admin-recovery-codes"))
 	return mac.Sum(nil)
 }
 

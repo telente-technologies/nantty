@@ -24,7 +24,7 @@ func readAppStoreFixture(t *testing.T, name string) []byte {
 
 func newFixtureAppleVerifier(t *testing.T, apiBaseUrl string, withApiKey bool) *AppleAppStoreVerifier {
 	t.Helper()
-	settings := AppleAppStoreSettings{BundleId: "com.zudomart.app", Environment: "Sandbox", RootCertificatesPem: readAppStoreFixture(t, "rootCertificate.pem"), StoreFeeBasisPoints: 3000, ApiBaseUrl: apiBaseUrl, IssuerId: "issuer-1", KeyId: "KEY123"}
+	settings := AppleAppStoreSettings{BundleId: "com.nantty.app", Environment: "Sandbox", RootCertificatesPem: readAppStoreFixture(t, "rootCertificate.pem"), StoreFeeBasisPoints: 3000, ApiBaseUrl: apiBaseUrl, IssuerId: "issuer-1", KeyId: "KEY123"}
 	if withApiKey {
 		settings.PrivateKeyPem = readAppStoreFixture(t, "apiSigningKey.p8")
 	}

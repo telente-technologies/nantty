@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	moneyv1 "nantty/contracts/gen/go/zudomart/money/v1"
+	moneyv1 "nantty/contracts/gen/go/nantty/money/v1"
 	"nantty/modules/creators/src/generated/ent"
 	"nantty/modules/creators/src/modules/liveMoney/models"
 	"nantty/modules/creators/src/modules/liveMoney/services"
@@ -131,13 +131,13 @@ func (controller LiveMoneyGrpcController) convertError(ctx context.Context, err 
 		if failure.Precondition {
 			code = codes.FailedPrecondition
 		}
-		information := &errdetails.ErrorInfo{Reason: failure.Reason, Domain: "money.zudomart.com", Metadata: map[string]string{}}
+		information := &errdetails.ErrorInfo{Reason: failure.Reason, Domain: "money.nantty.com", Metadata: map[string]string{}}
 		if failure.CoinBalance != nil {
 			information.Metadata["coinBalance"] = strconv.FormatInt(*failure.CoinBalance, 10)
 		}
 		return withErrorInfo(code, failure.Message, information)
 	case errors.Is(err, services.ErrIdempotencyKeyReused):
-		return withErrorInfo(codes.AlreadyExists, "This idempotency key was used with a different request.", &errdetails.ErrorInfo{Reason: "IDEMPOTENCY_KEY_REUSED", Domain: "money.zudomart.com"})
+		return withErrorInfo(codes.AlreadyExists, "This idempotency key was used with a different request.", &errdetails.ErrorInfo{Reason: "IDEMPOTENCY_KEY_REUSED", Domain: "money.nantty.com"})
 	}
 	controller.Logger.ErrorContext(ctx, "live money request failed", slog.Any("error", err))
 	return status.Error(codes.Internal, "internal error")

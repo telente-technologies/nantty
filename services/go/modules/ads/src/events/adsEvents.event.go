@@ -3,7 +3,7 @@ package events
 import "time"
 
 const (
-	EventSource = "zudomart.ads"
+	EventSource = "nantty.ads"
 
 	AdImpressionRecorded    = "ad.impressionRecorded"
 	AdReviewed              = "ad.reviewed"

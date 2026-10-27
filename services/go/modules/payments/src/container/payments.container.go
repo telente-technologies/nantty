@@ -86,7 +86,7 @@ func NewPaymentsContainer(resources loaders.MoneyModuleResources, settings confi
 		Resources: resources, Settings: settings, Providers: providers, StoreVerifiers: storeVerifiers, Accounts: accounts, CardHandoffs: cardHandoffs, OrderStatuses: orderStatuses,
 		Documents: overrides.Documents, Audit: auditRecorder(settings, overrides.Audit),
 		Ledger:      ledgerservices.NewLedgerInSchema(settings.Money.LedgerSchema),
-		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "zudomart.payments"},
+		Outbox:      ledgerevents.OutboxTable{Schema: schema, Source: "nantty.payments"},
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Now:         time.Now,
 		schemaConfig: ent.SchemaConfig{

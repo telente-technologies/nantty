@@ -34,7 +34,7 @@ func main() {
 func run(email, name string) error {
 	databaseUrl := os.Getenv("ADMIN_DATABASE_URL")
 	if databaseUrl == "" || email == "" {
-		return fmt.Errorf("usage: ADMIN_DATABASE_URL=... [ADMIN_BOOTSTRAP_PASSWORD=...] bootstrapSuperadmin -email you@zudomart.com -name \"Your Name\"")
+		return fmt.Errorf("usage: ADMIN_DATABASE_URL=... [ADMIN_BOOTSTRAP_PASSWORD=...] bootstrapSuperadmin -email you@nantty.com -name \"Your Name\"")
 	}
 	password, err := readPassword()
 	if err != nil {

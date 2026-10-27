@@ -9,15 +9,15 @@ import (
 )
 
 const (
-	DomainEventsExchange    = "zudomart.events"
-	JobsExchange            = "zudomart.jobs"
-	RetryExchange           = "zudomart.retry"
-	DeadLetterExchange      = "zudomart.dlx"
+	DomainEventsExchange    = "nantty.events"
+	JobsExchange            = "nantty.jobs"
+	RetryExchange           = "nantty.retry"
+	DeadLetterExchange      = "nantty.dlx"
 	MaximumDeliveryAttempts = 5
-	attemptHeader           = "x-zudomart-attempt"
-	lastErrorHeader         = "x-zudomart-last-error"
-	subjectHeader           = "x-zudomart-subject"
-	envelopeSchemaHeader    = "x-zudomart-schema"
+	attemptHeader           = "x-nantty-attempt"
+	lastErrorHeader         = "x-nantty-last-error"
+	subjectHeader           = "x-nantty-subject"
+	envelopeSchemaHeader    = "x-nantty-schema"
 	envelopeSchemaVersion   = "envelope.v1"
 )
 

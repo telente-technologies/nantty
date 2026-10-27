@@ -13,7 +13,7 @@ import (
 	"nantty/platform/events"
 )
 
-const EventSource = "zudomart.moderation"
+const EventSource = "nantty.moderation"
 
 func EnqueueOutboxEventInTransaction(ctx context.Context, tx *ent.Tx, eventType, subject string, occurredAt time.Time, data any) error {
 	event, err := events.BuildOutboxEventWithEnvelope(eventType, EventSource, subject, 1, occurredAt, data)

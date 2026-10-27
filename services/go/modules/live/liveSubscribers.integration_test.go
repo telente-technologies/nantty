@@ -37,7 +37,7 @@ func TestStreamStatsCountSubscriptionsStartedDuringTheLive(t *testing.T) {
 func TestSchemaCreatorSubscriptionsReadsAccessAndStartsFromTheSubscriptionsSchema(t *testing.T) {
 	databaseUrl := os.Getenv("LIVE_TEST_DATABASE_URL")
 	if databaseUrl == "" {
-		databaseUrl = "postgres://zudomart:zudomart@localhost:15432/zudomart_live_test?sslmode=disable"
+		databaseUrl = "postgres://nantty:nantty@localhost:15432/nantty_live_test?sslmode=disable"
 	}
 	ctx := context.Background()
 	database, err := postgres.OpenDatabaseAndVerifyConnection(ctx, databaseUrl, postgres.DefaultPoolSettings())

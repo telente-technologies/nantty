@@ -85,7 +85,7 @@ func startPrivacyHarness(t *testing.T, adjust ...func(*configs.PrivacySettings))
 	t.Helper()
 	databaseUrl := os.Getenv("USERS_TEST_DATABASE_URL")
 	if databaseUrl == "" {
-		databaseUrl = "postgres://zudomart:zudomart@localhost:15432/zudomart_test?sslmode=disable"
+		databaseUrl = "postgres://nantty:nantty@localhost:15432/nantty_test?sslmode=disable"
 	}
 	ctx := context.Background()
 	administrator, err := postgres.OpenDatabaseAndVerifyConnection(ctx, databaseUrl, postgres.DefaultPoolSettings())
@@ -120,7 +120,7 @@ func startPrivacyHarness(t *testing.T, adjust ...func(*configs.PrivacySettings))
 	identityports.Default.RegisterAuditRecorder(audit)
 	clock := &testClock{}
 	privacy := configs.PrivacySettings{
-		ExportBucket: "zudomart-exports-test", ExportObjectEndpoint: "http://localhost:18333", ExportRegion: "eu-west-1",
+		ExportBucket: "nantty-exports-test", ExportObjectEndpoint: "http://localhost:18333", ExportRegion: "eu-west-1",
 		ExportDownloadLinkTtl: 5 * time.Minute, ExportArchiveTtl: 72 * time.Hour, ExportWorkerPollInterval: time.Hour, DeletionGraceDays: 30,
 		DeletionWorkerPollInterval: time.Hour, InternalApiToken: "internal-secret-token-for-tests", AnonymousConsentPerMinute: 1000,
 	}

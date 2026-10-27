@@ -11,7 +11,7 @@ import (
 
 func TestCreatorEligibilityIsAViewOfTheCreatorThresholds(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
-	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("eligibility@zudomart.com")
+	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("eligibility@nantty.com")
 	eligibility := harness.expect("GET", "/api/v1/admin/config/creator-eligibility", nil, bearer(accessToken), http.StatusOK)
 	thresholds := harness.expect("GET", "/api/v1/admin/config/creator-thresholds", nil, bearer(accessToken), http.StatusOK)
 	if eligibility["key"] != "creator-eligibility" || eligibility["version"] != thresholds["version"] || eligibility["content"].(map[string]any)["minimumFollowers"] != float64(1000) {

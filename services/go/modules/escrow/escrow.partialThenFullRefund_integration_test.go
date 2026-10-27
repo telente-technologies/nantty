@@ -50,7 +50,7 @@ func TestAPartiallyRefundedEscrowCanBeFinishedByRefundingExactlyTheRest(t *testi
 	harness.RunMoneyWorkers()
 	held := harness.escrow.Application.Container.Client(harness.Database).Escrow.Query().Where(escrow.OrderID(orderId)).OnlyX(context.Background())
 	if want := 100_000 + held.ReleasedToSellerMinor; held.RefundedMinor != want || held.Status != escrow.StatusRefunded {
-		t.Fatalf("the rest refunds only the seller's kept share once; Zudomart keeps its fees on the released part: %d, want %d", held.RefundedMinor, want)
+		t.Fatalf("the rest refunds only the seller's kept share once; Nantty keeps its fees on the released part: %d, want %d", held.RefundedMinor, want)
 	}
 	if buyerMoney := harness.balance(ledgermodels.WalletAvailableAccount(buyer, "NGN")) + harness.balance(ledgermodels.WalletDepositHoldAccount(buyer, "NGN")); buyerMoney != held.RefundedMinor {
 		t.Fatalf("the buyer holds everything refunded: %d %v", buyerMoney, harness.NonZeroBalances())

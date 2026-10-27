@@ -24,11 +24,11 @@ func TestRemoteJwksThatWasDownAtStartupNeverHangsRequestsAndRecoversWithoutWaiti
 	t.Cleanup(server.Close)
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	verifier, err := NewAccessTokenVerifierFromRemoteJwks(ctx, server.URL, "https://auth.zudomart.test", "zudomart-api")
+	verifier, err := NewAccessTokenVerifierFromRemoteJwks(ctx, server.URL, "https://auth.nantty.test", "nantty-api")
 	if err != nil {
 		t.Fatal(err)
 	}
-	token := signTestToken(t, signingKey, "zudomart-api", time.Now().Add(time.Minute), "session-1")
+	token := signTestToken(t, signingKey, "nantty-api", time.Now().Add(time.Minute), "session-1")
 	started := time.Now()
 	if _, err := verifier.VerifyAccessTokenAndExtractPrincipal(context.Background(), token); err == nil {
 		t.Fatal("a token cannot be verified while the key set is unavailable")

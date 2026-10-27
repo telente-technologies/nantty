@@ -47,15 +47,15 @@ func ReadCatalogSettingsFromEnvironment(reader *platformconfig.EnvironmentReader
 		DatabaseSchema:         reader.ReadStringOrDefault("CATALOG_DATABASE_SCHEMA", "catalog"),
 		DomainEventsTopicArn:   reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
 		AccessTokenJwksUrl:     reader.ReadStringOrDefault("AUTH_JWKS_URL", "http://localhost:8101/.well-known/jwks.json"),
-		TokenIssuer:            reader.ReadStringOrDefault("AUTH_TOKEN_ISSUER", "https://auth.zudomart.com"),
-		TokenAudience:          reader.ReadStringOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
+		TokenIssuer:            reader.ReadStringOrDefault("AUTH_TOKEN_ISSUER", "https://auth.nantty.com"),
+		TokenAudience:          reader.ReadStringOrDefault("AUTH_TOKEN_AUDIENCE", "nantty-api"),
 		RedisUrl:               reader.ReadStringOrDefault("CATALOG_REDIS_URL", ""),
-		MediaPublicBaseUrl:     reader.ReadStringOrDefault("MEDIA_PUBLIC_BASE_URL", "http://localhost:18333/zudomart-media-public"),
+		MediaPublicBaseUrl:     reader.ReadStringOrDefault("MEDIA_PUBLIC_BASE_URL", "http://localhost:18333/nantty-media-public"),
 		InternalApiToken:       reader.ReadStringOrDefault("CATALOG_INTERNAL_API_TOKEN", ""),
 		EventsQueueName:        reader.ReadStringOrDefault("CATALOG_EVENTS_QUEUE", ""),
 		SocialInternalUrl:      reader.ReadStringOrDefault("CATALOG_SOCIAL_INTERNAL_URL", ""),
 		SocialInternalToken:    reader.ReadStringOrDefault("CATALOG_SOCIAL_INTERNAL_TOKEN", ""),
-		PublicWebBaseUrl:       reader.ReadStringOrDefault("PUBLIC_WEB_BASE_URL", "https://zudomart.com"),
+		PublicWebBaseUrl:       reader.ReadStringOrDefault("PUBLIC_WEB_BASE_URL", "https://nantty.com"),
 		ImportJobsQueue:        reader.ReadStringOrDefault("CATALOG_IMPORT_JOBS_QUEUE", "jobs-catalog-import"),
 		ScheduledPublishPeriod: reader.ReadDurationOrDefault("CATALOG_SCHEDULED_PUBLISH_INTERVAL", 30*time.Second),
 		AdminInternalUrl:       reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
@@ -75,7 +75,7 @@ func ReadCatalogSettingsFromEnvironment(reader *platformconfig.EnvironmentReader
 	return settings
 }
 
-var developmentDataKey = sha256.Sum256([]byte("zudomart-catalog-local-only-data-key"))
+var developmentDataKey = sha256.Sum256([]byte("nantty-catalog-local-only-data-key"))
 
 func ReadDataEncryptionKey(reader *platformconfig.EnvironmentReader, isProduction bool) []byte {
 	encoded := reader.ReadStringOrDefault("CATALOG_DATA_ENCRYPTION_KEY", "")

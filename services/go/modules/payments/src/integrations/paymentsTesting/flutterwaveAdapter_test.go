@@ -25,12 +25,12 @@ func newFakeFlutterwaveAdapter(t *testing.T) (*FakeFlutterwave, *integrations.Fl
 func TestFlutterwaveCheckoutIsHashedAndVerifiedByIdWithTheExactReference(t *testing.T) {
 	fake, adapter := newFakeFlutterwaveAdapter(t)
 	ctx := context.Background()
-	session, err := adapter.InitializeCharge(ctx, interfaces.ChargeRequest{Reference: "chk-abc", AmountMinor: 250_050, Currency: "NGN", CustomerEmail: "Buyer@Zudomart.test", SuccessUrl: "https://zudomart.test/pay/return"})
+	session, err := adapter.InitializeCharge(ctx, interfaces.ChargeRequest{Reference: "chk-abc", AmountMinor: 250_050, Currency: "NGN", CustomerEmail: "Buyer@Nantty.test", SuccessUrl: "https://nantty.test/pay/return"})
 	if err != nil || !strings.Contains(session.CheckoutUrl, "/hosted/pay/chk-abc") {
 		t.Fatalf("checkout: %v %+v", err, session)
 	}
 	paid := fake.CompleteCheckout("chk-abc", 0, 3_500, "card")
-	if _, err := adapter.InitializeCharge(ctx, interfaces.ChargeRequest{Reference: "chk-other", AmountMinor: 100, Currency: "NGN", CustomerEmail: "x@zudomart.test"}); err != nil {
+	if _, err := adapter.InitializeCharge(ctx, interfaces.ChargeRequest{Reference: "chk-other", AmountMinor: 100, Currency: "NGN", CustomerEmail: "x@nantty.test"}); err != nil {
 		t.Fatal(err)
 	}
 	other := fake.TransactionByReference("chk-other")
@@ -38,11 +38,11 @@ func TestFlutterwaveCheckoutIsHashedAndVerifiedByIdWithTheExactReference(t *test
 	if err != nil || verified.Reference != "chk-abc" || verified.AmountMinor != 250_050 || verified.ProviderFeeMinor != 3_500 || verified.Outcome != interfaces.OutcomeSucceeded {
 		t.Fatalf("a charge id from another reference must fall back to the reference lookup: %v %+v", err, verified)
 	}
-	if verified.ProviderChargeId != itoa(paid.Id) || verified.CustomerEmail != "buyer@zudomart.test" || verified.Authorization == nil || !strings.HasPrefix(verified.Authorization.AuthorizationCode, "flw-t") {
+	if verified.ProviderChargeId != itoa(paid.Id) || verified.CustomerEmail != "buyer@nantty.test" || verified.Authorization == nil || !strings.HasPrefix(verified.Authorization.AuthorizationCode, "flw-t") {
 		t.Fatalf("verification details: %+v", verified)
 	}
 	fake.RejectPayloadHash = true
-	if _, err := adapter.InitializeCharge(ctx, interfaces.ChargeRequest{Reference: "chk-tampered", AmountMinor: 100, Currency: "NGN", CustomerEmail: "x@zudomart.test"}); err == nil {
+	if _, err := adapter.InitializeCharge(ctx, interfaces.ChargeRequest{Reference: "chk-tampered", AmountMinor: 100, Currency: "NGN", CustomerEmail: "x@nantty.test"}); err == nil {
 		t.Fatal("a rejected payload hash must fail the checkout")
 	}
 }
@@ -50,20 +50,20 @@ func TestFlutterwaveCheckoutIsHashedAndVerifiedByIdWithTheExactReference(t *test
 func TestFlutterwaveCardTokenOnlyChargesTheEmailItWasIssuedTo(t *testing.T) {
 	fake, adapter := newFakeFlutterwaveAdapter(t)
 	ctx := context.Background()
-	if _, err := adapter.InitializeCharge(ctx, interfaces.ChargeRequest{Reference: "csub-1", AmountMinor: 500_000, Currency: "NGN", CustomerEmail: "owner@zudomart.test"}); err != nil {
+	if _, err := adapter.InitializeCharge(ctx, interfaces.ChargeRequest{Reference: "csub-1", AmountMinor: 500_000, Currency: "NGN", CustomerEmail: "owner@nantty.test"}); err != nil {
 		t.Fatal(err)
 	}
 	token := fake.CompleteCheckout("csub-1", 0, 0, "card").CardToken
-	_, err := adapter.ChargeAuthorization(ctx, interfaces.AuthorizationChargeRequest{AuthorizationCode: token, CustomerEmail: "thief@zudomart.test", Reference: "ren-1", AmountMinor: 500_000, Currency: "NGN"})
+	_, err := adapter.ChargeAuthorization(ctx, interfaces.AuthorizationChargeRequest{AuthorizationCode: token, CustomerEmail: "thief@nantty.test", Reference: "ren-1", AmountMinor: 500_000, Currency: "NGN"})
 	if !errors.Is(err, interfaces.ErrSavedCardNotForCustomer) {
 		t.Fatalf("a token must not charge another email: %v", err)
 	}
-	result, err := adapter.ChargeAuthorization(ctx, interfaces.AuthorizationChargeRequest{AuthorizationCode: token, CustomerEmail: "owner@zudomart.test", Reference: "ren-2", AmountMinor: 500_000, Currency: "NGN"})
+	result, err := adapter.ChargeAuthorization(ctx, interfaces.AuthorizationChargeRequest{AuthorizationCode: token, CustomerEmail: "owner@nantty.test", Reference: "ren-2", AmountMinor: 500_000, Currency: "NGN"})
 	if err != nil || result.ProviderChargeId == "" || result.Outcome != interfaces.OutcomePending {
 		t.Fatalf("token charge must succeed and still be verified: %v %+v", err, result)
 	}
 	fake.LoseNextWriteReply(FakeWriteCharge)
-	lost, err := adapter.ChargeAuthorization(ctx, interfaces.AuthorizationChargeRequest{AuthorizationCode: token, CustomerEmail: "owner@zudomart.test", Reference: "ren-3", AmountMinor: 500_000, Currency: "NGN"})
+	lost, err := adapter.ChargeAuthorization(ctx, interfaces.AuthorizationChargeRequest{AuthorizationCode: token, CustomerEmail: "owner@nantty.test", Reference: "ren-3", AmountMinor: 500_000, Currency: "NGN"})
 	if err != nil || lost.Outcome != interfaces.OutcomePending {
 		t.Fatalf("a lost reply must stay pending: %v %+v", err, lost)
 	}
@@ -75,11 +75,11 @@ func TestFlutterwaveCardTokenOnlyChargesTheEmailItWasIssuedTo(t *testing.T) {
 func TestFlutterwaveTransfersSkipBeneficiariesNeverRetryAndRespectPsaBalances(t *testing.T) {
 	fake, adapter := newFakeFlutterwaveAdapter(t)
 	ctx := context.Background()
-	wallet, err := adapter.CreateWallet(ctx, interfaces.WalletOwner{UserId: "u1", AccountName: "Temitope Adeyemi", AliasEmail: "u+u1@wallets.zudomart.com", Country: "NG"})
+	wallet, err := adapter.CreateWallet(ctx, interfaces.WalletOwner{UserId: "u1", AccountName: "Temitope Adeyemi", AliasEmail: "u+u1@wallets.nantty.com", Country: "NG"})
 	if err != nil || !strings.HasPrefix(wallet.AccountRef, "PSA") {
 		t.Fatalf("wallet: %v %+v", err, wallet)
 	}
-	again, err := adapter.CreateWallet(ctx, interfaces.WalletOwner{UserId: "u1", AccountName: "Temitope Adeyemi", AliasEmail: "u+u1@wallets.zudomart.com", Country: "NG"})
+	again, err := adapter.CreateWallet(ctx, interfaces.WalletOwner{UserId: "u1", AccountName: "Temitope Adeyemi", AliasEmail: "u+u1@wallets.nantty.com", Country: "NG"})
 	if err != nil || again.AccountRef != wallet.AccountRef {
 		t.Fatalf("creating twice must return the same wallet: %v %+v", err, again)
 	}
@@ -118,7 +118,7 @@ func TestFlutterwaveTransfersSkipBeneficiariesNeverRetryAndRespectPsaBalances(t 
 func TestFlutterwaveReadsRetry429AndParseGroupedAmounts(t *testing.T) {
 	fake, adapter := newFakeFlutterwaveAdapter(t)
 	ctx := context.Background()
-	wallet, _ := adapter.CreateWallet(ctx, interfaces.WalletOwner{AccountName: "A B", AliasEmail: "u+a@wallets.zudomart.com"})
+	wallet, _ := adapter.CreateWallet(ctx, interfaces.WalletOwner{AccountName: "A B", AliasEmail: "u+a@wallets.nantty.com"})
 	fake.FundWallet(wallet.AccountRef, "NGN", 123_456_789, "PSA_GROUPED")
 	fake.SetRateLimitedRequests(2)
 	lines, err := adapter.ListWalletTransactions(ctx, wallet.AccountRef, time.Now().Add(-time.Hour), time.Now())
@@ -142,7 +142,7 @@ func TestFlutterwaveWebhookHashIsOnlyATrigger(t *testing.T) {
 	if _, err := adapter.VerifyWebhookSignatureAndParse(body, forged); !errors.Is(err, interfaces.ErrInvalidWebhookSignature) {
 		t.Fatalf("a wrong hash must be rejected: %v", err)
 	}
-	wallet, _ := adapter.CreateWallet(context.Background(), interfaces.WalletOwner{AccountName: "A B", AliasEmail: "u+w@wallets.zudomart.com"})
+	wallet, _ := adapter.CreateWallet(context.Background(), interfaces.WalletOwner{AccountName: "A B", AliasEmail: "u+w@wallets.nantty.com"})
 	fundingBody, fundingHeaders := fake.FundWalletAndSignWebhook(wallet.AccountRef, 50_000, "PSA_X1", 0)
 	funding, err := adapter.VerifyWebhookSignatureAndParse(fundingBody, fundingHeaders)
 	if err != nil || funding.Kind != interfaces.WebhookKindWalletFunding || funding.Reference != "PSA_X1" || funding.AccountNumber == "" {

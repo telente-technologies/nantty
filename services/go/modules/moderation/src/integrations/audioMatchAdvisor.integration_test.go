@@ -20,8 +20,8 @@ func TestIntelligenceAudioMatchAdvisorSignsRequestsTheWayIntelligenceVerifiesThe
 		body, _ := io.ReadAll(request.Body)
 		digest := sha256.Sum256(body)
 		mac := hmac.New(sha256.New, []byte(secret))
-		mac.Write([]byte("v1\nPOST\n" + request.URL.Path + "\n" + request.Header.Get("x-zudo-timestamp") + "\n" + request.Header.Get("x-zudo-nonce") + "\n" + hex.EncodeToString(digest[:])))
-		if request.Header.Get("x-zudo-signature") != "v1="+hex.EncodeToString(mac.Sum(nil)) || request.URL.Path != "/v1/audio/copyright-matches" {
+		mac.Write([]byte("v1\nPOST\n" + request.URL.Path + "\n" + request.Header.Get("x-nantty-timestamp") + "\n" + request.Header.Get("x-nantty-nonce") + "\n" + hex.EncodeToString(digest[:])))
+		if request.Header.Get("x-nantty-signature") != "v1="+hex.EncodeToString(mac.Sum(nil)) || request.URL.Path != "/v1/audio/copyright-matches" {
 			writer.WriteHeader(http.StatusUnauthorized)
 			return
 		}

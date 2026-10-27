@@ -67,14 +67,14 @@ func TestGrossUpKeepsTheNetAtLeastTheWebPrice(t *testing.T) {
 
 func TestCreatorStoreProductIdsRoundTrip(t *testing.T) {
 	id := CreatorStoreProductId("1000", "month", 3)
-	if id != "zudomart.creatorsub.tier_1000.s3.monthly" {
+	if id != "nantty.creatorsub.tier_1000.s3.monthly" {
 		t.Fatalf("product id %s", id)
 	}
 	parsed, ok := ParseCreatorStoreProductId(id)
 	if !ok || parsed.Tier != "1000" || parsed.Interval != "month" || parsed.Slot != 3 {
 		t.Fatalf("parsed %+v %v", parsed, ok)
 	}
-	for _, bad := range []string{"zudomart.creatorsub.tier_1200.s1.monthly", "zudomart.creatorsub.tier_1000.s9.monthly", "com.zudomart.app.coins.tier1", "zudomart.creatorsub.tier_1000.s1.weekly"} {
+	for _, bad := range []string{"nantty.creatorsub.tier_1200.s1.monthly", "nantty.creatorsub.tier_1000.s9.monthly", "com.nantty.app.coins.tier1", "nantty.creatorsub.tier_1000.s1.weekly"} {
 		if _, ok := ParseCreatorStoreProductId(bad); ok {
 			t.Fatalf("%s must not parse", bad)
 		}

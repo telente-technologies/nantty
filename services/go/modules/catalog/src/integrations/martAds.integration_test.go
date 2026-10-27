@@ -21,10 +21,10 @@ const adsSecret = "a-shared-secret-of-at-least-32-chars"
 
 func adsSignatureIsValid(request *http.Request, body []byte) bool {
 	bodyHash := sha256.Sum256(body)
-	canonical := "v1\n" + request.Method + "\n" + request.URL.RequestURI() + "\n" + request.Header.Get("x-zudo-timestamp") + "\n" + request.Header.Get("x-zudo-nonce") + "\n" + hex.EncodeToString(bodyHash[:])
+	canonical := "v1\n" + request.Method + "\n" + request.URL.RequestURI() + "\n" + request.Header.Get("x-nantty-timestamp") + "\n" + request.Header.Get("x-nantty-nonce") + "\n" + hex.EncodeToString(bodyHash[:])
 	mac := hmac.New(sha256.New, []byte(adsSecret))
 	mac.Write([]byte(canonical))
-	return len(request.Header.Get("x-zudo-nonce")) >= 16 && hmac.Equal([]byte(request.Header.Get("x-zudo-signature")), []byte("v1="+hex.EncodeToString(mac.Sum(nil))))
+	return len(request.Header.Get("x-nantty-nonce")) >= 16 && hmac.Equal([]byte(request.Header.Get("x-nantty-signature")), []byte("v1="+hex.EncodeToString(mac.Sum(nil))))
 }
 
 func TestMartAdsAsksForAMartTileWithASignedRequest(t *testing.T) {

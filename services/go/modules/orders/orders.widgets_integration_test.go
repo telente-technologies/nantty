@@ -49,7 +49,7 @@ func TestOrderWidgetShowsOnlyTheBuyersActiveOrders(t *testing.T) {
 	statuses := map[string]string{}
 	for _, order := range payload.Orders {
 		statuses[order.Id] = order.Status
-		if order.EtaAt == nil || order.DeepLink != "zudomart://orders/"+order.Id {
+		if order.EtaAt == nil || order.DeepLink != "nantty://orders/"+order.Id {
 			t.Fatalf("missing eta or deep link: %+v", order)
 		}
 	}

@@ -86,7 +86,7 @@ func TestStoreAndProfileDestinationsResolveToInAppLinksOnEveryPlatform(t *testin
 		creative := entityCandidate(kind, kind, "target-9").Creative
 		for _, platform := range []string{"ios", "android", "web"} {
 			target, err := ResolveClickTarget(creative, 0, platform)
-			if err != nil || target != "zudomart://"+kind+"/target-9" || !IsSafeClickTarget(target) {
+			if err != nil || target != "nantty://"+kind+"/target-9" || !IsSafeClickTarget(target) {
 				t.Fatalf("%s on %s resolves to %q %v", kind, platform, target, err)
 			}
 		}

@@ -68,10 +68,10 @@ func startMoneyHarness(t *testing.T, storeVerifiers map[string]interfaces.StoreR
 	harness.UsersSchema = createHarnessUsersSchema(t, database)
 	settings := configs.PaymentsSettings{
 		Money:             moneytesting.MoneyModuleSettingsForTests("payments", moneytesting.CreateEmptySchema(t, database, "payments"), ledgerSchema),
-		AllowedReturnUrls: []string{"https://zudomart.test/pay/return", "https://app.zudomart.test/pay/return"}, DefaultProvider: "flutterwave",
+		AllowedReturnUrls: []string{"https://nantty.test/pay/return", "https://app.nantty.test/pay/return"}, DefaultProvider: "flutterwave",
 		EscrowFeeBps: 150, BusinessEscrowFeeBps: 100, EscrowMode: "e2", CheckoutExpiryMinutes: 15, ConnectedAccountCountry: "NG", UsersSchema: harness.UsersSchema,
 		CheckoutChannels: []string{"card", "bank", "ussd", "bank_transfer"}, SubaccountBearsFee: true, CardVerificationAmount: 5000,
-		OnboardingReturnUrl: "https://zudomart.test/seller/verification/return", OnboardingRefreshUrl: "https://zudomart.test/seller/verification/refresh",
+		OnboardingReturnUrl: "https://nantty.test/seller/verification/return", OnboardingRefreshUrl: "https://nantty.test/seller/verification/refresh",
 		WebSubscriptionPlanProducts: map[string]string{"premium_web": "PLN_premium_web"},
 		UnverifiedSellerSalesCaps:   map[string]int64{"NGN": 1 << 50, "USD": 1 << 50},
 		DataEncryptionKey:           bytes.Repeat([]byte{7}, 32), SavedCardFingerprintKey: "fingerprint-test-key", InternalApiToken: strings.Repeat("i", 32),
@@ -116,7 +116,7 @@ type PermissiveAccountDirectory struct {
 func (directory *PermissiveAccountDirectory) FindAccountContact(_ context.Context, accountId string) (repositories.VerifiedAccountContact, bool, error) {
 	directory.mutex.Lock()
 	defer directory.mutex.Unlock()
-	return repositories.VerifiedAccountContact{Email: "user-" + accountId[:min(len(accountId), 8)] + "@zudomart.test", Name: "Test User", EmailVerified: !directory.Unverified[accountId]}, true, nil
+	return repositories.VerifiedAccountContact{Email: "user-" + accountId[:min(len(accountId), 8)] + "@nantty.test", Name: "Test User", EmailVerified: !directory.Unverified[accountId]}, true, nil
 }
 
 func (directory *PermissiveAccountDirectory) MarkUnverified(accountId string) {
@@ -189,7 +189,7 @@ func applyFlutterwaveHarnessSettings(settings *configs.PaymentsSettings) {
 	settings.DefaultProvider = "flutterwave"
 	settings.Flutterwave = configs.FlutterwaveSettings{SecretKey: FakeFlutterwaveSecretKey, WebhookHash: FakeFlutterwaveWebhookHash, MerchantId: FakeFlutterwaveMerchantId}
 	settings.Wallets = configs.WalletSettings{
-		AliasEmailDomain: "wallets.zudomart.test", PsaCountries: []string{"NG"}, DepositFeeBps: 50, DepositFeeCaps: map[string]int64{"NGN": 100_000},
+		AliasEmailDomain: "wallets.nantty.test", PsaCountries: []string{"NG"}, DepositFeeBps: 50, DepositFeeCaps: map[string]int64{"NGN": 100_000},
 		DepositHold: 24 * time.Hour, FirstDepositHold: 72 * time.Hour, CardBuyerWalletAtCheckout: true, MovementStuckAfter: time.Hour,
 	}
 	settings.CustomerValidationMode = "required"

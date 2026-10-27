@@ -23,8 +23,8 @@ func TestGooglePlayPushAcceptsPubSubIdentityTokensForTheConfiguredAudience(t *te
 	}))
 	t.Cleanup(server.Close)
 	verifier, err := NewGooglePlayVerifier(GooglePlaySettings{
-		PackageName: "com.zudomart.app", ServiceAccountJson: readGooglePlayFixture(t, "serviceAccount.json"), PushAudience: "https://api.zudomart.com/webhooks/store-notifications/google_play",
-		PushServiceAccountEmail: "rtdn-push@zudomart.iam.gserviceaccount.com", PushCertificatesUrl: server.URL,
+		PackageName: "com.nantty.app", ServiceAccountJson: readGooglePlayFixture(t, "serviceAccount.json"), PushAudience: "https://api.nantty.com/webhooks/store-notifications/google_play",
+		PushServiceAccountEmail: "rtdn-push@nantty.iam.gserviceaccount.com", PushCertificatesUrl: server.URL,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -38,20 +38,20 @@ func TestGooglePlayPushAcceptsPubSubIdentityTokensForTheConfiguredAudience(t *te
 		return input + "." + base64.RawURLEncoding.EncodeToString(signature)
 	}
 	claims := func(audience string) map[string]any {
-		return map[string]any{"iss": "https://accounts.google.com", "aud": audience, "email": "rtdn-push@zudomart.iam.gserviceaccount.com", "email_verified": true, "exp": now.Add(time.Hour).Unix()}
+		return map[string]any{"iss": "https://accounts.google.com", "aud": audience, "email": "rtdn-push@nantty.iam.gserviceaccount.com", "email_verified": true, "exp": now.Add(time.Hour).Unix()}
 	}
-	data, _ := json.Marshal(map[string]any{"packageName": "com.zudomart.app", "subscriptionNotification": map[string]any{"notificationType": 3, "purchaseToken": "p1", "subscriptionId": "zudomart.creatorsub.tier_500.s1.monthly"}})
+	data, _ := json.Marshal(map[string]any{"packageName": "com.nantty.app", "subscriptionNotification": map[string]any{"notificationType": 3, "purchaseToken": "p1", "subscriptionId": "nantty.creatorsub.tier_500.s1.monthly"}})
 	body, _ := json.Marshal(map[string]any{"message": map[string]any{"messageId": "m1", "data": base64.StdEncoding.EncodeToString(data)}})
 	push := func(token string) error {
 		_, err := verifier.VerifySignedRefundNotification(context.Background(), body, http.Header{GooglePlayPushTokenHeader: []string{token}})
 		return err
 	}
-	if err := push(sign(claims("https://api.zudomart.com/webhooks/store-notifications/google_play"), key)); err != nil {
+	if err := push(sign(claims("https://api.nantty.com/webhooks/store-notifications/google_play"), key)); err != nil {
 		t.Fatalf("a Pub/Sub identity token for our audience is accepted: %v", err)
 	}
 	otherKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	for name, token := range map[string]string{
-		"other audience": sign(claims("https://evil.example"), key), "forged signature": sign(claims("https://api.zudomart.com/webhooks/store-notifications/google_play"), otherKey), "empty": "",
+		"other audience": sign(claims("https://evil.example"), key), "forged signature": sign(claims("https://api.nantty.com/webhooks/store-notifications/google_play"), otherKey), "empty": "",
 	} {
 		if push(token) == nil {
 			t.Fatalf("%s must be rejected", name)

@@ -105,7 +105,7 @@ func Internal(deployed *container.Container) func(http.HandlerFunc) http.Handler
 
 func internalSignatureIsValid(deployed *container.Container, request *http.Request, body []byte) bool {
 	secret := deployed.Settings.InternalSharedSecret
-	timestamp, nonce, signature := request.Header.Get("x-zudo-timestamp"), request.Header.Get("x-zudo-nonce"), request.Header.Get("x-zudo-signature")
+	timestamp, nonce, signature := request.Header.Get("x-nantty-timestamp"), request.Header.Get("x-nantty-nonce"), request.Header.Get("x-nantty-signature")
 	seconds, err := strconv.ParseInt(timestamp, 10, 64)
 	if secret == "" || err != nil || len(nonce) < 16 || math.Abs(float64(deployed.Now().Unix()-seconds)) > 300 {
 		return false
@@ -122,6 +122,6 @@ func internalSignatureIsValid(deployed *container.Container, request *http.Reque
 }
 
 func internalNonceIsFresh(deployed *container.Container, request *http.Request) bool {
-	seen, err := deployed.Counters.Increment(request.Context(), "nonce:"+request.Header.Get("x-zudo-nonce"), 1, 15*time.Minute)
+	seen, err := deployed.Counters.Increment(request.Context(), "nonce:"+request.Header.Get("x-nantty-nonce"), 1, 15*time.Minute)
 	return err == nil && seen == 1
 }

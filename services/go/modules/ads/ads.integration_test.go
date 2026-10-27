@@ -37,8 +37,8 @@ import (
 )
 
 const (
-	testIssuer   = "https://auth.zudomart.test"
-	testAudience = "zudomart-api"
+	testIssuer   = "https://auth.nantty.test"
+	testAudience = "nantty-api"
 )
 
 type fakeClock struct {
@@ -127,7 +127,7 @@ func startAdsAgainstFreshSchema(t *testing.T, options ...harnessOption) *harness
 	}
 	databaseUrl := os.Getenv("ADS_TEST_DATABASE_URL")
 	if databaseUrl == "" {
-		databaseUrl = "postgres://zudomart:zudomart@localhost:15432/zudomart_ads_test?sslmode=disable"
+		databaseUrl = "postgres://nantty:nantty@localhost:15432/nantty_ads_test?sslmode=disable"
 	}
 	ctx := context.Background()
 	administrator, err := postgres.OpenDatabaseAndVerifyConnection(ctx, databaseUrl, postgres.DefaultPoolSettings())

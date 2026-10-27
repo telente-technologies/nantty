@@ -153,7 +153,7 @@ func TestOrderGroupEventDataCarriesEmailRenderableSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := module.Container.Client.OrderItem.Create().SetOrderGroupID(group.ID).SetStoreID(group.StoreID).SetProductID(uuid.New()).SetVariantID(uuid.New()).
-		SetProductName("Vitamin C Glow Serum").SetVariantTitle("30ml").SetImageURL("https://cdn.zudomart.com/p/serum.jpg").SetUnitPriceMinor(85_000).SetQuantity(2).SetLineTotalMinor(170_000).
+		SetProductName("Vitamin C Glow Serum").SetVariantTitle("30ml").SetImageURL("https://cdn.nantty.com/p/serum.jpg").SetUnitPriceMinor(85_000).SetQuantity(2).SetLineTotalMinor(170_000).
 		Save(ctx); err != nil {
 		t.Fatal(err)
 	}

@@ -69,7 +69,7 @@ func landingUrl(destination types.CreativeDestination) string {
 		return *destination.Url
 	}
 	if destination.TargetId != nil {
-		return fmt.Sprintf("zudomart://%s/%s", destination.Type, *destination.TargetId)
+		return fmt.Sprintf("nantty://%s/%s", destination.Type, *destination.TargetId)
 	}
 	return ""
 }

@@ -36,8 +36,8 @@ func TestRevokedStaffSessionsReachTheSharedDenylistSoOtherDeployablesRejectThem(
 	previous := jwtauth.RegisteredSessionDenylist()
 	jwtauth.RegisterSessionDenylist(denylist)
 	t.Cleanup(func() { jwtauth.RegisterSessionDenylist(previous) })
-	harness.bootstrapSuperadmin("denylisted@zudomart.com")
-	session, _ := harness.enrollAndSignIn("denylisted@zudomart.com", strongPassword)
+	harness.bootstrapSuperadmin("denylisted@nantty.com")
+	session, _ := harness.enrollAndSignIn("denylisted@nantty.com", strongPassword)
 	harness.expect("POST", "/api/v1/admin/auth/logout", nil, bearer(session["accessToken"].(string)), http.StatusNoContent)
 	revoked, err := harness.seeder.Client.StaffSession.Query().Where(staffsession.RevokedAtNotNil()).All(context.Background())
 	if err != nil || len(revoked) == 0 {

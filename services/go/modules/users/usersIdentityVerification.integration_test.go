@@ -47,7 +47,7 @@ func (fakeCapture) CreateSmileLink(context.Context, integrations.SmileLinkReques
 func (harness *usersTestHarness) enableIdentityVerification() *scriptedEligibility {
 	eligibility := &scriptedEligibility{tier: "request", score: 40}
 	container := harness.module.Container()
-	container.Settings.Verification = configs.IdentityVerificationSettings{SmileIdPartnerId: "partner-1", SmileIdApiKey: "api-key", ConsentVersion: "v1", DocumentFingerprintKey: "fingerprint-key", EligibilityRecheckEvery: time.Hour, WebAppBaseUrl: "https://zudomart.test"}
+	container.Settings.Verification = configs.IdentityVerificationSettings{SmileIdPartnerId: "partner-1", SmileIdApiKey: "api-key", ConsentVersion: "v1", DocumentFingerprintKey: "fingerprint-key", EligibilityRecheckEvery: time.Hour, WebAppBaseUrl: "https://nantty.test"}
 	container.IdentityCapture, container.Eligibility = fakeCapture{}, eligibility
 	return eligibility
 }

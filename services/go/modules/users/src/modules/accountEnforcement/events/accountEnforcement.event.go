@@ -9,8 +9,8 @@ const (
 	AppealDecidedType             = "appeal.decided"
 	UsernameReassignedType        = "username.reassigned"
 	AccountWarnedType             = "account.warned"
-	CommunityGuidelinesUrl        = "https://zudomart.com/community-guidelines"
-	AppealUrl                     = "https://zudomart.com/settings/account-status"
+	CommunityGuidelinesUrl        = "https://nantty.com/community-guidelines"
+	AppealUrl                     = "https://nantty.com/settings/account-status"
 )
 
 type AccountRestrictedData struct {

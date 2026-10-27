@@ -31,7 +31,7 @@ func startInventoryAgainstFreshSchema(t *testing.T) *src.Module {
 	}
 	databaseUrl := os.Getenv("INVENTORY_TEST_DATABASE_URL")
 	if databaseUrl == "" {
-		databaseUrl = "postgres://zudomart:zudomart@localhost:15432/zudomart_test?sslmode=disable"
+		databaseUrl = "postgres://nantty:nantty@localhost:15432/nantty_test?sslmode=disable"
 	}
 	ctx := context.Background()
 	admin, err := postgres.OpenDatabaseAndVerifyConnection(ctx, databaseUrl, postgres.DefaultPoolSettings())

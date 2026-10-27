@@ -127,8 +127,8 @@ func signAdsRequest(request *http.Request, body []byte, secret string, now time.
 	canonical := "v1\n" + request.Method + "\n" + request.URL.RequestURI() + "\n" + timestamp + "\n" + nonce + "\n" + hex.EncodeToString(bodyHash[:])
 	mac := hmac.New(sha256.New, []byte(secret))
 	mac.Write([]byte(canonical))
-	request.Header.Set("x-zudo-timestamp", timestamp)
-	request.Header.Set("x-zudo-nonce", nonce)
-	request.Header.Set("x-zudo-signature", "v1="+hex.EncodeToString(mac.Sum(nil)))
+	request.Header.Set("x-nantty-timestamp", timestamp)
+	request.Header.Set("x-nantty-nonce", nonce)
+	request.Header.Set("x-nantty-signature", "v1="+hex.EncodeToString(mac.Sum(nil)))
 	return nil
 }

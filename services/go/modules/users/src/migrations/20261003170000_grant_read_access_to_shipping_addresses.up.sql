@@ -1,1 +1,1 @@
-GRANT SELECT ("id", "account_id", "recipient_name", "phone", "line1", "line2", "postal_code", "details", "country_code", "region_id", "admin_area_id", "city_id", "free_text_city", "free_text_state") ON "shipping_addresses" TO zudomart_readers;
+GRANT SELECT ("id", "account_id", "recipient_name", "phone", "line1", "line2", "postal_code", "details", "country_code", "region_id", "admin_area_id", "city_id", "free_text_city", "free_text_state") ON "shipping_addresses" TO nantty_readers;

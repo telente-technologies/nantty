@@ -34,7 +34,7 @@ func (harness *liveHarness) ownStore(owner liveUser, productIds ...uuid.UUID) st
 	storeId := uuid.New()
 	harness.catalog.AddMember(storeId, owner.id)
 	for _, productId := range productIds {
-		image := "https://media.zudomart.test/" + productId.String() + ".jpg"
+		image := "https://media.nantty.test/" + productId.String() + ".jpg"
 		harness.catalog.AddProduct(storeId, interfaces.StoreProduct{Id: productId, Title: "Product " + productId.String()[:4], PriceMinor: 125000, Currency: "NGN", ImageUrl: &image, Status: "active"})
 	}
 	return storeId.String()

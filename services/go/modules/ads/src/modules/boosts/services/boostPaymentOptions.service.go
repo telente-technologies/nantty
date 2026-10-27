@@ -45,7 +45,7 @@ func ReadAdBalanceSummary(ctx context.Context, deployed *container.Container, us
 
 func earningsPaymentOption(ctx context.Context, deployed *container.Container, userId uuid.UUID, platform string) dtos.PaymentOption {
 	if IsNativeClient(platform) {
-		return paymentOption(PaymentEarnings, "NOT_AVAILABLE_IN_APP", "Pay from your earnings on zudomart.com.")
+		return paymentOption(PaymentEarnings, "NOT_AVAILABLE_IN_APP", "Pay from your earnings on nantty.com.")
 	}
 	status, err := deployed.Verification.ReadVerificationLevel(ctx, userId.String())
 	if err != nil {
