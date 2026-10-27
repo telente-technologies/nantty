@@ -30,7 +30,7 @@ export interface CommentQuoteFieldsContract {
   readonly quotedPostUnavailable: boolean;
 }
 
-export const postLinkHostsContract: readonly string[] = ["zudomart.com", "www.zudomart.com", "app.zudomart.com", "zudomart.app", "www.zudomart.app"];
+export const postLinkHostsContract: readonly string[] = ["nantty.com", "www.nantty.com", "app.nantty.com", "nantty.app", "www.nantty.app"];
 export const postLinkPathKindsContract: readonly string[] = ["post", "posts", "clip", "clips"];
 
 export interface PostNotificationMuteContract {

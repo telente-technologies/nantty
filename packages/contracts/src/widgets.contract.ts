@@ -92,7 +92,7 @@ export interface WidgetRefreshPushDataContract {
 export interface OembedResponseContract {
   readonly version: "1.0";
   readonly type: "rich";
-  readonly provider_name: "Zudomart";
+  readonly provider_name: "Nantty";
   readonly provider_url: string;
   readonly title: string;
   readonly author_name: string;
