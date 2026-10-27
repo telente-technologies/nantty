@@ -1,6 +1,6 @@
 ---
 title: Notification settings
-summary: Turn push notifications on or off, manage them in your phone's settings, and choose birthday and Zudoversary alerts. Security and safety alerts always reach you.
+summary: Turn push notifications on or off, manage them in your phone's settings, and choose birthday and anniversary alerts. Security and safety alerts always reach you.
 tags: notifications, push notifications, turn off notifications, email notifications, too many notifications, stop notifications, alerts
 related: post-notifications-bell, mute-a-post, notifications-faq, login-alerts, chat-passcode-and-notifications, notifications-not-arriving
 ---

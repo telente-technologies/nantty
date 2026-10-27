@@ -25,13 +25,14 @@ export interface AutoFaqPublisherDependencies {
   readonly writer: HelpAnswerWriter;
 }
 
-const autoEditorName = "Zudomart Help";
+const autoEditorName = "Nantty Help";
 const ticketReference = (ticket: TicketWithThread) => `SUP-${ticket.number}`;
 
 function scrubContextFor(ticket: TicketWithThread): ScrubContext {
   const names = new Set<string>([ticket.requesterName, ...(ticket.assigneeName === null ? [] : [ticket.assigneeName])]);
   for (const message of ticket.messages) if (message.authorKind !== "system") names.add(message.authorName);
   names.delete("Zudomart Support");
+  names.delete("Nantty Support");
   return { knownNames: [...names].filter((name) => name.trim() !== ""), knownUsernames: ticket.requesterUsername === "" ? [] : [ticket.requesterUsername] };
 }
 

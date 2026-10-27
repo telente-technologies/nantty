@@ -1,6 +1,7 @@
 import type { HttpRouterContext } from "@zudojs/http";
 
 import { defaultLocale, searchResultLimit } from "../../../constants/support.constant.js";
+import { canonicalHelpTopicSlugs } from "../../../constants/helpTopicSlugAliases.constant.js";
 import { notFound } from "../../../errors/support.error.js";
 import { findViewerAccountId, requireViewerAccountId } from "../../../middlewares/principal.middleware.js";
 import type { HelpTopicRecord } from "../../../types/helpContent.type.js";
@@ -15,12 +16,15 @@ const readLocale = (context: HttpRouterContext) => (/^[a-z]{2}(?:-[A-Z]{2})?$/.t
 export function createPublicHelpController({ store }: HelpContentModuleDependencies) {
   const findPublishedTopic = async (slug: string, locale: string): Promise<{ readonly topic: HelpTopicRecord; readonly redirectedFromSlug: string | null } | null> => {
     const topic = await store.findTopicBySlug(slug, locale);
-    if (topic === null) return null;
-    if (topic.status === "merged" && topic.mergedIntoTopicId !== null) {
+    if (topic?.status === "merged" && topic.mergedIntoTopicId !== null) {
       const target = await store.findTopicById(topic.mergedIntoTopicId);
       return target?.status === "published" ? { topic: target, redirectedFromSlug: topic.slug } : null;
     }
-    return topic.status === "published" ? { topic, redirectedFromSlug: null } : null;
+    if (topic !== null) return topic.status === "published" ? { topic, redirectedFromSlug: null } : null;
+    const canonicalSlug = canonicalHelpTopicSlugs[slug];
+    if (canonicalSlug === undefined) return null;
+    const canonicalTopic = await store.findTopicBySlug(canonicalSlug, locale);
+    return canonicalTopic?.status === "published" ? { topic: canonicalTopic, redirectedFromSlug: slug } : null;
   };
   return {
     categories: async (context: HttpRouterContext) => {

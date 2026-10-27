@@ -26,7 +26,7 @@ export function createIdentityHttpDirectory(baseUrl: string, internalToken: stri
         if (raw === null) return null;
         const firstName = typeof raw["firstName"] === "string" ? raw["firstName"] : "";
         const username = typeof raw["username"] === "string" ? raw["username"] : "";
-        return { accountId, displayName: firstName || username || "Zudomart member", username, emailMasked: typeof raw["email"] === "string" ? maskEmail(raw["email"]) : "", status: typeof raw["status"] === "string" ? raw["status"] : "active" };
+        return { accountId, displayName: firstName || username || "Nantty member", username, emailMasked: typeof raw["email"] === "string" ? maskEmail(raw["email"]) : "", status: typeof raw["status"] === "string" ? raw["status"] : "active" };
       } catch {
         return null;
       }

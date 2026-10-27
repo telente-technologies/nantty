@@ -1,6 +1,6 @@
 ---
-title: Birthday balloons and your Zudoversary
-summary: On your birthday, balloons can appear on your profile, and on each anniversary of joining you get a Happy Zudoversary celebration with highlights from your year.
+title: Birthday balloons and your Nantty anniversary
+summary: On your birthday, balloons can appear on your profile, and on each anniversary of joining you get a Nantty anniversary celebration with highlights from your year.
 tags: birthday, anniversary, zudoversary, celebration, balloons, milestones, account anniversary
 related: edit-your-profile, notification-settings, settings-overview, privacy-settings, notifications-faq
 ---
@@ -13,9 +13,9 @@ On your birthday, balloons appear on your profile. You always see them yourself.
 
 **To turn off balloons for visitors:** go to **Settings > Privacy & Data** and switch off **Birthday balloons** ("Show balloons on your profile to visitors on your birthday").
 
-## Your Zudoversary
+## Your Nantty anniversary
 
-Each year on the day you joined, you see a **Happy Zudoversary!** celebration, for example "Thanks for being part of Nantty for 1 year". It includes a few highlights from your year when you have them, such as posts, followers, orders and lives. You also get an anniversary email.
+Each year on the day you joined, you see a **Happy Nantty anniversary!** celebration, for example "Thanks for being part of Nantty for 1 year". It includes a few highlights from your year when you have them, such as posts, followers, orders and lives. You also get an anniversary email.
 
 ## Choose how you're told
 

@@ -48,7 +48,7 @@ export function loadSupportConfigFromEnvironment(): SupportConfig {
     databaseUrl,
     databaseSchema: readOrDefault("DATABASE_SCHEMA", "support"),
     internalToken,
-    webBaseUrl: readOrDefault("WEB_BASE_URL", "https://zudomart.com").replace(/\/+$/, ""),
+    webBaseUrl: readOrDefault("WEB_BASE_URL", "https://nantty.com").replace(/\/+$/, ""),
     mediaPublicBaseUrls: readOrDefault("MEDIA_PUBLIC_BASE_URL", "").split(",").map((entry) => entry.trim().replace(/\/+$/, "")).filter(Boolean),
     staffAuth: jwksUrl === "" ? undefined : { jwksUrl, issuer: readOrDefault("AUTH_TOKEN_ISSUER", "") },
     rabbitMq: rabbitUrl === "" ? undefined : { url: rabbitUrl, prefetch: Number(readOrDefault("RABBITMQ_PREFETCH", "20")) },

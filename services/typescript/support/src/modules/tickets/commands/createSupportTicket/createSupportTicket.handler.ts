@@ -15,7 +15,7 @@ export async function handleCreateSupportTicket(dependencies: TicketModuleDepend
   const profile = await dependencies.identity.findRequesterProfile(command.accountId);
   const now = dependencies.clock.now();
   const priority = defaultPriorityByCategory[command.category];
-  const requesterName = profile?.displayName ?? "Zudomart member";
+  const requesterName = profile?.displayName ?? "Nantty member";
   return dependencies.store.createTicket(
     {
       requesterAccountId: command.accountId, requesterName, requesterUsername: profile?.username ?? "", subject: command.subject.trim(), category: command.category, priority,

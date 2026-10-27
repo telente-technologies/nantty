@@ -32,6 +32,16 @@ describe("public help content", () => {
     expect((await fetch(`${server.baseUrl}/api/v1/help/topics/nope`)).status).toBe(404);
   });
 
+  it("serves old help slugs through canonical topics", async () => {
+    const category = await server.harness.helpStore.findCategoryBySlug("buying-and-orders");
+    for (const [canonical, legacy] of [["what-is-nantty", "what-is-zudomart"], ["owed-to-nantty", "owed-to-zudomart"]] as const) {
+      const created = await server.harness.helpStore.createTopic({ categoryId: category!.id, slug: canonical, locale: "en", title: canonical, summary: "Brand help topic.", bodyMarkdown: "This is the current help topic content.", tags: [], status: "published", origin: "seed", sourceTicketId: null, seedKey: null, seedHash: null, editorName: "Nantty", relatedTopicIds: [] });
+      const response = await fetch(`${server.baseUrl}/api/v1/help/topics/${legacy}`);
+      expect(response.status).toBe(200);
+      expect(await response.json()).toMatchObject({ id: created.id, slug: canonical, redirectedFromSlug: legacy });
+    }
+  });
+
   it("requires sign-in to vote and counts one vote per person", async () => {
     const topic = (await (await fetch(`${server.baseUrl}/api/v1/help/topics/how-escrow-protects-you`)).json()) as { id: string };
     expect((await post(`/api/v1/help/topics/${topic.id}/votes`, { helpful: true })).status).toBe(401);

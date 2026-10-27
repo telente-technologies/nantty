@@ -30,7 +30,7 @@ export function createJwtStaffAuthenticator(options: { readonly jwksUrl: string;
       const roles = Array.isArray(claims["roles"]) ? (claims["roles"] as unknown[]).filter((role): role is string => typeof role === "string") : [];
       return {
         id: String(claims["sub"] ?? ""),
-        name: roles.find((role) => role.startsWith("name:"))?.slice(5) ?? "Zudomart Support",
+        name: roles.find((role) => role.startsWith("name:"))?.slice(5) ?? "Nantty Support",
         role: roles.find((role) => !role.startsWith("name:") && !role.startsWith("perm:")) ?? "",
         permissions: roles.filter((role) => role.startsWith("perm:")).map((role) => role.slice(5)),
       };

@@ -13,7 +13,7 @@ const fillerSentence = /^(?:sorry for the (?:wait|delay)|thanks for (?:waiting|y
 const stepVerb = /^(?:go to|open|tap|click|select|choose|press|enter|type|upload|add|turn on|turn off|switch|scroll|find|sign in|log in|update|check|confirm)\b/i;
 
 export function replacePlaceholdersWithGenericWords(text: string): string {
-  return text.replace(/\[[a-z ]+\]/g, (placeholder) => genericWordForPlaceholder[placeholder] ?? "it").replace(/\bsomeone,?\s+(?=from zudomart)/gi, "");
+  return text.replace(/\[[a-z ]+\]/g, (placeholder) => genericWordForPlaceholder[placeholder] ?? "it").replace(/\bsomeone,?\s+(?=from (?:zudomart|nantty))/gi, "");
 }
 
 export function stripConversationalNoise(text: string): string {

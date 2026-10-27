@@ -46,4 +46,4 @@ See [Verification levels](/help/checkmarks-and-verification/verification-levels)
 ## Profiles
 
 - **Personal, business, brand and government profiles**: different profile types under one account. See [Profile types](/help/profiles-and-privacy/profile-types).
-- **Zudoversary**: the anniversary of the day you joined.
+- **Nantty anniversary**: the anniversary of the day you joined.

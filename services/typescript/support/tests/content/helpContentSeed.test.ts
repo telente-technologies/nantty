@@ -35,7 +35,7 @@ describe("seeded help content", async () => {
     for (const article of articles) {
       expect(article.summary.length, article.slug).toBeGreaterThan(20);
       expect(/\p{Extended_Pictographic}/u.test(article.bodyMarkdown + article.title), article.slug).toBe(false);
-      expect(findResidualPersonalData(article.bodyMarkdown.replace(/@all\b/g, "all").replace(/[\w.+-]*@(mail\.)?zudomart\.com\b/g, "our team")).filter((label) => label !== "money"), article.slug).toEqual([]);
+      expect(findResidualPersonalData(article.bodyMarkdown.replace(/@all\b/g, "all").replace(/[\w.+-]*@(mail\.)?(?:zudomart|nantty)\.com\b/g, "our team")).filter((label) => label !== "money"), article.slug).toEqual([]);
     }
   });
 
@@ -49,5 +49,23 @@ describe("seeded help content", async () => {
     const changed = [{ ...first!, hash: "new", bodyMarkdown: "Fresh seed text that is long enough." }, { ...second!, hash: "new2", bodyMarkdown: "Refreshed seed text that is long enough." }];
     expect(await seedHelpContent(store, changed, silentLogger)).toEqual({ created: 0, updated: 1 });
     expect((await store.findTopicById(edited!.id))?.bodyMarkdown).toBe("Edited by staff with care.");
+  });
+
+  it("moves legacy help addresses onto canonical slugs without replacing existing topics", async () => {
+    const store = new InMemoryHelpContentStore();
+    const article = articles.find((entry) => entry.slug === "what-is-nantty")!;
+    const category = await store.createCategory({ ...helpCategorySeeds.find((entry) => entry.slug === article.categorySlug)!, position: 0 });
+    const oldTopic = await store.createTopic({ categoryId: category.id, slug: "what-is-zudomart", locale: "en", title: "Staff edited title", summary: article.summary, bodyMarkdown: "Staff edited this topic with more detail.", tags: article.tags, status: "published", origin: "seed", sourceTicketId: null, seedKey: "getting-started/what-is-zudomart", seedHash: "old", editorName: "Tolu", relatedTopicIds: [] });
+    await store.updateTopic(oldTopic.id, { bodyMarkdown: "Staff edited this topic with more detail.", editorName: "Tolu", changeNote: "edit", markEditedByStaff: true });
+    expect(await seedHelpContent(store, [article], silentLogger)).toEqual({ created: 0, updated: 0 });
+    const moved = await store.findTopicBySlug("what-is-nantty", "en");
+    expect(moved).toMatchObject({ id: oldTopic.id, seedKey: "getting-started/what-is-zudomart", editedByStaff: true, bodyMarkdown: "Staff edited this topic with more detail.", updatedByName: "Tolu" });
+    expect(await store.findTopicBySlug("what-is-zudomart", "en")).toBeNull();
+
+    const owed = articles.find((entry) => entry.slug === "owed-to-nantty")!;
+    const payments = await store.createCategory({ ...helpCategorySeeds.find((entry) => entry.slug === owed.categorySlug)!, position: 1 });
+    const oldOwed = await store.createTopic({ categoryId: payments.id, slug: "owed-to-zudomart", locale: "en", title: "Old heading", summary: owed.summary, bodyMarkdown: "Old content that is long enough.", tags: owed.tags, status: "published", origin: "seed", sourceTicketId: null, seedKey: "payments-and-wallet/owed-to-zudomart", seedHash: "old", editorName: "Zudomart", relatedTopicIds: [] });
+    expect(await seedHelpContent(store, [owed], silentLogger)).toEqual({ created: 0, updated: 1 });
+    expect(await store.findTopicBySlug("owed-to-nantty", "en")).toMatchObject({ id: oldOwed.id, seedKey: "payments-and-wallet/owed-to-zudomart", title: owed.title });
   });
 });

@@ -5,6 +5,7 @@ import { join } from "node:path";
 import type { Logger } from "@zudojs/logger";
 
 import { helpCategorySeeds } from "../constants/helpCategories.constant.js";
+import { legacyHelpTopicSlugs } from "../constants/helpTopicSlugAliases.constant.js";
 import { defaultLocale } from "../constants/support.constant.js";
 import type { HelpContentStore } from "../interfaces/helpContentStore.interface.js";
 import { parseFrontMatter, splitList } from "../utils/markdownFrontMatter.util.js";
@@ -50,25 +51,29 @@ export async function seedHelpContent(store: HelpContentStore, articles: readonl
       logger.warn("help article skipped: unknown category", { category: article.categorySlug, slug: article.slug });
       continue;
     }
-    const seedKey = `${article.categorySlug}/${article.slug}`;
+    const legacySlug = legacyHelpTopicSlugs[article.slug as keyof typeof legacyHelpTopicSlugs];
+    const seedKey = `${article.categorySlug}/${legacySlug ?? article.slug}`;
     const existing = await store.findTopicBySeedKey(seedKey);
     if (existing === null) {
       if ((await store.findTopicBySlug(article.slug, defaultLocale)) !== null) continue;
       const topic = await store.createTopic({
         categoryId, slug: article.slug, locale: defaultLocale, title: article.title, summary: article.summary, bodyMarkdown: article.bodyMarkdown, tags: article.tags,
-        status: "published", origin: "seed", sourceTicketId: null, seedKey, seedHash: article.hash, editorName: "Zudomart", relatedTopicIds: [],
+        status: "published", origin: "seed", sourceTicketId: null, seedKey, seedHash: article.hash, editorName: "Nantty", relatedTopicIds: [],
       });
       touched.set(topic.id, article.related);
       created += 1;
-    } else if (!existing.editedByStaff && existing.seedHash !== article.hash) {
-      await store.updateTopic(existing.id, { categoryId, title: article.title, summary: article.summary, bodyMarkdown: article.bodyMarkdown, tags: article.tags, editorName: "Zudomart", changeNote: "Content refresh", markEditedByStaff: false, seedHash: article.hash });
+    } else if (!existing.editedByStaff && (existing.seedHash !== article.hash || existing.slug !== article.slug)) {
+      const slugAvailable = existing.slug === article.slug || (await store.findTopicBySlug(article.slug, defaultLocale)) === null;
+      await store.updateTopic(existing.id, { categoryId, ...(slugAvailable ? { slug: article.slug } : {}), title: article.title, summary: article.summary, bodyMarkdown: article.bodyMarkdown, tags: article.tags, editorName: "Nantty", changeNote: "Content refresh", markEditedByStaff: false, seedHash: article.hash });
       touched.set(existing.id, article.related);
       updated += 1;
+    } else if (existing.editedByStaff && existing.slug !== article.slug && (await store.findTopicBySlug(article.slug, defaultLocale)) === null) {
+      await store.updateTopic(existing.id, { slug: article.slug, editorName: existing.updatedByName, changeNote: "Help address updated", markEditedByStaff: false });
     }
   }
   for (const [topicId, relatedSlugs] of touched) {
     const relatedTopicIds = (await Promise.all(relatedSlugs.map((slug) => store.findTopicBySlug(slug, defaultLocale)))).flatMap((topic) => (topic === null ? [] : [topic.id]));
-    if (relatedTopicIds.length > 0) await store.updateTopic(topicId, { relatedTopicIds, editorName: "Zudomart", changeNote: "Related topics", markEditedByStaff: false });
+    if (relatedTopicIds.length > 0) await store.updateTopic(topicId, { relatedTopicIds, editorName: "Nantty", changeNote: "Related topics", markEditedByStaff: false });
   }
   return { created, updated };
 }

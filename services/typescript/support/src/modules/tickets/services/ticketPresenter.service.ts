@@ -30,7 +30,7 @@ function presentRequesterMessage(message: TicketMessageRecord) {
   return {
     id: message.id,
     fromSupport: message.authorKind !== "customer",
-    authorName: message.authorKind === "customer" ? message.authorName : message.authorKind === "system" ? "Zudomart" : message.authorName,
+    authorName: message.authorKind === "customer" ? message.authorName : message.authorKind === "system" ? "Nantty" : message.authorName,
     text: message.body,
     attachmentUrls: message.attachments.map((attachment) => attachment.url),
     createdAt: message.createdAt.toISOString(),
