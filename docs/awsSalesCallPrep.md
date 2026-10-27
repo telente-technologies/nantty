@@ -5,7 +5,7 @@ Prepared 2026-10-10 for the call on 2026-10-11. The architecture and services ar
 
 ## 1. Your 60-second pitch
 
-> Zudomart is a Nigerian social marketplace: a short-video and live-streaming social app where people can buy
+> Nantty is a Nigerian social marketplace: a short-video and live-streaming social app where people can buy
 > directly from the stores and creators they follow. It covers escrow-protected checkout, creator subscriptions,
 > gifts, live shopping and an ads platform. We have six web apps, a React Native app, and a backend of Go,
 > TypeScript, Elixir and Python microservices on one Postgres. It's built and tested, with infrastructure as code,
@@ -96,7 +96,7 @@ Ask for **all** of these. Different teams own different pots.
 > Thanks for today's call. Summary of what we discussed: (1) credits: [amount/pots/expiry]; (2) Region guidance:
 > [answer]; (3) Solutions Architect review booked for [date]; (4) introductions to [Activate Provider/partner];
 > (5) SES production access request [case id]. Our account IDs: dev [..], staging [..], prod [..]. Please confirm the
-> credit amounts and conditions in writing. Best, Oluwayemi (Zudomart).
+> credit amounts and conditions in writing. Best, Oluwayemi (Nantty).
 
 ## Sources
 

@@ -21,14 +21,14 @@ There is no aggregator. The gateway is a router, and each widget reads data owne
   - Errors: 401 (no session, revoked session, inactive account), 403 ACCOUNT_SUSPENDED, 503 WIDGET_TOKENS_UNAVAILABLE (no Valkey in production).
 - `DELETE /api/v1/auth/widget-token` — revokes this session's widget token. 204.
 
-The token is an EdDSA JWT from the auth signing keys with `aud: "zudomart-widgets"`, `scope: "widgets:read"`, `sid` (the device's session), `jti` and `age`. TTL `AUTH_WIDGET_TOKEN_TTL` (default 24h, max 7 days). The app rotates it when less than 6 hours remain, on foreground and in the background refresh task.
+The token is an EdDSA JWT from the auth signing keys with `aud: "nantty-widgets"`, `scope: "widgets:read"`, `sid` (the device's session), `jti` and `age`. TTL `AUTH_WIDGET_TOKEN_TTL` (default 24h, max 7 days). The app rotates it when less than 6 hours remain, on foreground and in the background refresh task.
 
 Rules:
 - One live widget token per session (device). Valkey key `auth:widget-token:<sid>` holds the current `jti`; issuing a new token replaces it, so the previous token stops working.
 - Signing out, `DELETE /auth/sessions/{id}`, revoke-all, a password change and a ban all revoke the session. The session denylist entry (`auth:revoked-session:<sid>`) is kept for the widget-token lifetime, and the widget key is deleted.
 - Signing keys stay published for the widget-token lifetime after rotation, so widgets don't break on key rotation.
 - The gateway (`WidgetTokenVerifier`) and the Go services (`jwtauth.VerifyWidgetTokenAndExtractPrincipal`) both check the signature, audience, scope, denylist and the current `jti`. On a Valkey error they fail closed.
-- A widget token on any route that isn't `GET /api/v1/widgets/*` gets `401 WIDGET_TOKEN_SCOPE` at the gateway without reaching a service. The Go services reject it too, because their normal verifier only accepts `aud: zudomart-api`.
+- A widget token on any route that isn't `GET /api/v1/widgets/*` gets `401 WIDGET_TOKEN_SCOPE` at the gateway without reaching a service. The Go services reject it too, because their normal verifier only accepts `aud: nantty-api`.
 
 ## Read endpoints
 
@@ -39,7 +39,7 @@ All of them:
 - contain no email, phone, address or payment details. Avatars and images are the stored URLs.
 
 ### GET /api/v1/widgets/orders
-Response 200 `OrderWidgetResponseContract`. Lists up to 3 of the buyer's orders in `new | processing | ready | shipped | delivered`, most recently updated first, plus `activeCount`. The status is `out_for_delivery` when the order has shipped and a rider is assigned. `deepLink: zudomart://orders/<id>`.
+Response 200 `OrderWidgetResponseContract`. Lists up to 3 of the buyer's orders in `new | processing | ready | shipped | delivered`, most recently updated first, plus `activeCount`. The status is `out_for_delivery` when the order has shipped and a rider is assigned. `deepLink: nantty://orders/<id>`.
 
 ### GET /api/v1/widgets/seller-today[?amounts=hidden]
 Response 200 `SellerTodayWidgetResponseContract` for the caller's default store, which needs the `dashboard:view` permission. It returns sales and orders since local midnight in the store's timezone, `ordersToShip` (paid `new | processing | ready`) and `availableBalance` (only with `wallet:view`).
@@ -50,18 +50,18 @@ Response 200 `SellerTodayWidgetResponseContract` for the caller's default store,
 Response 200 `LiveNowWidgetResponseContract`. Up to 8 lives that are live now, hosted by accounts the viewer follows, ordered by viewer count.
 - Blocked hosts (in either direction) and lives hidden by moderation are excluded.
 - Subscriber-only lives are excluded unless the viewer is an active subscriber.
-- `deepLink: zudomart://live/<id>`.
+- `deepLink: nantty://live/<id>`.
 
 ### GET /api/v1/widgets/creator-today[?amounts=hidden&currency=NGN]
 Response 200 `CreatorTodayWidgetResponseContract`.
 - For a Creator Program member: today's (UTC) impressions across their posts, new accepted followers since UTC midnight, and today's earnings total. `earningsToday` is `null` with `amounts=hidden`.
-- For a non-member: `creatorProgramMember: false` with `deepLink: zudomart://creator`. No numbers are returned.
+- For a non-member: `creatorProgramMember: false` with `deepLink: nantty://creator`. No numbers are returned.
 
 ### GET /api/v1/widgets/stories
 Response 200 `StoriesWidgetResponseContract`. Up to 8 accounts the viewer follows that have active stories, ordered unseen first and then by newest story.
 - Excluded: expired stories (`expiresAt <= now`), stories hidden by moderation, subscriber-only stories, blocked accounts in either direction, and private accounts the viewer doesn't follow.
 - The thumbnail is dropped for stories with sensitive labels.
-- `deepLink: zudomart://stories/<userId>`.
+- `deepLink: nantty://stories/<userId>`.
 - There is no close-friends audience in the data model yet. When one is added, it must be filtered here too.
 
 ## Silent refresh push
@@ -89,7 +89,7 @@ The app needs `expo-notifications` to receive these pushes. It is blocked by the
 | `GET /embed/store/{storeIdOrSlug}?theme=&size=` | Store card |
 | `GET /embed/products/{storeIdOrSlug}?theme=&layout=grid\|carousel&limit=1-12&products=id,id&size=` | Products |
 | `GET /embed/product/{productId}?theme=&view=button\|card` | Buy on Nantty button or product card |
-| `GET /oembed?url=<zudomart store or product url>&format=json&maxwidth=` | oEmbed `rich` JSON with a sandboxed iframe (`OembedResponseContract`) |
+| `GET /oembed?url=<nantty store or product url>&format=json&maxwidth=` | oEmbed `rich` JSON with a sandboxed iframe (`OembedResponseContract`) |
 
 Who can be embedded:
 - any **active** store that moderation has not hidden, with products that are active, published online, public and not hidden by moderation;
@@ -113,4 +113,4 @@ Security:
 
 ## Deep links (mobile)
 
-`zudomart://orders/<orderId>`, `zudomart://seller/dashboard`, `zudomart://creator/dashboard`, `zudomart://creator`, `zudomart://live/<liveId>`, `zudomart://stories/<userId>`, `zudomart://settings/widgets`.
+`nantty://orders/<orderId>`, `nantty://seller/dashboard`, `nantty://creator/dashboard`, `nantty://creator`, `nantty://live/<liveId>`, `nantty://stories/<userId>`, `nantty://settings/widgets`.

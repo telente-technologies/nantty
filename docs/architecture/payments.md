@@ -16,7 +16,7 @@ Updated 2026-10-11 from the code. Later sections still carry some PROPOSED label
 | Flutterwave v3 adapter: Standard checkout, verify by id, refunds, disputes, PSAs (wallets), transfers, BVN consent, account resolve | EXISTING; the only provider | `services/go/modules/payments/src/integrations/flutterwave*.integration.go` |
 | Apple App Store and Google Play receipts and server notifications | EXISTING | `payments/src/integrations/appleAppStore*.go`, `googlePlay*.go` |
 | Webhooks: `POST /webhooks/flutterwave` through the gateway (raw body), `verif-hash` compared in constant time, stored in the webhook inbox, used only as a trigger | EXISTING | `payments/src/integrations/flutterwaveWebhooks.integration.go`, `webhookEvent.schema.go` |
-| gRPC `LiveMoneyService`, `CheckoutMoneyService`, `AdsMoneyService` served by go-money and called by go-live, go-commerce and go-ads | EXISTING | `services/contracts/proto/zudomart/money/v1/*.proto`, `wallet`, `creators`, `escrow` `src/app.go` |
+| gRPC `LiveMoneyService`, `CheckoutMoneyService`, `AdsMoneyService` served by go-money and called by go-live, go-commerce and go-ads | EXISTING | `services/contracts/proto/nantty/money/v1/*.proto`, `wallet`, `creators`, `escrow` `src/app.go` |
 | Escrow locked in the buyer's own wallet (`CustodyBuyerWalletLock`), release, disputes, refunds, clawback and seller debt | EXISTING | `services/go/modules/escrow/src/modules/escrows/services/escrowWallet*.service.go` |
 | Selling eligibility: outside the PSA countries (`WALLET_PSA_COUNTRIES`, default `NG`) a seller must be payout-verified; debt over the limit blocks selling | EXISTING | `payments/src/modules/gateway/services/sellingEligibility.service.go` |
 | Idempotency: money requests stored in Postgres (`idempotentRequest.schema.go`); HTTP replay cache in Valkey | EXISTING | `payments/src/databases/schema`, `services/go/platform/idempotency` |
@@ -31,7 +31,7 @@ Rule: **the product being sold decides the rail, not the app it is sold from.**
 
 | | Physical economy | Digital economy |
 | --- | --- | --- |
-| Goods | Marketplace products, shipping fees | ZudoCoins, gifts, premium, creator subscriptions, in-app boosts |
+| Goods | Marketplace products, shipping fees | NanttyCoins, gifts, premium, creator subscriptions, in-app boosts |
 | Unit | Fiat `Money` (int64 minor + currency, store currency) | Coins (plain integer, own unit; **never money, never mixed with fiat**) |
 | Rail | Flutterwave Standard checkout (card, bank transfer, USSD) or the buyer's funded wallet (PSA), one intent per checkout | Mobile apps: Apple IAP / Google Play Billing. Web: Flutterwave checkout or wallet, into Nantty's main balance |
 | Holding | Escrow per order group, locked in our ledger inside the buyer's own PSA until release; release moves buyer PSA → seller PSA. Card money settles to main and is moved into the buyer's PSA. Outside NG (no PSA): direct payment, no escrow | Spendable coins (bought) and earned coins (creator side) |

@@ -4,7 +4,7 @@
 
 As of 2026-10-03. The go-money code (payments, escrow, wallet, ledger) was being edited by another agent while this audit ran (Bachs connected-account mirror: `paymentCollectionPosting.service.go`, `providerMirrorReconciliation.service.go`, `escrowChargebacks.service.go`). Statements below describe the working tree at audit time; re-verify line numbers before acting. Paths are relative to `services/go/modules/`.
 
-> **Bachs and Anchor dropped.** The audit below describes the code as it was (Bachs mirror). Target model (`docs/integrations/flutterwaveMigration.md` §2–3): Zudomart holds no customer money; escrow is locked in the buyer's own Flutterwave payout subaccount and released PSA → PSA, then the 24h seller lock applies before a withdrawal transfer; the ledger is the source of truth for what money means. Wherever this file says Bachs, read the Flutterwave equivalent given in brackets.
+> **Bachs and Anchor dropped.** The audit below describes the code as it was (Bachs mirror). Target model (`docs/integrations/flutterwaveMigration.md` §2–3): Nantty holds no customer money; escrow is locked in the buyer's own Flutterwave payout subaccount and released PSA → PSA, then the 24h seller lock applies before a withdrawal transfer; the ledger is the source of truth for what money means. Wherever this file says Bachs, read the Flutterwave equivalent given in brackets.
 
 ## 1. Shared machinery (EXISTING)
 

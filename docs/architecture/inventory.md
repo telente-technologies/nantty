@@ -1,4 +1,4 @@
-# Zudomart architecture inventory (phase 1)
+# Nantty architecture inventory (phase 1)
 
 > **Historical snapshot.** This audit records the repo on 2026-10-03 and is no longer accurate (for example, the old monolith it refers to has been removed, and most services it lists as routeless now serve traffic). For the current system see [system.md](system.md).
 
@@ -17,11 +17,11 @@ Status legend: **EXISTING** implemented code; **MOCK-ONLY** frontend mock contra
 | `apps/webapp`, `apps/studio` | Next 16 buyer web app and creator live studio, each with a BFF | EXISTING UI, MOCK-ONLY data |
 | `apps/seller`, `apps/ads`, `apps/admin` | Next 16 seller dashboard, ads manager, admin console, each with a BFF | EXISTING UI, MOCK-ONLY data |
 | `apps/web` | Next 16 marketing site (6 pages, no BFF) | EXISTING |
-| old monolith | Zudojs modular monolith; removed on 2026-10-10 after everything still in use was ported to the services | REMOVED |
+| old monolith | Nanttyjs modular monolith; removed on 2026-10-10 after everything still in use was ported to the services | REMOVED |
 | `services/python/intelligence` | FastAPI scoring service (Python 3.14) | EXISTING (stateless scoring), no event consumer |
 | `apps/gift` | three mp4 files (`heart.mp4`, `rose.mp4`, `star.mp4`), no code | assets only |
 | `services/go` | Go 1.26 workspace: 14 platform libs, 18 module dirs, 6 deployables | EXISTING, one module complete |
-| `services/typescript/gateway` | Zudojs edge proxy | EXISTING, one upstream |
+| `services/typescript/gateway` | Nanttyjs edge proxy | EXISTING, one upstream |
 | `services/elixir/realtime` | Phoenix 1.8 raw-WebSocket realtime | EXISTING |
 | `services/contracts` | buf protos (3), JSON event schemas (4), AsyncAPI 3 | EXISTING, small |
 | `packages/{designTokens,webKit,contracts,shared-types}` | shared packages | see section 1.4 |
@@ -48,7 +48,7 @@ Root `package.json`: pnpm 11 workspace over `apps/*`, `packages/*`, `services/ty
 | Security headers | CSP / frame / HSTS configured in each `next.config.ts` (admin has a dedicated `contentSecurityPolicy.service.ts`) | `apps/*/next.config.ts`, `apps/admin/src/server/contentSecurityPolicy.service.ts` |
 | Admin extras | MFA enrollment, passkey (WebAuthn) options, step-up, keep-alive BFF routes | `apps/admin/src/app/bff/auth/{mfa,step-up,keep-alive}/**` |
 | Tests | No frontend test files exist. Only `apps/mobile` has a `test` script (`jest`) and `apps/mobile/tests/` holds `.gitkeep` only. The other Next apps only define `typecheck` (web has none). `pnpm test` therefore runs nothing for the UI | `apps/*/package.json`, `find` of `*.test.*` (48 files, all under the old monolith) |
-| Error/empty/loading kit | Web: `@zudomart/web-kit` has `skeleton`, `emptyState`, `errorState`; mobile has own `ui/{errorState,skeleton,listSkeleton}`; webapp `components/ui/feedback.tsx`; admin/ads `ui/feedback.module.css`. Next `error.tsx`/`loading.tsx`: webapp 2/1, studio 2/1, ads 2/2, admin 2/1, seller 1/0, web 1/0 | `packages/webKit/src/*`, `apps/mobile/src/components/ui/*`, find of `error.tsx`, `loading.tsx` |
+| Error/empty/loading kit | Web: `@nantty/web-kit` has `skeleton`, `emptyState`, `errorState`; mobile has own `ui/{errorState,skeleton,listSkeleton}`; webapp `components/ui/feedback.tsx`; admin/ads `ui/feedback.module.css`. Next `error.tsx`/`loading.tsx`: webapp 2/1, studio 2/1, ads 2/2, admin 2/1, seller 1/0, web 1/0 | `packages/webKit/src/*`, `apps/mobile/src/components/ui/*`, find of `error.tsx`, `loading.tsx` |
 | Realtime client | Mobile opens `wss://<apiBase>/ws`, sends `{type:"auth",accessToken}`, heartbeat 25 s, backoff 1-30 s, with a mock emitter in mocks mode | `apps/mobile/src/services/core/realtime.service.ts`; matches `services/elixir/realtime/lib/realtimeWeb/clientSocket.socket.ex` |
 
 ### 1.2 Per-app inventory
@@ -56,7 +56,7 @@ Root `package.json`: pnpm 11 workspace over `apps/*`, `packages/*`, `services/ty
 | App | Stack and state | Rendering | Routes (real count from `page.tsx`) | Notes |
 | --- | --- | --- | --- | --- |
 | `apps/mobile` | Expo ~57, RN 0.86.3, React 19.2, React Navigation 7, TanStack Query 5 with persisted cache (AsyncStorage), Zustand 5 (8 stores: `actingProfile`, `auth`, `locale`, `offline`, `profileSwitcherSheet`, `signup`, `uploadQueue`, `videoAudio`) | native | 92 screen files in 29 folders: auth boost brand cart checkout clips create creator disputes escrow explore home live messages notifications orders posts product profile rankings seller settings sounds store story support verification wallet | per-prefix staleTime table, offline mutation queue, expo-sqlite message history (`cache/messageHistory.database.ts`), media upload queue, `useInfiniteQuery` in 7 files, FlatList/FlashList in 27 files, tokens in `utils/secureStorage.util.ts`. 59 service files, all mock-switched |
-| `apps/webapp` | Next 16.3, React 19.3, TanStack Query 5, Zustand 5 (`auth.store`, `locale.store`), `@zudomart/design-tokens`, `@zudomart/web-kit` | CSR: 21/21 pages are `"use client"`; 7 route handlers (BFF) | 21 pages: `/`, analytics/post/[postId], cart, category/[categoryId], chats, chats/[conversationId], checkout, collections/[collection], creator, explore, me, notifications, orders, orders/[orderId], product/[productId], user/[userId], plus auth: welcome, login, signup, forgot-password, reset-password | `useInfiniteQuery` + IntersectionObserver on `/` and `productCollectionBrowser`; 16 service files; `cache/messageHistory.type.ts` only |
+| `apps/webapp` | Next 16.3, React 19.3, TanStack Query 5, Zustand 5 (`auth.store`, `locale.store`), `@nantty/design-tokens`, `@nantty/web-kit` | CSR: 21/21 pages are `"use client"`; 7 route handlers (BFF) | 21 pages: `/`, analytics/post/[postId], cart, category/[categoryId], chats, chats/[conversationId], checkout, collections/[collection], creator, explore, me, notifications, orders, orders/[orderId], product/[productId], user/[userId], plus auth: welcome, login, signup, forgot-password, reset-password | `useInfiniteQuery` + IntersectionObserver on `/` and `productCollectionBrowser`; 16 service files; `cache/messageHistory.type.ts` only |
 | `apps/studio` | Next 16.3, TanStack Query, Zustand | mostly CSR (4/6) | 6 pages: login, overlay/[sceneId], lives, lives/[liveId], lives/[liveId]/overlay; 6 BFF routes | no social route in mocks (`backendPlan.md` mismatch 18) |
 | `apps/seller` | Next 16.3, React 19.3, no react-query or zustand; hooks in `src/hooks` (7) | Server Components shells (0/88 pages are `"use client"`, 203 client files) | 88 pages: dashboard, orders (+disputes, returns, invoice, packing-slip), products (+import, categories, labels), inventory (locations, movements, transfers, suppliers, reorder, adjustments), customers, marketing, promotions, delivery, wallet (accounts, escrow, fees, refunds, settlements, statements, withdraw), affiliates, brand, staff, reports, reviews, settings/* (15), access/apply, access/verification, billing-checkout/* | `apiContract.md` present; 10 BFF routes incl. password reset and store/location session. Still contains POS-era roles per `backendPlan.md` mismatch 15 (`apps/seller/src/config/rolePermissions.config.ts`) |
 | `apps/ads` | Next 16.3, no react-query | Server shells (0/22 client) | 22 pages: login, policy, invites/[token], accounts (+new, [id]/overview, campaigns, ad-sets, ads, audiences, billing, reports, settings, activity, tools/{events,experiments,rules}) | `apiContract.md`; 4 BFF routes |
@@ -75,15 +75,15 @@ Root `package.json`: pnpm 11 workspace over `apps/*`, `packages/*`, `services/ty
 
 | Package | Contents | Consumers found |
 | --- | --- | --- |
-| `@zudomart/design-tokens` (`packages/designTokens`) | `tokens.css`, `native.ts` | webapp, studio, ads, admin, web (package.json) ; mobile keeps its own `src/constants/colors.constant.ts` |
-| `@zudomart/web-kit` (`packages/webKit`) | Skeleton, EmptyState, ErrorState, wordmark, feedback css | webapp, studio, ads, admin |
-| `@zudomart/contracts` (`packages/contracts`) | 20 TS contract files (auth, carts, orders, products, media, feeds, posts, wallets, escrows, ...) | **none**: no app or service imports it (grep of `apps/*/package.json`, `apps/*/src`, `services/typescript`) |
-| `@zudomart/shared-types` | 15 type files (money, order, escrow, post, ...) | **none** found |
+| `@nantty/design-tokens` (`packages/designTokens`) | `tokens.css`, `native.ts` | webapp, studio, ads, admin, web (package.json) ; mobile keeps its own `src/constants/colors.constant.ts` |
+| `@nantty/web-kit` (`packages/webKit`) | Skeleton, EmptyState, ErrorState, wordmark, feedback css | webapp, studio, ads, admin |
+| `@nantty/contracts` (`packages/contracts`) | 20 TS contract files (auth, carts, orders, products, media, feeds, posts, wallets, escrows, ...) | **none**: no app or service imports it (grep of `apps/*/package.json`, `apps/*/src`, `services/typescript`) |
+| `@nantty/shared-types` | 15 type files (money, order, escrow, post, ...) | **none** found |
 | Dark mode | `docs/darkModePlan.md` (95 lines) | PROPOSED; stylelint config at root (`stylelint.config.mjs`) |
 
 ## 2. Backend
 
-### 2.1 Go platform libraries (`services/go/platform`, module `zudomart/platform`)
+### 2.1 Go platform libraries (`services/go/platform`, module `nantty/platform`)
 
 | Package | Provides | Tests |
 | --- | --- | --- |
@@ -148,7 +148,7 @@ Dockerfile: multi-stage `golang:1.26-alpine` to `distroless/static-debian13:nonr
 | Size | 6 source files (~300 lines), 1 test file (`tests/upstreamDispatch.handler.test.ts`, 134 lines), vitest, Dockerfile |
 | Built on | `@zudojs/http`, `@zudojs/logger`, `jose` |
 | Route table | 3 prefixes, all to upstream `identity`: `/api/v1/auth/logout` (auth required, POST), `/api/v1/auth/sessions` (auth required), `/api/v1/auth/` (optional auth). `UpstreamName = "identity"` is the only upstream (`src/routes/upstream.routes.ts`, `src/configs/gateway.config.ts`) |
-| Auth | JWKS verification via `jose` (`accessTokenVerifier.service.ts`); forwards `x-zudomart-account-id` and `x-zudomart-session-id`, `x-request-id`, `x-forwarded-for`, `x-real-ip`; whitelists forwarded and returned headers |
+| Auth | JWKS verification via `jose` (`accessTokenVerifier.service.ts`); forwards `x-nantty-account-id` and `x-nantty-session-id`, `x-request-id`, `x-forwarded-for`, `x-real-ip`; whitelists forwarded and returned headers |
 | Edge controls | CORS allow-list (`CORS_ORIGINS`, `credentials:false`), in-process rate limit (`RATE_LIMIT_MAX_PER_MINUTE` default 600, per instance), 1 MiB body limit, upstream timeout 10 s (502/504 mapping), `nosniff`, `no-referrer`, HSTS |
 | Absent | idempotency fast path, per-route stricter limits for login/OTP, aggregation, response caching, other upstreams, Redis-backed limits (all PROPOSED in `backendPlan.md` 1.3, 5.5) |
 
@@ -174,13 +174,13 @@ Dockerfile: multi-stage `golang:1.26-alpine` to `distroless/static-debian13:nonr
 | Stack | FastAPI, polars, pyarrow, scikit-learn, scipy, redis, uv, Python >=3.14; ~12.8k lines of Python | `pyproject.toml` |
 | Modules (12) | ads, audio, clips, events_ingestion, experiments, feed, model_registry, recommendations, risk, search, social_proof, trending | `src/modules/*` |
 | Endpoints | `POST /v1/events`, `/v1/feed/rank`, `/v1/clips/rank`, `/v1/social-proof/select`, `/v1/ads/select`, `/v1/recommendations/{products,accounts,clips}`, `/v1/trending`, `/v1/search/rerank`, `/v1/risk/score`, `/v1/experiments/assign`, `GET /v1/experiments/{key}/metrics`, `/v1/audio/{fingerprints,match,sounds/status}` + health | `apiContract.md` section 7 |
-| Auth | HMAC-SHA256 signed requests (`x-zudo-timestamp`, `x-zudo-nonce`, `x-zudo-signature`), 300 s skew, Redis nonce store (fail closed 503), previous-secret rotation, token-bucket rate limit, 1 MiB/4 MiB body caps | `apiContract.md` section 2 |
+| Auth | HMAC-SHA256 signed requests (`x-nantty-timestamp`, `x-nantty-nonce`, `x-nantty-signature`), 300 s skew, Redis nonce store (fail closed 503), previous-secret rotation, token-bucket rate limit, 1 MiB/4 MiB body caps | `apiContract.md` section 2 |
 | Storage | Redis online features, Parquet feature logs, synthetic data simulators and offline metrics utils | `src/repositories`, `src/utils` |
 | Tests | 15 `test_*.py` files in `tests/` (counted by `find`); not run here | `services/python/intelligence/tests` |
 | Callers | No Go/TS service calls it yet; `services/python/README.md` says it reads SQS queue `intelligence-domain-events`, but no SQS/boto code exists in `src` (grep). It ingests via `POST /v1/events` | `services/python/README.md`, grep |
 | Location | Plan says to move to `services/python/intelligence` later; currently `services/python/` is only a README | `services/python/README.md` |
 
-### 2.7 Legacy monolith (Zudojs, removed on 2026-10-10)
+### 2.7 Legacy monolith (Nanttyjs, removed on 2026-10-10)
 
 | Item | Count / finding | Evidence |
 | --- | --- | --- |
@@ -240,7 +240,7 @@ Legend: A = the old monolith Prisma model (124 total, reference), G = Go ent ent
 
 ent totals: auth 7 entities (6 domain + outbox), live 14 entities (13 domain + outbox); 2 outbox tables, one per module schema. `live_sessions` table has 28 columns including `livekit_room`, `live_ad_settings`, `sponsorship_line`.
 
-DB layout: one Postgres, per-service schema and `svc_<service>` login role for 29 services, plus `zudomart_readers` NOLOGIN role granted to all (`infra/local/postgres/create-databases.sh`). Only auth (`AUTH_DATABASE_SCHEMA=auth`) actually runs against its schema today. `live` has a migration but no module wiring uses it.
+DB layout: one Postgres, per-service schema and `svc_<service>` login role for 29 services, plus `nantty_readers` NOLOGIN role granted to all (`infra/local/postgres/create-databases.sh`). Only auth (`AUTH_DATABASE_SCHEMA=auth`) actually runs against its schema today. `live` has a migration but no module wiring uses it.
 
 ## 4. Events and jobs
 
@@ -251,9 +251,9 @@ DB layout: one Postgres, per-service schema and `svc_<service>` login role for 2
 | Publisher | EXISTING SNS publisher `platform/events/sns.publisher.go`; dev fallback `DiscardingPublisher` marks events published without sending; production requires `DOMAIN_EVENTS_TOPIC_ARN` | `auth.module.go` `createDomainEventPublisher` |
 | Failure handling in relay | no attempt counter or dead-letter column on the outbox row; a failed batch is logged and retried on the next tick forever | `outbox.relay.go` |
 | Envelope | `platform/events/event.envelope.go` builds `{id,type,source,subject,version,occurredAt,data}`; JSON Schema `services/contracts/events/schemas/envelope.v1.json` | |
-| Event schemas | 3 domain events only: `account.registered`, `account.loggedIn`, `session.refreshTokenReuseDetected` (+envelope) | `services/contracts/events/schemas/*`, `asyncapi.yaml` (AsyncAPI 3.0, one channel `zudomart-domain-events`, 1 operation `publishAuthEvents`) |
+| Event schemas | 3 domain events only: `account.registered`, `account.loggedIn`, `session.refreshTokenReuseDetected` (+envelope) | `services/contracts/events/schemas/*`, `asyncapi.yaml` (AsyncAPI 3.0, one channel `nantty-domain-events`, 1 operation `publishAuthEvents`) |
 | Events consumed but undefined | Elixir router handles `gift.sent`, `goal.*`, `leaderboard.updated`, `live.*`, `guest.*`, `stage.updated`, `battle.*`, `message.created`, `notification.created`; none has a JSON Schema or a producer | `domain_event_router.ex` vs `contracts/events/schemas` |
-| Local topology | SNS `zudomart-domain-events`; consumer queues `users-`, `notifications-`, `realtime-`, `intelligence-domain-events` subscribed with RawMessageDelivery; job queues `jobs-email`, `jobs-media`, `jobs-reports`, `jobs-payouts`, `jobs-search-indexing`; each with a `-dlq`, `maxReceiveCount=5`, visibility timeout 60 s | `scripts/localStack (queue/topic bootstrap)` |
+| Local topology | SNS `nantty-domain-events`; consumer queues `users-`, `notifications-`, `realtime-`, `intelligence-domain-events` subscribed with RawMessageDelivery; job queues `jobs-email`, `jobs-media`, `jobs-reports`, `jobs-payouts`, `jobs-search-indexing`; each with a `-dlq`, `maxReceiveCount=5`, visibility timeout 60 s | `scripts/localStack (queue/topic bootstrap)` |
 | Filter policies | AsyncAPI says consumers subscribe "with a filter policy on eventType"; the local script subscribes **without** filter policy (`RawMessageDelivery=true` only), and raw delivery drops the `eventType` message attribute envelope that a filter would need | script vs `asyncapi.yaml` description |
 | Consumers (real) | Only Elixir `SqsConsumer` (queue `realtime-domain-events`). No Go SQS consumer in use (`SqsQueues.ConsumeQueueUntilContextDone` exists in `platform/events/sqs.queue.go`, with no caller). Intelligence has no consumer | grep |
 | Job queues | `SqsQueues.EnqueueJob` exists in platform; nothing enqueues or consumes jobs; the old monolith used an in-process scheduler | `sqs.queue.go`, the old monolith's scheduler |
@@ -271,7 +271,7 @@ See 2.5. Contract for clients: `/ws` JSON frames; topics `user:*`, `conversation
 | --- | --- | --- |
 | Compose services | postgres (postgis 17-3.5), valkey 9, localstack 4.9, object-storage (SeaweedFS), livekit, otel-collector, jaeger; profiles `search` (opensearch 3) and `analytics` (clickhouse). All published ports bound to 127.0.0.1 | `infra/local/docker-compose.yml` |
 | Not in compose | gateway, go-identity, realtime, intelligence (run on host or via per-service Dockerfile); `services/README.md` lists port 4000 for realtime but compose has no realtime service | compose vs README |
-| Bootstrap | schemas and roles per service, `zudomart_test` and `atlas_dev` DBs, PostGIS | `infra/local/postgres/create-databases.sh` |
+| Bootstrap | schemas and roles per service, `nantty_test` and `atlas_dev` DBs, PostGIS | `infra/local/postgres/create-databases.sh` |
 | Observability | Go OTLP/gRPC tracing opt-in by env, collector config at `infra/local/otel/collector.yaml`, Jaeger UI :16686; Elixir has `telemetry.ex` metrics only; gateway has no tracing; no metrics backend, no log shipping | `platform/telemetry`, `infra/local/otel` |
 | AWS | `infra/aws/README.md` only: planned Terraform modules (network, ecs-cluster, ecs-service, alb, aurora-postgres, elasticache, messaging, step-functions, media, livekit, secrets, observability, opensearch, clickhouse), envs staging/production; "Nothing here is applied" | README |
 | Dockerfiles | 6 Go (one per deployable), gateway, realtime, `services/python/intelligence`. None for the Next apps | find |
@@ -292,9 +292,9 @@ See 2.5. Contract for clients: `/ws` JSON frames; topics `user:*`, `conversation
 | CORS | gateway allow-list; realtime `check_origin` allow-list; Go services none (internal) | |
 | Headers | gateway: nosniff, referrer-policy, HSTS; Next apps: CSP etc. in `next.config.ts`; Go services none | |
 | Webhook verification | **ABSENT** in new services (no payments module). The old monolith has `verify-webhook-signature.middleware.ts` per SECURITY.md | |
-| Service-to-service auth | Python HMAC EXISTING; Go-to-Go none; gateway-to-Go uses plain forwarded `x-zudomart-*` headers with no signing visible, so go-identity trust relies on network isolation | `upstreamProxy.service.ts` |
+| Service-to-service auth | Python HMAC EXISTING; Go-to-Go none; gateway-to-Go uses plain forwarded `x-nantty-*` headers with no signing visible, so go-identity trust relies on network isolation | `upstreamProxy.service.ts` |
 | Idempotency | Redis middleware in Go platform, not wired to any module route | `platform/idempotency` |
-| DB access | one role per service plus read-only group role (`zudomart_readers`); `auth` migration `grant_read_access_to_other_services` | |
+| DB access | one role per service plus read-only group role (`nantty_readers`); `auth` migration `grant_read_access_to_other_services` | |
 | CI guards | 300-line limit, no raw SQL in TS, govulncheck | `backend.yml` |
 | SECURITY.md | 50 lines of baseline rules (secrets, deps, auth, authorization, money, data, transport). Written against the old monolith paths (`src/loggers/redact.ts`, `compose.yaml`, `modules/audit`, `verify-webhook-signature.middleware.ts`, `RATE_LIMIT_MAX`); none map to `services/**` | `SECURITY.md` |
 

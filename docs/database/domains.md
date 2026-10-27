@@ -74,7 +74,7 @@ flowchart LR
 
 - **Criticality**: C1 = financial truth or legal record (loss = money or compliance incident); C2 = core user state (loss = outage / user harm, recoverable from backup); C3 = derived or rebuildable (read models, counters, leaderboards); C4 = reference/config.
 - **Tx needs**: `money-tx` = must be written inside `RunInMoneyTransaction` with the ledger posting (`ledger/src/databases/moneyTransaction.database.go`); `single-row` = autocommit or short tx; `with-outbox` = same tx as an `outbox_events` insert; `append-only` = INSERT only.
-- **Readers**: what the owner's grant migration exposes to `zudomart_readers` (column list abbreviated). "owner" = no grant.
+- **Readers**: what the owner's grant migration exposes to `nantty_readers` (column list abbreviated). "owner" = no grant.
 - **Partition key** (FUTURE, trigger in [partitioning.md](partitioning.md)) / **Shard key** (FUTURE, shard-ready only; no physical sharding, see [sharding.md](sharding.md)). "none" = stays small or must stay global.
 
 ## 3. Size classes (assumption scenarios, no user counts)

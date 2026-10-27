@@ -60,7 +60,7 @@ All PROPOSED except local OTLP from Go. Collector runs as a sidecar per task (`i
 | Go to Python | HTTP headers plus HMAC (EXISTING signing); Python reads `traceparent` and `x-request-id`, logs them, includes `model_version` in the response | PROPOSED |
 | Go to Phoenix | Phoenix does not get synchronous calls; it receives events | n/a |
 | Outbox | store `trace_id`, `request_id`, `correlation_id` in the envelope (`event.envelope.go` adds `meta` object) | PROPOSED |
-| RabbitMQ | AMQP properties `message_id` = event/job id, `correlation_id`, `type` = event type; headers `traceparent`/`tracestate` (W3C, injected by the Go publisher from the context), `x-zudomart-subject`, `x-zudomart-schema`, `x-zudomart-attempt`, `x-zudomart-last-error` on retries | EXISTING (Go publisher injects `traceparent`; TS/Python/Elixir carry ids and attempts) |
+| RabbitMQ | AMQP properties `message_id` = event/job id, `correlation_id`, `type` = event type; headers `traceparent`/`tracestate` (W3C, injected by the Go publisher from the context), `x-nantty-subject`, `x-nantty-schema`, `x-nantty-attempt`, `x-nantty-last-error` on retries | EXISTING (Go publisher injects `traceparent`; TS/Python/Elixir carry ids and attempts) |
 | Workers / Phoenix consumer | start a new span with a **link** to the producer span (async, not parent-child), carry correlation id into logs; Go consumer extracts `traceparent` into the handler context | Go EXISTING; others PROPOSED |
 | Phoenix to client | server events carry `seq` per topic (plan 5.6) and an optional `correlationId` for acks | PROPOSED |
 | DB | `application_name` = service; optional SQL comment with `trace_id` via `sqlcommenter`; slow-query log in Aurora with `log_min_duration_statement` | PROPOSED |

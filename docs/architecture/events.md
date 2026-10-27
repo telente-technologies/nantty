@@ -11,11 +11,11 @@ As of 2026-10-03. **RabbitMQ adopted (owner, 2026-10-03)**: the event bus and jo
 | Outbox table per module schema `(id, event_type, subject, payload jsonb, published_at)`, index `(published_at, created_at)` | EXISTING in `auth` (serving) and `users`, `admin`, `currency`, `ledger`, `live` (WIP) | `services/go/modules/*/src/databases/schema/outbox_event.schema.go` |
 | Outbox write in the same tx as the business change | EXISTING (auth) | `modules/auth/src/events/outbox.event.go` |
 | Relay: poll 500 ms, batch 100, `FOR UPDATE SKIP LOCKED`, mark published after publish | EXISTING | `platform/events/outbox.relay.go`, `EntOutboxStore` in each module |
-| RabbitMQ publisher: confirm channel, `mandatory`, persistent, routing key = `eventType`, `message_id` = envelope id, `type` = event type, `traceparent` + `x-zudomart-subject` headers; batch fails on any nack/return so outbox rows stay unpublished | EXISTING | `platform/events/rabbitmq.publisher.go`, social `rabbitMqDomainEventPublisher.integration.ts` |
+| RabbitMQ publisher: confirm channel, `mandatory`, persistent, routing key = `eventType`, `message_id` = envelope id, `type` = event type, `traceparent` + `x-nantty-subject` headers; batch fails on any nack/return so outbox rows stay unpublished | EXISTING | `platform/events/rabbitmq.publisher.go`, social `rabbitMqDomainEventPublisher.integration.ts` |
 | Bus selection `EVENT_BUS=rabbitmq` (default) or `sqs` (old SNS/SQS adapters kept for rollback), `RABBITMQ_URL` per service user | EXISTING | `platform/events/messageBus.factory.go` |
 | Envelope `{id,type,source,subject,version,occurredAt,data}` (unchanged, envelope.v1) | EXISTING | `platform/events/event.envelope.go`, `services/contracts/events/schemas/envelope.v1.json` |
 | JSON schemas: `account.registered`, `account.loggedIn`, `session.refreshTokenReuseDetected`, `exchangeRate.updated` | EXISTING | `services/contracts/events/schemas` |
-| Topology: topic exchange `zudomart.events` (alternate exchange `zudomart.unrouted` → `unrouted-events`, 24 h), direct `zudomart.jobs`, topic `zudomart.retry`, direct `zudomart.dlx`; one durable quorum queue per consumer and per job type, 4 retry queues + `.dlq` each | EXISTING (local definitions) | `infra/local/rabbitmq/topology.json` → `generateDefinitions.mjs` → `definitions.json` |
+| Topology: topic exchange `nantty.events` (alternate exchange `nantty.unrouted` → `unrouted-events`, 24 h), direct `nantty.jobs`, topic `nantty.retry`, direct `nantty.dlx`; one durable quorum queue per consumer and per job type, 4 retry queues + `.dlq` each | EXISTING (local definitions) | `infra/local/rabbitmq/topology.json` → `generateDefinitions.mjs` → `definitions.json` |
 | Consumers: realtime (Elixir `AmqpConsumer`, 10k-id in-memory dedupe), notifications (TS), intelligence (aio-pika, Redis claim dedupe), orders (`processed_events`), goTrust advisory, goAds report jobs | EXISTING | `realtime/events/amqp.consumer.ex`, `notifications/src/integrations/rabbitMq*.integration.ts`, `services/python/intelligence/.../amqp_domain_event_queue_repository.py`, `platform/events/rabbitmq.consumer.go` |
 | DLQ replay tool (shovel from `<queue>.dlq` back to the queue), alarms in Terraform | ABSENT (runbook uses the management UI "Move messages" / dynamic shovel) | |
 
@@ -30,7 +30,7 @@ flowchart LR
   tx["One Postgres tx<br/>business rows + outbox row"]:::existing
   outbox[("schema.outbox_events")]:::existing
   relay["Relay per deployable<br/>SKIP LOCKED batch"]:::existing
-  ex["topic exchange zudomart.events<br/>routing key = event type"]:::existing
+  ex["topic exchange nantty.events<br/>routing key = event type"]:::existing
   qRt["realtime-domain-events"]:::existing
   qNotif["notifications-domain-events"]:::existing
   qIntel["intelligence-domain-events"]:::existing
@@ -129,20 +129,20 @@ Assumed launch traffic: < 500 domain events/s peak, gift bursts of a few thousan
 | Kafka / MSK | Very high | Per partition | Replicated log | Full replay by offset | High | Highest fixed cost | Needs Kafka experience |
 | Redis Streams | High, memory-bound | Per stream | Weak (memory, AOF) | Limited by memory | Medium | Uses existing ElastiCache | Ephemeral fan-out only, not money |
 
-**Decision (owner, 2026-10-03): RabbitMQ.** One durable topic exchange `zudomart.events` (routing key = event name), one durable quorum queue per consumer service bound to the keys it needs (replaces SNS→SQS fan-out and filter policies), and a direct exchange `zudomart.jobs` with one quorum queue per job type. All behind the unchanged `DomainEventPublisher` / `JobQueue` / `QueueConsumer` interfaces; the SNS/SQS adapters stay behind `EVENT_BUS=sqs` until the cut-over is proven, then get deleted. The outbox remains the replay source.
+**Decision (owner, 2026-10-03): RabbitMQ.** One durable topic exchange `nantty.events` (routing key = event name), one durable quorum queue per consumer service bound to the keys it needs (replaces SNS→SQS fan-out and filter policies), and a direct exchange `nantty.jobs` with one quorum queue per job type. All behind the unchanged `DomainEventPublisher` / `JobQueue` / `QueueConsumer` interfaces; the SNS/SQS adapters stay behind `EVENT_BUS=sqs` until the cut-over is proven, then get deleted. The outbox remains the replay source.
 
 ### 4.1 Topology (single definitions file)
 
 | Element | Definition |
 | --- | --- |
 | Source of truth | `infra/local/rabbitmq/topology.json` (queues, bindings, service grants) → `pnpm backend:rabbitmq:definitions` → `definitions.json`, loaded by the local broker at boot and imported into Amazon MQ through the management API (`POST /api/definitions`) by the deploy pipeline with real password hashes from Secrets Manager |
-| Exchanges | `zudomart.events` topic (alternate exchange `zudomart.unrouted` fanout → `unrouted-events`, TTL 24 h, max 100k, drop-head), `zudomart.jobs` direct, `zudomart.retry` topic, `zudomart.dlx` direct |
-| Work queue `<q>` | quorum, `x-dead-letter-exchange=zudomart.dlx`, `x-dead-letter-routing-key=<q>.dlq`, `x-dead-letter-strategy=at-least-once`, `x-overflow=reject-publish`; bound to `zudomart.retry` with key `<q>` (return path) |
-| Retry queues | `<q>.retry.30s`, `.2m`, `.10m`, `.30m`: quorum, `x-message-ttl`, dead-letter back to `zudomart.retry` with key `<q>`; bound with their own name. Per-tier queues avoid head-of-line blocking of per-message TTL; no delayed-message plugin |
-| Dead-letter queue | `<q>.dlq` quorum, bound to `zudomart.dlx` |
-| Consumer contract | manual ack, prefetch (`RABBITMQ_PREFETCH`, default 20; realtime 50), idempotent on event id. On failure the consumer republishes a copy to `<q>.retry.<tier>` with `x-zudomart-attempt` + 1 (confirmed) and then acks; failure 5, or a poison message (unparseable, invalid envelope, unknown job type), is rejected without requeue → `.dlq`; if the retry publish fails the message is requeued |
+| Exchanges | `nantty.events` topic (alternate exchange `nantty.unrouted` fanout → `unrouted-events`, TTL 24 h, max 100k, drop-head), `nantty.jobs` direct, `nantty.retry` topic, `nantty.dlx` direct |
+| Work queue `<q>` | quorum, `x-dead-letter-exchange=nantty.dlx`, `x-dead-letter-routing-key=<q>.dlq`, `x-dead-letter-strategy=at-least-once`, `x-overflow=reject-publish`; bound to `nantty.retry` with key `<q>` (return path) |
+| Retry queues | `<q>.retry.30s`, `.2m`, `.10m`, `.30m`: quorum, `x-message-ttl`, dead-letter back to `nantty.retry` with key `<q>`; bound with their own name. Per-tier queues avoid head-of-line blocking of per-message TTL; no delayed-message plugin |
+| Dead-letter queue | `<q>.dlq` quorum, bound to `nantty.dlx` |
+| Consumer contract | manual ack, prefetch (`RABBITMQ_PREFETCH`, default 20; realtime 50), idempotent on event id. On failure the consumer republishes a copy to `<q>.retry.<tier>` with `x-nantty-attempt` + 1 (confirmed) and then acks; failure 5, or a poison message (unparseable, invalid envelope, unknown job type), is rejected without requeue → `.dlq`; if the retry publish fails the message is requeued |
 | Delayed jobs | `JobQueue` delay = publish to the largest retry tier ≤ delay (handlers that need exact timing re-defer, e.g. `email.sendIfUnread`) |
-| Least privilege | one user per service; `configure=^$` (no service declares or deletes anything), `write` only on the exchanges it publishes to, `read` only on its own queues, topic permission on `zudomart.retry` limited to `^(<its queues>)\.retry\.` |
+| Least privilege | one user per service; `configure=^$` (no service declares or deletes anything), `write` only on the exchanges it publishes to, `read` only on its own queues, topic permission on `nantty.retry` limited to `^(<its queues>)\.retry\.` |
 | Outside the bus | SES bounce/complaint feedback stays AWS-native (SES → SNS → SQS `notifications-ses-feedback`, optional `SQS_SES_FEEDBACK_QUEUE_URL`) because SES cannot publish to RabbitMQ; it carries no domain events |
 | Connections | one connection per process, named after the service; channel per consumer/goroutine plus one confirm channel for publishing; reconnect with exponential backoff and jitter (0.5 s → 30 s); graceful shutdown cancels consumers, finishes the in-flight message, closes channels |
 
@@ -182,7 +182,7 @@ flowchart LR
   jReports & jAi --> wPy
 ```
 
-Job queues (`zudomart.jobs`, routing key = queue name) EXISTING locally: `jobs-email` (notifications: unread emails, throttled bulk batches, digests), `jobs-ads-reports` (goAds), `intelligence-trust-advisory` (intelligence → goTrust), `jobs-payouts` (goMoney), and `jobs-media`, `jobs-reports`, `jobs-search-indexing` (no workers yet). Everything else PROPOSED.
+Job queues (`nantty.jobs`, routing key = queue name) EXISTING locally: `jobs-email` (notifications: unread emails, throttled bulk batches, digests), `jobs-ads-reports` (goAds), `intelligence-trust-advisory` (intelligence → goTrust), `jobs-payouts` (goMoney), and `jobs-media`, `jobs-reports`, `jobs-search-indexing` (no workers yet). Everything else PROPOSED.
 
 Defaults for all jobs unless the row says otherwise: quorum queue, manual ack, prefetch 20; 5 attempts with backoff 30 s, 2 m, 10 m, 30 m through the retry queues, then `<queue>.dlq`; DLQ alarm at depth > 0; job id (`message_id`) = idempotency key; long jobs extend nothing (no visibility timeout) but must finish within the consumer timeout (30 min default, `consumer_timeout`).
 

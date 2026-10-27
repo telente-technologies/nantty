@@ -20,7 +20,7 @@ Studio sits next to the other Nantty landings and reuses their system rather tha
 | Brand-blue CTA panel with a photo half, yellow primary and glass secondary | seller CTA |
 | Deep-blue footer: wordmark, description, both contact emails, three link columns, copyright, theme switcher, giant wordmark | seller and web footers |
 
-Header and footer markup is now duplicated across seller, ads, web and studio. Lifting them into `@zudomart/web-kit` (props: product label, nav links, link groups, giant word) is a good follow-up, done when no other agent is editing those apps.
+Header and footer markup is now duplicated across seller, ads, web and studio. Lifting them into `@nantty/web-kit` (props: product label, nav links, link groups, giant word) is a good follow-up, done when no other agent is editing those apps.
 
 ## Streaming and creator pages studied
 

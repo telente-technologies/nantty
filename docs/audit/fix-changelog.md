@@ -148,14 +148,14 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 
 **Audit:** ZM-010 and ZM-020 (shadow moderation had appeal only in email copy; the appeal URLs pointed at routes that do not exist)
 **Changes:**
-1. `services/go/modules/users/src/modules/accountEnforcement/events/accountEnforcement.event.go` — `AppealUrl` now points at `https://zudomart.com/settings/account-status`, the page that renders the appeal flow, instead of the non-existent `/settings/account/appeal`.
-2. `services/go/modules/users/src/modules/checkmarks/services/checkmarkNotices.service.go` — the checkmark appeal URL now points at `https://zudomart.com/settings/verification` instead of the non-existent `/settings/verification/appeal`.
+1. `services/go/modules/users/src/modules/accountEnforcement/events/accountEnforcement.event.go` — `AppealUrl` now points at `https://nantty.com/settings/account-status`, the page that renders the appeal flow, instead of the non-existent `/settings/account/appeal`.
+2. `services/go/modules/users/src/modules/checkmarks/services/checkmarkNotices.service.go` — the checkmark appeal URL now points at `https://nantty.com/settings/verification` instead of the non-existent `/settings/verification/appeal`.
 3. `services/typescript/notifications/src/modules/eventIngestion/mappings/identity.mapping.ts` — restricted, warned, suspended, banned and appeal-decided in-app notifications now carry `{ url, screen: "AccountStatus" }`, so the inbox can link straight to the appeal page.
 4. `services/typescript/notifications/src/modules/eventIngestion/mappings/verification.mapping.ts` — a revoked checkmark now links to `{ url, screen: "Verification" }`.
 5. `apps/webapp/src/app/(app)/notifications/page.tsx`, `apps/webapp/src/types/models.type.ts` — web notifications expose `url` and navigate to it on click.
 6. `apps/mobile/src/screens/notifications/notifications.screen.tsx` — `AccountStatus` and `Verification` screens open natively instead of falling through to the browser.
 7. `services/typescript/notifications/tests/accountStatusLinks.test.ts` — covers the five trust mappings, the `toInAppPath` normalisation and the revoked-checkmark link.
-**Verified:** `pnpm --filter @zudomart/notifications test` (313 passed, 4 skipped), notifications typecheck and lint, webapp typecheck and lint, mobile `tsc`, and `go build ./modules/users/...`.
+**Verified:** `pnpm --filter @nantty/notifications test` (313 passed, 4 skipped), notifications typecheck and lint, webapp typecheck and lint, mobile `tsc`, and `go build ./modules/users/...`.
 **Rollback:** revert the constants, the mapping `data` blocks, the web `url` navigation and the mobile screen branches together. Notifications still render without a link.
 **Remaining:** audio/PDF moderation, fan-out caps, single-use unsubscribe replay tracking and the rest of ZM-010/ZM-020.
 
@@ -193,7 +193,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 3. `services/typescript/social/src/modules/linkPreviews/commands/refreshPostLinkPreview/refreshPostLinkPreview.handler.ts` — link-preview refresh now requires the caller to be the post author after the normal visibility check; other viewers receive `NOT_POST_OWNER`.
 4. `services/typescript/social/src/modules/posts/commands/{sharePost,recordPostImpression,recordProfileVisitFromPost}/*.handler.ts` — anonymous requests return before loading the post, so they cannot be used to force database work while returning success. Share event payloads now use the narrowed actor id.
 5. `services/typescript/notifications/src/modules/unsubscribe/services/unsubscribeToken.service.ts` and `configs/notifications.config.ts` — unsubscribe tokens now include `iat`/`exp`, reject future-issued and expired tokens, and default to 90 days. `UNSUBSCRIBE_TOKEN_TTL_DAYS` accepts 1–365 days; `.env.example` documents it. Repeat unsubscribe POSTs remain idempotent by design.
-6. `services/typescript/gateway/src/configs/gateway.config.ts` — startup now rejects `AUTH_TOKEN_AUDIENCE=zudomart-admin`, so a deployment cannot make user access tokens satisfy the gateway's staff audience. Covered in `deepScanHardening.test.ts`.
+6. `services/typescript/gateway/src/configs/gateway.config.ts` — startup now rejects `AUTH_TOKEN_AUDIENCE=nantty-admin`, so a deployment cannot make user access tokens satisfy the gateway's staff audience. Covered in `deepScanHardening.test.ts`.
 7. Tests: Go checkout validator and payment-mode tests; social link-preview and anonymous-counter tests; notifications expiry test; gateway audience config test.
 **Verified:** `go test ./modules/orders/validators ./services -run 'ValidateCheckout|ResolvePaymentModes'` passes. Social 86 files / 549 pass, 4 files skipped; notifications 33 files / 310 pass, 1 file skipped; gateway 35 files / 1705 pass. Webapp, mobile, notifications and gateway `tsc --noEmit` clean. Social/notifications/webapp/gateway lint 0 errors (pre-existing warnings only).
 **Rollback:** revert the checkout DTO/validator/service/client flag together, otherwise every direct checkout will fail validation. Revert the link-preview owner check and anon early returns independently; reverting the token service invalidates all outstanding unsubscribe links and restores non-expiring tokens.
@@ -227,7 +227,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 5. `infra/local/rabbitmq/topology.json` + regenerated `definitions.json` — bound the six routing keys to `notifications-domain-events`.
 6. `services/contracts/events/schemas/orderGroup.{created,paid,shipped,delivered}.v1.json` updated to match emitted payloads; added `orderGroup.completed.v1.json`; AsyncAPI message list updated.
 7. `services/typescript/notifications/tests/orderGroupMapping.test.ts` + `tests/fixtures/eventFixtures.fixture.ts` — new coverage for buyer/seller fan-out, cancellation, tracking links and status-change duplicate suppression.
-**Verified:** `pnpm --filter @zudomart/notifications test` → 33 files, 309 passed; `typecheck` clean. `go test ./modules/orders/...` → pass; `gofmt` clean. `node infra/local/rabbitmq/generateDefinitions.mjs` → 421 bindings.
+**Verified:** `pnpm --filter @nantty/notifications test` → 33 files, 309 passed; `typecheck` clean. `go test ./modules/orders/...` → pass; `gofmt` clean. `node infra/local/rabbitmq/generateDefinitions.mjs` → 421 bindings.
 **Rollback:** remove the six mappings and queue bindings, and revert the producer fields. In-app/push order updates stop until a replacement consumer exists.
 **Remaining:** email templates are still not sent for order-group events (payloads lack line items/payment URL/recipient names). Production topology must be deployed with the same routing keys.
 
@@ -241,7 +241,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 4. `services/typescript/media/src/app.ts` — warns at startup when unscanned uploads are enabled.
 5. `services/typescript/media/.env.example` — documents the local-only `MEDIA_ALLOW_UNSCANNED=true` override.
 6. `services/typescript/media/tests/pipeline/mediaPipeline.test.ts` and `tests/integrations/scanAndModeration.test.ts` — default harness now provides a healthy classifier; added absent-classifier hold, skipped-scan rejection and explicit allowance tests; the old fail-open assertion now opts into `failMode=allow` explicitly.
-**Verified:** `pnpm --filter @zudomart/media test` → 21 files, 126 passed; `typecheck` clean.
+**Verified:** `pnpm --filter @nantty/media test` → 21 files, 126 passed; `typecheck` clean.
 **Rollback:** restore the previous `allow` default and remove the skipped-scan guard. Do not roll back without an equivalent fail-closed control.
 **Remaining:** audio/PDF moderation, presigned `Content-Type` binding, internal-token defaults, fan-out caps, expiring unsubscribe tokens and in-product appeal links remain in ZM-010.
 
@@ -249,7 +249,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 
 **Audit:** ZM-003 (`direct` mode silently waives buyer protection)
 **Changes:**
-1. `apps/mobile/src/components/cart/paymentModeChooser.tsx` — selecting `direct` now shows caution-coloured copy: the buyer loses escrow protection, refunds/disputes depend on the seller, and Zudomart cannot hold or reverse the payment.
+1. `apps/mobile/src/components/cart/paymentModeChooser.tsx` — selecting `direct` now shows caution-coloured copy: the buyer loses escrow protection, refunds/disputes depend on the seller, and Nantty cannot hold or reverse the payment.
 2. `apps/webapp/src/components/commerce/paymentModeChooser.tsx` + `paymentModeChooser.module.css` — the same warning renders in a `role="note"` callout when `direct` is chosen.
 **Verified:** webapp `tsc --noEmit` clean. Mobile has no typecheck script; lint/tests are the available gates.
 **Rollback:** remove the two warning blocks and CSS class. The default remains `escrow`; this is copy only, no payment behaviour changed.
@@ -267,7 +267,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
    - media: 14 files
 3. Kept the build scripts and `scripts/stripGeneratedPrismaImports.mjs` unchanged; locally generated output is still cleaned before type checking.
 **Verified:**
-- Deleted the three generated directories, then ran `pnpm --filter @zudomart/social typecheck`, `pnpm --filter @zudomart/search typecheck`, and `pnpm --filter @zudomart/media typecheck`; all regenerate the clients and pass.
+- Deleted the three generated directories, then ran `pnpm --filter @nantty/social typecheck`, `pnpm --filter @nantty/search typecheck`, and `pnpm --filter @nantty/media typecheck`; all regenerate the clients and pass.
 - `git ls-files 'services/typescript/*/src/generated/**'` → 0.
 - `git status` shows only the ignore rule and the staged deletions; regenerated working-tree clients are ignored.
 **Rollback:** restore the paths from the previous commit if generated code must be vendored again; not recommended.
@@ -358,7 +358,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 **Verified:**
 - `go build ./modules/moderation/... ./modules/live/... ./modules/auth/...` → clean; changed files `gofmt`-clean.
 - Intelligence: `ruff check` clean on all four files; `mypy` strict clean; `pytest tests/modules/events_ingestion tests/modules/domain_events tests/modules/trending` → 51 passed.
-- `pnpm --filter @zudomart/mobile --filter @zudomart/admin --filter @zudomart/notifications --filter @zudomart/api-smoke --filter @zudomart/browser-e2e --filter @zudomart/social --filter @zudomart/search exec tsc --noEmit` → clean.
+- `pnpm --filter @nantty/mobile --filter @nantty/admin --filter @nantty/notifications --filter @nantty/api-smoke --filter @nantty/browser-e2e --filter @nantty/social --filter @nantty/search exec tsc --noEmit` → clean.
 - Lint across the same packages → 0 errors (notifications 2 warnings, admin 52, mobile 371 pre-existing warnings).
 - Notifications Vitest → 32 files passed, 1 skipped; 298 tests passed, 4 skipped.
 **Rollback:** revert the hunks independently; no schema, migration, or runtime-contract changes.
@@ -374,7 +374,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 3. **Removed dead initialisers** — `apps/webapp/src/components/actions/brandedMediaDownload.hook.ts` (`outcome`), `services/scripts/apiSmoke/src/apiClient.util.ts` (`parsed`), `apps/ads/src/utils/money.util.ts` and `apps/admin/src/utils/formatting.util.ts` (`digits`).
    - Every path already assigns before use; the declarations are now `let name: Type;`, so nothing is silently overwritten.
 **Verified:**
-- `pnpm --filter @zudomart/gateway --filter @zudomart/studio --filter @zudomart/seller --filter @zudomart/webapp --filter @zudomart/ads --filter @zudomart/admin --filter @zudomart/api-smoke exec tsc --noEmit` → clean.
+- `pnpm --filter @nantty/gateway --filter @nantty/studio --filter @nantty/seller --filter @nantty/webapp --filter @nantty/ads --filter @nantty/admin --filter @nantty/api-smoke exec tsc --noEmit` → clean.
 - `pnpm ... lint` → 0 errors (70 pre-existing webapp warnings).
 **Rollback:** revert the hunks independently; no runtime contract, schema, or migration changes.
 
@@ -408,11 +408,11 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 9. **An incomplete idempotency record returns a retryable 409** — `ledger/src/utils/idempotentCommand.util.go`.
    - `IDEMPOTENCY_IN_PROGRESS` replaces the generic 500 when a stored record has no response yet.
 **Verified (real output):**
-- `go test ./modules/payments -run 'TestPayoutAccountCreation…|TestFailedPayoutAccountJobs…|TestADirectSalePayout…' -count=1` → `ok zudomart/modules/payments 2.300s`.
-- `go test ./modules/wallet -run 'TestWithdrawalAndNewPayout…|TestWithdrawalVelocity…|TestANameMatchedOnly…' -count=1` → `ok zudomart/modules/wallet 3.489s`.
-- `go test ./modules/escrow -run 'TestSecondDistinct…|TestAPartiallyRefunded…|TestAPartialChargeback…|TestAFailedRelease…' -count=1` → `ok zudomart/modules/escrow 2.821s`.
-- `go test ./modules/creators -run TestAffiliateCommission… -count=1` → `ok zudomart/modules/creators 0.424s`.
-- `go test ./modules/payments -run TestAConcurrentCheckoutOpen… -count=1` → `ok zudomart/modules/payments 0.460s`.
+- `go test ./modules/payments -run 'TestPayoutAccountCreation…|TestFailedPayoutAccountJobs…|TestADirectSalePayout…' -count=1` → `ok nantty/modules/payments 2.300s`.
+- `go test ./modules/wallet -run 'TestWithdrawalAndNewPayout…|TestWithdrawalVelocity…|TestANameMatchedOnly…' -count=1` → `ok nantty/modules/wallet 3.489s`.
+- `go test ./modules/escrow -run 'TestSecondDistinct…|TestAPartiallyRefunded…|TestAPartialChargeback…|TestAFailedRelease…' -count=1` → `ok nantty/modules/escrow 2.821s`.
+- `go test ./modules/creators -run TestAffiliateCommission… -count=1` → `ok nantty/modules/creators 0.424s`.
+- `go test ./modules/payments -run TestAConcurrentCheckoutOpen… -count=1` → `ok nantty/modules/payments 0.460s`.
 - `go build ./modules/payments/... ./modules/wallet/... ./modules/escrow/... ./modules/creators/... ./modules/ledger/...` → clean.
 - Mobile: `tsc --noEmit` clean; social `typecheck` clean; mobile Jest `126 suites / 781 tests`; social Vitest `84 files / 544 tests`.
 **Rollback:**
@@ -433,7 +433,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 2. **Refund after the seller was paid keeps the platform fees** (owner decision 2).
    - `escrowWalletClawback.service.go:37-38,73`: when a released escrow is refunded, the clawback takes only `ReleasedToSellerMinor` from the seller and credits that same amount to `RefundedMinor`; the commission and processing fee stay with the platform. Any seller shortfall still becomes wallet debt (`takeFromSellerWallet`).
    - Terms now match the code: `apps/web/src/content/refundEscrowPolicy.content.ts`, `sellerTerms.content.ts`, `termsOfServiceMoney.content.ts` — removed the "code today refunds in full/returns the fees" caveats, state that the fee is non-refundable, and replace the 30-day caveats with "not released automatically while review is open".
-   - Test: `escrow.refundAfterPayoutKeepsFees_integration_test.go` — `TestARefundAfterTheSellerWasPaidReturnsOnlyTheSellersPortionAndKeepsZudomartsFees`.
+   - Test: `escrow.refundAfterPayoutKeepsFees_integration_test.go` — `TestARefundAfterTheSellerWasPaidReturnsOnlyTheSellersPortionAndKeepsNanttysFees`.
 3. **Non-NGN direct-sale payouts require business verification** (owner decision 4).
    - `payments/.../walletPayouts.service.go:109`: `PrepareDirectSellerPayoutInTransaction` now calls `RequireSellerVerifiedForWithdrawal` before the payout-level check. The helper returns nil when the user has no `OrderPayable` rows, so ordinary wallet users are unaffected.
    - Fixtures updated: `payments.directPayoutGate_integration_test.go` records `RecordSellerVerification`; `flutterwaveCardAndDirect_test.go` marks the seller business-verified.
@@ -452,11 +452,11 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
    - `liveSessionPresenter.service.go:68-95`: `GetLiveSession` evaluates `DecideLiveAccess`; when not allowed it returns `lockedLiveView`, which clears `PlaybackUrl`, `Media`, `StoreId`, products, pinned product, ad settings, sponsorship line, top supporter and gifts. Private/blocked viewers get 403 (`LIVE_NOT_ACCESSIBLE`).
    - Test: `restrictedLiveAccess.integration_test.go` — `TestRestrictedLivesOfAPublicHostHandOutNoPlaybackToIneligibleViewers` (followers-only, subscribers-only, guest, blocked; media token + join refused).
 **Verified (real output):**
-- Escrow: `go test -count=1 ./ -run 'TestAnUndelivered…|TestTheBackfill…|TestARefundAfter…'` → `ok zudomart/modules/escrow 10.845s` (all 3 pass).
-- Live: `go test -count=1 ./ -run TestRestrictedLives…` → `ok zudomart/modules/live 0.694s`.
+- Escrow: `go test -count=1 ./ -run 'TestAnUndelivered…|TestTheBackfill…|TestARefundAfter…'` → `ok nantty/modules/escrow 10.845s` (all 3 pass).
+- Live: `go test -count=1 ./ -run TestRestrictedLives…` → `ok nantty/modules/live 0.694s`.
 - Wallet units: `go test -count=1 ./src/configs/... ./src/modules/payouts/services/... -run 'Withdrawal|NameMatched'` → `ok …/configs 0.031s`, `ok …/payouts/services 0.015s`.
-- Wallet integration: `go test -count=1 ./ -run TestANameMatchedOnly…` → `ok zudomart/modules/wallet 1.264s`.
-- Payments: `go test -count=1 ./ -run TestADirectSalePayout…` → `ok zudomart/modules/payments 1.030s`.
+- Wallet integration: `go test -count=1 ./ -run TestANameMatchedOnly…` → `ok nantty/modules/wallet 1.264s`.
+- Payments: `go test -count=1 ./ -run TestADirectSalePayout…` → `ok nantty/modules/payments 1.030s`.
 - Social: `pnpm -s vitest run tests/follows` → `Test Files 3 passed (3)`, `Tests 73 passed (73)`; `pnpm -s typecheck` regenerates the Prisma clients and both `tsc` passes are clean.
 - `gofmt` clean on the changed Go files; wallet, payments and escrow build.
 **Rollback:**
@@ -508,7 +508,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 8. Level-1 limit on a name-matched-only bank — **already the safe default.** `PAYOUT_BANK_VALIDATION` defaults to `required` (`payments/src/configs/payments.config.go:110`), so NG Level 1 needs a BVN-validated bank. The audit's "mode optional default" was wrong. Owner decision listed for when `optional` is enabled.
 9. Clawback shortfall → seller debt — **already the safe default.** The shortfall is booked to the seller's `WalletDebt` with an alert and `wallet.debtRecorded` (`escrowWalletClawback.service.go:51,64-72`). The platform absorbs the returned processing fee. Owner decision listed.
 **Verified (real output):**
-- `go test -race -count=1 ./...`: payments → `ok zudomart/modules/payments 36.092s` (+8 subpackages ok); wallet → `ok zudomart/modules/wallet 66.808s` (+7 ok); orders → `ok zudomart/modules/orders 14.385s` (+10 ok).
+- `go test -race -count=1 ./...`: payments → `ok nantty/modules/payments 36.092s` (+8 subpackages ok); wallet → `ok nantty/modules/wallet 66.808s` (+7 ok); orders → `ok nantty/modules/orders 14.385s` (+10 ok).
 - deployables → `ok …/flutterwaveFlows 143.709s`, `ok …/goCommerce 18.343s`.
 - gateway `npx vitest run` → `Test Files 34 passed (34) Tests 1690 passed (1690)`.
 - `gofmt -l` clean (generated excluded); `go vet ./...` clean.
@@ -564,7 +564,7 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
    - Idempotent two ways: skipped if the held-path reference `chargeback-lost:<escrow>` exists (the refund came from the chargeback itself), and a per-dispute reference is checked before posting.
    - Tests: `escrow.walletChargebacksAfterRefunds_integration_test.go` (partial 100 000 then lost → buyer −100 000, seller −kept share, receivable 0, `refunded` 300 000, duplicate notice moves nothing; full wallet refund then lost → buyer −200 000 once; held-path recovered then duplicate → nothing). Before: `receivable 300000` and `receivable 200000, buyer 200000 -> 200000`.
 **Verified (real output):**
-- `go test -race -count=1 ./...` in `modules/escrow` → `ok zudomart/modules/escrow 66.900s`, `ok …/escrows/models 1.013s`.
+- `go test -race -count=1 ./...` in `modules/escrow` → `ok nantty/modules/escrow 66.900s`, `ok …/escrows/models 1.013s`.
 - deployables `go test -race -count=1 ./flutterwaveFlows/ ./goCommerce/` → `ok …/flutterwaveFlows 143.709s`, `ok …/goCommerce 18.343s`.
 - `gofmt -l` clean; `go vet ./...` clean.
 **Rollback:** revert each hunk independently. The dust rule, transitions and deadline need no data migration. Rows held before this change keep `AutoReleaseAt = NULL` until delivered; to backfill, run `UPDATE escrows SET auto_release_at = created_at + interval '30 days' WHERE status = 'held' AND auto_release_at IS NULL` (owner call, not run).
@@ -612,9 +612,9 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 - webapp `npx tsx --test src/services/wallets.service.test.ts` before the fix: `✖ … expected 'step-up-token-1' + actual undefined`; after: `ℹ pass 1 ℹ fail 0`; `tsc --noEmit` 0 errors.
 - mobile jest before: `Tests: 2 failed, 2 total`; after: `Tests: 2 passed, 2 total`; `tsc --noEmit` 0 errors.
 - relay route test before: `DELETE without a step-up must stop at the relay: 204 (relayed 1)`; after: `ok …/sellerMoneyRelay/routes`.
-- wallet removal test before: `removing without a step-up must be refused: 204`; after: `ok zudomart/modules/wallet`.
-- direct chargeback tests before: `the ledger moved the provider balance by -400000 while the provider moved it by -200000` and `… -250000 … -200000`; after: `ok zudomart/modules/escrow`.
-- verify test before: `a retry storm must not fan out to the provider: 200 {"status":"pending"} after 20 provider calls`; after: `ok zudomart/modules/payments`.
+- wallet removal test before: `removing without a step-up must be refused: 204`; after: `ok nantty/modules/wallet`.
+- direct chargeback tests before: `the ledger moved the provider balance by -400000 while the provider moved it by -200000` and `… -250000 … -200000`; after: `ok nantty/modules/escrow`.
+- verify test before: `a retry storm must not fan out to the provider: 200 {"status":"pending"} after 20 provider calls`; after: `ok nantty/modules/payments`.
 - gateway rate-limit test before: `Tests 3 failed | 1 passed (4)`; OPTIONS test before: `expected 200 to be 204`; after: `Test Files 2 passed (2) Tests 22 passed (22)`.
 - Go ServeMux OPTIONS probe: `/api/v1/admin/ledger/entries 405 GET, HEAD handlers run: 0` and `/api/v1/admin/withdrawals/w1/approve 405 POST handlers run: 0`.
 **Rollback:**

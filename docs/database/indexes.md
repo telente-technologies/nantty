@@ -310,7 +310,7 @@ JSONB GIN: none planned. Current jsonb columns (`metadata`, `settlement`, `payou
 
 ## 7. Validation follow-ups
 
-When the compose Postgres is up (`docker ps | grep zudomart-backend-postgres`), run against seeded schemas and record plans here:
+When the compose Postgres is up (`docker ps | grep nantty-backend-postgres`), run against seeded schemas and record plans here:
 
 1. `EXPLAIN (ANALYZE, BUFFERS)` the statement query: `SELECT ... FROM ledger.journal_lines WHERE account_id = $1 ORDER BY id DESC LIMIT 21` (expect Sort today; Index Scan Backward after I1).
 2. `EXPLAIN SELECT ... FROM ledger.ledger_accounts WHERE code LIKE 'battle:%' AND currency = 'COIN'` and `SHOW lc_collate` (expect Seq Scan unless collation is C).

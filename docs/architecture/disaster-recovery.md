@@ -67,7 +67,7 @@ Rule: Tier 0 is restored and verified before anything else starts.
 | 3 | Region loss | declare; `terraform apply envs/production-dr`; restore latest snapshot in DR region; restore secrets replicas; deploy images from replicated ECR; point Route 53; verify Tier 0 checks; open traffic in order: auth, read paths, checkout, money |
 | 4 | Credential or key compromise | rotate signing key (forces JWKS update, short access TTL bounds impact), revoke sessions, rotate secrets, review CloudTrail |
 | 5 | Payment provider outage | enable degraded mode (below), queue retries, no manual ledger edits |
-| 6 | Poison queue / DLQ growth | pause consumer, inspect `<queue>.dlq` in the management UI (`x-zudomart-last-error` header), fix, move messages back to `<queue>` |
+| 6 | Poison queue / DLQ growth | pause consumer, inspect `<queue>.dlq` in the management UI (`x-nantty-last-error` header), fix, move messages back to `<queue>` |
 | 7 | S3 object loss or malicious delete | restore previous version; CRR copy |
 | 8 | Restore drill | quarterly into an isolated account; validate trial balance 0, row counts, auth login; record achieved RPO/RTO |
 

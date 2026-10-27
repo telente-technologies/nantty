@@ -36,7 +36,7 @@ The switch writes only the mode keys in each app's local env file. Every other l
 | web (marketing, no mocks) | `apps/web/.env.local` | `NEXT_PUBLIC_API_URL` |
 | mobile (Expo) | `apps/mobile/.env` | `EXPO_PUBLIC_USE_MOCKS`, `EXPO_PUBLIC_REAL_API_PREFIXES`, `EXPO_PUBLIC_API_URL` |
 
-Restart the dev servers after switching. Next reads env files when it starts. Expo bakes `EXPO_PUBLIC_*` into the bundle, so start it with a clean cache: `pnpm --filter @zudomart/mobile exec expo start -c`.
+Restart the dev servers after switching. Next reads env files when it starts. Expo bakes `EXPO_PUBLIC_*` into the bundle, so start it with a clean cache: `pnpm --filter @nantty/mobile exec expo start -c`.
 
 ## A typical session
 
@@ -45,7 +45,7 @@ pnpm backend:up          # first run builds the Go binaries, a few minutes
 pnpm mode:backend
 pnpm mode:status         # every app "backend", gateway "reachable"
 pnpm backend:check       # all PASS
-pnpm --filter @zudomart/webapp dev     # http://localhost:3500, sign in as a demo account
+pnpm --filter @nantty/webapp dev     # http://localhost:3500, sign in as a demo account
 # ...
 pnpm mode:mock           # back to mocks
 pnpm backend:down
@@ -53,7 +53,7 @@ pnpm backend:down
 
 The services, logs and PID files live in `.data/localStack/` (`logs/goIdentity.log` holds the one-time codes, since `AUTH_OTP_DELIVERY=log`). If the stack is already running, for example because someone else started `security/regression/startSandboxStack.sh`, `backend:up` reuses it instead of starting a second copy, and `backend:down` leaves it alone.
 
-Realtime (chat and live sockets) runs natively with `mix phx.server` on 127.0.0.1:4000 when Elixir is installed, with the same internal tokens and JWKS as the Go services. Without a local `ffmpeg`, `backend:up` builds a small `zudomart-local-ffmpeg` Docker image (`scripts/localStack/ffmpeg/`) and puts its `ffmpeg`/`ffprobe` wrappers on the media service's PATH, so video clips process like in production.
+Realtime (chat and live sockets) runs natively with `mix phx.server` on 127.0.0.1:4000 when Elixir is installed, with the same internal tokens and JWKS as the Go services. Without a local `ffmpeg`, `backend:up` builds a small `nantty-local-ffmpeg` Docker image (`scripts/localStack/ffmpeg/`) and puts its `ffmpeg`/`ffprobe` wrappers on the media service's PATH, so video clips process like in production.
 
 Payments: go-money uses Flutterwave, the only payment provider (`PAYMENTS_PROVIDER=flutterwave`). The sandbox stack points it at the fake Flutterwave on 127.0.0.1:18998; never put live `FLWSECK-` keys in a local env file.
 
@@ -63,10 +63,10 @@ The seed (`scripts/localStack/seedDemo.mts`) creates these through the real API.
 
 | Who | Sign in with | Password | What it has |
 | --- | --- | --- | --- |
-| Buyer | `demo.buyer@zudomart.test` | `Lagos-Market-Demo-2026!` | Lagos address; follows the creator and the seller. Deliberately not payout-verified, to test the verification prompts |
-| Seller | `demo.seller@zudomart.test` | `Lagos-Market-Demo-2026!` | Store "Ife Lifestyle (demo)" with 3 products and nationwide shipping |
-| Creator | `demo.creator@zudomart.test` | `Lagos-Market-Demo-2026!` | Approved creator, payout-verified (level 1, through payout onboarding and BVN consent on the fake Flutterwave) with a wallet: 2 image posts, 3 video clips, 1 live |
-| Staff admin | `admin.demo@zudomart.com` | `Quartz-Harbour-Lantern-Velvet-2026!` | Superadmin for the admin console; enrol MFA at the first sign-in |
+| Buyer | `demo.buyer@nantty.test` | `Lagos-Market-Demo-2026!` | Lagos address; follows the creator and the seller. Deliberately not payout-verified, to test the verification prompts |
+| Seller | `demo.seller@nantty.test` | `Lagos-Market-Demo-2026!` | Store "Ife Lifestyle (demo)" with 3 products and nationwide shipping |
+| Creator | `demo.creator@nantty.test` | `Lagos-Market-Demo-2026!` | Approved creator, payout-verified (level 1, through payout onboarding and BVN consent on the fake Flutterwave) with a wallet: 2 image posts, 3 video clips, 1 live |
+| Staff admin | `admin.demo@nantty.com` | `Quartz-Harbour-Lantern-Velvet-2026!` | Superadmin for the admin console; enrol MFA at the first sign-in |
 
 These passwords only exist in your local database. The mock-mode demo accounts are different: they are listed on each app's sign-in page in mock mode.
 
@@ -87,7 +87,7 @@ Your firewall must allow inbound connections on 8080 and 18333 for option 1. The
 ## Production builds never ship mocks
 
 - **Next apps (webapp, seller, studio, ads, admin):** the mock backend is loaded with a dynamic `import()` that only exists when `NODE_ENV` is not `production`. `next build` folds that condition, so the mock modules and seed data are not in `.next/server` or `.next/static`. At runtime, `isMockBackendEnabled()` is always false in production, whatever `*_USE_MOCKS` says. The seller sign-in and password-reset demo hints use the same pattern.
-- **CI:** the Frontend workflow runs `node scripts/checkNoMocksInBuild.mjs <app> --require-build` after every `next build`. It searches the output for a marker that every mock backend sets (`zudomart-mock-backend-bundled`), the mock error text, and the seed ids that only exist under `src/mocks`, and fails if it finds any.
+- **CI:** the Frontend workflow runs `node scripts/checkNoMocksInBuild.mjs <app> --require-build` after every `next build`. It searches the output for a marker that every mock backend sets (`nantty-mock-backend-bundled`), the mock error text, and the seed ids that only exist under `src/mocks`, and fails if it finds any.
 - **Mobile (EAS):** `development`, `preview` and `production` set `EXPO_PUBLIC_USE_MOCKS=false`. The mock demo APK the owner shares is now its own profile: `eas build --profile demo --platform android` (`EXPO_PUBLIC_USE_MOCKS=true`). `preview` is a real-backend APK. Set `EXPO_PUBLIC_API_URL` for preview and production in the EAS environment variables. Without it they fall back to `app.json` `extra.apiUrl`, which is localhost. If `EXPO_PUBLIC_USE_MOCKS` is missing, a build now uses mocks only in development (`__DEV__`). The CI mobile job checks all of this. The GitHub `androidApk.yml` workflow still builds the mock demo APK (`EXPO_PUBLIC_USE_MOCKS: "true"`).
 - **Mobile bundle:** when `EXPO_PUBLIC_USE_MOCKS` is `false` (or unset in a production export), `apps/mobile/metro.config.js` resolves every import of `src/mocks` from outside it to `src/config/mocksDisabled.stub.js`, so Metro never bundles the mock modules. The `demo` profile (`true`) keeps them. Prove it with `pnpm check:no-mocks:mobile` (exports the Android bundle with mocks off and searches it for the mock seed ids; CI runs it in the mobile job). On 2026-10-11 the production export had 0 of 84 markers, and a demo export with mocks on was flagged with all 84.
 

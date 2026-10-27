@@ -13,7 +13,7 @@ As of 2026-10-03. Labels: EXISTING (path), PLANNED, FUTURE.
 | Lint | No `atlas migrate lint` step; CI only starts compose Postgres | `.github/workflows/backend.yml`; no `atlas.hcl` in repo | **P1** |
 | Rollback | `.down.sql` files exist; `migrate.Down` is never called by code; rollbacks are untested | migrations folders | P2 |
 | Index builds | Generated SQL uses plain `CREATE INDEX` (blocks writes); fine on empty tables, unsafe once tables hold data | e.g. `ledger/src/migrations/*_create_ledger_tables.up.sql` | P1 once data exists |
-| Grants in migrations | Cross-schema `GRANT SELECT` to `zudomart_readers` live in migrations and need the owner role | `users/src/migrations/*_grant_read_access_*.up.sql` | note |
+| Grants in migrations | Cross-schema `GRANT SELECT` to `nantty_readers` live in migrations and need the owner role | `users/src/migrations/*_grant_read_access_*.up.sql` | note |
 | Per-schema history | golang-migrate tracks `schema_migrations` per schema because URLs set `search_path` | `platform/postgres/schema.scope.go` | ok |
 | Mixed concern | `docs/architecture/database.md` line 807 and `devops.md` line 73 already propose pre-deploy task + lint (PROPOSED) | those docs | aligned |
 
@@ -35,12 +35,12 @@ flowchart LR
 | Versioned | One migration = one reviewed `.sql` file, timestamp prefix, `atlas.sum` committed; hand edits require `-rehash` (EXISTING) |
 | Reviewable | PRs show SQL; a migration that adds an index to a table > 1M rows or alters types needs a second reviewer and a "table size" note |
 | Linted | `atlas migrate lint --dir file://... --dev-url docker://postgres/16/dev --latest N` with analyzers: destructive (DROP TABLE/COLUMN), data-dependent (add NOT NULL without default, unique on existing data), concurrent-index, naming. Needs an `atlas.hcl` per module with `lint { destructive { error = true } }`. Note the repo runs ent's Go API rather than the Atlas CLI: lint works on the SQL directory either way (golang-migrate format via `dir: "file://migrations?format=golang-migrate"`) |
-| Shadow DB test | CI replays all migrations from zero on a clean shadow DB (EXISTING pattern: `atlas_dev`, `zudomart_test`; `moneyTesting.CreateFreshSchemaWithMigrations`) then runs ent diff and asserts **no drift** (generated diff is empty) |
+| Shadow DB test | CI replays all migrations from zero on a clean shadow DB (EXISTING pattern: `atlas_dev`, `nantty_test`; `moneyTesting.CreateFreshSchemaWithMigrations`) then runs ent diff and asserts **no drift** (generated diff is empty) |
 | Upgrade test | Optional: restore a masked recent snapshot into CI and run pending migrations to measure lock time and duration on realistic size |
 | Reversible where practical | `.down.sql` for additive changes; contract-phase (drops) are not reversible: rely on PITR plus expand/contract discipline. Restore point: take a manual cluster snapshot before any contract migration |
 | Pre-deploy task | One ECS RunTask per deployable and schema list, before the service update; fails the pipeline on error; services read a `MIGRATE_ON_START=false` flag (**default false in prod**, true only for local dev/tests) |
 | Migrator role | Separate login role per schema (`svc_x_migrator`, owner of objects), app role `svc_x` gets only DML grants. Default privileges: `ALTER DEFAULT PRIVILEGES FOR ROLE svc_x_migrator IN SCHEMA x GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO svc_x` (a grant statement: within the "no hand SQL except grants" rule). Credentials only in the pipeline's task role / Secrets Manager |
-| Ordering across services | Schemas are independent; cross-schema `zudomart_readers` grants create ordering coupling: apply the owner's migration (column added) before consumers' code reads it |
+| Ordering across services | Schemas are independent; cross-schema `nantty_readers` grants create ordering coupling: apply the owner's migration (column added) before consumers' code reads it |
 
 ## 3. Safe DDL cookbook
 

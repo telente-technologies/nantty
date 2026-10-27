@@ -40,7 +40,7 @@ flowchart LR
   PY["intelligence<br/>(Python, scores only)"]
 
   PG[("PostgreSQL + PostGIS<br/>schema per owner")]
-  MQ[["RabbitMQ<br/>zudomart.events / zudomart.jobs"]]
+  MQ[["RabbitMQ<br/>nantty.events / nantty.jobs"]]
   VK[("Valkey")]
   S3[("S3 / SeaweedFS")]
 
@@ -81,7 +81,7 @@ Clients only ever call two hosts: the gateway (`/api/v1/*`, `/webhooks/*`) and r
 
 The five product Next apps use a BFF (`src/app/bff/[...path]/route.ts`): the browser talks only to its own origin, the session lives in `__Host-` httpOnly cookies, and mutations carry a CSRF token. Each app can run on in-process mocks (`src/mocks`) or against the gateway; see section 10.
 
-Shared packages: `@zudomart/chat-crypto` (E2EE), `@zudomart/contracts` and `@zudomart/shared-types` (API shapes), `@zudomart/design-tokens`, `@zudomart/web-kit`, `@zudomart/email-templates` (React Email), `@zudomart/eslint-config`.
+Shared packages: `@nantty/chat-crypto` (E2EE), `@nantty/contracts` and `@nantty/shared-types` (API shapes), `@nantty/design-tokens`, `@nantty/web-kit`, `@nantty/email-templates` (React Email), `@nantty/eslint-config`.
 
 ## 3. Services and what each owns
 
@@ -108,7 +108,7 @@ Python returns scores; Go and TypeScript make the allow, hold, review or reject 
 
 ## 4. Data ownership
 
-- **One PostgreSQL database** (21 schemas, with PostGIS locally; Aurora PostgreSQL in AWS). Each owning service has its own schema and login role, created by `infra/local/postgres/create-databases.sh`. Only the owner writes its schema; other roles read through `zudomart_readers` grants where a read model needs it.
+- **One PostgreSQL database** (21 schemas, with PostGIS locally; Aurora PostgreSQL in AWS). Each owning service has its own schema and login role, created by `infra/local/postgres/create-databases.sh`. Only the owner writes its schema; other roles read through `nantty_readers` grants where a read model needs it.
 - Grouped roles: `svc_money` is granted the payments, wallet, ledger, escrow, subscriptions and creators roles, so every balance change in go-money commits in one transaction. (The old `rewards` module is gone; Nantty Points live in `live`.) `svc_commerce` likewise covers catalog, inventory and orders, so an order and its stock reservation commit together.
 - **Go** persistence is ent with Atlas-generated migrations (`modules/<module>/src/migrations`), applied on service start locally and by a pre-deploy migrate task in AWS. **TypeScript** uses Prisma (`services/typescript/<service>/prisma`); `pnpm backend:lint` refuses raw SQL in TypeScript.
 - **Valkey:** rate limits, the session denylist, widget tokens, live counters and intelligence features. It holds nothing that cannot be rebuilt.
@@ -123,11 +123,11 @@ ERDs per domain: [database.md](database.md) and [../database/schema.md](../datab
 flowchart LR
   CMD["Command handler"] -->|"one transaction"| TX[("business rows<br/>+ outbox row")]
   TX --> RELAY["Outbox relay<br/>every 500 ms, batch 100"]
-  RELAY -->|"routing key = event name"| EX{{"zudomart.events<br/>(topic)"}}
+  RELAY -->|"routing key = event name"| EX{{"nantty.events<br/>(topic)"}}
   EX --> Q["one quorum queue per consumer<br/>e.g. realtime-domain-events,<br/>notifications-domain-events"]
-  JOBS{{"zudomart.jobs"}} --> JQ["jobs-email, jobs-media, jobs-payouts,<br/>jobs-subscription-billing, jobs-search-indexing, ..."]
-  Q & JQ -.->|failure| RETRY["zudomart.retry<br/>30 s, 2 min, 10 min, 30 min"]
-  RETRY -.->|"after 5 attempts"| DLQ[("zudomart.dlx<br/>per-queue DLQ")]
+  JOBS{{"nantty.jobs"}} --> JQ["jobs-email, jobs-media, jobs-payouts,<br/>jobs-subscription-billing, jobs-search-indexing, ..."]
+  Q & JQ -.->|failure| RETRY["nantty.retry<br/>30 s, 2 min, 10 min, 30 min"]
+  RETRY -.->|"after 5 attempts"| DLQ[("nantty.dlx<br/>per-queue DLQ")]
   EX -.->|no binding| UNR[("unrouted-events")]
 ```
 
@@ -184,14 +184,14 @@ sequenceDiagram
     S->>I: JWKS (cached)
     S->>S: verify the token itself
   else TypeScript upstream
-    G->>T: x-zudomart-account-id, session, viewer headers<br/>+ x-zudomart-identity-signature (HMAC, 60 s)
+    G->>T: x-nantty-account-id, session, viewer headers<br/>+ x-nantty-identity-signature (HMAC, 60 s)
     T->>T: check the signature (GATEWAY_IDENTITY_SECRET)
   end
 ```
 
 - Sign-in is by email only (password or one-time code, or Google and Apple). go-identity issues short-lived EdDSA access tokens and rotating refresh tokens, and publishes its keys at `/.well-known/jwks.json`.
 - Go services verify the access token themselves (`services/go/platform/jwtauth`) and do not trust forwarded headers. TypeScript services accept identity only with a valid gateway HMAC signature (`src/middlewares/gatewayIdentity.middleware.ts`), with a previous secret allowed during rotation.
-- Separate token audiences for staff (password + TOTP, step-up for sensitive actions), realtime (`zudomart-realtime`, from `POST /api/v1/auth/realtime-token`) and widgets (`zudomart-widgets`, read-only, from `POST /api/v1/auth/widget-token`).
+- Separate token audiences for staff (password + TOTP, step-up for sensitive actions), realtime (`nantty-realtime`, from `POST /api/v1/auth/realtime-token`) and widgets (`nantty-widgets`, read-only, from `POST /api/v1/auth/widget-token`).
 - Provider webhooks enter through the gateway with the raw body untouched: `/webhooks/*` to go-money (Flutterwave), `/api/v1/webhooks/smile-id` to go-identity, `/api/v1/live/webhooks/*` to go-live (LiveKit).
 - Admin routes are limited by an IP allowlist in the gateway and in each service.
 

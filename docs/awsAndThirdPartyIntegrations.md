@@ -8,7 +8,7 @@ Status:
 - **Needed, not in Terraform:** the code or the docs need it, but no Terraform exists yet.
 - **Local only:** a local stand-in in compose; production uses the AWS or managed equivalent.
 
-One AWS account per environment (`zudomart-dev`, `zudomart-staging`, `zudomart-prod`), each with its own Terraform state.
+One AWS account per environment (`nantty-dev`, `nantty-staging`, `nantty-prod`), each with its own Terraform state.
 Production replicates to a disaster-recovery (DR) region.
 
 ## 1. AWS services
@@ -19,10 +19,10 @@ Production replicates to a disaster-recovery (DR) region.
 | --- | --- | --- |
 | **ECS on Fargate** | 12 private services: gateway, go-identity, go-commerce, go-money, go-live, go-ads, go-trust, social, notifications, media, realtime, intelligence. Also `support` and `search`; check that they're in the service catalog. Container Insights is on. | In Terraform (`ecs-cluster`, `ecs-service`) |
 | **ECS on EC2** (Auto Scaling group + launch template) | Only when LiveKit is self-hosted (`livekit_mode = "self_hosted"`) | In Terraform (`livekit`) |
-| **ECR** | One repository per service (`zudomart/<service>`) plus `zudomart/migrate`. Tags are immutable; images are scanned on push, KMS-encrypted, kept under a lifecycle policy, and replicated to the DR region in prod. | In Terraform (`ecr`) |
+| **ECR** | One repository per service (`nantty/<service>`) plus `nantty/migrate`. Tags are immutable; images are scanned on push, KMS-encrypted, kept under a lifecycle policy, and replicated to the DR region in prod. | In Terraform (`ecr`) |
 | **Application Auto Scaling** | Scales each service on CPU, memory or request count | In Terraform |
 | **CodeDeploy** | Blue/green deploys for `go-money`: a 10% canary for 5 minutes, rolled back automatically on the ledger-imbalance or 5xx alarm | In Terraform (`ecs-service`) |
-| **Cloud Map** | Private service discovery (`*.svc.<env>.zudomart.internal`) | In Terraform |
+| **Cloud Map** | Private service discovery (`*.svc.<env>.nantty.internal`) | In Terraform |
 
 ### Networking and edge
 
@@ -42,7 +42,7 @@ Production replicates to a disaster-recovery (DR) region.
 | Service | Used for | Status |
 | --- | --- | --- |
 | **Aurora PostgreSQL** (+ **RDS Proxy**) | One cluster where each service owns its own schema. RDS Proxy gives writer and reader endpoints. | In Terraform (`aurora`) |
-| **ElastiCache for Valkey** | Shared cluster: rate limits, sessions and the session denylist, caches. A separate small cluster (`zudomart-<env>-intelligence`, `intelligence_valkey`) holds the Python feature state, replay nonces and dedup keys, so they can't evict the shared cluster's TTL'd security keys. Its security group admits only the intelligence task. TLS and AUTH are on for both, and the URLs are in Secrets Manager. | In Terraform (`valkey`, `platform/intelligence_cache.tf`) |
+| **ElastiCache for Valkey** | Shared cluster: rate limits, sessions and the session denylist, caches. A separate small cluster (`nantty-<env>-intelligence`, `intelligence_valkey`) holds the Python feature state, replay nonces and dedup keys, so they can't evict the shared cluster's TTL'd security keys. Its security group admits only the intelligence task. TLS and AUTH are on for both, and the URLs are in Secrets Manager. | In Terraform (`valkey`, `platform/intelligence_cache.tf`) |
 | **Amazon MQ for RabbitMQ** | Domain events between services (outbox → broker → queues). Admin user plus one user per service. | In Terraform (`messaging`) |
 | **S3** | Public media, a private KYC bucket (Object Lock, KMS, TLS only), logs, live recordings, live-safety frames and evidence, user data exports, model artefacts, encrypted chat blobs. Cross-region replication to DR. CORS for browser uploads from the dashboards. | In Terraform (`storage`). **Check that the live-recording, live-safety, export and ads-creative buckets exist, and that the dashboard origins have CORS.** |
 | **Amazon OpenSearch Service** | Full-text and people search (`ts-search`). Postgres full-text is the MVP fallback. | **Needed, not in Terraform.** Local: OpenSearch 3 in compose. |
@@ -80,7 +80,7 @@ Production replicates to a disaster-recovery (DR) region.
 
 | Service | Used for | Status |
 | --- | --- | --- |
-| **CloudWatch Logs, Metrics, Alarms, Dashboard** | JSON logs from every service. Alarms for ALB, ECS, Aurora, Valkey, MQ, SES, ledger imbalance, and Go background-worker restarts (a log metric filter). The ADOT sidecar scrapes each Go deployable's loopback-only `/metrics` (RED per route, goroutines, denylist failure counters) and exports it as EMF to `Zudomart/<env>`; traces go to X-Ray. ALB target groups check `/readyz` (intelligence: `/health/ready`), and container checks use liveness. | In Terraform (`observability`, `ecs-service`) |
+| **CloudWatch Logs, Metrics, Alarms, Dashboard** | JSON logs from every service. Alarms for ALB, ECS, Aurora, Valkey, MQ, SES, ledger imbalance, and Go background-worker restarts (a log metric filter). The ADOT sidecar scrapes each Go deployable's loopback-only `/metrics` (RED per route, goroutines, denylist failure counters) and exports it as EMF to `Nantty/<env>`; traces go to X-Ray. ALB target groups check `/readyz` (intelligence: `/health/ready`), and container checks use liveness. | In Terraform (`observability`, `ecs-service`) |
 | **AWS X-Ray** (or Amazon Managed Grafana / Tempo) via an OpenTelemetry collector sidecar | Distributed tracing (`OTEL_EXPORTER_OTLP_ENDPOINT`) | **Needed, not in Terraform.** Local: OTel collector + Jaeger. |
 | **AWS Budgets / Cost Anomaly Detection** | Cost alerts | Recommended |
 
@@ -121,7 +121,7 @@ Documented in `docs/architecture` with a trigger; none is built or in Terraform.
 
 | Provider | Used for | What you need |
 | --- | --- | --- |
-| **LiveKit** (LiveKit Cloud by default, or self-hosted on ECS/EC2) | Live video (WebRTC), guest stages, recording to S3 | Project URL, API key and secret, stored in the `zudomart/<env>/livekit` secret |
+| **LiveKit** (LiveKit Cloud by default, or self-hosted on ECS/EC2) | Live video (WebRTC), guest stages, recording to S3 | Project URL, API key and secret, stored in the `nantty/<env>/livekit` secret |
 | **RTMP/HLS ingest** for OBS streaming in Studio (`RTMP_INGEST_URL`, `HLS_PLAYBACK_URL`) | Creators streaming from OBS | Through LiveKit ingress, or a separate ingest service |
 
 ### Notifications
@@ -148,7 +148,7 @@ Documented in `docs/architecture` with a trigger; none is built or in Terraform.
 | **GitHub** (Actions + OIDC to AWS, Dependabot) | CI, image builds and pushes to ECR, deploys, dependency updates | The repo, plus the environments `dev`/`staging`/`prod` with protection rules |
 | **Error tracking: Sentry or similar** (optional) | Crash and error reports for the mobile and web apps (jest is already set up to transform `@sentry/react-native`) | Decide whether to add it |
 | **Exchange-rate feed** | Live FX for display prices (`EXCHANGE_RATE_PROVIDER` is `static` today) | Choose a provider |
-| **Domain registrar + DNS** | `zudomart.com` delegated to Route 53. Subdomains: api, dashboard, ads, studio, admin, app/web, livekit, media CDN. | Registrar access |
+| **Domain registrar + DNS** | `nantty.com` delegated to Route 53. Subdomains: api, dashboard, ads, studio, admin, app/web, livekit, media CDN. | Registrar access |
 
 ## 3. Local stand-ins (development only)
 
@@ -188,4 +188,4 @@ Documented in `docs/architecture` with a trigger; none is built or in Terraform.
    - `PAYMENT_ADS_RETURN_ORIGINS` and the CORS origins.
    - `ADMIN_IP_ALLOWLIST`.
 5. **Finish the store setup:** create the IAP products and notification URLs in App Store Connect and the Play Console (see `appStoreProducts.md`).
-6. **Get Flutterwave ready for production:** go live with the business account, enable payout subaccounts, BVN consent, tokenized charges and transfers via API, register `https://api.zudomart.com/webhooks/flutterwave` (v3 webhooks with the PSA funding hook), whitelist the NAT IPs (`terraform output nat_public_ips`), and get Flutterwave's written answers (`docs/integrations/flutterwaveMigration.md` §8).
+6. **Get Flutterwave ready for production:** go live with the business account, enable payout subaccounts, BVN consent, tokenized charges and transfers via API, register `https://api.nantty.com/webhooks/flutterwave` (v3 webhooks with the PSA funding hook), whitelist the NAT IPs (`terraform output nat_public_ips`), and get Flutterwave's written answers (`docs/integrations/flutterwaveMigration.md` §8).

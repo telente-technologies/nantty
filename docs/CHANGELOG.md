@@ -127,7 +127,7 @@ All notable changes to Nantty are documented here. Format follows
 
 - The mobile and web checkout payment-mode choosers now warn that choosing
   `direct` removes escrow protection: refunds and disputes depend on the
-  seller, and Zudomart cannot hold or reverse the payment. Escrow remains the
+  seller, and Nantty cannot hold or reverse the payment. Escrow remains the
   default.
 
 ## [Unreleased] — 2026-10-20
@@ -267,7 +267,7 @@ All notable changes to Nantty are documented here. Format follows
 
 ### Mobile — watermark, header, composer
 
-- Videos show a TikTok-style `@handle · Zudomart` tag during in-app
+- Videos show a TikTok-style `@handle · Nantty` tag during in-app
   playback (clips and feed video pages); downloads already burn in the
   owner-handle watermark plus the animated brand end-card server-side,
   and screenshots prompt a tagged copy (`videoWatermark`, `clipPage`,

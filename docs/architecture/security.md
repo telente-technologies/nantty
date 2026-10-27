@@ -63,7 +63,7 @@ sequenceDiagram
   A->>D: new session + refresh hash + outbox event (one tx)
   A-->>C: EdDSA access (15 min) + opaque refresh
   C->>G: Bearer access token
-  G->>G: verify via JWKS (jose), forward x-zudomart-account-id / session-id
+  G->>G: verify via JWKS (jose), forward x-nantty-account-id / session-id
   C->>A: POST /refresh (old refresh)
   A->>D: rotate; if old token reused revoke whole session
 ```
@@ -81,7 +81,7 @@ sequenceDiagram
 | Social login | `POST /auth/google`, `/auth/apple`, ID-token verifier | EXISTING | `internal/socialidentity/identity_token.verifier.go` |
 | Admin MFA / step-up | Frontend: enrollment, WebAuthn options, step-up, keep-alive BFF routes (MOCK-ONLY). Backend: separate admin audience, TOTP + WebAuthn, 5-min step-up token PROPOSED. `staffauth` guard and staff TTL config EXISTING, no staff login route | MOCK-ONLY / PROPOSED | `apps/admin/src/app/bff/auth/{mfa,step-up,keep-alive}`, `platform/staffauth` |
 | Realtime auth | First frame `{type:"auth",accessToken}` within 10 s else close; browser tickets (60 s, `POST /realtime/tickets`) PROPOSED | EXISTING / PROPOSED | `client_socket.ex` |
-| Service-to-service | Python: HMAC-SHA256 + nonce (Redis, fail closed) + 300 s skew EXISTING. Go-to-Go and gateway-to-Go: plain `x-zudomart-*` headers, trust rests on network isolation. Recommendation below | EXISTING (Python) / gap | `services/python/intelligence/apiContract.md` s2 |
+| Service-to-service | Python: HMAC-SHA256 + nonce (Redis, fail closed) + 300 s skew EXISTING. Go-to-Go and gateway-to-Go: plain `x-nantty-*` headers, trust rests on network isolation. Recommendation below | EXISTING (Python) / gap | `services/python/intelligence/apiContract.md` s2 |
 
 ## 3. Authorization
 
@@ -122,7 +122,7 @@ sequenceDiagram
 | Money integrity | int64 minor units; server recomputes prices; payment paid only after provider verification; `Idempotency-Key` on money endpoints; ledger inside DB tx with row locks | PROPOSED (`platform/idempotency` and `platform/money` EXISTING, not wired to routes) |
 | Audit log | Append-only `AuditEvent` (actor, actingAs, action, subject, before/after, reason, ip, UA, requestId). Required for escrow release, refunds, disputes, payouts, role/staff/plan changes, API keys, admin config. DB role for writers is INSERT only | PROPOSED (`backendPlan.md` 5.7); events via outbox EXISTING in auth |
 | Inbound webhooks | Gateway forwards `/webhooks/*` to go-money byte-for-byte (WAF requires the `verif-hash` header on `/webhooks/flutterwave` and rate-limits it). Verify signature on raw body before parsing, unique provider event id, process once, ack fast, process async. Providers: Flutterwave, couriers, LiveKit, App Store/Play | Flutterwave is the only payment provider (owner, 2026-10-11). EXISTING in go-money (`POST /webhooks/flutterwave`): `verif-hash` (a shared secret, not an HMAC) compared in constant time, the event stored first in the webhook inbox (claimed with a lease, deduplicated), and every charge, transfer or funding re-fetched by id before any ledger posting, because v3 webhooks are unsigned. Couriers, LiveKit, stores ABSENT |
-| Outbound webhooks | HMAC-SHA256 `X-Zudomart-Signature`, backoff for 24 h, replay, SSRF guard (deny private/link-local ranges, resolve then pin IP, no redirects) | PROPOSED |
+| Outbound webhooks | HMAC-SHA256 `X-Nantty-Signature`, backoff for 24 h, replay, SSRF guard (deny private/link-local ranges, resolve then pin IP, no redirects) | PROPOSED |
 | File uploads | Presigned S3 multipart URLs with size and content-type limits; server re-checks magic bytes; objects land in a quarantine prefix, malware scan, then moved to the processed bucket; processed media served by CloudFront with OAC and signed URLs; buckets block public access; strip EXIF GPS | PROPOSED (`backendPlan.md` media rows; the old monolith media module) |
 | Logging | Central redaction (passwords, tokens, OTPs, card, bank). See `observability.md` | Go key-based redaction EXISTING (`platform/logging`); other stacks PROPOSED |
 | Dependencies | pnpm 24 h release age block, frozen lockfile, `govulncheck` EXISTING in CI; `pnpm audit`, `pip-audit`, Trivy, SAST, secret scan PROPOSED | see `devops.md` |
@@ -135,7 +135,7 @@ sequenceDiagram
 | Egress | NAT for payment providers, LiveKit, email, push; VPC endpoints (S3 gateway, SQS, SNS, Secrets Manager, ECR, CloudWatch Logs, KMS) to keep AWS traffic off NAT |
 | Security groups | SG per tier. Go services accept only from gateway SG and ALB (health). Python accepts only from Go/TS SGs. Aurora/Valkey accept only from app SG |
 | Task roles | One IAM task role per service. go-identity: read its secrets, `kms:Decrypt` on identity key, `sns:Publish` to domain-events topic. go-money: money key, payout queue send/receive. realtime: receive from its queue only. intelligence: its queue, read-only feature bucket. No `*` resources; no shared role. Task execution role only pulls image and secrets |
-| DB roles | `svc_<service>` owns its schema (EXISTING in `infra/local/postgres/create-databases.sh`), `zudomart_readers` read-only to others (EXISTING for auth, `20261003094100_grant_read_access_to_other_services`). Migration role separate from runtime role (runtime has no DDL) in prod. go-money ledger tables: runtime role gets INSERT/SELECT only, no UPDATE/DELETE |
+| DB roles | `svc_<service>` owns its schema (EXISTING in `infra/local/postgres/create-databases.sh`), `nantty_readers` read-only to others (EXISTING for auth, `20261003094100_grant_read_access_to_other_services`). Migration role separate from runtime role (runtime has no DDL) in prod. go-money ledger tables: runtime role gets INSERT/SELECT only, no UPDATE/DELETE |
 | Humans | SSO into per-environment AWS accounts, MFA, no long-lived keys, break-glass role with CloudTrail alert. Prod DB access via SSM session, read-only by default |
 | Org guardrails | SCPs deny disabling CloudTrail/GuardDuty, deny public S3, deny leaving the region allow-list |
 | Detection | CloudTrail (org-wide, log-file validation), GuardDuty, Security Hub, AWS Config rules for public buckets and open SGs |
@@ -151,7 +151,7 @@ sequenceDiagram
 | 5 | Double spend / negative balance via race | Medium / Critical | Ledger tx with row locks, idempotency keys, deferred balance constraint, property tests, reconciliation job and `ledger imbalance` page | PROPOSED |
 | 6 | Gift/coin abuse and fraud (self-gifting, stolen cards, chargebacks) | High / High | Python risk score, Go thresholds, per-user rate limit, holds before payout, velocity rules | PROPOSED |
 | 7 | Compromised admin account | Low / Critical | Separate audience, MFA/WebAuthn, 5-min step-up, SUPERADMIN count cap, audit, IP allow-list option, dual approval for payouts above a limit | MOCK-ONLY / PROPOSED |
-| 8 | Internal service spoofing (forged `x-zudomart-*`) | Low / High | Private subnets + SG; recommended signed internal JWT (see below) | gap |
+| 8 | Internal service spoofing (forged `x-nantty-*`) | Low / High | Private subnets + SG; recommended signed internal JWT (see below) | gap |
 | 9 | Malicious upload (malware, polyglot, oversized) | Medium / Medium | Type/size limits, magic bytes, quarantine + scan, serve from separate domain, CSP | PROPOSED |
 | 10 | SSRF via webhook URLs or link previews | Medium / High | Egress allow-list proxy, block metadata IP 169.254.169.254, IMDSv2 only, no redirects | PROPOSED |
 | 11 | Secret leak (repo, logs, CI) | Medium / Critical | Secrets Manager, secret scan in CI and pre-commit, redaction, rotation runbook, OIDC to AWS in CI | PROPOSED |
@@ -172,7 +172,7 @@ sequenceDiagram
 - **Tag:** MVP.
 
 ### R2. Sign gateway-to-service identity
-- **Problem:** `x-zudomart-account-id/session-id` are plain headers.
+- **Problem:** `x-nantty-account-id/session-id` are plain headers.
 - **Current:** `upstreamProxy.service.ts` forwards them; Go services trust them via network isolation only.
 - **Why it matters:** any SG misconfiguration or compromised task becomes full impersonation, including admin and money.
 - **Recommendation:** gateway mints a 60 s internal JWT (EdDSA, audience per service) or forwards the user token for Go to verify with `platform/jwtauth`; Go ignores raw headers. Prefer the second (already built).
@@ -263,7 +263,7 @@ The automatic suspension goes through go-identity's existing suspension flow (`s
 - Provider: Cloudflare Turnstile behind `HumanVerificationProvider` (`services/typescript/gateway/src/services/security/humanVerificationProvider.service.ts`); `HUMAN_VERIFICATION_PROVIDER=hcaptcha` switches to hCaptcha with the same flow.
 - Server-side verification happens in the gateway (`POST /api/v1/security/human-verification`): token length check, `remoteip`, an idempotency key, optional hostname allow-list (`HUMAN_VERIFICATION_HOSTNAMES`). Rate limit 10 attempts a minute per account and 30 per IP. Tokens are never logged or forwarded.
 - Web: Turnstile widget in a sheet when any request answers 428, then the request is retried once (`apps/webapp/src/components/security/`). CSP allows `challenges.cloudflare.com` for scripts and frames.
-- Mobile: the in-app browser sheet opens `<webapp>/security-check`, which runs Turnstile and returns to `zudomart://security-check#token=…`; the app submits the token and retries (`apps/mobile/src/services/humanVerification.service.ts`). Concurrent 428s share one check.
+- Mobile: the in-app browser sheet opens `<webapp>/security-check`, which runs Turnstile and returns to `nantty://security-check#token=…`; the app submits the token and retries (`apps/mobile/src/services/humanVerification.service.ts`). Concurrent 428s share one check.
 - Staff are never challenged: admin routes are exempt and staff tokens are not consumer principals.
 - Device integrity: clients may send `POST /api/v1/security/client-signals` with headless signals and a Play Integrity / App Attest token. go-trust verifies through `DeviceAttestationVerifier` (`PlayIntegrityVerifier`, `AppAttestVerifier` interfaces); until those are configured the verdict is `unavailable` and is ignored.
 

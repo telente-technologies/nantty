@@ -112,7 +112,7 @@ The stores run their own trials (introductory offers), renewals, retries and gra
 
 Owner to-dos for the stores:
 
-- [ ] App Store Connect: subscription group with `com.zudomart.app.blue_essential.monthly|yearly`, `com.zudomart.app.blue.monthly|yearly`, `com.zudomart.app.premium.monthly|yearly`. Add a **7-day free introductory offer** to `premium.monthly` (Premium is the plan with a trial). Turn on **Billing Grace Period** (16 days is Apple's default; we follow whatever Apple sends).
+- [ ] App Store Connect: subscription group with `com.nantty.app.blue_essential.monthly|yearly`, `com.nantty.app.blue.monthly|yearly`, `com.nantty.app.premium.monthly|yearly`. Add a **7-day free introductory offer** to `premium.monthly` (Premium is the plan with a trial). Turn on **Billing Grace Period** (16 days is Apple's default; we follow whatever Apple sends).
 - [ ] Google Play Console: same product ids with monthly and yearly base plans. Add a **7-day free trial offer** on the Premium monthly base plan. Turn on grace period and account hold.
 - [ ] Set the Apple App Store Server Notifications V2 URL and the Google Real-time developer notifications topic to the money webhook endpoints (already used for refunds).
 - [ ] Seller plans, Gold-only and Black are sold on the web only, so they need no store products.
@@ -167,6 +167,6 @@ stateDiagram-v2
 - `.../modules/billing/services/renewalEngine.service.go` (scheduler and charge), `renewalSettlement.service.go` (charge outcome, ledger entry `subscription.periodBilled`: Dr payments awaiting application / Cr `revenue:planSubscriptions`), `dunning.service.go`, `planChange.service.go`, `billingNotices.service.go`, `billingJobs.service.go`.
 - Table `subscriptions.subscription_periods` (one row per invoice, unique `idempotency_key`). New columns on `subscriptions` (`next_charge_at`, `dunning_attempts`, `credit_minor`, `pending_plan_code`, `price_effective_at`, …).
 - `payments.billing_authorizations`: the Flutterwave card token sealed with AES-GCM (`DATA_ENCRYPTION_KEY`), with a keyed card fingerprint. Charges go through `PaymentGateway.ChargeBillingAuthorization`. Refunds of renewal payments go through `RefundSubscriptionPayment` (ledger first, under the caller's idempotency key).
-- Jobs: every minute the module finds due subscriptions, takes a 15-minute lease, and puts one job per subscription on the RabbitMQ queue `jobs-subscription-billing` (`zudomart.jobs` exchange, retries at 30 s/2 m/10 m/30 m, then the `.dlq`). Without a broker (local tests) the job runs inline.
+- Jobs: every minute the module finds due subscriptions, takes a 15-minute lease, and puts one job per subscription on the RabbitMQ queue `jobs-subscription-billing` (`nantty.jobs` exchange, retries at 30 s/2 m/10 m/30 m, then the `.dlq`). Without a broker (local tests) the job runs inline.
 - Events → emails: `subscriptionTrial.ending`, `subscriptionRenewal.upcoming`, `subscriptionInvoice.paid`, `subscriptionPayment.failed`, `subscriptionGrace.ending`, `subscription.downgraded`, `subscriptionCard.expiring`, `subscriptionPrice.changeNotice` (templates in `packages/emailTemplates/src/templates/subscriptionBilling.template.tsx`).
 - Endpoints: `POST /api/v1/subscriptions/{id}/change-plan`, `POST /api/v1/subscriptions/{id}/pay-now`, `GET /api/v1/subscriptions/{id}/periods`, `GET /api/v1/subscriptions/{id}/upcoming-charge`.

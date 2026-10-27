@@ -6,11 +6,11 @@
 
 As of 2026-10-03. Labels: **EXISTING** · **MOCK-ONLY** · **PROPOSED** · **OPTIONAL FUTURE**. Facts: [inventory.md](inventory.md) section 3.
 
-Fixed decisions: one Aurora PostgreSQL + PostGIS cluster, one schema per owning service, one `svc_<service>` login role per service, read-only grants to others through `zudomart_readers` (granted per table in the owner's migration). Only the owner writes. Money is `int64` minor units + ISO currency; coins are integer `COIN`; points are never money. ent + Atlas for Go, Prisma for TS.
+Fixed decisions: one Aurora PostgreSQL + PostGIS cluster, one schema per owning service, one `svc_<service>` login role per service, read-only grants to others through `nantty_readers` (granted per table in the owner's migration). Only the owner writes. Money is `int64` minor units + ISO currency; coins are integer `COIN`; points are never money. ent + Atlas for Go, Prisma for TS.
 
 | Fact | Status | Evidence |
 | --- | --- | --- |
-| 21 schemas + roles, `zudomart_readers`, `REVOKE CREATE ON SCHEMA public` | EXISTING (local) | `infra/local/postgres/create-databases.sh` |
+| 21 schemas + roles, `nantty_readers`, `REVOKE CREATE ON SCHEMA public` | EXISTING (local) | `infra/local/postgres/create-databases.sh` |
 | `auth` schema: account, session, refresh_token, one_time_code, signing_key, social_identity, outbox_event | EXISTING, serving | `services/go/modules/auth/src/databases/schema` |
 | `users`, `admin`, `currency`, `ledger`, `live` ent schemas + Atlas migrations | EXISTING (serving) | `services/go/modules/<m>/src/{databases/schema,migrations}` |
 | Everything else | PROPOSED; the old monolith's Prisma schema (124 models) is the reference spec | |

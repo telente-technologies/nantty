@@ -80,7 +80,7 @@ flowchart TD
 
 | Concern | local | dev | staging | prod |
 | --- | --- | --- | --- | --- |
-| AWS account | none (Docker RabbitMQ, LocalStack SES) | shared `zudomart-dev` | `zudomart-staging` | `zudomart-prod` (all in an AWS Organization) |
+| AWS account | none (Docker RabbitMQ, LocalStack SES) | shared `nantty-dev` | `nantty-staging` | `nantty-prod` (all in an AWS Organization) |
 | Data | compose volumes, synthetic seed | synthetic | synthetic or masked, never prod copies | real |
 | Secrets | `.env` from `*.example`, throwaway keys | Secrets Manager (dev) | Secrets Manager (staging) | Secrets Manager (prod), separate KMS keys |
 | Payment providers | test/sandbox | sandbox | sandbox | live keys, only in prod account |
@@ -116,7 +116,7 @@ Guarantee that local cannot reach prod: (1) separate AWS accounts with no cross-
 | Aurora PostgreSQL + PostGIS | single cluster, schema per service | owner decision; PITR, Multi-AZ failover, read replica; one cluster keeps cost and ops low | PROPOSED |
 | ElastiCache Valkey | cache, rate limit, idempotency, nonces, presence | managed, Multi-AZ, cheaper than Redis OSS licensing | PROPOSED |
 | S3 | media, exports, KYB docs, Parquet, backups | durable, versioned, lifecycle rules | PROPOSED |
-| Amazon MQ for RabbitMQ (RabbitMQ adopted, owner, 2026-10-03) | domain event fan-out (`zudomart.events`) and job queues (`zudomart.jobs`), quorum queues with retry queues and DLQs | **cluster deployment** (3 brokers across AZs, `mq.m7g.large` prod / single-instance `mq.m7g.medium` staging), **private subnets only**, no public accessibility, security group allows 5671 from ECS task SGs only; TLS (`amqps`), one user per service from Secrets Manager; definitions imported via the management API on deploy; same broker family as local Docker | RabbitMQ EXISTING locally, Amazon MQ PROPOSED |
+| Amazon MQ for RabbitMQ (RabbitMQ adopted, owner, 2026-10-03) | domain event fan-out (`nantty.events`) and job queues (`nantty.jobs`), quorum queues with retry queues and DLQs | **cluster deployment** (3 brokers across AZs, `mq.m7g.large` prod / single-instance `mq.m7g.medium` staging), **private subnets only**, no public accessibility, security group allows 5671 from ECS task SGs only; TLS (`amqps`), one user per service from Secrets Manager; definitions imported via the management API on deploy; same broker family as local Docker | RabbitMQ EXISTING locally, Amazon MQ PROPOSED |
 | SES feedback SNS → SQS | bounce/complaint feedback only | SES cannot publish to RabbitMQ; one small SQS queue `notifications-ses-feedback` | PROPOSED |
 | Secrets Manager + KMS | secrets, rotation, envelope keys | per-task injection, audited | PROPOSED |
 | IAM | task roles, OIDC deploy roles | least privilege per service | PROPOSED |
@@ -135,7 +135,7 @@ Guarantee that local cannot reach prod: (1) separate AWS accounts with no cross-
 
 Webhooks enter through the gateway. Its `/webhooks/` route sends only `POST` to go-money, forwards the request body as the exact received bytes (no JSON re-parse or re-serialisation) and passes the `verif-hash` header through, so go-money checks it before parsing the raw body (pinned by the gateway test `webhook passthrough`). The gateway skips guest rate limits on these routes, and the WAF refuses `/webhooks/flutterwave` requests without a `verif-hash` header, rate-limits that path, and blocks any `/internal` path.
 
-Service-to-service HTTP goes through an internal ALB (host rule `<service>.svc.<env>.zudomart.internal`), which also gives the distroless Go images a health check. This design replaces the earlier ALB rule straight to go-money: go-money deploys with CodeDeploy blue/green, which swaps target groups on one listener, so a public rule on a second listener would keep pointing at the standby group after a swap. The old `/api/v1/payments/webhooks/*` paths are not routed. Flutterwave is the only payment provider (owner, 2026-10-11): the endpoint is `https://api.zudomart.com/webhooks/flutterwave`, set on the Flutterwave dashboard (v3 webhooks, PSA funding hook enabled) for live and test modes, with the `verif-hash` secret in `FLUTTERWAVE_WEBHOOK_HASH`.
+Service-to-service HTTP goes through an internal ALB (host rule `<service>.svc.<env>.nantty.internal`), which also gives the distroless Go images a health check. This design replaces the earlier ALB rule straight to go-money: go-money deploys with CodeDeploy blue/green, which swaps target groups on one listener, so a public rule on a second listener would keep pointing at the standby group after a swap. The old `/api/v1/payments/webhooks/*` paths are not routed. Flutterwave is the only payment provider (owner, 2026-10-11): the endpoint is `https://api.nantty.com/webhooks/flutterwave`, set on the Flutterwave dashboard (v3 webhooks, PSA funding hook enabled) for live and test modes, with the `verif-hash` secret in `FLUTTERWAVE_WEBHOOK_HASH`.
 
 
 ## 7. NOT yet

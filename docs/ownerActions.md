@@ -30,7 +30,7 @@ The handoff work has since been committed; this page is kept as the owner-action
    - register 3 fixed IP addresses per environment (see `flutterwaveMigration.md` §7.1).
 4. **Widgets (EAS):**
    - Apple Team ID;
-   - app group `group.com.zudomart.app`;
+   - app group `group.com.nantty.app`;
    - APNs key;
    - FCM `google-services.json`.
    Then run `eas build`.

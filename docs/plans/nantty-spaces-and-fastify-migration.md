@@ -14,7 +14,7 @@ Status: **implementation plan / not yet launch-ready** (2026-10-26)
 ## Current architecture and ownership
 
 - The repository's backend plan places live sessions, LiveKit credentials, stage membership and live safety in **Go `go-live`**. The existing Go live service already has scheduled sessions, LiveKit token issuance, audience presence, comments, safety controls and a retention worker. Extend that single authority for Spaces rather than creating a second source of truth.
-- TypeScript deployables are `gateway`, `social`, `notifications`, `media`, `search` and `support`. They currently use `@zudojs/http` and do not declare Fastify. Social uses Prisma; other services have their own storage/integration patterns. Browser/mobile BFFs remain Next.js/Expo and are not Fastify migration targets.
+- TypeScript deployables are `gateway`, `social`, `notifications`, `media`, `search` and `support`. `gateway` and `search` now run through `@nantty/fastify-platform` and no longer depend on ZudoJS. `social`, `notifications`, `media` and `support` remain migration targets. Social uses Prisma; other services have their own storage/integration patterns. Browser/mobile BFFs remain Next.js/Expo and are not Fastify migration targets.
 - Consequently, the Fastify migration is a separate platform migration for the TypeScript HTTP deployables. Space lifecycle and LiveKit authorization remain in `go-live`; TypeScript consumes its existing public/internal contracts and events. Do not dual-write live state from social or gateway.
 
 ## Implementation status (2026-10-26)
@@ -71,6 +71,13 @@ Creator eligibility is checked server-side on create/start/schedule and rechecke
 
 ## TypeScript services migration to Fastify
 
+### Verified migration progress (2026-10-27)
+
+- `@nantty/fastify-platform` now owns Fastify construction, request IDs, security plugins, metrics, readiness helpers and the small framework-neutral request/response/middleware contract used by domain handlers. Its validation contract is backed by Zod v4.
+- `gateway` and `search` have been switched from `@zudojs/http`, `@zudojs/logger` and `@zudojs/schema` to `@nantty/fastify-platform`. Public routes, headers, request IDs and response envelopes were retained. `notifications` now uses Fastify for HTTP ingress while retaining its unchanged queue consumers and outbox processing.
+- Verification: Gateway typecheck plus 1,709 tests; Search typecheck plus 74 active tests (4 intentionally skipped); Notifications typecheck plus 314 active tests (4 intentionally skipped) pass. This is not a deployment approval: staging infrastructure, contract snapshots and canary evidence are still required.
+- Remaining ZudoJS consumers are `support`, `media` and `social`. Migrate them one service at a time; Support is next, followed by Media and then Social.
+
 ### Target and non-goals
 
 - Replace the HTTP server/router/runtime of the six TypeScript deployables with supported Fastify APIs and plugins. Do not rewrite their domain handlers, Prisma repositories, queues, event consumers, BFFs or public API paths as part of the first pass.
@@ -81,11 +88,11 @@ Creator eligibility is checked server-side on create/start/schedule and rechecke
 
 0. **Inventory / baseline** — enumerate routes, middleware order, request size limits, parsers, auth, rate limiting, CORS, proxy trust, error mapping, metrics, readiness, shutdown, streaming, raw webhook body requirements, and service-specific hooks. Capture OpenAPI/contract snapshots and per-service latency/error baselines. Record every route's authentication and validation rules.
 1. **Shared Fastify platform package** — add a pinned compatible Fastify version and `@nantty/fastify-platform` package. Provide typed config, logger integration, request ID propagation, safe error envelope, Ajv/Zod-compatible boundary validation, OpenAPI generation, auth decorators, permission-deny-by-default helpers, rate-limit hooks, request body limits, readiness/liveness, tracing/metrics, graceful shutdown and test inject helpers. Pin plugin versions and register plugins in one documented order.
-2. **Pilot `search`** — migrate the smallest stateless API first. Preserve all URLs/status/body/error behavior. Run old and new implementations against identical contract tests and compare OpenAPI/route inventories. Ship behind deployment rollback, then remove the old server only after parity and production canary evidence.
+2. **Pilot `search` — complete in local verification.** Preserve all URLs/status/body/error behavior. The local Fastify migration is typechecked and tested; contract inventory/snapshot comparison and staging canary evidence remain before it can be called shipped.
 3. **`support`, then `media`** — migrate CRUD and upload/stream paths with raw-body, streaming, timeout and body-size tests. Preserve signed media/security behavior and SSRF protections.
-4. **`notifications`** — migrate HTTP ingress without changing queue consumers, retry/DLQ, provider callbacks or outbox behavior. Test webhook raw-body signature verification and duplicate delivery.
+4. **`notifications` — complete in local verification.** HTTP ingress now runs in Fastify without changing queue consumers, retry/DLQ, provider callbacks or outbox behavior. Staging raw-body signature and duplicate-delivery validation remain required.
 5. **`social`** — migrate route groups incrementally by module using Fastify plugins and encapsulated dependencies. Preserve identity middleware, optional/required principal semantics, age-context propagation, idempotency, Prisma transaction boundaries and response codes. Do not rewrite domain handlers in the same change.
-6. **`gateway`** — migrate last because it is the public edge. Preserve JWT/JWKS validation, service proxying, route-specific auth, rate limits, streaming, timeout behavior, trusted proxy configuration and request/correlation IDs. Canary and rollback by deployment.
+6. **`gateway` — complete in local verification.** Preserve JWT/JWKS validation, service proxying, route-specific auth, rate limits, streaming, timeout behavior, trusted proxy configuration and request/correlation IDs. Staging canary and rollback validation remain before deployment.
 7. **Removal / hardening** — remove `@zudojs/http` from TypeScript deployables only after no runtime use remains; delete adapter code, align docs/runbooks, pin dependencies, and run full CI, API smoke, integration, security and load suites.
 
 ### Acceptance gates per service
@@ -112,5 +119,6 @@ Creator eligibility is checked server-side on create/start/schedule and rechecke
 - [ ] Add launch/rollout flags: video LIVE beta; Spaces audio-only; Spaces coin gifts independently gated (host-only recipient); animated/live gifts unavailable in Spaces.
 - [ ] Add webapp Space discovery/detail after mobile+API contract stability.
 - [ ] Complete video LIVE beta exit gates before enabling general launch.
-- [ ] Start Fastify migration with shared platform and search pilot; continue service-by-service through gateway.
+- [x] Build the shared Fastify platform and complete locally verified Gateway/Search migrations.
+- [ ] Migrate Notifications, Support, Media and Social service by service; then remove the last ZudoJS packages and run full integration/security/load verification.
 - [ ] Do not commit or deploy without explicit request and validated release configuration.

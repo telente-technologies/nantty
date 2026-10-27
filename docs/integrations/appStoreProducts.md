@@ -31,9 +31,9 @@ Apple and Google let one account hold **only one active subscription per product
 The solution is slots: every tier and interval has **5 identical products**:
 
 ```
-zudomart.creatorsub.tier_1000.s1.monthly
+nantty.creatorsub.tier_1000.s1.monthly
 ...
-zudomart.creatorsub.tier_1000.s5.monthly
+nantty.creatorsub.tier_1000.s5.monthly
 ```
 
 When a fan subscribes to a creator, the backend gives them the first slot they aren't already using at that tier. Each product sits in **its own subscription group** on iOS, and is its own subscription on Google Play, so slots never cancel or upgrade each other. A fan can therefore hold up to 5 creators per tier and interval: 70 creator subscriptions in all. Past that, the app shows `STORE_SLOTS_FULL` and offers web checkout.
@@ -54,7 +54,7 @@ The totals are 7 tiers × 2 intervals × 5 slots = **70 products** per store, an
 1. **Agreements.** Under App Store Connect → Business, make sure the Paid Applications agreement, tax and banking are active.
 2. **Small Business Program.** If Nantty is enrolled in the App Store Small Business Program, set `appleSmallBusinessProgram: true` in admin config `appStore.fees`. iOS prices then use the 15% column (`appleSmallBusinessMinor`).
 3. **Create the subscriptions.** Go to App → Monetization → Subscriptions. For each of the 70 products in the JSON:
-   - Create a **subscription group**. Its reference name is the product id, for example `zudomart.creatorsub.tier_1000.s1.monthly`. Every product needs a group of its own.
+   - Create a **subscription group**. Its reference name is the product id, for example `nantty.creatorsub.tier_1000.s1.monthly`. Every product needs a group of its own.
    - Inside that group, add one auto-renewable subscription:
      - Product ID = `productId`
      - Reference name = `apple.referenceName`
@@ -65,12 +65,12 @@ The totals are 7 tiers × 2 intervals × 5 slots = **70 products** per store, an
    - Upload one review screenshot of the subscribe screen.
    - Tip: the App Store Connect API (`POST /v1/subscriptionGroups`, `/v1/subscriptions`, `/v1/subscriptionPrices`) can create all 70 from the JSON in a script. This is far faster than clicking.
 4. **Server notifications.** Under App Information → App Store Server Notifications:
-   - Production URL: `https://api.zudomart.com/webhooks/store-notifications/apple_iap`, **Version 2**.
+   - Production URL: `https://api.nantty.com/webhooks/store-notifications/apple_iap`, **Version 2**.
    - Sandbox URL: the same path on the staging gateway.
 5. **API key.** Under Users and Access → Integrations → In-App Purchase, generate a key. Then set:
    - `APPLE_IAP_ISSUER_ID` and `APPLE_IAP_KEY_ID`
    - `APPLE_IAP_PRIVATE_KEY_PATH`, which points to the downloaded `.p8` file
-   - `APPLE_IAP_BUNDLE_ID=com.zudomart.app`
+   - `APPLE_IAP_BUNDLE_ID=com.nantty.app`
    - `APPLE_IAP_ROOT_CERTIFICATES_PATH`, which points to Apple Root CA G3 (download it from apple.com/certificateauthority)
    - `APPLE_IAP_ENVIRONMENT`: `Sandbox` or `Production`
    - `APPLE_IAP_API_BASE_URL`, which matches the environment: `https://api.storekit-sandbox.itunes.apple.com` or `https://api.storekit.itunes.apple.com`
@@ -91,11 +91,11 @@ The totals are 7 tiers × 2 intervals × 5 slots = **70 products** per store, an
 3. **Service account for receipt checks.**
    - In Google Cloud, create a service account and enable the "Google Play Android Developer API".
    - In Play Console → Users and permissions, invite the service account with **View financial data** and **Manage orders and subscriptions**.
-   - Download its JSON key and set `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_PATH` to it, plus `GOOGLE_PLAY_PACKAGE_NAME=com.zudomart.app`.
+   - Download its JSON key and set `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_PATH` to it, plus `GOOGLE_PLAY_PACKAGE_NAME=com.nantty.app`.
    - The backend calls `purchases.subscriptionsv2.get` to verify, and `purchases.subscriptions.acknowledge` to acknowledge. Google refunds anything left unacknowledged for 3 days; the app acknowledges too, when it finishes the transaction.
 4. **Real-time Developer Notifications.**
    - Create a Pub/Sub topic, for example `play-rtdn`, and grant `google-play-developer-notifications@system.gserviceaccount.com` the **Pub/Sub Publisher** role on it.
-   - Create a **push** subscription to `https://api.zudomart.com/webhooks/store-notifications/google_play` with **authentication enabled**: pick a service account, and set the audience to that same URL.
+   - Create a **push** subscription to `https://api.nantty.com/webhooks/store-notifications/google_play` with **authentication enabled**: pick a service account, and set the audience to that same URL.
    - Set `GOOGLE_PLAY_RTDN_PUSH_AUDIENCE` to that URL and `GOOGLE_PLAY_RTDN_PUSH_SERVICE_ACCOUNT` to the push service account's email. The backend verifies Google's signed OIDC token on every push.
    - In Play Console → Monetize → Monetization setup, enter the topic name and send a test notification.
 5. **Testing.** Add license testers under Settings → License testing, then install the development build from an internal testing track.

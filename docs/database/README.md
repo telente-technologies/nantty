@@ -31,11 +31,11 @@ Older narrative doc: `docs/architecture/database.md` (ERD proposals for planned 
 | Item | Value | Path |
 | --- | --- | --- |
 | Engine | PostgreSQL + PostGIS (Aurora PostgreSQL in prod, PLANNED) | `infra/local/docker-compose.yml`, `infra/local/postgres/create-databases.sh` |
-| Databases | `$POSTGRES_DB` (app), `zudomart_test`, `atlas_dev` (Atlas diff scratch) | `create-databases.sh` |
+| Databases | `$POSTGRES_DB` (app), `nantty_test`, `atlas_dev` (Atlas diff scratch) | `create-databases.sh` |
 | Schemas | 21, one per owning service: auth users catalog inventory orders payments wallet ledger escrow subscriptions ads creators moderation live currency admin social notifications media search support (rewards, analytics, feed, integrations, campaigns, realtime and intelligence were removed 2026-10-12: nothing used them) | `create-databases.sh` |
-| Roles | `svc_<service>` LOGIN owns schema `<service>`; all are members of `zudomart_readers` (NOLOGIN) | `create-databases.sh` |
+| Roles | `svc_<service>` LOGIN owns schema `<service>`; all are members of `nantty_readers` (NOLOGIN) | `create-databases.sh` |
 | Money role | `svc_money` is granted `svc_payments, svc_wallet, svc_ledger, svc_escrow, svc_subscriptions, svc_creators` (one tx across money schemas) | `create-databases.sh` |
-| Cross-schema reads | Column-level `GRANT SELECT ... TO zudomart_readers` in each owner's `*_grant_*.up.sql` migration | `services/go/modules/*/src/migrations/*grant*.up.sql` |
+| Cross-schema reads | Column-level `GRANT SELECT ... TO nantty_readers` in each owner's `*_grant_*.up.sql` migration | `services/go/modules/*/src/migrations/*grant*.up.sql` |
 | `public` | `REVOKE CREATE ON SCHEMA public FROM PUBLIC` | `create-databases.sh` |
 | Search path | Per-module DSN gets `search_path=<schema>` | `services/go/platform/postgres/schema.scope.go` |
 
@@ -75,7 +75,7 @@ Every Go module with a database uses the same layout. `<m>` = `services/go/modul
 | ads | goAds | `ads` | EXISTING | see migrations | Campaigns, audiences, billing, tracking and reporting |
 | moderation | goTrust | `moderation` | EXISTING | see migrations | Reports, copyright, strikes, suspensions and appeals |
 
-gRPC contracts touching money data: `services/contracts/proto/zudomart/money/v1/{checkout_money,live_money}.proto`, `auth/v1/account_directory.proto`.
+gRPC contracts touching money data: `services/contracts/proto/nantty/money/v1/{checkout_money,live_money}.proto`, `auth/v1/account_directory.proto`.
 
 ## 4. Non-Go data stores
 

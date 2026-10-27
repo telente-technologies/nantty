@@ -75,7 +75,7 @@ Restore drills run with masked data outside the production account when possible
 | R6 | Credential compromise | Rotate secrets (multi-user rotation), revoke sessions, invalidate JWT signing key via the key-rotation procedure, review `pgaudit` and CloudTrail, restore if tampering found |
 | R7 | Backup failure alarm | Check AWS Backup job, KMS permissions, vault lock; take manual snapshot; escalate if > 26 h without a valid snapshot |
 | R8 | Failed migration | Abort per PR plan; if schema changed partially, restore from the pre-migration manual snapshot **only** if data was altered; otherwise fix forward; `migrations.md` s3 |
-| R9 | Outbox/event pipeline stuck | Check relay logs, RabbitMQ user permissions (`write` on `zudomart.events`), broker memory/disk alarms, publish confirm timeouts; do not delete unpublished rows; replay after fix; move DLQ messages back |
+| R9 | Outbox/event pipeline stuck | Check relay logs, RabbitMQ user permissions (`write` on `nantty.events`), broker memory/disk alarms, publish confirm timeouts; do not delete unpublished rows; replay after fix; move DLQ messages back |
 
 ## 6. Gaps and actions
 

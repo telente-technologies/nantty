@@ -328,7 +328,7 @@ Requirement: tapping **Repost** must offer a choice — *just reshare* or *quote
 
 ## 8. Studio subdomain + live broadcasting
 
-Requirement: a dedicated **`studio.zudomart.com`** web app where creators **go live**, connect an external encoder like **OBS**, and compose **overlays (text, logos, anything)** on top of the livestream — plus **in-app go-live** on mobile for everyone including gamers, who can stream **their phone screen** or connect an **external source**. Studio is mock-driven exactly like the mobile app and the webapp.
+Requirement: a dedicated **`studio.nantty.com`** web app where creators **go live**, connect an external encoder like **OBS**, and compose **overlays (text, logos, anything)** on top of the livestream — plus **in-app go-live** on mobile for everyone including gamers, who can stream **their phone screen** or connect an **external source**. Studio is mock-driven exactly like the mobile app and the webapp.
 
 **Launch scope (owner direction, 2026-10-26):** video livestreaming remains a **beta capability** while it is improved; the presence of mobile screens, Studio mocks or backend infrastructure does not mean video LIVE is part of the initial launch. **Nantty Spaces is separate**: scheduled/joinable audio-only rooms; only creators may host, anyone may listen, and coin-purchased static gifts may go to the host only. No gift animation, leaderboard or separate Space chat; comments stay under the feed post announcing the Space. Spaces implementation is tracked separately and must not be inferred as complete from this video-live section.
 
@@ -346,7 +346,7 @@ The diagram below records the earlier proposed topology (MediaMTX/SRS + HLS); it
 ```
                           ┌───────────────────────────────┐
   OBS / encoder ──RTMP──► │  ingest (MediaMTX or SRS)     │──HLS──► viewers (webapp + app)
-  phone screen-cast ─────► │  rtmp://studio.zudomart.com/  │
+  phone screen-cast ─────► │  rtmp://studio.nantty.com/  │
   Studio browser source ─► │          live/<streamKey>     │
                           └───────────────────────────────┘
                                      ▲            │
@@ -357,10 +357,10 @@ The diagram below records the earlier proposed topology (MediaMTX/SRS + HLS); it
                           └────────────────────────────────┘
 ```
 
-1. **Studio app** — `apps/studio`, package `@zudomart/studio`, **port 3600**, host `studio.zudomart.com`. Server layer copied from `apps/webapp` (BFF pattern: `server/*service.ts`, `app/bff/{auth/[…path]}`, `proxy.ts`, httpOnly `zd_*` cookies, CSRF HMAC), **mock backend ON by default** (`STUDIO_USE_MOCKS`). Public routes: `/` (landing), `/login`, `/overlay*` (browser source). Everything else requires a session and lives under `(studio)` → shell → `/lives`. **[DONE]**
+1. **Studio app** — `apps/studio`, package `@nantty/studio`, **port 3600**, host `studio.nantty.com`. Server layer copied from `apps/webapp` (BFF pattern: `server/*service.ts`, `app/bff/{auth/[…path]}`, `proxy.ts`, httpOnly `zd_*` cookies, CSRF HMAC), **mock backend ON by default** (`STUDIO_USE_MOCKS`). Public routes: `/` (landing), `/login`, `/overlay*` (browser source). Everything else requires a session and lives under `(studio)` → shell → `/lives`. **[DONE]**
 2. **Ingest** — RTMP endpoint per session with a per-session **stream key** issued by `POST /api/v1/lives/:id/stream-key`. Creator pastes Server URL + Stream Key into OBS (or any encoder, or a phone screen-recorder's RTMP output).
 3. **Playback** — LL-HLS from the ingest host; viewers play `<hlsUrl>` on the session.
-4. **Overlays** — scenes stored per session; a transparent **browser-source page** (`studio.zudomart.com/overlay/:sceneId`, 1920×1080, no chrome) renders the current scene. The creator adds it in OBS as a **Browser Source** and the graphics land on the outgoing stream. For in-app viewers who are not on OBS, the same scene JSON is fetched with the session and composited client-side over the player.
+4. **Overlays** — scenes stored per session; a transparent **browser-source page** (`studio.nantty.com/overlay/:sceneId`, 1920×1080, no chrome) renders the current scene. The creator adds it in OBS as a **Browser Source** and the graphics land on the outgoing stream. For in-app viewers who are not on OBS, the same scene JSON is fetched with the session and composited client-side over the player.
    - Overlay layer types: **text**, **image (logo)**, **shape/badge**, **countdown**, **ticker**. Each layer: `x`, `y`, `w`, `h`, `zIndex`, `opacity`, colour, font size, and per-type payload.
 5. **Mobile go-live source picker** — extend `liveSetupPanel.tsx` with three sources: **Camera** (exists today) | **Screen** (phone screen capture) | **External** (shows the same RTMP server URL + stream key to paste into an encoder or screen-cast app).
 6. **Webapp** — viewer-facing live surface + a "Go live" hand-off to Studio (Phase 2, §6.4).
@@ -369,10 +369,10 @@ The diagram below records the earlier proposed topology (MediaMTX/SRS + HLS); it
 
 | # | Scope | Marker |
 | --- | --- | --- |
-| 8.3.1 | **Studio app skeleton** — `apps/studio` scaffolded from `apps/webapp`'s server layer (BFF pattern: `server/*service.ts`, `app/bff/{auth/[…path]}`, `proxy.ts`, `zd_*` cookies, CSRF HMAC), port **3600**, package `@zudomart/studio`, `STUDIO_*` env, mock backend on by default, `/login`. | **[DONE]** |
+| 8.3.1 | **Studio app skeleton** — `apps/studio` scaffolded from `apps/webapp`'s server layer (BFF pattern: `server/*service.ts`, `app/bff/{auth/[…path]}`, `proxy.ts`, `zd_*` cookies, CSRF HMAC), port **3600**, package `@nantty/studio`, `STUDIO_*` env, mock backend on by default, `/login`. | **[DONE]** |
 | 8.3.2 | **Studio landing page + split auth** — public `/` marketing landing (hero, feature grid, how-it-works, CTA), `/login` rendered as a **split screen**: brand/design half + form half (same format as the webapp auth layout). Signed-in visits to `/` and `/login` redirect to `/lives`. | **[DONE]** |
 | 8.3.3 | **Studio shell + navigation** — `studioShell` (sidebar + mobile top bar, sign out), `(studio)` route group, `Lives` dashboard at **`/lives`** (create live, state badges, control-room/overlay-editor links). | **[DONE]** |
-| 8.3.4 | **Live control room** — `/lives/:id`; **Start / End**; **stream key card** with copy affordances (`rtmp://studio.zudomart.com/live` + key + overlay browser-source URL + HLS) and explicit **OBS setup steps**; connection state (`idle` / `connecting` / `live` / `ended`); viewer count, chat, product pinning. | **[DONE]** |
+| 8.3.4 | **Live control room** — `/lives/:id`; **Start / End**; **stream key card** with copy affordances (`rtmp://studio.nantty.com/live` + key + overlay browser-source URL + HLS) and explicit **OBS setup steps**; connection state (`idle` / `connecting` / `live` / `ended`); viewer count, chat, product pinning. | **[DONE]** |
 | 8.3.5 | **Overlay editor + browser-source page** — `/lives/:id/overlay`: toolbar (text / image / shape / countdown / ticker), 1920×1080 preview canvas, layer list, inspector (content, font size, colours, x/y/w/h, opacity, z-order, delete), save/discard. Public **`/overlay/:sceneId`** renders the scene with no chrome and no session (proxied as public, fetched through `GET /api/v1/overlay-scenes/:sceneId`). | **[DONE]** |
 | 8.3.6 | **Mobile source picker** — Camera / Screen / External segmented picker in `liveSetupPanel.tsx`. Camera = existing backdrop; Screen = capture-stage placeholder; External = creates the session, issues the key via `POST /api/v1/lives/:id/stream-key`, then shows the **server URL + stream key card with a Share sheet** and an "Open live room" action. | **[DONE]** |
 | 8.3.7 | **Screen capture** — iOS ReplayKit broadcast extension + Android MediaProjection. Requires a **dev client** (not Expo Go) and a capability check; falls back to External when unavailable. | **[LATER]** |
@@ -388,7 +388,7 @@ Requirement: *"on both there and inside the app, they can go live, gamers too �
 | --- | --- | --- | --- |
 | **Camera** | Sellers, reviewers, Q&A | Existing mobile flow (front/back camera) | **[DONE]** |
 | **Screen** | Gamers, app demos | OS screen capture → RTMP (`ingestUrl` + `streamKey` from the session). iOS ReplayKit / Android MediaProjection (§8.3.7). | **[LATER]** |
-| **External** | OBS, vMix, screen-cast apps, capture cards | Studio shows the same **Server URL + Stream Key** card; any encoder pushes to `rtmp://studio.zudomart.com/live/<key>` | **[DONE]** |
+| **External** | OBS, vMix, screen-cast apps, capture cards | Studio shows the same **Server URL + Stream Key** card; any encoder pushes to `rtmp://studio.nantty.com/live/<key>` | **[DONE]** |
 
 Mock rule (§9): all three sources must be **selectable and complete end-to-end in mock mode** — picking Screen/External issues a mock stream key and flips the session to `connecting`, exactly like the API would.
 
@@ -613,7 +613,7 @@ LiveGift { id, name, description?, tier: basic|premium|legendary, priceCoins,
            comboable, isActive, sortOrder, metadata? }
 ```
 
-- 26 seeded gifts. **Quick** (basic/micro): Like, Clap, Fire, Heart, Star, Thumbs Up, Smile, Sparkle. **Fun** (basic/medium): Rose, Gift Box, Crown, Diamond, Rocket, Lightning, Fireworks, Money Rain. **Premium** (large): Golden Crown, Luxury Car, Private Jet, Treasure Chest, Diamond Shower, Golden Rain, Supernova. **Legendary** (global): Zudo Galaxy, Zudo King, Zudo Empire.
+- 26 seeded gifts. **Quick** (basic/micro): Like, Clap, Fire, Heart, Star, Thumbs Up, Smile, Sparkle. **Fun** (basic/medium): Rose, Gift Box, Crown, Diamond, Rocket, Lightning, Fireworks, Money Rain. **Premium** (large): Golden Crown, Luxury Car, Private Jet, Treasure Chest, Diamond Shower, Golden Rain, Supernova. **Legendary** (global): Nantty Galaxy, Nantty King, Nantty Empire.
 - The client maps `animationAssetKey` to a local vector preset (`liveGiftArtworkPresets.constant.ts`). An unknown key falls back to a generic gift-box preset, so adding a gift is only a config change.
 - Panel sections: Popular = `basic`, Premium = `premium`, Legendary = `legendary`.
 
@@ -769,15 +769,15 @@ Events the client expects in production (backendPlan §4.2.5): `stage.updated`, 
 
 ---
 
-## 19. Seller dashboard (dashboard.zudomart.com) **[DONE — mock]**
+## 19. Seller dashboard (dashboard.nantty.com) **[DONE — mock]**
 
-**ZudoMart App = sell from anywhere. ZudoMart Dashboard = run your business.** `apps/seller` is the seller operating system. Contract: [apps/seller/apiContract.md](../apps/seller/apiContract.md).
+**Nantty App = sell from anywhere. Nantty Dashboard = run your business.** `apps/seller` is the seller operating system. Contract: [apps/seller/apiContract.md](../apps/seller/apiContract.md).
 
 ### 19.1 Rules
 
-- **Free for every approved Zudomart seller.** Access needs only a store membership — no Gold verification, no paid plan. Suspended or revoked stores see a restricted page.
-- **No in-store POS.** No register, cash drawer, shifts, offline sales or cashier PINs. Online orders are the marketplace orders customers place in the Zudomart app.
-- **Staff are Zudomart users.** Added by username search, they accept in the app and sign in with their own app credentials. Never separate staff accounts or email invites.
+- **Free for every approved Nantty seller.** Access needs only a store membership — no Gold verification, no paid plan. Suspended or revoked stores see a restricted page.
+- **No in-store POS.** No register, cash drawer, shifts, offline sales or cashier PINs. Online orders are the marketplace orders customers place in the Nantty app.
+- **Staff are Nantty users.** Added by username search, they accept in the app and sign in with their own app credentials. Never separate staff accounts or email invites.
 - **Money** is always `{ amountMinor, currency }` from the API, formatted with `money.util`. Plan prices come from `GET /seller/subscription/plans` (Nigeria: Pro ₦5,000/mo, Business ₦15,000/mo). Pro and Business include the Gold business checkmark once the business is verified.
 - **Basic selling is never locked.** Locked features stay visible with an upgrade link; the API answers `402 PLAN_FEATURE_REQUIRED` with `requiredPlan`.
 
@@ -804,7 +804,7 @@ Owner (everything), Manager (all but billing, withdrawals, developer), Inventory
 | 5 | Customers | `/customers`, `/customers/segments` | Segments Pro | **[DONE]** |
 | 6 | Sales & Analytics | `/analytics` | Breakdowns and >30 days Pro | **[DONE]** |
 | 7 | Marketing | `/marketing`, `/marketing/discounts`, flash sales, bundles, featured | Flash sales, bundles, Mart featuring Pro | **[DONE]** |
-| 8 | Ads | `/ads` (+ link to ads.zudomart.com) | Pro | **[DONE]** |
+| 8 | Ads | `/ads` (+ link to ads.nantty.com) | Pro | **[DONE]** |
 | 9 | Payments & finance | `/wallet` (escrow, settlements, fees, refunds, withdraw, statements, accounts) | Free; accounting export Business | **[DONE]** |
 | 10 | Delivery | `/delivery`, `/delivery/settings` | Free | **[DONE]** |
 | 11 | Messages | `/messages` | Free | **[DONE]** |
@@ -825,11 +825,11 @@ Owner (everything), Manager (all but billing, withdrawals, developer), Inventory
 
 ---
 
-## 21. Social graph, profiles & ZudoPoints (mobile) **[DONE — mock]**
+## 21. Social graph, profiles & NanttyPoints (mobile) **[DONE — mock]**
 
 > **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
 
-Contracts: backendPlan §4.5 (ZudoPoints, social graph) and §4.4 (live ads). Mock mode only; `services/**` untouched.
+Contracts: backendPlan §4.5 (NanttyPoints, social graph) and §4.4 (live ads). Mock mode only; `services/**` untouched.
 
 | # | Feature | Mobile scope | Marker |
 | --- | --- | --- | --- |
@@ -837,7 +837,7 @@ Contracts: backendPlan §4.5 (ZudoPoints, social graph) and §4.4 (live ads). Mo
 | 2 | Followers / Following | Profile counts open a searchable list (`GET /users/:id/followers\|following?q=` returning `{ data, nextCursor }`); private lists return 403 for non-followers and render the private state | **[DONE]** |
 | 3 | Profile switching | Existing switcher sheet extended: Personal / Business (creator is a status on the Personal profile, not a switchable profile; owner correction 2026-10-03); "Create business profile" form with category > subcategory, several allowed, plus custom (pending review); open to any organisation | **[DONE]** |
 | 4 | AI-generated label | "AI generated" switch in the composer sends `isAiGenerated: true`; label on posts and clips | **[DONE]** |
-| 5 | ZudoPoints on live | Supporter board ranks by points (gifts 1 coin = 1 point, like, share, follow, watch time); like-points capped at 10/min in the mock while visual likes stay unlimited; viewer's own points pill; leaderboard chip/sheet and live-ended Top Supporters use points; Rankings screen (Global / Country / Category x Streamers / Supporters / Creators). No cash-out or money display | **[DONE]** |
+| 5 | NanttyPoints on live | Supporter board ranks by points (gifts 1 coin = 1 point, like, share, follow, watch time); like-points capped at 10/min in the mock while visual likes stay unlimited; viewer's own points pill; leaderboard chip/sheet and live-ended Top Supporters use points; Rankings screen (Global / Country / Category x Streamers / Supporters / Creators). No cash-out or money display | **[DONE]** |
 | 6 | Live-ad settings | "Live monetization" sheet in go-live setup: allow ads (off by default), placements, max interruptions 0-3, minimum interval, ad indicator, live-ad terms (`acceptedLiveAdTermsVersion` stored with the session), free-text own sponsorship line | **[DONE]** |
 
 ### 21.1 Notes
@@ -868,7 +868,7 @@ Contracts: backendPlan §4.6 and §4.7. Mock mode only; `services/**` untouched.
 
 ## 23. Shipping config & web privacy **[DONE: mock]**
 
-Mock mode only; `apps/mobile/**` and `services/**` untouched. Sellers ship themselves; ZudoMart validates and calculates. Shipping is priced per order group, never per item.
+Mock mode only; `apps/mobile/**` and `services/**` untouched. Sellers ship themselves; Nantty validates and calculates. Shipping is priced per order group, never per item.
 
 | # | Feature | Scope | Marker |
 | --- | --- | --- | --- |
@@ -876,7 +876,7 @@ Mock mode only; `apps/mobile/**` and `services/**` untouched. Sellers ship thems
 | 2 | Order shipping snapshot | Order detail shows destination, rule applied, and fee or free | **[DONE]** |
 | 3 | Seller API contract | `apiContract.md` "Shipping configuration": ShippingProfile / ShippingZone / ShippingRule / ShippingDestination, `/seller/shipping/*`, `/seller/orders/:id/shipping-snapshot` | **[DONE]** |
 | 4 | Marketing legal pages | `/privacy` and `/cookies` rewritten or added as DRAFTS with a "pending review by qualified legal counsel" notice and version and effective-date placeholders; `/terms` carries the same notice; footer links | **[DONE]** |
-| 5 | Cookie consent | `@zudomart/web-kit` banner, `useConsent(category)`, `ConsentGuard`; first-party cookie with policy version; signed-in choices POST to a mock consents endpoint; mounted in web, webapp, studio, seller, ads, admin | **[DONE]** |
+| 5 | Cookie consent | `@nantty/web-kit` banner, `useConsent(category)`, `ConsentGuard`; first-party cookie with policy version; signed-in choices POST to a mock consents endpoint; mounted in web, webapp, studio, seller, ads, admin | **[DONE]** |
 | 6 | Webapp Privacy & Data | `/settings` hub and `/settings/privacy` mirroring mobile; settings link restored on the profile | **[DONE]** |
 
 ### 23.1 Notes
@@ -967,7 +967,7 @@ Message `kind` gains `location`, `liveLocation`, `document` and `poll`. Entries 
 
 ## 26. Webapp tablet/desktop, dark mode & saved **[DONE (webapp, mock)]**
 
-Scope: `apps/webapp` only. Theme plumbing comes from `@zudomart/web-kit` (`ThemeProvider`, `ThemeSwitcher`, `ThemeInitScript`, `theme` cookie) and dark values from `@zudomart/design-tokens`. Files are listed in [CHANGELOG.md](./CHANGELOG.md) under apps/webapp.
+Scope: `apps/webapp` only. Theme plumbing comes from `@nantty/web-kit` (`ThemeProvider`, `ThemeSwitcher`, `ThemeInitScript`, `theme` cookie) and dark values from `@nantty/design-tokens`. Files are listed in [CHANGELOG.md](./CHANGELOG.md) under apps/webapp.
 
 ### 26.1 Layouts
 
@@ -1146,7 +1146,7 @@ Spec: owner trust/verification/admin bullets and "Decided 2026-10-03". Mobile on
 
 ### 29.1 Suspended accounts
 
-- `account.status` is `active | suspended | deactivated` on `UserSummary`. Mock suspended users: `u_16`, `u_22`. Log in with an identifier containing `suspended` (for example `suspended.zudomart@gmail.com`) to be the suspended user.
+- `account.status` is `active | suspended | deactivated` on `UserSummary`. Mock suspended users: `u_16`, `u_22`. Log in with an identifier containing `suspended` (for example `suspended.nantty@gmail.com`) to be the suspended user.
 - Profile: `SuspendedProfileState` (greyed avatar, "This account is suspended", Learn more to the community guidelines link). No posts, tabs, follow or message buttons.
 - Chat: header `SuspendedBadge`, composer replaced by "You can't message this account", history stays visible (mock conversation `c_susp`).
 - Hidden from search, suggestions, connection suggestions, ranking lists and feeds; `GET /users/:id/posts` returns an empty page.
@@ -1157,7 +1157,7 @@ Spec: owner trust/verification/admin bullets and "Decided 2026-10-03". Mobile on
 
 - Cards "You may qualify for a verified checkmark" on Settings and the own-profile shortcuts, shown only when `eligible && !dismissed` and only for the active profile's colour: Personal (including creator accounts) gets Blue, Business and Brand get Gold, Government gets Black (never suggested). Blue never shows on a business and Gold never on a person. Badges render from the profile (`verificationForProfileKind`, `VerificationBadge` rejects a colour that doesn't match its profile type), never from the account.
 - Blue (Personal, incl. creator accounts): Apply opens `VerificationApply` (ID check, then a mock in-app purchase sheet, no real StoreKit). Not now dismisses.
-- Gold (Business/Brand): not sold in the app. The card, the Verification screen and "Verify brand" show "Manage on the web", which opens dashboard.zudomart.com billing in an in-app browser. No prices, price links or discounts anywhere in the app. Status reads "Gold after business verification" until KYB is approved.
+- Gold (Business/Brand): not sold in the app. The card, the Verification screen and "Verify brand" show "Manage on the web", which opens dashboard.nantty.com billing in an in-app browser. No prices, price links or discounts anywhere in the app. Status reads "Gold after business verification" until KYB is approved.
 - Black (Government profiles only): "Apply for government verification" opens the web application flow.
 - Lapsed Black keeps its badge for everyone during the 14-day grace period (`graceEndsAt`); staff also see "Renewal due". Blue and Gold drop at period end.
 - Blue rules: ID verified, account at least 90 days, at least 1,000 real followers, no violations in 90 days, no active checkmark yet. Gold rules: business verification passed, active store or brand, success rate at least 90%.
@@ -1174,7 +1174,7 @@ Spec: owner trust/verification/admin bullets and "Decided 2026-10-03". Mobile on
 
 - Help centre (`HelpCenter`, `HelpArticle`) with search; public for guests, contacting support is gated with `requireAuthThen`.
 - Tickets: category, optional linked order or payment, screenshots. "Get help" on Order detail and Payment passes the link. List shows status and the link.
-- Ticket thread is a live chat (3 s poll, typing indicator) with an admin agent labelled "Zudomart Support". A notice states it is not end-to-end encrypted and is recorded for quality and safety.
+- Ticket thread is a live chat (3 s poll, typing indicator) with an admin agent labelled "Nantty Support". A notice states it is not end-to-end encrypted and is recorded for quality and safety.
 
 ### 29.6 Marketing emails and usernames
 
@@ -1319,7 +1319,7 @@ Spec: owner rules. Superadmins create Legal admins; Legal admins manage the priv
 
 ### 32.4 Open items
 
-- ~~Render the draft preview with the `policyUpdated` template~~ Done: the admin preview uses `@zudomart/email-templates` (§34). Sending with it is part of the notifications worker.
+- ~~Render the draft preview with the `policyUpdated` template~~ Done: the admin preview uses `@nantty/email-templates` (§34). Sending with it is part of the notifications worker.
 - Real SES, SQS and SNS; real acceptance records; the web site still reads build-time mock data.
 - Webapp/mobile banner dismissal is per device (webapp localStorage, mobile in memory). Not tested in a browser or on a device.
 
@@ -1331,7 +1331,7 @@ Spec: owner rules. Superadmins create Legal admins; Legal admins manage the priv
 > **Referral and purchase loyalty/cashback removed (owner, 2026-10-03).** Reason: "we don't know how to pay for them".
 
 - **Removed:** referral codes, links, invite-and-earn screens, referral attribution at signup and referral rewards; platform-funded loyalty points and cashback on orders and escrow release; loyalty tiers and redemption at checkout; the admin referral/loyalty/cashback revenue rules; the seller "Loyalty" settings page and per-customer point adjustments.
-- **Kept:** ZudoPoints engagement and gift points on lives (leaderboards, rankings, streak points). They are non-monetary.
+- **Kept:** NanttyPoints engagement and gift points on lives (leaderboards, rankings, streak points). They are non-monetary.
 - **Seller-funded store rewards (owner, 2026-10-03).** A store can turn on "Store rewards" under Marketing: X% of order value back as store credit, with minimum order, max per order, expiry and an on/off switch. Credit is redeemable only at that store as a discount on a future order, never cash, never withdrawable. Earned after escrow release; reversed on refund. The seller sees outstanding liability. Mobile and webapp show "Store credit −₦X" in the checkout summary, a "Store rewards" list per store (balance, expiry) and "Earn X% back at this store" on product and store pages. Mock contracts: `apps/seller/apiContract.md` (Store rewards), `GET /api/v1/store-rewards/me` (buyer apps). Backend: per-store credit ledger in go-commerce (see `backendPlan.md`, Store rewards).
 
 ---
@@ -1340,16 +1340,16 @@ Spec: owner rules. Superadmins create Legal admins; Legal admins manage the priv
 
 Spec: owner (3 Oct 2026). Every email is branded, carries the company legal name and address, support contacts and app links, and covers every flow. Provider: AWS SES, sent by the TypeScript notifications worker.
 
-### 34.1 Package `@zudomart/email-templates` (`packages/emailTemplates`)
+### 34.1 Package `@nantty/email-templates` (`packages/emailTemplates`)
 
 - React Email (`react-email` 6.11, the successor of the now-deprecated `@react-email/components`) plus `@react-email/render` 2.1. Each template is a typed `defineEmailTemplate<Props>()` definition with a React component, a subject builder, a preheader, a plain-text version built from the same content blocks, catalogue metadata (category, kind, audience, trigger event, consent rule) and sample props.
 - `renderEmail(templateKey, props, { locale, theme, timeZone, brand, links })` → `{ subject, html, text }`. `theme` is `auto` (light + `prefers-color-scheme` dark overrides, also `[data-ogsc]` for Outlook.com), `light` or `dark`. Defaults: `en-NG`, `Africa/Lagos`. The worker passes the per-recipient `unsubscribeUrl` (signed token) for marketing emails.
 - Money is always `{ amountMinor, currency }`, formatted with `Intl` using the currency's minor digits. Nothing hardcodes ₦.
-- Layout: 600 px table layout, inline styles, no JS, alt text on every image, colours from `@zudomart/design-tokens` (contrast checked for text and buttons; danger buttons use the AA-safe red in both themes), Inter with system fallbacks. Header: wordmark (CDN image from `ZUDOMART_EMAIL_LOGO_URL`, otherwise an HTML "z" tile + "zudomart" wordmark that renders everywhere), an optional mono reference (order, case, ticket number). Brand strip (blue with the yellow accent), hero with a tone eyebrow, content blocks, bulletproof button (table cell with `bgcolor` + React Email's MSO padding). Signature block: a progress "track" showing where the order or money is (Ordered → Paid → Shipped → Delivered → Complete; In escrow → Locked 24h → Available → Payout sent; dispute stages).
-- Footer: app store links (badge images when `ZUDOMART_EMAIL_APP_STORE_BADGE_URL` / `..._PLAY_STORE_BADGE_URL` are set), social links, a "why you got this email" line, **Unsubscribe + Manage email preferences only on marketing emails**, Manage notifications on transactional, security and legal emails, Help Centre, support email (support@zudomart.com; see docs/emailAddresses.md), official App Store and Google Play badges, "we never ask for your password or code", © legal name and address.
-- **OWNER TO FILL:** `ZUDOMART_COMPANY_LEGAL_NAME` and `ZUDOMART_COMPANY_ADDRESS` (placeholders render literally until set; `isBrandConfigComplete()` lets the worker refuse to send in production), the App Store id, social handles, and a hosted PNG wordmark + store badges on the CDN. `readEmailBrandFromEnvironment(process.env)` reads them.
+- Layout: 600 px table layout, inline styles, no JS, alt text on every image, colours from `@nantty/design-tokens` (contrast checked for text and buttons; danger buttons use the AA-safe red in both themes), Inter with system fallbacks. Header: wordmark (CDN image from `NANTTY_EMAIL_LOGO_URL`, otherwise an HTML "z" tile + "nantty" wordmark that renders everywhere), an optional mono reference (order, case, ticket number). Brand strip (blue with the yellow accent), hero with a tone eyebrow, content blocks, bulletproof button (table cell with `bgcolor` + React Email's MSO padding). Signature block: a progress "track" showing where the order or money is (Ordered → Paid → Shipped → Delivered → Complete; In escrow → Locked 24h → Available → Payout sent; dispute stages).
+- Footer: app store links (badge images when `NANTTY_EMAIL_APP_STORE_BADGE_URL` / `..._PLAY_STORE_BADGE_URL` are set), social links, a "why you got this email" line, **Unsubscribe + Manage email preferences only on marketing emails**, Manage notifications on transactional, security and legal emails, Help Centre, support email (support@nantty.com; see docs/emailAddresses.md), official App Store and Google Play badges, "we never ask for your password or code", © legal name and address.
+- **OWNER TO FILL:** `NANTTY_COMPANY_LEGAL_NAME` and `NANTTY_COMPANY_ADDRESS` (placeholders render literally until set; `isBrandConfigComplete()` lets the worker refuse to send in production), the App Store id, social handles, and a hosted PNG wordmark + store badges on the CDN. `readEmailBrandFromEnvironment(process.env)` reads them.
 - Marketing products are typed `VerifiedProduct` (`sellerVerified: true`) so only verified sellers and brands can appear.
-- `pnpm --filter @zudomart/email-templates preview` renders every template (light, dark, text) into `packages/emailTemplates/previews/` (gitignored) with an `index.html`. `pnpm --filter @zudomart/email-templates test` runs the vitest suite (render in light and dark, footer/legal content present, unsubscribe only on marketing, money formatting, 4 plain-text snapshots).
+- `pnpm --filter @nantty/email-templates preview` renders every template (light, dark, text) into `packages/emailTemplates/previews/` (gitignored) with an `index.html`. `pnpm --filter @nantty/email-templates test` runs the vitest suite (render in light and dark, footer/legal content present, unsubscribe only on marketing, money formatting, 4 plain-text snapshots).
 
 ### 34.2 Admin
 
@@ -1525,7 +1525,7 @@ Owner complaint: the Terms/Privacy update notice was not designed, and modals lo
 
 ## 37. Chat reporting **[DONE (mobile + webapp + admin, mock)]**
 
-Owner requirement: in chats a user can report a user, report and block, report a conversation or message, or report a group, and it reaches an admin for review. Chats are end-to-end encrypted (§25), so Zudomart cannot read them: the reporter's device attaches the messages it chooses.
+Owner requirement: in chats a user can report a user, report and block, report a conversation or message, or report a group, and it reaches an admin for review. Chats are end-to-end encrypted (§25), so Nantty cannot read them: the reporter's device attaches the messages it chooses.
 
 ### 37.1 Entry points
 
@@ -1541,7 +1541,7 @@ Guests cannot report: every entry goes through `requireAuthThen`.
 ### 37.2 Report flow
 
 - Reasons: child safety (urgent, priority path), self-harm (shows support resources), violence or threats, harassment or bullying, hate, sexual content, spam or scam, fraud or payment scam, impersonation, selling prohibited items, other (text required). Optional details, 500 characters.
-- Conversation, message and group reports add an evidence step: last N messages (10, 20 default, 50) or pick messages (up to 100 newest). Consent notice: "These messages will be sent to Zudomart for review. The other person won't be told who reported them."
+- Conversation, message and group reports add an evidence step: last N messages (10, 20 default, 50) or pick messages (up to 100 newest). Consent notice: "These messages will be sent to Nantty for review. The other person won't be told who reported them."
 - The device sends per message: `messageId`, `senderId`, `senderName`, `sentAt`, `text`, `attachments[]` (type, mime, file name, size, duration; file bytes are never sent), plus `evidenceHash` (SHA-256 of the JSON evidence array) for integrity.
 - Report and block is one request (`blockReportedUser: true`).
 - Confirmation "Thanks, we'll review this" with Block, Mute (mobile) and Restrict buttons and a link to "My reports" (mobile) / Settings, Your reports (webapp).
@@ -1578,9 +1578,9 @@ One "Get paid" flow for sellers and creators. Users never see the payment provid
 1. Who you are: legal name, DOB, address, BVN or NIN (11 digits). Sellers choose "registered business".
 2. Business (registered sellers only): CAC number, business type.
 3. Bank: bank list, 10-digit account number, live name resolution. The resolved name must match the legal name (order and case ignored).
-4. Verify your ID: only active when `accountStatus = documentsRequired`. A fresh link is requested on every tap and never cached. It opens in an in-app browser (mobile `openAuthSessionAsync` with `zudomart://payouts/verification-return`; web popup with a return page that signals the opener). Return is never trusted: "Checking your documents…", short status poll, then `underReview` (shows `reviewEstimate` from the API), `verified`, or `actionNeeded` with the exact reasons and "Fix it". 503 on the link: "Try again in a moment". Closed halfway: "Verify your ID: not finished".
+4. Verify your ID: only active when `accountStatus = documentsRequired`. A fresh link is requested on every tap and never cached. It opens in an in-app browser (mobile `openAuthSessionAsync` with `nantty://payouts/verification-return`; web popup with a return page that signals the opener). Return is never trusted: "Checking your documents…", short status poll, then `underReview` (shows `reviewEstimate` from the API), `verified`, or `actionNeeded` with the exact reasons and "Fix it". 503 on the link: "Try again in a moment". Closed halfway: "Verify your ID: not finished".
 
-Steps save to Zudomart immediately and are sent to Flutterwave later. Per-step sync badge: Saved, Sending, Done, Needs attention. Resume uses `currentStep` from the server.
+Steps save to Nantty immediately and are sent to Flutterwave later. Per-step sync badge: Saved, Sending, Done, Needs attention. Resume uses `currentStep` from the server.
 
 ### 38.2 Contract for go-money (`/api/v1/payments/...`)
 
@@ -1692,7 +1692,7 @@ Post shown full at the top with the action row and counts, a full timestamp and 
 ### 42.5 Sensitive content and the age gate
 
 - Labels: `nudity` (adult content only where policy allows), `graphic_violence`, `dangerous_acts`, `self_harm`. Sources stored apart: poster (composer "Mark as sensitive" or `PATCH /posts/:postId/sensitivity`), moderation (`labels` on go-trust `content.visibilityChanged`) and Python advisory scores (`content.sensitivityAdvised { targetType, targetId, scores[{label, score}] }`, only scores >= 0.8). Effective `sensitiveLabels` = poster ∪ moderation ∪ advisory; once moderation reviews, its labels replace the advisory ones (Python never decides alone and can only add warnings). Changes emit `post.updated`; sensitive posts can't be promoted.
-- Age bracket: go-auth adds an `age` claim (`adult | minor | unknown`, computed from the birthday at token issue, the date never leaves goIdentity); the gateway forwards only the verified claim as `x-zudomart-age-bracket` (client copies are dropped). Guests and accounts without a birthday are `unknown`.
+- Age bracket: go-auth adds an `age` claim (`adult | minor | unknown`, computed from the birthday at token issue, the date never leaves goIdentity); the gateway forwards only the verified claim as `x-nantty-age-bracket` (client copies are dropped). Guests and accounts without a birthday are `unknown`.
 - Under-18 and unknown viewers never receive `nudity` or `dangerous_acts`: filtered in feeds before ranking, profiles, threads, quotes, saves, sound pages and embedded originals (`buildPostViews` defaults to the strictest policy), direct links answer `404 POST_NOT_AVAILABLE`, and search drops `restricted_for_minors` documents unless the viewer is a verified adult. Under-18 authors can't post those categories (`403 SENSITIVE_LABEL_NOT_ALLOWED`).
 - Adults see a blurred "Sensitive content: This post may contain …" interstitial with a View button; the choice is remembered per post on the device. `GET/PUT /api/v1/me/content-preferences { showSensitiveWithoutWarning }` (adults only; others get the explanation) backs Settings → Privacy → Content preferences on both apps.
 
@@ -1710,18 +1710,18 @@ Post shown full at the top with the action row and counts, a full timestamp and 
 ### 41.1 Link previews in feed posts
 
 - **Server unfurl** (`services/typescript/social`, module `linkPreviews`): when a text post has no media, `createPost` unfurls the first external URL (waits at most 1.5 s, then finishes in the background) and stores `posts.linkPreview` (`{ url, domain, title, description, siteName, imageUrl, imageMediaId }`). Older posts: `POST /api/v1/posts/:postId/link-preview` (auth) fills it on demand. Chat senders: `GET /api/v1/link-previews/resolve?url=` (auth). Results are cached per normalised URL (tracking params stripped, params sorted) in `link_preview_cache` (24 h ready, 1 h failed); concurrent unfurls of one URL are deduplicated.
-- **SSRF guard** (`utils/ssrfGuard.util.ts`, `integrations/safeHttpFetcher.integration.ts`): http/https only, ports 80/443, no credentials, internal hostnames (`localhost`, `*.local`, `*.internal`, metadata names, bare or numeric hosts) refused; every DNS answer must be public (IPv4 private, CGNAT, loopback, link-local/metadata, multicast, reserved; IPv6 loopback, ULA incl. `fd00:ec2::254`, link-local, site-local, multicast, documentation, IPv4-mapped/NAT64/6to4 checked against the embedded IPv4); the socket is pinned to the validated address (no DNS rebinding); redirects are manual (max 3) and every hop is re-validated; 5 s budget, HTML capped at 512 KB, images 5 MB (jpeg/png/webp/avif only), oEmbed JSON 64 KB; user agent `ZudomartBot/1.0`. Parser reads Open Graph, Twitter Card, `<title>`/description and oEmbed discovery.
+- **SSRF guard** (`utils/ssrfGuard.util.ts`, `integrations/safeHttpFetcher.integration.ts`): http/https only, ports 80/443, no credentials, internal hostnames (`localhost`, `*.local`, `*.internal`, metadata names, bare or numeric hosts) refused; every DNS answer must be public (IPv4 private, CGNAT, loopback, link-local/metadata, multicast, reserved; IPv6 loopback, ULA incl. `fd00:ec2::254`, link-local, site-local, multicast, documentation, IPv4-mapped/NAT64/6to4 checked against the embedded IPv4); the socket is pinned to the validated address (no DNS rebinding); redirects are manual (max 3) and every hop is re-validated; 5 s budget, HTML capped at 512 KB, images 5 MB (jpeg/png/webp/avif only), oEmbed JSON 64 KB; user agent `NanttyBot/1.0`. Parser reads Open Graph, Twitter Card, `<title>`/description and oEmbed discovery.
 - **No hotlinking**: the image is downloaded through the guard and uploaded to ts-media via a `post`-purpose internal intent, presigned PUT and the new `POST /internal/v1/media/:mediaId/complete` (owner-checked), so it is scanned, moderated and served from the CDN; without media the card has no image. Owner account: `LINK_PREVIEW_MEDIA_OWNER_ID`.
-- **Internal links** (`app.zudomart.com`, `zudomart.com`) are never unfurled: clients render the existing rich cards (mobile `SharedContentCardView` when signed in, a light tappable card for guests; webapp product/store cards from public reads).
+- **Internal links** (`app.nantty.com`, `nantty.com`) are never unfurled: clients render the existing rich cards (mobile `SharedContentCardView` when signed in, a light tappable card for guests; webapp product/store cards from public reads).
 - **Frontends**: card under the text (image 1.91:1, site/domain, title, two-line description), themed for light and dark. Mobile opens external links in the in-app browser (`expo-web-browser`, page sheet); shortened or suspicious domains get the chat warning sheet first. Webapp opens a new tab (`noopener noreferrer nofollow ugc`) with a confirmation dialog for risky domains. Mocks: post_31 (external) and post_32 (internal product) in both apps, `POST /posts/:id/link-preview` mock.
 - Tests: `social/tests/linkPreviews/*` (SSRF guard incl. IPv6, rebinding, redirect hops; parser; cache; no-hotlink), `media/tests/pipeline/internalLinkPreviewIngest.test.ts`.
 
-### 41.2 Profile share links `https://app.zudomart.com/<username>`
+### 41.2 Profile share links `https://app.nantty.com/<username>`
 
-- Every share/copy link uses the web app domain and no `@`: mobile `config/webAppLinks.config.ts` (profile, product `/p/<slug>-<id>`, store, post, clip, live) replaces the old `zudomart.com/@…`, `/products/…`, `/posts/…`, `/clips/…`, `/lives/…` links; webapp copy-link uses `NEXT_PUBLIC_SITE_URL`. No QR code exists in either app yet (nothing to update).
+- Every share/copy link uses the web app domain and no `@`: mobile `config/webAppLinks.config.ts` (profile, product `/p/<slug>-<id>`, store, post, clip, live) replaces the old `nantty.com/@…`, `/products/…`, `/posts/…`, `/clips/…`, `/lives/…` links; webapp copy-link uses `NEXT_PUBLIC_SITE_URL`. No QR code exists in either app yet (nothing to update).
 - Webapp: SSR `/(app)/[username]` with metadata (title, description, canonical, OG `profile`, Twitter) and `ProfilePage` + breadcrumb JSON-LD; `/u/<username>` and `/user/<id>` answer 308 to it from `proxy.ts`. Profile links in the feed, threads, mentions, explore and the right rail point straight at `/<username>`.
 - Reserved names: `config/reservedRoutes.config.ts` lists every top-level route; goIdentity `webRouteTerms` (exact, confusable-skeleton match) now covers all of them plus `_next`, `sitemap(s)`, `robots`, legal pages, `bff`, `api`, …. `src/contracts/reservedRoutes.test.ts` fails if a new webapp route is missing from either list.
-- Mobile deep links: `navigation/linking.config.ts` (prefixes `zudomart://`, the web app URL, `zudomart.com`): `/`, `/clips`, `/p/<slug>-<id>` (+`/product/:id`), `/store/:id`, `/post/:id`, `/live/:id`, `/user/:id`, `/:username` → new `UserProfileByUsername` resolver screen, plus explore, cart, orders, saved, settings, `create/:mode`, creator. Chat link parsing understands `/username` and `/p/` slugs (it used to open `/u/<name>` as a user id).
+- Mobile deep links: `navigation/linking.config.ts` (prefixes `nantty://`, the web app URL, `nantty.com`): `/`, `/clips`, `/p/<slug>-<id>` (+`/product/:id`), `/store/:id`, `/post/:id`, `/live/:id`, `/user/:id`, `/:username` → new `UserProfileByUsername` resolver screen, plus explore, cart, orders, saved, settings, `create/:mode`, creator. Chat link parsing understands `/username` and `/p/` slugs (it used to open `/u/<name>` as a user id).
 
 ### 41.3 Guests are view-only
 
@@ -1746,7 +1746,7 @@ Post shown full at the top with the action row and counts, a full timestamp and 
 
 - Webapp product page: "Add to cart" navigated to the cart and "Buy now" did not; now Add stays with a confirmation and Buy goes to checkout. Breadcrumb includes Mart.
 - Webapp: missing store route, clip like/comment were inert, `/creator` dead end, profile share path was `/user/<id>`.
-- Mobile: share links pointed at non-existent `zudomart.com` paths; no deep link handling at all; `/u/<name>` chat links opened a user id; live-ended "More options" did nothing (now shares the live).
+- Mobile: share links pointed at non-existent `nantty.com` paths; no deep link handling at all; `/u/<name>` chat links opened a user id; live-ended "More options" did nothing (now shares the live).
 
 ### 41.7 Open items
 
@@ -1770,7 +1770,7 @@ Owner brief: people promote ads with CTA buttons (download an app, several pictu
 - **app_install**: `app { appName, iconMediaId, rating? (1-5), iosStoreUrl, androidStoreUrl, webFallbackUrl, iosDeepLink, androidDeepLink }`, destination type `app_store`. App Store links must be `https://apps.apple.com|itunes.apple.com/.../app/...`, Google Play `https://play.google.com/store/apps/details?id=...`; deep links are custom schemes only (no http, javascript, data, file, intent). At least one store link; one store link needs a web fallback.
 - **promoted_post**: source `post` or `clip`, destination must be `post` with the same id; the click opens the post.
 - CTAs: `shop_now learn_more install download sign_up book_now contact_us watch_more` (plus the older `visit_store send_message follow order_now`).
-- Destinations: `url` (https only, no credentials, optional `utm {source,medium,campaign,content,term}`; missing source/medium default to `zudomart`/`paid`, existing query params are never overwritten), internal `post|product|store|profile|messages`, and `app_store`.
+- Destinations: `url` (https only, no credentials, optional `utm {source,medium,campaign,content,term}`; missing source/medium default to `nantty`/`paid`, existing query params are never overwritten), internal `post|product|store|profile|messages`, and `app_store`.
 
 ### 43.2 Review
 
@@ -1830,9 +1830,9 @@ Owner rules (4 Oct): the feed cannot be manipulated and favours nobody in secret
 
 Open: run the k6 feed scenario with 2 workers; producers should start sending `context.actorClusterKey` (hashed /24 + device) and `context.actorTrust` with events; the "Why am I seeing this?" item in the main feed post menu waits for the feed UI work in progress (data is already on `PostView.ranking`).
 
-## 47. Birthday and Zudoversary celebrations **[DONE (go-identity users, notifications, email templates, mobile + webapp, mock)]**
+## 47. Birthday and Nanttyversary celebrations **[DONE (go-identity users, notifications, email templates, mobile + webapp, mock)]**
 
-Owner rules: X-style birthday balloons, and a yearly "Zudoversary" on the join date. No birthday email. Anniversary email respects the "Milestones" notification preference. The date of birth is never exposed.
+Owner rules: X-style birthday balloons, and a yearly "Nanttyversary" on the join date. No birthday email. Anniversary email respects the "Milestones" notification preference. The date of birth is never exposed.
 
 ### 47.1 Backend (go-identity, `users` module `celebrations`)
 
@@ -1845,14 +1845,14 @@ Owner rules: X-style birthday balloons, and a yearly "Zudoversary" on the join d
 
 ### 47.2 Notifications and email
 
-- New preference category `milestones` (push and email on by default). `milestones.mapping.ts` maps the event to an in-app item and the `zudoversary` email.
-- New template `zudoversary` in `packages/emailTemplates` (`milestones.template.tsx`, category `milestones`, kind `transactional`, consent `transactionalOptOut`): hero, thank-you copy, optional "Your time on Zudomart" stats card (only non-zero figures), open-app button.
+- New preference category `milestones` (push and email on by default). `milestones.mapping.ts` maps the event to an in-app item and the `nanttyversary` email.
+- New template `nanttyversary` in `packages/emailTemplates` (`milestones.template.tsx`, category `milestones`, kind `transactional`, consent `transactionalOptOut`): hero, thank-you copy, optional "Your time on Nantty" stats card (only non-zero figures), open-app button.
 
 ### 47.3 Mobile and webapp
 
-- Message copy: "Happy 25th birthday, Ada! Wishing you an amazing year ahead from all of us at Zudomart." and "Happy 2nd Zudoversary! Thanks for being part of Zudomart for 2 years." plus a stats card.
+- Message copy: "Happy 25th birthday, Ada! Wishing you an amazing year ahead from all of us at Nantty." and "Happy 2nd Nanttyversary! Thanks for being part of Nantty for 2 years." plus a stats card.
 - Once per day per surface: local memory (AsyncStorage on mobile, localStorage on web, keyed by account, kind, surface, local date) plus the server `shown` flags. Birthday wins over the anniversary on a surface.
-- Surfaces: first open of the app (overlay, `CelebrationHost`) and first view of the own profile (balloons over the header plus a message note). Visitors see balloons over the header without a message or age, and a "Zudoversary" pill.
+- Surfaces: first open of the app (overlay, `CelebrationHost`) and first view of the own profile (balloons over the header plus a message note). Visitors see balloons over the header without a message or age, and a "Nanttyversary" pill.
 - Vector balloons only (SVG, theme tokens, no emojis). Mobile uses Reanimated; web uses CSS keyframes. Balloons are buttons ("Pop balloon") and pop on tap. Reduced motion shows a static confetti illustration instead.
 - Accessibility: the message is announced (`announceForAccessibility` on mobile, a polite live region on web); the dialog is an alert dialog.
 - Settings: "Birthday balloons" switch (Privacy & Data on mobile, Settings > Privacy on web). Clients send the device timezone once when none is set.
@@ -1867,15 +1867,15 @@ Owner rules: X-style birthday balloons, and a yearly "Zudoversary" on the join d
 
 ## 44. Help Centre **[DONE (ts-support, notifications, gateway, intelligence, admin + mobile + webapp, mock UI)]**
 
-Owner requirements (4 Oct): a Help Centre that explains every part of Zudomart; tickets with email on every staff reply; admins answer tickets; a deep FAQ that grows by itself from resolved questions, with admin create, edit and delete.
+Owner requirements (4 Oct): a Help Centre that explains every part of Nantty; tickets with email on every staff reply; admins answer tickets; a deep FAQ that grows by itself from resolved questions, with admin create, edit and delete.
 
 ### 44.1 Backend: `services/typescript/support` (port 8111, Prisma schema `support`)
 
 - **Help content**: categories → topics (Markdown, slug unique per locale, tags, related topics, version history, helpful votes one per account). Search uses the Prisma API only (keyword `contains` on a normalised `search_text` column + tags, ranked in TypeScript with trigram and keyword scores; no raw SQL). 82 starter articles live in `content/help/<category>/<slug>.md` and are seeded at start-up; staff edits are never overwritten and untouched seed topics refresh when the file changes. Merged topics redirect to their target.
 - **Tickets**: categories (order, payment, account, seller, verification, creator, live, ads, safety, other), linked order/payment/live/report/dispute, attachments restricted to media-service URLs, statuses `open | awaiting_user | awaiting_support | resolved | closed`, SLA due dates by priority, internal notes, assignment (self, or others with `support:assign`), satisfaction rating 1-5, unread counts, reopen within 7 days, auto-close 7 days after resolution, live chat as a ticket channel (`chat`, recorded, not E2EE). Account deletion anonymises the requester's tickets (consumes `account.deletionExecuted`).
-- **Events** (outbox → `zudomart.events`): `ticket.created`, `ticket.replied` (agent replies carry the message), `ticket.resolved`. Notifications maps them to `supportTicketReceived`, `supportAgentReplied` (email + push + in-app, sent immediately) and `supportTicketResolved`.
+- **Events** (outbox → `nantty.events`): `ticket.created`, `ticket.replied` (agent replies carry the message), `ticket.resolved`. Notifications maps them to `supportTicketReceived`, `supportAgentReplied` (email + push + in-app, sent immediately) and `supportTicketResolved`.
 - **Auto-FAQ** (job every 30 s on tickets queued at resolution): customer question + staff answer → PII scrubber (emails incl. obfuscated, phones in Nigerian and international formats, cards with Luhn, bank/BVN/NIN digits, order/ticket/payment references, UUIDs, amounts in every supported currency, addresses and postcodes, IPs, dates, @handles, links, names from greetings, sign-offs, introductions, honorifics, participants and capitalised pairs) → residual check → intelligence `POST /v1/help/answer-drafts` (HMAC, deterministic template; never called when residue remains) with a TypeScript template fallback → re-scrub → dedupe (title trigram + keyword Jaccard against published topics and their related-question headings): ≥ 0.55 appends a "Related question" section to that topic, ≥ 0.8 is skipped as already answered, otherwise a new topic is created with related links. Topics are published automatically and marked "From a resolved question" unless the admin setting `autoFaqRequiresReview` is on (default off) or residue was found. Safety tickets are never used. Every outcome is logged for the admin list.
-- **Access**: guests read published help (`GET /api/v1/help/*`); voting and every ticket route need an account; admin routes verify the staff JWT (`zudomart-admin` audience) and permissions `support:tickets`, `support:assign`, `support:chat`, new `support:helpContent`; `/internal/support/*` needs the internal token. Gateway, RabbitMQ topology (`support-domain-events`, ticket events on `notifications-domain-events`), Dockerfile, `pnpm backend:dev:support`, CI matrix and Terraform entry added.
+- **Access**: guests read published help (`GET /api/v1/help/*`); voting and every ticket route need an account; admin routes verify the staff JWT (`nantty-admin` audience) and permissions `support:tickets`, `support:assign`, `support:chat`, new `support:helpContent`; `/internal/support/*` needs the internal token. Gateway, RabbitMQ topology (`support-domain-events`, ticket events on `notifications-domain-events`), Dockerfile, `pnpm backend:dev:support`, CI matrix and Terraform entry added.
 
 ### 44.2 Frontends
 
@@ -1904,7 +1904,7 @@ Owner rules (4 Oct): probing other people's endpoints or data flags the account 
 | Intelligence | `bot_detection` module: `POST /v1/trust/bot-score` (cadence, headless signals, attestation verdict, account age, follow/like/comment velocity, duplicate comments, engagement manipulation share, shared device/IP clusters), advisory only, publishes high scores once per 6 h |
 | Consistent 404s | Orders, seller orders, conversations, messages, disputes and escrow return the same 404 for "not yours" and "missing" (tests in orders and social); `getMyOrder` no longer panics on an empty view |
 | Admin | Trust & safety > Security cases: filters (status, trigger, severity), evidence timeline, linked devices and network prefixes, challenge history, bot signals, actions shown only with the matching permission; `security:cases` permission (Trust & Safety template) |
-| Web and mobile | Webapp: Turnstile sheet on any 428 and one retry; session-free `/security-check` page for the app. Mobile: in-app browser sheet to `/security-check`, deep-link return `zudomart://security-check#token=…`, shared in-flight check, retry |
+| Web and mobile | Webapp: Turnstile sheet on any 428 and one retry; session-free `/security-check` page for the app. Mobile: in-app browser sheet to `/security-check`, deep-link return `nantty://security-check#token=…`, shared in-flight check, retry |
 | Contracts and infra | JSON schemas and AsyncAPI entries for `security.accessViolationDetected`, `security.accountAutoSuspended`, `security.caseDecided`, `security.botScoreComputed`; RabbitMQ topology and definitions; Terraform secrets `TRUST_INTERNAL_TOKEN`, `TURNSTILE_SECRET_KEY` (gateway) and queue env |
 | Privacy and help | Privacy policy draft ("Security", Cloudflare in "Who we share data with"); help article `services/typescript/support/content/help/account-and-login/security-checks.md` for the help agent to import |
 
@@ -1914,8 +1914,8 @@ Never commit real keys. Defaults everywhere are Cloudflare's public **test** key
 
 | Key | Local (gitignored files) | AWS |
 | --- | --- | --- |
-| `TURNSTILE_SECRET_KEY` (server only) | `services/typescript/gateway/.env` | Secrets Manager `zudomart/<environment>/gateway/app`, JSON key `TURNSTILE_SECRET_KEY` (created by Terraform with `CHANGE_ME`; paste the real value in the console or `aws secretsmanager put-secret-value`) |
-| `TRUST_INTERNAL_TOKEN` (gateway → go-trust, same value as go-trust's `MODERATION_INTERNAL_API_TOKEN`) | `services/typescript/gateway/.env` | `zudomart/<environment>/gateway/app` key `TRUST_INTERNAL_TOKEN`, and `zudomart/<environment>/go-trust/app` key `MODERATION_INTERNAL_API_TOKEN` |
+| `TURNSTILE_SECRET_KEY` (server only) | `services/typescript/gateway/.env` | Secrets Manager `nantty/<environment>/gateway/app`, JSON key `TURNSTILE_SECRET_KEY` (created by Terraform with `CHANGE_ME`; paste the real value in the console or `aws secretsmanager put-secret-value`) |
+| `TRUST_INTERNAL_TOKEN` (gateway → go-trust, same value as go-trust's `MODERATION_INTERNAL_API_TOKEN`) | `services/typescript/gateway/.env` | `nantty/<environment>/gateway/app` key `TRUST_INTERNAL_TOKEN`, and `nantty/<environment>/go-trust/app` key `MODERATION_INTERNAL_API_TOKEN` |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (public) | `apps/webapp/.env.local` | build-time variable of the webapp deployment (not a secret) |
 | `EXPO_PUBLIC_TURNSTILE_SITE_KEY` (public) | `apps/mobile/.env` | EAS environment variable; reserved for a native WebView, the app currently uses the webapp page |
 
@@ -2038,9 +2038,9 @@ Optional and never automatic: a text place search (`GET /api/v1/places/search?q=
 ### 51.7 Links in posts, comments, bios and messages
 
 `MentionText` (mobile and webapp) now renders mentions and URLs together. Every `https://` and `www.` URL is tappable and coloured whether or not a preview card exists: mobile `colors.link` (light #2043F5, dark #8FA1FA, at least 4.5:1 on surfaces in both themes); webapp `--color-brand`. Links in your own chat bubbles are underlined in the bubble's text colour.
-- Mobile: Zudomart links (`zudomart.com`, `app.zudomart.com`, `zudomart.app`) open in the app. Other links open in the in-app browser (`expo-web-browser`, full screen, themed toolbar, share menu). It has the system "Open in Safari" or "Open in Chrome" control. Shortened and suspicious links show the warning dialog first. Preview cards (feed and chat) use the same path, so chat previews now open in the app instead of going straight to the external browser.
+- Mobile: Nantty links (`nantty.com`, `app.nantty.com`, `nantty.app`) open in the app. Other links open in the in-app browser (`expo-web-browser`, full screen, themed toolbar, share menu). It has the system "Open in Safari" or "Open in Chrome" control. Shortened and suspicious links show the warning dialog first. Preview cards (feed and chat) use the same path, so chat previews now open in the app instead of going straight to the external browser.
 - Other mobile web links now use the same in-app browser: legal, guidelines, creator terms, seller dashboard and Ads Manager pages open directly (`openTrustedWebPage`). Brand websites and escrow tracking links show the risk check first (`openUserSuppliedWebLink`). `mailto:`, maps, ad deep links, document and export downloads stay on `Linking`.
-- Webapp: Zudomart links navigate in the same tab. External links open in a new tab with `rel="noopener noreferrer nofollow ugc"`, and risky ones show the confirm dialog first.
+- Webapp: Nantty links navigate in the same tab. External links open in a new tab with `rel="noopener noreferrer nofollow ugc"`, and risky ones show the confirm dialog first.
 
 ### 51.8 Open items
 
@@ -2080,7 +2080,7 @@ Owner rules, 2026-10-04 (asked for as §50, which was already taken by username 
 
 - Personal (creator or not) verifies for Blue, Business/Brand for Gold. Government keeps the Black vetting with maker-checker; the hub only points there.
 - go-identity asks Python `POST /v1/verification/eligibility` with the profile signals and the admin checkmark thresholds. Score 75+ with every hard threshold met is **Buy now**; otherwise **Request verification** queues the profile (`verification_eligibilities.state = requested`).
-- A worker (hourly; per profile at most every `VERIFICATION_ELIGIBILITY_RECHECK_EVERY`, default 24 h, or sooner when Python asks) re-scores queued profiles. The first time one qualifies it emits `verification.eligible` once: in-app, push and email "You can now apply for verification" with a deep link to `/settings/verification?step=pay` (mobile: `zudomart://settings/verification`).
+- A worker (hourly; per profile at most every `VERIFICATION_ELIGIBILITY_RECHECK_EVERY`, default 24 h, or sooner when Python asks) re-scores queued profiles. The first time one qualifies it emits `verification.eligible` once: in-app, push and email "You can now apply for verification" with a deep link to `/settings/verification?step=pay` (mobile: `nantty://settings/verification`).
 - Intelligence down: Go falls back to `request`, never `buy_now`.
 - go-money refuses web checkout for `blue` and `gold_only` (`409 VERIFICATION_NOT_ELIGIBLE`) unless the profile is eligible or already passed identity once (read-only grant on two users columns). Seller plans and Premium are not gated; their checkmark still needs the identity check.
 
@@ -2136,7 +2136,7 @@ Owner request, 2026-10-04. Plain-language guide with timelines, state diagram an
 - Dunning: retries at +1, +3 and +5 days, then a 7-day grace with the plan on, then Free. The checkmark comes off unless another live subscription on the profile grants it. A notification and email at each step, plus a card-expiring notice.
 - Cancel any time: the plan stays until the period end, with no partial refunds (verification rule excepted). Upgrades are charged now minus unused time. Downgrades apply at the next renewal.
 - Yearly: one charge at 20% off, with a reminder 7 days before. Monthly: no reminder, except trial conversions.
-- Jobs: queue `jobs-subscription-billing` on `zudomart.jobs`, using the standard retry tiers and DLQ.
+- Jobs: queue `jobs-subscription-billing` on `nantty.jobs`, using the standard retry tiers and DLQ.
 
 ### 54.3 Free trials
 
@@ -2168,7 +2168,7 @@ Owner request, 2026-10-04.
 - Webapp: `position: sticky` at `--top-bar-height` (new token in `globals.css`), with the same divider, selected-chip-in-view and scroll behaviour.
 - **[CHECK]** Not run on a device or browser yet; confirm `--top-bar-height` still matches once the top bar wordmark lands.
 
-## 56. Contextual sheets and the Zudomart wordmark **[DONE (mobile + webapp + web-kit)]**
+## 56. Contextual sheets and the Nantty wordmark **[DONE (mobile + webapp + web-kit)]**
 
 ### 56.1 Bottom sheets instead of centred dialogs
 
@@ -2186,17 +2186,17 @@ Owner request, 2026-10-04.
 
 ## 57. Branded downloads and the screenshot share prompt **[DONE (ts-media, ts-social, gateway, mobile + webapp, mock UI)]**
 
-Owner request, 2026-10-04: content saved from Zudomart carries the brand, like X and TikTok.
+Owner request, 2026-10-04: content saved from Nantty carries the brand, like X and TikTok.
 
 ### 57.1 Photos **[DONE]**
 
-- Download (post `⋯` menu, the image viewer's download button on mobile, the webapp `⋯` menu) saves a copy with a small Zudomart badge and the owner's `@username` in the bottom-right corner: 72% opacity, scaled to 6% of the short side. Rendered server-side with sharp (the media service already had it), so one privacy check covers every client.
+- Download (post `⋯` menu, the image viewer's download button on mobile, the webapp `⋯` menu) saves a copy with a small Nantty badge and the owner's `@username` in the bottom-right corner: 72% opacity, scaled to 6% of the short side. Rendered server-side with sharp (the media service already had it), so one privacy check covers every client.
 - Mobile saves to the gallery with expo-media-library (write-only photo/video permission); if refused, the share sheet opens instead. Webapp downloads through the signed link.
 
 ### 57.2 Videos and clips **[DONE]**
 
 - ffmpeg "download variant" in ts-media: the logo and `@username` move TL → TR → BR → BL every 4 s so a single crop can't remove them, and a 1.8 s end card shows the logo fading and rising in on brand blue. Cached per media id, username and source; made on the first request, served by a 5-minute signed URL.
-- Clients show progress: "Adding the Zudomart tag… n%" while the server renders (polling), then byte progress while saving (mobile). Cancel at any time.
+- Clients show progress: "Adding the Nantty tag… n%" while the server renders (polling), then byte progress while saving (mobile). Cancel at any time.
 - Copyright-muted clips stay silent in the download; muting throws away cached copies.
 
 ### 57.3 Privacy **[DONE]**
@@ -2248,20 +2248,20 @@ Owner direction, 2026-10-20: provider delivery is a **V2** feature, not launch. 
 
 ## Nantty rebrand, landing pages and static waitlist **[IN PROGRESS]**
 
-Owner direction, 2026-10-23 and 2026-10-26: rebrand Zudomart as **Nantty**, update Node.js to the security-patched release, and launch static marketing pages on Cloudflare. Implementation is in progress; the existing Next.js marketing app is the required landing-page source. Do not describe any page, domain, countdown, or waitlist as live until deployment and end-to-end submission are verified.
+Owner direction, 2026-10-23 and 2026-10-26: rebrand Nantty as **Nantty**, update Node.js to the security-patched release, and launch static marketing pages on Cloudflare. Implementation is in progress; the existing Next.js marketing app is the required landing-page source. Do not describe any page, domain, countdown, or waitlist as live until deployment and end-to-end submission are verified.
 
 ### 60.1 Decisions and constraints
 
 - Use **Node.js 24.22.1** as the initial project baseline. The official Node.js security advisory was published **2026-10-21** (two days before this plan date, rather than yesterday) and lists 24.22.1 as the patched LTS release, alongside 26.12.1 Current and 22.23.4. Stay on the supported LTS line rather than moving the production toolchain to Current 26. Recheck the official release page immediately before implementation in case a newer patch has shipped.
 - Preserve the existing product landing pages and their layouts; only change the public brand name/logo and the already-requested launch controls. Use `apps/web` at `nantty.com`, `apps/ads` at `ads.nantty.com`, and the existing creator-facing page at `creator.nantty.com`. `web.nantty.com` is reserved for the real web app and must not receive a static marketing export (unless the owner later explicitly chooses a clearly labeled demo). Do not replace existing landing pages with a new generic design or add duplicate routes to `apps/web`. `admin.nantty.com` is private: use Cloudflare Access or equivalent access control before publishing; a hidden/disabled browser button is not an access-control boundary.
 - Keep the existing apps' server behavior. Do not set `output: "export"` on a whole app that includes authenticated routes, cookie reads, or BFF handlers. If static hosting is still required for the prelaunch surfaces, create route-scoped static artifacts that reuse the existing landing components and prove that the selected outputs contain no app data or working login endpoints. Do not deploy a generic replacement page.
-- Before launch, product login CTAs must be visibly locked and genuinely disabled; do not route them into an existing production login. Use the supplied Nantty icon/lockup in the existing app brand renderers. Do not use the supplied Zudomart-branded banner as a Nantty logo or publish it unchanged.
+- Before launch, product login CTAs must be visibly locked and genuinely disabled; do not route them into an existing production login. Use the supplied Nantty icon/lockup in the existing app brand renderers. Do not use the supplied Nantty-branded banner as a Nantty logo or publish it unchanged.
 - This is a new, explicitly requested static marketing waitlist and does not restore the previously dropped app/API waitlist or `POST /waitlist` service. Keep the marketing pages static and avoid an app-managed backend/database. For immediate in-page writes to Google Sheets, use a small Google Apps Script web app owned by the business and bound to a dedicated Sheet; it is the minimal server-side execution required to keep Google credentials out of browser code. Post to it without navigating away and return an explicit saved/duplicate/error result to the page. Provide setup instructions and a configurable endpoint; require both an endpoint and an explicit enable flag. Until the owner creates the Sheet, deploys the script, completes the privacy notice and retention/deletion/opt-out process, and configures the URL and enable flag, do not accept data or claim that a signup was saved.
 - Show two independent main-page countdowns in `Africa/Lagos`: an early beta target on **2027-01-15** (chosen as a planning date, not stated in the deck) and a public-launch planning target on **2027-03-01**. The deck says public beta in Nigeria is targeted **by March 2027**, without specifying an exact day. Label both dates as targets until the owner approves them. At zero, transition to a live/announcement state without negative values or redirects. Respect reduced motion and provide accessible text equivalents.
 - Offer three clearly distinct signup paths: general launch updates, request beta access, and seller interest. The beta request is an application/request, not a promise of access. Keep form state and confirmation inline on the landing page.
 - Make seller interest an LOI-style intake that captures a seller's stated intent and readiness, then writes the submission to a restricted seller-interest sheet/tab. Unless counsel approves a binding document and signing flow, label it **non-binding expression of interest**, not a binding letter of intent; do not imply guaranteed onboarding, sales, or commercial terms.
 - Confirm the Nantty spelling, legal/trademark clearance, ownership and availability of the intended domain(s), and the external account ownership before migrating live identities. The current AWS/domain configuration is documented but marked proposed in places; verify actual deployed resources before changing DNS or infrastructure.
-- Treat this as a brand and identifier migration, not a blind text replacement. Classify every Zudomart occurrence as user-facing brand copy, source/package identifier, stable protocol or data identifier, historical record, or external-provider identifier. Preserve compatibility during rollout and retain historical names where needed to explain past decisions.
+- Treat this as a brand and identifier migration, not a blind text replacement. Classify every Nantty occurrence as user-facing brand copy, source/package identifier, stable protocol or data identifier, historical record, or external-provider identifier. Preserve compatibility during rollout and retain historical names where needed to explain past decisions.
 
 ### 60.2 Work sequence
 
@@ -2273,7 +2273,7 @@ Owner direction, 2026-10-23 and 2026-10-26: rebrand Zudomart as **Nantty**, upda
 6. **Remove the app wordmark.** Remove the wordmark from the mobile and app/webapp interface as requested; retain the icon-only Nantty mark where branding is needed. This is an app UI change, not permission to rename internal identifiers or rewrite historical/legal records.
 7. **Migrate public-facing identity first.** Update approved public copy, icon/lockup assets, metadata, email templates, legal/privacy references after review, documentation landing pages, support channels, and the new domain. Keep old domains and email addresses forwarding/working; add redirects and allowlists; update CSP/CORS, OAuth callbacks, payment/webhook URLs, app links and certificates as applicable. Do not cut over DNS until the new destinations and rollback path are verified.
 8. **Migrate internal and external identifiers deliberately.** Rename package scopes, workspace names, source references, bundle IDs, app-store product identifiers, cloud resources, secrets, queue/exchange names, database schemas, JWT audiences, cookie/local-storage keys, and event headers only where the owning platform supports a safe migration. Where an identifier is immutable or already persisted externally, keep it as a compatibility alias or stable internal ID while presenting Nantty to users. Never recreate production data/resources just to change a label without a migration and recovery plan.
-9. **Validate, cut over and retire aliases gradually.** Run repository-wide checks for unintended remaining user-facing Zudomart copy and for broken imports/config, full CI and app build matrix, app-link/auth/payment/webhook smoke tests, security review, legal review, and accessibility checks. Roll out by environment, monitor error rates and signup completion, retain old routes/identities through the agreed transition window, then remove aliases only when traffic and provider dependencies confirm they are unused.
+9. **Validate, cut over and retire aliases gradually.** Run repository-wide checks for unintended remaining user-facing Nantty copy and for broken imports/config, full CI and app build matrix, app-link/auth/payment/webhook smoke tests, security review, legal review, and accessibility checks. Roll out by environment, monitor error rates and signup completion, retain old routes/identities through the agreed transition window, then remove aliases only when traffic and provider dependencies confirm they are unused.
 
 ### 60.3 Initial implementation inventory and progress
 
@@ -2310,7 +2310,7 @@ No provider integration is to be built until the V2 design is approved and the s
 
 - **Order lifecycle notifications:** `orderGroup.created`, `.paid`, `.statusChanged`, `.shipped`, `.delivered` and `.completed` now map to in-app and push notifications. Buyers get placed/paid/preparing/ready/shipped/delivered/completed/cancelled; sellers get paid/cancelled. Shipped/delivered/completed are not duplicated by `statusChanged`. Producer payloads carry the order number and buyer/seller IDs; shipped/delivered also carry courier/tracking. Email was queued at the time and is now sent; see plan 75.
 - **Media safety:** moderation defaults to `hold` on classifier failure; invalid fail modes fail startup; a skipped ClamAV scan rejects the upload unless `MEDIA_ALLOW_UNSCANNED=true` is explicitly set for local development.
-- **Direct-payment warning:** both checkout choosers now state that direct payment removes escrow protection and that Zudomart cannot reverse it. Escrow remains the default.
+- **Direct-payment warning:** both checkout choosers now state that direct payment removes escrow protection and that Nantty cannot reverse it. Escrow remains the default.
 - **Still open at this snapshot:** audio/PDF moderation and the remaining ZM-018/019/020 API sweeps. Presigned upload binding, direct-payment acceptance, and per-store promotion error handling were completed in later entries below.
 
 ## 61. Checkout confirmation, upload binding, admin step-up and route limits (2026-10-22) **[DONE]**
@@ -2329,7 +2329,7 @@ No provider integration is to be built until the V2 design is approved and the s
 - **Link previews:** refreshing a post's cached link preview is now author-only. Any other viewer who can see the post still gets a `403 NOT_POST_OWNER`, and no fetch or cache write occurs.
 - **Anonymous counters:** anonymous share, impression and profile-visit requests now return before loading the post, so they can no longer be used for unauthenticated read amplification while reporting success.
 - **Unsubscribe links:** tokens now carry issued-at/expiry claims and default to 90 days (`UNSUBSCRIBE_TOKEN_TTL_DAYS`, 1–365). Expired, future-issued, tampered or legacy claim-less tokens are rejected. Repeat clicks remain idempotent rather than burning the link.
-- **Staff audience:** gateway startup rejects `AUTH_TOKEN_AUDIENCE=zudomart-admin`, preventing a config mistake from making ordinary user tokens satisfy the staff audience.
+- **Staff audience:** gateway startup rejects `AUTH_TOKEN_AUDIENCE=nantty-admin`, preventing a config mistake from making ordinary user tokens satisfy the staff audience.
 - **Still open at this snapshot:** audio/PDF moderation and the remaining ZM-018/ZM-020 items. Promotion issues and unsubscribe replay handling were completed in later entries below.
 
 ## 63. Internal route guards (2026-10-22) **[DONE]**

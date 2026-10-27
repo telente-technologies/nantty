@@ -6,7 +6,7 @@ Status: shipping (2026-10-03). Tokens and the shared web theme kit have landed; 
 
 Today every Next app has its own copy of `:root` tokens in `src/app/globals.css`, and they have drifted. Admin's `--blue-50` is `#eef1fe` where the others use `#d2dafd`. `--ink-strong` is `#0a0a14` in webapp and studio but `#000` elsewhere. Radii run 6/8/12 in ads and admin, 8/10/12 in seller, 8/14/22 in webapp and 10/18/28 in web. Mobile has a separate `src/constants/colors.constant.ts`. The plan is one source for all of these.
 
-Create `packages/designTokens` (workspace package `@zudomart/design-tokens`):
+Create `packages/designTokens` (workspace package `@nantty/design-tokens`):
 
 ```
 packages/designTokens/
@@ -17,7 +17,7 @@ packages/designTokens/
   build/native.ts       generated: typed objects for React Native
 ```
 
-Next apps run `@import "@zudomart/design-tokens/tokens.css";` at the top of `globals.css` and delete their local `:root` blocks. App-specific tokens such as `--sidebar-width` stay local. Mobile imports `native.ts` through a `useTheme()` hook (section 2).
+Next apps run `@import "@nantty/design-tokens/tokens.css";` at the top of `globals.css` and delete their local `:root` blocks. App-specific tokens such as `--sidebar-width` stay local. Mobile imports `native.ts` through a `useTheme()` hook (section 2).
 
 Semantic tokens (names are final, values are the starting point and must pass AA):
 
@@ -103,7 +103,7 @@ Mobile is built pixel-exact from Figma file `4lzFdjt4oRgyuOIuPTePLl`, and Figma 
 
 Shared pieces (2026-10-03):
 - `packages/designTokens/tokens.css`: light `:root`, `:root[data-theme="dark"]`, the `@media (prefers-color-scheme: dark) :root:not([data-theme="light"])` fallback for `system`, `prefers-contrast: more` steps, and `color-scheme` per theme. Charts use `--chart-1..5`, `--chart-compare`, `--chart-grid` and `--chart-axis`, and each has a dark variant.
-- `@zudomart/web-kit` theme API (stable):
+- `@nantty/web-kit` theme API (stable):
   - `parseThemePreference(cookieValue)` and `readHtmlThemeAttribute(preference)` give server layouts `<html data-theme>`. Add `suppressHydrationWarning` on `<html>`.
   - `<ThemeInitScript nonce? />` goes in `<head>`. It is the pre-paint fallback for static pages and stale caches: it reads the `theme` cookie and sets `data-theme` and `theme-color`.
   - Spread `themeViewport` into `export const viewport`. It sets `color-scheme: light dark` and a per-scheme `theme-color`.
@@ -116,7 +116,7 @@ Shared pieces (2026-10-03):
 | mobile | Beta (default Light) | `PATCH /api/v1/users/me/preferences { theme }` (mock) | Light unchanged. Dark follows Figma node 874:5002 (owner decision): canvas `#0E0E10`, surface `#2C2C2C`, derived greys, brand `#2043F5` fills and yellow kept. Grey text lightened for AA: `@handle` `#5B5B5B`→`#B3B3B3`, metadata `#909090`→`#A6A6A6`. Blue text `#7A8DF9` pending design confirmation. Mobile-only; `designTokens` untouched. `app.json` stays `"light"` until visual QA. See plans.md §27. |
 | web (marketing) | Shipped | none (no sign-in) | Stays static: there is no `cookies()` read, so `ThemeInitScript` applies the cookie before paint. The switcher sits in the header and footer. Dark is art-directed (navy canvas, deeper brand bands, solid glass header over the yellow hero) |
 | studio | Shipped | `PATCH /api/v1/users/me/preferences` | The switcher is in the shell, the landing header and auth. The control room, overlay editor and stream overlays stay dark in both themes |
-| seller | Shipped | `PATCH /seller/users/me/preferences` (signed_in) | Now imports `@zudomart/design-tokens`. The switcher is in the top bar, account settings and the landing footer. Print (packing slips, statements, barcode labels) is forced to light paper tokens |
+| seller | Shipped | `PATCH /seller/users/me/preferences` (signed_in) | Now imports `@nantty/design-tokens`. The switcher is in the top bar, account settings and the landing footer. Print (packing slips, statements, barcode labels) is forced to light paper tokens |
 | ads | Shipped | `PATCH /ads/users/me/preferences` (signed-in path) | The switcher is in the user menu and the Settings > Appearance card. Ad previews and charts are driven by `--chart-*` tokens. The top bar fits at 390 px |
 | admin | Shipped | `PATCH /admin/users/me/preferences` (anyAdmin, listed before `/admin/users`) | The nonce is passed to `ThemeInitScript`. The `--console-night*` rail stays dark in both themes. The switcher is in the console top bar and the account page |
 | webapp | Owned by the webapp workstream | `PATCH /bff/.../users/me/preferences` | Consumes the same kit |

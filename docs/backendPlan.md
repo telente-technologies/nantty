@@ -1,8 +1,8 @@
-# Zudomart — Backend Plan
+# Nantty — Backend Plan
 
-Status: **draft (3 Oct 2026)**. Nothing here is built unless marked **ref** (logic existed in the old Zudojs monolith; it has been ported and the monolith was removed on 2026-10-10). Items marked **[CONFIRM]** need an owner decision before that piece starts.
+Status: **draft (3 Oct 2026)**. Nothing here is built unless marked **ref** (logic existed in the old Nanttyjs monolith; it has been ported and the monolith was removed on 2026-10-10). Items marked **[CONFIRM]** need an owner decision before that piece starts.
 
-Inputs read: `docs/plans.md` (incl. §5.4 contract debt, §8 Studio, §13 checkmarks, §20 creator live), `docs/CHANGELOG.md`, `docs/architecture/microservicesPlan.json`, `SECURITY.md`, the old monolith (Zudojs reference monolith), `apps/{seller,ads,admin,intelligence}/apiContract.md`, `apps/mobile/src/services` + `src/mocks`, and the BFF layers of `apps/webapp` and `apps/studio`.
+Inputs read: `docs/plans.md` (incl. §5.4 contract debt, §8 Studio, §13 checkmarks, §20 creator live), `docs/CHANGELOG.md`, `docs/architecture/microservicesPlan.json`, `SECURITY.md`, the old monolith (Nanttyjs reference monolith), `apps/{seller,ads,admin,intelligence}/apiContract.md`, `apps/mobile/src/services` + `src/mocks`, and the BFF layers of `apps/webapp` and `apps/studio`.
 
 ---
 
@@ -27,7 +27,7 @@ These apply to every backend file, whether a person or an agent writes it.
 | Stack | Owns | Why this stack |
 | --- | --- | --- |
 | **Go** | users/accounts (auth, profiles, verification/KYB), wallet + ledger, payments, marketplace (catalog, inventory, stores), orders + escrow, subscriptions, creators (gifts, earnings), Nantty Points, live (sessions, guests, battles), ads decision + attribution, admin | Strong typing and simple concurrency for money and the core state machines |
-| **TypeScript (Zudojs)** | gateway, social orchestration (posts, comments, clips, stories, sounds, follows, privacy), feed orchestration, notifications, media, support, integrations (webhooks, couriers, partner APIs) | I/O-heavy fan-out; the existing Zudojs code in the old monolith ports almost line for line |
+| **TypeScript (Nanttyjs)** | gateway, social orchestration (posts, comments, clips, stories, sounds, follows, privacy), feed orchestration, notifications, media, support, integrations (webhooks, couriers, partner APIs) | I/O-heavy fan-out; the existing Nanttyjs code in the old monolith ports almost line for line |
 | **Elixir / Phoenix** | realtime: chat, presence, typing, live activity (comments, gifts, goals, scores, viewer counts), in-app notification stream | Cheap processes, built-in presence and pub/sub, made for socket fan-out. **Never touches money** |
 | **Python** | `services/python/intelligence`: ranking, recommendations, risk/fraud and moderation **scores**, ads pCTR, analytics pipelines | ML ecosystem. **Python returns scores; Go/TS make the deterministic policy decision** (thresholds live in config tables) |
 | **OpenSearch** | search (products, people, businesses, posts, sounds) | Fed from domain events, later |
@@ -35,7 +35,7 @@ These apply to every backend file, whether a person or an agent writes it.
 
 **Data:** one primary **Aurora PostgreSQL + PostGIS** cluster. Each owning service has **its own schema** (`accounts`, `ledger`, `payments`, `marketplace`, `orders`, `social`, `realtime`, `ads`, `points`, …). Only the owner writes; other services get **read-only grants** for joins and read models. Writes across ownership boundaries go through the owner's API or an event, never a direct cross-schema write. ClickHouse/OpenSearch are added later, fed from events.
 
-**Events (no Kafka on day one; RabbitMQ adopted, owner, 2026-10-03):** every owner writes a transactional **outbox** row with its business change. A relay publishes it with publisher confirms to the RabbitMQ topic exchange **`zudomart.events`** (routing key = event name); each consumer service owns a durable quorum queue bound to the keys it needs. Work goes through the direct exchange **`zudomart.jobs`** (one quorum queue per job type). Every queue has retry queues (30 s, 2 m, 10 m, 30 m) and a `.dlq` after 5 attempts. Locally RabbitMQ runs in Docker; in AWS it is Amazon MQ for RabbitMQ (cluster deployment, private subnets). The code depends on one `DomainEventPublisher` / `JobQueue` / `QueueConsumer` interface per language, so the broker can change again without touching business code (the SNS/SQS adapters remain behind `EVENT_BUS=sqs` until the cut-over is proven). Phoenix consumes its own queue bound to the live/chat routing keys.
+**Events (no Kafka on day one; RabbitMQ adopted, owner, 2026-10-03):** every owner writes a transactional **outbox** row with its business change. A relay publishes it with publisher confirms to the RabbitMQ topic exchange **`nantty.events`** (routing key = event name); each consumer service owns a durable quorum queue bound to the keys it needs. Work goes through the direct exchange **`nantty.jobs`** (one quorum queue per job type). Every queue has retry queues (30 s, 2 m, 10 m, 30 m) and a `.dlq` after 5 attempts. Locally RabbitMQ runs in Docker; in AWS it is Amazon MQ for RabbitMQ (cluster deployment, private subnets). The code depends on one `DomainEventPublisher` / `JobQueue` / `QueueConsumer` interface per language, so the broker can change again without touching business code (the SNS/SQS adapters remain behind `EVENT_BUS=sqs` until the cut-over is proven). Phoenix consumes its own queue bound to the live/chat routing keys.
 
 **Compute:** **ECS on Fargate** first (one service per deployable, autoscaling on CPU/queue depth). EKS only if ECS limits are hit. **Media:** S3 + CloudFront (signed URLs), LiveKit for live.
 
@@ -43,7 +43,7 @@ These apply to every backend file, whether a person or an agent writes it.
 
 ### 1.1 The old monolith (removed on 2026-10-10)
 
-The old Zudojs monolith was a **reference implementation** and was never deployed; it was deleted on 2026-10-10 once the audit showed every live route, job, event and model had an owner in the services (brand deals, chat pushes, review/seller-application/creator-standing notifications and purchase signals were ported in that last pass). The table below is kept as the port map. It holds 354 routes, 124 Prisma models, a double-entry ledger, idempotency, escrow, disputes, legacy card gateways (replaced by the Flutterwave adapter in the new stack), coins and gifts, and the auth rules from SECURITY.md. Its validators, DTO shapes, state machines and tests are the spec to port. Its current 4 type errors (missing `admin.loader`, missing admin routes, `SocialSharedServices.discovery`, and `ads` `parentName`) do not need fixing.
+The old Nanttyjs monolith was a **reference implementation** and was never deployed; it was deleted on 2026-10-10 once the audit showed every live route, job, event and model had an owner in the services (brand deals, chat pushes, review/seller-application/creator-standing notifications and purchase signals were ported in that last pass). The table below is kept as the port map. It holds 354 routes, 124 Prisma models, a double-entry ledger, idempotency, escrow, disputes, legacy card gateways (replaced by the Flutterwave adapter in the new stack), coins and gifts, and the auth rules from SECURITY.md. Its validators, DTO shapes, state machines and tests are the spec to port. Its current 4 type errors (missing `admin.loader`, missing admin routes, `SocialSharedServices.discovery`, and `ads` `parentName`) do not need fixing.
 
 | Old monolith module | Ported to | Reuse |
 | --- | --- | --- |
@@ -78,10 +78,10 @@ Cross-deployable calls go over gRPC/HTTP (sync) or outbox → RabbitMQ (async). 
 mobile / webapp BFF / studio BFF / seller BFF / ads BFF / admin BFF
         │  HTTPS  /api/v1/*                  │  WSS  /ws
         ▼                                     ▼
-  ts.gateway (Zudojs)                 Phoenix realtime
+  ts.gateway (Nanttyjs)                 Phoenix realtime
   - JWT verify (JWKS), rate limits    - auth via access token or ticket
   - idempotency fast path, currency   - topics user:*, conversation:*, live:*
-        │ gRPC/HTTP                           ▲ RabbitMQ queue (bound to zudomart.events)
+        │ gRPC/HTTP                           ▲ RabbitMQ queue (bound to nantty.events)
         ▼                                     │
   go-* / ts-* services ──outbox──► publisher ─┘   python intelligence (HMAC, internal; scores only)
         └──────── one Aurora cluster, schema per owner, read-only grants ────────┘
@@ -208,7 +208,7 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | GET /wallets/me `{available,pending}`, transactions, payout accounts, withdrawals (+quote), top-ups, GET /banks | M | ✅ | Top-ups not built yet. **✅ built (go-money).** |
 | GET /wallets/me/escrow-holds, POST /banks/resolve-account | M | ✗ | **✅ built (go-money).** |
 | GET /store-rewards/me (per-store credit balances), GET /seller/marketing/rewards/summary | M S | ✅ | **New, seller-funded** (§ Store rewards below). Per-store credit ledger in go-commerce, not go-money cash. Referral and platform loyalty/cashback endpoints removed |
-| GET /notifications (bare array), read, read-all, preferences, device tokens | M W | ✅ | Needs a page envelope; → ts.notifications. **✅ built (ts.notifications):** `GET /notifications?filter=all\|mentions` → `{data,nextCursor}`, `POST /notifications/:id/read`, `/read-all`, `GET /notifications/unread-count`, `GET\|PATCH /notifications/preferences`, `POST\|DELETE /notifications/device-tokens`, `GET\|POST /email/unsubscribe` (one-click), admin `/admin/support/email/*` and `/admin/legal/{notices,versions/:id/notice-draft,notice-preview}`; consumes domain events from RabbitMQ (`notifications-domain-events`, jobs on `jobs-email`) and sends SES email through `@zudomart/email-templates` |
+| GET /notifications (bare array), read, read-all, preferences, device tokens | M W | ✅ | Needs a page envelope; → ts.notifications. **✅ built (ts.notifications):** `GET /notifications?filter=all\|mentions` → `{data,nextCursor}`, `POST /notifications/:id/read`, `/read-all`, `GET /notifications/unread-count`, `GET\|PATCH /notifications/preferences`, `POST\|DELETE /notifications/device-tokens`, `GET\|POST /email/unsubscribe` (one-click), admin `/admin/support/email/*` and `/admin/legal/{notices,versions/:id/notice-draft,notice-preview}`; consumes domain events from RabbitMQ (`notifications-domain-events`, jobs on `jobs-email`) and sends SES email through `@nantty/email-templates` |
 | Reports, appeals, copyright claims, support tickets | M | ◐ (`/copyright/claims` ✗) | go.moderation / ts.support |
 | ~~POST /waitlist~~ | L | — | **Dropped by the owner on 2026-10-05.** Not ported; the website links to the app stores, the web app and seller sign-up instead |
 
@@ -231,7 +231,7 @@ Contract: `apps/seller/apiContract.md`, types in `apps/seller/src/types/*.type.t
 | GET /seller/dashboard, /seller/reports/:kind (+`format=csv`) | ◐ | reporting (ClickHouse) | Drop `sales-by-staff` shifts/register kinds and `shifts`. Add xlsx/pdf (§4.3.13) |
 | /seller/wallet/balances, transactions, statements, payout-settings, payouts, banks, payout-accounts | ◐ | go.wallet | Payouts: owner/finance only, step-up re-auth |
 | /seller/settings, /seller/locations | ✗ | go.catalog.stores, go.inventory.locations | Remove POS settings (receipt printer, cash rounding, discount-approval PIN threshold) |
-| /seller/nantty-users?q, /seller/staff/candidates, /seller/staff CRUD | ◐ (`/stores/:id/members`) | go.catalog.storeMembers | Staff = existing Zudomart users added by username; they accept in the app. Roles change (§4.3.14) |
+| /seller/nantty-users?q, /seller/staff/candidates, /seller/staff CRUD | ◐ (`/stores/:id/members`) | go.catalog.storeMembers | Staff = existing Nantty users added by username; they accept in the app. Roles change (§4.3.14) |
 | /seller/audit-log | ✗ | go.admin.auditLog (store-scoped view) | |
 | /seller/affiliates/* (settings, overview, requests, creators, product-commissions, ledger, directory, live-invitations) | ◐ | go.creators.affiliations | |
 | /seller/brands/*, /seller/stores/mine, official store, protection claims | ◐ | go.users.brands, go.moderation.trademarkClaims | Official Store still needs a registered brand (plus Gold) |
@@ -242,7 +242,7 @@ Contract: `apps/ads/apiContract.md`, mock toggle `ADS_USE_MOCKS`. The old monoli
 
 | Endpoint group | Ref | Mismatch / change |
 | --- | --- | --- |
-| /ads/memberships, /ads/accounts[/:id], business-profiles, entitlements, members, invites, activity | ✅ | Invites are by **email** token. That conflicts with the "existing Zudomart users only" staff rule used for sellers. **[CONFIRM]** whether ad-account members must also be existing app users (recommended: yes, invite by username, accept in app) |
+| /ads/memberships, /ads/accounts[/:id], business-profiles, entitlements, members, invites, activity | ✅ | Invites are by **email** token. That conflicts with the "existing Nantty users only" staff rule used for sellers. **[CONFIRM]** whether ad-account members must also be existing app users (recommended: yes, invite by username, accept in app) |
 | Campaigns (create bundle, submit, duplicate, bulk-actions), ad sets, ads, appeal | ◐ (models only) | |
 | Creatives preview, content-sources, chunked media | ◐ | |
 | Audiences, customer lists (hashed), locations, behaviours, estimates | ◐ (models) | |
@@ -272,7 +272,7 @@ Contract: `apps/admin/apiContract.md`, mock toggle `ADMIN_USE_MOCKS`. The old mo
 
 ### 2.12 Intelligence (internal) — owner **py.intelligence**
 
-Internal only, HMAC signed (`x-zudo-timestamp/nonce/signature`), and called by services, never by frontends. Endpoints: `/v1/events`, `/v1/feed/rank`, `/v1/clips/rank`, `/v1/social-proof/select`, `/v1/ads/select`, `/v1/recommendations/{products,accounts,clips}`, `/v1/trending`, `/v1/search/rerank`, `/v1/risk/score`, `/v1/experiments/*`, `/v1/audio/*`. The the old monolith client only calls events, feed/clips rank, ads select, product recs, rerank and trending. **Risk scoring is not wired**, and it must score `gift`, `coin_purchase`, `coin_transfer` and `payout` before those go live. Error envelope `{error:{code}}` stays internal (the gateway never exposes it). The JSON `python` block lacks an `intelligence` entry; the foundation agent should add it, mapping to `services/python/intelligence`.
+Internal only, HMAC signed (`x-nantty-timestamp/nonce/signature`), and called by services, never by frontends. Endpoints: `/v1/events`, `/v1/feed/rank`, `/v1/clips/rank`, `/v1/social-proof/select`, `/v1/ads/select`, `/v1/recommendations/{products,accounts,clips}`, `/v1/trending`, `/v1/search/rerank`, `/v1/risk/score`, `/v1/experiments/*`, `/v1/audio/*`. The the old monolith client only calls events, feed/clips rank, ads select, product recs, rerank and trending. **Risk scoring is not wired**, and it must score `gift`, `coin_purchase`, `coin_transfer` and `payout` before those go live. Error envelope `{error:{code}}` stays internal (the gateway never exposes it). The JSON `python` block lacks an `intelligence` entry; the foundation agent should add it, mapping to `services/python/intelligence`.
 
 | Intelligence endpoint or consumer | Status | Notes |
 |---|---|---|
@@ -351,7 +351,7 @@ Changes the clients must make: lists are `{data,nextCursor}` (`/coins/packages`,
 
 Done with integration tests against compose (`pnpm backend:test:go`, `pnpm backend:test:gateway`):
 
-- **Guest browsing** (gateway): anonymous GET on public routes (feeds, clips, posts, explore, products, stores, lives, public profiles incl. `GET /users/by-username/{username}`, `GET /legal/policy-versions/current`), per IP + `X-Device-Id` rate limits (`GUEST_RATE_LIMIT_PER_MINUTE` 120, `GUEST_SENSITIVE_RATE_LIMIT_PER_MINUTE` 30 on feeds/explore/search/products/stores/clips, 429 + `Retry-After`), `x-zudomart-viewer: anonymous` upstream, private routes answer `401 UNAUTHENTICATED`. `POST /reports` goes to go-trust when the body has a `conversationId` or a chat `targetType`.
+- **Guest browsing** (gateway): anonymous GET on public routes (feeds, clips, posts, explore, products, stores, lives, public profiles incl. `GET /users/by-username/{username}`, `GET /legal/policy-versions/current`), per IP + `X-Device-Id` rate limits (`GUEST_RATE_LIMIT_PER_MINUTE` 120, `GUEST_SENSITIVE_RATE_LIMIT_PER_MINUTE` 30 on feeds/explore/search/products/stores/clips, 429 + `Retry-After`), `x-nantty-viewer: anonymous` upstream, private routes answer `401 UNAUTHENTICATED`. `POST /reports` goes to go-trust when the body has a `conversationId` or a chat `targetType`.
 - **RBAC** (admin): permission catalogue and ten department templates (`staffauth.DepartmentRoleTemplates`), custom roles, several roles per admin (effective permissions are the union and are put in the token with legacy aliases), superadmin implicit, second-superadmin approval (`GET/PUT /admin/staff-settings`, default on), suspend / revoke / enable / reset-mfa with session killing (a session checker also rejects live access tokens at once), "cannot grant what you do not hold", every write audited with staff name, id, departments, target, before/after, reason, IP, request id and step-up flag.
 - **User actions** (users, with auth `AccountEnforcement` port): restrict (features + days), suspend (120-day deletion clock, worker deletes profile and users-owned data and emits `account.deletionExecuted` so owners anonymise financial/order records, retained 7 years), ban (permanent bans block email / phone / device re-signup by HMAC hash), delete, username reassign and assign-held (hold bypass flag, audited as `username.assigned_hold_bypassed`), suspension appeals. Python suggestions are advisory `suspension_cases` in go-trust (`POST /internal/suspension-cases` and the `INTELLIGENCE_TRUST_ADVISORY_QUEUE` RabbitMQ consumer); only an admin approval calls the users service.
 - **Creator Program**: `GET /creators/eligibility` (checklist + decision), `POST /creators/applications`, `GET /creators/applications/me`, admin review queue; thresholds from the `creator-thresholds` setting; signals (followers, original posts, violations, fraud/risk scores, ID, orders, plan) are written by social / Python / commerce through `PUT /internal/profiles/{profileId}/signals`.
@@ -422,7 +422,7 @@ Unit-tested per module (Go `-short`, vitest, pytest); integration suites need th
 
 ### 2.20 Built so far: ts.support (Help Centre and tickets)
 
-`services/typescript/support`, port 8111, Prisma schema `support` (role `svc_support`), Zudojs layout. Design and rules: [plans.md §44](./plans.md).
+`services/typescript/support`, port 8111, Prisma schema `support` (role `svc_support`), Nanttyjs layout. Design and rules: [plans.md §44](./plans.md).
 
 | Area | Endpoints | Notes |
 | --- | --- | --- |
@@ -470,7 +470,7 @@ Today each app has one global switch (`EXPO_PUBLIC_USE_MOCKS`, `WEBAPP_USE_MOCKS
 - **Endpoints:** §2.3, §2.4.
 - **Decision for the audience debt:** extend the server enum to `audience: everyone | followers` (followers-only posts are a real feature and cheap with the follow graph), and keep `visibility: public | subscribers` as the separate subscriber gate (plans §5.4). Mobile then ships the Subscribers chip by sending `visibility: "subscribers"`. **[CONFIRM]**
 - **Models:** `Post` (`kind post|clip|story`, `resharedFrom`, `audience`, `visibility`, `isAiGenerated`), `Comment` (threaded), `Reaction`, `Sound`, `Story`, `MediaAsset`, `UploadSession`, `UploadChunk`, `FeedTimeline` (Redis), `PostImpressionDaily` (ClickHouse).
-- **Infra:** S3 multipart, MediaConvert or FFmpeg workers on Fargate (driven by the `jobs-media` queue) (HLS H.264, AVIF/WebP, poster frames, thumbnail job per plans §5.5), CloudFront signed URLs, py.intelligence `/v1/feed/rank` with a deterministic fallback, `post.created` on `zudomart.events` → fan-out worker queue.
+- **Infra:** S3 multipart, MediaConvert or FFmpeg workers on Fargate (driven by the `jobs-media` queue) (HLS H.264, AVIF/WebP, poster frames, thumbnail job per plans §5.5), CloudFront signed URLs, py.intelligence `/v1/feed/rank` with a deterministic fallback, `post.created` on `nantty.events` → fan-out worker queue.
 - **Frontend switch:** `/api/v1/feeds`, `/api/v1/posts`, `/api/v1/comments`, `/api/v1/clips`, `/api/v1/stories`, `/api/v1/sounds`, `/api/v1/media`. Fix the mobile list unwrap before enabling.
 - **Acceptance:** a clip needs exactly one video (`assertMediaFitsPostKind`); up to 10 media per post; a reshare creates a post that embeds the original; analytics return 403 for non-owners; an upload resumes after app kill; the following feed shows only followed authors.
 
@@ -494,7 +494,7 @@ Today each app has one global switch (`EXPO_PUBLIC_USE_MOCKS`, `WEBAPP_USE_MOCKS
 
 - **Endpoints:** §2.8.
 - **Models:** `Store`, `Product`, `ProductVariant` (SKU, options), `StockLevel`, `StockReservation`, `Cart`, `Checkout`, `Order`, `OrderItem`, `OrderEvent` (timeline), `Payment`, `WebhookEvent`, `Escrow`, `Dispute`, `DisputeMessage`, `PayoutAccount` (encrypted, masked), `Withdrawal`, ledger accounts.
-- **Infra:** Flutterwave only (https://developer.flutterwave.com/docs; owner 2026-10-11) behind capability interfaces: Standard checkout (card, bank transfer, USSD), payout subaccounts, transfers, refunds, chargebacks, tokenized charges, BVN consent and account resolve, webhooks checked with `verif-hash` and re-verified by id. Zudomart holds no customer money: escrow stays in the buyer's own PSA. Details: `docs/integrations/flutterwaveMigration.md`. Escrow auto-release scheduler (3 days after delivery, dispute pauses); daily reconciliation against Flutterwave; py.intelligence `/v1/risk/score` for orders and payouts.
+- **Infra:** Flutterwave only (https://developer.flutterwave.com/docs; owner 2026-10-11) behind capability interfaces: Standard checkout (card, bank transfer, USSD), payout subaccounts, transfers, refunds, chargebacks, tokenized charges, BVN consent and account resolve, webhooks checked with `verif-hash` and re-verified by id. Nantty holds no customer money: escrow stays in the buyer's own PSA. Details: `docs/integrations/flutterwaveMigration.md`. Escrow auto-release scheduler (3 days after delivery, dispute pauses); daily reconciliation against Flutterwave; py.intelligence `/v1/risk/score` for orders and payouts.
 - **Checkout transaction (inside `go-commerce` + `go-money`):** recompute prices, seller grouping, shipping (§4.6), discounts and eligibility on the server → reserve stock (TTL 15 min) → create Checkout/Orders with a locked exchange rate → initialise payment → on verified webhook: mark paid, hold in escrow, commit the reservation → seller fulfils → buyer confirms or auto-release after N days → release escrow minus commission → seller wallet.
 - **Frontend switch:** `/api/v1/mart`, `/api/v1/products`, `/api/v1/categories`, `/api/v1/stores`, `/api/v1/search`, `/api/v1/cart`, `/api/v1/orders`, `/api/v1/payments`, `/api/v1/disputes`, `/api/v1/wallets`, `/api/v1/banks`.
 - **Acceptance:** client-sent prices ignored; double-submitting checkout with the same key returns the same orders; webhook replay is processed once; concurrent withdrawals cannot overdraw (row lock + version); ledger trial balance = 0 per currency after the e2e suite; escrow release, refunds and payouts are written to the audit log.
@@ -512,7 +512,7 @@ Today each app has one global switch (`EXPO_PUBLIC_USE_MOCKS`, `WEBAPP_USE_MOCKS
 - **Acceptance:** charge price never exceeds the bid; per-currency budgets; spend order is credits → prepaid → card; creator share credited per impression batch.
 
 #### Phase 8 status (go-ads)
-Built in `services/go/modules/ads`: accounts/members/invites/activity, campaigns/ad sets/ads/bulk/appeal, admin review + advertisers + frequency policies, boosts (wallet debit via the `AdsMoneyService` contract in `services/contracts/proto/zudomart/money/v1/ads_money.proto`, refund on failed save, in-memory fake refused in production), decide + signed-token events, settlement and creator pools, reports + CSV + server-rendered PDF, scheduled reports (due sweep -> `jobs-ads-reports` RabbitMQ job -> CSV/PDF in S3 -> `adReport.ready` event for notifications to email), saved audiences (hashed email lists matched in go-auth data, only matched user ids stored, lookalikes, ranges only), audience estimates, content sources (social internal API), creative media upload intents (S3 presigned, `adMedia.uploaded` event, `/internal/v1/ads/media/:id/processed` callback), billing overview and internal funds credit (`POST /internal/v1/ads/accounts/:id/funds`).
+Built in `services/go/modules/ads`: accounts/members/invites/activity, campaigns/ad sets/ads/bulk/appeal, admin review + advertisers + frequency policies, boosts (wallet debit via the `AdsMoneyService` contract in `services/contracts/proto/nantty/money/v1/ads_money.proto`, refund on failed save, in-memory fake refused in production), decide + signed-token events, settlement and creator pools, reports + CSV + server-rendered PDF, scheduled reports (due sweep -> `jobs-ads-reports` RabbitMQ job -> CSV/PDF in S3 -> `adReport.ready` event for notifications to email), saved audiences (hashed email lists matched in go-auth data, only matched user ids stored, lookalikes, ranges only), audience estimates, content sources (social internal API), creative media upload intents (S3 presigned, `adMedia.uploaded` event, `/internal/v1/ads/media/:id/processed` callback), billing overview and internal funds credit (`POST /internal/v1/ads/accounts/:id/funds`).
 Creator revenue multipliers are read from the admin `monetization.policy` setting (AI-generated default 0.30 of the normal creator share); go-ads has no policy table of its own. Python is called on `/v1/ads/predicted-ctr` and `/v1/risk/score-extended` (`ad_click`) with a timeout and deterministic fallback.
 Open items: phone-hash customer lists (needs go-auth hashing details), engagement/store/follower audience sources (social/commerce membership APIs; audiences end `failed` until wired), social `ad-content-sources` endpoint, go-money implementing `AdsMoneyService`, media pipeline consuming `adMedia.uploaded`, notifications template for `adReport.ready`, conversion-event/experiment/rule tools, invoices/receipts, top-up checkout.
 
@@ -552,7 +552,7 @@ Mock-mode frontends for these are being built in parallel. The contracts below a
 client ─POST /api/v1/live/gifts─► ts.gateway ─► go-money (go.creators.gifts)
    validate: live is active (gRPC go-live), recipient on stage, gift isActive, wallet balance
    one DB transaction: debit sender coins → balanced ledger entry → GiftTransaction row → outbox row
-outbox publisher ─► RabbitMQ `zudomart.events` key `gift.sent` ─► consumer quorum queues
+outbox publisher ─► RabbitMQ `nantty.events` key `gift.sent` ─► consumer quorum queues
    ├─► ex.realtime: fan-out over WebSocket to streamer + all viewers (combos, goals, leaderboards)
    └─► python analytics (Postgres read model now, ClickHouse later), py.intelligence (risk, ranking signals)
 ```
@@ -657,7 +657,7 @@ Transport order is not relied on (retries and redeliveries reorder): the produce
 **4.1.9 Creator gift analytics — where they live**
 
 - Metrics: revenue by gift, top supporters over time, average gift value, revenue per stream, peak gifting periods (heatmap by minute-of-stream and hour-of-week), goal completion rate, battle results.
-- **Home: Studio** (`studio.zudomart.com`, `/analytics/gifts`), because creators are often not sellers. Mobile Creator Studio shows a summary card. The seller dashboard gets a **Live** section only for stores whose members stream, linking live sales and gift revenue for that store's lives.
+- **Home: Studio** (`studio.nantty.com`, `/analytics/gifts`), because creators are often not sellers. Mobile Creator Studio shows a summary card. The seller dashboard gets a **Live** section only for stores whose members stream, linking live sales and gift revenue for that store's lives.
 - **Store:** Postgres read model (replica) at launch, moving to ClickHouse fed from `money.gift.sent.v1` once volume needs it. Columnar storage is justified here: per-gift, per-minute aggregates over every stream are a columnar workload, and the same pipeline serves seller analytics (§4.3). Endpoints are served by the Go `reporting` module: `GET /api/v1/creators/me/analytics/gifts?from&to&granularity`, `…/supporters`, `…/streams/:liveId`. The ledger remains the source of truth for amounts; ClickHouse is for reporting only.
 
 **4.1.10 Acceptance**
@@ -795,9 +795,9 @@ At settlement, `go-money` runs `settleLiveBattleAndPostLedgerEntries(battleId)` 
 - Killing the `go-live` pod mid-battle still ends and settles the battle on time (±2 s).
 - Every edge case in §4.2.8 has an integration test.
 
-### 4.3 Seller dashboard (`dashboard.zudomart.com`) — the seller operating system
+### 4.3 Seller dashboard (`dashboard.nantty.com`) — the seller operating system
 
-"App = sell from anywhere, Dashboard = run your business." Online orders are the same marketplace orders placed in the Zudomart apps. There is **no in-store POS**.
+"App = sell from anywhere, Dashboard = run your business." Online orders are the same marketplace orders placed in the Nantty apps. There is **no in-store POS**.
 
 **Stack and why**
 
@@ -811,7 +811,7 @@ At settlement, `go-money` runs `settleLiveBattleAndPostLedgerEntries(battleId)` 
 
 **4.3.1 Access rule (owner decision, 3 Oct)**
 
-- **Any approved seller can use the dashboard on the Free plan.** Access requires: an authenticated Zudomart user, an `approved` seller application, and membership of the store (owner or staff). It is **not** tied to Gold verification or a paid subscription.
+- **Any approved seller can use the dashboard on the Free plan.** Access requires: an authenticated Nantty user, an `approved` seller application, and membership of the store (owner or staff). It is **not** tied to Gold verification or a paid subscription.
 - Free / Pro / Business **only gate features and limits**. Basic selling (list products, receive and fulfil orders, get paid, chat with buyers, see reviews) is **never locked**.
 - **Gold comes with Pro/Business once the business is verified (KYB).** Paying alone does not show the badge; KYB alone on Free does not either. The badge (gold check beside the store name) is removed when the paid plan lapses or KYB is revoked. "Official Store" still requires a **registered brand** on top of that.
 - Server check, replacing `SellerAccessService.assertStoreHasActiveSellerAccess`: `assertUserIsApprovedSellerMemberOfStore(userId, storeId)` then `assertStorePlanIncludesFeature(storeId, featureKey)` only for gated features (403 `PLAN_FEATURE_REQUIRED` with `{feature, requiredPlan}`), then `assertStoreRoleHasPermission(userId, storeId, permission)`.
@@ -873,7 +873,7 @@ any post-payment state ─► disputed ─► resolved (refund / partial / relea
 - `OrderEvent { orderId, type, fromStatus, toStatus, actor{type:buyer|seller|staff|system|admin, userId}, note, at }` powers the timeline. Endpoints: `POST /seller/orders/:id/accept` (→processing), `/ready`, `/fulfilment {courier, trackingNumber, locationId}` (→shipped), `/deliver` (seller-confirmed or courier webhook), `/cancel {reason}`; buyer `confirm-receipt` → completed (escrow release); auto-complete after N days.
 - Returns: `/seller/returns` approve/decline/receive `{restock, locationId}` → refund via go-money (Idempotency-Key). Disputes: go.escrow.
 
-**4.3.7 Customers CRM** — read model built from orders: `GET /seller/customers?segment&q`, `/:id` (orders, lifetime value, last order, notes, tags), `POST /:id/notes`, `PATCH /:id {tags}`, export. Customers are Zudomart users who bought from the store. Contact details shown are limited to what the order needs (shipping name/phone), per privacy rules.
+**4.3.7 Customers CRM** — read model built from orders: `GET /seller/customers?segment&q`, `/:id` (orders, lifetime value, last order, notes, tags), `POST /:id/notes`, `PATCH /:id {tags}`, export. Customers are Nantty users who bought from the store. Contact details shown are limited to what the order needs (shipping name/phone), per privacy rules.
 
 **4.3.8 Analytics** — `GET /seller/analytics/{sales|products|customers|traffic|marketing}?from&to&granularity=day|week|month&compare=previous|yearAgo` from ClickHouse. Traffic covers product views, store visits, add-to-cart and conversion (events from feed/mart), and live-sourced sales.
 
@@ -897,14 +897,14 @@ Delete from `apps/seller/apiContract.md`, `apps/seller/src/types`, `src/mocks`, 
 
 **4.3.14 Team members, roles and permissions**
 
-- Staff are **existing Zudomart app users**, added by username search (`GET /seller/nantty-users?q=`). They accept in the app and sign in with their own app credentials. There are no separate staff accounts and no email-only invites.
+- Staff are **existing Nantty app users**, added by username search (`GET /seller/nantty-users?q=`). They accept in the app and sign in with their own app credentials. There are no separate staff accounts and no email-only invites.
 - Roles: `owner` (one; transfer by owner only, step-up) · `admin` · `manager` · `inventory` · `fulfilment` (replaces cashier) · `support` · `marketing` · `finance` · `analyst` (read-only).
 - Permissions (examples): `products:view|manage`, `inventory:view|manage`, `orders:view|fulfil|cancel|refund`, `customers:view|manage`, `marketing:manage`, `ads:manage`, `analytics:view`, `reports:export`, `wallet:view`, `wallet:withdraw` (owner + finance), `billing:manage` (owner), `staff:manage` (owner + admin), `settings:manage`, `apiKeys:manage`, `messages:reply`, `audit:view`.
 - Seats are counted against the plan (`409 SEAT_LIMIT_REACHED`). Role changes, removals and payouts go to the audit log.
 
-**4.3.15 Settings, API keys, webhooks** — store profile, currency (fixed after first sale), taxes, policies, notifications, locations. API keys (Business): `POST /seller/api-keys {name, scopes[]}` returns the secret once, stored as a hash; `DELETE` revokes. Webhooks: `POST /seller/webhooks {url, events[]}`, HMAC-SHA256 signature header `X-Zudomart-Signature`, retries with exponential backoff for 24 h, delivery log `GET /seller/webhooks/:id/deliveries`. Events: `order.created|paid|cancelled|shipped|delivered|completed|refunded`, `inventory.lowStock`, `product.updated`, `payout.paid`, `review.created`.
+**4.3.15 Settings, API keys, webhooks** — store profile, currency (fixed after first sale), taxes, policies, notifications, locations. API keys (Business): `POST /seller/api-keys {name, scopes[]}` returns the secret once, stored as a hash; `DELETE` revokes. Webhooks: `POST /seller/webhooks {url, events[]}`, HMAC-SHA256 signature header `X-Nantty-Signature`, retries with exponential backoff for 24 h, delivery log `GET /seller/webhooks/:id/deliveries`. Events: `order.created|paid|cancelled|shipped|delivered|completed|refunded`, `inventory.lowStock`, `product.updated`, `payout.paid`, `review.created`.
 
-**4.3.16 Billing for plans** — `GET /seller/subscription/plans` (public, localised prices), `POST /seller/subscription/checkout {planKey, interval}` (Flutterwave checkout on Zudomart's main account, renewals by our own engine, Idempotency-Key), `/verify`, `/cancel`, `/resume`. Downgrade above a limit keeps existing data read-only (e.g. the 101st product becomes unpublished-but-kept) rather than deleting.
+**4.3.16 Billing for plans** — `GET /seller/subscription/plans` (public, localised prices), `POST /seller/subscription/checkout {planKey, interval}` (Flutterwave checkout on Nantty's main account, renewals by our own engine, Idempotency-Key), `/verify`, `/cancel`, `/resume`. Downgrade above a limit keeps existing data read-only (e.g. the 101st product becomes unpublished-but-kept) rather than deleting.
 
 **4.3.17 Acceptance**
 
@@ -919,7 +919,7 @@ Delete from `apps/seller/apiContract.md`, `apps/seller/src/types`, `src/mocks`, 
 
 ### 4.4 Ads system — Ad Decision Engine, placements, revenue sharing
 
-**Core rule: "ZudoMart doesn't pay for views; it shares eligible monetization revenue."** Every percentage below comes from config tables. None is hardcoded.
+**Core rule: "Nantty doesn't pay for views; it shares eligible monetization revenue."** Every percentage below comes from config tables. None is hardcoded.
 
 **Stack:** **Go `go-ads`** owns the Ad Decision Engine, campaigns, budgets, frequency caps and attribution. It is **separate from feed ranking**: the feed reserves slots, and the engine fills or declines them. **Redis** holds caps, pacing and spend counters. **Python** returns pCTR and fraud **scores**; Go applies the deterministic thresholds. **Go `go-money`** posts revenue to pools in the ledger.
 
@@ -939,7 +939,7 @@ Delete from `apps/seller/apiContract.md`, `apps/seller/src/types`, `src/mocks`, 
 | Pre-roll / post-roll | Long videos only; skippable after N seconds (config) | **Launch** |
 | Shorts ads | **Only between clips**, as a full clip slot. Never inside a clip | **Launch** |
 | Mid-roll | Only at natural breaks the creator marks (`VideoAdBreak { videoId, atMs }`, auto-suggested from scene changes) and only on videos above a minimum length | Later (switch) |
-| Live ads | **Only if the creator opts in**: per-stream `LiveAdSettings { allowAds, placements: beforeJoin\|naturalBreak\|betweenSegments\|overlay\|end, maxInterruptions 0–3, minIntervalMinutes, showAdIndicator, acceptedTermsVersion, acceptedAt }`. Accepted live-ad terms are stored per stream. The creator's **own sponsorship branding** is allowed (overlays, mentions) and is not sold by ZudoMart | Later (switch) |
+| Live ads | **Only if the creator opts in**: per-stream `LiveAdSettings { allowAds, placements: beforeJoin\|naturalBreak\|betweenSegments\|overlay\|end, maxInterruptions 0–3, minIntervalMinutes, showAdIndicator, acceptedTermsVersion, acceptedAt }`. Accepted live-ad terms are stored per stream. The creator's **own sponsorship branding** is allowed (overlays, mentions) and is not sold by Nantty | Later (switch) |
 
 Each placement is behind a feature flag (`ads.placement.<name>.enabled`).
 
@@ -991,7 +991,7 @@ The pipeline runs `raw impression` (client `POST /ads/events`, batched and idemp
 
 ### 4.6 Shipping and cart (go-commerce)
 
-**For the MVP there is no ZudoMart logistics network.** Sellers ship. ZudoMart validates, calculates, shows and records.
+**For the MVP there is no Nantty logistics network.** Sellers ship. Nantty validates, calculates, shows and records.
 
 **4.6.1 Models** (`marketplace` / `orders` schemas)
 
@@ -1147,7 +1147,7 @@ Append-only `AuditEvent { actor, actingAs (store/admin), action, subjectType, su
 Still open:
 
 1. **Seller plan limits** in §4.3.2 (prices decided: ₦0 / ₦5,000 / ₦15,000 a month in Nigeria).
-3. **Ad-account members:** existing Zudomart users only (like seller staff), replacing email invites? (§2.10)
+3. **Ad-account members:** existing Nantty users only (like seller staff), replacing email invites? (§2.10)
 4. **Go deployable grouping** on ECS (§1.2). Coordinate with the foundation agent.
 5. **Per-language migration tools** (Atlas / Ecto / Alembic), given the Prisma-only rule covers TS services. (§0)
 6. **Gift art:** commission final transparent HEVC/WebM + Lottie assets. Should `star` join the catalogue?
@@ -1163,7 +1163,7 @@ Still open:
 | Business, Brand | Gold only | A separate subscription per business/brand profile, with its own invoices and payment method | Web only (Flutterwave) |
 | Government | Black only | ₦50,000/month, invoiced to the agency | Web only (Flutterwave) |
 
-- **Prices (docs/pricing.md, 2026-10-03; all admin-editable):** Blue Essential ₦1,000, Blue Verified (the checkmark, `checkmark-pricing.blueMonthlyPrice`) ₦2,500 web / ₦2,900 in app, Blue Premium (the Premium user subscription) ₦4,500 web / ₦5,500 in app; seller Free ₦0, Pro ₦5,000, Business ₦15,000; Gold-only ₦3,000; Black ₦50,000. Yearly = 20% off (12 × monthly × 0.8). **0% commission on products.** Escrow fee 1.5% of the seller-group total incl. shipping (1% on Business), paid by the seller and deducted from the payout (`ESCROW_PLATFORM_COMMISSION_BPS=150`); direct payments carry no Zudomart fee, only Flutterwave processing paid by the seller; buyers pay no fee. Pro ad credit ₦1,000/mo, Business ₦5,000/mo.
+- **Prices (docs/pricing.md, 2026-10-03; all admin-editable):** Blue Essential ₦1,000, Blue Verified (the checkmark, `checkmark-pricing.blueMonthlyPrice`) ₦2,500 web / ₦2,900 in app, Blue Premium (the Premium user subscription) ₦4,500 web / ₦5,500 in app; seller Free ₦0, Pro ₦5,000, Business ₦15,000; Gold-only ₦3,000; Black ₦50,000. Yearly = 20% off (12 × monthly × 0.8). **0% commission on products.** Escrow fee 1.5% of the seller-group total incl. shipping (1% on Business), paid by the seller and deducted from the payout (`ESCROW_PLATFORM_COMMISSION_BPS=150`); direct payments carry no Nantty fee, only Flutterwave processing paid by the seller; buyers pay no fee. Pro ad credit ₦1,000/mo, Business ₦5,000/mo.
 - **Regional pricing (owner, 2026-10-04; [pricing.md](./pricing.md)):** every checkmark, Premium, seller plans, coin packs, creator bands, boosts and ad floors are priced per region NG/GH/KE/ZA/GB/EU/US; any other country pays the US price in USD. Region = app storefront (`X-Store-Storefront` + `X-Client-Platform`) > profile country > CDN/IP country > `X-Client-Region` > US (`platform/regionpricing`). The creator ad share (40%) and subscription share (80% of net) are the same everywhere. Headline Blue Verified: ₦2,500 / GH₵30 / KSh 500 / R59.99 / £5.99 / €5.99 / $5.99 (web; app one step higher). **✅ built:** go-money `plan_prices` holds web/iOS/Android monthly+yearly and store product ids per region (migration `20261004120000_regional_plan_prices`, seeded from research, staff edits never overwritten); `GET /api/v1/pricing/{region,plans,creator-subscription-bands}`; coin packs priced in all 7 currencies per channel; web falls back to the US/USD price when Flutterwave can't charge the region currency (GBP/EUR; `FLUTTERWAVE_SUPPORTED_CURRENCIES` defaults to NGN, GHS, KES, ZAR, USD); go-ads floors/minimum budgets per targeted region converted into the billing currency with `currency.exchange_rate_revisions` (strictest of several regions), auction reserve by viewer region, `GET /api/v1/ads/pricing`, USD `reportingSpend`; admin setting `regional-pricing` (ad floors, boost minimums, creator bands) and the Regional pricing admin page; staff price edits in go-money are written to the admin audit log (`ADMIN_INTERNAL_URL`; refused in production when the audit log is unreachable). **Owner decision (4 Oct):** UK/EU web buyers pay the US price in USD, labelled "Billed in USD"; with USD off, web checkout returns `422 WEB_CURRENCY_NOT_ENABLED`. go-money reads prices only from the price book (legacy `checkmark-pricing` prices and the admin "Plans & prices" per-currency prices removed). **Ads (research-based, pricing.md §5):** per-region CPM/CPC floors, suggested CPM/CPC/CPV and suggested/minimum daily budgets; `POST /api/v1/ads/pricing/estimate` returns total cost, impressions, reach, clicks, results and cost per result for a budget and duration, split per region in the billing currency with FX notes; boost options carry regional packages with reach. **Open:** Flutterwave GH/KE/ZA collections activation, the native StoreKit/Play Billing module in the mobile app (adapter and server product ids ready), mobile verification plans still read a mocked `/api/v1/verification/plans`.
 - Blue and Gold never cross profile types. Gold requires business verification (CAC/KYB) before it shows. Seller Pro (₦5,000) and Business (₦15,000) include Gold.
 - **Gold-only plan** for brands and businesses that don't sell: its own lower admin-set price (proposed ₦3,000/month), with the checkmark and brand-page features but no seller dashboard tools.
@@ -1184,7 +1184,7 @@ Still open:
 
 ## Store rewards (backend requirements)
 
-> **Seller-funded store rewards (owner, 2026-10-03).** Not platform-funded: Zudomart holds no money for it.
+> **Seller-funded store rewards (owner, 2026-10-03).** Not platform-funded: Nantty holds no money for it.
 
 - Per-store credit ledger in **go-commerce** (schema `orders`), never go-money cash. Entries per (store, buyer): `earn`, `reverse`, `redeem`, `expire`. Append-only, idempotent on `(orderGroupId, kind)`.
 - Rules per store (`StoreSettings.storeRewards`): `enabled`, `percentBackBasisPoints` (0–2000), `minimumOrder`, `maxPerOrder`, `expiryDays`.
@@ -1198,10 +1198,10 @@ Built in `services/typescript/media` (port 8108, Prisma schema `media`, `pnpm ba
 
 ### ts-social status (3 Oct 2026)
 
-Built in `services/typescript/social` (port 8105, Prisma schema `social`): follows and requests, blocks, posts/clips/stories, reshares, threaded comments, likes, shares, saves and collections (`/saves*`), mentions (`/mentions/candidates|resolve`, 20 cap, `@all`), video replies, feeds (following, for-you, popular, clips), conversations (direct, groups), message requests and spam folder, chat settings, mute/restrict/block, E2EE message envelopes, polls, locations, documents, reactions, shares to chats, streaks (`/conversations/:id/streak/*`), 30-day chat media expiry job, report intake (`POST /reports`, event `report.created` to goTrust) and the notifications digest source (`GET /api/v1/internal/digests/{weekly|followRequests|messageRequests}`, `x-internal-token`). Open items: reading `who_can_mention_me` needs `GRANT SELECT (who_can_mention_me)` on `users.privacy_settings` for `zudomart_readers` (until then mentions default to `everyone`); link previews are built (4 Oct, see below); story replies, channels, sounds, post analytics and `/search/people` are not built; product and store share cards now resolve (the commerce guard accepts `X-Internal-Token`, §2.19); live cards come from go-live.
+Built in `services/typescript/social` (port 8105, Prisma schema `social`): follows and requests, blocks, posts/clips/stories, reshares, threaded comments, likes, shares, saves and collections (`/saves*`), mentions (`/mentions/candidates|resolve`, 20 cap, `@all`), video replies, feeds (following, for-you, popular, clips), conversations (direct, groups), message requests and spam folder, chat settings, mute/restrict/block, E2EE message envelopes, polls, locations, documents, reactions, shares to chats, streaks (`/conversations/:id/streak/*`), 30-day chat media expiry job, report intake (`POST /reports`, event `report.created` to goTrust) and the notifications digest source (`GET /api/v1/internal/digests/{weekly|followRequests|messageRequests}`, `x-internal-token`). Open items: reading `who_can_mention_me` needs `GRANT SELECT (who_can_mention_me)` on `users.privacy_settings` for `nantty_readers` (until then mentions default to `everyone`); link previews are built (4 Oct, see below); story replies, channels, sounds, post analytics and `/search/people` are not built; product and store share cards now resolve (the commerce guard accepts `X-Internal-Token`, §2.19); live cards come from go-live.
 
 
-**Social contract additions (4 Oct 2026, [plans.md §42](./plans.md)).** Posts: `replyPolicy` (`everyone|following|followers|mentioned|off`), `isQuote`, `quoteCount`, `sensitiveLabels` (effective) with `authorSensitiveLabels`, `moderationSensitiveLabels`, `advisorySensitiveLabels`, `sensitiveLabelsReviewed`; comments: `depth` and materialised `path` (index `rootCommentId, path`); table `content_preferences`. `PostView` adds `quotes`, `isQuote`, `replyPolicy`, `viewerCanReply`, `replyRestriction`, `sensitive { labels, requiresInterstitial }`, `resharedFromUnavailable`. Routes: `PATCH /posts/:id/reply-settings`, `PATCH /posts/:id/sensitivity`, `GET /posts/:id/quotes`, `GET /posts/:id/thread?sort`, `GET /comments/:id/thread`, `GET|PUT /me/content-preferences` (gateway routes `/api/v1/me/content-preferences` to social). Replies are refused with `403 REPLIES_OFF|AUTHOR_FOLLOWS_ONLY|FOLLOWERS_ONLY|MENTIONED_ONLY|SUBSCRIBERS_ONLY`; subscriber-only posts need an approved creator (`CREATOR_ONLY`). Age gate: go-auth access tokens carry `age` (`adult|minor|unknown`, never the date of birth), the gateway forwards `x-zudomart-age-bracket`, social keeps it in request context and withholds `nudity` and `dangerous_acts` from every non-adult read path (direct links `404 POST_NOT_AVAILABLE`); the post search source adds `sensitiveLabels` and search stores `restricted_for_minors`. Consumed events: `labels` on `content.visibilityChanged`, new `content.sensitivityAdvised` (bound to `social-domain-events`); `post.updated` carries `replyPolicy` or `sensitiveLabels` changes.
+**Social contract additions (4 Oct 2026, [plans.md §42](./plans.md)).** Posts: `replyPolicy` (`everyone|following|followers|mentioned|off`), `isQuote`, `quoteCount`, `sensitiveLabels` (effective) with `authorSensitiveLabels`, `moderationSensitiveLabels`, `advisorySensitiveLabels`, `sensitiveLabelsReviewed`; comments: `depth` and materialised `path` (index `rootCommentId, path`); table `content_preferences`. `PostView` adds `quotes`, `isQuote`, `replyPolicy`, `viewerCanReply`, `replyRestriction`, `sensitive { labels, requiresInterstitial }`, `resharedFromUnavailable`. Routes: `PATCH /posts/:id/reply-settings`, `PATCH /posts/:id/sensitivity`, `GET /posts/:id/quotes`, `GET /posts/:id/thread?sort`, `GET /comments/:id/thread`, `GET|PUT /me/content-preferences` (gateway routes `/api/v1/me/content-preferences` to social). Replies are refused with `403 REPLIES_OFF|AUTHOR_FOLLOWS_ONLY|FOLLOWERS_ONLY|MENTIONED_ONLY|SUBSCRIBERS_ONLY`; subscriber-only posts need an approved creator (`CREATOR_ONLY`). Age gate: go-auth access tokens carry `age` (`adult|minor|unknown`, never the date of birth), the gateway forwards `x-nantty-age-bracket`, social keeps it in request context and withholds `nudity` and `dangerous_acts` from every non-adult read path (direct links `404 POST_NOT_AVAILABLE`); the post search source adds `sensitiveLabels` and search stores `restricted_for_minors`. Consumed events: `labels` on `content.visibilityChanged`, new `content.sensitivityAdvised` (bound to `social-domain-events`); `post.updated` carries `replyPolicy` or `sensitiveLabels` changes.
 
 ### Link previews, guest gate and role checks (4 Oct 2026)
 

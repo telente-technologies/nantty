@@ -202,7 +202,7 @@ References are `{prefix}-{uuidv7 without hyphens}`, unique in the DB and ≤42 c
 ### 3.1 Deposit to a PSA, then the fee sweep (NG)
 
 1. **Create the wallet (once, at L1; see section 5).**
-   - Call `POST /v3/payout-subaccounts` with `{account_name: <BVN name>, email: <alias u+{userId}@wallets.zudomart.com>, mobilenumber, country:"NG"}`. The alias email keeps the user's real email out of Flutterwave and stays unique per PSA.
+   - Call `POST /v3/payout-subaccounts` with `{account_name: <BVN name>, email: <alias u+{userId}@wallets.nantty.com>, mobilenumber, country:"NG"}`. The alias email keeps the user's real email out of Flutterwave and stays unique per PSA.
    - Store `account_reference`, `barter_id`, `nuban` and `bank_code`, then `GET /{ref}/static-account?currency=NGN&verbose=1` and store **every** funding number. All numbers map to the one PSA.
 2. **The user transfers** from any Nigerian bank to their NUBAN.
 3. **Webhook.** `transfer.completed` arrives with `data.debit_currency == "PSA"`, `narration == "WALLET FUNDING"` and `reference: "PSA_..."`. Check `verif-hash` in constant time, insert into the webhook inbox, and return 200.
@@ -398,7 +398,7 @@ Identity sources confirmed against every reference page (updated from API refere
 - **KE and ZA:** no name check in either version, so the Smile ID path or manual review stays.
 - There is no NIN, Ghana Card, Kenyan ID or SA ID endpoint in v2, v3 or v4, so Smile ID remains the L1 check outside NG. That keeps the owner's rule (no selling outside NG without identity verification) unchanged.
 
-The `watchlisted` flag or a sanctions hit means a manual review before any PSA is created. Starting caps are the CBN-tier-modelled limits in [Appendix A.3](#a3-cbn-kyc-tiers-and-zudomart-limits), now replaced by the owner-approved limits; confirm the PSA tier with Flutterwave (Q3). BVN data (including the face image) is sensitive personal data under NDPA s.30. Store only what the decision needs, encrypted with `secretbox`, and discard the image after the match.
+The `watchlisted` flag or a sanctions hit means a manual review before any PSA is created. Starting caps are the CBN-tier-modelled limits in [Appendix A.3](#a3-cbn-kyc-tiers-and-nantty-limits), now replaced by the owner-approved limits; confirm the PSA tier with Flutterwave (Q3). BVN data (including the face image) is sensitive personal data under NDPA s.30. Store only what the decision needs, encrypted with `secretbox`, and discard the image after the match.
 
 ---
 

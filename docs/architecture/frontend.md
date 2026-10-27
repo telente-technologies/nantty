@@ -16,7 +16,7 @@ As of 2026-10-03. Sources: `inventory.md` (section 1), spot checks of `apps/*`. 
 | `apps/admin` | Next 16.3 | Server shells; MFA, passkey, step-up BFF routes | mocks | EXISTING UI, MOCK-ONLY |
 | `apps/web` | Next 16.3 | Server components, 6 pages, no BFF | none | EXISTING |
 
-Shared packages: `@zudomart/design-tokens` and `@zudomart/web-kit` (webapp, studio, ads, admin) are used. `@zudomart/contracts` and `@zudomart/shared-types` have **no consumers** (inventory 1.4).
+Shared packages: `@nantty/design-tokens` and `@nantty/web-kit` (webapp, studio, ads, admin) are used. `@nantty/contracts` and `@nantty/shared-types` have **no consumers** (inventory 1.4).
 
 ## 2. Web request flow (webapp pattern, repeated in studio/seller/ads/admin)
 
@@ -66,7 +66,7 @@ flowchart LR
 | Cursor pagination | `useInfiniteQuery` + IntersectionObserver on `/` and `productCollectionBrowser` | `useInfiniteQuery` in 7 files, FlatList/FlashList in 27 | Envelope `{data,nextCursor}`; **mobile unwraps `payload.data ?? payload` and drops `nextCursor`** (`apiClient.service.ts:65`) |
 | Optimistic updates | `onMutate` in `feed/postCard.tsx` (like), `settings/consentChoicesSection.tsx` | `onMutate` for follow (product, brand, store), `hooks/useProductLike.hook.ts`; offline mutation queue (`cache/offlineMutationExecutor.util.ts`) | EXISTING |
 | Idempotency | n/a | `Idempotency-Key` header sent from `apiClient.service.ts` | server side wired on the money and creation routes that require it (`services/go/platform/idempotency`); coverage varies by route |
-| Error / loading / empty | `@zudomart/web-kit` `Skeleton`, `EmptyState`, `ErrorState`; Next `error.tsx`/`loading.tsx`: webapp 2/1, studio 2/1, ads 2/2, admin 2/1, seller 1/0, web 1/0 | `components/ui/{errorState,skeleton,listSkeleton}` | seller has no `loading.tsx` |
+| Error / loading / empty | `@nantty/web-kit` `Skeleton`, `EmptyState`, `ErrorState`; Next `error.tsx`/`loading.tsx`: webapp 2/1, studio 2/1, ads 2/2, admin 2/1, seller 1/0, web 1/0 | `components/ui/{errorState,skeleton,listSkeleton}` | seller has no `loading.tsx` |
 | Realtime | none in webapp | `/ws` client, heartbeat 25 s, 60 s missed-heartbeat close, backoff 1-30 s with jitter, mock emitter when mocks on (`apps/mobile/src/services/core/realtime.service.ts`) | see `realtime.md` |
 | Media upload | via BFF `/bff/*` | chunked upload queue (`PUT /media/uploads/:id/chunks/:i`, `X-Chunk-Sha256`), `uploadQueue` store | see `media.md` |
 | Reduced motion | n/a | `hooks/useReducedMotionPreference.hook.ts` | EXISTING |
@@ -147,7 +147,7 @@ Contract: `apps/seller/apiContract.md` (EXISTING, ~1100 lines). Pages: 88. All d
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | F1 | No per-domain mock switch | one `USE_MOCKS` flag per app | blocks incremental backend rollout | `REAL_API_PREFIXES` as in section 5 | Low | Low | P1: second real domain is imminent |
 | F2 | Zero frontend tests, no CI for 6 Next apps and mobile | `pnpm test` runs nothing; only `typecheck` scripts | regressions invisible while swapping mocks for real APIs | CI job: typecheck + lint + build per app; Vitest + MSW unit tests for services and BFF guards; Playwright smoke for login/cart/checkout. **MVP** | Medium | Low | P1: contract drift is the main risk of the switch |
-| F3 | Contract tests absent | envelope drift (`{data,nextCursor}` vs `{items,...}`), mobile drops `nextCursor` | silent pagination bugs | Generate TS types from `services/contracts` (OpenAPI/proto) and consume `@zudomart/contracts` (today unused); add schema tests for each mock against the real contract. **MVP** | Medium | Low | P1 |
+| F3 | Contract tests absent | envelope drift (`{data,nextCursor}` vs `{items,...}`), mobile drops `nextCursor` | silent pagination bugs | Generate TS types from `services/contracts` (OpenAPI/proto) and consume `@nantty/contracts` (today unused); add schema tests for each mock against the real contract. **MVP** | Medium | Low | P1 |
 | F4 | Mobile drops `nextCursor` | `payload.data ?? payload` | infinite scroll cannot work against real API | return `{data,nextCursor}` from `apiClient`, fix before the feed switch. **MVP** | Low | Low | P1 |
 | F5 | Env defaults point at port 3000 | `.env.example` | first real call hits wrong service | point to gateway `:8080`. **MVP** | Low | Low | P2 |
 | F6 | webapp is 100% CSR | 21/21 `"use client"` | poor LCP/SEO for public product and profile pages | Server Components + `HydrationBoundary` prefetch for `product/[id]`, `user/[id]`, `category/[id]`; keep the rest CSR. **Near term** | Medium | Medium (cookie/BFF fetch on server) | P2 |

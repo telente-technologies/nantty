@@ -116,10 +116,10 @@ Retention: set Smile ID's image retention to the shortest period the contract al
 
 | Setting | Where | Notes |
 | --- | --- | --- |
-| `SMILE_ID_PARTNER_ID` | Secrets Manager `zudomart/<env>/go-identity/app` | Smile ID portal, Account settings |
-| `SMILE_ID_API_KEY` | Secrets Manager `zudomart/<env>/go-identity/app` | Generate in the portal; sandbox and production keys differ. Also used to verify callbacks |
-| `VERIFICATION_DOCUMENT_FINGERPRINT_KEY` | Secrets Manager `zudomart/<env>/go-identity/app` | 32+ random bytes; never rotate without re-fingerprinting |
-| `INTELLIGENCE_SHARED_SECRET` | Secrets Manager `zudomart/<env>/go-identity/app` | Same value as the intelligence service |
+| `SMILE_ID_PARTNER_ID` | Secrets Manager `nantty/<env>/go-identity/app` | Smile ID portal, Account settings |
+| `SMILE_ID_API_KEY` | Secrets Manager `nantty/<env>/go-identity/app` | Generate in the portal; sandbox and production keys differ. Also used to verify callbacks |
+| `VERIFICATION_DOCUMENT_FINGERPRINT_KEY` | Secrets Manager `nantty/<env>/go-identity/app` | 32+ random bytes; never rotate without re-fingerprinting |
+| `INTELLIGENCE_SHARED_SECRET` | Secrets Manager `nantty/<env>/go-identity/app` | Same value as the intelligence service |
 | `SMILE_ID_ENVIRONMENT` | Terraform `wiring.tf` | `production` in prod, `sandbox` elsewhere |
 | `SMILE_ID_CALLBACK_URL` | Terraform `wiring.tf` | `https://api.<domain>/api/v1/webhooks/smile-id`; also set it as the callback URL in the Smile ID portal |
 | `PAYMENT_RETURN_URLS` | Terraform `wiring.tf` (go-money) | includes `<webapp>/settings/verification` for the Flutterwave checkout return |

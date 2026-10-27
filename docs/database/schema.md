@@ -860,7 +860,7 @@ erDiagram
     uuid id PK
   }
   RABBITMQ_EXCHANGE {
-    text name "zudomart.events"
+    text name "nantty.events"
   }
   RABBITMQ_QUEUES {
     text name "quorum, retry tiers, dlq"

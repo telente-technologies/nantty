@@ -7,7 +7,7 @@ Sections 1 and 2 were rewritten on 2026-10-11 from the code. Sections 3 to 7 are
 | Item | Evidence |
 | --- | --- |
 | Raw JSON WebSocket at `/ws` (a `Phoenix.Socket.Transport`, not Phoenix Channels), 16 KB maximum frame, origin check against `ALLOWED_ORIGINS`, `GET /healthz`, per-account limits (by default 5 connections and 120 frames a minute) | `lib/realtimeWeb/realtime.endpoint.ex`, `origin.policy.ex`, `lib/realtime/connections/connection.limiter.ex` |
-| Auth: the first frame must be `{type: "auth", accessToken}` within 10 s, or the socket closes with 4401. The token is a realtime token (audience `zudomart-realtime`, from `POST /api/v1/auth/realtime-token`), checked against go-identity's JWKS with a key cache and a revocation list | `lib/realtimeWeb/clientSocket.socket.ex`, `lib/realtime/auth/*` |
+| Auth: the first frame must be `{type: "auth", accessToken}` within 10 s, or the socket closes with 4401. The token is a realtime token (audience `nantty-realtime`, from `POST /api/v1/auth/realtime-token`), checked against go-identity's JWKS with a key cache and a revocation list | `lib/realtimeWeb/clientSocket.socket.ex`, `lib/realtime/auth/*` |
 | Client frames: `ping`, `auth`, `subscribe`, `unsubscribe`, `typing`; at most 50 subscriptions per socket | `clientSocket.socket.ex` |
 | Topics: `user:<id>` for the account itself only; `conversation:<id>` after a membership check with the social service; `live:<id>` and `battle:<id>` after an access check with go-live | `lib/realtime/topics/topic.authorizer.ex`, `conversationMembership.client.ex`, `liveAccess.client.ex` |
 | Live presence: joins and leaves are batched and posted to go-live, which owns viewer counts | `lib/realtime/presence/livePresence.forwarder.ex`, `livePresence.client.ex` |
@@ -27,7 +27,7 @@ flowchart LR
     GM[go-money] --> OB2[(outbox)]
     SO["social, notifications"] --> OB3[(outbox)]
   end
-  OB1 & OB2 & OB3 --> RL["outbox relay"] --> EX{{"RabbitMQ zudomart.events"}}
+  OB1 & OB2 & OB3 --> RL["outbox relay"] --> EX{{"RabbitMQ nantty.events"}}
   EX --> Q["quorum queue realtime-domain-events<br/>(retry tiers + DLQ)"]
   Q --> AC["AMQP consumer"] --> RT["domain event router + throttle"] --> PS
   PS --> PH

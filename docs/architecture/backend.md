@@ -105,7 +105,7 @@ Updated 2026-10-11 to match the code. The `ts-social` / `ts-io` grouping above w
 
 ## 2. Code layout (target, all stacks)
 
-Owner rule: every backend uses the Zudojs layout and naming in [services/zudojsStructure.md](../../services/zudojsStructure.md). Files are `<name>.<kind>.<ext>`, camelCase (Python is the one snake_case exception), 300 lines max, almost no comments. The current snake_case Go files are being converted; the tree below is the target.
+Owner rule: every backend uses the Nanttyjs layout and naming in [services/zudojsStructure.md](../../services/zudojsStructure.md). Files are `<name>.<kind>.<ext>`, camelCase (Python is the one snake_case exception), 300 lines max, almost no comments. The current snake_case Go files are being converted; the tree below is the target.
 
 ```
 services/go/deployables/goMoney/            (one per deployable: goIdentity, goCommerce, goMoney, goLive, goAds, goTrust)
@@ -173,7 +173,7 @@ tests/                                       (mirrors src/, files <name>.<kind>_
 | WebSocket | Raw JSON `/ws`, first-frame auth within 10 s, 64 KB frames, max 50 subs (`client_socket.ex`) | Keep; add `seq` per topic, browser tickets | Gap recovery relies on `seq` which no producer sets | P1 |
 | Internal gRPC | Protos only (`services/contracts/proto/{account_directory,live_money,money}.proto`), no server/client; no gRPC wiring in Go platform | gRPC for go-live -> go-money, go-commerce -> go-money; deadlines 300 ms; mTLS not needed inside VPC if JWT/service token verified | Add `platform/grpcserver` with deadlines, auth interceptor, OTel | P1 |
 | Webhooks inbound | ABSENT in services; the old monolith has verifier | Verify signature on raw body before parse, store `webhook_events(provider, provider_event_id UNIQUE)`, ack 200 fast, process via SQS | Build in payments before any money route | P0 |
-| Webhooks outbound | PROPOSED (ts-io integrations) | HMAC `X-Zudomart-Signature`, timestamp, backoff 24 h, DLQ, replay | | P2 |
+| Webhooks outbound | PROPOSED (ts-io integrations) | HMAC `X-Nantty-Signature`, timestamp, backoff 24 h, DLQ, replay | | P2 |
 | Pagination | Go `CursorPage {data,nextCursor,total?}` (`platform/httpserver/cursor.page.go`), unused; mobile drops `nextCursor` (`apiClient.service.ts:65`); ads `{items,...}`, admin `{items,page,...}` (MOCK-ONLY) | `{data,nextCursor,total?}`; admin tables `{data,page,pageSize,total}`; opaque base64 cursor of `(sort key, id)` | Fix mobile unwrap and ads/admin envelopes before wiring | P1 |
 | Filtering / sorting | Not specified in services | Query params `?status=&from=&to=&sort=-createdAt`; whitelist per endpoint; each sort has a matching composite index ending in `id` | Add a shared validator helper | P2 |
 | Idempotency | `platform/idempotency`: Redis store, `^[A-Za-z0-9_-]{8,128}$`, response replay (`require_idempotency_key.middleware.go`); not mounted on any route. Ads mock allows <=256 | Gateway fast path + durable unique `(scope, key)` in the owner's tx; 422 on body mismatch, 409 in flight; TTL 24 h, 7 d money | Redis-only is not durable for money: add DB uniqueness (e.g. `gift_transactions(sender_id, idempotency_key)` already exists) | P0 for money routes |
