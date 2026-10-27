@@ -40,7 +40,7 @@ apps/
   admin/       staff console
   web/         marketing site
 services/
-  typescript/  gateway, social, notifications, search, media, support (Zudojs + Prisma)
+  typescript/  gateway, social, notifications, search, media, support (Nanttyjs + Prisma)
   go/          platform/ libraries, modules/ (17 domain modules), deployables/ (6 binaries)
   elixir/      realtime: Phoenix WebSocket fan-out
   python/      intelligence: ranking, recommendations, ads, risk and moderation scores
@@ -123,4 +123,4 @@ Nantty is a private, owner-led project. Read [services/zudojsStructure.md](servi
 
 ## Licence and contact
 
-All rights reserved; no licence has been chosen yet. Contact addresses are in [docs/emailAddresses.md](docs/emailAddresses.md). Report security issues privately to [security@zudomart.com](mailto:security@zudomart.com), never in a public issue.
+All rights reserved; no licence has been chosen yet. Contact addresses are in [docs/emailAddresses.md](docs/emailAddresses.md). Report security issues privately to [security@nantty.com](mailto:security@nantty.com), never in a public issue.

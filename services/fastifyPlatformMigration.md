@@ -1,6 +1,6 @@
-# Zudojs structure for every backend stack
+# Nanttyjs structure for every backend stack
 
-Every backend (Go, TypeScript, Elixir, Python) uses the same Zudojs layout. A developer who knows one service can find their way around any other.
+Every backend (Go, TypeScript, Elixir, Python) uses the same Nanttyjs layout. A developer who knows one service can find their way around any other.
 
 ## Service layout
 
@@ -55,7 +55,7 @@ Only create the folders a service actually needs.
 
 | Stack | Rule |
 | --- | --- |
-| TypeScript (Zudojs) | Exactly as above. Barrels stay `index.ts`. |
+| TypeScript (Nanttyjs) | Exactly as above. Barrels stay `index.ts`. |
 | Go | As above. Each folder is a package, and the package name is the lowercased folder name (`commands/verifyOtp` → `package verifyotp`). Tests are `<name>.<kind>_test.go`, because Go requires the `_test.go` suffix. ent's generated code lives in `src/generated/ent/`, like Prisma's `src/generated/prisma` in the TypeScript services. |
 | Elixir (Phoenix) | `lib/realtime/` follows the layout with camelCase file names (`clientSocket.socket.ex`, `topic.authorizer.ex`). Module names stay idiomatic (`Realtime.Topics.TopicAuthorizer`). Tests are `<name>.<kind>_test.exs`. |
 | Python | Same folders and kinds, but file names must be importable, so they use snake_case with the kind as a suffix: `verify_otp_command.py`, `feed_ranking_service.py`. This is the one allowed exception, already used in `services/python/intelligence`. |

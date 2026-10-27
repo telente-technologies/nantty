@@ -49,10 +49,10 @@ OpenSearch and ClickHouse. Traces: http://localhost:16686.
 | 8111 | ts-support |
 | 8090 | Python intelligence |
 | 4000 | realtime (Phoenix, `/ws`) |
-| 15432 | Postgres (`zudomart`, `zudomart_test`, `atlas_dev`) |
+| 15432 | Postgres (`nantty`, `nantty_test`, `atlas_dev`) |
 | 16379 | Valkey |
-| 5672 | RabbitMQ AMQP, vhost `zudomart`, one user per service (`<service>` / `<service>-local-only`, see `infra/local/rabbitmq/topology.json`) |
-| 15672 | RabbitMQ management UI (localhost only; `zudomart` / `zudomart-local-only`) |
+| 5672 | RabbitMQ AMQP, vhost `nantty`, one user per service (`<service>` / `<service>-local-only`, see `infra/local/rabbitmq/topology.json`) |
+| 15672 | RabbitMQ management UI (localhost only; `nantty` / `nantty-local-only`) |
 | 15692 | RabbitMQ Prometheus metrics (`/metrics`, `/metrics/per-object`) |
 | 14566 | LocalStack (SES only) |
 | 18333 | SeaweedFS S3 API (MinIO no longer publishes public images) |
@@ -72,12 +72,12 @@ services/
     platform/          shared Go libraries (below)
     modules/<service>/ one Go module per domain. All 17 are implemented except `analytics`, which is still a stub.
     deployables/       6 binaries (goIdentity, goLive, goMoney, goCommerce, goAds, goTrust, each `server.go` + Dockerfile); build context is `services`: `docker build -f go/deployables/goMoney/Dockerfile .`
-  typescript/social/   Zudojs + Prisma (`social` schema): follows, blocks, posts, comments, saves, mentions, feeds, chat metadata, streaks, report intake
-  typescript/gateway/  Zudojs (@zudojs/http) edge: CORS, rate limit, JWKS verification, upstream routing
-  typescript/media/    Zudojs + Prisma (`media` schema): upload sessions, S3/SeaweedFS multipart, image/video derivatives, signed CDN URLs
-  typescript/search/   Zudojs + Prisma (`search` schema): search documents, read models, OpenSearch indexing
-  typescript/support/  Zudojs + Prisma (`support` schema): Help Centre, support conversations, auto-FAQ and moderation intake
-  typescript/notifications/ Zudojs + Prisma (schema `notifications`): domain-event consumer, in-app inbox, SES email, push adapter, admin email and legal notices
+  typescript/social/   Nanttyjs + Prisma (`social` schema): follows, blocks, posts, comments, saves, mentions, feeds, chat metadata, streaks, report intake
+  typescript/gateway/  Nanttyjs (@zudojs/http) edge: CORS, rate limit, JWKS verification, upstream routing
+  typescript/media/    Nanttyjs + Prisma (`media` schema): upload sessions, S3/SeaweedFS multipart, image/video derivatives, signed CDN URLs
+  typescript/search/   Nanttyjs + Prisma (`search` schema): search documents, read models, OpenSearch indexing
+  typescript/support/  Nanttyjs + Prisma (`support` schema): Help Centre, support conversations, auto-FAQ and moderation intake
+  typescript/notifications/ Nanttyjs + Prisma (schema `notifications`): domain-event consumer, in-app inbox, SES email, push adapter, admin email and legal notices
   elixir/realtime/     Phoenix: raw JSON WebSocket at /ws, PubSub topics, Presence, JWKS auth, domain event router
   python/              Python services (intelligence)
   scripts/             CI checks and test runners
@@ -88,16 +88,16 @@ infra/local/           docker-compose + bootstrap scripts;   infra/aws/  Terrafo
 
 Protos live in `contracts/proto`; regenerate with
 `docker run --rm -u $(id -u):$(id -g) -e HOME=/tmp -v "$PWD":/workspace -w /workspace bufbuild/buf generate` from
-`services/contracts`. Generated Go is committed under `contracts/gen/go` (Go module `zudomart/contracts`, in `go.work`);
+`services/contracts`. Generated Go is committed under `contracts/gen/go` (Go module `nantty/contracts`, in `go.work`);
 other languages stay ignored.
 
 | Proto | Server | Callers |
 | --- | --- | --- |
-| `zudomart/money/v1/live_money.proto` (`LiveMoneyService`: `ChargeGiftAndCreditCreator`, `SettleBattle`, `GetBattleGiftTotals`, `GetCoinBalance`) | go-money (`MONEY_GRPC_ADDRESS`, default `:9103`) | go-live |
-| `zudomart/money/v1/checkout_money.proto` (`CheckoutMoneyService`: `RegisterCheckoutPayables`, `RecordOrderFulfilment`, `ConfirmOrderReceipt`, `GetOrderEscrow`) | go-money | goCommerce |
-| `zudomart/auth/v1/account_directory.proto` | goIdentity | admin, moderation |
+| `nantty/money/v1/live_money.proto` (`LiveMoneyService`: `ChargeGiftAndCreditCreator`, `SettleBattle`, `GetBattleGiftTotals`, `GetCoinBalance`) | go-money (`MONEY_GRPC_ADDRESS`, default `:9103`) | go-live |
+| `nantty/money/v1/checkout_money.proto` (`CheckoutMoneyService`: `RegisterCheckoutPayables`, `RecordOrderFulfilment`, `ConfirmOrderReceipt`, `GetOrderEscrow`) | go-money | goCommerce |
+| `nantty/auth/v1/account_directory.proto` | goIdentity | admin, moderation |
 
-Go import: `moneyv1 "zudomart/contracts/gen/go/zudomart/money/v1"`. go-money's gRPC requires
+Go import: `moneyv1 "nantty/contracts/gen/go/nantty/money/v1"`. go-money's gRPC requires
 `authorization: Bearer $MONEY_INTERNAL_GRPC_TOKEN` metadata (32+ characters, required in production). Because the workspace
 includes `services/contracts`, every Go Dockerfile uses `services` as the build context (all six build; CI builds them in the `images` job).
 
@@ -145,7 +145,7 @@ A module never imports another module's packages (use `platform/identityports`, 
 ### Persistence
 
 - **One Aurora PostgreSQL cluster, one database, one schema per owning service.** Only the owner writes its tables. Each
-  service logs in as `svc_<service>`, which owns its schema; every service role is a member of `zudomart_readers`, and
+  service logs in as `svc_<service>`, which owns its schema; every service role is a member of `nantty_readers`, and
   owners grant read access table by table (column by column for sensitive tables) in their own migrations. See
   `modules/auth/src/migrations/*_grant_read_access_to_other_services.up.sql`: other services can read account ids,
   usernames and names, but never password hashes, sessions or keys.
@@ -170,9 +170,9 @@ go run ./cmd/generateMigration -rehash                    # after adding a manua
 No Kafka on day one. A command writes its business rows **and** an `outbox_events` row in one transaction. The module's
 outbox relay (`events.RelayOutboxEventsUntilContextDone`, `FOR UPDATE SKIP LOCKED`) publishes through the
 `DomainEventPublisher` interface. RabbitMQ adopted (owner, 2026-10-03): events go with publisher confirms to the topic
-exchange `zudomart.events` (routing key = event type, `message_id` = envelope id); each consumer owns a durable quorum
+exchange `nantty.events` (routing key = event type, `message_id` = envelope id); each consumer owns a durable quorum
 queue bound to the keys it needs. Background jobs (email, media, reports, ad reports, payouts, search indexing, trust
-advisories) go through `JobQueue` to the direct exchange `zudomart.jobs`, one quorum queue per job type. Consumers
+advisories) go through `JobQueue` to the direct exchange `nantty.jobs`, one quorum queue per job type. Consumers
 (`QueueConsumer`) use manual acks and prefetch, must be idempotent on the envelope/job id, return
 `events.ErrPoisonMessage` (TS `PoisonMessageError`) for messages that can never succeed, and get 5 attempts with
 backoff (`<queue>.retry.30s/2m/10m/30m`) before `<queue>.dlq`. Wiring: `events.CreateDomainEventPublisherFromEnvironment`
@@ -188,7 +188,7 @@ Python returns scores only; Go/TS apply a deterministic allow / hold / review / 
 
 ## go-identity: auth, users, currency, admin
 
-All four modules live in `deployables/goIdentity` and follow the Zudojs Go layout (`modules/<service>/src/modules/<feature>/{commands,queries,controllers,routes,dtos,validators,models,services,repositories,events}`;
+All four modules live in `deployables/goIdentity` and follow the Nanttyjs Go layout (`modules/<service>/src/modules/<feature>/{commands,queries,controllers,routes,dtos,validators,models,services,repositories,events}`;
 each command or query is a folder with `<name>.command.go` + `<name>.handler.go`). Modules never import each other. They talk
 through narrow ports in `platform/identityports` (registered at start-up, in-process today, replaceable by gRPC when a module is split out):
 `AccountDirectory` (auth), `UsernameGuard` and `AccountCountryLookup` (users), `StaffTokenService` (auth), `AuditRecorder` and
@@ -255,7 +255,7 @@ staff: `GET /api/v1/admin/exchange-rates`, `PUT /api/v1/admin/exchange-rates/{cu
 
 ### admin (`modules/admin`)
 
-Staff are separate from customer accounts (tokens use audience `zudomart-admin`, step-up tokens `zudomart-admin-step-up`, header `X-Step-Up-Token`, 5 minutes).
+Staff are separate from customer accounts (tokens use audience `nantty-admin`, step-up tokens `nantty-admin-step-up`, header `X-Step-Up-Token`, 5 minutes).
 Superadmins exist only through the CLI: `cd services/go/modules/admin && ADMIN_DATABASE_URL=... ADMIN_BOOTSTRAP_PASSWORD=... go run ./cmd/bootstrapSuperadmin -email you@example.com -name "Your Name"`.
 Login is password then TOTP (`/api/v1/admin/auth/login`, `.../mfa/enroll/start|confirm`, `.../mfa/verify`, `.../refresh`, `.../logout`, `.../me`, `.../step-up`); admins are invited by a superadmin (`/api/v1/admin/admins`, `.../permissions`, `.../disable`, `/api/v1/admin/auth/accept-invitation`).
 Settings (`/api/v1/admin/config[/{key}]`, optimistic `expectedVersion` + `reason`, step-up): `creator.requirements`, `monetization.policy`, `gift.shareTiers` (creator share <= 7000 bps). Public read: `GET /api/v1/platform-config/creator-requirements`; other services read settings through `GET /api/v1/internal/platform-config/{key}` with `X-Internal-Token` (never routed by the gateway).
@@ -269,17 +269,17 @@ Abuse protection ([security.md §10](../docs/architecture/security.md), [plans.m
 
 | Key | Put it in (local, gitignored) | AWS Secrets Manager |
 | --- | --- | --- |
-| `TURNSTILE_SECRET_KEY` | `services/typescript/gateway/.env` | `zudomart/<environment>/gateway/app` → `TURNSTILE_SECRET_KEY` |
-| `TRUST_INTERNAL_TOKEN` (= go-trust `MODERATION_INTERNAL_API_TOKEN`) | `services/typescript/gateway/.env` | `zudomart/<environment>/gateway/app` → `TRUST_INTERNAL_TOKEN` |
+| `TURNSTILE_SECRET_KEY` | `services/typescript/gateway/.env` | `nantty/<environment>/gateway/app` → `TURNSTILE_SECRET_KEY` |
+| `TRUST_INTERNAL_TOKEN` (= go-trust `MODERATION_INTERNAL_API_TOKEN`) | `services/typescript/gateway/.env` | `nantty/<environment>/gateway/app` → `TRUST_INTERNAL_TOKEN` |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (public) | `apps/webapp/.env.local` | none: webapp build variable |
 | `EXPO_PUBLIC_TURNSTILE_SITE_KEY` (public) | `apps/mobile/.env` | none: EAS variable |
 
-Terraform creates the gateway secret with `CHANGE_ME` placeholders (`infra/aws/modules/platform/secrets.tf`); set the real value with `aws secretsmanager put-secret-value --secret-id zudomart/<environment>/gateway/app` (keep the other JSON keys). Without `TRUST_INTERNAL_TOKEN` the gateway still detects probing locally but sends nothing to go-trust and serves no challenges. To test failures use the always-fail secret `2x0000000000000000000000000000000AA`.
+Terraform creates the gateway secret with `CHANGE_ME` placeholders (`infra/aws/modules/platform/secrets.tf`); set the real value with `aws secretsmanager put-secret-value --secret-id nantty/<environment>/gateway/app` (keep the other JSON keys). Without `TRUST_INTERNAL_TOKEN` the gateway still detects probing locally but sends nothing to go-trust and serves no challenges. To test failures use the always-fail secret `2x0000000000000000000000000000000AA`.
 
 ## Adding a service or module (template for per-service agents)
 
 1. Read the service's block in `microservicesPlan.json` and its rows in `docs/backendPlan.md`.
-2. Go: work in `services/go/modules/<service>` using the Zudojs layout from [`zudojsStructure.md`](zudojsStructure.md); copy auth or currency:
+2. Go: work in `services/go/modules/<service>` using the Nanttyjs layout from [`zudojsStructure.md`](zudojsStructure.md); copy auth or currency:
    ```
    <service>.module.go                       facade at the module root (package <service>) forwarding to src
    <service>.integration_test.go             real Postgres, fresh schema, HTTP-level flow
@@ -293,7 +293,7 @@ Terraform creates the gateway secret with `CHANGE_ME` placeholders (`infra/aws/m
    src/modules/<feature>/{commands,queries}/<name>/<name>.command.go + <name>.handler.go, controllers, routes, dtos, validators, services
    ```
    Add `<SERVICE>_DATABASE_URL` (role `svc_<service>`) to `services/go/.env.example`.
-3. TypeScript: `services/typescript/<service>` (Zudojs + Prisma, `<name>.<kind>.ts`), then add its route prefix to
+3. TypeScript: `services/typescript/<service>` (Nanttyjs + Prisma, `<name>.<kind>.ts`), then add its route prefix to
    `typescript/gateway/src/routes/upstream.routes.ts` and its URL to `gateway.config.ts`.
 4. Contracts: add each new event's JSON Schema + AsyncAPI message, and proto files for any internal gRPC.
 5. Infra: if the service consumes events or jobs, add its queue, bindings and service grants to
@@ -303,7 +303,7 @@ Terraform creates the gateway secret with `CHANGE_ME` placeholders (`infra/aws/m
 
 ## go-live: live (`modules/live`)
 
-Zudojs Go layout like go-identity (`src/{configs,container,databases/schema,errors,events,generated/ent,integrations,interfaces,jobs,middlewares,migrations,modules,services,types,utils}`;
+Nanttyjs Go layout like go-identity (`src/{configs,container,databases/schema,errors,events,generated/ent,integrations,interfaces,jobs,middlewares,migrations,modules,services,types,utils}`;
 each command/query is `commands|queries/<name>/<name>.command|query.go` + `<name>.handler.go`; modules: sessions, stage, battles, gifts, points). `pnpm backend:dev:live` runs it on :8102.
 
 - Writes only the `live` schema. Money goes through go-money gRPC (`LIVE_MONEY_GRPC_ADDRESS`, `LIVE_MONEY_GRPC_TOKEN`, `LIVE_MONEY_CALL_TIMEOUT` 5s, `LIVE_GRPC_RETRY_ATTEMPTS` 3 on `UNAVAILABLE` only; the in-memory fake is used only when the address is empty outside production, and production refuses to start without addresses and 32+ character tokens). Names and creator-program roles come from the auth account directory (`LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS`/`_TOKEN`; without an address the granted `auth.accounts` columns are used outside production). `deployables/goLive/liveMoney.integration_test.go` runs go-live against a real go-money (gift, balanced ledger, `gift.sent` and `giftTransaction.committed` outbox rows). Lists (`/lives/suggested`, `/lives/:id/viewers`) are `{data, nextCursor}`.
@@ -418,7 +418,7 @@ winner, a tie settles as keep-own, viewers are never refunded. Money events are 
 | `POST /payments/initialize` (IK), `POST /payments/orders/{orderId}/verify`, `POST /webhooks/{provider}`, `POST /webhooks/store-notifications/{store}` (`/webhooks/*` enters through the gateway, which passes the raw body to go-money untouched) | |
 | `GET /orders/{orderId}/escrow`, `POST /orders/{orderId}/disputes` (IK), `GET /disputes`, `GET /disputes/{id}`, `POST /disputes/{id}/messages` (IK), `POST /disputes/{id}/close` | gateway routes `/orders/*/escrow` and `/orders/*/disputes` (`*` = one path segment) |
 | `GET/POST /payments/connected-accounts/me`, `POST /payments/connected-accounts/me/onboarding-link`, `POST /payments/connected-accounts/me/virtual-account`, `POST /payments/subscriptions/checkout` | onboarding link is created only when the user taps continue |
-| Admin: `/admin/ledger/*`, `/admin/payments/reconciliations`, `/admin/payments/disputes/{id}/evidence`, `/admin/coins/price-table*`, `/admin/disputes*` (resolve needs step-up), `/admin/orders/{id}/escrow[/refund]`, `/admin/withdrawals*`, `/admin/payouts/run`, `/admin/creator-tiers*`, `/admin/creators/{userId}/program` | staff tokens (`zudomart-admin` audience) with `money.*` permissions |
+| Admin: `/admin/ledger/*`, `/admin/payments/reconciliations`, `/admin/payments/disputes/{id}/evidence`, `/admin/coins/price-table*`, `/admin/disputes*` (resolve needs step-up), `/admin/orders/{id}/escrow[/refund]`, `/admin/withdrawals*`, `/admin/payouts/run`, `/admin/creator-tiers*`, `/admin/creators/{userId}/program` | staff tokens (`nantty-admin` audience) with `money.*` permissions |
 
 The subscriptions module (web billing and creator subscriptions), App Store and Play verification, wallet deposits into
 Flutterwave payout subaccounts and payout-account name matching are built (updated 2026-10-11). Open payment items are in

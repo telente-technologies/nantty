@@ -1,5 +1,5 @@
 {
-  "name": "zudomart",
+  "name": "nantty",
   "private": true,
   "packageManager": "pnpm@11.24.0",
   "engines": {
@@ -27,10 +27,10 @@
     "backend:logs": "docker compose -f infra/local/docker-compose.yml logs -f",
     "backend:rabbitmq:definitions": "node infra/local/rabbitmq/generateDefinitions.mjs",
     "backend:dev:identity": "cd services/go && set -a && . ./.env.example && set +a && go run ./deployables/goIdentity",
-    "backend:dev:live": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8102 RABBITMQ_URL=amqp://go-live:go-live-local-only@localhost:5672/zudomart go run ./deployables/goLive",
-    "backend:dev:money": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8103 RABBITMQ_URL=amqp://go-money:go-money-local-only@localhost:5672/zudomart go run ./deployables/goMoney",
-    "backend:dev:trust": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8106 RABBITMQ_URL=amqp://go-trust:go-trust-local-only@localhost:5672/zudomart go run ./deployables/goTrust",
-    "backend:dev:commerce": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8107 RABBITMQ_URL=amqp://go-commerce:go-commerce-local-only@localhost:5672/zudomart go run ./deployables/goCommerce",
+    "backend:dev:live": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8102 RABBITMQ_URL=amqp://go-live:go-live-local-only@localhost:5672/nantty go run ./deployables/goLive",
+    "backend:dev:money": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8103 RABBITMQ_URL=amqp://go-money:go-money-local-only@localhost:5672/nantty go run ./deployables/goMoney",
+    "backend:dev:trust": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8106 RABBITMQ_URL=amqp://go-trust:go-trust-local-only@localhost:5672/nantty go run ./deployables/goTrust",
+    "backend:dev:commerce": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8107 RABBITMQ_URL=amqp://go-commerce:go-commerce-local-only@localhost:5672/nantty go run ./deployables/goCommerce",
     "backend:dev:social": "cd services/typescript/social && set -a && . ./.env.example && set +a && pnpm dev",
     "backend:dev:media": "cd services/typescript/media && set -a && . ./.env.example && set +a && pnpm dev",
     "backend:dev:gateway": "cd services/typescript/gateway && set -a && . ./.env.example && set +a && pnpm dev",
@@ -45,7 +45,7 @@
     "backend:test:realtime": "bash services/scripts/test-realtime-in-docker.sh",
     "backend:test:smoke": "pnpm --filter @nantty/api-smoke test",
     "browser:e2e": "pnpm --filter @nantty/browser-e2e app",
-    "backend:dev:ads": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8110 RABBITMQ_URL=amqp://go-ads:go-ads-local-only@localhost:5672/zudomart go run ./deployables/goAds",
+    "backend:dev:ads": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8110 RABBITMQ_URL=amqp://go-ads:go-ads-local-only@localhost:5672/nantty go run ./deployables/goAds",
     "backend:lint": "bash services/scripts/check-backend-file-lengths.sh && bash services/scripts/check-no-raw-sql-in-typescript.sh",
     "check:no-mocks": "node scripts/checkNoMocksInBuild.mjs",
     "check:no-mocks:mobile": "cd apps/mobile && EXPO_PUBLIC_USE_MOCKS=false NODE_ENV=production npx expo export --platform android --output-dir ../../.data/mobileExport --clear && cd ../.. && node scripts/checkNoMocksInBuild.mjs mobile --mobile-export .data/mobileExport"
