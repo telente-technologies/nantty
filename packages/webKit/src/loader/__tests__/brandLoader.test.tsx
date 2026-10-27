@@ -14,7 +14,7 @@ describe("BrandLoader", () => {
     assert.match(html, /aria-live="polite"/);
     assert.match(html, /width="64"/);
     assert.match(html, /<span class="visuallyHidden">Loading…<\/span>/);
-    assert.doesNotMatch(html, /zudomart/i);
+    assert.doesNotMatch(html, /nantty/i);
   });
 
   it("can show its label", () => {

@@ -17,7 +17,7 @@ export interface EmbedSnippetOptions {
 const attributeValue = (value: string) => value.replace(/[&"<>]/g, (character) => `&#${character.charCodeAt(0)};`);
 
 export function buildEmbedSnippet(options: EmbedSnippetOptions): string {
-  const attributes: [string, string][] = [["class", "zudomart-embed"], ["data-type", options.kind]];
+  const attributes: [string, string][] = [["class", "nantty-embed"], ["data-type", options.kind]];
   if (options.kind === "button") attributes.push(["data-product", options.productId ?? ""]);
   else attributes.push(["data-store", options.storeId]);
   attributes.push(["data-theme", options.theme]);

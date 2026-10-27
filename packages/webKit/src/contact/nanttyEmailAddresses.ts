@@ -1,6 +1,6 @@
 // Keep the legacy export names for source compatibility; the default brand domain is Nantty.
 export const nanttyMailboxDomain = "nantty.com";
-export const nanttySendingDomain = "mail.zudomart.com";
+export const nanttySendingDomain = "mail.nantty.com";
 
 export const nanttyMailboxNames = [
   "support",

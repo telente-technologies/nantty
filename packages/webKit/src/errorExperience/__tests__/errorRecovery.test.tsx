@@ -16,7 +16,7 @@ function loadJsdom(): JsdomModule | null {
 const jsdom = loadJsdom();
 
 async function withDom(run: (window: Window & typeof globalThis, online: { value: boolean }) => Promise<void>): Promise<void> {
-  const { window } = new jsdom!.JSDOM("<!doctype html><div id='root'></div>", { pretendToBeVisual: true, url: "https://zudomart.test/" });
+  const { window } = new jsdom!.JSDOM("<!doctype html><div id='root'></div>", { pretendToBeVisual: true, url: "https://nantty.test/" });
   const online = { value: true };
   Object.defineProperty(window.navigator, "onLine", { configurable: true, get: () => online.value });
   Object.assign(globalThis, { window, document: window.document, HTMLElement: window.HTMLElement, IS_REACT_ACT_ENVIRONMENT: true });

@@ -1,8 +1,8 @@
 export const consentPolicyVersion = "1.0";
-export const consentCookieName = "zudomart_consent";
+export const consentCookieName = "nantty_consent";
 export const consentCookieMaxAgeSeconds = 60 * 60 * 24 * 180;
-export const openCookieSettingsEventName = "zudomart:open-cookie-settings";
-export const consentChangedEventName = "zudomart:consent-changed";
+export const openCookieSettingsEventName = "nantty:open-cookie-settings";
+export const consentChangedEventName = "nantty:consent-changed";
 
 export const consentCategories = ["essential", "analytics", "personalization", "advertising"] as const;
 export type ConsentCategory = (typeof consentCategories)[number];

@@ -4,7 +4,7 @@ export type ResolvedTheme = "light" | "dark";
 export const themePreferences: readonly ThemePreference[] = ["light", "dark", "system"];
 export const themeCookieName = "theme";
 export const themeCookieMaxAgeSeconds = 60 * 60 * 24 * 365;
-export const themeChangedEventName = "zudomart:theme-changed";
+export const themeChangedEventName = "nantty:theme-changed";
 export const darkColorSchemeQuery = "(prefers-color-scheme: dark)";
 
 export const themeColorByResolvedTheme: Record<ResolvedTheme, string> = { light: "#f7f8fe", dark: "#15161a" };

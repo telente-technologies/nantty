@@ -8,7 +8,7 @@ export interface StoreLinks {
   readonly playStoreUrl: string | null;
 }
 
-export const defaultPlayPackage = "com.zudomart.app";
+export const defaultPlayPackage = "com.nantty.app";
 
 export function buildStoreLinks({ appStoreId, playPackage }: StoreLinkConfig): StoreLinks {
   const appleId = appStoreId?.trim().replace(/^id/i, "") ?? "";

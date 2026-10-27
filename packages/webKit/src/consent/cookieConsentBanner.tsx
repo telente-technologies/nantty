@@ -16,7 +16,7 @@ export interface CookieConsentBannerProps {
   readonly isSignedIn?: boolean;
 }
 
-const syncedChoiceStorageKey = "zudomart_consent_synced_at";
+const syncedChoiceStorageKey = "nantty_consent_synced_at";
 
 const allGranted: Record<OptionalConsentCategory, boolean> = { analytics: true, personalization: true, advertising: true };
 const noneGranted: Record<OptionalConsentCategory, boolean> = { analytics: false, personalization: false, advertising: false };

@@ -16,7 +16,7 @@ export async function probeConnectivity(url = "/favicon.ico", timeoutMillisecond
 export function isBrowserStorageAvailable(): boolean {
   if (typeof window === "undefined") return true;
   try {
-    const key = "__zudomart_storage_probe__";
+    const key = "__nantty_storage_probe__";
     window.localStorage.setItem(key, "1");
     window.localStorage.removeItem(key);
     return navigator.cookieEnabled !== false;
