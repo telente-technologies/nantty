@@ -6,7 +6,7 @@ terraform {
 }
 
 resource "aws_ecs_cluster" "this" {
-  name = "zudomart-${var.environment}"
+  name = "nantty-${var.environment}"
   setting {
     name  = "containerInsights"
     value = "enabled"
@@ -24,7 +24,7 @@ resource "aws_ecs_cluster" "this" {
 }
 
 resource "aws_cloudwatch_log_group" "exec" {
-  name              = "/zudomart/${var.environment}/ecs-exec"
+  name              = "/nantty/${var.environment}/ecs-exec"
   retention_in_days = var.log_retention_days
   kms_key_id        = var.logs_kms_key_arn
 }
@@ -40,7 +40,7 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
 }
 
 resource "aws_service_discovery_private_dns_namespace" "this" {
-  name        = "${var.environment}.zudomart.internal"
+  name        = "${var.environment}.nantty.internal"
   description = "Service-to-service discovery"
   vpc         = var.vpc_id
 }

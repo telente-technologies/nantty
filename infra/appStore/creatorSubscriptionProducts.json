@@ -1,6 +1,6 @@
 {
   "description": "Creator subscription store products. One product per price tier, interval and slot; each product is its own iOS subscription group so a fan can hold several creator subscriptions at once. Generated from services/go/platform/regionpricing/regionPricing.creatorTiers.go and checked by regionPricing.storeProducts_test.go.",
-  "productIdPattern": "zudomart.creatorsub.tier_<tier>.s<slot>.<monthly|yearly>",
+  "productIdPattern": "nantty.creatorsub.tier_<tier>.s<slot>.<monthly|yearly>",
   "slotsPerTierAndInterval": 5,
   "storeFeeBps": {
     "ios": 3000,
@@ -44,25 +44,25 @@
     }
   ],
   "notificationUrls": {
-    "apple": "https://api.zudomart.com/webhooks/store-notifications/apple_iap",
-    "google": "https://api.zudomart.com/webhooks/store-notifications/google_play"
+    "apple": "https://api.nantty.com/webhooks/store-notifications/apple_iap",
+    "google": "https://api.nantty.com/webhooks/store-notifications/google_play"
   },
   "products": [
     {
-      "productId": "zudomart.creatorsub.tier_500.s1.monthly",
+      "productId": "nantty.creatorsub.tier_500.s1.monthly",
       "tier": "500",
       "interval": "month",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_500.s1.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_500.s1.monthly",
         "referenceName": "Creator subscription ₦500 tier monthly slot 1",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_500.s1.monthly",
+        "productId": "nantty.creatorsub.tier_500.s1.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -122,20 +122,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_500.s2.monthly",
+      "productId": "nantty.creatorsub.tier_500.s2.monthly",
       "tier": "500",
       "interval": "month",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_500.s2.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_500.s2.monthly",
         "referenceName": "Creator subscription ₦500 tier monthly slot 2",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_500.s2.monthly",
+        "productId": "nantty.creatorsub.tier_500.s2.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -195,20 +195,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_500.s3.monthly",
+      "productId": "nantty.creatorsub.tier_500.s3.monthly",
       "tier": "500",
       "interval": "month",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_500.s3.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_500.s3.monthly",
         "referenceName": "Creator subscription ₦500 tier monthly slot 3",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_500.s3.monthly",
+        "productId": "nantty.creatorsub.tier_500.s3.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -268,20 +268,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_500.s4.monthly",
+      "productId": "nantty.creatorsub.tier_500.s4.monthly",
       "tier": "500",
       "interval": "month",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_500.s4.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_500.s4.monthly",
         "referenceName": "Creator subscription ₦500 tier monthly slot 4",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_500.s4.monthly",
+        "productId": "nantty.creatorsub.tier_500.s4.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -341,20 +341,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_500.s5.monthly",
+      "productId": "nantty.creatorsub.tier_500.s5.monthly",
       "tier": "500",
       "interval": "month",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_500.s5.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_500.s5.monthly",
         "referenceName": "Creator subscription ₦500 tier monthly slot 5",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_500.s5.monthly",
+        "productId": "nantty.creatorsub.tier_500.s5.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -414,20 +414,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1000.s1.monthly",
+      "productId": "nantty.creatorsub.tier_1000.s1.monthly",
       "tier": "1000",
       "interval": "month",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s1.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1000.s1.monthly",
         "referenceName": "Creator subscription ₦1,000 tier monthly slot 1",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1000.s1.monthly",
+        "productId": "nantty.creatorsub.tier_1000.s1.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -487,20 +487,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1000.s2.monthly",
+      "productId": "nantty.creatorsub.tier_1000.s2.monthly",
       "tier": "1000",
       "interval": "month",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s2.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1000.s2.monthly",
         "referenceName": "Creator subscription ₦1,000 tier monthly slot 2",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1000.s2.monthly",
+        "productId": "nantty.creatorsub.tier_1000.s2.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -560,20 +560,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1000.s3.monthly",
+      "productId": "nantty.creatorsub.tier_1000.s3.monthly",
       "tier": "1000",
       "interval": "month",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s3.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1000.s3.monthly",
         "referenceName": "Creator subscription ₦1,000 tier monthly slot 3",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1000.s3.monthly",
+        "productId": "nantty.creatorsub.tier_1000.s3.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -633,20 +633,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1000.s4.monthly",
+      "productId": "nantty.creatorsub.tier_1000.s4.monthly",
       "tier": "1000",
       "interval": "month",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s4.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1000.s4.monthly",
         "referenceName": "Creator subscription ₦1,000 tier monthly slot 4",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1000.s4.monthly",
+        "productId": "nantty.creatorsub.tier_1000.s4.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -706,20 +706,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1000.s5.monthly",
+      "productId": "nantty.creatorsub.tier_1000.s5.monthly",
       "tier": "1000",
       "interval": "month",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s5.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1000.s5.monthly",
         "referenceName": "Creator subscription ₦1,000 tier monthly slot 5",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1000.s5.monthly",
+        "productId": "nantty.creatorsub.tier_1000.s5.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -779,20 +779,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1500.s1.monthly",
+      "productId": "nantty.creatorsub.tier_1500.s1.monthly",
       "tier": "1500",
       "interval": "month",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s1.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1500.s1.monthly",
         "referenceName": "Creator subscription ₦1,500 tier monthly slot 1",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1500.s1.monthly",
+        "productId": "nantty.creatorsub.tier_1500.s1.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -852,20 +852,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1500.s2.monthly",
+      "productId": "nantty.creatorsub.tier_1500.s2.monthly",
       "tier": "1500",
       "interval": "month",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s2.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1500.s2.monthly",
         "referenceName": "Creator subscription ₦1,500 tier monthly slot 2",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1500.s2.monthly",
+        "productId": "nantty.creatorsub.tier_1500.s2.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -925,20 +925,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1500.s3.monthly",
+      "productId": "nantty.creatorsub.tier_1500.s3.monthly",
       "tier": "1500",
       "interval": "month",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s3.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1500.s3.monthly",
         "referenceName": "Creator subscription ₦1,500 tier monthly slot 3",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1500.s3.monthly",
+        "productId": "nantty.creatorsub.tier_1500.s3.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -998,20 +998,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1500.s4.monthly",
+      "productId": "nantty.creatorsub.tier_1500.s4.monthly",
       "tier": "1500",
       "interval": "month",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s4.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1500.s4.monthly",
         "referenceName": "Creator subscription ₦1,500 tier monthly slot 4",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1500.s4.monthly",
+        "productId": "nantty.creatorsub.tier_1500.s4.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1071,20 +1071,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1500.s5.monthly",
+      "productId": "nantty.creatorsub.tier_1500.s5.monthly",
       "tier": "1500",
       "interval": "month",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s5.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1500.s5.monthly",
         "referenceName": "Creator subscription ₦1,500 tier monthly slot 5",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1500.s5.monthly",
+        "productId": "nantty.creatorsub.tier_1500.s5.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1144,20 +1144,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_2000.s1.monthly",
+      "productId": "nantty.creatorsub.tier_2000.s1.monthly",
       "tier": "2000",
       "interval": "month",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s1.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_2000.s1.monthly",
         "referenceName": "Creator subscription ₦2,000 tier monthly slot 1",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_2000.s1.monthly",
+        "productId": "nantty.creatorsub.tier_2000.s1.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1217,20 +1217,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_2000.s2.monthly",
+      "productId": "nantty.creatorsub.tier_2000.s2.monthly",
       "tier": "2000",
       "interval": "month",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s2.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_2000.s2.monthly",
         "referenceName": "Creator subscription ₦2,000 tier monthly slot 2",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_2000.s2.monthly",
+        "productId": "nantty.creatorsub.tier_2000.s2.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1290,20 +1290,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_2000.s3.monthly",
+      "productId": "nantty.creatorsub.tier_2000.s3.monthly",
       "tier": "2000",
       "interval": "month",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s3.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_2000.s3.monthly",
         "referenceName": "Creator subscription ₦2,000 tier monthly slot 3",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_2000.s3.monthly",
+        "productId": "nantty.creatorsub.tier_2000.s3.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1363,20 +1363,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_2000.s4.monthly",
+      "productId": "nantty.creatorsub.tier_2000.s4.monthly",
       "tier": "2000",
       "interval": "month",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s4.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_2000.s4.monthly",
         "referenceName": "Creator subscription ₦2,000 tier monthly slot 4",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_2000.s4.monthly",
+        "productId": "nantty.creatorsub.tier_2000.s4.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1436,20 +1436,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_2000.s5.monthly",
+      "productId": "nantty.creatorsub.tier_2000.s5.monthly",
       "tier": "2000",
       "interval": "month",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s5.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_2000.s5.monthly",
         "referenceName": "Creator subscription ₦2,000 tier monthly slot 5",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_2000.s5.monthly",
+        "productId": "nantty.creatorsub.tier_2000.s5.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1509,20 +1509,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_3000.s1.monthly",
+      "productId": "nantty.creatorsub.tier_3000.s1.monthly",
       "tier": "3000",
       "interval": "month",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s1.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_3000.s1.monthly",
         "referenceName": "Creator subscription ₦3,000 tier monthly slot 1",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_3000.s1.monthly",
+        "productId": "nantty.creatorsub.tier_3000.s1.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1582,20 +1582,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_3000.s2.monthly",
+      "productId": "nantty.creatorsub.tier_3000.s2.monthly",
       "tier": "3000",
       "interval": "month",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s2.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_3000.s2.monthly",
         "referenceName": "Creator subscription ₦3,000 tier monthly slot 2",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_3000.s2.monthly",
+        "productId": "nantty.creatorsub.tier_3000.s2.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1655,20 +1655,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_3000.s3.monthly",
+      "productId": "nantty.creatorsub.tier_3000.s3.monthly",
       "tier": "3000",
       "interval": "month",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s3.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_3000.s3.monthly",
         "referenceName": "Creator subscription ₦3,000 tier monthly slot 3",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_3000.s3.monthly",
+        "productId": "nantty.creatorsub.tier_3000.s3.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1728,20 +1728,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_3000.s4.monthly",
+      "productId": "nantty.creatorsub.tier_3000.s4.monthly",
       "tier": "3000",
       "interval": "month",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s4.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_3000.s4.monthly",
         "referenceName": "Creator subscription ₦3,000 tier monthly slot 4",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_3000.s4.monthly",
+        "productId": "nantty.creatorsub.tier_3000.s4.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1801,20 +1801,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_3000.s5.monthly",
+      "productId": "nantty.creatorsub.tier_3000.s5.monthly",
       "tier": "3000",
       "interval": "month",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s5.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_3000.s5.monthly",
         "referenceName": "Creator subscription ₦3,000 tier monthly slot 5",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_3000.s5.monthly",
+        "productId": "nantty.creatorsub.tier_3000.s5.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1874,20 +1874,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_4000.s1.monthly",
+      "productId": "nantty.creatorsub.tier_4000.s1.monthly",
       "tier": "4000",
       "interval": "month",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s1.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_4000.s1.monthly",
         "referenceName": "Creator subscription ₦4,000 tier monthly slot 1",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_4000.s1.monthly",
+        "productId": "nantty.creatorsub.tier_4000.s1.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -1947,20 +1947,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_4000.s2.monthly",
+      "productId": "nantty.creatorsub.tier_4000.s2.monthly",
       "tier": "4000",
       "interval": "month",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s2.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_4000.s2.monthly",
         "referenceName": "Creator subscription ₦4,000 tier monthly slot 2",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_4000.s2.monthly",
+        "productId": "nantty.creatorsub.tier_4000.s2.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -2020,20 +2020,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_4000.s3.monthly",
+      "productId": "nantty.creatorsub.tier_4000.s3.monthly",
       "tier": "4000",
       "interval": "month",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s3.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_4000.s3.monthly",
         "referenceName": "Creator subscription ₦4,000 tier monthly slot 3",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_4000.s3.monthly",
+        "productId": "nantty.creatorsub.tier_4000.s3.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -2093,20 +2093,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_4000.s4.monthly",
+      "productId": "nantty.creatorsub.tier_4000.s4.monthly",
       "tier": "4000",
       "interval": "month",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s4.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_4000.s4.monthly",
         "referenceName": "Creator subscription ₦4,000 tier monthly slot 4",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_4000.s4.monthly",
+        "productId": "nantty.creatorsub.tier_4000.s4.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -2166,20 +2166,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_4000.s5.monthly",
+      "productId": "nantty.creatorsub.tier_4000.s5.monthly",
       "tier": "4000",
       "interval": "month",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s5.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_4000.s5.monthly",
         "referenceName": "Creator subscription ₦4,000 tier monthly slot 5",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_4000.s5.monthly",
+        "productId": "nantty.creatorsub.tier_4000.s5.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -2239,20 +2239,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_5000.s1.monthly",
+      "productId": "nantty.creatorsub.tier_5000.s1.monthly",
       "tier": "5000",
       "interval": "month",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s1.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_5000.s1.monthly",
         "referenceName": "Creator subscription ₦5,000 tier monthly slot 1",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_5000.s1.monthly",
+        "productId": "nantty.creatorsub.tier_5000.s1.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -2312,20 +2312,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_5000.s2.monthly",
+      "productId": "nantty.creatorsub.tier_5000.s2.monthly",
       "tier": "5000",
       "interval": "month",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s2.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_5000.s2.monthly",
         "referenceName": "Creator subscription ₦5,000 tier monthly slot 2",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_5000.s2.monthly",
+        "productId": "nantty.creatorsub.tier_5000.s2.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -2385,20 +2385,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_5000.s3.monthly",
+      "productId": "nantty.creatorsub.tier_5000.s3.monthly",
       "tier": "5000",
       "interval": "month",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s3.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_5000.s3.monthly",
         "referenceName": "Creator subscription ₦5,000 tier monthly slot 3",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_5000.s3.monthly",
+        "productId": "nantty.creatorsub.tier_5000.s3.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -2458,20 +2458,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_5000.s4.monthly",
+      "productId": "nantty.creatorsub.tier_5000.s4.monthly",
       "tier": "5000",
       "interval": "month",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s4.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_5000.s4.monthly",
         "referenceName": "Creator subscription ₦5,000 tier monthly slot 4",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_5000.s4.monthly",
+        "productId": "nantty.creatorsub.tier_5000.s4.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -2531,20 +2531,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_5000.s5.monthly",
+      "productId": "nantty.creatorsub.tier_5000.s5.monthly",
       "tier": "5000",
       "interval": "month",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s5.monthly",
+        "subscriptionGroup": "nantty.creatorsub.tier_5000.s5.monthly",
         "referenceName": "Creator subscription ₦5,000 tier monthly slot 5",
         "duration": "1 month",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_5000.s5.monthly",
+        "productId": "nantty.creatorsub.tier_5000.s5.monthly",
         "basePlanId": "monthly",
         "billingPeriod": "P1M",
         "renewalType": "auto-renewing",
@@ -2604,20 +2604,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_500.s1.yearly",
+      "productId": "nantty.creatorsub.tier_500.s1.yearly",
       "tier": "500",
       "interval": "year",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_500.s1.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_500.s1.yearly",
         "referenceName": "Creator subscription ₦500 tier yearly slot 1",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_500.s1.yearly",
+        "productId": "nantty.creatorsub.tier_500.s1.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -2677,20 +2677,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_500.s2.yearly",
+      "productId": "nantty.creatorsub.tier_500.s2.yearly",
       "tier": "500",
       "interval": "year",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_500.s2.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_500.s2.yearly",
         "referenceName": "Creator subscription ₦500 tier yearly slot 2",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_500.s2.yearly",
+        "productId": "nantty.creatorsub.tier_500.s2.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -2750,20 +2750,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_500.s3.yearly",
+      "productId": "nantty.creatorsub.tier_500.s3.yearly",
       "tier": "500",
       "interval": "year",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_500.s3.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_500.s3.yearly",
         "referenceName": "Creator subscription ₦500 tier yearly slot 3",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_500.s3.yearly",
+        "productId": "nantty.creatorsub.tier_500.s3.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -2823,20 +2823,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_500.s4.yearly",
+      "productId": "nantty.creatorsub.tier_500.s4.yearly",
       "tier": "500",
       "interval": "year",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_500.s4.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_500.s4.yearly",
         "referenceName": "Creator subscription ₦500 tier yearly slot 4",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_500.s4.yearly",
+        "productId": "nantty.creatorsub.tier_500.s4.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -2896,20 +2896,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_500.s5.yearly",
+      "productId": "nantty.creatorsub.tier_500.s5.yearly",
       "tier": "500",
       "interval": "year",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_500.s5.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_500.s5.yearly",
         "referenceName": "Creator subscription ₦500 tier yearly slot 5",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_500.s5.yearly",
+        "productId": "nantty.creatorsub.tier_500.s5.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -2969,20 +2969,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1000.s1.yearly",
+      "productId": "nantty.creatorsub.tier_1000.s1.yearly",
       "tier": "1000",
       "interval": "year",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s1.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1000.s1.yearly",
         "referenceName": "Creator subscription ₦1,000 tier yearly slot 1",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1000.s1.yearly",
+        "productId": "nantty.creatorsub.tier_1000.s1.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3042,20 +3042,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1000.s2.yearly",
+      "productId": "nantty.creatorsub.tier_1000.s2.yearly",
       "tier": "1000",
       "interval": "year",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s2.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1000.s2.yearly",
         "referenceName": "Creator subscription ₦1,000 tier yearly slot 2",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1000.s2.yearly",
+        "productId": "nantty.creatorsub.tier_1000.s2.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3115,20 +3115,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1000.s3.yearly",
+      "productId": "nantty.creatorsub.tier_1000.s3.yearly",
       "tier": "1000",
       "interval": "year",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s3.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1000.s3.yearly",
         "referenceName": "Creator subscription ₦1,000 tier yearly slot 3",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1000.s3.yearly",
+        "productId": "nantty.creatorsub.tier_1000.s3.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3188,20 +3188,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1000.s4.yearly",
+      "productId": "nantty.creatorsub.tier_1000.s4.yearly",
       "tier": "1000",
       "interval": "year",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s4.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1000.s4.yearly",
         "referenceName": "Creator subscription ₦1,000 tier yearly slot 4",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1000.s4.yearly",
+        "productId": "nantty.creatorsub.tier_1000.s4.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3261,20 +3261,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1000.s5.yearly",
+      "productId": "nantty.creatorsub.tier_1000.s5.yearly",
       "tier": "1000",
       "interval": "year",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1000.s5.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1000.s5.yearly",
         "referenceName": "Creator subscription ₦1,000 tier yearly slot 5",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1000.s5.yearly",
+        "productId": "nantty.creatorsub.tier_1000.s5.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3334,20 +3334,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1500.s1.yearly",
+      "productId": "nantty.creatorsub.tier_1500.s1.yearly",
       "tier": "1500",
       "interval": "year",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s1.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1500.s1.yearly",
         "referenceName": "Creator subscription ₦1,500 tier yearly slot 1",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1500.s1.yearly",
+        "productId": "nantty.creatorsub.tier_1500.s1.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3407,20 +3407,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1500.s2.yearly",
+      "productId": "nantty.creatorsub.tier_1500.s2.yearly",
       "tier": "1500",
       "interval": "year",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s2.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1500.s2.yearly",
         "referenceName": "Creator subscription ₦1,500 tier yearly slot 2",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1500.s2.yearly",
+        "productId": "nantty.creatorsub.tier_1500.s2.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3480,20 +3480,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1500.s3.yearly",
+      "productId": "nantty.creatorsub.tier_1500.s3.yearly",
       "tier": "1500",
       "interval": "year",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s3.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1500.s3.yearly",
         "referenceName": "Creator subscription ₦1,500 tier yearly slot 3",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1500.s3.yearly",
+        "productId": "nantty.creatorsub.tier_1500.s3.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3553,20 +3553,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1500.s4.yearly",
+      "productId": "nantty.creatorsub.tier_1500.s4.yearly",
       "tier": "1500",
       "interval": "year",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s4.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1500.s4.yearly",
         "referenceName": "Creator subscription ₦1,500 tier yearly slot 4",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1500.s4.yearly",
+        "productId": "nantty.creatorsub.tier_1500.s4.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3626,20 +3626,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_1500.s5.yearly",
+      "productId": "nantty.creatorsub.tier_1500.s5.yearly",
       "tier": "1500",
       "interval": "year",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_1500.s5.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_1500.s5.yearly",
         "referenceName": "Creator subscription ₦1,500 tier yearly slot 5",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_1500.s5.yearly",
+        "productId": "nantty.creatorsub.tier_1500.s5.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3699,20 +3699,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_2000.s1.yearly",
+      "productId": "nantty.creatorsub.tier_2000.s1.yearly",
       "tier": "2000",
       "interval": "year",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s1.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_2000.s1.yearly",
         "referenceName": "Creator subscription ₦2,000 tier yearly slot 1",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_2000.s1.yearly",
+        "productId": "nantty.creatorsub.tier_2000.s1.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3772,20 +3772,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_2000.s2.yearly",
+      "productId": "nantty.creatorsub.tier_2000.s2.yearly",
       "tier": "2000",
       "interval": "year",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s2.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_2000.s2.yearly",
         "referenceName": "Creator subscription ₦2,000 tier yearly slot 2",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_2000.s2.yearly",
+        "productId": "nantty.creatorsub.tier_2000.s2.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3845,20 +3845,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_2000.s3.yearly",
+      "productId": "nantty.creatorsub.tier_2000.s3.yearly",
       "tier": "2000",
       "interval": "year",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s3.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_2000.s3.yearly",
         "referenceName": "Creator subscription ₦2,000 tier yearly slot 3",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_2000.s3.yearly",
+        "productId": "nantty.creatorsub.tier_2000.s3.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3918,20 +3918,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_2000.s4.yearly",
+      "productId": "nantty.creatorsub.tier_2000.s4.yearly",
       "tier": "2000",
       "interval": "year",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s4.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_2000.s4.yearly",
         "referenceName": "Creator subscription ₦2,000 tier yearly slot 4",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_2000.s4.yearly",
+        "productId": "nantty.creatorsub.tier_2000.s4.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -3991,20 +3991,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_2000.s5.yearly",
+      "productId": "nantty.creatorsub.tier_2000.s5.yearly",
       "tier": "2000",
       "interval": "year",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_2000.s5.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_2000.s5.yearly",
         "referenceName": "Creator subscription ₦2,000 tier yearly slot 5",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_2000.s5.yearly",
+        "productId": "nantty.creatorsub.tier_2000.s5.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4064,20 +4064,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_3000.s1.yearly",
+      "productId": "nantty.creatorsub.tier_3000.s1.yearly",
       "tier": "3000",
       "interval": "year",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s1.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_3000.s1.yearly",
         "referenceName": "Creator subscription ₦3,000 tier yearly slot 1",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_3000.s1.yearly",
+        "productId": "nantty.creatorsub.tier_3000.s1.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4137,20 +4137,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_3000.s2.yearly",
+      "productId": "nantty.creatorsub.tier_3000.s2.yearly",
       "tier": "3000",
       "interval": "year",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s2.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_3000.s2.yearly",
         "referenceName": "Creator subscription ₦3,000 tier yearly slot 2",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_3000.s2.yearly",
+        "productId": "nantty.creatorsub.tier_3000.s2.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4210,20 +4210,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_3000.s3.yearly",
+      "productId": "nantty.creatorsub.tier_3000.s3.yearly",
       "tier": "3000",
       "interval": "year",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s3.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_3000.s3.yearly",
         "referenceName": "Creator subscription ₦3,000 tier yearly slot 3",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_3000.s3.yearly",
+        "productId": "nantty.creatorsub.tier_3000.s3.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4283,20 +4283,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_3000.s4.yearly",
+      "productId": "nantty.creatorsub.tier_3000.s4.yearly",
       "tier": "3000",
       "interval": "year",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s4.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_3000.s4.yearly",
         "referenceName": "Creator subscription ₦3,000 tier yearly slot 4",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_3000.s4.yearly",
+        "productId": "nantty.creatorsub.tier_3000.s4.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4356,20 +4356,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_3000.s5.yearly",
+      "productId": "nantty.creatorsub.tier_3000.s5.yearly",
       "tier": "3000",
       "interval": "year",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_3000.s5.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_3000.s5.yearly",
         "referenceName": "Creator subscription ₦3,000 tier yearly slot 5",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_3000.s5.yearly",
+        "productId": "nantty.creatorsub.tier_3000.s5.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4429,20 +4429,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_4000.s1.yearly",
+      "productId": "nantty.creatorsub.tier_4000.s1.yearly",
       "tier": "4000",
       "interval": "year",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s1.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_4000.s1.yearly",
         "referenceName": "Creator subscription ₦4,000 tier yearly slot 1",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_4000.s1.yearly",
+        "productId": "nantty.creatorsub.tier_4000.s1.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4502,20 +4502,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_4000.s2.yearly",
+      "productId": "nantty.creatorsub.tier_4000.s2.yearly",
       "tier": "4000",
       "interval": "year",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s2.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_4000.s2.yearly",
         "referenceName": "Creator subscription ₦4,000 tier yearly slot 2",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_4000.s2.yearly",
+        "productId": "nantty.creatorsub.tier_4000.s2.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4575,20 +4575,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_4000.s3.yearly",
+      "productId": "nantty.creatorsub.tier_4000.s3.yearly",
       "tier": "4000",
       "interval": "year",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s3.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_4000.s3.yearly",
         "referenceName": "Creator subscription ₦4,000 tier yearly slot 3",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_4000.s3.yearly",
+        "productId": "nantty.creatorsub.tier_4000.s3.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4648,20 +4648,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_4000.s4.yearly",
+      "productId": "nantty.creatorsub.tier_4000.s4.yearly",
       "tier": "4000",
       "interval": "year",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s4.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_4000.s4.yearly",
         "referenceName": "Creator subscription ₦4,000 tier yearly slot 4",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_4000.s4.yearly",
+        "productId": "nantty.creatorsub.tier_4000.s4.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4721,20 +4721,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_4000.s5.yearly",
+      "productId": "nantty.creatorsub.tier_4000.s5.yearly",
       "tier": "4000",
       "interval": "year",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_4000.s5.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_4000.s5.yearly",
         "referenceName": "Creator subscription ₦4,000 tier yearly slot 5",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_4000.s5.yearly",
+        "productId": "nantty.creatorsub.tier_4000.s5.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4794,20 +4794,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_5000.s1.yearly",
+      "productId": "nantty.creatorsub.tier_5000.s1.yearly",
       "tier": "5000",
       "interval": "year",
       "slot": 1,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s1.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_5000.s1.yearly",
         "referenceName": "Creator subscription ₦5,000 tier yearly slot 1",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_5000.s1.yearly",
+        "productId": "nantty.creatorsub.tier_5000.s1.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4867,20 +4867,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_5000.s2.yearly",
+      "productId": "nantty.creatorsub.tier_5000.s2.yearly",
       "tier": "5000",
       "interval": "year",
       "slot": 2,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s2.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_5000.s2.yearly",
         "referenceName": "Creator subscription ₦5,000 tier yearly slot 2",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_5000.s2.yearly",
+        "productId": "nantty.creatorsub.tier_5000.s2.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -4940,20 +4940,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_5000.s3.yearly",
+      "productId": "nantty.creatorsub.tier_5000.s3.yearly",
       "tier": "5000",
       "interval": "year",
       "slot": 3,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s3.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_5000.s3.yearly",
         "referenceName": "Creator subscription ₦5,000 tier yearly slot 3",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_5000.s3.yearly",
+        "productId": "nantty.creatorsub.tier_5000.s3.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -5013,20 +5013,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_5000.s4.yearly",
+      "productId": "nantty.creatorsub.tier_5000.s4.yearly",
       "tier": "5000",
       "interval": "year",
       "slot": 4,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s4.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_5000.s4.yearly",
         "referenceName": "Creator subscription ₦5,000 tier yearly slot 4",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_5000.s4.yearly",
+        "productId": "nantty.creatorsub.tier_5000.s4.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",
@@ -5086,20 +5086,20 @@
       }
     },
     {
-      "productId": "zudomart.creatorsub.tier_5000.s5.yearly",
+      "productId": "nantty.creatorsub.tier_5000.s5.yearly",
       "tier": "5000",
       "interval": "year",
       "slot": 5,
       "apple": {
         "type": "auto-renewable subscription",
-        "subscriptionGroup": "zudomart.creatorsub.tier_5000.s5.yearly",
+        "subscriptionGroup": "nantty.creatorsub.tier_5000.s5.yearly",
         "referenceName": "Creator subscription ₦5,000 tier yearly slot 5",
         "duration": "1 year",
         "displayName": "Creator subscription",
         "familySharable": false
       },
       "google": {
-        "productId": "zudomart.creatorsub.tier_5000.s5.yearly",
+        "productId": "nantty.creatorsub.tier_5000.s5.yearly",
         "basePlanId": "yearly",
         "billingPeriod": "P1Y",
         "renewalType": "auto-renewing",

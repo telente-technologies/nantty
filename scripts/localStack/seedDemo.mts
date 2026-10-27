@@ -28,7 +28,7 @@ function subjectOf(accessToken: string): string {
 }
 
 function psql(statement: string): string {
-  return execFileSync("docker", ["exec", "zudomart-backend-postgres-1", "psql", "-U", "zudomart", "-d", "zudomart", "-At", "-c", statement], { encoding: "utf8" }).trim();
+  return execFileSync("docker", ["exec", "nantty-backend-postgres-1", "psql", "-U", "nantty", "-d", "nantty", "-At", "-c", statement], { encoding: "utf8" }).trim();
 }
 
 async function signIn(account: DemoAccount): Promise<Session> {
@@ -244,7 +244,7 @@ async function ensureBuyer(buyer: Session, creator: Session, seller: Session): P
 function ensureStaffAdmin(): void {
   const exists = psql(`select count(*) from admin.staff_accounts where email = '${demoAdmin.email}'`);
   if (exists !== "0") return;
-  const environment = { ...process.env, ADMIN_DATABASE_URL: process.env["SMOKE_ADMIN_DATABASE_URL"] ?? "postgres://svc_admin:svc_admin_local_only@localhost:15432/zudomart?sslmode=disable", ADMIN_BOOTSTRAP_PASSWORD: demoAdmin.password };
+  const environment = { ...process.env, ADMIN_DATABASE_URL: process.env["SMOKE_ADMIN_DATABASE_URL"] ?? "postgres://svc_admin:svc_admin_local_only@localhost:15432/nantty?sslmode=disable", ADMIN_BOOTSTRAP_PASSWORD: demoAdmin.password };
   const binary = process.env["SMOKE_BOOTSTRAP_SUPERADMIN_BINARY"];
   try {
     if (binary) execFileSync(binary, ["-email", demoAdmin.email, "-name", demoAdmin.name], { env: environment, stdio: "pipe" });

@@ -12,7 +12,7 @@ variable "name_suffix" {
 }
 variable "description" {
   type    = string
-  default = "zudomart cache, rate limits, idempotency, presence"
+  default = "nantty cache, rate limits, idempotency, presence"
 }
 variable "maxmemory_policy" {
   type    = string

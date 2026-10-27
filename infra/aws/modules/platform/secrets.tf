@@ -1,6 +1,6 @@
 resource "aws_secretsmanager_secret" "app" {
   for_each   = local.services
-  name       = "zudomart/${var.environment}/${each.key}/app"
+  name       = "nantty/${var.environment}/${each.key}/app"
   kms_key_id = module.kms.key_arns["secrets"]
   dynamic "replica" {
     for_each = var.enable_dr ? [1] : []

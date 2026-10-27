@@ -39,7 +39,7 @@ data "aws_iam_policy_document" "push_trust" {
 }
 
 resource "aws_iam_role" "ecr_push" {
-  name               = "zudomart-${var.environment}-github-ecr-push"
+  name               = "nantty-${var.environment}-github-ecr-push"
   assume_role_policy = data.aws_iam_policy_document.push_trust.json
 }
 
@@ -83,7 +83,7 @@ data "aws_iam_policy_document" "deploy_trust" {
 }
 
 resource "aws_iam_role" "deploy" {
-  name               = "zudomart-${var.environment}-github-deploy"
+  name               = "nantty-${var.environment}-github-deploy"
   assume_role_policy = data.aws_iam_policy_document.deploy_trust.json
 }
 
@@ -96,12 +96,12 @@ data "aws_iam_policy_document" "deploy" {
   statement {
     sid       = "UpdateServicesInCluster"
     actions   = ["ecs:UpdateService", "ecs:RunTask"]
-    resources = ["arn:aws:ecs:*:${local.account_id}:service/zudomart-${var.environment}/*", "arn:aws:ecs:*:${local.account_id}:task-definition/zudomart-${var.environment}-*:*"]
+    resources = ["arn:aws:ecs:*:${local.account_id}:service/nantty-${var.environment}/*", "arn:aws:ecs:*:${local.account_id}:task-definition/nantty-${var.environment}-*:*"]
   }
   statement {
     sid       = "PassTaskRoles"
     actions   = ["iam:PassRole"]
-    resources = ["arn:aws:iam::${local.account_id}:role/zudomart-${var.environment}-*"]
+    resources = ["arn:aws:iam::${local.account_id}:role/nantty-${var.environment}-*"]
     condition {
       test     = "StringEquals"
       variable = "iam:PassedToService"
@@ -111,7 +111,7 @@ data "aws_iam_policy_document" "deploy" {
   statement {
     sid       = "BlueGreen"
     actions   = ["codedeploy:CreateDeployment", "codedeploy:GetDeployment", "codedeploy:GetDeploymentConfig", "codedeploy:GetApplicationRevision", "codedeploy:RegisterApplicationRevision", "codedeploy:StopDeployment"]
-    resources = ["arn:aws:codedeploy:*:${local.account_id}:*zudomart-${var.environment}-*"]
+    resources = ["arn:aws:codedeploy:*:${local.account_id}:*nantty-${var.environment}-*"]
   }
   statement {
     sid       = "PullImagesForPromotion"
@@ -136,13 +136,13 @@ data "aws_iam_policy_document" "deploy" {
     content {
       sid       = "PullFromSourceRegistry"
       actions   = ["ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer", "ecr:BatchCheckLayerAvailability"]
-      resources = ["arn:aws:ecr:*:${var.promotion_source_account_id}:repository/zudomart/*"]
+      resources = ["arn:aws:ecr:*:${var.promotion_source_account_id}:repository/nantty/*"]
     }
   }
   statement {
     sid       = "ReadLogsForSmokeFailures"
     actions   = ["logs:GetLogEvents", "logs:FilterLogEvents"]
-    resources = ["arn:aws:logs:*:${local.account_id}:log-group:/zudomart/${var.environment}/*:*"]
+    resources = ["arn:aws:logs:*:${local.account_id}:log-group:/nantty/${var.environment}/*:*"]
   }
 }
 

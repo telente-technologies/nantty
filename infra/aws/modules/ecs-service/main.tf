@@ -8,7 +8,7 @@ terraform {
 data "aws_caller_identity" "current" {}
 
 locals {
-  family  = "zudomart-${var.environment}-${var.name}"
+  family  = "nantty-${var.environment}-${var.name}"
   has_lb  = length(var.listener_rules) > 0
   rules   = { for rule in var.listener_rules : "${rule.listener_arn}:${rule.priority}" => rule }
   app_env = merge({ OTEL_EXPORTER_OTLP_ENDPOINT = "http://127.0.0.1:4318" }, var.environment_variables, { OTEL_SERVICE_NAME = var.name, OTEL_RESOURCE_ATTRIBUTES = "deployment.environment=${var.environment}", ENVIRONMENT = var.environment })
@@ -29,8 +29,8 @@ locals {
       awsxray = { region = var.region }
       awsemf = {
         region                           = var.region
-        namespace                        = "Zudomart/${var.environment}"
-        log_group_name                   = "/zudomart/${var.environment}/${var.name}/metrics"
+        namespace                        = "Nantty/${var.environment}"
+        log_group_name                   = "/nantty/${var.environment}/${var.name}/metrics"
         log_stream_name                  = "{TaskId}"
         resource_to_telemetry_conversion = { enabled = true }
         metric_declarations = [
@@ -53,13 +53,13 @@ locals {
 
 resource "aws_cloudwatch_log_group" "metrics" {
   count             = var.otel_sidecar ? 1 : 0
-  name              = "/zudomart/${var.environment}/${var.name}/metrics"
+  name              = "/nantty/${var.environment}/${var.name}/metrics"
   retention_in_days = var.log_retention_days
   kms_key_id        = var.logs_kms_key_arn
 }
 
 resource "aws_cloudwatch_log_group" "this" {
-  name              = "/zudomart/${var.environment}/${var.name}"
+  name              = "/nantty/${var.environment}/${var.name}"
   retention_in_days = var.log_retention_days
   kms_key_id        = var.logs_kms_key_arn
 }
@@ -88,7 +88,7 @@ data "aws_iam_policy_document" "execution" {
   statement {
     sid       = "PullOwnImage"
     actions   = ["ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer", "ecr:BatchCheckLayerAvailability"]
-    resources = ["arn:aws:ecr:${var.region}:${data.aws_caller_identity.current.account_id}:repository/zudomart/${var.name}"]
+    resources = ["arn:aws:ecr:${var.region}:${data.aws_caller_identity.current.account_id}:repository/nantty/${var.name}"]
   }
   statement {
     sid       = "EcrAuthToken"
@@ -138,7 +138,7 @@ data "aws_iam_policy_document" "task" {
     condition {
       test     = "StringEquals"
       variable = "cloudwatch:namespace"
-      values   = ["Zudomart/${var.environment}"]
+      values   = ["Nantty/${var.environment}"]
     }
   }
   dynamic "statement" {

@@ -16,7 +16,7 @@ variable "cluster_name" { type = string }
 variable "listener_arn" { type = string }
 variable "alb_security_group_id" { type = string }
 variable "host" {
-  description = "Signaling host name, for example livekit.staging.zudomart.com."
+  description = "Signaling host name, for example livekit.staging.nantty.com."
   type        = string
 }
 variable "webhook_url" {

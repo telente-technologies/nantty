@@ -1,6 +1,6 @@
 {
-  "vhost": "zudomart",
-  "administrator": "zudomart",
+  "vhost": "nantty",
+  "administrator": "nantty",
   "retryTiers": { "30s": 30000, "2m": 120000, "10m": 600000, "30m": 1800000 },
   "unroutedRetentionMs": 86400000,
   "services": {

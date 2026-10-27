@@ -9,7 +9,7 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  name    = "zudomart-${var.environment}-cloudfront"
+  name    = "nantty-${var.environment}-cloudfront"
   account = data.aws_caller_identity.current.account_id
   region  = data.aws_region.current.name
   managed_rule_groups = {
@@ -48,14 +48,14 @@ data "aws_iam_policy_document" "logs_key" {
 }
 
 resource "aws_kms_key" "logs" {
-  description             = "zudomart ${var.environment} cloudfront waf logs"
+  description             = "nantty ${var.environment} cloudfront waf logs"
   enable_key_rotation     = true
   deletion_window_in_days = 30
   policy                  = data.aws_iam_policy_document.logs_key.json
 }
 
 resource "aws_kms_alias" "logs" {
-  name          = "alias/zudomart-${var.environment}-cloudfront-waf-logs"
+  name          = "alias/nantty-${var.environment}-cloudfront-waf-logs"
   target_key_id = aws_kms_key.logs.key_id
 }
 

@@ -8,7 +8,7 @@ terraform {
 data "aws_caller_identity" "current" {}
 
 locals {
-  name = "zudomart-${var.environment}"
+  name = "nantty-${var.environment}"
 }
 
 resource "aws_sesv2_email_identity" "domain" {

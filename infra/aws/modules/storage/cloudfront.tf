@@ -1,5 +1,5 @@
 resource "aws_cloudfront_origin_access_control" "media" {
-  name                              = "zudomart-${var.environment}-media"
+  name                              = "nantty-${var.environment}-media"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -7,13 +7,13 @@ resource "aws_cloudfront_origin_access_control" "media" {
 
 resource "aws_cloudfront_public_key" "media_signing" {
   count       = var.media_signing_public_key_pem == null ? 0 : 1
-  name        = "zudomart-${var.environment}-media-signing"
+  name        = "nantty-${var.environment}-media-signing"
   encoded_key = var.media_signing_public_key_pem
 }
 
 resource "aws_cloudfront_key_group" "media_signing" {
   count = var.media_signing_public_key_pem == null ? 0 : 1
-  name  = "zudomart-${var.environment}-media-signing"
+  name  = "nantty-${var.environment}-media-signing"
   items = [aws_cloudfront_public_key.media_signing[0].id]
 }
 
@@ -21,7 +21,7 @@ resource "aws_cloudfront_distribution" "media" {
   enabled         = true
   is_ipv6_enabled = true
   http_version    = "http2and3"
-  comment         = "zudomart ${var.environment} media"
+  comment         = "nantty ${var.environment} media"
   aliases         = [var.media_domain]
   price_class     = var.cloudfront_price_class
   web_acl_id      = var.web_acl_arn

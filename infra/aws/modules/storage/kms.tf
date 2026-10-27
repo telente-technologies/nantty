@@ -58,21 +58,21 @@ data "aws_iam_policy_document" "media_key" {
 }
 
 resource "aws_kms_key" "media" {
-  description             = "zudomart ${var.environment} media"
+  description             = "nantty ${var.environment} media"
   enable_key_rotation     = true
   deletion_window_in_days = 30
   policy                  = data.aws_iam_policy_document.media_key["primary"].json
 }
 
 resource "aws_kms_alias" "media" {
-  name          = "alias/zudomart-${var.environment}-media"
+  name          = "alias/nantty-${var.environment}-media"
   target_key_id = aws_kms_key.media.key_id
 }
 
 resource "aws_kms_key" "media_dr" {
   provider                = aws.dr
   count                   = var.enable_dr ? 1 : 0
-  description             = "zudomart ${var.environment} media (DR replica bucket)"
+  description             = "nantty ${var.environment} media (DR replica bucket)"
   enable_key_rotation     = true
   deletion_window_in_days = 30
   policy                  = data.aws_iam_policy_document.media_key["dr"].json
@@ -81,6 +81,6 @@ resource "aws_kms_key" "media_dr" {
 resource "aws_kms_alias" "media_dr" {
   provider      = aws.dr
   count         = var.enable_dr ? 1 : 0
-  name          = "alias/zudomart-${var.environment}-media"
+  name          = "alias/nantty-${var.environment}-media"
   target_key_id = aws_kms_key.media_dr[0].key_id
 }

@@ -82,7 +82,7 @@ data "aws_iam_policy_document" "key" {
 
 resource "aws_kms_key" "this" {
   for_each                = local.purposes
-  description             = "zudomart ${var.environment} ${each.key}"
+  description             = "nantty ${var.environment} ${each.key}"
   enable_key_rotation     = true
   deletion_window_in_days = 30
   multi_region            = contains(var.multi_region_purposes, each.key)
@@ -91,6 +91,6 @@ resource "aws_kms_key" "this" {
 
 resource "aws_kms_alias" "this" {
   for_each      = local.purposes
-  name          = "alias/zudomart-${var.environment}-${each.key}"
+  name          = "alias/nantty-${var.environment}-${each.key}"
   target_key_id = aws_kms_key.this[each.key].key_id
 }

@@ -9,7 +9,7 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_ecr_repository" "this" {
   for_each             = toset(var.repositories)
-  name                 = "zudomart/${each.key}"
+  name                 = "nantty/${each.key}"
   image_tag_mutability = "IMMUTABLE"
   force_delete         = false
   image_scanning_configuration { scan_on_push = true }
@@ -35,7 +35,7 @@ resource "aws_ecr_registry_scanning_configuration" "this" {
   rule {
     scan_frequency = "CONTINUOUS_SCAN"
     repository_filter {
-      filter      = "zudomart/*"
+      filter      = "nantty/*"
       filter_type = "WILDCARD"
     }
   }
@@ -50,7 +50,7 @@ resource "aws_ecr_replication_configuration" "dr" {
         registry_id = data.aws_caller_identity.current.account_id
       }
       repository_filter {
-        filter      = "zudomart/"
+        filter      = "nantty/"
         filter_type = "PREFIX_MATCH"
       }
     }

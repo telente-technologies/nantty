@@ -1,12 +1,12 @@
 environment          = "prod"
 region               = "eu-west-1"
 dr_region            = "eu-central-1"
-zone_name            = "zudomart.com"
+zone_name            = "nantty.com"
 create_zone          = true
-app_domain           = "zudomart.com"
-mail_domain          = "mail.zudomart.com"
-dmarc_report_address = "dmarc@zudomart.com"
-github_repository    = "zudomart/zudomart"
+app_domain           = "nantty.com"
+mail_domain          = "mail.nantty.com"
+dmarc_report_address = "dmarc@nantty.com"
+github_repository    = "nantty/nantty"
 vpc_cidr             = "10.30.0.0/16"
 nat_per_az           = true
 enable_dr            = true
@@ -16,13 +16,13 @@ max_tasks_cap        = 20
 log_retention_days   = 365
 livekit_mode         = "cloud"
 app_origins = {
-  web    = "https://zudomart.com"
-  webapp = "https://app.zudomart.com"
-  seller = "https://seller.zudomart.com"
-  studio = "https://studio.zudomart.com"
-  admin  = "https://admin.zudomart.com"
-  ads    = "https://ads.zudomart.com"
-  gift   = "https://gift.zudomart.com"
+  web    = "https://nantty.com"
+  webapp = "https://app.nantty.com"
+  seller = "https://seller.nantty.com"
+  studio = "https://studio.nantty.com"
+  admin  = "https://admin.nantty.com"
+  ads    = "https://ads.nantty.com"
+  gift   = "https://gift.nantty.com"
 }
 aurora              = { instance_class = "db.r7g.xlarge", reader_count = 2, backup_retention_days = 35, engine_version = "17.4" }
 valkey              = { node_type = "cache.r7g.large", node_count = 3 }

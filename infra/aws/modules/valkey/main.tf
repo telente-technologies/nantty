@@ -7,7 +7,7 @@ terraform {
 }
 
 locals {
-  name = "zudomart-${var.environment}${var.name_suffix}"
+  name = "nantty-${var.environment}${var.name_suffix}"
 }
 
 resource "aws_elasticache_subnet_group" "this" {
@@ -85,13 +85,13 @@ resource "aws_elasticache_replication_group" "this" {
 }
 
 resource "aws_cloudwatch_log_group" "slow" {
-  name              = "/zudomart/${var.environment}/valkey${var.name_suffix}-slow"
+  name              = "/nantty/${var.environment}/valkey${var.name_suffix}-slow"
   retention_in_days = 30
   kms_key_id        = var.logs_kms_key_arn
 }
 
 resource "aws_secretsmanager_secret" "url" {
-  name       = "zudomart/${var.environment}/valkey${var.name_suffix}/url"
+  name       = "nantty/${var.environment}/valkey${var.name_suffix}/url"
   kms_key_id = var.secrets_kms_key_arn
 }
 

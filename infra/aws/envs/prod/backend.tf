@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    bucket         = "zudomart-terraform-state-prod"
+    bucket         = "nantty-terraform-state-prod"
     key            = "platform/terraform.tfstate"
     region         = "eu-west-1"
-    dynamodb_table = "zudomart-terraform-locks"
+    dynamodb_table = "nantty-terraform-locks"
     encrypt        = true
   }
 }

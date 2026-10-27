@@ -10,12 +10,12 @@ export interface DemoAccount {
 export const demoPassword = "Lagos-Market-Demo-2026!";
 
 export const demoAccounts: readonly DemoAccount[] = [
-  { role: "buyer", email: "demo.buyer@zudomart.test", username: "demobuyer", name: "Dayo Buyer", bio: "Demo buyer account" },
-  { role: "seller", email: "demo.seller@zudomart.test", username: "demoseller", name: "Adaeze Seller", bio: "Owner of Ife Lifestyle (demo)" },
-  { role: "creator", email: "demo.creator@zudomart.test", username: "democreator", name: "Tolu Creator", bio: "Lagos street style, every weekend" },
+  { role: "buyer", email: "demo.buyer@nantty.test", username: "demobuyer", name: "Dayo Buyer", bio: "Demo buyer account" },
+  { role: "seller", email: "demo.seller@nantty.test", username: "demoseller", name: "Adaeze Seller", bio: "Owner of Ife Lifestyle (demo)" },
+  { role: "creator", email: "demo.creator@nantty.test", username: "democreator", name: "Tolu Creator", bio: "Lagos street style, every weekend" },
 ];
 
-export const demoAdmin = { email: "admin.demo@zudomart.com", name: "Demo Admin", password: "Quartz-Harbour-Lantern-Velvet-2026!" };
+export const demoAdmin = { email: "admin.demo@nantty.com", name: "Demo Admin", password: "Quartz-Harbour-Lantern-Velvet-2026!" };
 
 export const demoProducts = [
   { name: "Ankara wrap dress", description: "Hand-finished ankara wrap dress, sizes 8 to 16.", sku: "DEMO-ANKARA-01", priceMinor: 2_500_000 },

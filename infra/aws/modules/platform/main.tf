@@ -4,7 +4,7 @@ locals {
   api_domain     = "api.${var.app_domain}"
   media_domain   = "media.${var.app_domain}"
   livekit_domain = "livekit.${var.app_domain}"
-  tags_prefix    = "zudomart-${var.environment}"
+  tags_prefix    = "nantty-${var.environment}"
   service_names  = keys(local.services)
 }
 

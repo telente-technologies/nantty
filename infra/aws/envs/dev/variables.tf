@@ -17,7 +17,7 @@ variable "enable_dr" {
   default     = false
 }
 variable "zone_name" {
-  description = "Public Route 53 zone, for example zudomart.com."
+  description = "Public Route 53 zone, for example nantty.com."
   type        = string
 }
 variable "create_zone" {
@@ -25,7 +25,7 @@ variable "create_zone" {
   default = false
 }
 variable "app_domain" {
-  description = "Domain for this environment, for example staging.zudomart.com (api., media. and livekit. are prefixed)."
+  description = "Domain for this environment, for example staging.nantty.com (api., media. and livekit. are prefixed)."
   type        = string
 }
 variable "mail_domain" {

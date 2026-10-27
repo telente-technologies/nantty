@@ -6,7 +6,7 @@ terraform {
 }
 
 locals {
-  name = "zudomart-${var.environment}"
+  name = "nantty-${var.environment}"
 }
 
 resource "aws_sns_topic" "alarms" {
@@ -153,7 +153,7 @@ resource "aws_cloudwatch_metric_alarm" "ecs_running_tasks" {
 resource "aws_cloudwatch_metric_alarm" "ledger_imbalance" {
   alarm_name          = "${local.name}-ledger-imbalance"
   alarm_description   = "Trial balance is not zero; money deployments roll back on this alarm"
-  namespace           = "Zudomart/${var.environment}"
+  namespace           = "Nantty/${var.environment}"
   metric_name         = "LedgerImbalance"
   statistic           = "Maximum"
   period              = 60
@@ -315,7 +315,7 @@ resource "aws_cloudwatch_dashboard" "overview" {
       { type = "metric", x = 0, y = 0, width = 12, height = 6, properties = { title = "ALB requests and 5xx", region = var.region, stat = "Sum", metrics = [["AWS/ApplicationELB", "RequestCount", "LoadBalancer", var.alb_arn_suffix], [".", "HTTPCode_Target_5XX_Count", ".", "."]] } },
       { type = "metric", x = 12, y = 0, width = 12, height = 6, properties = { title = "Aurora CPU and connections", region = var.region, stat = "Average", metrics = [["AWS/RDS", "CPUUtilization", "DBClusterIdentifier", var.aurora_cluster_identifier], [".", "DatabaseConnections", ".", "."]] } },
       { type = "metric", x = 0, y = 6, width = 12, height = 6, properties = { title = "Valkey", region = var.region, stat = "Average", metrics = [["AWS/ElastiCache", "EngineCPUUtilization", "ReplicationGroupId", var.valkey_replication_group_id], [".", "DatabaseMemoryUsagePercentage", ".", "."]] } },
-      { type = "metric", x = 12, y = 6, width = 12, height = 6, properties = { title = "Ledger imbalance", region = var.region, stat = "Maximum", metrics = [["Zudomart/${var.environment}", "LedgerImbalance"]] } },
+      { type = "metric", x = 12, y = 6, width = 12, height = 6, properties = { title = "Ledger imbalance", region = var.region, stat = "Maximum", metrics = [["Nantty/${var.environment}", "LedgerImbalance"]] } },
     ]
   })
 }

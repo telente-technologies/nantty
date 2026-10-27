@@ -12,7 +12,7 @@ data "aws_availability_zones" "available" {
 locals {
   azs               = slice(data.aws_availability_zones.available.names, 0, var.az_count)
   nat_gateway_count = var.nat_per_az ? var.az_count : 1
-  name              = "zudomart-${var.environment}"
+  name              = "nantty-${var.environment}"
 }
 
 resource "aws_vpc" "this" {

@@ -7,7 +7,7 @@ terraform {
 }
 
 locals {
-  name       = "zudomart-${var.environment}"
+  name       = "nantty-${var.environment}"
   is_cluster = var.deployment_mode == "CLUSTER_MULTI_AZ"
 }
 
@@ -73,7 +73,7 @@ resource "aws_mq_broker" "this" {
   }
 
   user {
-    username = "zudomart_admin"
+    username = "nantty_admin"
     password = random_password.admin.result
   }
 
@@ -81,14 +81,14 @@ resource "aws_mq_broker" "this" {
 }
 
 resource "aws_secretsmanager_secret" "admin" {
-  name       = "zudomart/${var.environment}/mq/admin"
+  name       = "nantty/${var.environment}/mq/admin"
   kms_key_id = var.secrets_kms_key_arn
 }
 
 resource "aws_secretsmanager_secret_version" "admin" {
   secret_id = aws_secretsmanager_secret.admin.id
   secret_string = jsonencode({
-    username       = "zudomart_admin"
+    username       = "nantty_admin"
     password       = random_password.admin.result
     host           = replace(replace(aws_mq_broker.this.instances[0].endpoints[0], "amqps://", ""), ":5671", "")
     management_url = aws_mq_broker.this.instances[0].console_url
@@ -104,7 +104,7 @@ resource "random_password" "service_users" {
 
 resource "aws_secretsmanager_secret" "service_users" {
   for_each   = toset(var.service_users)
-  name       = "zudomart/${var.environment}/mq/${each.key}"
+  name       = "nantty/${var.environment}/mq/${each.key}"
   kms_key_id = var.secrets_kms_key_arn
 }
 

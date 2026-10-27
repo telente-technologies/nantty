@@ -14,7 +14,7 @@ data "aws_region" "current" {}
 data "aws_elb_service_account" "alb" {}
 
 locals {
-  prefix       = "zudomart-${var.environment}-${data.aws_caller_identity.current.account_id}"
+  prefix       = "nantty-${var.environment}-${data.aws_caller_identity.current.account_id}"
   logs_bucket  = "${local.prefix}-logs"
   media_bucket = "${local.prefix}-media"
   kyc_bucket   = "${local.prefix}-kyc"

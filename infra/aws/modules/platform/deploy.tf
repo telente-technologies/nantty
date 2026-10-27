@@ -4,7 +4,7 @@ locals {
   s3_object_access = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:AbortMultipartUpload"]
   media_key_users  = ["media", "go-live", "intelligence", "go-trust", "go-ads"]
   kyc_key_users    = ["go-identity", "go-trust"]
-  task_role_arn    = { for name in distinct(concat(local.media_key_users, local.kyc_key_users)) : name => "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/zudomart-${var.environment}-${name}-task" }
+  task_role_arn    = { for name in distinct(concat(local.media_key_users, local.kyc_key_users)) : name => "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/nantty-${var.environment}-${name}-task" }
   media_key_access = { sid = "MediaKey", actions = ["kms:Decrypt", "kms:GenerateDataKey"], resources = [module.storage.media_kms_key_arn] }
 
   task_policies = {
@@ -61,7 +61,7 @@ locals {
     RABBITMQ_PREFETCH       = "20"
     DATABASE_READ_HOST      = module.aurora.proxy_reader_endpoint
     AUTH_TOKEN_ISSUER       = "https://${local.api_domain}"
-    AUTH_TOKEN_AUDIENCE     = "zudomart-api"
+    AUTH_TOKEN_AUDIENCE     = "nantty-api"
     AUTH_JWKS_URL           = "${local.internal_url["go-identity"]}/.well-known/jwks.json"
     MEDIA_PUBLIC_BASE_URL   = "https://${local.media_domain}"
     MEDIA_BUCKET            = module.storage.media_bucket.id
@@ -84,7 +84,7 @@ locals {
   service_specific_environment = {
     gateway       = merge(local.runtime_environment.gateway_only, { PORT = "8080", AUTH_JWKS_URL = "${local.internal_url["go-identity"]}/.well-known/jwks.json" })
     social        = { PORT = "8105" }
-    notifications = { PORT = "8104", PUSH_PROVIDER = "expo", ZUDOMART_WEB_BASE_URL = try(var.app_origins["web"], "https://${var.app_domain}"), SQS_SES_FEEDBACK_QUEUE_URL = module.ses.feedback_queue_url, SES_CONFIGURATION_SET = module.ses.configuration_set_name, SES_FROM_ADDRESS = "Zudomart <noreply@${var.mail_domain}>", ZUDOMART_MAIL_SENDING_DOMAIN = var.mail_domain, IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
+    notifications = { PORT = "8104", PUSH_PROVIDER = "expo", NANTTY_WEB_BASE_URL = try(var.app_origins["web"], "https://${var.app_domain}"), SQS_SES_FEEDBACK_QUEUE_URL = module.ses.feedback_queue_url, SES_CONFIGURATION_SET = module.ses.configuration_set_name, SES_FROM_ADDRESS = "Nantty <noreply@${var.mail_domain}>", NANTTY_MAIL_SENDING_DOMAIN = var.mail_domain, IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
     media = merge({
       PORT                     = "8108"
       S3_REGION                = var.region

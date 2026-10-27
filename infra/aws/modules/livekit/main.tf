@@ -10,7 +10,7 @@ data "aws_caller_identity" "current" {}
 
 locals {
   self_hosted = var.mode == "self_hosted"
-  name        = "zudomart-${var.environment}-livekit"
+  name        = "nantty-${var.environment}-livekit"
 }
 
 resource "random_password" "api_secret" {
@@ -19,7 +19,7 @@ resource "random_password" "api_secret" {
 }
 
 resource "aws_secretsmanager_secret" "credentials" {
-  name       = "zudomart/${var.environment}/livekit"
+  name       = "nantty/${var.environment}/livekit"
   kms_key_id = var.secrets_kms_key_arn
 }
 
@@ -27,12 +27,12 @@ resource "aws_secretsmanager_secret_version" "credentials" {
   secret_id = aws_secretsmanager_secret.credentials.id
   secret_string = jsonencode(local.self_hosted ? {
     LIVEKIT_URL        = "wss://${var.host}"
-    LIVEKIT_API_KEY    = "zudomart"
+    LIVEKIT_API_KEY    = "nantty"
     LIVEKIT_API_SECRET = random_password.api_secret.result
     LIVEKIT_CONFIG     = <<-YAML
       port: 7880
       keys:
-        zudomart: ${random_password.api_secret.result}
+        nantty: ${random_password.api_secret.result}
       rtc:
         tcp_port: 7881
         udp_port: 7882
@@ -46,7 +46,7 @@ resource "aws_secretsmanager_secret_version" "credentials" {
       room:
         auto_create: false
       webhook:
-        api_key: zudomart
+        api_key: nantty
         urls:
           - ${var.webhook_url}
       logging:

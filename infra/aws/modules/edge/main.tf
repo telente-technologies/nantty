@@ -6,7 +6,7 @@ terraform {
 }
 
 locals {
-  name = "zudomart-${var.environment}"
+  name = "nantty-${var.environment}"
 }
 
 resource "aws_security_group" "alb" {
@@ -159,7 +159,7 @@ resource "aws_lb_listener" "internal" {
 }
 
 resource "aws_route53_zone" "internal" {
-  name = "svc.${var.environment}.zudomart.internal"
+  name = "svc.${var.environment}.nantty.internal"
   vpc { vpc_id = var.vpc_id }
 }
 

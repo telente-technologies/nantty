@@ -97,7 +97,7 @@ data "aws_iam_policy_document" "replication" {
 
 resource "aws_iam_role" "replication" {
   count              = var.enable_dr ? 1 : 0
-  name               = "zudomart-${var.environment}-s3-replication"
+  name               = "nantty-${var.environment}-s3-replication"
   assume_role_policy = data.aws_iam_policy_document.replication_trust.json
 }
 

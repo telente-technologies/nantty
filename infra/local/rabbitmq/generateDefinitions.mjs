@@ -6,14 +6,14 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const topology = JSON.parse(readFileSync(join(here, "topology.json"), "utf8"));
 const vhost = topology.vhost;
-const exchanges = { events: "zudomart.events", unrouted: "zudomart.unrouted", jobs: "zudomart.jobs", retry: "zudomart.retry", deadLetter: "zudomart.dlx" };
+const exchanges = { events: "nantty.events", unrouted: "nantty.unrouted", jobs: "nantty.jobs", retry: "nantty.retry", deadLetter: "nantty.dlx" };
 const unroutedQueue = "unrouted-events";
 
 const escape = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const anyOf = (values) => (values.length === 0 ? "^$" : `^(${values.map(escape).join("|")})$`);
 
 function localPasswordHash(user) {
-  const salt = createHash("sha256").update(`zudomart-local-salt:${user}`).digest().subarray(0, 4);
+  const salt = createHash("sha256").update(`nantty-local-salt:${user}`).digest().subarray(0, 4);
   const digest = createHash("sha256").update(Buffer.concat([salt, Buffer.from(`${user}-local-only`, "utf8")])).digest();
   return Buffer.concat([salt, digest]).toString("base64");
 }

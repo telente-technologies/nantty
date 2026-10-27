@@ -8,7 +8,7 @@ terraform {
 
 locals {
   default_tags = {
-    Project     = "zudomart"
+    Project     = "nantty"
     Environment = var.environment
     ManagedBy   = "terraform"
   }

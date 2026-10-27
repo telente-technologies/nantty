@@ -21,7 +21,7 @@ module "valkey_intelligence" {
   source                    = "../valkey"
   environment               = var.environment
   name_suffix               = "-intelligence"
-  description               = "zudomart ${var.environment} intelligence feature state, replay nonces, dedup keys"
+  description               = "nantty ${var.environment} intelligence feature state, replay nonces, dedup keys"
   vpc_id                    = module.network.vpc_id
   data_subnet_ids           = module.network.data_subnet_ids
   client_security_group_ids = [aws_security_group.intelligence.id]

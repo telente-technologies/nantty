@@ -41,13 +41,13 @@ infraUp() {
 
 ensureFfmpeg() {
   command -v ffmpeg >/dev/null && return 0
-  docker image inspect zudomart-local-ffmpeg:1 >/dev/null 2>&1 || docker build -q -t zudomart-local-ffmpeg:1 "$ROOT/scripts/localStack/ffmpeg" >/dev/null
+  docker image inspect nantty-local-ffmpeg:1 >/dev/null 2>&1 || docker build -q -t nantty-local-ffmpeg:1 "$ROOT/scripts/localStack/ffmpeg" >/dev/null
   export PATH="$ROOT/scripts/localStack/ffmpeg/bin:$PATH"
-  log "no ffmpeg on this machine: media processes videos with the local zudomart-local-ffmpeg image"
+  log "no ffmpeg on this machine: media processes videos with the local nantty-local-ffmpeg image"
 }
 
 startRealtime() {
-  docker rm -f zudomart-realtime-smoke >/dev/null 2>&1 || true
+  docker rm -f nantty-realtime-smoke >/dev/null 2>&1 || true
   [ -f "$ZLOGS/realtimeLogs.pid" ] && { killTree "$(cat "$ZLOGS/realtimeLogs.pid")"; rm -f "$ZLOGS/realtimeLogs.pid"; }
   if ! command -v mix >/dev/null; then log "mix not installed; realtime (chat, live sockets) stays down"; return 0; fi
   local liveToken socialToken
@@ -56,10 +56,10 @@ startRealtime() {
   socialToken="$(grep -m1 '^SOCIAL_INTERNAL_TOKEN=' "$ROOT/services/typescript/social/.env.example" | cut -d= -f2-)"
   ( cd "$ROOT/services/elixir/realtime"
     export MIX_ENV=dev PHX_SERVER=true REALTIME_HTTP_IP=127.0.0.1 PORT=4000
-    export AUTH_JWKS_URL=http://127.0.0.1:8101/.well-known/jwks.json AUTH_TOKEN_ISSUER=http://localhost:8101 REALTIME_TOKEN_AUDIENCE=zudomart-realtime
+    export AUTH_JWKS_URL=http://127.0.0.1:8101/.well-known/jwks.json AUTH_TOKEN_ISSUER=http://localhost:8101 REALTIME_TOKEN_AUDIENCE=nantty-realtime
     export LIVE_INTERNAL_URL=http://127.0.0.1:8102 LIVE_INTERNAL_API_TOKEN="$liveToken"
     export SOCIAL_INTERNAL_URL=http://127.0.0.1:8105 SOCIAL_INTERNAL_TOKEN="$socialToken"
-    export RABBITMQ_URL=amqp://realtime:realtime-local-only@localhost:5672/zudomart
+    export RABBITMQ_URL=amqp://realtime:realtime-local-only@localhost:5672/nantty
     mix deps.get >"$ZLOGS/realtime.log" 2>&1
     nohup nice -n 5 mix phx.server >>"$ZLOGS/realtime.log" 2>&1 &
     echo $! >"$ZLOGS/realtime.pid" )
@@ -141,7 +141,7 @@ down() {
     kill -0 "$pid" 2>/dev/null && killTree "$pid"
     rm -f "$pidfile"
   done
-  [ -f "$STATE/servicesStartedByUp" ] && docker rm -f zudomart-realtime-smoke >/dev/null 2>&1 || true
+  [ -f "$STATE/servicesStartedByUp" ] && docker rm -f nantty-realtime-smoke >/dev/null 2>&1 || true
   rm -f "$STATE/servicesStartedByUp"
   sleep 3
   local leftover=()

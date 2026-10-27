@@ -7,7 +7,7 @@ terraform {
 }
 
 locals {
-  name = "zudomart-${var.environment}"
+  name = "nantty-${var.environment}"
 }
 
 resource "aws_db_subnet_group" "this" {
@@ -89,8 +89,8 @@ resource "aws_rds_cluster" "this" {
   cluster_identifier                  = local.name
   engine                              = "aurora-postgresql"
   engine_version                      = var.engine_version
-  database_name                       = "zudomart"
-  master_username                     = "zudomart_admin"
+  database_name                       = "nantty"
+  master_username                     = "nantty_admin"
   manage_master_user_password         = true
   master_user_secret_kms_key_id       = var.secrets_kms_key_arn
   storage_encrypted                   = true
@@ -137,7 +137,7 @@ resource "random_password" "service_roles" {
 
 resource "aws_secretsmanager_secret" "service_roles" {
   for_each   = toset(var.service_database_roles)
-  name       = "zudomart/${var.environment}/db/${each.key}"
+  name       = "nantty/${var.environment}/db/${each.key}"
   kms_key_id = var.secrets_kms_key_arn
 }
 
@@ -149,9 +149,9 @@ resource "aws_secretsmanager_secret_version" "service_roles" {
     password   = random_password.service_roles[each.key].result
     host       = aws_db_proxy.this.endpoint
     port       = 5432
-    dbname     = "zudomart"
-    url        = "postgres://${each.key}:${random_password.service_roles[each.key].result}@${aws_db_proxy.this.endpoint}:5432/zudomart?sslmode=require"
-    prisma_url = "postgres://${each.key}:${random_password.service_roles[each.key].result}@${aws_db_proxy.this.endpoint}:5432/zudomart?sslmode=require&schema=${replace(each.key, "svc_", "")}"
+    dbname     = "nantty"
+    url        = "postgres://${each.key}:${random_password.service_roles[each.key].result}@${aws_db_proxy.this.endpoint}:5432/nantty?sslmode=require"
+    prisma_url = "postgres://${each.key}:${random_password.service_roles[each.key].result}@${aws_db_proxy.this.endpoint}:5432/nantty?sslmode=require&schema=${replace(each.key, "svc_", "")}"
   })
   lifecycle { ignore_changes = [secret_string] }
 }

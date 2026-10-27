@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_log_group" "this" {
   count             = local.self_hosted ? 1 : 0
-  name              = "/zudomart/${var.environment}/livekit"
+  name              = "/nantty/${var.environment}/livekit"
   retention_in_days = var.log_retention_days
   kms_key_id        = var.logs_kms_key_arn
 }

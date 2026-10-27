@@ -1,10 +1,10 @@
 # AWS infrastructure (Terraform)
 
-Nantty uses the existing `zudomart` infrastructure identifiers in this configuration. Keep resource names, DNS records,
+Nantty uses the existing `nantty` infrastructure identifiers in this configuration. Keep resource names, DNS records,
 state bucket names, IAM policies, and secret paths aligned with deployed environments until they have a planned migration.
 
 Written, formatted and validated, never applied. Nothing here talks to AWS until someone runs `terraform apply` in an
-environment account. One AWS account per environment (`zudomart-dev`, `zudomart-staging`, `zudomart-prod`), one state per
+environment account. One AWS account per environment (`nantty-dev`, `nantty-staging`, `nantty-prod`), one state per
 environment. Architecture rationale: `docs/architecture/devops.md` and `docs/architecture/disaster-recovery.md`.
 
 ```
@@ -32,14 +32,14 @@ infra/aws/
 
 Fourteen Fargate services, all private, no public IPs: `gateway`, `go-identity`, `go-commerce`, `go-money`, `go-live`,
 `go-ads`, `go-trust`, `social`, `notifications`, `media`, `search`, `support`, `realtime`, `intelligence`. ECR repositories are
-`zudomart/<service>` (immutable tags, scan on push, KMS, lifecycle, replicated to the DR region in prod) plus
-`zudomart/migrate` for the pre-deploy migration task.
+`nantty/<service>` (immutable tags, scan on push, KMS, lifecycle, replicated to the DR region in prod) plus
+`nantty/migrate` for the pre-deploy migration task.
 
 | Path | Target |
 | --- | --- |
 | public ALB `/ws*` (priority 20) | `realtime` |
 | public ALB `/*` (priority 100) | `gateway` |
-| internal ALB, host `<service>.svc.<env>.zudomart.internal` | each service (HTTP inside the VPC), health checks per target group |
+| internal ALB, host `<service>.svc.<env>.nantty.internal` | each service (HTTP inside the VPC), health checks per target group |
 
 Provider webhooks (`/webhooks/*`) enter through the gateway, which routes them only to `go-money` and passes the raw
 request bytes and the `verif-hash` header through untouched (gateway test `webhook passthrough`). Flutterwave is the only
@@ -55,7 +55,7 @@ Security groups: one task group, data stores accept only that group, ALB groups 
 Task roles are per service and least privilege (S3 prefixes, KMS keys, SES identity, SQS feedback queue); execution roles
 read only their own secrets. ECS Exec is off unless `enable_execute_command = true`.
 
-LiveKit: `livekit_mode = "cloud"` (default) creates `zudomart/<env>/livekit` with placeholders to replace with your
+LiveKit: `livekit_mode = "cloud"` (default) creates `nantty/<env>/livekit` with placeholders to replace with your
 LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-backed ECS with host networking behind
 `livekit.<app_domain>` (signaling via the ALB, media on 7881/tcp and 7882/udp straight to the instance).
 
@@ -66,7 +66,7 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
 | `environment` | required | `dev`, `staging` or `prod` |
 | `region` / `dr_region` | required / `eu-central-1` | primary and DR regions |
 | `enable_dr` | `false` (true in prod) | AWS Backup cross-region copy, S3 CRR, ECR replication, secret replicas, DR KMS keys |
-| `zone_name`, `create_zone` | required, `false` | Route 53 zone; dev and staging own delegated sub-zones, prod owns `zudomart.com` |
+| `zone_name`, `create_zone` | required, `false` | Route 53 zone; dev and staging own delegated sub-zones, prod owns `nantty.com` |
 | `app_domain` | required | environment domain; services get `api.`, `media.`, `livekit.` prefixes |
 | `mail_domain` | required | SES sending domain |
 | `vpc_cidr`, `az_count`, `nat_per_az` | required, `3`, `false` | network shape, one NAT per AZ in prod |
@@ -90,27 +90,27 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
 1. Create the remote state backend by hand, in the environment account (the bucket and table are intentionally not
    managed by this stack):
    ```
-   aws s3api create-bucket --bucket zudomart-terraform-state-<env> --region eu-west-1 \
+   aws s3api create-bucket --bucket nantty-terraform-state-<env> --region eu-west-1 \
      --create-bucket-configuration LocationConstraint=eu-west-1
-   aws s3api put-bucket-versioning --bucket zudomart-terraform-state-<env> --versioning-configuration Status=Enabled
-   aws s3api put-bucket-encryption --bucket zudomart-terraform-state-<env> \
+   aws s3api put-bucket-versioning --bucket nantty-terraform-state-<env> --versioning-configuration Status=Enabled
+   aws s3api put-bucket-encryption --bucket nantty-terraform-state-<env> \
      --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"aws:kms"}}]}'
-   aws s3api put-public-access-block --bucket zudomart-terraform-state-<env> \
+   aws s3api put-public-access-block --bucket nantty-terraform-state-<env> \
      --public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
-   aws dynamodb create-table --table-name zudomart-terraform-locks --billing-mode PAY_PER_REQUEST \
+   aws dynamodb create-table --table-name nantty-terraform-locks --billing-mode PAY_PER_REQUEST \
      --attribute-definitions AttributeName=LockID,AttributeType=S --key-schema AttributeName=LockID,KeyType=HASH
    ```
 2. `cd infra/aws/envs/<env>`, edit `terraform.tfvars`, then `terraform init`, `terraform plan`, review with a second
    person, `terraform apply`. Prod applies run from a protected machine or the approved pipeline only.
 3. Delegate DNS: copy the `name_servers` output of dev and staging into NS records in the prod zone
-   (`dev.zudomart.com`, `staging.zudomart.com`), and point the registrar at prod's name servers.
+   (`dev.nantty.com`, `staging.nantty.com`), and point the registrar at prod's name servers.
 4. Verify SES: DKIM and MAIL FROM records are created automatically; request production access (out of the sandbox).
-5. Database roles: for each secret `zudomart/<env>/db/svc_*` create the Postgres role with that password, the schema it
+5. Database roles: for each secret `nantty/<env>/db/svc_*` create the Postgres role with that password, the schema it
    owns, PostGIS (`CREATE EXTENSION postgis`) and grants, using the Aurora master secret (output
    `aurora_master_secret_arn`) from a bastion via SSM. `svc_migrator` owns schemas for the pre-deploy migrate task.
-6. RabbitMQ: create one user per `zudomart/<env>/mq/<service>` secret and import
-   `infra/local/rabbitmq/topology.json` through the management API using `zudomart/<env>/mq/admin`.
-7. Fill the placeholders `CHANGE_ME` in `zudomart/<env>/<service>/app` (JWT/OTP keys, internal tokens, and for go-money
+6. RabbitMQ: create one user per `nantty/<env>/mq/<service>` secret and import
+   `infra/local/rabbitmq/topology.json` through the management API using `nantty/<env>/mq/admin`.
+7. Fill the placeholders `CHANGE_ME` in `nantty/<env>/<service>/app` (JWT/OTP keys, internal tokens, and for go-money
    `FLUTTERWAVE_SECRET_KEY`, `FLUTTERWAVE_WEBHOOK_HASH` (32+ characters) and `FLUTTERWAVE_MERCHANT_ID` for that environment;
    go-money refuses to start in production without them). Register `terraform output nat_public_ips` in Flutterwave's IP whitelist. Replace the LiveKit credentials when using LiveKit Cloud.
 8. In GitHub, create environments `staging` and `production` (required reviewers on production) and add repository

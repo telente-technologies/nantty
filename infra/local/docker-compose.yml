@@ -1,4 +1,4 @@
-name: zudomart-backend
+name: nantty-backend
 
 x-local-only: &local-only
   restart: unless-stopped
@@ -8,15 +8,15 @@ services:
     <<: *local-only
     image: postgis/postgis:17-3.5
     environment:
-      POSTGRES_USER: zudomart
-      POSTGRES_PASSWORD: zudomart
-      POSTGRES_DB: zudomart
+      POSTGRES_USER: nantty
+      POSTGRES_PASSWORD: nantty
+      POSTGRES_DB: nantty
     ports: ["127.0.0.1:15432:5432"]
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./postgres/create-databases.sh:/docker-entrypoint-initdb.d/10-create-databases.sh:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U zudomart -d zudomart"]
+      test: ["CMD-SHELL", "pg_isready -U nantty -d nantty"]
       interval: 5s
       retries: 20
 
@@ -39,17 +39,17 @@ services:
     ports: ["127.0.0.1:14566:4566"]
     volumes: ["./localstack/create-ses-identities.sh:/etc/localstack/init/ready.d/10-create-ses-identities.sh:ro"]
     healthcheck:
-      test: ["CMD-SHELL", "test -f /tmp/zudomart-ses-ready"]
+      test: ["CMD-SHELL", "test -f /tmp/nantty-ses-ready"]
       interval: 5s
       retries: 30
 
   rabbitmq:
     <<: *local-only
     image: rabbitmq:4-management
-    hostname: zudomart-rabbitmq
+    hostname: nantty-rabbitmq
     ports: ["127.0.0.1:5672:5672", "127.0.0.1:15672:15672", "127.0.0.1:15692:15692"]
     volumes:
-      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/conf.d/20-zudomart.conf:ro
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/conf.d/20-nantty.conf:ro
       - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
       - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
       - rabbitmq-data:/var/lib/rabbitmq
@@ -107,8 +107,8 @@ services:
     profiles: [analytics]
     image: clickhouse/clickhouse-server:latest
     environment:
-      CLICKHOUSE_USER: zudomart
-      CLICKHOUSE_PASSWORD: zudomart
+      CLICKHOUSE_USER: nantty
+      CLICKHOUSE_PASSWORD: nantty
       CLICKHOUSE_DB: analytics
     ports: ["127.0.0.1:18123:8123", "127.0.0.1:19000:9000"]
     volumes: [clickhouse-data:/var/lib/clickhouse]
