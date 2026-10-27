@@ -21,7 +21,7 @@ export async function logInThroughLoginPage(page: Page, identifier: string, pass
 }
 
 export async function logInThroughAuthPrompt(page: Page, identifier: string, password = smokePassword): Promise<void> {
-  const dialog = page.getByRole("dialog", { name: /sign in to zudomart/i });
+  const dialog = page.getByRole("dialog", { name: /sign in to nantty/i });
   await expect(dialog).toBeVisible();
   await dialog.getByLabel("Email or username").fill(identifier);
   await dialog.getByLabel("Password", { exact: true }).fill(password);

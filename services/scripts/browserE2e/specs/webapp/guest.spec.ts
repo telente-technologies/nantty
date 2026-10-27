@@ -12,7 +12,7 @@ test.beforeAll(async () => {
   world = await seedGuestWorld();
 });
 
-const signInDialog = (page: Page) => page.getByRole("dialog", { name: /sign in to zudomart/i });
+const signInDialog = (page: Page) => page.getByRole("dialog", { name: /sign in to nantty/i });
 
 async function expectGateThenReturn(page: Page, path: string, trigger: (page: Page) => Locator, afterSignIn: (page: Page) => Promise<void>): Promise<void> {
   await page.goto(path);

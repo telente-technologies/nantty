@@ -26,7 +26,7 @@ test.describe("guest on the marketing site", () => {
     for (const href of hrefs) {
       const target = new URL(href);
       if (target.origin !== origin) {
-        expect(href, "external business links point at Zudomart apps").toMatch(/localhost:(3200|3300|3500)|zudomart\.com|apps\.apple\.com|play\.google\.com/);
+        expect(href, "external business links point at Nantty apps").toMatch(/localhost:(3200|3300|3500)|nantty\.com|apps\.apple\.com|play\.google\.com/);
         continue;
       }
       const response = await request.get(`${target.pathname}${target.search}`);
@@ -43,8 +43,8 @@ test.describe("guest on the marketing site", () => {
     const menu = page.getByRole("button", { name: "For business" });
     await menu.click();
     await expect(menu).toHaveAttribute("aria-expanded", "true");
-    await expect(page.getByRole("link", { name: "Sell on Zudomart" }).first()).toBeVisible();
-    const dashboard = page.getByRole("link", { name: /Zudomart Dashboard/ }).first();
+    await expect(page.getByRole("link", { name: "Sell on Nantty" }).first()).toBeVisible();
+    const dashboard = page.getByRole("link", { name: /Nantty Dashboard/ }).first();
     await expect(dashboard).toHaveAttribute("target", "_blank");
     await page.keyboard.press("Escape");
   });

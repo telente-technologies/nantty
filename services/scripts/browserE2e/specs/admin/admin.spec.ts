@@ -173,7 +173,7 @@ test("suspending a user (step-up when asked) signs them out everywhere", async (
   expect(profile.status, "suspended user's token stops working").toBeGreaterThanOrEqual(400);
 });
 
-test("a normal Zudomart user cannot use the admin console; tampered session is refused", async ({ page }) => {
+test("a normal Nantty user cannot use the admin console; tampered session is refused", async ({ page }) => {
   const member = await registerUser("notadmin");
   await page.goto("/login");
   await page.getByLabel("Work email").fill(member.email);

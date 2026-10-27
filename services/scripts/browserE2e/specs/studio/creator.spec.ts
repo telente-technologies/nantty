@@ -3,7 +3,7 @@ import type { Page } from "@playwright/test";
 import { seedStoreWithProduct, type SeededStore } from "../../src/data/commerce.data.js";
 import { promoteToCreator } from "../../src/data/creator.data.js";
 import { doubleClickSubmit, expireSession, malformedInputs, oversizedText } from "../../src/helpers/abuse.helper.js";
-import { expectRedirectedToLogin, logInWithZudomartAccount } from "../../src/helpers/appLogin.helper.js";
+import { expectRedirectedToLogin, logInWithNanttyAccount } from "../../src/helpers/appLogin.helper.js";
 import { expectReadableMessages } from "../../src/helpers/rendering.helper.js";
 import { toggleDarkModeOnce } from "../../src/helpers/theme.helper.js";
 import { callApi, registerUser, type UserActor } from "../../src/smokeBridge.js";
@@ -18,7 +18,7 @@ let creator: UserActor;
 let restoreThresholds: (() => Promise<void>) | undefined;
 let livePath = "";
 
-const logIn = (page: Page, user: UserActor = creator, next?: string) => logInWithZudomartAccount(page, user.email, { identifierLabel: "Email", submit: "Log in", next });
+const logIn = (page: Page, user: UserActor = creator, next?: string) => logInWithNanttyAccount(page, user.email, { identifierLabel: "Email", submit: "Log in", next });
 
 test.beforeAll(async () => {
   shop = await seedStoreWithProduct("studio");

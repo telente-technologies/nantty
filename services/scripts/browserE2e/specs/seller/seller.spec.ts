@@ -3,7 +3,7 @@ import type { Page } from "@playwright/test";
 import { seedStoreWithProduct, type SeededStore } from "../../src/data/commerce.data.js";
 import { acceptTeamRequest, addStoreManager, placePaidOrder, upgradeToBusinessPlan } from "../../src/data/seller.data.js";
 import { doubleClickSubmit, expireSession, malformedInputs, oversizedText } from "../../src/helpers/abuse.helper.js";
-import { expectRedirectedToLogin, logInWithZudomartAccount } from "../../src/helpers/appLogin.helper.js";
+import { expectRedirectedToLogin, logInWithNanttyAccount } from "../../src/helpers/appLogin.helper.js";
 import { expectReadableMessages } from "../../src/helpers/rendering.helper.js";
 import { toggleDarkModeOnce } from "../../src/helpers/theme.helper.js";
 import { createSamplePng, registerUser, uniqueSuffix, type UserActor } from "../../src/smokeBridge.js";
@@ -16,7 +16,7 @@ let freeStore: SeededStore;
 let secondStore: SeededStore;
 let orderId = "";
 
-const logIn = (page: Page, user: UserActor = freeStore.seller, next?: string) => logInWithZudomartAccount(page, user.email, { identifierLabel: "Email or username", submit: "Sign in", next });
+const logIn = (page: Page, user: UserActor = freeStore.seller, next?: string) => logInWithNanttyAccount(page, user.email, { identifierLabel: "Email or username", submit: "Sign in", next });
 
 test.beforeAll(async () => {
   freeStore = await seedStoreWithProduct("sellfree");
@@ -175,13 +175,13 @@ test("staff roles: a sales staff member is blocked from finance and settings", a
   await upgradeToBusinessPlan(freeStore);
   const member = await registerUser("staffer");
   await logIn(page);
-  const finder = page.getByLabel("Find a Zudomart user");
+  const finder = page.getByLabel("Find a Nantty user");
   await expect(async () => {
     await page.goto("/staff/invite");
     await expect(finder, "the new plan unlocks the team form once the short plan cache expires").toBeVisible({ timeout: 3000 });
   }).toPass({ timeout: 30_000 });
   await finder.fill(`@${member.username}`);
-  await page.getByRole("list", { name: "Matching Zudomart users" }).getByText(member.username).first().click();
+  await page.getByRole("list", { name: "Matching Nantty users" }).getByText(member.username).first().click();
   await page.getByLabel("Role").selectOption({ label: "Sales staff" });
   await page.getByRole("button", { name: "Send team request" }).click();
   await expect(page.getByRole("group", { name: "Works at" }).getByRole("alert"), "a location is required").toHaveText("Pick at least one location.");

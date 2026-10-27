@@ -2,7 +2,7 @@ import { expect, type Page } from "@playwright/test";
 
 import { smokePassword } from "../smokeBridge.js";
 
-export async function logInWithZudomartAccount(page: Page, identifier: string, options: { readonly next?: string; readonly password?: string; readonly identifierLabel?: string | RegExp; readonly submit?: string | RegExp } = {}): Promise<void> {
+export async function logInWithNanttyAccount(page: Page, identifier: string, options: { readonly next?: string; readonly password?: string; readonly identifierLabel?: string | RegExp; readonly submit?: string | RegExp } = {}): Promise<void> {
   await page.goto(options.next === undefined ? "/login" : `/login?next=${encodeURIComponent(options.next)}`);
   await page.getByLabel(options.identifierLabel ?? /^(Email or username|Email)$/).fill(identifier);
   await page.getByLabel("Password", { exact: true }).fill(options.password ?? smokePassword);

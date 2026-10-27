@@ -193,7 +193,7 @@ test("notifications, then sign out and an expired session", async ({ page }) => 
   await expect(page).toHaveURL(/\/notifications$/);
   await page.getByRole("button", { name: "Account menu" }).click();
   await page.getByRole("menuitem", { name: "Sign out" }).or(page.getByRole("button", { name: "Sign out" })).first().click();
-  await page.getByRole("alertdialog", { name: "Sign out of Zudomart?" }).getByRole("button", { name: "Sign out" }).click();
+  await page.getByRole("alertdialog", { name: "Sign out of Nantty?" }).getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/login/);
   await page.goBack();
   await expect(page, "back after sign-out does not show member pages").toHaveURL(/\/login/);

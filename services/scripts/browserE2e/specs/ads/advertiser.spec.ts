@@ -1,5 +1,5 @@
 import { doubleClickSubmit, expireSession, malformedInputs, oversizedText } from "../../src/helpers/abuse.helper.js";
-import { expectRedirectedToLogin, logInWithZudomartAccount } from "../../src/helpers/appLogin.helper.js";
+import { expectRedirectedToLogin, logInWithNanttyAccount } from "../../src/helpers/appLogin.helper.js";
 import { routeFlutterwaveToFake } from "../../src/helpers/flutterwave.helper.js";
 import { expectReadableMessages } from "../../src/helpers/rendering.helper.js";
 import { toggleDarkModeOnce } from "../../src/helpers/theme.helper.js";
@@ -24,12 +24,12 @@ test("signed-out deep links go to sign-in and come back", async ({ page }) => {
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("alert").filter({ hasText: /incorrect|not right|try again/i }).first()).toBeVisible();
   await expectReadableMessages(page);
-  await logInWithZudomartAccount(page, advertiser.email, { next: "/accounts/new" });
+  await logInWithNanttyAccount(page, advertiser.email, { next: "/accounts/new" });
   await expect(page).toHaveURL(/\/accounts\/new/);
 });
 
 test("create an ad account (with empty, oversized and double submits)", async ({ page }) => {
-  await logInWithZudomartAccount(page, advertiser.email);
+  await logInWithNanttyAccount(page, advertiser.email);
   await page.goto("/accounts/new");
   await page.getByText("Just me").click();
   const submit = page.getByRole("button", { name: "Create ad account" });
@@ -50,7 +50,7 @@ test("create an ad account (with empty, oversized and double submits)", async ({
 
 test("campaign wizard with creative upload, then clear the spend cap", async ({ page }) => {
   test.skip(accountPath === "", "needs the ad account");
-  await logInWithZudomartAccount(page, advertiser.email);
+  await logInWithNanttyAccount(page, advertiser.email);
   await page.goto(`${accountPath}/campaigns/new`);
   await page.getByText("Traffic & profile visits").click();
   await page.getByRole("button", { name: "Continue" }).click();
@@ -102,7 +102,7 @@ test("campaign wizard with creative upload, then clear the spend cap", async ({ 
 test("invite a member, reject bad emails, and the invitee cannot see the account before accepting", async ({ page, browser }) => {
   test.skip(accountPath === "", "needs the ad account");
   const invitee = await registerUser("advinv");
-  await logInWithZudomartAccount(page, advertiser.email);
+  await logInWithNanttyAccount(page, advertiser.email);
   await page.goto(`${accountPath}/settings`);
   await page.getByLabel("Invite by email").fill("not-an-email");
   await page.getByRole("button", { name: "Send invite" }).click();
@@ -113,7 +113,7 @@ test("invite a member, reject bad emails, and the invitee cannot see the account
   await expect(page.getByText(`Invite sent to ${invitee.email}`)).toBeVisible();
   const otherContext = await browser.newContext();
   const other = await otherContext.newPage();
-  await logInWithZudomartAccount(other, invitee.email);
+  await logInWithNanttyAccount(other, invitee.email);
   await other.goto(`${accountPath}/overview`);
   await expect(other).toHaveURL(/\/accounts\?denied=/);
   await expect(other.getByText(/not a member of that ad account/)).toBeVisible();
@@ -122,7 +122,7 @@ test("invite a member, reject bad emails, and the invitee cannot see the account
 
 test("top up through fake Flutterwave, double-tap Pay, expired session", async ({ page }) => {
   test.skip(accountPath === "", "needs the ad account");
-  await logInWithZudomartAccount(page, advertiser.email);
+  await logInWithNanttyAccount(page, advertiser.email);
   const accountId = accountPath.split("/").at(-1) ?? "";
   const flutterwave = await routeFlutterwaveToFake(page, `/accounts/${accountId}/billing/return`);
   await page.goto(`${accountPath}/billing`);
@@ -145,7 +145,7 @@ test("top up through fake Flutterwave, double-tap Pay, expired session", async (
 });
 
 test("dark mode renders", async ({ page }, testInfo) => {
-  await logInWithZudomartAccount(page, advertiser.email);
+  await logInWithNanttyAccount(page, advertiser.email);
   await page.goto("/accounts");
   await toggleDarkModeOnce(page, testInfo, "ads-accounts", page.getByLabel(/^Signed in as/));
 });

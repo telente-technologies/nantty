@@ -34,7 +34,7 @@ function secret() {
 
 function environmentFor(app) {
   const origin = `http://localhost:${ports[app]}`;
-  const shared = { NEXT_PUBLIC_SITE_URL: origin, NEXT_PUBLIC_MAIL_DOMAIN: "zudomart.com", NEXT_TELEMETRY_DISABLED: "1", PORT: String(ports[app]) };
+  const shared = { NEXT_PUBLIC_SITE_URL: origin, NEXT_PUBLIC_MAIL_DOMAIN: "nantty.com", NEXT_TELEMETRY_DISABLED: "1", PORT: String(ports[app]) };
   const urls = { NEXT_PUBLIC_MARKETING_SITE_URL: "http://localhost:3100", NEXT_PUBLIC_SELLER_WEB_URL: "http://localhost:3200", NEXT_PUBLIC_ADS_MANAGER_URL: "http://localhost:3300", NEXT_PUBLIC_WEBAPP_URL: "http://localhost:3500", NEXT_PUBLIC_DASHBOARD_URL: "http://localhost:3200" };
   switch (app) {
     case "webapp":

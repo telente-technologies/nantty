@@ -187,7 +187,7 @@ test("report: pick messages, see consent, and the report carries only those mess
   await expect(dialog.getByRole("button", { name: "Pick messages" })).toHaveAttribute("aria-pressed", "true");
   const boxes = dialog.getByRole("checkbox");
   await boxes.nth(0).check();
-  await expect(dialog.getByText(/These messages will be sent to Zudomart for review/)).toBeVisible();
+  await expect(dialog.getByText(/These messages will be sent to Nantty for review/)).toBeVisible();
   await expect(dialog.getByText(/1 message(s)? selected/)).toBeVisible();
   await dialog.getByRole("button", { name: "Send report" }).click();
   await expect(dialog.getByText("Thanks, we'll review this").or(b.page.getByText("Thanks, we'll review this"))).toBeVisible();
