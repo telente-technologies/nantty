@@ -1,6 +1,6 @@
 # Creator subscriptions in the App Store and Google Play
 
-Fans can subscribe to creators inside the iOS and Android apps. The price in the app is the web price plus that store's fee, so the creator earns the same as on the web: Zudomart takes the store fee off the gross, then the creator keeps 80% of what is left (net).
+Fans can subscribe to creators inside the iOS and Android apps. The price in the app is the web price plus that store's fee, so the creator earns the same as on the web: Nantty takes the store fee off the gross, then the creator keeps 80% of what is left (net).
 
 The full product list, with every price per region, is in [`infra/appStore/creatorSubscriptionProducts.json`](../../infra/appStore/creatorSubscriptionProducts.json). It is generated from `services/go/platform/regionpricing/regionPricing.creatorTiers.go`, and `regionPricing.storeProducts_test.go` fails if the two drift apart.
 
@@ -43,7 +43,7 @@ The products don't name a creator. The link between a store purchase and a creat
 - `appAccountToken` on iOS
 - `obfuscatedAccountId` on Android
 
-Both are set to the Zudomart creator-subscription id when the purchase starts, and the backend verifies them on every receipt and notification.
+Both are set to the Nantty creator-subscription id when the purchase starts, and the backend verifies them on every receipt and notification.
 
 To raise the limit, add slots 6 onwards in both consoles, then bump `CreatorStoreSlots` and regenerate the JSON.
 
@@ -52,7 +52,7 @@ The totals are 7 tiers × 2 intervals × 5 slots = **70 products** per store, an
 ## App Store Connect (iOS)
 
 1. **Agreements.** Under App Store Connect → Business, make sure the Paid Applications agreement, tax and banking are active.
-2. **Small Business Program.** If Zudomart is enrolled in the App Store Small Business Program, set `appleSmallBusinessProgram: true` in admin config `appStore.fees`. iOS prices then use the 15% column (`appleSmallBusinessMinor`).
+2. **Small Business Program.** If Nantty is enrolled in the App Store Small Business Program, set `appleSmallBusinessProgram: true` in admin config `appStore.fees`. iOS prices then use the 15% column (`appleSmallBusinessMinor`).
 3. **Create the subscriptions.** Go to App → Monetization → Subscriptions. For each of the 70 products in the JSON:
    - Create a **subscription group**. Its reference name is the product id, for example `zudomart.creatorsub.tier_1000.s1.monthly`. Every product needs a group of its own.
    - Inside that group, add one auto-renewable subscription:
@@ -61,7 +61,7 @@ The totals are 7 tiers × 2 intervals × 5 slots = **70 products** per store, an
      - Duration = `apple.duration`
      - Family Sharing off
    - **Price:** set the base country to Nigeria at `prices.NG.appleMinor` (minor units, so 150000 means ₦1,500). Use "manually adjust prices" so GH, KE, ZA, GB, the euro countries and the US match the `appleMinor` of their region. Pick the nearest Apple price point **at or above** each value. Let every other storefront follow the US price.
-   - **Localization:** display name "Creator subscription", description "Supports a Zudomart creator you choose in the app".
+   - **Localization:** display name "Creator subscription", description "Supports a Nantty creator you choose in the app".
    - Upload one review screenshot of the subscribe screen.
    - Tip: the App Store Connect API (`POST /v1/subscriptionGroups`, `/v1/subscriptions`, `/v1/subscriptionPrices`) can create all 70 from the JSON in a script. This is far faster than clicking.
 4. **Server notifications.** Under App Information → App Store Server Notifications:
@@ -127,11 +127,11 @@ Store fees live in the admin platform setting `appStore.fees` (permission `confi
 | `REFUND`, `REVOKE`, voided purchase | The charge is marked `refunded` and access ends. The creator's share is clawed back from their earnings; any part already withdrawn goes to their earnings-debt account. Emits `creatorSubscription.refunded`. |
 
 - **Idempotency:** each notification id is processed once, and each store transaction id posts earnings once.
-- **Cancelling:** fans cancel store-billed subscriptions in their store settings. The Zudomart cancel and resume endpoints return 409 `MANAGE_IN_STORE`, and the app shows a "Manage in the App Store / Google Play" button instead.
+- **Cancelling:** fans cancel store-billed subscriptions in their store settings. The Nantty cancel and resume endpoints return 409 `MANAGE_IN_STORE`, and the app shows a "Manage in the App Store / Google Play" button instead.
 
 ## Mobile development build
 
-IAP needs native code, so it can't run in Expo Go. In Expo Go, the subscribe screen says "Subscriptions need the Zudomart app build" and disables the button.
+IAP needs native code, so it can't run in Expo Go. In Expo Go, the subscribe screen says "Subscriptions need the Nantty app build" and disables the button.
 
 ```bash
 cd apps/mobile

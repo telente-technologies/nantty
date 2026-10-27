@@ -1,4 +1,4 @@
-# Zudomart legal pack
+# Nantty legal pack
 
 **Draft — not legal advice — review with a Nigerian lawyer before use.** Everything here is a working draft written on 2026-10-10 from public sources. Nothing is in effect until counsel approves it. The public policies keep `isReviewedByLegal: false` until then.
 
@@ -6,7 +6,7 @@ Parts are adapted from the CC0 templates by General Legal, PC (kept unchanged in
 
 ## 1. Public policies (website)
 
-All are rendered by `apps/web/src/components/legal/legalPolicyPage.tsx` from content in `apps/web/src/content/` and registered in `legalPolicies.content.ts`. Zudomart has not launched, so every document is **version 1.0 (draft)**, planned effective date 2026-12-01 (to be confirmed with counsel), with no version history. The `/legal-archive/<slug>/<version>` route stays in place and has no entries until a post-launch version replaces 1.0. The Terms are split across `termsOfService.content.ts` and `termsOfServiceMoney.content.ts`.
+All are rendered by `apps/web/src/components/legal/legalPolicyPage.tsx` from content in `apps/web/src/content/` and registered in `legalPolicies.content.ts`. Nantty has not launched, so every document is **version 1.0 (draft)**, planned effective date 2026-12-01 (to be confirmed with counsel), with no version history. The `/legal-archive/<slug>/<version>` route stays in place and has no entries until a post-launch version replaces 1.0. The Terms are split across `termsOfService.content.ts` and `termsOfServiceMoney.content.ts`.
 
 | Page | Slug | Content file | Derived from General Legal |
 | --- | --- | --- | --- |
@@ -32,14 +32,14 @@ The same document keys are registered in: `apps/admin/src/constants/legalDocumen
 | Template | Use | Source |
 | --- | --- | --- |
 | [mutualNda.md](templates/mutualNda.md) | Two-way NDA for partners, investors, integrations | General Legal Mutual NDA |
-| [oneWayNda.md](templates/oneWayNda.md) | Zudomart discloses only (candidates, agencies, vendors in evaluation) | General Legal One-Way NDA |
+| [oneWayNda.md](templates/oneWayNda.md) | Nantty discloses only (candidates, agencies, vendors in evaluation) | General Legal One-Way NDA |
 | [advisorAgreement.md](templates/advisorAgreement.md) | Advisors paid in share options under CAMA 2020 | General Legal Advisor Agreement |
 | [masterServicesAgreement.md](templates/masterServicesAgreement.md) | B2B and brand deals, managed campaigns, integrations, with an Order Form | General Legal MSA |
 | [dataProcessingAgreement.md](templates/dataProcessingAgreement.md) | Controller-to-processor DPA under NDPA s.29 with a UK/EU/US/GH/KE/ZA annex | General Legal DPA (Global and US) |
 | [employeeOfferLetter.md](templates/employeeOfferLetter.md) | Nigerian employees: Labour Act, minimum wage, PAYE, pension, NHF, ECA, probation, notice | General Legal Offer Letter (rewritten) |
 | [contractorAgreement.md](templates/contractorAgreement.md) | Freelancers and consultants, with IP assignment and WHT | IP and confidentiality clauses from General Legal |
 
-**Not adapted: the HIPAA Business Associate Agreement.** HIPAA only governs US "covered entities" (health plans, providers, clearing houses) and their business associates handling protected health information. Zudomart is not a health provider and does not process PHI for one, so the BAA has no use. Health products sold on the marketplace are governed by NAFDAC rules, not HIPAA.
+**Not adapted: the HIPAA Business Associate Agreement.** HIPAA only governs US "covered entities" (health plans, providers, clearing houses) and their business associates handling protected health information. Nantty is not a health provider and does not process PHI for one, so the BAA has no use. Health products sold on the marketplace are governed by NAFDAC rules, not HIPAA.
 
 ## 3. Compliance checklist by country
 
@@ -62,10 +62,10 @@ Status column is for the team to fill in.
 | Local presence and liaison officer | NITDA Code of Practice for Interactive Computer Service Platforms (2022) | Large platforms (over 100,000 Nigerian users) must be incorporated in Nigeria, publish a physical Nigerian address, appoint a liaison officer, and file an annual compliance report with NITDA. | |
 | Takedown timelines | NITDA Code | Remove unlawful content on notice from an authorised agency (reported as 24 hours) and non-consensual intimate images within **24 hours**; keep a 24/7 channel for agencies. | |
 | Copyright notice-and-takedown | Copyright Act 2022 ss.54–58 | Designate the notice channel; forward counter-notices; repeat infringer suspension of at least one month (s.56). | |
-| ARCON | ARCON Act 2022; Nigerian Code of Advertising Practice | Ads and influencer content need pre-exposure vetting; check whether Zudomart must register as a platform/media and whether boosts count as ads. | |
+| ARCON | ARCON Act 2022; Nigerian Code of Advertising Practice | Ads and influencer content need pre-exposure vetting; check whether Nantty must register as a platform/media and whether boosts count as ads. | |
 | Consumer protection | FCCPA 2018 (incl. ss.120, 122, 127) | No blanket no-refund terms; plain-language terms; complaints to FCCPC. | |
-| Payments licensing | CBN regulations; partner licences | Zudomart must never hold customer funds. Get written confirmation from counsel and Flutterwave that the PSA model needs no CBN licence for Zudomart. | |
-| VAT and tax | Nigeria Tax Act 2025; Nigeria Tax Administration Act 2025 | Register for VAT and charge 7.5% on Zudomart fees unless small-company relief applies; check marketplace collection/reporting duties and e-invoicing. | |
+| Payments licensing | CBN regulations; partner licences | Nantty must never hold customer funds. Get written confirmation from counsel and Flutterwave that the PSA model needs no CBN licence for Nantty. | |
+| VAT and tax | Nigeria Tax Act 2025; Nigeria Tax Administration Act 2025 | Register for VAT and charge 7.5% on Nantty fees unless small-company relief applies; check marketplace collection/reporting duties and e-invoicing. | |
 | Employment | Labour Act; National Minimum Wage (Amendment) Act 2024 (₦70,000); Pension Reform Act 2014; NHF Act; Employee's Compensation Act 2010; ITF Act | Register with PFA/PenCom, NSITF, ITF, state tax authority (PAYE). | |
 | Company records | CAMA 2020 | Keep accounting records at least 6 years; file annual returns. | |
 
@@ -101,7 +101,7 @@ Status column is for the team to fill in.
 
 | Obligation | Law | Detail | Status |
 | --- | --- | --- | --- |
-| Appoint EU and UK representatives | GDPR / UK GDPR Art. 27 | Required while Zudomart has no establishment there. | |
+| Appoint EU and UK representatives | GDPR / UK GDPR Art. 27 | Required while Nantty has no establishment there. | |
 | SCCs / UK IDTA | GDPR Ch. V | For transfers to Nigeria and the US. | |
 | Cookie consent | ePrivacy / PECR | Done in webKit. | |
 | Online platform duties | EU Digital Services Act; UK Online Safety Act 2023 | Notice and action, statements of reasons, trader traceability, ad transparency, no profiling ads to minors, point of contact/legal representative; OSA risk assessments. | |
@@ -132,13 +132,13 @@ Status column is for the team to fill in.
 
 ## 5. Questions for a Nigerian lawyer
 
-1. Does the Flutterwave payout-subaccount model (wallets in each user's name, Zudomart only instructing transfers and taking fees, escrow as a ledger lock) keep Zudomart outside CBN licensing (PSSP, switching, mobile money, or escrow regulation)? Do we need any CBN or NIBSS approval for the escrow wording?
-2. Which NDPC tier will Zudomart fall into at launch, what are the current registration and CAR fees, and must the DPO be in Nigeria?
+1. Does the Flutterwave payout-subaccount model (wallets in each user's name, Nantty only instructing transfers and taking fees, escrow as a ledger lock) keep Nantty outside CBN licensing (PSSP, switching, mobile money, or escrow regulation)? Do we need any CBN or NIBSS approval for the escrow wording?
+2. Which NDPC tier will Nantty fall into at launch, what are the current registration and CAR fees, and must the DPO be in Nigeria?
 3. Is our biometric verification flow (explicit consent, no face template stored, Smile ID as processor) compliant with NDPA s.30 and the GAID? Do we need a DPIA filed with the NDPC?
 4. Does the owner-selected 13+ minimum with parent/guardian responsibility for under-18s meet NDPA s.31, and what is the simplest lawful parental-consent and age-assurance method for launch?
 5. Are the transfer bases for AWS in Ireland and Germany and US vendors adequate under NDPA ss.41–43 and the GAID, and has the NDPC issued any adequacy list we can rely on?
 6. Does the NITDA Code of Practice bind us as a "Large Service Platform" from launch, and what local incorporation, address and liaison officer steps are needed? Is the Code's legal status settled?
-7. Do boosts, in-app sponsored posts and creator paid partnerships each need ARCON pre-exposure approval, who must obtain it, and must Zudomart register with ARCON?
+7. Do boosts, in-app sponsored posts and creator paid partnerships each need ARCON pre-exposure approval, who must obtain it, and must Nantty register with ARCON?
 8. Is the arbitration clause (AMA 2023, Lagos seat, sole arbitrator) enforceable against Nigerian consumers, which institution and rules should we name, and should US users get an opt-out and class-action waiver?
 9. Is the liability cap (greater of 12 months' fees and ₦100,000) acceptable under FCCPA s.127 and the Lagos courts' approach to unfair terms?
 10. What are our VAT, withholding and reporting obligations as a marketplace under the Nigeria Tax Act 2025 and the Nigeria Tax Administration Act 2025, including e-invoicing and any duty to collect VAT on sellers' sales?

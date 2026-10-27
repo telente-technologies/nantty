@@ -2,7 +2,7 @@
 
 # Advisor Agreement
 
-This Advisor Agreement (the "**Agreement**") is made on <mark>[date]</mark> (the "**Effective Date**") between <mark>[Zudomart legal entity name]</mark>, a private company limited by shares incorporated in Nigeria, RC <mark>[RC number]</mark>, of <mark>[registered address]</mark> (the "**Company**"), and <mark>[Advisor name]</mark> of <mark>[address]</mark> (the "**Advisor**").
+This Advisor Agreement (the "**Agreement**") is made on <mark>[date]</mark> (the "**Effective Date**") between <mark>[Nantty legal entity name]</mark>, a private company limited by shares incorporated in Nigeria, RC <mark>[RC number]</mark>, of <mark>[registered address]</mark> (the "**Company**"), and <mark>[Advisor name]</mark> of <mark>[address]</mark> (the "**Advisor**").
 
 ## 1. Services
 

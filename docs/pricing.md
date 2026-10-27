@@ -1,4 +1,4 @@
-# Zudomart pricing (regional)
+# Nantty pricing (regional)
 
 Status: recommended defaults, 4 October 2026, replacing the Nigeria-only sheet of 3 October. Every price is admin-editable (Admin → Configuration → Regional pricing). None is hardcoded in a UI. Amounts are stored as `amountMinor` in the region's currency. "Est." marks an estimate, not a sourced figure.
 
@@ -99,7 +99,7 @@ Since 2026-10-05 creators pick a plan price from a fixed tier ladder (₦500, �
 
 Reading: African CPMs are 5–15× cheaper than US/UK; South Africa is the priciest African market; X and Snapchat undercut Meta in the US/UK; TikTok sits between X/Snap and Meta.
 
-### 5.2 Zudomart floors and suggested bids (local currency)
+### 5.2 Nantty floors and suggested bids (local currency)
 
 | Region | CPM floor | Suggested CPM | CPC floor | Suggested CPC | Suggested cost per video view | Minimum daily budget | Suggested daily budget | Boost minimum / day |
 |---|---|---|---|---|---|---|---|---|
@@ -160,14 +160,14 @@ Flutterwave is the only web payment provider (owner, 2026-10-11). Country detail
 
 | Region | Charge | Notes |
 |---|---|---|
-| Nigeria (Zudomart's entity) | NGN, and USD for international cards | Card, bank transfer, USSD; payout subaccounts (wallets) are NGN only |
+| Nigeria (platform entity) | NGN, and USD for international cards | Card, bank transfer, USSD; payout subaccounts (wallets) are NGN only |
 | Ghana / Kenya / South Africa | GHS / KES / ZAR | Card plus MoMo (GH), M-Pesa (KE), account (ZA); each currency must be activated on the Flutterwave account. Direct mode, no wallet or escrow (§6 of the spec) |
 | GBP / EUR | **not enabled** | Not in `FLUTTERWAVE_SUPPORTED_CURRENCIES`; UK/EU web buyers pay in USD |
 
 **Owner decision (4 Oct 2026, kept):** UK and Eurozone web buyers **pay the US price in USD**. The apps keep store-local prices.
 
 - `FLUTTERWAVE_SUPPORTED_CURRENCIES` (default `NGN,GHS,KES,ZAR,USD`) is the switch. For each web price the server decides: region currency if Flutterwave can charge it, otherwise the US price in USD, labelled **"Billed in USD"** (`billingNote` on `/api/v1/pricing/plans`, coin packs, creator bands and checkout). Remove a currency from the list until Flutterwave has activated it on the account.
-- If USD is switched off, those regions show their local price with `canBuyOnWeb: false` and the note "Web checkout isn't available in your currency or in USD yet. Buy in the Zudomart app, or try again later."; checkout returns `422 WEB_CURRENCY_NOT_ENABLED` and the coin pack list returns the same error instead of an empty list.
+- If USD is switched off, those regions show their local price with `canBuyOnWeb: false` and the note "Web checkout isn't available in your currency or in USD yet. Buy in the Zudomart app, or try again later."; checkout returns `422 WEB_CURRENCY_NOT_ENABLED` and the coin pack list returns the same error instead of an empty list. This is the current server response text; its legacy brand wording needs a separate service change.
 
 ### 7.1 Owner setup checklist
 
@@ -200,7 +200,7 @@ Reading per market:
 - **Ghana:** Spotify is GH₵22 (≈ $1.40); X charges USD. Blue Verified at GH₵30 (≈ $1.94) sits just above Spotify (est. willingness to pay).
 - **Kenya:** Spotify KSh 419, X Premium KSh 1,100 (≈ $8.50, X barely localises). Blue Verified KSh 500 ≈ Spotify; Premium KSh 900 below X.
 - **South Africa:** Spotify R69.99, YouTube R82, Netflix Standard R179. Blue Verified R59.99 under Spotify; Premium R109.99 between YouTube and Netflix.
-- **UK / Eurozone / US:** X Premium £8/$8, Meta Verified £13.99/$14.99. Blue Verified at £5.99/€5.99/$5.99 undercuts X by 25% because Zudomart is the new network; Premium £9.99/$9.99 undercuts Spotify. Euro prices sit one step higher for Premium because euro prices include 19–21% VAT. Seller Pro $17/£15 undercuts Shopify Basic ($27/£25) because Zudomart brings the audience but takes 1–1.5% escrow fees.
+- **UK / Eurozone / US:** X Premium £8/$8, Meta Verified £13.99/$14.99. Blue Verified at £5.99/€5.99/$5.99 undercuts X by 25% because Nantty is the new network; Premium £9.99/$9.99 undercuts Spotify. Euro prices sit one step higher for Premium because euro prices include 19–21% VAT. Seller Pro $17/£15 undercuts Shopify Basic ($27/£25) because Nantty brings the audience but takes 1–1.5% escrow fees.
 
 ### 8.2 Purchasing power (est.)
 

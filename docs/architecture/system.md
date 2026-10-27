@@ -76,7 +76,7 @@ Clients only ever call two hosts: the gateway (`/api/v1/*`, `/webhooks/*`) and r
 | Studio | `apps/studio` | Creators | Lives, browser go-live over WHIP (`src/live/whipPublisher.ts`), OBS set-up, overlays, replays, comments, analytics |
 | Seller dashboard | `apps/seller` | Sellers and their staff | E-commerce back office: products, inventory, orders, returns, money, staff, marketing, reports. No in-store register |
 | Ads Manager | `apps/ads` | Advertisers | Campaigns, audiences, creatives, billing, reports |
-| Admin | `apps/admin` | Zudomart staff | Trust and safety, money, legal, support, settings |
+| Admin | `apps/admin` | Nantty staff | Trust and safety, money, legal, support, settings |
 | Marketing site | `apps/web` | Public | Landing, sellers page, legal pages. No mocks |
 
 The five product Next apps use a BFF (`src/app/bff/[...path]/route.ts`): the browser talks only to its own origin, the session lives in `__Host-` httpOnly cookies, and mutations carry a CSRF token. Each app can run on in-process mocks (`src/mocks`) or against the gateway; see section 10.
@@ -142,13 +142,13 @@ More detail: [events.md](events.md).
 
 ## 6. Money flow
 
-Flutterwave is the only payment provider (`PAYMENTS_PROVIDER=flutterwave`); Apple and Google in-app purchase cover digital goods bought inside the mobile apps. **Zudomart never holds customer money.** Full design: [../integrations/flutterwaveMigration.md](../integrations/flutterwaveMigration.md).
+Flutterwave is the only payment provider (`PAYMENTS_PROVIDER=flutterwave`); Apple and Google in-app purchase cover digital goods bought inside the mobile apps. **Nantty never holds customer money.** Full design: [../integrations/flutterwaveMigration.md](../integrations/flutterwaveMigration.md).
 
 ```mermaid
 flowchart TB
   subgraph NG["Nigeria: payout subaccounts (PSA)"]
     PAY["Buyer pays: card, bank transfer, USSD,<br/>or their funded wallet"] --> BPSA["Buyer's own PSA<br/>escrow locked in our ledger"]
-    BPSA -->|"buyer confirms, or 72 h after delivery,<br/>no open dispute"| REL["Release: buyer PSA → seller PSA,<br/>escrow fee → Zudomart main"]
+    BPSA -->|"buyer confirms, or 72 h after delivery,<br/>no open dispute"| REL["Release: buyer PSA → seller PSA,<br/>escrow fee → Nantty main"]
     REL --> HOLD["Seller credit hold (24 h)"] --> WD["Withdrawal (step-up)<br/>transfer from seller PSA"] --> BANK["Seller's bank"]
     BPSA -.->|"dispute pauses the timer"| DSP["Dispute"]
     DSP -.->|"refund"| UNLOCK["Unlock in the buyer's PSA,<br/>or refund to the card"]

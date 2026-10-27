@@ -93,7 +93,7 @@ Your firewall must allow inbound connections on 8080 and 18333 for option 1. The
 
 ## Live video with LiveKit (dev build only)
 
-Going live streams through LiveKit. Expo Go can't load WebRTC, so it shows the "needs the Zudomart app build" screen, and mock mode only shows a camera preview with a "Preview only" pill. To test real video you need the local backend, the LiveKit container and a dev build on each phone.
+Going live streams through LiveKit. Expo Go can't load WebRTC, so it shows the "needs the Nantty app build" screen, and mock mode only shows a camera preview with a "Preview only" pill. To test real video you need the local backend, the LiveKit container and a dev build on each phone.
 
 1. **Start LiveKit.** It is only in the full infra set: `pnpm backend:up -- --full`, or add it to a running stack with `docker compose -f infra/local/docker-compose.yml up -d livekit`. The image is pinned by digest (`livekit/livekit-server:v1.13.7`). The dev keys (`devkey` / the secret in `infra/local/livekit/livekit.yaml`) already match `security/regression/sandboxSecrets.env`.
 2. **Make it reachable from phones.** By default LiveKit listens on 127.0.0.1 only. For two phones on the same Wi-Fi, recreate it on the LAN:

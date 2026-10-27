@@ -1,8 +1,8 @@
-> **Draft — not legal advice — review with a Nigerian lawyer before use.** Adapted from the General Legal Data Processing Addenda (Global and US, CC0) for the Nigeria Data Protection Act 2023 (NDPA) and the NDPC's General Application and Implementation Directive 2025 (GAID). Highlighted `<mark>` text must be customised. Written with Zudomart as the **controller** and a vendor as the **processor** (for example a payment, identity, hosting, email or support vendor). Swap the roles where Zudomart processes data for a business customer. Annex 3 adds the UK, EU, US and other launch-country terms.
+> **Draft — not legal advice — review with a Nigerian lawyer before use.** Adapted from the General Legal Data Processing Addenda (Global and US, CC0) for the Nigeria Data Protection Act 2023 (NDPA) and the NDPC's General Application and Implementation Directive 2025 (GAID). Highlighted `<mark>` text must be customised. Written with Nantty as the **controller** and a vendor as the **processor** (for example a payment, identity, hosting, email or support vendor). Swap the roles where Nantty processes data for a business customer. Annex 3 adds the UK, EU, US and other launch-country terms.
 
 # Data Processing Agreement
 
-This Data Processing Agreement (the "**DPA**") forms part of the <mark>[name of main agreement]</mark> dated <mark>[date]</mark> (the "**Agreement**") between <mark>[Zudomart legal entity name]</mark>, RC <mark>[RC number]</mark>, of <mark>[address]</mark> (the "**Controller**"), and <mark>[Processor name]</mark>, of <mark>[address]</mark> (the "**Processor**").
+This Data Processing Agreement (the "**DPA**") forms part of the <mark>[name of main agreement]</mark> dated <mark>[date]</mark> (the "**Agreement**") between <mark>[Nantty legal entity name]</mark>, RC <mark>[RC number]</mark>, of <mark>[address]</mark> (the "**Controller**"), and <mark>[Processor name]</mark>, of <mark>[address]</mark> (the "**Processor**").
 
 ## 1. Definitions
 
@@ -88,7 +88,7 @@ This DPA is governed by the laws of the Federal Republic of Nigeria, except that
 
 | Item | Detail |
 | --- | --- |
-| Controller DPO contact | <mark>dpo@zudomart.com</mark> |
+| Controller DPO contact | <mark>dpo@nantty.com</mark> |
 | Processor data protection contact | <mark>[name, email]</mark> |
 | Subject matter and services | <mark>[e.g. identity verification; transactional email; cloud hosting]</mark> |
 | Data subjects | <mark>[users, buyers, sellers, creators, advertisers, staff]</mark> |

@@ -1,4 +1,4 @@
-# Zudomart architecture docs
+# Nantty architecture docs
 
 Start with [system.md](system.md): the current system, checked against the code on 2026-10-11 and refreshed for seller-managed delivery on 2026-10-21 (services, data ownership, events, money flow, auth, realtime, deployment).
 
@@ -10,7 +10,7 @@ The topic documents below go deeper. Most were written as design notes on 2026-1
 - Transactional outbox into RabbitMQ (Amazon MQ in AWS). No Kafka. The SNS/SQS adapters remain in the code behind `EVENT_BUS=sqs` but are not used.
 - ECS on Fargate via Terraform; no Kubernetes or service mesh.
 - Six Go deployables (ent + Atlas), a TypeScript gateway and five TypeScript services (Prisma), Phoenix realtime, and Python intelligence that returns scores only.
-- Flutterwave is the only payment provider. Zudomart never holds customer money: in Nigeria each user's money is in their own payout subaccount and escrow is a lock on the buyer's balance; outside Nigeria payment is direct, with no escrow, and sellers must be identity-verified.
+- Flutterwave is the only payment provider. Nantty never holds customer money: in Nigeria each user's money is in their own payout subaccount and escrow is a lock on the buyer's balance; outside Nigeria payment is direct, with no escrow, and sellers must be identity-verified.
 - go-money's ledger is the single financial truth. Points are never money.
 - LiveKit for live video; chat is end-to-end encrypted with no plaintext fallback.
 - One store or one business page per personal account, plus one brand.

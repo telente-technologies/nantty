@@ -2,7 +2,7 @@
 
 # Independent Contractor Agreement
 
-This Agreement is made on <mark>[date]</mark> between <mark>[Zudomart legal entity name]</mark>, RC <mark>[RC number]</mark>, of <mark>[registered address]</mark> (the "**Company**"), and <mark>[Contractor name / business name, RC or BN number]</mark>, of <mark>[address]</mark> (the "**Contractor**").
+This Agreement is made on <mark>[date]</mark> between <mark>[Nantty legal entity name]</mark>, RC <mark>[RC number]</mark>, of <mark>[registered address]</mark> (the "**Company**"), and <mark>[Contractor name / business name, RC or BN number]</mark>, of <mark>[address]</mark> (the "**Contractor**").
 
 ## 1. Services and deliverables
 

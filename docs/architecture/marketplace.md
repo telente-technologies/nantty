@@ -42,7 +42,7 @@ All steps from G onward are server-authoritative. Everything in this diagram is 
 
 ## 3. Seller-controlled shipping model (MVP)
 
-There is **no ZudoMart logistics network in the MVP**. Sellers ship; the platform validates, calculates, shows and records.
+There is **no Nantty logistics network in the MVP**. Sellers ship; the platform validates, calculates, shows and records.
 
 | Rule | Detail |
 | --- | --- |
@@ -57,7 +57,7 @@ There is **no ZudoMart logistics network in the MVP**. Sellers ship; the platfor
 | Buyer messages | The messages above come from the server as codes plus text; clients localize by code |
 | Addresses and geo | Owned by go-identity; go-commerce reads through read-only grants or API. Mobile address lacks `countryCode`, `postalCode`, normalized region ids (backendPlan mismatch 8) |
 | Currency | All amounts `{amountMinor, currency}` in store currency; order stores a locked exchange rate when buyer currency differs |
-| Later (OPTIONAL FUTURE) | Carrier integrations (DHL, UPS, local couriers) behind `ShippingMethod`; ZudoMart logistics only with a stated volume trigger. See [logisticsV2.md](logisticsV2.md) for the planned provider-delivery design (Chowdeck Relay first). |
+| Later (OPTIONAL FUTURE) | Carrier integrations (DHL, UPS, local couriers) behind `ShippingMethod`; Nantty logistics only with a stated volume trigger. See [logisticsV2.md](logisticsV2.md) for the planned provider-delivery design (Chowdeck Relay first). |
 
 ### 3.1 Data model (PROPOSED)
 
@@ -200,8 +200,8 @@ stateDiagram-v2
 | Rule | Detail |
 | --- | --- |
 | Release triggers | Buyer confirm-receipt, or auto-release 3 days after `delivered` (admin-configurable default; a dispute pauses the timer; auto-release job, reference `escrowAutoRelease.job.ts`) |
-| Amounts | Commission stays in Zudomart's main account (the split remainder); the seller gets the rest (split share for direct, transfer for escrow). Processing fee policy is a finance decision. Shipping fee follows the group to the seller. Computed in minor units, remainder to the platform |
-| Where the money is | Escrow stays in the buyer's own Flutterwave payout subaccount, locked by the ledger; release moves it buyer PSA → seller PSA (the escrow fee goes to Zudomart's main balance), then the 24h seller lock applies before withdrawal. Outside Nigeria (no PSA yet) sales use direct payment |
+| Amounts | Commission stays in Nantty's main account (the split remainder); the seller gets the rest (split share for direct, transfer for escrow). Processing fee policy is a finance decision. Shipping fee follows the group to the seller. Computed in minor units, remainder to the platform |
+| Where the money is | Escrow stays in the buyer's own Flutterwave payout subaccount, locked by the ledger; release moves it buyer PSA → seller PSA (the escrow fee goes to Nantty's main balance), then the 24h seller lock applies before withdrawal. Outside Nigeria (no PSA yet) sales use direct payment |
 | Seller visibility | Wallet shows `escrow`, locked, pending transfer, `available`, payout requested, settling to your bank (direct) and debt per currency |
 | Disputes | Opening a dispute freezes the escrow and pauses auto-release; admin resolves with refund, partial or release; every action audited. Refunds before release unlock the money in the buyer's PSA (or go back to the card on request); for a direct share already settled, or a chargeback after payout, the seller gets a debt that is netted from later payouts and turns direct mode off |
 | Idempotency | Release, refund and split are journals with unique idempotency keys |

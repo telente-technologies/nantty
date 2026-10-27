@@ -1,6 +1,6 @@
 # Payments architecture
 
-> **Provider (owner, 2026-10-11):** Flutterwave is the only payment provider. Each verified user's money sits in their own Flutterwave payout subaccount (PSA) and Zudomart never holds customer money. Detailed flows, ledger mapping, reconciliation and go-live checklist: [`flutterwaveMigration.md`](../integrations/flutterwaveMigration.md). This file keeps the architecture view.
+> **Provider (owner, 2026-10-11):** Flutterwave is the only payment provider. Each verified user's money sits in their own Flutterwave payout subaccount (PSA) and Nantty never holds customer money. Detailed flows, ledger mapping, reconciliation and go-live checklist: [`flutterwaveMigration.md`](../integrations/flutterwaveMigration.md). This file keeps the architecture view.
 
 Status date: 2026-10-11.
 
@@ -33,11 +33,11 @@ Rule: **the product being sold decides the rail, not the app it is sold from.**
 | --- | --- | --- |
 | Goods | Marketplace products, shipping fees | ZudoCoins, gifts, premium, creator subscriptions, in-app boosts |
 | Unit | Fiat `Money` (int64 minor + currency, store currency) | Coins (plain integer, own unit; **never money, never mixed with fiat**) |
-| Rail | Flutterwave Standard checkout (card, bank transfer, USSD) or the buyer's funded wallet (PSA), one intent per checkout | Mobile apps: Apple IAP / Google Play Billing. Web: Flutterwave checkout or wallet, into Zudomart's main balance |
+| Rail | Flutterwave Standard checkout (card, bank transfer, USSD) or the buyer's funded wallet (PSA), one intent per checkout | Mobile apps: Apple IAP / Google Play Billing. Web: Flutterwave checkout or wallet, into Nantty's main balance |
 | Holding | Escrow per order group, locked in our ledger inside the buyer's own PSA until release; release moves buyer PSA → seller PSA. Card money settles to main and is moved into the buyer's PSA. Outside NG (no PSA): direct payment, no escrow | Spendable coins (bought) and earned coins (creator side) |
-| Payee | Seller's PSA, then a withdrawal transfer to their bank (`debit_subaccount`). Commission goes PSA → Zudomart's main balance | Creator share of gifts, paid main → creator PSA, then withdrawn |
+| Payee | Seller's PSA, then a withdrawal transfer to their bank (`debit_subaccount`). Commission goes PSA → Nantty's main balance | Creator share of gifts, paid main → creator PSA, then withdrawn |
 | Owner | go-money (payments, escrow, seller balances, payouts) + go-commerce (orders) | go-money (coins, gifts, subscriptions, creators) |
-| Refund | Before release: unlock in the buyer's PSA (or refund to the card on request). After release: refund only the amount released to the seller; Zudomart keeps the escrow and processing fees and any shortfall becomes seller debt | Store refund notification: claw back coins or flag account |
+| Refund | Before release: unlock in the buyer's PSA (or refund to the card on request). After release: refund only the amount released to the seller; Nantty keeps the escrow and processing fees and any shortfall becomes seller debt | Store refund notification: claw back coins or flag account |
 
 ### 2.1 App-store rules (owner-relevant, verify before launch)
 
@@ -55,7 +55,7 @@ Store policies change and differ by region. **Re-check Apple App Review Guidelin
 
 ## 3. Provider adapters to ledger
 
-Owner direction (2026-10-10): **Zudomart does not hold customer money.** Payments run on Flutterwave only. Full flows, ledger mapping and citations: `docs/integrations/flutterwaveMigration.md`. This file keeps the architecture view.
+Owner direction (2026-10-10): **Nantty does not hold customer money.** Payments run on Flutterwave only. Full flows, ledger mapping and citations: `docs/integrations/flutterwaveMigration.md`. This file keeps the architecture view.
 
 Go capability interfaces in go-money: `PaymentProvider` (collections), `WalletProvider` (PSAs), `PayoutProvider` (transfers, fees, balances, settlements), `IdentityVerifier` (BVN consent, account resolve), `DisputeProvider`, `SavedCardProvider`. Active adapters: `flutterwave` (v3), Apple IAP, Google Play. The interfaces carry no provider-specific types.
 
@@ -75,7 +75,7 @@ flowchart LR
   W --> SS[Escrow locked in the buyer's PSA]
   W --> DS[Seller and creator PSAs<br/>available, 24h lock, reserved payout]
   W --> CS[Withdrawals<br/>transfer with debit_subaccount]
-  W --> PL[Zudomart revenue and store-fee accounts]
+  W --> PL[Nantty revenue and store-fee accounts]
   PB[(PSA balances and statements,<br/>main balance, settlements)] -.->|daily reconcile| LG
 ```
 
@@ -197,7 +197,7 @@ sequenceDiagram
   else buyer asks for a card refund
     M->>P: buyer PSA → main, then POST /v3/transactions/{id}/refund
   else after release
-    M->>P: refund the seller-released portion; Zudomart keeps its fees; any shortfall is booked as seller debt
+    M->>P: refund the seller-released portion; Nantty keeps its fees; any shortfall is booked as seller debt
   end
   Note over P,M: chargeback (hourly poll + webhook)
   P->>M: chargeback initiated
@@ -293,9 +293,9 @@ Errors per proto: `INSUFFICIENT_COINS`, `CANNOT_GIFT_SELF`, `BATTLE_ALREADY_SETT
 | --- | --- |
 | Coin pack bought in app, price P | Cash/store receivable +P, store fee expense -fee, revenue (deferred coins liability) +(P - fee), coins minted to buyer |
 | Gift of N coins | Buyer coins -N, creator earned coins +floor(N x share bps), platform coins +remainder |
-| Creator cash-out | Earned coins converted at the finance-set rate (minimum payout enforced). The payout run moves main → creator PSA (free wallet transfer), after which the creator withdraws. Needs the Flutterwave main balance funded first (IAP money arrives in Zudomart's bank, not Flutterwave) |
+| Creator cash-out | Earned coins converted at the finance-set rate (minimum payout enforced). The payout run moves main → creator PSA (free wallet transfer), after which the creator withdraws. Needs the Flutterwave main balance funded first (IAP money arrives in Nantty's bank, not Flutterwave) |
 
-Coin purchases (web via Flutterwave, app via the stores) and gifts are Zudomart revenue in Zudomart's own account, so only the creator share is owed to anyone. The rate must keep payout cost below net revenue after the **worst-channel** store fee. This is a finance decision; flag it before pricing UI is built.
+Coin purchases (web via Flutterwave, app via the stores) and gifts are Nantty revenue in Nantty's own account, so only the creator share is owed to anyone. The rate must keep payout cost below net revenue after the **worst-channel** store fee. This is a finance decision; flag it before pricing UI is built.
 
 ## 6. Payout flow
 
@@ -347,8 +347,8 @@ See `marketplace.md` section 6 for the escrow state machine. Money rule: only go
 | 4 | Payout economics undefined | Rate and minimum are config only | Creator payouts could exceed net revenue after store fees | Finance signs off coin-to-fiat rate and store-fee accounting before launch | S | High | P1, pricing launch gate |
 | 5 | Single provider (Flutterwave) | One provider, capability interfaces | A Flutterwave outage stops checkout and payouts | Keep the capability interfaces free of provider-specific fields so another provider can be added later; outage mode hides the pay button and keeps browse and cart | M | Medium | P2, MVP optional, Near term |
 | 6 | Reconciliation | Daily Flutterwave reconciliation in code (cases, wallet freezes, alerts) | The ledger can silently diverge from PSA balances, the main balance and settlements | Keep the daily per-PSA, main and settlement recon plus the trial-balance check in CI e2e | M | Medium | P1, money integrity, MVP |
-| 8 | Control of funds and licensing | Owner rule: Zudomart holds no customer money. Escrow is locked in the buyer's own PSA | PSA fund ownership is undocumented; a regulator could still treat Zudomart as controlling buyer funds | Flutterwave's written answers (§8 of the spec) and a Nigerian fintech lawyer's review before launch | S | High | P0, launch gate |
-| 9 | Prepaid ad credit and unspent coins | Not modelled | Stored value held by Zudomart | Postpaid or threshold ads billing; lawyer review of coin terms | S | Medium | P1 |
+| 8 | Control of funds and licensing | Owner rule: Nantty holds no customer money. Escrow is locked in the buyer's own PSA | PSA fund ownership is undocumented; a regulator could still treat Nantty as controlling buyer funds | Flutterwave's written answers (§8 of the spec) and a Nigerian fintech lawyer's review before launch | S | High | P0, launch gate |
+| 9 | Prepaid ad credit and unspent coins | Not modelled | Stored value held by Nantty | Postpaid or threshold ads billing; lawyer review of coin terms | S | Medium | P1 |
 | 7 | Ledger at scale | Single Aurora | Hot ledger rows (platform account) serialize writes | MVP: split platform accounts per shard key (per day or per creator bucket); Scale stage: only consider partitioning ledger entries when write p95 exceeds a defined budget. No sharding trigger is met today | M | Low | P3, Scale stage |
 
 The money-module task list is `docs/integrations/flutterwaveMigration.md` §10.

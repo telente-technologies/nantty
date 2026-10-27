@@ -104,7 +104,7 @@ Payout onboarding screens are owned by another workstream; coordinate before swi
 - [x] Payout onboarding: the dashboard calls `/payments/payout-onboarding/me/*` and `/payments/payout-fees`; the BFF forwards them (owner only, `wallet:withdraw`).
 - [x] Store rewards save through `PUT /seller/marketing/rewards/settings` (the settings PATCH no longer carries `storeRewards`).
 - [ ] Still mocked: brands workspace, developers (API keys and webhooks), integrations and ads summary. Affiliates, conversations, security sessions, subscription details/verify/trial verify and cancel, verification, preferences, consents and product import now have Go routes and are in `SELLER_REAL_API_PREFIXES`. Business documents still need the two-step upload.
-- [ ] App side: the Zudomart app must show team requests (`GET /stores/team-requests`, accept/decline) so invited staff can join.
+- [ ] App side: the Nantty app must show team requests (`GET /stores/team-requests`, accept/decline) so invited staff can join.
 
 ### 8. Ads (`/api/v1/ads`)
 

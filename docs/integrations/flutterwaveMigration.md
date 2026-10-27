@@ -217,7 +217,7 @@ References are `{prefix}-{uuidv7 without hyphens}`, unique in the DB and ≤42 c
    - Movement row `sweep:{flwRef}`, then `POST /v3/transfers` with `{account_bank:"flutterwave", account_number:<our merchant id>, amount:<fee>, currency:"NGN", debit_subaccount:<ref>, reference:"sweep-..."}`.
    - The docs sample for PSA→main omits `debit_subaccount`. We always send it, and test it in sandbox first (task P2.0).
    - Ledger on success: Dr `wallet:{user}:depositHold` fee / Cr `platformRevenue:depositFee`; Dr `providerBalance` / Cr `providerWallet:{ref}`.
-7. **Release the hold.** After `DEPOSIT_WITHDRAWAL_COOLDOWN` (default 24 h; 72 h for a user's first deposit), move `depositHold → available`. Deposits are **spendable inside Zudomart at once**, so a hold-funded purchase debits `depositHold` first. They are withdrawable only after the hold, which stops deposit-and-withdraw cycling through a stolen bank account.
+7. **Release the hold.** After `DEPOSIT_WITHDRAWAL_COOLDOWN` (default 24 h; 72 h for a user's first deposit), move `depositHold → available`. Deposits are **spendable inside Nantty at once**, so a hold-funded purchase debits `depositHold` first. They are withdrawable only after the hold, which stops deposit-and-withdraw cycling through a stolen bank account.
 8. **Funding we must reject** (sender name fails sanctions screening, wallet closed, user banned): call `POST /v3/payout-subaccounts/refunds {funding_reference: <ref without "PSA_">, debit_currency:"NGN"}` and reverse the ledger entry. This is irreversible, and it can debit main if the PSA is short, so run it only before any spend.
 
 ### 3.2 Checkout by card or another method, for a buyer without a funded wallet
@@ -242,7 +242,7 @@ References are `{prefix}-{uuidv7 without hyphens}`, unique in the DB and ≤42 c
 
 ### 3.3 Escrow purchase: lock, confirm, release, dispute, refund
 
-**Owner decision (2026-10-10): Zudomart must not hold customer money.** The owner has no licence and can't fund one. So there is **no platform escrow PSA**. Escrow money stays in the **buyer's own PSA**, locked by our ledger, until the order is confirmed. It moves to the seller's PSA only on release. Until release the money is legally still the buyer's, held by Flutterwave. A refund just unlocks it.
+**Owner decision (2026-10-10): Nantty must not hold customer money.** The owner has no licence and can't fund one. So there is **no platform escrow PSA**. Escrow money stays in the **buyer's own PSA**, locked by our ledger, until the order is confirmed. It moves to the seller's PSA only on release. Until release the money is legally still the buyer's, held by Flutterwave. A refund just unlocks it.
 
 Accepted risk: a court or regulator order on the buyer's PSA, or a reversal of the deposit that funded it, can pull locked money out before release. The seller isn't paid until the funds are confirmed, so the seller only loses the sale and is never owed money we hold. Reconciliation alerts on any PSA whose Flutterwave balance falls below its locked total.
 
@@ -282,7 +282,7 @@ Accepted risk: a court or regulator order on the buyer's PSA, or a reversal of t
    - outbox.
 3. Worker:
    - pre-check `GET /{ref}/balances` (section 2.3);
-   - send `POST /v3/transfers` with `{account_bank, account_number, amount:<net>, currency:"NGN", debit_currency:"NGN", debit_subaccount:<user ref>, reference:"wd-…", narration:"Zudomart withdrawal", callback_url, beneficiary_name, skip_beneficiary_creation:1}` (the last field updated from API reference 2026-10-10);
+   - send `POST /v3/transfers` with `{account_bank, account_number, amount:<net>, currency:"NGN", debit_currency:"NGN", debit_subaccount:<user ref>, reference:"wd-…", narration:"Nantty withdrawal", callback_url, beneficiary_name, skip_beneficiary_creation:1}` (the last field updated from API reference 2026-10-10);
    - save `id` and `status` (`NEW`);
    - **one attempt only.**
 4. `transfer.completed`, or a 15-minute sweep: `GET /v3/transfers/{id}` (or `?reference=`).
@@ -355,7 +355,7 @@ We keep **our own renewal engine** (`subscriptions/.../renewalEngine.service.go`
 | S17 | **Provider-side state we did not ask for** (updated from API reference 2026-10-10) | Every transfer sends `skip_beneficiary_creation:1`. We never call the transfer-retry or bulk-tokenized-charge endpoints. Card-token edits (`PUT /tokens/{token}`) run only as audited staff commands. The OTP endpoint (`POST /otps`) returns the OTP in clear text, so we do not use it for user login or step-up |
 | S18 | **v4 readiness** (updated from API reference 2026-10-10) | When a flow moves to v4: OAuth token cached in memory and refreshed 60 s before its 600 s expiry; `X-Idempotency-Key` = our movement reference (12–255 alphanumeric, so the hyphens come out); `X-Trace-Id` per call, logged; `flutterwave-signature` checked as base64 HMAC-SHA256 of the raw body in constant time, with the comparison mode confirmed in sandbox first (follow-up F1) |
 
-### 4.1 Money can only leave through Zudomart
+### 4.1 Money can only leave through Nantty
 
 **What the docs say about PSAs:**
 
@@ -423,10 +423,10 @@ The `watchlisted` flag or a sanctions hit means a manual review before any PSA i
 **Launch order:**
 
 1. **NG on the full PSA model.**
-2. **GH, KE and ZA as "direct mode" first:** no stored balance, the seller's share is paid out by main → bank/MoMo as soon as the charge settles. No escrow and no stored balance, so Zudomart never holds customer money.
+2. **GH, KE and ZA as "direct mode" first:** no stored balance, the seller's share is paid out by main → bank/MoMo as soon as the charge settles. No escrow and no stored balance, so Nantty never holds customer money.
 3. **PSAs in those markets** once Flutterwave offers non-NGN PSAs.
 
-The full reference changes none of this (updated from API reference 2026-10-10). No v2, v3 or v4 page offers a per-user GHS, KES or ZAR balance. The only non-NGN "accounts" are merchant virtual accounts, which pool into our main balance, so using them to hold users' money would break the rule that Zudomart never holds customer money. GH, KE and ZA stay in direct mode with no escrow, and selling there still requires identity verification.
+The full reference changes none of this (updated from API reference 2026-10-10). No v2, v3 or v4 page offers a per-user GHS, KES or ZAR balance. The only non-NGN "accounts" are merchant virtual accounts, which pool into our main balance, so using them to hold users' money would break the rule that Nantty never holds customer money. GH, KE and ZA stay in direct mode with no escrow, and selling there still requires identity verification.
 
 ---
 
@@ -465,11 +465,11 @@ Security groups can't match hostnames. The internet rule therefore defaults to `
 
 ## 8. Email to Flutterwave
 
-**Subject:** Zudomart: questions before go-live on payout subaccounts, transfers and webhooks (v3)
+**Subject:** Nantty: questions before go-live on payout subaccounts, transfers and webhooks (v3)
 
 > Hello Flutterwave team,
 >
-> Zudomart is a social marketplace launching in Nigeria first, then Ghana, Kenya and South Africa. We plan to give each verified user their own payout subaccount (PSA) with a static NUBAN. Zudomart does not hold customer money: marketplace escrow stays locked (in our ledger) inside the buyer's own PSA until delivery is confirmed, then moves PSA→PSA to the seller. We use Flutterwave Standard checkout for cards and other methods. Before we go live, could you confirm the following?
+> Nantty is a social marketplace launching in Nigeria first, then Ghana, Kenya and South Africa. We plan to give each verified user their own payout subaccount (PSA) with a static NUBAN. Nantty does not hold customer money: marketplace escrow stays locked (in our ledger) inside the buyer's own PSA until delivery is confirmed, then moves PSA→PSA to the seller. We use Flutterwave Standard checkout for cards and other methods. Before we go live, could you confirm the following?
 >
 > **Product and API version**
 > 1. Can one merchant account use v3 (PSAs, Standard, tokenized charges, BVN) and v4 at the same time? Can it receive v3-format webhooks (needed for the "payout subaccounts wallet funding hook") alongside v4-format webhooks? Is a v4 PSA API planned, and is there a v3 sunset date?
@@ -500,11 +500,11 @@ Security groups can't match hostnames. The internet rule therefore defaults to `
 > 16. Can split-payment subaccounts point to a PSA (`is_f4b_account` with a PSA `barter_id`)? Is any Mono identity product (BVN, NIN or account lookup) available through Flutterwave? Is there a bank-account name check for Kenya and South Africa?
 >
 > **Licensing (most important for us)**
-> 17. We do not hold an MMO, PSSP or e-money licence. With this model (each user's money in their own PSA, held by Flutterwave; we only instruct transfers via the API and take our commission), does Zudomart need any CBN licence of its own? Is Flutterwave, under its MFB or PSSP licence, the regulated holder of these funds? Do you have marketplaces using PSAs this way?
+> 17. We do not hold an MMO, PSSP or e-money licence. With this model (each user's money in their own PSA, held by Flutterwave; we only instruct transfers via the API and take our commission), does Nantty need any CBN licence of its own? Is Flutterwave, under its MFB or PSSP licence, the regulated holder of these funds? Do you have marketplaces using PSAs this way?
 > 18. Card checkout settles to our main balance before we move it into the buyer's PSA. Can a Standard or tokenized card charge settle **directly into a specific PSA** instead? Can we create a PSA for a buyer at first checkout (before BVN), and what tier and limits apply until BVN is added?
 >
 > Thank you,
-> Zudomart Engineering
+> Nantty Engineering
 
 ### 8.1 Follow-up questions (updated from API reference 2026-10-10)
 
@@ -605,9 +605,9 @@ Moved here from the former wallet and KYC plan (2026-10-11). Sources and citatio
 
 ### A.1 Where stored value starts
 
-1. **Holding funds.** A per-user balance that can be spent later, withdrawn or sent to others is stored value. CBN puts wallet and e-money issuing under the MMO licence (₦2bn capital per secondary sources), with nominee settlement accounts and NDIC pass-through cover (CBN 2020 licence categories, 2021 MMS Guidelines). A PSSP licence does not cover it. With Flutterwave the PSA is held **in the user's own name** by the licensed partner, so Zudomart keeps a ledger mirror and never holds the money (§1).
-2. **Outside stored value** (strongest to weakest; counsel to confirm): split at charge time to the seller; spend-from-earnings (set-off of money Zudomart already owes a seller or creator); prepaid ad credit usable only on Zudomart's ads, not transferable or withdrawable, refundable on closure; coins as closed-loop virtual items; escrow in a merchant balance (the old E2 grey area of escrow in Zudomart's merchant balance, removed by locking escrow in the buyer's own PSA).
-3. **Would cross the line:** cash top-ups into a balance Zudomart controls that become withdrawable; user-to-user cash transfers from such a balance; interest.
+1. **Holding funds.** A per-user balance that can be spent later, withdrawn or sent to others is stored value. CBN puts wallet and e-money issuing under the MMO licence (₦2bn capital per secondary sources), with nominee settlement accounts and NDIC pass-through cover (CBN 2020 licence categories, 2021 MMS Guidelines). A PSSP licence does not cover it. With Flutterwave the PSA is held **in the user's own name** by the licensed partner, so Nantty keeps a ledger mirror and never holds the money (§1).
+2. **Outside stored value** (strongest to weakest; counsel to confirm): split at charge time to the seller; spend-from-earnings (set-off of money Nantty already owes a seller or creator); prepaid ad credit usable only on Nantty's ads, not transferable or withdrawable, refundable on closure; coins as closed-loop virtual items; escrow in a merchant balance (the old E2 grey area of escrow in Nantty's merchant balance, removed by locking escrow in the buyer's own PSA).
+3. **Would cross the line:** cash top-ups into a balance Nantty controls that become withdrawable; user-to-user cash transfers from such a balance; interest.
 
 ### A.2 Verification levels
 
@@ -620,9 +620,9 @@ Moved here from the former wallet and KYC plan (2026-10-11). Sources and citatio
 
 Bank-account validation answers "does this account belong to the BVN holder?", never "is this person present?". A stolen BVN plus a mule account passes it; it fails Smile ID's liveness and face match. So payouts use provider validation and checkmarks and high limits use Smile ID.
 
-### A.3 CBN KYC tiers and Zudomart limits
+### A.3 CBN KYC tiers and Nantty limits
 
-Zudomart is not a wallet issuer, so CBN tier limits bind its licensed partner rather than Zudomart directly. Mirroring them keeps the AML posture defensible. The owner approved these limits on 2026-10-11; all are admin settings (`seller.debtLimits`, `payments.limits`):
+Nantty is not a wallet issuer, so CBN tier limits bind its licensed partner rather than Nantty directly. Mirroring them keeps the AML posture defensible. The owner approved these limits on 2026-10-11; all are admin settings (`seller.debtLimits`, `payments.limits`):
 
 - **Wallet payments per day:** basic (L1) ₦50,000, mid (L2) ₦200,000, full (L2 + business verified) ₦5,000,000.
 - **One payment:** order ₦5,000,000, coins ₦500,000, ads top-up ₦10,000,000.
@@ -643,13 +643,13 @@ The CBN Dec 2023 circular: no new Tier 1 accounts or wallets without BVN or NIN;
 - **Sales:** an unverified seller sells escrow-only; proceeds are kept for them and shown as "Ready once you verify". Nothing is forfeited (forfeiture is void and an offence risk under FCCPA ss.127, 129, 155). Terms state this before the first sale (FCCPA s.128).
 - **Creator cash:** earning features that create a cash liability (gift cash-out, creator subscriptions, ads revenue share) need L1 first. Unverified creators can still receive gifts as coins.
 - **Refunding the payer** is right only for undelivered orders, which escrow already handles.
-- **Dormant balances:** stay a liability; 12 months without login or verification marks the account dormant for reporting only; on deletion the balance stays payable within the retention period. The CBN July 2024 dormant-accounts guidelines (10 years to the Unclaimed Balances Trust Fund) and Finance Act 2020 s.77 (6 years, deposit money banks) probably bind the licensed partner rather than Zudomart; counsel decides. Never credit an unclaimed balance to revenue.
+- **Dormant balances:** stay a liability; 12 months without login or verification marks the account dormant for reporting only; on deletion the balance stays payable within the retention period. The CBN July 2024 dormant-accounts guidelines (10 years to the Unclaimed Balances Trust Fund) and Finance Act 2020 s.77 (6 years, deposit money banks) probably bind the licensed partner rather than Nantty; counsel decides. Never credit an unclaimed balance to revenue.
 - **Prepaid ad credit:** refund unused credit on account closure or on request after 30 days of inactivity (card-funded to source, earnings-funded back to Available), deducting the disclosed processing fee.
 
 ### A.5 Questions for a Nigerian fintech lawyer
 
 1. Does spend-from-earnings (set-off against our own ad services) count as mobile money or e-money business under the CBN 2020 licence categories and the 2021 MMS Guidelines?
-2. Are prepaid ad credit and coins, usable only on Zudomart and not transferable or withdrawable, outside "e-money"?
+2. Are prepaid ad credit and coins, usable only on Nantty and not transferable or withdrawable, outside "e-money"?
 3. Is locking escrow in the buyer's own PSA (held by the licensed partner) free of any escrow licence, and how long may a lock last?
 4. Which KYC and AML duties apply to us as a marketplace (DNFBP and SCUML registration, NFIU reporting, applying CBN tier limits to payouts)?
 5. Unverified users' balances: the right disclosure under FCCPA ss.127–128, and any dormancy destination (CBN UBTF, Finance Act 2020 s.77, or neither).
@@ -666,9 +666,9 @@ Moved here from the former `docs/checkoutPaymentFlowPlan.md` (2026-10-11). Provi
 | Rule | Detail |
 |---|---|
 | Unverified store | Escrow is the only payment mode. |
-| Verified store | The buyer picks Escrow or Pay directly. Verified = gold business checkmark after Zudomart KYB. |
+| Verified store | The buyer picks Escrow or Pay directly. Verified = gold business checkmark after Nantty KYB. |
 | Escrow | Release when the buyer confirms delivery, or automatically 3 days after delivery (`escrow.policy`). A dispute pauses the timer; the seller has 48 h to answer before it escalates. |
-| Direct | The seller is paid by PSA move (or a payout outside NG) as soon as the charge settles; Zudomart never holds that money. |
+| Direct | The seller is paid by PSA move (or a payout outside NG) as soon as the charge settles; Nantty never holds that money. |
 | Seller credit hold | Escrow releases become withdrawable after the hold in `escrow.policy` (default 24 h). |
 | Payouts | Withdrawals and creator payouts run as provider transfers; only go-money calls the transfer API. |
 | Visibility | Sellers see balances and payouts. Buyers see "Pay". No provider names in UI copy. |
@@ -677,7 +677,7 @@ Moved here from the former `docs/checkoutPaymentFlowPlan.md` (2026-10-11). Provi
 
 ### B.2 Who pays the fees
 
-0% commission on products (owner, 2026-10-03). Escrow groups pay an escrow fee of 1.5% of the group total including shipping (1% for Business-plan sellers), deducted from the seller payout at release; no fee on refunded amounts. Direct groups pay no Zudomart fee; the seller covers only the provider's processing fee. Buyers pay nothing extra. A checkout's processing fee is allocated across its groups pro rata with the largest-remainder method.
+0% commission on products (owner, 2026-10-03). Escrow groups pay an escrow fee of 1.5% of the group total including shipping (1% for Business-plan sellers), deducted from the seller payout at release; no fee on refunded amounts. Direct groups pay no Nantty fee; the seller covers only the provider's processing fee. Buyers pay nothing extra. A checkout's processing fee is allocated across its groups pro rata with the largest-remainder method.
 
 ### B.3 Escrow mechanics
 

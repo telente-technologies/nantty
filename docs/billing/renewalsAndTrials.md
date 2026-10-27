@@ -2,7 +2,7 @@
 
 > **Provider (owner, 2026-10-11):** Flutterwave is the only payment provider. Renewals use Flutterwave tokenized charges; details in [`flutterwaveMigration.md`](../integrations/flutterwaveMigration.md) §3.6.
 
-Status: built 4 October 2026 (go-money `subscriptions` and `payments` modules, notifications, email templates). This page explains, in plain words, how Zudomart charges plans on the web, how free trials turn into paid plans, and what happens when a payment fails. App Store and Google Play purchases are covered in section 8.
+Status: built 4 October 2026 (go-money `subscriptions` and `payments` modules, notifications, email templates). This page explains, in plain words, how Nantty charges plans on the web, how free trials turn into paid plans, and what happens when a payment fails. App Store and Google Play purchases are covered in section 8.
 
 Prices below are Nigeria web prices from [pricing.md](../pricing.md). Every other region works the same way in its own currency (or in USD where Flutterwave can't charge the local currency).
 

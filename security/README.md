@@ -1,6 +1,6 @@
 # Security workspace
 
-Sandbox red-team and static review material for Zudomart. Nothing here may touch production, live payment keys, real AWS resources, or the `betng-*` containers.
+Sandbox red-team and static review material for Nantty. Nothing here may touch production, live payment keys, real AWS resources, or the `betng-*` containers.
 
 ## Layout
 

@@ -1,6 +1,6 @@
 > **Draft — not legal advice — review with a Nigerian lawyer before use.** Adapted for Nigeria from the General Legal Employee Offer Letter (California exempt, CC0). The California at-will, exempt-status and US arbitration terms do not apply in Nigeria and have been replaced. Highlighted `<mark>` text must be customised. Check figures (minimum wage, tax bands, contribution rates) against current law before each use.
 
-<mark>[Zudomart legal entity name]</mark>
+<mark>[Nantty legal entity name]</mark>
 RC <mark>[RC number]</mark>, <mark>[registered address]</mark>
 
 <mark>[Date]</mark>
@@ -12,7 +12,7 @@ RC <mark>[RC number]</mark>, <mark>[registered address]</mark>
 
 Dear <mark>[First name]</mark>,
 
-<mark>[Zudomart legal entity name]</mark> (the "**Company**") is pleased to offer you employment on the terms below. This letter, with the Confidentiality and Intellectual Property Agreement in the Appendix and the Company handbook, forms your contract of employment and the written statement of particulars required by section 7 of the Labour Act.
+<mark>[Nantty legal entity name]</mark> (the "**Company**") is pleased to offer you employment on the terms below. This letter, with the Confidentiality and Intellectual Property Agreement in the Appendix and the Company handbook, forms your contract of employment and the written statement of particulars required by section 7 of the Labour Act.
 
 ## 1. Role and place of work
 
@@ -103,7 +103,7 @@ Please sign and return this letter and the Appendix by <mark>[date]</mark>.
 
 Yours sincerely,
 
-<mark>[Name]</mark>, <mark>[Title]</mark>, for and on behalf of <mark>[Zudomart legal entity name]</mark>
+<mark>[Name]</mark>, <mark>[Title]</mark>, for and on behalf of <mark>[Nantty legal entity name]</mark>
 
 **Accepted:** I accept this offer on the terms above.
 

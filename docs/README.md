@@ -1,10 +1,12 @@
-# Zudomart documentation index
+# Nantty documentation index
 
 Every maintained document in the repo, one line each. Third-party files (`deps/`, `node_modules/`), generated test reports and the agent files (`AGENTS.md`, `CLAUDE.md`) are not listed. Last cleaned up 2026-10-21 (see [CHANGELOG.md](CHANGELOG.md)).
 
+Use **Nantty** for current product-facing prose. Legacy `zudomart` strings in package names, API headers, event exchanges, token audiences, deep links, domains, email addresses, app-store product IDs, database roles, Docker resources, and demo accounts are operational identifiers; keep them aligned with the running code and provider configuration until a coordinated migration. Dated audits, changelogs, legal entity placeholders, and past correspondence retain their original wording as evidence. A quoted response that still comes from code is documented verbatim until that code changes.
+
 ## Start here
 
-- [../README.md](../README.md): what Zudomart is, the repo map, quick start and common commands.
+- [../README.md](../README.md): what Nantty is, the repo map, quick start and common commands.
 - [runningLocally.md](runningLocally.md): switch the apps between mocks and the real backend, start the local stack, demo accounts, testing on a phone.
 - [plans.md](plans.md): the living work plan, with status markers and owner decisions.
 - [CHANGELOG.md](CHANGELOG.md): what changed, by date.

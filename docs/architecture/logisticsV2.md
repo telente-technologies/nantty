@@ -17,7 +17,7 @@ Status date: 2026-10-20.
 - Sellers configure shipping profiles, zones and rules.
 - Buyers see the seller's delivery price at checkout.
 - The seller fulfils the order and updates delivery status manually.
-- No ZudoMart logistics network and no third-party courier API is used.
+- No Nantty logistics network and no third-party courier API is used.
 
 ### V2 goal
 
@@ -28,12 +28,12 @@ disclosed rules.
 
 Two principles govern every provider:
 
-1. **The buyer chooses the available provider.** ZudoMart requests live rates,
+1. **The buyer chooses the available provider.** Nantty requests live rates,
    filters out unavailable providers, and shows the delivery price before
    payment. A provider is never shown unless its route, parcel limits and quote
    are valid.
 2. **The order's delivery policy decides who bears each cost.** The buyer,
-   seller or ZudoMart may bear a cost depending on the circumstances. Provider
+   seller or Nantty may bear a cost depending on the circumstances. Provider
    charges must never silently become buyer charges.
 
 ### Non-goals for v2.0
@@ -159,7 +159,7 @@ refund.
 | Does Relay offer optional insurance, a policy reference and a claims endpoint? | `estimated_order_amount` is a declared value, not proof of insurance. Leave insurance disabled for this provider until confirmed. |
 | What are the allowed `item_type` values? | The docs give examples, not a complete enum. Map our package categories to confirmed values. |
 | Is there a sandbox environment and test wallet? | Needed for contract tests, webhook replay and failure-path testing. |
-| Who bears the redelivery fee when the buyer is unavailable or the address is wrong? | The wallet is debited by ZudoMart; that does not mean the buyer has agreed to pay. |
+| Who bears the redelivery fee when the buyer is unavailable or the address is wrong? | The wallet is debited by Nantty; that does not mean the buyer has agreed to pay. |
 
 ### 4.3 Adapter behaviour
 
@@ -203,7 +203,7 @@ Separate the courier's actual charge from the party who bears it.
 | Normal paid delivery | Buyer |
 | Seller offers free delivery | Seller, up to the seller's disclosed subsidy cap |
 | Seller offers free delivery above a threshold | Seller, when the qualifying order meets the rule |
-| ZudoMart delivery promotion | ZudoMart, unless another funding arrangement is disclosed |
+| Nantty delivery promotion | Nantty, unless another funding arrangement is disclosed |
 | Buyer gives an incorrect address | Buyer, where the disclosed policy assigns the resulting redelivery cost |
 | Buyer is unavailable after agreed attempts | Buyer may pay for redelivery under the disclosed policy |
 | Seller is not available for pickup | Seller, where the failed pickup was the seller's responsibility |
@@ -268,10 +268,10 @@ cover.
 Flow:
 
 1. Seller selects a delivery provider.
-2. ZudoMart retrieves the provider's insurance options and terms.
+2. Nantty retrieves the provider's insurance options and terms.
 3. Seller selects standard delivery or optional insurance and a permitted
    coverage amount.
-4. ZudoMart obtains the confirmed premium.
+4. Nantty obtains the confirmed premium.
 5. Checkout shows who pays the premium.
 6. Store the policy reference, coverage amount, premium, exclusions and insured
    shipment value.
@@ -307,7 +307,7 @@ A failed delivery does not automatically mean the buyer pays.
 3. Submit the redelivery request with that fee ID.
 4. The fee is deducted from the Relay wallet.
 
-ZudoMart must still decide who bears the cost:
+Nantty must still decide who bears the cost:
 
 - record the failure reason and supporting evidence;
 - request the current redelivery fee;
@@ -315,7 +315,7 @@ ZudoMart must still decide who bears the cost:
 - collect payment or an authorised balance deduction;
 - book redelivery only after payment is confirmed.
 
-If the courier caused the failure, do not charge the buyer just because ZudoMart
+If the courier caused the failure, do not charge the buyer just because Nantty
 funded the redelivery first. Pursue the applicable courier credit or
 reimbursement.
 
@@ -338,7 +338,7 @@ from whichever API call is convenient.
 ## 9. Unified logistics orchestrator
 
 ```
-ZudoMart checkout
+Nantty checkout
         |
         v
 Logistics orchestrator
@@ -349,7 +349,7 @@ Logistics orchestrator
         +--> ShipBubble (aggregator, v2.1)
         +--> GIG / Fez (interstate, later)
         +--> Sendbox (aggregator, later)
-        +--> ZudoMart rural partners (later)
+        +--> Nantty rural partners (later)
         |
         v
 Unified shipment record
@@ -428,7 +428,7 @@ Rules:
   kobo; other providers may use major units with decimals.
 - Prefunded provider wallets are an operational float. Record every top-up,
   debit and refund. The legal/accounting treatment of that float needs review
-  against the "ZudoMart never holds customer money" decision before launch.
+  against the "Nantty never holds customer money" decision before launch.
 - A provider cost increase must never silently become a buyer charge. Re-quote,
   ask for approval, or absorb the difference under the disclosed policy.
 

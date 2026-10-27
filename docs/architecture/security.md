@@ -207,7 +207,7 @@ sequenceDiagram
 
 ## 9. Compliance statement
 
-These controls are engineering measures. They do not constitute PCI DSS, GDPR, or NDPA compliance. Card data never touches Zudomart systems (hosted provider checkout only), which keeps PCI scope minimal but still needs a qualified assessor's confirmation.
+These controls are engineering measures. They do not constitute PCI DSS, GDPR, or NDPA compliance. Card data never touches Nantty systems (hosted provider checkout only), which keeps PCI scope minimal but still needs a qualified assessor's confirmation.
 
 ## 10. Abuse protection: access probing and bots
 

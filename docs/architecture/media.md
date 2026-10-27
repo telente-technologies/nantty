@@ -91,7 +91,7 @@ Rules: the client uploads **only** to quarantine; nothing in quarantine is ever 
 
 ## 7. Branded downloads (4 Oct 2026, [plans.md §57](../plans.md))
 
-Saved copies of posts and clips carry the Zudomart logo and the owner's `@username`, like X and TikTok.
+Saved copies of posts and clips carry the Nantty logo and the owner's `@username`, like X and TikTok.
 
 | Step | Detail |
 | --- | --- |

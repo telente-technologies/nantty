@@ -4,7 +4,7 @@
 
 **This Mutual Non-Disclosure Agreement** (this "**Agreement**") is made on <mark>[date]</mark> (the "**Effective Date**") between:
 
-1. <mark>[Zudomart legal entity name]</mark>, a company incorporated in Nigeria under the Companies and Allied Matters Act 2020 with RC number <mark>[RC number]</mark> and its registered office at <mark>[registered address]</mark> ("**Zudomart**"); and
+1. <mark>[Nantty legal entity name]</mark>, a company incorporated in Nigeria under the Companies and Allied Matters Act 2020 with RC number <mark>[RC number]</mark> and its registered office at <mark>[registered address]</mark> ("**Nantty**"); and
 2. <mark>[Counterparty name]</mark>, <mark>[a company incorporated in [country] with registration number [number] / an individual]</mark>, of <mark>[address]</mark> (the "**Other Party**"),
 
 (each a "**Party**", together the "**Parties**"), to protect confidential information that either Party discloses solely to evaluate or pursue <mark>[describe the business relationship, e.g. a brand partnership, integration or investment]</mark> (the "**Permitted Use**").
@@ -77,19 +77,19 @@ Unauthorised use or disclosure may cause harm that money cannot fully compensate
 
 13.4 **Severability and waiver.** If any provision is unenforceable, the rest stays in force and that provision is applied to the extent allowed. A failure to enforce is not a waiver.
 
-13.5 **Stamp duty.** <mark>[Zudomart / the Parties equally]</mark> will pay any stamp duty payable on this Agreement under the Stamp Duties Act.
+13.5 **Stamp duty.** <mark>[Nantty / the Parties equally]</mark> will pay any stamp duty payable on this Agreement under the Stamp Duties Act.
 
 13.6 **Counterparts and electronic signature.** This Agreement may be signed in counterparts and by electronic signature, which the Parties agree is valid under section 93 of the Evidence Act 2011 (as amended) and section 17 of the Cybercrimes (Prohibition, Prevention, etc.) Act 2015.
 
 ## Signatures
 
-| | Zudomart | Other Party |
+| | Nantty | Other Party |
 | --- | --- | --- |
 | Name | <mark>[name]</mark> | <mark>[name]</mark> |
 | Title | <mark>[Director]</mark> | <mark>[title]</mark> |
 | Signature | | |
 | Date | | |
-| Email for notices | <mark>legal@zudomart.com</mark> | <mark>[email]</mark> |
+| Email for notices | <mark>legal@nantty.com</mark> | <mark>[email]</mark> |
 | Address | <mark>[registered address]</mark> | <mark>[address]</mark> |
 
 ---

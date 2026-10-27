@@ -1,5 +1,8 @@
 # AWS infrastructure (Terraform)
 
+Nantty uses the existing `zudomart` infrastructure identifiers in this configuration. Keep resource names, DNS records,
+state bucket names, IAM policies, and secret paths aligned with deployed environments until they have a planned migration.
+
 Written, formatted and validated, never applied. Nothing here talks to AWS until someone runs `terraform apply` in an
 environment account. One AWS account per environment (`zudomart-dev`, `zudomart-staging`, `zudomart-prod`), one state per
 environment. Architecture rationale: `docs/architecture/devops.md` and `docs/architecture/disaster-recovery.md`.

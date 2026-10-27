@@ -88,15 +88,15 @@ The app needs `expo-notifications` to receive these pushes. It is blocked by the
 | `GET /embed/loader.js` | Loader script. `Access-Control-Allow-Origin: *`, cached 1h |
 | `GET /embed/store/{storeIdOrSlug}?theme=&size=` | Store card |
 | `GET /embed/products/{storeIdOrSlug}?theme=&layout=grid\|carousel&limit=1-12&products=id,id&size=` | Products |
-| `GET /embed/product/{productId}?theme=&view=button\|card` | Buy on Zudomart button or product card |
+| `GET /embed/product/{productId}?theme=&view=button\|card` | Buy on Nantty button or product card |
 | `GET /oembed?url=<zudomart store or product url>&format=json&maxwidth=` | oEmbed `rich` JSON with a sandboxed iframe (`OembedResponseContract`) |
 
 Who can be embedded:
 - any **active** store that moderation has not hidden, with products that are active, published online, public and not hidden by moderation;
 - automatic product lists show in-stock products only, and products a seller picks show "Sold out" with no buy link;
-- suspended, closed or moderated stores return 404 and show "This store isn't available on Zudomart right now."
+- suspended, closed or moderated stores return 404 and show "This store isn't available on Nantty right now."
 
-Verification is not required: unverified sellers already sell through escrow inside Zudomart, and every purchase still happens there.
+Verification is not required: unverified sellers already sell through escrow inside Nantty, and every purchase still happens there.
 
 Security:
 - **Embed pages** are server-built HTML route handlers, outside the session proxy, with no cookies read or set.
@@ -104,7 +104,7 @@ Security:
   - Seller text is HTML-escaped and only `https:` images load.
 - **Other pages**: every other webapp path keeps `X-Frame-Options: DENY` and `frame-ancestors 'none'` (`next.config.ts` uses the source `/:path((?!embed(?:/|$)|oembed(?:/|$)).*)`). Unknown `/embed/*` paths return an unframeable 404.
 - **Loader iframe**:
-  - It is sandboxed with `allow-scripts allow-popups allow-popups-to-escape-sandbox`, without `allow-same-origin`. Its origin is opaque, so it can't read the host page or Zudomart cookies, and the host page can't read it.
+  - It is sandboxed with `allow-scripts allow-popups allow-popups-to-escape-sandbox`, without `allow-same-origin`. Its origin is opaque, so it can't read the host page or Nantty cookies, and the host page can't read it.
   - Resize uses `postMessage`. The loader accepts a message only if it comes from that iframe's window, from origin `null` or the embed origin, and carries the random per-iframe `frame` id. Height is clamped to 64–2400px.
 - **Caching and limits**:
   - Rendered embeds are cached for 5 min in memory, and unavailable ones for 1 min.
