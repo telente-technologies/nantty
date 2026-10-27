@@ -28,12 +28,12 @@ struct LiveNowWidgetView: View {
         VStack(alignment: .leading, spacing: 6) {
           WidgetHeader(title: "Live now")
           ForEach(Array(payload.lives.prefix(family == .systemSmall ? 1 : 3))) { live in
-            Link(destination: URL(string: live.deepLink) ?? URL(string: "zudomart://")!) {
+            Link(destination: URL(string: live.deepLink) ?? URL(string: "nantty://")!) {
               HStack(spacing: 8) {
-                WidgetAvatarView(imageData: live.hostAvatarUrl.flatMap { images[$0] }, size: family == .systemSmall ? 40 : 30, ring: ZudoColor.live)
+                WidgetAvatarView(imageData: live.hostAvatarUrl.flatMap { images[$0] }, size: family == .systemSmall ? 40 : 30, ring: NanttyColor.live)
                 VStack(alignment: .leading, spacing: 1) {
-                  Text(live.hostName).font(.footnote.weight(.bold)).foregroundStyle(ZudoColor.text).lineLimit(1)
-                  Text("\(WidgetFormat.compact(live.viewers)) watching").font(.caption2).foregroundStyle(ZudoColor.muted).lineLimit(1)
+                  Text(live.hostName).font(.footnote.weight(.bold)).foregroundStyle(NanttyColor.text).lineLimit(1)
+                  Text("\(WidgetFormat.compact(live.viewers)) watching").font(.caption2).foregroundStyle(NanttyColor.muted).lineLimit(1)
                 }
               }
             }
@@ -46,13 +46,13 @@ struct LiveNowWidgetView: View {
         WidgetMessageView(title: "Live now", message: "No one you follow is live.")
       }
     }
-    .zudoWidgetBackground()
+    .nanttyWidgetBackground()
   }
 }
 
 struct NanttyLiveNowWidget: Widget {
   var body: some WidgetConfiguration {
-    StaticConfiguration(kind: "ZudomartLiveNowWidget", provider: LiveNowProvider()) { entry in LiveNowWidgetView(entry: entry) }
+    StaticConfiguration(kind: "NanttyLiveNowWidget", provider: LiveNowProvider()) { entry in LiveNowWidgetView(entry: entry) }
       .configurationDisplayName("Live now")
       .description("Creators you follow who are live right now.")
       .supportedFamilies([.systemSmall, .systemMedium])
@@ -96,13 +96,13 @@ struct CreatorTodayWidgetView: View {
         WidgetMessageView(title: "Creator stats", message: "Join the Creator Program to see your stats.").widgetURL(URL(string: payload.deepLink))
       }
     }
-    .zudoWidgetBackground()
+    .nanttyWidgetBackground()
   }
 }
 
 struct NanttyCreatorTodayWidget: Widget {
   var body: some WidgetConfiguration {
-    StaticConfiguration(kind: "ZudomartCreatorTodayWidget", provider: CreatorTodayProvider()) { entry in CreatorTodayWidgetView(entry: entry) }
+    StaticConfiguration(kind: "NanttyCreatorTodayWidget", provider: CreatorTodayProvider()) { entry in CreatorTodayWidgetView(entry: entry) }
       .configurationDisplayName("Creator stats")
       .description("Today's views, new followers and earnings.")
       .supportedFamilies([.systemSmall, .systemMedium])

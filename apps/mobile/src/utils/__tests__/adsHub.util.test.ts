@@ -14,7 +14,7 @@ const options = (overrides: Partial<BoostOptions> = {}): BoostOptions => ({
   paymentOptions: [
     { method: "card", available: true, reasonCode: null, reason: null },
     { method: "ad_balance", available: true, reasonCode: null, reason: null },
-    { method: "balance", available: false, reasonCode: "NOT_AVAILABLE_IN_APP", reason: "Pay from your earnings on zudomart.com" },
+    { method: "balance", available: false, reasonCode: "NOT_AVAILABLE_IN_APP", reason: "Pay from your earnings on nantty.com" },
     { method: "free", available: true, reasonCode: null, reason: null },
   ],
   adBalance: { accountId: "a1", balance: ngn(200_000), credit: ngn(100_000), committed: ngn(0), spendable: ngn(300_000) },
@@ -52,7 +52,7 @@ describe("status filters and chips", () => {
 describe("payment options", () => {
   it("shows unavailable methods with the server's reason", () => {
     const earnings = boostPaymentChoices(options(), ngn(100_000)).find((choice) => choice.method === "balance");
-    expect(earnings).toMatchObject({ selectable: false, note: "Pay from your earnings on zudomart.com" });
+    expect(earnings).toMatchObject({ selectable: false, note: "Pay from your earnings on nantty.com" });
   });
 
   it("blocks ad credit & balance when spendable is below the quote", () => {

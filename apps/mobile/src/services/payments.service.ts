@@ -6,7 +6,7 @@ import { shouldUseMockForPath } from "@/config/api.config";
 
 import { api } from "./apiClient.service";
 
-export const PAYMENT_RETURN_URL = "zudomart://payments/return";
+export const PAYMENT_RETURN_URL = "nantty://payments/return";
 
 interface SavedCardChargeWire {
   readonly status: string;

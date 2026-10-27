@@ -36,12 +36,12 @@ describe("widget native bridge", () => {
     const secureStore = { setItemAsync: jest.fn(), deleteItemAsync: jest.fn(), getItemAsync: jest.fn(), AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY: 7 };
     const bridge = loadBridge("ios", "standalone", () => ({ ExtensionStorage }), secureStore);
     await bridge.writeWidgetSecret("zm.widgetToken", "secret");
-    expect(secureStore.setItemAsync).toHaveBeenCalledWith("zm.widgetToken", "secret", { keychainService: "zudomart.widgets", accessGroup: "group.com.zudomart.app", keychainAccessible: 7 });
+    expect(secureStore.setItemAsync).toHaveBeenCalledWith("zm.widgetToken", "secret", { keychainService: "nantty.widgets", accessGroup: "group.com.nantty.app", keychainAccessible: 7 });
     await bridge.writeWidgetSharedValue("zm.widget.session", "{}");
-    expect(ExtensionStorage).toHaveBeenCalledWith("group.com.zudomart.app");
+    expect(ExtensionStorage).toHaveBeenCalledWith("group.com.nantty.app");
     expect(storage.set).toHaveBeenCalledWith("zm.widget.session", "{}");
     await bridge.reloadHomeScreenWidgets(["orders"]);
-    expect(ExtensionStorage.reloadWidget).toHaveBeenCalledWith("ZudomartOrdersWidget");
+    expect(ExtensionStorage.reloadWidget).toHaveBeenCalledWith("NanttyOrdersWidget");
   });
 
   it("does not crash when a build lacks the widget extension module", async () => {

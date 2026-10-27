@@ -20,7 +20,7 @@ let client: QueryClient;
 function renderStoreHook() {
   client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity }, mutations: { retry: false, gcTime: Infinity } } });
   const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client }, children);
-  return renderHook(() => useCreatorStoreSubscription("creator-1", "zudomart.creatorsub.tier_1000.s1.monthly"), { wrapper });
+  return renderHook(() => useCreatorStoreSubscription("creator-1", "nantty.creatorsub.tier_1000.s1.monthly"), { wrapper });
 }
 
 describe("useCreatorStoreSubscription", () => {

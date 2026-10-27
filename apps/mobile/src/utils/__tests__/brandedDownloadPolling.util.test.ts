@@ -7,7 +7,7 @@ describe("branded download polling", () => {
     const responses: PostMediaDownload[] = [
       { status: "processing", progress: 0.02, retryAfterMs: 10 },
       { status: "processing", progress: 0.6, retryAfterMs: 10 },
-      { status: "ready", progress: 1, url: "https://signed.example/clip.mp4", fileName: "zudomart-ada.mp4" },
+      { status: "ready", progress: 1, url: "https://signed.example/clip.mp4", fileName: "nantty-ada.mp4" },
     ];
     const progress: number[] = [];
     const waits: number[] = [];

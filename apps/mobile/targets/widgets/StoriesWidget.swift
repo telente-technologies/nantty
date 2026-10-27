@@ -39,8 +39,8 @@ struct StoriesWidgetView: View {
           VStack(alignment: .leading, spacing: 8) {
             WidgetHeader(title: "Stories")
             Spacer(minLength: 0)
-            WidgetAvatarView(imageData: first.avatarUrl.flatMap { images[$0] }, size: 56, ring: first.hasUnseen ? ZudoColor.brand : ZudoColor.seenRing)
-            Text(first.name).font(.footnote.weight(.semibold)).foregroundStyle(ZudoColor.text).lineLimit(1)
+            WidgetAvatarView(imageData: first.avatarUrl.flatMap { images[$0] }, size: 56, ring: first.hasUnseen ? NanttyColor.brand : NanttyColor.seenRing)
+            Text(first.name).font(.footnote.weight(.semibold)).foregroundStyle(NanttyColor.text).lineLimit(1)
           }
           .frame(maxWidth: .infinity, alignment: .leading)
           .widgetURL(URL(string: first.deepLink))
@@ -49,10 +49,10 @@ struct StoriesWidgetView: View {
             WidgetHeader(title: "Stories")
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 10) {
               ForEach(people) { person in
-                Link(destination: URL(string: person.deepLink) ?? URL(string: "zudomart://")!) {
+                Link(destination: URL(string: person.deepLink) ?? URL(string: "nantty://")!) {
                   VStack(spacing: 4) {
-                    WidgetAvatarView(imageData: person.avatarUrl.flatMap { images[$0] }, size: 46, ring: person.hasUnseen ? ZudoColor.brand : ZudoColor.seenRing)
-                    Text(person.name).font(.caption2).foregroundStyle(ZudoColor.text).lineLimit(1)
+                    WidgetAvatarView(imageData: person.avatarUrl.flatMap { images[$0] }, size: 46, ring: person.hasUnseen ? NanttyColor.brand : NanttyColor.seenRing)
+                    Text(person.name).font(.caption2).foregroundStyle(NanttyColor.text).lineLimit(1)
                   }
                 }
               }
@@ -64,13 +64,13 @@ struct StoriesWidgetView: View {
         WidgetMessageView(title: "Stories", message: "No new stories from people you follow.")
       }
     }
-    .zudoWidgetBackground()
+    .nanttyWidgetBackground()
   }
 }
 
 struct NanttyStoriesWidget: Widget {
   var body: some WidgetConfiguration {
-    StaticConfiguration(kind: "ZudomartStoriesWidget", provider: StoriesProvider()) { entry in StoriesWidgetView(entry: entry) }
+    StaticConfiguration(kind: "NanttyStoriesWidget", provider: StoriesProvider()) { entry in StoriesWidgetView(entry: entry) }
       .configurationDisplayName("Stories")
       .description("New stories from people you follow, unseen first.")
       .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])

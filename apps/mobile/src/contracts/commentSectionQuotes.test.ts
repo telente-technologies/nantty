@@ -40,7 +40,7 @@ describe("quotes in the comment section (mocks)", () => {
   it("shows a quote made with the button or a trailing link in the original's comments and thread", async () => {
     const original = await createPost("original thought");
     const viaButton = await createPost("my take", original.id);
-    const viaLink = await createPost(`hot take https://app.zudomart.com/post/${original.id}`);
+    const viaLink = await createPost(`hot take https://app.nantty.com/post/${original.id}`);
     expect(viaLink).toMatchObject({ text: "hot take", isQuote: true, resharedFrom: { id: original.id } });
     const listed = await everyItem((query) => listComments(original.id, query), "");
     expect(quoteIds(listed).sort()).toEqual([viaButton.id, viaLink.id].sort());

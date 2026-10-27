@@ -7,7 +7,7 @@ FRAME "Log in Screen" [0,0 393x852] bg=#F7F8FE clip
   FRAME "Frame 761" [16,114 361x67] flex=col gap=8
     TEXT "Email or username " Inter 400 14/16.8 ls-0.3 #000000 [16,114 361x17]
     FRAME "Frame 123" [16,139 361x42] border=#2043F5/1 radius=8 flex=row pad=12,8,12,8 gap=2 align=center fill=w
-      TEXT "testzudomart@yahoo.com" Inter 400 14/16.8 ls-0.3 #000000 [24,151.5 169x17]
+      TEXT "testnantty@yahoo.com" Inter 400 14/16.8 ls-0.3 #000000 [24,151.5 169x17]
   FRAME "Frame 762" [16,205 361x67] flex=col gap=8
     TEXT "Password" Inter 400 14/16.8 ls-0.3 #000000 [16,205 361x17]
     FRAME "Frame 123" [16,230 361x42] border=#2043F5/1 radius=8 flex=row pad=12,8,12,8 gap=2 justify=space_between align=center fill=w

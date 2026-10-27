@@ -9,7 +9,7 @@ import { finishStoreTransaction, isStoreBillingAvailable, purchaseStoreProduct, 
 import { useAuthStore } from "@/store/auth.store";
 import type { CoinPackage, VerifiedCoinPurchase } from "@/types";
 
-export const COIN_PAYMENT_RETURN_URL = "zudomart://payments/return";
+export const COIN_PAYMENT_RETURN_URL = "nantty://payments/return";
 export const COIN_BALANCE_QUERY_KEY = ["coin-balance"] as const;
 const MAXIMUM_VERIFY_ATTEMPTS = 6;
 const VERIFY_RETRY_DELAY_MS = 1_500;

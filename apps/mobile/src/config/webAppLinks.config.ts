@@ -12,8 +12,8 @@ const uuidAtEndPattern = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a
 export const webAppBaseUrl = (process.env.EXPO_PUBLIC_WEBAPP_URL || PRODUCTION_WEBAPP_URL).replace(/\/+$/, "");
 
 export const deepLinkPrefixes: readonly string[] = [
-  "zudomart://",
-  "com.zudomart.app://",
+  "nantty://",
+  "com.nantty.app://",
   webAppBaseUrl,
   PRODUCTION_WEBAPP_URL,
   "https://nantty.com",

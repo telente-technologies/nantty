@@ -27,7 +27,7 @@ describe("encrypted chat in mock mode", () => {
   it("encrypts text and link previews for the peer and stores only ciphertext", async () => {
     const client = new ChatCryptoClient({ storage: { secrets: new MemoryKeyValueStore(), records: new MemoryKeyValueStore() }, directory, random });
     await client.ensureReady(getSignedInMockUser().id);
-    const preview = { url: "https://zudomart.com/p/1", domain: "zudomart.com", title: "Ankara set", description: null, imageUrl: null };
+    const preview = { url: "https://nantty.com/p/1", domain: "nantty.com", title: "Ankara set", description: null, imageUrl: null };
     const encrypted = await client.encryptMessage({ kind: "direct", conversationId: "c_1", memberUserIds: ["u_21"] }, { text: "see this", linkPreview: preview });
     expect(encrypted.encryption.ciphertext).not.toContain("see this");
     expect(encrypted.linkPreview).not.toContain("Ankara");

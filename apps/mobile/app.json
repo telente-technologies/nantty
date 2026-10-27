@@ -1,23 +1,23 @@
 {
   "expo": {
     "name": "Nantty",
-    "slug": "zudomart",
+    "slug": "nantty",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.zudomart.app",
+      "bundleIdentifier": "com.nantty.app",
       "usesAppleSignIn": true,
       "entitlements": {
         "com.apple.security.application-groups": [
-          "group.com.zudomart.app"
+          "group.com.nantty.app"
         ]
       }
     },
     "android": {
-      "package": "com.zudomart.app",
+      "package": "com.nantty.app",
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptiveIconForeground.png",
@@ -45,8 +45,8 @@
     },
     "scheme": [
       "nantty",
-      "zudomart",
-      "com.zudomart.app"
+      "nantty",
+      "com.nantty.app"
     ],
     "plugins": [
       "expo-video",
@@ -105,7 +105,7 @@
         {
           "widgets": [
             {
-              "name": "ZudomartOrders",
+              "name": "NanttyOrders",
               "label": "Orders",
               "description": "Track your active orders and delivery times.",
               "minWidth": "110dp",
@@ -116,7 +116,7 @@
               "updatePeriodMillis": 1800000
             },
             {
-              "name": "ZudomartSellerToday",
+              "name": "NanttySellerToday",
               "label": "Sales today",
               "description": "Today's sales, orders to ship and your balance.",
               "minWidth": "110dp",
@@ -127,7 +127,7 @@
               "updatePeriodMillis": 1800000
             },
             {
-              "name": "ZudomartLiveNow",
+              "name": "NanttyLiveNow",
               "label": "Live now",
               "description": "Creators you follow who are live right now.",
               "minWidth": "110dp",
@@ -138,7 +138,7 @@
               "updatePeriodMillis": 1800000
             },
             {
-              "name": "ZudomartCreatorToday",
+              "name": "NanttyCreatorToday",
               "label": "Creator stats",
               "description": "Today's views, new followers and earnings.",
               "minWidth": "110dp",
@@ -149,7 +149,7 @@
               "updatePeriodMillis": 1800000
             },
             {
-              "name": "ZudomartStories",
+              "name": "NanttyStories",
               "label": "Stories",
               "description": "New stories from people you follow.",
               "minWidth": "110dp",

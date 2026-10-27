@@ -7,7 +7,7 @@ describe("findUsernameTags", () => {
     expect(names("@sinach loves it, thanks @ada_1.x")).toEqual(["sinach", "ada_1.x"]);
   });
   it("ignores emails", () => {
-    expect(names("write to me@zudomart.com")).toEqual([]);
+    expect(names("write to me@nantty.com")).toEqual([]);
   });
   it("ignores URLs", () => {
     expect(names("see https://x.com/@sinach and a.com?u=@bob")).toEqual([]);

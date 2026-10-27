@@ -13,19 +13,19 @@ const failureOf = (request: Promise<unknown>) => request.then(() => undefined, (
 
 describe("post links", () => {
   it.each([
-    ["https://app.zudomart.com/post/post_1", "post_1"],
-    ["http://www.zudomart.com/clips/clip_9/", "clip_9"],
-    ["https://zudomart.com.evil.io/post/post_1", null],
+    ["https://app.nantty.com/post/post_1", "post_1"],
+    ["http://www.nantty.com/clips/clip_9/", "clip_9"],
+    ["https://nantty.com.evil.io/post/post_1", null],
     ["https://evil.io/post/post_1", null],
-    ["https://zudomart.com/post/post_1?comment=cm_1", null],
-    ["https://zudomart.com/post/post_1/extra", null],
-    ["https://zudomart.com:444/post/post_1", null],
+    ["https://nantty.com/post/post_1?comment=cm_1", null],
+    ["https://nantty.com/post/post_1/extra", null],
+    ["https://nantty.com:444/post/post_1", null],
   ])("reads %s as %s", (url, expected) => {
     expect(readPostIdFromLink(url)).toBe(expected);
   });
 
   it("uses only the first post link and drops trailing punctuation", () => {
-    expect(findFirstPostLinkInText("see https://evil.io/x then https://zudomart.com/post/post_2. and https://zudomart.com/post/post_3")).toEqual({ postId: "post_2", url: "https://zudomart.com/post/post_2" });
+    expect(findFirstPostLinkInText("see https://evil.io/x then https://nantty.com/post/post_2. and https://nantty.com/post/post_3")).toEqual({ postId: "post_2", url: "https://nantty.com/post/post_2" });
   });
 });
 
@@ -33,22 +33,22 @@ describe("quote link mocks", () => {
   jest.setTimeout(30_000);
 
   it("quotes a linked post, strips the trailing link and keeps a middle one", async () => {
-    const trailing = await createPost("so true https://app.zudomart.com/post/post_1");
+    const trailing = await createPost("so true https://app.nantty.com/post/post_1");
     expect(trailing).toMatchObject({ text: "so true", isQuote: true, resharedFrom: { id: "post_1" } });
-    const middle = await createPost("look https://app.zudomart.com/post/post_1 here");
-    expect(middle.text).toBe("look https://app.zudomart.com/post/post_1 here");
+    const middle = await createPost("look https://app.nantty.com/post/post_1 here");
+    expect(middle.text).toBe("look https://app.nantty.com/post/post_1 here");
     expect(middle.resharedFrom?.id).toBe("post_1");
   });
 
   it("keeps the link as text when the preview was removed or the post is missing", async () => {
-    expect((await createPost("keep https://app.zudomart.com/post/post_1", null)).resharedFrom ?? null).toBeNull();
-    expect((await createPost("gone https://app.zudomart.com/post/nope_404")).resharedFrom ?? null).toBeNull();
+    expect((await createPost("keep https://app.nantty.com/post/post_1", null)).resharedFrom ?? null).toBeNull();
+    expect((await createPost("gone https://app.nantty.com/post/nope_404")).resharedFrom ?? null).toBeNull();
     expect(await failureOf(createPost("x", "nope_404"))).toMatchObject({ status: 422, code: "QUOTED_POST_UNAVAILABLE" });
   });
 
   it("embeds a quoted post in a comment and lists it with the Author flag and a chain", async () => {
     const post = await createPost("my post");
-    const comment = await createComment(post.id, "agree https://zudomart.com/post/post_1");
+    const comment = await createComment(post.id, "agree https://nantty.com/post/post_1");
     expect(comment).toMatchObject({ text: "agree", isPostAuthor: true, quotedPostUnavailable: false });
     expect(validateAgainstContract(quotedPostSummary, comment.quotedPost)).toEqual([]);
     const reply = await createComment(post.id, "thanks", { parentCommentId: comment.id });

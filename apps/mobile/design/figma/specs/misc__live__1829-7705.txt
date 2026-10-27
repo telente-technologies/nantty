@@ -10,4 +10,4 @@ FRAME "Live" [0,0 393x852] bg=#FFFFFF clip
     CIRCLE "Ellipse 40" [161,726 72x72] bg=#2043F5
   FRAME "Frame 797" [16,110 209x40] bg=#8F8F8F radius=4 flex=row pad=8,8,8,8 gap=12 align=center
     ICON text-indent-24.svg [24,118 24x24] (TextIndent)
-    TEXT "My First Live on Zudomart" Inter 500 13/16.9 ls-0.3 #000000 [60,121.5 157x17]
+    TEXT "My First Live on Nantty" Inter 500 13/16.9 ls-0.3 #000000 [60,121.5 157x17]

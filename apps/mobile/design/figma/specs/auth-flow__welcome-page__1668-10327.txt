@@ -1,3 +1,3 @@
 # Auth Flow / Welcome Page  (node 1668:10327, 393x852, reference: screens/auth-flow__welcome-page__1668-10327.png)
 FRAME "Welcome Page" [0,0 393x852] bg=#F7F8FE clip
-  TEXT "zudomart" Inter 700 21/25.2 ls-0.4 #1B39CC [148,414 98x25]
+  TEXT "nantty" Inter 700 21/25.2 ls-0.4 #1B39CC [148,414 98x25]

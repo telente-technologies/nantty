@@ -1,4 +1,4 @@
-export const widgetAppGroup = "group.com.zudomart.app";
+export const widgetAppGroup = "group.com.nantty.app";
 
 export const widgetKinds = ["orders", "sellerToday", "liveNow", "creatorToday", "stories"] as const;
 export type WidgetKind = (typeof widgetKinds)[number];
@@ -14,19 +14,19 @@ export const widgetEndpoints: Readonly<Record<WidgetKind, string>> = {
 export const moneyWidgetKinds: readonly WidgetKind[] = ["sellerToday", "creatorToday"];
 
 export const iosWidgetTimelineKinds: Readonly<Record<WidgetKind, string>> = {
-  orders: "ZudomartOrdersWidget",
-  sellerToday: "ZudomartSellerTodayWidget",
-  liveNow: "ZudomartLiveNowWidget",
-  creatorToday: "ZudomartCreatorTodayWidget",
-  stories: "ZudomartStoriesWidget",
+  orders: "NanttyOrdersWidget",
+  sellerToday: "NanttySellerTodayWidget",
+  liveNow: "NanttyLiveNowWidget",
+  creatorToday: "NanttyCreatorTodayWidget",
+  stories: "NanttyStoriesWidget",
 };
 
 export const androidWidgetNames: Readonly<Record<WidgetKind, string>> = {
-  orders: "ZudomartOrders",
-  sellerToday: "ZudomartSellerToday",
-  liveNow: "ZudomartLiveNow",
-  creatorToday: "ZudomartCreatorToday",
-  stories: "ZudomartStories",
+  orders: "NanttyOrders",
+  sellerToday: "NanttySellerToday",
+  liveNow: "NanttyLiveNow",
+  creatorToday: "NanttyCreatorToday",
+  stories: "NanttyStories",
 };
 
 export const widgetStorageKeys = {

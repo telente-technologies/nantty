@@ -2,13 +2,13 @@ import SwiftUI
 import UIKit
 import WidgetKit
 
-enum ZudoColor {
-  static let brand = Color("ZudoBrand")
-  static let surface = Color("ZudoSurface")
-  static let text = Color("ZudoText")
-  static let muted = Color("ZudoMuted")
-  static let seenRing = Color("ZudoSeenRing")
-  static let live = Color("ZudoLive")
+enum NanttyColor {
+  static let brand = Color("NanttyBrand")
+  static let surface = Color("NanttySurface")
+  static let text = Color("NanttyText")
+  static let muted = Color("NanttyMuted")
+  static let seenRing = Color("NanttySeenRing")
+  static let live = Color("NanttyLive")
 }
 
 enum WidgetFormat {
@@ -40,8 +40,8 @@ struct WidgetHeader: View {
   let title: String
   var body: some View {
     HStack(spacing: 6) {
-      Circle().fill(ZudoColor.brand).frame(width: 8, height: 8)
-      Text(title).font(.caption.weight(.semibold)).foregroundStyle(ZudoColor.muted).lineLimit(1)
+      Circle().fill(NanttyColor.brand).frame(width: 8, height: 8)
+      Text(title).font(.caption.weight(.semibold)).foregroundStyle(NanttyColor.muted).lineLimit(1)
     }
   }
 }
@@ -53,7 +53,7 @@ struct WidgetMessageView: View {
     VStack(alignment: .leading, spacing: 8) {
       WidgetHeader(title: title)
       Spacer(minLength: 0)
-      Text(message).font(.subheadline.weight(.semibold)).foregroundStyle(ZudoColor.text).lineLimit(3)
+      Text(message).font(.subheadline.weight(.semibold)).foregroundStyle(NanttyColor.text).lineLimit(3)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
   }
@@ -64,8 +64,8 @@ struct WidgetStatView: View {
   let value: String
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {
-      Text(value).font(.title3.weight(.bold)).foregroundStyle(ZudoColor.text).lineLimit(1).minimumScaleFactor(0.6)
-      Text(label).font(.caption2).foregroundStyle(ZudoColor.muted).lineLimit(1)
+      Text(value).font(.title3.weight(.bold)).foregroundStyle(NanttyColor.text).lineLimit(1).minimumScaleFactor(0.6)
+      Text(label).font(.caption2).foregroundStyle(NanttyColor.muted).lineLimit(1)
     }
     .frame(maxWidth: .infinity, alignment: .leading)
   }
@@ -81,7 +81,7 @@ struct WidgetAvatarView: View {
       if let imageData, let image = UIImage(data: imageData) {
         Image(uiImage: image).resizable().scaledToFill().frame(width: size, height: size).clipShape(Circle())
       } else {
-        Circle().fill(ZudoColor.surface).frame(width: size, height: size)
+        Circle().fill(NanttyColor.surface).frame(width: size, height: size)
       }
     }
   }
@@ -94,7 +94,7 @@ struct WidgetStateView<Payload, Content: View>: View {
   @ViewBuilder let content: (Payload, [String: Data]) -> Content
   var body: some View {
     switch state {
-    case .signedOut: WidgetMessageView(title: title, message: "Sign in to Nantty").widgetURL(URL(string: "zudomart://"))
+    case .signedOut: WidgetMessageView(title: title, message: "Sign in to Nantty").widgetURL(URL(string: "nantty://"))
     case .unavailable: WidgetMessageView(title: title, message: unavailableMessage)
     case .ready(let payload, let images): content(payload, images)
     }
@@ -102,7 +102,7 @@ struct WidgetStateView<Payload, Content: View>: View {
 }
 
 extension View {
-  func zudoWidgetBackground() -> some View {
+  func nanttyWidgetBackground() -> some View {
     containerBackground(for: .widget) { Color("$widgetBackground") }
   }
 }

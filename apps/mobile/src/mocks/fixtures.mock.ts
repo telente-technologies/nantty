@@ -4,11 +4,11 @@ import { directoryUsersExcludingAccounts, findDirectoryUserById, summariseUser }
 
 export const isoDateHoursAgo = (h: number) => new Date(Date.now() - h * 3_600_000).toISOString();
 
-export const me: User = { ...findDirectoryUserById("u_me")!, email: "testzudomart@yahoo.com", phone: "+2348034417720" };
+export const me: User = { ...findDirectoryUserById("u_me")!, email: "testnantty@yahoo.com", phone: "+2348034417720" };
 
-export const demoFanAccount: User = { ...findDirectoryUserById("u_buyer")!, email: "fan.zudomart@gmail.com", phone: null };
+export const demoFanAccount: User = { ...findDirectoryUserById("u_buyer")!, email: "fan.nantty@gmail.com", phone: null };
 
-export const suspendedDemoAccount: User = { ...findDirectoryUserById("u_22")!, email: "suspended.zudomart@gmail.com", phone: null };
+export const suspendedDemoAccount: User = { ...findDirectoryUserById("u_22")!, email: "suspended.nantty@gmail.com", phone: null };
 
 export const mockSession: { signedInUserId: string } = { signedInUserId: me.id };
 

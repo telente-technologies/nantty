@@ -1,6 +1,6 @@
 # Auth Flow / Sign up Screen  (node 224:13113, 393x852, reference: screens/auth-flow__sign-up-screen__224-13113.png)
 FRAME "Sign up Screen" [0,0 393x852] bg=#FFFFFF clip
-  TEXT "zudomart" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
+  TEXT "nantty" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
   TEXT "This can be anything you like and can be changed later. If you skip this step, you will be automatically be assigned a default name." Inter 500 13/16.9 ls-0.3 #909090 [24,250 345x51]
   TEXT "Create username" Inter 700 24/28.8 ls-0.5 #000000 [24,106 345x29]
   TEXT "Skip" Inter 400 14/16.8 ls-0.3 #000000 [16,69 28x17]

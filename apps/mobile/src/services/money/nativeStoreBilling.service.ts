@@ -8,7 +8,7 @@ export type StoreBillingAvailability =
   | { readonly kind: "needsAppBuild" }
   | { readonly kind: "ready"; readonly platform: "ios" | "android"; readonly billing: StoreBillingModule };
 
-export const CREATOR_STORE_PRODUCT_PREFIX = "zudomart.creatorsub.";
+export const CREATOR_STORE_PRODUCT_PREFIX = "nantty.creatorsub.";
 
 let cachedAvailability: StoreBillingAvailability | null = null;
 

@@ -20,7 +20,7 @@ export interface ActionSources {
   readonly handlers?: ErrorActionHandlers;
 }
 
-const androidPackage = "com.zudomart.app";
+const androidPackage = "com.nantty.app";
 
 export function readAppStoreUrl(): string {
   if (Platform.OS === "android") return `market://details?id=${androidPackage}`;

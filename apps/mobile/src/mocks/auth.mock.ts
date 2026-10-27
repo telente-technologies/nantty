@@ -47,7 +47,7 @@ export const authMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/auth/login", ({ body }) => {
     const { identifier } = body as { identifier: string };
-    if (!identifier.toLowerCase().includes("zudomart")) throw new ApiError(401, "Account doesn't exist", "ACCOUNT_NOT_FOUND");
+    if (!identifier.toLowerCase().includes("nantty")) throw new ApiError(401, "Account doesn't exist", "ACCOUNT_NOT_FOUND");
     signInDemoAccountMatchingIdentifier(identifier);
     return buildMockAuthSession();
   }),
@@ -61,7 +61,7 @@ export const authMocks: MockRoute[] = [
     const availability = username?.trim() ? checkAvailability(username) : null;
     if (availability && !availability.available) throw buildUsernameUnavailableError(availability);
     mockSession.signedInUserId = demoFanAccount.id;
-    applyProfileEditForSignedInUser({ username: username?.trim() || generateAutomaticUsername(email ?? "zudo") });
+    applyProfileEditForSignedInUser({ username: username?.trim() || generateAutomaticUsername(email ?? "nantty") });
     return { ...buildMockAuthSession(), user: signedInProfile() };
   }),
   createMockRoute("POST", "/api/v1/auth/otp/send", () => ({ expiresIn: 60 })),

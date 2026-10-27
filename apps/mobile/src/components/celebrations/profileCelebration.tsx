@@ -40,8 +40,8 @@ function VisitorCelebration({ profile }: { profile: User }) {
   return (
     <>
       {profile.anniversaryToday ? (
-        <View style={styles.badge} accessible accessibilityLabel={`${profile.name} is celebrating a Zudoversary today`}>
-          <Text size={12} weight={600} lineHeight={16} color={colors.primary} accessible={false}>Zudoversary</Text>
+        <View style={styles.badge} accessible accessibilityLabel={`${profile.name} is celebrating a Nanttyversary today`}>
+          <Text size={12} weight={600} lineHeight={16} color={colors.primary} accessible={false}>Nanttyversary</Text>
         </View>
       ) : null}
       {profile.birthdayToday ? <FloatingBalloons height={HEADER_HEIGHT} style={styles.layer} /> : null}

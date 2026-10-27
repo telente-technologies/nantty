@@ -36,11 +36,11 @@ export const buildLinkSeedMessages = (conversationId: string, peerId: string, bu
   }),
   linkMessage(buildText, "m_link_ext", conversationId, peerId, "Read this https://www.punchng.com/naira-and-the-market-this-week", 6, "https://www.punchng.com/naira-and-the-market-this-week"),
   linkMessage(buildText, "m_link_short", conversationId, "u_me", "Is this legit? https://bit.ly/3xYzAbC", 5.8, "https://bit.ly/3xYzAbC"),
-  linkMessage(buildText, "m_link_prod", conversationId, peerId, "This one https://zudomart.app/product/pr_f1", 5.5),
-  linkMessage(buildText, "m_link_post", conversationId, peerId, "https://zudomart.app/post/post_30", 5.2),
-  linkMessage(buildText, "m_link_private", conversationId, peerId, "https://zudomart.app/post/post_11", 5),
-  linkMessage(buildText, "m_link_profile", conversationId, peerId, "Follow her https://zudomart.app/u/u_3", 4.8),
-  linkMessage(buildText, "m_link_live", conversationId, peerId, "Watching now https://zudomart.app/live/live_s0", 4.5),
-  linkMessage(buildText, "m_link_gone", conversationId, peerId, "https://zudomart.app/product/pr_removed_item", 4.2),
+  linkMessage(buildText, "m_link_prod", conversationId, peerId, "This one https://nantty.app/product/pr_f1", 5.5),
+  linkMessage(buildText, "m_link_post", conversationId, peerId, "https://nantty.app/post/post_30", 5.2),
+  linkMessage(buildText, "m_link_private", conversationId, peerId, "https://nantty.app/post/post_11", 5),
+  linkMessage(buildText, "m_link_profile", conversationId, peerId, "Follow her https://nantty.app/u/u_3", 4.8),
+  linkMessage(buildText, "m_link_live", conversationId, peerId, "Watching now https://nantty.app/live/live_s0", 4.5),
+  linkMessage(buildText, "m_link_gone", conversationId, peerId, "https://nantty.app/product/pr_removed_item", 4.2),
 ];
 

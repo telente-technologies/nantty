@@ -37,7 +37,7 @@ let openedMessageHistoryDatabase: SQLiteDatabase | null = null;
 
 function openMessageHistoryDatabaseAndCreateTables(): SQLiteDatabase {
   if (openedMessageHistoryDatabase) return openedMessageHistoryDatabase;
-  const database = openDatabaseSync("zudomartMessageHistory.db");
+  const database = openDatabaseSync("nanttyMessageHistory.db");
   database.execSync(`
     PRAGMA journal_mode = WAL;
     CREATE TABLE IF NOT EXISTS conversations (

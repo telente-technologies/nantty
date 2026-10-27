@@ -23,6 +23,6 @@ export const useListViewPreferencesStore = create<ListViewPreferencesState>()(
       setConnectionPreference: (screenKey, preference) =>
         set((state) => ({ connectionsByScreen: { ...state.connectionsByScreen, [screenKey]: preference } })),
     }),
-    { name: "zudomart.listViewPreferences", storage: createJSONStorage(() => AsyncStorage) },
+    { name: "nantty.listViewPreferences", storage: createJSONStorage(() => AsyncStorage) },
   ),
 );

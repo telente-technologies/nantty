@@ -4,7 +4,7 @@ import { openDatabaseSync, type SQLiteDatabase } from "expo-sqlite";
 
 import { secureStorage } from "@/utils/secureStorage.util";
 
-const secureKeyPrefix = "zudomart.chatCrypto.";
+const secureKeyPrefix = "nantty.chatCrypto.";
 const secureIndexKey = `${secureKeyPrefix}index`;
 const storageKeyName = `${secureKeyPrefix}storageKey`;
 
@@ -42,7 +42,7 @@ let database: SQLiteDatabase | null = null;
 
 function openRecordsDatabase(): SQLiteDatabase {
   if (database) return database;
-  database = openDatabaseSync("zudomartChatCrypto.db");
+  database = openDatabaseSync("nanttyChatCrypto.db");
   database.execSync("PRAGMA journal_mode = WAL; CREATE TABLE IF NOT EXISTS records (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL);");
   return database;
 }

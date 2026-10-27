@@ -28,29 +28,29 @@ struct OrdersWidgetView: View {
         VStack(alignment: .leading, spacing: 6) {
           WidgetHeader(title: payload.activeCount > 1 ? "\(payload.activeCount) active orders" : "Your order")
           ForEach(family == .systemSmall ? [first] : Array(payload.orders.prefix(3))) { order in
-            Link(destination: URL(string: order.deepLink) ?? URL(string: "zudomart://orders")!) {
+            Link(destination: URL(string: order.deepLink) ?? URL(string: "nantty://orders")!) {
               VStack(alignment: .leading, spacing: 1) {
-                Text(order.statusLabel).font(.subheadline.weight(.bold)).foregroundStyle(ZudoColor.brand).lineLimit(1)
-                Text(WidgetFormat.eta(order.etaAt) ?? order.storeName).font(.caption2).foregroundStyle(ZudoColor.muted).lineLimit(1)
-                if family == .systemSmall { Text(order.itemTitle).font(.caption).foregroundStyle(ZudoColor.text).lineLimit(2) }
+                Text(order.statusLabel).font(.subheadline.weight(.bold)).foregroundStyle(NanttyColor.brand).lineLimit(1)
+                Text(WidgetFormat.eta(order.etaAt) ?? order.storeName).font(.caption2).foregroundStyle(NanttyColor.muted).lineLimit(1)
+                if family == .systemSmall { Text(order.itemTitle).font(.caption).foregroundStyle(NanttyColor.text).lineLimit(2) }
               }
             }
           }
           Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .widgetURL(URL(string: family == .systemSmall ? first.deepLink : "zudomart://orders"))
+        .widgetURL(URL(string: family == .systemSmall ? first.deepLink : "nantty://orders"))
       } else {
-        WidgetMessageView(title: "Orders", message: "No active orders right now.").widgetURL(URL(string: "zudomart://orders"))
+        WidgetMessageView(title: "Orders", message: "No active orders right now.").widgetURL(URL(string: "nantty://orders"))
       }
     }
-    .zudoWidgetBackground()
+    .nanttyWidgetBackground()
   }
 }
 
 struct NanttyOrdersWidget: Widget {
   var body: some WidgetConfiguration {
-    StaticConfiguration(kind: "ZudomartOrdersWidget", provider: OrdersProvider()) { entry in OrdersWidgetView(entry: entry) }
+    StaticConfiguration(kind: "NanttyOrdersWidget", provider: OrdersProvider()) { entry in OrdersWidgetView(entry: entry) }
       .configurationDisplayName("Orders")
       .description("Track your active orders and delivery times.")
       .supportedFamilies([.systemSmall, .systemMedium])
@@ -93,13 +93,13 @@ struct SellerTodayWidgetView: View {
       }
       .widgetURL(URL(string: payload.deepLink))
     }
-    .zudoWidgetBackground()
+    .nanttyWidgetBackground()
   }
 }
 
 struct NanttySellerTodayWidget: Widget {
   var body: some WidgetConfiguration {
-    StaticConfiguration(kind: "ZudomartSellerTodayWidget", provider: SellerTodayProvider()) { entry in SellerTodayWidgetView(entry: entry) }
+    StaticConfiguration(kind: "NanttySellerTodayWidget", provider: SellerTodayProvider()) { entry in SellerTodayWidgetView(entry: entry) }
       .configurationDisplayName("Sales today")
       .description("Today's sales, orders to ship and your available balance.")
       .supportedFamilies([.systemSmall, .systemMedium])

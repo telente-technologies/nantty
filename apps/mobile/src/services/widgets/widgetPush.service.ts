@@ -9,7 +9,7 @@ import { api } from "@/services/apiClient.service";
 type NotificationsModule = typeof import("expo-notifications");
 type WidgetSyncModule = typeof import("./widgetSync.service");
 
-export const WIDGET_PUSH_TASK_NAME = "zudomart-widget-refresh-push";
+export const WIDGET_PUSH_TASK_NAME = "nantty-widget-refresh-push";
 const widgetRefreshType = "widgetRefresh";
 
 export function isWidgetPushSupported(): boolean {

@@ -17,8 +17,8 @@ describe("celebration copy", () => {
     expect(birthdayMessage("Ada Obi", 25).message).toBe("Happy 25th birthday, Ada! Wishing you an amazing year ahead from all of us at Nantty.");
   });
 
-  it("writes the Zudoversary message", () => {
-    expect(anniversaryMessage(2).message).toBe("Happy 2nd Zudoversary! Thanks for being part of Nantty for 2 years.");
+  it("writes the Nanttyversary message", () => {
+    expect(anniversaryMessage(2).message).toBe("Happy 2nd Nanttyversary! Thanks for being part of Nantty for 2 years.");
     expect(anniversaryMessage(1).message).toContain("for 1 year.");
   });
 });

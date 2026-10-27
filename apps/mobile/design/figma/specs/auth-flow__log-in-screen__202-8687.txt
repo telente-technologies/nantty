@@ -1,6 +1,6 @@
 # Auth Flow / Log in Screen  (node 202:8687, 393x852, reference: screens/auth-flow__log-in-screen__202-8687.png)
 FRAME "Log in Screen" [0,0 393x852] bg=#FFFFFF clip
-  TEXT "zudomart" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
+  TEXT "nantty" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
   INST "arrow-left" [16,66 24x24] clip
     VECTOR "Vector" [21,71 14x14] border=#000000/2/center
   FRAME "Frame 399" [24,264 107x17] flex=row gap=4 align=center

@@ -42,9 +42,9 @@ export const LIVE_GIFT_ARTWORK_PRESETS: Readonly<Record<string, LiveGiftArtworkP
   "diamond-shower-v1": preset("diamond", "#E6FBFF", "#3D8BFF", "#7FDBFF", "diamond"),
   "golden-rain-v1": preset("coin", "#FFF3B0", "#D49A00", "#FFD34D", "coin"),
   "supernova-v1": preset("sparkle", "#FFFFFF", "#FF7A1A", "#FFB547", "star"),
-  "zudo-galaxy-v1": preset("sparkle", "#B69CFF", "#4B1FA8", "#B69CFF", "star", "galaxy"),
-  "zudo-king-v1": preset("crown", "#FFF3B0", "#B87900", "#FFC233", "crown"),
-  "zudo-empire-v1": preset("castle", "#FFE680", "#8A5A00", "#FFD34D", "star"),
+  "nantty-galaxy-v1": preset("sparkle", "#B69CFF", "#4B1FA8", "#B69CFF", "star", "galaxy"),
+  "nantty-king-v1": preset("crown", "#FFF3B0", "#B87900", "#FFC233", "crown"),
+  "nantty-empire-v1": preset("castle", "#FFE680", "#8A5A00", "#FFD34D", "star"),
 };
 
 const FALLBACK_ARTWORK_PRESET = preset("giftBox", "#FF7AD9", "#9B2CFF", "#E066FF");

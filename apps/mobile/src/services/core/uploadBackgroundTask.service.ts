@@ -7,7 +7,7 @@ import { useUploadQueueStore } from "@/store/uploadQueue.store";
 
 import { startDrainingUploadQueue } from "../media/mediaUploadQueue.service";
 
-const RESUME_PENDING_UPLOADS_TASK_NAME = "zudomart-resume-pending-media-uploads";
+const RESUME_PENDING_UPLOADS_TASK_NAME = "nantty-resume-pending-media-uploads";
 const MINIMUM_BACKGROUND_INTERVAL_MINUTES = 15;
 const BACKGROUND_TIME_BUDGET_MS = 25_000;
 const isBackgroundTaskSupported = Platform.OS === "ios" || Platform.OS === "android";

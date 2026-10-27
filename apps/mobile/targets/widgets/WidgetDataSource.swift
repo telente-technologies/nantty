@@ -3,8 +3,8 @@ import Security
 import WidgetKit
 
 enum WidgetDataSource {
-  static let appGroup = "group.com.zudomart.app"
-  static let keychainService = "zudomart.widgets:no-auth"
+  static let appGroup = "group.com.nantty.app"
+  static let keychainService = "nantty.widgets:no-auth"
   static let tokenKey = "zm.widgetToken"
   static let sessionKey = "zm.widget.session"
   static let snapshotPrefix = "zm.widget.snapshot."

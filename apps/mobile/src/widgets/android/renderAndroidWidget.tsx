@@ -15,10 +15,10 @@ const widgetTitles: Readonly<Record<WidgetKind, string>> = { orders: "Orders", s
 export function buildAndroidWidget(kind: WidgetKind, snapshot: WidgetSnapshot, info: Pick<WidgetInfo, "width" | "height">, scheme: "light" | "dark", now = new Date()) {
   const palette = widgetPaletteFor(scheme);
   const size = widgetSizeFromDimensions(info.width, info.height);
-  if (snapshot.state === "signedOut") return <AndroidWidgetMessage palette={palette} deepLink="zudomart://" title={widgetTitles[kind]} message="Sign in to Nantty" />;
+  if (snapshot.state === "signedOut") return <AndroidWidgetMessage palette={palette} deepLink="nantty://" title={widgetTitles[kind]} message="Sign in to Nantty" />;
   if (snapshot.state === "unavailable") {
     const message = kind === "sellerToday" ? "Open a store to see today's sales." : "Open Nantty to refresh.";
-    return <AndroidWidgetMessage palette={palette} deepLink={kind === "sellerToday" ? "zudomart://seller/dashboard" : "zudomart://"} title={widgetTitles[kind]} message={message} />;
+    return <AndroidWidgetMessage palette={palette} deepLink={kind === "sellerToday" ? "nantty://seller/dashboard" : "nantty://"} title={widgetTitles[kind]} message={message} />;
   }
   const payload = snapshot.payload;
   switch (kind) {

@@ -8,8 +8,8 @@ const amountsHidden = (query: URLSearchParams) => query.get("amounts") === "hidd
 
 const ordersWidget = (): OrderWidgetPayload => ({
   orders: [
-    { id: "o_1042", reference: "ZM-1042", status: "out_for_delivery", statusLabel: "Out for delivery", etaAt: hoursFromNow(3), itemTitle: "Adire two-piece set", itemCount: 1, imageUrl: null, storeName: "Adaeze Styles", deepLink: "zudomart://orders/o_1042" },
-    { id: "o_1038", reference: "ZM-1038", status: "preparing", statusLabel: "Being prepared", etaAt: hoursFromNow(50), itemTitle: "Shea butter glow kit", itemCount: 2, imageUrl: null, storeName: "Glow by Zainab", deepLink: "zudomart://orders/o_1038" },
+    { id: "o_1042", reference: "ZM-1042", status: "out_for_delivery", statusLabel: "Out for delivery", etaAt: hoursFromNow(3), itemTitle: "Adire two-piece set", itemCount: 1, imageUrl: null, storeName: "Adaeze Styles", deepLink: "nantty://orders/o_1042" },
+    { id: "o_1038", reference: "ZM-1038", status: "preparing", statusLabel: "Being prepared", etaAt: hoursFromNow(50), itemTitle: "Shea butter glow kit", itemCount: 2, imageUrl: null, storeName: "Glow by Zainab", deepLink: "nantty://orders/o_1038" },
   ],
   activeCount: 2,
   generatedAt: new Date().toISOString(),
@@ -17,26 +17,26 @@ const ordersWidget = (): OrderWidgetPayload => ({
 
 const sellerTodayWidget = (hidden: boolean): SellerTodayWidgetPayload => ({
   storeName: "Temi Homes", salesToday: hidden ? null : { amountMinor: 18_450_000, currency: "NGN" }, ordersToday: 7, ordersToShip: 4,
-  availableBalance: hidden ? null : { amountMinor: 92_300_000, currency: "NGN" }, amountsHidden: hidden, deepLink: "zudomart://seller/dashboard", generatedAt: new Date().toISOString(),
+  availableBalance: hidden ? null : { amountMinor: 92_300_000, currency: "NGN" }, amountsHidden: hidden, deepLink: "nantty://seller/dashboard", generatedAt: new Date().toISOString(),
 });
 
 const liveNowWidget = (): LiveNowWidgetPayload => ({
   lives: [
-    { id: "live_ada", hostId: "u_1", hostName: "Adaeze Okafor", hostUsername: "adaeze.styles", hostAvatarUrl: avatarImageUrlForUser("u_1"), title: "New adire drop, live try-on", viewers: 1840, deepLink: "zudomart://live/live_ada" },
-    { id: "live_tunde", hostId: "u_2", hostName: "Tunde Bakare", hostUsername: "tundetech", hostAvatarUrl: avatarImageUrlForUser("u_2"), title: "Unboxing the new phones", viewers: 620, deepLink: "zudomart://live/live_tunde" },
+    { id: "live_ada", hostId: "u_1", hostName: "Adaeze Okafor", hostUsername: "adaeze.styles", hostAvatarUrl: avatarImageUrlForUser("u_1"), title: "New adire drop, live try-on", viewers: 1840, deepLink: "nantty://live/live_ada" },
+    { id: "live_tunde", hostId: "u_2", hostName: "Tunde Bakare", hostUsername: "tundetech", hostAvatarUrl: avatarImageUrlForUser("u_2"), title: "Unboxing the new phones", viewers: 620, deepLink: "nantty://live/live_tunde" },
   ],
   generatedAt: new Date().toISOString(),
 });
 
 const creatorTodayWidget = (hidden: boolean): CreatorTodayWidgetPayload => ({
   creatorProgramMember: true, viewsToday: 12_480, newFollowersToday: 86, earningsToday: hidden ? null : { amountMinor: 2_150_000, currency: "NGN" }, amountsHidden: hidden,
-  deepLink: "zudomart://creator/dashboard", generatedAt: new Date().toISOString(),
+  deepLink: "nantty://creator/dashboard", generatedAt: new Date().toISOString(),
 });
 
 const storiesWidget = (): StoriesWidgetPayload => ({
   people: (["u_1", "u_3", "u_2"] as const).map((key, index) => ({
     userId: key, name: ["Adaeze Okafor", "Zainab Bello", "Tunde Bakare"][index] ?? key, username: ["adaeze.styles", "glowbyzainab", "tundetech"][index] ?? key,
-    avatarUrl: avatarImageUrlForUser(key), hasUnseen: index < 2, storyCount: 3 - index, latestStoryAt: hoursFromNow(-(index + 1)), thumbnailUrl: null, deepLink: `zudomart://stories/${key}`,
+    avatarUrl: avatarImageUrlForUser(key), hasUnseen: index < 2, storyCount: 3 - index, latestStoryAt: hoursFromNow(-(index + 1)), thumbnailUrl: null, deepLink: `nantty://stories/${key}`,
   })),
   generatedAt: new Date().toISOString(),
 });

@@ -19,7 +19,7 @@ export interface LiveHostMedia {
   readonly flipCamera: () => void;
 }
 
-const KEEP_AWAKE_TAG = "zudomart-live-host";
+const KEEP_AWAKE_TAG = "nantty-live-host";
 const BACKGROUND_NOTICE_MS = 6_000;
 
 async function requestBluetoothRouting() {

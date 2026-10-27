@@ -3,7 +3,7 @@ import * as Location from "expo-location";
 
 import type { SharedLocation } from "@/types";
 
-const LOCATION_CONSENT_STORAGE_KEY = "zudomart.chatLocationConsent.v1";
+const LOCATION_CONSENT_STORAGE_KEY = "nantty.chatLocationConsent.v1";
 
 export type LocationAccessResult = "granted" | "denied" | "blocked";
 

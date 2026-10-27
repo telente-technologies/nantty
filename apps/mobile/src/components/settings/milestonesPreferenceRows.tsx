@@ -21,13 +21,13 @@ export function MilestonesPreferenceRows() {
     <>
       <ConsentToggleRow
         label="Milestones: push"
-        description="Birthdays and Zudoversaries, like your account anniversary."
+        description="Birthdays and Nanttyversaries, like your account anniversary."
         enabled={update.variables?.push ?? row.push}
         onChange={(push) => update.mutate({ push })}
       />
       <ConsentToggleRow
         label="Milestones: email"
-        description="A celebration email on your Zudoversary."
+        description="A celebration email on your Nanttyversary."
         enabled={update.variables?.email ?? row.email}
         onChange={(email) => update.mutate({ email })}
       />

@@ -6,12 +6,12 @@ describe("splitTextByUrls", () => {
   });
 
   it("finds https and www links and trims trailing punctuation", () => {
-    const segments = splitTextByUrls("See https://example.com/a?b=1. Also www.zudomart.com/p/abc!");
+    const segments = splitTextByUrls("See https://example.com/a?b=1. Also www.nantty.com/p/abc!");
     expect(segments.filter((segment) => segment.href)).toEqual([
       { text: "https://example.com/a?b=1", href: "https://example.com/a?b=1" },
-      { text: "www.zudomart.com/p/abc", href: "https://www.zudomart.com/p/abc" },
+      { text: "www.nantty.com/p/abc", href: "https://www.nantty.com/p/abc" },
     ]);
-    expect(segments.map((segment) => segment.text).join("")).toBe("See https://example.com/a?b=1. Also www.zudomart.com/p/abc!");
+    expect(segments.map((segment) => segment.text).join("")).toBe("See https://example.com/a?b=1. Also www.nantty.com/p/abc!");
   });
 
   it("keeps balanced parentheses but drops a closing one that wraps the link", () => {

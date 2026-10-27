@@ -1,6 +1,6 @@
 # Auth Flow / Sign up Screen  (node 224:12061, 393x852, reference: screens/auth-flow__sign-up-screen__224-12061.png)
 FRAME "Sign up Screen" [0,0 393x852] bg=#FFFFFF clip
-  TEXT "zudomart" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
+  TEXT "nantty" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
   INST "arrow-left" [16,66 24x24] clip
     VECTOR "Vector" [21,71 14x14] border=#000000/2/center
   TEXT "Your password must have at least:" Inter 500 13/16.9 ls-0.3 #909090 [24,250 205x17]

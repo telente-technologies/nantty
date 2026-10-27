@@ -70,7 +70,7 @@ const setMemberRole = (conversationId: string, userId: string, role: Conversatio
     (membersByConversationId.get(conversationId) ?? []).map((member) => (member.user.id === userId ? { ...member, role } : member)),
   );
 
-const signedGroupPhotoUrl = (mediaId: string | null) => (mediaId ? `https://mock-media.zudomart.local/chat/${mediaId}?signature=member` : null);
+const signedGroupPhotoUrl = (mediaId: string | null) => (mediaId ? `https://mock-media.nantty.local/chat/${mediaId}?signature=member` : null);
 
 export const mockStoreInboxTeam = ["u_store_owner", "u_store_agent"];
 

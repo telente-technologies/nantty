@@ -53,7 +53,7 @@ export const useFeedModulePreferencesStore = create<FeedModulePreferencesState>(
       };
     },
     {
-      name: "zudomart.feedModulePreferences",
+      name: "nantty.feedModulePreferences",
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         suggestedClipsHiddenUntilByViewer: state.suggestedClipsHiddenUntilByViewer,

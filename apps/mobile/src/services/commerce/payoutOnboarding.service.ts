@@ -7,7 +7,7 @@ import { api } from "../core/apiClient.service";
 
 const base = "/api/v1/payments/payout-onboarding/me";
 
-export const PAYOUT_DOCUMENT_RETURN_URL = "zudomart://payouts/verification-return";
+export const PAYOUT_DOCUMENT_RETURN_URL = "nantty://payouts/verification-return";
 
 export const payoutOnboardingService = {
   fetchState: () => api.get<PayoutOnboardingState>(base),

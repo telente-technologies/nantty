@@ -147,7 +147,7 @@ function SubscriptionCard({
           height={40}
           onPress={() => {
             const settingsUrl = STORE_SUBSCRIPTION_SETTINGS[subscription.billingChannel as keyof typeof STORE_SUBSCRIPTION_SETTINGS];
-            const packageQuery = Platform.OS === "android" && subscription.storeProductId ? `?sku=${encodeURIComponent(subscription.storeProductId)}&package=com.zudomart.app` : "";
+            const packageQuery = Platform.OS === "android" && subscription.storeProductId ? `?sku=${encodeURIComponent(subscription.storeProductId)}&package=com.nantty.app` : "";
             void Linking.openURL(settingsUrl + packageQuery);
           }}
         />

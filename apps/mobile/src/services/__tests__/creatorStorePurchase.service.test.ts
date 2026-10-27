@@ -7,7 +7,7 @@ import type { StoreBillingModule } from "../money/nativeStoreBilling.service";
 
 jest.mock("../core/apiClient.service", () => ({ generateIdempotencyKey: () => "receipt-key", api: {} }));
 
-const PRODUCT = "zudomart.creatorsub.tier_1000.s2.monthly";
+const PRODUCT = "nantty.creatorsub.tier_1000.s2.monthly";
 
 const state = (status: CreatorSubscriptionState["status"]): CreatorSubscriptionState => ({
   subscriptionId: "sub-1", creatorId: "creator-1", planId: "plan-1", status, price: { amountMinor: 100_000, currency: "NGN" }, interval: "month",
@@ -32,7 +32,7 @@ function fakeBilling(outcome: "purchase" | "cancel", platform: "ios" | "android"
     }),
     finishTransaction: jest.fn(async () => undefined),
     restorePurchases: jest.fn(async () => undefined),
-    getAvailablePurchases: jest.fn(async () => [purchase, { ...purchase, productId: "com.zudomart.app.coins.tier1" }]),
+    getAvailablePurchases: jest.fn(async () => [purchase, { ...purchase, productId: "com.nantty.app.coins.tier1" }]),
   };
   return { billing: billing as unknown as StoreBillingModule, mocks: billing, removed };
 }

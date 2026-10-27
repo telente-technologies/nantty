@@ -10,7 +10,7 @@ const storiesPerSize: Readonly<Record<WidgetSize, number>> = { small: 1, medium:
 export function StoriesAndroidWidget({ payload, palette, size }: { readonly payload: StoriesWidgetPayload; readonly palette: WidgetPalette; readonly size: WidgetSize }) {
   const people = payload.people.slice(0, storiesPerSize[size]);
   const first = people[0];
-  if (first === undefined) return <AndroidWidgetMessage palette={palette} deepLink="zudomart://" title="Stories" message="No new stories from people you follow." />;
+  if (first === undefined) return <AndroidWidgetMessage palette={palette} deepLink="nantty://" title="Stories" message="No new stories from people you follow." />;
   if (size === "small") {
     return (
       <AndroidWidgetShell palette={palette} deepLink={first.deepLink}>
@@ -22,7 +22,7 @@ export function StoriesAndroidWidget({ payload, palette, size }: { readonly payl
   }
   const rows = size === "large" ? [people.slice(0, 4), people.slice(4, 8)] : [people];
   return (
-    <AndroidWidgetShell palette={palette} deepLink="zudomart://">
+    <AndroidWidgetShell palette={palette} deepLink="nantty://">
       <AndroidWidgetHeader palette={palette} title="Stories" />
       {rows.map((row, index) => (
         <FlexWidget key={`row-${index}`} style={{ flexDirection: "row", width: "match_parent", justifyContent: "space-between" }}>
@@ -41,7 +41,7 @@ export function StoriesAndroidWidget({ payload, palette, size }: { readonly payl
 export function LiveNowAndroidWidget({ payload, palette, size }: { readonly payload: LiveNowWidgetPayload; readonly palette: WidgetPalette; readonly size: WidgetSize }) {
   const lives = payload.lives.slice(0, size === "small" ? 1 : 3);
   const first = lives[0];
-  if (first === undefined) return <AndroidWidgetMessage palette={palette} deepLink="zudomart://" title="Live now" message="No one you follow is live." />;
+  if (first === undefined) return <AndroidWidgetMessage palette={palette} deepLink="nantty://" title="Live now" message="No one you follow is live." />;
   return (
     <AndroidWidgetShell palette={palette} deepLink={first.deepLink}>
       <AndroidWidgetHeader palette={palette} title="Live now" />

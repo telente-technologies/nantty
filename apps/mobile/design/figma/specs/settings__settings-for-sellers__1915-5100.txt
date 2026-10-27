@@ -5,7 +5,7 @@ FRAME "Settings for Sellers" [0,0 393x984] bg=#F7F8FE clip
       FRAME "Frame 302" [28,142 48x48] bg=image:avatar-placeholder.jpg radius=50
       FRAME "Frame 821" [88,147 169x38] flex=col gap=4
         TEXT "Enyo Dev" Inter 600 14/16.8 ls-0.3 #000000 [88,147 169x17]
-        TEXT "testzudomart@yahoo.com" Inter 400 14/16.8 ls-0.3 #000000 [88,168 169x17]
+        TEXT "testnantty@yahoo.com" Inter 400 14/16.8 ls-0.3 #000000 [88,168 169x17]
     ICON caret-right-24.svg [341,154 24x24] (CaretRight)
   FRAME "Frame 828" [16,248 361x144] radius=12 flex=col align=center
     FRAME "Frame 820" [16,248 361x48] bg=#FFFFFF radius=12,12,0,0 flex=row pad=8,12,8,12 gap=10 justify=space_between align=center fill=w

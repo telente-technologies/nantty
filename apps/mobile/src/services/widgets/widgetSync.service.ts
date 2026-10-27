@@ -12,7 +12,7 @@ import { clearWidgetSnapshotsForSignOut, refreshWidgetSnapshots } from "./widget
 import { startWidgetRefreshPush, unregisterDeviceFromWidgetPush } from "./widgetPush.service";
 import { forgetWidgetTokenOnThisDevice, rotateWidgetTokenWhenDue } from "./widgetToken.service";
 
-export const WIDGET_REFRESH_TASK_NAME = "zudomart-refresh-home-screen-widgets";
+export const WIDGET_REFRESH_TASK_NAME = "nantty-refresh-home-screen-widgets";
 const WIDGET_REFRESH_INTERVAL_MINUTES = 30;
 const FOREGROUND_SYNC_COOLDOWN_MS = 2 * 60 * 1000;
 

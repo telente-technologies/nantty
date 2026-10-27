@@ -15,7 +15,7 @@ FRAME "Onbarding Screen" [0,0 393x852] bg=#FFFFFF clip
   GROUP "Group 76" [95,749 204x17] radius=0,0,0,0
     TEXT "Dont have an account?" Inter 400 14/16.8 ls-0.3 #000000 [95,749 146x17]
     TEXT "Sign up" Inter 700 14/16.8 ls-0.3 #000000 [249,749 50x17]
-  TEXT "zudomart" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
+  TEXT "nantty" Inter 900 20/24.2 #FFFFFF [147,66 99x24]
   FRAME "Frame 389" [24,425 345x44] border=#000000/1 radius=8 flex=row pad=10,12,10,12 gap=66 align=center
     FRAME "ic:round-apple" [36,435 24x24] clip
       VECTOR "Vector" [40.4,438 15.2x18] bg=#000000

@@ -2,7 +2,7 @@ import type { BvnConsentStart, MyProviderWallet, PaymentIntentView, PaymentVerif
 
 import { api } from "../core/apiClient.service";
 
-export const BVN_CONSENT_RETURN_URL = "zudomart://payouts/bvn-return";
+export const BVN_CONSENT_RETURN_URL = "nantty://payouts/bvn-return";
 
 const onboardingBase = "/api/v1/payments/payout-onboarding/me";
 

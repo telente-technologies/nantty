@@ -7,7 +7,7 @@ FRAME "Live" [0,0 393x852] bg=#FFFFFF clip
       FRAME "Frame 647" [56,68.5 31x19] bg=#EF4444 radius=2 flex=row pad=2,4,2,4 gap=10 justify=center align=center
         TEXT "LIVE" Inter 500 11/15.4 ls-0.2 #FFFFFF [60,70.5 23x15]
   FRAME "Frame 798" [16,122 58x25] flex=row gap=2 align=center
-    TEXT "My First Live on Zudomart" Inter 400 21/25.2 ls-0.4 #D9D9D9 [16,122 250x25]
+    TEXT "My First Live on Nantty" Inter 400 21/25.2 ls-0.4 #D9D9D9 [16,122 250x25]
     VECTOR "Line 26" [268.5,122 0x25] border=#2043F5/1.5/center fill=wh
   FRAME "Frame 774" [0,466 393x50] bg=#FFFFFF border=#D9D9D9/1 borderSides=t1,r0,b0,l0 flex=col pad=8,16,8,16 gap=10 clip
     FRAME "Frame 543" [16,474 361x34] flex=row gap=12 align=center fill=w

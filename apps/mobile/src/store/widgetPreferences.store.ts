@@ -13,6 +13,6 @@ export const useWidgetPreferencesStore = create<WidgetPreferencesState>()(
       hideAmounts: true,
       setHideAmounts: (hideAmounts) => set({ hideAmounts }),
     }),
-    { name: "zudomart.widgetPreferences", storage: createJSONStorage(() => AsyncStorage) },
+    { name: "nantty.widgetPreferences", storage: createJSONStorage(() => AsyncStorage) },
   ),
 );

@@ -18,7 +18,7 @@ jest.mock("@/services/content/posts.service", () => ({
   },
 }));
 
-const link = (id: string) => `https://app.zudomart.com/post/${id}`;
+const link = (id: string) => `https://app.nantty.com/post/${id}`;
 
 function renderPreview(initialText: string, quotePostId?: string) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });

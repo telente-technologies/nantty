@@ -14,6 +14,6 @@ export const usePolicyUpdateStore = create<PolicyUpdateState>()(
       dismissPolicyBanner: (policyVersionIds) =>
         set((state) => ({ dismissedPolicyVersionIds: [...new Set([...state.dismissedPolicyVersionIds, ...policyVersionIds])] })),
     }),
-    { name: "zudomart.policyDismissals", storage: createJSONStorage(() => AsyncStorage) },
+    { name: "nantty.policyDismissals", storage: createJSONStorage(() => AsyncStorage) },
   ),
 );

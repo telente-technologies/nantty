@@ -24,7 +24,7 @@ jest.mock("@/services/content/posts.service", () => ({
   },
 }));
 jest.mock("@/store/toast.store", () => ({ showToast: jest.fn() }));
-jest.mock("@/config/webAppLinks.config", () => ({ webAppLinks: { post: (id: string) => `https://zudomart.test/post/${id}` } }));
+jest.mock("@/config/webAppLinks.config", () => ({ webAppLinks: { post: (id: string) => `https://nantty.test/post/${id}` } }));
 jest.mock("@/utils/requireAuth.util", () => ({
   requireAuthThen: (action: () => unknown, _returnTo: unknown, reason: string) => {
     if (!mockSignedIn.current) {

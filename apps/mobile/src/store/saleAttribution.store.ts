@@ -29,7 +29,7 @@ export const useSaleAttributionStore = create<SaleAttributionState>()(
       remember: (productId, attribution, expiresAt = Date.now() + defaultWindowMilliseconds) =>
         set((state) => ({ byProduct: keepLiveSaleAttributions(state.byProduct, productId, attribution, expiresAt, Date.now()) })),
     }),
-    { name: "zudomart.saleAttributions", storage: createJSONStorage(() => AsyncStorage) },
+    { name: "nantty.saleAttributions", storage: createJSONStorage(() => AsyncStorage) },
   ),
 );
 

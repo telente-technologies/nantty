@@ -19,7 +19,7 @@ import type { IdentityJourney } from "@/types/identityVerification.type";
 import { describeEligibilityReason, describeRefund } from "@/utils/identityVerificationCopy.util";
 
 const journeyKey = ["verification", "journey"] as const;
-const returnUrl = "zudomart://settings/verification";
+const returnUrl = "nantty://settings/verification";
 
 function isWaitingForResult(journey: IdentityJourney | undefined): boolean {
   return journey?.case?.status === "processing" || (journey?.case?.status === "awaiting_capture" && journey.case.consentGiven);

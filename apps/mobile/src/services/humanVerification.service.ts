@@ -2,7 +2,7 @@ import * as WebBrowser from "expo-web-browser";
 
 import { webAppBaseUrl } from "@/config/webAppLinks.config";
 
-export const HUMAN_VERIFICATION_RETURN_URL = "zudomart://security-check";
+export const HUMAN_VERIFICATION_RETURN_URL = "nantty://security-check";
 
 let inFlight: Promise<boolean> | null = null;
 

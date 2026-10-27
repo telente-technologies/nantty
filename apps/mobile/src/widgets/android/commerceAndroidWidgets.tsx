@@ -7,10 +7,10 @@ import { AndroidWidgetHeader, AndroidWidgetMessage, AndroidWidgetShell, AndroidW
 
 export function OrdersAndroidWidget({ payload, palette, size, now }: { readonly payload: OrderWidgetPayload; readonly palette: WidgetPalette; readonly size: WidgetSize; readonly now: Date }) {
   const first = payload.orders[0];
-  if (first === undefined) return <AndroidWidgetMessage palette={palette} deepLink="zudomart://orders" title="Orders" message="No active orders right now." />;
+  if (first === undefined) return <AndroidWidgetMessage palette={palette} deepLink="nantty://orders" title="Orders" message="No active orders right now." />;
   const shown = size === "small" ? [first] : payload.orders.slice(0, 3);
   return (
-    <AndroidWidgetShell palette={palette} deepLink={size === "small" ? first.deepLink : "zudomart://orders"}>
+    <AndroidWidgetShell palette={palette} deepLink={size === "small" ? first.deepLink : "nantty://orders"}>
       <AndroidWidgetHeader palette={palette} title={payload.activeCount > 1 ? `${payload.activeCount} active orders` : "Your order"} />
       {shown.map((order) => (
         <FlexWidget key={order.id} clickAction="OPEN_URI" clickActionData={{ uri: order.deepLink }} style={{ flexDirection: "row", alignItems: "center", width: "match_parent", marginTop: 6 }}>

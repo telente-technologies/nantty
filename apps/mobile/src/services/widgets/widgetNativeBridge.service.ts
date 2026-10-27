@@ -8,7 +8,7 @@ import { type AndroidWidgetModules, loadAndroidWidgetModules } from "@/widgets/a
 
 type AppleExtensionStorageModule = typeof import("@bacons/apple-targets");
 
-export const widgetKeychainService = "zudomart.widgets";
+export const widgetKeychainService = "nantty.widgets";
 
 const widgetSecureStoreOptions: SecureStore.SecureStoreOptions = {
   keychainService: widgetKeychainService,

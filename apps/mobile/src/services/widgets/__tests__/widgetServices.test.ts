@@ -28,7 +28,7 @@ describe("hide amounts on widgets", () => {
   it("strips amounts locally even if a response still carries them", () => {
     const seller = maskWidgetAmounts("sellerToday", {
       storeName: "Temi Homes", salesToday: { amountMinor: 100, currency: "NGN" }, ordersToday: 1, ordersToShip: 1,
-      availableBalance: { amountMinor: 900, currency: "NGN" }, amountsHidden: false, deepLink: "zudomart://seller/dashboard", generatedAt: "",
+      availableBalance: { amountMinor: 900, currency: "NGN" }, amountsHidden: false, deepLink: "nantty://seller/dashboard", generatedAt: "",
     }, true);
     expect(seller.salesToday).toBeNull();
     expect(seller.availableBalance).toBeNull();

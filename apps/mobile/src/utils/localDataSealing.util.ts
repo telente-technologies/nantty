@@ -3,7 +3,7 @@ import { getRandomBytes } from "expo-crypto";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
-const localDataKeyName = "zudomart.localData.key";
+const localDataKeyName = "nantty.localData.key";
 let cachedKey: Uint8Array | null = null;
 
 function loadLocalDataKey(): Uint8Array {

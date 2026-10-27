@@ -3,7 +3,7 @@ FRAME "Settings (Account)" [0,0 393x852] bg=#F7F8FE clip
   FRAME "Frame 829" [16,142 361x88] flex=col
     FRAME "Frame 826" [16,142 361x44] bg=#FFFFFF radius=12,12,0,0 flex=row pad=16,12,16,12 gap=10 justify=space_between align=center fill=w
       TEXT "Email" Inter 400 14/16.8 ls-0.3 #000000 [28,155.5 34x17]
-      TEXT "testzudomart@yahoo.com" Inter 400 13/16.9 ls-0.3 #5B5B5B [208,155.5 157x17]
+      TEXT "testnantty@yahoo.com" Inter 400 13/16.9 ls-0.3 #5B5B5B [208,155.5 157x17]
     FRAME "Frame 827" [16,186 361x44] bg=#FFFFFF radius=0,0,12,12 flex=row pad=16,12,16,12 gap=10 justify=space_between align=center fill=w
       TEXT "Phone number" Inter 400 14/16.8 ls-0.3 #000000 [28,199.5 94x17]
       TEXT "Set Up" Inter 500 13/16.9 ls-0.3 #2043F5 [324,199.5 41x17]

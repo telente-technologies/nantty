@@ -167,7 +167,7 @@ export const payoutOnboardingMocks: MockRoute[] = [
     }
     if (record.state.accountStatus !== "documentsRequired") throw new ApiError(409, "Your payout account is still being set up. We'll tell you when it's ready.", "ACCOUNT_NOT_READY");
     record.state = { ...record.state, documentStatus: "link_issued" };
-    return { url: "https://verify.nantty.com/payout-id/mock-session", returnUrl: "zudomart://payouts/verification-return", expiresAt: new Date(Date.now() + 15 * 60_000).toISOString() };
+    return { url: "https://verify.nantty.com/payout-id/mock-session", returnUrl: "nantty://payouts/verification-return", expiresAt: new Date(Date.now() + 15 * 60_000).toISOString() };
   }),
   createMockRoute("POST", "/api/v1/payments/payout-onboarding/me/document-link/complete", () => {
     const record = recordForSignedInUser();

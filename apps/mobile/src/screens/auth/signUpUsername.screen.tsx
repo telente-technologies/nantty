@@ -36,7 +36,7 @@ export function SignUpUsernameScreen({ navigation }: AuthScreenProps<"SignUpUser
   useEffect(() => {
     if (draft.username) return;
     usersService
-      .fetchSuggestedUsername(draft.destination || "zudo")
+      .fetchSuggestedUsername(draft.destination || "nantty")
       .then(({ username: suggestion }) => {
         setSuggestedUsername(suggestion);
         setUsername((current) => current || suggestion);

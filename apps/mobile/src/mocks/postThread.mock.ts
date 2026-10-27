@@ -118,7 +118,7 @@ const sponsoredCreatives: readonly Omit<ThreadDecidedAd, "adId" | "impressionTok
       primaryText: "Book pickup in the app and track every parcel to the doorstep.",
       callToAction: "Learn more",
       destination: { type: "url", targetId: null, url: "https://nantty.com/help/shipping" },
-      identity: { name: "Zudo Logistics", handle: "zudologistics", avatarUrl: null, verifiedBusiness: true },
+      identity: { name: "Nantty Logistics", handle: "nanttylogistics", avatarUrl: null, verifiedBusiness: true },
     },
   },
   {
@@ -126,7 +126,7 @@ const sponsoredCreatives: readonly Omit<ThreadDecidedAd, "adId" | "impressionTok
     slotKind: THREAD_AD_SLOT_KIND,
     format: "feed_post",
     label: "Promoted",
-    clickLinks: { cards: ["https://api.zudomart.com/api/v1/ads/r/mock-thread-0", "https://api.zudomart.com/api/v1/ads/r/mock-thread-1"] },
+    clickLinks: { cards: ["https://api.nantty.com/api/v1/ads/r/mock-thread-0", "https://api.nantty.com/api/v1/ads/r/mock-thread-1"] },
     creative: {
       type: "carousel",
       format: "feed_post",

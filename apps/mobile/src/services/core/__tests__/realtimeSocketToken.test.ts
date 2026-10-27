@@ -1,7 +1,7 @@
 const mockPost = jest.fn();
 
 jest.mock("@/services/apiClient.service", () => ({ api: { post: (...args: unknown[]) => mockPost(...args) } }));
-jest.mock("@/config/api.config", () => ({ apiConfig: { baseUrl: "https://api.zudomart.test" }, shouldUseMockForPath: () => false }));
+jest.mock("@/config/api.config", () => ({ apiConfig: { baseUrl: "https://api.nantty.test" }, shouldUseMockForPath: () => false }));
 jest.mock("@/store/auth.store", () => ({ useAuthStore: { getState: () => ({ accessToken: "session-access-token" }) } }));
 jest.mock("../realtimeMockEmitter.service", () => ({ startMockRealtimeEventEmitter: () => () => undefined }));
 
@@ -24,6 +24,6 @@ describe("realtime socket token", () => {
   });
 
   it("builds the socket url from the API base", () => {
-    expect(buildRealtimeWebSocketUrl("https://api.zudomart.test/")).toBe("wss://api.zudomart.test/ws");
+    expect(buildRealtimeWebSocketUrl("https://api.nantty.test/")).toBe("wss://api.nantty.test/ws");
   });
 });

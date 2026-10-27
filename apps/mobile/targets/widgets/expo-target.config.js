@@ -11,12 +11,12 @@ module.exports = (config) => ({
   colors: {
     $accent: { light: brandPalette.brand, dark: darkColors.brandSolid },
     $widgetBackground: { light: lightColors.surface, dark: darkColors.canvas },
-    ZudoBrand: { light: lightColors.brandSolid, dark: darkColors.brandSolid },
-    ZudoSurface: { light: lightColors.sunken, dark: darkColors.surface },
-    ZudoText: { light: lightColors.text, dark: darkColors.text },
-    ZudoMuted: { light: lightColors.textMuted, dark: darkColors.textMuted },
-    ZudoSeenRing: { light: lightColors.borderStrong, dark: darkColors.borderStrong },
-    ZudoLive: { light: lightColors.danger, dark: darkColors.danger },
+    NanttyBrand: { light: lightColors.brandSolid, dark: darkColors.brandSolid },
+    NanttySurface: { light: lightColors.sunken, dark: darkColors.surface },
+    NanttyText: { light: lightColors.text, dark: darkColors.text },
+    NanttyMuted: { light: lightColors.textMuted, dark: darkColors.textMuted },
+    NanttySeenRing: { light: lightColors.borderStrong, dark: darkColors.borderStrong },
+    NanttyLive: { light: lightColors.danger, dark: darkColors.danger },
   },
   entitlements: {
     "com.apple.security.application-groups": config.ios.entitlements["com.apple.security.application-groups"],

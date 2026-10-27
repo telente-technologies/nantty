@@ -59,6 +59,6 @@ export const useComposerDraftsStore = create<ComposerDraftsState>()(
       },
       deleteDraft: (id) => set((state) => ({ drafts: state.drafts.filter((draft) => draft.id !== id) })),
     }),
-    { name: "zudomart.composerDrafts", storage: createJSONStorage(() => AsyncStorage) },
+    { name: "nantty.composerDrafts", storage: createJSONStorage(() => AsyncStorage) },
   ),
 );

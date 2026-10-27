@@ -49,7 +49,7 @@ export const identityContracts: readonly EndpointContract[] = [
   { domain: "users", method: "GET", path: "/api/v1/users/me/username-policy", schema: usernamePolicy },
   { domain: "users", method: "POST", path: "/api/v1/users/me/media/upload-intents", body: { purpose: "avatar", contentType: "image/png", sizeBytes: 1, previewUri: "file:///a.png" }, schema: c.object({ mediaId: c.string(), uploadUrl: c.string(), method: c.string(), headers: c.any(), publicUrl: c.string(), expiresAt: c.string(), maximumSize: c.number() }, ["maximumSize"]) },
   { domain: "users", method: "GET", path: "/api/v1/locale/countries", schema: c.page(countryOption) },
-  { domain: "auth", method: "GET", path: "/api/v1/auth/username-available?username=zudo.new", schema: c.object({ available: c.boolean(), reason: usernameReason, message: c.string() }, ["reason", "message"]) },
+  { domain: "auth", method: "GET", path: "/api/v1/auth/username-available?username=nantty.new", schema: c.object({ available: c.boolean(), reason: usernameReason, message: c.string() }, ["reason", "message"]) },
   { domain: "auth", method: "GET", path: "/api/v1/auth/username-available?username=admin", schema: c.object({ available: c.boolean(), reason: usernameReason, message: c.string() }, ["message"]) },
   { domain: "auth", method: "GET", path: "/api/v1/auth/username-available?username=taken", schema: c.object({ available: c.boolean(), reason: usernameReason, message: c.string(), suggestions: c.array(c.string()) }, ["message"]) },
   { domain: "users", method: "GET", path: "/api/v1/geo/countries", schema: c.page(geoCountry) },

@@ -38,8 +38,8 @@ FRAME "Chats (Search)" [0,0 393x852] bg=#FFFFFF clip
     CIRCLE "Ellipse 29" [16,380 54x54] bg=#D2DAFD
     FRAME "Frame 731" [92,387 285x40] flex=row gap=37 align=center
       FRAME "Frame 729" [92,387 155x40] flex=col gap=4
-        TEXT "Zudo Support" Inter 500 16/19.2 ls-0.3 #000000 [92,387 155x19]
-        TEXT "@zudosupport" Inter 500 14/16.8 ls-0.3 #909090 truncate=1 [92,410 155x17]
+        TEXT "Nantty Support" Inter 500 16/19.2 ls-0.3 #000000 [92,387 155x19]
+        TEXT "@nanttysupport" Inter 500 14/16.8 ls-0.3 #909090 truncate=1 [92,410 155x17]
       FRAME "Frame 730" [284,394.5 93x25] flex=row gap=8 align=center
         FRAME "Frame 718" [284,394.5 61x25] bg=#DADADA radius=4 flex=row pad=4,4,4,4 gap=8 justify=center align=center
           TEXT "Unfollow" Inter 500 13/16.9 ls-0.3 #000000 [288,398.5 53x17]

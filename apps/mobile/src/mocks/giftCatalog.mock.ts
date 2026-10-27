@@ -47,9 +47,9 @@ export const mockLiveGiftCatalog: readonly LiveGift[] = [
   seedGift("premium", 24, "diamond_shower", "Diamond Shower", 2_500, "diamond-shower-v1", 5_000),
   seedGift("premium", 25, "golden_rain", "Golden Rain", 3_000, "golden-rain-v1", 5_000),
   seedGift("premium", 26, "supernova", "Supernova", 4_000, "supernova-v1", 5_000),
-  seedGift("legendary", 30, "zudo_galaxy", "Zudo Galaxy", 10_000, "zudo-galaxy-v1", 6_500),
-  seedGift("legendary", 31, "zudo_king", "Zudo King", 20_000, "zudo-king-v1", 7_000),
-  seedGift("legendary", 32, "zudo_empire", "Zudo Empire", 30_000, "zudo-empire-v1", 7_000),
+  seedGift("legendary", 30, "nantty_galaxy", "Nantty Galaxy", 10_000, "nantty-galaxy-v1", 6_500),
+  seedGift("legendary", 31, "nantty_king", "Nantty King", 20_000, "nantty-king-v1", 7_000),
+  seedGift("legendary", 32, "nantty_empire", "Nantty Empire", 30_000, "nantty-empire-v1", 7_000),
 ];
 
 export const findMockLiveGiftById = (giftId: string) => mockLiveGiftCatalog.find((gift) => gift.id === giftId);

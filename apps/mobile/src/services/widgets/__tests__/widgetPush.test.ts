@@ -65,7 +65,7 @@ describe("widget push registration", () => {
 
   it("registers the device once, listens for data messages and removes the token on sign-out", async () => {
     const { service, notifications, api, storage, defineTask } = load("standalone", "android");
-    expect(defineTask).toHaveBeenCalledWith("zudomart-widget-refresh-push", expect.any(Function));
+    expect(defineTask).toHaveBeenCalledWith("nantty-widget-refresh-push", expect.any(Function));
     await service.startWidgetRefreshPush();
     await service.startWidgetRefreshPush();
     expect(notifications.registerTaskAsync).toHaveBeenCalledTimes(1);

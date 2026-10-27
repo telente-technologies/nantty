@@ -134,7 +134,7 @@ FRAME "Feed" [0,0 393x2300] bg=#FFFFFF clip
           TEXT "100k" Inter 500 14/16.8 ls-0.3 #000000 [210,1988.5 32x17]
       ICON eye-24.svg [357,1985 24x24] (Eye)
   FRAME "Frame 397" [0,54 393x40] bg=#FFFFFF flex=row pad=8,16,8,16 gap=81 justify=space_between align=center
-    TEXT "zudomart" Satoshi 700 18/21.6 ls-0.4 #5B5B5B [16,63 78x22]
+    TEXT "nantty" Satoshi 700 18/21.6 ls-0.4 #5B5B5B [16,63 78x22]
     FRAME "Frame 430" [313,62 64x24] flex=row gap=16 align=center
       ICON magnifying-glass-24.svg [313,62 24x24] (MagnifyingGlass)
       ICON bell-24.svg [353,62 24x24] (Bell)

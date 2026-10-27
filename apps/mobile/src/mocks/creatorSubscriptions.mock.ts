@@ -80,7 +80,7 @@ const presentPlan = (plan: MockPlan, channel: CreatorBillingChannel = "web"): Cr
   tier: "1000",
   channel,
   channelPrice: convertUsdCentsToViewerCurrency(grossUp(plan.usdCents, channel)),
-  storeProductId: channel === "web" ? null : `zudomart.creatorsub.tier_1000.s1.${plan.interval === "month" ? "monthly" : "yearly"}`,
+  storeProductId: channel === "web" ? null : `nantty.creatorsub.tier_1000.s1.${plan.interval === "month" ? "monthly" : "yearly"}`,
 });
 
 const priceTiers = (interval: "month" | "year"): CreatorSubscriptionPriceTier[] =>
@@ -161,7 +161,7 @@ export const creatorSubscriptionsMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/creator-subscriptions/store-receipts", ({ body }) => {
     const { productId } = body as { productId: string };
     const pending = [...subscriptionStates.values()].find((state) => state.status === "pending" && state.billingChannel !== "web");
-    if (!pending || !productId.startsWith("zudomart.creatorsub.")) throw new ApiError(422, "This purchase isn't linked to a creator subscription.", "STORE_PURCHASE_NOT_LINKED");
+    if (!pending || !productId.startsWith("nantty.creatorsub.")) throw new ApiError(422, "This purchase isn't linked to a creator subscription.", "STORE_PURCHASE_NOT_LINKED");
     const active: CreatorSubscriptionState = { ...pending, status: "active", storeProductId: productId };
     subscriptionStates.set(active.subscriptionId, active);
     const viewerId = getSignedInMockUser().id;
