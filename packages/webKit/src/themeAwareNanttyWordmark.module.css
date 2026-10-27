@@ -1,0 +1,26 @@
+.themeAware {
+  display: inline-flex;
+  align-items: center;
+}
+
+.darkVariant {
+  display: none;
+}
+
+:global(:root[data-theme="dark"]) .lightVariant {
+  display: none;
+}
+
+:global(:root[data-theme="dark"]) .darkVariant {
+  display: inline-flex;
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .lightVariant {
+    display: none;
+  }
+
+  :global(:root:not([data-theme="light"])) .darkVariant {
+    display: inline-flex;
+  }
+}

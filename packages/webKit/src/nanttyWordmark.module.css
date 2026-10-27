@@ -11,16 +11,7 @@
   flex: none;
 }
 
-.lockup {
-  display: block;
-  width: auto;
-  max-width: min(34vw, 190px);
-  object-fit: contain;
-  flex: none;
-}
-
 .brandName {
-  font-size: 1.12em;
   font-weight: 750;
   letter-spacing: -0.055em;
 }
@@ -30,7 +21,7 @@
 }
 
 .onLight {
-  color: var(--color-brand);
+  color: var(--color-text);
 }
 
 .onDark {
@@ -54,17 +45,9 @@
   fill: var(--color-on-brand);
 }
 
-.showOnSmall {
-  display: none;
-}
-
 @media (max-width: 379px) {
   .hideOnSmall {
     display: none;
-  }
-
-  .showOnSmall {
-    display: block;
   }
 }
 

@@ -1,5 +1,6 @@
 export { NanttyLogoMark, NanttySymbol, NanttyWordmark } from "./nanttyWordmark";
 export type { NanttyProductLabel, NanttyWordmarkTone } from "./nanttyWordmark";
+export { ThemeAwareNanttyWordmark } from "./themeAwareNanttyWordmark";
 export { defaultNanttyWordmarkVariant, nanttyWordmarkFor, nanttyWordmarkPath, nanttyWordmarkVariants } from "./brand/nanttyBrand.path";
 export type { NanttyBrandPath, NanttyWordmarkVariant } from "./brand/nanttyBrand.path";
 export { Skeleton } from "./skeleton";
@@ -19,6 +20,7 @@ export type { ThemeContextValue, ThemeProviderProps } from "./theme/themeProvide
 export { ThemeSwitcher } from "./theme/themeSwitcher";
 export type { ThemeSwitcherProps } from "./theme/themeSwitcher";
 export { ThemeInitScript } from "./theme/themeInitScript";
+export { StaticThemeScript } from "./theme/staticThemeScript";
 export { isThemePreference, parseThemePreference, readHtmlThemeAttribute, themeColorByResolvedTheme, themeCookieName, themePreferenceLabels, themePreferences, themeViewport } from "./theme/themePreference.constant";
 export type { ResolvedTheme, ThemePreference } from "./theme/themePreference.constant";
 export { OfficialStoreBadges } from "./storeBadges/officialStoreBadges";

@@ -27,7 +27,7 @@ export function ThemeSwitcher({ label = "Theme", showLabel = false, iconOnly = f
   const { preference, setPreference } = useTheme();
   const groupName = useId();
   return (
-    <fieldset className={[styles.switcher, iconOnly ? styles.iconOnly : "", className ?? ""].join(" ")}>
+    <fieldset data-theme-switcher="true" className={[styles.switcher, iconOnly ? styles.iconOnly : "", className ?? ""].join(" ")}>
       <legend className={showLabel ? styles.legend : styles.visuallyHidden}>{label}</legend>
       <div className={styles.track}>
         {themePreferences.map((option) => (
