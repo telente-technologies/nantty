@@ -1,7 +1,7 @@
 import type { EmailBrandConfig } from "../emailTypes";
 
-export const companyLegalNamePlaceholder = "ZUDOMART_COMPANY_LEGAL_NAME";
-export const companyAddressPlaceholder = "ZUDOMART_COMPANY_ADDRESS";
+export const companyLegalNamePlaceholder = "NANTTY_COMPANY_LEGAL_NAME";
+export const companyAddressPlaceholder = "NANTTY_COMPANY_ADDRESS";
 
 export const defaultMailboxDomain = "nantty.com";
 // Keep the currently authenticated outbound domain until a Nantty sending provider and its SPF/DKIM records are configured.
@@ -45,6 +45,22 @@ export const defaultEmailBrand: EmailBrandConfig = {
 
 export type EmailBrandEnvironment = Readonly<Record<string, string | undefined>>;
 
+const legacyEnvironmentNames = {
+  mailboxDomain: "ZUDOMART_MAIL_DOMAIN",
+  sendingDomain: "ZUDOMART_MAIL_SENDING_DOMAIN",
+  assetBaseUrl: "ZUDOMART_EMAIL_ASSET_BASE_URL",
+  appStoreId: "ZUDOMART_APP_STORE_ID",
+  playPackage: "ZUDOMART_PLAY_PACKAGE",
+  companyLegalName: "ZUDOMART_COMPANY_LEGAL_NAME",
+  companyAddress: "ZUDOMART_COMPANY_ADDRESS",
+  webBaseUrl: "ZUDOMART_WEB_BASE_URL",
+  helpCenterUrl: "ZUDOMART_HELP_CENTER_URL",
+  supportEmails: "ZUDOMART_SUPPORT_EMAILS",
+  logoUrl: "ZUDOMART_EMAIL_LOGO_URL",
+  appStoreBadgeUrl: "ZUDOMART_EMAIL_APP_STORE_BADGE_URL",
+  playStoreBadgeUrl: "ZUDOMART_EMAIL_PLAY_STORE_BADGE_URL",
+} as const;
+
 function readDomain(value: string | undefined): string | undefined {
   const domain = value?.trim().toLowerCase().replace(/^@/, "");
   return domain && /^[a-z0-9.-]+\.[a-z]{2,}$/.test(domain) ? domain : undefined;
@@ -56,25 +72,25 @@ function readBadgeUrl(value: string | undefined, fallback: string | null): strin
 }
 
 export function readEmailBrandFromEnvironment(environment: EmailBrandEnvironment): EmailBrandConfig {
-  const pick = (name: string) => environment[name]?.trim() || undefined;
-  const mailboxDomain = readDomain(pick("ZUDOMART_MAIL_DOMAIN")) ?? defaultEmailBrand.mailboxDomain;
-  const sendingDomain = readDomain(pick("ZUDOMART_MAIL_SENDING_DOMAIN")) ?? (mailboxDomain === defaultMailboxDomain ? defaultSendingDomain : `mail.${mailboxDomain}`);
-  const assetBaseUrl = pick("ZUDOMART_EMAIL_ASSET_BASE_URL");
+  const pick = (...names: string[]) => names.map((name) => environment[name]?.trim()).find(Boolean) || undefined;
+  const mailboxDomain = readDomain(pick("NANTTY_MAIL_DOMAIN", legacyEnvironmentNames.mailboxDomain)) ?? defaultEmailBrand.mailboxDomain;
+  const sendingDomain = readDomain(pick("NANTTY_MAIL_SENDING_DOMAIN", legacyEnvironmentNames.sendingDomain)) ?? (mailboxDomain === defaultMailboxDomain ? defaultSendingDomain : `mail.${mailboxDomain}`);
+  const assetBaseUrl = pick("NANTTY_EMAIL_ASSET_BASE_URL", legacyEnvironmentNames.assetBaseUrl);
   const badges = assetBaseUrl ? buildStoreBadgeUrls(assetBaseUrl) : { appStoreBadgeUrl: defaultEmailBrand.appStoreBadgeUrl, playStoreBadgeUrl: defaultEmailBrand.playStoreBadgeUrl };
-  const appStoreId = pick("ZUDOMART_APP_STORE_ID")?.replace(/^id/i, "");
-  const playPackage = pick("ZUDOMART_PLAY_PACKAGE");
+  const appStoreId = pick("NANTTY_APP_STORE_ID", legacyEnvironmentNames.appStoreId)?.replace(/^id/i, "");
+  const playPackage = pick("NANTTY_PLAY_PACKAGE", legacyEnvironmentNames.playPackage);
   return {
     ...defaultEmailBrand,
-    companyLegalName: pick("ZUDOMART_COMPANY_LEGAL_NAME") ?? defaultEmailBrand.companyLegalName,
-    companyAddress: pick("ZUDOMART_COMPANY_ADDRESS") ?? defaultEmailBrand.companyAddress,
-    webBaseUrl: pick("ZUDOMART_WEB_BASE_URL") ?? defaultEmailBrand.webBaseUrl,
-    helpCenterUrl: pick("ZUDOMART_HELP_CENTER_URL") ?? defaultEmailBrand.helpCenterUrl,
-    supportEmails: pick("ZUDOMART_SUPPORT_EMAILS")?.split(",").map((email) => email.trim()).filter(Boolean) ?? [`support@${mailboxDomain}`],
-    logoUrl: readBadgeUrl(pick("ZUDOMART_EMAIL_LOGO_URL"), assetBaseUrl ? buildEmailLogoUrl(assetBaseUrl) : defaultEmailBrand.logoUrl),
+    companyLegalName: pick("NANTTY_COMPANY_LEGAL_NAME", legacyEnvironmentNames.companyLegalName) ?? defaultEmailBrand.companyLegalName,
+    companyAddress: pick("NANTTY_COMPANY_ADDRESS", legacyEnvironmentNames.companyAddress) ?? defaultEmailBrand.companyAddress,
+    webBaseUrl: pick("NANTTY_WEB_BASE_URL", legacyEnvironmentNames.webBaseUrl) ?? defaultEmailBrand.webBaseUrl,
+    helpCenterUrl: pick("NANTTY_HELP_CENTER_URL", legacyEnvironmentNames.helpCenterUrl) ?? defaultEmailBrand.helpCenterUrl,
+    supportEmails: pick("NANTTY_SUPPORT_EMAILS", legacyEnvironmentNames.supportEmails)?.split(",").map((email) => email.trim()).filter(Boolean) ?? [`support@${mailboxDomain}`],
+    logoUrl: readBadgeUrl(pick("NANTTY_EMAIL_LOGO_URL", legacyEnvironmentNames.logoUrl), assetBaseUrl ? buildEmailLogoUrl(assetBaseUrl) : defaultEmailBrand.logoUrl),
     appStoreUrl: appStoreId && /^\d{6,12}$/.test(appStoreId) ? `https://apps.apple.com/app/id${appStoreId}` : defaultEmailBrand.appStoreUrl,
     playStoreUrl: playPackage ? `https://play.google.com/store/apps/details?id=${encodeURIComponent(playPackage)}` : defaultEmailBrand.playStoreUrl,
-    appStoreBadgeUrl: readBadgeUrl(pick("ZUDOMART_EMAIL_APP_STORE_BADGE_URL"), badges.appStoreBadgeUrl),
-    playStoreBadgeUrl: readBadgeUrl(pick("ZUDOMART_EMAIL_PLAY_STORE_BADGE_URL"), badges.playStoreBadgeUrl),
+    appStoreBadgeUrl: readBadgeUrl(pick("NANTTY_EMAIL_APP_STORE_BADGE_URL", legacyEnvironmentNames.appStoreBadgeUrl), badges.appStoreBadgeUrl),
+    playStoreBadgeUrl: readBadgeUrl(pick("NANTTY_EMAIL_PLAY_STORE_BADGE_URL", legacyEnvironmentNames.playStoreBadgeUrl), badges.playStoreBadgeUrl),
     mailboxDomain,
     sendingDomain,
   };

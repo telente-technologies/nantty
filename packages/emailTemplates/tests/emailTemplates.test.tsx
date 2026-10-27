@@ -25,14 +25,14 @@ describe.each(emailTemplateKeys)("%s", (key) => {
       expect(rendered.subject.length).toBeGreaterThan(5);
       expect(rendered.html).toContain("<!DOCTYPE html");
       expect(rendered.html).toContain('name="color-scheme"');
-      expect(rendered.html).toContain("ZUDOMART_COMPANY_LEGAL_NAME");
-      expect(rendered.html).toContain("ZUDOMART_COMPANY_ADDRESS");
+      expect(rendered.html).toContain("NANTTY_COMPANY_LEGAL_NAME");
+      expect(rendered.html).toContain("NANTTY_COMPANY_ADDRESS");
       expect(rendered.html).toContain("support@nantty.com");
       expect(rendered.html).not.toContain("icloud.com");
       expect(rendered.html).toContain('alt="Download on the App Store"');
       expect(rendered.html).toContain('alt="Get it on Google Play"');
       expect(rendered.html).not.toContain("<script");
-      expect(rendered.text).toContain("ZUDOMART_COMPANY_ADDRESS");
+      expect(rendered.text).toContain("NANTTY_COMPANY_ADDRESS");
     }
   });
 });
@@ -99,21 +99,27 @@ describe("zudoversary", () => {
 describe("senders and brand", () => {
   it("sends receipts from receipts@mail and replies to billing", async () => {
     const rendered = await renderEmailSample("paymentReceipt");
-    expect(rendered.sender).toEqual({ from: "Nantty Receipts <receipts@mail.zudomart.com>", replyTo: "billing@nantty.com" });
+    expect(rendered.sender).toEqual({ from: "Nantty Receipts <receipts@mail.nantty.com>", replyTo: "billing@nantty.com" });
   });
 
   it("sends security mail from noreply@mail with replies to support", async () => {
     const rendered = await renderEmailSample("emailOtp");
-    expect(rendered.sender).toEqual({ from: "Nantty <noreply@mail.zudomart.com>", replyTo: "support@nantty.com" });
+    expect(rendered.sender).toEqual({ from: "Nantty <noreply@mail.nantty.com>", replyTo: "support@nantty.com" });
   });
 
   it("derives addresses and hosted badges from the environment", () => {
-    const brand = readEmailBrandFromEnvironment({ ZUDOMART_MAIL_DOMAIN: "example.ng", ZUDOMART_EMAIL_ASSET_BASE_URL: "https://cdn.example.ng/e/", ZUDOMART_APP_STORE_ID: "id123456789" });
+    const brand = readEmailBrandFromEnvironment({ NANTTY_MAIL_DOMAIN: "example.ng", NANTTY_EMAIL_ASSET_BASE_URL: "https://cdn.example.ng/e/", NANTTY_APP_STORE_ID: "id123456789" });
     expect(brand.supportEmails).toEqual(["support@example.ng"]);
     expect(brand.sendingDomain).toBe("mail.example.ng");
     expect(brand.appStoreBadgeUrl).toBe("https://cdn.example.ng/e/storeBadges/app-store-badge-black@2x.png");
     expect(brand.appStoreUrl).toBe("https://apps.apple.com/app/id123456789");
-    expect(readEmailBrandFromEnvironment({ ZUDOMART_EMAIL_PLAY_STORE_BADGE_URL: "none" }).playStoreBadgeUrl).toBeNull();
+    expect(readEmailBrandFromEnvironment({ NANTTY_EMAIL_PLAY_STORE_BADGE_URL: "none" }).playStoreBadgeUrl).toBeNull();
+  });
+
+  it("keeps the legacy email environment variables as fallbacks during the migration", () => {
+    const brand = readEmailBrandFromEnvironment({ ZUDOMART_MAIL_DOMAIN: "legacy.example.ng" });
+    expect(brand.supportEmails).toEqual(["support@legacy.example.ng"]);
+    expect(brand.sendingDomain).toBe("mail.legacy.example.ng");
   });
 
   it("falls back to text store buttons when badge images are off", async () => {
