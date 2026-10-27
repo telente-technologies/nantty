@@ -46,19 +46,19 @@ export const defaultEmailBrand: EmailBrandConfig = {
 export type EmailBrandEnvironment = Readonly<Record<string, string | undefined>>;
 
 const legacyEnvironmentNames = {
-  mailboxDomain: "ZUDOMART_MAIL_DOMAIN",
-  sendingDomain: "ZUDOMART_MAIL_SENDING_DOMAIN",
-  assetBaseUrl: "ZUDOMART_EMAIL_ASSET_BASE_URL",
-  appStoreId: "ZUDOMART_APP_STORE_ID",
-  playPackage: "ZUDOMART_PLAY_PACKAGE",
-  companyLegalName: "ZUDOMART_COMPANY_LEGAL_NAME",
-  companyAddress: "ZUDOMART_COMPANY_ADDRESS",
-  webBaseUrl: "ZUDOMART_WEB_BASE_URL",
-  helpCenterUrl: "ZUDOMART_HELP_CENTER_URL",
-  supportEmails: "ZUDOMART_SUPPORT_EMAILS",
-  logoUrl: "ZUDOMART_EMAIL_LOGO_URL",
-  appStoreBadgeUrl: "ZUDOMART_EMAIL_APP_STORE_BADGE_URL",
-  playStoreBadgeUrl: "ZUDOMART_EMAIL_PLAY_STORE_BADGE_URL",
+  mailboxDomain: "NANTTY_MAIL_DOMAIN",
+  sendingDomain: "NANTTY_MAIL_SENDING_DOMAIN",
+  assetBaseUrl: "NANTTY_EMAIL_ASSET_BASE_URL",
+  appStoreId: "NANTTY_APP_STORE_ID",
+  playPackage: "NANTTY_PLAY_PACKAGE",
+  companyLegalName: "NANTTY_COMPANY_LEGAL_NAME",
+  companyAddress: "NANTTY_COMPANY_ADDRESS",
+  webBaseUrl: "NANTTY_WEB_BASE_URL",
+  helpCenterUrl: "NANTTY_HELP_CENTER_URL",
+  supportEmails: "NANTTY_SUPPORT_EMAILS",
+  logoUrl: "NANTTY_EMAIL_LOGO_URL",
+  appStoreBadgeUrl: "NANTTY_EMAIL_APP_STORE_BADGE_URL",
+  playStoreBadgeUrl: "NANTTY_EMAIL_PLAY_STORE_BADGE_URL",
 } as const;
 
 function readDomain(value: string | undefined): string | undefined {
