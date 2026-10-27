@@ -128,6 +128,7 @@ export function SiteHeaderWithFloatingNavigation() {
               </li>
             ))}
           </ul>
+          <ThemeSwitcher label="Appearance" showLabel className={styles.mobileThemeSwitcher} />
         </nav>
         <Link href="/#download" className={styles.mobileDownloadButton} onClick={() => setIsMobileMenuOpen(false)}>
           Get the app

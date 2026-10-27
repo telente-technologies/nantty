@@ -67,7 +67,7 @@ export function SiteFooterWithGiantWordmark() {
         </div>
         <nav aria-label="Footer" className={styles.linkGroups}>
           {footerLinkGroups.map((linkGroup) => (
-            <div key={linkGroup.heading}>
+            <div key={linkGroup.heading} className={linkGroup.heading === "Company" ? styles.companyGroup : undefined}>
               <h2 className={styles.groupHeading}>{linkGroup.heading}</h2>
               <ul className={styles.linkList}>
                 {linkGroup.links.map((footerLink) => (

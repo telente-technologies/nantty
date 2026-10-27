@@ -20,6 +20,24 @@
   transition: box-shadow 200ms ease, background-color 200ms ease;
 }
 
+:global(:root[data-theme="dark"]) .pill {
+  background: rgb(39 41 48 / 0.96);
+  box-shadow: inset 0 0 0 1px #41444d, 0 12px 28px -18px rgb(0 0 0 / 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .pill,
+  :global(:root:not([data-theme="light"])) .scrolled .pill {
+    background: rgb(39 41 48 / 0.96);
+    box-shadow: inset 0 0 0 1px #41444d, 0 12px 28px -18px rgb(0 0 0 / 0.6);
+  }
+}
+
+:global(:root[data-theme="dark"]) .scrolled .pill {
+  background: rgb(39 41 48 / 0.96);
+  box-shadow: inset 0 0 0 1px #41444d, 0 12px 28px -18px rgb(0 0 0 / 0.6);
+}
+
 .scrolled .pill {
   background: var(--surface-glass-strong);
   box-shadow: inset 0 0 0 1px var(--line-hairline), var(--shadow-float);
@@ -49,6 +67,20 @@
   transition: background-color 160ms ease, color 160ms ease;
 }
 
+:global(:root[data-theme="dark"]) .navigationLink,
+:global(:root[data-theme="dark"]) .navigationLink:hover,
+:global(:root[data-theme="dark"]) .navigationLink[aria-current="page"] {
+  color: #e2e4e9;
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .navigationLink,
+  :global(:root:not([data-theme="light"])) .navigationLink:hover,
+  :global(:root:not([data-theme="light"])) .navigationLink[aria-current="page"] {
+    color: #e2e4e9;
+  }
+}
+
 .navigationLink:hover,
 .navigationLink[aria-current="page"] {
   background: var(--surface-app);
@@ -75,6 +107,14 @@
 .themeSwitcher {
   flex: none;
   margin-left: auto;
+}
+
+@media (max-width: 600px) {
+  /* The compact three-icon control can be clipped on narrow phones; the full
+     labeled control remains available in the mobile menu under Appearance. */
+  .header .themeSwitcher {
+    display: none;
+  }
 }
 
 .menuToggleButton {
@@ -185,6 +225,21 @@
 
 .mobileBusinessLink:hover {
   color: var(--surface-sunshine);
+}
+
+.mobileThemeSwitcher {
+  --color-sunken: rgb(255 255 255 / 0.1);
+  --color-border: rgb(255 255 255 / 0.28);
+  --color-elevated: var(--surface-sunshine);
+  --color-text: var(--ink-on-sunshine);
+  --color-text-muted: var(--ink-on-night-muted);
+  --color-focus: var(--surface-sunshine);
+  --shadow-card: none;
+  margin-top: var(--space-7);
+}
+
+.mobileThemeSwitcher legend {
+  color: var(--ink-on-night-muted);
 }
 
 .mobileDownloadButton {

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { NanttyWordmark } from "@nantty/web-kit";
+import { NanttyWordmark, ThemeAwareNanttyWordmark } from "@nantty/web-kit";
 
 import styles from "./nanttyWordmark.module.css";
 
@@ -12,7 +12,7 @@ interface WordmarkProps {
 export function NanttyWordmarkHomeLink({ tone = "brand", collapseOnSmallScreens = false }: WordmarkProps) {
   return (
     <Link href="/" className={styles.wordmarkLink} aria-label="Nantty home">
-      <NanttyWordmark tone={tone === "light" ? "onDark" : "onLight"} height={24} withSymbol collapseToMarkOnSmallScreens={collapseOnSmallScreens} />
+      {tone === "light" ? <NanttyWordmark tone="onDark" height={30} withSymbol /> : <ThemeAwareNanttyWordmark height={30} collapseToMarkOnSmallScreens={collapseOnSmallScreens} />}
     </Link>
   );
 }

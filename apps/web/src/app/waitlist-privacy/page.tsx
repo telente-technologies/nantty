@@ -1,12 +1,8 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Waitlist privacy notice — Nantty",
-  description: "How Nantty plans to handle waitlist information.",
-  robots: { index: false, follow: false },
-  alternates: { canonical: "https://nantty.com/waitlist-privacy/" },
-};
+import { createPublicPageMetadata } from "@/lib/pageMetadata.util";
+
+export const metadata = createPublicPageMetadata({ title: "Waitlist privacy notice", description: "How Nantty plans to handle waitlist information.", path: "/waitlist-privacy", noIndex: true });
 
 export default function WaitlistPrivacyPage() {
   return <article style={{ maxWidth: 760, margin: "64px auto", padding: "24px", lineHeight: 1.7 }}>

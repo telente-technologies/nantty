@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-
 import { AppDownloadCallToActionPanel } from "@/components/sections/appDownloadCallToAction";
 import { FrequentlyAskedQuestionsAccordion } from "@/components/sections/frequentlyAskedQuestions";
 import { SellerDashboardSection } from "@/components/sellers/sellerDashboardSection";
@@ -9,13 +7,9 @@ import { SellersPageHeroSection } from "@/components/sellers/sellersHeroSection"
 import { SellerOnboardingStepsSection } from "@/components/sellers/sellerStepsSection";
 import { sellerQuestions } from "@/content/sellerQuestions.content";
 import { businessAppLinks } from "@/lib/siteConfig.config";
+import { createPublicPageMetadata } from "@/lib/pageMetadata.util";
 
-export const metadata: Metadata = {
-  title: "Sell on Nantty",
-  description: "Open a Nantty store, sell through posts, clips and live streams, manage orders from the seller dashboard, and get paid to your wallet when buyers confirm delivery.",
-  alternates: { canonical: "/sellers" },
-  openGraph: { title: "Sell on Nantty", url: "/sellers" },
-};
+export const metadata = createPublicPageMetadata({ title: "Sell on Nantty", description: "Open a Nantty store, sell through posts, clips and live streams, manage orders from the seller dashboard, and get paid to your wallet when buyers confirm delivery.", path: "/sellers" });
 
 export default function SellersPage() {
   return (

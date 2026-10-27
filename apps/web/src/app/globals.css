@@ -118,6 +118,37 @@
   }
 }
 
+/* Keep the public landing experience comfortably charcoal rather than near-black. */
+:root[data-theme="dark"] {
+  --color-bg: #202228;
+  --color-surface: #25272e;
+  --color-elevated: #2d3038;
+  --color-sunken: #292c33;
+  --color-text: #f1f2f4;
+  --color-text-muted: #bec1c8;
+  --color-text-subtle: #a9adb5;
+  --color-border: #3d414a;
+  --color-border-strong: #50545e;
+  --color-surface-hover: #31343c;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #202228;
+    --color-surface: #25272e;
+    --color-elevated: #2d3038;
+    --color-sunken: #292c33;
+    --color-text: #f1f2f4;
+    --color-text-muted: #bec1c8;
+    --color-text-subtle: #a9adb5;
+    --color-border: #3d414a;
+    --color-border-strong: #50545e;
+    --color-surface-hover: #31343c;
+    color-scheme: dark;
+  }
+}
+
 .lightIsland {
   --color-surface: #ffffff;
   --color-elevated: #ffffff;

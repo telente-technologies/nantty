@@ -1,18 +1,12 @@
-import type { Metadata } from "next";
-
 import { ActionLinkStyledAsButton } from "@/components/ui/actionLink";
 import { FigmaIconTintedWithCurrentColor, type FigmaIconName } from "@/components/ui/figmaIcon";
 import { PageHeaderWithTitleAndLede } from "@/components/ui/pageHeader";
 import { PhoneFrameWithAppScreen } from "@/components/ui/phoneFrame";
+import { createPublicPageMetadata } from "@/lib/pageMetadata.util";
 
 import styles from "./about.module.css";
 
-export const metadata: Metadata = {
-  title: "About",
-  description: "Why we are building Nantty: Social Commerce in Nigeria with real sellers and escrow-protected payments.",
-  alternates: { canonical: "/about" },
-  openGraph: { title: "About Nantty", url: "/about" },
-};
+export const metadata = createPublicPageMetadata({ title: "About", description: "Why we are building Nantty: Social Commerce in Nigeria with real sellers and escrow-protected payments.", path: "/about" });
 
 const companyPrinciples: ReadonlyArray<{ readonly icon: FigmaIconName; readonly title: string; readonly description: string }> = [
   { icon: "sealCheck20", title: "Real sellers only", description: "Every store is reviewed before it opens, and verified sellers carry a badge buyers can check." },

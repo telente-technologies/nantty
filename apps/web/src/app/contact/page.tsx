@@ -1,19 +1,13 @@
-import type { Metadata } from "next";
-
 import { FigmaIconTintedWithCurrentColor, type FigmaIconName } from "@/components/ui/figmaIcon";
 import { PageHeaderWithTitleAndLede } from "@/components/ui/pageHeader";
 import { buildMailtoHref } from "@nantty/web-kit";
 
 import { emailAddresses, siteConfig } from "@/lib/siteConfig.config";
+import { createPublicPageMetadata } from "@/lib/pageMetadata.util";
 
 import styles from "./contact.module.css";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: "Contact the Nantty team about shopping, selling, press or privacy.",
-  alternates: { canonical: "/contact" },
-  openGraph: { title: "Contact Nantty", url: "/contact" },
-};
+export const metadata = createPublicPageMetadata({ title: "Contact", description: "Contact the Nantty team about shopping, selling, press or privacy.", path: "/contact" });
 
 const contactChannels: ReadonlyArray<{ readonly icon: FigmaIconName; readonly title: string; readonly description: string; readonly email: string }> = [
   { icon: "headset24", title: "Help with an order", description: "Questions about payments, escrow, delivery or a dispute.", email: emailAddresses.support },

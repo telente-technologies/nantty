@@ -7,7 +7,7 @@ import styles from "./nanttyLanding.module.css";
 
 export function NanttyPrelaunchSection() {
   return (
-    <>
+    <div className={styles.nanttyPage}>
       <section className={styles.milestonesSection} aria-labelledby="nantty-milestones-heading">
         <div className={styles.pageContainer}>
           <div className={styles.sectionHeading}>
@@ -38,6 +38,6 @@ export function NanttyPrelaunchSection() {
           <NanttyWaitlistForm />
         </div>
       </section>
-    </>
+    </div>
   );
 }
