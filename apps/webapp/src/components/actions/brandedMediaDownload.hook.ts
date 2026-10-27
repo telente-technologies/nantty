@@ -13,7 +13,7 @@ export interface BrandedDownloadProgress {
 }
 
 async function saveOrShareReadyFile(url: string, fileName: string | undefined, mediaType: DownloadTarget["mediaType"]): Promise<"savedToLibrary" | "sharedInstead"> {
-  const resolvedName = fileName ?? `zudomart-download.${mediaType === "video" ? "mp4" : "jpg"}`;
+  const resolvedName = fileName ?? `nantty-download.${mediaType === "video" ? "mp4" : "jpg"}`;
   try {
     const response = await fetch(url);
     const blob = await response.blob();
