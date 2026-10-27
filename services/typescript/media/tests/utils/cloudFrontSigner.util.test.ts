@@ -31,18 +31,18 @@ describe("media url signer", () => {
     const base = testConfig();
     const config = { ...base, storage: { ...base.storage, endpoint: "http://localhost:18333", publicEndpoint: "http://localhost:18333", forcePathStyle: true }, cdn: { ...base.cdn, baseUrl: undefined } };
     const signer = createMediaUrlSigner({ config, storage: new FakeObjectStorage(), clock });
-    expect(signer.publicUrl("m/1/w640.avif")).toBe("http://localhost:18333/zudomart-media-public/m/1/w640.avif");
-    expect(await signer.privateUrl("zudomart-media-private", "p/1/original.pdf", 60)).toBe("https://signed.test/zudomart-media-private/p/1/original.pdf?expires=60");
+    expect(signer.publicUrl("m/1/w640.avif")).toBe("http://localhost:18333/nantty-media-public/m/1/w640.avif");
+    expect(await signer.privateUrl("nantty-media-private", "p/1/original.pdf", 60)).toBe("https://signed.test/nantty-media-private/p/1/original.pdf?expires=60");
   });
 
   it("uses the CDN base for public urls and CloudFront signing for private delivery when configured", async () => {
     const base = testConfig();
-    const config = { ...base, cdn: { ...base.cdn, baseUrl: "https://cdn.zudomart.test/", privateBaseUrl: "https://private.zudomart.test", keyPairId: "K9", privateKeyPem: privateKey } };
+    const config = { ...base, cdn: { ...base.cdn, baseUrl: "https://cdn.nantty.test/", privateBaseUrl: "https://private.nantty.test", keyPairId: "K9", privateKeyPem: privateKey } };
     const signer = createMediaUrlSigner({ config, storage: new FakeObjectStorage(), clock });
-    expect(signer.publicUrl("m/1/poster.jpg")).toBe("https://cdn.zudomart.test/m/1/poster.jpg");
-    const viaCdn = new URL(await signer.privateUrl("zudomart-media-private", "p/1/w640.jpg", 300, { allowCdn: true }));
-    expect(viaCdn.origin).toBe("https://private.zudomart.test");
+    expect(signer.publicUrl("m/1/poster.jpg")).toBe("https://cdn.nantty.test/m/1/poster.jpg");
+    const viaCdn = new URL(await signer.privateUrl("nantty-media-private", "p/1/w640.jpg", 300, { allowCdn: true }));
+    expect(viaCdn.origin).toBe("https://private.nantty.test");
     expect(viaCdn.searchParams.get("Expires")).toBe(String(clock.now().getTime() / 1000 + 300));
-    expect(await signer.privateUrl("zudomart-media-private", "p/1/original.pdf", 60)).toContain("https://signed.test/");
+    expect(await signer.privateUrl("nantty-media-private", "p/1/original.pdf", 60)).toContain("https://signed.test/");
   });
 });

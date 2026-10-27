@@ -9,7 +9,7 @@ export const imageMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/h
 export const videoMimeTypes = ["video/mp4", "video/quicktime", "video/webm"] as const;
 export const audioMimeTypes = ["audio/mpeg", "audio/mp4", "audio/x-m4a", "audio/aac", "audio/ogg", "audio/webm", "audio/wav", "audio/x-wav"] as const;
 export const documentMimeTypes = ["application/pdf"] as const;
-export const encryptedChatMimeType = "application/vnd.zudomart.encrypted";
+export const encryptedChatMimeType = "application/vnd.nantty.encrypted";
 
 export interface PurposeRule {
   readonly kind: MediaKindName;

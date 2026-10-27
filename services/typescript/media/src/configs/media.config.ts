@@ -80,9 +80,9 @@ export function loadMediaConfigFromEnvironment(): MediaConfig {
       secretAccessKey: readOptional("S3_SECRET_ACCESS_KEY"),
       forcePathStyle: readOrDefault("S3_FORCE_PATH_STYLE", "false") === "true",
       createBuckets: readOrDefault("S3_CREATE_BUCKETS", "false") === "true",
-      quarantineBucket: readOrDefault("MEDIA_QUARANTINE_BUCKET", "zudomart-media-quarantine"),
-      publicBucket: readOrDefault("MEDIA_PUBLIC_BUCKET", "zudomart-media-public"),
-      privateBucket: readOrDefault("MEDIA_PRIVATE_BUCKET", "zudomart-media-private"),
+      quarantineBucket: readOrDefault("MEDIA_QUARANTINE_BUCKET", "nantty-media-quarantine"),
+      publicBucket: readOrDefault("MEDIA_PUBLIC_BUCKET", "nantty-media-public"),
+      privateBucket: readOrDefault("MEDIA_PRIVATE_BUCKET", "nantty-media-private"),
       privateKmsKeyId: readOptional("MEDIA_PRIVATE_KMS_KEY_ID"),
     },
     cdn: {

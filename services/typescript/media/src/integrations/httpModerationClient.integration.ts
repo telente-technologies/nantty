@@ -9,7 +9,7 @@ export function signIntelligenceRequest(sharedSecret: string, path: string, body
   const timestamp = nowSeconds.toString();
   const nonce = randomBytes(18).toString("base64url");
   const canonical = ["v1", "POST", path, timestamp, nonce, createHash("sha256").update(body, "utf8").digest("hex")].join("\n");
-  return { "x-zudo-timestamp": timestamp, "x-zudo-nonce": nonce, "x-zudo-signature": `v1=${createHmac("sha256", sharedSecret).update(canonical, "utf8").digest("hex")}` };
+  return { "x-nantty-timestamp": timestamp, "x-nantty-nonce": nonce, "x-nantty-signature": `v1=${createHmac("sha256", sharedSecret).update(canonical, "utf8").digest("hex")}` };
 }
 
 export function createHttpModerationClient(options: { readonly baseUrl: string; readonly token: string; readonly timeoutMs: number; readonly fetchFn?: typeof fetch }): ModerationClient {

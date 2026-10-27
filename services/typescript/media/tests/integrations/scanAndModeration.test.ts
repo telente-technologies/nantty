@@ -43,8 +43,8 @@ describe("python moderation client", () => {
     expect(result).toEqual({ score: 1, topCategory: "violence" });
     expect(calls[0]?.url).toBe("http://intelligence.test/v1/moderation/classify");
     const headers = calls[0]?.init.headers as Record<string, string>;
-    const canonical = ["v1", "POST", "/v1/moderation/classify", headers["x-zudo-timestamp"], headers["x-zudo-nonce"], createHash("sha256").update(calls[0]?.init.body as string).digest("hex")].join("\n");
-    expect(headers["x-zudo-signature"]).toBe(`v1=${createHmac("sha256", "secret").update(canonical).digest("hex")}`);
+    const canonical = ["v1", "POST", "/v1/moderation/classify", headers["x-nantty-timestamp"], headers["x-nantty-nonce"], createHash("sha256").update(calls[0]?.init.body as string).digest("hex")].join("\n");
+    expect(headers["x-nantty-signature"]).toBe(`v1=${createHmac("sha256", "secret").update(canonical).digest("hex")}`);
     expect(headers["x-internal-token"]).toBeUndefined();
     const sent = JSON.parse(calls[0]?.init.body as string) as { contentId: string; media: { frames: { mimeType: string }[] } };
     expect(sent.contentId).toBe("m1");

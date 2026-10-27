@@ -1,4 +1,4 @@
-export const accountIdHeaderName = "x-zudomart-account-id";
+export const accountIdHeaderName = "x-nantty-account-id";
 export const internalTokenHeaderName = "x-internal-token";
 export const mediaJobQueueName = "jobs-media";
 export const processMediaJobType = "media.process";

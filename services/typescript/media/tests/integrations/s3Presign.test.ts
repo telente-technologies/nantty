@@ -15,7 +15,7 @@ describe("s3 presigned uploads", () => {
       secretAccessKey: "test-secret-key",
     });
 
-    const presigned = await storage.presignPut("zudomart-media-quarantine", "owner/media/original", "image/png", 300, 12_345);
+    const presigned = await storage.presignPut("nantty-media-quarantine", "owner/media/original", "image/png", 300, 12_345);
 
     expect(presigned.headers).toEqual({ "content-type": "image/png" });
     const url = new URL(presigned.url);

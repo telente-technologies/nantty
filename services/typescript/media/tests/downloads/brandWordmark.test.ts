@@ -22,7 +22,7 @@ describe("brand wordmark and symbol assets", () => {
 
   it("draws no typed wordmark text in the badge", () => {
     const svg = buildBrandWatermarkSvg(computeWatermarkBox(1280, 720, "ada", 0.075), "ada", 0.78);
-    expect(svg).not.toContain(">zudomart<");
+    expect(svg).not.toContain(">nantty<");
     expect(svg).toContain(symbolPath);
   });
 

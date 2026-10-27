@@ -9,7 +9,7 @@ afterEach(() => {
 describe("media production configuration", () => {
   it("rejects an empty or placeholder internal token", () => {
     vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("DATABASE_URL", "postgres://svc_media:secret@db/zudomart");
+    vi.stubEnv("DATABASE_URL", "postgres://svc_media:secret@db/nantty");
     vi.stubEnv("GATEWAY_IDENTITY_SECRET", "g".repeat(48));
     vi.stubEnv("MEDIA_INTERNAL_TOKEN", "");
     expect(() => loadMediaConfigFromEnvironment()).toThrow(/MEDIA_INTERNAL_TOKEN/);
@@ -20,7 +20,7 @@ describe("media production configuration", () => {
 
   it("accepts a long random internal token", () => {
     vi.stubEnv("NODE_ENV", "production");
-    vi.stubEnv("DATABASE_URL", "postgres://svc_media:secret@db/zudomart");
+    vi.stubEnv("DATABASE_URL", "postgres://svc_media:secret@db/nantty");
     vi.stubEnv("GATEWAY_IDENTITY_SECRET", "g".repeat(48));
     vi.stubEnv("MEDIA_INTERNAL_TOKEN", "a".repeat(48));
     expect(loadMediaConfigFromEnvironment().internalToken).toHaveLength(48);
