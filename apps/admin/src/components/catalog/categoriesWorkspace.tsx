@@ -10,8 +10,8 @@ import { PageHeader } from "@/components/ui/pageHeader";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
-import { zudoIconNames, type ZudoIconName } from "@/constants/zudoIconNames.constant";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
+import { nanttyIconNames, type NanttyIconName } from "@/constants/nanttyIconNames.constant";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { readErrorMessageForDisplay } from "@/services/adminApiClient.service";
 import { fetchCatalogCategories, moveCatalogCategory } from "@/services/catalogApi.service";
@@ -24,8 +24,8 @@ import { CategoryDetailPanel } from "./categoryDetailPanel";
 import { CategoryEditorDialog } from "./categoryEditorDialog";
 import { filterCategoryTreeRowsBySearch, flattenCategoriesIntoTreeRows, type CategoryTreeRow } from "./categoryTreeRows.util";
 
-function isKnownZudoIconName(candidate: string | null): candidate is ZudoIconName {
-  return candidate !== null && (zudoIconNames as readonly string[]).includes(candidate);
+function isKnownNanttyIconName(candidate: string | null): candidate is NanttyIconName {
+  return candidate !== null && (nanttyIconNames as readonly string[]).includes(candidate);
 }
 
 export function CategoriesWorkspace() {
@@ -61,7 +61,7 @@ export function CategoriesWorkspace() {
       render: (row) => (
         <span className={row.depth === 0 ? styles.parentName : styles.childName}>
           {row.depth === 1 ? <span className={styles.branch} aria-hidden /> : null}
-          {isKnownZudoIconName(row.category.iconName) ? <ZudoIcon name={row.category.iconName} size={15} /> : null}
+          {isKnownNanttyIconName(row.category.iconName) ? <NanttyIcon name={row.category.iconName} size={15} /> : null}
           {row.category.name}
         </span>
       ),

@@ -49,7 +49,7 @@ function readFeatureFields(body: Record<string, unknown>, existing: MockMartHome
   if (!readCatalogMockStore().imageLibrary.some((option) => option.id === imageId)) failValidation("imageId", "Choose an image from the approved library.");
   const targetType = pick("targetType", () => readEnumValue(body, "targetType", targetTypes), existing?.targetType);
   const targetValue = pick("targetValue", () => readRequiredTrimmedString(body, "targetValue", 200), existing?.targetValue);
-  if (targetType === "URL" && !/^https:\/\/([a-z0-9-]+\.)*(?:nantty|zudomart)\.com(\/|$)/.test(targetValue)) failValidation("targetValue", "Links must be https:// addresses on Nantty.");
+  if (targetType === "URL" && !/^https:\/\/([a-z0-9-]+\.)*(?:nantty|nantty)\.com(\/|$)/.test(targetValue)) failValidation("targetValue", "Links must be https:// addresses on Nantty.");
   const countries = pick("countries", () => {
     const value = body.countries;
     if (!Array.isArray(value) || value.length === 0 || value.some((country) => typeof country !== "string" || !supportedCountries.includes(country))) failValidation("countries", "Choose at least one supported country.");

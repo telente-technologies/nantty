@@ -19,7 +19,7 @@ import type { ApplicationKind } from "@/types/applications.type";
 import { formatDateTime, formatMoneyForDisplay } from "@/utils/formatting.util";
 
 import styles from "./peopleWorkspace.module.css";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 
 interface ProgramApplicationPanelProps {
   readonly kind: ApplicationKind;
@@ -73,7 +73,7 @@ export function ProgramApplicationPanel({ kind, applicationId, onClose, onDecide
           <ul className={styles.checkList}>
             {application.eligibility.map((check) => (
               <li key={check.key} className={styles.check}>
-                <span className={check.isMet ? styles.checkPass : styles.checkFail} aria-label={check.isMet ? "Met" : "Not met"}><ZudoIcon name={check.isMet ? "check16" : "cancel20"} size={14} /></span>
+                <span className={check.isMet ? styles.checkPass : styles.checkFail} aria-label={check.isMet ? "Met" : "Not met"}><NanttyIcon name={check.isMet ? "check16" : "cancel20"} size={14} /></span>
                 <span>
                   <strong>{check.label}</strong>
                   <br />

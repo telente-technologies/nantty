@@ -34,5 +34,5 @@ export function readClientIpAddress(request: NextRequest): string {
 }
 
 export function readClientUserAgent(request: NextRequest): string {
-  return request.headers.get("user-agent")?.slice(0, 200) ?? "zudomart-admin";
+  return request.headers.get("user-agent")?.slice(0, 200) ?? "nantty-admin";
 }

@@ -27,7 +27,7 @@ export interface MockDatabase {
   readonly areaStores: Map<string, unknown>;
 }
 
-const globalKey = Symbol.for("zudomart.admin.mockDatabase");
+const globalKey = Symbol.for("nantty.admin.mockDatabase");
 
 function createMockDatabase(): MockDatabase {
   const admins = buildDemoAdmins();

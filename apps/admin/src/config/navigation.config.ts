@@ -1,12 +1,12 @@
 import type { AdminPermission } from "@/constants/adminPermissions.constant";
-import type { ZudoIconName } from "@/constants/zudoIconNames.constant";
+import type { NanttyIconName } from "@/constants/nanttyIconNames.constant";
 
 export type PageRequirement = AdminPermission | readonly AdminPermission[] | "SUPERADMIN" | "ANY_ADMIN";
 
 export interface NavigationItem {
   readonly label: string;
   readonly href: string;
-  readonly icon: ZudoIconName;
+  readonly icon: NanttyIconName;
   readonly requirement: PageRequirement;
   readonly goShortcutKey?: string;
 }

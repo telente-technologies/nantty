@@ -1,10 +1,10 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-import type { ZudoIconName } from "@/constants/zudoIconNames.constant";
+import type { NanttyIconName } from "@/constants/nanttyIconNames.constant";
 
 import styles from "./button.module.css";
-import { ZudoIcon } from "./zudoIcon";
+import { NanttyIcon } from "./nanttyIcon";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "quietDanger";
 export type ButtonSize = "small" | "medium";
@@ -12,7 +12,7 @@ export type ButtonSize = "small" | "medium";
 interface SharedButtonProps {
   readonly variant?: ButtonVariant;
   readonly size?: ButtonSize;
-  readonly iconName?: ZudoIconName;
+  readonly iconName?: NanttyIconName;
   readonly children?: ReactNode;
 }
 
@@ -27,7 +27,7 @@ function buildButtonClassName(variant: ButtonVariant, size: ButtonSize, extraCla
 export function Button({ variant = "secondary", size = "medium", iconName, isBusy = false, children, className, disabled, type = "button", ...rest }: ButtonProps) {
   return (
     <button type={type} className={buildButtonClassName(variant, size, className)} disabled={disabled || isBusy} aria-busy={isBusy || undefined} {...rest}>
-      {isBusy ? <span className={styles.spinner} aria-hidden /> : iconName ? <ZudoIcon name={iconName} size={size === "small" ? 14 : 16} /> : null}
+      {isBusy ? <span className={styles.spinner} aria-hidden /> : iconName ? <NanttyIcon name={iconName} size={size === "small" ? 14 : 16} /> : null}
       {children ? <span>{children}</span> : null}
     </button>
   );
@@ -42,7 +42,7 @@ interface ButtonLinkProps extends SharedButtonProps {
 export function ButtonLink({ href, variant = "secondary", size = "medium", iconName, children, className, ariaLabel }: ButtonLinkProps) {
   return (
     <Link href={href} className={buildButtonClassName(variant, size, className)} aria-label={ariaLabel}>
-      {iconName ? <ZudoIcon name={iconName} size={size === "small" ? 14 : 16} /> : null}
+      {iconName ? <NanttyIcon name={iconName} size={size === "small" ? 14 : 16} /> : null}
       {children ? <span>{children}</span> : null}
     </Link>
   );

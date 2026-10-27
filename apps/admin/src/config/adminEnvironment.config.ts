@@ -1,7 +1,7 @@
 import { isAddressInAllowList, isValidAllowListEntry } from "@/utils/ipAllowList.util";
 
 const isProductionRuntime = process.env.NODE_ENV === "production";
-const developmentOnlySessionSecret = "zudomart-admin-development-only-secret-never-use-in-production";
+const developmentOnlySessionSecret = "nantty-admin-development-only-secret-never-use-in-production";
 
 export type AdminDeploymentEnvironment = "production" | "staging" | "development";
 

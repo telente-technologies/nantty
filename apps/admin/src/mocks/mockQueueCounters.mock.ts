@@ -5,7 +5,7 @@ export interface MockQueueCounter {
   readonly readCount: () => { count: number; oldestAt: string | null; breachingSla?: number };
 }
 
-const queueCountersKey = Symbol.for("zudomart.admin.mockQueueCounters");
+const queueCountersKey = Symbol.for("nantty.admin.mockQueueCounters");
 
 function readCounterList(): MockQueueCounter[] {
   const globalScope = globalThis as unknown as Record<symbol, MockQueueCounter[] | undefined>;

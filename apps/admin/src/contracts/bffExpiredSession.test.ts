@@ -46,7 +46,7 @@ function requestWithExpiredToken(): NextRequest {
   const sessionId = "session-under-test";
   const cookies: Record<string, string> = {
     [sessionCookieNames.session]: signPayloadIntoCookieValue({ sessionId, startedAtEpochSeconds: now() }, "admin-session", 3600),
-    [sessionCookieNames.sessionView]: signPayloadIntoCookieValue({ sessionId, admin: { id: "adm_1", email: "a@zudomart.com", name: "A", role: "superadmin", permissions: [] }, lastActivityAtEpochSeconds: now(), verifiedAtEpochSeconds: now() }, "admin-session-view", 900),
+    [sessionCookieNames.sessionView]: signPayloadIntoCookieValue({ sessionId, admin: { id: "adm_1", email: "a@nantty.com", name: "A", role: "superadmin", permissions: [] }, lastActivityAtEpochSeconds: now(), verifiedAtEpochSeconds: now() }, "admin-session-view", 900),
     [sessionCookieNames.accessToken]: expiredToken,
     [sessionCookieNames.refreshToken]: "refresh-token",
   };

@@ -5,7 +5,7 @@ import { NanttyWordmark } from "@nantty/web-kit";
 import { usePathname } from "next/navigation";
 
 import { useAdminSession } from "@/components/session/adminSessionProvider";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { navigationGroups } from "@/config/navigation.config";
 import { doesAdminMeetPageRequirement } from "@/utils/adminAccess.util";
 
@@ -37,7 +37,7 @@ export function SidebarNavigation({ isOpenOnSmallScreens, onNavigate }: { readon
                 return (
                   <li key={item.href}>
                     <Link href={item.href} className={isActive ? `${styles.link} ${styles.active}` : styles.link} aria-current={isActive ? "page" : undefined} onClick={onNavigate}>
-                      <ZudoIcon name={item.icon} size={16} />
+                      <NanttyIcon name={item.icon} size={16} />
                       <span className={styles.linkLabel}>{item.label}</span>
                       {item.goShortcutKey ? <span className={styles.shortcut} aria-hidden>g {item.goShortcutKey}</span> : null}
                     </Link>

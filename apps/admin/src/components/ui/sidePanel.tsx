@@ -3,7 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 
 import styles from "./sidePanel.module.css";
-import { ZudoIcon } from "./zudoIcon";
+import { NanttyIcon } from "./nanttyIcon";
 
 interface SidePanelProps {
   readonly isOpen: boolean;
@@ -43,7 +43,7 @@ export function SidePanel({ isOpen, title, subtitle, onClose, children, footer, 
             {subtitle ? <div className={styles.subtitle}>{subtitle}</div> : null}
           </div>
           <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close details (Esc)">
-            <ZudoIcon name="cancel20" size={16} />
+            <NanttyIcon name="cancel20" size={16} />
           </button>
         </header>
         <div className={styles.body}>{children}</div>

@@ -1,5 +1,5 @@
 import { StatusBadge } from "@/components/ui/statusBadge";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import type { ModeratedTargetPreview } from "@/types/moderation.type";
 import { formatDateTime, humanizeConstantName } from "@/utils/formatting.util";
 
@@ -25,7 +25,7 @@ export function ModeratedTargetPreviewCard({ target }: { readonly target: Modera
       ) : null}
       {target.soundTitle ? (
         <span className={styles.soundLine}>
-          <ZudoIcon name="speakerHigh24" size={14} />
+          <NanttyIcon name="speakerHigh24" size={14} />
           {target.soundTitle}
         </span>
       ) : null}

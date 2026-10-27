@@ -32,7 +32,7 @@ function buildOutgoingHeaders(call: BackendCall): Headers {
   if (call.contentType) headers.set("Content-Type", call.contentType);
   if (call.accessToken) headers.set("Authorization", `Bearer ${call.accessToken}`);
   headers.set("X-Request-Id", crypto.randomUUID());
-  headers.set("X-Client-App", "zudomart-admin");
+  headers.set("X-Client-App", "nantty-admin");
   for (const [headerName, headerValue] of Object.entries(call.forwardedHeaders ?? {})) headers.set(headerName, headerValue);
   return headers;
 }

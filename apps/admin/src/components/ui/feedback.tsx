@@ -3,14 +3,14 @@ import type { ReactNode } from "react";
 import { ErrorState, resolveCallerErrorCopy, type ErrorStateVariant } from "@nantty/web-kit";
 
 import styles from "./feedback.module.css";
-import type { ZudoIconName } from "@/constants/zudoIconNames.constant";
+import type { NanttyIconName } from "@/constants/nanttyIconNames.constant";
 
-import { ZudoIcon } from "./zudoIcon";
+import { NanttyIcon } from "./nanttyIcon";
 
 export function InlineError({ message }: { readonly message: string }) {
   return (
     <p className={styles.inlineError} role="alert">
-      <ZudoIcon name="warning20" size={14} />
+      <NanttyIcon name="warning20" size={14} />
       {message}
     </p>
   );
@@ -32,11 +32,11 @@ export function LoadingBlock({ label = "Loading…", lines = 4 }: { readonly lab
   );
 }
 
-export function EmptyState({ title, description, action, iconName = "squaresFour24" }: { readonly title: string; readonly description?: ReactNode; readonly action?: ReactNode; readonly iconName?: ZudoIconName }) {
+export function EmptyState({ title, description, action, iconName = "squaresFour24" }: { readonly title: string; readonly description?: ReactNode; readonly action?: ReactNode; readonly iconName?: NanttyIconName }) {
   return (
     <div className={styles.emptyState}>
       <span className={styles.emptyIcon} aria-hidden="true">
-        <ZudoIcon name={iconName} size={24} />
+        <NanttyIcon name={iconName} size={24} />
       </span>
       <p className={styles.emptyTitle}>{title}</p>
       {description ? <p className={styles.emptyDescription}>{description}</p> : null}

@@ -17,7 +17,7 @@ import { TicketConversation } from "./ticketConversation";
 import styles from "./ticketDetailWorkspace.module.css";
 import { TicketReplyBox } from "./ticketReplyBox";
 import { TicketAssignmentCard, TicketFactsCard, TicketRequesterCard, TicketStatusCard } from "./ticketSidebarCards";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 
 export function TicketDetailWorkspace({ ticketId }: { readonly ticketId: string }) {
   const { showToast } = useToast();

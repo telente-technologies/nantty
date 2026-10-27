@@ -10,7 +10,7 @@ import { useAdminPermissions, useAdminSession } from "@/components/session/admin
 import { Button } from "@/components/ui/button";
 import { KeyboardKey } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
-import { ZudoIcon } from "@/components/ui/zudoIcon";
+import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { readErrorMessageForDisplay, sendRequestToAdminConsoleServer } from "@/services/adminApiClient.service";
 
 import { globalSearchInputId } from "./keyboardShortcuts";
@@ -45,14 +45,14 @@ export function ConsoleTopBar({ onOpenNavigation }: { readonly onOpenNavigation:
   return (
     <header className={styles.topBar}>
       <button type="button" className={styles.menuButton} onClick={onOpenNavigation} aria-label="Open navigation">
-        <ZudoIcon name="squaresFour24" size={18} />
+        <NanttyIcon name="squaresFour24" size={18} />
       </button>
       <Link href="/" className={styles.compactBrand} aria-label="Nantty Admin start page">
         <NanttyLogoMark size={28} />
       </Link>
       {can("users:read") ? (
         <form className={styles.search} role="search" onSubmit={searchUsers}>
-          <ZudoIcon name="magnifyingGlass16" size={14} className={styles.searchIcon} />
+          <NanttyIcon name="magnifyingGlass16" size={14} className={styles.searchIcon} />
           <label htmlFor={globalSearchInputId} className="visuallyHidden">
             Search users by username, name or ID
           </label>

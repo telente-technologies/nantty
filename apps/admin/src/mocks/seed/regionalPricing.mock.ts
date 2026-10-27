@@ -38,7 +38,7 @@ const yearlyFromMonthly = (monthlyMinor: number, currency: string) => roundToPri
 
 function storeProductIdsFor(planCode: string, isInApp: boolean): Partial<Record<StoreProductKey, string>> {
   if (!isInApp) return {};
-  return { "ios.month": `com.zudomart.app.${planCode}.monthly`, "ios.year": `com.zudomart.app.${planCode}.yearly`, "android.month": `com.zudomart.app.${planCode}.monthly`, "android.year": `com.zudomart.app.${planCode}.yearly` };
+  return { "ios.month": `com.nantty.app.${planCode}.monthly`, "ios.year": `com.nantty.app.${planCode}.yearly`, "android.month": `com.nantty.app.${planCode}.monthly`, "android.year": `com.nantty.app.${planCode}.yearly` };
 }
 
 export function buildInitialPlanPriceRows(): PlanPriceRow[] {
@@ -69,7 +69,7 @@ export function buildInitialCoinPackRows(): CoinPackPriceRow[] {
     coinTiers.map(({ tier, coins, webBonus }, index) => ({
       id: `${clientPlatform}-coins-${tier}`, name: `${coins.toLocaleString("en-US")} coins`, clientPlatform, coins, bonusCoins: clientPlatform === "web" ? webBonus : 0,
       prices: Object.fromEntries(Object.entries(hundredCoinPrices).map(([currency, [web, app]]) => [currency, roundToPricePoint(((clientPlatform === "web" ? web : app) * coins) / 100, currency)])),
-      storeProductId: clientPlatform === "web" ? "" : `com.zudomart.app.coins.tier${tier}`, active: true, sortOrder: index + 1,
+      storeProductId: clientPlatform === "web" ? "" : `com.nantty.app.coins.tier${tier}`, active: true, sortOrder: index + 1,
     })),
   );
 }

@@ -1,4 +1,4 @@
-export const zudoIconNames = [
+export const nanttyIconNames = [
   "arrowLeft24",
   "arrowUpRight24",
   "bell24",
@@ -42,4 +42,4 @@ export const zudoIconNames = [
   "warning20",
 ] as const;
 
-export type ZudoIconName = (typeof zudoIconNames)[number];
+export type NanttyIconName = (typeof nanttyIconNames)[number];

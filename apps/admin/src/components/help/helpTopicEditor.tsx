@@ -12,7 +12,7 @@ import { PageHeader } from "@/components/ui/pageHeader";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Card } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
-import { IconLabel } from "@/components/ui/zudoIcon";
+import { IconLabel } from "@/components/ui/nanttyIcon";
 import { useAdminMutation } from "@/hooks/useAdminMutation.hook";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { createHelpTopic, fetchHelpCategories, fetchHelpTopic, fetchHelpTopics, updateHelpTopic } from "@/services/helpContentApi.service";

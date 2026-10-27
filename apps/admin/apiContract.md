@@ -20,10 +20,10 @@ The console ships a mock adapter (`ADMIN_USE_MOCKS=true`, default outside produc
 | `Idempotency-Key` | Required on money-moving endpoints (marked **idempotent**). Same key + same admin + same path replays the first response with `Idempotent-Replayed: true`. |
 | `X-Forwarded-For`, `User-Agent` | Admin's client IP and browser, for the audit log, session list and IP allow-list. |
 | `X-Request-Id` | Correlation ID; store it on the audit entry. |
-| `X-Client-App: zudomart-admin` | Identifies the caller. |
+| `X-Client-App: nantty-admin` | Identifies the caller. |
 
 ### Authorization (server-enforced)
-- Admin roles: `SUPERADMIN`, `ADMIN`, `SUPPORT`. Superadmins implicitly hold every permission and are created **only** by a backend CLI bootstrap (`zudo admin:bootstrap-superadmin`); no endpoint can create, promote to, disable or edit a superadmin.
+- Admin roles: `SUPERADMIN`, `ADMIN`, `SUPPORT`. Superadmins implicitly hold every permission and are created **only** by a backend CLI bootstrap (`nantty admin:bootstrap-superadmin`); no endpoint can create, promote to, disable or edit a superadmin.
 - `ADMIN` and `SUPPORT` hold an explicit list of granular permissions (below). The API must check the permission on every request; the console hides UI but is never trusted.
 - Admin tokens are a separate audience from app user tokens. A normal user token must never reach `/api/v1/admin/*`.
 
@@ -810,7 +810,7 @@ Permission: `catalog:manage`. Banners and featured slots on the Mart home screen
 | POST | `/api/v1/admin/catalog/features/{featureId}/unpublish` | `{ reason }` | `{ item }` | `catalog.feature_unpublished` |
 | POST | `/api/v1/admin/catalog/features/{featureId}/move` | `{ direction: "up"|"down" }` | `{ items }` | `catalog.feature_reordered` |
 
-Validation: `URL` targets must be `https://` on `zudomart.com` or a subdomain; `imageId` must be in the library; at least one supported country; `endsAt` after `startsAt`. Errors: `400 VALIDATION_FAILED`, `404 NOT_FOUND`, `409 NO_CHANGE`, `409 CANNOT_MOVE`.
+Validation: `URL` targets must be `https://` on `nantty.com` or a subdomain; `imageId` must be in the library; at least one supported country; `endsAt` after `startsAt`. Errors: `400 VALIDATION_FAILED`, `404 NOT_FOUND`, `409 NO_CHANGE`, `409 CANNOT_MOVE`.
 
 ## Support tickets
 
@@ -1059,7 +1059,7 @@ Queued automatically on publish for `terms` and `privacy` and for any material c
 | GET | `/admin/legal/notices`, `/admin/legal/notices/{id}` | view | `LegalNoticeProgress { id, documentKey, documentTitle, versionId, versionNumber, subject, status: "QUEUED"|"SENDING"|"COMPLETED", recipientCount, sentCount, excludedHardBounces, excludedSuppressed, batchSize, ratePerSecond, batchesTotal, batchesDone, queuedAt, queuedByName, estimatedCompletionAt, provider }`. The console polls every 3 seconds while sending. | — |
 | POST | `/admin/legal/notices` | notices.send, **step-up** | `{ versionId, reason }` (resend a published version) → `201 LegalNoticeProgress`. `409 NOT_PUBLISHED`, `409 NOTICE_IN_PROGRESS`. | `legal_notice.queued` |
 
-Preview rendering: the console shows a placeholder frame until the `policyUpdated` template from `@zudomart/email-templates` exists (`apps/admin/src/components/legal/legalNoticeEmailFrame.tsx` is the one place to wire it; props are the `LegalNoticeDraft` fields).
+Preview rendering: the console shows a placeholder frame until the `policyUpdated` template from `@nantty/email-templates` exists (`apps/admin/src/components/legal/legalNoticeEmailFrame.tsx` is the one place to wire it; props are the `LegalNoticeDraft` fields).
 
 ### User-facing endpoints (mocked in apps/webapp and apps/mobile)
 

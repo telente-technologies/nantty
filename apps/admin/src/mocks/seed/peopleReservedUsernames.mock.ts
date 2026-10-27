@@ -3,8 +3,8 @@ import type { ReservedUsernameEntry } from "@/types/usernames.type";
 export function buildDemoReservedUsernames(): ReservedUsernameEntry[] {
   const addedAt = (daysAgo: number) => new Date(Date.now() - daysAgo * 86_400_000).toISOString();
   const rows: Omit<ReservedUsernameEntry, "id" | "addedAt" | "addedByName">[] = [
-    { value: "zudomart", kind: "EXACT", category: "BRAND", note: "Legacy brand" },
-    { value: "zudomart*", kind: "PREFIX", category: "BRAND", note: "Blocks zudomart_support, zudomartng and similar" },
+    { value: "nantty", kind: "EXACT", category: "BRAND", note: "Legacy brand" },
+    { value: "nantty*", kind: "PREFIX", category: "BRAND", note: "Blocks nantty_support, nanttyng and similar" },
     { value: "*official*", kind: "PATTERN", category: "SYSTEM", note: "Only Black-verified accounts may use 'official'" },
     { value: "admin", kind: "EXACT", category: "SYSTEM", note: null },
     { value: "support", kind: "EXACT", category: "SYSTEM", note: null },
