@@ -7,14 +7,23 @@ import { fileURLToPath } from "node:url";
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const artifactRoot = path.join(repositoryRoot, "dist/cloudflare/product-marketing");
 const products = [
-  // The prelaunch render replaces product UI screenshots with Nantty-native
-  // HTML/CSS previews. Do not copy old screenshot assets into public uploads.
-  { id: "ads", app: "apps/ads", host: "ads.nantty.com", publicDirs: ["brand", "storeBadges"] },
+  // Ads screenshots are freshly captured from the current Nantty Ads Manager
+  // and are allowlisted individually; other product screenshot directories
+  // remain excluded because they may contain legacy branding.
+  { id: "ads", app: "apps/ads", host: "ads.nantty.com", publicDirs: ["brand", "screenshots", "storeBadges"] },
   { id: "creator", app: "apps/seller", host: "creator.nantty.com", publicDirs: ["brand", "photos", "storeBadges"] },
-  { id: "studio", app: "apps/studio", host: "studio.nantty.com", publicDirs: ["brand", "photos", "icons", "storeBadges"] },
+  { id: "studio", app: "apps/studio", host: "studio.nantty.com", publicDirs: ["brand", "photos", "storeBadges"] },
 ];
 const routeAllowlist = ["/"];
 const deniedPaths = ["/login", "/bff", "/accounts", "/home", "/settings", "/admin"];
+const adsScreenshotAllowlist = new Set([
+  "billing.webp",
+  "campaignsList.webp",
+  "overview.webp",
+  "reportsPlacement.webp",
+  "wizardAudience.webp",
+  "wizardObjective.webp",
+]);
 const suspenseScriptHashes = new Set();
 
 function run(command, args, options) {
@@ -59,6 +68,10 @@ function assertSafeHtml(html, product, { requireLockedControls = true } = {}) {
 function removeRuntimeScripts(html) {
   let suspenseScript = "";
   const withoutScripts = html.replace(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi, (_match, attributes, body) => {
+    if (/\bdata-nantty-static-theme(?:\s|=|$)/i.test(attributes)) {
+      suspenseScriptHashes.add(createHash("sha256").update(body).digest("base64"));
+      return _match;
+    }
     if (!attributes.trim() && body.includes("$RC(") && body.includes("$RV=function")) suspenseScript = body.trim();
     return "";
   });
@@ -84,10 +97,14 @@ async function assertOnlyRootPage(product) {
 async function copyMarkupAssets(product, html) {
   const appRoot = path.join(repositoryRoot, product.app);
   const assetPrefix = "/_next/static/";
-  const references = new Set([...html.matchAll(/(?:src|href)=["']([^"']+)["']/g)].map((match) => match[1]));
-  for (const reference of references) {
+  const pending = [...html.matchAll(/(?:src|href)=["']([^"']+)["']/g)].map((match) => match[1]);
+  const visited = new Set();
+  while (pending.length > 0) {
+    const reference = pending.pop();
+    if (!reference) continue;
     const pathname = new URL(reference, "https://nantty.invalid").pathname;
-    if (!pathname.startsWith(assetPrefix)) continue;
+    if (!pathname.startsWith(assetPrefix) || visited.has(pathname)) continue;
+    visited.add(pathname);
     // The prelaunch sites are deliberately document-only. Do not publish Next
     // chunks: shared app/error chunks include authenticated product routes.
     if (/\.(?:m?js)$/i.test(pathname)) continue;
@@ -95,6 +112,14 @@ async function copyMarkupAssets(product, html) {
     const outRoot = path.resolve(appRoot, "out");
     if (!source.startsWith(`${outRoot}${path.sep}`)) throw new Error(`Unsafe Next static asset path: ${pathname}`);
     await copyRequired(source, artifactFile(product, pathname.slice(1)));
+    if (/\.css$/i.test(pathname)) {
+      const css = await readFile(source, "utf8");
+      for (const match of css.matchAll(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi)) {
+        const assetReference = match[2]?.trim();
+        if (!assetReference || assetReference.startsWith("data:") || assetReference.startsWith("http:") || assetReference.startsWith("https:")) continue;
+        pending.push(new URL(assetReference, "https://nantty.invalid" + pathname).pathname);
+      }
+    }
   }
 }
 
@@ -135,7 +160,16 @@ async function stageProduct(product) {
 
   for (const publicDir of product.publicDirs) {
     const source = outputFile(product, publicDir);
-    if (await stat(source).catch(() => null)) await copyRequired(source, artifactFile(product, publicDir));
+    if (publicDir === "screenshots" && product.id === "ads") {
+      for (const file of adsScreenshotAllowlist) {
+        await copyRequired(path.join(source, file), artifactFile(product, `${publicDir}/${file}`));
+      }
+      const actual = await readdir(source);
+      const unexpected = actual.filter((file) => !adsScreenshotAllowlist.has(file));
+      if (unexpected.length) throw new Error(`Ads screenshot directory contains non-allowlisted files: ${unexpected.join(", ")}`);
+    } else if (await stat(source).catch(() => null)) {
+      await copyRequired(source, artifactFile(product, publicDir));
+    }
   }
   const html = removeRuntimeScripts(await readFile(artifactFile(product, "index.html"), "utf8"));
   await writeFile(artifactFile(product, "index.html"), html);

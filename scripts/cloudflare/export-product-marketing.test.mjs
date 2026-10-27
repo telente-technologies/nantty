@@ -13,6 +13,14 @@ const expected = {
   creator: "creator.nantty.com",
   studio: "studio.nantty.com",
 };
+const expectedAdsScreenshots = [
+  "screenshots/billing.webp",
+  "screenshots/campaignsList.webp",
+  "screenshots/overview.webp",
+  "screenshots/reportsPlacement.webp",
+  "screenshots/wizardAudience.webp",
+  "screenshots/wizardObjective.webp",
+];
 
 test("product marketing artifact contains only the approved root routes and excludes app/API paths", async (context) => {
   const manifest = JSON.parse(await readFile(path.join(artifactRoot, "export-manifest.json"), "utf8"));
@@ -25,14 +33,30 @@ test("product marketing artifact contains only the approved root routes and excl
       const html = await readFile(path.join(artifactRoot, product, "index.html"), "utf8");
       assert.match(html, /data-prelaunch-locked="true"/);
       assert.match(html, /disabled/);
+      assert.match(html, /data-theme-switcher="true"/);
+      assert.match(html, /data-nantty-static-theme="true"/);
+      assert.match(html, /rel="canonical" href="https:\/\/[^"]+\/?"/);
+      assert.match(html, /property="og:title"/);
+      assert.match(html, /name="twitter:card"/);
+      assert.match(html, /name="robots" content="index, follow"/);
       assert.doesNotMatch(html, /<script\b[^>]*\bsrc\s*=|\/_next\/static\/chunks\/[^"']+\.m?js(?:[?#][^"']*)?["']/i, "prelaunch HTML must not load executable app bundles");
       const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)];
       const hasServerSuspense = /<template\s+id="B:0"/.test(html);
-      assert.equal(scripts.length, hasServerSuspense ? 1 : 0, "only the bounded reveal script may remain when streamed HTML needs it");
+      const themeScripts = scripts.filter(([, attributes]) => /\bdata-nantty-static-theme(?:\s|=|$)/i.test(attributes));
+      const revealScripts = scripts.filter(([, attributes]) => !/\bdata-nantty-static-theme(?:\s|=|$)/i.test(attributes));
+      assert.equal(themeScripts.length, 1, "the minimal theme controller must remain for static light/dark controls");
+      assert.equal(revealScripts.length, hasServerSuspense ? 1 : 0, "only the bounded reveal script may remain when streamed HTML needs it");
+      if (themeScripts.length) {
+        assert.match(themeScripts[0][2], /document\.addEventListener\("change"/);
+        assert.match(themeScripts[0][2], /document\.cookie/);
+        const hash = createHash("sha256").update(themeScripts[0][2]).digest("base64");
+        const headers = await readFile(path.join(artifactRoot, "_headers"), "utf8");
+        assert.ok(headers.includes(`'sha256-${hash}'`), "CSP must allow only the exact theme controller");
+      }
       if (hasServerSuspense) {
-        assert.equal(scripts[0][1].trim(), "");
-        assert.match(scripts[0][2], /\$RC\("B:0","S:0"\)/);
-        const hash = createHash("sha256").update(scripts[0][2]).digest("base64");
+        assert.equal(revealScripts[0][1].trim(), "");
+        assert.match(revealScripts[0][2], /\$RC\("B:0","S:0"\)/);
+        const hash = createHash("sha256").update(revealScripts[0][2]).digest("base64");
         const headers = await readFile(path.join(artifactRoot, "_headers"), "utf8");
         assert.ok(headers.includes(`'sha256-${hash}'`), "CSP must allow only the exact reveal script");
       }
@@ -43,9 +67,47 @@ test("product marketing artifact contains only the approved root routes and excl
       assert.ok(files.includes("404.html"));
       assert.ok(!files.some((entry) => typeof entry === "string" && (/\.(?:m?js)$/i.test(entry) || (/\.txt$/i.test(entry) && entry !== "robots.txt"))), "the static bundle must not include executable chunks or RSC payloads");
       assert.ok(!files.some((entry) => typeof entry === "string" && /(?:^|\/)(?:login|bff|accounts|home|settings|admin)(?:\/|\.|$)/i.test(entry)));
-      assert.ok(!files.some((entry) => typeof entry === "string" && /(?:^|\/)(?:screenshots|screens)(?:\/|$)/i.test(entry)), "legacy-branded screenshot assets must not be uploaded with the prelaunch pages");
+      for (const cssFile of files.filter((entry) => typeof entry === "string" && entry.endsWith(".css"))) {
+        const css = await readFile(path.join(artifactRoot, product, cssFile), "utf8");
+        for (const match of css.matchAll(/url\(\s*(['"]?)([^)'"]+)\1\s*\)/gi)) {
+          const assetReference = match[2]?.trim();
+          if (!assetReference || assetReference.startsWith("data:") || assetReference.startsWith("http:") || assetReference.startsWith("https:")) continue;
+          const assetUrl = new URL(assetReference, "https://nantty.invalid/" + product + "/" + cssFile);
+          const staticPrefix = "/" + product + "/_next/static/";
+          if (!assetUrl.pathname.startsWith(staticPrefix)) continue;
+          const assetRelativePath = assetUrl.pathname.slice(("/" + product + "/").length);
+          assert.ok(await stat(path.join(artifactRoot, product, assetRelativePath)).catch(() => null), cssFile + " references missing " + assetRelativePath);
+        }
+      }
+      const screenshotFiles = files.filter((entry) => typeof entry === "string" && entry !== "screenshots" && /(?:^|\/)(?:screenshots|screens)(?:\/|$)/i.test(entry));
+      if (product === "ads") {
+        assert.deepEqual(screenshotFiles.sort(), expectedAdsScreenshots, "only freshly verified Ads Manager screenshots may be uploaded");
+      } else if (product === "studio") {
+        assert.ok(files.includes("photos/creatorMicPortrait.webp"), "Studio social preview photo should be included");
+        assert.deepEqual(screenshotFiles, [], "Studio screenshot directories remain excluded");
+      } else {
+        assert.deepEqual(screenshotFiles, [], "Dashboard screenshot directories remain excluded");
+      }
     });
   }
+});
+
+test("Ads static page references only the included, current app screenshots", async () => {
+  const html = await readFile(path.join(artifactRoot, "ads", "index.html"), "utf8");
+  for (const screenshot of expectedAdsScreenshots) {
+    assert.ok(html.includes(`src="/${screenshot}"`), `Ads landing page should show ${screenshot}`);
+    assert.ok((await stat(path.join(artifactRoot, "ads", screenshot))).isFile(), `${screenshot} must be present in the upload artifact`);
+  }
+});
+
+test("Studio social-preview image, canonical metadata and sitemap use the Studio host", async () => {
+  const html = await readFile(path.join(artifactRoot, "studio", "index.html"), "utf8");
+  assert.match(html, /https:\/\/studio\.nantty\.com\//);
+  assert.match(html, /creatorMicPortrait\.webp/);
+  const sitemap = await readFile(path.join(artifactRoot, "studio", "sitemap.xml"), "utf8");
+  assert.match(sitemap, /<loc>https:\/\/studio\.nantty\.com\/<\//);
+  const robots = await readFile(path.join(artifactRoot, "studio", "robots.txt"), "utf8");
+  assert.match(robots, /Sitemap: https:\/\/studio\.nantty\.com\/sitemap\.xml/);
 });
 
 test("static roots serve without exposing a login route", async (context) => {

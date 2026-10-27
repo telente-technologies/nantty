@@ -36,12 +36,13 @@ never copied.
   contain Nantty-branded public content. The artifact is checked for local link
   targets, missing assets, Next's request-time image optimizer, login/BFF URLs,
   and secret-like values.
-- `apps/ads`, `apps/seller` and `apps/studio`: their ordinary production builds
+- `apps/ads`, `apps/seller`, and `apps/studio`: their ordinary production builds
   remain request/session-aware and retain app login/BFF routes. The separate
   product exporter below builds only each original `/` marketing page in an
   explicit prelaunch mode, disables sign-in, and excludes those app routes.
-  The exporter uses Nantty-branded HTML/CSS previews and deliberately omits
-  screenshot directories that contain legacy branding.
+  The exporter uses Nantty-branded HTML/CSS previews. The Ads root includes
+  only six explicitly allowlisted, freshly captured Nantty Ads Manager
+  screenshots; other product screenshot directories remain excluded.
 - `apps/admin` remains private and is never part of this export.
 
 The product roots were built and their export/HTTP tests passed (see below).
@@ -62,7 +63,7 @@ node scripts/cloudflare/export-product-marketing.mjs
 node --test scripts/cloudflare/export-product-marketing.test.mjs
 ```
 
-The export builds the existing `/` pages from `apps/ads`, `apps/seller` and
+The export builds the existing `/` pages from `apps/ads`, `apps/seller`, and
 `apps/studio` one at a time, using each app's original landing components and
 assets. It sets `NANTTY_CLOUDFLARE_PRELAUNCH=1` only in these build processes.
 That branch skips request/session data (and the Seller plan API call), turns
@@ -71,16 +72,20 @@ export only for this build. Ordinary app builds retain the existing proxy,
 session providers, server pricing and sign-in links.
 
 The artifact at `dist/cloudflare/product-marketing/` contains only `/` for Ads,
-Seller/Creator and Studio. The approved product hosts are `ads.nantty.com` and
-`creator.nantty.com`. `studio.nantty.com` has not been approved and must not be
-configured. The main public-site artifact maps to `nantty.com`;
+Seller/Dashboard (published as Creator), and Studio. The approved product hosts
+are `ads.nantty.com`, `creator.nantty.com`, and `studio.nantty.com`. The main public-site artifact maps to `nantty.com`;
 `web.nantty.com` is reserved for the real web app and must not receive a static
 marketing export unless the owner later explicitly requests a clearly labeled
 demo. The product export deliberately omits every other app route, including
 login, BFF, session, account/workspace, API and admin paths.
 Each root is checked for static lock controls, excluded route links, the Next
-image optimizer, secret-like strings and accidental screenshot-directory
-uploads; the HTTP test confirms that login and BFF paths return 404.
+image optimizer, secret-like strings and screenshot-directory uploads. The
+only executable code retained in product artifacts is a small hash-allowlisted
+theme controller so the shared light/dark/system switch remains functional
+without shipping the product application's JavaScript. Ads
+must contain exactly the six current app screenshots referenced by its page;
+Dashboard must contain no screenshot directory. The HTTP test confirms that login and
+BFF paths return 404.
 `apps/seller/public/serviceWorker.js` is not copied.
 
 This creates a local artifact only. It does not authenticate, create a Worker,
