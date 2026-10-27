@@ -12,7 +12,7 @@ import { AccessTokenVerifier } from "../src/services/accessTokenVerifier.service
 import { WidgetTokenVerifier, widgetTokenAudience, widgetTokenScope, type WidgetTokenRevocationSource } from "../src/services/widgetTokenVerifier.service.js";
 
 const upstreamNames: readonly UpstreamName[] = ["identity", "live", "money", "notifications", "social", "trust", "commerce", "media", "search", "ads", "support"];
-const issuer = "https://auth.zudomart.test";
+const issuer = "https://auth.nantty.test";
 
 describe("widget route table", () => {
   it("only GET /api/v1/widgets/* routes accept a widget token", () => {
@@ -75,7 +75,7 @@ describe("widget token scope enforcement at the gateway", () => {
     await new Promise<void>((resolve) => upstream.listen(0, "127.0.0.1", resolve));
     const url = `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`;
     const upstreams = Object.fromEntries(upstreamNames.map((name) => [name, url])) as GatewayConfig["upstreams"];
-    const config: GatewayConfig = { host: "127.0.0.1", port: 0, corsOrigins: [], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer, audience: "zudomart-api" }, policyGate: null, guestRateLimits: { perMinute: 100_000, sensitivePerMinute: 100_000 }, upstreams, routeRateLimitsPerMinute: { widgetRead: 100_000, widgetToken: 100_000 } };
+    const config: GatewayConfig = { host: "127.0.0.1", port: 0, corsOrigins: [], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer, audience: "nantty-api" }, policyGate: null, guestRateLimits: { perMinute: 100_000, sensitivePerMinute: 100_000 }, upstreams, routeRateLimitsPerMinute: { widgetRead: 100_000, widgetToken: 100_000 } };
     gateway = createGatewayServer({ config, verifier: new AccessTokenVerifier(config.accessToken, keySet), widgetVerifier: new WidgetTokenVerifier(config.accessToken, revocations, keySet) });
     await gateway.start();
     gatewayUrl = `http://127.0.0.1:${gateway.address?.port}`;
@@ -92,11 +92,11 @@ describe("widget token scope enforcement at the gateway", () => {
     current.set("session-1", "widget-1");
     const response = await call("GET", "/api/v1/widgets/stories", await widgetToken());
     expect(response.status).toBe(200);
-    expect(lastHeaders["x-zudomart-account-id"]).toBe("account-1");
+    expect(lastHeaders["x-nantty-account-id"]).toBe("account-1");
   });
 
   it("accepts a normal session token on widget endpoints too", async () => {
-    const response = await call("GET", "/api/v1/widgets/orders", await signToken("zudomart-api", { roles: [] }));
+    const response = await call("GET", "/api/v1/widgets/orders", await signToken("nantty-api", { roles: [] }));
     expect(response.status).toBe(200);
   });
 
@@ -124,8 +124,8 @@ describe("widget token scope enforcement at the gateway", () => {
     ["POST", "/api/v1/seller/conversations/c1/messages"],
   ])("refuses a realtime socket token on %s %s without reaching a service", async (method, path) => {
     const before = upstreamHits;
-    expect((await call(method, path, await signToken("zudomart-realtime", { scope: "realtime" }, "rt-1"))).status).toBe(401);
-    expect((await call(method, path, await signToken("zudomart-api", { scope: "realtime" }, "rt-2"))).status).toBe(401);
+    expect((await call(method, path, await signToken("nantty-realtime", { scope: "realtime" }, "rt-1"))).status).toBe(401);
+    expect((await call(method, path, await signToken("nantty-api", { scope: "realtime" }, "rt-2"))).status).toBe(401);
     expect(upstreamHits).toBe(before);
   });
 

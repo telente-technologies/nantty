@@ -1,7 +1,7 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 
-import { createResponseContext, type HttpRequestContext } from "@zudojs/http";
+import { createResponseContext, type HttpRequestContext } from "@nantty/fastify-platform";
 import { SignJWT, createLocalJWKSet, exportJWK, generateKeyPair, type CryptoKey } from "jose";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
@@ -17,7 +17,7 @@ import { CachedChallengeStateSource } from "../src/services/security/humanVerifi
 import { InMemorySecurityStore } from "../src/services/security/securityStore.service.js";
 import type { ChallengeState, TrustSecurityClient } from "../src/services/security/securitySignalSink.service.js";
 
-const issuer = "https://auth.zudomart.test";
+const issuer = "https://auth.nantty.test";
 let signingKey: CryptoKey;
 let verifier: AccessTokenVerifier;
 let upstream: Server;
@@ -33,7 +33,7 @@ function configFor(overrides: Partial<GatewayConfig>): GatewayConfig {
   return {
     host: "127.0.0.1", port: 0, corsOrigins: [], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, policyGate: null,
     guestRateLimits: { perMinute: 1000, sensitivePerMinute: 1000 },
-    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer, audience: "zudomart-api" },
+    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer, audience: "nantty-api" },
     upstreams: { identity: upstreamUrl, live: upstreamUrl, money: upstreamUrl, notifications: upstreamUrl, social: upstreamUrl, trust: upstreamUrl, commerce: upstreamUrl, media: upstreamUrl, search: upstreamUrl, ads: upstreamUrl, support: upstreamUrl },
     ...overrides,
   };
@@ -49,7 +49,7 @@ async function startGateway(overrides: Partial<GatewayConfig>): Promise<string> 
 beforeAll(async () => {
   const keyPair = await generateKeyPair("EdDSA", { crv: "Ed25519" });
   signingKey = keyPair.privateKey;
-  verifier = new AccessTokenVerifier({ jwksUrl: "http://unused.invalid", issuer, audience: "zudomart-api" }, createLocalJWKSet({ keys: [{ ...(await exportJWK(keyPair.publicKey)), kid: "k1", alg: "EdDSA" }] }));
+  verifier = new AccessTokenVerifier({ jwksUrl: "http://unused.invalid", issuer, audience: "nantty-api" }, createLocalJWKSet({ keys: [{ ...(await exportJWK(keyPair.publicKey)), kid: "k1", alg: "EdDSA" }] }));
   upstream = createServer((request, response) => {
     forwardedPaths.push(request.url ?? "");
     response.writeHead(200, { "content-type": "application/json" });
@@ -76,7 +76,7 @@ describe("C1 proxy trust", () => {
   });
 
   it("refuses to reuse the staff audience for user access tokens", () => {
-    Object.assign(process.env, required, { AUTH_TOKEN_AUDIENCE: "zudomart-admin" });
+    Object.assign(process.env, required, { AUTH_TOKEN_AUDIENCE: "nantty-admin" });
     expect(() => loadGatewayConfigFromEnvironment()).toThrow(/AUTH_TOKEN_AUDIENCE must not equal the staff audience/);
   });
 
@@ -108,8 +108,8 @@ describe("H2 placeholder secrets", () => {
 describe("H1 admin routes need a staff token at the gateway", () => {
   it("refuses missing, garbage and customer tokens and forwards a verified staff token", async () => {
     const base = await startGateway({});
-    const customer = await sign("zudomart-api");
-    const staff = await sign("zudomart-admin", "staff-1");
+    const customer = await sign("nantty-api");
+    const staff = await sign("nantty-admin", "staff-1");
     expect((await fetch(`${base}/api/v1/admin/withdrawals`)).status).toBe(401);
     expect((await fetch(`${base}/api/v1/admin/refunds`, { method: "POST", headers: { authorization: "Bearer garbage" }, body: "{}" })).status).toBe(401);
     expect((await fetch(`${base}/api/v1/admin/ledger/entries`, { headers: { authorization: `Bearer ${customer}` } })).status).toBe(401);
@@ -130,7 +130,7 @@ describe("H1 admin routes need a staff token at the gateway", () => {
   });
 
   it("rejects tokens whose subject carries control characters", async () => {
-    expect(await verifier.verifyAccessTokenWithJwks(await sign("zudomart-api", "account-1\nx-zudomart-viewer"))).toBeUndefined();
+    expect(await verifier.verifyAccessTokenWithJwks(await sign("nantty-api", "account-1\nx-nantty-viewer"))).toBeUndefined();
   });
 });
 
@@ -207,7 +207,7 @@ describe("M5/M7/M8/M9 edges", () => {
   });
 
   it("refuses identity fields with line breaks", () => {
-    expect(() => buildIdentitySigningPayload({ method: "GET", path: "/p", requestId: "r", issuedAtSeconds: 1, headers: { "x-zudomart-account-id": "a\nb" } })).toThrow();
+    expect(() => buildIdentitySigningPayload({ method: "GET", path: "/p", requestId: "r", issuedAtSeconds: 1, headers: { "x-nantty-account-id": "a\nb" } })).toThrow();
   });
 
   it("network-gates the bare admin prefix", async () => {
@@ -256,12 +256,12 @@ describe("S3 social write limits", () => {
 
 describe("M6 CORS answers are rate limited", () => {
   it("counts preflights and rejected origins once each against the global limit", async () => {
-    const base = await startGateway({ corsOrigins: ["https://app.zudomart.test"], rateLimitMaxPerMinute: 3 });
-    const preflight = { method: "OPTIONS", headers: { origin: "https://app.zudomart.test", "access-control-request-method": "POST" } };
+    const base = await startGateway({ corsOrigins: ["https://app.nantty.test"], rateLimitMaxPerMinute: 3 });
+    const preflight = { method: "OPTIONS", headers: { origin: "https://app.nantty.test", "access-control-request-method": "POST" } };
     const statuses = [
       (await fetch(`${base}/api/v1/feeds/popular`, preflight)).status,
       (await fetch(`${base}/api/v1/feeds/popular`, { headers: { origin: "https://evil.example" } })).status,
-      (await fetch(`${base}/api/v1/feeds/popular`, { headers: { origin: "https://app.zudomart.test" } })).status,
+      (await fetch(`${base}/api/v1/feeds/popular`, { headers: { origin: "https://app.nantty.test" } })).status,
       (await fetch(`${base}/api/v1/feeds/popular`, preflight)).status,
     ];
     expect(statuses).toEqual([204, 403, 200, 429]);

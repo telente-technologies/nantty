@@ -1,4 +1,4 @@
-import { createResponseContext, type HttpResponseContext } from "@zudojs/http";
+import { createResponseContext, type HttpResponseContext } from "@nantty/fastify-platform";
 
 export function json(status: number, data: unknown): HttpResponseContext {
   return createResponseContext({ status }).json(data);

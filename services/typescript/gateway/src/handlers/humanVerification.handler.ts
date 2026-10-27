@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
-import type { HttpRequestContext, HttpResponseContext } from "@zudojs/http";
-import type { Logger } from "@zudojs/logger";
+import type { HttpRequestContext, HttpResponseContext } from "@nantty/fastify-platform";
+import type { Logger } from "@nantty/fastify-platform";
 
 import { extractBearerTokenFromAuthorizationHeader, type AccessTokenVerifier } from "../services/accessTokenVerifier.service.js";
 import type { RateLimitStore } from "../services/rateLimitStore.service.js";

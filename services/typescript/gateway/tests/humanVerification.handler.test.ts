@@ -1,7 +1,7 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { createGatewayServer } from "../src/app.js";
@@ -53,7 +53,7 @@ beforeAll(async () => {
   const url = `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`;
   const config: GatewayConfig = {
     host: "127.0.0.1", port: 0, corsOrigins: [], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, policyGate: null, guestRateLimits: { perMinute: 1000, sensitivePerMinute: 1000 },
-    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.zudomart.test", audience: "zudomart-api" },
+    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.nantty.test", audience: "nantty-api" },
     upstreams: { identity: url, live: url, money: url, notifications: url, social: url, trust: url, commerce: url, media: url, search: url, ads: url, support: url },
     security: { trustInternalToken: "t".repeat(32), humanVerification: { provider: "turnstile", secretKey: "1x0000000000000000000000000000000AA", siteKey: "1x00000000000000000000AA", expectedHostnames: [], attemptsPerMinute: 10 }, probeThresholds: defaultProbeThresholds },
   };

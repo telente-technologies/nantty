@@ -1,7 +1,7 @@
 import { createHmac } from "node:crypto";
 
-export const identitySignatureHeaderName = "x-zudomart-identity-signature";
-export const signedIdentityHeaderNames = ["x-zudomart-account-id", "x-zudomart-session-id", "x-zudomart-age-bracket", "x-zudomart-viewer"] as const;
+export const identitySignatureHeaderName = "x-nantty-identity-signature";
+export const signedIdentityHeaderNames = ["x-nantty-account-id", "x-nantty-session-id", "x-nantty-age-bracket", "x-nantty-viewer"] as const;
 
 export interface IdentitySigningInput {
   readonly method: string;

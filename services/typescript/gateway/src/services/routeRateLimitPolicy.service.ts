@@ -125,7 +125,7 @@ export function classifyRequestForRateLimit(method: string, path: string): Route
   if ((verb === "POST" && lowered === "/api/v1/posts") || (verb === "PUT" && /^\/api\/v1\/posts\/[^/]+\/tags$/.test(lowered)) || (verb === "DELETE" && /^\/api\/v1\/posts\/[^/]+\/tags\/me$/.test(lowered))) return "postWrite";
   if (verb === "POST" && lowered.startsWith("/api/v1/verification/")) return "verification";
   if (verb === "POST" && /^\/api\/v1\/posts\/[^/]+\/media\/[^/]+\/download$/.test(lowered)) return "mediaDownload";
-  if (verb === "GET" && (lowered === "/api/v1/seller/nantty-users" || lowered === "/api/v1/seller/zudomart-users" || lowered === "/api/v1/seller/staff/candidates")) return "sellerPeopleSearch";
+  if (verb === "GET" && (lowered === "/api/v1/seller/nantty-users" || lowered === "/api/v1/seller/nantty-users" || lowered === "/api/v1/seller/staff/candidates")) return "sellerPeopleSearch";
   if (verb !== "GET" && (lowered === "/api/v1/seller/staff" || lowered.startsWith("/api/v1/seller/staff/") || lowered.startsWith("/api/v1/stores/team-requests/"))) return "sellerTeamWrite";
   if (verb !== "GET" && (lowered.startsWith("/api/v1/seller/wallet/payouts") || lowered.startsWith("/api/v1/seller/wallet/payout-accounts"))) return "sellerMoneyWrite";
   if (verb === "POST" && (/^\/api\/v1\/seller\/conversations\/[^/]+\/messages$/.test(lowered) || /^\/api\/v1\/conversations\/stores\/[^/]+\/messages$/.test(lowered))) return "storeMessageSend";

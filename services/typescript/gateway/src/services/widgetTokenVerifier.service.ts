@@ -3,7 +3,7 @@ import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from "jose";
 import { readAgeBracketClaim, type AccessTokenVerifierOptions, type VerifiedPrincipal } from "./accessTokenVerifier.service.js";
 import type { ValkeyConnection } from "./valkeyConnection.service.js";
 
-export const widgetTokenAudience = "zudomart-widgets";
+export const widgetTokenAudience = "nantty-widgets";
 export const widgetTokenScope = "widgets:read";
 
 export interface WidgetTokenRevocationSource {

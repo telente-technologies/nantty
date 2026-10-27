@@ -1,4 +1,4 @@
-import { createLogger } from "@zudojs/logger";
+import { createLogger } from "@nantty/fastify-platform";
 
 import { createGatewayServer } from "./app.js";
 import { loadGatewayConfigFromEnvironment } from "./configs/gateway.config.js";

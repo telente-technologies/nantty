@@ -2,7 +2,7 @@ import { createServer, request, type IncomingMessage, type Server } from "node:h
 import type { AddressInfo } from "node:net";
 import type { Duplex } from "node:stream";
 
-import { createLogger } from "@zudojs/logger";
+import { createLogger } from "@nantty/fastify-platform";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { attachRealtimeSocketProxy, isRealtimeSocketPath } from "../src/services/realtimeSocketProxy.service.js";

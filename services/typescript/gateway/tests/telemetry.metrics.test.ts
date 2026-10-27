@@ -33,7 +33,7 @@ beforeAll(async () => {
     corsOrigins: ["http://localhost:3000"],
     rateLimitMaxPerMinute: 100,
     upstreamTimeoutMs: 2_000,
-    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.zudomart.test", audience: "zudomart-api" },
+    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.nantty.test", audience: "nantty-api" },
     policyGate: null,
     valkeyUrl: null,
     guestRateLimits: { perMinute: 120, sensitivePerMinute: 30 },

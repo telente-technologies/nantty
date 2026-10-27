@@ -55,7 +55,7 @@ describe("anonymous requests to protected routes", () => {
     await new Promise<void>((resolve) => upstream.listen(0, "127.0.0.1", resolve));
     const url = `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`;
     const upstreams = Object.fromEntries(upstreamNames.map((name) => [name, url])) as GatewayConfig["upstreams"];
-    const config: GatewayConfig = { host: "127.0.0.1", port: 0, corsOrigins: [], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.zudomart.test", audience: "zudomart-api" }, policyGate: null, guestRateLimits: { perMinute: 100_000, sensitivePerMinute: 100_000 }, upstreams };
+    const config: GatewayConfig = { host: "127.0.0.1", port: 0, corsOrigins: [], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.nantty.test", audience: "nantty-api" }, policyGate: null, guestRateLimits: { perMinute: 100_000, sensitivePerMinute: 100_000 }, upstreams };
     gateway = createGatewayServer({ config, verifier: new AccessTokenVerifier(config.accessToken, createLocalJWKSet({ keys: [publicJwk] })) });
     await gateway.start();
     gatewayUrl = `http://127.0.0.1:${gateway.address?.port}`;

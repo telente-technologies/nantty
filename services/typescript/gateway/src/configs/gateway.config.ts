@@ -69,7 +69,7 @@ export function loadGatewayConfigFromEnvironment(): GatewayConfig {
     accessToken: {
       jwksUrl: readRequiredEnvironmentVariable("AUTH_JWKS_URL", problems),
       issuer: readRequiredEnvironmentVariable("AUTH_TOKEN_ISSUER", problems),
-      audience: readEnvironmentVariableOrDefault("AUTH_TOKEN_AUDIENCE", "zudomart-api"),
+      audience: readEnvironmentVariableOrDefault("AUTH_TOKEN_AUDIENCE", "nantty-api"),
     },
     trustedProxyHops: Number(readEnvironmentVariableOrDefault("TRUSTED_PROXY_HOPS", "0")),
     trustCdnCountryHeader: readEnvironmentVariableOrDefault("TRUST_CDN_COUNTRY_HEADER", "false") === "true",

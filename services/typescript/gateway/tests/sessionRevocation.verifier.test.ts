@@ -3,8 +3,8 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import { AccessTokenVerifier, type SessionRevocationSource } from "../src/services/accessTokenVerifier.service.js";
 
-const issuer = "https://auth.zudomart.test";
-const options = { jwksUrl: "http://unused.invalid/jwks.json", issuer, audience: "zudomart-api" };
+const issuer = "https://auth.nantty.test";
+const options = { jwksUrl: "http://unused.invalid/jwks.json", issuer, audience: "nantty-api" };
 
 describe("gateway access tokens honour the shared session denylist", () => {
   let privateKey: CryptoKey;
@@ -12,7 +12,7 @@ describe("gateway access tokens honour the shared session denylist", () => {
   const revoked = new Set<string>();
   const revocations: SessionRevocationSource = { isSessionRevoked: async (sessionId) => revoked.has(sessionId) };
 
-  const sign = (sessionId: string, audience = "zudomart-api") =>
+  const sign = (sessionId: string, audience = "nantty-api") =>
     new SignJWT({ sid: sessionId, roles: [] }).setProtectedHeader({ alg: "EdDSA", kid: "k1" }).setIssuer(issuer).setAudience(audience)
       .setSubject("account-1").setIssuedAt().setExpirationTime("10m").sign(privateKey);
 
@@ -33,7 +33,7 @@ describe("gateway access tokens honour the shared session denylist", () => {
   it("refuses revoked staff sessions too", async () => {
     revoked.add("staff-session");
     const verifier = new AccessTokenVerifier(options, keySet, revocations);
-    expect(await verifier.verifyStaffAccessToken(await sign("staff-session", "zudomart-admin"))).toBeUndefined();
+    expect(await verifier.verifyStaffAccessToken(await sign("staff-session", "nantty-admin"))).toBeUndefined();
   });
 
   it("fails closed when the denylist cannot be read", async () => {

@@ -35,7 +35,7 @@ export class ValkeySessionRevocationSource implements SessionRevocationSource {
   }
 }
 
-export const staffAccessTokenAudience = "zudomart-admin";
+export const staffAccessTokenAudience = "nantty-admin";
 const hasControlCharacter = (value: string): boolean => [...value].some((character) => character.charCodeAt(0) < 0x20 || character.charCodeAt(0) === 0x7f);
 
 export class AccessTokenVerifier {

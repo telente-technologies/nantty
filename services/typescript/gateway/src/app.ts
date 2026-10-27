@@ -1,5 +1,5 @@
-import { createRequestContext, HttpMiddlewarePipeline, createResponseContext, type HttpRequestContext, type HttpResponseContext } from "@zudojs/http";
-import { createLogger, type Logger } from "@zudojs/logger";
+import { createRequestContext, HttpMiddlewarePipeline, createResponseContext, type HttpRequestContext, type HttpResponseContext } from "@nantty/fastify-platform";
+import { createLogger, type Logger } from "@nantty/fastify-platform";
 import { createPlatform, sendLegacyResponse } from "@nantty/fastify-platform";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 

@@ -8,8 +8,8 @@ import { createGatewayServer } from "../src/app.js";
 import type { GatewayConfig, UpstreamName } from "../src/configs/gateway.config.js";
 import { AccessTokenVerifier } from "../src/services/accessTokenVerifier.service.js";
 
-const issuer = "https://auth.zudomart.test";
-const audience = "zudomart-api";
+const issuer = "https://auth.nantty.test";
+const audience = "nantty-api";
 const upstreamNames: readonly UpstreamName[] = ["identity", "live", "money", "notifications", "social", "trust", "commerce", "media", "search", "ads", "support"];
 const hits: { upstream: UpstreamName; method: string; url: string; accountId: string | undefined }[] = [];
 const upstreamServers: Server[] = [];
@@ -21,7 +21,7 @@ async function startRecordingUpstream(name: UpstreamName): Promise<string> {
   const server = createServer((request, response) => {
     request.resume();
     request.on("end", () => {
-      const accountId = request.headers["x-zudomart-account-id"];
+      const accountId = request.headers["x-nantty-account-id"];
       hits.push({ upstream: name, method: request.method ?? "", url: request.url ?? "", accountId: typeof accountId === "string" ? accountId : undefined });
       response.writeHead(200, { "content-type": "application/json" });
       response.end(JSON.stringify({ upstream: name }));

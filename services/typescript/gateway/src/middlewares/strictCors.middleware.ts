@@ -1,4 +1,4 @@
-import { createResponseContext, type HttpMiddleware, type HttpRequestContext } from "@zudojs/http";
+import { createResponseContext, type HttpMiddleware, type HttpRequestContext } from "@nantty/fastify-platform";
 
 export interface StrictCorsOptions {
   readonly allowedOrigins: readonly string[];

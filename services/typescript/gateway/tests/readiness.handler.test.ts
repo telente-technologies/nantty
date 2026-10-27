@@ -18,7 +18,7 @@ function buildConfig(valkeyUrl: string | null): GatewayConfig {
     corsOrigins: ["http://localhost:3000"],
     rateLimitMaxPerMinute: 1,
     upstreamTimeoutMs: 2_000,
-    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.zudomart.test", audience: "zudomart-api" },
+    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.nantty.test", audience: "nantty-api" },
     policyGate: null,
     valkeyUrl,
     guestRateLimits: { perMinute: 120, sensitivePerMinute: 3 },

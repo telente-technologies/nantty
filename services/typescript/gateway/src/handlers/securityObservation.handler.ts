@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { VerifiedPrincipal } from "../services/accessTokenVerifier.service.js";
 import { classifyCompletedRequest, convertPathToRouteTemplate, isAdminPath, isTamperedConsumerToken, type ProbeSignal } from "../services/security/accessProbeClassifier.service.js";

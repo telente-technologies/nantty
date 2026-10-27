@@ -1,4 +1,4 @@
-import type { HttpMiddleware } from "@zudojs/http";
+import type { HttpMiddleware } from "@nantty/fastify-platform";
 
 export function createSecurityHeadersMiddleware(): HttpMiddleware {
   return async (context, next) => {

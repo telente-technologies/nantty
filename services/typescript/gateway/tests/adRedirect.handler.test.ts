@@ -9,8 +9,8 @@ import { AccessTokenVerifier } from "../src/services/accessTokenVerifier.service
 import { isSafeRedirectLocation } from "../src/services/upstreamProxy.service.js";
 
 const locations: Record<string, string> = {
-  "/api/v1/ads/r/good": "https://shop.example.com/sale?utm_source=zudomart",
-  "/api/v1/ads/r/app": "zudomart://product/p1",
+  "/api/v1/ads/r/good": "https://shop.example.com/sale?utm_source=nantty",
+  "/api/v1/ads/r/app": "nantty://product/p1",
   "/api/v1/ads/r/evil": "javascript:alert(1)",
   "/api/v1/ads/campaigns": "https://elsewhere.example.com/",
 };
@@ -27,7 +27,7 @@ beforeAll(async () => {
   const upstreamUrl = `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`;
   const config: GatewayConfig = {
     host: "127.0.0.1", port: 0, corsOrigins: ["http://localhost:3000"], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, policyGate: null,
-    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.zudomart.test", audience: "zudomart-api" },
+    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.nantty.test", audience: "nantty-api" },
     guestRateLimits: { perMinute: 120, sensitivePerMinute: 3 },
     upstreams: { identity: upstreamUrl, live: upstreamUrl, money: upstreamUrl, notifications: upstreamUrl, social: upstreamUrl, trust: upstreamUrl, commerce: upstreamUrl, media: upstreamUrl, search: upstreamUrl, ads: upstreamUrl, support: upstreamUrl },
   };
@@ -45,9 +45,9 @@ describe("ad click redirects through the gateway", () => {
   it("passes a vetted https or in-app target to anonymous viewers", async () => {
     const web = await fetch(`${gatewayUrl}/api/v1/ads/r/good`, { redirect: "manual" });
     expect(web.status).toBe(302);
-    expect(web.headers.get("location")).toBe("https://shop.example.com/sale?utm_source=zudomart");
+    expect(web.headers.get("location")).toBe("https://shop.example.com/sale?utm_source=nantty");
     const app = await fetch(`${gatewayUrl}/api/v1/ads/r/app`, { redirect: "manual" });
-    expect(app.headers.get("location")).toBe("zudomart://product/p1");
+    expect(app.headers.get("location")).toBe("nantty://product/p1");
   });
 
   it("refuses an unsafe target instead of becoming an open redirect", async () => {
@@ -64,7 +64,7 @@ describe("ad click redirects through the gateway", () => {
 
   it("accepts only https with a host and no credentials, or the app scheme", () => {
     expect(isSafeRedirectLocation("https://a.example.com/x")).toBe(true);
-    expect(isSafeRedirectLocation("zudomart://messages")).toBe(true);
+    expect(isSafeRedirectLocation("nantty://messages")).toBe(true);
     for (const unsafe of ["http://a.example.com", "//evil.example.com", "/relative", "https://user:pass@a.example.com", "data:text/html,x", "https://a.example.com/\\evil"]) {
       expect(isSafeRedirectLocation(unsafe)).toBe(false);
     }

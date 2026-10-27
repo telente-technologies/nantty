@@ -214,7 +214,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/seller/staff", upstream: "commerce", authentication: "required" },
   { pathPrefix: "/api/v1/seller/audit-log", upstream: "commerce", authentication: "required", methods: ["GET"] },
   { pathPrefix: "/api/v1/seller/nantty-users", upstream: "commerce", authentication: "required", methods: ["GET"] },
-  { pathPrefix: "/api/v1/seller/zudomart-users", upstream: "commerce", authentication: "required", methods: ["GET"] },
+  { pathPrefix: "/api/v1/seller/nantty-users", upstream: "commerce", authentication: "required", methods: ["GET"] },
   { pathPrefix: "/api/v1/creators/earnings/convert", upstream: "money", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/admin/ledger/", upstream: "money", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/payments/", upstream: "money", authentication: "optional" },

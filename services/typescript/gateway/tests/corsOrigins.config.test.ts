@@ -15,8 +15,8 @@ afterEach(() => {
 
 describe("gateway CORS origins", () => {
   it("allows the marketing site next to the apps, from the list or the per-app variables", () => {
-    Object.assign(process.env, required, { CORS_ORIGINS: "http://localhost:3500,http://localhost:3100", CORS_ORIGIN_WEB: "https://zudomart.com", CORS_ORIGIN_WEBAPP: "https://app.zudomart.com" });
-    expect(loadGatewayConfigFromEnvironment().corsOrigins).toEqual(["http://localhost:3500", "http://localhost:3100", "https://zudomart.com", "https://app.zudomart.com"]);
+    Object.assign(process.env, required, { CORS_ORIGINS: "http://localhost:3500,http://localhost:3100", CORS_ORIGIN_WEB: "https://nantty.com", CORS_ORIGIN_WEBAPP: "https://app.nantty.com" });
+    expect(loadGatewayConfigFromEnvironment().corsOrigins).toEqual(["http://localhost:3500", "http://localhost:3100", "https://nantty.com", "https://app.nantty.com"]);
   });
 
   it("refuses a wildcard origin", () => {

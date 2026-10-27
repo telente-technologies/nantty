@@ -39,9 +39,9 @@ describe("probe classification", () => {
 
   it("treats unexpired consumer tokens with bad signatures as tampered, but not expired or staff tokens", () => {
     const now = 1_800_000_000;
-    expect(isTamperedConsumerToken(unsignedToken({ aud: "zudomart-api", exp: now + 600 }), "zudomart-api", now)).toBe(true);
-    expect(isTamperedConsumerToken(unsignedToken({ aud: "zudomart-api", exp: now - 600 }), "zudomart-api", now)).toBe(false);
-    expect(isTamperedConsumerToken(unsignedToken({ aud: "zudomart-staff", exp: now + 600 }), "zudomart-api", now)).toBe(false);
+    expect(isTamperedConsumerToken(unsignedToken({ aud: "nantty-api", exp: now + 600 }), "nantty-api", now)).toBe(true);
+    expect(isTamperedConsumerToken(unsignedToken({ aud: "nantty-api", exp: now - 600 }), "nantty-api", now)).toBe(false);
+    expect(isTamperedConsumerToken(unsignedToken({ aud: "nantty-staff", exp: now + 600 }), "nantty-api", now)).toBe(false);
   });
 
   it("keeps only a network prefix of the client address", () => {

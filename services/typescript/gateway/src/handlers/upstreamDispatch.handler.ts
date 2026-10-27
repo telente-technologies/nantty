@@ -1,5 +1,5 @@
-import { createResponseContext, type HttpMiddleware } from "@zudojs/http";
-import type { Logger } from "@zudojs/logger";
+import { createResponseContext, type HttpMiddleware } from "@nantty/fastify-platform";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { GatewayConfig } from "../configs/gateway.config.js";
 import { isChatReportSubmission, resolveUpstreamRouteForRequest, sensitiveGuestPathPrefixes, type UpstreamRoute } from "../routes/upstream.routes.js";

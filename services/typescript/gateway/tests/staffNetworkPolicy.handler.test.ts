@@ -9,7 +9,7 @@ import type { GatewayConfig } from "../src/configs/gateway.config.js";
 import { AccessTokenVerifier } from "../src/services/accessTokenVerifier.service.js";
 import { IdentityStaffNetworkPolicySource, StaffNetworkGate } from "../src/services/staffNetworkPolicy.service.js";
 
-const issuer = "https://auth.zudomart.test";
+const issuer = "https://auth.nantty.test";
 const internalToken = "admin-internal-token-for-tests-0001";
 let upstream: Server;
 let upstreamUrl = "";
@@ -41,7 +41,7 @@ beforeAll(async () => {
   const keyPair = await generateKeyPair("EdDSA", { crv: "Ed25519" });
   signingKey = keyPair.privateKey;
   const publicJwk = { ...(await exportJWK(keyPair.publicKey)), kid: "k1", alg: "EdDSA" };
-  verifier = new AccessTokenVerifier({ jwksUrl: "http://unused.invalid/jwks.json", issuer, audience: "zudomart-api" }, createLocalJWKSet({ keys: [publicJwk] }));
+  verifier = new AccessTokenVerifier({ jwksUrl: "http://unused.invalid/jwks.json", issuer, audience: "nantty-api" }, createLocalJWKSet({ keys: [publicJwk] }));
 });
 
 afterAll(async () => {
@@ -51,9 +51,9 @@ afterAll(async () => {
 
 function configFor(identityUrl: string, token: string, failClosed: boolean): GatewayConfig {
   return {
-    host: "127.0.0.1", port: 0, corsOrigins: ["https://admin.zudomart.test"], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, policyGate: null,
+    host: "127.0.0.1", port: 0, corsOrigins: ["https://admin.nantty.test"], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, policyGate: null,
     guestRateLimits: { perMinute: 1000, sensitivePerMinute: 1000 }, trustedProxyHops: 1, staffNetworkPolicy: { internalToken: token, failClosed },
-    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer, audience: "zudomart-api" },
+    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer, audience: "nantty-api" },
     upstreams: { identity: identityUrl, live: upstreamUrl, money: upstreamUrl, notifications: upstreamUrl, social: upstreamUrl, trust: upstreamUrl, commerce: upstreamUrl, media: upstreamUrl, search: upstreamUrl, ads: upstreamUrl, support: upstreamUrl },
   };
 }
@@ -67,7 +67,7 @@ async function startGateway(config: GatewayConfig): Promise<string> {
 
 async function staffToken(staffId: string): Promise<string> {
   return new SignJWT({ sid: "staff-session-1", roles: ["admin", "perm:support:tickets"] }).setProtectedHeader({ alg: "EdDSA", kid: "k1" })
-    .setIssuer(issuer).setAudience("zudomart-admin").setSubject(staffId).setIssuedAt().setExpirationTime("5m").sign(signingKey);
+    .setIssuer(issuer).setAudience("nantty-admin").setSubject(staffId).setIssuedAt().setExpirationTime("5m").sign(signingKey);
 }
 
 async function callAdmin(base: string, path: string, clientIp: string, token: string): Promise<{ status: number; code?: string }> {

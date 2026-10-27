@@ -23,7 +23,7 @@ export interface ProxiedResponse {
 
 const forwardedRequestHeaders = ["accept", "authorization", "content-type", "idempotency-key", "if-match", "if-none-match", "x-chunk-sha256", "x-seller-store", "x-seller-location", "user-agent", "x-client-platform", "x-client-region", "x-device-id", "x-step-up-token", "x-store-storefront"];
 const cdnCountryHeader = "cloudfront-viewer-country";
-const webhookSignatureHeaders = ["verif-hash", "flutterwave-signature", "x-signature", "x-apple-signature", "x-goog-signature", "x-zudomart-push-token", "x-webhook-id", "x-webhook-timestamp"];
+const webhookSignatureHeaders = ["verif-hash", "flutterwave-signature", "x-signature", "x-apple-signature", "x-goog-signature", "x-nantty-push-token", "x-webhook-id", "x-webhook-timestamp"];
 const returnedResponseHeaders = ["cache-control", "content-type", "etag", "idempotent-replayed", "retry-after", "x-request-id"];
 
 const redirectStatuses = new Set([301, 302, 303, 307, 308]);
@@ -32,7 +32,7 @@ export function isSafeRedirectLocation(location: string): boolean {
   if (location.length > 2048 || /[\s\\]/.test(location)) return false;
   try {
     const parsed = new URL(location);
-    if (parsed.protocol === "zudomart:") return true;
+    if (parsed.protocol === "nantty:") return true;
     return parsed.protocol === "https:" && parsed.hostname !== "" && parsed.username === "" && parsed.password === "";
   } catch {
     return false;
@@ -59,11 +59,11 @@ export function buildUpstreamRequestHeaders(request: ProxiedRequest, identitySec
     headers["x-real-ip"] = request.clientIp;
     headers["x-forwarded-for"] = request.clientIp;
   }
-  if (request.principal === undefined) headers["x-zudomart-viewer"] = "anonymous";
-  headers["x-zudomart-age-bracket"] = request.principal?.ageBracket ?? "unknown";
+  if (request.principal === undefined) headers["x-nantty-viewer"] = "anonymous";
+  headers["x-nantty-age-bracket"] = request.principal?.ageBracket ?? "unknown";
   if (request.principal !== undefined) {
-    headers["x-zudomart-account-id"] = request.principal.accountId;
-    headers["x-zudomart-session-id"] = request.principal.sessionId;
+    headers["x-nantty-account-id"] = request.principal.accountId;
+    headers["x-nantty-session-id"] = request.principal.sessionId;
   }
   if (identitySecret !== undefined && identitySecret !== "") {
     const path = new URL(request.pathWithQuery, "http://gateway.invalid").pathname;

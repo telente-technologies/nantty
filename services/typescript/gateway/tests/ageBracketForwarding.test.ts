@@ -7,10 +7,10 @@ const request = (overrides: Partial<ProxiedRequest>): ProxiedRequest => ({ metho
 
 describe("age bracket forwarding", () => {
   it("forwards only the verified token's bracket and never a client-supplied one", () => {
-    const spoofed = { "x-zudomart-age-bracket": "adult" };
-    expect(buildUpstreamRequestHeaders(request({ headers: spoofed }))["x-zudomart-age-bracket"]).toBe("unknown");
-    expect(buildUpstreamRequestHeaders(request({ headers: spoofed, principal: { accountId: "a", sessionId: "s", roles: [], ageBracket: "minor" } }))["x-zudomart-age-bracket"]).toBe("minor");
-    expect(buildUpstreamRequestHeaders(request({ principal: { accountId: "a", sessionId: "s", roles: [] } }))["x-zudomart-age-bracket"]).toBe("unknown");
+    const spoofed = { "x-nantty-age-bracket": "adult" };
+    expect(buildUpstreamRequestHeaders(request({ headers: spoofed }))["x-nantty-age-bracket"]).toBe("unknown");
+    expect(buildUpstreamRequestHeaders(request({ headers: spoofed, principal: { accountId: "a", sessionId: "s", roles: [], ageBracket: "minor" } }))["x-nantty-age-bracket"]).toBe("minor");
+    expect(buildUpstreamRequestHeaders(request({ principal: { accountId: "a", sessionId: "s", roles: [] } }))["x-nantty-age-bracket"]).toBe("unknown");
   });
 
   it("reads the age claim without accepting anything but adult or minor", () => {

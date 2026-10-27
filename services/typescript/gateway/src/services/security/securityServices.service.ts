@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { SecurityConfig } from "../../configs/security.config.js";
 import type { ValkeyConnection } from "../valkeyConnection.service.js";

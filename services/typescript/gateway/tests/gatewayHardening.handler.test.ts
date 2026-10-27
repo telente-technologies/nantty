@@ -22,9 +22,9 @@ let base: string;
 
 function buildConfig(upstreamUrl: string): GatewayConfig {
   return {
-    host: "127.0.0.1", port: 0, corsOrigins: ["https://app.zudomart.test"], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, policyGate: null,
+    host: "127.0.0.1", port: 0, corsOrigins: ["https://app.nantty.test"], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, policyGate: null,
     guestRateLimits: { perMinute: 1000, sensitivePerMinute: 1000 },
-    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.zudomart.test", audience: "zudomart-api" },
+    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.nantty.test", audience: "nantty-api" },
     maxRequestBodyBytes: 2048,
     routeRateLimitsPerMinute: { login: 2, search: 3 },
     upstreams: { identity: upstreamUrl, live: upstreamUrl, money: upstreamUrl, notifications: upstreamUrl, social: upstreamUrl, trust: upstreamUrl, commerce: upstreamUrl, media: upstreamUrl, search: upstreamUrl, ads: upstreamUrl, support: upstreamUrl },
@@ -152,12 +152,12 @@ describe("headers, cors, size and tracing", () => {
   });
 
   it("allows only configured origins", async () => {
-    const allowed = await fetch(`${base}/healthz`, { headers: { origin: "https://app.zudomart.test" } });
-    expect(allowed.headers.get("access-control-allow-origin")).toBe("https://app.zudomart.test");
+    const allowed = await fetch(`${base}/healthz`, { headers: { origin: "https://app.nantty.test" } });
+    expect(allowed.headers.get("access-control-allow-origin")).toBe("https://app.nantty.test");
     const denied = await fetch(`${base}/healthz`, { headers: { origin: "https://evil.test" } });
     expect(denied.status).toBe(403);
     expect(denied.headers.get("access-control-allow-origin")).toBeNull();
-    const preflight = await fetch(`${base}/api/v1/posts`, { method: "OPTIONS", headers: { origin: "https://app.zudomart.test", "access-control-request-method": "POST" } });
+    const preflight = await fetch(`${base}/api/v1/posts`, { method: "OPTIONS", headers: { origin: "https://app.nantty.test", "access-control-request-method": "POST" } });
     expect(preflight.status).toBe(204);
     expect(preflight.headers.get("access-control-allow-headers")).toContain("Idempotency-Key");
   });

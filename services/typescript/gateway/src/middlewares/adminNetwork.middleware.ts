@@ -1,6 +1,6 @@
 import { BlockList, isIP } from "node:net";
 
-import { createResponseContext, type HttpMiddleware } from "@zudojs/http";
+import { createResponseContext, type HttpMiddleware } from "@nantty/fastify-platform";
 
 import { isAdminPath } from "../services/security/accessProbeClassifier.service.js";
 

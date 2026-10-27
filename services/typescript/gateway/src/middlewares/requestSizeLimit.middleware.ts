@@ -1,4 +1,4 @@
-import { createResponseContext, type HttpMiddleware } from "@zudojs/http";
+import { createResponseContext, type HttpMiddleware } from "@nantty/fastify-platform";
 
 export function createRequestSizeLimitMiddleware(maximumBytes: number): HttpMiddleware {
   return (context, next) => {

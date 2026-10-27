@@ -1,7 +1,7 @@
 import { createServer, request as httpRequest, type IncomingHttpHeaders, type IncomingMessage, type Server } from "node:http";
 import { pipeline, type Duplex } from "node:stream";
 
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 const hopByHopHeaders = new Set(["host", "proxy-connection", "keep-alive", "transfer-encoding", "te", "trailer"]);
 

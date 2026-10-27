@@ -20,9 +20,9 @@ beforeAll(async () => {
   await new Promise<void>((resolve) => upstream.listen(0, "127.0.0.1", resolve));
   const upstreamUrl = `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`;
   const config: GatewayConfig = {
-    host: "127.0.0.1", port: 0, corsOrigins: ["https://app.zudomart.test"], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, policyGate: null,
+    host: "127.0.0.1", port: 0, corsOrigins: ["https://app.nantty.test"], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, policyGate: null,
     guestRateLimits: { perMinute: 1000, sensitivePerMinute: 1000 }, trustedProxyHops: 1,
-    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.zudomart.test", audience: "zudomart-api" },
+    accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.nantty.test", audience: "nantty-api" },
     routeRateLimitsPerMinute: { login: 2 },
     upstreams: { identity: upstreamUrl, live: upstreamUrl, money: upstreamUrl, notifications: upstreamUrl, social: upstreamUrl, trust: upstreamUrl, commerce: upstreamUrl, media: upstreamUrl, search: upstreamUrl, ads: upstreamUrl, support: upstreamUrl },
   };

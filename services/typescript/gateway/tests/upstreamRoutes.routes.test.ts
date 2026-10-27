@@ -233,7 +233,7 @@ describe("routes added after the full API sweep", () => {
     expect(route?.authentication).toBe(authentication);
   });
 
-  it("lets LiveKit webhooks through without a Zudomart token and with the raw body", () => {
+  it("lets LiveKit webhooks through without a Nantty token and with the raw body", () => {
     const route = resolveUpstreamRouteForRequest("POST", "/api/v1/live/webhooks/livekit");
     expect(route).toMatchObject({ upstream: "live", authentication: "optional", rawBodyPassthrough: true });
   });

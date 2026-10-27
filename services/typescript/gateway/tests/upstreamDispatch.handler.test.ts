@@ -15,8 +15,8 @@ interface RecordedUpstreamRequest {
   readonly body: string;
 }
 
-const issuer = "https://auth.zudomart.test";
-const audience = "zudomart-api";
+const issuer = "https://auth.nantty.test";
+const audience = "nantty-api";
 const recorded: RecordedUpstreamRequest[] = [];
 let upstream: Server;
 let gateway: ReturnType<typeof createGatewayServer>;
@@ -76,7 +76,7 @@ describe("gateway upstream dispatch", () => {
   it("forwards public auth routes with body, query and request id, and strips spoofed identity headers", async () => {
     const response = await fetch(`${gatewayUrl}/api/v1/auth/login?client=mobile`, {
       method: "POST",
-      headers: { "content-type": "application/json", "x-zudomart-account-id": "spoofed" },
+      headers: { "content-type": "application/json", "x-nantty-account-id": "spoofed" },
       body: JSON.stringify({ identifier: "ada", password: "secret123" }),
     });
     expect(response.status).toBe(200);
@@ -85,7 +85,7 @@ describe("gateway upstream dispatch", () => {
     expect(forwarded?.url).toBe("/api/v1/auth/login?client=mobile");
     expect(JSON.parse(forwarded?.body ?? "{}")).toEqual({ identifier: "ada", password: "secret123" });
     expect(forwarded?.headers["x-request-id"]).toBeTruthy();
-    expect(forwarded?.headers["x-zudomart-account-id"]).toBeUndefined();
+    expect(forwarded?.headers["x-nantty-account-id"]).toBeUndefined();
   });
 
   it("rejects protected routes without a valid access token before reaching the upstream", async () => {
@@ -104,8 +104,8 @@ describe("gateway upstream dispatch", () => {
       body: JSON.stringify({ refreshToken: null }),
     });
     expect(response.status).toBe(200);
-    expect(recorded.at(-1)?.headers["x-zudomart-account-id"]).toBe("account-1");
-    expect(recorded.at(-1)?.headers["x-zudomart-session-id"]).toBe("session-1");
+    expect(recorded.at(-1)?.headers["x-nantty-account-id"]).toBe("account-1");
+    expect(recorded.at(-1)?.headers["x-nantty-session-id"]).toBe("session-1");
   });
 
   it("lets refresh through with an expired access token attached", async () => {
@@ -115,7 +115,7 @@ describe("gateway upstream dispatch", () => {
       body: JSON.stringify({ refreshToken: "x".repeat(43) }),
     });
     expect(response.status).toBe(200);
-    expect(recorded.at(-1)?.headers["x-zudomart-account-id"]).toBeUndefined();
+    expect(recorded.at(-1)?.headers["x-nantty-account-id"]).toBeUndefined();
   });
 
   it("returns 404 for routes without an upstream", async () => {
@@ -127,9 +127,9 @@ describe("guest browsing", () => {
   it("serves public GET routes without a token and marks the viewer anonymous", async () => {
     const response = await fetch(`${gatewayUrl}/api/v1/lives`, { headers: { "x-device-id": "device-guest-0001" } });
     expect(response.status).toBe(200);
-    expect(recorded.at(-1)?.headers["x-zudomart-viewer"]).toBe("anonymous");
+    expect(recorded.at(-1)?.headers["x-nantty-viewer"]).toBe("anonymous");
     expect(recorded.at(-1)?.headers["x-device-id"]).toBe("device-guest-0001");
-    expect(recorded.at(-1)?.headers["x-zudomart-account-id"]).toBeUndefined();
+    expect(recorded.at(-1)?.headers["x-nantty-account-id"]).toBeUndefined();
   });
 
   it("answers 401 UNAUTHENTICATED on private routes and for guest writes to live rooms", async () => {
