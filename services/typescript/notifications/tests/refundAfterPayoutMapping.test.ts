@@ -13,20 +13,20 @@ const clawedBack = {
 };
 
 describe("refund after the seller was paid", () => {
-  it("tells the buyer what came back and which Zudomart fees were kept", () => {
+  it("tells the buyer what came back and which Nantty fees were kept", () => {
     const mapping = eventMappings["escrow.clawedBack"];
     expect(mapping).toBeDefined();
     const event = makeEvent("escrow.clawedBack", clawedBack);
     const [intent] = mapping!(event, new EventDataReader(event.data), context);
     expect(intent?.recipientUserId).toBe("buyer1");
-    expect(intent?.inApp?.body).toContain("₦9,710.00 is back in your Zudomart wallet");
-    expect(intent?.inApp?.body).toContain("Zudomart's escrow fee (₦150.00) and payment processing fee (₦140.00) aren't refunded");
+    expect(intent?.inApp?.body).toContain("₦9,710.00 is back in your Nantty wallet");
+    expect(intent?.inApp?.body).toContain("Nantty's escrow fee (₦150.00) and payment processing fee (₦140.00) aren't refunded");
     expect(intent?.email?.(makeRecipient({ accountId: "buyer1" })).props).toMatchObject({ refund: ngn(971_000) });
   });
 
   it("keeps the plain refund copy when nothing was kept", () => {
     const event = makeEvent("escrow.refunded", { ...clawedBack, status: "refunded", refunded: ngn(1_000_000), refundBreakdown: null, refundDestination: "wallet" });
     const [intent] = eventMappings["escrow.refunded"]!(event, new EventDataReader(event.data), context);
-    expect(intent?.inApp?.body).toBe("The money is back in your Zudomart wallet. You can spend it or withdraw it to your bank.");
+    expect(intent?.inApp?.body).toBe("The money is back in your Nantty wallet. You can spend it or withdraw it to your bank.");
   });
 });

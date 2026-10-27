@@ -10,7 +10,7 @@ const deviceDetails = (data: EventDataReader, occurredAt: string) => ({
 export const accountRegistered: EventMapping = (event, data) => [
   intentFor(event, data.text("accountId"), {
     category: "auth",
-    inApp: { category: "system", title: "Welcome to Zudomart", body: "Buy from real sellers near you. Your money stays in escrow until you confirm delivery." },
+    inApp: { category: "system", title: "Welcome to Nantty", body: "Buy from real sellers near you. Your money stays in escrow until you confirm delivery." },
     email: (recipient) => plan("welcome", { firstName: recipient.firstName, username: data.text("username") }),
   }),
 ];
@@ -63,7 +63,7 @@ export const refreshTokenReuseDetected: EventMapping = (event, data) => [
   intentFor(event, data.text("accountId"), {
     category: "auth",
     inApp: { category: "system", title: "We signed you out for your safety", body: "We saw suspicious activity on your session. Sign in again and change your password." },
-    email: (recipient) => plan("sessionsRevoked", { firstName: recipient.firstName, sessionCount: data.integer("sessionCount", 1), initiatedBy: "zudomart", occurredAt: event.occurredAt }),
+    email: (recipient) => plan("sessionsRevoked", { firstName: recipient.firstName, sessionCount: data.integer("sessionCount", 1), initiatedBy: "nantty", occurredAt: event.occurredAt }),
   }),
 ];
 
@@ -137,7 +137,7 @@ export const appealDecided: EventMapping = (event, data, context) => [
 export const reportClosed: EventMapping = (event, data) => [
   intentFor(event, data.text("reporterUserId"), {
     category: "trust",
-    inApp: { category: "system", title: "Your report was reviewed", body: "Thanks for helping keep Zudomart safe. Open the email for the outcome." },
+    inApp: { category: "system", title: "Your report was reviewed", body: "Thanks for helping keep Nantty safe. Open the email for the outcome." },
     email: (recipient) => plan("reportOutcome", { firstName: recipient.firstName, reportId: data.text("reportId"), reportedWhat: data.text("reportedWhat"), outcome: data.text("outcome") === "action_taken" ? "action_taken" : "no_violation", reportedAt: data.text("reportedAt") }),
   }),
 ];

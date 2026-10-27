@@ -8,7 +8,7 @@ export const adInviteCreated: EventMapping = (event, data) => {
   return [
     intentFor(event, data.text("inviteeUserId"), {
       category: "seller",
-      inApp: { category: "system", title: "Ad account invite", body: `${invitedBy} invited you to ${accountName} on Zudomart Ads.`, data: { url: inviteUrl, screen: "AdAccountInvite", inviteId: data.text("inviteId", "") } },
+      inApp: { category: "system", title: "Ad account invite", body: `${invitedBy} invited you to ${accountName} on Nantty Ads.`, data: { url: inviteUrl, screen: "AdAccountInvite", inviteId: data.text("inviteId", "") } },
       email: (recipient) => plan("adAccountInvite", { firstName: recipient.firstName, accountName, role: data.text("role", "advertiser"), invitedBy, inviteUrl, expiresAt: data.text("expiresAt", event.occurredAt) }),
     }),
   ];

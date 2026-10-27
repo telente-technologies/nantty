@@ -14,7 +14,7 @@ export const anniversaryReached: EventMapping = (event, data) => {
   return [
     intentFor(event, data.text("accountId"), {
       category: "milestones",
-      inApp: { category: "system", title: "Happy Zudoversary!", body: `Thanks for being part of Zudomart for ${label}.` },
+      inApp: { category: "system", title: "Happy Nantty anniversary!", body: `Thanks for being part of Nantty for ${label}.` },
       email: (recipient) => plan("zudoversary", { firstName: recipient.firstName, years, ...(Object.keys(stats).length > 0 ? { stats } : {}) }),
     }),
   ];

@@ -17,7 +17,7 @@ describe("undelivered order under staff review", () => {
     for (const intent of intents) {
       expect(intent.inApp?.title).toBe("Order under review");
       expect(intent.inApp?.body).toContain("ZM-48213");
-      expect(intent.inApp?.body).toContain("Zudomart staff");
+      expect(intent.inApp?.body).toContain("Nantty staff");
       expect(intent.push?.title).toBe("Order under review");
       expect(intent.inApp?.data).toMatchObject({ orderId: "o1", escrowId: "e1" });
     }

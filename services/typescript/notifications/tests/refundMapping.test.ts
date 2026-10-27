@@ -11,12 +11,12 @@ const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https
 const refunded = { escrowId: "e1", orderId: "o1", orderNumber: "ZM-48213", buyerUserId: "buyer1", sellerUserId: "seller1", refunded: { amountMinor: 1850000, currency: "NGN" } };
 
 describe("refund notifications say where the money lands", () => {
-  it("tells the buyer an escrow refund is back in their Zudomart wallet", () => {
+  it("tells the buyer an escrow refund is back in their Nantty wallet", () => {
     const event = makeEvent("escrow.refunded", { ...refunded, refundDestination: "wallet" });
     const [intent] = escrowRefunded(event, new EventDataReader(event.data), context);
-    expect(intent?.inApp?.body).toBe("The money is back in your Zudomart wallet. You can spend it or withdraw it to your bank.");
-    expect(intent?.push?.body).toBe("It's back in your Zudomart wallet.");
-    expect(intent?.email?.(makeRecipient({ accountId: "buyer1" })).props).toMatchObject({ refundDestination: "wallet", refundMethod: "Your Zudomart wallet" });
+    expect(intent?.inApp?.body).toBe("The money is back in your Nantty wallet. You can spend it or withdraw it to your bank.");
+    expect(intent?.push?.body).toBe("It's back in your Nantty wallet.");
+    expect(intent?.email?.(makeRecipient({ accountId: "buyer1" })).props).toMatchObject({ refundDestination: "wallet", refundMethod: "Your Nantty wallet" });
   });
 
   it("tells the buyer a provider refund goes back to how they paid", () => {
@@ -32,7 +32,7 @@ describe("refund notifications say where the money lands", () => {
       const event = makeEvent("escrow.partiallyRefunded", data);
       const [intent] = escrowPartiallyRefunded(event, new EventDataReader(event.data), context);
       expect(intent?.inApp?.title).toBe("Partial refund issued");
-      expect(intent?.inApp?.body).toContain("Zudomart wallet");
+      expect(intent?.inApp?.body).toContain("Nantty wallet");
       expect(intent?.inApp?.body).not.toContain("original payment method");
     }
   });
@@ -48,6 +48,6 @@ describe("refund notifications say where the money lands", () => {
     await harness.deviceTokens.register("buyer1", "ExponentPushToken[b1]", "ios");
     const handler = new HandleDomainEventHandler(harness.dispatcher, { handlePolicyPublished: async () => undefined }, context, silentLogger);
     await handler.execute({ event: makeEvent("escrow.refunded", { ...refunded, refundDestination: "wallet" }) });
-    expect(harness.pushSender.sent.map((push) => [push.content.title, push.content.body])).toEqual([["Refund issued", "It's back in your Zudomart wallet."]]);
+    expect(harness.pushSender.sent.map((push) => [push.content.title, push.content.body])).toEqual([["Refund issued", "It's back in your Nantty wallet."]]);
   });
 });

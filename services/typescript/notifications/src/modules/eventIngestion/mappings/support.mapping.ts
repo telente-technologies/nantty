@@ -14,12 +14,12 @@ export const ticketCreated: EventMapping = (event, data, context) => [
 
 export const ticketReplied: EventMapping = (event, data, context) => {
   if (data.text("authorKind", "customer") !== "agent") return [];
-  const agentName = data.text("agentName", "Zudomart Support");
+  const agentName = data.text("agentName", "Nantty Support");
   return [
     intentFor(event, data.text("accountId"), {
       category: "support",
       inApp: { category: "system", title: "Support replied to your request", body: `${agentName}: ${data.text("message").slice(0, 120)}`, data: linkData(context, data) },
-      push: { title: "Zudomart Support replied", body: data.text("message").slice(0, 120), data: linkData(context, data) },
+      push: { title: "Nantty Support replied", body: data.text("message").slice(0, 120), data: linkData(context, data) },
       email: (recipient) => plan("supportAgentReplied", { firstName: recipient.firstName, ticketId: data.text("reference"), subjectLine: data.text("subject"), ticketUrl: ticketUrl(context, data), agentName, message: data.text("message"), repliedAt: data.text("repliedAt") }),
     }),
   ];

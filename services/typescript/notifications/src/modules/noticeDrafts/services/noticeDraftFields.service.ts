@@ -12,7 +12,7 @@ export interface NoticeDraftSource {
   readonly requiresReacceptance: boolean;
 }
 
-export const defaultReacceptNote = "This is a material change. Please review and accept it in the app before the effective date to keep using Zudomart.";
+export const defaultReacceptNote = "This is a material change. Please review and accept it in the app before the effective date to keep using Nantty.";
 
 export function buildNoticeDraftFields(source: NoticeDraftSource, webBaseUrl: string): Omit<NoticeDraft, "updatedAt" | "testSends" | "updatedByName"> {
   const definition = policyDocumentDefinitions[source.documentKey] ?? { title: source.documentTitle, publicPath: `/legal/${source.documentKey}` };

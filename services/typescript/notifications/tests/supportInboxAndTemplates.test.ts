@@ -21,7 +21,7 @@ describe("support team inbox email", () => {
     await handler.execute({ event });
     const staffMail = harness.sender.sent.filter((mail) => mail.to !== "amaka@example.com");
     expect(staffMail.map((mail) => mail.to)).toEqual(["support@zudomart.com", "lead@zudomart.com"]);
-    expect(staffMail[0]?.subject).toBe("[Zudomart Support] SUP-10421 Refund <b>missing</b>");
+    expect(staffMail[0]?.subject).toBe("[Nantty Support] SUP-10421 Refund <b>missing</b>");
     expect(staffMail[0]?.html).toContain("https://admin.zudomart.com/support/7b9e2f3a-1111-4222-8333-123456789abc");
     expect(staffMail[0]?.html).not.toContain("<b>missing</b>");
     expect(staffMail[0]?.text).toContain("Priority: high");

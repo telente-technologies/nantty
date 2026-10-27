@@ -34,7 +34,7 @@ export const escrowReleased: EventMapping = (event, data) => {
 };
 
 const refundCopy = {
-  wallet: { method: "Your Zudomart wallet", inApp: "The money is back in your Zudomart wallet. You can spend it or withdraw it to your bank.", push: "It's back in your Zudomart wallet." },
+  wallet: { method: "Your Nantty wallet", inApp: "The money is back in your Nantty wallet. You can spend it or withdraw it to your bank.", push: "It's back in your Nantty wallet." },
   paymentMethod: { method: "The card or account you paid with", inApp: "Your refund is on its way back to the card or account you paid with. Your bank may take 3–5 business days to show it.", push: "It's on its way back to the card or account you paid with." },
 } as const;
 
@@ -44,8 +44,8 @@ function feesKeptCopy(data: EventDataReader, destination: keyof typeof refundCop
   const breakdown = data.optionalObject("refundBreakdown");
   if (!breakdown) return undefined;
   const money = (key: string) => formatMoney(breakdown.money(key), "en-NG");
-  const landed = destination === "wallet" ? "is back in your Zudomart wallet" : "is on its way back to the card or account you paid with";
-  return `${money("refundedToBuyer")} ${landed}. The seller had already been paid, so Zudomart's escrow fee (${money("escrowFeeKept")}) and payment processing fee (${money("processingFeeKept")}) aren't refunded.`;
+  const landed = destination === "wallet" ? "is back in your Nantty wallet" : "is on its way back to the card or account you paid with";
+  return `${money("refundedToBuyer")} ${landed}. The seller had already been paid, so Nantty's escrow fee (${money("escrowFeeKept")}) and payment processing fee (${money("processingFeeKept")}) aren't refunded.`;
 }
 
 function refundIntent(partial: boolean): EventMapping {
@@ -85,16 +85,16 @@ export const escrowRefundScheduled: EventMapping = (event, data) => {
 export const escrowUnderReview: EventMapping = (event, data) => {
   const order = data.text("orderNumber", "your order");
   const links = { orderId: data.text("orderId"), escrowId: data.text("escrowId") };
-  const push = { title: "Order under review", body: `Order ${order} hasn't been marked delivered, so Zudomart staff are reviewing it.`, data: { orderId: data.text("orderId") } };
+  const push = { title: "Order under review", body: `Order ${order} hasn't been marked delivered, so Nantty staff are reviewing it.`, data: { orderId: data.text("orderId") } };
   return [
     intentFor(event, data.text("buyerUserId"), {
       category: "payments",
-      inApp: { category: "orders", title: "Order under review", body: `Order ${order} still isn't marked delivered after 30 days. Zudomart staff will contact you and the seller. Your payment stays safe and won't go to the seller until this is settled.`, data: links },
+      inApp: { category: "orders", title: "Order under review", body: `Order ${order} still isn't marked delivered after 30 days. Nantty staff will contact you and the seller. Your payment stays safe and won't go to the seller until this is settled.`, data: links },
       push,
     }),
     intentFor(event, data.text("sellerUserId"), {
       category: "escrow",
-      inApp: { category: "orders", title: "Order under review", body: `Order ${order} still isn't marked delivered after 30 days. Zudomart staff will contact you and the buyer. Mark it delivered or send proof of delivery to have the payment released.`, data: links },
+      inApp: { category: "orders", title: "Order under review", body: `Order ${order} still isn't marked delivered after 30 days. Nantty staff will contact you and the buyer. Mark it delivered or send proof of delivery to have the payment released.`, data: links },
       push,
     }),
   ];
@@ -152,11 +152,11 @@ export const disputeSellerResponseOverdue: EventMapping = (event, data) =>
   disputeParties(event, data, (role) => ({
     category: "escrow", variant: role,
     inApp: {
-      category: "orders", title: "Dispute sent to Zudomart review",
+      category: "orders", title: "Dispute sent to Nantty review",
       body: role === "seller" ? "You didn't respond within 48 hours, so our team is now reviewing the dispute. You can still add your side." : "The seller didn't respond within 48 hours, so our team is now reviewing your dispute. Your money stays protected.",
       data: { disputeId: data.text("disputeId"), orderId: data.text("orderId") },
     },
-    push: { title: "Dispute under review", body: "The 48-hour response window ended. Zudomart support is reviewing the case.", data: { disputeId: data.text("disputeId") } },
+    push: { title: "Dispute under review", body: "The 48-hour response window ended. Nantty support is reviewing the case.", data: { disputeId: data.text("disputeId") } },
   }));
 
 export const paymentFailed: EventMapping = (event, data, context) => [
@@ -165,7 +165,7 @@ export const paymentFailed: EventMapping = (event, data, context) => [
     inApp: { category: "system", title: "Payment failed", body: "Your payment did not go through. Try again or use another method.", data: { paymentId: data.text("paymentId") } },
     push: { title: "Payment failed", body: "Your payment did not go through.", data: { paymentId: data.text("paymentId") } },
     email: (recipient) => plan("paymentFailed", {
-      firstName: recipient.firstName, description: data.text("description", "Your Zudomart payment"), amount: data.money("amount"), paymentMethod: data.text("paymentMethod", data.text("provider")),
+      firstName: recipient.firstName, description: data.text("description", "Your Nantty payment"), amount: data.money("amount"), paymentMethod: data.text("paymentMethod", data.text("provider")),
       reason: data.text("reason", "The payment was not completed."), retryUrl: data.text("retryUrl", `${context.webBaseUrl}/orders`),
     }),
   }),

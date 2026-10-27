@@ -63,7 +63,7 @@ export const messageSent: EventMapping = (event, data) => {
   const groupTitle = data.optionalText("conversationTitle");
   return data.objectList("pushRecipients").map((recipient) => {
     const showPreview = recipient.bool("showPreview", true);
-    const title = showPreview ? (inGroup && groupTitle !== undefined ? groupTitle : sender) : "Zudomart";
+    const title = showPreview ? (inGroup && groupTitle !== undefined ? groupTitle : sender) : "Nantty";
     const body = showPreview ? (inGroup ? `${sender} sent a message` : "Sent you a message") : "New message";
     return intentFor(event, recipient.text("userId"), {
       category: "social",

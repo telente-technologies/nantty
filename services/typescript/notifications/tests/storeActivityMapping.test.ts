@@ -58,7 +58,7 @@ describe("chat message pushes", () => {
     expect(harness.notifications.rows).toHaveLength(0);
     expect(harness.pushSender.sent.map((push) => [push.tokens[0], push.content.title, push.content.body])).toEqual([
       ["ExponentPushToken[a]", "Fabric lovers", "Ada sent a message"],
-      ["ExponentPushToken[b]", "Zudomart", "New message"],
+      ["ExponentPushToken[b]", "Nantty", "New message"],
     ]);
     expect(harness.pushSender.sent[0]?.content.data).toEqual({ url: "/chats/c1", conversationId: "c1" });
   });

@@ -18,7 +18,7 @@ export interface RenderedAdminMessage {
   readonly includesUnsubscribeLink: boolean;
 }
 
-const unsubscribeFooterText = "You are getting this because you agreed to Zudomart updates. Unsubscribe: {{unsubscribeUrl}}";
+const unsubscribeFooterText = "You are getting this because you agreed to Nantty updates. Unsubscribe: {{unsubscribeUrl}}";
 
 export function renderAdminMessage(input: AdminMessageInput): RenderedAdminMessage {
   const brand = input.brand ?? defaultEmailBrand;

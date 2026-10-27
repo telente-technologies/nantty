@@ -99,8 +99,8 @@ export const orderCompleted: EventMapping = (event, data, context) => [
   }),
 ];
 
-const sellerCancelledBy = (cancelledBy: string) => (cancelledBy === "buyer" || cancelledBy === "you" ? "buyer" : cancelledBy === "seller" ? "system" : "zudomart");
-const buyerCancelledBy = (cancelledBy: string) => (cancelledBy === "buyer" || cancelledBy === "you" ? "you" : cancelledBy === "seller" ? "seller" : "zudomart");
+const sellerCancelledBy = (cancelledBy: string) => (cancelledBy === "buyer" || cancelledBy === "you" ? "buyer" : cancelledBy === "seller" ? "system" : "nantty");
+const buyerCancelledBy = (cancelledBy: string) => (cancelledBy === "buyer" || cancelledBy === "you" ? "you" : cancelledBy === "seller" ? "seller" : "nantty");
 
 export const orderCancelled: EventMapping = (event, data, context) => {
   // Checkout aborts publish a shell `order.cancelled` with only checkoutId/reason/status.
@@ -126,7 +126,7 @@ export const orderCancelled: EventMapping = (event, data, context) => {
 
 const orderGroupNumber = (data: EventDataReader): string => data.optionalText("orderNumber") ?? data.optionalText("reference") ?? data.text("orderGroupId");
 
-const orderGroupImage = (item: EventDataReader): string => item.optionalText("imageUrl") ?? "https://placehold.co/112x112/e8e4dc/55504a/png?text=Zudomart";
+const orderGroupImage = (item: EventDataReader): string => item.optionalText("imageUrl") ?? "https://placehold.co/112x112/e8e4dc/55504a/png?text=Nantty";
 
 function readOrderGroup(data: EventDataReader): SellerItemGroup | undefined {
   const rawItems = data.rawValues.items;

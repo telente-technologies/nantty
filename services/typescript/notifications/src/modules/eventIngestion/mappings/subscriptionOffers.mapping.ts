@@ -16,7 +16,7 @@ export const subscriptionOfferSent: EventMapping = (event, data) => {
       variant: data.text("sendId", event.id),
       emailAddressOverride: recipientEmail,
       email: () => plan("subscriptionOfferInvite", {
-        planLabels: data.objectList("plans").map((entry) => entry.text("planLabel", "Zudomart plan")),
+        planLabels: data.objectList("plans").map((entry) => entry.text("planLabel", "Nantty plan")),
         ...(amountOff === undefined ? { percentOff: data.integer("percentOff") } : { amountOff }),
         durationCycles: Math.max(1, data.integer("durationCycles", 1)),
         ...(expiresAt === undefined || expiresAt === "" ? {} : { expiresAt }),

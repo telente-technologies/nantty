@@ -45,7 +45,7 @@ export const copyrightContentTakenDown: EventMapping = (event, data, context) =>
   return [
     intentFor(event, data.text("infringerId"), {
       category: "trust",
-      inApp: { category: "system", title: "Content taken down for copyright", body: strikeAdded ? "A copyright strike was added to your account." : "It is no longer visible on Zudomart.", data: statusLink(context) },
+      inApp: { category: "system", title: "Content taken down for copyright", body: strikeAdded ? "A copyright strike was added to your account." : "It is no longer visible on Nantty.", data: statusLink(context) },
       push: { title: "Content taken down", body: "Open your account status for details and your options.", data: statusLink(context) },
       email: (recipient) => plan("contentTakenDown", { ...contentProps(context, data, recipient.firstName), strikeAdded }),
     }),
