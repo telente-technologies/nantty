@@ -4,6 +4,8 @@ import rateLimit from "@fastify/rate-limit";
 import sensible from "@fastify/sensible";
 import { metrics } from "@opentelemetry/api";
 
+export * from "./httpContracts.js";
+
 export interface PlatformPrincipal {
   readonly subject: string;
   readonly permissions: readonly string[];
@@ -57,7 +59,7 @@ export async function createPlatform(options: PlatformOptions): Promise<FastifyI
   app.removeContentTypeParser("application/json");
   app.addContentTypeParser("application/json", { parseAs: "string" }, (_request, body, done) => done(null, body));
 
-  const duration = metrics.getMeter("zudomart.http").createHistogram("http.server.request.duration", { unit: "s", description: "Duration of HTTP server requests." });
+  const duration = metrics.getMeter("nantty.http").createHistogram("http.server.request.duration", { unit: "s", description: "Duration of HTTP server requests." });
   app.decorateRequest("startTime", null);
   app.addHook("onRequest", async (request) => { (request as typeof request & { startTime?: bigint }).startTime = process.hrtime.bigint(); });
   app.addHook("onResponse", async (request, reply) => {
