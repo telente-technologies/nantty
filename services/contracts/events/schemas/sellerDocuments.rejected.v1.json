@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/sellerDocuments.rejected.v1.json",
+  "$id": "https://contracts.nantty.com/events/sellerDocuments.rejected.v1.json",
   "title": "sellerDocuments.rejected",
   "type": "object",
   "additionalProperties": false,

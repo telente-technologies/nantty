@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/liveSafetyScore.generated.v1.json",
+  "$id": "https://contracts.nantty.com/events/liveSafetyScore.generated.v1.json",
   "title": "LiveSafetyScoreGenerated (job on intelligence-trust-live-safety, raw body, no envelope). Advisory only; go-trust decides.",
   "type": "object",
   "additionalProperties": false,

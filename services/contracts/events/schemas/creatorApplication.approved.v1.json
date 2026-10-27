@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/creatorApplication.approved.v1.json",
+  "$id": "https://contracts.nantty.com/events/creatorApplication.approved.v1.json",
   "title": "creatorApplication.approved",
   "type": "object",
   "additionalProperties": false,

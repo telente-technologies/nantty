@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/live.safetyHold.v1.json",
+  "$id": "https://contracts.nantty.com/events/live.safetyHold.v1.json",
   "title": "live.safetyHold (go-trust; go-live pauses the stream for viewers)",
   "type": "object",
   "additionalProperties": false,

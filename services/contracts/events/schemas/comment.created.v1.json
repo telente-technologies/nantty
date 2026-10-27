@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/comment.created.v1.json",
+  "$id": "https://contracts.nantty.com/events/comment.created.v1.json",
   "title": "CommentCreated",
   "type": "object",
   "additionalProperties": false,
@@ -65,7 +65,7 @@
         "null"
       ],
       "format": "uuid",
-      "description": "Post this one quotes, resolved server-side from a Zudomart post link or an explicit quotedPostId."
+      "description": "Post this one quotes, resolved server-side from a Nantty post link or an explicit quotedPostId."
     },
     "notificationsMuted": {
       "type": "boolean",

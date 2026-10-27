@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/liveViewer.unbanned.v1.json",
+  "$id": "https://contracts.nantty.com/events/liveViewer.unbanned.v1.json",
   "title": "LiveViewerUnbanned",
   "type": "object",
   "additionalProperties": false,

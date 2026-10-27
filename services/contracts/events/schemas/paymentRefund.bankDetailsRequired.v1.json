@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/paymentRefund.bankDetailsRequired.v1.json",
+  "$id": "https://contracts.nantty.com/events/paymentRefund.bankDetailsRequired.v1.json",
   "title": "paymentRefund.bankDetailsRequired",
   "description": "The payment provider needs the buyer's bank account to return a bank-transfer payment (refund needs-attention).",
   "type": "object",

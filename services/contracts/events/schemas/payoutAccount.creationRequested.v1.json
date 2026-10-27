@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/payoutAccount.creationRequested.v1.json",
+  "$id": "https://contracts.nantty.com/events/payoutAccount.creationRequested.v1.json",
   "title": "payoutAccount.creationRequested",
   "description": "go-money queued the Flutterwave payout account (transfer recipient, and a settlement subaccount for sellers).",
   "type": "object",

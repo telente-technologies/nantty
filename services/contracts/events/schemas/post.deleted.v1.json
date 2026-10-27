@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/post.deleted.v1.json",
+  "$id": "https://contracts.nantty.com/events/post.deleted.v1.json",
   "title": "PostDeleted",
   "type": "object",
   "additionalProperties": false,

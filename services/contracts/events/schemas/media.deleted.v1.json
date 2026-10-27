@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/media.deleted.v1.json",
+  "$id": "https://contracts.nantty.com/events/media.deleted.v1.json",
   "title": "MediaDeleted",
   "description": "All stored objects of the asset were deleted (chat media expiry, owner or staff request).",
   "type": "object",

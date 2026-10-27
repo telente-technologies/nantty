@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/exchangeRate.updated.v1.json",
+  "$id": "https://contracts.nantty.com/events/exchangeRate.updated.v1.json",
   "title": "ExchangeRateUpdated",
   "type": "object",
   "additionalProperties": false,

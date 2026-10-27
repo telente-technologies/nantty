@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/liveSafety.hostNotice.v1.json",
+  "$id": "https://contracts.nantty.com/events/liveSafety.hostNotice.v1.json",
   "title": "liveSafety.hostNotice (go-live; realtime delivers to user:{hostId} only)",
   "type": "object",
   "additionalProperties": false,

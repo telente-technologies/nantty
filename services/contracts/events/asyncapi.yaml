@@ -1,26 +1,26 @@
 asyncapi: 3.0.0
 info:
-  title: Zudomart domain events
+  title: Nantty domain events
   version: 1.0.0
   description: >
     Durable domain events. Each owning service writes the event to its Postgres outbox in the same
     transaction as the business change; a relay publishes it with publisher confirms to the RabbitMQ
-    topic exchange zudomart.events with routing key = event type (message_id = envelope id).
+    topic exchange nantty.events with routing key = event type (message_id = envelope id).
     Each consumer owns a durable quorum queue bound to the routing keys it needs, with retry queues
     and a dead-letter queue, and must be idempotent on the envelope id. RabbitMQ adopted (owner, 2026-10-03).
 defaultContentType: application/json
 servers:
   aws:
-    host: zudomart-mq.eu-west-1.amazonaws.com:5671
+    host: nantty-mq.eu-west-1.amazonaws.com:5671
     protocol: amqps
-    description: Amazon MQ for RabbitMQ cluster deployment in private subnets, vhost zudomart
+    description: Amazon MQ for RabbitMQ cluster deployment in private subnets, vhost nantty
   local:
     host: localhost:5672
     protocol: amqp
-    description: infra/local docker compose, vhost zudomart
+    description: infra/local docker compose, vhost nantty
 channels:
   domainEvents:
-    address: zudomart.events
+    address: nantty.events
     messages:
       followCreated:
         $ref: '#/components/messages/followCreated'
@@ -556,25 +556,25 @@ channels:
         $ref: '#/components/messages/liveSafetyHostNotice'
   trustContentScores:
     address: intelligence-trust-content-scores
-    description: Job queue bound to zudomart.jobs; Python intelligence sends, go-trust consumes.
+    description: Job queue bound to nantty.jobs; Python intelligence sends, go-trust consumes.
     messages:
       contentScoreGenerated:
         $ref: '#/components/messages/contentScoreGenerated'
   liveFrames:
     address: jobs-live-frames
-    description: Job queue bound to zudomart.jobs; go-live samples one frame per live every 5s (2s when boosted) and sends, Python intelligence consumes.
+    description: Job queue bound to nantty.jobs; go-live samples one frame per live every 5s (2s when boosted) and sends, Python intelligence consumes.
     messages:
       liveFrameCaptured:
         $ref: '#/components/messages/liveFrameCaptured'
   liveAudio:
     address: jobs-live-audio
-    description: Job queue bound to zudomart.jobs; go-live sends short audio segments when LIVE_SAFETY_AUDIO_ENABLED, Python intelligence transcribes and scores them.
+    description: Job queue bound to nantty.jobs; go-live sends short audio segments when LIVE_SAFETY_AUDIO_ENABLED, Python intelligence transcribes and scores them.
     messages:
       liveAudioSegmentCaptured:
         $ref: '#/components/messages/liveAudioSegmentCaptured'
   trustLiveSafety:
     address: intelligence-trust-live-safety
-    description: Job queue bound to zudomart.jobs; Python intelligence sends advisory live safety scores, go-trust applies the policy.
+    description: Job queue bound to nantty.jobs; Python intelligence sends advisory live safety scores, go-trust applies the policy.
     messages:
       liveSafetyScoreGenerated:
         $ref: '#/components/messages/liveSafetyScoreGenerated'
@@ -906,17 +906,17 @@ components:
           - properties: { data: { $ref: './schemas/productBundle.saved.v1.json' } }
     liveFrameCaptured:
       name: liveFrame.captured
-      summary: Job on zudomart.jobs, routing key jobs-live-frames; the body is the platform job wrapper {id, type, payload}.
+      summary: Job on nantty.jobs, routing key jobs-live-frames; the body is the platform job wrapper {id, type, payload}.
       payload:
         $ref: './schemas/liveFrame.captured.v1.json'
     liveAudioSegmentCaptured:
       name: liveAudio.segmentCaptured
-      summary: Job on zudomart.jobs, routing key jobs-live-audio; the body is the platform job wrapper {id, type, payload}.
+      summary: Job on nantty.jobs, routing key jobs-live-audio; the body is the platform job wrapper {id, type, payload}.
       payload:
         $ref: './schemas/liveAudio.segmentCaptured.v1.json'
     liveSafetyScoreGenerated:
       name: liveSafetyScore.generated
-      summary: Job on zudomart.jobs, routing key intelligence-trust-live-safety; raw score body. Advisory only; go-trust applies the policy.
+      summary: Job on nantty.jobs, routing key intelligence-trust-live-safety; raw score body. Advisory only; go-trust applies the policy.
       payload:
         $ref: './schemas/liveSafetyScore.generated.v1.json'
     securityAccessViolationDetected:
@@ -998,7 +998,7 @@ components:
           - properties: { data: { $ref: './schemas/liveSafety.hostNotice.v1.json' } }
     contentScoreGenerated:
       name: contentScore.generated
-      summary: Job on the zudomart.jobs exchange, routing key intelligence-trust-content-scores; the body is the score itself, not an envelope. Advisory only; go-trust applies the policy.
+      summary: Job on the nantty.jobs exchange, routing key intelligence-trust-content-scores; the body is the score itself, not an envelope. Advisory only; go-trust applies the policy.
       payload:
         $ref: './schemas/contentScore.generated.v1.json'
     accountRegistered:

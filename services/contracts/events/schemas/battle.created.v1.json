@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/battle.created.v1.json",
+  "$id": "https://contracts.nantty.com/events/battle.created.v1.json",
   "title": "BattleCreated",
   "type": "object",
   "additionalProperties": true,

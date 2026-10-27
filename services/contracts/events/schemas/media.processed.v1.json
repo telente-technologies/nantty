@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/media.processed.v1.json",
+  "$id": "https://contracts.nantty.com/events/media.processed.v1.json",
   "title": "MediaProcessed",
   "description": "Scanning, moderation and processing passed; derivatives are published and the asset is ready. Private assets (chat, voice, documents, KYC) are served only through signed URLs.",
   "type": "object",

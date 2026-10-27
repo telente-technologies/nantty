@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/media.rejected.v1.json",
+  "$id": "https://contracts.nantty.com/events/media.rejected.v1.json",
   "title": "MediaRejected",
   "description": "The upload failed validation, the malware scan or moderation and was deleted. reason is a stable code such as TYPE_MISMATCH, MALWARE_DETECTED, MODERATION_REJECTED, DURATION_EXCEEDED or PROCESSING_FAILED.",
   "type": "object",

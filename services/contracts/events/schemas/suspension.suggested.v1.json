@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/suspension.suggested.v1.json",
+  "$id": "https://contracts.nantty.com/events/suspension.suggested.v1.json",
   "title": "SuspensionSuggested",
   "description": "Advisory only. goTrust opens a case for an admin to decide; nothing is suspended automatically.",
   "type": "object",

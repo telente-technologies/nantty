@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/planTrial.started.v1.json",
+  "$id": "https://contracts.nantty.com/events/planTrial.started.v1.json",
   "title": "planTrial.started",
   "type": "object",
   "additionalProperties": false,

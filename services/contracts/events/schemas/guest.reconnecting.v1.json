@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/guest.reconnecting.v1.json",
+  "$id": "https://contracts.nantty.com/events/guest.reconnecting.v1.json",
   "title": "GuestReconnecting",
   "type": "object",
   "additionalProperties": false,

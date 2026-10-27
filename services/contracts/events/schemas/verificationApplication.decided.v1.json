@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/verificationApplication.decided.v1.json",
+  "$id": "https://contracts.nantty.com/events/verificationApplication.decided.v1.json",
   "title": "VerificationApplicationDecided",
   "type": "object",
   "additionalProperties": false,

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/media.uploaded.v1.json",
+  "$id": "https://contracts.nantty.com/events/media.uploaded.v1.json",
   "title": "MediaUploaded",
   "description": "A client finished uploading an original file to the quarantine bucket; processing is queued.",
   "type": "object",

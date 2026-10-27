@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/subscriptionOffer.sent.v1.json",
+  "$id": "https://contracts.nantty.com/events/subscriptionOffer.sent.v1.json",
   "title": "subscriptionOffer.sent",
-  "description": "Staff emailed a subscription discount link. The recipient may not have a Zudomart account; claimUrl carries the link token, so consumers must not log it.",
+  "description": "Staff emailed a subscription discount link. The recipient may not have a Nantty account; claimUrl carries the link token, so consumers must not log it.",
   "type": "object",
   "additionalProperties": false,
   "required": ["sendId", "linkId", "recipientEmail", "note", "claimUrl", "discountKind", "plans", "durationCycles", "expiresAt", "singleUse", "sentByStaffId"],

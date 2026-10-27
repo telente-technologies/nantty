@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/wallet.funded.v1.json",
+  "$id": "https://contracts.nantty.com/events/wallet.funded.v1.json",
   "title": "WalletFunded",
   "type": "object",
   "additionalProperties": false,

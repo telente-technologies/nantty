@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/payoutAccount.verified.v1.json",
+  "$id": "https://contracts.nantty.com/events/payoutAccount.verified.v1.json",
   "title": "payoutAccount.verified",
   "description": "Every Flutterwave object the person needs exists; withdrawals are enabled.",
   "type": "object",

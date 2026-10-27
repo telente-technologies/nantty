@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/adReport.ready.v1.json",
+  "$id": "https://contracts.nantty.com/events/adReport.ready.v1.json",
   "title": "AdReportReady",
   "description": "A scheduled Ads Manager report was generated. Notifications emails every recipient a summary and the expiring CSV and PDF links.",
   "type": "object",

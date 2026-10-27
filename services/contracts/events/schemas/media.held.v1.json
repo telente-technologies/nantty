@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/media.held.v1.json",
+  "$id": "https://contracts.nantty.com/events/media.held.v1.json",
   "title": "MediaHeld",
   "description": "The moderation score put the upload in the human review queue; nothing is published until staff approve it.",
   "type": "object",

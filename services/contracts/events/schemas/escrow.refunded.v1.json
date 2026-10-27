@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/escrow.refunded.v1.json",
+  "$id": "https://contracts.nantty.com/events/escrow.refunded.v1.json",
   "title": "EscrowRefunded",
   "type": "object",
   "additionalProperties": false,
@@ -134,7 +134,7 @@
         "wallet",
         "paymentMethod"
       ],
-      "description": "wallet: unlocked in the buyer's own Zudomart (Flutterwave) wallet. paymentMethod: refunded through Flutterwave to the card or account the buyer paid with."
+      "description": "wallet: unlocked in the buyer's own Nantty (Flutterwave) wallet. paymentMethod: refunded through Flutterwave to the card or account the buyer paid with."
     }
   }
 }

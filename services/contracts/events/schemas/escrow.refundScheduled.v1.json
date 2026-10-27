@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/escrow.refundScheduled.v1.json",
+  "$id": "https://contracts.nantty.com/events/escrow.refundScheduled.v1.json",
   "title": "EscrowRefundScheduled",
   "description": "A refund arrived before the buyer's card payment settled. It is stored and runs automatically once the funds reach the buyer's wallet; the escrow cannot be released meanwhile.",
   "type": "object",

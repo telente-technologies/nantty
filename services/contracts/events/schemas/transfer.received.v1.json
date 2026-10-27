@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/transfer.received.v1.json",
+  "$id": "https://contracts.nantty.com/events/transfer.received.v1.json",
   "title": "TransferReceived",
   "type": "object",
   "additionalProperties": false,

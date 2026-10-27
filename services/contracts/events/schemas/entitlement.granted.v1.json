@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/entitlement.granted.v1.json",
+  "$id": "https://contracts.nantty.com/events/entitlement.granted.v1.json",
   "title": "entitlement.granted",
   "description": "A subscription now grants its plan: checkmark (blue, gold, black) and seller plan. goIdentity shows the badge (gold only after KYB); seller gating reads sellerPlan.",
   "type": "object",

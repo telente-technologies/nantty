@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/reconciliation.alertRaised.v1.json",
+  "$id": "https://contracts.nantty.com/events/reconciliation.alertRaised.v1.json",
   "title": "ReconciliationAlertRaised",
   "type": "object",
   "additionalProperties": false,

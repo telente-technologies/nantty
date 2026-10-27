@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/entitlement.graceStarted.v1.json",
+  "$id": "https://contracts.nantty.com/events/entitlement.graceStarted.v1.json",
   "title": "entitlement.graceStarted",
   "description": "Black payment lapsed: the badge stays during the admin grace period (default 14 days).",
   "type": "object",

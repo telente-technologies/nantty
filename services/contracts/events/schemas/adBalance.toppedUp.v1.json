@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/adBalance.toppedUp.v1.json",
+  "$id": "https://contracts.nantty.com/events/adBalance.toppedUp.v1.json",
   "title": "AdBalanceToppedUp",
   "description": "Prepaid ad credit was added to an ad account, by Flutterwave top-up or from the owner's withdrawable earnings (source = earnings).",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/liveAudio.segmentCaptured.v1.json",
+  "$id": "https://contracts.nantty.com/events/liveAudio.segmentCaptured.v1.json",
   "title": "LiveAudioSegmentCaptured (job on jobs-live-audio; go-live sends when LIVE_SAFETY_AUDIO_ENABLED, intelligence consumes)",
   "type": "object",
   "additionalProperties": false,

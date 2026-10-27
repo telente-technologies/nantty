@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/creatorApplication.ineligible.v1.json",
+  "$id": "https://contracts.nantty.com/events/creatorApplication.ineligible.v1.json",
   "title": "creatorApplication.ineligible",
   "type": "object",
   "additionalProperties": false,

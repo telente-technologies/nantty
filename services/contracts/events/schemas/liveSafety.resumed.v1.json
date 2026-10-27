@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.zudomart.com/events/liveSafety.resumed.v1.json",
+  "$id": "https://contracts.nantty.com/events/liveSafety.resumed.v1.json",
   "title": "liveSafety.resumed (go-live; realtime fans out to live:{liveId})",
   "type": "object",
   "additionalProperties": false,
