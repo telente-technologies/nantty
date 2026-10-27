@@ -22,7 +22,7 @@ export async function buildStoreConversationViews(context: HandlerContext, db: D
     const buyerMember = conversation.members.find((member) => member.accountId === buyerId);
     return {
       id: conversation.id,
-      customer: { id: buyerId, name: summary?.name ?? "Zudomart user", username: summary?.username ?? "", avatarUrl: summary?.avatarUrl ?? null },
+      customer: { id: buyerId, name: summary?.name ?? "Nantty user", username: summary?.username ?? "", avatarUrl: summary?.avatarUrl ?? null },
       orderId: conversation.orderId, orderNumber: conversation.orderNumber,
       lastMessage: last === undefined ? null : { kind: last.kind, from: last.senderId === buyerId ? "customer" : "seller", createdAt: last.createdAt.toISOString() },
       unreadCount: storeMember?.unreadCount ?? 0,

@@ -1,4 +1,7 @@
-export const zudomartPostLinkHosts: readonly string[] = ["zudomart.com", "www.zudomart.com", "app.zudomart.com", "zudomart.app", "www.zudomart.app"];
+export const nanttyPostLinkHosts: readonly string[] = ["nantty.com", "www.nantty.com", "app.nantty.com", "zudomart.com", "www.zudomart.com", "app.zudomart.com", "zudomart.app", "www.zudomart.app"];
+
+/** @deprecated Use nanttyPostLinkHosts; legacy links remain accepted. */
+export const zudomartPostLinkHosts = nanttyPostLinkHosts;
 
 const urlPattern = /https?:\/\/[^\s<>"']+/gi;
 const trailingPunctuationPattern = /[.,!?;:)\]}'"]+$/;
@@ -22,7 +25,7 @@ export function readPostIdFromUrl(rawUrl: string): string | null {
   }
   if (url.protocol !== "https:" && url.protocol !== "http:") return null;
   if (url.username !== "" || url.password !== "" || url.port !== "") return null;
-  if (!zudomartPostLinkHosts.includes(url.hostname.toLowerCase())) return null;
+  if (!nanttyPostLinkHosts.includes(url.hostname.toLowerCase())) return null;
   if ([...url.searchParams.keys()].some((key) => commentQueryKeys.includes(key.toLowerCase()))) return null;
   const segments = url.pathname.split("/").filter((segment) => segment !== "");
   if (segments.length !== 2) return null;

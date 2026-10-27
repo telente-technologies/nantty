@@ -10,7 +10,7 @@ const reasonLabels: Readonly<Record<ReasonCode, string>> = {
   mutuals: "Followed by people you follow",
   interests: "Similar to posts you liked",
   popular_in_region: "Popular in your region",
-  popular: "Popular on Zudomart",
+  popular: "Popular on Nantty",
 };
 const reasonWeights: Readonly<Record<ReasonCode, number>> = { mutuals: 3, interests: 2, popular_in_region: 1.5, popular: 1 };
 

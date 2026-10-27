@@ -19,7 +19,7 @@ export function createSendStoreMessageHandler(context: HandlerContext): Handler<
     const conversation = await storeInboxRepository.findForStore(db, command.storeId, command.conversationId);
     if (conversation === null) throw notFound("CONVERSATION_NOT_FOUND", "That conversation could not be found.");
     const buyerId = buyerIdOf(conversation, command.storeId);
-    const customerName = (await context.directory.findUserSummaries([buyerId])).get(buyerId)?.name ?? "Zudomart user";
+    const customerName = (await context.directory.findUserSummaries([buyerId])).get(buyerId)?.name ?? "Nantty user";
     const view = async (row: MessageRow) => (await buildStoreMessageViews(context, command.senderAccountId, [row], buyerId, customerName))[0] as StoreMessageView;
     if (command.idempotencyKey !== undefined) {
       const existing = await messageRepository.findByClientId(db, conversation.id, command.senderAccountId, command.idempotencyKey);

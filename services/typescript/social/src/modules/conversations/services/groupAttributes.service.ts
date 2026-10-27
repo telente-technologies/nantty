@@ -7,7 +7,7 @@ const minimumSealedLength = 64;
 
 export function assertNoPlaintextGroupName(name: unknown): void {
   if (name !== undefined && name !== null && name !== "") {
-    throw unprocessable("PLAINTEXT_NOT_ACCEPTED", "Group names and photos are end-to-end encrypted. Update Zudomart to create or rename groups.", { fields: ["name"] });
+    throw unprocessable("PLAINTEXT_NOT_ACCEPTED", "Group names and photos are end-to-end encrypted. Update Nantty to create or rename groups.", { fields: ["name"] });
   }
 }
 

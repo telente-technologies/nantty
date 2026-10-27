@@ -7,6 +7,9 @@ const other = "0192f0a0-0000-7000-8000-0000000000c2";
 
 describe("post link parsing", () => {
   it.each([
+    `https://nantty.com/post/${id}`,
+    `https://www.nantty.com/posts/${id}`,
+    `https://app.nantty.com/clip/${id}`,
     `https://app.zudomart.com/post/${id}`,
     `http://zudomart.com/post/${id}`,
     `https://www.zudomart.com/posts/${id}/`,
@@ -18,6 +21,7 @@ describe("post link parsing", () => {
 
   it.each([
     [`https://evil.io/post/${id}`, "a foreign domain"],
+    [`https://nantty.com.evil.io/post/${id}`, "a Nantty lookalike domain"],
     [`https://zudomart.com.evil.io/post/${id}`, "a lookalike suffix domain"],
     [`https://evilzudomart.com/post/${id}`, "a lookalike prefix domain"],
     [`https://zudomart.com@evil.io/post/${id}`, "credentials pointing elsewhere"],

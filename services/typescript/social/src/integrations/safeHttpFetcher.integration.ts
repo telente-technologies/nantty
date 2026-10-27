@@ -5,7 +5,7 @@ import { isIP, type LookupFunction } from "node:net";
 
 import { assertUrlIsSafeToFetch, BlockedUrlError, resolvePublicAddressOrThrow, type AddressLookup, type ResolvedAddress } from "../utils/ssrfGuard.util.js";
 
-export const linkPreviewUserAgent = "ZudomartBot/1.0 (+https://app.zudomart.com/bot; link previews)";
+export const linkPreviewUserAgent = "NanttyBot/1.0 (+https://nantty.com/bot; link previews)";
 
 export interface SafeFetchOptions {
   readonly accept: string;

@@ -14,7 +14,7 @@ export function createShareToChatsHandler(context: HandlerContext): Handler<Shar
     if (isPost) await loadPostVisibleToViewer(context, senderId, reference.id);
     const unique = [...new Set(conversationIds)];
     if (unique.some((conversationId) => !encryptions.some((candidate) => candidate.conversationId === conversationId))) {
-      throw unprocessable("ENCRYPTION_REQUIRED", "Shared items are end-to-end encrypted. Update Zudomart to share to chats.");
+      throw unprocessable("ENCRYPTION_REQUIRED", "Shared items are end-to-end encrypted. Update Nantty to share to chats.");
     }
     let sentCount = 0;
     for (const conversationId of unique) {

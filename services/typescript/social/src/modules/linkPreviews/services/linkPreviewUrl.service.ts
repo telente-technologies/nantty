@@ -1,7 +1,7 @@
 const urlInTextPattern = /https?:\/\/[^\s<>"'`]+/gi;
 const trackingParameterPattern = /^(utm_[a-z]+|fbclid|gclid|dclid|msclkid|mc_cid|mc_eid|igshid|si|ref_src|_hsenc|_hsmi)$/i;
 
-export const defaultInternalHosts: readonly string[] = ["nantty.com", "zudomart.com", "app.zudomart.com", "zudomart.app"];
+export const defaultInternalHosts: readonly string[] = ["nantty.com", "www.nantty.com", "app.nantty.com", "zudomart.com", "www.zudomart.com", "app.zudomart.com", "zudomart.app"];
 
 export function findUrlsInText(text: string): string[] {
   return (text.match(urlInTextPattern) ?? []).map((url) => url.replace(/[.,!?;:)\]}]+$/, ""));

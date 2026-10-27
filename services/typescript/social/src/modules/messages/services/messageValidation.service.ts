@@ -35,7 +35,7 @@ export function assertNoPlaintext(plaintext: OutgoingMessageInput["plaintext"]):
     return value !== undefined && value !== null && value !== "";
   });
   if (sent.length > 0) {
-    throw unprocessable("PLAINTEXT_NOT_ACCEPTED", "Chats are end-to-end encrypted. Update Zudomart to send this: text, locations, polls, documents and shared items must be inside the encrypted message.", { fields: sent });
+    throw unprocessable("PLAINTEXT_NOT_ACCEPTED", "Chats are end-to-end encrypted. Update Nantty to send this: text, locations, polls, documents and shared items must be inside the encrypted message.", { fields: sent });
   }
 }
 
