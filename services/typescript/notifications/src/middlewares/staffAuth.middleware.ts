@@ -1,4 +1,4 @@
-import type { HttpRequestContext } from "@zudojs/http";
+import type { HttpRequestContext } from "@nantty/fastify-platform";
 import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from "jose";
 
 import { staffAccessAudience, staffStepUpAudience } from "../constants/delivery.constant.js";

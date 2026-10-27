@@ -1,6 +1,6 @@
 import { DeleteMessageCommand, ReceiveMessageCommand, SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { PublishableDomainEvent } from "../interfaces/domainEventPublisher.interface.js";
 import type { JobQueue, MessageBroker, QueueConsumer, QueueMessage, QueueReader } from "../interfaces/jobQueue.interface.js";

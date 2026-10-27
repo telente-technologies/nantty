@@ -17,7 +17,7 @@ const orderGroup = {
   currency: "NGN",
 };
 
-const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com" };
+const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com" };
 const statusChanged = (to: string) =>
   orderGroupStatusChanged(
     makeEvent("orderGroup.statusChanged", { ...orderGroup, reference: orderGroup.orderNumber, from: "new", to, actorKind: "seller" }),

@@ -12,7 +12,7 @@ const money = (amountMinor: number) => ({ amountMinor, currency: "NGN" });
 
 const groups = [{
   sellerUserId: "seller1", sellerName: "Glow by Zainab", sellerVerified: true, shipping: money(150000), shippingMethod: "GIG Logistics",
-  items: [{ name: "Vitamin C Glow Serum", quantity: 2, unitPrice: money(850000), imageUrl: "https://cdn.zudomart.com/p/serum.jpg" }],
+  items: [{ name: "Vitamin C Glow Serum", quantity: 2, unitPrice: money(850000), imageUrl: "https://cdn.nantty.com/p/serum.jpg" }],
 }];
 
 const order = { orderId: "o1", orderNumber: "ZM-48213", buyerUserId: "buyer1", groups, sellerName: "Glow by Zainab" };
@@ -20,7 +20,7 @@ const orderGroup = {
   orderGroupId: "og1", orderNumber: "ZM-48213", checkoutId: "c1", storeId: "s1", sellerName: "Glow by Zainab", buyerName: "Amaka O.",
   buyerAccountId: "buyer1", sellerAccountId: "seller1", paymentMode: "escrow", subtotalMinor: 1700000, shippingMinor: 150000,
   totalMinor: 1850000, refundedMinor: 0, currency: "NGN", status: "pending",
-  items: [{ name: "Vitamin C Glow Serum", variant: "30ml", quantity: 2, unitPrice: money(850000), imageUrl: "https://cdn.zudomart.com/p/serum.jpg" }],
+  items: [{ name: "Vitamin C Glow Serum", variant: "30ml", quantity: 2, unitPrice: money(850000), imageUrl: "https://cdn.nantty.com/p/serum.jpg" }],
 };
 const dispute = { disputeId: "dsp1", caseNumber: "DSP-10294", orderId: "o1", orderNumber: "ZM-48213", escrowId: "e1", buyerUserId: "buyer1", sellerUserId: "seller1", amount: money(1850000), reason: "Item damaged" };
 const escrow = { escrowId: "e1", orderId: "o1", orderNumber: "ZM-48213", checkoutId: "c1", storeId: "s1", buyerUserId: "buyer1", sellerUserId: "seller1", status: "released", amount: money(1850000), commission: money(92500), refunded: money(1850000), releasedToSeller: money(1757500) };
@@ -29,7 +29,7 @@ const mark = { accountId: "u1", checkmark: "gold", accountName: "Amaka Stores" }
 const plan = { accountId: "u1", storeName: "Amaka Stores", plan: "pro", price: money(500000), interval: "month", cardLabel: "Visa ending 4242" };
 const subscriber = { accountId: "u1", subscriptionId: "s1", audience: "business", accountName: "Amaka Stores", planLabel: "Pro plan", plan: "seller_pro", interval: "month", cardLabel: "Visa ending 4242" };
 const billingItems = [{ kind: "plan_base", label: "Pro plan", amountMinor: 200000 }, { kind: "checkmark", label: "Gold checkmark", amountMinor: 300000 }];
-const caseAction = { accountId: "u1", caseId: "CASE-1", reason: "Counterfeit listings", policy: "Marketplace policy", policyUrl: "https://zudomart.com/policy", appealUrl: "https://zudomart.com/appeal" };
+const caseAction = { accountId: "u1", caseId: "CASE-1", reason: "Counterfeit listings", policy: "Marketplace policy", policyUrl: "https://nantty.com/policy", appealUrl: "https://nantty.com/appeal" };
 
 export interface EventFixture {
   readonly data: Record<string, unknown>;
@@ -40,7 +40,7 @@ export interface EventFixture {
 const ticket = { ticketId: "7b9e2f3a-1111-4222-8333-123456789abc", reference: "SUP-10421", accountId: "u1", subject: "Refund has not arrived", category: "payment", channel: "form" };
 const copyrightRemedy = { claimId: "0192f0a1-7c3e-7000-8000-00000000c1a1", targetType: "clip", targetId: "clip-1", infringerId: "u1", workTitle: "Lagos Nights", reason: "Proof of ownership matches.", canSubmitCounterNotice: true };
 export const eventFixtures: Readonly<Record<string, EventFixture>> = {
-  "order.placed": { data: { ...order, payBy: "2026-10-05T10:00:00.000Z", paymentUrl: "https://zudomart.com/pay/o1" }, templates: ["orderPlaced"], inAppRecipients: ["buyer1"] },
+  "order.placed": { data: { ...order, payBy: "2026-10-05T10:00:00.000Z", paymentUrl: "https://nantty.com/pay/o1" }, templates: ["orderPlaced"], inAppRecipients: ["buyer1"] },
   "orderGroup.created": { data: { ...orderGroup, payBy: "2026-10-05T10:00:00.000Z" }, templates: ["orderPlaced"], inAppRecipients: ["buyer1"] },
   "orderGroup.paid": { data: { ...orderGroup, paidAt: "2026-10-03T10:00:00.000Z", paymentMethod: "Visa •••• 4242" }, templates: ["paymentConfirmed", "sellerNewOrder"], inAppRecipients: ["buyer1", "seller1"] },
   "orderGroup.shipped": { data: { ...orderGroup, occurredAt: "2026-10-06T10:00:00.000Z", courierName: "GIG", trackingNumber: "GIG123", trackingUrl: "https://track.example/GIG123", estimatedDeliveryAt: "2026-10-07T10:00:00.000Z" }, templates: ["orderShipped"], inAppRecipients: ["buyer1"] },
@@ -89,10 +89,10 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "appeal.decided": { data: { accountId: "u1", caseId: "CASE-1", outcome: "overturned", explanation: "We reviewed again." }, templates: ["appealDecision"], inAppRecipients: ["u1"] },
   "report.closed": { data: { reporterUserId: "u1", reportId: "R-9", reportedWhat: "a comment", outcome: "action_taken", reportedAt: "2026-10-01T00:00:00.000Z" }, templates: ["reportOutcome"], inAppRecipients: ["u1"] },
   "dataExport.completed": { data: { accountId: "u1", exportId: "x1", completedAt: "2026-10-03T09:00:00.000Z", expiresAt: "2026-10-10T09:00:00.000Z", sizeBytes: 193000000 }, templates: ["dataExportReady"], inAppRecipients: ["u1"] },
-  "account.anniversaryReached": { data: { accountId: "u1", years: 2, localDate: "2026-10-04", timezone: "Africa/Lagos", joinedAt: "2024-10-04T09:00:00.000Z", stats: { posts: 148, followers: 1260, orders: 37, lives: 9 } }, templates: ["zudoversary"], inAppRecipients: ["u1"] },
+  "account.anniversaryReached": { data: { accountId: "u1", years: 2, localDate: "2026-10-04", timezone: "Africa/Lagos", joinedAt: "2024-10-04T09:00:00.000Z", stats: { posts: 148, followers: 1260, orders: 37, lives: 9 } }, templates: ["nanttyversary"], inAppRecipients: ["u1"] },
   "account.deletionRequested": { data: { accountId: "u1", requestedAt: "2026-10-03T09:00:00.000Z", scheduledFor: "2026-10-17T09:00:00.000Z", retentionPolicy: [] }, templates: ["accountDeletionScheduled"], inAppRecipients: ["u1"] },
   "account.deletionExecuted": { data: { accountId: "u1", executedAt: "2026-10-17T09:00:00.000Z", finalEmail: "amaka@example.com", retentionPolicy: [], appliedSteps: [] }, templates: ["accountDeletionCompleted"], inAppRecipients: [] },
-  "mention.created": { data: { recipientUserId: "u1", actor, surface: "comment", excerpt: "@amaka check this", url: "https://zudomart.com/p/1" }, templates: ["mentionedYou"], inAppRecipients: ["u1"] },
+  "mention.created": { data: { recipientUserId: "u1", actor, surface: "comment", excerpt: "@amaka check this", url: "https://nantty.com/p/1" }, templates: ["mentionedYou"], inAppRecipients: ["u1"] },
   "post.tagged": { data: { recipientUserId: "u1", actor, postId: "p1", kind: "clip", url: "/clips/p1" }, templates: [], inAppRecipients: ["u1"] },
   "post.reshared": { data: { postId: "p2", originalPostId: "p1", authorId: "u2", originalAuthorId: "u1", isQuote: true, actor, surface: "post", url: "/post/p2" }, templates: [], inAppRecipients: ["u1"] },
   "follow.created": { data: { recipientUserId: "u1", actor }, templates: [], inAppRecipients: ["u1"] },
@@ -103,7 +103,7 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "messageRequest.received": { data: { recipientUserId: "u1", actor }, templates: [], inAppRecipients: ["u1"] },
   "gift.sent": { data: { liveId: "l1", giftTransactionId: "g1", receiverUserId: "u1", quantity: 3, totalCoins: 90, sender: actor }, templates: [], inAppRecipients: ["u1"] },
   "creatorSubscription.started": { data: { subscriptionId: "s1", creatorId: "u1", subscriberId: "u2", kind: "initial", creatorShare: money(160000) }, templates: [], inAppRecipients: ["u1"] },
-  "adInvite.created": { data: { inviteId: "i1", accountId: "acc1", accountName: "Ada's Closet", role: "advertiser", invitedBy: "Adaeze", invitedByUserId: "u2", inviteeUserId: "u1", expiresAt: "2026-10-12T09:00:00.000Z", inviteUrl: "https://ads.zudomart.com/invites/i1" }, templates: ["adAccountInvite"], inAppRecipients: ["u1"] },
+  "adInvite.created": { data: { inviteId: "i1", accountId: "acc1", accountName: "Ada's Closet", role: "advertiser", invitedBy: "Adaeze", invitedByUserId: "u2", inviteeUserId: "u1", expiresAt: "2026-10-12T09:00:00.000Z", inviteUrl: "https://ads.nantty.com/invites/i1" }, templates: ["adAccountInvite"], inAppRecipients: ["u1"] },
   "tip.sent": { data: { tipId: "t1", senderUserId: "u2", creatorUserId: "u1", targetType: "post", targetId: "p1", coins: 50, creatorCoins: 35 }, templates: [], inAppRecipients: ["u1"] },
   "affiliateCommission.credited": { data: { commissionId: "a1", creatorId: "u1", orderId: "o1", productId: "p1", storeId: "s1", commission: money(25000) }, templates: [], inAppRecipients: ["u1"] },
   "review.created": { data: { reviewId: "r1", storeId: "s1", rating: 5, authorAccountId: "u2", storeOwnerAccountId: "u1", storeName: "Ada Fabrics" }, templates: [], inAppRecipients: ["u1"] },
@@ -120,7 +120,7 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "ticket.resolved": { data: { ...ticket, resolution: "Refunds take up to 10 business days.", reopenDays: 7, resolvedAt: "2026-10-04T11:00:00.000Z" }, templates: ["supportTicketResolved"], inAppRecipients: ["u1"] },
   "checkmark.approved": { data: { ...mark, renewsAt: "2026-11-03T00:00:00.000Z" }, templates: ["checkmarkApproved"], inAppRecipients: ["u1"] },
   "checkmark.rejected": { data: { ...mark, reasons: ["Documents unclear"], reapplyFrom: "2026-11-03T00:00:00.000Z" }, templates: ["checkmarkRejected"], inAppRecipients: ["u1"] },
-  "checkmark.revoked": { data: { ...mark, reason: "Impersonation", appealUrl: "https://zudomart.com/appeal" }, templates: ["checkmarkRevoked"], inAppRecipients: ["u1"] },
+  "checkmark.revoked": { data: { ...mark, reason: "Impersonation", appealUrl: "https://nantty.com/appeal" }, templates: ["checkmarkRevoked"], inAppRecipients: ["u1"] },
   "checkmark.renewalFailed": { data: { ...mark, price: money(300000), failedAt: "2026-10-03T00:00:00.000Z", graceEndsAt: "2026-10-17T00:00:00.000Z" }, templates: ["checkmarkRenewalDue"], inAppRecipients: ["u1"] },
   "creatorApplication.submitted": { data: { accountId: "u1", applicationId: "CA1" }, templates: ["creatorApplicationReceived"], inAppRecipients: ["u1"] },
   "creatorApplication.approved": { data: { accountId: "u1", handle: "amaka" }, templates: ["creatorApproved"], inAppRecipients: ["u1"] },
@@ -134,7 +134,7 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "planTrial.converted": { data: { ...plan, nextBillingAt: "2026-11-10T00:00:00.000Z", invoiceNumber: "INV-1" }, templates: ["planTrialConverted"], inAppRecipients: ["u1"] },
   "planInvoice.paymentFailed": { data: { ...plan, reason: "Card declined", retryAt: "2026-10-05T00:00:00.000Z", downgradeAt: "2026-10-12T00:00:00.000Z" }, templates: ["planPaymentFailed"], inAppRecipients: ["u1"] },
   "planInvoice.paid": { data: { ...plan, invoiceNumber: "INV-2", paidAt: "2026-10-03T00:00:00.000Z", periodStart: "2026-10-03T00:00:00.000Z", periodEnd: "2026-11-03T00:00:00.000Z", vat: money(37500) }, templates: ["planReceipt"], inAppRecipients: ["u1"] },
-  "verification.eligible": { data: { accountId: "u1", checkmark: "blue", accountName: "@amaka.styles", deepLink: "https://zudomart.com/settings/verification?step=pay" }, templates: ["verificationEligible"], inAppRecipients: ["u1"] },
+  "verification.eligible": { data: { accountId: "u1", checkmark: "blue", accountName: "@amaka.styles", deepLink: "https://nantty.com/settings/verification?step=pay" }, templates: ["verificationEligible"], inAppRecipients: ["u1"] },
   "verification.underReview": { data: { accountId: "u1", checkmark: "gold", accountName: "Adire Studio", caseId: "c1", reviewWithinDays: 3 }, templates: ["verificationUnderReview"], inAppRecipients: ["u1"] },
   "verification.approved": { data: { accountId: "u1", checkmark: "blue", accountName: "@amaka.styles", caseId: "c1", verifiedAt: "2026-10-04T10:00:00.000Z" }, templates: ["verificationApproved"], inAppRecipients: ["u1"] },
   "verification.rejectedRefunded": { data: { accountId: "u1", checkmark: "blue", accountName: "@tobi", caseId: "c1", reasons: ["Name does not match"], refundMethod: "apple_request", reapplyFrom: "2026-11-03T00:00:00.000Z" }, templates: ["verificationRejectedRefunded"], inAppRecipients: ["u1"] },
@@ -145,7 +145,7 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "subscriptionGrace.ending": { data: { ...subscriber, graceEndsAt: "2026-11-23T09:00:00.000Z", amount: money(500000) }, templates: ["subscriptionGraceEnding"], inAppRecipients: ["u1"] },
   "subscription.downgraded": { data: { ...subscriber, reason: "payment_failed", checkmarkRemoved: true }, templates: ["subscriptionDowngraded"], inAppRecipients: ["u1"] },
   "subscriptionCard.expiring": { data: { ...subscriber, expiryMonth: 11, expiryYear: 2026, chargeAt: "2026-12-04T09:00:00.000Z" }, templates: ["subscriptionCardExpiring"], inAppRecipients: ["u1"] },
-  "subscriptionOffer.sent": { data: { sendId: "send1", linkId: "link1", recipientEmail: "Ada@Example.com", note: "Welcome to the pilot.", claimUrl: "https://zudomart.com/offer/Xq3v0mZp9bT2nR8kL5wA7cD1eF4gH6jK0lM2nP4qR6s", discountKind: "percentage", percentOff: 30, plans: [{ planCode: "seller_pro", planLabel: "Pro plan" }], durationCycles: 2, expiresAt: "", singleUse: true, sentByStaffId: "staff1" }, templates: ["subscriptionOfferInvite"], inAppRecipients: [] },
+  "subscriptionOffer.sent": { data: { sendId: "send1", linkId: "link1", recipientEmail: "Ada@Example.com", note: "Welcome to the pilot.", claimUrl: "https://nantty.com/offer/Xq3v0mZp9bT2nR8kL5wA7cD1eF4gH6jK0lM2nP4qR6s", discountKind: "percentage", percentOff: 30, plans: [{ planCode: "seller_pro", planLabel: "Pro plan" }], durationCycles: 2, expiresAt: "", singleUse: true, sentByStaffId: "staff1" }, templates: ["subscriptionOfferInvite"], inAppRecipients: [] },
   "subscriptionPrice.changeNotice": { data: { ...subscriber, oldPrice: money(500000), newPrice: money(600000), effectiveAt: "2026-12-04T09:00:00.000Z" }, templates: ["subscriptionPriceChange"], inAppRecipients: ["u1"] },
   "cardVerification.refunded": { data: { accountId: "u1", amount: money(10000), cardLabel: "Visa ending 4242", reference: "REF-1" }, templates: ["cardVerificationRefunded"], inAppRecipients: ["u1"] },
   "copyrightClaim.warningIssued": { data: { ...copyrightRemedy, deadlineAt: "2026-10-05T11:59:00.000Z", warningId: "0192f0a1-7c3e-7000-8000-00000000c1a2" }, templates: ["copyrightWarning"], inAppRecipients: ["u1"] },

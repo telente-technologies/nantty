@@ -95,14 +95,14 @@ describe("deferred mention email", () => {
 
 describe("policy publication", () => {
   const publish = (id = "evt-policy") => makeEvent("policyVersion.published", { kind: "terms", version: "7", effectiveAt: "2026-11-03T00:00:00.000Z", publishedBy: "Legal Lead", versionId: "terms:7", changeSummary: "We clarified escrow release.", whatChanged: ["Escrow release timing"] }, id);
-  const createHandler = (autoSend: boolean, queued: unknown[]) => new CreateDraftFromPublishedPolicyHandler(harness.drafts, "https://zudomart.com", autoSend, { execute: async (command) => void queued.push(command) as never });
+  const createHandler = (autoSend: boolean, queued: unknown[]) => new CreateDraftFromPublishedPolicyHandler(harness.drafts, "https://nantty.com", autoSend, { execute: async (command) => void queued.push(command) as never });
 
   it("creates the notice draft once and does not send automatically by default", async () => {
     const queued: unknown[] = [];
     await createHandler(false, queued).handlePolicyPublished({ event: publish() });
     await createHandler(false, queued).handlePolicyPublished({ event: publish("evt-policy-2") });
     expect(harness.drafts.rows.size).toBe(1);
-    expect(harness.drafts.rows.get("terms:7")).toMatchObject({ documentTitle: "Terms of Service", subject: "We've updated our Terms of Service", requiresReacceptance: true, documentUrl: "https://zudomart.com/terms" });
+    expect(harness.drafts.rows.get("terms:7")).toMatchObject({ documentTitle: "Terms of Service", subject: "We've updated our Terms of Service", requiresReacceptance: true, documentUrl: "https://nantty.com/terms" });
     expect(queued).toHaveLength(0);
   });
 
@@ -114,12 +114,12 @@ describe("policy publication", () => {
 
   it("sends the draft as a test to the calling admin's own address and records it", async () => {
     await createHandler(false, []).handlePolicyPublished({ event: publish() });
-    harness.identity.staffEmails.set("staff1", "legal@zudomart.com");
-    const handler = new SendNoticeTestEmailHandler({ drafts: harness.drafts, identity: harness.identity, sender: harness.sender, acceptUrl: "https://zudomart.com/settings/legal/accept", brand: undefined as never, now: harness.now });
+    harness.identity.staffEmails.set("staff1", "legal@nantty.com");
+    const handler = new SendNoticeTestEmailHandler({ drafts: harness.drafts, identity: harness.identity, sender: harness.sender, acceptUrl: "https://nantty.com/settings/legal/accept", brand: undefined as never, now: harness.now });
     const draft = await handler.execute({ versionId: "terms:7", actor: { id: "staff1", name: "Legal Lead" } });
     expect(harness.sender.sent).toHaveLength(1);
-    expect(harness.sender.sent[0]).toMatchObject({ to: "legal@zudomart.com" });
+    expect(harness.sender.sent[0]).toMatchObject({ to: "legal@nantty.com" });
     expect(harness.sender.sent[0]?.subject).toContain("[Test]");
-    expect(draft.testSends[0]).toMatchObject({ sentToEmail: "legal@zudomart.com", sentByName: "Legal Lead" });
+    expect(draft.testSends[0]).toMatchObject({ sentToEmail: "legal@nantty.com", sentByName: "Legal Lead" });
   });
 });

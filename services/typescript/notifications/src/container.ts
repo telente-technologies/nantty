@@ -1,5 +1,5 @@
 import { readEmailBrandFromEnvironment } from "@nantty/email-templates";
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { NotificationsConfig } from "./configs/notifications.config.js";
 import { createPrismaClient, type PrismaClient } from "./databases/prisma.database.js";

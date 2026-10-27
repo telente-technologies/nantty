@@ -5,11 +5,11 @@ import { EventDataReader } from "../src/utils/eventDataReader.util.js";
 import { makeEvent } from "./fakes/testHarness.fake.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 
-const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com" };
+const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com" };
 
 describe("identity verification notifications", () => {
   it("tells a queued applicant they can now apply, with a deep link to pay", () => {
-    const data = { accountId: "u1", checkmark: "blue", accountName: "@amaka", deepLink: "https://zudomart.com/settings/verification?step=pay" };
+    const data = { accountId: "u1", checkmark: "blue", accountName: "@amaka", deepLink: "https://nantty.com/settings/verification?step=pay" };
     const [intent] = verificationEligible(makeEvent("verification.eligible", data), new EventDataReader(data), context);
     expect(intent?.inApp?.title).toBe("You can now apply for verification");
     expect(intent?.push?.data).toMatchObject({ url: data.deepLink, screen: "Verification" });

@@ -1,4 +1,4 @@
-import type { HttpRequestContext } from "@zudojs/http";
+import type { HttpRequestContext } from "@nantty/fastify-platform";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { createRequestHandler, createRoutes } from "../src/app.js";
@@ -43,18 +43,18 @@ describe("inbox routes", () => {
   });
 
   it("lists in the page envelope and rejects an unknown filter", async () => {
-    const ok = await call("GET", "/api/v1/notifications?filter=all", { "x-zudomart-account-id": "u1" });
+    const ok = await call("GET", "/api/v1/notifications?filter=all", { "x-nantty-account-id": "u1" });
     expect(ok.status).toBe(200);
     expect(ok.body).toMatchObject({ nextCursor: null, data: [{ title: "Order shipped", read: false }] });
-    expect((await call("GET", "/api/v1/notifications?filter=bogus", { "x-zudomart-account-id": "u1" })).status).toBe(400);
+    expect((await call("GET", "/api/v1/notifications?filter=bogus", { "x-nantty-account-id": "u1" })).status).toBe(400);
   });
 
   it("serves the unread count and marks read with 204, 404 for a stranger", async () => {
-    const headers = { "x-zudomart-account-id": "u1" };
+    const headers = { "x-nantty-account-id": "u1" };
     expect((await call("GET", "/api/v1/notifications/unread-count", headers)).body).toEqual({ count: 1 });
     const id = harness.notifications.rows[0]!.id;
     expect((await call("POST", `/api/v1/notifications/${id}/read`, headers)).status).toBe(204);
-    expect((await call("POST", `/api/v1/notifications/${id}/read`, { "x-zudomart-account-id": "u2" })).status).toBe(404);
+    expect((await call("POST", `/api/v1/notifications/${id}/read`, { "x-nantty-account-id": "u2" })).status).toBe(404);
   });
 
   it("returns 404 for unknown routes", async () => {

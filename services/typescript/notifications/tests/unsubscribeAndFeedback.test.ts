@@ -28,7 +28,7 @@ describe("one-click unsubscribe tokens", () => {
   });
 
   it("a token signed with another secret is rejected", () => {
-    const other = new (harness.unsubscribeTokens.constructor as new (secret: string, base: string) => typeof harness.unsubscribeTokens)("a-different-signing-secret-0123456789abcdef", "https://api.zudomart.test");
+    const other = new (harness.unsubscribeTokens.constructor as new (secret: string, base: string) => typeof harness.unsubscribeTokens)("a-different-signing-secret-0123456789abcdef", "https://api.nantty.test");
     expect(harness.unsubscribeTokens.verify(other.sign("u1"))).toBeNull();
   });
 
@@ -50,7 +50,7 @@ describe("one-click unsubscribe tokens", () => {
   });
 
   it("builds a public one-click URL", () => {
-    expect(harness.unsubscribeTokens.buildUnsubscribeUrl("u1")).toMatch(/^https:\/\/api\.zudomart\.test\/api\/v1\/email\/unsubscribe\?token=/);
+    expect(harness.unsubscribeTokens.buildUnsubscribeUrl("u1")).toMatch(/^https:\/\/api\.nantty\.test\/api\/v1\/email\/unsubscribe\?token=/);
   });
 });
 

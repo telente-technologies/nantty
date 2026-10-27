@@ -1,4 +1,4 @@
-import { createRequestContext } from "@zudojs/http";
+import { createRequestContext } from "@nantty/fastify-platform";
 import { describe, expect, it, vi } from "vitest";
 
 import { createRequestHandler } from "../src/app.js";

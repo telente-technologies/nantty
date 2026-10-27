@@ -6,7 +6,7 @@ import { eventFixtures } from "./fixtures/eventFixtures.fixture.js";
 import { makeEvent } from "./fakes/testHarness.fake.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 
-const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com" };
+const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com" };
 const base = eventFixtures["subscriptionOffer.sent"]!.data as Record<string, unknown>;
 const run = (data: Record<string, unknown>) => subscriptionOfferSent(makeEvent("subscriptionOffer.sent", data), new EventDataReader(data), context);
 

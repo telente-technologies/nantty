@@ -106,7 +106,7 @@ export const orderCancelled: EventMapping = (event, data, context) => {
   // Checkout aborts publish a shell `order.cancelled` with only checkoutId/reason/status.
   // It has no buyer or groups, so there is no notification to send.
   if (data.optionalText("buyerUserId") === undefined) return [];
-  const cancelledBy = data.text("cancelledBy", "zudomart");
+  const cancelledBy = data.text("cancelledBy", "nantty");
   return [
     intentFor(event, data.text("buyerUserId"), {
       category: "orders",

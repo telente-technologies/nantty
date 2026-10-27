@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import { widgetRefreshFanoutJobType } from "../../../../constants/delivery.constant.js";
 import type { JobQueue } from "../../../../interfaces/jobQueue.interface.js";

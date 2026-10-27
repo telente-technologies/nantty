@@ -9,7 +9,7 @@ import { planPostNotificationFanout, type PostNotificationFanoutJob } from "../s
 import { createTestHarness, makeEvent, silentLogger, type TestHarness } from "./fakes/testHarness.fake.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 
-const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com" };
+const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com" };
 const author = "11111111-1111-4111-8111-111111111111";
 const clip = { postId: "p1", authorId: author, kind: "clip", audience: "everyone", visibility: "public", isAiGenerated: false, authorProfileId: null, isVideoReply: false };
 const lookupAuthor = async (accountId: string) => (accountId === author ? { username: "adaeze" } : null);

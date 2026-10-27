@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import { MissingEventFieldError } from "../../../../errors/notifications.error.js";
 import { EventDataReader } from "../../../../utils/eventDataReader.util.js";

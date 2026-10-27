@@ -5,7 +5,7 @@ import { eventFixtures } from "./fixtures/eventFixtures.fixture.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 import { createTestHarness, makeEvent, silentLogger, type TestHarness } from "./fakes/testHarness.fake.js";
 
-const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com" };
+const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com" };
 const reminder = eventFixtures["live.reminderDue"]!.data as Record<string, unknown>;
 let harness: TestHarness;
 let handler: HandleDomainEventHandler;

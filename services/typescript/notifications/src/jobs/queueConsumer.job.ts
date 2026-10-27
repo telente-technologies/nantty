@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import { PoisonMessageError } from "../errors/poisonMessage.error.js";
 import type { QueueConsumer, QueueReader } from "../interfaces/jobQueue.interface.js";

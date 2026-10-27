@@ -7,7 +7,7 @@ import { EventDataReader } from "../src/utils/eventDataReader.util.js";
 import { createTestHarness, makeEvent, silentLogger } from "./fakes/testHarness.fake.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 
-const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com" };
+const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com" };
 const refunded = { escrowId: "e1", orderId: "o1", orderNumber: "ZM-48213", buyerUserId: "buyer1", sellerUserId: "seller1", refunded: { amountMinor: 1850000, currency: "NGN" } };
 
 describe("refund notifications say where the money lands", () => {

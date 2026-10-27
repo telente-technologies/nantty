@@ -1,4 +1,4 @@
-import { createLogger } from "@zudojs/logger";
+import { createLogger } from "@nantty/fastify-platform";
 
 import { createNotificationsApp } from "./app.js";
 import { loadNotificationsConfigFromEnvironment } from "./configs/notifications.config.js";

@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import { bulkBatchJobType, digestJobType, postNotificationFanoutJobType, unreadEmailJobType, widgetRefreshFanoutJobType } from "../constants/delivery.constant.js";
 import type { Container } from "../container.js";

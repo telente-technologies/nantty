@@ -27,7 +27,7 @@ describe("RabbitMQ job publishing", () => {
     const broker = new RabbitMqMessageBroker(connectionWith(channel).connection, 5, silentLogger);
     await broker.send("jobs-email", { type: "bulkSend.batch", campaignId: "c1" });
     const [published] = channel.published;
-    expect(published?.exchange).toBe("zudomart.jobs");
+    expect(published?.exchange).toBe("nantty.jobs");
     expect(published?.routingKey).toBe("jobs-email");
     expect(published?.options).toMatchObject({ mandatory: true, persistent: true, type: "bulkSend.batch", contentType: "application/json" });
     expect(JSON.parse(published?.content ?? "{}")).toEqual({ type: "bulkSend.batch", campaignId: "c1" });
@@ -38,7 +38,7 @@ describe("RabbitMQ job publishing", () => {
     const broker = new RabbitMqMessageBroker(connectionWith(channel).connection, 5, silentLogger);
     await broker.send("jobs-email", { type: "email.sendIfUnread" }, 900);
     await broker.send("jobs-email", { type: "email.sendIfUnread" }, 10);
-    expect(channel.published.map((entry) => `${entry.exchange}/${entry.routingKey}`)).toEqual(["zudomart.retry/jobs-email.retry.10m", "zudomart.jobs/jobs-email"]);
+    expect(channel.published.map((entry) => `${entry.exchange}/${entry.routingKey}`)).toEqual(["nantty.retry/jobs-email.retry.10m", "nantty.jobs/jobs-email"]);
   });
 
   it("fails the send when the broker nacks or cannot route the job", async () => {
@@ -69,11 +69,11 @@ describe("RabbitMQ queue consumer", () => {
     const channel = new FakeAmqpChannel();
     const { consumer } = startConsumer([channel], async () => { throw new Error("ses throttled"); });
     await waitUntil(() => channel.prefetchCount === 5);
-    channel.deliver(1, "{}", { "x-zudomart-attempt": 1 });
+    channel.deliver(1, "{}", { "x-nantty-attempt": 1 });
     await waitUntil(() => channel.settled.length === 1);
     expect(channel.settled[0]?.outcome).toBe("ack");
     const retry = channel.published[0];
-    expect(`${retry?.exchange}/${retry?.routingKey}`).toBe("zudomart.retry/jobs-email.retry.2m");
+    expect(`${retry?.exchange}/${retry?.routingKey}`).toBe("nantty.retry/jobs-email.retry.2m");
     expect(deliveryAttemptFromHeaders(retry?.options.headers as Record<string, unknown>)).toBe(2);
     expect(retry?.options.messageId).toBe("m-1");
     await consumer.stop();
@@ -86,7 +86,7 @@ describe("RabbitMQ queue consumer", () => {
       throw new Error("still failing");
     });
     await waitUntil(() => channel.prefetchCount === 5);
-    channel.deliver(1, "{}", { "x-zudomart-attempt": 4 });
+    channel.deliver(1, "{}", { "x-nantty-attempt": 4 });
     channel.deliver(2, "poison");
     await waitUntil(() => channel.settled.length === 2);
     expect(channel.settled).toEqual([{ tag: 1, outcome: "nack", requeue: false }, { tag: 2, outcome: "nack", requeue: false }]);

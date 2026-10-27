@@ -6,7 +6,7 @@ import { EventDataReader } from "../src/utils/eventDataReader.util.js";
 import { makeEvent } from "./fakes/testHarness.fake.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 
-const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com" };
+const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com" };
 const remedy = { claimId: "0192f0a1-7c3e-7000-8000-00000000c1a1", targetType: "clip", targetId: "clip-1", infringerId: "u1", workTitle: "Lagos Nights", reason: "proof matches", canSubmitCounterNotice: true };
 const run = (mapping: typeof copyrightWarningIssued, type: string, data: Record<string, unknown>) => mapping(makeEvent(type, data), new EventDataReader(data), context);
 
@@ -18,7 +18,7 @@ describe("copyright notifications", () => {
     expect(intent?.inApp?.body).toContain("48 hours");
     expect(intent?.push?.data).toMatchObject({ screen: "AccountStatus" });
     const email = intent?.email?.(makeRecipient({ accountId: "u1" }));
-    expect(email).toMatchObject({ templateKey: "copyrightWarning", props: { deadlineHours: 48, contentUrl: "https://zudomart.com/clips/clip-1" } });
+    expect(email).toMatchObject({ templateKey: "copyrightWarning", props: { deadlineHours: 48, contentUrl: "https://nantty.com/clips/clip-1" } });
   });
 
   it("tells the uploader about muted audio, takedowns and restorations", () => {

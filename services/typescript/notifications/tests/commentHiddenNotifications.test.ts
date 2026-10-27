@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { HandleDomainEventHandler } from "../src/modules/eventIngestion/commands/handleDomainEvent/handleDomainEvent.handler.js";
 import { createTestHarness, makeEvent, silentLogger } from "./fakes/testHarness.fake.js";
 
-const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com" };
+const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com" };
 const actor = { id: "commenter", name: "Ada" };
 const comment = (commentId: string, recipientUserId: string, id: string) =>
   makeEvent("comment.created", { recipientUserId, actor, target: "post", excerpt: "hi", url: `/post/p1?comment=${commentId}`, commentId, postId: "p1", authorId: "commenter" }, id);

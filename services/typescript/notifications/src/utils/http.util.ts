@@ -1,4 +1,4 @@
-import { createResponseContext, type HttpRequestContext, type HttpResponseContext } from "@zudojs/http";
+import { createResponseContext, type HttpRequestContext, type HttpResponseContext } from "@nantty/fastify-platform";
 
 import { ApiError, validationError } from "../errors/notifications.error.js";
 

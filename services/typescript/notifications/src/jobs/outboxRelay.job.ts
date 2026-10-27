@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { PrismaClient } from "../databases/prisma.database.js";
 import type { DomainEventPublisher } from "../interfaces/domainEventPublisher.interface.js";

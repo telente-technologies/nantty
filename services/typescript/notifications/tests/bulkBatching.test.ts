@@ -20,7 +20,7 @@ function createProcessor() {
 
 function createLegalQueue(batchSize = 2) {
   const audience = new LegalAudienceService(harness.identity, harness.suppressions, batchSize, 10);
-  return new QueueLegalNoticeHandler({ drafts: harness.drafts, campaigns: harness.campaigns, audience, jobQueue: harness.jobQueue, jobsQueueUrl: "jobs-queue", identity: harness.identity, batchSize, ratePerSecond: 10, acceptUrl: "https://zudomart.com/settings/legal/accept" });
+  return new QueueLegalNoticeHandler({ drafts: harness.drafts, campaigns: harness.campaigns, audience, jobQueue: harness.jobQueue, jobsQueueUrl: "jobs-queue", identity: harness.identity, batchSize, ratePerSecond: 10, acceptUrl: "https://nantty.com/settings/legal/accept" });
 }
 
 async function runJobsToCompletion() {
@@ -38,7 +38,7 @@ beforeEach(async () => {
   harness.identity.audience = ["a", "b", "c", "d", "e"].map((id) => makeRecipient({ accountId: id, email: `${id}@example.com`, firstName: id.toUpperCase(), marketingConsent: id === "a" }));
   await harness.drafts.createIfAbsent({
     versionId: "terms:7", documentKey: "terms", documentTitle: "Terms of Service", versionNumber: 7, subject: "We've updated our Terms of Service", summaryText: "We clarified escrow release.",
-    whatChanged: ["Clarified escrow release timing"], effectiveAt: new Date("2026-11-03T00:00:00.000Z"), reacceptNote: null, requiresReacceptance: true, documentUrl: "https://zudomart.com/terms",
+    whatChanged: ["Clarified escrow release timing"], effectiveAt: new Date("2026-11-03T00:00:00.000Z"), reacceptNote: null, requiresReacceptance: true, documentUrl: "https://nantty.com/terms",
   });
 });
 
@@ -122,7 +122,7 @@ describe("admin email queue", () => {
     const email = harness.sender.sent[0]!;
     expect(email.to).toBe("a@example.com");
     expect(email.text).toContain("Hi A,");
-    expect(email.text).toMatch(/Unsubscribe: https:\/\/api\.zudomart\.test\/api\/v1\/email\/unsubscribe\?token=/);
+    expect(email.text).toMatch(/Unsubscribe: https:\/\/api\.nantty\.test\/api\/v1\/email\/unsubscribe\?token=/);
     expect(email.headers?.["List-Unsubscribe-Post"]).toBe("List-Unsubscribe=One-Click");
     expect(harness.identity.audits[0]).toMatchObject({ action: "support.email_sent", actorId: "staff1" });
   });

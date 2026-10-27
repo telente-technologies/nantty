@@ -1,4 +1,4 @@
-import type { HttpRequestContext, HttpResponseContext } from "@zudojs/http";
+import type { HttpRequestContext, HttpResponseContext } from "@nantty/fastify-platform";
 
 export interface RouteContext {
   readonly request: HttpRequestContext;

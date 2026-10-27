@@ -1,5 +1,5 @@
-import { HttpMiddlewarePipeline, createHttpServer, createNodeHttpAdapter, createResponseContext, type HttpRequestContext } from "@zudojs/http";
-import { createLogger, type Logger } from "@zudojs/logger";
+import { HttpMiddlewarePipeline, createLogger, createPlatform, createRequestContext, createResponseContext, sendLegacyResponse, type HttpRequestContext, type Logger } from "@nantty/fastify-platform";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 
 import type { NotificationsConfig } from "./configs/notifications.config.js";
 import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
@@ -61,10 +61,22 @@ export function createNotificationsApp(config: NotificationsConfig, options: { r
       return response;
     }],
   });
-  const server = createHttpServer({
-    adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: 1024 * 1024, trustProxy: true }),
-    handler: withRequestMetrics((request: HttpRequestContext) => pipeline.execute(request, createResponseContext())),
-  });
+  let fastify: FastifyInstance | undefined;
+  const server = {
+    async start() {
+      fastify = await createPlatform({ name: "notifications", host: config.host, port: config.port, bodyLimit: 1024 * 1024, trustProxy: true, logger: true, rateLimit: false });
+      const dispatch = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+        const parsed = new URL(request.url, "http://notifications.invalid");
+        const headers = Object.fromEntries(Object.entries(request.headers).flatMap(([name, value]) => value === undefined ? [] : [[name, Array.isArray(value) ? value.join(",") : String(value)]]));
+        const context = createRequestContext({ id: request.id, method: request.method, url: request.url, path: parsed.pathname, headers, body: request.method === "GET" || request.method === "HEAD" ? undefined : request.body, remoteAddress: request.ip, protocol: request.protocol, hostname: request.hostname, signal: request.raw.signal });
+        sendLegacyResponse(reply, await withRequestMetrics((entry: HttpRequestContext) => pipeline.execute(entry, createResponseContext()))(context));
+      };
+      fastify.all("/", dispatch);
+      fastify.all("/*", dispatch);
+      await fastify.listen({ host: config.host, port: config.port });
+    },
+    async stop() { await fastify?.close(); },
+  };
   const consumers = config.consumersEnabled
     ? [
       container.broker.createConsumer("domainEvents", config.queues.domainEvents, createDomainEventMessageHandler(container, logger)),

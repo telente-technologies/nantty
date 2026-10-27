@@ -4,7 +4,7 @@ import { HandleDomainEventHandler } from "../src/modules/eventIngestion/commands
 import { createTestHarness, makeEvent, silentLogger } from "./fakes/testHarness.fake.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 
-const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com" };
+const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com" };
 const creatorId = "c1";
 
 async function setup() {
@@ -47,11 +47,11 @@ describe("ad account invites", () => {
     const harness = createTestHarness();
     harness.identity.accounts.set("u1", makeRecipient({ accountId: "u1", email: "amaka@example.com" }));
     const handler = new HandleDomainEventHandler(harness.dispatcher, { handlePolicyPublished: async () => undefined }, context, silentLogger);
-    const data = { inviteId: "i1", accountId: "acc1", accountName: "Ada's Closet", role: "advertiser", invitedBy: "Adaeze", invitedByUserId: "u2", inviteeUserId: "u1", expiresAt: "2026-10-12T09:00:00.000Z", inviteUrl: "https://ads.zudomart.com/invites/i1" };
+    const data = { inviteId: "i1", accountId: "acc1", accountName: "Ada's Closet", role: "advertiser", invitedBy: "Adaeze", invitedByUserId: "u2", inviteeUserId: "u1", expiresAt: "2026-10-12T09:00:00.000Z", inviteUrl: "https://ads.nantty.com/invites/i1" };
     await handler.execute({ event: makeEvent("adInvite.created", data) });
     expect(harness.notifications.rows).toEqual([expect.objectContaining({ userId: "u1", title: "Ad account invite" })]);
     expect(harness.sender.sent[0]).toMatchObject({ to: "amaka@example.com", subject: "Adaeze invited you to Ada's Closet on Nantty Ads" });
-    expect(harness.sender.sent[0]?.html).toContain("https://ads.zudomart.com/invites/i1");
+    expect(harness.sender.sent[0]?.html).toContain("https://ads.nantty.com/invites/i1");
     await handler.execute({ event: makeEvent("adInvite.created", { ...data, inviteUrl: "javascript:alert(1)" }, "evt-2") });
     expect(harness.sender.sent).toHaveLength(1);
   });

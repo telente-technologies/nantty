@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import { EmailDeliveryService } from "../../src/modules/delivery/services/emailDelivery.service.js";
 import { NotificationDispatcherService } from "../../src/modules/delivery/services/notificationDispatcher.service.js";
@@ -24,7 +24,7 @@ export function createTestHarness() {
   const sender = new RecordingEmailSender();
   const pushSender = new RecordingPushSender();
   const jobQueue = new RecordingJobQueue();
-  const unsubscribeTokens = new UnsubscribeTokenService("test-signing-secret-that-is-long-enough-0123", "https://api.zudomart.test");
+  const unsubscribeTokens = new UnsubscribeTokenService("test-signing-secret-that-is-long-enough-0123", "https://api.nantty.test");
   const clock = { current: new Date("2026-10-03T12:00:00.000Z") };
   const now = () => clock.current;
   deliveries.now = now;

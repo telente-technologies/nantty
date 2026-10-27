@@ -1,5 +1,5 @@
 import { metrics, type Histogram, type MeterProvider } from "@opentelemetry/api";
-import type { HttpRequestContext, HttpResponseContext } from "@zudojs/http";
+import type { HttpRequestContext, HttpResponseContext } from "@nantty/fastify-platform";
 
 const knownMethods = new Set(["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
 const routes = new WeakMap<object, string>();
@@ -8,7 +8,7 @@ let cached: { readonly provider: MeterProvider; readonly histogram: Histogram } 
 function requestDuration(): Histogram {
   const provider = metrics.getMeterProvider();
   if (cached?.provider !== provider) {
-    cached = { provider, histogram: provider.getMeter("zudomart.http").createHistogram("http.server.request.duration", { unit: "s", description: "Duration of HTTP server requests." }) };
+    cached = { provider, histogram: provider.getMeter("nantty.http").createHistogram("http.server.request.duration", { unit: "s", description: "Duration of HTTP server requests." }) };
   }
   return cached.histogram;
 }

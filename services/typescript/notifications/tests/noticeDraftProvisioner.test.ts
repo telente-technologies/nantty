@@ -23,9 +23,9 @@ describe("notice drafts for unpublished versions", () => {
   it("creates the draft once from the version, using the caller's staff token", async () => {
     const drafts = new InMemoryNoticeDraftRepository();
     const versions = new FakeVersions(facts);
-    const provisioner = new NoticeDraftProvisionerService(drafts, versions, "https://zudomart.com");
+    const provisioner = new NoticeDraftProvisionerService(drafts, versions, "https://nantty.com");
     const draft = await provisioner.ensure(versionId, "Bearer staff-token");
-    expect(draft).toMatchObject({ versionId, documentTitle: "Privacy Policy", versionNumber: 4, summaryText: "Retention changes.", requiresReacceptance: true, documentUrl: "https://zudomart.com/privacy" });
+    expect(draft).toMatchObject({ versionId, documentTitle: "Privacy Policy", versionNumber: 4, summaryText: "Retention changes.", requiresReacceptance: true, documentUrl: "https://nantty.com/privacy" });
     expect(draft.reacceptNote).not.toBeNull();
     await provisioner.ensure(versionId, "Bearer staff-token");
     expect(versions.calls).toEqual([{ versionId, authorization: "Bearer staff-token" }]);
@@ -33,17 +33,17 @@ describe("notice drafts for unpublished versions", () => {
 
   it("answers 404 for unknown versions and 401 without a staff token", async () => {
     const drafts = new InMemoryNoticeDraftRepository();
-    await expect(new NoticeDraftProvisionerService(drafts, new FakeVersions(null), "https://zudomart.com").ensure(versionId, "Bearer t")).rejects.toMatchObject({ status: 404 });
-    await expect(new NoticeDraftProvisionerService(drafts, new FakeVersions(facts), "https://zudomart.com").ensure(versionId, undefined)).rejects.toMatchObject({ status: 401 });
-    await expect(new NoticeDraftProvisionerService(drafts, null, "https://zudomart.com").ensure(versionId, "Bearer t")).rejects.toMatchObject({ status: 404 });
+    await expect(new NoticeDraftProvisionerService(drafts, new FakeVersions(null), "https://nantty.com").ensure(versionId, "Bearer t")).rejects.toMatchObject({ status: 404 });
+    await expect(new NoticeDraftProvisionerService(drafts, new FakeVersions(facts), "https://nantty.com").ensure(versionId, undefined)).rejects.toMatchObject({ status: 401 });
+    await expect(new NoticeDraftProvisionerService(drafts, null, "https://nantty.com").ensure(versionId, "Bearer t")).rejects.toMatchObject({ status: 404 });
   });
 
   it("keeps staff edits on publish but refreshes the effective date", async () => {
     const drafts = new InMemoryNoticeDraftRepository();
-    await new NoticeDraftProvisionerService(drafts, new FakeVersions(facts), "https://zudomart.com").ensure(versionId, "Bearer t");
+    await new NoticeDraftProvisionerService(drafts, new FakeVersions(facts), "https://nantty.com").ensure(versionId, "Bearer t");
     await drafts.update(versionId, { subject: "Edited subject", summaryText: "Edited", whatChanged: ["One"], reacceptNote: "Accept please", updatedByName: "Tolu" });
     const queued: string[] = [];
-    const handler = new CreateDraftFromPublishedPolicyHandler(drafts, "https://zudomart.com", true, { execute: async (command) => { queued.push(command.versionId); return {} as never; } });
+    const handler = new CreateDraftFromPublishedPolicyHandler(drafts, "https://nantty.com", true, { execute: async (command) => { queued.push(command.versionId); return {} as never; } });
     await handler.handlePolicyPublished({ event: makeEvent("policyVersion.published", { kind: "privacy", version: "4", versionId, documentKey: "privacy", effectiveAt: "2026-11-15T00:00:00.000Z", publishedBy: "Tolu", isMaterialChange: true }) });
     const draft = await drafts.find(versionId);
     expect(draft).toMatchObject({ subject: "Edited subject", reacceptNote: "Accept please", requiresReacceptance: true });

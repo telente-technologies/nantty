@@ -1,5 +1,5 @@
 import { connect, type ConfirmChannel, type Options } from "amqplib";
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 export type AmqpChannel = Pick<ConfirmChannel, "publish" | "consume" | "cancel" | "ack" | "nack" | "prefetch" | "close" | "on" | "off">;
 

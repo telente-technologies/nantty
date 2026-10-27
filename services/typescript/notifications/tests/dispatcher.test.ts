@@ -6,7 +6,7 @@ import { eventFixtures } from "./fixtures/eventFixtures.fixture.js";
 import { createTestHarness, makeEvent, silentLogger, type TestHarness } from "./fakes/testHarness.fake.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 
-const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com", otpEnvelopeKeys: { "otp-1": testOtpKey } };
+const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com", otpEnvelopeKeys: { "otp-1": testOtpKey } };
 let harness: TestHarness;
 let handler: HandleDomainEventHandler;
 

@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { PushSender } from "../interfaces/pushSender.interface.js";
 import type { PushContent } from "../types/notification.type.js";

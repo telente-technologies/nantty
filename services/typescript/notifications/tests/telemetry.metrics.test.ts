@@ -1,6 +1,6 @@
 import { metrics } from "@opentelemetry/api";
 import { MeterProvider, MetricReader, type HistogramMetricData } from "@opentelemetry/sdk-metrics";
-import { createRequestContext, type HttpResponseContext } from "@zudojs/http";
+import { createRequestContext, type HttpResponseContext } from "@nantty/fastify-platform";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { createRequestHandler } from "../src/app.js";

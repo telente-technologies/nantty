@@ -5,7 +5,7 @@ import { EventDataReader } from "../src/utils/eventDataReader.util.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 import { makeEvent } from "./fakes/testHarness.fake.js";
 
-const context = { webBaseUrl: "https://zudomart.com", sellerDashboardUrl: "https://dashboard.zudomart.com" };
+const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com" };
 const ngn = (amountMinor: number) => ({ amountMinor, currency: "NGN" });
 const clawedBack = {
   escrowId: "e1", orderId: "o1", orderNumber: "ZM-48213", buyerUserId: "buyer1", sellerUserId: "seller1", status: "clawedBack", amount: ngn(1_000_000), refunded: ngn(971_000),

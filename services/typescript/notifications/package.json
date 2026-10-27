@@ -17,6 +17,8 @@
     "lint": "eslint -c ../../../packages/eslintConfig/node.config.mjs src"
   },
   "dependencies": {
+    "@nantty/fastify-platform": "workspace:*",
+    "fastify": "5.7.4",
     "@aws-sdk/client-sesv2": "^3.1152.0",
     "@aws-sdk/client-sqs": "^3.1152.0",
     "@opentelemetry/api": "1.9.1",
@@ -30,8 +32,6 @@
     "@opentelemetry/sdk-trace-node": "2.12.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
-    "@zudojs/http": "^1.5.0",
-    "@zudojs/logger": "^1.5.0",
     "@nantty/email-templates": "workspace:*",
     "amqplib": "^2.2.0",
     "jose": "^6.2.12",

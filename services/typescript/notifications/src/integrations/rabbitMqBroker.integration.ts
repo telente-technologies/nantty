@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import { domainEventsExchange, jobsExchange, retryExchange } from "../constants/rabbitMq.constant.js";
 import type { PublishableDomainEvent } from "../interfaces/domainEventPublisher.interface.js";
@@ -34,7 +34,7 @@ export class RabbitMqMessageBroker implements MessageBroker {
     try {
       await Promise.all(events.map((event) => publishConfirmed(channel, domainEventsExchange, event.eventType, Buffer.from(JSON.stringify(event.payload)), {
         messageId: event.id, correlationId: event.id, type: event.eventType, contentType: "application/json", timestamp: Math.floor(Date.now() / 1000),
-        headers: { "x-zudomart-subject": event.subject, "x-zudomart-schema": "envelope.v1" },
+        headers: { "x-nantty-subject": event.subject, "x-nantty-schema": "envelope.v1" },
       })));
     } catch (error) {
       this.publishChannel = undefined;
