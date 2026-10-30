@@ -40,5 +40,14 @@ export const sellerErrorExperience: ErrorExperienceConfig = {
 };
 
 export function SellerErrorExperienceProvider({ children }: { readonly children: ReactNode }) {
-  return <ErrorExperienceProvider value={sellerErrorExperience}>{children}</ErrorExperienceProvider>;
+  const experience: ErrorExperienceConfig = process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? {
+    homeHref: "/", homeLabel: "Back to Nantty Creator",
+    hrefs: { browse: "/", support: contactMailtoHref },
+    labels: { browse: "Back to Nantty Creator" },
+    destinations: [
+      { label: "Nantty Creator", href: "/", icon: "house" },
+      { label: "Selling on Nantty", href: "https://nantty.com/sellers", icon: "package" },
+    ], renderLink: renderNextLink,
+  } : sellerErrorExperience;
+  return <ErrorExperienceProvider value={experience}>{children}</ErrorExperienceProvider>;
 }

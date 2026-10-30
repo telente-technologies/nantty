@@ -115,13 +115,13 @@
 }
 
 .giantWordmark {
-  width: min(92%, 1280px);
-  margin: var(--space-7) auto -0.18em;
+  width: min(100%, 1440px);
+  margin: clamp(40px, 6vw, 80px) auto -0.11em;
   color: var(--blue-500);
-  font-size: clamp(5rem, 22vw, 19rem);
+  font-size: clamp(4rem, 25vw, 24rem);
   font-weight: 800;
-  letter-spacing: -0.075em;
-  line-height: 0.86;
+  letter-spacing: -0.09em;
+  line-height: 0.82;
   text-align: center;
   white-space: nowrap;
   user-select: none;
@@ -148,15 +148,65 @@
     gap: var(--space-3);
   }
 
-  .giantWordmark {
-    width: 100%;
-    font-size: 23vw;
-  }
 }
 
 @media (max-width: 339px) {
   .linkGroups {
     grid-template-columns: 1fr;
     gap: var(--space-6);
+  }
+}
+
+/* Keep touch targets and keyboard focus consistent across Nantty. */
+.footer {
+  container-type: inline-size;
+}
+
+.giantWordmark {
+  font-size: clamp(4rem, 27cqi, 24rem);
+}
+
+.footer :is(a, button):focus-visible {
+  outline: 3px solid var(--yellow-500);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.linkGroups {
+  min-width: 0;
+}
+
+.linkList a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.brandColumn {
+  min-width: 0;
+}
+
+.bottomRow {
+  padding-bottom: 16px;
+}
+
+@media (pointer: coarse) {
+  .linkList a {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 359px) {
+  .linkGroups,
+  .linkGroups > :last-child .linkList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (forced-colors: active) {
+  .giantWordmark {
+    color: CanvasText;
   }
 }

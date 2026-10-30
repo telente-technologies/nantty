@@ -1,7 +1,6 @@
 import styles from "./landingHero.module.css";
 import { NanttyIcon } from "@/components/ui/nanttyIcon";
 import { PrelaunchLoginAction } from "./prelaunchLoginAction";
-import { LandingProductPreview } from "./landingProductPreview";
 
 export function LandingHero() {
   return (
@@ -41,10 +40,10 @@ export function LandingHero() {
               <span />
               <p>creator.nantty.com</p>
             </div>
-            {process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? <LandingProductPreview title="Your business at a glance" /> : <img src="/screenshots/dashboardOverview.webp" alt="The dashboard home: sales today, a 30-day revenue chart, wallet balances and online orders by status" width={1440} height={900} className={styles.browserScreenshot} />}
+            <img src="/screenshots/liveDashboard.webp" alt="Nantty's current seller dashboard in the mobile app" width={786} height={1704} className={styles.browserScreenshot} />
           </figure>
           <figure className={styles.tabletFrame}>
-            {process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? <LandingProductPreview title="Orders protected by escrow" /> : <img src="/screenshots/orderEscrow.webp" alt="An app order with escrow status and the mark-as-shipped form" width={1180} height={820} className={styles.tabletScreenshot} />}
+            <img src="/screenshots/liveEscrowStatus.webp" alt="An order's escrow status in the current Nantty app" width={786} height={1704} className={styles.tabletScreenshot} />
           </figure>
           <p className={`${styles.chip} ${styles.offlineChip}`}>
             <span className={styles.chipDot} aria-hidden="true" />

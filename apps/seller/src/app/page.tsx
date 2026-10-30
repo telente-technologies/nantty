@@ -6,6 +6,7 @@ import { LandingFeatures } from "@/components/landing/landingFeatures";
 import { LandingFooter } from "@/components/landing/landingFooter";
 import { LandingHeader } from "@/components/landing/landingHeader";
 import { LandingHero } from "@/components/landing/landingHero";
+import { LaunchCountdown } from "@/components/landing/launchCountdown";
 import { LandingPricing } from "@/components/landing/landingPricing";
 import { LandingQuestions } from "@/components/landing/landingQuestions";
 import { LandingSyncSection } from "@/components/landing/landingSyncSection";
@@ -42,6 +43,7 @@ export default async function LandingPage() {
       <LandingHeader />
       <main id="main-content" tabIndex={-1}>
         <LandingHero />
+        <LaunchCountdown />
         <LandingTicker />
         <LandingFeatures />
         <LandingSyncSection />

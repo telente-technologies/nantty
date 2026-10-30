@@ -25,21 +25,19 @@ export interface LandingFeature {
   readonly id: string;
   readonly title: string;
   readonly description: string;
-  readonly screenshot: string;
-  readonly screenshotAlt: string;
   readonly size: "wide" | "regular";
 }
 
 export const landingFeatures: LandingFeature[] = [
-  { id: "overview", title: "Your whole business at a glance", description: "Sales today, orders by status, available balance, pending settlement, low stock, views and conversion — the moment you sign in.", screenshot: "dashboardOverview", screenshotAlt: "The dashboard overview with sales, orders by status and balances", size: "wide" },
-  { id: "inventory", title: "One stock count, every warehouse", description: "App orders reserve stock automatically. Adjust with reasons, transfer between locations, set reorder levels and track suppliers.", screenshot: "inventoryLevels", screenshotAlt: "Inventory levels per location with reserved and available stock", size: "regular" },
-  { id: "orders", title: "App orders with escrow built in", description: "Accept, pack and ship the orders customers place in the Nantty app, print invoices, and see exactly when escrow pays you.", screenshot: "orderEscrow", screenshotAlt: "An app order with escrow status and the mark-as-shipped form", size: "regular" },
-  { id: "customers", title: "Customers you can grow", description: "Every buyer's history, total spent, average order and last purchase, with notes and segments for new, returning and VIP customers.", screenshot: "customerProfile", screenshotAlt: "A customer profile with purchase history", size: "regular" },
-  { id: "reports", title: "Reports your accountant will like", description: "Sales, orders, inventory, customers, products, finance and ads. Download CSV, Excel or a printable PDF.", screenshot: "salesReport", screenshotAlt: "A sales-by-day report with a chart and table", size: "wide" },
-  { id: "staff", title: "A team that signs in with their own app account", description: "Add Nantty users by username as Manager, Inventory staff, Sales staff or Accountant. Each sees only what their role allows.", screenshot: "staffRoles", screenshotAlt: "The team list with roles and locations", size: "regular" },
-  { id: "wallet", title: "Payments and finance", description: "Money in escrow, pending settlement and available, fees, refunds, payouts and downloadable statements.", screenshot: "walletPayouts", screenshotAlt: "Wallet balances and recent transactions", size: "regular" },
-  { id: "affiliates", title: "Creators who sell for you", description: "Set commissions, approve creators from the Nantty Creator Program and invite them to live-sell your products. Commissions settle automatically from escrow.", screenshot: "affiliateCreators", screenshotAlt: "The affiliates overview with top creators and commissions", size: "regular" },
-  { id: "brand", title: "Your brand, protected", description: "Run your brand profile and team, link your stores, earn the Official Store badge when your brand is registered and Gold verified, and report listings that misuse your name.", screenshot: "brandProtection", screenshotAlt: "Brand protection listings ranked by risk with a file-claim button", size: "wide" },
+  { id: "overview", title: "Your whole business at a glance", description: "Sales today, orders by status, available balance, pending settlement, low stock, views and conversion — the moment you sign in.", size: "wide" },
+  { id: "inventory", title: "One stock count, every warehouse", description: "App orders reserve stock automatically. Adjust with reasons, transfer between locations, set reorder levels and track suppliers.", size: "regular" },
+  { id: "orders", title: "App orders with escrow built in", description: "Accept, pack and ship the orders customers place in the Nantty app, print invoices, and see exactly when escrow pays you.", size: "regular" },
+  { id: "customers", title: "Customers you can grow", description: "Every buyer's history, total spent, average order and last purchase, with notes and segments for new, returning and VIP customers.", size: "regular" },
+  { id: "reports", title: "Reports your accountant will like", description: "Sales, orders, inventory, customers, products, finance and ads. Download CSV, Excel or a printable PDF.", size: "wide" },
+  { id: "staff", title: "A team that signs in with their own app account", description: "Add Nantty users by username as Manager, Inventory staff, Sales staff or Accountant. Each sees only what their role allows.", size: "regular" },
+  { id: "wallet", title: "Payments and finance", description: "Money in escrow, pending settlement and available, fees, refunds, payouts and downloadable statements.", size: "regular" },
+  { id: "affiliates", title: "Creators who sell for you", description: "Set commissions, approve creators from the Nantty Creator Program and invite them to live-sell your products. Commissions settle automatically from escrow.", size: "regular" },
+  { id: "brand", title: "Your brand, protected", description: "Run your brand profile and team, link your stores, earn the Official Store badge when your brand is registered and Gold verified, and report listings that misuse your name.", size: "wide" },
 ];
 
 export const landingQuestions = [

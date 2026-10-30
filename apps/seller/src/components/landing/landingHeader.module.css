@@ -29,6 +29,7 @@
 }
 
 .pill {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -123,16 +124,25 @@
   opacity: 0.86;
 }
 
-.menuButton {
+.mobileMenu {
+  display: block;
+  margin-left: auto;
+}
+
+.mobileMenu summary {
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
-  margin-left: auto;
-  border: 0;
   border-radius: 50%;
   background: var(--yellow-500);
   color: var(--blue-900);
+  cursor: pointer;
+  list-style: none;
+}
+
+.mobileMenu summary::-webkit-details-marker {
+  display: none;
 }
 
 .menuBars,
@@ -156,27 +166,25 @@
   top: 6px;
 }
 
-.menuButton[aria-expanded="true"] .menuBars {
+.mobileMenu[open] .menuBars {
   transform: rotate(45deg);
 }
 
-.menuButton[aria-expanded="true"] .menuBars::before {
+.mobileMenu[open] .menuBars::before {
   top: 0;
   transform: rotate(-90deg);
 }
 
-.mobileMenu {
+.mobileMenuPanel {
   position: absolute;
-  top: calc(100% - 4px);
-  left: var(--landing-gutter);
-  right: var(--landing-gutter);
-  display: flex;
-  flex-direction: column;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  z-index: 1;
+  display: grid;
   justify-content: space-between;
   gap: var(--space-8);
-  max-width: var(--landing-width);
   max-height: calc(100dvh - 100px);
-  margin-inline: auto;
   padding: var(--space-6);
   overflow-y: auto;
   border: 1px solid var(--header-line);
@@ -184,10 +192,6 @@
   background: var(--header-surface);
   box-shadow: var(--shadow-float);
   color: var(--header-ink);
-}
-
-.mobileMenu[hidden] {
-  display: none;
 }
 
 .mobileLink {
@@ -243,7 +247,6 @@
     margin-left: auto;
   }
 
-  .menuButton,
   .mobileMenu {
     display: none;
   }
@@ -258,11 +261,7 @@
     font-size: 0.875rem;
   }
 
-  .menuButton {
-    flex: none;
-  }
-
-  .mobileMenu {
+  .mobileMenuPanel {
     padding: var(--space-5);
   }
 }

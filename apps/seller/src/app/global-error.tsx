@@ -2,6 +2,8 @@
 
 import { GlobalErrorScreen, ThemeInitScript } from "@nantty/web-kit";
 
+import styles from "@/components/errors/errorPage.module.css";
+
 import { sellerErrorExperience } from "@/components/errors/errorExperience.provider";
 
 import "./globals.css";
@@ -13,7 +15,7 @@ export default function GlobalError({ error, retry }: { readonly error: Error & 
         <ThemeInitScript />
         <title>Something broke | Nantty</title>
       </head>
-      <body>
+      <body className={styles.experience}>
         <GlobalErrorScreen error={error} retry={retry} config={sellerErrorExperience} />
       </body>
     </html>

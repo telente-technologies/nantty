@@ -125,6 +125,7 @@
 }
 
 .stage {
+  min-width: 0;
   position: relative;
   min-height: 380px;
   padding: var(--space-8) 0 0 4%;
@@ -140,7 +141,7 @@
 .browserFrame {
   position: relative;
   z-index: 1;
-  width: 104%;
+  width: 100%;
   border-radius: 14px 14px 0 0;
   overflow: hidden;
   background: var(--color-surface);
@@ -174,6 +175,7 @@
 }
 
 .browserScreenshot {
+  display: block;
   width: 100%;
   height: auto;
 }
@@ -192,6 +194,7 @@
 }
 
 .tabletScreenshot {
+  display: block;
   width: 100%;
   height: auto;
   border-radius: 10px;

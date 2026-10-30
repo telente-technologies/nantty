@@ -31,6 +31,7 @@
 }
 
 .stepCard {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -81,7 +82,8 @@
 }
 
 .screenshotWindow {
-  padding: 18px 0 0 22px;
+  height: auto;
+  padding: var(--space-4);
   background: linear-gradient(to bottom, var(--surface-app), var(--landing-wash-brand));
 }
 
@@ -92,10 +94,11 @@
 }
 
 .screenshot {
-  width: 640px;
-  max-width: none;
+  display: block;
+  width: 100%;
+  max-width: 100%;
   height: auto;
-  border-radius: 12px 0 0 0;
+  border-radius: 12px;
   box-shadow: var(--landing-screen-shadow);
 }
 

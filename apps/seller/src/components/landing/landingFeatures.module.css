@@ -39,6 +39,7 @@
 }
 
 .card {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -67,22 +68,27 @@
 
 .screenWindow {
   margin-top: auto;
-  height: 250px;
-  padding: var(--space-4) 0 0 var(--space-6);
+  min-width: 0;
+  padding: var(--space-4);
   overflow: hidden;
   background: linear-gradient(to bottom, var(--surface-card), var(--landing-wash-brand));
 }
 
 .wide .screenWindow {
-  height: 320px;
   background: linear-gradient(to bottom, var(--surface-card), var(--landing-wash-accent));
 }
 
+.screenLink {
+  display: block;
+  border-radius: 12px;
+}
+
 .screenshot {
-  width: 760px;
-  max-width: none;
+  display: block;
+  width: 100%;
+  max-width: 100%;
   height: auto;
-  border-radius: 12px 0 0 0;
+  border-radius: 12px;
   box-shadow: var(--landing-screen-shadow);
   transition: transform 300ms ease;
 }
@@ -109,13 +115,9 @@
 
   .wide .screenWindow {
     flex: 1;
-    height: 360px;
+    align-self: center;
     margin-top: 0;
-    padding-top: 36px;
-  }
-
-  .wide .screenshot {
-    width: 900px;
+    padding: var(--space-5);
   }
 }
 
