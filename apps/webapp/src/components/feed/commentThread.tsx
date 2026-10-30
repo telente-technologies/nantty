@@ -19,7 +19,6 @@ import { MentionText } from "@/components/mentions/mentionText";
 import { CommentComposer } from "./commentComposer";
 import styles from "./commentsPanel.module.css";
 import { QuotedPostCard } from "./quotedPostCard";
-import { countRepliesHiddenFromChain } from "@/utils/commentChain.util";
 
 interface CommentRowProps {
   readonly comment: Comment;
@@ -149,10 +148,23 @@ function CommentRow({ comment, postId, postAuthorId, isReply, connectBelow = fal
   );
 }
 
-export function CommentThread({ comment, postId, postAuthorId }: { readonly comment: CommentWithReplies; readonly postId: string; readonly postAuthorId?: string }) {
+function CommentBranch({
+  comment,
+  postId,
+  postAuthorId,
+  previewPool,
+  nestingLevel,
+}: {
+  readonly comment: Comment;
+  readonly postId: string;
+  readonly postAuthorId?: string;
+  readonly previewPool: readonly Comment[];
+  readonly nestingLevel: number;
+}) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [replyTarget, setReplyTarget] = useState<Comment | null>(null);
   const [localReplies, setLocalReplies] = useState<readonly Comment[]>([]);
+  const previewReplies = previewPool.filter((reply) => reply.parentCommentId === comment.id);
   const repliesQuery = useInfiniteQuery({
     queryKey: ["commentReplies", comment.id],
     queryFn: ({ pageParam }) => commentsService.fetchReplies(comment.id, pageParam),
@@ -160,18 +172,26 @@ export function CommentThread({ comment, postId, postAuthorId }: { readonly comm
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: isExpanded,
   });
-  const serverReplies = isExpanded ? (repliesQuery.data?.pages ?? []).flatMap((page) => page.data) : comment.previewReplies;
+  const serverReplies = isExpanded ? (repliesQuery.data?.pages ?? []).flatMap((page) => page.data) : previewReplies;
   const replies = [...serverReplies, ...localReplies.filter((local) => !serverReplies.some((reply) => reply.id === local.id))];
   const isChain = !isExpanded;
-  const hiddenReplyCount = isExpanded ? Math.max(0, comment.replyCount - serverReplies.length) : countRepliesHiddenFromChain(comment, comment.previewReplies);
+  const hiddenReplyCount = isExpanded ? Math.max(0, comment.replyCount - serverReplies.length) : Math.max(0, comment.replyCount - previewReplies.length);
   const canShowMore = isExpanded ? repliesQuery.hasNextPage === true : hiddenReplyCount > 0;
   const showMoreLabel = repliesQuery.isFetching ? "Loading replies…" : isExpanded ? "Show more replies" : `Show ${hiddenReplyCount} more ${hiddenReplyCount === 1 ? "reply" : "replies"}`;
+  const branchIndent = nestingLevel > 0 && nestingLevel <= 3 ? 14 : 0;
 
   return (
-    <div className={styles.thread}>
-      <CommentRow comment={comment} postId={postId} postAuthorId={postAuthorId} isReply={false} connectBelow={isChain && replies.length > 0} onReply={setReplyTarget} />
-      {replies.map((reply, index) => (
-        <CommentRow key={reply.id} comment={reply} postId={postId} postAuthorId={postAuthorId} isReply={!isChain} connectBelow={isChain && index < replies.length - 1} onReply={setReplyTarget} />
+    <div className={styles.thread} style={branchIndent ? { marginLeft: branchIndent } : undefined}>
+      <CommentRow comment={comment} postId={postId} postAuthorId={postAuthorId} isReply={nestingLevel === 1} connectBelow={isChain && replies.length > 0} onReply={setReplyTarget} />
+      {replies.map((reply) => (
+        <CommentBranch
+          key={reply.id}
+          comment={reply}
+          postId={postId}
+          postAuthorId={postAuthorId}
+          previewPool={previewPool}
+          nestingLevel={nestingLevel + 1}
+        />
       ))}
       {canShowMore ? (
         <button
@@ -191,7 +211,7 @@ export function CommentThread({ comment, postId, postAuthorId }: { readonly comm
         <CommentComposer
           key={replyTarget.id}
           postId={postId}
-          parentCommentId={comment.id}
+          parentCommentId={replyTarget.id}
           replyingTo={replyTarget.id === comment.id ? undefined : { userId: replyTarget.author.id, username: replyTarget.author.username }}
           autoFocus
           onPosted={(created) => {
@@ -201,5 +221,17 @@ export function CommentThread({ comment, postId, postAuthorId }: { readonly comm
         />
       ) : null}
     </div>
+  );
+}
+
+export function CommentThread({ comment, postId, postAuthorId }: { readonly comment: CommentWithReplies; readonly postId: string; readonly postAuthorId?: string }) {
+  return (
+    <CommentBranch
+      comment={comment}
+      postId={postId}
+      postAuthorId={postAuthorId}
+      previewPool={comment.previewReplies}
+      nestingLevel={0}
+    />
   );
 }

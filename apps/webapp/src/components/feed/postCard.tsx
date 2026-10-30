@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SpaceAnnouncement } from "@/components/spaces/spaceAnnouncement";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -146,6 +147,7 @@ function OrganicPostCard({ post, priority = false, swipeable = false, showPinned
 
       {viewer?.id === post.author.id ? <CopyrightCountdownBanner contentId={post.id} /> : null}
       <SensitiveContentGate postId={post.id} sensitive={post.sensitive} previewUrl={post.media[0]?.posterUrl ?? post.media[0]?.url ?? null}>
+      <SpaceAnnouncement text={post.text} />
       {post.text ? (
         <p className={styles.text}>
           <MentionText text={post.text} mentions={post.mentions} />

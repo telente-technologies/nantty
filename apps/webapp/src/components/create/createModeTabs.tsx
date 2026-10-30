@@ -2,13 +2,14 @@ import Link from "next/link";
 
 import styles from "./composer.module.css";
 
-export type CreateModeTab = "post" | "clip" | "story" | "live";
+export type CreateModeTab = "post" | "clip" | "story" | "live" | "space";
 
 const CREATE_MODES: readonly { readonly mode: CreateModeTab; readonly label: string; readonly href: string }[] = [
   { mode: "post", label: "Post", href: "/post/new" },
   { mode: "clip", label: "Clip", href: "/create/clip" },
   { mode: "story", label: "Story", href: "/create/story" },
   { mode: "live", label: "Live", href: "/create/live" },
+  { mode: "space", label: "Space", href: "/create/space" },
 ];
 
 export function CreateModeTabs({ active }: { readonly active: CreateModeTab }) {

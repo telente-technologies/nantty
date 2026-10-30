@@ -37,6 +37,7 @@ export function buildSidebarNavigationGroups(isSignedIn: boolean, counts: ShellB
       { href: "/mart", label: "Mart", icon: <StoreIcon /> },
       { href: "/clips", label: "Clips", icon: <ClipsIcon /> },
       { href: "/live", label: "Live", icon: <LiveIcon /> },
+      { href: "/spaces", label: "Spaces", icon: <LiveIcon /> },
     ],
     [
       { href: "/chats", label: "Messages", icon: <ChatIcon />, badgeCount: counts.chats },
