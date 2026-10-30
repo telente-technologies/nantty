@@ -21,6 +21,7 @@ module "platform" {
   github_repository            = var.github_repository
   create_github_oidc_provider  = var.create_github_oidc_provider
   app_origins                  = var.app_origins
+  admin_ip_allow_list          = var.admin_ip_allow_list
   image_tag                    = var.image_tag
   min_tasks                    = var.min_tasks
   max_tasks_cap                = var.max_tasks_cap

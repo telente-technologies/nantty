@@ -7,14 +7,15 @@ resource "aws_security_group" "intelligence" {
   name_prefix = "${local.tags_prefix}-intelligence-"
   description = "Identity of the intelligence task; its Valkey accepts only this group"
   vpc_id      = module.network.vpc_id
-  egress {
-    description = "Valkey TLS inside the VPC"
-    from_port   = 6379
-    to_port     = 6379
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
-  }
   lifecycle { create_before_destroy = true }
+}
+
+resource "aws_vpc_security_group_egress_rule" "intelligence_cache" {
+  security_group_id            = aws_security_group.intelligence.id
+  referenced_security_group_id = module.valkey_intelligence.security_group_id
+  ip_protocol                  = "tcp"
+  from_port                    = 6379
+  to_port                      = 6379
 }
 
 module "valkey_intelligence" {

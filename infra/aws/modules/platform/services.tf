@@ -17,7 +17,7 @@ locals {
     }
     go-money = {
       port         = 8080, cpu = 1024, memory = 2048, health = "/healthz", ready = "/readyz", database = true, rabbit = true, min = 2, max = 8, extra_ports = [9103]
-      public_rules = [], internal = true, request_target = 0, valkey = true, node = false, blue_green = true
+      public_rules = [], internal = true, request_target = 0, valkey = true, node = false
       secret_keys  = ["FLUTTERWAVE_SECRET_KEY", "FLUTTERWAVE_WEBHOOK_HASH", "FLUTTERWAVE_MERCHANT_ID", "MONEY_INTERNAL_GRPC_TOKEN", "MONEY_INTERNAL_API_TOKEN", "DATA_ENCRYPTION_KEY", "ADMIN_INTERNAL_API_TOKEN", "SAVED_CARD_FINGERPRINT_KEY", "SOCIAL_INTERNAL_API_TOKEN"]
     }
     go-live = {
@@ -96,5 +96,6 @@ locals {
   internal_names = [for name, definition in local.services : name if definition.internal]
 
   gateway_cors = { for key, origin in var.app_origins : "CORS_ORIGIN_${upper(key)}" => origin }
-  internal_url = { for name in local.internal_names : name => "http://${name}.${module.edge.internal_zone_name}" }
+  # Clients connect only to loopback; HAProxy verifies and encrypts the remote hop.
+  internal_url = { for name in local.internal_names : name => "http://127.0.0.1:${20000 + index(local.internal_names, name)}" }
 }

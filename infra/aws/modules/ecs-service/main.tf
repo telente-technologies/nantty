@@ -88,7 +88,7 @@ data "aws_iam_policy_document" "execution" {
   statement {
     sid       = "PullOwnImage"
     actions   = ["ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer", "ecr:BatchCheckLayerAvailability"]
-    resources = ["arn:aws:ecr:${var.region}:${data.aws_caller_identity.current.account_id}:repository/nantty/${var.name}"]
+    resources = ["arn:aws:ecr:${var.region}:${data.aws_caller_identity.current.account_id}:repository/nantty/${var.name}", var.tls_proxy_repository_arn]
   }
   statement {
     sid       = "EcrAuthToken"
@@ -126,6 +126,26 @@ resource "aws_iam_role" "task" {
 }
 
 data "aws_iam_policy_document" "task" {
+  statement {
+    sid       = "ReadOwnTlsIdentity"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [var.tls_secret_arn]
+  }
+  statement {
+    sid       = "DecryptOwnTlsIdentity"
+    actions   = ["kms:Decrypt"]
+    resources = [var.secrets_kms_key_arn]
+    condition {
+      test     = "StringEquals"
+      variable = "kms:ViaService"
+      values   = ["secretsmanager.${var.region}.amazonaws.com"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "kms:EncryptionContext:SecretARN"
+      values   = [var.tls_secret_arn]
+    }
+  }
   statement {
     sid       = "TraceExport"
     actions   = ["xray:PutTraceSegments", "xray:PutTelemetryRecords", "xray:GetSamplingRules", "xray:GetSamplingTargets"]
@@ -195,12 +215,14 @@ resource "aws_ecs_task_definition" "this" {
   }
 
   volume { name = "tmp" }
+  volume { name = "tls-state" }
 
   container_definitions = jsonencode(concat([
     merge({
       name                   = var.name
       image                  = "${var.image}:${var.image_tag}"
       essential              = true
+      cpu                    = var.cpu - 256 - (var.otel_sidecar ? 32 : 0)
       readonlyRootFilesystem = var.readonly_root_filesystem
       stopTimeout            = 30
       portMappings           = local.port_mapping
@@ -209,7 +231,7 @@ resource "aws_ecs_task_definition" "this" {
       mountPoints            = [{ sourceVolume = "tmp", containerPath = "/tmp", readOnly = false }]
       linuxParameters        = { initProcessEnabled = true, capabilities = { drop = ["ALL"] } }
       ulimits                = [{ name = "nofile", softLimit = 65536, hardLimit = 65536 }]
-      dependsOn              = var.otel_sidecar ? [{ containerName = "otel-collector", condition = "START" }] : []
+      dependsOn              = concat([{ containerName = "tls-proxy", condition = "START" }], var.otel_sidecar ? [{ containerName = "otel-collector", condition = "START" }] : [])
       logConfiguration = {
         logDriver = "awslogs"
         options   = { "awslogs-group" = aws_cloudwatch_log_group.this.name, "awslogs-region" = var.region, "awslogs-stream-prefix" = var.name }
@@ -217,12 +239,39 @@ resource "aws_ecs_task_definition" "this" {
       }, var.container_health_check == null ? {} : {
       healthCheck = { command = var.container_health_check, interval = 15, timeout = 5, retries = 3, startPeriod = 30 }
     }),
+    {
+      name                   = "tls-proxy"
+      image                  = var.tls_proxy_image
+      essential              = true
+      user                   = "0"
+      readonlyRootFilesystem = true
+      cpu                    = 256
+      memory                 = 512
+      stopTimeout            = 30
+      portMappings           = [for port in concat([18443, 19443], [for port in var.extra_ports : port + 10000]) : { containerPort = port, hostPort = port, protocol = "tcp" }]
+      mountPoints            = [{ sourceVolume = "tls-state", containerPath = "/run/tls", readOnly = false }]
+      linuxParameters        = { initProcessEnabled = true, capabilities = { drop = ["ALL"] } }
+      environment = [
+        { name = "TLS_SECRET_ARN", value = var.tls_secret_arn },
+        { name = "TLS_CONFIG", value = var.tls_config },
+        { name = "AWS_DEFAULT_REGION", value = var.region },
+        { name = "PYTHONDONTWRITEBYTECODE", value = "1" },
+      ]
+      healthCheck = {
+        command  = ["CMD", "python3", "/opt/nantty/proxy.py", "--health"]
+        interval = 15, timeout = 10, retries = 3, startPeriod = 90
+      }
+      logConfiguration = {
+        logDriver = "awslogs"
+        options   = { "awslogs-group" = aws_cloudwatch_log_group.this.name, "awslogs-region" = var.region, "awslogs-stream-prefix" = "tls" }
+      }
+    },
     ], var.otel_sidecar ? [{
       name                   = "otel-collector"
       image                  = var.otel_collector_image
       essential              = false
       readonlyRootFilesystem = false
-      cpu                    = 0
+      cpu                    = 32
       portMappings           = [{ containerPort = 4318, hostPort = 4318, protocol = "tcp" }]
       environment            = [{ name = "AOT_CONFIG_CONTENT", value = local.collector_config }]
       logConfiguration = {
@@ -236,11 +285,12 @@ resource "aws_lb_target_group" "this" {
   for_each             = local.has_lb ? toset(local.tg_pair) : toset([])
   name                 = substr("${var.environment}-${var.name}-${each.key}", 0, 32)
   vpc_id               = var.vpc_id
-  port                 = var.port
-  protocol             = "HTTP"
+  port                 = 18443
+  protocol             = "HTTPS"
   target_type          = "ip"
   deregistration_delay = var.deregistration_delay
   health_check {
+    protocol            = "HTTPS"
     path                = var.health_path
     matcher             = "200"
     interval            = 15
@@ -317,6 +367,14 @@ resource "aws_ecs_service" "this" {
   deployment_controller {
     type = var.blue_green ? "CODE_DEPLOY" : "ECS"
   }
+  dynamic "alarms" {
+    for_each = length(var.deployment_alarm_names) > 0 ? [1] : []
+    content {
+      alarm_names = var.deployment_alarm_names
+      enable      = true
+      rollback    = true
+    }
+  }
 
   dynamic "deployment_circuit_breaker" {
     for_each = var.blue_green ? [] : [1]
@@ -336,8 +394,8 @@ resource "aws_ecs_service" "this" {
     for_each = local.has_lb ? [1] : []
     content {
       target_group_arn = aws_lb_target_group.this["blue"].arn
-      container_name   = var.name
-      container_port   = var.port
+      container_name   = "tls-proxy"
+      container_port   = 18443
     }
   }
 

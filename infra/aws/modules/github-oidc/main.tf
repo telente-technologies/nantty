@@ -89,6 +89,16 @@ resource "aws_iam_role" "deploy" {
 
 data "aws_iam_policy_document" "deploy" {
   statement {
+    sid       = "ReadMigrationRecoveryEvidence"
+    actions   = ["backup:DescribeRestoreJob", "backup:DescribeRecoveryPoint", "rds:DescribeDBClusters", "rds:DescribeDBClusterSnapshots"]
+    resources = ["*"]
+  }
+  statement {
+    sid       = "PreMigrationSnapshot"
+    actions   = ["rds:CreateDBClusterSnapshot"]
+    resources = ["arn:aws:rds:*:${local.account_id}:cluster:nantty-${var.environment}*", "arn:aws:rds:*:${local.account_id}:cluster-snapshot:nantty-${var.environment}-pre-migration-*"]
+  }
+  statement {
     sid       = "DescribeAndRegister"
     actions   = ["ecs:DescribeServices", "ecs:DescribeTaskDefinition", "ecs:RegisterTaskDefinition", "ecs:ListTasks", "ecs:DescribeTasks", "ecs:DescribeClusters"]
     resources = ["*"]

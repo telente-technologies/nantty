@@ -11,6 +11,14 @@ variable "image_tag" { type = string }
 variable "cpu" { type = number }
 variable "memory" { type = number }
 variable "port" { type = number }
+variable "tls_proxy_image" { type = string }
+variable "tls_proxy_repository_arn" { type = string }
+variable "tls_secret_arn" { type = string }
+variable "tls_config" { type = string }
+variable "deployment_alarm_names" {
+  type    = list(string)
+  default = []
+}
 variable "extra_ports" {
   type    = list(number)
   default = []

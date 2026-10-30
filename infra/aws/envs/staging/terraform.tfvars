@@ -20,8 +20,10 @@ app_origins = {
   studio = "https://studio.staging.nantty.com"
   admin  = "https://admin.staging.nantty.com"
   ads    = "https://ads.staging.nantty.com"
-  gift   = "https://gift.staging.nantty.com"
 }
+
+# Required before the staging environment can be applied. Use your team's fixed egress CIDR(s), never 0.0.0.0/0.
+# admin_ip_allow_list = ["203.0.113.10/32"]
 aurora              = { instance_class = "db.r7g.large", reader_count = 1, backup_retention_days = 14, engine_version = "17.4" }
 valkey              = { node_type = "cache.t4g.medium", node_count = 2 }
 intelligence_valkey = { node_type = "cache.t4g.small", node_count = 1 }

@@ -20,7 +20,6 @@ app_origins = {
   studio = "https://studio.dev.nantty.com"
   admin  = "https://admin.dev.nantty.com"
   ads    = "https://ads.dev.nantty.com"
-  gift   = "https://gift.dev.nantty.com"
 }
 aurora              = { instance_class = "db.t4g.medium", reader_count = 0, backup_retention_days = 7, engine_version = "17.4" }
 valkey              = { node_type = "cache.t4g.small", node_count = 1 }

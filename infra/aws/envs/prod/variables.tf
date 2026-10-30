@@ -58,6 +58,11 @@ variable "app_origins" {
   description = "Exact browser origins per frontend, used for gateway CORS and S3 upload CORS."
   type        = map(string)
 }
+variable "admin_ip_allow_list" {
+  description = "CIDR ranges permitted to reach admin routes through the gateway. Required for production."
+  type        = list(string)
+  default     = []
+}
 variable "image_tag" {
   description = "Initial image tag; CI registers new task definitions afterwards (Terraform ignores them)."
   type        = string

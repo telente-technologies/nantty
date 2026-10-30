@@ -1,7 +1,7 @@
 locals {
   grpc_address = {
-    go-money    = "go-money.${module.cluster.namespace_name}:9103"
-    go-identity = "go-identity.${module.cluster.namespace_name}:9101"
+    go-money    = "127.0.0.1:29103"
+    go-identity = "127.0.0.1:29101"
   }
 
   internal_wiring_environment = {
@@ -10,7 +10,7 @@ locals {
       HUMAN_VERIFICATION_HOSTNAMES = join(",", [for origin in values(var.app_origins) : replace(replace(origin, "https://", ""), "http://", "")])
     }
     go-identity = {
-      AUTH_ACCOUNT_DIRECTORY_GRPC_ADDRESS = ":9101"
+      AUTH_ACCOUNT_DIRECTORY_GRPC_ADDRESS = "127.0.0.1:9101"
       USERS_MONEY_INTERNAL_URL            = local.internal_url["go-money"]
       USERS_ENTITLEMENT_EVENTS_QUEUE      = "identity-domain-events"
       INTELLIGENCE_URL                    = local.internal_url["intelligence"]
@@ -21,9 +21,11 @@ locals {
       USERS_LIVE_INTERNAL_URL             = local.internal_url["go-live"]
     }
     go-money = {
-      SOCIAL_INTERNAL_URL = local.internal_url["social"]
-      ADMIN_INTERNAL_URL  = local.internal_url["go-identity"]
-      PAYMENT_RETURN_URLS = join(",", ["${var.app_origins["web"]}/pay/return", "${var.app_origins["webapp"]}/pay/return", "${var.app_origins["webapp"]}/settings/verification"])
+      ESCROW_FEE_BPS               = "0"
+      ESCROW_FEE_BUSINESS_PLAN_BPS = "0"
+      SOCIAL_INTERNAL_URL          = local.internal_url["social"]
+      ADMIN_INTERNAL_URL           = local.internal_url["go-identity"]
+      PAYMENT_RETURN_URLS          = join(",", ["${var.app_origins["web"]}/pay/return", "${var.app_origins["webapp"]}/pay/return", "${var.app_origins["webapp"]}/settings/verification"])
     }
     go-commerce = {
       ORDERS_MONEY_GRPC_ADDRESS    = local.grpc_address["go-money"]

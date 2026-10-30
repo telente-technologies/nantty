@@ -4,7 +4,6 @@ terraform {
     aws = { source = "hashicorp/aws", version = "~> 5.70" }
   }
 }
-
 locals {
   name = "nantty-${var.environment}"
 }
@@ -30,9 +29,9 @@ resource "aws_security_group" "alb" {
     ipv6_cidr_blocks = ["::/0"]
   }
   egress {
-    description = "To tasks inside the VPC"
-    from_port   = 0
-    to_port     = 65535
+    description = "To task TLS proxies inside the VPC"
+    from_port   = 18443
+    to_port     = 18443
     protocol    = "tcp"
     cidr_blocks = [var.vpc_cidr]
   }
@@ -84,93 +83,5 @@ resource "aws_lb_listener" "https" {
       message_body = "{\"message\":\"Not found.\",\"code\":\"NOT_FOUND\"}"
       status_code  = "404"
     }
-  }
-}
-
-resource "aws_security_group" "internal_alb" {
-  name_prefix = "${local.name}-internal-alb-"
-  description = "Internal ALB for service-to-service HTTP"
-  vpc_id      = var.vpc_id
-  ingress {
-    description     = "HTTP from ECS tasks"
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
-    security_groups = [var.tasks_security_group_id]
-  }
-  dynamic "ingress" {
-    for_each = var.payments_security_group_id == null ? [] : [var.payments_security_group_id]
-    content {
-      description     = "HTTP from go-money (payments)"
-      from_port       = 80
-      to_port         = 80
-      protocol        = "tcp"
-      security_groups = [ingress.value]
-    }
-  }
-  egress {
-    description     = "To ECS tasks"
-    from_port       = 0
-    to_port         = 65535
-    protocol        = "tcp"
-    security_groups = [var.tasks_security_group_id]
-  }
-  dynamic "egress" {
-    for_each = var.payments_security_group_id == null ? [] : [var.payments_security_group_id]
-    content {
-      description     = "To go-money (payments) HTTP"
-      from_port       = 8080
-      to_port         = 8080
-      protocol        = "tcp"
-      security_groups = [egress.value]
-    }
-  }
-  lifecycle { create_before_destroy = true }
-}
-
-resource "aws_lb" "internal" {
-  name                       = "${local.name}-int"
-  internal                   = true
-  load_balancer_type         = "application"
-  subnets                    = var.private_subnet_ids
-  security_groups            = [aws_security_group.internal_alb.id]
-  idle_timeout               = 120
-  drop_invalid_header_fields = true
-  enable_deletion_protection = var.deletion_protection
-  access_logs {
-    bucket  = var.logs_bucket_id
-    prefix  = "alb-internal"
-    enabled = true
-  }
-}
-
-resource "aws_lb_listener" "internal" {
-  load_balancer_arn = aws_lb.internal.arn
-  port              = 80
-  protocol          = "HTTP"
-  default_action {
-    type = "fixed-response"
-    fixed_response {
-      content_type = "application/json"
-      message_body = "{\"message\":\"Not found.\",\"code\":\"NOT_FOUND\"}"
-      status_code  = "404"
-    }
-  }
-}
-
-resource "aws_route53_zone" "internal" {
-  name = "svc.${var.environment}.nantty.internal"
-  vpc { vpc_id = var.vpc_id }
-}
-
-resource "aws_route53_record" "internal_services" {
-  for_each = toset(var.internal_service_names)
-  zone_id  = aws_route53_zone.internal.zone_id
-  name     = "${each.key}.${aws_route53_zone.internal.name}"
-  type     = "A"
-  alias {
-    name                   = aws_lb.internal.dns_name
-    zone_id                = aws_lb.internal.zone_id
-    evaluate_target_health = true
   }
 }

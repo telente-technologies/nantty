@@ -55,6 +55,7 @@ locals {
 
   common_environment = {
     APP_ENV                 = local.app_env
+    DEPLOYMENT_ENVIRONMENT  = var.environment
     LOG_LEVEL               = "info"
     AWS_REGION              = var.region
     EVENT_BUS               = "rabbitmq"
@@ -71,10 +72,10 @@ locals {
   }
 
   runtime_environment = {
-    go     = { HTTP_ADDRESS = ":8080", OTEL_EXPORTER_OTLP_ENDPOINT = "http://127.0.0.1:4317" }
-    node   = { HOST = "0.0.0.0", NODE_ENV = "production" }
+    go     = { HTTP_ADDRESS = "127.0.0.1:8080", OTEL_EXPORTER_OTLP_ENDPOINT = "http://127.0.0.1:4317" }
+    node   = { HOST = "127.0.0.1", NODE_ENV = "production" }
     elixir = { PHX_SERVER = "true", PHX_HOST = local.api_domain, DNS_CLUSTER_QUERY = "realtime.${module.cluster.namespace_name}" }
-    python = { OTEL_SEMCONV_STABILITY_OPT_IN = "http", INTELLIGENCE_ENVIRONMENT = local.app_env, INTELLIGENCE_HOST = "0.0.0.0", INTELLIGENCE_EVENT_STORAGE_URI = "s3://${module.storage.media_bucket.id}/intelligence" }
+    python = { OTEL_SEMCONV_STABILITY_OPT_IN = "http", INTELLIGENCE_ENVIRONMENT = local.app_env, INTELLIGENCE_HOST = "127.0.0.1", INTELLIGENCE_EVENT_STORAGE_URI = "s3://${module.storage.media_bucket.id}/intelligence" }
     gateway_only = merge(
       { CORS_ORIGINS = join(",", values(var.app_origins)), RATE_LIMIT_MAX_PER_MINUTE = "600", TRUSTED_PROXY_HOPS = "1" },
       { for name, url in local.internal_url : "UPSTREAM_${upper(replace(replace(name, "go-", ""), "-", "_"))}_URL" => url if contains(["go-identity", "go-live", "go-money", "go-trust", "go-commerce", "go-ads", "social", "notifications", "media", "search", "support"], name) },
@@ -82,7 +83,15 @@ locals {
   }
 
   service_specific_environment = {
-    gateway       = merge(local.runtime_environment.gateway_only, { PORT = "8080", AUTH_JWKS_URL = "${local.internal_url["go-identity"]}/.well-known/jwks.json" })
+    gateway = merge(local.runtime_environment.gateway_only, { PORT = "8080", AUTH_JWKS_URL = "${local.internal_url["go-identity"]}/.well-known/jwks.json", ADMIN_IP_ALLOWLIST = join(",", var.admin_ip_allow_list) })
+    go-money = {
+      PAYMENTS_MIGRATE_ON_START      = "false"
+      WALLET_MIGRATE_ON_START        = "false"
+      LEDGER_MIGRATE_ON_START        = "false"
+      ESCROW_MIGRATE_ON_START        = "false"
+      SUBSCRIPTIONS_MIGRATE_ON_START = "false"
+      CREATORS_MIGRATE_ON_START      = "false"
+    }
     social        = { PORT = "8105" }
     notifications = { PORT = "8104", PUSH_PROVIDER = "expo", NANTTY_WEB_BASE_URL = try(var.app_origins["web"], "https://${var.app_domain}"), SQS_SES_FEEDBACK_QUEUE_URL = module.ses.feedback_queue_url, SES_CONFIGURATION_SET = module.ses.configuration_set_name, SES_FROM_ADDRESS = "Nantty <noreply@${var.mail_domain}>", NANTTY_MAIL_SENDING_DOMAIN = var.mail_domain, IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
     media = merge({
@@ -116,7 +125,7 @@ locals {
       LIVE_SAFETY_FRAMES_QUEUE     = "jobs-live-frames"
       LIVE_SAFETY_AUDIO_QUEUE      = "jobs-live-audio"
     }
-    go-money = { MONEY_GRPC_ADDRESS = ":9103", PAYMENTS_PROVIDER = "flutterwave" }
+    go-money = { MONEY_GRPC_ADDRESS = "127.0.0.1:9103", PAYMENTS_PROVIDER = "flutterwave" }
   }
 
   runtime_of = { for name, definition in local.services : name => (
@@ -178,44 +187,72 @@ module "service" {
   source   = "../ecs-service"
   for_each = local.services
 
-  name                    = each.key
-  environment             = var.environment
-  region                  = var.region
-  cluster_arn             = module.cluster.cluster_arn
-  cluster_name            = module.cluster.cluster_name
-  vpc_id                  = module.network.vpc_id
-  subnet_ids              = module.network.private_subnet_ids
-  security_group_ids      = each.key == "go-money" ? [aws_security_group.payments.id] : each.key == "intelligence" ? [aws_security_group.tasks.id, aws_security_group.intelligence.id] : [aws_security_group.tasks.id]
-  image                   = module.ecr.repository_urls[each.key]
-  image_tag               = var.image_tag
-  cpu                     = each.value.cpu
-  memory                  = each.value.memory
-  port                    = each.value.port
-  extra_ports             = each.value.extra
-  health_path             = each.value.ready
-  metrics_scrape_path     = contains(["go", "elixir"], local.runtime_of[each.key]) ? "/metrics" : null
-  container_health_check  = each.value.health_command
-  environment_variables   = merge(local.common_environment, local.runtime_environment[local.runtime_of[each.key]], lookup(local.service_specific_environment, each.key, {}), lookup(local.internal_wiring_environment, each.key, {}), lookup(local.database_schema_environment, each.key, {}))
-  secrets                 = local.service_secrets[each.key]
-  secret_arns             = local.service_secret_arns[each.key]
-  secrets_kms_key_arn     = module.kms.key_arns["secrets"]
-  logs_kms_key_arn        = module.kms.key_arns["logs"]
-  task_policy_statements  = lookup(local.task_policies, each.key, [])
-  min_count               = each.value.min
-  max_count               = each.value.max
-  request_count_target    = each.value.request_target
-  alb_arn_suffix          = module.edge.alb_arn_suffix
-  namespace_id            = module.cluster.namespace_id
-  enable_execute_command  = var.enable_execute_command
-  log_retention_days      = var.log_retention_days
-  use_spot                = var.environment == "dev"
-  blue_green              = each.value.blue_green
-  blue_green_listener_arn = each.value.blue_green ? module.edge.internal_listener_arn : null
-  blue_green_alarm_names  = each.value.blue_green ? [module.observability.ledger_imbalance_alarm_name, module.observability.alb_5xx_alarm_name] : []
-  listener_rules = concat(
-    [for rule in each.value.public_rules : { listener_arn = module.edge.https_listener_arn, priority = rule.priority, path_patterns = rule.path_patterns, host_headers = [] }],
-    each.value.internal ? [{ listener_arn = module.edge.internal_listener_arn, priority = 100 + index(local.internal_names, each.key), path_patterns = [], host_headers = ["${each.key}.${module.edge.internal_zone_name}"] }] : [],
-  )
+  name                     = each.key
+  environment              = var.environment
+  region                   = var.region
+  cluster_arn              = module.cluster.cluster_arn
+  cluster_name             = module.cluster.cluster_name
+  vpc_id                   = module.network.vpc_id
+  subnet_ids               = module.network.private_subnet_ids
+  security_group_ids       = each.key == "go-money" ? [aws_security_group.payments.id] : concat([aws_security_group.tasks.id, aws_security_group.service[each.key].id], each.key == "intelligence" ? [aws_security_group.intelligence.id] : [])
+  image                    = module.ecr.repository_urls[each.key]
+  image_tag                = var.image_tag
+  cpu                      = each.value.cpu * 2
+  memory                   = max(ceil((each.value.memory + 512) / 1024) * 1024, each.value.cpu * 4)
+  port                     = each.value.port
+  extra_ports              = each.value.extra
+  tls_proxy_image          = "${module.ecr.repository_urls["tls-proxy"]}:${var.image_tag}"
+  tls_proxy_repository_arn = module.ecr.repository_arns["tls-proxy"]
+  tls_secret_arn           = aws_secretsmanager_secret.tls[each.key].arn
+  tls_config = jsonencode({
+    identity   = local.tls_identity[each.key]
+    ca         = aws_acmpca_certificate_authority_certificate.mesh.certificate
+    alb        = length(each.value.public_rules) > 0
+    app_port   = each.value.port
+    ready_path = each.value.ready
+    grpc_ports = each.value.extra
+    clients    = [for name in local.tls_clients[each.key] : local.tls_identity[name]]
+    upstreams = concat(
+      [for target in local.internal_names : {
+        name        = target
+        dns         = local.tls_identity[target]
+        local_port  = 20000 + index(local.internal_names, target)
+        remote_port = 19443
+        ready_path  = local.services[target].ready
+      } if contains(local.tls_http_clients[target], each.key)],
+      [for target, clients in local.tls_grpc_clients : {
+        name        = "${target}-grpc"
+        dns         = local.tls_identity[target]
+        local_port  = target == "go-money" ? 29103 : 29101
+        remote_port = target == "go-money" ? 19103 : 19101
+      } if contains(clients, each.key)],
+    )
+  })
+  health_path            = each.value.ready
+  metrics_scrape_path    = contains(["go", "elixir"], local.runtime_of[each.key]) ? "/metrics" : null
+  container_health_check = each.value.health_command
+  environment_variables  = merge(local.common_environment, local.runtime_environment[local.runtime_of[each.key]], lookup(local.service_specific_environment, each.key, {}), lookup(local.internal_wiring_environment, each.key, {}), lookup(local.database_schema_environment, each.key, {}))
+  secrets                = local.service_secrets[each.key]
+  secret_arns            = local.service_secret_arns[each.key]
+  secrets_kms_key_arn    = module.kms.key_arns["secrets"]
+  logs_kms_key_arn       = module.kms.key_arns["logs"]
+  task_policy_statements = lookup(local.task_policies, each.key, [])
+  min_count              = each.value.min
+  desired_count          = each.value.min
+  max_count              = each.value.max
+  request_count_target   = each.value.request_target
+  alb_arn_suffix         = module.edge.alb_arn_suffix
+  namespace_id           = module.cluster.namespace_id
+  enable_execute_command = var.enable_execute_command
+  log_retention_days     = var.log_retention_days
+  use_spot               = var.environment == "dev"
+  blue_green             = false
+  deployment_alarm_names = each.key == "go-money" ? [module.observability.ledger_imbalance_alarm_name, module.observability.alb_5xx_alarm_name] : []
+  listener_rules = [for rule in each.value.public_rules : {
+    listener_arn  = module.edge.https_listener_arn, priority = rule.priority,
+    path_patterns = rule.path_patterns, host_headers = []
+  }]
+  depends_on = [aws_lambda_invocation.tls_bootstrap]
 }
 
 module "observability" {
@@ -234,8 +271,8 @@ module "observability" {
   service_log_group_names     = { for name in local.service_names : name => module.service[name].log_group_name if local.runtime_of[name] == "go" }
   target_group_arn_suffixes = {
     for name, definition in local.services : name => {
-      load_balancer_suffix = length(definition.public_rules) > 0 ? module.edge.alb_arn_suffix : module.edge.internal_alb_arn_suffix
+      load_balancer_suffix = module.edge.alb_arn_suffix
       target_group_suffix  = module.service[name].target_group_arn_suffix
-    }
+    } if length(definition.public_rules) > 0
   }
 }

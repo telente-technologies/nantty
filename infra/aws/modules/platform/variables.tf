@@ -58,6 +58,15 @@ variable "app_origins" {
   description = "Exact browser origins per frontend, used for gateway CORS and S3 upload CORS."
   type        = map(string)
 }
+variable "admin_ip_allow_list" {
+  description = "CIDR ranges permitted to reach admin routes through the gateway. Required outside dev."
+  type        = list(string)
+  default     = []
+  validation {
+    condition     = alltrue([for cidr in var.admin_ip_allow_list : can(cidrnetmask(cidr)) && !contains(["0.0.0.0/0", "::/0"], cidr)])
+    error_message = "Admin access requires valid restricted IPv4 CIDRs."
+  }
+}
 variable "image_tag" {
   description = "Initial image tag; CI registers new task definitions afterwards (Terraform ignores them)."
   type        = string
@@ -144,7 +153,21 @@ variable "intelligence_valkey" {
   default = { node_type = "cache.t4g.small", node_count = 1 }
 }
 variable "payments_internet_egress_cidrs" {
-  description = "Internet ranges go-money may reach on 443 (Flutterwave, Apple, Google). Narrow once the providers' ranges are confirmed; hostnames cannot be expressed in a security group."
+  description = "Reviewed IPv4 ranges go-money may reach on 443. Security groups cannot express hostnames; use an egress proxy/domain firewall when provider ranges are dynamic. Empty denies direct internet egress."
   type        = list(string)
-  default     = ["0.0.0.0/0"]
+  default     = []
+  validation {
+    condition     = alltrue([for cidr in var.payments_internet_egress_cidrs : can(cidrnetmask(cidr)) && cidr != "0.0.0.0/0"])
+    error_message = "Payment internet egress must use explicit, valid IPv4 CIDRs; 0.0.0.0/0 is not allowed."
+  }
+}
+
+variable "service_internet_egress_cidrs" {
+  description = "Reviewed IPv4 ranges shared ECS services may reach on 443. Prefer VPC endpoints and an egress proxy/domain firewall for dynamic provider hostnames. Empty denies direct internet egress."
+  type        = list(string)
+  default     = []
+  validation {
+    condition     = alltrue([for cidr in var.service_internet_egress_cidrs : can(cidrnetmask(cidr)) && cidr != "0.0.0.0/0"])
+    error_message = "Service internet egress must use explicit, valid IPv4 CIDRs; 0.0.0.0/0 is not allowed."
+  }
 }

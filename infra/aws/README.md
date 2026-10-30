@@ -105,16 +105,26 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
 3. Delegate DNS: copy the `name_servers` output of dev and staging into NS records in the prod zone
    (`dev.nantty.com`, `staging.nantty.com`), and point the registrar at prod's name servers.
 4. Verify SES: DKIM and MAIL FROM records are created automatically; request production access (out of the sandbox).
-5. Database roles: for each secret `nantty/<env>/db/svc_*` create the Postgres role with that password, the schema it
-   owns, PostGIS (`CREATE EXTENSION postgis`) and grants, using the Aurora master secret (output
-   `aurora_master_secret_arn`) from a bastion via SSM. `svc_migrator` owns schemas for the pre-deploy migrate task.
+5. Database roles: use the Aurora master secret (output `aurora_master_secret_arn`) from a bastion via SSM to create
+   each `svc_*` login from its matching Secrets Manager secret. `svc_migrator` owns the `payments`, `wallet`, `ledger`,
+   `escrow`, `subscriptions`, and `creators` schemas; create `svc_money` before applying money migrations because the
+   three narrowly scoped cleanup grants are conditional on that role existing. Grant it schema USAGE, default
+   SELECT/INSERT/UPDATE and sequence access, plus DELETE only on `payments.provider_payout_destinations`,
+   `creators.creator_brand_deals`, and `ledger.step_up_consumptions`. It must not be a member of `svc_migrator` or any
+   money schema-owner role. The normal go-money ECS
+   task receives only `MONEY_DATABASE_URL`. The separate pre-deploy task definition must receive exactly
+   `MONEY_MIGRATION_DATABASE_URL` from the `svc_migrator` secret and run `--migrate-money`; it must not receive the
+   runtime database URL. Create PostGIS as required by the other service schemas and apply the reviewed grants before
+   rollout.
 6. RabbitMQ: create one user per `nantty/<env>/mq/<service>` secret and import
    `infra/local/rabbitmq/topology.json` through the management API using `nantty/<env>/mq/admin`.
 7. Fill the placeholders `CHANGE_ME` in `nantty/<env>/<service>/app` (JWT/OTP keys, internal tokens, and for go-money
    `FLUTTERWAVE_SECRET_KEY`, `FLUTTERWAVE_WEBHOOK_HASH` (32+ characters) and `FLUTTERWAVE_MERCHANT_ID` for that environment;
    go-money refuses to start in production without them). Register `terraform output nat_public_ips` in Flutterwave's IP whitelist. Replace the LiveKit credentials when using LiveKit Cloud.
 8. In GitHub, create environments `staging` and `production` (required reviewers on production) and add repository
-   variables `AWS_ACCOUNT_ID_STAGING`, `AWS_ACCOUNT_ID_PROD`, `AWS_REGION`, `STAGING_API_URL`, `PROD_API_URL` (optional pre-deploy migration: `MIGRATE_TASK_DEFINITION[_PROD]`, `*_PRIVATE_SUBNETS`, `*_TASKS_SECURITY_GROUP`).
+   variables `AWS_ACCOUNT_ID_STAGING`, `AWS_ACCOUNT_ID_PROD`, `AWS_REGION`, `STAGING_API_URL`, `PROD_API_URL`,
+   `MIGRATE_TASK_DEFINITION[_PROD]`, `*_PRIVATE_SUBNETS`, `*_TASKS_SECURITY_GROUP`, and the snapshot/restore gate
+   variables. The deploy workflow runs the migration task before each rollout and stops if it does not succeed.
    The roles are the outputs `github_ecr_push_role_arn` and `github_deploy_role_arn`.
 9. Push the first images (the CI `images` job does it on merge to main), then CI deploys; autoscaling minimums start tasks.
 

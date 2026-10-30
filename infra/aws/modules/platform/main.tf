@@ -56,57 +56,26 @@ module "network" {
 
 resource "aws_security_group" "tasks" {
   name_prefix = "${local.tags_prefix}-tasks-"
-  description = "All ECS tasks; data stores only accept this group"
+  description = "Shared data-store client and outbound access; never grants service ingress"
   vpc_id      = module.network.vpc_id
-  ingress {
-    description = "Task to task (Erlang distribution, internal HTTP)"
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    self        = true
+  lifecycle {
+    create_before_destroy = true
+    precondition {
+      condition     = var.environment == "dev" || length(var.admin_ip_allow_list) > 0
+      error_message = "admin_ip_allow_list must contain a trusted CIDR for staging and prod."
+    }
   }
-  ingress {
-    description     = "go-money (payments) to go-identity account directory gRPC"
-    from_port       = 9101
-    to_port         = 9101
-    protocol        = "tcp"
-    security_groups = [aws_security_group.payments.id]
-  }
-  egress {
-    description = "Outbound HTTPS to AWS endpoints, Flutterwave and push providers"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    description = "Inside the VPC"
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
-  }
-  lifecycle { create_before_destroy = true }
 }
 
 resource "aws_security_group_rule" "tasks_from_public_alb" {
+  for_each                 = { for name, definition in local.services : name => definition if length(definition.public_rules) > 0 }
   type                     = "ingress"
   description              = "Public ALB to tasks"
-  from_port                = 4000
-  to_port                  = 8109
+  from_port                = 18443
+  to_port                  = 18443
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.tasks.id
+  security_group_id        = aws_security_group.service[each.key].id
   source_security_group_id = module.edge.alb_security_group_id
-}
-
-resource "aws_security_group_rule" "tasks_from_internal_alb" {
-  type                     = "ingress"
-  description              = "Internal ALB to tasks"
-  from_port                = 4000
-  to_port                  = 8109
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.tasks.id
-  source_security_group_id = module.edge.internal_alb_security_group_id
 }
 
 module "dns" {
@@ -123,25 +92,21 @@ module "dns" {
 }
 
 module "edge" {
-  source                     = "../edge"
-  environment                = var.environment
-  vpc_id                     = module.network.vpc_id
-  vpc_cidr                   = var.vpc_cidr
-  public_subnet_ids          = module.network.public_subnet_ids
-  private_subnet_ids         = module.network.private_subnet_ids
-  certificate_arn            = module.dns.api_certificate_arn
-  logs_bucket_id             = module.storage.logs_bucket.id
-  logs_kms_key_arn           = module.kms.key_arns["logs"]
-  deletion_protection        = var.deletion_protection
-  tasks_security_group_id    = aws_security_group.tasks.id
-  internal_service_names     = local.internal_names
-  payments_security_group_id = aws_security_group.payments.id
-  log_retention_days         = var.log_retention_days
+  source              = "../edge"
+  environment         = var.environment
+  vpc_id              = module.network.vpc_id
+  vpc_cidr            = var.vpc_cidr
+  public_subnet_ids   = module.network.public_subnet_ids
+  certificate_arn     = module.dns.api_certificate_arn
+  logs_bucket_id      = module.storage.logs_bucket.id
+  logs_kms_key_arn    = module.kms.key_arns["logs"]
+  deletion_protection = var.deletion_protection
+  log_retention_days  = var.log_retention_days
 }
 
 module "ecr" {
   source              = "../ecr"
-  repositories        = concat(local.service_names, ["migrate"])
+  repositories        = concat(local.service_names, ["migrate", "tls-proxy"])
   kms_key_arn         = module.kms.key_arns["ecr"]
   replicate_to_region = var.enable_dr ? var.dr_region : null
   pull_account_ids    = var.ecr_pull_account_ids
@@ -239,7 +204,7 @@ module "github_oidc" {
   source              = "../github-oidc"
   environment         = var.environment
   repository          = var.github_repository
-  github_environment  = var.environment
+  github_environment  = var.environment == "prod" ? "production" : var.environment
   create_provider     = var.create_github_oidc_provider
   ecr_repository_arns = module.ecr.repository_arns
 
