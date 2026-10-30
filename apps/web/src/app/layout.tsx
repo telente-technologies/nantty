@@ -38,13 +38,20 @@ export const metadata: Metadata = {
     description: siteConfig.description,
   },
   manifest: "/manifest.webmanifest",
-  icons: { icon: [{ url: "/brand/nantty-icon.png", type: "image/png" }], apple: "/brand/nantty-icon.png" },
+  icons: {
+    icon: [
+      { url: "/brand/favicon.ico", type: "image/x-icon", sizes: "48x48" },
+      { url: "/brand/icon192.png", type: "image/png", sizes: "192x192" },
+      { url: "/brand/icon512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: "/brand/appleTouchIcon.png",
+  },
   formatDetection: { telephone: false },
 };
 
 const organizationJsonLd = JSON.stringify([
   { "@context": "https://schema.org", "@type": "Organization", name: "Nantty", url: siteConfig.siteUrl, logo: `${siteConfig.siteUrl}/brand/nantty-icon.png` },
-  { "@context": "https://schema.org", "@type": "WebSite", name: "Nantty", url: siteConfig.siteUrl },
+  { "@context": "https://schema.org", "@type": "WebSite", name: "Nantty", alternateName: "nantty.com", url: siteConfig.siteUrl },
 ]).replace(/</g, "\\u003c");
 
 export const viewport: Viewport = {

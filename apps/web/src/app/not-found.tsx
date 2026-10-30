@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+
+import styles from "@/components/errors/errorPage.module.css";
 import { NotFoundScreen } from "@nantty/web-kit";
 
 export const metadata: Metadata = {
@@ -7,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function PageNotFound() {
-  return <NotFoundScreen description="The link may be old or have a typo. The shops are this way." />;
+  return <div className={styles.experience}><NotFoundScreen description="The link may be old or have a typo. The shops are this way." /></div>;
 }

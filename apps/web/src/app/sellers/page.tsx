@@ -6,10 +6,9 @@ import { SellerPayoutsSection } from "@/components/sellers/sellerPayoutsSection"
 import { SellersPageHeroSection } from "@/components/sellers/sellersHeroSection";
 import { SellerOnboardingStepsSection } from "@/components/sellers/sellerStepsSection";
 import { sellerQuestions } from "@/content/sellerQuestions.content";
-import { businessAppLinks } from "@/lib/siteConfig.config";
 import { createPublicPageMetadata } from "@/lib/pageMetadata.util";
 
-export const metadata = createPublicPageMetadata({ title: "Sell on Nantty", description: "Open a Nantty store, sell through posts, clips and live streams, manage orders from the seller dashboard, and get paid to your wallet when buyers confirm delivery.", path: "/sellers" });
+export const metadata = createPublicPageMetadata({ title: "Selling on Nantty", description: "See the seller experience Nantty is building for Nigeria. Store onboarding and the seller workspace are not open to the public yet.", path: "/sellers" });
 
 export default function SellersPage() {
   return (
@@ -23,10 +22,10 @@ export default function SellersPage() {
       <AppDownloadCallToActionPanel
         sectionId="apply"
         headingId="apply-heading"
-        heading="Open your store."
-        description="Apply to sell from the Nantty app or the Nantty Dashboard. We review every seller before their store opens."
-        actionLabel={`Apply on ${businessAppLinks.sellerDashboard.label}`}
-        actionHref={businessAppLinks.sellerDashboard.href}
+        heading="Get ready to sell with Nantty."
+        description="Seller onboarding and the seller workspace are still in development. Join the waitlist for launch updates; joining does not guarantee store approval."
+        actionLabel="Join the waitlist"
+        actionHref="/waitlist"
       />
     </>
   );
