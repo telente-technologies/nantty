@@ -1,10 +1,11 @@
 import Link from "next/link";
 
-import { siteConfig } from "@/lib/siteConfig.config";
+import { isPrelaunchMode, siteConfig } from "@/lib/siteConfig.config";
 
 import styles from "./announcementBar.module.css";
 
 export function LaunchAnnouncementBar() {
+  if (!isPrelaunchMode) return null;
   return (
     <aside className={styles.bar} aria-label="Launch announcement">
       <p className={styles.message}>
@@ -12,7 +13,7 @@ export function LaunchAnnouncementBar() {
         <span>
           Nantty opens in {siteConfig.launchCountry} first.{" "}
           <Link href="/#download" className={styles.link}>
-            Get the app
+          Join the waitlist
           </Link>
         </span>
       </p>

@@ -18,6 +18,7 @@ const footerLinkGroups = [
       { label: "Posts, clips and live streams", href: "/#social-shopping" },
       { label: "Creators and badges", href: "/#creators" },
       { label: "Questions", href: "/#questions" },
+      { label: "Join the waitlist", href: "/waitlist" },
     ],
   },
   {
@@ -34,6 +35,7 @@ const footerLinkGroups = [
     heading: "Company",
     links: [
       { label: "About", href: "/about" },
+      { label: "Waitlist", href: "/waitlist" },
       { label: "Contact", href: "/contact" },
       { label: "Privacy policy", href: "/privacy" },
       { label: "Cookie policy", href: "/cookies" },

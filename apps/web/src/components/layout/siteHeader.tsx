@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { ThemeSwitcher } from "@nantty/web-kit";
 
-import { businessAppLinks, siteConfig } from "@/lib/siteConfig.config";
+import { businessAppLinks, isPrelaunchMode, siteConfig } from "@/lib/siteConfig.config";
 
 import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
 import { ForBusinessDisclosureMenu } from "./forBusinessMenu";
@@ -77,8 +77,8 @@ export function SiteHeaderWithFloatingNavigation() {
           </ul>
         </nav>
         <ThemeSwitcher iconOnly label="Colour theme" className={styles.themeSwitcher} />
-        <Link href="/#download" className={styles.downloadButton}>
-          Get the app
+        <Link href={isPrelaunchMode ? "/waitlist" : "/#download"} className={styles.downloadButton}>
+          {isPrelaunchMode ? "Join the waitlist" : "Get the app"}
         </Link>
         <button
           ref={menuToggleButtonRef}
@@ -130,8 +130,8 @@ export function SiteHeaderWithFloatingNavigation() {
           </ul>
           <ThemeSwitcher label="Appearance" showLabel className={styles.mobileThemeSwitcher} />
         </nav>
-        <Link href="/#download" className={styles.mobileDownloadButton} onClick={() => setIsMobileMenuOpen(false)}>
-          Get the app
+        <Link href={isPrelaunchMode ? "/waitlist" : "/#download"} className={styles.mobileDownloadButton} onClick={() => setIsMobileMenuOpen(false)}>
+          {isPrelaunchMode ? "Join the waitlist" : "Get the app"}
         </Link>
       </div>
     </header>
