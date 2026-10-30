@@ -64,18 +64,37 @@
   display: flex;
   justify-content: space-between;
   gap: var(--space-4);
+  min-width: 0;
   padding: var(--space-4) 0;
   border-bottom: 1px solid var(--divider);
   font-weight: 500;
 }
 
 .feeValue {
-  flex: none;
+  flex: 0 1 25ch;
   max-width: 25ch;
+  overflow-wrap: anywhere;
   color: var(--ink-muted);
   font-weight: 600;
   font-size: 0.9rem;
   text-align: end;
+}
+
+@media (max-width: 480px) {
+  .card {
+    gap: var(--space-6);
+    padding: var(--space-5);
+  }
+
+  .topicList li {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .feeValue {
+    max-width: none;
+    text-align: start;
+  }
 }
 
 @media (min-width: 960px) {
