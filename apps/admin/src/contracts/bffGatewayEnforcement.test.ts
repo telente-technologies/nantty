@@ -85,6 +85,26 @@ describe("BFF enforcement (forged calls)", () => {
     assert.equal((await callBff(session, "GET", "/admin/auth/me")).status, 404);
   });
 
+  it("lets a superadmin with no explicit permission claims load backend role templates", async () => {
+    const session = openSession(superadminId, []);
+    const result = await callBff(session, "GET", "/admin/roles");
+    assert.equal(result.status, 200);
+  });
+
+  it("lets the seeded superadmin invite another superadmin through the backend flow", async () => {
+    const session = openSession(superadminId, []);
+    grantStepUp(session);
+    const result = await callBff(session, "POST", "/admin/admins", {
+      name: "Second Superadmin",
+      email: "second.superadmin@example.com",
+      role: "SUPERADMIN",
+      roleIds: [],
+      permissions: [],
+      reason: "Adding a second authorized superadmin",
+    });
+    assert.equal(result.status, 201);
+  });
+
   it("rejects a mutation without the CSRF token", async () => {
     const session = openSession(superadminId);
     const result = await callBff(session, "POST", "/admin/users/usr_1/warn", { reason: "Spam links in bio", policy: "spam", addStrike: false }, { "x-csrf-token": "forged" });

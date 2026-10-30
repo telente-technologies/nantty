@@ -7,6 +7,21 @@ export interface PricingRegion {
 
 export type StoreProductKey = "ios.month" | "ios.year" | "android.month" | "android.year";
 
+export interface PlanPriceVersionSummary {
+  readonly currency: string;
+  readonly monthlyAmountMinor: number;
+  readonly yearlyAmountMinor: number;
+  readonly iosMonthlyAmountMinor: number;
+  readonly iosYearlyAmountMinor: number;
+  readonly androidMonthlyAmountMinor: number;
+  readonly androidYearlyAmountMinor: number;
+  readonly storeProductIds: Partial<Record<StoreProductKey, string>>;
+  readonly active: boolean;
+  readonly effectiveFrom: string;
+  readonly createdByStaffId: string;
+  readonly changeReason: string;
+}
+
 export interface PlanPriceRow {
   readonly planCode: string;
   readonly countryCode: PricingRegionCode;
@@ -20,6 +35,9 @@ export interface PlanPriceRow {
   readonly storeProductIds: Partial<Record<StoreProductKey, string>>;
   readonly active: boolean;
   readonly updatedByStaffId?: string;
+  readonly effectiveFrom: string;
+  readonly nextEffectiveFrom?: string;
+  readonly history?: readonly PlanPriceVersionSummary[];
 }
 
 export interface PlanPriceTable {

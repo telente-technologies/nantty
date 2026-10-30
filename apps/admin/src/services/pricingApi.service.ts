@@ -6,7 +6,7 @@ export function fetchPlanPriceTable(signal?: AbortSignal): Promise<PlanPriceTabl
 }
 
 export function savePlanPriceRow(row: PlanPriceRow, reason: string): Promise<PlanPriceRow> {
-  const { planCode, countryCode, updatedByStaffId: _ignored, ...body } = row;
+  const { planCode, countryCode, updatedByStaffId: _ignored, nextEffectiveFrom: _nextEffectiveFrom, history: _history, ...body } = row;
   return sendAdminApiRequest(`/admin/subscriptions/price-table/${encodeURIComponent(planCode)}/${encodeURIComponent(countryCode)}`, { method: "PUT", body: { ...body, reason } });
 }
 

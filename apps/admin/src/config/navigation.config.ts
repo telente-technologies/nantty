@@ -16,7 +16,9 @@ export interface NavigationGroup {
   readonly items: readonly NavigationItem[];
 }
 
-const configReaders: readonly AdminPermission[] = ["config:read", "config:plans", "config:revenue", "config:rules"];
+const planConfigReaders: readonly AdminPermission[] = ["config:read", "config:plans"];
+const revenueConfigReaders: readonly AdminPermission[] = ["config:read", "config:revenue"];
+const rulesConfigReaders: readonly AdminPermission[] = ["config:read", "config:rules"];
 const legalReaders: readonly AdminPermission[] = ["legal.documents.view", "legal.documents.edit", "legal.documents.publish", "legal.notices.send"];
 
 export const navigationGroups: readonly NavigationGroup[] = [
@@ -83,12 +85,12 @@ export const navigationGroups: readonly NavigationGroup[] = [
   {
     title: "Configuration",
     items: [
-      { label: "Plans & perks", href: "/config/plans", icon: "viewProducts24", requirement: configReaders },
-      { label: "Regional pricing", href: "/config/pricing", icon: "creditCard24", requirement: configReaders },
-      { label: "Subscription offers", href: "/config/offers", icon: "tag24", requirement: configReaders },
-      { label: "Revenue rules", href: "/config/revenue", icon: "creditCard24", requirement: configReaders },
-      { label: "Platform rules", href: "/config/rules", icon: "slidersHorizontal24", requirement: configReaders },
-      { label: "Feed ranking", href: "/config/ranking", icon: "slidersHorizontal24", requirement: configReaders },
+      { label: "Plans & perks", href: "/config/plans", icon: "viewProducts24", requirement: planConfigReaders },
+      { label: "Regional pricing", href: "/config/pricing", icon: "creditCard24", requirement: planConfigReaders },
+      { label: "Subscription offers", href: "/config/offers", icon: "tag24", requirement: planConfigReaders },
+      { label: "Revenue rules", href: "/config/revenue", icon: "creditCard24", requirement: revenueConfigReaders },
+      { label: "Platform rules", href: "/config/rules", icon: "slidersHorizontal24", requirement: rulesConfigReaders },
+      { label: "Feed ranking", href: "/config/ranking", icon: "slidersHorizontal24", requirement: rulesConfigReaders },
             { label: "Automation", href: "/config/automation", icon: "refresh20", requirement: "automation:manage" },
     ],
   },

@@ -40,6 +40,10 @@ export function registerRegionalPriceTableMockHandlers(): void {
     requireMockStepUp(request);
     const body = readJsonObjectBody(request);
     const reason = readRequiredReason(body);
+    const requestedEffectiveFrom = typeof body.effectiveFrom === "string" ? new Date(body.effectiveFrom) : new Date();
+    if (!Number.isFinite(requestedEffectiveFrom.getTime())) failValidation("effectiveFrom", "Choose a valid effective date.");
+    if (requestedEffectiveFrom.getTime() < Date.now() - 30_000) failValidation("effectiveFrom", "Choose now or a future date.");
+    if (requestedEffectiveFrom.getTime() < Date.now()) requestedEffectiveFrom.setTime(Date.now());
     const rows = readPlanPriceRows();
     const index = rows.findIndex((row) => row.planCode === request.params.planCode && row.countryCode === request.params.countryCode);
     if (index < 0) failNotFound("Plan price");
@@ -53,6 +57,14 @@ export function registerRegionalPriceTableMockHandlers(): void {
       iosMonthlyAmountMinor: readAmount(body, "iosMonthlyAmountMinor", 0), iosYearlyAmountMinor: readAmount(body, "iosYearlyAmountMinor", 0),
       androidMonthlyAmountMinor: readAmount(body, "androidMonthlyAmountMinor", 0), androidYearlyAmountMinor: readAmount(body, "androidYearlyAmountMinor", 0),
       storeProductIds: readStoreProductIds(body.storeProductIds), active: body.active !== false, updatedByStaffId: request.principal?.adminId ?? "",
+      effectiveFrom: requestedEffectiveFrom.toISOString(), nextEffectiveFrom: undefined,
+      history: [...(before.history ?? []), {
+        currency: before.currency, monthlyAmountMinor: readAmount(body, "monthlyAmountMinor", 1), yearlyAmountMinor,
+        iosMonthlyAmountMinor: readAmount(body, "iosMonthlyAmountMinor", 0), iosYearlyAmountMinor: readAmount(body, "iosYearlyAmountMinor", 0),
+        androidMonthlyAmountMinor: readAmount(body, "androidMonthlyAmountMinor", 0), androidYearlyAmountMinor: readAmount(body, "androidYearlyAmountMinor", 0),
+        storeProductIds: readStoreProductIds(body.storeProductIds), active: body.active !== false, effectiveFrom: requestedEffectiveFrom.toISOString(),
+        createdByStaffId: request.principal?.adminId ?? "mock-staff", changeReason: reason,
+      }],
     };
     rows[index] = after;
     recordMockAuditEntry(request, { action: "pricing.plan_price.update", area: "config", target: { type: "planPrice", id: `${after.planCode}:${after.countryCode}`, label: `${after.planCode} in ${after.countryCode}` }, reason, before, after });

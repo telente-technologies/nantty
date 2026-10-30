@@ -5,6 +5,7 @@ import { describe, it } from "node:test";
 
 import { doesApiCallRequireStepUp, findAdminApiRoute, isReasonMissing, listAdminApiRoutes } from "@/config/apiAccess.config";
 import { findRequirementForPagePath, navigationGroups } from "@/config/navigation.config";
+import { adminRoleTemplates } from "@/constants/adminRoleTemplates.constant";
 import { doesAdminMeetPageRequirement } from "@/utils/adminAccess.util";
 
 const sourceRoot = join(process.cwd(), "src");
@@ -129,6 +130,11 @@ describe("admin BFF route table", () => {
     assert.equal(doesApiCallRequireStepUp("GET", "/admin/users/u1"), false);
   });
 
+  it("limits confusable username previews to staff who can resolve ownership", () => {
+    const route = findAdminApiRoute("GET", "/admin/usernames/confusables")!;
+    assert.deepEqual(route.requirement, { kind: "anyOf", permissions: ["usernames:reassign"] });
+  });
+
   it("requires a reason on destructive mutations and rejects blank ones", () => {
     const destructive = listAdminApiRoutes().filter((route) => route.method !== "GET" && route.stepUp && !/^\/admin\/(account|usernames\/reserved|trending|payouts\/run)/.test(route.path));
     for (const route of destructive) assert.equal(route.reasonRequired, true, `${route.method} ${route.path} must require a reason`);
@@ -173,6 +179,43 @@ describe("admin page access", () => {
     assert.deepEqual(visible, ["/commerce/orders", "/support"]);
     assert.equal(doesAdminMeetPageRequirement(agent, findRequirementForPagePath("/commerce/payouts")!), false);
     assert.equal(doesAdminMeetPageRequirement(agent, findRequirementForPagePath("/users/sample")!), false);
+  });
+
+  it("provides the requested assignable, scoped department profiles", () => {
+    const byName = new Map(adminRoleTemplates.map((template) => [template.name, template]));
+    for (const name of ["Trust & Verification", "Finance Admin", "Moderation Admin", "Support Agent", "Subscription Manager", "Operations Analyst", "Auditor"]) {
+      assert.ok(byName.has(name), `missing ${name} role template`);
+    }
+
+    const profile = (name: string) => ({ role: "ADMIN" as const, permissions: byName.get(name)!.permissions });
+    const visiblePages = (name: string) => navigationGroups.flatMap((group) => group.items).filter((item) => doesAdminMeetPageRequirement(profile(name), item.requirement)).map((item) => item.href);
+
+    const trustVerificationPages = visiblePages("Trust & Verification");
+    for (const page of ["/verification", "/verification/business-documents", "/verification/black", "/applications/sellers", "/applications/creators", "/brands"]) assert.ok(trustVerificationPages.includes(page), `Trust & Verification cannot access ${page}`);
+    assert.ok(!trustVerificationPages.includes("/moderation/reports"));
+
+    const moderationPages = visiblePages("Moderation Admin");
+    for (const page of ["/moderation/reports", "/moderation/appeals", "/moderation/chat-reports", "/moderation/suspensions", "/moderation/security"]) assert.ok(moderationPages.includes(page), `Moderation Admin cannot access ${page}`);
+    assert.ok(!moderationPages.includes("/verification/black"));
+
+    const subscriptionPages = visiblePages("Subscription Manager");
+    for (const page of ["/config/plans", "/config/pricing", "/config/offers"]) assert.ok(subscriptionPages.includes(page), `Subscription Manager cannot access ${page}`);
+    for (const page of ["/config/revenue", "/config/rules", "/config/ranking", "/config/automation"]) assert.ok(!subscriptionPages.includes(page), `Subscription Manager unexpectedly sees ${page}`);
+
+    assert.ok(visiblePages("Operations Analyst").includes("/overview"));
+    assert.ok(!visiblePages("Operations Analyst").includes("/audit"));
+    assert.deepEqual(visiblePages("Auditor"), ["/audit"]);
+  });
+
+  it("gives a superadmin every permission-backed page and API capability", () => {
+    const superadmin = { role: "SUPERADMIN" as const, permissions: [] as const };
+    const pages = navigationGroups.flatMap((group) => group.items);
+    for (const page of pages) assert.equal(doesAdminMeetPageRequirement(superadmin, page.requirement), true, page.href);
+    for (const route of listAdminApiRoutes()) {
+      if (route.requirement.kind === "anyOf") assert.equal(doesAdminMeetPageRequirement(superadmin, route.requirement.permissions), true, `${route.method} ${route.path}`);
+      if (route.requirement.kind === "superadmin") assert.equal(doesAdminMeetPageRequirement(superadmin, "SUPERADMIN"), true, `${route.method} ${route.path}`);
+    }
+    assert.equal(doesAdminMeetPageRequirement({ role: "ADMIN", permissions: [] }, "SUPERADMIN"), false);
   });
 
   it("does not ship dropped features", () => {

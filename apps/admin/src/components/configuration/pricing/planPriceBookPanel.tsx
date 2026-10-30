@@ -26,9 +26,11 @@ const planLabels: Record<string, string> = {
 };
 
 const priceOrDash = (amountMinor: number, currency: string) => (amountMinor > 0 ? formatMoneyForDisplay({ amountMinor, currency }) : "Not sold");
+const dateOrDash = (value?: string) => value ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "—";
 
 export function PlanPriceBookPanel() {
   const { can } = useAdminPermissions();
+  const canEditPlanPrices = can("config:plans") || can("config:revenue");
   const table = useAdminQuery((signal) => fetchPlanPriceTable(signal), "plan-price-table");
   const [planCode, setPlanCode] = useState("blue");
   const [editing, setEditing] = useState<PlanPriceRow | null>(null);
@@ -46,12 +48,13 @@ export function PlanPriceBookPanel() {
           rows={rows}
           isLoading={table.isLoading}
           readRowKey={(row) => `${row.planCode}:${row.countryCode}`}
-          onRowOpen={can("config:revenue") ? setEditing : undefined}
+          onRowOpen={canEditPlanPrices ? setEditing : undefined}
           columns={[
             { key: "region", header: "Region", render: (row) => `${row.countryCode} · ${row.currency}`, isMono: true },
             { key: "web", header: "Web monthly / yearly", render: (row) => `${priceOrDash(row.monthlyAmountMinor, row.currency)} / ${priceOrDash(row.yearlyAmountMinor, row.currency)}` },
             { key: "ios", header: "iOS monthly / yearly", render: (row) => `${priceOrDash(row.iosMonthlyAmountMinor, row.currency)} / ${priceOrDash(row.iosYearlyAmountMinor, row.currency)}` },
             { key: "android", header: "Android monthly / yearly", render: (row) => `${priceOrDash(row.androidMonthlyAmountMinor, row.currency)} / ${priceOrDash(row.androidYearlyAmountMinor, row.currency)}` },
+            { key: "effective", header: "Effective since · next change", render: (row) => `${dateOrDash(row.effectiveFrom)} · ${dateOrDash(row.nextEffectiveFrom)}` },
             { key: "status", header: "Status", render: (row) => (row.active ? "Active" : "Paused") },
           ]}
         />

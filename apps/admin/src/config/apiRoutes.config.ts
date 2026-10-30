@@ -90,7 +90,9 @@ const peopleRoutes: ApiRouteDefinition[] = [
   write("POST", "/admin/users/:id/linked-profiles/{convert|resolve}", ["users:moderate"], sensitive),
   read("/admin/linked-profiles/conflicts", linkedProfileReaders),
   read("/admin/usernames/withheld", usernameReaders),
-  read("/admin/usernames/confusables", usernameReaders),
+  // The response can identify the current owner of a confusable handle.
+  // Restrict it to staff who are authorized to resolve ownership conflicts.
+  read("/admin/usernames/confusables", ["usernames:reassign"]),
   read("/admin/usernames/held", usernameHoldReaders),
   read("/admin/usernames/hold", usernameHoldReaders),
   read("/admin/usernames/reserved", ["reserved-usernames:manage"]),

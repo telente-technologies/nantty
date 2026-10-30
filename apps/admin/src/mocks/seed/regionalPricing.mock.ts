@@ -17,7 +17,7 @@ const monthlyPlanPrices: Record<string, Record<PricingRegionCode, WebAndApp>> = 
   blue: { NG: [250_000, 290_000], GH: [3_000, 3_500], KE: [50_000, 60_000], ZA: [5_999, 6_999], GB: [599, 699], EU: [599, 699], US: [599, 699] },
   premium: { NG: [450_000, 550_000], GH: [5_500, 6_500], KE: [90_000, 110_000], ZA: [10_999, 12_999], GB: [999, 1_199], EU: [1_099, 1_299], US: [999, 1_199] },
   seller_pro: { NG: [500_000, 0], GH: [6_000, 0], KE: [100_000, 0], ZA: [14_999, 0], GB: [1_500, 0], EU: [1_700, 0], US: [1_700, 0] },
-  seller_business: { NG: [1_500_000, 0], GH: [18_000, 0], KE: [300_000, 0], ZA: [44_999, 0], GB: [4_500, 0], EU: [4_900, 0], US: [4_900, 0] },
+  seller_business: { NG: [3_000_000, 0], GH: [18_000, 0], KE: [300_000, 0], ZA: [44_999, 0], GB: [4_500, 0], EU: [4_900, 0], US: [4_900, 0] },
   gold_only: { NG: [300_000, 0], GH: [3_600, 0], KE: [60_000, 0], ZA: [8_999, 0], GB: [900, 0], EU: [1_000, 0], US: [1_000, 0] },
   black: { NG: [5_000_000, 0], GH: [60_000, 0], KE: [1_000_000, 0], ZA: [149_999, 0], GB: [14_900, 0], EU: [16_900, 0], US: [16_900, 0] },
 };
@@ -48,7 +48,7 @@ export function buildInitialPlanPriceRows(): PlanPriceRow[] {
       return {
         planCode, countryCode: region, currency, monthlyAmountMinor: web, yearlyAmountMinor: yearlyFromMonthly(web, currency),
         iosMonthlyAmountMinor: app, iosYearlyAmountMinor: yearlyFromMonthly(app, currency), androidMonthlyAmountMinor: app, androidYearlyAmountMinor: yearlyFromMonthly(app, currency),
-        storeProductIds: storeProductIdsFor(planCode, app > 0), active: true,
+        storeProductIds: storeProductIdsFor(planCode, app > 0), active: true, effectiveFrom: "2026-01-01T00:00:00.000Z",
       };
     }),
   );

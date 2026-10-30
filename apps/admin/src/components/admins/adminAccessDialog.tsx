@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { InlineError } from "@/components/ui/feedback";
+import { ErrorBlock, InlineError } from "@/components/ui/feedback";
 import { CheckboxField, SelectField, TextAreaField, TextField, readIssueMessageForField } from "@/components/ui/formFields";
 import { ModalDialog } from "@/components/ui/modalDialog";
 import { useToast } from "@/components/ui/toastProvider";
@@ -87,6 +87,9 @@ export function AdminAccessDialog({ existingAdmin, onClose, onSaved }: AdminAcce
       {role === "SUPERADMIN" ? <p className={styles.stepUpNote}>A new superadmin may need a second superadmin to approve before they can sign in, depending on Staff settings.</p> : (
         <div>
           <p className={styles.sectionLabel}>Department roles</p>
+          {roles.errorMessage ? <ErrorBlock error={roles.error} message={roles.errorMessage} onRetry={roles.reload} /> : null}
+          {roles.isLoading ? <p className={styles.stepUpNote}>Loading department roles…</p> : null}
+          {!roles.isLoading && !roles.errorMessage && (roles.data?.items.length ?? 0) === 0 ? <p className={styles.stepUpNote}>No department roles are available from the admin service.</p> : null}
           {(roles.data?.items ?? []).map((definition) => (
             <CheckboxField key={definition.id} label={`${definition.name}${definition.isTemplate ? "" : " (custom)"}`} description={`${definition.permissions.length} permissions`} checked={roleIds.includes(definition.id)} onChange={(event) => {
               const next = event.target.checked ? [...roleIds, definition.id] : roleIds.filter((id) => id !== definition.id);
