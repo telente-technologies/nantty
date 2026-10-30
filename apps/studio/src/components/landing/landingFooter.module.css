@@ -105,13 +105,13 @@
 }
 
 .giantWordmark {
-  width: min(100%, 1400px);
-  margin: 40px auto -0.19em;
-  color: var(--color-brand);
-  font-size: clamp(4.4rem, 22vw, 21rem);
+  width: min(100%, 1440px);
+  margin: clamp(40px, 6vw, 80px) auto -0.11em;
+  color: var(--blue-500);
+  font-size: clamp(4rem, 25vw, 24rem);
   font-weight: 800;
-  letter-spacing: -0.085em;
-  line-height: 0.88;
+  letter-spacing: -0.09em;
+  line-height: 0.82;
   text-align: center;
   white-space: nowrap;
   user-select: none;
@@ -165,5 +165,59 @@
 
   .legalGroup .linkList {
     column-gap: 16px;
+  }
+}
+
+/* Keep touch targets and keyboard focus consistent across Nantty. */
+.footer {
+  container-type: inline-size;
+}
+
+.giantWordmark {
+  font-size: clamp(4rem, 27cqi, 24rem);
+}
+
+.footer :is(a, button):focus-visible {
+  outline: 3px solid var(--yellow-500);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.linkGroups {
+  min-width: 0;
+}
+
+.linkList a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.brandColumn {
+  min-width: 0;
+}
+
+.bottomRow {
+  padding-bottom: 16px;
+}
+
+@media (pointer: coarse) {
+  .linkList a {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 359px) {
+  .linkGroups,
+  .legalGroup .linkList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (forced-colors: active) {
+  .giantWordmark {
+    color: CanvasText;
   }
 }

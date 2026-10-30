@@ -32,5 +32,14 @@ export const studioErrorExperience: ErrorExperienceConfig = {
 };
 
 export function StudioErrorExperienceProvider({ children }: { readonly children: ReactNode }) {
-  return <ErrorExperienceProvider value={studioErrorExperience}>{children}</ErrorExperienceProvider>;
+  const experience: ErrorExperienceConfig = process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? {
+    homeHref: "/", homeLabel: "Back to Nantty Studio",
+    hrefs: { browse: "/", support: buildContactMailtoLink("Help with Nantty Studio") },
+    labels: { browse: "Back to Nantty Studio" },
+    destinations: [
+      { label: "Nantty Studio", href: "/", icon: "broadcast" },
+      { label: "Creator Program", href: "https://nantty.com/creator-terms", icon: "users" },
+    ], renderLink: renderNextLink,
+  } : studioErrorExperience;
+  return <ErrorExperienceProvider value={experience}>{children}</ErrorExperienceProvider>;
 }
