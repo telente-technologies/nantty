@@ -14,6 +14,7 @@ export const deepLinking: LinkingOptions<RootStackParamList> = {
       ProductDetail: { path: "p/:productId", alias: ["product/:productId", "products/:productId"], parse: { productId: readProductIdFromSlug } },
       Store: { path: "store/:storeId", alias: ["stores/:storeId"] },
       PostDetail: { path: "post/:postId", alias: ["posts/:postId"] },
+      Spaces: { path: "spaces/:spaceId?", parse: { spaceId: decodeURIComponent } },
       Live: { path: "live/:liveId", alias: ["lives/:liveId"], parse: { liveId: decodeURIComponent }, stringify: { host: () => "" } },
       SuggestedVideos: "videos/suggested",
       UserProfile: "user/:userId",

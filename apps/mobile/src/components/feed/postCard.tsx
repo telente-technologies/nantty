@@ -1,9 +1,10 @@
 import { useNavigation, type NavigationProp } from "@react-navigation/native";
+import { spaceAnnouncementDisplayText, spaceIdFromAnnouncement } from "@/utils/spaceAnnouncement.util";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, View, type AccessibilityActionEvent, type AccessibilityActionInfo } from "react-native";
 
 import { ExpandableText } from "@/components/ui/expandableText";
-import { Bell24Icon, BellSlash24Icon, BoxArrowDown24Icon, DotsThreeVertical24Icon, Group1256Icon, PushPin24Icon, ReplyActionIcon, Trash24Icon } from "@/components/icons";
+import { Bell24Icon, BellSlash24Icon, BoxArrowDown24Icon, DotsThreeVertical24Icon, Group1256Icon, Headset24Icon, PushPin24Icon, ReplyActionIcon, Trash24Icon } from "@/components/icons";
 import { isContentLockedForViewer, SubscriberOnlyLock } from "@/components/coins/subscriberOnlyLock";
 import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { VerificationBadge } from "@/components/profile/verificationBadge";
@@ -255,9 +256,10 @@ function OrganicPostCard(props: PostCardProps) {
             <AiGeneratedLabel />
           </View>
         ) : null}
+        {spaceIdFromAnnouncement(post.text) ? <Pressable accessibilityRole="button" accessibilityLabel="Join audio Space" style={styles.spaceAnnouncementAction} onPress={(event) => { event.stopPropagation(); navigation.navigate("Spaces", { spaceId: spaceIdFromAnnouncement(post.text)! }); }}><Headset24Icon size={18} color={colors.primary} /><Text weight={600} color={colors.primary}>Join Space</Text></Pressable> : null}
         {post.text ? (
           <View style={styles.body}>
-            <ExpandableText text={post.text} mentions={post.mentions} size={14} lineHeight={16.8} />
+            <ExpandableText text={spaceAnnouncementDisplayText(post.text)} mentions={post.mentions} size={14} lineHeight={16.8} />
           </View>
         ) : null}
         {isMediaLockedForViewer ? (
@@ -281,6 +283,7 @@ function OrganicPostCard(props: PostCardProps) {
                 onDownloadMedia={canDownload ? downloadMedia : undefined}
                 look={post.look}
                 watermarkHandle={post.author.username}
+                postActions={{ post, onToggleLike, onPressComments, onRepost, onShare }}
               />
             </View>
           </SponsoredMedia>
@@ -348,6 +351,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   authorActions: { flexDirection: "row", alignItems: "center", gap: 12 },
   follow: { height: 25, paddingHorizontal: 16, borderRadius: 4, backgroundColor: colors.primarySolid, justifyContent: "center" },
   body: { paddingHorizontal: 16, paddingVertical: 8 },
+  spaceAnnouncementAction: { marginHorizontal: 16, marginTop: 8, alignSelf: "flex-start", minHeight: 40, paddingHorizontal: 14, flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 20, backgroundColor: colors.primaryTint },
   sponsoredCallToAction: { paddingHorizontal: 16, paddingTop: 8 },
   lockedMedia: { height: 335, overflow: "hidden" },
   quote: { paddingTop: 8 },

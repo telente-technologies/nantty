@@ -20,6 +20,8 @@ export const shareUrlForReference = (target: SharedContentReference): string => 
       return webAppLinks.store(target.id);
     case "live":
       return webAppLinks.live(target.id);
+    case "space":
+      return webAppLinks.space(target.id);
     case "profile":
       return webAppLinks.profile(target.id);
     default:

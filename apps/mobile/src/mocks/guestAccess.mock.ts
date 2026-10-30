@@ -1,4 +1,6 @@
 const publicRoutePatterns: ReadonlySet<string> = new Set([
+  "GET /api/v1/spaces",
+  "GET /api/v1/spaces/:spaceId",
   "GET /api/v1/auth/username-available",
   "GET /api/v1/auth/username-suggestion",
   "GET /api/v1/brands",

@@ -1,5 +1,6 @@
 import { createElement, type ReactNode } from "react";
-import { Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
+import NetInfo from "@react-native-community/netinfo";
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 
 import { ErrorBoundary } from "@/components/ui/errorBoundary";
@@ -43,13 +44,18 @@ beforeEach(() => useOfflineStore.setState({ isOnline: true, queuedMutations: [] 
 test("counts down from Retry-After before allowing a retry", async () => {
   jest.useFakeTimers();
   try {
-    await render(createElement(ErrorState, { error: { status: 429, code: "RATE_LIMITED", retryAfterSeconds: 2 }, onRetry: jest.fn() }));
+    const onRetry = jest.fn();
+    await render(createElement(ErrorState, { error: { status: 429, code: "RATE_LIMITED", retryAfterSeconds: 2 }, onRetry }));
     expect(screen.getByText("Try again in 0:02")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Try again in 0:02" }).props.accessibilityState).toMatchObject({ disabled: true });
+    fireEvent.press(screen.getByRole("button", { name: "Try again in 0:02" }));
+    expect(onRetry).not.toHaveBeenCalled();
     await act(async () => {
       jest.advanceTimersByTime(2100);
     });
     expect(screen.getByText("Try again")).toBeTruthy();
+    await act(async () => fireEvent.press(screen.getByRole("button", { name: "Try again" })));
+    expect(onRetry).toHaveBeenCalledTimes(1);
   } finally {
     jest.useRealTimers();
   }
@@ -118,4 +124,39 @@ test("empty states use presets", async () => {
 test("offline banner says queued actions will send later", () => {
   expect(describeOfflineBanner(2)).toBe("You're offline. 2 actions will send when you're back online.");
   expect(describeOfflineBanner(0)).toMatch(/Check your data or Wi-Fi/);
+});
+
+test.each([320, 375, 430])("inline recovery fits a %ipx container and keeps a full touch target", async (width) => {
+  const onRetry = jest.fn();
+  await render(createElement(ErrorState, { kind: "serverError", variant: "inline", onRetry, retryLabel: "Retry loading this part of your account" }));
+  await act(async () => {
+    fireEvent(screen.getByTestId("error-state-serverError"), "layout", { nativeEvent: { layout: { width, height: 240, x: 0, y: 0 } } });
+  });
+  expect(StyleSheet.flatten(screen.getByTestId("error-state-serverError").props.style)).toMatchObject({ flexDirection: "column", minWidth: 0 });
+  const retry = screen.getByRole("button", { name: "Retry loading this part of your account" });
+  expect(StyleSheet.flatten(retry.props.style)).toMatchObject({ minWidth: 0, width: "100%", maxWidth: "100%", minHeight: 44 });
+  await act(async () => fireEvent.press(retry));
+  expect(onRetry).toHaveBeenCalledTimes(1);
+});
+
+test("does not retry an offline request until the connection probe succeeds", async () => {
+  useOfflineStore.setState({ isOnline: false });
+  const onRetry = jest.fn();
+  jest.mocked(NetInfo.refresh).mockResolvedValueOnce({ isConnected: false } as Awaited<ReturnType<typeof NetInfo.refresh>>);
+  await render(createElement(ErrorState, { kind: "offline", onRetry }));
+  await act(async () => fireEvent.press(screen.getByRole("button", { name: "Check again" })));
+  expect(onRetry).not.toHaveBeenCalled();
+  await act(async () => fireEvent.press(screen.getByRole("button", { name: "Check again" })));
+  expect(onRetry).toHaveBeenCalledTimes(1);
+});
+
+test("page recovery keeps a screen-reader heading and growing text at narrow width", async () => {
+  await render(createElement(ErrorState, { kind: "notFound" }));
+  await act(async () => {
+    fireEvent(screen.getByTestId("error-state-notFound"), "layout", { nativeEvent: { layout: { width: 320, height: 700, x: 0, y: 0 } } });
+  });
+  expect(screen.getByRole("header")).toBeTruthy();
+  expect(screen.getByText("This page wandered off").props.allowFontScaling).toBe(true);
+  expect(screen.getByText("404", { includeHiddenElements: true }).props.allowFontScaling).toBe(false);
+  expect(StyleSheet.flatten(screen.getByText("This page wandered off").props.style).fontSize).toBe(28);
 });

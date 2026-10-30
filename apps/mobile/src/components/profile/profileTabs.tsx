@@ -1,17 +1,18 @@
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { BrandBilibili20Icon, BuildingStore20Icon, MessageShare20Icon, Refresh20Icon, SpeakerHigh24Icon } from "@/components/icons";
+import { BrandBilibili20Icon, BuildingStore20Icon, LockSimple24Icon, MessageShare20Icon, Refresh20Icon, SpeakerHigh24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles } from "@/theme";
 
-export type ProfileTabKey = "posts" | "reposts" | "clips" | "sounds" | "store";
+export type ProfileTabKey = "posts" | "reposts" | "clips" | "subscribers" | "sounds" | "store";
 
-const TAB_DEFINITIONS: Record<ProfileTabKey, { label: string; icon: () => React.ReactNode }> = {
-  posts: { label: "Posts", icon: () => <MessageShare20Icon /> },
-  reposts: { label: "Reposts", icon: () => <Refresh20Icon /> },
-  clips: { label: "Clips", icon: () => <BrandBilibili20Icon /> },
-  sounds: { label: "Sounds", icon: () => <SpeakerHigh24Icon size={20} /> },
-  store: { label: "Store", icon: () => <BuildingStore20Icon /> },
+const TAB_DEFINITIONS: Record<ProfileTabKey, { label: string; accessibilityLabel: string; icon: () => React.ReactNode }> = {
+  posts: { label: "Posts", accessibilityLabel: "Posts", icon: () => <MessageShare20Icon /> },
+  reposts: { label: "Reposts", accessibilityLabel: "Reposts", icon: () => <Refresh20Icon /> },
+  clips: { label: "Clips", accessibilityLabel: "Clips", icon: () => <BrandBilibili20Icon /> },
+  subscribers: { label: "Subs", accessibilityLabel: "Subscriber posts", icon: () => <LockSimple24Icon size={20} /> },
+  sounds: { label: "Sounds", accessibilityLabel: "Sounds", icon: () => <SpeakerHigh24Icon size={20} /> },
+  store: { label: "Store", accessibilityLabel: "Store", icon: () => <BuildingStore20Icon /> },
 };
 
 export interface ProfileTabsProps {
@@ -31,7 +32,7 @@ export function ProfileTabs({ tabs, activeTab, onChangeTab }: ProfileTabsProps) 
           <Pressable
             key={tab}
             accessibilityRole="tab"
-            accessibilityLabel={definition.label}
+            accessibilityLabel={definition.accessibilityLabel}
             accessibilityState={{ selected: active }}
             onPress={() => onChangeTab(tab)}
             style={[styles.tab, active && styles.activeTab]}
@@ -50,7 +51,7 @@ export function ProfileTabs({ tabs, activeTab, onChangeTab }: ProfileTabsProps) 
 }
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  row: { height: 36, paddingHorizontal: 16, flexDirection: "row", gap: 8 },
-  tab: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, borderBottomWidth: 1, borderBottomColor: "transparent" },
+  row: { height: 44, paddingHorizontal: 12, flexDirection: "row", gap: 4 },
+  tab: { flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, borderBottomWidth: 2, borderBottomColor: "transparent" },
   activeTab: { borderBottomColor: colors.black },
 }));

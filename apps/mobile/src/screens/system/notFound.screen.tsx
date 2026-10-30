@@ -31,7 +31,7 @@ export function KeepExploring() {
   const styles = useStyles();
   return (
     <View style={styles.explore}>
-      <Pressable accessibilityRole="search" accessibilityLabel="Search Nantty" onPress={() => navigate("Search")} style={[styles.search, { borderColor: colors.divider, backgroundColor: colors.surface }]}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Search Nantty" onPress={() => navigate("Search")} style={[styles.search, { borderColor: colors.divider, backgroundColor: colors.surface }]}>
         <SearchGlyph color={colors.textSubtle} />
         <Text size={15} color={colors.textSubtle}>Search Nantty</Text>
       </Pressable>
@@ -61,7 +61,7 @@ export function NotFoundScreen() {
 
 const useStyles = makeThemedStyles(() => StyleSheet.create({
   explore: { alignSelf: "stretch", gap: spacing[4], marginTop: spacing[4] },
-  search: { flexDirection: "row", alignItems: "center", gap: spacing[3], height: 46, paddingHorizontal: spacing[4], borderRadius: 999, borderWidth: StyleSheet.hairlineWidth },
+  search: { flexDirection: "row", alignItems: "center", gap: spacing[3], minHeight: 48, paddingVertical: spacing[3], paddingHorizontal: spacing[4], borderRadius: 999, borderWidth: StyleSheet.hairlineWidth },
   chips: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: spacing[2] },
-  chip: { flexDirection: "row", alignItems: "center", gap: spacing[2], height: 36, paddingHorizontal: spacing[4], borderRadius: 999, borderWidth: StyleSheet.hairlineWidth },
+  chip: { flexDirection: "row", flexGrow: 1, flexBasis: 100, minWidth: 0, alignItems: "center", justifyContent: "center", gap: spacing[2], minHeight: 44, paddingVertical: spacing[3], paddingHorizontal: spacing[4], borderRadius: 999, borderWidth: StyleSheet.hairlineWidth },
 }));

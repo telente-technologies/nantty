@@ -15,7 +15,7 @@ import type { LinkPreview, Post, SharedContentReference } from "@/types";
 
 import { usePostSurface } from "./interactions/postSurface.context";
 
-const internalKindLabels: Readonly<Record<SharedContentReference["kind"], string>> = { product: "Product", store: "Store", profile: "Profile", live: "Live", post: "Post", clip: "Clip", order: "Order" };
+const internalKindLabels: Readonly<Record<SharedContentReference["kind"], string>> = { product: "Product", store: "Store", profile: "Profile", live: "Live", space: "Space", post: "Post", clip: "Clip", order: "Order" };
 
 function ExternalLinkCard({ preview, onOpen }: { readonly preview: LinkPreview; readonly onOpen: () => void }) {
   const { colors } = useTheme();

@@ -9,10 +9,13 @@ export interface VerificationPerk {
 
 export interface VerificationPlan {
   readonly id: ID;
+  readonly planCode?: string;
   readonly color: Exclude<VerificationColor, "black">;
   readonly tier: VerificationTier;
   readonly price: Money;
   readonly interval: "month" | "year";
+  readonly channel?: "web" | "ios" | "android";
+  readonly storeProductId?: string | null;
   readonly perks: readonly VerificationPerk[];
 }
 

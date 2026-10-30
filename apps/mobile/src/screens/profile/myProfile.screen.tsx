@@ -8,6 +8,7 @@ import { OwnProfileMenu } from "@/components/profile/ownProfileMenu";
 import { ProfileHeaderBar } from "@/components/profile/profileHeaderBar";
 import { useMyProfileQuery, useUserPostsQuery } from "@/components/profile/profileQueries.hook";
 import { ProfileView } from "@/components/profile/profileView";
+import { hasSubscriberOnlyPosts } from "@/components/profile/subscriberPosts.util";
 import { usePinPostMutation } from "@/components/feed/usePinPost.hook";
 import { useDeleteOwnPost } from "@/components/feed/useDeleteOwnPost.hook";
 import { ArrowUpRight24Icon, ChatCircle24Icon, PushPin24Icon, Trash24Icon } from "@/components/icons";
@@ -31,6 +32,8 @@ export function MeScreen() {
   const profileQuery = useMyProfileQuery();
   const profile = profileQuery.data;
   const postsQuery = useUserPostsQuery(profile?.id);
+  const subscriberPostsQuery = useUserPostsQuery(profile?.id, "subscribers", profile?.isCreator === true);
+  const hasSubscriberPosts = hasSubscriberOnlyPosts(subscriberPostsQuery.data?.data);
   const [postWithOpenMenu, setPostWithOpenMenu] = useState<Post | null>(null);
   const pinMutation = usePinPostMutation();
   const { confirmAndDelete } = useDeleteOwnPost();
@@ -53,6 +56,7 @@ export function MeScreen() {
   const refreshProfileAndPosts = () => {
     profileQuery.refetch();
     postsQuery.refetch();
+    if (profile?.isCreator) subscriberPostsQuery.refetch();
   };
 
   return (
@@ -71,15 +75,17 @@ export function MeScreen() {
         key={actingProfileId ?? profile?.id ?? "me"}
         profile={profile}
         posts={postsQuery.data?.data ?? []}
+        subscriberPosts={subscriberPostsQuery.data?.data ?? []}
         variant="own"
-        tabs={showsMart ? ["posts", "reposts", "clips", "store"] : ["posts", "reposts", "clips"]}
+        tabs={["posts", "reposts", "clips", ...(hasSubscriberPosts ? (["subscribers"] as const) : []), ...(showsMart ? (["store"] as const) : [])]}
         actions={[
           { label: "Edit profile", onPress: () => navigation.navigate("EditProfile") },
           { label: "Share profile", onPress: shareMyProfileLink },
         ]}
         headerAccessory={profile ? <OwnProfileCards profile={profile} /> : null}
         loading={postsQuery.isLoading}
-        refreshing={profileQuery.isRefetching || postsQuery.isRefetching}
+        subscriberPostsLoading={subscriberPostsQuery.isLoading}
+        refreshing={profileQuery.isRefetching || postsQuery.isRefetching || subscriberPostsQuery.isRefetching}
         onRefresh={refreshProfileAndPosts}
         onPressFollowers={() => profile && navigation.navigate("Connections", { userId: profile.id, tab: "followers" })}
         onPressFollowing={() => profile && navigation.navigate("Connections", { userId: profile.id, tab: "following" })}

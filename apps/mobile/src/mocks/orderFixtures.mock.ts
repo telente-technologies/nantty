@@ -8,7 +8,8 @@ import { catalogProductSeeds, discountedUsdCents, productSummaryByKey } from "./
 
 export const SIGNED_IN_BUYER = "signed_in";
 export const AUTO_RELEASE_HOURS_AFTER_DELIVERY = 72;
-export const PLATFORM_FEE_PERCENT = 5;
+// Marketplace sales commission; provider processing fees are separate.
+export const PLATFORM_FEE_PERCENT = 0;
 
 export interface MockOrderLine {
   readonly productKey: CatalogProductKey;

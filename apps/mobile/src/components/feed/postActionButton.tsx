@@ -26,9 +26,10 @@ export interface PostActionButtonProps {
   readonly popOnActivate?: boolean;
   readonly popKey?: number;
   readonly onPress?: () => void;
+  readonly defaultInk?: string;
 }
 
-export function PostActionButton({ label, tone, renderIcon, count, active = false, popOnActivate = false, popKey = 0, onPress }: PostActionButtonProps) {
+export function PostActionButton({ label, tone, renderIcon, count, active = false, popOnActivate = false, popKey = 0, onPress, defaultInk }: PostActionButtonProps) {
   const { colors } = useTheme();
   const tint = usePostActionTint(tone);
   const isReducedMotionPreferred = useReducedMotionPreference();
@@ -59,7 +60,7 @@ export function PostActionButton({ label, tone, renderIcon, count, active = fals
       style={styles.button}
     >
       {({ pressed }) => {
-        const ink = active || pressed ? tint : colors.textMuted;
+        const ink = active || pressed ? tint : defaultInk ?? colors.textMuted;
         return (
           <>
             <View style={[styles.halo, pressed ? { backgroundColor: `${tint}26` } : null]}>

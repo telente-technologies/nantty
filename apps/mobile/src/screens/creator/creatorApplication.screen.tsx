@@ -59,7 +59,7 @@ export function CreatorApplicationScreen({ navigation }: MainScreenProps<"Creato
           contentCategories: categories,
           socialLinks: SOCIAL_PLATFORMS.filter(({ platform }) => socialLinkByPlatform[platform]?.trim()).map(({ platform }) => ({ platform, url: socialLinkByPlatform[platform]!.trim() })),
           sampleContentUrls,
-          payoutAccountId: payoutAccountId!,
+          ...(payoutAccountId ? { payoutAccountId } : {}),
           acceptedCreatorTermsVersion: CREATOR_TERMS_VERSION,
         },
         idempotencyKeyForThisApplication.current,
@@ -70,7 +70,7 @@ export function CreatorApplicationScreen({ navigation }: MainScreenProps<"Creato
     },
   });
 
-  const readyToSubmit = categories.length > 0 && !!payoutAccountId && acceptedTerms && !uploadingSample;
+  const readyToSubmit = categories.length > 0 && acceptedTerms && !uploadingSample;
 
   return (
     <Screen>
@@ -114,14 +114,15 @@ export function CreatorApplicationScreen({ navigation }: MainScreenProps<"Creato
           <PhotoEvidencePicker photoUrls={sampleContentUrls} onChangePhotoUrls={setSampleContentUrls} maximumPhotos={3} addLabel="Add sample" onUploadingChange={setUploadingSample} />
         </View>
         <View style={styles.section}>
-          <Text size={16} weight={600} lineHeight={19.2}>Where should earnings go?</Text>
+          <Text size={16} weight={600} lineHeight={19.2}>Payout account (optional)</Text>
+          <Text size={12} lineHeight={16.8} color={colors.textMuted}>You can apply without a payout account. Any creator earnings stay in your Nantty balance until you add an eligible payout method.</Text>
           {payoutAccounts.map((account) => (
             <SelectableRow key={account.id} selected={account.id === payoutAccountId} onPress={() => setChosenPayoutAccountId(account.id)} accessibilityLabel={`${account.bankName} ${account.accountNumberMasked}`}>
               <Text size={14} lineHeight={16.8}>{account.bankName} {account.accountNumberMasked}</Text>
               <Text size={12} lineHeight={16.8} color={colors.textMuted}>{account.accountName}</Text>
             </SelectableRow>
           ))}
-          <Button variant="subtle" title={payoutAccounts.length ? "Use a different account" : "Add a payout account"} onPress={() => navigation.navigate("PayoutAccounts")} />
+          <Button variant="subtle" title={payoutAccounts.length ? "Manage payout accounts" : "Add a payout account"} onPress={() => navigation.navigate("PayoutAccounts")} />
         </View>
         <SelectableRow selected={acceptedTerms} onPress={() => setAcceptedTerms((value) => !value)} accessibilityLabel="I agree to the Creator Terms">
           <Text size={13} lineHeight={17.5}>

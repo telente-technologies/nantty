@@ -9,7 +9,7 @@ import type { LiveAdSettings } from "./socialGraph.type";
 
 export type ConversationFilter = "all" | "direct";
 export type ClipsFeedTab = "forYou" | "following";
-export type CreateMode = "story" | "post" | "clip" | "product" | "live";
+export type CreateMode = "story" | "post" | "clip" | "product" | "live" | "space";
 export type PostAudience = "everyone" | "followers";
 
 export interface StoryTrayItem {
@@ -105,6 +105,17 @@ export interface NewPostInput {
   readonly location?: PostLocationTag;
   readonly taggedUserIds?: readonly ID[];
   readonly quotedPostId?: ID | null;
+  readonly scheduledAt?: string;
+}
+
+export interface ScheduledPostSummary {
+  readonly id: ID;
+  readonly text: string;
+  readonly createdAt: string;
+  readonly scheduledAt: string | null;
+  readonly status: "scheduled" | "failed";
+  readonly failureReason: "media_failed" | "media_processing_timeout" | "author_unavailable" | "profile_unavailable" | null;
+  readonly media: readonly { readonly id: ID; readonly type: "image" | "video"; readonly status: "processing" | "ready" | "failed"; readonly posterUrl: string | null }[];
 }
 
 export type AdPlacement = "feed" | "clips" | "stories" | "mart" | "search" | "live_discovery" | "live" | "feedCommentThread";
@@ -234,7 +245,7 @@ export interface CoinTransferReceipt {
   readonly balance: number;
 }
 
-export type TipTargetType = "post" | "clip" | "live";
+export type TipTargetType = "post" | "clip" | "live" | "profile";
 
 export interface SendTipInput {
   readonly targetType: TipTargetType;

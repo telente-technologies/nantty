@@ -13,6 +13,7 @@ import type { Media, SaveTarget } from "@/types";
 
 import { FeedVideoPage } from "./feedVideoPage";
 import { MediaLightbox } from "./mediaLightbox";
+import type { MediaLightboxPostActionsProps } from "./mediaLightboxPostActions";
 import { AnimatedPageIndicator } from "./pageIndicator";
 import { ClipLookOverlay, isClipLookId } from "@/components/create/clip/clipLook.constant";
 import { VideoWatermark } from "@/components/media/videoWatermark";
@@ -29,12 +30,13 @@ export interface MediaPagerProps {
   readonly onDownloadMedia?: (media: Media) => void;
   readonly look?: string | null;
   readonly watermarkHandle?: string | null;
+  readonly postActions?: MediaLightboxPostActionsProps;
 }
 
 const MAXIMUM_PAGER_WIDTH = 393;
 const DEFAULT_PHOTO_PAGER_HEIGHT = 335;
 
-export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts, saveTarget, savedAccordingToServer, overlay, onDownloadMedia, look, watermarkHandle }: MediaPagerProps) {
+export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts, saveTarget, savedAccordingToServer, overlay, onDownloadMedia, look, watermarkHandle, postActions }: MediaPagerProps) {
   const styles = useStyles();
   const { width: windowWidth } = useWindowDimensions();
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
@@ -182,7 +184,7 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
         look={look}
       />
       {openedImageIndex !== null ? (
-        <MediaLightbox images={imagePages} initialIndex={openedImageIndex} onClose={() => setOpenedImageIndex(null)} onDownloadImage={onDownloadMedia} />
+        <MediaLightbox images={imagePages} initialIndex={openedImageIndex} onClose={() => setOpenedImageIndex(null)} onDownloadImage={onDownloadMedia} postActions={postActions} />
       ) : null}
     </View>
   );

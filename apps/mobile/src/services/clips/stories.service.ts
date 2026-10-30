@@ -14,7 +14,9 @@ export const storiesService = {
     await encrypted.confirmSent(delivered?.id ?? null);
   },
   publishStory: (input: NewStoryInput) => api.post<Story>("/api/v1/stories", input),
-  publishPost: (input: NewPostInput) => api.post<Post>("/api/v1/posts", input),
+  publishPost: (input: NewPostInput, idempotencyKey?: string) => idempotencyKey === undefined
+    ? api.post<Post>("/api/v1/posts", input)
+    : api.post<Post>("/api/v1/posts", input, { idempotencyKey }),
   fetchStoryViewers: (storyId: string, cursor?: string | null) =>
     api.get<{ viewers: UserSummary[]; total: number; nextCursor: string | null }>(`/api/v1/stories/${storyId}/viewers`, { cursor: cursor ?? undefined }),
 };

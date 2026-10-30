@@ -111,7 +111,7 @@ export function CommentRow({
         if (event.nativeEvent.actionName === "togglePin") onTogglePin?.();
         if (event.nativeEvent.actionName === "hide") askBeforeHiding();
       }}
-      style={[styles.row, isPending && styles.pending, (isHighlighted || (isPickingForVideoReply && onReplyWithVideo)) && styles.pickable]}
+      style={[styles.row, isPending && styles.pending, isHighlighted && styles.highlighted, isPickingForVideoReply && onReplyWithVideo && styles.pickable]}
     >
       <View>
         <Pressable accessibilityRole="button" accessibilityLabel={`${comment.author.username}'s profile`} onPress={() => openUserProfile(comment.author.id)}>
@@ -192,6 +192,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { flexDirection: "row", gap: 8 },
   pending: { opacity: 0.55 },
   pickable: { backgroundColor: colors.primaryTint, borderRadius: 8 },
+  highlighted: { backgroundColor: colors.chip, borderRadius: 8 },
   actions: { flexDirection: "row", alignItems: "center", gap: 12 },
   body: { flex: 1, gap: 4 },
   pinnedBadge: { flexDirection: "row", alignItems: "center", gap: 2 },

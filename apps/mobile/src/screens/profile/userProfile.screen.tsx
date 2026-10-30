@@ -2,7 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { creatorQueryKeys, useMySubscriptionsQuery } from "@/components/creator/creatorQueries.hook";
+import { Gift24Icon } from "@/components/icons";
 import { ProfileHeaderBar } from "@/components/profile/profileHeaderBar";
+import { TipSheet } from "@/components/coins/tipSheet";
 import { TransferCoinsSheet } from "@/components/coins/transferCoinsSheet";
 import { ProfileMoreSheet } from "@/components/profile/profileMoreSheet";
 import { useFollowUserToggle } from "@/components/profile/confirmedFollowToggle.hook";
@@ -13,6 +15,7 @@ import { followButtonLabelForState, isFollowStateHighlighted, lockedProfileCopyB
 import { useUnblockFromProfile } from "@/components/profile/unblockFromProfile.hook";
 import { SuspendedProfileState } from "@/components/profile/suspendedProfileState";
 import { ProfileView } from "@/components/profile/profileView";
+import { hasSubscriberOnlyPosts } from "@/components/profile/subscriberPosts.util";
 import { ErrorState } from "@/components/ui/errorState";
 import { Screen } from "@/components/ui/screen";
 import { useTheme } from "@/theme";
@@ -44,6 +47,7 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
   const alreadySubscribed = (mySubscriptions.data ?? []).some((item) => item.creatorId === userId && item.status === "active");
   const [moreSheetVisible, setMoreSheetVisible] = useState(false);
   const [isTransferCoinsSheetOpen, setIsTransferCoinsSheetOpen] = useState(false);
+  const [isProfileGiftSheetOpen, setIsProfileGiftSheetOpen] = useState(false);
   const fetchedProfile = profileQuery.data;
   const profile = fetchedProfile && followStatus ? { ...fetchedProfile, followState: followStatus.state, isFollowing: followStatus.state === "accepted" } : fetchedProfile;
   const followState = profile ? resolveFollowStateOfUser(profile) : "none";
@@ -52,6 +56,9 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
   const profileLock = profile ? resolveProfileLock(profile) : "open";
   const isContentHidden = profileLock !== "open";
   const postsQuery = useUserPostsQuery(profile && !isContentHidden ? userId : undefined);
+  const showsSubscriberPosts = !!profile?.isCreator || hasActivePlans;
+  const subscriberPostsQuery = useUserPostsQuery(profile && !isContentHidden ? userId : undefined, "subscribers", showsSubscriberPosts);
+  const hasSubscriberPosts = hasSubscriberOnlyPosts(subscriberPostsQuery.data?.data);
   const showsMart = userProfileShowsMart(profile);
 
   useEffect(() => {
@@ -72,6 +79,14 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
               accessibilityLabel: `Post notifications for @${profile.username}: ${postNotificationLevel === "off" ? "off" : postNotificationLevel === "posts" ? "all posts" : "posts and lives"}`,
               icon: <PostNotificationLevelIcon level={postNotificationLevel} color={postNotificationLevel === "off" ? colors.text : colors.primary} />,
               onPress: () => setIsBellSheetOpen(true),
+            }]
+          : []),
+        ...(profile.isCreator && !isContentHidden && followState !== "blocked"
+          ? [{
+              label: "Gift",
+              accessibilityLabel: `Gift coins to ${profile.name}`,
+              icon: <Gift24Icon size={20} color={colors.textMuted} />,
+              onPress: () => requireAuthThen(() => setIsProfileGiftSheetOpen(true), undefined, "gift creators"),
             }]
           : []),
         ...(showsMart && profile.storeId ? [{ label: "View Shop", onPress: () => navigation.navigate("Store", { storeId: profile.storeId! }) }] : []),
@@ -104,19 +119,25 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
           "posts",
           "reposts",
           "clips",
+          ...(hasSubscriberPosts ? (["subscribers"] as const) : []),
           ...(profile?.isCreator || (subscriptionPlans.data?.length ?? 0) > 0 ? (["sounds"] as const) : []),
           ...(showsMart ? (["store"] as const) : []),
         ]}
         actions={actions}
         isLocked={isContentHidden}
+        subscriberPosts={subscriberPostsQuery.data?.data ?? []}
         lockedCopy={profileLock === "open" ? undefined : lockedProfileCopyByLock[profileLock]}
         identityAction={identityAction}
         loading={postsQuery.isLoading}
-        refreshing={profileQuery.isRefetching || postsQuery.isRefetching}
+        subscriberPostsLoading={subscriberPostsQuery.isLoading}
+        subscriberSubscriptionAvailable={hasActivePlans}
+        onPressSubscribe={() => requireAuthThen(() => navigation.navigate("CreatorSubscribe", { creatorId: userId }), undefined, "subscribe to creators")}
+        refreshing={profileQuery.isRefetching || postsQuery.isRefetching || subscriberPostsQuery.isRefetching}
         onRefresh={() => {
           profileQuery.refetch();
           if (signedInUserId) followStatusQuery.refetch();
           if (!isContentHidden) postsQuery.refetch();
+          if (!isContentHidden && showsSubscriberPosts) subscriberPostsQuery.refetch();
         }}
         onPressFollowers={() => (isContentHidden ? undefined : navigation.navigate("Connections", { userId, tab: "followers" }))}
         onPressFollowing={() => (isContentHidden ? undefined : navigation.navigate("Connections", { userId, tab: "following" }))}
@@ -130,7 +151,7 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
           visible={moreSheetVisible}
           onClose={() => setMoreSheetVisible(false)}
           onBlocked={() => navigation.goBack()}
-          onSendCoins={() => setIsTransferCoinsSheetOpen(true)}
+          onSendCoins={profile.isCreator ? undefined : () => setIsTransferCoinsSheetOpen(true)}
         />
       ) : null}
       {profile && showBell ? (
@@ -146,6 +167,10 @@ export function UserProfileScreen({ navigation, route }: MainScreenProps<"UserPr
         visible={isTransferCoinsSheetOpen}
         recipient={profile ?? null}
         onClose={() => setIsTransferCoinsSheetOpen(false)}
+      />
+      <TipSheet
+        target={profile && profile.isCreator && isProfileGiftSheetOpen ? { targetType: "profile", targetId: userId, creatorName: profile.name } : null}
+        onClose={() => setIsProfileGiftSheetOpen(false)}
       />
     </Screen>
   );

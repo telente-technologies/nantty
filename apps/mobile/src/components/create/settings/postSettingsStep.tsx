@@ -30,6 +30,7 @@ export interface PostSettingsStepProps {
   readonly publishButtonTitle: string;
   readonly publishErrorMessage: string | null;
   readonly onPublish: () => void;
+  readonly onSchedule?: () => void;
   readonly onSaveDraft?: () => void;
 }
 
@@ -85,6 +86,7 @@ export function PostSettingsStep(props: PostSettingsStepProps) {
           <Text size={13} lineHeight={16.9} color={colors.error} accessibilityLiveRegion="polite">{props.publishErrorMessage}</Text>
         ) : null}
         <Button title={props.publishButtonTitle} disabled={props.publishing} loading={props.publishing} onPress={props.onPublish} />
+        {props.onSchedule ? <Button title="Schedule post" variant="outline" disabled={props.publishing} onPress={props.onSchedule} /> : null}
         {props.onSaveDraft ? (
           <Button variant="subtle" title="Save as draft" disabled={props.publishing} onPress={props.onSaveDraft} />
         ) : null}

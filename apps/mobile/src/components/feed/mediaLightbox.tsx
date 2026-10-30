@@ -10,6 +10,8 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { Media } from "@/types";
 
+import { MediaLightboxPostActions, type MediaLightboxPostActionsProps } from "./mediaLightboxPostActions";
+
 const DOUBLE_TAP_DELAY_MS = 260;
 const ZOOMED_SCALE = 2.5;
 
@@ -18,9 +20,10 @@ export interface MediaLightboxProps {
   readonly initialIndex: number;
   readonly onClose: () => void;
   readonly onDownloadImage?: (media: Media) => void;
+  readonly postActions?: MediaLightboxPostActionsProps;
 }
 
-export function MediaLightbox({ images, initialIndex, onClose, onDownloadImage }: MediaLightboxProps) {
+export function MediaLightbox({ images, initialIndex, onClose, onDownloadImage, postActions }: MediaLightboxProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const { width, height } = useWindowDimensions();
@@ -83,6 +86,14 @@ export function MediaLightbox({ images, initialIndex, onClose, onDownloadImage }
             ) : null}
           </View>
         </View>
+        {postActions ? (
+          <View
+            pointerEvents="box-none"
+            style={[styles.postActions, { paddingBottom: Math.max(safeAreaInsets.bottom, 16) + 12 }]}
+          >
+            <MediaLightboxPostActions {...postActions} />
+          </View>
+        ) : null}
       </View>
     </FrameAwareModal>
   );
@@ -233,6 +244,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     justifyContent: "center",
   },
   trailing: { flexDirection: "row", alignItems: "center", gap: 10 },
+  postActions: { position: "absolute", left: 0, right: 0, bottom: 0 },
   counter: {
     paddingHorizontal: 10,
     height: 28,

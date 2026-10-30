@@ -7,6 +7,7 @@ import {
   BellIcon,
   BellRingingIcon,
   BellSlashIcon,
+  BroadcastIcon,
   BookmarkIcon,
   BoxArrowDownIcon,
   CalendarDotsIcon,
@@ -99,6 +100,7 @@ import {
   BugIcon,
   ChatTeardropTextIcon,
   CookieIcon,
+  ClockIcon,
   DownloadSimpleIcon,
   EnvelopeSimpleIcon,
   EyeSlashIcon,
@@ -144,11 +146,13 @@ export const ArrowUpRight24Icon = phosphorIcon(ArrowUpRightIcon);
 export const ArrowsOutSimple24Icon = phosphorIcon(ArrowsOutSimpleIcon);
 export const Bell24Icon = phosphorIcon(BellIcon);
 export const BellRinging24Icon = phosphorIcon(BellRingingIcon);
+export const Broadcast24Icon = phosphorIcon(BroadcastIcon);
 export const BookmarkSimple24Icon = phosphorIcon(BookmarkIcon);
 export const BoxArrowDown24Icon = phosphorIcon(BoxArrowDownIcon, { ink: "#5B5B5B" });
 export const BrandBilibili20Icon = phosphorIcon(TelevisionSimpleIcon, { width: 20 });
 export const BuildingStore20Icon = phosphorIcon(StorefrontIcon, { width: 20 });
 export const CalendarDots16Icon = phosphorIcon(CalendarDotsIcon, { ink: "#909090", width: 16 });
+export const CalendarDots24Icon = phosphorIcon(CalendarDotsIcon);
 export const Camera24Icon = phosphorIcon(CameraIcon);
 export const CameraBolt24Icon = phosphorIcon(CameraPlusIcon, { ink: "#5B5B5B" });
 export const Cancel20Icon = phosphorIcon(XIcon, { width: 20 });
@@ -160,6 +164,7 @@ export const Chat37Icon = phosphorIcon(ChatsCircleIcon, { width: 37, height: 28 
 export const Chat37AltIcon = phosphorIcon(ChatsCircleIcon, { width: 37, height: 24 });
 export const Chat37AltAltIcon = phosphorIcon(ChatCircleIcon, { width: 37, height: 24 });
 export const ChatCircle24Icon = phosphorIcon(ChatCircleIcon);
+export const Clock24Icon = phosphorIcon(ClockIcon);
 export const ChatsCircle48Icon = phosphorIcon(ChatsCircleIcon, { weight: "fill", ink: "#3A2BFF", width: 48 });
 export const Check16Icon = phosphorIcon(CheckIcon, { ink: "#D9D9D9", width: 16 });
 export const Coin24Icon = phosphorIcon(CoinIcon);

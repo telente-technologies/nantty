@@ -27,6 +27,8 @@ test.each([
   ["creator/dashboard", ["CreatorDashboard"]],
   ["stories/u_1", ["Story"]],
   ["live/live_ada", ["Live"]],
+  ["spaces/space_demo_live", ["Spaces"]],
+  ["spaces", ["Spaces"]],
   ["settings/widgets", ["SettingsWidgets"]],
 ])("the %s widget deep link opens the right screen", (path, expected) => {
   expect(focusedRouteNames(path)).toEqual(expected);

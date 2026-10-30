@@ -1,6 +1,6 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FlatList, Platform, RefreshControl, Share, StyleSheet, View, type TextInput } from "react-native";
 
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
@@ -43,7 +43,8 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const { colors } = useTheme();
   const styles = useStyles();
   const openUserProfile = useOpenUserProfile();
-  const { postId } = route.params;
+  const { postId, highlight = false } = route.params;
+  const [isPostHighlighted, setIsPostHighlighted] = useState(highlight);
   const { togglePostLike, followPostAuthor } = usePostInteractions();
   const composerRef = useRef<TextInput>(null);
   const isGuest = useAuthStore((s) => s.status !== "signedIn");
@@ -59,6 +60,12 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const threadListRef = useRef<FlatList<ThreadRow>>(null);
   const conversation = usePostConversation(postId, sort, () => threadListRef.current?.scrollToOffset({ offset: 0, animated: false }), filter);
   const { offerSendInChat, sendInChatElement } = useShareToChat();
+
+  useEffect(() => {
+    if (!highlight || !post.data) return;
+    const timer = setTimeout(() => setIsPostHighlighted(false), 3500);
+    return () => clearTimeout(timer);
+  }, [highlight, post.data, postId]);
 
   const sharePostLink = async () => {
     await Share.share({ message: webAppLinks.post(postId) }).catch(() => undefined);
@@ -84,6 +91,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
           <ReplyingToCommentLink clip={post.data} />
         </View>
       ) : null}
+      <View style={isPostHighlighted ? styles.highlightedPost : undefined}>
       <PostCard
         post={post.data}
         surface="post_detail"
@@ -96,6 +104,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
         onPressOriginalPost={post.data.resharedFrom ? () => navigation.navigate("PostDetail", { postId: post.data.resharedFrom!.id }) : undefined}
         onPressAnalytics={() => navigation.navigate("PostAnalytics", { postId })}
       />
+      </View>
       <Text size={14} lineHeight={19} color={colors.textMuted} style={styles.timestamp}>
         {formatFullTimestamp(post.data.createdAt)}
         {post.data.views > 0 ? (
@@ -199,6 +208,7 @@ const useStyles = makeThemedStyles((colors) =>
     flex: { flex: 1 },
     replyLink: { paddingHorizontal: 16, paddingBottom: 12 },
     timestamp: { paddingHorizontal: 16, paddingVertical: 12 },
+    highlightedPost: { marginHorizontal: 8, borderWidth: 1, borderColor: colors.textMuted, borderRadius: 10, overflow: "hidden" },
     threadHeader: { paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },
     conversation: { paddingBottom: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },
     footer: { height: 24 },

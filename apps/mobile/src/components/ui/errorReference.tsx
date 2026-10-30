@@ -46,6 +46,6 @@ export function ErrorReference({ code, reference }: { readonly code?: string; re
 
 const styles = StyleSheet.create({
   row: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 8 },
-  text: { fontVariant: ["tabular-nums"] },
-  copy: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, borderWidth: StyleSheet.hairlineWidth },
+  text: { maxWidth: "100%", flexShrink: 1, fontVariant: ["tabular-nums"] },
+  copy: { minHeight: 44, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, borderWidth: StyleSheet.hairlineWidth },
 });

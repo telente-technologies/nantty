@@ -33,6 +33,7 @@ export function SharedContentCardView({ reference, snapshot }: SharedContentCard
   });
   if (!card) return <View style={[styles.card, styles.loading]} accessibilityLabel="Loading preview" />;
   const isAvailable = card.availability === "available";
+  const privateSpace = reference.kind === "space" && card.availability === "private";
   const openInApp = () => {
     const route = buildInternalRoute(reference, card.profileUserId);
     (navigation.navigate as (name: string, params: object) => void)(route.name, route.params);
@@ -47,8 +48,8 @@ export function SharedContentCardView({ reference, snapshot }: SharedContentCard
             <Text size={11} lineHeight={14} color={colors.textMuted}>{(card.viewerCount ?? 0).toLocaleString("en-US")} watching</Text>
           </View>
         ) : null}
-        <Text size={13} weight={600} lineHeight={17} numberOfLines={2} color={isAvailable ? colors.text : colors.textMuted}>{card.title}</Text>
-        {isAvailable && card.subtitle ? <Text size={12} lineHeight={16} color={colors.textMuted} numberOfLines={1}>{card.subtitle}</Text> : null}
+        <Text size={13} weight={600} lineHeight={17} numberOfLines={2} color={isAvailable ? colors.text : colors.textMuted}>{privateSpace ? "Private Space" : card.title ?? "This content is unavailable"}</Text>
+        {privateSpace ? <Text size={12} lineHeight={16} color={colors.textMuted} numberOfLines={2}>Only people invited by the host can preview and join.</Text> : isAvailable && card.subtitle ? <Text size={12} lineHeight={16} color={colors.textMuted} numberOfLines={1}>{card.subtitle}</Text> : null}
         {card.priceLabel ? (
           <Text size={13} weight={600} lineHeight={17} color={colors.primary}>
             {card.priceLabel}{typeof card.stock === "number" ? (card.stock > 0 ? ` · ${card.stock} in stock` : " · Out of stock") : ""}

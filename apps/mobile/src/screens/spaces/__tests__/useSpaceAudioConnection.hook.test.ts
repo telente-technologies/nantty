@@ -40,6 +40,26 @@ const hostGrant = { ...listenerGrant, role: "host", token: "host-jwt", canPublis
 const flush = async () => { for (let index = 0; index < 5; index += 1) await Promise.resolve(); };
 
 describe("useSpaceAudioConnection", () => {
+  it("reconnects an approved listener muted, and revokes microphone control on demotion", async () => {
+    const speakerGrant = { ...listenerGrant, role: "speaker" as const, token: "speaker-jwt", canPublish: true };
+    const {result,rerender} = await renderHook(({grant}: {grant: import("@/services/spaces.service").SpaceJoinGrant}) => useSpaceAudioConnection("space-1",true,grant), {initialProps:{grant:listenerGrant}});
+    await act(async () => flush());
+    await rerender({grant:speakerGrant});
+    await act(async () => flush());
+    expect(MockRoom.created[0]!.disconnect).toHaveBeenCalled();
+    expect(result.current.canPublish).toBe(true);
+    expect(result.current.isMuted).toBe(true);
+    expect(MockRoom.created[1]!.setMicrophoneEnabled).not.toHaveBeenCalled();
+    await act(async () => result.current.toggleMicrophone());
+    expect(MockRoom.created[1]!.setMicrophoneEnabled).toHaveBeenCalledWith(true);
+    await rerender({grant:listenerGrant});
+    await act(async () => flush());
+    expect(MockRoom.created[1]!.disconnect).toHaveBeenCalled();
+    expect(result.current.canPublish).toBe(false);
+    expect(result.current.isMuted).toBe(true);
+    await act(async () => result.current.toggleMicrophone());
+    expect(MockRoom.created[2]!.setMicrophoneEnabled).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     jest.useFakeTimers();
     MockRoom.created = [];

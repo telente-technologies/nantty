@@ -14,7 +14,7 @@ import { followStatusPollIntervalMs } from "./followState.util";
 export const profileQueryKeys = {
   myProfile: ["users", "me"] as const,
   userProfile: (userId: string) => ["users", userId] as const,
-  userPosts: (userId: string) => ["users", userId, "posts"] as const,
+  userPosts: (userId: string, visibility: "public" | "subscribers" = "public") => ["users", userId, "posts", visibility] as const,
   connections: (userId: string, tab: ConnectionTab) => ["users", userId, "connections", tab] as const,
   settings: ["users", "me", "settings"] as const,
   addresses: ["users", "me", "addresses"] as const,
@@ -47,11 +47,11 @@ export function useUserProfileQuery(userId: string) {
   return useQuery({ queryKey: profileQueryKeys.userProfile(userId), queryFn: () => usersService.fetchUserProfileById(userId) });
 }
 
-export function useUserPostsQuery(userId: string | undefined) {
+export function useUserPostsQuery(userId: string | undefined, visibility: "public" | "subscribers" = "public", enabled = true) {
   return useQuery({
-    queryKey: profileQueryKeys.userPosts(userId ?? "none"),
-    queryFn: () => usersService.fetchPostsByUserId(userId!),
-    enabled: !!userId,
+    queryKey: profileQueryKeys.userPosts(userId ?? "none", visibility),
+    queryFn: () => usersService.fetchPostsByUserId(userId!, undefined, visibility),
+    enabled: !!userId && enabled,
   });
 }
 

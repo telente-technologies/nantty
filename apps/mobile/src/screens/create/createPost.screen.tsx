@@ -9,6 +9,8 @@ import { LiveSetupPanel, type LiveStreamCredentials } from "@/components/create/
 import { ClipComposer, type ClipComposerSeed } from "@/components/create/clip/clipComposer";
 import type { ClipLookId } from "@/components/create/clip/clipLook.constant";
 import { DraftsButton, DraftsSheet } from "@/components/create/draftsSheet";
+import { SchedulePostSheet } from "@/components/create/schedulePostSheet";
+import { ScheduledPostsButton } from "@/components/create/scheduledPostsSheet";
 import { PostComposerPanel, type PostComposerDraft } from "@/components/create/postComposerPanel";
 import { QuotedPostCard } from "@/components/feed/quotedPostCard";
 import { QUOTE_UNAVAILABLE_MESSAGE, useQuotedPostPreview } from "@/components/feed/quotedPostPreview.hook";
@@ -51,6 +53,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const [mode, setMode] = useState<CreateMode>(videoReply ? "clip" : (route.params?.mode ?? "post"));
   const [stickerLayout, setStickerLayout] = useState<CommentStickerLayout>(DEFAULT_STICKER_LAYOUT);
   const [postStage, setPostStage] = useState<"compose" | "settings">("compose");
+  const [isScheduleSheetOpen, setIsScheduleSheetOpen] = useState(false);
   const [postDraft, setPostDraft] = useState<PostComposerDraft>(() =>
     videoReply
       ? {
@@ -156,11 +159,19 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     draftMediaItems: postDraftUploads.draftMediaItems,
     combinedUploadedFraction: postDraftUploads.combinedUploadedFraction,
     waitForAllDraftMediaIds: postDraftUploads.waitForAllDraftMediaIds,
-    onPublished: (post) => navigation.replace("PostDetail", { postId: post.id }),
+    onPublished: (post) => {
+      if (post.publicationState === "scheduled") {
+        setIsScheduleSheetOpen(false);
+        showToast("Post scheduled");
+        navigation.goBack();
+        return;
+      }
+      navigation.replace("PostDetail", { postId: post.id });
+    },
     onError: (error) => {
       if (error instanceof ApiError && error.code === "QUOTED_POST_UNAVAILABLE") quote.refresh();
     },
-    buildInput: (mediaIds) => {
+    buildInput: (mediaIds, scheduledAt) => {
       const trimmedDraft = shiftMentionsAfterTrimmingStart(postDraft.text, postDraft.mentions);
       return {
         text: trimmedDraft.text,
@@ -175,6 +186,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
           : {}),
         ...(videoReply && selectedSoundId ? { soundId: selectedSoundId } : {}),
         ...(quote.quotedPostId === undefined || !quoteApplies ? {} : { quotedPostId: quote.quotedPostId }),
+        ...(scheduledAt === undefined ? {} : { scheduledAt }),
       };
     },
   });
@@ -200,6 +212,10 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
   const isLiveModeLockedForViewer = (!canGoLive || !createAccess.isApprovedCreator) && !isCreatorStatusLoading;
   const isProductModeLockedForViewer = !createAccess.isApprovedSeller && !createAccess.isSellerStatusLoading;
   useEffect(() => {
+    if (mode === "space" && !isLiveModeLockedForViewer) {
+      navigation.replace("Spaces", { create: true });
+      return;
+    }
     if (mode === "live" && isLiveModeLockedForViewer) setMode("post");
     if (mode === "product" && createAccess.isApprovedSeller) navigation.replace("ProductForm");
   }, [mode, isLiveModeLockedForViewer, createAccess.isApprovedSeller, navigation]);
@@ -263,6 +279,14 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
       openCreatorProgramOrSettings(navigation, creatorEntry.route);
       return;
     }
+    if (next === "space") {
+      if (isLiveModeLockedForViewer) {
+        if (!creatorEntry.isLoading) openCreatorProgramOrSettings(navigation, creatorEntry.route);
+        return;
+      }
+      navigation.replace("Spaces", { create: true });
+      return;
+    }
     if ((next === "clip") !== (mode === "clip")) postDraftUploads.discardAllDraftMedia();
     setMode(next);
   };
@@ -277,6 +301,8 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     mode === "clip" ? hasExactlyOneClipVideo : !isQuoteBlocked && (postDraft.text.trim().length > 0 || postDraftUploads.draftMediaItems.length > 0);
   if (requestedMode === "product" && isProductModeLockedForViewer) return <RoleGateScreen kind="seller" />;
   if (requestedMode === "live" && isLiveModeLockedForViewer) return <RoleGateScreen kind="creator" />;
+  if (requestedMode === "space" && isLiveModeLockedForViewer) return <RoleGateScreen kind="creator" />;
+  if (mode === "space") return null;
 
   if (mode === "clip" && !videoReply) {
     return (
@@ -311,7 +337,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
           <CreateHeader
             title={videoReply ? `Reply to @${videoReply.commenterUsername}'s comment` : mode === "story" ? "Story" : mode === "clip" ? "Clip" : quoteApplies && quote.preview ? "Quote" : "Post"}
             onClose={closeOrStepBack}
-            afterTitle={mode === "post" && !videoReply ? <DraftsButton /> : undefined}
+            afterTitle={mode === "post" && !videoReply ? <View style={styles.headerActions}><DraftsButton /><ScheduledPostsButton /></View> : undefined}
             actionLabel={(mode === "post" || mode === "clip") && postStage === "compose" ? "Next" : undefined}
             actionDisabled={!canContinuePost}
             onAction={() => setPostStage("settings")}
@@ -350,6 +376,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
             onPublish={() => {
               if (!isQuoteBlocked) publishPost.publish();
             }}
+            onSchedule={mode === "post" && !videoReply && !isQuoteBlocked ? () => setIsScheduleSheetOpen(true) : undefined}
             onSaveDraft={videoReply ? undefined : savePostDraft}
             soundPicker={videoReply ? <SoundPickerRow selectedSoundId={selectedSoundId} onChangeSelectedSoundId={setSelectedSoundId} /> : null}
           />
@@ -392,9 +419,16 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
         />
       ) : null}
       <DraftsSheet onResume={resumeDraft} />
+      <SchedulePostSheet
+        visible={isScheduleSheetOpen}
+        submitting={publishPost.mutation.isPending && publishPost.mutation.variables !== undefined}
+        errorMessage={publishPost.mutation.variables === undefined ? null : publishPost.errorMessage}
+        onClose={() => setIsScheduleSheetOpen(false)}
+        onSchedule={(scheduledAt) => publishPost.publish(scheduledAt)}
+      />
       <KeyboardSpacer />
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({ flex: { flex: 1 } });
+const styles = StyleSheet.create({ flex: { flex: 1 }, headerActions: { flexDirection: "row", alignItems: "center", gap: 12 } });

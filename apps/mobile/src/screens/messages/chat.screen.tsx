@@ -4,7 +4,7 @@ import { FlatList, Platform, StyleSheet, View } from "react-native";
 
 import type { LocallyStoredMessage } from "@/cache/messageHistory.type";
 import { removeExpiredMessagesFromCaches } from "@/cache/messageRealtimeCache.util";
-import { readSavedMessagesForInstantDisplay, syncConversationMessagesIncrementallyAndReadLocalHistory } from "@/cache/messageSync.util";
+import { readSavedMessagesForInstantDisplay, syncConversationHistoryUntilMessage, syncConversationMessagesIncrementallyAndReadLocalHistory } from "@/cache/messageSync.util";
 import { ChatBubble } from "@/components/chat/chatBubble";
 import { foldConversationMessages } from "@/components/chat/chatControlFold.util";
 import { ChatComposerWithVoiceNotes } from "@/components/chat/chatComposerWithVoiceNotes";
@@ -64,6 +64,9 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
   const queryClient = useQueryClient();
   const myUserId = useAuthStore((s) => s.user?.id ?? "u_me");
   const listRef = useRef<FlatList<LocallyStoredMessage>>(null);
+  const targetMessageAttempted = useRef<string | null>(null);
+  const targetMessageScrolled = useRef<string | null>(null);
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
   const [messageBeingReactedTo, setMessageBeingReactedTo] = useState<LocallyStoredMessage | null>(null);
   const [isMuteSheetOpen, setIsMuteSheetOpen] = useState(false);
   const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
@@ -136,6 +139,31 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
     if (conversationId) navigation.navigate("ConversationInfo", { conversationId });
   };
 
+  useEffect(() => {
+    const messageId = route.params.messageId;
+    if (!messageId || !conversationId || messages.isLoading || messages.isFetching) return;
+    const index = newestFirstItems.findIndex((message) => message.id === messageId);
+    if (index >= 0) {
+      if (targetMessageScrolled.current !== messageId) {
+        targetMessageScrolled.current = messageId;
+        setHighlightedMessageId(messageId);
+        listRef.current?.scrollToIndex({ index, viewPosition: 0.5, animated: true });
+      }
+      return;
+    }
+    if (targetMessageAttempted.current === messageId) return;
+    targetMessageAttempted.current = messageId;
+    void syncConversationHistoryUntilMessage(conversationId, messageId)
+      .catch(() => false)
+      .finally(() => queryClient.invalidateQueries({ queryKey: ["messages", conversationId] }));
+  }, [route.params.messageId, conversationId, messages.isLoading, messages.isFetching, newestFirstItems, queryClient]);
+
+  useEffect(() => {
+    if (!highlightedMessageId) return;
+    const timer = setTimeout(() => setHighlightedMessageId(null), 3500);
+    return () => clearTimeout(timer);
+  }, [highlightedMessageId]);
+
   return (
     <Screen background={colors.surface} edges={["top"]}>
       <ChatLockGate>
@@ -153,7 +181,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
         {disappearingSeconds ? (
           <View style={styles.disappearingBanner}>
             <Text size={11} lineHeight={15.4} letterSpacing={0} color={colors.textMuted} align="center">
-              Messages disappear {describeDisappearingMessagesDuration(disappearingSeconds)} after they're sent
+              Messages disappear {describeDisappearingMessagesDuration(disappearingSeconds)} after they&apos;re sent
             </Text>
           </View>
         ) : null}
@@ -166,6 +194,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
             data={newestFirstItems}
             inverted
             keyExtractor={(m) => m.id}
+            onScrollToIndexFailed={({ averageItemLength, index }) => listRef.current?.scrollToOffset({ offset: averageItemLength * index, animated: true })}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
             ListFooterComponent={
@@ -197,6 +226,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
                 isMine={isMyMessage(item)}
                 showSenderIdentity={isGroupLike || !!display?.isBusiness}
                 showReadReceipt={inboxFolder === "chats"}
+                highlighted={item.id === highlightedMessageId}
                 onLongPress={item.deliveryStatus === "sent" && item.kind !== "system" ? () => setMessageBeingReactedTo(item) : undefined}
                 onToggleReaction={(emoji, shouldReact) => toggleReactionOnMessage(item, emoji, shouldReact).catch(() => undefined)}
                 onRetryDocument={() => void retryDocument(item.id)}
@@ -214,7 +244,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
         ) : !isGroupLike && peer?.account?.status === "suspended" ? (
           <View style={styles.readOnlyNotice}>
             <Text size={13} lineHeight={16.9} color={colors.textMuted} align="center">
-              You can't message this account
+              You can&apos;t message this account
             </Text>
           </View>
         ) : display && !display.canPostMessages ? (

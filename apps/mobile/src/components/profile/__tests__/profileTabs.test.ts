@@ -1,5 +1,5 @@
 import { createElement } from "react";
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { act, fireEvent, render, screen } from "@testing-library/react-native";
 
 import { ProfileTabs } from "@/components/profile/profileTabs";
 
@@ -22,4 +22,15 @@ test("switching to clips shows the clips label and hides the rest", async () => 
   expect(screen.queryByText("Reposts")).toBeNull();
   await fireEvent.press(screen.getByLabelText("Posts"));
   expect(onChangeTab).toHaveBeenCalledWith("posts");
+});
+
+test("subscriber tab is optional and fits the same flexible tab row", async () => {
+  const onChangeTab = jest.fn();
+  const screenView = await render(createElement(ProfileTabs, { tabs: ["posts", "reposts", "clips"], activeTab: "posts", onChangeTab }));
+  expect(screen.queryByLabelText("Subscriber posts")).toBeNull();
+  await act(async () => {
+    screenView.rerender(createElement(ProfileTabs, { tabs: ["posts", "reposts", "clips", "subscribers"], activeTab: "subscribers", onChangeTab }));
+  });
+  expect(screen.getByLabelText("Subscriber posts")).toBeTruthy();
+  expect(screen.getByText("Subs")).toBeTruthy();
 });

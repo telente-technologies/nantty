@@ -18,7 +18,7 @@ import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { EmptyState } from "@/components/ui/emptyState";
 import { ErrorState } from "@/components/ui/errorState";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
-import { buildInternalRoute, readInternalReferenceFromUrl } from "@/components/chat/chatLinks.util";
+import { buildInternalRoute, readInternalNotificationTargetFromUrl } from "@/components/chat/chatLinks.util";
 import { inAppBrowserColorsFromTheme, openUserSuppliedWebLink } from "@/components/links/openLink.util";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
@@ -39,13 +39,23 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
   const openNotification = (notification: CategorizedNotification) => {
     if (!notification.read) markOneRead.mutate(notification.id);
     const url = notification.url ?? notification.data?.url;
-    const reference = url ? readInternalReferenceFromUrl(url) : null;
+    const target = url ? readInternalNotificationTargetFromUrl(url) : null;
+    const reference = target?.reference ?? null;
+    const conversationId = notification.data?.conversationId ?? target?.conversationId;
+    const messageId = notification.data?.messageId ?? target?.messageId;
+    const commentId = notification.data?.commentId ?? target?.commentId;
+    const clipId = notification.data?.clipId ?? (reference?.kind === "clip" ? reference.id : undefined);
+    const postId = notification.data?.postId ?? (reference?.kind === "post" ? reference.id : undefined);
     if (notification.kind === "followRequest") return navigation.navigate("FollowRequests");
     if (notification.kind === "followRequestAccepted" && notification.actor) {
       void queryClient.invalidateQueries({ queryKey: ["users", notification.actor.id] });
       return navigation.navigate("UserProfile", { userId: notification.actor.id });
     }
-    if (notification.data?.screen === "AccountStatus") navigation.navigate("AccountStatus");
+    if (conversationId) navigation.push("Chat", { conversationId, name: notification.actor?.name ?? notification.title, ...(messageId ? { messageId } : {}) });
+    else if (clipId) navigation.navigate("Tabs", { screen: "Clips", params: { startId: clipId, ...(commentId ? { commentId } : {}) } });
+    else if (commentId && postId) navigation.push("CommentThread", { postId, commentId });
+    else if (postId) navigation.push("PostDetail", { postId, highlight: true });
+    else if (notification.data?.screen === "AccountStatus") navigation.navigate("AccountStatus");
     else if (notification.data?.screen === "Verification") navigation.navigate("IdentityVerification");
     else if (notification.data?.ticketId) navigation.navigate("SupportTicketDetail", { ticketId: notification.data.ticketId });
     else if (reference) {

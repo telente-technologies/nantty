@@ -127,7 +127,7 @@ export interface CategorizedNotification extends AppNotification {
   readonly category: NotificationCategory;
   readonly kind?: "mention" | "videoReply" | "postTag" | "followRequest" | "followRequestAccepted";
   readonly url?: string | null;
-  readonly data?: { readonly ticketId?: string; readonly screen?: string; readonly url?: string | null } | null;
+  readonly data?: { readonly ticketId?: string; readonly screen?: string; readonly url?: string | null; readonly postId?: string; readonly clipId?: string; readonly commentId?: string; readonly conversationId?: string; readonly messageId?: string } | null;
 }
 
 export type EscrowStage =

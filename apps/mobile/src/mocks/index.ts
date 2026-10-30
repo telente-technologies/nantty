@@ -1,4 +1,5 @@
 import { ApiError } from "@/errors/api.error";
+import { spacesMocks } from "./spaces.mock";
 
 import { accountHealthMocks } from "./accountHealth.mock";
 import { accountStatusMocks } from "./accountStatus.mock";
@@ -84,6 +85,7 @@ import { reportsMocks } from "./reports.mock";
 import { liveSafetyMocks } from "./liveSafety.mock";
 
 const routes: MockRoute[] = [
+  ...spacesMocks,
   ...localeMocks,
   ...usernameMocks,
   ...accountStatusMocks,

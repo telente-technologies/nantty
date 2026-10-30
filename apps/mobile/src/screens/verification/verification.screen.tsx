@@ -96,6 +96,9 @@ export function VerificationScreen({ navigation }: MainScreenProps<"Verification
             <Text size={typeScale.sm} lineHeight={17.5} color={colors.textMuted}>
               {goldPending ? "Gold after business verification" : "Your business profile is verified."}
             </Text>
+            {(plans.data ?? []).filter((plan) => plan.color === "gold").map((plan) => (
+              <VerificationPlanCard key={plan.id} plan={plan} current={subscription?.planId === plan.id} />
+            ))}
             {goldPending ? <Button title="Verify your identity" onPress={() => navigation.navigate("IdentityVerification")} /> : null}
             <Button variant="subtle" title={MANAGE_ON_THE_WEB_LABEL} onPress={() => webHandoffService.openManageBilling(actingProfileId)} />
           </View>

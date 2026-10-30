@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Animated, { type SharedValue, useAnimatedStyle } from "react-native-reanimated";
 
-import { Bell24Icon, MagnifyingGlass24Icon } from "@/components/icons";
+import { Bell24Icon, Headset24Icon, MagnifyingGlass24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainStackParamList } from "@/navigation/navigation.types";
@@ -69,7 +69,7 @@ export function HomeHeader({ activeSection, onChangeSection, pagerOffset, pageWi
         </Pressable>
         <CartHeaderButtonShownOnlyWhenCartHasItems />
         <Pressable accessibilityRole="button" accessibilityLabel="Explore Nantty Spaces" onPress={() => navigation.navigate("Spaces")} hitSlop={10}>
-          <Text size={13} weight={600} color={colors.primary}>Spaces</Text>
+          <Headset24Icon size={24} color={colors.text} />
         </Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel="Notifications" hitSlop={10} onPress={onPressNotifications}>
           <Bell24Icon />

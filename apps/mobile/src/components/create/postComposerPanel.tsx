@@ -38,6 +38,7 @@ export interface PostComposerPanelProps {
   readonly publishErrorMessage: string | null;
   readonly validationHint: string | null;
   readonly onPublish: () => void;
+  readonly onSchedule?: () => void;
   readonly onSaveDraft?: () => void;
   readonly soundPicker?: ReactNode;
   readonly videoReplyStage?: ReactNode;
@@ -81,6 +82,7 @@ export function PostComposerPanel(props: PostComposerPanelProps) {
         publishButtonTitle={props.publishButtonTitle}
         publishErrorMessage={props.publishErrorMessage}
         onPublish={props.onPublish}
+        onSchedule={props.onSchedule}
         onSaveDraft={props.onSaveDraft}
       />
     );

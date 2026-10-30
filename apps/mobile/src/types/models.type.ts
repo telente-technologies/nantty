@@ -161,6 +161,8 @@ export interface Post {
   readonly author: UserSummary;
   readonly postedAs?: { readonly id: ID; readonly kind: string; readonly name: string; readonly handle: string; readonly avatarUrl: string | null } | null;
   readonly createdAt: ISODate;
+  readonly publicationState?: "published" | "scheduled" | "cancelled" | "failed";
+  readonly scheduledAt?: ISODate | null;
   readonly text: string;
   readonly media: readonly Media[];
   readonly likes: number;

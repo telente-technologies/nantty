@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactElement, type ReactNode } from "react";
+import { ScrollView } from "react-native";
 
 import type { ErrorStateVariant } from "./errorState";
 import { ErrorState } from "./errorState";
@@ -37,7 +38,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (!this.state.error) return this.props.children;
     const signal = this.state.error as Error & { status?: number; code?: string };
     const isRenderCrash = signal.status === undefined && signal.code === undefined;
-    return <ErrorState error={this.state.error} kind={isRenderCrash ? "serverError" : undefined} title={isRenderCrash ? "This screen hit a snag" : undefined} description={isRenderCrash ? "Something on this screen stopped working. Try again, and nothing you saved is lost." : undefined} variant={this.props.variant ?? "page"} onRetry={this.retry} />;
+    const variant = this.props.variant ?? "page";
+    const recovery = <ErrorState error={this.state.error} kind={isRenderCrash ? "serverError" : undefined} title={isRenderCrash ? "This screen hit a snag" : undefined} description={isRenderCrash ? "This screen couldn't load. Try again, or return to the previous screen." : undefined} variant={variant} onRetry={this.retry} />;
+    return variant === "page" ? <ScrollView contentContainerStyle={{ flexGrow: 1 }}>{recovery}</ScrollView> : recovery;
   }
 }
 

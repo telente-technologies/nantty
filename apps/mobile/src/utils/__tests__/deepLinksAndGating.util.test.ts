@@ -1,4 +1,4 @@
-import { buildInternalRoute, readInternalReferenceFromUrl } from "@/components/chat/chatLinks.util";
+import { buildInternalRoute, readInternalNotificationTargetFromUrl, readInternalReferenceFromUrl } from "@/components/chat/chatLinks.util";
 import { isBackgroundCallSkippedForGuests } from "@/config/guestAccess.config";
 import { readProductIdFromSlug, webAppLinks } from "@/config/webAppLinks.config";
 
@@ -33,13 +33,23 @@ describe("internal link parsing", () => {
     expect(readInternalReferenceFromUrl("https://web.nantty.com/p/ankara-wrap-midi-dress-pr_f1")).toEqual({ kind: "product", id: "pr_f1" });
     expect(readInternalReferenceFromUrl("https://evil.example/ada")).toBeNull();
   });
+
+  it("preserves the exact post comment or clip comment target from internal notification URLs", () => {
+    expect(readInternalNotificationTargetFromUrl("/post/p1?comment=c1")).toEqual({ reference: { kind: "post", id: "p1" }, commentId: "c1" });
+    expect(readInternalNotificationTargetFromUrl("https://web.nantty.com/clips/v1?comment=c2")).toEqual({ reference: { kind: "clip", id: "v1" }, commentId: "c2" });
+  });
+
+  it("preserves a group chat and exact message target but rejects untrusted origins", () => {
+    expect(readInternalNotificationTargetFromUrl("/chats/conversation-1?message=message-7")).toEqual({ reference: null, conversationId: "conversation-1", messageId: "message-7" });
+    expect(readInternalNotificationTargetFromUrl("https://evil.example/chats/c1?message=m1")).toBeNull();
+  });
 });
 
 describe("create menu", () => {
   it("shows Product only to approved sellers and Live only to approved creators", () => {
     expect(listCreateModesForViewer(false, false)).toEqual(["story", "post", "clip"]);
     expect(listCreateModesForViewer(true, false)).toEqual(["story", "post", "clip", "product"]);
-    expect(listCreateModesForViewer(false, true)).toEqual(["story", "post", "clip", "live"]);
+    expect(listCreateModesForViewer(false, true)).toEqual(["story", "post", "clip", "live", "space"]);
   });
 });
 

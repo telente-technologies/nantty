@@ -31,7 +31,7 @@ export type MainTabParamList = {
 
 export type MainStackParamList = {
   NotFound: undefined;
-  Spaces: { spaceId?: string } | undefined;
+  Spaces: { spaceId?: string; create?: boolean } | undefined;
   Tabs: NavigatorScreenParams<MainTabParamList> | undefined;
   Search: { scope?: SearchScopeKey | "all" | "messages"; scopeLabel?: string } | undefined;
   Notifications: undefined;
@@ -83,12 +83,12 @@ export type MainStackParamList = {
   ProductForm: { productId?: string } | undefined;
   SellerOrders: undefined;
   SellerOrderDetail: { orderId: string };
-  Chat: { conversationId?: string; userId?: string; storeId?: string; name: string };
+  Chat: { conversationId?: string; userId?: string; storeId?: string; name: string; messageId?: string };
   NewMessage: undefined;
   NewGroup: { kind: "group" | "channel" };
   ConversationInfo: { conversationId: string };
-  CreatePost: { mode?: "story" | "post" | "clip" | "product" | "live"; soundId?: string; videoReply?: VideoReplyTarget; quotePostId?: string } | undefined;
-  PostDetail: { postId: string };
+  CreatePost: { mode?: "story" | "post" | "clip" | "product" | "live" | "space"; soundId?: string; videoReply?: VideoReplyTarget; quotePostId?: string } | undefined;
+  PostDetail: { postId: string; highlight?: boolean };
   PostAnalytics: { postId: string };
   PostQuotes: { postId: string };
   CommentThread: { commentId: string; postId: string };

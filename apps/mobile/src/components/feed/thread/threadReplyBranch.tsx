@@ -1,4 +1,5 @@
-import { useNavigation, type NavigationProp } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ActivityIndicator, Pressable, Share, StyleSheet, View } from "react-native";
 
 import { CaretRight24Icon } from "@/components/icons";
@@ -34,7 +35,7 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
   const { colors } = useTheme();
   const styles = useStyles();
   const thread = useCommentThreadContext();
-  const navigation = useNavigation<NavigationProp<MainStackParamList>>();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const isAtIndentLimit = nestingLevel >= MAXIMUM_THREAD_INDENT_LEVELS;
   const childrenAreIndented = nestingLevel + 1 <= MAXIMUM_THREAD_INDENT_LEVELS;
   const isExpanded = thread.replyThreadVisibilityFor(reply.id) === "expanded";
@@ -76,7 +77,7 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
         onToggleLike={() => thread.toggleLikeOnComment(reply)}
         onRepost={() => onRepostReply?.(reply)}
         onShare={shareReply}
-        onOpenThread={() => navigation.navigate("CommentThread", { commentId: reply.id, postId: reply.postId })}
+        onOpenThread={() => navigation.push("CommentThread", { commentId: reply.id, postId: reply.postId })}
         onDelete={() => thread.deleteOwnComment(reply)}
       />
       <View style={childrenAreIndented && !continuesAsChain && visibleChildren.length > 0 ? styles.indented : null}>
@@ -96,7 +97,7 @@ export function ThreadReplyBranch({ reply, postAuthorId, hasParentAbove, showRep
         <Pressable
           accessibilityRole="link"
           accessibilityLabel={`View thread, ${hiddenCount} more ${hiddenCount === 1 ? "reply" : "replies"} to ${reply.author?.name ?? "this reply"}`}
-          onPress={() => navigation.navigate("CommentThread", { commentId: reply.id, postId: reply.postId })}
+          onPress={() => navigation.push("CommentThread", { commentId: reply.id, postId: reply.postId })}
           style={styles.showMore}
         >
           <View style={styles.rail}>

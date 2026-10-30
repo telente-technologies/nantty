@@ -78,8 +78,8 @@ async function sendHttpRequest<T>(method: Method, path: string, options: Request
     });
     const payload = response.status === 204 ? undefined : await response.json().catch(() => undefined);
     if (!response.ok) {
-      const error = (payload ?? {}) as { message?: string; code?: string; suggestions?: string[]; details?: Record<string, unknown> };
-      throw new ApiError(response.status, error.message ?? `Request failed (HTTP ${response.status})`, error.code, error.suggestions, error.details, {
+      const error = (payload ?? {}) as { message?: string; code?: string; reason?: string; suggestions?: string[]; details?: Record<string, unknown> };
+      throw new ApiError(response.status, error.message ?? `Request failed (HTTP ${response.status})`, error.code, error.suggestions, { ...error.details, ...(error.reason ? { reason: error.reason } : {}) }, {
         requestId: readRequestIdHeader(response.headers) ?? requestId,
         retryAfterSeconds: parseRetryAfterHeader(response.headers.get("retry-after")),
       });
@@ -116,7 +116,8 @@ async function sendRequestWithHumanVerification<T>(method: Method, path: string,
     return await sendHttpRequest<T>(method, path, options);
   } catch (error) {
     if (!(error instanceof ApiError) || error.status !== 428 || error.code !== "HUMAN_VERIFICATION_REQUIRED") throw error;
-    if (!(await runHumanVerificationInAppBrowser("security_check", submitHumanVerificationToken))) throw error;
+    const reason = typeof error.details?.reason === "string" ? error.details.reason : "security_check";
+    if (!(await runHumanVerificationInAppBrowser(reason, submitHumanVerificationToken))) throw error;
     return sendHttpRequest<T>(method, path, options);
   }
 }

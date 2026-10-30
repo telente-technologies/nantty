@@ -24,6 +24,7 @@ export interface ChatBubbleProps {
   readonly deliveryStatus?: LocalMessageDeliveryStatus;
   readonly showSenderIdentity?: boolean;
   readonly showReadReceipt?: boolean;
+  readonly highlighted?: boolean;
   readonly onLongPress?: () => void;
   readonly onToggleReaction?: (emoji: string, shouldReact: boolean) => void;
   readonly onRetryDocument?: () => void;
@@ -48,6 +49,7 @@ export function ChatBubble({
   deliveryStatus = "sent",
   showSenderIdentity = false,
   showReadReceipt = false,
+  highlighted = false,
   onLongPress,
   onToggleReaction,
   onRetryDocument,
@@ -71,7 +73,7 @@ export function ChatBubble({
   const isShort = !isRich && !isVoiceNote && !isPhoto && !isMediaExpired && message.text.length <= 24 && !message.text.includes("\n");
   const shouldShowSender = showSenderIdentity && !isMine && !!message.sender;
   return (
-    <View style={[styles.row, isMine ? styles.mine : styles.theirs]}>
+    <View style={[styles.row, isMine ? styles.mine : styles.theirs, highlighted && styles.highlightedRow]}>
       {shouldShowSender ? <Avatar uri={message.sender!.avatarUrl} size={24} placeholderColor={colors.placeholder} /> : null}
       <View style={isMine ? styles.mineColumn : styles.theirsColumn}>
         {shouldShowSender ? (
@@ -158,6 +160,7 @@ export function ChatBubble({
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { flexDirection: "row", paddingHorizontal: 20, gap: 8, alignItems: "flex-end" },
+  highlightedRow: { backgroundColor: colors.chip, borderRadius: 18, paddingVertical: 4 },
   mine: { justifyContent: "flex-end" },
   theirs: { justifyContent: "flex-start" },
   mineColumn: { alignItems: "flex-end", gap: 2 },

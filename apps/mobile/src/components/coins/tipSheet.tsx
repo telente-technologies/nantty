@@ -34,6 +34,7 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
   const [isBuyCoinsOpen, setIsBuyCoinsOpen] = useState(false);
   const pendingTipIdempotencyKey = useRef<string | null>(null);
   const coins = customCoins ? Number.parseInt(customCoins, 10) : (selectedPresetCoins ?? 0);
+  const isProfileGift = target?.targetType === "profile";
 
   const sendTip = useMutation({
     mutationFn: () => {
@@ -62,7 +63,7 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
 
   return (
     <>
-      <BottomSheet visible={!!target && !isBuyCoinsOpen} onClose={closeAndReset} title={`Tip ${target?.creatorName ?? ""}`} floating scrollable>
+      <BottomSheet visible={!!target && !isBuyCoinsOpen} onClose={closeAndReset} title={`${isProfileGift ? "Gift" : "Tip"} ${target?.creatorName ?? ""}`} floating scrollable>
         <View style={styles.body}>
           <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
             {sendTip.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <Gift24Icon size={22} color={colors.textMuted} />}
@@ -70,7 +71,7 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
           <CoinBalanceChip onPress={() => setIsBuyCoinsOpen(true)} />
           {sendTip.isSuccess ? (
             <Text size={14} lineHeight={16.8} color={colors.success} accessibilityLiveRegion="polite">
-              You tipped {formatCoinAmount(sendTip.data.coins)}. Thank you for supporting {target?.creatorName}!
+              {isProfileGift ? `Gift credited to ${target?.creatorName}.` : `You tipped ${formatCoinAmount(sendTip.data.coins)}. Thank you for supporting ${target?.creatorName}!`}
             </Text>
           ) : (
             <>

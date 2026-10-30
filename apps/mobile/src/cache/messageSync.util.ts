@@ -37,6 +37,18 @@ export async function syncConversationMessagesIncrementallyAndReadLocalHistory(c
   return messageHistoryStore.readSavedMessagesInConversation(conversationId);
 }
 
+export async function syncConversationHistoryUntilMessage(conversationId: string, messageId: string): Promise<boolean> {
+  let cursor: string | undefined;
+  for (let pageNumber = 0; pageNumber < MAXIMUM_SYNC_PAGES_PER_OPEN; pageNumber++) {
+    const page = await messagesService.fetchMessagesInConversation(conversationId, { cursor });
+    messageHistoryStore.saveDeliveredMessages(page.data);
+    if (page.data.some((message) => message.id === messageId)) return true;
+    if (!page.nextCursor) return false;
+    cursor = page.nextCursor;
+  }
+  return messageHistoryStore.readSavedMessagesInConversation(conversationId).some((message) => message.id === messageId);
+}
+
 export async function fetchConversationListAndSaveLocally(filter: ConversationFilter): Promise<Conversation[]> {
   try {
     const conversations = await messagesService.fetchConversationList(filter);

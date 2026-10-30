@@ -16,7 +16,6 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useOpenUserProfile } from "@/hooks/useOpenUserProfile.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { postCommentsService } from "@/services/content/postComments.service";
 import { postsService } from "@/services/content/posts.service";
 import { postThreadService } from "@/services/content/postThread.service";
 import { ApiError } from "@/services/core/apiClient.service";
@@ -39,7 +38,7 @@ export function CommentThreadScreen({ navigation, route }: MainScreenProps<"Comm
   const { commentId, postId } = route.params;
   const openUserProfile = useOpenUserProfile();
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
-  const focus = useQuery({ queryKey: ["comment", commentId], queryFn: () => postCommentsService.fetchComment(commentId) });
+  const [isFocusHighlighted, setIsFocusHighlighted] = useState(true);
   const post = useQuery({ queryKey: ["post", postId], queryFn: () => postsService.fetchPostById(postId) });
   const thread = useInfiniteQuery({
     queryKey: ["comment-thread", commentId],
@@ -50,14 +49,7 @@ export function CommentThreadScreen({ navigation, route }: MainScreenProps<"Comm
   const postAuthorId = post.data?.author?.id;
   const commentThread = useCommentThreadController(postId, undefined, undefined, postAuthorId);
   const { setReplyThreadVisibility, startReplyingToComment, replyTarget } = commentThread;
-  useEffect(() => {
-    setReplyThreadVisibility(commentId, "expanded");
-  }, [commentId, setReplyThreadVisibility]);
-  useEffect(() => {
-    if (focus.data && !replyTarget) startReplyingToComment(focus.data, { focus: false });
-  }, [focus.data, replyTarget, startReplyingToComment]);
-
-  const pages = thread.data?.pages ?? [];
+  const pages = useMemo(() => thread.data?.pages ?? [], [thread.data?.pages]);
   const ancestors = useMemo(() => pages[0]?.ancestors ?? [], [pages]);
   const subtree = useMemo(() => {
     const seen = new Set<string>();
@@ -65,12 +57,24 @@ export function CommentThreadScreen({ navigation, route }: MainScreenProps<"Comm
       .flatMap((page) => page.data ?? [])
       .filter((reply) => (seen.has(reply.id) ? false : (seen.add(reply.id), true)));
   }, [pages]);
-  const focusComment = pages[0]?.focus ?? focus.data ?? null;
-  const initialLoading = focus.isLoading || thread.isLoading || post.isLoading;
-  const retrying = (focus.isFetching || thread.isFetching || post.isFetching) && !initialLoading;
-  const commentGone = isGoneError(focus.error) || isGoneError(thread.error);
-  const commentDenied = !commentGone && (isDeniedError(focus.error) || isDeniedError(thread.error));
-  const commentFailed = (focus.isError || thread.isError) && !commentGone && !commentDenied;
+  const focusComment = pages[0]?.focus ?? null;
+  useEffect(() => {
+    setReplyThreadVisibility(commentId, "expanded");
+  }, [commentId, setReplyThreadVisibility]);
+  useEffect(() => {
+    if (!focusComment) return;
+    const timer = setTimeout(() => setIsFocusHighlighted(false), 3500);
+    return () => clearTimeout(timer);
+  }, [commentId, focusComment]);
+  useEffect(() => {
+    if (focusComment && !replyTarget) startReplyingToComment(focusComment, { focus: false });
+  }, [focusComment, replyTarget, startReplyingToComment]);
+
+  const initialLoading = thread.isLoading || post.isLoading;
+  const retrying = (thread.isFetching || post.isFetching) && !initialLoading;
+  const commentGone = isGoneError(thread.error);
+  const commentDenied = !commentGone && isDeniedError(thread.error);
+  const commentFailed = thread.isError && !commentGone && !commentDenied;
   const commentMissing = !initialLoading && !commentGone && !commentDenied && !commentFailed && !focusComment;
   const showCommentGone = !initialLoading && (commentGone || commentMissing);
   const postGone = isGoneError(post.error);
@@ -79,7 +83,6 @@ export function CommentThreadScreen({ navigation, route }: MainScreenProps<"Comm
   const showThreadBody = !initialLoading && !commentGone && !commentDenied && !commentFailed && !commentMissing;
   const retryAll = () => {
     post.refetch();
-    focus.refetch();
     thread.refetch();
   };
 
@@ -158,7 +161,7 @@ export function CommentThreadScreen({ navigation, route }: MainScreenProps<"Comm
                 ))
               : null}
             {showThreadBody && focusComment ? (
-              <View style={styles.focus}>
+              <View style={[styles.focus, isFocusHighlighted && styles.highlightedFocus]}>
                 <ThreadReplyBranch
                   reply={toLocalThreadReply(focusComment, postAuthorId, ancestors.length > 0)}
                   postAuthorId={postAuthorId}
@@ -213,7 +216,8 @@ const useStyles = () => {
   return StyleSheet.create({
     flex: { flex: 1 },
     content: { paddingBottom: 24 },
-    focus: { backgroundColor: colors.primaryTint, borderTopWidth: StyleSheet.hairlineWidth, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },
+    focus: { borderTopWidth: StyleSheet.hairlineWidth, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },
+    highlightedFocus: { backgroundColor: colors.chip },
     repliesHeader: { paddingHorizontal: 16, paddingTop: 12 },
     loadMore: { paddingHorizontal: 16, paddingVertical: 12 },
     postNotice: { paddingHorizontal: 32, paddingVertical: 24, gap: 8, alignItems: "center" },
