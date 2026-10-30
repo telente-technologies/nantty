@@ -35,7 +35,7 @@ export function PlaceholderLegalDocument({ title, summary, versionLabel, effecti
           <p className={styles.placeholderNotice} role="note">
           <FigmaIconTintedWithCurrentColor name="warning20" size={20} />
           <span>
-            <strong>Draft — pending review by qualified legal counsel.</strong> This text is a working draft designed to support Nigeria&apos;s NDPA 2023 and, where it applies, the GDPR. It does not claim compliance with either and is not legal advice. It is not in effect until approved.
+            <strong>Draft</strong>
           </span>
         </p>
         )}

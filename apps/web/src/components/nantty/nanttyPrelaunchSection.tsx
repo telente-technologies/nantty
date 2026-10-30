@@ -33,7 +33,7 @@ export function NanttyPrelaunchSection() {
             <Image src="/brand/nantty-icon.png" alt="" width={46} height={46} />
             <span className={styles.eyebrow}>LAUNCH UPDATES</span>
             <h2 id="nantty-waitlist-heading">Keep me posted.</h2>
-            <p>Join the list for occasional launch updates. Signup stays disabled until the Google Sheet connection and privacy notice are ready.</p>
+            <p>Join the list for occasional launch updates. We’ll use your email only for Nantty launch news and you can opt out at any time.</p>
           </div>
           <NanttyWaitlistForm />
         </div>

@@ -4,9 +4,8 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 
 import styles from "./nanttyLanding.module.css";
 
-const isStaticPrelaunchExport = process.env.NANTTY_CLOUDFLARE_STATIC_EXPORT === "1";
-const waitlistEndpoint = isStaticPrelaunchExport ? "" : process.env.NEXT_PUBLIC_WAITLIST_APPS_SCRIPT_URL?.trim() ?? "";
-const waitlistEnabled = !isStaticPrelaunchExport && process.env.NEXT_PUBLIC_WAITLIST_ENABLED === "true" && waitlistEndpoint.length > 0;
+const waitlistEndpoint = process.env.NEXT_PUBLIC_WAITLIST_APPS_SCRIPT_URL?.trim() ?? "";
+const waitlistEnabled = process.env.NEXT_PUBLIC_WAITLIST_ENABLED === "true" && waitlistEndpoint.length > 0;
 const knownGoogleOrigins = new Set(["https://script.google.com"]);
 
 interface WaitlistMessage {
@@ -30,7 +29,7 @@ export function NanttyWaitlistForm() {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const nonceRef = useRef("");
   const timeoutRef = useRef<number | undefined>(undefined);
-  const [status, setStatus] = useState("We’re preparing the waitlist. It will open once the private Sheet connection is ready.");
+  const [status, setStatus] = useState(waitlistEnabled ? "Your signup goes to Nantty’s private waitlist Sheet." : "We’re preparing the waitlist. Check back soon.");
   const [statusKind, setStatusKind] = useState<"idle" | "pending" | "saved" | "duplicate" | "error">("idle");
 
   useEffect(() => () => window.clearTimeout(timeoutRef.current), []);
