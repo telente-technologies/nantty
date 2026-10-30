@@ -19,6 +19,8 @@ function readPublicSiteUrl(): string {
 
 const isDevelopmentEnvironment = process.env.NODE_ENV === "development";
 
+export const isPrelaunchMode = process.env.NEXT_PUBLIC_PRELAUNCH_MODE !== "false";
+
 function readBusinessAppUrl(configuredUrl: string | undefined, productionUrl: string, developmentUrl: string): string {
   const fallbackUrl = isDevelopmentEnvironment ? developmentUrl : productionUrl;
   if (!configuredUrl) return fallbackUrl;
@@ -64,7 +66,9 @@ export const siteConfig = {
   wordmark: "nantty",
   tagline: "Shop the sellers you already watch.",
   description:
-    "Nantty is a Nigerian social marketplace. Discover real sellers through posts, clips, stories and live shopping, and pay in your local currency with your money held in escrow until you confirm delivery.",
+    isPrelaunchMode
+      ? "Nantty is a social marketplace in development for Nigeria, bringing seller and creator discovery together with payment-partner protection for eligible orders. Join the waitlist for launch updates."
+      : "Nantty brings seller and creator discovery together with payment-partner protection for eligible orders in Nigeria.",
   siteUrl: readPublicSiteUrl(),
   launchCountry: "Nigeria",
   contactEmailRecipients,
@@ -72,6 +76,7 @@ export const siteConfig = {
     { label: "How it works", href: "/#how-it-works" },
     { label: "Escrow", href: "/#escrow" },
     { label: "Creators", href: "/#creators" },
+    { label: "Waitlist", href: "/waitlist" },
     { label: "About", href: "/about" },
   ] satisfies readonly SiteNavigationLink[],
 } as const;
