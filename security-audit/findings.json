@@ -1,0 +1,137 @@
+{
+  "assessmentDate": "2026-10-29",
+  "scope": "Repository review plus bounded tests against disposable local PostgreSQL; other dynamic application tests remain incomplete",
+  "productionReady": false,
+  "counts": {
+    "confirmedCritical": 0,
+    "confirmedHigh": 0,
+    "confirmedMedium": 3,
+    "confirmedLow": 1,
+    "informational": 2,
+    "suspected": 0,
+    "needsManualVerification": 3
+  },
+  "remediationCounts": {
+    "fixedAndVerified": 2,
+    "fixedButUnverified": 3,
+    "blocked": 0,
+    "falsePositiveOrNonVulnerability": 1
+  },
+  "findings": [
+    {
+      "id": "AUD-DB-001",
+      "title": "Local ledger runtime identity owns schema protection boundary",
+      "severity": "Medium",
+      "confidence": "High for local bootstrap; AWS role setup unknown",
+      "cwe": ["CWE-250", "CWE-266"],
+      "cvss": null,
+      "affectedFiles": [
+        "infra/local/postgres/create-databases.sh",
+        "services/go/modules/ledger/src/loaders/moneyModule.loader.go",
+        "services/go/deployables/goMoney/server.go",
+        "services/go/deployables/goMoney/ledgerMigration.go",
+        "services/go/modules/ledger/src/migrations/20261003142306_protect_append_only_ledger_history.up.sql",
+        "services/go/modules/ledger/src/migrations/20261029120000_restore_fk_owner_key_lock.up.sql",
+        ".github/scripts/runMigrationTask.sh",
+        "infra/aws/modules/platform/deploy.tf"
+      ],
+      "status": "Confirmed",
+      "remediationStatus": "Fixed but Unverified",
+      "remediationNote": "All six money schemas now migrate through a separate svc_migrator one-shot task before rollout; normal startup migration is disabled. Disposable PostGIS verified repeat migrations, ownership/grants, runtime DDL and role-escalation denials, atomic ledger posting, and narrowly scoped DELETE grants. AWS role provisioning, task/secret/IAM/KMS/network configuration, table-level SELECT/INSERT/UPDATE minimization, and staging execution remain unverified.",
+      "scopeQualifier": "Local bootstrap template only; deployed AWS grants require manual verification",
+      "priority": "P1"
+    },
+    {
+      "id": "AUD-ROUTE-001",
+      "title": "Space APIs are absent from gateway route map",
+      "severity": "Informational",
+      "confidence": "High",
+      "cwe": [],
+      "cvss": null,
+      "affectedFiles": [
+        "services/go/modules/live/src/modules/sessions/routes/sessions.routes.go",
+        "services/typescript/gateway/src/routes/upstream.routes.ts"
+      ],
+      "status": "Confirmed",
+      "remediationStatus": "Fixed but Unverified (informational integration gap; not a vulnerability)",
+      "remediationNote": "Gateway read routes use optional auth; all other Space routes/methods require auth. Route unit tests and TypeScript checks pass; live gateway-to-Go verification remains pending.",
+      "scopeQualifier": "Source integration gap; gateway runtime not available for live confirmation",
+      "priority": "P2 if Space launches"
+    },
+    {
+      "id": "AUD-NET-001",
+      "title": "Shared runtime security group allows HTTPS egress to any IPv4 host",
+      "severity": "Medium",
+      "confidence": "High for checked-in Terraform; deployed state not verified",
+      "cwe": ["CWE-668", "CWE-693"],
+      "cvss": null,
+      "affectedFiles": [
+        "infra/aws/modules/platform/service_network.tf",
+        "infra/aws/modules/platform/deploy.tf",
+        "infra/aws/modules/platform/variables.tf",
+        "infra/aws/modules/platform/payments_egress.tf"
+      ],
+      "status": "Confirmed",
+      "remediationStatus": "Fixed but Unverified",
+      "remediationNote": "Terraform now defaults public HTTPS egress to deny and allows only explicit validated IPv4 CIDRs. Static regression and Terraform validate pass; AWS plan/state and external provider connectivity remain unverified.",
+      "priority": "P1 before production"
+    },
+    {
+      "id": "AUD-PAY-001",
+      "title": "Provider amount mismatch bypassed payment-intent failure transition",
+      "severity": "Medium",
+      "confidence": "High; reproduced against disposable PostGIS with a local fake provider",
+      "cwe": ["CWE-755"],
+      "cvss": null,
+      "affectedFiles": [
+        "services/go/modules/payments/src/modules/gateway/services/paymentSettlement.service.go"
+      ],
+      "status": "Confirmed",
+      "remediationStatus": "Fixed and Verified",
+      "remediationNote": "A signed underpaid-charge webhook entered finance review while its pending intent remained pending. Invalid provider fees remain quarantined; amount mismatches now reach transactional state handling. The intent becomes failed, and a mismatched late charge on a cancelled intent remains cancelled and uncredited. Focused fake-provider PostGIS regressions passed. Apple/Google fixture tests and production-like provider integrations remain unverified.",
+      "scopeQualifier": "Locally verified with synthetic data and fake provider only",
+      "priority": "P1 financial workflow"
+    },
+    {
+      "id": "AUD-ADS-001",
+      "title": "Concurrent same-key ad-balance withdrawal retries could falsely fail",
+      "severity": "Low",
+      "confidence": "High; reproduced with 16 parallel synthetic HTTP requests against disposable PostGIS",
+      "cwe": ["CWE-362"],
+      "cvss": null,
+      "affectedFiles": [
+        "services/go/modules/ads/src/modules/adFunds/services/adBalanceWithdrawals.service.go",
+        "services/go/modules/ads/adsCreditAndBalance.integration_test.go"
+      ],
+      "status": "Confirmed",
+      "remediationStatus": "Fixed and Verified locally",
+      "remediationNote": "Withdrawal reservation now rechecks the user/idempotency key inside the account-locked transaction. A 16-request test passed normally and under Go race detection, with one withdrawal, one ledger debit, one fake payout and a consistent replay ID. Different-key concurrency, multi-instance deployment and real wallet/provider effects remain unverified.",
+      "scopeQualifier": "Single local process, synthetic PostGIS and fake downstream wallet adapter",
+      "priority": "P2 reliability/idempotency"
+    },
+    {
+      "id": "AUD-CONFIG-001",
+      "title": "Production admin allowlist is an unapplied operator prerequisite",
+      "severity": "Informational",
+      "confidence": "High",
+      "cwe": [],
+      "cvss": null,
+      "affectedFiles": [
+        "infra/aws/envs/prod/terraform.tfvars",
+        "infra/aws/modules/platform/main.tf",
+        "services/typescript/gateway/src/configs/gateway.config.ts"
+      ],
+      "status": "Confirmed",
+      "remediationStatus": "False Positive as a vulnerability; operator prerequisite remains",
+      "scopeQualifier": "Operational prerequisite; fail-closed behavior observed in source, not a vulnerability",
+      "priority": "P1 before production apply"
+    }
+  ],
+  "limitations": [
+    "No full backend stack was started; gateway tests used in-process fake upstreams, and payment tests used a disposable database plus fake provider.",
+    "Gitleaks selected-tree scan reviewed 42 candidates; apps, Go, and Git history remain unscanned.",
+    "Trivy policy cache emitted parse errors and is stale; results are not authoritative.",
+    "Apple/Google store-provider fixture tests fail signature validation and remain unresolved; no verifier was weakened.",
+    "No AWS state, public endpoint, real payment provider, or customer data was accessed."
+  ]
+}

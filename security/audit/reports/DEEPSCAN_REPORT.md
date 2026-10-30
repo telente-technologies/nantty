@@ -27,7 +27,7 @@ This report documents gaps, bugs, and security issues found across the Nantty Ty
 **Files:**
 - `services/typescript/gateway/src/configs/gateway.config.ts:68`
 - `services/typescript/gateway/src/app.ts:62`
-- `node_modules/.pnpm/@zudojs+http@1.5.0/.../httpTrustProxy.helper.js:79-101`
+- HTTP adapter package version 1.5.0, `httpTrustProxy.helper.js:79-101`
 
 The gateway defaults to hop-count proxy trust. The underlying adapter compiles `hops=1` into `(_address, index) => index < 1`, which returns `true` for **any** peer. `getClientIp()` then walks the `X-Forwarded-For` chain and returns the right-most forwarded entry as `remoteAddress`.
 
