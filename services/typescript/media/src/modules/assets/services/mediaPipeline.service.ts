@@ -16,7 +16,7 @@ import type { MediaAssetWithVariants } from "../models/mediaAsset.model.js";
 import { mediaAssetRepository } from "../repositories/mediaAsset.repository.js";
 import { derivativeBucketFor, uploadDerivatives } from "./derivativePublishing.service.js";
 import { mediaEvents } from "./mediaEvents.service.js";
-import { evaluateModeration } from "./moderationPolicy.service.js";
+import { evaluateModeration, uninspectableModerationOutcome } from "./moderationPolicy.service.js";
 import { derivativeKeyFor } from "../../../utils/objectKeys.util.js";
 
 const sniffBytes = 4096;
@@ -101,13 +101,25 @@ export async function runMediaPipeline(context: HandlerContext, mediaId: string,
     const inspected = await inspectOriginal(asset, inputPath);
     const scan = await context.scanner.scanFile(inputPath);
     if (scan.verdict === "infected") return await rejectAsset(context, asset, "MALWARE_DETECTED", scan.signature);
-    if (scan.verdict === "skipped" && !context.config.allowUnscannedUploads) return await rejectAsset(context, asset, "MALWARE_SCAN_UNAVAILABLE", "skipped");
+    const mediaNeedsContentScan = inspected.kind === "audio" || inspected.kind === "document";
+    if (scan.verdict === "skipped" && (!context.config.allowUnscannedUploads || mediaNeedsContentScan)) {
+      return await rejectAsset(context, asset, "MALWARE_SCAN_UNAVAILABLE", "skipped");
+    }
     const processed = await produceDerivatives(context, inspected.kind, inputPath, workDirectory, purpose, inspected.maximumDurationSeconds);
     let outcome = { decision: "allow" as "allow" | "hold" | "reject", score: null as number | null, category: null as string | null };
-    if (policy.moderate && !options.moderationApproved && (inspected.kind === "image" || inspected.kind === "video")) {
-      outcome = await evaluateModeration(context.moderation, context.config.moderation, { mediaId: asset.id, ownerId: asset.ownerId, purpose, kind: inspected.kind, frames: processed.moderationFrames });
+    let moderationDecision = "not_required";
+    if (options.moderationApproved) {
+      moderationDecision = "approved";
+    } else if (policy.moderate) {
+      if ((inspected.kind !== "image" && inspected.kind !== "video") || processed.moderationFrames.length === 0) {
+        outcome = uninspectableModerationOutcome(inspected.kind);
+        moderationDecision = "uninspectable";
+      } else {
+        outcome = await evaluateModeration(context.moderation, context.config.moderation, { mediaId: asset.id, ownerId: asset.ownerId, purpose, kind: inspected.kind, frames: processed.moderationFrames });
+        moderationDecision = outcome.decision;
+      }
     }
-    const persisted = { sniffedMimeType: inspected.sniffedMimeType, kind: inspected.kind, scanResult: scan.verdict, ...(outcome.score === null ? {} : { moderationScore: outcome.score }), moderationDecision: options.moderationApproved ? "approved" : outcome.decision };
+    const persisted = { sniffedMimeType: inspected.sniffedMimeType, kind: inspected.kind, scanResult: scan.verdict, ...(outcome.score === null ? {} : { moderationScore: outcome.score }), moderationDecision };
     if (outcome.decision === "reject") {
       await mediaAssetRepository.update(context.database.client, asset.id, persisted);
       return await rejectAsset(context, asset, "MODERATION_REJECTED");

@@ -15,7 +15,7 @@ When there's a space for an ad, advertisers compete in an auction. The winner de
 - how useful the ad is likely to be to you
 - the audience the advertiser chose, for example country, state, age range or interests
 
-There are limits on how often one person sees the same ad. Checkmark plans see fewer ads, and Blue Premium and Gold Business see none. See [How many ads you see on each plan](/help/ads-and-boosts/ads-by-plan).
+There are limits on how often one person sees the same ad. Platform-controlled ad load depends on active plan entitlements and configured settings; paid status does not remove every sponsored placement or other user content. See [How many ads you see on each plan](/help/ads-and-boosts/ads-by-plan).
 
 ## What can be used
 
@@ -44,5 +44,5 @@ Ads can appear in your feed, between clips, in stories, in the Mart and search, 
 
 ## Good to know
 
-- Blue Premium and Gold Business members see no ads. Other checkmark plans see fewer. See [How many ads you see on each plan](/help/ads-and-boosts/ads-by-plan).
+- Ad load is determined by the applicable plan entitlement and configured settings. See [How many ads you see on each plan](/help/ads-and-boosts/ads-by-plan).
 - Your privacy choices are explained in our Privacy Policy. See [Terms, privacy and cookies](/help/legal-and-data/terms-privacy-and-cookies).

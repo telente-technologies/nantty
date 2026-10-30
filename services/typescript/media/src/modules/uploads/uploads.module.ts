@@ -1,4 +1,4 @@
-import type { HttpRouter } from "@zudojs/http";
+import type { FastifyInstance } from "fastify";
 
 import type { HandlerContext } from "../../types/handlerContext.type.js";
 import type { RouteFactory } from "../../utils/route.util.js";
@@ -13,8 +13,8 @@ import { createGetChunkUploadUrlsHandler } from "./queries/getChunkUploadUrls/ge
 import { createGetUploadSessionHandler } from "./queries/getUploadSession/getUploadSession.handler.js";
 import { registerUploadsRoutes } from "./routes/uploads.routes.js";
 
-export function mountUploadsModule(router: HttpRouter, route: RouteFactory, context: HandlerContext): void {
-  registerUploadsRoutes(router, createUploadsController(route, {
+export function mountUploadsModule(app: FastifyInstance, route: RouteFactory, context: HandlerContext): void {
+  registerUploadsRoutes(app, createUploadsController(route, {
     createUploadSession: createCreateUploadSessionHandler(context),
     uploadChunk: createUploadChunkHandler(context),
     completeUploadSession: createCompleteUploadSessionHandler(context),

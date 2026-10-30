@@ -30,6 +30,14 @@ export function createDeletePostHandler(context: HandlerContext): Handler<Delete
       return;
     }
     const now = context.clock.now();
+    if (post.publicationState === "scheduled" || post.publicationState === "failed" || post.publicationState === "cancelled") {
+      const removed = await context.database.client.post.updateMany({
+        where: { id: postId, authorId: post.authorId, deletedAt: null, publicationState: post.publicationState },
+        data: { deletedAt: now, publicationState: "cancelled", scheduledAt: null, scheduledTaggedUserIds: [], publicationFailureReason: null, isPinned: false, pinnedAt: null },
+      });
+      if (removed.count > 0) await cleanUpMedia(context, post);
+      return;
+    }
     const wasPinned = post.isPinned;
     const deleted = await context.database.transaction(async (transaction) => {
       const claimed = await transaction.post.updateMany({ where: { id: postId, deletedAt: null }, data: { deletedAt: now, isPinned: false, pinnedAt: null } });

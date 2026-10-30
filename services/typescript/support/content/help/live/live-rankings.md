@@ -2,7 +2,7 @@
 title: Live rankings and the rank ring
 summary: A coloured ring and number on the host's avatar show their global streamer rank this week. Tap it to see their category rank too.
 tags: live ranking, rank ring, streamer rank, top streamer, leaderboard, global rank, category rank
-related: nanttypoints, supporters-leaderboard, gifts-and-coins-on-live, watch-a-live, live-faq
+related: nantty-points, supporters-leaderboard, gifts-and-coins-on-live, watch-a-live, live-faq
 ---
 
 There's no separate Rankings page on Nantty. Instead, a streamer's rank shows right on their avatar in the live header.
@@ -35,7 +35,7 @@ The category rank only counts points earned in lives of that category: Just chat
 
 ## Good to know
 
-- Rankings are for fun and discovery. Nantty Points are never money and can't be bought, sold, withdrawn or exchanged. See [Nantty Points](/help/live/nanttypoints).
+- Rankings are for fun and discovery. Nantty Points are never money and can't be bought, sold, withdrawn or exchanged. See [Nantty Points](/help/live/nantty-points).
 - Viewers have their own ranking on each live: the [Top supporters](/help/live/supporters-leaderboard) list.
 - Buying fake engagement or using several accounts to gift yourself breaks our [Community guidelines](/help/safety-and-reporting/community-guidelines) and can lead to points being removed and strikes.
 

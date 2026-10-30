@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 import { helpTopicOrigins, helpTopicStatuses } from "../../../enums/helpTopic.enum.js";
 import { badRequest } from "../../../errors/support.error.js";

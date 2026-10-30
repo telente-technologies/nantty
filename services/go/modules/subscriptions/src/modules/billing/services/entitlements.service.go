@@ -8,6 +8,7 @@ import (
 	"nantty/modules/subscriptions/src/generated/ent/subscription"
 	"nantty/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
 	"nantty/modules/subscriptions/src/loaders"
+	"nantty/modules/subscriptions/src/repositories"
 )
 
 type ProfileEntitlement struct {
@@ -37,6 +38,53 @@ type Entitlements struct {
 	SubscribedToCreator   bool                           `json:"subscribedToCreator"`
 	DashboardEntitlements []loaders.DashboardEntitlement `json:"dashboardEntitlements"`
 	AdLoadPercent         int                            `json:"adLoadPercent"`
+	CanSchedulePosts      bool                           `json:"canSchedulePosts"`
+}
+
+var schedulingSubscriptionStatuses = []subscription.Status{
+	subscription.StatusActive,
+	subscription.StatusPastDue,
+	subscription.StatusGrace,
+}
+
+// CanSchedulePostsForProfile resolves scheduling access for one profile.
+// Trial-only subscriptions do not satisfy the paid scheduling requirement.
+func (billing Billing) CanSchedulePostsForProfile(ctx context.Context, userId, profileId string) (bool, error) {
+	if profileId == "" {
+		finder, supported := billing.Container.Identity.(repositories.PersonalProfileFinder)
+		if !supported {
+			return false, nil
+		}
+		profile, found, err := finder.FindPersonalProfile(ctx, userId)
+		if err != nil || !found {
+			return false, err
+		}
+		profileId = profile.ProfileId
+	}
+	client := billing.Container.Client(billing.Container.Resources.Database)
+	rows, err := client.Subscription.Query().
+		Where(subscription.OwnerUserID(userId), subscription.StatusIn(schedulingSubscriptionStatuses...)).All(ctx)
+	if err != nil {
+		return false, err
+	}
+	for _, row := range rows {
+		definition := constants.Plans[row.PlanCode]
+		if row.ProfileID == profileId && (definition.Checkmark == "blue" || definition.Checkmark == "gold") {
+			return true, nil
+		}
+		if row.PlanCode != constants.PlanGoldCombined {
+			continue
+		}
+		covered, err := client.SubscriptionCoveredProfile.Query().
+			Where(subscriptioncoveredprofile.SubscriptionID(row.ID.String()), subscriptioncoveredprofile.ProfileID(profileId), subscriptioncoveredprofile.StatusIn(grantedCoverageStatuses...)).Exist(ctx)
+		if err != nil {
+			return false, err
+		}
+		if covered {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func (billing Billing) ReadEntitlements(ctx context.Context, userId string) (Entitlements, error) {

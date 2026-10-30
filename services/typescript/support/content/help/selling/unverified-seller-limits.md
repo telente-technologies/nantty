@@ -27,7 +27,7 @@ Finish business verification. See [Verify your store](/help/selling/verify-your-
 
 - The limit is set by Nantty and may change. The figure above is the current default.
 - Buyers see your store without a checkmark and with **Protected by Nantty Escrow** at checkout.
-- You still pay only the escrow fee and processing fee on each order.
+- Nantty's intended launch policy has no sales commission. Any actual provider charge is disclosed in the checkout quote before confirmation.
 
 ## If something goes wrong
 

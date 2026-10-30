@@ -9,11 +9,11 @@ import { buildPostViews } from "../../services/postView.service.js";
 import type { ListUserPostsQuery } from "./listUserPosts.query.js";
 
 export function createListUserPostsHandler(context: HandlerContext): Handler<ListUserPostsQuery, Page<PostView>> {
-  return async ({ viewerId, ownerId, cursor, limit, kind }) => {
+  return async ({ viewerId, ownerId, cursor, limit, kind, visibility = "public" }) => {
     await assertViewerMaySeeConnections(context, viewerId, ownerId);
     const db = context.database.client;
     const isFollower = viewerId !== undefined && (viewerId === ownerId || (await followRepository.find(db, viewerId, ownerId))?.state === "accepted");
-    const rows = await postRepository.pageByAuthorOrProfile(db, ownerId, kind === undefined ? ["post", "clip"] : [kind], limit, cursor, isFollower ? ["everyone", "followers"] : ["everyone"], context.clock.now());
+    const rows = await postRepository.pageByAuthorOrProfile(db, ownerId, kind === undefined ? ["post", "clip"] : [kind], limit, cursor, isFollower ? ["everyone", "followers"] : ["everyone"], context.clock.now(), visibility);
     const page = buildPageFromOverfetchedRows(rows, limit);
     return { data: await buildPostViews(context, viewerId, page.data), nextCursor: page.nextCursor };
   };

@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { MessageConsumerFactory } from "../interfaces/domainEventConsumer.interface.js";
 import { createApplyContentVisibilityHandler } from "../modules/contentEvents/commands/applyContentVisibility/applyContentVisibility.handler.js";

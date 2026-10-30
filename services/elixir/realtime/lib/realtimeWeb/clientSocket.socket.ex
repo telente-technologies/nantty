@@ -85,10 +85,20 @@ defmodule RealtimeWeb.ClientSocket do
 
   def handle_info({:realtime_event, _topic, payload}, state), do: push(payload, state)
 
-  def handle_info({:conversation_fanout, conversation_id, payload}, state) do
-    if MapSet.member?(state.topics, "conversation:#{conversation_id}"),
-      do: {:ok, state},
-      else: push(payload, state)
+  def handle_info(
+        {:conversation_fanout, conversation_id, payload},
+        %{principal: principal} = state
+      ) do
+    cond do
+      MapSet.member?(state.topics, "conversation:#{conversation_id}") ->
+        {:ok, state}
+
+      TopicAuthorizer.authorize_conversation_delivery(principal, conversation_id) == :ok ->
+        push(payload, state)
+
+      true ->
+        {:ok, state}
+    end
   end
 
   def handle_info({:disconnect, scope, reason}, %{principal: principal} = state)

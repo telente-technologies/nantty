@@ -1,7 +1,7 @@
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import { followRepository } from "../../../follows/repositories/follow.repository.js";
 import type { ListDigestPageQuery } from "./listDigestPage.query.js";
-import { shownToViewers } from "../../../../constants/moderation.constant.js";
+import { publishedPostToViewers } from "../../../../constants/moderation.constant.js";
 
 export interface DigestEntry {
   readonly userId: string;
@@ -59,7 +59,7 @@ async function weeklyDigests(context: HandlerContext, query: ListDigestPageQuery
   const data: DigestEntry[] = [];
   for (const group of groups) {
     const followed = await followRepository.allFollowedAccountIds(db, group.followerId, 100);
-    const posts = await db.post.findMany({ where: { authorId: { in: followed }, kind: { in: ["post", "clip"] }, audience: "everyone", visibility: "public", ...shownToViewers, createdAt: { gte: weekAgo } }, orderBy: [{ likeCount: "desc" }, { id: "desc" }], take: sampleSize });
+    const posts = await db.post.findMany({ where: { authorId: { in: followed }, kind: { in: ["post", "clip"] }, audience: "everyone", visibility: "public", ...publishedPostToViewers, createdAt: { gte: weekAgo } }, orderBy: [{ likeCount: "desc" }, { id: "desc" }], take: sampleSize });
     if (posts.length === 0) continue;
     const authors = await context.directory.findUserSummaries(posts.map((post) => post.authorId));
     const topPosts = posts.flatMap((post) => { const author = authors.get(post.authorId); return author === undefined ? [] : [{ postId: post.id, authorName: author.name, authorHandle: author.username, excerpt: post.text.slice(0, 120), likes: post.likeCount }]; });

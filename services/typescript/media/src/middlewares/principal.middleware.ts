@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 
-import type { HttpRouterContext } from "@zudojs/http";
+import type { HttpRouterContext } from "@nantty/fastify-platform";
 
 import { accountIdHeaderName, internalTokenHeaderName } from "../constants/media.constant.js";
 import { forbidden, unauthorized } from "../errors/media.error.js";

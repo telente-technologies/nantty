@@ -1,4 +1,4 @@
-import type { HttpRouterContext } from "@zudojs/http";
+import type { HttpRouterContext } from "@nantty/fastify-platform";
 
 import { defaultLocale, searchResultLimit } from "../../../constants/support.constant.js";
 import { canonicalHelpTopicSlugs } from "../../../constants/helpTopicSlugAliases.constant.js";

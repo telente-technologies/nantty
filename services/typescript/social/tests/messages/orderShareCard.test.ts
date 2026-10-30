@@ -34,3 +34,22 @@ describe("order share cards", () => {
     expect(seen[0]).toContain(`/api/v1/internal/share-cards/order/${orderId}?viewerId=${buyerId}`);
   });
 });
+
+describe("Space share cards", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("resolves a Space preview through the live service with viewer identity", async () => {
+    const seen: string[] = [];
+    vi.stubGlobal("fetch", async (url: URL) => {
+      seen.push(String(url));
+      return new Response(JSON.stringify({ availability: "available", title: "Design talk", subtitle: "Ayo · host", imageUrl: null, isLive: true, status: "LIVE", viewerCount: 8 }), { status: 200 });
+    });
+    const shareCards = createHttpShareCardResolver({ commerce: undefined, live: { baseUrl: "http://live.internal", internalToken: "t" } });
+    const context = { shareCards, database: { client: {} }, directory: { findUserSummaries: async () => new Map() } } as unknown as HandlerContext;
+    const reference = { kind: "space", id: orderId } as const;
+    expect(contentQuerySchema.parse(reference)).toEqual(reference);
+    const card = await buildSharedContentCard(context, buyerId, reference);
+    expect(card).toMatchObject({ availability: "available", title: "Design talk", isLive: true, viewerCount: 8, reference });
+    expect(seen[0]).toContain(`/api/v1/internal/share-cards/space/${orderId}?viewerId=${buyerId}`);
+  });
+});

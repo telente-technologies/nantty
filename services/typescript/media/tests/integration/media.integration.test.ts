@@ -5,7 +5,7 @@ import { loadMediaConfigFromEnvironment } from "../../src/configs/media.config.j
 
 describe.skipIf(process.env["RUN_INTEGRATION"] !== "1")("media service against Postgres and S3", () => {
   it("answers health and refuses anonymous uploads", async () => {
-    const app = createMediaApp({ ...loadMediaConfigFromEnvironment(), port: 0, jobsEnabled: false });
+    const app = await createMediaApp({ ...loadMediaConfigFromEnvironment(), port: 0, jobsEnabled: false });
     const port = await app.start();
     try {
       expect((await fetch(`http://127.0.0.1:${port}/healthz`)).status).toBe(200);

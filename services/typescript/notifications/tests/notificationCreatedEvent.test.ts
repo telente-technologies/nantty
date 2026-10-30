@@ -29,6 +29,11 @@ describe("notification response", () => {
     expect(toInAppPath("/orders/o-1")).toBe("/orders/o-1");
     expect(toInAppPath("https://nantty.com/orders/o-1")).toBeNull();
   });
+
+  it("preserves whitelisted deep-link identifiers while dropping unrelated payload data", () => {
+    const notification = { ...stored, data: { url: "/post/p1?comment=c1", postId: "p1", commentId: "c1", messageId: "m1", private: "secret" } };
+    expect(convertNotificationToResponse(notification, "https://nantty.com")).toMatchObject({ data: { postId: "p1", commentId: "c1", messageId: "m1" } });
+  });
 });
 
 describe("notification.created event", () => {

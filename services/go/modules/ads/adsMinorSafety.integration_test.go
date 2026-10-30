@@ -61,8 +61,8 @@ func TestMinorsGetContextualAgeSafeAdsOnly(t *testing.T) {
 	ages.adults[adult.id.String()] = true
 	ages.failed[lookupFails.id.String()] = true
 	start := h.clock.Now().Add(-time.Hour).Format(time.RFC3339)
-	alcoholAdId := h.approvedFundedAd(advertiser, staff, "alcohol", bundleWithCategory(start, "alcohol", "Premium lager"))
-	cryptoAdId := h.approvedFundedAd(advertiser, staff, "crypto", bundleWithCategory(start, "general", "Trade bitcoin today"))
+	alcoholAdId := h.approvedFundedAd(advertiser, staff, "alcohol-key", bundleWithCategory(start, "alcohol", "Premium lager"))
+	cryptoAdId := h.approvedFundedAd(advertiser, staff, "crypto-key", bundleWithCategory(start, "general", "Trade bitcoin today"))
 	if err := h.module.Container.Candidates.ReloadFromDatabase(ctx); err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func TestMinorsGetContextualAgeSafeAdsOnly(t *testing.T) {
 		t.Fatalf("adults still see adults-only categories: %v", served)
 	}
 
-	generalAdId := h.approvedFundedAd(advertiser, staff, "general", bundleWithCategory(start, "general", "Fresh fabrics"))
+	generalAdId := h.approvedFundedAd(advertiser, staff, "general-key", bundleWithCategory(start, "general", "Fresh fabrics"))
 	if err := h.module.Container.Candidates.ReloadFromDatabase(ctx); err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestAdvertisersCannotTargetUnderEighteenAndCategoriesAreValidated(t *testin
 	if status, _ := h.call("POST", path, &advertiser, "bad-category", bundleWithCategory(start, "fireworks", "Fresh fabrics")); status != http.StatusUnprocessableEntity && status != http.StatusBadRequest {
 		t.Fatalf("an unknown category must be refused, got %d", status)
 	}
-	created := h.expect("POST", path, &advertiser, "dating", bundleWithCategory(start, "dating", "Meet people"), http.StatusCreated)
+	created := h.expect("POST", path, &advertiser, "dating-key", bundleWithCategory(start, "dating", "Meet people"), http.StatusCreated)
 	campaignId := created["campaign"].(map[string]any)["id"].(string)
 	if created["campaign"].(map[string]any)["adCategory"] != "dating" {
 		t.Fatalf("the campaign category is returned: %v", created["campaign"])
@@ -122,7 +122,9 @@ func TestAdvertisersCannotTargetUnderEighteenAndCategoriesAreValidated(t *testin
 	}
 	general := h.expect("POST", path, &advertiser, "general-2", bundleWithCategory(start, "", "Fresh fabrics"), http.StatusCreated)
 	adId := general["ads"].([]any)[0].(map[string]any)["id"].(string)
-	h.expect("POST", "/api/v1/admin/ads/"+adId+"/approve", &staff, "", map[string]any{"adCategory": "casino"}, http.StatusUnprocessableEntity)
+	if status, _ := h.call("POST", "/api/v1/admin/ads/"+adId+"/approve", &staff, "", map[string]any{"adCategory": "casino"}); status != http.StatusBadRequest && status != http.StatusUnprocessableEntity {
+		t.Fatalf("an unknown review category must be refused, got %d", status)
+	}
 	approved := h.expect("POST", "/api/v1/admin/ads/"+adId+"/approve", &staff, "", map[string]any{"adCategory": "gambling"}, http.StatusOK)
 	if approved["adCategory"] != "gambling" || approved["ageRestricted"] != true {
 		t.Fatalf("the reviewer can mark an ad adults-only: %v", approved)

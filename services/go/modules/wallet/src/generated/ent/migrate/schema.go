@@ -223,6 +223,43 @@ var (
 			},
 		},
 	}
+	// CoinPurchaseChargebacksColumns holds the columns for the "coin_purchase_chargebacks" table.
+	CoinPurchaseChargebacksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "provider", Type: field.TypeString, Size: 40},
+		{Name: "provider_dispute_id", Type: field.TypeString, Size: 120},
+		{Name: "amount_minor", Type: field.TypeInt64},
+		{Name: "coins_clawed", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "purchase_id", Type: field.TypeUUID},
+	}
+	// CoinPurchaseChargebacksTable holds the schema information for the "coin_purchase_chargebacks" table.
+	CoinPurchaseChargebacksTable = &schema.Table{
+		Name:       "coin_purchase_chargebacks",
+		Columns:    CoinPurchaseChargebacksColumns,
+		PrimaryKey: []*schema.Column{CoinPurchaseChargebacksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "coin_purchase_chargebacks_coin_purchases_chargebacks",
+				Columns:    []*schema.Column{CoinPurchaseChargebacksColumns[7]},
+				RefColumns: []*schema.Column{CoinPurchasesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "coinpurchasechargeback_provider_provider_dispute_id",
+				Unique:  true,
+				Columns: []*schema.Column{CoinPurchaseChargebacksColumns[2], CoinPurchaseChargebacksColumns[3]},
+			},
+			{
+				Name:    "coinpurchasechargeback_purchase_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{CoinPurchaseChargebacksColumns[7], CoinPurchaseChargebacksColumns[1]},
+			},
+		},
+	}
 	// CoinTransfersColumns holds the columns for the "coin_transfers" table.
 	CoinTransfersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -551,6 +588,7 @@ var (
 		CoinConversionsTable,
 		CoinPackagesTable,
 		CoinPurchasesTable,
+		CoinPurchaseChargebacksTable,
 		CoinTransfersTable,
 		IdempotentRequestsTable,
 		MonetisationHoldsTable,
@@ -586,6 +624,11 @@ func init() {
 	CoinPurchasesTable.Annotation = &entsql.Annotation{}
 	CoinPurchasesTable.Annotation.Checks = map[string]string{
 		"coin_purchases_amounts_valid": "coins > 0 AND amount_minor >= 0 AND store_fee_minor >= 0 AND clawback_shortfall_coins >= 0",
+	}
+	CoinPurchaseChargebacksTable.ForeignKeys[0].RefTable = CoinPurchasesTable
+	CoinPurchaseChargebacksTable.Annotation = &entsql.Annotation{}
+	CoinPurchaseChargebacksTable.Annotation.Checks = map[string]string{
+		"coin_purchase_chargebacks_amounts_valid": "amount_minor > 0 AND coins_clawed >= 0",
 	}
 	CoinTransfersTable.Annotation = &entsql.Annotation{}
 	CoinTransfersTable.Annotation.Checks = map[string]string{

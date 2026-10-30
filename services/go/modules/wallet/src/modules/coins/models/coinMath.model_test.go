@@ -62,6 +62,44 @@ func TestClawbackRecoversWhatIsLeftAndCountsTheShortfall(t *testing.T) {
 	}
 }
 
+func TestProportionalCoinChargebackUsesCumulativeFloorWithoutOverClawing(t *testing.T) {
+	cases := []struct {
+		amount, coins, price, want int64
+	}{
+		{1, 3, 2, 1},
+		{1, 100, 300, 0},
+		{150, 150, 300, 75},
+		{299, 150, 300, 149},
+		{300, 150, 300, 150},
+		{math.MaxInt64 - 1, math.MaxInt64, math.MaxInt64, math.MaxInt64 - 1},
+	}
+	for _, testCase := range cases {
+		got, err := ProportionalCoinChargeback(testCase.amount, testCase.coins, testCase.price)
+		if err != nil || got != testCase.want {
+			t.Errorf("proportionalCoinAmount(%d, %d, %d) = %d, %v; want %d", testCase.amount, testCase.coins, testCase.price, got, err, testCase.want)
+		}
+	}
+	for _, testCase := range [][3]int64{{-1, 10, 10}, {1, 0, 10}, {1, 10, 0}, {11, 10, 10}} {
+		if _, err := ProportionalCoinChargeback(testCase[0], testCase[1], testCase[2]); err == nil {
+			t.Errorf("invalid ratio %v was accepted", testCase)
+		}
+	}
+}
+
+func TestPartialChargebackCoinTargetsAccumulateRemainders(t *testing.T) {
+	coinTargets := []int64{}
+	for _, cumulativeAmount := range []int64{1, 2, 3} {
+		target, err := ProportionalCoinChargeback(cumulativeAmount, 2, 3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		coinTargets = append(coinTargets, target)
+	}
+	if coinTargets[0] != 0 || coinTargets[1] != 1 || coinTargets[2] != 2 {
+		t.Fatalf("cumulative targets lost fractional progress: %v", coinTargets)
+	}
+}
+
 func TestWebPacksGiveMoreCoinsPerNairaWhileNettingTheSamePerCoin(t *testing.T) {
 	cases := []struct {
 		channelFeeBps int64

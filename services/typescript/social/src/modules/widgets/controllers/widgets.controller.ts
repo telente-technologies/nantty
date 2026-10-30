@@ -1,4 +1,4 @@
-import type { HttpRouterContext } from "@zudojs/http";
+import type { HttpRouterContext } from "@nantty/fastify-platform";
 
 import type { Handler } from "../../../types/handlerContext.type.js";
 import type { RouteFactory } from "../../../utils/route.util.js";

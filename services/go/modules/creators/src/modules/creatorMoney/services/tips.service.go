@@ -59,6 +59,12 @@ type TipReceipt struct {
 }
 
 func (money CreatorMoney) resolveTipCreator(ctx context.Context, request TipRequest) (string, error) {
+	if request.TargetType == "profile" {
+		if _, err := uuid.Parse(request.TargetId); err != nil {
+			return "", ErrTipTargetNotFound
+		}
+		return request.TargetId, nil
+	}
 	directory := money.Container.Directory
 	if request.TargetType == "live" {
 		live, found, err := directory.FindLive(ctx, request.TargetId)

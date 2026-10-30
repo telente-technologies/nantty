@@ -44,7 +44,10 @@ func (gateway *PaymentGateway) refundLateChargeOnClosedIntent(ctx context.Contex
 	if err != nil {
 		return unchanged, convertProviderError(err)
 	}
-	if verification.Outcome != interfaces.OutcomeSucceeded || verification.ProviderChargeId != chargeId || verification.AmountMinor <= 0 {
+	if verification.Outcome != interfaces.OutcomeSucceeded || !lateChargeMatchesIntent(intent, verification, chargeId) {
+		if verification.Outcome == interfaces.OutcomeSucceeded {
+			return unchanged, ErrPaymentAmountMismatch
+		}
 		return unchanged, nil
 	}
 	verification.Reference = intent.Reference
@@ -76,8 +79,11 @@ func (gateway *PaymentGateway) recordLateChargeInTransaction(ctx context.Context
 	if err != nil {
 		return nil, err
 	}
-	if isSettleable(intent.Status) || intent.ProviderTransactionID == verification.ProviderChargeId || verification.AmountMinor <= 0 {
+	if isSettleable(intent.Status) || intent.ProviderTransactionID == verification.ProviderChargeId {
 		return nil, nil
+	}
+	if !lateChargeMatchesIntent(intent, verification, verification.ProviderChargeId) {
+		return nil, ErrPaymentAmountMismatch
 	}
 	recorded, err := client.PaymentIntent.Query().Where(paymentintent.Provider(intent.Provider), paymentintent.ProviderTransactionID(verification.ProviderChargeId)).Exist(ctx)
 	if err != nil || recorded {
@@ -90,7 +96,7 @@ func (gateway *PaymentGateway) recordLateChargeInTransaction(ctx context.Context
 		SetSubjectID(intent.SubjectID).SetProvider(intent.Provider).SetAmountMinor(verification.AmountMinor).SetCurrency(verification.Currency).
 		SetConnectedAccountID(intent.ConnectedAccountID).SetBeneficiaryUserID(intent.BeneficiaryUserID).
 		SetStatus(paymentintent.StatusSucceeded).SetPaidAt(now).SetProviderSettledAt(now).SetProviderTransactionID(verification.ProviderChargeId).
-		SetProviderFeeMinor(max(verification.ProviderFeeMinor, 0)).SetFailureReason(duplicatePaymentReason).SetCustomerEmail(verification.CustomerEmail).
+		SetProviderFeeMinor(verification.ProviderFeeMinor).SetFailureReason(duplicatePaymentReason).SetCustomerEmail(verification.CustomerEmail).
 		SetMetadata(metadata).SetCreatedAt(now).Save(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("record late charge on %s: %w", intent.Reference, err)
@@ -100,6 +106,12 @@ func (gateway *PaymentGateway) recordLateChargeInTransaction(ctx context.Context
 	}
 	refund, err := gateway.refundDuplicatePaymentInTransaction(ctx, transaction, duplicate)
 	return &refund, err
+}
+
+func lateChargeMatchesIntent(intent *ent.PaymentIntent, verification interfaces.ChargeVerification, chargeId string) bool {
+	return intent != nil && chargeId != "" && verification.ProviderChargeId == chargeId &&
+		verification.AmountMinor == intent.AmountMinor && verification.Currency == intent.Currency &&
+		validProviderFeeForIntent(intent, verification.ProviderFeeMinor, verification.AmountMinor)
 }
 
 func (gateway *PaymentGateway) alertFinanceOfDuplicateSettlement(ctx context.Context, transaction *sql.Tx, duplicate *ent.PaymentIntent) error {

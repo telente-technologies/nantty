@@ -255,6 +255,13 @@ describe("S3 social write limits", () => {
 });
 
 describe("M6 CORS answers are rate limited", () => {
+  it("enforces the global limit under a bounded concurrent request burst", async () => {
+    const base = await startGateway({ rateLimitMaxPerMinute: 5 });
+    const statuses = await Promise.all(Array.from({ length: 20 }, () => fetch(`${base}/api/v1/feeds/popular`).then((response) => response.status)));
+    expect(statuses.filter((status) => status === 200)).toHaveLength(5);
+    expect(statuses.filter((status) => status === 429)).toHaveLength(15);
+  });
+
   it("counts preflights and rejected origins once each against the global limit", async () => {
     const base = await startGateway({ corsOrigins: ["https://app.nantty.test"], rateLimitMaxPerMinute: 3 });
     const preflight = { method: "OPTIONS", headers: { origin: "https://app.nantty.test", "access-control-request-method": "POST" } };

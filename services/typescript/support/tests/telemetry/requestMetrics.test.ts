@@ -1,6 +1,6 @@
 import { metrics } from "@opentelemetry/api";
 import { MeterProvider, MetricReader, type HistogramMetricData } from "@opentelemetry/sdk-metrics";
-import { createRequestContext } from "@zudojs/http";
+import { createRequestContext } from "@nantty/fastify-platform";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { buildSupportRouter, type RouteDependencies } from "../../src/routes/index.js";

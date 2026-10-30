@@ -1,4 +1,4 @@
-import { createRequestContext } from "@zudojs/http";
+import { createRequestContext } from "@nantty/fastify-platform";
 import { describe, expect, it, vi } from "vitest";
 
 import { RabbitMqConnection } from "../../src/integrations/rabbitMqConnection.integration.js";

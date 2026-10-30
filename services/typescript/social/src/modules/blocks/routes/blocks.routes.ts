@@ -1,4 +1,4 @@
-import type { HttpRouter } from "@zudojs/http";
+import type { HttpRouter } from "@nantty/fastify-platform";
 
 import type { createBlocksController } from "../controllers/blocks.controller.js";
 

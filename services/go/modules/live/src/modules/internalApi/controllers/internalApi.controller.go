@@ -11,6 +11,7 @@ import (
 	getliveadeligibility "nantty/modules/live/src/modules/internalApi/queries/getLiveAdEligibility"
 	getlivesharecard "nantty/modules/live/src/modules/internalApi/queries/getLiveShareCard"
 	getmoderationtargetpreview "nantty/modules/live/src/modules/internalApi/queries/getModerationTargetPreview"
+	"nantty/modules/live/src/services"
 	"nantty/modules/live/src/types"
 	"nantty/modules/live/src/utils"
 	"nantty/platform/httpserver"
@@ -32,6 +33,21 @@ func (controller InternalApiController) GetShareCard(writer http.ResponseWriter,
 	}
 	viewerId, _ := uuid.Parse(request.URL.Query().Get("viewerId"))
 	card, err := (getlivesharecard.Handler{Container: controller.Container}).Execute(request.Context(), getlivesharecard.Query{LiveId: liveId, ViewerId: viewerId})
+	if err != nil {
+		controller.responder().Error(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, card)
+}
+
+func (controller InternalApiController) GetSpaceShareCard(writer http.ResponseWriter, request *http.Request) {
+	spaceID, err := utils.PathIdentifier(request, "id")
+	if err != nil {
+		httpserver.WriteJsonResponse(writer, http.StatusOK, types.ShareCardView{Availability: "unavailable"})
+		return
+	}
+	viewerID, _ := uuid.Parse(request.URL.Query().Get("viewerId"))
+	card, err := services.NewLiveService(controller.Container).BuildSpaceShareCard(request.Context(), spaceID, viewerID)
 	if err != nil {
 		controller.responder().Error(writer, request, err)
 		return
@@ -81,12 +97,19 @@ func (controller InternalApiController) ApplyPresence(writer http.ResponseWriter
 }
 
 func (controller InternalApiController) GetModerationTarget(writer http.ResponseWriter, request *http.Request) {
-	liveId, err := utils.PathIdentifier(request, "id")
-	if err != nil || request.PathValue("type") != "live" {
+	targetID, err := utils.PathIdentifier(request, "id")
+	targetType := request.PathValue("type")
+	if err != nil || targetType != "live" && targetType != "space" {
 		controller.responder().Error(writer, request, httpserver.ErrNotFound)
 		return
 	}
-	preview, err := (getmoderationtargetpreview.Handler{Container: controller.Container}).Execute(request.Context(), getmoderationtargetpreview.Query{LiveId: liveId})
+	query := getmoderationtargetpreview.Query{}
+	if targetType == "live" {
+		query.LiveId = targetID
+	} else {
+		query.SpaceId = targetID
+	}
+	preview, err := (getmoderationtargetpreview.Handler{Container: controller.Container}).Execute(request.Context(), query)
 	if err != nil {
 		controller.responder().Error(writer, request, err)
 		return

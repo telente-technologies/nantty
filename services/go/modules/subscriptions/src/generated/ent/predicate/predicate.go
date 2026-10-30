@@ -24,6 +24,9 @@ type OutboxEvent func(*sql.Selector)
 // PlanPrice is the predicate function for planprice builders.
 type PlanPrice func(*sql.Selector)
 
+// PlanPriceVersion is the predicate function for planpriceversion builders.
+type PlanPriceVersion func(*sql.Selector)
+
 // ProviderPlan is the predicate function for providerplan builders.
 type ProviderPlan func(*sql.Selector)
 

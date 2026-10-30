@@ -26,6 +26,10 @@ var (
 		{Name: "ends_at", Type: field.TypeTime, Nullable: true},
 		{Name: "end_reason", Type: field.TypeEnum, Nullable: true, Enums: []string{"timer", "hostEnded", "hostEndedLive", "forfeit"}},
 		{Name: "settled_at", Type: field.TypeTime, Nullable: true},
+		{Name: "settlement_attempts", Type: field.TypeInt, Default: 0},
+		{Name: "settlement_lease_until", Type: field.TypeTime, Nullable: true},
+		{Name: "settlement_next_attempt_at", Type: field.TypeTime, Nullable: true},
+		{Name: "settlement_lease_token", Type: field.TypeString, Nullable: true},
 		{Name: "winner_user_ids", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "is_tie", Type: field.TypeBool, Default: false},
 		{Name: "settlement", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
@@ -53,6 +57,11 @@ var (
 				Name:    "battle_state_ends_at",
 				Unique:  false,
 				Columns: []*schema.Column{BattlesColumns[4], BattlesColumns[12]},
+			},
+			{
+				Name:    "battle_state_settlement_next_attempt_at_settlement_lease_until",
+				Unique:  false,
+				Columns: []*schema.Column{BattlesColumns[4], BattlesColumns[17], BattlesColumns[16]},
 			},
 			{
 				Name:    "battle_state_starts_at",

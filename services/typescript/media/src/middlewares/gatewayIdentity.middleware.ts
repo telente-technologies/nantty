@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-import { createResponseContext, type HttpMiddleware, type HttpRequestContext } from "@zudojs/http";
+import { createResponseContext, type HttpMiddleware, type HttpRequestContext } from "@nantty/fastify-platform";
 
 export const identitySignatureHeaderName = "x-nantty-identity-signature";
 const signedIdentityHeaderNames = ["x-nantty-account-id", "x-nantty-session-id", "x-nantty-age-bracket", "x-nantty-viewer"] as const;

@@ -47,6 +47,23 @@ describe("live routes", () => {
     expect(route?.upstream).toBe("live");
     expect(route?.authentication).toBe("required");
   });
+
+  it("routes Space reads optionally and requires authentication for every non-read route", () => {
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/spaces")).toMatchObject({ upstream: "live", authentication: "optional" });
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/spaces/space-123")).toMatchObject({ upstream: "live", authentication: "optional" });
+
+    const mutationCases: ReadonlyArray<readonly [string, string]> = [
+      ["POST", "/api/v1/spaces"],
+      ["POST", "/api/v1/spaces/space-123/start"],
+      ["POST", "/api/v1/spaces/space-123/join"],
+      ["POST", "/api/v1/spaces/space-123/gifts"],
+      ["POST", "/api/v1/spaces/space-123/speaker-requests"],
+    ];
+    for (const [method, path] of mutationCases) {
+      expect(resolveUpstreamRouteForRequest(method, path)).toMatchObject({ upstream: "live", authentication: "required" });
+    }
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/spaces/space-123/start")?.authentication).toBe("required");
+  });
 });
 
 describe("money routes", () => {

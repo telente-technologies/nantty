@@ -44,7 +44,6 @@ SAFETY_DOMAIN_EVENT_TYPES = frozenset(
         "account.registered",
     }
 )
-UNHASHED_VALUE_FLOW_EVENT_TYPES = frozenset({"gift.sent"})
 HASHED_PAYLOAD_USER_FIELDS = ("authorId", "creatorId", "targetAuthorId", "hostCreatorId")
 DOMAIN_ONLY_PAYLOAD_FIELDS = {"comment_id"}
 
@@ -102,15 +101,20 @@ def translate_to_intelligence_event(
     payload = event.payload.model_dump(
         by_alias=True, mode="json", exclude_none=True, exclude=DOMAIN_ONLY_PAYLOAD_FIELDS
     )
-    keep_raw = event.event_type in UNHASHED_VALUE_FLOW_EVENT_TYPES
+    if event.event_type == "gift.sent":
+        # Value-flow scoring needs only a stable pseudonymous counterparty and amount.
+        payload = {
+            "creatorId": hasher.hash_user_id(event.payload.creator_id),
+            "coinAmount": event.payload.coin_amount,
+        }
     envelope: dict[str, Any] = {
         "eventId": event.event_id,
         "eventType": intelligence_type,
         "occurredAt": event.occurred_at.isoformat(),
-        "actorId": event.actor_id if keep_raw else hasher.hash_user_id(event.actor_id),
+        "actorId": hasher.hash_user_id(event.actor_id),
         "producer": "domain_events",
-        "payload": payload if keep_raw else pseudonymize_payload(payload, hasher),
+        "payload": payload if event.event_type == "gift.sent" else pseudonymize_payload(payload, hasher),
     }
-    if event.country:
+    if event.country and event.event_type != "gift.sent":
         envelope["country"] = event.country
     return envelope

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var ContentTargetTypes = []string{"post", "comment", "clip", "live", "product", "store", "sound"}
+var ContentTargetTypes = []string{"post", "comment", "clip", "live", "space", "product", "store", "sound"}
 
 var contentReasons = []string{"child_safety", "spam", "scam", "harassment", "hate", "nudity", "violence", "counterfeit", "impersonation", "misinformation", "self_harm", "other"}
 

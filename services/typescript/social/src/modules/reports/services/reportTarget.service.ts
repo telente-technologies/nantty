@@ -1,5 +1,6 @@
 import { notFound, unprocessable } from "../../../errors/social.error.js";
 import type { Db } from "../../../types/database.type.js";
+import { publishedPostToViewers } from "../../../constants/moderation.constant.js";
 import type { ReportTargetType } from "./reportReasons.service.js";
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -7,9 +8,9 @@ const missing = () => notFound("TARGET_NOT_FOUND", "We couldn't find what you're
 
 async function findLocalOwner(db: Db, targetType: ReportTargetType, targetId: string): Promise<string | null | undefined> {
   if (targetType === "user") return targetId;
-  if (!uuidPattern.test(targetId)) return targetType === "post" || targetType === "clip" || targetType === "comment" || targetType === "sound" ? null : undefined;
+  if (!uuidPattern.test(targetId)) return targetType === "post" || targetType === "clip" || targetType === "comment" || targetType === "sound" || targetType === "space" ? null : undefined;
   if (targetType === "post" || targetType === "clip") {
-    const post = await db.post.findFirst({ where: { id: targetId, deletedAt: null, moderationVisibility: { not: "removed" } }, select: { authorId: true } });
+    const post = await db.post.findFirst({ where: { id: targetId, ...publishedPostToViewers, moderationVisibility: { not: "removed" } }, select: { authorId: true } });
     return post?.authorId ?? null;
   }
   if (targetType === "comment") return (await db.comment.findFirst({ where: { id: targetId, deletedAt: null }, select: { authorId: true } }))?.authorId ?? null;

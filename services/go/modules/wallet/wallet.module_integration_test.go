@@ -21,6 +21,7 @@ import (
 	"nantty/modules/payments/src/interfaces"
 	"nantty/modules/wallet/src"
 	"nantty/modules/wallet/src/configs"
+	walletmigrations "nantty/modules/wallet/src/migrations"
 )
 
 type fakeStoreVerifier struct {
@@ -49,8 +50,9 @@ type walletHarness struct {
 func startWalletHarness(t *testing.T, requireReview bool, adjustments ...func(*configs.WalletSettings)) *walletHarness {
 	t.Helper()
 	money := paymentstesting.StartMoneyHarnessWithPayments(t, map[string]interfaces.StoreReceiptVerifier{"apple_iap": fakeStoreVerifier{store: "apple_iap"}})
+	walletSchema := moneytesting.CreateFreshSchemaWithMigrations(t, money.Database, "wallet", walletmigrations.Files)
 	settings := configs.WalletSettings{
-		Money:                        moneytesting.MoneyModuleSettingsForTests("wallet", moneytesting.CreateEmptySchema(t, money.Database, "wallet"), money.LedgerSchema),
+		Money:                        moneytesting.MoneyModuleSettingsForTests("wallet", walletSchema, money.LedgerSchema),
 		CoinTransferFeeBps:           2500,
 		CoinCashValueMinorByCurrency: configs.ParseCurrencyAmounts("NGN:1000,USD:1"),
 		MinimumPayoutMinorByCurrency: configs.ParseCurrencyAmounts("NGN:1000,USD:1000"),

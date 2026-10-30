@@ -36,4 +36,5 @@ export interface CreatePostCommand {
   readonly taggedUserIds?: readonly string[] | undefined;
   readonly sensitiveLabels?: readonly string[] | undefined;
   readonly quotedPostId?: string | null | undefined;
+  readonly scheduledAt?: string | undefined;
 }

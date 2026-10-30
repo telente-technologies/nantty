@@ -102,6 +102,8 @@ export interface PostView {
   readonly author: UserSummary;
   readonly postedAs: PostedAsView | null;
   readonly createdAt: string;
+  readonly publicationState?: "published" | "scheduled" | "cancelled" | "failed";
+  readonly scheduledAt?: string | null;
   readonly text: string;
   readonly media: readonly MediaView[];
   readonly likes: number;

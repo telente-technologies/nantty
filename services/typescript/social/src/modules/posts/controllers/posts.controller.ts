@@ -66,7 +66,7 @@ export function createPostsController(route: RouteFactory, handlers: PostsHandle
     recordImpression: route({ authentication: "optional", params: postIdParamsSchema }, ({ principal, params }) => handlers.recordPostImpression({ viewerId: principal?.accountId, postId: params.postId })),
     recordProfileVisit: route({ authentication: "optional", params: postIdParamsSchema }, ({ principal, params }) => handlers.recordProfileVisitFromPost({ viewerId: principal?.accountId, postId: params.postId })),
     analytics: route({ authentication: "required", params: postIdParamsSchema }, ({ principal, params }) => handlers.getPostAnalytics({ viewerId: principal.accountId, postId: params.postId })),
-    createPost: route({ authentication: "required", body: createPostBodySchema, successStatus: 201 }, ({ principal, body }) =>
+    createPost: route({ authentication: "required", body: createPostBodySchema, successStatus: 201, idempotent: true }, ({ principal, body }) =>
       handlers.createPost({
         authorId: principal.accountId,
         asProfileId: body.asProfileId,
@@ -89,6 +89,7 @@ export function createPostsController(route: RouteFactory, handlers: PostsHandle
         sensitiveLabels: body.sensitiveLabels,
         taggedUserIds: body.taggedUserIds,
         quotedPostId: body.quotedPostId,
+        scheduledAt: body.scheduledAt,
       })),
     getPost: route({ authentication: "optional", params: postIdParamsSchema }, ({ principal, params }) => handlers.getPost({ viewerId: principal?.accountId, postId: params.postId })),
     deletePost: route({ authentication: "required", params: postIdParamsSchema, successStatus: 204 }, ({ principal, params }) => handlers.deletePost({ actorId: principal.accountId, postId: params.postId })),
@@ -100,7 +101,7 @@ export function createPostsController(route: RouteFactory, handlers: PostsHandle
     resharePost: route({ authentication: "required", params: postIdParamsSchema, body: repostBodySchema, successStatus: 201 }, ({ principal, params, body }) => handlers.resharePost({ actorId: principal.accountId, postId: params.postId, text: body?.text ?? "" })),
     undoRepost: route({ authentication: "required", params: postIdParamsSchema, successStatus: 204 }, ({ principal, params }) => handlers.undoRepost({ actorId: principal.accountId, postId: params.postId })),
     listUserPosts: route({ authentication: "optional", params: userIdParamsSchema, query: userPostsQuerySchema }, ({ principal, params, query }) =>
-      handlers.listUserPosts({ viewerId: principal?.accountId, ownerId: resolveAccountParam(params.userId, principal?.accountId), cursor: query.cursor, limit: clampPageSize(query.limit), kind: query.kind })),
+      handlers.listUserPosts({ viewerId: principal?.accountId, ownerId: resolveAccountParam(params.userId, principal?.accountId), cursor: query.cursor, limit: clampPageSize(query.limit), kind: query.kind, visibility: query.visibility ?? "public" })),
     publishStory: route({ authentication: "required", body: publishStoryBodySchema, successStatus: 201 }, ({ principal, body }) => handlers.publishStory({ authorId: principal.accountId, mediaId: body.mediaId, soundId: body.soundId, look: body.look })),
     markStorySeen: route({ authentication: "required", params: storyIdParamsSchema }, ({ principal, params }) => handlers.markStorySeen({ viewerId: principal.accountId, storyId: params.storyId })),
     listStoryTray: route({ authentication: "required" }, ({ principal }) => handlers.listStoryTray({ viewerId: principal.accountId })),

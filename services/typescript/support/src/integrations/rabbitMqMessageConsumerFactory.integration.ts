@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { MessageConsumerFactory, QueueConsumer } from "../interfaces/domainEventConsumer.interface.js";
 import { RabbitMqConnection } from "./rabbitMqConnection.integration.js";

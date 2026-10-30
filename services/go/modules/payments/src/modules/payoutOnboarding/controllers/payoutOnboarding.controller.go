@@ -37,16 +37,14 @@ func (controller PayoutOnboardingController) respondWithState(writer http.Respon
 }
 
 func (controller PayoutOnboardingController) GetState(writer http.ResponseWriter, request *http.Request) {
+	if request.URL.Query().Get("refresh") == "true" {
+		httpserver.WriteJsonResponse(writer, http.StatusMethodNotAllowed, httpserver.NewApiError(http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Payout status refresh must use a mutation request."))
+		return
+	}
 	principal, err := ledgerutils.RequirePrincipal(request)
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
-	}
-	if request.URL.Query().Get("refresh") == "true" {
-		if _, err := controller.Application.Gateway.RefreshMyPayoutAccount(request.Context(), principal.UserId); err != nil && err != services.ErrConnectedAccountMissing {
-			controller.fail(writer, request, err)
-			return
-		}
 	}
 	controller.respondWithState(writer, request, principal.UserId)
 }

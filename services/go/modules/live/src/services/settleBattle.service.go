@@ -2,21 +2,32 @@ package services
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"nantty/modules/live/src/events"
 	"nantty/modules/live/src/interfaces"
 	"nantty/modules/live/src/types"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
 	"nantty/modules/live/src/generated/ent"
 	battlerecord "nantty/modules/live/src/generated/ent/battle"
+	"nantty/modules/live/src/generated/ent/predicate"
 )
 
 const settlementCallTimeout = 10 * time.Second
 
+const (
+	maxBattleSettlementAttempts = 8
+	battleSettlementLease       = 30 * time.Second
+	battleSettlementRetryBase   = 250 * time.Millisecond
+	battleSettlementRetryMax    = 30 * time.Second
+)
+
 func (service *LiveService) SettleEndedBattlesForLive(ctx context.Context, liveId uuid.UUID) error {
-	identifiers, err := service.Client.Battle.Query().Where(battlerecord.LiveID(liveId), battlerecord.StateEQ(battlerecord.StateEnded)).IDs(ctx)
+	identifiers, err := service.Client.Battle.Query().Where(battlerecord.LiveID(liveId), dueBattleSettlement(service.Now())).Order(ent.Asc(battlerecord.FieldEndsAt)).Limit(20).IDs(ctx)
 	if err != nil {
 		return err
 	}
@@ -24,7 +35,7 @@ func (service *LiveService) SettleEndedBattlesForLive(ctx context.Context, liveI
 }
 
 func (service *LiveService) SettleDueBattles(ctx context.Context) error {
-	identifiers, err := service.Client.Battle.Query().Where(battlerecord.StateEQ(battlerecord.StateEnded)).Order(ent.Asc(battlerecord.FieldEndsAt)).Limit(20).IDs(ctx)
+	identifiers, err := service.Client.Battle.Query().Where(dueBattleSettlement(service.Now())).Order(ent.Asc(battlerecord.FieldEndsAt)).Limit(20).IDs(ctx)
 	if err != nil {
 		return err
 	}
@@ -42,28 +53,121 @@ func (service *LiveService) settleEach(ctx context.Context, identifiers []uuid.U
 }
 
 func (service *LiveService) SettleBattle(ctx context.Context, battleId uuid.UUID) error {
-	return service.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		battle, err := service.lockBattle(ctx, tx, battleId)
-		if err != nil || battle.State != battlerecord.StateEnded {
+	claim, err := service.claimBattleSettlement(ctx, battleId)
+	if err != nil || claim == nil {
+		return err
+	}
+
+	callContext, cancel := context.WithTimeout(ctx, settlementCallTimeout)
+	settlement, err := service.Money.SettleBattle(callContext, claim.request)
+	cancel()
+	if err != nil {
+		if releaseErr := service.retryBattleSettlement(ctx, battleId, claim.token, claim.attempt); releaseErr != nil {
+			return errors.Join(fmt.Errorf("settle battle %s: %w", battleId, err), fmt.Errorf("record settlement retry: %w", releaseErr))
+		}
+		return fmt.Errorf("settle battle %s: %w", battleId, err)
+	}
+
+	return service.commitBattleSettlement(ctx, battleId, claim, settlement)
+}
+
+type battleSettlementClaim struct {
+	request interfaces.SettleBattleRequest
+	rows    []*ent.BattleParticipant
+	token   string
+	attempt int
+}
+
+func dueBattleSettlement(now time.Time) predicate.Battle {
+	return battlerecord.And(
+		battlerecord.StateEQ(battlerecord.StateEnded),
+		battlerecord.SettlementAttemptsLT(maxBattleSettlementAttempts),
+		battlerecord.Or(battlerecord.SettlementLeaseUntilIsNil(), battlerecord.SettlementLeaseUntilLTE(now)),
+		battlerecord.Or(battlerecord.SettlementNextAttemptAtIsNil(), battlerecord.SettlementNextAttemptAtLTE(now)),
+	)
+}
+
+// Claim in a short transaction, call the idempotent ledger with no database
+// transaction open, and finalize in a second short transaction. An expired
+// lease recovers claims left behind by a crashed process.
+func (service *LiveService) claimBattleSettlement(ctx context.Context, battleId uuid.UUID) (*battleSettlementClaim, error) {
+	var claim *battleSettlementClaim
+	err := service.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		now := service.Now()
+		row, err := tx.Battle.Query().Where(battlerecord.ID(battleId), dueBattleSettlement(now)).ForUpdate(sql.WithLockAction(sql.SkipLocked)).Only(ctx)
+		if ent.IsNotFound(err) {
+			return nil
+		}
+		if err != nil {
 			return err
 		}
 		rows, err := service.loadParticipants(ctx, tx, battleId)
 		if err != nil {
 			return err
 		}
-		request := buildSettlementRequest(battle, rows)
-		callContext, cancel := context.WithTimeout(ctx, settlementCallTimeout)
-		defer cancel()
-		settlement, err := service.Money.SettleBattle(callContext, request)
+		token := uuid.NewString()
+		attempt := row.SettlementAttempts + 1
+		if _, err := row.Update().SetSettlementAttempts(attempt).SetSettlementLeaseUntil(now.Add(battleSettlementLease)).SetSettlementLeaseToken(token).ClearSettlementNextAttemptAt().Save(ctx); err != nil {
+			return err
+		}
+		claim = &battleSettlementClaim{request: buildSettlementRequest(row, rows), rows: rows, token: token, attempt: attempt}
+		return nil
+	})
+	return claim, err
+}
+
+func (service *LiveService) retryBattleSettlement(ctx context.Context, battleId uuid.UUID, token string, attempt int) error {
+	return service.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		row, err := service.lockBattle(ctx, tx, battleId)
+		if err != nil || row.State != battlerecord.StateEnded || row.SettlementLeaseToken == nil || *row.SettlementLeaseToken != token {
+			return err
+		}
+		update := row.Update().ClearSettlementLeaseUntil().ClearSettlementLeaseToken()
+		if attempt < maxBattleSettlementAttempts {
+			update.SetSettlementNextAttemptAt(service.Now().Add(battleSettlementRetryDelay(attempt)))
+		} else {
+			update.ClearSettlementNextAttemptAt()
+			service.Logger.ErrorContext(ctx, "battle settlement retries exhausted; operator recovery required", "battle_id", battleId.String(), "attempts", attempt)
+		}
+		_, err = update.Save(ctx)
+		return err
+	})
+}
+
+func battleSettlementRetryDelay(attempt int) time.Duration {
+	if attempt < 1 {
+		attempt = 1
+	}
+	delay := battleSettlementRetryBase
+	for step := 1; step < attempt; step++ {
+		if delay >= battleSettlementRetryMax/2 {
+			return battleSettlementRetryMax
+		}
+		delay *= 2
+	}
+	return delay
+}
+
+func (service *LiveService) commitBattleSettlement(ctx context.Context, battleId uuid.UUID, claim *battleSettlementClaim, settlement interfaces.BattleSettlement) error {
+	return service.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		row, err := service.lockBattle(ctx, tx, battleId)
+		if err != nil || row.State == battlerecord.StateSettled {
+			return err
+		}
+		if row.State != battlerecord.StateEnded || row.SettlementLeaseToken == nil || *row.SettlementLeaseToken != claim.token {
+			return nil // A newer lease owns recovery; ledger idempotency makes its retry safe.
+		}
+		next, err := NextBattleState(BattleState(row.State), SettlementCommitted)
 		if err != nil {
 			return err
 		}
-		next, err := NextBattleState(BattleState(battle.State), SettlementCommitted)
-		if err != nil {
-			return err
+		stored := buildStoredSettlement(claim.rows, settlement)
+		settledAt := settlement.SettledAt
+		if settledAt.IsZero() {
+			settledAt = service.Now()
 		}
-		stored := buildStoredSettlement(rows, settlement)
-		saved, err := battle.Update().SetState(battlerecord.State(next)).SetSettledAt(settlement.SettledAt).SetSettlement(writeStoredSettlement(stored)).Save(ctx)
+		saved, err := row.Update().SetState(battlerecord.State(next)).SetSettledAt(settledAt).
+			SetSettlement(writeStoredSettlement(stored)).ClearSettlementLeaseUntil().ClearSettlementLeaseToken().ClearSettlementNextAttemptAt().Save(ctx)
 		if err != nil {
 			return err
 		}

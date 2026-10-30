@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 import { postNotificationLevels } from "../models/postNotifications.model.js";
 import { accountIdOrMeParam } from "../../../utils/accountParam.util.js";

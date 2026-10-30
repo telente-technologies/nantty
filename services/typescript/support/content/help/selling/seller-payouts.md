@@ -15,7 +15,7 @@ Sellers. Escrow and the wallet balance are for Nigeria. Outside Nigeria, buyers 
 
 1. The buyer pays with escrow. The money stays locked in the buyer's own wallet and shows on your side as **Pending (escrow)**.
 2. You ship. The buyer taps **Confirm delivery**, or 3 days pass after delivery without a dispute.
-3. The money moves to your wallet, minus the escrow fee and processing fee, and sits in **Locked** for 24 hours.
+3. The order proceeds move to your wallet and sit in **Locked** for 24 hours. No sales commission is intended; any actual provider charge is shown in the checkout quote and itemized in your history.
 4. After 24 hours it becomes **Available to withdraw**.
 5. You tap **Withdraw** and choose a payout account.
 

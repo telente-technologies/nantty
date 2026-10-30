@@ -1,10 +1,10 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 import { maximumShareConversations } from "../../../constants/social.constant.js";
 import { mentionEntitiesSchema } from "../../mentions/validators/mentions.validator.js";
 
 const kindSchema = schema.enum(["text", "voice", "image", "video", "shared", "location", "liveLocation", "document", "poll", "control"]);
-const referenceKinds = schema.enum(["post", "clip", "story", "product", "live", "store", "profile", "order"]);
+const referenceKinds = schema.enum(["post", "clip", "story", "product", "live", "space", "store", "profile", "order"]);
 const referenceSchema = schema.object({ kind: referenceKinds, id: schema.string().min(1).max(100) });
 
 export const sendMessageBodySchema = schema.object({

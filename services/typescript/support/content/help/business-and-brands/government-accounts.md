@@ -1,6 +1,6 @@
 ---
 title: Government accounts and the Black checkmark
-summary: Official government bodies get the Black checkmark after deep vetting, two separate approvals and yearly re-verification. It costs ₦50,000 a month.
+summary: Official government bodies may request manual review for a Black checkmark. The process and any approved subscription terms are provided privately.
 tags: government, black checkmark, ministry, agency, official account, public body, parastatal, gov
 related: black-checkmark, business-profiles, checkmarks-explained, checkmark-prices, impersonation, business-and-brands-faq
 ---
@@ -16,28 +16,20 @@ A government profile is a special profile type that the app can't create by itse
 ## How to apply
 
 1. Switch to the government profile, open your profile menu and tap **Get verified** (or **Verification**). On the **Black: government** card you'll see: "Official government bodies apply through a reviewed process. This badge can't be bought in the app."
-2. Tap **Apply for government verification**. This continues on the web.
-3. Enter the agency name, and the name and role of the person who represents it.
-4. Our team reviews it and checks the details through official channels.
+2. Use the application option available for that profile, or contact support from an official institutional channel if no application is available.
+3. Provide the institution and representative details requested by the application.
+4. The application is subject to manual review; email verification alone does not prove institutional legitimacy or representative authority.
 
-Only a government profile can apply. The plan is never self-serve and has no free trial.
+Government verification is not a public self-serve purchase. Payment alone never grants government status or a Black badge.
 
 ## What we check
 
-Before approval, every item must be confirmed:
-
-- An official letter on letterhead, signed by an authorised officer.
-- Confirmation through an official channel, such as a .gov.ng email domain or a published phone line.
-- The representative's ID, BVN or NIN, and proof of their role.
-- Proof the body exists, such as its official website or a gazette.
-
-Two different members of our team must each approve the application.
+The review team may request evidence of the institution's legitimacy and the representative's authority through official sources. The application will explain what is required. Email verification alone is not sufficient proof.
 
 ## Price and renewal
 
-- The Black checkmark costs **₦50,000 a month** in Nigeria. Prices differ in other countries.
-- It is re-verified **every year**, and again whenever the representative changes. We remind you 30 days before it is due.
-- If re-verification or billing lapses, the checkmark stays for a **14-day grace period**, then it is removed until things are fixed.
+- Any price, billing interval, renewal authorization, re-verification schedule, grace period, cancellation and revocation terms must be stated in the approved invitation and checkout before the institution consents.
+- The current working price is not public and remains subject to founder confirmation; do not rely on old NGN amounts or infer an annual option.
 
 ## If something goes wrong
 

@@ -7,7 +7,7 @@ related: checkmarks-explained, verification-levels, identity-check, checkmark-pr
 
 ## Can I just pay for a checkmark?
 
-No. You pay, then we verify your identity or business. If we can't, you're refunded. See [Blue, Gold and Black checkmarks](/help/checkmarks-and-verification/checkmarks-explained).
+No. Payment does not grant a checkmark: identity or business approval is separate. Refund terms are shown during checkout and depend on the purchase channel. See [Blue, Gold and Black checkmarks](/help/checkmarks-and-verification/checkmarks-explained).
 
 ## Which checkmark should I get?
 
@@ -15,11 +15,11 @@ Blue for people and creators, Gold for businesses and brands, Black for governme
 
 ## Why can't I apply yet?
 
-Blue needs an account at least 90 days old, 1,000 real followers, regular original posts and no recent violations. Tap **Request verification** and we'll notify you when you qualify. See [The Blue checkmark](/help/checkmarks-and-verification/blue-checkmark).
+Eligibility requirements can differ by account type and are shown in the verification application. See [The Blue checkmark](/help/checkmarks-and-verification/blue-checkmark).
 
 ## How much does it cost?
 
-In Nigeria Blue Verified is ₦2,500 a month on the web. See [Checkmark and plan prices by country](/help/checkmarks-and-verification/checkmark-prices).
+The applicable price is shown in the signed-in checkout, which reflects country, plan, billing interval and purchase channel. Repository defaults are not a quote. See [Checkmark and plan prices by country](/help/checkmarks-and-verification/checkmark-prices).
 
 ## Why is it cheaper on the web?
 

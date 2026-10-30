@@ -19,7 +19,7 @@ There's no stored wallet balance yet. You pay at checkout each time, and sellers
 
 ## What Nantty keeps
 
-Nantty earns from fees, not from holding your money: the escrow fee on orders, a small deposit fee, payout fees, and sales of coins, ads, boosts and subscriptions. Every fee is shown before you pay.
+Nantty does not take a commission on marketplace sales under the intended launch policy. Payment-provider processing and withdrawal charges are passed through at cost and shown before confirmation. Nantty may also earn from optional products such as coins, ads, boosts and subscriptions; any charge is disclosed before purchase.
 
 ## How we protect your wallet
 

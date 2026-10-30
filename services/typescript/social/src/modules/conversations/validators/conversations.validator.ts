@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 export const conversationParamsSchema = schema.object({ conversationId: schema.string().uuid() });
 export const memberParamsSchema = schema.object({ conversationId: schema.string().uuid(), userId: schema.string().uuid() });

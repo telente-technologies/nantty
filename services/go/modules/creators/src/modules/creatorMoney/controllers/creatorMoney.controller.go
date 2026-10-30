@@ -82,7 +82,7 @@ func (controller CreatorMoneyController) SendTip(writer http.ResponseWriter, req
 	}
 	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body dtos.TipRequestDto) error {
 		collector := &ledgerutils.IssueCollector{}
-		collector.RequireOneOf("targetType", body.TargetType, "post", "clip", "live")
+		collector.RequireOneOf("targetType", body.TargetType, "post", "clip", "live", "profile")
 		collector.RequireLength("targetId", body.TargetId, 1, 80)
 		collector.RequireRange("coins", body.Coins, 1, services.MaximumTipCoins)
 		return collector.Result()

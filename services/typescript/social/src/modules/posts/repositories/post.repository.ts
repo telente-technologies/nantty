@@ -1,6 +1,6 @@
 import type { Prisma } from "../../../generated/prisma/client.js";
 import type { Db } from "../../../types/database.type.js";
-import { shownToViewers } from "../../../constants/moderation.constant.js";
+import { publishedPostToViewers } from "../../../constants/moderation.constant.js";
 
 export const postWithMedia = { media: { orderBy: { position: "asc" } } } satisfies Prisma.PostInclude;
 export type PostRow = Prisma.PostGetPayload<{ include: typeof postWithMedia }>;
@@ -8,9 +8,9 @@ export type PostRow = Prisma.PostGetPayload<{ include: typeof postWithMedia }>;
 export const postRepository = {
   create: (db: Db, data: Prisma.PostUncheckedCreateInput): Promise<PostRow> => db.post.create({ data, include: postWithMedia }),
 
-  findById: (db: Db, id: string): Promise<PostRow | null> => db.post.findFirst({ where: { id, ...shownToViewers }, include: postWithMedia }),
+  findById: (db: Db, id: string): Promise<PostRow | null> => db.post.findFirst({ where: { id, ...publishedPostToViewers }, include: postWithMedia }),
 
-  findManyByIds: (db: Db, ids: readonly string[]): Promise<PostRow[]> => db.post.findMany({ where: { id: { in: [...ids] }, ...shownToViewers }, include: postWithMedia }),
+  findManyByIds: (db: Db, ids: readonly string[]): Promise<PostRow[]> => db.post.findMany({ where: { id: { in: [...ids] }, ...publishedPostToViewers }, include: postWithMedia }),
 
   findByIdIncludingHidden: (db: Db, id: string): Promise<PostRow | null> => db.post.findFirst({ where: { id }, include: postWithMedia }),
 
@@ -19,7 +19,7 @@ export const postRepository = {
   },
 
   findPlainRepost: (db: Db, authorId: string, originalId: string): Promise<PostRow | null> =>
-    db.post.findFirst({ where: { authorId, resharedFromId: originalId, isQuote: false, kind: "post", ...shownToViewers }, include: postWithMedia }),
+    db.post.findFirst({ where: { authorId, resharedFromId: originalId, isQuote: false, kind: "post", ...publishedPostToViewers }, include: postWithMedia }),
 
   softDelete: (db: Db, id: string, at: Date) => db.post.update({ where: { id }, data: { deletedAt: at, isPinned: false, pinnedAt: null } }),
 
@@ -36,23 +36,23 @@ export const postRepository = {
 
   pageByAuthor: (db: Db, authorId: string, kinds: readonly ("post" | "clip" | "story")[], limit: number, cursor: string | undefined, audiences: readonly ("everyone" | "followers")[], now: Date): Promise<PostRow[]> =>
     db.post.findMany({
-      where: { authorId, ...shownToViewers, kind: { in: [...kinds] }, audience: { in: [...audiences] }, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
+      where: { authorId, ...publishedPostToViewers, kind: { in: [...kinds] }, audience: { in: [...audiences] }, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
       orderBy: { id: "desc" },
       take: limit + 1,
       include: postWithMedia,
       ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
     }),
 
-  pageByAuthorOrProfile: (db: Db, ownerId: string, kinds: readonly ("post" | "clip" | "story")[], limit: number, cursor: string | undefined, audiences: readonly ("everyone" | "followers")[], now: Date): Promise<PostRow[]> =>
+  pageByAuthorOrProfile: (db: Db, ownerId: string, kinds: readonly ("post" | "clip" | "story")[], limit: number, cursor: string | undefined, audiences: readonly ("everyone" | "followers")[], now: Date, visibility: "public" | "subscribers" = "public"): Promise<PostRow[]> =>
     db.post.findMany({
-      where: { AND: [{ OR: [{ authorId: ownerId }, { authorProfileId: ownerId }] }, { ...shownToViewers, kind: { in: [...kinds] }, audience: { in: [...audiences] } }, { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }] },
+      where: { AND: [{ OR: [{ authorId: ownerId }, { authorProfileId: ownerId }] }, { ...publishedPostToViewers, kind: { in: [...kinds] }, audience: { in: [...audiences] }, visibility }, { OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] }] },
       orderBy: [{ isPinned: "desc" }, { pinnedAt: { sort: "desc", nulls: "last" } }, { id: "desc" }],
       take: limit + 1,
       include: postWithMedia,
       ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
     }),
 
-  countPinnedByAuthor: (db: Db, authorId: string) => db.post.count({ where: { authorId, isPinned: true, ...shownToViewers, kind: { in: ["post", "clip"] } } }),
+  countPinnedByAuthor: (db: Db, authorId: string) => db.post.count({ where: { authorId, isPinned: true, ...publishedPostToViewers, kind: { in: ["post", "clip"] } } }),
 
   setPinned: (db: Db, id: string, pinnedAt: Date | null): Promise<PostRow> => db.post.update({ where: { id }, data: { isPinned: pinnedAt !== null, pinnedAt }, include: postWithMedia }),
 
@@ -65,18 +65,18 @@ export const postRepository = {
 
   pageQuotesOf: (db: Db, originalId: string, limit: number, cursor: string | undefined, extraWhere: Prisma.PostWhereInput): Promise<PostRow[]> =>
     db.post.findMany({
-      where: { resharedFromId: originalId, isQuote: true, ...shownToViewers, ...extraWhere },
+      where: { resharedFromId: originalId, isQuote: true, ...publishedPostToViewers, ...extraWhere },
       orderBy: { id: "desc" },
       take: limit + 1,
       include: postWithMedia,
       ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
     }),
 
-  countByAuthor: (db: Db, authorId: string) => db.post.count({ where: { authorId, ...shownToViewers, kind: { in: ["post", "clip"] } } }),
+  countByAuthor: (db: Db, authorId: string) => db.post.count({ where: { authorId, ...publishedPostToViewers, kind: { in: ["post", "clip"] } } }),
 
   repostedOriginalIds: async (db: Db, userId: string, originalIds: readonly string[]): Promise<Set<string>> => {
     if (originalIds.length === 0) return new Set();
-    const rows = await db.post.findMany({ where: { authorId: userId, resharedFromId: { in: [...originalIds] }, isQuote: false, kind: "post", ...shownToViewers }, select: { authorId: true, resharedFromId: true, isQuote: true } });
+    const rows = await db.post.findMany({ where: { authorId: userId, resharedFromId: { in: [...originalIds] }, isQuote: false, kind: "post", ...publishedPostToViewers }, select: { authorId: true, resharedFromId: true, isQuote: true } });
     return new Set(rows.flatMap((row) => (row.authorId === userId && !row.isQuote && row.resharedFromId !== null && originalIds.includes(row.resharedFromId) ? [row.resharedFromId] : [])));
   },
 
@@ -92,10 +92,10 @@ export const postRepository = {
   recordShare: (db: Db, postId: string, userId: string, channel: string) => db.postShare.create({ data: { postId, userId, channel } }),
 
   storyAuthorsWithActiveStories: (db: Db, authorIds: readonly string[], now: Date) =>
-    db.post.findMany({ where: { authorId: { in: [...authorIds] }, kind: "story", ...shownToViewers, expiresAt: { gt: now } }, select: { id: true, authorId: true, createdAt: true }, orderBy: { createdAt: "desc" } }),
+    db.post.findMany({ where: { authorId: { in: [...authorIds] }, kind: "story", ...publishedPostToViewers, expiresAt: { gt: now } }, select: { id: true, authorId: true, createdAt: true }, orderBy: { createdAt: "desc" } }),
 
   activeStoryIdsByAuthor: async (db: Db, authorId: string, audiences: readonly ("everyone" | "followers")[], now: Date): Promise<string[]> => {
-    const rows = await db.post.findMany({ where: { authorId, kind: "story", ...shownToViewers, audience: { in: [...audiences] }, expiresAt: { gt: now } }, select: { id: true }, orderBy: { id: "asc" }, take: 100 });
+    const rows = await db.post.findMany({ where: { authorId, kind: "story", ...publishedPostToViewers, audience: { in: [...audiences] }, expiresAt: { gt: now } }, select: { id: true }, orderBy: { id: "asc" }, take: 100 });
     return rows.map((row) => row.id);
   },
 

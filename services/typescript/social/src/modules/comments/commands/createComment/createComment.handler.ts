@@ -48,7 +48,7 @@ export function createCreateCommentHandler(context: HandlerContext): Handler<Cre
       if (parent !== null) await commentRepository.incrementReplies(transaction, parent.id, 1);
       const events: DomainEventInput[] = [];
       const excerpt = buildExcerpt(storedText);
-      const url = `/post/${post.id}?comment=${comment.id}`;
+      const url = `/${post.kind === "clip" ? "clips" : "post"}/${post.id}?comment=${comment.id}`;
       const recipients = new Set<string>(silent ? [] : [post.authorId, ...(parent === null ? [] : [parent.authorId])]);
       recipients.delete(command.authorId);
       for (const recipientUserId of recipients) {

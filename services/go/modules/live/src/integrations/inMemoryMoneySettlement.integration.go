@@ -11,6 +11,9 @@ import (
 )
 
 func (gateway *InMemoryMoneyGateway) SettleBattle(_ context.Context, request interfaces.SettleBattleRequest) (interfaces.BattleSettlement, error) {
+	if gateway.SettlementHook != nil {
+		gateway.SettlementHook()
+	}
 	gateway.mutex.Lock()
 	defer gateway.mutex.Unlock()
 	gateway.SettleCallCount[request.BattleId]++
@@ -39,5 +42,9 @@ func (gateway *InMemoryMoneyGateway) SettleBattle(_ context.Context, request int
 		settlement.Payouts = append(settlement.Payouts, interfaces.ParticipantPayout{UserId: participant.UserId, HoldingCoins: holding, CreditedUserId: credited})
 	}
 	gateway.Settlements[request.BattleId] = settlement
+	if gateway.FailAfterSettlementOnce {
+		gateway.FailAfterSettlementOnce = false
+		return interfaces.BattleSettlement{}, errors.New("money response lost after ledger commit")
+	}
 	return settlement, nil
 }

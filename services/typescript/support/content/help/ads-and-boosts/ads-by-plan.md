@@ -1,33 +1,32 @@
 ---
 title: How many ads you see on each plan
-summary: Blue Premium and Gold Business are ad-free everywhere. Other checkmark plans see fewer ads, and Black Official accounts see about one in five of the usual ads.
+summary: Premium tiers suppress platform-controlled ad inventory; Basic tiers use reduced ad-load settings. Sponsored content and inventory outside Nantty's control may still appear.
 tags: ad free, no ads, fewer ads, remove ads, too many ads, premium ads, checkmark ads, gold business ads, government ads, ad load
 related: why-you-see-an-ad, premium, checkmark-prices, blue-checkmark, ads-in-comments, ads-faq
 ---
 
-How many ads you see depends on your plan. Fewer ads means fewer ad spaces get filled. It doesn't change which ads you see.
+The plan setting controls the share of normal platform-controlled ad inventory eligible to be shown. It does not guarantee a particular number of ads in every session and does not remove creator sponsorships or other non-platform advertising content.
 
 ## Ad-free plans
 
-- **Blue Premium**: no ads anywhere, in feeds, clips, comments, stories, search or the marketplace.
-- **Gold Business** (the top Gold seller plan): no ads anywhere either.
+- **Blue Premium**: zero platform-controlled ad inventory.
+- **Gold Premium** (legacy Gold Business tier): zero platform-controlled ad inventory.
 
 ## Plans with fewer ads
 
 | Plan | Ads you see, compared with a free account |
 | --- | --- |
-| Blue Essential | about 75% |
-| Blue Verified | about 60% |
-| Gold and Gold Pro | about half |
-| Black Official (government) | about 20% |
+| Blue Basic | 60% of normal platform-controlled ad load |
+| Gold Basic | 50% of normal platform-controlled ad load |
+| Black Government (legacy Black Official) | 20% of normal platform-controlled ad load |
 | No plan | the usual amount |
 
-These are default levels. Nantty can adjust them, but ad-free plans always stay at zero.
+These are repository defaults. An authorized admin may configure nonzero ad-load settings; ad-free tiers are validated as zero in plan configuration.
 
 ## If you have more than one plan
 
-The plan with the fewest ads wins. For example, a Blue Verified member who also runs a Gold Business store sees no ads.
+Account and business-profile ad settings are resolved by active subscription entitlements. A plan on one profile does not automatically grant ad-free status to an unrelated profile.
 
 ## Still seeing ads on an ad-free plan?
 
-Changes can take a minute to apply after you subscribe. If you still see ads after that, make sure the plan is active in **Settings > Subscriptions**, then [contact support](/help/contact-support/contact-support).
+Changes may take time to appear after a verified subscription change. If platform-controlled ads still appear on an active ad-free entitlement, check the signed-in plan status and [contact support](/help/contact-support/contact-support).

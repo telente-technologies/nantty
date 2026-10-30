@@ -1,11 +1,12 @@
 import type { Db } from "../../../types/database.type.js";
+import { publishedPostToViewers } from "../../../constants/moderation.constant.js";
 
 export const recentTrendPostSelect = { id: true, authorId: true, text: true, createdAt: true, likeCount: true, commentCount: true, repostCount: true, shareCount: true, viewCount: true, saveCount: true } as const;
 
 export const exploreRepository = {
   recentPublicPosts: (db: Db, since: Date, take: number) =>
     db.post.findMany({
-      where: { kind: { in: ["post", "clip"] }, deletedAt: null, moderationVisibility: "visible", audience: "everyone", visibility: "public", createdAt: { gte: since }, sensitiveLabels: { isEmpty: true } },
+      where: { kind: { in: ["post", "clip"] }, ...publishedPostToViewers, moderationVisibility: "visible", audience: "everyone", visibility: "public", createdAt: { gte: since }, sensitiveLabels: { isEmpty: true } },
       select: recentTrendPostSelect,
       orderBy: { createdAt: "desc" },
       take,

@@ -12,6 +12,7 @@ import (
 
 	"nantty/modules/escrow/src"
 	"nantty/modules/escrow/src/configs"
+	escrowmigrations "nantty/modules/escrow/src/migrations"
 	"nantty/modules/ledger/src/databases"
 	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
@@ -88,7 +89,7 @@ func startEscrowHarness(t *testing.T) *escrowHarness {
 	t.Helper()
 	money := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
 	settings := configs.EscrowSettings{
-		Money:                 moneytesting.MoneyModuleSettingsForTests("escrow", moneytesting.CreateEmptySchema(t, money.Database, "escrow"), money.LedgerSchema),
+		Money:                 moneytesting.MoneyModuleSettingsForTests("escrow", moneytesting.CreateFreshSchemaWithMigrations(t, money.Database, "escrow", escrowmigrations.Files), money.LedgerSchema),
 		PlatformCommissionBps: 150, InspectionPeriod: 72 * time.Hour, SellerResponseWindow: 48 * time.Hour, AutoReleaseSweepInterval: time.Hour,
 		SellerCreditHoldPeriod: 24 * time.Hour, InternalApiToken: strings.Repeat("e", 32),
 	}
@@ -140,7 +141,11 @@ func (harness *escrowHarness) payCheckoutThroughWebhook(buyer, orderId string, p
 	reference := initialized.Body["reference"].(string)
 	amount := int64(initialized.Body["payment"].(map[string]any)["amount"].(map[string]any)["amountMinor"].(float64))
 	harness.SetCountry(buyer, "NG")
-	harness.CompleteCheckoutThroughWebhook(reference, providerAmount, processingFeeFor(amount))
+	providerFee := processingFeeFor(amount)
+	if providerAmount > 0 {
+		providerFee = processingFeeFor(providerAmount)
+	}
+	harness.CompleteCheckoutThroughWebhook(reference, providerAmount, providerFee)
 	return reference
 }
 

@@ -80,6 +80,18 @@ func (f PlanPriceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PlanPriceMutation", m)
 }
 
+// The PlanPriceVersionFunc type is an adapter to allow the use of ordinary
+// function as PlanPriceVersion mutator.
+type PlanPriceVersionFunc func(context.Context, *ent.PlanPriceVersionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PlanPriceVersionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PlanPriceVersionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PlanPriceVersionMutation", m)
+}
+
 // The ProviderPlanFunc type is an adapter to allow the use of ordinary
 // function as ProviderPlan mutator.
 type ProviderPlanFunc func(context.Context, *ent.ProviderPlanMutation) (ent.Value, error)

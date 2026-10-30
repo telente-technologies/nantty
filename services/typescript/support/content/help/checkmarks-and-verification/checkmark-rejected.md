@@ -13,12 +13,11 @@ On **Get verified** a card shows **Not approved** and **We couldn't verify your 
 
 ## What happens to your money
 
-- **Blue Verified or Gold plan**: the checkmark is the plan, so we refund your payment in full. Card refunds usually show in 5 to 10 working days.
-- **Blue Premium or a seller plan**: your plan stays active with its other benefits. Only the checkmark wasn't added, so we refund the checkmark's share of that payment, once.
+- **A subscription that includes a checkmark**: verification and subscription payment are separate. The subscription does not grant the badge without approval. Any refund or continued access follows the applicable checkout terms and provider rules; contact support if an application is rejected and the checkout terms do not explain your case.
 - **Paid in the iPhone app**: Apple handles App Store refunds. Request yours at reportaproblem.apple.com.
 - **Paid on Google Play**: Google Play refunds you.
 
-Renewals after a rejection are charged at the plan's normal price.
+Do not assume a plan will continue, renew, or receive a partial refund after rejection unless those terms were shown at checkout.
 
 ## Common reasons
 
@@ -30,7 +29,7 @@ Renewals after a rejection are charged at the plan's normal price.
 ## What to do next
 
 1. Fix the problem in the reason (better light, a valid ID, matching names).
-2. Wait until the date shown: you can try again 30 days after the decision.
+2. Follow the retry date shown in your application, if one is provided.
 3. If you think we got it wrong, contact support under **Checkmarks** or see [Appealing a decision](/help/safety-and-reporting/appeal-a-decision).
 
 ## If something goes wrong

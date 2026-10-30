@@ -23,7 +23,7 @@ Read our policies on the website. Each is version 1.0, a draft that isn't in eff
 - **Nigerian law applies.** Disputes go first to our support team, then mediation if you both agree, then arbitration seated in Lagos. Small claims courts and regulators such as the FCCPC and the Nigeria Data Protection Commission stay open to you, and consumers abroad keep their local rights.
 - **Your consumer rights are not affected.** Sellers must accept returns of goods that are defective or not as described.
 - **Coins aren't money.** Gifts and tips are final once sent. Nantty Points can never be withdrawn, and ad credit is never cash.
-- **Sellers pay the fees.** There's no commission on products. Sellers pay the escrow fee and processing fee; buyers never pay a checkout or escrow fee.
+- **Fees are disclosed before payment.** The intended launch policy has no Nantty sales commission; actual payment-provider processing and withdrawal charges are passed through at cost. Checkout must show any applicable provider charge before confirmation. Do not publish or enforce a different fee configuration without updating the terms and notifying affected users.
 - **We never sell your personal data,** and we can't read your end-to-end encrypted chats.
 
 ## When policies change

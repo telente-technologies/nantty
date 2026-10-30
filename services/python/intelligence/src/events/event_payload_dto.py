@@ -143,6 +143,13 @@ class GiftSentPayload(ContractModel):
     host_content_id: OpaqueIdentifier | None = None
 
 
+class GiftValueFlowPayload(ContractModel):
+    """Minimal pseudonymous fields needed to score gift value-flow signals."""
+
+    creator_id: OpaqueIdentifier
+    coin_amount: int = Field(ge=1, le=10**12)
+
+
 class SavedPayload(ItemTopicsMixin):
     target_id: OpaqueIdentifier
     target_type: Literal["post", "clip", "product"]

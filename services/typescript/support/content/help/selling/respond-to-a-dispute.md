@@ -39,7 +39,7 @@ You can't choose the outcome yourself while a dispute is open, but you can offer
 
 ## Good to know
 
-- Escrow fees aren't charged when money is refunded before release. After release, only the seller portion is recovered; Nantty's escrow and processing fees stay with Nantty.
+- No sales commission is intended under the launch policy. Refunds and any non-refundable provider charges follow the applicable checkout and refund disclosures; the order history shows the amounts recovered or returned.
 - Good evidence wins disputes: packing photos, courier receipts and tracking numbers.
 
 ## If something goes wrong

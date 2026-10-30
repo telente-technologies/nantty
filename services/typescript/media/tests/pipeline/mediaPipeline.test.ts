@@ -121,6 +121,17 @@ describe("rejections", () => {
     expect(harness.db.assets.get(id)).toMatchObject({ status: "ready", scanResult: "skipped" });
   });
 
+  it.each([
+    { purpose: "voice", mimeType: "audio/mp4", kind: "audio", bytes: Buffer.concat([Buffer.from([0, 0, 0, 24]), Buffer.from("ftypM4A "), Buffer.alloc(40)]) },
+    { purpose: "document", mimeType: "application/pdf", kind: "document", bytes: minimalPdf(1) },
+  ] as const)("rejects unscanned $kind uploads even when local unscanned uploads are enabled", async ({ purpose, mimeType, kind, bytes }) => {
+    const harness = createHarness({ scanner: { scanFile: async () => ({ verdict: "skipped" }) }, config: { allowUnscannedUploads: true } });
+    const id = harness.seedUpload({ purpose, mimeType, bytes, kind, isPrivate: true });
+    await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });
+    expect(harness.db.assets.get(id)).toMatchObject({ status: "rejected", rejectionReason: "MALWARE_SCAN_UNAVAILABLE", scanResult: "skipped" });
+    expect(harness.storage.keysIn(harness.context.config.storage.privateBucket)).toHaveLength(0);
+  });
+
   it("fails closed when the scanner itself errors until the final attempt", async () => {
     const harness = createHarness({ scanner: { scanFile: async () => { throw new Error("clamd down"); } } });
     const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
@@ -173,6 +184,19 @@ describe("moderation gate", () => {
     expect(closed.db.assets.get(closedId)?.["status"]).toBe("held");
   });
 
+  it("holds moderated media when processing produces no classifier input, even in allow mode", async () => {
+    const config = createHarness().context.config;
+    const harness = createHarness({
+      images: { processImage: async () => ({ width: 10, height: 10, files: [{ name: "display.jpg", contentType: "image/jpeg", format: "jpeg", width: 10, height: 10, isVariant: true, source: { buffer: Buffer.from("image") }, sizeBytes: 5 }], moderationFrames: [] }) },
+      config: { moderation: { ...config.moderation, failMode: "allow" } },
+    });
+    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
+    await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });
+    expect(harness.db.assets.get(id)).toMatchObject({ status: "held", moderationDecision: "uninspectable" });
+    expect(harness.db.eventTypes()).toEqual(["media.held"]);
+    expect(harness.storage.keysIn(harness.context.config.storage.publicBucket)).toHaveLength(0);
+  });
+
   it("skips moderation for private purposes", async () => {
     let calls = 0;
     const harness = createHarness({ moderation: { classify: async () => { calls += 1; return { score: 1, topCategory: null }; } } });
@@ -188,7 +212,7 @@ describe("documents", () => {
     const harness = createHarness();
     const id = harness.seedUpload({ purpose: "kyc", mimeType: "application/pdf", bytes: minimalPdf(3), kind: "document", isPrivate: true });
     await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });
-    expect(harness.db.assets.get(id)).toMatchObject({ status: "ready", pageCount: 3, expiresAt: null });
+    expect(harness.db.assets.get(id)).toMatchObject({ status: "ready", pageCount: 3, expiresAt: null, moderationDecision: "not_required" });
     expect(harness.storage.keysIn(harness.context.config.storage.publicBucket)).toHaveLength(0);
     const stored = harness.storage.objects.get(harness.storage.key(harness.context.config.storage.privateBucket, `p/${id}/original.pdf`));
     expect(stored?.options?.encrypted).toBe(true);
@@ -232,7 +256,7 @@ describe("video and audio", () => {
     const harness = createHarness({ transcoder: fakeTranscoder });
     const id = harness.seedUpload({ purpose: "voice", mimeType: "audio/mp4", bytes: Buffer.concat([Buffer.from([0, 0, 0, 24]), Buffer.from("ftypM4A "), Buffer.alloc(40)]), kind: "audio", isPrivate: true });
     await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });
-    expect(harness.db.assets.get(id)).toMatchObject({ status: "ready", durationSeconds: 4 });
+    expect(harness.db.assets.get(id)).toMatchObject({ status: "ready", durationSeconds: 4, moderationDecision: "not_required" });
     expect(harness.storage.keysIn(harness.context.config.storage.privateBucket)).toContain(`p/${id}/audio.m4a`);
   });
 

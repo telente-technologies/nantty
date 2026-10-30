@@ -223,6 +223,43 @@ var (
 			},
 		},
 	}
+	// PlanPriceVersionsColumns holds the columns for the "plan_price_versions" table.
+	PlanPriceVersionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "plan_code", Type: field.TypeString, Size: 40},
+		{Name: "country_code", Type: field.TypeString, Size: 2},
+		{Name: "currency", Type: field.TypeString, Size: 3},
+		{Name: "monthly_amount_minor", Type: field.TypeInt64},
+		{Name: "yearly_amount_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "ios_monthly_amount_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "ios_yearly_amount_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "android_monthly_amount_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "android_yearly_amount_minor", Type: field.TypeInt64, Default: 0},
+		{Name: "store_product_ids", Type: field.TypeJSON},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "effective_from", Type: field.TypeTime},
+		{Name: "created_by_staff_id", Type: field.TypeString, Size: 80},
+		{Name: "change_reason", Type: field.TypeString, Size: 300},
+	}
+	// PlanPriceVersionsTable holds the schema information for the "plan_price_versions" table.
+	PlanPriceVersionsTable = &schema.Table{
+		Name:       "plan_price_versions",
+		Columns:    PlanPriceVersionsColumns,
+		PrimaryKey: []*schema.Column{PlanPriceVersionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "planpriceversion_plan_code_country_code_effective_from",
+				Unique:  true,
+				Columns: []*schema.Column{PlanPriceVersionsColumns[2], PlanPriceVersionsColumns[3], PlanPriceVersionsColumns[13]},
+			},
+			{
+				Name:    "planpriceversion_effective_from",
+				Unique:  false,
+				Columns: []*schema.Column{PlanPriceVersionsColumns[13]},
+			},
+		},
+	}
 	// ProviderPlansColumns holds the columns for the "provider_plans" table.
 	ProviderPlansColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -599,6 +636,7 @@ var (
 		IdempotentRequestsTable,
 		OutboxEventsTable,
 		PlanPricesTable,
+		PlanPriceVersionsTable,
 		ProviderPlansTable,
 		SubscriptionsTable,
 		SubscriptionCoveredProfilesTable,

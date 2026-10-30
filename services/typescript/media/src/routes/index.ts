@@ -1,4 +1,4 @@
-import type { HttpRouter } from "@zudojs/http";
+import type { FastifyInstance } from "fastify";
 
 import type { MediaDatabase } from "../databases/prisma.database.js";
 import { mountDownloadsModule } from "../modules/downloads/downloads.module.js";
@@ -9,12 +9,12 @@ import type { RouteFactory } from "../utils/route.util.js";
 import { checkRabbitMqConnections } from "../integrations/rabbitMqConnection.integration.js";
 import { registerHealthRoutes } from "./health.routes.js";
 
-export function registerRoutes(router: HttpRouter, route: RouteFactory, context: HandlerContext, database: MediaDatabase): void {
-  registerHealthRoutes(router, database, async () => {
+export function registerRoutes(app: FastifyInstance, route: RouteFactory, context: HandlerContext, database: MediaDatabase): void {
+  registerHealthRoutes(app, database, async () => {
     const ffmpeg = await context.transcoder.isAvailable();
     return { healthy: ffmpeg || context.config.ffmpeg.mode !== "required", ffmpeg, malwareScan: context.config.clamAv !== undefined, moderation: context.moderation !== undefined };
   }, context.config.rabbitMqUrl === "" ? async () => undefined : checkRabbitMqConnections);
-  mountUploadsModule(router, route, context);
-  mountInternalModule(router, route, context);
-  mountDownloadsModule(router, route, context);
+  mountUploadsModule(app, route, context);
+  mountInternalModule(app, route, context);
+  mountDownloadsModule(app, route, context);
 }

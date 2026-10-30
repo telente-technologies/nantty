@@ -21,7 +21,7 @@ Buyers in Nigeria. Escrow isn't available outside Nigeria. See [Buying outside N
 
 ## Good to know
 
-- Buyers pay no escrow fee. The seller pays it.
+- Nantty's intended launch policy has no sales commission. Any applicable payment-provider charge is shown in the checkout quote before you confirm.
 - If your order is cancelled or refunded before release, the money is unlocked back to you.
 - Stores that aren't verified can only take escrow payments. Verified stores (Gold) can also offer **Pay directly**, which has no escrow protection. See [Escrow or direct payment](/help/buying-and-orders/escrow-or-direct-payment).
 - After release, the seller's money sits in a short safety hold before they can withdraw it.

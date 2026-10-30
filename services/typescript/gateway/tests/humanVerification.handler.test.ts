@@ -45,19 +45,20 @@ const trust = new FakeTrust();
 let upstream: Server;
 let gateway: ReturnType<typeof createGatewayServer>;
 let base: string;
+let configForTest: GatewayConfig;
 let upstreamStatus = 200;
 
 beforeAll(async () => {
   upstream = createServer((_request, response) => { response.writeHead(upstreamStatus, { "content-type": "application/json" }); response.end("{}"); });
   await new Promise<void>((resolve) => upstream.listen(0, "127.0.0.1", resolve));
   const url = `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`;
-  const config: GatewayConfig = {
+  configForTest = {
     host: "127.0.0.1", port: 0, corsOrigins: [], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, policyGate: null, guestRateLimits: { perMinute: 1000, sensitivePerMinute: 1000 },
     accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.nantty.test", audience: "nantty-api" },
     upstreams: { identity: url, live: url, money: url, notifications: url, social: url, trust: url, commerce: url, media: url, search: url, ads: url, support: url },
     security: { trustInternalToken: "t".repeat(32), humanVerification: { provider: "turnstile", secretKey: "1x0000000000000000000000000000000AA", siteKey: "1x00000000000000000000AA", expectedHostnames: [], attemptsPerMinute: 10 }, probeThresholds: defaultProbeThresholds },
   };
-  gateway = createGatewayServer({ config, verifier, logger, security: { trust, provider } });
+  gateway = createGatewayServer({ config: configForTest, verifier, logger, security: { trust, provider } });
   await gateway.start();
   base = `http://127.0.0.1:${gateway.address?.port}`;
 });
@@ -117,8 +118,36 @@ describe("human verification challenge", () => {
     expect(JSON.stringify(trust.outcomes)).not.toContain("bad-token");
   });
 
-  it("rate-limits the challenge endpoint and requires sign-in", async () => {
-    expect((await fetch(`${base}/api/v1/security/human-verification`, { method: "POST", body: "{}" })).status).toBe(401);
+  it("steps up repeated guest rate-limit violations with Turnstile and permits one verified retry", async () => {
+    const limitedGateway = createGatewayServer({
+      config: { ...configForTest, port: 0, guestRateLimits: { perMinute: 1, sensitivePerMinute: 1 } },
+      verifier,
+      logger,
+      security: { trust: new FakeTrust(), provider },
+    });
+    await limitedGateway.start();
+    const limitedBase = `http://127.0.0.1:${limitedGateway.address?.port}`;
+    const feedUrl = `${limitedBase}/api/v1/feeds/popular`;
+    try {
+      expect((await fetch(feedUrl)).status).toBe(200);
+      expect((await fetch(feedUrl)).status).toBe(429);
+      expect((await fetch(feedUrl)).status).toBe(429);
+      const challenge = await fetch(feedUrl);
+      expect(challenge.status).toBe(428);
+      expect(await challenge.json()).toMatchObject({ code: "HUMAN_VERIFICATION_REQUIRED", reason: "rate_limit_abuse", provider: "turnstile" });
+
+      const verified = await fetch(`${limitedBase}/api/v1/security/human-verification`, {
+        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token: turnstileAlwaysPassToken }),
+      });
+      expect(verified.status).toBe(200);
+      expect((await fetch(feedUrl)).status).toBe(200);
+    } finally {
+      await limitedGateway.stop();
+    }
+  });
+
+  it("requires an active challenge before accepting a guest verification and rate-limits attempts", async () => {
+    expect((await fetch(`${base}/api/v1/security/human-verification`, { method: "POST", body: "{}" })).status).toBe(400);
     const statuses: number[] = [];
     for (let attempt = 0; attempt < 11; attempt += 1) statuses.push((await verify("token-clean", turnstileAlwaysPassToken)).status);
     expect(statuses.slice(0, 10).every((status) => status === 200)).toBe(true);

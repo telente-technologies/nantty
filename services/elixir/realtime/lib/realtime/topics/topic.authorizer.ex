@@ -17,6 +17,14 @@ defmodule Realtime.Topics.TopicAuthorizer do
     end
   end
 
+  def authorize_conversation_delivery(principal, conversation_id)
+      when is_map(principal) and is_binary(conversation_id) and conversation_id != "" do
+    authorize_subscription(principal, "conversation:#{conversation_id}")
+  end
+
+  def authorize_conversation_delivery(_principal, _conversation_id),
+    do: {:error, :forbidden}
+
   defp authorize_live_access(principal, topic) do
     checker =
       Application.get_env(:realtime, :live_access_checker, Realtime.Topics.LiveAccessClient)

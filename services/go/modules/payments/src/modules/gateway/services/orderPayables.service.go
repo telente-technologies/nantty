@@ -11,10 +11,12 @@ import (
 	"nantty/modules/payments/src/generated/ent/orderpayable"
 	"nantty/modules/payments/src/modules/gateway/models"
 	"nantty/platform/httpserver"
+	"nantty/platform/money"
 )
 
 var (
 	ErrCheckoutPayablesConflict = httpserver.NewApiError(http.StatusConflict, "CHECKOUT_PAYABLES_CONFLICT", "These orders were already registered with different amounts.")
+	ErrCheckoutPayablesInvalid  = httpserver.NewApiError(http.StatusBadRequest, "CHECKOUT_PAYABLES_INVALID", "Checkout orders must have positive amounts and use one valid currency.")
 	ErrDirectPaymentNotAllowed  = httpserver.NewApiError(http.StatusUnprocessableEntity, "DIRECT_PAYMENT_NOT_ALLOWED", "This store is not verified yet, so its orders can only be paid through escrow.")
 )
 
@@ -22,7 +24,17 @@ func (gateway *PaymentGateway) RegisterCheckoutPayables(ctx context.Context, pay
 	if len(payables) == 0 {
 		return fmt.Errorf("a checkout needs at least one order")
 	}
+	if err := validateCheckoutPayableMoney(payables); err != nil {
+		return err
+	}
 	checkoutId, buyerId, currency := payables[0].CheckoutId, payables[0].BuyerUserId, payables[0].Currency
+	provider, err := gateway.Container.Provider(gateway.Container.Settings.DefaultProvider)
+	if err != nil {
+		return err
+	}
+	if !provider.SupportsCurrency(currency) {
+		return ErrCurrencyNotSupported
+	}
 	for index, payable := range payables {
 		if payable.PaymentMode == "" {
 			payables[index].PaymentMode, payable.PaymentMode = "escrow", "escrow"
@@ -40,11 +52,30 @@ func (gateway *PaymentGateway) RegisterCheckoutPayables(ctx context.Context, pay
 	if err := gateway.applyCheckoutRules(ctx, payables); err != nil {
 		return err
 	}
-	err := gateway.registerCheckoutPayablesOnce(ctx, payables)
+	err = gateway.registerCheckoutPayablesOnce(ctx, payables)
 	if ent.IsConstraintError(err) {
 		err = gateway.registerCheckoutPayablesOnce(ctx, payables)
 	}
 	return err
+}
+
+func validateCheckoutPayableMoney(payables []models.OrderPayable) error {
+	if len(payables) == 0 {
+		return fmt.Errorf("a checkout needs at least one order")
+	}
+	currency := payables[0].Currency
+	if _, err := money.ParseCurrencyCode(currency); err != nil {
+		return ErrCurrencyNotSupported
+	}
+	for _, payable := range payables {
+		if payable.AmountMinor <= 0 {
+			return ErrCheckoutPayablesInvalid
+		}
+		if payable.Currency != currency {
+			return ErrCheckoutPayablesInvalid
+		}
+	}
+	return nil
 }
 
 func (gateway *PaymentGateway) registerCheckoutPayablesOnce(ctx context.Context, payables []models.OrderPayable) error {

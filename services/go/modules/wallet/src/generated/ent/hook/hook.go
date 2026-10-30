@@ -80,6 +80,18 @@ func (f CoinPurchaseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoinPurchaseMutation", m)
 }
 
+// The CoinPurchaseChargebackFunc type is an adapter to allow the use of ordinary
+// function as CoinPurchaseChargeback mutator.
+type CoinPurchaseChargebackFunc func(context.Context, *ent.CoinPurchaseChargebackMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoinPurchaseChargebackFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoinPurchaseChargebackMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoinPurchaseChargebackMutation", m)
+}
+
 // The CoinTransferFunc type is an adapter to allow the use of ordinary
 // function as CoinTransfer mutator.
 type CoinTransferFunc func(context.Context, *ent.CoinTransferMutation) (ent.Value, error)

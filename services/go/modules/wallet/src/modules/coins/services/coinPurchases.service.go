@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"slices"
+	"strings"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 	paymentconstants "nantty/modules/payments/src/constants"
@@ -125,6 +128,157 @@ func (purchases CoinPurchases) HandleFailedPayment(ctx context.Context, transact
 		return err
 	}
 	return purchase.Update().SetStatus(coinpurchase.StatusFailed).Exec(ctx)
+}
+
+// HandleProviderDispute applies coin clawback only after the provider reports a
+// final loss. It runs in the payment module's transaction, so the dispute
+// receipt, coin ledger, staff-review flag, and cash chargeback accounting commit
+// or roll back together.
+func (purchases CoinPurchases) HandleProviderDispute(ctx context.Context, transaction *sql.Tx, notice paymentmodels.ProviderDisputeNotice) error {
+	if notice.Status != "lost" {
+		return nil
+	}
+	if notice.ProviderDisputeId == "" || notice.AmountMinor <= 0 {
+		return fmt.Errorf("lost coin-purchase dispute requires a provider dispute id and positive amount")
+	}
+
+	client := purchases.Container.Client(transaction)
+	purchase, err := lockCoinPurchase(ctx, client, notice.SubjectId)
+	if err != nil {
+		return err
+	}
+	if notice.Purpose != paymentconstants.PurposeCoinPurchase || purchase.PaymentIntentID == nil || purchase.PaymentIntentID.String() != notice.PaymentIntentId.String() {
+		return fmt.Errorf("provider dispute does not match the coin purchase payment intent")
+	}
+	if purchase.Channel != coinpurchase.ChannelWebCheckout || (purchase.Status != coinpurchase.StatusSucceeded && purchase.Status != coinpurchase.StatusRefunded) {
+		return fmt.Errorf("lost provider dispute references a coin purchase that was not a completed web checkout")
+	}
+	if purchase.AmountMinor <= 0 || !strings.EqualFold(purchase.Currency, notice.Currency) {
+		return fmt.Errorf("lost provider dispute amount or currency does not match the coin purchase")
+	}
+
+	providerIntent, err := purchases.Container.Payments.Container.Client(transaction).PaymentIntent.Get(ctx, notice.PaymentIntentId)
+	if err != nil {
+		return err
+	}
+	if providerIntent.Purpose != paymentconstants.PurposeCoinPurchase || providerIntent.SubjectID != purchase.ID.String() || providerIntent.AmountMinor != purchase.AmountMinor || !strings.EqualFold(providerIntent.Currency, purchase.Currency) {
+		return fmt.Errorf("coin purchase does not match its payment intent")
+	}
+
+	// A repeated final notice is an idempotent no-op. Locking the purchase first
+	// serializes distinct partial disputes for the same purchase.
+	var existingAmount int64
+	var existingPurchase uuid.UUID
+	chargebacksTable := pgx.Identifier{purchases.Container.Settings.Money.DatabaseSchema, "coin_purchase_chargebacks"}.Sanitize()
+	err = transaction.QueryRowContext(ctx, `SELECT purchase_id, amount_minor FROM `+chargebacksTable+` WHERE provider = $1 AND provider_dispute_id = $2`, providerIntent.Provider, notice.ProviderDisputeId).Scan(&existingPurchase, &existingAmount)
+	if err == nil {
+		if existingPurchase != purchase.ID || existingAmount != notice.AmountMinor {
+			return fmt.Errorf("provider dispute was already recorded against a different purchase or amount")
+		}
+		return nil
+	}
+	if err != sql.ErrNoRows {
+		return err
+	}
+
+	var priorAmount, priorCoins int64
+	if err := transaction.QueryRowContext(ctx, `SELECT COALESCE(SUM(amount_minor), 0), COALESCE(SUM(coins_clawed), 0) FROM `+chargebacksTable+` WHERE purchase_id = $1`, purchase.ID).Scan(&priorAmount, &priorCoins); err != nil {
+		return err
+	}
+	if priorAmount < 0 || priorAmount > purchase.AmountMinor || priorCoins < 0 || priorCoins > purchase.Coins {
+		return fmt.Errorf("stored coin chargeback totals exceed the purchase bounds")
+	}
+	if notice.AmountMinor > purchase.AmountMinor-priorAmount {
+		return fmt.Errorf("cumulative lost dispute amount exceeds the coin purchase amount")
+	}
+	cumulativeAmount := priorAmount + notice.AmountMinor
+	targetCoins, err := models.ProportionalCoinChargeback(cumulativeAmount, purchase.Coins, purchase.AmountMinor)
+	if err != nil {
+		return err
+	}
+	alreadyClawed := priorCoins
+	// A separate completed refund/reversal has already removed all purchased
+	// coins. Do not claw those coins a second time when a later chargeback lands.
+	if purchase.Status == coinpurchase.StatusRefunded || purchase.ReviewStatus == coinpurchase.ReviewStatusReversed {
+		alreadyClawed = purchase.Coins
+	}
+	coinsToClaw := max(targetCoins-alreadyClawed, 0)
+	if coinsToClaw > purchase.Coins-alreadyClawed {
+		return fmt.Errorf("calculated coin chargeback clawback exceeds the remaining purchased coins")
+	}
+
+	inserted, err := transaction.ExecContext(ctx, `INSERT INTO `+chargebacksTable+` (id, created_at, purchase_id, provider, provider_dispute_id, amount_minor, coins_clawed, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $2) ON CONFLICT (provider, provider_dispute_id) DO NOTHING`, uuid.Must(uuid.NewV7()), purchases.Container.Now().UTC(), purchase.ID, providerIntent.Provider, notice.ProviderDisputeId, notice.AmountMinor, coinsToClaw)
+	if err != nil {
+		return err
+	}
+	insertedCount, err := inserted.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if insertedCount == 0 {
+		return nil
+	}
+
+	clawback := models.CoinClawback{}
+	if coinsToClaw > 0 {
+		buyerCoins := ledgermodels.UserSpendableCoinsAccount(purchase.UserID)
+		balance, err := purchases.Container.Ledger.ReadAccountBalance(ctx, transaction, buyerCoins)
+		if err != nil {
+			return err
+		}
+		clawback = models.SplitCoinClawback(balance, coinsToClaw)
+		lines := []ledgermodels.JournalLineRequest{{Account: ledgermodels.CoinsInCirculationAccount(), Direction: ledgermodels.Credit, AmountMinor: coinsToClaw}}
+		if clawback.RecoveredCoins > 0 {
+			lines = append(lines, ledgermodels.JournalLineRequest{Account: buyerCoins, Direction: ledgermodels.Debit, AmountMinor: clawback.RecoveredCoins})
+		}
+		if clawback.ShortfallCoins > 0 {
+			lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.UserCoinDebtAccount(purchase.UserID), Direction: ledgermodels.Debit, AmountMinor: clawback.ShortfallCoins})
+		}
+		if _, err := purchases.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
+			Reference: "coin-purchase-chargeback:" + providerIntent.Provider + ":" + notice.ProviderDisputeId,
+			Kind:      "coins.purchaseChargebackLost", Description: "Coins removed after a lost card or bank chargeback",
+			Metadata: map[string]any{"coinPurchaseId": purchase.ID.String(), "providerDisputeId": notice.ProviderDisputeId, "chargedBackMinor": notice.AmountMinor, "cumulativeChargedBackMinor": cumulativeAmount, "recoveredCoins": clawback.RecoveredCoins, "shortfallCoins": clawback.ShortfallCoins},
+			Lines:    lines,
+		}); err != nil {
+			return err
+		}
+	}
+
+	if providerIntent.Provider == "flutterwave" {
+		if _, err := purchases.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
+			Reference: "coin-purchase-chargeback-loss:" + notice.ProviderDisputeId, Kind: "chargeback.lostUnrecovered",
+			ExternalReference: purchase.Reference, Description: "Lost provider chargeback on a coin purchase",
+			Lines: []ledgermodels.JournalLineRequest{
+				{Account: ledgermodels.PlatformUnreconciledLossAccount(purchase.Currency), Direction: ledgermodels.Debit, AmountMinor: notice.AmountMinor},
+				{Account: ledgermodels.PlatformChargebackReceivableAccount(providerIntent.Provider, purchase.Currency), Direction: ledgermodels.Credit, AmountMinor: notice.AmountMinor},
+			},
+		}); err != nil {
+			return err
+		}
+	}
+
+	flags := append([]string(nil), purchase.ReviewFlags...)
+	if !slices.Contains(flags, "coin_purchase_chargeback_lost") {
+		flags = append(flags, "coin_purchase_chargeback_lost")
+	}
+	now := purchases.Container.Now().UTC()
+	if err := purchase.Update().SetReviewStatus(coinpurchase.ReviewStatusPendingReview).SetReviewFlags(flags).
+		SetReviewedByStaffID("").ClearReviewedAt().AddClawbackShortfallCoins(clawback.ShortfallCoins).
+		SetReviewNote("Provider dispute lost; coin clawback and chargeback require staff review.").Exec(ctx); err != nil {
+		return err
+	}
+	if clawback.ShortfallCoins > 0 {
+		if err := client.WalletRiskFlag.Create().SetUserID(purchase.UserID).SetReason("coinPurchaseChargebackLost").SetSubjectID(notice.ProviderDisputeId).
+			SetCoinsShortfall(clawback.ShortfallCoins).SetCreatedAt(now).Exec(ctx); err != nil {
+			return err
+		}
+	}
+	return purchases.Container.Outbox.EnqueueInTransaction(ctx, transaction, "coinPurchase.chargebackLost", purchase.ID.String(), now, map[string]any{
+		"coinPurchaseId": purchase.ID.String(), "userId": purchase.UserID, "provider": providerIntent.Provider, "providerDisputeId": notice.ProviderDisputeId,
+		"chargedBackMinor": notice.AmountMinor, "cumulativeChargedBackMinor": cumulativeAmount, "coinsClawed": coinsToClaw,
+		"recoveredCoins": clawback.RecoveredCoins, "shortfallCoins": clawback.ShortfallCoins,
+	})
 }
 
 func (purchases CoinPurchases) VerifyCoinPurchase(ctx context.Context, userId, reference string) (dtos.VerifiedCoinPurchaseDto, error) {

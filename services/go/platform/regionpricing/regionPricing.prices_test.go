@@ -31,7 +31,11 @@ func TestPriceLookupPerCountry(t *testing.T) {
 		currency                         string
 	}{
 		{"NG", "blue", "web", "month", 250_000, "NGN"},
-		{"NG", "blue", "ios", "month", 290_000, "NGN"},
+		{"NG", "premium", "web", "month", 2_000_000, "NGN"},
+		{"NG", "seller_business", "web", "month", 3_000_000, "NGN"},
+		{"NG", "blue", "ios", "month", GrossUpForStoreFee(250_000, DefaultStoreFeeSettings().AppleFeeBps, "NGN"), "NGN"},
+		{"NG", "seller_business", "ios", "month", GrossUpForStoreFee(3_000_000, DefaultStoreFeeSettings().AppleFeeBps, "NGN"), "NGN"},
+		{"NG", "seller_pro", "android", "month", GrossUpForStoreFee(500_000, DefaultStoreFeeSettings().GoogleSubscriptionFeeBps, "NGN"), "NGN"},
 		{"NG", "blue", "web", "year", 2_400_000, "NGN"},
 		{"GH", "premium", "android", "month", 6_500, "GHS"},
 		{"KE", "seller_pro", "web", "month", 100_000, "KES"},

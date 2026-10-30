@@ -146,6 +146,15 @@ describe("hiding comments", () => {
     await expect(create({ authorId: stranger, postId, text: "hi", parentCommentId: rootId, mentions: undefined, quotedPostId: undefined })).rejects.toMatchObject({ status: 404 });
   });
 
+  it("links comments on clips back to that clip and exact comment", async () => {
+    const store = createMemoryStore({ posts: [{ ...buildPostRow({ id: postId, kind: "clip", commentCount: 0 }) } as Row] });
+    await createCreateCommentHandler(store.context)({ authorId: commenter, postId, text: "Nice clip", parentCommentId: undefined, mentions: undefined, quotedPostId: undefined });
+    const notificationEvent = store.events.find((event) => event["eventType"] === "comment.created");
+    const eventPayload = notificationEvent?.["payload"] as Record<string, unknown> | undefined;
+    const eventData = eventPayload?.["data"] as Record<string, unknown> | undefined;
+    expect(eventData?.["url"]).toBe(`/clips/${postId}?comment=${String(eventData?.["commentId"])}`);
+  });
+
   it("unpins a pinned comment when it is hidden", async () => {
     const { store, hide } = setup();
     row(store.comments, otherRootId)["isPinned"] = true;

@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 
-import { HttpMiddlewarePipeline, createHttpServer, createNodeHttpAdapter, createResponseContext, type HttpMiddleware, type HttpRequestContext } from "@zudojs/http";
-import { createLogger, type Logger } from "@zudojs/logger";
+import { HttpMiddlewarePipeline, createHttpServer, createNodeHttpAdapter, createResponseContext, type HttpMiddleware, type HttpRequestContext } from "@nantty/fastify-platform";
+import { createLogger, type Logger } from "@nantty/fastify-platform";
 
 import type { SupportConfig } from "./configs/support.config.js";
 import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
@@ -52,7 +52,7 @@ export function createSupportApp(config: SupportConfig, infrastructure: { readon
   });
   const dispatch: HttpMiddleware = async (requestContext) => {
     try {
-      return (await dispatchWithRoute(router, requestContext.request, requestContext.signal)).response;
+      return (await dispatchWithRoute(router, requestContext.request, requestContext.signal ?? new AbortController().signal)).response;
     } catch (error) {
       logger.error("unhandled error", { path: requestContext.request.path, error: error instanceof Error ? error.message : String(error) });
       return json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });

@@ -1,7 +1,7 @@
 # Python services
 
 The Python intelligence layer lives at [`services/python/intelligence`](intelligence).
-It is structured like a Nanttyjs app (`src/modules/<domain>`, snake_case files with a kind suffix such as
+It is structured like the TypeScript service architecture (`src/modules/<domain>`, snake_case files with a kind suffix such as
 `feed_rank.route.py`) and its HTTP contract is [`services/python/intelligence/apiContract.md`](intelligence/apiContract.md).
 
 Rules that apply to it (see `platform.decisions` in `docs/architecture/microservicesPlan.json`):

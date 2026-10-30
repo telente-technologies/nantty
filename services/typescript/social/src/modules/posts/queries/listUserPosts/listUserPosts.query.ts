@@ -4,4 +4,5 @@ export interface ListUserPostsQuery {
   readonly cursor: string | undefined;
   readonly limit: number;
   readonly kind: "post" | "clip" | undefined;
+  readonly visibility?: "public" | "subscribers";
 }

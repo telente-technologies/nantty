@@ -6,6 +6,9 @@ export const humanVerificationPath = "/api/v1/security/human-verification";
 export const sessionPassSeconds = 12 * 3600;
 export const actionPassSeconds = 300;
 const likeBurstLimitPerMinute = 10;
+export const rateLimitChallengePendingKey = (subject: string) => `sec:hv:rate-limit-pending:${subject}`;
+export const rateLimitChallengePassKey = (subject: string) => `sec:hv:rate-limit-pass:${subject}`;
+export const rateLimitChallengeCooldownKey = (subject: string) => `sec:hv:rate-limit-cooldown:${subject}`;
 
 const mutatingMethods = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -88,6 +91,25 @@ export class HumanVerificationGate {
   public async grantPasses(sessionId: string): Promise<void> {
     await this.store.put(sessionPassKey(sessionId), sessionPassSeconds);
     await this.store.put(actionPassKey(sessionId), actionPassSeconds);
+    await this.store.take(rateLimitChallengePendingKey(`s:${sessionId}`));
+    await this.store.put(rateLimitChallengePassKey(`s:${sessionId}`), 60);
+    await this.store.put(rateLimitChallengeCooldownKey(`s:${sessionId}`), 300);
+  }
+
+  public async requireRateLimitChallenge(subject: string): Promise<void> {
+    await this.store.put(rateLimitChallengePendingKey(subject), 300);
+  }
+
+  public async hasPendingRateLimitChallenge(subject: string): Promise<boolean> {
+    return this.store.has(rateLimitChallengePendingKey(subject));
+  }
+
+  public async takeRateLimitPass(subject: string): Promise<boolean> {
+    return this.store.take(rateLimitChallengePassKey(subject));
+  }
+
+  public async isRateLimitChallengeCoolingDown(subject: string): Promise<boolean> {
+    return this.store.has(rateLimitChallengeCooldownKey(subject));
   }
 }
 

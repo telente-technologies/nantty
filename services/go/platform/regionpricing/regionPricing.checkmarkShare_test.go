@@ -26,14 +26,14 @@ func TestDefaultCheckmarkStandalonePriceFollowsRegionChannelAndInterval(t *testi
 	if got := DefaultCheckmarkStandalonePrice("gold", "NGN", "web", "month"); got != 300_000 {
 		t.Fatalf("Gold web month in NGN = %d", got)
 	}
-	if got := DefaultCheckmarkStandalonePrice("blue", "NGN", "android", "month"); got != 290_000 {
+	if got := DefaultCheckmarkStandalonePrice("blue", "NGN", "android", "month"); got != GrossUpForStoreFee(250_000, DefaultStoreFeeSettings().GoogleSubscriptionFeeBps, "NGN") {
 		t.Fatalf("Blue android month in NGN = %d", got)
 	}
 	if got := DefaultCheckmarkStandalonePrice("blue", "NGN", "web", "year"); got != YearlyFromMonthly(250_000, DefaultYearlyDiscountBps, "NGN") {
 		t.Fatalf("Blue web year in NGN = %d", got)
 	}
 	if got := DefaultCheckmarkStandalonePrice("gold", "NGN", "ios", "month"); got != 300_000 {
-		t.Fatalf("Gold has no app price so the web price applies, got %d", got)
+		t.Fatalf("legacy Gold checkmark-only plan falls back to web price, got %d", got)
 	}
 	if got := DefaultCheckmarkStandalonePrice("blue", "JPY", "web", "month"); got != 0 {
 		t.Fatalf("unsupported currency = %d", got)

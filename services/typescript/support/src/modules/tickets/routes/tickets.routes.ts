@@ -1,4 +1,4 @@
-import type { HttpRouter } from "@zudojs/http";
+import type { HttpRouter } from "@nantty/fastify-platform";
 
 import type { createMacrosController } from "../controllers/macros.controller.js";
 import type { createMyTicketsController } from "../controllers/myTickets.controller.js";

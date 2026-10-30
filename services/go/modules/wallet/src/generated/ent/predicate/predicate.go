@@ -24,6 +24,9 @@ type CoinPackage func(*sql.Selector)
 // CoinPurchase is the predicate function for coinpurchase builders.
 type CoinPurchase func(*sql.Selector)
 
+// CoinPurchaseChargeback is the predicate function for coinpurchasechargeback builders.
+type CoinPurchaseChargeback func(*sql.Selector)
+
 // CoinTransfer is the predicate function for cointransfer builders.
 type CoinTransfer func(*sql.Selector)
 

@@ -47,7 +47,8 @@ if config_env() != :test do
 end
 
 if config_env() == :prod do
-  config :realtime, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+  cluster_settings = Realtime.ClusterConfig.production_settings!(System.get_env())
+  config :realtime, :dns_cluster_query, cluster_settings.dns_cluster_query
 
   config :realtime,
          :allowed_origins,

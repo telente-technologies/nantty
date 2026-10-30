@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { MediaDatabase } from "../databases/prisma.database.js";
 import type { Clock } from "../interfaces/clock.interface.js";

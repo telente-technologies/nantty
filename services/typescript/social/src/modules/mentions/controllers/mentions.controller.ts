@@ -15,6 +15,9 @@ export function createMentionsController(route: RouteFactory, handlers: Mentions
   return {
     candidates: route({ authentication: "required", query: candidatesQuerySchema }, ({ principal, query }) =>
       handlers.listMentionCandidates({ viewerId: principal.accountId, surface: query.surface, term: query.q ?? "", conversationId: query.conversationId })),
-    resolve: route({ authentication: "optional", body: resolveBodySchema }, ({ body }) => handlers.resolveMentionTargets({ userIds: body.userIds })),
+    // Resolving account IDs to usernames/statuses enables client-side mention
+    // rendering. Keep it authenticated; the gateway applies the existing
+    // account-scoped mentionsResolve rate limit to this route.
+    resolve: route({ authentication: "required", body: resolveBodySchema }, ({ body }) => handlers.resolveMentionTargets({ userIds: body.userIds })),
   };
 }

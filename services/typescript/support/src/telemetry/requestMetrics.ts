@@ -1,5 +1,5 @@
 import { metrics, type Histogram, type MeterProvider } from "@opentelemetry/api";
-import type { HttpRequestContext, HttpResponseContext, createRouter } from "@zudojs/http";
+import type { HttpRequestContext, HttpResponseContext, createRouter } from "@nantty/fastify-platform";
 
 const knownMethods = new Set(["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
 const routes = new WeakMap<object, string>();

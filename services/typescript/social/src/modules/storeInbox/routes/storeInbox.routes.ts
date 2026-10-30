@@ -1,4 +1,4 @@
-import type { HttpRouter } from "@zudojs/http";
+import type { HttpRouter } from "@nantty/fastify-platform";
 
 import type { createStoreInboxController } from "../controllers/storeInbox.controller.js";
 

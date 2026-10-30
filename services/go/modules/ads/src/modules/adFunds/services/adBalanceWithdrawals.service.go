@@ -109,6 +109,17 @@ func reserveWithdrawal(ctx context.Context, deployed *container.Container, userI
 		if account, err = tx.AdAccount.Query().Where(adaccount.ID(account.ID)).ForUpdate().Only(ctx); err != nil {
 			return err
 		}
+		previous, err := tx.AdBalanceWithdrawal.Query().Where(
+			adbalancewithdrawal.UserID(userId),
+			adbalancewithdrawal.IdempotencyKey(key),
+		).Only(ctx)
+		if err == nil {
+			reserved = previous
+			return nil
+		}
+		if !ent.IsNotFound(err) {
+			return err
+		}
 		position, err := adsservices.ReadAdFundsPosition(ctx, tx.Client(), account, deployed.Now())
 		if err != nil {
 			return err

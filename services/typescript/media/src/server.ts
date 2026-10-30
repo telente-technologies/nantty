@@ -1,4 +1,4 @@
-import { createLogger } from "@zudojs/logger";
+import { createLogger } from "@nantty/fastify-platform";
 
 import { createMediaApp } from "./app.js";
 import { loadMediaConfigFromEnvironment } from "./configs/media.config.js";
@@ -8,7 +8,7 @@ import { startTelemetry } from "./telemetry/telemetry.js";
 const stopTelemetry = startTelemetry("media");
 const logger = createLogger({ name: "media" });
 const config = loadMediaConfigFromEnvironment();
-const app = createMediaApp(config, logger);
+const app = await createMediaApp(config, logger);
 
 const port = await app.start();
 logger.info("media listening", { host: config.host, port });

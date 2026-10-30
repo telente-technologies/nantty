@@ -150,7 +150,7 @@ export function createMemoryStore(seed: { posts?: Row[]; comments?: Row[]; postD
       findPrivateAccountIds: async (ids: string[]) => new Set(ids.filter((id) => store.privateAccountIds.has(id))),
     },
     clock: { now: () => store.now },
-    premium: { isPremium: async () => false, hasSubscribedToCreator: async () => false },
+    premium: { isPremium: async () => false, hasSubscribedToCreator: async () => false, canSchedulePosts: async () => false },
   } as unknown as HandlerContext;
   return store;
 }

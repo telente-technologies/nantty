@@ -11,12 +11,14 @@ import (
 	"nantty/modules/live/src/generated/ent/spaceparticipant"
 	"nantty/modules/live/src/generated/ent/spacespeakerrequest"
 	"nantty/modules/live/src/interfaces"
+	"nantty/modules/live/src/services"
 	"nantty/modules/live/src/types"
 	"nantty/modules/live/src/utils"
 	"nantty/platform/httpserver"
 )
 
 type spaceDetailsResponse struct {
+	AnnouncementPostID     string                     `json:"announcementPostId,omitempty"`
 	ID                     string                     `json:"id"`
 	Title                  string                     `json:"title"`
 	Description            string                     `json:"description,omitempty"`
@@ -24,6 +26,8 @@ type spaceDetailsResponse struct {
 	ScheduledAt            *time.Time                 `json:"scheduledAt,omitempty"`
 	StartedAt              *time.Time                 `json:"startedAt,omitempty"`
 	ListenerCount          int                        `json:"listenerCount"`
+	GiftsEnabled           bool                       `json:"giftsEnabled"`
+	Visibility             string                     `json:"visibility"`
 	Host                   spacePerson                `json:"host"`
 	Speakers               []spacePerson              `json:"speakers"`
 	ViewerRole             *string                    `json:"viewerRole,omitempty"`
@@ -126,8 +130,11 @@ func (c SpacesController) Detail(w http.ResponseWriter, r *http.Request) {
 	}
 	response := spaceDetailsResponse{
 		ID: id.String(), Title: row.Title, Description: row.Description, State: row.State,
-		ScheduledAt: row.ScheduledAt, StartedAt: row.StartedAt, ListenerCount: row.Listeners,
+		ScheduledAt: row.ScheduledAt, StartedAt: row.StartedAt, ListenerCount: row.Listeners, Visibility: spaceVisibility(row), GiftsEnabled: row.GiftsEnabled,
 		Host: describeSpacePerson(row.HostID, "host", false, profiles), Speakers: make([]spacePerson, 0),
+	}
+	if postID, ok := row.Metadata["announcementPostId"].(string); ok {
+		response.AnnouncementPostID = postID
 	}
 	for _, participant := range active {
 		if participant.Role == spaceparticipant.RoleSpeaker {
@@ -179,7 +186,10 @@ func authorizeSpaceDetails(ctx context.Context, row *ent.Space, viewer *types.Ac
 	if viewer != nil {
 		viewerID = viewer.UserId
 	}
-	if viewerID != row.HostID {
+	if services.IsInviteOnlySpace(row) && !services.SpaceHasInvite(row, viewerID) {
+		return httpserver.ErrNotFound
+	}
+	if viewerID != row.HostID && !services.IsInviteOnlySpace(row) {
 		private, err := relations.PrivateAccountsAmong(ctx, []uuid.UUID{row.HostID})
 		if err != nil {
 			return err

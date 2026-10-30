@@ -3,10 +3,12 @@
 package coinpurchase
 
 import (
+	"nantty/modules/wallet/src/generated/ent/internal"
 	"nantty/modules/wallet/src/generated/ent/predicate"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -1193,6 +1195,35 @@ func UpdatedAtLT(v time.Time) predicate.CoinPurchase {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.CoinPurchase {
 	return predicate.CoinPurchase(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// HasChargebacks applies the HasEdge predicate on the "chargebacks" edge.
+func HasChargebacks() predicate.CoinPurchase {
+	return predicate.CoinPurchase(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ChargebacksTable, ChargebacksColumn),
+		)
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.CoinPurchaseChargeback
+		step.Edge.Schema = schemaConfig.CoinPurchaseChargeback
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasChargebacksWith applies the HasEdge predicate on the "chargebacks" edge with a given conditions (other predicates).
+func HasChargebacksWith(preds ...predicate.CoinPurchaseChargeback) predicate.CoinPurchase {
+	return predicate.CoinPurchase(func(s *sql.Selector) {
+		step := newChargebacksStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.CoinPurchaseChargeback
+		step.Edge.Schema = schemaConfig.CoinPurchaseChargeback
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

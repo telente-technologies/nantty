@@ -19,7 +19,7 @@ To create ads and pay by card or from your ad credit and balance, no. To use Ads
 
 ## How much does a boost cost?
 
-In Nigeria from ₦1,000 for 1 day. Packages are ₦1,000, ₦3,000, ₦7,000 and ₦15,000, or set your own daily or total budget for up to 30 days. The price is always shown before you pay.
+Minimum budgets, package options and campaign durations are configured by region and can change. The Ads flow shows the applicable price and duration before you pay.
 
 ## Why can't I pay for a boost through Apple or Google?
 
@@ -31,7 +31,7 @@ Yes, if you're verified. Choose your earnings under **Pay with** on the web. See
 
 ## Do I get free boosts?
 
-Blue Premium members get one free boost a month, worth up to ₦1,000 in Nigeria. See [Your free boost with Premium](/help/ads-and-boosts/free-boost-with-premium).
+Do not assume a plan includes free boosts; any eligible promotion is displayed in the Ads flow and plan entitlements.
 
 ## Can I withdraw my ad balance or ad credit?
 
@@ -39,7 +39,7 @@ Your **ad balance** (real money you added) can be withdrawn to your Nantty walle
 
 ## What is cashback?
 
-Some advertisers get a share of their ad spend, usually 10%, back as ad credit. It's only earned on spend paid with real money, not on spend paid with credit.
+Some campaigns may grant ad credit under their displayed terms. Credit is distinct from withdrawable funds; review the offer details before participating.
 
 ## What happens if my boost is rejected?
 
@@ -89,7 +89,7 @@ Its ads and boosts pause automatically, and resume if the store is reinstated.
 
 ## Who won't see my ad?
 
-Blue Premium and Gold Business members don't see ads. See [How many ads you see on each plan](/help/ads-and-boosts/ads-by-plan).
+Ad load depends on the active plan entitlement and configured platform settings. See [How many ads you see on each plan](/help/ads-and-boosts/ads-by-plan).
 
 ## How do creators earn from ads?
 

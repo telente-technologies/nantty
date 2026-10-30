@@ -2,12 +2,12 @@ import { popularFeedCandidateLimit } from "../../../constants/social.constant.js
 import type { Db } from "../../../types/database.type.js";
 import { extractHashtags } from "../../internalSources/services/hashtags.service.js";
 import { postWithMedia, type PostRow } from "../../posts/repositories/post.repository.js";
-import { shownToViewers } from "../../../constants/moderation.constant.js";
+import { publishedPostToViewers } from "../../../constants/moderation.constant.js";
 
 export const feedRepository = {
   pageFollowing: (db: Db, authorIds: readonly string[], kinds: readonly ("post" | "clip")[], limit: number, cursor: string | undefined): Promise<PostRow[]> =>
     db.post.findMany({
-      where: { authorId: { in: [...authorIds] }, kind: { in: [...kinds] }, ...shownToViewers, ...(cursor === undefined ? {} : { id: { lt: cursor } }) },
+      where: { authorId: { in: [...authorIds] }, kind: { in: [...kinds] }, ...publishedPostToViewers, ...(cursor === undefined ? {} : { id: { lt: cursor } }) },
       orderBy: { id: "desc" },
       take: limit + 1,
       include: postWithMedia,
@@ -15,7 +15,7 @@ export const feedRepository = {
 
   popularCandidates: (db: Db, kinds: readonly ("post" | "clip")[], since: Date): Promise<PostRow[]> =>
     db.post.findMany({
-      where: { kind: { in: [...kinds] }, deletedAt: null, moderationVisibility: "visible", audience: "everyone", visibility: "public", createdAt: { gte: since } },
+      where: { kind: { in: [...kinds] }, ...publishedPostToViewers, moderationVisibility: "visible", audience: "everyone", visibility: "public", createdAt: { gte: since } },
       orderBy: [{ likeCount: "desc" }, { id: "desc" }],
       take: popularFeedCandidateLimit,
       include: postWithMedia,
@@ -28,7 +28,7 @@ export const feedRepository = {
   },
 
   findRankedRows: (db: Db, ids: readonly string[], kinds: readonly ("post" | "clip")[]): Promise<PostRow[]> =>
-    db.post.findMany({ where: { id: { in: [...ids] }, kind: { in: [...kinds] }, deletedAt: null, moderationVisibility: "visible", audience: "everyone", visibility: "public" }, include: postWithMedia }),
+    db.post.findMany({ where: { id: { in: [...ids] }, kind: { in: [...kinds] }, ...publishedPostToViewers, moderationVisibility: "visible", audience: "everyone", visibility: "public" }, include: postWithMedia }),
 
   recordFeedback: (db: Db, userId: string, postId: string, kind: string) => db.feedFeedback.create({ data: { userId, postId, kind } }),
 

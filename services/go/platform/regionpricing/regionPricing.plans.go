@@ -21,16 +21,16 @@ const UsdBillingNote = "Billed in USD"
 
 type monthlyPair struct{ web, app int64 }
 
-var inAppPlans = map[string]bool{"blue_essential": true, "blue": true, "premium": true}
+var inAppPlans = map[string]bool{"blue_essential": true, "blue": true, "premium": true, "seller_pro": true, "seller_business": true}
 
-var defaultMonthlyPlanPrices = map[string]map[string]monthlyPair{
-	"blue_essential":  {"NG": {100_000, 120_000}, "GH": {1_200, 1_500}, "KE": {20_000, 25_000}, "ZA": {2_999, 3_499}, "GB": {249, 299}, "EU": {249, 299}, "US": {249, 299}},
-	"blue":            {"NG": {250_000, 290_000}, "GH": {3_000, 3_500}, "KE": {50_000, 60_000}, "ZA": {5_999, 6_999}, "GB": {599, 699}, "EU": {599, 699}, "US": {599, 699}},
-	"premium":         {"NG": {450_000, 550_000}, "GH": {5_500, 6_500}, "KE": {90_000, 110_000}, "ZA": {10_999, 12_999}, "GB": {999, 1_199}, "EU": {1_099, 1_299}, "US": {999, 1_199}},
-	"seller_pro":      {"NG": {500_000, 0}, "GH": {6_000, 0}, "KE": {100_000, 0}, "ZA": {14_999, 0}, "GB": {1_500, 0}, "EU": {1_700, 0}, "US": {1_700, 0}},
-	"seller_business": {"NG": {1_500_000, 0}, "GH": {18_000, 0}, "KE": {300_000, 0}, "ZA": {44_999, 0}, "GB": {4_500, 0}, "EU": {4_900, 0}, "US": {4_900, 0}},
-	"gold_only":       {"NG": {300_000, 0}, "GH": {3_600, 0}, "KE": {60_000, 0}, "ZA": {8_999, 0}, "GB": {900, 0}, "EU": {1_000, 0}, "US": {1_000, 0}},
-	"black":           {"NG": {5_000_000, 0}, "GH": {60_000, 0}, "KE": {1_000_000, 0}, "ZA": {149_999, 0}, "GB": {14_900, 0}, "EU": {16_900, 0}, "US": {16_900, 0}},
+var defaultMonthlyPlanPrices = map[string]map[string]int64{
+	"blue_essential":  {"NG": 100_000, "GH": 1_200, "KE": 20_000, "ZA": 2_999, "GB": 249, "EU": 249, "US": 249},
+	"blue":            {"NG": 250_000, "GH": 3_000, "KE": 50_000, "ZA": 5_999, "GB": 599, "EU": 599, "US": 599},
+	"premium":         {"NG": 2_000_000, "GH": 5_500, "KE": 90_000, "ZA": 10_999, "GB": 999, "EU": 1_099, "US": 999},
+	"seller_pro":      {"NG": 500_000, "GH": 6_000, "KE": 100_000, "ZA": 14_999, "GB": 1_500, "EU": 1_700, "US": 1_700},
+	"seller_business": {"NG": 3_000_000, "GH": 18_000, "KE": 300_000, "ZA": 44_999, "GB": 4_500, "EU": 4_900, "US": 4_900},
+	"gold_only":       {"NG": 300_000, "GH": 3_600, "KE": 60_000, "ZA": 8_999, "GB": 900, "EU": 1_000, "US": 1_000},
+	"black":           {"NG": 5_000_000, "GH": 60_000, "KE": 1_000_000, "ZA": 149_999, "GB": 14_900, "EU": 16_900, "US": 16_900},
 }
 
 func DefaultStoreProductId(planCode, interval string) string {
@@ -54,16 +54,14 @@ func DefaultPlanPrices() []PlanRegionalPrice {
 	var prices []PlanRegionalPrice
 	for _, region := range supportedRegions {
 		for planCode, byRegion := range defaultMonthlyPlanPrices {
-			pair := byRegion[region.Code]
+			webMonthly := byRegion[region.Code]
 			price := PlanRegionalPrice{
 				PlanCode: planCode, Region: region.Code, Currency: region.Currency,
-				WebMonthlyMinor: pair.web, WebYearlyMinor: YearlyFromMonthly(pair.web, DefaultYearlyDiscountBps, region.Currency),
+				WebMonthlyMinor: webMonthly, WebYearlyMinor: YearlyFromMonthly(webMonthly, DefaultYearlyDiscountBps, region.Currency),
 				StoreProductIds: defaultStoreProductIds(planCode),
 			}
-			if pair.app > 0 {
-				appYearly := YearlyFromMonthly(pair.app, DefaultYearlyDiscountBps, region.Currency)
-				price.IosMonthlyMinor, price.IosYearlyMinor = pair.app, appYearly
-				price.AndroidMonthlyMinor, price.AndroidYearlyMinor = pair.app, appYearly
+			if inAppPlans[planCode] {
+				price = DeriveStorePrices(price, DefaultStoreFeeSettings(), DefaultYearlyDiscountBps)
 			}
 			prices = append(prices, price)
 		}

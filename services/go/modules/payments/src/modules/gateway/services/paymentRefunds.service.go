@@ -26,11 +26,18 @@ type RequestedRefund struct {
 	Replayed  bool
 }
 
+func sameRefundRequest(existing *ent.PaymentRefund, request models.RefundRequest) bool {
+	return existing.PaymentIntentID == request.PaymentIntentId &&
+		existing.AmountMinor == request.AmountMinor &&
+		existing.Currency == request.Currency &&
+		existing.Reason == truncateReason(request.Reason)
+}
+
 func (gateway *PaymentGateway) RequestRefundInTransaction(ctx context.Context, transaction *sql.Tx, request models.RefundRequest) (RequestedRefund, error) {
 	client := gateway.Container.Client(transaction)
 	existing, err := client.PaymentRefund.Query().Where(paymentrefund.Reference(request.Reference)).Only(ctx)
 	if err == nil {
-		if existing.PaymentIntentID != request.PaymentIntentId || existing.AmountMinor != request.AmountMinor {
+		if !sameRefundRequest(existing, request) {
 			return RequestedRefund{}, fmt.Errorf("refund reference %s reused with different details", request.Reference)
 		}
 		return RequestedRefund{RefundId: existing.ID, Provider: existing.Provider, Reference: existing.Reference, Replayed: true}, nil
@@ -43,6 +50,21 @@ func (gateway *PaymentGateway) RequestRefundInTransaction(ctx context.Context, t
 		return RequestedRefund{}, ErrPaymentNotFound
 	}
 	if err != nil {
+		return RequestedRefund{}, err
+	}
+	// The initial reference lookup can race another transaction: an uncommitted
+	// refund is invisible until that transaction commits, while the payment-row
+	// lock below serializes both requests. Recheck after acquiring the lock so
+	// the waiter observes and replays the winner instead of failing on the
+	// unique refund-reference constraint.
+	existing, err = client.PaymentRefund.Query().Where(paymentrefund.Reference(request.Reference)).Only(ctx)
+	if err == nil {
+		if !sameRefundRequest(existing, request) {
+			return RequestedRefund{}, fmt.Errorf("refund reference %s reused with different details", request.Reference)
+		}
+		return RequestedRefund{RefundId: existing.ID, Provider: existing.Provider, Reference: existing.Reference, Replayed: true}, nil
+	}
+	if !ent.IsNotFound(err) {
 		return RequestedRefund{}, err
 	}
 	if intent.Status != paymentintent.StatusSucceeded {

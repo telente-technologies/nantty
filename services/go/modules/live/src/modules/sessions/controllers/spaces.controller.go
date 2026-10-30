@@ -94,6 +94,7 @@ type spaceSummaryResponse struct {
 	ScheduledAt   *time.Time  `json:"scheduledAt,omitempty"`
 	StartedAt     *time.Time  `json:"startedAt,omitempty"`
 	ListenerCount int         `json:"listenerCount"`
+	Visibility    string      `json:"visibility"`
 	Host          spacePerson `json:"host"`
 }
 
@@ -124,7 +125,7 @@ func (c SpacesController) presentSpaceSummaries(ctx context.Context, rows []*ent
 	for _, row := range accessible {
 		views = append(views, spaceSummaryResponse{
 			ID: row.ID.String(), Title: row.Title, Description: row.Description, State: row.State,
-			ScheduledAt: row.ScheduledAt, StartedAt: row.StartedAt, ListenerCount: row.Listeners,
+			ScheduledAt: row.ScheduledAt, StartedAt: row.StartedAt, ListenerCount: row.Listeners, Visibility: spaceVisibility(row),
 			Host: describeSpacePerson(row.HostID, "host", false, profiles),
 		})
 	}
@@ -169,6 +170,20 @@ func filterAccessibleSpaceRows(ctx context.Context, rows []*ent.Space, viewer *t
 			continue
 		}
 		isHost := viewer != nil && row.HostID == viewerID
+		if services.IsInviteOnlySpace(row) {
+			if viewer == nil || !services.SpaceHasInvite(row, viewerID) {
+				continue
+			}
+			blocked, err := relations.BlockedEitherWay(ctx, viewerID, []uuid.UUID{row.HostID})
+			if err != nil {
+				return nil, err
+			}
+			if blocked[row.HostID] {
+				continue
+			}
+			accessible = append(accessible, row)
+			continue
+		}
 		if viewer == nil {
 			if row.Visibility != space.VisibilityPublic || private[row.HostID] {
 				continue
@@ -231,25 +246,52 @@ func (c SpacesController) Create(w http.ResponseWriter, r *http.Request) {
 	if visibility == "" {
 		visibility = "public"
 	}
-	if visibility != "public" && visibility != "followers" && visibility != "subscribers" {
+	if visibility != "public" && visibility != "followers" && visibility != "subscribers" && visibility != "invite_only" {
 		c.responder().Error(w, r, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "visibility", Message: "unsupported audience policy"}}))
 		return
 	}
+	profiles, profileErr := c.Container.Directory.LookupParticipants(r.Context(), []uuid.UUID{actor.UserId})
+	if profileErr != nil {
+		c.responder().Error(w, r, profileErr)
+		return
+	}
 	room := "space_" + uuid.NewString()
-	query := c.Container.Client.Space.Create().SetHostID(actor.UserId).SetTitle(input.Title).SetDescription(input.Description).SetVisibility(space.Visibility(visibility)).SetLivekitRoom(room)
+	databaseVisibility := visibility
+	metadata := map[string]any{}
+	if visibility == "invite_only" {
+		// Keep the DB enum backward-compatible while invite-only membership lives in
+		// the already-available JSON metadata column and is checked server-side.
+		databaseVisibility = "public"
+		metadata["spaceAudiencePolicy"] = "invite_only"
+		metadata["invitedAccountIds"] = []string{}
+	}
+	query := c.Container.Client.Space.Create().SetHostID(actor.UserId).SetTitle(input.Title).SetDescription(input.Description).SetVisibility(space.Visibility(databaseVisibility)).SetLivekitRoom(room).SetGiftsEnabled(true).SetMetadata(metadata)
 	if input.ScheduledAt != nil {
 		if !input.ScheduledAt.After(c.Container.Now()) {
 			c.responder().Error(w, r, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "scheduledAt", Message: "must be in the future"}}))
 			return
 		}
 		query.SetScheduledAt(*input.ScheduledAt)
+	} else {
+		if err := c.Container.Media.EnsureRoom(r.Context(), room); err != nil {
+			c.responder().Error(w, r, err)
+			return
+		}
+		query.SetState(space.StateLive).SetStartedAt(c.Container.Now())
 	}
 	row, err := query.Save(r.Context())
 	if err != nil {
 		c.responder().Error(w, r, err)
 		return
 	}
-	httpserver.WriteJsonResponse(w, http.StatusCreated, row)
+	httpserver.WriteJsonResponse(w, http.StatusCreated, spaceSummaryResponse{ID: row.ID.String(), Title: row.Title, Description: row.Description, State: row.State, ScheduledAt: row.ScheduledAt, StartedAt: row.StartedAt, Visibility: visibility, Host: describeSpacePerson(row.HostID, "host", false, profiles)})
+}
+
+func spaceVisibility(row *ent.Space) string {
+	if services.IsInviteOnlySpace(row) {
+		return "invite_only"
+	}
+	return string(row.Visibility)
 }
 
 func (c SpacesController) transition(w http.ResponseWriter, r *http.Request, target string) {

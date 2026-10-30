@@ -43,6 +43,14 @@ const (
 	FieldEndReason = "end_reason"
 	// FieldSettledAt holds the string denoting the settled_at field in the database.
 	FieldSettledAt = "settled_at"
+	// FieldSettlementAttempts holds the string denoting the settlement_attempts field in the database.
+	FieldSettlementAttempts = "settlement_attempts"
+	// FieldSettlementLeaseUntil holds the string denoting the settlement_lease_until field in the database.
+	FieldSettlementLeaseUntil = "settlement_lease_until"
+	// FieldSettlementNextAttemptAt holds the string denoting the settlement_next_attempt_at field in the database.
+	FieldSettlementNextAttemptAt = "settlement_next_attempt_at"
+	// FieldSettlementLeaseToken holds the string denoting the settlement_lease_token field in the database.
+	FieldSettlementLeaseToken = "settlement_lease_token"
 	// FieldWinnerUserIds holds the string denoting the winner_user_ids field in the database.
 	FieldWinnerUserIds = "winner_user_ids"
 	// FieldIsTie holds the string denoting the is_tie field in the database.
@@ -70,6 +78,10 @@ var Columns = []string{
 	FieldEndsAt,
 	FieldEndReason,
 	FieldSettledAt,
+	FieldSettlementAttempts,
+	FieldSettlementLeaseUntil,
+	FieldSettlementNextAttemptAt,
+	FieldSettlementLeaseToken,
 	FieldWinnerUserIds,
 	FieldIsTie,
 	FieldSettlement,
@@ -92,6 +104,8 @@ var (
 	DefaultWinnerTakesAll bool
 	// IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
 	IdempotencyKeyValidator func(string) error
+	// DefaultSettlementAttempts holds the default value on creation for the "settlement_attempts" field.
+	DefaultSettlementAttempts int
 	// DefaultWinnerUserIds holds the default value on creation for the "winner_user_ids" field.
 	DefaultWinnerUserIds []string
 	// DefaultIsTie holds the default value on creation for the "is_tie" field.
@@ -231,6 +245,26 @@ func ByEndReason(opts ...sql.OrderTermOption) OrderOption {
 // BySettledAt orders the results by the settled_at field.
 func BySettledAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSettledAt, opts...).ToFunc()
+}
+
+// BySettlementAttempts orders the results by the settlement_attempts field.
+func BySettlementAttempts(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSettlementAttempts, opts...).ToFunc()
+}
+
+// BySettlementLeaseUntil orders the results by the settlement_lease_until field.
+func BySettlementLeaseUntil(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSettlementLeaseUntil, opts...).ToFunc()
+}
+
+// BySettlementNextAttemptAt orders the results by the settlement_next_attempt_at field.
+func BySettlementNextAttemptAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSettlementNextAttemptAt, opts...).ToFunc()
+}
+
+// BySettlementLeaseToken orders the results by the settlement_lease_token field.
+func BySettlementLeaseToken(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSettlementLeaseToken, opts...).ToFunc()
 }
 
 // ByIsTie orders the results by the is_tie field.

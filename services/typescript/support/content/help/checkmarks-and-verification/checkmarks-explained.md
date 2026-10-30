@@ -9,23 +9,15 @@ A checkmark next to a name tells people Nantty has confirmed who is behind the p
 
 ## Blue: people
 
-For personal profiles, including creators. You pay for a Blue plan, then confirm your identity with a selfie and a government photo ID. See [The Blue checkmark](/help/checkmarks-and-verification/blue-checkmark).
-
-You can usually apply when:
-
-- your email is verified
-- your account is at least 90 days old
-- you have at least 1,000 real, active followers
-- you post original content regularly
-- you've had no violations in the last 90 days
+For eligible personal profiles, including creators. Blue Basic and Blue Premium use the same Blue badge; the tier changes entitlements, not badge meaning. Payment and identity approval are separate. Requirements and requested evidence are shown in the verification application. See [The Blue checkmark](/help/checkmarks-and-verification/blue-checkmark).
 
 ## Gold: businesses and brands
 
-For business and brand profiles after business verification. Gold comes with the **Gold Pro** and **Gold Business** seller plans, or with the **Gold** plan for brands that don't sell. Stores usually qualify after about 20 completed orders with a success rate of at least 90%, and need an active store or brand page. See [The Gold checkmark](/help/checkmarks-and-verification/gold-checkmark).
+For business and brand profiles after business verification. Gold Basic and Gold Premium use the same Gold badge. Legacy catalogue codes and current plan/verification workflow are not yet a one-to-one mapping; checkout and the application show current availability. See [The Gold checkmark](/help/checkmarks-and-verification/gold-checkmark).
 
 ## Black: government
 
-Only for official government bodies and public institutions. It needs official vetting, two independent approvals by Nantty staff and yearly re-verification. It can't be bought in the app. See [The Black checkmark](/help/checkmarks-and-verification/black-checkmark).
+Reserved for official government bodies and institutions after manual approval. Black is not granted by a commercial subscription or payment alone. It is web-only in the current source defaults; the exact vetting and review workflow must be confirmed in the application. See [The Black checkmark](/help/checkmarks-and-verification/black-checkmark).
 
 ## Where to manage it
 
@@ -35,8 +27,8 @@ Only for official government bodies and public institutions. It needs official v
 
 ## Good to know
 
-- Paying never buys a badge on its own. If we can't verify you, you're refunded. See [If your checkmark is rejected](/help/checkmarks-and-verification/checkmark-rejected).
-- If you don't qualify yet, tap **Request verification**. We check your account again regularly and notify you when you can apply.
+- Payment never buys a badge on its own. Refunds follow the purchase-specific terms shown at checkout. See [If your checkmark is rejected](/help/checkmarks-and-verification/checkmark-rejected).
+- Eligibility and application options are determined by the current verification workflow; do not infer an automatic re-review schedule.
 - Checkmarks are separate from payout verification. See [Verification levels](/help/checkmarks-and-verification/verification-levels).
 
 ## Losing a checkmark

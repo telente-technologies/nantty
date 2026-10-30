@@ -1,4 +1,4 @@
-import type { HttpRouter } from "@zudojs/http";
+import type { HttpRouter } from "@nantty/fastify-platform";
 
 import { mountBlocksModule } from "../modules/blocks/blocks.module.js";
 import { mountChatSettingsModule } from "../modules/chatSettings/chatSettings.module.js";

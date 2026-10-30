@@ -18,4 +18,4 @@ RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack 
 COPY --from=build /out /app
 USER node
 EXPOSE 8109
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node --import tsx src/server.ts"]
+CMD ["node", "--import", "tsx", "src/server.ts"]

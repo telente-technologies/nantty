@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 export const mediaPurposeSchema = schema.enum(["post", "clip", "story", "avatar", "banner", "product", "chat", "voice", "document", "kyc", "adCreative", "dispute_evidence", "identity_document", "verification_document"]);
 

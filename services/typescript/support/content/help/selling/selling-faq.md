@@ -11,11 +11,11 @@ Tap **Start selling on Nantty** in **Settings** or on your profile and apply. Se
 
 ## Does Nantty take commission?
 
-No. You pay a 1.5% escrow fee on escrow orders (1% on Business) plus the payment processing fee. See [Seller fees](/help/selling/fees-and-escrow-fee).
+No. Nantty's intended launch policy has no commission on sales; actual payment-provider processing fees are passed through at cost and disclosed before checkout. See [Seller fees](/help/selling/fees-and-escrow-fee).
 
 ## Do I need a paid plan?
 
-No. Free covers everyday selling with up to 100 active products. Pro is ₦5,000 and Business ₦15,000 a month. See [Seller plans](/help/selling/seller-plans).
+No. Free covers everyday selling with up to 100 active products. Paid seller plan availability and prices are shown in the signed-in checkout; fresh-install Nigeria source defaults currently include ₦5,000 for Seller Pro and ₦30,000 for Seller Business. See [Seller plans](/help/selling/seller-plans).
 
 ## Can I sell before my business is verified?
 

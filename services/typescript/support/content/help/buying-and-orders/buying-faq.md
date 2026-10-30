@@ -15,7 +15,7 @@ No. Escrow money stays in your own wallet with our licensed payment partner unti
 
 ## Do I pay any fees as a buyer?
 
-No checkout fee and no escrow fee. You pay the item price, any shipping and nothing else.
+Nantty's intended launch policy has no sales commission or extra fee for choosing escrow. Any actual payment-provider charge that applies is shown in the checkout total before you confirm, in addition to item price and shipping.
 
 ## Should I choose escrow or Pay directly?
 

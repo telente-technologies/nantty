@@ -12,6 +12,7 @@ import (
 	"nantty/modules/wallet/src/generated/ent/coinconversion"
 	"nantty/modules/wallet/src/generated/ent/coinpackage"
 	"nantty/modules/wallet/src/generated/ent/coinpurchase"
+	"nantty/modules/wallet/src/generated/ent/coinpurchasechargeback"
 	"nantty/modules/wallet/src/generated/ent/cointransfer"
 	"nantty/modules/wallet/src/generated/ent/idempotentrequest"
 	"nantty/modules/wallet/src/generated/ent/monetisationhold"
@@ -46,6 +47,7 @@ const (
 	TypeCoinConversion            = "CoinConversion"
 	TypeCoinPackage               = "CoinPackage"
 	TypeCoinPurchase              = "CoinPurchase"
+	TypeCoinPurchaseChargeback    = "CoinPurchaseChargeback"
 	TypeCoinTransfer              = "CoinTransfer"
 	TypeIdempotentRequest         = "IdempotentRequest"
 	TypeMonetisationHold          = "MonetisationHold"
@@ -4358,6 +4360,9 @@ type CoinPurchaseMutation struct {
 	review_note                 *string
 	updated_at                  *time.Time
 	clearedFields               map[string]struct{}
+	chargebacks                 map[uuid.UUID]struct{}
+	removedchargebacks          map[uuid.UUID]struct{}
+	clearedchargebacks          bool
 	done                        bool
 	oldValue                    func(context.Context) (*CoinPurchase, error)
 	predicates                  []predicate.CoinPurchase
@@ -5456,6 +5461,60 @@ func (m *CoinPurchaseMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// AddChargebackIDs adds the "chargebacks" edge to the CoinPurchaseChargeback entity by ids.
+func (m *CoinPurchaseMutation) AddChargebackIDs(ids ...uuid.UUID) {
+	if m.chargebacks == nil {
+		m.chargebacks = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.chargebacks[ids[i]] = struct{}{}
+	}
+}
+
+// ClearChargebacks clears the "chargebacks" edge to the CoinPurchaseChargeback entity.
+func (m *CoinPurchaseMutation) ClearChargebacks() {
+	m.clearedchargebacks = true
+}
+
+// ChargebacksCleared reports if the "chargebacks" edge to the CoinPurchaseChargeback entity was cleared.
+func (m *CoinPurchaseMutation) ChargebacksCleared() bool {
+	return m.clearedchargebacks
+}
+
+// RemoveChargebackIDs removes the "chargebacks" edge to the CoinPurchaseChargeback entity by IDs.
+func (m *CoinPurchaseMutation) RemoveChargebackIDs(ids ...uuid.UUID) {
+	if m.removedchargebacks == nil {
+		m.removedchargebacks = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.chargebacks, ids[i])
+		m.removedchargebacks[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedChargebacks returns the removed IDs of the "chargebacks" edge to the CoinPurchaseChargeback entity.
+func (m *CoinPurchaseMutation) RemovedChargebacksIDs() (ids []uuid.UUID) {
+	for id := range m.removedchargebacks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ChargebacksIDs returns the "chargebacks" edge IDs in the mutation.
+func (m *CoinPurchaseMutation) ChargebacksIDs() (ids []uuid.UUID) {
+	for id := range m.chargebacks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetChargebacks resets all changes to the "chargebacks" edge.
+func (m *CoinPurchaseMutation) ResetChargebacks() {
+	m.chargebacks = nil
+	m.clearedchargebacks = false
+	m.removedchargebacks = nil
+}
+
 // Where appends a list predicates to the CoinPurchaseMutation builder.
 func (m *CoinPurchaseMutation) Where(ps ...predicate.CoinPurchase) {
 	m.predicates = append(m.predicates, ps...)
@@ -6047,50 +6106,865 @@ func (m *CoinPurchaseMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CoinPurchaseMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.chargebacks != nil {
+		edges = append(edges, coinpurchase.EdgeChargebacks)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *CoinPurchaseMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case coinpurchase.EdgeChargebacks:
+		ids := make([]ent.Value, 0, len(m.chargebacks))
+		for id := range m.chargebacks {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CoinPurchaseMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedchargebacks != nil {
+		edges = append(edges, coinpurchase.EdgeChargebacks)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *CoinPurchaseMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case coinpurchase.EdgeChargebacks:
+		ids := make([]ent.Value, 0, len(m.removedchargebacks))
+		for id := range m.removedchargebacks {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CoinPurchaseMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedchargebacks {
+		edges = append(edges, coinpurchase.EdgeChargebacks)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *CoinPurchaseMutation) EdgeCleared(name string) bool {
+	switch name {
+	case coinpurchase.EdgeChargebacks:
+		return m.clearedchargebacks
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *CoinPurchaseMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown CoinPurchase unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *CoinPurchaseMutation) ResetEdge(name string) error {
+	switch name {
+	case coinpurchase.EdgeChargebacks:
+		m.ResetChargebacks()
+		return nil
+	}
 	return fmt.Errorf("unknown CoinPurchase edge %s", name)
+}
+
+// CoinPurchaseChargebackMutation represents an operation that mutates the CoinPurchaseChargeback nodes in the graph.
+type CoinPurchaseChargebackMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *uuid.UUID
+	created_at          *time.Time
+	provider            *string
+	provider_dispute_id *string
+	amount_minor        *int64
+	addamount_minor     *int64
+	coins_clawed        *int64
+	addcoins_clawed     *int64
+	updated_at          *time.Time
+	clearedFields       map[string]struct{}
+	purchase            *uuid.UUID
+	clearedpurchase     bool
+	done                bool
+	oldValue            func(context.Context) (*CoinPurchaseChargeback, error)
+	predicates          []predicate.CoinPurchaseChargeback
+}
+
+var _ ent.Mutation = (*CoinPurchaseChargebackMutation)(nil)
+
+// coinpurchasechargebackOption allows management of the mutation configuration using functional options.
+type coinpurchasechargebackOption func(*CoinPurchaseChargebackMutation)
+
+// newCoinPurchaseChargebackMutation creates new mutation for the CoinPurchaseChargeback entity.
+func newCoinPurchaseChargebackMutation(c config, op Op, opts ...coinpurchasechargebackOption) *CoinPurchaseChargebackMutation {
+	m := &CoinPurchaseChargebackMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCoinPurchaseChargeback,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCoinPurchaseChargebackID sets the ID field of the mutation.
+func withCoinPurchaseChargebackID(id uuid.UUID) coinpurchasechargebackOption {
+	return func(m *CoinPurchaseChargebackMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CoinPurchaseChargeback
+		)
+		m.oldValue = func(ctx context.Context) (*CoinPurchaseChargeback, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CoinPurchaseChargeback.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCoinPurchaseChargeback sets the old CoinPurchaseChargeback of the mutation.
+func withCoinPurchaseChargeback(node *CoinPurchaseChargeback) coinpurchasechargebackOption {
+	return func(m *CoinPurchaseChargebackMutation) {
+		m.oldValue = func(context.Context) (*CoinPurchaseChargeback, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CoinPurchaseChargebackMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CoinPurchaseChargebackMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CoinPurchaseChargeback entities.
+func (m *CoinPurchaseChargebackMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CoinPurchaseChargebackMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CoinPurchaseChargebackMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CoinPurchaseChargeback.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *CoinPurchaseChargebackMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *CoinPurchaseChargebackMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the CoinPurchaseChargeback entity.
+// If the CoinPurchaseChargeback object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoinPurchaseChargebackMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *CoinPurchaseChargebackMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetPurchaseID sets the "purchase_id" field.
+func (m *CoinPurchaseChargebackMutation) SetPurchaseID(u uuid.UUID) {
+	m.purchase = &u
+}
+
+// PurchaseID returns the value of the "purchase_id" field in the mutation.
+func (m *CoinPurchaseChargebackMutation) PurchaseID() (r uuid.UUID, exists bool) {
+	v := m.purchase
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPurchaseID returns the old "purchase_id" field's value of the CoinPurchaseChargeback entity.
+// If the CoinPurchaseChargeback object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoinPurchaseChargebackMutation) OldPurchaseID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPurchaseID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPurchaseID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPurchaseID: %w", err)
+	}
+	return oldValue.PurchaseID, nil
+}
+
+// ResetPurchaseID resets all changes to the "purchase_id" field.
+func (m *CoinPurchaseChargebackMutation) ResetPurchaseID() {
+	m.purchase = nil
+}
+
+// SetProvider sets the "provider" field.
+func (m *CoinPurchaseChargebackMutation) SetProvider(s string) {
+	m.provider = &s
+}
+
+// Provider returns the value of the "provider" field in the mutation.
+func (m *CoinPurchaseChargebackMutation) Provider() (r string, exists bool) {
+	v := m.provider
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProvider returns the old "provider" field's value of the CoinPurchaseChargeback entity.
+// If the CoinPurchaseChargeback object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoinPurchaseChargebackMutation) OldProvider(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProvider is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProvider requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProvider: %w", err)
+	}
+	return oldValue.Provider, nil
+}
+
+// ResetProvider resets all changes to the "provider" field.
+func (m *CoinPurchaseChargebackMutation) ResetProvider() {
+	m.provider = nil
+}
+
+// SetProviderDisputeID sets the "provider_dispute_id" field.
+func (m *CoinPurchaseChargebackMutation) SetProviderDisputeID(s string) {
+	m.provider_dispute_id = &s
+}
+
+// ProviderDisputeID returns the value of the "provider_dispute_id" field in the mutation.
+func (m *CoinPurchaseChargebackMutation) ProviderDisputeID() (r string, exists bool) {
+	v := m.provider_dispute_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProviderDisputeID returns the old "provider_dispute_id" field's value of the CoinPurchaseChargeback entity.
+// If the CoinPurchaseChargeback object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoinPurchaseChargebackMutation) OldProviderDisputeID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProviderDisputeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProviderDisputeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProviderDisputeID: %w", err)
+	}
+	return oldValue.ProviderDisputeID, nil
+}
+
+// ResetProviderDisputeID resets all changes to the "provider_dispute_id" field.
+func (m *CoinPurchaseChargebackMutation) ResetProviderDisputeID() {
+	m.provider_dispute_id = nil
+}
+
+// SetAmountMinor sets the "amount_minor" field.
+func (m *CoinPurchaseChargebackMutation) SetAmountMinor(i int64) {
+	m.amount_minor = &i
+	m.addamount_minor = nil
+}
+
+// AmountMinor returns the value of the "amount_minor" field in the mutation.
+func (m *CoinPurchaseChargebackMutation) AmountMinor() (r int64, exists bool) {
+	v := m.amount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmountMinor returns the old "amount_minor" field's value of the CoinPurchaseChargeback entity.
+// If the CoinPurchaseChargeback object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoinPurchaseChargebackMutation) OldAmountMinor(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmountMinor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmountMinor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmountMinor: %w", err)
+	}
+	return oldValue.AmountMinor, nil
+}
+
+// AddAmountMinor adds i to the "amount_minor" field.
+func (m *CoinPurchaseChargebackMutation) AddAmountMinor(i int64) {
+	if m.addamount_minor != nil {
+		*m.addamount_minor += i
+	} else {
+		m.addamount_minor = &i
+	}
+}
+
+// AddedAmountMinor returns the value that was added to the "amount_minor" field in this mutation.
+func (m *CoinPurchaseChargebackMutation) AddedAmountMinor() (r int64, exists bool) {
+	v := m.addamount_minor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmountMinor resets all changes to the "amount_minor" field.
+func (m *CoinPurchaseChargebackMutation) ResetAmountMinor() {
+	m.amount_minor = nil
+	m.addamount_minor = nil
+}
+
+// SetCoinsClawed sets the "coins_clawed" field.
+func (m *CoinPurchaseChargebackMutation) SetCoinsClawed(i int64) {
+	m.coins_clawed = &i
+	m.addcoins_clawed = nil
+}
+
+// CoinsClawed returns the value of the "coins_clawed" field in the mutation.
+func (m *CoinPurchaseChargebackMutation) CoinsClawed() (r int64, exists bool) {
+	v := m.coins_clawed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCoinsClawed returns the old "coins_clawed" field's value of the CoinPurchaseChargeback entity.
+// If the CoinPurchaseChargeback object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoinPurchaseChargebackMutation) OldCoinsClawed(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCoinsClawed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCoinsClawed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCoinsClawed: %w", err)
+	}
+	return oldValue.CoinsClawed, nil
+}
+
+// AddCoinsClawed adds i to the "coins_clawed" field.
+func (m *CoinPurchaseChargebackMutation) AddCoinsClawed(i int64) {
+	if m.addcoins_clawed != nil {
+		*m.addcoins_clawed += i
+	} else {
+		m.addcoins_clawed = &i
+	}
+}
+
+// AddedCoinsClawed returns the value that was added to the "coins_clawed" field in this mutation.
+func (m *CoinPurchaseChargebackMutation) AddedCoinsClawed() (r int64, exists bool) {
+	v := m.addcoins_clawed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCoinsClawed resets all changes to the "coins_clawed" field.
+func (m *CoinPurchaseChargebackMutation) ResetCoinsClawed() {
+	m.coins_clawed = nil
+	m.addcoins_clawed = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *CoinPurchaseChargebackMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *CoinPurchaseChargebackMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the CoinPurchaseChargeback entity.
+// If the CoinPurchaseChargeback object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoinPurchaseChargebackMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *CoinPurchaseChargebackMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// ClearPurchase clears the "purchase" edge to the CoinPurchase entity.
+func (m *CoinPurchaseChargebackMutation) ClearPurchase() {
+	m.clearedpurchase = true
+	m.clearedFields[coinpurchasechargeback.FieldPurchaseID] = struct{}{}
+}
+
+// PurchaseCleared reports if the "purchase" edge to the CoinPurchase entity was cleared.
+func (m *CoinPurchaseChargebackMutation) PurchaseCleared() bool {
+	return m.clearedpurchase
+}
+
+// PurchaseIDs returns the "purchase" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PurchaseID instead. It exists only for internal usage by the builders.
+func (m *CoinPurchaseChargebackMutation) PurchaseIDs() (ids []uuid.UUID) {
+	if id := m.purchase; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPurchase resets all changes to the "purchase" edge.
+func (m *CoinPurchaseChargebackMutation) ResetPurchase() {
+	m.purchase = nil
+	m.clearedpurchase = false
+}
+
+// Where appends a list predicates to the CoinPurchaseChargebackMutation builder.
+func (m *CoinPurchaseChargebackMutation) Where(ps ...predicate.CoinPurchaseChargeback) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CoinPurchaseChargebackMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CoinPurchaseChargebackMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CoinPurchaseChargeback, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CoinPurchaseChargebackMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CoinPurchaseChargebackMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CoinPurchaseChargeback).
+func (m *CoinPurchaseChargebackMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CoinPurchaseChargebackMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m.created_at != nil {
+		fields = append(fields, coinpurchasechargeback.FieldCreatedAt)
+	}
+	if m.purchase != nil {
+		fields = append(fields, coinpurchasechargeback.FieldPurchaseID)
+	}
+	if m.provider != nil {
+		fields = append(fields, coinpurchasechargeback.FieldProvider)
+	}
+	if m.provider_dispute_id != nil {
+		fields = append(fields, coinpurchasechargeback.FieldProviderDisputeID)
+	}
+	if m.amount_minor != nil {
+		fields = append(fields, coinpurchasechargeback.FieldAmountMinor)
+	}
+	if m.coins_clawed != nil {
+		fields = append(fields, coinpurchasechargeback.FieldCoinsClawed)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, coinpurchasechargeback.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CoinPurchaseChargebackMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case coinpurchasechargeback.FieldCreatedAt:
+		return m.CreatedAt()
+	case coinpurchasechargeback.FieldPurchaseID:
+		return m.PurchaseID()
+	case coinpurchasechargeback.FieldProvider:
+		return m.Provider()
+	case coinpurchasechargeback.FieldProviderDisputeID:
+		return m.ProviderDisputeID()
+	case coinpurchasechargeback.FieldAmountMinor:
+		return m.AmountMinor()
+	case coinpurchasechargeback.FieldCoinsClawed:
+		return m.CoinsClawed()
+	case coinpurchasechargeback.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CoinPurchaseChargebackMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case coinpurchasechargeback.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case coinpurchasechargeback.FieldPurchaseID:
+		return m.OldPurchaseID(ctx)
+	case coinpurchasechargeback.FieldProvider:
+		return m.OldProvider(ctx)
+	case coinpurchasechargeback.FieldProviderDisputeID:
+		return m.OldProviderDisputeID(ctx)
+	case coinpurchasechargeback.FieldAmountMinor:
+		return m.OldAmountMinor(ctx)
+	case coinpurchasechargeback.FieldCoinsClawed:
+		return m.OldCoinsClawed(ctx)
+	case coinpurchasechargeback.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown CoinPurchaseChargeback field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoinPurchaseChargebackMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case coinpurchasechargeback.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case coinpurchasechargeback.FieldPurchaseID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPurchaseID(v)
+		return nil
+	case coinpurchasechargeback.FieldProvider:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProvider(v)
+		return nil
+	case coinpurchasechargeback.FieldProviderDisputeID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProviderDisputeID(v)
+		return nil
+	case coinpurchasechargeback.FieldAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmountMinor(v)
+		return nil
+	case coinpurchasechargeback.FieldCoinsClawed:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCoinsClawed(v)
+		return nil
+	case coinpurchasechargeback.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoinPurchaseChargeback field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CoinPurchaseChargebackMutation) AddedFields() []string {
+	var fields []string
+	if m.addamount_minor != nil {
+		fields = append(fields, coinpurchasechargeback.FieldAmountMinor)
+	}
+	if m.addcoins_clawed != nil {
+		fields = append(fields, coinpurchasechargeback.FieldCoinsClawed)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CoinPurchaseChargebackMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case coinpurchasechargeback.FieldAmountMinor:
+		return m.AddedAmountMinor()
+	case coinpurchasechargeback.FieldCoinsClawed:
+		return m.AddedCoinsClawed()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoinPurchaseChargebackMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case coinpurchasechargeback.FieldAmountMinor:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmountMinor(v)
+		return nil
+	case coinpurchasechargeback.FieldCoinsClawed:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCoinsClawed(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CoinPurchaseChargeback numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CoinPurchaseChargebackMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CoinPurchaseChargebackMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CoinPurchaseChargebackMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown CoinPurchaseChargeback nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CoinPurchaseChargebackMutation) ResetField(name string) error {
+	switch name {
+	case coinpurchasechargeback.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case coinpurchasechargeback.FieldPurchaseID:
+		m.ResetPurchaseID()
+		return nil
+	case coinpurchasechargeback.FieldProvider:
+		m.ResetProvider()
+		return nil
+	case coinpurchasechargeback.FieldProviderDisputeID:
+		m.ResetProviderDisputeID()
+		return nil
+	case coinpurchasechargeback.FieldAmountMinor:
+		m.ResetAmountMinor()
+		return nil
+	case coinpurchasechargeback.FieldCoinsClawed:
+		m.ResetCoinsClawed()
+		return nil
+	case coinpurchasechargeback.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown CoinPurchaseChargeback field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CoinPurchaseChargebackMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.purchase != nil {
+		edges = append(edges, coinpurchasechargeback.EdgePurchase)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CoinPurchaseChargebackMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case coinpurchasechargeback.EdgePurchase:
+		if id := m.purchase; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CoinPurchaseChargebackMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CoinPurchaseChargebackMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CoinPurchaseChargebackMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedpurchase {
+		edges = append(edges, coinpurchasechargeback.EdgePurchase)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CoinPurchaseChargebackMutation) EdgeCleared(name string) bool {
+	switch name {
+	case coinpurchasechargeback.EdgePurchase:
+		return m.clearedpurchase
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CoinPurchaseChargebackMutation) ClearEdge(name string) error {
+	switch name {
+	case coinpurchasechargeback.EdgePurchase:
+		m.ClearPurchase()
+		return nil
+	}
+	return fmt.Errorf("unknown CoinPurchaseChargeback unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CoinPurchaseChargebackMutation) ResetEdge(name string) error {
+	switch name {
+	case coinpurchasechargeback.EdgePurchase:
+		m.ResetPurchase()
+		return nil
+	}
+	return fmt.Errorf("unknown CoinPurchaseChargeback edge %s", name)
 }
 
 // CoinTransferMutation represents an operation that mutates the CoinTransfer nodes in the graph.

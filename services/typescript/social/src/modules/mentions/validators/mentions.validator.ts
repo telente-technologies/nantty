@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 const userMentionSchema = schema.object({
   userId: schema.string().uuid(),

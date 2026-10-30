@@ -1,4 +1,4 @@
-import type { HttpRouterContext } from "@zudojs/http";
+import type { HttpRouterContext } from "@nantty/fastify-platform";
 
 import { idempotencyKeyHeaderName } from "../../../constants/support.constant.js";
 import { badRequest } from "../../../errors/support.error.js";

@@ -1,5 +1,5 @@
-import { type HttpResponseContext, type HttpRouterContext } from "@zudojs/http";
-import type { Infer, Schema } from "@zudojs/schema";
+import { type HttpResponseContext, type HttpRouterContext } from "@nantty/fastify-platform";
+import type { Infer, Schema } from "@nantty/fastify-platform";
 
 import { badRequest } from "../errors/media.error.js";
 import { requireInternalCaller, requirePrincipal } from "../middlewares/principal.middleware.js";
@@ -35,7 +35,7 @@ export type RouteFactory = <P extends Schema<unknown> | undefined, Q extends Sch
 function parseWith(schema: Schema<unknown> | undefined, value: unknown): { readonly ok: true; readonly data: unknown } | { readonly ok: false; readonly response: HttpResponseContext } {
   if (schema === undefined) return { ok: true, data: undefined };
   const result = schema.safeParse(value);
-  return result.success ? { ok: true, data: result.data } : { ok: false, response: validationFailed(result.issues) };
+  return result.success ? { ok: true, data: result.data } : { ok: false, response: validationFailed(result.error.issues) };
 }
 
 const firstQueryValues = (query: Readonly<Record<string, string | string[]>>): Record<string, string> =>

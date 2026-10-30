@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"sync"
 	"testing"
 	"time"
 
@@ -263,5 +264,64 @@ func TestWithdrawingAdBalanceNeedsStepUpVerificationAndSettledFundsAndPaysOnce(t
 	view := h.expect("GET", "/api/v1/ads/boosts/balance", &member.testUser, "", nil, http.StatusOK)
 	if view["balance"].(map[string]any)["amountMinor"].(float64) != 140_000 || view["credit"].(map[string]any)["amountMinor"].(float64) != 300_000 {
 		t.Fatalf("withdrawals only reduce the real balance: %v", view)
+	}
+}
+
+func TestConcurrentWithdrawalReplayCreatesOnePayoutAndLedgerDebit(t *testing.T) {
+	money := newFakeMoneyAccounts()
+	h := startAdsAgainstFreshSchema(t, withMoneyAccounts(money, &fakeTopUps{status: "pending"}), withAuditAndWithdrawalFees(&recordingAudit{}))
+	member, manager := h.newSteppableUser("withdraw-race-member"), h.newStaff("Ada", "advertisers:manage")
+	money.levels[member.id.String()] = 1
+	h.issueCredit(manager, "withdraw-race-credit", member.id, 300_000, nil)
+	accountID := h.lotByReference("admin:" + manager.id + ":withdraw-race-credit").AccountID
+	h.callInternal(t, "/internal/v1/ads/accounts/"+accountID.String()+"/funds", map[string]any{"reference": "withdraw-race-top-up", "type": "top_up", "amountMinor": 400_000, "currency": "NGN", "description": "Synthetic settled balance"}, http.StatusNoContent)
+	h.clock.Advance(24*time.Hour + time.Minute)
+
+	const attempts = 16
+	start := make(chan struct{})
+	type result struct {
+		status int
+		body   map[string]any
+	}
+	results := make(chan result, attempts)
+	var workers sync.WaitGroup
+	for range attempts {
+		workers.Add(1)
+		go func() {
+			defer workers.Done()
+			<-start
+			status, body := h.callWithStepUp("/api/v1/ads/boosts/balance/withdrawals", member, "withdraw-race-key-0001", h.stepUpFor(member), map[string]any{"amount": ngn(250_000)})
+			results <- result{status: status, body: body}
+		}()
+	}
+	close(start)
+	workers.Wait()
+	close(results)
+
+	var withdrawalID string
+	for response := range results {
+		if response.status != http.StatusCreated {
+			t.Fatalf("same-key concurrent withdrawal should resolve successfully: %d %v", response.status, response.body)
+		}
+		id, _ := response.body["id"].(string)
+		if id == "" || withdrawalID != "" && id != withdrawalID {
+			t.Fatalf("all retries must resolve to one withdrawal: %q vs %q", id, withdrawalID)
+		}
+		withdrawalID = id
+	}
+
+	client := h.module.Container.Client
+	if count := client.AdBalanceWithdrawal.Query().CountX(context.Background()); count != 1 {
+		t.Fatalf("one withdrawal row expected, got %d", count)
+	}
+	if count := client.AdFundsTransaction.Query().Where(adfundstransaction.TypeEQ(adfundstransaction.TypeWithdrawal)).CountX(context.Background()); count != 1 {
+		t.Fatalf("one ledger debit expected, got %d", count)
+	}
+	account := client.AdAccount.GetX(context.Background(), accountID)
+	if account.BalanceMinor != 150_000 {
+		t.Fatalf("one 250000 withdrawal should leave 150000 real balance, got %d", account.BalanceMinor)
+	}
+	if moved := h.module.Container.Withdrawals.(*integrations.InMemoryAdBalanceWithdrawals).Moved; len(moved) != 1 {
+		t.Fatalf("one downstream payout expected, got %d", len(moved))
 	}
 }

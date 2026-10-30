@@ -17,6 +17,8 @@ const strangerId = "0192f0a0-0000-7000-8000-00000000d001";
 const postId = "0192f0a0-0000-7000-8000-0000000000a1";
 const clipId = "0192f0a0-0000-7000-8000-0000000000a2";
 const storyId = "0192f0a0-0000-7000-8000-0000000000a3";
+const subscriberPostId = "0192f0a0-0000-7000-8000-0000000000a4";
+const subscriberClipId = "0192f0a0-0000-7000-8000-0000000000a5";
 
 type ViewerName = "owner" | "acceptedFollower" | "pendingRequester" | "stranger" | "guest";
 const viewers: Readonly<Record<ViewerName, string | undefined>> = { owner: ownerId, acceptedFollower: followerId, pendingRequester: requesterId, stranger: strangerId, guest: undefined };
@@ -26,6 +28,8 @@ function privateWorld() {
     posts: [
       buildPostRow({ id: postId, authorId: ownerId, text: "Private post" }) as unknown as Row,
       buildPostRow({ id: clipId, authorId: ownerId, kind: "clip", text: "Private clip" }) as unknown as Row,
+      buildPostRow({ id: subscriberPostId, authorId: ownerId, text: "Members-only post", visibility: "subscribers" }) as unknown as Row,
+      buildPostRow({ id: subscriberClipId, authorId: ownerId, kind: "clip", text: "Members-only clip", visibility: "subscribers" }) as unknown as Row,
       buildPostRow({ id: storyId, authorId: ownerId, kind: "story", text: "", expiresAt: new Date("2026-10-11T12:00:00Z"), media: [{ type: "image", url: "https://cdn.test/story.webp", posterUrl: null }] as never }) as unknown as Row,
     ],
     postDefaults: () => ({ ...buildPostRow({}), id: undefined }),
@@ -37,6 +41,7 @@ function privateWorld() {
   const context = store.context;
   const endpoints = {
     userPosts: (viewerId: string | undefined) => createListUserPostsHandler(context)({ viewerId, ownerId, cursor: undefined, limit: 20, kind: "post" }),
+    subscriberPosts: (viewerId: string | undefined) => createListUserPostsHandler(context)({ viewerId, ownerId, cursor: undefined, limit: 20, kind: undefined, visibility: "subscribers" }),
     userClips: (viewerId: string | undefined) => createListUserPostsHandler(context)({ viewerId, ownerId, cursor: undefined, limit: 20, kind: "clip" }),
     userStories: (viewerId: string | undefined) => createListUserStoriesHandler(context)({ viewerId, ownerId }),
     followers: (viewerId: string | undefined) => createListFollowersHandler(context)({ viewerId, ownerId, searchTerm: undefined, cursor: undefined, limit: 20 }),
@@ -82,6 +87,19 @@ describe("server-side enforcement of a private profile", () => {
     expect((await endpoints.userStories(followerId)).map((story) => story.id)).toEqual([storyId]);
     expect((await endpoints.followers(followerId)).data.map((entry) => entry.id)).toEqual([followerId]);
     expect((await endpoints.following(ownerId)).data.map((entry) => entry.id)).toEqual([strangerId]);
+  });
+
+  it("separates subscriber posts and clips from the public profile timeline and masks them for non-subscribers", async () => {
+    const { endpoints } = privateWorld();
+    const regularPosts = await endpoints.userPosts(followerId);
+    expect(regularPosts.data.map((post) => post.id)).toEqual([postId]);
+    const subscriberPosts = await endpoints.subscriberPosts(followerId);
+    expect(subscriberPosts.data.map((post) => post.id)).toEqual([subscriberClipId, subscriberPostId]);
+    expect(subscriberPosts.data.every((post) => post.subscriberOnly && post.viewerHasAccess === false)).toBe(true);
+    expect(subscriberPosts.data.every((post) => post.text === "" && post.media.length === 0)).toBe(true);
+    const ownerPosts = await endpoints.subscriberPosts(ownerId);
+    expect(ownerPosts.data.every((post) => post.viewerHasAccess === true)).toBe(true);
+    expect(ownerPosts.data.map((post) => post.text)).toEqual(["Members-only clip", "Members-only post"]);
   });
 
   it("hides the story ring from everyone the content is hidden from", async () => {

@@ -9,7 +9,7 @@ import type { GatewayConfig } from "../src/configs/gateway.config.js";
 import { isInternalOnlyPath } from "../src/services/internalRouteGuard.service.js";
 import { AccessTokenVerifier } from "../src/services/accessTokenVerifier.service.js";
 import { InMemoryRateLimitStore } from "../src/services/rateLimitStore.service.js";
-import { classifyRequestForRateLimit } from "../src/services/routeRateLimitPolicy.service.js";
+import { buildRouteRateLimitBuckets, classifyRequestForRateLimit, defaultRouteLimitWindowsSeconds, defaultRouteLimitsPerMinute } from "../src/services/routeRateLimitPolicy.service.js";
 import { startGatewaySpan } from "../src/services/traceContext.service.js";
 import { ValkeyRateLimitStore } from "../src/services/valkeyRateLimitStore.service.js";
 
@@ -100,8 +100,19 @@ describe("per-route rate limits", () => {
     expect((await fetch(`${base}/api/v1/auth/refresh`, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })).status).toBe(200);
   });
 
+  it("limits login identifiers independently while sharing the broader IP bucket", async () => {
+    const login = (identifier: string) => fetch(`${base}/api/v1/auth/login`, {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ identifier }),
+    });
+    expect((await login("account-a@example.test")).status).toBe(200);
+    expect((await login("account-a@example.test")).status).toBe(200);
+    expect((await login("account-a@example.test")).status).toBe(429);
+    expect((await login("account-b@example.test")).status).toBe(200);
+  });
+
   it("classifies the sensitive routes", () => {
-    expect(classifyRequestForRateLimit("POST", "/api/v1/auth/otp/send")).toBe("otp");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/auth/otp/send")).toBe("otpSend");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/auth/otp/verify")).toBe("otp");
     expect(classifyRequestForRateLimit("POST", "/api/v1/auth/password/reset")).toBe("reset");
     expect(classifyRequestForRateLimit("POST", "/api/v1/auth/register")).toBe("signup");
     expect(classifyRequestForRateLimit("GET", "/api/v1/auth/username-available?username=ada")).toBe("usernameCheck");
@@ -114,6 +125,8 @@ describe("per-route rate limits", () => {
     expect(classifyRequestForRateLimit("GET", "/api/v1/posts/abc/tagged-users")).toBeUndefined();
     expect(classifyRequestForRateLimit("POST", "/api/v1/reports")).toBe("report");
     expect(classifyRequestForRateLimit("POST", "/api/v1/media/uploads")).toBe("upload");
+    expect(classifyRequestForRateLimit("PUT", "/api/v1/media/uploads/u1/chunks/1")).toBeUndefined();
+    expect(classifyRequestForRateLimit("POST", "/api/v1/coins/transfers")).toBe("walletTransfer");
     expect(classifyRequestForRateLimit("POST", "/api/v1/ads/events")).toBe("adEvent");
     expect(classifyRequestForRateLimit("GET", "/api/v1/users/01a12b3d-d5cc-7e11-bc61-000000000001")).toBe("profileRead");
     expect(classifyRequestForRateLimit("GET", "/api/v1/users/by-username/ada")).toBe("profileRead");
@@ -121,6 +134,29 @@ describe("per-route rate limits", () => {
     expect(classifyRequestForRateLimit("GET", "/api/v1/sitemap/profiles?page=2")).toBe("sitemapRead");
     expect(classifyRequestForRateLimit("GET", "/api/v1/search/people")).toBe("search");
     expect(classifyRequestForRateLimit("GET", "/api/v1/auth/login")).toBeUndefined();
+  });
+
+  it("uses count/window policies and opaque identity-plus-IP buckets for pre-auth actions", async () => {
+    expect(defaultRouteLimitsPerMinute.login).toBe(5);
+    expect(defaultRouteLimitWindowsSeconds.login).toBe(900);
+    expect(defaultRouteLimitsPerMinute.signup).toBe(5);
+    expect(defaultRouteLimitWindowsSeconds.signup).toBe(3600);
+    expect(defaultRouteLimitsPerMinute.search).toBe(30);
+    expect(defaultRouteLimitsPerMinute.upload).toBe(10);
+    expect(defaultRouteLimitsPerMinute.walletTransfer).toBe(5);
+    const login = buildRouteRateLimitBuckets("login", "203.0.113.8", undefined, { identifier: "person@example.test" }, "test-secret");
+    expect(login.map(({ name }) => name)).toEqual(["loginIp", "login"]);
+    expect(login.every(({ key }) => !key.includes("person@example.test"))).toBe(true);
+    expect(login[1]?.key).toMatch(/^rl:route:login:h:[a-f0-9]{64}$/);
+    expect(buildRouteRateLimitBuckets("signup", "203.0.113.8", undefined, {}, "test-secret")).toEqual([
+      { name: "signup", key: "rl:route:signup:i:203.0.113.8" },
+    ]);
+
+    const store = new InMemoryRateLimitStore(() => 1_000_000);
+    for (let request = 0; request < 45; request += 1) expect((await store.hit("normal:authenticated", 120, 60)).allowed).toBe(true);
+    for (let query = 0; query < 12; query += 1) expect((await store.hit("normal:search", 30, 60)).allowed).toBe(true);
+    for (let upload = 0; upload < 4; upload += 1) expect((await store.hit("normal:upload", 10, 60)).allowed).toBe(true);
+    for (let transfer = 0; transfer < 2; transfer += 1) expect((await store.hit("normal:transfer", 5, 60)).allowed).toBe(true);
   });
 
   it("uses valkey counters and falls back to memory when valkey fails", async () => {

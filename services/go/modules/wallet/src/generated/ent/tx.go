@@ -26,6 +26,8 @@ type Tx struct {
 	CoinPackage *CoinPackageClient
 	// CoinPurchase is the client for interacting with the CoinPurchase builders.
 	CoinPurchase *CoinPurchaseClient
+	// CoinPurchaseChargeback is the client for interacting with the CoinPurchaseChargeback builders.
+	CoinPurchaseChargeback *CoinPurchaseChargebackClient
 	// CoinTransfer is the client for interacting with the CoinTransfer builders.
 	CoinTransfer *CoinTransferClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
@@ -183,6 +185,7 @@ func (tx *Tx) init() {
 	tx.CoinConversion = NewCoinConversionClient(tx.config)
 	tx.CoinPackage = NewCoinPackageClient(tx.config)
 	tx.CoinPurchase = NewCoinPurchaseClient(tx.config)
+	tx.CoinPurchaseChargeback = NewCoinPurchaseChargebackClient(tx.config)
 	tx.CoinTransfer = NewCoinTransferClient(tx.config)
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
 	tx.MonetisationHold = NewMonetisationHoldClient(tx.config)

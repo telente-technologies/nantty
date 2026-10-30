@@ -1,4 +1,4 @@
-import type { HttpRouterContext } from "@zudojs/http";
+import type { HttpRouterContext } from "@nantty/fastify-platform";
 
 import { defaultPageSize, maximumPageSize } from "../../../constants/support.constant.js";
 import { isTicketStatusStopped, openTicketStatuses, ticketStatuses } from "../../../enums/ticket.enum.js";

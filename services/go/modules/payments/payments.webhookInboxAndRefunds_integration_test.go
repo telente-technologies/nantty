@@ -202,3 +202,55 @@ func TestRefundFailingThenRetriedReleasesCapacityAndPaysOnce(t *testing.T) {
 	}
 	assertLedgerHealthy(t, harness)
 }
+
+func TestConcurrentRefundReferenceReplaysAfterPaymentLock(t *testing.T) {
+	skipIntegrationWhenShort(t)
+	harness := paymentstesting.StartMoneyHarnessWithPayments(t, nil)
+	ctx := context.Background()
+	intent, err := harness.Payments.Application.Container.Client(harness.Database).PaymentIntent.Create().
+		SetReference("zm_ord_" + uuid.NewString()[:18]).SetPurpose(paymentintent.PurposeOrderCheckout).
+		SetOwnerUserID(uuid.NewString()).SetSubjectID(uuid.NewString()).SetProvider("flutterwave").
+		SetAmountMinor(5_000).SetCurrency("NGN").SetStatus(paymentintent.StatusSucceeded).
+		SetMetadata([]byte(`{}`)).Save(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	refundReference := "refund-concurrent-" + uuid.NewString()
+	start := make(chan struct{})
+	type result struct {
+		requested paymentservices.RequestedRefund
+		err       error
+	}
+	results := make(chan result, 2)
+	for range 2 {
+		go func() {
+			<-start
+			var requested paymentservices.RequestedRefund
+			err := databases.RunInMoneyTransaction(ctx, harness.Database, func(ctx context.Context, transaction *sql.Tx) error {
+				var err error
+				requested, err = harness.Payments.Application.Gateway.RequestRefundInTransaction(ctx, transaction, models.RefundRequest{
+					PaymentIntentId: intent.ID, AmountMinor: intent.AmountMinor, Currency: intent.Currency,
+					Reference: refundReference, Reason: "same request",
+				})
+				return err
+			})
+			results <- result{requested: requested, err: err}
+		}()
+	}
+	close(start)
+	first, second := <-results, <-results
+	if first.err != nil || second.err != nil {
+		t.Fatalf("both equivalent refund requests should succeed: first=%v second=%v", first.err, second.err)
+	}
+	if first.requested.RefundId != second.requested.RefundId {
+		t.Fatalf("concurrent retries must return the same refund: %s != %s", first.requested.RefundId, second.requested.RefundId)
+	}
+	if first.requested.Replayed == second.requested.Replayed {
+		t.Fatalf("exactly one request should create the refund and the other replay it: first=%+v second=%+v", first.requested, second.requested)
+	}
+	refunds, err := harness.Payments.Application.Container.Client(harness.Database).PaymentRefund.Query().
+		Where(paymentrefund.Reference(refundReference)).All(ctx)
+	if err != nil || len(refunds) != 1 {
+		t.Fatalf("expected exactly one refund row, got %d: %v", len(refunds), err)
+	}
+}

@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 import { mentionEntitiesSchema } from "../../mentions/validators/mentions.validator.js";
 import { accountIdOrMeParam } from "../../../utils/accountParam.util.js";
@@ -61,7 +61,13 @@ export const createPostBodySchema = schema.object({
   topics: topicSlugsSchema.optional(),
   productIds: productIdsSchema.optional(),
   quotedPostId: schema.optional(schema.nullable(schema.string().uuid())),
+  scheduledAt: schema.string().min(20).max(40).regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/).optional(),
 });
+
+export const schedulePostBodySchema = schema.object({
+  scheduledAt: schema.string().min(20).max(40).regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/),
+});
+export const scheduledPostsQuerySchema = schema.object({ cursor: schema.string().uuid().optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });
 
 export const tagProductsBodySchema = schema.object({ productIds: productIdsSchema });
 export const setPostTagsBodySchema = schema.object({ taggedUserIds: taggedUserIdsSchema });
@@ -86,5 +92,6 @@ export const userPostsQuerySchema = schema.object({
   cursor: schema.string().uuid().optional(),
   limit: schema.coerce.number().int().min(1).max(100).optional(),
   kind: schema.enum(["post", "clip"]).optional(),
+  visibility: schema.enum(["public", "subscribers"]).optional(),
 });
 export const tagCandidatesQuerySchema = schema.object({ q: schema.string().min(1).max(60), cursor: schema.string().max(100).optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });

@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 import { mentionEntitiesSchema } from "../../mentions/validators/mentions.validator.js";
 

@@ -57,6 +57,10 @@ func (handler Handler) Execute(ctx context.Context, command Command) (services.A
 	if err != nil {
 		return services.ApplicationView{}, err
 	}
+	if command.Input.PayoutAccountId == "" && eligibility.Decision == services.DecisionAutoApprove {
+		eligibility.Decision = services.DecisionManualReview
+		eligibility.DecisionNote = "Your application will be reviewed by our team. You can add a payout account later; earnings remain in your creator balance until one is available."
+	}
 	return handler.store(ctx, command, personal, eligibility)
 }
 
@@ -66,8 +70,6 @@ func validateInput(command Command) error {
 		return usersErrors.Unprocessable("Pick at least one content category")
 	case command.Input.AcceptedCreatorTermsVersion == "":
 		return usersErrors.Unprocessable("Accept the Creator terms to continue")
-	case command.Input.PayoutAccountId == "":
-		return usersErrors.Unprocessable("Choose a payout account")
 	}
 	return nil
 }

@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { AuthorRankingTier } from "../constants/ranking.constant.js";
 import type { IdentityReadClient } from "../databases/identityRead.database.js";

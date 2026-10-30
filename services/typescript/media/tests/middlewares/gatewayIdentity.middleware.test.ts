@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 
-import { createResponseContext, type HttpMiddlewareContext, type HttpRequestContext } from "@zudojs/http";
+import { createResponseContext, type HttpMiddlewareContext, type HttpRequestContext } from "@nantty/fastify-platform";
 import { describe, expect, it } from "vitest";
 
 import { createGatewayIdentityMiddleware, readGatewayIdentitySecretsFromEnvironment } from "../../src/middlewares/gatewayIdentity.middleware.js";

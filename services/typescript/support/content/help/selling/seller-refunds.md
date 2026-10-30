@@ -32,7 +32,7 @@ Sellers, for paid orders that aren't in dispute.
 
 ## Good to know
 
-- No escrow fee is charged when you refund before release. After release, only your seller portion is recovered; Nantty's escrow and processing fees are not refunded.
+- Nantty's intended launch policy has no sales commission. Refunds and any provider charges that cannot be recovered follow the applicable checkout and refund disclosures; the order history shows amounts returned or recovered.
 - Refunding after release takes the money back from your earnings. If you've already withdrawn it, it shows as **Owed to Nantty**: "Refunds or chargebacks taken from your next earnings." See [Owed to Nantty](/help/payments-and-wallet/owed-to-nantty).
 - Store credit the buyer earned on the order is taken back.
 - For direct-payment orders, buyers rely on you for refunds.

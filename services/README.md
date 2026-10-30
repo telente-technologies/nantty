@@ -72,12 +72,12 @@ services/
     platform/          shared Go libraries (below)
     modules/<service>/ one Go module per domain. All 17 are implemented except `analytics`, which is still a stub.
     deployables/       6 binaries (goIdentity, goLive, goMoney, goCommerce, goAds, goTrust, each `server.go` + Dockerfile); build context is `services`: `docker build -f go/deployables/goMoney/Dockerfile .`
-  typescript/social/   Nanttyjs + Prisma (`social` schema): follows, blocks, posts, comments, saves, mentions, feeds, chat metadata, streaks, report intake
-  typescript/gateway/  Nanttyjs (@zudojs/http) edge: CORS, rate limit, JWKS verification, upstream routing
-  typescript/media/    Nanttyjs + Prisma (`media` schema): upload sessions, S3/SeaweedFS multipart, image/video derivatives, signed CDN URLs
-  typescript/search/   Nanttyjs + Prisma (`search` schema): search documents, read models, OpenSearch indexing
-  typescript/support/  Nanttyjs + Prisma (`support` schema): Help Centre, support conversations, auto-FAQ and moderation intake
-  typescript/notifications/ Nanttyjs + Prisma (schema `notifications`): domain-event consumer, in-app inbox, SES email, push adapter, admin email and legal notices
+  typescript/social/   Fastify + Prisma (`social` schema): follows, blocks, posts, comments, saves, mentions, feeds, chat metadata, streaks, report intake
+  typescript/gateway/  Fastify edge: CORS, rate limit, JWKS verification, upstream routing
+  typescript/media/    Fastify + Prisma (`media` schema): upload sessions, S3/SeaweedFS multipart, image/video derivatives, signed CDN URLs
+  typescript/search/   Fastify + Prisma (`search` schema): search documents, read models, OpenSearch indexing
+  typescript/support/  Fastify + Prisma (`support` schema): Help Centre, support conversations, auto-FAQ and moderation intake
+  typescript/notifications/ Fastify + Prisma (schema `notifications`): domain-event consumer, in-app inbox, SES email, push adapter, admin email and legal notices
   elixir/realtime/     Phoenix: raw JSON WebSocket at /ws, PubSub topics, Presence, JWKS auth, domain event router
   python/              Python services (intelligence)
   scripts/             CI checks and test runners
@@ -134,7 +134,7 @@ A module never imports another module's packages (use `platform/identityports`, 
 
 - Almost no comments. Long, self-explanatory names: `RotateRefreshTokenAndDetectReuse`, `rotateRefreshTokenAndDetectReuse`.
 - Every backend file is at most 300 lines (generated code excluded). CI enforces it.
-- File names follow [`zudojsStructure.md`](zudojsStructure.md): `<name>.<kind>.<ext>` with camelCase multi-word names in every
+- File names follow [`fastifyPlatformMigration.md`](fastifyPlatformMigration.md): `<name>.<kind>.<ext>` with camelCase multi-word names in every
   language (`registerAccount.handler.go`, `upstreamDispatch.handler.ts`); Python is the one snake_case exception.
 - Money is always integer minor units + ISO currency; coins are a separate integer unit. Never hardcode NGN.
 - Errors: `{ "message", "code", "issues"?: [{path, message}] }`. Single resources are returned as the object; every list
@@ -150,13 +150,14 @@ A module never imports another module's packages (use `platform/identityports`, 
   `modules/auth/src/migrations/*_grant_read_access_to_other_services.up.sql`: other services can read account ids,
   usernames and names, but never password hashes, sessions or keys.
 - **TypeScript services: Prisma only** (no raw SQL, no hand-written `.sql`, except `prisma migrate` output).
-- **Go services: ent + Atlas** (decision to confirm with the owner). The schema is Go code (`src/databases/schema`), ent
-  generates a typed query client, and Atlas diffs the schema against the replayed migration directory to write versioned
-  migrations. Migrations are embedded in the binary and applied at start-up with golang-migrate (advisory-locked, so it is
-  safe with many replicas). Why ent rather than sqlc: sqlc needs hand-written SQL for every query, and the owner banned
-  hand-written SQL in the TS monolith. ent is the closest Go equivalent to Prisma (declarative schema, typed client, no
-  string SQL, row locks via `ForUpdate`), and Atlas gives Prisma-style generated migrations. The only hand-written SQL is
-  in the rare manual migration (grants), which goes through `-rehash` so Atlas still verifies the directory.
+- **Go services: ent + Atlas.** The schema is Go code (`src/databases/schema`), ent generates typed query clients, and
+  Atlas validates and writes versioned migrations. Most Go modules still apply embedded migrations at service startup.
+  The six money schemas are the exception: normal `go-money` startup rejects migration credentials, and the dedicated
+  `go-money --migrate-money` task applies them before rollout; AWS role provisioning and staging execution remain
+  unverified. Advisory locking is provided by the migration framework. Go also has narrowly reviewed parameterized SQL
+  where ent does not fit the operation (including the ledger outbox and grant migrations); this is distinct from the
+  TypeScript policy, where CI blocks raw SQL outside the documented search-query exception. See
+  [`docs/database/migrations.md`](../docs/database/migrations.md) and [`staging-migration-runbook.md`](../docs/database/staging-migration-runbook.md).
 
 ```bash
 cd services/go/modules/<service>
@@ -188,7 +189,7 @@ Python returns scores only; Go/TS apply a deterministic allow / hold / review / 
 
 ## go-identity: auth, users, currency, admin
 
-All four modules live in `deployables/goIdentity` and follow the Nanttyjs Go layout (`modules/<service>/src/modules/<feature>/{commands,queries,controllers,routes,dtos,validators,models,services,repositories,events}`;
+All four modules live in `deployables/goIdentity` and follow the Nantty Go layout (`modules/<service>/src/modules/<feature>/{commands,queries,controllers,routes,dtos,validators,models,services,repositories,events}`;
 each command or query is a folder with `<name>.command.go` + `<name>.handler.go`). Modules never import each other. They talk
 through narrow ports in `platform/identityports` (registered at start-up, in-process today, replaceable by gRPC when a module is split out):
 `AccountDirectory` (auth), `UsernameGuard` and `AccountCountryLookup` (users), `StaffTokenService` (auth), `AuditRecorder` and
@@ -279,7 +280,7 @@ Terraform creates the gateway secret with `CHANGE_ME` placeholders (`infra/aws/m
 ## Adding a service or module (template for per-service agents)
 
 1. Read the service's block in `microservicesPlan.json` and its rows in `docs/backendPlan.md`.
-2. Go: work in `services/go/modules/<service>` using the Nanttyjs layout from [`zudojsStructure.md`](zudojsStructure.md); copy auth or currency:
+2. Go: work in `services/go/modules/<service>` using the Nantty service layout from [`fastifyPlatformMigration.md`](fastifyPlatformMigration.md); copy auth or currency:
    ```
    <service>.module.go                       facade at the module root (package <service>) forwarding to src
    <service>.integration_test.go             real Postgres, fresh schema, HTTP-level flow
@@ -293,7 +294,7 @@ Terraform creates the gateway secret with `CHANGE_ME` placeholders (`infra/aws/m
    src/modules/<feature>/{commands,queries}/<name>/<name>.command.go + <name>.handler.go, controllers, routes, dtos, validators, services
    ```
    Add `<SERVICE>_DATABASE_URL` (role `svc_<service>`) to `services/go/.env.example`.
-3. TypeScript: `services/typescript/<service>` (Nanttyjs + Prisma, `<name>.<kind>.ts`), then add its route prefix to
+3. TypeScript: `services/typescript/<service>` (Fastify + Prisma, `<name>.<kind>.ts`), then add its route prefix to
    `typescript/gateway/src/routes/upstream.routes.ts` and its URL to `gateway.config.ts`.
 4. Contracts: add each new event's JSON Schema + AsyncAPI message, and proto files for any internal gRPC.
 5. Infra: if the service consumes events or jobs, add its queue, bindings and service grants to
@@ -303,7 +304,7 @@ Terraform creates the gateway secret with `CHANGE_ME` placeholders (`infra/aws/m
 
 ## go-live: live (`modules/live`)
 
-Nanttyjs Go layout like go-identity (`src/{configs,container,databases/schema,errors,events,generated/ent,integrations,interfaces,jobs,middlewares,migrations,modules,services,types,utils}`;
+Nantty Go layout like go-identity (`src/{configs,container,databases/schema,errors,events,generated/ent,integrations,interfaces,jobs,middlewares,migrations,modules,services,types,utils}`;
 each command/query is `commands|queries/<name>/<name>.command|query.go` + `<name>.handler.go`; modules: sessions, stage, battles, gifts, points). `pnpm backend:dev:live` runs it on :8102.
 
 - Writes only the `live` schema. Money goes through go-money gRPC (`LIVE_MONEY_GRPC_ADDRESS`, `LIVE_MONEY_GRPC_TOKEN`, `LIVE_MONEY_CALL_TIMEOUT` 5s, `LIVE_GRPC_RETRY_ATTEMPTS` 3 on `UNAVAILABLE` only; the in-memory fake is used only when the address is empty outside production, and production refuses to start without addresses and 32+ character tokens). Names and creator-program roles come from the auth account directory (`LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS`/`_TOKEN`; without an address the granted `auth.accounts` columns are used outside production). `deployables/goLive/liveMoney.integration_test.go` runs go-live against a real go-money (gift, balanced ledger, `gift.sent` and `giftTransaction.committed` outbox rows). Lists (`/lives/suggested`, `/lives/:id/viewers`) are `{data, nextCursor}`.
@@ -337,11 +338,12 @@ lines; it runs daily, also runs the provider mirror reconciliation, and is expos
 **Flutterwave, Nantty holding no customer money.** Flutterwave is the only payment provider. Each verified user in
 Nigeria gets a Flutterwave payout subaccount (PSA, `WALLET_PSA_COUNTRIES`); the ledger mirrors it as
 `asset:providerWallet:flutterwave:{ref}` against the user's liability accounts. Escrow money stays locked (in the ledger)
-inside the buyer's own PSA and moves buyer PSA → seller PSA on release, with the escrow fee sent PSA → main. Card checkouts
-settle to the main balance and are then moved into the buyer's PSA. The escrow fee is 1.5% of the seller-group total incl.
-shipping (`ESCROW_FEE_BPS`), 1% on the Business plan (`ESCROW_FEE_BUSINESS_PLAN_BPS`, looked up through subscriptions); the
-seller also pays Flutterwave's processing fee; both are separate ledger lines (`liability:platformFeesUnearned` →
-`revenue:escrowFees` at release, and the recovered `expense:paymentProcessingFees`). The daily reconciliation compares every
+inside the buyer's own PSA and moves buyer PSA → seller PSA on release. Card checkouts settle to the main balance and are
+then moved into the buyer's PSA. The intended launch policy is **0% Nantty sales commission** for standard and Business
+orders. Actual Flutterwave processing and withdrawal charges are passed through at cost and must be shown in checkout or
+the withdrawal quote before confirmation; these are provider charges, not sales commission. Fresh-install defaults are
+zero, but an existing `admin.platform_settings.revenue` document can retain legacy 150/100-bps values and must be audited
+and corrected before staging or launch. Historical fee ledger lines remain readable. Daily reconciliation compares every
 PSA balance and statement, the main balance and settlements with the ledger, opens cases and freezes wallets on any break
 (design: [`docs/integrations/flutterwaveMigration.md`](../docs/integrations/flutterwaveMigration.md) §2.3).
 
@@ -368,13 +370,14 @@ stored encrypted and pinned to the issuing email; renewals use tokenized charges
 JWS + App Store Server API and Google Play Developer API verifiers with refund claw-back.
 
 **Escrow** (`modules/escrow`). One escrow per order, split computed at funding (seller rounds down, platform takes the
-remainder, `ESCROW_FEE_BPS` 150; commerce refunds arrive as `orderGroup.refundRequested` on `money-domain-events` or at
+remainder, `ESCROW_FEE_BPS` 0; commerce refunds arrive as `orderGroup.refundRequested` on `money-domain-events` or at
 `POST /api/v1/internal/order-groups/{orderGroupId}/refunds` with `X-Internal-Token`). States `held → released | refunded | disputed | partiallyRefunded`,
 `disputed → held` (buyer closes) and `released → refunded` (post-release refunds), all compare-and-set with a version.
 Auto-release `ESCROW_INSPECTION_PERIOD` (72h) after the delivered timestamp; an open dispute pauses the timer and closing it
 resumes the remaining window. Unverified stores are escrow-only (`DIRECT_PAYMENT_NOT_ALLOWED`); direct orders credit the
-seller's locked balance at payment. The escrow amount is the seller's net (gross − platform fee − processing fee); the
-platform fee waits in `liability:platformFeesUnearned` until release. `escrow_events` is the audit trail (actor, trigger) for release, refunds and decisions.
+seller's locked balance at payment. The intended launch policy has no sales-commission deduction. Any provider charge
+shown in the verified checkout quote is accounted for separately; existing settings and historical fee lines must be
+reconciled before staging or launch. `escrow_events` is the audit trail (actor, trigger) for release, refunds and decisions.
 
 **Wallet** (`modules/wallet`). Coin packages per channel (`web`, `ios`, `android`): coins = floor(price × (1 − channel fee) ÷
 net value per coin) (`COIN_CHANNEL_FEE_BPS`, `COIN_NET_VALUES`), so web packs give more coins per naira; staff edit the price
@@ -425,7 +428,9 @@ Flutterwave payout subaccounts and payout-account name matching are built (updat
 `docs/integrations/flutterwaveMigration.md` (cutover status). Referrals and purchase loyalty/cashback were removed by the owner
 (no rewards module); engagement Nantty Points in go-live are not money.
 
-**Money settings (admin-owned).** go-money reads `gift.shareTiers` and `escrow.policy` (`autoReleaseDays` 3, `sellerCreditHoldHours` 24, `sellerReserveBps` 0) from `admin.platform_settings` through the read-only grant (`ADMIN_DATABASE_SCHEMA`, cached `MONEY_PLATFORM_SETTINGS_TTL` 30s, last good value kept if the read fails). `ESCROW_INSPECTION_PERIOD`, `SELLER_CREDIT_HOLD_PERIOD` and the creator tier table are the fallback. The admin `revenue` document is the source for the coin transfer fee and coin cash values (wallet, creators), the creator ad share (creators, go-ads) and the escrow fee including the Business rate (payments); `COIN_TRANSFER_FEE_BPS`, `COIN_CASH_VALUES`, `ADS_CREATOR_SHARE_BPS`, `ADS_REVENUE_CREATOR_SHARE_BPS` and `ESCROW_FEE_*` are the fallback when it is missing or unreadable (logged as a warning). Gift share = max(staff-granted member tier, admin tier reached by this month's gift coins), capped at 7000 bps.
+> Legacy escrow-fee settings remain in the admin revenue schema for compatibility; fresh-install defaults are 0 bps. The founder's intended policy is no sales commission. A pre-existing revenue document may still contain old rates and must be audited before staging or launch.
+
+**Money settings (admin-owned).** go-money reads `gift.shareTiers` and `escrow.policy` (`autoReleaseDays` 3, `sellerCreditHoldHours` 24, `sellerReserveBps` 0) from `admin.platform_settings` through the read-only grant (`ADMIN_DATABASE_SCHEMA`, cached `MONEY_PLATFORM_SETTINGS_TTL` 30s, last good value kept if the read fails). `ESCROW_INSPECTION_PERIOD`, `SELLER_CREDIT_HOLD_PERIOD` and the creator tier table are the fallback. The admin `revenue` document is the source for the coin transfer fee and coin cash values (wallet, creators), the creator ad share (creators, go-ads) and legacy escrow-fee settings (payments); `COIN_TRANSFER_FEE_BPS`, `COIN_CASH_VALUES`, `ADS_CREATOR_SHARE_BPS`, `ADS_REVENUE_CREATOR_SHARE_BPS` and `ESCROW_FEE_*` are the fallback when it is missing or unreadable (logged as a warning). Gift share = max(staff-granted member tier, admin tier reached by this month's gift coins), capped at 7000 bps.
 
 ## Elixir file names
 

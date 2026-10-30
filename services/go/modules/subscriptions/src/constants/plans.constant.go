@@ -33,8 +33,8 @@ type PlanDefinition struct {
 }
 
 var Plans = map[string]PlanDefinition{
-	PlanSellerPro:      {Code: PlanSellerPro, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", SellerPlan: "pro", TrialAllowed: true, BundleEligible: true, SelfServe: true, Tier: "PRO"},
-	PlanSellerBusiness: {Code: PlanSellerBusiness, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", SellerPlan: "business", TrialAllowed: true, BundleEligible: true, SelfServe: true, Tier: "BUSINESS"},
+	PlanSellerPro:      {Code: PlanSellerPro, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", SellerPlan: "pro", TrialAllowed: true, BundleEligible: true, SelfServe: true, InAppAllowed: true, Tier: "PRO"},
+	PlanSellerBusiness: {Code: PlanSellerBusiness, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", SellerPlan: "business", TrialAllowed: true, BundleEligible: true, SelfServe: true, InAppAllowed: true, Tier: "BUSINESS"},
 	PlanGoldOnly:       {Code: PlanGoldOnly, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", TrialAllowed: true, BundleEligible: true, SelfServe: true, Tier: "GOLD"},
 	PlanBlack:          {Code: PlanBlack, ProfileTypes: []string{ProfileGovernment}, Checkmark: "black", GracePeriodEligible: true, Tier: "OFFICIAL"},
 	PlanBlueEssential:  {Code: PlanBlueEssential, ProfileTypes: []string{ProfilePersonal}, SelfServe: true, InAppAllowed: true, Tier: "ESSENTIAL"},

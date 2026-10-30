@@ -1,5 +1,5 @@
-import { createRequestContext, createRouter } from "@zudojs/http";
-import { describe, expect, it, vi } from "vitest";
+import { createPlatform } from "@nantty/fastify-platform";
+import { describe, expect, it } from "vitest";
 
 import type { MediaDatabase } from "../../src/databases/prisma.database.js";
 import { RabbitMqConnection } from "../../src/integrations/rabbitMqConnection.integration.js";
@@ -10,10 +10,10 @@ function databaseWith(count: () => Promise<number>): MediaDatabase {
 }
 
 async function readyz(database: MediaDatabase, broker: () => Promise<void>, healthy = true) {
-  const router = createRouter({});
-  registerHealthRoutes(router, database, async () => ({ healthy, ffmpeg: healthy }), broker);
-  const { response } = await router.dispatch(createRequestContext({ method: "GET", url: "/readyz", path: "/readyz" }));
-  return response.status;
+  const app = await createPlatform({ name: "media-test", host: "127.0.0.1", port: 0, logger: false, rateLimit: false });
+  registerHealthRoutes(app, database, async () => ({ healthy, ffmpeg: healthy }), broker);
+  try { return (await app.inject("/readyz")).statusCode; }
+  finally { await app.close(); }
 }
 
 describe("/readyz", () => {
@@ -26,14 +26,7 @@ describe("/readyz", () => {
   });
 
   it("is unavailable when the database hangs past the timeout", async () => {
-    vi.useFakeTimers();
-    try {
-      const pending = readyz(databaseWith(() => new Promise<number>(() => undefined)), async () => undefined);
-      await vi.advanceTimersByTimeAsync(2_100);
-      expect(await pending).toBe(503);
-    } finally {
-      vi.useRealTimers();
-    }
+    expect(await readyz(databaseWith(() => new Promise<number>(() => undefined)), async () => undefined)).toBe(503);
   });
 
   it("stays unavailable when a required capability is missing", async () => {

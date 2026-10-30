@@ -6,11 +6,11 @@ export const viewerId = "0192f0a0-0000-7000-8000-00000000b001";
 
 export function buildPostRow(overrides: Partial<PostRow>): PostRow {
   return {
-    id: "0192f0a0-0000-7000-8000-000000000001", authorId, kind: "post", text: "Hello", audience: "everyone", visibility: "public", isAiGenerated: false, soundId: null,
+    id: "0192f0a0-0000-7000-8000-000000000001", authorId, authorProfileId: null, authorProfileKind: null, kind: "post", text: "Hello", audience: "everyone", visibility: "public", isAiGenerated: false, soundId: null,
     resharedFromId: null, replyToCommentId: null, replyToClipId: null, replyToCommenterId: null, stickerLayout: null, mentions: [], linkPreview: null,
     likeCount: 0, commentCount: 0, repostCount: 0, shareCount: 0, viewCount: 0, profileVisitCount: 0, saveCount: 0, quoteCount: 0, isQuote: false, replyPolicy: "everyone",
     sensitiveLabels: [], authorSensitiveLabels: [], moderationSensitiveLabels: [], advisorySensitiveLabels: [], sensitiveLabelsReviewed: false,
-    moderationVisibility: "visible", topics: [], productIds: [], clipEdit: null, location: null, expiresAt: null, deletedAt: null, createdAt: new Date("2026-10-04T10:00:00Z"), media: [],
+    moderationVisibility: "visible", topics: [], productIds: [], clipEdit: null, location: null, expiresAt: null, publicationState: "published", scheduledAt: null, scheduledTaggedUserIds: [], publicationFailureReason: null, deletedAt: null, createdAt: new Date("2026-10-04T10:00:00Z"), media: [],
     ...overrides,
   } as PostRow;
 }
@@ -26,7 +26,12 @@ export function buildFakeContext(posts: readonly PostRow[], options: { readonly 
   } as Record<string, unknown>, { get: (target, key: string) => target[key] ?? emptyList });
   return {
     database: { client, transaction: async (work: (db: unknown) => Promise<unknown>) => work(client) },
-    directory: { findUserSummaries: async () => new Map(), findPrivateAccountIds: async () => new Set() },
+    directory: {
+      findUserSummaries: async () => new Map(),
+      findPrivateAccountIds: async () => new Set(),
+      findMentionTargetStatuses: async (ids: readonly string[]) => new Map(ids.map((id) => [id, { username: `user${id.slice(-4)}`, status: "active" as const }])),
+      findOwnedPostableProfile: async () => null,
+    },
     clock: { now: () => new Date("2026-10-04T12:00:00Z") },
     premium: { isPremium: async () => false, hasSubscribedToCreator: async () => false },
     ranker: { rank: async (candidates: unknown[]) => candidates },

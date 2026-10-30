@@ -44,6 +44,12 @@ describe("comment hiding withdraws and restores in-app notifications", () => {
     expect(await harness.notifications.setHiddenForComment("c9", true)).toBe(0);
   });
 
+  it("routes group-chat mentions to their conversation and exact message", async () => {
+    const { harness, handler } = setup();
+    await handler.execute({ event: { ...makeEvent("mention.created", { recipientUserId: "friend", mentionedUserId: "friend", actor, authorId: "sender", surface: "group", conversationId: "room-1", url: "/chats/room-1" }, "e8"), subject: "message-9" } });
+    expect((await harness.notifications.list("friend", "all", 10, null)).rows[0]?.data).toMatchObject({ url: "/chats/room-1", conversationId: "room-1", messageId: "message-9" });
+  });
+
   it("ignores a visibility event without a comment id or with nothing to match", async () => {
     const { harness, handler } = setup();
     expect(await handler.execute({ event: makeEvent("comment.hidden", { postId: "p1" }, "e6") })).toMatchObject({ handled: false });

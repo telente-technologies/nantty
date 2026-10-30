@@ -15,7 +15,7 @@ export async function buildSharedContentCard(context: HandlerContext, viewerId: 
     if (user === undefined) return unavailable(reference);
     return { reference, availability: "available", title: user.name, subtitle: `@${user.username}`, imageUrl: user.avatarUrl, isLive: false, followsAuthor: null, profileUserId: user.id };
   }
-  if (reference.kind === "product" || reference.kind === "store" || reference.kind === "live" || reference.kind === "order") {
+  if (reference.kind === "product" || reference.kind === "store" || reference.kind === "live" || reference.kind === "space" || reference.kind === "order") {
     const external = await context.shareCards?.resolve(reference.kind, reference.id, viewerId);
     if (external === null || external === undefined) return unavailable(reference);
     return { ...unavailable(reference), ...external, reference, isLive: external.isLive ?? false };

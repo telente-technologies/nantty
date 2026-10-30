@@ -6,13 +6,49 @@ import (
 )
 
 func TestEveryDepartmentTemplateOnlyUsesKnownPermissions(t *testing.T) {
-	if len(DepartmentRoleTemplates) != 10 {
-		t.Fatalf("expected ten department templates, got %d", len(DepartmentRoleTemplates))
+	if len(DepartmentRoleTemplates) != 15 {
+		t.Fatalf("expected fifteen department templates, got %d", len(DepartmentRoleTemplates))
 	}
 	for _, template := range DepartmentRoleTemplates {
 		for _, permission := range template.Permissions {
 			if !IsKnownPermission(permission) {
 				t.Errorf("%s grants unknown permission %s", template.Name, permission)
+			}
+		}
+	}
+}
+
+func TestRequestedDepartmentTemplatesAreNamedAndLeastPrivilege(t *testing.T) {
+	byKey := make(map[string]DepartmentRoleTemplate, len(DepartmentRoleTemplates))
+	for _, template := range DepartmentRoleTemplates {
+		byKey[template.Key] = template
+	}
+
+	for key, name := range map[string]string{
+		"trust_verification":   "Trust & Verification",
+		"finance":              "Finance Admin",
+		"moderation":           "Moderation Admin",
+		"support":              "Support Agent",
+		"subscription_manager": "Subscription Manager",
+		"operations_analyst":   "Operations Analyst",
+		"auditor":              "Auditor",
+	} {
+		if template, exists := byKey[key]; !exists || template.Name != name {
+			t.Errorf("template %q = %+v, exists %v; want name %q", key, template, exists, name)
+		}
+	}
+
+	for key, forbidden := range map[string][]string{
+		"trust_verification":   {"moderation:reports", "users:suspend", "users:read-pii"},
+		"moderation":           {"verification:grant", "verification:revoke", "users:read-pii"},
+		"subscription_manager": {"config:read", "config:revenue", "payments:wallets", "users:read-pii"},
+		"operations_analyst":   {"orders:read", "ledger:read", "audit:export", "users:read-pii"},
+		"auditor":              {"audit:export", "staff:manage", "users:read-pii"},
+	} {
+		template := byKey[key]
+		for _, permission := range forbidden {
+			if slices.Contains(template.Permissions, permission) {
+				t.Errorf("template %q unexpectedly grants %q", key, permission)
 			}
 		}
 	}

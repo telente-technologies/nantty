@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 import { notFound } from "../../../errors/social.error.js";
 import { requireInternalToken } from "../../../middlewares/internalToken.middleware.js";

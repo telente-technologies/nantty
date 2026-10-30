@@ -188,6 +188,62 @@ func (_c *BattleCreate) SetNillableSettledAt(v *time.Time) *BattleCreate {
 	return _c
 }
 
+// SetSettlementAttempts sets the "settlement_attempts" field.
+func (_c *BattleCreate) SetSettlementAttempts(v int) *BattleCreate {
+	_c.mutation.SetSettlementAttempts(v)
+	return _c
+}
+
+// SetNillableSettlementAttempts sets the "settlement_attempts" field if the given value is not nil.
+func (_c *BattleCreate) SetNillableSettlementAttempts(v *int) *BattleCreate {
+	if v != nil {
+		_c.SetSettlementAttempts(*v)
+	}
+	return _c
+}
+
+// SetSettlementLeaseUntil sets the "settlement_lease_until" field.
+func (_c *BattleCreate) SetSettlementLeaseUntil(v time.Time) *BattleCreate {
+	_c.mutation.SetSettlementLeaseUntil(v)
+	return _c
+}
+
+// SetNillableSettlementLeaseUntil sets the "settlement_lease_until" field if the given value is not nil.
+func (_c *BattleCreate) SetNillableSettlementLeaseUntil(v *time.Time) *BattleCreate {
+	if v != nil {
+		_c.SetSettlementLeaseUntil(*v)
+	}
+	return _c
+}
+
+// SetSettlementNextAttemptAt sets the "settlement_next_attempt_at" field.
+func (_c *BattleCreate) SetSettlementNextAttemptAt(v time.Time) *BattleCreate {
+	_c.mutation.SetSettlementNextAttemptAt(v)
+	return _c
+}
+
+// SetNillableSettlementNextAttemptAt sets the "settlement_next_attempt_at" field if the given value is not nil.
+func (_c *BattleCreate) SetNillableSettlementNextAttemptAt(v *time.Time) *BattleCreate {
+	if v != nil {
+		_c.SetSettlementNextAttemptAt(*v)
+	}
+	return _c
+}
+
+// SetSettlementLeaseToken sets the "settlement_lease_token" field.
+func (_c *BattleCreate) SetSettlementLeaseToken(v string) *BattleCreate {
+	_c.mutation.SetSettlementLeaseToken(v)
+	return _c
+}
+
+// SetNillableSettlementLeaseToken sets the "settlement_lease_token" field if the given value is not nil.
+func (_c *BattleCreate) SetNillableSettlementLeaseToken(v *string) *BattleCreate {
+	if v != nil {
+		_c.SetSettlementLeaseToken(*v)
+	}
+	return _c
+}
+
 // SetWinnerUserIds sets the "winner_user_ids" field.
 func (_c *BattleCreate) SetWinnerUserIds(v []string) *BattleCreate {
 	_c.mutation.SetWinnerUserIds(v)
@@ -275,6 +331,10 @@ func (_c *BattleCreate) defaults() {
 		v := battle.DefaultWinnerTakesAll
 		_c.mutation.SetWinnerTakesAll(v)
 	}
+	if _, ok := _c.mutation.SettlementAttempts(); !ok {
+		v := battle.DefaultSettlementAttempts
+		_c.mutation.SetSettlementAttempts(v)
+	}
 	if _, ok := _c.mutation.WinnerUserIds(); !ok {
 		v := battle.DefaultWinnerUserIds
 		_c.mutation.SetWinnerUserIds(v)
@@ -326,6 +386,9 @@ func (_c *BattleCreate) check() error {
 		if err := battle.EndReasonValidator(v); err != nil {
 			return &ValidationError{Name: "end_reason", err: fmt.Errorf(`ent: validator failed for field "Battle.end_reason": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.SettlementAttempts(); !ok {
+		return &ValidationError{Name: "settlement_attempts", err: errors.New(`ent: missing required field "Battle.settlement_attempts"`)}
 	}
 	if _, ok := _c.mutation.WinnerUserIds(); !ok {
 		return &ValidationError{Name: "winner_user_ids", err: errors.New(`ent: missing required field "Battle.winner_user_ids"`)}
@@ -424,6 +487,22 @@ func (_c *BattleCreate) createSpec() (*Battle, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.SettledAt(); ok {
 		_spec.SetField(battle.FieldSettledAt, field.TypeTime, value)
 		_node.SettledAt = &value
+	}
+	if value, ok := _c.mutation.SettlementAttempts(); ok {
+		_spec.SetField(battle.FieldSettlementAttempts, field.TypeInt, value)
+		_node.SettlementAttempts = value
+	}
+	if value, ok := _c.mutation.SettlementLeaseUntil(); ok {
+		_spec.SetField(battle.FieldSettlementLeaseUntil, field.TypeTime, value)
+		_node.SettlementLeaseUntil = &value
+	}
+	if value, ok := _c.mutation.SettlementNextAttemptAt(); ok {
+		_spec.SetField(battle.FieldSettlementNextAttemptAt, field.TypeTime, value)
+		_node.SettlementNextAttemptAt = &value
+	}
+	if value, ok := _c.mutation.SettlementLeaseToken(); ok {
+		_spec.SetField(battle.FieldSettlementLeaseToken, field.TypeString, value)
+		_node.SettlementLeaseToken = &value
 	}
 	if value, ok := _c.mutation.WinnerUserIds(); ok {
 		_spec.SetField(battle.FieldWinnerUserIds, field.TypeJSON, value)
@@ -636,6 +715,78 @@ func (u *BattleUpsert) UpdateSettledAt() *BattleUpsert {
 // ClearSettledAt clears the value of the "settled_at" field.
 func (u *BattleUpsert) ClearSettledAt() *BattleUpsert {
 	u.SetNull(battle.FieldSettledAt)
+	return u
+}
+
+// SetSettlementAttempts sets the "settlement_attempts" field.
+func (u *BattleUpsert) SetSettlementAttempts(v int) *BattleUpsert {
+	u.Set(battle.FieldSettlementAttempts, v)
+	return u
+}
+
+// UpdateSettlementAttempts sets the "settlement_attempts" field to the value that was provided on create.
+func (u *BattleUpsert) UpdateSettlementAttempts() *BattleUpsert {
+	u.SetExcluded(battle.FieldSettlementAttempts)
+	return u
+}
+
+// AddSettlementAttempts adds v to the "settlement_attempts" field.
+func (u *BattleUpsert) AddSettlementAttempts(v int) *BattleUpsert {
+	u.Add(battle.FieldSettlementAttempts, v)
+	return u
+}
+
+// SetSettlementLeaseUntil sets the "settlement_lease_until" field.
+func (u *BattleUpsert) SetSettlementLeaseUntil(v time.Time) *BattleUpsert {
+	u.Set(battle.FieldSettlementLeaseUntil, v)
+	return u
+}
+
+// UpdateSettlementLeaseUntil sets the "settlement_lease_until" field to the value that was provided on create.
+func (u *BattleUpsert) UpdateSettlementLeaseUntil() *BattleUpsert {
+	u.SetExcluded(battle.FieldSettlementLeaseUntil)
+	return u
+}
+
+// ClearSettlementLeaseUntil clears the value of the "settlement_lease_until" field.
+func (u *BattleUpsert) ClearSettlementLeaseUntil() *BattleUpsert {
+	u.SetNull(battle.FieldSettlementLeaseUntil)
+	return u
+}
+
+// SetSettlementNextAttemptAt sets the "settlement_next_attempt_at" field.
+func (u *BattleUpsert) SetSettlementNextAttemptAt(v time.Time) *BattleUpsert {
+	u.Set(battle.FieldSettlementNextAttemptAt, v)
+	return u
+}
+
+// UpdateSettlementNextAttemptAt sets the "settlement_next_attempt_at" field to the value that was provided on create.
+func (u *BattleUpsert) UpdateSettlementNextAttemptAt() *BattleUpsert {
+	u.SetExcluded(battle.FieldSettlementNextAttemptAt)
+	return u
+}
+
+// ClearSettlementNextAttemptAt clears the value of the "settlement_next_attempt_at" field.
+func (u *BattleUpsert) ClearSettlementNextAttemptAt() *BattleUpsert {
+	u.SetNull(battle.FieldSettlementNextAttemptAt)
+	return u
+}
+
+// SetSettlementLeaseToken sets the "settlement_lease_token" field.
+func (u *BattleUpsert) SetSettlementLeaseToken(v string) *BattleUpsert {
+	u.Set(battle.FieldSettlementLeaseToken, v)
+	return u
+}
+
+// UpdateSettlementLeaseToken sets the "settlement_lease_token" field to the value that was provided on create.
+func (u *BattleUpsert) UpdateSettlementLeaseToken() *BattleUpsert {
+	u.SetExcluded(battle.FieldSettlementLeaseToken)
+	return u
+}
+
+// ClearSettlementLeaseToken clears the value of the "settlement_lease_token" field.
+func (u *BattleUpsert) ClearSettlementLeaseToken() *BattleUpsert {
+	u.SetNull(battle.FieldSettlementLeaseToken)
 	return u
 }
 
@@ -916,6 +1067,90 @@ func (u *BattleUpsertOne) UpdateSettledAt() *BattleUpsertOne {
 func (u *BattleUpsertOne) ClearSettledAt() *BattleUpsertOne {
 	return u.Update(func(s *BattleUpsert) {
 		s.ClearSettledAt()
+	})
+}
+
+// SetSettlementAttempts sets the "settlement_attempts" field.
+func (u *BattleUpsertOne) SetSettlementAttempts(v int) *BattleUpsertOne {
+	return u.Update(func(s *BattleUpsert) {
+		s.SetSettlementAttempts(v)
+	})
+}
+
+// AddSettlementAttempts adds v to the "settlement_attempts" field.
+func (u *BattleUpsertOne) AddSettlementAttempts(v int) *BattleUpsertOne {
+	return u.Update(func(s *BattleUpsert) {
+		s.AddSettlementAttempts(v)
+	})
+}
+
+// UpdateSettlementAttempts sets the "settlement_attempts" field to the value that was provided on create.
+func (u *BattleUpsertOne) UpdateSettlementAttempts() *BattleUpsertOne {
+	return u.Update(func(s *BattleUpsert) {
+		s.UpdateSettlementAttempts()
+	})
+}
+
+// SetSettlementLeaseUntil sets the "settlement_lease_until" field.
+func (u *BattleUpsertOne) SetSettlementLeaseUntil(v time.Time) *BattleUpsertOne {
+	return u.Update(func(s *BattleUpsert) {
+		s.SetSettlementLeaseUntil(v)
+	})
+}
+
+// UpdateSettlementLeaseUntil sets the "settlement_lease_until" field to the value that was provided on create.
+func (u *BattleUpsertOne) UpdateSettlementLeaseUntil() *BattleUpsertOne {
+	return u.Update(func(s *BattleUpsert) {
+		s.UpdateSettlementLeaseUntil()
+	})
+}
+
+// ClearSettlementLeaseUntil clears the value of the "settlement_lease_until" field.
+func (u *BattleUpsertOne) ClearSettlementLeaseUntil() *BattleUpsertOne {
+	return u.Update(func(s *BattleUpsert) {
+		s.ClearSettlementLeaseUntil()
+	})
+}
+
+// SetSettlementNextAttemptAt sets the "settlement_next_attempt_at" field.
+func (u *BattleUpsertOne) SetSettlementNextAttemptAt(v time.Time) *BattleUpsertOne {
+	return u.Update(func(s *BattleUpsert) {
+		s.SetSettlementNextAttemptAt(v)
+	})
+}
+
+// UpdateSettlementNextAttemptAt sets the "settlement_next_attempt_at" field to the value that was provided on create.
+func (u *BattleUpsertOne) UpdateSettlementNextAttemptAt() *BattleUpsertOne {
+	return u.Update(func(s *BattleUpsert) {
+		s.UpdateSettlementNextAttemptAt()
+	})
+}
+
+// ClearSettlementNextAttemptAt clears the value of the "settlement_next_attempt_at" field.
+func (u *BattleUpsertOne) ClearSettlementNextAttemptAt() *BattleUpsertOne {
+	return u.Update(func(s *BattleUpsert) {
+		s.ClearSettlementNextAttemptAt()
+	})
+}
+
+// SetSettlementLeaseToken sets the "settlement_lease_token" field.
+func (u *BattleUpsertOne) SetSettlementLeaseToken(v string) *BattleUpsertOne {
+	return u.Update(func(s *BattleUpsert) {
+		s.SetSettlementLeaseToken(v)
+	})
+}
+
+// UpdateSettlementLeaseToken sets the "settlement_lease_token" field to the value that was provided on create.
+func (u *BattleUpsertOne) UpdateSettlementLeaseToken() *BattleUpsertOne {
+	return u.Update(func(s *BattleUpsert) {
+		s.UpdateSettlementLeaseToken()
+	})
+}
+
+// ClearSettlementLeaseToken clears the value of the "settlement_lease_token" field.
+func (u *BattleUpsertOne) ClearSettlementLeaseToken() *BattleUpsertOne {
+	return u.Update(func(s *BattleUpsert) {
+		s.ClearSettlementLeaseToken()
 	})
 }
 
@@ -1370,6 +1605,90 @@ func (u *BattleUpsertBulk) UpdateSettledAt() *BattleUpsertBulk {
 func (u *BattleUpsertBulk) ClearSettledAt() *BattleUpsertBulk {
 	return u.Update(func(s *BattleUpsert) {
 		s.ClearSettledAt()
+	})
+}
+
+// SetSettlementAttempts sets the "settlement_attempts" field.
+func (u *BattleUpsertBulk) SetSettlementAttempts(v int) *BattleUpsertBulk {
+	return u.Update(func(s *BattleUpsert) {
+		s.SetSettlementAttempts(v)
+	})
+}
+
+// AddSettlementAttempts adds v to the "settlement_attempts" field.
+func (u *BattleUpsertBulk) AddSettlementAttempts(v int) *BattleUpsertBulk {
+	return u.Update(func(s *BattleUpsert) {
+		s.AddSettlementAttempts(v)
+	})
+}
+
+// UpdateSettlementAttempts sets the "settlement_attempts" field to the value that was provided on create.
+func (u *BattleUpsertBulk) UpdateSettlementAttempts() *BattleUpsertBulk {
+	return u.Update(func(s *BattleUpsert) {
+		s.UpdateSettlementAttempts()
+	})
+}
+
+// SetSettlementLeaseUntil sets the "settlement_lease_until" field.
+func (u *BattleUpsertBulk) SetSettlementLeaseUntil(v time.Time) *BattleUpsertBulk {
+	return u.Update(func(s *BattleUpsert) {
+		s.SetSettlementLeaseUntil(v)
+	})
+}
+
+// UpdateSettlementLeaseUntil sets the "settlement_lease_until" field to the value that was provided on create.
+func (u *BattleUpsertBulk) UpdateSettlementLeaseUntil() *BattleUpsertBulk {
+	return u.Update(func(s *BattleUpsert) {
+		s.UpdateSettlementLeaseUntil()
+	})
+}
+
+// ClearSettlementLeaseUntil clears the value of the "settlement_lease_until" field.
+func (u *BattleUpsertBulk) ClearSettlementLeaseUntil() *BattleUpsertBulk {
+	return u.Update(func(s *BattleUpsert) {
+		s.ClearSettlementLeaseUntil()
+	})
+}
+
+// SetSettlementNextAttemptAt sets the "settlement_next_attempt_at" field.
+func (u *BattleUpsertBulk) SetSettlementNextAttemptAt(v time.Time) *BattleUpsertBulk {
+	return u.Update(func(s *BattleUpsert) {
+		s.SetSettlementNextAttemptAt(v)
+	})
+}
+
+// UpdateSettlementNextAttemptAt sets the "settlement_next_attempt_at" field to the value that was provided on create.
+func (u *BattleUpsertBulk) UpdateSettlementNextAttemptAt() *BattleUpsertBulk {
+	return u.Update(func(s *BattleUpsert) {
+		s.UpdateSettlementNextAttemptAt()
+	})
+}
+
+// ClearSettlementNextAttemptAt clears the value of the "settlement_next_attempt_at" field.
+func (u *BattleUpsertBulk) ClearSettlementNextAttemptAt() *BattleUpsertBulk {
+	return u.Update(func(s *BattleUpsert) {
+		s.ClearSettlementNextAttemptAt()
+	})
+}
+
+// SetSettlementLeaseToken sets the "settlement_lease_token" field.
+func (u *BattleUpsertBulk) SetSettlementLeaseToken(v string) *BattleUpsertBulk {
+	return u.Update(func(s *BattleUpsert) {
+		s.SetSettlementLeaseToken(v)
+	})
+}
+
+// UpdateSettlementLeaseToken sets the "settlement_lease_token" field to the value that was provided on create.
+func (u *BattleUpsertBulk) UpdateSettlementLeaseToken() *BattleUpsertBulk {
+	return u.Update(func(s *BattleUpsert) {
+		s.UpdateSettlementLeaseToken()
+	})
+}
+
+// ClearSettlementLeaseToken clears the value of the "settlement_lease_token" field.
+func (u *BattleUpsertBulk) ClearSettlementLeaseToken() *BattleUpsertBulk {
+	return u.Update(func(s *BattleUpsert) {
+		s.ClearSettlementLeaseToken()
 	})
 }
 

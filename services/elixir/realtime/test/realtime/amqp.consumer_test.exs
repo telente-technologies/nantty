@@ -17,7 +17,14 @@ defmodule Realtime.Events.AmqpConsumerTest do
         end)
 
       send(owner, {:opened, channel_pid})
-      {:ok, %{pid: channel_pid, owner: owner, fail_publish: settings[:fail_publish] == true}}
+
+      {:ok,
+       %{
+         pid: channel_pid,
+         owner: owner,
+         fail_publish: settings[:fail_publish] == true,
+         unroutable: settings[:unroutable] == true
+       }}
     end
 
     @impl true
@@ -44,7 +51,12 @@ defmodule Realtime.Events.AmqpConsumerTest do
     @impl true
     def publish_confirmed(channel, exchange, routing_key, _payload, options) do
       send(channel.owner, {:published, exchange, routing_key, options})
-      if channel.fail_publish, do: {:error, :nacked}, else: :ok
+
+      cond do
+        channel.unroutable -> {:error, :unroutable}
+        channel.fail_publish -> {:error, :nacked}
+        true -> :ok
+      end
     end
 
     @impl true
@@ -118,6 +130,14 @@ defmodule Realtime.Events.AmqpConsumerTest do
     pid = start_consumer(fail_publish: true)
     deliver(pid, 5, envelope("e-4", "explode"))
     assert_receive {:rejected, 5, true}
+  end
+
+  test "dead-letters the original delivery when a confirmed retry is unroutable" do
+    pid = start_consumer(unroutable: true)
+    deliver(pid, 8, envelope("e-unroutable", "explode"))
+
+    assert_receive {:rejected, 8, false}
+    refute_received {:acked, 8}
   end
 
   test "broadcasts a duplicated envelope id once but acknowledges both copies" do

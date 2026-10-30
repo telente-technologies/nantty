@@ -39,7 +39,7 @@ Report the listing from its menu, or file a claim from the brand tools in the se
 
 ## Who can have a government account?
 
-Only official public bodies. They go through deep vetting, two separate approvals and yearly re-verification for the Black checkmark, which costs ₦50,000 a month. See [Government accounts](/help/business-and-brands/government-accounts).
+Only official public bodies may request manual review for Black. It is not a public self-serve purchase; the approved process and any price are provided privately. See [Government accounts](/help/business-and-brands/government-accounts).
 
 ## Can I post as my business from the web?
 

@@ -28,7 +28,7 @@ Approved creators get **LIVE** in the **Create** tab, or can stream from a compu
 - **Gifts**: fans send gifts with coins during lives. See [Gifts and coins on live](/help/live/gifts-and-coins-on-live).
 - **Fan subscriptions**: set a monthly price for subscriber perks. You keep 80% of the net. See [Fan subscriptions](/help/creators-and-earnings/fan-subscriptions).
 - **Ads revenue share**: see [Ads revenue share](/help/creators-and-earnings/ads-revenue-share).
-- **Nantty Points** rank your supporters but are never money. See [Nantty Points](/help/live/nanttypoints).
+- **Nantty Points** rank your supporters but are never money. See [Nantty Points](/help/live/nantty-points).
 
 ## Step 6: Set up payouts
 

@@ -1,16 +1,7 @@
-import {
-  HttpMiddlewarePipeline,
-  createHttpServer,
-  createNodeHttpAdapter,
-  createResponseContext,
-  createRouter,
-  type HttpMiddleware,
-  type HttpRequestContext,
-} from "@zudojs/http";
-import { createLogger, type Logger } from "@zudojs/logger";
+import { createLogger, type Logger } from "@nantty/fastify-platform";
 
 import type { MediaConfig } from "./configs/media.config.js";
-import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
+import { createMediaHttpApp } from "./httpApp.js";
 import { mediaDomainEventsQueue, mediaJobQueueName } from "./constants/media.constant.js";
 import { createMediaDatabase, type MediaDatabase } from "./databases/prisma.database.js";
 import { createMediaUrlSigner } from "./integrations/cdnMediaUrlSigner.integration.js";
@@ -33,21 +24,14 @@ import { startMaintenanceJob } from "./jobs/maintenance.job.js";
 import { createMediaJobHandlers } from "./jobs/mediaJobHandlers.job.js";
 import { startOutboxRelay } from "./jobs/outboxRelay.job.js";
 import { handleDomainEventForMedia } from "./modules/assets/services/chatMediaExpiryEvent.service.js";
-import { registerRoutes } from "./routes/index.js";
 import type { HandlerContext } from "./types/handlerContext.type.js";
-import { errorToResponse, json } from "./utils/http.util.js";
-import { createRouteFactory } from "./utils/route.util.js";
-import { dispatchWithRoute, withRequestMetrics } from "./telemetry/requestMetrics.js";
-
-const bodyAllowanceBytes = 1024 * 1024;
-const proxiedChunkLimitBytes = 65 * 1024 * 1024;
 
 export interface MediaApp {
   readonly start: () => Promise<number>;
   readonly stop: () => Promise<void>;
 }
 
-export function createMediaApp(config: MediaConfig, logger: Logger = createLogger({ name: "media" })): MediaApp {
+export async function createMediaApp(config: MediaConfig, logger: Logger = createLogger({ name: "media" })): Promise<MediaApp> {
   const database: MediaDatabase = createMediaDatabase(config.databaseUrl);
   const storage = createS3ObjectStorage(config.storage);
   const rabbitConnection = new RabbitMqConnection(config.rabbitMqUrl, "media", logger);
@@ -62,25 +46,7 @@ export function createMediaApp(config: MediaConfig, logger: Logger = createLogge
     transcoder: createFfmpegMediaTranscoder({ config: config.ffmpeg }),
     branding: createBrandedDownloadRenderer({ config: config.ffmpeg }),
   };
-  const router = createRouter({
-    onError: (error) => errorToResponse(error),
-    notFoundHandler: () => json(404, { message: "Not found.", code: "NOT_FOUND" }),
-    methodNotAllowedHandler: () => json(405, { message: "Method not allowed.", code: "METHOD_NOT_ALLOWED" }),
-  });
-  registerRoutes(router, createRouteFactory(config.internalToken), context, database);
-  const dispatch: HttpMiddleware = async (requestContext) => {
-    try {
-      return (await dispatchWithRoute(router, requestContext.request, requestContext.signal)).response;
-    } catch (error) {
-      logger.error("unhandled error", { path: requestContext.request.path, error: error instanceof Error ? error.message : String(error) });
-      return json(500, { message: "Internal Server Error", code: "INTERNAL_ERROR" });
-    }
-  };
-  const pipeline = new HttpMiddlewarePipeline({ middlewares: [createGatewayIdentityMiddleware(config.gatewayIdentitySecrets ?? []), dispatch] });
-  const server = createHttpServer({
-    adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: config.allowProxiedChunks ? proxiedChunkLimitBytes : bodyAllowanceBytes, trustProxy: true }),
-    handler: withRequestMetrics((request: HttpRequestContext) => pipeline.execute(request, createResponseContext())),
-  });
+  const server = await createMediaHttpApp(context, database);
   const stoppers: (() => void | Promise<void>)[] = [];
   return {
     async start() {
@@ -88,7 +54,7 @@ export function createMediaApp(config: MediaConfig, logger: Logger = createLogge
       if (config.ffmpeg.mode === "required" && !(await context.transcoder.isAvailable())) throw new Error("FFMPEG_MODE=required but ffmpeg is not available");
       if (config.ffmpeg.mode !== "disabled" && !(await context.transcoder.isAvailable())) logger.warn("ffmpeg is not available: video and audio uploads will stay in processing until it is installed");
       if (config.allowUnscannedUploads) logger.warn("MEDIA_ALLOW_UNSCANNED is enabled: uploads will be published without a malware scan");
-      await server.start();
+      await server.listen({ host: config.host, port: config.port });
       if (config.jobsEnabled) {
         const publisher = createDomainEventPublisher(config, logger);
         stoppers.push(startOutboxRelay({ database, publisher, clock: systemClock, logger, intervalMs: config.outboxPollIntervalMs }));
@@ -101,11 +67,12 @@ export function createMediaApp(config: MediaConfig, logger: Logger = createLogge
           stoppers.push(() => jobConsumer.stop(), () => eventConsumer.stop(), () => rabbitConnection.close());
         } else logger.warn("RABBITMQ_URL is empty: media jobs and events are not consumed");
       }
-      return server.address?.port ?? config.port;
+      const address = server.server.address();
+      return typeof address === "object" && address !== null ? address.port : config.port;
     },
     async stop() {
       for (const stop of stoppers) await stop();
-      await server.stop();
+      await server.close();
       await database.disconnect();
     },
   };

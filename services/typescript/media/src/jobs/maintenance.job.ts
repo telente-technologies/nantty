@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import { mediaJobQueueName, processMediaJobType } from "../constants/media.constant.js";
 import { abortOpenUploadSession } from "../modules/uploads/commands/abortUploadSession/abortUploadSession.handler.js";

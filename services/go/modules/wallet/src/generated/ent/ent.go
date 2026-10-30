@@ -12,6 +12,7 @@ import (
 	"nantty/modules/wallet/src/generated/ent/coinconversion"
 	"nantty/modules/wallet/src/generated/ent/coinpackage"
 	"nantty/modules/wallet/src/generated/ent/coinpurchase"
+	"nantty/modules/wallet/src/generated/ent/coinpurchasechargeback"
 	"nantty/modules/wallet/src/generated/ent/cointransfer"
 	"nantty/modules/wallet/src/generated/ent/idempotentrequest"
 	"nantty/modules/wallet/src/generated/ent/monetisationhold"
@@ -94,6 +95,7 @@ func checkColumn(t, c string) error {
 			coinconversion.Table:            coinconversion.ValidColumn,
 			coinpackage.Table:               coinpackage.ValidColumn,
 			coinpurchase.Table:              coinpurchase.ValidColumn,
+			coinpurchasechargeback.Table:    coinpurchasechargeback.ValidColumn,
 			cointransfer.Table:              cointransfer.ValidColumn,
 			idempotentrequest.Table:         idempotentrequest.ValidColumn,
 			monetisationhold.Table:          monetisationhold.ValidColumn,

@@ -47,6 +47,14 @@ type Battle struct {
 	EndReason *battle.EndReason `json:"end_reason,omitempty"`
 	// SettledAt holds the value of the "settled_at" field.
 	SettledAt *time.Time `json:"settled_at,omitempty"`
+	// SettlementAttempts holds the value of the "settlement_attempts" field.
+	SettlementAttempts int `json:"settlement_attempts,omitempty"`
+	// SettlementLeaseUntil holds the value of the "settlement_lease_until" field.
+	SettlementLeaseUntil *time.Time `json:"settlement_lease_until,omitempty"`
+	// SettlementNextAttemptAt holds the value of the "settlement_next_attempt_at" field.
+	SettlementNextAttemptAt *time.Time `json:"settlement_next_attempt_at,omitempty"`
+	// SettlementLeaseToken holds the value of the "settlement_lease_token" field.
+	SettlementLeaseToken *string `json:"settlement_lease_token,omitempty"`
 	// WinnerUserIds holds the value of the "winner_user_ids" field.
 	WinnerUserIds []string `json:"winner_user_ids,omitempty"`
 	// IsTie holds the value of the "is_tie" field.
@@ -65,11 +73,11 @@ func (*Battle) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case battle.FieldWinnerTakesAll, battle.FieldIsTie:
 			values[i] = new(sql.NullBool)
-		case battle.FieldDurationSeconds:
+		case battle.FieldDurationSeconds, battle.FieldSettlementAttempts:
 			values[i] = new(sql.NullInt64)
-		case battle.FieldState, battle.FieldIdempotencyKey, battle.FieldEndReason:
+		case battle.FieldState, battle.FieldIdempotencyKey, battle.FieldEndReason, battle.FieldSettlementLeaseToken:
 			values[i] = new(sql.NullString)
-		case battle.FieldCreatedAt, battle.FieldProposalExpiresAt, battle.FieldHostDecisionDeadlineAt, battle.FieldCountdownStartedAt, battle.FieldStartsAt, battle.FieldEndsAt, battle.FieldSettledAt:
+		case battle.FieldCreatedAt, battle.FieldProposalExpiresAt, battle.FieldHostDecisionDeadlineAt, battle.FieldCountdownStartedAt, battle.FieldStartsAt, battle.FieldEndsAt, battle.FieldSettledAt, battle.FieldSettlementLeaseUntil, battle.FieldSettlementNextAttemptAt:
 			values[i] = new(sql.NullTime)
 		case battle.FieldID, battle.FieldLiveID, battle.FieldHostID:
 			values[i] = new(uuid.UUID)
@@ -185,6 +193,33 @@ func (_m *Battle) assignValues(columns []string, values []any) error {
 				_m.SettledAt = new(time.Time)
 				*_m.SettledAt = value.Time
 			}
+		case battle.FieldSettlementAttempts:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field settlement_attempts", values[i])
+			} else if value.Valid {
+				_m.SettlementAttempts = int(value.Int64)
+			}
+		case battle.FieldSettlementLeaseUntil:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field settlement_lease_until", values[i])
+			} else if value.Valid {
+				_m.SettlementLeaseUntil = new(time.Time)
+				*_m.SettlementLeaseUntil = value.Time
+			}
+		case battle.FieldSettlementNextAttemptAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field settlement_next_attempt_at", values[i])
+			} else if value.Valid {
+				_m.SettlementNextAttemptAt = new(time.Time)
+				*_m.SettlementNextAttemptAt = value.Time
+			}
+		case battle.FieldSettlementLeaseToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field settlement_lease_token", values[i])
+			} else if value.Valid {
+				_m.SettlementLeaseToken = new(string)
+				*_m.SettlementLeaseToken = value.String
+			}
 		case battle.FieldWinnerUserIds:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field winner_user_ids", values[i])
@@ -297,6 +332,24 @@ func (_m *Battle) String() string {
 	if v := _m.SettledAt; v != nil {
 		builder.WriteString("settled_at=")
 		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("settlement_attempts=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SettlementAttempts))
+	builder.WriteString(", ")
+	if v := _m.SettlementLeaseUntil; v != nil {
+		builder.WriteString("settlement_lease_until=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.SettlementNextAttemptAt; v != nil {
+		builder.WriteString("settlement_next_attempt_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.SettlementLeaseToken; v != nil {
+		builder.WriteString("settlement_lease_token=")
+		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("winner_user_ids=")

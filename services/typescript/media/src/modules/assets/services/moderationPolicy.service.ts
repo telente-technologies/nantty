@@ -1,5 +1,6 @@
 import type { MediaConfig } from "../../../configs/media.config.js";
 import type { ModerationClient, ModerationRequest } from "../../../interfaces/moderationClient.interface.js";
+import type { MediaKindName } from "../../../constants/purposePolicy.constant.js";
 
 export type ModerationDecision = "allow" | "hold" | "reject";
 
@@ -8,6 +9,10 @@ export interface ModerationOutcome {
   readonly score: number | null;
   readonly category: string | null;
   readonly degraded: boolean;
+}
+
+export function uninspectableModerationOutcome(kind: MediaKindName): ModerationOutcome {
+  return { decision: "hold", score: null, category: `uninspectable_${kind}`, degraded: true };
 }
 
 export function decideModerationFromScore(score: number, thresholds: { readonly holdThreshold: number; readonly rejectThreshold: number }): ModerationDecision {

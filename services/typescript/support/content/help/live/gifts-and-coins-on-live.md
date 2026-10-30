@@ -2,7 +2,7 @@
 title: Sending gifts on a live
 summary: Send gifts with coins to support streamers. Gifts are final, appear on screen for everyone and earn you Nantty Points.
 tags: gifts, coins, send gift, combo, support streamer, recharge coins, tip host
-related: buy-coins, nanttypoints, supporters-leaderboard, live-goals, creator-earnings, live-guests-and-battles
+related: buy-coins, nantty-points, supporters-leaderboard, live-goals, creator-earnings, live-guests-and-battles
 ---
 
 Gifts are the main way to support a streamer. You pay for them with coins, and the streamer gets a share as earnings.
@@ -26,7 +26,7 @@ When several people are on stage, tap a streamer's tile to gift them. If a guest
 
 - It plays on screen for everyone.
 - It adds to the streamer's gift goal, if one is running. See [Gift goals](/help/live/live-goals).
-- You earn 1 Nantty Point per coin, which ranks you on the live's **Top supporters**. See [Nantty Points](/help/live/nanttypoints).
+- You earn 1 Nantty Point per coin, which ranks you on the live's **Top supporters**. See [Nantty Points](/help/live/nantty-points).
 - The streamer earns a share of the coins. See [How creators earn](/help/creators-and-earnings/creator-earnings).
 
 ## Good to know

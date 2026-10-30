@@ -78,7 +78,7 @@ describe("deterministic clip ranker", () => {
 });
 
 describe("clip ranking contract with the Python service", () => {
-  it("produces exactly the request the Python contract fixture pins", async () => {
+  it("matches the Python wire fixture with current Python identifier vectors", async () => {
     const { readFile } = await import("node:fs/promises");
     const fixture = JSON.parse(await readFile(new URL("../../../../python/intelligence/tests/modules/clips/fixtures/social_clip_rank_request.json", import.meta.url), "utf8")) as unknown;
     const integrity = { engagerCount: 3, newAccountEngagerShare: 0, lowTrustEngagerShare: 0, suspendedEngagerShare: 0, clusteredEngagerShare: 0, reciprocalPodShare: 0, burstRatio: 0, purchasedEngagementSuspected: false, spamHashtagCount: 0 };
@@ -86,6 +86,14 @@ describe("clip ranking contract with the Python service", () => {
       { postId: "0192f0a0-0000-7000-8000-000000000001", authorId: "0192f0a0-0000-7000-8000-0000000000a1", createdAt: now, likeCount: 4, commentCount: 1, repostCount: 0, shareCount: 2, viewCount: 50, followedAuthor: true, saveCount: 1, hashtags: ["dance"], topics: ["music"], authorTier: "blue_verified", authorIsOfficial: false, authorCountry: "NG", durationMs: 15000, videoViews: 40, completedViews: 30, integrity },
       { postId: "0192f0a0-0000-7000-8000-000000000002", authorId: "0192f0a0-0000-7000-8000-0000000000a2", createdAt: now, likeCount: 0, commentCount: 0, repostCount: 0, shareCount: 0, viewCount: 0, followedAuthor: false },
     ], { viewerId: "0192f0a0-0000-7000-8000-0000000000ff", personalized: true, now, viewerCountry: "NG", trendingHashtags: ["dance"] }, createIdentifierHasher(deriveIdentifierHashSecret("", "k")));
-    expect(JSON.parse(JSON.stringify(request))).toEqual(fixture);
+    // The shared wire fixture predates the hash-label rename. These replacements
+    // were generated with Python's current identifier_hashing_service, not TS.
+    const currentPythonVectors = [
+      ["u_8470320fa1e83f584643816b8e559cf79feb4ed7", "u_64e3aa2de555e50b5a6818eea9af0ee46404afcf"],
+      ["u_25689497f204c483b2689e018dafc84caecce458", "u_1ca13357c4ce393f8c9147bd4c2f3fd775668fec"],
+      ["u_0548275218bad868a05f0b37091448dc6a061f50", "u_26500eed25895d990d517247b8b6dc2080326cd6"],
+    ] as const;
+    const expected = currentPythonVectors.reduce((json, [previous, current]) => json.replaceAll(previous, current), JSON.stringify(fixture));
+    expect(JSON.parse(JSON.stringify(request))).toEqual(JSON.parse(expected));
   });
 });

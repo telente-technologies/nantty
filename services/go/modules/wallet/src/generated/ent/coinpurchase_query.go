@@ -4,9 +4,11 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 	"nantty/modules/wallet/src/generated/ent/coinpurchase"
+	"nantty/modules/wallet/src/generated/ent/coinpurchasechargeback"
 	"nantty/modules/wallet/src/generated/ent/internal"
 	"nantty/modules/wallet/src/generated/ent/predicate"
 
@@ -21,11 +23,12 @@ import (
 // CoinPurchaseQuery is the builder for querying CoinPurchase entities.
 type CoinPurchaseQuery struct {
 	config
-	ctx        *QueryContext
-	order      []coinpurchase.OrderOption
-	inters     []Interceptor
-	predicates []predicate.CoinPurchase
-	modifiers  []func(*sql.Selector)
+	ctx             *QueryContext
+	order           []coinpurchase.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.CoinPurchase
+	withChargebacks *CoinPurchaseChargebackQuery
+	modifiers       []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,6 +63,31 @@ func (_q *CoinPurchaseQuery) Unique(unique bool) *CoinPurchaseQuery {
 func (_q *CoinPurchaseQuery) Order(o ...coinpurchase.OrderOption) *CoinPurchaseQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryChargebacks chains the current query on the "chargebacks" edge.
+func (_q *CoinPurchaseQuery) QueryChargebacks() *CoinPurchaseChargebackQuery {
+	query := (&CoinPurchaseChargebackClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coinpurchase.Table, coinpurchase.FieldID, selector),
+			sqlgraph.To(coinpurchasechargeback.Table, coinpurchasechargeback.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, coinpurchase.ChargebacksTable, coinpurchase.ChargebacksColumn),
+		)
+		schemaConfig := _q.schemaConfig
+		step.To.Schema = schemaConfig.CoinPurchaseChargeback
+		step.Edge.Schema = schemaConfig.CoinPurchaseChargeback
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first CoinPurchase entity from the query.
@@ -249,15 +277,27 @@ func (_q *CoinPurchaseQuery) Clone() *CoinPurchaseQuery {
 		return nil
 	}
 	return &CoinPurchaseQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]coinpurchase.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.CoinPurchase{}, _q.predicates...),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]coinpurchase.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.CoinPurchase{}, _q.predicates...),
+		withChargebacks: _q.withChargebacks.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithChargebacks tells the query-builder to eager-load the nodes that are connected to
+// the "chargebacks" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *CoinPurchaseQuery) WithChargebacks(opts ...func(*CoinPurchaseChargebackQuery)) *CoinPurchaseQuery {
+	query := (&CoinPurchaseChargebackClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withChargebacks = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -336,8 +376,11 @@ func (_q *CoinPurchaseQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *CoinPurchaseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CoinPurchase, error) {
 	var (
-		nodes = []*CoinPurchase{}
-		_spec = _q.querySpec()
+		nodes       = []*CoinPurchase{}
+		_spec       = _q.querySpec()
+		loadedTypes = [1]bool{
+			_q.withChargebacks != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*CoinPurchase).scanValues(nil, columns)
@@ -345,6 +388,7 @@ func (_q *CoinPurchaseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &CoinPurchase{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	_spec.Node.Schema = _q.schemaConfig.CoinPurchase
@@ -361,7 +405,45 @@ func (_q *CoinPurchaseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withChargebacks; query != nil {
+		if err := _q.loadChargebacks(ctx, query, nodes,
+			func(n *CoinPurchase) { n.Edges.Chargebacks = []*CoinPurchaseChargeback{} },
+			func(n *CoinPurchase, e *CoinPurchaseChargeback) { n.Edges.Chargebacks = append(n.Edges.Chargebacks, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *CoinPurchaseQuery) loadChargebacks(ctx context.Context, query *CoinPurchaseChargebackQuery, nodes []*CoinPurchase, init func(*CoinPurchase), assign func(*CoinPurchase, *CoinPurchaseChargeback)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*CoinPurchase)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(coinpurchasechargeback.FieldPurchaseID)
+	}
+	query.Where(predicate.CoinPurchaseChargeback(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(coinpurchase.ChargebacksColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PurchaseID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "purchase_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (_q *CoinPurchaseQuery) sqlCount(ctx context.Context) (int, error) {

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
 	ledgerutils "nantty/modules/ledger/src/utils"
 	"nantty/modules/subscriptions/src/constants"
@@ -90,7 +91,7 @@ func (controller BillingController) ListPriceTable(writer http.ResponseWriter, r
 	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"data": rows, "regions": regionpricing.SupportedRegions(), "nextCursor": nil})
 }
 
-func validatePriceRow(region string, body dtos.PriceRowRequestDto) error {
+func validatePriceRow(region string, body dtos.PriceRowRequestDto, now time.Time) error {
 	collector := &ledgerutils.IssueCollector{}
 	expected, known := regionpricing.FindRegion(region)
 	switch {
@@ -107,27 +108,36 @@ func validatePriceRow(region string, body dtos.PriceRowRequestDto) error {
 	if body.YearlyAmountMinor > body.MonthlyAmountMinor*12 {
 		collector.Add("yearlyAmountMinor", "can't cost more than twelve months")
 	}
+	if !body.EffectiveFrom.IsZero() && body.EffectiveFrom.Before(now.UTC().Add(-30*time.Second)) {
+		collector.Add("effectiveFrom", "must be now or a future date")
+	}
 	for key, productId := range body.StoreProductIds {
 		if !storeProductKeys[key] || !storeProductIdForm.MatchString(productId) {
 			collector.Add("storeProductIds."+key, "use ios.month, ios.year, android.month or android.year with a store product id")
 		}
 	}
-	collector.RequireLength("reason", body.Reason, 0, 300)
+	collector.RequireLength("reason", body.Reason, 5, 300)
 	return collector.Result()
 }
 
 func (controller BillingController) UpsertPrice(writer http.ResponseWriter, request *http.Request) {
 	staff, _ := staffauth.StaffFromContext(request.Context())
 	planCode, region := request.PathValue("planCode"), strings.ToUpper(request.PathValue("countryCode"))
-	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body dtos.PriceRowRequestDto) error { return validatePriceRow(region, body) })
+	now := controller.Billing.Container.Now().UTC()
+	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body dtos.PriceRowRequestDto) error { return validatePriceRow(region, body, now) })
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
 	}
+	if body.EffectiveFrom.IsZero() {
+		body.EffectiveFrom = now
+	} else if body.EffectiveFrom.Before(now) {
+		body.EffectiveFrom = now
+	}
 	row := services.PlanPriceRow{
 		PlanCode: planCode, CountryCode: region, Currency: body.Currency, MonthlyAmountMinor: body.MonthlyAmountMinor, YearlyAmountMinor: body.YearlyAmountMinor,
 		IosMonthlyMinor: body.IosMonthlyAmountMinor, IosYearlyMinor: body.IosYearlyAmountMinor, AndroidMonthlyMinor: body.AndroidMonthlyAmountMinor, AndroidYearlyMinor: body.AndroidYearlyAmountMinor,
-		StoreProductIds: body.StoreProductIds, Active: body.Active,
+		StoreProductIds: body.StoreProductIds, Active: body.Active, EffectiveFrom: body.EffectiveFrom,
 	}
 	before, _ := controller.Billing.FindPriceRow(request.Context(), planCode, region)
 	audit := controller.Billing.Container.Audit
@@ -141,7 +151,7 @@ func (controller BillingController) UpsertPrice(writer http.ResponseWriter, requ
 			return
 		}
 	}
-	saved, err := controller.Billing.UpsertPrice(request.Context(), staff.Id, row)
+	saved, err := controller.Billing.UpsertPrice(request.Context(), staff.Id, body.Reason, body.EffectiveFrom, row)
 	if err != nil {
 		controller.fail(writer, request, err)
 		return

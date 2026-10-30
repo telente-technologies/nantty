@@ -11,6 +11,7 @@ import (
 	"nantty/modules/live/src/generated/ent/space"
 	"nantty/modules/live/src/generated/ent/spaceparticipant"
 	"nantty/modules/live/src/integrations"
+	"nantty/modules/live/src/services"
 	"nantty/modules/live/src/types"
 	"nantty/modules/live/src/utils"
 	"nantty/platform/httpserver"
@@ -191,6 +192,9 @@ func (c SpacesController) authorizeSpaceAudience(ctx context.Context, row *ent.S
 	if row.State != space.StateLive {
 		return httpserver.NewApiError(http.StatusConflict, "SPACE_NOT_LIVE", "This Space is not accepting listeners.")
 	}
+	if services.IsInviteOnlySpace(row) && !services.SpaceHasInvite(row, userID) {
+		return httpserver.ErrForbidden
+	}
 	moderator, err := c.isSpaceModerator(ctx, row, userID)
 	if err != nil {
 		return err
@@ -209,7 +213,7 @@ func (c SpacesController) authorizeSpaceAudience(ctx context.Context, row *ent.S
 	if err != nil {
 		return err
 	}
-	if private[row.HostID] && userID != row.HostID {
+	if private[row.HostID] && userID != row.HostID && !services.IsInviteOnlySpace(row) {
 		following, err := c.Container.Relations.IsFollowing(ctx, userID, row.HostID)
 		if err != nil {
 			return err

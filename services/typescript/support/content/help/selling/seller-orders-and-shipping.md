@@ -32,7 +32,7 @@ You set where you deliver and what it costs in **Delivery > Shipping rules**. Bu
 ## Good to know
 
 - Escrow orders show the money as **Pending (escrow)** until release. See [Seller payouts](/help/selling/seller-payouts).
-- Direct-payment orders pay you right away, with only the processing fee.
+- Direct-payment orders settle according to the checkout terms. No sales commission is intended; any actual provider charge is shown in the quote before confirmation.
 - Buyers can cancel by themselves only before you start preparing. Accept quickly so they aren't left waiting.
 - A dispute pauses release. See [Responding to a dispute](/help/selling/respond-to-a-dispute).
 

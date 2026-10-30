@@ -1,5 +1,5 @@
-import { createResponseContext, type HttpResponseContext } from "@zudojs/http";
-import type { Schema, SchemaIssue } from "@zudojs/schema";
+import { createResponseContext, type HttpResponseContext } from "@nantty/fastify-platform";
+import type { Schema, SchemaIssue } from "@nantty/fastify-platform";
 
 import { SupportError } from "../errors/support.error.js";
 
@@ -34,7 +34,7 @@ export function parseJsonBody(body: unknown): unknown {
 
 export function parseWithSchema<T>(definition: Schema<T>, value: unknown): T {
   const result = definition.safeParse(value ?? {});
-  if (!result.success) throw new SupportError(400, "VALIDATION_FAILED", describeIssues(result.issues));
+  if (!result.success) throw new SupportError(400, "VALIDATION_FAILED", describeIssues(result.error.issues));
   return result.data;
 }
 

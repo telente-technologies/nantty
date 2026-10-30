@@ -1,4 +1,4 @@
-export const reportTargetTypes = ["user", "message", "conversation", "group", "post", "comment", "clip", "live", "product", "store", "sound"] as const;
+export const reportTargetTypes = ["user", "message", "conversation", "group", "post", "comment", "clip", "live", "space", "product", "store", "sound"] as const;
 export type ReportTargetType = (typeof reportTargetTypes)[number];
 
 export const currentReportReasons = [

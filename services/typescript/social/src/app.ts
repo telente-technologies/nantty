@@ -1,13 +1,11 @@
 import {
   HttpMiddlewarePipeline,
-  createHttpServer,
-  createNodeHttpAdapter,
   createResponseContext,
-  createRouter,
+  createPlatform,
   type HttpMiddleware,
   type HttpRequestContext,
-} from "@zudojs/http";
-import { createLogger, type Logger } from "@zudojs/logger";
+} from "@nantty/fastify-platform";
+import { createLogger, type Logger } from "@nantty/fastify-platform";
 
 import type { SocialConfig } from "./configs/social.config.js";
 import { createGatewayIdentityMiddleware } from "./middlewares/gatewayIdentity.middleware.js";
@@ -43,15 +41,17 @@ import { createSnsDomainEventPublisher, noopDomainEventPublisher } from "./integ
 import type { DomainEventPublisher } from "./interfaces/domainEventPublisher.interface.js";
 import { systemClock } from "./interfaces/clock.interface.js";
 import { startChatMediaExpiryJob } from "./jobs/scheduler.job.js";
+import { startScheduledPostPublisher } from "./jobs/publishScheduledPosts.job.js";
 import { startContentEventConsumer } from "./jobs/contentEvents.job.js";
 import { createRabbitMqMessageConsumerFactory } from "./integrations/rabbitMqMessageConsumerFactory.integration.js";
 import { startOutboxRelay } from "./jobs/outboxRelay.job.js";
 import { registerRoutes } from "./routes/index.js";
 import type { HandlerContext } from "./types/handlerContext.type.js";
-import { errorToResponse, json } from "./utils/http.util.js";
+import { json } from "./utils/http.util.js";
 import { createIdentifierHasher, deriveIdentifierHashSecret, type IdentifierHasher } from "./utils/identifierHashing.util.js";
 import { createRouteFactory } from "./utils/route.util.js";
-import { dispatchWithRoute, withRequestMetrics } from "./telemetry/requestMetrics.js";
+import { dispatchWithRoute } from "./telemetry/requestMetrics.js";
+import { createSocialRouter } from "./fastifyRouter.js";
 
 const maximumRequestBodyBytes = 1024 * 1024;
 
@@ -60,7 +60,7 @@ export interface SocialApp {
   readonly stop: () => Promise<void>;
 }
 
-export function createSocialApp(config: SocialConfig, internalToken: string, logger: Logger = createLogger({ name: "social" })): SocialApp {
+export async function createSocialApp(config: SocialConfig, internalToken: string, logger: Logger = createLogger({ name: "social" })): Promise<SocialApp> {
   const database: SocialDatabase = createSocialDatabase(config.databaseUrl);
   const identityClient = createIdentityReadClient(config.identityReadDatabaseUrl);
   const premium = config.moneyInternal === undefined ? noPremiumEntitlements : createHttpPremiumEntitlements(config.moneyInternal);
@@ -81,11 +81,8 @@ export function createSocialApp(config: SocialConfig, internalToken: string, log
     ...(config.mediaInternal === undefined ? {} : { media: createHttpMediaDescriptorResolver(config.mediaInternal), chatMedia: createHttpChatMediaAccess(config.mediaInternal), postMedia: createHttpPostMediaCleaner(config.mediaInternal), mediaDownloads: createHttpMediaDownloadVariantClient(config.mediaInternal) }),
     ...(config.linkPreviewsEnabled ? { linkPreviews: createLinkUnfurler({ db: database.client, fetcher: withHostCircuitBreaker(createSafeHttpFetcher()), clock: systemClock, imageStore: config.mediaInternal === undefined ? undefined : createHttpLinkPreviewImageStore(config.mediaInternal, config.linkPreviewMediaOwnerId) }) } : {}),
   };
-  const router = createRouter({
-    onError: (error) => errorToResponse(error),
-    notFoundHandler: () => json(404, { message: "Not found.", code: "NOT_FOUND" }),
-    methodNotAllowedHandler: () => json(405, { message: "Method not allowed.", code: "METHOD_NOT_ALLOWED" }),
-  });
+  const app = await createPlatform({ name: "social", host: config.host, port: config.port, bodyLimit: maximumRequestBodyBytes, trustProxy: true, logger: false, rateLimit: false });
+  const router = createSocialRouter(app);
   registerRoutes(router, createRouteFactory(createIdempotencyGuard(createPrismaIdempotencyStore(database.client))), context, database, internalToken);
   const dispatch: HttpMiddleware = async (requestContext) => {
     try {
@@ -96,30 +93,29 @@ export function createSocialApp(config: SocialConfig, internalToken: string, log
     }
   };
   const pipeline = new HttpMiddlewarePipeline({ middlewares: [createGatewayIdentityMiddleware(config.gatewayIdentitySecrets ?? []), dispatch] });
-  const server = createHttpServer({
-    adapter: createNodeHttpAdapter({ host: config.host, port: config.port, maxBodySize: maximumRequestBodyBytes, trustProxy: true }),
-    handler: withRequestMetrics((request: HttpRequestContext) => pipeline.execute(request, createResponseContext())),
-  });
+  router.setFastifyHandler((request: HttpRequestContext) => pipeline.execute(request, createResponseContext()));
   const stoppers: (() => void)[] = [];
   return {
     async start() {
-      await server.start();
+      await app.listen({ host: config.host, port: config.port });
       if (config.jobsEnabled) {
         const publisher = createDomainEventPublisher(config, logger);
         stoppers.push(startOutboxRelay({ database, publisher, clock: systemClock, logger, intervalMs: config.outboxPollIntervalMs }));
         stoppers.push(() => void (publisher as { close?: () => Promise<void> }).close?.());
         stoppers.push(startChatMediaExpiryJob(context, logger, config.mediaExpiryIntervalMs));
+        stoppers.push(startScheduledPostPublisher(context, logger, 15_000));
         if (config.messageBus === "rabbitmq" && config.rabbitMqUrl !== "") {
           const consumers = createRabbitMqMessageConsumerFactory(config.rabbitMqUrl, config.rabbitMqPrefetch, logger);
           const stopConsumer = startContentEventConsumer(context, consumers, config.domainEventsQueue, config.mediaPublicBaseUrl, logger);
           stoppers.push(() => void stopConsumer().finally(() => consumers.close()));
         }
       }
-      return server.address?.port ?? config.port;
+      const address = app.server.address();
+      return typeof address === "object" && address !== null ? address.port : config.port;
     },
     async stop() {
       for (const stop of stoppers) stop();
-      await server.stop();
+      await app.close();
       await database.disconnect();
       await identityClient.$disconnect();
     },

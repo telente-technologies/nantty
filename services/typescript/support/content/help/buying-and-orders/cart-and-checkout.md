@@ -29,7 +29,7 @@ Items are grouped by store. Each store shows **Subtotal**, **Discounts**, **Ship
 
 ## Good to know
 
-- Buyers pay no checkout fee and no escrow fee.
+- Nantty's intended launch policy has no sales commission. Any actual payment-provider charge that applies is included in the checkout total before you confirm.
 - With escrow, your money stays locked in your own wallet with our payment partner until you confirm delivery. See [How escrow protects your order](/help/buying-and-orders/how-escrow-protects-your-order).
 - Your receipt goes to your account email.
 - Items from stores that sell in different currencies must be bought in separate checkouts.

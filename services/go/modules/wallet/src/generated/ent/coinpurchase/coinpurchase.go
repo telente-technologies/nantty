@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -61,8 +62,17 @@ const (
 	FieldReviewNote = "review_note"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// EdgeChargebacks holds the string denoting the chargebacks edge name in mutations.
+	EdgeChargebacks = "chargebacks"
 	// Table holds the table name of the coinpurchase in the database.
 	Table = "coin_purchases"
+	// ChargebacksTable is the table that holds the chargebacks relation/edge.
+	ChargebacksTable = "coin_purchase_chargebacks"
+	// ChargebacksInverseTable is the table name for the CoinPurchaseChargeback entity.
+	// It exists in this package in order to avoid circular dependency with the "coinpurchasechargeback" package.
+	ChargebacksInverseTable = "coin_purchase_chargebacks"
+	// ChargebacksColumn is the table column denoting the chargebacks relation/edge.
+	ChargebacksColumn = "purchase_id"
 )
 
 // Columns holds all SQL columns for coinpurchase fields.
@@ -359,4 +369,25 @@ func ByReviewNote(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByChargebacksCount orders the results by chargebacks count.
+func ByChargebacksCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newChargebacksStep(), opts...)
+	}
+}
+
+// ByChargebacks orders the results by chargebacks terms.
+func ByChargebacks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newChargebacksStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newChargebacksStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ChargebacksInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ChargebacksTable, ChargebacksColumn),
+	)
 }

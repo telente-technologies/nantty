@@ -18,7 +18,7 @@ func (ContentReport) Mixin() []ent.Mixin {
 
 func (ContentReport) Fields() []ent.Field {
 	return []ent.Field{
-		field.Enum("target_type").Values("post", "comment", "clip", "live", "product", "store", "sound", "user").Immutable(),
+		field.Enum("target_type").Values("post", "comment", "clip", "live", "space", "product", "store", "sound", "user").Immutable(),
 		field.String("target_id").MaxLen(128).Immutable(),
 		field.UUID("author_id", uuid.UUID{}).Optional().Nillable(),
 		field.Enum("status").Values("open", "in_review", "resolved", "dismissed").Default("open"),

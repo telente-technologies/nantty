@@ -91,32 +91,37 @@ const (
 // BattleMutation represents an operation that mutates the Battle nodes in the graph.
 type BattleMutation struct {
 	config
-	op                        Op
-	typ                       string
-	id                        *uuid.UUID
-	created_at                *time.Time
-	live_id                   *uuid.UUID
-	host_id                   *uuid.UUID
-	state                     *battle.State
-	winner_takes_all          *bool
-	duration_seconds          *int
-	addduration_seconds       *int
-	idempotency_key           *string
-	proposal_expires_at       *time.Time
-	host_decision_deadline_at *time.Time
-	countdown_started_at      *time.Time
-	starts_at                 *time.Time
-	ends_at                   *time.Time
-	end_reason                *battle.EndReason
-	settled_at                *time.Time
-	winner_user_ids           *[]string
-	appendwinner_user_ids     []string
-	is_tie                    *bool
-	settlement                *map[string]interface{}
-	clearedFields             map[string]struct{}
-	done                      bool
-	oldValue                  func(context.Context) (*Battle, error)
-	predicates                []predicate.Battle
+	op                         Op
+	typ                        string
+	id                         *uuid.UUID
+	created_at                 *time.Time
+	live_id                    *uuid.UUID
+	host_id                    *uuid.UUID
+	state                      *battle.State
+	winner_takes_all           *bool
+	duration_seconds           *int
+	addduration_seconds        *int
+	idempotency_key            *string
+	proposal_expires_at        *time.Time
+	host_decision_deadline_at  *time.Time
+	countdown_started_at       *time.Time
+	starts_at                  *time.Time
+	ends_at                    *time.Time
+	end_reason                 *battle.EndReason
+	settled_at                 *time.Time
+	settlement_attempts        *int
+	addsettlement_attempts     *int
+	settlement_lease_until     *time.Time
+	settlement_next_attempt_at *time.Time
+	settlement_lease_token     *string
+	winner_user_ids            *[]string
+	appendwinner_user_ids      []string
+	is_tie                     *bool
+	settlement                 *map[string]interface{}
+	clearedFields              map[string]struct{}
+	done                       bool
+	oldValue                   func(context.Context) (*Battle, error)
+	predicates                 []predicate.Battle
 }
 
 var _ ent.Mutation = (*BattleMutation)(nil)
@@ -838,6 +843,209 @@ func (m *BattleMutation) ResetSettledAt() {
 	delete(m.clearedFields, battle.FieldSettledAt)
 }
 
+// SetSettlementAttempts sets the "settlement_attempts" field.
+func (m *BattleMutation) SetSettlementAttempts(i int) {
+	m.settlement_attempts = &i
+	m.addsettlement_attempts = nil
+}
+
+// SettlementAttempts returns the value of the "settlement_attempts" field in the mutation.
+func (m *BattleMutation) SettlementAttempts() (r int, exists bool) {
+	v := m.settlement_attempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSettlementAttempts returns the old "settlement_attempts" field's value of the Battle entity.
+// If the Battle object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BattleMutation) OldSettlementAttempts(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSettlementAttempts is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSettlementAttempts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSettlementAttempts: %w", err)
+	}
+	return oldValue.SettlementAttempts, nil
+}
+
+// AddSettlementAttempts adds i to the "settlement_attempts" field.
+func (m *BattleMutation) AddSettlementAttempts(i int) {
+	if m.addsettlement_attempts != nil {
+		*m.addsettlement_attempts += i
+	} else {
+		m.addsettlement_attempts = &i
+	}
+}
+
+// AddedSettlementAttempts returns the value that was added to the "settlement_attempts" field in this mutation.
+func (m *BattleMutation) AddedSettlementAttempts() (r int, exists bool) {
+	v := m.addsettlement_attempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSettlementAttempts resets all changes to the "settlement_attempts" field.
+func (m *BattleMutation) ResetSettlementAttempts() {
+	m.settlement_attempts = nil
+	m.addsettlement_attempts = nil
+}
+
+// SetSettlementLeaseUntil sets the "settlement_lease_until" field.
+func (m *BattleMutation) SetSettlementLeaseUntil(t time.Time) {
+	m.settlement_lease_until = &t
+}
+
+// SettlementLeaseUntil returns the value of the "settlement_lease_until" field in the mutation.
+func (m *BattleMutation) SettlementLeaseUntil() (r time.Time, exists bool) {
+	v := m.settlement_lease_until
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSettlementLeaseUntil returns the old "settlement_lease_until" field's value of the Battle entity.
+// If the Battle object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BattleMutation) OldSettlementLeaseUntil(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSettlementLeaseUntil is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSettlementLeaseUntil requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSettlementLeaseUntil: %w", err)
+	}
+	return oldValue.SettlementLeaseUntil, nil
+}
+
+// ClearSettlementLeaseUntil clears the value of the "settlement_lease_until" field.
+func (m *BattleMutation) ClearSettlementLeaseUntil() {
+	m.settlement_lease_until = nil
+	m.clearedFields[battle.FieldSettlementLeaseUntil] = struct{}{}
+}
+
+// SettlementLeaseUntilCleared returns if the "settlement_lease_until" field was cleared in this mutation.
+func (m *BattleMutation) SettlementLeaseUntilCleared() bool {
+	_, ok := m.clearedFields[battle.FieldSettlementLeaseUntil]
+	return ok
+}
+
+// ResetSettlementLeaseUntil resets all changes to the "settlement_lease_until" field.
+func (m *BattleMutation) ResetSettlementLeaseUntil() {
+	m.settlement_lease_until = nil
+	delete(m.clearedFields, battle.FieldSettlementLeaseUntil)
+}
+
+// SetSettlementNextAttemptAt sets the "settlement_next_attempt_at" field.
+func (m *BattleMutation) SetSettlementNextAttemptAt(t time.Time) {
+	m.settlement_next_attempt_at = &t
+}
+
+// SettlementNextAttemptAt returns the value of the "settlement_next_attempt_at" field in the mutation.
+func (m *BattleMutation) SettlementNextAttemptAt() (r time.Time, exists bool) {
+	v := m.settlement_next_attempt_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSettlementNextAttemptAt returns the old "settlement_next_attempt_at" field's value of the Battle entity.
+// If the Battle object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BattleMutation) OldSettlementNextAttemptAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSettlementNextAttemptAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSettlementNextAttemptAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSettlementNextAttemptAt: %w", err)
+	}
+	return oldValue.SettlementNextAttemptAt, nil
+}
+
+// ClearSettlementNextAttemptAt clears the value of the "settlement_next_attempt_at" field.
+func (m *BattleMutation) ClearSettlementNextAttemptAt() {
+	m.settlement_next_attempt_at = nil
+	m.clearedFields[battle.FieldSettlementNextAttemptAt] = struct{}{}
+}
+
+// SettlementNextAttemptAtCleared returns if the "settlement_next_attempt_at" field was cleared in this mutation.
+func (m *BattleMutation) SettlementNextAttemptAtCleared() bool {
+	_, ok := m.clearedFields[battle.FieldSettlementNextAttemptAt]
+	return ok
+}
+
+// ResetSettlementNextAttemptAt resets all changes to the "settlement_next_attempt_at" field.
+func (m *BattleMutation) ResetSettlementNextAttemptAt() {
+	m.settlement_next_attempt_at = nil
+	delete(m.clearedFields, battle.FieldSettlementNextAttemptAt)
+}
+
+// SetSettlementLeaseToken sets the "settlement_lease_token" field.
+func (m *BattleMutation) SetSettlementLeaseToken(s string) {
+	m.settlement_lease_token = &s
+}
+
+// SettlementLeaseToken returns the value of the "settlement_lease_token" field in the mutation.
+func (m *BattleMutation) SettlementLeaseToken() (r string, exists bool) {
+	v := m.settlement_lease_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSettlementLeaseToken returns the old "settlement_lease_token" field's value of the Battle entity.
+// If the Battle object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BattleMutation) OldSettlementLeaseToken(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSettlementLeaseToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSettlementLeaseToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSettlementLeaseToken: %w", err)
+	}
+	return oldValue.SettlementLeaseToken, nil
+}
+
+// ClearSettlementLeaseToken clears the value of the "settlement_lease_token" field.
+func (m *BattleMutation) ClearSettlementLeaseToken() {
+	m.settlement_lease_token = nil
+	m.clearedFields[battle.FieldSettlementLeaseToken] = struct{}{}
+}
+
+// SettlementLeaseTokenCleared returns if the "settlement_lease_token" field was cleared in this mutation.
+func (m *BattleMutation) SettlementLeaseTokenCleared() bool {
+	_, ok := m.clearedFields[battle.FieldSettlementLeaseToken]
+	return ok
+}
+
+// ResetSettlementLeaseToken resets all changes to the "settlement_lease_token" field.
+func (m *BattleMutation) ResetSettlementLeaseToken() {
+	m.settlement_lease_token = nil
+	delete(m.clearedFields, battle.FieldSettlementLeaseToken)
+}
+
 // SetWinnerUserIds sets the "winner_user_ids" field.
 func (m *BattleMutation) SetWinnerUserIds(s []string) {
 	m.winner_user_ids = &s
@@ -1008,7 +1216,7 @@ func (m *BattleMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BattleMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 21)
 	if m.created_at != nil {
 		fields = append(fields, battle.FieldCreatedAt)
 	}
@@ -1050,6 +1258,18 @@ func (m *BattleMutation) Fields() []string {
 	}
 	if m.settled_at != nil {
 		fields = append(fields, battle.FieldSettledAt)
+	}
+	if m.settlement_attempts != nil {
+		fields = append(fields, battle.FieldSettlementAttempts)
+	}
+	if m.settlement_lease_until != nil {
+		fields = append(fields, battle.FieldSettlementLeaseUntil)
+	}
+	if m.settlement_next_attempt_at != nil {
+		fields = append(fields, battle.FieldSettlementNextAttemptAt)
+	}
+	if m.settlement_lease_token != nil {
+		fields = append(fields, battle.FieldSettlementLeaseToken)
 	}
 	if m.winner_user_ids != nil {
 		fields = append(fields, battle.FieldWinnerUserIds)
@@ -1096,6 +1316,14 @@ func (m *BattleMutation) Field(name string) (ent.Value, bool) {
 		return m.EndReason()
 	case battle.FieldSettledAt:
 		return m.SettledAt()
+	case battle.FieldSettlementAttempts:
+		return m.SettlementAttempts()
+	case battle.FieldSettlementLeaseUntil:
+		return m.SettlementLeaseUntil()
+	case battle.FieldSettlementNextAttemptAt:
+		return m.SettlementNextAttemptAt()
+	case battle.FieldSettlementLeaseToken:
+		return m.SettlementLeaseToken()
 	case battle.FieldWinnerUserIds:
 		return m.WinnerUserIds()
 	case battle.FieldIsTie:
@@ -1139,6 +1367,14 @@ func (m *BattleMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldEndReason(ctx)
 	case battle.FieldSettledAt:
 		return m.OldSettledAt(ctx)
+	case battle.FieldSettlementAttempts:
+		return m.OldSettlementAttempts(ctx)
+	case battle.FieldSettlementLeaseUntil:
+		return m.OldSettlementLeaseUntil(ctx)
+	case battle.FieldSettlementNextAttemptAt:
+		return m.OldSettlementNextAttemptAt(ctx)
+	case battle.FieldSettlementLeaseToken:
+		return m.OldSettlementLeaseToken(ctx)
 	case battle.FieldWinnerUserIds:
 		return m.OldWinnerUserIds(ctx)
 	case battle.FieldIsTie:
@@ -1252,6 +1488,34 @@ func (m *BattleMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSettledAt(v)
 		return nil
+	case battle.FieldSettlementAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSettlementAttempts(v)
+		return nil
+	case battle.FieldSettlementLeaseUntil:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSettlementLeaseUntil(v)
+		return nil
+	case battle.FieldSettlementNextAttemptAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSettlementNextAttemptAt(v)
+		return nil
+	case battle.FieldSettlementLeaseToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSettlementLeaseToken(v)
+		return nil
 	case battle.FieldWinnerUserIds:
 		v, ok := value.([]string)
 		if !ok {
@@ -1284,6 +1548,9 @@ func (m *BattleMutation) AddedFields() []string {
 	if m.addduration_seconds != nil {
 		fields = append(fields, battle.FieldDurationSeconds)
 	}
+	if m.addsettlement_attempts != nil {
+		fields = append(fields, battle.FieldSettlementAttempts)
+	}
 	return fields
 }
 
@@ -1294,6 +1561,8 @@ func (m *BattleMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case battle.FieldDurationSeconds:
 		return m.AddedDurationSeconds()
+	case battle.FieldSettlementAttempts:
+		return m.AddedSettlementAttempts()
 	}
 	return nil, false
 }
@@ -1309,6 +1578,13 @@ func (m *BattleMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddDurationSeconds(v)
+		return nil
+	case battle.FieldSettlementAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSettlementAttempts(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Battle numeric field %s", name)
@@ -1338,6 +1614,15 @@ func (m *BattleMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(battle.FieldSettledAt) {
 		fields = append(fields, battle.FieldSettledAt)
+	}
+	if m.FieldCleared(battle.FieldSettlementLeaseUntil) {
+		fields = append(fields, battle.FieldSettlementLeaseUntil)
+	}
+	if m.FieldCleared(battle.FieldSettlementNextAttemptAt) {
+		fields = append(fields, battle.FieldSettlementNextAttemptAt)
+	}
+	if m.FieldCleared(battle.FieldSettlementLeaseToken) {
+		fields = append(fields, battle.FieldSettlementLeaseToken)
 	}
 	if m.FieldCleared(battle.FieldSettlement) {
 		fields = append(fields, battle.FieldSettlement)
@@ -1376,6 +1661,15 @@ func (m *BattleMutation) ClearField(name string) error {
 		return nil
 	case battle.FieldSettledAt:
 		m.ClearSettledAt()
+		return nil
+	case battle.FieldSettlementLeaseUntil:
+		m.ClearSettlementLeaseUntil()
+		return nil
+	case battle.FieldSettlementNextAttemptAt:
+		m.ClearSettlementNextAttemptAt()
+		return nil
+	case battle.FieldSettlementLeaseToken:
+		m.ClearSettlementLeaseToken()
 		return nil
 	case battle.FieldSettlement:
 		m.ClearSettlement()
@@ -1429,6 +1723,18 @@ func (m *BattleMutation) ResetField(name string) error {
 		return nil
 	case battle.FieldSettledAt:
 		m.ResetSettledAt()
+		return nil
+	case battle.FieldSettlementAttempts:
+		m.ResetSettlementAttempts()
+		return nil
+	case battle.FieldSettlementLeaseUntil:
+		m.ResetSettlementLeaseUntil()
+		return nil
+	case battle.FieldSettlementNextAttemptAt:
+		m.ResetSettlementNextAttemptAt()
+		return nil
+	case battle.FieldSettlementLeaseToken:
+		m.ResetSettlementLeaseToken()
 		return nil
 	case battle.FieldWinnerUserIds:
 		m.ResetWinnerUserIds()

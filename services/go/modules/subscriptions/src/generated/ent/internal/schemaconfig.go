@@ -13,6 +13,7 @@ type SchemaConfig struct {
 	IdempotentRequest          string // IdempotentRequest table.
 	OutboxEvent                string // OutboxEvent table.
 	PlanPrice                  string // PlanPrice table.
+	PlanPriceVersion           string // PlanPriceVersion table.
 	ProviderPlan               string // ProviderPlan table.
 	Subscription               string // Subscription table.
 	SubscriptionCoveredProfile string // SubscriptionCoveredProfile table.

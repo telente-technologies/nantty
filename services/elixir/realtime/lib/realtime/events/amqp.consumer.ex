@@ -48,6 +48,9 @@ defmodule Realtime.Events.AmqpConsumer do
     {:noreply, state}
   end
 
+  def handle_info({:basic_ack, _sequence_number, _multiple}, state), do: {:noreply, state}
+  def handle_info({:basic_nack, _sequence_number, _multiple}, state), do: {:noreply, state}
+
   def handle_info({:basic_deliver, payload, meta}, %{channel: channel} = state)
       when not is_nil(channel),
       do: {:noreply, handle_delivery(payload, meta, state)}
@@ -170,6 +173,10 @@ defmodule Realtime.Events.AmqpConsumer do
       :ok ->
         Logger.warning("domain event broadcast failed, retry in #{tier}: #{inspect(error)}")
         settle(state.client.ack(state.channel, meta.delivery_tag))
+
+      {:error, :unroutable} ->
+        Logger.error("retry route is missing; dead-lettering the original delivery")
+        settle(state.client.reject(state.channel, meta.delivery_tag, false))
 
       {:error, reason} ->
         Logger.warning("retry not scheduled, requeueing: #{inspect(reason)}")

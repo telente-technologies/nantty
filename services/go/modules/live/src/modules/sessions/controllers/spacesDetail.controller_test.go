@@ -45,6 +45,7 @@ func TestAuthorizeSpaceDetails(t *testing.T) {
 		visibility space.Visibility
 		viewer     *types.Actor
 		relations  fakeSpaceDetailRelations
+		metadata   map[string]any
 		wantDenied bool
 	}{
 		{name: "public anonymous listener", visibility: space.VisibilityPublic},
@@ -56,11 +57,13 @@ func TestAuthorizeSpaceDetails(t *testing.T) {
 		{name: "private host hidden from anonymous", visibility: space.VisibilityPublic, relations: fakeSpaceDetailRelations{private: true}, wantDenied: true},
 		{name: "private host hidden from non-follower", visibility: space.VisibilityPublic, viewer: viewer, relations: fakeSpaceDetailRelations{private: true}, wantDenied: true},
 		{name: "private host visible to follower", visibility: space.VisibilityPublic, viewer: viewer, relations: fakeSpaceDetailRelations{private: true, following: true}},
+		{name: "invite-only hidden from a non-invited account", visibility: space.VisibilityPublic, viewer: viewer, metadata: map[string]any{"spaceAudiencePolicy": "invite_only", "invitedAccountIds": []string{}}, wantDenied: true},
+		{name: "invite-only available to explicitly invited account", visibility: space.VisibilityPublic, viewer: viewer, metadata: map[string]any{"spaceAudiencePolicy": "invite_only", "invitedAccountIds": []string{viewer.UserId.String()}}},
 		{name: "blocked relationship hides space", visibility: space.VisibilityPublic, viewer: viewer, relations: fakeSpaceDetailRelations{blocked: true}, wantDenied: true},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := authorizeSpaceDetails(context.Background(), &ent.Space{HostID: hostID, Visibility: test.visibility, ModerationVisibility: "visible"}, test.viewer, test.relations)
+			err := authorizeSpaceDetails(context.Background(), &ent.Space{HostID: hostID, Visibility: test.visibility, ModerationVisibility: "visible", Metadata: test.metadata}, test.viewer, test.relations)
 			if (err != nil) != test.wantDenied {
 				t.Fatalf("error = %v, wantDenied %v", err, test.wantDenied)
 			}

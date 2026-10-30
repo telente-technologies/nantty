@@ -115,6 +115,26 @@ func SettledAt(v time.Time) predicate.Battle {
 	return predicate.Battle(sql.FieldEQ(FieldSettledAt, v))
 }
 
+// SettlementAttempts applies equality check predicate on the "settlement_attempts" field. It's identical to SettlementAttemptsEQ.
+func SettlementAttempts(v int) predicate.Battle {
+	return predicate.Battle(sql.FieldEQ(FieldSettlementAttempts, v))
+}
+
+// SettlementLeaseUntil applies equality check predicate on the "settlement_lease_until" field. It's identical to SettlementLeaseUntilEQ.
+func SettlementLeaseUntil(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldEQ(FieldSettlementLeaseUntil, v))
+}
+
+// SettlementNextAttemptAt applies equality check predicate on the "settlement_next_attempt_at" field. It's identical to SettlementNextAttemptAtEQ.
+func SettlementNextAttemptAt(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldEQ(FieldSettlementNextAttemptAt, v))
+}
+
+// SettlementLeaseToken applies equality check predicate on the "settlement_lease_token" field. It's identical to SettlementLeaseTokenEQ.
+func SettlementLeaseToken(v string) predicate.Battle {
+	return predicate.Battle(sql.FieldEQ(FieldSettlementLeaseToken, v))
+}
+
 // IsTie applies equality check predicate on the "is_tie" field. It's identical to IsTieEQ.
 func IsTie(v bool) predicate.Battle {
 	return predicate.Battle(sql.FieldEQ(FieldIsTie, v))
@@ -703,6 +723,221 @@ func SettledAtIsNil() predicate.Battle {
 // SettledAtNotNil applies the NotNil predicate on the "settled_at" field.
 func SettledAtNotNil() predicate.Battle {
 	return predicate.Battle(sql.FieldNotNull(FieldSettledAt))
+}
+
+// SettlementAttemptsEQ applies the EQ predicate on the "settlement_attempts" field.
+func SettlementAttemptsEQ(v int) predicate.Battle {
+	return predicate.Battle(sql.FieldEQ(FieldSettlementAttempts, v))
+}
+
+// SettlementAttemptsNEQ applies the NEQ predicate on the "settlement_attempts" field.
+func SettlementAttemptsNEQ(v int) predicate.Battle {
+	return predicate.Battle(sql.FieldNEQ(FieldSettlementAttempts, v))
+}
+
+// SettlementAttemptsIn applies the In predicate on the "settlement_attempts" field.
+func SettlementAttemptsIn(vs ...int) predicate.Battle {
+	return predicate.Battle(sql.FieldIn(FieldSettlementAttempts, vs...))
+}
+
+// SettlementAttemptsNotIn applies the NotIn predicate on the "settlement_attempts" field.
+func SettlementAttemptsNotIn(vs ...int) predicate.Battle {
+	return predicate.Battle(sql.FieldNotIn(FieldSettlementAttempts, vs...))
+}
+
+// SettlementAttemptsGT applies the GT predicate on the "settlement_attempts" field.
+func SettlementAttemptsGT(v int) predicate.Battle {
+	return predicate.Battle(sql.FieldGT(FieldSettlementAttempts, v))
+}
+
+// SettlementAttemptsGTE applies the GTE predicate on the "settlement_attempts" field.
+func SettlementAttemptsGTE(v int) predicate.Battle {
+	return predicate.Battle(sql.FieldGTE(FieldSettlementAttempts, v))
+}
+
+// SettlementAttemptsLT applies the LT predicate on the "settlement_attempts" field.
+func SettlementAttemptsLT(v int) predicate.Battle {
+	return predicate.Battle(sql.FieldLT(FieldSettlementAttempts, v))
+}
+
+// SettlementAttemptsLTE applies the LTE predicate on the "settlement_attempts" field.
+func SettlementAttemptsLTE(v int) predicate.Battle {
+	return predicate.Battle(sql.FieldLTE(FieldSettlementAttempts, v))
+}
+
+// SettlementLeaseUntilEQ applies the EQ predicate on the "settlement_lease_until" field.
+func SettlementLeaseUntilEQ(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldEQ(FieldSettlementLeaseUntil, v))
+}
+
+// SettlementLeaseUntilNEQ applies the NEQ predicate on the "settlement_lease_until" field.
+func SettlementLeaseUntilNEQ(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldNEQ(FieldSettlementLeaseUntil, v))
+}
+
+// SettlementLeaseUntilIn applies the In predicate on the "settlement_lease_until" field.
+func SettlementLeaseUntilIn(vs ...time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldIn(FieldSettlementLeaseUntil, vs...))
+}
+
+// SettlementLeaseUntilNotIn applies the NotIn predicate on the "settlement_lease_until" field.
+func SettlementLeaseUntilNotIn(vs ...time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldNotIn(FieldSettlementLeaseUntil, vs...))
+}
+
+// SettlementLeaseUntilGT applies the GT predicate on the "settlement_lease_until" field.
+func SettlementLeaseUntilGT(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldGT(FieldSettlementLeaseUntil, v))
+}
+
+// SettlementLeaseUntilGTE applies the GTE predicate on the "settlement_lease_until" field.
+func SettlementLeaseUntilGTE(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldGTE(FieldSettlementLeaseUntil, v))
+}
+
+// SettlementLeaseUntilLT applies the LT predicate on the "settlement_lease_until" field.
+func SettlementLeaseUntilLT(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldLT(FieldSettlementLeaseUntil, v))
+}
+
+// SettlementLeaseUntilLTE applies the LTE predicate on the "settlement_lease_until" field.
+func SettlementLeaseUntilLTE(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldLTE(FieldSettlementLeaseUntil, v))
+}
+
+// SettlementLeaseUntilIsNil applies the IsNil predicate on the "settlement_lease_until" field.
+func SettlementLeaseUntilIsNil() predicate.Battle {
+	return predicate.Battle(sql.FieldIsNull(FieldSettlementLeaseUntil))
+}
+
+// SettlementLeaseUntilNotNil applies the NotNil predicate on the "settlement_lease_until" field.
+func SettlementLeaseUntilNotNil() predicate.Battle {
+	return predicate.Battle(sql.FieldNotNull(FieldSettlementLeaseUntil))
+}
+
+// SettlementNextAttemptAtEQ applies the EQ predicate on the "settlement_next_attempt_at" field.
+func SettlementNextAttemptAtEQ(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldEQ(FieldSettlementNextAttemptAt, v))
+}
+
+// SettlementNextAttemptAtNEQ applies the NEQ predicate on the "settlement_next_attempt_at" field.
+func SettlementNextAttemptAtNEQ(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldNEQ(FieldSettlementNextAttemptAt, v))
+}
+
+// SettlementNextAttemptAtIn applies the In predicate on the "settlement_next_attempt_at" field.
+func SettlementNextAttemptAtIn(vs ...time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldIn(FieldSettlementNextAttemptAt, vs...))
+}
+
+// SettlementNextAttemptAtNotIn applies the NotIn predicate on the "settlement_next_attempt_at" field.
+func SettlementNextAttemptAtNotIn(vs ...time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldNotIn(FieldSettlementNextAttemptAt, vs...))
+}
+
+// SettlementNextAttemptAtGT applies the GT predicate on the "settlement_next_attempt_at" field.
+func SettlementNextAttemptAtGT(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldGT(FieldSettlementNextAttemptAt, v))
+}
+
+// SettlementNextAttemptAtGTE applies the GTE predicate on the "settlement_next_attempt_at" field.
+func SettlementNextAttemptAtGTE(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldGTE(FieldSettlementNextAttemptAt, v))
+}
+
+// SettlementNextAttemptAtLT applies the LT predicate on the "settlement_next_attempt_at" field.
+func SettlementNextAttemptAtLT(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldLT(FieldSettlementNextAttemptAt, v))
+}
+
+// SettlementNextAttemptAtLTE applies the LTE predicate on the "settlement_next_attempt_at" field.
+func SettlementNextAttemptAtLTE(v time.Time) predicate.Battle {
+	return predicate.Battle(sql.FieldLTE(FieldSettlementNextAttemptAt, v))
+}
+
+// SettlementNextAttemptAtIsNil applies the IsNil predicate on the "settlement_next_attempt_at" field.
+func SettlementNextAttemptAtIsNil() predicate.Battle {
+	return predicate.Battle(sql.FieldIsNull(FieldSettlementNextAttemptAt))
+}
+
+// SettlementNextAttemptAtNotNil applies the NotNil predicate on the "settlement_next_attempt_at" field.
+func SettlementNextAttemptAtNotNil() predicate.Battle {
+	return predicate.Battle(sql.FieldNotNull(FieldSettlementNextAttemptAt))
+}
+
+// SettlementLeaseTokenEQ applies the EQ predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenEQ(v string) predicate.Battle {
+	return predicate.Battle(sql.FieldEQ(FieldSettlementLeaseToken, v))
+}
+
+// SettlementLeaseTokenNEQ applies the NEQ predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenNEQ(v string) predicate.Battle {
+	return predicate.Battle(sql.FieldNEQ(FieldSettlementLeaseToken, v))
+}
+
+// SettlementLeaseTokenIn applies the In predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenIn(vs ...string) predicate.Battle {
+	return predicate.Battle(sql.FieldIn(FieldSettlementLeaseToken, vs...))
+}
+
+// SettlementLeaseTokenNotIn applies the NotIn predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenNotIn(vs ...string) predicate.Battle {
+	return predicate.Battle(sql.FieldNotIn(FieldSettlementLeaseToken, vs...))
+}
+
+// SettlementLeaseTokenGT applies the GT predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenGT(v string) predicate.Battle {
+	return predicate.Battle(sql.FieldGT(FieldSettlementLeaseToken, v))
+}
+
+// SettlementLeaseTokenGTE applies the GTE predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenGTE(v string) predicate.Battle {
+	return predicate.Battle(sql.FieldGTE(FieldSettlementLeaseToken, v))
+}
+
+// SettlementLeaseTokenLT applies the LT predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenLT(v string) predicate.Battle {
+	return predicate.Battle(sql.FieldLT(FieldSettlementLeaseToken, v))
+}
+
+// SettlementLeaseTokenLTE applies the LTE predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenLTE(v string) predicate.Battle {
+	return predicate.Battle(sql.FieldLTE(FieldSettlementLeaseToken, v))
+}
+
+// SettlementLeaseTokenContains applies the Contains predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenContains(v string) predicate.Battle {
+	return predicate.Battle(sql.FieldContains(FieldSettlementLeaseToken, v))
+}
+
+// SettlementLeaseTokenHasPrefix applies the HasPrefix predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenHasPrefix(v string) predicate.Battle {
+	return predicate.Battle(sql.FieldHasPrefix(FieldSettlementLeaseToken, v))
+}
+
+// SettlementLeaseTokenHasSuffix applies the HasSuffix predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenHasSuffix(v string) predicate.Battle {
+	return predicate.Battle(sql.FieldHasSuffix(FieldSettlementLeaseToken, v))
+}
+
+// SettlementLeaseTokenIsNil applies the IsNil predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenIsNil() predicate.Battle {
+	return predicate.Battle(sql.FieldIsNull(FieldSettlementLeaseToken))
+}
+
+// SettlementLeaseTokenNotNil applies the NotNil predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenNotNil() predicate.Battle {
+	return predicate.Battle(sql.FieldNotNull(FieldSettlementLeaseToken))
+}
+
+// SettlementLeaseTokenEqualFold applies the EqualFold predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenEqualFold(v string) predicate.Battle {
+	return predicate.Battle(sql.FieldEqualFold(FieldSettlementLeaseToken, v))
+}
+
+// SettlementLeaseTokenContainsFold applies the ContainsFold predicate on the "settlement_lease_token" field.
+func SettlementLeaseTokenContainsFold(v string) predicate.Battle {
+	return predicate.Battle(sql.FieldContainsFold(FieldSettlementLeaseToken, v))
 }
 
 // IsTieEQ applies the EQ predicate on the "is_tie" field.

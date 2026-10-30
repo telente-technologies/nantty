@@ -267,7 +267,7 @@ var (
 	ContentReportsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "target_type", Type: field.TypeEnum, Enums: []string{"post", "comment", "clip", "live", "product", "store", "sound", "user"}},
+		{Name: "target_type", Type: field.TypeEnum, Enums: []string{"post", "comment", "clip", "live", "space", "product", "store", "sound", "user"}},
 		{Name: "target_id", Type: field.TypeString, Size: 128},
 		{Name: "author_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "in_review", "resolved", "dismissed"}, Default: "open"},

@@ -29,16 +29,21 @@ var AllPermissionKeys = []string{
 }
 
 var DepartmentRoleTemplates = []DepartmentRoleTemplate{
-	{"support", "Support", "Support", []string{"users:read", "orders:read", "support:tickets", "support:chat", "support:email", "support:assign", "support:helpContent"}},
+	{"support", "Support Agent", "Support", []string{"users:read", "orders:read", "support:tickets", "support:chat", "support:email", "support:assign", "support:helpContent"}},
 	{"marketing", "Marketing", "Marketing", []string{"metrics:read", "marketing:campaigns", "marketing:email", "catalog:manage"}},
 	{"sales", "Sales", "Sales", []string{"metrics:read", "users:read", "sales:leads", "applications:sellers", "brands:review"}},
-	{"finance", "Finance", "Finance", []string{"metrics:read", "orders:read", "payouts:approve", "refunds:issue", "coins:review", "ledger:read", "finance:reports", "audit:read", "payments:webhooks", "payments:wallets"}},
+	{"finance", "Finance Admin", "Finance", []string{"metrics:read", "orders:read", "payouts:approve", "refunds:issue", "coins:review", "ledger:read", "finance:reports", "audit:read", "payments:webhooks", "payments:wallets"}},
 	{"trust", "Trust & Safety", "Trust & Safety", []string{"users:read", "users:moderate", "users:restrict", "users:suspend", "moderation:reports", "moderation:appeals", "chat-reports:review", "copyright:review", "ip-claims:review", "security:cases"}},
 	{"verification", "Verification", "Verification", []string{"users:read", "verification:review", "verification:documents", "verification:grant", "applications:sellers", "applications:creators"}},
+	{"trust_verification", "Trust & Verification", "Trust & Verification", []string{"users:read", "verification:review", "verification:documents", "verification:grant", "verification:revoke", "applications:sellers", "applications:creators", "brands:review", "brands:revoke"}},
+	{"moderation", "Moderation Admin", "Moderation", []string{"users:read", "users:moderate", "users:restrict", "users:suspend", "moderation:reports", "moderation:appeals", "chat-reports:review", "copyright:review", "ip-claims:review", "security:cases"}},
 	{"content", "Content", "Content", []string{"content:review", "catalog:manage", "applications:creators", "moderation:reports"}},
 	{"ads", "Ads", "Ads", []string{"ads:review", "advertisers:manage", "metrics:read"}},
 	{"legal", "Legal", "Legal", []string{"legal.documents.view", "legal.documents.edit", "legal.documents.publish", "legal.notices.send"}},
 	{"engineering", "Engineering (read-only)", "Engineering", []string{"metrics:read", "users:read", "orders:read", "ledger:read", "config:read", "audit:read"}},
+	{"subscription_manager", "Subscription Manager", "Subscriptions", []string{"config:plans"}},
+	{"operations_analyst", "Operations Analyst", "Operations", []string{"metrics:read"}},
+	{"auditor", "Auditor", "Audit", []string{"audit:read"}},
 }
 
 var permissionAliases = map[string][]string{

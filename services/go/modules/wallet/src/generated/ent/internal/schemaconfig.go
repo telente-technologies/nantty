@@ -13,6 +13,7 @@ type SchemaConfig struct {
 	CoinConversion            string // CoinConversion table.
 	CoinPackage               string // CoinPackage table.
 	CoinPurchase              string // CoinPurchase table.
+	CoinPurchaseChargeback    string // CoinPurchaseChargeback table.
 	CoinTransfer              string // CoinTransfer table.
 	IdempotentRequest         string // IdempotentRequest table.
 	MonetisationHold          string // MonetisationHold table.

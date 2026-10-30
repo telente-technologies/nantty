@@ -10,6 +10,7 @@ import (
 	"nantty/modules/subscriptions/src/generated/ent/idempotentrequest"
 	"nantty/modules/subscriptions/src/generated/ent/outboxevent"
 	"nantty/modules/subscriptions/src/generated/ent/planprice"
+	"nantty/modules/subscriptions/src/generated/ent/planpriceversion"
 	"nantty/modules/subscriptions/src/generated/ent/providerplan"
 	"nantty/modules/subscriptions/src/generated/ent/subscription"
 	"nantty/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
@@ -589,6 +590,137 @@ func init() {
 	planpriceDescID := planpriceMixinFields0[0].Descriptor()
 	// planprice.DefaultID holds the default value on creation for the id field.
 	planprice.DefaultID = planpriceDescID.Default.(func() uuid.UUID)
+	planpriceversionMixin := schema.PlanPriceVersion{}.Mixin()
+	planpriceversionMixinFields0 := planpriceversionMixin[0].Fields()
+	_ = planpriceversionMixinFields0
+	planpriceversionFields := schema.PlanPriceVersion{}.Fields()
+	_ = planpriceversionFields
+	// planpriceversionDescCreatedAt is the schema descriptor for created_at field.
+	planpriceversionDescCreatedAt := planpriceversionMixinFields0[1].Descriptor()
+	// planpriceversion.DefaultCreatedAt holds the default value on creation for the created_at field.
+	planpriceversion.DefaultCreatedAt = planpriceversionDescCreatedAt.Default.(func() time.Time)
+	// planpriceversionDescPlanCode is the schema descriptor for plan_code field.
+	planpriceversionDescPlanCode := planpriceversionFields[0].Descriptor()
+	// planpriceversion.PlanCodeValidator is a validator for the "plan_code" field. It is called by the builders before save.
+	planpriceversion.PlanCodeValidator = func() func(string) error {
+		validators := planpriceversionDescPlanCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(plan_code string) error {
+			for _, fn := range fns {
+				if err := fn(plan_code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// planpriceversionDescCountryCode is the schema descriptor for country_code field.
+	planpriceversionDescCountryCode := planpriceversionFields[1].Descriptor()
+	// planpriceversion.CountryCodeValidator is a validator for the "country_code" field. It is called by the builders before save.
+	planpriceversion.CountryCodeValidator = func() func(string) error {
+		validators := planpriceversionDescCountryCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(country_code string) error {
+			for _, fn := range fns {
+				if err := fn(country_code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// planpriceversionDescCurrency is the schema descriptor for currency field.
+	planpriceversionDescCurrency := planpriceversionFields[2].Descriptor()
+	// planpriceversion.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	planpriceversion.CurrencyValidator = func() func(string) error {
+		validators := planpriceversionDescCurrency.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(currency string) error {
+			for _, fn := range fns {
+				if err := fn(currency); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// planpriceversionDescYearlyAmountMinor is the schema descriptor for yearly_amount_minor field.
+	planpriceversionDescYearlyAmountMinor := planpriceversionFields[4].Descriptor()
+	// planpriceversion.DefaultYearlyAmountMinor holds the default value on creation for the yearly_amount_minor field.
+	planpriceversion.DefaultYearlyAmountMinor = planpriceversionDescYearlyAmountMinor.Default.(int64)
+	// planpriceversionDescIosMonthlyAmountMinor is the schema descriptor for ios_monthly_amount_minor field.
+	planpriceversionDescIosMonthlyAmountMinor := planpriceversionFields[5].Descriptor()
+	// planpriceversion.DefaultIosMonthlyAmountMinor holds the default value on creation for the ios_monthly_amount_minor field.
+	planpriceversion.DefaultIosMonthlyAmountMinor = planpriceversionDescIosMonthlyAmountMinor.Default.(int64)
+	// planpriceversionDescIosYearlyAmountMinor is the schema descriptor for ios_yearly_amount_minor field.
+	planpriceversionDescIosYearlyAmountMinor := planpriceversionFields[6].Descriptor()
+	// planpriceversion.DefaultIosYearlyAmountMinor holds the default value on creation for the ios_yearly_amount_minor field.
+	planpriceversion.DefaultIosYearlyAmountMinor = planpriceversionDescIosYearlyAmountMinor.Default.(int64)
+	// planpriceversionDescAndroidMonthlyAmountMinor is the schema descriptor for android_monthly_amount_minor field.
+	planpriceversionDescAndroidMonthlyAmountMinor := planpriceversionFields[7].Descriptor()
+	// planpriceversion.DefaultAndroidMonthlyAmountMinor holds the default value on creation for the android_monthly_amount_minor field.
+	planpriceversion.DefaultAndroidMonthlyAmountMinor = planpriceversionDescAndroidMonthlyAmountMinor.Default.(int64)
+	// planpriceversionDescAndroidYearlyAmountMinor is the schema descriptor for android_yearly_amount_minor field.
+	planpriceversionDescAndroidYearlyAmountMinor := planpriceversionFields[8].Descriptor()
+	// planpriceversion.DefaultAndroidYearlyAmountMinor holds the default value on creation for the android_yearly_amount_minor field.
+	planpriceversion.DefaultAndroidYearlyAmountMinor = planpriceversionDescAndroidYearlyAmountMinor.Default.(int64)
+	// planpriceversionDescStoreProductIds is the schema descriptor for store_product_ids field.
+	planpriceversionDescStoreProductIds := planpriceversionFields[9].Descriptor()
+	// planpriceversion.DefaultStoreProductIds holds the default value on creation for the store_product_ids field.
+	planpriceversion.DefaultStoreProductIds = planpriceversionDescStoreProductIds.Default.(map[string]string)
+	// planpriceversionDescActive is the schema descriptor for active field.
+	planpriceversionDescActive := planpriceversionFields[10].Descriptor()
+	// planpriceversion.DefaultActive holds the default value on creation for the active field.
+	planpriceversion.DefaultActive = planpriceversionDescActive.Default.(bool)
+	// planpriceversionDescCreatedByStaffID is the schema descriptor for created_by_staff_id field.
+	planpriceversionDescCreatedByStaffID := planpriceversionFields[12].Descriptor()
+	// planpriceversion.CreatedByStaffIDValidator is a validator for the "created_by_staff_id" field. It is called by the builders before save.
+	planpriceversion.CreatedByStaffIDValidator = func() func(string) error {
+		validators := planpriceversionDescCreatedByStaffID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(created_by_staff_id string) error {
+			for _, fn := range fns {
+				if err := fn(created_by_staff_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// planpriceversionDescChangeReason is the schema descriptor for change_reason field.
+	planpriceversionDescChangeReason := planpriceversionFields[13].Descriptor()
+	// planpriceversion.ChangeReasonValidator is a validator for the "change_reason" field. It is called by the builders before save.
+	planpriceversion.ChangeReasonValidator = func() func(string) error {
+		validators := planpriceversionDescChangeReason.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(change_reason string) error {
+			for _, fn := range fns {
+				if err := fn(change_reason); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// planpriceversionDescID is the schema descriptor for id field.
+	planpriceversionDescID := planpriceversionMixinFields0[0].Descriptor()
+	// planpriceversion.DefaultID holds the default value on creation for the id field.
+	planpriceversion.DefaultID = planpriceversionDescID.Default.(func() uuid.UUID)
 	providerplanMixin := schema.ProviderPlan{}.Mixin()
 	providerplanMixinFields0 := providerplanMixin[0].Fields()
 	_ = providerplanMixinFields0

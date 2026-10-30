@@ -1,5 +1,5 @@
-import { createResponseContext, type HttpResponseContext } from "@zudojs/http";
-import type { SchemaIssue } from "@zudojs/schema";
+import { createResponseContext, type HttpResponseContext } from "@nantty/fastify-platform";
+import type { SchemaIssue } from "@nantty/fastify-platform";
 
 import { SocialError } from "../errors/social.error.js";
 

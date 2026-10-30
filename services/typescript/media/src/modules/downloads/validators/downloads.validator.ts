@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 export const downloadVariantParamsSchema = schema.object({ mediaId: schema.string().uuid() });
 export const downloadVariantBodySchema = schema.object({

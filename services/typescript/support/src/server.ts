@@ -1,4 +1,4 @@
-import { createLogger } from "@zudojs/logger";
+import { createLogger } from "@nantty/fastify-platform";
 
 import { createSupportApp } from "./app.js";
 import { loadSupportConfigFromEnvironment } from "./configs/support.config.js";

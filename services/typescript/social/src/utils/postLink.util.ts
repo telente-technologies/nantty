@@ -1,8 +1,5 @@
 export const nanttyPostLinkHosts: readonly string[] = ["nantty.com", "www.nantty.com", "app.nantty.com", "nantty.com", "www.nantty.com", "app.nantty.com", "nantty.app", "www.nantty.app"];
 
-/** @deprecated Use nanttyPostLinkHosts; legacy links remain accepted. */
-export const nanttyPostLinkHosts = nanttyPostLinkHosts;
-
 const urlPattern = /https?:\/\/[^\s<>"']+/gi;
 const trailingPunctuationPattern = /[.,!?;:)\]}'"]+$/;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

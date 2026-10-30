@@ -34,7 +34,7 @@ describe("public help content", () => {
 
   it("serves old help slugs through canonical topics", async () => {
     const category = await server.harness.helpStore.findCategoryBySlug("buying-and-orders");
-    for (const [canonical, legacy] of [["what-is-nantty", "what-is-nantty"], ["owed-to-nantty", "owed-to-nantty"]] as const) {
+    for (const [canonical, legacy] of [["nantty-points", "nanttypoints"]] as const) {
       const created = await server.harness.helpStore.createTopic({ categoryId: category!.id, slug: canonical, locale: "en", title: canonical, summary: "Brand help topic.", bodyMarkdown: "This is the current help topic content.", tags: [], status: "published", origin: "seed", sourceTicketId: null, seedKey: null, seedHash: null, editorName: "Nantty", relatedTopicIds: [] });
       const response = await fetch(`${server.baseUrl}/api/v1/help/topics/${legacy}`);
       expect(response.status).toBe(200);

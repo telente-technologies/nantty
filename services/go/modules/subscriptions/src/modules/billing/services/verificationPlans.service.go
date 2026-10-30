@@ -24,14 +24,16 @@ var verificationPlanCodes = map[string][]string{
 }
 
 type VerificationPlanView struct {
-	Id       string             `json:"id"`
-	PlanCode string             `json:"planCode"`
-	Name     string             `json:"name"`
-	Color    string             `json:"color"`
-	Tier     string             `json:"tier"`
-	Price    map[string]any     `json:"price"`
-	Interval string             `json:"interval"`
-	Perks    []loaders.PlanPerk `json:"perks"`
+	Id             string             `json:"id"`
+	PlanCode       string             `json:"planCode"`
+	Name           string             `json:"name"`
+	Color          string             `json:"color"`
+	Tier           string             `json:"tier"`
+	Price          map[string]any     `json:"price"`
+	Interval       string             `json:"interval"`
+	Channel        string             `json:"channel"`
+	StoreProductId *string            `json:"storeProductId"`
+	Perks          []loaders.PlanPerk `json:"perks"`
 }
 
 type VerificationSubscriptionView struct {
@@ -64,6 +66,13 @@ func verificationColorOf(planCode string) string {
 	return "blue"
 }
 
+func verificationPlanView(plan PlanView) VerificationPlanView {
+	return VerificationPlanView{
+		Id: plan.Id, PlanCode: plan.PlanCode, Name: plan.DisplayName, Color: verificationColorOf(plan.PlanCode), Tier: plan.Tier,
+		Price: plan.Price, Interval: plan.Interval, Channel: plan.Channel, StoreProductId: plan.StoreProductId, Perks: plan.Perks,
+	}
+}
+
 func (billing Billing) ListVerificationPlans(ctx context.Context, userId string, resolution regionpricing.Resolution) ([]VerificationPlanView, error) {
 	profile, found, err := billing.Container.Identity.FindActingProfile(ctx, userId)
 	if err != nil {
@@ -82,9 +91,7 @@ func (billing Billing) ListVerificationPlans(ctx context.Context, userId string,
 	}
 	views := make([]VerificationPlanView, 0, len(plans))
 	for _, plan := range plans {
-		views = append(views, VerificationPlanView{
-			Id: plan.Id, PlanCode: plan.PlanCode, Name: plan.DisplayName, Color: verificationColorOf(plan.PlanCode), Tier: plan.Tier, Price: plan.Price, Interval: plan.Interval, Perks: plan.Perks,
-		})
+		views = append(views, verificationPlanView(plan))
 	}
 	return views, nil
 }

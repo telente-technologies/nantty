@@ -41,7 +41,9 @@ func MountAccountEnforcementRoutes(mux *http.ServeMux, container *container.Cont
 	mux.Handle("POST /api/v1/admin/users/{userId}/username/withhold", one("users.usernames.withhold", true, controller.WithholdUsername))
 	mux.Handle("POST /api/v1/admin/users/{userId}/username/reclaim", one("users.usernames.withhold", true, controller.ReclaimUsername))
 	mux.Handle("GET /api/v1/admin/usernames/withheld", any(usernameReadPermissions, controller.ListWithheld))
-	mux.Handle("GET /api/v1/admin/usernames/confusables", any(usernameReadPermissions, controller.PreviewConfusables))
+	// The response can identify the current owner of a confusable handle, so
+	// only staff authorized to resolve username ownership conflicts may view it.
+	mux.Handle("GET /api/v1/admin/usernames/confusables", one("usernames:reassign", false, controller.PreviewConfusables))
 	mux.Handle("GET /api/v1/admin/usernames/held", any(usernameHoldPermissions, controller.ListHeld))
 	mux.Handle("GET /api/v1/admin/usernames/hold", any(usernameHoldPermissions, controller.GetHold))
 	mux.Handle("GET /api/v1/admin/suspensions/accounts", one("users:suspend", false, controller.ListSuspendedAccounts))

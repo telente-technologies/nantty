@@ -1,4 +1,4 @@
-import { createLogger } from "@zudojs/logger";
+import { createLogger } from "@nantty/fastify-platform";
 
 import { createSocialApp } from "./app.js";
 import { loadSocialConfigFromEnvironment } from "./configs/social.config.js";
@@ -8,7 +8,7 @@ import { startTelemetry } from "./telemetry/telemetry.js";
 const stopTelemetry = startTelemetry("social");
 const logger = createLogger({ name: "social" });
 const config = loadSocialConfigFromEnvironment();
-const app = createSocialApp(config, process.env["SOCIAL_INTERNAL_TOKEN"]?.trim() ?? "", logger);
+const app = await createSocialApp(config, process.env["SOCIAL_INTERNAL_TOKEN"]?.trim() ?? "", logger);
 
 const port = await app.start();
 logger.info("social listening", { host: config.host, port });

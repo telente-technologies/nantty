@@ -1,4 +1,4 @@
-import { defaultRouteLimitsPerMinute, type RouteLimitName } from "../services/routeRateLimitPolicy.service.js";
+import { defaultRouteLimitWindowsSeconds, defaultRouteLimitsPerMinute, type RouteLimitName } from "../services/routeRateLimitPolicy.service.js";
 import { staffAccessTokenAudience } from "../services/accessTokenVerifier.service.js";
 import { isValidAllowListEntry } from "../middlewares/adminNetwork.middleware.js";
 import { loadSecurityConfigFromEnvironment, type SecurityConfig } from "./security.config.js";
@@ -20,6 +20,8 @@ export interface GatewayConfig {
   readonly valkeyUrl?: string | null;
   readonly sessionDenylistUrl?: string | null;
   readonly routeRateLimitsPerMinute?: Readonly<Partial<Record<RouteLimitName, number>>>;
+  readonly routeRateLimitWindowsSeconds?: Readonly<Partial<Record<RouteLimitName, number>>>;
+  readonly authenticatedApiLimitPerMinute?: number;
   readonly security?: SecurityConfig | null;
   readonly identitySigningSecret?: string;
   readonly adminIpAllowList?: readonly string[];
@@ -51,9 +53,20 @@ function readAllowedCorsOrigins(): string[] {
 function readRouteRateLimits(): Partial<Record<RouteLimitName, number>> {
   const limits: Partial<Record<RouteLimitName, number>> = {};
   for (const name of Object.keys(defaultRouteLimitsPerMinute) as RouteLimitName[]) {
-    limits[name] = Number(readEnvironmentVariableOrDefault(`RATE_LIMIT_${name.toUpperCase()}_PER_MINUTE`, String(defaultRouteLimitsPerMinute[name])));
+    const count = process.env[`RATE_LIMIT_${name.toUpperCase()}_COUNT`]?.trim()
+      ?? process.env[`RATE_LIMIT_${name.toUpperCase()}_PER_MINUTE`]?.trim()
+      ?? String(defaultRouteLimitsPerMinute[name]);
+    limits[name] = Number(count);
   }
   return limits;
+}
+
+function readRouteRateLimitWindows(): Partial<Record<RouteLimitName, number>> {
+  const windows: Partial<Record<RouteLimitName, number>> = {};
+  for (const name of Object.keys(defaultRouteLimitWindowsSeconds) as RouteLimitName[]) {
+    windows[name] = Number(readEnvironmentVariableOrDefault(`RATE_LIMIT_${name.toUpperCase()}_WINDOW_SECONDS`, String(defaultRouteLimitWindowsSeconds[name])));
+  }
+  return windows;
 }
 
 export function loadGatewayConfigFromEnvironment(): GatewayConfig {
@@ -77,6 +90,8 @@ export function loadGatewayConfigFromEnvironment(): GatewayConfig {
     valkeyUrl: process.env["VALKEY_URL"]?.trim() || null,
     sessionDenylistUrl: process.env["AUTH_SESSION_DENYLIST_URL"]?.trim() || null,
     routeRateLimitsPerMinute: readRouteRateLimits(),
+    routeRateLimitWindowsSeconds: readRouteRateLimitWindows(),
+    authenticatedApiLimitPerMinute: Number(readEnvironmentVariableOrDefault("AUTHENTICATED_API_LIMIT_PER_MINUTE", "120")),
     security: loadSecurityConfigFromEnvironment(problems),
     identitySigningSecret: readRequiredEnvironmentVariable("GATEWAY_IDENTITY_SECRET", problems),
     adminIpAllowList: readEnvironmentVariableOrDefault("ADMIN_IP_ALLOWLIST", "").split(",").map((entry) => entry.trim()).filter(Boolean),
@@ -85,12 +100,18 @@ export function loadGatewayConfigFromEnvironment(): GatewayConfig {
     upstreams: { identity: readRequiredEnvironmentVariable("UPSTREAM_IDENTITY_URL", problems), live: readEnvironmentVariableOrDefault("UPSTREAM_LIVE_URL", "http://localhost:8102"), money: readEnvironmentVariableOrDefault("UPSTREAM_MONEY_URL", "http://localhost:8103"), notifications: readEnvironmentVariableOrDefault("UPSTREAM_NOTIFICATIONS_URL", "http://localhost:8104"), social: readEnvironmentVariableOrDefault("UPSTREAM_SOCIAL_URL", "http://localhost:8105"), trust: readEnvironmentVariableOrDefault("UPSTREAM_TRUST_URL", "http://localhost:8106"), commerce: readEnvironmentVariableOrDefault("UPSTREAM_COMMERCE_URL", "http://localhost:8107"), media: readEnvironmentVariableOrDefault("UPSTREAM_MEDIA_URL", "http://localhost:8108"), search: readEnvironmentVariableOrDefault("UPSTREAM_SEARCH_URL", "http://localhost:8109"), ads: readEnvironmentVariableOrDefault("UPSTREAM_ADS_URL", "http://localhost:8110"), support: readEnvironmentVariableOrDefault("UPSTREAM_SUPPORT_URL", "http://localhost:8111") },
   };
   if (config.corsOrigins.includes("*")) problems.push("CORS_ORIGINS must list exact origins, not *");
+  if (!Number.isInteger(config.authenticatedApiLimitPerMinute) || (config.authenticatedApiLimitPerMinute ?? 0) <= 0) problems.push("AUTHENTICATED_API_LIMIT_PER_MINUTE must be a positive integer");
+  for (const [name, count] of Object.entries(config.routeRateLimitsPerMinute ?? {})) if (!Number.isInteger(count) || (count ?? 0) <= 0) problems.push(`RATE_LIMIT_${name.toUpperCase()}_COUNT must be a positive integer`);
+  for (const [name, seconds] of Object.entries(config.routeRateLimitWindowsSeconds ?? {})) if (!Number.isInteger(seconds) || (seconds ?? 0) <= 0) problems.push(`RATE_LIMIT_${name.toUpperCase()}_WINDOW_SECONDS must be a positive integer`);
   if (config.accessToken.audience === staffAccessTokenAudience) problems.push("AUTH_TOKEN_AUDIENCE must not equal the staff audience");
   if (process.env["NODE_ENV"] === "production" && config.valkeyUrl === null) problems.push("VALKEY_URL is required in production");
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
   if ((config.identitySigningSecret ?? "").length > 0 && (config.identitySigningSecret ?? "").length < 32) problems.push("GATEWAY_IDENTITY_SECRET must be at least 32 characters");
   if (!Number.isInteger(config.trustedProxyHops) || (config.trustedProxyHops ?? 0) < 0) problems.push("TRUSTED_PROXY_HOPS must be a non-negative integer");
   if ((config.adminIpAllowList ?? []).some((entry) => !isValidAllowListEntry(entry))) problems.push("ADMIN_IP_ALLOWLIST must list IP addresses or CIDR ranges");
+  if (process.env["NODE_ENV"] === "production" && process.env["DEPLOYMENT_ENVIRONMENT"] !== "dev" && (config.adminIpAllowList ?? []).length === 0) {
+    problems.push("ADMIN_IP_ALLOWLIST is required outside development");
+  }
   problems.push(...collectProductionHardeningProblems(process.env));
   if (problems.length > 0) throw new Error(`Invalid gateway configuration: ${problems.join("; ")}`);
   return config;

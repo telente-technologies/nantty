@@ -120,8 +120,8 @@ class IntelligenceSettings(BaseSettings):
             if len(self.model_signing_secret.get_secret_value()) < MINIMUM_SHARED_SECRET_LENGTH:
                 raise ValueError("INTELLIGENCE_MODEL_SIGNING_SECRET must be at least 32 characters")
             id_hash_length = len(self.id_hash_secret.get_secret_value())
-            if 0 < id_hash_length < MINIMUM_SHARED_SECRET_LENGTH:
-                raise ValueError("INTELLIGENCE_ID_HASH_SECRET must be empty or at least 32 characters")
+            if id_hash_length < MINIMUM_SHARED_SECRET_LENGTH:
+                raise ValueError("INTELLIGENCE_ID_HASH_SECRET must be set and at least 32 characters")
             for name, secret in (
                 ("INTELLIGENCE_SHARED_SECRET", self.shared_secret),
                 ("INTELLIGENCE_PREVIOUS_SHARED_SECRET", self.previous_shared_secret),

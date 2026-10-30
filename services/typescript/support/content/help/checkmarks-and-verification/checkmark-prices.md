@@ -1,64 +1,51 @@
 ---
 title: Checkmark and plan prices by country
-summary: Checkmark, Premium and seller plan prices are set per country. Web prices are lower than in-app prices, and yearly plans save 20%.
+summary: Checkmark plan prices vary by country and purchase channel. The price shown in the current checkout is authoritative.
 tags: prices, checkmark price, how much is verification, premium price, gold price, blue price, country price, gold for all your businesses, multi-business discount
 related: checkmarks-explained, premium, seller-plans, prices-by-country, checkmark-renewals-and-cancelling, app-store-purchases
 ---
 
-Prices are set for Nigeria, Ghana, Kenya, South Africa, the United Kingdom, the eurozone and the United States. Everywhere else sees US prices in US dollars. Your country comes from your app store account in the app, or from your country and currency on the web.
+Prices are stored by country and currency and may be changed by an authorized administrator. The price, renewal amount and billing interval shown in your checkout are authoritative; repository defaults are not a promise of an active price in an existing account or database.
+
+The catalogue is being migrated from legacy names to Blue Basic, Blue Premium, Gold Basic and Gold Premium. Basic and Premium tiers in the same family use the same checkmark color. Identity or business verification remains separate from payment. See [Blue checkmark](/help/checkmarks-and-verification/blue-checkmark) and [Gold checkmark](/help/checkmarks-and-verification/gold-checkmark).
 
 ## Nigeria prices (monthly)
 
 | Plan | Web | In the app |
 |---|---|---|
-| Blue Essential (account protection, no badge) | ₦1,000 | ₦1,200 |
-| Blue Verified (the blue checkmark) | ₦2,500 | ₦2,900 |
-| Blue Premium (blue checkmark plus extras) | ₦4,500 | ₦5,500 |
-| Gold (brands that don't sell) | ₦3,000 | web only |
-| Gold Pro (seller plan, Gold after verification) | ₦5,000 | web only |
-| Gold Business (seller plan, Gold after verification) | ₦15,000 | web only |
-| Black Official (government) | ₦50,000 | web only, by application |
+| Legacy Blue Essential | ₦1,000 source default | Availability and effective price are shown in checkout |
+| Blue Basic (legacy Blue Verified code) | ₦2,500 source default | Derived from configured store fees; checkout is authoritative |
+| Blue Premium | ₦20,000 source default | Derived from configured store fees; checkout is authoritative |
+| Gold (legacy Gold-only plan) | ₦3,000 source default | Web-only in the current default catalogue |
+| Gold Basic (legacy Gold Pro candidate) | ₦5,000 source default | Store price is derived in code; native purchase availability is not confirmed |
+| Gold Premium (legacy Gold Business candidate) | ₦30,000 source default | Store price is derived in code; native purchase availability is not confirmed |
+| Black Government (legacy Black Official) | No public amount | Manual review and an approved invitation are required; no public self-serve checkout |
+
+These are fresh-install source defaults, not live database prices. Store prices are calculated from configurable fee settings and must not be treated as published Apple or Google prices until the products and native purchase flow are verified.
 
 ## Discounts
 
-- Paying yearly on the web saves 20%.
-- If you have Blue (without Premium), adding Gold for your businesses is 15% off, for up to 3 businesses. It never applies to Black, and it doesn't stack with the yearly discount; you get whichever is bigger.
-- If you have Blue Premium, you get **Gold for all your businesses** instead. See below.
-- Some plans come with a 7-day free trial for eligible accounts. See [Checkmark renewals and cancelling](/help/checkmarks-and-verification/checkmark-renewals-and-cancelling).
+- The default annual discount is configurable at 20%; checkout shows the effective annual price and renewal terms.
+- Any Blue + Gold bundle discount and eligibility must be shown in checkout before purchase. Do not assume discounts stack.
+- Trial availability is account- and plan-dependent; see [Checkmark renewals and cancelling](/help/checkmarks-and-verification/checkmark-renewals-and-cancelling).
 
 ## Gold for all your businesses (Blue Premium)
 
-One Gold plan covers 1 to 5 of your businesses, billed once. The more businesses you add, the bigger the monthly discount:
-
-| Businesses on the plan | Monthly discount |
-|---|---|
-| 1 | 5% |
-| 2 | 10% |
-| 3 | 12% |
-| 4 | 14% |
-| 5 | 16% |
-
-Paying yearly takes an extra 5% off the discounted price. This replaces the usual 20% yearly discount.
-
-Example in Nigeria: 3 businesses at ₦3,000 each is ₦9,000 a month. 12% off makes it ₦7,920 a month, or ₦95,040 a year. Less 5% for paying yearly, you pay ₦90,288 a year.
-
-- Prices vary by country and region, so the amounts you see may differ.
-- It's bought on the web, not in the app.
-- It doesn't combine with offer links or the Blue + Gold bundle. You get the better single discount.
-- If Premium ends, your businesses keep Gold and the plan renews at the full price.
+Blue Premium's linked-business profile allowance does not itself prove that a multi-business Gold bundle is active. Any bundle, covered profiles, discount, channel availability and renewal terms must be specified in the signed-in checkout before purchase.
 
 See [The Gold checkmark](/help/checkmarks-and-verification/gold-checkmark) for adding and removing businesses.
 
 ## Why the app costs more
 
-Apple and Google charge a fee on in-app purchases, so in-app prices are higher. Gold, seller and Black plans can only be bought on the web. See [App Store and Google Play purchases](/help/payments-and-wallet/app-store-purchases).
+Apple and Google fee schedules are configurable and can differ. The backend derives estimates from effective web prices; the native store catalog is authoritative for an in-app purchase. Black Government remains web-only and manually approved. See [App Store and Google Play purchases](/help/payments-and-wallet/app-store-purchases).
 
 ## What each Blue plan gives you
 
-- **Blue Essential**: priority account recovery, impersonation protection, edit posts within 1 hour. No badge.
-- **Blue Verified**: the blue badge on your profile and posts, priority ranking in comments, longer clips (up to 10 minutes).
-- **Blue Premium**: everything in Blue Verified, no ads anywhere, a monthly boost credit, up to 5 business profiles, one Gold plan for all your businesses (up to 16% off) and priority support.
+- **Blue Basic**: Blue badge after verification approval, scheduled posts up to 90 days ahead, and configured reduced-ad load.
+- **Blue Premium**: the same Blue badge, zero platform-controlled ad inventory, scheduled posts up to 90 days ahead, and premium entitlements shown for your account.
+- **Gold Basic and Gold Premium**: Gold badge after business verification; Gold Premium includes its approved seller-workspace entitlements.
+- **Black Government**: reserved for manually approved government institutions; payment alone never grants the badge.
 
 ## Good to know
 
-Prices can change. We tell you before a renewal price changes, and the price shown at checkout is the one you pay. Other countries' prices: see [Prices by country](/help/payments-and-wallet/prices-by-country).
+Prices can change. Checkout shows the applicable price, discount, billing channel, renewal amount and date before you consent. Other countries: see [Prices by country](/help/payments-and-wallet/prices-by-country).

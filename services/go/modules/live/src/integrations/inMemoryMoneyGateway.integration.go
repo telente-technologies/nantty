@@ -11,18 +11,20 @@ import (
 )
 
 type InMemoryMoneyGateway struct {
-	mutex            sync.Mutex
-	Balances         map[string]int64
-	DefaultBalance   int64
-	CreatorShareBps  int64
-	Charges          map[string]interfaces.ChargedGift
-	chargeRequests   map[string]interfaces.ChargeGiftRequest
-	Settlements      map[string]interfaces.BattleSettlement
-	SettleCallCount  map[string]int
-	holdings         map[string]map[string]int64
-	GiftEarnedCoins  map[string]int64
-	battleGross      map[string]map[string]interfaces.BattleGiftTotal
-	FailSettlementOn bool
+	mutex                   sync.Mutex
+	Balances                map[string]int64
+	DefaultBalance          int64
+	CreatorShareBps         int64
+	Charges                 map[string]interfaces.ChargedGift
+	chargeRequests          map[string]interfaces.ChargeGiftRequest
+	Settlements             map[string]interfaces.BattleSettlement
+	SettleCallCount         map[string]int
+	holdings                map[string]map[string]int64
+	GiftEarnedCoins         map[string]int64
+	battleGross             map[string]map[string]interfaces.BattleGiftTotal
+	FailSettlementOn        bool
+	FailAfterSettlementOnce bool
+	SettlementHook          func()
 }
 
 func NewInMemoryMoneyGateway() *InMemoryMoneyGateway {

@@ -6,12 +6,12 @@ import type { PostView } from "../../../posts/models/post.model.js";
 import { postWithMedia } from "../../../posts/repositories/post.repository.js";
 import { buildPostViews } from "../../../posts/services/postView.service.js";
 import type { ListSoundClipsQuery } from "./listSoundClips.query.js";
-import { shownToViewers } from "../../../../constants/moderation.constant.js";
+import { publishedPostToViewers } from "../../../../constants/moderation.constant.js";
 
 export function createListSoundClipsHandler(context: HandlerContext): Handler<ListSoundClipsQuery, Page<PostView>> {
   return async ({ viewerId, soundId, cursor, limit }) => {
     const rows = await context.database.client.post.findMany({
-      where: { soundId, kind: "clip", ...shownToViewers, audience: "everyone" }, orderBy: { id: "desc" }, take: limit + 1, include: postWithMedia,
+      where: { soundId, kind: "clip", ...publishedPostToViewers, audience: "everyone" }, orderBy: { id: "desc" }, take: limit + 1, include: postWithMedia,
       ...(cursor === undefined ? {} : { cursor: { id: cursor }, skip: 1 }),
     });
     const page = buildPageFromOverfetchedRows(rows, limit);

@@ -1,4 +1,4 @@
-import type { HttpRouterContext } from "@zudojs/http";
+import type { HttpRouterContext } from "@nantty/fastify-platform";
 
 import type { Clock } from "../../../interfaces/clock.interface.js";
 import type { TicketStore } from "../../../interfaces/ticketStore.interface.js";

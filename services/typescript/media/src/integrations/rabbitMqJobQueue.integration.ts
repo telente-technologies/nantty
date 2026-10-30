@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import { jobsExchange, maximumDeliveryAttempts, retryExchange } from "../constants/rabbitMq.constant.js";
 import type { Job, JobHandlers, JobQueue } from "../interfaces/jobQueue.interface.js";

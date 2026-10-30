@@ -1,4 +1,4 @@
-import type { HttpRouter } from "@zudojs/http";
+import type { FastifyInstance } from "fastify";
 
 import type { HandlerContext } from "../../types/handlerContext.type.js";
 import type { RouteFactory } from "../../utils/route.util.js";
@@ -12,8 +12,8 @@ import { createGetAudioFingerprintHandler } from "./queries/getAudioFingerprint/
 import { createGetInternalMediaHandler } from "./queries/getInternalMedia/getInternalMedia.handler.js";
 import { registerInternalRoutes } from "./routes/internal.routes.js";
 
-export function mountInternalModule(router: HttpRouter, route: RouteFactory, context: HandlerContext): void {
-  registerInternalRoutes(router, createInternalController(route, {
+export function mountInternalModule(app: FastifyInstance, route: RouteFactory, context: HandlerContext): void {
+  registerInternalRoutes(app, createInternalController(route, {
     createUploadIntent: createCreateUploadIntentHandler(context),
     getInternalMedia: createGetInternalMediaHandler(context),
     createPrivateAccessUrl: createCreatePrivateAccessUrlHandler(context),

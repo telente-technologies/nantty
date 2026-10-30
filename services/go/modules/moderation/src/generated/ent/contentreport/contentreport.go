@@ -110,6 +110,7 @@ const (
 	TargetTypeComment TargetType = "comment"
 	TargetTypeClip    TargetType = "clip"
 	TargetTypeLive    TargetType = "live"
+	TargetTypeSpace   TargetType = "space"
 	TargetTypeProduct TargetType = "product"
 	TargetTypeStore   TargetType = "store"
 	TargetTypeSound   TargetType = "sound"
@@ -123,7 +124,7 @@ func (tt TargetType) String() string {
 // TargetTypeValidator is a validator for the "target_type" field enum values. It is called by the builders before save.
 func TargetTypeValidator(tt TargetType) error {
 	switch tt {
-	case TargetTypePost, TargetTypeComment, TargetTypeClip, TargetTypeLive, TargetTypeProduct, TargetTypeStore, TargetTypeSound, TargetTypeUser:
+	case TargetTypePost, TargetTypeComment, TargetTypeClip, TargetTypeLive, TargetTypeSpace, TargetTypeProduct, TargetTypeStore, TargetTypeSound, TargetTypeUser:
 		return nil
 	default:
 		return fmt.Errorf("contentreport: invalid enum value for target_type field: %q", tt)

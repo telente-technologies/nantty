@@ -133,6 +133,14 @@ defmodule RealtimeWeb.ClientSocketTest do
     assert {:ok, _} = ClientSocket.handle_info({:conversation_fanout, "c-1", payload}, state)
   end
 
+  test "one-off conversation fan-out rechecks current membership before delivery", %{jwk: jwk} do
+    state = authenticated(jwk, "acc-fan-authz")
+    payload = %{"type" => "message.created", "conversationId" => "c-other"}
+
+    assert {:ok, ^state} =
+             ClientSocket.handle_info({:conversation_fanout, "c-other", payload}, state)
+  end
+
   test "enforcement closes the matching session or every session", %{jwk: jwk} do
     state = authenticated(jwk, "acc-enf", "sid-a")
 

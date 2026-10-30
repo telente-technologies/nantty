@@ -1,11 +1,11 @@
-import { shownToViewers } from "../../../constants/moderation.constant.js";
+import { publishedPostToViewers } from "../../../constants/moderation.constant.js";
 import type { Prisma } from "../../../generated/prisma/client.js";
 import type { Db } from "../../../types/database.type.js";
 import { postWithMedia, type PostRow } from "../../posts/repositories/post.repository.js";
 
 export const quoteCandidateLimit = 300;
 
-const quotesOf = (postId: string) => ({ resharedFromId: postId, isQuote: true, kind: "post" as const, ...shownToViewers });
+const quotesOf = (postId: string) => ({ resharedFromId: postId, isQuote: true, kind: "post" as const, ...publishedPostToViewers });
 
 export const conversationQuotesRepository = {
   rankingCandidates: (db: Db, postId: string): Promise<PostRow[]> =>

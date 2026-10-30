@@ -64,8 +64,29 @@ type CoinPurchase struct {
 	// ReviewNote holds the value of the "review_note" field.
 	ReviewNote string `json:"review_note,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt    time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the CoinPurchaseQuery when eager-loading is set.
+	Edges        CoinPurchaseEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// CoinPurchaseEdges holds the relations/edges for other nodes in the graph.
+type CoinPurchaseEdges struct {
+	// Chargebacks holds the value of the chargebacks edge.
+	Chargebacks []*CoinPurchaseChargeback `json:"chargebacks,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// ChargebacksOrErr returns the Chargebacks value or an error if the edge
+// was not loaded in eager-loading.
+func (e CoinPurchaseEdges) ChargebacksOrErr() ([]*CoinPurchaseChargeback, error) {
+	if e.loadedTypes[0] {
+		return e.Chargebacks, nil
+	}
+	return nil, &NotLoadedError{edge: "chargebacks"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -261,6 +282,11 @@ func (_m *CoinPurchase) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *CoinPurchase) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryChargebacks queries the "chargebacks" edge of the CoinPurchase entity.
+func (_m *CoinPurchase) QueryChargebacks() *CoinPurchaseChargebackQuery {
+	return NewCoinPurchaseClient(_m.config).QueryChargebacks(_m)
 }
 
 // Update returns a builder for updating this CoinPurchase.

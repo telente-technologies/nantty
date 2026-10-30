@@ -51,7 +51,7 @@ describe("seeded help content", async () => {
     expect((await store.findTopicById(edited!.id))?.bodyMarkdown).toBe("Edited by staff with care.");
   });
 
-  it("moves legacy help addresses onto canonical slugs without replacing existing topics", async () => {
+  it("preserves canonical topic identities and staff edits during reseeding", async () => {
     const store = new InMemoryHelpContentStore();
     const article = articles.find((entry) => entry.slug === "what-is-nantty")!;
     const category = await store.createCategory({ ...helpCategorySeeds.find((entry) => entry.slug === article.categorySlug)!, position: 0 });
@@ -60,7 +60,7 @@ describe("seeded help content", async () => {
     expect(await seedHelpContent(store, [article], silentLogger)).toEqual({ created: 0, updated: 0 });
     const moved = await store.findTopicBySlug("what-is-nantty", "en");
     expect(moved).toMatchObject({ id: oldTopic.id, seedKey: "getting-started/what-is-nantty", editedByStaff: true, bodyMarkdown: "Staff edited this topic with more detail.", updatedByName: "Tolu" });
-    expect(await store.findTopicBySlug("what-is-nantty", "en")).toBeNull();
+    expect(await store.findTopicBySlug("what-is-nantty", "en")).toMatchObject({ id: oldTopic.id });
 
     const owed = articles.find((entry) => entry.slug === "owed-to-nantty")!;
     const payments = await store.createCategory({ ...helpCategorySeeds.find((entry) => entry.slug === owed.categorySlug)!, position: 1 });

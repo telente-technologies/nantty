@@ -83,6 +83,7 @@ func StartWalletModuleWithSettings(ctx context.Context, settings configs.WalletS
 		return nil, err
 	}
 	payments.RegisterPaymentPurposeHandler(paymentconstants.PurposeCoinPurchase, module.Coins.Purchases)
+	payments.RegisterProviderDisputeHandler(paymentconstants.PurposeCoinPurchase, module.Coins.Purchases)
 	payments.RegisterStoreRefundHandler(paymentconstants.PurposeCoinPurchase, module.Coins.Purchases)
 	payments.RegisterTransferOutcomeHandler(paymentconstants.PurposeWithdrawal, module.Payouts.Withdrawals)
 	payments.RegisterTransferOutcomeHandler(paymentconstants.PurposeCreatorEarnings, module.Payouts.Creators)

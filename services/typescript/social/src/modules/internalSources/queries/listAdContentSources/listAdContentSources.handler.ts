@@ -1,4 +1,5 @@
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
+import { publishedPostToViewers } from "../../../../constants/moderation.constant.js";
 import type { PostRow } from "../../../posts/repositories/post.repository.js";
 import type { AdContentMedia, AdContentSource, CursorPage } from "../../models/internalSources.model.js";
 import type { ListAdContentSourcesQuery } from "./listAdContentSources.query.js";
@@ -39,7 +40,7 @@ export function createListAdContentSourcesHandler(context: HandlerContext): Hand
     const rows = await context.database.client.post.findMany({
       where: {
         authorId: ownerUserId,
-        deletedAt: null,
+        ...publishedPostToViewers,
         kind: type === undefined ? { in: ["post", "clip"] } : type,
         resharedFromId: null,
         ...(search === undefined || search === "" ? {} : { text: { contains: search, mode: "insensitive" as const } }),

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { parseClamAvResponse } from "../../src/integrations/clamAvTcpScanner.integration.js";
 import { createHttpModerationClient } from "../../src/integrations/httpModerationClient.integration.js";
-import { decideModerationFromScore, evaluateModeration } from "../../src/modules/assets/services/moderationPolicy.service.js";
+import { decideModerationFromScore, evaluateModeration, uninspectableModerationOutcome } from "../../src/modules/assets/services/moderationPolicy.service.js";
 
 describe("clamd responses", () => {
   it("maps OK and FOUND answers", () => {
@@ -21,6 +21,10 @@ describe("moderation policy", () => {
     expect(decideModerationFromScore(0.5, thresholds)).toBe("hold");
     expect(decideModerationFromScore(0.96, thresholds)).toBe("hold");
     expect(decideModerationFromScore(0.97, thresholds)).toBe("reject");
+  });
+
+  it.each(["audio", "document"] as const)("holds %s because the configured classifier accepts image frames only", (kind) => {
+    expect(uninspectableModerationOutcome(kind)).toEqual({ decision: "hold", score: null, category: `uninspectable_${kind}`, degraded: true });
   });
 
   it("fails closed when no classifier is configured unless policy explicitly allows it", async () => {

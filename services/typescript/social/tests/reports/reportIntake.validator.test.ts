@@ -19,7 +19,7 @@ function fakeDb(rows: { readonly post?: { authorId: string } | null; readonly co
 
 describe("report intake validator", () => {
   it("accepts product, store and sound targets", () => {
-    for (const targetType of ["product", "store", "sound"]) {
+    for (const targetType of ["product", "store", "sound", "space"]) {
       expect(submitReportBodySchema.safeParse({ targetType, targetId: postId, reason: "scam" }).success).toBe(true);
     }
   });
@@ -52,5 +52,7 @@ describe("report target checks", () => {
     await expect(assertReportableBy(fakeDb({ post: null }), reporterId, { targetType: "clip", targetId: postId, reportedUserId: undefined })).rejects.toMatchObject({ status: 404 });
     await expect(assertReportableBy(fakeDb({ post: { authorId: ownerId } }), reporterId, { targetType: "post", targetId: postId, reportedUserId: ownerId })).resolves.toBeUndefined();
     await expect(assertReportableBy(fakeDb({}), reporterId, { targetType: "store", targetId: postId, reportedUserId: undefined })).resolves.toBeUndefined();
+    await expect(assertReportableBy(fakeDb({}), reporterId, { targetType: "space", targetId: "not-a-uuid", reportedUserId: undefined })).rejects.toMatchObject({ status: 404 });
+    await expect(assertReportableBy(fakeDb({}), reporterId, { targetType: "space", targetId: postId, reportedUserId: undefined })).resolves.toBeUndefined();
   });
 });

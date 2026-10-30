@@ -8,7 +8,7 @@ export interface ShareCardSource {
 export function createHttpShareCardResolver(sources: { readonly commerce: ShareCardSource | undefined; readonly live: ShareCardSource | undefined }, timeoutMs = 2000): ShareCardResolver {
   return {
     async resolve(kind, id, viewerId) {
-      const source = kind === "live" ? sources.live : sources.commerce;
+      const source = kind === "live" || kind === "space" ? sources.live : sources.commerce;
       if (source === undefined || source.baseUrl === "") return null;
       try {
         const url = new URL(`/api/v1/internal/share-cards/${kind}/${encodeURIComponent(id)}?viewerId=${encodeURIComponent(viewerId)}`, source.baseUrl);

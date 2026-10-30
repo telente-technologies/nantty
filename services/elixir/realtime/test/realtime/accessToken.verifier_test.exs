@@ -57,6 +57,10 @@ defmodule Realtime.Auth.AccessTokenVerifierTest do
   test "accepts only realtime-scoped socket tokens, never session access or widget tokens", %{
     private_jwk: jwk
   } do
+    # This dedicated audience matches services/go/platform/jwtauth/realtimeToken.go.
+    assert Keyword.fetch!(Application.fetch_env!(:realtime, :access_token), :audience) ==
+             "nantty-realtime"
+
     assert {:error, _} =
              AccessTokenVerifier.verify_access_token_and_extract_principal(
                sign(jwk, %{"aud" => ["nantty-api"], "scope" => nil})

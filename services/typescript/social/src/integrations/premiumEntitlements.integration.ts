@@ -3,6 +3,7 @@ import type { PremiumEntitlements } from "../interfaces/premiumEntitlements.inte
 export const noPremiumEntitlements: PremiumEntitlements = {
   isPremium: async () => false,
   hasSubscribedToCreator: async () => false,
+  canSchedulePosts: async () => false,
 };
 
 const cacheMilliseconds = 60_000;
@@ -10,6 +11,7 @@ const cacheMilliseconds = 60_000;
 interface EntitlementResponse {
   readonly premium?: boolean;
   readonly subscribedToCreator?: boolean;
+  readonly canSchedulePosts?: boolean;
 }
 
 export function createHttpPremiumEntitlements(source: { readonly baseUrl: string; readonly internalToken: string }, now: () => number = Date.now, timeoutMs = 2000): PremiumEntitlements {
@@ -35,5 +37,18 @@ export function createHttpPremiumEntitlements(source: { readonly baseUrl: string
   return {
     isPremium: (accountId) => cached(`premium:${accountId}`, async () => (await lookup(accountId, undefined)).premium === true),
     hasSubscribedToCreator: (viewerId, creatorId) => cached(`creator:${viewerId}:${creatorId}`, async () => (await lookup(viewerId, creatorId)).subscribedToCreator === true),
+    canSchedulePosts: async (accountId, profileId) => {
+      try {
+        const url = new URL(`/api/v1/internal/entitlements/${encodeURIComponent(accountId)}`, source.baseUrl);
+        url.searchParams.set("includeScheduling", "true");
+        if (profileId !== undefined) url.searchParams.set("profileId", profileId);
+        const response = await fetch(url, { headers: { "x-internal-token": source.internalToken }, signal: AbortSignal.timeout(timeoutMs) });
+        if (!response.ok) return false;
+        const entitlements = (await response.json()) as EntitlementResponse;
+        return entitlements.canSchedulePosts === true;
+      } catch {
+        return false;
+      }
+    },
   };
 }

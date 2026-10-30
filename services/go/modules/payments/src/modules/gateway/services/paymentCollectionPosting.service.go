@@ -12,6 +12,20 @@ import (
 	"nantty/modules/payments/src/modules/gateway/models"
 )
 
+func validProviderFee(feeMinor, amountMinor int64) bool {
+	return feeMinor >= 0 && amountMinor > 0 && feeMinor <= amountMinor
+}
+
+func validProviderFeeForIntent(intent *ent.PaymentIntent, feeMinor, amountMinor int64) bool {
+	if intent == nil || !validProviderFee(feeMinor, amountMinor) || amountMinor != intent.AmountMinor {
+		return false
+	}
+	if IsConnectedAccountCharge(intent) {
+		return intent.PlatformFeeMinor >= 0 && intent.PlatformFeeMinor <= amountMinor && feeMinor <= amountMinor-intent.PlatformFeeMinor
+	}
+	return true
+}
+
 func IsConnectedAccountCharge(intent *ent.PaymentIntent) bool {
 	return intent.ConnectedAccountID != "" && intent.BeneficiaryUserID != ""
 }

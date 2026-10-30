@@ -90,6 +90,21 @@ func TestCreatorApplicationNeedsInputAndAdminReviewQueueDecides(t *testing.T) {
 	harness.waitForPublishedEvents("creatorApplication.needsReview", "creatorApplication.approved", "creatorApplication.decided")
 }
 
+func TestEligibleCreatorCanApplyWithoutPayoutAccountAndIsHeldForManualReview(t *testing.T) {
+	harness := startUsersModuleAgainstFreshSchema(t)
+	_, token := harness.newAccount("creator.without.payout", "Creator Without Payout")
+	harness.putSignals(harness.profileIdOf(token), map[string]any{"realFollowers": 1500, "originalPostsLast60Days": 12, "daysSinceLastViolation": 400, "fraudScore": 10})
+	application := harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{
+		"contentCategories": []string{"education"}, "acceptedCreatorTermsVersion": "1",
+	}, http.StatusCreated)
+	if application["status"] != "PENDING" || application["decision"] != "manual_review" {
+		t.Fatalf("an eligible applicant without a payout account must be manually reviewed: %v", application)
+	}
+	if application["decisionNote"] != "Your application will be reviewed by our team. You can add a payout account later; earnings remain in your creator balance until one is available." {
+		t.Fatalf("application should explain the payout requirement is deferred: %v", application)
+	}
+}
+
 func TestCheckmarkRulesFollowTheProfileTypeAndLifetimeGrantsRespectThem(t *testing.T) {
 	harness := startUsersModuleAgainstFreshSchema(t)
 	_, personalToken := harness.newAccount("blue.person", "Blue Person")

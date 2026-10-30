@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import { helpCategorySeeds } from "../constants/helpCategories.constant.js";
 import { legacyHelpTopicSlugs } from "../constants/helpTopicSlugAliases.constant.js";

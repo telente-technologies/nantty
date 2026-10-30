@@ -5,7 +5,7 @@ tags: cancel checkmark, cancel verification, renew, renewal, auto renew, subscri
 related: checkmark-prices, manage-subscriptions, app-store-purchases, checkmarks-explained, checkmark-rejected, verification-faq
 ---
 
-Blue, Gold and Black plans are subscriptions. They renew each month or year until you cancel.
+Where checkout offers a recurring plan, its billing interval, renewal amount, cancellation method and effective dates are shown before purchase. Black Government is not publicly self-serve. The legacy plan catalogue and in-app purchase implementation are still being aligned with the canonical Blue/Gold/Black model; use account billing settings as the authority.
 
 ## How to cancel
 
@@ -24,17 +24,17 @@ You'll see **Cancelled — your badge stays until** the date your period ends. Y
 ## Renewals
 
 - The Verification screen shows **Renews** and the date.
-- If a renewal payment fails, we retry 1, 3 and 5 days after the due date, then keep your plan for a short grace period. If it still isn't paid, the plan ends and the checkmark is removed.
-- Government (Black) plans get a 14-day grace period.
-- We tell you before a renewal price changes.
+- Failed-payment retry and grace behavior depends on the active billing channel and current subscription state; check the billing screen and provider receipt.
+- Do not assume a Black Government grace period: government pricing and recurring billing remain subject to approval and provider capability.
+- Any renewal price-change notice and effective date should be disclosed through the applicable billing channel before taking effect.
 
 ## Free trials
 
-Blue Premium, Gold, Gold Pro and Gold Business can come with a 7-day free trial. Trials need a verified email, an account at least 7 days old, and are limited to one per person, card and device.
+Trial eligibility and duration are conditional. A trial is offered only when shown in checkout; requirements and any card authorization are displayed there.
 
 ## Good to know
 
-- Cancelling doesn't refund the current period; you keep the badge and perks until it ends.
+- Cancellation and refund treatment follow the purchase channel and terms displayed at purchase; do not assume a refund or access-through-period-end without checking the subscription status.
 - Changed your mind? Before the period ends you can resume instead of subscribing again.
 - To pay for your plan with a different card, manage it on the web. See [Managing your subscriptions](/help/payments-and-wallet/manage-subscriptions).
 

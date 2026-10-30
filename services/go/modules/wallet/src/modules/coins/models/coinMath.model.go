@@ -66,6 +66,21 @@ func SplitCoinClawback(spendableBalance, purchasedCoins int64) CoinClawback {
 	return CoinClawback{RecoveredCoins: recovered, ShortfallCoins: purchasedCoins - recovered}
 }
 
+// ProportionalCoinChargeback returns the cumulative coin clawback target for a
+// cumulative fiat chargeback amount. Flooring each dispute independently would
+// lose fractional progress, so callers must pass the cumulative fiat amount.
+func ProportionalCoinChargeback(cumulativeAmount, purchaseCoins, purchaseAmount int64) (int64, error) {
+	if cumulativeAmount < 0 || purchaseCoins <= 0 || purchaseAmount <= 0 || cumulativeAmount > purchaseAmount {
+		return 0, ErrCoinAmountOutOfRange
+	}
+	if cumulativeAmount == purchaseAmount {
+		return purchaseCoins, nil
+	}
+	high, low := bits.Mul64(uint64(cumulativeAmount), uint64(purchaseCoins))
+	quotient, _ := bits.Div64(high, low, uint64(purchaseAmount))
+	return int64(quotient), nil
+}
+
 func CoinsForChannelPrice(priceMinor, channelFeeBps, netValuePerCoinMinor int64) (int64, error) {
 	if priceMinor <= 0 || netValuePerCoinMinor <= 0 || channelFeeBps < 0 || channelFeeBps >= 10_000 {
 		return 0, ErrCoinAmountOutOfRange

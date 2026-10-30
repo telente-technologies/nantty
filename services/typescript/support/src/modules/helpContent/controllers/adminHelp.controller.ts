@@ -1,4 +1,4 @@
-import type { HttpRouterContext } from "@zudojs/http";
+import type { HttpRouterContext } from "@nantty/fastify-platform";
 
 import { autoFaqRequiresReviewSettingKey, defaultPageSize, maximumPageSize } from "../../../constants/support.constant.js";
 import type { HelpTopicOrigin, HelpTopicStatus } from "../../../enums/helpTopic.enum.js";

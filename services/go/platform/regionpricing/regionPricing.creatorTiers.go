@@ -73,8 +73,11 @@ func GrossUpForStoreFee(webMinor, feeBps int64, currency string) int64 {
 	if webMinor <= 0 || feeBps <= 0 || feeBps >= 10_000 {
 		return webMinor
 	}
-	grossed := (webMinor*10_000 + (10_000 - feeBps) - 1) / (10_000 - feeBps)
-	return RoundToPricePoint(grossed, strings.ToUpper(currency))
+	grossed, err := GrossUpForFees(webMinor, 0, []int64{feeBps}, strings.ToUpper(currency))
+	if err != nil {
+		return webMinor
+	}
+	return grossed
 }
 
 var creatorIntervalSuffix = map[string]string{"month": "monthly", "year": "yearly"}

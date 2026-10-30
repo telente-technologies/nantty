@@ -28,7 +28,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	reason, known := services.NormalizeReason(command.Reason)
 	switch {
 	case !slices.Contains(services.ContentTargetTypes, command.TargetType):
-		return Result{}, invalid("targetType", "must be post, comment, clip, live, product, store or sound")
+		return Result{}, invalid("targetType", "must be post, comment, clip, live, space, product, store or sound")
 	case !known:
 		return Result{}, invalid("reason", "is not a known reason")
 	case strings.TrimSpace(command.TargetId) == "" || len(command.TargetId) > 128 || len(command.Details) > 500:

@@ -15,7 +15,7 @@ export interface EncryptedDocumentView {
 }
 
 export interface SharedContentReference {
-  readonly kind: "post" | "clip" | "story" | "product" | "live" | "store" | "profile" | "order";
+  readonly kind: "post" | "clip" | "story" | "product" | "live" | "space" | "store" | "profile" | "order";
   readonly id: string;
 }
 

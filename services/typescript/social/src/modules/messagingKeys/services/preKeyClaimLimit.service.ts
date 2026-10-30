@@ -1,4 +1,4 @@
-import { createLogger } from "@zudojs/logger";
+import { createLogger } from "@nantty/fastify-platform";
 
 import { tooManyRequests } from "../../../errors/social.error.js";
 import type { Db } from "../../../types/database.type.js";

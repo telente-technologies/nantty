@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import type { IdentityReadClient } from "../databases/identityRead.database.js";
 import type { CheckmarkColor, IdentityDirectory, MentionTargetStatus, UserSummary, WhoCanMentionMe } from "../interfaces/identityDirectory.interface.js";

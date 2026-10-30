@@ -22,17 +22,17 @@ related: sensitive-content-and-age, privacy-settings, checkmarks-explained, expl
 
 ## Boosts we disclose
 
-Accounts with a checkmark get a small ranking boost, like the one X gives Premium subscribers. The boost multiplies a post's score and has a fixed upper limit:
+Accounts with an active eligible checkmark/plan may receive the configured ranking multiplier. The current source defaults and hard caps are below; staff may lower the setting, and this is a ranking input, not a guarantee of reach:
 
 | Account | Upper limit |
 | --- | --- |
-| Black checkmark (government) | up to 15% |
-| Gold checkmark (business) | up to 12% |
-| Premium | up to 10% |
-| Blue checkmark (Verified) | up to 8% |
-| Blue Essential | up to 5% |
+| Black Official (government; legacy code) | 10% default; 15% hard cap |
+| Gold Business (legacy Gold Premium candidate) | 8% default; 12% hard cap |
+| Blue Premium | 6% default; 10% hard cap |
+| Blue Verified (legacy Blue Basic candidate) | 4% default; 8% hard cap |
+| Blue Essential (legacy) | 2% default; 5% hard cap |
 
-The order is always Black ≥ Gold ≥ Premium ≥ Blue Verified ≥ Blue Essential.
+The source-enforced order is always Black Official ≥ Gold Business ≥ Blue Premium ≥ Blue Verified ≥ Blue Essential. These legacy internal tier names are still present in code and are not the final canonical subscription catalogue.
 
 **Official** accounts are accounts Nantty created for public bodies, brands or our own teams and gave a checkmark. They show an **Official** label and get an extra editorial boost of up to 15%, so their important updates can trend. Together with the checkmark boost this can never go above 25%.
 

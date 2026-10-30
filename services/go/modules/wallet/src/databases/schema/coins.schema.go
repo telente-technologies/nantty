@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
@@ -83,6 +84,49 @@ func (CoinPurchase) Fields() []ent.Field {
 
 func (CoinPurchase) Indexes() []ent.Index {
 	return []ent.Index{index.Fields("reference").Unique(), index.Fields("user_id", "created_at"), index.Fields("review_status", "id").Annotations(entsql.DescColumns("id"))}
+}
+
+func (CoinPurchase) Edges() []ent.Edge {
+	return []ent.Edge{edge.To("chargebacks", CoinPurchaseChargeback.Type).Immutable()}
+}
+
+// CoinPurchaseChargeback records each final provider loss notice applied to a
+// coin purchase. The provider/dispute pair is the idempotency key; purchase
+// rows are locked while cumulative fiat and coin clawbacks are calculated.
+type CoinPurchaseChargeback struct {
+	ent.Schema
+}
+
+func (CoinPurchaseChargeback) Annotations() []schema.Annotation {
+	return []schema.Annotation{entsql.Checks(map[string]string{
+		"coin_purchase_chargebacks_amounts_valid": "amount_minor > 0 AND coins_clawed >= 0",
+	})}
+}
+
+func (CoinPurchaseChargeback) Mixin() []ent.Mixin {
+	return []ent.Mixin{TimeOrderedIdentifierMixin{}}
+}
+
+func (CoinPurchaseChargeback) Fields() []ent.Field {
+	return []ent.Field{
+		field.UUID("purchase_id", uuid.UUID{}).Immutable(),
+		field.String("provider").NotEmpty().MaxLen(40).Immutable(),
+		field.String("provider_dispute_id").NotEmpty().MaxLen(120).Immutable(),
+		field.Int64("amount_minor").Immutable(),
+		field.Int64("coins_clawed").Default(0),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+	}
+}
+
+func (CoinPurchaseChargeback) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("provider", "provider_dispute_id").Unique(),
+		index.Fields("purchase_id", "created_at"),
+	}
+}
+
+func (CoinPurchaseChargeback) Edges() []ent.Edge {
+	return []ent.Edge{edge.From("purchase", CoinPurchase.Type).Ref("chargebacks").Field("purchase_id").Required().Unique().Immutable()}
 }
 
 type CoinTransfer struct {

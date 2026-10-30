@@ -38,7 +38,7 @@ func NewHttpTargetResolver(sources map[string]configs.InternalSource) HttpTarget
 }
 
 var ownerServiceByTargetType = map[string]string{
-	"post": "social", "comment": "social", "clip": "social", "sound": "social", "user": "social", "product": "commerce", "store": "commerce", "live": "live",
+	"post": "social", "comment": "social", "clip": "social", "sound": "social", "user": "social", "product": "commerce", "store": "commerce", "live": "live", "space": "live",
 }
 
 func (resolver HttpTargetResolver) Resolve(ctx context.Context, targetType, targetId string) (*TargetPreview, error) {

@@ -21,6 +21,27 @@ describe("http premium entitlements", () => {
     expect(await entitlements.isPremium("b")).toBe(false);
     vi.unstubAllGlobals();
   });
+
+  it("checks paid scheduling for the exact profile without caching and fails closed", async () => {
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const url = new URL(String(input));
+      return new Response(JSON.stringify({ canSchedulePosts: url.searchParams.get("profileId") === "business-profile" }), { status: 200 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const entitlements = createHttpPremiumEntitlements({ baseUrl: "http://money.internal", internalToken: "internal-token" });
+
+    expect(await entitlements.canSchedulePosts("owner", "business-profile")).toBe(true);
+    expect(await entitlements.canSchedulePosts("owner", "other-profile")).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const requested = new URL(String(fetchMock.mock.calls[0]?.[0]));
+    expect(requested.pathname).toBe("/api/v1/internal/entitlements/owner");
+    expect(requested.searchParams.get("includeScheduling")).toBe("true");
+    expect(requested.searchParams.get("profileId")).toBe("business-profile");
+
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("money service unavailable"); }));
+    expect(await entitlements.canSchedulePosts("owner", "business-profile")).toBe(false);
+    vi.unstubAllGlobals();
+  });
 });
 
 describe("post analytics days", () => {

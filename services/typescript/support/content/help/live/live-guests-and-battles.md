@@ -2,7 +2,7 @@
 title: Guests and battles
 summary: Bring up to 9 guests on stage with you and run timed gift battles between the streamers on stage.
 tags: guest, multi-guest, battle, pk, winner takes all, join stage, co-host
-related: gifts-and-coins-on-live, going-live, supporters-leaderboard, nanttypoints, live-faq
+related: gifts-and-coins-on-live, going-live, supporters-leaderboard, nantty-points, live-faq
 ---
 
 Lives can have up to 10 people on stage: the host plus 9 guests. Streamers on stage can then battle for gifts.

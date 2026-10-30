@@ -31,7 +31,7 @@ func (settings EscrowSettings) UndeliveredReleaseWindow() time.Duration {
 func ReadEscrowSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) EscrowSettings {
 	settings := EscrowSettings{
 		Money:                    loaders.ReadMoneyModuleSettingsFromEnvironment(reader, "escrow"),
-		PlatformCommissionBps:    int64(reader.ReadIntegerOrDefault("ESCROW_FEE_BPS", 150)),
+		PlatformCommissionBps:    int64(reader.ReadIntegerOrDefault("ESCROW_FEE_BPS", 0)),
 		InternalApiToken:         reader.ReadStringOrDefault("MONEY_INTERNAL_API_TOKEN", ""),
 		InspectionPeriod:         reader.ReadDurationOrDefault("ESCROW_INSPECTION_PERIOD", 72*time.Hour),
 		SellerResponseWindow:     reader.ReadDurationOrDefault("ESCROW_SELLER_RESPONSE_WINDOW", 48*time.Hour),

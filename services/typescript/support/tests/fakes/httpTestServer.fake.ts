@@ -1,4 +1,4 @@
-import { HttpMiddlewarePipeline, createHttpServer, createNodeHttpAdapter, createResponseContext, type HttpRequestContext } from "@zudojs/http";
+import { HttpMiddlewarePipeline, createHttpServer, createNodeHttpAdapter, createResponseContext, type HttpRequestContext } from "@nantty/fastify-platform";
 import { SignJWT, generateKeyPair, type JWTVerifyGetKey } from "jose";
 
 import { createJwtStaffAuthenticator } from "../../src/middlewares/staffAuth.middleware.js";

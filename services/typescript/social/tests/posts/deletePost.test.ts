@@ -125,6 +125,15 @@ describe("delete post", () => {
     expect(store.events[0]?.data).toMatchObject({ quotedPostId: originalId });
   });
 
+  it("deleting a scheduled quote has no public deletion event or quote-counter effect", async () => {
+    const store = createStore({ publicationState: "scheduled", scheduledAt: new Date("2026-10-05T12:00:00Z"), resharedFromId: originalId, isQuote: true });
+    await createDeletePostHandler(store.context)({ actorId: authorId, postId });
+    expect(store.post).toMatchObject({ deletedAt: new Date("2026-10-04T12:00:00Z"), publicationState: "cancelled", scheduledAt: null });
+    expect(store.original).toMatchObject({ repostCount: 1, quoteCount: 1 });
+    expect(store.events).toHaveLength(0);
+    expect(store.mediaCalls).toEqual([["m-1", "m-2"]]);
+  });
+
   it("deleting a post that others quote leaves the quotes in place", async () => {
     const store = createStore();
     store.posts.push({ ...buildPostRow({ id: "0192f0a0-0000-7000-8000-0000000000d3", authorId: viewerId }), resharedFromId: postId, isQuote: true, media: [] });

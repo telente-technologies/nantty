@@ -1,4 +1,4 @@
-import type { HttpRouterContext } from "@zudojs/http";
+import type { HttpRouterContext } from "@nantty/fastify-platform";
 
 import { accountIdHeaderName, ageBracketHeaderName } from "../constants/social.constant.js";
 import { unauthorized } from "../errors/social.error.js";

@@ -36,7 +36,7 @@ Prepare, ship and update each order. See [Orders and shipping](/help/selling/sel
 
 ## Step 7: Get paid
 
-When the buyer confirms (or 3 days after delivery), escrow money moves to your wallet, stays **Locked** for 24 hours, then becomes **Available to withdraw**. See [Seller payouts](/help/selling/seller-payouts) and [Fees and the escrow fee](/help/selling/fees-and-escrow-fee).
+When the buyer confirms (or 3 days after delivery), escrow money moves to your wallet, stays **Locked** for 24 hours, then becomes **Available to withdraw**. See [Seller payouts](/help/selling/seller-payouts) and [Seller fees](/help/selling/fees-and-escrow-fee).
 
 ## Step 8: Grow
 

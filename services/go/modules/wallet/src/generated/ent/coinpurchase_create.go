@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"nantty/modules/wallet/src/generated/ent/coinpurchase"
+	"nantty/modules/wallet/src/generated/ent/coinpurchasechargeback"
 	"time"
 
 	"entgo.io/ent/dialect"
@@ -278,6 +279,21 @@ func (_c *CoinPurchaseCreate) SetNillableID(v *uuid.UUID) *CoinPurchaseCreate {
 		_c.SetID(*v)
 	}
 	return _c
+}
+
+// AddChargebackIDs adds the "chargebacks" edge to the CoinPurchaseChargeback entity by IDs.
+func (_c *CoinPurchaseCreate) AddChargebackIDs(ids ...uuid.UUID) *CoinPurchaseCreate {
+	_c.mutation.AddChargebackIDs(ids...)
+	return _c
+}
+
+// AddChargebacks adds the "chargebacks" edges to the CoinPurchaseChargeback entity.
+func (_c *CoinPurchaseCreate) AddChargebacks(v ...*CoinPurchaseChargeback) *CoinPurchaseCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddChargebackIDs(ids...)
 }
 
 // Mutation returns the CoinPurchaseMutation object of the builder.
@@ -601,6 +617,23 @@ func (_c *CoinPurchaseCreate) createSpec() (*CoinPurchase, *sqlgraph.CreateSpec)
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(coinpurchase.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if nodes := _c.mutation.ChargebacksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   coinpurchase.ChargebacksTable,
+			Columns: []string{coinpurchase.ChargebacksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(coinpurchasechargeback.FieldID, field.TypeUUID),
+			},
+		}
+		edge.Schema = _c.schemaConfig.CoinPurchaseChargeback
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

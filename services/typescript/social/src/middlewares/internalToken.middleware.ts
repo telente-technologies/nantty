@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 
-import type { HttpResponseContext, HttpRouterContext } from "@zudojs/http";
+import type { HttpResponseContext, HttpRouterContext } from "@nantty/fastify-platform";
 
 import { json } from "../utils/http.util.js";
 

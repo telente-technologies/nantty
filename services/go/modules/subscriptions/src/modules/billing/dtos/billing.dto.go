@@ -1,5 +1,7 @@
 package dtos
 
+import "time"
+
 type CheckoutRequestDto struct {
 	ProfileId    string `json:"profileId"`
 	PlanCode     string `json:"planCode"`
@@ -29,6 +31,7 @@ type PriceRowRequestDto struct {
 	StoreProductIds           map[string]string `json:"storeProductIds"`
 	Active                    bool              `json:"active"`
 	Reason                    string            `json:"reason"`
+	EffectiveFrom             time.Time         `json:"effectiveFrom"`
 }
 
 type ChangePlanRequestDto struct {

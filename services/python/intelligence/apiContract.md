@@ -22,12 +22,16 @@ gets back and falls back to deterministic logic whenever Python is slow, down or
   account ids, event `actorId`): `u_` + the first 40 lowercase hex chars of
   `HMAC-SHA256(key, "user:" + rawUserId)`. Search queries: `q_` + 40 hex of `HMAC-SHA256(key, "query:" + q)`
   where `q` is NFKC-normalised, trimmed, lowercased and whitespace-collapsed. `key` is
-  `INTELLIGENCE_ID_HASH_SECRET` (UTF-8) when set, otherwise `HMAC-SHA256(INTELLIGENCE_SHARED_SECRET,
-  "nantty:intelligence:user-id-hash")` (raw 32 bytes), so every caller that signs requests can derive it.
+  `INTELLIGENCE_ID_HASH_SECRET` (UTF-8). Staging and production require this dedicated secret to be at least
+  32 characters; they never derive it from `INTELLIGENCE_SHARED_SECRET`. Development may derive a key from
+  the shared secret when the dedicated setting is omitted.
   Hashing is idempotent: a value already matching `^u_[0-9a-f]{40}$` is used unchanged. Python hashes the
   raw ids it receives in domain events with the same key, so features written from events and ids sent
   over HTTP line up. Risk, trust, bot, chat-spam, gift and value-flow endpoints keep raw account ids,
   because goTrust and the money services act on them.
+- Gift events forwarded from the domain-event bus retain only pseudonymous sender/creator ids and the coin
+  amount for value-flow processing. Gift identifiers, host-content identifiers, country and other personal
+  payload fields are not persisted in the intelligence event dataset.
 - Topic / hashtag slugs: `^[a-z0-9_\-]{1,64}$` (lowercase, no `#`). Max 20 per item.
 - Country: ISO 3166-1 alpha-2 uppercase (`NG`). Region: `^[A-Z0-9\-]{1,12}$` (e.g. `LA`, `NG-LA`).
 - Currency: ISO 4217 (`NGN`).

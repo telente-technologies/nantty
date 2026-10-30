@@ -84,6 +84,7 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "gift.sent": social.giftSent,
   "creatorSubscription.started": creatorMoney.creatorSubscriptionStarted,
   "tip.sent": creatorMoney.tipSent,
+  "spaceCoinGift.committed": creatorMoney.spaceCoinGiftCommitted,
   "adInvite.created": ads.adInviteCreated,
   "affiliateCommission.credited": creatorMoney.affiliateCommissionCredited,
   "live.started": social.liveStarted,

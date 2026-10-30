@@ -84,6 +84,7 @@ export class FakeMediaDatabase {
       },
     },
     outboxEvent: {
+      count: async () => this.outbox.length,
       createMany: async ({ data }: { data: Row[] }) => {
         this.outbox.push(...data);
       },

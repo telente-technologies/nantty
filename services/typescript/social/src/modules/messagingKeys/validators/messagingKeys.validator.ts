@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 import { maximumDevicesPerQuery, maximumOneTimePreKeysPerUpload } from "../repositories/deviceKey.repository.js";
 import { maximumMailboxCiphertextLength, maximumMailboxEntriesPerDeposit } from "../repositories/keyMailbox.repository.js";

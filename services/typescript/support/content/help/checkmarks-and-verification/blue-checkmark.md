@@ -1,6 +1,6 @@
 ---
 title: The Blue checkmark
-summary: Blue is for people and creators. Check you qualify, buy Blue Verified or Blue Premium, then confirm your identity with a selfie and ID.
+summary: Blue is for eligible personal accounts and creators. A paid plan does not grant the badge without identity approval.
 tags: blue checkmark, blue tick, blue badge, verified badge, get verified, blue verified, premium badge
 related: checkmarks-explained, checkmark-prices, identity-check, checkmark-rejected, premium, verification-faq
 ---
@@ -9,22 +9,16 @@ The Blue checkmark shows your personal profile, or creator profile, really belon
 
 ## Who this is for
 
-Personal profiles, including creators. Business and brand profiles get Gold instead. You can apply when your email is verified, your account is at least 90 days old, you have at least 1,000 real followers, you post original content regularly and you've had no violations in the last 90 days.
+Blue is for eligible personal profiles, including creators. Businesses and brands use Gold; government institutions use Black after separate approval. Eligibility is assessed by the current verification workflow and policy. Do not rely on follower or account-age thresholds unless the application displays them for your account.
 
 ## How to get Blue
 
-1. Go to **Profile > More (top right) > Get verified**. On the web: **app.nantty.com > Settings > Verification**.
-2. Under **Blue: people**, compare the plans and tap **Get the blue badge**.
-3. If you qualify you'll see **You qualify** and a **Buy now** button. If not, tap **Request verification** and check the **What helps** list.
-4. Pay for **Blue Verified** or **Blue Premium**. You'll see **Payment received**.
-5. On **One last step: confirm it's you**, take a selfie and a photo of your ID. See [The selfie and ID check](/help/checkmarks-and-verification/identity-check).
-6. Once approved you'll see **You're verified** and the badge appears on your profile and posts.
+Open **Verification** from your profile or account settings. Review the plan, eligibility and requested identity evidence shown for your account. Payment and identity review are separate; the Blue badge appears only after approval.
 
 ## Which plan
 
-- **Blue Verified**: the blue badge, priority ranking in comments, longer clips up to 10 minutes.
-- **Blue Premium**: all of that plus no ads anywhere, a monthly boost credit and priority support.
-- **Blue Essential** protects your account but has no badge.
+- **Blue Basic** and **Blue Premium** use the same Blue badge. Premium changes entitlements, not the truth claim represented by the badge.
+- The legacy catalogue still contains `blue_essential` and `blue`; plan names/availability may change during migration. Security, recovery, privacy and appeals are not paywalled.
 
 See [Checkmark and plan prices by country](/help/checkmarks-and-verification/checkmark-prices).
 

@@ -23,6 +23,7 @@ import (
 	"nantty/modules/payments/src/container"
 	"nantty/modules/payments/src/integrations"
 	"nantty/modules/payments/src/interfaces"
+	paymentmigrations "nantty/modules/payments/src/migrations"
 	"nantty/modules/payments/src/repositories"
 	"nantty/platform/events"
 	"nantty/platform/health"
@@ -66,8 +67,9 @@ func startMoneyHarness(t *testing.T, storeVerifiers map[string]interfaces.StoreR
 		Dependencies: servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), Health: health.NewRegistryForService("money-test")},
 	}
 	harness.UsersSchema = createHarnessUsersSchema(t, database)
+	paymentsSchema := moneytesting.CreateFreshSchemaWithMigrations(t, database, "payments", paymentmigrations.Files)
 	settings := configs.PaymentsSettings{
-		Money:             moneytesting.MoneyModuleSettingsForTests("payments", moneytesting.CreateEmptySchema(t, database, "payments"), ledgerSchema),
+		Money:             moneytesting.MoneyModuleSettingsForTests("payments", paymentsSchema, ledgerSchema),
 		AllowedReturnUrls: []string{"https://nantty.test/pay/return", "https://app.nantty.test/pay/return"}, DefaultProvider: "flutterwave",
 		EscrowFeeBps: 150, BusinessEscrowFeeBps: 100, EscrowMode: "e2", CheckoutExpiryMinutes: 15, ConnectedAccountCountry: "NG", UsersSchema: harness.UsersSchema,
 		CheckoutChannels: []string{"card", "bank", "ussd", "bank_transfer"}, SubaccountBearsFee: true, CardVerificationAmount: 5000,

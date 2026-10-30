@@ -14,6 +14,14 @@ import (
 )
 
 func main() {
+	if len(os.Args) == 2 && os.Args[1] == "--migrate-money" {
+		if err := runMoneyMigrations(os.Getenv("MONEY_MIGRATION_DATABASE_URL")); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	err := servicemodule.RunDeployableWithModulesUntilTerminationSignal("go-money",
 		payments.NewPaymentsModule,
 		wallet.NewWalletModule,

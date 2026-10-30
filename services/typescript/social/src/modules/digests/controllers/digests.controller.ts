@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 
-import { schema } from "@zudojs/schema";
-import type { HttpRouterContext } from "@zudojs/http";
+import { schema } from "@nantty/fastify-platform";
+import type { HttpRouterContext } from "@nantty/fastify-platform";
 
 import { unauthorized } from "../../../errors/social.error.js";
 import { json } from "../../../utils/http.util.js";

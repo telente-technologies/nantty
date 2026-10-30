@@ -123,8 +123,8 @@ func defaultRevenueRules() RevenueRulesConfiguration {
 			{AmountMinor: 1, Currency: "GBP"}, {AmountMinor: 1, Currency: "EUR"}, {AmountMinor: 1, Currency: "USD"},
 		},
 	}
-	rules.WithdrawalFee.Mode, rules.WithdrawalFee.Note = "PASS_THROUGH", "Daily automatic payouts are free; any provider transfer fee is passed through at cost with no Nantty margin."
-	rules.EscrowFee.DefaultBasisPoints, rules.EscrowFee.BusinessPlanBasisPoints = 150, 100
+	rules.WithdrawalFee.Mode, rules.WithdrawalFee.Note = "PASS_THROUGH", "Any payment-provider withdrawal fee is passed through at cost with no Nantty margin."
+	rules.EscrowFee.DefaultBasisPoints, rules.EscrowFee.BusinessPlanBasisPoints = 0, 0
 	return rules
 }
 

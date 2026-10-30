@@ -10,6 +10,7 @@ import (
 	"nantty/modules/wallet/src/generated/ent/coinconversion"
 	"nantty/modules/wallet/src/generated/ent/coinpackage"
 	"nantty/modules/wallet/src/generated/ent/coinpurchase"
+	"nantty/modules/wallet/src/generated/ent/coinpurchasechargeback"
 	"nantty/modules/wallet/src/generated/ent/cointransfer"
 	"nantty/modules/wallet/src/generated/ent/idempotentrequest"
 	"nantty/modules/wallet/src/generated/ent/monetisationhold"
@@ -554,6 +555,65 @@ func init() {
 	coinpurchaseDescID := coinpurchaseMixinFields0[0].Descriptor()
 	// coinpurchase.DefaultID holds the default value on creation for the id field.
 	coinpurchase.DefaultID = coinpurchaseDescID.Default.(func() uuid.UUID)
+	coinpurchasechargebackMixin := schema.CoinPurchaseChargeback{}.Mixin()
+	coinpurchasechargebackMixinFields0 := coinpurchasechargebackMixin[0].Fields()
+	_ = coinpurchasechargebackMixinFields0
+	coinpurchasechargebackFields := schema.CoinPurchaseChargeback{}.Fields()
+	_ = coinpurchasechargebackFields
+	// coinpurchasechargebackDescCreatedAt is the schema descriptor for created_at field.
+	coinpurchasechargebackDescCreatedAt := coinpurchasechargebackMixinFields0[1].Descriptor()
+	// coinpurchasechargeback.DefaultCreatedAt holds the default value on creation for the created_at field.
+	coinpurchasechargeback.DefaultCreatedAt = coinpurchasechargebackDescCreatedAt.Default.(func() time.Time)
+	// coinpurchasechargebackDescProvider is the schema descriptor for provider field.
+	coinpurchasechargebackDescProvider := coinpurchasechargebackFields[1].Descriptor()
+	// coinpurchasechargeback.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	coinpurchasechargeback.ProviderValidator = func() func(string) error {
+		validators := coinpurchasechargebackDescProvider.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider string) error {
+			for _, fn := range fns {
+				if err := fn(provider); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// coinpurchasechargebackDescProviderDisputeID is the schema descriptor for provider_dispute_id field.
+	coinpurchasechargebackDescProviderDisputeID := coinpurchasechargebackFields[2].Descriptor()
+	// coinpurchasechargeback.ProviderDisputeIDValidator is a validator for the "provider_dispute_id" field. It is called by the builders before save.
+	coinpurchasechargeback.ProviderDisputeIDValidator = func() func(string) error {
+		validators := coinpurchasechargebackDescProviderDisputeID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider_dispute_id string) error {
+			for _, fn := range fns {
+				if err := fn(provider_dispute_id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// coinpurchasechargebackDescCoinsClawed is the schema descriptor for coins_clawed field.
+	coinpurchasechargebackDescCoinsClawed := coinpurchasechargebackFields[4].Descriptor()
+	// coinpurchasechargeback.DefaultCoinsClawed holds the default value on creation for the coins_clawed field.
+	coinpurchasechargeback.DefaultCoinsClawed = coinpurchasechargebackDescCoinsClawed.Default.(int64)
+	// coinpurchasechargebackDescUpdatedAt is the schema descriptor for updated_at field.
+	coinpurchasechargebackDescUpdatedAt := coinpurchasechargebackFields[5].Descriptor()
+	// coinpurchasechargeback.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	coinpurchasechargeback.DefaultUpdatedAt = coinpurchasechargebackDescUpdatedAt.Default.(func() time.Time)
+	// coinpurchasechargeback.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	coinpurchasechargeback.UpdateDefaultUpdatedAt = coinpurchasechargebackDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// coinpurchasechargebackDescID is the schema descriptor for id field.
+	coinpurchasechargebackDescID := coinpurchasechargebackMixinFields0[0].Descriptor()
+	// coinpurchasechargeback.DefaultID holds the default value on creation for the id field.
+	coinpurchasechargeback.DefaultID = coinpurchasechargebackDescID.Default.(func() uuid.UUID)
 	cointransferMixin := schema.CoinTransfer{}.Mixin()
 	cointransferMixinFields0 := cointransferMixin[0].Fields()
 	_ = cointransferMixinFields0

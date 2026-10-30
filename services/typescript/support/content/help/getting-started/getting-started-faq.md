@@ -35,7 +35,7 @@ In Nigeria, escrow keeps your money locked until you confirm delivery. Nantty ne
 
 ## Does Nantty take a cut of my sales?
 
-There's no commission on product sales. Sellers pay a small escrow fee on escrow orders plus payment processing. See [Fees and the escrow fee](/help/selling/fees-and-escrow-fee).
+Nantty's intended launch policy has no commission on product sales. Actual payment-provider processing and withdrawal fees are passed through at cost and disclosed before confirmation. See [Seller fees](/help/selling/fees-and-escrow-fee).
 
 ## How do creators earn?
 

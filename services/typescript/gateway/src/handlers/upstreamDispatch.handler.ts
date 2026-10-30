@@ -9,7 +9,7 @@ import type { StaffNetworkGate } from "../services/staffNetworkPolicy.service.js
 import { doesRequestNeedPolicyGate, type PolicyGateSource } from "../services/policyAcceptanceGate.service.js";
 import { isInternalOnlyPath } from "../services/internalRouteGuard.service.js";
 import { InMemoryRateLimitStore, type RateLimitStore } from "../services/rateLimitStore.service.js";
-import { buildRouteRateLimitKey, classifyRequestForRateLimit, defaultRouteLimitsPerMinute } from "../services/routeRateLimitPolicy.service.js";
+import { buildRouteRateLimitBuckets, classifyRequestForRateLimit, defaultRouteLimitWindowsSeconds, defaultRouteLimitsPerMinute } from "../services/routeRateLimitPolicy.service.js";
 import { startGatewaySpan } from "../services/traceContext.service.js";
 import { extractBearerTokenFromAuthorizationHeader, type AccessTokenVerifier, type VerifiedPrincipal } from "../services/accessTokenVerifier.service.js";
 import { forwardRequestToUpstream } from "../services/upstreamProxy.service.js";
@@ -17,11 +17,11 @@ import type { WidgetTokenVerifier } from "../services/widgetTokenVerifier.servic
 import { convertRequestBodyToBytes, json, unauthorizedResponseBody } from "../utils/http.util.js";
 import { runReadinessChecks } from "../utils/readiness.util.js";
 import { buildSecurityServices, type SecurityServices } from "../services/security/securityServices.service.js";
-import { humanVerificationPath, humanVerificationRequiredBody } from "../services/security/humanVerificationGate.service.js";
+import { humanVerificationPath, humanVerificationRequiredBody, rateLimitChallengeCooldownKey, rateLimitChallengePassKey, rateLimitChallengePendingKey } from "../services/security/humanVerificationGate.service.js";
 import { handleHumanVerificationRequest } from "./humanVerification.handler.js";
 import { completedRequestSignal, internalPathSignal, observeProbeSignalInBackground, tamperedTokenSignal, type ObservedRequest } from "./securityObservation.handler.js";
 import { markRequestRoute } from "../telemetry/requestMetrics.js";
-import { isAdminPath } from "../services/security/accessProbeClassifier.service.js";
+import { isAdminPath, truncateIpToPrefix } from "../services/security/accessProbeClassifier.service.js";
 
 export interface UpstreamDispatchOptions {
   readonly config: GatewayConfig;
@@ -45,6 +45,25 @@ function buildRateLimited(retryAfterSeconds: number) {
   const limited = json(429, { message: "Too many requests. Try again shortly.", code: "RATE_LIMITED" }).clone();
   limited.setHeader("retry-after", String(retryAfterSeconds));
   return limited;
+}
+
+const rateLimitChallengeThreshold = 3;
+const rateLimitChallengeWindowSeconds = 300;
+
+function rateLimitSubject(principal: VerifiedPrincipal | undefined, remoteAddress: string | undefined): string {
+  return principal === undefined ? `i:${truncateIpToPrefix(remoteAddress) ?? "unknown"}` : `s:${principal.sessionId}`;
+}
+
+async function respondToRateLimit(request: Parameters<HttpMiddleware>[0]["request"], principal: VerifiedPrincipal | undefined, retryAfterSeconds: number, security: SecurityServices) {
+  const limited = buildRateLimited(retryAfterSeconds);
+  if (security.gate === undefined || security.provider === undefined) return limited;
+  const subject = rateLimitSubject(principal, request.remoteAddress);
+  if (await security.store.take(rateLimitChallengePassKey(subject))) return undefined;
+  if (await security.store.has(rateLimitChallengeCooldownKey(subject))) return limited;
+  const strikes = await security.store.recordInWindow(`sec:hv:rate-limit-strikes:${subject}`, request.id, rateLimitChallengeWindowSeconds);
+  if (strikes < rateLimitChallengeThreshold) return limited;
+  await security.store.put(rateLimitChallengePendingKey(subject), rateLimitChallengeWindowSeconds);
+  return json(428, humanVerificationRequiredBody("rate_limit_abuse", security.provider.name));
 }
 
 async function resolvePrincipalForRoute(route: UpstreamRoute, authorizationHeader: string | undefined, verifier: AccessTokenVerifier, widgetVerifier: WidgetTokenVerifier | undefined) {
@@ -78,6 +97,10 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
     if (widgetTokenMisused) return json(401, { message: "This token only works for home-screen widgets.", code: "WIDGET_TOKEN_SCOPE" });
     observeProbeSignalInBackground(security, options.logger, observed(principal), tamperedTokenSignal(request.path, token, principal, options.config.accessToken.audience));
     if (rejected) return json(401, unauthorizedResponseBody);
+    if (security.gate !== undefined && security.provider !== undefined) {
+      const subject = rateLimitSubject(principal, request.remoteAddress);
+      if (await security.store.has(rateLimitChallengePendingKey(subject))) return json(428, humanVerificationRequiredBody("rate_limit_abuse", security.provider.name));
+    }
     if (doesAdminRequestNeedStaffToken(request.method, request.path)) {
       const staff = await authenticateStaffRequest(options.verifier, request.getHeader("authorization"));
       if (staff === undefined) return json(401, unauthorizedResponseBody);
@@ -86,6 +109,13 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
     }
     if (principal === undefined && shouldRefuseAnonymousMutation(request.method, request.path, request.getHeader("authorization"))) return json(401, unauthorizedResponseBody);
     const requestUrl = new URL(request.url, "http://gateway.internal");
+    if (principal !== undefined) {
+      const decision = await rateLimitStore.hit(`rl:authenticated-api:a:${principal.accountId}`, options.config.authenticatedApiLimitPerMinute ?? 120, 60);
+      if (!decision.allowed) {
+        const response = await respondToRateLimit(request, principal, decision.retryAfterSeconds, security);
+        if (response !== undefined) return response;
+      }
+    }
     if (principal !== undefined && options.policyGate !== undefined && doesRequestNeedPolicyGate(request.method, requestUrl.pathname)) {
       try {
         const gate = await options.policyGate.readGate(principal.accountId);
@@ -104,15 +134,25 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
     }
     const routeLimit = classifyRequestForRateLimit(request.method, requestUrl.pathname);
     if (routeLimit !== undefined) {
-      const limit = options.config.routeRateLimitsPerMinute?.[routeLimit] ?? defaultRouteLimitsPerMinute[routeLimit];
-      const decision = await rateLimitStore.hit(buildRouteRateLimitKey(routeLimit, request.remoteAddress, principal?.accountId), limit, 60);
-      if (!decision.allowed) return buildRateLimited(decision.retryAfterSeconds);
+      const buckets = buildRouteRateLimitBuckets(routeLimit, request.remoteAddress, principal?.accountId, request.body, options.config.identitySigningSecret ?? "");
+      for (const bucket of buckets) {
+        const limit = options.config.routeRateLimitsPerMinute?.[bucket.name] ?? defaultRouteLimitsPerMinute[bucket.name];
+        const windowSeconds = options.config.routeRateLimitWindowsSeconds?.[bucket.name] ?? defaultRouteLimitWindowsSeconds[bucket.name];
+        const decision = await rateLimitStore.hit(bucket.key, limit, windowSeconds);
+        if (!decision.allowed) {
+          const response = await respondToRateLimit(request, principal, decision.retryAfterSeconds, security);
+          if (response !== undefined) return response;
+        }
+      }
     }
     if (principal === undefined && route.rawBodyPassthrough !== true) {
       const sensitive = sensitiveGuestPathPrefixes.some((prefix) => requestUrl.pathname.startsWith(prefix));
       const limits = options.config.guestRateLimits;
       const decision = await rateLimitStore.hit(`rl:guest:${sensitive ? "s" : "g"}|${request.remoteAddress ?? ""}`, sensitive ? limits.sensitivePerMinute : limits.perMinute, 60);
-      if (!decision.allowed) return buildRateLimited(decision.retryAfterSeconds);
+      if (!decision.allowed) {
+        const response = await respondToRateLimit(request, principal, decision.retryAfterSeconds, security);
+        if (response !== undefined) return response;
+      }
     }
     const trace = startGatewaySpan(request.getHeader("traceparent"));
     const requestBody = convertRequestBodyToBytes(request.body);

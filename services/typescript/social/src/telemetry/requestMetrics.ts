@@ -1,5 +1,5 @@
 import { metrics, type Histogram, type MeterProvider } from "@opentelemetry/api";
-import type { HttpRequestContext, HttpResponseContext, createRouter } from "@zudojs/http";
+import type { HttpRequestContext, HttpResponseContext, createRouter } from "@nantty/fastify-platform";
 
 const knownMethods = new Set(["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
 const routes = new WeakMap<object, string>();
@@ -35,7 +35,7 @@ export function withRequestMetrics(handler: (request: HttpRequestContext) => Pro
   };
 }
 
-export async function dispatchWithRoute(router: ReturnType<typeof createRouter>, request: HttpRequestContext, signal: AbortSignal) {
+export async function dispatchWithRoute(router: ReturnType<typeof createRouter>, request: HttpRequestContext, signal?: AbortSignal) {
   const result = await router.dispatch(request, { signal });
   markRequestRoute(request, result.route?.path);
   return result;

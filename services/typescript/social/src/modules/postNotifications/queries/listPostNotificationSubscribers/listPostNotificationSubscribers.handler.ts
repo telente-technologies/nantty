@@ -1,4 +1,4 @@
-import { shownToViewers } from "../../../../constants/moderation.constant.js";
+import { publishedPostToViewers } from "../../../../constants/moderation.constant.js";
 import type { Handler, HandlerContext } from "../../../../types/handlerContext.type.js";
 import { blockRepository } from "../../../blocks/repositories/block.repository.js";
 import { followRepository } from "../../../follows/repositories/follow.repository.js";
@@ -14,7 +14,7 @@ export interface SubscriberPage {
 export function createListPostNotificationSubscribersHandler(context: HandlerContext): Handler<ListPostNotificationSubscribersQuery, SubscriberPage> {
   return async ({ authorId, scope, cursor, limit, postId }) => {
     const db = context.database.client;
-    if (postId !== undefined && (await db.post.count({ where: { id: postId, authorId, ...shownToViewers } })) === 0) return { data: [], nextCursor: null };
+    if (postId !== undefined && (await db.post.count({ where: { id: postId, authorId, ...publishedPostToViewers } })) === 0) return { data: [], nextCursor: null };
     const rows = await followRepository.pagePostNotificationSubscribers(db, authorId, levelsForScope(scope), limit, cursor);
     const page = rows.slice(0, limit);
     const candidateIds = page.map((row) => row.followerId).filter((id) => id !== authorId);

@@ -1,4 +1,4 @@
-import type { HttpRouter } from "@zudojs/http";
+import type { HttpRouter } from "@nantty/fastify-platform";
 
 import type { HandlerContext } from "../../types/handlerContext.type.js";
 import type { RouteFactory } from "../../utils/route.util.js";
@@ -42,6 +42,8 @@ import { createPostNotificationMuteController } from "./controllers/postNotifica
 import { registerPostNotificationMuteRoutes } from "./routes/postNotificationMute.routes.js";
 import { createSetPostNotificationMuteHandler } from "./commands/setPostNotificationMute/setPostNotificationMute.handler.js";
 import { createGetPostNotificationMuteHandler } from "./queries/getPostNotificationMute/getPostNotificationMute.handler.js";
+import { createScheduledPostsController } from "./controllers/scheduledPosts.controller.js";
+import { registerScheduledPostsRoutes } from "./routes/scheduledPosts.routes.js";
 
 export function mountPostsModule(router: HttpRouter, route: RouteFactory, context: HandlerContext): void {
   const deletePost = createDeletePostHandler(context);
@@ -67,6 +69,7 @@ export function mountPostsModule(router: HttpRouter, route: RouteFactory, contex
     getStoryRingStatus: createGetStoryRingStatusHandler(context),
     listStoryViewers: createListStoryViewersHandler(context),
   }));
+  registerScheduledPostsRoutes(router, createScheduledPostsController(route, context));
   registerPostAudienceRoutes(router, createPostAudienceController(route, {
     updateReplySettings: createUpdateReplySettingsHandler(context),
     updatePostSensitivity: createUpdatePostSensitivityHandler(context),

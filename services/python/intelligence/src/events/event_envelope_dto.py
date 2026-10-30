@@ -12,7 +12,7 @@ from src.events.event_payload_dto import (
     CoinTransferredPayload,
     CommentedPayload,
     FollowedPayload,
-    GiftSentPayload,
+    GiftValueFlowPayload,
     HiddenPayload,
     PostLikedPayload,
     PostViewedPayload,
@@ -136,7 +136,7 @@ class CoinTransferredEvent(EventEnvelopeBase):
 
 class GiftSentEvent(EventEnvelopeBase):
     event_type: Literal["gift_sent"]
-    payload: GiftSentPayload
+    payload: GiftValueFlowPayload
 
 
 class SavedEvent(EventEnvelopeBase):

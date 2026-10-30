@@ -1,11 +1,11 @@
 ---
 title: Seller plans: Free, Pro and Business
-summary: Free covers everyday selling. Pro is ₦5,000 and Business ₦15,000 a month in Nigeria, adding capacity, team seats, advanced tools and the Gold checkmark.
+summary: Free covers everyday selling. Paid seller entitlements add capacity and tools; the current price and limits are shown in your signed-in dashboard.
 tags: plans, pro, business, free, subscription, trial, upgrade, seller plan price, how much
 related: fees-and-escrow-fee, checkmark-prices, verify-your-store, seller-dashboard-overview, prices-by-country, gold-checkmark
 ---
 
-Every seller starts on Free. Paid plans add room to grow and advanced tools. Nantty never takes a commission on any plan.
+Every seller starts on Free. Paid plans add capacity and advanced tools. The service price book and checkout determine current subscription prices. Fresh-install platform-settings defaults now apply no Nantty sales commission; previously persisted settings may still contain superseded fee values and must be checked before staging or launch.
 
 ## Who this is for
 
@@ -15,38 +15,38 @@ Store owners on business or brand profiles, in every country.
 
 | | Free | Pro | Business |
 |---|---|---|---|
-| Price in Nigeria | ₦0 | ₦5,000 a month | ₦15,000 a month |
-| Active products | 100 | 2,000 | Unlimited |
-| Locations | 1 | 3 | 10 |
-| Team seats | none | 5 | 25 |
-| Analytics history | 30 days | 365 days | 730 days |
-| Escrow fee | 1.5% | 1.5% | 1% |
-| Gold checkmark | no | after verification | after verification |
+| Price in Nigeria (fresh-install source default) | ₦0 | ₦5,000 a month | ₦30,000 a month |
+| Active products (seller-plan resolver) | 100 | 2,000 | Unlimited |
+| Locations (seller-plan resolver) | 1 | 3 | 10 |
+| Team seats (seller-plan resolver) | none | 5 | 25 |
+| Analytics history (seller-plan resolver) | 30 days | 365 days | 730 days |
+| Gold checkmark | no | after verification approval | after verification approval |
+
+The figures above are repository defaults and resolver limits, not a live database read. Gold Premium is the target name for the integrated Business workspace; current legacy plan and dashboard settings still require reconciliation before being presented as a final customer promise.
 
 **Free** includes orders, products, stock levels and alerts, customers, messages, delivery and shipping rules, reviews, storefront, discount codes, store rewards, payouts, and core sales and inventory reports with CSV export.
 
-**Pro** adds advanced inventory, bulk tools, advanced analytics and reports (with Excel and PDF export), customer segments, team, flash sales, bundles, Mart featuring, ad results, multiple locations, automated alerts, and API keys and webhooks.
+**Pro** currently gates advanced inventory, bulk tools, advanced analytics/reports, customer segments, team, advanced promotions, ad tools, multiple warehouses, automated alerts and API/webhooks in the seller resolver. Verify the separate feature is actually available in your account before relying on it.
 
-**Business** adds the lower 1% escrow fee, multiple stores, per-member permissions and accounting integrations.
+**Business** currently adds multiple stores, advanced permissions and accounting integrations in the resolver. No lower escrow-fee or account-manager promise is made here while fee configuration and operational support are being reconciled.
 
 ## Prices in other countries
 
-Plans are priced locally each month: Pro is GH₵60, KSh 1,000, R149.99, £15, €17 or US$17. Business is GH₵180, KSh 3,000, R449.99, £45, €49 or US$49. See [Prices by country](/help/payments-and-wallet/prices-by-country).
+Regional prices are configurable and can differ from these defaults. Use the amount shown in dashboard checkout. See [Prices by country](/help/payments-and-wallet/prices-by-country).
 
 ## How to buy a plan
 
 1. Sign in at **dashboard.nantty.com**.
 2. Go to **Settings > Billing**.
 3. Choose **Upgrade to** Pro or Business, or **Start 7-day free trial** if you're eligible.
-4. Pay through the on-screen checkout. Yearly billing saves 20%.
+4. Review the amount, platform, interval, discount and renewal terms in checkout before paying.
 
-Plans are bought on the web, not inside the mobile app.
+Channel availability depends on the plan and the current app/store purchase implementation; use the checkout presented in your account.
 
 ## Good to know
 
-- Free trials last 7 days. You need a verified email and an account at least 7 days old, and there's one trial per person, card and device.
-- Paid plans give the Gold checkmark only after your business documents are approved. See [Verify your store](/help/selling/verify-your-store).
-- Don't sell on Nantty but want Gold? The Gold-only plan is ₦3,000 a month.
+- Any trial eligibility is shown in checkout; do not assume every account or plan has a trial.
+- A paid plan does not grant a Gold checkmark before business verification approval. See [Verify your store](/help/selling/verify-your-store).
 
 ## If something goes wrong
 

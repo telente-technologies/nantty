@@ -5,13 +5,13 @@ const actorNameOf = (data: EventDataReader) => readActor(data)?.name ?? "Someone
 
 export const mentionCreated: EventMapping = (event, data) => {
   const surface = data.text("surface", "comment");
-  const where = surface === "post" || surface === "clip" || surface === "group chat" ? surface : "comment";
+  const where = surface === "post" || surface === "clip" || surface === "group chat" || surface === "group" ? surface === "group" ? "group chat" : surface : "comment";
   const actor = readActor(data);
   const commentId = where === "comment" ? data.optionalText("commentId") : undefined;
   return [
     intentFor(event, data.text("recipientUserId"), {
       category: "social",
-      inApp: { category: "social", kind: "mention", title: actorNameOf(data), body: data.bool("mentionedEveryone") ? `mentioned everyone in a ${where}.` : `mentioned you in a ${where}.`, actor, data: { url: data.optionalText("url") ?? null, ...(commentId === undefined ? {} : { commentId }) } },
+      inApp: { category: "social", kind: "mention", title: actorNameOf(data), body: data.bool("mentionedEveryone") ? `mentioned everyone in a ${where}.` : `mentioned you in a ${where}.`, actor, data: { url: data.optionalText("url") ?? null, ...(commentId === undefined ? {} : { commentId }), ...(data.optionalText("postId") ? { postId: data.optionalText("postId")! } : {}), ...(data.optionalText("conversationId") ? { conversationId: data.optionalText("conversationId")! } : {}), ...(where === "group chat" ? { messageId: event.subject } : {}) } },
       push: { title: actorNameOf(data), body: `mentioned you in a ${where}.`, data: { url: data.optionalText("url") ?? null } },
       email: (recipient) => plan("mentionedYou", { firstName: recipient.firstName, actorName: actorNameOf(data), actorHandle: actor?.username ?? "", where, excerpt: data.text("excerpt"), url: data.text("url") }, 60),
     }),
@@ -56,7 +56,7 @@ export const followRequestAccepted: EventMapping = (event, data) => [
 export const commentCreated: EventMapping = (event, data) => [
   intentFor(event, data.text("recipientUserId"), {
     category: "social",
-    inApp: { category: "social", title: actorNameOf(data), body: `commented on your ${data.text("target", "post")}.`, actor: readActor(data), data: { url: data.optionalText("url") ?? null, commentId: data.optionalText("commentId") ?? null } },
+    inApp: { category: "social", title: actorNameOf(data), body: `commented on your ${data.text("target", "post")}.`, actor: readActor(data), data: { url: data.optionalText("url") ?? null, commentId: data.optionalText("commentId") ?? null, ...(data.optionalText("postId") ? { postId: data.optionalText("postId")! } : {}) } },
     push: { title: actorNameOf(data), body: `commented: ${data.text("excerpt", "")}`.slice(0, 120) },
   }),
 ];
@@ -78,7 +78,7 @@ export const postReshared: EventMapping = (event, data) => {
 export const videoReplyCreated: EventMapping = (event, data) => [
   intentFor(event, data.text("recipientUserId"), {
     category: "social",
-    inApp: { category: "social", kind: "videoReply", title: actorNameOf(data), body: "replied to your comment with a video.", actor: readActor(data), data: { url: data.optionalText("url") ?? null } },
+    inApp: { category: "social", kind: "videoReply", title: actorNameOf(data), body: "replied to your comment with a video.", actor: readActor(data), data: { url: data.optionalText("url") ?? null, ...(data.optionalText("commentId") ? { commentId: data.optionalText("commentId")! } : {}), ...(data.optionalText("replyClipId") ? { clipId: data.optionalText("replyClipId")! } : {}) } },
     push: { title: actorNameOf(data), body: "replied to your comment with a video." },
   }),
 ];

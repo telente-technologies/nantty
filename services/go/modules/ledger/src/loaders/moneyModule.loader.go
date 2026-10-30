@@ -6,7 +6,8 @@ import (
 	"errors"
 	"io/fs"
 	"log/slog"
-	"nantty/platform/viewerregion"
+	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -19,6 +20,7 @@ import (
 	"nantty/platform/postgres"
 	"nantty/platform/servicemodule"
 	"nantty/platform/staffauth"
+	"nantty/platform/viewerregion"
 )
 
 type MoneyModuleSettings struct {
@@ -27,6 +29,7 @@ type MoneyModuleSettings struct {
 	DatabaseUrl          string
 	DatabaseSchema       string
 	DatabaseOwnerRole    string
+	MigrateOnStart       bool
 	LedgerSchema         string
 	DomainEventsTopicArn string
 	JwksUrl              string
@@ -43,12 +46,14 @@ func (settings MoneyModuleSettings) IsProduction() bool { return settings.Enviro
 
 func ReadMoneyModuleSettingsFromEnvironment(reader *platformconfig.EnvironmentReader, moduleName string) MoneyModuleSettings {
 	prefix := strings.ToUpper(moduleName) + "_"
+	environment := reader.ReadStringOrDefault("APP_ENV", "development")
 	return MoneyModuleSettings{
 		ModuleName:           moduleName,
-		Environment:          reader.ReadStringOrDefault("APP_ENV", "development"),
+		Environment:          environment,
 		DatabaseUrl:          reader.ReadRequiredString("MONEY_DATABASE_URL"),
 		DatabaseSchema:       reader.ReadStringOrDefault(prefix+"DATABASE_SCHEMA", moduleName),
 		DatabaseOwnerRole:    reader.ReadStringOrDefault(prefix+"DATABASE_OWNER_ROLE", "svc_"+moduleName),
+		MigrateOnStart:       readMigrateOnStart(reader, moduleName),
 		LedgerSchema:         reader.ReadStringOrDefault("LEDGER_DATABASE_SCHEMA", "ledger"),
 		DomainEventsTopicArn: reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
 		JwksUrl:              reader.ReadRequiredString("AUTH_JWKS_URL"),
@@ -60,6 +65,24 @@ func ReadMoneyModuleSettingsFromEnvironment(reader *platformconfig.EnvironmentRe
 		CatalogSchema:        reader.ReadStringOrDefault("MONEY_CATALOG_SCHEMA", "catalog"),
 		PlatformSettingsTtl:  reader.ReadDurationOrDefault("MONEY_PLATFORM_SETTINGS_TTL", 30*time.Second),
 	}
+}
+
+func readMigrateOnStart(reader *platformconfig.EnvironmentReader, moduleName string) bool {
+	settingName := strings.ToUpper(moduleName) + "_MIGRATE_ON_START"
+	raw := strings.TrimSpace(os.Getenv(settingName))
+	if raw == "" {
+		return false
+	}
+	enabled, err := strconv.ParseBool(raw)
+	if err != nil {
+		reader.ReportProblem(settingName + " must be a boolean")
+		return false
+	}
+	if enabled {
+		reader.ReportProblem(moduleName + " migrations must run through the dedicated money migration task")
+		return false
+	}
+	return false
 }
 
 type MoneyModuleResources struct {
@@ -88,10 +111,12 @@ type MoneyModuleOverrides struct {
 
 func PrepareMoneyModuleResources(ctx context.Context, settings MoneyModuleSettings, migrationFiles fs.FS, dependencies servicemodule.Dependencies, overrides MoneyModuleOverrides) (MoneyModuleResources, error) {
 	logger := dependencies.Logger.With(slog.String("module", settings.ModuleName))
-	if err := databases.ApplyModuleMigrationsAsSchemaOwner(databases.ModuleMigrationTarget{
-		DatabaseUrl: settings.DatabaseUrl, Schema: settings.DatabaseSchema, OwnerRole: settings.DatabaseOwnerRole, Files: migrationFiles,
-	}); err != nil {
-		return MoneyModuleResources{}, err
+	if settings.MigrateOnStart {
+		if err := databases.ApplyModuleMigrationsAsSchemaOwner(databases.ModuleMigrationTarget{
+			DatabaseUrl: settings.DatabaseUrl, Schema: settings.DatabaseSchema, OwnerRole: settings.DatabaseOwnerRole, Files: migrationFiles,
+		}); err != nil {
+			return MoneyModuleResources{}, err
+		}
 	}
 	database, release, err := databases.AcquireSharedMoneyDatabase(ctx, settings.DatabaseUrl)
 	if err != nil {

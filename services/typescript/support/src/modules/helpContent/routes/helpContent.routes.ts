@@ -1,4 +1,4 @@
-import type { HttpRouter } from "@zudojs/http";
+import type { HttpRouter } from "@nantty/fastify-platform";
 
 import type { createAdminHelpController } from "../controllers/adminHelp.controller.js";
 import type { createPublicHelpController } from "../controllers/publicHelp.controller.js";

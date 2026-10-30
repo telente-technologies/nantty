@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 import { requireInternalToken } from "../../../middlewares/internalToken.middleware.js";
 import type { Handler } from "../../../types/handlerContext.type.js";

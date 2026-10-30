@@ -34,6 +34,15 @@ async function attachLinkPreviewWithinBudget(context: HandlerContext, postId: st
 
 export function createCreatePostHandler(context: HandlerContext): Handler<CreatePostCommand, PostView> {
   return async (command) => {
+    const scheduledAt = command.scheduledAt === undefined ? null : new Date(command.scheduledAt);
+    if (command.scheduledAt !== undefined) {
+      const now = context.clock.now();
+      if (!Number.isFinite(scheduledAt?.getTime())) throw unprocessable("INVALID_SCHEDULE_TIME", "Choose a valid date and time, including its timezone.");
+      if (command.kind !== "post") throw unprocessable("SCHEDULED_POST_ONLY", "Only feed posts can be scheduled right now.");
+      if (command.replyToComment !== undefined) throw unprocessable("SCHEDULED_POST_ONLY", "Comment replies cannot be scheduled.");
+      if (scheduledAt!.getTime() < now.getTime() + 60_000) throw unprocessable("SCHEDULE_TOO_SOON", "Schedule a post at least one minute in the future.");
+      if (scheduledAt!.getTime() > now.getTime() + 90 * 24 * 60 * 60_000) throw unprocessable("SCHEDULE_TOO_FAR", "Posts can be scheduled up to 90 days ahead.");
+    }
     if (command.text.length > maximumTextLength) throw unprocessable("TEXT_TOO_LONG", `Text can be up to ${maximumTextLength} characters.`);
     const media = await resolveOwnedPostMedia(context, command.authorId, command.mediaIds);
     assertMediaFitsPostKind(command.kind, command.text, media);
@@ -64,6 +73,9 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
       authorProfileId = owned.id;
       authorProfileKind = owned.kind;
     }
+    if (scheduledAt !== null && !(await context.premium.canSchedulePosts(command.authorId, authorProfileId ?? undefined))) {
+      throw forbidden("PAID_SCHEDULING_REQUIRED", "An active Blue or Gold subscription is required to schedule posts.");
+    }
     const now = context.clock.now();
     const actor = await resolveEventActor(context.directory, command.authorId);
     const created = await context.database.transaction(async (transaction) => {
@@ -87,6 +99,7 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
         ...(clipEdit === null ? {} : { clipEdit: clipEdit as unknown as Prisma.InputJsonValue }),
         ...(command.location === undefined || command.kind === "story" ? {} : { location: { placeId: command.location.placeId, name: command.location.name, area: command.location.area ?? null } }),
         ...(command.soundId === undefined ? {} : { soundId: command.soundId }),
+        ...(scheduledAt === null ? {} : { publicationState: "scheduled" as const, scheduledAt, scheduledTaggedUserIds: taggedUserIds }),
         ...(command.kind === "story" ? { expiresAt: new Date(now.getTime() + storyLifetimeHours * 3_600_000) } : {}),
         ...(command.replyToComment === undefined ? {} : { replyToCommentId: command.replyToComment.commentId, replyToClipId: command.replyToComment.clipId, replyToCommenterId: command.replyToComment.commenterUserId }),
         ...(command.stickerLayout === undefined ? {} : { stickerLayout: command.stickerLayout as unknown as Prisma.InputJsonValue }),
@@ -98,19 +111,22 @@ export function createCreatePostHandler(context: HandlerContext): Handler<Create
         },
       });
       if (command.soundId !== undefined) await soundRepository.incrementUsage(transaction, command.soundId, 1);
-      const events: DomainEventInput[] = [{ eventType: socialEventTypes.postCreated, subject: post.id, occurredAt: now, data: { postId: post.id, authorId: post.authorId, authorProfileId: post.authorProfileId, authorProfileKind: post.authorProfileKind, kind: post.kind, audience: post.audience, visibility: post.visibility, replyPolicy: post.replyPolicy, sensitiveLabels: post.sensitiveLabels, isAiGenerated: post.isAiGenerated, text: post.text.slice(0, 2000), mediaIds: post.media.map((media) => media.mediaId), topics: post.topics, productIds: post.productIds, quotedPostId: quote?.originalId ?? null, isVideoReply: comment !== undefined } }];
-      for (const userId of mentionResult.userIdsToNotify) {
-        events.push({ eventType: socialEventTypes.mentionCreated, subject: post.id, occurredAt: now, data: { recipientUserId: userId, mentionedUserId: userId, actor, authorId: command.authorId, surface: "post", postId: post.id, excerpt: buildExcerpt(text), url: `/post/${post.id}` } });
+      if (scheduledAt === null) {
+        const events: DomainEventInput[] = [{ eventType: socialEventTypes.postCreated, subject: post.id, occurredAt: now, data: { postId: post.id, authorId: post.authorId, authorProfileId: post.authorProfileId, authorProfileKind: post.authorProfileKind, kind: post.kind, audience: post.audience, visibility: post.visibility, replyPolicy: post.replyPolicy, sensitiveLabels: post.sensitiveLabels, isAiGenerated: post.isAiGenerated, text: post.text.slice(0, 2000), mediaIds: post.media.map((media) => media.mediaId), topics: post.topics, productIds: post.productIds, quotedPostId: quote?.originalId ?? null, isVideoReply: comment !== undefined } }];
+        for (const userId of mentionResult.userIdsToNotify) {
+          const isClip = post.kind === "clip";
+          events.push({ eventType: socialEventTypes.mentionCreated, subject: post.id, occurredAt: now, data: { recipientUserId: userId, mentionedUserId: userId, actor, authorId: command.authorId, surface: isClip ? "clip" : "post", postId: post.id, excerpt: buildExcerpt(text), url: `/${isClip ? "clips" : "post"}/${post.id}` } });
+        }
+        if (comment !== undefined) {
+          events.push({ eventType: socialEventTypes.videoReplyCreated, subject: post.id, occurredAt: now, data: { recipientUserId: comment.authorId, actor, url: `/clips/${post.id}`, replyClipId: post.id, originalClipId: comment.postId, commentId: comment.id, authorId: command.authorId, commenterId: comment.authorId } });
+        }
+        await appendDomainEventsToOutbox(transaction, events);
+        if (quote !== null) await recordReshareInTransaction(transaction, { postId: post.id, originalId: quote.originalId, actorId: command.authorId, originalAuthorId: quote.originalAuthorId, isQuote: true, now, actor });
+        await syncPostTags(transaction, { postId: post.id, kind: post.kind, authorId: command.authorId, actor, desiredUserIds: taggedUserIds, now });
       }
-      if (comment !== undefined) {
-        events.push({ eventType: socialEventTypes.videoReplyCreated, subject: post.id, occurredAt: now, data: { recipientUserId: comment.authorId, actor, url: `/clips/${post.id}`, replyClipId: post.id, originalClipId: comment.postId, commentId: comment.id, authorId: command.authorId, commenterId: comment.authorId } });
-      }
-      await appendDomainEventsToOutbox(transaction, events);
-      if (quote !== null) await recordReshareInTransaction(transaction, { postId: post.id, originalId: quote.originalId, actorId: command.authorId, originalAuthorId: quote.originalAuthorId, isQuote: true, now, actor });
-      await syncPostTags(transaction, { postId: post.id, kind: post.kind, authorId: command.authorId, actor, desiredUserIds: taggedUserIds, now });
       return post;
     });
-    const withPreview = created.media.length === 0 && command.kind === "post" && quote === null ? await attachLinkPreviewWithinBudget(context, created.id, created.text) : null;
+    const withPreview = scheduledAt === null && created.media.length === 0 && command.kind === "post" && quote === null ? await attachLinkPreviewWithinBudget(context, created.id, created.text) : null;
     const [view] = await buildPostViews(context, command.authorId, [withPreview === null ? created : { ...created, linkPreview: withPreview as unknown as Prisma.JsonValue }]);
     return view as PostView;
   };

@@ -1,4 +1,4 @@
-import type { HttpRouter } from "@zudojs/http";
+import type { HttpRouter } from "@nantty/fastify-platform";
 
 import type { SocialDatabase } from "../databases/prisma.database.js";
 import { checkRabbitMqConnections } from "../integrations/rabbitMqConnection.integration.js";

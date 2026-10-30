@@ -25,7 +25,7 @@ export const myPostCommentsRepository = {
     db.comment.findMany({
       where: {
         ...shownToViewers,
-        post: { authorId: input.ownerId, deletedAt: null },
+        post: { authorId: input.ownerId, deletedAt: null, publicationState: "published" },
         ...(input.postId === undefined ? {} : { postId: input.postId }),
         ...(input.search === undefined ? {} : { text: { contains: input.search, mode: "insensitive" } }),
         ...(input.cursor === undefined ? {} : { id: { lt: input.cursor } }),
@@ -44,5 +44,5 @@ export const myPostCommentsRepository = {
   postSummaries: (db: Db, postIds: readonly string[]) =>
     postIds.length === 0
       ? Promise.resolve([])
-      : db.post.findMany({ where: { id: { in: [...postIds] } }, select: { id: true, kind: true, text: true, media: { select: { type: true, url: true, posterUrl: true }, orderBy: { position: "asc" }, take: 1 } } }),
+      : db.post.findMany({ where: { id: { in: [...postIds] }, publicationState: "published" }, select: { id: true, kind: true, text: true, media: { select: { type: true, url: true, posterUrl: true }, orderBy: { position: "asc" }, take: 1 } } }),
 };

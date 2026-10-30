@@ -24,7 +24,7 @@ Until both are done, you can't publish products and buyers can't check out your 
 
 - Buyers pay you directly through checkout. There is no escrow and no stored Nantty balance.
 - The money settles to your payout account.
-- You pay only the payment processing fee. No escrow fee and no commission.
+- There is no sales commission. Any applicable payment-processing or withdrawal charge is passed through at provider cost and disclosed before confirmation.
 
 ## Good to know
 

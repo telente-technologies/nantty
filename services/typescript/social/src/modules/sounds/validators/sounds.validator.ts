@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 export const soundParamsSchema = schema.object({ soundId: schema.string().uuid() });
 export const listSoundsQuerySchema = schema.object({ q: schema.string().max(80).optional(), cursor: schema.string().uuid().optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });

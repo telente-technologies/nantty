@@ -8,8 +8,15 @@ from typing import Any
 from src.container import ApplicationContainer
 from src.databases.in_memory_feature_database import InMemoryFeatureBackend
 from src.events.domain_event_dto import GiftSentDomainEvent, domain_event_type_adapter
+from src.events.event_envelope_dto import intelligence_event_type_adapter
 from src.modules.domain_events.services.domain_event_translation_service import translate_to_intelligence_event
-from src.repositories.online_feature_keyspace_repository import ACCOUNT_AFFINITY_KIND, AFFINITY_HALF_LIFE_SECONDS
+from src.modules.events_ingestion.repositories.raw_event_parquet_repository import convert_event_to_raw_row
+from src.modules.risk.services.value_flow_feature_service import build_value_flow_operations
+from src.repositories.online_feature_keyspace_repository import (
+    ACCOUNT_AFFINITY_KIND,
+    AFFINITY_HALF_LIFE_SECONDS,
+    OnlineFeatureKeyspace,
+)
 from src.services.identifier_hashing_service import (
     OpaqueIdentifierHasher,
     derive_identifier_hash_key,
@@ -171,7 +178,7 @@ async def test_opted_out_actor_gets_no_engagement_features(
     )
 
 
-def test_gift_events_keep_raw_ids_for_the_value_flow_graph(reference_now: datetime) -> None:
+def test_gift_events_persist_only_pseudonymous_value_flow_fields(reference_now: datetime) -> None:
     hasher = OpaqueIdentifierHasher(b"k" * 32)
     event = domain_event_type_adapter.validate_python(
         {
@@ -179,11 +186,28 @@ def test_gift_events_keep_raw_ids_for_the_value_flow_graph(reference_now: dateti
             "eventType": "gift.sent",
             "occurredAt": reference_now.isoformat(),
             "actorId": "sender_1",
+            "country": "NG",
             "payload": {"giftId": "g1", "creatorId": "creator_1", "coinAmount": 5},
         }
     )
     assert isinstance(event, GiftSentDomainEvent)
     translated = translate_to_intelligence_event(event, False, hasher)
     assert translated is not None
-    assert translated["actorId"] == "sender_1"
-    assert translated["payload"]["creatorId"] == "creator_1"
+    assert translated["actorId"] == hasher.hash_user_id("sender_1")
+    assert translated["payload"] == {"creatorId": hasher.hash_user_id("creator_1"), "coinAmount": 5}
+    assert "country" not in translated
+    assert "giftId" not in translated["payload"]
+    assert "hostContentId" not in translated["payload"]
+    intelligence_event = intelligence_event_type_adapter.validate_python(translated)
+    persisted = convert_event_to_raw_row(intelligence_event, reference_now)
+    serialized = f"{persisted['actor_id']} {persisted['payload_json']} {persisted['context_json']}"
+    assert "sender_1" not in serialized
+    assert "creator_1" not in serialized
+    assert '"giftId"' not in serialized
+    assert '"hostContentId"' not in serialized
+    operations = build_value_flow_operations(intelligence_event, OnlineFeatureKeyspace("gift-test"))
+    serialized_operations = repr(operations)
+    assert hasher.hash_user_id("sender_1") in serialized_operations
+    assert hasher.hash_user_id("creator_1") in serialized_operations
+    assert "sender_1" not in serialized_operations
+    assert "creator_1" not in serialized_operations

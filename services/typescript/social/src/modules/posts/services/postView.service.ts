@@ -93,6 +93,8 @@ export async function buildPostViews(context: HandlerContext, viewerId: string |
       author: authors.get(row.authorId) ?? placeholderAuthor(row.authorId),
       postedAs: postedAsProfile === undefined ? null : { id: postedAsProfile.id, kind: postedAsProfile.kind, name: postedAsProfile.displayName, handle: postedAsProfile.handle, avatarUrl: postedAsProfile.avatarUrl },
       createdAt: row.createdAt.toISOString(),
+      publicationState: row.publicationState,
+      scheduledAt: row.scheduledAt?.toISOString() ?? null,
       text: hasAccess ? row.text : "",
       media: hasAccess ? row.media.map((media) => toMediaView(media, clipEdit)) : [],
       likes: row.likeCount,

@@ -1,4 +1,4 @@
-import { createRequestContext, createRouter } from "@zudojs/http";
+import { createRequestContext, createRouter } from "@nantty/fastify-platform";
 import { describe, expect, it, vi } from "vitest";
 
 import { createFollowsController, type FollowsHandlers } from "../../src/modules/follows/controllers/follows.controller.js";

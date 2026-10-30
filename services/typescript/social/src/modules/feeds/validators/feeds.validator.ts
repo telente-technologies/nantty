@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 export const feedQuerySchema = schema.object({
   cursor: schema.string().max(200).optional(),

@@ -116,8 +116,8 @@ func TestPlansDocumentMatchesWhatMoneyReads(t *testing.T) {
 
 func TestDocumentDefaultsMirrorWhatMoneyAndUsersEnforceToday(t *testing.T) {
 	revenue := defaultRevenueRules()
-	if revenue.CoinTransferFeeBasisPoints != 2500 || revenue.CreatorAdShareBasisPoints != 4000 || revenue.EscrowFee.DefaultBasisPoints != 150 || revenue.EscrowFee.BusinessPlanBasisPoints != 100 {
-		t.Fatalf("revenue defaults drifted from COIN_TRANSFER_FEE_BPS, ADS_REVENUE_CREATOR_SHARE_BPS and ESCROW_FEE_*: %+v", revenue)
+	if revenue.CoinTransferFeeBasisPoints != 2500 || revenue.CreatorAdShareBasisPoints != 4000 || revenue.EscrowFee.DefaultBasisPoints != 0 || revenue.EscrowFee.BusinessPlanBasisPoints != 0 {
+		t.Fatalf("revenue defaults drifted from COIN_TRANSFER_FEE_BPS, ADS_REVENUE_CREATOR_SHARE_BPS or zero platform sales commission: %+v", revenue)
 	}
 	if len(revenue.CoinUnitValues) != 7 || revenue.CoinUnitValues[0] != (MoneyValue{AmountMinor: 1000, Currency: "NGN"}) {
 		t.Fatalf("coin unit values must equal COIN_CASH_VALUES: %v", revenue.CoinUnitValues)

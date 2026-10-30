@@ -17,13 +17,13 @@ Anyone buying coins, Premium or creator subscriptions in the iPhone or Android a
 - **Premium and Blue plans** bought in the app
 - **Creator subscriptions** bought in the app
 
-**Seller plans** and **Gold** are only sold on the web at **dashboard.nantty.com**. Orders from sellers are never paid through Apple or Google.
+Some legacy Gold seller plan codes are marked eligible for store-price derivation in backend configuration, but published products and a working native purchase flow have not been confirmed. Follow the channel and product availability shown in the current app checkout. Black Government remains web-only and manually approved. Orders from sellers are never paid through Apple or Google.
 
 ## Why app prices are higher
 
-Apple and Google take a fee on in-app purchases, so in-app prices are higher. For example, in Nigeria 100 coins cost about ₦1,000 on the web and ₦1,200 in the app, and Premium costs ₦4,500 a month on the web or ₦5,500 in the app. For creator subscriptions, the higher in-app price means the creator gets the same amount whether you subscribe in the app or on the web.
+Apple and Google apply store-specific fees and price-point rules. Store prices can differ from web prices and from one another; the prices shown in the native purchase sheet are authoritative. The repository can calculate suggested store prices from configured fee schedules, but that does not prove a product is configured or purchasable in either store. For creator subscriptions, compare the final displayed price and terms on each purchase channel before confirming.
 
-To pay less, buy on the web at **app.nantty.com** with the same account. What you buy there shows up in the app.
+Where web purchase is offered, the checkout displays its applicable price and terms. Do not assume web purchase is available for every plan or allowed as an alternative in every mobile app flow.
 
 ## Cancelling and refunds
 

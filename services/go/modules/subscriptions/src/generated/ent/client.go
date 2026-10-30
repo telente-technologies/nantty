@@ -17,6 +17,7 @@ import (
 	"nantty/modules/subscriptions/src/generated/ent/idempotentrequest"
 	"nantty/modules/subscriptions/src/generated/ent/outboxevent"
 	"nantty/modules/subscriptions/src/generated/ent/planprice"
+	"nantty/modules/subscriptions/src/generated/ent/planpriceversion"
 	"nantty/modules/subscriptions/src/generated/ent/providerplan"
 	"nantty/modules/subscriptions/src/generated/ent/subscription"
 	"nantty/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
@@ -53,6 +54,8 @@ type Client struct {
 	OutboxEvent *OutboxEventClient
 	// PlanPrice is the client for interacting with the PlanPrice builders.
 	PlanPrice *PlanPriceClient
+	// PlanPriceVersion is the client for interacting with the PlanPriceVersion builders.
+	PlanPriceVersion *PlanPriceVersionClient
 	// ProviderPlan is the client for interacting with the ProviderPlan builders.
 	ProviderPlan *ProviderPlanClient
 	// Subscription is the client for interacting with the Subscription builders.
@@ -88,6 +91,7 @@ func (c *Client) init() {
 	c.IdempotentRequest = NewIdempotentRequestClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.PlanPrice = NewPlanPriceClient(c.config)
+	c.PlanPriceVersion = NewPlanPriceVersionClient(c.config)
 	c.ProviderPlan = NewProviderPlanClient(c.config)
 	c.Subscription = NewSubscriptionClient(c.config)
 	c.SubscriptionCoveredProfile = NewSubscriptionCoveredProfileClient(c.config)
@@ -197,6 +201,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		IdempotentRequest:          NewIdempotentRequestClient(cfg),
 		OutboxEvent:                NewOutboxEventClient(cfg),
 		PlanPrice:                  NewPlanPriceClient(cfg),
+		PlanPriceVersion:           NewPlanPriceVersionClient(cfg),
 		ProviderPlan:               NewProviderPlanClient(cfg),
 		Subscription:               NewSubscriptionClient(cfg),
 		SubscriptionCoveredProfile: NewSubscriptionCoveredProfileClient(cfg),
@@ -231,6 +236,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		IdempotentRequest:          NewIdempotentRequestClient(cfg),
 		OutboxEvent:                NewOutboxEventClient(cfg),
 		PlanPrice:                  NewPlanPriceClient(cfg),
+		PlanPriceVersion:           NewPlanPriceVersionClient(cfg),
 		ProviderPlan:               NewProviderPlanClient(cfg),
 		Subscription:               NewSubscriptionClient(cfg),
 		SubscriptionCoveredProfile: NewSubscriptionCoveredProfileClient(cfg),
@@ -270,10 +276,10 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.CreatorSubscription, c.CreatorSubscriptionCharge, c.CreatorSubscriptionPlan,
-		c.IdempotentRequest, c.OutboxEvent, c.PlanPrice, c.ProviderPlan,
-		c.Subscription, c.SubscriptionCoveredProfile, c.SubscriptionOfferClaim,
-		c.SubscriptionOfferLink, c.SubscriptionOfferSend, c.SubscriptionPeriod,
-		c.SubscriptionReminder, c.TrialClaim,
+		c.IdempotentRequest, c.OutboxEvent, c.PlanPrice, c.PlanPriceVersion,
+		c.ProviderPlan, c.Subscription, c.SubscriptionCoveredProfile,
+		c.SubscriptionOfferClaim, c.SubscriptionOfferLink, c.SubscriptionOfferSend,
+		c.SubscriptionPeriod, c.SubscriptionReminder, c.TrialClaim,
 	} {
 		n.Use(hooks...)
 	}
@@ -284,10 +290,10 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.CreatorSubscription, c.CreatorSubscriptionCharge, c.CreatorSubscriptionPlan,
-		c.IdempotentRequest, c.OutboxEvent, c.PlanPrice, c.ProviderPlan,
-		c.Subscription, c.SubscriptionCoveredProfile, c.SubscriptionOfferClaim,
-		c.SubscriptionOfferLink, c.SubscriptionOfferSend, c.SubscriptionPeriod,
-		c.SubscriptionReminder, c.TrialClaim,
+		c.IdempotentRequest, c.OutboxEvent, c.PlanPrice, c.PlanPriceVersion,
+		c.ProviderPlan, c.Subscription, c.SubscriptionCoveredProfile,
+		c.SubscriptionOfferClaim, c.SubscriptionOfferLink, c.SubscriptionOfferSend,
+		c.SubscriptionPeriod, c.SubscriptionReminder, c.TrialClaim,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -308,6 +314,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.OutboxEvent.mutate(ctx, m)
 	case *PlanPriceMutation:
 		return c.PlanPrice.mutate(ctx, m)
+	case *PlanPriceVersionMutation:
+		return c.PlanPriceVersion.mutate(ctx, m)
 	case *ProviderPlanMutation:
 		return c.ProviderPlan.mutate(ctx, m)
 	case *SubscriptionMutation:
@@ -1126,6 +1134,139 @@ func (c *PlanPriceClient) mutate(ctx context.Context, m *PlanPriceMutation) (Val
 		return (&PlanPriceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown PlanPrice mutation op: %q", m.Op())
+	}
+}
+
+// PlanPriceVersionClient is a client for the PlanPriceVersion schema.
+type PlanPriceVersionClient struct {
+	config
+}
+
+// NewPlanPriceVersionClient returns a client for the PlanPriceVersion from the given config.
+func NewPlanPriceVersionClient(c config) *PlanPriceVersionClient {
+	return &PlanPriceVersionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `planpriceversion.Hooks(f(g(h())))`.
+func (c *PlanPriceVersionClient) Use(hooks ...Hook) {
+	c.hooks.PlanPriceVersion = append(c.hooks.PlanPriceVersion, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `planpriceversion.Intercept(f(g(h())))`.
+func (c *PlanPriceVersionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PlanPriceVersion = append(c.inters.PlanPriceVersion, interceptors...)
+}
+
+// Create returns a builder for creating a PlanPriceVersion entity.
+func (c *PlanPriceVersionClient) Create() *PlanPriceVersionCreate {
+	mutation := newPlanPriceVersionMutation(c.config, OpCreate)
+	return &PlanPriceVersionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PlanPriceVersion entities.
+func (c *PlanPriceVersionClient) CreateBulk(builders ...*PlanPriceVersionCreate) *PlanPriceVersionCreateBulk {
+	return &PlanPriceVersionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PlanPriceVersionClient) MapCreateBulk(slice any, setFunc func(*PlanPriceVersionCreate, int)) *PlanPriceVersionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PlanPriceVersionCreateBulk{err: fmt.Errorf("calling to PlanPriceVersionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PlanPriceVersionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PlanPriceVersionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PlanPriceVersion.
+func (c *PlanPriceVersionClient) Update() *PlanPriceVersionUpdate {
+	mutation := newPlanPriceVersionMutation(c.config, OpUpdate)
+	return &PlanPriceVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PlanPriceVersionClient) UpdateOne(_m *PlanPriceVersion) *PlanPriceVersionUpdateOne {
+	mutation := newPlanPriceVersionMutation(c.config, OpUpdateOne, withPlanPriceVersion(_m))
+	return &PlanPriceVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PlanPriceVersionClient) UpdateOneID(id uuid.UUID) *PlanPriceVersionUpdateOne {
+	mutation := newPlanPriceVersionMutation(c.config, OpUpdateOne, withPlanPriceVersionID(id))
+	return &PlanPriceVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PlanPriceVersion.
+func (c *PlanPriceVersionClient) Delete() *PlanPriceVersionDelete {
+	mutation := newPlanPriceVersionMutation(c.config, OpDelete)
+	return &PlanPriceVersionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PlanPriceVersionClient) DeleteOne(_m *PlanPriceVersion) *PlanPriceVersionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PlanPriceVersionClient) DeleteOneID(id uuid.UUID) *PlanPriceVersionDeleteOne {
+	builder := c.Delete().Where(planpriceversion.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PlanPriceVersionDeleteOne{builder}
+}
+
+// Query returns a query builder for PlanPriceVersion.
+func (c *PlanPriceVersionClient) Query() *PlanPriceVersionQuery {
+	return &PlanPriceVersionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePlanPriceVersion},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PlanPriceVersion entity by its id.
+func (c *PlanPriceVersionClient) Get(ctx context.Context, id uuid.UUID) (*PlanPriceVersion, error) {
+	return c.Query().Where(planpriceversion.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PlanPriceVersionClient) GetX(ctx context.Context, id uuid.UUID) *PlanPriceVersion {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PlanPriceVersionClient) Hooks() []Hook {
+	return c.hooks.PlanPriceVersion
+}
+
+// Interceptors returns the client interceptors.
+func (c *PlanPriceVersionClient) Interceptors() []Interceptor {
+	return c.inters.PlanPriceVersion
+}
+
+func (c *PlanPriceVersionClient) mutate(ctx context.Context, m *PlanPriceVersionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PlanPriceVersionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PlanPriceVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PlanPriceVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PlanPriceVersionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PlanPriceVersion mutation op: %q", m.Op())
 	}
 }
 
@@ -2330,17 +2471,17 @@ func (c *TrialClaimClient) mutate(ctx context.Context, m *TrialClaimMutation) (V
 type (
 	hooks struct {
 		CreatorSubscription, CreatorSubscriptionCharge, CreatorSubscriptionPlan,
-		IdempotentRequest, OutboxEvent, PlanPrice, ProviderPlan, Subscription,
-		SubscriptionCoveredProfile, SubscriptionOfferClaim, SubscriptionOfferLink,
-		SubscriptionOfferSend, SubscriptionPeriod, SubscriptionReminder,
-		TrialClaim []ent.Hook
+		IdempotentRequest, OutboxEvent, PlanPrice, PlanPriceVersion, ProviderPlan,
+		Subscription, SubscriptionCoveredProfile, SubscriptionOfferClaim,
+		SubscriptionOfferLink, SubscriptionOfferSend, SubscriptionPeriod,
+		SubscriptionReminder, TrialClaim []ent.Hook
 	}
 	inters struct {
 		CreatorSubscription, CreatorSubscriptionCharge, CreatorSubscriptionPlan,
-		IdempotentRequest, OutboxEvent, PlanPrice, ProviderPlan, Subscription,
-		SubscriptionCoveredProfile, SubscriptionOfferClaim, SubscriptionOfferLink,
-		SubscriptionOfferSend, SubscriptionPeriod, SubscriptionReminder,
-		TrialClaim []ent.Interceptor
+		IdempotentRequest, OutboxEvent, PlanPrice, PlanPriceVersion, ProviderPlan,
+		Subscription, SubscriptionCoveredProfile, SubscriptionOfferClaim,
+		SubscriptionOfferLink, SubscriptionOfferSend, SubscriptionPeriod,
+		SubscriptionReminder, TrialClaim []ent.Interceptor
 	}
 )
 

@@ -6,7 +6,6 @@ func TestUserAgentsBecomeReadableDevicesAndIpAddressesAreMasked(t *testing.T) {
 	cases := map[string][2]string{
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36": {"Chrome on Windows", "dashboard"},
 		"Nantty/1.0 (iPhone; iOS 18.1) CFNetwork": {"Nantty app on iPhone", "mobile_app"},
-		"Nantty/1.0 (iPhone; iOS 18.1) CFNetwork": {"Nantty app on iPhone", "mobile_app"},
 		"okhttp/4.12.0": {"Nantty app on Android", "mobile_app"},
 	}
 	for userAgent, want := range cases {

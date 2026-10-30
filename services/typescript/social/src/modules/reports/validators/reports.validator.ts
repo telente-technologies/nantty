@@ -1,4 +1,4 @@
-import { schema } from "@zudojs/schema";
+import { schema } from "@nantty/fastify-platform";
 
 import { acceptedReportReasons, reportTargetTypes } from "../services/reportReasons.service.js";
 
@@ -10,7 +10,7 @@ export const submitReportBodySchema = schema.object({
   reason: schema.enum(acceptedReportReasons),
   details: schema.string().max(500).optional(),
   blockReportedUser: schema.boolean().optional(),
-  evidence: schema.array(schema.record(schema.unknown())).max(100).optional(),
+  evidence: schema.array(schema.record(schema.string(), schema.unknown())).max(100).optional(),
   evidenceSelection: schema.string().max(40).optional(),
   evidenceHash: schema.string().max(128).optional(),
   liveContext: schema.object({

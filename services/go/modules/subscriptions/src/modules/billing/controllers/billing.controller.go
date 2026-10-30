@@ -174,6 +174,9 @@ func (controller BillingController) InternalEntitlements(writer http.ResponseWri
 		return
 	}
 	entitlements, err := controller.Billing.ReadEntitlements(request.Context(), request.PathValue("userId"))
+	if err == nil && request.URL.Query().Get("includeScheduling") == "true" {
+		entitlements.CanSchedulePosts, err = controller.Billing.CanSchedulePostsForProfile(request.Context(), entitlements.UserId, request.URL.Query().Get("profileId"))
+	}
 	if creatorId := request.URL.Query().Get("creatorId"); err == nil && creatorId != "" && controller.CreatorAccess != nil {
 		entitlements.SubscribedToCreator, err = controller.CreatorAccess(request.Context(), entitlements.UserId, creatorId)
 	}

@@ -1,4 +1,4 @@
-import type { Logger } from "@zudojs/logger";
+import type { Logger } from "@nantty/fastify-platform";
 
 import { autoFaqBatchSize, autoFaqLockMilliseconds } from "../constants/support.constant.js";
 import type { AutoFaqStatus } from "../enums/ticket.enum.js";

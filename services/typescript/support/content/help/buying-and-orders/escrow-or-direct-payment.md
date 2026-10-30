@@ -34,7 +34,7 @@ The note at the bottom sums it up: "Escrow orders are held until you confirm del
 ## Good to know
 
 - Only verified stores (Gold, "Verified business") can offer direct payment.
-- Both options cost you the same. Buyers never pay the escrow fee.
+- Choosing escrow does not add a Nantty sales commission. Any actual provider charge that applies is shown in your checkout total before you confirm; compare the quoted totals for each seller.
 - The store line shows its success rate and rating, or **New store**, to help you decide.
 - If you're unsure, choose escrow. It's the only option where we can step in.
 

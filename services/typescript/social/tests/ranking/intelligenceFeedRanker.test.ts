@@ -64,7 +64,8 @@ describe("intelligence feed ranker", () => {
   });
 
   it("matches the Python identifier_hashing_service vectors exactly", () => {
-    expect(createIdentifierHasher(deriveIdentifierHashSecret("", "shared-secret")).hashUserId("0192f0a0-0000-7000-8000-00000000a001")).toBe("u_11baaae5819d1a17534ae804efc2685db359e6fe");
+    // Generated independently with Python's identifier_hashing_service.
+    expect(createIdentifierHasher(deriveIdentifierHashSecret("", "shared-secret")).hashUserId("0192f0a0-0000-7000-8000-00000000a001")).toBe("u_e066a1aafe1ec2d06ced8891055551740833370a");
     const explicit = createIdentifierHasher(deriveIdentifierHashSecret("explicit", "ignored"));
     expect(explicit.hashUserId("abc")).toBe("u_c10937b3436a81539bd288e267afcd451fb1c8e1");
     expect(explicit.hashUserId("u_c10937b3436a81539bd288e267afcd451fb1c8e1")).toBe("u_c10937b3436a81539bd288e267afcd451fb1c8e1");

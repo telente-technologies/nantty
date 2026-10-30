@@ -8,6 +8,7 @@ import type { RateLimitStore } from "../services/rateLimitStore.service.js";
 import { truncateIpToPrefix } from "../services/security/accessProbeClassifier.service.js";
 import { HumanVerificationUnavailableError } from "../services/security/humanVerificationProvider.service.js";
 import type { SecurityServices } from "../services/security/securityServices.service.js";
+import { rateLimitChallengeCooldownKey, rateLimitChallengePendingKey, rateLimitChallengePassKey } from "../services/security/humanVerificationGate.service.js";
 import { json, unauthorizedResponseBody } from "../utils/http.util.js";
 
 function readChallengeToken(body: unknown): string | undefined {
@@ -27,16 +28,24 @@ function safeParse(text: string): unknown {
 export async function handleHumanVerificationRequest(request: HttpRequestContext, security: SecurityServices, verifier: AccessTokenVerifier, rateLimits: RateLimitStore, logger: Logger): Promise<HttpResponseContext> {
   const token = extractBearerTokenFromAuthorizationHeader(request.getHeader("authorization"));
   const principal = token === undefined ? undefined : await verifier.verifyAccessTokenWithJwks(token);
-  if (principal === undefined) return json(401, unauthorizedResponseBody);
+  if (token !== undefined && principal === undefined) return json(401, unauthorizedResponseBody);
   if (security.trust === undefined || security.states === undefined || security.gate === undefined || security.provider === undefined) {
     return json(503, { message: "Human verification is not configured.", code: "HUMAN_VERIFICATION_UNAVAILABLE" });
   }
   if (request.method.toUpperCase() === "GET") {
+    if (principal === undefined) return json(401, unauthorizedResponseBody);
     const state = await security.states.read(principal.accountId);
     return json(200, { requirement: state.requirement, reason: state.reason ?? null, provider: security.provider.name });
   }
   if (request.method.toUpperCase() !== "POST") return json(405, { message: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
-  for (const [key, limit] of [[`rl:hv:a:${principal.accountId}`, security.attemptsPerMinute], [`rl:hv:i:${request.remoteAddress ?? "unknown"}`, security.attemptsPerMinute * 3]] as const) {
+  const guestSubject = `i:${truncateIpToPrefix(request.remoteAddress) ?? "unknown"}`;
+  if (principal === undefined && !(await security.store.has(rateLimitChallengePendingKey(guestSubject)))) {
+    return json(400, { message: "No verification is currently required.", code: "HUMAN_VERIFICATION_NOT_REQUIRED" });
+  }
+  const attemptLimits: readonly (readonly [string, number])[] = principal === undefined
+    ? [[`rl:hv:i:${request.remoteAddress ?? "unknown"}`, security.attemptsPerMinute * 3]]
+    : [[`rl:hv:a:${principal.accountId}`, security.attemptsPerMinute], [`rl:hv:i:${request.remoteAddress ?? "unknown"}`, security.attemptsPerMinute * 3]];
+  for (const [key, limit] of attemptLimits) {
     const decision = await rateLimits.hit(key, limit, 60);
     if (!decision.allowed) {
       const limited = json(429, { message: "Too many verification attempts. Try again shortly.", code: "RATE_LIMITED" }).clone();
@@ -53,15 +62,21 @@ export async function handleHumanVerificationRequest(request: HttpRequestContext
     logger.warn("human verification provider failed", { provider: security.provider.name, unavailable: error instanceof HumanVerificationUnavailableError });
     return json(503, { message: "Verification is unavailable right now. Try again.", code: "HUMAN_VERIFICATION_UNAVAILABLE" });
   }
-  const state = await security.trust.reportChallengeOutcome({
+  const state = principal === undefined ? undefined : await security.trust.reportChallengeOutcome({
     attemptId: randomUUID(), accountId: principal.accountId, sessionId: principal.sessionId, deviceId: (request.getHeader("x-device-id") ?? "").slice(0, 128),
     ipPrefix: truncateIpToPrefix(request.remoteAddress), passed: verdict.success, provider: security.provider.name, errorCodes: verdict.errorCodes,
   });
-  security.states.forget(principal.accountId);
-  if (state.suspended === true) return json(403, { message: "Your account has been suspended for security reasons. You can appeal from the suspension notice.", code: "ACCOUNT_SUSPENDED_SECURITY" });
+  if (principal !== undefined) security.states.forget(principal.accountId);
+  if (state?.suspended === true) return json(403, { message: "Your account has been suspended for security reasons. You can appeal from the suspension notice.", code: "ACCOUNT_SUSPENDED_SECURITY" });
   if (!verdict.success) {
-    return json(400, { message: "We couldn't confirm that. Try again.", code: "HUMAN_VERIFICATION_FAILED", failuresInWindow: state.failuresInWindow ?? null, failuresAllowed: state.failuresAllowed ?? null });
+    return json(400, { message: "We couldn't confirm that. Try again.", code: "HUMAN_VERIFICATION_FAILED", failuresInWindow: state?.failuresInWindow ?? null, failuresAllowed: state?.failuresAllowed ?? null });
   }
-  await security.gate.grantPasses(principal.sessionId);
-  return json(200, { verified: true, requirement: state.requirement, clearedUntil: state.clearedUntil ?? null });
+  if (principal !== undefined) {
+    await security.gate.grantPasses(principal.sessionId);
+    return json(200, { verified: true, requirement: state?.requirement ?? "none", clearedUntil: state?.clearedUntil ?? null });
+  }
+  await security.store.take(rateLimitChallengePendingKey(guestSubject));
+  await security.store.put(rateLimitChallengePassKey(guestSubject), 60);
+  await security.store.put(rateLimitChallengeCooldownKey(guestSubject), 300);
+  return json(200, { verified: true, requirement: "none", clearedUntil: null });
 }

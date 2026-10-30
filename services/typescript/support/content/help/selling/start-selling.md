@@ -29,7 +29,7 @@ When approved: **You're approved!** "Your store is live. Add your first products
 ## What's free
 
 - Selling, orders, products, delivery, payouts and the seller dashboard on **dashboard.nantty.com** are free on every plan.
-- Nantty takes **0% commission**. Escrow orders carry a small escrow fee. See [Seller fees](/help/selling/fees-and-escrow-fee).
+- Nantty's intended launch policy takes **0% commission on sales**. Actual payment-provider processing and withdrawal charges are passed through at cost and shown before confirmation. See [Seller fees](/help/selling/fees-and-escrow-fee).
 - Paid plans add capacity and tools. See [Seller plans](/help/selling/seller-plans).
 
 ## Payment rules for new stores

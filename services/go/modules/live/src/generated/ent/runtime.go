@@ -61,12 +61,16 @@ func init() {
 	battleDescIdempotencyKey := battleFields[5].Descriptor()
 	// battle.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
 	battle.IdempotencyKeyValidator = battleDescIdempotencyKey.Validators[0].(func(string) error)
+	// battleDescSettlementAttempts is the schema descriptor for settlement_attempts field.
+	battleDescSettlementAttempts := battleFields[13].Descriptor()
+	// battle.DefaultSettlementAttempts holds the default value on creation for the settlement_attempts field.
+	battle.DefaultSettlementAttempts = battleDescSettlementAttempts.Default.(int)
 	// battleDescWinnerUserIds is the schema descriptor for winner_user_ids field.
-	battleDescWinnerUserIds := battleFields[13].Descriptor()
+	battleDescWinnerUserIds := battleFields[17].Descriptor()
 	// battle.DefaultWinnerUserIds holds the default value on creation for the winner_user_ids field.
 	battle.DefaultWinnerUserIds = battleDescWinnerUserIds.Default.([]string)
 	// battleDescIsTie is the schema descriptor for is_tie field.
-	battleDescIsTie := battleFields[14].Descriptor()
+	battleDescIsTie := battleFields[18].Descriptor()
 	// battle.DefaultIsTie holds the default value on creation for the is_tie field.
 	battle.DefaultIsTie = battleDescIsTie.Default.(bool)
 	// battleDescID is the schema descriptor for id field.

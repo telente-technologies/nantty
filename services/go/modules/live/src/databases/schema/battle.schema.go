@@ -32,6 +32,10 @@ func (Battle) Fields() []ent.Field {
 		field.Time("ends_at").Optional().Nillable(),
 		field.Enum("end_reason").Values("timer", "hostEnded", "hostEndedLive", "forfeit").Optional().Nillable(),
 		field.Time("settled_at").Optional().Nillable(),
+		field.Int("settlement_attempts").Default(0),
+		field.Time("settlement_lease_until").Optional().Nillable(),
+		field.Time("settlement_next_attempt_at").Optional().Nillable(),
+		field.String("settlement_lease_token").Optional().Nillable(),
 		field.JSON("winner_user_ids", []string{}).Default([]string{}).SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 		field.Bool("is_tie").Default(false),
 		field.JSON("settlement", map[string]any{}).Optional().SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
@@ -43,6 +47,7 @@ func (Battle) Indexes() []ent.Index {
 		index.Fields("live_id").Unique().Annotations(entsql.IndexWhere("state IN ('pending','countdown','active','ended')")),
 		index.Fields("live_id", "idempotency_key").Unique(),
 		index.Fields("state", "ends_at"),
+		index.Fields("state", "settlement_next_attempt_at", "settlement_lease_until"),
 		index.Fields("state", "starts_at"),
 		index.Fields("state", "proposal_expires_at"),
 	}

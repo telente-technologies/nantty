@@ -14,6 +14,20 @@ enum PostVisibility {
   subscribers
 }
 
+enum PostPublicationState {
+  published
+  scheduled
+  cancelled
+  failed
+}
+
+enum PostPublicationFailureReason {
+  media_failed
+  media_processing_timeout
+  author_unavailable
+  profile_unavailable
+}
+
 enum MediaKind {
   image
   video
@@ -87,6 +101,10 @@ model Post {
   clipEdit           Json?
   location           Json?
   expiresAt          DateTime?
+  publicationState   PostPublicationState @default(published)
+  scheduledAt        DateTime?
+  scheduledTaggedUserIds Json          @default("[]")
+  publicationFailureReason PostPublicationFailureReason?
   deletedAt          DateTime?
   createdAt          DateTime       @default(now())
   isPinned           Boolean        @default(false)
@@ -101,6 +119,7 @@ model Post {
   reshares   Post[]   @relation("Reshares")
 
   @@index([authorId, id])
+  @@index([publicationState, scheduledAt])
   @@index([kind, id])
   @@index([kind, createdAt, likeCount])
   @@index([resharedFromId])

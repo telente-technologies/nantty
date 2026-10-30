@@ -1,4 +1,4 @@
-import { createRequestContext, createRouter } from "@zudojs/http";
+import { createRequestContext, createRouter } from "@nantty/fastify-platform";
 import { describe, expect, it, vi } from "vitest";
 
 import type { SocialDatabase } from "../../src/databases/prisma.database.js";

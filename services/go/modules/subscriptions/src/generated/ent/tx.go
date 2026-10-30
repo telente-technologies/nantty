@@ -26,6 +26,8 @@ type Tx struct {
 	OutboxEvent *OutboxEventClient
 	// PlanPrice is the client for interacting with the PlanPrice builders.
 	PlanPrice *PlanPriceClient
+	// PlanPriceVersion is the client for interacting with the PlanPriceVersion builders.
+	PlanPriceVersion *PlanPriceVersionClient
 	// ProviderPlan is the client for interacting with the ProviderPlan builders.
 	ProviderPlan *ProviderPlanClient
 	// Subscription is the client for interacting with the Subscription builders.
@@ -181,6 +183,7 @@ func (tx *Tx) init() {
 	tx.IdempotentRequest = NewIdempotentRequestClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.PlanPrice = NewPlanPriceClient(tx.config)
+	tx.PlanPriceVersion = NewPlanPriceVersionClient(tx.config)
 	tx.ProviderPlan = NewProviderPlanClient(tx.config)
 	tx.Subscription = NewSubscriptionClient(tx.config)
 	tx.SubscriptionCoveredProfile = NewSubscriptionCoveredProfileClient(tx.config)

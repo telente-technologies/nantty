@@ -30,6 +30,20 @@ export const tipSent: EventMapping = (event, data) => {
   ];
 };
 
+export const spaceCoinGiftCommitted: EventMapping = (event, data) => {
+  const coins = data.integer("creatorAmountCoins", 0);
+  const body = coins > 0
+    ? `${coins.toLocaleString("en-US")} coins from a Space gift were credited to your creator earnings.`
+    : "A Space gift was received, but no creator earnings were credited.";
+  return [
+    intentFor(event, data.text("hostUserId"), {
+      category: "creator",
+      inApp: { category: "social", title: "Space gift credited", body, data: { url: "/creator", screen: "CreatorEarnings" } },
+      push: { title: "Space gift credited", body, data: { url: "/creator", screen: "CreatorEarnings" } },
+    }),
+  ];
+};
+
 export const affiliateCommissionCredited: EventMapping = (event, data) => {
   const body = `You earned${amountText(data.optionalMoney("commission"))} commission on a sale you referred.`;
   return [

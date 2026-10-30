@@ -1,6 +1,5 @@
 import asyncio
 import json
-import logging
 import time
 from pathlib import Path
 from typing import Any
@@ -39,6 +38,7 @@ def staging_settings(**overrides: object) -> IntelligenceSettings:
         "environment": "staging",
         "shared_secret": "staging-shared-secret-that-is-long-enough-0",
         "model_signing_secret": "staging-model-signing-secret-long-enough-00",
+        "id_hash_secret": "staging-id-hash-secret-long-enough-000000",
         "redis_url": "redis://localhost:6379/0",
         "rabbitmq_url": "amqp://intelligence:secret@rabbit:5672/nantty",
     }
@@ -76,10 +76,20 @@ def test_media_internal_url_and_token_must_be_paired() -> None:
     assert paired.media_internal_url == "http://media.internal"
 
 
-def test_derived_pseudonym_key_is_reported_outside_development(caplog: pytest.LogCaptureFixture) -> None:
-    with caplog.at_level(logging.WARNING, logger="intelligence.container"):
-        build_identifier_hasher(staging_settings())
-    assert "identifier_hash_key_derived_from_shared_secret" in caplog.messages
+def test_id_hash_secret_is_required_outside_development() -> None:
+    with pytest.raises(ValidationError, match="ID_HASH_SECRET"):
+        staging_settings(id_hash_secret="")
+
+
+def test_id_hash_secret_must_have_minimum_length_outside_development() -> None:
+    with pytest.raises(ValidationError, match="ID_HASH_SECRET"):
+        staging_settings(id_hash_secret="k" * 31)
+
+
+def test_dedicated_id_hash_secret_is_independent_of_shared_secret_rotation() -> None:
+    first = build_identifier_hasher(staging_settings(shared_secret="a" * 40))
+    second = build_identifier_hasher(staging_settings(shared_secret="b" * 40))
+    assert first.hash_user_id("account_1") == second.hash_user_id("account_1")
 
 
 class NeverFinishingBus:

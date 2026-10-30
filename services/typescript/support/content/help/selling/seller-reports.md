@@ -44,7 +44,7 @@ On Free you'll see a notice that the report "is part of advanced reports. Upgrad
 
 ## Good to know
 
-- The **Fees** report shows the escrow fee and payment processing fee as separate lines. See [Seller fees](/help/selling/fees-and-escrow-fee).
+- The **Fees** report itemizes applicable payment-provider charges and other wallet fees. Historical escrow-fee rows may remain for older orders; the current intended policy has no sales commission. See [Seller fees](/help/selling/fees-and-escrow-fee).
 - How far back you can look in **Analytics** depends on your plan: 30 days on Free, 365 on Pro, 730 on Business.
 - Your wallet history and receipts are in **Payments & finance**.
 

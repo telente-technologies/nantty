@@ -1,6 +1,6 @@
 import type { Prisma } from "../../../generated/prisma/client.js";
 import type { Db } from "../../../types/database.type.js";
-import { shownToViewers } from "../../../constants/moderation.constant.js";
+import { publishedPostToViewers, shownToViewers } from "../../../constants/moderation.constant.js";
 
 export type CommentRow = Prisma.CommentGetPayload<object>;
 
@@ -72,7 +72,7 @@ export const commentRepository = {
 
   videoRepliesFor: (db: Db, commentIds: readonly string[]) =>
     db.post.findMany({
-      where: { replyToCommentId: { in: [...commentIds] }, kind: "clip", ...shownToViewers },
+      where: { replyToCommentId: { in: [...commentIds] }, kind: "clip", ...publishedPostToViewers },
       select: { id: true, replyToCommentId: true, createdAt: true, media: { select: { posterUrl: true }, orderBy: { position: "asc" }, take: 1 } },
       orderBy: { id: "asc" },
     }),

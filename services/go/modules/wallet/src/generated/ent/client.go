@@ -17,6 +17,7 @@ import (
 	"nantty/modules/wallet/src/generated/ent/coinconversion"
 	"nantty/modules/wallet/src/generated/ent/coinpackage"
 	"nantty/modules/wallet/src/generated/ent/coinpurchase"
+	"nantty/modules/wallet/src/generated/ent/coinpurchasechargeback"
 	"nantty/modules/wallet/src/generated/ent/cointransfer"
 	"nantty/modules/wallet/src/generated/ent/idempotentrequest"
 	"nantty/modules/wallet/src/generated/ent/monetisationhold"
@@ -31,6 +32,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 
 	stdsql "database/sql"
@@ -54,6 +56,8 @@ type Client struct {
 	CoinPackage *CoinPackageClient
 	// CoinPurchase is the client for interacting with the CoinPurchase builders.
 	CoinPurchase *CoinPurchaseClient
+	// CoinPurchaseChargeback is the client for interacting with the CoinPurchaseChargeback builders.
+	CoinPurchaseChargeback *CoinPurchaseChargebackClient
 	// CoinTransfer is the client for interacting with the CoinTransfer builders.
 	CoinTransfer *CoinTransferClient
 	// IdempotentRequest is the client for interacting with the IdempotentRequest builders.
@@ -91,6 +95,7 @@ func (c *Client) init() {
 	c.CoinConversion = NewCoinConversionClient(c.config)
 	c.CoinPackage = NewCoinPackageClient(c.config)
 	c.CoinPurchase = NewCoinPurchaseClient(c.config)
+	c.CoinPurchaseChargeback = NewCoinPurchaseChargebackClient(c.config)
 	c.CoinTransfer = NewCoinTransferClient(c.config)
 	c.IdempotentRequest = NewIdempotentRequestClient(c.config)
 	c.MonetisationHold = NewMonetisationHoldClient(c.config)
@@ -201,6 +206,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		CoinConversion:            NewCoinConversionClient(cfg),
 		CoinPackage:               NewCoinPackageClient(cfg),
 		CoinPurchase:              NewCoinPurchaseClient(cfg),
+		CoinPurchaseChargeback:    NewCoinPurchaseChargebackClient(cfg),
 		CoinTransfer:              NewCoinTransferClient(cfg),
 		IdempotentRequest:         NewIdempotentRequestClient(cfg),
 		MonetisationHold:          NewMonetisationHoldClient(cfg),
@@ -236,6 +242,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		CoinConversion:            NewCoinConversionClient(cfg),
 		CoinPackage:               NewCoinPackageClient(cfg),
 		CoinPurchase:              NewCoinPurchaseClient(cfg),
+		CoinPurchaseChargeback:    NewCoinPurchaseChargebackClient(cfg),
 		CoinTransfer:              NewCoinTransferClient(cfg),
 		IdempotentRequest:         NewIdempotentRequestClient(cfg),
 		MonetisationHold:          NewMonetisationHoldClient(cfg),
@@ -276,9 +283,10 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AdBalanceEarningsTransfer, c.AdBalanceTopUp, c.AdSpendDebit, c.CoinConversion,
-		c.CoinPackage, c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest,
-		c.MonetisationHold, c.OutboxEvent, c.PayoutAccount, c.PayoutAccountResolution,
-		c.SellerPayoutSchedule, c.SellerReserveFlag, c.WalletRiskFlag, c.Withdrawal,
+		c.CoinPackage, c.CoinPurchase, c.CoinPurchaseChargeback, c.CoinTransfer,
+		c.IdempotentRequest, c.MonetisationHold, c.OutboxEvent, c.PayoutAccount,
+		c.PayoutAccountResolution, c.SellerPayoutSchedule, c.SellerReserveFlag,
+		c.WalletRiskFlag, c.Withdrawal,
 	} {
 		n.Use(hooks...)
 	}
@@ -289,9 +297,10 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AdBalanceEarningsTransfer, c.AdBalanceTopUp, c.AdSpendDebit, c.CoinConversion,
-		c.CoinPackage, c.CoinPurchase, c.CoinTransfer, c.IdempotentRequest,
-		c.MonetisationHold, c.OutboxEvent, c.PayoutAccount, c.PayoutAccountResolution,
-		c.SellerPayoutSchedule, c.SellerReserveFlag, c.WalletRiskFlag, c.Withdrawal,
+		c.CoinPackage, c.CoinPurchase, c.CoinPurchaseChargeback, c.CoinTransfer,
+		c.IdempotentRequest, c.MonetisationHold, c.OutboxEvent, c.PayoutAccount,
+		c.PayoutAccountResolution, c.SellerPayoutSchedule, c.SellerReserveFlag,
+		c.WalletRiskFlag, c.Withdrawal,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -312,6 +321,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.CoinPackage.mutate(ctx, m)
 	case *CoinPurchaseMutation:
 		return c.CoinPurchase.mutate(ctx, m)
+	case *CoinPurchaseChargebackMutation:
+		return c.CoinPurchaseChargeback.mutate(ctx, m)
 	case *CoinTransferMutation:
 		return c.CoinTransfer.mutate(ctx, m)
 	case *IdempotentRequestMutation:
@@ -1110,6 +1121,25 @@ func (c *CoinPurchaseClient) GetX(ctx context.Context, id uuid.UUID) *CoinPurcha
 	return obj
 }
 
+// QueryChargebacks queries the chargebacks edge of a CoinPurchase.
+func (c *CoinPurchaseClient) QueryChargebacks(_m *CoinPurchase) *CoinPurchaseChargebackQuery {
+	query := (&CoinPurchaseChargebackClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coinpurchase.Table, coinpurchase.FieldID, id),
+			sqlgraph.To(coinpurchasechargeback.Table, coinpurchasechargeback.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, coinpurchase.ChargebacksTable, coinpurchase.ChargebacksColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.CoinPurchaseChargeback
+		step.Edge.Schema = schemaConfig.CoinPurchaseChargeback
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *CoinPurchaseClient) Hooks() []Hook {
 	return c.hooks.CoinPurchase
@@ -1132,6 +1162,158 @@ func (c *CoinPurchaseClient) mutate(ctx context.Context, m *CoinPurchaseMutation
 		return (&CoinPurchaseDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown CoinPurchase mutation op: %q", m.Op())
+	}
+}
+
+// CoinPurchaseChargebackClient is a client for the CoinPurchaseChargeback schema.
+type CoinPurchaseChargebackClient struct {
+	config
+}
+
+// NewCoinPurchaseChargebackClient returns a client for the CoinPurchaseChargeback from the given config.
+func NewCoinPurchaseChargebackClient(c config) *CoinPurchaseChargebackClient {
+	return &CoinPurchaseChargebackClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coinpurchasechargeback.Hooks(f(g(h())))`.
+func (c *CoinPurchaseChargebackClient) Use(hooks ...Hook) {
+	c.hooks.CoinPurchaseChargeback = append(c.hooks.CoinPurchaseChargeback, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coinpurchasechargeback.Intercept(f(g(h())))`.
+func (c *CoinPurchaseChargebackClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CoinPurchaseChargeback = append(c.inters.CoinPurchaseChargeback, interceptors...)
+}
+
+// Create returns a builder for creating a CoinPurchaseChargeback entity.
+func (c *CoinPurchaseChargebackClient) Create() *CoinPurchaseChargebackCreate {
+	mutation := newCoinPurchaseChargebackMutation(c.config, OpCreate)
+	return &CoinPurchaseChargebackCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CoinPurchaseChargeback entities.
+func (c *CoinPurchaseChargebackClient) CreateBulk(builders ...*CoinPurchaseChargebackCreate) *CoinPurchaseChargebackCreateBulk {
+	return &CoinPurchaseChargebackCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CoinPurchaseChargebackClient) MapCreateBulk(slice any, setFunc func(*CoinPurchaseChargebackCreate, int)) *CoinPurchaseChargebackCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CoinPurchaseChargebackCreateBulk{err: fmt.Errorf("calling to CoinPurchaseChargebackClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CoinPurchaseChargebackCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CoinPurchaseChargebackCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CoinPurchaseChargeback.
+func (c *CoinPurchaseChargebackClient) Update() *CoinPurchaseChargebackUpdate {
+	mutation := newCoinPurchaseChargebackMutation(c.config, OpUpdate)
+	return &CoinPurchaseChargebackUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoinPurchaseChargebackClient) UpdateOne(_m *CoinPurchaseChargeback) *CoinPurchaseChargebackUpdateOne {
+	mutation := newCoinPurchaseChargebackMutation(c.config, OpUpdateOne, withCoinPurchaseChargeback(_m))
+	return &CoinPurchaseChargebackUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoinPurchaseChargebackClient) UpdateOneID(id uuid.UUID) *CoinPurchaseChargebackUpdateOne {
+	mutation := newCoinPurchaseChargebackMutation(c.config, OpUpdateOne, withCoinPurchaseChargebackID(id))
+	return &CoinPurchaseChargebackUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CoinPurchaseChargeback.
+func (c *CoinPurchaseChargebackClient) Delete() *CoinPurchaseChargebackDelete {
+	mutation := newCoinPurchaseChargebackMutation(c.config, OpDelete)
+	return &CoinPurchaseChargebackDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoinPurchaseChargebackClient) DeleteOne(_m *CoinPurchaseChargeback) *CoinPurchaseChargebackDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoinPurchaseChargebackClient) DeleteOneID(id uuid.UUID) *CoinPurchaseChargebackDeleteOne {
+	builder := c.Delete().Where(coinpurchasechargeback.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoinPurchaseChargebackDeleteOne{builder}
+}
+
+// Query returns a query builder for CoinPurchaseChargeback.
+func (c *CoinPurchaseChargebackClient) Query() *CoinPurchaseChargebackQuery {
+	return &CoinPurchaseChargebackQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoinPurchaseChargeback},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CoinPurchaseChargeback entity by its id.
+func (c *CoinPurchaseChargebackClient) Get(ctx context.Context, id uuid.UUID) (*CoinPurchaseChargeback, error) {
+	return c.Query().Where(coinpurchasechargeback.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoinPurchaseChargebackClient) GetX(ctx context.Context, id uuid.UUID) *CoinPurchaseChargeback {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPurchase queries the purchase edge of a CoinPurchaseChargeback.
+func (c *CoinPurchaseChargebackClient) QueryPurchase(_m *CoinPurchaseChargeback) *CoinPurchaseQuery {
+	query := (&CoinPurchaseClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(coinpurchasechargeback.Table, coinpurchasechargeback.FieldID, id),
+			sqlgraph.To(coinpurchase.Table, coinpurchase.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, coinpurchasechargeback.PurchaseTable, coinpurchasechargeback.PurchaseColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.CoinPurchase
+		step.Edge.Schema = schemaConfig.CoinPurchaseChargeback
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CoinPurchaseChargebackClient) Hooks() []Hook {
+	return c.hooks.CoinPurchaseChargeback
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoinPurchaseChargebackClient) Interceptors() []Interceptor {
+	return c.inters.CoinPurchaseChargeback
+}
+
+func (c *CoinPurchaseChargebackClient) mutate(ctx context.Context, m *CoinPurchaseChargebackMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoinPurchaseChargebackCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoinPurchaseChargebackUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoinPurchaseChargebackUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoinPurchaseChargebackDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CoinPurchaseChargeback mutation op: %q", m.Op())
 	}
 }
 
@@ -2469,15 +2651,17 @@ func (c *WithdrawalClient) mutate(ctx context.Context, m *WithdrawalMutation) (V
 type (
 	hooks struct {
 		AdBalanceEarningsTransfer, AdBalanceTopUp, AdSpendDebit, CoinConversion,
-		CoinPackage, CoinPurchase, CoinTransfer, IdempotentRequest, MonetisationHold,
-		OutboxEvent, PayoutAccount, PayoutAccountResolution, SellerPayoutSchedule,
-		SellerReserveFlag, WalletRiskFlag, Withdrawal []ent.Hook
+		CoinPackage, CoinPurchase, CoinPurchaseChargeback, CoinTransfer,
+		IdempotentRequest, MonetisationHold, OutboxEvent, PayoutAccount,
+		PayoutAccountResolution, SellerPayoutSchedule, SellerReserveFlag,
+		WalletRiskFlag, Withdrawal []ent.Hook
 	}
 	inters struct {
 		AdBalanceEarningsTransfer, AdBalanceTopUp, AdSpendDebit, CoinConversion,
-		CoinPackage, CoinPurchase, CoinTransfer, IdempotentRequest, MonetisationHold,
-		OutboxEvent, PayoutAccount, PayoutAccountResolution, SellerPayoutSchedule,
-		SellerReserveFlag, WalletRiskFlag, Withdrawal []ent.Interceptor
+		CoinPackage, CoinPurchase, CoinPurchaseChargeback, CoinTransfer,
+		IdempotentRequest, MonetisationHold, OutboxEvent, PayoutAccount,
+		PayoutAccountResolution, SellerPayoutSchedule, SellerReserveFlag,
+		WalletRiskFlag, Withdrawal []ent.Interceptor
 	}
 )
 

@@ -33,6 +33,15 @@ describe("creator money notifications", () => {
     expect(harness.pushSender.sent.map((push) => push.content.title)).toEqual(["You got a tip", "Affiliate commission earned"]);
   });
 
+  it("notifies a Space host only after the committed gift credits creator earnings", async () => {
+    const { harness, handler } = await setup();
+    await handler.execute({ event: makeEvent("spaceCoinGift.committed", { spaceCoinGiftId: "g1", spaceId: "sp1", giftId: "gift1", quantity: 1, totalCoins: 100, creatorAmountCoins: 60, senderUserId: "u9", hostUserId: creatorId }) });
+    expect(harness.notifications.rows).toEqual([
+      expect.objectContaining({ userId: creatorId, title: "Space gift credited", body: "60 coins from a Space gift were credited to your creator earnings." }),
+    ]);
+    expect(harness.pushSender.sent.map((push) => push.content.title)).toEqual(["Space gift credited"]);
+  });
+
   it("respects the creator push preference", async () => {
     const { harness, handler } = await setup();
     await harness.preferences.upsert(creatorId, "creator", { push: false });

@@ -12,6 +12,7 @@ import (
 	"nantty/modules/subscriptions/src/generated/ent/idempotentrequest"
 	"nantty/modules/subscriptions/src/generated/ent/outboxevent"
 	"nantty/modules/subscriptions/src/generated/ent/planprice"
+	"nantty/modules/subscriptions/src/generated/ent/planpriceversion"
 	"nantty/modules/subscriptions/src/generated/ent/providerplan"
 	"nantty/modules/subscriptions/src/generated/ent/subscription"
 	"nantty/modules/subscriptions/src/generated/ent/subscriptioncoveredprofile"
@@ -93,6 +94,7 @@ func checkColumn(t, c string) error {
 			idempotentrequest.Table:          idempotentrequest.ValidColumn,
 			outboxevent.Table:                outboxevent.ValidColumn,
 			planprice.Table:                  planprice.ValidColumn,
+			planpriceversion.Table:           planpriceversion.ValidColumn,
 			providerplan.Table:               providerplan.ValidColumn,
 			subscription.Table:               subscription.ValidColumn,
 			subscriptioncoveredprofile.Table: subscriptioncoveredprofile.ValidColumn,

@@ -49,6 +49,10 @@ func (gateway *PaymentGateway) verifyAndSettlePaymentIntent(ctx context.Context,
 	if verification.Outcome == interfaces.OutcomePending {
 		return ConvertPaymentIntentToView(intent), nil
 	}
+	if verification.Outcome == interfaces.OutcomeSucceeded && (!validProviderFee(verification.ProviderFeeMinor, verification.AmountMinor) ||
+		(IsConnectedAccountCharge(intent) && (intent.PlatformFeeMinor < 0 || intent.PlatformFeeMinor > verification.AmountMinor || verification.ProviderFeeMinor > verification.AmountMinor-intent.PlatformFeeMinor))) {
+		return models.PaymentIntentView{}, ErrPaymentAmountMismatch
+	}
 	var settled *ent.PaymentIntent
 	var mismatch bool
 	var duplicateRefund *RequestedRefund
@@ -125,8 +129,12 @@ func (gateway *PaymentGateway) applyVerificationToIntent(ctx context.Context, tr
 		}
 	}
 	customerMatches := intent.CustomerEmail == "" || verification.CustomerEmail == "" || strings.EqualFold(intent.CustomerEmail, verification.CustomerEmail)
-	amountMatches := verification.AmountMinor == intent.AmountMinor && verification.Currency == intent.Currency && !chargeReused && customerMatches
+	feeMatches := verification.Outcome != interfaces.OutcomeSucceeded || validProviderFeeForIntent(intent, verification.ProviderFeeMinor, verification.AmountMinor)
+	amountMatches := verification.AmountMinor == intent.AmountMinor && verification.Currency == intent.Currency && !chargeReused && customerMatches && feeMatches
 	if verification.Outcome == interfaces.OutcomeFailed || !amountMatches {
+		if !amountMatches && intent.Status == paymentintent.StatusCancelled {
+			return intent, true, nil
+		}
 		reason := verification.FailureReason
 		if !amountMatches {
 			reason = fmt.Sprintf("amountMismatch: provider reported %d %s", verification.AmountMinor, verification.Currency)
@@ -136,6 +144,9 @@ func (gateway *PaymentGateway) applyVerificationToIntent(ctx context.Context, tr
 		}
 		if chargeReused {
 			reason = "chargeReused: the provider charge already settled another payment"
+		}
+		if !feeMatches {
+			reason = fmt.Sprintf("amountMismatch: provider fee %d exceeds verified charge capacity", verification.ProviderFeeMinor)
 		}
 		failed, err := intent.Update().Where(paymentintent.Version(intent.Version)).AddVersion(1).
 			SetStatus(paymentintent.StatusFailed).SetFailureReason(truncateReason(reason)).SetFailedAt(now).
@@ -159,7 +170,7 @@ func (gateway *PaymentGateway) applyVerificationToIntent(ctx context.Context, tr
 	}
 	update := intent.Update().Where(paymentintent.Version(intent.Version)).AddVersion(1).
 		SetStatus(paymentintent.StatusSucceeded).SetPaidAt(now).SetProviderTransactionID(verification.ProviderChargeId).
-		SetProviderFeeMinor(max(verification.ProviderFeeMinor, 0)).SetFailureReason("")
+		SetProviderFeeMinor(verification.ProviderFeeMinor).SetFailureReason("")
 	if paidElsewhere {
 		update.SetFailureReason(duplicatePaymentReason)
 	}

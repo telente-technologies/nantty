@@ -56,7 +56,7 @@ func NewSubscriptionsContainer(resources loaders.MoneyModuleResources, settings 
 		Idempotency: ledgerutils.SqlIdempotencyRecordStore{Schema: schema},
 		Now:         time.Now,
 		schemaConfig: ent.SchemaConfig{
-			CreatorSubscription: schema, CreatorSubscriptionCharge: schema, CreatorSubscriptionPlan: schema, IdempotentRequest: schema, OutboxEvent: schema, PlanPrice: schema, ProviderPlan: schema, Subscription: schema, SubscriptionCoveredProfile: schema, SubscriptionOfferClaim: schema, SubscriptionOfferLink: schema, SubscriptionOfferSend: schema, SubscriptionPeriod: schema, SubscriptionReminder: schema, TrialClaim: schema,
+			CreatorSubscription: schema, CreatorSubscriptionCharge: schema, CreatorSubscriptionPlan: schema, IdempotentRequest: schema, OutboxEvent: schema, PlanPrice: schema, PlanPriceVersion: schema, ProviderPlan: schema, Subscription: schema, SubscriptionCoveredProfile: schema, SubscriptionOfferClaim: schema, SubscriptionOfferLink: schema, SubscriptionOfferSend: schema, SubscriptionPeriod: schema, SubscriptionReminder: schema, TrialClaim: schema,
 		},
 	}
 }

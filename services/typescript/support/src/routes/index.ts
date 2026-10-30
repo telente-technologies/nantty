@@ -1,4 +1,4 @@
-import { createRouter, type HttpRouter } from "@zudojs/http";
+import { createRouter, type HttpRouter } from "@nantty/fastify-platform";
 
 import type { Clock } from "../interfaces/clock.interface.js";
 import type { HelpContentStore } from "../interfaces/helpContentStore.interface.js";
