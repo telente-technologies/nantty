@@ -17,6 +17,7 @@ import { SignUpTopicsStep } from "./signupTopicsStep";
 import { SignUpVerifyCodeStep } from "./signupVerifyCodeStep";
 import { useResendCountdown } from "./useResendCountdown.hook";
 import { useUsernameAvailability } from "./useUsernameAvailability.hook";
+import { runWithAsyncActionLock } from "@/utils/asyncActionLock.util";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -34,6 +35,8 @@ export default function SignUpPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const submissionInFlight = useRef(false);
+  const accountCreationInFlight = useRef(false);
+  const otpActionInFlight = useRef(false);
   const [registered, setRegistered] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [customisingFeed, setCustomisingFeed] = useState(false);
@@ -86,33 +89,37 @@ export default function SignUpPage() {
 
   async function verifyCode(enteredCode: string) {
     if (enteredCode.length !== 6 || busy) return;
-    setError(null);
-    setBusy(true);
-    try {
-      const verified = await authService.verifyOneTimeCode(destination, enteredCode, "signup");
-      setOtpToken(verified.otpToken);
-      setStep("birthday");
-    } catch (caught) {
-      setError(caught instanceof WebappRequestError ? caught.message : "That code didn't work. Try again.");
-      setCode("");
-    } finally {
-      setBusy(false);
-    }
+    await runWithAsyncActionLock(otpActionInFlight, async () => {
+      setError(null);
+      setBusy(true);
+      try {
+        const verified = await authService.verifyOneTimeCode(destination, enteredCode, "signup");
+        setOtpToken(verified.otpToken);
+        setStep("birthday");
+      } catch (caught) {
+        setError(caught instanceof WebappRequestError ? caught.message : "That code didn't work. Try again.");
+        setCode("");
+      } finally {
+        setBusy(false);
+      }
+    });
   }
 
   async function resendCode(successMessage: string) {
-    if (submissionInFlight.current) return;
-    submissionInFlight.current = true;
-    setError(null);
-    try {
-      await authService.sendOneTimeCode(destination, "signup");
-      restartResendCountdown();
-      setMessage(successMessage);
-    } catch {
-      setError("We couldn't resend the code. Please try again.");
-    } finally {
-      submissionInFlight.current = false;
-    }
+    if (resendSeconds > 0 || busy) return;
+    await runWithAsyncActionLock(otpActionInFlight, async () => {
+      setError(null);
+      setBusy(true);
+      try {
+        await authService.sendOneTimeCode(destination, "signup");
+        restartResendCountdown();
+        setMessage(successMessage);
+      } catch (caught) {
+        setError(caught instanceof WebappRequestError ? caught.message : "We couldn't resend the code. Please try again.");
+      } finally {
+        setBusy(false);
+      }
+    });
   }
 
   async function createAccount(chosenUsername: string | undefined) {
@@ -120,28 +127,32 @@ export default function SignUpPage() {
       setError("Your verification expired. Go back and request a new code.");
       return;
     }
-    setError(null);
-    setConflictSuggestions([]);
-    setBusy(true);
-    try {
-      const createdAccount = await sendRequestToWebappServer<{ user: User; csrfToken?: string }>("/auth/register", {
-        method: "POST",
-        body: {
-          email: destination,
-          ...(chosenUsername ? { username: chosenUsername } : {}),
-          password,
-          birthday: parseBirthdayFromDayMonthYear(birthdayText)?.toISOString().slice(0, 10) ?? "",
-          otpToken,
-        },
-      });
-      if (createdAccount.csrfToken) rememberCsrfTokenForRequests(createdAccount.csrfToken);
-      setRegistered(true);
-      setStep("topics");
-    } catch (caught) {
-      setError(caught instanceof WebappRequestError ? caught.message : "We couldn't create your account. Please try again.");
-    } finally {
-      setBusy(false);
-    }
+    await runWithAsyncActionLock(accountCreationInFlight, async () => {
+      setError(null);
+      setConflictSuggestions([]);
+      setBusy(true);
+      try {
+        const createdAccount = await sendRequestToWebappServer<{ user: User; csrfToken?: string }>("/auth/register", {
+          method: "POST",
+          body: {
+            email: destination,
+            ...(chosenUsername ? { username: chosenUsername } : {}),
+            password,
+            birthday: parseBirthdayFromDayMonthYear(birthdayText)?.toISOString().slice(0, 10) ?? "",
+            otpToken,
+          },
+        });
+        if (createdAccount.csrfToken) rememberCsrfTokenForRequests(createdAccount.csrfToken);
+        setCode("");
+        setOtpToken("");
+        setRegistered(true);
+        setStep("topics");
+      } catch (caught) {
+        setError(caught instanceof WebappRequestError ? caught.message : "We couldn't create your account. Please try again.");
+      } finally {
+        setBusy(false);
+      }
+    });
   }
 
   async function handleCreateAccount(event: FormEvent<HTMLFormElement>) {

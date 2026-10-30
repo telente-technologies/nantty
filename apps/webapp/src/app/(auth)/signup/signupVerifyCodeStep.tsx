@@ -27,6 +27,7 @@ export function SignUpVerifyCodeStep({ code, hasError, isBusy, canContinue, rese
           className={stepStyles.otpHiddenInput}
           inputMode="numeric"
           autoComplete="one-time-code"
+          disabled={isBusy}
           pattern="\d{6}"
           maxLength={6}
           aria-label="Verification code"
@@ -55,7 +56,7 @@ export function SignUpVerifyCodeStep({ code, hasError, isBusy, canContinue, rese
             Resend code {resendSeconds}s
           </button>
         ) : (
-          <button type="button" className={stepStyles.resendButtonLink} onClick={onResend}>
+          <button type="button" className={stepStyles.resendButtonLink} disabled={isBusy} onClick={onResend}>
             Resend code
           </button>
         )}

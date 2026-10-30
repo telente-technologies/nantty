@@ -2,6 +2,8 @@
 
 import { GlobalErrorScreen, ThemeInitScript } from "@nantty/web-kit";
 
+import recoveryStyles from "@/components/errors/errorPage.module.css";
+
 import { buildWebappErrorConfig } from "@/components/errors/errorExperience.provider";
 
 import "./globals.css";
@@ -13,7 +15,7 @@ export default function GlobalError({ error, retry }: { readonly error: Error & 
         <title>Nantty hit a problem</title>
         <ThemeInitScript />
       </head>
-      <body>
+      <body className={recoveryStyles.experience}>
         <GlobalErrorScreen error={error} retry={retry} config={buildWebappErrorConfig()} />
       </body>
     </html>
