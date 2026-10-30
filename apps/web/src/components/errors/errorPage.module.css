@@ -1,0 +1,84 @@
+.experience {
+  min-width: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.experience [data-error-kind] {
+  min-height: min(78svh, 780px);
+  padding: clamp(64px, 10vw, 120px) clamp(20px, 5vw, 64px);
+  gap: clamp(48px, 7vw, 80px);
+}
+
+.experience [data-error-kind] > div:first-child > span:first-child:not(:last-child) {
+  font-size: clamp(112px, 28vw, 240px);
+  font-weight: 900;
+  letter-spacing: -0.08em;
+  background: none;
+  color: color-mix(in srgb, var(--color-brand) 22%, var(--color-bg));
+}
+
+.experience [data-error-kind] > div:last-child {
+  width: 100%;
+  max-width: 640px;
+  min-width: 0;
+  gap: 16px;
+}
+
+.experience [data-error-kind] h1 {
+  max-width: 18ch;
+  font-size: clamp(28px, 5vw, 56px);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.experience h1 + p {
+  max-width: 48ch;
+  line-height: 1.65;
+}
+
+.experience nav {
+  max-width: 560px;
+}
+
+.experience a,
+.experience button {
+  min-height: 44px;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.experience :is(a, button, input):focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+@media (max-width: 480px) {
+  .experience [data-error-kind] {
+    min-height: 70svh;
+  }
+
+  .experience nav li {
+    flex: 1 1 130px;
+    min-width: 0;
+  }
+
+  .experience nav a {
+    width: 100%;
+    justify-content: center;
+    padding-block: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .experience *,
+  .experience *::before,
+  .experience *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+

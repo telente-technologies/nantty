@@ -50,6 +50,9 @@ importers:
       '@nantty/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslintConfig
+      '@tauri-apps/cli':
+        specifier: ^2.0.0
+        version: 2.12.4
       '@types/node':
         specifier: ^26.6.5
         version: 26.6.5
@@ -759,6 +762,9 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: 3.1152.0
         version: 3.1152.0
+      '@nantty/fastify-platform':
+        specifier: workspace:*
+        version: link:../../../packages/fastify-platform
       '@opentelemetry/api':
         specifier: 1.9.1
         version: 1.9.1
@@ -792,27 +798,24 @@ importers:
       '@prisma/client':
         specifier: ^7.10.0
         version: 7.10.0(prisma@7.10.0(@types/node@26.6.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
-      '@zudojs/http':
-        specifier: ^1.5.0
-        version: 1.5.0
-      '@zudojs/logger':
-        specifier: ^1.5.0
-        version: 1.5.0
-      '@zudojs/schema':
-        specifier: ^1.3.0
-        version: 1.3.0
       amqplib:
         specifier: ^2.2.0
         version: 2.2.0
       blurhash:
         specifier: ^2.0.5
         version: 2.0.5
+      fastify:
+        specifier: 5.7.4
+        version: 5.7.4
       prisma:
         specifier: ^7.10.0
         version: 7.10.0(@types/node@26.6.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
       sharp:
         specifier: ^0.35.5
         version: 0.35.5(@types/node@26.6.5)
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
     devDependencies:
       '@nantty/eslint-config':
         specifier: workspace:*
@@ -823,9 +826,6 @@ importers:
       eslint:
         specifier: ^10.12.0
         version: 10.12.0(jiti@2.7.0)(supports-color@10.2.2)
-      tsx:
-        specifier: ^4.23.15
-        version: 4.23.15
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
@@ -990,6 +990,9 @@ importers:
       '@aws-sdk/client-sns':
         specifier: 3.1152.0
         version: 3.1152.0
+      '@nantty/fastify-platform':
+        specifier: workspace:*
+        version: link:../../../packages/fastify-platform
       '@opentelemetry/api':
         specifier: 1.9.1
         version: 1.9.1
@@ -1023,21 +1026,18 @@ importers:
       '@prisma/client':
         specifier: ^7.10.0
         version: 7.10.0(prisma@7.10.0(@types/node@26.6.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
-      '@zudojs/http':
-        specifier: ^1.5.0
-        version: 1.5.0
-      '@zudojs/logger':
-        specifier: ^1.5.0
-        version: 1.5.0
-      '@zudojs/schema':
-        specifier: ^1.3.0
-        version: 1.3.0
       amqplib:
         specifier: ^2.2.0
         version: 2.2.0
+      fastify:
+        specifier: 5.7.4
+        version: 5.7.4
       prisma:
         specifier: ^7.10.0
         version: 7.10.0(@types/node@26.6.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
     devDependencies:
       '@nantty/eslint-config':
         specifier: workspace:*
@@ -1048,9 +1048,6 @@ importers:
       eslint:
         specifier: ^10.12.0
         version: 10.12.0(jiti@2.7.0)(supports-color@10.2.2)
-      tsx:
-        specifier: ^4.23.15
-        version: 4.23.15
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
@@ -1060,6 +1057,9 @@ importers:
 
   services/typescript/support:
     dependencies:
+      '@nantty/fastify-platform':
+        specifier: workspace:*
+        version: link:../../../packages/fastify-platform
       '@opentelemetry/api':
         specifier: 1.9.1
         version: 1.9.1
@@ -1093,15 +1093,6 @@ importers:
       '@prisma/client':
         specifier: ^7.10.0
         version: 7.10.0(prisma@7.10.0(@types/node@26.6.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
-      '@zudojs/http':
-        specifier: ^1.5.0
-        version: 1.5.0
-      '@zudojs/logger':
-        specifier: ^1.5.0
-        version: 1.5.0
-      '@zudojs/schema':
-        specifier: ^1.3.0
-        version: 1.3.0
       amqplib:
         specifier: ^2.2.0
         version: 2.2.0
@@ -3462,6 +3453,82 @@ packages:
       '@types/react':
         optional: true
 
+  '@tauri-apps/cli-darwin-arm64@2.12.4':
+    resolution: {integrity: sha512-OxqKSckIkoJ6vX2AjifIJpTasFC0Hbdoo7gEiCmAjauABO3U8m2MRsLWe+QTiBwDx1mIrvgA+rvI7tvDnbnHVg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@tauri-apps/cli-darwin-x64@2.12.4':
+    resolution: {integrity: sha512-fz76/77wMMJOaaUN6n3CybRG0P/MTEjjqYk81mGPyhi9m6Ue5T+LWBnJP/AkPooNatBPI2vtulGqomyMJ44lCQ==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@tauri-apps/cli-linux-arm-gnueabihf@2.12.4':
+    resolution: {integrity: sha512-K0w8Bof6Lt8QKLAYhRy0yy36ZH5iA/35VuSOvnxyjvCUZ+A3JKsUTlALviH/sVgAlisaPzzmeJSH8XOn4Q2HBA==}
+    engines: {node: '>= 10'}
+    cpu: [arm]
+    os: [linux]
+
+  '@tauri-apps/cli-linux-arm64-gnu@2.12.4':
+    resolution: {integrity: sha512-j5rOnjmRUwWrm1oosf0zBYl4D+fqydgUROFCk0hvKZxvbTT8SOERes0QB7rBV/XWNy+kM6pCKzb3oSm2sRglzg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@tauri-apps/cli-linux-arm64-musl@2.12.4':
+    resolution: {integrity: sha512-aOue3Fy6Jb7+oWcfAVUsVHfeTybSCt2CZoU06aO4jv4d2Ks/KnaTPwMAK3CLEduGOvBLY1lbBBrIyomqLLH5Sg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@tauri-apps/cli-linux-riscv64-gnu@2.12.4':
+    resolution: {integrity: sha512-Fx6GShY/RvST+t6LMlTHAwd66+1tEaAAGrnU7cysVfaiRP1BKng5Vl6rVmO6rSLOA1Sp1dRzNYM4f0OWQGb7qA==}
+    engines: {node: '>= 10'}
+    cpu: [riscv64]
+    os: [linux]
+    libc: [glibc]
+
+  '@tauri-apps/cli-linux-x64-gnu@2.12.4':
+    resolution: {integrity: sha512-tNzZSa79Z1nRpHxEpQ38lsAFpKlFlYvoXzjTV+lRRn/zSf3wrdUC3wnLcq2XEadchPu4ttK0zivhYzr+XGD19Q==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@tauri-apps/cli-linux-x64-musl@2.12.4':
+    resolution: {integrity: sha512-jmZ1pr0xEqUhuEusWtt9Yt+GF6lCnGHUmIL+KIknpbjK/XQ2qkhDBhaxK/JMHM2A8dAacVXCxXJk2EXpwhQUfA==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@tauri-apps/cli-win32-arm64-msvc@2.12.4':
+    resolution: {integrity: sha512-fGo8pgEHZxdSYgZ/J98m1usJ7NHKmKbq7k6uT0x1rpOq6Bg2YVzzpaAblWk710f5LHYBJIL5QIFS5IrD+4gmTg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@tauri-apps/cli-win32-ia32-msvc@2.12.4':
+    resolution: {integrity: sha512-ezl8sQIcjYsye3TUnTH5VcWmWzccZASlQm7hlZt0dYyj1XD0qpVW47u2xYVrIKui0F8uQv/7QGZixdWiClBsbg==}
+    engines: {node: '>= 10'}
+    cpu: [ia32]
+    os: [win32]
+
+  '@tauri-apps/cli-win32-x64-msvc@2.12.4':
+    resolution: {integrity: sha512-DJhDeCqjLDNMWYFy7ZS8cfeAHX2RK0RbQMLiA3bMVVkXRDJ4NBYiHriGqsUhsr9iG41aTb+dJGkFPmPw1gWwVw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@tauri-apps/cli@2.12.4':
+    resolution: {integrity: sha512-JI9bHfudSRJikGOrjbXEm6RjzzvmKuLc+JixB1NE8hNzQkNlCCIC3pTES3uypkR9lxHrsbxzcnSwhI2IxBQphw==}
+    engines: {node: '>= 10'}
+    hasBin: true
+
   '@testing-library/react-native@14.1.0':
     resolution: {integrity: sha512-tWOam5U3aUE8XqStdWAN/OuUUdGRzh/vJMg7SfCaqXNKx7orRh04590Jp4JbORctYjORoRYfJSg04I2//wnxYw==}
     engines: {node: ^22.13.0 || >=24}
@@ -3979,46 +4046,6 @@ packages:
   '@xmldom/xmldom@0.9.12':
     resolution: {integrity: sha512-5AXjrcMClTryPe9LgZrygpB1lj7s0S9E0+W+AHaVKAVyHanafK86iPSvG5xHVSp/jC+VH1UXu0TAEmY279xH7A==}
     engines: {node: '>=14.6'}
-
-  '@zudojs/constants@1.2.0':
-    resolution: {integrity: sha512-3+pto2PD7Wptj+O6KMs5ytlWaCqu1eLvrJOZIFHykslS83NGlk3kOVV+hAuJc4gM2h2IbADw79yUuOD3SrMA7g==}
-    engines: {node: '>=24.0.0'}
-
-  '@zudojs/crypto@1.4.0':
-    resolution: {integrity: sha512-agMOFjupE0uuFnTqXjTaem8ZwfDJOCsUqsAUMihUSMjbJqubp0G1vwlS5IO9hNCbgEsr43HuNaUNsKqVH8sr9A==}
-    engines: {node: '>=24.0.0'}
-
-  '@zudojs/errors@1.4.0':
-    resolution: {integrity: sha512-wJu30LVlZkTjKpZgayGwfsImmT1b9qMex5jf+AREcaY+uT5XhgNIhOaFXfMdP7/D09PFc15luwk0yTYW971WwA==}
-    engines: {node: '>=24.0.0'}
-
-  '@zudojs/http@1.5.0':
-    resolution: {integrity: sha512-mn8VvEC6GxJVwDYyyzRBZWEvuzVVJ2+NdrpA12eaCG0yxM8hThSOPRmIPij+F98Dgbq9nMkFfvN+7tyfi+JE5g==}
-    engines: {node: '>=24.0.0'}
-
-  '@zudojs/logger@1.5.0':
-    resolution: {integrity: sha512-fS+qFqp0RCSsTL6pshcnz8MJMRYnBez68zUq4wJrAtHg7xaZrS2r/hKaZjMb9YA2WrioQtEWOpcwNCDKWjSSMA==}
-    engines: {node: '>=24.0.0'}
-
-  '@zudojs/middleware@1.1.3':
-    resolution: {integrity: sha512-tvJLQNir7+eCqkpTZ3EiED7ot49JE7Xpp82nT4O5Dntrz/jJnxdllZUDDCIAt8JMVcJi3qOQmWjThX29zSEldA==}
-    engines: {node: '>=24.0.0'}
-
-  '@zudojs/openapi@1.6.0':
-    resolution: {integrity: sha512-MQLm4qCzhVHRK+Q9gioo+J0nRAz66/Uty80VBmzb6f9QKa71LvzKRAWQAF1g1BdIjrWgVVGrprbqHX57QS/nGQ==}
-    engines: {node: '>=24.0.0'}
-
-  '@zudojs/schema@1.3.0':
-    resolution: {integrity: sha512-lRsLHQlqPLA2eS64i+fHSoJ8JpAbjsB0tiDNqi3NNNW20stMqZbeZrVdlqkMa5dNOHEhwOLJMo64FVTV+/RsFw==}
-    engines: {node: '>=24.0.0'}
-
-  '@zudojs/security@1.3.4':
-    resolution: {integrity: sha512-dE6dEdhkzWaZn3nKpasKpMArDqOc+OApZbR4IIQizWAZ87cZp7LpYa+QSDXceNHOYBBJJ0PbIBNI5CCqM+Xl3w==}
-    engines: {node: '>=24.0.0'}
-
-  '@zudojs/types@1.3.0':
-    resolution: {integrity: sha512-UwLoThCZR+TXamCn/Hp8gADRWd4Zi2Q3K4F4MvtVNaz2xrH1gw9aoGlPywl58zsdHrvY4x4qDNUtmHDxZx3nSw==}
-    engines: {node: '>=24.0.0'}
 
   abab@2.0.6:
     resolution: {integrity: sha512-j2afSsaIENvHZN2B8GOpF566vZ5WVk5opAiMTvWgaQT8DkbOqsTfvNAvHoRGU2zzP8cPoqys+xHTRDWW8L+/BA==}
@@ -11519,6 +11546,53 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
 
+  '@tauri-apps/cli-darwin-arm64@2.12.4':
+    optional: true
+
+  '@tauri-apps/cli-darwin-x64@2.12.4':
+    optional: true
+
+  '@tauri-apps/cli-linux-arm-gnueabihf@2.12.4':
+    optional: true
+
+  '@tauri-apps/cli-linux-arm64-gnu@2.12.4':
+    optional: true
+
+  '@tauri-apps/cli-linux-arm64-musl@2.12.4':
+    optional: true
+
+  '@tauri-apps/cli-linux-riscv64-gnu@2.12.4':
+    optional: true
+
+  '@tauri-apps/cli-linux-x64-gnu@2.12.4':
+    optional: true
+
+  '@tauri-apps/cli-linux-x64-musl@2.12.4':
+    optional: true
+
+  '@tauri-apps/cli-win32-arm64-msvc@2.12.4':
+    optional: true
+
+  '@tauri-apps/cli-win32-ia32-msvc@2.12.4':
+    optional: true
+
+  '@tauri-apps/cli-win32-x64-msvc@2.12.4':
+    optional: true
+
+  '@tauri-apps/cli@2.12.4':
+    optionalDependencies:
+      '@tauri-apps/cli-darwin-arm64': 2.12.4
+      '@tauri-apps/cli-darwin-x64': 2.12.4
+      '@tauri-apps/cli-linux-arm-gnueabihf': 2.12.4
+      '@tauri-apps/cli-linux-arm64-gnu': 2.12.4
+      '@tauri-apps/cli-linux-arm64-musl': 2.12.4
+      '@tauri-apps/cli-linux-riscv64-gnu': 2.12.4
+      '@tauri-apps/cli-linux-x64-gnu': 2.12.4
+      '@tauri-apps/cli-linux-x64-musl': 2.12.4
+      '@tauri-apps/cli-win32-arm64-msvc': 2.12.4
+      '@tauri-apps/cli-win32-ia32-msvc': 2.12.4
+      '@tauri-apps/cli-win32-x64-msvc': 2.12.4
+
   '@testing-library/react-native@14.1.0(jest@30.5.2(@types/node@26.6.4)(supports-color@10.2.2))(react-native@0.86.3(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/jest-preset@0.86.3(@babel/core@7.29.7(supports-color@10.2.2))(react@19.2.3)(supports-color@10.2.2))(@react-native/metro-config@0.86.3(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.3.0)(react@19.2.3)(supports-color@10.2.2))(react@19.2.3)(test-renderer@1.3.0(@types/react@19.3.0)(react@19.2.3))':
     dependencies:
       jest-matcher-utils: 30.5.2
@@ -12001,52 +12075,6 @@ snapshots:
   '@xmldom/xmldom@0.8.15': {}
 
   '@xmldom/xmldom@0.9.12': {}
-
-  '@zudojs/constants@1.2.0':
-    dependencies:
-      '@zudojs/errors': 1.4.0
-
-  '@zudojs/crypto@1.4.0':
-    dependencies:
-      '@zudojs/constants': 1.2.0
-      '@zudojs/errors': 1.4.0
-
-  '@zudojs/errors@1.4.0': {}
-
-  '@zudojs/http@1.5.0':
-    dependencies:
-      '@zudojs/crypto': 1.4.0
-      '@zudojs/errors': 1.4.0
-      '@zudojs/logger': 1.5.0
-      '@zudojs/middleware': 1.1.3
-      '@zudojs/openapi': 1.6.0
-      '@zudojs/security': 1.3.4
-
-  '@zudojs/logger@1.5.0':
-    dependencies:
-      '@zudojs/errors': 1.4.0
-
-  '@zudojs/middleware@1.1.3':
-    dependencies:
-      '@zudojs/errors': 1.4.0
-
-  '@zudojs/openapi@1.6.0':
-    dependencies:
-      '@zudojs/constants': 1.2.0
-      '@zudojs/errors': 1.4.0
-
-  '@zudojs/schema@1.3.0':
-    dependencies:
-      '@zudojs/constants': 1.2.0
-      '@zudojs/errors': 1.4.0
-      '@zudojs/types': 1.3.0
-
-  '@zudojs/security@1.3.4':
-    dependencies:
-      '@zudojs/constants': 1.2.0
-      '@zudojs/errors': 1.4.0
-
-  '@zudojs/types@1.3.0': {}
 
   abab@2.0.6: {}
 
