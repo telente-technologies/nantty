@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches: [main]
-    paths: ["services/**", "services/python/intelligence/**", "pnpm-lock.yaml", ".github/workflows/deploy.yml", ".github/scripts/**"]
+    paths: ["services/**", "packages/**", "infra/aws/tls-proxy/**", "pnpm-lock.yaml", "pnpm-workspace.yaml", "package.json", ".github/workflows/deploy.yml", ".github/scripts/**"]
   workflow_dispatch:
 
 permissions:
@@ -25,6 +25,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { service: tls-proxy, context: infra/aws/tls-proxy, file: infra/aws/tls-proxy/Dockerfile }
           - { service: go-identity, context: services, file: services/go/deployables/goIdentity/Dockerfile }
           - { service: go-commerce, context: services, file: services/go/deployables/goCommerce/Dockerfile }
           - { service: go-money, context: services, file: services/go/deployables/goMoney/Dockerfile }
@@ -35,16 +36,20 @@ jobs:
           - { service: social, context: ., file: services/typescript/social/Dockerfile }
           - { service: notifications, context: ., file: services/typescript/notifications/Dockerfile }
           - { service: media, context: ., file: services/typescript/media/Dockerfile }
+          - { service: search, context: ., file: services/typescript/search/Dockerfile }
+          - { service: support, context: ., file: services/typescript/support/Dockerfile }
           - { service: realtime, context: services/elixir/realtime, file: services/elixir/realtime/Dockerfile }
           - { service: intelligence, context: services/python/intelligence, file: services/python/intelligence/Dockerfile }
     steps:
       - uses: actions/checkout@v7.0.1
+      - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v4
       - name: Build image for scanning
         uses: docker/build-push-action@v7
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.file }}
+          platforms: linux/arm64
           load: true
           tags: scan/${{ matrix.service }}:${{ env.IMAGE_TAG }}
           cache-from: type=gha,scope=${{ matrix.service }}
@@ -73,6 +78,7 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.file }}
           push: true
+          platforms: linux/arm64
           provenance: mode=max
           sbom: true
           tags: ${{ steps.ecr.outputs.registry }}/nantty/${{ matrix.service }}:${{ env.IMAGE_TAG }}
@@ -89,29 +95,33 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID_STAGING }}:role/nantty-staging-github-deploy
           aws-region: ${{ vars.AWS_REGION }}
+      - name: Create and verify pre-migration Aurora snapshot
+        env:
+          AURORA_CLUSTER_ID: ${{ vars.AURORA_CLUSTER_ID_STAGING }}
+          RESTORE_JOB_ID: ${{ vars.MIGRATION_RESTORE_JOB_ID_STAGING }}
+          MIGRATE_TASK_DEFINITION: ${{ vars.MIGRATE_TASK_DEFINITION }}
+        run: bash .github/scripts/migrationSnapshotGate.sh staging
       - name: Run pre-deploy migration task
-        if: ${{ vars.MIGRATE_TASK_DEFINITION != '' }}
-        run: |
-          aws ecs run-task --cluster nantty-staging --task-definition "${{ vars.MIGRATE_TASK_DEFINITION }}" \
-            --launch-type FARGATE --started-by "ci-${{ github.sha }}" \
-            --network-configuration "awsvpcConfiguration={subnets=[${{ vars.STAGING_PRIVATE_SUBNETS }}],securityGroups=[${{ vars.STAGING_TASKS_SECURITY_GROUP }}],assignPublicIp=DISABLED}" \
-            --query 'tasks[0].taskArn' --output text > task.txt
-          aws ecs wait tasks-stopped --cluster nantty-staging --tasks "$(cat task.txt)"
-          test "$(aws ecs describe-tasks --cluster nantty-staging --tasks "$(cat task.txt)" --query 'tasks[0].containers[0].exitCode' --output text)" = 0
+        env:
+          MIGRATE_TASK_DEFINITION: ${{ vars.MIGRATE_TASK_DEFINITION }}
+          MIGRATION_IMAGE: "${{ vars.AWS_ACCOUNT_ID_STAGING }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nantty/go-money:${{ github.sha }}"
+          PRIVATE_SUBNETS: ${{ vars.STAGING_PRIVATE_SUBNETS }}
+          TASKS_SECURITY_GROUP: ${{ vars.STAGING_TASKS_SECURITY_GROUP }}
+        run: bash .github/scripts/runMigrationTask.sh staging
       - id: registry
         run: echo "host=${{ vars.AWS_ACCOUNT_ID_STAGING }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com" >> "$GITHUB_OUTPUT"
-      - name: Roll out services (ECS rolling, CodeDeploy blue/green for go-money)
+      - name: Roll out services (ECS rolling with rollback)
         env:
           REGISTRY: ${{ steps.registry.outputs.host }}
         run: |
-          for service in go-identity go-commerce go-live go-ads go-trust social notifications media realtime intelligence gateway; do
+          for service in go-identity go-commerce go-live go-ads go-trust social notifications media search support realtime intelligence gateway; do
             bash .github/scripts/deployService.sh "$service" "$REGISTRY/nantty/$service:$IMAGE_TAG" staging &
             pids+=($!)
           done
           failed=0
           for pid in "${pids[@]}"; do wait "$pid" || failed=1; done
           [ "$failed" = 0 ]
-          bash .github/scripts/deployService.sh go-money "$REGISTRY/nantty/go-money:$IMAGE_TAG" staging true 8080
+          bash .github/scripts/deployService.sh go-money "$REGISTRY/nantty/go-money:$IMAGE_TAG" staging
 
   smoke-staging:
     needs: deploy-staging
@@ -131,38 +141,42 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID_PROD }}:role/nantty-prod-github-deploy
           aws-region: ${{ vars.AWS_REGION }}
+      - name: Create and verify pre-migration Aurora snapshot
+        env:
+          AURORA_CLUSTER_ID: ${{ vars.AURORA_CLUSTER_ID_PROD }}
+          RESTORE_JOB_ID: ${{ vars.MIGRATION_RESTORE_JOB_ID_PROD }}
+          MIGRATE_TASK_DEFINITION: ${{ vars.MIGRATE_TASK_DEFINITION_PROD }}
+        run: bash .github/scripts/migrationSnapshotGate.sh prod
       - id: registries
         run: |
           staging="${{ vars.AWS_ACCOUNT_ID_STAGING }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
           prod="${{ vars.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
           aws ecr get-login-password | docker login --username AWS --password-stdin "$prod"
-          aws ecr get-login-password --registry-ids "${{ vars.AWS_ACCOUNT_ID_STAGING }}" | docker login --username AWS --password-stdin "$staging"
+          aws ecr get-login-password | docker login --username AWS --password-stdin "$staging"
           echo "staging=$staging" >> "$GITHUB_OUTPUT"
           echo "prod=$prod" >> "$GITHUB_OUTPUT"
       - name: Promote the exact staging images to the production registry
         run: |
-          for service in go-identity go-commerce go-money go-live go-ads go-trust social notifications media realtime intelligence gateway; do
+          for service in tls-proxy go-identity go-commerce go-money go-live go-ads go-trust social notifications media search support realtime intelligence gateway; do
             docker buildx imagetools create --tag "${{ steps.registries.outputs.prod }}/nantty/$service:$IMAGE_TAG" "${{ steps.registries.outputs.staging }}/nantty/$service:$IMAGE_TAG"
           done
       - name: Run pre-deploy migration task
-        if: ${{ vars.MIGRATE_TASK_DEFINITION_PROD != '' }}
-        run: |
-          aws ecs run-task --cluster nantty-prod --task-definition "${{ vars.MIGRATE_TASK_DEFINITION_PROD }}" \
-            --launch-type FARGATE --started-by "ci-${{ github.sha }}" \
-            --network-configuration "awsvpcConfiguration={subnets=[${{ vars.PROD_PRIVATE_SUBNETS }}],securityGroups=[${{ vars.PROD_TASKS_SECURITY_GROUP }}],assignPublicIp=DISABLED}" \
-            --query 'tasks[0].taskArn' --output text > task.txt
-          aws ecs wait tasks-stopped --cluster nantty-prod --tasks "$(cat task.txt)"
-          test "$(aws ecs describe-tasks --cluster nantty-prod --tasks "$(cat task.txt)" --query 'tasks[0].containers[0].exitCode' --output text)" = 0
+        env:
+          MIGRATE_TASK_DEFINITION: ${{ vars.MIGRATE_TASK_DEFINITION_PROD }}
+          MIGRATION_IMAGE: "${{ vars.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nantty/go-money:${{ github.sha }}"
+          PRIVATE_SUBNETS: ${{ vars.PROD_PRIVATE_SUBNETS }}
+          TASKS_SECURITY_GROUP: ${{ vars.PROD_TASKS_SECURITY_GROUP }}
+        run: bash .github/scripts/runMigrationTask.sh prod
       - name: Roll out services
         env:
           REGISTRY: ${{ steps.registries.outputs.prod }}
         run: |
-          for service in go-identity go-commerce go-live go-ads go-trust social notifications media realtime intelligence gateway; do
+          for service in go-identity go-commerce go-live go-ads go-trust social notifications media search support realtime intelligence gateway; do
             bash .github/scripts/deployService.sh "$service" "$REGISTRY/nantty/$service:$IMAGE_TAG" prod &
             pids+=($!)
           done
           failed=0
           for pid in "${pids[@]}"; do wait "$pid" || failed=1; done
           [ "$failed" = 0 ]
-          bash .github/scripts/deployService.sh go-money "$REGISTRY/nantty/go-money:$IMAGE_TAG" prod true 8080
+          bash .github/scripts/deployService.sh go-money "$REGISTRY/nantty/go-money:$IMAGE_TAG" prod
       - run: bash .github/scripts/smokeTest.sh "${{ vars.PROD_API_URL }}"

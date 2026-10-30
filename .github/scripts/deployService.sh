@@ -5,30 +5,23 @@ service=$1
 image=$2
 environment=$3
 cluster="nantty-${environment}"
-blue_green=${4:-false}
-port=${5:-8080}
+proxy_image="${image%/nantty/*}/nantty/tls-proxy:${image##*:}"
 
-current=$(aws ecs describe-services --cluster "$cluster" --services "$service" --query 'services[0].taskDefinition' --output text)
-aws ecs describe-task-definition --task-definition "$current" --query taskDefinition > current.json
-jq --arg image "$image" --arg name "$service" '
-  .containerDefinitions |= map(if .name == $name then .image = $image else . end)
+# Services deploy concurrently; task-definition files must never be shared.
+deploy_tmp=$(mktemp -d)
+trap 'rm -f "$deploy_tmp/current.json" "$deploy_tmp/next.json"; rmdir "$deploy_tmp"' EXIT
+
+# Latest active family revision picks up Terraform's runtime/SG-independent task
+# configuration after bootstrap or infrastructure changes, rather than cloning
+# the older definition still attached to the service.
+aws ecs describe-task-definition --task-definition "nantty-${environment}-${service}" --query taskDefinition > "$deploy_tmp/current.json"
+jq -e --arg image "$image" --arg proxy "$proxy_image" --arg name "$service" '
+  select(any(.containerDefinitions[]; .name == "tls-proxy" and .essential == true))
+  | .containerDefinitions |= map(if .name == $name then .image = $image elif .name == "tls-proxy" then .image = $proxy else . end)
   | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)
-' current.json > next.json
-next=$(aws ecs register-task-definition --cli-input-json file://next.json --query taskDefinition.taskDefinitionArn --output text)
+' "$deploy_tmp/current.json" > "$deploy_tmp/next.json"
+next=$(aws ecs register-task-definition --cli-input-json "file://$deploy_tmp/next.json" --query taskDefinition.taskDefinitionArn --output text)
 echo "registered $next"
-
-if [ "$blue_green" = "true" ]; then
-  appspec=$(jq -cn --arg task "$next" --arg name "$service" --argjson port "$port" \
-    '{version: 1, Resources: [{TargetService: {Type: "AWS::ECS::Service", Properties: {TaskDefinition: $task, LoadBalancerInfo: {ContainerName: $name, ContainerPort: $port}}}}]}')
-  revision=$(jq -cn --arg content "$appspec" '{revisionType: "AppSpecContent", appSpecContent: {content: $content}}')
-  deployment=$(aws deploy create-deployment \
-    --application-name "nantty-${environment}-${service}" \
-    --deployment-group-name "nantty-${environment}-${service}" \
-    --revision "$revision" --query deploymentId --output text)
-  echo "codedeploy deployment $deployment (10 percent canary, alarm rollback)"
-  aws deploy wait deployment-successful --deployment-id "$deployment"
-  exit 0
-fi
 
 aws ecs update-service --cluster "$cluster" --service "$service" --task-definition "$next" --force-new-deployment > /dev/null
 aws ecs wait services-stable --cluster "$cluster" --services "$service"
