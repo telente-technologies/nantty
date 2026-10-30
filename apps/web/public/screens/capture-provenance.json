@@ -1,0 +1,145 @@
+{
+  "capturedAt": "2026-10-27T13:05:10.526Z",
+  "runtime": "http://localhost:8081 Expo React Native Web, actual mobile screens",
+  "data": "Existing app demo fixtures, browser-local demo session; no invented UI or legacy-pixel edits",
+  "viewport": {
+    "width": 393,
+    "height": 852,
+    "deviceScaleFactor": 2
+  },
+  "format": "WebP quality 92; native screenshot dimensions recorded per image",
+  "screens": [
+    {
+      "file": "escrowStatusScreen.webp",
+      "source": "apps/mobile/src/screens/escrow/escrowStatus.screen.tsx; o_4105",
+      "route": "/EscrowStatus?orderId=o_4105",
+      "sha256": "798cb9c003adc6265c61bea561a2e637ed10d3c81f86c7797f6839167993ee01",
+      "oldBrandInRenderedText": false,
+      "pageErrors": [],
+      "captureTool": "Headless Chromium via Playwright, captured before CUA-only reminder",
+      "dimensions": "786x1704"
+    },
+    {
+      "file": "sellerDashboardScreen.webp",
+      "source": "apps/mobile/src/screens/seller/sellerDashboard.screen.tsx",
+      "route": "/seller/dashboard",
+      "sha256": "2ec074de37fa64ae8c8fbd5b14981abd20386639c49191f636b028ba1e5d2e57",
+      "oldBrandInRenderedText": false,
+      "pageErrors": [],
+      "captureTool": "Headless Chromium via Playwright, captured before CUA-only reminder",
+      "dimensions": "786x1704"
+    },
+    {
+      "file": "creatorDashboardScreen.webp",
+      "source": "apps/mobile/src/screens/creator/creatorDashboard.screen.tsx",
+      "route": "/creator/dashboard",
+      "sha256": "fa7cbc21225a3b4a2e9adbad7c201b73ea4fb19fe220e9ae39dd8a7139d51c1a",
+      "oldBrandInRenderedText": false,
+      "pageErrors": [],
+      "captureTool": "Headless Chromium via Playwright, captured before CUA-only reminder",
+      "dimensions": "786x1704"
+    },
+    {
+      "file": "sellerWalletScreen.webp",
+      "source": "apps/mobile/src/screens/wallet/wallet.screen.tsx",
+      "route": "/Wallet",
+      "sha256": "50179f6f710a53df2380556f5badfe7da72fdbcef3838eab6fa9dfbc48234fba",
+      "oldBrandInRenderedText": false,
+      "pageErrors": [],
+      "captureTool": "Headless Chromium via Playwright, captured before CUA-only reminder",
+      "dimensions": "786x1704"
+    },
+    {
+      "file": "productDetailScreen.webp",
+      "source": "apps/mobile/src/screens/product/productDetail.screen.tsx; pr_f1",
+      "route": "/p/pr_f1",
+      "sha256": "63a6334f3de321ea4b42cb6eecdd6732839c1013282a30856d17cf9e422c8e8f",
+      "oldBrandInRenderedText": false,
+      "pageErrors": [],
+      "captureTool": "Headless Chromium via Playwright, captured before CUA-only reminder",
+      "dimensions": "786x1704"
+    },
+    {
+      "file": "shoppingCartScreen.webp",
+      "source": "apps/mobile/src/screens/cart/cart.screen.tsx",
+      "route": "/cart",
+      "sha256": "ad8241062853877191f3e64e57a3a3f30a6e45c7388591a1b37bd12fd773a432",
+      "oldBrandInRenderedText": false,
+      "pageErrors": [],
+      "captureTool": "Headless Chromium via Playwright, captured before CUA-only reminder",
+      "dimensions": "786x1704"
+    },
+    {
+      "file": "chatWithSellerScreen.webp",
+      "source": "apps/mobile/src/screens/messages/chat.screen.tsx; c_2 business conversation",
+      "route": "/Chat?conversationId=c_2&userId=u_1&name=Adaeze%20Styles",
+      "sha256": "beed3f38f19d1f8c633a13931188a0eab9a06f3b0ca7ec472919aaa3c306b026",
+      "oldBrandInRenderedText": false,
+      "pageErrors": [],
+      "captureTool": "Headless Chromium via Playwright, captured before CUA-only reminder",
+      "dimensions": "786x1704"
+    },
+    {
+      "file": "creatorProfileScreen.webp",
+      "source": "apps/mobile/src/screens/profile/userProfile.screen.tsx; u_2",
+      "route": "/user/u_2",
+      "sha256": "0eee3240d352730109a73c186d5d4525d5ee5e0b70b468ad36ec47d9dce31875",
+      "oldBrandInRenderedText": false,
+      "pageErrors": [],
+      "captureTool": "Headless Chromium via Playwright, captured before CUA-only reminder",
+      "dimensions": "786x1704"
+    },
+    {
+      "file": "storyScreen.webp",
+      "source": "apps/mobile/src/screens/story/story.screen.tsx; u_2",
+      "route": "/stories/u_2",
+      "sha256": "56382a5f93c9de3872a0d2b6b0330ed975506085a3a203ee92513f153d256e4c",
+      "oldBrandInRenderedText": false,
+      "pageErrors": [],
+      "captureTool": "Headless Chromium via Playwright, captured before CUA-only reminder",
+      "dimensions": "786x1704"
+    },
+    {
+      "file": "shoppableClipsScreen.webp",
+      "source": "apps/mobile/src/screens/clips/clips.screen.tsx",
+      "route": "/clips",
+      "sha256": "139fad7258044b9cc9e64d29eaad2fbd265dfcf13927283883e5eb3470e4d03b",
+      "oldBrandInRenderedText": false,
+      "pageErrors": [],
+      "captureTool": "Headless Chromium via Playwright, captured before CUA-only reminder",
+      "dimensions": "786x1704"
+    },
+    {
+      "file": "homeFeedScreen.webp",
+      "source": "apps/mobile/src/screens/home/home.screen.tsx; FeedTab",
+      "route": "/",
+      "captureTool": "cua_repl in-app browser",
+      "dimensions": "393x852",
+      "sha256": "65cddc0b576e71dbde891c26bcb178bf37db2b5bc03085601e8592abfa179fe4",
+      "oldBrandInRenderedText": false,
+      "pageErrors": []
+    }
+  ],
+  "unrefreshed": [
+    {
+      "file": "homeMartScreen.webp",
+      "reason": "Excluded capture with unloaded hero image; original retained"
+    },
+    {
+      "file": "martProductsScreen.webp",
+      "reason": "Story auto-advance interrupted capture; original retained"
+    },
+    {
+      "file": "liveShoppingScreen.webp",
+      "reason": "Live capture interrupted; Expo connection unavailable before CUA retry; original retained"
+    }
+  ],
+  "platformFeePercent": 0,
+  "checks": {
+    "count": 11,
+    "visualReview": "Each installed image visually inspected; escrow brand and zero fee verified",
+    "oldBrandSearch": "Retired brand terms are absent from rendered text of installed captures",
+    "productSourceEdits": false,
+    "legacyImageEditing": false
+  }
+}
