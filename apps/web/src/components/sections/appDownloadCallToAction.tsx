@@ -1,6 +1,6 @@
 import { OfficialStoreBadges } from "@nantty/web-kit";
 
-import { storeLinks, webAppLink } from "@/lib/siteConfig.config";
+import { isPrelaunchMode, storeLinks, webAppLink } from "@/lib/siteConfig.config";
 
 import { ActionLinkStyledAsButton } from "../ui/actionLink";
 import { PhoneFrameWithAppScreen } from "../ui/phoneFrame";
@@ -17,12 +17,13 @@ interface AppDownloadCallToActionProps {
 
 export function AppDownloadCallToActionPanel({
   headingId = "download-heading",
-  heading = "Shop the sellers you already watch.",
-  description = "Get Nantty on iPhone and Android, or open the web app and start shopping in your browser.",
-  actionLabel = webAppLink.label,
-  actionHref = webAppLink.href,
+  heading = isPrelaunchMode ? "Be there when Nantty opens." : "Shop the sellers you already watch.",
+  description = isPrelaunchMode ? "Nantty is still in development. Join the waitlist for launch updates; app and web access will be announced when they are ready." : "Get Nantty on iPhone and Android, or open the web app and start shopping in your browser.",
+  actionLabel = isPrelaunchMode ? "Join the waitlist" : webAppLink.label,
+  actionHref = isPrelaunchMode ? "/waitlist" : webAppLink.href,
   sectionId = "download",
 }: AppDownloadCallToActionProps) {
+  const visibleStoreLinks = isPrelaunchMode ? { appStoreUrl: null, playStoreUrl: null } : storeLinks;
   return (
     <section id={sectionId} className={styles.section} aria-labelledby={headingId}>
       <div className="pageContainer">
@@ -32,10 +33,15 @@ export function AppDownloadCallToActionPanel({
               {heading}
             </h2>
             <p className={styles.description}>{description}</p>
-            <ActionLinkStyledAsButton href={actionHref} appearance="onDark" opensInNewTab>
+            <ActionLinkStyledAsButton
+              href={actionHref}
+              appearance="onDark"
+              opensInNewTab={actionHref === webAppLink.href}
+              disabled={process.env.NANTTY_CLOUDFLARE_STATIC_EXPORT === "1" && actionHref === webAppLink.href}
+            >
               {actionLabel}
             </ActionLinkStyledAsButton>
-            <OfficialStoreBadges links={storeLinks} className={styles.storeBadges} />
+            <OfficialStoreBadges links={visibleStoreLinks} className={styles.storeBadges} />
           </div>
           <div className={styles.phoneColumn}>
             <PhoneFrameWithAppScreen screen="homeMartScreen" alt="Nantty Mart tab with Sales of the Day, Featured Brands and New Arrivals" className={styles.phone} sizes="(min-width: 960px) 320px, 70vw" />

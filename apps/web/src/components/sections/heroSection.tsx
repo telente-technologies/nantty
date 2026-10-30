@@ -1,6 +1,6 @@
 import { OfficialStoreBadges } from "@nantty/web-kit";
 
-import { storeLinks, webAppLink } from "@/lib/siteConfig.config";
+import { isPrelaunchMode, storeLinks, webAppLink } from "@/lib/siteConfig.config";
 
 import { ActionLinkStyledAsButton } from "../ui/actionLink";
 import { FigmaIconTintedWithCurrentColor } from "../ui/figmaIcon";
@@ -9,35 +9,38 @@ import { PhoneFrameWithAppScreen } from "../ui/phoneFrame";
 import styles from "./heroSection.module.css";
 
 export function HomeHeroSectionWithPhoneStage() {
+  const visibleStoreLinks = isPrelaunchMode ? { appStoreUrl: null, playStoreUrl: null } : storeLinks;
   return (
     <section className={styles.hero} aria-labelledby="hero-heading">
       <div className={`pageContainer ${styles.layout}`}>
         <div className={styles.copyColumn}>
-          <p className="eyebrowLabel">Social Commerce, made for Nigeria</p>
+          <p className="eyebrowLabel">{isPrelaunchMode ? "Social commerce, being built for Nigeria" : "Social commerce, made for Nigeria"}</p>
           <h1 id="hero-heading" className={styles.heading}>
-            Shop the sellers you already <span className={styles.priceTag}>watch.</span>
+            {isPrelaunchMode ? "Discover the sellers you already " : "Shop the sellers you already "}<span className={styles.priceTag}>watch.</span>
           </h1>
           <p className={styles.lede}>
-            Find real sellers through posts, clips, stories and live streams. Pay in your local currency, and your money stays in escrow until you confirm your order arrived.
+            {isPrelaunchMode
+              ? "We’re building one place to discover independent sellers and creators, explore what they share, and shop with clearer protections. Nantty is still in development; join the waitlist for launch updates."
+              : "Discover independent sellers and creators, explore what they share, and shop with clearer protections."}
           </p>
           <div className={styles.actions}>
-            <ActionLinkStyledAsButton href={webAppLink.href} opensInNewTab>
-              {webAppLink.label}
-            </ActionLinkStyledAsButton>
-            <OfficialStoreBadges links={storeLinks} />
+            {isPrelaunchMode
+              ? <ActionLinkStyledAsButton href="/waitlist">Join the waitlist</ActionLinkStyledAsButton>
+              : <ActionLinkStyledAsButton href={webAppLink.href} opensInNewTab>{webAppLink.label}</ActionLinkStyledAsButton>}
+            <OfficialStoreBadges links={visibleStoreLinks} />
           </div>
           <ul className={styles.proofList}>
             <li>
               <FigmaIconTintedWithCurrentColor name="shield24" size={18} />
-              Escrow on every order
+              {isPrelaunchMode ? "Buyer protection is being built" : "Payment-partner protection on eligible orders"}
             </li>
             <li>
               <FigmaIconTintedWithCurrentColor name="sealCheck20" size={18} />
-              Sellers are reviewed before they open
+              {isPrelaunchMode ? "Seller verification is part of the plan" : "Seller verification supports trust"}
             </li>
             <li>
               <FigmaIconTintedWithCurrentColor name="apple24" size={18} />
-              iPhone and Android
+              {isPrelaunchMode ? "Planned for iPhone and Android" : "Available on iPhone and Android"}
             </li>
           </ul>
         </div>
@@ -48,13 +51,13 @@ export function HomeHeroSectionWithPhoneStage() {
           <PhoneFrameWithAppScreen screen="productDetailScreen" alt="Ankara wrap midi dress product page with its naira price, official store badge and Add to Cart" className={`${styles.phone} ${styles.phoneRight}`} sizes="(min-width: 900px) 220px, 34vw" />
           <p className={`${styles.floatingChip} ${styles.liveChip}`}>
             <span className={styles.liveDot} aria-hidden="true" />
-            Live now: shop while you watch
+            {isPrelaunchMode ? "A preview of what we’re building" : "Live shopping"}
           </p>
           <p className={`${styles.floatingChip} ${styles.escrowChip}`}>
             <span className={styles.currencyCoin}>
               <LocalCurrencySymbol />
             </span>
-            <span>Your payment is held until you confirm delivery</span>
+            <span>{isPrelaunchMode ? "Eligible orders are designed for payment-partner escrow" : "Payment-partner escrow for eligible Nigerian orders"}</span>
           </p>
         </div>
       </div>

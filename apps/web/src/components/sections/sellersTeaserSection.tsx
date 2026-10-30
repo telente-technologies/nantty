@@ -5,10 +5,10 @@ import { SellerWalletPreviewCard } from "../ui/sellerWalletPreviewCard";
 import styles from "./sellersTeaserSection.module.css";
 
 const sellerBenefits = [
-  "A store on your profile, next to your posts and clips",
-  "Go live and sell while you talk",
-  "Orders, chats and stock in one seller dashboard",
-  "A wallet that pays out to your bank account",
+  "A planned store on your profile, alongside posts and clips",
+  "Creator-approved live tools, with video LIVE remaining in beta",
+  "A seller workspace designed for orders, customers and stock",
+  "Payment and payout status designed to be clear",
 ] as const;
 
 export function SellersTeaserSection() {
@@ -20,12 +20,12 @@ export function SellersTeaserSection() {
           <SellerWalletPreviewCard className={styles.walletCard} />
         </div>
         <div className={styles.copyColumn}>
-          <p className={styles.eyebrow}>For sellers</p>
+          <p className={styles.eyebrow}>For sellers · in development</p>
           <h2 id="sellers-teaser-heading" className={styles.heading}>
-            Your followers keep asking “how much?” Give them a checkout.
+            Turn discovery into a clearer way to shop.
           </h2>
           <p className={styles.description}>
-            Stop sending account numbers in DMs. Open a Nantty store, tag products in your content, and get paid once buyers confirm delivery.
+            We’re building stores that connect products with the posts and conversations where people discover them. Seller onboarding and payment features are not open to the public yet.
           </p>
           <ul className={styles.benefitList}>
             {sellerBenefits.map((sellerBenefit) => (
@@ -37,8 +37,8 @@ export function SellersTeaserSection() {
           </ul>
           <div className={styles.actions}>
             <ActionLinkStyledAsButton href="/sellers">See how selling works</ActionLinkStyledAsButton>
-            <ActionLinkStyledAsButton href="/sellers#apply" appearance="secondary">
-              Apply to sell
+            <ActionLinkStyledAsButton href="/waitlist" appearance="secondary">
+              Join the waitlist
             </ActionLinkStyledAsButton>
           </div>
         </div>

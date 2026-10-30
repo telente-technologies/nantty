@@ -13,25 +13,25 @@ interface BuyerJourneyStep {
 const buyerJourneySteps: readonly BuyerJourneyStep[] = [
   {
     title: "Discover",
-    description: "Scroll posts, clips and live streams from sellers and creators. Tap a tagged item to see the product.",
+    description: "The planned feed brings together posts, clips and seller content. When the feature is available, a tagged item can take you to its product page.",
     screen: "martProductsScreen",
     screenAlt: "Nantty Mart tab with Ankara dresses, earbuds and skincare priced in naira",
   },
   {
     title: "Ask the seller",
-    description: "Message the seller about sizes, colours or delivery before you pay. The chat stays attached to your order.",
+    description: "Ask a seller about sizes, colours or delivery before checkout, using the product and order conversation tools as they become available.",
     screen: "chatWithSellerScreen",
     screenAlt: "Chat with Adaeze Styles asking if an Adire kaftan is available in size L",
   },
   {
     title: "Pay into escrow",
-    description: "Check out from one or many stores in your local currency. Your payment is held by Nantty, not sent to the seller yet.",
+    description: "For eligible Nigerian orders, the planned checkout uses payment-partner escrow. Nantty does not hold customer funds; availability depends on the payment method and supported market.",
     screen: "shoppingCartScreen",
     screenAlt: "Nantty cart with earbuds, a vitamin C serum and suya spice, with the order summary",
   },
   {
     title: "Confirm and release",
-    description: "When your order arrives as described, confirm delivery. Only then is the seller paid.",
+    description: "For an eligible escrow order, the buyer can confirm delivery or raise a dispute before funds are released under the applicable order policy.",
     screen: "escrowStatusScreen",
     screenAlt: "Payment protection timeline for a delivered order, with the payment still held in escrow until the buyer confirms",
   },
@@ -42,10 +42,10 @@ export function BuyerJourneyStepsSection() {
     <section id="how-it-works" className={styles.section} aria-labelledby="how-it-works-heading">
       <div className="pageContainer">
         <SectionIntroWithEyebrowAndHeading
-          eyebrow="How buying works"
+          eyebrow="The planned buyer journey"
           headingId="how-it-works-heading"
-          heading="From scroll to doorstep in four steps."
-          description="You see the seller, talk to the seller, and pay without the usual worry about what will actually show up."
+          heading="A more confident way to shop socially."
+          description="Nantty is still being built. These screens show the intended buyer journey; features and availability may change before launch."
         />
         <ol className={styles.stepList}>
           {buyerJourneySteps.map((journeyStep, stepIndex) => (

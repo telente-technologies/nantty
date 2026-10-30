@@ -31,10 +31,10 @@ export function SocialShoppingFeatureTabsSection() {
       <div className={`pageContainer ${styles.layout}`}>
         <div className={styles.copyColumn}>
           <SectionIntroWithEyebrowAndHeading
-            eyebrow="Social Commerce"
+            eyebrow="The product we’re building"
             headingId="social-shopping-heading"
-            heading="Watch it, ask about it, buy it. Same app."
-            description="Nantty puts the way Nigerians already shop online, through posts, videos and DMs, next to a proper cart and checkout."
+            heading="Discovery and shopping, designed to work together."
+            description="Nantty is still in development. These app screens are previews of the intended product, not a statement that the features are already available."
           />
           <div className={styles.tabList} role="tablist" aria-label="Ways to shop" aria-orientation="vertical" onKeyDown={moveTabSelectionWithArrowKeys}>
             {socialShoppingFeatures.map((feature, featureIndex) => {

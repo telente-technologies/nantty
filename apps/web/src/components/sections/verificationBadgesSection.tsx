@@ -8,19 +8,19 @@ const verificationBadgeKinds = [
     badgeClassName: styles.blueBadge,
     title: "Blue badge",
     audience: "People and creators",
-    description: "A personal account whose identity Nantty has checked.",
+    description: "The planned Blue badge is for a personal account approved through identity review.",
   },
   {
     badgeClassName: styles.goldBadge,
     title: "Gold badge",
     audience: "Businesses and brands",
-    description: "A verified business. Gold brands can run an official store, so you know the product comes from the brand itself.",
+    description: "The planned Gold badge is for a business or brand approved through business verification. Store eligibility is reviewed separately.",
   },
   {
     badgeClassName: styles.blackBadge,
     title: "Black badge",
     audience: "Government",
-    description: "An official government body or public institution, such as a ministry or regulator.",
+    description: "The planned Black badge is reserved for approved government institutions and authorized official accounts.",
   },
 ] as const;
 
@@ -33,10 +33,10 @@ export function VerificationBadgesSection() {
         </div>
         <div className={styles.copyColumn}>
           <SectionIntroWithEyebrowAndHeading
-            eyebrow="Badges and official stores"
+            eyebrow="The planned verification model"
             headingId="badges-heading"
-            heading="Know exactly who you are buying from."
-            description="Verification badges tell you who is behind an account. Brands can claim their profile and open an official store, and fakes can be reported from any product or post."
+            heading="Verification should make identity clearer."
+            description="Nantty is still in development. Verification requires separate review; a paid plan will not replace identity or business approval, and a badge will not guarantee a product or seller."
           />
           <ul className={styles.badgeList}>
             {verificationBadgeKinds.map((verificationBadgeKind) => (
@@ -51,7 +51,7 @@ export function VerificationBadgesSection() {
           <p className={styles.officialStoreNote}>
             <FigmaIconTintedWithCurrentColor name="buildingStore20" size={20} />
             <span>
-              <strong>Brands and official stores.</strong> Look for the Official Store label on product pages. Every order, from a small seller or a big brand, is paid in your local currency and held in escrow until you confirm delivery.
+              <strong>Official stores.</strong> Nantty is designed to distinguish a brand’s official store from other sellers. Payment options and escrow protection will depend on the supported market and payment method.
             </span>
           </p>
         </div>

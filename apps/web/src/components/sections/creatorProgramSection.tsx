@@ -4,10 +4,10 @@ import { SectionIntroWithEyebrowAndHeading } from "../ui/sectionIntro";
 import styles from "./creatorProgramSection.module.css";
 
 const creatorEarningStreams: ReadonlyArray<{ readonly icon: FigmaIconName; readonly title: string; readonly description: string }> = [
-  { icon: "videoCamera24", title: "Go live and receive gifts", description: "Stream your talk show, music, game or class. Fans send gifts during your lives and they land in your creator earnings. You do not need a store." },
-  { icon: "tag24", title: "Affiliate commissions", description: "Promote products from sellers you trust. You earn a commission once the buyer's order is confirmed and escrow is released." },
-  { icon: "play24", title: "Ad revenue share", description: "Earn a share of the revenue from ads shown alongside your posts and clips." },
-  { icon: "userCircle24", title: "Subscriptions", description: "Offer monthly or yearly plans with subscriber-only clips, posts and lives for your biggest fans." },
+  { icon: "videoCamera24", title: "Video LIVE is in beta", description: "Live video is a gated beta capability while we improve it; it is not part of the initial launch. Creator Program approval is required to host." },
+  { icon: "tag24", title: "Affiliate tools are being built", description: "The planned affiliate flow will attribute eligible completed purchases to a creator’s link. Escrow or pending orders do not earn a commission." },
+  { icon: "play24", title: "Creator monetisation is evolving", description: "Advertising revenue sharing and other earning tools depend on program approval, eligibility, feature availability and the final Creator Program terms." },
+  { icon: "userCircle24", title: "Fan subscriptions are in development", description: "Subscription-only posts and clips are part of the product direction, subject to launch readiness and the final feature rules." },
 ];
 
 export function CreatorProgramSection() {
@@ -16,10 +16,10 @@ export function CreatorProgramSection() {
       <div className={`pageContainer ${styles.layout}`}>
         <div className={styles.copyColumn}>
           <SectionIntroWithEyebrowAndHeading
-            eyebrow="Creator Program"
+            eyebrow="Creator tools in development"
             headingId="creators-heading"
-            heading="Creators get paid here too."
-            description="Join the Creator Program in the app and earn from the content you already make. Earnings show in your local currency and withdraw to your bank account."
+            heading="A home for the work creators already do."
+            description="We’re building creator tools alongside the marketplace. Some features are still in development or beta, require separate approval, and may change before launch. No earnings are guaranteed."
           />
           <ul className={styles.streamList}>
             {creatorEarningStreams.map((creatorEarningStream) => (
@@ -36,7 +36,7 @@ export function CreatorProgramSection() {
           </ul>
         </div>
         <div className={styles.visual}>
-          <PhoneFrameWithAppScreen screen="creatorDashboardScreen" alt="Creator dashboard with monthly earnings split into gifts, affiliate commissions and bonuses, and top lives and posts" className={styles.phone} sizes="(min-width: 960px) 300px, 66vw" />
+          <PhoneFrameWithAppScreen screen="creatorDashboardScreen" alt="Preview of a Nantty creator dashboard concept showing earnings, content and creator tools" className={styles.phone} sizes="(min-width: 960px) 300px, 66vw" />
         </div>
       </div>
     </section>

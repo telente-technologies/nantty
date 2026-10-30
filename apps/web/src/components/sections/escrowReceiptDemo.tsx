@@ -7,10 +7,10 @@ import { LocalCurrencySymbol } from "../ui/localCurrencySymbol";
 import styles from "./escrowReceiptDemo.module.css";
 
 const escrowStages = [
-  { label: "Payment received", detail: "Paid in your local currency by card, bank transfer or another local method." },
-  { label: "Held in escrow", detail: "Nantty keeps the money. The seller is told to ship." },
-  { label: "Out for delivery", detail: "Track it, and chat with the seller if anything changes." },
-  { label: "Released to seller", detail: "You confirmed delivery, so the seller's wallet is paid." },
+  { label: "Payment received", detail: "A supported payment method starts the order-protection flow." },
+  { label: "Held by payment partner", detail: "For eligible Nigerian orders, funds stay in the buyer’s payment-partner account. Nantty does not hold the money." },
+  { label: "Out for delivery", detail: "The buyer can track delivery and raise an issue if something changes." },
+  { label: "Released to seller", detail: "After delivery confirmation or dispute review, the payment partner releases eligible funds under the order policy." },
 ] as const;
 
 const confirmDeliveryStageIndex = 2;
@@ -40,7 +40,7 @@ export function InteractiveEscrowReceiptDemo() {
   return (
     <figure className={styles.receipt} aria-labelledby="escrow-receipt-caption">
       <div className={styles.receiptHeader}>
-        <p className={styles.receiptLabel}>Example order</p>
+        <p className={styles.receiptLabel}>Illustrative example · not a live order</p>
         <p className={`${styles.statusBadge} ${isReleased ? styles.statusReleased : styles.statusHeld}`}>{isReleased ? "Paid out" : "Protected"}</p>
       </div>
       <div className={styles.amountRow}>
@@ -82,7 +82,7 @@ export function InteractiveEscrowReceiptDemo() {
         {!isAwaitingBuyerConfirmation && !isReleased ? <p className={styles.waitingNote}>The seller is not paid yet.</p> : null}
       </div>
       <figcaption id="escrow-receipt-caption" className="visuallyHidden">
-        Interactive example of a Nantty order moving through escrow, from payment to release.
+        Illustrative, non-live example of the planned payment-partner protection flow for eligible orders. Nantty does not hold customer funds.
       </figcaption>
     </figure>
   );
