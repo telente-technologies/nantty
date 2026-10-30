@@ -21,7 +21,7 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     paragraphs: [
       "You must be at least 13 years old to have an account, or older where your local law sets a higher age for using online services without a parent's consent.",
       "We ask for your date of birth when you sign up. If you are under 18, you need the permission of a parent or guardian, who accepts these terms for you and is responsible for your use. In Nigeria, section 31 of the Nigeria Data Protection Act 2023 requires that consent for processing a child's data comes from a parent or guardian.",
-      "Under-18 accounts never see nudity or dangerous content, are not shown ads, and cannot sell, receive payouts, join the Creator Program or run ads.",
+      "Under-18 accounts never see nudity or dangerous content. They may receive contextual ads only from categories permitted for their age; those ads are not personalised or targeted using personal traits. Under-18 accounts cannot sell, receive payouts, join the Creator Program or run ads.",
       "You cannot use Nantty if we have permanently banned you, or if the law or sanctions rules that apply to us prevent us from serving you.",
     ],
   },

@@ -80,7 +80,7 @@ export const termsOfServiceMoneySections: readonly LegalDocumentSection[] = [
       "A boost pays to show your own post, profile or store to more people. Boosted posts are labelled Boosted. Ads bought in Nantty Ads are labelled Sponsored, and ads in comment sections are labelled Promoted. Premium members get 1 free boost each month.",
       "Ad balance is real money you top up to pay for ads. Unspent ad balance can be withdrawn after a 24-hour hold, once you are payout-verified, to your Nantty wallet and from there to your verified payout account. Any fee is shown before you confirm.",
       "Ad credit is promotional value that can only be spent on ads in Nantty. It is never money and can never be withdrawn or transferred. Credit we give you, for example as a promotion or goodwill, may have an expiry date that we show when we give it. Credit you earn in the app, such as cashback, never expires. Selected advertisers can receive 10% of their ad spend back as ad credit.",
-      "How many ads you see depends on your plan, as the Ads Policy explains. Premium and some business plans are ad-free, and guests and under-18s are not shown ads.",
+      "How many ads you see depends on your plan, as the Ads Policy explains. Guests are not shown ads. Under-18s may receive contextual, age-appropriate ads, but not personalised ads or ads from restricted categories.",
     ],
   },
 ];

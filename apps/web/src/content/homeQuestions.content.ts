@@ -1,42 +1,57 @@
 import type { QuestionAndAnswer } from "@/components/sections/frequentlyAskedQuestions";
+import { isPrelaunchMode } from "@/lib/siteConfig.config";
 
 export const homeQuestions: readonly QuestionAndAnswer[] = [
   {
     question: "What is Nantty?",
     answer:
-      "Nantty is a shopping app built around social content. Sellers and creators post photos, clips, stories and live streams, and you can buy what you see from their stores inside the same app.",
+      isPrelaunchMode
+        ? "Nantty is a social marketplace we’re building for Nigeria. The product is designed to bring seller and creator content, product discovery and protected checkout together; it is not open to the public yet."
+        : "Nantty is a social marketplace bringing seller and creator content, product discovery and protected checkout together in supported markets.",
   },
   {
     question: "How does escrow protect me?",
     answer:
-      "When you pay, Nantty holds the money instead of sending it straight to the seller. The seller is paid only after you confirm the order arrived as described. If something is wrong, you can open a dispute before confirming and the money stays held while it is reviewed.",
+      isPrelaunchMode
+        ? "For eligible Nigerian orders, the planned escrow flow keeps the funds in the buyer’s own account with our licensed payment partner while the order is protected. Nantty does not hold customer money. Release or refund follows delivery and dispute rules. Escrow is not available in every market or for every payment method."
+        : "For eligible Nigerian orders, funds remain in the buyer’s own account with our licensed payment partner while escrow is active. Nantty does not hold customer money. Release or refund follows delivery and dispute rules. Escrow is not available in every market or for every payment method.",
   },
   {
     question: "What currency will I pay in?",
     answer:
-      "Prices are shown in your local currency based on where you are. If Nantty does not support your country yet, you will see prices in US dollars.",
+      isPrelaunchMode
+        ? "Supported currencies and payment methods will depend on your country and the payment options available at launch. We’ll publish the supported-market details before opening the service."
+        : "Supported currencies and payment methods depend on your country and the options shown at checkout.",
   },
   {
     question: "Can I buy from more than one seller at once?",
-    answer: "Yes. Add products from different stores to one cart and check out once. Each seller ships their part and is paid separately when you confirm their delivery.",
+    answer: isPrelaunchMode
+      ? "That is the planned marketplace experience: one cart can include products from different stores, while each seller’s fulfilment and payment status remain separate. Availability will be confirmed before launch."
+      : "Add eligible products from different stores to one cart. Each seller’s fulfilment and payment status remain separate.",
   },
   {
     question: "Who can sell on Nantty?",
     answer:
-      "Businesses and individual sellers can apply to open a store. Applications are reviewed before a store goes live, so buyers know they are dealing with real sellers.",
+      isPrelaunchMode
+        ? "Businesses and eligible individual sellers are expected to be able to apply for a store. Seller verification and review are part of the product design; application availability and requirements will be published before launch."
+        : "Eligible businesses and individual sellers can apply for a store. Applications are reviewed and requirements depend on account and market eligibility.",
   },
   {
     question: "What do the blue, gold and black badges mean?",
     answer:
-      "Blue is a verified personal account, such as a creator. Gold is a verified business or brand, and gold brands can run an official store. Black is an official government account. Badges only appear after Nantty has checked who is behind the account.",
+      "Badge colors distinguish approved personal accounts (Blue), businesses and brands (Gold), and official government accounts (Black). Verification is separate from payment, and a badge appears only after the relevant review is complete.",
   },
   {
     question: "Can creators earn on Nantty?",
     answer:
-      "Yes. Through the Creator Program you can receive gifts when you go live, earn affiliate commissions on products you promote, get a share of ad revenue on your content, and offer paid subscriptions to your fans.",
+      isPrelaunchMode
+        ? "Creator earning tools are still being built. Video LIVE is a gated beta capability, while affiliate, advertising and fan-subscription features depend on launch readiness and Creator Program eligibility. No earnings are guaranteed, and gifts are not being presented as an initial-launch feature."
+        : "Some creator tools require separate Creator Program approval. Video LIVE remains a gated beta capability; current earning features and eligibility are shown in the program terms. Earnings are not guaranteed.",
   },
   {
     question: "When and where does Nantty launch?",
-    answer: "Nantty launches first across Nigeria, on iPhone and Android, with more countries after. Get the app on iPhone or Android, or shop from the web app in your browser.",
+    answer: isPrelaunchMode
+      ? "Nantty is still in development and is not yet open for public use. Join the waitlist for launch updates; we’ll confirm the launch date, supported countries and app availability when they are ready."
+      : "Nantty is available in supported markets. Check the official app stores and Nantty web app for current availability in your country.",
   },
 ];

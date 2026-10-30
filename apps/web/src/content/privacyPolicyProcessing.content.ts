@@ -127,7 +127,7 @@ export const privacyPolicyProcessingSections: readonly LegalDocumentSection[] = 
     heading: "Children",
     paragraphs: [
       "You must be at least 13 to have an account, and we ask for your date of birth when you sign up. Under the NDPA, a child is anyone under 18, and section 31 requires consent from a parent or guardian.",
-      "Under-18 accounts and anyone whose age we do not know never receive nudity or dangerous content, are not shown ads, and cannot sell, receive payouts, join the Creator Program or run ads.",
+      "Under-18 accounts and anyone whose age we do not know never receive nudity or dangerous content. They may receive contextual ads only from age-safe categories; personalised ads are limited to adults who consent. Under-18 accounts cannot sell, receive payouts, join the Creator Program or run ads.",
       "If you believe a child has given us personal data without the right consent, contact our DPO and we will delete it. Reports about child safety go to an urgent queue, and we report child sexual abuse material to the authorities.",
     ],
   },

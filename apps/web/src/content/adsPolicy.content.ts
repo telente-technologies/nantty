@@ -34,7 +34,7 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
   {
     id: "ad-load",
     heading: "How many ads people see",
-    paragraphs: ["The number of ads depends on the viewer's plan. Guests and under-18s are not shown ads. Today, compared with an account with no plan:"],
+    paragraphs: ["The number of ads depends on the viewer's plan. Guests are not shown ads. Under-18s and viewers whose age is unknown may receive contextual ads only from categories permitted for their age; those ads are not personalised."],
     bullets: [
       "No ads: Premium, the Business seller plan and the combined Gold and Premium plan.",
       "About 20% of the usual ads: government accounts with a Black checkmark.",
@@ -86,7 +86,7 @@ export const adsPolicySections: readonly LegalDocumentSection[] = [
     id: "targeting",
     heading: "Targeting and data",
     paragraphs: [
-      "Ads are chosen by a system separate from feed ranking, with frequency caps. Personalised ads are shown only to adults who allowed them. Under-18s and guests are not shown ads. You may not target ads using sensitive data such as health, religion, ethnicity or sexuality.",
+      "Ads are chosen by a system separate from feed ranking, with frequency caps. Personalised ads are shown only to adults who allowed them. Under-18s and viewers whose age is unknown may receive contextual ads only; age-restricted categories are excluded, and advertisers cannot target under-18 audiences. Guests are not shown ads. You may not target ads using sensitive data such as health, religion, ethnicity or sexuality.",
       "If you upload a customer list, upload only people who agreed to hear from you. Emails and phone numbers are hashed and matched inside Nantty; we never give you personal data about the people who see your ads, only aggregated results. Lookalike audiences are built inside Nantty in the same way.",
       "Advertisers are not charged for invalid traffic, such as fake or automated impressions and clicks. Creators who show your ads are paid a share of what you pay, as the Creator Program Terms explain.",
     ],
