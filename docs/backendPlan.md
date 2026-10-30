@@ -1,6 +1,6 @@
 # Nantty — Backend Plan
 
-Status: **draft (3 Oct 2026)**. Nothing here is built unless marked **ref** (logic existed in the old Nanttyjs monolith; it has been ported and the monolith was removed on 2026-10-10). Items marked **[CONFIRM]** need an owner decision before that piece starts.
+Status: **historical draft (3 Oct 2026)**. This is a port/design record, not a current implementation status report; check the code and [current architecture](architecture/system.md) before relying on implementation claims. The TypeScript services use Fastify; the old reference monolith has been removed. Items marked **[CONFIRM]** were owner decisions still open when this draft was written.
 
 Inputs read: `docs/plans.md` (incl. §5.4 contract debt, §8 Studio, §13 checkmarks, §20 creator live), `docs/CHANGELOG.md`, `docs/architecture/microservicesPlan.json`, `SECURITY.md`, the old monolith (Nanttyjs reference monolith), `apps/{seller,ads,admin,intelligence}/apiContract.md`, `apps/mobile/src/services` + `src/mocks`, and the BFF layers of `apps/webapp` and `apps/studio`.
 
@@ -27,7 +27,7 @@ These apply to every backend file, whether a person or an agent writes it.
 | Stack | Owns | Why this stack |
 | --- | --- | --- |
 | **Go** | users/accounts (auth, profiles, verification/KYB), wallet + ledger, payments, marketplace (catalog, inventory, stores), orders + escrow, subscriptions, creators (gifts, earnings), Nantty Points, live (sessions, guests, battles), ads decision + attribution, admin | Strong typing and simple concurrency for money and the core state machines |
-| **TypeScript (Nanttyjs)** | gateway, social orchestration (posts, comments, clips, stories, sounds, follows, privacy), feed orchestration, notifications, media, support, integrations (webhooks, couriers, partner APIs) | I/O-heavy fan-out; the existing Nanttyjs code in the old monolith ports almost line for line |
+| **TypeScript services (Fastify)** | gateway, social orchestration (posts, comments, clips, stories, sounds, follows, privacy), feed orchestration, notifications, media, support, integrations (webhooks, couriers, partner APIs) | I/O-heavy fan-out; the removed monolith is retained only as historical port/reference context |
 | **Elixir / Phoenix** | realtime: chat, presence, typing, live activity (comments, gifts, goals, scores, viewer counts), in-app notification stream | Cheap processes, built-in presence and pub/sub, made for socket fan-out. **Never touches money** |
 | **Python** | `services/python/intelligence`: ranking, recommendations, risk/fraud and moderation **scores**, ads pCTR, analytics pipelines | ML ecosystem. **Python returns scores; Go/TS make the deterministic policy decision** (thresholds live in config tables) |
 | **OpenSearch** | search (products, people, businesses, posts, sounds) | Fed from domain events, later |
@@ -78,7 +78,7 @@ Cross-deployable calls go over gRPC/HTTP (sync) or outbox → RabbitMQ (async). 
 mobile / webapp BFF / studio BFF / seller BFF / ads BFF / admin BFF
         │  HTTPS  /api/v1/*                  │  WSS  /ws
         ▼                                     ▼
-  ts.gateway (Nanttyjs)                 Phoenix realtime
+  ts.gateway (Fastify)                 Phoenix realtime
   - JWT verify (JWKS), rate limits    - auth via access token or ticket
   - idempotency fast path, currency   - topics user:*, conversation:*, live:*
         │ gRPC/HTTP                           ▲ RabbitMQ queue (bound to nantty.events)
@@ -422,7 +422,7 @@ Unit-tested per module (Go `-short`, vitest, pytest); integration suites need th
 
 ### 2.20 Built so far: ts.support (Help Centre and tickets)
 
-`services/typescript/support`, port 8111, Prisma schema `support` (role `svc_support`), Nanttyjs layout. Design and rules: [plans.md §44](./plans.md).
+`services/typescript/support`, port 8111, Prisma schema `support` (role `svc_support`), Fastify service layout. Design and rules: [plans.md §44](./plans.md).
 
 | Area | Endpoints | Notes |
 | --- | --- | --- |
@@ -819,7 +819,7 @@ At settlement, `go-money` runs `settleLiveBattleAndPostLedgerEntries(battleId)` 
 
 **4.3.2 Plan tiers and feature gating** (limits admin-configurable; **[CONFIRM limits]**)
 
-Prices live in a `SellerPlanPrice { planKey, countryCode, currency, interval, amountMinor }` table. Nigeria: **Free ₦0, Pro ₦5,000/month (`500000` NGN minor), Business ₦15,000/month (`1500000`)**. Admin prices other countries; no price is hardcoded.
+Prices live in a `SellerPlanPrice { planKey, countryCode, currency, interval, amountMinor }` table. Historical seller pricing in this plan used **Free ₦0, Pro ₦5,000/month, Business ₦15,000/month**; the latest Gold Premium working price/source default is **₦30,000/month**. Admin price records and effective checkout results override all examples. This legacy seller-plan taxonomy still requires migration to Gold Basic/Premium.
 
 | Feature | Free | Pro | Business |
 | --- | --- | --- | --- |
@@ -1146,7 +1146,7 @@ Append-only `AuditEvent { actor, actingAs (store/admin), action, subjectType, su
 
 Still open:
 
-1. **Seller plan limits** in §4.3.2 (prices decided: ₦0 / ₦5,000 / ₦15,000 a month in Nigeria).
+1. **Seller plan limits** in §4.3.2 (historical prices; latest Gold Premium working price is ₦30,000/month, subject to active price-book verification).
 3. **Ad-account members:** existing Nantty users only (like seller staff), replacing email invites? (§2.10)
 4. **Go deployable grouping** on ECS (§1.2). Coordinate with the foundation agent.
 5. **Per-language migration tools** (Atlas / Ecto / Alembic), given the Prisma-only rule covers TS services. (§0)
@@ -1154,6 +1154,8 @@ Still open:
 7. **Points rules:** starting point values and caps per action in `PointsRule` (§4.5.1).
 
 ## 4.8 Verification checkmarks and billing (owner, 2026-10-03; supersedes earlier checkmark rules)
+
+> **Status:** This is a dated design snapshot, not the canonical current subscription spec. Later decisions define Blue Basic/Premium, Gold Basic/Premium, and manually approved Black Government; use `product-analysis/FINAL_SUBSCRIPTION_SPEC.md` for target behavior and inspect the live source/price book for actual behavior. The ₦15,000 Business and ₦4,500 Premium amounts below are superseded proposals; current Nigeria source defaults are ₦30,000 and ₦20,000 respectively. The former 150/100-bps escrow default was changed to zero for fresh-install settings to match the founder's no-sales-commission policy. Existing persisted platform settings still require an audited read/update before staging or launch.
 
 > **Creator = personal account upgrade (owner, 2026-10-03).** A creator account is the user's personal account turned into a creator account, not a separate profile. Profile types are Personal, Business/Brand and Government; `creatorStatus` (`none|pending|approved|rejected`) lives on the Personal profile and is set to `approved` when the Creator Program application is approved. It unlocks Creator Studio, going live, monetisation and earnings. Blue applies to the Personal profile whether or not it is creator-enabled.
 
@@ -1163,11 +1165,11 @@ Still open:
 | Business, Brand | Gold only | A separate subscription per business/brand profile, with its own invoices and payment method | Web only (Flutterwave) |
 | Government | Black only | ₦50,000/month, invoiced to the agency | Web only (Flutterwave) |
 
-- **Prices (docs/pricing.md, 2026-10-03; all admin-editable):** Blue Essential ₦1,000, Blue Verified (the checkmark, `checkmark-pricing.blueMonthlyPrice`) ₦2,500 web / ₦2,900 in app, Blue Premium (the Premium user subscription) ₦4,500 web / ₦5,500 in app; seller Free ₦0, Pro ₦5,000, Business ₦15,000; Gold-only ₦3,000; Black ₦50,000. Yearly = 20% off (12 × monthly × 0.8). **0% commission on products.** Escrow fee 1.5% of the seller-group total incl. shipping (1% on Business), paid by the seller and deducted from the payout (`ESCROW_PLATFORM_COMMISSION_BPS=150`); direct payments carry no Nantty fee, only Flutterwave processing paid by the seller; buyers pay no fee. Pro ad credit ₦1,000/mo, Business ₦5,000/mo.
+- **Prices (historical proposal, superseded):** see the status note above and the live price book. Nigeria source defaults now include Blue ₦2,500, Premium ₦20,000, Seller Pro ₦5,000, Seller Business ₦30,000, Gold-only ₦3,000 and legacy Black ₦50,000 monthly; annual/store amounts are derived/configured and not proof of a published store SKU. **Commission policy:** the prior 150/100-bps proposal was removed from fresh-install platform-settings defaults; existing persisted settings still require inspection/update. The founder stated no sale commission, with actual processing and withdrawal charges passed through from Flutterwave. Verify effective settings before enabling payments. Do not treat legacy ad-credit examples or old tier entitlements as current.
 - **Regional pricing (owner, 2026-10-04; [pricing.md](./pricing.md)):** every checkmark, Premium, seller plans, coin packs, creator bands, boosts and ad floors are priced per region NG/GH/KE/ZA/GB/EU/US; any other country pays the US price in USD. Region = app storefront (`X-Store-Storefront` + `X-Client-Platform`) > profile country > CDN/IP country > `X-Client-Region` > US (`platform/regionpricing`). The creator ad share (40%) and subscription share (80% of net) are the same everywhere. Headline Blue Verified: ₦2,500 / GH₵30 / KSh 500 / R59.99 / £5.99 / €5.99 / $5.99 (web; app one step higher). **✅ built:** go-money `plan_prices` holds web/iOS/Android monthly+yearly and store product ids per region (migration `20261004120000_regional_plan_prices`, seeded from research, staff edits never overwritten); `GET /api/v1/pricing/{region,plans,creator-subscription-bands}`; coin packs priced in all 7 currencies per channel; web falls back to the US/USD price when Flutterwave can't charge the region currency (GBP/EUR; `FLUTTERWAVE_SUPPORTED_CURRENCIES` defaults to NGN, GHS, KES, ZAR, USD); go-ads floors/minimum budgets per targeted region converted into the billing currency with `currency.exchange_rate_revisions` (strictest of several regions), auction reserve by viewer region, `GET /api/v1/ads/pricing`, USD `reportingSpend`; admin setting `regional-pricing` (ad floors, boost minimums, creator bands) and the Regional pricing admin page; staff price edits in go-money are written to the admin audit log (`ADMIN_INTERNAL_URL`; refused in production when the audit log is unreachable). **Owner decision (4 Oct):** UK/EU web buyers pay the US price in USD, labelled "Billed in USD"; with USD off, web checkout returns `422 WEB_CURRENCY_NOT_ENABLED`. go-money reads prices only from the price book (legacy `checkmark-pricing` prices and the admin "Plans & prices" per-currency prices removed). **Ads (research-based, pricing.md §5):** per-region CPM/CPC floors, suggested CPM/CPC/CPV and suggested/minimum daily budgets; `POST /api/v1/ads/pricing/estimate` returns total cost, impressions, reach, clicks, results and cost per result for a budget and duration, split per region in the billing currency with FX notes; boost options carry regional packages with reach. **Open:** Flutterwave GH/KE/ZA collections activation, the native StoreKit/Play Billing module in the mobile app (adapter and server product ids ready), mobile verification plans still read a mocked `/api/v1/verification/plans`.
-- Blue and Gold never cross profile types. Gold requires business verification (CAC/KYB) before it shows. Seller Pro (₦5,000) and Business (₦15,000) include Gold.
+- Blue and Gold never cross profile types. Gold requires business verification before it shows. Seller Pro/Business are legacy operational plan codes; the current target model is Gold Basic/Premium, with ₦30,000 as the latest confirmed Gold Premium working price.
 - **Gold-only plan** for brands and businesses that don't sell: its own lower admin-set price (proposed ₦3,000/month), with the checkmark and brand-page features but no seller dashboard tools.
-- **Blue + Gold bundle:** 15% off a Gold subscription when the same verified identity has an active Blue. It doesn't stack with the yearly discount (the bigger one wins), applies to at most 3 businesses per person, and lapses at the business's next renewal if Blue ends. It never applies to Black. The percentage and cap are admin settings.
+- **Blue + Gold bundle (historical proposal):** the former 15%/three-business rule is not the current approved bundle policy. The latest product proposal is 10% off the eligible combined Blue + Gold subtotal, but activation is pending founder confirmation of discount calculation/scope and must be confirmed in checkout before use.
 - **Black: deep vetting and maker-checker.** Black is never suggested or self-serve; it's by application or invite, followed by manual review. Vetting covers:
   - an official letterhead letter signed by an authorised officer;
   - confirmation through an official channel (a published `.gov.ng` domain or official phone line);
@@ -1175,7 +1177,7 @@ Still open:
   - proof the entity exists (official site or gazette).
 
   Approval needs two different admins with step-up auth, and is audited. Black is re-verified yearly and whenever the representative changes, and revoked immediately on misuse. The handle stays reserved even if the subscription lapses.
-- **Web billing on Flutterwave (owner, 2026-10-11):** `POST /payments/subscriptions/checkout` starts a Flutterwave Standard checkout for the first period (dashboard plans, Premium web, Gold/Black business billing); refused from the apps. Trials: a small verification charge (refunded at once) saves the card token, and our own renewal engine charges it with tokenized charges at trial end and each period (no provider-side plans). A failed renewal follows the dunning schedule (`docs/billing/renewalsAndTrials.md`); the manage link lets the customer update the card. go-money records `billing_subscriptions` and emits `billingSubscription.downgraded` when recovery runs out. **✅ built:** `modules/subscriptions` (plans, per-country price table, trials, reminders, bundle vs yearly, Black grace, IAP, `GET /api/v1/internal/entitlements/{userId}`).
+- **Web billing on Flutterwave (owner, 2026-10-11; implementation status requires runtime validation):** `POST /payments/subscriptions/checkout` and the renewal design are described in `docs/billing/renewalsAndTrials.md`. Do not infer that all listed trial, proration, notification, or store flows are deployed merely from this design note. Verify the actual API/provider configuration and subscription records before launch.
 - **Lapsed payment:** Blue and Gold drop at period end. Black gets a 14-day grace period with reminders (admin-editable) before the badge is removed.
 - **Admin-granted lifetime checkmarks** bypass billing but still respect the profile-type rule.
 

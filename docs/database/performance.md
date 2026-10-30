@@ -1,6 +1,6 @@
 # Database performance, capacity and security
 
-As of 2026-10-03. Labels: EXISTING (path), PLANNED, FUTURE. **No production data and no load test exist.** Every number below is either an EXISTING config value (cited), an AWS-documented default to verify, or a labelled assumption / target. Nothing here is a guarantee. EXPLAIN validation was not run (compose Postgres not running): follow-up F1.
+Audit snapshot from 2026-10-03; money database roles refreshed 2026-10-29. Labels: EXISTING (path), PLANNED, FUTURE. **No production data and no load test exist.** Every number below is either an EXISTING config value (cited), an AWS-documented default to verify, or a labelled assumption / target. Nothing here is a guarantee. EXPLAIN validation was not run (compose Postgres not running): follow-up F1. Older rows about `svc_money` membership and startup migration describe the pre-remediation state; the current local role model is summarized in [system.md](../architecture/system.md), and AWS grants remain unverified.
 
 ## 1. Connection management
 
@@ -260,7 +260,7 @@ The owner's phase wording was not available to this audit beyond the brief (desi
 | TLS | `rds.force_ssl=1`; clients `sslmode=verify-full` with RDS CA bundle; local uses `sslmode=disable` (EXISTING in `generateMigration` URL) | PLANNED |
 | Encryption at rest | Aurora storage encrypted with a customer-managed KMS key; separate keys for prod vs DR region (multi-region key); snapshots inherit | PLANNED |
 | Secrets | Credentials in Secrets Manager with rotation (30-90 d, multi-user rotation to avoid downtime) or IAM database auth; **local passwords like `svc_x_local_only` must never reach non-local envs** (EXISTING in `create-databases.sh`) | PLANNED |
-| Least privilege roles | EXISTING: one login role per owning service (`svc_auth`, `svc_users`, ...), schema `AUTHORIZATION` to that role, `PUBLIC` revoked, shared `svc_money` granted membership of 7 money roles. Gaps: (a) app role == schema owner (can DDL/DROP): split owner/migrator vs app (`migrations.md`); (b) every `svc_*` is `IN ROLE nantty_readers`, so reader grants apply to all services; (c) `svc_money` unions 7 roles, so a flaw in any money module has all money schema rights | **P1 (a)**, P2 (b, c) |
+| Least privilege roles | Current local state: non-money service login roles own their schemas; the six money schemas are owned by `svc_migrator`; `svc_money` is not a member of those owner roles and receives schema USAGE plus configured table/sequence grants. Existing `nantty_readers` membership remains for cross-schema reads. AWS grants are unverified. The older finding in this 2026-10-03 audit described the prior role-inheritance model. | Historical finding; staging verification remains P1 |
 | Read-only roles | `svc_x_ro` per schema for replicas, reports, BI; `pg_read_all_data` is **not** granted to humans | PLANNED |
 | Migration role | Per-schema `*_migrator`, used only by the pipeline task; short-lived credentials | PLANNED |
 | Admin access | No standing human access: break-glass through SSM/IAM role with approval, time-boxed, session recorded, `pgaudit` logs reviewed; `rds_superuser` only for AWS operators; Query results containing PII must not be copied to chat/tickets | PLANNED |
@@ -279,7 +279,7 @@ The owner's phase wording was not available to this audit beyond the brief (desi
 | P1-1 | Pool config: 20 per module, no timeouts, no jitter; goIdentity worst case 80/task; doc/code mismatch (`database.md` says pgxpool 10) | P1 |
 | P1-2 | Pooler incompatibility: pgx default named prepared statements + startup `search_path` | P1 (before RDS Proxy) |
 | P1-3 | No outbox cleanup or relay-lag metric, and `outbox` pending index not partial | P1 |
-| P1-4 | Services migrate on boot with schema-owner credentials | P1 (`migrations.md`) |
+| P1-4 | Historical finding: services migrated on boot with schema-owner credentials. The six money schemas now use a separate pre-deploy task; the remaining Go/Prisma migration owners still need one staging orchestrator | P1 (`migrations.md`, `staging-migration-runbook.md`) |
 | P1-5 | Messages dominate PG storage in every scenario: decide store/partition before the module is built | P1 |
 | P2-1 | Statement/lock/idle-in-tx timeouts and `application_name` per service | P2 |
 | P2-2 | Relay holds a tx open during RabbitMQ publish | P2 |

@@ -8,14 +8,15 @@ As of 2026-10-03. Labels: **EXISTING** (cite path), **PROPOSED**, **OPTIONAL FUT
 
 | Item | Status | Evidence |
 | --- | --- | --- |
-| `Backend` workflow: file-length (300) and no-raw-SQL checks; Go build/vet/test against compose Postgres; `govulncheck`; gateway typecheck + vitest; realtime tests in Docker | EXISTING (`backend.yml` untracked in git at audit time) | `.github/workflows/backend.yml` |
-| `androidApk.yml`: mobile APK build | EXISTING | `.github/workflows/androidApk.yml` |
+| Backend workflow: file-length and no-raw-SQL checks; Go build/vet/race tests; TS service typecheck/tests; Elixir/Python jobs; migration lint and container checks | EXISTING (source configuration; actual CI runs are separate evidence) | `.github/workflows/backend.yml` |
+| Frontend workflow: path-filtered Next app typecheck/lint/style/contract tests/build/no-mock checks; mobile typecheck/lint/tests/no-mock check; shared-package changes fan out | EXISTING | `.github/workflows/frontend.yml` |
+| Security, deploy and Android workflows | EXISTING: dependency/secret/container scanning; staging/production deploy pipeline gated on configured AWS vars; Android build workflow is manually gated | `.github/workflows/security.yml`, `.github/workflows/deploy.yml`, `.github/workflows/androidApk.yml` |
 | Scripts | EXISTING | `services/scripts/{check-backend-file-lengths,check-no-raw-sql-in-typescript,test-go-workspace,test-realtime-in-docker}.sh` |
 | Dockerfiles: 6 Go (distroless nonroot), gateway, realtime, `services/python/intelligence` | EXISTING | `services/go/deployables/*/Dockerfile` |
 | Local stack: Postgres/PostGIS 17, Valkey 9, RabbitMQ 4 (management UI 127.0.0.1:15672, definitions from `infra/local/rabbitmq`), LocalStack (SES only), SeaweedFS, LiveKit, OTel collector, Jaeger; ports on 127.0.0.1 | EXISTING | `infra/local/docker-compose.yml` |
-| Atlas migrations embedded and applied at service start | EXISTING | `platform/postgres` `ApplyPendingMigrationsFromEmbeddedDirectory` |
-| Terraform layout | PROPOSED, README only | `infra/aws/README.md` |
-| Not present | CI for 6 Next apps, mobile (lint/typecheck/build), `services/python/intelligence`; Dockerfiles for Next apps; deploy pipeline; `pnpm audit`, SAST, secret scan, container scan; E2E, contract, load tests; frontend tests (0) | `inventory.md` s6, s8 |
+| Go migrations embedded; money-service startup migration disabled; go-money migrations run in a separate pre-deploy ECS task | EXISTING in source/workflow; AWS resources and staging execution unverified | `services/go/deployables/goMoney/ledgerMigration.go`, `services/go/modules/ledger/src/loaders/moneyModule.loader.go`, `.github/workflows/deploy.yml` |
+| Terraform layout | EXISTING source blueprint; no live apply/deployment verified | `infra/aws/modules/**`, `infra/aws/envs/**`, `infra/aws/README.md` |
+| Remaining CI/deployment gaps | No single end-to-end browser workflow across all apps; local/preproduction checks do not prove AWS resources exist. Frontend workflow builds Next apps but has no separate deploy job for the product applications; landing-page hosting is separate. AWS deployment remains conditional on configured environment variables and has not been verified against live staging resources. | `.github/workflows/frontend.yml`, `.github/workflows/deploy.yml`, `infra/aws/README.md` |
 
 ## 2. DevOps architecture
 
@@ -62,9 +63,9 @@ flowchart TD
 
 | Stage | Detail | Status |
 | --- | --- | --- |
-| Lint / format / typecheck | `golangci-lint`, `gofmt`, `go vet`; `tsc` + eslint + stylelint for every Next app and mobile; `ruff` + `mypy` for Python; `mix format --check` + credo. Path filters per app | Go vet only EXISTING; rest PROPOSED |
+| Lint / format / typecheck | Go format/vet; app/service-specific TypeScript typecheck and lint; mobile typecheck/lint; Elixir and Python checks are path-filtered in backend workflow | EXISTING in workflow configuration; execution depends on changed-path filters |
 | Conventions | file-length and no-raw-SQL | EXISTING |
-| Unit | `go test -race`, vitest, pytest, ExUnit, jest | Go/gateway/realtime/intelligence EXISTING, frontend none |
+| Unit | Go race tests, TS service and app tests, Python and Elixir tests | EXISTING in workflow configuration; coverage varies by package |
 | Integration | `docker compose up` Postgres, Valkey, RabbitMQ, LocalStack (SES); per-service ent + Atlas against real DB | auth only EXISTING |
 | SAST | `semgrep` (TS/Go/Python), `gosec` via golangci-lint, CodeQL | PROPOSED |
 | Dependencies | `govulncheck` EXISTING; `pnpm audit --prod`, `pip-audit`, `mix deps.audit`, Dependabot/Renovate | partly PROPOSED |
@@ -96,8 +97,8 @@ Guarantee that local cannot reach prod: (1) separate AWS accounts with no cross-
 | Rule | Detail |
 | --- | --- |
 | Tool | Atlas versioned migrations from ent schemas, one directory per module (EXISTING for auth, live) |
-| Today | applied at service start by the service itself (EXISTING). In prod this races across tasks and gives the runtime role DDL rights |
-| Target | one-off ECS task `migrate` per deployable using a separate migration DB role (owner of schema), run before the service update, deployment aborts on failure. Runtime role keeps DML only |
+| Current money-service path | `go-money --migrate-money` runs embedded payment, wallet, ledger, escrow, subscription and creator migrations in a separate pre-deploy task using `svc_migrator`; normal money-service startup rejects migration-on-start. Deployment waits for task success before rollout. Local integration tests that create isolated schemas may apply migrations directly. |
+| Remaining prerequisite | AWS role/ownership/grants, task definition and secret wiring, and real staging execution are not verified. The migration task and deployment workflow are source-configured; Terraform apply or a passing mocked runner test is not evidence that AWS resources exist. |
 | Expand / contract | Release N: add nullable column / new table / dual-write. Release N+1: backfill, switch reads. Release N+2: drop old. No rename or drop in the same release as code that stops using it |
 | Locks | `SET lock_timeout`, `CREATE INDEX CONCURRENTLY` (separate non-transactional file), batch backfills |
 | Down files | exist but are not used in prod; rollback = roll back image, keep expand schema |
@@ -185,26 +186,19 @@ Service-to-service HTTP goes through an internal ALB (host rule `<service>.svc.<
 
 ## 9. Recommendations
 
-### D1. CI for every app and service
-- **Problem:** six Next apps, mobile, `services/python/intelligence` have no CI job; frontend has 0 tests.
-- **Current:** `backend.yml` covers Go, gateway, realtime only; `pnpm test` runs nothing for the UI.
-- **Why it matters:** regressions in BFFs (cookies, CSRF) reach main unseen.
-- **Recommendation:** matrix job with typecheck, lint, build per Next app, path-filtered; add intelligence pytest and ruff; add gitleaks and `pnpm audit`.
-- **Complexity:** S. **Risk:** low. **Priority: P1**, cheap and unblocks everything else.
-- **Tag:** MVP.
+### D1. CI coverage and regression gaps
+- **Status:** the original 2026-10-03 finding is partly resolved. Current backend, frontend, mobile and security workflow files provide path-filtered checks and builds, including shared-package fan-out, but configuration is not proof of a successful run and app coverage varies.
+- **Remaining work:** add or maintain browser-level end-to-end tests for critical account, checkout, seller and admin flows; review path filters when new packages/services are added; inspect actual CI results before releases.
+- **Evidence:** `.github/workflows/backend.yml`, `frontend.yml`, `security.yml`.
 
 ### D2. Move migrations out of service startup
-- **Problem:** each task applies migrations on boot with its runtime role.
-- **Why it matters:** concurrent boot races, DDL privilege in runtime, slow starts, failed deploys mid-rollout.
-- **Recommendation:** `migrate` subcommand in each deployable's `main.go` (or Atlas CLI image) run as a pre-deploy ECS task; keep embedded apply for local/dev only behind a flag.
-- **Complexity:** S. **Risk:** low. **Priority: P1**, before first staging deploy.
-- **Tag:** MVP.
+- **Status:** partly resolved. The six money schemas use `go-money --migrate-money` with `svc_migrator` before rollout; normal money-service startup migration is disabled. Other Go schemas still migrate at service startup, and Prisma migrations are not included in a single all-owner staging gate.
+- **Remaining work:** implement and verify the complete 21-owner staging migration orchestration described in [staging-migration-runbook.md](../database/staging-migration-runbook.md); confirm AWS role, secret and task configuration in isolated staging.
+- **Evidence:** `services/go/deployables/goMoney/ledgerMigration.go`, `.github/workflows/deploy.yml`.
 
 ### D3. Stand up staging Terraform first
-- **Problem:** `infra/aws` is a README.
-- **Recommendation:** order: network, ecr, aurora, valkey, messaging, ecs-service for gateway + go-identity, alb + waf; then others as each service gets real routes. Do not provision services that are still skeletons (16 of 18 Go modules).
-- **Complexity:** L. **Risk:** medium. **Priority: P1**, auth is the only live service and needs a real environment to prove the path.
-- **Tag:** MVP.
+- **Status:** the old “README only” claim is superseded: `infra/aws` now contains Terraform modules and environment configuration. No live application or AWS state was inspected here; the repo still does not prove that Terraform was applied or that staging resources are operational.
+- **Remaining work:** validate and plan the intended staging configuration, provision only after explicit approval, and complete deployment/runtime smoke tests. No cloud changes are made by this documentation update.
 
 ### D4. Contract-test harness using mocks as fixtures
 - **Problem:** `packages/contracts` has no consumers; mocks drift from backend (`backendPlan.md` 2.13).

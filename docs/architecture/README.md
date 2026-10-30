@@ -15,7 +15,7 @@ The topic documents below go deeper. Most were written as design notes on 2026-1
 - LiveKit for live video; chat is end-to-end encrypted with no plaintext fallback.
 - One store or one business page per personal account, plus one brand.
 - Consents are versioned; the docs make no compliance claims.
-- Code layout: [services/zudojsStructure.md](../../services/zudojsStructure.md).
+- Code layout: [services/fastifyPlatformMigration.md](../../services/fastifyPlatformMigration.md).
 
 ## Index
 

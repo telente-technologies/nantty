@@ -200,8 +200,8 @@ stateDiagram-v2
 | Rule | Detail |
 | --- | --- |
 | Release triggers | Buyer confirm-receipt, or auto-release 3 days after `delivered` (admin-configurable default; a dispute pauses the timer; auto-release job, reference `escrowAutoRelease.job.ts`) |
-| Amounts | Commission stays in Nantty's main account (the split remainder); the seller gets the rest (split share for direct, transfer for escrow). Processing fee policy is a finance decision. Shipping fee follows the group to the seller. Computed in minor units, remainder to the platform |
-| Where the money is | Escrow stays in the buyer's own Flutterwave payout subaccount, locked by the ledger; release moves it buyer PSA → seller PSA (the escrow fee goes to Nantty's main balance), then the 24h seller lock applies before withdrawal. Outside Nigeria (no PSA yet) sales use direct payment |
+| Amounts | The founder's intended launch policy is 0% sales commission. Actual payment-provider processing/withdrawal charges are passed through at cost and disclosed before confirmation; the checkout quote and verified provider amount are authoritative. Shipping follows the group to the seller. Computed in minor units |
+| Where the money is | Escrow stays in the buyer's own Flutterwave payout subaccount, locked by the ledger; release moves it buyer PSA → seller PSA, then the 24h seller lock applies before withdrawal. No sales commission is intended to be sent to Nantty. Outside Nigeria (no PSA yet) sales use direct payment |
 | Seller visibility | Wallet shows `escrow`, locked, pending transfer, `available`, payout requested, settling to your bank (direct) and debt per currency |
 | Disputes | Opening a dispute freezes the escrow and pauses auto-release; admin resolves with refund, partial or release; every action audited. Refunds before release unlock the money in the buyer's PSA (or go back to the card on request); for a direct share already settled, or a chargeback after payout, the seller gets a debt that is netted from later payouts and turns direct mode off |
 | Idempotency | Release, refund and split are journals with unique idempotency keys |

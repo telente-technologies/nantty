@@ -1,8 +1,12 @@
 # Nantty pricing (regional)
 
-Status: recommended defaults, 4 October 2026, replacing the Nigeria-only sheet of 3 October. Every price is admin-editable (Admin → Configuration → Regional pricing). None is hardcoded in a UI. Amounts are stored as `amountMinor` in the region's currency. "Est." marks an estimate, not a sourced figure.
+Status: this is a dated pricing proposal and implementation guide, not a live price list. Runtime prices come from the effective-dated subscription price book (`plan_prices` plus `plan_price_versions`) and can be changed by authorized staff. The source defaults live in `services/go/platform/regionpricing/regionPricing.plans.go`; checkout/API prices take precedence over every table in this document. Amounts use currency minor units. Do not publish or quote a proposal as an active price without checking the effective price returned by the service.
 
-## 1. Rules (owner, 4 Oct 2026)
+The legacy subscription catalogue is still being migrated to the canonical Blue Basic, Blue Premium, Gold Basic, Gold Premium and Black Government model. As of 2026-10-29, the Nigeria source defaults are Blue/legacy `blue` ₦2,500/month, Premium/legacy `premium` ₦20,000/month, Gold-only ₦3,000/month, seller Pro ₦5,000/month, seller Business ₦30,000/month, and legacy Black ₦50,000/month. Black's source row is not approved public pricing: the current working proposal is USD 300/month, USD 500 was mentioned earlier, and the amount remains pending confirmation; Black is not self-serve and public Help Centre copy must not quote either value. All figures are fresh-install defaults, not a read of any existing database. Gold Pro and Gold Business have store-channel price derivation enabled in code; whether a native store product is actually purchasable must be verified against the platform catalog and current client flow.
+
+## 1. Historical proposal rules (owner, 4 Oct 2026; not a current checkout contract)
+
+The regional tables below preserve an earlier pricing proposal for research and historical context. They have not been reconciled to all current founder decisions and must not be presented to customers as active prices. Only use the effective price book/checkout response for a quote. Current Nigeria fresh-install subscription defaults are summarized at the top of this document; the current configured Gold Business default is ₦30,000/month. Annual and mobile prices are calculated/configured values, not guaranteed published store prices.
 
 - Prices differ per **pricing region**: Nigeria (NG, NGN), Ghana (GH, GHS), Kenya (KE, KES), South Africa (ZA, ZAR), United Kingdom (GB, GBP), Eurozone (EU, EUR; the 20 euro countries share one price), United States (US, USD).
 - **Any other country pays the US price in USD.**
@@ -20,15 +24,15 @@ Status: recommended defaults, 4 October 2026, replacing the Nigeria-only sheet o
 
 ## 2. Headline price table (monthly; web / app where sold in the app)
 
-App = Apple and Google (same price on both). Seller plans, Gold-only and Black are sold on the web only.
+Historical proposal amounts only; the old same-price-for-Apple-and-Google assumption is no longer reliable. Store fees and catalog price points are platform/region-specific. Seller plans, Gold-only and Black channel availability must be checked against current checkout and store configuration.
 
 | Product | NG (NGN) | GH (GHS) | KE (KES) | ZA (ZAR) | GB (GBP) | EU (EUR) | US (USD) and every other country |
 |---|---|---|---|---|---|---|---|
 | Blue Essential (no badge) | ₦1,000 / ₦1,200 | GH₵12 / GH₵15 | KSh 200 / KSh 250 | R29.99 / R34.99 | £2.49 / £2.99 | €2.49 / €2.99 | $2.49 / $2.99 |
 | **Blue Verified (blue checkmark)** | **₦2,500 / ₦2,900** | **GH₵30 / GH₵35** | **KSh 500 / KSh 600** | **R59.99 / R69.99** | **£5.99 / £6.99** | **€5.99 / €6.99** | **$5.99 / $6.99** |
-| **Premium (Blue Premium)** | **₦4,500 / ₦5,500** | **GH₵55 / GH₵65** | **KSh 900 / KSh 1,100** | **R109.99 / R129.99** | **£9.99 / £11.99** | **€10.99 / €12.99** | **$9.99 / $11.99** |
+| **Premium (Blue Premium)** | **₦20,000 source default / store price derived from configured fee schedule** | historical proposal | historical proposal | historical proposal | historical proposal | historical proposal | historical proposal |
 | Seller Pro (Gold after KYB) | ₦5,000 | GH₵60 | KSh 1,000 | R149.99 | £15 | €17 | $17 |
-| Seller Business (Gold, 1% escrow fee) | ₦15,000 | GH₵180 | KSh 3,000 | R449.99 | £45 | €49 | $49 |
+| Seller Business (Gold) | ₦30,000 source default | historical proposal | historical proposal | historical proposal | historical proposal | historical proposal | historical proposal |
 | Gold only (brands that don't sell) | ₦3,000 | GH₵36 | KSh 600 | R89.99 | £9 | €10 | $10 |
 | Black (government, invoiced) | ₦50,000 | GH₵600 | KSh 10,000 | R1,499.99 | £149 | €169 | $169 |
 
@@ -38,17 +42,17 @@ App = Apple and Google (same price on both). Seller plans, Gold-only and Black a
 |---|---|---|---|---|---|---|---|
 | Blue Essential | ₦9,600 / ₦12,000 | GH₵116 / GH₵144 | KSh 1,950 / KSh 2,400 | R287.99 / R335.99 | £23.99 / £28.99 | €23.99 / €28.99 | $23.99 / $28.99 |
 | Blue Verified | ₦24,000 / ₦28,000 | GH₵288 / GH₵336 | KSh 4,800 / KSh 5,800 | R575.99 / R671.99 | £57.99 / £67.99 | €57.99 / €67.99 | $57.99 / $67.99 |
-| Premium | ₦43,500 / ₦53,000 | GH₵528 / GH₵624 | KSh 8,650 / KSh 10,600 | R1,055.99 / R1,247.99 | £95.99 / £115.99 | €105.99 / €124.99 | $95.99 / $115.99 |
+| Premium | ₦192,000 from source annual-discount default; store price derived from configured fee schedule | historical proposal | historical proposal | historical proposal | historical proposal | historical proposal | historical proposal |
 | Seller Pro | ₦48,000 | GH₵576 | KSh 9,600 | R1,439.99 | £144.99 | €163.99 | $163.99 |
-| Seller Business | ₦144,000 | GH₵1,728 | KSh 28,800 | R4,319.99 | £432.99 | €470.99 | $470.99 |
+| Seller Business | ₦288,000 from source annual-discount default | historical proposal | historical proposal | historical proposal | historical proposal | historical proposal | historical proposal |
 | Gold only | ₦29,000 | GH₵346 | KSh 5,800 | R863.99 | £86.99 | €96.99 | $96.99 |
 | Black | ₦480,000 | GH₵5,760 | KSh 96,000 | R14,399.99 | £1,430.99 | €1,622.99 | $1,622.99 |
 
-The Blue+Gold bundle (15% off Gold, max 3 businesses, never stacks with yearly, never on Black) applies in every region on the web price.
+Historical bundle configuration is not authoritative. Current bundle discount, covered profile scope, stacking and renewal terms must be verified in the price quote returned by checkout; do not rely on the 15%/three-business proposal above.
 
 ### 2.1 Checkmark share on a rejected verification
 
-When a seller plan (Pro, Business) or Premium is bought and the identity check is rejected, the plan keeps running and only the checkmark's share of the current period's payment is refunded: the standalone checkmark price in the buyer's region, channel and interval (Blue for Premium, Gold-only for Pro and Business), capped at the amount paid (so a discounted bundle tier never refunds more than it cost). Example, Nigeria on web: Pro rejected refunds ₦3,000 of ₦5,000 (monthly); Premium refunds ₦2,500 of ₦4,500. Standalone Blue, Gold-only, Black and bundle tiers get the full refund. This refund happens once, for the current period. Renewals are always at the full plan price, whatever the verification status (owner, 4 Oct 2026); receipts still list the checkmark line for transparency. Renewal and trial rules: [billing/renewalsAndTrials.md](./billing/renewalsAndTrials.md).
+The former checkmark-share refund rule is a historical proposal, not a verified current billing contract. Current refund, verification-rejection, renewal and access behavior must be checked against the billing implementation and purchase-channel terms; see [billing/renewalsAndTrials.md](./billing/renewalsAndTrials.md).
 
 ### 2.2 Price points
 
@@ -200,7 +204,7 @@ Reading per market:
 - **Ghana:** Spotify is GH₵22 (≈ $1.40); X charges USD. Blue Verified at GH₵30 (≈ $1.94) sits just above Spotify (est. willingness to pay).
 - **Kenya:** Spotify KSh 419, X Premium KSh 1,100 (≈ $8.50, X barely localises). Blue Verified KSh 500 ≈ Spotify; Premium KSh 900 below X.
 - **South Africa:** Spotify R69.99, YouTube R82, Netflix Standard R179. Blue Verified R59.99 under Spotify; Premium R109.99 between YouTube and Netflix.
-- **UK / Eurozone / US:** X Premium £8/$8, Meta Verified £13.99/$14.99. Blue Verified at £5.99/€5.99/$5.99 undercuts X by 25% because Nantty is the new network; Premium £9.99/$9.99 undercuts Spotify. Euro prices sit one step higher for Premium because euro prices include 19–21% VAT. Seller Pro $17/£15 undercuts Shopify Basic ($27/£25) because Nantty brings the audience but takes 1–1.5% escrow fees.
+- **UK / Eurozone / US:** this historical benchmark compared earlier proposed prices and an escrow-fee model that is no longer the intended policy. Competitor prices and tax treatment require fresh source verification before external use; don't use this dated comparison as current pricing research.
 
 ### 8.2 Purchasing power (est.)
 
@@ -215,9 +219,9 @@ Our African prices land at ≈ 25–35% of the US price (NG, GH, KE) and ≈ 55%
 
 FX used for conversions and the cross-region checks: the currency module's seed rates (₦1,550, GH₵15.5, KSh 129, R18.2, £0.79, €0.92 per $1; est.) until admins set live rates.
 
-## 9. Nigeria-specific fees (unchanged, 3 Oct)
+## 9. Nigeria-specific fees (historical 3 Oct proposal; superseded for fresh installs)
 
-- **0% commission on products.** Escrow fee 1.5% of the seller-group total incl. shipping (1% on Business), paid by the seller, plus Flutterwave's processing fee (taken from each verified charge). Direct payments: Flutterwave processing only. Buyers pay no fee. Daily automatic payout free.
+- The earlier proposal below charged a separate escrow percentage (1.5% standard / 1% Business). It is not the current intended policy: fresh-install settings now default platform escrow/sales commission to zero, with only actual Flutterwave processing/withdrawal costs passed through. Existing persisted settings were not inspected or changed in this audit; do not claim the policy is active for an existing environment until its effective admin `revenue` setting and checkout quote are verified.
 - Launch promotions (Blue first month ₦1,000 for 90 days, founding sellers Pro ₦2,500 for 3 months, founding creators 10% share for 6 months, double first web coin pack, Black first year ₦400,000) stay Nigeria-only.
 
 ## 10. Where it lives

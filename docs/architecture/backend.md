@@ -2,7 +2,7 @@
 
 > **Dated design document.** The status labels below describe the repo when this was written; much that is marked PROPOSED or ABSENT has since been built. For the current system see [system.md](system.md); where the two disagree, the code wins. Where this document says SNS or SQS, read RabbitMQ: the event bus is RabbitMQ (Amazon MQ in AWS), and the SNS/SQS adapters are unused.
 
-As of 2026-10-03. Labels: **EXISTING** · **MOCK-ONLY** · **PROPOSED** · **OPTIONAL FUTURE** (see [README.md](README.md)). Facts: [inventory.md](inventory.md). Service map source: [microservicesPlan.json](microservicesPlan.json), `docs/backendPlan.md`. Code layout rule: [services/zudojsStructure.md](../../services/zudojsStructure.md).
+As of 2026-10-03. Labels: **EXISTING** · **MOCK-ONLY** · **PROPOSED** · **OPTIONAL FUTURE** (see [README.md](README.md)). Facts: [inventory.md](inventory.md). Service map source: [microservicesPlan.json](microservicesPlan.json), `docs/backendPlan.md`. Code layout rule: [services/fastifyPlatformMigration.md](../../services/fastifyPlatformMigration.md).
 
 ## 1. Service map and domain ownership
 
@@ -105,7 +105,7 @@ Updated 2026-10-11 to match the code. The `ts-social` / `ts-io` grouping above w
 
 ## 2. Code layout (target, all stacks)
 
-Owner rule: every backend uses the Nanttyjs layout and naming in [services/zudojsStructure.md](../../services/zudojsStructure.md). Files are `<name>.<kind>.<ext>`, camelCase (Python is the one snake_case exception), 300 lines max, almost no comments. The current snake_case Go files are being converted; the tree below is the target.
+Owner rule: every backend uses the Nantty service layout and naming in [services/fastifyPlatformMigration.md](../../services/fastifyPlatformMigration.md). Files are `<name>.<kind>.<ext>`, camelCase (Python is the one snake_case exception), 300 lines max, almost no comments. The current snake_case Go files are being converted; the tree below is the target.
 
 ```
 services/go/deployables/goMoney/            (one per deployable: goIdentity, goCommerce, goMoney, goLive, goAds, goTrust)

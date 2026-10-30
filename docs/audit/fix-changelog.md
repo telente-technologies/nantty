@@ -2,6 +2,63 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-10-27 — Audit record reconciliation and regression re-check
+
+**Audit:** Reconciled the issue index and detailed findings in `frontend-backend-audit.md` with current code and focused regression tests.
+**Documentation changes:** Marked original code excerpts and reproductions as historical unless refreshed; corrected ZM-014/015/016/021 statuses; replaced ZM-001's obsolete `Limit(10)` sample and proposed fix with the current implementation/test summary; clarified that ZM-021's local topology implementation is not proof of deployed production topology. Corrected a malformed ZM-018 user-audit entry that contained literal newline escapes.
+**Re-verified in current workspace:** Go payments tests `TestVerifyingAnOrderPayment` and `TestAConcurrentCheckoutOpen` pass; Go escrow undelivered-review and fee-retaining refund tests pass; Go auth OTP send-cap test passes; Gateway auth-rate/edge tests pass (24 tests); Notifications unsubscribe/HTTP-route tests pass (16 tests).
+**Limits:** This is a focused cross-check, not a full re-audit of every ZM finding. The TypeScript test suites were run directly from installed Vitest binaries after `pnpm exec` attempted a workspace install with slow registry requests. Gateway tests emit an existing Fastify `FSTWRN004` error-handler override warning and pass; review this separately. No production topology, Actions pipeline, database migration or cloud resource was applied/verified. Workspace remains dirty; no source-code fix was applied in this entry.
+
+## 2026-10-28 — ZM-005: concurrent refund replay and stale evidence correction
+
+**Finding confirmed:** Two identical requests could both observe no `PaymentRefund` row before the first committed. The payment-intent row lock serialized them, but the second request did not re-check the refund reference after obtaining that lock; it could hit the unique reference constraint instead of replaying the successful request.
+**Change:** `services/go/modules/payments/src/modules/gateway/services/paymentRefunds.service.go` now rechecks the reference after locking the payment intent and replays the existing refund. A reused reference with different amount, currency, or normalized reason is rejected. Added `paymentRefunds.service_test.go` for request-equivalence rules and `payments.webhookInboxAndRefunds_integration_test.go` for the concurrent PostgreSQL scenario.
+**Verified:** focused pure Go regression passes; the DB-backed concurrency test compiles and is skipped by the test harness when PostgreSQL is unavailable; scoped `git diff --check` passes. Run the integration test against PostgreSQL before release.
+**Audit corrections:** ZM-005 now records that checkout session creation is serialized by an intent-scoped PostgreSQL advisory lock, the billing refund hash includes charge reference/amount/currency/full-refund mode, wallet and saved-card amount/currency come from immutable server-side payment intents, receipt replay is money-idempotent, and unsupported refund-lookup providers fail closed for manual review rather than being blindly resent. The stale-claim processing recovery remains open; do not automate uncertain provider resends without per-provider idempotency/lookup guarantees.
+**Rollback:** revert the recheck, fingerprint helper/tests, and corresponding audit text. Rollback reintroduces a retry-breaking unique-constraint race; no ledger double-refund was observed. No commit, push, merge, deploy, or migration.
+
+## 2026-10-28 — ZM-017: lost coin-purchase chargebacks
+
+**Finding confirmed:** card/bank chargebacks on completed web coin purchases had no purpose-specific dispute handler, so a lost dispute could be recorded as an unrecovered platform loss while the buyer retained the purchased coins.
+**Change:** wallet now registers a `PurposeCoinPurchase` provider-dispute handler. Only final `lost` notices are applied. A new immutable chargeback record keyed by provider/dispute ID makes retries idempotent; purchase row locking serializes partial disputes; cumulative fiat amounts map to a cumulative proportional coin target to avoid rounding away partial losses or clawing the same coins twice. The handler claws back available spendable coins, books any already-spent shortfall as user coin debt, marks the purchase for staff review, and leaves recipient/creator balances untouched. Added Ent schema/generated code and a forward/down migration.
+**Verified:** all wallet Go packages pass `go test ./src/...`; `go build ./...` passes; proportional/remainder unit tests pass; focused DB integration tests compile but skip because PostgreSQL on `localhost:15432` is unavailable / rejects the configured credentials. `git diff --check` passes for the wallet change. The database-backed accounting behavior is not runtime-verified and the migration is not applied; both remain release gates.
+**Rollback:** revert wallet handler registration, chargeback schema/generated Ent changes, migration, and tests together. Rollback restores the prior behavior in which lost web coin-purchase disputes did not claw back buyer coins. No commit, push, merge, deploy, or migration execution.
+
+## 2026-10-27 — ZM-007/ZM-014/ZM-018: wallet wiring, cross-currency debt gate, username privacy
+
+**Audit:** ZM-007 seller wallet route wiring; ZM-014 seller-debt withdrawal bypass; ZM-018 confusable-username owner disclosure.
+**Changes:**
+1. `apps/seller/.env.example` now includes `/api/v1/wallets/me` in `SELLER_REAL_API_PREFIXES`, so the documented seller configuration sends the wallet summary to the backend instead of the mock path.
+2. Reviewed existing `providerWalletWithdrawals.service.go`: the withdrawal transaction checks seller-debt balances across currencies before allowing provider payout. Focused cross-currency and outstanding-debt regressions pass; this confirms the reported bypass is already closed in code, not a new source change.
+3. `services/go/modules/users/src/modules/accountEnforcement/routes/accountEnforcement.routes.go` now gates confusable-handle previews on `usernames:reassign` rather than broader read permissions. The admin client route policy is aligned, and its contract test asserts the narrow permission. This response includes the current username owner, so limiting access to staff able to resolve that ownership conflict follows least privilege.
+**Verified:** seller environment routing smoke check passes; `go test ./modules/wallet -run 'TestAnOutstandingWalletDebtBlocksWithdrawalsAndMovesNoMoney|TestASellerDebtInAnotherCurrencyAlsoBlocksAWithdrawal' -count=1` passes; Go `TestWithholdAndReclaimAnAccountUsername` passes; admin `test:contracts` focused file passes 10/10 using the app's `tsx --test` runner; admin TypeScript typecheck passes; payment focused tests and `go build ./modules/payments/...` pass. An initial unsupported Vitest invocation failed before test collection because the file uses `node:test` and path aliases; the supported test runner then passed. `git diff --check` passes. No commit, push, merge, deploy or production change.
+**Remaining:** ZM-007 production environment checklist; ZM-014 held-vs-spendable mobile display and broader ledger atomicity review; ZM-018 audit coverage, retention honesty and other historical findings remain open pending source-by-source re-verification.
+
+## 2026-10-27 — ZM-008/ZM-009/ZM-010/ZM-020: validation and privacy hardening
+
+**Changes:**
+1. Payments validate checkout payable amounts/currencies before persistence, reject provider-fee values that exceed the verified charge or connected-seller proceeds, and require late charges to match the original intent's amount, currency and provider charge before recording/refunding. This removes silent fee clamps and prevents mismatched late settlements from being booked as ordinary duplicates.
+2. Python intelligence requires its own `INTELLIGENCE_ID_HASH_SECRET` (at least 32 characters) in staging/production; gift-sent events persist pseudonymized sender/creator IDs and coin amount rather than raw IDs and unrelated gift/content/country fields.
+3. Media malware scanning cannot skip audio/PDF assets via `MEDIA_ALLOW_UNSCANNED`; if policy requires content moderation but the classifier cannot inspect that media, it is held as `uninspectable` rather than passed through.
+4. Social mentions resolution requires an authenticated caller; its gateway path has an account-scoped rate limit and a 100-ID batch cap. CAPTCHA remains an independent open hardening item.
+**Verified:** payment focused tests and `go build ./modules/payments/...` pass; payment integration tests compiled, but runtime DB-backed tests could not run without PostgreSQL at `localhost:15432`. Python focused tests pass (25), Ruff/mypy pass. Media focused tests pass (31) and TypeScript compilation passes. Social mention tests pass (3) and typecheck passes. No commit, push, merge, deploy or production setting changed.
+
+## 2026-10-27 — ZM-011: fail-fast cluster, authorized fanout and confirmed retries
+
+**Changes:**
+1. Elixir production startup now requires nonblank `DNS_CLUSTER_QUERY` and `RELEASE_COOKIE`; clustered release startup exits if it cannot determine a task IP.
+2. Conversation fanout rechecks current membership before delivering to a socket not already subscribed to that conversation.
+3. RabbitMQ retry publishes now register for confirms and mandatory returns, correlate each publish by sequence/message ID, and distinguish unroutable retries; the original event is rejected without requeue so the configured dead-letter route receives it instead of acknowledging and losing it.
+4. Native clients without an `Origin` header are accepted for socket auth; malformed/untrusted browser origins remain denied.
+**Verified:** Elixir suite passes (110 tests); production-config check confirms cluster query and token audience; scoped diff check passes.
+**Remaining:** AWS target health still uses `/readyz`, which may mark tasks unhealthy during a RabbitMQ outage; production RabbitMQ topology/ACLs and actual cluster formation need deployment-level verification. No infrastructure or production resources changed.
+
+## 2026-10-27 — ZM-019: recoverable live-battle settlement
+
+**Changes:** Live battles now persist a lease token, lease expiry, next retry time and attempt count. Workers claim an ended battle under a short DB transaction, call the idempotent money service outside the transaction, then finalize only if their lease still owns the battle. Failures use bounded exponential backoff; expired leases recover crashed workers; after eight attempts the battle is left ended for operator recovery rather than being silently dropped. Added a migration and index for the retry state.
+**Verified:** `go test ./modules/live -run 'TestFailedSettlementIsRetriedAndNeverDoubleSettles|TestBattleSettlementLedgerCallDoesNotHoldDatabaseLock|TestAmbiguousLedgerFailureRetriesWithSameIdempotencyKey' -count=1` passes; `go test ./modules/live/src/... -run '^$'` compiles all packages; scoped `git diff --check` passes. The migration is not applied. No commit, push, merge or deployment.
+**Remaining:** card-paid boost refund parity and the other route/logic findings in ZM-019 remain open. The production schema migration must run before this code can serve real traffic.
+
 ## 2026-10-22 — ZM-013: race detector for the workspace integration suite
 
 **Audit:** ZM-013 (the integration script ran Go tests without `-race` or `-count=1`)
@@ -122,7 +179,20 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 
 **Remaining:** the staff-JWKS staging assertion.
 
-## 2026-10-22 — ZM-018: user-action audit trail\n\n**Audit:** ZM-018 (no user-action trail on username change, deactivation or deletion requests)\n**Changes:**\n1. `services/go/modules/users/src/useraudit/userAudit.service.go` — a small user-actor audit helper that records through the registered `identityports.AuditRecorder` with `ActorRole: \"user\"`.\n2. `changeUsername.handler.go` — records `user.username_changed` with before/after handles. A failed audit is logged and does not roll back a successful rename.\n3. `deactivateAccount.handler.go` — records `user.deactivated` after the directory deactivates and revokes sessions.\n4. `requestAccountDeletion.handler.go` and `cancelAccountDeletion.handler.go` — record `user.deletion_requested` and `user.deletion_cancelled` against the deletion request.\n5. Tests assert the audit entries in the username, profile and privacy integration suites.\n**Verified:** `go test ./modules/users -run 'TestChangeUsernameEnforcesRulesCooldownAndQuarantine|TestDeactivatedAccountsCannotBeViewed'` and `go test ./modules/users/src/modules/privacy -run TestAccountDeletionRequestGracePeriodCancelAndRetainByDefault` pass.\n**Rollback:** remove the audit calls and the helper. The underlying user actions are unchanged.\n**Remaining:** username-worker oracles and the remaining ZM-018 audit gaps.\n\n## 2026-10-22 — ZM-018: stale exchange-rate alerting"})
+## 2026-10-22 — ZM-018: user-action audit trail
+
+**Audit:** ZM-018 (no user-action trail on username change, deactivation or deletion requests)
+**Changes:**
+1. `services/go/modules/users/src/useraudit/userAudit.service.go` — a small user-actor audit helper that records through the registered `identityports.AuditRecorder` with `ActorRole: "user"`.
+2. `changeUsername.handler.go` — records `user.username_changed` with before/after handles. A failed audit is logged and does not roll back a successful rename.
+3. `deactivateAccount.handler.go` — records `user.deactivated` after the directory deactivates and revokes sessions.
+4. `requestAccountDeletion.handler.go` and `cancelAccountDeletion.handler.go` — record `user.deletion_requested` and `user.deletion_cancelled` against the deletion request.
+5. Tests assert the audit entries in the username, profile and privacy integration suites.
+**Verified:** `go test ./modules/users -run 'TestChangeUsernameEnforcesRulesCooldownAndQuarantine|TestDeactivatedAccountsCannotBeViewed'` and `go test ./modules/users/src/modules/privacy -run TestAccountDeletionRequestGracePeriodCancelAndRetainByDefault` pass.
+**Rollback:** remove the audit calls and the helper. The underlying user actions are unchanged.
+**Remaining:** username-worker oracles and the remaining ZM-018 audit gaps.
+
+## 2026-10-22 — ZM-018: stale exchange-rate alerting"})
 
 
 **Audit:** ZM-018 (no FX TTL or freshness signal)
@@ -689,4 +759,14 @@ Every code change made while fixing `docs/audit/frontend-backend-audit.md` is lo
 2. `services/typescript/gateway/src/services/routeRateLimitPolicy.service.ts:10-12` — `POST /api/v1/admin/auth/login` → `login` bucket (10/min/IP, was generic guest 120/min); `POST /api/v1/admin/auth/mfa/verify` → `otp` bucket (5/min). Highest-privilege accounts now have the strongest edge block.
 **Verified:** `pnpm vitest run tests/anonymousMutations.handler.test.ts tests/gatewayHardening.handler.test.ts` → 2 files, 1169 tests passed.
 **Rollback:** revert both lines (re-opens 12x brute-force window + breaks admin passkey login).
-**Remaining in ZM-002 (queued):** confirm upstream `OPTIONS /api/v1/admin/*` returns empty 204 with no side effects.
+**Historical queued note (closed 2026-10-17):** `upstreamDispatch.handler.ts` now answers bare admin `OPTIONS` at the edge with 204; `deepScanHardening.test.ts` covers the no-forwarding behavior. The later review-corrections entry records the fix and regression test.
+## 2026-10-28 — ZM-006: close cookie-authenticated BFF GET side effects
+
+**Audit:** ZM-006 BFF GET-origin/CSRF invariant.
+**Changes:**
+1. `apps/webapp/src/server/gateway.service.ts` — refuse to proxy `GET /api/v1/ads/r/{token}` through the session-cookie BFF. The signed click URL remains available on the intended public API host; the BFF cannot be used as a cross-site cookie-authenticated path to record a billable click.
+2. `services/go/modules/payments/src/modules/payoutOnboarding/controllers/payoutOnboarding.controller.go` — reject `GET .../me?refresh=true` with 405 before reading session state or recomputing/persisting payout status. No frontend caller used this legacy query; any future refresh action must be an explicit mutation.
+3. `apps/webapp/src/contracts/bffExpiredSession.test.ts` — with valid session cookies, the ad-click GET returns 404 and makes no upstream call.
+4. `services/go/modules/payments/src/modules/payoutOnboarding/controllers/payoutOnboarding.controller_test.go` — regression test verifies the legacy refresh query returns `METHOD_NOT_ALLOWED`.
+**Verified:** `services/go` `go test ./modules/payments/src/modules/payoutOnboarding/controllers/...` passed; `apps/webapp` `./node_modules/.bin/tsx --test src/contracts/bffExpiredSession.test.ts` passed (7/7); `./node_modules/.bin/tsc --noEmit` passed; scoped `git diff --check` passed. `pnpm --filter @nantty/webapp exec ...` was not used for verification because the wrapper attempted a workspace install and registry requests failed with `ETIMEDOUT`/`EAI_AGAIN`; the app-local installed runner worked. No production services or database were needed for these regressions.
+**Remaining:** keep new GET handlers read-only; any future state-changing behavior must use an unsafe HTTP method and existing BFF Origin + CSRF checks. Direct signed ad-click links on the API host intentionally remain public and idempotent.

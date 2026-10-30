@@ -146,7 +146,7 @@ Dockerfile: multi-stage `golang:1.26-alpine` to `distroless/static-debian13:nonr
 | Item | Finding |
 | --- | --- |
 | Size | 6 source files (~300 lines), 1 test file (`tests/upstreamDispatch.handler.test.ts`, 134 lines), vitest, Dockerfile |
-| Built on | `@zudojs/http`, `@zudojs/logger`, `jose` |
+| Built on | Fastify through `@nantty/fastify-platform`, `jose` |
 | Route table | 3 prefixes, all to upstream `identity`: `/api/v1/auth/logout` (auth required, POST), `/api/v1/auth/sessions` (auth required), `/api/v1/auth/` (optional auth). `UpstreamName = "identity"` is the only upstream (`src/routes/upstream.routes.ts`, `src/configs/gateway.config.ts`) |
 | Auth | JWKS verification via `jose` (`accessTokenVerifier.service.ts`); forwards `x-nantty-account-id` and `x-nantty-session-id`, `x-request-id`, `x-forwarded-for`, `x-real-ip`; whitelists forwarded and returned headers |
 | Edge controls | CORS allow-list (`CORS_ORIGINS`, `credentials:false`), in-process rate limit (`RATE_LIMIT_MAX_PER_MINUTE` default 600, per instance), 1 MiB body limit, upstream timeout 10 s (502/504 mapping), `nosniff`, `no-referrer`, HSTS |

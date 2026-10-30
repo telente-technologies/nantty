@@ -2,11 +2,11 @@
 
 Owner decision, 2026-10-04: every Nantty address is on the company domain. This replaces the earlier rule that the product only showed the owner's iCloud addresses.
 
-- **Human mailboxes** live on the root domain: `<name>@nantty.com`.
+- **Human-facing addresses** use the root domain: `<name>@nantty.com`.
 - **Automated mail** is sent through Amazon SES from the sending subdomain `mail.nantty.com`, so its reputation is kept apart from the people's mailboxes.
 - Nothing in the product hardcodes an address. Each app builds them from its brand config (`NEXT_PUBLIC_MAIL_DOMAIN`, `EXPO_PUBLIC_MAIL_DOMAIN`, `NANTTY_MAIL_DOMAIN`, `NANTTY_MAIL_SENDING_DOMAIN`), defaulting to the addresses below. The shared helper is `buildNanttyEmailAddresses` in `packages/webKit/src/contact/nanttyEmailAddresses.ts`; email senders are chosen by `selectEmailSender` in `packages/emailTemplates/src/config/emailSenders.config.ts`.
 
-**Forwarding to the owner.** Until there is a team, the owner's iCloud addresses (oyinlola.tech@icloud.com and oluwayemioyinlola2@icloud.com) can be set as forwarding targets for any mailbox or group below. Configure this in the mail provider only; never put those addresses back in product code, emails or legal pages.
+**Current routing (2026-10-28).** Cloudflare Email Routing forwards the public contact addresses listed below, plus `oyinlola@nantty.com` used in the investor deck, to the owner's verified Gmail destination. These are receive-only forwarding aliases, not separate inboxes; Email Routing does not let the owner send mail as `@nantty.com`. Do not put the forwarding destination in product code, outgoing email, or public/legal pages. A future team mailbox provider can replace these temporary routes.
 
 ## Human addresses (root domain)
 
@@ -14,25 +14,26 @@ Type: **mailbox** is a real inbox with its own login; **alias** delivers into an
 
 | Address | Type | Purpose | Who reads it | Where it is used |
 | --- | --- | --- | --- | --- |
-| support@nantty.com | group (helpdesk) | Buyer and account help: orders, payments, escrow, disputes, sign-in | Support team | Web contact page, footers, help centre "Contact support", email footer, Reply-To of most transactional mail, API `SUPPORT_NOTIFICATION_EMAILS`, mobile Settings › Support, webapp |
+| support@nantty.com | forwarding alias (Cloudflare) | Buyer and account help: orders, payments, escrow, disputes, sign-in | Owner inbox temporarily | Web contact page, footers, help centre "Contact support", email footer, Reply-To of most transactional mail, API `SUPPORT_NOTIFICATION_EMAILS`, mobile Settings › Support, webapp |
 | help@nantty.com | alias → support@ | Catches people who guess "help@" | Support team | Not shown in the product |
 | billing@nantty.com | group | Receipts, invoices, subscriptions, VAT, card checks, ad billing | Finance and support | Reply-To of payments and receipt emails, Ads billing pages |
 | payouts@nantty.com | group | Seller and creator payouts, bank details, failed transfers | Finance | Reserved for payout pages and payout email copy (not shown yet) |
-| sellers@nantty.com | group | Store applications, business verification, listings, fees | Seller success | Seller dashboard landing, login and footer, web contact page, Reply-To of seller emails |
-| creators@nantty.com | group | Creator Program applications, earnings, Studio | Creator team | Studio landing, FAQ, login and footer, Reply-To of creator emails |
-| ads@nantty.com | group | Advertisers, campaigns, ad policy questions | Ads team | Ads landing, login, policy page, not-found page, footer |
+| sellers@nantty.com | forwarding alias (Cloudflare) | Store applications, business verification, listings, fees | Owner inbox temporarily | Seller dashboard landing, login and footer, web contact page, Reply-To of seller emails |
+| creators@nantty.com | forwarding alias (Cloudflare) | Creator Program applications, earnings, Studio | Owner inbox temporarily | Studio landing, FAQ, login and footer, Reply-To of creator emails |
+| ads@nantty.com | forwarding alias (Cloudflare) | Advertisers, campaigns, ad policy questions | Owner inbox temporarily | Ads landing, login, policy page, not-found page, footer |
 | legal@nantty.com | mailbox | Legal notices, terms questions, law-enforcement requests | Legal / owner | Terms of service, admin legal documents |
-| privacy@nantty.com | group | Data-subject requests (access, deletion, export), cookies | Privacy team, DPO | Privacy and cookie policies, web contact page, mobile data export, Reply-To of privacy and legal emails |
+| privacy@nantty.com | forwarding alias (Cloudflare) | Data-subject requests (access, deletion, export), cookies | Owner inbox temporarily | Privacy and cookie policies, web contact page, mobile data export, Reply-To of privacy and legal emails |
 | dpo@nantty.com | mailbox (or alias → privacy@ until a named DPO) | Data Protection Officer under the Nigeria Data Protection Act 2023; regulators (NDPC) and data subjects | Appointed DPO | Privacy policy |
-| security@nantty.com | group | Vulnerability reports; admin VPN / IP allow-list access problems | Engineering on call | `/.well-known/security.txt` on nantty.com, README, admin sign-in and restricted pages, web contact page |
+| security@nantty.com | forwarding alias (Cloudflare) | Vulnerability reports; admin VPN / IP allow-list access problems | Owner inbox temporarily | `/.well-known/security.txt` on nantty.com, README, admin sign-in and restricted pages, web contact page |
 | abuse@nantty.com | group | Spam, phishing, fraud and platform abuse reports from outside (also what other providers mail about our IPs) | Trust & Safety | Reported via WHOIS/abuse contacts; not shown in the app |
 | copyright@nantty.com | group | DMCA-style copyright and trademark notices and counter-notices | Trust & Safety (IP) | Terms of service (infringement section), help centre, Reply-To of copyright claim emails |
 | trustandsafety@nantty.com | group | Appeals and questions about strikes, restrictions and suspensions | Trust & Safety | Reply-To of trust and account-status emails |
 | verification@nantty.com | group | Checkmark and identity verification questions | Verification team | Reply-To of checkmark and verification emails |
 | partnerships@nantty.com | group | Brands, logistics and payment partners | Business development | README |
-| press@nantty.com | group | Journalists and media kits | Comms | Web contact page, README |
+| press@nantty.com | forwarding alias (Cloudflare) | Journalists and media kits | Owner inbox temporarily | Web contact page, README |
 | careers@nantty.com | group | Job applications | Hiring | Careers page when it ships |
-| hello@nantty.com | group | General enquiries; Reply-To of marketing emails | Owner / ops | Web contact page "anything else", README, Reply-To of marketing |
+| hello@nantty.com | forwarding alias (Cloudflare) | General enquiries; Reply-To of marketing emails | Owner inbox temporarily | Web contact page "anything else", README, Reply-To of marketing |
+| oyinlola@nantty.com | forwarding alias (Cloudflare) | Founder contact shown in the investor deck | Owner inbox | Investor deck |
 | dmarc@nantty.com | mailbox (or a DMARC reporting service address) | Aggregate DMARC reports (`rua`) | Engineering | DNS only (`infra/aws/envs/*/terraform.tfvars`) |
 
 ## Automated senders (sending subdomain)
@@ -61,8 +62,8 @@ Prod values; the Terraform module `infra/aws/modules/ses` creates the SES record
 
 | Record | Name | Value | Notes |
 | --- | --- | --- | --- |
-| MX | `nantty.com` | your mailbox provider (Google Workspace or Microsoft 365) | Human mail on the root |
-| SPF (TXT) | `nantty.com` | `v=spf1 include:_spf.google.com ~all` (or the provider's include) | Root domain: mailbox provider only. Keep under 10 lookups |
+| MX | `nantty.com` | Cloudflare Email Routing (`route1/2/3.mx.cloudflare.net`) | Current inbound forwarding; do not replace without migrating routing |
+| SPF (TXT) | `nantty.com` | `v=spf1 include:_spf.mx.cloudflare.net ~all` | Current Cloudflare Email Routing record; review before adding any mailbox sender |
 | SPF (TXT) | `bounce.mail.nantty.com` | `v=spf1 include:amazonses.com ~all` | Custom MAIL FROM for SES (Terraform) |
 | MX | `bounce.mail.nantty.com` | `10 feedback-smtp.eu-west-1.amazonses.com` | Custom MAIL FROM (Terraform) |
 | DKIM (3 × CNAME) | `<token>._domainkey.mail.nantty.com` | `<token>.dkim.amazonses.com` | SES Easy DKIM, 2048-bit (Terraform) |

@@ -677,7 +677,7 @@ Moved here from the former `docs/checkoutPaymentFlowPlan.md` (2026-10-11). Provi
 
 ### B.2 Who pays the fees
 
-0% commission on products (owner, 2026-10-03). Escrow groups pay an escrow fee of 1.5% of the group total including shipping (1% for Business-plan sellers), deducted from the seller payout at release; no fee on refunded amounts. Direct groups pay no Nantty fee; the seller covers only the provider's processing fee. Buyers pay nothing extra. A checkout's processing fee is allocated across its groups pro rata with the largest-remainder method.
+Latest founder policy: 0% commission on completed sales; Flutterwave processing and withdrawal charges are passed through at cost and disclosed before confirmation. The earlier 1.5%/1% escrow fee proposal is superseded and the fresh-install platform-settings default is zero. Existing persisted settings must still be reconciled before staging/launch. Verify refund allocations, provider charges and the fee lines returned by checkout against this policy; do not assume old fee allocation examples remain valid.
 
 ### B.3 Escrow mechanics
 

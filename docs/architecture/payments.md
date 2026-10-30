@@ -207,14 +207,19 @@ sequenceDiagram
 
 Refund capacity counts succeeded refunds only; in-flight amounts are released if a refund fails. Chargebacks are withheld from main at `initiated`, freeze remaining escrow, notify the seller and feed risk signals (fraud.md). Source: `docs/integrations/flutterwaveMigration.md` §3.3 and §3.8.
 
-### 4.2 Fee lines: direct vs escrow (4 Oct 2026)
+### 4.2 Fee lines: direct vs escrow (4 Oct 2026; historical proposal)
 
-Product commission is 0%. Buyers pay nothing extra. The seller sees two separate fee lines per order group:
+The fee amounts below are a superseded design proposal, not the current fee policy. The founder's intended launch policy is
+0% sales commission; actual payment-processing and withdrawal charges are passed through at provider cost and disclosed
+before confirmation. Fresh-install settings default to zero, but previously persisted revenue settings still require an
+audited check before staging or launch. Do not use the historical percentages as current checkout promises.
+
+The old design described two separate fee lines per order group:
 
 | Line | Escrow group | Direct group (verified store only) |
 |---|---|---|
-| Escrow fee | 1.5% of the group total including shipping (1% for Business plan), deducted from the payout at release, none on refunded amounts | none |
-| Flutterwave processing fee | allocated pro rata across the checkout and deducted from the payout | allocated pro rata and borne by the seller |
+| Escrow fee | Historical proposal: 1.5% of the group total including shipping (1% for Business plan); superseded by the zero-commission policy | none |
+| Flutterwave processing fee | Historical allocation proposal; current amount must equal the provider charge and be shown in checkout | Historical allocation proposal; current amount must equal the provider charge and be shown in checkout |
 
 Unverified stores are escrow only. All amounts are int64 minor units. Detail: `docs/integrations/flutterwaveMigration.md` Appendix B.2.
 

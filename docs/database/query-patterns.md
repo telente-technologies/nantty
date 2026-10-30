@@ -1,6 +1,6 @@
 # Query patterns
 
-As of 2026-10-03. Endpoints are the real routes in `services/go/modules/*/src/modules/*/routes` (prefix `/api/v1` omitted) unless marked PLANNED. Sizes use the classes in [domains.md](domains.md#3-size-classes-assumption-scenarios-no-user-counts) (rows returned / rows touched). Index names refer to [indexes.md](indexes.md).
+As of 2026-10-03. This is a dated query inventory, not a current route catalogue: routes, ownership and pagination have changed since this snapshot. Verify endpoint availability and enforcement in the current Go/TypeScript route registrations before using a row as an implementation claim. Sizes use the classes in [domains.md](domains.md#3-size-classes-assumption-scenarios-no-user-counts) (rows returned / rows touched). Index names refer to [indexes.md](indexes.md).
 
 Consistency: **strong** = must read the writer (read-after-write, money, locks). **eventual** = replica or cache acceptable (seconds of lag).
 

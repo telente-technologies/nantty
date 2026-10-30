@@ -3,6 +3,68 @@
 All notable changes to Nantty are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased] — 2026-10-29
+
+### Documentation and subscription policy reconciliation
+
+- Audited the maintained repository Markdown inventory (409 files) and
+  validated local relative links; no broken project links were found. Kept
+  dated plans, audits and legal drafts as history because none was
+  demonstrably unnecessary.
+- Updated subscription/pricing references to distinguish source defaults,
+  historical proposals, canonical target tiers and prices in an existing
+  database or store catalog. Removed unsupported fixed Black pricing from
+  public Help Centre articles while government pricing remains unconfirmed.
+- Removed stale customer promises about automatic verification refunds,
+  fixed eligibility thresholds, trials, ad-free sponsorships and unavailable
+  store purchase routes; aligned ad-load and ranking examples to source values.
+- Changed fresh-install platform revenue settings to zero sales/escrow
+  commission, matching the founder policy. Previously persisted settings are
+  not rewritten and must be audited before staging or launch.
+- Verification: Go platform-settings package tests pass; Support Help Centre
+  content seed/link tests pass (9 tests). The repository Node version warning
+  remains (installed 24.19.0; required >=24.22.1).
+
+### App-flow and prelaunch story reconciliation
+
+- New Spaces now persist with coin gifts disabled until the separate safety
+  and rollout gates pass. The mobile and webapp no longer display gift actions
+  that the server currently rejects. Public Spaces attach an announcement
+  post; invite-only Spaces remain private and are shared by invitation.
+- The main-site About story, hero, seller teaser and escrow example now present
+  product surfaces as planned previews, not currently available services. The
+  escrow example states that eligible funds remain with the buyer's payment
+  partner and clearly labels itself as illustrative, not a live order.
+- Corrected the Terms, Ads Policy, Privacy Policy and dated legal comparison:
+  minors may see contextual, age-safe ads, but not personalised ads or
+  age-restricted categories. This matches the tested Go ads decision path;
+  parental consent and paid coin/gift age gates remain open.
+- Verification: Go sessions-controller test passed; mobile Spaces tests
+  passed (6 tests); webapp typecheck passed; focused web ESLint checks passed.
+  Pre-existing lint warnings remain in the mobile/webapp Space screens, and
+  device/browser QA has not been run.
+
+## [Unreleased] — 2026-10-27
+
+### Branding, landing pages and deployment safety
+
+- Removed the retired TypeScript framework from all six service imports and
+  package dependencies; Fastify owns HTTP routing and network I/O. Support and
+  Social suites pass; final Media integration verification is in progress.
+- Kept the legal status label as “Draft” and removed the longer draft notice.
+- Repaired phone navigation on Main, Ads, Creator and Studio; stacked seller
+  fee rows on narrow screens. Unified large footer and error-page typography,
+  keyboard focus and touch targets. Prelaunch 404 recovery links stay public.
+- Published updated Ads, Creator and Studio static artifacts to Cloudflare.
+  Main-site screenshot refresh and publication remain in progress.
+- Added Search and Support to deployment builds/rollouts and shared-package
+  triggers. Set default platform sales commission to zero and aligned demo
+  order fixtures. Flutterwave processing/withdrawal charges remain separate.
+- Required production admin network configuration and added mandatory restore
+  evidence and encrypted snapshot checks before migration tasks. Internal
+  service ingress is segmented; final internal TLS verification remains open.
+- Nested comment continuation screens retain their Back navigation history.
+
 ## [Unreleased] — 2026-10-26
 
 ### Platform foundation

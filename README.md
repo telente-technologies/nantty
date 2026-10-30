@@ -14,7 +14,7 @@ A social network and a marketplace in one, built for African buyers, sellers and
 </div>
 
 > [!NOTE]
-> Nantty is **pre-launch**. The apps run either on built-in mocks or against the real backend started on a developer machine. Nothing is deployed yet: the AWS Terraform is written but has never been applied, and production payments still need live Flutterwave keys and Flutterwave's written answers.
+> Nantty is **pre-launch**. The public marketing landing pages are deployed as static Cloudflare Pages sites. The product apps and API/backend are not a production service; they run in mock mode or against a developer's local backend. The AWS Terraform is a blueprint and has not been applied. Production payments still require approved live Flutterwave configuration and provider confirmation.
 
 ## What it is
 
@@ -40,7 +40,7 @@ apps/
   admin/       staff console
   web/         marketing site
 services/
-  typescript/  gateway, social, notifications, search, media, support (Nanttyjs + Prisma)
+  typescript/  Fastify gateway and services; Prisma-backed data services
   go/          platform/ libraries, modules/ (17 domain modules), deployables/ (6 binaries)
   elixir/      realtime: Phoenix WebSocket fan-out
   python/      intelligence: ranking, recommendations, ads, risk and moderation scores
@@ -112,14 +112,14 @@ The development machine has 15 GB of RAM: run one dev server, build or test suit
 - [docs/architecture/system.md](docs/architecture/system.md): system overview (services, data ownership, events, money flow, auth, realtime, deployment).
 - [docs/architecture/README.md](docs/architecture/README.md): the topic documents.
 - [docs/runningLocally.md](docs/runningLocally.md): mocks or the real backend, demo accounts, phones, LiveKit.
-- [services/README.md](services/README.md) and [services/zudojsStructure.md](services/zudojsStructure.md): running each service; the shared code layout.
+- [services/README.md](services/README.md) and [services/fastifyPlatformMigration.md](services/fastifyPlatformMigration.md): running each service; the shared code layout.
 - [docs/integrations/flutterwaveMigration.md](docs/integrations/flutterwaveMigration.md): the payments design.
 - [docs/README.md](docs/README.md): every document, one line each.
 - [SECURITY.md](SECURITY.md): security rules and how to report a vulnerability.
 
 ## Contributing
 
-Nantty is a private, owner-led project. Read [services/zudojsStructure.md](services/zudojsStructure.md) and [SECURITY.md](SECURITY.md) first. House rules: backend files stay at 300 lines or fewer, almost no comments, Prisma or ent + Atlas only (no hand-written SQL), money in integer minor units, and events named `<entity>.<pastTense>` with a JSON Schema.
+Nantty is a private, owner-led project. Read [services/fastifyPlatformMigration.md](services/fastifyPlatformMigration.md) and [SECURITY.md](SECURITY.md) first. House rules: backend files stay at 300 lines or fewer, almost no comments, TypeScript services use Prisma (CI blocks raw SQL outside the documented search-query exception), and Go services use ent + Atlas with narrowly reviewed parameterized SQL where required (for example, the ledger outbox). Money uses integer minor units, and events are named `<entity>.<pastTense>` with a JSON Schema.
 
 ## Licence and contact
 

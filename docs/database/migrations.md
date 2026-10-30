@@ -1,14 +1,14 @@
 # Migration practice
 
-As of 2026-10-03. Labels: EXISTING (path), PLANNED, FUTURE.
+Audit snapshot from 2026-10-03; current-money migration and credential exceptions refreshed 2026-10-29. Labels: EXISTING (path), PLANNED, FUTURE. Older rows in the audit describe the former shared-role startup path; do not treat them as current for the six money schemas. See [staging-migration-runbook.md](staging-migration-runbook.md) for the full staging gate and remaining owners.
 
 ## 1. Current state (audit)
 
 | Area | Finding | Evidence | Severity |
 | --- | --- | --- | --- |
 | Generation | Per-module `cmd/generateMigration` uses ent's Go API `entmigrate.NamedDiff` in replay mode against `atlas_dev`, golang-migrate file format (`.up.sql`/`.down.sql`) plus `atlas.sum`; `WithDropColumn(false)`, `WithDropIndex(true)` | `services/go/modules/*/cmd/generateMigration/main.go` | EXISTING |
-| Apply | **Services run migrations on boot**: each module's `Start...Module` calls `postgres.ApplyPendingMigrationsFromEmbeddedDirectory` (golang-migrate `Up()`) before opening its pool. Files embedded via `migrations.Files` | `platform/postgres/migrations.runner.go`; e.g. `modules/users/src/app.go:56`; same in auth, admin, currency, live, money loaders | **P1** |
-| Credentials | The app role that serves traffic is also the **schema owner** (`CREATE SCHEMA x AUTHORIZATION svc_x`), so the running service can run any DDL, including `DROP` | `infra/local/postgres/create-databases.sh` | **P1** |
+| Apply | Historical audit: migrations ran at module startup. Current exception: all six money schemas disable startup migration; embedded migrations run through the dedicated `go-money --migrate-money` task before rollout. Other Go modules still migrate at startup. The staging workflow does not yet provide one controlled pre-rollout migration phase for all 21 owners; Prisma migrations are also not in that phase. | `goMoney/ledgerMigration.go`, `moneyModule.loader.go`, `.github/workflows/deploy.yml`, `staging-migration-runbook.md` | **P1** (remaining owners) |
+| Credentials | Historical audit: runtime roles owned schemas. Current money exception: `svc_migrator` owns six money schemas; runtime `svc_money` has no owner-role membership and only configured schema/table/sequence grants. Non-money schema ownership remains as defined by the local bootstrap. Actual AWS role/grant state is unverified. | `infra/local/postgres/create-databases.sh`, `security-audit/REMEDIATION_PROGRESS.md` | **P1** (AWS verification) |
 | Concurrency | N tasks start together: golang-migrate takes a Postgres advisory lock, so migrations serialize, but every replica blocks at boot waiting on the lock, and a long DDL keeps all new tasks unready (rolling deploy stalls, health-check failures) | `migrations.runner.go` | P1 |
 | Lint | No `atlas migrate lint` step; CI only starts compose Postgres | `.github/workflows/backend.yml`; no `atlas.hcl` in repo | **P1** |
 | Rollback | `.down.sql` files exist; `migrate.Down` is never called by code; rollbacks are untested | migrations folders | P2 |

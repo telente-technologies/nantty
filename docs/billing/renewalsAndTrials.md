@@ -2,9 +2,9 @@
 
 > **Provider (owner, 2026-10-11):** Flutterwave is the only payment provider. Renewals use Flutterwave tokenized charges; details in [`flutterwaveMigration.md`](../integrations/flutterwaveMigration.md) §3.6.
 
-Status: built 4 October 2026 (go-money `subscriptions` and `payments` modules, notifications, email templates). This page explains, in plain words, how Nantty charges plans on the web, how free trials turn into paid plans, and what happens when a payment fails. App Store and Google Play purchases are covered in section 8.
+Status: historical billing design and operator notes, not proof that every behavior below is currently deployed. The current source still uses legacy plan IDs; configured database price books, payment-provider settings, client purchase flows and receipts are authoritative. Several amounts and refund/bundle examples below are superseded and retained only as historical context. Verify implementation before using this page to answer a customer or change billing.
 
-Prices below are Nigeria web prices from [pricing.md](../pricing.md). Every other region works the same way in its own currency (or in USD where Flutterwave can't charge the local currency).
+Prices below are historical Nigeria web examples from [pricing.md](../pricing.md), not a current quote. Current fresh-install source defaults are Blue (`blue`) ₦2,500, Premium ₦20,000, Gold-only ₦3,000, Seller Pro ₦5,000, Seller Business ₦30,000, and legacy Black ₦50,000/month. Existing database prices can differ. Region and billing-channel availability must be checked in checkout.
 
 ## 1. The short version
 
@@ -23,7 +23,7 @@ Flutterwave payment plans charge the same fixed amount every period, auto-cancel
 |---|---|
 | Blue + Gold bundle starts or stops | Gold-only ₦3,000 becomes ₦2,550, and goes back up if Blue lapses |
 | Credit from an upgrade | Upgrading leaves a credit that comes off the next charge |
-| Downgrade at renewal | Business ₦15,000 becomes Pro ₦5,000 at the next renewal |
+| Downgrade at renewal | A legacy Business plan changes to the selected lower plan at its effective renewal, if supported by the current billing implementation |
 | Price change after notice | New price only from the first renewal at least 30 days after we emailed |
 | Customer moved country | New region's price (USD where Flutterwave can't charge the currency) |
 
@@ -35,7 +35,7 @@ With plans we'd have to cancel and recreate a provider subscription each time on
 
 ## 3. What a period's charge is made of
 
-| Line | Pro (₦5,000) | Business (₦15,000) | Premium (₦4,500) | Gold only (₦3,000) | Blue (₦2,500) |
+| Historical line-item example (not a current charge schedule) | Pro (old ₦5,000 default) | Business (old ₦15,000 proposal) | Premium (old ₦4,500 proposal) | Gold only (old ₦3,000 default) | Blue (old ₦2,500 default) |
 |---|---|---|---|---|---|
 | Plan | ₦2,000 | ₦12,000 | ₦2,000 | – | – |
 | Checkmark | ₦3,000 (Gold) | ₦3,000 (Gold) | ₦2,500 (Blue) | ₦3,000 | ₦2,500 |
@@ -49,7 +49,7 @@ With plans we'd have to cancel and recreate a provider subscription each time on
 **Examples**
 
 - A Pro seller whose Gold checkmark is rejected gets **₦3,000** back once (the checkmark share of the period they already paid for). After that the plan keeps renewing at **₦5,000**. The receipt still shows "Plan ₦2,000 + Gold checkmark ₦3,000", with a note that the checkmark line is part of the plan price.
-- A Premium member whose Blue check is still in review at renewal pays the full **₦4,500**.
+- Any amount due while verification is pending is determined by the applicable checkout terms and current subscription record; this historical example is not a promise of renewal pricing.
 - Standalone checkmarks (Blue, Gold-only, Black, bundle tiers) are unchanged: a rejected one is cancelled and fully refunded, so it never renews.
 
 ## 4. Renewal timeline (monthly Pro, card on file)
@@ -94,7 +94,7 @@ At any point the customer can tap **Pay now** (`POST /api/v1/subscriptions/{id}/
 ## 7. Cancel, upgrade, downgrade
 
 - **Cancel**: the plan stays on until the end of the paid period, then ends. No refund for unused days. The only refund is the existing one: a rejected verification refunds the checkmark share (seller plans and Premium) or the whole payment (standalone checkmarks). It's refunded from the **latest** charge, not the first one.
-- **Upgrade** (e.g. Pro → Business, or monthly → yearly): we charge the difference now, minus a **credit for unused time** on the old plan. Example: halfway through a ₦5,000 Pro month, moving to Business (₦15,000) costs ₦7,500 − ₦2,500 = **₦5,000** today. Then it's ₦15,000 from the next renewal. Monthly → yearly starts a new yearly period today, with the unused month taken off.
+- **Upgrade/downgrade** rules and proration must be verified against the current billing implementation and provider response; the numeric example below this paragraph is superseded and must not be used to quote a customer.
 - **Downgrade** (e.g. Business → Pro, or yearly → monthly): nothing is charged or refunded now. The new plan and price start at the next renewal.
 - During a trial, changing plan just switches the plan. The first charge at trial end uses the new plan.
 

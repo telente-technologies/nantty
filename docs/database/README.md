@@ -1,6 +1,6 @@
 # Database architecture index
 
-> **Historical snapshot (2026-10-03).** The counts and status labels below are stale; several modules marked PLANNED or 0-table have since shipped. Use [system.md](../architecture/system.md) for the current ownership map and the per-module `src/migrations` directories for current tables. The workflow and grep recipes are still useful.
+> **Historical snapshot (2026-10-03), refreshed for role/migration exceptions on 2026-10-29.** The counts and status labels below are stale; several modules marked PLANNED or 0-table have since shipped. Use [system.md](../architecture/system.md) for the current ownership map and the per-module `src/migrations` directories for current tables. Money schemas are owned by `svc_migrator` and are migrated by a dedicated go-money task; normal runtime `svc_money` is not a member of those owner roles. The workflow and grep recipes are still useful.
 
 As of 2026-10-03. Static audit of the working tree (no EXPLAIN run: the compose Postgres was not running. EXPLAIN validation is a follow-up in [indexes.md](indexes.md#7-validation-follow-ups)).
 
@@ -33,8 +33,8 @@ Older narrative doc: `docs/architecture/database.md` (ERD proposals for planned 
 | Engine | PostgreSQL + PostGIS (Aurora PostgreSQL in prod, PLANNED) | `infra/local/docker-compose.yml`, `infra/local/postgres/create-databases.sh` |
 | Databases | `$POSTGRES_DB` (app), `nantty_test`, `atlas_dev` (Atlas diff scratch) | `create-databases.sh` |
 | Schemas | 21, one per owning service: auth users catalog inventory orders payments wallet ledger escrow subscriptions ads creators moderation live currency admin social notifications media search support (rewards, analytics, feed, integrations, campaigns, realtime and intelligence were removed 2026-10-12: nothing used them) | `create-databases.sh` |
-| Roles | `svc_<service>` LOGIN owns schema `<service>`; all are members of `nantty_readers` (NOLOGIN) | `create-databases.sh` |
-| Money role | `svc_money` is granted `svc_payments, svc_wallet, svc_ledger, svc_escrow, svc_subscriptions, svc_creators` (one tx across money schemas) | `create-databases.sh` |
+| Roles | For non-money schemas, `svc_<service>` LOGIN owns its schema and is a member of `nantty_readers` (NOLOGIN). The six money schemas are owned by `svc_migrator`; runtime `svc_money` has schema USAGE plus migration-owner default DML/sequence grants, but no membership in owner roles. AWS equivalence is unverified. | `create-databases.sh` |
+| Money transaction pool | `svc_money` uses one shared application pool across payments, wallet, ledger, escrow, subscriptions and creators; one SQL transaction can span these schemas without granting role inheritance. | `services/go/modules/ledger/src/databases/sharedPool.database.go`, `create-databases.sh` |
 | Cross-schema reads | Column-level `GRANT SELECT ... TO nantty_readers` in each owner's `*_grant_*.up.sql` migration | `services/go/modules/*/src/migrations/*grant*.up.sql` |
 | `public` | `REVOKE CREATE ON SCHEMA public FROM PUBLIC` | `create-databases.sh` |
 | Search path | Per-module DSN gets `search_path=<schema>` | `services/go/platform/postgres/schema.scope.go` |
@@ -50,7 +50,7 @@ Every Go module with a database uses the same layout. `<m>` = `services/go/modul
 | Generated client | `<m>/src/generated/ent/` (never edit; `migrate/schema.go` = expected tables) |
 | Migration generator | `<m>/cmd/generateMigration/main.go` (`go run ./cmd/generateMigration <name>`; `-rehash` after hand-written files; uses `ATLAS_DEV_DATABASE_URL`, default `atlas_dev` on :15432) |
 | Migrations | `<m>/src/migrations/<ts>_<name>.{up,down}.sql`, `atlas.sum`, `embedded.migrations.go` (embedded into the binary) |
-| Migration runner | `services/go/platform/postgres/migrations.runner.go` (golang-migrate, applied at service start); money modules: `services/go/modules/ledger/src/databases/sharedPool.database.go` `ApplyModuleMigrationsAsSchemaOwner` (sets `-c role=svc_<m>`) |
+| Migration runner | Go migrations use golang-migrate. Current money-service deployment uses the dedicated `go-money --migrate-money` task with `svc_migrator`; normal money-service startup migration is disabled. See `services/go/deployables/goMoney/ledgerMigration.go`, `.github/workflows/deploy.yml` and `infra/aws/README.md`. AWS role/task provisioning and staging execution remain unverified. `ApplyModuleMigrationsAsSchemaOwner` is retained for isolated tests/local schema setup, not the production runtime path. |
 | Queries (reads) | `<m>/src/modules/<feature>/queries/<name>/*.handler.go` |
 | Commands (writes) | `<m>/src/modules/<feature>/commands/<name>/*.handler.go` |
 | Domain services (most query code) | `<m>/src/modules/<feature>/services/*.service.go` (live: `<m>/src/services/*.service.go`) |

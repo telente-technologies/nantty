@@ -1,6 +1,6 @@
 # Nantty documentation index
 
-Every maintained document in the repo, one line each. Third-party files (`deps/`, `node_modules/`), generated test reports and the agent files (`AGENTS.md`, `CLAUDE.md`) are not listed. Last cleaned up 2026-10-21 (see [CHANGELOG.md](CHANGELOG.md)).
+Index of maintained project documentation and major source-backed content collections. Help Centre articles are grouped by category rather than repeated individually. Third-party files (`deps/`, `node_modules/`), generated reports and agent instruction files are not listed. Reviewed 2026-10-29; see [CHANGELOG.md](CHANGELOG.md) for dated changes.
 
 Use **Nantty** for current product-facing prose. Legacy `nantty` strings in package names, API headers, event exchanges, token audiences, deep links, domains, email addresses, app-store product IDs, database roles, Docker resources, and demo accounts are operational identifiers; keep them aligned with the running code and provider configuration until a coordinated migration. Dated audits, changelogs, legal entity placeholders, and past correspondence retain their original wording as evidence. A quoted response that still comes from code is documented verbatim until that code changes.
 
@@ -14,6 +14,18 @@ Use **Nantty** for current product-facing prose. Legacy `nantty` strings in pack
 - [ownerActions.md](ownerActions.md): the owner-action checklist still open after the handoff.
 - [audit/frontend-backend-audit.md](audit/frontend-backend-audit.md): the living front-end/back-end audit (in progress).
 - [audit/fix-changelog.md](audit/fix-changelog.md): every code change made while fixing that audit, newest first.
+- [database/staging-migration-runbook.md](database/staging-migration-runbook.md): staging migration orchestration across service-owned databases; preserves each service's migration history.
+- [../infra/aws/SECURITY_DEPLOYMENT.md](../infra/aws/SECURITY_DEPLOYMENT.md): production security prerequisites and deployment controls for the AWS blueprint.
+
+## Product analysis
+
+- [../product-analysis/FEATURE_INVENTORY.md](../product-analysis/FEATURE_INVENTORY.md): source-backed feature inventory and implementation status.
+- [../product-analysis/CURRENT_SUBSCRIPTION_PRICING.md](../product-analysis/CURRENT_SUBSCRIPTION_PRICING.md): repository price defaults, explicitly not a live database read.
+- [../product-analysis/FINAL_SUBSCRIPTION_SPEC.md](../product-analysis/FINAL_SUBSCRIPTION_SPEC.md): approved working subscription taxonomy and target entitlements; implementation gaps are called out in the report.
+- [../product-analysis/PRICING_ENGINE_SPEC.md](../product-analysis/PRICING_ENGINE_SPEC.md): configurable regional and app-store price derivation design/status.
+- [../product-analysis/PRICING_DECISIONS_PENDING.md](../product-analysis/PRICING_DECISIONS_PENDING.md): unresolved price and operational approvals.
+- [../product-analysis/MIGRATION_PLAN.md](../product-analysis/MIGRATION_PLAN.md): backward-compatible legacy plan transition.
+- [../product-analysis/POST_SCHEDULING_ARCHITECTURE.md](../product-analysis/POST_SCHEDULING_ARCHITECTURE.md): current scheduled-post implementation and remaining gaps.
 
 ## Architecture (`docs/architecture`)
 
@@ -59,7 +71,7 @@ Use **Nantty** for current product-facing prose. Legacy `nantty` strings in pack
 ## Backend services
 
 - [../services/README.md](../services/README.md): how to run and test every backend service.
-- [../services/zudojsStructure.md](../services/zudojsStructure.md): the shared code layout for every stack.
+- [../services/fastifyPlatformMigration.md](../services/fastifyPlatformMigration.md): the shared code layout for every stack.
 - [backendPlan.md](backendPlan.md): backend contracts and wiring order (3 Oct draft, partly built).
 - [../services/python/README.md](../services/python/README.md): rules for the Python intelligence layer.
 - [../services/python/intelligence/README.md](../services/python/intelligence/README.md): intelligence service setup (read by its Dockerfile).
@@ -91,11 +103,15 @@ Use **Nantty** for current product-facing prose. Legacy `nantty` strings in pack
 
 - [../infra/aws/README.md](../infra/aws/README.md): the Terraform layout (never applied).
 - [awsAndThirdPartyIntegrations.md](awsAndThirdPartyIntegrations.md): every AWS service and third-party provider, and the go-live checklist.
-- [awsSalesCallPrep.md](awsSalesCallPrep.md): notes for the AWS sales call of 2026-10-11.
+- [awsSalesCallPrep.md](awsSalesCallPrep.md): architecture and launch-assumption brief for the AWS Solutions Architect session; distinguish repository blueprint from deployed infrastructure.
 - [emailAddresses.md](emailAddresses.md): company mailboxes and sending addresses.
 
 ## Security
 
+- `security/audit/reports/` is the earlier deep-scan archive; `security-audit/` is the current 2026-10-29 preproduction review and remediation record. Their scopes and test evidence differ, so use each report's status/evidence rather than combining old findings as current vulnerabilities.
+- [../security-audit/README.md](../security-audit/README.md): current preproduction audit scope, findings, remediation and verification limits.
+- [../security-audit/REMEDIATION_PROGRESS.md](../security-audit/REMEDIATION_PROGRESS.md): verified remediation state and remaining work; do not infer production readiness from source tests.
+- [../security-audit/REMAINING_RISKS.md](../security-audit/REMAINING_RISKS.md): unresolved or environment-blocked security checks.
 - [../security/README.md](../security/README.md): security workspace layout, rules and review status.
 - [../security/audit/reports/VERIFICATION_SUMMARY.md](../security/audit/reports/VERIFICATION_SUMMARY.md): status of every deep-scan finding (start here).
 - [../security/audit/reports/GO_BACKEND_DEEP_SCAN.md](../security/audit/reports/GO_BACKEND_DEEP_SCAN.md): Go backend deep scan.
@@ -120,6 +136,15 @@ Use **Nantty** for current product-facing prose. Legacy `nantty` strings in pack
 - `legal/templates/*.md`: advisor, contractor, DPA, employment, MSA and NDA templates (drafts for counsel).
 - [legal/platformBenchmark-2026-10.md](legal/platformBenchmark-2026-10.md): code-vs-policy benchmark against comparable platforms (rechecked 2026-10-21).
 - `apps/*/public/storeBadges/NOTICE.md`, `packages/emailTemplates/assets/storeBadges/NOTICE.md`: App Store and Google Play badge licence notices.
+
+## Help Centre source content
+
+- [../services/typescript/support/content/help/](../services/typescript/support/content/help/): seeded Help Centre articles, grouped by the categories in `services/typescript/support/src/constants/helpCategories.constant.ts`. Treat these as customer-facing claims: prices, eligibility, limits and workflows must match current API/service behavior, not only mocks or plans. Route links use `/help/<category>` and `/help/<category>/<article>`.
+
+## Historical and planning documents
+
+- [plans.md](plans.md), [backendPlan.md](backendPlan.md), [../services/fastifyPlatformMigration.md](../services/fastifyPlatformMigration.md), and [../docs/plans/nantty-spaces-and-fastify-migration.md](plans/nantty-spaces-and-fastify-migration.md) contain current plans or migration history; status labels and dates determine whether an item is complete or only proposed.
+- Dated audits, changelogs, legal drafts and meeting notes are retained as evidence. Do not delete them merely because later code or a newer report supersedes their conclusions.
 
 ## Product content (not docs)
 

@@ -10,11 +10,12 @@ Status: **implementation plan / not yet launch-ready** (2026-10-26)
 - Use Nantty's blue brand token for Space identity and actions. Keep the existing red live indicator for video LIVE; blue “Space” is not a LIVE-state indicator.
 - **Video livestream remains beta** until the reliability, safety and device QA gates below pass. It must not be represented as a launch-ready general feature. Keep existing data and APIs compatible while adding an explicit rollout gate.
 - **Spaces gifts are permitted by owner direction, purchased with coins and sent to the Space host only.** Render a static gift confirmation/state; do not animate gifts. Do not add gift leaderboards, gift battles, video/live gifts or cash tips to Spaces. Use the canonical coin wallet/ledger, server-side pricing, idempotency, age-safety and fraud controls; never accept client-provided values or directly mutate balances. Gate the UI and endpoint independently so disabled configuration fails closed. Other video-LIVE gifts remain governed by their beta/launch gate and must not be inferred to be enabled by this Spaces decision.
+- **Gifting is an in-product capability, never a standalone product.** Do not provision `gift.nantty.com`, a gift portal, or a separate gifting login. Surface approved coin-gift actions only inside the mobile app and the real webapp, where the canonical wallet, safety gates, identity and receipts are available.
 
 ## Current architecture and ownership
 
 - The repository's backend plan places live sessions, LiveKit credentials, stage membership and live safety in **Go `go-live`**. The existing Go live service already has scheduled sessions, LiveKit token issuance, audience presence, comments, safety controls and a retention worker. Extend that single authority for Spaces rather than creating a second source of truth.
-- TypeScript deployables are `gateway`, `social`, `notifications`, `media`, `search` and `support`. `gateway` and `search` now run through `@nantty/fastify-platform` and no longer depend on ZudoJS. `social`, `notifications`, `media` and `support` remain migration targets. Social uses Prisma; other services have their own storage/integration patterns. Browser/mobile BFFs remain Next.js/Expo and are not Fastify migration targets.
+- TypeScript deployables are `gateway`, `social`, `notifications`, `media`, `search` and `support`. All six now use Fastify through `@nantty/fastify-platform`; the previous HTTP, schema and logging packages have been removed. Social uses Prisma; other services retain their storage/integration ownership. Browser/mobile BFFs remain Next.js/Expo.
 - Consequently, the Fastify migration is a separate platform migration for the TypeScript HTTP deployables. Space lifecycle and LiveKit authorization remain in `go-live`; TypeScript consumes its existing public/internal contracts and events. Do not dual-write live state from social or gateway.
 
 ## Implementation status (2026-10-26)
@@ -22,6 +23,12 @@ Status: **implementation plan / not yet launch-ready** (2026-10-26)
 - **Verified:** creator-gated hosting, public listener participation, speaker request/moderation persistence, rate-limited/idempotent Space mutations, audio-only LiveKit grants, access-filtered list/detail presenters, and a mobile LiveKit connection hook. Focused mobile typecheck/tests and Go controller/route tests pass.
 - **Verified wallet slice, not enabled:** creators money service has a server-priced, Space-host-derived coin-gift RPC with balanced ledger posting, idempotent replay and `gifts_enabled` enforcement. The Go live gateway/HTTP caller, account-age/fraud policy gates and static gift confirmation UI are not yet integrated. Keep gifts disabled until all those layers pass together.
 - **Still open:** publish/link a Space announcement post and expose its post ID so all discussion remains in that post's comment thread; reminders; real device audio QA; web experience; complete integration/security gates; and the six-service Fastify migration. Do not add a Space comment/chat surface, gift animation or leaderboard while closing these gaps.
+
+### Verified update (2026-10-29)
+
+- The Go live service exposes `POST /api/v1/spaces/{spaceId}/gifts` and delegates coin charging to the money service, but the create handler now explicitly stores `gifts_enabled=false`. The endpoint rejects gifts unless that stored flag is enabled. Both the mobile app and webapp hide the gift picker/action while the safety and rollout gates remain incomplete; do not infer gift availability from the presence of a route or wallet RPC.
+- Public Spaces created from the mobile or webapp publish and attach a feed announcement; private invite-only Spaces are shared by invitation and do not publish a public announcement. Comments for a published Space remain on its announcement post. The private-Space exception is intentional to avoid exposing invite-only rooms in a public feed.
+- Verification: Go sessions-controller package tests pass, including a regression assertion that new Spaces persist gifts disabled. Mobile focused Spaces/audio tests pass (6 tests); webapp TypeScript check passes. Device audio QA and live DB/integration verification remain open.
 
 ## Nantty Spaces implementation
 
@@ -74,14 +81,14 @@ Creator eligibility is checked server-side on create/start/schedule and rechecke
 ### Verified migration progress (2026-10-27)
 
 - `@nantty/fastify-platform` now owns Fastify construction, request IDs, security plugins, metrics, readiness helpers and the small framework-neutral request/response/middleware contract used by domain handlers. Its validation contract is backed by Zod v4.
-- `gateway` and `search` have been switched from `@zudojs/http`, `@zudojs/logger` and `@zudojs/schema` to `@nantty/fastify-platform`. Public routes, headers, request IDs and response envelopes were retained. `notifications` now uses Fastify for HTTP ingress while retaining its unchanged queue consumers and outbox processing.
+- All six HTTP deployables use `@nantty/fastify-platform`. Public routes, headers, request IDs and response envelopes are preserved. Notifications retains its queue consumers and outbox processing.
 - Verification: Gateway typecheck plus 1,709 tests; Search typecheck plus 74 active tests (4 intentionally skipped); Notifications typecheck plus 314 active tests (4 intentionally skipped) pass. This is not a deployment approval: staging infrastructure, contract snapshots and canary evidence are still required.
-- Remaining ZudoJS consumers are `support`, `media` and `social`. Migrate them one service at a time; Support is next, followed by Media and then Social.
+- No TypeScript service imports the retired framework. Source/test typechecks and HTTP tests have passed; remaining Social fixture failures and final cross-service verification must be closed before release.
 
 ### Target and non-goals
 
 - Replace the HTTP server/router/runtime of the six TypeScript deployables with supported Fastify APIs and plugins. Do not rewrite their domain handlers, Prisma repositories, queues, event consumers, BFFs or public API paths as part of the first pass.
-- Keep `@zudojs/http` route contracts usable during a temporary adapter phase only; delete the compatibility router once each service has parity. Do not permanently mount the old router behind a catch-all Fastify route and call that a migration.
+- Keep framework-neutral route contracts during migration; Fastify must own route matching and network I/O. Remove transitional adapters after each service has direct route parity.
 - Keep Go and Elixir services unchanged. Keep deployment names, ports, health/readiness paths, OpenTelemetry attributes, auth contracts, headers, request IDs and JSON error semantics stable.
 
 ### Phases and order
@@ -93,7 +100,7 @@ Creator eligibility is checked server-side on create/start/schedule and rechecke
 4. **`notifications` — complete in local verification.** HTTP ingress now runs in Fastify without changing queue consumers, retry/DLQ, provider callbacks or outbox behavior. Staging raw-body signature and duplicate-delivery validation remain required.
 5. **`social`** — migrate route groups incrementally by module using Fastify plugins and encapsulated dependencies. Preserve identity middleware, optional/required principal semantics, age-context propagation, idempotency, Prisma transaction boundaries and response codes. Do not rewrite domain handlers in the same change.
 6. **`gateway` — complete in local verification.** Preserve JWT/JWKS validation, service proxying, route-specific auth, rate limits, streaming, timeout behavior, trusted proxy configuration and request/correlation IDs. Staging canary and rollback validation remain before deployment.
-7. **Removal / hardening** — remove `@zudojs/http` from TypeScript deployables only after no runtime use remains; delete adapter code, align docs/runbooks, pin dependencies, and run full CI, API smoke, integration, security and load suites.
+7. **Removal / hardening** — verify retired packages are absent from source and lockfile; remove transitional adapters, align docs/runbooks, pin dependencies, and run full CI, API smoke, integration, security and load suites.
 
 ### Acceptance gates per service
 
@@ -107,7 +114,7 @@ Creator eligibility is checked server-side on create/start/schedule and rechecke
 
 - This is a multi-service migration, not a package replacement; changing all six servers at once is high-risk and makes regressions hard to localize.
 - Existing observability auto-instrumentation notes ESM import ordering. Keep explicit request metrics during migration and verify spans/metrics end-to-end before removing any instrumentation.
-- Route schemas in `@zudojs/schema` may need a deliberate bridge or conversion to JSON Schema/type-provider schemas. Do not duplicate validation logic indefinitely; select one canonical schema source during phase 1.
+- Route schemas now use Zod through the shared platform; avoid duplicated validation logic and derive JSON Schema from the canonical schema where needed.
 - Prisma generation/build scripts are service-specific and stay untouched unless Fastify integration proves a need.
 - Re-evaluate cost and performance after the pilot; Fastify is the chosen target, but adoption is gated by parity and production evidence, not a blind simultaneous cutover.
 
@@ -120,5 +127,6 @@ Creator eligibility is checked server-side on create/start/schedule and rechecke
 - [ ] Add webapp Space discovery/detail after mobile+API contract stability.
 - [ ] Complete video LIVE beta exit gates before enabling general launch.
 - [x] Build the shared Fastify platform and complete locally verified Gateway/Search migrations.
-- [ ] Migrate Notifications, Support, Media and Social service by service; then remove the last ZudoJS packages and run full integration/security/load verification.
+- [x] Migrate all six TypeScript service package dependencies and imports to Fastify.
+- [ ] Complete final integration, security and load verification and remove transitional route adapters.
 - [ ] Do not commit or deploy without explicit request and validated release configuration.
