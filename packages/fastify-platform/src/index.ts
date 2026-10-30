@@ -1,10 +1,77 @@
-import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastify";
+import Fastify, { type FastifyInstance, type FastifyServerOptions, type HTTPMethods } from "fastify";
+import { STATUS_CODES } from "node:http";
+import { createRequestContext } from "./httpContracts.js";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import sensible from "@fastify/sensible";
 import { metrics } from "@opentelemetry/api";
 
 export * from "./httpContracts.js";
+
+export interface NodeHttpAdapterOptions {
+  readonly host: string;
+  readonly port: number;
+  readonly maxBodySize: number;
+  readonly trustProxy?: boolean;
+}
+
+export function createNodeHttpAdapter(options: NodeHttpAdapterOptions): NodeHttpAdapterOptions { return options; }
+
+export interface HttpServer {
+  readonly address: { readonly port: number } | undefined;
+  start(): Promise<void>;
+  stop(): Promise<void>;
+}
+
+export function createHttpServer(options: {
+  readonly adapter: NodeHttpAdapterOptions;
+  readonly handler: (request: import("./httpContracts.js").HttpRequestContext) => Promise<import("./httpContracts.js").HttpResponseContext>;
+}): HttpServer {
+  let server: FastifyInstance | undefined;
+  let address: { readonly port: number } | undefined;
+  return {
+    get address() { return address; },
+    async start() {
+      if (server !== undefined) return;
+      const app = Fastify({ logger: false, bodyLimit: options.adapter.maxBodySize, trustProxy: options.adapter.trustProxy ?? false });
+      // Preserve raw bytes for proxying and signature verification in existing consumers.
+      app.removeAllContentTypeParsers();
+      app.addContentTypeParser("*", { parseAs: "buffer" }, (_request, body, done) => done(null, body));
+      app.setErrorHandler((error, _request, reply) => {
+        const status = (error as { statusCode?: number }).statusCode;
+        return reply.code(status === 413 ? 413 : 500).send(status === 413
+          ? { message: "Payload too large.", code: "PAYLOAD_TOO_LARGE" }
+          : { message: "Internal Server Error", code: "INTERNAL_ERROR" });
+      });
+      app.setNotFoundHandler(async (request, reply) => {
+        const controller = new AbortController();
+        const abort = () => controller.abort();
+        request.raw.once("aborted", abort);
+        try {
+          const result = await options.handler(createRequestContext({
+            id: request.headers["x-request-id"]?.toString() ?? request.id,
+            method: request.method, url: request.url,
+            headers: Object.fromEntries(Object.entries(request.headers).flatMap(([name, value]) => value === undefined ? [] : [[name, Array.isArray(value) ? value.join(", ") : String(value)]])),
+            body: request.body ?? Buffer.alloc(0), remoteAddress: request.ip, protocol: request.protocol, hostname: request.hostname, signal: controller.signal,
+          }));
+          sendLegacyResponse(reply, result);
+        } finally { request.raw.off("aborted", abort); }
+      });
+      try { await app.listen({ port: options.adapter.port, host: options.adapter.host }); }
+      catch (error) { await app.close(); throw error; }
+      server = app;
+      const bound = app.server.address();
+      address = typeof bound === "object" && bound !== null ? { port: bound.port } : { port: options.adapter.port };
+    },
+    async stop() {
+      if (server === undefined) return;
+      const current = server;
+      server = undefined;
+      address = undefined;
+      await current.close();
+    },
+  };
+}
 
 export interface PlatformPrincipal {
   readonly subject: string;
@@ -73,18 +140,25 @@ export async function createPlatform(options: PlatformOptions): Promise<FastifyI
   });
 
   app.setNotFoundHandler((request, reply) => {
-    const methods = methodsByPath.get(request.url.split("?", 1)[0] ?? "");
-    if (methods !== undefined) {
+    const path = request.url.split("?", 1)[0] ?? "";
+    const methods = [...new Set([...methodsByPath.values()].flatMap((value) => [...value]))]
+      .filter((method) => app.findRoute({ method: method as HTTPMethods, url: path }) !== null);
+    if (methods.length > 0) {
       const allowed = new Set(methods);
       if (allowed.has("GET")) allowed.add("HEAD");
       allowed.add("OPTIONS");
       if (request.method === "OPTIONS") return reply.header("allow", [...allowed].join(", ")).code(204).send();
-      return reply.code(405).send({ message: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
+      return reply.header("allow", [...allowed].join(", ")).code(405).send({ message: "Method not allowed.", code: "METHOD_NOT_ALLOWED" });
     }
     return reply.code(404).send({ message: "Not found.", code: "NOT_FOUND" });
   });
   app.setErrorHandler((error, _request, reply) => {
-    if ((error as Error & { statusCode?: number }).statusCode === 413) return reply.code(413).send({ message: "Payload too large.", code: "PAYLOAD_TOO_LARGE" });
+    const { statusCode, code } = error as Error & { statusCode?: number; code?: string };
+    if (statusCode === 413) return reply.code(413).send({ message: "Payload too large.", code: "PAYLOAD_TOO_LARGE" });
+    if (typeof statusCode === "number" && Number.isInteger(statusCode) && statusCode >= 400 && statusCode < 500) {
+      const safeCode = typeof code === "string" && /^FST_ERR_[A-Z0-9_]{1,80}$/.test(code) ? code : `HTTP_${statusCode}`;
+      return reply.code(statusCode).send({ message: STATUS_CODES[statusCode] ?? "Request rejected.", code: safeCode });
+    }
     app.log.error({ err: error }, "unhandled request error");
     return reply.code(500).send({ message: "Internal Server Error", code: "INTERNAL_ERROR" });
   });
@@ -128,5 +202,5 @@ export function boundarySchema<T extends BoundarySchema>(schema: T): T {
 export function sendLegacyResponse(reply: import("fastify").FastifyReply, response: { readonly status: number; readonly body: unknown; readonly headers: Readonly<Record<string, string | readonly string[] | undefined>> }): void {
   for (const [name, value] of Object.entries(response.headers)) if (value !== undefined) reply.header(name, value);
   if (response.body === undefined || response.status === 204) void reply.code(response.status).send();
-  else void reply.code(response.status).send(response.body);
+  else void reply.code(response.status).send(response.body instanceof Uint8Array ? Buffer.from(response.body) : response.body);
 }
