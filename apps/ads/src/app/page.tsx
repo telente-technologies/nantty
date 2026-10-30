@@ -7,6 +7,7 @@ import { FeatureShowcaseSections, PolicyAndReviewSection } from "@/components/la
 import { LandingFooterWithContact } from "@/components/landing/landingFooter";
 import { LandingHeaderWithFloatingNavigation } from "@/components/landing/landingHeader";
 import { LandingHeroWithProductStage } from "@/components/landing/landingHero";
+import { LaunchCountdown } from "@/components/landing/launchCountdown";
 import { LandingFinalCallToAction, LandingQuestionsSection } from "@/components/landing/landingQuestionsAndCallToAction";
 import { WhatIsNanttyAdsSection } from "@/components/landing/whatIsNanttyAdsSection";
 import landingLayoutStyles from "@/components/landing/landingLayout.module.css";
@@ -47,6 +48,7 @@ export default async function LandingPage() {
       <LandingHeaderWithFloatingNavigation primaryAction={primaryAction} />
       <main id="main-content">
         <LandingHeroWithProductStage primaryAction={primaryAction} isSignedIn={isSignedIn} />
+        <LaunchCountdown />
         <WhatIsNanttyAdsSection />
         <AdFormatsSection />
         <CampaignStepsSection />

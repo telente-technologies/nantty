@@ -126,10 +126,6 @@
   display: none;
 }
 
-.menuCloseLabel {
-  display: none;
-}
-
 .actionLink {
   display: inline-flex;
   align-items: center;
@@ -356,12 +352,34 @@
     display: none;
   }
 
-  .mobileMenu[open] .menuOpenLabel {
-    display: none;
+  .menuBars,
+  .menuBars::before {
+    display: block;
+    width: 16px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform 180ms ease;
   }
 
-  .mobileMenu[open] .menuCloseLabel {
-    display: inline;
+  .menuBars {
+    position: relative;
+    transform: translateY(-3px);
+  }
+
+  .menuBars::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+  }
+
+  .mobileMenu[open] .menuBars {
+    transform: rotate(45deg);
+  }
+
+  .mobileMenu[open] .menuBars::before {
+    top: 0;
+    transform: rotate(-90deg);
   }
 
   .mobileMenuPanel {

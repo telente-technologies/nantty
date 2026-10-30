@@ -35,7 +35,10 @@ export function LandingHeaderWithFloatingNavigation({ primaryAction }: { readonl
           <LandingActionLink action={{ ...primaryAction, label: primaryAction.href === "/accounts" ? "Open manager" : "Sign in" }} />
         </div>
         <details className={styles.mobileMenu}>
-          <summary><span className={styles.menuOpenLabel}>Menu</span><span className={styles.menuCloseLabel}>Close</span></summary>
+          <summary aria-label="Open navigation">
+            <span className="visuallyHidden">Open navigation</span>
+            <span className={styles.menuBars} aria-hidden="true" />
+          </summary>
           <div className={styles.mobileMenuPanel}>
             <nav aria-label="Mobile">
               <ul>

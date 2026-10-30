@@ -35,5 +35,14 @@ export const adsErrorExperience: ErrorExperienceConfig = {
 };
 
 export function AdsErrorExperienceProvider({ children }: { readonly children: ReactNode }) {
-  return <ErrorExperienceProvider value={adsErrorExperience}>{children}</ErrorExperienceProvider>;
+  const experience: ErrorExperienceConfig = process.env.NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH === "1" ? {
+    homeHref: "/", homeLabel: "Back to Nantty Ads",
+    hrefs: { browse: "/", support: buildContactMailtoLink("Help with Nantty Ads") },
+    labels: { browse: "Back to Nantty Ads" },
+    destinations: [
+      { label: "Nantty Ads", href: "/", icon: "megaphone" },
+      { label: "Ad policy", href: "https://nantty.com/ads-policy", icon: "shieldCheck" },
+    ], renderLink: renderNextLink,
+  } : adsErrorExperience;
+  return <ErrorExperienceProvider value={experience}>{children}</ErrorExperienceProvider>;
 }

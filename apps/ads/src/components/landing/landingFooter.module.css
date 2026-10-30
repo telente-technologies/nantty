@@ -90,15 +90,15 @@
 }
 
 .giantWordmark {
-  width: min(92%, 1280px);
-  margin: clamp(24px, 4vw, 48px) auto -0.19em;
-  font-size: clamp(4.5rem, 25vw, 22rem);
-  font-weight: 850;
-  letter-spacing: -0.085em;
-  line-height: 1;
+  width: min(100%, 1440px);
+  margin: clamp(40px, 6vw, 80px) auto -0.11em;
+  color: var(--blue-500);
+  font-size: clamp(4rem, 25vw, 24rem);
+  font-weight: 800;
+  letter-spacing: -0.09em;
+  line-height: 0.82;
   text-align: center;
   white-space: nowrap;
-  color: color-mix(in srgb, var(--blue-500) 52%, var(--surface-rail));
   user-select: none;
 }
 
@@ -111,6 +111,17 @@
   max-width: calc(var(--content-width) + var(--gutter) * 2);
   margin-inline: auto;
   padding-inline: var(--gutter);
+}
+
+.themeSwitcher {
+  --color-sunken: rgb(255 255 255 / 0.08);
+  --color-border: rgb(255 255 255 / 0.2);
+  --color-elevated: var(--blue-500);
+  --color-text: var(--blue-50);
+  --color-text-muted: var(--blue-100);
+  --color-focus: var(--yellow-500);
+  --shadow-card: none;
+  flex-basis: 100%;
 }
 
 @media (min-width: 720px) {
@@ -136,5 +147,58 @@
   .footerBottom {
     flex-direction: column;
     gap: 8px;
+  }
+}
+
+/* Keep touch targets and keyboard focus consistent across Nantty. */
+.footer {
+  container-type: inline-size;
+}
+
+.giantWordmark {
+  font-size: clamp(4rem, 27cqi, 24rem);
+}
+
+.footer :is(a, button):focus-visible {
+  outline: 3px solid var(--yellow-500);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.footerLinks {
+  min-width: 0;
+}
+
+.footerLinks a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.footerBrand {
+  min-width: 0;
+}
+
+.footerBottom {
+  padding-bottom: 16px;
+}
+
+@media (pointer: coarse) {
+  .footerLinks a {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 359px) {
+  .footerLinks {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (forced-colors: active) {
+  .giantWordmark {
+    color: CanvasText;
   }
 }

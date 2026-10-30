@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { NanttyWordmark } from "@nantty/web-kit";
+import { NanttyWordmark, ThemeSwitcher } from "@nantty/web-kit";
 import { buildContactMailtoLink, contactEmailDisplayText, readNanttyMainSiteUrl } from "@/constants/contact.constant";
 
 import styles from "./landingFooter.module.css";
@@ -69,6 +69,7 @@ export function LandingFooterWithContact() {
       <div className={`${styles.container} ${styles.footerBottom}`}>
         <p>© {new Date().getFullYear()} Nantty. Made in Nigeria.</p>
         <p>Budgets and billing in your local currency.</p>
+        <ThemeSwitcher label="Colour theme" className={styles.themeSwitcher} />
       </div>
       <p className={styles.giantWordmark} aria-hidden="true">Nantty</p>
     </footer>
