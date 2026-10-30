@@ -1,6 +1,7 @@
 import { isUsernameProfilePath } from "./reservedRoutes.config";
 
 const guestBrowsablePagePatterns: readonly RegExp[] = [
+  /^\/spaces(?:\/[A-Za-z0-9_-]+)?$/,
   /^\/$/,
   /^\/(explore|mart|clips|live)$/,
   /^\/(product|p|category|collections|store|brand|user|u|watch|live)\/[A-Za-z0-9_.~%-]+$/,
@@ -15,6 +16,7 @@ const guestBrowsablePagePatterns: readonly RegExp[] = [
 ];
 
 const publicApiReadPatterns: readonly RegExp[] = [
+  /^\/api\/v1\/spaces(?:\/[A-Za-z0-9_-]+)?$/,
   /^\/api\/v1\/feeds\/(popular|for-you|suggested-clips)$/,
   /^\/api\/v1\/explore\/(categories|trends|headlines|who-to-follow|posts-for-you)$/,
   /^\/api\/v1\/(clips|videos|categories|topics|search|mart\/home|mart\/highlights|products|products\/featured|brands)$/,

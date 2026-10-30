@@ -1,4 +1,5 @@
 import { accountHealthMocks } from "./accountHealth.mock";
+import { spacesMocks } from "./spaces.mock";
 import { adEventsMocks } from "./adEvents.mock";
 import { authMocks } from "./auth.mock";
 import { banksMocks } from "./banks.mock";
@@ -75,6 +76,7 @@ import { linkPreviewsMocks } from "./linkPreviews.mock";
 import { securityMocks } from "./security.mock";
 
 export const routes: MockRoute[] = [
+  ...spacesMocks,
   ...localeMocks,
   ...usernameMocks,
   ...authMocks,

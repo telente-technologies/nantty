@@ -88,4 +88,24 @@ describe("not-found pages", () => {
     const { default: ProductNotFound } = await import("@/app/(app)/product/[productId]/not-found");
     assert.match(renderToStaticMarkup(createElement(ProductNotFound)), /This product isn&#x27;t available/);
   });
+
+  it("keeps route crashes distinct from offline failures and hides raw details", async () => {
+    const { createElement } = await import("react");
+    const { renderToStaticMarkup } = await import("react-dom/server");
+    const { ErrorExperienceProvider } = await import("@nantty/web-kit");
+    const { buildWebappErrorConfig } = await import("@/components/errors/errorExperience.provider");
+    const { default: RouteError } = await import("@/app/error");
+    const config = { ...buildWebappErrorConfig(), renderLink: undefined };
+    const renderError = (error: Error) => renderToStaticMarkup(createElement(ErrorExperienceProvider, { value: config, children: createElement(RouteError, { error, retry: () => undefined }) }));
+    const crash = renderError(Object.assign(new Error("private database details"), { digest: "recovery-123" }));
+    assert.match(crash, /data-error-kind="serverError"/);
+    assert.match(crash, /Ref recovery-123/);
+    assert.match(crash, /tabindex="-1"/);
+    assert.match(crash, /<button[^>]*>Try again<\/button>/);
+    assert.doesNotMatch(crash, /private database details/);
+    const offline = renderError(new TypeError("Failed to fetch"));
+    assert.match(offline, /data-error-kind="offline"/);
+    assert.match(offline, /Check again/);
+    assert.doesNotMatch(offline, /Something broke on our side/);
+  });
 });

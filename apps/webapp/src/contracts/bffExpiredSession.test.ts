@@ -92,6 +92,15 @@ describe("BFF with an expired access token", () => {
     assert.equal(isAccessTokenKnownExpired(null), false);
   });
 
+  it("does not proxy a billable ad-click GET through a cookie-authenticated BFF", async () => {
+    const apiPath = "/api/v1/ads/r/signed-click-token";
+    const response = await forwardBffRequestToWebappApi(signedInRequest(apiPath, freshToken), segments(apiPath));
+
+    assert.equal(response.status, 404);
+    assert.deepEqual(await response.json(), { message: "This endpoint is not available.", code: "NOT_FOUND" });
+    assert.deepEqual(seen, []);
+  });
+
   it("refreshes before forwarding, never sends the expired token, and stores the new pair", async () => {
     const response = await forwardBffRequestToWebappApi(signedInRequest("/api/v1/notifications", expiredToken), segments("/api/v1/notifications"));
     assert.equal(response.status, 200);

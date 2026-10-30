@@ -13,6 +13,9 @@ const forwardedRequestHeaderNames = ["idempotency-key", "x-client-region", "if-m
 const longForwardedHeaderNames = new Set(["x-step-up-token"]);
 const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag", "x-request-id"];
 const allowedApiPathPattern = /^\/api\/v1(\/[A-Za-z0-9._~:@%,-]+)+$/;
+// Ad-click redirects record a billable click on GET. Their signed links point
+// directly at the public API host; never proxy them through a cookie session.
+const stateChangingGetApiPathPattern = /^\/api\/v1\/ads\/r\/[^/]+$/;
 
 const publicApiRoutes = [
   { method: "POST", path: "/api/v1/auth/otp/send" },
@@ -56,6 +59,9 @@ function isAllowedApiPath(apiPath: string): boolean {
 export async function forwardBffRequestToWebappApi(request: NextRequest, pathSegments: readonly string[]): Promise<NextResponse> {
   const apiPath = `/${pathSegments.map((segment) => encodeURIComponent(segment)).join("/")}`;
   if (!isAllowedApiPath(apiPath)) return respondWithBffError(404, "NOT_FOUND", "This endpoint is not available.");
+  if (request.method === "GET" && stateChangingGetApiPathPattern.test(apiPath)) {
+    return respondWithBffError(404, "NOT_FOUND", "This endpoint is not available.");
+  }
 
   const sessionId = readSessionIdFromCookies(request.cookies);
   const isAnonymousPublicRead = !sessionId && isPublicApiRead(request.method, apiPath);
