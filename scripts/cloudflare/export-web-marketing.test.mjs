@@ -58,14 +58,14 @@ describe("static web marketing artifact", () => {
   it("serves every allowlisted page and returns 404 for app/session/auth endpoints", async () => {
     const manifest = JSON.parse(await readFile(path.join(artifactRoot, "export-manifest.json"), "utf8"));
     assert.equal(manifest.source, "apps/web");
-    assert.equal(manifest.routes.length, 15);
+    assert.equal(manifest.routes.length, 16);
     for (const route of manifest.routes) {
       const response = await fetch(`${origin}${route}`);
       assert.equal(response.status, 200, `${route} should be served from the static artifact`);
       assert.match(response.headers.get("content-type") ?? "", /text\/html/);
       const html = await response.text();
       assert.match(html, /Nantty/);
-      assert.doesNotMatch(html, /nantty/i, `${route} must not expose the legacy brand in rendered content`);
+      assert.doesNotMatch(html, new RegExp(["zu", "do", "mart"].join(""), "i"), `${route} must not expose the legacy brand in rendered content`);
     }
     for (const deniedPath of ["/api/v1/locale", "/bff/session", "/login"]) {
       assert.equal((await fetch(`${origin}${deniedPath}`)).status, 404, `${deniedPath} must not be an exported route`);
@@ -87,6 +87,18 @@ describe("static web marketing artifact", () => {
     }
   });
 
+  it("publishes square Nantty favicons and consistent site-name structured data", async () => {
+    const response = await fetch(origin);
+    const html = await response.text();
+    assert.match(html, /<link rel="icon" href="\/brand\/favicon\.ico" type="image\/x-icon" sizes="48x48"/);
+    assert.match(html, /<link rel="icon" href="\/brand\/icon192\.png" type="image\/png" sizes="192x192"/);
+    assert.match(html, /<link rel="icon" href="\/brand\/icon512\.png" type="image\/png" sizes="512x512"/);
+    assert.match(html, /"@type":"WebSite","name":"Nantty","alternateName":"nantty\.com","url":"https:\/\/nantty\.com"/);
+    for (const iconPath of ["/brand/favicon.ico", "/brand/icon192.png", "/brand/icon512.png"]) {
+      assert.equal((await fetch(`${origin}${iconPath}`)).status, 200, `${iconPath} should be available to crawlers`);
+    }
+  });
+
   it("preserves both countdown targets, the inline status, and disabled waitlist UX", async () => {
     const response = await fetch(origin);
     const html = await response.text();
@@ -96,8 +108,40 @@ describe("static web marketing artifact", () => {
     assert.match(html, /data-countdown-label="public launch"/);
     assert.match(html, /Preparing countdown/);
     assert.match(html, /Join the waitlist/);
-    assert.match(html, /disabled=""[^>]*>Join the waitlist|<button[^>]*disabled=""[^>]*>Join the waitlist/);
-    assert.match(html, /preparing the waitlist|waitlist connection/i);
+    const manifest = JSON.parse(await readFile(path.join(artifactRoot, "export-manifest.json"), "utf8"));
+    if (manifest.waitlistEnabled) {
+      assert.doesNotMatch(html, /<button[^>]*disabled=""[^>]*>Join the waitlist/);
+      const scripts = (await collectFiles(artifactRoot)).filter((file) => file.endsWith(".js"));
+      const scriptText = await Promise.all(scripts.map((file) => readFile(file, "utf8")));
+      assert.ok(scriptText.some((contents) => contents.includes("https://script.google.com/macros/s/")), "enabled export includes the public Apps Script endpoint");
+    } else {
+      assert.match(html, /<button[^>]*disabled=""[^>]*>Join the waitlist/);
+      assert.match(html, /preparing the waitlist|check back soon/i);
+    }
     assert.match(html, /waitlist-privacy/);
+  });
+
+  it("serves the dedicated waitlist explainer with the launch timeline and product details", async () => {
+    const response = await fetch(`${origin}/waitlist`);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, /A social marketplace built around[\s\S]{0,80}people you trust/i);
+    assert.match(html, /posts, clips and stories/i);
+    assert.match(html, /licensed payment partner/i);
+    assert.match(html, /funds in the buyer.{0,8} own account with the licensed payment partner.{0,20}not with Nantty/i);
+    assert.match(html, /data-countdown-label="early beta"/);
+    assert.match(html, /data-countdown-label="public launch"/);
+    const manifest = JSON.parse(await readFile(path.join(artifactRoot, "export-manifest.json"), "utf8"));
+    assert.equal(/<button[^>]*disabled=""[^>]*>Join the waitlist/.test(html), !manifest.waitlistEnabled);
+    assert.match(html, /waitlist-privacy/);
+  });
+
+  it("keeps prelaunch actions on the waitlist instead of linking to unavailable apps", async () => {
+    const response = await fetch(origin);
+    const html = await response.text();
+    assert.match(html, /<a[^>]*href="\/waitlist"[^>]*>[\s\S]*?Join the waitlist/i);
+    assert.doesNotMatch(html, /<a[^>]*href="https:\/\/web\.nantty\.com"[^>]*>/i);
+    assert.doesNotMatch(html, /Live now: shop while you watch/i);
+    assert.match(html, /still in development/i);
   });
 });

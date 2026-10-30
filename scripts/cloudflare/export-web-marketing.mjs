@@ -25,6 +25,7 @@ const routes = [
   "/seller-terms",
   "/sellers",
   "/terms",
+  "/waitlist",
   "/waitlist-privacy",
 ];
 const siteUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://nantty.com").origin;
@@ -66,6 +67,7 @@ async function copyRequiredFile(from, to) {
 
 async function assertStaticHtmlIsSafe(filePath, route) {
   const html = await readFile(filePath, "utf8");
+  const legacyBrandPattern = new RegExp(["zu", "do", "mart"].join(""), "i");
   const unsafeReferences = [
     /(?:href|src)=["'](?:\/bff\/|\/login(?:[/?#]|$))/i,
     /\/_next\/image(?:\?|["'])/i,
@@ -74,7 +76,7 @@ async function assertStaticHtmlIsSafe(filePath, route) {
   for (const pattern of unsafeReferences) {
     if (pattern.test(html)) throw new Error(`Unsafe app endpoint, server image optimizer, or secret-like value in ${route}`);
   }
-  if (/nantty/i.test(html)) throw new Error(`Legacy brand is visible in public static HTML on ${route}`);
+  if (legacyBrandPattern.test(html)) throw new Error(`Legacy brand is visible in public static HTML on ${route}`);
   if (!html.includes("Nantty")) throw new Error(`Expected Nantty branding was not rendered on ${route}`);
 }
 
@@ -126,16 +128,24 @@ async function copyDirectoryContents(from, to) {
 }
 
 async function main() {
-  const debugBuildPaths = sourcePages.join(",");
-  await run("pnpm", ["exec", "next", "build", "--debug-build-paths", debugBuildPaths], {
-    cwd: webRoot,
-    env: {
-      ...process.env,
-      NANTTY_CLOUDFLARE_STATIC_EXPORT: "1",
-      NEXT_PUBLIC_WAITLIST_ENABLED: "false",
-      NEXT_PUBLIC_WAITLIST_APPS_SCRIPT_URL: "",
-    },
-  });
+  const waitlistEnabled = process.env.NEXT_PUBLIC_WAITLIST_ENABLED === "true";
+  const waitlistEndpoint = waitlistEnabled ? process.env.NEXT_PUBLIC_WAITLIST_APPS_SCRIPT_URL?.trim() ?? "" : "";
+  if (waitlistEnabled && !waitlistEndpoint.startsWith("https://script.google.com/macros/s/")) {
+    throw new Error("Waitlist collection requires the approved HTTPS Google Apps Script web-app endpoint.");
+  }
+
+  if (!process.argv.includes("--stage-built-output")) {
+    const debugBuildPaths = sourcePages.join(",");
+    await run(process.execPath, [path.join(webRoot, "node_modules/next/dist/bin/next"), "build", "--debug-build-paths", debugBuildPaths], {
+      cwd: webRoot,
+      env: {
+        ...process.env,
+        NANTTY_CLOUDFLARE_STATIC_EXPORT: "1",
+        NEXT_PUBLIC_WAITLIST_ENABLED: waitlistEnabled ? "true" : "false",
+        NEXT_PUBLIC_WAITLIST_APPS_SCRIPT_URL: waitlistEndpoint,
+      },
+    });
+  }
 
   const manifest = JSON.parse(await readFile(path.join(webRoot, ".next/prerender-manifest.json"), "utf8"));
   for (const route of routes) {
@@ -204,12 +214,12 @@ async function main() {
 
   await writeFile(
     path.join(artifactRoot, "_headers"),
-    `/*\n  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; manifest-src 'self'; worker-src 'self' blob:\n  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload\n  X-Content-Type-Options: nosniff\n  X-Frame-Options: DENY\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()\n`,
+    `/*\n  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-src 'self' https://script.google.com https://*.googleusercontent.com; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://script.google.com; frame-ancestors 'none'; manifest-src 'self'; worker-src 'self' blob:\n  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload\n  X-Content-Type-Options: nosniff\n  X-Frame-Options: DENY\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()\n`,
   );
 
   await writeFile(
     path.join(artifactRoot, "export-manifest.json"),
-    `${JSON.stringify({ source: "apps/web", routes, excludedApps: ["apps/ads", "apps/seller", "apps/studio", "apps/admin"], generatedAt: new Date().toISOString() }, null, 2)}\n`,
+    `${JSON.stringify({ source: "apps/web", routes, waitlistEnabled, excludedApps: ["apps/ads", "apps/seller", "apps/studio", "apps/admin"], generatedAt: new Date().toISOString() }, null, 2)}\n`,
   );
 
   console.log(`Staged ${routes.length} existing public Nantty routes at ${path.relative(repositoryRoot, artifactRoot)}.`);

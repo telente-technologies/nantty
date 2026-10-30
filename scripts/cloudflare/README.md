@@ -16,9 +16,13 @@ authenticate to Cloudflare, change DNS, or handle any credential.
 
 In this opt-in build only, visitor-locale API lookup and the web-app login
 destination are disabled; ordinary `apps/web` builds retain their current
-behavior. The waitlist endpoint and enable flag are forced off even if shell
-environment variables configure the live integration, and those values are
-overridden before Next compiles public environment variables into JavaScript.
+behavior. The waitlist is disabled by default. To publish a build with collection
+enabled, explicitly set `NEXT_PUBLIC_WAITLIST_ENABLED=true` and
+`NEXT_PUBLIC_WAITLIST_APPS_SCRIPT_URL` to the approved public Apps Script endpoint.
+The exporter validates the endpoint's HTTPS Google Apps Script origin, records
+the enabled state in its manifest, and allows the Google iframe/form origins in
+CSP. The endpoint URL is public configuration, not a secret. Keep signup
+disabled if the privacy notice or Sheet access setup is incomplete.
 Static locale display therefore stays neutral (`your local currency`) until the
 live app can resolve a visitor's supported currency. Artifact checks scan
 HTML and emitted JavaScript for API/BFF/login references, and the served-output
@@ -41,8 +45,9 @@ never copied.
   product exporter below builds only each original `/` marketing page in an
   explicit prelaunch mode, disables sign-in, and excludes those app routes.
   The exporter uses Nantty-branded HTML/CSS previews. The Ads root includes
-  only six explicitly allowlisted, freshly captured Nantty Ads Manager
-  screenshots; other product screenshot directories remain excluded.
+  only six explicitly allowlisted Nantty Ads Manager screenshots, and Creator
+  only the two current app-captured dashboard and escrow screens; unapproved
+  screenshots remain excluded.
 - `apps/admin` remains private and is never part of this export.
 
 The product roots were built and their export/HTTP tests passed (see below).
@@ -62,6 +67,10 @@ Run from the repository root:
 node scripts/cloudflare/export-product-marketing.mjs
 node --test scripts/cloudflare/export-product-marketing.test.mjs
 ```
+
+After a successful prelaunch build of all three apps, `--stage-built-output`
+restages those existing exports without compiling again. Use it only when
+changing artifact staging; source changes require the normal build command.
 
 The export builds the existing `/` pages from `apps/ads`, `apps/seller`, and
 `apps/studio` one at a time, using each app's original landing components and
@@ -84,7 +93,8 @@ only executable code retained in product artifacts is a small hash-allowlisted
 theme controller so the shared light/dark/system switch remains functional
 without shipping the product application's JavaScript. Ads
 must contain exactly the six current app screenshots referenced by its page;
-Dashboard must contain no screenshot directory. The HTTP test confirms that login and
+Dashboard includes only the two app-captured dashboard and escrow screens explicitly
+allowlisted by the exporter; prior branded screenshots are excluded. The HTTP test confirms that login and
 BFF paths return 404.
 `apps/seller/public/serviceWorker.js` is not copied.
 

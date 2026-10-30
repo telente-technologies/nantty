@@ -21,6 +21,7 @@ const expectedAdsScreenshots = [
   "screenshots/wizardAudience.webp",
   "screenshots/wizardObjective.webp",
 ];
+const expectedCreatorScreenshots = ["screenshots/liveDashboard.webp", "screenshots/liveEscrowStatus.webp"];
 
 test("product marketing artifact contains only the approved root routes and excludes app/API paths", async (context) => {
   const manifest = JSON.parse(await readFile(path.join(artifactRoot, "export-manifest.json"), "utf8"));
@@ -65,6 +66,13 @@ test("product marketing artifact contains only the approved root routes and excl
       const files = await readdir(path.join(artifactRoot, product), { recursive: true });
       assert.ok(files.includes("index.html"));
       assert.ok(files.includes("404.html"));
+      for (const page of ["index.html", "404.html"]) {
+        const markup = await readFile(path.join(artifactRoot, product, page), "utf8");
+        for (const match of markup.matchAll(/(?:src|href)=["'](\/_next\/static\/[^"']+)["']/g)) {
+          const asset = new URL(match[1], "https://nantty.invalid").pathname.slice(1);
+          assert.ok(await stat(path.join(artifactRoot, product, asset)).catch(() => null), `${product}/${page} references missing ${asset}`);
+        }
+      }
       assert.ok(!files.some((entry) => typeof entry === "string" && (/\.(?:m?js)$/i.test(entry) || (/\.txt$/i.test(entry) && entry !== "robots.txt"))), "the static bundle must not include executable chunks or RSC payloads");
       assert.ok(!files.some((entry) => typeof entry === "string" && /(?:^|\/)(?:login|bff|accounts|home|settings|admin)(?:\/|\.|$)/i.test(entry)));
       for (const cssFile of files.filter((entry) => typeof entry === "string" && entry.endsWith(".css"))) {
@@ -86,7 +94,7 @@ test("product marketing artifact contains only the approved root routes and excl
         assert.ok(files.includes("photos/creatorMicPortrait.webp"), "Studio social preview photo should be included");
         assert.deepEqual(screenshotFiles, [], "Studio screenshot directories remain excluded");
       } else {
-        assert.deepEqual(screenshotFiles, [], "Dashboard screenshot directories remain excluded");
+        assert.deepEqual(screenshotFiles.sort(), expectedCreatorScreenshots, "Dashboard export includes only current, app-captured Nantty screens");
       }
     });
   }

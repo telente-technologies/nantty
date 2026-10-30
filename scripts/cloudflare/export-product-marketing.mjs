@@ -7,11 +7,10 @@ import { fileURLToPath } from "node:url";
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const artifactRoot = path.join(repositoryRoot, "dist/cloudflare/product-marketing");
 const products = [
-  // Ads screenshots are freshly captured from the current Nantty Ads Manager
-  // and are allowlisted individually; other product screenshot directories
-  // remain excluded because they may contain legacy branding.
+  // Product screenshots are allowlisted individually so old-brand or unverified
+  // images can never leak into the public static landing pages.
   { id: "ads", app: "apps/ads", host: "ads.nantty.com", publicDirs: ["brand", "screenshots", "storeBadges"] },
-  { id: "creator", app: "apps/seller", host: "creator.nantty.com", publicDirs: ["brand", "photos", "storeBadges"] },
+  { id: "creator", app: "apps/seller", host: "creator.nantty.com", publicDirs: ["brand", "photos", "screenshots", "storeBadges"] },
   { id: "studio", app: "apps/studio", host: "studio.nantty.com", publicDirs: ["brand", "photos", "storeBadges"] },
 ];
 const routeAllowlist = ["/"];
@@ -24,6 +23,7 @@ const adsScreenshotAllowlist = new Set([
   "wizardAudience.webp",
   "wizardObjective.webp",
 ]);
+const creatorScreenshotAllowlist = new Set(["liveDashboard.webp", "liveEscrowStatus.webp"]);
 const suspenseScriptHashes = new Set();
 
 function run(command, args, options) {
@@ -145,7 +145,9 @@ async function stageProduct(product) {
     NEXT_PUBLIC_NANTTY_STATIC_PRELAUNCH: "1",
     NEXT_PUBLIC_SITE_URL: `https://${product.host}`,
   };
-  await run("pnpm", ["exec", "next", "build", "--debug-build-paths", "src/app/page.tsx"], { cwd: appRoot, env });
+  if (!process.argv.includes("--stage-built-output")) {
+    await run(process.execPath, [path.join(appRoot, "node_modules/next/dist/bin/next"), "build", "--debug-build-paths", "src/app/page.tsx"], { cwd: appRoot, env });
+  }
 
   const manifest = JSON.parse(await readFile(path.join(appRoot, ".next/prerender-manifest.json"), "utf8"));
   if (manifest.routes["/"]?.compute !== "static" || manifest.routes["/"]?.initialRevalidateSeconds !== false) {
@@ -160,13 +162,14 @@ async function stageProduct(product) {
 
   for (const publicDir of product.publicDirs) {
     const source = outputFile(product, publicDir);
-    if (publicDir === "screenshots" && product.id === "ads") {
-      for (const file of adsScreenshotAllowlist) {
+    if (publicDir === "screenshots") {
+      const allowlist = product.id === "ads" ? adsScreenshotAllowlist : product.id === "creator" ? creatorScreenshotAllowlist : new Set();
+      for (const file of allowlist) {
         await copyRequired(path.join(source, file), artifactFile(product, `${publicDir}/${file}`));
       }
       const actual = await readdir(source);
-      const unexpected = actual.filter((file) => !adsScreenshotAllowlist.has(file));
-      if (unexpected.length) throw new Error(`Ads screenshot directory contains non-allowlisted files: ${unexpected.join(", ")}`);
+      const unexpected = actual.filter((file) => !allowlist.has(file));
+      if (unexpected.length && product.id === "ads") throw new Error(`Ads screenshot directory contains non-allowlisted files: ${unexpected.join(", ")}`);
     } else if (await stat(source).catch(() => null)) {
       await copyRequired(source, artifactFile(product, publicDir));
     }
@@ -180,6 +183,7 @@ async function stageProduct(product) {
   const notFoundHtml = removeRuntimeScripts(await readFile(notFoundPath, "utf8"));
   await writeFile(notFoundPath, notFoundHtml);
   assertSafeHtml(notFoundHtml, product, { requireLockedControls: false });
+  await copyMarkupAssets(product, notFoundHtml);
   await assertExportTreeHasNoAppEndpoints(product);
   await assertOnlyRootPage(product);
 
