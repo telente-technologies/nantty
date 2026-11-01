@@ -1,0 +1,63 @@
+name: Deploy Nantty website to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/web-kit/**"
+      - "packages/design-tokens/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - ".node-version"
+      - ".github/workflows/pages-deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: pages-nantty-main
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v6.1.0
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter "{./apps/web}..."
+      - name: Build the static Nantty site
+        run: pnpm --filter ./apps/web build
+        env:
+          NANTTY_CLOUDFLARE_STATIC_EXPORT: "1"
+          NEXT_PUBLIC_PRELAUNCH_MODE: "true"
+          NEXT_PUBLIC_WAITLIST_ENABLED: "true"
+          NEXT_PUBLIC_WAITLIST_APPS_SCRIPT_URL: https://script.google.com/macros/s/AKfycbw9zv0GRV4qjvuMiU5cNifUUKPZV18u3rUHBqjFN17C6VeOBEnrNiDJYLEK-FK7kQcV/exec
+      - name: Verify waitlist is enabled in the exported page
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const html = fs.readFileSync("apps/web/out/waitlist.html", "utf8");
+          const button = html.match(/<button\b[^>]*>Join the waitlist<\/button>/);
+          if (!button || /\sdisabled(?:\s|=|>)/.test(button[0])) {
+            throw new Error("The static waitlist page is missing an enabled submit button.");
+          }
+          if (!html.includes("Your signup goes to Nantty’s private waitlist Sheet.")) {
+            throw new Error("The static waitlist page does not show the active submission status.");
+          }
+          NODE
+      - name: Deploy production site to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: a8d2da9ca2bd5b59d036f370257d5de7
+          command: pages deploy apps/web/out --project-name=nantty-main --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

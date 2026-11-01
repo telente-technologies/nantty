@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/lib/siteConfig.config";
 
+export const dynamic = "force-static";
+
 const publicRoutes: ReadonlyArray<{ readonly path: string; readonly priority: number; readonly changeFrequency: "weekly" | "monthly" | "yearly" }> = [
   { path: "/", priority: 1, changeFrequency: "weekly" },
   { path: "/sellers", priority: 0.9, changeFrequency: "weekly" },
