@@ -74,6 +74,22 @@ class StaticSecurityContracts(unittest.TestCase):
         self.assertIn('process.env["NODE_ENV"] === "production"', gateway)
         self.assertIn('"ADMIN_IP_ALLOWLIST is required outside development"', gateway)
 
+    def test_deploy_workflow_covers_all_platform_services_and_shared_packages(self) -> None:
+        workflow = (ROOT / ".github/workflows/deploy.yml").read_text()
+        self.assertIn('"packages/**"', workflow, "Shared package changes must trigger deploy CI.")
+
+        for service in ("search", "support"):
+            self.assertRegex(
+                workflow,
+                rf"service:\s*{service}\b",
+                f"{service} must be built and scanned by the deploy matrix.",
+            )
+            self.assertGreaterEqual(
+                workflow.count(service),
+                4,
+                f"{service} must be present in build, staging rollout, and production rollout.",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
