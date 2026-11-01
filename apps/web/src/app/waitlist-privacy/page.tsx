@@ -21,29 +21,29 @@ const sections: readonly LegalDocumentSection[] = [
     id: "why-we-use-it",
     heading: "Why we use it",
     paragraphs: [
-      "We use your email address to send occasional updates about Nantty’s beta and launch. Your selected interest helps us understand whether you are joining as a shopper, seller or business, or creator. Joining does not guarantee beta access. We do not use this information for unrelated marketing or sell it.",
+      "We use your email address and selected interest to record and manage your waitlist request. If you choose the seller or business option, optional seller details help us understand onboarding needs and plan the seller beta. Joining does not guarantee beta access. You can separately opt in to occasional launch updates; declining those updates does not remove you from the waitlist. We do not sell this information or use it for unrelated marketing.",
     ],
   },
   {
     id: "what-we-collect",
     heading: "What we collect and where it is stored",
     paragraphs: [
-      "The form collects your email address, selected interest, the fact and time of your consent, and the time of submission. It does not ask for your name, phone number, precise location, or payment information.",
-      "The entry is written to a private Google Sheet using Google Apps Script. The Sheet is currently private to the Nantty Google account. Google provides the spreadsheet and script services and processes information to provide them; Google may process data outside Nigeria under its published privacy and security terms.",
+      "For everyone, the form collects your email address, selected interest, waitlist-processing acknowledgement, optional launch-update preference, and submission/consent times. If you select seller or business, you may also provide your name, store/business name, phone or WhatsApp number, product category, current sales channels, approximate monthly sales in NGN, expected product count, founding-seller beta interest, and intended listing timeframe. Seller details are optional. The form does not ask for precise location, payment credentials, or bank details.",
+      "Entries are written through Google Apps Script to a private Google Sheet with access restricted to the Nantty account. Google provides the spreadsheet and script services and processes information to provide them; Google may process data outside Nigeria under its published privacy and security terms. Older seller responses are archived separately and marked as historical in the main list; their old beta acknowledgement is not treated as consent to marketing updates. A legacy seller can re-submit the form to confirm current interest.",
     ],
   },
   {
     id: "retention-and-choices",
     heading: "Retention and your choices",
     paragraphs: [
-      "We keep your waitlist entry for up to 12 months after you submit it, then delete it. You can withdraw consent or ask to access, correct, or delete your entry at any time by emailing privacy@nantty.com. We aim to respond within 30 days and remove the entry when you ask us to delete it. If we later send launch emails, each will include a way to unsubscribe.",
+      "We keep your current waitlist entry for up to 12 months after you submit it, then delete it. You can withdraw your waitlist-processing acknowledgement, unsubscribe from launch updates, or ask to access, correct, or delete your entry at any time by emailing privacy@nantty.com. We aim to respond within 30 days. If you withdraw or ask us to delete the entry, we will remove it unless we must retain limited information for a legal obligation. Each launch email will include a way to unsubscribe.",
     ],
   },
   {
     id: "keeping-the-list-safe",
     heading: "Keeping the list safe",
     paragraphs: [
-      "Access to the Sheet is restricted to the account owner. The form validates entries, checks for duplicates, and applies a daily submission limit. Please do not submit another person’s email address. If you are under 18, ask a parent or guardian to review and submit the form with you.",
+      "Access to the Sheet is restricted to the Nantty account owner. The form validates entries, checks for duplicates, and uses a honeypot and request serialization to reduce automated or repeated submissions; these measures do not guarantee that abuse will be prevented. Please provide only information you are comfortable sharing and do not submit another person’s contact details. If you are under 18, ask a parent or guardian to review this notice and submit the form with you.",
     ],
   },
   {
