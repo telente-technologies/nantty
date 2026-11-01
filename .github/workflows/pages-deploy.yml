@@ -55,9 +55,7 @@ jobs:
           }
           NODE
       - name: Deploy production site to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v4
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: a8d2da9ca2bd5b59d036f370257d5de7
-          command: pages deploy apps/web/out --project-name=nantty-main --branch=main
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm dlx wrangler@4 pages deploy apps/web/out --project-name=nantty-main --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: a8d2da9ca2bd5b59d036f370257d5de7
