@@ -4,8 +4,12 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 
 import styles from "./nanttyLanding.module.css";
 
-const waitlistEndpoint = process.env.NEXT_PUBLIC_WAITLIST_APPS_SCRIPT_URL?.trim() ?? "";
-const waitlistEnabled = process.env.NEXT_PUBLIC_WAITLIST_ENABLED === "true" && waitlistEndpoint.length > 0;
+// This is a public Apps Script web-app URL, not a credential. Keeping a
+// fallback prevents static hosting builds from silently disabling signups
+// when a build-time environment variable was not configured.
+const defaultWaitlistEndpoint = "https://script.google.com/macros/s/AKfycbw9zv0GRV4qjvuMiU5cNifUUKPZV18u3rUHBqjFN17C6VeOBEnrNiDJYLEK-FK7kQcV/exec";
+const waitlistEndpoint = process.env.NEXT_PUBLIC_WAITLIST_APPS_SCRIPT_URL?.trim() || defaultWaitlistEndpoint;
+const waitlistEnabled = process.env.NEXT_PUBLIC_WAITLIST_ENABLED !== "false" && waitlistEndpoint.length > 0;
 const knownGoogleOrigins = new Set(["https://script.google.com"]);
 
 interface WaitlistMessage {
