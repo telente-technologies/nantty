@@ -38,6 +38,7 @@ FRAME_KEY = "live-safety/frames/l9/frame_7.jpeg"
 DEPLOYED_SECRETS: dict[str, Any] = {
     "shared_secret": "s" * 40,
     "model_signing_secret": "m" * 40,
+    "id_hash_secret": "h" * 40,
     "redis_url": "redis://cache:6379/0",
     "rabbitmq_url": "amqp://bus:5672",
 }

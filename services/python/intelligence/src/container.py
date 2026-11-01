@@ -179,9 +179,7 @@ def build_identifier_hasher(settings: IntelligenceSettings) -> OpaqueIdentifierH
     id_hash_secret = settings.id_hash_secret.get_secret_value()
     if settings.environment in {"staging", "production"} and not id_hash_secret:
         raise ValueError("INTELLIGENCE_ID_HASH_SECRET is required outside development")
-    return OpaqueIdentifierHasher(
-        derive_identifier_hash_key(id_hash_secret, settings.shared_secret.get_secret_value())
-    )
+    return OpaqueIdentifierHasher(derive_identifier_hash_key(id_hash_secret, settings.shared_secret.get_secret_value()))
 
 
 def build_application_container(

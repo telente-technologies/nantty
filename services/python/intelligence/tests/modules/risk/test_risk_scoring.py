@@ -204,9 +204,10 @@ async def test_gift_to_creator_who_sent_coins_to_the_sender_is_laundering(
         "gift_sent",
         "creator_1",
         reference_now,
-        {"giftId": "gift_back_1", "creatorId": "sender_1", "coinAmount": 900},
+        {"creatorId": "sender_1", "coinAmount": 900},
     )
-    await signed_client.post("/v1/events", {"events": [creator_to_sender]})
+    ingestion = await signed_client.post("/v1/events", {"events": [creator_to_sender]})
+    assert ingestion.json()["accepted"] == 1
     body = await score(
         signed_client,
         build_risk_request(

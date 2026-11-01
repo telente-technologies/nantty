@@ -22,6 +22,7 @@ def _staging_settings(**overrides: object) -> IntelligenceSettings:
         "environment": "staging",
         "shared_secret": "staging-shared-secret-that-is-long-enough-0",
         "model_signing_secret": "staging-model-signing-secret-long-enough-00",
+        "id_hash_secret": "staging-id-hash-secret-long-enough-000",
         "redis_url": "redis://localhost:6379/0",
     }
     base.update(overrides)

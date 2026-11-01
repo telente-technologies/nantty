@@ -95,22 +95,27 @@ export interface PlatformOptions {
   readonly host: string;
   readonly port: number;
   readonly bodyLimit?: number;
-  readonly trustProxy?: boolean | number;
+  readonly trustProxy?: NonNullable<FastifyServerOptions["trustProxy"]> | number;
   readonly logger?: FastifyServerOptions["logger"];
   readonly rateLimit?: false | { readonly max: number; readonly timeWindow: number };
 }
 
 export async function createPlatform(options: PlatformOptions): Promise<FastifyInstance> {
   const methodsByPath = new Map<string, Set<string>>();
-  const app = Fastify({
+  const trustedProxyHops = options.trustProxy;
+  const trustProxy = typeof trustedProxyHops === "number"
+    ? (_address: string, hop: number) => hop < trustedProxyHops
+    : trustedProxyHops ?? false;
+  const serverOptions: FastifyServerOptions = {
     logger: options.logger ?? { level: process.env["LOG_LEVEL"] ?? "info" },
     bodyLimit: options.bodyLimit ?? 256 * 1024,
-    trustProxy: options.trustProxy ?? false,
+    trustProxy,
     genReqId: (request) => request.headers["x-request-id"]?.toString() || crypto.randomUUID(),
     requestIdHeader: "x-request-id",
     requestIdLogLabel: "requestId",
     disableRequestLogging: true,
-  });
+  };
+  const app = Fastify<import("node:http").Server>(serverOptions);
 
   await app.register(sensible);
   await app.register(helmet, { contentSecurityPolicy: false });

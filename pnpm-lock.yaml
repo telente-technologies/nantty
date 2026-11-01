@@ -11,6 +11,8 @@ overrides:
   deepmerge-ts@<8.0.0: ^8.0.2
   uuid@<11.1.1: ^11.1.1
   '@xmldom/xmldom@<0.8.15': ^0.8.15
+  zod@<4.6.6: 4.6.6
+  node-forge@<=1.4.0: 1.4.1
 
 importers:
 
@@ -642,11 +644,11 @@ importers:
         specifier: 1.9.1
         version: 1.9.1
       fastify:
-        specifier: 5.7.4
-        version: 5.7.4
+        specifier: 5.12.7
+        version: 5.12.7
       zod:
-        specifier: 4.6.5
-        version: 4.6.5
+        specifier: 4.6.6
+        version: 4.6.6
 
   packages/shared-types: {}
 
@@ -729,8 +731,8 @@ importers:
         specifier: 2.12.0
         version: 2.12.0(@opentelemetry/api@1.9.1)
       fastify:
-        specifier: 5.7.4
-        version: 5.7.4
+        specifier: 5.12.7
+        version: 5.12.7
       jose:
         specifier: ^6.2.12
         version: 6.2.12
@@ -805,8 +807,8 @@ importers:
         specifier: ^2.0.5
         version: 2.0.5
       fastify:
-        specifier: 5.7.4
-        version: 5.7.4
+        specifier: 5.12.7
+        version: 5.12.7
       prisma:
         specifier: ^7.10.0
         version: 7.10.0(@types/node@26.6.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
@@ -884,8 +886,8 @@ importers:
         specifier: ^2.2.0
         version: 2.2.0
       fastify:
-        specifier: 5.7.4
-        version: 5.7.4
+        specifier: 5.12.7
+        version: 5.12.7
       jose:
         specifier: ^6.2.12
         version: 6.2.12
@@ -893,8 +895,8 @@ importers:
         specifier: ^4.23.15
         version: 4.23.15
       zod:
-        specifier: ^4.6.5
-        version: 4.6.5
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@nantty/eslint-config':
         specifier: workspace:*
@@ -960,8 +962,8 @@ importers:
         specifier: ^2.2.0
         version: 2.2.0
       fastify:
-        specifier: 5.7.4
-        version: 5.7.4
+        specifier: 5.12.7
+        version: 5.12.7
       tsx:
         specifier: ^4.23.15
         version: 4.23.15
@@ -1030,8 +1032,8 @@ importers:
         specifier: ^2.2.0
         version: 2.2.0
       fastify:
-        specifier: 5.7.4
-        version: 5.7.4
+        specifier: 5.12.7
+        version: 5.12.7
       prisma:
         specifier: ^7.10.0
         version: 7.10.0(@types/node@26.6.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
@@ -5514,9 +5516,6 @@ packages:
   fast-json-stable-stringify@2.1.0:
     resolution: {integrity: sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==}
 
-  fast-json-stringify@6.4.0:
-    resolution: {integrity: sha512-ibRCQ0GZKJIQ+P3Et1h0LhPgp3PMTYk0MH8O+kW3lNYsvmaQww5Nn3f1jf73Q0jR1Yz3a1CDP4/NZD3vOajWJQ==}
-
   fast-json-stringify@7.2.0:
     resolution: {integrity: sha512-q18imgm9fEdQVfvJbRJALE9VP/A5HGme0+NUnWcmFYM9rbQbLkZZk20FyIp1LQ8gDOauQKwqMc52YozqFaQyOw==}
 
@@ -5539,8 +5538,8 @@ packages:
   fastify-plugin@5.1.0:
     resolution: {integrity: sha512-FAIDA8eovSt5qcDgcBvDuX/v0Cjz0ohGhENZ/wpc3y+oZCY2afZ9Baqql3g/lC+OHRnciQol4ww7tuthOb9idw==}
 
-  fastify@5.7.4:
-    resolution: {integrity: sha512-e6l5NsRdaEP8rdD8VR0ErJASeyaRbzXYpmkrpr2SuvuMq6Si3lvsaVy5C+7gLanEkvjpMDzBXWE5HPeb/hgTxA==}
+  fastify@5.12.7:
+    resolution: {integrity: sha512-v4pEPsTRPuqlDIYiQFB+BHjVN4SdHX9u0ABk0ZDUKbbdY1vsNryUd1j4Z+jQEZajvYIVk047Kimva9/AJ79GYw==}
 
   fastq@1.20.3:
     resolution: {integrity: sha512-XKv5nnLs6nLF71NgiKJLIZFLkPyIEuOselLG7ujZnGrRfQK8HpvY+WqKhAJUAdLomwVHErVS4LfxFlPq0/FTAw==}
@@ -6875,8 +6874,8 @@ packages:
       encoding:
         optional: true
 
-  node-forge@1.4.0:
-    resolution: {integrity: sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==}
+  node-forge@1.4.1:
+    resolution: {integrity: sha512-w5/MfWaeMrpR/5ba6fZyAUTLSuE6aYz7H/3cYrqwZEmf5eQS3IaaLgJt4MBv7HglGFWmV22K8h4U18RJQmw/ow==}
     engines: {node: '>= 6.13.0'}
 
   node-int64@0.4.0:
@@ -8595,13 +8594,10 @@ packages:
     resolution: {integrity: sha512-Q6/nZLe6jxuU80qb/4uJ4t5v2VEZ44lzQjPDhYJNztRQ4wyWc6VF3D3Kb/fAuPetZQnhS3hnajCf9CsWesghLQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      zod: ^3.25.0 || ^4.0.0
+      zod: 4.6.6
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-
-  zod@4.6.5:
-    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
+  zod@4.6.6:
+    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
 
   zustand@5.0.15:
     resolution: {integrity: sha512-MpSEjRiBkA9crSYeOUH32rJC7SVqAbm0Fqcqge/bUi2PPoLcBWKOsG+C8mevmpr8TwXHBVkChbbJiyvkE+i/3A==}
@@ -9713,7 +9709,7 @@ snapshots:
       glob: 13.0.6
       lan-network: 0.2.1
       multitars: 1.0.2
-      node-forge: 1.4.0
+      node-forge: 1.4.1
       npm-package-arg: 11.0.3
       ora: 3.4.0
       picomatch: 4.0.7
@@ -9731,7 +9727,7 @@ snapshots:
       toqr: 0.1.1
       wrap-ansi: 7.0.0
       ws: 8.22.0
-      zod: 3.25.76
+      zod: 4.6.6
     optionalDependencies:
       react-native: 0.86.3(@babel/core@7.29.7(supports-color@10.2.2))(@react-native/jest-preset@0.86.3(@babel/core@7.29.7(supports-color@10.2.2))(react@19.2.3)(supports-color@10.2.2))(@react-native/metro-config@0.86.3(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.3.0)(react@19.2.3)(supports-color@10.2.2)
     transitivePeerDependencies:
@@ -9749,7 +9745,7 @@ snapshots:
 
   '@expo/code-signing-certificates@0.0.6':
     dependencies:
-      node-forge: 1.4.0
+      node-forge: 1.4.1
 
   '@expo/config-plugins@55.0.11(supports-color@10.2.2)':
     dependencies:
@@ -13322,8 +13318,8 @@ snapshots:
       '@babel/parser': 7.29.9
       eslint: 10.12.0(jiti@2.7.0)(supports-color@10.2.2)
       hermes-parser: 0.25.1
-      zod: 4.6.5
-      zod-validation-error: 4.0.2(zod@4.6.5)
+      zod: 4.6.6
+      zod-validation-error: 4.0.2(zod@4.6.6)
     transitivePeerDependencies:
       - supports-color
 
@@ -13854,15 +13850,6 @@ snapshots:
 
   fast-json-stable-stringify@2.1.0: {}
 
-  fast-json-stringify@6.4.0:
-    dependencies:
-      '@fastify/merge-json-schemas': 0.2.2
-      ajv: 8.20.0
-      ajv-formats: 3.0.1(ajv@8.20.0)
-      fast-uri: 3.1.8
-      json-schema-ref-resolver: 3.0.1
-      rfdc: 1.4.1
-
   fast-json-stringify@7.2.0:
     dependencies:
       '@fastify/merge-json-schemas': 0.2.2
@@ -13886,7 +13873,7 @@ snapshots:
 
   fastify-plugin@5.1.0: {}
 
-  fastify@5.7.4:
+  fastify@5.12.7:
     dependencies:
       '@fastify/ajv-compiler': 4.0.7
       '@fastify/error': 4.2.1
@@ -13894,7 +13881,7 @@ snapshots:
       '@fastify/proxy-addr': 5.1.2
       abstract-logging: 2.0.1
       avvio: 9.3.1
-      fast-json-stringify: 6.4.0
+      fast-json-stringify: 7.2.0
       find-my-way: 9.7.0
       light-my-request: 6.8.0
       pino: 10.4.0
@@ -15623,7 +15610,7 @@ snapshots:
     dependencies:
       whatwg-url: 5.0.0
 
-  node-forge@1.4.0: {}
+  node-forge@1.4.1: {}
 
   node-int64@0.4.0: {}
 
@@ -17507,13 +17494,11 @@ snapshots:
       grammex: 3.1.13
       graphmatch: 1.1.1
 
-  zod-validation-error@4.0.2(zod@4.6.5):
+  zod-validation-error@4.0.2(zod@4.6.6):
     dependencies:
-      zod: 4.6.5
+      zod: 4.6.6
 
-  zod@3.25.76: {}
-
-  zod@4.6.5: {}
+  zod@4.6.6: {}
 
   zustand@5.0.15(@types/react@19.3.0)(react@19.2.3)(use-sync-external-store@1.7.0(react@19.2.3)):
     optionalDependencies:
