@@ -52,7 +52,6 @@ func (controller StoreTeamController) SearchNanttyUsers(writer http.ResponseWrit
 	controller.search(writer, request, false)
 }
 
-
 func (controller StoreTeamController) SearchStaffCandidates(writer http.ResponseWriter, request *http.Request) {
 	controller.search(writer, request, true)
 }

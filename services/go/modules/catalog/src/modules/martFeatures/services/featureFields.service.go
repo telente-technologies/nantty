@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	FeatureKinds      = []string{"HERO_BANNER", "PROMO_BANNER", "FEATURED_COLLECTION", "FEATURED_STORE"}
-	TargetTypes       = []string{"CATEGORY", "COLLECTION", "STORE", "PRODUCT", "URL"}
-	Collections       = []string{"sales_of_the_day", "featured_brands", "new_arrivals"}
+	FeatureKinds    = []string{"HERO_BANNER", "PROMO_BANNER", "FEATURED_COLLECTION", "FEATURED_STORE"}
+	TargetTypes     = []string{"CATEGORY", "COLLECTION", "STORE", "PRODUCT", "URL"}
+	Collections     = []string{"sales_of_the_day", "featured_brands", "new_arrivals"}
 	nanttyUrlFormat = regexp.MustCompile(`^https://([a-z0-9-]+\.)*nantty\.com(/|$)`)
 )
 

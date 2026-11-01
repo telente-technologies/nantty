@@ -28,7 +28,7 @@ type CustomerView struct {
 	Name                 string             `json:"name"`
 	Phone                *string            `json:"phone"`
 	Email                *string            `json:"email"`
-	NanttyUsername     *string            `json:"nanttyUsername"`
+	NanttyUsername       *string            `json:"nanttyUsername"`
 	City                 *string            `json:"city"`
 	Tags                 []string           `json:"tags"`
 	Notes                []CustomerNoteView `json:"notes"`

@@ -29,7 +29,7 @@ var webRouteTerms = []string{
 	"subscriptions", "user", "users", "verify-email", "watch", "welcome", "security-check", "cookies", "guidelines", "community-guidelines",
 	"creator-terms", "faq", "sitemap", "sitemaps", "robots", "favicon", "manifest", "_next", "static", "assets", "images", "icons", "fonts", "public",
 	"embed", "oembed", "share", "invite", "download", "app", "apps", "reels", "videos", "video", "rankings", "wallet", "studio", "boost", "boosts", "sounds", "stories", "verification",
-	"rss", "logout", "register", "auth", "oauth", "callback", "new", "create", "edit", "trending", "discover", "tags", "hashtag", "dispute", "disputes",
+	"rss", "logout", "register", "auth", "oauth", "callback", "new", "create", "edit", "trending", "discover", "tags", "hashtag", "dispute", "disputes", "spaces",
 }
 
 var prefixTerms = []string{
@@ -44,7 +44,7 @@ var wellKnownBrands = []string{
 	"google", "apple", "facebook", "instagram", "meta", "whatsapp", "tiktok", "twitter", "youtube", "snapchat", "linkedin", "telegram",
 	"amazon", "microsoft", "netflix", "spotify", "paypal", "visa", "mastercard", "samsung", "jumia", "konga", "flutterwave",
 	"opay", "palmpay", "moniepoint", "kuda", "mtn", "airtel", "glo", "dangote", "access", "gtbank", "zenithbank", "firstbank", "uba",
-	"stanbic", "nike", "adidas", "cocacola", "pepsi", "shoprite", "bolt", "uber", "chowdeck", "glovo",
+	"stanbic", "nike", "adidas", "cocacola", "pepsi", "shoprite", "bolt", "uber", "chowdeck", "glovo", "zudomart",
 }
 
 var brandImpersonationAffixes = []string{

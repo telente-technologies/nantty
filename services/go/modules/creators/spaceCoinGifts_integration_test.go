@@ -60,29 +60,34 @@ func TestSpaceCoinGiftUsesServerCatalogHostOnlyAndIdempotentBalancedLedger(t *te
 	if err != nil || !replay.GetReplayed() || replay.GetGiftTransactionId() != first.GetGiftTransactionId() {
 		t.Fatalf("expected the original receipt on replay, receipt=%+v error=%v", replay, err)
 	}
-	changed := *request
-	changed.Quantity = 3
-	if _, err := harness.client.ChargeSpaceCoinGift(harness.authorized(), &changed); status.Code(err) != codes.AlreadyExists {
+	changed := &moneyv1.ChargeSpaceCoinGiftRequest{
+		SenderUserId: sender, SpaceId: spaceID, GiftId: "gift_static", Quantity: 3, IdempotencyKey: request.GetIdempotencyKey(),
+	}
+	if _, err := harness.client.ChargeSpaceCoinGift(harness.authorized(), changed); status.Code(err) != codes.AlreadyExists {
 		t.Fatalf("same key with changed request should be rejected, got %v", err)
 	}
-	selfGift := *request
-	selfGift.SenderUserId, selfGift.IdempotencyKey = host, "space-gift-self-01"
-	if _, err := harness.client.ChargeSpaceCoinGift(harness.authorized(), &selfGift); status.Code(err) != codes.FailedPrecondition {
+	selfGift := &moneyv1.ChargeSpaceCoinGiftRequest{
+		SenderUserId: host, SpaceId: spaceID, GiftId: "gift_static", Quantity: request.GetQuantity(), IdempotencyKey: "space-gift-self-01",
+	}
+	if _, err := harness.client.ChargeSpaceCoinGift(harness.authorized(), selfGift); status.Code(err) != codes.FailedPrecondition {
 		t.Fatalf("host must not gift themselves, got %v", err)
 	}
-	nonCreatorGift := *request
-	nonCreatorGift.SpaceId, nonCreatorGift.IdempotencyKey = nonCreatorSpaceID, "space-gift-noncreator-01"
-	if _, err := harness.client.ChargeSpaceCoinGift(harness.authorized(), &nonCreatorGift); status.Code(err) != codes.FailedPrecondition {
+	nonCreatorGift := &moneyv1.ChargeSpaceCoinGiftRequest{
+		SenderUserId: sender, SpaceId: nonCreatorSpaceID, GiftId: "gift_static", Quantity: request.GetQuantity(), IdempotencyKey: "space-gift-noncreator-01",
+	}
+	if _, err := harness.client.ChargeSpaceCoinGift(harness.authorized(), nonCreatorGift); status.Code(err) != codes.FailedPrecondition {
 		t.Fatalf("non-creator host must not receive coin gifts, got %v", err)
 	}
-	disabledGift := *request
-	disabledGift.GiftId, disabledGift.IdempotencyKey = "gift_disabled", "space-gift-disabled-01"
-	if _, err := harness.client.ChargeSpaceCoinGift(harness.authorized(), &disabledGift); status.Code(err) != codes.FailedPrecondition {
+	disabledGift := &moneyv1.ChargeSpaceCoinGiftRequest{
+		SenderUserId: sender, SpaceId: spaceID, GiftId: "gift_disabled", Quantity: request.GetQuantity(), IdempotencyKey: "space-gift-disabled-01",
+	}
+	if _, err := harness.client.ChargeSpaceCoinGift(harness.authorized(), disabledGift); status.Code(err) != codes.FailedPrecondition {
 		t.Fatalf("inactive server catalog gift must be refused, got %v", err)
 	}
-	spaceDisabledGift := *request
-	spaceDisabledGift.SpaceId, spaceDisabledGift.IdempotencyKey = disabledSpaceID, "space-gift-feature-off-01"
-	if _, err := harness.client.ChargeSpaceCoinGift(harness.authorized(), &spaceDisabledGift); status.Code(err) != codes.FailedPrecondition {
+	spaceDisabledGift := &moneyv1.ChargeSpaceCoinGiftRequest{
+		SenderUserId: sender, SpaceId: disabledSpaceID, GiftId: "gift_static", Quantity: request.GetQuantity(), IdempotencyKey: "space-gift-feature-off-01",
+	}
+	if _, err := harness.client.ChargeSpaceCoinGift(harness.authorized(), spaceDisabledGift); status.Code(err) != codes.FailedPrecondition {
 		t.Fatalf("Space gifts_enabled flag must be enforced by money service, got %v", err)
 	}
 	if harness.balance(ledgermodels.UserSpendableCoinsAccount(sender)) != 80 || harness.balance(ledgermodels.CreatorEarnedCoinsAccount(host)) != 10 || harness.balance(ledgermodels.PlatformGiftRevenueCoinsAccount()) != 10 {

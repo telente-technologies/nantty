@@ -6,7 +6,7 @@ func TestAdsAccountReturnUrlsMatchOnlyTheBillingReturnPageOnAllowedOrigins(t *te
 	origins := []string{"https://ads.nantty.com", "http://localhost:3300"}
 	cases := map[string]bool{
 		"https://ads.nantty.com/accounts/acct_123/billing/return":         true,
-		"http://localhost:3300/accounts/01a10d07-5689/billing/return":       true,
+		"http://localhost:3300/accounts/01a10d07-5689/billing/return":     true,
 		"https://ads.nantty.com/accounts/acct_123/billing/return/":        false,
 		"https://ads.nantty.com/accounts/acct_123/billing/return?next=/x": false,
 		"https://ads.nantty.com/accounts/acct_123/billing/return#x":       false,
