@@ -1,6 +1,7 @@
 package com.nantty.android.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -18,13 +19,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.mergeDescendants
+import androidx.compose.ui.semantics.semantics
+import coil.compose.AsyncImage
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -207,23 +219,74 @@ private fun EmptyState(title: String, message: String, action: (() -> Unit)? = n
 }
 
 @Composable
-private fun FeedCard(post: FeedPost) {
+internal fun FeedCard(post: FeedPost) {
     Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp), shape = RoundedCornerShape(18.dp), tonalElevation = 1.dp) {
         Column(Modifier.padding(18.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(42.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), CircleShape), contentAlignment = Alignment.Center) {
-                    Text(post.authorName.firstOrNull()?.uppercase() ?: "N", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    val displayName = post.postedAsName ?: post.authorName
+                    Text(displayName.firstOrNull()?.uppercase() ?: "N", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    (post.postedAsAvatarUrl ?: post.avatarUrl)?.let {
+                        AsyncImage(it, contentDescription = "$displayName profile photo", modifier = Modifier.fillMaxSize().clip(CircleShape), contentScale = ContentScale.Crop)
+                    }
                 }
-                Column(Modifier.padding(start = 12.dp)) {
-                    Text(post.authorName, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(if (post.username.isBlank()) "On Nantty" else "@${post.username}", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodySmall)
+                Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(post.postedAsName ?: post.authorName, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        val badgeColor = post.verificationColor ?: if (post.verified) "blue" else null
+                        badgeColor?.let { color ->
+                            Icon(
+                                Icons.Default.Verified,
+                                contentDescription = when (color) {
+                                    "gold" -> "Verified business"
+                                    "black" -> "Official government account"
+                                    else -> "Verified account"
+                                },
+                                tint = when (color) {
+                                    "gold" -> Color(0xFFB7791F)
+                                    "black" -> MaterialTheme.colorScheme.onSurface
+                                    else -> MaterialTheme.colorScheme.primary
+                                },
+                                modifier = Modifier.padding(start = 4.dp).size(16.dp),
+                            )
+                        }
+                    }
+                    val handle = post.postedAsHandle ?: post.username
+                    Text(if (handle.isBlank()) "On Nantty" else "@$handle", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
+                if (post.kind == "clip") Text("CLIP", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
             }
             if (post.text.isNotBlank()) Text(post.text, Modifier.padding(top = 16.dp), style = MaterialTheme.typography.bodyLarge)
-            Row(Modifier.fillMaxWidth().padding(top = 18.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                Text("♡  ${post.likes}", color = MaterialTheme.colorScheme.secondary)
-                Text("○  ${post.comments}", color = MaterialTheme.colorScheme.secondary)
+            post.media.forEach { media ->
+                val displayUrl = if (media.type == "video") media.posterUrl ?: media.url else media.url
+                Box(Modifier.fillMaxWidth().padding(top = 14.dp), contentAlignment = Alignment.BottomStart) {
+                    AsyncImage(
+                        model = displayUrl,
+                        contentDescription = if (media.type == "video") "Video preview" else "Post image",
+                        modifier = Modifier.fillMaxWidth().aspectRatio(media.width?.toFloat()?.div(media.height?.toFloat() ?: 0f)?.takeIf { it.isFinite() && it in 0.5f..2.2f } ?: (16f / 10f)).clip(RoundedCornerShape(14.dp)),
+                        contentScale = ContentScale.Crop,
+                    )
+                    if (media.type == "video") Text("VIDEO", Modifier.padding(10.dp).background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.72f), RoundedCornerShape(6.dp)).padding(horizontal = 8.dp, vertical = 4.dp), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(Modifier.fillMaxWidth().padding(top = 18.dp), horizontalArrangement = Arrangement.spacedBy(22.dp), verticalAlignment = Alignment.CenterVertically) {
+                EngagementCount(Icons.Default.FavoriteBorder, post.likes, "likes")
+                EngagementCount(Icons.AutoMirrored.Filled.ChatBubbleOutline, post.comments, "comments")
+                EngagementCount(Icons.Default.Repeat, post.reposts, "reposts")
+                EngagementCount(Icons.Default.Share, post.shares, "shares")
             }
         }
+    }
+}
+
+@Composable
+private fun EngagementCount(icon: androidx.compose.ui.graphics.vector.ImageVector, count: Int, label: String) {
+    Row(
+        Modifier.semantics(mergeDescendants = true) { contentDescription = "$count $label" },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(18.dp))
+        Text(count.toString(), color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.labelMedium)
     }
 }
