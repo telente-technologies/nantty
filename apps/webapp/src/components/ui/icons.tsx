@@ -62,6 +62,7 @@ export const CoinIcon = createFigmaIcon("coin24");
 export const ClipsIcon = createFigmaIcon("flips34");
 export const GiftIcon = createFigmaIcon("gift24");
 export const LiveIcon = createFigmaIcon("videoCamera24");
+export const SpacesIcon = createFigmaIcon("headset24");
 export const PlayIcon = createFigmaIcon("play24");
 export const OrdersIcon = createFigmaIcon("truck24");
 export const CreatorIcon = createFigmaIcon("cameraBolt24");

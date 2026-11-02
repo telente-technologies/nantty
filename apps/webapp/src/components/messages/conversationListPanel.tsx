@@ -26,6 +26,7 @@ import { InboxRequestActions } from "./inboxRequestActions";
 import { groupAttributesQueryKey, useConversationDisplay } from "./conversationDisplay.hook";
 import { NewGroupDialog } from "./newGroupDialog";
 import { NewMessageDialog } from "./newMessageDialog";
+import { conversationUnreadCount, conversationUnreadLabel } from "./conversationUnreadLabel";
 
 function ConversationRowLink({ conversation, isActive }: { readonly conversation: Conversation; readonly isActive: boolean }) {
   const display = useConversationDisplay(conversation);
@@ -39,7 +40,12 @@ function ConversationRowLink({ conversation, isActive }: { readonly conversation
         </span>
         <span className={styles.rowPreview}>{conversation.lastMessage || (display.isGroup ? "Encrypted group" : "")}</span>
       </span>
-      {conversation.unread > 0 ? <span className={styles.unread}>{conversation.unread > 99 ? "99+" : conversation.unread}</span> : null}
+      {conversation.unread > 0 ? (
+        <>
+          <span className={styles.unread} aria-hidden="true">{conversationUnreadCount(conversation.unread)}</span>
+          <span className={styles.unreadAssistive}>{conversationUnreadLabel(conversation.unread)}</span>
+        </>
+      ) : null}
     </Link>
   );
 }
@@ -142,7 +148,7 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
   const people = search.trim().length >= 2 ? (searchResults.data?.people ?? []) : [];
 
   return (
-    <div className={styles.page}>
+    <section className={styles.page} aria-label="Messages">
       <div className={styles.titleRow}>
         <InboxFolderMenu folder={folder} onSelect={setFolder} />
         <span className={styles.titleActions}>
@@ -186,59 +192,61 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
         ) : null}
       </div>
 
-      {conversationsQuery.isLoading ? (
-        <ConversationListSkeleton />
-      ) : conversationsQuery.isError ? (
-        <ErrorState description="Couldn't load your messages." error={conversationsQuery.error} onRetry={() => void conversationsQuery.refetch()} />
-      ) : search.trim().length >= 2 ? (
-        searchResults.isLoading ? (
-          <Spinner label="Searching" />
-        ) : visible.length === 0 && people.length === 0 ? (
-          <EmptyState kind="search" title="No matches" description="Nobody matched that search." />
+      <div className={styles.results}>
+        {conversationsQuery.isLoading ? (
+          <ConversationListSkeleton />
+        ) : conversationsQuery.isError ? (
+          <ErrorState description="Couldn't load your messages." error={conversationsQuery.error} onRetry={() => void conversationsQuery.refetch()} />
+        ) : search.trim().length >= 2 ? (
+          searchResults.isLoading ? (
+            <Spinner label="Searching" />
+          ) : visible.length === 0 && people.length === 0 ? (
+            <EmptyState kind="search" title="No matches" description="Nobody matched that search." />
+          ) : (
+            <>
+              {visible.length > 0 ? (
+                <ul className={styles.list} aria-label="Matching chats">
+                  {visible.map((conversation) => (
+                    <li key={conversation.id}>
+                      <ConversationRowLink conversation={conversation} isActive={activeConversationId === conversation.id} />
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {people.length > 0 ? (
+                <ul className={styles.list}>
+                  {people.map((person) => (
+                    <li key={person.id}>
+                      <button type="button" className={styles.row} onClick={() => router.push(`/user/${person.id}`)}>
+                        <Avatar name={person.name} src={person.avatarUrl} size="md" />
+                        <span className={styles.rowText}>
+                          <span className={styles.rowName}>{person.name}</span>
+                          <span className={styles.rowHandle}>@{person.username}</span>
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </>
+          )
+        ) : conversations.length === 0 ? (
+          folder !== "chats" ? (
+            <EmptyState icon={<AppIcon name={inboxFolderIcons[folder]} size={28} />} title={folder === "requests" ? "No message requests." : "No chats flagged as spam."} />
+          ) : (
+            <EmptyState kind="inbox" title="No chats yet" description="Message a seller or a friend to get started." action={<InlineLink href="/explore">Find people</InlineLink>} />
+          )
         ) : (
-          <>
-            {visible.length > 0 ? (
-              <ul className={styles.list} aria-label="Matching chats">
-                {visible.map((conversation) => (
-                  <li key={conversation.id}>
-                    <ConversationRowLink conversation={conversation} isActive={activeConversationId === conversation.id} />
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            {people.length > 0 ? (
-              <ul className={styles.list}>
-                {people.map((person) => (
-                  <li key={person.id}>
-                    <button type="button" className={styles.row} onClick={() => router.push(`/user/${person.id}`)}>
-                      <Avatar name={person.name} src={person.avatarUrl} size="md" />
-                      <span className={styles.rowText}>
-                        <span className={styles.rowName}>{person.name}</span>
-                        <span className={styles.rowHandle}>@{person.username}</span>
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </>
-        )
-      ) : conversations.length === 0 ? (
-        folder !== "chats" ? (
-          <EmptyState icon={<AppIcon name={inboxFolderIcons[folder]} size={28} />} title={folder === "requests" ? "No message requests." : "No chats flagged as spam."} />
-        ) : (
-          <EmptyState kind="inbox" title="No chats yet" description="Message a seller or a friend to get started." action={<InlineLink href="/explore">Find people</InlineLink>} />
-        )
-      ) : (
-        <ul className={styles.list}>
-          {conversations.map((conversation) => (
-            <li key={conversation.id}>
-              <ConversationRowLink conversation={conversation} isActive={activeConversationId === conversation.id} />
-              {folder === "chats" ? null : <InboxRequestActions conversation={conversation} viewerId={viewer?.id ?? ""} showExplanation />}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+          <ul className={styles.list}>
+            {conversations.map((conversation) => (
+              <li key={conversation.id}>
+                <ConversationRowLink conversation={conversation} isActive={activeConversationId === conversation.id} />
+                {folder === "chats" ? null : <InboxRequestActions conversation={conversation} viewerId={viewer?.id ?? ""} showExplanation />}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
   );
 }
