@@ -45,7 +45,7 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - uses: gradle/actions/setup-gradle@v6.4.0
+      - uses: gradle/actions/setup-gradle@v6.4.1
 
       - name: Install mobile dependencies
         run: pnpm install --frozen-lockfile --filter @nantty/mobile...
