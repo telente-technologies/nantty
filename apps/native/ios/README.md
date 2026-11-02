@@ -2,7 +2,7 @@
 
 This is a native SwiftUI app and WidgetKit extension, defined with XcodeGen in `project.yml`. Generate the Xcode project with `xcodegen generate`, then open `Nantty.xcodeproj` in Xcode. The app and widget use bundle identifiers `com.nantty.app` and `com.nantty.app.widget` and share the `group.com.nantty.app` app group.
 
-The app shell is intentionally limited to product identity and backend configuration. It does not claim to implement marketplace or social workflows. Set the backend base URL in Settings; the initial value follows the repository's local gateway convention (`http://localhost:8080`). For a physical device, configure a reachable development host. API configuration validation is present, but this scaffold does not yet issue API requests.
+The app includes a read-only public For You feed backed by `GET /api/v1/feeds/for-you`. Set the backend base URL in Settings; the initial value follows the repository's local gateway convention (`http://localhost:8080`). For a physical device, configure a reachable development host. Feed requests use `URLSession` without credentials; feed posts show their author, text, and attached images supported by the response contract. The feed has loading, empty, error, retry, and pull-to-refresh states. Other social and marketplace workflows are not implemented here.
 
 The API URL stays in the app's private preferences. The widget reads only a Boolean backend-configured flag from app-group `UserDefaults`. It makes no network requests and does not read tokens, account details, messages, orders, balances, hosts, or other sensitive data. Do not add credentials or sensitive user state to the app group.
 

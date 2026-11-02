@@ -7,7 +7,7 @@ struct APISettingsView: View {
     private var validationMessage: String? {
         guard !apiBaseURL.isEmpty else { return nil }
         guard APIConfiguration(rawValue: apiBaseURL) != nil else {
-            return "Enter a valid HTTP or HTTPS base URL."
+            return "Use HTTPS, or HTTP only for localhost during development."
         }
         return nil
     }
@@ -30,7 +30,7 @@ struct APISettingsView: View {
             } header: {
                 Text("Backend")
             } footer: {
-                Text("Used as the base address for future Nantty API requests. The current shell does not make API requests.")
+                Text("Used as the base address for Nantty API requests, including the public For You feed.")
             }
 
             Section("Widget") {
