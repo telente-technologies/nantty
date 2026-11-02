@@ -1,0 +1,50 @@
+import SwiftUI
+
+struct APISettingsView: View {
+    @AppStorage("apiBaseURL")
+    private var apiBaseURL = Bundle.main.object(forInfoDictionaryKey: "NanttyAPIBaseURL") as? String ?? "http://localhost:8080"
+
+    private var validationMessage: String? {
+        guard !apiBaseURL.isEmpty else { return nil }
+        guard APIConfiguration(rawValue: apiBaseURL) != nil else {
+            return "Enter a valid HTTP or HTTPS base URL."
+        }
+        return nil
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                TextField("https://api.example.com", text: $apiBaseURL)
+                    .textContentType(.URL)
+                    .keyboardType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .accessibilityLabel("Backend API base URL")
+                if let validationMessage {
+                    Text(validationMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                        .accessibilityLabel("Invalid API URL. \(validationMessage)")
+                }
+            } header: {
+                Text("Backend")
+            } footer: {
+                Text("Used as the base address for future Nantty API requests. The current shell does not make API requests.")
+            }
+
+            Section("Widget") {
+                Text("The widget reads only the configured host name from this shared setting. It does not access account data or contact the backend.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .formStyle(.grouped)
+        .onAppear(perform: syncWidgetState)
+        .onChange(of: apiBaseURL) { _, _ in syncWidgetState() }
+    }
+
+    private func syncWidgetState() {
+        SharedAppGroup.defaults?.set(APIConfiguration(rawValue: apiBaseURL) != nil, forKey: "apiConfigured")
+    }
+}
