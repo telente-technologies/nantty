@@ -2,24 +2,33 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
+import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { useDeleteOwnPost } from "@/components/feed/useDeleteOwnPost.hook";
 import { useSession } from "@/components/providers/sessionProvider";
+import { readChatCryptoErrorMessage } from "@/services/chatCrypto/chatCrypto.service";
+import { readErrorMessageForDisplay } from "@/services/clientApi.service";
+import { storiesService } from "@/services/stories.service";
+import { useAuthStore } from "@/store/auth.store";
 
 import { ErrorState } from "@/components/ui/feedback";
 import { Avatar } from "@/components/ui/media";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
-import { storiesService } from "@/services/stories.service";
 
-import styles from "../../sounds/page.module.css";
+import styles from "./page.module.css";
 
 export default function StoryViewerPage() {
   const params = useParams<{ userId: string }>();
   const userId = params.userId;
   const stories = useQuery({ queryKey: ["stories", userId], queryFn: () => storiesService.fetchStoriesForUser(userId) });
-  const [index, setIndex] = useState(0);
+  const [storyPosition, setStoryPosition] = useState({ userId, index: 0 });
+  const index = storyPosition.userId === userId ? storyPosition.index : 0;
+  const [replyState, setReplyState] = useState({ userId, draft: "", notice: "" });
+  const [isReplyFocused, setIsReplyFocused] = useState(false);
+  const replyDraft = replyState.userId === userId ? replyState.draft : "";
+  const replyNotice = replyState.userId === userId ? replyState.notice : "";
   const router = useRouter();
   const { viewer } = useSession();
   const { confirmAndDelete, isDeleting } = useDeleteOwnPost({ onDeleted: () => {
@@ -27,25 +36,48 @@ export default function StoryViewerPage() {
   } });
   const list = stories.data ?? [];
   const current = list[Math.min(index, Math.max(list.length - 1, 0))];
-  useEffect(() => {
-    setIndex(0);
-  }, [userId]);
+  const reply = useMutation({
+    mutationFn: (variables: { readonly storyId: string; readonly authorId: string; readonly viewerId: string; readonly text: string }) =>
+      storiesService.replyToStory(variables.storyId, variables.authorId, variables.viewerId, variables.text),
+    onSuccess: (_, variables) => {
+      setReplyState((currentState) => currentState.userId === userId
+        ? { ...currentState, draft: currentState.draft === variables.text ? "" : currentState.draft, notice: "Reply sent in a private chat." }
+        : currentState);
+    },
+  });
   useEffect(() => {
     if (current && !current.seen && viewer) {
       void storiesService.markStoryAsSeen(current.id).catch(() => undefined);
     }
   }, [current, viewer]);
   useEffect(() => {
-    if (list.length <= 1) return;
-    const timer = window.setTimeout(() => setIndex((value) => Math.min(value + 1, list.length - 1)), 8000);
+    if (list.length <= 1 || index >= list.length - 1 || isReplyFocused || reply.isPending) return;
+    const timer = window.setTimeout(() => setStoryPosition({ userId, index: Math.min(index + 1, list.length - 1) }), 8000);
     return () => window.clearTimeout(timer);
-  }, [index, list.length]);
+  }, [index, isReplyFocused, list.length, reply.isPending, userId]);
   const viewers = useQuery({
     queryKey: ["stories", current?.id, "viewers"],
     queryFn: () => storiesService.fetchStoryViewers(current!.id),
     enabled: !!current && viewer?.id === current.author.id,
     retry: false,
   });
+  function submitReply(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const text = replyDraft.trim();
+    if (!text || !current || reply.isPending) return;
+    setReplyState((currentState) => ({ ...currentState, userId, notice: "" }));
+    const send = (viewerId: string | null) => {
+      if (!viewerId) return;
+      reply.mutate({ storyId: current.id, authorId: current.author.id, viewerId, text });
+    };
+    if (viewer?.id) send(viewer.id);
+    else requireAuthThen(() => send(useAuthStore.getState().user?.id ?? null), "Sign in to reply to stories.");
+  }
+  function submitOnEnter(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter" || event.shiftKey) return;
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
+  }
   if (stories.isLoading) return <ListRowsSkeleton label="Loading story" rows={3} />;
   if (stories.isError || !current) return <ErrorState description="This story isn't available." error={stories.error} onRetry={() => void stories.refetch()} />;
   const media = current.media;
@@ -69,13 +101,37 @@ export default function StoryViewerPage() {
           <img className={styles.media} src={media.url} alt={`Story by ${current.author.username}`} />
         ) : null}
         <div className={styles.controls}>
-          <button type="button" className={styles.linkButton} disabled={index === 0} onClick={() => setIndex((value) => Math.max(value - 1, 0))}>Previous</button>
-          <button type="button" className={styles.linkButton} disabled={index >= list.length - 1} onClick={() => setIndex((value) => Math.min(value + 1, list.length - 1))}>Next</button>
+          <button type="button" className={styles.linkButton} disabled={index === 0} onClick={() => setStoryPosition({ userId, index: Math.max(index - 1, 0) })}>Previous</button>
+          <button type="button" className={styles.linkButton} disabled={index >= list.length - 1} onClick={() => setStoryPosition({ userId, index: Math.min(index + 1, list.length - 1) })}>Next</button>
           <Link className={styles.linkButton} href="/stories">All stories</Link>
           {viewer?.id === current.author.id ? (
             <button type="button" className={styles.linkButton} disabled={isDeleting} onClick={() => void confirmAndDelete({ id: current.id, kind: "story" })}>Delete story</button>
           ) : null}
         </div>
+        {viewer?.id === current.author.id ? null : (
+          <>
+            <form className={styles.replyForm} aria-label="Reply to story" onSubmit={submitReply}>
+              <label className="visuallyHidden" htmlFor="story-reply">Reply to @{current.author.username}</label>
+              <textarea
+                id="story-reply"
+                className={styles.replyInput}
+                rows={1}
+                maxLength={1000}
+                placeholder={`Reply to @${current.author.username}…`}
+                value={replyDraft}
+                onFocus={() => setIsReplyFocused(true)}
+                onBlur={() => setIsReplyFocused(false)}
+                onChange={(event) => setReplyState({ userId, draft: event.target.value, notice: "" })}
+                onKeyDown={submitOnEnter}
+              />
+              <button className={styles.replyButton} type="submit" disabled={!replyDraft.trim() || reply.isPending}>
+                {reply.isPending ? "Sending…" : "Send"}
+              </button>
+            </form>
+            {replyNotice ? <p className={styles.replyNotice} role="status">{replyNotice}</p> : null}
+            {reply.isError ? <p className={styles.replyError} role="alert">{readChatCryptoErrorMessage(reply.error) ?? readErrorMessageForDisplay(reply.error)}</p> : null}
+          </>
+        )}
         {viewers.data ? (
           <p className={styles.note}>{viewers.data.total.toLocaleString()} views{viewers.data.viewers.length > 0 ? ` · latest by @${viewers.data.viewers[0]?.username}` : ""}</p>
         ) : null}
