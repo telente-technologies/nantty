@@ -52,6 +52,10 @@ const LISTING_TIMINGS = [
   "Not sure yet",
 ];
 
+function doGet() {
+  return ContentService.createTextOutput("Nantty waitlist intake is ready.");
+}
+
 function doPost(event) {
   const values = event && event.parameter ? event.parameter : {};
   const allValues = event && event.parameters ? event.parameters : {};

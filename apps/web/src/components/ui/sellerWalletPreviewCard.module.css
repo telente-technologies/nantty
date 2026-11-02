@@ -1,11 +1,11 @@
 .card {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-3);
   width: 100%;
-  max-width: 300px;
-  padding: var(--space-5);
-  border-radius: var(--radius-medium);
-  background: var(--surface-paper);
+  max-width: 330px;
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border-radius: 22px;
+  background: linear-gradient(155deg, var(--surface-paper) 0%, color-mix(in srgb, var(--surface-paper) 90%, var(--fill-brand)) 100%);
   color: var(--ink-strong);
   box-shadow: var(--shadow-lift), inset 0 0 0 1px var(--line-hairline);
 }
@@ -19,8 +19,28 @@
   font-weight: 600;
 }
 
-.caption > span {
+.captionTitle {
+  font-weight: 750;
+}
+
+.previewTag {
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--fill-brand) 12%, transparent);
   color: var(--icon-brand);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.intro {
+  max-width: 31ch;
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .rows {
@@ -41,6 +61,7 @@
 .rowLabel {
   color: var(--ink-muted);
   font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .rowAmount {
@@ -53,17 +74,16 @@
 .rowNote {
   color: var(--ink-faint);
   font-size: 0.8rem;
+  line-height: 1.35;
 }
 
-.payoutButton {
-  display: grid;
-  place-items: center;
-  min-height: 44px;
-  border-radius: 12px;
-  background: var(--fill-brand);
-  color: var(--ink-on-fill);
-  font-size: 0.95rem;
-  font-weight: 600;
+.disclaimer {
+  margin: 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--divider);
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+  line-height: 1.4;
 }
 
 .hiddenBalanceNote {
@@ -73,6 +93,7 @@
   margin-left: auto;
   color: var(--ink-faint);
   font-weight: 500;
+  font-size: 0.7rem;
 }
 
 .caption > .hiddenBalanceNote > span {
