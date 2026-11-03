@@ -165,6 +165,7 @@ describe("price tables", () => {
 describe("admin page access", () => {
   const consoleRoot = join(sourceRoot, "app", "(console)");
   const pagePaths = listFiles(consoleRoot, (path) => path.endsWith("page.tsx")).map((file) => `/${relative(consoleRoot, file).replace(/\/?page\.tsx$/, "").replace(/\[[^\]]+\]/g, "sample")}`);
+  const accountsWorkspaceSource = readFileSync(join(sourceRoot, "components", "people", "accounts", "accountsWorkspace.tsx"), "utf8");
 
   it("every console page maps to a permission (deny by default)", () => {
     assert.ok(pagePaths.length > 40);
@@ -179,6 +180,24 @@ describe("admin page access", () => {
     assert.deepEqual(visible, ["/commerce/orders", "/support"]);
     assert.equal(doesAdminMeetPageRequirement(agent, findRequirementForPagePath("/commerce/payouts")!), false);
     assert.equal(doesAdminMeetPageRequirement(agent, findRequirementForPagePath("/users/sample")!), false);
+  });
+
+  it("lands revoke-only Accounts admins on the checkmark list they can access", () => {
+    const revokeOnly = { role: "ADMIN" as const, permissions: ["verification:revoke" as const] };
+    const accountsRequirement = findRequirementForPagePath("/accounts");
+    assert.ok(accountsRequirement);
+    assert.equal(doesAdminMeetPageRequirement(revokeOnly, accountsRequirement), true);
+
+    const canReadRoute = (path: string) => {
+      const route = findAdminApiRoute("GET", path)!;
+      assert.equal(route.requirement.kind, "anyOf");
+      return route.requirement.kind === "anyOf" && doesAdminMeetPageRequirement(revokeOnly, route.requirement.permissions);
+    };
+    assert.equal(canReadRoute("/admin/accounts/created"), false);
+    assert.equal(canReadRoute("/admin/checkmark-grants"), true);
+
+    assert.match(accountsWorkspaceSource, /getInitialAccountsTab\(can\("verification:grant"\)\)/);
+    assert.match(accountsWorkspaceSource, /return canGrant \? "CREATED" : "CHECKMARKS";/);
   });
 
   it("provides the requested assignable, scoped department profiles", () => {

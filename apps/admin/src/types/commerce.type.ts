@@ -183,6 +183,7 @@ export interface UndeliveredReviewRow {
   readonly shippedAt: string | null;
   readonly courierName: string;
   readonly trackingNumber: string;
+  readonly trackingUrl?: string | null;
 }
 
 export interface StaffEscrowDecisionResult {

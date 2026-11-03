@@ -16,7 +16,7 @@ let reviewRecords: MockReviewRecord[] | null = null;
 
 function readReviewRecords(): MockReviewRecord[] {
   reviewRecords ??= [
-    { escrowId: "esc_review_1", orderId: "ord_review_1", orderReference: "ZM-30117", buyerUserId: "usr_buyer_review_1", sellerUserId: "usr_seller_review_1", storeId: "sto_review_1", heldAmount: { amountMinor: 4_500_000, currency: "NGN" }, heldSince: daysAgo(33), reviewSince: daysAgo(3), shippedAt: daysAgo(31), courierName: "GIG Logistics", trackingNumber: "GIG-882104", status: "held" },
+    { escrowId: "esc_review_1", orderId: "ord_review_1", orderReference: "ZM-30117", buyerUserId: "usr_buyer_review_1", sellerUserId: "usr_seller_review_1", storeId: "sto_review_1", heldAmount: { amountMinor: 4_500_000, currency: "NGN" }, heldSince: daysAgo(33), reviewSince: daysAgo(3), shippedAt: daysAgo(31), courierName: "GIG Logistics", trackingNumber: "GIG-882104", trackingUrl: "https://www.giglogistics.com/track/GIG-882104", status: "held" },
     { escrowId: "esc_review_2", orderId: "ord_review_2", orderReference: "ZM-30244", buyerUserId: "usr_buyer_review_2", sellerUserId: "usr_seller_review_2", storeId: "sto_review_2", heldAmount: { amountMinor: 1_250_000, currency: "NGN" }, heldSince: daysAgo(31), reviewSince: daysAgo(1), shippedAt: null, courierName: "", trackingNumber: "", status: "held" },
     { escrowId: "esc_review_3", orderId: "ord_review_3", orderReference: "ZM-30391", buyerUserId: "usr_buyer_review_3", sellerUserId: "usr_seller_review_3", storeId: "sto_review_3", heldAmount: { amountMinor: 18_000, currency: "GHS" }, heldSince: daysAgo(30), reviewSince: daysAgo(0), shippedAt: null, courierName: "", trackingNumber: "", status: "held" },
   ];

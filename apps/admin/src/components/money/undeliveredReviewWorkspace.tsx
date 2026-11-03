@@ -20,6 +20,16 @@ import styles from "./money.module.css";
 
 type Decision = "release" | "refund";
 
+function safeTrackingUrl(value?: string | null): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname && !url.username && !url.password ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 const decisionCopy: Record<Decision, { title: string; confirm: string; toast: string; consequence: string }> = {
   release: { title: "Release to the seller", confirm: "Release payment", toast: "Released to the seller", consequence: "The seller is paid the order amount minus Nantty's fees. Use this only when the seller has shown the order was delivered." },
   refund: { title: "Refund the buyer", confirm: "Refund buyer", toast: "Refunded to the buyer", consequence: "The full amount goes back to the buyer and the seller is not paid." },
@@ -66,7 +76,21 @@ export function UndeliveredReviewWorkspace() {
     { key: "order", header: "Order", render: (row) => row.orderReference, isMono: true },
     { key: "amount", header: "Held", render: (row) => <span className={styles.amount}>{formatMoneyForDisplay(row.heldAmount)}</span>, align: "end" },
     { key: "parties", header: "Buyer / seller", render: (row) => <span className={styles.stack}><span className="mono">{row.buyerUserId}</span><span className={`mono ${styles.muted}`}>{row.sellerUserId}</span></span> },
-    { key: "shipping", header: "Shipping", render: (row) => (row.shippedAt ? <span className={styles.stack}><span>{row.courierName} <span className="mono">{row.trackingNumber}</span></span><span className={styles.muted}>shipped {formatRelativeTimeFromNow(row.shippedAt)}</span></span> : <span className={styles.muted}>Never marked shipped</span>) },
+    {
+      key: "shipping",
+      header: "Shipping",
+      render: (row) => {
+        if (!row.shippedAt) return <span className={styles.muted}>Never marked shipped</span>;
+        const trackingUrl = safeTrackingUrl(row.trackingUrl);
+        return (
+          <span className={styles.stack}>
+            <span>{row.courierName} <span className="mono">{row.trackingNumber}</span></span>
+            <span className={styles.muted}>shipped {formatRelativeTimeFromNow(row.shippedAt)}</span>
+            {trackingUrl ? <a href={trackingUrl} target="_blank" rel="noopener noreferrer">Open carrier tracking</a> : null}
+          </span>
+        );
+      },
+    },
     { key: "review", header: "In review", render: (row) => <span className={styles.muted}>{formatRelativeTimeFromNow(row.reviewSince)}</span> },
     { key: "actions", header: "Decision", render: (row) => <span className={styles.stack}><Button onClick={() => setPending({ row, decision: "release" })}>Release</Button><Button onClick={() => setPending({ row, decision: "refund" })}>Refund</Button></span>, align: "end" },
   ];

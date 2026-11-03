@@ -56,8 +56,8 @@ export function EmailTemplatesWorkspace() {
     <>
       <PageHeader
         area="Support"
-        title="Email templates"
-        description="Every email Nantty sends, rendered with sample data. Marketing emails carry an unsubscribe link; everything else links to notification settings."
+        title="Email template library"
+        description="Registered templates rendered with sample data. This library includes event-driven, scheduled and campaign templates; listing a template here does not mean its producer is active. Marketing emails carry an unsubscribe link; other templates follow their category's preference rules."
         meta={catalogue.data ? <span>{items.length} templates · {items.filter((item) => item.kind === "marketing").length} marketing</span> : null}
         actions={<EmailThemeToggle theme={theme} onChange={setTheme} />}
       />
