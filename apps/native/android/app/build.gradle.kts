@@ -1,16 +1,18 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
 val apiBaseUrl = providers.gradleProperty("nanttyApiBaseUrl")
     .orElse(providers.environmentVariable("NANTTY_API_BASE_URL"))
     .getOrElse("")
+val webAppBaseUrl = providers.gradleProperty("nanttyWebAppUrl")
+    .orElse(providers.environmentVariable("NANTTY_WEBAPP_URL"))
+    .getOrElse("https://web.nantty.com")
 
 android {
     namespace = "com.nantty.android"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.nantty.android"
@@ -19,6 +21,7 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         buildConfigField("String", "NANTTY_API_BASE_URL", "\"${apiBaseUrl.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
+        buildConfigField("String", "NANTTY_WEBAPP_URL", "\"${webAppBaseUrl.trimEnd('/').replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -31,7 +34,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
 }
 
 dependencies {
@@ -46,8 +48,10 @@ dependencies {
     implementation(libs.androidx.compose.adaptive)
     implementation(libs.androidx.glance)
     implementation(libs.androidx.glance.material3)
+    implementation(libs.androidx.work.runtime)
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)
+    testImplementation(libs.json.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso)
