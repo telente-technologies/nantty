@@ -71,7 +71,7 @@ export function registerReportMockHandlers(): void {
   });
 
   registerMockRoute("POST", "/ads/accounts/:accountId/reports/scheduled", (request) => {
-    const { account } = requireAccountAccess(request, "reports:view");
+    const { account } = requireAccountAccess(request, "reports:manage");
     const body = readJsonObjectBody(request);
     const name = readRequiredTrimmedString(body, "name", 100);
     const recipients = Array.isArray(body.recipients) ? body.recipients.filter((email): email is string => typeof email === "string").map((email) => email.trim().toLowerCase()) : [];
@@ -88,7 +88,7 @@ export function registerReportMockHandlers(): void {
   });
 
   registerMockRoute("DELETE", "/ads/accounts/:accountId/reports/scheduled/:scheduledReportId", (request) => {
-    const { account } = requireAccountAccess(request, "reports:view");
+    const { account } = requireAccountAccess(request, "reports:manage");
     const database = readMockDatabase();
     const report = findRecordInAccount(database.scheduledReports, account.id, request.params.scheduledReportId, "scheduled report");
     database.scheduledReports.splice(database.scheduledReports.indexOf(report), 1);

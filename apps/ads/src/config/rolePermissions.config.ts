@@ -8,12 +8,13 @@ export type AdsPermission =
   | "campaigns:manage"
   | "audiences:manage"
   | "reports:view"
+  | "reports:manage"
   | "billing:view"
   | "billing:manage"
   | "tools:manage";
 
 const permissionsByRole: Record<AdAccountRole, readonly AdsPermission[]> = {
-  admin: ["account:view", "account:manage", "members:manage", "campaigns:view", "campaigns:manage", "audiences:manage", "reports:view", "billing:view", "billing:manage", "tools:manage"],
+  admin: ["account:view", "account:manage", "members:manage", "campaigns:view", "campaigns:manage", "audiences:manage", "reports:view", "reports:manage", "billing:view", "billing:manage", "tools:manage"],
   advertiser: ["account:view", "campaigns:view", "campaigns:manage", "audiences:manage", "reports:view", "billing:view", "tools:manage"],
   analyst: ["account:view", "campaigns:view", "reports:view"],
   billing: ["account:view", "campaigns:view", "reports:view", "billing:view", "billing:manage"],
@@ -42,7 +43,7 @@ const accountResourcePermissions: readonly { readonly pattern: RegExp; readonly 
   { pattern: /^\/(campaigns|ad-sets|ads|creatives|content-sources|promotable-destinations|bulk-actions)(\/|$)/, read: "campaigns:view", write: "campaigns:manage" },
   { pattern: /^\/audiences(\/|$)/, read: "campaigns:view", write: "audiences:manage" },
   { pattern: /^\/estimates(\/|$)/, read: "campaigns:view", write: "campaigns:view" },
-  { pattern: /^\/reports\/scheduled(\/|$)/, read: "reports:view", write: "reports:view" },
+  { pattern: /^\/reports\/scheduled(\/|$)/, read: "reports:view", write: "reports:manage" },
   { pattern: /^\/reports(\/|$)/, read: "reports:view", write: "reports:view" },
   { pattern: /^\/billing(\/|$)/, read: "billing:view", write: "billing:manage" },
   { pattern: /^\/(members|invites)(\/|$)/, read: "account:view", write: "members:manage" },

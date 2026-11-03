@@ -5,6 +5,7 @@ import { useState } from "react";
 import { requestConfirmation } from "@nantty/web-kit";
 
 import { ScheduleReportDialog } from "@/components/reports/scheduleReportDialog";
+import { useAdAccount } from "@/components/session/adAccountProvider";
 import { useAdsSession } from "@/components/session/adsSessionProvider";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/feedback";
@@ -22,10 +23,12 @@ import styles from "./reportsPage.module.css";
 const frequencyLabels = { daily: "Daily", weekly: "Weekly", monthly: "Monthly" } as const;
 
 export function ScheduledReportsPanel({ accountId, breakdown, metrics }: { readonly accountId: string; readonly breakdown: ReportBreakdown; readonly metrics: readonly MetricKey[] }) {
+  const { canPerform } = useAdAccount();
   const session = useAdsSession();
   const { showToast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const canManageScheduledReports = canPerform("reports:manage");
   const scheduledQuery = useAdsQuery(() => reportsApi.listScheduledReports(accountId), `scheduled-${accountId}`);
 
   async function deleteScheduledReport(scheduledReportId: string, name: string) {
@@ -43,7 +46,7 @@ export function ScheduledReportsPanel({ accountId, breakdown, metrics }: { reado
   }
 
   return (
-    <Card title="Scheduled email reports" description="Sent as CSV attachments in the ad account's time zone." actions={<Button size="small" iconName="calendarDots16" onClick={() => setIsDialogOpen(true)}>Schedule report</Button>}>
+    <Card title="Scheduled email reports" description="Sent as CSV attachments in the ad account's time zone." actions={canManageScheduledReports ? <Button size="small" iconName="calendarDots16" onClick={() => setIsDialogOpen(true)}>Schedule report</Button> : undefined}>
       {scheduledQuery.errorMessage ? <ErrorState error={scheduledQuery.error} message={scheduledQuery.errorMessage} onRetry={scheduledQuery.reload} /> : null}
       {scheduledQuery.data && scheduledQuery.data.items.length === 0 ? <p className={styles.quietText}>No scheduled reports yet.</p> : null}
       <ul className={styles.scheduledList}>
@@ -56,11 +59,11 @@ export function ScheduledReportsPanel({ accountId, breakdown, metrics }: { reado
               </p>
               <p className={styles.quietText}>To {report.recipients.join(", ")}</p>
             </div>
-            <Button size="small" variant="ghost" iconName="trash24" aria-label={`Stop sending ${report.name}`} isLoading={deletingId === report.id} onClick={() => deleteScheduledReport(report.id, report.name)} />
+            {canManageScheduledReports ? <Button size="small" variant="ghost" iconName="trash24" aria-label={`Stop sending ${report.name}`} isLoading={deletingId === report.id} onClick={() => deleteScheduledReport(report.id, report.name)} /> : null}
           </li>
         ))}
       </ul>
-      {isDialogOpen ? (
+      {isDialogOpen && canManageScheduledReports ? (
         <ScheduleReportDialog
           accountId={accountId}
           isOpen={isDialogOpen}
