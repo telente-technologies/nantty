@@ -7,7 +7,7 @@ struct APISettingsView: View {
     private var validationMessage: String? {
         guard !apiBaseURL.isEmpty else { return nil }
         guard APIConfiguration(rawValue: apiBaseURL) != nil else {
-            return "Use HTTPS, or HTTP only for localhost during development."
+            return "Use HTTPS. Release builds allow only the configured API origin; HTTP is limited to loopback in Debug."
         }
         return nil
     }
@@ -34,7 +34,7 @@ struct APISettingsView: View {
             }
 
             Section("Widget") {
-                Text("The widget reads only the configured host name from this shared setting. It does not access account data or contact the backend.")
+                Text("The Orders widget never contacts the backend. While signed in, Nantty refreshes it and shares a small, private order summary with the widget extension.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
