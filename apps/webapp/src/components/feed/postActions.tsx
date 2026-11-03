@@ -64,6 +64,18 @@ export function PostActions({ post, saveTargetType, isOwnPost, isLiked, likeCoun
   return (
     <div className={styles.row}>
       <div className={styles.primaryActions}>
+        <button
+          type="button"
+          className={actionClassName("like", isLiked, lastToggledTone === "like")}
+          aria-pressed={isLiked}
+          aria-label={`${isLiked ? "Unlike" : "Like"}, ${describeCount(likeCount, "like", "likes")}`}
+          onClick={() => {
+            setLastToggledTone("like");
+            onToggleLike();
+          }}
+        >
+          <ActionContent icon={isLiked ? <LikeFilledActionIcon size={ICON_SIZE} /> : <LikeActionIcon size={ICON_SIZE} />} count={likeCount} />
+        </button>
         <Link href={`/post/${post.id}#comments`} className={actionClassName("reply")} aria-label={`Reply, ${describeCount(post.comments, "reply", "replies")}`}>
           <ActionContent icon={<ReplyActionIcon size={ICON_SIZE} />} count={post.comments} />
         </Link>
@@ -78,18 +90,6 @@ export function PostActions({ post, saveTargetType, isOwnPost, isLiked, likeCoun
           }}
         >
           <ActionContent icon={<RepostActionIcon size={ICON_SIZE} />} count={repostCount} />
-        </button>
-        <button
-          type="button"
-          className={actionClassName("like", isLiked, lastToggledTone === "like")}
-          aria-pressed={isLiked}
-          aria-label={`${isLiked ? "Unlike" : "Like"}, ${describeCount(likeCount, "like", "likes")}`}
-          onClick={() => {
-            setLastToggledTone("like");
-            onToggleLike();
-          }}
-        >
-          <ActionContent icon={isLiked ? <LikeFilledActionIcon size={ICON_SIZE} /> : <LikeActionIcon size={ICON_SIZE} />} count={likeCount} />
         </button>
         {isOwnPost ? (
           <Link href={`/analytics/post/${post.id}`} className={actionClassName("reply")} aria-label={`View post analytics, ${describeCount(post.views, "view", "views")}`}>

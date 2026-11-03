@@ -4,6 +4,16 @@
   gap: var(--space-4);
 }
 
+.mobileWalletPreview {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .mobileWalletPreview {
+    display: none;
+  }
+}
+
 .feedList {
   display: flex;
   flex-direction: column;

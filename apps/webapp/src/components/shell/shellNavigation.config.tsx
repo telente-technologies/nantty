@@ -11,6 +11,7 @@ import {
   LiveIcon,
   OrdersIcon,
   PlusIcon,
+  ScheduleIcon,
   SettingsIcon,
   SpacesIcon,
   StoreIcon,
@@ -45,6 +46,7 @@ export function buildSidebarNavigationGroups(isSignedIn: boolean, counts: ShellB
       { href: "/notifications", label: "Notifications", icon: <BellIcon />, badgeCount: counts.notifications },
       { href: "/orders", label: "Orders", icon: <OrdersIcon /> },
       { href: "/saved", label: "Saved", icon: <BookmarkIcon /> },
+      ...(isSignedIn ? [{ href: "/scheduled", label: "Scheduled", icon: <ScheduleIcon /> }] : []),
     ],
     [
       { href: "/creator", label: "Creator", icon: <CreatorIcon /> },

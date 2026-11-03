@@ -1,6 +1,7 @@
 import { ApiError } from "@/errors/api.error";
 import type { NewPostInput, Post, ProductSummary, TagCandidate } from "@/types";
 
+import { findOwnedProfileOfSignedInUser } from "./brands.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { convertMediaAssetToPostMedia, currentMediaAsset } from "./media.mock";
 import { mockPostsState } from "./postCatalog.mock";
@@ -59,11 +60,17 @@ export function createMockPostFromInput(input: NewPostInput): Post {
     const user = directoryUsersExcludingAccounts.find((candidate) => candidate.id === userId);
     return user ? [{ id: user.id, username: user.username, displayName: user.name, avatarUrl: user.avatarUrl, checkmark: null }] : [];
   });
+  const actingProfile = input.asProfileId ? findOwnedProfileOfSignedInUser(input.asProfileId) : undefined;
+  if (input.asProfileId && !actingProfile) throw new ApiError(403, "You can't post as that profile", "FORBIDDEN");
+  const signedInUser = getSignedInMockUser();
   const sensitiveLabels = input.sensitiveLabels ?? [];
   const post: Post = {
     id: `p_new_${Date.now().toString(36)}_${nextPostNumber++}`,
     kind,
-    author: getSignedInMockUser(),
+    author: signedInUser,
+    ...(actingProfile && actingProfile.kind !== "person"
+      ? { postedAs: { id: actingProfile.id, kind: actingProfile.kind, name: actingProfile.name, handle: actingProfile.handle, avatarUrl: actingProfile.avatarUrl } }
+      : {}),
     createdAt: new Date().toISOString(),
     text: quote?.text ?? text,
     media,

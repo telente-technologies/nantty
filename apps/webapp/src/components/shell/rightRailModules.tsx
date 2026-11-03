@@ -16,6 +16,7 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import type { UserSummary } from "@/types";
 
 import styles from "./rightRail.module.css";
+import { walletSummaryQueryOptions } from "./walletSummaryQuery.util";
 
 function RailModuleSkeleton({ rows }: { readonly rows: number }) {
   return (
@@ -27,14 +28,25 @@ function RailModuleSkeleton({ rows }: { readonly rows: number }) {
   );
 }
 
-export function WalletSummaryModule() {
+export function WalletSummaryModule({ location = "rail" }: { readonly location?: "rail" | "home" }) {
   const { viewer } = useSession();
-  const walletQuery = useQuery({ queryKey: ["rail", "wallet"], queryFn: walletsService.fetchMyWalletSummary, retry: false, staleTime: 60_000 });
-  const coinsQuery = useQuery({ queryKey: ["rail", "coins"], queryFn: walletsService.fetchMyCoinBalance, retry: false, staleTime: 60_000 });
+  const titleId = location === "home" ? "home-wallet-title" : "rail-wallet-title";
+  const queryOptions = walletSummaryQueryOptions(viewer?.id ?? null);
+  const walletQuery = useQuery({ ...queryOptions.wallet, queryFn: walletsService.fetchMyWalletSummary });
+  const coinsQuery = useQuery({ ...queryOptions.coins, queryFn: walletsService.fetchMyCoinBalance });
+  if (viewer === null) {
+    return (
+      <section className={[styles.module, styles.walletModule].join(" ")} aria-labelledby={titleId}>
+        <h2 id={titleId} className={styles.moduleTitle}>Wallet</h2>
+        <p className={styles.mutedText}>Sign in to view your wallet balance, escrow, and coins.</p>
+        <Link href="/login" className={styles.moduleLink}>Sign in</Link>
+      </section>
+    );
+  }
   if (walletQuery.isError && coinsQuery.isError) return null;
   return (
-    <section className={[styles.module, styles.walletModule].join(" ")} aria-labelledby="rail-wallet-title">
-      <h2 id="rail-wallet-title" className={styles.moduleTitle}>
+    <section className={[styles.module, styles.walletModule].join(" ")} aria-labelledby={titleId}>
+      <h2 id={titleId} className={styles.moduleTitle}>
         Wallet
       </h2>
       {walletQuery.isLoading ? (

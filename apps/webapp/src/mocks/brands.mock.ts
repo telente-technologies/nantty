@@ -31,6 +31,10 @@ function listProfilesOfSignedInUser(): ActingProfile[] {
   return [person, ...storeProfile, ...brandProfiles];
 }
 
+export function findOwnedProfileOfSignedInUser(profileId: string): ActingProfile | undefined {
+  return listProfilesOfSignedInUser().find((profile) => profile.id === profileId);
+}
+
 export const brandsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/brands", ({ query }) => {
     const term = (query.get("q") ?? "").trim().toLowerCase();
@@ -69,7 +73,7 @@ export const brandsMocks: MockRoute[] = [
   }),
   createMockRoute("PUT", "/api/v1/users/me/acting-profile", ({ body }) => {
     const { profileId } = body as { profileId: string };
-    const profile = listProfilesOfSignedInUser().find((candidate) => candidate.id === profileId);
+    const profile = findOwnedProfileOfSignedInUser(profileId);
     if (!profile) throw new ApiError(403, "You can't act as that profile");
     actingProfileIdByUserId.set(getSignedInMockUser().id, profile.id);
     return profile;

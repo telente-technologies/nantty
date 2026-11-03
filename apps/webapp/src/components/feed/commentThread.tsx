@@ -1,6 +1,7 @@
 "use client";
 
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState } from "react";
 
 import { ReportDialog } from "@/components/actions/reportDialog";
@@ -8,13 +9,17 @@ import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { useSession } from "@/components/providers/sessionProvider";
 import { AppIcon } from "@/components/ui/appIcon";
 import { HeartIcon } from "@/components/ui/icons";
-import { Avatar } from "@/components/ui/media";
+import { Avatar, MediaImage } from "@/components/ui/media";
 import { showToast } from "@/components/ui/toast";
 import { commentsService } from "@/services/webActions.service";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
 import type { Comment, CommentWithReplies } from "@/types";
+import { CheckmarkBadge } from "@/components/verification/checkmarkBadge";
 
 import { MentionText } from "@/components/mentions/mentionText";
+import { commentVideoReplyHref } from "@/utils/commentVideoReply.util";
+import { describeCommentLikeAccessibility } from "./commentLikeAccessibility.util";
+import { commentVerificationColor } from "./commentVerificationColor.util";
 
 import { CommentComposer } from "./commentComposer";
 import styles from "./commentsPanel.module.css";
@@ -27,9 +32,10 @@ interface CommentRowProps {
   readonly isReply: boolean;
   readonly connectBelow?: boolean;
   readonly onReply: (comment: Comment) => void;
+  readonly onReplyWithVideo?: (comment: Comment) => void;
 }
 
-function CommentRow({ comment, postId, postAuthorId, isReply, connectBelow = false, onReply }: CommentRowProps) {
+function CommentRow({ comment, postId, postAuthorId, isReply, connectBelow = false, onReply, onReplyWithVideo }: CommentRowProps) {
   const { viewer } = useSession();
   const queryClient = useQueryClient();
   const [isLiked, setIsLiked] = useState(comment.liked);
@@ -87,16 +93,22 @@ function CommentRow({ comment, postId, postAuthorId, isReply, connectBelow = fal
   const isOwnComment = viewer?.id === comment.author.id;
   const canHide = postAuthorId !== undefined && viewer?.id === postAuthorId && !isOwnComment;
   const isPostAuthor = comment.isPostAuthor ?? (postAuthorId !== undefined && comment.author.id === postAuthorId);
+  const displayName = comment.postedAs?.name ?? comment.author.name;
+  const displayAvatar = comment.postedAs?.avatarUrl ?? comment.author.avatarUrl;
+  const verificationColor = commentVerificationColor(comment);
+  const likeAccessibility = describeCommentLikeAccessibility(isLiked, formatCountWithThousandsSuffix(likeCount), displayName);
 
   return (
     <div className={[styles.comment, isReply ? styles.reply : ""].join(" ")}>
       <span className={styles.avatarRail}>
-        <Avatar name={comment.author.name} src={comment.author.avatarUrl} size={isReply ? "xs" : "sm"} />
+        <Avatar name={displayName} src={displayAvatar} size={isReply ? "xs" : "sm"} />
         {connectBelow ? <span className={styles.chainLine} aria-hidden="true" /> : null}
       </span>
       <div className={styles.commentBody}>
         <p className={styles.commentMeta}>
-          <strong>{comment.author.name}</strong>
+          <strong>{displayName}</strong>
+          {verificationColor ? <CheckmarkBadge color={verificationColor} /> : null}
+          {comment.postedAs ? <span className={styles.profileAttribution}>@{comment.postedAs.handle} · {comment.postedAs.kind}</span> : null}
           {isPostAuthor ? <span className={styles.authorBadge}>Author</span> : null}
           {optimisticPinned ? (
             <span className={styles.pinnedBadge} aria-label="Pinned by author">
@@ -108,13 +120,21 @@ function CommentRow({ comment, postId, postAuthorId, isReply, connectBelow = fal
         <p className={styles.commentText}>
           <MentionText text={comment.text} mentions={comment.mentions} />
         </p>
+        {comment.videoReplies?.[0] ? (
+          <Link className={styles.videoReplyChip} href={commentVideoReplyHref(comment.videoReplies[0])} aria-label="Replied with video, open the reply">
+            <span className={styles.videoReplyThumbnail}>
+              <MediaImage src={comment.videoReplies[0].thumbnailUrl} alt="" sizes="28px" />
+            </span>
+            <span>Replied with video</span>
+          </Link>
+        ) : null}
         {comment.quotedPost || comment.quotedPostUnavailable ? <QuotedPostCard quoted={comment.quotedPost ?? null} unavailable={!comment.quotedPost} /> : null}
         <div className={styles.commentActions}>
           <button
             type="button"
             className={[styles.commentAction, isLiked ? styles.commentActionActive : ""].join(" ")}
-            aria-pressed={isLiked}
-            aria-label={`Like comment by ${comment.author.name}`}
+            aria-pressed={likeAccessibility.pressed}
+            aria-label={likeAccessibility.label}
             onClick={() => requireAuthThen(() => likeMutation.mutate(!isLiked), "Sign in to like comments.")}
           >
             <HeartIcon size={14} /> {likeCount > 0 ? formatCountWithThousandsSuffix(likeCount) : null}
@@ -122,6 +142,11 @@ function CommentRow({ comment, postId, postAuthorId, isReply, connectBelow = fal
           <button type="button" className={styles.commentAction} onClick={() => requireAuthThen(() => onReply(comment), "Sign in to reply.")}>
             Reply
           </button>
+          {onReplyWithVideo && comment.postId === postId && !comment.id.startsWith("pending_") && !comment.videoReplyBlocked ? (
+            <button type="button" className={styles.commentAction} onClick={() => onReplyWithVideo(comment)}>
+              Reply with video
+            </button>
+          ) : null}
           {canPin ? (
             <button type="button" className={styles.commentAction} onClick={() => pinMutation.mutate()} disabled={pinMutation.isPending}>
               {optimisticPinned ? "Unpin" : "Pin"}
@@ -154,12 +179,14 @@ function CommentBranch({
   postAuthorId,
   previewPool,
   nestingLevel,
+  onReplyWithVideo,
 }: {
   readonly comment: Comment;
   readonly postId: string;
   readonly postAuthorId?: string;
   readonly previewPool: readonly Comment[];
   readonly nestingLevel: number;
+  readonly onReplyWithVideo?: (comment: Comment) => void;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [replyTarget, setReplyTarget] = useState<Comment | null>(null);
@@ -182,7 +209,7 @@ function CommentBranch({
 
   return (
     <div className={styles.thread} style={branchIndent ? { marginLeft: branchIndent } : undefined}>
-      <CommentRow comment={comment} postId={postId} postAuthorId={postAuthorId} isReply={nestingLevel === 1} connectBelow={isChain && replies.length > 0} onReply={setReplyTarget} />
+      <CommentRow comment={comment} postId={postId} postAuthorId={postAuthorId} isReply={nestingLevel === 1} connectBelow={isChain && replies.length > 0} onReply={setReplyTarget} onReplyWithVideo={onReplyWithVideo} />
       {replies.map((reply) => (
         <CommentBranch
           key={reply.id}
@@ -191,6 +218,7 @@ function CommentBranch({
           postAuthorId={postAuthorId}
           previewPool={previewPool}
           nestingLevel={nestingLevel + 1}
+          onReplyWithVideo={onReplyWithVideo}
         />
       ))}
       {canShowMore ? (
@@ -224,7 +252,7 @@ function CommentBranch({
   );
 }
 
-export function CommentThread({ comment, postId, postAuthorId }: { readonly comment: CommentWithReplies; readonly postId: string; readonly postAuthorId?: string }) {
+export function CommentThread({ comment, postId, postAuthorId, onReplyWithVideo }: { readonly comment: CommentWithReplies; readonly postId: string; readonly postAuthorId?: string; readonly onReplyWithVideo?: (comment: Comment) => void }) {
   return (
     <CommentBranch
       comment={comment}
@@ -232,6 +260,7 @@ export function CommentThread({ comment, postId, postAuthorId }: { readonly comm
       postAuthorId={postAuthorId}
       previewPool={comment.previewReplies}
       nestingLevel={0}
+      onReplyWithVideo={onReplyWithVideo}
     />
   );
 }

@@ -1,9 +1,9 @@
 import {
   ArrowRightIcon as PhArrowRight, ArrowSquareOutIcon, BookmarkSimpleIcon, CaretLeftIcon, ChartBarIcon, ChatCircleIcon, CheckCircleIcon as PhCheckCircle, CompassIcon as PhCompass, CopyIcon as PhCopy, CopyrightIcon as PhCopyright, DownloadSimpleIcon, EnvelopeIcon,
   ExportIcon, FileTextIcon, FlagIcon as PhFlag, GearIcon, GiftIcon as PhGift, HeartIcon as PhHeart, LinkSimpleIcon as PhLinkSimple, MonitorIcon as PhMonitor, MoonIcon as PhMoon, PackageIcon as PhPackage,
-  PaperPlaneTiltIcon, PauseIcon as PhPause, PhoneIcon as PhPhone, ProhibitIcon as PhProhibit, PushPinIcon as PhPushPin, QuotesIcon, RepeatIcon, ShieldCheckIcon, SignInIcon as PhSignIn, SignOutIcon, SpeakerHighIcon as PhSpeakerHigh, SpeakerXIcon as PhSpeakerX, SunIcon as PhSun, TrendUpIcon,
+  PaperPlaneTiltIcon, PauseIcon as PhPause, PhoneIcon as PhPhone, ProhibitIcon as PhProhibit, PushPinIcon as PhPushPin, QuotesIcon, ShieldCheckIcon, SignInIcon as PhSignIn, SignOutIcon, SpeakerHighIcon as PhSpeakerHigh, SpeakerXIcon as PhSpeakerX, SunIcon as PhSun, TrendUpIcon,
   UsersIcon, WalletIcon as PhWallet, WarningIcon, BellIcon as PhBell, BellRingingIcon, BellSlashIcon, UserMinusIcon,
-  ArrowClockwiseIcon, ArrowCounterClockwiseIcon, CornersInIcon, CornersOutIcon, MicrophoneIcon as PhMicrophone, StopIcon as PhStop,
+  ArrowClockwiseIcon, ArrowCounterClockwiseIcon, CalendarDotsIcon as PhCalendarDots, CornersInIcon, CornersOutIcon, MicrophoneIcon as PhMicrophone, StopIcon as PhStop,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon, IconProps as PhosphorIconProps, IconWeight } from "@phosphor-icons/react";
 
@@ -63,6 +63,7 @@ export const ClipsIcon = createFigmaIcon("flips34");
 export const GiftIcon = createFigmaIcon("gift24");
 export const LiveIcon = createFigmaIcon("videoCamera24");
 export const SpacesIcon = createFigmaIcon("headset24");
+export const ScheduleIcon = createIcon(PhCalendarDots);
 export const PlayIcon = createFigmaIcon("play24");
 export const OrdersIcon = createFigmaIcon("truck24");
 export const CreatorIcon = createFigmaIcon("cameraBolt24");
@@ -86,7 +87,7 @@ export const WalletIcon = createIcon(PhWallet);
 export const ArrowRightIcon = createIcon(PhArrowRight);
 
 export const ReplyActionIcon = createIcon(ChatCircleIcon);
-export const RepostActionIcon = createIcon(RepeatIcon);
+export { RepostActionIcon } from "@/components/feed/repostActionIcon";
 export const QuoteActionIcon = createIcon(QuotesIcon);
 export const LikeActionIcon = createIcon(PhHeart);
 export const LikeFilledActionIcon = createIcon(PhHeart, "fill");

@@ -124,12 +124,37 @@ a.name:hover {
 
 .media {
   position: relative;
+  display: block;
+  width: 100%;
   max-height: 420px;
   margin-top: var(--space-2);
   overflow: hidden;
   border: 1px solid var(--divider);
   border-radius: var(--radius-large);
   background: var(--surface-sunken);
+}
+
+.mediaButton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-large);
+  background: transparent;
+  text-align: left;
+  cursor: zoom-in;
+}
+
+.mediaButton:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.mediaPreview {
+  display: block;
+  width: 100%;
+  max-height: min(75dvh, 960px);
+  object-fit: contain;
 }
 
 .actions {

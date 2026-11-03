@@ -85,7 +85,6 @@ export const creatorProgramMocks: MockRoute[] = [
     const input = body as CreatorApplicationInput;
     if (input.contentCategories.length === 0) throw new ApiError(422, "Pick at least one content category");
     if (!input.acceptedCreatorTermsVersion) throw new ApiError(422, "Accept the Creator terms to continue");
-    if (!input.payoutAccountId) throw new ApiError(422, "Choose a payout account");
     const eligibility = buildEligibilityForSignedInUser();
     const application: CreatorApplication = {
       id: `ca_${Date.now()}`,

@@ -1,10 +1,11 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeProvider, type ThemePreference } from "@nantty/web-kit";
-import { Suspense, useCallback, useState, type ReactNode } from "react";
+import { isThemePreference, ThemeProvider, themeChangedEventName, useTheme, type ThemePreference } from "@nantty/web-kit";
+import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { isRetryableApiFailure, sendRequestToWebappServer } from "@/services/clientApi.service";
+import { usersService } from "@/services/users.service";
 
 import { WebappErrorExperienceProvider } from "@/components/errors/errorExperience.provider";
 import { ConsentBannerHost } from "@/components/privacy/consentBannerHost";
@@ -24,6 +25,35 @@ interface AppProvidersProps {
   readonly children: ReactNode;
 }
 
+function AccountThemePreferenceHydrator({ viewerId, markPreferenceAsHydrated }: { readonly viewerId: string; readonly markPreferenceAsHydrated: (preference: ThemePreference) => void }) {
+  const { setPreference } = useTheme();
+  const localChoiceVersionRef = useRef(0);
+
+  const applyAccountPreference = useCallback((preference: ThemePreference) => {
+    markPreferenceAsHydrated(preference);
+    setPreference(preference);
+  }, [markPreferenceAsHydrated, setPreference]);
+
+  useEffect(() => {
+    let active = true;
+    const choiceVersionAtRequest = localChoiceVersionRef.current;
+    const recordLocalChoice = () => { localChoiceVersionRef.current += 1; };
+    window.addEventListener(themeChangedEventName, recordLocalChoice);
+
+    void usersService.fetchMyAccountSettings().then((settings) => {
+      if (!active || localChoiceVersionRef.current !== choiceVersionAtRequest || !isThemePreference(settings.theme)) return;
+      applyAccountPreference(settings.theme);
+    }).catch(() => undefined);
+
+    return () => {
+      active = false;
+      window.removeEventListener(themeChangedEventName, recordLocalChoice);
+    };
+  }, [applyAccountPreference, viewerId]);
+
+  return null;
+}
+
 export function AppProviders({ viewer, csrfToken, themePreference, children }: AppProvidersProps) {
   const [queryClient] = useState(
     () =>
@@ -41,8 +71,16 @@ export function AppProviders({ viewer, csrfToken, themePreference, children }: A
   );
 
   const isSignedIn = viewer !== null;
+  const hydratedThemePreferenceRef = useRef<ThemePreference | null>(null);
+  const markPreferenceAsHydrated = useCallback((theme: ThemePreference) => {
+    hydratedThemePreferenceRef.current = theme;
+  }, []);
   const saveThemePreferenceToProfile = useCallback(
     async (theme: ThemePreference) => {
+      if (hydratedThemePreferenceRef.current === theme) {
+        hydratedThemePreferenceRef.current = null;
+        return;
+      }
       if (!isSignedIn) return;
       await sendRequestToWebappServer<void>("/api/v1/users/me/preferences", { method: "PATCH", body: { theme } });
     },
@@ -51,6 +89,7 @@ export function AppProviders({ viewer, csrfToken, themePreference, children }: A
 
   return (
     <ThemeProvider initialPreference={themePreference} onPreferenceChange={saveThemePreferenceToProfile}>
+      {viewer?.id ? <AccountThemePreferenceHydrator viewerId={viewer.id} markPreferenceAsHydrated={markPreferenceAsHydrated} /> : null}
       <QueryClientProvider client={queryClient}>
         <SessionProvider viewer={viewer} csrfToken={csrfToken}>
           <WebappErrorExperienceProvider>{children}</WebappErrorExperienceProvider>

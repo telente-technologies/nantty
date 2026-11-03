@@ -10,8 +10,10 @@ import { MentionText } from "@/components/mentions/mentionText";
 import { useSession } from "@/components/providers/sessionProvider";
 import { useSaveToggle } from "@/components/saves/useSaveToggle.hook";
 import { AppIcon } from "@/components/ui/appIcon";
+import { Dialog } from "@/components/ui/dialog";
 import { BookmarkActionIcon, BookmarkFilledActionIcon, LikeActionIcon, LikeFilledActionIcon, ReplyActionIcon, RepostActionIcon, ShareActionIcon } from "@/components/ui/icons";
 import { Avatar, MediaImage } from "@/components/ui/media";
+import { CheckmarkBadge } from "@/components/verification/checkmarkBadge";
 import { showToast } from "@/components/ui/toast";
 import { commentsService } from "@/services/webActions.service";
 import { postsService } from "@/services/posts.service";
@@ -20,6 +22,9 @@ import type { ThreadReply as ThreadReplyModel } from "@/types/postThread.type";
 import { formatCompactCount, formatTimeSincePosted } from "@/utils/formatDate.util";
 
 import { useThreadReplies } from "./postThread.hook";
+import { describeThreadReplyImagePreview } from "./threadReplyImagePreview.util";
+import { threadReplyAuthorProfileHref } from "./threadReplyAuthorProfile.util";
+import { commentVerificationColor } from "../commentVerificationColor.util";
 import { QuotedPostCard } from "../quotedPostCard";
 import styles from "./thread.module.css";
 import { describeCount } from "@/utils/countLabel.util";
@@ -43,6 +48,7 @@ function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildB
   const [isLiked, setIsLiked] = useState(reply.liked);
   const [likeCount, setLikeCount] = useState(reply.likes);
   const [shouldPopLike, setShouldPopLike] = useState(false);
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [pinOverride, setPinOverride] = useState<boolean | null>(null);
   const optimisticPinned = pinOverride ?? reply.isPinned === true;
@@ -99,6 +105,10 @@ function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildB
   });
   const isOwnReply = viewer?.id === reply.author.id;
   const canHide = postAuthorId !== undefined && viewer?.id === postAuthorId && !isOwnReply;
+  const displayName = reply.postedAs?.name ?? reply.author.name;
+  const displayAvatar = reply.postedAs?.avatarUrl ?? reply.author.avatarUrl;
+  const authorProfileHref = threadReplyAuthorProfileHref(reply.author.username, reply.postedAs);
+  const verificationColor = commentVerificationColor(reply);
 
   async function copyReplyLinkToClipboard() {
     try {
@@ -111,24 +121,22 @@ function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildB
   }
 
   return (
-    <article className={styles.row} aria-label={`Reply from ${reply.author.name}`}>
+    <article className={styles.row} aria-label={`Reply from ${displayName}`}>
       <div className={styles.rail} aria-hidden="true">
         <span className={[styles.lineAbove, hasParentAbove ? styles.lineVisible : ""].join(" ")} />
-        <Link href={`/${reply.author.username}`} tabIndex={-1}>
-          <Avatar name={reply.author.name} src={reply.author.avatarUrl} size="md" />
-        </Link>
+        {authorProfileHref ? (
+          <Link href={authorProfileHref} tabIndex={-1}>
+            <Avatar name={displayName} src={displayAvatar} size="md" />
+          </Link>
+        ) : <Avatar name={displayName} src={displayAvatar} size="md" />}
         <span className={[styles.lineBelow, hasChildBelow ? styles.lineVisible : ""].join(" ")} />
       </div>
       <div className={styles.body}>
         <p className={styles.meta}>
-          <Link href={`/${reply.author.username}`} className={styles.name}>
-            {reply.author.name}
-          </Link>
-          {reply.author.verified ? (
-            <span className={styles.verified} aria-label="Verified account">
-              <AppIcon name="check16" size={10} />
-            </span>
-          ) : null}
+          {reply.postedAs ? <strong className={styles.name}>{displayName}</strong> : (
+            <Link href={`/${reply.author.username}`} className={styles.name}>{displayName}</Link>
+          )}
+          {verificationColor ? <CheckmarkBadge color={verificationColor} /> : null}
           {reply.isPostAuthor ? <span className={styles.authorBadge}>Author</span> : null}
           {optimisticPinned ? (
             <span className={styles.pinnedBadge} aria-label="Pinned by author">
@@ -136,7 +144,7 @@ function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildB
             </span>
           ) : null}
           <span className={styles.handle}>
-            @{reply.author.username} · <time dateTime={reply.createdAt}>{formatTimeSincePosted(reply.createdAt)}</time>
+            {reply.postedAs ? `@${reply.postedAs.handle} · ${reply.postedAs.kind} · ` : `@${reply.author.username} · `}<time dateTime={reply.createdAt}>{formatTimeSincePosted(reply.createdAt)}</time>
           </span>
         </p>
         {showReplyingTo && reply.replyingTo ? (
@@ -149,9 +157,33 @@ function ThreadReplyRow({ reply, postId, postAuthorId, hasParentAbove, hasChildB
         </p>
         {reply.quotedPost || reply.quotedPostUnavailable ? <QuotedPostCard quoted={reply.quotedPost ?? null} unavailable={!reply.quotedPost} /> : null}
         {firstImage ? (
-          <div className={styles.media} style={{ aspectRatio: firstImage.width && firstImage.height ? `${firstImage.width} / ${firstImage.height}` : "4 / 3" }}>
-            <MediaImage src={firstImage.url} alt={`Image in ${reply.author.name}'s reply`} sizes="(max-width: 768px) 80vw, 520px" />
-          </div>
+          <>
+            <button
+              type="button"
+              className={styles.mediaButton}
+              aria-label={describeThreadReplyImagePreview(displayName).buttonLabel}
+              onClick={() => setIsImagePreviewOpen(true)}
+            >
+              <span className={styles.media} style={{ aspectRatio: firstImage.width && firstImage.height ? `${firstImage.width} / ${firstImage.height}` : "4 / 3" }}>
+                <MediaImage src={firstImage.url} alt="" sizes="(max-width: 768px) 80vw, 520px" />
+              </span>
+            </button>
+            <Dialog
+              isOpen={isImagePreviewOpen}
+              onClose={() => setIsImagePreviewOpen(false)}
+              title={describeThreadReplyImagePreview(displayName).dialogTitle}
+              layout="centered"
+              size="large"
+              closeLabel="Close image preview"
+            >
+              <MediaImage
+                src={firstImage.url}
+                alt={describeThreadReplyImagePreview(displayName).imageAlt}
+                sizes="(max-width: 768px) 100vw, 960px"
+                className={styles.mediaPreview}
+              />
+            </Dialog>
+          </>
         ) : null}
         <div className={styles.actions}>
           <div className={styles.primaryActions}>

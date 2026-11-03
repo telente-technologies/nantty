@@ -48,6 +48,7 @@ export interface CommentWithReplies extends Comment {
 export interface NewCommentInput {
   readonly text: string;
   readonly parentCommentId?: ID;
+  readonly asProfileId?: ID;
 }
 
 export interface LiveSessionDetails extends LiveSession {
@@ -85,6 +86,7 @@ export interface NewPostInput {
   readonly text: string;
   readonly mediaIds: readonly ID[];
   readonly audience: PostAudience;
+  readonly asProfileId?: ID;
   readonly kind?: "post" | "clip";
   readonly media?: readonly ClipMediaInput[];
   readonly slideshow?: ClipSlideshowInput;
@@ -99,6 +101,13 @@ export interface NewPostInput {
   readonly taggedUserIds?: readonly ID[];
   readonly productIds?: readonly ID[];
   readonly quotedPostId?: ID | null;
+  readonly replyToComment?: ReplyToComment;
+}
+
+export interface ReplyToComment {
+  readonly commentId: ID;
+  readonly clipId: ID;
+  readonly commenterUserId: ID;
 }
 
 export interface TagCandidate {

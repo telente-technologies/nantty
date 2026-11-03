@@ -13,6 +13,7 @@ import { Avatar } from "@/components/ui/media";
 import { EmptyState, ErrorState, Skeleton, Spinner } from "@/components/ui/feedback";
 import { InlineLink } from "@/components/ui/controls";
 import { messagesService } from "@/services/messages.service";
+import { storiesService } from "@/services/stories.service";
 import { webappRealtime } from "@/services/realtime/webappRealtime.service";
 import { useRealtimeStatus } from "@nantty/web-kit/src/realtime/realtimeHooks";
 import { useQueries, useQuery } from "@tanstack/react-query";
@@ -25,8 +26,10 @@ import { AppIcon, type AppIconName } from "@/components/ui/appIcon";
 import { InboxRequestActions } from "./inboxRequestActions";
 import { groupAttributesQueryKey, useConversationDisplay } from "./conversationDisplay.hook";
 import { NewGroupDialog } from "./newGroupDialog";
+import { NewChannelDialog } from "./newChannelDialog";
 import { NewMessageDialog } from "./newMessageDialog";
 import { conversationUnreadCount, conversationUnreadLabel } from "./conversationUnreadLabel";
+import { buildInboxStoryItems } from "./inboxStoryTray.util";
 
 function ConversationRowLink({ conversation, isActive }: { readonly conversation: Conversation; readonly isActive: boolean }) {
   const display = useConversationDisplay(conversation);
@@ -115,6 +118,7 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
   const [search, setSearch] = useState("");
   const [isNewMessageOpen, setIsNewMessageOpen] = useState(false);
   const [isNewGroupOpen, setIsNewGroupOpen] = useState(false);
+  const [isNewChannelOpen, setIsNewChannelOpen] = useState(false);
   const isRealtime = useRealtimeStatus(webappRealtime) === "live";
 
   const conversationsQuery = useQuery({
@@ -122,6 +126,11 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
     queryFn: () => (folder === "chats" ? messagesService.fetchConversationList(filter) : messagesService.fetchInboxFolder(folder)),
     retry: false,
     refetchInterval: isRealtime ? 60_000 : 15_000,
+  });
+  const storyTrayQuery = useQuery({
+    queryKey: ["story-tray"],
+    queryFn: storiesService.fetchStoryTray,
+    retry: false,
   });
 
   const searchResults = useQuery({
@@ -158,6 +167,9 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
           <button type="button" className={styles.newMessage} aria-label="New group" onClick={() => setIsNewGroupOpen(true)}>
             <AppIcon name="userPlus24" size={20} />
           </button>
+          <button type="button" className={styles.newMessage} aria-label="New channel" onClick={() => setIsNewChannelOpen(true)}>
+            <AppIcon name="share24" size={20} />
+          </button>
           <button type="button" className={styles.newMessage} aria-label="New message" onClick={() => setIsNewMessageOpen(true)}>
             <AppIcon name="paperPlaneTilt24" size={20} />
           </button>
@@ -165,6 +177,24 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
       </div>
       <NewMessageDialog isOpen={isNewMessageOpen} onClose={() => setIsNewMessageOpen(false)} />
       <NewGroupDialog isOpen={isNewGroupOpen} onClose={() => setIsNewGroupOpen(false)} />
+      <NewChannelDialog isOpen={isNewChannelOpen} onClose={() => setIsNewChannelOpen(false)} />
+
+      {folder === "chats" ? (
+        <nav className={styles.storyTray} aria-label="Stories">
+          {buildInboxStoryItems(storyTrayQuery.data ?? []).map((item) => (
+            <Link key={item.key} className={styles.storyItem} href={item.href} aria-label={item.accessibleLabel}>
+              <span className={[styles.storyAvatar, item.hasUnseen ? styles.storyAvatarUnseen : ""].filter(Boolean).join(" ")}>
+                {item.isOwnStory ? (
+                  <AppIcon name="plus24" size={20} />
+                ) : (
+                  <Avatar name={item.name} src={item.avatarUrl} size="sm" />
+                )}
+              </span>
+              <span className={styles.storyName}>{item.name}</span>
+            </Link>
+          ))}
+        </nav>
+      ) : null}
 
       <div className={styles.toolbar}>
         <input

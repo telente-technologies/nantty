@@ -141,6 +141,7 @@ export interface Post {
   readonly id: ID;
   readonly kind: "post" | "clip";
   readonly author: UserSummary;
+  readonly postedAs?: { readonly id: ID; readonly kind: string; readonly name: string; readonly handle: string; readonly avatarUrl: string | null } | null;
   readonly createdAt: ISODate;
   readonly text: string;
   readonly media: readonly Media[];
@@ -224,12 +225,19 @@ export interface QuotedPostSummary {
   readonly createdAt: ISODate;
 }
 
+export interface CommentVideoReply {
+  readonly clipId: ID;
+  readonly thumbnailUrl: string | null;
+  readonly createdAt: ISODate;
+}
+
 export interface Comment {
   readonly id: ID;
   readonly postId: ID;
   readonly parentCommentId: ID | null;
   readonly rootCommentId: ID | null;
   readonly author: UserSummary;
+  readonly postedAs?: { readonly id: ID; readonly kind: string; readonly name: string; readonly handle: string; readonly avatarUrl: string | null; readonly checkmark?: VerificationColor | null } | null;
   readonly text: string;
   readonly createdAt: ISODate;
   readonly likes: number;
@@ -243,6 +251,8 @@ export interface Comment {
   readonly isPostAuthor?: boolean;
   readonly quotedPost?: QuotedPostSummary | null;
   readonly quotedPostUnavailable?: boolean;
+  readonly videoReplies?: readonly CommentVideoReply[];
+  readonly videoReplyBlocked?: boolean;
 }
 
 export interface CommentHiddenState {

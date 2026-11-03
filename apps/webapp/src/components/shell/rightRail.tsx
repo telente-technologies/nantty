@@ -5,7 +5,7 @@ import styles from "./rightRail.module.css";
 import type { RightRailModuleName } from "./shellLayout.config";
 
 const railModuleComponents: Record<RightRailModuleName, () => React.ReactNode> = {
-  wallet: WalletSummaryModule,
+  wallet: () => <WalletSummaryModule />,
   suggestedAccounts: SuggestedAccountsModule,
   trending: TrendingModule,
   cartSummary: CartSummaryModule,

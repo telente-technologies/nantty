@@ -3,10 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 
-import { OfficialStoreBadges } from "@nantty/web-kit";
-
 import { SubscriptionPlansSection } from "@/components/creator/subscriptionPlansSection";
-import { storeLinks } from "@/config/brandContact.config";
+import { InlineLink } from "@/components/ui/controls";
 import { ErrorState } from "@/components/ui/feedback";
 import { AnalyticsIcon } from "@/components/ui/icons";
 import { creatorProgramService } from "@/services/creatorProgram.service";
@@ -41,8 +39,8 @@ export default function CreatorDashboardPage() {
       <EmptyState
         icon={<CreatorIcon size={28} />}
         title="Join the Creator Program"
-        description="Approved creators can go live, earn from gifts and subscriptions, and see their analytics here. Apply in the Nantty app: Profile, then Creator Program."
-        action={<OfficialStoreBadges links={storeLinks} align="center" />}
+        description="Approved creators can go live, earn from gifts and subscriptions, and see their analytics here. Explore the Creator Program to review eligibility and apply."
+        action={<InlineLink href="/creator/program">Explore the Creator Program</InlineLink>}
       />
     );
   }

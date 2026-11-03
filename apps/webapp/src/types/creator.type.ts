@@ -35,7 +35,7 @@ export interface CreatorApplicationInput {
   readonly contentCategories: readonly CreatorContentCategory[];
   readonly socialLinks: readonly CreatorSocialLink[];
   readonly sampleContentUrls: readonly string[];
-  readonly payoutAccountId: ID;
+  readonly payoutAccountId?: ID;
   readonly acceptedCreatorTermsVersion: string;
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
@@ -10,6 +10,8 @@ import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { MentionAutocompleteInput } from "@/components/mentions/mentionAutocompleteInput";
 import { commentsService } from "@/services/webActions.service";
+import { actingProfileService } from "@/services/actingProfile.service";
+import { commentableActingProfiles } from "@/utils/commentableActingProfiles.util";
 import type { Comment } from "@/types";
 import { maximumMentionsPerText } from "@/types/mentions.type";
 import { buildMentionEntitiesFromText, countMentionsInText, type MentionDraft } from "@/utils/mentions.util";
@@ -30,12 +32,16 @@ interface CommentComposerProps {
 export function CommentComposer({ postId, parentCommentId, replyingTo, onPosted, autoFocus = false }: CommentComposerProps) {
   const { viewer } = useSession();
   const queryClient = useQueryClient();
+  const [selectedProfileId, setSelectedProfileId] = useState<string | undefined>();
+  const profilesQuery = useQuery({ queryKey: ["users", "me", "profiles"], queryFn: actingProfileService.fetchMine, enabled: viewer !== null, retry: false, staleTime: 60_000 });
+  const commentProfiles = commentableActingProfiles(profilesQuery.data ?? []);
+  const selectedProfile = commentProfiles.find((profile) => profile.id === selectedProfileId);
   const [text, setText] = useState(replyingTo ? `@${replyingTo.username} ` : "");
   const [chosenMentions, setChosenMentions] = useState<readonly MentionDraft[]>(replyingTo ? [replyingTo] : []);
   const mentionCount = countMentionsInText(text, chosenMentions);
   const quote = useQuotedPostPreview(text);
   const postMutation = useMutation({
-    mutationFn: (commentText: string) => commentsService.addComment(postId, commentText, parentCommentId, buildMentionEntitiesFromText(commentText, chosenMentions), quote.quotedPostId),
+    mutationFn: (commentText: string) => commentsService.addComment(postId, commentText, parentCommentId, buildMentionEntitiesFromText(commentText, chosenMentions), quote.quotedPostId, selectedProfile?.id),
     onSuccess: (created) => {
       setText("");
       setChosenMentions([]);
@@ -57,7 +63,16 @@ export function CommentComposer({ postId, parentCommentId, replyingTo, onPosted,
   const inputId = `comment-input-${parentCommentId ?? postId}`;
   return (
     <form className={[styles.composer, parentCommentId ? styles.composerReply : ""].join(" ")} onSubmit={submitComment}>
-      <Avatar name={viewer?.name ?? "You"} src={viewer?.avatarUrl ?? null} size={parentCommentId ? "xs" : "sm"} />
+      <Avatar name={selectedProfile?.name ?? viewer?.name ?? "You"} src={selectedProfile?.avatarUrl ?? viewer?.avatarUrl ?? null} size={parentCommentId ? "xs" : "sm"} />
+      {viewer && commentProfiles.length > 0 ? (
+        <label className={styles.commentIdentity}>
+          <span className="visuallyHidden">Commenting as</span>
+          <select aria-label="Comment as" value={selectedProfile?.id ?? ""} onChange={(event) => setSelectedProfileId(event.target.value || undefined)}>
+            <option value="">Comment as {viewer.username ? `@${viewer.username}` : viewer.name}</option>
+            {commentProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name} · @{profile.handle}</option>)}
+          </select>
+        </label>
+      ) : null}
       <label htmlFor={inputId} className="visuallyHidden">
         {parentCommentId ? "Write a reply" : "Add a comment"}
       </label>

@@ -18,9 +18,10 @@ export interface InlineVideoPlayerProps {
   readonly videoClassName?: string;
   readonly label?: string;
   readonly documentShortcuts?: boolean;
+  readonly onError?: () => void;
 }
 
-export function InlineVideoPlayer({ src, poster, durationSeconds, className, videoClassName, label = "Video", documentShortcuts = false }: InlineVideoPlayerProps) {
+export function InlineVideoPlayer({ src, poster, durationSeconds, className, videoClassName, label = "Video", documentShortcuts = false, onError }: InlineVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const controls = useVideoControls({ videoRef, containerRef, sourceKey: src, fallbackDurationSeconds: durationSeconds ?? 0 });
@@ -50,6 +51,7 @@ export function InlineVideoPlayer({ src, poster, durationSeconds, className, vid
         poster={poster ?? undefined}
         preload="metadata"
         playsInline
+        onError={onError}
         onClick={fullscreen.isFullscreen ? controls.toggleControls : controls.togglePlay}
       />
       {playback.isPaused && !controls.isScrubbing && !fullscreen.isFullscreen ? (

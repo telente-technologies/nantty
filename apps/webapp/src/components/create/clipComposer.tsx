@@ -14,7 +14,7 @@ import { showToast } from "@/components/ui/toast";
 import { createIdempotencyKey, readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { composerService } from "@/services/composer.service";
 import { contentPreferencesService } from "@/services/contentPreferences.service";
-import type { ClipTransition, ID } from "@/types";
+import type { ClipTransition, ID, ReplyToComment } from "@/types";
 import {
   buildClipCreateFields, clampPhotoSeconds, clampTrim, CLIP_LOOK_LABELS, CLIP_LOOKS, defaultTrimFor, EMPTY_CLIP_EDITS, formatClipSeconds, readClipSource, secondsForPhoto, totalClipSeconds, validateClipDraft, type ClipEdits,
 } from "@/utils/clipDraft.util";
@@ -31,7 +31,7 @@ import { SoundPicker } from "./soundPicker";
 const CLIP_CAPTION_LIMIT = 2200;
 const acceptedClipMedia = [...ALLOWED_VIDEO_MIME_TYPES, ...ALLOWED_IMAGE_MIME_TYPES].join(",");
 
-export function ClipComposer({ initialSoundId }: { readonly initialSoundId: ID | null }) {
+export function ClipComposer({ initialSoundId, replyToComment }: { readonly initialSoundId: ID | null; readonly replyToComment?: ReplyToComment }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const viewerId = useSession().viewer?.id ?? "";
@@ -85,6 +85,7 @@ export function ClipComposer({ initialSoundId }: { readonly initialSoundId: ID |
         mediaIds,
         audience: "everyone",
         kind: "clip",
+        ...(replyToComment ? { replyToComment } : {}),
         mentions: buildMentionEntitiesFromText(text, settings.mentions),
         replyPolicy: settings.replyPolicy,
         visibility: settings.visibility,

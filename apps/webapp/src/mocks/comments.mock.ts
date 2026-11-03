@@ -9,6 +9,7 @@ import { chooseMockChain, mockPostAuthorId, rankMockTopLevelComments, resolveMoc
 import { quotedSummaryFromPost } from "@/utils/quotedPostLinks.util";
 import { isQuoteThreadItem, type QuoteThreadItem } from "@/types/postThread.type";
 import { mergeQuotesIntoRankedComments, mockQuoteItemsFor, newestQuotesFirst } from "./commentSectionQuotes.mock";
+import { findOwnedProfileOfSignedInUser } from "./brands.mock";
 
 const TOP_LEVEL_PAGE_SIZE = 6;
 const REPLIES_PAGE_SIZE = 4;
@@ -202,13 +203,15 @@ export const commentsMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/posts/:postId/comments", ({ params, body }) => {
     const postId = params.postId!;
-    const input = body as { text: string; parentCommentId?: string; mentions?: unknown; quotedPostId?: string | null };
+    const input = body as { text: string; parentCommentId?: string; mentions?: unknown; quotedPostId?: string | null; asProfileId?: string };
     const targetPost = mockPostsState.get(postId);
     if (targetPost?.viewerCanReply === false && targetPost.author.id !== me.id) throw new ApiError(403, targetPost.replyRestriction?.message ?? "You can't reply to this post.", targetPost.replyRestriction?.reason ?? "REPLIES_OFF");
     const parent = input.parentCommentId ? (findCommentAnywhere(input.parentCommentId) ?? null) : null;
     const quote = resolveMockQuote(input.text, input.quotedPostId);
     const text = quote?.text ?? input.text;
-    const stored = { ...createStoredComment(postId, me, text, parent, 0, 0), mentions: keepAllowedMentionEntities(text, input.mentions) };
+    const profile = input.asProfileId ? findOwnedProfileOfSignedInUser(input.asProfileId) : undefined;
+    if (input.asProfileId && (!profile || !["business", "brand", "store"].includes(profile.kind) || profile.onHold)) throw new ApiError(404, "Profile not found.", "PROFILE_NOT_FOUND");
+    const stored = { ...createStoredComment(postId, me, text, parent, 0, 0), ...(profile ? { postedAs: { id: profile.id, kind: profile.kind, name: profile.name, handle: profile.handle, avatarUrl: profile.avatarUrl } } : {}), mentions: keepAllowedMentionEntities(text, input.mentions) };
     const created = withMockQuoteState(quote ? { ...stored, quotedPost: quotedSummaryFromPost(quote.original) } : stored, targetPost?.author.id);
     const comments = commentsForPost(postId);
     commentsByPostId.set(postId, parent ? [...comments, created] : [created, ...comments]);

@@ -43,10 +43,10 @@ export interface AccountEmailStatus {
 export const commentsService = {
   fetchReplies: (commentId: ID, cursor: string | null | undefined) =>
     sendRequestToWebappServer<Page<Comment>>(`/api/v1/comments/${commentId}/replies`, { query: { cursor: cursor ?? undefined } }),
-  addComment: (postId: ID, text: string, parentCommentId: ID | undefined, mentions: readonly MentionEntity[], quotedPostId?: ID | null) =>
+  addComment: (postId: ID, text: string, parentCommentId: ID | undefined, mentions: readonly MentionEntity[], quotedPostId?: ID | null, asProfileId?: ID) =>
     sendRequestToWebappServer<Comment>(`/api/v1/posts/${postId}/comments`, {
       method: "POST",
-      body: { text, parentCommentId, mentions, ...(quotedPostId === undefined ? {} : { quotedPostId }) },
+      body: { text, parentCommentId, mentions, ...(quotedPostId === undefined ? {} : { quotedPostId }), ...(asProfileId === undefined ? {} : { asProfileId }) },
       idempotencyKey: createIdempotencyKey("comment"),
     }),
   likeComment: (commentId: ID) => sendRequestToWebappServer<void>(`/api/v1/comments/${commentId}/like`, { method: "POST" }),

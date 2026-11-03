@@ -1,0 +1,22 @@
+.page { display: flex; flex-direction: column; gap: var(--space-4); max-width: 760px; margin-inline: auto; padding: var(--space-4); }
+.header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.eyebrow { color: var(--text-muted); font-size: var(--text-xs); font-weight: 700; letter-spacing: .08em; margin: 0 0 var(--space-1); text-transform: uppercase; }
+.title { font-size: var(--text-xl); font-weight: 800; margin: 0; }
+.subtitle { color: var(--text-muted); font-size: var(--text-sm); line-height: 1.5; margin: var(--space-1) 0 0; max-width: 56ch; }
+.list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--divider); border-radius: var(--radius-lg); overflow: hidden; }
+.card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border-bottom: 1px solid var(--divider); background: var(--surface); }
+.card:last-child { border-bottom: 0; }
+.postBody { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.status, .failedStatus, .failure, .postText, .mediaCount, .error { margin: 0; }
+.status { color: var(--primary); font-size: var(--text-sm); font-weight: 700; }
+.failedStatus, .error { color: var(--danger, #b91c1c); font-size: var(--text-sm); font-weight: 700; }
+.failure { color: var(--text-muted); font-size: var(--text-sm); line-height: 1.45; }
+.postText { white-space: pre-wrap; overflow-wrap: anywhere; }
+.mediaCount { color: var(--text-muted); font-size: var(--text-xs); }
+.actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.rescheduleForm { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); border-top: 1px solid var(--divider); padding-top: var(--space-3); }
+.dateLabel { font-size: var(--text-sm); font-weight: 650; }
+.dateInput { width: min(100%, 360px); min-height: 44px; border: 1px solid var(--divider); border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); color: inherit; background: var(--background); font: inherit; }
+.dateInput:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.loadMore { display: flex; justify-content: center; }
+@media (max-width: 520px) { .page { padding: var(--space-3); } .actions > button { flex: 1 1 42%; } }

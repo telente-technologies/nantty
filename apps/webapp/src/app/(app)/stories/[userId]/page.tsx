@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
@@ -12,6 +12,7 @@ import { readChatCryptoErrorMessage } from "@/services/chatCrypto/chatCrypto.ser
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { storiesService } from "@/services/stories.service";
 import { useAuthStore } from "@/store/auth.store";
+import { getStoryTrayNeighbors } from "@/utils/storyTrayNavigation.util";
 
 import { ErrorState } from "@/components/ui/feedback";
 import { Avatar } from "@/components/ui/media";
@@ -23,8 +24,13 @@ export default function StoryViewerPage() {
   const params = useParams<{ userId: string }>();
   const userId = params.userId;
   const stories = useQuery({ queryKey: ["stories", userId], queryFn: () => storiesService.fetchStoriesForUser(userId) });
+  const storyTray = useQuery({ queryKey: ["story-tray"], queryFn: storiesService.fetchStoryTray });
   const [storyPosition, setStoryPosition] = useState({ userId, index: 0 });
-  const index = storyPosition.userId === userId ? storyPosition.index : 0;
+  const [startAtLastUserId, setStartAtLastUserId] = useState<string | null>(null);
+  const list = stories.data ?? [];
+  const index = storyPosition.userId === userId
+    ? storyPosition.index
+    : startAtLastUserId === userId ? Math.max(list.length - 1, 0) : 0;
   const [replyState, setReplyState] = useState({ userId, draft: "", notice: "" });
   const [isReplyFocused, setIsReplyFocused] = useState(false);
   const replyDraft = replyState.userId === userId ? replyState.draft : "";
@@ -34,8 +40,32 @@ export default function StoryViewerPage() {
   const { confirmAndDelete, isDeleting } = useDeleteOwnPost({ onDeleted: () => {
     if ((stories.data ?? []).length === 0) router.replace("/stories");
   } });
-  const list = stories.data ?? [];
   const current = list[Math.min(index, Math.max(list.length - 1, 0))];
+  const tray = storyTray.data ?? [];
+  const { previous: previousStoryUser, next: nextStoryUser } = getStoryTrayNeighbors(tray, userId);
+  const goToNextStory = useCallback(() => {
+    if (index < list.length - 1) {
+      setStoryPosition({ userId, index: index + 1 });
+      return;
+    }
+    if (storyTray.isLoading) return;
+    if (nextStoryUser) {
+      setStartAtLastUserId(null);
+      router.replace(`/stories/${encodeURIComponent(nextStoryUser.user.id)}`);
+      return;
+    }
+    router.replace("/stories");
+  }, [index, list.length, nextStoryUser, router, storyTray.isLoading, userId]);
+  const goToPreviousStory = useCallback(() => {
+    if (index > 0) {
+      setStoryPosition({ userId, index: index - 1 });
+      return;
+    }
+    if (previousStoryUser) {
+      setStartAtLastUserId(previousStoryUser.user.id);
+      router.replace(`/stories/${encodeURIComponent(previousStoryUser.user.id)}`);
+    }
+  }, [index, previousStoryUser, router, userId]);
   const reply = useMutation({
     mutationFn: (variables: { readonly storyId: string; readonly authorId: string; readonly viewerId: string; readonly text: string }) =>
       storiesService.replyToStory(variables.storyId, variables.authorId, variables.viewerId, variables.text),
@@ -51,10 +81,10 @@ export default function StoryViewerPage() {
     }
   }, [current, viewer]);
   useEffect(() => {
-    if (list.length <= 1 || index >= list.length - 1 || isReplyFocused || reply.isPending) return;
-    const timer = window.setTimeout(() => setStoryPosition({ userId, index: Math.min(index + 1, list.length - 1) }), 8000);
+    if (!current || current.media.type === "video" || isReplyFocused || reply.isPending) return;
+    const timer = window.setTimeout(goToNextStory, 8000);
     return () => window.clearTimeout(timer);
-  }, [index, isReplyFocused, list.length, reply.isPending, userId]);
+  }, [current, goToNextStory, isReplyFocused, reply.isPending]);
   const viewers = useQuery({
     queryKey: ["stories", current?.id, "viewers"],
     queryFn: () => storiesService.fetchStoryViewers(current!.id),
@@ -96,13 +126,13 @@ export default function StoryViewerPage() {
           <span className={styles.rowMeta}>{new Date(current.createdAt).toLocaleString()}</span>
         </span>
         {isVideo && media.url ? (
-          <video className={styles.media} src={media.url} poster={media.posterUrl ?? undefined} controls autoPlay muted playsInline />
+          <video className={styles.media} src={media.url} poster={media.posterUrl ?? undefined} controls autoPlay muted playsInline onEnded={goToNextStory} />
         ) : media.url ? (
           <img className={styles.media} src={media.url} alt={`Story by ${current.author.username}`} />
         ) : null}
         <div className={styles.controls}>
-          <button type="button" className={styles.linkButton} disabled={index === 0} onClick={() => setStoryPosition({ userId, index: Math.max(index - 1, 0) })}>Previous</button>
-          <button type="button" className={styles.linkButton} disabled={index >= list.length - 1} onClick={() => setStoryPosition({ userId, index: Math.min(index + 1, list.length - 1) })}>Next</button>
+          <button type="button" className={styles.linkButton} disabled={index === 0 && !previousStoryUser} onClick={goToPreviousStory}>Previous</button>
+          <button type="button" className={styles.linkButton} disabled={index >= list.length - 1 && storyTray.isLoading} onClick={goToNextStory}>{index >= list.length - 1 ? nextStoryUser ? "Next person" : "Close stories" : "Next"}</button>
           <Link className={styles.linkButton} href="/stories">All stories</Link>
           {viewer?.id === current.author.id ? (
             <button type="button" className={styles.linkButton} disabled={isDeleting} onClick={() => void confirmAndDelete({ id: current.id, kind: "story" })}>Delete story</button>

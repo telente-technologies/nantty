@@ -120,6 +120,7 @@ function OrganicPostCard({ post, priority = false, swipeable = false, showPinned
               {post.author.verified ? <span className={styles.verified} aria-label="Verified account"><AppIcon name="check16" size={10} /></span> : null}
             </span>
             <span className={styles.authorMeta}>@{post.author.username}</span>
+            {post.postedAs ? <span className={styles.authorMeta}>Posted as {post.postedAs.name} · @{post.postedAs.handle}</span> : null}
           </span>
         </Link>
         {post.sponsored ? <span className={post.sponsored.label === "Boosted" ? styles.boosted : styles.sponsored}>{post.sponsored.label === "Boosted" ? <AppIcon name="rocketLaunch16" size={11} /> : null}{post.sponsored.label}</span> : null}

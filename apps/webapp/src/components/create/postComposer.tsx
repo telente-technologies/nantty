@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ImageIcon } from "@/components/ui/icons";
 import { showToast } from "@/components/ui/toast";
 import { useIsOnline } from "@/components/ui/onlineStatus.hook";
+import { actingProfileService } from "@/services/actingProfile.service";
 import { createIdempotencyKey, readErrorMessageForDisplay, WebappRequestError } from "@/services/clientApi.service";
 import { composerService } from "@/services/composer.service";
 import { contentPreferencesService } from "@/services/contentPreferences.service";
@@ -36,6 +37,12 @@ export function PostComposer({ quotePostId = null }: { readonly quotePostId?: st
   const queryClient = useQueryClient();
   const { viewer } = useSession();
   const viewerId = viewer?.id ?? "";
+  const actingProfile = useQuery({
+    queryKey: ["users", "me", "acting-profile"],
+    queryFn: actingProfileService.fetchCurrent,
+    enabled: viewerId !== "",
+    retry: false,
+  });
   const textId = useId();
   const counterId = useId();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -83,6 +90,7 @@ export function PostComposer({ quotePostId = null }: { readonly quotePostId?: st
         mediaIds,
         audience: draft.audience,
         kind: "post",
+        ...(actingProfile.data ? { asProfileId: actingProfile.data.id } : {}),
         mentions: buildMentionEntitiesFromText(text, draft.mentions),
         replyPolicy: draft.replyPolicy,
         visibility: draft.visibility,
@@ -110,7 +118,7 @@ export function PostComposer({ quotePostId = null }: { readonly quotePostId?: st
   });
 
   const isBusy = publish.isPending;
-  const canPublish = canPublishComposerDraft(draft, uploads.items.length, textLimit) && !uploads.hasFailedUploads && isOnline && !quote.isUnavailable;
+  const canPublish = canPublishComposerDraft(draft, uploads.items.length, textLimit) && !uploads.hasFailedUploads && isOnline && !quote.isUnavailable && actingProfile.data !== undefined;
   const hasUnsavedWork = uploads.items.length > 0 || publish.isPending;
 
   useEffect(() => {
@@ -172,6 +180,7 @@ export function PostComposer({ quotePostId = null }: { readonly quotePostId?: st
         </p>
       ) : null}
       {isOnline ? null : <p className={styles.offlineNotice} role="status">You&apos;re offline. Your draft is saved and uploads resume when you&apos;re back online.</p>}
+      {actingProfile.isLoading ? <p className={styles.profileContext} role="status">Confirming posting profile…</p> : actingProfile.data ? <p className={styles.profileContext}>Posting as <strong>{actingProfile.data.name}</strong> · @{actingProfile.data.handle}</p> : <p className={styles.fieldError} role="alert">We couldn&apos;t confirm your posting profile. Refresh the page before publishing.</p>}
       <MentionAutocompleteInput
         id={textId}
         multiline

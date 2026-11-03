@@ -1,6 +1,7 @@
 "use client";
 
 import { useModalFocusTrap } from "@nantty/web-kit";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
@@ -9,9 +10,11 @@ import { CommentComposer } from "@/components/feed/commentComposer";
 import { commentSectionFilterOptions, useCommentSection } from "@/components/feed/commentSection.hook";
 import { CommentThread } from "@/components/feed/commentThread";
 import { QuoteThreadItemRow } from "@/components/feed/thread/quoteThreadItem";
+import { useSession } from "@/components/providers/sessionProvider";
 import { UnderlineTabs } from "@/components/ui/underlineTabs";
 import { isQuoteThreadItem, type CommentSectionFilter } from "@/types/postThread.type";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
+import { buildClipVideoReplyTarget, clipVideoReplyHref } from "@/utils/clipVideoReply.util";
 
 import styles from "./page.module.css";
 
@@ -25,8 +28,11 @@ interface ClipCommentsSheetProps {
 
 export function ClipCommentsSheet({ postId, postAuthorId, totalComments, quoteCount, onClose }: ClipCommentsSheetProps) {
   const listRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
+  const { viewer } = useSession();
   const [chosenFilter, setFilter] = useState<CommentSectionFilter>("all");
   const hasQuotes = (quoteCount ?? 0) > 0;
+  const canStartVideoReply = !!postId && !!postAuthorId && viewer?.id === postAuthorId;
   const filter: CommentSectionFilter = hasQuotes ? chosenFilter : "all";
   const { query: commentsQuery, items: orderedComments, isRestartingFromTop } = useCommentSection(postId, filter, () => listRef.current?.scrollTo({ top: 0 }));
 
@@ -65,7 +71,10 @@ export function ClipCommentsSheet({ postId, postAuthorId, totalComments, quoteCo
           ) : (
             <>
               {orderedComments.map((item) =>
-                isQuoteThreadItem(item) ? <QuoteThreadItemRow key={`quote-${item.id}`} item={item} /> : <CommentThread key={item.id} comment={item} postId={postId} postAuthorId={postAuthorId} />,
+                isQuoteThreadItem(item) ? <QuoteThreadItemRow key={`quote-${item.id}`} item={item} /> : <CommentThread key={item.id} comment={item} postId={postId} postAuthorId={postAuthorId} onReplyWithVideo={canStartVideoReply ? (comment) => {
+                  const target = buildClipVideoReplyTarget(comment, postId);
+                  if (target) router.push(clipVideoReplyHref(target));
+                } : undefined} />,
               )}
               {commentsQuery.hasNextPage ? (
                 <button
