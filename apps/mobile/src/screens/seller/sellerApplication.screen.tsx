@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { ApplicationIdentityStep } from "@/components/seller/applicationIdentityStep";
 import { ApplicationPayoutStep } from "@/components/seller/applicationPayoutStep";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Header } from "@/components/ui/header";
 import { ProfileLimitGate } from "@/components/profile/profileLimitGate";
+import { useAccountSettingsQuery } from "@/components/settings/settingsQueries.hook";
 import { linkedProfilesQueryKey } from "@/hooks/useLinkedProfiles.hook";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -22,6 +23,7 @@ import { sellerService } from "@/services/sellers/seller.service";
 import type { SellerApplicationDraft, SellerApplicationInput } from "@/types/account.type";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { describeActionFailure } from "@/errors/errorExperience/describeError";
+import { getSellerApplicationCountryState, isSellerApplicationContactComplete } from "@/utils/sellerApplicationEligibility.util";
 
 const EMPTY_DRAFT: SellerApplicationDraft = {
   storeName: "", categoryId: "", description: "", phone: "", addressLine: "", city: "", state: "",
@@ -31,7 +33,7 @@ const EMPTY_DRAFT: SellerApplicationDraft = {
 
 const STEPS = [
   { title: "Tell us about your store", subtitle: "This is what buyers see first.", isComplete: (d: SellerApplicationDraft) => d.storeName.trim().length >= 3 && !!d.categoryId && d.description.trim().length >= 20 },
-  { title: "How can buyers and couriers reach you?", subtitle: "We use this for pickups and order updates.", isComplete: (d: SellerApplicationDraft) => d.phone.replace(/\D/g, "").length >= 10 && !!d.addressLine.trim() && !!d.city.trim() && !!d.state },
+  { title: "How can buyers and couriers reach you?", subtitle: "We use this for pickups and order updates.", isComplete: isSellerApplicationContactComplete },
   { title: "Verify your identity", subtitle: "Required by law so buyers can trust every seller. Your ID number is never shown in full.", isComplete: (d: SellerApplicationDraft) => !!d.identityDocumentType && d.identityDocumentNumber.length >= 6 && !!d.identityDocumentPhotoUrl },
   { title: "Where should we pay you?", subtitle: "Money released from escrow is sent here.", isComplete: (d: SellerApplicationDraft) => !!d.payoutBankCode && d.payoutAccountNumber.length === 10 && !!d.payoutAccountName },
   { title: "Review and submit", subtitle: "Tap any row to change it.", isComplete: () => true },
@@ -57,6 +59,7 @@ export function SellerApplicationScreen({ navigation }: MainScreenProps<"SellerA
   const [uploadingDocument, setUploadingDocument] = useState(false);
   const idempotencyKeyForThisApplication = useRef(generateIdempotencyKey());
   const existingApplication = useQuery({ queryKey: sellerQueryKeys.application, queryFn: sellerService.fetchMySellerApplication });
+  const accountSettings = useAccountSettingsQuery();
 
   useEffect(() => {
     if (existingApplication.data?.status === "pending") navigation.replace("SellerApplicationStatus");
@@ -77,11 +80,43 @@ export function SellerApplicationScreen({ navigation }: MainScreenProps<"SellerA
   const isLastStep = stepIndex === STEPS.length - 1;
   const goBackOneStep = () => (stepIndex === 0 ? navigation.goBack() : setStepIndex(stepIndex - 1));
 
-  if (existingApplication.isLoading) {
+  if (existingApplication.isLoading || accountSettings.isLoading) {
     return (
       <Screen>
         <Header title="Start selling" />
         <ListSkeleton />
+      </Screen>
+    );
+  }
+
+  if (accountSettings.isError) {
+    return (
+      <Screen>
+        <Header title="Start selling" onBack={() => navigation.goBack()} />
+        <View style={styles.countryGate}>
+          <Text size={16} weight={600} lineHeight={20} accessibilityRole="header">We couldn’t check your account country</Text>
+          <Text size={14} lineHeight={20} color={colors.textSubtle}>Try again before starting a seller application.</Text>
+          <Button title="Try again" variant="outline" onPress={() => accountSettings.refetch()} />
+        </View>
+      </Screen>
+    );
+  }
+
+  const countryState = getSellerApplicationCountryState(accountSettings.data?.countryCode);
+  if (countryState !== "eligible") {
+    const countryMessage = countryState === "country_required"
+      ? "Set your account country to Nigeria in Settings → App Preference before applying to sell."
+      : `Seller applications are currently open only to sellers based in Nigeria. Your account country is ${accountSettings.data?.countryCode}. Creator applications from outside Nigeria remain available.`;
+    return (
+      <Screen>
+        <Header title="Start selling" onBack={() => navigation.goBack()} />
+        <View style={styles.countryGate}>
+          <Text size={16} weight={600} lineHeight={20} accessibilityRole="header">Seller applications are Nigeria-only for v1</Text>
+          <Text size={14} lineHeight={20} color={colors.textSubtle}>{countryMessage}</Text>
+          {countryState === "country_required" ? (
+            <Button title="Open country settings" variant="outline" onPress={() => navigation.navigate("SettingsAppPreference")} />
+          ) : null}
+        </View>
       </Screen>
     );
   }
@@ -122,4 +157,5 @@ export function SellerApplicationScreen({ navigation }: MainScreenProps<"SellerA
 const styles = StyleSheet.create({
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32, gap: 24 },
   footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12, gap: 8 },
+  countryGate: { paddingHorizontal: 20, paddingTop: 28, gap: 12 },
 });
