@@ -88,6 +88,7 @@ const pagePermissionRules: { readonly pathPrefix: string; readonly permission: S
 ];
 
 export function findPermissionRequiredForPage(pathname: string): SellerPermission | null {
+  if (pathname === "/products") return "catalog:view";
   const matchingRule = pagePermissionRules.find((rule) => pathname === rule.pathPrefix || pathname.startsWith(`${rule.pathPrefix}/`));
   return matchingRule?.permission ?? null;
 }

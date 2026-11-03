@@ -9,6 +9,7 @@ import { buildProductListColumns } from "@/components/catalog/productListColumns
 import { defaultProductListFilters, ProductListFilters, type ProductListFilterValues } from "@/components/catalog/productListFilters";
 import { ProductsSectionTabs } from "@/components/catalog/productsSectionTabs";
 import { ProductUsageMeter } from "@/components/catalog/productUsageMeter";
+import { useSellerSession } from "@/components/session/sellerSessionProvider";
 import { ButtonLink } from "@/components/ui/button";
 import { DataTable, type TableSortState } from "@/components/ui/dataTable";
 import { EmptyState } from "@/components/ui/feedback";
@@ -46,6 +47,8 @@ interface ProductListViewProps {
 
 export function ProductListView({ initialCategoryId = "", initialStatus = "", initialStock = "", initialSupplierId = "" }: ProductListViewProps) {
   const router = useRouter();
+  const { can } = useSellerSession();
+  const canManageProducts = can("products:manage");
   const { formatMoney } = useMoneyFormatter();
   const { selectedLocationId } = useStoreContext();
   const [filters, setFilters] = useState<ProductListFilterValues>({ ...defaultProductListFilters, categoryId: initialCategoryId, status: initialStatus, stock: initialStock });
@@ -55,7 +58,7 @@ export function ProductListView({ initialCategoryId = "", initialStatus = "", in
     q: filters.searchText, categoryId: filters.categoryId, status: filters.status, online: filters.online, visibility: filters.visibility, stock: filters.stock, sort: filters.sort, supplierId: initialSupplierId || undefined, locationId: selectedLocationId, limit: 25,
   });
   const visibleProducts = useMemo(() => productList.items ?? [], [productList.items]);
-  const columns = buildProductListColumns({ products: visibleProducts, selectedProductIds, onSelectionChange: setSelectedProductIds, formatMoney, selectedLocationId });
+  const columns = buildProductListColumns({ canManage: canManageProducts, products: visibleProducts, selectedProductIds, onSelectionChange: setSelectedProductIds, formatMoney, selectedLocationId });
 
   function refreshAfterBulkChange() {
     setSelectedProductIds(new Set());
@@ -70,9 +73,9 @@ export function ProductListView({ initialCategoryId = "", initialStatus = "", in
         description="Everything you sell on Nantty. Listed products show in the app; drafts and scheduled products wait here until you publish them."
         actions={
           <span className={styles.headerActions}>
-            <ButtonLink href="/products/import" iconName="export24">Import & export</ButtonLink>
+            {canManageProducts ? <ButtonLink href="/products/import" iconName="export24">Import & export</ButtonLink> : null}
             <FeaturePlanBadge feature="bulk_tools" />
-            <ButtonLink href="/products/new" variant="primary" iconName="plus16">New product</ButtonLink>
+            {canManageProducts ? <ButtonLink href="/products/new" variant="primary" iconName="plus16">New product</ButtonLink> : null}
           </span>
         }
       />
@@ -81,7 +84,7 @@ export function ProductListView({ initialCategoryId = "", initialStatus = "", in
       <Panel padded={false}>
         <div className={styles.toolbar}>
           <ProductListFilters value={filters} onValueChange={(next) => { setFilters(next); setSelectedProductIds(new Set()); }} />
-          {selectedProductIds.size > 0 ? <ProductBulkActionBar selectedProductIds={[...selectedProductIds]} onFinished={refreshAfterBulkChange} /> : null}
+          {canManageProducts && selectedProductIds.size > 0 ? <ProductBulkActionBar selectedProductIds={[...selectedProductIds]} onFinished={refreshAfterBulkChange} /> : null}
         </div>
         <DataTable
           caption="Products"
@@ -93,11 +96,11 @@ export function ProductListView({ initialCategoryId = "", initialStatus = "", in
           onRetry={productList.reload}
           sortState={convertSortParameterToSortState(filters.sort)}
           onSortChange={(sortState) => setFilters((current) => ({ ...current, sort: sortParameterBySortState[sortState.key]?.[sortState.direction] ?? "updated" }))}
-          onRowActivate={(product) => router.push(`/products/${product.id}`)}
+          onRowActivate={canManageProducts ? (product) => router.push(`/products/${product.id}`) : undefined}
           hasMore={productList.hasMore}
           onLoadMore={productList.loadMore}
           isLoadingMore={productList.isLoadingMore}
-          emptyState={<EmptyState iconName="tag24" title="No products match" description="Change the filters, or add your first product." action={<ButtonLink href="/products/new" variant="primary">New product</ButtonLink>} />}
+          emptyState={<EmptyState iconName="tag24" title="No products match" description="Change the filters, or add your first product." action={canManageProducts ? <ButtonLink href="/products/new" variant="primary">New product</ButtonLink> : null} />}
         />
       </Panel>
     </PageStack>

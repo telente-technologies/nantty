@@ -8,6 +8,7 @@ import { formatBasisPointsAsPercent } from "@/utils/money.util";
 import styles from "./productListView.module.css";
 
 interface ProductListColumnOptions {
+  readonly canManage: boolean;
   readonly products: readonly Product[];
   readonly selectedProductIds: ReadonlySet<string>;
   readonly onSelectionChange: (selectedProductIds: ReadonlySet<string>) => void;
@@ -27,7 +28,7 @@ function renderProductPriceCell(product: Product, formatMoney: ProductListColumn
   );
 }
 
-export function buildProductListColumns({ products, selectedProductIds, onSelectionChange, formatMoney, selectedLocationId }: ProductListColumnOptions): DataTableColumn<Product>[] {
+export function buildProductListColumns({ canManage, products, selectedProductIds, onSelectionChange, formatMoney, selectedLocationId }: ProductListColumnOptions): DataTableColumn<Product>[] {
   const areAllVisibleSelected = products.length > 0 && products.every((product) => selectedProductIds.has(product.id));
   const toggleProductSelection = (productId: string) => {
     const next = new Set(selectedProductIds);
@@ -35,13 +36,13 @@ export function buildProductListColumns({ products, selectedProductIds, onSelect
     else next.add(productId);
     onSelectionChange(next);
   };
-  return [
-    {
-      key: "select",
-      width: "36px",
-      header: <input type="checkbox" aria-label="Select all products on this page" checked={areAllVisibleSelected} onChange={() => onSelectionChange(areAllVisibleSelected ? new Set() : new Set(products.map((product) => product.id)))} />,
-      render: (product) => <input type="checkbox" aria-label={`Select ${product.name}`} checked={selectedProductIds.has(product.id)} onClick={(event) => event.stopPropagation()} onChange={() => toggleProductSelection(product.id)} />,
-    },
+  const selectionColumn: DataTableColumn<Product> = {
+    key: "select",
+    width: "36px",
+    header: <input type="checkbox" aria-label="Select all products on this page" checked={areAllVisibleSelected} onChange={() => onSelectionChange(areAllVisibleSelected ? new Set() : new Set(products.map((product) => product.id)))} />,
+    render: (product) => <input type="checkbox" aria-label={`Select ${product.name}`} checked={selectedProductIds.has(product.id)} onClick={(event) => event.stopPropagation()} onChange={() => toggleProductSelection(product.id)} />,
+  };
+  const productColumns: DataTableColumn<Product>[] = [
     {
       key: "product",
       header: "Product",
@@ -90,4 +91,5 @@ export function buildProductListColumns({ products, selectedProductIds, onSelect
       },
     },
   ];
+  return canManage ? [selectionColumn, ...productColumns] : productColumns;
 }

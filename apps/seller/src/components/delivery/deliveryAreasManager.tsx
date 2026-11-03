@@ -49,6 +49,9 @@ export function DeliveryAreasManager() {
       description="Where you deliver, what it costs the customer and how long it takes. Shown at checkout in the Nantty app."
       actions={canEdit ? <Button variant="primary" iconName="plus16" onClick={() => setEditingArea("new")}>Add area</Button> : null}
     >
+      <Callout tone="info" title="You control how your store delivers">
+        Set the delivery areas and fees your store can fulfil. Third-party logistics opt-in is not available in this dashboard yet, so these settings do not activate a provider. Buyer and seller email addresses are not used as logistics contact details here.
+      </Callout>
       {areasQuery.isLoading && !areasQuery.data ? <LoadingBlock label="Loading delivery areas" /> : null}
       {areasQuery.errorMessage ? <Callout tone="error" action={<Button size="small" onClick={areasQuery.reload}>Try again</Button>}>{areasQuery.errorMessage}</Callout> : null}
       {areasQuery.data && areas.length === 0 ? <EmptyState iconName="mapPin24" title="No delivery areas yet" description="Add the states and cities you deliver to, with a fee for each." /> : null}
