@@ -23,7 +23,7 @@ The console ships a mock adapter (`ADMIN_USE_MOCKS=true`, default outside produc
 | `X-Client-App: nantty-admin` | Identifies the caller. |
 
 ### Authorization (server-enforced)
-- Admin roles: `SUPERADMIN`, `ADMIN`, `SUPPORT`. Superadmins implicitly hold every permission and are created **only** by a backend CLI bootstrap (`nantty admin:bootstrap-superadmin`); no endpoint can create, promote to, disable or edit a superadmin.
+- Admin roles: `SUPERADMIN`, `ADMIN`, `SUPPORT`. Superadmins implicitly hold every permission. The first superadmin is bootstrapped through the backend CLI (`nantty admin:bootstrap-superadmin`); after that, a superadmin can invite another superadmin through the staff-management flow, subject to the configured second-superadmin approval policy. Superadmin accounts cannot be disabled, edited, or demoted through the ordinary staff-management endpoints.
 - `ADMIN` and `SUPPORT` hold an explicit list of granular permissions (below). The API must check the permission on every request; the console hides UI but is never trusted.
 - Admin tokens are a separate audience from app user tokens. A normal user token must never reach `/api/v1/admin/*`.
 
@@ -71,7 +71,7 @@ All auth endpoints are called by the console server only. `challengeToken` is a 
 | `GET /api/v1/admin/auth/me` | bearer | — | `200 { id, email, name, role, permissions[], ... }` |
 | `POST /api/v1/admin/auth/step-up` | bearer | `{ code }` | `200 { stepUpToken, expiresIn }` |
 
-Not built in the backend yet (the console keeps the UI, calls fail with the backend's 400/404): recovery codes (`method: "recovery"`), passkeys (`/mfa/webauthn/options`, `/step-up/webauthn/options`, `method: "webauthn"`), and `recoveryCodes` on enrolment.
+Implemented backend routes include recovery-code regeneration and use for step-up, passkey sign-in and step-up options, and passkey registration/removal. These flows require the configured WebAuthn relying-party settings and persistent staff-account storage; verify them against a local backend before relying on this contract in a deployment. Recovery codes are generated through the account recovery-code endpoint rather than returned by TOTP enrollment confirmation.
 | `POST /api/v1/admin/auth/logout` | none | `{ refreshToken }` | `204` — revokes the session and all its tokens |
 
 `admin` = `{ id, email, name, role, permissions[] }`.
