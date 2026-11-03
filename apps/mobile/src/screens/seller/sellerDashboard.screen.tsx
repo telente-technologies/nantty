@@ -107,7 +107,7 @@ export function SellerDashboardScreen({ navigation }: MainScreenProps<"SellerDas
           {myStoreId ? <Button variant="subtle" title="Promote store" height={44} onPress={() => navigation.navigate("PromoteDestination", { destinationType: "store", targetId: myStoreId })} /> : null}
           {myStoreId ? <Button variant="subtle" title="Ads" height={44} accessibilityLabel="Ads: create and manage ads for your store and products" onPress={() => navigation.navigate("AdsHub")} /> : null}
 
-          <SalesChart values={dashboard.series.map((point) => point.value)} />
+          <SalesChart series={dashboard.series} totalSales={dashboard.totalSales} />
 
           <View style={styles.ordersCard}>
             <SectionTitle title="Recent orders" expanded={ordersExpanded} onToggle={() => setOrdersExpanded((v) => !v)} />

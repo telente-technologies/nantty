@@ -94,14 +94,14 @@ export const creatorProgramMocks: MockRoute[] = [
     const input = body as CreatorApplicationInput;
     if (input.contentCategories.length === 0) throw new ApiError(422, "Pick at least one content category");
     if (!input.acceptedCreatorTermsVersion) throw new ApiError(422, "Accept the Creator terms to continue");
-    if (!input.payoutAccountId) throw new ApiError(422, "Choose a payout account");
     const eligibility = buildEligibilityForSignedInUser();
+    const decision = !input.payoutAccountId && eligibility.decision === "auto_approve" ? "manual_review" : eligibility.decision;
     const application: CreatorApplication = {
       id: `ca_${Date.now()}`,
-      status: eligibility.decision === "auto_approve" ? "approved" : eligibility.eligible ? "pending" : "rejected",
+      status: decision === "auto_approve" ? "approved" : eligibility.eligible ? "pending" : "rejected",
       contentCategories: input.contentCategories,
       submittedAt: new Date().toISOString(),
-      reviewedAt: eligibility.decision === "manual_review" ? null : new Date().toISOString(),
+      reviewedAt: decision === "manual_review" ? null : new Date().toISOString(),
       rejectionReason: eligibility.eligible
         ? null
         : `Not eligible yet: ${eligibility.requirements.filter((r) => !r.met).map((r) => r.label.toLowerCase()).join(", ")}.`,

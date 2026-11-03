@@ -18,7 +18,9 @@ const readStoredThemePreferenceSynchronously = (): ThemePreference | null => {
 
 interface ThemePreferenceState {
   readonly preference: ThemePreference;
+  readonly localChoiceVersion: number;
   readonly setPreference: (preference: ThemePreference) => void;
+  readonly applyAccountPreference: (preference: ThemePreference, expectedLocalChoiceVersion: number) => void;
 }
 
 const preferenceReadAtLaunch = readStoredThemePreferenceSynchronously();
@@ -26,8 +28,15 @@ let hasChosenPreferenceSinceLaunch = false;
 
 export const useThemePreferenceStore = create<ThemePreferenceState>()((set) => ({
   preference: preferenceReadAtLaunch ?? DEFAULT_THEME_PREFERENCE,
+  localChoiceVersion: 0,
   setPreference: (preference) => {
     hasChosenPreferenceSinceLaunch = true;
+    writeDevicePreference(storageKeys.themePreference, preference);
+    set((state) => ({ preference, localChoiceVersion: state.localChoiceVersion + 1 }));
+  },
+  applyAccountPreference: (preference, expectedLocalChoiceVersion) => {
+    const current = useThemePreferenceStore.getState();
+    if (current.localChoiceVersion !== expectedLocalChoiceVersion) return;
     writeDevicePreference(storageKeys.themePreference, preference);
     set({ preference });
   },

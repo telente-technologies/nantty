@@ -1,8 +1,12 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { useQuery } from "@tanstack/react-query";
 
 import { Cancel20Icon, Gif24Icon, PaperPlaneTilt24Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
+import { brandsService } from "@/services/sellers/brands.service";
+import { useAuthStore } from "@/store/auth.store";
+import type { ActingProfile } from "@/types/brand.type";
 import { ComposerSlot } from "@/components/ui/composerSlot";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Text } from "@/components/ui/text";
@@ -22,7 +26,7 @@ export const QUICK_REACTION_EMOJI = ["😂", "😍", "💕", "😊", "🥰", "�
 
 export interface CommentComposerProps {
   readonly myAvatarUrl: string | null;
-  readonly onSubmit: (text: string, mentions: readonly MentionEntity[], quote?: CommentQuoteOptions) => void;
+  readonly onSubmit: (text: string, mentions: readonly MentionEntity[], quote?: CommentQuoteOptions, asProfile?: ActingProfile) => void;
   readonly placeholder?: string;
   readonly replyTarget?: Comment | null;
   readonly onCancelReply?: () => void;
@@ -36,6 +40,11 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
 ) {
   const { colors } = useTheme();
   const styles = useStyles();
+  const authStatus = useAuthStore((state) => state.status);
+  const profilesQuery = useQuery({ queryKey: ["users", "me", "profiles"], queryFn: brandsService.listMyProfiles, enabled: authStatus === "signedIn", staleTime: 60_000, retry: false });
+  const commentProfiles = (profilesQuery.data ?? []).filter((profile: ActingProfile) => (profile.kind === "business" || profile.kind === "brand" || profile.kind === "store") && profile.onHold !== true);
+  const [selectedProfileId, setSelectedProfileId] = useState<string | undefined>();
+  const selectedProfile = commentProfiles.find((profile) => profile.id === selectedProfileId);
   const [text, setText] = useState("");
   const [mentions, setMentions] = useState<readonly MentionEntity[]>([]);
   const inputRef = useRef<TextInput>(null);
@@ -64,7 +73,7 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
   const submitTypedComment = () => {
     if (!hasContent) return;
     const trimmed = shiftMentionsAfterTrimmingStart(text, mentions);
-    onSubmit(trimmed.text, trimmed.mentions, { quotedPostId: quote.quotedPostId, quotedPost: quote.preview?.quoted ?? null });
+    onSubmit(trimmed.text, trimmed.mentions, { quotedPostId: quote.quotedPostId, quotedPost: quote.preview?.quoted ?? null }, selectedProfile);
     setText("");
     setMentions([]);
     quote.reset();
@@ -100,8 +109,25 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
           </Pressable>
         ))}
       </View>
+      {commentProfiles.length > 0 ? (
+        <View style={styles.identityPicker}>
+          <Text size={11} weight={600} lineHeight={14} color={colors.textMuted}>Commenting as</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.identityOptions}>
+            <Pressable accessibilityRole="radio" accessibilityState={{ checked: selectedProfile === undefined }} onPress={() => setSelectedProfileId(undefined)} style={[styles.identityOption, selectedProfile === undefined && styles.identityOptionActive]}>
+              <Avatar uri={myAvatarUrl} size={22} placeholderColor={colors.placeholder} />
+              <Text size={12} weight={500} lineHeight={16}>You</Text>
+            </Pressable>
+            {commentProfiles.map((profile) => (
+              <Pressable key={profile.id} accessibilityRole="radio" accessibilityState={{ checked: profile.id === selectedProfile?.id }} onPress={() => setSelectedProfileId(profile.id)} style={[styles.identityOption, profile.id === selectedProfile?.id && styles.identityOptionActive]}>
+                <Avatar uri={profile.avatarUrl} size={22} placeholderColor={colors.placeholder} />
+                <Text size={12} weight={500} lineHeight={16} numberOfLines={1}>{profile.name}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+      ) : null}
       <View style={styles.inputRow}>
-        <Avatar uri={myAvatarUrl} size={40} placeholderColor={colors.placeholder} />
+        <Avatar uri={selectedProfile?.avatarUrl ?? myAvatarUrl} size={40} placeholderColor={colors.placeholder} />
         <View style={styles.field}>
           <TextInput
             ref={inputRef}
@@ -143,6 +169,10 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   keyboardArea: { backgroundColor: colors.surface },
   replyingTo: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: -4 },
   emojiRow: { flexDirection: "row", justifyContent: "space-between" },
+  identityPicker: { gap: 6 },
+  identityOptions: { flexDirection: "row", gap: 8, paddingVertical: 2 },
+  identityOption: { minHeight: 34, maxWidth: 180, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 9, borderWidth: 1, borderColor: colors.divider, borderRadius: 18 },
+  identityOptionActive: { borderColor: colors.primary, backgroundColor: colors.primaryTint },
   inputRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   field: {
     flex: 1,

@@ -2,9 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
   Alert,
-  Modal,
   Pressable,
-  ScrollView,
   Share,
   StyleSheet,
   TextInput,
@@ -30,6 +28,8 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/errorState";
+import { BottomSheet } from "@/components/ui/bottomSheet";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Text } from "@/components/ui/text";
 import { webAppLinks } from "@/config/webAppLinks.config";
 import {
@@ -323,10 +323,10 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
           </Pressable>
         )}
       </View>
-      <ScrollView
+      <KeyboardAwareForm
         style={styles.scroll}
         contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
+        safeAreaHandledByParent
       >
         {message ? (
           <Text accessibilityRole="alert" style={styles.notice}>
@@ -677,7 +677,7 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
             ))}
           </>
         )}
-      </ScrollView>
+      </KeyboardAwareForm>
       {space ? (
         <View style={styles.bottomBar}>
           <View style={styles.bottomInner}>
@@ -782,25 +782,14 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
           onClose={() => setGiftPickerOpen(false)}
         />
       ) : null}
-      <Modal
-        transparent
+      <BottomSheet
         visible={panel !== null}
-        animationType="none"
-        onRequestClose={() => setPanel(null)}
+        onClose={() => setPanel(null)}
+        title="Manage Space"
+        scrollable
+        style={styles.manageSheet}
       >
-        <View style={styles.overlay}>
-          <View accessibilityViewIsModal style={styles.sheet}>
-            <View style={styles.stageHeading}>
-              <Text size={22} weight={700}>
-                "Manage Space"
-              </Text>
-              <Button
-                title="Close"
-                variant="subtle"
-                onPress={() => setPanel(null)}
-              />
-            </View>
-            <ScrollView contentContainerStyle={styles.panelBody}>
+            <View style={styles.panelBody}>
               {space && host ? (
                 <>
                   {space.visibility === "invite_only" ? (
@@ -932,10 +921,8 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
                   />
                 </>
               ) : null}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
+            </View>
+      </BottomSheet>
       {sendInChatElement}
     </View>
   );
@@ -1072,23 +1059,8 @@ const useStyles = makeThemedStyles((colors) =>
     joinIcon: { width: 40, height: 40, alignItems: "center", justifyContent: "center", borderRadius: 20, backgroundColor: colors.primarySolid },
     cardCopy: { flex: 1, gap: 4 },
     empty: { paddingVertical: 36, gap: 8 },
-    overlay: {
-      flex: 1,
-      justifyContent: "center",
-      padding: 16,
-      backgroundColor: "#00000066",
-    },
-    sheet: {
-      width: "100%",
-      maxWidth: 640,
-      maxHeight: "85%",
-      alignSelf: "center",
-      backgroundColor: colors.surface,
-      borderRadius: 22,
-      padding: 20,
-      gap: 12,
-    },
-    panelBody: { gap: 18, paddingBottom: 12 },
+    manageSheet: { width: "100%", maxWidth: 640, alignSelf: "center" },
+    panelBody: { gap: 18, paddingHorizontal: 16, paddingBottom: 20 },
     inviteRow: { flexDirection: "row", alignItems: "center", gap: 10, minHeight: 54 },
     manageRow: {
       flexDirection: "row",

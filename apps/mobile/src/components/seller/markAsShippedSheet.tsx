@@ -25,8 +25,11 @@ export function MarkAsShippedSheet({ visible, submitting, errorMessage, onClose,
   const [selectedCourier, setSelectedCourier] = useState<string | null>(null);
   const [otherCourierName, setOtherCourierName] = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");
+  const [trackingUrl, setTrackingUrl] = useState("");
   const courierName = selectedCourier === "Other" ? otherCourierName.trim() : selectedCourier ?? "";
-  const readyToSubmit = courierName.length > 1 && trackingNumber.trim().length >= 4;
+  const normalizedTrackingUrl = trackingUrl.trim();
+  const validTrackingUrl = !normalizedTrackingUrl || /^https:\/\/\S{3,300}$/.test(normalizedTrackingUrl);
+  const readyToSubmit = courierName.length > 1 && trackingNumber.trim().length >= 4 && validTrackingUrl;
 
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Mark as shipped" scrollable>
@@ -57,6 +60,17 @@ export function MarkAsShippedSheet({ visible, submitting, errorMessage, onClose,
           value={trackingNumber}
           onChangeText={setTrackingNumber}
         />
+        <TextField
+          label="Tracking link (optional)"
+          placeholder="https://"
+          keyboardType="url"
+          autoCapitalize="none"
+          autoCorrect={false}
+          value={trackingUrl}
+          onChangeText={setTrackingUrl}
+          invalid={!validTrackingUrl}
+        />
+        {!validTrackingUrl ? <Text size={12} lineHeight={16} color={colors.error}>Tracking link must start with https:// and be no longer than 300 characters.</Text> : null}
         {errorMessage ? (
           <Text size={12} lineHeight={16} color={colors.error} accessibilityRole="alert">{errorMessage}</Text>
         ) : null}
@@ -64,7 +78,7 @@ export function MarkAsShippedSheet({ visible, submitting, errorMessage, onClose,
           title="Confirm shipment"
           disabled={!readyToSubmit}
           loading={submitting}
-          onPress={() => onSubmit({ courierName, trackingNumber: trackingNumber.trim() })}
+          onPress={() => onSubmit({ courierName, trackingNumber: trackingNumber.trim(), trackingUrl: normalizedTrackingUrl || null })}
         />
       </View>
     </BottomSheet>

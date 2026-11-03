@@ -60,3 +60,9 @@ test("a creator's affiliate link opens the exact product and keeps the link id f
 test("the creator affiliate workspace has its own link", () => {
   expect(focusedRouteNames("creator/affiliates")).toEqual(["CreatorAffiliates"]);
 });
+
+test("web creator application and post analytics links resolve to their mobile screens", () => {
+  expect(focusedRouteNames("creator/apply")).toEqual(["CreatorApplication"]);
+  const state = getStateFromPath("analytics/post/post_42", deepLinking.config) as { routes: { name: string; params?: Record<string, string> }[] };
+  expect(state.routes.at(-1)).toMatchObject({ name: "PostAnalytics", params: { postId: "post_42" } });
+});

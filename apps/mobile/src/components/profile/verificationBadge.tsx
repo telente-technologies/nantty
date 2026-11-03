@@ -21,6 +21,7 @@ const ACCESSIBILITY_LABELS: Record<VerificationColor, string> = {
 
 export interface VerificationBadgeProps {
   readonly verification?: Verification | null;
+  readonly checkmarkColor?: VerificationColor | null;
   readonly legacyVerified?: boolean;
   readonly size?: number;
   readonly viewerIsStaff?: boolean;
@@ -32,11 +33,11 @@ export const isVerificationBadgeVisible = (verification?: Verification | null) =
   return verification.status === "active" || isInBlackGracePeriod(verification);
 };
 
-export function VerificationBadge({ verification, legacyVerified = false, size = 16, viewerIsStaff = false }: VerificationBadgeProps) {
+export function VerificationBadge({ verification, checkmarkColor, legacyVerified = false, size = 16, viewerIsStaff = false }: VerificationBadgeProps) {
   const theme = useTheme();
-  const visible = verification ? isVerificationBadgeVisible(verification) : legacyVerified;
+  const visible = checkmarkColor ? true : verification ? isVerificationBadgeVisible(verification) : legacyVerified;
   if (!visible) return null;
-  const badgeColorName = verification?.color ?? "blue";
+  const badgeColorName = checkmarkColor ?? verification?.color ?? "blue";
   const badgeColor = theme.isDark && badgeColorName !== "gold" ? theme.colors[badgeColorName === "black" ? "text" : "primary"] : VERIFICATION_BADGE_COLORS[badgeColorName];
   const renewalDue = viewerIsStaff && isInBlackGracePeriod(verification);
   return (

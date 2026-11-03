@@ -6,6 +6,7 @@ import { FlatList, StyleSheet, View } from "react-native";
 import { GuestFeedBanner } from "@/components/auth/guestFeedBanner";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { PostCard } from "@/components/feed/postCard";
+import { WalletHomePreview } from "@/components/home/walletHomePreview";
 import { ReshareSheet } from "@/components/feed/reshareSheet";
 import { BrandLoader } from "@/components/ui/brandLoader";
 import { makeThemedStyles } from "@/theme";
@@ -15,7 +16,7 @@ import type { Post, ProductSummary } from "@/types";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 
 import { attributionSourceForPostKind, type SaleAttribution } from "@/utils/saleAttribution.util";
-import { feedModuleRowKey } from "@/utils/feedModuleLayout.util";
+import { feedModuleRowKey, type FeedRowWithModules } from "@/utils/feedModuleLayout.util";
 
 import { PostProductsFlow } from "./postProductsFlow";
 import { FeedModuleRow } from "./feedModuleRow";
@@ -27,8 +28,10 @@ import { EmptyState } from "@/components/ui/emptyState";
 import { ErrorState } from "@/components/ui/errorState";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { spacing } from "@/constants/spacing.constant";
+import { useAuthStore } from "@/store/auth.store";
 
 type FeedMode = "for-you" | "following";
+type HomeFeedRow = { readonly type: "walletPreview" } | FeedRowWithModules<Post>;
 
 export function FeedTab() {
   const styles = useStyles();
@@ -37,6 +40,7 @@ export function FeedTab() {
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [openPostProducts, setOpenPostProducts] = useState<{ readonly products: readonly ProductSummary[]; readonly attribution: SaleAttribution } | null>(null);
   const [reshareTarget, setReshareTarget] = useState<Post | null>(null);
+  const viewerId = useAuthStore((state) => (state.status === "signedIn" ? state.user?.id ?? null : null));
   const { togglePostLike, followPostAuthor, sharePost } = usePostInteractions();
   const { offerSendInChat, sendInChatElement } = useShareToChat();
 
@@ -67,6 +71,7 @@ export function FeedTab() {
   }, [feed.data]);
   const modules = useFeedModules(posts);
   const rows = modules.rows;
+  const feedRows = useMemo<HomeFeedRow[]>(() => viewerId && rows.length > 0 ? [{ type: "walletPreview" }, ...rows] : rows, [viewerId, rows]);
 
   const selectTopic = (topicId: string | null) => {
     setFeedMode("for-you");
@@ -77,8 +82,8 @@ export function FeedTab() {
     <View style={styles.root}>
       <GuestFeedBanner />
       <FlatList
-        data={rows}
-        keyExtractor={(row) => (row.type === "post" ? row.post.id : feedModuleRowKey(row.slot))}
+        data={feedRows}
+        keyExtractor={(row) => (row.type === "walletPreview" ? "wallet-home-preview" : row.type === "post" ? row.post.id : feedModuleRowKey(row.slot))}
         ListHeaderComponent={
           <TopicFilterRow
             topics={topics.data ?? []}
@@ -98,7 +103,9 @@ export function FeedTab() {
         stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) =>
-          item.type === "module" ? (
+          item.type === "walletPreview" ? (
+            <WalletHomePreview onPressWallet={() => navigation.navigate("Wallet")} />
+          ) : item.type === "module" ? (
             <FeedModuleRow slot={item.slot} modules={modules} onPressRailMore={setRailOptionsClipIds} />
           ) : (
             <PostCard
@@ -124,13 +131,16 @@ export function FeedTab() {
         onEndReached={() => feed.hasNextPage && !feed.isFetchingNextPage && feed.fetchNextPage()}
         refreshControl={refreshControl}
         ListEmptyComponent={
-          feed.isLoading ? (
-            <ListSkeleton />
-          ) : feed.isError ? (
-            <ErrorState error={feed.error} compact message="Couldn't load your feed." onRetry={() => feed.refetch()} retrying={feed.isRefetching} />
-          ) : (
-            <EmptyState compact title="No posts yet" body="Follow people and stores to fill your feed." actionLabel="Find people" onAction={() => navigation.navigate("Search", { scope: "global" })} />
-          )
+          <>
+            {viewerId ? <WalletHomePreview onPressWallet={() => navigation.navigate("Wallet")} /> : null}
+            {feed.isLoading ? (
+              <ListSkeleton />
+            ) : feed.isError ? (
+              <ErrorState error={feed.error} compact message="Couldn't load your feed." onRetry={() => feed.refetch()} retrying={feed.isRefetching} />
+            ) : (
+              <EmptyState compact title="No posts yet" body="Follow people and stores to fill your feed." actionLabel="Find people" onAction={() => navigation.navigate("Search", { scope: "global" })} />
+            )}
+          </>
         }
         ListFooterComponent={feed.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
       />

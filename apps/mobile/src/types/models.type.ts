@@ -256,6 +256,7 @@ export interface Comment {
   readonly parentCommentId: ID | null;
   readonly rootCommentId: ID | null;
   readonly author: UserSummary;
+  readonly postedAs?: { readonly id: ID; readonly kind: string; readonly name: string; readonly handle: string; readonly avatarUrl: string | null; readonly checkmark?: VerificationColor | null } | null;
   readonly text: string;
   readonly createdAt: ISODate;
   readonly likes: number;

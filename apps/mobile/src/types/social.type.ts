@@ -53,6 +53,7 @@ export interface CommentWithReplies extends Comment {
 export interface NewCommentInput {
   readonly text: string;
   readonly parentCommentId?: ID;
+  readonly asProfileId?: ID;
   readonly mentions?: readonly MentionEntity[];
   readonly quotedPostId?: ID | null;
 }

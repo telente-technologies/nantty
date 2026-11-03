@@ -48,9 +48,9 @@ export function ThreadReplyRow({ reply, hasParentAbove, hasChildBelow, showReply
   const styles = useStyles();
   const openUserProfile = useOpenUserProfile();
   const { isSaved, toggleSaved } = useSaveToggle(saveTargetForComment(reply), reply.bookmarked ?? false);
-  const authorName = reply.author?.name ?? "Deleted user";
-  const authorUsername = reply.author?.username ?? "deleted";
-  const authorAvatarUrl = reply.author?.avatarUrl ?? null;
+  const authorName = reply.postedAs?.name ?? reply.author?.name ?? "Deleted user";
+  const authorUsername = reply.postedAs?.handle ?? reply.author?.username ?? "deleted";
+  const authorAvatarUrl = reply.postedAs?.avatarUrl ?? reply.author?.avatarUrl ?? null;
   const authorId = reply.author?.id;
   const firstImage = reply.media?.find((item) => item.type === "image" && item.url);
   const mediaAspect = firstImage?.width && firstImage.height ? firstImage.width / firstImage.height : 4 / 3;
@@ -86,9 +86,13 @@ export function ThreadReplyRow({ reply, hasParentAbove, hasChildBelow, showReply
     >
       <View style={styles.rail}>
         <View style={[styles.lineAbove, hasParentAbove ? styles.line : null]} />
-        <Pressable accessibilityRole="button" accessibilityLabel={`Open ${authorName}'s profile`} onPress={() => (authorId ? openUserProfile(authorId) : undefined)}>
+        {reply.postedAs ? (
           <Avatar uri={authorAvatarUrl} size={THREAD_AVATAR_SIZE} />
-        </Pressable>
+        ) : (
+          <Pressable accessibilityRole="button" accessibilityLabel={`Open ${authorName}'s profile`} onPress={() => (authorId ? openUserProfile(authorId) : undefined)}>
+            <Avatar uri={authorAvatarUrl} size={THREAD_AVATAR_SIZE} />
+          </Pressable>
+        )}
         <View style={[styles.lineBelow, hasChildBelow ? styles.line : null]} />
       </View>
       <Pressable style={styles.content} onPress={isPending ? undefined : onOpenThread} onLongPress={replyOptions.length > 0 ? () => setIsOptionsSheetOpen(true) : undefined} delayLongPress={400} accessible={false}>
@@ -96,7 +100,17 @@ export function ThreadReplyRow({ reply, hasParentAbove, hasChildBelow, showReply
           <Text size={15} weight={600} lineHeight={19} numberOfLines={1} style={styles.name}>
             {authorName}
           </Text>
-          <VerificationBadge verification={reply.author?.verification ?? null} legacyVerified={reply.author?.verified ?? false} size={15} />
+          <VerificationBadge
+            verification={reply.postedAs ? null : reply.author?.verification ?? null}
+            checkmarkColor={reply.postedAs?.checkmark}
+            legacyVerified={!reply.postedAs && (reply.author?.verified ?? false)}
+            size={15}
+          />
+          {reply.postedAs ? (
+            <Text size={11} weight={500} lineHeight={14} color={colors.textMuted}>
+              {reply.postedAs.name} · {reply.postedAs.kind}
+            </Text>
+          ) : null}
           {reply.isPostAuthor ? (
             <View style={styles.authorBadge} accessibilityLabel="Post author">
               <Text size={11} weight={600} lineHeight={14} color={colors.primary}>

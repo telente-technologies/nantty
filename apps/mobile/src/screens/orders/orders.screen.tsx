@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { RefreshControl, ScrollView, SectionList, StyleSheet, View } from "react-native";
 
@@ -15,6 +15,7 @@ import type { Order, OrderStatus } from "@/types";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { ErrorState } from "@/components/ui/errorState";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
+import { BrandLoader } from "@/components/ui/brandLoader";
 
 type OrderFilterKey = "all" | "to_ship" | "on_the_way" | "to_confirm" | "completed" | "disputed" | "cancelled";
 
@@ -45,14 +46,31 @@ export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
   const { colors } = useTheme();
   const styles = useStyles();
   const [filter, setFilter] = useState<OrderFilterKey>("all");
-  const orders = useQuery({ queryKey: ["orders", "all"], queryFn: () => ordersService.fetchMyOrders(null) });
+  const orders = useInfiniteQuery({
+    queryKey: ["orders", "all"],
+    queryFn: ({ pageParam }) => ordersService.fetchMyOrdersPage(null, pageParam),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  });
+  const loadedOrders = useMemo(() => {
+    const seenOrderIds = new Set<string>();
+    const unique: Order[] = [];
+    for (const page of orders.data?.pages ?? []) {
+      for (const order of page.data) {
+        if (seenOrderIds.has(order.id)) continue;
+        seenOrderIds.add(order.id);
+        unique.push(order);
+      }
+    }
+    return unique;
+  }, [orders.data]);
 
   const sections = useMemo(
     () =>
       ORDER_GROUPS.filter((group) => filter === "all" || group.filter === filter)
-        .map((group) => ({ title: group.title, data: (orders.data ?? []).filter((order) => group.statuses.includes(order.status)) }))
+        .map((group) => ({ title: group.title, data: loadedOrders.filter((order) => group.statuses.includes(order.status)) }))
         .filter((section) => section.data.length > 0),
-    [orders.data, filter],
+    [loadedOrders, filter],
   );
 
   return (
@@ -64,10 +82,13 @@ export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
         ))}
       </ScrollView>
       <SectionList
+        testID="buyer-orders-list"
         sections={sections}
         keyExtractor={(order) => order.id}
         stickySectionHeadersEnabled={false}
         contentContainerStyle={styles.list}
+        onEndReached={() => orders.hasNextPage && !orders.isFetchingNextPage && orders.fetchNextPage()}
+        onEndReachedThreshold={0.5}
         refreshControl={<RefreshControl refreshing={orders.isRefetching} onRefresh={() => orders.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
         renderSectionHeader={({ section }) => (
           <Text size={13} weight={600} lineHeight={16.9} color={colors.textMuted} style={styles.sectionTitle} accessibilityRole="header">
@@ -92,6 +113,7 @@ export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
             <Text align="center" color={colors.textSubtle} style={styles.state}>No orders here yet.</Text>
           )
         }
+        ListFooterComponent={orders.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
       />
     </Screen>
   );
@@ -106,4 +128,5 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   firstRow: { borderTopLeftRadius: 12, borderTopRightRadius: 12, paddingTop: 4 },
   lastRow: { borderBottomLeftRadius: 12, borderBottomRightRadius: 12, paddingBottom: 4 },
   state: { marginTop: 64 },
+  footer: { paddingVertical: 24 },
 }));

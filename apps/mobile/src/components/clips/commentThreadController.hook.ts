@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { postCommentsService } from "@/services/content/postComments.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { Comment, ID, QuotedPostSummary, UserSummary } from "@/types";
+import type { ActingProfile } from "@/types/brand.type";
 import type { MentionEntity } from "@/types/mention.type";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { canReplyWithVideo } from "./videoReply/videoReply.util";
@@ -101,7 +102,7 @@ export function useCommentThreadController(postId: string | null, closeContainin
       return { ...s, locallyPostedCommentsByParentKey: { ...s.locallyPostedCommentsByParentKey, [parentKey]: updated } };
     });
 
-  const applyCommentOrReplyText = (text: string, mentions: readonly MentionEntity[], quote?: CommentQuoteOptions) => {
+  const applyCommentOrReplyText = (text: string, mentions: readonly MentionEntity[], quote?: CommentQuoteOptions, asProfile?: ActingProfile) => {
     if (!postId || !text.trim()) return;
     const parent = threadState.replyTarget;
     const parentKey = parent?.id ?? TOP_LEVEL_PARENT_KEY;
@@ -111,6 +112,7 @@ export function useCommentThreadController(postId: string | null, closeContainin
       parentCommentId: parent?.id ?? null,
       rootCommentId: parent ? (parent.rootCommentId ?? parent.id) : null,
       author: signedInAuthor,
+      postedAs: asProfile ? { id: asProfile.id, kind: asProfile.kind, name: asProfile.name, handle: asProfile.handle, avatarUrl: asProfile.avatarUrl } : null,
       text: text.trim(),
       mentions,
       createdAt: new Date().toISOString(),
@@ -133,7 +135,7 @@ export function useCommentThreadController(postId: string | null, closeContainin
       },
     }));
     postCommentsService
-      .addCommentToPost(postId, { text: pendingComment.text, parentCommentId: parent?.id, mentions, ...(quote?.quotedPostId === undefined ? {} : { quotedPostId: quote.quotedPostId }) })
+      .addCommentToPost(postId, { text: pendingComment.text, parentCommentId: parent?.id, mentions, ...(quote?.quotedPostId === undefined ? {} : { quotedPostId: quote.quotedPostId }), ...(asProfile === undefined ? {} : { asProfileId: asProfile.id }) })
       .then((savedComment) => replaceLocallyPostedComment(parentKey, pendingComment.id, savedComment))
       .catch(() => {
         replaceLocallyPostedComment(parentKey, pendingComment.id, null);
@@ -145,9 +147,9 @@ export function useCommentThreadController(postId: string | null, closeContainin
     closeContainingModal ? requireAuthAfterClosingModal(closeContainingModal, action, reason) : requireAuthThen(action, undefined, reason);
 
   const toggleLikeOnComment = (comment: Comment) => requireSignInFor(() => applyCommentLikeToggle(comment), "like comments");
-  const submitCommentOrReplyText = (text: string, mentions: readonly MentionEntity[] = [], quote?: CommentQuoteOptions) => {
+  const submitCommentOrReplyText = (text: string, mentions: readonly MentionEntity[] = [], quote?: CommentQuoteOptions, asProfile?: ActingProfile) => {
     if (!postId || !text.trim()) return;
-    requireSignInFor(() => applyCommentOrReplyText(text, mentions, quote), "comment");
+    requireSignInFor(() => applyCommentOrReplyText(text, mentions, quote, asProfile), "comment");
   };
 
   const setDeletedFlag = (commentId: string, deleted: boolean) =>

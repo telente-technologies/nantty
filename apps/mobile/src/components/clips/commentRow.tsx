@@ -114,17 +114,33 @@ export function CommentRow({
       style={[styles.row, isPending && styles.pending, isHighlighted && styles.highlighted, isPickingForVideoReply && onReplyWithVideo && styles.pickable]}
     >
       <View>
-        <Pressable accessibilityRole="button" accessibilityLabel={`${comment.author.username}'s profile`} onPress={() => openUserProfile(comment.author.id)}>
-          <Avatar uri={comment.author.avatarUrl} size={isReply ? REPLY_AVATAR_SIZE : TOP_LEVEL_AVATAR_SIZE} placeholderColor={colors.placeholder} />
-        </Pressable>
+        {comment.postedAs ? (
+          <Avatar uri={comment.postedAs.avatarUrl ?? comment.author.avatarUrl} size={isReply ? REPLY_AVATAR_SIZE : TOP_LEVEL_AVATAR_SIZE} placeholderColor={colors.placeholder} />
+        ) : (
+          <Pressable accessibilityRole="button" accessibilityLabel={`${comment.author.username}'s profile`} onPress={() => openUserProfile(comment.author.id)}>
+            <Avatar uri={comment.author.avatarUrl} size={isReply ? REPLY_AVATAR_SIZE : TOP_LEVEL_AVATAR_SIZE} placeholderColor={colors.placeholder} />
+          </Pressable>
+        )}
         {connectBelow ? <View style={[styles.chainLine, { left: (isReply ? REPLY_AVATAR_SIZE : TOP_LEVEL_AVATAR_SIZE) / 2 - 1, top: (isReply ? REPLY_AVATAR_SIZE : TOP_LEVEL_AVATAR_SIZE) + 4 }]} /> : null}
       </View>
       <View style={styles.body}>
         <View style={styles.meta}>
-          <Text size={12} weight={600} lineHeight={16.8} accessibilityRole="link" onPress={() => openUserProfile(comment.author.id)}>
-            {comment.author.username}
-          </Text>
-          <VerificationBadge verification={comment.author.verification} legacyVerified={comment.author.verified} size={12} />
+          {comment.postedAs ? (
+            <Text size={12} weight={600} lineHeight={16.8}>
+              @{comment.postedAs.handle}
+            </Text>
+          ) : (
+            <Text size={12} weight={600} lineHeight={16.8} accessibilityRole="link" onPress={() => openUserProfile(comment.author.id)}>
+              {comment.author.username}
+            </Text>
+          )}
+          {comment.postedAs ? <Text size={11} weight={500} lineHeight={14} color={colors.textMuted}>{comment.postedAs.name} · {comment.postedAs.kind}</Text> : null}
+          <VerificationBadge
+            verification={comment.postedAs ? null : comment.author.verification}
+            checkmarkColor={comment.postedAs?.checkmark}
+            legacyVerified={!comment.postedAs && comment.author.verified}
+            size={12}
+          />
           {comment.isPostAuthor ? (
             <View style={styles.authorBadge} accessibilityLabel="Post author">
               <Text size={11} weight={600} lineHeight={14} color={colors.primary}>

@@ -206,17 +206,7 @@ export const mediaMocks: MockRoute[] = [
     const sanitizedMentions = sanitizeMentionsForWrite(getSignedInMockUser(), input.mentions, "post");
     const actingProfile = input.asProfileId ? findOwnedProfileOfSignedInUser(input.asProfileId) : undefined;
     if (input.asProfileId && !actingProfile) throw new ApiError(403, "You can't post as that profile", "FORBIDDEN");
-    const author = actingProfile
-      ? {
-          ...getSignedInMockUser(),
-          id: actingProfile.id,
-          name: actingProfile.name,
-          username: actingProfile.handle,
-          avatarUrl: actingProfile.avatarUrl,
-          verified: !!actingProfile.verification,
-          verification: actingProfile.verification,
-        }
-      : getSignedInMockUser();
+    const author = getSignedInMockUser();
     const post: Post = {
       id: nextMockId("p"),
       kind: input.kind === "clip" ? "clip" : "post",

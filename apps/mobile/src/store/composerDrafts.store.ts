@@ -40,6 +40,7 @@ interface ComposerDraftsState {
   readonly closeDraftsSheet: () => void;
   readonly saveDraft: (input: ComposerDraftInput) => ID;
   readonly deleteDraft: (id: ID) => void;
+  readonly clearDrafts: () => void;
 }
 
 const newDraftId = () => `draft_${Date.now().toString(36)}_${Math.floor(Math.random() * 1e6).toString(36)}`;
@@ -58,6 +59,7 @@ export const useComposerDraftsStore = create<ComposerDraftsState>()(
         return id;
       },
       deleteDraft: (id) => set((state) => ({ drafts: state.drafts.filter((draft) => draft.id !== id) })),
+      clearDrafts: () => set({ drafts: [], isDraftsSheetOpen: false }),
     }),
     { name: "nantty.composerDrafts", storage: createJSONStorage(() => AsyncStorage) },
   ),

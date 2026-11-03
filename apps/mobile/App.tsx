@@ -38,6 +38,7 @@ import { forgetDecryptedAttachmentsInMemory } from "@/services/chatCrypto/encryp
 import { startDecryptedMediaHygiene, wipeDecryptedFiles } from "@/services/chatCrypto/ephemeralDecryptedFiles.service";
 import { useActingProfileStore } from "@/store/actingProfile.store";
 import { useAuthStore } from "@/store/auth.store";
+import { useComposerDraftsStore } from "@/store/composerDrafts.store";
 import { addOfflineMutationReplayedListener, startOfflineConnectivityMonitoring, useOfflineStore } from "@/store/offline.store";
 import { useUploadQueueStore } from "@/store/uploadQueue.store";
 import { ThemeProvider, useTheme } from "@/theme";
@@ -97,6 +98,7 @@ export default function App() {
     wipeDecryptedFiles();
     useOfflineStore.getState().clearQueuedMutations();
     useActingProfileStore.getState().setActingProfile(null);
+    useComposerDraftsStore.getState().clearDrafts();
   }, [authStatus, queryClient]);
 
   useEffect(() => {

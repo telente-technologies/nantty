@@ -29,6 +29,7 @@ import { makeThemedStyles, useTheme } from "@/theme";
 import type { Post } from "@/types";
 import type { CommentSectionFilter, ThreadRow, ThreadSort } from "@/types/postThread.type";
 import { formatCompactCount } from "@/utils/formatDate.util";
+import { platformIdentityLabelFor } from "@/utils/platformIdentity.util";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import { webAppLinks } from "@/config/webAppLinks.config";
 
@@ -81,6 +82,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
     .filter((row) => row.kind !== "reply" || !commentThread.isCommentDeleted(row.reply.id))
     .sort((a, b) => Number(isPinnedRow(b)) - Number(isPinnedRow(a)));
   const threadQuery = conversation.query;
+  const platformIdentityLabel = platformIdentityLabelFor(Platform.OS);
 
   const postBlock = post.isLoading ? (
     <ListSkeleton rows={1} />
@@ -117,6 +119,18 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
           </Text>
         ) : null}
       </Text>
+      {platformIdentityLabel ? (
+        <Text
+          size={11}
+          lineHeight={16}
+          color={colors.textMuted}
+          style={styles.platformLabel}
+          accessibilityRole="text"
+          testID="post-thread-platform-label"
+        >
+          {platformIdentityLabel}
+        </Text>
+      ) : null}
       <View style={styles.threadHeader}>
         <CommentSectionFilterTabs filter={filter} onChange={setFilter} quoteCount={post.data.quotes} />
         {filter === "all" ? <ThreadSortDropdown sort={sort} onChange={setSort} /> : null}
@@ -208,6 +222,7 @@ const useStyles = makeThemedStyles((colors) =>
     flex: { flex: 1 },
     replyLink: { paddingHorizontal: 16, paddingBottom: 12 },
     timestamp: { paddingHorizontal: 16, paddingVertical: 12 },
+    platformLabel: { paddingHorizontal: 16, paddingBottom: 6 },
     highlightedPost: { marginHorizontal: 8, borderWidth: 1, borderColor: colors.textMuted, borderRadius: 10, overflow: "hidden" },
     threadHeader: { paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },
     conversation: { paddingBottom: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.divider },

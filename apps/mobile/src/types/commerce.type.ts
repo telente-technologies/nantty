@@ -187,6 +187,7 @@ export interface EscrowHold {
 export interface MarkOrderShippedInput {
   readonly courierName: string;
   readonly trackingNumber: string;
+  readonly trackingUrl?: string | null;
 }
 
 export type DisputeStatus = "open" | "awaiting_seller" | "under_review" | "resolved_refunded" | "resolved_released" | "closed";

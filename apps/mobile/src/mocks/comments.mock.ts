@@ -10,6 +10,7 @@ import { chooseMockChain, mockPostAuthorId, rankMockTopLevelComments, resolveMoc
 import { quotedSummaryFromPost } from "@/utils/postLinks.util";
 import { isQuoteThreadItem, type QuoteThreadItem } from "@/types/postThread.type";
 import { mergeQuotesIntoRankedComments, mockQuoteItemsFor, newestQuotesFirst } from "./commentSectionQuotes.mock";
+import { findOwnedProfileOfSignedInUser } from "./brands.mock";
 
 const TOP_LEVEL_PAGE_SIZE = 6;
 const REPLIES_PAGE_SIZE = 4;
@@ -232,7 +233,9 @@ export const commentsMocks: MockRoute[] = [
     const parent = input.parentCommentId ? (findCommentAnywhere(input.parentCommentId) ?? null) : null;
     const sanitized = sanitizeMentionsForWrite(me, input.mentions, "comment");
     const quote = resolveMockQuote(input.text, input.quotedPostId);
-    const stored = createStoredComment(postId, me, quote?.text ?? input.text, parent, 0, 0, sanitized.mentions);
+    const profile = input.asProfileId ? findOwnedProfileOfSignedInUser(input.asProfileId) : undefined;
+    if (input.asProfileId && (!profile || !["business", "brand", "store"].includes(profile.kind) || profile.onHold)) throw new ApiError(404, "Profile not found.", "PROFILE_NOT_FOUND");
+    const stored = { ...createStoredComment(postId, me, quote?.text ?? input.text, parent, 0, 0, sanitized.mentions), ...(profile ? { postedAs: { id: profile.id, kind: profile.kind, name: profile.name, handle: profile.handle, avatarUrl: profile.avatarUrl } } : {}) };
     const created = withMockQuoteState(quote ? { ...stored, quotedPost: quotedSummaryFromPost(quote.original) } : stored, targetPost?.author.id);
     notifyMentionedUsers(me, sanitized, "comment");
     const comments = commentsForPost(postId);
