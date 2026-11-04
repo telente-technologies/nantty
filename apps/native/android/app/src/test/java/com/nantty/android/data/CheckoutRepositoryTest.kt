@@ -31,7 +31,7 @@ class CheckoutRepositoryTest {
     @Test
     fun quoteUsesSelectedAddressAndServerCartTotal() {
         val transport = RecordingTransport().apply {
-            postResponse = JSONObject("""{"data":{"total":{"amountMinor":7200,"currency":"NGN"},"payableGroupCount":1,"groups":[]}}""")
+            postResponse = JSONObject("""{"data":{"itemsTotal":{"amountMinor":6000,"currency":"NGN"},"shopDiscount":{"amountMinor":300,"currency":"NGN"},"storeCredit":{"amountMinor":0,"currency":"NGN"},"shipping":{"amountMinor":1500,"currency":"NGN"},"total":{"amountMinor":7200,"currency":"NGN"},"payableGroupCount":1,"groups":[]}}""")
         }
         val result = repository(transport).quoteCart(addressId) as CheckoutCartResult.Success
 
@@ -40,6 +40,9 @@ class CheckoutRepositoryTest {
         assertEquals(addressId, transport.body?.getString("addressId"))
         assertEquals(7200L, result.cart.totalAmountMinor)
         assertEquals("NGN", result.cart.currency)
+        assertEquals(6000L, result.cart.itemsTotal?.amountMinor)
+        assertEquals(300L, result.cart.discounts?.amountMinor)
+        assertEquals(1500L, result.cart.shipping?.amountMinor)
     }
 
     @Test
@@ -66,6 +69,14 @@ class CheckoutRepositoryTest {
         assertTrue(repository.placeOrder("../other", idempotencyKey) is PlaceCheckoutResult.Failure)
         assertTrue(repository.placeOrder(addressId, "bad") is PlaceCheckoutResult.Failure)
         assertNull(transport.path)
+    }
+
+    @Test
+    fun rejectsCheckoutResponseWithoutAnOrderInsteadOfInventingOne() {
+        val repo = repository()
+        val malformed = JSONObject("""{"checkoutId":"$checkoutId","payableOrderId":"$orderId","total":{"amountMinor":1,"currency":"NGN"},"orders":[]}""")
+
+        assertTrue(runCatching { repo.parseCheckoutReceipt(malformed) }.isFailure)
     }
 
     @Test

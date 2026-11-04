@@ -255,8 +255,8 @@ private fun SignedInApp(
     var checkoutId by rememberSaveable { mutableStateOf<String?>(null) }
     var checkoutOrderId by rememberSaveable { mutableStateOf<String?>(null) }
     var checkoutTotalMinor by rememberSaveable { mutableStateOf(0L) }
-    var checkoutCurrency by rememberSaveable { mutableStateOf("NGN") }
-    var checkoutOrderCount by rememberSaveable { mutableStateOf(1) }
+    var checkoutCurrency by rememberSaveable { mutableStateOf("") }
+    var checkoutOrderCount by rememberSaveable { mutableStateOf(0) }
     var pendingMartProductId by rememberSaveable { mutableStateOf<String?>(null) }
     var showingComposer by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(requestedWidgetDestination) {

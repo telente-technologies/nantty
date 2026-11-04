@@ -176,8 +176,10 @@ internal class CheckoutRepository(
             ?: error("Nantty returned an incomplete checkout confirmation.")
         val total = data.optJSONObject("total")?.toWalletMoney()
             ?: error("Nantty returned an incomplete checkout total.")
-        val orders = data.optJSONArray("orders") ?: data.optJSONArray("orderGroups")
-        val orderCount = orders?.length()?.coerceAtLeast(1) ?: 1
+        val orders = data.optJSONArray("orders")?.takeIf { it.length() > 0 }
+            ?: data.optJSONArray("orderGroups")?.takeIf { it.length() > 0 }
+            ?: error("Nantty returned no orders for checkout.")
+        val orderCount = orders.length()
         return CheckoutReceipt(checkoutId, payableOrderId, total, orderCount)
     }
 
@@ -211,7 +213,8 @@ private fun JSONObject.toWalletMoney(): WalletMoney {
 private fun String.checkoutText(maxLength: Int): String = filterNot(Char::isISOControl).trim().take(maxLength)
 
 private fun Throwable.isCheckoutAuthFailure(): Boolean =
-    this is CheckoutHttpException && statusCode in setOf(HttpURLConnection.HTTP_UNAUTHORIZED, HttpURLConnection.HTTP_FORBIDDEN)
+    (this is CheckoutHttpException && statusCode in setOf(HttpURLConnection.HTTP_UNAUTHORIZED, HttpURLConnection.HTTP_FORBIDDEN)) ||
+        message?.startsWith("Sign in") == true
 
 private fun checkoutErrorMessage(error: Throwable, action: String): String = when {
     error is CheckoutHttpException && error.statusCode in setOf(401, 403) -> "Your session has expired. Sign in again to continue."

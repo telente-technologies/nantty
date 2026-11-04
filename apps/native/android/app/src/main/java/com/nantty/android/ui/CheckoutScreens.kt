@@ -18,7 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -278,6 +278,12 @@ internal fun CheckoutPaymentScreen(
                 },
             ) { if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp) else Text("Set up secure payment") }
         } else {
+            Text(
+                "You will leave Nantty and continue at ${Uri.parse(payment!!.checkoutUrl).host}.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.size(8.dp))
             Button(
                 enabled = !busy,
                 onClick = {
@@ -287,7 +293,7 @@ internal fun CheckoutPaymentScreen(
                     }.onFailure { status = "No browser could open the secure payment page. Try another browser or check payment status." }
                 },
             ) {
-                Icon(Icons.Default.OpenInNew, contentDescription = null)
+                Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text("Open secure payment")
             }

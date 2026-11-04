@@ -65,7 +65,7 @@ The checkout was already dirty across mobile, Android, iOS, web, admin, backend,
 
 ## Remaining work, ordered by risk
 
-1. Checkout and payment on Android, including idempotency, trusted hosted-checkout return, and verification-before-success; build only against test/staging contracts.
+1. Complete Android purchase parity: native address creation/editing, RN payment choices and eligibility disclosures, provider return recovery, and purchase confirmation.
 2. Buyer receipt confirmation and dispute open/detail/message behavior, with role/status-based availability.
 3. Seller order list/detail, fulfillment/status actions, and dispute response, preserving backend authorization and idempotency requirements.
 4. Remaining wallet surfaces and step-up-protected mutations; keep money amounts/currency sourced from API and never present mock balance as live.
@@ -74,7 +74,7 @@ The checkout was already dirty across mobile, Android, iOS, web, admin, backend,
 
 ### Cart line subtotal follow-up — 2026-11-04
 
-Cart rows now display a per-line subtotal computed from the API-provided unit amount and quantity using overflow-safe multiplication. The API-provided cart total remains authoritative. Compose test source covers an updated subtotal after quantity change and overflow omission. The latest serialized Android run passed Kotlin compilation, 207 JVM tests, and Android instrumentation-source compilation; no emulator/device was attached, so the UI test was not executed. Checkout, shipping/address selection, and payment remain unimplemented.
+Cart rows display a per-line subtotal computed from the API-provided unit amount and quantity using overflow-safe multiplication. The API-provided cart total remains authoritative. Compose test source covers an updated subtotal after quantity change and overflow omission. Shipping quote and payment flow have since been added in the bounded first slice below; full RN parity remains outstanding.
 
 ### Checkout and payment first slice — 2026-11-04
 
@@ -89,7 +89,7 @@ Separately, the product-detail delta in [`parity-android-discovery-commerce.md`]
 
 **Integrated validation for these deltas:** `./gradlew --no-daemon --no-parallel --max-workers=1 :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin :app:assembleDebug` succeeded. The unit suite reported **221 tests, 0 failures, 0 errors**; app and Android-test Kotlin sources compiled, and the debug APK assembled. `adb devices -l` found no attached device, so the Compose UI tests were compiled but not run on emulator/device. No live/staging API, payment provider, or production data was used.
 
-### Checkout and payment first slice — 2026-11-04
+<!-- Duplicate of the preceding checkout first-slice note removed. -->
 
 This working-tree update adds a bounded buyer path beyond cart review:
 
