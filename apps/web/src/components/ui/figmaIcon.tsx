@@ -2,7 +2,7 @@ import type { Icon, IconWeight } from "@phosphor-icons/react";
 import {
   AppleLogo, ArrowLeft, ArrowsClockwise, ArrowUpRight, Bell, BoxArrowDown, Camera, CaretDown, ChatCircle, Check,
   CreditCard, EyeClosed, Gauge, Headset, Heart, ImageSquare, MagnifyingGlass, MapPin, Minus, PaperPlaneTilt, Play,
-  Plus, SealCheck, Shield, SquaresFour, Star, Storefront, Tag, TextIndent, Truck, UserCircle, VideoCamera, Warning, X,
+  Plus, SealCheck, Shield, SquaresFour, Star, Storefront, Tag, TextIndent, Truck, UserCircle, VideoCamera, Wallet, Warning, X,
 } from "@phosphor-icons/react/dist/ssr";
 
 import styles from "./figmaIcon.module.css";
@@ -41,6 +41,7 @@ const iconsByName = {
   truck24: [Truck],
   userCircle24: [UserCircle],
   videoCamera24: [VideoCamera],
+  wallet24: [Wallet],
   warning20: [Warning],
 } as const satisfies Record<string, readonly [Icon] | readonly [Icon, IconWeight]>;
 

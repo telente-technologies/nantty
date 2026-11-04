@@ -33,7 +33,7 @@ function readBusinessAppUrl(configuredUrl: string | undefined, productionUrl: st
 
 export const businessAppLinks = {
   sellerDashboard: {
-    label: "Nantty Creator",
+    label: "Nantty Sellers",
     description: "Products, inventory, orders, customers and reports. Free for every seller.",
     href: readBusinessAppUrl(process.env.NEXT_PUBLIC_DASHBOARD_URL, "https://creator.nantty.com", "http://localhost:3200"),
   },

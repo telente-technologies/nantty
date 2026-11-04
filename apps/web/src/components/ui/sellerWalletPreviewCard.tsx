@@ -11,7 +11,7 @@ export function SellerWalletPreviewCard({ className }: { readonly className?: st
   return (
     <figure className={className ? `${styles.card} ${className}` : styles.card} aria-label="Illustrative seller wallet preview">
       <figcaption className={styles.caption}>
-        <FigmaIconTintedWithCurrentColor name="bank24" size={18} />
+        <FigmaIconTintedWithCurrentColor name="wallet24" size={18} />
         <span className={styles.captionTitle}>Seller wallet</span>
         <span className={styles.previewTag}>Preview</span>
         <span className={styles.hiddenBalanceNote} aria-label="Example balances are hidden">
