@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -46,7 +47,11 @@ import com.nantty.android.data.PublicStorePage
 import com.nantty.android.data.PublicStoreResult
 import com.nantty.android.data.SearchProduct
 import com.nantty.android.data.StoreRepository
+import com.nantty.android.data.StoreFollowResult
 import java.util.concurrent.Executor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 internal fun PublicStoreScreen(
@@ -55,6 +60,7 @@ internal fun PublicStoreScreen(
     executor: Executor,
     onBack: () -> Unit,
     onOpenProduct: (String) -> Unit,
+    onRequireSignIn: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var store by remember(storeId) { mutableStateOf<PublicStore?>(null) }
@@ -66,6 +72,10 @@ internal fun PublicStoreScreen(
     var pageError by remember(storeId) { mutableStateOf(false) }
     var reloadGeneration by remember(storeId) { mutableStateOf(0) }
     var requestGeneration by remember(storeId) { mutableStateOf(0) }
+    var following by remember(storeId) { mutableStateOf(false) }
+    var followingBusy by remember(storeId) { mutableStateOf(false) }
+    var followError by remember(storeId) { mutableStateOf<String?>(null) }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
 
     LaunchedEffect(storeId, reloadGeneration) {
         requestGeneration += 1
@@ -79,12 +89,33 @@ internal fun PublicStoreScreen(
         when (result) {
             is PublicStoreResult.Success -> {
                 store = result.page.store
+                following = result.page.store.isFollowing
                 products = result.page.products
                 nextCursor = result.page.nextCursor
             }
             is PublicStoreResult.Failure -> error = result.message
         }
         loading = false
+    }
+
+    fun toggleFollow() {
+        val currentStore = store ?: return
+        if (followingBusy) return
+        followingBusy = true
+        followError = null
+        scope.launch {
+            val outcome = withContext(Dispatchers.IO) { repository.setFollowing(currentStore.id, !following) }
+            when (outcome) {
+                is StoreFollowResult.Success -> {
+                    following = outcome.state.isFollowing
+                    store = store?.copy(isFollowing = outcome.state.isFollowing, followers = outcome.state.followers)
+                }
+                is StoreFollowResult.Failure -> {
+                    if (outcome.authenticationRequired) onRequireSignIn() else followError = outcome.message
+                }
+            }
+            followingBusy = false
+        }
     }
 
     fun loadMore() {
@@ -128,6 +159,10 @@ internal fun PublicStoreScreen(
                 loadingMore = loadingMore,
                 nextCursor = nextCursor,
                 onOpenProduct = onOpenProduct,
+                following = following,
+                followingBusy = followingBusy,
+                followError = followError,
+                onToggleFollow = ::toggleFollow,
                 onLoadMore = ::loadMore,
                 onRetry = { reloadGeneration++ },
             )
@@ -144,6 +179,10 @@ private fun PublicStoreContent(
     loadingMore: Boolean,
     nextCursor: String?,
     onOpenProduct: (String) -> Unit,
+    following: Boolean,
+    followingBusy: Boolean,
+    followError: String?,
+    onToggleFollow: () -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
 ) {
@@ -151,7 +190,9 @@ private fun PublicStoreContent(
         modifier = Modifier.fillMaxWidth().widthIn(max = 1040.dp).testTag("public-store-content"),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item(key = "store-summary") { PublicStoreHeader(store) }
+        item(key = "store-summary") {
+            PublicStoreHeader(store.copy(isFollowing = following), followingBusy, followError, onToggleFollow)
+        }
         item(key = "store-products-heading") {
             Text("Products", Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).semantics { heading() }, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         }
@@ -180,7 +221,7 @@ private fun PublicStoreContent(
 }
 
 @Composable
-private fun PublicStoreHeader(store: PublicStore) {
+private fun PublicStoreHeader(store: PublicStore, followingBusy: Boolean, followError: String?, onToggleFollow: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         store.bannerUrl?.let { banner ->
             AsyncImage(banner, contentDescription = "${store.name} store banner", modifier = Modifier.fillMaxWidth().height(160.dp), contentScale = ContentScale.Crop)
@@ -205,6 +246,15 @@ private fun PublicStoreHeader(store: PublicStore) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall,
         )
+        Button(
+            onClick = onToggleFollow,
+            enabled = !followingBusy,
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+        ) {
+            if (followingBusy) CircularProgressIndicator(Modifier.size(18.dp))
+            else Text(if (store.isFollowing) "Following" else "Follow store")
+        }
+        followError?.let { Text(it, Modifier.fillMaxWidth().padding(top = 4.dp), color = MaterialTheme.colorScheme.error) }
         Spacer(Modifier.height(8.dp))
     }
 }

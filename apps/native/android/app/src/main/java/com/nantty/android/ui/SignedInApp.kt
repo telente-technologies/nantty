@@ -411,6 +411,7 @@ internal fun SignedInApp(
                 repository = storeRepository,
                 executor = executor,
                 onBack = { selectedStoreId = null },
+                onRequireSignIn = onRequireSignIn,
                 onOpenProduct = { productId ->
                     selectedStoreId = null
                     pendingMartProductId = productId
@@ -580,6 +581,7 @@ internal fun SignedInApp(
                         messagesRepository = messagesRepository,
                         savedPostsRepository = savedPostsRepository,
                         martRepository = martRepository,
+                        storeRepository = storeRepository,
                         showMartCategoryPane = showMartCategoryPane,
                         initialMartProductId = pendingMartProductId,
                         onInitialMartProductHandled = { pendingMartProductId = null },
@@ -659,6 +661,7 @@ internal fun SignedInApp(
                     messagesRepository = messagesRepository,
                     savedPostsRepository = savedPostsRepository,
                     martRepository = martRepository,
+                    storeRepository = storeRepository,
                     showMartCategoryPane = showMartCategoryPane,
                     initialMartProductId = pendingMartProductId,
                     onInitialMartProductHandled = { pendingMartProductId = null },

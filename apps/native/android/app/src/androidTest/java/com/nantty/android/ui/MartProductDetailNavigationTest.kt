@@ -15,6 +15,10 @@ import com.nantty.android.data.MartRepository
 import com.nantty.android.data.CartRepository
 import com.nantty.android.data.CartTransport
 import com.nantty.android.data.ProductReviewsRepository
+import com.nantty.android.data.AccountSession
+import com.nantty.android.data.AccountUser
+import com.nantty.android.data.StoreRepository
+import com.nantty.android.data.StoreTransport
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.net.HttpURLConnection
@@ -55,6 +59,67 @@ class MartProductDetailNavigationTest {
 
         composeRule.onNodeWithContentDescription("Back to Mart").performClick()
         composeRule.onNodeWithText("Silk wrap dress").assertIsDisplayed()
+    }
+
+    @Test
+    fun productDetailOpensItsStoreByServerStoreId() {
+        var openedStoreId: String? = null
+        val repository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            openConnection = { url -> FakeMartConnection(url, responseFor(url)) },
+        )
+        composeRule.setContent {
+            MaterialTheme { MartScreen(repository, onOpenStore = { openedStoreId = it }) }
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Silk wrap dress").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Silk wrap dress").performClick()
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("View store").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithContentDescription("View Adire House store").performClick()
+        composeRule.runOnIdle { assertEquals("store-1", openedStoreId) }
+    }
+
+    @Test
+    fun productDetailFollowUsesStoreSocialRoutesAndServerStatus() {
+        val transport = ProductStoreFollowTransport()
+        val storeRepository = StoreRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = { AccountSession("token", "refresh", AccountUser("user-1", "Ada", "ada", null, null, emptyList())) },
+            transport = transport,
+        )
+        val productRepository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            openConnection = { url -> FakeMartConnection(url, responseFor(url)) },
+        )
+        composeRule.setContent {
+            MaterialTheme {
+                MartProductDetailScreen(
+                    productId = "prd-1",
+                    repository = productRepository,
+                    onAuthenticationRequired = {},
+                    onBack = {},
+                    storeRepository = storeRepository,
+                )
+            }
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Follow store").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Follow store").performClick()
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Following store").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Following store").performClick()
+        composeRule.waitUntil(5_000) {
+            transport.deletes.isNotEmpty()
+        }
+        assertEquals(listOf("/api/v1/stores/store-1/follow"), transport.posts)
+        assertEquals(listOf("/api/v1/stores/store-1/follow"), transport.deletes)
     }
 
     @Test
@@ -221,4 +286,29 @@ private class RecordingProductCartTransport : CartTransport {
     }
     override fun patch(path: String, accessToken: String, body: JSONObject) = error("Unexpected cart update")
     override fun delete(path: String, accessToken: String) = error("Unexpected cart delete")
+}
+
+private class ProductStoreFollowTransport : StoreTransport {
+    val posts = mutableListOf<String>()
+    val deletes = mutableListOf<String>()
+    private var isFollowing = false
+
+    override fun get(path: String, accessToken: String?): JSONObject {
+        assertEquals("/api/v1/stores/store-1/follow-status", path)
+        assertEquals("token", accessToken)
+        return JSONObject("""{"storeId":"store-1","isFollowing":$isFollowing,"followers":${if (isFollowing) 19 else 18}}""")
+    }
+
+    override fun post(path: String, accessToken: String): JSONObject {
+        assertEquals("token", accessToken)
+        posts += path
+        isFollowing = true
+        return JSONObject()
+    }
+
+    override fun delete(path: String, accessToken: String) {
+        assertEquals("token", accessToken)
+        deletes += path
+        isFollowing = false
+    }
 }

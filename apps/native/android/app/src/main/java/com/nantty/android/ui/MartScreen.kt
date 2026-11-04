@@ -52,6 +52,7 @@ import com.nantty.android.data.MartProduct
 import com.nantty.android.data.MartRepository
 import com.nantty.android.data.MartResult
 import com.nantty.android.data.ProductReviewsRepository
+import com.nantty.android.data.StoreRepository
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.Currency
@@ -61,7 +62,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun MartScreen(
+internal fun MartScreen(
     repository: MartRepository,
     modifier: Modifier = Modifier,
     showCategoryPane: Boolean = false,
@@ -70,6 +71,8 @@ fun MartScreen(
     onInitialProductHandled: () -> Unit = {},
     initialCategoryId: String? = null,
     onInitialCategoryHandled: () -> Unit = {},
+    onOpenStore: (String) -> Unit = {},
+    storeRepository: StoreRepository? = null,
     reviewsRepositoryOverride: ProductReviewsRepository? = null,
 ) {
     var categories by remember { mutableStateOf<List<MartCategory>>(emptyList()) }
@@ -107,6 +110,8 @@ fun MartScreen(
             onAuthenticationRequired = onAuthenticationRequired,
             onBack = { selectedProductId = null },
             onOpenReviews = { selectedReviewsProductId = it },
+            onOpenStore = onOpenStore,
+            storeRepository = storeRepository,
             modifier = modifier,
         )
         return

@@ -20,6 +20,7 @@ data class PublicStore(
     val rating: Double,
     val ratingCount: Int,
     val verified: Boolean,
+    val isFollowing: Boolean = false,
 )
 
 data class PublicStorePage(val store: PublicStore, val products: List<SearchProduct>, val nextCursor: String?)
@@ -31,6 +32,15 @@ sealed interface PublicStoreResult {
 
 fun interface StoreTransport {
     fun get(path: String, accessToken: String?): JSONObject
+    fun post(path: String, accessToken: String): JSONObject { error("This store transport does not support writes.") }
+    fun delete(path: String, accessToken: String): Unit { error("This store transport does not support writes.") }
+}
+
+data class StoreFollowState(val storeId: String, val isFollowing: Boolean, val followers: Int)
+
+sealed interface StoreFollowResult {
+    data class Success(val state: StoreFollowState) : StoreFollowResult
+    data class Failure(val message: String, val authenticationRequired: Boolean = false) : StoreFollowResult
 }
 
 class StoreRepository(
@@ -38,10 +48,12 @@ class StoreRepository(
     private val sessionProvider: () -> AccountSession? = { null },
     private val transport: StoreTransport = JdkStoreTransport(baseUrl),
 ) {
+    fun currentAccessToken(): String? = sessionProvider()?.accessToken?.takeIf(String::isNotBlank)
+
     fun loadStore(storeId: String, cursor: String? = null): PublicStoreResult = try {
         require(isSafeMartIdentifier(storeId)) { "This store link is invalid." }
         require(cursor == null || cursor.length <= MAX_CURSOR_LENGTH) { "This store page cursor is invalid. Refresh the store and try again." }
-        val accessToken = sessionProvider()?.accessToken?.takeIf(String::isNotBlank)
+        val accessToken = currentAccessToken()
         val storePayload = transport.get("/api/v1/stores/${pathSegment(storeId)}", accessToken)
         val store = parseStore(storePayload, storeId)
         val productPath = buildString {
@@ -52,6 +64,33 @@ class StoreRepository(
         PublicStoreResult.Success(parsePage(store, productsPayload))
     } catch (error: Exception) {
         PublicStoreResult.Failure(error.message ?: "Could not load this store. Check your connection and try again.")
+    }
+
+    fun setFollowing(storeId: String, follow: Boolean): StoreFollowResult {
+        if (!isSafeMartIdentifier(storeId)) return StoreFollowResult.Failure("This store link is invalid.")
+        val token = currentAccessToken() ?: return StoreFollowResult.Failure("Sign in to follow stores.", authenticationRequired = true)
+        val path = "/api/v1/stores/${pathSegment(storeId)}/follow"
+        return try {
+            if (follow) {
+                transport.post(path, token)
+            } else {
+                transport.delete(path, token)
+            }
+            val response = transport.get("/api/v1/stores/${pathSegment(storeId)}/follow-status", token)
+            StoreFollowResult.Success(parseFollowState(response, storeId, expectedFollowing = follow))
+        } catch (error: StoreTransportException) {
+            StoreFollowResult.Failure(error.message ?: "Could not update this store. Try again.", authenticationRequired = error.statusCode == 401)
+        } catch (error: Exception) {
+            StoreFollowResult.Failure(error.message ?: "Could not update this store. Check your connection and try again.")
+        }
+    }
+
+    private fun parseFollowState(payload: JSONObject, expectedId: String, expectedFollowing: Boolean): StoreFollowState {
+        val value = payload.optJSONObject("data") ?: payload
+        val id = value.optString("storeId")
+        val isFollowing = value.optBoolean("isFollowing")
+        require(id == expectedId && isSafeMartIdentifier(id) && isFollowing == expectedFollowing) { "Nantty returned an invalid store-follow state." }
+        return StoreFollowState(id, isFollowing, value.optInt("followers").coerceAtLeast(0))
     }
 
     internal fun parseStore(payload: JSONObject, expectedId: String): PublicStore {
@@ -71,6 +110,7 @@ class StoreRepository(
             rating = value.optDouble("rating").takeIf(Double::isFinite)?.coerceIn(0.0, 5.0) ?: 0.0,
             ratingCount = value.optInt("ratingCount").coerceAtLeast(0),
             verified = value.optBoolean("verified"),
+            isFollowing = value.optBoolean("isFollowing"),
         )
     }
 
@@ -114,9 +154,19 @@ private fun JSONObject.optNullableString(key: String): String? = optString(key).
 
 private class JdkStoreTransport(private val baseUrl: String) : StoreTransport {
     override fun get(path: String, accessToken: String?): JSONObject {
+        return request(path, "GET", accessToken)
+    }
+
+    override fun post(path: String, accessToken: String): JSONObject = request(path, "POST", accessToken, allowEmpty = true)
+
+    override fun delete(path: String, accessToken: String) {
+        request(path, "DELETE", accessToken, allowEmpty = true)
+    }
+
+    private fun request(path: String, method: String, accessToken: String?, allowEmpty: Boolean = false): JSONObject {
         val origin = trustedApiOrigin(baseUrl) ?: error("Configure an HTTPS Nantty API URL to view stores.")
         val connection = (URL(origin + path).openConnection() as HttpURLConnection).apply {
-            requestMethod = "GET"
+            requestMethod = method
             connectTimeout = 10_000
             readTimeout = 15_000
             instanceFollowRedirects = false
@@ -127,7 +177,8 @@ private class JdkStoreTransport(private val baseUrl: String) : StoreTransport {
         try {
             val status = connection.responseCode
             val body = (if (status in 200..299) connection.inputStream else connection.errorStream)?.use(::readBounded).orEmpty()
-            if (status !in 200..299) error("Store request failed (HTTP $status). Please try again.")
+            if (status !in 200..299) throw StoreTransportException(status, "Store request failed (HTTP $status). Please try again.")
+            if (body.isBlank() && allowEmpty) return JSONObject()
             if (body.isBlank()) error("Nantty returned an empty store response.")
             return JSONObject(body)
         } finally {
@@ -147,3 +198,5 @@ private class JdkStoreTransport(private val baseUrl: String) : StoreTransport {
         return output.toString(Charsets.UTF_8.name())
     }
 }
+
+class StoreTransportException(val statusCode: Int, message: String) : IllegalStateException(message)

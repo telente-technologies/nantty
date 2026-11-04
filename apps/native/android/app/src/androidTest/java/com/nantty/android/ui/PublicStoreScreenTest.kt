@@ -71,9 +71,67 @@ class PublicStoreScreenTest {
         compose.onNodeWithText("No products available").assertIsDisplayed()
     }
 
+    @Test
+    fun signedInViewerCanFollowAndUnfollowStoreWithServerCount() {
+        val transport = FollowableStoreTransport()
+        val repository = StoreRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = transport,
+        )
+        compose.setContent {
+            MaterialTheme { PublicStoreScreen(STORE_ID, repository, Executor { it.run() }, onBack = {}, onOpenProduct = {}) }
+        }
+
+        compose.onNodeWithText("Follow store").performClick()
+        compose.waitUntil(5_000) {
+            compose.onNodeWithText("Following").assertExists()
+            true
+        }
+        compose.onNodeWithText("19 followers · 0 products · 0.0 rating (0)").assertIsDisplayed()
+        assertEquals(listOf("/api/v1/stores/$STORE_ID/follow"), transport.posts)
+
+        compose.onNodeWithText("Following").performClick()
+        compose.waitUntil(5_000) {
+            compose.onNodeWithText("Follow store").assertExists()
+            true
+        }
+        compose.onNodeWithText("18 followers · 0 products · 0.0 rating (0)").assertIsDisplayed()
+        assertEquals(listOf("/api/v1/stores/$STORE_ID/follow"), transport.deletes)
+    }
+
     private fun signedInSession() = AccountSession("store-token", "refresh-token", AccountUser("user-1", "Ada", "ada", null, null, emptyList()))
 
     companion object {
-        private const val STORE_ID = "0192a4f0-0000-7000-8000-000000000000"
+        internal const val STORE_ID = "0192a4f0-0000-7000-8000-000000000000"
+    }
+}
+
+private class FollowableStoreTransport : StoreTransport {
+    val posts = mutableListOf<String>()
+    val deletes = mutableListOf<String>()
+    private var isFollowing = false
+    private var followers = 18
+
+    override fun get(path: String, accessToken: String?): JSONObject = when {
+        path == "/api/v1/stores/${PublicStoreScreenTest.STORE_ID}" -> JSONObject("""{"id":"${PublicStoreScreenTest.STORE_ID}","name":"Ada Fabrics","followers":$followers,"productsCount":0,"rating":0,"ratingCount":0,"isFollowing":$isFollowing}""")
+        path.startsWith("/api/v1/stores/${PublicStoreScreenTest.STORE_ID}/products") -> JSONObject("""{"data":[],"nextCursor":null}""")
+        path == "/api/v1/stores/${PublicStoreScreenTest.STORE_ID}/follow-status" -> JSONObject("""{"storeId":"${PublicStoreScreenTest.STORE_ID}","isFollowing":$isFollowing,"followers":$followers}""")
+        else -> error("Unexpected store request: $path")
+    }
+
+    override fun post(path: String, accessToken: String): JSONObject {
+        assertEquals("store-token", accessToken)
+        posts += path
+        isFollowing = true
+        followers += 1
+        return JSONObject("""{"storeId":"${PublicStoreScreenTest.STORE_ID}","isFollowing":true,"followers":$followers}""")
+    }
+
+    override fun delete(path: String, accessToken: String) {
+        assertEquals("store-token", accessToken)
+        deletes += path
+        isFollowing = false
+        followers -= 1
     }
 }

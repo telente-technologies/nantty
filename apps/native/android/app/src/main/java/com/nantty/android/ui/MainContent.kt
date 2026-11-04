@@ -49,6 +49,7 @@ import com.nantty.android.data.NotificationsRepository
 import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.data.SavedPostsRepository
 import com.nantty.android.data.SearchRepository
+import com.nantty.android.data.StoreRepository
 import com.nantty.android.data.WalletRepository
 import java.util.concurrent.Executor
 
@@ -96,6 +97,7 @@ internal fun MainContent(
     messagesRepository: MessagesRepository? = null,
     savedPostsRepository: SavedPostsRepository? = null,
     martRepository: MartRepository? = null,
+    storeRepository: StoreRepository? = null,
     showMartCategoryPane: Boolean = false,
     initialMartProductId: String? = null,
     onInitialMartProductHandled: () -> Unit = {},
@@ -191,11 +193,15 @@ internal fun MainContent(
             martRepository,
             modifier,
             showCategoryPane = showMartCategoryPane,
-            onAuthenticationRequired = onReauthenticate,
+            onAuthenticationRequired = {
+                if (canViewFollowing) onReauthenticate() else onSignInRequired()
+            },
             initialProductId = initialMartProductId,
             onInitialProductHandled = onInitialMartProductHandled,
             initialCategoryId = initialMartCategoryId,
             onInitialCategoryHandled = onInitialMartCategoryHandled,
+            onOpenStore = onOpenStore,
+            storeRepository = storeRepository,
         )
         return
     }

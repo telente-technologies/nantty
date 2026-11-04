@@ -47,6 +47,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,10 +57,16 @@ import com.nantty.android.data.MartProductDetailResult
 import com.nantty.android.data.MartRepository
 import com.nantty.android.data.AddToCartResult
 import com.nantty.android.data.CartRepository
+import com.nantty.android.data.StoreFollowResult
+import com.nantty.android.data.StoreRepository
+import com.nantty.android.data.ProductReportReason
+import com.nantty.android.data.ProductReportRepository
+import com.nantty.android.data.ProductReportResult
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.Currency
 import java.util.Locale
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -71,8 +78,11 @@ internal fun MartProductDetailScreen(
     onAuthenticationRequired: () -> Unit,
     onBack: () -> Unit,
     onOpenReviews: (String) -> Unit = {},
+    onOpenStore: (String) -> Unit = {},
+    storeRepository: StoreRepository? = null,
     modifier: Modifier = Modifier,
     cartRepositoryOverride: CartRepository? = null,
+    productReportRepositoryOverride: ProductReportRepository? = null,
 ) {
     var result by remember(productId, repository) { mutableStateOf<MartProductDetailResult?>(null) }
     var loading by remember(productId, repository) { mutableStateOf(true) }
@@ -81,9 +91,43 @@ internal fun MartProductDetailScreen(
     var quantity by rememberSaveable(productId) { mutableIntStateOf(1) }
     var addToCartResult by remember(productId) { mutableStateOf<AddToCartResult?>(null) }
     var addingToCart by remember(productId) { mutableStateOf(false) }
+    var followingStore by remember(productId) { mutableStateOf(false) }
+    var followingStoreBusy by remember(productId) { mutableStateOf(false) }
+    var storeFollowError by remember(productId) { mutableStateOf<String?>(null) }
+    var reportDialogVisible by rememberSaveable(productId) { mutableStateOf(false) }
+    var reportSubmitting by remember(productId) { mutableStateOf(false) }
+    var reportSubmitted by remember(productId) { mutableStateOf(false) }
+    var reportSelectedReason by rememberSaveable(productId) { mutableStateOf<ProductReportReason?>(null) }
+    var reportError by remember(productId) { mutableStateOf<String?>(null) }
+    var reportIdempotencyKey by rememberSaveable(productId) { mutableStateOf(UUID.randomUUID().toString()) }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     val cartRepository = remember(productId, repository, cartRepositoryOverride) {
         cartRepositoryOverride ?: CartRepository(accessTokenProvider = repository::currentAccessToken)
+    }
+    val productReportRepository = remember(productId, repository, productReportRepositoryOverride) {
+        productReportRepositoryOverride ?: ProductReportRepository(accessTokenProvider = repository::currentAccessToken)
+    }
+
+    fun submitProductReport(reason: ProductReportReason) {
+        if (reportSubmitting) return
+        reportSelectedReason = reason
+        reportSubmitting = true
+        reportError = null
+        scope.launch {
+            val outcome = withContext(Dispatchers.IO) {
+                productReportRepository.submit(productId, reason, reportIdempotencyKey)
+            }
+            reportSubmitting = false
+            when (outcome) {
+                is ProductReportResult.Success -> reportSubmitted = true
+                is ProductReportResult.Failure -> {
+                    if (outcome.authenticationRequired) {
+                        reportDialogVisible = false
+                        onAuthenticationRequired()
+                    } else reportError = outcome.message
+                }
+            }
+        }
     }
 
     BackHandler(onBack = onBack)
@@ -95,6 +139,7 @@ internal fun MartProductDetailScreen(
         }
         Snapshot.withMutableSnapshot {
             result = loaded
+            if (loaded is MartProductDetailResult.Success) followingStore = loaded.value.store.isFollowing
             loading = false
         }
     }
@@ -129,6 +174,35 @@ internal fun MartProductDetailScreen(
                         quantity = quantity,
                         onQuantityChange = { quantity = it; addToCartResult = null },
                         onOpenReviews = { onOpenReviews(detail.id) },
+                        onOpenStore = { onOpenStore(detail.store.id) },
+                        isFollowingStore = followingStore,
+                        followingStoreBusy = followingStoreBusy,
+                        storeFollowError = storeFollowError,
+                        onReportProduct = {
+                            if (productReportRepository.currentAccessToken() == null) onAuthenticationRequired()
+                            else reportDialogVisible = true
+                        },
+                        onToggleStoreFollow = if (storeRepository == null) null else {
+                            {
+                                if (!followingStoreBusy) {
+                                    followingStoreBusy = true
+                                    storeFollowError = null
+                                    scope.launch {
+                                        val outcome = withContext(Dispatchers.IO) {
+                                            storeRepository.setFollowing(detail.store.id, follow = !followingStore)
+                                        }
+                                        when (outcome) {
+                                            is StoreFollowResult.Success -> followingStore = outcome.state.isFollowing
+                                            is StoreFollowResult.Failure -> {
+                                                if (outcome.authenticationRequired) onAuthenticationRequired()
+                                                else storeFollowError = outcome.message
+                                            }
+                                        }
+                                        followingStoreBusy = false
+                                    }
+                                }
+                            }
+                        },
                         modifier = Modifier.weight(1f),
                     )
                     val selectedVariant = detail.variants.firstOrNull { it.id == effectiveVariantId }
@@ -169,6 +243,25 @@ internal fun MartProductDetailScreen(
             }
         }
     }
+
+    ProductReportDialog(
+        visible = reportDialogVisible,
+        submitting = reportSubmitting,
+        submitted = reportSubmitted,
+        selectedReason = reportSelectedReason,
+        errorMessage = reportError,
+        onDismiss = {
+            reportDialogVisible = false
+            if (reportSubmitted) {
+                reportSubmitted = false
+                reportSelectedReason = null
+                reportError = null
+                reportIdempotencyKey = UUID.randomUUID().toString()
+            }
+        },
+        onSelectReason = ::submitProductReport,
+        onRetry = { reportSelectedReason?.let(::submitProductReport) },
+    )
 }
 
 @Composable
@@ -193,6 +286,12 @@ private fun ProductDetailContent(
     quantity: Int,
     onQuantityChange: (Int) -> Unit,
     onOpenReviews: () -> Unit,
+    onOpenStore: () -> Unit,
+    onReportProduct: () -> Unit,
+    isFollowingStore: Boolean,
+    followingStoreBusy: Boolean,
+    storeFollowError: String?,
+    onToggleStoreFollow: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     BoxWithProductWidth(modifier) { wide ->
@@ -205,7 +304,7 @@ private fun ProductDetailContent(
                     item { ProductImages(detail, wide = true) }
                 }
                 LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(end = 20.dp, bottom = 32.dp)) {
-                    item { ProductInformation(detail, selectedVariantId, onSelectVariant, quantity, onQuantityChange, onOpenReviews) }
+                    item { ProductInformation(detail, selectedVariantId, onSelectVariant, quantity, onQuantityChange, onOpenReviews, onOpenStore, onReportProduct, isFollowingStore, followingStoreBusy, storeFollowError, onToggleStoreFollow) }
                 }
             }
         } else {
@@ -215,7 +314,7 @@ private fun ProductDetailContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 item { ProductImages(detail, wide = false) }
-                item { ProductInformation(detail, selectedVariantId, onSelectVariant, quantity, onQuantityChange, onOpenReviews) }
+                item { ProductInformation(detail, selectedVariantId, onSelectVariant, quantity, onQuantityChange, onOpenReviews, onOpenStore, onReportProduct, isFollowingStore, followingStoreBusy, storeFollowError, onToggleStoreFollow) }
             }
         }
     }
@@ -271,6 +370,12 @@ private fun ProductInformation(
     quantity: Int,
     onQuantityChange: (Int) -> Unit,
     onOpenReviews: () -> Unit,
+    onOpenStore: () -> Unit,
+    onReportProduct: () -> Unit,
+    isFollowingStore: Boolean,
+    followingStoreBusy: Boolean,
+    storeFollowError: String?,
+    onToggleStoreFollow: (() -> Unit)?,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(detail.title, Modifier.semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -306,6 +411,22 @@ private fun ProductInformation(
                     )
                 }
             }
+        }
+        TextButton(onClick = onOpenStore, modifier = Modifier.semantics { contentDescription = "View ${detail.store.name} store" }) {
+            Text("View store")
+        }
+        if (onToggleStoreFollow != null) {
+            TextButton(onClick = onToggleStoreFollow, enabled = !followingStoreBusy) {
+                if (followingStoreBusy) CircularProgressIndicator(Modifier.size(16.dp))
+                else Text(if (isFollowingStore) "Following store" else "Follow store")
+            }
+            storeFollowError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        }
+        TextButton(
+            onClick = onReportProduct,
+            modifier = Modifier.semantics { contentDescription = "Report this product" },
+        ) {
+            Text(stringResource(com.nantty.android.R.string.report_product_action))
         }
         if (detail.variants.isNotEmpty()) {
             HorizontalDetailDivider()

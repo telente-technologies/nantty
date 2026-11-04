@@ -11,7 +11,15 @@ import java.net.URLEncoder
 
 data class MartCategory(val id: String, val name: String, val depth: Int)
 data class MartProduct(val id: String, val name: String, val amountMinor: Long, val currency: String, val imageUrl: String?, val stock: Int)
-data class MartStoreSummary(val id: String, val name: String, val logoUrl: String?, val rating: Double, val ratingCount: Int, val reviewCount: Int)
+data class MartStoreSummary(
+    val id: String,
+    val name: String,
+    val logoUrl: String?,
+    val rating: Double,
+    val ratingCount: Int,
+    val reviewCount: Int,
+    val isFollowing: Boolean = false,
+)
 data class MartProductVariant(
     val id: String,
     val title: String,
@@ -224,6 +232,7 @@ class MartRepository(
                 rating = storeJson.optDouble("rating").takeIf { it.isFinite() && it >= 0 } ?: 0.0,
                 ratingCount = storeJson.optInt("ratingCount").coerceAtLeast(0),
                 reviewCount = storeJson.optInt("reviewCount").coerceAtLeast(0),
+                isFollowing = storeJson.optBoolean("isFollowing"),
             ),
             variants = variants,
         )
