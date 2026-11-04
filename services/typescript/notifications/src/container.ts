@@ -23,11 +23,13 @@ import type { PushSender } from "./interfaces/pushSender.interface.js";
 import type { DeliveryRepository, DeviceTokenRepository, NotificationRepository, PreferenceRepository, SuppressionRepository, UnsubscribeReceiptRepository } from "./interfaces/repositories.interface.js";
 import { StaffAuthenticator } from "./middlewares/staffAuth.middleware.js";
 import { DeliverEmailIfStillUnreadHandler } from "./modules/delivery/commands/deliverEmailIfStillUnread/deliverEmailIfStillUnread.handler.js";
+import { DeliverTemplateEmailHandler } from "./modules/delivery/commands/deliverTemplateEmail/deliverTemplateEmail.handler.js";
 import { RunDigestBatchHandler } from "./modules/digests/commands/runDigestBatch/runDigestBatch.handler.js";
 import { DeliveryPrismaRepository } from "./modules/delivery/repositories/delivery.prisma.repository.js";
 import { EmailDeliveryService } from "./modules/delivery/services/emailDelivery.service.js";
 import { NotificationDispatcherService } from "./modules/delivery/services/notificationDispatcher.service.js";
 import { SupportInboxAlertService } from "./modules/delivery/services/supportInboxAlert.service.js";
+import { ListFailedEmailDeliveriesHandler } from "./modules/delivery/queries/listFailedEmailDeliveries/listFailedEmailDeliveries.handler.js";
 import { QueueAdminEmailHandler } from "./modules/bulkCampaigns/commands/queueAdminEmail/queueAdminEmail.handler.js";
 import { ProcessBulkBatchHandler } from "./modules/bulkCampaigns/commands/processBulkBatch/processBulkBatch.handler.js";
 import { QueueLegalNoticeHandler } from "./modules/bulkCampaigns/commands/queueLegalNotice/queueLegalNotice.handler.js";
@@ -66,6 +68,7 @@ import { SuppressionPrismaRepository } from "./modules/suppression/repositories/
 import { UnsubscribeFromMarketingHandler } from "./modules/unsubscribe/commands/unsubscribeFromMarketing/unsubscribeFromMarketing.handler.js";
 import { UnsubscribeReceiptPrismaRepository } from "./modules/unsubscribe/repositories/unsubscribeReceipt.prisma.repository.js";
 import { UnsubscribeTokenService } from "./modules/unsubscribe/services/unsubscribeToken.service.js";
+import type { DomainEventEnvelope } from "./types/domainEvent.type.js";
 
 export interface ContainerOverrides {
   readonly prisma?: PrismaClient;
@@ -109,7 +112,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
   const legalAudience = new LegalAudienceService(identity, suppressions, batchSize, ratePerSecond);
   const queueLegalNotice = new QueueLegalNoticeHandler({ drafts, campaigns, audience: legalAudience, jobQueue, jobsQueueUrl: config.queues.jobs, identity, batchSize, ratePerSecond, acceptUrl });
   const planner = new AudiencePlannerService(identity);
-  const supportInbox = config.supportInbox === undefined ? undefined : new SupportInboxAlertService({ emailDelivery, ...config.supportInbox });
+  const supportInbox = config.supportInbox === undefined ? undefined : new SupportInboxAlertService({ emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs, ...config.supportInbox });
   const subscriberSource = overrides.postNotificationSubscribers !== undefined ? overrides.postNotificationSubscribers
     : config.digestSource === null ? null : new SocialHttpPostNotificationSubscribers(config.digestSource.baseUrl, config.digestSource.internalToken);
   const runPostNotificationFanout = subscriberSource === null ? null : new RunPostNotificationFanoutHandler({
@@ -137,6 +140,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
     removeDeviceToken: new RemoveDeviceTokenHandler(deviceTokens),
     listAdminEmailReferenceData: new ListAdminEmailReferenceDataHandler(identity),
     listAdminEmailSends: new ListAdminEmailSendsHandler(campaigns),
+    listFailedEmailDeliveries: new ListFailedEmailDeliveriesHandler(deliveries),
     previewAdminEmail: new PreviewAdminEmailHandler(planner),
     queueAdminEmail: new QueueAdminEmailHandler({ planner, campaigns, jobQueue, jobsQueueUrl: config.queues.jobs, identity, batchSize, ratePerSecond }),
     noticeDraftProvisioner: new NoticeDraftProvisionerService(drafts, overrides.legalVersions !== undefined ? overrides.legalVersions : new IdentityLegalVersionSource(config.identity.baseUrl), config.webBaseUrl),
@@ -151,7 +155,10 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
     runPostNotificationFanout,
     sendWidgetRefresh,
     processBulkBatch: new ProcessBulkBatchHandler({ campaigns, identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs, pause: overrides.pause ?? ((milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))) }),
-    deliverEmailIfStillUnread: new DeliverEmailIfStillUnreadHandler({ notifications, deliveries, identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs }),
+    deliverEmailIfStillUnread: new DeliverEmailIfStillUnreadHandler({ notifications, deliveries, identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs, supportInbox, logger }),
+    deliverTemplateEmail: new DeliverTemplateEmailHandler({ identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs, supportInbox, logger }),
+    deliverSupportTicketAlert: { execute: async (event: DomainEventEnvelope) => { await supportInbox?.deliverTicketCreated(event); } },
+    deliverFailedEmailAlert: { execute: async (input: { eventId: string; templateKey: string; reason: string; address: string }) => { await supportInbox?.deliverEmailDeliveryFailed(input); } },
     runDigestBatch: config.digestSource === null ? null : new RunDigestBatchHandler({ source: new SocialHttpDigestSource(config.digestSource.baseUrl, config.digestSource.internalToken), identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs, batchSize }),
     recordSesFeedback: new RecordSesFeedbackHandler(suppressions),
   };

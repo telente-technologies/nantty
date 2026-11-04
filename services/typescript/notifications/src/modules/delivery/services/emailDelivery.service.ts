@@ -28,6 +28,13 @@ export interface CustomEmailRequest extends BaseRequest {
 
 export type EmailDeliveryOutcome = { readonly status: "sent" | "skipped" | "failed" | "duplicate"; readonly reason?: string; readonly previous?: string };
 
+export class EmailDeliveryFailure extends Error {
+  public constructor(public readonly attemptCount: number, message: string) {
+    super(message);
+    this.name = "EmailDeliveryFailure";
+  }
+}
+
 export class EmailDeliveryService {
   public constructor(
     private readonly deps: {
@@ -78,9 +85,9 @@ export class EmailDeliveryService {
       const { messageId } = await this.deps.sender.send(message);
       await deliveries.finish(claim.id, "sent", { providerMessageId: messageId });
       return { status: "sent" };
-    } catch (error) {
-      await deliveries.finish(claim.id, "failed", { skipReason: error instanceof Error ? error.message.slice(0, 200) : "send_failed" });
-      throw error;
+    } catch {
+      await deliveries.finish(claim.id, "failed", { skipReason: "email_provider_send_failed" });
+      throw new EmailDeliveryFailure(claim.attemptCount, "email_provider_send_failed");
     }
   }
 

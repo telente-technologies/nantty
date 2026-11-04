@@ -10,7 +10,7 @@ import { UpdateNotificationPreferenceHandler } from "../src/modules/inbox/comman
 import { CreateDraftFromPublishedPolicyHandler } from "../src/modules/noticeDrafts/commands/createDraftFromPublishedPolicy/createDraftFromPublishedPolicy.handler.js";
 import { SendNoticeTestEmailHandler } from "../src/modules/noticeDrafts/commands/sendNoticeTestEmail/sendNoticeTestEmail.handler.js";
 import { eventFixtures } from "./fixtures/eventFixtures.fixture.js";
-import { createTestHarness, makeEvent, type TestHarness } from "./fakes/testHarness.fake.js";
+import { createTestHarness, makeEvent, silentLogger, type TestHarness } from "./fakes/testHarness.fake.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 
 let harness: TestHarness;
@@ -63,7 +63,7 @@ describe("inbox", () => {
 
 describe("deferred mention email", () => {
   const command = { eventId: "e1", userId: "u1", preferenceCategory: "social" as const, notificationKey: "e1:u1:main", emailDedupeKey: "e1:u1:email:main", templateKey: "mentionedYou" as const, props: {}, notBefore: "2026-10-03T13:00:00.000Z" };
-  const createHandler = () => new DeliverEmailIfStillUnreadHandler({ notifications: harness.notifications, deliveries: harness.deliveries, identity: harness.identity, emailDelivery: harness.emailDelivery, jobQueue: harness.jobQueue, jobsQueueUrl: "jobs-queue", now: harness.now });
+  const createHandler = () => new DeliverEmailIfStillUnreadHandler({ notifications: harness.notifications, deliveries: harness.deliveries, identity: harness.identity, emailDelivery: harness.emailDelivery, jobQueue: harness.jobQueue, jobsQueueUrl: "jobs-queue", now: harness.now, logger: silentLogger });
 
   beforeEach(async () => {
     harness.identity.add(makeRecipient());

@@ -40,13 +40,24 @@ export interface NotificationRepository {
 export interface DeliveryClaim {
   readonly id: string;
   readonly status: DeliveryStatus;
+  readonly attemptCount: number;
   readonly alreadyProcessed: boolean;
+}
+
+export interface FailedDeliveryRecord {
+  readonly id: string;
+  readonly eventId: string;
+  readonly templateKey: string | null;
+  readonly attemptCount: number;
+  readonly failedAt: Date | null;
+  readonly reason: string | null;
 }
 
 export interface DeliveryRepository {
   claim(input: { readonly dedupeKey: string; readonly eventId: string; readonly userId: string | null; readonly channel: DeliveryChannel; readonly templateKey: string | null; readonly mailKind: MailKind | null }): Promise<DeliveryClaim>;
   finish(id: string, status: DeliveryStatus, detail: { readonly skipReason?: string; readonly providerMessageId?: string }): Promise<void>;
   countSentEmails(userId: string, mailKind: MailKind, since: Date): Promise<number>;
+  listFailedEmails(limit: number): Promise<readonly FailedDeliveryRecord[]>;
   findUserIdByProviderMessageId(providerMessageId: string): Promise<string | null>;
 }
 

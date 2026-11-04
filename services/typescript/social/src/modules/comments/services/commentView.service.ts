@@ -31,9 +31,12 @@ export async function buildCommentViews(context: HandlerContext, viewerId: strin
           ).map((row) => row.targetId),
         );
   const authorIds = [...new Set([...rows.map((row) => row.authorId), ...parents.map((parent) => parent.authorId)])];
-  const [authors, blockedViewer] = await Promise.all([
+  const authorProfileIds = [...new Set(rows.flatMap((row) => row.authorProfileId === null || row.authorProfileId === undefined ? [] : [row.authorProfileId]))];
+  const [authors, blockedViewer, profiles, profileCheckmarks] = await Promise.all([
     context.directory.findUserSummaries(authorIds),
     postAuthorId === undefined ? new Set<string>() : blockRepository.blockersOfViewer(db, postAuthorId, authorIds),
+    authorProfileIds.length === 0 ? new Map() : context.directory.findProfilesByIds(authorProfileIds),
+    authorProfileIds.length === 0 ? new Map() : context.directory.findProfileCheckmarkColors(authorProfileIds),
   ]);
   const videoRepliesByComment = new Map<string, CommentVideoReply[]>();
   for (const reply of videoReplyRows) {
@@ -52,6 +55,10 @@ export async function buildCommentViews(context: HandlerContext, viewerId: strin
       parentCommentId: row.parentCommentId,
       rootCommentId: row.rootCommentId,
       author: authors.get(row.authorId) ?? placeholderAuthor(row.authorId),
+      postedAs: row.authorProfileId === null || row.authorProfileId === undefined ? null : (() => {
+        const profile = profiles.get(row.authorProfileId);
+        return profile === undefined ? null : { id: profile.id, kind: profile.kind, name: profile.displayName, handle: profile.handle, avatarUrl: profile.avatarUrl, checkmark: profileCheckmarks.get(profile.id) ?? null };
+      })(),
       text: row.text,
       createdAt: row.createdAt.toISOString(),
       likes: row.likeCount,

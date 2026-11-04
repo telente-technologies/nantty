@@ -11,4 +11,5 @@ export interface DeliverEmailIfStillUnreadCommand {
   readonly templateKey: EmailTemplateKey;
   readonly props: unknown;
   readonly notBefore: string;
+  readonly attempt?: number;
 }

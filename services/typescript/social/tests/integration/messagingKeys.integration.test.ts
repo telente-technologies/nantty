@@ -33,7 +33,7 @@ function deviceRegistration(oneTimePreKeys: number) {
 const emptyDirectory: IdentityDirectory = {
   findUserSummaries: async (ids) => new Map(ids.map((id) => [id, { id, name: id, username: id.slice(0, 8), avatarUrl: null, verified: false, isCreator: false }])),
   findAccountIdsByUsernames: async () => new Map(), searchUserSummaries: async () => [], findPrivateAccountIds: async () => new Set(), findMentionPrivacy: async () => new Map(),
-  findMentionTargetStatuses: async () => new Map(), hasPersonalizationConsent: async () => false, findAccountsAllowingPersonalizedAds: async () => new Set<string>(), findCheckmarkColors: async () => new Map(), findAccountCreatedAt: async () => undefined,
+  findMentionTargetStatuses: async () => new Map(), hasPersonalizationConsent: async () => false, findAccountsAllowingPersonalizedAds: async () => new Set<string>(), findCheckmarkColors: async () => new Map(), findProfileCheckmarkColors: async () => new Map(), findAccountCreatedAt: async () => undefined,
   findOwnedPostableProfile: async () => null, findProfilesByIds: async () => new Map(),
 };
 

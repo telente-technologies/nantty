@@ -107,6 +107,18 @@ export function createIdentityDirectory(client: IdentityReadClient, logger: Logg
       return result;
     },
 
+    async findProfileCheckmarkColors(profileIds) {
+      const result = new Map<string, CheckmarkColor>();
+      const unique = [...new Set(profileIds)];
+      if (unique.length === 0) return result;
+      const rows = await client.identityProfileCheckmark.findMany({
+        where: { profileId: { in: unique }, status: { in: ["verified", "grace"] } },
+        select: { profileId: true, color: true },
+      });
+      for (const row of rows) if (row.color === "blue" || row.color === "gold" || row.color === "black") result.set(row.profileId, row.color);
+      return result;
+    },
+
     async findAccountCreatedAt(accountId) {
       const row = await client.identityAccount.findUnique({ where: { id: accountId }, select: { createdAt: true } });
       return row?.createdAt;

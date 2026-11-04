@@ -3,6 +3,9 @@ import type { Logger } from "@nantty/fastify-platform";
 import { EmailDeliveryService } from "../../src/modules/delivery/services/emailDelivery.service.js";
 import { NotificationDispatcherService } from "../../src/modules/delivery/services/notificationDispatcher.service.js";
 import { UnsubscribeTokenService } from "../../src/modules/unsubscribe/services/unsubscribeToken.service.js";
+import { failedEmailAlertJobType, supportTicketAlertJobType, templateEmailJobType } from "../../src/constants/delivery.constant.js";
+import { DeliverTemplateEmailHandler } from "../../src/modules/delivery/commands/deliverTemplateEmail/deliverTemplateEmail.handler.js";
+import { SupportInboxAlertService } from "../../src/modules/delivery/services/supportInboxAlert.service.js";
 import type { DomainEventEnvelope } from "../../src/types/domainEvent.type.js";
 import {
   InMemoryCampaignRepository, InMemoryDeliveryRepository, InMemoryDeviceTokenRepository, InMemoryNoticeDraftRepository, InMemoryNotificationRepository, InMemoryPreferenceRepository, InMemorySuppressionRepository, InMemoryUnsubscribeReceiptRepository,
@@ -34,6 +37,29 @@ export function createTestHarness() {
 }
 
 export type TestHarness = ReturnType<typeof createTestHarness>;
+
+export async function runQueuedTemplateEmails(harness: TestHarness, inbox?: SupportInboxAlertService): Promise<void> {
+  const queued = harness.jobQueue.jobs.splice(0);
+  const deliveryJobs = queued.filter((job) => [templateEmailJobType, supportTicketAlertJobType, failedEmailAlertJobType].includes(String(job.body["type"])));
+  harness.jobQueue.jobs.push(...queued.filter((job) => ![templateEmailJobType, supportTicketAlertJobType, failedEmailAlertJobType].includes(String(job.body["type"]))));
+  const supportInbox = inbox ?? new SupportInboxAlertService({ emailDelivery: harness.emailDelivery, recipients: ["support@nantty.test"], adminBaseUrl: "https://admin.nantty.test", jobQueue: harness.jobQueue, jobsQueueUrl: "jobs-queue" });
+  const handler = new DeliverTemplateEmailHandler({
+    identity: harness.identity,
+    emailDelivery: harness.emailDelivery,
+    jobQueue: harness.jobQueue,
+    jobsQueueUrl: "jobs-queue",
+    supportInbox,
+    logger: silentLogger,
+  });
+  for (const job of deliveryJobs) {
+    if (job.body["type"] === templateEmailJobType) await handler.execute(job.body as never);
+    else if (job.body["type"] === supportTicketAlertJobType) await supportInbox.deliverTicketCreated(job.body["event"] as never);
+    else await supportInbox.deliverEmailDeliveryFailed(job.body as never);
+  }
+  const failureAlerts = harness.jobQueue.jobs.filter((job) => job.body["type"] === failedEmailAlertJobType);
+  harness.jobQueue.jobs.splice(0, harness.jobQueue.jobs.length, ...harness.jobQueue.jobs.filter((job) => job.body["type"] !== failedEmailAlertJobType));
+  for (const job of failureAlerts) await supportInbox.deliverEmailDeliveryFailed(job.body as never);
+}
 
 export function makeEvent(type: string, data: Record<string, unknown>, id = `evt-${type}`): DomainEventEnvelope {
   return { id, type, source: "test", subject: type, schemaVersion: 1, occurredAt: "2026-10-03T11:59:00.000Z", data };

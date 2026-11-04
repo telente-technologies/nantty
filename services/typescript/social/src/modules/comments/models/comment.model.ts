@@ -1,4 +1,5 @@
 import type { UserSummary } from "../../../interfaces/identityDirectory.interface.js";
+import type { CheckmarkColor } from "../../../interfaces/identityDirectory.interface.js";
 import type { MentionEntity } from "../../mentions/models/mention.model.js";
 import type { QuotedPostSummary } from "../../posts/models/post.model.js";
 
@@ -8,12 +9,22 @@ export interface CommentVideoReply {
   readonly createdAt: string;
 }
 
+export interface CommentAuthorProfile {
+  readonly id: string;
+  readonly kind: string;
+  readonly name: string;
+  readonly handle: string;
+  readonly avatarUrl: string | null;
+  readonly checkmark: CheckmarkColor | null;
+}
+
 export interface CommentView {
   readonly id: string;
   readonly postId: string;
   readonly parentCommentId: string | null;
   readonly rootCommentId: string | null;
   readonly author: UserSummary;
+  readonly postedAs?: CommentAuthorProfile | null;
   readonly text: string;
   readonly createdAt: string;
   readonly likes: number;

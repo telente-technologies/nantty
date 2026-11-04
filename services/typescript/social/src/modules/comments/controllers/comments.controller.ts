@@ -42,7 +42,7 @@ export interface CommentsHandlers {
 export function createCommentsController(route: RouteFactory, handlers: CommentsHandlers) {
   return {
     createComment: route({ authentication: "required", params: postCommentsParamsSchema, body: newCommentBodySchema, successStatus: 201 }, ({ principal, params, body }) =>
-      handlers.createComment({ authorId: principal.accountId, postId: params.postId, text: body.text, parentCommentId: body.parentCommentId, mentions: body.mentions, quotedPostId: body.quotedPostId })),
+      handlers.createComment({ authorId: principal.accountId, authorProfileId: body.asProfileId, postId: params.postId, text: body.text, parentCommentId: body.parentCommentId, mentions: body.mentions, quotedPostId: body.quotedPostId })),
     listPostComments: route({ authentication: "optional", params: postCommentsParamsSchema, query: rankedCommentsQuerySchema }, ({ principal, params, query }) =>
       handlers.listPostComments({ viewerId: principal?.accountId, postId: params.postId, filter: query.filter, cursor: query.cursor, limit: clampPageSize(query.limit, 20) })),
     listCommentReplies: route({ authentication: "optional", params: commentParamsSchema, query: commentsPageQuerySchema }, ({ principal, params, query }) =>

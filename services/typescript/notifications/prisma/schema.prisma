@@ -39,6 +39,9 @@ model Delivery {
   templateKey       String?
   mailKind          String?
   status            String
+  attemptCount      Int      @default(0)
+  lastAttemptAt     DateTime?
+  failedAt          DateTime?
   skipReason        String?
   providerMessageId String?
   createdAt         DateTime @default(now())

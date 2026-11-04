@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { HandleDomainEventHandler } from "../src/modules/eventIngestion/commands/handleDomainEvent/handleDomainEvent.handler.js";
-import { createTestHarness, makeEvent, silentLogger } from "./fakes/testHarness.fake.js";
+import { createTestHarness, makeEvent, runQueuedTemplateEmails, silentLogger } from "./fakes/testHarness.fake.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 
 const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com" };
@@ -58,10 +58,12 @@ describe("ad account invites", () => {
     const handler = new HandleDomainEventHandler(harness.dispatcher, { handlePolicyPublished: async () => undefined }, context, silentLogger);
     const data = { inviteId: "i1", accountId: "acc1", accountName: "Ada's Closet", role: "advertiser", invitedBy: "Adaeze", invitedByUserId: "u2", inviteeUserId: "u1", expiresAt: "2026-10-12T09:00:00.000Z", inviteUrl: "https://ads.nantty.com/invites/i1" };
     await handler.execute({ event: makeEvent("adInvite.created", data) });
+    await runQueuedTemplateEmails(harness);
     expect(harness.notifications.rows).toEqual([expect.objectContaining({ userId: "u1", title: "Ad account invite" })]);
     expect(harness.sender.sent[0]).toMatchObject({ to: "amaka@example.com", subject: "Adaeze invited you to Ada's Closet on Nantty Ads" });
     expect(harness.sender.sent[0]?.html).toContain("https://ads.nantty.com/invites/i1");
     await handler.execute({ event: makeEvent("adInvite.created", { ...data, inviteUrl: "javascript:alert(1)" }, "evt-2") });
+    await runQueuedTemplateEmails(harness);
     expect(harness.sender.sent).toHaveLength(1);
   });
 });

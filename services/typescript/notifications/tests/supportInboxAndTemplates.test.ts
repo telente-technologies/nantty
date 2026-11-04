@@ -4,21 +4,45 @@ import { HandleDomainEventHandler } from "../src/modules/eventIngestion/commands
 import { SupportInboxAlertService } from "../src/modules/delivery/services/supportInboxAlert.service.js";
 import { PreviewEmailTemplateHandler } from "../src/modules/emailTemplates/queries/previewEmailTemplate/previewEmailTemplate.handler.js";
 import { policyUpdatedPreviewBodySchema } from "../src/modules/emailTemplates/validators/emailTemplates.validator.js";
-import { createTestHarness, makeEvent, silentLogger } from "./fakes/testHarness.fake.js";
+import { createJobMessageHandler } from "../src/jobs/messageRouting.job.js";
+import { createTestHarness, makeEvent, runQueuedTemplateEmails, silentLogger } from "./fakes/testHarness.fake.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
 
 const ticket = { ticketId: "7b9e2f3a-1111-4222-8333-123456789abc", reference: "SUP-10421", accountId: "u1", subject: "Refund <b>missing</b>", category: "payment", channel: "web", priority: "high", firstResponseHours: 4 };
 const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com" };
 
 describe("support team inbox email", () => {
+  it("routes queued delivery-failure alerts to the alert delivery handler", async () => {
+    const alerts: unknown[] = [];
+    const handleJob = createJobMessageHandler({ deliverFailedEmailAlert: { execute: async (alert: unknown) => { alerts.push(alert); } } } as never, silentLogger);
+    await handleJob(JSON.stringify({ type: "email.alertDeliveryFailure", eventId: "evt-mail-1", templateKey: "orderShipped", reason: "email_provider_send_failed", address: "support@nantty.com" }));
+    expect(alerts).toEqual([{ eventId: "evt-mail-1", templateKey: "orderShipped", reason: "email_provider_send_failed", address: "support@nantty.com" }]);
+  });
+
+  it("queues exhausted transactional-email alerts and persists/retries failures in the delivery ledger", async () => {
+    const harness = createTestHarness();
+    const inbox = new SupportInboxAlertService({ emailDelivery: harness.emailDelivery, recipients: ["support@nantty.com"], adminBaseUrl: "https://admin.nantty.com", jobQueue: harness.jobQueue, jobsQueueUrl: "jobs-queue" });
+    await inbox.notifyEmailDeliveryFailed({ eventId: "evt-mail-1", templateKey: "orderShipped", reason: "email_provider_send_failed" });
+    expect(harness.jobQueue.jobs[0]).toMatchObject({ queueUrl: "jobs-queue", body: { type: "email.alertDeliveryFailure", eventId: "evt-mail-1", address: "support@nantty.com" } });
+
+    harness.sender.failNext = true;
+    await expect(inbox.deliverEmailDeliveryFailed({ eventId: "evt-mail-1", templateKey: "orderShipped", reason: "email_provider_send_failed", address: "support@nantty.com" })).rejects.toMatchObject({ attemptCount: 1 });
+    expect(await harness.deliveries.listFailedEmails(10)).toEqual([expect.objectContaining({ eventId: "evt-mail-1", attemptCount: 1 })]);
+
+    await inbox.deliverEmailDeliveryFailed({ eventId: "evt-mail-1", templateKey: "orderShipped", reason: "email_provider_send_failed", address: "support@nantty.com" });
+    expect(harness.sender.sent).toHaveLength(1);
+    expect(harness.sender.sent[0]?.to).toBe("support@nantty.com");
+  });
+
   it("emails every support address once per ticket with an admin link, and the requester still gets their receipt", async () => {
     const harness = createTestHarness();
     harness.identity.accounts.set("u1", makeRecipient({ accountId: "u1", email: "amaka@example.com" }));
-    const inbox = new SupportInboxAlertService({ emailDelivery: harness.emailDelivery, recipients: ["support@nantty.com", "lead@nantty.com"], adminBaseUrl: "https://admin.nantty.com/" });
+    const inbox = new SupportInboxAlertService({ emailDelivery: harness.emailDelivery, recipients: ["support@nantty.com", "lead@nantty.com"], adminBaseUrl: "https://admin.nantty.com/", jobQueue: harness.jobQueue, jobsQueueUrl: "jobs-queue" });
     const handler = new HandleDomainEventHandler(harness.dispatcher, { handlePolicyPublished: async () => undefined }, context, silentLogger, inbox);
     const event = makeEvent("ticket.created", ticket);
     await handler.execute({ event });
     await handler.execute({ event });
+    await runQueuedTemplateEmails(harness, inbox);
     const staffMail = harness.sender.sent.filter((mail) => mail.to !== "amaka@example.com");
     expect(staffMail.map((mail) => mail.to)).toEqual(["support@nantty.com", "lead@nantty.com"]);
     expect(staffMail[0]?.subject).toBe("[Nantty Support] SUP-10421 Refund <b>missing</b>");
@@ -30,7 +54,7 @@ describe("support team inbox email", () => {
 
   it("does nothing for other events", async () => {
     const harness = createTestHarness();
-    const inbox = new SupportInboxAlertService({ emailDelivery: harness.emailDelivery, recipients: ["support@nantty.com"], adminBaseUrl: "https://admin.nantty.com" });
+    const inbox = new SupportInboxAlertService({ emailDelivery: harness.emailDelivery, recipients: ["support@nantty.com"], adminBaseUrl: "https://admin.nantty.com", jobQueue: harness.jobQueue, jobsQueueUrl: "jobs-queue" });
     const handler = new HandleDomainEventHandler(harness.dispatcher, { handlePolicyPublished: async () => undefined }, context, silentLogger, inbox);
     await handler.execute({ event: makeEvent("ticket.resolved", { ...ticket, resolution: "Done", reopenDays: 7, resolvedAt: "2026-10-05T10:00:00.000Z" }) });
     expect(harness.sender.sent.filter((mail) => mail.to === "support@nantty.com")).toEqual([]);

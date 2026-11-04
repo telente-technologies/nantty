@@ -75,7 +75,7 @@ export const orderShipped: EventMapping = (event, data, context) => [
     category: "orders",
     inApp: { category: "orders", title: "Your order is on its way", body: `${sellerNameOf(data)} shipped order ${data.text("orderNumber")}.`, data: { orderId: data.text("orderId") } },
     push: { title: "Your order is on its way", body: `Order ${data.text("orderNumber")} has shipped.`, data: { orderId: data.text("orderId") } },
-    email: (recipient) => plan("orderShipped", { ...buyerOrderProps(data, recipient.firstName, context), sellerName: sellerNameOf(data), carrier: data.text("carrier"), trackingNumber: data.text("trackingNumber"), trackingUrl: data.text("trackingUrl"), estimatedDelivery: data.text("estimatedDelivery") }),
+    email: (recipient) => plan("orderShipped", { ...buyerOrderProps(data, recipient.firstName, context), sellerName: sellerNameOf(data), carrier: data.text("carrier"), trackingNumber: data.text("trackingNumber"), estimatedDelivery: data.text("estimatedDelivery") }),
   }),
 ];
 
@@ -200,17 +200,16 @@ export const orderGroupPaid: EventMapping = (event, data, context) => {
 export const orderGroupShipped: EventMapping = (event, data, context) => {
   const group = readOrderGroup(data);
   const courier = data.optionalText("courierName");
-  const trackingUrl = data.optionalText("trackingUrl");
   const estimatedDelivery = data.optionalText("estimatedDeliveryAt");
   const shippedBody = `Order ${orderGroupNumber(data)} has shipped${courier === undefined ? "" : ` with ${courier}`}.`;
   return [
     intentFor(event, data.text("buyerAccountId"), {
       category: "orders",
-      inApp: { category: "orders", title: "Your order is on its way", body: shippedBody, data: { orderId: data.text("orderGroupId"), ...(trackingUrl === undefined ? {} : { trackingUrl }) } },
+      inApp: { category: "orders", title: "Your order is on its way", body: shippedBody, data: { orderId: data.text("orderGroupId") } },
       push: { title: "Your order is on its way", body: shippedBody, data: { orderId: data.text("orderGroupId") } },
       ...(group === undefined ? {} : { email: (recipient: Recipient) => plan("orderShipped", {
         ...orderGroupEmailProps(data, context, recipient.firstName, group), sellerName: group.sellerName, carrier: courier, trackingNumber: data.optionalText("trackingNumber"),
-        trackingUrl, estimatedDelivery,
+        estimatedDelivery,
       }) }),
     }),
   ];
@@ -230,6 +229,26 @@ export const orderGroupDelivered: EventMapping = (event, data, context) => {
         deliveredAt, confirmBy,
         confirmUrl: `${orderUrl(context, data.text("orderGroupId"))}/confirm`, disputeUrl: `${orderUrl(context, data.text("orderGroupId"))}/dispute`,
       }) }),
+    }),
+  ];
+};
+
+export const orderGroupDeliveryAttemptFailed: EventMapping = (event, data) => {
+  const buyerAccountId = data.optionalText("buyerAccountId");
+  if (buyerAccountId === undefined) return [];
+
+  const orderNumber = orderGroupNumber(data);
+  const body = `A delivery attempt for order ${orderNumber} was unsuccessful. Check your order for the latest update.`;
+  const notificationData = {
+    orderId: data.text("orderGroupId"),
+    deliveryAttempts: data.integer("attempts"),
+  };
+
+  return [
+    intentFor(event, buyerAccountId, {
+      category: "orders",
+      inApp: { category: "orders", title: "Delivery attempt unsuccessful", body, data: notificationData },
+      push: { title: "Delivery attempt unsuccessful", body, data: { orderId: notificationData.orderId } },
     }),
   ];
 };

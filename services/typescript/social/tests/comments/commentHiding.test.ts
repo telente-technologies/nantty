@@ -155,6 +155,21 @@ describe("hiding comments", () => {
     expect(eventData?.["url"]).toBe(`/clips/${postId}?comment=${String(eventData?.["commentId"])}`);
   });
 
+  it("stores a managed profile as the visible comment identity and rejects profiles owned by someone else", async () => {
+    const store = createMemoryStore({ posts: [{ ...buildPostRow({ id: postId, commentCount: 0 }) } as Row] });
+    const profileId = "0192f0a0-0000-7000-8000-0000000000e1";
+    const profile = { id: profileId, accountId: commenter, kind: "brand", displayName: "Nantty Studio", handle: "nantty-studio", avatarUrl: "https://cdn.example.test/brand.png" };
+    store.context.directory.findOwnedPostableProfile = async (accountId, requestedId) => accountId === commenter && requestedId === profileId ? profile : null;
+    store.context.directory.findProfilesByIds = async (ids) => new Map(ids.filter((id) => id === profileId).map((id) => [id, profile]));
+    const create = createCreateCommentHandler(store.context);
+
+    await expect(create({ authorId: stranger, authorProfileId: profileId, postId, text: "forged identity", parentCommentId: undefined, mentions: undefined, quotedPostId: undefined })).rejects.toMatchObject({ status: 404 });
+    const created = await create({ authorId: commenter, authorProfileId: profileId, postId, text: "Hello as Nantty Studio", parentCommentId: undefined, mentions: undefined, quotedPostId: undefined });
+
+    expect(store.comments).toContainEqual(expect.objectContaining({ authorId: commenter, authorProfileId: profileId }));
+    expect(created).toMatchObject({ author: { id: commenter }, postedAs: { id: profileId, kind: "brand", name: "Nantty Studio", handle: "nantty-studio" } });
+  });
+
   it("unpins a pinned comment when it is hidden", async () => {
     const { store, hide } = setup();
     row(store.comments, otherRootId)["isPinned"] = true;

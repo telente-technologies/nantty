@@ -25,6 +25,7 @@ function directoryWithPrivateAccount(users: readonly UserSummary[], privateId: s
     hasPersonalizationConsent: async () => false,
     findAccountsAllowingPersonalizedAds: async () => new Set<string>(),
     findCheckmarkColors: async () => new Map(),
+    findProfileCheckmarkColors: async () => new Map(),
     findAccountCreatedAt: async () => undefined,
     findOwnedPostableProfile: async () => null,
     findProfilesByIds: async () => new Map(),

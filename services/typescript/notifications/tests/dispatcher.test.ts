@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { HandleDomainEventHandler } from "../src/modules/eventIngestion/commands/handleDomainEvent/handleDomainEvent.handler.js";
 import { eventFixtures } from "./fixtures/eventFixtures.fixture.js";
-import { createTestHarness, makeEvent, silentLogger, type TestHarness } from "./fakes/testHarness.fake.js";
+import { createTestHarness, makeEvent, runQueuedTemplateEmails, silentLogger, type TestHarness } from "./fakes/testHarness.fake.js";
 import { makeRecipient } from "./fakes/inMemoryServices.fake.js";
+import { DeliverTemplateEmailHandler } from "../src/modules/delivery/commands/deliverTemplateEmail/deliverTemplateEmail.handler.js";
+import { SupportInboxAlertService } from "../src/modules/delivery/services/supportInboxAlert.service.js";
 
 const context = { webBaseUrl: "https://nantty.com", sellerDashboardUrl: "https://dashboard.nantty.com", otpEnvelopeKeys: { "otp-1": testOtpKey } };
 let harness: TestHarness;
@@ -19,7 +21,11 @@ beforeEach(() => {
   handler = new HandleDomainEventHandler(harness.dispatcher, { handlePolicyPublished: async () => undefined }, context, silentLogger);
 });
 
-const handle = (type: string, data = eventFixtures[type]!.data, id = `evt-${type}`) => handler.execute({ event: makeEvent(type, data, id) });
+const handle = async (type: string, data = eventFixtures[type]!.data, id = `evt-${type}`) => {
+  const result = await handler.execute({ event: makeEvent(type, data, id) });
+  await runQueuedTemplateEmails(harness);
+  return result;
+};
 
 describe("idempotency by event id", () => {
   it("creates one in-app notification and one email when the same event is delivered twice", async () => {
@@ -35,12 +41,58 @@ describe("idempotency by event id", () => {
     expect(harness.sender.sent).toHaveLength(2);
   });
 
-  it("retries a failed send without duplicating the in-app notification", async () => {
+  it("keeps order/event processing successful and schedules a bounded retry when email delivery fails", async () => {
     harness.sender.failNext = true;
-    await expect(handle("account.passwordChanged")).rejects.toThrow("SES unavailable");
-    await handle("account.passwordChanged");
+    await expect(handle("account.passwordChanged")).resolves.toMatchObject({ handled: true });
     expect(harness.notifications.rows).toHaveLength(1);
-    expect(harness.sender.sent).toHaveLength(1);
+    expect(harness.sender.sent).toHaveLength(0);
+    expect(harness.jobQueue.jobs).toHaveLength(1);
+    expect(harness.jobQueue.jobs[0]).toMatchObject({ delaySeconds: 30, body: { type: "email.deliverTemplate", attempt: 2 } });
+  });
+
+  it("notifies the configured support inbox after the fourth failed send", async () => {
+    await handler.execute({ event: makeEvent("account.passwordChanged", eventFixtures["account.passwordChanged"]!.data) });
+    for (const delaySeconds of [30, 120, 600]) {
+      harness.sender.failNext = true;
+      await runQueuedTemplateEmails(harness);
+      expect(harness.jobQueue.jobs[0]?.delaySeconds).toBe(delaySeconds);
+    }
+    harness.sender.failNext = true;
+    await runQueuedTemplateEmails(harness);
+    expect(harness.sender.sent.map((email) => email.to)).toEqual(["support@nantty.test"]);
+    expect(harness.sender.sent[0]?.subject).toContain("Transactional email failed");
+    expect(await harness.deliveries.listFailedEmails(10)).toEqual([expect.objectContaining({ attemptCount: 4 })]);
+  });
+
+  it("retries the terminal admin-alert enqueue when the failed email job is redelivered", async () => {
+    const delivery = { dedupeKey: "evt-terminal:email:u1:passwordChanged", eventId: "evt-terminal", userId: "u1", channel: "email" as const, templateKey: "passwordChanged" as const, mailKind: "transactional" as const };
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const claim = await harness.deliveries.claim(delivery);
+      await harness.deliveries.finish(claim.id, "failed", { skipReason: "email_provider_send_failed" });
+    }
+    const supportInbox = new SupportInboxAlertService({
+      emailDelivery: harness.emailDelivery,
+      recipients: ["support@nantty.test"],
+      adminBaseUrl: "https://admin.nantty.test",
+      jobQueue: harness.jobQueue,
+      jobsQueueUrl: "jobs-queue",
+    });
+    const deliveryHandler = new DeliverTemplateEmailHandler({
+      identity: harness.identity,
+      emailDelivery: harness.emailDelivery,
+      jobQueue: harness.jobQueue,
+      jobsQueueUrl: "jobs-queue",
+      supportInbox,
+      logger: silentLogger,
+    });
+    const command = { ...delivery, preferenceCategory: "account" as const, props: {}, attempt: 4 };
+
+    harness.jobQueue.failNext = true;
+    await expect(deliveryHandler.execute(command)).rejects.toThrow("queue unavailable");
+    expect(harness.jobQueue.jobs).toHaveLength(0);
+
+    await expect(deliveryHandler.execute(command)).resolves.toBe("failed_terminal");
+    expect(harness.jobQueue.jobs[0]).toMatchObject({ body: { type: "email.alertDeliveryFailure", eventId: "evt-terminal", address: "support@nantty.test" } });
   });
 
   it("sends each party of a dispute their own email once", async () => {

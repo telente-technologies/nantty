@@ -50,6 +50,8 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
   const problems: string[] = [];
   const authIssuer = readRequired("AUTH_TOKEN_ISSUER", problems);
   const messageBus = readOrDefault("EVENT_BUS", "rabbitmq") === "sqs" ? "sqs" : "rabbitmq";
+  const emailProviderValue = readOrDefault("EMAIL_PROVIDER", "ses");
+  if (emailProviderValue !== "ses" && emailProviderValue !== "log") problems.push("EMAIL_PROVIDER must be either 'ses' or 'log'");
   const config: NotificationsConfig = {
     gatewayIdentitySecrets: readGatewayIdentitySecretsFromEnvironment(problems),
     host: readOrDefault("HOST", "0.0.0.0"),
@@ -80,7 +82,7 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
     },
     digestSource: process.env["SOCIAL_INTERNAL_URL"]?.trim() ? { baseUrl: process.env["SOCIAL_INTERNAL_URL"].trim(), internalToken: process.env["SOCIAL_INTERNAL_TOKEN"]?.trim() ?? "" } : null,
     pushProvider: readOrDefault("PUSH_PROVIDER", "log") === "expo" ? "expo" : "log",
-    emailProvider: readOrDefault("EMAIL_PROVIDER", "ses") === "log" ? "log" : "ses",
+    emailProvider: emailProviderValue === "log" ? "log" : "ses",
   };
   if (config.emailProvider === "log" && process.env["NODE_ENV"] === "production") problems.push("EMAIL_PROVIDER=log is for local development only");
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");

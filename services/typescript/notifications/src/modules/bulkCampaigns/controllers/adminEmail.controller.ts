@@ -31,6 +31,11 @@ export class AdminEmailController {
     return json(200, await this.container.listAdminEmailSends.execute());
   };
 
+  public listFailedDeliveries = async (context: RouteContext) => {
+    await this.staff(context);
+    return json(200, { deliveries: await this.container.listFailedEmailDeliveries.execute() });
+  };
+
   public preview = async (context: RouteContext) => {
     await this.staff(context);
     return json(200, await this.container.previewAdminEmail.execute(parseWithSchema(previewAdminEmailBodySchema, readJsonBody(context.request))));

@@ -148,6 +148,7 @@ export function createMemoryStore(seed: { posts?: Row[]; comments?: Row[]; postD
     directory: {
       findUserSummaries: async (ids: string[]) => new Map(ids.map((id) => [id, { id, name: `User ${id.slice(-4)}`, username: `user${id.slice(-4)}`, avatarUrl: null, verified: false, isCreator: false }])),
       findPrivateAccountIds: async (ids: string[]) => new Set(ids.filter((id) => store.privateAccountIds.has(id))),
+      findProfileCheckmarkColors: async () => new Map(),
     },
     clock: { now: () => store.now },
     premium: { isPremium: async () => false, hasSubscribedToCreator: async () => false, canSchedulePosts: async () => false },

@@ -11,6 +11,7 @@ export const rankedCommentsQuerySchema = schema.object({ filter: conversationFil
 export const newCommentBodySchema = schema.object({
   text: schema.string().min(1).max(1500),
   parentCommentId: schema.string().uuid().optional(),
+  asProfileId: schema.string().uuid().optional(),
   mentions: mentionEntitiesSchema.optional(),
   quotedPostId: schema.optional(schema.nullable(schema.string().uuid())),
 });

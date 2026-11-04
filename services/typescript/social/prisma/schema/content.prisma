@@ -180,6 +180,7 @@ model Comment {
   parentCommentId  String?   @db.Uuid
   rootCommentId    String?   @db.Uuid
   authorId         String    @db.Uuid
+  authorProfileId  String?   @db.Uuid
   text             String
   mentions         Json      @default("[]")
   likeCount        Int       @default(0)
@@ -206,6 +207,7 @@ model Comment {
   @@index([rootCommentId, id])
   @@index([rootCommentId, path])
   @@index([authorId])
+  @@index([authorProfileId])
   @@index([quotedPostId])
   @@index([postId, hiddenAt])
   @@map("comments")

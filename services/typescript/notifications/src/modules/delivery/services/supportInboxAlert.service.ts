@@ -1,4 +1,6 @@
 import type { DomainEventEnvelope } from "../../../types/domainEvent.type.js";
+import type { JobQueue } from "../../../interfaces/jobQueue.interface.js";
+import { failedEmailAlertJobType, supportTicketAlertJobType } from "../../../constants/delivery.constant.js";
 import type { Recipient } from "../../../types/notification.type.js";
 import { EventDataReader } from "../../../utils/eventDataReader.util.js";
 import type { EmailDeliveryService } from "./emailDelivery.service.js";
@@ -34,9 +36,38 @@ function inboxRecipient(address: string): Recipient {
 }
 
 export class SupportInboxAlertService {
-  public constructor(private readonly deps: { readonly emailDelivery: EmailDeliveryService; readonly recipients: readonly string[]; readonly adminBaseUrl: string }) {}
+  public constructor(private readonly deps: { readonly emailDelivery: EmailDeliveryService; readonly recipients: readonly string[]; readonly adminBaseUrl: string; readonly jobQueue: JobQueue; readonly jobsQueueUrl: string }) {}
+
+  public async notifyEmailDeliveryFailed(input: { readonly eventId: string; readonly templateKey: string; readonly reason: string }): Promise<void> {
+    if (this.deps.recipients.length === 0) return;
+    for (const address of this.deps.recipients) {
+      await this.deps.jobQueue.send(this.deps.jobsQueueUrl, { type: failedEmailAlertJobType, ...input, address });
+    }
+  }
+
+  public async deliverEmailDeliveryFailed(input: { readonly eventId: string; readonly templateKey: string; readonly reason: string; readonly address: string }): Promise<void> {
+    const subject = `Transactional email failed: ${input.templateKey}`;
+    const deliveryUrl = `${this.deps.adminBaseUrl.replace(/\/+$/, "")}/operations/notifications`;
+    const text = [`${subject} after four total attempts.`, `Event: ${input.eventId}`, `Reason: ${input.reason}`, `Review delivery records: ${deliveryUrl}`].join("\n");
+    const html = `<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;color:#111"><h2>${escapeHtml(subject)}</h2><p>Delivery stopped after four total attempts.</p><dl><dt>Event</dt><dd>${escapeHtml(input.eventId)}</dd><dt>Reason</dt><dd>${escapeHtml(input.reason)}</dd></dl><p><a href="${escapeHtml(deliveryUrl)}">Review notification operations</a></p></body></html>`;
+    if (!this.deps.recipients.includes(input.address)) throw new Error("support alert recipient is not configured");
+    await this.deps.emailDelivery.deliverCustom({
+      dedupeKey: `email-delivery-failed:${input.eventId}:${input.templateKey}:${input.address}`,
+      eventId: input.eventId,
+      recipient: inboxRecipient(input.address),
+      preferenceCategory: "support",
+      mailKind: "transactional",
+      render: () => ({ subject: `[Nantty Operations] ${subject}`.slice(0, 200), text, html }),
+    });
+  }
 
   public async notifyTicketCreated(event: DomainEventEnvelope): Promise<readonly string[]> {
+    if (this.deps.recipients.length === 0) return [];
+    await this.deps.jobQueue.send(this.deps.jobsQueueUrl, { type: supportTicketAlertJobType, event });
+    return ["queued"];
+  }
+
+  public async deliverTicketCreated(event: DomainEventEnvelope): Promise<readonly string[]> {
     if (this.deps.recipients.length === 0) return [];
     const alert = composeSupportInboxAlert(new EventDataReader(event.data), this.deps.adminBaseUrl);
     const outcomes: string[] = [];

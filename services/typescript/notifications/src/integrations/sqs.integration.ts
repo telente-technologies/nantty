@@ -35,7 +35,11 @@ export class SqsMessageBroker implements MessageBroker {
   }
 
   public async publishDomainEvents(events: readonly PublishableDomainEvent[]): Promise<void> {
-    if (events.length > 0) this.logger.warn("EVENT_BUS=sqs has no domain event exchange: outbox events are marked published without being sent", { count: events.length });
+    if (events.length > 0) {
+      const error = new Error("EVENT_BUS=sqs cannot publish domain events; refusing to acknowledge outbox events without delivery");
+      this.logger.error("domain event publish is not configured for SQS", { count: events.length });
+      throw error;
+    }
   }
 
   public createConsumer(name: string, queueUrl: string, handleMessageBody: (body: string) => Promise<void>): QueueConsumer {

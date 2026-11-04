@@ -23,7 +23,11 @@ export class RecordingPushSender implements PushSender {
 
 export class RecordingJobQueue implements JobQueue {
   public readonly jobs: { queueUrl: string; body: Record<string, unknown>; delaySeconds: number }[] = [];
-  public async send(queueUrl: string, body: unknown, delaySeconds = 0) { this.jobs.push({ queueUrl, body: body as Record<string, unknown>, delaySeconds }); }
+  public failNext = false;
+  public async send(queueUrl: string, body: unknown, delaySeconds = 0) {
+    if (this.failNext) { this.failNext = false; throw new Error("queue unavailable"); }
+    this.jobs.push({ queueUrl, body: body as Record<string, unknown>, delaySeconds });
+  }
   public takeAll() { return this.jobs.splice(0, this.jobs.length); }
 }
 

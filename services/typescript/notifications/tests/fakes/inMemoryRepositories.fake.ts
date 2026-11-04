@@ -71,7 +71,7 @@ export class InMemoryNotificationRepository implements NotificationRepository {
 
 export interface RecordedDelivery {
   id: string; dedupeKey: string; eventId: string; userId: string | null; channel: string; templateKey: string | null; mailKind: MailKind | null;
-  status: DeliveryStatus; skipReason?: string; providerMessageId?: string; createdAt: Date;
+  status: DeliveryStatus; attemptCount: number; lastAttemptAt: Date; failedAt?: Date | null; skipReason?: string; providerMessageId?: string; createdAt: Date;
 }
 
 export class InMemoryDeliveryRepository implements DeliveryRepository {
@@ -81,22 +81,31 @@ export class InMemoryDeliveryRepository implements DeliveryRepository {
   public async claim(input: Parameters<DeliveryRepository["claim"]>[0]): Promise<DeliveryClaim> {
     const existing = this.rows.get(input.dedupeKey);
     if (existing !== undefined) {
-      const retryable = existing.status === "pending" || existing.status === "failed";
-      if (retryable) existing.status = "pending";
-      return { id: existing.id, status: existing.status, alreadyProcessed: !retryable };
+      if (existing.status !== "failed" || (input.channel === "email" && existing.attemptCount >= 4)) return { id: existing.id, status: existing.status, attemptCount: existing.attemptCount, alreadyProcessed: true };
+      existing.status = "pending";
+      existing.attemptCount += 1;
+      existing.lastAttemptAt = this.now();
+      return { id: existing.id, status: "pending", attemptCount: existing.attemptCount, alreadyProcessed: false };
     }
-    const row: RecordedDelivery = { id: `d${this.rows.size + 1}`, ...input, status: "pending", createdAt: this.now() };
+    const row: RecordedDelivery = { id: `d${this.rows.size + 1}`, ...input, status: "pending", attemptCount: 1, lastAttemptAt: this.now(), createdAt: this.now() };
     this.rows.set(input.dedupeKey, row);
-    return { id: row.id, status: "pending", alreadyProcessed: false };
+    return { id: row.id, status: "pending", attemptCount: row.attemptCount, alreadyProcessed: false };
   }
 
   public async finish(id: string, status: DeliveryStatus, detail: { skipReason?: string; providerMessageId?: string }) {
     const row = [...this.rows.values()].find((candidate) => candidate.id === id);
-    if (row !== undefined) Object.assign(row, { status, ...detail });
+    if (row !== undefined) Object.assign(row, { status, ...detail, failedAt: status === "failed" ? this.now() : null });
   }
 
   public async countSentEmails(userId: string, mailKind: MailKind, since: Date) {
     return [...this.rows.values()].filter((row) => row.userId === userId && row.channel === "email" && row.mailKind === mailKind && row.status === "sent" && row.createdAt >= since).length;
+  }
+
+  public async listFailedEmails(limit: number) {
+    return [...this.rows.values()].filter((row) => row.channel === "email" && row.status === "failed")
+      .sort((left, right) => (right.failedAt?.getTime() ?? 0) - (left.failedAt?.getTime() ?? 0))
+      .slice(0, limit)
+      .map(({ id, eventId, templateKey, attemptCount, failedAt, skipReason }) => ({ id, eventId, templateKey, attemptCount, failedAt: failedAt ?? null, reason: skipReason ?? null }));
   }
 
   public async findUserIdByProviderMessageId(providerMessageId: string) { return [...this.rows.values()].find((row) => row.providerMessageId === providerMessageId)?.userId ?? null; }

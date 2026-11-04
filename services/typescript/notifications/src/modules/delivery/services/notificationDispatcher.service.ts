@@ -1,5 +1,5 @@
 import { defaultPushEnabledByCategory } from "../../../constants/notificationCategories.constant.js";
-import { unreadEmailJobType } from "../../../constants/delivery.constant.js";
+import { templateEmailJobType, unreadEmailJobType } from "../../../constants/delivery.constant.js";
 import { MissingEventFieldError } from "../../../errors/notifications.error.js";
 import type { IdentityDirectory } from "../../../interfaces/identityDirectory.interface.js";
 import type { JobQueue } from "../../../interfaces/jobQueue.interface.js";
@@ -71,6 +71,19 @@ export class NotificationDispatcherService {
       await this.scheduleEmailIfStillUnread(intent, plan, `${baseKey}:${variant}`, dedupeKey);
       return "scheduled";
     }
+    if (intent.emailAddressOverride === undefined) {
+      await this.deps.jobQueue.send(this.deps.jobsQueueUrl, {
+        type: templateEmailJobType,
+        dedupeKey,
+        eventId: intent.eventId,
+        userId: intent.recipientUserId,
+        preferenceCategory: intent.preferenceCategory,
+        templateKey: plan.templateKey,
+        props: plan.props,
+        attempt: 1,
+      });
+      return "queued";
+    }
     const outcome = await this.deps.emailDelivery.deliver({
       dedupeKey, eventId: intent.eventId, recipient, addressVerifiedByFlow: intent.emailAddressOverride !== undefined,
       preferenceCategory: intent.preferenceCategory, templateKey: plan.templateKey, props: plan.props,
@@ -92,6 +105,7 @@ export class NotificationDispatcherService {
     await this.deps.jobQueue.send(this.deps.jobsQueueUrl, {
       type: unreadEmailJobType, eventId: intent.eventId, userId: intent.recipientUserId, preferenceCategory: intent.preferenceCategory,
       notificationKey, emailDedupeKey, templateKey: plan.templateKey, props: plan.props, notBefore: notBefore.toISOString(),
+      attempt: 1,
     }, 900);
   }
 

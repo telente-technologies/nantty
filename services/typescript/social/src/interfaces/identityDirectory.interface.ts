@@ -31,6 +31,7 @@ export interface IdentityDirectory {
   hasPersonalizationConsent(accountId: string): Promise<boolean>;
   findAccountsAllowingPersonalizedAds(accountIds: readonly string[]): Promise<ReadonlySet<string>>;
   findCheckmarkColors(accountIds: readonly string[]): Promise<ReadonlyMap<string, CheckmarkColor>>;
+  findProfileCheckmarkColors(profileIds: readonly string[]): Promise<ReadonlyMap<string, CheckmarkColor>>;
   findAccountCreatedAt(accountId: string): Promise<Date | undefined>;
   findOwnedPostableProfile(accountId: string, profileId: string, purpose?: "publish" | "manage"): Promise<OwnedProfileSummary | null>;
   findProfilesByIds(profileIds: readonly string[]): Promise<ReadonlyMap<string, OwnedProfileSummary>>;

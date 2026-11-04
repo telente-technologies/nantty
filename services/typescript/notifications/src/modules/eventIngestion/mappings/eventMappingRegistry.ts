@@ -1,6 +1,7 @@
 import * as ads from "./ads.mapping.js";
 import * as creatorMoney from "./creatorMoney.mapping.js";
 import * as escrowMoney from "./escrowMoney.mapping.js";
+import * as escrowRelease from "./escrowRelease.mapping.js";
 import * as identity from "./identity.mapping.js";
 import * as identityVerification from "./identityVerification.mapping.js";
 import * as copyright from "./copyright.mapping.js";
@@ -25,6 +26,7 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "orderGroup.paid": orders.orderGroupPaid,
   "orderGroup.shipped": orders.orderGroupShipped,
   "orderGroup.delivered": orders.orderGroupDelivered,
+  "orderGroup.deliveryAttemptFailed": orders.orderGroupDeliveryAttemptFailed,
   "orderGroup.completed": orders.orderGroupCompleted,
   "orderGroup.statusChanged": orders.orderGroupStatusChanged,
   "order.paid": orders.orderPaid,
@@ -35,12 +37,15 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "order.completed": orders.orderCompleted,
   "order.cancelled": orders.orderCancelled,
   "escrow.held": escrowMoney.escrowHeld,
+  "escrow.releaseScheduled": escrowRelease.escrowReleaseScheduled,
   "escrow.released": escrowMoney.escrowReleased,
+  "escrow.chargeback": escrowRelease.escrowChargeback,
   "escrow.refunded": escrowMoney.escrowRefunded,
   "escrow.partiallyRefunded": escrowMoney.escrowPartiallyRefunded,
   "escrow.clawedBack": escrowMoney.escrowClawedBack,
   "escrow.refundScheduled": escrowMoney.escrowRefundScheduled,
   "escrow.underReview": escrowMoney.escrowUnderReview,
+  "escrow.releaseFailed": escrowRelease.escrowReleaseFailed,
   "dispute.opened": escrowMoney.disputeOpened,
   "disputeMessage.posted": escrowMoney.disputeMessagePosted,
   "dispute.resolved": escrowMoney.disputeResolved,

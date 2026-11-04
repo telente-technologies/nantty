@@ -20,6 +20,12 @@ export function createCreateCommentHandler(context: HandlerContext): Handler<Cre
   return async (command) => {
     const text = command.text.trim();
     if (text === "" || text.length > 1500) throw unprocessable("COMMENT_TEXT_INVALID", "Comments need 1 to 1500 characters.");
+    const authorProfile = command.authorProfileId === undefined
+      ? null
+      : await context.directory.findOwnedPostableProfile(command.authorId, command.authorProfileId, "publish");
+    if (command.authorProfileId !== undefined && (authorProfile === null || !["business", "brand", "store"].includes(authorProfile.kind))) {
+      throw notFound("PROFILE_NOT_FOUND", "Profile not found.");
+    }
     const post = await loadPostVisibleToViewer(context, command.authorId, command.postId);
     const parent = command.parentCommentId === undefined ? null : await findCommentVisibleToViewer(context.database.client, command.parentCommentId, command.authorId);
     if (command.parentCommentId !== undefined && (parent === null || parent.postId !== post.id)) throw notFound("COMMENT_NOT_FOUND", "Comment not found.");
@@ -37,6 +43,7 @@ export function createCreateCommentHandler(context: HandlerContext): Handler<Cre
       const comment = await commentRepository.create(transaction, {
         postId: post.id,
         authorId: command.authorId,
+        ...(authorProfile === null ? {} : { authorProfileId: authorProfile.id }),
         text: storedText,
         ...(quote === null ? {} : { quotedPostId: quote.originalId }),
         mentions: mentionResult.entities as unknown as Prisma.InputJsonValue,
