@@ -229,6 +229,19 @@ All notable changes to Nantty are documented here. Format follows
 - Linked the plan from the architecture and documentation indexes and from the
   marketplace shipping notes.
 
+### Logistics V1 direction (2026-11-03)
+
+- Superseded the future V2/Chowdeck-first proposal with Natty Logistics V1:
+  seller delivery remains available by default and stores can opt into Kwikpik.
+  Natty's V1 label is separate from Kwikpik's Partnership API v2.
+- Added the confirmed Kwikpik request-field and frontend mapping in
+  [architecture/logisticsV1.md](architecture/logisticsV1.md). Provider-facing
+  parcel input uses weight and does not require or send dimensions. Dynamic
+  provider estimates are shown; no static Express/Same-day tariff is invented.
+- Updated [plans.md](plans.md) and the architecture/marketplace indexes. The
+  Kwikpik adapter, checkout options, store opt-in, booking and webhook routes
+  remain unimplemented and are clearly marked as such.
+
 ## [Unreleased] — 2026-10-11
 
 ### Payments — Flutterwave only

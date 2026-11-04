@@ -37,7 +37,7 @@ Use **Nantty** for current product-facing prose. Legacy `nantty` strings in pack
 - [architecture/database.md](architecture/database.md): domain ERDs and schema ownership.
 - [architecture/events.md](architecture/events.md): outbox, event catalog, queues and background jobs.
 - [architecture/marketplace.md](architecture/marketplace.md): catalog, carts by seller, checkout, orders, shipping.
-- [architecture/logisticsV2.md](architecture/logisticsV2.md): V2 provider delivery (Chowdeck Relay first), delivery cost allocation, insurance, redelivery; not launch work.
+- [architecture/logisticsV1.md](architecture/logisticsV1.md): optional Kwikpik provider delivery alongside seller-managed fulfillment, request mapping and dynamic pricing; adapter and checkout wiring still pending.
 - [architecture/payments.md](architecture/payments.md): ledger, escrow, wallets, coins, payouts (architecture view; Flutterwave is the only provider).
 - [architecture/realtime.md](architecture/realtime.md): Phoenix realtime and the livestream stack.
 - [architecture/liveSafety.md](architecture/liveSafety.md): live reports, frame sampling, safety holds.

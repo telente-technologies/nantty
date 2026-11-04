@@ -2242,9 +2242,9 @@ Owner request, 2026-10-04.
 - Store-specific posts (posts made "as the store") once social records the store on a post; today the store scope uses posts by the store owner's account.
 - Scope-aware suggestions (`/search/suggest`) and Mart filters (price, rating, ships-to) on the scoped results.
 
-## 59. V2 logistics: provider delivery, Chowdeck first **[LATER]**
+## 59. Logistics V1: optional Kwikpik provider delivery **[IN PROGRESS]**
 
-Owner direction, 2026-10-20: provider delivery is a **V2** feature, not launch. Seller-managed delivery remains the current flow. The full design is in [architecture/logisticsV2.md](./architecture/logisticsV2.md).
+Owner direction, 2026-11-03: logistics is part of Natty V1, with seller-managed delivery retained. Seller/store registration and logistics are Nigeria-only in V1; seller applications must explicitly record whether the seller can handle logistics. Creator Program consideration remains open to creators outside Nigeria. Only buyer/seller phone numbers may be sent to a provider when necessary; never send their email addresses. Provider contact email must be a Natty-owned deployment setting, not a user address. “Natty Logistics V1” is distinct from Kwikpik's documented Partnership API v2. The detailed request/UI contract and implementation status are in [architecture/logisticsV1.md](./architecture/logisticsV1.md). No Kwikpik adapter or quote/booking routes are live yet.
 
 ## Nantty rebrand, landing pages and static waitlist **[IN PROGRESS]**
 
@@ -2298,14 +2298,14 @@ Owner direction, 2026-10-23 and 2026-10-26: rebrand Nantty as **Nantty**, update
 - Seller-interest submissions clearly record non-binding intent, are access-restricted, and do not promise acceptance or commercial terms; any actual binding LOI is a separate counsel-approved workflow.
 - The approved brand surfaces show Nantty, external integrations and old links continue to work through the transition, stable identifiers remain compatible, and the legal/domain owners approve the final cutover.
 
-- **V1 (now):** sellers set their own delivery price and update delivery status; no third-party courier API.
-- **Foundation (2026-10-20):** product/variant weight, dimensions, package category/count, fragile, contents and declared value are stored, collected in the seller product form and exposed through the seller API; checkout product snapshots carry them. Hidden orders tables for policy, quotes, shipments, parcels, attempts, events, charges, insurance and claims exist behind `LOGISTICS_ENABLED=false`. Adapter interface is in place; buyer order detail now shows seller-managed delivery status, rider contact, ETA and attempts, but no provider adapter, provider delivery route or provider delivery UI is live.
-- **V2.0:** logistics orchestrator, delivery ledger split, live quotes, buyer selection, seller-ready booking gate, Chowdeck Relay adapter, tracking, cancellation and redelivery.
-- **V2.1+:** second provider, coverage sync, insurance partnerships, rural partners.
-- **Before V2 code:** fix the shipping/commission ledger split, capture address coordinates, add store pickup coordinates and provider contracts.
-- **Chowdeck blockers:** production base URL, Relay webhook contract, coverage/serviceability list, weight/dimension rules, insurance terms and prepaid-wallet/float treatment.
+- **Current behavior:** seller-managed delivery remains available and is the default. Existing seller shipping profiles and manual status/tracking continue unchanged.
+- **V1 provider behavior:** stores may explicitly opt in to Kwikpik; buyer checkout displays only server-returned, serviceable estimates and lets the buyer choose per seller order group. Provider prices are dynamic estimates, not a hard-coded rate card. Do not make provider delivery mandatory.
+- **V1 parcel contract:** require parcel weight for provider delivery; retain package count, server-derived declared value, currency and description. Dimensions/category/fragile are not required or sent to Kwikpik. Existing catalog dimensions may remain for compatibility or other carriers, but should not block this UI.
+- **Current implementation:** provider-neutral interface/registry and logistics schema exist; `LOGISTICS_ENABLED=false`; no Kwikpik adapter, provider quote/create/track/cancel routes, webhook route, persisted store-level provider switch or checkout choice is implemented. Seller application now rejects profile countries other than `NG` and stores an explicit, default-off logistics capability choice for review. The provider interface does not include customer email fields. The interface no longer requires parcel dimensions and now represents optional timeline/vehicle/pricing metadata.
+- **Before provider booking:** verify Kwikpik endpoint paths, canonical vehicle enums, provider options, serviceability, quote expiry/price-lock, final-price/surcharge behavior, insurance terms, duplicate-reference behavior and webhook contract using provider documentation and then staging. Separate provider delivery costs from merchandise/commission/escrow accounting.
+- **Same-day / Express:** show only if a valid returned provider option confirms that service and its estimate. The docs' `SAME_DAY` tracking example does not establish an Express product or fixed price.
 
-No provider integration is to be built until the V2 design is approved and the seller-managed flow remains unchanged behind the disabled feature flag.
+See [architecture/logisticsV1.md](./architecture/logisticsV1.md) for the complete request-field map, frontend screen contract, price display rules, rollout and open provider questions.
 
 ## Order notifications and fail-closed media (2026-10-21) **[DONE]**
 

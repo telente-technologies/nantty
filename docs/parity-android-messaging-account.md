@@ -1,0 +1,63 @@
+# React Native ↔ Kotlin Android: messaging and account parity audit
+
+**Audit date:** 2026-11-04  
+**Scope:** conversations/chat/groups/settings, profile/edit/connections, account/security/privacy, notifications. Auth flows are explicitly excluded. This is a source audit of the current fork; it does not assert live-service behavior.
+
+## Status legend and method
+
+- **Implemented** — a reachable Kotlin screen/flow and its service contract cover the RN behavior in this audited slice.
+- **Partial** — a native slice exists, but one or more RN behaviors, screen affordances, or service operations are absent.
+- **Missing** — no corresponding reachable Kotlin screen/flow and service operation were found.
+- **Intentional** — a source comment/product rule explicitly defers the behavior. No intentional deferrals were found for the missing rows below.
+
+The RN reference is `apps/mobile/src/navigation/main.navigator.tsx`, `mainTabs.navigator.tsx`, and the cited screen/service implementations. Kotlin reachability is through `apps/native/android/app/src/main/java/com/nantty/android/ui/NanttyApp.kt`: `Destination` is limited to the app's current tab destinations at lines 116–118; `MainContent` connects profile, messages, and activity at lines 699–713. No general account/settings destination is registered there. Kotlin evidence below is from current source, not inferred from the UI design alone.
+
+## Per-screen and flow comparison
+
+| Screen / flow | React Native evidence and behavior | Kotlin Android evidence | Status / gap |
+|---|---|---|---|
+| Messages inbox | `apps/mobile/src/screens/messages/chats.screen.tsx:39-48,61-79,85-148`: chats and inbox folders, all/direct filters, persisted inbox preview, story tray, search, open conversation/person, compose, group/channel creation, settings menu. | `apps/native/android/app/src/main/java/com/nantty/android/ui/MessagesScreen.kt`: paged inbox, refresh, loading/error/empty, unread count, and tappable rows that open the selected thread. `data/MessagesRepository.kt`: authenticated inbox request currently fixes `folder=chats&filter=all&limit=20`. | **Partial — high.** Opening a listed thread is supported; folder/filter/search/create actions and requests/spam management are missing. The service query is fixed to one inbox view. |
+| Conversation detail / message thread | `apps/mobile/src/screens/messages/chat.screen.tsx` and `apps/mobile/src/services/chat/messages.service.ts:102-145`: loads/creates conversations, paginates and decrypts messages, marks read, sends encrypted text/media/location/polls, reactions, updates settings, and handles message targets. | Kotlin `ConversationThreadScreen` loads authenticated history and marks the conversation read. Ciphertext is not rendered as plaintext and the composer is disabled; source includes cryptographic primitives but not a complete RN-compatible session/ratchet/envelope implementation. | **Partial — critical parity blocker.** Receive/read-only history exists, but safe decrypt/send, attachments/reactions, idempotency and realtime are not equivalent. Do not enable sending or claim E2E parity without cross-client protocol conformance. |
+| New message / groups / channels | RN `main.navigator.tsx:57-60,182-185`; `chats.screen.tsx:75-79,141-148`; `messages.service.ts:114-115,146-152` support new direct/store chats, search, groups/channels. | No corresponding Kotlin screens/repositories/routes; no corresponding action from `MessagesScreen.kt`. | **Missing.** |
+| Conversation details and chat settings | RN `conversationInfo.screen.tsx`, `chatSettings.screen.tsx`, `chatNotificationSettings.screen.tsx`, `chatPasscode.screen.tsx`; routes registered in `main.navigator.tsx:38-40,165-167,185`. | No Kotlin route/screen/repository found for per-conversation info, chat notification settings, or passcode. | **Missing.** |
+| Own profile | RN `myProfile.screen.tsx:82-91` links to edit profile and follower/following lists. | Kotlin `CurrentProfileScreen.kt:58-145` loads and updates the signed-in profile; `CurrentProfileRepository.kt:45-58` uses `GET/PATCH /api/v1/users/me`. | **Partial.** Name, bio, and privacy can be edited, but avatar/banner media upload and profile subroutes are absent. |
+| Public profile | RN `userProfile.screen.tsx`, `userProfileByUsername.screen.tsx`; `users.service.ts:17-24` and follow service endpoints load profile, relationships and content. | Kotlin `PublicProfileScreen.kt:63-179`; `PublicProfileRepository.kt:56-98` loads by user ID, follows/unfollows and loads public posts. | **Partial.** ID-based public profile and posts exist; username route and profile connections are absent. |
+| Edit profile | RN `editProfile.screen.tsx:18-49,51-107` edits name/bio and uploads avatar/banner before saving. | Kotlin `CurrentProfileScreen.kt:106-141`; `CurrentProfileRepository.kt:49-58` writes name, bio, and privacy only. | **Partial.** Image selection/upload and its service contract are missing. |
+| Connections / follow requests | RN `connections.screen.tsx:41-72,85-169` supports followers, following, shopped, suggested, blocked, search, sorting/filtering, relationship actions and messaging. `follows.service.ts:7-25` provides those APIs and follow-request actions. RN `FollowRequestsScreen` is registered in `main.navigator.tsx:103`. | No Kotlin connections/follow-requests screen or repository; public profile exposes only follow/unfollow. | **Missing.** |
+| Account root, security, privacy, privacy-data | RN settings stack registers root/account/security/privacy/privacy-data and related screens in `main.navigator.tsx:24-42,100,104-105,148-167`. `users.service.ts:22-38` shows account/profile settings APIs. | Kotlin has no general settings destination in `NanttyApp.kt:116-118`; no Kotlin account/security/privacy screen or matching repository was found. | **Missing.** A notification-settings subpage does not provide the rest of account settings. |
+| Activity notifications | RN `notifications.screen.tsx:26-58` marks read and resolves follow-request, conversation/message, clip/comment/post, account-status, verification, support-ticket, internal-route, URL, order and actor targets. `notifications.service.ts:6-12` lists feed/read/preference APIs. | Kotlin `NotificationsScreen.kt:54-147` supports all/mentions, pagination, mark-read/all, settings and a smaller destination resolver; `NotificationsRepository.kt` persists read state. | **Partial.** Kotlin does not retain/open conversation or message target IDs and lacks several RN target types (follow requests, clips/comments, verification, support tickets). |
+| Account notification settings | RN `settingsNotifications.screen.tsx:12-37` provides account-level push, OS settings, and milestone push/email controls. `components/settings/milestonesPreferenceRows.tsx:8-34` reads category preferences and writes category-specific changes. | Kotlin `AccountNotificationSettingsScreen.kt:43-138` already had account-wide push and Android OS settings. This audit adds the milestone push/email section using the same category endpoint and server-owned `locked`/value fields. | **Implemented for the RN-visible slice.** Other categories are not presented in the RN screen either. |
+
+## API contract evidence
+
+| Operation | React Native contract | Kotlin contract / status |
+|---|---|---|
+| Inbox list | `GET /api/v1/conversations?filter=…` or `?folder=…` (`messages.service.ts:103-104`) | `GET /api/v1/conversations?folder=chats&filter=all&limit=20[&cursor=…]` (`MessagesRepository.kt:118-121`) — **partial; fixed query** |
+| Conversation detail/messages | `GET /api/v1/conversations/{id}`, `GET /api/v1/conversations/{id}/messages`, `POST /api/v1/conversations/{id}/read` (`messages.service.ts:109-113,145`) | Kotlin fetches history and marks read; safe RN-compatible decrypt/render remains **blocked** on protocol compatibility |
+| Send / conversation creation | encrypted message/media/control endpoints and `POST /api/v1/conversations`, `POST /api/v1/conversations/stores/{storeId}` (`messages.service.ts:53-85,114-142`) | Kotlin send/create operations are **missing**; composer is deliberately disabled |
+| Profile | `GET/PATCH /api/v1/users/me`, `GET/PATCH /api/v1/users/me/settings` (`account/users.service.ts:17-25`) | Current profile `GET/PATCH /api/v1/users/me` exists; general account settings beyond notification push are **missing** |
+| Follow/connections | `/api/v1/users/{id}/follow`, `/connections`, `/followers`, `/following`, `/users/me/follow-requests`, `/users/me/blocked` (`follows.service.ts:7-25`) | Kotlin supports follow/unfollow on public profile; connections and request/list actions are **missing** |
+| Notifications feed/read | `GET /api/v1/notifications?filter=…`, `POST /api/v1/notifications/{id}/read`, `POST /api/v1/notifications/read-all` (`notifications.service.ts:6-12`) | Kotlin implements feed/read/all-read in `NotificationsRepository.kt`; notification destination handling remains **partial** |
+| Notification preferences | `GET /api/v1/notifications/preferences`; `PATCH /api/v1/notifications/preferences` with `{category, push?, email?}` (`notifications.service.ts:9-11`) | Implemented for milestone preferences in `AccountNotificationSettingsRepository.kt`; honors server `locked` and reflects server response. |
+
+## One implemented gap: milestone notification preferences
+
+Android previously exposed only the account-wide push toggle, even though the RN Notifications settings screen also exposes milestone push and email toggles. The native settings screen now loads the server category list and displays the `milestones` row only when it is returned, then sends only the changed field with the category. It disables writes while pending, honors `locked`, surfaces failures without optimistic state, and routes authentication-required failures through the existing reauthentication callback.
+
+Implementation: `apps/native/android/app/src/main/java/com/nantty/android/data/AccountNotificationSettingsRepository.kt`, `ui/AccountNotificationSettingsScreen.kt`, and new `ui/MilestoneNotificationPreferences.kt`. Contract tests: `apps/native/android/app/src/test/java/com/nantty/android/data/AccountNotificationSettingsRepositoryTest.kt`; Compose coverage: `apps/native/android/app/src/androidTest/java/com/nantty/android/ui/MilestoneNotificationPreferencesTest.kt`.
+
+## Prioritized remaining work
+
+1. **P0 — secure message send/decrypt conformance:** implement RN-compatible device/key/session/envelope semantics, idempotency, read receipts, pagination, attachment safety and offline behavior; keep the existing history view receive-limited until conformance tests pass.
+2. **P1 — inbox parity:** remove the fixed `chats/all` query, then add direct/all folders, request/spam handling, search and group/channel creation with server-authoritative actions. Thread-row navigation now exists and should be preserved.
+3. **P1 — notification targets:** preserve safe conversation/message IDs and implement destination types only when their native destination exists; cover each resolver branch with tests.
+4. **P1 — profile editing and relationships:** add media upload for avatar/banner, connections, follow requests, and username-based profile navigation.
+5. **P2 — account/settings surface:** add reachable account, security, privacy, privacy-data, and chat-notification/passcode destinations against the existing contracts.
+
+## Android design and architecture notes
+
+The Android docs emphasize scalable, modularized, testable Kotlin/Compose apps, consistent quality across form factors, and layouts/adaptive interactions for phones, tablets and foldables. The existing native UI already uses Compose and window-size/hinge-aware layout in the shell, but parity is feature-flow based, not achieved by copying RN pixels. Continue using Material controls, accessible names/states, server-owned preference values, and adaptive width/layout behavior. Sources: [Android getting started](https://developer.android.com/get-started/overview) and [Android UI design](https://developer.android.com/design/ui).
+
+## Validation boundary
+
+Only source and local test doubles were used. No live Nantty endpoint, production account, or production data was accessed. Latest integrated run of `:app:compileDebugKotlin`, `:app:testDebugUnitTest`, and `:app:compileDebugAndroidTestKotlin` completed successfully: **210 unit tests passed, 0 failed, 0 errored**, and Android instrumentation-test sources compiled. No emulator/device was attached, so instrumentation/UI tests were not executed; this audit does not claim backend deployment or live integration verification. `git diff --check` passed.
