@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/toastProvider";
 import { useStoreContext } from "@/hooks/useStoreSettings.hook";
 import { createIdempotencyKey, readErrorMessageForDisplay, sendSellerApiRequest, SellerApiRequestError } from "@/services/clientApi.service";
 import type { OnlineOrder } from "@/types/order.type";
+import { isValidOptionalTrackingUrl } from "@/utils/trackingUrl.util";
 
 import styles from "./orders.module.css";
 
@@ -30,7 +31,7 @@ export function OrderFulfilmentForm({ order, onShipped }: { readonly order: Onli
     const courier = courierChoice === "Other" ? otherCourierName.trim() : courierChoice;
     if (courier.length < 2 || courier.length > 60) errors.courier = "Enter the courier's name.";
     if (!/^[A-Za-z0-9-]{4,40}$/.test(trackingNumber.trim())) errors.trackingNumber = "Enter the tracking number (4–40 letters, digits or dashes).";
-    if (trackingUrl.trim() && !/^https:\/\/\S{3,300}$/.test(trackingUrl.trim())) errors.trackingUrl = "Tracking link must start with https://.";
+    if (!isValidOptionalTrackingUrl(trackingUrl)) errors.trackingUrl = "Enter a valid HTTPS tracking link (up to 300 characters).";
     if (!fromLocationId) errors.fromLocationId = "Choose where the parcel ships from.";
     return errors;
   }

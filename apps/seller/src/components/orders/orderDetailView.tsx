@@ -24,6 +24,7 @@ import { readErrorMessageForDisplay, sendSellerApiRequest } from "@/services/cli
 import type { Conversation } from "@/types/conversation.type";
 import type { OnlineOrder } from "@/types/order.type";
 import { formatDateTimeForDisplay } from "@/utils/dateFormatting.util";
+import { getSafeTrackingUrl } from "@/utils/trackingUrl.util";
 
 import styles from "./orders.module.css";
 import { IconLabel } from "@/components/ui/nanttyIcon";
@@ -53,6 +54,7 @@ export function OrderDetailView({ orderId }: { readonly orderId: string }) {
   const canManageOrders = can("orders:manage");
   const canCancel = canManageOrders && (order.status === "processing" || order.status === "ready");
   const canRefund = canManageOrders && refundableStatuses.has(order.status) && order.total.amountMinor > order.refundedAmount.amountMinor;
+  const safeTrackingUrl = getSafeTrackingUrl(order.fulfilment?.trackingUrl);
   const replaceOrder = (updatedOrder: OnlineOrder) => orderQuery.replaceData(() => updatedOrder);
 
   async function openConversationWithCustomer() {
@@ -154,7 +156,7 @@ export function OrderDetailView({ orderId }: { readonly orderId: string }) {
             <KeyValueList
               items={[
                 { label: "Courier", value: order.fulfilment?.courier ?? "—" },
-                { label: "Tracking", value: order.fulfilment ? (order.fulfilment.trackingUrl ? <a href={order.fulfilment.trackingUrl} target="_blank" rel="noopener noreferrer">{order.fulfilment.trackingNumber}</a> : order.fulfilment.trackingNumber) : "—" },
+                { label: "Tracking", value: order.fulfilment ? (safeTrackingUrl ? <a href={safeTrackingUrl} target="_blank" rel="noopener noreferrer">{order.fulfilment.trackingNumber}</a> : order.fulfilment.trackingNumber) : "—" },
                 { label: "Rider", value: order.delivery.riderName ? `${order.delivery.riderName}${order.delivery.riderPhone ? ` · ${order.delivery.riderPhone}` : ""}` : "—" },
                 { label: "Ships from", value: locations.find((location) => location.id === order.fulfilment?.fromLocationId)?.name ?? "—" },
                 { label: "Delivered", value: formatDateTimeForDisplay(order.deliveredAt) },
