@@ -6,6 +6,10 @@ dist/
 .expo/
 coverage/
 
+# Kotlin / JetBrains compiler session artifacts
+.kotlin/
+**/.kotlin/
+
 # Secrets: only *.example env files are committed.
 .env
 .env.*

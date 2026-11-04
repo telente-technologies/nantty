@@ -407,7 +407,6 @@ internal fun PostDetailScreen(
 
                 if (accountId != null) {
                     PostReplyComposer(
-                        accountId = accountId,
                         profiles = commentProfiles,
                         profilesLoading = profilesLoading,
                         profilesError = profilesError,

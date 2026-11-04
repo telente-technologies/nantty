@@ -36,7 +36,6 @@ import com.nantty.android.data.ThreadComment
 
 @Composable
 internal fun PostReplyComposer(
-    accountId: String,
     profiles: List<CommentActingProfile>?,
     profilesLoading: Boolean,
     profilesError: String?,
