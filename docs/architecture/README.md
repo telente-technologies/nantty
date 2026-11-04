@@ -26,12 +26,13 @@ The topic documents below go deeper. Most were written as design notes on 2026-1
 | [widgetsApiContract.md](widgetsApiContract.md) | Home-screen widgets and the embeddable web widget API | Current |
 | [liveSafety.md](liveSafety.md) | Live reports, frame sampling, safety holds, Live incidents queue | Design (2026-10-04) |
 | [events.md](events.md) | Outbox, event catalogue, queue choice, background jobs | Dated (2026-10-03) |
+| [notificationDelivery.md](notificationDelivery.md) | Transactional email jobs/retries/admin failures and payment webhook retry/dead-letter operations | Source-reviewed (2026-11-03); deployment unverified |
 | [realtime.md](realtime.md) | Phoenix realtime and the livestream stack | Sections 1 and 2 current; the rest is the 2026-10-03 design |
 | [backend.md](backend.md) | Deployables, ownership matrix, API design audit, findings | Dated (2026-10-03) |
 | [database.md](database.md) | Domain ERDs, schema ownership matrix, DB reliability | Dated (2026-10-03) |
 | [frontend.md](frontend.md) | Front-end apps, BFF pattern, data layer | Dated (2026-10-03); mode switching is in [runningLocally.md](../runningLocally.md) |
 | [marketplace.md](marketplace.md) | Catalog, inventory, carts by seller, checkout, orders, shipping | Dated (2026-10-03) |
-| [logisticsV2.md](logisticsV2.md) | V2 logistics: provider quotes, Chowdeck Relay first, delivery cost allocation, insurance, redelivery | Planned (2026-10-20); seller delivery remains current |
+| [logisticsV1.md](logisticsV1.md) | V1 logistics: optional Kwikpik provider delivery or seller delivery, request mapping, live estimates, cost allocation and tracking | Contract/plan; provider adapter and checkout routes not implemented |
 | [media.md](media.md) | Uploads, processing, storage and delivery | Dated (2026-10-03) |
 | [search.md](search.md) | Postgres search now, OpenSearch only on a trigger | Dated (2026-10-03, with a 2026-10-04 MVP section) |
 | [recommendations.md](recommendations.md) | Ranking and personalisation; Python scores, deterministic fallbacks | Dated (2026-10-04) |

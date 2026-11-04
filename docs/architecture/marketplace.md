@@ -40,9 +40,12 @@ flowchart TD
 
 All steps from G onward are server-authoritative. Everything in this diagram is PROPOSED in the new stack.
 
-## 3. Seller-controlled shipping model (MVP)
+## 3. Seller-managed shipping and optional provider fulfillment (V1)
 
-There is **no Nantty logistics network in the MVP**. Sellers ship; the platform validates, calculates, shows and records.
+The implemented default is seller-managed delivery: sellers ship, and the
+platform validates, calculates, shows and records their shipping rules. The
+Kwikpik provider option is planned for V1 but is not wired into checkout yet.
+Stores must be able to keep using seller delivery without enabling a provider.
 
 | Rule | Detail |
 | --- | --- |
@@ -57,7 +60,7 @@ There is **no Nantty logistics network in the MVP**. Sellers ship; the platform 
 | Buyer messages | The messages above come from the server as codes plus text; clients localize by code |
 | Addresses and geo | Owned by go-identity; go-commerce reads through read-only grants or API. Mobile address lacks `countryCode`, `postalCode`, normalized region ids (backendPlan mismatch 8) |
 | Currency | All amounts `{amountMinor, currency}` in store currency; order stores a locked exchange rate when buyer currency differs |
-| Later (OPTIONAL FUTURE) | Carrier integrations (DHL, UPS, local couriers) behind `ShippingMethod`; Nantty logistics only with a stated volume trigger. See [logisticsV2.md](logisticsV2.md) for the planned provider-delivery design (Chowdeck Relay first). |
+| Optional provider fulfillment | V1 seller/store eligibility is Nigeria-only. Seller applications capture an explicit, default-off logistics capability choice; this is not yet a persisted store-level booking switch. Seller-managed delivery remains the default. Provider requests must never include buyer/seller email addresses; use only their required phone numbers and a separately configured Natty-owned contact email. See [logisticsV1.md](logisticsV1.md) for the scope and current limitations. |
 
 ### 3.1 Data model (PROPOSED)
 
