@@ -74,13 +74,29 @@ func settleRefundRecords(ctx context.Context, tx *ent.Tx, group *ent.OrderGroup,
 }
 
 func RecordOrderRefundScheduled(ctx context.Context, deployed *container.Container, orderId uuid.UUID, amountMinor int64) error {
+	return recordOrderRefundScheduled(ctx, deployed, orderId, amountMinor, "")
+}
+
+func RecordOrderRefundScheduledForEvent(ctx context.Context, deployed *container.Container, orderId uuid.UUID, amountMinor int64, envelopeID string) error {
+	return recordOrderRefundScheduled(ctx, deployed, orderId, amountMinor, envelopeID)
+}
+
+func recordOrderRefundScheduled(ctx context.Context, deployed *container.Container, orderId uuid.UUID, amountMinor int64, envelopeID string) error {
 	return deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		claimed, err := claimProcessedMoneyEvent(ctx, tx, envelopeID, "escrow.refundScheduled")
+		if err != nil || !claimed {
+			return err
+		}
 		group, err := LockOrderGroup(ctx, tx, orderId)
 		if err != nil {
 			return err
 		}
-		if _, err := tx.RefundRecord.Update().Where(refundrecord.OrderGroupID(group.ID), refundrecord.Status(RefundProcessing)).SetStatus(RefundScheduled).Save(ctx); err != nil {
+		updated, err := tx.RefundRecord.Update().Where(refundrecord.OrderGroupID(group.ID), refundrecord.Status(RefundProcessing)).SetStatus(RefundScheduled).Save(ctx)
+		if err != nil {
 			return err
+		}
+		if updated == 0 {
+			return nil
 		}
 		summary := fmt.Sprintf("Refund of %d %s (minor units) scheduled; it completes automatically once the card payment settles", amountMinor, group.Currency)
 		return AppendTimelineEvent(ctx, tx, group.ID, "refundScheduled", summary, SystemActor)

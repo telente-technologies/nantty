@@ -64,7 +64,7 @@ func orderWidgetItem(group *ent.OrderGroup, items []*ent.OrderItem, storeName st
 	status := widgetservices.OrderWidgetStatusFor(group.Status, group.DeliveryStatus, group.RiderName != nil && *group.RiderName != "")
 	item := dtos.OrderWidgetItem{
 		Id: group.ID.String(), Reference: group.Reference, Status: status.Key, StatusLabel: status.Label,
-		EtaAt: widgets.FormatWidgetTime(group.EstimatedDeliveryAt), StoreName: storeName,
+		EtaAt: widgets.FormatWidgetTime(group.EstimatedDeliveryAt), TrackingURL: group.TrackingURL, StoreName: storeName,
 		DeepLink: widgetservices.OrderDeepLink(group.ID.String()), UpdatedAt: group.UpdatedAt.UTC().Format(time.RFC3339),
 	}
 	for _, line := range items {

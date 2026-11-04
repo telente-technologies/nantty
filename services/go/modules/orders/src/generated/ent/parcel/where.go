@@ -280,6 +280,16 @@ func LengthMmLTE(v int) predicate.Parcel {
 	return predicate.Parcel(sql.FieldLTE(FieldLengthMm, v))
 }
 
+// LengthMmIsNil applies the IsNil predicate on the "length_mm" field.
+func LengthMmIsNil() predicate.Parcel {
+	return predicate.Parcel(sql.FieldIsNull(FieldLengthMm))
+}
+
+// LengthMmNotNil applies the NotNil predicate on the "length_mm" field.
+func LengthMmNotNil() predicate.Parcel {
+	return predicate.Parcel(sql.FieldNotNull(FieldLengthMm))
+}
+
 // WidthMmEQ applies the EQ predicate on the "width_mm" field.
 func WidthMmEQ(v int) predicate.Parcel {
 	return predicate.Parcel(sql.FieldEQ(FieldWidthMm, v))
@@ -320,6 +330,16 @@ func WidthMmLTE(v int) predicate.Parcel {
 	return predicate.Parcel(sql.FieldLTE(FieldWidthMm, v))
 }
 
+// WidthMmIsNil applies the IsNil predicate on the "width_mm" field.
+func WidthMmIsNil() predicate.Parcel {
+	return predicate.Parcel(sql.FieldIsNull(FieldWidthMm))
+}
+
+// WidthMmNotNil applies the NotNil predicate on the "width_mm" field.
+func WidthMmNotNil() predicate.Parcel {
+	return predicate.Parcel(sql.FieldNotNull(FieldWidthMm))
+}
+
 // HeightMmEQ applies the EQ predicate on the "height_mm" field.
 func HeightMmEQ(v int) predicate.Parcel {
 	return predicate.Parcel(sql.FieldEQ(FieldHeightMm, v))
@@ -358,6 +378,16 @@ func HeightMmLT(v int) predicate.Parcel {
 // HeightMmLTE applies the LTE predicate on the "height_mm" field.
 func HeightMmLTE(v int) predicate.Parcel {
 	return predicate.Parcel(sql.FieldLTE(FieldHeightMm, v))
+}
+
+// HeightMmIsNil applies the IsNil predicate on the "height_mm" field.
+func HeightMmIsNil() predicate.Parcel {
+	return predicate.Parcel(sql.FieldIsNull(FieldHeightMm))
+}
+
+// HeightMmNotNil applies the NotNil predicate on the "height_mm" field.
+func HeightMmNotNil() predicate.Parcel {
+	return predicate.Parcel(sql.FieldNotNull(FieldHeightMm))
 }
 
 // PackageCategoryEQ applies the EQ predicate on the "package_category" field.

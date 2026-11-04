@@ -8,7 +8,7 @@ type DepartmentRoleTemplate struct {
 }
 
 var AllPermissionKeys = []string{
-	"metrics:read",
+	"metrics:read", "events:read",
 	"users:read", "users:read-pii", "users:moderate", "users:restrict", "users:suspend", "users:ban", "users:delete",
 	"usernames:reassign", "usernames:manage", "reserved-usernames:manage",
 	"verification:review", "verification:documents", "verification:grant", "verification:revoke",
@@ -16,7 +16,7 @@ var AllPermissionKeys = []string{
 	"brands:review", "brands:revoke", "ip-claims:review",
 	"moderation:reports", "moderation:appeals", "chat-reports:review", "chat-reports:legal", "copyright:review",
 	"security:cases",
-	"orders:read", "disputes:resolve", "refunds:issue", "payouts:approve", "coins:review", "ledger:read",
+	"orders:read", "disputes:resolve", "refunds:issue", "payouts:approve", "coins:review", "ledger:read", "logistics:read",
 	"ads:review", "advertisers:manage",
 	"catalog:manage",
 	"config:read", "config:plans", "config:revenue", "config:rules", "flags:manage", "automation:manage", "templates:manage",
@@ -42,7 +42,7 @@ var DepartmentRoleTemplates = []DepartmentRoleTemplate{
 	{"legal", "Legal", "Legal", []string{"legal.documents.view", "legal.documents.edit", "legal.documents.publish", "legal.notices.send"}},
 	{"engineering", "Engineering (read-only)", "Engineering", []string{"metrics:read", "users:read", "orders:read", "ledger:read", "config:read", "audit:read"}},
 	{"subscription_manager", "Subscription Manager", "Subscriptions", []string{"config:plans"}},
-	{"operations_analyst", "Operations Analyst", "Operations", []string{"metrics:read"}},
+	{"operations_analyst", "Operations Analyst", "Operations", []string{"metrics:read", "logistics:read", "events:read"}},
 	{"auditor", "Auditor", "Audit", []string{"audit:read"}},
 }
 

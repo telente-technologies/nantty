@@ -8,6 +8,7 @@ type OrderWidgetItem struct {
 	Status      string  `json:"status"`
 	StatusLabel string  `json:"statusLabel"`
 	EtaAt       *string `json:"etaAt"`
+	TrackingURL *string `json:"trackingUrl,omitempty"`
 	ItemTitle   string  `json:"itemTitle"`
 	ItemCount   int     `json:"itemCount"`
 	ImageUrl    *string `json:"imageUrl"`

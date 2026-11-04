@@ -24,6 +24,13 @@ const (
 	StatusFailed    = "failed"
 )
 
+type FulfillmentMode string
+
+const (
+	FulfillmentSellerManaged   FulfillmentMode = "seller_managed"
+	FulfillmentProviderManaged FulfillmentMode = "provider_managed"
+)
+
 type Address struct {
 	RecipientName string
 	Phone         string
@@ -33,21 +40,26 @@ type Address struct {
 	Region        string
 	CountryCode   string
 	PostalCode    string
+	Instructions  string
 	Latitude      *float64
 	Longitude     *float64
 }
 
 type Parcel struct {
 	WeightGrams         int
-	LengthMm            int
-	WidthMm             int
-	HeightMm            int
-	PackageCategory     string
 	PackageCount        int
-	Fragile             bool
 	ContentsDescription string
 	DeclaredValueMinor  int64
 	Currency            string
+}
+
+// PriceComponent preserves provider-returned line items so checkout can show
+// a transparent total without inventing a tariff breakdown.
+type PriceComponent struct {
+	Code        string
+	Label       string
+	AmountMinor int64
+	Currency    string
 }
 
 type QuoteRequest struct {
@@ -58,29 +70,35 @@ type QuoteRequest struct {
 	Destination  Address
 	Parcel       Parcel
 	Currency     string
+	VehicleType  string
 }
 
 type Quote struct {
-	Provider        string
-	ProviderQuoteId string
-	ServiceType     string
-	AmountMinor     int64
-	Currency        string
-	ExpiresAt       time.Time
-	Conditions      []string
-	Metadata        map[string]any
+	Provider              string
+	ProviderQuoteId       string
+	ServiceType           string
+	VehicleType           string
+	DeliveryTimeline      string
+	AmountMinor           int64
+	InsurancePremiumMinor int64
+	Currency              string
+	ExpiresAt             time.Time
+	Conditions            []string
+	PriceComponents       []PriceComponent
+	Metadata              map[string]any
 }
 
 type BookRequest struct {
-	StoreId      uuid.UUID
-	OrderGroupId uuid.UUID
-	Reference    string
-	Quote        Quote
-	Pickup       Address
-	Destination  Address
-	Parcel       Parcel
-	DeliveryPin  string
-	Notes        string
+	StoreId           uuid.UUID
+	OrderGroupId      uuid.UUID
+	Reference         string
+	Quote             Quote
+	Pickup            Address
+	Destination       Address
+	Parcel            Parcel
+	DeliveryPin       string
+	Notes             string
+	ScheduledPickupAt *time.Time
 }
 
 type Booking struct {

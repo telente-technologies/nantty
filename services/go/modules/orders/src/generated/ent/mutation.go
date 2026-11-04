@@ -18654,18 +18654,23 @@ func (m *OrderNoteMutation) ResetEdge(name string) error {
 // OutboxEventMutation represents an operation that mutates the OutboxEvent nodes in the graph.
 type OutboxEventMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uuid.UUID
-	created_at    *time.Time
-	event_type    *string
-	subject       *string
-	payload       *[]byte
-	published_at  *time.Time
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*OutboxEvent, error)
-	predicates    []predicate.OutboxEvent
+	op               Op
+	typ              string
+	id               *uuid.UUID
+	created_at       *time.Time
+	event_type       *string
+	subject          *string
+	payload          *[]byte
+	published_at     *time.Time
+	attempt_count    *int
+	addattempt_count *int
+	next_attempt_at  *time.Time
+	last_error       *string
+	dead_lettered_at *time.Time
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*OutboxEvent, error)
+	predicates       []predicate.OutboxEvent
 }
 
 var _ ent.Mutation = (*OutboxEventMutation)(nil)
@@ -18965,6 +18970,196 @@ func (m *OutboxEventMutation) ResetPublishedAt() {
 	delete(m.clearedFields, outboxevent.FieldPublishedAt)
 }
 
+// SetAttemptCount sets the "attempt_count" field.
+func (m *OutboxEventMutation) SetAttemptCount(i int) {
+	m.attempt_count = &i
+	m.addattempt_count = nil
+}
+
+// AttemptCount returns the value of the "attempt_count" field in the mutation.
+func (m *OutboxEventMutation) AttemptCount() (r int, exists bool) {
+	v := m.attempt_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttemptCount returns the old "attempt_count" field's value of the OutboxEvent entity.
+// If the OutboxEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxEventMutation) OldAttemptCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttemptCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttemptCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttemptCount: %w", err)
+	}
+	return oldValue.AttemptCount, nil
+}
+
+// AddAttemptCount adds i to the "attempt_count" field.
+func (m *OutboxEventMutation) AddAttemptCount(i int) {
+	if m.addattempt_count != nil {
+		*m.addattempt_count += i
+	} else {
+		m.addattempt_count = &i
+	}
+}
+
+// AddedAttemptCount returns the value that was added to the "attempt_count" field in this mutation.
+func (m *OutboxEventMutation) AddedAttemptCount() (r int, exists bool) {
+	v := m.addattempt_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAttemptCount resets all changes to the "attempt_count" field.
+func (m *OutboxEventMutation) ResetAttemptCount() {
+	m.attempt_count = nil
+	m.addattempt_count = nil
+}
+
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (m *OutboxEventMutation) SetNextAttemptAt(t time.Time) {
+	m.next_attempt_at = &t
+}
+
+// NextAttemptAt returns the value of the "next_attempt_at" field in the mutation.
+func (m *OutboxEventMutation) NextAttemptAt() (r time.Time, exists bool) {
+	v := m.next_attempt_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNextAttemptAt returns the old "next_attempt_at" field's value of the OutboxEvent entity.
+// If the OutboxEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxEventMutation) OldNextAttemptAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNextAttemptAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNextAttemptAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNextAttemptAt: %w", err)
+	}
+	return oldValue.NextAttemptAt, nil
+}
+
+// ClearNextAttemptAt clears the value of the "next_attempt_at" field.
+func (m *OutboxEventMutation) ClearNextAttemptAt() {
+	m.next_attempt_at = nil
+	m.clearedFields[outboxevent.FieldNextAttemptAt] = struct{}{}
+}
+
+// NextAttemptAtCleared returns if the "next_attempt_at" field was cleared in this mutation.
+func (m *OutboxEventMutation) NextAttemptAtCleared() bool {
+	_, ok := m.clearedFields[outboxevent.FieldNextAttemptAt]
+	return ok
+}
+
+// ResetNextAttemptAt resets all changes to the "next_attempt_at" field.
+func (m *OutboxEventMutation) ResetNextAttemptAt() {
+	m.next_attempt_at = nil
+	delete(m.clearedFields, outboxevent.FieldNextAttemptAt)
+}
+
+// SetLastError sets the "last_error" field.
+func (m *OutboxEventMutation) SetLastError(s string) {
+	m.last_error = &s
+}
+
+// LastError returns the value of the "last_error" field in the mutation.
+func (m *OutboxEventMutation) LastError() (r string, exists bool) {
+	v := m.last_error
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastError returns the old "last_error" field's value of the OutboxEvent entity.
+// If the OutboxEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxEventMutation) OldLastError(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastError is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastError requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastError: %w", err)
+	}
+	return oldValue.LastError, nil
+}
+
+// ResetLastError resets all changes to the "last_error" field.
+func (m *OutboxEventMutation) ResetLastError() {
+	m.last_error = nil
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (m *OutboxEventMutation) SetDeadLetteredAt(t time.Time) {
+	m.dead_lettered_at = &t
+}
+
+// DeadLetteredAt returns the value of the "dead_lettered_at" field in the mutation.
+func (m *OutboxEventMutation) DeadLetteredAt() (r time.Time, exists bool) {
+	v := m.dead_lettered_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeadLetteredAt returns the old "dead_lettered_at" field's value of the OutboxEvent entity.
+// If the OutboxEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OutboxEventMutation) OldDeadLetteredAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeadLetteredAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeadLetteredAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeadLetteredAt: %w", err)
+	}
+	return oldValue.DeadLetteredAt, nil
+}
+
+// ClearDeadLetteredAt clears the value of the "dead_lettered_at" field.
+func (m *OutboxEventMutation) ClearDeadLetteredAt() {
+	m.dead_lettered_at = nil
+	m.clearedFields[outboxevent.FieldDeadLetteredAt] = struct{}{}
+}
+
+// DeadLetteredAtCleared returns if the "dead_lettered_at" field was cleared in this mutation.
+func (m *OutboxEventMutation) DeadLetteredAtCleared() bool {
+	_, ok := m.clearedFields[outboxevent.FieldDeadLetteredAt]
+	return ok
+}
+
+// ResetDeadLetteredAt resets all changes to the "dead_lettered_at" field.
+func (m *OutboxEventMutation) ResetDeadLetteredAt() {
+	m.dead_lettered_at = nil
+	delete(m.clearedFields, outboxevent.FieldDeadLetteredAt)
+}
+
 // Where appends a list predicates to the OutboxEventMutation builder.
 func (m *OutboxEventMutation) Where(ps ...predicate.OutboxEvent) {
 	m.predicates = append(m.predicates, ps...)
@@ -18999,7 +19194,7 @@ func (m *OutboxEventMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OutboxEventMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, outboxevent.FieldCreatedAt)
 	}
@@ -19014,6 +19209,18 @@ func (m *OutboxEventMutation) Fields() []string {
 	}
 	if m.published_at != nil {
 		fields = append(fields, outboxevent.FieldPublishedAt)
+	}
+	if m.attempt_count != nil {
+		fields = append(fields, outboxevent.FieldAttemptCount)
+	}
+	if m.next_attempt_at != nil {
+		fields = append(fields, outboxevent.FieldNextAttemptAt)
+	}
+	if m.last_error != nil {
+		fields = append(fields, outboxevent.FieldLastError)
+	}
+	if m.dead_lettered_at != nil {
+		fields = append(fields, outboxevent.FieldDeadLetteredAt)
 	}
 	return fields
 }
@@ -19033,6 +19240,14 @@ func (m *OutboxEventMutation) Field(name string) (ent.Value, bool) {
 		return m.Payload()
 	case outboxevent.FieldPublishedAt:
 		return m.PublishedAt()
+	case outboxevent.FieldAttemptCount:
+		return m.AttemptCount()
+	case outboxevent.FieldNextAttemptAt:
+		return m.NextAttemptAt()
+	case outboxevent.FieldLastError:
+		return m.LastError()
+	case outboxevent.FieldDeadLetteredAt:
+		return m.DeadLetteredAt()
 	}
 	return nil, false
 }
@@ -19052,6 +19267,14 @@ func (m *OutboxEventMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldPayload(ctx)
 	case outboxevent.FieldPublishedAt:
 		return m.OldPublishedAt(ctx)
+	case outboxevent.FieldAttemptCount:
+		return m.OldAttemptCount(ctx)
+	case outboxevent.FieldNextAttemptAt:
+		return m.OldNextAttemptAt(ctx)
+	case outboxevent.FieldLastError:
+		return m.OldLastError(ctx)
+	case outboxevent.FieldDeadLetteredAt:
+		return m.OldDeadLetteredAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown OutboxEvent field %s", name)
 }
@@ -19096,6 +19319,34 @@ func (m *OutboxEventMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPublishedAt(v)
 		return nil
+	case outboxevent.FieldAttemptCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttemptCount(v)
+		return nil
+	case outboxevent.FieldNextAttemptAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNextAttemptAt(v)
+		return nil
+	case outboxevent.FieldLastError:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastError(v)
+		return nil
+	case outboxevent.FieldDeadLetteredAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeadLetteredAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown OutboxEvent field %s", name)
 }
@@ -19103,13 +19354,21 @@ func (m *OutboxEventMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *OutboxEventMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addattempt_count != nil {
+		fields = append(fields, outboxevent.FieldAttemptCount)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *OutboxEventMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case outboxevent.FieldAttemptCount:
+		return m.AddedAttemptCount()
+	}
 	return nil, false
 }
 
@@ -19118,6 +19377,13 @@ func (m *OutboxEventMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *OutboxEventMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case outboxevent.FieldAttemptCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAttemptCount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown OutboxEvent numeric field %s", name)
 }
@@ -19128,6 +19394,12 @@ func (m *OutboxEventMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(outboxevent.FieldPublishedAt) {
 		fields = append(fields, outboxevent.FieldPublishedAt)
+	}
+	if m.FieldCleared(outboxevent.FieldNextAttemptAt) {
+		fields = append(fields, outboxevent.FieldNextAttemptAt)
+	}
+	if m.FieldCleared(outboxevent.FieldDeadLetteredAt) {
+		fields = append(fields, outboxevent.FieldDeadLetteredAt)
 	}
 	return fields
 }
@@ -19145,6 +19417,12 @@ func (m *OutboxEventMutation) ClearField(name string) error {
 	switch name {
 	case outboxevent.FieldPublishedAt:
 		m.ClearPublishedAt()
+		return nil
+	case outboxevent.FieldNextAttemptAt:
+		m.ClearNextAttemptAt()
+		return nil
+	case outboxevent.FieldDeadLetteredAt:
+		m.ClearDeadLetteredAt()
 		return nil
 	}
 	return fmt.Errorf("unknown OutboxEvent nullable field %s", name)
@@ -19168,6 +19446,18 @@ func (m *OutboxEventMutation) ResetField(name string) error {
 		return nil
 	case outboxevent.FieldPublishedAt:
 		m.ResetPublishedAt()
+		return nil
+	case outboxevent.FieldAttemptCount:
+		m.ResetAttemptCount()
+		return nil
+	case outboxevent.FieldNextAttemptAt:
+		m.ResetNextAttemptAt()
+		return nil
+	case outboxevent.FieldLastError:
+		m.ResetLastError()
+		return nil
+	case outboxevent.FieldDeadLetteredAt:
+		m.ResetDeadLetteredAt()
 		return nil
 	}
 	return fmt.Errorf("unknown OutboxEvent field %s", name)
@@ -19503,7 +19793,7 @@ func (m *ParcelMutation) LengthMm() (r int, exists bool) {
 // OldLengthMm returns the old "length_mm" field's value of the Parcel entity.
 // If the Parcel object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ParcelMutation) OldLengthMm(ctx context.Context) (v int, err error) {
+func (m *ParcelMutation) OldLengthMm(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldLengthMm is only allowed on UpdateOne operations")
 	}
@@ -19535,10 +19825,24 @@ func (m *ParcelMutation) AddedLengthMm() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearLengthMm clears the value of the "length_mm" field.
+func (m *ParcelMutation) ClearLengthMm() {
+	m.length_mm = nil
+	m.addlength_mm = nil
+	m.clearedFields[parcel.FieldLengthMm] = struct{}{}
+}
+
+// LengthMmCleared returns if the "length_mm" field was cleared in this mutation.
+func (m *ParcelMutation) LengthMmCleared() bool {
+	_, ok := m.clearedFields[parcel.FieldLengthMm]
+	return ok
+}
+
 // ResetLengthMm resets all changes to the "length_mm" field.
 func (m *ParcelMutation) ResetLengthMm() {
 	m.length_mm = nil
 	m.addlength_mm = nil
+	delete(m.clearedFields, parcel.FieldLengthMm)
 }
 
 // SetWidthMm sets the "width_mm" field.
@@ -19559,7 +19863,7 @@ func (m *ParcelMutation) WidthMm() (r int, exists bool) {
 // OldWidthMm returns the old "width_mm" field's value of the Parcel entity.
 // If the Parcel object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ParcelMutation) OldWidthMm(ctx context.Context) (v int, err error) {
+func (m *ParcelMutation) OldWidthMm(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldWidthMm is only allowed on UpdateOne operations")
 	}
@@ -19591,10 +19895,24 @@ func (m *ParcelMutation) AddedWidthMm() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearWidthMm clears the value of the "width_mm" field.
+func (m *ParcelMutation) ClearWidthMm() {
+	m.width_mm = nil
+	m.addwidth_mm = nil
+	m.clearedFields[parcel.FieldWidthMm] = struct{}{}
+}
+
+// WidthMmCleared returns if the "width_mm" field was cleared in this mutation.
+func (m *ParcelMutation) WidthMmCleared() bool {
+	_, ok := m.clearedFields[parcel.FieldWidthMm]
+	return ok
+}
+
 // ResetWidthMm resets all changes to the "width_mm" field.
 func (m *ParcelMutation) ResetWidthMm() {
 	m.width_mm = nil
 	m.addwidth_mm = nil
+	delete(m.clearedFields, parcel.FieldWidthMm)
 }
 
 // SetHeightMm sets the "height_mm" field.
@@ -19615,7 +19933,7 @@ func (m *ParcelMutation) HeightMm() (r int, exists bool) {
 // OldHeightMm returns the old "height_mm" field's value of the Parcel entity.
 // If the Parcel object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ParcelMutation) OldHeightMm(ctx context.Context) (v int, err error) {
+func (m *ParcelMutation) OldHeightMm(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldHeightMm is only allowed on UpdateOne operations")
 	}
@@ -19647,10 +19965,24 @@ func (m *ParcelMutation) AddedHeightMm() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearHeightMm clears the value of the "height_mm" field.
+func (m *ParcelMutation) ClearHeightMm() {
+	m.height_mm = nil
+	m.addheight_mm = nil
+	m.clearedFields[parcel.FieldHeightMm] = struct{}{}
+}
+
+// HeightMmCleared returns if the "height_mm" field was cleared in this mutation.
+func (m *ParcelMutation) HeightMmCleared() bool {
+	_, ok := m.clearedFields[parcel.FieldHeightMm]
+	return ok
+}
+
 // ResetHeightMm resets all changes to the "height_mm" field.
 func (m *ParcelMutation) ResetHeightMm() {
 	m.height_mm = nil
 	m.addheight_mm = nil
+	delete(m.clearedFields, parcel.FieldHeightMm)
 }
 
 // SetPackageCategory sets the "package_category" field.
@@ -20356,6 +20688,15 @@ func (m *ParcelMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *ParcelMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(parcel.FieldLengthMm) {
+		fields = append(fields, parcel.FieldLengthMm)
+	}
+	if m.FieldCleared(parcel.FieldWidthMm) {
+		fields = append(fields, parcel.FieldWidthMm)
+	}
+	if m.FieldCleared(parcel.FieldHeightMm) {
+		fields = append(fields, parcel.FieldHeightMm)
+	}
 	if m.FieldCleared(parcel.FieldMetadata) {
 		fields = append(fields, parcel.FieldMetadata)
 	}
@@ -20373,6 +20714,15 @@ func (m *ParcelMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *ParcelMutation) ClearField(name string) error {
 	switch name {
+	case parcel.FieldLengthMm:
+		m.ClearLengthMm()
+		return nil
+	case parcel.FieldWidthMm:
+		m.ClearWidthMm()
+		return nil
+	case parcel.FieldHeightMm:
+		m.ClearHeightMm()
+		return nil
 	case parcel.FieldMetadata:
 		m.ClearMetadata()
 		return nil

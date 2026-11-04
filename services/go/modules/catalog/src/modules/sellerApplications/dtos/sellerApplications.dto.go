@@ -19,6 +19,7 @@ type SubmitApplicationRequest struct {
 	AddressLine      string                  `json:"addressLine"`
 	City             string                  `json:"city"`
 	State            string                  `json:"state"`
+	EnableLogistics  *bool                   `json:"enableLogistics"`
 	IdentityDocument IdentityDocumentRequest `json:"identityDocument"`
 	PayoutAccount    PayoutAccountRequest    `json:"payoutAccount"`
 }

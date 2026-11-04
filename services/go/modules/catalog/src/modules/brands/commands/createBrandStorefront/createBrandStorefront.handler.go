@@ -48,6 +48,11 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	if !owned.SellingEnabled {
 		return Result{}, catalogerrors.BrandSellingOff
 	}
+	if owned.CountryCode != "" {
+		if err := services.RequireNigeriaSellerMarket(owned.CountryCode); err != nil {
+			return Result{}, err
+		}
+	}
 	if status, err := handler.Container.LinkedProfiles.StatusOf(ctx, command.AccountId, "brand", owned.ID); err != nil || status == "held" || status == "retired" {
 		return Result{}, firstError(err, catalogerrors.ProfileOnHold)
 	}
@@ -93,11 +98,19 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 }
 
 func (handler Handler) country(ctx context.Context, command Command) (string, error) {
-	if command.CountryCode != nil {
-		return strings.ToUpper(*command.CountryCode), nil
-	}
 	country, err := handler.Container.Users.PersonalProfileCountry(ctx, command.AccountId)
-	return strings.ToUpper(country), err
+	if err != nil {
+		return "", err
+	}
+	if err := services.RequireNigeriaSellerMarket(country); err != nil {
+		return "", err
+	}
+	if command.CountryCode != nil {
+		if err := services.RequireNigeriaSellerMarket(*command.CountryCode); err != nil {
+			return "", err
+		}
+	}
+	return strings.ToUpper(strings.TrimSpace(country)), nil
 }
 
 func (handler Handler) slugFor(ctx context.Context, base string) (string, error) {

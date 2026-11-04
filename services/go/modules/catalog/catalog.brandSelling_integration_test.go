@@ -92,6 +92,24 @@ func TestBrandSellingToggleHidesTheStorefrontButKeepsOrdersWorking(t *testing.T)
 	}
 }
 
+func TestBrandStorefrontCannotOverrideNonNigeriaAccountCountry(t *testing.T) {
+	harness := startHttpHarness(t)
+	startProfileRuleHarness(harness)
+	accountId, owner := harness.account("international-brand-owner")
+	brand := harness.expect("POST", "/api/v1/brands", owner, brandBody("internationalbrand"), http.StatusCreated, "Idempotency-Key", "brand-country-000001")
+	path := "/api/v1/brands/" + brand["id"].(string)
+	_, stepUp := harness.tokens.SignAccountTokensWithStepUpForTest(t, accountId.String())
+	harness.expect("PATCH", path, owner, map[string]any{"sellingEnabled": true}, http.StatusOK, "X-Step-Up-Token", stepUp)
+	harness.directory.setCountry(accountId, "GB")
+	status, body := harness.call("POST", path+"/storefront", owner, map[string]any{"countryCode": "NG"}, "Idempotency-Key", "storefront-country-0001")
+	if status != http.StatusForbidden || body["code"] != "SELLER_MARKET_UNAVAILABLE" {
+		t.Fatalf("request-supplied Nigeria must not bypass brand seller market gate: %d %v", status, body)
+	}
+	if count, err := harness.client().Store.Query().Count(context.Background()); err != nil || count != 0 {
+		t.Fatalf("blocked storefront creation must not persist: count=%d err=%v", count, err)
+	}
+}
+
 func TestStaffReassignABrandWithStepUpAReasonAndAnAuditEntry(t *testing.T) {
 	harness := startHttpHarness(t)
 	registry, _ := startProfileRuleHarness(harness)

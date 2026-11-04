@@ -33,7 +33,7 @@ func buyerOrderView(group *ent.OrderGroup, items []*ent.OrderItem, store commerc
 		view.Items = append(view.Items, orderItemView(item, group.Currency))
 	}
 	if group.ShippedAt != nil && group.CourierName != nil && group.TrackingNumber != nil {
-		view.Shipment = &types.ShipmentView{CourierName: *group.CourierName, TrackingNumber: *group.TrackingNumber, TrackingUrl: group.TrackingURL, ShippedAt: *group.ShippedAt, EstimatedDeliveryAt: group.EstimatedDeliveryAt}
+		view.Shipment = &types.ShipmentView{CourierName: *group.CourierName, TrackingNumber: *group.TrackingNumber, ShippedAt: *group.ShippedAt, EstimatedDeliveryAt: group.EstimatedDeliveryAt}
 	}
 	view.Delivery = buyerDeliveryView(group.DeliveryStatus, group.RiderName, group.RiderPhone, group.EstimatedDeliveryAt, group.DeliveryAttempts, group.LastAttemptNote)
 	if group.PromotionIssueCode != "" {

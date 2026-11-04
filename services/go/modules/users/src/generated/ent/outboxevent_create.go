@@ -67,6 +67,62 @@ func (_c *OutboxEventCreate) SetNillablePublishedAt(v *time.Time) *OutboxEventCr
 	return _c
 }
 
+// SetAttemptCount sets the "attempt_count" field.
+func (_c *OutboxEventCreate) SetAttemptCount(v int) *OutboxEventCreate {
+	_c.mutation.SetAttemptCount(v)
+	return _c
+}
+
+// SetNillableAttemptCount sets the "attempt_count" field if the given value is not nil.
+func (_c *OutboxEventCreate) SetNillableAttemptCount(v *int) *OutboxEventCreate {
+	if v != nil {
+		_c.SetAttemptCount(*v)
+	}
+	return _c
+}
+
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (_c *OutboxEventCreate) SetNextAttemptAt(v time.Time) *OutboxEventCreate {
+	_c.mutation.SetNextAttemptAt(v)
+	return _c
+}
+
+// SetNillableNextAttemptAt sets the "next_attempt_at" field if the given value is not nil.
+func (_c *OutboxEventCreate) SetNillableNextAttemptAt(v *time.Time) *OutboxEventCreate {
+	if v != nil {
+		_c.SetNextAttemptAt(*v)
+	}
+	return _c
+}
+
+// SetLastError sets the "last_error" field.
+func (_c *OutboxEventCreate) SetLastError(v string) *OutboxEventCreate {
+	_c.mutation.SetLastError(v)
+	return _c
+}
+
+// SetNillableLastError sets the "last_error" field if the given value is not nil.
+func (_c *OutboxEventCreate) SetNillableLastError(v *string) *OutboxEventCreate {
+	if v != nil {
+		_c.SetLastError(*v)
+	}
+	return _c
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (_c *OutboxEventCreate) SetDeadLetteredAt(v time.Time) *OutboxEventCreate {
+	_c.mutation.SetDeadLetteredAt(v)
+	return _c
+}
+
+// SetNillableDeadLetteredAt sets the "dead_lettered_at" field if the given value is not nil.
+func (_c *OutboxEventCreate) SetNillableDeadLetteredAt(v *time.Time) *OutboxEventCreate {
+	if v != nil {
+		_c.SetDeadLetteredAt(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *OutboxEventCreate) SetID(v uuid.UUID) *OutboxEventCreate {
 	_c.mutation.SetID(v)
@@ -120,6 +176,14 @@ func (_c *OutboxEventCreate) defaults() {
 		v := outboxevent.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.AttemptCount(); !ok {
+		v := outboxevent.DefaultAttemptCount
+		_c.mutation.SetAttemptCount(v)
+	}
+	if _, ok := _c.mutation.LastError(); !ok {
+		v := outboxevent.DefaultLastError
+		_c.mutation.SetLastError(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := outboxevent.DefaultID()
 		_c.mutation.SetID(v)
@@ -144,6 +208,17 @@ func (_c *OutboxEventCreate) check() error {
 	}
 	if _, ok := _c.mutation.Payload(); !ok {
 		return &ValidationError{Name: "payload", err: errors.New(`ent: missing required field "OutboxEvent.payload"`)}
+	}
+	if _, ok := _c.mutation.AttemptCount(); !ok {
+		return &ValidationError{Name: "attempt_count", err: errors.New(`ent: missing required field "OutboxEvent.attempt_count"`)}
+	}
+	if _, ok := _c.mutation.LastError(); !ok {
+		return &ValidationError{Name: "last_error", err: errors.New(`ent: missing required field "OutboxEvent.last_error"`)}
+	}
+	if v, ok := _c.mutation.LastError(); ok {
+		if err := outboxevent.LastErrorValidator(v); err != nil {
+			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "OutboxEvent.last_error": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -199,6 +274,22 @@ func (_c *OutboxEventCreate) createSpec() (*OutboxEvent, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.PublishedAt(); ok {
 		_spec.SetField(outboxevent.FieldPublishedAt, field.TypeTime, value)
 		_node.PublishedAt = &value
+	}
+	if value, ok := _c.mutation.AttemptCount(); ok {
+		_spec.SetField(outboxevent.FieldAttemptCount, field.TypeInt, value)
+		_node.AttemptCount = value
+	}
+	if value, ok := _c.mutation.NextAttemptAt(); ok {
+		_spec.SetField(outboxevent.FieldNextAttemptAt, field.TypeTime, value)
+		_node.NextAttemptAt = &value
+	}
+	if value, ok := _c.mutation.LastError(); ok {
+		_spec.SetField(outboxevent.FieldLastError, field.TypeString, value)
+		_node.LastError = value
+	}
+	if value, ok := _c.mutation.DeadLetteredAt(); ok {
+		_spec.SetField(outboxevent.FieldDeadLetteredAt, field.TypeTime, value)
+		_node.DeadLetteredAt = &value
 	}
 	return _node, _spec
 }

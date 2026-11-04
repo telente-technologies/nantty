@@ -176,11 +176,20 @@ func (gateway *PaymentGateway) returnRefundToPendingQueue(ctx context.Context, r
 }
 
 func (gateway *PaymentGateway) RetryPendingRefunds(ctx context.Context, limit int) int {
-	_ = gateway.Container.Client(gateway.Container.Resources.Database).PaymentRefund.Update().
+	client := gateway.Container.Client(gateway.Container.Resources.Database)
+	cutoff := gateway.Container.Now().Add(-10 * time.Minute)
+	_ = client.PaymentRefund.Update().
 		Where(paymentrefund.StatusEQ(paymentrefund.StatusProcessing), paymentrefund.FailureReasonHasPrefix("provider call failed"),
-			paymentrefund.UpdatedAtLT(gateway.Container.Now().Add(-10*time.Minute))).
+			paymentrefund.UpdatedAtLT(cutoff)).
 		SetStatus(paymentrefund.StatusPending).Exec(ctx)
-	pending, err := gateway.Container.Client(gateway.Container.Resources.Database).PaymentRefund.Query().
+	// A crash after the processing claim but before the provider call leaves no
+	// failure text. Recover only untouched first attempts; the next claim checks
+	// the provider by refund reference before it can submit another refund.
+	_ = client.PaymentRefund.Update().
+		Where(paymentrefund.StatusEQ(paymentrefund.StatusProcessing), paymentrefund.AttemptCountEQ(1),
+			paymentrefund.FailureReasonEQ(""), paymentrefund.ProviderRefundIDEQ(""), paymentrefund.UpdatedAtLT(cutoff)).
+		SetStatus(paymentrefund.StatusPending).SetFailureReason("provider call interrupted; reconciling before retry").Exec(ctx)
+	pending, err := client.PaymentRefund.Query().
 		Where(paymentrefund.StatusEQ(paymentrefund.StatusPending)).Order(ent.Asc(paymentrefund.FieldCreatedAt)).Limit(limit).All(ctx)
 	if err != nil {
 		return 0

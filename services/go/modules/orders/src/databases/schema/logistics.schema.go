@@ -145,9 +145,9 @@ func (Parcel) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("shipment_id", uuid.UUID{}).Immutable(),
 		field.Int("weight_grams").Positive(),
-		field.Int("length_mm").Positive(),
-		field.Int("width_mm").Positive(),
-		field.Int("height_mm").Positive(),
+		field.Int("length_mm").Optional().Nillable().Positive(),
+		field.Int("width_mm").Optional().Nillable().Positive(),
+		field.Int("height_mm").Optional().Nillable().Positive(),
 		field.String("package_category").Default("general").MaxLen(40),
 		field.Int("package_count").Default(1).Positive(),
 		field.Bool("fragile").Default(false),

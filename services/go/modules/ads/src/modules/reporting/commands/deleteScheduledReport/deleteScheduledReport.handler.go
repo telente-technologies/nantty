@@ -14,7 +14,7 @@ type Handler struct{ Container *container.Container }
 
 func (handler Handler) Execute(ctx context.Context, command Command) error {
 	deployed := handler.Container
-	if _, _, err := accountservices.LoadAccountForPermission(ctx, deployed, command.AccountId, command.UserId, adsservices.PermissionReportsView); err != nil {
+	if _, _, err := accountservices.LoadAccountForPermission(ctx, deployed, command.AccountId, command.UserId, adsservices.PermissionReportsManage); err != nil {
 		return err
 	}
 	deleted, err := deployed.Client.AdScheduledReport.Delete().Where(adscheduledreport.ID(command.ReportId), adscheduledreport.AccountID(command.AccountId)).Exec(ctx)

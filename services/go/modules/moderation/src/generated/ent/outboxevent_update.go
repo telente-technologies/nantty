@@ -48,6 +48,81 @@ func (_u *OutboxEventUpdate) ClearPublishedAt() *OutboxEventUpdate {
 	return _u
 }
 
+// SetAttemptCount sets the "attempt_count" field.
+func (_u *OutboxEventUpdate) SetAttemptCount(v int) *OutboxEventUpdate {
+	_u.mutation.ResetAttemptCount()
+	_u.mutation.SetAttemptCount(v)
+	return _u
+}
+
+// SetNillableAttemptCount sets the "attempt_count" field if the given value is not nil.
+func (_u *OutboxEventUpdate) SetNillableAttemptCount(v *int) *OutboxEventUpdate {
+	if v != nil {
+		_u.SetAttemptCount(*v)
+	}
+	return _u
+}
+
+// AddAttemptCount adds value to the "attempt_count" field.
+func (_u *OutboxEventUpdate) AddAttemptCount(v int) *OutboxEventUpdate {
+	_u.mutation.AddAttemptCount(v)
+	return _u
+}
+
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (_u *OutboxEventUpdate) SetNextAttemptAt(v time.Time) *OutboxEventUpdate {
+	_u.mutation.SetNextAttemptAt(v)
+	return _u
+}
+
+// SetNillableNextAttemptAt sets the "next_attempt_at" field if the given value is not nil.
+func (_u *OutboxEventUpdate) SetNillableNextAttemptAt(v *time.Time) *OutboxEventUpdate {
+	if v != nil {
+		_u.SetNextAttemptAt(*v)
+	}
+	return _u
+}
+
+// ClearNextAttemptAt clears the value of the "next_attempt_at" field.
+func (_u *OutboxEventUpdate) ClearNextAttemptAt() *OutboxEventUpdate {
+	_u.mutation.ClearNextAttemptAt()
+	return _u
+}
+
+// SetLastError sets the "last_error" field.
+func (_u *OutboxEventUpdate) SetLastError(v string) *OutboxEventUpdate {
+	_u.mutation.SetLastError(v)
+	return _u
+}
+
+// SetNillableLastError sets the "last_error" field if the given value is not nil.
+func (_u *OutboxEventUpdate) SetNillableLastError(v *string) *OutboxEventUpdate {
+	if v != nil {
+		_u.SetLastError(*v)
+	}
+	return _u
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (_u *OutboxEventUpdate) SetDeadLetteredAt(v time.Time) *OutboxEventUpdate {
+	_u.mutation.SetDeadLetteredAt(v)
+	return _u
+}
+
+// SetNillableDeadLetteredAt sets the "dead_lettered_at" field if the given value is not nil.
+func (_u *OutboxEventUpdate) SetNillableDeadLetteredAt(v *time.Time) *OutboxEventUpdate {
+	if v != nil {
+		_u.SetDeadLetteredAt(*v)
+	}
+	return _u
+}
+
+// ClearDeadLetteredAt clears the value of the "dead_lettered_at" field.
+func (_u *OutboxEventUpdate) ClearDeadLetteredAt() *OutboxEventUpdate {
+	_u.mutation.ClearDeadLetteredAt()
+	return _u
+}
+
 // Mutation returns the OutboxEventMutation object of the builder.
 func (_u *OutboxEventUpdate) Mutation() *OutboxEventMutation {
 	return _u.mutation
@@ -80,7 +155,20 @@ func (_u *OutboxEventUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *OutboxEventUpdate) check() error {
+	if v, ok := _u.mutation.LastError(); ok {
+		if err := outboxevent.LastErrorValidator(v); err != nil {
+			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "OutboxEvent.last_error": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *OutboxEventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(outboxevent.Table, outboxevent.Columns, sqlgraph.NewFieldSpec(outboxevent.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -94,6 +182,27 @@ func (_u *OutboxEventUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if _u.mutation.PublishedAtCleared() {
 		_spec.ClearField(outboxevent.FieldPublishedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.AttemptCount(); ok {
+		_spec.SetField(outboxevent.FieldAttemptCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAttemptCount(); ok {
+		_spec.AddField(outboxevent.FieldAttemptCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.NextAttemptAt(); ok {
+		_spec.SetField(outboxevent.FieldNextAttemptAt, field.TypeTime, value)
+	}
+	if _u.mutation.NextAttemptAtCleared() {
+		_spec.ClearField(outboxevent.FieldNextAttemptAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.LastError(); ok {
+		_spec.SetField(outboxevent.FieldLastError, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DeadLetteredAt(); ok {
+		_spec.SetField(outboxevent.FieldDeadLetteredAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeadLetteredAtCleared() {
+		_spec.ClearField(outboxevent.FieldDeadLetteredAt, field.TypeTime)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -132,6 +241,81 @@ func (_u *OutboxEventUpdateOne) SetNillablePublishedAt(v *time.Time) *OutboxEven
 // ClearPublishedAt clears the value of the "published_at" field.
 func (_u *OutboxEventUpdateOne) ClearPublishedAt() *OutboxEventUpdateOne {
 	_u.mutation.ClearPublishedAt()
+	return _u
+}
+
+// SetAttemptCount sets the "attempt_count" field.
+func (_u *OutboxEventUpdateOne) SetAttemptCount(v int) *OutboxEventUpdateOne {
+	_u.mutation.ResetAttemptCount()
+	_u.mutation.SetAttemptCount(v)
+	return _u
+}
+
+// SetNillableAttemptCount sets the "attempt_count" field if the given value is not nil.
+func (_u *OutboxEventUpdateOne) SetNillableAttemptCount(v *int) *OutboxEventUpdateOne {
+	if v != nil {
+		_u.SetAttemptCount(*v)
+	}
+	return _u
+}
+
+// AddAttemptCount adds value to the "attempt_count" field.
+func (_u *OutboxEventUpdateOne) AddAttemptCount(v int) *OutboxEventUpdateOne {
+	_u.mutation.AddAttemptCount(v)
+	return _u
+}
+
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (_u *OutboxEventUpdateOne) SetNextAttemptAt(v time.Time) *OutboxEventUpdateOne {
+	_u.mutation.SetNextAttemptAt(v)
+	return _u
+}
+
+// SetNillableNextAttemptAt sets the "next_attempt_at" field if the given value is not nil.
+func (_u *OutboxEventUpdateOne) SetNillableNextAttemptAt(v *time.Time) *OutboxEventUpdateOne {
+	if v != nil {
+		_u.SetNextAttemptAt(*v)
+	}
+	return _u
+}
+
+// ClearNextAttemptAt clears the value of the "next_attempt_at" field.
+func (_u *OutboxEventUpdateOne) ClearNextAttemptAt() *OutboxEventUpdateOne {
+	_u.mutation.ClearNextAttemptAt()
+	return _u
+}
+
+// SetLastError sets the "last_error" field.
+func (_u *OutboxEventUpdateOne) SetLastError(v string) *OutboxEventUpdateOne {
+	_u.mutation.SetLastError(v)
+	return _u
+}
+
+// SetNillableLastError sets the "last_error" field if the given value is not nil.
+func (_u *OutboxEventUpdateOne) SetNillableLastError(v *string) *OutboxEventUpdateOne {
+	if v != nil {
+		_u.SetLastError(*v)
+	}
+	return _u
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (_u *OutboxEventUpdateOne) SetDeadLetteredAt(v time.Time) *OutboxEventUpdateOne {
+	_u.mutation.SetDeadLetteredAt(v)
+	return _u
+}
+
+// SetNillableDeadLetteredAt sets the "dead_lettered_at" field if the given value is not nil.
+func (_u *OutboxEventUpdateOne) SetNillableDeadLetteredAt(v *time.Time) *OutboxEventUpdateOne {
+	if v != nil {
+		_u.SetDeadLetteredAt(*v)
+	}
+	return _u
+}
+
+// ClearDeadLetteredAt clears the value of the "dead_lettered_at" field.
+func (_u *OutboxEventUpdateOne) ClearDeadLetteredAt() *OutboxEventUpdateOne {
+	_u.mutation.ClearDeadLetteredAt()
 	return _u
 }
 
@@ -180,7 +364,20 @@ func (_u *OutboxEventUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *OutboxEventUpdateOne) check() error {
+	if v, ok := _u.mutation.LastError(); ok {
+		if err := outboxevent.LastErrorValidator(v); err != nil {
+			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "OutboxEvent.last_error": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (_u *OutboxEventUpdateOne) sqlSave(ctx context.Context) (_node *OutboxEvent, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(outboxevent.Table, outboxevent.Columns, sqlgraph.NewFieldSpec(outboxevent.FieldID, field.TypeUUID))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -211,6 +408,27 @@ func (_u *OutboxEventUpdateOne) sqlSave(ctx context.Context) (_node *OutboxEvent
 	}
 	if _u.mutation.PublishedAtCleared() {
 		_spec.ClearField(outboxevent.FieldPublishedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.AttemptCount(); ok {
+		_spec.SetField(outboxevent.FieldAttemptCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedAttemptCount(); ok {
+		_spec.AddField(outboxevent.FieldAttemptCount, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.NextAttemptAt(); ok {
+		_spec.SetField(outboxevent.FieldNextAttemptAt, field.TypeTime, value)
+	}
+	if _u.mutation.NextAttemptAtCleared() {
+		_spec.ClearField(outboxevent.FieldNextAttemptAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.LastError(); ok {
+		_spec.SetField(outboxevent.FieldLastError, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DeadLetteredAt(); ok {
+		_spec.SetField(outboxevent.FieldDeadLetteredAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeadLetteredAtCleared() {
+		_spec.ClearField(outboxevent.FieldDeadLetteredAt, field.TypeTime)
 	}
 	_node = &OutboxEvent{config: _u.config}
 	_spec.Assign = _node.assignValues

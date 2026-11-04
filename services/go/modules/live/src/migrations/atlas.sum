@@ -1,4 +1,4 @@
-h1:8fmBxWZQ9Wss//N1tBnLr/8+6jtXD3i0Mqq9/d1wuy0=
+h1:W/MOExT7f5ydOR1J1S6TPK4i9FYPreaCxvOaLEgeL7g=
 20261003102843_create_live_tables.up.sql h1:eWwBy8a9/PqMTjm1Eut18Z46Q1Z4j4AMpLKvQOPPuaw=
 20261003102900_grant_read_access_to_other_services.up.sql h1:Z/gnABkUd5KEzt/st9Ddk5pDFIoW9C0smwjIgY3p6R8=
 20261003120000_add_comments_moderation_streaming_overlays.up.sql h1:BQAqyIvXxWX4OseyMp9xCearGNBOLktSI+LRLKI62d4=
@@ -12,3 +12,4 @@ h1:8fmBxWZQ9Wss//N1tBnLr/8+6jtXD3i0Mqq9/d1wuy0=
 20261026120000_add_spaces.up.sql h1:eGgf2BqGC8YcnBbgzWqKsu2+YMt6NcxjDvWT4iFS86o=
 20261026124435_add_space_participants_and_requests.up.sql h1:Hr3RemyFGGw/IxuPx3WMXnPGgb+lh4V6ofcOj3gKryU=
 20261027210000_add_battle_settlement_retries.up.sql h1:odsPo/oZ+cglYWtc0wODkediv0cOtFMAbRxPGB/sF9A=
+20261103140000_add_live_outbox_retry_state.up.sql h1:jWyNiuqaDoX5Qkh/8u91i7zvQLNhPKQ5O4CvMnaOE8I=

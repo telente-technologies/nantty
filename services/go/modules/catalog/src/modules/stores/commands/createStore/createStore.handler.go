@@ -42,10 +42,22 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 	if !found || !profile.Active || profile.AccountId != command.AccountId {
 		return Result{}, catalogerrors.BusinessProfileInvalid
 	}
-	country := strings.ToUpper(profile.CountryCode)
-	if request.CountryCode != nil {
-		country = strings.ToUpper(*request.CountryCode)
+	accountCountry, err := handler.Container.Users.PersonalProfileCountry(ctx, command.AccountId)
+	if err != nil {
+		return Result{}, err
 	}
+	if err := services.RequireNigeriaSellerMarket(accountCountry); err != nil {
+		return Result{}, err
+	}
+	if err := services.RequireNigeriaSellerMarket(profile.CountryCode); err != nil {
+		return Result{}, err
+	}
+	if request.CountryCode != nil {
+		if err := services.RequireNigeriaSellerMarket(*request.CountryCode); err != nil {
+			return Result{}, err
+		}
+	}
+	country := "NG"
 	currency, supported := services.CurrencyForCountry(country)
 	if !supported {
 		return Result{}, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "countryCode", Message: "stores are not available in this country yet"}})

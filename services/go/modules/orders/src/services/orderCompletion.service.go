@@ -13,7 +13,19 @@ import (
 )
 
 func CompleteOrderGroup(ctx context.Context, deployed *container.Container, orderId uuid.UUID, actor OrderActor, summary string) error {
+	return completeOrderGroup(ctx, deployed, orderId, actor, summary, "")
+}
+
+func CompleteOrderGroupForEvent(ctx context.Context, deployed *container.Container, orderId uuid.UUID, actor OrderActor, summary, envelopeID string) error {
+	return completeOrderGroup(ctx, deployed, orderId, actor, summary, envelopeID)
+}
+
+func completeOrderGroup(ctx context.Context, deployed *container.Container, orderId uuid.UUID, actor OrderActor, summary, envelopeID string) error {
 	return deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		claimed, err := claimProcessedMoneyEvent(ctx, tx, envelopeID, "escrow.released")
+		if err != nil || !claimed {
+			return err
+		}
 		group, err := LockOrderGroup(ctx, tx, orderId)
 		if err != nil || group.Status == enums.StatusCompleted {
 			return err

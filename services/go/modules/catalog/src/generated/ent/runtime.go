@@ -540,6 +540,16 @@ func init() {
 	outboxeventDescEventType := outboxeventFields[0].Descriptor()
 	// outboxevent.EventTypeValidator is a validator for the "event_type" field. It is called by the builders before save.
 	outboxevent.EventTypeValidator = outboxeventDescEventType.Validators[0].(func(string) error)
+	// outboxeventDescAttemptCount is the schema descriptor for attempt_count field.
+	outboxeventDescAttemptCount := outboxeventFields[4].Descriptor()
+	// outboxevent.DefaultAttemptCount holds the default value on creation for the attempt_count field.
+	outboxevent.DefaultAttemptCount = outboxeventDescAttemptCount.Default.(int)
+	// outboxeventDescLastError is the schema descriptor for last_error field.
+	outboxeventDescLastError := outboxeventFields[6].Descriptor()
+	// outboxevent.DefaultLastError holds the default value on creation for the last_error field.
+	outboxevent.DefaultLastError = outboxeventDescLastError.Default.(string)
+	// outboxevent.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
+	outboxevent.LastErrorValidator = outboxeventDescLastError.Validators[0].(func(string) error)
 	// outboxeventDescID is the schema descriptor for id field.
 	outboxeventDescID := outboxeventMixinFields0[0].Descriptor()
 	// outboxevent.DefaultID holds the default value on creation for the id field.
@@ -1182,8 +1192,12 @@ func init() {
 			return nil
 		}
 	}()
+	// sellerapplicationDescLogisticsEnabled is the schema descriptor for logistics_enabled field.
+	sellerapplicationDescLogisticsEnabled := sellerapplicationFields[10].Descriptor()
+	// sellerapplication.DefaultLogisticsEnabled holds the default value on creation for the logistics_enabled field.
+	sellerapplication.DefaultLogisticsEnabled = sellerapplicationDescLogisticsEnabled.Default.(bool)
 	// sellerapplicationDescIdentityDocumentType is the schema descriptor for identity_document_type field.
-	sellerapplicationDescIdentityDocumentType := sellerapplicationFields[10].Descriptor()
+	sellerapplicationDescIdentityDocumentType := sellerapplicationFields[11].Descriptor()
 	// sellerapplication.IdentityDocumentTypeValidator is a validator for the "identity_document_type" field. It is called by the builders before save.
 	sellerapplication.IdentityDocumentTypeValidator = func() func(string) error {
 		validators := sellerapplicationDescIdentityDocumentType.Validators
@@ -1201,11 +1215,11 @@ func init() {
 		}
 	}()
 	// sellerapplicationDescIdentityDocumentLast4 is the schema descriptor for identity_document_last4 field.
-	sellerapplicationDescIdentityDocumentLast4 := sellerapplicationFields[12].Descriptor()
+	sellerapplicationDescIdentityDocumentLast4 := sellerapplicationFields[13].Descriptor()
 	// sellerapplication.IdentityDocumentLast4Validator is a validator for the "identity_document_last4" field. It is called by the builders before save.
 	sellerapplication.IdentityDocumentLast4Validator = sellerapplicationDescIdentityDocumentLast4.Validators[0].(func(string) error)
 	// sellerapplicationDescIdentityDocumentPhotoURL is the schema descriptor for identity_document_photo_url field.
-	sellerapplicationDescIdentityDocumentPhotoURL := sellerapplicationFields[13].Descriptor()
+	sellerapplicationDescIdentityDocumentPhotoURL := sellerapplicationFields[14].Descriptor()
 	// sellerapplication.IdentityDocumentPhotoURLValidator is a validator for the "identity_document_photo_url" field. It is called by the builders before save.
 	sellerapplication.IdentityDocumentPhotoURLValidator = func() func(string) error {
 		validators := sellerapplicationDescIdentityDocumentPhotoURL.Validators
@@ -1223,7 +1237,7 @@ func init() {
 		}
 	}()
 	// sellerapplicationDescPayoutBankCode is the schema descriptor for payout_bank_code field.
-	sellerapplicationDescPayoutBankCode := sellerapplicationFields[14].Descriptor()
+	sellerapplicationDescPayoutBankCode := sellerapplicationFields[15].Descriptor()
 	// sellerapplication.PayoutBankCodeValidator is a validator for the "payout_bank_code" field. It is called by the builders before save.
 	sellerapplication.PayoutBankCodeValidator = func() func(string) error {
 		validators := sellerapplicationDescPayoutBankCode.Validators
@@ -1241,29 +1255,29 @@ func init() {
 		}
 	}()
 	// sellerapplicationDescPayoutBankName is the schema descriptor for payout_bank_name field.
-	sellerapplicationDescPayoutBankName := sellerapplicationFields[15].Descriptor()
+	sellerapplicationDescPayoutBankName := sellerapplicationFields[16].Descriptor()
 	// sellerapplication.DefaultPayoutBankName holds the default value on creation for the payout_bank_name field.
 	sellerapplication.DefaultPayoutBankName = sellerapplicationDescPayoutBankName.Default.(string)
 	// sellerapplication.PayoutBankNameValidator is a validator for the "payout_bank_name" field. It is called by the builders before save.
 	sellerapplication.PayoutBankNameValidator = sellerapplicationDescPayoutBankName.Validators[0].(func(string) error)
 	// sellerapplicationDescPayoutAccountLast4 is the schema descriptor for payout_account_last4 field.
-	sellerapplicationDescPayoutAccountLast4 := sellerapplicationFields[17].Descriptor()
+	sellerapplicationDescPayoutAccountLast4 := sellerapplicationFields[18].Descriptor()
 	// sellerapplication.PayoutAccountLast4Validator is a validator for the "payout_account_last4" field. It is called by the builders before save.
 	sellerapplication.PayoutAccountLast4Validator = sellerapplicationDescPayoutAccountLast4.Validators[0].(func(string) error)
 	// sellerapplicationDescReviewedByID is the schema descriptor for reviewed_by_id field.
-	sellerapplicationDescReviewedByID := sellerapplicationFields[19].Descriptor()
+	sellerapplicationDescReviewedByID := sellerapplicationFields[20].Descriptor()
 	// sellerapplication.ReviewedByIDValidator is a validator for the "reviewed_by_id" field. It is called by the builders before save.
 	sellerapplication.ReviewedByIDValidator = sellerapplicationDescReviewedByID.Validators[0].(func(string) error)
 	// sellerapplicationDescReviewedByName is the schema descriptor for reviewed_by_name field.
-	sellerapplicationDescReviewedByName := sellerapplicationFields[20].Descriptor()
+	sellerapplicationDescReviewedByName := sellerapplicationFields[21].Descriptor()
 	// sellerapplication.ReviewedByNameValidator is a validator for the "reviewed_by_name" field. It is called by the builders before save.
 	sellerapplication.ReviewedByNameValidator = sellerapplicationDescReviewedByName.Validators[0].(func(string) error)
 	// sellerapplicationDescDecisionReason is the schema descriptor for decision_reason field.
-	sellerapplicationDescDecisionReason := sellerapplicationFields[21].Descriptor()
+	sellerapplicationDescDecisionReason := sellerapplicationFields[22].Descriptor()
 	// sellerapplication.DecisionReasonValidator is a validator for the "decision_reason" field. It is called by the builders before save.
 	sellerapplication.DecisionReasonValidator = sellerapplicationDescDecisionReason.Validators[0].(func(string) error)
 	// sellerapplicationDescUpdatedAt is the schema descriptor for updated_at field.
-	sellerapplicationDescUpdatedAt := sellerapplicationFields[22].Descriptor()
+	sellerapplicationDescUpdatedAt := sellerapplicationFields[23].Descriptor()
 	// sellerapplication.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	sellerapplication.DefaultUpdatedAt = sellerapplicationDescUpdatedAt.Default.(func() time.Time)
 	// sellerapplication.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

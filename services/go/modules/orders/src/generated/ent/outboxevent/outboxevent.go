@@ -24,6 +24,14 @@ const (
 	FieldPayload = "payload"
 	// FieldPublishedAt holds the string denoting the published_at field in the database.
 	FieldPublishedAt = "published_at"
+	// FieldAttemptCount holds the string denoting the attempt_count field in the database.
+	FieldAttemptCount = "attempt_count"
+	// FieldNextAttemptAt holds the string denoting the next_attempt_at field in the database.
+	FieldNextAttemptAt = "next_attempt_at"
+	// FieldLastError holds the string denoting the last_error field in the database.
+	FieldLastError = "last_error"
+	// FieldDeadLetteredAt holds the string denoting the dead_lettered_at field in the database.
+	FieldDeadLetteredAt = "dead_lettered_at"
 	// Table holds the table name of the outboxevent in the database.
 	Table = "outbox_events"
 )
@@ -36,6 +44,10 @@ var Columns = []string{
 	FieldSubject,
 	FieldPayload,
 	FieldPublishedAt,
+	FieldAttemptCount,
+	FieldNextAttemptAt,
+	FieldLastError,
+	FieldDeadLetteredAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -53,6 +65,12 @@ var (
 	DefaultCreatedAt func() time.Time
 	// EventTypeValidator is a validator for the "event_type" field. It is called by the builders before save.
 	EventTypeValidator func(string) error
+	// DefaultAttemptCount holds the default value on creation for the "attempt_count" field.
+	DefaultAttemptCount int
+	// DefaultLastError holds the default value on creation for the "last_error" field.
+	DefaultLastError string
+	// LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
+	LastErrorValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -83,4 +101,24 @@ func BySubject(opts ...sql.OrderTermOption) OrderOption {
 // ByPublishedAt orders the results by the published_at field.
 func ByPublishedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPublishedAt, opts...).ToFunc()
+}
+
+// ByAttemptCount orders the results by the attempt_count field.
+func ByAttemptCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAttemptCount, opts...).ToFunc()
+}
+
+// ByNextAttemptAt orders the results by the next_attempt_at field.
+func ByNextAttemptAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNextAttemptAt, opts...).ToFunc()
+}
+
+// ByLastError orders the results by the last_error field.
+func ByLastError(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastError, opts...).ToFunc()
+}
+
+// ByDeadLetteredAt orders the results by the dead_lettered_at field.
+func ByDeadLetteredAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeadLetteredAt, opts...).ToFunc()
 }

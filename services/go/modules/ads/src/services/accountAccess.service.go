@@ -20,13 +20,14 @@ const (
 	PermissionCampaignsManage = "campaigns:manage"
 	PermissionAudiencesManage = "audiences:manage"
 	PermissionReportsView     = "reports:view"
+	PermissionReportsManage   = "reports:manage"
 	PermissionBillingView     = "billing:view"
 	PermissionBillingManage   = "billing:manage"
 	PermissionToolsManage     = "tools:manage"
 )
 
 var permissionsByRole = map[string][]string{
-	"admin":      {PermissionAccountView, PermissionAccountManage, PermissionMembersManage, PermissionCampaignsView, PermissionCampaignsManage, PermissionAudiencesManage, PermissionReportsView, PermissionBillingView, PermissionBillingManage, PermissionToolsManage},
+	"admin":      {PermissionAccountView, PermissionAccountManage, PermissionMembersManage, PermissionCampaignsView, PermissionCampaignsManage, PermissionAudiencesManage, PermissionReportsView, PermissionReportsManage, PermissionBillingView, PermissionBillingManage, PermissionToolsManage},
 	"advertiser": {PermissionAccountView, PermissionCampaignsView, PermissionCampaignsManage, PermissionAudiencesManage, PermissionReportsView, PermissionBillingView, PermissionToolsManage},
 	"analyst":    {PermissionAccountView, PermissionCampaignsView, PermissionReportsView},
 	"billing":    {PermissionAccountView, PermissionCampaignsView, PermissionReportsView, PermissionBillingView, PermissionBillingManage},

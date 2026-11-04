@@ -36,6 +36,8 @@ const (
 	FieldCity = "city"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
+	// FieldLogisticsEnabled holds the string denoting the logistics_enabled field in the database.
+	FieldLogisticsEnabled = "logistics_enabled"
 	// FieldIdentityDocumentType holds the string denoting the identity_document_type field in the database.
 	FieldIdentityDocumentType = "identity_document_type"
 	// FieldIdentityDocumentNumberSealed holds the string denoting the identity_document_number_sealed field in the database.
@@ -80,6 +82,7 @@ var Columns = []string{
 	FieldAddressLine,
 	FieldCity,
 	FieldState,
+	FieldLogisticsEnabled,
 	FieldIdentityDocumentType,
 	FieldIdentityDocumentNumberSealed,
 	FieldIdentityDocumentLast4,
@@ -128,6 +131,8 @@ var (
 	CityValidator func(string) error
 	// StateValidator is a validator for the "state" field. It is called by the builders before save.
 	StateValidator func(string) error
+	// DefaultLogisticsEnabled holds the default value on creation for the "logistics_enabled" field.
+	DefaultLogisticsEnabled bool
 	// IdentityDocumentTypeValidator is a validator for the "identity_document_type" field. It is called by the builders before save.
 	IdentityDocumentTypeValidator func(string) error
 	// IdentityDocumentLast4Validator is a validator for the "identity_document_last4" field. It is called by the builders before save.
@@ -212,6 +217,11 @@ func ByCity(opts ...sql.OrderTermOption) OrderOption {
 // ByState orders the results by the state field.
 func ByState(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldState, opts...).ToFunc()
+}
+
+// ByLogisticsEnabled orders the results by the logistics_enabled field.
+func ByLogisticsEnabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLogisticsEnabled, opts...).ToFunc()
 }
 
 // ByIdentityDocumentType orders the results by the identity_document_type field.

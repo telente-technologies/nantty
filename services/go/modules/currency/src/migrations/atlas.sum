@@ -1,3 +1,4 @@
-h1:ujNp1jLg/HxV0sEqGdublP6uJZuRP9Oh8MIvmoekoiM=
+h1:cDYmxXXioYe2joN2yl+6YPWyT64M2JT0StCQ9t9Nv3s=
 20261003101325_create_currency_tables.up.sql h1:04JtXy/L372+/bxl9LQjfCSgpiULcqieht2J80lvD3g=
 20261003110000_grant_read_access_to_other_services.up.sql h1:dY2ZxtDotDCO1O6L6/UkrhX63H2olzqxt57Zakm6pLM=
+20261103130000_add_currency_outbox_retry_state.up.sql h1:S6S1tHrgNExpOBiqJGAFo3jG3fm7FmoMOwLaY2HCGuU=

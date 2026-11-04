@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"sync"
 	"testing"
 
 	"github.com/google/uuid"
 
 	"nantty/modules/orders/src/generated/ent/orderevent"
+	"nantty/modules/orders/src/generated/ent/processedevent"
 	"nantty/modules/orders/src/generated/ent/refundrecord"
 	"nantty/modules/orders/src/services"
 	"nantty/platform/staffauth"
@@ -26,10 +28,24 @@ func TestARefundScheduledByEscrowIsShownAsScheduledAndCompletesOnTheRefundEvent(
 	envelope, _ := json.Marshal(map[string]any{"id": uuid.NewString(), "type": "escrow.refundScheduled", "source": "nantty.escrow", "subject": orderId.String(), "schemaVersion": 1, "occurredAt": "2026-10-12T10:00:00Z", "data": json.RawMessage(data)})
 	handler := services.MoneyEventHandler{Container: harness.module.Container}
 	ctx := context.Background()
+	var wait sync.WaitGroup
+	errors := make(chan error, 2)
 	for range 2 {
-		if err := handler.Handle(ctx, envelope); err != nil {
+		wait.Add(1)
+		go func() {
+			defer wait.Done()
+			errors <- handler.Handle(ctx, envelope)
+		}()
+	}
+	wait.Wait()
+	close(errors)
+	for err := range errors {
+		if err != nil {
 			t.Fatal(err)
 		}
+	}
+	if err := services.RecordOrderRefundScheduled(ctx, harness.module.Container, orderId, 120_000); err != nil {
+		t.Fatal(err)
 	}
 	record := harness.module.Container.Client.RefundRecord.Query().Where(refundrecord.OrderGroupID(orderId)).OnlyX(ctx)
 	if record.Status != "scheduled" {
@@ -38,6 +54,9 @@ func TestARefundScheduledByEscrowIsShownAsScheduledAndCompletesOnTheRefundEvent(
 	timeline := harness.module.Container.Client.OrderEvent.Query().Where(orderevent.OrderGroupID(orderId), orderevent.Kind("refundScheduled")).CountX(ctx)
 	if timeline != 1 {
 		t.Fatalf("buyer and seller timeline must show the scheduled refund once, got %d", timeline)
+	}
+	if receipts := harness.module.Container.Client.ProcessedEvent.Query().Where(processedevent.EventType("escrow.refundScheduled")).CountX(ctx); receipts != 1 {
+		t.Fatalf("concurrent delivery must commit one processed-event receipt: %d", receipts)
 	}
 	status, page, _ := harness.call("GET", "/api/v1/admin/refunds?status=scheduled", nil, bearer(access, nil))
 	if status != http.StatusOK || len(page["data"].([]any)) != 1 {

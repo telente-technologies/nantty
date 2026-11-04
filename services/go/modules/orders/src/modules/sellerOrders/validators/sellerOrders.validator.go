@@ -40,7 +40,7 @@ func ValidateFulfilment(body dtos.FulfilmentRequest) error {
 		collected.Add("trackingNumber", "must be 4-40 letters, digits or hyphens")
 	}
 	if body.TrackingUrl != nil {
-		if parsed, err := url.Parse(*body.TrackingUrl); err != nil || parsed.Scheme != "https" || len(*body.TrackingUrl) > 300 {
+		if parsed, err := url.Parse(*body.TrackingUrl); err != nil || parsed.Scheme != "https" || parsed.Hostname() == "" || parsed.User != nil || len(*body.TrackingUrl) > 300 {
 			collected.Add("trackingUrl", "must be an https link of at most 300 characters")
 		}
 	}

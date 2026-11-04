@@ -21,6 +21,7 @@ type MyApplication struct {
 	CategoryName                 string     `json:"categoryName"`
 	City                         string     `json:"city"`
 	State                        string     `json:"state"`
+	LogisticsEnabled             bool       `json:"logisticsEnabled"`
 	IdentityDocumentType         string     `json:"identityDocumentType"`
 	IdentityDocumentNumberMasked string     `json:"identityDocumentNumberMasked"`
 	PayoutBankName               string     `json:"payoutBankName"`
@@ -49,6 +50,7 @@ type ProgramApplication struct {
 	DecisionReason       *string           `json:"decisionReason"`
 	Pitch                string            `json:"pitch"`
 	StoreName            *string           `json:"storeName"`
+	LogisticsEnabled     bool              `json:"logisticsEnabled"`
 	Categories           []string          `json:"categories"`
 	ExpectedMonthlySales any               `json:"expectedMonthlySales"`
 	ContentNiche         *string           `json:"contentNiche"`
@@ -60,7 +62,7 @@ func mask(lastFour string) string { return "******" + lastFour }
 
 func PresentMine(row *ent.SellerApplication) MyApplication {
 	view := MyApplication{Id: row.ID.String(), Status: row.Status, StoreName: row.StoreName, CategoryName: row.CategoryName, City: row.City, State: row.State,
-		IdentityDocumentType: row.IdentityDocumentType, IdentityDocumentNumberMasked: mask(row.IdentityDocumentLast4), PayoutBankName: row.PayoutBankName,
+		LogisticsEnabled: row.LogisticsEnabled, IdentityDocumentType: row.IdentityDocumentType, IdentityDocumentNumberMasked: mask(row.IdentityDocumentLast4), PayoutBankName: row.PayoutBankName,
 		PayoutAccountNumberMasked: mask(row.PayoutAccountLast4), SubmittedAt: row.CreatedAt, ReviewedAt: row.ReviewedAt}
 	if row.Status == "rejected" {
 		view.RejectionReason = row.DecisionReason
@@ -89,7 +91,7 @@ func Present(ctx context.Context, deployed *container.Container, rows []*ent.Sel
 		storeName := row.StoreName
 		view := ProgramApplication{Id: row.ID.String(), Kind: "sellers", User: person, Status: strings.ToUpper(row.Status), SubmittedAt: row.CreatedAt,
 			ReviewedAt: row.ReviewedAt, ReviewedByName: row.ReviewedByName, DecisionReason: row.DecisionReason, Pitch: row.Description, StoreName: &storeName,
-			Categories: []string{row.CategoryName}, Eligibility: eligibility(row, person, categoryActive)}
+			LogisticsEnabled: row.LogisticsEnabled, Categories: []string{row.CategoryName}, Eligibility: eligibility(row, person, categoryActive)}
 		view.IsEligible = true
 		for _, line := range view.Eligibility {
 			view.IsEligible = view.IsEligible && line.IsMet

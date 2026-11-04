@@ -19,6 +19,7 @@ import (
 	"nantty/modules/ads/src"
 	"nantty/modules/ads/src/configs"
 	"nantty/modules/ads/src/events"
+	"nantty/modules/ads/src/generated/ent/adaccountmember"
 	"nantty/modules/ads/src/integrations"
 	"nantty/modules/ads/src/interfaces"
 	"nantty/modules/ads/src/modules/reporting/delivery"
@@ -199,6 +200,33 @@ func TestScheduledReportsAreDeliveredAsFilesAndAnEmailEvent(t *testing.T) {
 	}
 	h.expect("DELETE", base+"/reports/scheduled/"+created["id"].(string), &owner, "", nil, http.StatusNoContent)
 	h.expect("DELETE", base+"/reports/scheduled/"+created["id"].(string), &owner, "", nil, http.StatusNotFound)
+}
+
+func TestAnalystCanReadButCannotManageScheduledReports(t *testing.T) {
+	h := startAdsAgainstFreshSchema(t)
+	owner, analyst := h.newUser("report-permission-owner"), h.newUser("report-permission-analyst")
+	accountID := createAccount(h, &owner, "report-permission-account")
+	parsedAccountID, err := uuid.Parse(accountID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := h.module.Container.Client.AdAccountMember.Create().SetAccountID(parsedAccountID).SetUserID(analyst.id).SetRole(adaccountmember.RoleAnalyst).Save(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	base := "/api/v1/ads/accounts/" + accountID + "/reports/scheduled"
+	input := map[string]any{"name": "Sensitive weekly report", "recipients": []string{"external@example.test"}, "frequency": "daily", "breakdown": "campaign", "metrics": []string{"spend"}}
+
+	created := h.expect("POST", base, &owner, "", input, http.StatusCreated)
+	h.expect("GET", base, &analyst, "", nil, http.StatusOK)
+	if status, _ := h.call("POST", base, &analyst, "", input); status != http.StatusForbidden {
+		t.Fatalf("analyst POST must be forbidden, got %d", status)
+	}
+	if status, _ := h.call("DELETE", base+"/"+created["id"].(string), &analyst, "", nil); status != http.StatusForbidden {
+		t.Fatalf("analyst DELETE must be forbidden, got %d", status)
+	}
+	if reports := h.expect("GET", base, &owner, "", nil, http.StatusOK)["data"].([]any); len(reports) != 1 {
+		t.Fatalf("analyst mutations must not create or remove reports: %v", reports)
+	}
 }
 
 func TestCreativeMediaUploadUsesPresignedStorageAndWaitsForProcessing(t *testing.T) {

@@ -14,6 +14,7 @@ import (
 	"nantty/modules/admin/src/generated/ent"
 	"nantty/modules/admin/src/integrations"
 	"nantty/modules/admin/src/middlewares"
+	eventoperations "nantty/modules/admin/src/modules/eventOperations/services"
 	recoverycodes "nantty/modules/admin/src/utils/recoveryCodes"
 	"nantty/platform/identityports"
 	"nantty/platform/passwordhash"
@@ -21,17 +22,18 @@ import (
 )
 
 type Container struct {
-	Client    *ent.Client
-	Database  *sql.DB
-	Settings  configs.AdminSettings
-	Passwords *passwordhash.PasswordHasher
-	Tokens    func() (identityports.StaffTokenService, error)
-	Delivery  integrations.InvitationDelivery
-	Logger    *slog.Logger
-	Now       func() time.Time
-	Guard     staffauth.Guard
-	Limiter   *middlewares.AttemptRateLimiter
-	WebAuthn  *webauthn.WebAuthn
+	Client         *ent.Client
+	Database       *sql.DB
+	Settings       configs.AdminSettings
+	Passwords      *passwordhash.PasswordHasher
+	Tokens         func() (identityports.StaffTokenService, error)
+	Delivery       integrations.InvitationDelivery
+	Logger         *slog.Logger
+	Now            func() time.Time
+	Guard          staffauth.Guard
+	Limiter        *middlewares.AttemptRateLimiter
+	WebAuthn       *webauthn.WebAuthn
+	RabbitMQQueues eventoperations.QueueReader
 }
 
 func (container *Container) RecoveryCodeKey() []byte {

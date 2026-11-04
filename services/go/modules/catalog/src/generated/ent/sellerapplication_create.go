@@ -122,6 +122,20 @@ func (_c *SellerApplicationCreate) SetState(v string) *SellerApplicationCreate {
 	return _c
 }
 
+// SetLogisticsEnabled sets the "logistics_enabled" field.
+func (_c *SellerApplicationCreate) SetLogisticsEnabled(v bool) *SellerApplicationCreate {
+	_c.mutation.SetLogisticsEnabled(v)
+	return _c
+}
+
+// SetNillableLogisticsEnabled sets the "logistics_enabled" field if the given value is not nil.
+func (_c *SellerApplicationCreate) SetNillableLogisticsEnabled(v *bool) *SellerApplicationCreate {
+	if v != nil {
+		_c.SetLogisticsEnabled(*v)
+	}
+	return _c
+}
+
 // SetIdentityDocumentType sets the "identity_document_type" field.
 func (_c *SellerApplicationCreate) SetIdentityDocumentType(v string) *SellerApplicationCreate {
 	_c.mutation.SetIdentityDocumentType(v)
@@ -313,6 +327,10 @@ func (_c *SellerApplicationCreate) defaults() {
 		v := sellerapplication.DefaultDescription
 		_c.mutation.SetDescription(v)
 	}
+	if _, ok := _c.mutation.LogisticsEnabled(); !ok {
+		v := sellerapplication.DefaultLogisticsEnabled
+		_c.mutation.SetLogisticsEnabled(v)
+	}
 	if _, ok := _c.mutation.PayoutBankName(); !ok {
 		v := sellerapplication.DefaultPayoutBankName
 		_c.mutation.SetPayoutBankName(v)
@@ -396,6 +414,9 @@ func (_c *SellerApplicationCreate) check() error {
 		if err := sellerapplication.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "SellerApplication.state": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.LogisticsEnabled(); !ok {
+		return &ValidationError{Name: "logistics_enabled", err: errors.New(`ent: missing required field "SellerApplication.logistics_enabled"`)}
 	}
 	if _, ok := _c.mutation.IdentityDocumentType(); !ok {
 		return &ValidationError{Name: "identity_document_type", err: errors.New(`ent: missing required field "SellerApplication.identity_document_type"`)}
@@ -548,6 +569,10 @@ func (_c *SellerApplicationCreate) createSpec() (*SellerApplication, *sqlgraph.C
 	if value, ok := _c.mutation.State(); ok {
 		_spec.SetField(sellerapplication.FieldState, field.TypeString, value)
 		_node.State = value
+	}
+	if value, ok := _c.mutation.LogisticsEnabled(); ok {
+		_spec.SetField(sellerapplication.FieldLogisticsEnabled, field.TypeBool, value)
+		_node.LogisticsEnabled = value
 	}
 	if value, ok := _c.mutation.IdentityDocumentType(); ok {
 		_spec.SetField(sellerapplication.FieldIdentityDocumentType, field.TypeString, value)
@@ -795,6 +820,9 @@ func (u *SellerApplicationUpsertOne) UpdateNewValues() *SellerApplicationUpsertO
 		}
 		if _, exists := u.create.mutation.State(); exists {
 			s.SetIgnore(sellerapplication.FieldState)
+		}
+		if _, exists := u.create.mutation.LogisticsEnabled(); exists {
+			s.SetIgnore(sellerapplication.FieldLogisticsEnabled)
 		}
 		if _, exists := u.create.mutation.IdentityDocumentType(); exists {
 			s.SetIgnore(sellerapplication.FieldIdentityDocumentType)
@@ -1175,6 +1203,9 @@ func (u *SellerApplicationUpsertBulk) UpdateNewValues() *SellerApplicationUpsert
 			}
 			if _, exists := b.mutation.State(); exists {
 				s.SetIgnore(sellerapplication.FieldState)
+			}
+			if _, exists := b.mutation.LogisticsEnabled(); exists {
+				s.SetIgnore(sellerapplication.FieldLogisticsEnabled)
 			}
 			if _, exists := b.mutation.IdentityDocumentType(); exists {
 				s.SetIgnore(sellerapplication.FieldIdentityDocumentType)

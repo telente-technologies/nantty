@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -106,6 +108,107 @@ func TestAdminOrdersListAndDetailNeedAnOrdersPermission(t *testing.T) {
 	}
 	if status, body, _ := harness.call("GET", "/api/v1/admin/orders/ZM-NOPE", nil, bearer(reader, nil)); status != http.StatusNotFound || body["code"] != "ORDER_NOT_FOUND" {
 		t.Fatalf("missing order: %d %v", status, body)
+	}
+}
+
+func TestAdminLogisticsShipmentsRequiresDedicatedPermissionAndRedactsPrivateData(t *testing.T) {
+	harness := startAdminHarness(t, "held")
+	orderId := harness.seedOrder("ZM-LOG-0001", "processing")
+	group, err := harness.module.Container.Client.OrderGroup.Get(context.Background(), orderId)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = group.Update().SetStatus("shipped").SetDeliveryStatus("failed").SetShippedAt(time.Now().UTC()).
+		SetCourierName("courier").SetTrackingNumber("TEST-TRACK-1234").SetTrackingURL("https://courier.example/track/TEST-TRACK-1234").Save(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	storeId := group.StoreID
+	shipmentRow, err := harness.module.Container.Client.Shipment.Create().SetOrderGroupID(orderId).SetStoreID(storeId).
+		SetProvider("courier").SetStatus("failed").SetPickupAddress(schema.AddressSnapshot{RecipientName: "Buyer PII", Phone: "+2348000000000", Line1: "1 Private Street", CountryCode: "NG"}).
+		SetDestinationAddress(schema.AddressSnapshot{RecipientName: "Seller PII", Phone: "+2348111111111", Line1: "2 Private Street", CountryCode: "NG"}).
+		SetTrackingNumber("TEST-TRACK-1234").SetTrackingURL("https://courier.example/track/TEST-TRACK-1234").Save(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = harness.module.Container.Client.DeliveryClaim.Create().SetShipmentID(shipmentRow.ID).SetKind("loss").SetStatus("open").
+		SetAmountMinor(100).SetCurrency("NGN").SetDescription("buyer@example.test +2348000000000 private claim narrative").
+		SetEvidence([]string{"private-evidence-url"}).SetMetadata(map[string]any{"contact": "private"}).Save(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	logisticsReader, _, _ := harness.tokens.SignStaffTokensForTest(t, "admin", []string{"logistics:read"})
+	ordersReader, _, _ := harness.tokens.SignStaffTokensForTest(t, "admin", []string{"orders:read"})
+	path := "/api/v1/admin/logistics/shipments"
+	if status, _, _ := harness.call("GET", path, nil, nil); status != http.StatusUnauthorized {
+		t.Fatalf("anonymous: %d", status)
+	}
+	if status, _, _ := harness.call("GET", path, nil, bearer(ordersReader, nil)); status != http.StatusForbidden {
+		t.Fatalf("orders permission must not grant logistics access: %d", status)
+	}
+	status, page, _ := harness.call("GET", path+"?status=failed&limit=10", nil, bearer(logisticsReader, nil))
+	if status != http.StatusOK || len(page["items"].([]any)) != 1 || page["nextCursor"] != "" {
+		t.Fatalf("logistics page: %d %v", status, page)
+	}
+	item := page["items"].([]any)[0].(map[string]any)
+	if item["shipmentId"] != shipmentRow.ID.String() || item["orderId"] != orderId.String() || item["storeId"] != storeId.String() || item["reference"] != "ZM-LOG-0001" {
+		t.Fatalf("shipment summary identity fields: %v", item)
+	}
+	if item["trackingNumber"] != "TEST-TRACK-1234" || item["trackingUrl"] != "https://courier.example/track/TEST-TRACK-1234" {
+		t.Fatalf("validated tracking details missing from staff logistics response: %v", item)
+	}
+	exception := item["exception"].(map[string]any)
+	if exception["reason"] != "loss" || exception["status"] != "open" {
+		t.Fatalf("safe exception summary: %v", exception)
+	}
+	encoded, _ := json.Marshal(page)
+	for _, forbidden := range []string{"Buyer PII", "+2348000000000", "Private Street", "buyer@example.test", "private-evidence-url", "private"} {
+		if bytes.Contains(encoded, []byte(forbidden)) {
+			t.Fatalf("response leaked %q: %s", forbidden, encoded)
+		}
+	}
+	if status, _, _ := harness.call("GET", path+"?status=unknown", nil, bearer(logisticsReader, nil)); status != http.StatusBadRequest {
+		t.Fatalf("unknown status: %d", status)
+	}
+	if status, _, _ := harness.call("GET", path+"?cursor=bad", nil, bearer(logisticsReader, nil)); status != http.StatusBadRequest {
+		t.Fatalf("invalid cursor: %d", status)
+	}
+}
+
+func TestAdminLogisticsShipmentsCursorPaginationIsBoundedAndStatusFiltered(t *testing.T) {
+	harness := startAdminHarness(t, "held")
+	for index, statusValue := range []string{"booked", "failed", "failed"} {
+		orderID := harness.seedOrder(fmt.Sprintf("ZM-LP-%04d", index), "processing")
+		group, err := harness.module.Container.Client.OrderGroup.Get(context.Background(), orderID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := group.Update().SetStatus("shipped").SetDeliveryStatus(statusValue).SetShippedAt(time.Now().UTC()).Save(context.Background()); err != nil {
+			t.Fatal(err)
+		}
+		_, err = harness.module.Container.Client.Shipment.Create().SetOrderGroupID(orderID).SetStoreID(group.StoreID).
+			SetProvider("courier").SetStatus(statusValue).SetPickupAddress(schema.AddressSnapshot{}).SetDestinationAddress(schema.AddressSnapshot{}).Save(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	reader, _, _ := harness.tokens.SignStaffTokensForTest(t, "admin", []string{"logistics:read"})
+	status, first, _ := harness.call("GET", "/api/v1/admin/logistics/shipments?status=failed&limit=1", nil, bearer(reader, nil))
+	if status != http.StatusOK || len(first["items"].([]any)) != 1 || first["nextCursor"] == "" {
+		t.Fatalf("first page: %d %v", status, first)
+	}
+	status, second, _ := harness.call("GET", "/api/v1/admin/logistics/shipments?status=failed&limit=1&cursor="+first["nextCursor"].(string), nil, bearer(reader, nil))
+	if status != http.StatusOK || len(second["items"].([]any)) != 1 || second["nextCursor"] != "" {
+		t.Fatalf("second page: %d %v", status, second)
+	}
+	for _, page := range []map[string]any{first, second} {
+		if page["items"].([]any)[0].(map[string]any)["status"] != "failed" {
+			t.Fatalf("status filter ignored: %v", page)
+		}
+	}
+	if status, _, _ := harness.call("GET", "/api/v1/admin/logistics/shipments?limit=101", nil, bearer(reader, nil)); status != http.StatusBadRequest {
+		t.Fatalf("oversized limit must be rejected: %d", status)
 	}
 }
 

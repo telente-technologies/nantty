@@ -27,8 +27,16 @@ type OutboxEvent struct {
 	// Payload holds the value of the "payload" field.
 	Payload []byte `json:"payload,omitempty"`
 	// PublishedAt holds the value of the "published_at" field.
-	PublishedAt  *time.Time `json:"published_at,omitempty"`
-	selectValues sql.SelectValues
+	PublishedAt *time.Time `json:"published_at,omitempty"`
+	// AttemptCount holds the value of the "attempt_count" field.
+	AttemptCount int `json:"attempt_count,omitempty"`
+	// NextAttemptAt holds the value of the "next_attempt_at" field.
+	NextAttemptAt *time.Time `json:"next_attempt_at,omitempty"`
+	// LastError holds the value of the "last_error" field.
+	LastError string `json:"last_error,omitempty"`
+	// DeadLetteredAt holds the value of the "dead_lettered_at" field.
+	DeadLetteredAt *time.Time `json:"dead_lettered_at,omitempty"`
+	selectValues   sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -38,9 +46,11 @@ func (*OutboxEvent) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case outboxevent.FieldPayload:
 			values[i] = new([]byte)
-		case outboxevent.FieldEventType, outboxevent.FieldSubject:
+		case outboxevent.FieldAttemptCount:
+			values[i] = new(sql.NullInt64)
+		case outboxevent.FieldEventType, outboxevent.FieldSubject, outboxevent.FieldLastError:
 			values[i] = new(sql.NullString)
-		case outboxevent.FieldCreatedAt, outboxevent.FieldPublishedAt:
+		case outboxevent.FieldCreatedAt, outboxevent.FieldPublishedAt, outboxevent.FieldNextAttemptAt, outboxevent.FieldDeadLetteredAt:
 			values[i] = new(sql.NullTime)
 		case outboxevent.FieldID:
 			values[i] = new(uuid.UUID)
@@ -96,6 +106,32 @@ func (_m *OutboxEvent) assignValues(columns []string, values []any) error {
 				_m.PublishedAt = new(time.Time)
 				*_m.PublishedAt = value.Time
 			}
+		case outboxevent.FieldAttemptCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field attempt_count", values[i])
+			} else if value.Valid {
+				_m.AttemptCount = int(value.Int64)
+			}
+		case outboxevent.FieldNextAttemptAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field next_attempt_at", values[i])
+			} else if value.Valid {
+				_m.NextAttemptAt = new(time.Time)
+				*_m.NextAttemptAt = value.Time
+			}
+		case outboxevent.FieldLastError:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field last_error", values[i])
+			} else if value.Valid {
+				_m.LastError = value.String
+			}
+		case outboxevent.FieldDeadLetteredAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field dead_lettered_at", values[i])
+			} else if value.Valid {
+				_m.DeadLetteredAt = new(time.Time)
+				*_m.DeadLetteredAt = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -146,6 +182,22 @@ func (_m *OutboxEvent) String() string {
 	builder.WriteString(", ")
 	if v := _m.PublishedAt; v != nil {
 		builder.WriteString("published_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("attempt_count=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AttemptCount))
+	builder.WriteString(", ")
+	if v := _m.NextAttemptAt; v != nil {
+		builder.WriteString("next_attempt_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("last_error=")
+	builder.WriteString(_m.LastError)
+	builder.WriteString(", ")
+	if v := _m.DeadLetteredAt; v != nil {
+		builder.WriteString("dead_lettered_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteByte(')')

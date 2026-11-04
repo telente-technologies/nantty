@@ -80,6 +80,26 @@ func PublishedAt(v time.Time) predicate.OutboxEvent {
 	return predicate.OutboxEvent(sql.FieldEQ(FieldPublishedAt, v))
 }
 
+// AttemptCount applies equality check predicate on the "attempt_count" field. It's identical to AttemptCountEQ.
+func AttemptCount(v int) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldEQ(FieldAttemptCount, v))
+}
+
+// NextAttemptAt applies equality check predicate on the "next_attempt_at" field. It's identical to NextAttemptAtEQ.
+func NextAttemptAt(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldEQ(FieldNextAttemptAt, v))
+}
+
+// LastError applies equality check predicate on the "last_error" field. It's identical to LastErrorEQ.
+func LastError(v string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldEQ(FieldLastError, v))
+}
+
+// DeadLetteredAt applies equality check predicate on the "dead_lettered_at" field. It's identical to DeadLetteredAtEQ.
+func DeadLetteredAt(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldEQ(FieldDeadLetteredAt, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.OutboxEvent {
 	return predicate.OutboxEvent(sql.FieldEQ(FieldCreatedAt, v))
@@ -338,6 +358,211 @@ func PublishedAtIsNil() predicate.OutboxEvent {
 // PublishedAtNotNil applies the NotNil predicate on the "published_at" field.
 func PublishedAtNotNil() predicate.OutboxEvent {
 	return predicate.OutboxEvent(sql.FieldNotNull(FieldPublishedAt))
+}
+
+// AttemptCountEQ applies the EQ predicate on the "attempt_count" field.
+func AttemptCountEQ(v int) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldEQ(FieldAttemptCount, v))
+}
+
+// AttemptCountNEQ applies the NEQ predicate on the "attempt_count" field.
+func AttemptCountNEQ(v int) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldNEQ(FieldAttemptCount, v))
+}
+
+// AttemptCountIn applies the In predicate on the "attempt_count" field.
+func AttemptCountIn(vs ...int) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldIn(FieldAttemptCount, vs...))
+}
+
+// AttemptCountNotIn applies the NotIn predicate on the "attempt_count" field.
+func AttemptCountNotIn(vs ...int) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldNotIn(FieldAttemptCount, vs...))
+}
+
+// AttemptCountGT applies the GT predicate on the "attempt_count" field.
+func AttemptCountGT(v int) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldGT(FieldAttemptCount, v))
+}
+
+// AttemptCountGTE applies the GTE predicate on the "attempt_count" field.
+func AttemptCountGTE(v int) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldGTE(FieldAttemptCount, v))
+}
+
+// AttemptCountLT applies the LT predicate on the "attempt_count" field.
+func AttemptCountLT(v int) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldLT(FieldAttemptCount, v))
+}
+
+// AttemptCountLTE applies the LTE predicate on the "attempt_count" field.
+func AttemptCountLTE(v int) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldLTE(FieldAttemptCount, v))
+}
+
+// NextAttemptAtEQ applies the EQ predicate on the "next_attempt_at" field.
+func NextAttemptAtEQ(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldEQ(FieldNextAttemptAt, v))
+}
+
+// NextAttemptAtNEQ applies the NEQ predicate on the "next_attempt_at" field.
+func NextAttemptAtNEQ(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldNEQ(FieldNextAttemptAt, v))
+}
+
+// NextAttemptAtIn applies the In predicate on the "next_attempt_at" field.
+func NextAttemptAtIn(vs ...time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldIn(FieldNextAttemptAt, vs...))
+}
+
+// NextAttemptAtNotIn applies the NotIn predicate on the "next_attempt_at" field.
+func NextAttemptAtNotIn(vs ...time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldNotIn(FieldNextAttemptAt, vs...))
+}
+
+// NextAttemptAtGT applies the GT predicate on the "next_attempt_at" field.
+func NextAttemptAtGT(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldGT(FieldNextAttemptAt, v))
+}
+
+// NextAttemptAtGTE applies the GTE predicate on the "next_attempt_at" field.
+func NextAttemptAtGTE(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldGTE(FieldNextAttemptAt, v))
+}
+
+// NextAttemptAtLT applies the LT predicate on the "next_attempt_at" field.
+func NextAttemptAtLT(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldLT(FieldNextAttemptAt, v))
+}
+
+// NextAttemptAtLTE applies the LTE predicate on the "next_attempt_at" field.
+func NextAttemptAtLTE(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldLTE(FieldNextAttemptAt, v))
+}
+
+// NextAttemptAtIsNil applies the IsNil predicate on the "next_attempt_at" field.
+func NextAttemptAtIsNil() predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldIsNull(FieldNextAttemptAt))
+}
+
+// NextAttemptAtNotNil applies the NotNil predicate on the "next_attempt_at" field.
+func NextAttemptAtNotNil() predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldNotNull(FieldNextAttemptAt))
+}
+
+// LastErrorEQ applies the EQ predicate on the "last_error" field.
+func LastErrorEQ(v string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldEQ(FieldLastError, v))
+}
+
+// LastErrorNEQ applies the NEQ predicate on the "last_error" field.
+func LastErrorNEQ(v string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldNEQ(FieldLastError, v))
+}
+
+// LastErrorIn applies the In predicate on the "last_error" field.
+func LastErrorIn(vs ...string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldIn(FieldLastError, vs...))
+}
+
+// LastErrorNotIn applies the NotIn predicate on the "last_error" field.
+func LastErrorNotIn(vs ...string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldNotIn(FieldLastError, vs...))
+}
+
+// LastErrorGT applies the GT predicate on the "last_error" field.
+func LastErrorGT(v string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldGT(FieldLastError, v))
+}
+
+// LastErrorGTE applies the GTE predicate on the "last_error" field.
+func LastErrorGTE(v string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldGTE(FieldLastError, v))
+}
+
+// LastErrorLT applies the LT predicate on the "last_error" field.
+func LastErrorLT(v string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldLT(FieldLastError, v))
+}
+
+// LastErrorLTE applies the LTE predicate on the "last_error" field.
+func LastErrorLTE(v string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldLTE(FieldLastError, v))
+}
+
+// LastErrorContains applies the Contains predicate on the "last_error" field.
+func LastErrorContains(v string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldContains(FieldLastError, v))
+}
+
+// LastErrorHasPrefix applies the HasPrefix predicate on the "last_error" field.
+func LastErrorHasPrefix(v string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldHasPrefix(FieldLastError, v))
+}
+
+// LastErrorHasSuffix applies the HasSuffix predicate on the "last_error" field.
+func LastErrorHasSuffix(v string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldHasSuffix(FieldLastError, v))
+}
+
+// LastErrorEqualFold applies the EqualFold predicate on the "last_error" field.
+func LastErrorEqualFold(v string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldEqualFold(FieldLastError, v))
+}
+
+// LastErrorContainsFold applies the ContainsFold predicate on the "last_error" field.
+func LastErrorContainsFold(v string) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldContainsFold(FieldLastError, v))
+}
+
+// DeadLetteredAtEQ applies the EQ predicate on the "dead_lettered_at" field.
+func DeadLetteredAtEQ(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldEQ(FieldDeadLetteredAt, v))
+}
+
+// DeadLetteredAtNEQ applies the NEQ predicate on the "dead_lettered_at" field.
+func DeadLetteredAtNEQ(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldNEQ(FieldDeadLetteredAt, v))
+}
+
+// DeadLetteredAtIn applies the In predicate on the "dead_lettered_at" field.
+func DeadLetteredAtIn(vs ...time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldIn(FieldDeadLetteredAt, vs...))
+}
+
+// DeadLetteredAtNotIn applies the NotIn predicate on the "dead_lettered_at" field.
+func DeadLetteredAtNotIn(vs ...time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldNotIn(FieldDeadLetteredAt, vs...))
+}
+
+// DeadLetteredAtGT applies the GT predicate on the "dead_lettered_at" field.
+func DeadLetteredAtGT(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldGT(FieldDeadLetteredAt, v))
+}
+
+// DeadLetteredAtGTE applies the GTE predicate on the "dead_lettered_at" field.
+func DeadLetteredAtGTE(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldGTE(FieldDeadLetteredAt, v))
+}
+
+// DeadLetteredAtLT applies the LT predicate on the "dead_lettered_at" field.
+func DeadLetteredAtLT(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldLT(FieldDeadLetteredAt, v))
+}
+
+// DeadLetteredAtLTE applies the LTE predicate on the "dead_lettered_at" field.
+func DeadLetteredAtLTE(v time.Time) predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldLTE(FieldDeadLetteredAt, v))
+}
+
+// DeadLetteredAtIsNil applies the IsNil predicate on the "dead_lettered_at" field.
+func DeadLetteredAtIsNil() predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldIsNull(FieldDeadLetteredAt))
+}
+
+// DeadLetteredAtNotNil applies the NotNil predicate on the "dead_lettered_at" field.
+func DeadLetteredAtNotNil() predicate.OutboxEvent {
+	return predicate.OutboxEvent(sql.FieldNotNull(FieldDeadLetteredAt))
 }
 
 // And groups predicates with the AND operator between them.

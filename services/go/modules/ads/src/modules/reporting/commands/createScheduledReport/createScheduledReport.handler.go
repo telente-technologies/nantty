@@ -23,7 +23,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Sched
 	if err != nil {
 		return dtos.ScheduledReport{}, err
 	}
-	account, _, err := accountservices.LoadAccountForPermission(ctx, deployed, command.AccountId, command.UserId, adsservices.PermissionReportsView)
+	account, _, err := accountservices.LoadAccountForPermission(ctx, deployed, command.AccountId, command.UserId, adsservices.PermissionReportsManage)
 	if err != nil {
 		return dtos.ScheduledReport{}, err
 	}

@@ -44,6 +44,25 @@ func TestActingProfileViewUsesMobileKindNames(t *testing.T) {
 	}
 }
 
+func TestBuildActingProfileViewExposesPublishingHold(t *testing.T) {
+	for _, testCase := range []struct {
+		name           string
+		publishingHeld bool
+		wantOnHold     bool
+	}{
+		{name: "publishing held", publishingHeld: true, wantOnHold: true},
+		{name: "publishing allowed", publishingHeld: false, wantOnHold: false},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			row := &ent.Profile{ID: uuid.New(), Kind: profile.KindBusiness, PublishingHeld: testCase.publishingHeld}
+			view := BuildActingProfileView(row, "")
+			if view.OnHold != testCase.wantOnHold {
+				t.Fatalf("OnHold = %t, want %t", view.OnHold, testCase.wantOnHold)
+			}
+		})
+	}
+}
+
 func TestCreatorFlagFollowsApprovedStatusOnly(t *testing.T) {
 	summary := identityports.AccountSummary{CreatedAt: time.Now()}
 	for status, want := range map[profile.CreatorStatus]bool{profile.CreatorStatusNone: false, profile.CreatorStatusPending: false, profile.CreatorStatusRejected: false, profile.CreatorStatusApproved: true} {

@@ -9,6 +9,7 @@ import (
 	"nantty/modules/orders/src/container"
 	"nantty/modules/orders/src/enums"
 	ordererrors "nantty/modules/orders/src/errors"
+	"nantty/modules/orders/src/events"
 	"nantty/modules/orders/src/generated/ent"
 )
 
@@ -59,10 +60,18 @@ func RecordFailedDeliveryAttempt(ctx context.Context, deployed *container.Contai
 		if group.Status != enums.StatusShipped {
 			return ordererrors.NotInTransit
 		}
-		if err := tx.OrderGroup.UpdateOneID(group.ID).SetDeliveryStatus("failed").AddDeliveryAttempts(1).SetLastAttemptNote(note).AddVersion(1).Exec(ctx); err != nil {
+		updated, err := tx.OrderGroup.UpdateOneID(group.ID).SetDeliveryStatus("failed").AddDeliveryAttempts(1).SetLastAttemptNote(note).AddVersion(1).Save(ctx)
+		if err != nil {
 			return err
 		}
-		return AppendTimelineEvent(ctx, tx, group.ID, "delivery_failed", "Delivery attempt failed: "+note, seller.actor())
+		if err := AppendTimelineEvent(ctx, tx, group.ID, "delivery_failed", "Delivery attempt failed: "+note, seller.actor()); err != nil {
+			return err
+		}
+		return events.EnqueueOutboxEventInTransaction(ctx, tx, "orderGroup.deliveryAttemptFailed", group.ID.String(), time.Now().UTC(), map[string]any{
+			"orderGroupId": group.ID, "storeId": group.StoreID, "buyerAccountId": group.BuyerAccountID,
+			"sellerAccountId": group.SellerAccountID, "reference": group.Reference, "attempts": updated.DeliveryAttempts,
+			"actorKind": seller.actor().Kind,
+		})
 	})
 }
 

@@ -2,8 +2,12 @@ package src
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/google/uuid"
 
 	ledgerevents "nantty/modules/ledger/src/events"
 	ledgerjobs "nantty/modules/ledger/src/jobs"
@@ -29,6 +33,34 @@ type Module struct {
 	Application *gateway.Application
 }
 
+func validateCreatorApplicationApprovedEvent(accountId string) error {
+	if strings.TrimSpace(accountId) == "" {
+		return fmt.Errorf("%w: creatorApplication.approved is missing accountId", platformevents.ErrPoisonMessage)
+	}
+	return nil
+}
+
+func validateBusinessVerificationApprovedEvent(accountId string, goldEligible, goldCheckmarkGranted *bool) error {
+	if _, err := uuid.Parse(accountId); err != nil || goldEligible == nil || goldCheckmarkGranted == nil {
+		return fmt.Errorf("%w: invalid businessVerification.approved payload", platformevents.ErrPoisonMessage)
+	}
+	return nil
+}
+
+func validateBusinessVerificationRevokedEvent(accountId, documentKind, reason string) error {
+	if _, err := uuid.Parse(accountId); err != nil || strings.TrimSpace(documentKind) == "" || strings.TrimSpace(reason) == "" {
+		return fmt.Errorf("%w: invalid businessVerification.revoked payload", platformevents.ErrPoisonMessage)
+	}
+	return nil
+}
+
+func validateVerificationLevelRefreshEvent(accountId string) error {
+	if strings.TrimSpace(accountId) == "" {
+		return fmt.Errorf("%w: verification level refresh event is missing accountId", platformevents.ErrPoisonMessage)
+	}
+	return nil
+}
+
 func NewPaymentsModule(ctx context.Context, dependencies servicemodule.Dependencies) (servicemodule.Module, error) {
 	settings := configs.ReadPaymentsSettingsFromEnvironment(dependencies.Environment)
 	if err := dependencies.Environment.CombinedConfigurationError(); err != nil {
@@ -47,22 +79,35 @@ func NewPaymentsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &data); err != nil {
 			return err
 		}
+		if err := validateCreatorApplicationApprovedEvent(data.AccountId); err != nil {
+			return err
+		}
 		return gateway.HandleCreatorApproved(ctx, data.AccountId)
 	})
 	loaders.RegisterMoneyDomainEventHandler("businessVerification.approved", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
 		var data struct {
-			AccountId string `json:"accountId"`
+			AccountId            string `json:"accountId"`
+			GoldEligible         *bool  `json:"goldEligible"`
+			GoldCheckmarkGranted *bool  `json:"goldCheckmarkGranted"`
 		}
 		if err := loaders.DecodeEventData(envelope, &data); err != nil {
+			return err
+		}
+		if err := validateBusinessVerificationApprovedEvent(data.AccountId, data.GoldEligible, data.GoldCheckmarkGranted); err != nil {
 			return err
 		}
 		return gateway.RecordSellerVerification(ctx, data.AccountId, envelope.Id, envelope.OccurredAt)
 	})
 	loaders.RegisterMoneyDomainEventHandler("businessVerification.revoked", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
 		var data struct {
-			AccountId string `json:"accountId"`
+			AccountId    string `json:"accountId"`
+			DocumentKind string `json:"documentKind"`
+			Reason       string `json:"reason"`
 		}
 		if err := loaders.DecodeEventData(envelope, &data); err != nil {
+			return err
+		}
+		if err := validateBusinessVerificationRevokedEvent(data.AccountId, data.DocumentKind, data.Reason); err != nil {
 			return err
 		}
 		return gateway.RevokeSellerVerification(ctx, data.AccountId, envelope.Id, envelope.OccurredAt)
@@ -72,7 +117,10 @@ func NewPaymentsModule(ctx context.Context, dependencies servicemodule.Dependenc
 			var data struct {
 				AccountId string `json:"accountId"`
 			}
-			if err := loaders.DecodeEventData(envelope, &data); err != nil || data.AccountId == "" {
+			if err := loaders.DecodeEventData(envelope, &data); err != nil {
+				return err
+			}
+			if err := validateVerificationLevelRefreshEvent(data.AccountId); err != nil {
 				return err
 			}
 			return gateway.RefreshVerificationLevel(ctx, data.AccountId)

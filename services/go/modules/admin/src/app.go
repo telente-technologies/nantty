@@ -21,6 +21,8 @@ import (
 	"nantty/modules/admin/src/migrations"
 	auditlog "nantty/modules/admin/src/modules/auditLog"
 	auditlogservices "nantty/modules/admin/src/modules/auditLog/services"
+	eventopsroutes "nantty/modules/admin/src/modules/eventOperations/routes"
+	eventopsservices "nantty/modules/admin/src/modules/eventOperations/services"
 	platformmetrics "nantty/modules/admin/src/modules/platformMetrics"
 	platformsettings "nantty/modules/admin/src/modules/platformSettings"
 	seeddefaultsettings "nantty/modules/admin/src/modules/platformSettings/commands/seedDefaultSettings"
@@ -83,6 +85,14 @@ func StartAdminModuleWithSettings(ctx context.Context, settings configs.AdminSet
 		Limiter:   middlewares.NewAttemptRateLimiter(10, 6*time.Second, time.Now),
 		WebAuthn:  relyingParty,
 	}
+	if settings.RabbitMQManagement.URL != "" {
+		queueReader, err := eventopsservices.NewRabbitMQManagementClient(settings.RabbitMQManagement.URL, settings.RabbitMQManagement.Username, settings.RabbitMQManagement.Password)
+		if err != nil {
+			_ = client.Close()
+			return nil, fmt.Errorf("configure RabbitMQ monitoring: %w", err)
+		}
+		adminContainer.RabbitMQQueues = queueReader
+	}
 	if err := (seeddefaultsettings.Handler{Container: adminContainer}).Execute(ctx, seeddefaultsettings.Command{}); err != nil {
 		_ = database.Close()
 		return nil, fmt.Errorf("seed default platform settings: %w", err)
@@ -110,6 +120,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	staffadmins.MountRoutes(routes, module.container)
 	platformsettings.MountRoutes(routes, module.container)
 	auditlog.MountRoutes(routes, module.container)
+	eventopsroutes.MountEventOperationsRoutes(routes, module.container)
 	handler := middlewares.AttachClientDetailsToContext(routes)
 	for _, prefix := range []string{"/api/v1/admin/", "/api/v1/platform-config/", "/api/v1/internal/platform-config/", "/api/v1/internal/audit/", "/api/v1/internal/admin/", "/api/v1/internal/admins/"} {
 		mux.Handle(prefix, handler)
@@ -118,7 +129,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
 	return events.RelayOutboxEventsUntilContextDone(ctx, events.OutboxRelayOptions{
-		Store:     adminevents.EntOutboxStore{Client: module.container.Client, Now: time.Now},
+		Store:     adminevents.EntOutboxStore{Client: module.container.Client, Now: time.Now, Logger: module.container.Logger},
 		Publisher: module.publisher,
 		Logger:    module.container.Logger,
 	})

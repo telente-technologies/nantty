@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -14,6 +16,7 @@ import (
 	"nantty/modules/orders/src/databases/schema"
 	"nantty/modules/orders/src/generated/ent"
 	"nantty/modules/orders/src/generated/ent/outboxevent"
+	"nantty/modules/orders/src/generated/ent/processedevent"
 	"nantty/modules/orders/src/interfaces"
 	"nantty/modules/orders/src/services"
 	"nantty/platform/commerceports"
@@ -91,12 +94,47 @@ func TestDeliveredIsAnnouncedOnlyAfterTheOrderCommitsAndNeverCallsEscrowFirst(t 
 	}
 }
 
+func TestFailedDeliveryAttemptWritesStateTimelineAndSafeOutboxEventTogether(t *testing.T) {
+	module := startAgainstFreshSchema(t)
+	ctx := context.Background()
+	store := uuid.New()
+	orderId := seedGroup(t, module, store, "shipped", "paid", false)
+	seller := services.SellerContext{Store: commerceports.StoreAccess{StoreId: store}, ActorId: uuid.New(), Name: "Temi"}
+	note := "Recipient unavailable at pickup point"
+
+	if err := services.RecordFailedDeliveryAttempt(ctx, module.Container, seller, orderId, note); err != nil {
+		t.Fatal(err)
+	}
+	group := module.Container.Client.OrderGroup.GetX(ctx, orderId)
+	if group.DeliveryStatus != "failed" || group.DeliveryAttempts != 1 || group.LastAttemptNote == nil || *group.LastAttemptNote != note {
+		t.Fatalf("failed attempt state not committed: status=%q attempts=%d note=%v", group.DeliveryStatus, group.DeliveryAttempts, group.LastAttemptNote)
+	}
+	if countOutbox(t, module, "orderGroup.deliveryAttemptFailed", orderId.String()) != 1 {
+		t.Fatal("failed delivery attempt must create one durable notification event")
+	}
+	event := module.Container.Client.OutboxEvent.Query().Where(outboxevent.EventType("orderGroup.deliveryAttemptFailed"), outboxevent.Subject(orderId.String())).OnlyX(ctx)
+	if len(event.Payload) == 0 || strings.Contains(string(event.Payload), note) {
+		t.Fatalf("outbox payload must be present and exclude free-form attempt notes: %s", event.Payload)
+	}
+
+	notShipped := seedGroup(t, module, store, "new", "paid", false)
+	if err := services.RecordFailedDeliveryAttempt(ctx, module.Container, seller, notShipped, note); err == nil {
+		t.Fatal("an order that has not shipped cannot create a failed-delivery notification")
+	}
+	if countOutbox(t, module, "orderGroup.deliveryAttemptFailed", notShipped.String()) != 0 {
+		t.Fatal("refused delivery attempt must not create an outbox event")
+	}
+}
+
 func TestEscrowReleaseScheduleIsShownOnTheOrder(t *testing.T) {
 	module := startAgainstFreshSchema(t)
 	orderId := seedGroup(t, module, uuid.New(), "delivered", "paid", false)
 	releaseAt := time.Now().Add(72 * time.Hour).UTC().Truncate(time.Second)
 	data, _ := json.Marshal(map[string]any{"orderId": orderId.String(), "autoReleaseAt": releaseAt})
-	body, _ := json.Marshal(platformevents.EventEnvelope{Id: uuid.NewString(), Type: "escrow.releaseScheduled", Data: data})
+	body, _ := json.Marshal(platformevents.EventEnvelope{
+		Id: uuid.NewString(), Type: "escrow.releaseScheduled", Source: "nantty.escrow", Subject: orderId.String(),
+		SchemaVersion: 1, OccurredAt: time.Now().UTC(), Data: data,
+	})
 	if err := (services.MoneyEventHandler{Container: module.Container}).Handle(context.Background(), body); err != nil {
 		t.Fatal(err)
 	}
@@ -138,6 +176,43 @@ func TestPaidOrderWithoutStockIsCancelledAndRefundedExactlyOnce(t *testing.T) {
 	}
 	if countOutbox(t, module, "orderGroup.paid", orderId.String()) != 0 {
 		t.Fatal("an order without stock is never announced as paid")
+	}
+}
+
+func TestPaymentEventReceiptCommitsWithOrderPayment(t *testing.T) {
+	for _, eventType := range []string{"escrow.held", "directPayment.received"} {
+		t.Run(eventType, func(t *testing.T) {
+			module := startAgainstFreshSchema(t)
+			orderId := seedGroup(t, module, uuid.New(), "pending", "pending", false)
+			handler := services.MoneyEventHandler{Container: module.Container}
+			body := escrowEnvelope(eventType, orderId, map[string]any{})
+			var wait sync.WaitGroup
+			errors := make(chan error, 2)
+			for range 2 {
+				wait.Add(1)
+				go func() {
+					defer wait.Done()
+					errors <- handler.Handle(context.Background(), body)
+				}()
+			}
+			wait.Wait()
+			close(errors)
+			for err := range errors {
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			group := module.Container.Client.OrderGroup.GetX(context.Background(), orderId)
+			if group.Status != "new" || group.PaymentStatus != "paid" {
+				t.Fatalf("payment event must commit paid order state, got %s/%s", group.Status, group.PaymentStatus)
+			}
+			if countOutbox(t, module, "orderGroup.paid", orderId.String()) != 1 {
+				t.Fatal("duplicate payment event must emit one paid-order outbox event")
+			}
+			if receipts := module.Container.Client.ProcessedEvent.Query().Where(processedevent.EventType(eventType)).CountX(context.Background()); receipts != 1 {
+				t.Fatalf("duplicate delivery must commit one %s receipt, got %d", eventType, receipts)
+			}
+		})
 	}
 }
 

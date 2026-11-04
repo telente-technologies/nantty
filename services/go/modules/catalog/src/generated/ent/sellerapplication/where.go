@@ -110,6 +110,11 @@ func State(v string) predicate.SellerApplication {
 	return predicate.SellerApplication(sql.FieldEQ(FieldState, v))
 }
 
+// LogisticsEnabled applies equality check predicate on the "logistics_enabled" field. It's identical to LogisticsEnabledEQ.
+func LogisticsEnabled(v bool) predicate.SellerApplication {
+	return predicate.SellerApplication(sql.FieldEQ(FieldLogisticsEnabled, v))
+}
+
 // IdentityDocumentType applies equality check predicate on the "identity_document_type" field. It's identical to IdentityDocumentTypeEQ.
 func IdentityDocumentType(v string) predicate.SellerApplication {
 	return predicate.SellerApplication(sql.FieldEQ(FieldIdentityDocumentType, v))
@@ -788,6 +793,16 @@ func StateEqualFold(v string) predicate.SellerApplication {
 // StateContainsFold applies the ContainsFold predicate on the "state" field.
 func StateContainsFold(v string) predicate.SellerApplication {
 	return predicate.SellerApplication(sql.FieldContainsFold(FieldState, v))
+}
+
+// LogisticsEnabledEQ applies the EQ predicate on the "logistics_enabled" field.
+func LogisticsEnabledEQ(v bool) predicate.SellerApplication {
+	return predicate.SellerApplication(sql.FieldEQ(FieldLogisticsEnabled, v))
+}
+
+// LogisticsEnabledNEQ applies the NEQ predicate on the "logistics_enabled" field.
+func LogisticsEnabledNEQ(v bool) predicate.SellerApplication {
+	return predicate.SellerApplication(sql.FieldNEQ(FieldLogisticsEnabled, v))
 }
 
 // IdentityDocumentTypeEQ applies the EQ predicate on the "identity_document_type" field.

@@ -100,7 +100,8 @@ func kindForMobile(kind profile.Kind) string {
 func BuildActingProfileView(row *ent.Profile, activeProfileId string) ActingProfileView {
 	view := ActingProfileView{
 		Id: row.ID.String(), Kind: kindForMobile(row.Kind), Type: string(row.Kind), Name: row.DisplayName, Handle: row.Handle,
-		AvatarUrl: row.AvatarURL, IsPrivate: row.IsPrivate, Description: row.Bio, Website: row.Website, Active: row.ID.String() == activeProfileId,
+		AvatarUrl: row.AvatarURL, IsPrivate: row.IsPrivate, Description: row.Bio, Website: row.Website,
+		Active: row.ID.String() == activeProfileId, OnHold: row.PublishingHeld,
 	}
 	for _, category := range row.Edges.Categories {
 		view.Categories = append(view.Categories, category.Name)

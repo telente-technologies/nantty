@@ -81,19 +81,28 @@ func (gateway *PaymentGateway) finishClaimedWebhook(ctx context.Context, claim c
 	now := gateway.Container.Now().UTC()
 	update := gateway.Container.Client(gateway.Container.Resources.Database).WebhookEvent.Update().
 		Where(webhookevent.ID(claim.id), webhookevent.LeaseToken(claim.token), webhookevent.ProcessedAtIsNil()).ClearLockedUntil().SetLeaseToken("")
+	alertDeadLetter := false
+	alertReason := ""
 	switch {
 	case processingError == nil:
 		update.SetProcessedAt(now).SetLastError("")
 	case errors.As(processingError, new(webhookNeedsFinanceReview)):
 		update.SetDeadLetteredAt(now).SetLastError(truncate(providerhttp.RedactSecrets(processingError.Error()), 1000))
-		gateway.RecordPaymentAlertMetric(ctx, "webhookDeadLettered", "provider", claim.provider, "eventKey", claim.eventKey, "reason", processingError.Error())
+		alertDeadLetter = true
+		alertReason = truncate(providerhttp.RedactSecrets(processingError.Error()), 1000)
 	case claim.attempts >= MaximumWebhookAttempts:
-		update.SetDeadLetteredAt(now).SetLastError(truncate(providerhttp.RedactSecrets(processingError.Error()), 1000))
+		redactedError := truncate(providerhttp.RedactSecrets(processingError.Error()), 1000)
+		update.SetDeadLetteredAt(now).SetLastError(redactedError)
+		alertDeadLetter = true
+		alertReason = redactedError
 		gateway.Container.Resources.Logger.ErrorContext(ctx, "webhook moved to the dead-letter state; replay it by hand once fixed", "provider", claim.provider, "eventKey", claim.eventKey, "attempts", claim.attempts)
 	default:
 		update.SetNextAttemptAt(now.Add(webhookRetryDelay(claim.attempts))).SetLastError(truncate(providerhttp.RedactSecrets(processingError.Error()), 1000))
 	}
 	updated, err := update.Save(ctx)
+	if err == nil && updated > 0 && alertDeadLetter {
+		gateway.RecordPaymentAlertMetric(ctx, "webhookDeadLettered", "provider", claim.provider, "eventKey", claim.eventKey, "attempts", claim.attempts, "reason", alertReason)
+	}
 	if err == nil && updated == 0 {
 		gateway.Container.Resources.Logger.WarnContext(ctx, "webhook lease was lost before the result was recorded", "eventKey", claim.eventKey)
 	}

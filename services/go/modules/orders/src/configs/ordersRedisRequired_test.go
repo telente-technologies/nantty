@@ -25,3 +25,18 @@ func TestProductionRequiresTheOrdersIdempotencyRedis(t *testing.T) {
 		t.Fatalf("configured production settings rejected: %v", reader.CombinedConfigurationError())
 	}
 }
+
+func TestLogisticsContactIsConfiguredSeparatelyFromCustomerContacts(t *testing.T) {
+	t.Setenv("APP_ENV", "test")
+	t.Setenv("ORDERS_DATABASE_URL", "postgres://orders")
+	t.Setenv("LOGISTICS_ENABLED", "true")
+	t.Setenv("LOGISTICS_CONTACT_EMAIL", "natty-logistics@example.test")
+	reader := platformconfig.NewEnvironmentReader()
+	settings := ReadOrdersSettingsFromEnvironment(reader)
+	if settings.LogisticsContactEmail != "natty-logistics@example.test" {
+		t.Fatalf("Natty logistics contact must come only from its dedicated setting: %q", settings.LogisticsContactEmail)
+	}
+	if reader.CombinedConfigurationError() != nil {
+		t.Fatalf("test configuration rejected: %v", reader.CombinedConfigurationError())
+	}
+}

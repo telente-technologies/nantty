@@ -40,6 +40,8 @@ type SellerApplication struct {
 	City string `json:"city,omitempty"`
 	// State holds the value of the "state" field.
 	State string `json:"state,omitempty"`
+	// LogisticsEnabled holds the value of the "logistics_enabled" field.
+	LogisticsEnabled bool `json:"logistics_enabled,omitempty"`
 	// IdentityDocumentType holds the value of the "identity_document_type" field.
 	IdentityDocumentType string `json:"identity_document_type,omitempty"`
 	// IdentityDocumentNumberSealed holds the value of the "identity_document_number_sealed" field.
@@ -76,6 +78,8 @@ func (*SellerApplication) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case sellerapplication.FieldPhoneSealed, sellerapplication.FieldIdentityDocumentNumberSealed, sellerapplication.FieldPayoutAccountNumberSealed:
 			values[i] = new([]byte)
+		case sellerapplication.FieldLogisticsEnabled:
+			values[i] = new(sql.NullBool)
 		case sellerapplication.FieldStatus, sellerapplication.FieldStoreName, sellerapplication.FieldCategoryName, sellerapplication.FieldDescription, sellerapplication.FieldAddressLine, sellerapplication.FieldCity, sellerapplication.FieldState, sellerapplication.FieldIdentityDocumentType, sellerapplication.FieldIdentityDocumentLast4, sellerapplication.FieldIdentityDocumentPhotoURL, sellerapplication.FieldPayoutBankCode, sellerapplication.FieldPayoutBankName, sellerapplication.FieldPayoutAccountLast4, sellerapplication.FieldReviewedByID, sellerapplication.FieldReviewedByName, sellerapplication.FieldDecisionReason:
 			values[i] = new(sql.NullString)
 		case sellerapplication.FieldCreatedAt, sellerapplication.FieldReviewedAt, sellerapplication.FieldUpdatedAt:
@@ -168,6 +172,12 @@ func (_m *SellerApplication) assignValues(columns []string, values []any) error 
 				return fmt.Errorf("unexpected type %T for field state", values[i])
 			} else if value.Valid {
 				_m.State = value.String
+			}
+		case sellerapplication.FieldLogisticsEnabled:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field logistics_enabled", values[i])
+			} else if value.Valid {
+				_m.LogisticsEnabled = value.Bool
 			}
 		case sellerapplication.FieldIdentityDocumentType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -319,6 +329,9 @@ func (_m *SellerApplication) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("state=")
 	builder.WriteString(_m.State)
+	builder.WriteString(", ")
+	builder.WriteString("logistics_enabled=")
+	builder.WriteString(fmt.Sprintf("%v", _m.LogisticsEnabled))
 	builder.WriteString(", ")
 	builder.WriteString("identity_document_type=")
 	builder.WriteString(_m.IdentityDocumentType)

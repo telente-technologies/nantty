@@ -29,6 +29,14 @@ type AdminSettings struct {
 	IpAllowList            []string
 	WebAuthn               WebAuthnSettings
 	MetricsSources         MetricsSourceSchemas
+	RabbitMQManagement     RabbitMQManagementSettings
+}
+
+type RabbitMQManagementSettings struct {
+	URL      string
+	Vhost    string
+	Username string
+	Password string
 }
 
 type WebAuthnSettings struct {
@@ -48,8 +56,9 @@ type MetricsSourceSchemas struct {
 func (settings AdminSettings) IsProduction() bool { return settings.Environment == "production" }
 
 func ReadAdminSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) AdminSettings {
+	environment := reader.ReadStringOrDefault("APP_ENV", "development")
 	settings := AdminSettings{
-		Environment:            reader.ReadStringOrDefault("APP_ENV", "development"),
+		Environment:            environment,
 		DatabaseUrl:            reader.ReadRequiredString("ADMIN_DATABASE_URL"),
 		DatabaseSchema:         reader.ReadStringOrDefault("ADMIN_DATABASE_SCHEMA", "admin"),
 		DomainEventsTopicArn:   reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
@@ -74,10 +83,41 @@ func ReadAdminSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 			Escrow:   reader.ReadStringOrDefault("ESCROW_DATABASE_SCHEMA", "escrow"),
 			Wallet:   reader.ReadStringOrDefault("WALLET_DATABASE_SCHEMA", "wallet"),
 		},
+		RabbitMQManagement: readRabbitMQManagementSettings(reader, environment == "production"),
 	}
 	reader.RequireMinimumLength("ADMIN_INTERNAL_API_TOKEN", settings.InternalApiToken, 32)
 	if settings.IsProduction() && settings.DeliveryMode == "log" {
 		reader.ReadRequiredString("ADMIN_INVITATION_DELIVERY_NOT_LOG_IN_PRODUCTION")
+	}
+	return settings
+}
+
+func readRabbitMQManagementSettings(reader *platformconfig.EnvironmentReader, production bool) RabbitMQManagementSettings {
+	settings := RabbitMQManagementSettings{
+		URL:      reader.ReadStringOrDefault("RABBITMQ_MANAGEMENT_URL", ""),
+		Vhost:    reader.ReadStringOrDefault("RABBITMQ_VHOST", "nantty"),
+		Username: reader.ReadStringOrDefault("RABBITMQ_MONITORING_USERNAME", ""),
+		Password: reader.ReadStringOrDefault("RABBITMQ_MONITORING_PASSWORD", ""),
+	}
+	configured := settings.URL != "" || settings.Username != "" || settings.Password != ""
+	if !configured {
+		return settings
+	}
+	if settings.URL == "" {
+		reader.ReportProblem("RABBITMQ_MANAGEMENT_URL is required when RabbitMQ monitoring is configured")
+	}
+	if settings.Username == "" {
+		reader.ReportProblem("RABBITMQ_MONITORING_USERNAME is required when RabbitMQ monitoring is configured")
+	}
+	if settings.Password == "" {
+		reader.ReportProblem("RABBITMQ_MONITORING_PASSWORD is required when RabbitMQ monitoring is configured")
+	}
+	parsed, err := url.Parse(settings.URL)
+	if settings.URL != "" && (err != nil || parsed.Hostname() == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.User != nil || parsed.RawQuery != "" || parsed.Fragment != "") {
+		reader.ReportProblem("RABBITMQ_MANAGEMENT_URL must be an HTTP(S) origin/path without userinfo, query, or fragment")
+	}
+	if production && settings.URL != "" && (err != nil || parsed.Scheme != "https") {
+		reader.ReportProblem("RABBITMQ_MANAGEMENT_URL must use HTTPS in production")
 	}
 	return settings
 }

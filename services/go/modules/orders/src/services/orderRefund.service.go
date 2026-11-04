@@ -11,7 +11,9 @@ import (
 	"nantty/modules/orders/src/enums"
 	"nantty/modules/orders/src/generated/ent"
 	"nantty/modules/orders/src/generated/ent/ordergroup"
+	"nantty/modules/orders/src/generated/ent/processedevent"
 	"nantty/modules/orders/src/generated/ent/storecreditentry"
+	platformevents "nantty/platform/events"
 )
 
 func RecordOrderRefund(ctx context.Context, deployed *container.Container, orderId uuid.UUID, refundedMinor int64, disputeId string) error {
@@ -21,11 +23,31 @@ func RecordOrderRefund(ctx context.Context, deployed *container.Container, order
 // RecordSettledOrderRefund marks the order refunded in full when escrow says nothing more is refundable,
 // even if the amount is below the total because Nantty kept its fees on a refund after the seller was paid.
 func RecordSettledOrderRefund(ctx context.Context, deployed *container.Container, orderId uuid.UUID, refundedMinor int64, disputeId string, complete bool) error {
+	return recordSettledOrderRefund(ctx, deployed, orderId, refundedMinor, "", disputeId, complete, "", "")
+}
+
+func RecordSettledOrderRefundForEvent(ctx context.Context, deployed *container.Container, orderId uuid.UUID, refundedMinor int64, currency, disputeId string, complete bool, eventType, envelopeID string) error {
+	return recordSettledOrderRefund(ctx, deployed, orderId, refundedMinor, currency, disputeId, complete, eventType, envelopeID)
+}
+
+func recordSettledOrderRefund(ctx context.Context, deployed *container.Container, orderId uuid.UUID, refundedMinor int64, currency, disputeId string, complete bool, eventType, envelopeID string) error {
 	released := false
 	err := deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		if eventType != "" {
+			claimed, err := claimProcessedMoneyEvent(ctx, tx, envelopeID, eventType)
+			if err != nil || !claimed {
+				return err
+			}
+		}
 		group, err := LockOrderGroup(ctx, tx, orderId)
-		if err != nil || refundedMinor <= group.RefundedMinor {
+		if err != nil {
 			return err
+		}
+		if eventType != "" && (currency != group.Currency || refundedMinor <= 0 || refundedMinor > group.TotalMinor) {
+			return fmt.Errorf("%w: %s refund amount/currency does not match the order", platformevents.ErrPoisonMessage, eventType)
+		}
+		if refundedMinor <= group.RefundedMinor {
+			return nil
 		}
 		now := deployed.Now()
 		if err := settleRefundRecords(ctx, tx, group, refundedMinor, disputeId, now); err != nil {
@@ -93,7 +115,29 @@ func settleCreditForRefund(ctx context.Context, tx *ent.Tx, group *ent.OrderGrou
 }
 
 func MarkOrderDisputed(ctx context.Context, deployed *container.Container, orderId uuid.UUID, opened bool) error {
+	return markOrderDisputed(ctx, deployed, orderId, opened, "", "")
+}
+
+func MarkOrderDisputedForEvent(ctx context.Context, deployed *container.Container, orderId uuid.UUID, opened bool, envelopeID string) error {
+	eventType := "dispute.closed"
+	if opened {
+		eventType = "dispute.opened"
+	}
+	return markOrderDisputed(ctx, deployed, orderId, opened, eventType, envelopeID)
+}
+
+func MarkOrderDisputeResolvedForEvent(ctx context.Context, deployed *container.Container, orderId uuid.UUID, envelopeID string) error {
+	return markOrderDisputed(ctx, deployed, orderId, false, "dispute.resolved", envelopeID)
+}
+
+func markOrderDisputed(ctx context.Context, deployed *container.Container, orderId uuid.UUID, opened bool, eventType, envelopeID string) error {
 	return deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		if eventType != "" {
+			claimed, err := claimProcessedMoneyEvent(ctx, tx, envelopeID, eventType)
+			if err != nil || !claimed {
+				return err
+			}
+		}
 		group, err := LockOrderGroup(ctx, tx, orderId)
 		if err != nil {
 			return err
@@ -113,29 +157,79 @@ func MarkOrderDisputed(ctx context.Context, deployed *container.Container, order
 		if restored == "" || !CanTransition(enums.StatusDisputed, restored) {
 			restored = enums.StatusNew
 		}
-		_, err = TransitionOrderGroup(ctx, tx, group, Transition{To: restored, Summary: "The dispute was closed", Kind: "note", Actor: SystemActor}, now)
+		summary := "The dispute was closed"
+		if eventType == "dispute.resolved" {
+			summary = "The dispute was resolved"
+		}
+		_, err = TransitionOrderGroup(ctx, tx, group, Transition{To: restored, Summary: summary, Kind: "note", Actor: SystemActor}, now)
 		return err
 	})
 }
 
 func RecordEscrowReleaseTime(ctx context.Context, deployed *container.Container, orderId uuid.UUID, releaseAt *time.Time) error {
+	return recordEscrowReleaseTime(ctx, deployed, orderId, releaseAt, "")
+}
+
+func RecordEscrowReleaseTimeForEvent(ctx context.Context, deployed *container.Container, orderId uuid.UUID, releaseAt *time.Time, envelopeID string) error {
+	return recordEscrowReleaseTime(ctx, deployed, orderId, releaseAt, envelopeID)
+}
+
+func recordEscrowReleaseTime(ctx context.Context, deployed *container.Container, orderId uuid.UUID, releaseAt *time.Time, envelopeID string) error {
 	if releaseAt == nil {
 		return nil
 	}
-	return deployed.Client.OrderGroup.Update().Where(ordergroup.ID(orderId), ordergroup.EscrowReleaseAtIsNil()).SetEscrowReleaseAt(releaseAt.UTC()).Exec(ctx)
+	return deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		claimed, err := claimProcessedMoneyEvent(ctx, tx, envelopeID, "escrow.releaseScheduled")
+		if err != nil || !claimed {
+			return err
+		}
+		group, err := LockOrderGroup(ctx, tx, orderId)
+		if err != nil {
+			return err
+		}
+		return tx.OrderGroup.UpdateOneID(group.ID).Where(ordergroup.EscrowReleaseAtIsNil()).SetEscrowReleaseAt(releaseAt.UTC()).Exec(ctx)
+	})
 }
 
 func RecordEscrowReleaseRetry(ctx context.Context, deployed *container.Container, orderId uuid.UUID, retryAt *time.Time) error {
+	return recordEscrowReleaseRetry(ctx, deployed, orderId, retryAt, "")
+}
+
+func RecordEscrowReleaseRetryForEvent(ctx context.Context, deployed *container.Container, orderId uuid.UUID, retryAt *time.Time, envelopeID string) error {
+	return recordEscrowReleaseRetry(ctx, deployed, orderId, retryAt, envelopeID)
+}
+
+func recordEscrowReleaseRetry(ctx context.Context, deployed *container.Container, orderId uuid.UUID, retryAt *time.Time, envelopeID string) error {
 	return deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		claimed, err := claimProcessedMoneyEvent(ctx, tx, envelopeID, "escrow.releaseFailed")
+		if err != nil || !claimed {
+			return err
+		}
 		group, err := LockOrderGroup(ctx, tx, orderId)
 		if err != nil {
 			return err
 		}
 		if retryAt != nil {
-			if err := tx.OrderGroup.UpdateOneID(group.ID).SetEscrowReleaseAt(retryAt.UTC()).AddVersion(1).Exec(ctx); err != nil {
+			normalizedRetryAt := retryAt.UTC()
+			if group.EscrowReleaseAt != nil && group.EscrowReleaseAt.Equal(normalizedRetryAt) {
+				return nil
+			}
+			if err := tx.OrderGroup.UpdateOneID(group.ID).SetEscrowReleaseAt(normalizedRetryAt).AddVersion(1).Exec(ctx); err != nil {
 				return err
 			}
 		}
 		return AppendTimelineEvent(ctx, tx, group.ID, "sellerPayoutRetrying", "Paying the seller failed; Nantty retries automatically", SystemActor)
 	})
+}
+
+func claimProcessedMoneyEvent(ctx context.Context, tx *ent.Tx, envelopeID, eventType string) (bool, error) {
+	if envelopeID == "" {
+		return true, nil
+	}
+	err := tx.ProcessedEvent.Create().SetEnvelopeID(envelopeID).SetEventType(eventType).
+		OnConflictColumns(processedevent.FieldEnvelopeID).DoNothing().Exec(ctx)
+	if isNoRowsError(err) {
+		return false, nil
+	}
+	return err == nil, err
 }

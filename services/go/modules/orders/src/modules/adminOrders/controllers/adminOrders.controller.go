@@ -9,6 +9,7 @@ import (
 	"nantty/modules/orders/src/container"
 	issueadminrefund "nantty/modules/orders/src/modules/adminOrders/commands/issueAdminRefund"
 	getadminorder "nantty/modules/orders/src/modules/adminOrders/queries/getAdminOrder"
+	listadminlogistics "nantty/modules/orders/src/modules/adminOrders/queries/listAdminLogisticsShipments"
 	listadminorders "nantty/modules/orders/src/modules/adminOrders/queries/listAdminOrders"
 	listadminrefunds "nantty/modules/orders/src/modules/adminOrders/queries/listAdminRefunds"
 	"nantty/modules/orders/src/modules/adminOrders/services"
@@ -79,6 +80,23 @@ func (controller AdminOrdersController) ListRefunds(writer http.ResponseWriter, 
 	values := request.URL.Query()
 	page, err := listadminrefunds.Handler{Container: controller.Container}.Execute(request.Context(), listadminrefunds.Query{
 		Source: values.Get("source"), Status: values.Get("status"), OrderId: orderId, Text: values.Get("search"), Cursor: values.Get("cursor"), Limit: limit,
+	})
+	controller.respond(writer, request, http.StatusOK, page, err)
+}
+
+func (controller AdminOrdersController) ListLogisticsShipments(writer http.ResponseWriter, request *http.Request) {
+	limit, err := utils.ReadPageLimit(request, 25, 100)
+	values := request.URL.Query()
+	status := strings.TrimSpace(values.Get("status"))
+	if err == nil && status != "" && !listadminlogistics.ValidShipmentStatus(status) {
+		err = httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "status", Message: "must be a supported shipment status"}})
+	}
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	page, err := listadminlogistics.Handler{Container: controller.Container}.Execute(request.Context(), listadminlogistics.Query{
+		Status: status, Cursor: values.Get("cursor"), Limit: limit,
 	})
 	controller.respond(writer, request, http.StatusOK, page, err)
 }

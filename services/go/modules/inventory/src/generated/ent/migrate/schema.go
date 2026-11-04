@@ -39,6 +39,10 @@ var (
 		{Name: "subject", Type: field.TypeString},
 		{Name: "payload", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true},
+		{Name: "attempt_count", Type: field.TypeInt, Default: 0},
+		{Name: "next_attempt_at", Type: field.TypeTime, Nullable: true},
+		{Name: "last_error", Type: field.TypeString, Size: 1000, Default: ""},
+		{Name: "dead_lettered_at", Type: field.TypeTime, Nullable: true},
 	}
 	// OutboxEventsTable holds the schema information for the "outbox_events" table.
 	OutboxEventsTable = &schema.Table{

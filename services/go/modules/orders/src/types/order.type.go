@@ -57,7 +57,6 @@ type PromotionIssueView struct {
 type ShipmentView struct {
 	CourierName         string     `json:"courierName"`
 	TrackingNumber      string     `json:"trackingNumber"`
-	TrackingUrl         *string    `json:"trackingUrl"`
 	ShippedAt           time.Time  `json:"shippedAt"`
 	EstimatedDeliveryAt *time.Time `json:"estimatedDeliveryAt"`
 }

@@ -1,4 +1,4 @@
-h1:No/9Mr1qZgBVcNaZ421pn3hHEw3LzdztK5gobiicqZg=
+h1:ywN7yjZKahT72bCK8pn24UDdfL1vK1CI5D5F+j5hsEU=
 20261003094035_create_auth_tables.up.sql h1:KtaB3JZqg9eMzXAQZ13OTwIzR/UCL/D/Pd6ovWwq10I=
 20261003094100_grant_read_access_to_other_services.up.sql h1:H47OiswGxjuOqv/qj+ImQCXFbCLBJ45N7XZePh87dEU=
 20261003100736_add_social_identities.up.sql h1:/ZhAX0L0xtUUkB2+guudIFRMEGeeX87tCJ3e0lLrHS4=
@@ -9,3 +9,4 @@ h1:No/9Mr1qZgBVcNaZ421pn3hHEw3LzdztK5gobiicqZg=
 20261005200000_drop_phone_hash.up.sql h1:WVMON5IzL9klnXpAdVE6YLB34ScYJ8oO6UbE12kZVuw=
 20261017154209_add_age_gate_refusals.up.sql h1:AYZsx0Wl6vFQ8u6jssvEHdv3KJcoUD25yYncwqUjH0E=
 20261017154300_expose_account_age_brackets.up.sql h1:jVHq4lWlpeO0k4xXCyKiaOiybSrFKFdi8n8UoGky63g=
+20261103133000_add_auth_outbox_retry_state.up.sql h1:NLPs39U+LFaQfIMHbe5OEh8WFOTja9KKpVGKJTSJxvo=

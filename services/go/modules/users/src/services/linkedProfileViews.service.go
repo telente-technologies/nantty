@@ -31,7 +31,7 @@ func ApplyLinkedState(view types.ActingProfileView, row *ent.LinkedProfile, sell
 		return view
 	}
 	view.Kind, view.Type = string(row.Kind), string(row.Kind)
-	view.OnHold = row.Status != linkedprofile.StatusActive
+	view.OnHold = view.OnHold || row.Status != linkedprofile.StatusActive
 	view.ShowsMart = row.Kind == linkedprofile.KindStore || (row.Kind == linkedprofile.KindBrand && sellingEnabled)
 	return view
 }

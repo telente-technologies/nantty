@@ -70,6 +70,11 @@ func BuildCheckoutPlan(ctx context.Context, deployed *container.Container, buyer
 	if !found {
 		return plan, ordererrors.AddressNotFound
 	}
+	phone, err := normalizeCheckoutDeliveryPhone(address.Phone)
+	if err != nil {
+		return plan, err
+	}
+	address.Phone = phone
 	buyerCountry := BuyerCountry(ctx, deployed, buyerId, &address)
 	if buyerCountry == "" {
 		return plan, regionpricing.ErrCountryRequired

@@ -70,6 +70,62 @@ func (_c *OutboxEventCreate) SetNillablePublishedAt(v *time.Time) *OutboxEventCr
 	return _c
 }
 
+// SetAttemptCount sets the "attempt_count" field.
+func (_c *OutboxEventCreate) SetAttemptCount(v int) *OutboxEventCreate {
+	_c.mutation.SetAttemptCount(v)
+	return _c
+}
+
+// SetNillableAttemptCount sets the "attempt_count" field if the given value is not nil.
+func (_c *OutboxEventCreate) SetNillableAttemptCount(v *int) *OutboxEventCreate {
+	if v != nil {
+		_c.SetAttemptCount(*v)
+	}
+	return _c
+}
+
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (_c *OutboxEventCreate) SetNextAttemptAt(v time.Time) *OutboxEventCreate {
+	_c.mutation.SetNextAttemptAt(v)
+	return _c
+}
+
+// SetNillableNextAttemptAt sets the "next_attempt_at" field if the given value is not nil.
+func (_c *OutboxEventCreate) SetNillableNextAttemptAt(v *time.Time) *OutboxEventCreate {
+	if v != nil {
+		_c.SetNextAttemptAt(*v)
+	}
+	return _c
+}
+
+// SetLastError sets the "last_error" field.
+func (_c *OutboxEventCreate) SetLastError(v string) *OutboxEventCreate {
+	_c.mutation.SetLastError(v)
+	return _c
+}
+
+// SetNillableLastError sets the "last_error" field if the given value is not nil.
+func (_c *OutboxEventCreate) SetNillableLastError(v *string) *OutboxEventCreate {
+	if v != nil {
+		_c.SetLastError(*v)
+	}
+	return _c
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (_c *OutboxEventCreate) SetDeadLetteredAt(v time.Time) *OutboxEventCreate {
+	_c.mutation.SetDeadLetteredAt(v)
+	return _c
+}
+
+// SetNillableDeadLetteredAt sets the "dead_lettered_at" field if the given value is not nil.
+func (_c *OutboxEventCreate) SetNillableDeadLetteredAt(v *time.Time) *OutboxEventCreate {
+	if v != nil {
+		_c.SetDeadLetteredAt(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *OutboxEventCreate) SetID(v uuid.UUID) *OutboxEventCreate {
 	_c.mutation.SetID(v)
@@ -123,6 +179,14 @@ func (_c *OutboxEventCreate) defaults() {
 		v := outboxevent.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.AttemptCount(); !ok {
+		v := outboxevent.DefaultAttemptCount
+		_c.mutation.SetAttemptCount(v)
+	}
+	if _, ok := _c.mutation.LastError(); !ok {
+		v := outboxevent.DefaultLastError
+		_c.mutation.SetLastError(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := outboxevent.DefaultID()
 		_c.mutation.SetID(v)
@@ -147,6 +211,17 @@ func (_c *OutboxEventCreate) check() error {
 	}
 	if _, ok := _c.mutation.Payload(); !ok {
 		return &ValidationError{Name: "payload", err: errors.New(`ent: missing required field "OutboxEvent.payload"`)}
+	}
+	if _, ok := _c.mutation.AttemptCount(); !ok {
+		return &ValidationError{Name: "attempt_count", err: errors.New(`ent: missing required field "OutboxEvent.attempt_count"`)}
+	}
+	if _, ok := _c.mutation.LastError(); !ok {
+		return &ValidationError{Name: "last_error", err: errors.New(`ent: missing required field "OutboxEvent.last_error"`)}
+	}
+	if v, ok := _c.mutation.LastError(); ok {
+		if err := outboxevent.LastErrorValidator(v); err != nil {
+			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "OutboxEvent.last_error": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -203,6 +278,22 @@ func (_c *OutboxEventCreate) createSpec() (*OutboxEvent, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.PublishedAt(); ok {
 		_spec.SetField(outboxevent.FieldPublishedAt, field.TypeTime, value)
 		_node.PublishedAt = &value
+	}
+	if value, ok := _c.mutation.AttemptCount(); ok {
+		_spec.SetField(outboxevent.FieldAttemptCount, field.TypeInt, value)
+		_node.AttemptCount = value
+	}
+	if value, ok := _c.mutation.NextAttemptAt(); ok {
+		_spec.SetField(outboxevent.FieldNextAttemptAt, field.TypeTime, value)
+		_node.NextAttemptAt = &value
+	}
+	if value, ok := _c.mutation.LastError(); ok {
+		_spec.SetField(outboxevent.FieldLastError, field.TypeString, value)
+		_node.LastError = value
+	}
+	if value, ok := _c.mutation.DeadLetteredAt(); ok {
+		_spec.SetField(outboxevent.FieldDeadLetteredAt, field.TypeTime, value)
+		_node.DeadLetteredAt = &value
 	}
 	return _node, _spec
 }
@@ -271,6 +362,72 @@ func (u *OutboxEventUpsert) UpdatePublishedAt() *OutboxEventUpsert {
 // ClearPublishedAt clears the value of the "published_at" field.
 func (u *OutboxEventUpsert) ClearPublishedAt() *OutboxEventUpsert {
 	u.SetNull(outboxevent.FieldPublishedAt)
+	return u
+}
+
+// SetAttemptCount sets the "attempt_count" field.
+func (u *OutboxEventUpsert) SetAttemptCount(v int) *OutboxEventUpsert {
+	u.Set(outboxevent.FieldAttemptCount, v)
+	return u
+}
+
+// UpdateAttemptCount sets the "attempt_count" field to the value that was provided on create.
+func (u *OutboxEventUpsert) UpdateAttemptCount() *OutboxEventUpsert {
+	u.SetExcluded(outboxevent.FieldAttemptCount)
+	return u
+}
+
+// AddAttemptCount adds v to the "attempt_count" field.
+func (u *OutboxEventUpsert) AddAttemptCount(v int) *OutboxEventUpsert {
+	u.Add(outboxevent.FieldAttemptCount, v)
+	return u
+}
+
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (u *OutboxEventUpsert) SetNextAttemptAt(v time.Time) *OutboxEventUpsert {
+	u.Set(outboxevent.FieldNextAttemptAt, v)
+	return u
+}
+
+// UpdateNextAttemptAt sets the "next_attempt_at" field to the value that was provided on create.
+func (u *OutboxEventUpsert) UpdateNextAttemptAt() *OutboxEventUpsert {
+	u.SetExcluded(outboxevent.FieldNextAttemptAt)
+	return u
+}
+
+// ClearNextAttemptAt clears the value of the "next_attempt_at" field.
+func (u *OutboxEventUpsert) ClearNextAttemptAt() *OutboxEventUpsert {
+	u.SetNull(outboxevent.FieldNextAttemptAt)
+	return u
+}
+
+// SetLastError sets the "last_error" field.
+func (u *OutboxEventUpsert) SetLastError(v string) *OutboxEventUpsert {
+	u.Set(outboxevent.FieldLastError, v)
+	return u
+}
+
+// UpdateLastError sets the "last_error" field to the value that was provided on create.
+func (u *OutboxEventUpsert) UpdateLastError() *OutboxEventUpsert {
+	u.SetExcluded(outboxevent.FieldLastError)
+	return u
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (u *OutboxEventUpsert) SetDeadLetteredAt(v time.Time) *OutboxEventUpsert {
+	u.Set(outboxevent.FieldDeadLetteredAt, v)
+	return u
+}
+
+// UpdateDeadLetteredAt sets the "dead_lettered_at" field to the value that was provided on create.
+func (u *OutboxEventUpsert) UpdateDeadLetteredAt() *OutboxEventUpsert {
+	u.SetExcluded(outboxevent.FieldDeadLetteredAt)
+	return u
+}
+
+// ClearDeadLetteredAt clears the value of the "dead_lettered_at" field.
+func (u *OutboxEventUpsert) ClearDeadLetteredAt() *OutboxEventUpsert {
+	u.SetNull(outboxevent.FieldDeadLetteredAt)
 	return u
 }
 
@@ -352,6 +509,83 @@ func (u *OutboxEventUpsertOne) UpdatePublishedAt() *OutboxEventUpsertOne {
 func (u *OutboxEventUpsertOne) ClearPublishedAt() *OutboxEventUpsertOne {
 	return u.Update(func(s *OutboxEventUpsert) {
 		s.ClearPublishedAt()
+	})
+}
+
+// SetAttemptCount sets the "attempt_count" field.
+func (u *OutboxEventUpsertOne) SetAttemptCount(v int) *OutboxEventUpsertOne {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.SetAttemptCount(v)
+	})
+}
+
+// AddAttemptCount adds v to the "attempt_count" field.
+func (u *OutboxEventUpsertOne) AddAttemptCount(v int) *OutboxEventUpsertOne {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.AddAttemptCount(v)
+	})
+}
+
+// UpdateAttemptCount sets the "attempt_count" field to the value that was provided on create.
+func (u *OutboxEventUpsertOne) UpdateAttemptCount() *OutboxEventUpsertOne {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.UpdateAttemptCount()
+	})
+}
+
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (u *OutboxEventUpsertOne) SetNextAttemptAt(v time.Time) *OutboxEventUpsertOne {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.SetNextAttemptAt(v)
+	})
+}
+
+// UpdateNextAttemptAt sets the "next_attempt_at" field to the value that was provided on create.
+func (u *OutboxEventUpsertOne) UpdateNextAttemptAt() *OutboxEventUpsertOne {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.UpdateNextAttemptAt()
+	})
+}
+
+// ClearNextAttemptAt clears the value of the "next_attempt_at" field.
+func (u *OutboxEventUpsertOne) ClearNextAttemptAt() *OutboxEventUpsertOne {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.ClearNextAttemptAt()
+	})
+}
+
+// SetLastError sets the "last_error" field.
+func (u *OutboxEventUpsertOne) SetLastError(v string) *OutboxEventUpsertOne {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.SetLastError(v)
+	})
+}
+
+// UpdateLastError sets the "last_error" field to the value that was provided on create.
+func (u *OutboxEventUpsertOne) UpdateLastError() *OutboxEventUpsertOne {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.UpdateLastError()
+	})
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (u *OutboxEventUpsertOne) SetDeadLetteredAt(v time.Time) *OutboxEventUpsertOne {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.SetDeadLetteredAt(v)
+	})
+}
+
+// UpdateDeadLetteredAt sets the "dead_lettered_at" field to the value that was provided on create.
+func (u *OutboxEventUpsertOne) UpdateDeadLetteredAt() *OutboxEventUpsertOne {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.UpdateDeadLetteredAt()
+	})
+}
+
+// ClearDeadLetteredAt clears the value of the "dead_lettered_at" field.
+func (u *OutboxEventUpsertOne) ClearDeadLetteredAt() *OutboxEventUpsertOne {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.ClearDeadLetteredAt()
 	})
 }
 
@@ -600,6 +834,83 @@ func (u *OutboxEventUpsertBulk) UpdatePublishedAt() *OutboxEventUpsertBulk {
 func (u *OutboxEventUpsertBulk) ClearPublishedAt() *OutboxEventUpsertBulk {
 	return u.Update(func(s *OutboxEventUpsert) {
 		s.ClearPublishedAt()
+	})
+}
+
+// SetAttemptCount sets the "attempt_count" field.
+func (u *OutboxEventUpsertBulk) SetAttemptCount(v int) *OutboxEventUpsertBulk {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.SetAttemptCount(v)
+	})
+}
+
+// AddAttemptCount adds v to the "attempt_count" field.
+func (u *OutboxEventUpsertBulk) AddAttemptCount(v int) *OutboxEventUpsertBulk {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.AddAttemptCount(v)
+	})
+}
+
+// UpdateAttemptCount sets the "attempt_count" field to the value that was provided on create.
+func (u *OutboxEventUpsertBulk) UpdateAttemptCount() *OutboxEventUpsertBulk {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.UpdateAttemptCount()
+	})
+}
+
+// SetNextAttemptAt sets the "next_attempt_at" field.
+func (u *OutboxEventUpsertBulk) SetNextAttemptAt(v time.Time) *OutboxEventUpsertBulk {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.SetNextAttemptAt(v)
+	})
+}
+
+// UpdateNextAttemptAt sets the "next_attempt_at" field to the value that was provided on create.
+func (u *OutboxEventUpsertBulk) UpdateNextAttemptAt() *OutboxEventUpsertBulk {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.UpdateNextAttemptAt()
+	})
+}
+
+// ClearNextAttemptAt clears the value of the "next_attempt_at" field.
+func (u *OutboxEventUpsertBulk) ClearNextAttemptAt() *OutboxEventUpsertBulk {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.ClearNextAttemptAt()
+	})
+}
+
+// SetLastError sets the "last_error" field.
+func (u *OutboxEventUpsertBulk) SetLastError(v string) *OutboxEventUpsertBulk {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.SetLastError(v)
+	})
+}
+
+// UpdateLastError sets the "last_error" field to the value that was provided on create.
+func (u *OutboxEventUpsertBulk) UpdateLastError() *OutboxEventUpsertBulk {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.UpdateLastError()
+	})
+}
+
+// SetDeadLetteredAt sets the "dead_lettered_at" field.
+func (u *OutboxEventUpsertBulk) SetDeadLetteredAt(v time.Time) *OutboxEventUpsertBulk {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.SetDeadLetteredAt(v)
+	})
+}
+
+// UpdateDeadLetteredAt sets the "dead_lettered_at" field to the value that was provided on create.
+func (u *OutboxEventUpsertBulk) UpdateDeadLetteredAt() *OutboxEventUpsertBulk {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.UpdateDeadLetteredAt()
+	})
+}
+
+// ClearDeadLetteredAt clears the value of the "dead_lettered_at" field.
+func (u *OutboxEventUpsertBulk) ClearDeadLetteredAt() *OutboxEventUpsertBulk {
+	return u.Update(func(s *OutboxEventUpsert) {
+		s.ClearDeadLetteredAt()
 	})
 }
 

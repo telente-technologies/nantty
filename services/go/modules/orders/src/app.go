@@ -182,7 +182,7 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	go services.RunReportExportsUntilContextDone(ctx, module.Container)
 	go module.consumeMoneyEvents(ctx)
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
-		Store:     events.EntOutboxStore{Client: module.Container.Client, Now: time.Now},
+		Store:     events.EntOutboxStore{Client: module.Container.Client, Now: time.Now, Logger: module.Container.Logger},
 		Publisher: module.publisher,
 		Logger:    module.Container.Logger,
 	})

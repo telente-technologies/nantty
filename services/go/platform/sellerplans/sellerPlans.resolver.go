@@ -36,7 +36,7 @@ func (plan Plan) AtLeast(required Plan) bool { return plan.rank() >= required.ra
 var minimumPlanByFeature = map[string]Plan{
 	"shipping_rules": Free, "advanced_inventory": Pro, "bulk_tools": Pro, "advanced_analytics": Pro, "advanced_reports": Pro, "customer_segments": Pro,
 	"team": Pro, "advanced_promotions": Pro, "ads_tools": Pro, "multiple_warehouses": Pro, "automated_alerts": Pro, "api_webhooks": Pro,
-	"multiple_stores": Business, "advanced_permissions": Business, "accounting_integrations": Business,
+	"multiple_stores": Business, "advanced_permissions": Business, "accounting_integrations": Business, "logistics_dashboard": Pro,
 }
 
 func MinimumPlanFor(feature string) Plan {

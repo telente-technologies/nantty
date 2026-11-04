@@ -15,6 +15,7 @@ var (
 	bankCodePattern       = regexp.MustCompile(`^[0-9A-Za-z]{2,10}$`)
 	accountNumberPattern  = regexp.MustCompile(`^\d{10}$`)
 	phonePattern          = regexp.MustCompile(`^\+?[0-9 ()-]{7,20}$`)
+	phoneDigitPattern     = regexp.MustCompile(`[^0-9]`)
 )
 
 func ValidateSubmit(request dtos.SubmitApplicationRequest) error {
@@ -24,8 +25,12 @@ func ValidateSubmit(request dtos.SubmitApplicationRequest) error {
 	if len(request.Description) > 1000 {
 		issues.Add("description", "must be at most 1000 characters")
 	}
-	if !phonePattern.MatchString(request.Phone) {
+	phoneDigits := phoneDigitPattern.ReplaceAllString(request.Phone, "")
+	if !phonePattern.MatchString(request.Phone) || len(phoneDigits) < 10 || len(phoneDigits) > 15 {
 		issues.Add("phone", "must be a valid phone number")
+	}
+	if request.EnableLogistics == nil {
+		issues.Add("enableLogistics", "choose whether your store can handle logistics")
 	}
 	issues.CheckLength("addressLine", request.AddressLine, 5, 200)
 	issues.CheckLength("city", request.City, 2, 80)

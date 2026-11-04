@@ -70,6 +70,12 @@ func (_u *ParcelUpdate) AddLengthMm(v int) *ParcelUpdate {
 	return _u
 }
 
+// ClearLengthMm clears the value of the "length_mm" field.
+func (_u *ParcelUpdate) ClearLengthMm() *ParcelUpdate {
+	_u.mutation.ClearLengthMm()
+	return _u
+}
+
 // SetWidthMm sets the "width_mm" field.
 func (_u *ParcelUpdate) SetWidthMm(v int) *ParcelUpdate {
 	_u.mutation.ResetWidthMm()
@@ -91,6 +97,12 @@ func (_u *ParcelUpdate) AddWidthMm(v int) *ParcelUpdate {
 	return _u
 }
 
+// ClearWidthMm clears the value of the "width_mm" field.
+func (_u *ParcelUpdate) ClearWidthMm() *ParcelUpdate {
+	_u.mutation.ClearWidthMm()
+	return _u
+}
+
 // SetHeightMm sets the "height_mm" field.
 func (_u *ParcelUpdate) SetHeightMm(v int) *ParcelUpdate {
 	_u.mutation.ResetHeightMm()
@@ -109,6 +121,12 @@ func (_u *ParcelUpdate) SetNillableHeightMm(v *int) *ParcelUpdate {
 // AddHeightMm adds value to the "height_mm" field.
 func (_u *ParcelUpdate) AddHeightMm(v int) *ParcelUpdate {
 	_u.mutation.AddHeightMm(v)
+	return _u
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (_u *ParcelUpdate) ClearHeightMm() *ParcelUpdate {
+	_u.mutation.ClearHeightMm()
 	return _u
 }
 
@@ -343,17 +361,26 @@ func (_u *ParcelUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedLengthMm(); ok {
 		_spec.AddField(parcel.FieldLengthMm, field.TypeInt, value)
 	}
+	if _u.mutation.LengthMmCleared() {
+		_spec.ClearField(parcel.FieldLengthMm, field.TypeInt)
+	}
 	if value, ok := _u.mutation.WidthMm(); ok {
 		_spec.SetField(parcel.FieldWidthMm, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedWidthMm(); ok {
 		_spec.AddField(parcel.FieldWidthMm, field.TypeInt, value)
 	}
+	if _u.mutation.WidthMmCleared() {
+		_spec.ClearField(parcel.FieldWidthMm, field.TypeInt)
+	}
 	if value, ok := _u.mutation.HeightMm(); ok {
 		_spec.SetField(parcel.FieldHeightMm, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedHeightMm(); ok {
 		_spec.AddField(parcel.FieldHeightMm, field.TypeInt, value)
+	}
+	if _u.mutation.HeightMmCleared() {
+		_spec.ClearField(parcel.FieldHeightMm, field.TypeInt)
 	}
 	if value, ok := _u.mutation.PackageCategory(); ok {
 		_spec.SetField(parcel.FieldPackageCategory, field.TypeString, value)
@@ -450,6 +477,12 @@ func (_u *ParcelUpdateOne) AddLengthMm(v int) *ParcelUpdateOne {
 	return _u
 }
 
+// ClearLengthMm clears the value of the "length_mm" field.
+func (_u *ParcelUpdateOne) ClearLengthMm() *ParcelUpdateOne {
+	_u.mutation.ClearLengthMm()
+	return _u
+}
+
 // SetWidthMm sets the "width_mm" field.
 func (_u *ParcelUpdateOne) SetWidthMm(v int) *ParcelUpdateOne {
 	_u.mutation.ResetWidthMm()
@@ -471,6 +504,12 @@ func (_u *ParcelUpdateOne) AddWidthMm(v int) *ParcelUpdateOne {
 	return _u
 }
 
+// ClearWidthMm clears the value of the "width_mm" field.
+func (_u *ParcelUpdateOne) ClearWidthMm() *ParcelUpdateOne {
+	_u.mutation.ClearWidthMm()
+	return _u
+}
+
 // SetHeightMm sets the "height_mm" field.
 func (_u *ParcelUpdateOne) SetHeightMm(v int) *ParcelUpdateOne {
 	_u.mutation.ResetHeightMm()
@@ -489,6 +528,12 @@ func (_u *ParcelUpdateOne) SetNillableHeightMm(v *int) *ParcelUpdateOne {
 // AddHeightMm adds value to the "height_mm" field.
 func (_u *ParcelUpdateOne) AddHeightMm(v int) *ParcelUpdateOne {
 	_u.mutation.AddHeightMm(v)
+	return _u
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (_u *ParcelUpdateOne) ClearHeightMm() *ParcelUpdateOne {
+	_u.mutation.ClearHeightMm()
 	return _u
 }
 
@@ -753,17 +798,26 @@ func (_u *ParcelUpdateOne) sqlSave(ctx context.Context) (_node *Parcel, err erro
 	if value, ok := _u.mutation.AddedLengthMm(); ok {
 		_spec.AddField(parcel.FieldLengthMm, field.TypeInt, value)
 	}
+	if _u.mutation.LengthMmCleared() {
+		_spec.ClearField(parcel.FieldLengthMm, field.TypeInt)
+	}
 	if value, ok := _u.mutation.WidthMm(); ok {
 		_spec.SetField(parcel.FieldWidthMm, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedWidthMm(); ok {
 		_spec.AddField(parcel.FieldWidthMm, field.TypeInt, value)
 	}
+	if _u.mutation.WidthMmCleared() {
+		_spec.ClearField(parcel.FieldWidthMm, field.TypeInt)
+	}
 	if value, ok := _u.mutation.HeightMm(); ok {
 		_spec.SetField(parcel.FieldHeightMm, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedHeightMm(); ok {
 		_spec.AddField(parcel.FieldHeightMm, field.TypeInt, value)
+	}
+	if _u.mutation.HeightMmCleared() {
+		_spec.ClearField(parcel.FieldHeightMm, field.TypeInt)
 	}
 	if value, ok := _u.mutation.PackageCategory(); ok {
 		_spec.SetField(parcel.FieldPackageCategory, field.TypeString, value)

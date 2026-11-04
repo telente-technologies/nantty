@@ -15,8 +15,9 @@ import (
 )
 
 type fakeDirectory struct {
-	mutex    sync.Mutex
-	profiles map[uuid.UUID]usersdirectory.ProfileName
+	mutex     sync.Mutex
+	profiles  map[uuid.UUID]usersdirectory.ProfileName
+	countries map[uuid.UUID]string
 }
 
 func (directory *fakeDirectory) add(handle string) uuid.UUID {
@@ -69,8 +70,22 @@ func (directory *fakeDirectory) AccountsAllowingPersonalizedAds(context.Context,
 	return nil, nil
 }
 
-func (directory *fakeDirectory) PersonalProfileCountry(context.Context, uuid.UUID) (string, error) {
+func (directory *fakeDirectory) PersonalProfileCountry(_ context.Context, accountId uuid.UUID) (string, error) {
+	directory.mutex.Lock()
+	defer directory.mutex.Unlock()
+	if country, found := directory.countries[accountId]; found {
+		return country, nil
+	}
 	return "NG", nil
+}
+
+func (directory *fakeDirectory) setCountry(accountId uuid.UUID, country string) {
+	directory.mutex.Lock()
+	defer directory.mutex.Unlock()
+	if directory.countries == nil {
+		directory.countries = map[uuid.UUID]string{}
+	}
+	directory.countries[accountId] = country
 }
 
 func (directory *fakeDirectory) PrivacyChoicesOf(context.Context, uuid.UUID) (usersdirectory.PrivacyChoices, bool, error) {

@@ -30,6 +30,7 @@ func (SellerApplication) Fields() []ent.Field {
 		field.String("address_line").NotEmpty().MaxLen(200).Immutable(),
 		field.String("city").NotEmpty().MaxLen(80).Immutable(),
 		field.String("state").NotEmpty().MaxLen(80).Immutable(),
+		field.Bool("logistics_enabled").Default(false).Immutable(),
 		field.String("identity_document_type").NotEmpty().MaxLen(30).Immutable(),
 		field.Bytes("identity_document_number_sealed").Immutable(),
 		field.String("identity_document_last4").MaxLen(4).Immutable(),

@@ -26,11 +26,11 @@ type Parcel struct {
 	// WeightGrams holds the value of the "weight_grams" field.
 	WeightGrams int `json:"weight_grams,omitempty"`
 	// LengthMm holds the value of the "length_mm" field.
-	LengthMm int `json:"length_mm,omitempty"`
+	LengthMm *int `json:"length_mm,omitempty"`
 	// WidthMm holds the value of the "width_mm" field.
-	WidthMm int `json:"width_mm,omitempty"`
+	WidthMm *int `json:"width_mm,omitempty"`
 	// HeightMm holds the value of the "height_mm" field.
-	HeightMm int `json:"height_mm,omitempty"`
+	HeightMm *int `json:"height_mm,omitempty"`
 	// PackageCategory holds the value of the "package_category" field.
 	PackageCategory string `json:"package_category,omitempty"`
 	// PackageCount holds the value of the "package_count" field.
@@ -110,19 +110,22 @@ func (_m *Parcel) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field length_mm", values[i])
 			} else if value.Valid {
-				_m.LengthMm = int(value.Int64)
+				_m.LengthMm = new(int)
+				*_m.LengthMm = int(value.Int64)
 			}
 		case parcel.FieldWidthMm:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field width_mm", values[i])
 			} else if value.Valid {
-				_m.WidthMm = int(value.Int64)
+				_m.WidthMm = new(int)
+				*_m.WidthMm = int(value.Int64)
 			}
 		case parcel.FieldHeightMm:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field height_mm", values[i])
 			} else if value.Valid {
-				_m.HeightMm = int(value.Int64)
+				_m.HeightMm = new(int)
+				*_m.HeightMm = int(value.Int64)
 			}
 		case parcel.FieldPackageCategory:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -219,14 +222,20 @@ func (_m *Parcel) String() string {
 	builder.WriteString("weight_grams=")
 	builder.WriteString(fmt.Sprintf("%v", _m.WeightGrams))
 	builder.WriteString(", ")
-	builder.WriteString("length_mm=")
-	builder.WriteString(fmt.Sprintf("%v", _m.LengthMm))
+	if v := _m.LengthMm; v != nil {
+		builder.WriteString("length_mm=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("width_mm=")
-	builder.WriteString(fmt.Sprintf("%v", _m.WidthMm))
+	if v := _m.WidthMm; v != nil {
+		builder.WriteString("width_mm=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("height_mm=")
-	builder.WriteString(fmt.Sprintf("%v", _m.HeightMm))
+	if v := _m.HeightMm; v != nil {
+		builder.WriteString("height_mm=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("package_category=")
 	builder.WriteString(_m.PackageCategory)

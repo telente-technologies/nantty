@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"net/url"
 	"time"
 
 	"nantty/modules/escrow/src/generated/ent"
@@ -94,9 +95,14 @@ func ConvertEscrowToSellerHold(held *ent.Escrow, inspectionPeriod time.Duration)
 }
 
 func ConvertEscrowToUndeliveredReviewRow(held *ent.Escrow) dtos.UndeliveredReviewRowDto {
-	return dtos.UndeliveredReviewRowDto{
+	row := dtos.UndeliveredReviewRowDto{
 		EscrowId: held.ID.String(), OrderId: held.OrderID, OrderReference: held.OrderReference, BuyerUserId: held.BuyerUserID, SellerUserId: held.SellerUserID,
 		StoreId: held.StoreID, HeldAmount: money(held.AmountMinor, held.Currency), HeldSince: held.CreatedAt, ReviewSince: *held.UndeliveredReviewAt,
 		ShippedAt: held.ShippedAt, CourierName: held.CourierName, TrackingNumber: held.TrackingNumber,
 	}
+	if parsed, err := url.Parse(held.TrackingURL); err == nil && parsed.Scheme == "https" && parsed.Hostname() != "" && parsed.User == nil {
+		trackingURL := held.TrackingURL
+		row.TrackingUrl = &trackingURL
+	}
+	return row
 }

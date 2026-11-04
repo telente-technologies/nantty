@@ -115,7 +115,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
 	go jobs.RunBackgroundJobsUntilContextDone(ctx, module.Container)
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
-		Store:     events.EntOutboxStore{Client: module.Container.Client, Now: time.Now},
+		Store:     events.EntOutboxStore{Client: module.Container.Client, Now: time.Now, Logger: module.Container.Logger},
 		Publisher: module.publisher,
 		Logger:    module.Container.Logger,
 	})

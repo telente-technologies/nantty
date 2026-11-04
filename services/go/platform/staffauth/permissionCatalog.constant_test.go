@@ -52,6 +52,22 @@ func TestRequestedDepartmentTemplatesAreNamedAndLeastPrivilege(t *testing.T) {
 			}
 		}
 	}
+	operations := byKey["operations_analyst"].Permissions
+	if len(operations) != 3 || !slices.Contains(operations, "metrics:read") || !slices.Contains(operations, "logistics:read") || !slices.Contains(operations, "events:read") {
+		t.Fatalf("Operations Analyst permissions = %v; want metrics:read, logistics:read, and events:read", operations)
+	}
+}
+
+func TestLogisticsReadIsKnownAndGrantable(t *testing.T) {
+	if !IsKnownPermission("logistics:read") || !IsGrantablePermission("logistics:read") {
+		t.Fatal("logistics:read must be a known, grantable staff permission")
+	}
+}
+
+func TestEventOperationsReadIsKnownAndGrantable(t *testing.T) {
+	if !IsKnownPermission("events:read") || !IsGrantablePermission("events:read") {
+		t.Fatal("events:read must be a known, grantable staff permission")
+	}
 }
 
 func TestPermissionAliasesBridgeContractKeysToServiceKeys(t *testing.T) {

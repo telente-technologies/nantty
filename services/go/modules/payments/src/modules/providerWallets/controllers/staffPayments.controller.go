@@ -18,6 +18,8 @@ type staffReasonRequest struct {
 	Reason string `json:"reason"`
 }
 
+var errPaymentAuditUnavailable = httpserver.NewApiError(http.StatusServiceUnavailable, "AUDIT_UNAVAILABLE", "The audit log is unavailable; the payment operation was not performed.")
+
 func validateStaffReason(body staffReasonRequest) error {
 	collector := &ledgerutils.IssueCollector{}
 	collector.RequireLength("reason", strings.TrimSpace(body.Reason), 5, 500)
@@ -84,6 +86,18 @@ func (controller ProviderWalletsController) ReplayDeadLetter(writer http.Respons
 	before, err := controller.Application.Gateway.GetDeadLetteredWebhook(request.Context(), id)
 	if err != nil {
 		controller.fail(writer, request, err)
+		return
+	}
+	recorder := controller.Application.Container.Audit
+	if recorder == nil {
+		controller.fail(writer, request, errPaymentAuditUnavailable)
+		return
+	}
+	staff, _ := staffauth.StaffFromContext(request.Context())
+	if err := staffaudit.RecordStaffChange(request, recorder, staff, "paymentWebhook.replay_requested", "paymentWebhook", id.String(), body.Reason,
+		map[string]any{"attempts": before.Attempts, "deadLetteredAt": before.DeadLetteredAt}, map[string]any{"status": "replay_requested"}); err != nil {
+		controller.Application.Container.Resources.Logger.ErrorContext(request.Context(), "payment webhook replay blocked because audit recording failed", "subjectId", id.String(), "error", err)
+		controller.fail(writer, request, errPaymentAuditUnavailable)
 		return
 	}
 	after, err := controller.Application.Gateway.ReplayDeadLetteredWebhook(request.Context(), id)

@@ -21,6 +21,7 @@ var (
 	CheckoutCurrencyNotSupported     = Api(http.StatusUnprocessableEntity, "CHECKOUT_CURRENCY_NOT_SUPPORTED", "Checkout is not available in this store's currency yet.")
 	MixedCurrencies                  = Api(http.StatusUnprocessableEntity, "MIXED_CURRENCIES", "Items from stores that sell in different currencies must be bought separately.")
 	AddressNotFound                  = Api(http.StatusNotFound, "ADDRESS_NOT_FOUND", "That delivery address could not be found.")
+	AddressPhoneRequired             = Api(http.StatusUnprocessableEntity, "ADDRESS_PHONE_REQUIRED", "Add a phone number to your delivery address to continue.")
 	NothingDeliverable               = Api(http.StatusUnprocessableEntity, "NOT_DELIVERABLE", "None of the sellers in your cart ship to that address.")
 	InsufficientStock                = Api(http.StatusConflict, "INSUFFICIENT_STOCK", "There is not enough stock for one of the items.")
 	PaymentServiceFailed             = Api(http.StatusBadGateway, "PAYMENT_SERVICE_UNAVAILABLE", "We could not prepare the payment. Try again in a moment.")

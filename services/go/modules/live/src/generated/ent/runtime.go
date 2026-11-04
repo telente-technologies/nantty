@@ -768,6 +768,16 @@ func init() {
 	outboxeventDescEventType := outboxeventFields[0].Descriptor()
 	// outboxevent.EventTypeValidator is a validator for the "event_type" field. It is called by the builders before save.
 	outboxevent.EventTypeValidator = outboxeventDescEventType.Validators[0].(func(string) error)
+	// outboxeventDescAttemptCount is the schema descriptor for attempt_count field.
+	outboxeventDescAttemptCount := outboxeventFields[4].Descriptor()
+	// outboxevent.DefaultAttemptCount holds the default value on creation for the attempt_count field.
+	outboxevent.DefaultAttemptCount = outboxeventDescAttemptCount.Default.(int)
+	// outboxeventDescLastError is the schema descriptor for last_error field.
+	outboxeventDescLastError := outboxeventFields[6].Descriptor()
+	// outboxevent.DefaultLastError holds the default value on creation for the last_error field.
+	outboxevent.DefaultLastError = outboxeventDescLastError.Default.(string)
+	// outboxevent.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
+	outboxevent.LastErrorValidator = outboxeventDescLastError.Validators[0].(func(string) error)
 	// outboxeventDescID is the schema descriptor for id field.
 	outboxeventDescID := outboxeventMixinFields0[0].Descriptor()
 	// outboxevent.DefaultID holds the default value on creation for the id field.

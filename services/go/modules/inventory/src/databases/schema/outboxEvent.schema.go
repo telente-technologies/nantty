@@ -21,6 +21,10 @@ func (OutboxEvent) Fields() []ent.Field {
 		field.String("subject").Immutable(),
 		field.Bytes("payload").Immutable().SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 		field.Time("published_at").Optional().Nillable(),
+		field.Int("attempt_count").Default(0),
+		field.Time("next_attempt_at").Optional().Nillable(),
+		field.String("last_error").MaxLen(1000).Default(""),
+		field.Time("dead_lettered_at").Optional().Nillable(),
 	}
 }
 

@@ -136,6 +136,9 @@ func TestReservationLifecycleReserveConfirmFulfilAndRelease(t *testing.T) {
 	if err := reservations.Confirm(ctx, "checkout-a"); err != nil {
 		t.Fatal(err)
 	}
+	if err := reservations.Confirm(ctx, "checkout-a"); err != nil {
+		t.Fatalf("confirming an already-confirmed reservation is a safe retry: %v", err)
+	}
 	if err := reservations.Fulfil(ctx, commerceports.FulfilStockRequest{Reference: "checkout-a", StoreId: storeId, ActorName: "seller"}); err != nil {
 		t.Fatal(err)
 	}

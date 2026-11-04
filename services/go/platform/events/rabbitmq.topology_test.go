@@ -3,12 +3,17 @@ package events
 import (
 	"encoding/json"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 	"time"
 )
 
 type definitionsFile struct {
+	Users []struct {
+		Name string   `json:"name"`
+		Tags []string `json:"tags"`
+	} `json:"users"`
 	Exchanges []struct {
 		Name      string         `json:"name"`
 		Type      string         `json:"type"`
@@ -26,7 +31,10 @@ type definitionsFile struct {
 	} `json:"bindings"`
 	Permissions []struct {
 		User      string `json:"user"`
+		Vhost     string `json:"vhost"`
 		Configure string `json:"configure"`
+		Write     string `json:"write"`
+		Read      string `json:"read"`
 	} `json:"permissions"`
 }
 
@@ -123,6 +131,30 @@ func TestEventsExchangeKeepsUnroutedEventsAndServicesCannotChangeTopology(t *tes
 			t.Fatalf("%s may not declare or delete resources", permission.User)
 		}
 	}
+}
+
+func TestMonitoringUserHasReadOnlyManagementAccessToConfiguredVhost(t *testing.T) {
+	definitions := loadLocalDefinitions(t)
+	monitoringUser := "nantty_monitor"
+	foundUser := false
+	for _, user := range definitions.Users {
+		if user.Name == monitoringUser {
+			foundUser = slices.Contains(user.Tags, "monitoring")
+			break
+		}
+	}
+	if !foundUser {
+		t.Fatal("monitoring user must have the RabbitMQ monitoring tag")
+	}
+	for _, permission := range definitions.Permissions {
+		if permission.User == monitoringUser {
+			if permission.Vhost != "nantty" || permission.Configure != "^$" || permission.Write != "^$" || permission.Read != "^$" {
+				t.Fatalf("monitoring user must have empty resource permissions only: %+v", permission)
+			}
+			return
+		}
+	}
+	t.Fatal("monitoring user needs an explicit read-only vhost permission")
 }
 
 func hasBindingFrom(definitions definitionsFile, source, destination string) bool {

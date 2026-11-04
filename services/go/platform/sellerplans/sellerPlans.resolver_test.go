@@ -53,8 +53,8 @@ func TestFeatureGateReturns402WithRequiredPlan(t *testing.T) {
 }
 
 func TestMinimumPlans(t *testing.T) {
-	if MinimumPlanFor("shipping_rules") != Free || MinimumPlanFor("advanced_inventory") != Pro || MinimumPlanFor("multiple_stores") != Business {
-		t.Fatal("plan minimums drifted from planFeatures.config.ts")
+	if MinimumPlanFor("shipping_rules") != Free || MinimumPlanFor("advanced_inventory") != Pro || MinimumPlanFor("multiple_stores") != Business || MinimumPlanFor("logistics_dashboard") != Pro {
+		t.Fatal("seller plan feature minimums are inconsistent")
 	}
 	if !Business.AtLeast(Pro) || Free.AtLeast(Pro) {
 		t.Fatal("plan ordering broken")

@@ -87,4 +87,5 @@ type UndeliveredReviewRowDto struct {
 	ShippedAt      *time.Time `json:"shippedAt"`
 	CourierName    string     `json:"courierName"`
 	TrackingNumber string     `json:"trackingNumber"`
+	TrackingUrl    *string    `json:"trackingUrl,omitempty"`
 }

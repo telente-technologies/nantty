@@ -19,6 +19,14 @@ import (
 )
 
 func RecordOrderPaid(ctx context.Context, deployed *container.Container, orderId uuid.UUID) error {
+	return recordOrderPaid(ctx, deployed, orderId, "", "")
+}
+
+func RecordOrderPaidForEvent(ctx context.Context, deployed *container.Container, orderId uuid.UUID, eventType, envelopeID string) error {
+	return recordOrderPaid(ctx, deployed, orderId, eventType, envelopeID)
+}
+
+func recordOrderPaid(ctx context.Context, deployed *container.Container, orderId uuid.UUID, eventType, envelopeID string) error {
 	group, err := deployed.Client.OrderGroup.Get(ctx, orderId)
 	if err != nil {
 		return err
@@ -34,6 +42,12 @@ func RecordOrderPaid(ctx context.Context, deployed *container.Container, orderId
 		}
 	}
 	return deployed.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		if eventType != "" {
+			claimed, err := claimProcessedMoneyEvent(ctx, tx, envelopeID, eventType)
+			if err != nil || !claimed {
+				return err
+			}
+		}
 		locked, err := LockOrderGroup(ctx, tx, orderId)
 		if err != nil {
 			return err

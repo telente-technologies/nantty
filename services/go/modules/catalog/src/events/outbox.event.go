@@ -2,7 +2,9 @@ package events
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -29,22 +31,27 @@ func EnqueueOutboxEventInTransaction(ctx context.Context, tx *ent.Tx, eventType,
 
 const EventSource = "nantty.catalog"
 
+const (
+	publishAttemptsBeforeAlert = 10
+	maximumRetryBackoff        = 15 * time.Minute
+)
+
 type EntOutboxStore struct {
 	Client *ent.Client
 	Now    func() time.Time
+	Logger *slog.Logger
 }
 
 func (store EntOutboxStore) PublishPendingOutboxEventsInTransaction(ctx context.Context, limit int, publish func(context.Context, []events.OutboxEvent) error) (int, error) {
+	now := store.now()
 	tx, err := store.Client.Tx(ctx)
 	if err != nil {
 		return 0, err
 	}
-	pending, err := tx.OutboxEvent.Query().
-		Where(outboxevent.PublishedAtIsNil()).
-		Order(ent.Asc(outboxevent.FieldCreatedAt)).
-		Limit(limit).
-		ForUpdate(sql.WithLockAction(sql.SkipLocked)).
-		All(ctx)
+	pending, err := tx.OutboxEvent.Query().Where(
+		outboxevent.PublishedAtIsNil(),
+		outboxevent.Or(outboxevent.NextAttemptAtIsNil(), outboxevent.NextAttemptAtLTE(now)),
+	).Order(ent.Asc(outboxevent.FieldCreatedAt)).Limit(limit).ForUpdate(sql.WithLockAction(sql.SkipLocked)).All(ctx)
 	if err != nil || len(pending) == 0 {
 		return 0, rollbackAndJoin(tx, err)
 	}
@@ -54,21 +61,89 @@ func (store EntOutboxStore) PublishPendingOutboxEventsInTransaction(ctx context.
 		batch = append(batch, events.OutboxEvent{Id: row.ID.String(), EventType: row.EventType, Subject: row.Subject, Payload: row.Payload})
 		identifiers = append(identifiers, row.ID)
 	}
-	publishedIndexes, publishError := events.PublishIsolatingFailures(ctx, batch, publish)
-	if len(publishedIndexes) == 0 {
-		return 0, rollbackAndJoin(tx, fmt.Errorf("publish outbox events: %w", publishError))
+	publishedIndexes := make(map[int]struct{}, len(batch))
+	failedIndexes := make(map[int]error)
+	var publishErrors []error
+	if batchError := publish(ctx, batch); batchError == nil {
+		for index := range batch {
+			publishedIndexes[index] = struct{}{}
+		}
+	} else {
+		for index, event := range batch {
+			if ctx.Err() != nil {
+				break
+			}
+			if eventError := publish(ctx, []events.OutboxEvent{event}); eventError != nil {
+				failedIndexes[index] = eventError
+				publishErrors = append(publishErrors, fmt.Errorf("publish outbox event %s: %w", event.Id, eventError))
+				continue
+			}
+			publishedIndexes[index] = struct{}{}
+		}
 	}
-	published := make([]uuid.UUID, 0, len(publishedIndexes))
-	for _, index := range publishedIndexes {
-		published = append(published, identifiers[index])
-	}
-	if err := tx.OutboxEvent.Update().Where(outboxevent.IDIn(published...)).SetPublishedAt(store.Now()).Exec(ctx); err != nil {
-		return 0, rollbackAndJoin(tx, err)
+	for index, row := range pending {
+		if _, published := publishedIndexes[index]; published {
+			if err := tx.OutboxEvent.UpdateOneID(identifiers[index]).SetPublishedAt(now).Exec(ctx); err != nil {
+				return 0, rollbackAndJoin(tx, err)
+			}
+			continue
+		}
+		publishError, attempted := failedIndexes[index]
+		if attempted {
+			if err := store.recordFailedAttempt(ctx, tx, row, publishError, now); err != nil {
+				return 0, rollbackAndJoin(tx, err)
+			}
+		}
 	}
 	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
-	return len(published), publishError
+	return len(publishedIndexes), errors.Join(publishErrors...)
+}
+
+func (store EntOutboxStore) recordFailedAttempt(ctx context.Context, tx *ent.Tx, row *ent.OutboxEvent, publishError error, now time.Time) error {
+	attempts := row.AttemptCount + 1
+	message := publishError.Error()
+	if len(message) > 1000 {
+		message = message[:1000]
+	}
+	update := tx.OutboxEvent.UpdateOneID(row.ID).
+		SetAttemptCount(attempts).
+		SetLastError(message).
+		SetNextAttemptAt(now.Add(retryBackoffAfterAttempts(attempts)))
+	if attempts >= publishAttemptsBeforeAlert && row.DeadLetteredAt == nil {
+		update.SetDeadLetteredAt(now)
+	}
+	if attempts == publishAttemptsBeforeAlert || (attempts > publishAttemptsBeforeAlert && attempts%publishAttemptsBeforeAlert == 0) {
+		store.logger().ErrorContext(ctx, "catalog outbox event remains unpublished and will keep retrying", "alert", "catalogOutboxStuck", "eventId", row.ID, "eventType", row.EventType, "attempts", attempts, "error", message)
+	}
+	_, err := update.Save(ctx)
+	return err
+}
+
+func (store EntOutboxStore) now() time.Time {
+	if store.Now != nil {
+		return store.Now()
+	}
+	return time.Now()
+}
+
+func (store EntOutboxStore) logger() *slog.Logger {
+	if store.Logger != nil {
+		return store.Logger
+	}
+	return slog.Default()
+}
+
+func retryBackoffAfterAttempts(attempts int) time.Duration {
+	if attempts > 20 {
+		return maximumRetryBackoff
+	}
+	delay := time.Second << attempts
+	if delay > maximumRetryBackoff {
+		return maximumRetryBackoff
+	}
+	return delay
 }
 
 func rollbackAndJoin(tx *ent.Tx, err error) error {

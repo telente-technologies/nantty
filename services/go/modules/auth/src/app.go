@@ -130,7 +130,7 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 		}
 	}()
 	return platformevents.RelayOutboxEventsUntilContextDone(ctx, platformevents.OutboxRelayOptions{
-		Store:     events.EntOutboxStore{Client: module.container.Client, Now: time.Now},
+		Store:     events.EntOutboxStore{Client: module.container.Client, Now: time.Now, Logger: module.container.Logger},
 		Publisher: module.publisher,
 		Logger:    module.container.Logger,
 	})

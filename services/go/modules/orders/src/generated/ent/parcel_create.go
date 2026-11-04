@@ -56,15 +56,39 @@ func (_c *ParcelCreate) SetLengthMm(v int) *ParcelCreate {
 	return _c
 }
 
+// SetNillableLengthMm sets the "length_mm" field if the given value is not nil.
+func (_c *ParcelCreate) SetNillableLengthMm(v *int) *ParcelCreate {
+	if v != nil {
+		_c.SetLengthMm(*v)
+	}
+	return _c
+}
+
 // SetWidthMm sets the "width_mm" field.
 func (_c *ParcelCreate) SetWidthMm(v int) *ParcelCreate {
 	_c.mutation.SetWidthMm(v)
 	return _c
 }
 
+// SetNillableWidthMm sets the "width_mm" field if the given value is not nil.
+func (_c *ParcelCreate) SetNillableWidthMm(v *int) *ParcelCreate {
+	if v != nil {
+		_c.SetWidthMm(*v)
+	}
+	return _c
+}
+
 // SetHeightMm sets the "height_mm" field.
 func (_c *ParcelCreate) SetHeightMm(v int) *ParcelCreate {
 	_c.mutation.SetHeightMm(v)
+	return _c
+}
+
+// SetNillableHeightMm sets the "height_mm" field if the given value is not nil.
+func (_c *ParcelCreate) SetNillableHeightMm(v *int) *ParcelCreate {
+	if v != nil {
+		_c.SetHeightMm(*v)
+	}
 	return _c
 }
 
@@ -251,24 +275,15 @@ func (_c *ParcelCreate) check() error {
 			return &ValidationError{Name: "weight_grams", err: fmt.Errorf(`ent: validator failed for field "Parcel.weight_grams": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.LengthMm(); !ok {
-		return &ValidationError{Name: "length_mm", err: errors.New(`ent: missing required field "Parcel.length_mm"`)}
-	}
 	if v, ok := _c.mutation.LengthMm(); ok {
 		if err := parcel.LengthMmValidator(v); err != nil {
 			return &ValidationError{Name: "length_mm", err: fmt.Errorf(`ent: validator failed for field "Parcel.length_mm": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.WidthMm(); !ok {
-		return &ValidationError{Name: "width_mm", err: errors.New(`ent: missing required field "Parcel.width_mm"`)}
-	}
 	if v, ok := _c.mutation.WidthMm(); ok {
 		if err := parcel.WidthMmValidator(v); err != nil {
 			return &ValidationError{Name: "width_mm", err: fmt.Errorf(`ent: validator failed for field "Parcel.width_mm": %w`, err)}
 		}
-	}
-	if _, ok := _c.mutation.HeightMm(); !ok {
-		return &ValidationError{Name: "height_mm", err: errors.New(`ent: missing required field "Parcel.height_mm"`)}
 	}
 	if v, ok := _c.mutation.HeightMm(); ok {
 		if err := parcel.HeightMmValidator(v); err != nil {
@@ -371,15 +386,15 @@ func (_c *ParcelCreate) createSpec() (*Parcel, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.LengthMm(); ok {
 		_spec.SetField(parcel.FieldLengthMm, field.TypeInt, value)
-		_node.LengthMm = value
+		_node.LengthMm = &value
 	}
 	if value, ok := _c.mutation.WidthMm(); ok {
 		_spec.SetField(parcel.FieldWidthMm, field.TypeInt, value)
-		_node.WidthMm = value
+		_node.WidthMm = &value
 	}
 	if value, ok := _c.mutation.HeightMm(); ok {
 		_spec.SetField(parcel.FieldHeightMm, field.TypeInt, value)
-		_node.HeightMm = value
+		_node.HeightMm = &value
 	}
 	if value, ok := _c.mutation.PackageCategory(); ok {
 		_spec.SetField(parcel.FieldPackageCategory, field.TypeString, value)
@@ -501,6 +516,12 @@ func (u *ParcelUpsert) AddLengthMm(v int) *ParcelUpsert {
 	return u
 }
 
+// ClearLengthMm clears the value of the "length_mm" field.
+func (u *ParcelUpsert) ClearLengthMm() *ParcelUpsert {
+	u.SetNull(parcel.FieldLengthMm)
+	return u
+}
+
 // SetWidthMm sets the "width_mm" field.
 func (u *ParcelUpsert) SetWidthMm(v int) *ParcelUpsert {
 	u.Set(parcel.FieldWidthMm, v)
@@ -519,6 +540,12 @@ func (u *ParcelUpsert) AddWidthMm(v int) *ParcelUpsert {
 	return u
 }
 
+// ClearWidthMm clears the value of the "width_mm" field.
+func (u *ParcelUpsert) ClearWidthMm() *ParcelUpsert {
+	u.SetNull(parcel.FieldWidthMm)
+	return u
+}
+
 // SetHeightMm sets the "height_mm" field.
 func (u *ParcelUpsert) SetHeightMm(v int) *ParcelUpsert {
 	u.Set(parcel.FieldHeightMm, v)
@@ -534,6 +561,12 @@ func (u *ParcelUpsert) UpdateHeightMm() *ParcelUpsert {
 // AddHeightMm adds v to the "height_mm" field.
 func (u *ParcelUpsert) AddHeightMm(v int) *ParcelUpsert {
 	u.Add(parcel.FieldHeightMm, v)
+	return u
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (u *ParcelUpsert) ClearHeightMm() *ParcelUpsert {
+	u.SetNull(parcel.FieldHeightMm)
 	return u
 }
 
@@ -747,6 +780,13 @@ func (u *ParcelUpsertOne) UpdateLengthMm() *ParcelUpsertOne {
 	})
 }
 
+// ClearLengthMm clears the value of the "length_mm" field.
+func (u *ParcelUpsertOne) ClearLengthMm() *ParcelUpsertOne {
+	return u.Update(func(s *ParcelUpsert) {
+		s.ClearLengthMm()
+	})
+}
+
 // SetWidthMm sets the "width_mm" field.
 func (u *ParcelUpsertOne) SetWidthMm(v int) *ParcelUpsertOne {
 	return u.Update(func(s *ParcelUpsert) {
@@ -768,6 +808,13 @@ func (u *ParcelUpsertOne) UpdateWidthMm() *ParcelUpsertOne {
 	})
 }
 
+// ClearWidthMm clears the value of the "width_mm" field.
+func (u *ParcelUpsertOne) ClearWidthMm() *ParcelUpsertOne {
+	return u.Update(func(s *ParcelUpsert) {
+		s.ClearWidthMm()
+	})
+}
+
 // SetHeightMm sets the "height_mm" field.
 func (u *ParcelUpsertOne) SetHeightMm(v int) *ParcelUpsertOne {
 	return u.Update(func(s *ParcelUpsert) {
@@ -786,6 +833,13 @@ func (u *ParcelUpsertOne) AddHeightMm(v int) *ParcelUpsertOne {
 func (u *ParcelUpsertOne) UpdateHeightMm() *ParcelUpsertOne {
 	return u.Update(func(s *ParcelUpsert) {
 		s.UpdateHeightMm()
+	})
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (u *ParcelUpsertOne) ClearHeightMm() *ParcelUpsertOne {
+	return u.Update(func(s *ParcelUpsert) {
+		s.ClearHeightMm()
 	})
 }
 
@@ -1185,6 +1239,13 @@ func (u *ParcelUpsertBulk) UpdateLengthMm() *ParcelUpsertBulk {
 	})
 }
 
+// ClearLengthMm clears the value of the "length_mm" field.
+func (u *ParcelUpsertBulk) ClearLengthMm() *ParcelUpsertBulk {
+	return u.Update(func(s *ParcelUpsert) {
+		s.ClearLengthMm()
+	})
+}
+
 // SetWidthMm sets the "width_mm" field.
 func (u *ParcelUpsertBulk) SetWidthMm(v int) *ParcelUpsertBulk {
 	return u.Update(func(s *ParcelUpsert) {
@@ -1206,6 +1267,13 @@ func (u *ParcelUpsertBulk) UpdateWidthMm() *ParcelUpsertBulk {
 	})
 }
 
+// ClearWidthMm clears the value of the "width_mm" field.
+func (u *ParcelUpsertBulk) ClearWidthMm() *ParcelUpsertBulk {
+	return u.Update(func(s *ParcelUpsert) {
+		s.ClearWidthMm()
+	})
+}
+
 // SetHeightMm sets the "height_mm" field.
 func (u *ParcelUpsertBulk) SetHeightMm(v int) *ParcelUpsertBulk {
 	return u.Update(func(s *ParcelUpsert) {
@@ -1224,6 +1292,13 @@ func (u *ParcelUpsertBulk) AddHeightMm(v int) *ParcelUpsertBulk {
 func (u *ParcelUpsertBulk) UpdateHeightMm() *ParcelUpsertBulk {
 	return u.Update(func(s *ParcelUpsert) {
 		s.UpdateHeightMm()
+	})
+}
+
+// ClearHeightMm clears the value of the "height_mm" field.
+func (u *ParcelUpsertBulk) ClearHeightMm() *ParcelUpsertBulk {
+	return u.Update(func(s *ParcelUpsert) {
+		s.ClearHeightMm()
 	})
 }
 

@@ -31,6 +31,7 @@ type OrdersSettings struct {
 	EventsQueueName         string
 	ShippingRuleLimit       int
 	LogisticsEnabled        bool
+	LogisticsContactEmail   string
 	AutoCompleteGrace       time.Duration
 	InternalApiToken        string
 	MoneyInternalUrl        string
@@ -70,6 +71,7 @@ func ReadOrdersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		EventsQueueName:         reader.ReadStringOrDefault("ORDERS_EVENTS_QUEUE", ""),
 		ShippingRuleLimit:       50,
 		LogisticsEnabled:        strings.EqualFold(reader.ReadStringOrDefault("LOGISTICS_ENABLED", "false"), "true"),
+		LogisticsContactEmail:   reader.ReadStringOrDefault("LOGISTICS_CONTACT_EMAIL", ""),
 		InternalApiToken:        reader.ReadStringOrDefault("CATALOG_INTERNAL_API_TOKEN", ""),
 		MoneyInternalUrl:        reader.ReadStringOrDefault("ORDERS_MONEY_INTERNAL_URL", ""),
 		MoneyInternalToken:      reader.ReadStringOrDefault("MONEY_INTERNAL_API_TOKEN", ""),

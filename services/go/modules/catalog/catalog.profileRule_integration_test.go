@@ -44,6 +44,23 @@ func TestStoreCreationClaimsTheAccountSlotAndReleasesOnFailure(t *testing.T) {
 	}
 }
 
+func TestStoreCreationRejectsNonNigeriaEvenWhenRequestClaimsNigeria(t *testing.T) {
+	harness := startHttpHarness(t)
+	_, directory := startProfileRuleHarness(harness)
+	accountId, token := harness.account("international-store-owner")
+	directory.setCountry(accountId, "GB")
+	profileId := directory.addBusiness(accountId)
+	status, body := harness.call("POST", "/api/v1/stores", token, map[string]any{
+		"businessProfileId": profileId.String(), "name": "International Shop", "countryCode": "NG",
+	}, "Idempotency-Key", "store-country-0000001")
+	if status != http.StatusForbidden || body["code"] != "SELLER_MARKET_UNAVAILABLE" {
+		t.Fatalf("request-supplied Nigeria must not bypass the account market gate: %d %v", status, body)
+	}
+	if count, err := harness.client().Store.Query().Count(context.Background()); err != nil || count != 0 {
+		t.Fatalf("blocked store creation must not persist: count=%d err=%v", count, err)
+	}
+}
+
 func TestOneBrandPerAccountEvenWithDoubleTapsAndParallelCreates(t *testing.T) {
 	harness := startHttpHarness(t)
 	registry, _ := startProfileRuleHarness(harness)
