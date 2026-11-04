@@ -32,7 +32,12 @@ export const sellerService = {
     if (!fromLocation) throw new Error("Add a store location in your seller dashboard before shipping.");
     await sendRequestToWebappServer<unknown>(`/api/v1/seller/orders/${encodeURIComponent(orderId)}/fulfilment`, {
       method: "POST",
-      body: { courier: input.courierName, trackingNumber: input.trackingNumber, fromLocationId: fromLocation.id },
+      body: {
+        courier: input.courierName,
+        trackingNumber: input.trackingNumber,
+        trackingUrl: input.trackingUrl?.trim() || null,
+        fromLocationId: fromLocation.id,
+      },
       idempotencyKey,
     });
     return sellerService.fetchStoreOrderById(orderId);

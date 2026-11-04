@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 
 import type { CatalogProduct } from "@/types/sellerCatalog.type";
 
-import { buildCatalogProductUpsertRequest, EMPTY_SELLER_PRODUCT_FORM, formValuesFromCatalogProduct, totalOnHandStock, validateSellerProductForm } from "./sellerProductForm.util";
+import { buildCatalogProductUpsertRequest, EMPTY_SELLER_PRODUCT_FORM, formValuesFromCatalogProduct, hasConfirmedProductVisibility, totalOnHandStock, validateSellerProductForm } from "./sellerProductForm.util";
 
 const price = { amountMinor: 450_000, currency: "NGN" as const };
 const product: CatalogProduct = {
@@ -44,5 +44,17 @@ describe("seller product form", () => {
   it("validates name, price and stock like the catalog", () => {
     assert.deepEqual(Object.keys(validateSellerProductForm({ ...EMPTY_SELLER_PRODUCT_FORM, name: "a", priceText: "0", stockText: "-1" }, true)).sort(), ["name", "price", "stock"]);
     assert.equal(validateSellerProductForm({ ...EMPTY_SELLER_PRODUCT_FORM, name: "Pot", priceText: "5", stockText: "x" }, false).stock, undefined);
+  });
+
+  it("confirms requested publish and hide state from the refreshed server list", () => {
+    const hidden = { ...product, publishedOnline: false };
+    assert.equal(hasConfirmedProductVisibility([product], product.id, true), true);
+    assert.equal(hasConfirmedProductVisibility([hidden], product.id, false), true);
+    assert.equal(hasConfirmedProductVisibility([product], product.id, false), false);
+    assert.equal(hasConfirmedProductVisibility([], product.id, true), false);
+  });
+
+  it("does not treat a non-active product as published even when the flag is true", () => {
+    assert.equal(hasConfirmedProductVisibility([{ ...product, status: "draft" }], product.id, true), false);
   });
 });

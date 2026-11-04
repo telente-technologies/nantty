@@ -28,6 +28,10 @@ export function lowestVariantPrice(product: CatalogProduct): Money | null {
 }
 
 export const isProductLive = (product: CatalogProduct) => product.status === "active" && product.publishedOnline;
+export const hasConfirmedProductVisibility = (products: readonly CatalogProduct[], productId: string, published: boolean) => {
+  const product = products.find((candidate) => candidate.id === productId);
+  return product !== undefined && isProductLive(product) === published;
+};
 
 export function formValuesFromCatalogProduct(product: CatalogProduct): SellerProductFormValues {
   const optionValues = (name: string) => product.options.find((option) => option.name === name)?.values.join(", ") ?? "";

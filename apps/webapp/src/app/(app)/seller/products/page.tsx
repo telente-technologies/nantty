@@ -10,7 +10,7 @@ import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { sellerService } from "@/services/seller.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
-import { isProductLive, lowestVariantPrice, totalOnHandStock } from "@/utils/sellerProductForm.util";
+import { hasConfirmedProductVisibility, isProductLive, lowestVariantPrice, totalOnHandStock } from "@/utils/sellerProductForm.util";
 
 import styles from "../page.module.css";
 
@@ -26,8 +26,21 @@ export default function SellerProductsPage() {
     onError: (mutationError) => showToast({ text: readErrorMessageForDisplay(mutationError), tone: "error" }),
   });
   const togglePublish = useMutation({
-    mutationFn: (input: { id: string; published: boolean }) => (input.published ? sellerService.unpublishStoreProduct(input.id) : sellerService.publishStoreProduct(input.id)),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["seller", "products"] }),
+    mutationFn: async (input: { id: string; published: boolean }) => {
+      const shouldPublish = !input.published;
+      if (input.published) await sellerService.unpublishStoreProduct(input.id);
+      else await sellerService.publishStoreProduct(input.id);
+      const refreshedProducts = await sellerService.listMyStoreProducts();
+      queryClient.setQueryData(["seller", "products"], refreshedProducts);
+      return { confirmed: hasConfirmedProductVisibility(refreshedProducts, input.id, shouldPublish), shouldPublish };
+    },
+    onSuccess: ({ confirmed, shouldPublish }) => {
+      if (!confirmed) {
+        showToast({ text: "We couldn't confirm that change. Refresh the product list and try again.", tone: "error" });
+        return;
+      }
+      showToast({ text: shouldPublish ? "Product published" : "Product hidden" });
+    },
     onError: (mutationError) => showToast({ text: readErrorMessageForDisplay(mutationError), tone: "error" }),
   });
   const confirmAndRemove = async (productId: string) => {

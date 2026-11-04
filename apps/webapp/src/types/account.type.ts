@@ -71,6 +71,7 @@ export interface SellerApplicationInput {
     readonly documentPhotoUrl: string;
   };
   readonly payoutAccount: { readonly bankCode: string; readonly accountNumber: string };
+  readonly enableLogistics: boolean;
 }
 
 export type SellerApplicationStatus = "pending" | "approved" | "rejected";
@@ -82,6 +83,7 @@ export interface SellerApplication {
   readonly categoryName: string;
   readonly city: string;
   readonly state: string;
+  readonly logisticsEnabled: boolean;
   readonly identityDocumentType: IdentityDocumentType;
   readonly identityDocumentNumberMasked: string;
   readonly payoutBankName: string;

@@ -54,11 +54,6 @@ export type VerificationApplicationInput =
       readonly documentUrls: readonly string[];
     };
 
-export interface VerificationCheckout {
-  readonly applicationId: ID;
-  readonly checkoutUrl: string;
-}
-
 export interface VerificationOfferDiscount {
   readonly linkId: ID;
   readonly token: string;

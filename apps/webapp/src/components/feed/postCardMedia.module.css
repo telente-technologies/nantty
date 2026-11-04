@@ -57,14 +57,30 @@
   background: var(--surface-sunken);
 }
 
-.previewImage {
-  object-fit: contain;
+.previewPanSurface {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  transform-origin: center;
   transition: transform var(--motion-base) var(--motion-ease);
 }
 
-.previewImageZoomed {
-  transform: scale(2);
-  cursor: zoom-out;
+.previewPanSurface .previewImage {
+  object-fit: contain;
+}
+
+.previewPanSurfaceZoomed {
+  cursor: grab;
+}
+
+.previewPanSurfacePanning {
+  cursor: grabbing;
+  transition: none;
+}
+
+.previewPanSurfaceZoomed:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
 }
 
 .previewPrevious,

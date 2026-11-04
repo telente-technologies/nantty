@@ -5,6 +5,7 @@ import type { SellerDashboard } from "@/types";
 import { bankNameForCode } from "./banks.mock";
 import { buildOrderFromRecord } from "./escrowBuilders.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
+import { signedInCountryPreference } from "./settings.mock";
 import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 import { buildShipment, mockOrderRecords, usdCentsForOrderRecord, type MockOrderRecord } from "./orderFixtures.mock";
 import { catalogProductSeeds, buildCatalogProductSummary } from "./productCatalog.mock";
@@ -72,6 +73,9 @@ const maskAllButLastFour = (value: string) => `•••• ${value.replace(/\s/
 function validateSellerApplication(input: SellerApplicationInput) {
   const requiredText = [input.storeName, input.categoryId, input.description, input.phone, input.addressLine, input.city, input.state];
   if (requiredText.some((value) => !value?.trim())) throw new ApiError(422, "Please complete every step before submitting");
+  const phoneDigits = input.phone.replace(/\D/g, "");
+  if (phoneDigits.length < 10 || phoneDigits.length > 15) throw new ApiError(422, "Enter a valid phone number");
+  if (typeof input.enableLogistics !== "boolean") throw new ApiError(422, "Choose whether your store can handle logistics");
   if (!input.identityDocument?.documentPhotoUrl) throw new ApiError(422, "Add a photo of your ID document");
   if ((input.identityDocument.documentNumber ?? "").replace(/\s/g, "").length < 6) throw new ApiError(422, "Check your ID number");
   if (!/^\d{10}$/.test(input.payoutAccount?.accountNumber ?? "")) throw new ApiError(422, "Enter a valid 10-digit account number");
@@ -85,6 +89,7 @@ export const sellerMocks: MockRoute[] = [
     return { data: storeId ? [{ storeId, storeName: "Your store", role: "owner", isCurrent: true }] : [], nextCursor: null };
   }),
   createMockRoute("POST", "/api/v1/seller/applications", ({ body }) => {
+    if (signedInCountryPreference() !== "NG") throw new ApiError(403, "Seller applications are currently available in Nigeria only. Creator applications are separate.", "SELLER_MARKET_UNAVAILABLE");
     const existing = applicationsByUserId.get(getSignedInMockUser().id);
     if (existing?.status === "pending") return existing;
     const input = body as SellerApplicationInput;
@@ -96,6 +101,7 @@ export const sellerMocks: MockRoute[] = [
       categoryName: productCategories.find((category) => category.id === input.categoryId)?.name ?? input.categoryId,
       city: input.city.trim(),
       state: input.state.trim(),
+      logisticsEnabled: input.enableLogistics,
       identityDocumentType: input.identityDocument.documentType,
       identityDocumentNumberMasked: maskAllButLastFour(input.identityDocument.documentNumber),
       payoutBankName: bankNameForCode(input.payoutAccount.bankCode),

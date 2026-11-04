@@ -18,6 +18,8 @@ let settings: AccountSettings = {
   twoFactorEnabled: false,
 };
 
+export const signedInCountryPreference = () => settings.countryCode?.trim().toUpperCase() ?? null;
+
 const seedAddress = (id: string, overrides: Partial<ShippingAddressInput>): Address =>
   buildAddressFromInput(
     { fullName: "", phone: "", line1: "", postalCode: "", details: "", countryId: "ng", stateId: null, lgaId: null, cityId: null, isDefault: false, ...overrides },

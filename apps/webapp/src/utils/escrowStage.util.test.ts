@@ -9,7 +9,7 @@ const money = { amountMinor: 1_000_000, currency: "NGN" as const };
 const escrow = (overrides: Partial<EscrowDetail>): EscrowDetail => ({
   orderId: "o1", orderReference: "ZM-1", stage: "shipped", heldAmount: money, platformFee: { amountMinor: 50_000, currency: "NGN" as const }, sellerPayoutAmount: { amountMinor: 950_000, currency: "NGN" as const },
   buyer: { id: "b", name: "Bola", username: "bola", avatarUrl: null } as EscrowDetail["buyer"], store: { id: "s", name: "Ada Styles" } as EscrowDetail["store"], sellerUserId: "seller",
-  paidAt: "2026-10-01T10:00:00Z", preparingSince: null, shipment: { courierName: "GIG", trackingNumber: "T1", trackingUrl: null, shippedAt: "2026-10-02T10:00:00Z", estimatedDeliveryAt: null },
+  paidAt: "2026-10-01T10:00:00Z", preparingSince: null, shipment: { courierName: "GIG", trackingNumber: "T1", shippedAt: "2026-10-02T10:00:00Z", estimatedDeliveryAt: null },
   deliveredAt: null, buyerConfirmedAt: null, autoReleaseAt: null, expectedReleaseAt: null, releasedAt: null, refundedAt: null, disputeId: null, ...overrides,
 });
 

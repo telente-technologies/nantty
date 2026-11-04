@@ -78,7 +78,6 @@ export interface EscrowTimelineStep {
   readonly title: string;
   readonly detail: string;
   readonly state: EscrowStepState;
-  readonly trackingUrl?: string | null;
 }
 
 function lastCompletedStepIndex(escrow: EscrowDetail): number {
@@ -110,7 +109,6 @@ export function buildEscrowTimelineSteps(escrow: EscrowDetail, viewerRole: Escro
       title: "Shipped",
       detail: shipment ? `${shipment.courierName} · ${shipment.trackingNumber} · ${formatFriendlyDate(shipment.shippedAt)}` : "Courier and tracking number will appear here",
       state: stateFor(2),
-      trackingUrl: shipment?.trackingUrl ?? null,
     },
     {
       key: "delivered",

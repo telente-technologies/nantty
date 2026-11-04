@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { canPlayInline, describeCarouselPosition, describePostImagePreview, describePostImageZoom, getAdjacentPostImageIndex, isHlsUrl, selectPostVideoSource } from "./postCardMedia.util";
+import { canPlayInline, clampPostImagePan, describeCarouselPosition, describePostImagePreview, describePostImageZoom, getAdjacentPostImageIndex, isHlsUrl, selectPostVideoSource } from "./postCardMedia.util";
 
 test("image preview navigation wraps across available post images", () => {
   assert.equal(getAdjacentPostImageIndex(0, 3, -1), 2);
@@ -28,6 +28,18 @@ test("image preview exposes a useful accessible position label", () => {
 test("image zoom control announces its action and pressed state", () => {
   assert.deepEqual(describePostImageZoom(false), { label: "Zoom image", pressed: false });
   assert.deepEqual(describePostImageZoom(true), { label: "Fit image to screen", pressed: true });
+});
+
+test("zoomed image panning stays within the visible image bounds", () => {
+  assert.deepEqual(
+    clampPostImagePan({ x: 900, y: 80 }, { width: 400, height: 600 }, { width: 1200, height: 600 }),
+    { x: 300, y: 0 },
+  );
+  assert.deepEqual(
+    clampPostImagePan({ x: -900, y: -900 }, { width: 400, height: 600 }, { width: 600, height: 1200 }),
+    { x: -175, y: -450 },
+  );
+  assert.deepEqual(clampPostImagePan({ x: 10, y: 10 }, { width: 0, height: 600 }, { width: 600, height: 900 }), { x: 0, y: 0 });
 });
 
 test("inline carousel playback mounts video media with a progressive or HLS source", () => {

@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 
 import { ArrowLeftIcon, ArrowRightIcon, PlayIcon } from "@/components/ui/icons";
 import { Dialog } from "@/components/ui/dialog";
 import { MediaImage } from "@/components/ui/media";
 import { InlineVideoPlayer } from "@/components/video/inlineVideoPlayer";
 import type { Media, Post } from "@/types";
-import { canPlayInline, describeCarouselPosition, describePostImagePreview, describePostImageZoom, getAdjacentPostImageIndex, isHlsUrl, selectPostVideoSource } from "./postCardMedia.util";
+import { canPlayInline, clampPostImagePan, describeCarouselPosition, describePostImagePreview, describePostImageZoom, getAdjacentPostImageIndex, isHlsUrl, POST_IMAGE_ZOOM_SCALE, selectPostVideoSource } from "./postCardMedia.util";
 
 import styles from "./postCardMedia.module.css";
 
@@ -90,6 +90,14 @@ export function PostMedia({ media, priority, watchHref }: { readonly media: read
 }
 
 function PostImagePreviewDialog({ images, index, isZoomed, onZoomChange, onClose, onIndexChange }: { readonly images: readonly Media[]; readonly index: number | null; readonly isZoomed: boolean; readonly onZoomChange: (isZoomed: boolean) => void; readonly onClose: () => void; readonly onIndexChange: (index: number) => void }) {
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const pointer = useRef<{ readonly id: number; readonly startX: number; readonly startY: number; readonly originX: number; readonly originY: number } | null>(null);
+  const resetView = () => {
+    setPan({ x: 0, y: 0 });
+    setIsPanning(false);
+    pointer.current = null;
+  };
   const isOpen = index !== null && images.length > 0;
   const currentIndex = isOpen ? Math.min(index, images.length - 1) : 0;
   const current = images[currentIndex];
@@ -97,21 +105,71 @@ function PostImagePreviewDialog({ images, index, isZoomed, onZoomChange, onClose
   const description = describePostImagePreview(currentIndex, images.length);
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Post image preview" layout="centered" size="large" closeLabel="Close image preview">
+    <Dialog isOpen={isOpen} onClose={() => { resetView(); onClose(); }} title="Post image preview" layout="centered" size="large" closeLabel="Close image preview">
       {hasImage ? (
         <div className={styles.previewStage}>
-          <MediaImage src={current?.url} alt={description.imageAlt} sizes="(max-width: 768px) 100vw, 960px" className={[styles.previewImage, isZoomed ? styles.previewImageZoomed : ""].join(" ")} />
+          <div
+            className={[styles.previewPanSurface, isZoomed ? styles.previewPanSurfaceZoomed : "", isPanning ? styles.previewPanSurfacePanning : ""].join(" ")}
+            style={{ transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${isZoomed ? POST_IMAGE_ZOOM_SCALE : 1})` }}
+            role={isZoomed ? "group" : undefined}
+            aria-label={isZoomed ? "Zoomed image. Drag or use arrow keys to pan." : undefined}
+            tabIndex={isZoomed ? 0 : -1}
+            onPointerDown={(event) => {
+              if (!isZoomed || event.button !== 0) return;
+              event.preventDefault();
+              event.currentTarget.setPointerCapture(event.pointerId);
+              setIsPanning(true);
+              pointer.current = { id: event.pointerId, startX: event.clientX, startY: event.clientY, originX: pan.x, originY: pan.y };
+            }}
+            onPointerMove={(event) => {
+              const origin = pointer.current;
+              if (!isZoomed || !origin || origin.id !== event.pointerId) return;
+              const bounds = event.currentTarget.parentElement?.getBoundingClientRect();
+              if (!bounds) return;
+              const next = clampPostImagePan(
+                { x: origin.originX + event.clientX - origin.startX, y: origin.originY + event.clientY - origin.startY },
+                { width: bounds.width, height: bounds.height },
+                { width: current?.width, height: current?.height },
+              );
+              setPan(next);
+            }}
+            onPointerUp={(event) => {
+              if (pointer.current?.id !== event.pointerId) return;
+              pointer.current = null;
+              setIsPanning(false);
+              if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+            }}
+            onPointerCancel={() => { pointer.current = null; setIsPanning(false); }}
+            onKeyDown={(event) => {
+              if (!isZoomed || !["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) return;
+              event.preventDefault();
+              const distance = 32;
+              const bounds = event.currentTarget.parentElement?.getBoundingClientRect();
+              if (!bounds) return;
+              const delta = {
+                x: event.key === "ArrowLeft" ? -distance : event.key === "ArrowRight" ? distance : 0,
+                y: event.key === "ArrowUp" ? -distance : event.key === "ArrowDown" ? distance : 0,
+              };
+              setPan(clampPostImagePan(
+                { x: pan.x + delta.x, y: pan.y + delta.y },
+                { width: bounds.width, height: bounds.height },
+                { width: current?.width, height: current?.height },
+              ));
+            }}
+          >
+            <MediaImage src={current?.url} alt={description.imageAlt} sizes="(max-width: 768px) 100vw, 960px" className={styles.previewImage} />
+          </div>
           {images.length > 1 ? (
-            <button type="button" className={styles.previewPrevious} aria-label="Previous image" onClick={() => onIndexChange(getAdjacentPostImageIndex(currentIndex, images.length, -1))}>
+            <button type="button" className={styles.previewPrevious} aria-label="Previous image" onClick={() => { resetView(); onIndexChange(getAdjacentPostImageIndex(currentIndex, images.length, -1)); }}>
               <ArrowLeftIcon size={22} />
             </button>
           ) : null}
           {images.length > 1 ? (
-            <button type="button" className={styles.previewNext} aria-label="Next image" onClick={() => onIndexChange(getAdjacentPostImageIndex(currentIndex, images.length, 1))}>
+            <button type="button" className={styles.previewNext} aria-label="Next image" onClick={() => { resetView(); onIndexChange(getAdjacentPostImageIndex(currentIndex, images.length, 1)); }}>
               <ArrowRightIcon size={22} />
             </button>
           ) : null}
-          <button type="button" className={styles.previewZoom} aria-label={describePostImageZoom(isZoomed).label} aria-pressed={describePostImageZoom(isZoomed).pressed} onClick={() => onZoomChange(!isZoomed)}>
+          <button type="button" className={styles.previewZoom} aria-label={describePostImageZoom(isZoomed).label} aria-pressed={describePostImageZoom(isZoomed).pressed} onClick={() => { resetView(); onZoomChange(!isZoomed); }}>
             {isZoomed ? "Fit" : "Zoom"}
           </button>
           {images.length > 1 ? <p className={styles.previewPosition} aria-live="polite">{description.positionLabel}</p> : null}

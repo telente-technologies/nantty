@@ -10,7 +10,6 @@ import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { verificationShopService } from "@/services/verification.service";
-import type { ID } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 import styles from "./page.module.css";
@@ -19,32 +18,12 @@ export default function VerificationHubPage() {
   const queryClient = useQueryClient();
   const plans = useQuery({ queryKey: ["verification", "plans"], queryFn: () => verificationShopService.listVerificationPlans() });
   const mine = useQuery({ queryKey: ["verification", "me"], queryFn: () => verificationShopService.fetchMyVerification() });
-  const [planId, setPlanId] = useState<ID | "">("");
-  const [legalName, setLegalName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const cancel = useMutation({
     mutationFn: () => verificationShopService.cancelVerificationSubscription(),
     onSuccess: (updated) => {
       queryClient.setQueryData(["verification", "me"], updated);
       showToast({ text: "Subscription cancelled" });
-    },
-    onError: (mutationError) => setError(readErrorMessageForDisplay(mutationError)),
-  });
-  const apply = useMutation({
-    mutationFn: () => {
-      const plan = plans.data?.find((entry) => entry.id === planId);
-      if (!plan) throw new Error("Pick a plan first.");
-      if (!legalName.trim()) throw new Error("Enter your legal name.");
-      return verificationShopService.submitVerificationApplication({
-        kind: "blue",
-        planId: plan.id,
-        legalName: legalName.trim(),
-        identityDocument: { documentType: "nin_slip", documentNumber: "web", documentPhotoUrl: "web" },
-        selfiePhotoUrl: "web",
-      });
-    },
-    onSuccess: (checkout) => {
-      window.location.href = checkout.checkoutUrl;
     },
     onError: (mutationError) => setError(readErrorMessageForDisplay(mutationError)),
   });
@@ -62,7 +41,7 @@ export default function VerificationHubPage() {
           <span className={styles.rowMeta}>Badge {current.badgeVisible ? "visible" : "hidden"} · Tier {current.tier}</span>
         </div>
       ) : (
-        <p className={styles.note}>Get a checkmark badge for your profile. Business verification with documents happens in the mobile app.</p>
+        <p className={styles.note}>Get a checkmark badge for your profile. Complete identity evidence and any eligible subscription checkout through the secure identity verification flow.</p>
       )}
       {subscription ? (
         <div className={styles.card}>
@@ -83,26 +62,16 @@ export default function VerificationHubPage() {
                 <span className={styles.rowTitle}>{plan.color} · {plan.tier}</span>
                 <span className={styles.rowMeta}>{plan.perks.map((perk) => perk.title).join(" · ")}</span>
               </span>
-              <span className={styles.amount}>{formatMoneyForDisplay(plan.price)}</span>
-              <button type="button" className={[styles.chip, planId === plan.id ? styles.chipActive : ""].filter(Boolean).join(" ")} aria-pressed={planId === plan.id} onClick={() => setPlanId(plan.id)}>Pick</button>
+              <span className={styles.amount}>{formatMoneyForDisplay(plan.price)} / {plan.interval}</span>
             </li>
           ))}
         </ul>
       </section>
-      <form
-        className={styles.form}
-        onSubmit={(event) => {
-          event.preventDefault();
-          apply.mutate();
-        }}
-      >
-        <label className={styles.field}>Legal name
-          <input className={styles.input} value={legalName} onChange={(event) => setLegalName(event.target.value)} required />
-        </label>
-        <p className={styles.note}>Identity documents and selfies are captured in the mobile app or identity check. Continue to checkout to start.</p>
+      <section className={styles.form} aria-label="Start identity verification">
+        <p className={styles.note}>Identity is reviewed separately from payment. The secure identity flow collects real evidence, checks eligibility, and presents checkout only when available.</p>
         {error ? <p className={styles.error} role="alert">{error}</p> : null}
-        <button type="submit" className={styles.primary} disabled={apply.isPending || !planId}>{apply.isPending ? "Starting…" : "Continue to checkout"}</button>
-      </form>
+        <Link className={styles.primary} href="/settings/verification">Continue to identity verification</Link>
+      </section>
       <GoldForBusinessesCard />
       <div className={styles.links}>
         <Link className={styles.linkButton} href="/settings/verification">Identity verification hub</Link>

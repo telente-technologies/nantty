@@ -226,7 +226,7 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
             {order.shipment?.trackingNumber ? (
               <div className={styles.deliveryFact}>
                 <dt>Tracking</dt>
-                <dd>{order.shipment.trackingUrl ? <a href={order.shipment.trackingUrl} target="_blank" rel="noopener noreferrer">{order.shipment.trackingNumber}</a> : order.shipment.trackingNumber}</dd>
+                <dd>{order.shipment.trackingNumber}</dd>
               </div>
             ) : null}
             {order.delivery.riderName || order.delivery.riderPhone ? (
@@ -251,6 +251,7 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
               </div>
             ) : null}
           </dl>
+          <p className={styles.escrowNote}>Delivery updates are shown here in Nantty.</p>
           {order.delivery.lastAttemptNote ? <p className={styles.deliveryNote}>Last attempt: {order.delivery.lastAttemptNote}</p> : null}
           {order.delivery.status === "failed" ? <p className={styles.deliveryNote}>The seller will try again. Contact them if your address or phone number has changed.</p> : null}
         </section>

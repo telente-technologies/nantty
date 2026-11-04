@@ -75,9 +75,6 @@ export function EscrowTimeline({ escrow, viewerRole }: { readonly escrow: Escrow
           <span className={styles.stepBody}>
             <span className={styles.stepTitle}>{step.title}</span>
             <span className={styles.muted}>{step.detail}</span>
-            {step.trackingUrl && step.state !== "upcoming" ? (
-              <a className={styles.link} href={step.trackingUrl} target="_blank" rel="noopener noreferrer nofollow">Track parcel</a>
-            ) : null}
           </span>
         </li>
       ))}

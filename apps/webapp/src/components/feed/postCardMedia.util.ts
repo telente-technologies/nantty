@@ -1,5 +1,7 @@
 import type { Media } from "@/types";
 
+export const POST_IMAGE_ZOOM_SCALE = 2.5;
+
 export function isHlsUrl(url: string | null | undefined): url is string {
   return typeof url === "string" && /\.m3u8(?:[?#]|$)/i.test(url);
 }
@@ -45,4 +47,26 @@ export function describePostImageZoom(isZoomed: boolean): { readonly label: stri
   return isZoomed
     ? { label: "Fit image to screen", pressed: true }
     : { label: "Zoom image", pressed: false };
+}
+
+export function clampPostImagePan(
+  pan: { readonly x: number; readonly y: number },
+  stage: { readonly width: number; readonly height: number },
+  image: { readonly width?: number; readonly height?: number },
+  zoom = POST_IMAGE_ZOOM_SCALE,
+): { readonly x: number; readonly y: number } {
+  const stageWidth = Math.max(0, stage.width);
+  const stageHeight = Math.max(0, stage.height);
+  const imageWidth = image.width ?? stageWidth;
+  const imageHeight = image.height ?? stageHeight;
+  if (stageWidth === 0 || stageHeight === 0 || imageWidth <= 0 || imageHeight <= 0) return { x: 0, y: 0 };
+
+  const scale = Math.max(1, zoom);
+  const fit = Math.min(stageWidth / imageWidth, stageHeight / imageHeight);
+  const maxX = Math.max(0, (imageWidth * fit * scale - stageWidth) / 2);
+  const maxY = Math.max(0, (imageHeight * fit * scale - stageHeight) / 2);
+  return {
+    x: Math.min(maxX, Math.max(-maxX, pan.x)),
+    y: Math.min(maxY, Math.max(-maxY, pan.y)),
+  };
 }

@@ -130,7 +130,6 @@ export type EscrowStage =
 export interface ShipmentDetails {
   readonly courierName: string;
   readonly trackingNumber: string;
-  readonly trackingUrl: string | null;
   readonly shippedAt: ISODate;
   readonly estimatedDeliveryAt: ISODate | null;
 }
@@ -172,6 +171,7 @@ export interface EscrowHold {
 export interface MarkOrderShippedInput {
   readonly courierName: string;
   readonly trackingNumber: string;
+  readonly trackingUrl?: string | null;
 }
 
 export type DisputeStatus = "open" | "awaiting_seller" | "under_review" | "resolved_refunded" | "resolved_released" | "closed";

@@ -14,6 +14,7 @@ import { escrowQueryKeys, escrowsService } from "@/services/disputes.service";
 import { sellerService } from "@/services/seller.service";
 import { formatFriendlyDate } from "@/utils/escrowStage.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
+import { isValidOptionalTrackingUrl, isValidTrackingNumber } from "@/utils/trackingUrl.util";
 
 import styles from "../../page.module.css";
 
@@ -26,9 +27,14 @@ export default function SellerOrderDetailPage() {
   const shipKey = useRef(createIdempotencyKey("ship"));
   const [courierName, setCourierName] = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");
+  const [trackingUrl, setTrackingUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const ship = useMutation({
-    mutationFn: () => sellerService.markStoreOrderAsShipped(orderId, { courierName: courierName.trim(), trackingNumber: trackingNumber.trim() }, shipKey.current),
+    mutationFn: () => sellerService.markStoreOrderAsShipped(orderId, {
+      courierName: courierName.trim(),
+      trackingNumber: trackingNumber.trim(),
+      trackingUrl: trackingUrl.trim() || null,
+    }, shipKey.current),
     onSuccess: () => {
       setError(null);
       void queryClient.invalidateQueries({ queryKey: ["seller", "order", orderId] });
@@ -92,6 +98,14 @@ export default function SellerOrderDetailPage() {
           className={styles.form}
           onSubmit={(event) => {
             event.preventDefault();
+            if (!isValidTrackingNumber(trackingNumber)) {
+              setError("Tracking number must be 4–40 letters, numbers, or hyphens.");
+              return;
+            }
+            if (!isValidOptionalTrackingUrl(trackingUrl)) {
+              setError("Enter a valid HTTPS tracking link of at most 300 characters.");
+              return;
+            }
             if (!ship.isPending) ship.mutate();
           }}
         >
@@ -99,8 +113,27 @@ export default function SellerOrderDetailPage() {
             <input className={styles.input} value={courierName} onChange={(event) => setCourierName(event.target.value)} required />
           </label>
           <label className={styles.field}>Tracking number
-            <input className={styles.input} value={trackingNumber} onChange={(event) => setTrackingNumber(event.target.value)} required />
+            <input className={styles.input} value={trackingNumber} onChange={(event) => setTrackingNumber(event.target.value)} minLength={4} maxLength={40} pattern="[A-Za-z0-9-]{4,40}" required />
           </label>
+          <label className={styles.field}>Tracking link (optional)
+            <input
+              className={styles.input}
+              type="url"
+              inputMode="url"
+              autoComplete="url"
+              placeholder="https://"
+              maxLength={300}
+              value={trackingUrl}
+              onChange={(event) => setTrackingUrl(event.target.value)}
+              aria-invalid={!isValidOptionalTrackingUrl(trackingUrl)}
+              aria-describedby="tracking-url-help"
+            />
+          </label>
+          <p id="tracking-url-help" className={isValidOptionalTrackingUrl(trackingUrl) ? styles.rowMeta : styles.error}>
+            {isValidOptionalTrackingUrl(trackingUrl)
+              ? "Add a secure carrier tracking link if available."
+              : "Enter a valid HTTPS tracking link (up to 300 characters)."}
+          </p>
           {error ? <p className={styles.error} role="alert">{error}</p> : null}
           <button type="submit" className={styles.primary} disabled={ship.isPending}>{ship.isPending ? "Saving…" : "Mark as shipped"}</button>
         </form>
