@@ -116,8 +116,45 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
    `MONEY_MIGRATION_DATABASE_URL` from the `svc_migrator` secret and run `--migrate-money`; it must not receive the
    runtime database URL. Create PostGIS as required by the other service schemas and apply the reviewed grants before
    rollout.
-6. RabbitMQ: create one user per `nantty/<env>/mq/<service>` secret and import
-   `infra/local/rabbitmq/topology.json` through the management API using `nantty/<env>/mq/admin`.
+6. RabbitMQ topology is **BLOCKED pending an AWS-safe importer**. Do not upload
+   `infra/local/rabbitmq/topology.json` to the RabbitMQ definitions API: it is
+   Natty's custom topology model, not RabbitMQ's definitions format. Do not upload
+   `infra/local/rabbitmq/definitions.json` either: its generated user hashes are
+   intentionally local-only. Before staging, implement and review an
+   environment-aware conversion/import step that provisions per-service users
+   from the matching `nantty/<env>/mq/<service>` secrets, applies the reviewed
+   grants, and imports the converted topology using
+   `nantty/<env>/mq/admin`. Verify the resulting broker topology and permissions
+   after import; Terraform creation of the broker alone does not apply them.
+   The event-operations queue endpoint also requires a separate monitoring-only
+   RabbitMQ account. After broker creation, run
+   `infra/aws/modules/messaging/bootstrapMonitoringUser.mjs` from a trusted
+   machine with private VPC access, using the admin and monitoring values from
+   `nantty/<env>/mq/admin` and `nantty/<env>/mq/monitoring`. The script creates
+   or updates the `monitoring`-tagged user, grants empty configure/write/read
+   permissions on the `nantty` vhost, then authenticates as that user and
+   verifies the queue-list API. It does not import topology or modify queues.
+   RabbitMQ requires monitoring users to retain normal resource permissions;
+   empty permissions provide monitoring-only access. See the [RabbitMQ
+   management access guide](https://www.rabbitmq.com/docs/management#monitoring-only-read-only-access).
+   Run from a trusted host with private VPC access; the following keeps secret
+   values out of shell history and does not print them:
+   ```bash
+   environment=staging # use dev, staging, or prod deliberately
+   admin_secret="$(aws secretsmanager get-secret-value --secret-id "nantty/${environment}/mq/admin" --query SecretString --output text)"
+   monitoring_secret="$(aws secretsmanager get-secret-value --secret-id "nantty/${environment}/mq/monitoring" --query SecretString --output text)"
+   export RABBITMQ_MANAGEMENT_URL="$(jq -er '.management_url' <<<"$monitoring_secret")"
+   export RABBITMQ_MANAGEMENT_ADMIN_USERNAME="$(jq -er '.username' <<<"$admin_secret")"
+   export RABBITMQ_MANAGEMENT_ADMIN_PASSWORD="$(jq -er '.password' <<<"$admin_secret")"
+   export RABBITMQ_MONITORING_USERNAME="$(jq -er '.username' <<<"$monitoring_secret")"
+   export RABBITMQ_MONITORING_PASSWORD="$(jq -er '.password' <<<"$monitoring_secret")"
+   export RABBITMQ_VHOST="$(jq -er '.vhost' <<<"$monitoring_secret")"
+   node infra/aws/modules/messaging/bootstrapMonitoringUser.mjs
+   unset admin_secret monitoring_secret RABBITMQ_MANAGEMENT_ADMIN_PASSWORD RABBITMQ_MONITORING_PASSWORD
+   ```
+   Do not run it from an untrusted host or pass credentials as command-line
+   arguments. The script does not contact AWS itself and must never be pointed
+   at a production broker without the approved change procedure.
 7. Fill the placeholders `CHANGE_ME` in `nantty/<env>/<service>/app` (JWT/OTP keys, internal tokens, and for go-money
    `FLUTTERWAVE_SECRET_KEY`, `FLUTTERWAVE_WEBHOOK_HASH` (32+ characters) and `FLUTTERWAVE_MERCHANT_ID` for that environment;
    go-money refuses to start in production without them). Register `terraform output nat_public_ips` in Flutterwave's IP whitelist. Replace the LiveKit credentials when using LiveKit Cloud.

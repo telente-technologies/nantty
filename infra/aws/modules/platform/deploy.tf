@@ -115,6 +115,7 @@ locals {
       ADMIN_INVITATION_DELIVERY   = "none"
       ADMIN_CONSOLE_URL           = try(var.app_origins["admin"], "https://admin.${var.app_domain}")
       USERS_MEDIA_PUBLIC_BASE_URL = "https://${local.media_domain}"
+      RABBITMQ_VHOST              = "nantty"
     }
     go-live = {
       LIVE_RECORDING_S3_BUCKET     = module.storage.media_bucket.id
@@ -163,6 +164,11 @@ locals {
       { for key in lookup(local.database_url_names, name, []) : key => "${module.aurora.service_role_secret_arns[local.database_roles[name]]}:url::" },
       { for key in lookup(local.valkey_url_names, name, []) : key => module.valkey.url_secret_arn },
       definition.rabbit ? { RABBITMQ_URL = "${module.messaging.service_user_secret_arns[name]}:url::" } : {},
+      name == "go-identity" ? {
+        RABBITMQ_MANAGEMENT_URL      = "${module.messaging.monitoring_secret_arn}:management_url::"
+        RABBITMQ_MONITORING_USERNAME = "${module.messaging.monitoring_secret_arn}:username::"
+        RABBITMQ_MONITORING_PASSWORD = "${module.messaging.monitoring_secret_arn}:password::"
+      } : {},
       definition.valkey ? { VALKEY_URL = "${module.valkey.url_secret_arn}" } : {},
       definition.valkey && local.runtime_of[name] == "go" ? { AUTH_SESSION_DENYLIST_URL = module.valkey.url_secret_arn } : {},
       name == "intelligence" ? { INTELLIGENCE_REDIS_URL = module.valkey_intelligence.url_secret_arn } : {},
@@ -176,6 +182,7 @@ locals {
       aws_secretsmanager_secret.app[name].arn,
       definition.database ? module.aurora.service_role_secret_arns[local.database_roles[name]] : "",
       definition.rabbit ? module.messaging.service_user_secret_arns[name] : "",
+      name == "go-identity" ? module.messaging.monitoring_secret_arn : "",
       definition.valkey ? module.valkey.url_secret_arn : "",
       name == "intelligence" ? module.valkey_intelligence.url_secret_arn : "",
       name == "go-live" ? module.livekit.credentials_secret_arn : "",

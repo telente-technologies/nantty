@@ -49,8 +49,11 @@ for (const name of topology.jobQueues) {
 }
 
 const declaredQueues = new Set(queues.map((entry) => entry.name));
-const users = [user(topology.administrator, ["administrator"])];
-const permissions = [{ user: topology.administrator, vhost, configure: ".*", write: ".*", read: ".*" }];
+const users = [user(topology.administrator, ["administrator"]), user(topology.monitoringUser, ["monitoring"])];
+const permissions = [
+  { user: topology.administrator, vhost, configure: ".*", write: ".*", read: ".*" },
+  { user: topology.monitoringUser, vhost, configure: "^$", write: "^$", read: "^$" },
+];
 const topicPermissions = [];
 for (const [service, grants] of Object.entries(topology.services)) {
   const consumes = grants.consumes ?? [];

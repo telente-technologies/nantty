@@ -33,7 +33,7 @@ resource "aws_security_group" "broker" {
     }
   }
   ingress {
-    description     = "Management API over HTTPS from ECS tasks (topology import on deploy)"
+    description     = "Management API over HTTPS from ECS tasks (reserved; no topology importer is wired)"
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
@@ -92,6 +92,27 @@ resource "aws_secretsmanager_secret_version" "admin" {
     password       = random_password.admin.result
     host           = replace(replace(aws_mq_broker.this.instances[0].endpoints[0], "amqps://", ""), ":5671", "")
     management_url = aws_mq_broker.this.instances[0].console_url
+  })
+  lifecycle { ignore_changes = [secret_string] }
+}
+
+resource "random_password" "monitoring" {
+  length  = 32
+  special = false
+}
+
+resource "aws_secretsmanager_secret" "monitoring" {
+  name       = "nantty/${var.environment}/mq/monitoring"
+  kms_key_id = var.secrets_kms_key_arn
+}
+
+resource "aws_secretsmanager_secret_version" "monitoring" {
+  secret_id = aws_secretsmanager_secret.monitoring.id
+  secret_string = jsonencode({
+    username       = "nantty_monitor"
+    password       = random_password.monitoring.result
+    management_url = aws_mq_broker.this.instances[0].console_url
+    vhost          = "nantty"
   })
   lifecycle { ignore_changes = [secret_string] }
 }

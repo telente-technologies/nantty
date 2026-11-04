@@ -2,87 +2,95 @@
   "users": [
     {
       "name": "nantty",
-      "password_hash": "MCi0gBW4obucnKbSpwx3lkVn078psdRt6v8AguiXD8yMhFgm",
+      "password_hash": "5L8JI9Q2PvpZ19Q2n0bONcKtQ7BUzPbkkh+cPvMdqjTZ+4yb",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": [
         "administrator"
       ]
     },
     {
+      "name": "nantty_monitor",
+      "password_hash": "/F2n181S6aEL53YUP0TiHb7Bw8qE1aoHQm+rJoQzZuTghJHZ",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "monitoring"
+      ]
+    },
+    {
       "name": "go-identity",
-      "password_hash": "UQEhNCsvqr08h0MXujWyC2EE/65J6oV/+q6iGvkWn6jci9go",
+      "password_hash": "7ArB+9C87NWuITiNiokS03TfKkojCOL3prVkxpvaNt/swNLl",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     },
     {
       "name": "go-commerce",
-      "password_hash": "gt0cRiiyUS0lfVI9p3QGkYk9naR7UvvvUB+BWfx5A4lrpraY",
+      "password_hash": "aGaftzS5tCh5YxVSS3i+LxMgWPHnp1IF/DIxoO1JK+59DbtE",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     },
     {
       "name": "go-live",
-      "password_hash": "RyHW/vZsq+EsD7gqFNInKE1A3ixuRbh0+yDAnoOf06ylFfar",
+      "password_hash": "cwX+mC6BoUIWB+WmnoIt2lKN4aGQ3ZVRwgkT+43EwYccr5IY",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     },
     {
       "name": "go-money",
-      "password_hash": "OTEf5hyN9hABQQJoCGWE9vYl2pkN/8F0C6SfJfiDRk4iCs/m",
+      "password_hash": "PaBdPaXDl+8oqb+HgXLN/MkQTuKzenct9nNYQB/EPNXOPDpc",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     },
     {
       "name": "go-ads",
-      "password_hash": "CklUhkOA3FUASd4s+lBYqXRyTV6A/Q3UXUN3MIOopwDmFGxj",
+      "password_hash": "2qMmGZxcB9PI3Lair2iDbGw4lJ6ZP+ACNbXJIWxyNlpbNjEK",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     },
     {
       "name": "go-trust",
-      "password_hash": "ZBMB+F5mSQOB0v0Z1slOkFFXvxPgdm4dcdShltG5LahPCTWo",
+      "password_hash": "DUtb+18nK62idqAg1Iv2ckFgA+hcFJMyG7Cj9qtMhGo7KJKF",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     },
     {
       "name": "search",
-      "password_hash": "nUCa5jnKlIMZcqg/t0fyFtIlj7wNZdeXLPOLU+7TFOp0ZopS",
+      "password_hash": "y9sbqflqKAlXv2T4wi/Hhxy8JBz4rtNuHly9kLjbZq7K5VFj",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     },
     {
       "name": "support",
-      "password_hash": "XaUnpfRWEF7E25F+3DwT7HOuTt3AkGyArFBrL9aeNxQW4Ewq",
+      "password_hash": "wK6tOFhi/80AX2/sqZHwWWKmkUoDzemW2a1c7R9P7dSfM5YU",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     },
     {
       "name": "social",
-      "password_hash": "xvXsew5mEq5u8CNLn9IMtHn0+VHEWNVl+BChfOTWXtIHVni3",
+      "password_hash": "ov4+j3AuRm2GGOiu5XQxGeAWtO8cs88prpfBCojbsJL9vW5o",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     },
     {
       "name": "media",
-      "password_hash": "BmTDPkZVYMYToORU/Woe7nZm0Rq6f5jIaNAPer2pC76aYHzN",
+      "password_hash": "pH2S+ri63ByBuxFCInpKSf6QTQXd6U3bAATz0nYiu4qP5xLa",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     },
     {
       "name": "notifications",
-      "password_hash": "oB7pbGP/u3TFwWDEgfkthtQiE6oAxgVRrV4c9dBKCg3ezoQU",
+      "password_hash": "1yrcYRMLC3ItfMOhMVPXLwTIcptQTFXVUx9lqgl2RRBpQ709",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     },
     {
       "name": "realtime",
-      "password_hash": "WWqZHH5OdbjNt5lVpKn0L+4Ssu8GJdEYabC2A1b9n9u0XVTb",
+      "password_hash": "g85/rAxqVBlovyKJYx2sWUh7/FVdqwG8kTU+FGJey2m5apzC",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     },
     {
       "name": "intelligence",
-      "password_hash": "+EoPCZk9LFQFZU07nBtccmJYp0dMo5QjlO8OPURsSutJhbB1",
+      "password_hash": "x4F+gZ1R0HEyRWKZm0mm5rH0b4B27mOcLBmeM/HcjwOQQwwF",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": []
     }
@@ -99,6 +107,13 @@
       "configure": ".*",
       "write": ".*",
       "read": ".*"
+    },
+    {
+      "user": "nantty_monitor",
+      "vhost": "nantty",
+      "configure": "^$",
+      "write": "^$",
+      "read": "^$"
     },
     {
       "user": "go-identity",
@@ -3468,7 +3483,23 @@
       "vhost": "nantty",
       "destination": "commerce-domain-events",
       "destination_type": "queue",
+      "routing_key": "escrow.releaseFailed",
+      "arguments": {}
+    },
+    {
+      "source": "nantty.events",
+      "vhost": "nantty",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
       "routing_key": "escrow.refundScheduled",
+      "arguments": {}
+    },
+    {
+      "source": "nantty.events",
+      "vhost": "nantty",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
+      "routing_key": "escrow.clawedBack",
       "arguments": {}
     },
     {
@@ -3493,6 +3524,14 @@
       "destination": "commerce-domain-events",
       "destination_type": "queue",
       "routing_key": "dispute.closed",
+      "arguments": {}
+    },
+    {
+      "source": "nantty.events",
+      "vhost": "nantty",
+      "destination": "commerce-domain-events",
+      "destination_type": "queue",
+      "routing_key": "dispute.resolved",
       "arguments": {}
     },
     {

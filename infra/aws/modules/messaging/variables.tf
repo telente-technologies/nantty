@@ -22,7 +22,7 @@ variable "engine_version" {
   default = "3.13"
 }
 variable "service_users" {
-  description = "One RabbitMQ user per service, created through the management API at deploy time."
+  description = "Service usernames for client credentials stored in Secrets Manager; Terraform does not create these users or apply their broker permissions."
   type        = list(string)
 }
 variable "payments_security_group_id" {
