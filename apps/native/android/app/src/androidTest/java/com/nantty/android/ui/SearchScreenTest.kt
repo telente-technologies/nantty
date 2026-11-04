@@ -132,6 +132,29 @@ class SearchScreenTest {
     }
 
     @Test
+    fun categorySearchResultPassesItsIdToMartNavigationInsteadOfSearchingItsLabel() {
+        val transport = FakeTransport(categoriesOnly = true)
+        var openedCategory: Pair<String, String>? = null
+        compose.setContent {
+            MaterialTheme {
+                SearchScreen(
+                    SearchRepository("https://api.nantty.com", ::signedInSession, transport),
+                    Executor { it.run() },
+                    onOpenCategory = { id, name -> openedCategory = id to name },
+                )
+            }
+        }
+
+        searchFor("clothing")
+        compose.onNodeWithContentDescription("Search Mart category Clothing").performClick()
+
+        compose.runOnIdle {
+            assertEquals("category_1" to "Clothing", openedCategory)
+            assertEquals(listOf("/api/v1/search?q=clothing&scope=global&type=top&limit=10"), transport.searchPaths())
+        }
+    }
+
+    @Test
     fun failedSearchCanBeRetried() {
         val transport = FakeTransport(failFirst = true)
         compose.setContent {
@@ -378,6 +401,7 @@ class SearchScreenTest {
     private class FakeTransport(
         private val failFirst: Boolean = false,
         private val usersOnly: Boolean = false,
+        private val categoriesOnly: Boolean = false,
         private val recentEntries: List<JSONObject> = emptyList(),
         private val failHistory: Boolean = false,
     ) : SearchTransport {
@@ -404,6 +428,7 @@ class SearchScreenTest {
             if (failFirst && searchRequests.size == 1) error("Offline")
             if (path.contains("cursor=")) return JSONObject("""{"data":[{"type":"post","id":"post-2","caption":"Another API post","likes":2,"views":5}],"nextCursor":null,"scope":"global"}""")
             if (path.contains("type=products")) return JSONObject("""{"data":[{"type":"product","id":"prod_1","name":"Adire jacket","price":{"amountMinor":1250000,"currency":"NGN"},"imageUrl":"https://cdn.nantty.com/jacket.jpg","stock":3}],"nextCursor":null,"scope":"global"}""")
+            if (categoriesOnly) return JSONObject("""{"data":[{"type":"category","id":"category_1","name":"Clothing"}],"nextCursor":null,"scope":"global"}""")
             if (usersOnly) return JSONObject("""{"data":[{"type":"user","id":"user-1","name":"Ari","username":"ari","verified":true}],"nextCursor":null,"scope":"global"}""")
             return JSONObject("""{"data":[{"type":"post","id":"post-1","caption":"A real post result","thumbnailUrl":"https://cdn.nantty.com/post.jpg","likes":4,"views":12}],"nextCursor":"next-page","scope":"global"}""")
         }

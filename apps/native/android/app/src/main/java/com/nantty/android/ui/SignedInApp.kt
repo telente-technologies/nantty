@@ -58,6 +58,7 @@ import com.nantty.android.data.PostDetailRepository
 import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.data.SavedPostsRepository
 import com.nantty.android.data.SearchRepository
+import com.nantty.android.data.StoreRepository
 import com.nantty.android.data.SellerWorkspaceRepository
 import com.nantty.android.data.WalletRepository
 import com.nantty.android.data.appendUniqueFeedPosts
@@ -84,6 +85,7 @@ internal fun SignedInApp(
     var feedSelectionGeneration by rememberSaveable { mutableStateOf(0) }
     var selectedPostId by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedProfileId by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedStoreId by rememberSaveable { mutableStateOf<String?>(null) }
     var showingCart by rememberSaveable { mutableStateOf(false) }
     var showingCheckout by rememberSaveable { mutableStateOf(false) }
     var showingPayment by rememberSaveable { mutableStateOf(false) }
@@ -93,6 +95,7 @@ internal fun SignedInApp(
     var checkoutCurrency by rememberSaveable { mutableStateOf("") }
     var checkoutOrderCount by rememberSaveable { mutableStateOf(0) }
     var pendingMartProductId by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingMartCategoryId by rememberSaveable { mutableStateOf<String?>(null) }
     var showingComposer by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(requestedWidgetDestination) {
         if (isGuest && requestedWidgetDestination != null) {
@@ -151,6 +154,9 @@ internal fun SignedInApp(
     }
     val publicProfileRepository = remember(sessionRepository) {
         PublicProfileRepository(sessionProvider = sessionRepository::sessionOrNull)
+    }
+    val storeRepository = remember(sessionRepository) {
+        StoreRepository(sessionProvider = sessionRepository::sessionOrNull)
     }
     val currentProfileRepository = remember(sessionRepository) {
         CurrentProfileRepository(sessionProvider = sessionRepository::sessionOrNull)
@@ -389,6 +395,23 @@ internal fun SignedInApp(
         return
     }
 
+    selectedStoreId?.let { storeId ->
+        HingeSafeContent {
+            PublicStoreScreen(
+                storeId = storeId,
+                repository = storeRepository,
+                executor = executor,
+                onBack = { selectedStoreId = null },
+                onOpenProduct = { productId ->
+                    selectedStoreId = null
+                    pendingMartProductId = productId
+                    destination = Destination.Mart
+                },
+            )
+        }
+        return
+    }
+
     selectedProfileId?.let { profileId ->
         HingeSafeContent {
             PublicProfileScreen(
@@ -520,6 +543,8 @@ internal fun SignedInApp(
                         onOpenPost = { selectedPostId = it },
                         onOpenProfile = { selectedProfileId = it },
                         onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
+                        onOpenStore = { selectedStoreId = it },
+                        onOpenCategory = { categoryId, _ -> pendingMartCategoryId = categoryId; destination = Destination.Mart },
                         onLike = { if (isGuest) onRequireSignIn() else toggleFeedLike(it) },
                         onRepost = { if (isGuest) onRequireSignIn() else toggleFeedRepost(it) },
                         onSave = { if (isGuest) onRequireSignIn() else toggleFeedSaved(it) },
@@ -548,6 +573,8 @@ internal fun SignedInApp(
                         showMartCategoryPane = showMartCategoryPane,
                         initialMartProductId = pendingMartProductId,
                         onInitialMartProductHandled = { pendingMartProductId = null },
+                        initialMartCategoryId = pendingMartCategoryId,
+                        onInitialMartCategoryHandled = { pendingMartCategoryId = null },
                         onOpenSavedPosts = { if (isGuest) onRequireSignIn() else destination = Destination.Saved },
                         onBackFromSavedPosts = { destination = Destination.Feed },
                         onBackFromOrders = { destination = Destination.Feed },
@@ -594,6 +621,8 @@ internal fun SignedInApp(
                     onOpenPost = { selectedPostId = it },
                     onOpenProfile = { selectedProfileId = it },
                     onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
+                    onOpenStore = { selectedStoreId = it },
+                    onOpenCategory = { categoryId, _ -> pendingMartCategoryId = categoryId; destination = Destination.Mart },
                     onLike = { if (isGuest) onRequireSignIn() else toggleFeedLike(it) },
                     onRepost = { if (isGuest) onRequireSignIn() else toggleFeedRepost(it) },
                     onSave = { if (isGuest) onRequireSignIn() else toggleFeedSaved(it) },
@@ -622,6 +651,8 @@ internal fun SignedInApp(
                     showMartCategoryPane = showMartCategoryPane,
                     initialMartProductId = pendingMartProductId,
                     onInitialMartProductHandled = { pendingMartProductId = null },
+                    initialMartCategoryId = pendingMartCategoryId,
+                    onInitialMartCategoryHandled = { pendingMartCategoryId = null },
                     onOpenSavedPosts = { if (isGuest) onRequireSignIn() else destination = Destination.Saved },
                     onBackFromSavedPosts = { destination = Destination.Feed },
                     onBackFromOrders = { destination = Destination.Feed },

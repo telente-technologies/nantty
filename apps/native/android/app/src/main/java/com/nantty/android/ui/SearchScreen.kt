@@ -58,6 +58,8 @@ internal fun SearchScreen(
     onOpenProfile: (String) -> Unit = {},
     onReauthenticate: () -> Unit = {},
     onOpenProduct: (String) -> Unit = {},
+    onOpenStore: (String) -> Unit = {},
+    onOpenCategory: (String, String) -> Unit = { _, _ -> },
     exploreRepository: ExploreRepository? = null,
     profileRepository: PublicProfileRepository? = null,
     onRequireSignIn: () -> Unit = onReauthenticate,
@@ -312,16 +314,10 @@ internal fun SearchScreen(
                                     type = SearchType.POSTS
                                 }
                                 "store" -> {
-                                    scope = "store:${item.id}"
-                                    scopeLabel = item.title
-                                    type = SearchType.TOP
-                                    query = ""
+                                    onOpenStore(item.id)
                                 }
                                 "category" -> {
-                                    scope = "mart"
-                                    scopeLabel = "Mart"
-                                    type = SearchType.PRODUCTS
-                                    query = item.title
+                                    onOpenCategory(item.id, item.title)
                                 }
                             }
                             })

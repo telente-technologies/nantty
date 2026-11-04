@@ -118,6 +118,34 @@ class MartProductDetailNavigationTest {
         assertEquals("prd-1", cartTransport.body?.getString("productId"))
         assertEquals("variant-1", cartTransport.body?.getString("variantId"))
     }
+
+    @Test
+    fun externalCategorySelectionLoadsProductsByCategoryId() {
+        val requestedUrls = mutableListOf<String>()
+        var categoryHandled = false
+        val repository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            openConnection = { url ->
+                requestedUrls += url.toString()
+                FakeMartConnection(url, responseFor(url))
+            },
+        )
+
+        composeRule.setContent {
+            MaterialTheme {
+                MartScreen(
+                    repository = repository,
+                    initialCategoryId = "category-fashion",
+                    onInitialCategoryHandled = { categoryHandled = true },
+                )
+            }
+        }
+
+        composeRule.waitUntil(5_000) { requestedUrls.any { it.contains("categoryId=category-fashion") } }
+        composeRule.runOnIdle { assertTrue(categoryHandled) }
+        composeRule.onNodeWithText("Silk wrap dress").assertIsDisplayed()
+        assertTrue(requestedUrls.any { it.endsWith("/api/v1/products?limit=20&categoryId=category-fashion") })
+    }
 }
 
 private fun responseFor(url: URL, productName: String = "Silk wrap dress"): String = when {

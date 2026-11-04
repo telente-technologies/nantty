@@ -68,6 +68,8 @@ internal fun MainContent(
     onOpenPost: (String) -> Unit = {},
     onOpenProfile: (String) -> Unit = {},
     onOpenProduct: (String) -> Unit = {},
+    onOpenStore: (String) -> Unit = {},
+    onOpenCategory: (String, String) -> Unit = { _, _ -> },
     onLike: (FeedPost) -> Unit = {},
     onRepost: (FeedPost) -> Unit = {},
     onSave: (FeedPost) -> Unit = {},
@@ -96,6 +98,8 @@ internal fun MainContent(
     showMartCategoryPane: Boolean = false,
     initialMartProductId: String? = null,
     onInitialMartProductHandled: () -> Unit = {},
+    initialMartCategoryId: String? = null,
+    onInitialMartCategoryHandled: () -> Unit = {},
     onOpenSavedPosts: () -> Unit = {},
     onBackFromSavedPosts: () -> Unit = {},
     onBackFromOrders: () -> Unit = {},
@@ -173,6 +177,8 @@ internal fun MainContent(
             onOpenProfile = onOpenProfile,
             onReauthenticate = onReauthenticate,
             onOpenProduct = onOpenProduct,
+            onOpenStore = onOpenStore,
+            onOpenCategory = onOpenCategory,
             exploreRepository = exploreRepository,
             profileRepository = publicProfileRepository,
             onRequireSignIn = onSignInRequired,
@@ -187,6 +193,8 @@ internal fun MainContent(
             onAuthenticationRequired = onReauthenticate,
             initialProductId = initialMartProductId,
             onInitialProductHandled = onInitialMartProductHandled,
+            initialCategoryId = initialMartCategoryId,
+            onInitialCategoryHandled = onInitialMartCategoryHandled,
         )
         return
     }

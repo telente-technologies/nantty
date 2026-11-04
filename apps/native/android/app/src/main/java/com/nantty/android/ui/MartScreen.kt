@@ -67,6 +67,8 @@ fun MartScreen(
     onAuthenticationRequired: () -> Unit = {},
     initialProductId: String? = null,
     onInitialProductHandled: () -> Unit = {},
+    initialCategoryId: String? = null,
+    onInitialCategoryHandled: () -> Unit = {},
 ) {
     var categories by remember { mutableStateOf<List<MartCategory>>(emptyList()) }
     var products by remember { mutableStateOf<List<MartProduct>>(emptyList()) }
@@ -85,6 +87,13 @@ fun MartScreen(
         if (initialProductId != null) {
             selectedProductId = initialProductId
             onInitialProductHandled()
+        }
+    }
+
+    LaunchedEffect(initialCategoryId) {
+        if (initialCategoryId != null) {
+            selectedCategoryId = initialCategoryId
+            onInitialCategoryHandled()
         }
     }
 
