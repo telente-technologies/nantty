@@ -18,6 +18,8 @@ import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.SearchRepository
 import com.nantty.android.data.SearchTransport
+import com.nantty.android.data.ExploreRepository
+import com.nantty.android.data.ExploreTransport
 import org.json.JSONObject
 import org.json.JSONArray
 import org.junit.Assert.assertEquals
@@ -31,6 +33,45 @@ import java.util.concurrent.Executor
 @RunWith(AndroidJUnit4::class)
 class SearchScreenTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test
+    fun discoverLoadsExploreSectionsAndCategorySelectionRefreshesServerData() {
+        val searchTransport = FakeTransport()
+        val exploreRequests = mutableListOf<String>()
+        val exploreRepository = ExploreRepository(transport = ExploreTransport { path, _ ->
+            exploreRequests += path
+            when {
+                path == "/api/v1/explore/categories" -> JSONObject("""{"data":[{"id":"for_you","label":"For you"},{"id":"sports","label":"Sports"}]}""")
+                path.startsWith("/api/v1/explore/trends") -> {
+                    val tag = if (path.contains("category=sports")) "sports-tag" else "music-tag"
+                    JSONObject("""{"scope":"in Nigeria","items":[{"hashtag":"$tag","label":"#$tag","category":"sports","categoryLabel":"Sports","postCount":8,"authorCount":4,"rank":1,"context":"Sports · Trending"}]}""")
+                }
+                path.startsWith("/api/v1/explore/headlines") -> JSONObject("""{"scope":"in Nigeria","items":[{"id":"headline-1","title":"Explore headline","summary":"A short summary","category":"sports","categoryLabel":"Sports","postIds":["post-explore"],"postCount":12,"authorCount":6,"hashtags":["sports-tag"],"sourceLabel":"Summarised from posts"}]}""")
+                path.startsWith("/api/v1/explore/who-to-follow") -> JSONObject("""{"data":[{"user":{"id":"user-follow","name":"Ada","username":"ada"},"reason":{"code":"popular","label":"Popular in your region"},"isOfficial":false,"checkmarkTier":"none","isPrivate":false}]}""")
+                path.startsWith("/api/v1/explore/posts-for-you") -> JSONObject("""{"data":[{"id":"post-explore","kind":"post","author":{"id":"user-follow","name":"Ada","username":"ada"},"text":"Explore post","media":[],"likes":2,"comments":1,"reposts":0,"shares":0,"createdAt":"2026-11-04T10:00:00Z","ranking":{"explanations":[{"code":"trending_topic","label":"Trending in Sports"}]}}],"nextCursor":null}""")
+                else -> error("Unexpected Explore path: $path")
+            }
+        })
+        compose.setContent {
+            MaterialTheme {
+                SearchScreen(
+                    SearchRepository("https://api.nantty.com", { null }, searchTransport),
+                    Executor { it.run() },
+                    exploreRepository = exploreRepository,
+                )
+            }
+        }
+
+        compose.waitForIdle()
+        compose.onNodeWithText("Explore headline").assertIsDisplayed()
+        compose.onNodeWithText("#music-tag").assertIsDisplayed()
+        compose.onNodeWithText("Who to follow").assertIsDisplayed()
+        compose.onNodeWithText("Explore post").assertIsDisplayed()
+        compose.onNodeWithText("Sports").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("#sports-tag").assertIsDisplayed()
+        compose.runOnIdle { assertTrue(exploreRequests.any { it == "/api/v1/explore/posts-for-you?category=sports" }) }
+    }
 
     @Test
     fun signedOutGuestCanSearchAndRequestHasNoBearerToken() {

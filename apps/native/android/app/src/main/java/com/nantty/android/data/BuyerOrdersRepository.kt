@@ -146,9 +146,15 @@ internal class BuyerOrdersRepository(
         }
     }
 
-    fun confirmReceipt(orderId: String): BuyerOrderReceiptResult {
+    fun confirmReceipt(
+        orderId: String,
+        idempotencyKey: String = UUID.randomUUID().toString(),
+    ): BuyerOrderReceiptResult {
         if (!orderId.matches(Regex("[A-Za-z0-9_-]{1,128}"))) {
             return BuyerOrderReceiptResult.Failure("That order could not be found.")
+        }
+        if (!idempotencyKey.matches(Regex("[A-Za-z0-9_-]{8,128}"))) {
+            return BuyerOrderReceiptResult.Failure("Could not safely prepare this confirmation. Please try again.")
         }
         val session = sessionProvider()
             ?: return BuyerOrderReceiptResult.Failure("Sign in to confirm receipt.", authenticationRequired = true)
@@ -156,11 +162,13 @@ internal class BuyerOrdersRepository(
             ?: return BuyerOrderReceiptResult.Failure("Sign in to confirm receipt.", authenticationRequired = true)
         val transport = transport as? BuyerOrderReceiptTransport
             ?: return BuyerOrderReceiptResult.Failure("Receipt confirmation is unavailable. Please try again.")
-        val idempotencyKey = UUID.randomUUID().toString()
-
         return try {
             val order = parseDetail(transport.post(buildBuyerOrderConfirmReceiptPath(orderId), token, idempotencyKey))
-            BuyerOrderReceiptResult.Success(order)
+            if (order.status == "completed") {
+                BuyerOrderReceiptResult.Success(order)
+            } else {
+                BuyerOrderReceiptResult.Failure("Nantty couldn't verify receipt confirmation. Refresh the order before trying again.")
+            }
         } catch (error: Exception) {
             val httpError = error as? BuyerOrdersHttpException
             val authenticationRequired = httpError?.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED || httpError?.statusCode == HttpURLConnection.HTTP_FORBIDDEN
@@ -286,6 +294,8 @@ internal fun buildBuyerOrderConfirmReceiptPath(orderId: String): String {
     require(orderId.matches(Regex("[A-Za-z0-9_-]{1,128}"))) { "That order could not be found." }
     return "/api/v1/orders/$orderId/confirm-receipt"
 }
+
+internal fun buyerCanConfirmReceipt(status: String): Boolean = status == "delivered"
 
 internal fun appendUniqueBuyerOrders(current: List<BuyerOrder>, incoming: List<BuyerOrder>): List<BuyerOrder> {
     val existingIds = current.asSequence().map(BuyerOrder::id).toHashSet()

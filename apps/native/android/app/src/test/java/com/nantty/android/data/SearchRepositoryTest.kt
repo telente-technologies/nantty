@@ -163,6 +163,41 @@ class SearchRepositoryTest {
     }
 
     @Test
+    fun scopedSearchAndRecentHistoryUseMartAndStoreScopesWithoutMixingHistory() {
+        val payload = JSONObject("""{"data":[{"type":"product","id":"prod_1","name":"Adire jacket","price":{"amountMinor":1200,"currency":"NGN"},"stock":2}],"nextCursor":null,"scope":"mart"}""")
+        val transport = RecordingTransport(payload)
+        val repository = SearchRepository("https://api.nantty.com", ::signedInSession, transport)
+
+        val result = repository.search("adire", SearchType.PRODUCTS, scope = "mart") as SearchResult.Success
+        assertEquals("/api/v1/search?q=adire&scope=mart&type=products&limit=10", transport.path)
+        assertEquals("prod_1", result.page.products.single().id)
+
+        repository.recordRecentSearch("adire", "mart")
+        assertEquals("mart", transport.body?.optString("scope"))
+        repository.clearRecentSearches("mart")
+        assertEquals("/api/v1/search/recent?scope=mart", transport.path)
+        assertTrue(repository.search("term", SearchType.TOP, scope = "store:not-a-uuid") is SearchResult.Failure)
+    }
+
+    @Test
+    fun topSearchReturnsStoreBrandCategoryAndHashtagSummariesWithoutPrivateFields() {
+        val payload = JSONObject("""{"data":[
+            {"type":"store","id":"store_1","name":"Adire House","logoUrl":"https://cdn.nantty.com/store.png","username":"adire"},
+            {"type":"brand","id":"brand_1","name":"Nigerian Loom","logoUrl":"https://cdn.nantty.com/brand.png","handle":"@loom","officialStoreId":"store_2"},
+            {"type":"category","id":"category_1","name":"Clothing"},
+            {"type":"hashtag","id":"lagosfashion","tag":"lagosfashion","postCount":14}
+        ],"nextCursor":null}""")
+
+        val result = SearchRepository("https://api.nantty.com", { null }, RecordingTransport(payload))
+            .parsePage(payload, SearchType.TOP)
+
+        assertEquals(listOf("store", "brand", "category", "hashtag"), result.otherResults.map(SearchOther::kind))
+        assertEquals("store_2", result.otherResults[1].associatedStoreId)
+        assertEquals("#lagosfashion", result.otherResults.last().title)
+        assertEquals("14 posts", result.otherResults.last().subtitle)
+    }
+
+    @Test
     fun recentHistorySkipsMalformedIdsAndRejectsUnsafeDeleteIds() {
         val payload = JSONObject("""{"data":[
             {"id":"7b7d83c7-d9a8-49e8-9e98-c52aab1ba444","query":"safe","scope":"global","searchedAt":"now"},

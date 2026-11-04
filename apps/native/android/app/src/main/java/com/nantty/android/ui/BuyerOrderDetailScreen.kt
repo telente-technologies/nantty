@@ -39,9 +39,11 @@ import com.nantty.android.data.BuyerOrderDetail
 import com.nantty.android.data.BuyerOrderDetailResult
 import com.nantty.android.data.BuyerOrderReceiptResult
 import com.nantty.android.data.BuyerOrdersRepository
+import com.nantty.android.data.buyerCanConfirmReceipt
 import com.nantty.android.data.WalletMoney
 import com.nantty.android.data.formatWalletAmount
 import java.util.concurrent.Executor
+import java.util.UUID
 
 @Composable
 internal fun BuyerOrderDetailScreen(
@@ -57,6 +59,7 @@ internal fun BuyerOrderDetailScreen(
     var generation by remember(orderId) { mutableStateOf(0) }
     var showConfirmDialog by remember(orderId) { mutableStateOf(false) }
     var confirmingReceipt by remember(orderId) { mutableStateOf(false) }
+    var receiptIdempotencyKey by remember(orderId) { mutableStateOf(UUID.randomUUID().toString()) }
     var receiptConfirmed by remember(orderId) { mutableStateOf(false) }
     var receiptError by remember(orderId) { mutableStateOf<BuyerOrderReceiptResult.Failure?>(null) }
     var refreshError by remember(orderId) { mutableStateOf<String?>(null) }
@@ -121,7 +124,7 @@ internal fun BuyerOrderDetailScreen(
     }
 
     val displayedOrder = (result as? BuyerOrderDetailResult.Success)?.order
-    if (showConfirmDialog && displayedOrder?.status == "delivered" && !receiptConfirmed) {
+    if (showConfirmDialog && displayedOrder?.let { buyerCanConfirmReceipt(it.status) } == true && !receiptConfirmed) {
         AlertDialog(
             onDismissRequest = { if (!confirmingReceipt) showConfirmDialog = false },
             title = { Text("Confirm you received it?") },
@@ -135,11 +138,11 @@ internal fun BuyerOrderDetailScreen(
                 TextButton(
                     enabled = !confirmingReceipt && receiptError?.authenticationRequired != true,
                     onClick = {
-                        if (confirmingReceipt || displayedOrder.status != "delivered") return@TextButton
+                        if (confirmingReceipt || !buyerCanConfirmReceipt(displayedOrder.status)) return@TextButton
                         confirmingReceipt = true
                         receiptError = null
                         executor.execute {
-                            when (val confirmed = repository.confirmReceipt(orderId)) {
+                            when (val confirmed = repository.confirmReceipt(orderId, receiptIdempotencyKey)) {
                                 is BuyerOrderReceiptResult.Failure -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                                     confirmingReceipt = false
                                     receiptError = confirmed
@@ -149,7 +152,7 @@ internal fun BuyerOrderDetailScreen(
                                     androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                                         confirmingReceipt = false
                                         showConfirmDialog = false
-                                        receiptConfirmed = true
+                                        receiptConfirmed = confirmed.order.status == "completed"
                                         when (refreshed) {
                                             is BuyerOrderDetailResult.Success -> {
                                                 result = refreshed
@@ -253,7 +256,7 @@ private fun BuyerOrderDetailContent(
         }
         order.escrowReleaseAt?.let { releaseAt -> item { Text("Escrow release date: ${formatBuyerOrderDate(releaseAt)}", color = MaterialTheme.colorScheme.secondary) } }
         order.promotionIssue?.let { issue -> item { Text(issue, color = MaterialTheme.colorScheme.error) } }
-        if (order.status == "delivered" && !receiptConfirmed) {
+        if (buyerCanConfirmReceipt(order.status) && !receiptConfirmed) {
             item {
                 Button(
                     onClick = onConfirmReceipt,

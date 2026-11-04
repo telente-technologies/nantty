@@ -78,7 +78,7 @@ Cart rows display a per-line subtotal computed from the API-provided unit amount
 
 ### Checkout and payment first slice — 2026-11-04
 
-This working-tree update adds a bounded buyer path beyond cart review:
+Implemented scope beyond cart review:
 
 - Cart can open an adaptive Compose checkout screen; checkout loads saved delivery addresses, requests a server shipping quote for the selected address, displays server-returned total components where present, and submits order creation with an idempotency key. Checkout uses the API's escrow defaults (`paymentModes: []`, `directPaymentAccepted: false`) rather than exposing a direct-payment choice without the RN trust disclosure and eligibility parity.
 - A successful checkout response is labeled as an order requiring payment, not as a completed purchase. Payment initialization uses the server-provided payable order ID; the returned HTTPS checkout URL is opened externally. On return, the buyer must explicitly request server verification, and only the `paid` response displays confirmation. Pending, failed, and verification-error states remain distinct.
@@ -89,7 +89,7 @@ Separately, the product-detail delta in [`parity-android-discovery-commerce.md`]
 
 **Integrated validation for these deltas:** `./gradlew --no-daemon --no-parallel --max-workers=1 :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin :app:assembleDebug` succeeded. The unit suite reported **221 tests, 0 failures, 0 errors**; app and Android-test Kotlin sources compiled, and the debug APK assembled. `adb devices -l` found no attached device, so the Compose UI tests were compiled but not run on emulator/device. No live/staging API, payment provider, or production data was used.
 
-<!-- Duplicate of the preceding checkout first-slice note removed. -->
+### Checkout-flow recap
 
 This working-tree update adds a bounded buyer path beyond cart review:
 
@@ -98,5 +98,5 @@ This working-tree update adds a bounded buyer path beyond cart review:
 - `CheckoutRepositoryTest.kt` covers address parsing, shipping quote request, escrow-only checkout payload/idempotency, URL safety, verification states, and missing-session gating. Values and amounts are sourced from the backend response; the address ID and currency are not synthesized in the purchase flow.
 - **Still missing:** native address creation/editing (buyers with no saved address must add one on Nantty web), direct payment and its eligibility confirmation, provider-wallet/saved-card integration, provider callback/deep-link restoration, purchase receipt success/detail parity, and a live seeded-backend or device run. The checkout slice is not full commerce parity or production sign-off.
 
-The product-detail slice documented in [`parity-android-discovery-commerce.md`](parity-android-discovery-commerce.md) separately adds quantity selection 1–10 and passes the selected quantity to the existing cart API; its UI test source is pending integrated compile/test confirmation.
+The product-detail slice documented in [`parity-android-discovery-commerce.md`](parity-android-discovery-commerce.md) separately adds quantity selection 1–10 and passes the selected quantity to the existing cart API. Its UI test sources compiled in the integrated Android build; execution requires an attached emulator/device.
 

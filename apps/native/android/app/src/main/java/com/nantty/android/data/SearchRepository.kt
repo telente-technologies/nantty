@@ -9,7 +9,8 @@ import java.net.URL
 import java.util.UUID
 
 enum class SearchType(val apiValue: String, val label: String) {
-    TOP("top", "Top"), POSTS("posts", "Posts"), PEOPLE("people", "People"), PRODUCTS("products", "Products"),
+    TOP("top", "Top"), PEOPLE("people", "People"), POSTS("posts", "Posts"), CLIPS("clips", "Clips"),
+    PRODUCTS("products", "Products"), STORES("stores", "Stores"), BRANDS("brands", "Brands"), HASHTAGS("hashtags", "Hashtags"),
 }
 
 data class SearchPost(
@@ -19,11 +20,27 @@ data class SearchPost(
     val likes: Int,
     val views: Int,
     val authorId: String? = null,
+    val kind: String = "post",
 )
 
 data class SearchUser(val id: String, val name: String, val username: String, val avatarUrl: String?, val verified: Boolean)
 data class SearchProduct(val id: String, val name: String, val amountMinor: Long, val currency: String, val imageUrl: String?, val stock: Int)
-data class SearchPage(val posts: List<SearchPost>, val users: List<SearchUser>, val nextCursor: String?, val products: List<SearchProduct> = emptyList())
+data class SearchOther(
+    val kind: String,
+    val id: String,
+    val title: String,
+    val subtitle: String = "",
+    val imageUrl: String? = null,
+    val count: Int? = null,
+    val associatedStoreId: String? = null,
+)
+data class SearchPage(
+    val posts: List<SearchPost>,
+    val users: List<SearchUser>,
+    val nextCursor: String?,
+    val products: List<SearchProduct> = emptyList(),
+    val otherResults: List<SearchOther> = emptyList(),
+)
 data class SearchRecent(val id: String, val query: String, val scope: String, val searchedAt: String)
 
 sealed interface SearchResult {
@@ -47,14 +64,15 @@ class SearchRepository(
 ) {
     fun hasAuthenticatedViewer(): Boolean = sessionProvider()?.accessToken?.isNotBlank() == true
 
-    fun search(query: String, type: SearchType, cursor: String? = null): SearchResult = try {
+    fun search(query: String, type: SearchType, cursor: String? = null, scope: String = GLOBAL_SCOPE): SearchResult = try {
         val cleanQuery = query.trim()
         require(cleanQuery.isNotEmpty() && cleanQuery.length <= MAX_QUERY_LENGTH) {
             "Search terms must be between 1 and $MAX_QUERY_LENGTH characters."
         }
         require(cursor == null || cursor.length <= MAX_CURSOR_LENGTH) { "This search page cursor is invalid. Start a new search." }
+        require(isSafeSearchScope(scope)) { "This search scope is invalid." }
         val session = sessionProvider()
-        SearchResult.Success(parsePage(transport.request(buildSearchPath(cleanQuery, type, cursor), session?.accessToken), type))
+        SearchResult.Success(parsePage(transport.request(buildSearchPath(cleanQuery, type, cursor, scope), session?.accessToken), type))
     } catch (error: Exception) {
         SearchResult.Failure(
             error.message ?: "Could not search Nantty. Check your connection and try again.",
@@ -62,21 +80,22 @@ class SearchRepository(
         )
     }
 
-    fun listRecentSearches(): RecentSearchResult {
+    fun listRecentSearches(scope: String = GLOBAL_SCOPE): RecentSearchResult {
+        if (!isSafeSearchScope(scope)) return RecentSearchResult.Failure("This search scope is invalid.")
         val session = sessionProvider()?.takeIf { it.accessToken.isNotBlank() }
             ?: return RecentSearchResult.Success(emptyList())
         return try {
-            val payload = transport.request("/api/v1/search/recent?scope=global", session.accessToken)
+            val payload = transport.request("/api/v1/search/recent?scope=${encodeSearchValue(scope)}", session.accessToken)
             val rows = payload.optJSONArray("data") ?: error("Nantty returned an incomplete recent-search response.")
             val entries = buildList {
                 for (index in 0 until rows.length()) {
                     val row = rows.optJSONObject(index) ?: continue
                     val id = row.optString("id").takeIf(::isUuid) ?: continue
                     val query = row.optNullableString("query")?.takeIf { it.length <= MAX_QUERY_LENGTH } ?: continue
-                    val scope = row.optNullableString("scope") ?: continue
-                    if (scope != GLOBAL_SCOPE) continue
+                    val entryScope = row.optNullableString("scope") ?: continue
+                    if (entryScope != scope) continue
                     val searchedAt = row.optNullableString("searchedAt") ?: continue
-                    add(SearchRecent(id, query, scope, searchedAt))
+                    add(SearchRecent(id, query, entryScope, searchedAt))
                 }
             }
             RecentSearchResult.Success(entries)
@@ -85,11 +104,12 @@ class SearchRepository(
         }
     }
 
-    fun recordRecentSearch(query: String): RecentSearchResult {
+    fun recordRecentSearch(query: String, scope: String = GLOBAL_SCOPE): RecentSearchResult {
         val cleanQuery = query.trim()
         if (cleanQuery.isEmpty() || cleanQuery.length > MAX_QUERY_LENGTH) {
             return RecentSearchResult.Failure("Search terms must be between 1 and $MAX_QUERY_LENGTH characters.")
         }
+        if (!isSafeSearchScope(scope)) return RecentSearchResult.Failure("This search scope is invalid.")
         val session = sessionProvider()?.takeIf { it.accessToken.isNotBlank() }
             ?: return RecentSearchResult.Failure("Sign in to save recent searches.", authenticationRequired = true)
         return try {
@@ -97,7 +117,7 @@ class SearchRepository(
                 "/api/v1/search/recent",
                 session.accessToken,
                 "POST",
-                JSONObject().put("q", cleanQuery).put("scope", GLOBAL_SCOPE),
+                JSONObject().put("q", cleanQuery).put("scope", scope),
             )
             RecentSearchResult.Success(emptyList())
         } catch (error: Exception) {
@@ -117,11 +137,12 @@ class SearchRepository(
         }
     }
 
-    fun clearRecentSearches(): RecentSearchResult {
+    fun clearRecentSearches(scope: String = GLOBAL_SCOPE): RecentSearchResult {
+        if (!isSafeSearchScope(scope)) return RecentSearchResult.Failure("This search scope is invalid.")
         val session = sessionProvider()?.takeIf { it.accessToken.isNotBlank() }
             ?: return RecentSearchResult.Failure("Sign in to manage recent searches.", authenticationRequired = true)
         return try {
-            transport.request("/api/v1/search/recent?scope=global", session.accessToken, "DELETE", null)
+            transport.request("/api/v1/search/recent?scope=${encodeSearchValue(scope)}", session.accessToken, "DELETE", null)
             RecentSearchResult.Success(emptyList())
         } catch (error: Exception) {
             RecentSearchResult.Failure(error.message ?: "Could not clear recent searches.")
@@ -131,10 +152,15 @@ class SearchRepository(
     internal fun parsePage(payload: JSONObject, type: SearchType): SearchPage {
         val rows = payload.optJSONArray("data") ?: error("Nantty returned an incomplete search response.")
         val posts = buildList {
-            if (type == SearchType.PEOPLE) return@buildList
+            if (type == SearchType.PEOPLE || type == SearchType.PRODUCTS || type == SearchType.STORES || type == SearchType.BRANDS || type == SearchType.HASHTAGS) return@buildList
             for (index in 0 until rows.length()) {
                 val row = rows.optJSONObject(index) ?: continue
-                if (row.optString("type") != "post") continue
+                val rowKind = row.optString("type")
+                if (type == SearchType.CLIPS) {
+                    if (rowKind != "clip") continue
+                } else if (rowKind != "post") {
+                    continue
+                }
                 val id = row.optString("id").takeIf(::isSafePostId) ?: continue
                 add(SearchPost(
                     id = id,
@@ -143,11 +169,12 @@ class SearchRepository(
                     likes = row.optInt("likes").coerceAtLeast(0),
                     views = row.optInt("views").coerceAtLeast(0),
                     authorId = row.optNullableString("authorId")?.takeIf(::isSafePostId),
+                    kind = rowKind,
                 ))
             }
         }
         val users = buildList {
-            if (type == SearchType.POSTS || type == SearchType.PRODUCTS) return@buildList
+            if (type in setOf(SearchType.POSTS, SearchType.CLIPS, SearchType.PRODUCTS, SearchType.STORES, SearchType.BRANDS, SearchType.HASHTAGS)) return@buildList
             for (index in 0 until rows.length()) {
                 val row = rows.optJSONObject(index) ?: continue
                 if (row.optString("type") != "user") continue
@@ -163,7 +190,7 @@ class SearchRepository(
             }
         }
         val products = buildList {
-            if (type != SearchType.PRODUCTS) return@buildList
+            if (type != SearchType.PRODUCTS && type != SearchType.TOP) return@buildList
             for (index in 0 until rows.length()) {
                 val row = rows.optJSONObject(index) ?: continue
                 if (row.optString("type") != "product") continue
@@ -183,9 +210,44 @@ class SearchRepository(
                 ))
             }
         }
+        val otherResults = buildList {
+            val includedKinds = when (type) {
+                SearchType.TOP -> setOf("store", "brand", "hashtag", "category")
+                SearchType.STORES -> setOf("store")
+                SearchType.BRANDS -> setOf("brand")
+                SearchType.HASHTAGS -> setOf("hashtag")
+                else -> emptySet()
+            }
+            if (includedKinds.isEmpty()) return@buildList
+            for (index in 0 until rows.length()) {
+                val row = rows.optJSONObject(index) ?: continue
+                val kind = row.optString("type")
+                if (kind !in includedKinds) continue
+                val id = row.optString("id").takeIf(::isSafePostId) ?: continue
+                val title = when (kind) {
+                    "hashtag" -> row.optNullableString("tag")?.let { "#$it" }
+                    else -> row.optNullableString("name")
+                }?.filterNot(Char::isISOControl)?.take(120)?.takeIf(String::isNotBlank) ?: continue
+                val subtitle = when (kind) {
+                    "hashtag" -> "${row.optInt("postCount").coerceAtLeast(0)} posts"
+                    "store" -> listOfNotNull(row.optNullableString("username")?.let { "@$it" }, row.optNullableString("location")).joinToString(" · ")
+                    "category" -> "Shop this category in Mart"
+                    else -> row.optNullableString("username")?.let { "@$it" }.orEmpty()
+                }
+                add(SearchOther(
+                    kind = kind,
+                    id = id,
+                    title = title,
+                    subtitle = subtitle,
+                    imageUrl = safeMediaUrl(row.optNullableString("logoUrl")),
+                    count = row.optInt("postCount").takeIf { kind == "hashtag" }?.coerceAtLeast(0),
+                    associatedStoreId = row.optNullableString("officialStoreId")?.takeIf(::isSafePostId),
+                ))
+            }
+        }
         val cursor = payload.optNullableString("nextCursor")
         require(cursor == null || cursor.length <= MAX_CURSOR_LENGTH) { "Nantty returned an invalid search page cursor." }
-        return SearchPage(posts, users, cursor, products)
+        return SearchPage(posts, users, cursor, products, otherResults)
     }
 
     companion object {
@@ -193,6 +255,15 @@ class SearchRepository(
         const val MAX_QUERY_LENGTH = 100
         const val MAX_CURSOR_LENGTH = 300
         const val PAGE_SIZE = 10
+
+        private fun isSafeSearchScope(scope: String): Boolean = when {
+            scope == GLOBAL_SCOPE || scope == "mart" -> true
+            scope.startsWith("store:") || scope.startsWith("profile:") -> {
+                val id = scope.substringAfter(':')
+                runCatching { UUID.fromString(id).toString().equals(id, ignoreCase = true) && id.length == 36 }.getOrDefault(false)
+            }
+            else -> false
+        }
     }
 }
 
@@ -207,10 +278,11 @@ private fun isUuid(value: String): Boolean = try {
     false
 }
 
-internal fun buildSearchPath(query: String, type: SearchType, cursor: String? = null): String = buildString {
-    append("/api/v1/search?q=${encodeSearchValue(query)}&scope=global&type=${type.apiValue}&limit=${SearchRepository.PAGE_SIZE}")
+internal fun buildSearchPath(query: String, type: SearchType, cursor: String? = null, scope: String = SearchRepository.GLOBAL_SCOPE): String = buildString {
+    append("/api/v1/search?q=${encodeSearchValue(query)}&scope=${encodeSearchValue(scope)}&type=${type.apiValue}&limit=${SearchRepository.PAGE_SIZE}")
     cursor?.takeIf(String::isNotBlank)?.let { append("&cursor=${encodeSearchValue(it)}") }
 }
+
 
 private fun encodeSearchValue(value: String): String = java.net.URLEncoder.encode(value, Charsets.UTF_8.name()).replace("+", "%20")
 

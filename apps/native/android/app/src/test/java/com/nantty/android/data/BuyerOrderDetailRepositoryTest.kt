@@ -120,14 +120,47 @@ class BuyerOrderDetailRepositoryTest {
     }
 
     @Test
+    fun retriesTheSameConfirmationWithTheCallersIdempotencyKey() {
+        val transport = RecordingTransport(detail(status = "completed"))
+        val repository = BuyerOrdersRepository("https://api.nantty.com", ::signedInSession, transport)
+
+        assertTrue(repository.confirmReceipt("order_123", "receipt-action-0001") is BuyerOrderReceiptResult.Success)
+        assertTrue(repository.confirmReceipt("order_123", "receipt-action-0001") is BuyerOrderReceiptResult.Success)
+
+        assertEquals(listOf("receipt-action-0001", "receipt-action-0001"), transport.idempotencyKeys)
+    }
+
+    @Test
+    fun onlyTreatsACompletedServerResponseAsReceiptConfirmation() {
+        val deliveredResponse = BuyerOrdersRepository(
+            "https://api.nantty.com",
+            ::signedInSession,
+            RecordingTransport(detail(status = "delivered")),
+        ).confirmReceipt("order_123") as BuyerOrderReceiptResult.Failure
+
+        assertFalse(deliveredResponse.authenticationRequired)
+        assertTrue(deliveredResponse.message.contains("couldn't verify"))
+    }
+
+    @Test
+    fun onlyDeliveredOrdersAreEligibleForTheBuyerReceiptAction() {
+        assertTrue(buyerCanConfirmReceipt("delivered"))
+        assertFalse(buyerCanConfirmReceipt("shipped"))
+        assertFalse(buyerCanConfirmReceipt("completed"))
+        assertFalse(buyerCanConfirmReceipt("disputed"))
+    }
+
+    @Test
     fun rejectsMalformedOrderIdAndMissingSessionBeforePosting() {
         val transport = RecordingTransport(detail())
         val repository = BuyerOrdersRepository("https://api.nantty.com", ::signedInSession, transport)
         val malformed = repository.confirmReceipt("../foreign") as BuyerOrderReceiptResult.Failure
+        val malformedKey = repository.confirmReceipt("order_123", "bad key") as BuyerOrderReceiptResult.Failure
         val signedOut = BuyerOrdersRepository("https://api.nantty.com", { null }, transport)
             .confirmReceipt("order_123") as BuyerOrderReceiptResult.Failure
 
         assertEquals("That order could not be found.", malformed.message)
+        assertTrue(malformedKey.message.contains("safely prepare"))
         assertTrue(signedOut.authenticationRequired)
         assertEquals(0, transport.postCalls)
     }
