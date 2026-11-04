@@ -66,6 +66,10 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
           df -h /
       - uses: actions/checkout@v7.0.1
+      - name: Test event contract checker
+        run: node --test scripts/checkEventContracts.test.mjs
+      - name: Validate event contracts
+        run: node scripts/checkEventContracts.mjs
       - uses: actions/setup-go@v7
         with:
           go-version-file: services/go/platform/go.mod
@@ -131,6 +135,15 @@ jobs:
         with:
           go-version-file: services/go/platform/go.mod
           cache-dependency-path: services/go/**/go.sum
+      - uses: pnpm/action-setup@v6.1.0
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Verify RabbitMQ definitions match the topology source
+        run: |
+          node infra/local/rabbitmq/generateDefinitions.mjs
+          git diff --exit-code -- infra/local/rabbitmq/definitions.json
       - name: Create databases, roles and schemas like the local stack
         run: bash infra/local/postgres/create-databases.sh
       - name: Import RabbitMQ topology
@@ -142,11 +155,6 @@ jobs:
           REDIS_URL: redis://localhost:16379
           RABBITMQ_URL: amqp://guest:guest@localhost:5672/nantty
         run: bash ../scripts/test-go-workspace.sh
-      - uses: pnpm/action-setup@v6.1.0
-      - uses: actions/setup-node@v7.1.0
-        with:
-          node-version-file: .node-version
-          cache: pnpm
       - run: pnpm install --frozen-lockfile --filter @nantty/social... --filter @nantty/notifications... --filter @nantty/media...
       - name: TypeScript service tests that use the database
         env:
