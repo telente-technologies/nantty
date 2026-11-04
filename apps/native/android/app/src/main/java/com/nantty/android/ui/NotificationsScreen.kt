@@ -51,7 +51,7 @@ import com.nantty.android.data.AccountNotificationSettingsRepository
 import java.util.concurrent.Executor
 
 @Composable
-internal fun NotificationsScreen(repository: NotificationsRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenPost: (String) -> Unit = {}, onOpenProfile: (String) -> Unit = {}, onOpenMessages: () -> Unit = {}, onOpenOrders: () -> Unit = {}, accountSettingsRepository: AccountNotificationSettingsRepository? = null) {
+internal fun NotificationsScreen(repository: NotificationsRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenPost: (String) -> Unit = {}, onOpenProfile: (String) -> Unit = {}, onOpenMessages: () -> Unit = {}, onOpenOrders: () -> Unit = {}, accountSettingsRepository: AccountNotificationSettingsRepository? = null, onOpenFollowRequests: () -> Unit = {}) {
     var showingSettings by remember(repository) { mutableStateOf(false) }
     var filter by remember(repository) { mutableStateOf(NotificationFilter.ALL) }
     var result by remember(repository) { mutableStateOf<NotificationsResult?>(null) }
@@ -189,6 +189,7 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
                             is NotificationDestination.Profile -> onOpenProfile(destination.userId)
                             NotificationDestination.Messages -> onOpenMessages()
                             NotificationDestination.Orders -> onOpenOrders()
+                            NotificationDestination.FollowRequests -> onOpenFollowRequests()
                             null -> Unit
                         }
                     })

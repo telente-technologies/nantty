@@ -42,6 +42,7 @@ import com.nantty.android.data.ExploreRepository
 import com.nantty.android.data.FeedPost
 import com.nantty.android.data.FeedResult
 import com.nantty.android.data.FeedType
+import com.nantty.android.data.FollowRequestsRepository
 import com.nantty.android.data.MartRepository
 import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.NotificationsRepository
@@ -81,6 +82,7 @@ internal fun MainContent(
     onOpenWallet: () -> Unit = {},
     buyerOrdersRepository: BuyerOrdersRepository? = null,
     currentProfileRepository: CurrentProfileRepository? = null,
+    followRequestsRepository: FollowRequestsRepository? = null,
     ioExecutor: Executor? = null,
     notificationsRepository: NotificationsRepository? = null,
     accountNotificationSettingsRepository: AccountNotificationSettingsRepository? = null,
@@ -97,11 +99,38 @@ internal fun MainContent(
     onOpenSavedPosts: () -> Unit = {},
     onBackFromSavedPosts: () -> Unit = {},
     onBackFromOrders: () -> Unit = {},
+    onBackFromFollowRequests: () -> Unit = {},
     onOpenMessages: () -> Unit = {},
     onOpenOrders: () -> Unit = {},
+    onOpenFollowRequests: () -> Unit = {},
+    onOpenBusinessTools: () -> Unit = {},
+    businessContent: (@Composable () -> Unit)? = null,
 ) {
     if (destination == Destination.Profile && currentProfileRepository != null && ioExecutor != null) {
-        CurrentProfileScreen(currentProfileRepository, ioExecutor, modifier)
+        CurrentProfileScreen(
+            repository = currentProfileRepository,
+            executor = ioExecutor,
+            modifier = modifier,
+            onOpenBusinessTools = onOpenBusinessTools,
+            onOpenProfile = onOpenProfile,
+            followRequestsRepository = followRequestsRepository,
+            onReauthenticate = onReauthenticate,
+        )
+        return
+    }
+    if (destination == Destination.FollowRequests && followRequestsRepository != null && ioExecutor != null) {
+        FollowRequestsScreen(
+            repository = followRequestsRepository,
+            executor = ioExecutor,
+            onBack = onBackFromFollowRequests,
+            onReauthenticate = onReauthenticate,
+            onOpenProfile = onOpenProfile,
+            modifier = modifier,
+        )
+        return
+    }
+    if (destination == Destination.Business && businessContent != null) {
+        businessContent()
         return
     }
     if (destination == Destination.Saved && savedPostsRepository != null && ioExecutor != null) {
@@ -113,7 +142,18 @@ internal fun MainContent(
         return
     }
     if (destination == Destination.Notifications && notificationsRepository != null && ioExecutor != null) {
-        NotificationsScreen(notificationsRepository, ioExecutor, modifier, onNotificationReauthenticate, onOpenPost, onOpenProfile, onOpenMessages, onOpenOrders, accountNotificationSettingsRepository)
+        NotificationsScreen(
+            repository = notificationsRepository,
+            executor = ioExecutor,
+            modifier = modifier,
+            onReauthenticate = onNotificationReauthenticate,
+            onOpenPost = onOpenPost,
+            onOpenProfile = onOpenProfile,
+            onOpenMessages = onOpenMessages,
+            onOpenOrders = onOpenOrders,
+            accountSettingsRepository = accountNotificationSettingsRepository,
+            onOpenFollowRequests = onOpenFollowRequests,
+        )
         return
     }
     if (destination == Destination.Wallet && walletRepository != null && ioExecutor != null) {

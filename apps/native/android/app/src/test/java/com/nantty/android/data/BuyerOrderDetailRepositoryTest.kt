@@ -143,11 +143,12 @@ class BuyerOrderDetailRepositoryTest {
     }
 
     @Test
-    fun onlyDeliveredOrdersAreEligibleForTheBuyerReceiptAction() {
+    fun shippedAndDeliveredOrdersAreEligibleForTheBuyerReceiptAction() {
+        assertTrue(buyerCanConfirmReceipt("shipped"))
         assertTrue(buyerCanConfirmReceipt("delivered"))
-        assertFalse(buyerCanConfirmReceipt("shipped"))
         assertFalse(buyerCanConfirmReceipt("completed"))
         assertFalse(buyerCanConfirmReceipt("disputed"))
+        assertFalse(buyerCanConfirmReceipt("cancelled"))
     }
 
     @Test

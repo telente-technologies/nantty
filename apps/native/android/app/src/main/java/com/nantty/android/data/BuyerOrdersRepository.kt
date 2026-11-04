@@ -295,7 +295,7 @@ internal fun buildBuyerOrderConfirmReceiptPath(orderId: String): String {
     return "/api/v1/orders/$orderId/confirm-receipt"
 }
 
-internal fun buyerCanConfirmReceipt(status: String): Boolean = status == "delivered"
+internal fun buyerCanConfirmReceipt(status: String): Boolean = status == "shipped" || status == "delivered"
 
 internal fun appendUniqueBuyerOrders(current: List<BuyerOrder>, incoming: List<BuyerOrder>): List<BuyerOrder> {
     val existingIds = current.asSequence().map(BuyerOrder::id).toHashSet()

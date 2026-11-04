@@ -24,7 +24,7 @@ class MessagesRepositoryTest {
         )
 
         val result = repository.load() as MessagesResult.Success
-        assertEquals("/api/v1/conversations?folder=chats&filter=all&limit=20", seenPath)
+        assertEquals("/api/v1/conversations?filter=all&limit=20", seenPath)
         assertEquals("session-access", seenToken)
         assertEquals("Ari", result.page.conversations.single().title)
         assertEquals("https://cdn.nantty.com/ari.jpg", result.page.conversations.single().avatarUrl)
@@ -96,7 +96,25 @@ class MessagesRepositoryTest {
         )
 
         repository.load(cursor)
-        assertEquals("/api/v1/conversations?folder=chats&filter=all&limit=20&cursor=$cursor", requestedPath)
+        assertEquals("/api/v1/conversations?filter=all&limit=20&cursor=$cursor", requestedPath)
+    }
+
+    @Test
+    fun requestsDirectFilterWithExactApiQuery() {
+        var requestedPath: String? = null
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = MessagesTransport { path, _ ->
+                requestedPath = path
+                JSONObject("{\"data\":[],\"nextCursor\":null}")
+            },
+        )
+
+        repository.load(filter = MessagesFilter.DIRECT)
+
+        assertEquals("/api/v1/conversations?filter=direct&limit=20", requestedPath)
+        assertEquals("/api/v1/conversations?filter=all&limit=20", buildConversationPath())
     }
 
     @Test

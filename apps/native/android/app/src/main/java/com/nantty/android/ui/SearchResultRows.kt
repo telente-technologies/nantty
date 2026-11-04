@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,6 +55,17 @@ internal fun RecentHistoryNotice(onRetry: () -> Unit) {
         )
         TextButton(onClick = onRetry) { Text("Try again") }
     }
+}
+
+@Composable
+internal fun SearchSectionHeader(title: String, tag: String) {
+    Text(
+        title,
+        Modifier.fillMaxWidth().padding(horizontal = SearchDimensions.rowHorizontal, vertical = 8.dp)
+            .semantics { heading() }.testTag(tag),
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.SemiBold,
+    )
 }
 
 @Composable

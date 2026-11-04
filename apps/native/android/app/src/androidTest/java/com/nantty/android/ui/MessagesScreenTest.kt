@@ -40,7 +40,7 @@ class MessagesScreenTest {
         compose.onNode(hasContentDescription("Ari Oyinlola, Direct message", substring = true)).assertIsDisplayed()
         compose.onNodeWithText("Secret encrypted preview").assertDoesNotExist()
         compose.runOnIdle {
-            assertEquals("/api/v1/conversations?folder=chats&filter=all&limit=20", transport.path)
+            assertEquals("/api/v1/conversations?filter=all&limit=20", transport.path)
             assertEquals("inbox-access", transport.accessToken)
         }
     }
@@ -66,6 +66,67 @@ class MessagesScreenTest {
         compose.onNodeWithText("Try again").assertIsDisplayed().performClick()
         compose.onNodeWithText("Ari Oyinlola").assertIsDisplayed()
         compose.runOnIdle { assertEquals(2, transport.calls) }
+    }
+
+    @Test
+    fun switchingToDirectResetsListAndDoesNotReuseAllFilterCursor() {
+        val requestedPaths = mutableListOf<String>()
+        val cursor = "33333333-3333-4333-8333-333333333333"
+        val transport = MessagesTransport { path, _ ->
+            requestedPaths += path
+            when {
+                path.contains("filter=direct") -> JSONObject(
+                    """{"data":[{"id":"11111111-1111-4111-8111-111111111111","kind":"direct","peer":{"id":"22222222-2222-4222-8222-222222222222","name":"Direct filter result"},"lastMessageAt":"2026-10-01T12:00:00.000Z","unread":0}],"nextCursor":null}""",
+                )
+                path.contains("&cursor=") -> JSONObject("{\"data\":[],\"nextCursor\":null}")
+                else -> JSONObject(
+                    """{"data":[{"id":"11111111-1111-4111-8111-111111111111","kind":"direct","peer":{"id":"22222222-2222-4222-8222-222222222222","name":"All filter result"},"lastMessageAt":"2026-10-01T12:00:00.000Z","unread":0}],"nextCursor":"$cursor"}""",
+                )
+            }
+        }
+        compose.setContent {
+            MaterialTheme { MessagesScreen(MessagesRepository("https://api.nantty.com", ::signedInSession, transport), Executor { it.run() }) }
+        }
+
+        compose.onNodeWithText("Load more conversations").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Direct Messages").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Direct filter result").assertIsDisplayed()
+
+        compose.runOnIdle {
+            assertEquals(
+                listOf(
+                    "/api/v1/conversations?filter=all&limit=20",
+                    "/api/v1/conversations?filter=all&limit=20&cursor=$cursor",
+                    "/api/v1/conversations?filter=direct&limit=20",
+                ),
+                requestedPaths,
+            )
+        }
+    }
+
+    @Test
+    fun lateResponseFromPreviousFilterCannotReplaceSelectedFilter() {
+        val executor = QueuedExecutor()
+        val transport = MessagesTransport { path, _ ->
+            val name = if (path.contains("filter=direct")) "Current direct result" else "Stale all result"
+            JSONObject(
+                """{"data":[{"id":"11111111-1111-4111-8111-111111111111","kind":"direct","peer":{"id":"22222222-2222-4222-8222-222222222222","name":"$name"},"lastMessageAt":"2026-10-01T12:00:00.000Z","unread":0}],"nextCursor":null}""",
+            )
+        }
+        compose.setContent {
+            MaterialTheme { MessagesScreen(MessagesRepository("https://api.nantty.com", ::signedInSession, transport), executor) }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("Direct Messages").performClick()
+        compose.waitForIdle()
+
+        executor.runAt(1) // Complete the active direct-filter request first.
+        compose.waitForIdle()
+        executor.runAt(0) // The older all-filter response must now be ignored.
+        compose.waitForIdle()
+
+        compose.onNodeWithText("Current direct result").assertIsDisplayed()
+        compose.onNodeWithText("Stale all result").assertDoesNotExist()
     }
 
     @Test
@@ -110,6 +171,18 @@ class MessagesScreenTest {
             return JSONObject(
                 """{"data":[{"id":"11111111-1111-4111-8111-111111111111","kind":"direct","peer":{"id":"22222222-2222-4222-8222-222222222222","name":"Ari Oyinlola"},"lastMessage":"Secret encrypted preview","lastMessageAt":"2026-10-01T12:00:00.000Z","unread":3}],"nextCursor":null}""",
             )
+        }
+    }
+
+    private class QueuedExecutor : Executor {
+        private val tasks = mutableListOf<Runnable>()
+
+        override fun execute(command: Runnable) {
+            tasks += command
+        }
+
+        fun runAt(index: Int) {
+            tasks[index].run()
         }
     }
 

@@ -24,13 +24,13 @@ import com.nantty.android.widget.OrdersWidgetRefreshScheduler
 import java.util.concurrent.Executor
 
 internal enum class Destination(val title: String) {
-    Feed("Home"), Mart("Mart"), Discover("Discover"), Notifications("Activity"), Messages("Messages"), Wallet("Wallet"), Orders("Orders"), Profile("Profile"), Saved("Saved posts")
+    Feed("Home"), Mart("Mart"), Discover("Discover"), Notifications("Activity"), Messages("Messages"), Wallet("Wallet"), Orders("Orders"), Profile("Profile"), Saved("Saved posts"), Business("Business tools"), FollowRequests("Follow requests")
 }
 
 internal fun visibleDestinations(isGuest: Boolean): List<Destination> =
     Destination.entries.filter { item ->
         if (isGuest) item == Destination.Feed || item == Destination.Mart || item == Destination.Discover
-        else item != Destination.Saved && item != Destination.Orders && item != Destination.Mart
+        else item != Destination.Saved && item != Destination.Orders && item != Destination.Mart && item != Destination.Business && item != Destination.FollowRequests
     }
 
 @Composable

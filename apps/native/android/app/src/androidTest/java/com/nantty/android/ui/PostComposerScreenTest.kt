@@ -12,6 +12,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.PostComposerRepository
+import com.nantty.android.data.PostComposerAudience
 import com.nantty.android.data.PostPublishTransport
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -73,6 +74,32 @@ class PostComposerScreenTest {
 
         compose.onNodeWithContentDescription("Publish post").assertIsDisplayed().assertIsNotEnabled()
         assertEquals(null, transport.path)
+    }
+
+    @Test
+    fun selectedFollowersAudienceIsSentWhenPublishing() {
+        val session = AccountSession("current-access", "current-refresh", AccountUser("u1", "Ari", "ari", null, null, emptyList()))
+        val transport = RecordingPublishTransport()
+        val repository = PostComposerRepository("https://api.nantty.com", { session }, transport)
+        compose.setContent {
+            MaterialTheme {
+                PostComposerScreen(
+                    sessionProvider = { session },
+                    executor = Executor { it.run() },
+                    repository = repository,
+                    onCancel = {},
+                    onPublished = {},
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Post text").performTextInput("Only for followers")
+        compose.onNodeWithContentDescription("Post audience: Followers").performClick()
+        compose.onNodeWithContentDescription("Publish post").performClick()
+
+        compose.runOnIdle {
+            assertEquals(PostComposerAudience.FOLLOWERS.wireValue, transport.body?.getString("audience"))
+        }
     }
 
     private class RecordingPublishTransport : PostPublishTransport {

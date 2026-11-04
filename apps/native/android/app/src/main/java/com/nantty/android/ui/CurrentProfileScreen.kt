@@ -52,6 +52,7 @@ import com.nantty.android.data.CurrentProfile
 import com.nantty.android.data.CurrentProfileRepository
 import com.nantty.android.data.CurrentProfileResult
 import com.nantty.android.data.CurrentProfileUpdate
+import com.nantty.android.data.FollowRequestsRepository
 import java.util.concurrent.Executor
 
 @Composable
@@ -59,6 +60,10 @@ internal fun CurrentProfileScreen(
     repository: CurrentProfileRepository,
     executor: Executor,
     modifier: Modifier = Modifier,
+    onOpenBusinessTools: () -> Unit = {},
+    onOpenProfile: (String) -> Unit = {},
+    followRequestsRepository: FollowRequestsRepository? = null,
+    onReauthenticate: () -> Unit = {},
 ) {
     var profile by remember(repository) { mutableStateOf<CurrentProfile?>(null) }
     var loading by remember(repository) { mutableStateOf(true) }
@@ -66,7 +71,23 @@ internal fun CurrentProfileScreen(
     var error by remember(repository) { mutableStateOf<String?>(null) }
     var message by remember(repository) { mutableStateOf<String?>(null) }
     var editing by remember(repository) { mutableStateOf(false) }
+    var showingFollowRequests by remember(repository) { mutableStateOf(false) }
     var reload by remember(repository) { mutableStateOf(0) }
+
+    if (showingFollowRequests && followRequestsRepository != null) {
+        FollowRequestsScreen(
+            repository = followRequestsRepository,
+            executor = executor,
+            onBack = { showingFollowRequests = false },
+            onReauthenticate = onReauthenticate,
+            onOpenProfile = { userId ->
+                showingFollowRequests = false
+                onOpenProfile(userId)
+            },
+            modifier = modifier,
+        )
+        return
+    }
 
     LaunchedEffect(repository, reload) {
         loading = true
@@ -110,6 +131,8 @@ internal fun CurrentProfileScreen(
                     message = message,
                     error = error,
                     horizontalPadding = horizontalPadding,
+                    onOpenBusinessTools = onOpenBusinessTools,
+                    onOpenFollowRequests = { showingFollowRequests = true },
                     onStartEditing = {
                         message = null
                         error = null
@@ -153,6 +176,8 @@ private fun CurrentProfileContent(
     message: String?,
     error: String?,
     horizontalPadding: androidx.compose.ui.unit.Dp,
+    onOpenBusinessTools: () -> Unit,
+    onOpenFollowRequests: () -> Unit,
     onStartEditing: () -> Unit,
     onCancelEditing: () -> Unit,
     onSave: (CurrentProfileUpdate) -> Unit,
@@ -291,6 +316,18 @@ private fun CurrentProfileContent(
                 ) {
                     androidx.compose.material3.Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
                     Text("Edit profile", Modifier.padding(start = 8.dp))
+                }
+                OutlinedButton(
+                    onClick = onOpenBusinessTools,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                ) {
+                    Text("Seller, creator, brand & ads tools")
+                }
+                if (profile.isPrivate) {
+                    OutlinedButton(
+                        onClick = onOpenFollowRequests,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                    ) { Text("Review follow requests") }
                 }
                 message?.let { Text(it, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium) }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }

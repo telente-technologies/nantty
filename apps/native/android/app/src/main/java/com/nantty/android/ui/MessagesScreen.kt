@@ -25,12 +25,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +49,7 @@ import coil.compose.AsyncImage
 import com.nantty.android.data.ConversationPage
 import com.nantty.android.data.InboxConversation
 import com.nantty.android.data.MessagesRepository
+import com.nantty.android.data.MessagesFilter
 import com.nantty.android.data.MessagesResult
 import java.time.Instant
 import java.time.ZoneId
@@ -56,22 +60,27 @@ import java.util.concurrent.Executor
 internal fun MessagesScreen(repository: MessagesRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenConversation: (InboxConversation) -> Unit = {}) {
     var selectedConversation by remember(repository) { mutableStateOf<InboxConversation?>(null) }
     var result by remember(repository) { mutableStateOf<MessagesResult?>(null) }
+    var filter by remember(repository) { mutableStateOf(MessagesFilter.ALL) }
+    var refreshVersion by remember(repository) { mutableIntStateOf(0) }
+    var requestGeneration by remember(repository) { mutableIntStateOf(0) }
     var loading by remember(repository) { mutableStateOf(false) }
     var loadingMore by remember(repository) { mutableStateOf(false) }
     var pageError by remember(repository) { mutableStateOf<String?>(null) }
 
     fun refresh() {
-        if (loading) return
-        loading = true
-        pageError = null
+        requestGeneration += 1
+        refreshVersion += 1
+    }
+
+    fun selectFilter(next: MessagesFilter) {
+        if (filter == next) return
+        // Invalidate in-flight list and pagination requests before the new effect starts.
+        requestGeneration += 1
+        filter = next
         result = null
-        executor.execute {
-            val loaded = repository.load()
-            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                result = loaded
-                loading = false
-            }
-        }
+        loading = true
+        loadingMore = false
+        pageError = null
     }
 
     fun loadMore() {
@@ -80,9 +89,12 @@ internal fun MessagesScreen(repository: MessagesRepository, executor: Executor, 
         if (loadingMore) return
         loadingMore = true
         pageError = null
+        val requestFilter = filter
+        val generation = requestGeneration
         executor.execute {
-            val loaded = repository.load(cursor)
+            val loaded = repository.load(cursor = cursor, filter = requestFilter)
             androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                if (generation != requestGeneration || requestFilter != filter) return@withMutableSnapshot
                 when (loaded) {
                     is MessagesResult.Failure -> pageError = loaded.message
                     is MessagesResult.Success -> {
@@ -96,7 +108,23 @@ internal fun MessagesScreen(repository: MessagesRepository, executor: Executor, 
         }
     }
 
-    LaunchedEffect(repository) { refresh() }
+    LaunchedEffect(repository, filter, refreshVersion) {
+        val requestFilter = filter
+        val generation = requestGeneration + 1
+        requestGeneration = generation
+        loading = true
+        loadingMore = false
+        pageError = null
+        result = null
+        executor.execute {
+            val loaded = repository.load(filter = requestFilter)
+            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                if (generation != requestGeneration || requestFilter != filter) return@withMutableSnapshot
+                result = loaded
+                loading = false
+            }
+        }
+    }
 
     BackHandler(enabled = selectedConversation != null) { selectedConversation = null }
     selectedConversation?.let { conversation ->
@@ -132,6 +160,15 @@ internal fun MessagesScreen(repository: MessagesRepository, executor: Executor, 
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        PrimaryTabRow(selectedTabIndex = MessagesFilter.entries.indexOf(filter)) {
+            MessagesFilter.entries.forEach { option ->
+                Tab(
+                    selected = filter == option,
+                    onClick = { selectFilter(option) },
+                    text = { Text(option.label) },
+                )
+            }
+        }
         when {
             loading && result == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(Modifier.semantics { contentDescription = "Loading messages" })

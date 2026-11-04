@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
@@ -194,6 +195,35 @@ class RegistrationFlowScreenTest {
         compose.runOnIdle { flowState.value = flowState.value.copy(usernameAvailability = UsernameAvailability.Available) }
         compose.onNodeWithText("Confirm").assertIsEnabled().performClick()
         compose.runOnIdle { assertEquals("nantty_user", calls.createdUsername) }
+    }
+
+    @Test
+    fun selectingSuggestedUsernameChecksAvailabilityBeforeAccountCreation() {
+        val calls = RecordingCallbacks()
+        compose.setContent {
+            MaterialTheme {
+                RegistrationFlowScreen(
+                    state = RegistrationFlowState(
+                        step = RegistrationStep.Username,
+                        suggestedUsername = "nantty_user",
+                        usernameAvailability = UsernameAvailability.Idle,
+                    ),
+                    callbacks = calls.callbacks(),
+                )
+            }
+        }
+
+        compose.onNode(hasSetTextAction()).performTextClearance()
+        compose.onNode(hasSetTextAction()).performTextInput("another_user")
+        compose.onNodeWithText("Use suggestion").performClick()
+        compose.mainClock.advanceTimeBy(400)
+        compose.waitForIdle()
+
+        compose.runOnIdle {
+            assertEquals("nantty_user", calls.checkedUsername)
+            assertEquals(null, calls.createdUsername)
+        }
+        compose.onNodeWithText("Confirm").assertIsNotEnabled()
     }
 
     private class RecordingCallbacks {

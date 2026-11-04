@@ -52,6 +52,28 @@ class CurrentProfileScreenTest {
             assertEquals("PATCH", transport.methods.last())
         }
     }
+
+    @Test
+    fun opensBusinessToolsFromTheOwnProfile() {
+        var openedBusinessTools = false
+        val repository = CurrentProfileRepository(
+            "https://api.nantty.com",
+            CurrentProfileTransportFake(),
+            ::signedInSession,
+        )
+        compose.setContent {
+            MaterialTheme {
+                CurrentProfileScreen(
+                    repository = repository,
+                    executor = Executor { it.run() },
+                    onOpenBusinessTools = { openedBusinessTools = true },
+                )
+            }
+        }
+
+        compose.onNodeWithText("Seller, creator, brand & ads tools").assertIsDisplayed().performClick()
+        compose.runOnIdle { assertEquals(true, openedBusinessTools) }
+    }
 }
 
 private class CurrentProfileTransportFake : CurrentProfileTransport {

@@ -42,6 +42,14 @@ class NotificationsRepositoryTest {
         assertEquals(NotificationDestination.Messages, resolveNotificationDestination(base.copy(category = "messages")))
         assertEquals(NotificationDestination.Messages, resolveNotificationDestination(base.copy(conversationId = "conversation-1")))
         assertEquals(NotificationDestination.Orders, resolveNotificationDestination(base.copy(category = "orders")))
+        assertEquals(
+            NotificationDestination.FollowRequests,
+            resolveNotificationDestination(base.copy(kind = "followRequest", postId = "post-123")),
+        )
+        assertEquals(
+            NotificationDestination.Profile("user-123"),
+            resolveNotificationDestination(base.copy(kind = "followRequestAccepted", actor = NotificationActor("user-123", "Ari", null))),
+        )
         assertEquals(NotificationDestination.Profile("user-123"), resolveNotificationDestination(base.copy(actor = NotificationActor("user-123", "Ari", null))))
         assertNull(resolveNotificationDestination(base.copy(actor = NotificationActor("../settings", "Ari", null))))
     }

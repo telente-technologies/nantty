@@ -88,6 +88,7 @@ internal fun ExploreHomeScreen(
     onRetryRecents: () -> Unit = {},
 ) {
     var category by remember(repository) { mutableStateOf("for_you") }
+    var showAllTrends by remember(repository) { mutableStateOf(false) }
     var categories by remember(repository) { mutableStateOf(exploreCategories) }
     var trends by remember(repository) { mutableStateOf<List<ExploreTrend>>(emptyList()) }
     var headlines by remember(repository) { mutableStateOf<List<ExploreHeadline>>(emptyList()) }
@@ -235,12 +236,33 @@ internal fun ExploreHomeScreen(
                 }
             }
 
-            item(key = "trends-title") { ExploreHeading(if (category == "for_you") "Trends for you" else "Trending") }
+            item(key = "trends-title") {
+                Row(
+                    Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 18.dp, bottom = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        if (category == "for_you") "Trends for you" else "Trending",
+                        Modifier.weight(1f).semantics { heading() },
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    if (trends.size > COLLAPSED_TREND_COUNT) {
+                        TextButton(
+                            onClick = { showAllTrends = !showAllTrends },
+                            modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp).testTag("explore-toggle-trends"),
+                        ) { Text(if (showAllTrends) "Show less" else "Show more") }
+                    }
+                }
+            }
             when {
                 trendsLoading && trends.isEmpty() -> item(key = "trends-loading") { LoadingLine("Loading trends") }
                 trendsError != null && trends.isEmpty() -> item(key = "trends-error") { RetryLine("Trends didn’t load.", { retryTrends += 1 }) }
                 trends.isEmpty() -> item(key = "trends-empty") { QuietLine("No trends in this category yet.") }
-                else -> items(trends.take(5), key = ExploreTrend::hashtag) { trend -> TrendExploreRow(trend, onClick = { onSearch(trend.hashtag) }) }
+                else -> items(
+                    if (showAllTrends) trends else trends.take(COLLAPSED_TREND_COUNT),
+                    key = ExploreTrend::hashtag,
+                ) { trend -> TrendExploreRow(trend, onClick = { onSearch(trend.hashtag) }) }
             }
 
             item(key = "suggestions-title") { ExploreHeading("Who to follow") }
@@ -334,6 +356,8 @@ internal fun ExploreHomeScreen(
         }
     }
 }
+
+private const val COLLAPSED_TREND_COUNT = 5
 
 @Composable
 private fun ExploreHeading(title: String) {

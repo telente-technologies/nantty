@@ -35,14 +35,18 @@ import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import com.nantty.android.data.AccountNotificationSettingsRepository
 import com.nantty.android.data.AccountSessionRepository
+import com.nantty.android.data.AdsWorkspaceRepository
+import com.nantty.android.data.BrandProfilesRepository
 import com.nantty.android.data.BuyerOrdersRepository
 import com.nantty.android.data.CartRepository
 import com.nantty.android.data.CheckoutReceipt
 import com.nantty.android.data.CheckoutRepository
 import com.nantty.android.data.CurrentProfileRepository
+import com.nantty.android.data.CreatorWorkspaceRepository
 import com.nantty.android.data.ExploreRepository
 import com.nantty.android.data.FeedPost
 import com.nantty.android.data.FeedRepository
+import com.nantty.android.data.FollowRequestsRepository
 import com.nantty.android.data.FeedResult
 import com.nantty.android.data.FeedTopic
 import com.nantty.android.data.FeedTopicsResult
@@ -54,6 +58,7 @@ import com.nantty.android.data.PostDetailRepository
 import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.data.SavedPostsRepository
 import com.nantty.android.data.SearchRepository
+import com.nantty.android.data.SellerWorkspaceRepository
 import com.nantty.android.data.WalletRepository
 import com.nantty.android.data.appendUniqueFeedPosts
 import com.nantty.android.share.sharePostFromAndroid
@@ -149,6 +154,54 @@ internal fun SignedInApp(
     }
     val currentProfileRepository = remember(sessionRepository) {
         CurrentProfileRepository(sessionProvider = sessionRepository::sessionOrNull)
+    }
+    val followRequestsRepository = remember(sessionRepository) {
+        FollowRequestsRepository(sessionProvider = sessionRepository::sessionOrNull)
+    }
+    val sellerWorkspaceRepository = remember(sessionRepository) {
+        SellerWorkspaceRepository(sessionProvider = sessionRepository::sessionOrNull)
+    }
+    val creatorWorkspaceRepository = remember(sessionRepository) {
+        CreatorWorkspaceRepository(
+            sessionProvider = sessionRepository::sessionOrNull,
+            refreshSessionProvider = sessionRepository::refreshSession,
+        )
+    }
+    val brandProfilesRepository = remember(sessionRepository) {
+        BrandProfilesRepository(sessionProvider = sessionRepository::sessionOrNull)
+    }
+    val adsWorkspaceRepository = remember(sessionRepository) {
+        AdsWorkspaceRepository(
+            sessionProvider = sessionRepository::sessionOrNull,
+            refreshSessionProvider = sessionRepository::refreshSession,
+        )
+    }
+    val businessContent: @Composable () -> Unit = {
+        BusinessWorkspaceScreen(
+            sellerContent = { SellerWorkspaceScreen(sellerWorkspaceRepository) },
+            creatorContent = {
+                CreatorWorkspaceScreen(
+                    repository = creatorWorkspaceRepository,
+                    executor = executor,
+                    onReauthenticate = onSignOut,
+                )
+            },
+            brandContent = {
+                BrandProfilesScreen(
+                    repository = brandProfilesRepository,
+                    executor = executor,
+                    onReauthenticate = onSignOut,
+                )
+            },
+            adsContent = {
+                AdsWorkspaceScreen(
+                    repository = adsWorkspaceRepository,
+                    executor = executor,
+                    onReauthenticate = onSignOut,
+                )
+            },
+            onBack = { destination = Destination.Profile },
+        )
     }
 
     fun refresh() {
@@ -455,7 +508,56 @@ internal fun SignedInApp(
                             loadTopics(sessionRepository.sessionOrNull()?.accessToken)
                         }
                     }
-                    MainContent(destination, result, loading, selectedFeed = selectedFeed, canViewFollowing = !isGuest, onSelectFeed = ::selectFeed, onSignInRequired = onRequireSignIn, onReauthenticate = onSignOut, onRefresh = ::refresh, onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true }, onOpenPost = { selectedPostId = it }, onOpenProfile = { selectedProfileId = it }, onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart }, onLike = { if (isGuest) onRequireSignIn() else toggleFeedLike(it) }, onRepost = { if (isGuest) onRequireSignIn() else toggleFeedRepost(it) }, onSave = { if (isGuest) onRequireSignIn() else toggleFeedSaved(it) }, onShare = ::shareFeedPost, interactionMessage = interactionMessage, savingPostId = savingPostId, loadingMore = loadingMore, loadMoreError = loadMoreError, onLoadMore = ::loadMore, walletRepository = walletRepository, walletAccountKey = accountUser?.id, onOpenWallet = { if (isGuest) onRequireSignIn() else destination = Destination.Wallet }, buyerOrdersRepository = buyerOrdersRepository, currentProfileRepository = currentProfileRepository, ioExecutor = executor, notificationsRepository = notificationsRepository, accountNotificationSettingsRepository = accountNotificationSettingsRepository, onNotificationReauthenticate = onSignOut, searchRepository = searchRepository, exploreRepository = exploreRepository, publicProfileRepository = publicProfileRepository, messagesRepository = messagesRepository, savedPostsRepository = savedPostsRepository, martRepository = martRepository, showMartCategoryPane = showMartCategoryPane, initialMartProductId = pendingMartProductId, onInitialMartProductHandled = { pendingMartProductId = null }, onOpenSavedPosts = { if (isGuest) onRequireSignIn() else destination = Destination.Saved }, onBackFromSavedPosts = { destination = Destination.Feed }, onBackFromOrders = { destination = Destination.Feed }, onOpenMessages = { if (isGuest) onRequireSignIn() else destination = Destination.Messages }, onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders })
+                    MainContent(
+                        destination, result, loading,
+                        selectedFeed = selectedFeed,
+                        canViewFollowing = !isGuest,
+                        onSelectFeed = ::selectFeed,
+                        onSignInRequired = onRequireSignIn,
+                        onReauthenticate = onSignOut,
+                        onRefresh = ::refresh,
+                        onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true },
+                        onOpenPost = { selectedPostId = it },
+                        onOpenProfile = { selectedProfileId = it },
+                        onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
+                        onLike = { if (isGuest) onRequireSignIn() else toggleFeedLike(it) },
+                        onRepost = { if (isGuest) onRequireSignIn() else toggleFeedRepost(it) },
+                        onSave = { if (isGuest) onRequireSignIn() else toggleFeedSaved(it) },
+                        onShare = ::shareFeedPost,
+                        interactionMessage = interactionMessage,
+                        savingPostId = savingPostId,
+                        loadingMore = loadingMore,
+                        loadMoreError = loadMoreError,
+                        onLoadMore = ::loadMore,
+                        walletRepository = walletRepository,
+                        walletAccountKey = accountUser?.id,
+                        onOpenWallet = { if (isGuest) onRequireSignIn() else destination = Destination.Wallet },
+                        buyerOrdersRepository = buyerOrdersRepository,
+                        currentProfileRepository = currentProfileRepository,
+                        followRequestsRepository = followRequestsRepository,
+                        ioExecutor = executor,
+                        notificationsRepository = notificationsRepository,
+                        accountNotificationSettingsRepository = accountNotificationSettingsRepository,
+                        onNotificationReauthenticate = onSignOut,
+                        searchRepository = searchRepository,
+                        exploreRepository = exploreRepository,
+                        publicProfileRepository = publicProfileRepository,
+                        messagesRepository = messagesRepository,
+                        savedPostsRepository = savedPostsRepository,
+                        martRepository = martRepository,
+                        showMartCategoryPane = showMartCategoryPane,
+                        initialMartProductId = pendingMartProductId,
+                        onInitialMartProductHandled = { pendingMartProductId = null },
+                        onOpenSavedPosts = { if (isGuest) onRequireSignIn() else destination = Destination.Saved },
+                        onBackFromSavedPosts = { destination = Destination.Feed },
+                        onBackFromOrders = { destination = Destination.Feed },
+                        onBackFromFollowRequests = { destination = Destination.Profile },
+                        onOpenMessages = { if (isGuest) onRequireSignIn() else destination = Destination.Messages },
+                        onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders },
+                        onOpenFollowRequests = { if (isGuest) onRequireSignIn() else destination = Destination.FollowRequests },
+                        onOpenBusinessTools = { if (isGuest) onRequireSignIn() else destination = Destination.Business },
+                        businessContent = businessContent,
+                    )
                 }
                 if (hasExpandedWidth) {
                     Column(Modifier.width(280.dp).padding(start = 24.dp, top = 28.dp)) {
@@ -479,7 +581,57 @@ internal fun SignedInApp(
                         loadTopics(sessionRepository.sessionOrNull()?.accessToken)
                     }
                 }
-                    MainContent(destination, result, loading, selectedFeed = selectedFeed, canViewFollowing = !isGuest, onSelectFeed = ::selectFeed, onSignInRequired = onRequireSignIn, onReauthenticate = onSignOut, onRefresh = ::refresh, onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true }, modifier = Modifier.weight(1f), onOpenPost = { selectedPostId = it }, onOpenProfile = { selectedProfileId = it }, onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart }, onLike = { if (isGuest) onRequireSignIn() else toggleFeedLike(it) }, onRepost = { if (isGuest) onRequireSignIn() else toggleFeedRepost(it) }, onSave = { if (isGuest) onRequireSignIn() else toggleFeedSaved(it) }, onShare = ::shareFeedPost, interactionMessage = interactionMessage, savingPostId = savingPostId, loadingMore = loadingMore, loadMoreError = loadMoreError, onLoadMore = ::loadMore, walletRepository = walletRepository, walletAccountKey = accountUser?.id, onOpenWallet = { if (isGuest) onRequireSignIn() else destination = Destination.Wallet }, buyerOrdersRepository = buyerOrdersRepository, currentProfileRepository = currentProfileRepository, ioExecutor = executor, notificationsRepository = notificationsRepository, accountNotificationSettingsRepository = accountNotificationSettingsRepository, onNotificationReauthenticate = onSignOut, searchRepository = searchRepository, exploreRepository = exploreRepository, publicProfileRepository = publicProfileRepository, messagesRepository = messagesRepository, savedPostsRepository = savedPostsRepository, martRepository = martRepository, showMartCategoryPane = showMartCategoryPane, initialMartProductId = pendingMartProductId, onInitialMartProductHandled = { pendingMartProductId = null }, onOpenSavedPosts = { if (isGuest) onRequireSignIn() else destination = Destination.Saved }, onBackFromSavedPosts = { destination = Destination.Feed }, onBackFromOrders = { destination = Destination.Feed }, onOpenMessages = { if (isGuest) onRequireSignIn() else destination = Destination.Messages }, onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders })
+                MainContent(
+                    destination, result, loading,
+                    selectedFeed = selectedFeed,
+                    canViewFollowing = !isGuest,
+                    onSelectFeed = ::selectFeed,
+                    onSignInRequired = onRequireSignIn,
+                    onReauthenticate = onSignOut,
+                    onRefresh = ::refresh,
+                    onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true },
+                    modifier = Modifier.weight(1f),
+                    onOpenPost = { selectedPostId = it },
+                    onOpenProfile = { selectedProfileId = it },
+                    onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
+                    onLike = { if (isGuest) onRequireSignIn() else toggleFeedLike(it) },
+                    onRepost = { if (isGuest) onRequireSignIn() else toggleFeedRepost(it) },
+                    onSave = { if (isGuest) onRequireSignIn() else toggleFeedSaved(it) },
+                    onShare = ::shareFeedPost,
+                    interactionMessage = interactionMessage,
+                    savingPostId = savingPostId,
+                    loadingMore = loadingMore,
+                    loadMoreError = loadMoreError,
+                    onLoadMore = ::loadMore,
+                    walletRepository = walletRepository,
+                    walletAccountKey = accountUser?.id,
+                    onOpenWallet = { if (isGuest) onRequireSignIn() else destination = Destination.Wallet },
+                    buyerOrdersRepository = buyerOrdersRepository,
+                    currentProfileRepository = currentProfileRepository,
+                    followRequestsRepository = followRequestsRepository,
+                    ioExecutor = executor,
+                    notificationsRepository = notificationsRepository,
+                    accountNotificationSettingsRepository = accountNotificationSettingsRepository,
+                    onNotificationReauthenticate = onSignOut,
+                    searchRepository = searchRepository,
+                    exploreRepository = exploreRepository,
+                    publicProfileRepository = publicProfileRepository,
+                    messagesRepository = messagesRepository,
+                    savedPostsRepository = savedPostsRepository,
+                    martRepository = martRepository,
+                    showMartCategoryPane = showMartCategoryPane,
+                    initialMartProductId = pendingMartProductId,
+                    onInitialMartProductHandled = { pendingMartProductId = null },
+                    onOpenSavedPosts = { if (isGuest) onRequireSignIn() else destination = Destination.Saved },
+                    onBackFromSavedPosts = { destination = Destination.Feed },
+                    onBackFromOrders = { destination = Destination.Feed },
+                    onBackFromFollowRequests = { destination = Destination.Profile },
+                    onOpenMessages = { if (isGuest) onRequireSignIn() else destination = Destination.Messages },
+                    onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders },
+                    onOpenFollowRequests = { if (isGuest) onRequireSignIn() else destination = Destination.FollowRequests },
+                    onOpenBusinessTools = { if (isGuest) onRequireSignIn() else destination = Destination.Business },
+                    businessContent = businessContent,
+                )
                 NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                     visibleDestinations(isGuest).forEach { item ->
                         NavigationBarItem(

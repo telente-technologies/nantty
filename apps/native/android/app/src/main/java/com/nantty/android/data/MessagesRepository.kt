@@ -14,6 +14,11 @@ enum class ConversationType(val apiValue: String, val label: String) {
     }
 }
 
+enum class MessagesFilter(val apiValue: String, val label: String) {
+    ALL("all", "All Messages"),
+    DIRECT("direct", "Direct Messages"),
+}
+
 data class InboxConversation(
     val id: String,
     val title: String,
@@ -64,13 +69,13 @@ class MessagesRepository(
     private val refreshSessionProvider: () -> AccountSession? = { null },
     private val threadTransport: ChatThreadTransport = JdkChatThreadTransport(baseUrl),
 ) {
-    fun load(cursor: String? = null): MessagesResult = try {
+    fun load(cursor: String? = null, filter: MessagesFilter = MessagesFilter.ALL): MessagesResult = try {
         val session = sessionProvider() ?: error("Sign in to view your messages.")
         val token = session.accessToken.takeIf(String::isNotBlank) ?: error("Sign in to view your messages.")
         require(cursor == null || (cursor.length <= MAX_CURSOR_LENGTH && cursor.matches(UUID_PATTERN))) {
             "This inbox page cursor is invalid. Refresh your messages and try again."
         }
-        val path = buildConversationPath(cursor)
+        val path = buildConversationPath(filter, cursor)
         val payload = try {
             transport.get(path, token)
         } catch (error: MessagesHttpException) {
@@ -207,8 +212,8 @@ class MessagesRepository(
     }
 }
 
-internal fun buildConversationPath(cursor: String? = null): String = buildString {
-    append("/api/v1/conversations?folder=chats&filter=all&limit=${MessagesRepository.PAGE_SIZE}")
+internal fun buildConversationPath(filter: MessagesFilter = MessagesFilter.ALL, cursor: String? = null): String = buildString {
+    append("/api/v1/conversations?filter=${java.net.URLEncoder.encode(filter.apiValue, Charsets.UTF_8.name())}&limit=${MessagesRepository.PAGE_SIZE}")
     cursor?.takeIf(String::isNotBlank)?.let { append("&cursor=${java.net.URLEncoder.encode(it, Charsets.UTF_8.name())}") }
 }
 
@@ -221,7 +226,10 @@ private fun isSecureImageUrl(value: String): Boolean = runCatching {
 
 private class JdkMessagesTransport(private val baseUrl: String) : MessagesTransport {
     override fun get(path: String, accessToken: String): JSONObject {
-        require(path.startsWith("/api/v1/conversations?folder=chats&filter=all&limit=20")) { "Unsupported messages request." }
+        require(
+            path.startsWith("/api/v1/conversations?filter=all&limit=20") ||
+                path.startsWith("/api/v1/conversations?filter=direct&limit=20"),
+        ) { "Unsupported messages request." }
         val origin = trustedApiOrigin(baseUrl) ?: error("Configure an HTTPS Nantty API URL to view messages.")
         val connection = (URL(origin + path).openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"

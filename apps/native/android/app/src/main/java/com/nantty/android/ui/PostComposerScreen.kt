@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.PostComposerRepository
+import com.nantty.android.data.PostComposerAudience
 import java.util.UUID
 import java.util.concurrent.Executor
 
@@ -48,6 +50,7 @@ internal fun PostComposerScreen(
     onPublished: (String) -> Unit,
 ) {
     var content by remember { mutableStateOf(TextFieldValue()) }
+    var audience by remember { mutableStateOf(PostComposerAudience.EVERYONE) }
     var requestKey by remember { mutableStateOf(UUID.randomUUID().toString()) }
     var isPublishing by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -68,9 +71,10 @@ internal fun PostComposerScreen(
                     isPublishing = true
                     errorMessage = null
                     val submittedText = content.text
+                    val submittedAudience = audience
                     val idempotencyKey = requestKey
                     executor.execute {
-                        val result = repository.publishTextPost(submittedText, idempotencyKey)
+                        val result = repository.publishTextPost(submittedText, idempotencyKey, submittedAudience)
                         Snapshot.withMutableSnapshot {
                             isPublishing = false
                             result.fold(
@@ -102,8 +106,24 @@ internal fun PostComposerScreen(
                 enabled = !isPublishing,
                 maxLines = 10,
             )
+            Spacer(Modifier.height(16.dp))
+            Text("Who can see this post?", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PostComposerAudience.entries.forEach { option ->
+                    FilterChip(
+                        selected = audience == option,
+                        onClick = {
+                            if (audience != option) requestKey = UUID.randomUUID().toString()
+                            audience = option
+                        },
+                        enabled = !isPublishing,
+                        label = { Text(option.label) },
+                        modifier = Modifier.semantics { contentDescription = "Post audience: ${option.label}" },
+                    )
+                }
+            }
             Spacer(Modifier.height(8.dp))
-            Text("Posting to your personal account", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodySmall)
+            Text("Posting to your personal account · ${audience.label}", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodySmall)
             errorMessage?.let {
                 Spacer(Modifier.height(12.dp))
                 Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)

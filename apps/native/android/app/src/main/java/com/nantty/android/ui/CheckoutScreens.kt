@@ -2,6 +2,8 @@ package com.nantty.android.ui
 
 import android.content.Intent
 import android.net.Uri
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,11 +33,13 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +49,9 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import com.nantty.android.data.CheckoutAddress
 import com.nantty.android.data.CheckoutAddressesResult
 import com.nantty.android.data.CheckoutCartResult
@@ -240,8 +247,60 @@ internal fun CheckoutPaymentScreen(
     var status by remember(receipt.payableOrderId) { mutableStateOf("Payment is not confirmed yet.") }
     var verified by rememberSaveable(receipt.payableOrderId) { mutableStateOf(false) }
     var paymentKey by rememberSaveable(receipt.payableOrderId) { mutableStateOf(UUID.randomUUID().toString()) }
+    var awaitingProviderReturn by rememberSaveable(receipt.payableOrderId) { mutableStateOf(false) }
+    var providerPagePausedApp by rememberSaveable(receipt.payableOrderId) { mutableStateOf(false) }
     val context = LocalContext.current
+    val lifecycleOwner = remember(context) { context.findLifecycleOwner() }
+    val providerReturnTracker = remember(receipt.payableOrderId) {
+        HostedPaymentReturnTracker(awaitingProviderReturn, providerPagePausedApp)
+    }
     BackHandler(onBack = onBack)
+
+    fun verifyPaymentStatus() {
+        if (busy) return
+        busy = true
+        status = "Checking payment status with Nantty…"
+        executor.execute {
+            when (val result = repository.verifyPayment(receipt.payableOrderId)) {
+                PaymentVerificationResult.Paid -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                    busy = false
+                    status = "Payment verified by Nantty."
+                    verified = true
+                }
+                PaymentVerificationResult.Pending -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                    busy = false
+                    status = "Payment is still processing. You can safely check again shortly."
+                }
+                PaymentVerificationResult.Failed -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                    busy = false
+                    status = "Payment was not completed. Your order remains unpaid; retry securely or check your orders."
+                }
+                is PaymentVerificationResult.Failure -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                    busy = false
+                    status = result.message
+                    if (result.authenticationRequired) onAuthenticationRequired()
+                }
+            }
+        }
+    }
+    val verifyPaymentState = rememberUpdatedState<() -> Unit> { verifyPaymentStatus() }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> if (providerReturnTracker.onPause()) {
+                    providerPagePausedApp = true
+                }
+                Lifecycle.Event.ON_RESUME -> if (providerReturnTracker.onResume()) {
+                    awaitingProviderReturn = false
+                    providerPagePausedApp = false
+                    verifyPaymentState.value()
+                }
+                else -> Unit
+            }
+        }
+        lifecycleOwner?.lifecycle?.addObserver(observer)
+        onDispose { lifecycleOwner?.lifecycle?.removeObserver(observer) }
+    }
 
     Column(
         Modifier.fillMaxSize().widthIn(max = 640.dp).padding(24.dp),
@@ -287,10 +346,17 @@ internal fun CheckoutPaymentScreen(
             Button(
                 enabled = !busy,
                 onClick = {
+                    providerReturnTracker.prepareForReturn()
+                    awaitingProviderReturn = true
                     runCatching {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(payment!!.checkoutUrl))
                         context.startActivity(intent)
-                    }.onFailure { status = "No browser could open the secure payment page. Try another browser or check payment status." }
+                    }.onFailure {
+                        providerReturnTracker.cancel()
+                        awaitingProviderReturn = false
+                        providerPagePausedApp = false
+                        status = "No browser could open the secure payment page. Try another browser or check payment status."
+                    }
                 },
             ) {
                 Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null)
@@ -299,31 +365,7 @@ internal fun CheckoutPaymentScreen(
             }
             OutlinedButton(
                 enabled = !busy,
-                onClick = {
-                    busy = true
-                    executor.execute {
-                        when (val result = repository.verifyPayment(receipt.payableOrderId)) {
-                            PaymentVerificationResult.Paid -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                                busy = false
-                                status = "Payment verified by Nantty."
-                                verified = true
-                            }
-                            PaymentVerificationResult.Pending -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                                busy = false
-                                status = "Payment is still processing. You can safely check again shortly."
-                            }
-                            PaymentVerificationResult.Failed -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                                busy = false
-                                status = "Payment was not completed. Your order remains unpaid; retry securely or check your orders."
-                            }
-                            is PaymentVerificationResult.Failure -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                                busy = false
-                                status = result.message
-                                if (result.authenticationRequired) onAuthenticationRequired()
-                            }
-                        }
-                    }
-                },
+                onClick = ::verifyPaymentStatus,
             ) { if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp) else Text("Check payment status") }
         }
         Spacer(Modifier.size(12.dp))
@@ -335,6 +377,44 @@ internal fun CheckoutPaymentScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+internal class HostedPaymentReturnTracker(
+    awaitingReturn: Boolean = false,
+    appWasPaused: Boolean = false,
+) {
+    private var awaitingProviderReturn = awaitingReturn
+    private var providerPausedApp = appWasPaused
+
+    fun prepareForReturn() {
+        awaitingProviderReturn = true
+        providerPausedApp = false
+    }
+
+    fun onPause(): Boolean {
+        if (awaitingProviderReturn) providerPausedApp = true
+        return providerPausedApp
+    }
+
+    fun onResume(): Boolean {
+        if (!awaitingProviderReturn || !providerPausedApp) return false
+        cancel()
+        return true
+    }
+
+    fun cancel() {
+        awaitingProviderReturn = false
+        providerPausedApp = false
+    }
+}
+
+private fun Context.findLifecycleOwner(): LifecycleOwner? {
+    var current: Context? = this
+    while (current != null) {
+        if (current is LifecycleOwner) return current
+        current = (current as? ContextWrapper)?.baseContext
+    }
+    return null
 }
 
 @Composable

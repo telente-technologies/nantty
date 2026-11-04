@@ -138,6 +138,8 @@ internal fun DestinationIcon(destination: Destination) {
         Destination.Orders -> Icons.Default.ReceiptLong
         Destination.Profile -> Icons.Default.PersonOutline
         Destination.Saved -> Icons.Default.BookmarkBorder
+        Destination.Business -> Icons.Default.Storefront
+        Destination.FollowRequests -> Icons.Default.PersonOutline
     }
     Icon(image, contentDescription = null)
 }

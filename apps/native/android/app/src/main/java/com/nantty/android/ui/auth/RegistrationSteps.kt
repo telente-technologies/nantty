@@ -356,9 +356,9 @@ internal fun UsernameStep(
         onBack = callbacks.onBack,
         topAction = {
             TextButton(
-                onClick = { callbacks.onCreateAccount(state.suggestedUsername) },
+                onClick = { onUsernameChanged(state.suggestedUsername) },
                 enabled = state.suggestedUsername.isNotBlank() && !state.isCreatingAccount,
-            ) { Text("Skip") }
+            ) { Text("Use suggestion") }
         },
     ) {
         OutlinedTextField(

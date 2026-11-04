@@ -29,9 +29,12 @@ sealed interface NotificationDestination {
     data class Profile(val userId: String) : NotificationDestination
     data object Messages : NotificationDestination
     data object Orders : NotificationDestination
+    data object FollowRequests : NotificationDestination
 }
 
 fun resolveNotificationDestination(notification: ActivityNotification): NotificationDestination? {
+    // Match the React Native route precedence: a request notification opens its inbox.
+    if (notification.kind == "followRequest") return NotificationDestination.FollowRequests
     notification.postId?.takeIf(::isSafeNotificationId)?.let { return NotificationDestination.Post(it) }
     if (notification.category.equals("orders", ignoreCase = true)) return NotificationDestination.Orders
     if (notification.category.equals("messages", ignoreCase = true) ||

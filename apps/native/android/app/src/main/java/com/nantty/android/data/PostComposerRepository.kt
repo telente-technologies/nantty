@@ -6,6 +6,11 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.UUID
 
+enum class PostComposerAudience(val wireValue: String, val label: String) {
+    EVERYONE("everyone", "Everyone"),
+    FOLLOWERS("followers", "Followers"),
+}
+
 fun interface PostPublishTransport {
     fun publish(path: String, accessToken: String, idempotencyKey: String, body: JSONObject): JSONObject
 }
@@ -15,7 +20,11 @@ class PostComposerRepository(
     private val sessionProvider: () -> AccountSession?,
     private val transport: PostPublishTransport = JdkPostPublishTransport(baseUrl),
 ) {
-    fun publishTextPost(text: String, idempotencyKey: String = UUID.randomUUID().toString()): Result<String> = runCatching {
+    fun publishTextPost(
+        text: String,
+        idempotencyKey: String = UUID.randomUUID().toString(),
+        audience: PostComposerAudience = PostComposerAudience.EVERYONE,
+    ): Result<String> = runCatching {
         val session = sessionProvider() ?: error("Sign in to publish a post.")
         val cleanText = text.trim()
         require(cleanText.isNotEmpty() && cleanText.length <= MAX_POST_LENGTH) {
@@ -26,7 +35,7 @@ class PostComposerRepository(
             path = "/api/v1/posts",
             accessToken = session.accessToken,
             idempotencyKey = idempotencyKey,
-            body = JSONObject().put("text", cleanText).put("mediaIds", org.json.JSONArray()).put("audience", "everyone").put("kind", "post"),
+            body = JSONObject().put("text", cleanText).put("mediaIds", org.json.JSONArray()).put("audience", audience.wireValue).put("kind", "post"),
         )
         val post = response.optJSONObject("data") ?: response
         post.optString("id").takeIf(String::isNotBlank) ?: error("Nantty published the post but returned no post ID. Refresh your feed to check its status.")

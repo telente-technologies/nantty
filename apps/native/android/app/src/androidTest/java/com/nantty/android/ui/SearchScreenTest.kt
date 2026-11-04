@@ -44,7 +44,15 @@ class SearchScreenTest {
                 path == "/api/v1/explore/categories" -> JSONObject("""{"data":[{"id":"for_you","label":"For you"},{"id":"sports","label":"Sports"}]}""")
                 path.startsWith("/api/v1/explore/trends") -> {
                     val tag = if (path.contains("category=sports")) "sports-tag" else "music-tag"
-                    JSONObject("""{"scope":"in Nigeria","items":[{"hashtag":"$tag","label":"#$tag","category":"sports","categoryLabel":"Sports","postCount":8,"authorCount":4,"rank":1,"context":"Sports · Trending"}]}""")
+                    val items = JSONArray()
+                    val count = if (tag == "music-tag") 6 else 1
+                    repeat(count) { index ->
+                        val suffix = if (index == 0) "" else "-${index + 1}"
+                        items.put(JSONObject().put("hashtag", "$tag$suffix").put("label", "#$tag$suffix")
+                            .put("category", "sports").put("categoryLabel", "Sports").put("postCount", 8)
+                            .put("authorCount", 4).put("rank", index + 1).put("context", "Sports · Trending"))
+                    }
+                    JSONObject().put("scope", "in Nigeria").put("items", items)
                 }
                 path.startsWith("/api/v1/explore/headlines") -> JSONObject("""{"scope":"in Nigeria","items":[{"id":"headline-1","title":"Explore headline","summary":"A short summary","category":"sports","categoryLabel":"Sports","postIds":["post-explore"],"postCount":12,"authorCount":6,"hashtags":["sports-tag"],"sourceLabel":"Summarised from posts"}]}""")
                 path.startsWith("/api/v1/explore/who-to-follow") -> JSONObject("""{"data":[{"user":{"id":"user-follow","name":"Ada","username":"ada"},"reason":{"code":"popular","label":"Popular in your region"},"isOfficial":false,"checkmarkTier":"none","isPrivate":false}]}""")
@@ -65,6 +73,11 @@ class SearchScreenTest {
         compose.waitForIdle()
         compose.onNodeWithText("Explore headline").assertIsDisplayed()
         compose.onNodeWithText("#music-tag").assertIsDisplayed()
+        compose.onNodeWithText("#music-tag-6").assertDoesNotExist()
+        compose.onNodeWithText("Show more").performClick()
+        compose.onNodeWithText("#music-tag-6").assertIsDisplayed()
+        compose.onNodeWithText("Show less").performClick()
+        compose.onNodeWithText("#music-tag-6").assertDoesNotExist()
         compose.onNodeWithText("Who to follow").assertIsDisplayed()
         compose.onNodeWithText("Explore post").assertIsDisplayed()
         compose.onNodeWithText("Sports").performClick()

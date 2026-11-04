@@ -102,6 +102,29 @@ class NotificationsScreenTest {
     }
 
     @Test
+    fun followRequestNotificationOpensRequestInboxBeforePostFallback() {
+        val transport = FakeTransport(notificationKind = "followRequest")
+        var openedFollowRequests = false
+        var openedPost: String? = null
+        compose.setContent {
+            MaterialTheme {
+                NotificationsScreen(
+                    NotificationsRepository("https://api.nantty.com", ::signedInSession, transport),
+                    Executor { it.run() },
+                    onOpenPost = { openedPost = it },
+                    onOpenFollowRequests = { openedFollowRequests = true },
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Ari mentioned you Hello from Ari, unread").performClick()
+        compose.runOnIdle {
+            assertEquals(true, openedFollowRequests)
+            assertNull(openedPost)
+        }
+    }
+
+    @Test
     fun filtersAndLoadsNextCursorPage() {
         val transport = FakeTransport()
         compose.setContent {
@@ -160,7 +183,11 @@ class NotificationsScreenTest {
         }
     }
 
-    private class FakeTransport(private val failFirst: Boolean = false, private val includePostId: Boolean = true) : NotificationsTransport {
+    private class FakeTransport(
+        private val failFirst: Boolean = false,
+        private val includePostId: Boolean = true,
+        private val notificationKind: String? = null,
+    ) : NotificationsTransport {
         var calls = 0
         var lastMethod: String? = null
         var lastPath: String? = null
@@ -172,7 +199,7 @@ class NotificationsScreenTest {
             return if (path.contains("cursor=next-page")) secondPage() else firstPage()
         }
 
-        private fun firstPage() = JSONObject("""{"data":[{"id":"n1","category":"social","title":"Ari mentioned you","body":"Hello from Ari","createdAt":"2026-10-01T12:00:00.000Z","read":false,"actor":{"id":"u1","name":"Ari"},"url":"https://evil.example/post/forged"${if (includePostId) ",\"data\":{\"postId\":\"post-1\"}" else ""}}],"nextCursor":"next-page"}""")
+        private fun firstPage() = JSONObject("""{"data":[{"id":"n1","category":"social","${notificationKind?.let { "\"kind\":\"$it\"," } ?: ""}"title":"Ari mentioned you","body":"Hello from Ari","createdAt":"2026-10-01T12:00:00.000Z","read":false,"actor":{"id":"u1","name":"Ari"},"url":"https://evil.example/post/forged"${if (includePostId) ",\"data\":{\"postId\":\"post-1\"}" else ""}}],"nextCursor":"next-page"}""")
         private fun secondPage() = JSONObject("""{"data":[{"id":"n2","category":"social","title":"Second notification","body":"More activity","createdAt":"2026-10-01T11:00:00.000Z","read":true}],"nextCursor":null}""")
     }
 

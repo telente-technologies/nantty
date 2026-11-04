@@ -28,6 +28,19 @@ class PostComposerRepositoryTest {
     }
 
     @Test
+    fun publishPreservesFollowersOnlyAudienceInTheCreatePostContract() {
+        val session = AccountSession("access-secret", "refresh-secret", AccountUser("u1", "Ari", "ari", null, null, emptyList()))
+        val transport = RecordingTransport(JSONObject("""{"data":{"id":"post-2"}}"""))
+        val repository = PostComposerRepository("https://api.nantty.com", { session }, transport)
+
+        val result = repository.publishTextPost("Followers-only note", "retry-key-0002", PostComposerAudience.FOLLOWERS)
+
+        assertTrue(result.isSuccess)
+        assertEquals("followers", transport.call!!.body.getString("audience"))
+        assertEquals("post-2", result.getOrThrow())
+    }
+
+    @Test
     fun publishingRequiresSessionAndValidNonemptyTextWithinBackendLimit() {
         val transport = RecordingTransport(JSONObject("""{"id":"post-1"}"""))
         val signedOut = PostComposerRepository("https://api.nantty.com", { null }, transport)
