@@ -15,6 +15,33 @@ struct FeedInteractionBatch: Encodable, Equatable {
 }
 
 enum PostTextLinks {
+    private static let internalHosts: Set<String> = [
+        "nantty.com", "www.nantty.com", "web.nantty.com"
+    ]
+    private static let internalPostPathKinds: Set<String> = ["post", "posts"]
+    private static let commentQueryKeys: Set<String> = ["comment", "commentid", "reply"]
+
+    static func internalPostID(from url: URL) -> String? {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              components.scheme?.lowercased() == "https",
+              let host = components.host?.lowercased(), internalHosts.contains(host),
+              components.user == nil, components.password == nil, components.port == nil,
+              components.queryItems?.contains(where: { commentQueryKeys.contains($0.name.lowercased()) }) != true else {
+            return nil
+        }
+
+        let segments = components.percentEncodedPath.split(separator: "/", omittingEmptySubsequences: true)
+        guard segments.count == 2,
+              let kind = String(segments[0]).removingPercentEncoding?.lowercased(),
+              internalPostPathKinds.contains(kind),
+              let postID = String(segments[1]).removingPercentEncoding,
+              (1...64).contains(postID.utf8.count),
+              postID.range(of: "^[A-Za-z0-9_-]+$", options: .regularExpression) != nil else {
+            return nil
+        }
+        return postID
+    }
+
     static func safeHTTPSURL(_ value: String) -> URL? {
         guard !value.isEmpty,
               value == value.trimmingCharacters(in: .whitespacesAndNewlines),

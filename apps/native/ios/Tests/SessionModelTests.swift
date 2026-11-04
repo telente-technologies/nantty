@@ -390,6 +390,29 @@ final class SessionModelTests: XCTestCase {
     }
 
     @MainActor
+    func testWalletEscrowHoldsUseKeychainAccessTokenAndReturnReadOnlyData() async throws {
+        let credentials = InMemoryCredentialStore(tokens: SessionTokens(accessToken: "wallet-escrow-token", refreshToken: "refresh"))
+        let api = MockSessionService()
+        let hold = WalletEscrowHold(
+            orderId: "order-1",
+            orderReference: "NAN-1042",
+            productName: "Handwoven bag",
+            amount: WalletMoney(amountMinor: 12_500, currency: "NGN"),
+            stage: "shipped",
+            expectedReleaseAt: "2026-11-08T12:00:00Z"
+        )
+        api.walletEscrowHoldsPage = WalletEscrowHoldsPage(data: [hold])
+        let model = SessionModel(credentialStore: credentials, api: api)
+        await model.restoreSession()
+
+        let page = try await model.fetchWalletEscrowHolds()
+
+        XCTAssertEqual(api.lastWalletEscrowHoldsAccessToken, "wallet-escrow-token")
+        XCTAssertEqual(page.data, [hold])
+        XCTAssertEqual(try credentials.load()?.accessToken, "wallet-escrow-token")
+    }
+
+    @MainActor
     func testWalletTransactionsRequireSignedInKeychainSession() async throws {
         let api = MockSessionService()
         let model = SessionModel(credentialStore: InMemoryCredentialStore(tokens: nil), api: api)
@@ -697,6 +720,9 @@ private final class MockSessionService: SessionServicing {
     var lastWalletTransactionsCursor: String?
     var walletTransactionsPage = WalletTransactionsPage(data: [], nextCursor: nil, total: nil)
     var walletTransactionsError: Error?
+    var lastWalletEscrowHoldsAccessToken: String?
+    var walletEscrowHoldsPage = WalletEscrowHoldsPage(data: [])
+    var walletEscrowHoldsError: Error?
     var lastOrdersWidgetAccessToken: String?
     var lastNotificationsAccessToken: String?
     var lastNotificationFilter: NotificationFilter?
@@ -835,6 +861,12 @@ private final class MockSessionService: SessionServicing {
         lastWalletTransactionsCursor = cursor
         if let walletTransactionsError { throw walletTransactionsError }
         return walletTransactionsPage
+    }
+
+    func fetchWalletEscrowHolds(accessToken: String) async throws -> WalletEscrowHoldsPage {
+        lastWalletEscrowHoldsAccessToken = accessToken
+        if let walletEscrowHoldsError { throw walletEscrowHoldsError }
+        return walletEscrowHoldsPage
     }
 
     func fetchOrdersWidget(accessToken: String) async throws -> OrdersWidgetAPIResponse {

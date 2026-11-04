@@ -81,6 +81,98 @@ struct MartProduct: Decodable, Identifiable, Equatable {
     }
 }
 
+struct MartStoreSummary: Decodable, Equatable {
+    let id: String
+    let name: String
+    let logoUrl: URL?
+    let rating: Double
+    let ratingCount: Int
+    let reviewCount: Int
+
+    private struct Raw: Decodable {
+        let id: String?
+        let name: String?
+        let logoUrl: URL?
+        let rating: Double?
+        let ratingCount: Int?
+        let reviewCount: Int?
+    }
+
+    init(from decoder: Decoder) throws {
+        let raw = try Raw(from: decoder)
+        guard let id = raw.id, MartCatalogAPI.isSafeIdentifier(id),
+              let name = raw.name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty else {
+            throw MartCatalogAPIError.unreadableResponse
+        }
+        self.id = id
+        self.name = name
+        logoUrl = MartCatalogAPI.safeImageURL(raw.logoUrl)
+        rating = raw.rating.flatMap { $0.isFinite && $0 >= 0 ? $0 : nil } ?? 0
+        ratingCount = max(0, raw.ratingCount ?? 0)
+        reviewCount = max(0, raw.reviewCount ?? 0)
+    }
+}
+
+struct MartProductDetail: Decodable, Equatable {
+    let id: String
+    let title: String
+    let price: MartProduct.Price
+    let images: [URL]
+    let stock: Int
+    let rating: Double
+    let promo: String?
+    let sizes: [String]
+    let colors: [String]
+    let shippingInfo: String
+    let description: String
+    let store: MartStoreSummary
+
+    private struct Raw: Decodable {
+        let id: String?
+        let title: String?
+        let name: String?
+        let price: MartProduct.Price?
+        let imageUrl: URL?
+        let images: [URL]?
+        let stock: Int?
+        let rating: Double?
+        let promo: String?
+        let sizes: [String]?
+        let colors: [String]?
+        let shippingInfo: String?
+        let description: String?
+        let store: MartStoreSummary?
+    }
+
+    init(from decoder: Decoder) throws {
+        let raw = try Raw(from: decoder)
+        guard let id = raw.id, MartCatalogAPI.isSafeIdentifier(id),
+              let title = (raw.title ?? raw.name)?.trimmingCharacters(in: .whitespacesAndNewlines), !title.isEmpty,
+              let price = raw.price, price.amountMinor >= 0,
+              price.currency.range(of: "^[A-Z]{3}$", options: .regularExpression) != nil,
+              let store = raw.store else {
+            throw MartCatalogAPIError.unreadableResponse
+        }
+        self.id = id
+        self.title = title
+        self.price = price
+        let gallery = (raw.images ?? []).compactMap(MartCatalogAPI.safeImageURL)
+        images = gallery.isEmpty ? [raw.imageUrl].compactMap(MartCatalogAPI.safeImageURL) : gallery
+        stock = max(0, raw.stock ?? 0)
+        rating = raw.rating.flatMap { $0.isFinite && $0 >= 0 ? $0 : nil } ?? 0
+        promo = raw.promo?.trimmingCharacters(in: .whitespacesAndNewlines).nonEmpty
+        sizes = (raw.sizes ?? []).compactMap { $0.trimmingCharacters(in: .whitespacesAndNewlines).nonEmpty }
+        colors = (raw.colors ?? []).compactMap { $0.trimmingCharacters(in: .whitespacesAndNewlines).nonEmpty }
+        shippingInfo = raw.shippingInfo?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        description = raw.description?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        self.store = store
+    }
+}
+
+private extension String {
+    var nonEmpty: String? { isEmpty ? nil : self }
+}
+
 enum MartProductPresentation {
     static func price(_ price: MartProduct.Price, locale: Locale = .current) -> String {
         let formatter = NumberFormatter()
@@ -161,8 +253,23 @@ struct MartCatalogAPI {
         return try await get(path: "/api/v1/products", queryItems: queryItems, response: MartProductsPage.self)
     }
 
+    func fetchProductDetail(id: String) async throws -> MartProductDetail {
+        guard Self.isSafeIdentifier(id) else { throw MartCatalogAPIError.unreadableResponse }
+        let detail: MartProductDetail = try await get(path: "/api/v1/products/\(id)", queryItems: [], response: MartProductDetail.self)
+        guard detail.id == id else { throw MartCatalogAPIError.unreadableResponse }
+        return detail
+    }
+
     static func isSafeIdentifier(_ value: String) -> Bool {
         !value.isEmpty && value.utf16.count <= 100 && value.range(of: "^[A-Za-z0-9_-]+$", options: .regularExpression) != nil
+    }
+
+    static func safeImageURL(_ url: URL?) -> URL? {
+        guard let url, let scheme = url.scheme?.lowercased(),
+              let host = url.host?.lowercased(), !host.isEmpty,
+              url.user == nil, url.password == nil else { return nil }
+        guard scheme == "https" || (scheme == "http" && ["localhost", "127.0.0.1", "::1"].contains(host)) else { return nil }
+        return url
     }
 
     static func url(baseURL: String, path: String, queryItems: [URLQueryItem]) -> URL? {

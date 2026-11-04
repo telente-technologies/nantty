@@ -19,8 +19,11 @@ protocol SessionServicing {
     func createTextPost(text: String, accessToken: String, idempotencyKey: String) async throws -> String
     func fetchWalletSummary(accessToken: String) async throws -> WalletSummary
     func fetchWalletTransactions(accessToken: String, cursor: String?) async throws -> WalletTransactionsPage
+    func fetchWalletEscrowHolds(accessToken: String) async throws -> WalletEscrowHoldsPage
     func fetchConversationInbox(accessToken: String, cursor: String?) async throws -> ConversationInboxPage
     func fetchOrdersWidget(accessToken: String) async throws -> OrdersWidgetAPIResponse
+    func fetchBuyerOrders(filter: BuyerOrderFilter, cursor: String?, accessToken: String) async throws -> BuyerOrdersPage
+    func fetchBuyerOrder(orderID: String, accessToken: String) async throws -> BuyerOrderDetail
     func fetchNotifications(filter: NotificationFilter, cursor: String?, accessToken: String) async throws -> NotificationsPage
     func markNotificationRead(id: String, accessToken: String) async throws
     func markAllNotificationsRead(accessToken: String) async throws
@@ -64,7 +67,19 @@ extension SessionServicing {
         throw SessionAPIError.unsupportedOperation
     }
 
+    func fetchWalletEscrowHolds(accessToken: String) async throws -> WalletEscrowHoldsPage {
+        throw SessionAPIError.unsupportedOperation
+    }
+
     func updateMyProfile(_ update: MyProfileUpdate, accessToken: String) async throws -> MyProfile {
+        throw SessionAPIError.unsupportedOperation
+    }
+
+    func fetchBuyerOrders(filter: BuyerOrderFilter, cursor: String?, accessToken: String) async throws -> BuyerOrdersPage {
+        throw SessionAPIError.unsupportedOperation
+    }
+
+    func fetchBuyerOrder(orderID: String, accessToken: String) async throws -> BuyerOrderDetail {
         throw SessionAPIError.unsupportedOperation
     }
 }
@@ -267,6 +282,15 @@ struct SessionAPI: SessionServicing {
         )
     }
 
+    func fetchWalletEscrowHolds(accessToken: String) async throws -> WalletEscrowHoldsPage {
+        try await sendWithoutBody(
+            path: "/api/v1/wallets/me/escrow-holds",
+            method: "GET",
+            bearerToken: accessToken,
+            response: WalletEscrowHoldsPage.self
+        )
+    }
+
     func fetchConversationInbox(accessToken: String, cursor: String?) async throws -> ConversationInboxPage {
         var query = [URLQueryItem(name: "folder", value: "chats"), URLQueryItem(name: "limit", value: "20")]
         if let cursor { query.append(URLQueryItem(name: "cursor", value: cursor)) }
@@ -285,6 +309,33 @@ struct SessionAPI: SessionServicing {
             method: "GET",
             bearerToken: accessToken,
             response: OrdersWidgetAPIResponse.self
+        )
+    }
+
+    func fetchBuyerOrders(filter: BuyerOrderFilter, cursor: String?, accessToken: String) async throws -> BuyerOrdersPage {
+        let queryItems = [
+            URLQueryItem(name: "limit", value: String(BuyerOrdersRequest.pageSize)),
+            filter == .all ? nil : URLQueryItem(name: "status", value: filter.rawValue),
+            cursor?.isEmpty == false ? URLQueryItem(name: "cursor", value: cursor) : nil,
+        ].compactMap { $0 }
+        return try await sendWithoutBody(
+            path: "/api/v1/orders",
+            method: "GET",
+            queryItems: queryItems,
+            bearerToken: accessToken,
+            response: BuyerOrdersPage.self
+        )
+    }
+
+    func fetchBuyerOrder(orderID: String, accessToken: String) async throws -> BuyerOrderDetail {
+        guard let path = BuyerOrdersRequest.detailPath(orderID: orderID) else {
+            throw SessionAPIError.invalidBaseURL
+        }
+        return try await sendWithoutBody(
+            path: path,
+            method: "GET",
+            bearerToken: accessToken,
+            response: BuyerOrderDetail.self
         )
     }
 

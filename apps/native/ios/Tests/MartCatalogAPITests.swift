@@ -41,6 +41,55 @@ final class MartCatalogAPITests: XCTestCase {
         XCTAssertEqual(URLComponents(url: try XCTUnwrap(capturedRequest?.url), resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "categoryId" })?.value, "cat_1")
     }
 
+    func testFetchProductDetailUsesPublicDetailRouteAndDecodesStoreAndOptions() async throws {
+        var capturedRequest: URLRequest?
+        MartCatalogStubURLProtocol.handler = { request in
+            capturedRequest = request
+            return (200, Data(#"{"id":"product_1","name":"Handwoven tote","title":"Handwoven tote","price":{"amountMinor":125000,"currency":"NGN"},"imageUrl":"https://cdn.nantty.test/tote.jpg","stock":4,"hasVariants":true,"images":["https://cdn.nantty.test/tote.jpg"],"rating":4.5,"promo":null,"sizes":["Small"],"colors":["Indigo"],"shippingInfo":"Ships from Lagos","description":"Woven locally.","store":{"id":"store_1","name":"Ari Studio","logoUrl":"https://cdn.nantty.test/logo.jpg","rating":4.8,"ratingCount":12,"reviewCount":9},"related":[],"brand":null,"variants":[]}"#.utf8))
+        }
+        defer { MartCatalogStubURLProtocol.handler = nil }
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [MartCatalogStubURLProtocol.self]
+        let api = MartCatalogAPI(baseURL: "https://api.nantty.test", session: URLSession(configuration: configuration))
+
+        let detail = try await api.fetchProductDetail(id: "product_1")
+
+        XCTAssertEqual(capturedRequest?.url?.path, "/api/v1/products/product_1")
+        XCTAssertNil(capturedRequest?.value(forHTTPHeaderField: "Authorization"))
+        XCTAssertEqual(detail.title, "Handwoven tote")
+        XCTAssertEqual(detail.price.amountMinor, 125000)
+        XCTAssertEqual(detail.store.name, "Ari Studio")
+        XCTAssertEqual(detail.sizes, ["Small"])
+        XCTAssertEqual(detail.images.first?.host, "cdn.nantty.test")
+    }
+
+    func testProductDetailRejectsUnsafeImageURLs() throws {
+        let unsafeImage = Data(#"{"id":"product_1","title":"Item","price":{"amountMinor":100,"currency":"NGN"},"images":["javascript:alert(1)"],"store":{"id":"store_1","name":"Store"}}"#.utf8)
+        let detail = try JSONDecoder().decode(MartProductDetail.self, from: unsafeImage)
+        XCTAssertTrue(detail.images.isEmpty)
+    }
+
+    func testFetchProductDetailRejectsMismatchedResponseIdentity() async throws {
+        MartCatalogStubURLProtocol.handler = { _ in
+            (200, Data(#"{"id":"other_product","title":"Item","price":{"amountMinor":100,"currency":"NGN"},"store":{"id":"store_1","name":"Store"}}"#.utf8))
+        }
+        defer { MartCatalogStubURLProtocol.handler = nil }
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [MartCatalogStubURLProtocol.self]
+        let api = MartCatalogAPI(baseURL: "https://api.nantty.test", session: URLSession(configuration: configuration))
+
+        do {
+            _ = try await api.fetchProductDetail(id: "product_1")
+            XCTFail("A detail response for a different product must be rejected")
+        } catch {
+            guard let apiError = error as? MartCatalogAPIError,
+                  case .unreadableResponse = apiError else {
+                XCTFail("Expected an unreadable-response error")
+                return
+            }
+        }
+    }
+
     func testRejectsUnsafeProductIdentityAndImageURL() throws {
         let unsafeId = Data(#"{"data":[{"id":"../other","name":"Item","price":{"amountMinor":100,"currency":"NGN"}}],"nextCursor":null}"#.utf8)
         XCTAssertThrowsError(try JSONDecoder().decode(MartProductsPage.self, from: unsafeId))

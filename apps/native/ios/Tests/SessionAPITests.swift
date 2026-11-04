@@ -3,6 +3,87 @@ import XCTest
 @testable import Nantty
 
 final class SessionAPITests: XCTestCase {
+    func testWalletEscrowHoldsUseAuthenticatedReadOnlyEndpoint() async throws {
+        var observedRequest: URLRequest?
+        StubURLProtocol.handler = { request in
+            observedRequest = request
+            return (200, Data(#"{"data":[{"orderId":"order-1","orderReference":"NAN-1042","productName":"Handwoven bag","amount":{"amountMinor":12500,"currency":"NGN"},"stage":"shipped","expectedReleaseAt":"2026-11-08T12:00:00Z"}],"nextCursor":null}"#.utf8))
+        }
+        defer { StubURLProtocol.handler = nil }
+
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [StubURLProtocol.self]
+        let api = SessionAPI(session: URLSession(configuration: configuration), baseURLProvider: { "https://api.nantty.test" })
+
+        let page = try await api.fetchWalletEscrowHolds(accessToken: "wallet-read-token")
+
+        XCTAssertEqual(observedRequest?.url?.path, "/api/v1/wallets/me/escrow-holds")
+        XCTAssertEqual(observedRequest?.httpMethod, "GET")
+        XCTAssertEqual(observedRequest?.value(forHTTPHeaderField: "Authorization"), "Bearer wallet-read-token")
+        XCTAssertNil(observedRequest?.httpBody)
+        XCTAssertEqual(page.data, [WalletEscrowHold(
+            orderId: "order-1",
+            orderReference: "NAN-1042",
+            productName: "Handwoven bag",
+            amount: WalletMoney(amountMinor: 12_500, currency: "NGN"),
+            stage: "shipped",
+            expectedReleaseAt: "2026-11-08T12:00:00Z"
+        )])
+    }
+
+    func testBuyerOrderListAndDetailUseAuthenticatedReadOnlyEndpoints() async throws {
+        var requests: [URLRequest] = []
+        StubURLProtocol.handler = { request in
+            requests.append(request)
+            if request.url?.path == "/api/v1/orders" {
+                return (200, Data(#"{"data":[],"nextCursor":"next /cursor"}"#.utf8))
+            }
+            return (200, Data(#"{"id":"order-1","reference":"NT-1","status":"shipped","fulfilmentStatus":"shipped","paymentStatus":"paid","paymentMode":"escrow","items":[],"subtotal":{"amountMinor":100,"currency":"NGN"},"discount":{"amountMinor":0,"currency":"NGN"},"storeCredit":{"amountMinor":0,"currency":"NGN"},"shipping":{"amountMinor":0,"currency":"NGN"},"total":{"amountMinor":100,"currency":"NGN"},"store":{"name":"Ayo Market"},"createdAt":"2026-11-03T10:30:00Z","escrowReleaseAt":null,"shipment":null,"delivery":null,"promotionIssue":null}"#.utf8))
+        }
+        defer { StubURLProtocol.handler = nil }
+
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [StubURLProtocol.self]
+        let api = SessionAPI(session: URLSession(configuration: configuration), baseURLProvider: { "https://api.nantty.test" })
+
+        let page = try await api.fetchBuyerOrders(filter: .shipped, cursor: "cursor /+=", accessToken: "buyer-token")
+        let order = try await api.fetchBuyerOrder(orderID: "order-1", accessToken: "buyer-token")
+
+        XCTAssertEqual(page.nextCursor, "next /cursor")
+        XCTAssertEqual(order.store.name, "Ayo Market")
+        XCTAssertEqual(requests.map(\.httpMethod), ["GET", "GET"])
+        XCTAssertEqual(requests[0].url?.path, "/api/v1/orders")
+        XCTAssertEqual(URLComponents(url: try XCTUnwrap(requests[0].url), resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "limit" })?.value, "20")
+        XCTAssertEqual(URLComponents(url: try XCTUnwrap(requests[0].url), resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "status" })?.value, "shipped")
+        XCTAssertEqual(URLComponents(url: try XCTUnwrap(requests[0].url), resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "cursor" })?.value, "cursor /+=")
+        XCTAssertEqual(requests[1].url?.path, "/api/v1/orders/order-1")
+        XCTAssertTrue(requests.allSatisfy { $0.value(forHTTPHeaderField: "Authorization") == "Bearer buyer-token" })
+        XCTAssertTrue(requests.allSatisfy { $0.httpBody == nil })
+    }
+
+    func testBuyerOrderDetailRejectsUnsafeOrderIdentifierBeforeRequest() async {
+        var requestCount = 0
+        StubURLProtocol.handler = { _ in
+            requestCount += 1
+            return (200, Data())
+        }
+        defer { StubURLProtocol.handler = nil }
+
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [StubURLProtocol.self]
+        let api = SessionAPI(session: URLSession(configuration: configuration), baseURLProvider: { "https://api.nantty.test" })
+
+        do {
+            _ = try await api.fetchBuyerOrder(orderID: "../another-account", accessToken: "buyer-token")
+            XCTFail("Unsafe order identifiers must not reach the orders API")
+        } catch let error as SessionAPIError {
+            XCTAssertEqual(error.statusCode, nil)
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+        XCTAssertEqual(requestCount, 0)
+    }
+
     func testManagedCommentProfilesUseAuthenticatedExistingEndpointAndFilterUnsafeProfiles() async throws {
         var observedRequest: URLRequest?
         StubURLProtocol.handler = { request in

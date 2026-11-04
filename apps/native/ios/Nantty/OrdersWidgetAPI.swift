@@ -11,28 +11,13 @@ struct OrdersWidgetAPIItem: Decodable, Equatable {
     let reference: String
     let statusLabel: String
     let etaAt: String?
-    let trackingUrl: String?
     let itemTitle: String
     let storeName: String
 
     private enum CodingKeys: String, CodingKey {
-        case id, reference, statusLabel, etaAt, trackingUrl, itemTitle, storeName
+        case id, reference, statusLabel, etaAt, itemTitle, storeName
     }
 
-    var safeTrackingURL: URL? {
-        guard
-            let trackingUrl,
-            let components = URLComponents(string: trackingUrl),
-            components.scheme?.lowercased() == "https",
-            let host = components.host,
-            !host.isEmpty,
-            components.user == nil,
-            components.password == nil
-        else {
-            return nil
-        }
-        return components.url
-    }
 }
 
 enum OrdersWidgetSnapshotMapper {

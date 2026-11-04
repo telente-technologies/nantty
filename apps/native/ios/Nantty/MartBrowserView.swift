@@ -1,8 +1,11 @@
 import SwiftUI
 
 struct MartBrowserView: View {
+    let onOpenProduct: (String) -> Void
+
     @AppStorage("apiBaseURL") private var apiBaseURL = Bundle.main.object(forInfoDictionaryKey: "NanttyAPIBaseURL") as? String ?? "http://localhost:8080"
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var categories: [MartCategory] = []
     @State private var products: [MartProduct] = []
     @State private var selectedCategoryId: String?
@@ -14,7 +17,13 @@ struct MartBrowserView: View {
     @State private var requestID = UUID()
 
     private var columns: [GridItem] {
-        Array(repeating: GridItem(.flexible(), spacing: 14, alignment: .top), count: horizontalSizeClass == .regular ? 3 : 2)
+        Array(
+            repeating: GridItem(.flexible(), spacing: 14, alignment: .top),
+            count: MartGridLayout.columnCount(
+                isCompactWidth: horizontalSizeClass != .regular,
+                isAccessibilityTextSize: dynamicTypeSize.isAccessibilitySize
+            )
+        )
     }
 
     var body: some View {
@@ -52,7 +61,9 @@ struct MartBrowserView: View {
                 } else {
                     LazyVGrid(columns: columns, alignment: .leading, spacing: 20) {
                         ForEach(products) { product in
-                            MartProductCard(product: product)
+                            MartProductCard(product: product) {
+                                onOpenProduct(product.id)
+                            }
                         }
                     }
                     .padding(.horizontal)
@@ -165,36 +176,43 @@ struct MartBrowserView: View {
 }
 
 private struct MartProductCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let product: MartProduct
+    let onOpen: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            AsyncImage(url: product.imageUrl) { phase in
-                if let image = phase.image {
-                    image.resizable().scaledToFill()
-                } else if phase.error != nil {
-                    imagePlaceholder
-                } else {
-                    ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+        Button(action: onOpen) {
+            VStack(alignment: .leading, spacing: 8) {
+                AsyncImage(url: product.imageUrl) { phase in
+                    if let image = phase.image {
+                        image.resizable().scaledToFill()
+                    } else if phase.error != nil {
+                        imagePlaceholder
+                    } else {
+                        ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
+                .frame(height: 160)
+                .frame(maxWidth: .infinity)
+                .background(Color(uiColor: .secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+                Text(product.name)
+                    .font(.subheadline.weight(.medium))
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                    .foregroundStyle(.primary)
+                Text(MartProductPresentation.price(product.price))
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.primary)
+                if product.stock == 0 {
+                    Text("Out of stock").font(.caption).foregroundStyle(.secondary)
                 }
             }
-            .frame(height: 160)
-            .frame(maxWidth: .infinity)
-            .background(Color(uiColor: .secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-
-            Text(product.name)
-                .font(.subheadline.weight(.medium))
-                .lineLimit(2)
-                .foregroundStyle(.primary)
-            Text(MartProductPresentation.price(product.price))
-                .font(.subheadline.weight(.bold))
-                .foregroundStyle(.primary)
-            if product.stock == 0 {
-                Text("Out of stock").font(.caption).foregroundStyle(.secondary)
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .accessibilityElement(children: .combine)
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(product.name), \(MartProductPresentation.price(product.price))")
+        .accessibilityHint("Opens product details")
     }
 
     private var imagePlaceholder: some View {

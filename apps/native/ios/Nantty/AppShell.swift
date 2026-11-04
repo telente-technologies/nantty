@@ -1,6 +1,6 @@
 import SwiftUI
 
-private enum Destination: String, CaseIterable, Identifiable {
+enum Destination: String, CaseIterable, Identifiable {
     case home = "Nantty"
     case mart = "Mart"
     case explore = "Explore"
@@ -9,7 +9,6 @@ private enum Destination: String, CaseIterable, Identifiable {
     case wallet = "Wallet"
     case notifications = "Notifications"
     case saved = "Saved Posts"
-    case create = "Create post"
     case profile = "Profile"
     case account = "Account"
     case settings = "Settings"
@@ -25,7 +24,6 @@ private enum Destination: String, CaseIterable, Identifiable {
         case .wallet: "wallet.bifold"
         case .notifications: "bell"
         case .saved: "bookmark"
-        case .create: "square.and.pencil"
         case .profile: "person.crop.circle"
         case .account: "person.crop.circle"
         case .settings: "gearshape"
@@ -33,18 +31,77 @@ private enum Destination: String, CaseIterable, Identifiable {
     }
 }
 
+enum ComposerPresentationStyle: Equatable {
+    case fullScreen
+    case sheet
+
+    var compactAdaptation: PresentationAdaptation {
+        self == .fullScreen ? .fullScreenCover : .sheet
+    }
+
+    static func resolve(for sizeClass: UserInterfaceSizeClass?) -> Self {
+        sizeClass == .compact ? .fullScreen : .sheet
+    }
+}
+
+enum PrimaryBrowseSection: String, CaseIterable, Identifiable {
+    case feed = "Feed"
+    case mart = "Mart"
+
+    var id: String { rawValue }
+    var symbol: String { self == .feed ? "house" : "bag" }
+    var destination: Destination { self == .feed ? .home : .mart }
+
+    init(destination: Destination?) {
+        self = destination == .mart ? .mart : .feed
+    }
+
+    static func swipeDestination(from section: Self, horizontal: CGFloat, vertical: CGFloat) -> Self? {
+        guard abs(horizontal) >= 72, abs(horizontal) > abs(vertical) * 1.35 else { return nil }
+        if horizontal < 0, section == .feed { return .mart }
+        if horizontal > 0, section == .mart { return .feed }
+        return nil
+    }
+}
+
 private enum AppRoute: Hashable {
     case post(String)
     case profile(String)
+    case order(String)
+    case product(String)
 }
 
 struct AppShell: View {
     @Environment(SessionModel.self) private var session
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selection: Destination? = .home
     @State private var selectedOrderID: String?
     @State private var navigationPath: [AppRoute] = []
+    @State private var isComposerPresented = false
+
+    private var browseSelection: Binding<PrimaryBrowseSection> {
+        Binding(
+            get: { PrimaryBrowseSection(destination: selection) },
+            set: { selection = $0.destination }
+        )
+    }
+
+    private var showsBrowseNavigation: Bool {
+        horizontalSizeClass == .compact && (selection == .home || selection == .mart)
+    }
+
+    private var browseNavigationControl: some View {
+        Picker("Browse", selection: browseSelection) {
+            ForEach(PrimaryBrowseSection.allCases) { section in
+                Label(section.rawValue, systemImage: section.symbol)
+                    .tag(section)
+            }
+        }
+        .pickerStyle(.segmented)
+        .accessibilityIdentifier("feed-mart-navigation")
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -60,13 +117,17 @@ struct AppShell: View {
                     case .home:
                         ForYouFeedView(selection: $selection, onOpenProfile: openProfile)
                     case .mart:
-                        MartBrowserView()
+                        MartBrowserView(onOpenProduct: { navigationPath.append(.product($0)) })
                     case .explore:
                         ExploreSearchView(onOpenPost: openPost, onOpenProfile: openProfile)
                     case .inbox:
-                        ConversationInboxView()
+                        ConversationInboxView(onSignInRequired: { selection = .account })
                     case .orders:
-                        OrdersOverviewView(selectedOrderID: selectedOrderID, onSignInRequired: { selection = .account })
+                        OrdersOverviewView(
+                            selectedOrderID: selectedOrderID,
+                            onOpenOrder: { navigationPath.append(.order($0)) },
+                            onSignInRequired: { selection = .account }
+                        )
                     case .wallet:
                         WalletOverviewView(onSignInRequired: { selection = .account })
                     case .notifications:
@@ -77,8 +138,6 @@ struct AppShell: View {
                         )
                     case .saved:
                         SavedPostsView(onOpenPost: openPost, onSignInRequired: { selection = .account })
-                    case .create:
-                        TextPostComposerView(onPublished: { selection = .home }, onSignInRequired: { selection = .account })
                     case .profile:
                         MyProfileView(onSignInRequired: { selection = .account })
                     case .account:
@@ -95,56 +154,101 @@ struct AppShell: View {
                     ))
                 .frame(maxWidth: horizontalSizeClass == .regular ? 720 : .infinity)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    if showsBrowseNavigation && dynamicTypeSize.isAccessibilitySize {
+                        browseNavigationControl
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                    }
+                }
                 .navigationTitle(selection?.rawValue ?? Destination.home.rawValue)
                 .navigationBarTitleDisplayMode(.inline)
                 .animation(reduceMotion ? .linear(duration: 0.1) : .snappy(duration: 0.28), value: selection)
                 .toolbar {
-                    if selection == .home {
-                        ToolbarItem(placement: .topBarLeading) {
-                            Button {
-                                selection = .mart
-                            } label: {
-                                Label("Mart", systemImage: "bag")
-                            }
-                            .accessibilityIdentifier("open-mart-action")
+                    if showsBrowseNavigation && !dynamicTypeSize.isAccessibilitySize {
+                        ToolbarItem(placement: .principal) {
+                            browseNavigationControl
+                                .frame(maxWidth: 240)
                         }
+                    }
+                    if selection == .home {
                         ToolbarItem(placement: .primaryAction) {
                             Button {
-                                selection = .create
+                                isComposerPresented = true
                             } label: {
                                 Label("Create post", systemImage: "square.and.pencil")
                             }
                             .accessibilityIdentifier("create-post-action")
                         }
-                    } else if selection == .mart {
-                        ToolbarItem(placement: .topBarLeading) {
-                            Button {
-                                selection = .home
-                            } label: {
-                                Label("Feed", systemImage: "house")
-                            }
-                            .accessibilityIdentifier("open-feed-action")
-                        }
                     }
                 }
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 24)
+                        .onEnded { value in
+                            guard horizontalSizeClass == .compact,
+                                  navigationPath.isEmpty,
+                                  selection == .home || selection == .mart else { return }
+                            let current = PrimaryBrowseSection(destination: selection)
+                            guard let next = PrimaryBrowseSection.swipeDestination(
+                                from: current,
+                                horizontal: value.translation.width,
+                                vertical: value.translation.height
+                            ) else { return }
+                            selection = next.destination
+                        }
+                )
                 .navigationDestination(for: AppRoute.self) { route in
                     switch route {
                     case .post(let postID):
-                        PostThreadView(postID: postID) {
-                            selection = .account
-                        }
+                        PostThreadView(
+                            postID: postID,
+                            onRequestSignIn: { selection = .account },
+                            onOpenPost: openLinkedPost
+                        )
                     case .profile(let userID):
                         PublicProfileView(userID: userID, onOpenPost: openPost) {
                             selection = .account
                         }
+                    case .order(let orderID):
+                        BuyerOrderDetailView(orderID: orderID) {
+                            selection = .account
+                        }
+                    case .product(let productID):
+                        MartProductDetailView(productId: productID)
                     }
                 }
             }
             .onChange(of: selection) { _, destination in
-                if destination != .home { navigationPath = [] }
+                if destination != .home && destination != .orders { navigationPath = [] }
             }
         }
         .navigationSplitViewStyle(.automatic)
+        .sheet(isPresented: $isComposerPresented) {
+            NavigationStack {
+                TextPostComposerView(
+                    onPublished: {
+                        isComposerPresented = false
+                        selection = .home
+                    },
+                    onSignInRequired: {
+                        isComposerPresented = false
+                        selection = .account
+                    }
+                )
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel", systemImage: "xmark") {
+                            isComposerPresented = false
+                        }
+                        .accessibilityIdentifier("close-post-composer")
+                    }
+                }
+            }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationContentInteraction(.scrolls)
+            .presentationCompactAdaptation(ComposerPresentationStyle.resolve(for: horizontalSizeClass).compactAdaptation)
+        }
         .onOpenURL(perform: openAppURL)
     }
 
@@ -155,7 +259,8 @@ struct AppShell: View {
         case .feed:
             selection = .home
         case .createPost:
-            selection = .create
+            selection = .home
+            isComposerPresented = true
         case .wallet:
             selection = .wallet
         case .messages:
@@ -163,6 +268,7 @@ struct AppShell: View {
         case .orders(let orderID):
             selectedOrderID = orderID
             selection = .orders
+            navigationPath = [.order(orderID)]
         }
     }
 
@@ -170,6 +276,11 @@ struct AppShell: View {
         guard let safePostID = NotificationRouting.validatedPostID(postID) else { return }
         selection = .home
         navigationPath = [.post(safePostID)]
+    }
+
+    private func openLinkedPost(_ postID: String) {
+        guard let safePostID = NotificationRouting.validatedPostID(postID) else { return }
+        navigationPath.append(.post(safePostID))
     }
 
     private func openProfile(_ userID: String) {

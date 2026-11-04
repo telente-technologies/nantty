@@ -7,6 +7,10 @@ struct WalletOverviewView: View {
     @State private var wallet: WalletSummary?
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var escrowHolds: WalletEscrowHoldsPage?
+    @State private var isLoadingEscrowHolds = false
+    @State private var escrowHoldsError: String?
+    @State private var escrowRequestGeneration = UUID()
     @State private var transactions: [WalletTransaction] = []
     @State private var isLoadingTransactions = false
     @State private var isLoadingMoreTransactions = false
@@ -31,11 +35,13 @@ struct WalletOverviewView: View {
         .task {
             await loadWallet()
             await loadTransactions(cursor: nil)
+            await loadEscrowHolds()
         }
         .onChange(of: session.phase) { _, phase in
             if phase == .signedIn {
                 Task { await loadWallet() }
                 resetTransactionsAndReload()
+                resetEscrowHoldsAndReload()
             } else {
                 clearAccountData()
             }
@@ -46,6 +52,7 @@ struct WalletOverviewView: View {
                 clearAccountData()
                 Task { await loadWallet() }
                 resetTransactionsAndReload()
+                resetEscrowHoldsAndReload()
             }
         }
     }
@@ -129,6 +136,7 @@ struct WalletOverviewView: View {
                     .accessibilityIdentifier("wallet-balance-error")
                 }
 
+                escrowHoldsSection
                 transactionsSection
 
                 if wallet != nil {
@@ -145,7 +153,79 @@ struct WalletOverviewView: View {
         .refreshable {
             await loadWallet()
             await loadTransactions(cursor: nil)
+            await loadEscrowHolds()
         }
+    }
+
+    private var escrowHoldsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Held in escrow")
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+
+            if (isLoadingEscrowHolds || (escrowHolds == nil && escrowHoldsError == nil)) && escrowHolds == nil {
+                ProgressView("Loading escrow holds…")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityIdentifier("wallet-escrow-loading")
+            } else if let escrowHoldsError, escrowHolds == nil {
+                VStack(alignment: .leading, spacing: 10) {
+                    Label("Escrow holds unavailable", systemImage: "wifi.exclamationmark")
+                        .font(.subheadline.weight(.medium))
+                    Text(escrowHoldsError)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Button("Try Again", systemImage: "arrow.clockwise") {
+                        Task { await loadEscrowHolds() }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isLoadingEscrowHolds)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(16)
+                .background(.background.secondary, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .accessibilityIdentifier("wallet-escrow-error")
+            } else if let escrowHolds, escrowHolds.data.isEmpty {
+                ContentUnavailableView(
+                    "No orders held in escrow",
+                    systemImage: "lock.rectangle",
+                    description: Text("Escrow details for your orders will appear here.")
+                )
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .accessibilityIdentifier("wallet-escrow-empty")
+            } else if let escrowHolds {
+                VStack(spacing: 0) {
+                    ForEach(Array(escrowHolds.data.enumerated()), id: \.element.id) { index, hold in
+                        escrowHoldRow(hold)
+                        if index < escrowHolds.data.count - 1 {
+                            Rectangle().fill(.quaternary).frame(height: 1).padding(.leading, 16)
+                        }
+                    }
+                }
+                .background(.background.secondary, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .accessibilityIdentifier("wallet-escrow-list")
+
+                if isLoadingEscrowHolds {
+                    ProgressView("Refreshing escrow holds…")
+                        .font(.footnote)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else if let escrowHoldsError {
+                    HStack(spacing: 12) {
+                        Text(escrowHoldsError)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                        Spacer(minLength: 4)
+                        Button("Retry") {
+                            Task { await loadEscrowHolds() }
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(isLoadingEscrowHolds)
+                    }
+                    .accessibilityIdentifier("wallet-escrow-refresh-error")
+                }
+            }
+        }
+        .accessibilityIdentifier("wallet-escrow-holds")
     }
 
     private var transactionsSection: some View {
@@ -343,6 +423,38 @@ struct WalletOverviewView: View {
         .accessibilityElement(children: .combine)
     }
 
+    private func escrowHoldRow(_ hold: WalletEscrowHold) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text(hold.productName)
+                    .font(.subheadline.weight(.medium))
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                Text(WalletOverviewPresentation.amount(hold.amount))
+                    .font(.subheadline.weight(.semibold))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
+            Text(hold.orderReference)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Label(WalletEscrowHoldPresentation.stage(hold.stage), systemImage: "lock.fill")
+                .font(.footnote.weight(.medium))
+                .foregroundStyle(.secondary)
+            if let releaseDate = WalletEscrowHoldPresentation.releaseDate(hold.expectedReleaseAt) {
+                Text("Expected release · \(releaseDate)")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("wallet-escrow-hold-\(hold.orderId)")
+    }
+
     @MainActor
     private func loadWallet() async {
         guard session.phase == .signedIn else { return }
@@ -408,6 +520,33 @@ struct WalletOverviewView: View {
     }
 
     @MainActor
+    private func loadEscrowHolds() async {
+        guard session.phase == .signedIn, !isLoadingEscrowHolds else { return }
+        let requestGeneration = escrowRequestGeneration
+        let requestedUserID = session.user?.id
+        isLoadingEscrowHolds = true
+        escrowHoldsError = nil
+        defer {
+            if requestGeneration == escrowRequestGeneration {
+                isLoadingEscrowHolds = false
+            }
+        }
+        do {
+            let page = try await session.fetchWalletEscrowHolds()
+            guard requestGeneration == escrowRequestGeneration,
+                  session.phase == .signedIn,
+                  session.user?.id == requestedUserID else { return }
+            escrowHolds = page
+            escrowHoldsError = nil
+        } catch {
+            guard requestGeneration == escrowRequestGeneration,
+                  session.phase == .signedIn,
+                  session.user?.id == requestedUserID else { return }
+            escrowHoldsError = error.localizedDescription
+        }
+    }
+
+    @MainActor
     private func resetTransactionsAndReload() {
         transactionRequestGeneration = UUID()
         transactions = []
@@ -421,10 +560,23 @@ struct WalletOverviewView: View {
     }
 
     @MainActor
+    private func resetEscrowHoldsAndReload() {
+        escrowRequestGeneration = UUID()
+        escrowHolds = nil
+        escrowHoldsError = nil
+        isLoadingEscrowHolds = false
+        Task { await loadEscrowHolds() }
+    }
+
+    @MainActor
     private func clearAccountData() {
         transactionRequestGeneration = UUID()
+        escrowRequestGeneration = UUID()
         wallet = nil
         errorMessage = nil
+        escrowHolds = nil
+        escrowHoldsError = nil
+        isLoadingEscrowHolds = false
         transactions = []
         transactionPage = nil
         consumedTransactionCursors = []

@@ -14,6 +14,7 @@ struct PostThreadView: View {
 
     let postID: String
     let onRequestSignIn: () -> Void
+    let onOpenPost: (String) -> Void
 
     @Environment(SessionModel.self) private var session
     @AppStorage("apiBaseURL") private var apiBaseURL = Bundle.main.object(forInfoDictionaryKey: "NanttyAPIBaseURL") as? String ?? "http://localhost:8080"
@@ -226,6 +227,10 @@ struct PostThreadView: View {
             replyComposer
         }
         .environment(\.openURL, OpenURLAction { url in
+            if let internalPostID = PostTextLinks.internalPostID(from: url) {
+                onOpenPost(internalPostID)
+                return .handled
+            }
             guard let safeURL = PostTextLinks.safeHTTPSURL(url.absoluteString) else { return .discarded }
             Task { await session.recordPostLinkClick(postID: postID) }
             return .systemAction(safeURL)

@@ -3,12 +3,17 @@ import SwiftUI
 struct OrdersOverviewView: View {
     @Environment(SessionModel.self) private var session
     let selectedOrderID: String?
+    let onOpenOrder: (String) -> Void
     let onSignInRequired: () -> Void
 
-    @State private var response: OrdersWidgetAPIResponse?
+    @State private var filter: BuyerOrderFilter = .all
+    @State private var orders: [BuyerOrderSummary] = []
+    @State private var nextCursor: String?
     @State private var isLoading = true
+    @State private var isLoadingMore = false
     @State private var errorMessage: String?
-    @State private var reloadID = UUID()
+    @State private var paginationError: String?
+    @State private var requestID = UUID()
 
     var body: some View {
         Group {
@@ -33,119 +38,244 @@ struct OrdersOverviewView: View {
                     Button("Try again") { Task { await session.restoreSession() } }
                 }
             case .signedIn:
-                signedInContent
+                ordersContent
             }
         }
-        .task(id: reloadID) { await loadOrders() }
+        .task(id: requestID) { await loadOrders(replacing: true) }
         .onChange(of: session.phase) { _, phase in
             guard phase == .signedIn else { return }
-            Task { await loadOrders() }
+            requestID = UUID()
         }
-        .refreshable { await loadOrders() }
-        .accessibilityIdentifier("orders-overview")
+        .onChange(of: filter) { _, _ in requestID = UUID() }
+        .refreshable { await loadOrders(replacing: true) }
+        .accessibilityIdentifier("buyer-orders")
     }
 
     @ViewBuilder
-    private var signedInContent: some View {
-        if isLoading && response == nil {
+    private var ordersContent: some View {
+        if isLoading && orders.isEmpty {
             ProgressView("Loading your orders…")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else if let errorMessage, response == nil {
+        } else if let errorMessage, orders.isEmpty {
             ContentUnavailableView {
                 Label("Orders unavailable", systemImage: "wifi.exclamationmark")
             } description: {
                 Text(errorMessage)
             } actions: {
-                Button("Try again", systemImage: "arrow.clockwise") { reloadID = UUID() }
+                Button("Try again", systemImage: "arrow.clockwise") { requestID = UUID() }
             }
-        } else if let response, response.orders.isEmpty {
-            ContentUnavailableView("No active orders", systemImage: "shippingbox", description: Text("Your active purchases will appear here."))
-        } else if let response {
+        } else if orders.isEmpty {
+            ContentUnavailableView(
+                filter == .all ? "No orders yet" : "No \(filter.label.lowercased()) orders",
+                systemImage: "shippingbox",
+                description: Text("Orders you place on Nantty will appear here.")
+            )
+        } else {
             List {
-                ForEach(response.orders, id: \.id) { order in
-                    OrderOverviewRow(order: order, isSelected: order.id == selectedOrderID)
-                        .listRowBackground(order.id == selectedOrderID ? Color.accentColor.opacity(0.08) : Color.clear)
+                ForEach(orders) { order in
+                    Button { onOpenOrder(order.id) } label: {
+                        BuyerOrderRow(order: order, isSelected: order.id == selectedOrderID)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("buyer-order-\(order.id)")
+                }
+
+                if let errorMessage {
+                    Text("Showing loaded orders. \(errorMessage)")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
+                if let nextCursor {
+                    paginationFooter(cursor: nextCursor)
                 }
             }
             .listStyle(.plain)
-            .overlay(alignment: .top) {
-                if let errorMessage {
-                    Label("Showing saved results. \(errorMessage)", systemImage: "exclamationmark.triangle.fill")
-                        .font(.footnote)
-                        .padding(10)
-                        .frame(maxWidth: .infinity)
-                        .background(.bar)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                orderFilters
+            }
+        }
+    }
+
+    private var orderFilters: some View {
+        HStack(spacing: 12) {
+            Text("Filter")
+                .font(.footnote.weight(.medium))
+                .foregroundStyle(.secondary)
+            Picker("Order status", selection: $filter) {
+                ForEach(BuyerOrderFilter.allCases) { option in
+                    Text(option.label).tag(option)
                 }
             }
-            .safeAreaInset(edge: .top, spacing: 0) {
-                Text("\(response.activeCount) active orders")
-                    .font(.footnote.weight(.medium))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
+            .pickerStyle(.menu)
+            .accessibilityIdentifier("buyer-order-filter")
+            Spacer(minLength: 0)
+            Text("\(orders.count) loaded")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(.bar)
+    }
+
+    @ViewBuilder
+    private func paginationFooter(cursor: String) -> some View {
+        if isLoadingMore {
+            HStack {
+                Spacer()
+                ProgressView("Loading more orders…")
+                Spacer()
             }
+            .padding(.vertical, 12)
+        } else if let paginationError {
+            VStack(spacing: 8) {
+                Text(paginationError)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Button("Try again") { Task { await loadMore(after: cursor) } }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+        } else {
+            Button("Load more orders") { Task { await loadMore(after: cursor) } }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .accessibilityIdentifier("load-more-buyer-orders")
         }
     }
 
     @MainActor
-    private func loadOrders() async {
+    private func loadOrders(replacing: Bool) async {
         guard session.phase == .signedIn else { return }
+        let request = requestID
         isLoading = true
         errorMessage = nil
+        paginationError = nil
+        if replacing {
+            orders = []
+            nextCursor = nil
+        }
         do {
-            response = try await session.fetchOrdersWidget()
+            let page = try await session.fetchBuyerOrders(filter: filter)
+            guard request == requestID else { return }
+            orders = page.data
+            nextCursor = safeNextCursor(page.nextCursor, requested: nil)
         } catch {
+            guard request == requestID else { return }
             errorMessage = error.localizedDescription
+            if (error as? SessionAPIError)?.statusCode == 401 || (error as? SessionAPIError)?.statusCode == 403 {
+                onSignInRequired()
+            }
         }
         isLoading = false
     }
-}
 
-private struct OrderOverviewRow: View {
-    let order: OrdersWidgetAPIItem
-    let isSelected: Bool
-
-    private var eta: Date? {
-        order.etaAt.flatMap { ISO8601DateFormatter().date(from: $0) }
+    @MainActor
+    private func loadMore(after cursor: String) async {
+        guard !isLoadingMore else { return }
+        isLoadingMore = true
+        paginationError = nil
+        defer { isLoadingMore = false }
+        do {
+            let page = try await session.fetchBuyerOrders(filter: filter, cursor: cursor)
+            orders = BuyerOrdersPage.appending(page.data, to: orders)
+            nextCursor = safeNextCursor(page.nextCursor, requested: cursor)
+        } catch {
+            paginationError = error.localizedDescription
+            if (error as? SessionAPIError)?.statusCode == 401 || (error as? SessionAPIError)?.statusCode == 403 {
+                onSignInRequired()
+            }
+        }
     }
 
+    private func safeNextCursor(_ candidate: String?, requested: String?) -> String? {
+        guard let candidate = candidate?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !candidate.isEmpty, candidate != requested else { return nil }
+        return candidate
+    }
+}
+
+private struct BuyerOrderRow: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let order: BuyerOrderSummary
+    let isSelected: Bool
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(order.statusLabel)
-                    .font(.headline)
-                Spacer(minLength: 8)
-                Text(order.reference)
-                    .font(.caption.monospaced())
-                    .foregroundStyle(.secondary)
-            }
-            Text(order.itemTitle)
-                .font(.body)
+        VStack(alignment: .leading, spacing: 6) {
+            metadata
+            Text(order.store.name)
+                .font(.headline)
                 .lineLimit(2)
-            HStack {
-                Label(order.storeName, systemImage: "storefront")
-                    .lineLimit(1)
-                Spacer(minLength: 8)
-                if let eta {
-                    Text(eta, style: .relative)
-                        .foregroundStyle(.secondary)
-                }
+            if !order.itemSummary.isEmpty {
+                Text(order.itemSummary)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
             }
-            .font(.caption)
+            Text(WalletOverviewPresentation.amount(WalletMoney(
+                amountMinor: order.total.amountMinor,
+                currency: order.total.currency
+            )))
+            .font(.subheadline.weight(.semibold))
             if isSelected {
                 Label("Opened from your home-screen widget", systemImage: "arrow.down.left.and.arrow.up.right")
                     .font(.caption2)
                     .foregroundStyle(.tint)
-                if let trackingURL = order.safeTrackingURL {
-                    Link(destination: trackingURL) {
-                        Label("Track shipment", systemImage: "shippingbox")
-                    }
-                    .font(.caption.weight(.semibold))
-                }
             }
         }
         .padding(.vertical, 6)
-        .accessibilityElement(children: .contain)
+        .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private var metadata: some View {
+        let stacked = horizontalSizeClass == .compact || dynamicTypeSize.isAccessibilitySize
+        if stacked {
+            VStack(alignment: .leading, spacing: 2) {
+                status
+                referenceAndDate
+            }
+        } else {
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    status
+                    Spacer(minLength: 8)
+                    referenceAndDate
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    status
+                    referenceAndDate
+                }
+            }
+        }
+    }
+
+    private var status: some View {
+        Text(order.status.capitalized)
+            .font(.headline)
+            .foregroundStyle(.tint)
+    }
+
+    private var referenceAndDate: some View {
+        Text("\(order.reference) · \(BuyerOrderPresentation.date(order.createdAt))")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .lineLimit(2)
+    }
+}
+
+enum BuyerOrderPresentation {
+    static func date(_ value: String, locale: Locale = .current, timeZone: TimeZone = .current) -> String {
+        let date = ISO8601DateFormatter().date(from: value)
+        guard let date else { return value }
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.timeZone = timeZone
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter.string(from: date)
     }
 }

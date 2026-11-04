@@ -3,25 +3,6 @@ import XCTest
 @testable import Nantty
 
 final class OrdersWidgetSnapshotTests: XCTestCase {
-    func testShipmentTrackingURLAcceptsOnlyHostedHttpsWithoutCredentials() {
-        func item(_ trackingUrl: String?) -> OrdersWidgetAPIItem {
-            OrdersWidgetAPIItem(
-                id: "550e8400-e29b-41d4-a716-446655440000",
-                reference: "NT-1",
-                statusLabel: "On the way",
-                etaAt: nil,
-                trackingUrl: trackingUrl,
-                itemTitle: "Beans",
-                storeName: "Ayo Market"
-            )
-        }
-
-        XCTAssertEqual(item("https://carrier.example/track/NT-1").safeTrackingURL?.absoluteString, "https://carrier.example/track/NT-1")
-        XCTAssertNil(item("http://carrier.example/track/NT-1").safeTrackingURL)
-        XCTAssertNil(item("https:carrier.example/track/NT-1").safeTrackingURL)
-        XCTAssertNil(item("https://user@carrier.example/track/NT-1").safeTrackingURL)
-    }
-
     func testMapperStoresOnlyBoundedValidatedFieldsAndBuildsAppOwnedDeepLink() throws {
         let response = OrdersWidgetAPIResponse(
             orders: [
@@ -30,7 +11,6 @@ final class OrdersWidgetSnapshotTests: XCTestCase {
                     reference: "  NT-1\n",
                     statusLabel: "On\u{0007} the way",
                     etaAt: "2026-11-02T15:00:00Z",
-                    trackingUrl: "https://carrier.example/track/NT-1",
                     itemTitle: String(repeating: "x", count: 100),
                     storeName: "  Ada   Store  "
                 ),
@@ -39,7 +19,6 @@ final class OrdersWidgetSnapshotTests: XCTestCase {
                     reference: "bad",
                     statusLabel: "Invalid order",
                     etaAt: nil,
-                    trackingUrl: nil,
                     itemTitle: "Bad",
                     storeName: "Bad Store"
                 )

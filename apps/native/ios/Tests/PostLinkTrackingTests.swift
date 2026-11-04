@@ -15,6 +15,18 @@ final class PostLinkTrackingTests: XCTestCase {
         XCTAssertNil(PostTextLinks.safeHTTPSURL(" https://example.com/article"))
     }
 
+    func testInternalPostLinksResolveOnlyForKnownHostsAndValidatedPostPaths() throws {
+        XCTAssertEqual(PostTextLinks.internalPostID(from: try XCTUnwrap(URL(string: "https://nantty.com/post/post-123"))), "post-123")
+        XCTAssertEqual(PostTextLinks.internalPostID(from: try XCTUnwrap(URL(string: "https://web.nantty.com/posts/post_456"))), "post_456")
+        XCTAssertNil(PostTextLinks.internalPostID(from: try XCTUnwrap(URL(string: "http://nantty.com/post/post-123"))))
+        XCTAssertNil(PostTextLinks.internalPostID(from: try XCTUnwrap(URL(string: "https://nantty.app/post/post-123"))))
+        XCTAssertNil(PostTextLinks.internalPostID(from: try XCTUnwrap(URL(string: "https://evil.example/post/post-123"))))
+        XCTAssertNil(PostTextLinks.internalPostID(from: try XCTUnwrap(URL(string: "https://nantty.com/post/../private"))))
+        XCTAssertNil(PostTextLinks.internalPostID(from: try XCTUnwrap(URL(string: "https://nantty.com/post/post-123?comment=comment-1"))))
+        XCTAssertNil(PostTextLinks.internalPostID(from: try XCTUnwrap(URL(string: "https://user@nantty.com/post/post-123"))))
+        XCTAssertNil(PostTextLinks.internalPostID(from: try XCTUnwrap(URL(string: "https://nantty.com:443/post/post-123"))))
+    }
+
     func testPostTextMakesOnlySafeHTTPSDestinationsAccessibleAsLinks() {
         let text = "Read https://example.com/story. Ignore http://example.com and javascript:alert(1)."
         let attributed = PostTextLinks.attributedText(text)

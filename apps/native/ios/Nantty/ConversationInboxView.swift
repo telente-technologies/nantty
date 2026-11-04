@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ConversationInboxView: View {
     @Environment(SessionModel.self) private var session
+    let onSignInRequired: () -> Void
 
     @State private var conversations: [InboxConversation] = []
     @State private var nextCursor: String?
@@ -22,6 +23,12 @@ struct ConversationInboxView: View {
                     Label("Sign in to view conversations", systemImage: "bubble.left.and.bubble.right")
                 } description: {
                     Text("Your conversation list is private to your account.")
+                } actions: {
+                    Button("Sign in", systemImage: "person.crop.circle") {
+                        onSignInRequired()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .accessibilityIdentifier("inbox-sign-in")
                 }
             } else {
                 inboxContent

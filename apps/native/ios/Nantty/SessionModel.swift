@@ -554,6 +554,44 @@ final class SessionModel {
         }
     }
 
+    func fetchWalletEscrowHolds() async throws -> WalletEscrowHoldsPage {
+        guard phase == .signedIn else { throw SessionActionError.signInRequiredForWallet }
+        let storedTokens: SessionTokens?
+        do {
+            storedTokens = try credentialStore.load()
+        } catch {
+            user = nil
+            phase = .restoreUnavailable
+            hasStartedRestoration = false
+            throw SessionActionError.signInRequiredForWallet
+        }
+        guard let tokens = storedTokens else {
+            user = nil
+            phase = .signedOut
+            throw SessionActionError.signInRequiredForWallet
+        }
+        let requestedUserID = user?.id
+
+        do {
+            let page = try await api.fetchWalletEscrowHolds(accessToken: tokens.accessToken)
+            guard phase == .signedIn,
+                  user?.id == requestedUserID,
+                  try credentialStore.load()?.accessToken == tokens.accessToken else {
+                throw SessionActionError.sessionChanged
+            }
+            return page
+        } catch let error as SessionAPIError where error.statusCode == 401 {
+            guard phase == .signedIn,
+                  user?.id == requestedUserID,
+                  (try? credentialStore.load()?.accessToken) == tokens.accessToken else {
+                throw SessionActionError.sessionChanged
+            }
+            clearAfterRejectedSession()
+            message = "Your session expired. Please sign in again."
+            throw error
+        }
+    }
+
     func fetchOrdersWidget() async throws -> OrdersWidgetAPIResponse {
         guard phase == .signedIn else { throw SessionActionError.signInRequiredForOrders }
         guard let tokens = try credentialStore.load() else {
@@ -574,6 +612,32 @@ final class SessionModel {
         } catch let error as SessionAPIError where error.statusCode == 401 {
             clearAfterRejectedSession()
             message = "Your session expired. Please sign in again."
+            throw error
+        }
+    }
+
+    func fetchBuyerOrders(filter: BuyerOrderFilter = .all, cursor: String? = nil) async throws -> BuyerOrdersPage {
+        let tokens = try buyerOrdersSessionTokens()
+        let requestedUserID = user?.id
+        do {
+            let page = try await api.fetchBuyerOrders(filter: filter, cursor: cursor, accessToken: tokens.accessToken)
+            try validateBuyerOrdersSession(tokens: tokens, userID: requestedUserID)
+            return page
+        } catch let error as SessionAPIError where error.statusCode == 401 || error.statusCode == 403 {
+            try rejectBuyerOrdersSession(tokens: tokens, userID: requestedUserID)
+            throw error
+        }
+    }
+
+    func fetchBuyerOrder(orderID: String) async throws -> BuyerOrderDetail {
+        let tokens = try buyerOrdersSessionTokens()
+        let requestedUserID = user?.id
+        do {
+            let order = try await api.fetchBuyerOrder(orderID: orderID, accessToken: tokens.accessToken)
+            try validateBuyerOrdersSession(tokens: tokens, userID: requestedUserID)
+            return order
+        } catch let error as SessionAPIError where error.statusCode == 401 || error.statusCode == 403 {
+            try rejectBuyerOrdersSession(tokens: tokens, userID: requestedUserID)
             throw error
         }
     }
@@ -646,6 +710,29 @@ final class SessionModel {
             throw SessionActionError.signInRequiredForInbox
         }
         return tokens
+    }
+
+    private func buyerOrdersSessionTokens() throws -> SessionTokens {
+        guard phase == .signedIn else { throw SessionActionError.signInRequiredForOrders }
+        guard let tokens = try credentialStore.load() else {
+            user = nil
+            phase = .signedOut
+            throw SessionActionError.signInRequiredForOrders
+        }
+        return tokens
+    }
+
+    private func validateBuyerOrdersSession(tokens: SessionTokens, userID: String?) throws {
+        guard phase == .signedIn, user?.id == userID,
+              try credentialStore.load()?.accessToken == tokens.accessToken else {
+            throw SessionActionError.sessionChanged
+        }
+    }
+
+    private func rejectBuyerOrdersSession(tokens: SessionTokens, userID: String?) throws {
+        try validateBuyerOrdersSession(tokens: tokens, userID: userID)
+        clearAfterRejectedSession()
+        message = "Your session expired. Please sign in again."
     }
 
     private func validateConversationInboxSession(tokens: SessionTokens, userID: String?) throws {
