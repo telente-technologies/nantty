@@ -122,6 +122,56 @@ class WalletRepositoryTest {
     }
 
     @Test
+    fun loadsEscrowHoldsFromCurrentUsersAuthenticatedEndpoint() {
+        val transport = RecordingWalletTransport(
+            JSONObject("""{"data":[{"orderId":"order-1","orderReference":"NAN-1042","productName":"Handwoven bag","amount":{"amountMinor":12500,"currency":"NGN"},"stage":"shipped","expectedReleaseAt":"2026-11-08T12:00:00Z"}],"nextCursor":null}"""),
+        )
+
+        val result = WalletRepository("https://api.nantty.com", ::signedInSession, transport).loadEscrowHolds()
+
+        assertEquals("/api/v1/wallets/me/escrow-holds", transport.path)
+        assertEquals("current-access", transport.token)
+        assertEquals(
+            WalletEscrowHoldsResult.Success(
+                listOf(WalletEscrowHold("order-1", "NAN-1042", "Handwoven bag", WalletMoney(12500, "NGN"), "shipped", "2026-11-08T12:00:00Z")),
+            ),
+            result,
+        )
+    }
+
+    @Test
+    fun returnsEmptyEscrowHoldsWhenNoOrdersAreHeld() {
+        val result = WalletRepository(
+            "https://api.nantty.com",
+            ::signedInSession,
+            RecordingWalletTransport(JSONObject("""{"data":[],"nextCursor":null}""")),
+        ).loadEscrowHolds()
+
+        assertEquals(WalletEscrowHoldsResult.Success(emptyList()), result)
+    }
+
+    @Test
+    fun refusesEscrowHoldsWithoutSignedInSession() {
+        val transport = RecordingWalletTransport(JSONObject("""{"data":[]}"""))
+
+        val result = WalletRepository("https://api.nantty.com", { null }, transport).loadEscrowHolds()
+
+        assertTrue((result as WalletEscrowHoldsResult.Failure).message.contains("Sign in"))
+        assertEquals(null, transport.path)
+    }
+
+    @Test
+    fun reportsMalformedEscrowResponseAsFailure() {
+        val result = WalletRepository(
+            "https://api.nantty.com",
+            ::signedInSession,
+            RecordingWalletTransport(JSONObject("{}")),
+        ).loadEscrowHolds()
+
+        assertTrue(result is WalletEscrowHoldsResult.Failure)
+    }
+
+    @Test
     fun usesReactNativeAvailablePendingFallbackWhenApiLinesAreEmpty() {
         val payload = walletPayload().put("lines", org.json.JSONArray())
         val wallet = WalletRepository("https://api.nantty.com", { signedInSession() }, RecordingWalletTransport(payload)).load() as WalletResult.Success

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.clickable
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,7 +53,8 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executor
 
 @Composable
-internal fun MessagesScreen(repository: MessagesRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}) {
+internal fun MessagesScreen(repository: MessagesRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenConversation: (InboxConversation) -> Unit = {}) {
+    var selectedConversation by remember(repository) { mutableStateOf<InboxConversation?>(null) }
     var result by remember(repository) { mutableStateOf<MessagesResult?>(null) }
     var loading by remember(repository) { mutableStateOf(false) }
     var loadingMore by remember(repository) { mutableStateOf(false) }
@@ -94,6 +98,29 @@ internal fun MessagesScreen(repository: MessagesRepository, executor: Executor, 
 
     LaunchedEffect(repository) { refresh() }
 
+    BackHandler(enabled = selectedConversation != null) { selectedConversation = null }
+    selectedConversation?.let { conversation ->
+        AndroidConversationScreen(
+            conversation = conversation,
+            repository = repository,
+            executor = executor,
+            onBack = { selectedConversation = null },
+            onReauthenticate = onReauthenticate,
+            onConversationRead = {
+                androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                    selectedConversation = selectedConversation?.copy(unreadCount = 0)
+                    val success = result as? MessagesResult.Success
+                    if (success != null) {
+                        result = success.copy(page = success.page.copy(conversations = success.page.conversations.map {
+                            if (it.id == conversation.id) it.copy(unreadCount = 0) else it
+                        }))
+                    }
+                }
+            },
+        )
+        return
+    }
+
     Column(modifier.fillMaxSize()) {
         Row(
             Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
@@ -118,7 +145,12 @@ internal fun MessagesScreen(repository: MessagesRepository, executor: Executor, 
             result is MessagesResult.Success -> {
                 val page = (result as MessagesResult.Success).page
                 LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
-                    items(page.conversations, key = InboxConversation::id) { conversation -> ConversationRow(conversation) }
+                    items(page.conversations, key = InboxConversation::id) { conversation ->
+                        ConversationRow(conversation, onClick = {
+                            selectedConversation = conversation
+                            onOpenConversation(conversation)
+                        })
+                    }
                     item(key = "messages-pagination") {
                         when {
                             loadingMore -> Box(Modifier.fillMaxWidth().padding(20.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -137,10 +169,10 @@ internal fun MessagesScreen(repository: MessagesRepository, executor: Executor, 
 }
 
 @Composable
-private fun ConversationRow(conversation: InboxConversation) {
+private fun ConversationRow(conversation: InboxConversation, onClick: () -> Unit) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Row(
-            Modifier.fillMaxWidth().semantics(mergeDescendants = true) {
+            Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick).semantics(mergeDescendants = true) {
                 contentDescription = buildString {
                     append(conversation.title)
                     append(", ${conversation.type.label}")

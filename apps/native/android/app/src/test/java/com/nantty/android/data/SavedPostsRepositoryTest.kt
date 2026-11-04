@@ -66,6 +66,30 @@ class SavedPostsRepositoryTest {
     }
 
     @Test
+    fun requestsAndParsesOnlyCurrentUsersSavedVideos() {
+        val payload = JSONObject("""{"data":[
+            {"id":"$saveId","type":"video","targetId":"$postId","savedAt":"2026-11-02T10:00:00Z","post":${postJson()}},
+            {"id":"d4444444-4444-4444-8444-444444444444","type":"post","targetId":"$postId","post":${postJson()}}
+        ],"nextCursor":"$cursorId"}""")
+        val transport = RecordingTransport(payload)
+        val repository = SavedPostsRepository("https://api.nantty.com", ::signedInSession, transport)
+
+        val result = repository.load(type = SavedPostType.VIDEOS) as SavedPostsResult.Success
+
+        assertEquals("/api/v1/saves?type=video", transport.path)
+        assertEquals(listOf(saveId), result.page.posts.map(SavedPost::saveId))
+        assertEquals(cursorId, result.page.nextCursor)
+    }
+
+    @Test
+    fun encodesVideoTypeWithCursorOnSubsequentPage() {
+        assertEquals(
+            "/api/v1/saves?type=video&cursor=$cursorId",
+            buildSavedPostsPath(cursorId, SavedPostType.VIDEOS),
+        )
+    }
+
+    @Test
     fun rejectsNonUuidCursorReturnedByBackend() {
         val payload = JSONObject("""{"data":[],"nextCursor":"next-page"}""")
         val result = SavedPostsRepository("https://api.nantty.com", ::signedInSession, RecordingTransport(payload)).load()

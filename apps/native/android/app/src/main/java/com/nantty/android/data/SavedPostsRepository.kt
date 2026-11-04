@@ -10,6 +10,7 @@ import java.net.URLEncoder
 
 data class SavedPost(val saveId: String, val post: FeedPost, val savedAt: String)
 data class SavedPostsPage(val posts: List<SavedPost>, val nextCursor: String?)
+enum class SavedPostType(val apiValue: String) { POSTS("post"), VIDEOS("video") }
 
 sealed interface SavedPostsResult {
     data class Success(val page: SavedPostsPage) : SavedPostsResult
@@ -25,12 +26,12 @@ class SavedPostsRepository(
     private val sessionProvider: () -> AccountSession?,
     private val transport: SavedPostsTransport = JdkSavedPostsTransport(baseUrl),
 ) {
-    fun load(cursor: String? = null): SavedPostsResult = try {
+    fun load(cursor: String? = null, type: SavedPostType = SavedPostType.POSTS): SavedPostsResult = try {
         val session = sessionProvider() ?: error("Sign in to view saved posts.")
         val token = session.accessToken.takeIf(String::isNotBlank) ?: error("Sign in to view saved posts.")
         require(cursor == null || isUuid(cursor)) { "This saved-posts page cursor is invalid. Start again." }
-        val path = buildSavedPostsPath(cursor)
-        SavedPostsResult.Success(parsePage(transport.get(path, token)))
+        val path = buildSavedPostsPath(cursor, type)
+        SavedPostsResult.Success(parsePage(transport.get(path, token), type))
     } catch (error: Exception) {
         SavedPostsResult.Failure(
             error.message ?: "Could not load saved posts. Check your connection and try again.",
@@ -38,12 +39,12 @@ class SavedPostsRepository(
         )
     }
 
-    internal fun parsePage(payload: JSONObject): SavedPostsPage {
+    internal fun parsePage(payload: JSONObject, type: SavedPostType = SavedPostType.POSTS): SavedPostsPage {
         val rows = payload.optJSONArray("data") ?: error("Nantty returned an incomplete saved-posts response.")
         val posts = buildList {
             for (index in 0 until rows.length()) {
                 val row = rows.optJSONObject(index) ?: continue
-                if (row.optString("type") != "post") continue
+                if (row.optString("type") != type.apiValue) continue
                 val id = row.optString("id").takeIf(::isUuid) ?: continue
                 val targetId = row.optString("targetId").takeIf(::isUuid) ?: continue
                 val postJson = row.optJSONObject("post") ?: continue
@@ -62,8 +63,8 @@ class SavedPostsRepository(
     }
 }
 
-internal fun buildSavedPostsPath(cursor: String? = null): String = buildString {
-    append("/api/v1/saves?type=post")
+internal fun buildSavedPostsPath(cursor: String? = null, type: SavedPostType = SavedPostType.POSTS): String = buildString {
+    append("/api/v1/saves?type=${type.apiValue}")
     cursor?.takeIf(String::isNotBlank)?.let { append("&cursor=${URLEncoder.encode(it, Charsets.UTF_8.name()).replace("+", "%20")}") }
 }
 

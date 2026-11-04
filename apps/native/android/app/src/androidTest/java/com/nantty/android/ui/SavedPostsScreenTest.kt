@@ -64,6 +64,24 @@ class SavedPostsScreenTest {
     }
 
     @Test
+    fun videoFilterLoadsTheSavedVideoPostThroughExistingEndpoint() {
+        val transport = FakeTransport()
+        compose.setContent {
+            MaterialTheme {
+                SavedPostsScreen(
+                    SavedPostsRepository("https://api.nantty.com", ::signedInSession, transport),
+                    Executor { it.run() }, {}, {}, {},
+                )
+            }
+        }
+
+        compose.onNodeWithText("Videos").performClick()
+        compose.onNodeWithText("Saved videos").assertIsDisplayed()
+        compose.onNodeWithText("A saved video").assertIsDisplayed()
+        compose.runOnIdle { assertEquals("/api/v1/saves?type=video", transport.paths.last()) }
+    }
+
+    @Test
     fun initialFailureCanRetryWithoutLosingTheScreen() {
         val transport = FakeTransport(failFirst = true)
         compose.setContent {
@@ -179,11 +197,15 @@ class SavedPostsScreenTest {
             if (failCursor && path.contains("cursor=") && calls == 2) error("Offline")
             if (empty) return JSONObject("""{"data":[],"nextCursor":null}""")
             if (path.contains("cursor=")) return JSONObject("""{"data":[${savedItem("d1111111-1111-4111-8111-111111111111", "d2222222-2222-4222-8222-222222222222", "Duplicate saved row")},${savedItem("e1111111-1111-4111-8111-111111111111", "e2222222-2222-4222-8222-222222222222", "Second saved post")}],"nextCursor":null}""")
+            if (path.contains("type=video")) return JSONObject("""{"data":[${savedItem("d1111111-1111-4111-8111-111111111111", "d2222222-2222-4222-8222-222222222222", "A saved video", "video")}],"nextCursor":null}""")
             val nextCursor = if (twoPages || failCursor) "d3333333-3333-4333-8333-333333333333" else null
             return JSONObject("""{"data":[${savedItem("d1111111-1111-4111-8111-111111111111", "d2222222-2222-4222-8222-222222222222", "A saved post")}],"nextCursor":${nextCursor?.let { "\"$it\"" } ?: "null"}}""")
         }
 
-        private fun savedItem(saveId: String, postId: String, text: String) = """{"id":"$saveId","type":"post","targetId":"$postId","savedAt":"2026-11-02T10:00:00Z","post":{"id":"$postId","kind":"post","text":"$text","createdAt":"2026-11-02T09:00:00Z","author":{"id":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","name":"Ari","username":"ari"},"media":[]}}"""
+        private fun savedItem(saveId: String, postId: String, text: String, type: String = "post"): String {
+            val media = if (type == "video") """[{"id":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","type":"video","status":"ready","url":"https://cdn.nantty.com/saved.mp4","posterUrl":"https://cdn.nantty.com/saved-poster.jpg"}]""" else "[]"
+            return """{"id":"$saveId","type":"$type","targetId":"$postId","savedAt":"2026-11-02T10:00:00Z","post":{"id":"$postId","kind":"post","text":"$text","createdAt":"2026-11-02T09:00:00Z","author":{"id":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","name":"Ari","username":"ari"},"media":$media}}"""
+        }
     }
 
     private fun signedInSession() = AccountSession("saved-token", "refresh", AccountUser("user-1", "Ari", "ari", null, null, emptyList()))

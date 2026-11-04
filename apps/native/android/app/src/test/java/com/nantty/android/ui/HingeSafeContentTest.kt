@@ -45,4 +45,28 @@ class HingeSafeContentTest {
         assertNull(largestSafePaneBounds(Float.NaN, listOf(Rect(400f, 0f, 420f, 800f))))
         assertNull(largestSafePaneBounds(0f, listOf(Rect(400f, 0f, 420f, 800f))))
     }
+
+    @Test
+    fun keepsContentAboveHorizontalTabletopHinge() {
+        val safe = largestSafeContentBounds(800f, 1200f, listOf(Rect(0f, 580f, 800f, 620f)))
+
+        assertEquals(SafeContentBounds(0f, 0f, 800f, 580f), safe)
+    }
+
+    @Test
+    fun keepsContentInsideLargestRegionWhenBothHingeOrientationsSeparateWindow() {
+        val safe = largestSafeContentBounds(
+            1200f,
+            800f,
+            listOf(Rect(590f, 0f, 610f, 800f), Rect(0f, 390f, 590f, 410f)),
+        )
+        assertEquals(SafeContentBounds(610f, 0f, 1200f, 800f), safe)
+    }
+
+    @Test
+    fun ignoresInvalidWindowBoundsAndNonSeparatingHingeGeometry() {
+        assertNull(largestSafeContentBounds(800f, Float.POSITIVE_INFINITY, emptyList()))
+        assertNull(largestSafeContentBounds(800f, 1200f, listOf(Rect(900f, 300f, 950f, 350f))))
+        assertNull(largestSafeContentBounds(800f, 1200f, emptyList()))
+    }
 }

@@ -32,6 +32,14 @@ data class FeedPost(
     val bookmarked: Boolean = false,
 )
 
+data class FeedTopic(val id: String, val name: String)
+
+sealed interface FeedTopicsResult {
+    data class Success(val topics: List<FeedTopic>) : FeedTopicsResult
+    data class Failure(val message: String) : FeedTopicsResult
+    data object AuthenticationRequired : FeedTopicsResult
+}
+
 data class FeedMedia(
     val id: String,
     val type: String,
@@ -56,11 +64,12 @@ class FeedRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val openConnection: (URL) -> HttpURLConnection = { it.openConnection() as HttpURLConnection },
 ) {
-    fun loadForYou(accessToken: String? = null, cursor: String? = null): FeedResult = load(FeedType.FOR_YOU, accessToken, cursor)
+    fun loadForYou(accessToken: String? = null, cursor: String? = null, topicId: String? = null): FeedResult =
+        load(FeedType.FOR_YOU, accessToken, cursor, topicId)
 
     fun loadFollowing(accessToken: String?, cursor: String? = null): FeedResult = load(FeedType.FOLLOWING, accessToken, cursor)
 
-    fun load(feedType: FeedType, accessToken: String? = null, cursor: String? = null): FeedResult {
+    fun load(feedType: FeedType, accessToken: String? = null, cursor: String? = null, topicId: String? = null): FeedResult {
         if (feedType == FeedType.FOLLOWING && accessToken.isNullOrBlank()) return FeedResult.AuthenticationRequired
         val origin = baseUrl.trim().trimEnd('/')
         if (origin.isBlank()) return FeedResult.Failure("Feed unavailable: configure NANTTY_API_BASE_URL to connect to Nantty.")
@@ -72,7 +81,7 @@ class FeedRepository(
         }
 
         return try {
-            val connection = openConnection(buildFeedUrl(origin, feedType, cursor))
+            val connection = openConnection(buildFeedUrl(origin, feedType, cursor, topicId))
             connection.apply {
                 requestMethod = "GET"
                 connectTimeout = 10_000
@@ -92,6 +101,54 @@ class FeedRepository(
             FeedResult.Failure("Could not reach Nantty. Check your connection and try again.")
         }
     }
+
+    fun loadFollowedTopics(accessToken: String?): FeedTopicsResult {
+        if (accessToken.isNullOrBlank()) return FeedTopicsResult.AuthenticationRequired
+        val origin = baseUrl.trim().trimEnd('/')
+        if (origin.isBlank()) return FeedTopicsResult.Failure("Topics unavailable: configure NANTTY_API_BASE_URL to connect to Nantty.")
+        val parsed = runCatching { URL(origin) }.getOrElse {
+            return FeedTopicsResult.Failure("Topics unavailable: the configured API address is invalid.")
+        }
+        if (parsed.protocol != "https" && !(parsed.protocol == "http" && parsed.host == "10.0.2.2")) {
+            return FeedTopicsResult.Failure("Topics unavailable: the API address must use HTTPS (emulator development may use 10.0.2.2).")
+        }
+
+        return try {
+            val connection = openConnection(URL("${origin}/api/v1/users/me/topics"))
+            connection.apply {
+                requestMethod = "GET"
+                connectTimeout = 10_000
+                readTimeout = 15_000
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("Authorization", "Bearer $accessToken")
+            }
+            connection.useConnection {
+                val status = connection.responseCode
+                val body = (if (status in 200..299) connection.inputStream else connection.errorStream)
+                    ?.bufferedReader()?.use { it.readText() }.orEmpty()
+                if (status == HttpURLConnection.HTTP_UNAUTHORIZED) return@useConnection FeedTopicsResult.AuthenticationRequired
+                if (status !in 200..299) return@useConnection FeedTopicsResult.Failure("Topics request failed (HTTP $status). Please try again later.")
+                parseTopics(body)
+            }
+        } catch (_: Exception) {
+            FeedTopicsResult.Failure("Could not reach Nantty. Check your connection and try again.")
+        }
+    }
+
+    internal fun parseTopics(body: String): FeedTopicsResult = runCatching {
+        val root = JSONObject(body)
+        val rows = root.optJSONArray("data") ?: JSONArray()
+        val seenIds = mutableSetOf<String>()
+        val topics = buildList {
+            for (index in 0 until rows.length()) {
+                val item = rows.optJSONObject(index) ?: continue
+                val id = item.optString("id").trim()
+                val name = item.optString("name").trim()
+                if (id.isNotEmpty() && name.isNotEmpty() && seenIds.add(id)) add(FeedTopic(id, name))
+            }
+        }
+        FeedTopicsResult.Success(topics)
+    }.getOrElse { FeedTopicsResult.Failure("Nantty returned topics we could not read. Please try again later.") }
 
     internal fun parsePage(body: String): FeedResult = runCatching {
         val root = JSONObject(body)
@@ -149,15 +206,18 @@ class FeedRepository(
     }.getOrElse { FeedResult.Failure("Nantty returned a feed we could not read. Please try again later.") }
 }
 
-internal fun buildForYouUrl(origin: String, cursor: String?): URL {
-    return buildFeedUrl(origin, FeedType.FOR_YOU, cursor)
+internal fun buildForYouUrl(origin: String, cursor: String?, topicId: String? = null): URL {
+    return buildFeedUrl(origin, FeedType.FOR_YOU, cursor, topicId)
 }
 
 internal fun buildFollowingUrl(origin: String, cursor: String?): URL {
     return buildFeedUrl(origin, FeedType.FOLLOWING, cursor)
 }
 
-internal fun buildFeedUrl(origin: String, feedType: FeedType, cursor: String?): URL {
+internal fun buildFeedUrl(origin: String, feedType: FeedType, cursor: String?, topicId: String? = null): URL {
+    val encodedTopic = topicId?.takeIf(String::isNotBlank)?.let {
+        "&topicId=${URLEncoder.encode(it, "UTF-8")}"
+    }.orEmpty()
     val encodedCursor = cursor?.takeIf(String::isNotBlank)?.let {
         "&cursor=${URLEncoder.encode(it, "UTF-8")}"
     }.orEmpty()
@@ -165,7 +225,8 @@ internal fun buildFeedUrl(origin: String, feedType: FeedType, cursor: String?): 
         FeedType.FOR_YOU -> "for-you"
         FeedType.FOLLOWING -> "following"
     }
-    return URL("${origin.trimEnd('/')}/api/v1/feeds/$route?limit=10$encodedCursor")
+    val topicParameter = if (feedType == FeedType.FOR_YOU) encodedTopic else ""
+    return URL("${origin.trimEnd('/')}/api/v1/feeds/$route?limit=10$encodedCursor$topicParameter")
 }
 
 internal fun appendUniqueFeedPosts(current: List<FeedPost>, incoming: List<FeedPost>): List<FeedPost> {

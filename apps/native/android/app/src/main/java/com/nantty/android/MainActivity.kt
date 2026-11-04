@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
                 val app = application as NanttyApplication
                 NanttyApp(
                     sessionRepository = app.sessionRepository,
+                    authFlowApi = app.authApi,
                     sessionExecutor = app.sessionExecutor,
                     requestedWidgetDestination = widgetDestination,
                     onWidgetDestinationHandled = { widgetDestination = null },

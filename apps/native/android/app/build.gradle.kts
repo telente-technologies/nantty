@@ -9,6 +9,9 @@ val apiBaseUrl = providers.gradleProperty("nanttyApiBaseUrl")
 val webAppBaseUrl = providers.gradleProperty("nanttyWebAppUrl")
     .orElse(providers.environmentVariable("NANTTY_WEBAPP_URL"))
     .getOrElse("https://web.nantty.com")
+val googleServerClientId = providers.gradleProperty("nanttyGoogleServerClientId")
+    .orElse(providers.environmentVariable("NANTTY_GOOGLE_SERVER_CLIENT_ID"))
+    .getOrElse("")
 
 android {
     namespace = "com.nantty.android"
@@ -22,6 +25,7 @@ android {
         versionName = "0.1.0"
         buildConfigField("String", "NANTTY_API_BASE_URL", "\"${apiBaseUrl.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         buildConfigField("String", "NANTTY_WEBAPP_URL", "\"${webAppBaseUrl.trimEnd('/').replace("\\", "\\\\").replace("\"", "\\\"")}\"")
+        buildConfigField("String", "NANTTY_GOOGLE_SERVER_CLIENT_ID", "\"${googleServerClientId.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -49,6 +53,10 @@ dependencies {
     implementation(libs.androidx.glance)
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.work.runtime)
+    implementation(libs.bouncycastle.prov)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)
     testImplementation(libs.json.test)

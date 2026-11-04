@@ -102,6 +102,28 @@ class PostDetailScreenTest {
     }
 
     @Test
+    fun replySortUsesExistingApiSortAndReloadsTheThread() {
+        val transport = SuccessfulThreadTransport()
+        val repository = PostDetailRepository("https://api.nantty.com", { null }, transport)
+        compose.setContent {
+            MaterialTheme {
+                PostDetailScreen("post-1", { null }, Executor { it.run() }, onBack = {}, repository = repository)
+            }
+        }
+
+        compose.onNodeWithContentDescription("Sort replies, currently Relevant").performScrollTo().performClick()
+        compose.onNodeWithText("Latest").performClick()
+
+        compose.onNodeWithText("Root API reply").assertIsDisplayed()
+        compose.runOnIdle {
+            org.junit.Assert.assertEquals(
+                listOf("/api/v1/posts/post-1/thread?sort=relevant", "/api/v1/posts/post-1/thread?sort=latest"),
+                transport.calls.filter { it.method == "GET" && it.path.contains("/thread?") }.map { it.path },
+            )
+        }
+    }
+
+    @Test
     fun loadsNextPageDeduplicatesRootsAndStopsWhenServerRepeatsCursor() {
         val transport = PagedThreadTransport()
         val repository = PostDetailRepository("https://api.nantty.com", { null }, transport)

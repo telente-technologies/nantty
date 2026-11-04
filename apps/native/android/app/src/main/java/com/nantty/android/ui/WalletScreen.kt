@@ -38,6 +38,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nantty.android.data.WalletRepository
+import com.nantty.android.data.WalletEscrowHold
+import com.nantty.android.data.WalletEscrowHoldsResult
 import com.nantty.android.data.WalletResult
 import com.nantty.android.data.WalletSummary
 import com.nantty.android.data.WalletTransaction
@@ -58,8 +60,10 @@ internal fun WalletScreen(
 ) {
     var result by remember(repository) { mutableStateOf<WalletResult?>(null) }
     var transactionsResult by remember(repository) { mutableStateOf<WalletTransactionsResult?>(null) }
+    var escrowHoldsResult by remember(repository) { mutableStateOf<WalletEscrowHoldsResult?>(null) }
     var loadingWallet by remember(repository) { mutableStateOf(false) }
     var loadingTransactions by remember(repository) { mutableStateOf(false) }
+    var loadingEscrowHolds by remember(repository) { mutableStateOf(false) }
     var loadingMoreTransactions by remember(repository) { mutableStateOf(false) }
     var transactionPageError by remember(repository) { mutableStateOf(false) }
 
@@ -82,6 +86,17 @@ internal fun WalletScreen(
             androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                 transactionsResult = next
                 loadingTransactions = false
+            }
+        }
+    }
+
+    fun refreshEscrowHolds() {
+        loadingEscrowHolds = true
+        executor.execute {
+            val next = repository.loadEscrowHolds()
+            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                escrowHoldsResult = next
+                loadingEscrowHolds = false
             }
         }
     }
@@ -111,6 +126,7 @@ internal fun WalletScreen(
     fun refresh() {
         refreshWallet()
         refreshTransactions()
+        refreshEscrowHolds()
     }
 
     LaunchedEffect(repository) { refresh() }
@@ -121,7 +137,7 @@ internal fun WalletScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text("Wallet", Modifier.weight(1f).semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            IconButton(onClick = ::refresh, enabled = !loadingWallet && !loadingTransactions && !loadingMoreTransactions, modifier = Modifier.semantics { contentDescription = "Refresh wallet" }) {
+            IconButton(onClick = ::refresh, enabled = !loadingWallet && !loadingTransactions && !loadingEscrowHolds && !loadingMoreTransactions, modifier = Modifier.semantics { contentDescription = "Refresh wallet" }) {
                 Icon(Icons.Default.Refresh, contentDescription = null)
             }
         }
@@ -143,6 +159,9 @@ internal fun WalletScreen(
             ) {
                 WalletContent(
                     wallet = current.wallet,
+                    escrowHoldsResult = escrowHoldsResult,
+                    loadingEscrowHolds = loadingEscrowHolds,
+                    onRetryEscrowHolds = ::refreshEscrowHolds,
                     transactionsResult = transactionsResult,
                     loadingTransactions = loadingTransactions,
                     loadingMoreTransactions = loadingMoreTransactions,
@@ -158,6 +177,9 @@ internal fun WalletScreen(
 @Composable
 private fun WalletContent(
     wallet: WalletSummary,
+    escrowHoldsResult: WalletEscrowHoldsResult?,
+    loadingEscrowHolds: Boolean,
+    onRetryEscrowHolds: () -> Unit,
     transactionsResult: WalletTransactionsResult?,
     loadingTransactions: Boolean,
     loadingMoreTransactions: Boolean,
@@ -208,6 +230,25 @@ private fun WalletContent(
         }
 
         item {
+            Text("Held in escrow", Modifier.semantics { heading() }, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        }
+        when (val holds = escrowHoldsResult) {
+            null -> item { WalletTransactionsMessage("Loading escrow holds…", showProgress = true) }
+            is WalletEscrowHoldsResult.Failure -> if (loadingEscrowHolds) {
+                item { WalletTransactionsMessage("Retrying escrow holds…", showProgress = true) }
+            } else {
+                item { WalletTransactionsMessage(holds.message, action = onRetryEscrowHolds, actionLabel = "Try again") }
+            }
+            is WalletEscrowHoldsResult.Success -> if (loadingEscrowHolds) {
+                item { WalletTransactionsMessage("Refreshing escrow holds…", showProgress = true) }
+            } else if (holds.holds.isEmpty()) {
+                item { WalletTransactionsMessage("No orders are currently held in escrow.") }
+            } else {
+                items(holds.holds, key = WalletEscrowHold::orderId) { hold -> WalletEscrowHoldRow(hold) }
+            }
+        }
+
+        item {
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
                 Column(Modifier.fillMaxWidth().padding(16.dp)) {
                     Text("Coins", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -251,6 +292,37 @@ private fun WalletContent(
             }
         }
         item { Spacer(Modifier.height(8.dp)) }
+    }
+}
+
+@Composable
+private fun WalletEscrowHoldRow(hold: WalletEscrowHold) {
+    val stageLabel = when (hold.stage) {
+        "paid_into_escrow" -> "Paid into escrow"
+        "seller_preparing" -> "Seller preparing"
+        "shipped" -> "On the way"
+        "delivered" -> "Delivered"
+        "buyer_confirmed" -> "Receipt confirmed"
+        "disputed" -> "In dispute"
+        "under_review" -> "Under review"
+        else -> "Escrow hold"
+    }
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(hold.productName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                Text(
+                    listOfNotNull(hold.orderReference, stageLabel, hold.expectedReleaseAt?.let(::formatTransactionDate)?.let { "Expected release $it" }).joinToString(" · "),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Text(formatWalletAmount(hold.amount), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+        }
     }
 }
 

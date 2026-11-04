@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -24,11 +26,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import coil.compose.AsyncImage
 import com.nantty.android.data.MartCategory
 import com.nantty.android.data.MartPage
@@ -54,10 +60,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun MartScreen(repository: MartRepository, modifier: Modifier = Modifier) {
+fun MartScreen(
+    repository: MartRepository,
+    modifier: Modifier = Modifier,
+    showCategoryPane: Boolean = false,
+    onAuthenticationRequired: () -> Unit = {},
+    initialProductId: String? = null,
+    onInitialProductHandled: () -> Unit = {},
+) {
     var categories by remember { mutableStateOf<List<MartCategory>>(emptyList()) }
     var products by remember { mutableStateOf<List<MartProduct>>(emptyList()) }
-    var selectedCategoryId by remember { mutableStateOf<String?>(null) }
+    var selectedCategoryId by rememberMartCategorySelection()
+    var selectedProductId by rememberSaveable { mutableStateOf<String?>(null) }
     var nextCursor by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
     var loadingMore by remember { mutableStateOf(false) }
@@ -66,6 +80,24 @@ fun MartScreen(repository: MartRepository, modifier: Modifier = Modifier) {
     var reloadGeneration by remember { mutableStateOf(0) }
     var requestGeneration by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(initialProductId) {
+        if (initialProductId != null) {
+            selectedProductId = initialProductId
+            onInitialProductHandled()
+        }
+    }
+
+    selectedProductId?.let { productId ->
+        MartProductDetailScreen(
+            productId = productId,
+            repository = repository,
+            onAuthenticationRequired = onAuthenticationRequired,
+            onBack = { selectedProductId = null },
+            modifier = modifier,
+        )
+        return
+    }
 
     LaunchedEffect(selectedCategoryId, reloadGeneration) {
         requestGeneration++
@@ -103,63 +135,151 @@ fun MartScreen(repository: MartRepository, modifier: Modifier = Modifier) {
                 Text("Mart", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Text("Browse products from stores on Nantty.", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            if (categories.isNotEmpty()) {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    item {
-                        FilterChip(selectedCategoryId == null, onClick = { selectedCategoryId = null }, label = { Text("All") })
-                    }
-                    items(categories, key = MartCategory::id) { category ->
-                        FilterChip(
-                            selected = selectedCategoryId == category.id,
-                            onClick = { selectedCategoryId = category.id },
-                            label = { Text(category.name, maxLines = 1) },
-                        )
-                    }
-                }
+            val loadMore = {
+                startLoadingMore(
+                    scope, repository, selectedCategoryId, nextCursor, products, loadingMore,
+                    requestGeneration, { requestGeneration }, { products = it }, { nextCursor = it },
+                    { pageError = it }, { loadingMore = it },
+                )
             }
-            when {
-                loading && products.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+            if (showCategoryPane && categories.isNotEmpty()) {
+                Row(Modifier.fillMaxSize()) {
+                    MartCategoryPane(
+                        categories = categories,
+                        selectedCategoryId = selectedCategoryId,
+                        onSelectCategory = { selectedCategoryId = it },
+                        modifier = Modifier.weight(0.28f).fillMaxHeight(),
+                    )
+                    MartProductResults(
+                        modifier = Modifier.weight(0.72f).fillMaxHeight(),
+                        loading = loading,
+                        products = products,
+                        onOpenProduct = { selectedProductId = it },
+                        errorMessage = errorMessage,
+                        pageError = pageError,
+                        nextCursor = nextCursor,
+                        loadingMore = loadingMore,
+                        onRetry = { reloadGeneration++ },
+                        onLoadMore = loadMore,
+                    )
                 }
-                errorMessage != null && products.isEmpty() -> MartMessage(
-                    title = "Mart is unavailable",
-                    body = errorMessage.orEmpty(),
-                    action = { reloadGeneration++ },
-                )
-                products.isEmpty() -> MartMessage(
-                    title = "No products here yet",
-                    body = "Try another category or check back later.",
-                    action = null,
-                )
-                else -> LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 156.dp),
+            } else {
+                if (categories.isNotEmpty()) {
+                    MartCategoryChips(categories, selectedCategoryId) { selectedCategoryId = it }
+                }
+                MartProductResults(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    items(products, key = MartProduct::id) { product -> MartProductCard(product) }
-                    if (pageError != null) {
-                        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
-                            MartMessage("Could not load more products", pageError.orEmpty()) {
-                                startLoadingMore(scope, repository, selectedCategoryId, nextCursor, products, loadingMore, requestGeneration, { requestGeneration }, { products = it }, { nextCursor = it }, { pageError = it }, { loadingMore = it })
-                            }
-                        }
-                    } else if (nextCursor != null || loadingMore) {
-                        item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
-                            TextButton(
-                                enabled = !loadingMore,
-                                onClick = {
-                                    startLoadingMore(scope, repository, selectedCategoryId, nextCursor, products, loadingMore, requestGeneration, { requestGeneration }, { products = it }, { nextCursor = it }, { pageError = it }, { loadingMore = it })
-                                },
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                            ) {
-                                if (loadingMore) CircularProgressIndicator(Modifier.size(18.dp)) else Text("Load more")
-                            }
-                        }
+                    loading = loading,
+                    products = products,
+                    onOpenProduct = { selectedProductId = it },
+                    errorMessage = errorMessage,
+                    pageError = pageError,
+                    nextCursor = nextCursor,
+                    loadingMore = loadingMore,
+                    onRetry = { reloadGeneration++ },
+                    onLoadMore = loadMore,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+internal fun rememberMartCategorySelection(): MutableState<String?> = rememberSaveable { mutableStateOf(null) }
+
+@Composable
+private fun MartCategoryChips(
+    categories: List<MartCategory>,
+    selectedCategoryId: String?,
+    onSelectCategory: (String?) -> Unit,
+) {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item {
+            FilterChip(selectedCategoryId == null, onClick = { onSelectCategory(null) }, label = { Text("All") })
+        }
+        items(categories, key = MartCategory::id) { category ->
+            FilterChip(
+                selected = selectedCategoryId == category.id,
+                onClick = { onSelectCategory(category.id) },
+                label = { Text(category.name, maxLines = 1) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun MartCategoryPane(
+    categories: List<MartCategory>,
+    selectedCategoryId: String?,
+    onSelectCategory: (String?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(modifier = modifier.padding(start = 12.dp, end = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        item {
+            FilterChip(
+                selected = selectedCategoryId == null,
+                onClick = { onSelectCategory(null) },
+                label = { Text("All", maxLines = 1) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        items(categories, key = MartCategory::id) { category ->
+            FilterChip(
+                selected = selectedCategoryId == category.id,
+                onClick = { onSelectCategory(category.id) },
+                label = { Text(category.name, maxLines = 2, overflow = TextOverflow.Ellipsis) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun MartProductResults(
+    modifier: Modifier,
+    loading: Boolean,
+    products: List<MartProduct>,
+    onOpenProduct: (String) -> Unit,
+    errorMessage: String?,
+    pageError: String?,
+    nextCursor: String?,
+    loadingMore: Boolean,
+    onRetry: () -> Unit,
+    onLoadMore: () -> Unit,
+) {
+    when {
+        loading && products.isEmpty() -> Box(modifier, contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        errorMessage != null && products.isEmpty() -> Box(modifier, contentAlignment = Alignment.Center) {
+            MartMessage("Mart is unavailable", errorMessage, onRetry)
+        }
+        products.isEmpty() -> Box(modifier, contentAlignment = Alignment.Center) {
+            MartMessage("No products here yet", "Try another category or check back later.", null)
+        }
+        else -> LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 156.dp),
+            modifier = modifier,
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(products, key = MartProduct::id) { product -> MartProductCard(product, onOpen = { onOpenProduct(product.id) }) }
+            if (pageError != null) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    MartMessage("Could not load more products", pageError, onLoadMore)
+                }
+            } else if (nextCursor != null || loadingMore) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    TextButton(
+                        enabled = !loadingMore,
+                        onClick = onLoadMore,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    ) {
+                        if (loadingMore) CircularProgressIndicator(Modifier.size(18.dp)) else Text("Load more")
                     }
                 }
             }
@@ -168,8 +288,12 @@ fun MartScreen(repository: MartRepository, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun MartProductCard(product: MartProduct) {
-    Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+private fun MartProductCard(product: MartProduct, onOpen: () -> Unit) {
+    Card(
+        onClick = onOpen,
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
         Column {
             Box(
                 Modifier.fillMaxWidth().height(148.dp)
@@ -181,7 +305,7 @@ private fun MartProductCard(product: MartProduct) {
                 } ?: Text("N", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
             }
             Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
-                Text(product.name, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                Text(product.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                 Spacer(Modifier.height(4.dp))
                 Text(formatMartPrice(product.amountMinor, product.currency), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 if (product.stock == 0) Text("Out of stock", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)

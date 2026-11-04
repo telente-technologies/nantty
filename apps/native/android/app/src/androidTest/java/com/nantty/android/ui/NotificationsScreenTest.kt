@@ -9,6 +9,8 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
+import com.nantty.android.data.AccountNotificationSettingsRepository
+import com.nantty.android.data.AccountNotificationSettingsTransport
 import com.nantty.android.data.NotificationsRepository
 import com.nantty.android.data.NotificationsTransport
 import org.json.JSONObject
@@ -129,6 +131,35 @@ class NotificationsScreenTest {
         compose.onNodeWithContentDescription("Refresh notifications").assertIsDisplayed()
     }
 
+    @Test
+    fun opensAccountNotificationSettingsAndPersistsPushToggle() {
+        val accountSettingsTransport = FakeAccountSettingsTransport()
+        val settingsRepository = AccountNotificationSettingsRepository(
+            "https://api.nantty.com",
+            ::signedInSession,
+            accountSettingsTransport,
+        )
+        compose.setContent {
+            MaterialTheme {
+                NotificationsScreen(
+                    NotificationsRepository("https://api.nantty.com", ::signedInSession, FakeTransport()),
+                    Executor { it.run() },
+                    accountSettingsRepository = settingsRepository,
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Notification settings").performClick()
+        compose.onNodeWithText("Push notifications").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Push notifications").performClick()
+        compose.runOnIdle {
+            assertEquals("PATCH", accountSettingsTransport.method)
+            assertEquals("/api/v1/users/me/settings", accountSettingsTransport.path)
+            assertEquals("notifications-access", accountSettingsTransport.accessToken)
+            assertEquals(false, accountSettingsTransport.updatedValue)
+        }
+    }
+
     private class FakeTransport(private val failFirst: Boolean = false, private val includePostId: Boolean = true) : NotificationsTransport {
         var calls = 0
         var lastMethod: String? = null
@@ -143,6 +174,28 @@ class NotificationsScreenTest {
 
         private fun firstPage() = JSONObject("""{"data":[{"id":"n1","category":"social","title":"Ari mentioned you","body":"Hello from Ari","createdAt":"2026-10-01T12:00:00.000Z","read":false,"actor":{"id":"u1","name":"Ari"},"url":"https://evil.example/post/forged"${if (includePostId) ",\"data\":{\"postId\":\"post-1\"}" else ""}}],"nextCursor":"next-page"}""")
         private fun secondPage() = JSONObject("""{"data":[{"id":"n2","category":"social","title":"Second notification","body":"More activity","createdAt":"2026-10-01T11:00:00.000Z","read":true}],"nextCursor":null}""")
+    }
+
+    private class FakeAccountSettingsTransport : AccountNotificationSettingsTransport {
+        var method: String? = null
+        var path: String? = null
+        var accessToken: String? = null
+        var updatedValue: Boolean? = null
+
+        override fun getSettings(accessToken: String): JSONObject {
+            this.accessToken = accessToken
+            method = "GET"
+            path = "/api/v1/users/me/settings"
+            return JSONObject().put("pushNotificationsEnabled", true)
+        }
+
+        override fun updateSettings(accessToken: String, fields: JSONObject): JSONObject {
+            this.accessToken = accessToken
+            method = "PATCH"
+            path = "/api/v1/users/me/settings"
+            updatedValue = fields.getBoolean("pushNotificationsEnabled")
+            return JSONObject().put("pushNotificationsEnabled", updatedValue)
+        }
     }
 
     companion object {

@@ -50,4 +50,48 @@ class SignInScreenTest {
         compose.onNodeWithText("Could not connect to Nantty.").assertIsDisplayed()
         compose.onNodeWithText("Signing in…").assertIsDisplayed().assertIsNotEnabled()
     }
+
+    @Test
+    fun signInOffersGuestBrowsing() {
+        var browseRequested = false
+        compose.setContent {
+            MaterialTheme {
+                SignInScreen(
+                    loading = false,
+                    error = null,
+                    onSignIn = { _, _ -> },
+                    onBrowseAsGuest = { browseRequested = true },
+                )
+            }
+        }
+        compose.onNodeWithText("Browse as guest").assertIsDisplayed().performClick()
+        compose.runOnIdle { assertEquals(true, browseRequested) }
+    }
+
+    @Test
+    fun configuredGoogleProviderIsAvailableOnDedicatedSignInScreen() {
+        var googleRequested = false
+        compose.setContent {
+            MaterialTheme {
+                SignInScreen(
+                    loading = false,
+                    error = null,
+                    onSignIn = { _, _ -> },
+                    onGoogleSignIn = { googleRequested = true },
+                )
+            }
+        }
+        compose.onNodeWithText("Continue with Google").assertIsDisplayed().performClick()
+        compose.runOnIdle { assertEquals(true, googleRequested) }
+    }
+
+    @Test
+    fun unconfiguredGoogleProviderIsNotShownOnDedicatedSignInScreen() {
+        compose.setContent {
+            MaterialTheme {
+                SignInScreen(loading = false, error = null, onSignIn = { _, _ -> })
+            }
+        }
+        compose.onNodeWithText("Continue with Google").assertDoesNotExist()
+    }
 }

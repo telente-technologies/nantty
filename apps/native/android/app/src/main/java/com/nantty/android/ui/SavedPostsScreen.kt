@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +39,7 @@ import com.nantty.android.data.SavedPost
 import com.nantty.android.data.SavedPostsPage
 import com.nantty.android.data.SavedPostsRepository
 import com.nantty.android.data.SavedPostsResult
+import com.nantty.android.data.SavedPostType
 import com.nantty.android.data.appendUniqueSavedPosts
 import java.util.concurrent.Executor
 
@@ -56,14 +58,16 @@ internal fun SavedPostsScreen(
     var loadMoreFailure by remember(repository) { mutableStateOf<SavedPostsResult.Failure?>(null) }
     var retryGeneration by remember(repository) { mutableStateOf(0) }
     var requestGeneration by remember(repository) { mutableStateOf(0) }
+    var selectedType by remember(repository) { mutableStateOf(SavedPostType.POSTS) }
     val success = result as? SavedPostsResult.Success
 
-    LaunchedEffect(repository, retryGeneration) {
+    LaunchedEffect(repository, retryGeneration, selectedType) {
         val generation = ++requestGeneration
+        val requestedType = selectedType
         loading = true
         result = null
         executor.execute {
-            val loaded = repository.load()
+            val loaded = repository.load(type = requestedType)
             androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                 if (requestGeneration == generation) {
                     result = loaded
@@ -78,10 +82,11 @@ internal fun SavedPostsScreen(
         val cursor = page.nextCursor ?: return
         if (loadingMore || loading) return
         val generation = requestGeneration
+        val requestedType = selectedType
         loadingMore = true
         loadMoreFailure = null
         executor.execute {
-            val next = repository.load(cursor)
+            val next = repository.load(cursor, requestedType)
             androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                 if (requestGeneration == generation) {
                     when (next) {
@@ -99,6 +104,16 @@ internal fun SavedPostsScreen(
         }
     }
 
+    fun selectType(type: SavedPostType) {
+        if (selectedType == type) return
+        requestGeneration++
+        selectedType = type
+        loading = true
+        loadingMore = false
+        result = null
+        loadMoreFailure = null
+    }
+
     Column(modifier.fillMaxSize()) {
         Row(
             Modifier.fillMaxWidth().padding(start = 8.dp, end = 20.dp, top = 8.dp, bottom = 8.dp),
@@ -109,21 +124,19 @@ internal fun SavedPostsScreen(
             }
             Spacer(Modifier.width(8.dp))
             Column {
-                Text("Saved posts", Modifier.semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Text(if (selectedType == SavedPostType.POSTS) "Saved posts" else "Saved videos", Modifier.semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Text("Only you can see these", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodySmall)
             }
         }
-        Text(
-            "Posts only. Saved videos, clips, products and replies aren’t shown here yet.",
-            Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
-            color = MaterialTheme.colorScheme.secondary,
-            style = MaterialTheme.typography.bodySmall,
-        )
+        Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(selectedType == SavedPostType.POSTS, onClick = { selectType(SavedPostType.POSTS) }, label = { Text("Posts") })
+            FilterChip(selectedType == SavedPostType.VIDEOS, onClick = { selectType(SavedPostType.VIDEOS) }, label = { Text("Videos") })
+        }
         when {
             loading && result == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     CircularProgressIndicator()
-                    Text("Loading saved posts", color = MaterialTheme.colorScheme.secondary)
+                    Text(if (selectedType == SavedPostType.POSTS) "Loading saved posts" else "Loading saved videos", color = MaterialTheme.colorScheme.secondary)
                 }
             }
             result is SavedPostsResult.Failure && success == null -> {
@@ -136,8 +149,8 @@ internal fun SavedPostsScreen(
                 )
             }
             success != null && success.page.posts.isEmpty() -> CenterSavedPostsMessage(
-                title = "No saved posts yet",
-                message = "Save a post from your feed and it will be easy to find here.",
+                title = if (selectedType == SavedPostType.POSTS) "No saved posts yet" else "No saved videos yet",
+                message = if (selectedType == SavedPostType.POSTS) "Save a post from your feed and it will be easy to find here." else "Save a video from your feed and it will be easy to find here.",
                 icon = true,
             )
             success != null -> LazyColumn(Modifier.fillMaxSize()) {

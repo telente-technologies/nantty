@@ -60,6 +60,27 @@ class FeedCardTest {
     }
 
     @Test
+    fun commentsActionHasAccessibleLabelAndOpensTheMatchingPostThread() {
+        var openedPostId: String? = null
+        composeRule.setContent {
+            MaterialTheme {
+                FeedCard(
+                    FeedPost(
+                        id = "post-comments", authorName = "Ari", username = "ari", avatarUrl = null,
+                        verified = false, verificationColor = null, postedAsName = null, postedAsHandle = null,
+                        postedAsAvatarUrl = null, kind = "post", text = "Read the replies", media = emptyList(),
+                        likes = 3, comments = 12, reposts = 1, shares = 0, createdAt = "2026-11-04T10:00:00Z",
+                    ),
+                    onOpenComments = { openedPostId = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithContentDescription("Open 12 comments").assertIsDisplayed().performClick()
+        composeRule.runOnIdle { org.junit.Assert.assertEquals("post-comments", openedPostId) }
+    }
+
+    @Test
     fun feedAuthorIdentityOpensTheirPublicProfileWithoutOpeningThePost() {
         var openedPostId: String? = null
         var openedProfileId: String? = null

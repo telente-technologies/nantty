@@ -23,6 +23,14 @@ data class WalletTransaction(
     val status: String,
 )
 data class WalletTransactionPage(val items: List<WalletTransaction>, val nextCursor: String?)
+data class WalletEscrowHold(
+    val orderId: String,
+    val orderReference: String,
+    val productName: String,
+    val amount: WalletMoney,
+    val stage: String,
+    val expectedReleaseAt: String?,
+)
 data class WalletSummary(
     val available: WalletMoney,
     val pending: WalletMoney,
@@ -39,6 +47,11 @@ sealed interface WalletResult {
 sealed interface WalletTransactionsResult {
     data class Success(val page: WalletTransactionPage) : WalletTransactionsResult
     data class Failure(val message: String) : WalletTransactionsResult
+}
+
+sealed interface WalletEscrowHoldsResult {
+    data class Success(val holds: List<WalletEscrowHold>) : WalletEscrowHoldsResult
+    data class Failure(val message: String) : WalletEscrowHoldsResult
 }
 
 fun interface WalletTransport {
@@ -92,6 +105,35 @@ class WalletRepository(
         WalletTransactionsResult.Success(WalletTransactionPage(transactions, nextCursor))
     } catch (error: Exception) {
         WalletTransactionsResult.Failure(error.message ?: "Could not load wallet transactions. Check your connection and try again.")
+    }
+
+    fun loadEscrowHolds(): WalletEscrowHoldsResult = try {
+        val session = sessionProvider() ?: error("Sign in to view escrow holds.")
+        val accessToken = session.accessToken.takeIf(String::isNotBlank) ?: error("Sign in to view escrow holds.")
+        val payload = transport.get("/api/v1/wallets/me/escrow-holds", accessToken)
+        val data = payload.optJSONObject("data") ?: payload
+        val rows = data.optJSONArray("data") ?: error("Nantty returned an incomplete escrow list.")
+        val holds = buildList {
+            for (index in 0 until rows.length()) {
+                val row = rows.optJSONObject(index) ?: continue
+                val orderId = row.optString("orderId").takeIf(String::isNotBlank) ?: continue
+                val amount = row.optJSONObject("amount")?.toWalletMoney() ?: continue
+                val stage = row.optString("stage").takeIf(String::isNotBlank) ?: "unknown"
+                add(
+                    WalletEscrowHold(
+                        orderId = orderId,
+                        orderReference = row.optString("orderReference").takeIf(String::isNotBlank) ?: orderId,
+                        productName = row.optString("productName").takeIf(String::isNotBlank) ?: "Order",
+                        amount = amount,
+                        stage = stage,
+                        expectedReleaseAt = row.optNullableString("expectedReleaseAt"),
+                    ),
+                )
+            }
+        }
+        WalletEscrowHoldsResult.Success(holds)
+    } catch (error: Exception) {
+        WalletEscrowHoldsResult.Failure(error.message ?: "Could not load escrow holds. Check your connection and try again.")
     }
 
     internal fun parse(payload: JSONObject): WalletSummary {
@@ -182,6 +224,7 @@ private class JdkWalletTransport(baseUrl: String) : WalletTransport {
 
 private fun isAllowedWalletReadPath(path: String): Boolean {
     if (path == "/api/v1/wallets/me") return true
+    if (path == "/api/v1/wallets/me/escrow-holds") return true
     val transactionPrefix = "/api/v1/wallets/me/transactions?"
     if (!path.startsWith(transactionPrefix)) return false
     val query = path.removePrefix(transactionPrefix).split('&')

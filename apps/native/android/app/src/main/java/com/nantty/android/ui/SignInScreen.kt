@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -16,9 +17,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -48,9 +52,14 @@ internal fun SignInScreen(
     error: String?,
     onSignIn: (identifier: String, password: String) -> Unit,
     onRetryRestore: (() -> Unit)? = null,
+    onCreateAccount: (() -> Unit)? = null,
+    onForgotPassword: (() -> Unit)? = null,
+    onBrowseAsGuest: (() -> Unit)? = null,
+    onGoogleSignIn: (() -> Unit)? = null,
 ) {
     var identifier by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
     val canSubmit = identifier.isNotBlank() && password.isNotEmpty() && !loading
 
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -72,8 +81,7 @@ internal fun SignInScreen(
                     label = { Text("Email or username") },
                     singleLine = true,
                     enabled = !loading,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next, autoCorrect = false),
-                    supportingText = { Text("Your password is sent only to Nantty over a protected connection.") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next, autoCorrectEnabled = false),
                 )
                 Spacer(Modifier.height(12.dp))
                 OutlinedTextField(
@@ -83,10 +91,23 @@ internal fun SignInScreen(
                     label = { Text("Password") },
                     singleLine = true,
                     enabled = !loading,
-                    visualTransformation = if (password.isEmpty()) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done, autoCorrect = false),
+                    visualTransformation = if (passwordVisible || password.isEmpty()) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done, autoCorrectEnabled = false),
                     keyboardActions = KeyboardActions(onDone = { if (canSubmit) onSignIn(identifier.trim(), password) }),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }, enabled = !loading) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            )
+                        }
+                    },
                 )
+                onForgotPassword?.let { recover ->
+                    TextButton(onClick = recover, enabled = !loading, modifier = Modifier.align(Alignment.End)) {
+                        Text("Forgot password?")
+                    }
+                }
                 if (error != null) {
                     Spacer(Modifier.height(16.dp))
                     Text(
@@ -105,8 +126,29 @@ internal fun SignInScreen(
                     if (loading) CircularProgressIndicator(Modifier.padding(end = 12.dp), strokeWidth = 2.dp)
                     Text(if (loading) "Signing in…" else "Sign in")
                 }
+                onGoogleSignIn?.let { continueWithGoogle ->
+                    Spacer(Modifier.height(10.dp))
+                    androidx.compose.material3.OutlinedButton(
+                        onClick = continueWithGoogle,
+                        enabled = !loading,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp),
+                    ) {
+                        Text(if (loading) "Connecting to Google…" else "Continue with Google")
+                    }
+                }
                 Spacer(Modifier.height(24.dp))
                 RowLockNotice()
+                onCreateAccount?.let { createAccount ->
+                    Spacer(Modifier.height(10.dp))
+                    TextButton(onClick = createAccount, enabled = !loading, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                        Text("New to Nantty? Create account")
+                    }
+                }
+                onBrowseAsGuest?.let { browse ->
+                    TextButton(onClick = browse, enabled = !loading, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                        Text("Browse as guest")
+                    }
+                }
             }
         }
     }

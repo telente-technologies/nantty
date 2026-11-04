@@ -99,6 +99,60 @@ class MessagesRepositoryTest {
         assertEquals("/api/v1/conversations?folder=chats&filter=all&limit=20&cursor=$cursor", requestedPath)
     }
 
+    @Test
+    fun refreshesExpiredAccessTokenOnceAndRetriesInboxRequest() {
+        val requestedTokens = mutableListOf<String>()
+        var refreshes = 0
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            refreshSessionProvider = {
+                refreshes += 1
+                signedInSession().copy(accessToken = "refreshed-access")
+            },
+            transport = MessagesTransport { _, token ->
+                requestedTokens += token
+                if (requestedTokens.size == 1) throw MessagesHttpException(401)
+                JSONObject("{\"data\":[],\"nextCursor\":null}")
+            },
+        )
+
+        assertTrue(repository.load() is MessagesResult.Success)
+        assertEquals(listOf("session-access", "refreshed-access"), requestedTokens)
+        assertEquals(1, refreshes)
+    }
+
+    @Test
+    fun failedTokenRefreshDoesNotRetryAndRequestsReauthentication() {
+        var requests = 0
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            refreshSessionProvider = { null },
+            transport = MessagesTransport { _, _ -> requests += 1; throw MessagesHttpException(401) },
+        )
+
+        val result = repository.load() as MessagesResult.Failure
+
+        assertTrue(result.authenticationRequired)
+        assertEquals(1, requests)
+    }
+
+    @Test
+    fun transientRefreshFailureDoesNotMisclassifySessionAsRevoked() {
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            refreshSessionProvider = { throw IllegalStateException("Network unavailable") },
+            transport = MessagesTransport { _, _ -> throw MessagesHttpException(401) },
+        )
+
+        val result = repository.load() as MessagesResult.Failure
+
+        assertFalse(result.authenticationRequired)
+        assertEquals("Network unavailable", result.message)
+    }
+
     private fun repositoryWithPayload(payload: String) = makeRepository(response = { JSONObject(payload) })
 
     private fun makeRepository(

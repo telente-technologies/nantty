@@ -1,7 +1,5 @@
 package com.nantty.android.ui
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,7 +22,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nantty.android.data.BuyerOrderDetail
 import com.nantty.android.data.BuyerOrderDetailResult
+import com.nantty.android.data.BuyerOrderReceiptResult
 import com.nantty.android.data.BuyerOrdersRepository
 import com.nantty.android.data.WalletMoney
 import com.nantty.android.data.formatWalletAmount
@@ -55,6 +55,11 @@ internal fun BuyerOrderDetailScreen(
     var result by remember(orderId) { mutableStateOf<BuyerOrderDetailResult?>(null) }
     var retry by remember(orderId) { mutableStateOf(0) }
     var generation by remember(orderId) { mutableStateOf(0) }
+    var showConfirmDialog by remember(orderId) { mutableStateOf(false) }
+    var confirmingReceipt by remember(orderId) { mutableStateOf(false) }
+    var receiptConfirmed by remember(orderId) { mutableStateOf(false) }
+    var receiptError by remember(orderId) { mutableStateOf<BuyerOrderReceiptResult.Failure?>(null) }
+    var refreshError by remember(orderId) { mutableStateOf<String?>(null) }
     LaunchedEffect(orderId, retry) {
         val request = ++generation
         result = null
@@ -88,18 +93,114 @@ internal fun BuyerOrderDetailScreen(
                 action = if (current.authenticationRequired) onAuthenticationRequired else ({ retry += 1 }),
                 actionLabel = if (current.authenticationRequired) "Sign in again" else "Retry",
             )
-            is BuyerOrderDetailResult.Success -> BuyerOrderDetailContent(current.order)
+            is BuyerOrderDetailResult.Success -> {
+                BuyerOrderDetailContent(
+                    order = current.order,
+                    receiptConfirmed = receiptConfirmed,
+                    confirmingReceipt = confirmingReceipt,
+                    refreshError = refreshError,
+                    onConfirmReceipt = { showConfirmDialog = true },
+                    onRefreshAfterConfirmation = {
+                        val request = ++generation
+                        refreshError = null
+                        executor.execute {
+                            val loaded = repository.loadDetail(orderId)
+                            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                                if (generation == request) {
+                                    when (loaded) {
+                                        is BuyerOrderDetailResult.Success -> result = loaded
+                                        is BuyerOrderDetailResult.Failure -> refreshError = loaded.message
+                                    }
+                                }
+                            }
+                        }
+                    },
+                )
+            }
         }
+    }
+
+    val displayedOrder = (result as? BuyerOrderDetailResult.Success)?.order
+    if (showConfirmDialog && displayedOrder?.status == "delivered" && !receiptConfirmed) {
+        AlertDialog(
+            onDismissRequest = { if (!confirmingReceipt) showConfirmDialog = false },
+            title = { Text("Confirm you received it?") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Only confirm if everything arrived as described. ${displayedOrder.storeName} will be paid right away and this can't be undone.")
+                    receiptError?.let { Text(it.message, color = MaterialTheme.colorScheme.error) }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !confirmingReceipt && receiptError?.authenticationRequired != true,
+                    onClick = {
+                        if (confirmingReceipt || displayedOrder.status != "delivered") return@TextButton
+                        confirmingReceipt = true
+                        receiptError = null
+                        executor.execute {
+                            when (val confirmed = repository.confirmReceipt(orderId)) {
+                                is BuyerOrderReceiptResult.Failure -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                                    confirmingReceipt = false
+                                    receiptError = confirmed
+                                }
+                                is BuyerOrderReceiptResult.Success -> {
+                                    val refreshed = repository.loadDetail(orderId)
+                                    androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                                        confirmingReceipt = false
+                                        showConfirmDialog = false
+                                        receiptConfirmed = true
+                                        when (refreshed) {
+                                            is BuyerOrderDetailResult.Success -> {
+                                                result = refreshed
+                                                refreshError = null
+                                            }
+                                            is BuyerOrderDetailResult.Failure -> {
+                                                result = BuyerOrderDetailResult.Success(confirmed.order)
+                                                refreshError = refreshed.message
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                ) { Text(if (confirmingReceipt) "Confirming…" else "Yes, release payment") }
+            },
+            dismissButton = {
+                TextButton(
+                    enabled = !confirmingReceipt,
+                    onClick = {
+                        if (receiptError?.authenticationRequired == true) onAuthenticationRequired()
+                        showConfirmDialog = false
+                    },
+                ) { Text(if (receiptError?.authenticationRequired == true) "Sign in again" else "Cancel") }
+            },
+        )
     }
 }
 
 @Composable
-private fun BuyerOrderDetailContent(order: BuyerOrderDetail) {
-    val context = LocalContext.current
+private fun BuyerOrderDetailContent(
+    order: BuyerOrderDetail,
+    receiptConfirmed: Boolean,
+    confirmingReceipt: Boolean,
+    refreshError: String?,
+    onConfirmReceipt: () -> Unit,
+    onRefreshAfterConfirmation: () -> Unit,
+) {
     LazyColumn(
         Modifier.fillMaxSize().padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        if (receiptConfirmed && refreshError != null) {
+            item {
+                DetailSection("Receipt confirmed") {
+                    Text("Your confirmation was received, but the latest order status couldn't be loaded.")
+                    TextButton(onClick = onRefreshAfterConfirmation) { Text("Refresh order") }
+                }
+            }
+        }
         item {
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -132,13 +233,7 @@ private fun BuyerOrderDetailContent(order: BuyerOrderDetail) {
                 DetailSection("Shipment") {
                     Text(shipment.courierName.ifBlank { "Courier" })
                     if (shipment.trackingNumber.isNotBlank()) Text("Tracking: ${shipment.trackingNumber}")
-                    shipment.trackingUrl?.let { trackingUrl ->
-                        TextButton(onClick = {
-                            runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(trackingUrl))) }
-                        }) {
-                            Text("Track shipment")
-                        }
-                    }
+                    Text("Delivery updates are shown here in Nantty.", style = MaterialTheme.typography.bodySmall)
                     Text("Shipped ${formatBuyerOrderDate(shipment.shippedAt)}")
                     shipment.estimatedDeliveryAt?.let { Text("Estimated delivery ${formatBuyerOrderDate(it)}") }
                 }
@@ -158,6 +253,15 @@ private fun BuyerOrderDetailContent(order: BuyerOrderDetail) {
         }
         order.escrowReleaseAt?.let { releaseAt -> item { Text("Escrow release date: ${formatBuyerOrderDate(releaseAt)}", color = MaterialTheme.colorScheme.secondary) } }
         order.promotionIssue?.let { issue -> item { Text(issue, color = MaterialTheme.colorScheme.error) } }
+        if (order.status == "delivered" && !receiptConfirmed) {
+            item {
+                Button(
+                    onClick = onConfirmReceipt,
+                    enabled = !confirmingReceipt,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("Confirm receipt") }
+            }
+        }
     }
 }
 

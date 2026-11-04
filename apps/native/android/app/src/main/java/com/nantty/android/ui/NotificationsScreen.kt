@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -46,10 +47,12 @@ import com.nantty.android.data.NotificationsRepository
 import com.nantty.android.data.NotificationsResult
 import com.nantty.android.data.NotificationDestination
 import com.nantty.android.data.resolveNotificationDestination
+import com.nantty.android.data.AccountNotificationSettingsRepository
 import java.util.concurrent.Executor
 
 @Composable
-internal fun NotificationsScreen(repository: NotificationsRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenPost: (String) -> Unit = {}, onOpenProfile: (String) -> Unit = {}, onOpenMessages: () -> Unit = {}, onOpenOrders: () -> Unit = {}) {
+internal fun NotificationsScreen(repository: NotificationsRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenPost: (String) -> Unit = {}, onOpenProfile: (String) -> Unit = {}, onOpenMessages: () -> Unit = {}, onOpenOrders: () -> Unit = {}, accountSettingsRepository: AccountNotificationSettingsRepository? = null) {
+    var showingSettings by remember(repository) { mutableStateOf(false) }
     var filter by remember(repository) { mutableStateOf(NotificationFilter.ALL) }
     var result by remember(repository) { mutableStateOf<NotificationsResult?>(null) }
     var loading by remember(repository) { mutableStateOf(false) }
@@ -138,11 +141,26 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
 
     LaunchedEffect(repository) { refresh(clear = true) }
 
+    if (showingSettings && accountSettingsRepository != null) {
+        AccountNotificationSettingsScreen(
+            repository = accountSettingsRepository,
+            executor = executor,
+            onBack = { showingSettings = false },
+            onReauthenticate = onReauthenticate,
+            modifier = modifier,
+        )
+        return
+    }
+
     Column(modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("Activity", Modifier.weight(1f).semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             val hasUnread = (result as? NotificationsResult.Success)?.page?.items?.any { !it.read } == true
             if (hasUnread) TextButton(onClick = ::markAllRead) { Text("Mark all read") }
+            if (accountSettingsRepository != null) IconButton(
+                onClick = { showingSettings = true },
+                modifier = Modifier.semantics { contentDescription = "Notification settings" },
+            ) { Icon(Icons.Default.Settings, contentDescription = null) }
             IconButton(onClick = { refresh() }, enabled = !loading, modifier = Modifier.semantics { contentDescription = "Refresh notifications" }) {
                 Icon(Icons.Default.Refresh, contentDescription = null)
             }

@@ -45,6 +45,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
@@ -72,6 +73,7 @@ import com.nantty.android.data.PostDetail
 import com.nantty.android.data.PostDetailRepository
 import com.nantty.android.data.PostDetailResult
 import com.nantty.android.data.ThreadComment
+import com.nantty.android.data.ThreadSort
 import com.nantty.android.data.appendUniqueThreadComments
 import com.nantty.android.data.isRepeatedThreadCursor
 import com.nantty.android.data.updateThreadCommentLike
@@ -114,9 +116,11 @@ internal fun PostDetailScreen(
     var profilesError by remember(postId, accountId) { mutableStateOf<String?>(null) }
     var selectedProfileId by remember(postId, accountId) { mutableStateOf<String?>(null) }
     var profileMenuExpanded by remember(postId, accountId) { mutableStateOf(false) }
+    var threadSort by rememberSaveable(postId) { mutableStateOf(ThreadSort.RELEVANT) }
+    var threadSortMenuExpanded by rememberSaveable(postId) { mutableStateOf(false) }
     val keyboard = LocalSoftwareKeyboardController.current
 
-    fun load(cursor: String? = null, append: Boolean = false) {
+    fun load(cursor: String? = null, append: Boolean = false, sort: ThreadSort = threadSort) {
         if (append) {
             if (loadingMore || cursor.isNullOrBlank() || cursor in completedCursors) return
             loadingMore = true
@@ -128,9 +132,12 @@ internal fun PostDetailScreen(
             loadMoreError = null
         }
         executor.execute {
-            val next = dataRepository.load(postId, cursor)
+            val next = dataRepository.load(postId, cursor, sort)
             Snapshot.withMutableSnapshot {
-                if (append && result is PostDetailResult.Success) {
+                if (threadSort != sort) {
+                    loading = false
+                    loadingMore = false
+                } else if (append && result is PostDetailResult.Success) {
                     val previous = result as PostDetailResult.Success
                     if (next is PostDetailResult.Success) {
                         val repeatedCursor = isRepeatedThreadCursor(cursor.orEmpty(), next.nextCursor, completedCursors)
@@ -224,8 +231,11 @@ internal fun PostDetailScreen(
         }
     }
 
+    LaunchedEffect(postId, accountId, threadSort) {
+        load(sort = threadSort)
+    }
+
     LaunchedEffect(postId, accountId) {
-        load()
         commentProfiles = null
         selectedProfileId = null
         profileMenuExpanded = false
@@ -319,6 +329,47 @@ internal fun PostDetailScreen(
                                 }
                             },
                         )
+                    }
+                    item(key = "thread-sort") {
+                        Row(
+                            Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text("Replies", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                            Box {
+                                TextButton(
+                                    onClick = { threadSortMenuExpanded = true },
+                                    enabled = !loading,
+                                    modifier = Modifier.semantics {
+                                        contentDescription = "Sort replies, currently ${threadSort.label}"
+                                    },
+                                ) { Text(threadSort.label) }
+                                DropdownMenu(
+                                    expanded = threadSortMenuExpanded,
+                                    onDismissRequest = { threadSortMenuExpanded = false },
+                                ) {
+                                    ThreadSort.entries.forEach { option ->
+                                        DropdownMenuItem(
+                                            text = { Text(option.label) },
+                                            leadingIcon = { RadioButton(selected = option == threadSort, onClick = null) },
+                                            onClick = {
+                                                threadSortMenuExpanded = false
+                                                if (option != threadSort) {
+                                                    completedCursors = emptySet()
+                                                    loadMoreError = null
+                                                    result = null
+                                                    threadSort = option
+                                                }
+                                            },
+                                            modifier = Modifier.semantics {
+                                                contentDescription = "Sort replies by ${option.label}"
+                                                selected = option == threadSort
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                     if (current.comments.isEmpty() && !loading) {
                         item(key = "empty-thread") {

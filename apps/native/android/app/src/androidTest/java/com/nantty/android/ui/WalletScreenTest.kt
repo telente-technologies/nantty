@@ -42,10 +42,41 @@ class WalletScreenTest {
         compose.onNodeWithText("Buy coins").assertDoesNotExist()
         compose.onNodeWithText("Recent transactions").assertIsDisplayed()
         compose.onNodeWithText("No transactions yet. Payments, refunds and payouts will appear here.").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("No orders are currently held in escrow.").performScrollTo().assertIsDisplayed()
         compose.runOnIdle {
-            assertEquals(listOf("/api/v1/wallets/me", "/api/v1/wallets/me/transactions?limit=20"), transport.paths)
-            assertEquals(listOf("wallet-access", "wallet-access"), transport.tokens)
+            assertEquals(listOf("/api/v1/wallets/me", "/api/v1/wallets/me/transactions?limit=20", "/api/v1/wallets/me/escrow-holds"), transport.paths)
+            assertEquals(listOf("wallet-access", "wallet-access", "wallet-access"), transport.tokens)
         }
+    }
+
+    @Test
+    fun displaysIndividualEscrowHoldsAndExpectedReleaseDate() {
+        val transport = FakeTransport(withEscrowHolds = true)
+        compose.setContent {
+            MaterialTheme {
+                WalletScreen(WalletRepository("https://api.nantty.com", ::signedInSession, transport), Executor { it.run() })
+            }
+        }
+
+        compose.onNodeWithText("Handwoven bag").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("NAN-1042 · On the way · Expected release 8 Nov 2026").assertIsDisplayed()
+        compose.onNodeWithText("125.00", substring = true).assertIsDisplayed()
+        compose.runOnIdle { assertEquals(1, transport.escrowCalls) }
+    }
+
+    @Test
+    fun retriesEscrowHoldsAfterRequestFailure() {
+        val transport = FakeTransport(failFirstEscrowHolds = true, withEscrowHolds = true)
+        compose.setContent {
+            MaterialTheme {
+                WalletScreen(WalletRepository("https://api.nantty.com", ::signedInSession, transport), Executor { it.run() })
+            }
+        }
+
+        compose.onNodeWithText("Offline").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Try again").performScrollTo().performClick()
+        compose.onNodeWithText("Handwoven bag").performScrollTo().assertIsDisplayed()
+        compose.runOnIdle { assertEquals(2, transport.escrowCalls) }
     }
 
     @Test
@@ -172,11 +203,14 @@ class WalletScreenTest {
         private val failFirstTransactions: Boolean = false,
         private val withTransactions: Boolean = false,
         private val failCursorPage: Boolean = false,
+        private val withEscrowHolds: Boolean = false,
+        private val failFirstEscrowHolds: Boolean = false,
     ) : WalletTransport {
         val paths = mutableListOf<String>()
         val tokens = mutableListOf<String?>()
         var walletCalls = 0
         var transactionCalls = 0
+        var escrowCalls = 0
         override fun get(path: String, accessToken: String?): JSONObject {
             paths += path
             tokens += accessToken
@@ -194,6 +228,12 @@ class WalletScreenTest {
                 }
                 val rows = if (withTransactions) """[{"id":"txn-1","kind":"credit","amount":{"amountMinor":12500,"currency":"NGN"},"description":"Order payout","createdAt":"2026-10-31T13:45:00Z","status":"completed"}]""" else "[]"
                 return JSONObject("""{"data":$rows,"nextCursor":${if (withTransactions) "\"cursor-2\"" else "null"}}""")
+            }
+            if (path == "/api/v1/wallets/me/escrow-holds") {
+                escrowCalls += 1
+                if (failFirstEscrowHolds && escrowCalls == 1) error("Offline")
+                val rows = if (withEscrowHolds) """[{"orderId":"order-1","orderReference":"NAN-1042","productName":"Handwoven bag","amount":{"amountMinor":12500,"currency":"NGN"},"stage":"shipped","expectedReleaseAt":"2026-11-08T12:00:00Z"}]""" else "[]"
+                return JSONObject("""{"data":$rows,"nextCursor":null}""")
             }
             error("Unexpected wallet request: $path")
         }

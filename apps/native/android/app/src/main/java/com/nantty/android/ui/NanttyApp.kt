@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
@@ -42,11 +43,15 @@ import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Storefront
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -60,7 +65,9 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
+import androidx.compose.material3.adaptive.separatingVerticalHingeBounds
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -70,7 +77,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -79,9 +88,12 @@ import com.nantty.android.data.FeedPost
 import com.nantty.android.data.FeedRepository
 import com.nantty.android.data.FeedResult
 import com.nantty.android.data.FeedType
+import com.nantty.android.data.FeedTopic
+import com.nantty.android.data.FeedTopicsResult
 import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.PostDetailRepository
 import com.nantty.android.data.WalletRepository
+import com.nantty.android.data.CartRepository
 import com.nantty.android.data.BuyerOrdersRepository
 import com.nantty.android.data.NotificationsRepository
 import com.nantty.android.data.SearchRepository
@@ -91,23 +103,33 @@ import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.data.CurrentProfileRepository
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountSessionRepository
+import com.nantty.android.data.AuthFlowApi
+import com.nantty.android.data.AccountNotificationSettingsRepository
+import com.nantty.android.data.CheckoutRepository
+import com.nantty.android.data.CheckoutReceipt
 import com.nantty.android.data.appendUniqueFeedPosts
 import com.nantty.android.share.sharePostFromAndroid
 import com.nantty.android.widget.OrdersWidgetRefreshScheduler
 import com.nantty.android.widget.QuickActionDestination
 import com.nantty.android.widget.quickActionDestination
-import androidx.window.core.layout.WindowWidthSizeClass
-import androidx.window.core.layout.WindowHeightSizeClass
+import androidx.window.core.layout.WindowSizeClass
 import java.util.concurrent.Executors
 import java.util.concurrent.Executor
 
-private enum class Destination(val title: String) {
+internal enum class Destination(val title: String) {
     Feed("Home"), Mart("Mart"), Discover("Discover"), Notifications("Activity"), Messages("Messages"), Wallet("Wallet"), Orders("Orders"), Profile("Profile"), Saved("Saved posts")
 }
+
+internal fun visibleDestinations(isGuest: Boolean): List<Destination> =
+    Destination.entries.filter { item ->
+        if (isGuest) item == Destination.Feed || item == Destination.Mart || item == Destination.Discover
+        else item != Destination.Saved && item != Destination.Orders && item != Destination.Mart
+    }
 
 @Composable
 fun NanttyApp(
     sessionRepository: AccountSessionRepository,
+    authFlowApi: AuthFlowApi,
     sessionExecutor: Executor,
     repository: FeedRepository = remember { FeedRepository() },
     requestedWidgetDestination: String? = null,
@@ -115,6 +137,7 @@ fun NanttyApp(
 ) {
     val appContext = LocalContext.current.applicationContext
     var session by remember { mutableStateOf<AccountSession?>(null) }
+    var guestBrowsing by rememberSaveable { mutableStateOf(false) }
     var sessionLoading by remember { mutableStateOf(true) }
     var sessionWorking by remember { mutableStateOf(false) }
     var sessionError by remember { mutableStateOf<String?>(null) }
@@ -132,6 +155,7 @@ fun NanttyApp(
                 }
                 androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                     session = restored
+                    if (restored != null) guestBrowsing = false
                     sessionLoading = false
                     sessionWorking = false
                 }
@@ -154,35 +178,27 @@ fun NanttyApp(
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
-    } else if (session == null) {
-        SignInScreen(
-            loading = sessionWorking,
-            error = sessionError,
+    } else if (session == null && !guestBrowsing) {
+        AuthGatewayScreen(
+            authApi = authFlowApi,
+            sessionRepository = sessionRepository,
+            executor = sessionExecutor,
+            initialError = sessionError,
             onRetryRestore = if (sessionError != null) ::restoreSession else null,
-            onSignIn = { identifier, password ->
-                sessionWorking = true
+            onBrowseAsGuest = { guestBrowsing = true; sessionError = null },
+            onAuthenticated = { authenticated ->
+                OrdersWidgetRefreshScheduler.refreshSoon(appContext, replaceExisting = true)
+                session = authenticated
                 sessionError = null
-                sessionExecutor.execute {
-                    try {
-                        val signedIn = sessionRepository.signIn(identifier, password)
-                        OrdersWidgetRefreshScheduler.refreshSoon(appContext, replaceExisting = true)
-                        androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                            session = signedIn
-                            sessionWorking = false
-                        }
-                    } catch (error: Exception) {
-                        androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                            sessionError = error.message ?: "Could not sign in. Check your details and try again."
-                            sessionWorking = false
-                        }
-                    }
-                }
+                sessionWorking = false
             },
         )
     } else {
         SignedInApp(
-            accountUser = session!!.user,
+            accountUser = session?.user,
+            isGuest = session == null,
             sessionRepository = sessionRepository,
+            onRequireSignIn = { guestBrowsing = false },
             onSignOut = {
                 sessionWorking = true
                 sessionError = null
@@ -192,6 +208,7 @@ fun NanttyApp(
                         OrdersWidgetRefreshScheduler.markSignedOut(appContext)
                         androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                             session = null
+                            guestBrowsing = false
                             sessionLoading = false
                             sessionWorking = false
                         }
@@ -199,6 +216,7 @@ fun NanttyApp(
                         OrdersWidgetRefreshScheduler.markSignedOut(appContext)
                         androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                             session = null
+                            guestBrowsing = false
                             sessionLoading = false
                             sessionWorking = false
                             sessionError = "Signed out on this device. Nantty could not confirm server sign-out."
@@ -215,8 +233,10 @@ fun NanttyApp(
 
 @Composable
 private fun SignedInApp(
-    accountUser: com.nantty.android.data.AccountUser,
+    accountUser: com.nantty.android.data.AccountUser?,
+    isGuest: Boolean,
     sessionRepository: AccountSessionRepository,
+    onRequireSignIn: () -> Unit,
     onSignOut: () -> Unit,
     repository: FeedRepository,
     requestedWidgetDestination: String?,
@@ -225,11 +245,26 @@ private fun SignedInApp(
     val shareContext = LocalContext.current.applicationContext
     var destination by rememberSaveable { mutableStateOf(Destination.Feed) }
     var selectedFeed by rememberSaveable { mutableStateOf(FeedType.FOR_YOU) }
+    var selectedTopicId by rememberSaveable { mutableStateOf<String?>(null) }
     var feedSelectionGeneration by rememberSaveable { mutableStateOf(0) }
     var selectedPostId by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedProfileId by rememberSaveable { mutableStateOf<String?>(null) }
+    var showingCart by rememberSaveable { mutableStateOf(false) }
+    var showingCheckout by rememberSaveable { mutableStateOf(false) }
+    var showingPayment by rememberSaveable { mutableStateOf(false) }
+    var checkoutId by rememberSaveable { mutableStateOf<String?>(null) }
+    var checkoutOrderId by rememberSaveable { mutableStateOf<String?>(null) }
+    var checkoutTotalMinor by rememberSaveable { mutableStateOf(0L) }
+    var checkoutCurrency by rememberSaveable { mutableStateOf("NGN") }
+    var checkoutOrderCount by rememberSaveable { mutableStateOf(1) }
+    var pendingMartProductId by rememberSaveable { mutableStateOf<String?>(null) }
     var showingComposer by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(requestedWidgetDestination) {
+        if (isGuest && requestedWidgetDestination != null) {
+            onRequireSignIn()
+            onWidgetDestinationHandled()
+            return@LaunchedEffect
+        }
         when (quickActionDestination(requestedWidgetDestination)) {
             QuickActionDestination.Feed -> {
                 destination = Destination.Feed
@@ -255,16 +290,29 @@ private fun SignedInApp(
     var loading by remember { mutableStateOf(false) }
     var loadingMore by remember { mutableStateOf(false) }
     var loadMoreError by remember { mutableStateOf<String?>(null) }
+    var feedTopics by remember { mutableStateOf<List<FeedTopic>>(emptyList()) }
+    var topicsLoading by remember { mutableStateOf(false) }
+    var topicsError by remember { mutableStateOf<String?>(null) }
     var interactionMessage by remember { mutableStateOf<String?>(null) }
     var savingPostId by remember { mutableStateOf<String?>(null) }
     val executor = remember { Executors.newSingleThreadExecutor() }
     val walletRepository = remember(sessionRepository) { WalletRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val cartRepository = remember(sessionRepository) { CartRepository(accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken }) }
+    val checkoutRepository = remember(sessionRepository) { CheckoutRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val buyerOrdersRepository = remember(sessionRepository) { BuyerOrdersRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val notificationsRepository = remember(sessionRepository) { NotificationsRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val messagesRepository = remember(sessionRepository) { MessagesRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val accountNotificationSettingsRepository = remember(sessionRepository) { AccountNotificationSettingsRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val messagesRepository = remember(sessionRepository) {
+        MessagesRepository(
+            sessionProvider = sessionRepository::sessionOrNull,
+            refreshSessionProvider = sessionRepository::refreshSession,
+        )
+    }
     val searchRepository = remember(sessionRepository) { SearchRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val savedPostsRepository = remember(sessionRepository) { SavedPostsRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val martRepository = remember { MartRepository() }
+    val martRepository = remember(sessionRepository) {
+        MartRepository(accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken })
+    }
     val publicProfileRepository = remember(sessionRepository) {
         PublicProfileRepository(sessionProvider = sessionRepository::sessionOrNull)
     }
@@ -274,12 +322,13 @@ private fun SignedInApp(
 
     fun refresh() {
         val requestedFeed = selectedFeed
+        val requestedTopicId = selectedTopicId.takeIf { requestedFeed == FeedType.FOR_YOU }
         val requestGeneration = feedSelectionGeneration
         val accessToken = sessionRepository.sessionOrNull()?.accessToken
         loading = true
         loadMoreError = null
         executor.execute {
-            val fetched = repository.load(requestedFeed, accessToken)
+            val fetched = repository.load(requestedFeed, accessToken, topicId = requestedTopicId)
             androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                 if (selectedFeed == requestedFeed && feedSelectionGeneration == requestGeneration) {
                     result = fetched
@@ -290,12 +339,13 @@ private fun SignedInApp(
     }
 
     fun selectFeed(feed: FeedType) {
-        if (feed == selectedFeed) return
+        if (feed == selectedFeed && selectedTopicId == null) return
         if (feed == FeedType.FOLLOWING && sessionRepository.sessionOrNull()?.accessToken.isNullOrBlank()) {
             interactionMessage = "Sign in to view posts from accounts you follow."
             return
         }
         selectedFeed = feed
+        selectedTopicId = null
         feedSelectionGeneration += 1
         result = null
         loading = true
@@ -305,17 +355,48 @@ private fun SignedInApp(
         refresh()
     }
 
+    fun selectTopic(topicId: String?) {
+        if (selectedFeed == FeedType.FOR_YOU && selectedTopicId == topicId) return
+        selectedFeed = FeedType.FOR_YOU
+        selectedTopicId = topicId
+        feedSelectionGeneration += 1
+        result = null
+        loading = true
+        loadingMore = false
+        loadMoreError = null
+        interactionMessage = null
+        refresh()
+    }
+
+    fun loadTopics(accessToken: String?) {
+        if (topicsLoading) return
+        topicsLoading = true
+        topicsError = null
+        executor.execute {
+            val loaded = repository.loadFollowedTopics(accessToken)
+            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                when (loaded) {
+                    is FeedTopicsResult.Success -> feedTopics = loaded.topics
+                    is FeedTopicsResult.Failure -> topicsError = loaded.message
+                    FeedTopicsResult.AuthenticationRequired -> topicsError = "Sign in again to load your followed topics."
+                }
+                topicsLoading = false
+            }
+        }
+    }
+
     fun loadMore() {
         val page = result as? FeedResult.Success ?: return
         val cursor = page.nextCursor ?: return
         if (loadingMore) return
         val requestedFeed = selectedFeed
+        val requestedTopicId = selectedTopicId.takeIf { requestedFeed == FeedType.FOR_YOU }
         val requestGeneration = feedSelectionGeneration
         val accessToken = sessionRepository.sessionOrNull()?.accessToken
         loadingMore = true
         loadMoreError = null
         executor.execute {
-            val next = repository.load(requestedFeed, accessToken, cursor)
+            val next = repository.load(requestedFeed, accessToken, cursor, requestedTopicId)
             androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                 if (selectedFeed == requestedFeed && feedSelectionGeneration == requestGeneration) {
                     when (next) {
@@ -391,6 +472,7 @@ private fun SignedInApp(
     }
 
     LaunchedEffect(Unit) { refresh() }
+    LaunchedEffect(accountUser?.id) { if (!isGuest) loadTopics(sessionRepository.sessionOrNull()?.accessToken) }
 
     if (showingComposer) {
         HingeSafeContent {
@@ -436,13 +518,77 @@ private fun SignedInApp(
         return
     }
 
+    if (showingPayment) {
+        val orderId = checkoutOrderId
+        if (orderId != null) {
+            HingeSafeContent {
+                CheckoutPaymentScreen(
+                    repository = checkoutRepository,
+                    executor = executor,
+                    receipt = CheckoutReceipt(
+                        checkoutId = checkoutId ?: orderId,
+                        payableOrderId = orderId,
+                        total = com.nantty.android.data.WalletMoney(checkoutTotalMinor, checkoutCurrency),
+                        orderCount = checkoutOrderCount,
+                    ),
+                    onBack = { showingPayment = false; showingCart = true },
+                    onAuthenticationRequired = onSignOut,
+                    onViewOrders = { showingPayment = false; destination = Destination.Orders },
+                )
+            }
+        }
+        return
+    }
+
+    if (showingCheckout) {
+        HingeSafeContent {
+            CheckoutScreen(
+                repository = checkoutRepository,
+                executor = executor,
+                onBack = { showingCheckout = false; showingCart = true },
+                onAuthenticationRequired = onSignOut,
+                onCheckoutCreated = { receipt ->
+                    checkoutId = receipt.checkoutId
+                    checkoutOrderId = receipt.payableOrderId
+                    checkoutTotalMinor = receipt.total.amountMinor
+                    checkoutCurrency = receipt.total.currency
+                    checkoutOrderCount = receipt.orderCount
+                    showingCheckout = false
+                    showingPayment = true
+                    showingCart = false
+                },
+            )
+        }
+        return
+    }
+
+    if (showingCart) {
+        HingeSafeContent {
+            CartScreen(
+                repository = cartRepository,
+                executor = executor,
+                onBack = { showingCart = false },
+                onAuthenticationRequired = onSignOut,
+                onProceedToCheckout = { showingCart = false; showingCheckout = true },
+            )
+        }
+        return
+    }
+
     HingeSafeContent {
-    BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        val wideWindow = maxWidth >= 1000.dp
+    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         val adaptiveInfo = currentWindowAdaptiveInfoV2()
+        val windowSizeClass = adaptiveInfo.windowSizeClass
+        val hasExpandedWidth = windowSizeClass.isWidthAtLeastBreakpoint(
+            WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND,
+        )
+        val showMartCategoryPane = shouldShowMartCategoryPane(
+            windowSizeClass = windowSizeClass,
+            isTabletop = adaptiveInfo.windowPosture.isTabletop,
+            hasVerticalHinge = adaptiveInfo.windowPosture.separatingVerticalHingeBounds.isNotEmpty(),
+        )
         val useNavigationRail = shouldUseNavigationRail(
-            widthClass = adaptiveInfo.windowSizeClass.windowWidthSizeClass,
-            heightClass = adaptiveInfo.windowSizeClass.windowHeightSizeClass,
+            windowSizeClass = windowSizeClass,
             isTabletop = adaptiveInfo.windowPosture.isTabletop,
         )
         if (useNavigationRail) {
@@ -451,7 +597,7 @@ private fun SignedInApp(
                     Spacer(Modifier.height(18.dp))
                     BrandMark()
                     Spacer(Modifier.height(28.dp))
-                    Destination.entries.filterNot { it == Destination.Saved || it == Destination.Orders || it == Destination.Mart }.forEach { item ->
+                    visibleDestinations(isGuest).forEach { item ->
                         NavigationRailItem(
                             selected = destination == item,
                             onClick = { destination = item },
@@ -463,13 +609,24 @@ private fun SignedInApp(
                 Column(
                     Modifier
                         .weight(1f)
-                        .widthIn(max = if (wideWindow) 680.dp else 620.dp)
+                        .widthIn(max = if (hasExpandedWidth) 680.dp else 620.dp)
                         .fillMaxHeight(),
                 ) {
-                    AppHeader(onRefresh = ::refresh, onOpenMart = { destination = Destination.Mart }, onOpenOrders = { destination = Destination.Orders }, accountUser = accountUser, onSignOut = onSignOut)
-                    MainContent(destination, result, loading, selectedFeed = selectedFeed, canViewFollowing = !sessionRepository.sessionOrNull()?.accessToken.isNullOrBlank(), onSelectFeed = ::selectFeed, onSignInRequired = { interactionMessage = "Sign in to view posts from accounts you follow." }, onReauthenticate = onSignOut, onRefresh = ::refresh, onCreatePost = { showingComposer = true }, onOpenPost = { selectedPostId = it }, onOpenProfile = { selectedProfileId = it }, onLike = ::toggleFeedLike, onRepost = ::toggleFeedRepost, onSave = ::toggleFeedSaved, onShare = ::shareFeedPost, interactionMessage = interactionMessage, savingPostId = savingPostId, loadingMore = loadingMore, loadMoreError = loadMoreError, onLoadMore = ::loadMore, walletRepository = walletRepository, buyerOrdersRepository = buyerOrdersRepository, currentProfileRepository = currentProfileRepository, ioExecutor = executor, notificationsRepository = notificationsRepository, onNotificationReauthenticate = onSignOut, searchRepository = searchRepository, messagesRepository = messagesRepository, savedPostsRepository = savedPostsRepository, martRepository = martRepository, onOpenSavedPosts = { destination = Destination.Saved }, onBackFromSavedPosts = { destination = Destination.Feed }, onBackFromOrders = { destination = Destination.Feed }, onOpenMessages = { destination = Destination.Messages }, onOpenOrders = { destination = Destination.Orders })
+                    AppHeader(onRefresh = ::refresh, onOpenMart = { destination = Destination.Mart }, onOpenCart = { if (isGuest) onRequireSignIn() else showingCart = true }, onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders }, accountUser = accountUser, onSignOut = if (isGuest) onRequireSignIn else onSignOut)
+                    if (destination == Destination.Feed || destination == Destination.Mart) {
+                        FeedMartSectionTabs(
+                            selectedMart = destination == Destination.Mart,
+                            onSelectMart = { destination = if (it) Destination.Mart else Destination.Feed },
+                        )
+                    }
+                    if (destination == Destination.Feed && !isGuest) {
+                        FeedTopicSelector(feedTopics, selectedTopicId, topicsLoading, topicsError, ::selectTopic) {
+                            loadTopics(sessionRepository.sessionOrNull()?.accessToken)
+                        }
+                    }
+                    MainContent(destination, result, loading, selectedFeed = selectedFeed, canViewFollowing = !isGuest, onSelectFeed = ::selectFeed, onSignInRequired = onRequireSignIn, onReauthenticate = onSignOut, onRefresh = ::refresh, onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true }, onOpenPost = { selectedPostId = it }, onOpenProfile = { selectedProfileId = it }, onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart }, onLike = { if (isGuest) onRequireSignIn() else toggleFeedLike(it) }, onRepost = { if (isGuest) onRequireSignIn() else toggleFeedRepost(it) }, onSave = { if (isGuest) onRequireSignIn() else toggleFeedSaved(it) }, onShare = ::shareFeedPost, interactionMessage = interactionMessage, savingPostId = savingPostId, loadingMore = loadingMore, loadMoreError = loadMoreError, onLoadMore = ::loadMore, walletRepository = walletRepository, walletAccountKey = accountUser?.id, onOpenWallet = { if (isGuest) onRequireSignIn() else destination = Destination.Wallet }, buyerOrdersRepository = buyerOrdersRepository, currentProfileRepository = currentProfileRepository, ioExecutor = executor, notificationsRepository = notificationsRepository, accountNotificationSettingsRepository = accountNotificationSettingsRepository, onNotificationReauthenticate = onSignOut, searchRepository = searchRepository, messagesRepository = messagesRepository, savedPostsRepository = savedPostsRepository, martRepository = martRepository, showMartCategoryPane = showMartCategoryPane, initialMartProductId = pendingMartProductId, onInitialMartProductHandled = { pendingMartProductId = null }, onOpenSavedPosts = { if (isGuest) onRequireSignIn() else destination = Destination.Saved }, onBackFromSavedPosts = { destination = Destination.Feed }, onBackFromOrders = { destination = Destination.Feed }, onOpenMessages = { if (isGuest) onRequireSignIn() else destination = Destination.Messages }, onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders })
                 }
-                if (wideWindow) {
+                if (hasExpandedWidth) {
                     Column(Modifier.width(280.dp).padding(start = 24.dp, top = 28.dp)) {
                         Text("Your Nantty", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(8.dp))
@@ -479,10 +636,21 @@ private fun SignedInApp(
             }
         } else {
             Column(Modifier.fillMaxSize()) {
-                AppHeader(onRefresh = ::refresh, onOpenMart = { destination = Destination.Mart }, onOpenOrders = { destination = Destination.Orders }, accountUser = accountUser, onSignOut = onSignOut)
-                    MainContent(destination, result, loading, selectedFeed = selectedFeed, canViewFollowing = !sessionRepository.sessionOrNull()?.accessToken.isNullOrBlank(), onSelectFeed = ::selectFeed, onSignInRequired = { interactionMessage = "Sign in to view posts from accounts you follow." }, onReauthenticate = onSignOut, onRefresh = ::refresh, onCreatePost = { showingComposer = true }, modifier = Modifier.weight(1f), onOpenPost = { selectedPostId = it }, onOpenProfile = { selectedProfileId = it }, onLike = ::toggleFeedLike, onRepost = ::toggleFeedRepost, onSave = ::toggleFeedSaved, onShare = ::shareFeedPost, interactionMessage = interactionMessage, savingPostId = savingPostId, loadingMore = loadingMore, loadMoreError = loadMoreError, onLoadMore = ::loadMore, walletRepository = walletRepository, buyerOrdersRepository = buyerOrdersRepository, currentProfileRepository = currentProfileRepository, ioExecutor = executor, notificationsRepository = notificationsRepository, onNotificationReauthenticate = onSignOut, searchRepository = searchRepository, messagesRepository = messagesRepository, savedPostsRepository = savedPostsRepository, martRepository = martRepository, onOpenSavedPosts = { destination = Destination.Saved }, onBackFromSavedPosts = { destination = Destination.Feed }, onBackFromOrders = { destination = Destination.Feed }, onOpenMessages = { destination = Destination.Messages }, onOpenOrders = { destination = Destination.Orders })
+                AppHeader(onRefresh = ::refresh, onOpenMart = { destination = Destination.Mart }, onOpenCart = { if (isGuest) onRequireSignIn() else showingCart = true }, onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders }, accountUser = accountUser, onSignOut = if (isGuest) onRequireSignIn else onSignOut)
+                if (destination == Destination.Feed || destination == Destination.Mart) {
+                    FeedMartSectionTabs(
+                        selectedMart = destination == Destination.Mart,
+                        onSelectMart = { destination = if (it) Destination.Mart else Destination.Feed },
+                    )
+                }
+                if (destination == Destination.Feed && !isGuest) {
+                    FeedTopicSelector(feedTopics, selectedTopicId, topicsLoading, topicsError, ::selectTopic) {
+                        loadTopics(sessionRepository.sessionOrNull()?.accessToken)
+                    }
+                }
+                    MainContent(destination, result, loading, selectedFeed = selectedFeed, canViewFollowing = !isGuest, onSelectFeed = ::selectFeed, onSignInRequired = onRequireSignIn, onReauthenticate = onSignOut, onRefresh = ::refresh, onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true }, modifier = Modifier.weight(1f), onOpenPost = { selectedPostId = it }, onOpenProfile = { selectedProfileId = it }, onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart }, onLike = { if (isGuest) onRequireSignIn() else toggleFeedLike(it) }, onRepost = { if (isGuest) onRequireSignIn() else toggleFeedRepost(it) }, onSave = { if (isGuest) onRequireSignIn() else toggleFeedSaved(it) }, onShare = ::shareFeedPost, interactionMessage = interactionMessage, savingPostId = savingPostId, loadingMore = loadingMore, loadMoreError = loadMoreError, onLoadMore = ::loadMore, walletRepository = walletRepository, walletAccountKey = accountUser?.id, onOpenWallet = { if (isGuest) onRequireSignIn() else destination = Destination.Wallet }, buyerOrdersRepository = buyerOrdersRepository, currentProfileRepository = currentProfileRepository, ioExecutor = executor, notificationsRepository = notificationsRepository, accountNotificationSettingsRepository = accountNotificationSettingsRepository, onNotificationReauthenticate = onSignOut, searchRepository = searchRepository, messagesRepository = messagesRepository, savedPostsRepository = savedPostsRepository, martRepository = martRepository, showMartCategoryPane = showMartCategoryPane, initialMartProductId = pendingMartProductId, onInitialMartProductHandled = { pendingMartProductId = null }, onOpenSavedPosts = { if (isGuest) onRequireSignIn() else destination = Destination.Saved }, onBackFromSavedPosts = { destination = Destination.Feed }, onBackFromOrders = { destination = Destination.Feed }, onOpenMessages = { if (isGuest) onRequireSignIn() else destination = Destination.Messages }, onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders })
                 NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                    Destination.entries.filterNot { it == Destination.Saved || it == Destination.Orders || it == Destination.Mart }.forEach { item ->
+                    visibleDestinations(isGuest).forEach { item ->
                         NavigationBarItem(
                             selected = destination == item,
                             onClick = { destination = item },
@@ -499,27 +667,74 @@ private fun SignedInApp(
 }
 
 @Composable
-private fun AppHeader(onRefresh: () -> Unit, onOpenMart: () -> Unit, onOpenOrders: () -> Unit, accountUser: com.nantty.android.data.AccountUser, onSignOut: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        BrandMark()
-        Spacer(Modifier.width(12.dp))
-        Text("nantty", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-        Spacer(Modifier.weight(1f))
-        IconButton(onClick = onOpenMart, modifier = Modifier.semantics { contentDescription = "Open Mart" }) {
-            Icon(Icons.Default.Storefront, contentDescription = null)
-        }
-        IconButton(onClick = onOpenOrders, modifier = Modifier.semantics { contentDescription = "Open my orders" }) {
-            Icon(Icons.Default.ReceiptLong, contentDescription = null)
-        }
-        Text(accountUser.name, Modifier.padding(end = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelLarge)
-        TextButton(onClick = onSignOut) { Text("Sign out") }
-        TextButton(onClick = onRefresh) {
-            Icon(Icons.Default.Refresh, contentDescription = "Refresh feed")
-            Spacer(Modifier.width(6.dp))
-            Text("Refresh")
+internal fun AppHeader(
+    onRefresh: () -> Unit,
+    onOpenMart: () -> Unit,
+    onOpenOrders: () -> Unit,
+    accountUser: com.nantty.android.data.AccountUser?,
+    onSignOut: () -> Unit,
+    onOpenCart: () -> Unit = {},
+) {
+    var overflowExpanded by rememberSaveable { mutableStateOf(false) }
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val compact = maxWidth < WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND.dp
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            BrandMark()
+            Spacer(Modifier.width(12.dp))
+            if (!compact) {
+                Text("nantty", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+            }
+            Spacer(Modifier.weight(1f))
+            IconButton(onClick = onOpenMart, modifier = Modifier.semantics { contentDescription = "Open Mart" }) {
+                Icon(Icons.Default.Storefront, contentDescription = null)
+            }
+            if (accountUser != null) {
+                IconButton(onClick = onOpenCart, modifier = Modifier.semantics { contentDescription = "Open cart" }) {
+                    Icon(Icons.Default.ShoppingCart, contentDescription = null)
+                }
+                IconButton(onClick = onOpenOrders, modifier = Modifier.semantics { contentDescription = "Open my orders" }) {
+                    Icon(Icons.Default.ReceiptLong, contentDescription = null)
+                }
+            }
+            if (compact) {
+                Box {
+                    IconButton(
+                        onClick = { overflowExpanded = true },
+                        modifier = Modifier.semantics { contentDescription = "More account actions" },
+                    ) {
+                        Icon(Icons.Default.MoreVert, contentDescription = null)
+                    }
+                    DropdownMenu(expanded = overflowExpanded, onDismissRequest = { overflowExpanded = false }) {
+                        Text(
+                            accountUser?.let { "${it.name} · @${it.username}" } ?: "Browsing as guest",
+                            Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Refresh feed") },
+                            leadingIcon = { Icon(Icons.Default.Refresh, contentDescription = null) },
+                            onClick = { overflowExpanded = false; onRefresh() },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(if (accountUser == null) "Sign in" else "Sign out") },
+                            onClick = { overflowExpanded = false; onSignOut() },
+                        )
+                    }
+                }
+            } else {
+                Text(accountUser?.name ?: "Browsing as guest", Modifier.padding(end = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelLarge)
+                TextButton(onClick = onSignOut) { Text(if (accountUser == null) "Sign in" else "Sign out") }
+                TextButton(onClick = onRefresh) {
+                    Icon(Icons.Default.Refresh, contentDescription = "Refresh feed")
+                    Spacer(Modifier.width(6.dp))
+                    Text("Refresh")
+                }
+            }
         }
     }
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -563,6 +778,7 @@ private fun MainContent(
     modifier: Modifier = Modifier,
     onOpenPost: (String) -> Unit = {},
     onOpenProfile: (String) -> Unit = {},
+    onOpenProduct: (String) -> Unit = {},
     onLike: (FeedPost) -> Unit = {},
     onRepost: (FeedPost) -> Unit = {},
     onSave: (FeedPost) -> Unit = {},
@@ -573,15 +789,21 @@ private fun MainContent(
     loadMoreError: String? = null,
     onLoadMore: () -> Unit = {},
     walletRepository: WalletRepository? = null,
+    walletAccountKey: String? = null,
+    onOpenWallet: () -> Unit = {},
     buyerOrdersRepository: BuyerOrdersRepository? = null,
     currentProfileRepository: CurrentProfileRepository? = null,
     ioExecutor: Executor? = null,
     notificationsRepository: NotificationsRepository? = null,
+    accountNotificationSettingsRepository: AccountNotificationSettingsRepository? = null,
     onNotificationReauthenticate: () -> Unit = {},
     searchRepository: SearchRepository? = null,
     messagesRepository: MessagesRepository? = null,
     savedPostsRepository: SavedPostsRepository? = null,
     martRepository: MartRepository? = null,
+    showMartCategoryPane: Boolean = false,
+    initialMartProductId: String? = null,
+    onInitialMartProductHandled: () -> Unit = {},
     onOpenSavedPosts: () -> Unit = {},
     onBackFromSavedPosts: () -> Unit = {},
     onBackFromOrders: () -> Unit = {},
@@ -601,7 +823,7 @@ private fun MainContent(
         return
     }
     if (destination == Destination.Notifications && notificationsRepository != null && ioExecutor != null) {
-        NotificationsScreen(notificationsRepository, ioExecutor, modifier, onNotificationReauthenticate, onOpenPost, onOpenProfile, onOpenMessages, onOpenOrders)
+        NotificationsScreen(notificationsRepository, ioExecutor, modifier, onNotificationReauthenticate, onOpenPost, onOpenProfile, onOpenMessages, onOpenOrders, accountNotificationSettingsRepository)
         return
     }
     if (destination == Destination.Wallet && walletRepository != null && ioExecutor != null) {
@@ -613,11 +835,18 @@ private fun MainContent(
         return
     }
     if (destination == Destination.Discover && searchRepository != null && ioExecutor != null) {
-        SearchScreen(searchRepository, ioExecutor, modifier, onOpenPost, onOpenProfile, onReauthenticate)
+        SearchScreen(searchRepository, ioExecutor, modifier, onOpenPost, onOpenProfile, onReauthenticate, onOpenProduct)
         return
     }
     if (destination == Destination.Mart && martRepository != null) {
-        MartScreen(martRepository, modifier)
+        MartScreen(
+            martRepository,
+            modifier,
+            showCategoryPane = showMartCategoryPane,
+            onAuthenticationRequired = onReauthenticate,
+            initialProductId = initialMartProductId,
+            onInitialProductHandled = onInitialMartProductHandled,
+        )
         return
     }
     Column(modifier.fillMaxSize()) {
@@ -649,22 +878,57 @@ private fun MainContent(
         if (destination != Destination.Feed) {
             EmptyState("${destination.title} is coming to the native app.", "Your Nantty account and content are safe. This area will appear here as native features are added.")
         } else when {
-            loading && result == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            loading && result == null -> Column(Modifier.fillMaxSize()) {
+                HomeWalletPreviewCardIfAvailable(canViewFollowing, walletRepository, walletAccountKey, ioExecutor, onOpenWallet)
+                Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            }
             result == FeedResult.AuthenticationRequired -> EmptyState("Sign in to view Following", "Your Following feed is private to your account. Sign in again to continue.", onReauthenticate)
-            result is FeedResult.Failure -> EmptyState("Your feed could not load", result.message, onRefresh)
-            result is FeedResult.Success && result.posts.isEmpty() -> EmptyState("A little quiet here", "There are no posts to show right now. Pull your world back in when you’re ready.", onRefresh)
-            result is FeedResult.Success -> LazyColumn(Modifier.fillMaxSize()) {
-                items(result.posts, key = FeedPost::id) { FeedCard(it, onOpenPost, onLike, onRepost, onSave, onShare, canInteract = true, saveBusy = savingPostId == it.id, onOpenProfile = onOpenProfile) }
-                item(key = "feed-pagination") {
-                    FeedPaginationFooter(
-                        hasMore = result.nextCursor != null,
-                        loading = loadingMore,
-                        error = loadMoreError,
-                        onLoadMore = onLoadMore,
-                    )
+            result is FeedResult.Failure -> Column(Modifier.fillMaxSize()) {
+                HomeWalletPreviewCardIfAvailable(canViewFollowing, walletRepository, walletAccountKey, ioExecutor, onOpenWallet)
+                EmptyState("Your feed could not load", result.message, onRefresh)
+            }
+            result is FeedResult.Success && result.posts.isEmpty() -> Column(Modifier.fillMaxSize()) {
+                HomeWalletPreviewCardIfAvailable(canViewFollowing, walletRepository, walletAccountKey, ioExecutor, onOpenWallet)
+                EmptyState("A little quiet here", "There are no posts to show right now. Pull your world back in when you’re ready.", onRefresh)
+            }
+            result is FeedResult.Success -> PullToRefreshBox(
+                isRefreshing = loading,
+                onRefresh = onRefresh,
+                modifier = Modifier.weight(1f).fillMaxWidth().testTag("feed-pull-to-refresh"),
+            ) {
+                LazyColumn(Modifier.fillMaxSize()) {
+                    if (canViewFollowing) {
+                        item(key = "home-wallet-preview") {
+                            HomeWalletPreviewCardIfAvailable(canViewFollowing, walletRepository, walletAccountKey, ioExecutor, onOpenWallet)
+                        }
+                    }
+                    items(result.posts, key = FeedPost::id) { FeedCard(it, onOpenPost, onLike, onRepost, onSave, onShare, canInteract = canViewFollowing, saveBusy = savingPostId == it.id, onOpenProfile = onOpenProfile) }
+                    item(key = "feed-pagination") {
+                        FeedPaginationFooter(
+                            hasMore = result.nextCursor != null,
+                            loading = loadingMore,
+                            error = loadMoreError,
+                            onLoadMore = onLoadMore,
+                        )
+                    }
                 }
             }
             else -> EmptyState("Connecting to Nantty", "Your feed will show here.")
+        }
+    }
+}
+
+@Composable
+private fun HomeWalletPreviewCardIfAvailable(
+    signedIn: Boolean,
+    repository: WalletRepository?,
+    accountKey: String?,
+    executor: Executor?,
+    onOpenWallet: () -> Unit,
+) {
+    if (signedIn && repository != null && accountKey != null && executor != null) {
+        androidx.compose.runtime.key(accountKey) {
+            HomeWalletPreviewCard(signedIn, accountKey, repository, executor, onOpenWallet)
         }
     }
 }
@@ -687,6 +951,32 @@ internal fun FeedTabSelector(
                 text = { Text(feed.title) },
             )
         }
+    }
+}
+
+@Composable
+internal fun FeedMartSectionTabs(
+    selectedMart: Boolean,
+    onSelectMart: (Boolean) -> Unit,
+) {
+    TabRow(
+        selectedTabIndex = if (selectedMart) 1 else 0,
+        modifier = Modifier.testTag("feed-mart-tabs").pointerInput(selectedMart) {
+            var horizontalDrag = 0f
+            detectHorizontalDragGestures(
+                onDragEnd = {
+                    resolveFeedMartSwipeTarget(selectedMart, horizontalDrag, 64.dp.toPx())
+                        ?.let(onSelectMart)
+                },
+                onHorizontalDrag = { change, dragAmount ->
+                    horizontalDrag += dragAmount
+                    change.consume()
+                },
+            )
+        },
+    ) {
+        Tab(selected = !selectedMart, onClick = { onSelectMart(false) }, text = { Text("Feed") })
+        Tab(selected = selectedMart, onClick = { onSelectMart(true) }, text = { Text("Mart") })
     }
 }
 
@@ -733,6 +1023,7 @@ internal fun FeedCard(
     canInteract: Boolean = false,
     saveBusy: Boolean = false,
     onOpenProfile: (String) -> Unit = {},
+    onOpenComments: (String) -> Unit = onOpenPost,
 ) {
     Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp).clickable { onOpenPost(post.id) }, shape = RoundedCornerShape(18.dp), tonalElevation = 1.dp) {
         Column(Modifier.padding(18.dp)) {
@@ -783,7 +1074,15 @@ internal fun FeedCard(
                     }
                     Text(post.likes.toString(), color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.labelMedium)
                 } else EngagementCount(Icons.Default.FavoriteBorder, post.likes, "likes")
-                EngagementCount(Icons.Outlined.ChatBubbleOutline, post.comments, "comments")
+                IconButton(
+                    onClick = { onOpenComments(post.id) },
+                    modifier = Modifier.semantics {
+                        contentDescription = "Open ${post.comments} comments"
+                    },
+                ) {
+                    Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = null)
+                }
+                Text(post.comments.toString(), color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.labelMedium)
                 if (canInteract) {
                     IconButton(onClick = { onRepost(post) }, modifier = Modifier.semantics { contentDescription = if (post.reposted) "Undo repost" else "Repost" }) {
                         Icon(Icons.Default.Repeat, contentDescription = null, tint = if (post.reposted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)

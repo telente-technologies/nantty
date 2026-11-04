@@ -26,6 +26,51 @@ class FeedRepositoryTest {
     }
 
     @Test
+    fun forYouTopicFilterIsEncodedAndFollowingFeedIgnoresTopic() {
+        assertEquals(
+            "https://api.nantty.com/api/v1/feeds/for-you?limit=10&cursor=cursor%2F2&topicId=street+food",
+            buildForYouUrl("https://api.nantty.com/", "cursor/2", "street food").toString(),
+        )
+        assertEquals(
+            "https://api.nantty.com/api/v1/feeds/following?limit=10",
+            buildFeedUrl("https://api.nantty.com/", FeedType.FOLLOWING, null, "street-food").toString(),
+        )
+    }
+
+    @Test
+    fun followedTopicsRequireSessionAndUseAuthenticatedUserTopicsRoute() {
+        var opened = false
+        val noSessionRepository = FeedRepository("https://api.nantty.com") {
+            opened = true
+            error("No request should be made without an access token")
+        }
+        assertEquals(FeedTopicsResult.AuthenticationRequired, noSessionRepository.loadFollowedTopics(null))
+        assertEquals(false, opened)
+
+        lateinit var requestedUrl: URL
+        lateinit var connection: RecordingConnection
+        val repository = FeedRepository("https://api.nantty.com/") { url ->
+            requestedUrl = url
+            RecordingConnection(url, 200, """{"data":[{"id":"fashion","name":"Fashion"}]}""").also { connection = it }
+        }
+        val result = repository.loadFollowedTopics("access-token") as FeedTopicsResult.Success
+
+        assertEquals("https://api.nantty.com/api/v1/users/me/topics", requestedUrl.toString())
+        assertEquals("GET", connection.requestMethod)
+        assertEquals("Bearer access-token", connection.headers["Authorization"])
+        assertEquals(listOf(FeedTopic("fashion", "Fashion")), result.topics)
+    }
+
+    @Test
+    fun topicParsingDropsMalformedAndDuplicateRowsWithoutInventingTopics() {
+        val result = FeedRepository().parseTopics(
+            """{"data":[{"id":"fashion","name":"Fashion"},{"id":"fashion","name":"Duplicate"},{"id":"","name":"Missing ID"},{"id":"music","name":"  "},null]}""",
+        ) as FeedTopicsResult.Success
+
+        assertEquals(listOf(FeedTopic("fashion", "Fashion")), result.topics)
+    }
+
+    @Test
     fun followingUrlUsesAuthenticatedFeedRouteAndOpaqueCursor() {
         assertEquals(
             "https://api.nantty.com/api/v1/feeds/following?limit=10&cursor=opaque+cursor%2F%2B%3D%3D",

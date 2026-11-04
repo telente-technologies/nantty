@@ -8,6 +8,18 @@ import org.json.JSONObject
 
 class PostDetailRepositoryTest {
     @Test
+    fun threadPathUsesSupportedSortAndCursorEncoding() {
+        assertEquals(
+            "/api/v1/posts/post%20one/thread?sort=latest&cursor=cursor%20%2F%2B",
+            buildPostThreadPath("post one", ThreadSort.LATEST, "cursor /+"),
+        )
+        assertEquals(
+            "/api/v1/posts/post-1/thread?sort=likes",
+            buildPostThreadPath("post-1", ThreadSort.MOST_LIKED, null),
+        )
+    }
+
+    @Test
     fun paginationHelpersRemoveDuplicateRootsAndDetectRepeatedCursors() {
         val first = threadComment("root-1", "First")
         val second = threadComment("root-2", "Second")

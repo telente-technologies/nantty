@@ -46,6 +46,32 @@ class AccountSessionRepositoryTest {
         assertEquals(0, store.clearCalls)
     }
 
+    @Test
+    fun registrationSessionIsPersistedBeforeItBecomesCurrent() {
+        val registered = session("registration-access", "registration-refresh")
+        val store = MemorySessionStore(null)
+        val repository = AccountSessionRepository(FakeAuthApi(), store)
+
+        val active = repository.signInWithSession(registered)
+
+        assertEquals(registered, active)
+        assertEquals(registered, store.saved)
+        assertEquals(registered, repository.sessionOrNull())
+    }
+
+    @Test
+    fun registrationCanHonorDoNotRememberPreferenceWithoutDiskPersistence() {
+        val registered = session("registration-access", "registration-refresh")
+        val store = MemorySessionStore(session("old-access", "old-refresh"))
+        val repository = AccountSessionRepository(FakeAuthApi(), store)
+
+        repository.signInWithSession(registered, rememberOnDevice = false)
+
+        assertEquals(registered, repository.sessionOrNull())
+        assertNull(store.saved)
+        assertEquals(1, store.clearCalls)
+    }
+
     private fun session(access: String, refresh: String) = AccountSession(
         access,
         refresh,

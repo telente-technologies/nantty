@@ -2,9 +2,11 @@ package com.nantty.android.ui
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -12,6 +14,7 @@ import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.MessagesTransport
+import com.nantty.android.data.ChatThreadTransport
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -64,6 +67,35 @@ class MessagesScreenTest {
         compose.onNodeWithText("Ari Oyinlola").assertIsDisplayed()
         compose.runOnIdle { assertEquals(2, transport.calls) }
     }
+
+    @Test
+    fun opensThreadButKeepsCiphertextHiddenAndComposerDisabledUntilCryptoIsAvailable() {
+        val conversationId = "11111111-1111-4111-8111-111111111111"
+        val threadTransport = ChatThreadTransport { method, path, token, _ ->
+            when {
+                method == "GET" && path == "/api/v1/conversations/$conversationId/messages?limit=30" -> {
+                    assertEquals("inbox-access", token)
+                    JSONObject("""{"data":[{"id":"33333333-3333-4333-8333-333333333333","conversationId":"$conversationId","senderId":"22222222-2222-4222-8222-222222222222","createdAt":"2026-10-01T12:00:00.000Z","kind":"text","text":"plaintext must not render","encryption":{"deviceId":"device-a","ciphertext":"ciphertext-must-not-render","protocol":"signal-v1"}}],"nextCursor":null}""")
+                }
+                method == "POST" && path == "/api/v1/conversations/$conversationId/read" -> JSONObject()
+                else -> error("Unexpected thread request: $method $path")
+            }
+        }
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = FakeTransport(),
+            threadTransport = threadTransport,
+        )
+
+        compose.setContent { MaterialTheme { MessagesScreen(repository, Executor { it.run() }) } }
+        compose.onNodeWithText("Ari Oyinlola").performClick()
+        compose.onNodeWithText("Encrypted message. Secure decryption is not available in this Android build yet").assertIsDisplayed()
+        compose.onNodeWithText("ciphertext-must-not-render").assertDoesNotExist()
+        compose.onNodeWithText("plaintext must not render").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Send message").assertIsNotEnabled()
+    }
+
 
     private class FakeTransport(private val failFirst: Boolean = false) : MessagesTransport {
         var calls = 0

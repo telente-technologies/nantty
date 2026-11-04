@@ -40,7 +40,7 @@ class BuyerOrdersScreenTest {
         compose.onNodeWithText("Order details").assertIsDisplayed()
         compose.onNodeWithText("Ayo Market").assertIsDisplayed()
         compose.onNodeWithText("2 × Beans").assertIsDisplayed()
-        compose.onNodeWithText("Track shipment").assertIsDisplayed()
+        compose.onNodeWithText("Delivery updates are shown here in Nantty.").assertIsDisplayed()
         compose.runOnIdle {
             assertEquals("/api/v1/orders?limit=20", transport.paths.first())
             assertEquals("/api/v1/orders/order-123", transport.paths.last())

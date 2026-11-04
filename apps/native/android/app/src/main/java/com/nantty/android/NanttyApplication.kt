@@ -11,9 +11,11 @@ import java.util.concurrent.Executors
 class NanttyApplication : Application() {
     val sessionExecutor: ExecutorService by lazy { Executors.newSingleThreadExecutor() }
 
+    val authApi: AuthApi by lazy { AuthApi(BuildConfig.NANTTY_API_BASE_URL) }
+
     val sessionRepository: AccountSessionRepository by lazy {
         AccountSessionRepository(
-            api = AuthApi(BuildConfig.NANTTY_API_BASE_URL),
+            api = authApi,
             sessionStore = EncryptedSessionStore(this),
         )
     }

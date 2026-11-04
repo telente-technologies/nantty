@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
+import java.util.UUID
 
 internal enum class BuyerOrderFilter(val apiValue: String?, val label: String) {
     ALL(null, "All"),
@@ -64,7 +65,6 @@ internal data class BuyerOrderDetail(
 internal data class BuyerOrderShipment(
     val courierName: String,
     val trackingNumber: String,
-    val trackingUrl: String?,
     val shippedAt: String,
     val estimatedDeliveryAt: String?,
 )
@@ -88,8 +88,17 @@ internal sealed interface BuyerOrderDetailResult {
     data class Failure(val message: String, val authenticationRequired: Boolean = false) : BuyerOrderDetailResult
 }
 
+internal sealed interface BuyerOrderReceiptResult {
+    data class Success(val order: BuyerOrderDetail) : BuyerOrderReceiptResult
+    data class Failure(val message: String, val authenticationRequired: Boolean = false) : BuyerOrderReceiptResult
+}
+
 internal fun interface BuyerOrdersTransport {
     fun get(path: String, accessToken: String): JSONObject
+}
+
+internal interface BuyerOrderReceiptTransport : BuyerOrdersTransport {
+    fun post(path: String, accessToken: String, idempotencyKey: String): JSONObject
 }
 
 internal class BuyerOrdersRepository(
@@ -134,6 +143,37 @@ internal class BuyerOrdersRepository(
             },
             authenticationRequired,
         )
+        }
+    }
+
+    fun confirmReceipt(orderId: String): BuyerOrderReceiptResult {
+        if (!orderId.matches(Regex("[A-Za-z0-9_-]{1,128}"))) {
+            return BuyerOrderReceiptResult.Failure("That order could not be found.")
+        }
+        val session = sessionProvider()
+            ?: return BuyerOrderReceiptResult.Failure("Sign in to confirm receipt.", authenticationRequired = true)
+        val token = session.accessToken.takeIf(String::isNotBlank)
+            ?: return BuyerOrderReceiptResult.Failure("Sign in to confirm receipt.", authenticationRequired = true)
+        val transport = transport as? BuyerOrderReceiptTransport
+            ?: return BuyerOrderReceiptResult.Failure("Receipt confirmation is unavailable. Please try again.")
+        val idempotencyKey = UUID.randomUUID().toString()
+
+        return try {
+            val order = parseDetail(transport.post(buildBuyerOrderConfirmReceiptPath(orderId), token, idempotencyKey))
+            BuyerOrderReceiptResult.Success(order)
+        } catch (error: Exception) {
+            val httpError = error as? BuyerOrdersHttpException
+            val authenticationRequired = httpError?.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED || httpError?.statusCode == HttpURLConnection.HTTP_FORBIDDEN
+            BuyerOrderReceiptResult.Failure(
+                when {
+                    authenticationRequired -> "Your session has expired. Sign in again to confirm receipt."
+                    httpError?.statusCode == HttpURLConnection.HTTP_NOT_FOUND -> "That order could not be found."
+                    httpError?.statusCode == HttpURLConnection.HTTP_CONFLICT || httpError?.statusCode == 422 -> "This order can no longer be confirmed. Refresh the order to see its current status."
+                    httpError != null -> "Couldn't confirm receipt. Please try again."
+                    else -> "Couldn't confirm receipt. Check your connection and try again."
+                },
+                authenticationRequired,
+            )
         }
     }
 
@@ -206,7 +246,6 @@ internal class BuyerOrdersRepository(
                 BuyerOrderShipment(
                     courierName = shipment.optString("courierName"),
                     trackingNumber = shipment.optString("trackingNumber"),
-                    trackingUrl = safeTrackingUrl(shipment.optString("trackingUrl").takeIf(String::isNotBlank)),
                     shippedAt = shipment.optString("shippedAt"),
                     estimatedDeliveryAt = shipment.optString("estimatedDeliveryAt").takeIf(String::isNotBlank),
                 )
@@ -230,13 +269,6 @@ internal class BuyerOrdersRepository(
     }
 }
 
-private fun safeTrackingUrl(value: String?): String? = value?.let { candidate ->
-    runCatching {
-        val parsed = java.net.URI(candidate)
-        candidate.takeIf { parsed.scheme.equals("https", ignoreCase = true) && !parsed.host.isNullOrBlank() && parsed.rawUserInfo == null }
-    }.getOrNull()
-}
-
 internal fun buildBuyerOrdersPath(filter: BuyerOrderFilter, cursor: String? = null): String = buildString {
     append("/api/v1/orders?limit=${BuyerOrdersRepository.PAGE_SIZE}")
     filter.apiValue?.let { append("&status=$it") }
@@ -248,6 +280,11 @@ internal fun buildBuyerOrdersPath(filter: BuyerOrderFilter, cursor: String? = nu
 internal fun buildBuyerOrderDetailPath(orderId: String): String {
     require(orderId.matches(Regex("[A-Za-z0-9_-]{1,128}"))) { "That order could not be found." }
     return "/api/v1/orders/$orderId"
+}
+
+internal fun buildBuyerOrderConfirmReceiptPath(orderId: String): String {
+    require(orderId.matches(Regex("[A-Za-z0-9_-]{1,128}"))) { "That order could not be found." }
+    return "/api/v1/orders/$orderId/confirm-receipt"
 }
 
 internal fun appendUniqueBuyerOrders(current: List<BuyerOrder>, incoming: List<BuyerOrder>): List<BuyerOrder> {
@@ -270,7 +307,7 @@ private fun JSONArray?.orderItemNames(): List<String> {
     }
 }
 
-private class JdkBuyerOrdersTransport(baseUrl: String) : BuyerOrdersTransport {
+private class JdkBuyerOrdersTransport(baseUrl: String) : BuyerOrderReceiptTransport {
     private val origin = trustedApiOrigin(baseUrl)
 
     override fun get(path: String, accessToken: String): JSONObject {
@@ -298,6 +335,40 @@ private class JdkBuyerOrdersTransport(baseUrl: String) : BuyerOrdersTransport {
                     val count = input.read(buffer)
                     if (count < 0) break
                     require(output.size() + count <= MAX_RESPONSE_BYTES) { "Nantty returned an unexpectedly large orders response." }
+                    output.write(buffer, 0, count)
+                }
+                output.toString(Charsets.UTF_8.name())
+            }
+            return JSONObject(body)
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    override fun post(path: String, accessToken: String, idempotencyKey: String): JSONObject {
+        require(path.matches(Regex("/api/v1/orders/[A-Za-z0-9_-]{1,128}/confirm-receipt"))) { "Unsupported buyer order request." }
+        require(idempotencyKey.matches(Regex("[A-Za-z0-9_-]{8,128}"))) { "Could not safely prepare this confirmation. Please try again." }
+        val apiOrigin = origin ?: error("Configure an HTTPS Nantty API URL to confirm receipt.")
+        val connection = (URL(apiOrigin + path).openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            connectTimeout = 10_000
+            readTimeout = 15_000
+            instanceFollowRedirects = false
+            useCaches = false
+            setRequestProperty("Accept", "application/json")
+            setRequestProperty("Authorization", "Bearer $accessToken")
+            setRequestProperty("Idempotency-Key", idempotencyKey)
+        }
+        try {
+            val status = connection.responseCode
+            if (status !in 200..299) throw BuyerOrdersHttpException(status)
+            val body = connection.inputStream.use { input ->
+                val output = ByteArrayOutputStream()
+                val buffer = ByteArray(4_096)
+                while (true) {
+                    val count = input.read(buffer)
+                    if (count < 0) break
+                    require(output.size() + count <= MAX_RESPONSE_BYTES) { "Nantty returned an unexpectedly large order response." }
                     output.write(buffer, 0, count)
                 }
                 output.toString(Charsets.UTF_8.name())

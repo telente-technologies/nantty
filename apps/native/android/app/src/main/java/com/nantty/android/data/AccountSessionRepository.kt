@@ -42,6 +42,20 @@ class AccountSessionRepository(
     @Synchronized
     fun signIn(identifier: String, password: String): AccountSession {
         val session = api.login(identifier, password)
+        return persistSession(session)
+    }
+
+    /** Persists a session created by another first-party auth flow (for example, registration). */
+    @Synchronized
+    fun signInWithSession(session: AccountSession, rememberOnDevice: Boolean = true): AccountSession {
+        if (rememberOnDevice) return persistSession(session)
+        sessionStore.clear()
+        currentSession = session
+        hasRestored = true
+        return session
+    }
+
+    private fun persistSession(session: AccountSession): AccountSession {
         try {
             sessionStore.write(session)
         } catch (_: Exception) {

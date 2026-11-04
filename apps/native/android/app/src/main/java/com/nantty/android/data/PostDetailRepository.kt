@@ -83,6 +83,12 @@ data class CommentActingProfile(
     val avatarUrl: String?,
 )
 
+enum class ThreadSort(val label: String, val apiValue: String) {
+    RELEVANT("Relevant", "relevant"),
+    LATEST("Latest", "latest"),
+    MOST_LIKED("Most liked", "likes"),
+}
+
 sealed interface PostDetailResult {
     data class Success(val post: PostDetail, val comments: List<ThreadComment>, val nextCursor: String?) : PostDetailResult
     data class Failure(val message: String) : PostDetailResult
@@ -127,13 +133,10 @@ class PostDetailRepository(
         }
     }
 
-    fun load(postId: String, cursor: String? = null): PostDetailResult = try {
+    fun load(postId: String, cursor: String? = null, sort: ThreadSort = ThreadSort.RELEVANT): PostDetailResult = try {
         val session = sessionProvider()
         val postRoot = transport.request("GET", "/api/v1/posts/${pathSegment(postId)}", session?.accessToken, null)
-        val threadPath = buildString {
-            append("/api/v1/posts/${pathSegment(postId)}/thread?sort=relevant")
-            cursor?.takeIf(String::isNotBlank)?.let { append("&cursor=${queryValue(it)}") }
-        }
+        val threadPath = buildPostThreadPath(postId, sort, cursor)
         val threadRoot = transport.request("GET", threadPath, session?.accessToken, null)
         PostDetailResult.Success(parsePost(postRoot), parseThread(threadRoot), nextCursor(threadRoot))
     } catch (error: Exception) {
@@ -307,6 +310,15 @@ class PostDetailRepository(
 
     private fun pathSegment(value: String): String = queryValue(value)
     private fun queryValue(value: String): String = java.net.URLEncoder.encode(value, Charsets.UTF_8.name()).replace("+", "%20")
+}
+
+internal fun buildPostThreadPath(postId: String, sort: ThreadSort, cursor: String?): String = buildString {
+    val encodedPostId = java.net.URLEncoder.encode(postId, Charsets.UTF_8.name()).replace("+", "%20")
+    append("/api/v1/posts/$encodedPostId/thread?sort=${sort.apiValue}")
+    cursor?.takeIf(String::isNotBlank)?.let {
+        val encodedCursor = java.net.URLEncoder.encode(it, Charsets.UTF_8.name()).replace("+", "%20")
+        append("&cursor=$encodedCursor")
+    }
 }
 
 private fun JSONObject.optNullableString(key: String): String? = optString(key).takeIf { it.isNotBlank() && it != "null" }
