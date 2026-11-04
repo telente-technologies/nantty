@@ -70,6 +70,7 @@ internal fun MartProductDetailScreen(
     repository: MartRepository,
     onAuthenticationRequired: () -> Unit,
     onBack: () -> Unit,
+    onOpenReviews: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     cartRepositoryOverride: CartRepository? = null,
 ) {
@@ -127,6 +128,7 @@ internal fun MartProductDetailScreen(
                         onSelectVariant = { selectedVariantId = it; addToCartResult = null },
                         quantity = quantity,
                         onQuantityChange = { quantity = it; addToCartResult = null },
+                        onOpenReviews = { onOpenReviews(detail.id) },
                         modifier = Modifier.weight(1f),
                     )
                     val selectedVariant = detail.variants.firstOrNull { it.id == effectiveVariantId }
@@ -190,6 +192,7 @@ private fun ProductDetailContent(
     onSelectVariant: (String) -> Unit,
     quantity: Int,
     onQuantityChange: (Int) -> Unit,
+    onOpenReviews: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     BoxWithProductWidth(modifier) { wide ->
@@ -202,7 +205,7 @@ private fun ProductDetailContent(
                     item { ProductImages(detail, wide = true) }
                 }
                 LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(end = 20.dp, bottom = 32.dp)) {
-                    item { ProductInformation(detail, selectedVariantId, onSelectVariant, quantity, onQuantityChange) }
+                    item { ProductInformation(detail, selectedVariantId, onSelectVariant, quantity, onQuantityChange, onOpenReviews) }
                 }
             }
         } else {
@@ -212,7 +215,7 @@ private fun ProductDetailContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 item { ProductImages(detail, wide = false) }
-                item { ProductInformation(detail, selectedVariantId, onSelectVariant, quantity, onQuantityChange) }
+                item { ProductInformation(detail, selectedVariantId, onSelectVariant, quantity, onQuantityChange, onOpenReviews) }
             }
         }
     }
@@ -267,6 +270,7 @@ private fun ProductInformation(
     onSelectVariant: (String) -> Unit,
     quantity: Int,
     onQuantityChange: (Int) -> Unit,
+    onOpenReviews: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(detail.title, Modifier.semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -275,6 +279,7 @@ private fun ProductInformation(
             Text(if (detail.stock > 0) "In stock" else "Out of stock", color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (detail.rating > 0) Text("${"%.1f".format(Locale.ROOT, detail.rating)} · customer rating", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+        TextButton(onClick = onOpenReviews) { Text("Read product reviews") }
         detail.promo?.let { Text(it, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold) }
         if (detail.sizes.isNotEmpty()) DetailLine("Sizes", detail.sizes.joinToString(" · "))
         if (detail.colors.isNotEmpty()) DetailLine("Colors", detail.colors.joinToString(" · "))

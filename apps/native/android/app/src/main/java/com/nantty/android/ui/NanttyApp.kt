@@ -45,6 +45,7 @@ fun NanttyApp(
     val appContext = LocalContext.current.applicationContext
     var session by remember { mutableStateOf<AccountSession?>(null) }
     var guestBrowsing by rememberSaveable { mutableStateOf(false) }
+    var pendingFollowingAfterSignIn by rememberSaveable { mutableStateOf(false) }
     var sessionLoading by remember { mutableStateOf(true) }
     var sessionWorking by remember { mutableStateOf(false) }
     var sessionError by remember { mutableStateOf<String?>(null) }
@@ -106,6 +107,12 @@ fun NanttyApp(
             isGuest = session == null,
             sessionRepository = sessionRepository,
             onRequireSignIn = { guestBrowsing = false },
+            onRequireFollowingSignIn = {
+                pendingFollowingAfterSignIn = true
+                guestBrowsing = false
+            },
+            initialFollowingAfterSignIn = pendingFollowingAfterSignIn,
+            onInitialFollowingHandled = { pendingFollowingAfterSignIn = false },
             onSignOut = {
                 sessionWorking = true
                 sessionError = null

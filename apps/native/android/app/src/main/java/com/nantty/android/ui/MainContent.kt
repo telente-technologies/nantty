@@ -61,6 +61,7 @@ internal fun MainContent(
     canViewFollowing: Boolean = true,
     onSelectFeed: (FeedType) -> Unit = {},
     onSignInRequired: () -> Unit = {},
+    onFollowingSignInRequired: () -> Unit = onSignInRequired,
     onReauthenticate: () -> Unit = {},
     onRefresh: () -> Unit,
     onCreatePost: () -> Unit = {},
@@ -221,6 +222,7 @@ internal fun MainContent(
                 canViewFollowing = canViewFollowing,
                 onSelectFeed = onSelectFeed,
                 onSignInRequired = onSignInRequired,
+                onFollowingSignInRequired = onFollowingSignInRequired,
             )
         }
         interactionMessage?.let { Text(it, Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
@@ -288,13 +290,14 @@ internal fun FeedTabSelector(
     canViewFollowing: Boolean,
     onSelectFeed: (FeedType) -> Unit,
     onSignInRequired: () -> Unit,
+    onFollowingSignInRequired: () -> Unit = onSignInRequired,
 ) {
     TabRow(selectedTabIndex = FeedType.entries.indexOf(selectedFeed).coerceAtLeast(0)) {
         FeedType.entries.forEach { feed ->
             Tab(
                 selected = selectedFeed == feed,
                 onClick = {
-                    if (feed == FeedType.FOLLOWING && !canViewFollowing) onSignInRequired()
+                    if (feed == FeedType.FOLLOWING && !canViewFollowing) onFollowingSignInRequired()
                     else onSelectFeed(feed)
                 },
                 text = { Text(feed.title) },

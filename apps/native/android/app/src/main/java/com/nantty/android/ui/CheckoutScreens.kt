@@ -53,6 +53,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.nantty.android.data.CheckoutAddress
+import com.nantty.android.data.CheckoutAddressInput
 import com.nantty.android.data.CheckoutAddressesResult
 import com.nantty.android.data.CheckoutCartResult
 import com.nantty.android.data.CheckoutReceipt
@@ -80,6 +81,9 @@ internal fun CheckoutScreen(
     var loading by remember(repository) { mutableStateOf(true) }
     var placing by remember(repository) { mutableStateOf(false) }
     var error by remember(repository) { mutableStateOf<String?>(null) }
+    var showingAddressForm by remember(repository) { mutableStateOf(false) }
+    var savingAddress by remember(repository) { mutableStateOf(false) }
+    var addressSaveError by remember(repository) { mutableStateOf<String?>(null) }
     var generation by remember(repository) { mutableStateOf(0) }
     var checkoutKey by rememberSaveable { mutableStateOf(UUID.randomUUID().toString()) }
     val addressId = selectedId ?: addresses?.firstOrNull(CheckoutAddress::isDefault)?.id ?: addresses?.firstOrNull()?.id
@@ -143,8 +147,13 @@ internal fun CheckoutScreen(
                     item {
                         CheckoutInfoCard(
                             title = "Add a delivery address to continue",
-                            body = "Checkout needs a saved address so Nantty can calculate delivery and show the final total. Address creation is not available in this Android flow yet; add one in Nantty on the web, then return here.",
+                            body = "Add a delivery address so Nantty can calculate delivery and show your server-calculated total.",
                         )
+                    }
+                    item {
+                        Button(onClick = { addressSaveError = null; showingAddressForm = true }, enabled = !loading) {
+                            Text("Add delivery address")
+                        }
                     }
                 } else {
                     items(addresses.orEmpty(), key = CheckoutAddress::id) { address ->
@@ -160,6 +169,11 @@ internal fun CheckoutScreen(
                                     Text(address.phone, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
+                        }
+                    }
+                    item {
+                        OutlinedButton(onClick = { addressSaveError = null; showingAddressForm = true }, enabled = !loading) {
+                            Text("Add another address")
                         }
                     }
                 }
@@ -219,6 +233,33 @@ internal fun CheckoutScreen(
                 }
             }
         }
+    }
+    if (showingAddressForm) {
+        CheckoutAddressForm(
+            repository = repository,
+            executor = executor,
+            saving = savingAddress,
+            saveError = addressSaveError,
+            onDismiss = { if (!savingAddress) showingAddressForm = false },
+            onSave = { input: CheckoutAddressInput ->
+                if (savingAddress) return@CheckoutAddressForm
+                savingAddress = true
+                addressSaveError = null
+                executor.execute {
+                    val outcome = runCatching { repository.createAddress(input) }
+                    androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                        savingAddress = false
+                        outcome.onSuccess { saved ->
+                            addresses = (addresses.orEmpty().filterNot { it.id == saved.id } + saved)
+                            selectedId = saved.id
+                            cart = null
+                            showingAddressForm = false
+                            generation++
+                        }.onFailure { addressSaveError = it.message ?: "Could not save this address. Check the details and try again." }
+                    }
+                }
+            },
+        )
     }
 }
 

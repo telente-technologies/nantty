@@ -51,6 +51,7 @@ import com.nantty.android.data.MartPage
 import com.nantty.android.data.MartProduct
 import com.nantty.android.data.MartRepository
 import com.nantty.android.data.MartResult
+import com.nantty.android.data.ProductReviewsRepository
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.Currency
@@ -69,11 +70,13 @@ fun MartScreen(
     onInitialProductHandled: () -> Unit = {},
     initialCategoryId: String? = null,
     onInitialCategoryHandled: () -> Unit = {},
+    reviewsRepositoryOverride: ProductReviewsRepository? = null,
 ) {
     var categories by remember { mutableStateOf<List<MartCategory>>(emptyList()) }
     var products by remember { mutableStateOf<List<MartProduct>>(emptyList()) }
     var selectedCategoryId by rememberMartCategorySelection()
     var selectedProductId by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedReviewsProductId by rememberSaveable { mutableStateOf<String?>(null) }
     var nextCursor by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
     var loadingMore by remember { mutableStateOf(false) }
@@ -97,12 +100,23 @@ fun MartScreen(
         }
     }
 
-    selectedProductId?.let { productId ->
+    selectedProductId?.takeIf { selectedReviewsProductId == null }?.let { productId ->
         MartProductDetailScreen(
             productId = productId,
             repository = repository,
             onAuthenticationRequired = onAuthenticationRequired,
             onBack = { selectedProductId = null },
+            onOpenReviews = { selectedReviewsProductId = it },
+            modifier = modifier,
+        )
+        return
+    }
+
+    selectedReviewsProductId?.let { productId ->
+        ProductReviewsScreen(
+            productId = productId,
+            repository = reviewsRepositoryOverride ?: remember(repository) { ProductReviewsRepository(accessTokenProvider = repository::currentAccessToken) },
+            onBack = { selectedReviewsProductId = null },
             modifier = modifier,
         )
         return

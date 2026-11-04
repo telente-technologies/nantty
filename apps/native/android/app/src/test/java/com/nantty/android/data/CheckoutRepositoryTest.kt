@@ -29,6 +29,57 @@ class CheckoutRepositoryTest {
     }
 
     @Test
+    fun loadsGeoChoicesFromBackendRatherThanAssumingLocationIds() {
+        val countryId = "6b3a4e12-1234-4234-9234-123456789abc"
+        val stateId = "7b3a4e12-1234-4234-9234-123456789abc"
+        val transport = RecordingTransport().apply {
+            getResponse = JSONObject("""{"data":[{"id":"$countryId","name":"Nigeria","levels":["state","lga","city"],"stateLabel":"State","lgaLabel":"LGA"}]}""")
+        }
+        val repository = repository(transport)
+
+        val countries = repository.loadGeoCountries()
+
+        assertEquals(countryId, countries.single().id)
+        assertTrue(countries.single().levels.containsAll(setOf("state", "lga", "city")))
+        transport.getResponse = JSONObject("""{"data":[{"id":"$stateId","name":"Lagos","parentId":"$countryId"}]}""")
+        assertEquals("Lagos", repository.loadGeoAreas("/api/v1/geo/countries/$countryId/regions").single().name)
+        assertEquals("/api/v1/geo/countries/$countryId/regions", transport.path)
+    }
+
+    @Test
+    fun createsAddressUsingSelectedBackendGeoIdsAndParsesCanonicalResponse() {
+        val countryId = "6b3a4e12-1234-4234-9234-123456789abc"
+        val stateId = "7b3a4e12-1234-4234-9234-123456789abc"
+        val savedId = "8b3a4e12-1234-4234-9234-123456789abc"
+        val transport = RecordingTransport().apply {
+            postResponse = JSONObject("""{"data":{"id":"$savedId","fullName":"Buyer Name","phone":"+2348012345678","line1":"12 Market Road","city":"Ikeja","state":"Lagos","country":"Nigeria","isDefault":true}}""")
+        }
+
+        val address = repository(transport).createAddress(
+            CheckoutAddressInput("Buyer Name", "+234 801-234-5678", "12 Market Road", "", "", countryId, stateId, null, null, "", ""),
+        )
+
+        assertEquals("/api/v1/users/me/addresses", transport.path)
+        assertEquals("$stateId", transport.body?.getString("stateId"))
+        assertEquals(countryId, transport.body?.getString("countryId"))
+        assertEquals("+2348012345678", transport.body?.getString("phone"))
+        assertEquals("+2348012345678", address.phone)
+        assertTrue(address.isDefault)
+    }
+
+    @Test
+    fun rejectsInvalidAddressBeforeSendingItToTheApi() {
+        val transport = RecordingTransport()
+        val result = runCatching {
+            repository(transport).createAddress(
+                CheckoutAddressInput("Buyer", "0800000000", "12 Road", "", "", addressId, null, null, null, "", ""),
+            )
+        }
+        assertTrue(result.isFailure)
+        assertNull(transport.path)
+    }
+
+    @Test
     fun quoteUsesSelectedAddressAndServerCartTotal() {
         val transport = RecordingTransport().apply {
             postResponse = JSONObject("""{"data":{"itemsTotal":{"amountMinor":6000,"currency":"NGN"},"shopDiscount":{"amountMinor":300,"currency":"NGN"},"storeCredit":{"amountMinor":0,"currency":"NGN"},"shipping":{"amountMinor":1500,"currency":"NGN"},"total":{"amountMinor":7200,"currency":"NGN"},"payableGroupCount":1,"groups":[]}}""")

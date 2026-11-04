@@ -59,4 +59,29 @@ class FeedTabSelectorTest {
         composeRule.onNodeWithText("For You").assertIsSelected()
         composeRule.onNodeWithText("Following").assertIsNotSelected()
     }
+
+    @Test
+    fun signedOutFollowingSelectionUsesIntentPreservingAuthCallback() {
+        var preservedIntentCount = 0
+        var genericGateCount = 0
+        composeRule.setContent {
+            MaterialTheme {
+                var selected by remember { mutableStateOf(FeedType.FOR_YOU) }
+                FeedTabSelector(
+                    selectedFeed = selected,
+                    canViewFollowing = false,
+                    onSelectFeed = { selected = it },
+                    onSignInRequired = { genericGateCount++ },
+                    onFollowingSignInRequired = { preservedIntentCount++ },
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Following").performClick()
+        composeRule.runOnIdle {
+            assertEquals(1, preservedIntentCount)
+            assertEquals(0, genericGateCount)
+        }
+        composeRule.onNodeWithText("For You").assertIsSelected()
+    }
 }

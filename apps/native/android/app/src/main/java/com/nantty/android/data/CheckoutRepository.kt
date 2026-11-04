@@ -19,6 +19,30 @@ internal data class CheckoutAddress(
     val isDefault: Boolean,
 )
 
+internal data class CheckoutGeoCountry(
+    val id: String,
+    val name: String,
+    val levels: Set<String>,
+    val stateLabel: String,
+    val lgaLabel: String,
+)
+
+internal data class CheckoutGeoArea(val id: String, val name: String)
+
+internal data class CheckoutAddressInput(
+    val fullName: String,
+    val phone: String,
+    val line1: String,
+    val postalCode: String,
+    val details: String,
+    val countryId: String,
+    val stateId: String?,
+    val lgaId: String?,
+    val cityId: String?,
+    val state: String,
+    val city: String,
+)
+
 internal data class CheckoutReceipt(
     val checkoutId: String,
     val payableOrderId: String,
@@ -72,6 +96,61 @@ internal class CheckoutRepository(
         onSuccess = CheckoutAddressesResult::Success,
         onFailure = { CheckoutAddressesResult.Failure(checkoutErrorMessage(it, "load your addresses"), it.isCheckoutAuthFailure()) },
     )
+
+    fun loadGeoCountries(): List<CheckoutGeoCountry> {
+        val token = requireToken("Sign in to add a delivery address.")
+        val rows = unwrapCheckoutArray(transport.get("/api/v1/geo/countries", token))
+        return buildList {
+            for (index in 0 until rows.length()) {
+                val row = rows.optJSONObject(index) ?: continue
+                val id = row.optString("id")
+                val name = row.optString("name").checkoutText(100)
+                if (!isSafeAddressId(id) || name.isBlank()) continue
+                val levels = row.optJSONArray("levels")?.let { values ->
+                    buildSet { for (level in 0 until values.length()) add(values.optString(level).lowercase()) }
+                }.orEmpty()
+                add(CheckoutGeoCountry(id, name, levels, row.optString("stateLabel").checkoutText(60), row.optString("lgaLabel").checkoutText(60)))
+            }
+        }
+    }
+
+    fun loadGeoAreas(path: String): List<CheckoutGeoArea> {
+        require(path.matches(Regex("/api/v1/geo/(countries/[A-Fa-f0-9-]{36}/regions|regions/[A-Fa-f0-9-]{36}/(admin-areas|cities)|admin-areas/[A-Fa-f0-9-]{36}/cities)")))
+        val token = requireToken("Sign in to add a delivery address.")
+        val rows = unwrapCheckoutArray(transport.get(path, token))
+        return buildList {
+            for (index in 0 until rows.length()) {
+                val row = rows.optJSONObject(index) ?: continue
+                val id = row.optString("id")
+                val name = row.optString("name").checkoutText(100)
+                if (isSafeAddressId(id) && name.isNotBlank()) add(CheckoutGeoArea(id, name))
+            }
+        }
+    }
+
+    fun createAddress(input: CheckoutAddressInput): CheckoutAddress {
+        require(input.fullName.trim().length in 2..80) { "Enter the recipient's full name." }
+        val phone = input.phone.trim().filterNot { it in " -()." }
+        require(phone.matches(Regex("\\+[1-9][0-9]{7,14}"))) { "Enter a phone number with country code, such as +2348012345678." }
+        require(input.line1.trim().length in 3..160) { "Enter a valid street address." }
+        require(isSafeAddressId(input.countryId)) { "Choose a valid country." }
+        val token = requireToken("Sign in to add a delivery address.")
+        val body = JSONObject()
+            .put("fullName", input.fullName.trim())
+            .put("phone", phone)
+            .put("line1", input.line1.trim())
+            .put("postalCode", input.postalCode.trim())
+            .put("details", input.details.trim())
+            .put("isDefault", false)
+            .put("countryId", input.countryId)
+            .put("city", input.city.trim())
+            .put("state", input.state.trim())
+        input.stateId?.let { body.put("stateId", it) }
+        input.lgaId?.let { body.put("lgaId", it) }
+        input.cityId?.let { body.put("cityId", it) }
+        val response = transport.post("/api/v1/users/me/addresses", token, body)
+        return parseAddress(unwrapCheckoutObject(response))
+    }
 
     fun quoteCart(addressId: String): CheckoutCartResult = runCatching {
         require(isSafeAddressId(addressId)) { "Choose a valid delivery address." }
@@ -150,22 +229,28 @@ internal class CheckoutRepository(
                 val fullName = row.optString("fullName").checkoutText(100)
                 val line1 = row.optString("line1").checkoutText(180)
                 if (!isSafeAddressId(id) || fullName.isBlank() || line1.isBlank()) continue
-                add(
-                    CheckoutAddress(
-                        id = id,
-                        label = row.optString("label").checkoutText(60),
-                        fullName = fullName,
-                        phone = row.optString("phone").checkoutText(40),
-                        line1 = line1,
-                        line2 = row.optString("line2").checkoutText(180),
-                        city = row.optString("city").checkoutText(100),
-                        state = row.optString("state").checkoutText(100),
-                        country = row.optString("country").checkoutText(100),
-                        isDefault = row.optBoolean("isDefault"),
-                    ),
-                )
+                runCatching { parseAddress(row) }.getOrNull()?.let(::add)
             }
         }
+    }
+
+    internal fun parseAddress(row: JSONObject): CheckoutAddress {
+        val id = row.optString("id")
+        val fullName = row.optString("fullName").checkoutText(100)
+        val line1 = row.optString("line1").checkoutText(180)
+        require(isSafeAddressId(id) && fullName.isNotBlank() && line1.isNotBlank()) { "Nantty returned an incomplete address." }
+        return CheckoutAddress(
+            id = id,
+            label = row.optString("label").checkoutText(60),
+            fullName = fullName,
+            phone = row.optString("phone").checkoutText(40),
+            line1 = line1,
+            line2 = row.optString("line2").checkoutText(180),
+            city = row.optString("city").checkoutText(100),
+            state = row.optString("state").checkoutText(100),
+            country = row.optString("country").checkoutText(100),
+            isDefault = row.optBoolean("isDefault"),
+        )
     }
 
     internal fun parseCheckoutReceipt(payload: JSONObject): CheckoutReceipt {
@@ -227,7 +312,7 @@ private fun checkoutErrorMessage(error: Throwable, action: String): String = whe
 
 internal class CheckoutHttpException(val statusCode: Int) : Exception()
 
-private class JdkCheckoutTransport(private val baseUrl: String) : CheckoutTransport {
+internal class JdkCheckoutTransport(private val baseUrl: String) : CheckoutTransport {
     override fun get(path: String, accessToken: String): JSONObject = JSONObject(request(path, accessToken, "GET"))
 
     override fun post(path: String, accessToken: String, body: JSONObject, idempotencyKey: String?): JSONObject =
@@ -260,6 +345,15 @@ private class JdkCheckoutTransport(private val baseUrl: String) : CheckoutTransp
             connection.disconnect()
         }
     }
+}
+
+private fun unwrapCheckoutArray(payload: JSONObject): JSONArray {
+    val data = payload.opt("data")
+    return when (data) {
+        is JSONArray -> data
+        is JSONObject -> data.optJSONArray("data") ?: data.optJSONArray("items")
+        else -> payload.optJSONArray("items")
+    } ?: error("Nantty returned an incomplete location list.")
 }
 
 private fun java.io.InputStream.readBoundedCheckoutResponse(): String {

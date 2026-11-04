@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performClick
 import com.nantty.android.data.MartRepository
 import com.nantty.android.data.CartRepository
 import com.nantty.android.data.CartTransport
+import com.nantty.android.data.ProductReviewsRepository
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.net.HttpURLConnection
@@ -146,6 +147,38 @@ class MartProductDetailNavigationTest {
         composeRule.onNodeWithText("Silk wrap dress").assertIsDisplayed()
         assertTrue(requestedUrls.any { it.endsWith("/api/v1/products?limit=20&categoryId=category-fashion") })
     }
+
+    @Test
+    fun productDetailOpensPagedReviewsAndBackReturnsToTheProduct() {
+        val productRepository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            openConnection = { url -> FakeMartConnection(url, responseFor(url)) },
+        )
+        val reviewsRepository = ProductReviewsRepository(
+            baseUrl = "https://api.nantty.com",
+            openConnection = { url -> FakeReviewsConnection(url, reviewsResponseFor(url)) },
+        )
+
+        composeRule.setContent {
+            MaterialTheme { MartScreen(productRepository, reviewsRepositoryOverride = reviewsRepository) }
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Silk wrap dress").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Silk wrap dress").performClick()
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Read product reviews").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Read product reviews").performClick()
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Product reviews").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Ayo Oyin").assertIsDisplayed()
+        composeRule.onNodeWithText("Verified purchase").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Back to product").performClick()
+        composeRule.onNodeWithText("Product details").assertIsDisplayed()
+    }
 }
 
 private fun responseFor(url: URL, productName: String = "Silk wrap dress"): String = when {
@@ -156,6 +189,20 @@ private fun responseFor(url: URL, productName: String = "Silk wrap dress"): Stri
 }
 
 private class FakeMartConnection(url: URL, private val body: String) : HttpURLConnection(url) {
+    override fun getResponseCode(): Int = HttpURLConnection.HTTP_OK
+    override fun getInputStream() = ByteArrayInputStream(body.toByteArray())
+    override fun usingProxy(): Boolean = false
+    override fun connect() = Unit
+    override fun disconnect() = Unit
+}
+
+private fun reviewsResponseFor(url: URL): String = when (url.path) {
+    "/api/v1/products/prd-1/reviews" -> """{"average":5,"count":1,"reviews":[{"id":"review-1","author":{"id":"user-1","name":"Ayo Oyin","username":"ayo","avatarUrl":null},"rating":5,"text":"Lovely quality.","title":"Beautiful","isVerifiedPurchase":true,"reply":null,"createdAt":"2026-10-01T00:00:00Z"}],"nextCursor":null}"""
+    "/api/v1/products/prd-1/rating-summary" -> """{"average":5,"count":1,"distribution":{"1":0,"2":0,"3":0,"4":0,"5":1}}"""
+    else -> error("Unexpected reviews URL: $url")
+}
+
+private class FakeReviewsConnection(url: URL, private val body: String) : HttpURLConnection(url) {
     override fun getResponseCode(): Int = HttpURLConnection.HTTP_OK
     override fun getInputStream() = ByteArrayInputStream(body.toByteArray())
     override fun usingProxy(): Boolean = false

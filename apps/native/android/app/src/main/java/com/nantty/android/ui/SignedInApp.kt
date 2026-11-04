@@ -73,6 +73,9 @@ internal fun SignedInApp(
     isGuest: Boolean,
     sessionRepository: AccountSessionRepository,
     onRequireSignIn: () -> Unit,
+    onRequireFollowingSignIn: () -> Unit = onRequireSignIn,
+    initialFollowingAfterSignIn: Boolean = false,
+    onInitialFollowingHandled: () -> Unit = {},
     onSignOut: () -> Unit,
     repository: FeedRepository,
     requestedWidgetDestination: String?,
@@ -362,6 +365,12 @@ internal fun SignedInApp(
     }
 
     LaunchedEffect(Unit) { refresh() }
+    LaunchedEffect(accountUser?.id, isGuest, initialFollowingAfterSignIn) {
+        if (!isGuest && initialFollowingAfterSignIn) {
+            selectFeed(FeedType.FOLLOWING)
+            onInitialFollowingHandled()
+        }
+    }
     LaunchedEffect(accountUser?.id) { if (!isGuest) loadTopics(sessionRepository.sessionOrNull()?.accessToken) }
 
     if (showingComposer) {
@@ -537,6 +546,7 @@ internal fun SignedInApp(
                         canViewFollowing = !isGuest,
                         onSelectFeed = ::selectFeed,
                         onSignInRequired = onRequireSignIn,
+                        onFollowingSignInRequired = onRequireFollowingSignIn,
                         onReauthenticate = onSignOut,
                         onRefresh = ::refresh,
                         onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true },
@@ -614,6 +624,7 @@ internal fun SignedInApp(
                     canViewFollowing = !isGuest,
                     onSelectFeed = ::selectFeed,
                     onSignInRequired = onRequireSignIn,
+                    onFollowingSignInRequired = onRequireFollowingSignIn,
                     onReauthenticate = onSignOut,
                     onRefresh = ::refresh,
                     onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true },
