@@ -16,7 +16,8 @@
     "commission",
     "refunded",
     "releasedToSeller",
-    "orderNumber"
+    "orderNumber",
+    "refundBreakdown"
   ],
   "properties": {
     "escrowId": {
@@ -135,6 +136,23 @@
         "paymentMethod"
       ],
       "description": "wallet: unlocked in the buyer's own Nantty (Flutterwave) wallet. paymentMethod: refunded through Flutterwave to the card or account the buyer paid with."
+    },
+    "refundBreakdown": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["amountMinor", "currency"],
+            "properties": {
+              "amountMinor": { "type": "integer" },
+              "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+            }
+          }
+        }
+      ]
     }
   }
 }

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.nantty.com/events/escrow.chargeback.v1.json",
+  "title": "EscrowChargeback",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["escrowId", "orderId", "checkoutId", "storeId", "buyerUserId", "sellerUserId", "status", "amount", "commission", "refunded", "releasedToSeller", "orderNumber", "processingFee", "refundBreakdown"],
+  "properties": {
+    "escrowId": {"type": "string"},
+    "orderId": {"type": "string"},
+    "checkoutId": {"type": "string"},
+    "storeId": {"type": "string"},
+    "buyerUserId": {"type": "string"},
+    "sellerUserId": {"type": "string"},
+    "status": {"type": "string"},
+    "amount": {"$ref": "#/$defs/money"},
+    "commission": {"$ref": "#/$defs/money"},
+    "refunded": {"$ref": "#/$defs/money"},
+    "releasedToSeller": {"$ref": "#/$defs/money"},
+    "processingFee": {"$ref": "#/$defs/money"},
+    "orderNumber": {"type": "string"},
+    "refundBreakdown": {"oneOf": [{"type": "null"}, {"type": "object", "additionalProperties": {"$ref": "#/$defs/money"}}]}
+  },
+  "$defs": {
+    "money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amountMinor", "currency"],
+      "properties": {
+        "amountMinor": {"type": "integer"},
+        "currency": {"type": "string", "pattern": "^[A-Z]{3}$"}
+      }
+    }
+  }
+}

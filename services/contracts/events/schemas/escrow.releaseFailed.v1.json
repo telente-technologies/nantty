@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.nantty.com/events/escrow.releaseFailed.v1.json",
+  "title": "EscrowReleaseFailed",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "escrowId",
+    "orderId",
+    "status",
+    "autoReleaseAt",
+    "reason"
+  ],
+  "properties": {
+    "escrowId": {
+      "type": "string"
+    },
+    "orderId": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "const": "held"
+    },
+    "autoReleaseAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}

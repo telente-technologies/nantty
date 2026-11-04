@@ -16,7 +16,8 @@
     "commission",
     "refunded",
     "releasedToSeller",
-    "orderNumber"
+    "orderNumber",
+    "refundBreakdown"
   ],
   "properties": {
     "escrowId": {
@@ -127,6 +128,23 @@
           "pattern": "^[A-Z]{3}$"
         }
       }
+    },
+    "refundBreakdown": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["amountMinor", "currency"],
+            "properties": {
+              "amountMinor": { "type": "integer" },
+              "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+            }
+          }
+        }
+      ]
     }
   }
 }
