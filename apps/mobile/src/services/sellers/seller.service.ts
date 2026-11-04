@@ -20,6 +20,10 @@ export const sellerService = {
   createStoreProduct: (input: CatalogProductUpsertRequest, idempotencyKey: string) => api.post<CatalogProduct>("/api/v1/seller/products", input, { idempotencyKey }),
   updateStoreProduct: (productId: string, input: CatalogProductUpsertRequest) =>
     api.patch<CatalogProduct>(`/api/v1/seller/products/${encodeURIComponent(productId)}`, input),
+  publishStoreProduct: (productId: string) =>
+    api.post<CatalogProduct>(`/api/v1/seller/products/${encodeURIComponent(productId)}/publish`, {}),
+  unpublishStoreProduct: (productId: string) =>
+    api.post<CatalogProduct>(`/api/v1/seller/products/${encodeURIComponent(productId)}/unpublish`, {}),
   archiveStoreProduct: (productId: string) => api.delete<CatalogProduct>(`/api/v1/seller/products/${encodeURIComponent(productId)}`),
   listMyStoreOrders: () => api.getList<Order>("/api/v1/seller/orders"),
   fetchStoreOrderById: (orderId: string) => api.get<Order>(`/api/v1/seller/orders/${encodeURIComponent(orderId)}`),

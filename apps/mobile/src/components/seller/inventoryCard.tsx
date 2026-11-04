@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { BoxArrowDown24Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
@@ -11,12 +11,12 @@ import { typeScale } from "@/constants/typography.constant";
 
 const LOW_STOCK_THRESHOLD = 5;
 
-export function InventoryCard({ product, onPress }: { product: Pick<ProductSummary, "name" | "imageUrl" | "price" | "stock">; onPress: () => void }) {
+export function InventoryCard({ product, onPress, style }: { product: Pick<ProductSummary, "name" | "imageUrl" | "price" | "stock">; onPress: () => void; style?: StyleProp<ViewStyle> }) {
   const { colors } = useTheme();
   const styles = useStyles();
   const stock = product.stock ?? 0;
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={`${product.name}, ${stock} in stock`} onPress={onPress} style={styles.card}>
+    <Pressable accessibilityRole="button" accessibilityLabel={`${product.name}, ${stock} in stock`} onPress={onPress} style={[styles.card, style]}>
       <View style={styles.image}>
         {product.imageUrl ? <Image source={{ uri: product.imageUrl }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
       </View>

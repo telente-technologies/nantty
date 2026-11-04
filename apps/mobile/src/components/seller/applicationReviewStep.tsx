@@ -25,6 +25,7 @@ export function ApplicationReviewStep({ draft, onEditStep }: { draft: SellerAppl
       <SettingsGroup>
         <SettingsRow label="Phone" trailing={{ text: draft.phone, ...muted }} onPress={() => onEditStep(1)} />
         <SettingsRow label="Location" trailing={{ text: `${draft.city}, ${draft.state}`, ...muted }} onPress={() => onEditStep(1)} />
+        <SettingsRow label="Can handle logistics" trailing={{ text: draft.logisticsEnabled ? "Yes" : "Not yet", ...muted }} onPress={() => onEditStep(1)} />
       </SettingsGroup>
       <SettingsGroup>
         <SettingsRow label={documentLabel || "ID document"} trailing={{ text: maskAllButLastFourCharacters(draft.identityDocumentNumber), ...muted }} onPress={() => onEditStep(2)} />

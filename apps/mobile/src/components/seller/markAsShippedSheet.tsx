@@ -9,6 +9,7 @@ import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { MarkOrderShippedInput } from "@/types/commerce.type";
+import { isValidOptionalTrackingUrl, isValidTrackingNumber } from "@/utils/tracking.util";
 
 const COMMON_COURIERS = ["GIG Logistics", "Kwik Delivery", "DHL Nigeria", "Sendbox", "Red Star Express", "Other"];
 
@@ -28,8 +29,9 @@ export function MarkAsShippedSheet({ visible, submitting, errorMessage, onClose,
   const [trackingUrl, setTrackingUrl] = useState("");
   const courierName = selectedCourier === "Other" ? otherCourierName.trim() : selectedCourier ?? "";
   const normalizedTrackingUrl = trackingUrl.trim();
-  const validTrackingUrl = !normalizedTrackingUrl || /^https:\/\/\S{3,300}$/.test(normalizedTrackingUrl);
-  const readyToSubmit = courierName.length > 1 && trackingNumber.trim().length >= 4 && validTrackingUrl;
+  const validTrackingUrl = isValidOptionalTrackingUrl(normalizedTrackingUrl);
+  const validTrackingNumber = isValidTrackingNumber(trackingNumber);
+  const readyToSubmit = courierName.length > 1 && validTrackingNumber && validTrackingUrl;
 
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Mark as shipped" scrollable>
@@ -59,7 +61,9 @@ export function MarkAsShippedSheet({ visible, submitting, errorMessage, onClose,
           autoCorrect={false}
           value={trackingNumber}
           onChangeText={setTrackingNumber}
+          invalid={trackingNumber.length > 0 && !validTrackingNumber}
         />
+        {trackingNumber.length > 0 && !validTrackingNumber ? <Text size={12} lineHeight={16} color={colors.error}>Use 4–40 letters, numbers, or hyphens.</Text> : null}
         <TextField
           label="Tracking link (optional)"
           placeholder="https://"
@@ -70,7 +74,7 @@ export function MarkAsShippedSheet({ visible, submitting, errorMessage, onClose,
           onChangeText={setTrackingUrl}
           invalid={!validTrackingUrl}
         />
-        {!validTrackingUrl ? <Text size={12} lineHeight={16} color={colors.error}>Tracking link must start with https:// and be no longer than 300 characters.</Text> : null}
+        {!validTrackingUrl ? <Text size={12} lineHeight={16} color={colors.error}>Use a valid HTTPS tracking link of at most 300 characters.</Text> : null}
         {errorMessage ? (
           <Text size={12} lineHeight={16} color={colors.error} accessibilityRole="alert">{errorMessage}</Text>
         ) : null}

@@ -1,6 +1,5 @@
 import { StyleSheet, View } from "react-native";
 
-import { inAppBrowserColorsFromTheme, openUserSuppliedWebLink } from "@/components/links/openLink.util";
 import { Check16Icon, Warning20Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme, type ThemeColors } from "@/theme";
@@ -16,7 +15,6 @@ interface TimelineStep {
   readonly title: string;
   readonly detail: string;
   readonly state: StepState;
-  readonly trackingUrl?: string | null;
 }
 
 const lastCompletedStepIndex = (escrow: EscrowDetail): number => {
@@ -52,7 +50,6 @@ function buildTimelineSteps(escrow: EscrowDetail, viewerRole: "buyer" | "seller"
       title: "Shipped",
       detail: shipment ? `${shipment.courierName} · ${shipment.trackingNumber} · ${formatFriendlyDate(shipment.shippedAt)}` : "Courier and tracking number will appear here",
       state: stateFor(2),
-      trackingUrl: shipment?.trackingUrl,
     },
     {
       key: "delivered",
@@ -118,11 +115,6 @@ export function EscrowTimeline({ escrow, viewerRole }: { escrow: EscrowDetail; v
             <Text size={12} lineHeight={16.8} color={colors.textMuted}>
               {step.detail}
             </Text>
-            {step.trackingUrl && step.state !== "upcoming" ? (
-              <Text size={12} weight={500} lineHeight={16.8} color={colors.primary} accessibilityRole="link" onPress={() => openUserSuppliedWebLink(step.trackingUrl!, inAppBrowserColorsFromTheme(colors))}>
-                Track parcel
-              </Text>
-            ) : null}
           </View>
         </View>
       ))}

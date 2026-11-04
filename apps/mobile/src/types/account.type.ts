@@ -46,6 +46,8 @@ export interface SellerApplicationDraft {
   readonly addressLine: string;
   readonly city: string;
   readonly state: string;
+  readonly logisticsEnabled: boolean;
+  readonly logisticsChoiceConfirmed: boolean;
   readonly identityDocumentType: IdentityDocumentType | null;
   readonly identityDocumentNumber: string;
   readonly identityDocumentPhotoUrl: string | null;
@@ -63,6 +65,7 @@ export interface SellerApplicationInput {
   readonly addressLine: string;
   readonly city: string;
   readonly state: string;
+  readonly enableLogistics: boolean;
   readonly identityDocument: {
     readonly documentType: IdentityDocumentType;
     readonly documentNumber: string;
@@ -80,6 +83,7 @@ export interface SellerApplication {
   readonly categoryName: string;
   readonly city: string;
   readonly state: string;
+  readonly logisticsEnabled: boolean;
   readonly identityDocumentType: IdentityDocumentType;
   readonly identityDocumentNumberMasked: string;
   readonly payoutBankName: string;

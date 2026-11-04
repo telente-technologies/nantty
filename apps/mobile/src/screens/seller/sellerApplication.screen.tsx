@@ -27,13 +27,14 @@ import { getSellerApplicationCountryState, isSellerApplicationContactComplete } 
 
 const EMPTY_DRAFT: SellerApplicationDraft = {
   storeName: "", categoryId: "", description: "", phone: "", addressLine: "", city: "", state: "",
+  logisticsEnabled: false, logisticsChoiceConfirmed: false,
   identityDocumentType: null, identityDocumentNumber: "", identityDocumentPhotoUrl: null,
   payoutBankCode: "", payoutBankName: "", payoutAccountNumber: "", payoutAccountName: "",
 };
 
 const STEPS = [
   { title: "Tell us about your store", subtitle: "This is what buyers see first.", isComplete: (d: SellerApplicationDraft) => d.storeName.trim().length >= 3 && !!d.categoryId && d.description.trim().length >= 20 },
-  { title: "How can buyers and couriers reach you?", subtitle: "We use this for pickups and order updates.", isComplete: isSellerApplicationContactComplete },
+  { title: "How can buyers and couriers reach you?", subtitle: "We use this for pickups and order updates.", isComplete: (d: SellerApplicationDraft) => isSellerApplicationContactComplete(d) && d.logisticsChoiceConfirmed },
   { title: "Verify your identity", subtitle: "Required by law so buyers can trust every seller. Your ID number is never shown in full.", isComplete: (d: SellerApplicationDraft) => !!d.identityDocumentType && d.identityDocumentNumber.length >= 6 && !!d.identityDocumentPhotoUrl },
   { title: "Where should we pay you?", subtitle: "Money released from escrow is sent here.", isComplete: (d: SellerApplicationDraft) => !!d.payoutBankCode && d.payoutAccountNumber.length === 10 && !!d.payoutAccountName },
   { title: "Review and submit", subtitle: "Tap any row to change it.", isComplete: () => true },
@@ -47,6 +48,7 @@ const convertDraftToSubmission = (draft: SellerApplicationDraft): SellerApplicat
   addressLine: draft.addressLine.trim(),
   city: draft.city.trim(),
   state: draft.state,
+  enableLogistics: draft.logisticsEnabled,
   identityDocument: { documentType: draft.identityDocumentType!, documentNumber: draft.identityDocumentNumber, documentPhotoUrl: draft.identityDocumentPhotoUrl! },
   payoutAccount: { bankCode: draft.payoutBankCode, accountNumber: draft.payoutAccountNumber },
 });

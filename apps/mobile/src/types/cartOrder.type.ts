@@ -39,7 +39,6 @@ export interface DeliveryDetails {
 export interface OrderShipment {
   readonly courierName: string;
   readonly trackingNumber: string;
-  readonly trackingUrl: string | null;
   readonly shippedAt: ISODate;
   readonly estimatedDeliveryAt: ISODate | null;
 }

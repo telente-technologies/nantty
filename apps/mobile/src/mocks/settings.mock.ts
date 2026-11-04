@@ -18,6 +18,8 @@ let settings: AccountSettings = {
   twoFactorEnabled: false,
 };
 
+export const signedInCountryPreference = () => settings.countryCode?.trim().toUpperCase() ?? null;
+
 const seedAddress = (id: string, fullName: string, phone: string, line1: string, areaPath: [string, string, string], isDefault: boolean): Address =>
   buildAddressFromInput(
     { fullName, phone, line1, postalCode: "", details: "", isDefault, countryId: "ng", stateId: areaPath[0], lgaId: areaPath[1], cityId: areaPath[2] },

@@ -59,6 +59,16 @@ export function ApplicationContactStep({ draft, onChange }: ApplicationStepProps
       <TextField label="Pickup address" placeholder="House number and street" value={draft.addressLine} onChangeText={(addressLine) => onChange({ addressLine })} autoComplete="street-address" />
       <TextField label="City or town" placeholder="e.g. Ikeja" value={draft.city} onChangeText={(city) => onChange({ city })} />
       <OptionSelect label="State" placeholder="Choose your state" options={NIGERIAN_STATES} value={draft.state || null} onChange={(state) => onChange({ state })} />
+      <View style={styles.group}>
+        <Text size={14} lineHeight={18}>Can your store handle order logistics?</Text>
+        <View style={styles.chips}>
+          <Chip kind="topic" label="Yes, we can" selected={draft.logisticsChoiceConfirmed && draft.logisticsEnabled} onPress={() => onChange({ logisticsEnabled: true, logisticsChoiceConfirmed: true })} />
+          <Chip kind="topic" label="Not yet" selected={draft.logisticsChoiceConfirmed && !draft.logisticsEnabled} onPress={() => onChange({ logisticsEnabled: false, logisticsChoiceConfirmed: true })} />
+        </View>
+        <Text size={12} lineHeight={16.8} color={colors.textSubtle}>
+          This records your store’s capability for review. It does not activate a third-party courier. Your and your buyers’ email addresses are not shared with logistics providers.
+        </Text>
+      </View>
       <Text size={12} lineHeight={16.8} color={colors.textSubtle}>
         Couriers collect orders from this address. Buyers only see your city and state.
       </Text>

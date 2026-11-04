@@ -21,7 +21,6 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
 import { describeActionFailure } from "@/errors/errorExperience/describeError";
-import { inAppBrowserColorsFromTheme, openUserSuppliedWebLink } from "@/components/links/openLink.util";
 
 export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderDetail">) {
   const { colors } = useTheme();
@@ -107,17 +106,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
                 <Text size={12} lineHeight={16.8} style={styles.deliveryValue}>{detail.shipment.trackingNumber}</Text>
               </View>
             ) : null}
-            {detail.shipment?.trackingUrl ? (
-              <Pressable
-                accessibilityRole="link"
-                accessibilityLabel="Open shipment tracking link"
-                onPress={() => openUserSuppliedWebLink(detail.shipment!.trackingUrl!, inAppBrowserColorsFromTheme(colors))}
-                style={styles.row}
-              >
-                <Text size={12} lineHeight={16.8} color={colors.primary}>Track shipment</Text>
-                <Text size={12} lineHeight={16.8} color={colors.primary}>Open link</Text>
-              </Pressable>
-            ) : null}
+            <Text size={12} lineHeight={16.8} color={colors.textMuted}>Delivery updates are shown here in Nantty.</Text>
             {detail.delivery.riderName || detail.delivery.riderPhone ? (
               <View style={styles.row}>
                 <Text size={12} lineHeight={16.8} color={colors.textMuted}>Rider</Text>
