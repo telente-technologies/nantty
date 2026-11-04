@@ -87,7 +87,11 @@ export function ProgramApplicationPanel({ kind, applicationId, onClose, onDecide
           <KeyValueList
             items={[
               { label: "Pitch", value: application.pitch },
-              ...(kind === "sellers" ? [{ label: "Categories", value: application.categories.join(", ") }, { label: "Expected monthly sales", value: formatMoneyForDisplay(application.expectedMonthlySales), isMono: true }] : [{ label: "Content niche", value: application.contentNiche ?? "—" }]),
+              ...(kind === "sellers" ? [
+                { label: "Categories", value: application.categories.join(", ") },
+                { label: "Logistics capability", value: application.logisticsEnabled ? "Seller says they can handle logistics" : "Not yet" },
+                { label: "Expected monthly sales", value: formatMoneyForDisplay(application.expectedMonthlySales), isMono: true },
+              ] : [{ label: "Content niche", value: application.contentNiche ?? "—" }]),
               { label: "Submitted", value: formatDateTime(application.submittedAt) },
               ...(application.reviewedAt ? [{ label: "Decision", value: `${formatDateTime(application.reviewedAt)} by ${application.reviewedByName}: “${application.decisionReason}”` }] : []),
             ]}

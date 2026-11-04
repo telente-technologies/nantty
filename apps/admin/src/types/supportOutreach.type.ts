@@ -70,3 +70,12 @@ export interface EmailSendRecord {
   readonly sentAt: string;
   readonly provider: "AWS_SES";
 }
+
+export interface FailedEmailDeliveryRecord {
+  readonly id: string;
+  readonly eventId: string;
+  readonly templateKey: string | null;
+  readonly attemptCount: number;
+  readonly failedAt: string | null;
+  readonly reason: string | null;
+}

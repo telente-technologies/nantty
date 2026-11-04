@@ -12,6 +12,7 @@ export interface MockProgramApplicationRecord {
   decisionReason: string | null;
   pitch: string;
   storeName: string | null;
+  logisticsEnabled?: boolean;
   categories: string[];
   expectedMonthlySalesMajor: number | null;
   contentNiche: string | null;
@@ -29,6 +30,7 @@ interface SellerSeed {
   readonly categories: string[];
   readonly volume: number;
   readonly pitch: string;
+  readonly logisticsEnabled?: boolean;
   readonly kyc?: boolean;
   readonly bank?: boolean;
   readonly documents?: boolean;
@@ -46,7 +48,7 @@ interface CreatorSeed {
 }
 
 const sellerSeeds: readonly SellerSeed[] = [
-  { username: "segun.snaps", status: "PENDING", daysAgo: 0.6, storeName: "Segun Camera Hub", categories: ["Cameras", "Photography accessories"], volume: 1_800_000, pitch: "I sell tested second-hand cameras and lenses with a 30-day warranty." },
+  { username: "segun.snaps", status: "PENDING", daysAgo: 0.6, storeName: "Segun Camera Hub", categories: ["Cameras", "Photography accessories"], volume: 1_800_000, pitch: "I sell tested second-hand cameras and lenses with a 30-day warranty.", logisticsEnabled: true },
   { username: "ifeoma.art", status: "PENDING", daysAgo: 1.4, storeName: "Ifeoma Art Prints", categories: ["Art & prints", "Home decor"], volume: 650_000, pitch: "Limited-edition prints of my paintings, shipped framed." },
   { username: "sipho.fits", status: "PENDING", daysAgo: 2.2, storeName: "Sipho Fits Supplements", categories: ["Fitness", "Supplements"], volume: 22_000, pitch: "Protein and pre-workout for my followers.", kyc: false, prohibited: ["Unregistered supplements"] },
   { username: "ken.otieno", status: "PENDING", daysAgo: 3.1, storeName: "Otieno Crafts", categories: ["Handmade", "Home decor"], volume: 90_000, pitch: "Soapstone carvings from Kisii artisans.", bank: false },
@@ -81,6 +83,7 @@ export function buildDemoProgramApplications(users: readonly MockPlatformUserRec
       id: `sap_${String(index + 1).padStart(4, "0")}`, kind: "sellers", userId: user.id, status: seed.status, submittedAt: daysAgoIso(seed.daysAgo),
       reviewedAt: isReviewed ? daysAgoIso(seed.daysAgo - 1) : null, reviewedByName: isReviewed ? "Chidi Okafor" : null, decisionReason: isReviewed ? "Impersonation of a registered brand; KYC failed." : null,
       pitch: seed.pitch, storeName: seed.storeName, categories: [...seed.categories], expectedMonthlySalesMajor: convertMajorAmountForCurrency(seed.volume, user.currency), contentNiche: null,
+      logisticsEnabled: seed.logisticsEnabled ?? false,
       sellerSignals: { kycVerified: seed.kyc ?? true, bankAccountVerified: seed.bank ?? true, businessDocumentsProvided: seed.documents ?? true, prohibitedCategoryHits: seed.prohibited ?? [] },
       creatorSignals: null,
     });
@@ -91,6 +94,7 @@ export function buildDemoProgramApplications(users: readonly MockPlatformUserRec
     records.push({
       id: `cap_${String(index + 1).padStart(4, "0")}`, kind: "creators", userId: user.id, status: seed.status, submittedAt: daysAgoIso(seed.daysAgo),
       reviewedAt: null, reviewedByName: null, decisionReason: null, pitch: seed.pitch, storeName: null, categories: [], expectedMonthlySalesMajor: null, contentNiche: seed.niche,
+      logisticsEnabled: false,
       sellerSignals: null, creatorSignals: { postsLast30Days: seed.posts, averageViewsPerClip: seed.views },
     });
   });

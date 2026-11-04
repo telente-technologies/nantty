@@ -21,6 +21,6 @@ export const adminRoleTemplates: readonly AdminRoleTemplate[] = [
   { id: "tpl_legal", name: "Legal", department: "Legal", permissions: ["legal.documents.view", "legal.documents.edit", "legal.documents.publish", "legal.notices.send"] },
   { id: "tpl_engineering", name: "Engineering (read-only)", department: "Engineering", permissions: ["metrics:read", "users:read", "orders:read", "ledger:read", "config:read", "audit:read"] },
 	{ id: "tpl_subscription_manager", name: "Subscription Manager", department: "Subscriptions", permissions: ["config:plans"] },
-	{ id: "tpl_operations_analyst", name: "Operations Analyst", department: "Operations", permissions: ["metrics:read"] },
+	{ id: "tpl_operations_analyst", name: "Operations Analyst", department: "Operations", permissions: ["metrics:read", "logistics:read", "events:read"] },
 	{ id: "tpl_auditor", name: "Auditor", department: "Audit", permissions: ["audit:read"] },
 ];

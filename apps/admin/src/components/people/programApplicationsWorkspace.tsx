@@ -40,6 +40,7 @@ function buildColumns(kind: ApplicationKind): DataTableColumn<ProgramApplication
     kind === "sellers"
       ? [
           { key: "store", header: "Store", render: (application) => <strong>{application.storeName}</strong> },
+          { key: "logistics", header: "Logistics", render: (application) => <StatusBadge tone={application.logisticsEnabled ? "success" : "neutral"} label={application.logisticsEnabled ? "Can handle" : "Not yet"} /> },
           { key: "categories", header: "Categories", render: (application) => <span className={styles.muted}>{application.categories.join(", ")}</span> },
           { key: "volume", header: "Expected monthly sales", render: (application) => formatMoneyForDisplay(application.expectedMonthlySales), align: "end", isMono: true },
         ]

@@ -38,6 +38,12 @@ const orderSummaryFields = {
   paymentMode: c.string(), escrowStatus: c.string(), deliveryStatus: c.string(), total: money, itemCount: c.number(), placedAt: c.string(),
 };
 const refund = c.object({ id: c.string(), orderId: c.string(), orderNumber: c.string(), storeId: c.string(), buyer: orderParty, amount: money, source: c.string(["manual", "seller", "return", "cancellation", "dispute", "system"]), status: c.string(["processing", "scheduled", "completed", "failed"]), reason: c.string(), createdAt: c.string(), completedAt: c.nullable(c.string()), createdByName: c.string() });
+const logisticsShipment = c.object({
+  shipmentId: c.string(), orderId: c.string(), storeId: c.string(), reference: c.string(), provider: c.string(),
+  status: c.string(["pending", "quoted", "booked", "picked_up", "in_transit", "delivered", "cancelled", "failed"]),
+  trackingNumber: c.nullable(c.string()), trackingUrl: c.nullable(c.string()),
+  createdAt: c.string(), updatedAt: c.string(), exception: c.nullable(c.object({ reason: c.string(), status: c.string() })),
+});
 const orderDetail = c.object({
   ...orderSummaryFields, items: c.array(c.object({ id: c.string(), productId: c.string(), productName: c.string(), variant: c.string(), imageUrl: c.nullable(c.string()), quantity: c.number(), unitPrice: money, lineTotal: money, attribution: c.nullable(c.any()) })),
   subtotal: money, discount: money, storeCredit: money, deliveryFee: money, refundedTotal: money, refundable: money, deliveryCity: c.string(), deliveryState: c.string(), courier: c.nullable(c.string()), trackingNumber: c.nullable(c.string()),
@@ -141,6 +147,20 @@ describe("money endpoints match the Go handlers", () => {
     assert.deepEqual(validateAgainstContract(refund, issued.body), []);
   });
 
+  it("lists cursor-paged, PII-minimized logistics summaries by shipment state", async () => {
+    const response = await call("GET", "/admin/logistics/shipments", { query: "status=in_transit&limit=2" });
+    assert.equal(response.status, 200);
+    assert.deepEqual(validateAgainstContract(c.page(logisticsShipment), response.body), []);
+    const rows = response.body.data as Record<string, unknown>[];
+    assert.ok(rows.length > 0);
+    assert.ok(rows.every((row) => row.status === "in_transit"));
+    assert.equal(rows[0]?.trackingNumber, "TEST-TRACK-1234");
+    assert.equal(rows[0]?.trackingUrl, "https://carrier.example/track/TEST-TRACK-1234");
+    for (const row of rows) {
+      for (const privateField of ["email", "phone", "pickupAddress", "destinationAddress", "payload"]) assert.equal(privateField in row, false);
+    }
+  });
+
   it("disputes staff view and the REFUND_PARTIAL resolve body", async () => {
     const list = await call("GET", "/admin/disputes", { query: "status=open" });
     assert.deepEqual(validateAgainstContract(counted(c.object(disputeSummaryFields), disputeStatuses), list.body), []);
@@ -185,6 +205,7 @@ describe("undelivered orders under staff review", () => {
 
 describe("BFF access rules for money paths", () => {
   it("guards the new paths and asks for step-up where the Go routes do", () => {
+    assert.deepEqual(findApiAccessRequirement("/admin/logistics/shipments"), { kind: "anyOf", permissions: ["logistics:read"] });
     assert.deepEqual(findApiAccessRequirement("/admin/withdrawals/abc"), { kind: "anyOf", permissions: ["payouts:approve"] });
     assert.deepEqual(findApiAccessRequirement("/admin/coins/transactions"), { kind: "anyOf", permissions: ["coins:review"] });
     assert.deepEqual(findApiAccessRequirement("/admin/ledger/journal-entries"), { kind: "anyOf", permissions: ["ledger:read"] });

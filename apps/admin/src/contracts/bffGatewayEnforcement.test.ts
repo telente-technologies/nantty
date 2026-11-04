@@ -76,6 +76,8 @@ describe("BFF enforcement (forged calls)", () => {
     assert.deepEqual([result.status, result.code], [403, "FORBIDDEN"]);
     const ban = await callBff(session, "POST", "/admin/users/usr_1/ban", { reason: "forged call attempt", durationDays: null });
     assert.deepEqual([ban.status, ban.code], [403, "FORBIDDEN"]);
+    const logistics = await callBff(session, "GET", "/admin/logistics/shipments");
+    assert.deepEqual([logistics.status, logistics.code], [403, "FORBIDDEN"]);
   });
 
   it("returns 404 for routes that are not in the table", async () => {

@@ -1,6 +1,6 @@
 import { sendAdminApiRequest } from "@/services/adminApiClient.service";
 import type { PagedList } from "@/types/api.type";
-import type { EmailDraftInput, EmailPreview, EmailSegment, EmailSendRecord, EmailTemplate, LiveChatDetail, LiveChatSummary } from "@/types/supportOutreach.type";
+import type { EmailDraftInput, EmailPreview, EmailSegment, EmailSendRecord, EmailTemplate, FailedEmailDeliveryRecord, LiveChatDetail, LiveChatSummary } from "@/types/supportOutreach.type";
 
 const encode = encodeURIComponent;
 
@@ -34,6 +34,10 @@ export function fetchEmailSegments(signal?: AbortSignal): Promise<{ items: Email
 
 export function fetchEmailSends(signal?: AbortSignal): Promise<{ items: EmailSendRecord[] }> {
   return sendAdminApiRequest("/admin/support/email/sends", { signal });
+}
+
+export function fetchFailedEmailDeliveries(signal?: AbortSignal): Promise<{ deliveries: FailedEmailDeliveryRecord[] }> {
+  return sendAdminApiRequest("/admin/support/email/deliveries/failed", { signal });
 }
 
 export function previewSupportEmail(input: EmailDraftInput): Promise<EmailPreview> {

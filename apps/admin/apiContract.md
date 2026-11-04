@@ -30,6 +30,7 @@ The console ships a mock adapter (`ADMIN_USE_MOCKS=true`, default outside produc
 | Area | Permission keys |
 |---|---|
 | Overview | `metrics:read` |
+| Event operations | `events:read` |
 | Users | `users:read`, `users:read-pii`, `users:moderate`, `users:ban`, `usernames:manage`, `reserved-usernames:manage` |
 | Verification | `verification:review`, `verification:documents`, `verification:revoke` |
 | Applications | `applications:sellers`, `applications:creators` |
@@ -135,6 +136,43 @@ The store is append-only (no update or delete endpoints exist; enforce with data
 }
 ```
 Queue keys used by the console: `verification`, `sellerApplications`, `creatorApplications`, `reports`, `appeals`, `copyright`, `adsReview`, `disputes`, `payouts`, `coinReviews`, `supportTickets`, `brandVerification`, `ipClaims`. Each money list has one entry per currency with activity; the console never assumes a currency.
+
+## Event operations
+
+`GET /api/v1/admin/event-operations/queues` — `events:read`. Returns RabbitMQ queue metadata/counters plus sanitized broker consumer registrations; it never returns message bodies, consumer tags, or channel/connection metadata. Queue and consumer data are read from the RabbitMQ management API using a dedicated monitoring-tagged account with empty configure/write/read permissions on the configured vhost. A `503 EVENT_OPERATIONS_UNAVAILABLE` means queue monitoring credentials are not configured or queue retrieval failed. Consumer inventory degrades independently: its `status` is `available`, `unavailable`, or `unsupported` while queue counters can still be returned. A registered consumer is not proof that its application handler is healthy or making progress.
+
+```json
+{
+  "data": [{
+    "name": "orders",
+    "state": "running",
+    "messages": 4,
+    "messagesReady": 1,
+    "messagesUnacknowledged": 3,
+    "consumers": 2,
+    "deadLetter": false
+  }],
+  "summary": {
+    "queueCount": 1,
+    "deadLetterQueueCount": 0,
+    "readyMessages": 1,
+    "unacknowledgedMessages": 3,
+    "deadLetterReadyMessages": 0
+  },
+  "consumers": {
+    "status": "available",
+    "registrations": [{
+      "queueName": "orders",
+      "ackRequired": true,
+      "prefetchCount": 20,
+      "exclusive": false
+    }]
+  }
+}
+```
+
+This endpoint does not report per-service outbox lag or provide message inspection/redrive. Those operations are not exposed until cross-service relay visibility and consumer idempotency/recovery guarantees are in place. Consumer registration fields are an operational broker snapshot only. Provisioning the RabbitMQ monitoring user is a separate controlled broker bootstrap; see `infra/aws/README.md`.
+
 ## Users
 
 Shared shapes: `PlatformUserSummary` (`id`, `username`, `displayName`, `avatarUrl`, `country`, `currency`, `status` ACTIVE|WARNED|SUSPENDED|BANNED|DEACTIVATED, `verification` {color BLUE|GOLD|BLACK, tier ESSENTIAL|VERIFIED|PREMIUM|ONLY|PRO|BUSINESS|OFFICIAL, status, badgeVisible} | null, `isSeller`, `isCreator`, `followerCount`, `joinedAt`, `lastActiveAt`, `strikeCount`, `riskLevel` LOW|MEDIUM|HIGH, `emailMasked`, `phoneMasked`). Personal data is never included in list/detail responses.
@@ -467,6 +505,9 @@ Same permissions. Accepts the order UUID or the order number. Response `OrderSum
 
 ### GET /api/v1/admin/refunds
 `refunds:issue`. Query: `source` (`manual|seller|return|cancellation|dispute|system`), `status` (`processing|completed|failed`), `orderId`, `search`, `cursor`, `limit`. `RefundRecord = { id, orderId, orderNumber, storeId, buyer: OrderParty, amount, source, status, reason, createdAt, completedAt|null, createdByName }`.
+
+### GET /api/v1/admin/logistics/shipments
+`logistics:read` only. Query: optional allowlisted shipment `status`, `cursor`, and bounded `limit`. Returns paged shipment summaries with `trackingNumber: string|null` and `trackingUrl: string|null`; tracking numbers must match the shipment tracking format, and URLs are included only when they are valid HTTPS URLs with a host, no embedded credentials, and a maximum length of 300 characters. The response intentionally excludes recipient contact/address data and raw provider payloads or credentials.
 
 ### POST /api/v1/admin/refunds
 `refunds:issue`, step-up, `Idempotency-Key`. Body `{ orderId, amount: Money, reason (5–1000) }`. `201 RefundRecord`. Errors: `DISPUTE_OPEN` (resolve the dispute instead), `NOTHING_REFUNDABLE`, `REFUND_IN_PROGRESS`, `400` when the currency is not the order's, the amount exceeds what is refundable, or the escrow was released and the amount is not the full remainder.

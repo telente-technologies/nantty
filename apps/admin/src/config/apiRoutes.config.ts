@@ -57,6 +57,7 @@ const ownAccountRoutes: ApiRouteDefinition[] = [
 
 const platformRoutes: ApiRouteDefinition[] = [
   read("/admin/metrics/overview", ["metrics:read"]),
+  read("/admin/event-operations/queues", ["events:read"]),
   read("/admin/audit", ["audit:read"]),
   read("/admin/audit/facets", ["audit:read"]),
   read("/admin/audit/export", ["audit:export"]),
@@ -199,6 +200,7 @@ const trustRoutes: ApiRouteDefinition[] = [
 const moneyRoutes: ApiRouteDefinition[] = [
   read("/admin/orders", orderReaders),
   read("/admin/orders/:id", orderReaders),
+  read("/admin/logistics/shipments", ["logistics:read"]),
   read("/admin/disputes", ["disputes:resolve"]),
   read("/admin/disputes/:id", ["disputes:resolve"]),
   write("POST", "/admin/disputes/:id/resolve", ["disputes:resolve"], moneyAction),
@@ -278,6 +280,7 @@ const supportAndLegalRoutes: ApiRouteDefinition[] = [
   read("/admin/support/email/templates", ["support:email", "marketing:email"]),
   read("/admin/support/email/segments", ["support:email", "marketing:email"]),
   read("/admin/support/email/sends", ["support:email", "marketing:email"]),
+  read("/admin/support/email/deliveries/failed", ["support:email", "marketing:email"]),
   write("POST", "/admin/support/email/preview", ["support:email", "marketing:email"]),
   write("POST", "/admin/support/email/send", ["support:email", "marketing:email"]),
   read("/admin/help/categories", helpReaders),

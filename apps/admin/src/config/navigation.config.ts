@@ -76,6 +76,13 @@ export const navigationGroups: readonly NavigationGroup[] = [
     ],
   },
   {
+    title: "Operations",
+    items: [
+      { label: "Logistics", href: "/commerce/logistics", icon: "truck24", requirement: "logistics:read" },
+      { label: "Event operations", href: "/operations/events", icon: "speedometer24", requirement: "events:read" },
+    ],
+  },
+  {
     title: "Content",
     items: [
       { label: "Categories & topics", href: "/catalog/categories", icon: "squaresFour24", requirement: "catalog:manage" },

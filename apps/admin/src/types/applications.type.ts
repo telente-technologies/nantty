@@ -24,6 +24,7 @@ export interface ProgramApplication {
   readonly decisionReason: string | null;
   readonly pitch: string;
   readonly storeName: string | null;
+  readonly logisticsEnabled: boolean;
   readonly categories: readonly string[];
   readonly expectedMonthlySales: Money | null;
   readonly contentNiche: string | null;

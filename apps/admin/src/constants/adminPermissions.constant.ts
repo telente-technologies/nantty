@@ -4,6 +4,10 @@ export const adminPermissionGroups = [
     permissions: [{ key: "metrics:read", label: "View platform health and KPIs" }],
   },
   {
+    area: "Operations",
+    permissions: [{ key: "events:read", label: "View event broker queue health" }],
+  },
+  {
     area: "Users",
     permissions: [
       { key: "users:read", label: "Search and view users" },
@@ -57,6 +61,7 @@ export const adminPermissionGroups = [
     area: "Commerce",
     permissions: [
       { key: "orders:read", label: "Look up orders and escrow timelines" },
+      { key: "logistics:read", label: "View delivery operations and shipment exceptions" },
       { key: "disputes:resolve", label: "Resolve disputes" },
       { key: "refunds:issue", label: "Issue refunds" },
       { key: "payouts:approve", label: "Approve or hold withdrawals" },

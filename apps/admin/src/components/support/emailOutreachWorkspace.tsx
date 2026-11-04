@@ -13,8 +13,8 @@ import { Card, SectionHeading } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
 import { useAdminMutation } from "@/hooks/useAdminMutation.hook";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
-import { fetchEmailSegments, fetchEmailSends, fetchEmailTemplates, previewSupportEmail, sendSupportEmail } from "@/services/supportOutreachApi.service";
-import type { EmailAudience, EmailDraftInput, EmailKind, EmailPreview, EmailSendRecord } from "@/types/supportOutreach.type";
+import { fetchEmailSegments, fetchEmailSends, fetchEmailTemplates, fetchFailedEmailDeliveries, previewSupportEmail, sendSupportEmail } from "@/services/supportOutreachApi.service";
+import type { EmailAudience, EmailDraftInput, EmailKind, EmailPreview, EmailSendRecord, FailedEmailDeliveryRecord } from "@/types/supportOutreach.type";
 import { formatDateTime, humanizeConstantName } from "@/utils/formatting.util";
 
 const sendColumns: readonly DataTableColumn<EmailSendRecord>[] = [
@@ -26,11 +26,20 @@ const sendColumns: readonly DataTableColumn<EmailSendRecord>[] = [
   { key: "by", header: "Sent by", render: (item) => `${item.sentByName} · ${formatDateTime(item.sentAt)}` },
 ];
 
+const failedDeliveryColumns: readonly DataTableColumn<FailedEmailDeliveryRecord>[] = [
+  { key: "template", header: "Notification", render: (item) => item.templateKey ?? "Custom email" },
+  { key: "event", header: "Event ID", render: (item) => item.eventId },
+  { key: "attempts", header: "Attempts", align: "end", isMono: true, render: (item) => item.attemptCount },
+  { key: "failed", header: "Stopped at", render: (item) => item.failedAt ? formatDateTime(item.failedAt) : "—" },
+  { key: "reason", header: "Last error", render: (item) => item.reason ?? "No provider detail" },
+];
+
 export function EmailOutreachWorkspace() {
   const { showToast } = useToast();
   const templates = useAdminQuery((signal) => fetchEmailTemplates(signal), "templates");
   const segments = useAdminQuery((signal) => fetchEmailSegments(signal), "segments");
   const sends = useAdminQuery((signal) => fetchEmailSends(signal), "sends");
+  const failedDeliveries = useAdminQuery((signal) => fetchFailedEmailDeliveries(signal), "failed-deliveries");
   const [audienceType, setAudienceType] = useState<"USER" | "SEGMENT">("USER");
   const [username, setUsername] = useState("");
   const [segmentId, setSegmentId] = useState("all-users");
@@ -95,6 +104,8 @@ export function EmailOutreachWorkspace() {
       ) : null}
       <SectionHeading>Recent sends</SectionHeading>
       <DataTable caption="Email sends" columns={sendColumns} rows={sends.data?.items ?? []} readRowKey={(item) => item.id} isLoading={sends.isLoading} emptyMessage="Nothing sent yet." />
+      <SectionHeading>Failed notification emails</SectionHeading>
+      <DataTable caption="Failed notification emails" columns={failedDeliveryColumns} rows={failedDeliveries.data?.deliveries ?? []} readRowKey={(item) => item.id} isLoading={failedDeliveries.isLoading} emptyMessage="No exhausted notification deliveries." />
       {isConfirmOpen && preview ? <ConfirmActionDialog intent="send" isOpen title="Send this email" consequences={[`${preview.recipientCount} recipient${preview.recipientCount === 1 ? "" : "s"} through AWS SES.`, "The send, audience and counts are written to the audit log."]} confirmLabel="Send email" requiresStepUp={needsStepUp} isBusy={sendMutation.isRunning} errorMessage={sendMutation.errorMessage} onConfirm={confirmSend} onClose={() => { sendMutation.clearError(); setIsConfirmOpen(false); }} /> : null}
     </>
   );

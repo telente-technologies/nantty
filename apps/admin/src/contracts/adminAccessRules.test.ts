@@ -98,6 +98,19 @@ describe("admin BFF route table", () => {
     assert.equal(findAdminApiRoute("GET", "/admin/chats/c1/messages"), null);
   });
 
+  it("wires event operations through the same events:read permission in the page, BFF, and Operations Analyst profile", () => {
+    const pageRequirement = findRequirementForPagePath("/operations/events");
+    assert.equal(doesAdminMeetPageRequirement({ role: "ADMIN", permissions: ["events:read"] }, pageRequirement!), true);
+    assert.equal(doesAdminMeetPageRequirement({ role: "ADMIN", permissions: ["metrics:read"] }, pageRequirement!), false);
+
+    const route = findAdminApiRoute("GET", "/admin/event-operations/queues");
+    assert.deepEqual(route?.requirement, { kind: "anyOf", permissions: ["events:read"] });
+
+    const operationsAnalyst = adminRoleTemplates.find((template) => template.name === "Operations Analyst");
+    assert.ok(operationsAnalyst?.permissions.includes("events:read"));
+    assert.ok(navigationGroups.flatMap((group) => group.items).some((item) => item.href === "/operations/events" && item.requirement === "events:read"));
+  });
+
   it("only the caller's own account endpoints are open to every signed-in admin", () => {
     const open = listAdminApiRoutes().filter((route) => route.requirement.kind === "ownAccount").map((route) => route.path);
     assert.ok(open.length > 0);
@@ -166,6 +179,7 @@ describe("admin page access", () => {
   const consoleRoot = join(sourceRoot, "app", "(console)");
   const pagePaths = listFiles(consoleRoot, (path) => path.endsWith("page.tsx")).map((file) => `/${relative(consoleRoot, file).replace(/\/?page\.tsx$/, "").replace(/\[[^\]]+\]/g, "sample")}`);
   const accountsWorkspaceSource = readFileSync(join(sourceRoot, "components", "people", "accounts", "accountsWorkspace.tsx"), "utf8");
+  const logisticsWorkspaceSource = readFileSync(join(sourceRoot, "components", "money", "logisticsWorkspace.tsx"), "utf8");
 
   it("every console page maps to a permission (deny by default)", () => {
     assert.ok(pagePaths.length > 40);
@@ -222,8 +236,20 @@ describe("admin page access", () => {
     for (const page of ["/config/revenue", "/config/rules", "/config/ranking", "/config/automation"]) assert.ok(!subscriptionPages.includes(page), `Subscription Manager unexpectedly sees ${page}`);
 
     assert.ok(visiblePages("Operations Analyst").includes("/overview"));
+    assert.ok(visiblePages("Operations Analyst").includes("/commerce/logistics"));
     assert.ok(!visiblePages("Operations Analyst").includes("/audit"));
+    assert.ok(!visiblePages("Support Agent").includes("/commerce/logistics"));
     assert.deepEqual(visiblePages("Auditor"), ["/audit"]);
+  });
+
+  it("does not route logistics-only staff into the protected order investigation page", () => {
+    const operationsProfile = { role: "ADMIN" as const, permissions: adminRoleTemplates.find((template) => template.name === "Operations Analyst")!.permissions };
+    const supportProfile = { role: "ADMIN" as const, permissions: adminRoleTemplates.find((template) => template.name === "Support Agent")!.permissions };
+    const orderDetailRequirement = findRequirementForPagePath("/commerce/orders/sample");
+    assert.ok(orderDetailRequirement);
+    assert.equal(doesAdminMeetPageRequirement(operationsProfile, orderDetailRequirement), false);
+    assert.equal(doesAdminMeetPageRequirement(supportProfile, orderDetailRequirement), true);
+    assert.match(logisticsWorkspaceSource, /onRowOpen=\{canAny\("orders:read", "disputes:resolve", "refunds:issue", "support:tickets"\) \?/);
   });
 
   it("gives a superadmin every permission-backed page and API capability", () => {

@@ -15,7 +15,7 @@ function presentProgramApplication(record: MockProgramApplicationRecord): Progra
   const eligibility = evaluateApplicationEligibility(record, user);
   return {
     id: record.id, kind: record.kind, user: presentPlatformUserSummary(user), status: record.status, submittedAt: record.submittedAt, reviewedAt: record.reviewedAt,
-    reviewedByName: record.reviewedByName, decisionReason: record.decisionReason, pitch: record.pitch, storeName: record.storeName, categories: record.categories,
+    reviewedByName: record.reviewedByName, decisionReason: record.decisionReason, pitch: record.pitch, storeName: record.storeName, logisticsEnabled: record.logisticsEnabled ?? false, categories: record.categories,
     expectedMonthlySales: record.expectedMonthlySalesMajor === null ? null : { amountMinor: record.expectedMonthlySalesMajor * 100, currency: user.currency },
     contentNiche: record.contentNiche, eligibility, isEligible: eligibility.every((check) => check.isMet),
   };
