@@ -17,7 +17,7 @@ interface PayoutProps {
 const samplePayout: PayoutProps = { firstName: "Tobi", payoutId: "PO-2026-10-03-0192", amount: ngn(248300), bankAccount: "GTBank •••• 0412" };
 
 export const sellerNewOrder = defineEmailTemplate<{ readonly firstName: string; readonly orderNumber: string; readonly buyerName: string; readonly group: SellerItemGroup; readonly acceptBy?: string; readonly paymentMode: "escrow" | "direct" }>({
-  ...base, key: "sellerNewOrder", name: "New order", trigger: "commerce.order.paid (per seller group)",
+  ...base, key: "sellerNewOrder", name: "New order", trigger: "order.paid / orderGroup.paid (per seller)",
   subject: (p, c) => `New order ${p.orderNumber} — ${c.money(orderTotal([p.group]))}`,
   preheader: (p, c) => p.acceptBy === undefined ? "Open your dashboard to accept and prepare it." : `Accept by ${c.dateTime(p.acceptBy)} or it will be cancelled automatically.`,
   reference: (p) => `ORDER ${p.orderNumber}`,
@@ -34,7 +34,7 @@ export const sellerNewOrder = defineEmailTemplate<{ readonly firstName: string; 
 });
 
 export const sellerOrderCancelled = defineEmailTemplate<{ readonly firstName: string; readonly orderNumber: string; readonly cancelledBy: "buyer" | "system" | "nantty"; readonly reason: string; readonly group: SellerItemGroup; readonly restocked: boolean }>({
-  ...base, key: "sellerOrderCancelled", name: "Seller order cancelled", trigger: "commerce.order.cancelled (per seller group)",
+  ...base, key: "sellerOrderCancelled", name: "Seller order cancelled", trigger: "order.cancelled (per seller)",
   subject: (p) => `Order ${p.orderNumber} was cancelled — don't ship it`,
   preheader: (p) => p.reason,
   reference: (p) => `ORDER ${p.orderNumber}`,
@@ -77,7 +77,7 @@ export const payoutScheduled = defineEmailTemplate<PayoutProps & { readonly sche
 });
 
 export const payoutSent = defineEmailTemplate<PayoutProps & { readonly sentAt: string; readonly bankReference: string }>({
-  ...base, key: "payoutSent", name: "Payout sent", trigger: "money.payout.paid",
+  ...base, key: "payoutSent", name: "Payout sent", trigger: "payout.completed (seller payout)",
   subject: (p, c) => `${c.money(p.amount)} sent to ${p.bankAccount}`,
   preheader: () => "Most banks show it within a few hours.",
   reference: (p) => p.payoutId,
@@ -92,7 +92,7 @@ export const payoutSent = defineEmailTemplate<PayoutProps & { readonly sentAt: s
 });
 
 export const payoutFailed = defineEmailTemplate<PayoutProps & { readonly reason: string; readonly retryAt?: string }>({
-  ...base, key: "payoutFailed", name: "Payout failed", trigger: "money.payout.failed",
+  ...base, key: "payoutFailed", name: "Payout failed", trigger: "payout.failed",
   subject: (p, c) => `Action needed: your ${c.money(p.amount)} payout didn't go through`,
   preheader: (p) => p.reason,
   reference: (p) => p.payoutId,

@@ -21,7 +21,7 @@ export { ThemeSwitcher } from "./theme/themeSwitcher";
 export type { ThemeSwitcherProps } from "./theme/themeSwitcher";
 export { ThemeInitScript } from "./theme/themeInitScript";
 export { StaticThemeScript } from "./theme/staticThemeScript";
-export { isThemePreference, parseThemePreference, readHtmlThemeAttribute, themeColorByResolvedTheme, themeCookieName, themePreferenceLabels, themePreferences, themeViewport } from "./theme/themePreference.constant";
+export { isThemePreference, parseThemePreference, readHtmlThemeAttribute, themeChangedEventName, themeColorByResolvedTheme, themeCookieName, themePreferenceLabels, themePreferences, themeViewport } from "./theme/themePreference.constant";
 export type { ResolvedTheme, ThemePreference } from "./theme/themePreference.constant";
 export { OfficialStoreBadges } from "./storeBadges/officialStoreBadges";
 export { buildStoreLinks, defaultPlayPackage } from "./storeBadges/storeLinks";

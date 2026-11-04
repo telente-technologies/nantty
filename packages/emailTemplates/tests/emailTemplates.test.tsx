@@ -16,6 +16,24 @@ describe("email template catalogue", () => {
     expect(marketingKeys.length).toBeGreaterThan(0);
     for (const entry of catalogue) expect(entry.kind === "marketing").toBe(entry.category === "marketing");
   });
+
+  it("uses the event names actually consumed by the notifications service for order emails", () => {
+    const triggers = Object.fromEntries(catalogue.map((entry) => [entry.key, entry.trigger]));
+    expect(triggers).toMatchObject({
+      orderPlaced: "order.placed / orderGroup.created",
+      paymentConfirmed: "order.paid / orderGroup.paid",
+      sellerAccepted: "order.sellerAccepted",
+      sellerRejected: "order.sellerRejected",
+      orderShipped: "order.shipped / orderGroup.shipped",
+      orderDelivered: "order.delivered / orderGroup.delivered",
+      orderCompleted: "order.completed / orderGroup.completed",
+      orderCancelled: "order.cancelled",
+      sellerNewOrder: "order.paid / orderGroup.paid (per seller)",
+      sellerOrderCancelled: "order.cancelled (per seller)",
+      payoutSent: "payout.completed (seller payout)",
+      payoutFailed: "payout.failed",
+    });
+  });
 });
 
 describe.each(emailTemplateKeys)("%s", (key) => {
@@ -70,6 +88,14 @@ describe("money and snapshots", () => {
   it.each(["orderShipped", "policyUpdated", "weeklyDigest", "emailOtp"] as const)("%s plain text matches snapshot", async (key) => {
     const rendered = await renderEmailSample(key);
     expect(`${rendered.subject}\n\n${rendered.text.replace(/© \d{4}/, "© YEAR")}`).toMatchSnapshot();
+  });
+
+  it("keeps shipment tracking inside Nantty and includes the tracking number", async () => {
+    const rendered = await renderEmailSample("orderShipped");
+    expect(rendered.html).toContain('href="https://nantty.com/orders/ZM-48213"');
+    expect(rendered.text).toContain("Track in Nantty: https://nantty.com/orders/ZM-48213");
+    expect(rendered.text).toContain("GIG-7782-1190-NG");
+    expect(rendered.text).not.toContain("Track package:");
   });
 });
 

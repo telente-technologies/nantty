@@ -13,7 +13,7 @@ const pendingRefundRows = (refundMethod: string | undefined) =>
     : [{ label: "Goes to", value: "Your Nantty wallet, or your card if the payment hadn't settled yet" }, { label: "Arrives", value: "Wallet: straight away. Card: 3–5 business days" }];
 
 export const orderPlaced = defineEmailTemplate<OrderProps & { readonly payBy: string; readonly paymentUrl: string }>({
-  ...base, key: "orderPlaced", name: "Order placed", trigger: "commerce.order.placed",
+  ...base, key: "orderPlaced", name: "Order placed", trigger: "order.placed / orderGroup.created",
   subject: (p) => `Order ${p.orderNumber} placed — complete your payment`,
   preheader: (p, c) => `Pay ${c.money(orderTotal(p.groups))} by ${c.dateTime(p.payBy)} to send it to ${sellerCount(p.groups)}.`,
   reference: ref,
@@ -29,7 +29,7 @@ export const orderPlaced = defineEmailTemplate<OrderProps & { readonly payBy: st
 });
 
 export const paymentConfirmed = defineEmailTemplate<OrderProps & { readonly paymentMethod?: string; readonly paidAt: string }>({
-  ...base, key: "paymentConfirmed", name: "Payment confirmed", trigger: "payments.charge.succeeded",
+  ...base, key: "paymentConfirmed", name: "Payment confirmed", trigger: "order.paid / orderGroup.paid",
   subject: (p) => `Payment received for order ${p.orderNumber}`,
   preheader: (p, c) => `${c.money(orderTotal(p.groups))} is safe in escrow. ${sellerCount(p.groups)} can start packing.`,
   reference: ref,
@@ -45,7 +45,7 @@ export const paymentConfirmed = defineEmailTemplate<OrderProps & { readonly paym
 });
 
 export const sellerAccepted = defineEmailTemplate<OrderProps & { readonly sellerName: string; readonly shipBy: string }>({
-  ...base, key: "sellerAccepted", name: "Seller accepted order", trigger: "commerce.order.seller_accepted",
+  ...base, key: "sellerAccepted", name: "Seller accepted order", trigger: "order.sellerAccepted",
   subject: (p) => `${p.sellerName} accepted your order`,
   preheader: (p, c) => `They'll ship by ${c.date(p.shipBy)}.`,
   reference: ref,
@@ -60,7 +60,7 @@ export const sellerAccepted = defineEmailTemplate<OrderProps & { readonly seller
 });
 
 export const sellerRejected = defineEmailTemplate<OrderProps & { readonly sellerName: string; readonly reason: string; readonly refund: Money; readonly refundMethod?: string }>({
-  ...base, key: "sellerRejected", name: "Seller declined order", trigger: "commerce.order.seller_rejected",
+  ...base, key: "sellerRejected", name: "Seller declined order", trigger: "order.sellerRejected",
   subject: (p) => `${p.sellerName} couldn't fulfil part of your order`,
   preheader: (p, c) => `${c.money(p.refund)} is on its way back to you.`,
   reference: ref,
@@ -75,8 +75,8 @@ export const sellerRejected = defineEmailTemplate<OrderProps & { readonly seller
   sample: { ...sampleOrder, sellerName: firstGroup.sellerName, reason: "The indigo two-piece in size M sold out at our shop before we could update stock. Sorry!", refund: ngn(69000) },
 });
 
-export const orderShipped = defineEmailTemplate<OrderProps & { readonly sellerName: string; readonly carrier?: string; readonly trackingNumber?: string; readonly trackingUrl?: string; readonly estimatedDelivery?: string }>({
-  ...base, key: "orderShipped", name: "Order shipped", trigger: "commerce.shipment.dispatched", consent: consentRules.transactionalOptOut,
+export const orderShipped = defineEmailTemplate<OrderProps & { readonly sellerName: string; readonly carrier?: string; readonly trackingNumber?: string; readonly estimatedDelivery?: string }>({
+  ...base, key: "orderShipped", name: "Order shipped", trigger: "order.shipped / orderGroup.shipped", consent: consentRules.transactionalOptOut,
   subject: (p) => `On its way: your order from ${p.sellerName}`,
   preheader: (p, c) => [p.carrier, p.estimatedDelivery === undefined ? undefined : `arriving by ${c.date(p.estimatedDelivery)}`].filter((part): part is string => part !== undefined).join(" · ") || "Your order is on its way.",
   reference: ref,
@@ -88,15 +88,15 @@ export const orderShipped = defineEmailTemplate<OrderProps & { readonly sellerNa
       ...(p.trackingNumber === undefined ? [] : [{ label: "Tracking number", value: p.trackingNumber, mono: true }]),
       ...(p.estimatedDelivery === undefined ? [] : [{ label: "Estimated delivery", value: c.date(p.estimatedDelivery) }]),
     ] },
-    ...(p.trackingUrl === undefined ? [] : [{ type: "button" as const, label: "Track package", href: p.trackingUrl }]),
+    { type: "button", label: "Track in Nantty", href: p.orderUrl },
     { type: "orderGroups", groups: p.groups.filter((group) => group.sellerName === p.sellerName) },
-    { type: "paragraph", muted: true, text: "Check your items when they arrive. You'll have 3 days to confirm or report a problem before payment is released." },
+    { type: "paragraph", muted: true, text: "Open your order on Nantty to view its latest recorded delivery status. Check your items when they arrive; you'll have 3 days to confirm or report a problem before payment is released." },
   ],
-  sample: { ...sampleOrder, sellerName: firstGroup.sellerName, carrier: "GIG Logistics", trackingNumber: "GIG-7782-1190-NG", trackingUrl: "https://nantty.com/orders/ZM-48213/tracking", estimatedDelivery: "2026-10-07T12:00:00.000Z" },
+  sample: { ...sampleOrder, sellerName: firstGroup.sellerName, carrier: "GIG Logistics", trackingNumber: "GIG-7782-1190-NG", estimatedDelivery: "2026-10-07T12:00:00.000Z" },
 });
 
 export const orderDelivered = defineEmailTemplate<OrderProps & { readonly sellerName: string; readonly deliveredAt: string; readonly confirmBy: string; readonly confirmUrl: string; readonly disputeUrl: string }>({
-  ...base, key: "orderDelivered", name: "Order delivered", trigger: "commerce.shipment.delivered",
+  ...base, key: "orderDelivered", name: "Order delivered", trigger: "order.delivered / orderGroup.delivered",
   subject: (p) => `Delivered: is everything right with your ${p.sellerName} order?`,
   preheader: (p, c) => `Confirm or report a problem by ${c.dateTime(p.confirmBy)}.`,
   reference: ref,
@@ -112,7 +112,7 @@ export const orderDelivered = defineEmailTemplate<OrderProps & { readonly seller
 });
 
 export const orderCompleted = defineEmailTemplate<OrderProps & { readonly sellerName: string; readonly reviewUrl: string }>({
-  ...base, key: "orderCompleted", name: "Order completed", trigger: "commerce.order.completed", consent: consentRules.transactionalOptOut,
+  ...base, key: "orderCompleted", name: "Order completed", trigger: "order.completed / orderGroup.completed", consent: consentRules.transactionalOptOut,
   subject: (p) => `Order complete — how was ${p.sellerName}?`,
   preheader: () => "Payment has been released. Leave a review to help other shoppers.",
   reference: ref,
@@ -127,7 +127,7 @@ export const orderCompleted = defineEmailTemplate<OrderProps & { readonly seller
 });
 
 export const orderCancelled = defineEmailTemplate<OrderProps & { readonly cancelledBy: "you" | "seller" | "nantty"; readonly reason: string; readonly refund: Money | null; readonly refundMethod?: string }>({
-  ...base, key: "orderCancelled", name: "Order cancelled", trigger: "commerce.order.cancelled",
+  ...base, key: "orderCancelled", name: "Order cancelled", trigger: "order.cancelled",
   subject: (p) => `Order ${p.orderNumber} was cancelled`,
   preheader: (p, c) => (p.refund ? `${c.money(p.refund)} is being refunded.` : "You weren't charged."),
   reference: ref,
