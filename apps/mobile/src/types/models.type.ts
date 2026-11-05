@@ -90,6 +90,10 @@ export interface StoreSummary {
   readonly earnBackBasisPoints?: number | null;
 }
 
+export interface ProductStoreSummary extends StoreSummary {
+  readonly isFollowing?: boolean;
+}
+
 export interface ProductVariantGroup {
   readonly name: string;
   readonly options: readonly string[];
@@ -120,7 +124,7 @@ export interface Product extends ProductSummary {
   readonly variantGroups: readonly ProductVariantGroup[];
   readonly shippingInfo: string;
   readonly description: string;
-  readonly store: StoreSummary;
+  readonly store: ProductStoreSummary;
   readonly related: readonly ProductSummary[];
 }
 

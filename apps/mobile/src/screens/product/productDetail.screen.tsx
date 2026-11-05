@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ScrollView, Share, StyleSheet, View } from "react-native";
 
@@ -33,12 +33,15 @@ import { storesService } from "@/services/sellers/stores.service";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
 import { webAppLinks } from "@/config/webAppLinks.config";
+import type { BrandedProduct } from "@/types/brand.type";
+import type { StoreDetail } from "@/types/commerce.type";
 
 const QUANTITY_OPTIONS = Array.from({ length: 10 }, (_, i) => String(i + 1));
 
 export function ProductDetailScreen({ navigation, route }: MainScreenProps<"ProductDetail">) {
   const { colors } = useTheme();
   const styles = useStyles();
+  const queryClient = useQueryClient();
   const { productId, aff: affiliateLinkId } = route.params;
   const product = useQuery({ queryKey: ["products", "detail", productId], queryFn: () => productsService.fetchProductDetailById(productId) });
   useEffect(() => {
@@ -59,12 +62,33 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
   const [quantity, setQuantity] = useState(1);
   const { offerSendInChat, sendInChatElement } = useShareToChat();
   const productSave = useSaveToggle({ type: "product", targetId: productId }, product.data?.savedByViewer ?? false);
-  const [followingShop, setFollowingShop] = useState(false);
+  const [followingShopOverride, setFollowingShopOverride] = useState<{ readonly productId: string; readonly isFollowing: boolean } | null>(null);
+  const followingShop = (followingShopOverride?.productId === productId ? followingShopOverride.isFollowing : null)
+    ?? product.data?.store.isFollowing
+    ?? false;
   const [cartError, setCartError] = useState<string | null>(null);
   const [reportSheetVisible, setReportSheetVisible] = useState(false);
   const { addProductToCart } = useCartActions();
 
   const { toggle: toggleFollow } = useConfirmedFollowToggle();
+
+  const applyStoreFollowState = (isFollowing: boolean, followers?: number) => {
+    setFollowingShopOverride({ productId, isFollowing });
+    queryClient.setQueryData<BrandedProduct>(["products", "detail", productId], (current) => current
+      ? { ...current, store: {
+        ...current.store,
+        isFollowing,
+      } }
+      : current);
+    const storeId = product.data?.store.id;
+    if (storeId) {
+      queryClient.setQueryData<StoreDetail>(["stores", storeId], (current) => current ? {
+        ...current,
+        isFollowing,
+        followers: followers ?? Math.max(0, current.followers + (current.isFollowing === isFollowing ? 0 : isFollowing ? 1 : -1)),
+      } : current);
+    }
+  };
 
   const addSelectedProductToCart = () => {
     const detail = product.data;
@@ -184,8 +208,19 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
             store={detail.store}
             following={followingShop}
             onToggleFollow={() => requireAuthThen(() => toggleFollow({
-              subjectLabel: detail.store.name, state: followingShop ? "accepted" : "none", apply: (state) => setFollowingShop(state === "accepted"),
-              follow: () => storesService.followStore(detail.store.id), unfollow: () => storesService.unfollowStore(detail.store.id),
+              subjectLabel: detail.store.name,
+              state: followingShop ? "accepted" : "none",
+              apply: (state) => applyStoreFollowState(state === "accepted"),
+              follow: async () => {
+                const result = await storesService.followStore(detail.store.id);
+                applyStoreFollowState(result.isFollowing, result.followers);
+                return { state: result.isFollowing ? "accepted" : "none" };
+              },
+              unfollow: async () => {
+                const result = await storesService.unfollowStore(detail.store.id);
+                applyStoreFollowState(result.isFollowing, result.followers);
+                return { state: result.isFollowing ? "accepted" : "none" };
+              },
             }), undefined, "follow shops")}
             onViewShop={() => navigation.navigate("Store", { storeId: detail.store.id })}
           />

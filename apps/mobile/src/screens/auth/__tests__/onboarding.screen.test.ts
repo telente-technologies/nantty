@@ -11,7 +11,10 @@ jest.mock("react-native-safe-area-context", () => {
   return { SafeAreaView: View, useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }) };
 });
 jest.mock("@/services/auth/appleSignIn.service", () => ({ checkIfAppleSignInIsAvailableOnThisDevice: () => Promise.resolve(true) }));
-jest.mock("@/services/auth/auth.service", () => ({ authService: { signInWithSocialProvider: jest.fn() } }));
+jest.mock("@/services/auth/auth.service", () => ({ authService: { beginSocialSignIn: jest.fn(), completeSocialSignInWithBirthday: jest.fn() } }));
+jest.mock("@/store/auth.store", () => ({ useAuthStore: (selector: (state: unknown) => unknown) => selector({ saveSignedInSession: jest.fn() }) }));
+
+import { authService } from "@/services/auth/auth.service";
 
 const buildNavigation = () => {
   const goBack = jest.fn();
@@ -55,6 +58,28 @@ test("every sign-in option shares one height, radius, border and icon spacing", 
   const shapes = options.map(shapeOf);
   expect(new Set(shapes.map((shape) => JSON.stringify(shape))).size).toBe(1);
   expect(shapes[0]).toMatchObject({ height: 44, borderWidth: 1 });
+});
+
+test("a first-time social account collects birthday and retries using the same challenge", async () => {
+  jest.mocked(authService.beginSocialSignIn).mockResolvedValue({
+    status: "birthday_required",
+    challenge: { provider: "google", idToken: "google-token", nonce: "google-nonce" },
+  });
+  jest.mocked(authService.completeSocialSignInWithBirthday).mockRejectedValue(new Error("Try again."));
+  await renderOnboarding();
+
+  await fireEvent.press(screen.getByRole("button", { name: "Continue with Google" }));
+  expect(await screen.findByText("Add your birthday to continue with Google")).toBeTruthy();
+  const birthday = screen.getByLabelText("Birthday, day month year");
+  await fireEvent.changeText(birthday, "01/01/1990");
+  expect(screen.getByRole("button", { name: "Continue" }).props.accessibilityState?.disabled).toBe(false);
+  await fireEvent.press(screen.getByRole("button", { name: "Continue" }));
+
+  expect(authService.completeSocialSignInWithBirthday).toHaveBeenCalledWith(
+    { provider: "google", idToken: "google-token", nonce: "google-nonce" },
+    "1990-01-01",
+  );
+  expect(await screen.findByText("Try again.")).toBeTruthy();
 });
 
 test("the Not now variant takes the same top-right spot and closes the sheet without guest mode", async () => {

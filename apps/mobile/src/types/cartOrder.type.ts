@@ -23,7 +23,7 @@ export interface Cart {
 
 export type PaymentMode = "escrow" | "direct";
 
-export type OrderStatus = "pending" | "paid" | "shipped" | "delivered" | "completed" | "cancelled" | "disputed";
+export type OrderStatus = "pending" | "paid" | "new" | "processing" | "ready" | "shipped" | "delivered" | "completed" | "cancelled" | "returned" | "refunded" | "disputed";
 
 export type DeliveryStatus = "pending" | "preparing" | "ready_for_pickup" | "in_transit" | "delivered" | "failed" | "cancelled" | "returned";
 

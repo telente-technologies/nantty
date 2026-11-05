@@ -32,7 +32,9 @@
         "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
         "android.permission.BLUETOOTH_CONNECT"
       ],
-      "blockedPermissions": ["android.permission.SYSTEM_ALERT_WINDOW"]
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -87,7 +89,10 @@
         {
           "photosPermission": false,
           "savePhotosPermission": "Allow Nantty to save photos and videos you download.",
-          "granularPermissions": ["photo", "video"]
+          "granularPermissions": [
+            "photo",
+            "video"
+          ]
         }
       ],
       "expo-dev-client",
@@ -169,7 +174,12 @@
           "cameraPermission": "Allow Nantty to use your camera when you go live.",
           "microphonePermission": "Allow Nantty to use your microphone when you go live."
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-font",
+      "expo-image",
+      "expo-secure-store",
+      "expo-status-bar"
     ],
     "owner": "oyinlola141"
   }

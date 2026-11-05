@@ -39,10 +39,10 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
   }, [storeId]);
 
   const { toggle: toggleFollow } = useConfirmedFollowToggle();
-  const applyStoreFollow = (state: FollowState) =>
+  const applyStoreFollow = (state: FollowState, followers?: number) =>
     queryClient.setQueryData<StoreDetail>(["stores", storeId], (cached) => {
       const following = state === "accepted";
-      return cached && cached.isFollowing !== following ? { ...cached, isFollowing: following, followers: Math.max(0, cached.followers + (following ? 1 : -1)) } : cached;
+      return cached ? { ...cached, isFollowing: following, followers: followers ?? Math.max(0, cached.followers + (following === cached.isFollowing ? 0 : following ? 1 : -1)) } : cached;
     });
 
   const { offerSendInChat, sendInChatElement } = useShareToChat();
@@ -87,8 +87,18 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
           store={detail}
           onToggleFollow={() => requireAuthThen(() => toggleFollow({
             subjectLabel: detail.name, state: detail.isFollowing ? "accepted" : "none", apply: applyStoreFollow,
-            follow: () => storesService.followStore(storeId), unfollow: () => storesService.unfollowStore(storeId),
-            onSettled: () => void queryClient.invalidateQueries({ queryKey: ["stores", storeId] }),
+            follow: async () => {
+              const result = await storesService.followStore(storeId);
+              const state = result.isFollowing ? "accepted" : "none";
+              applyStoreFollow(state, result.followers);
+              return { state };
+            },
+            unfollow: async () => {
+              const result = await storesService.unfollowStore(storeId);
+              const state = result.isFollowing ? "accepted" : "none";
+              applyStoreFollow(state, result.followers);
+              return { state };
+            },
           }), undefined, "follow shops")}
           onMessage={() => requireAuthThen(() => navigation.navigate("Chat", { storeId, name: detail.name }), undefined, "message sellers")}
         />

@@ -4,7 +4,7 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-n
 
 import { ConfirmActionSheet } from "@/components/escrow/confirmActionSheet";
 import { useConfirmReceiptMutation, useEscrowForOrderQuery } from "@/components/escrow/escrowQueries.hook";
-import { ESCROW_STAGE_APPEARANCE, formatFriendlyDate } from "@/components/escrow/escrowStage.util";
+import { canBuyerOpenDispute, ESCROW_STAGE_APPEARANCE, formatFriendlyDate } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
 import { CaretRight24Icon, Shield24Icon } from "@/components/icons";
 import { CartItemSummary } from "@/components/order/cartItemSummary";
@@ -48,7 +48,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
   const stage = escrow.data?.stage;
   const canConfirm = detail.status === "shipped" || detail.status === "delivered";
   const isDirect = detail.paymentMode === "direct";
-  const canDispute = !isDirect && (detail.status === "paid" || canConfirm) && !escrow.data?.disputeId;
+  const canDispute = canBuyerOpenDispute(detail.status, isDirect, escrow.data, escrow.isSuccess);
   const releaseLine = isDirect
     ? `Paid directly: ${detail.store.name} was paid right away. For a refund, contact the seller or support.${detail.escrowReleaseAt && detail.status === "delivered" ? ` The order completes automatically ${formatFriendlyDate(detail.escrowReleaseAt)} unless you ask for a return or refund.` : ""}`
     : escrow.data?.releasedAt

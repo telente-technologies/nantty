@@ -17,10 +17,11 @@ import type { MainScreenProps } from "@/navigation/navigation.types";
 import { sellerService } from "@/services/sellers/seller.service";
 import type { OrderStatus } from "@/types";
 import { spacing } from "@/constants/spacing.constant";
+import { isSellerOrderIncludedInFilter } from "@/utils/sellerOrders.util";
 
 const FILTERS: { key: "all" | OrderStatus; label: string }[] = [
   { key: "all", label: "All" },
-  { key: "pending", label: "Pending" },
+  { key: "pending", label: "To ship" },
   { key: "shipped", label: "Shipped" },
   { key: "delivered", label: "Delivered" },
   { key: "disputed", label: "Disputed" },
@@ -33,7 +34,7 @@ export function SellerOrdersScreen({ navigation }: MainScreenProps<"SellerOrders
   const { data: orders = [], isLoading, isError, error, refetch, isRefetching } = useQuery({ queryKey: sellerQueryKeys.orders, queryFn: sellerService.listMyStoreOrders });
   const refreshControl = usePullToRefresh(refetch);
   const visibleOrders = useMemo(
-    () => (filter === "all" ? orders : orders.filter((o) => o.status === filter || (filter === "pending" && o.status === "paid"))),
+    () => (filter === "all" ? orders : orders.filter((order) => isSellerOrderIncludedInFilter(order.status, filter))),
     [orders, filter],
   );
 

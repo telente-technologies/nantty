@@ -14,6 +14,14 @@ export interface RegisterInput {
   readonly otpToken: string;
 }
 
+export type SocialSignInChallenge =
+  | { readonly provider: "google"; readonly idToken: string; readonly nonce: string }
+  | { readonly provider: "apple"; readonly identityToken: string; readonly nonce: string; readonly fullName: AppleFullName | null };
+
+export type SocialSignInAttempt =
+  | { readonly status: "authenticated"; readonly session: AuthSession }
+  | { readonly status: "birthday_required"; readonly challenge: SocialSignInChallenge };
+
 const rethrowSocialSignInNotConfigured = (provider: SocialSignInProvider) => (error: unknown): never => {
   if (error instanceof ApiError && error.code === "SOCIAL_SIGN_IN_NOT_CONFIGURED") throw new SocialSignInNotConfiguredError(provider);
   throw error;
@@ -32,18 +40,38 @@ export const authService = {
   logOutCurrentSession: (refreshToken: string | null) => api.post<void>("/api/v1/auth/logout", { refreshToken }),
   fetchPersonalizationTopics: () => api.getList<Topic>("/api/v1/topics"),
   saveSelectedTopics: (topicIds: readonly string[]) => api.put<void>("/api/v1/users/me/topics", { topicIds }),
-  exchangeGoogleIdTokenForSession: (idToken: string, nonce: string) =>
-    api.post<AuthSession>("/api/v1/auth/google", { idToken, nonce }, { auth: false }).catch(rethrowSocialSignInNotConfigured("google")),
-  exchangeAppleIdentityTokenForSession: (identityToken: string, nonce: string, fullName: AppleFullName | null) =>
+  exchangeGoogleIdTokenForSession: (idToken: string, nonce: string, birthday?: string) =>
+    api.post<AuthSession>("/api/v1/auth/google", { idToken, nonce, ...(birthday ? { birthday } : {}) }, { auth: false }).catch(rethrowSocialSignInNotConfigured("google")),
+  exchangeAppleIdentityTokenForSession: (identityToken: string, nonce: string, fullName: AppleFullName | null, birthday?: string) =>
     api
-      .post<AuthSession>("/api/v1/auth/apple", { identityToken, nonce, ...(fullName ? { fullName } : {}) }, { auth: false })
+      .post<AuthSession>("/api/v1/auth/apple", { identityToken, nonce, ...(fullName ? { fullName } : {}), ...(birthday ? { birthday } : {}) }, { auth: false })
       .catch(rethrowSocialSignInNotConfigured("apple")),
-  signInWithSocialProvider: async (provider: SocialSignInProvider): Promise<AuthSession> => {
+  beginSocialSignIn: async (provider: SocialSignInProvider): Promise<SocialSignInAttempt> => {
     if (provider === "google") {
       const { idToken, nonce } = await requestGoogleIdTokenWithNonce();
-      return authService.exchangeGoogleIdTokenForSession(idToken, nonce);
+      try {
+        return { status: "authenticated", session: await authService.exchangeGoogleIdTokenForSession(idToken, nonce) };
+      } catch (error) {
+        if (error instanceof ApiError && error.code === "BIRTHDAY_REQUIRED") {
+          return { status: "birthday_required", challenge: { provider, idToken, nonce } };
+        }
+        throw error;
+      }
     }
     const { identityToken, nonce, fullName } = await requestAppleIdentityTokenWithNonce();
-    return authService.exchangeAppleIdentityTokenForSession(identityToken, nonce, fullName);
+    try {
+      return { status: "authenticated", session: await authService.exchangeAppleIdentityTokenForSession(identityToken, nonce, fullName) };
+    } catch (error) {
+      if (error instanceof ApiError && error.code === "BIRTHDAY_REQUIRED") {
+        return { status: "birthday_required", challenge: { provider, identityToken, nonce, fullName } };
+      }
+      throw error;
+    }
+  },
+  completeSocialSignInWithBirthday: (challenge: SocialSignInChallenge, birthday: string): Promise<AuthSession> => {
+    if (challenge.provider === "google") {
+      return authService.exchangeGoogleIdTokenForSession(challenge.idToken, challenge.nonce, birthday);
+    }
+    return authService.exchangeAppleIdentityTokenForSession(challenge.identityToken, challenge.nonce, challenge.fullName, birthday);
   },
 };

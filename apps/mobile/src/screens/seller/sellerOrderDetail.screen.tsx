@@ -21,6 +21,7 @@ import type { MarkOrderShippedInput } from "@/types/commerce.type";
 import { formatMoneyForDisplay, multiplyMoneyByQuantity } from "@/utils/formatMoney.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { describeActionFailure } from "@/errors/errorExperience/describeError";
+import { sellerOrderFundsRemainHeld, sellerOrderNeedsShipment } from "@/utils/sellerOrders.util";
 
 export function SellerOrderDetailScreen({ navigation, route }: MainScreenProps<"SellerOrderDetail">) {
   const { colors } = useTheme();
@@ -53,8 +54,8 @@ export function SellerOrderDetailScreen({ navigation, route }: MainScreenProps<"
     );
   }
 
-  const needsShipping = order.status === "paid";
-  const fundsHeld = ["paid", "shipped", "delivered", "disputed"].includes(order.status);
+  const needsShipping = sellerOrderNeedsShipment(order.status);
+  const fundsHeld = sellerOrderFundsRemainHeld(order.status);
   const muted = { color: colors.textMuted, weight: 400 as const };
 
   return (

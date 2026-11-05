@@ -1,4 +1,5 @@
 import type { DisputeReason, DisputeStatus, EscrowDetail, EscrowStage } from "@/types/commerce.type";
+import type { OrderStatus } from "@/types/cartOrder.type";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 
 import type { StatusTone } from "./statusPill";
@@ -43,6 +44,11 @@ export const disputeReasonLabel = (reason: DisputeReason) => DISPUTE_REASON_OPTI
 
 export const STAGES_BUYER_CAN_CONFIRM = new Set<EscrowStage>(["shipped", "delivered", "under_review"]);
 export const STAGES_BUYER_CAN_DISPUTE = new Set<EscrowStage>(["seller_preparing", "paid_into_escrow", "shipped", "delivered", "under_review"]);
+
+export function canBuyerOpenDispute(orderStatus: OrderStatus, directPayment: boolean, escrow: EscrowDetail | undefined, escrowLoaded: boolean): boolean {
+  return escrowLoaded && !directPayment && (orderStatus === "paid" || orderStatus === "shipped" || orderStatus === "delivered") &&
+    escrow !== undefined && !escrow.disputeId && STAGES_BUYER_CAN_DISPUTE.has(escrow.stage);
+}
 
 export function describeEscrowRelease(escrow: EscrowDetail): string {
   if (escrow.releasedAt) return `Released ${formatFriendlyDate(escrow.releasedAt)}`;

@@ -1,6 +1,6 @@
 import type { EscrowDetail } from "@/types/commerce.type";
 
-import { describeEscrowRelease, escrowPausedStepCopy, ESCROW_STAGE_APPEARANCE, STAGES_BUYER_CAN_CONFIRM, STAGES_BUYER_CAN_DISPUTE } from "../escrowStage.util";
+import { canBuyerOpenDispute, describeEscrowRelease, escrowPausedStepCopy, ESCROW_STAGE_APPEARANCE, STAGES_BUYER_CAN_CONFIRM, STAGES_BUYER_CAN_DISPUTE } from "../escrowStage.util";
 
 const money = { amountMinor: 1_000_000, currency: "NGN" as const };
 const escrow = (overrides: Partial<EscrowDetail>): EscrowDetail => ({
@@ -26,5 +26,24 @@ describe("undelivered order under staff review", () => {
   it("keeps the dispute copy", () => {
     expect(describeEscrowRelease(escrow({ stage: "disputed" }))).toBe("Release paused while the dispute is reviewed");
     expect(escrowPausedStepCopy(escrow({ stage: "disputed" })).title).toBe("Dispute open — release paused");
+  });
+});
+
+describe("buyer dispute eligibility", () => {
+  it("waits for a successful escrow lookup and allows only active held escrow orders", () => {
+    const held = escrow({ stage: "paid_into_escrow" });
+
+    expect(canBuyerOpenDispute("paid", false, undefined, false)).toBe(false);
+    expect(canBuyerOpenDispute("paid", false, held, false)).toBe(false);
+    expect(canBuyerOpenDispute("paid", false, held, true)).toBe(true);
+    expect(canBuyerOpenDispute("shipped", false, escrow({ stage: "shipped" }), true)).toBe(true);
+  });
+
+  it("does not offer dispute for direct, ineligible, settled, or already disputed orders", () => {
+    expect(canBuyerOpenDispute("paid", true, escrow({ stage: "paid_into_escrow" }), true)).toBe(false);
+    expect(canBuyerOpenDispute("pending", false, escrow({ stage: "paid_into_escrow" }), true)).toBe(false);
+    expect(canBuyerOpenDispute("completed", false, escrow({ stage: "released_to_seller" }), true)).toBe(false);
+    expect(canBuyerOpenDispute("paid", false, escrow({ stage: "paid_into_escrow", disputeId: "dispute-1" }), true)).toBe(false);
+    expect(canBuyerOpenDispute("paid", false, escrow({ stage: "refunded" }), true)).toBe(false);
   });
 });

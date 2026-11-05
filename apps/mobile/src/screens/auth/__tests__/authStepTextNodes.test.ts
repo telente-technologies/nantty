@@ -28,7 +28,7 @@ jest.mock("@react-navigation/native", () => ({
   useNavigation: () => ({ canGoBack: () => true, goBack: jest.fn() }),
 }));
 jest.mock("@/services/auth/appleSignIn.service", () => ({ checkIfAppleSignInIsAvailableOnThisDevice: () => Promise.resolve(true) }));
-jest.mock("@/services/auth/auth.service", () => ({ authService: { signInWithSocialProvider: jest.fn(), sendOneTimeCode: jest.fn() } }));
+jest.mock("@/services/auth/auth.service", () => ({ authService: { beginSocialSignIn: jest.fn(), completeSocialSignInWithBirthday: jest.fn(), sendOneTimeCode: jest.fn() } }));
 
 const hostComponentsThatAcceptText = new Set(["Text", "TextInput"]);
 
