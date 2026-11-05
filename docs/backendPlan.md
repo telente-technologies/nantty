@@ -120,7 +120,7 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | GET /users/me/username-policy, PATCH /users/me/username | M W | ◐ | Prisma models `UsernameChange/Hold/ReservedUsername` exist, but no routes **✅ built (go-identity).** |
 | GET /users/me/profiles, GET/PUT /users/me/acting-profile | M | ✗ | go.users.actingProfiles **✅ built (go-identity).** |
 | GET/POST /brands, /brands/:id[/products,/follow] | M | ✗ | go.users.brands + go.catalog.listBrandProducts |
-| POST/DELETE /users/:id/follow, /stores/:id/follow; GET followers/following/follow-status/connections | M W | ✅ | Offline queue sends `Idempotency-Key` on follow and the online path does not, so the key must be **optional** here | **✅ built (ts-social)** for users (follow states, requests inbox, searchable lists, `GET /users/:id/follow-status`); store follows stay in go-catalog.
+| POST/DELETE /users/:id/follow, /stores/:id/follow; GET followers/following/follow-status/connections | M W | ✅ | Offline queue sends `Idempotency-Key` on follow and the online path does not, so the key must be **optional** here | **✅ built (ts-social)** for users and stores, routed through the gateway to Social. Store POST and DELETE return canonical `{storeId,isFollowing,followers}` state; Go catalog owns store/product read projections and internal follow-stat lookup, not store-follow writes. Store follow records and `store.followed`/`store.unfollowed` outbox events are owned by Social.
 | POST/DELETE /users/:id/block, GET /users/me/blocked | M W | ✅ | | **✅ built (ts-social).**
 | GET /search/people | M W | ✅ | → ts.search |
 | GET /locale, /locale/countries, /currencies | M W L | ✅ | → go.currency **✅ built (go-identity).** |
