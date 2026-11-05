@@ -28,9 +28,9 @@ function RailModuleSkeleton({ rows }: { readonly rows: number }) {
   );
 }
 
-export function WalletSummaryModule({ location = "rail" }: { readonly location?: "rail" | "home" }) {
+export function WalletSummaryModule() {
   const { viewer } = useSession();
-  const titleId = location === "home" ? "home-wallet-title" : "rail-wallet-title";
+  const titleId = "rail-wallet-title";
   const queryOptions = walletSummaryQueryOptions(viewer?.id ?? null);
   const walletQuery = useQuery({ ...queryOptions.wallet, queryFn: walletsService.fetchMyWalletSummary });
   const coinsQuery = useQuery({ ...queryOptions.coins, queryFn: walletsService.fetchMyCoinBalance });

@@ -1,6 +1,6 @@
 import { ApiError } from "@/errors/api.error";
 import type { Page, ProductSummary } from "@/types";
-import type { MartHome, ProductCollection, StoreDetail } from "@/types/commerce.type";
+import type { MartHome, ProductCollection, StoreDetail, StoreFollowState } from "@/types/commerce.type";
 
 import { BRAND_ID_BY_PRODUCT_KEY, brandTagForProductKey, findBrandRecord, isVerifiedOfficialStoreOfBrand, mockBrandRecords, presentBrandSummary } from "./brandDirectory.mock";
 import { followedBrandIds } from "./brands.mock";
@@ -22,6 +22,11 @@ import { directoryStores, productCategories, storeBannerUrl, summariseStore } fr
 const PAGE_SIZE = 12;
 const likedProductIds = new Set<string>();
 const followedStoreIds = new Set<string>(["s_ada", "s_glow"]);
+const storeFollowState = (storeId: string): StoreFollowState => {
+  const store = directoryStores.find((candidate) => candidate.id === storeId);
+  const isFollowing = followedStoreIds.has(storeId);
+  return { storeId, isFollowing, followers: Math.max(0, (store?.followers ?? 0) + Number(isFollowing)) };
+};
 
 const withLikeState = (product: ProductSummary): ProductSummary => ({ ...product, liked: likedProductIds.has(product.id) });
 
@@ -91,6 +96,13 @@ export const productsMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/products/:productId/reviews", () => undefined),
   createMockRoute("GET", "/api/v1/stores/:storeId", ({ params }) => buildStoreDetail(params.storeId!)),
   createMockRoute("GET", "/api/v1/stores/:storeId/products", ({ params }) => listProductSummariesInStore(params.storeId!).map(withLikeState)),
-  createMockRoute("POST", "/api/v1/stores/:storeId/follow", ({ params }) => void followedStoreIds.add(params.storeId!)),
-  createMockRoute("DELETE", "/api/v1/stores/:storeId/follow", ({ params }) => void followedStoreIds.delete(params.storeId!)),
+  createMockRoute("GET", "/api/v1/stores/:storeId/follow-status", ({ params }) => storeFollowState(params.storeId!)),
+  createMockRoute("POST", "/api/v1/stores/:storeId/follow", ({ params }) => {
+    followedStoreIds.add(params.storeId!);
+    return storeFollowState(params.storeId!);
+  }),
+  createMockRoute("DELETE", "/api/v1/stores/:storeId/follow", ({ params }) => {
+    followedStoreIds.delete(params.storeId!);
+    return storeFollowState(params.storeId!);
+  }),
 ];

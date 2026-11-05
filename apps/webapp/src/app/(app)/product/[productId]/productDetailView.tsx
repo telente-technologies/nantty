@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
+import { confirmFollowChange } from "@/components/follow/useFollowUser.hook";
 import { ProductCard } from "@/components/commerce/productCard";
 import { ProductGallery } from "@/components/commerce/productGallery";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
@@ -17,12 +18,15 @@ import { StarIcon, StoreIcon } from "@/components/ui/icons";
 import { affiliateLinksService } from "@/services/affiliateLinks.service";
 import { cartsService } from "@/services/carts.service";
 import { productsService } from "@/services/products.service";
+import { storesService } from "@/services/stores.service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { formatProductPriceForDisplay } from "@/utils/formatMoney.util";
+import { followConfirmationCopy } from "@/utils/followToggle.util";
 import { readSaleAttribution, rememberSaleAttribution } from "@/utils/saleAttribution.util";
 import { buildProductPath, buildStorePath } from "@/utils/seoPaths.util";
 import type { BrandedProduct } from "@/types/brand.type";
+import type { StoreDetail } from "@/types/commerce.type";
 
 import controlStyles from "./buyBoxControls.module.css";
 import styles from "./page.module.css";
@@ -69,6 +73,47 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
     onError: () => setMessage("Couldn't add to cart. Try again."),
   });
 
+  const storeFollow = useMutation({
+    mutationFn: (followNow: boolean) => (followNow ? storesService.followStore(productQuery.data!.store.id) : storesService.unfollowStore(productQuery.data!.store.id)),
+    onMutate: async (followNow) => {
+      const queryKey = ["products", "detail", productId] as const;
+      const storeQueryKey = ["store", productQuery.data!.store.id] as const;
+      await queryClient.cancelQueries({ queryKey });
+      await queryClient.cancelQueries({ queryKey: storeQueryKey });
+      const previousProduct = queryClient.getQueryData<BrandedProduct>(queryKey);
+      const previousStore = queryClient.getQueryData<StoreDetail>(storeQueryKey);
+      queryClient.setQueryData<BrandedProduct>(queryKey, (current) => current ? {
+        ...current,
+        store: {
+          ...current.store,
+          isFollowing: followNow,
+        },
+      } : current);
+      queryClient.setQueryData<StoreDetail>(storeQueryKey, (current) => current ? {
+        ...current,
+        isFollowing: followNow,
+        followers: Math.max(0, current.followers + (current.isFollowing === followNow ? 0 : followNow ? 1 : -1)),
+      } : current);
+      return { previousProduct, previousStore, queryKey, storeQueryKey };
+    },
+    onError: (_error, _followNow, context) => {
+      if (context?.previousProduct) queryClient.setQueryData(context.queryKey, context.previousProduct);
+      if (context?.previousStore) queryClient.setQueryData(context.storeQueryKey, context.previousStore);
+      setMessage("Couldn't update this store. Check your connection and try again.");
+    },
+    onSuccess: (state, _followNow, context) => {
+      queryClient.setQueryData<BrandedProduct>(context?.queryKey ?? ["products", "detail", productId], (current) => current ? {
+        ...current,
+        store: { ...current.store, isFollowing: state.isFollowing },
+      } : current);
+      queryClient.setQueryData<StoreDetail>(context?.storeQueryKey ?? ["store", productQuery.data!.store.id], (current) => current ? {
+        ...current,
+        isFollowing: state.isFollowing,
+        followers: state.followers,
+      } : current);
+    },
+  });
+
   if (productQuery.isLoading) return <ProductDetailSkeleton />;
   if (productQuery.isError || !productQuery.data) {
     return <ErrorState title="Product unavailable" description="This product may have been removed." error={productQuery.error} onRetry={() => void productQuery.refetch()} />;
@@ -93,6 +138,14 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
         addToCartInFlight.current = false;
       },
     });
+  }
+
+  async function handleStoreFollow() {
+    if (storeFollow.isPending) return;
+    const copy = product.store.isFollowing ? followConfirmationCopy("unfollow", product.store.name) : null;
+    if (copy !== null && !(await confirmFollowChange(copy))) return;
+    setMessage(null);
+    storeFollow.mutate(!product.store.isFollowing);
   }
 
   return (
@@ -243,6 +296,17 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
             </span>
             <span className={styles.storeCta}>View store</span>
           </Link>
+          <div className={styles.storeActions}>
+            <Button
+              size="sm"
+              variant="secondary"
+              busy={storeFollow.isPending}
+              aria-pressed={product.store.isFollowing ?? false}
+              onClick={() => requireAuthThen(() => void handleStoreFollow(), `Sign in to follow ${product.store.name}.`)}
+            >
+              {product.store.isFollowing ? "Following store" : "Follow store"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

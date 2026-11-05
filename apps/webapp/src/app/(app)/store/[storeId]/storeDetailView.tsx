@@ -1,8 +1,7 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
@@ -31,6 +30,7 @@ interface StoreDetailViewProps {
 }
 
 export function StoreDetailView({ initialStore, initialProducts }: StoreDetailViewProps) {
+  const queryClient = useQueryClient();
   const storeQuery = useQuery({ queryKey: ["store", initialStore.id], queryFn: () => storesService.fetchStoreById(initialStore.id), initialData: initialStore, initialDataUpdatedAt: 0, retry: false });
   const productsQuery = useQuery({ queryKey: ["store", initialStore.id, "products"], queryFn: () => storesService.fetchStoreProducts(initialStore.id), initialData: [...initialProducts], initialDataUpdatedAt: 0, retry: false });
   const store = storeQuery.data ?? initialStore;
@@ -39,19 +39,41 @@ export function StoreDetailView({ initialStore, initialProducts }: StoreDetailVi
   const { viewer } = useSession();
   const myStores = useQuery({ queryKey: ["my-stores"], queryFn: () => storesService.fetchMyStores(), enabled: Boolean(viewer), retry: false, staleTime: 5 * 60_000 });
   const showsPromoteStore = canPromoteStore({ storeId: store.id, storeOwnerUserId: store.ownerUserId, signedInUserId: viewer?.id, myStores: myStores.data });
-  const [isFollowing, setIsFollowing] = useState(store.isFollowing);
   const follow = useMutation({
     mutationFn: (followNow: boolean) => (followNow ? storesService.followStore(store.id) : storesService.unfollowStore(store.id)),
-    onMutate: (followNow) => setIsFollowing(followNow),
-    onError: (_error, followNow) => setIsFollowing(!followNow),
+    onMutate: async (followNow) => {
+      const queryKey = ["store", store.id] as const;
+      await queryClient.cancelQueries({ queryKey });
+      const previousStore = queryClient.getQueryData<StoreDetail>(queryKey);
+      queryClient.setQueryData<StoreDetail>(queryKey, (current) => current ? {
+        ...current,
+        isFollowing: followNow,
+        followers: Math.max(0, current.followers + (followNow ? 1 : -1)),
+      } : current);
+      return { previousStore, queryKey };
+    },
+    onError: (_error, _followNow, context) => {
+      if (context?.previousStore) queryClient.setQueryData(context.queryKey, context.previousStore);
+    },
+    onSuccess: (state, _followNow, context) => {
+      queryClient.setQueryData<StoreDetail>(context?.queryKey ?? ["store", store.id], (current) => current ? {
+        ...current,
+        isFollowing: state.isFollowing,
+        followers: state.followers,
+      } : current);
+    },
   });
+  const isFollowing = store.isFollowing;
   const confirmAndToggleFollow = async () => {
     if (follow.isPending) return;
     const copy = isFollowing ? followConfirmationCopy("unfollow", store.handle) : null;
     if (copy !== null && !(await confirmFollowChange(copy))) return;
     follow.mutate(!isFollowing);
   };
-  const toggleFollow = () => requireAuthThen(() => void confirmAndToggleFollow(), `Sign in to follow ${store.name}.`);
+  const toggleFollow = () => requireAuthThen(() => {
+    follow.reset();
+    void confirmAndToggleFollow();
+  }, `Sign in to follow ${store.name}.`);
 
   return (
     <div className={styles.page}>
@@ -76,6 +98,7 @@ export function StoreDetailView({ initialStore, initialProducts }: StoreDetailVi
           <ContentActionsMenu shareKind="store" reportTargetType="user" targetId={store.ownerUserId} canonicalPath={buildStorePath(store.id)} />
         </div>
       </header>
+      {follow.isError ? <p className={styles.followError} role="alert">Couldn’t update this store. Check your connection and try again.</p> : null}
       {store.bio ? <p className={styles.bio}>{store.bio}</p> : null}
       <div className={styles.stats}>
         <span><strong>{formatCountWithThousandsSuffix(store.followers)}</strong>followers</span>

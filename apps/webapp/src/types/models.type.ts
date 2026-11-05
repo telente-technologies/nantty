@@ -79,6 +79,10 @@ export interface StoreSummary {
   readonly earnBackBasisPoints?: number | null;
 }
 
+export interface ProductStoreSummary extends StoreSummary {
+  readonly isFollowing?: boolean;
+}
+
 export interface ProductSummary {
   readonly id: ID;
   readonly name: string;
@@ -102,7 +106,7 @@ export interface Product extends ProductSummary {
   readonly colors: readonly string[];
   readonly shippingInfo: string;
   readonly description: string;
-  readonly store: StoreSummary;
+  readonly store: ProductStoreSummary;
   readonly related: readonly ProductSummary[];
 }
 

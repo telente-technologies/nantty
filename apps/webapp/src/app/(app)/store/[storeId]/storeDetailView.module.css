@@ -57,6 +57,12 @@
   flex-wrap: wrap;
 }
 
+.followError {
+  margin: calc(var(--space-4) * -1) 0 0;
+  color: var(--color-danger, #b42318);
+  font-size: var(--text-sm);
+}
+
 .bio {
   max-width: 62ch;
   color: var(--ink-strong);
