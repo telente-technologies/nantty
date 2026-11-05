@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -74,14 +76,18 @@ internal fun CartDeliveryAddressPicker(
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     items(addresses, key = CheckoutAddress::id) { address ->
                         Row(
-                            Modifier.fillMaxWidth().semantics {
+                            Modifier.fillMaxWidth().selectable(
+                                selected = address.id == selectedAddressId,
+                                role = Role.RadioButton,
+                                onClick = {
+                                    showingPicker = false
+                                    onSelect(address)
+                                },
+                            ).semantics {
                                 contentDescription = "${address.fullName}, ${address.line1}, ${address.city}, ${address.country}"
                             },
                         ) {
-                            RadioButton(selected = address.id == selectedAddressId, onClick = {
-                                showingPicker = false
-                                onSelect(address)
-                            })
+                            RadioButton(selected = address.id == selectedAddressId, onClick = null)
                             Column(Modifier.padding(top = 12.dp, start = 4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                 Text(address.fullName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                                 Text(

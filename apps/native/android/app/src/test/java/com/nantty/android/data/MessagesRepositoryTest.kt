@@ -8,6 +8,32 @@ import org.junit.Test
 
 class MessagesRepositoryTest {
     @Test
+    fun loadsNotificationConversationByIdWithAuthenticatedDetailRoute() {
+        val conversationId = "11111111-1111-4111-8111-111111111111"
+        var requested: String? = null
+        var token: String? = null
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = MessagesTransport { _, _ -> JSONObject() },
+            threadTransport = ChatThreadTransport { method, path, accessToken, _ ->
+                assertEquals("GET", method)
+                requested = path
+                token = accessToken
+                JSONObject("""{"data":{"id":"$conversationId","kind":"business","peer":{"id":"22222222-2222-4222-8222-222222222222","name":"Ari"},"store":{"id":"33333333-3333-4333-8333-333333333333","name":"Ari Shop"},"lastMessageAt":"2026-10-01T12:00:00Z","unread":1}}""")
+            },
+        )
+
+        val result = repository.loadConversationById(conversationId) as ConversationLookupResult.Success
+
+        assertEquals("/api/v1/conversations/$conversationId", requested)
+        assertEquals("session-access", token)
+        assertEquals(conversationId, result.conversation.id)
+        assertEquals("Ari Shop", result.conversation.title)
+        assertEquals(ConversationType.BUSINESS, result.conversation.type)
+    }
+
+    @Test
     fun loadsAuthenticatedConversationPageAndNeverParsesLastMessageContent() {
         var seenPath: String? = null
         var seenToken: String? = null

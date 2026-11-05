@@ -20,7 +20,6 @@ import com.nantty.android.data.FeedTopic
 import com.nantty.android.data.FeedTopicsResult
 import com.nantty.android.data.FeedType
 import com.nantty.android.data.InboxConversation
-import com.nantty.android.data.ConversationType
 import com.nantty.android.data.PostDetailRepository
 import com.nantty.android.data.appendUniqueFeedPosts
 import java.util.concurrent.Executors

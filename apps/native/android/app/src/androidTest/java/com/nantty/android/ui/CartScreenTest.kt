@@ -71,7 +71,7 @@ class CartScreenTest {
         compose.onNodeWithText("Handwoven bag").assertIsDisplayed()
         compose.onNodeWithText("Ayo Market").assertIsDisplayed()
         compose.onNodeWithContentDescription("Choose delivery address").performClick()
-        compose.onNodeWithContentDescription("Buyer, 12 Market Road, Lagos, Nigeria").performClick()
+        compose.onNodeWithContentDescription("Buyer, 12 Market Road, Ikeja, Nigeria").performClick()
         compose.onNodeWithText("Order total").assertIsDisplayed()
         compose.onNodeWithText("Shipping").assertIsDisplayed()
         compose.onNodeWithText(formatWalletAmount(WalletMoney(500, "NGN"))).assertIsDisplayed()
@@ -155,7 +155,7 @@ class CartScreenTest {
         val paths = mutableListOf<String>()
         override fun get(path: String, accessToken: String): JSONObject {
             paths += "GET:$path"
-            return if (path == "/api/v1/users/me/addresses") JSONObject("""{"data":[{"id":"$addressId","fullName":"Buyer","phone":"+2348000000000","line1":"12 Market Road","city":"Lagos","state":"Lagos","country":"Nigeria","isDefault":true}]}""") else JSONObject("""{"data":[]}""")
+            return if (path == "/api/v1/users/me/addresses") JSONObject("""{"data":[{"id":"$addressId","fullName":"Buyer","phone":"+2348000000000","line1":"12 Market Road","city":"Ikeja","state":"Lagos","country":"Nigeria","isDefault":true}]}""") else JSONObject("""{"data":[]}""")
         }
 
         override fun post(path: String, accessToken: String, body: JSONObject, idempotencyKey: String?): JSONObject {

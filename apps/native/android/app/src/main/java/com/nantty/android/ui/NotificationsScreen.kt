@@ -61,6 +61,7 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
     var loading by remember(repository) { mutableStateOf(false) }
     var loadingMore by remember(repository) { mutableStateOf(false) }
     var actionMessage by remember(repository) { mutableStateOf<String?>(null) }
+    var conversationOpenError by remember(repository) { mutableStateOf<String?>(null) }
     var openingConversationId by remember(repository) { mutableStateOf<String?>(null) }
     var generation by remember(repository) { mutableStateOf(0) }
 
@@ -175,6 +176,7 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
             }
         }
         actionMessage?.let { Text(it, Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+        conversationOpenError?.let { Text(it, Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
         when (val current = result) {
             null -> CenterMessage("Loading activity…", progress = true)
             is NotificationsResult.Failure -> if (loading) CenterMessage("Refreshing activity…", progress = true) else CenterMessage(
@@ -197,6 +199,7 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
                                 else if (openingConversationId == null) {
                                     openingConversationId = destination.conversationId
                                     actionMessage = null
+                                    conversationOpenError = null
                                     executor.execute {
                                         val lookup = messages.loadConversationById(destination.conversationId)
                                         androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
@@ -204,7 +207,7 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
                                             when (lookup) {
                                                 is ConversationLookupResult.Success -> onOpenConversation(lookup.conversation)
                                                 is ConversationLookupResult.Failure -> {
-                                                    actionMessage = lookup.message
+                                                    conversationOpenError = lookup.message
                                                     if (lookup.authenticationRequired) onReauthenticate()
                                                 }
                                             }
