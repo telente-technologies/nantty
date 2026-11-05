@@ -14,7 +14,7 @@ const mutatingMethods = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 const sensitiveActionPatterns: readonly RegExp[] = [
   /^\/api\/v1\/posts\/?$/, /^\/api\/v1\/posts\/[^/]+\/(comments|replies|quotes|reposts)$/, /^\/api\/v1\/comments\/[^/]+\/replies$/,
-  /^\/api\/v1\/clips\/?$/, /^\/api\/v1\/stories\/?$/, /^\/api\/v1\/users\/[^/]+\/follow$/,
+  /^\/api\/v1\/clips\/?$/, /^\/api\/v1\/stories\/?$/, /^\/api\/v1\/(?:users|stores)\/[^/]+\/follow$/,
   /^\/api\/v1\/conversations(\/.*)?$/, /^\/api\/v1\/messages\/.+$/, /^\/api\/v1\/chat\/.+$/,
   /^\/api\/v1\/orders(\/.*)?$/, /^\/api\/v1\/cart\/checkout.*$/, /^\/api\/v1\/payments\/.+$/,
   /^\/api\/v1\/wallets\/.+$/, /^\/api\/v1\/coins\/(transfers|withdrawals|purchases).*$/, /^\/api\/v1\/gifts(\/.*)?$/,

@@ -184,7 +184,7 @@ export function classifyRequestForRateLimit(method: string, path: string): Route
   if (verb === "POST" && (lowered === "/api/v1/auth/widget-token" || lowered === "/api/v1/auth/realtime-token")) return "widgetToken";
   if (verb === "GET" && /^\/api\/v1\/subscription-offers\/[^/]+$/.test(lowered)) return "offerRead";
   if (verb === "POST" && /^\/api\/v1\/subscription-offers\/[^/]+\/claim$/.test(lowered)) return "offerClaim";
-  if ((verb === "POST" || verb === "DELETE") && /^\/api\/v1\/users\/[^/]+\/follow$/.test(lowered)) return "followWrite";
+  if ((verb === "POST" || verb === "DELETE") && (/^\/api\/v1\/users\/[^/]+\/follow$/.test(lowered) || /^\/api\/v1\/stores\/[^/]+\/follow$/.test(lowered))) return "followWrite";
   if (verb === "POST" && /^\/api\/v1\/follow-requests\/[^/]+\/(accept|reject)$/.test(lowered)) return "followWrite";
   return undefined;
 }

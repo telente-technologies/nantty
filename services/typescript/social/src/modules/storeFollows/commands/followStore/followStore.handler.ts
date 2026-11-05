@@ -12,9 +12,8 @@ export function createFollowStoreHandler(context: HandlerContext): Handler<Follo
     const now = context.clock.now();
     const db = context.database.client;
     await context.database.transaction(async (transaction) => {
-      const wasFollowing = await storeFollowRepository.isFollowing(transaction, followerId, storeId);
-      await storeFollowRepository.follow(transaction, followerId, storeId, now);
-      if (!wasFollowing) await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.storeFollowed, subject: storeId, occurredAt: now, data: { storeId, followerId } }]);
+      const inserted = await storeFollowRepository.follow(transaction, followerId, storeId, now);
+      if (inserted) await appendDomainEventsToOutbox(transaction, [{ eventType: socialEventTypes.storeFollowed, subject: storeId, occurredAt: now, data: { storeId, followerId } }]);
     });
     return { storeId, isFollowing: true, followers: await storeFollowRepository.countFollowers(db, storeId) };
   };

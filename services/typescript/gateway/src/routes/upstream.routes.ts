@@ -144,7 +144,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/overlay-scenes/", upstream: "live", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/explore", upstream: "commerce", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/products", upstream: "commerce", authentication: "optional", methods: ["GET"] },
-  { pathPrefix: "/api/v1/stores/*/follow", upstream: "social", authentication: "required", methods: ["POST", "DELETE"] },
+  { pathPrefix: "/api/v1/stores/*/follow", upstream: "commerce", authentication: "required", methods: ["POST", "DELETE"] },
   { pathPrefix: "/api/v1/stores/*/followers", upstream: "social", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/stores/*/follow-status", upstream: "social", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/stores/team-requests", upstream: "commerce", authentication: "required" },

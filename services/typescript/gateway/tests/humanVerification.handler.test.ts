@@ -77,6 +77,9 @@ describe("human verification challenge", () => {
   it("classifies posting, following, messaging, checkout and payouts as sensitive but not reads or admin tools", () => {
     expect(classifyRequestSensitivity("POST", "/api/v1/posts")).toBe("sensitive");
     expect(classifyRequestSensitivity("POST", "/api/v1/users/abc/follow")).toBe("sensitive");
+    expect(classifyRequestSensitivity("POST", "/api/v1/stores/abc/follow")).toBe("sensitive");
+    expect(classifyRequestSensitivity("DELETE", "/api/v1/stores/abc/follow")).toBe("sensitive");
+    expect(classifyRequestSensitivity("GET", "/api/v1/stores/abc/follow-status")).toBe("none");
     expect(classifyRequestSensitivity("POST", "/api/v1/conversations/abc/messages")).toBe("sensitive");
     expect(classifyRequestSensitivity("POST", "/api/v1/orders/checkout")).toBe("sensitive");
     expect(classifyRequestSensitivity("POST", "/api/v1/wallets/me/withdrawals")).toBe("sensitive");

@@ -21,6 +21,8 @@ describe("catalog routes", () => {
     expect(resolveUpstreamRouteForRequest("GET", "/api/v1/seller/applications/me")).toMatchObject({ upstream: "commerce", authentication: "required" });
     expect(resolveUpstreamRouteForRequest("DELETE", `/api/v1/reviews/${id}`)).toMatchObject({ upstream: "commerce", authentication: "required" });
     expect(resolveUpstreamRouteForRequest("POST", "/api/v1/seller/products/import")).toMatchObject({ upstream: "commerce", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("POST", `/api/v1/stores/${id}/follow`)).toMatchObject({ upstream: "commerce", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("DELETE", `/api/v1/stores/${id}/follow`)).toMatchObject({ upstream: "commerce", authentication: "required" });
   });
 
   it("sends catalog admin routes to commerce before the identity catch-all", () => {

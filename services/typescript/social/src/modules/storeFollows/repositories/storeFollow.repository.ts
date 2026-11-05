@@ -1,8 +1,8 @@
 import type { Db } from "../../../types/database.type.js";
 
 export const storeFollowRepository = {
-  follow: (db: Db, followerId: string, storeId: string, at: Date) =>
-    db.storeFollow.upsert({ where: { followerId_storeId: { followerId, storeId } }, create: { followerId, storeId, createdAt: at }, update: {} }),
+  follow: async (db: Db, followerId: string, storeId: string, at: Date): Promise<boolean> =>
+    (await db.storeFollow.createMany({ data: [{ followerId, storeId, createdAt: at }], skipDuplicates: true })).count === 1,
 
   unfollow: async (db: Db, followerId: string, storeId: string): Promise<boolean> => (await db.storeFollow.deleteMany({ where: { followerId, storeId } })).count > 0,
 

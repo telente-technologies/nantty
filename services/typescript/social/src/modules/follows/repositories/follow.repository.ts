@@ -40,6 +40,25 @@ export const followRepository = {
     return new Map(rows.map((row) => [row.followeeId, row.state]));
   },
 
+  acceptedFolloweeIds: async (db: Db, followerId: string) => {
+    const rows = await db.follow.findMany({ where: { followerId, state: "accepted" }, select: { followeeId: true } });
+    return new Set(rows.map((row) => row.followeeId));
+  },
+
+  acceptedFollowersFromAccounts: async (db: Db, followerIds: readonly string[], followeeIds: readonly string[]) => {
+    if (followerIds.length === 0 || followeeIds.length === 0) return [];
+    return db.follow.findMany({
+      where: { followerId: { in: [...followerIds] }, followeeId: { in: [...followeeIds] }, state: "accepted" },
+      select: { followerId: true, followeeId: true },
+    });
+  },
+
+  acceptedFollowersOf: async (db: Db, followeeId: string, followerIds: readonly string[]) => {
+    if (followerIds.length === 0) return new Set<string>();
+    const rows = await db.follow.findMany({ where: { followeeId, followerId: { in: [...followerIds] }, state: "accepted" }, select: { followerId: true } });
+    return new Set(rows.map((row) => row.followerId));
+  },
+
   followedAccountIds: async (db: Db, followerId: string, candidateIds: readonly string[]) => {
     const rows = await db.follow.findMany({ where: { followerId, state: "accepted", followeeId: { in: [...candidateIds] } }, select: { followeeId: true } });
     return new Set(rows.map((row) => row.followeeId));

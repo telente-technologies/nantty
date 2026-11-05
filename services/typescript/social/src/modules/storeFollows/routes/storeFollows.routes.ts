@@ -8,4 +8,6 @@ export function registerStoreFollowsRoutes(router: HttpRouter, controller: Retur
   router.get("/api/v1/stores/:storeId/followers", controller.followers);
   router.get("/api/v1/stores/:storeId/follow-status", controller.status);
   router.get("/api/v1/internal/stores/:storeId/follow-stats", controller.internalStats);
+  router.post("/api/v1/internal/stores/:storeId/followers/:followerId", controller.internalFollow);
+  router.delete("/api/v1/internal/stores/:storeId/followers/:followerId", controller.internalUnfollow);
 }

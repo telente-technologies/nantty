@@ -9,11 +9,11 @@ import type { UnfollowStoreCommand } from "../commands/unfollowStore/unfollowSto
 import type { StoreFollowState } from "../models/storeFollow.model.js";
 import type { GetStoreFollowStatusQuery } from "../queries/getStoreFollowStatus/getStoreFollowStatus.query.js";
 import type { ListStoreFollowersQuery } from "../queries/listStoreFollowers/listStoreFollowers.query.js";
-import { followStatsQuerySchema, storeFollowersQuerySchema, storeIdParamsSchema } from "../validators/storeFollows.validator.js";
+import { followStatsQuerySchema, internalStoreFollowerParamsSchema, storeFollowersQuerySchema, storeIdParamsSchema } from "../validators/storeFollows.validator.js";
 
 export interface StoreFollowsHandlers {
   readonly followStore: Handler<FollowStoreCommand, StoreFollowState>;
-  readonly unfollowStore: Handler<UnfollowStoreCommand, void>;
+  readonly unfollowStore: Handler<UnfollowStoreCommand, StoreFollowState>;
   readonly listStoreFollowers: Handler<ListStoreFollowersQuery, Page<ConnectionEntry>>;
   readonly getStoreFollowStatus: Handler<GetStoreFollowStatusQuery, StoreFollowState>;
 }
@@ -27,5 +27,9 @@ export function createStoreFollowsController(route: RouteFactory, handlers: Stor
     status: route({ authentication: "optional", params: storeIdParamsSchema }, ({ principal, params }) => handlers.getStoreFollowStatus({ viewerId: principal?.accountId, storeId: params.storeId })),
     internalStats: requireInternalToken(internalToken, route({ authentication: "optional", params: storeIdParamsSchema, query: followStatsQuerySchema }, ({ params, query }) =>
       handlers.getStoreFollowStatus({ viewerId: query.viewerId, storeId: params.storeId }))),
+    internalFollow: requireInternalToken(internalToken, route({ authentication: "optional", params: internalStoreFollowerParamsSchema }, ({ params }) =>
+      handlers.followStore({ followerId: params.followerId, storeId: params.storeId }))),
+    internalUnfollow: requireInternalToken(internalToken, route({ authentication: "optional", params: internalStoreFollowerParamsSchema }, ({ params }) =>
+      handlers.unfollowStore({ followerId: params.followerId, storeId: params.storeId }))),
   };
 }

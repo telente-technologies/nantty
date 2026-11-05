@@ -9,6 +9,10 @@ export interface FollowResult {
 export interface ConnectionEntry extends UserSummary {
   readonly isFollowing: boolean;
   readonly followState: FollowState;
+  /** Whether this account has an accepted follow relationship to the viewer. */
+  readonly followsYou: boolean;
+  /** Number of accepted accounts both this account and the viewer follow. */
+  readonly mutualConnections: number;
 }
 
 export interface FollowRequestView {
