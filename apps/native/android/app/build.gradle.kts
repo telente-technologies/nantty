@@ -66,3 +66,10 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
+
+tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+    systemProperty(
+        "nanttySignalV1SerializationFixture",
+        rootProject.file("../../../packages/chatCrypto/fixtures/signal-v1-serialization.json").absolutePath,
+    )
+}

@@ -58,6 +58,16 @@ internal fun WalletScreen(
     executor: Executor,
     modifier: Modifier = Modifier,
 ) {
+    var managingPayoutAccounts by remember(repository) { mutableStateOf(false) }
+    if (managingPayoutAccounts) {
+        PayoutAccountsScreen(
+            repository = repository.payoutAccountsRepository,
+            executor = executor,
+            onBack = { managingPayoutAccounts = false },
+            modifier = modifier,
+        )
+        return
+    }
     var result by remember(repository) { mutableStateOf<WalletResult?>(null) }
     var transactionsResult by remember(repository) { mutableStateOf<WalletTransactionsResult?>(null) }
     var escrowHoldsResult by remember(repository) { mutableStateOf<WalletEscrowHoldsResult?>(null) }
@@ -168,6 +178,7 @@ internal fun WalletScreen(
                     transactionPageError = transactionPageError,
                     onRetryTransactions = ::refreshTransactions,
                     onLoadMoreTransactions = ::loadMoreTransactions,
+                    onManagePayoutAccounts = { managingPayoutAccounts = true },
                 )
             }
         }
@@ -186,6 +197,7 @@ private fun WalletContent(
     transactionPageError: Boolean,
     onRetryTransactions: () -> Unit,
     onLoadMoreTransactions: () -> Unit,
+    onManagePayoutAccounts: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.widthIn(max = 760.dp).fillMaxSize(),
@@ -225,6 +237,17 @@ private fun WalletContent(
                         Spacer(Modifier.height(6.dp))
                         Text(line.description, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                     }
+                }
+            }
+        }
+
+        item {
+            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
+                    Text("Payout accounts", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(4.dp))
+                    Text("Manage the bank accounts used for withdrawals.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                    TextButton(onClick = onManagePayoutAccounts, modifier = Modifier.align(Alignment.End)) { Text("Manage accounts") }
                 }
             }
         }

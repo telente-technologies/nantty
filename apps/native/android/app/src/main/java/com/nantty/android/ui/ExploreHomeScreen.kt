@@ -77,6 +77,7 @@ internal fun ExploreHomeScreen(
     onOpenPost: (String) -> Unit,
     onOpenProfile: (String) -> Unit,
     onRequireSignIn: () -> Unit,
+    onRequireSignInWithAction: ((() -> Unit) -> Unit) = { onRequireSignIn() },
     modifier: Modifier = Modifier,
     profileRepository: PublicProfileRepository? = null,
     recentEntries: List<SearchRecent> = emptyList(),
@@ -278,9 +279,8 @@ internal fun ExploreHomeScreen(
                         busy = followBusy[suggestion.user.id] == true,
                         onOpenProfile = { onOpenProfile(suggestion.user.id) },
                         onFollow = {
-                            if (!signedIn) onRequireSignIn()
-                            else if (profileRepository == null || followBusy[suggestion.user.id] == true) Unit
-                            else {
+                            fun followSuggestion() {
+                                if (profileRepository == null || followBusy[suggestion.user.id] == true) return
                                 val follow = followStates[suggestion.user.id] !in setOf("accepted", "requested")
                                 followBusy[suggestion.user.id] = true
                                 followError = null
@@ -295,6 +295,7 @@ internal fun ExploreHomeScreen(
                                     }
                                 }
                             }
+                            if (signedIn) followSuggestion() else onRequireSignInWithAction(::followSuggestion)
                         },
                     )
                 }

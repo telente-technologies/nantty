@@ -147,6 +147,7 @@ internal fun MartScreen(
     }
 
     LaunchedEffect(selectedCategoryId, selectedCollection, reloadGeneration) {
+        if (initialCategoryId != null && selectedCategoryId != initialCategoryId) return@LaunchedEffect
         requestGeneration++
         val generation = requestGeneration
         loading = true
@@ -183,6 +184,17 @@ internal fun MartScreen(
             is MartResult.Highlights -> highlights = result.value
             is MartResult.Failure, is MartResult.Home, is MartResult.Products -> Unit
         }
+    }
+
+    LaunchedEffect(repository, selectedCategoryId) {
+        selectedCategoryId?.let { categoryId ->
+            withContext(Dispatchers.IO) { repository.recordCategoryViewed(categoryId) }
+        }
+    }
+
+    val openProduct = { productId: String ->
+        scope.launch(Dispatchers.IO) { repository.recordProductClicked(productId) }
+        selectedProductId = productId
     }
 
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
@@ -259,7 +271,7 @@ internal fun MartScreen(
                         modifier = Modifier.weight(0.72f).fillMaxHeight(),
                         loading = loading,
                         products = products,
-                        onOpenProduct = { selectedProductId = it },
+                        onOpenProduct = openProduct,
                         errorMessage = errorMessage,
                         pageError = pageError,
                         nextCursor = nextCursor,
@@ -276,7 +288,7 @@ internal fun MartScreen(
                     modifier = Modifier.fillMaxSize(),
                     loading = loading,
                     products = products,
-                    onOpenProduct = { selectedProductId = it },
+                    onOpenProduct = openProduct,
                     errorMessage = errorMessage,
                     pageError = pageError,
                     nextCursor = nextCursor,

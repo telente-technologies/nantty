@@ -20,6 +20,8 @@ import com.nantty.android.data.SearchRepository
 import com.nantty.android.data.SearchTransport
 import com.nantty.android.data.ExploreRepository
 import com.nantty.android.data.ExploreTransport
+import com.nantty.android.data.PublicProfileRepository
+import com.nantty.android.data.PublicProfileTransport
 import org.json.JSONObject
 import org.json.JSONArray
 import org.junit.Assert.assertEquals
@@ -104,6 +106,71 @@ class SearchScreenTest {
             assertNull(transport.searchTokens().first())
             assertEquals(0, transport.historyPaths().size)
         }
+    }
+
+    @Test
+    fun guestExploreFollowIsDeferredUntilSignInThenReplayedOnTheSameScreen() {
+        var viewer: AccountSession? = null
+        var pendingAction: (() -> Unit)? = null
+        var followPath: String? = null
+        var followToken: String? = null
+        val targetId = "00000000-0000-4000-8000-000000000021"
+        val searchRepository = SearchRepository("https://api.nantty.com", { viewer }, FakeTransport())
+        val exploreRepository = ExploreRepository(
+            sessionProvider = { viewer },
+            transport = ExploreTransport { path, _ ->
+                when {
+                    path == "/api/v1/explore/categories" -> JSONObject("""{"data":[]}""")
+                    path.startsWith("/api/v1/explore/trends") -> JSONObject("""{"scope":"Nigeria","items":[]}""")
+                    path.startsWith("/api/v1/explore/headlines") -> JSONObject("""{"scope":"Nigeria","items":[]}""")
+                    path.startsWith("/api/v1/explore/who-to-follow") -> JSONObject("""{"data":[{"user":{"id":"$targetId","name":"Ada","username":"ada"},"reason":{"code":"popular","label":"Popular"},"isPrivate":false}]}""")
+                    path.startsWith("/api/v1/explore/posts-for-you") -> JSONObject("""{"data":[],"nextCursor":null}""")
+                    else -> error("Unexpected Explore path: $path")
+                }
+            },
+        )
+        val profileRepository = PublicProfileRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = { viewer },
+            transport = object : PublicProfileTransport {
+                override fun get(path: String, accessToken: String?) = error("Unexpected profile read: $path")
+                override fun post(path: String, accessToken: String): JSONObject {
+                    followPath = path
+                    followToken = accessToken
+                    return JSONObject("""{"data":{"state":"accepted"}}""")
+                }
+                override fun delete(path: String, accessToken: String) = error("Unexpected profile delete: $path")
+            },
+        )
+
+        compose.setContent {
+            MaterialTheme {
+                SearchScreen(
+                    repository = searchRepository,
+                    executor = Executor { it.run() },
+                    exploreRepository = exploreRepository,
+                    profileRepository = profileRepository,
+                    onRequireSignInWithAction = { pendingAction = it },
+                )
+            }
+        }
+
+        compose.onNodeWithText("Who to follow").assertIsDisplayed()
+        compose.onNodeWithText("Sign in").performClick()
+        compose.runOnIdle {
+            assertNull(followPath)
+            assertTrue(pendingAction != null)
+            viewer = signedInSession()
+        }
+        compose.waitForIdle()
+        compose.runOnIdle { pendingAction?.invoke() }
+        compose.waitForIdle()
+
+        compose.runOnIdle {
+            assertEquals("/api/v1/users/$targetId/follow", followPath)
+            assertEquals("search-token", followToken)
+        }
+        compose.onNodeWithText("Following").assertIsDisplayed()
     }
 
     @Test

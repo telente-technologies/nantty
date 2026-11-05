@@ -319,6 +319,7 @@ class MartProductDetailNavigationTest {
         composeRule.onNodeWithText("All Mart").performClick()
         composeRule.onNodeWithText("Browse products from stores on Nantty.").assertIsDisplayed()
         assertTrue(requestedUrls.any { it.endsWith("/api/v1/products?limit=20&categoryId=$categoryId") })
+        assertEquals(1, requestedUrls.count { it.endsWith("/api/v1/products?limit=20&categoryId=$categoryId") })
     }
 
     @Test

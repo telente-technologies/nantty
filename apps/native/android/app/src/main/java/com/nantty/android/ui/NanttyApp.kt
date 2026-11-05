@@ -16,10 +16,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.nantty.android.data.FeedRepository
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountSessionRepository
 import com.nantty.android.data.AuthFlowApi
+import com.nantty.android.ui.auth.PendingGuestAction
 import com.nantty.android.widget.OrdersWidgetRefreshScheduler
 import java.util.concurrent.Executor
 
@@ -45,6 +48,8 @@ fun NanttyApp(
     val appContext = LocalContext.current.applicationContext
     var session by remember { mutableStateOf<AccountSession?>(null) }
     var guestBrowsing by rememberSaveable { mutableStateOf(false) }
+    var showingGuestAuth by rememberSaveable { mutableStateOf(false) }
+    val pendingGuestAction = remember { PendingGuestAction() }
     var pendingFollowingAfterSignIn by rememberSaveable { mutableStateOf(false) }
     var sessionLoading by remember { mutableStateOf(true) }
     var sessionWorking by remember { mutableStateOf(false) }
@@ -82,6 +87,17 @@ fun NanttyApp(
 
     LaunchedEffect(sessionRepository) { restoreSession() }
 
+    LaunchedEffect(session?.accessToken) {
+        if (session != null) {
+            pendingGuestAction.takeAfterSignIn()?.invoke()
+        }
+    }
+
+    fun cancelGuestAuth() {
+        pendingGuestAction.discard()
+        showingGuestAuth = false
+    }
+
     if (sessionLoading) {
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -106,7 +122,11 @@ fun NanttyApp(
             accountUser = session?.user,
             isGuest = session == null,
             sessionRepository = sessionRepository,
-            onRequireSignIn = { guestBrowsing = false },
+            onRequireSignIn = { showingGuestAuth = true },
+            onRequireSignInWithAction = { action ->
+                pendingGuestAction.remember(action)
+                showingGuestAuth = true
+            },
             onRequireFollowingSignIn = {
                 pendingFollowingAfterSignIn = true
                 guestBrowsing = false
@@ -142,5 +162,30 @@ fun NanttyApp(
             requestedWidgetDestination = requestedWidgetDestination,
             onWidgetDestinationHandled = onWidgetDestinationHandled,
         )
+        if (session == null && guestBrowsing && showingGuestAuth) {
+            Dialog(
+                onDismissRequest = ::cancelGuestAuth,
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+            ) {
+                Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+                    AuthGatewayScreen(
+                        authApi = authFlowApi,
+                        sessionRepository = sessionRepository,
+                        executor = sessionExecutor,
+                        initialError = null,
+                        onRetryRestore = null,
+                        onBrowseAsGuest = ::cancelGuestAuth,
+                        onAuthenticated = { authenticated ->
+                            OrdersWidgetRefreshScheduler.refreshSoon(appContext, replaceExisting = true)
+                            session = authenticated
+                            guestBrowsing = false
+                            showingGuestAuth = false
+                            sessionError = null
+                            sessionWorking = false
+                        },
+                    )
+                }
+            }
+        }
     }
 }

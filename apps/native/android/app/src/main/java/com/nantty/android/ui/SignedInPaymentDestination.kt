@@ -18,7 +18,11 @@ internal fun SignedInPaymentDestination(
     executor: Executor,
     onBack: () -> Unit,
     onAuthenticationRequired: () -> Unit,
-    onViewOrders: () -> Unit,
+    initiallyVerified: Boolean,
+    onPaymentVerified: () -> Unit,
+    onViewPaymentProtection: () -> Unit,
+    onViewOrder: () -> Unit,
+    onContinueShopping: () -> Unit,
 ) {
     if (orderId == null) return
 
@@ -32,9 +36,13 @@ internal fun SignedInPaymentDestination(
                 total = WalletMoney(totalMinor, currency),
                 orderCount = orderCount,
             ),
+            initiallyVerified = initiallyVerified,
             onBack = onBack,
             onAuthenticationRequired = onAuthenticationRequired,
-            onViewOrders = onViewOrders,
+            onPaymentVerified = onPaymentVerified,
+            onViewPaymentProtection = onViewPaymentProtection,
+            onViewOrder = onViewOrder,
+            onContinueShopping = onContinueShopping,
         )
     }
 }

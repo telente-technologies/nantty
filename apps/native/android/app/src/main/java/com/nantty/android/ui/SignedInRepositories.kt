@@ -58,7 +58,12 @@ internal data class SignedInRepositories(
 
 @Composable
 internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepository): SignedInRepositories {
-    val wallet = remember(sessionRepository) { WalletRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val wallet = remember(sessionRepository) {
+        WalletRepository(
+            sessionProvider = sessionRepository::sessionOrNull,
+            refreshSessionProvider = sessionRepository::refreshSession,
+        )
+    }
     val cart = remember(sessionRepository) { CartRepository(accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken }) }
     val checkout = remember(sessionRepository) { CheckoutRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val buyerOrders = remember(sessionRepository) { BuyerOrdersRepository(sessionProvider = sessionRepository::sessionOrNull) }

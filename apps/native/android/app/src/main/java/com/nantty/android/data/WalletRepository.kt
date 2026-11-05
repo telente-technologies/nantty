@@ -62,7 +62,14 @@ class WalletRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val sessionProvider: () -> AccountSession?,
     private val transport: WalletTransport = JdkWalletTransport(baseUrl),
+    refreshSessionProvider: () -> AccountSession? = { null },
 ) {
+    internal val payoutAccountsRepository = PayoutAccountsRepository(
+        baseUrl = baseUrl,
+        sessionProvider = sessionProvider,
+        refreshSessionProvider = refreshSessionProvider,
+    )
+
     fun load(): WalletResult = try {
         val session = sessionProvider() ?: error("Sign in to view your wallet.")
         val payload = transport.get("/api/v1/wallets/me", session.accessToken)

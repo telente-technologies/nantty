@@ -124,7 +124,7 @@ class StoreRepository(
             bio = value.optNullableString("bio")?.filterNot(Char::isISOControl)?.take(MAX_BIO_LENGTH).orEmpty(),
             logoUrl = safeMediaUrl(value.optNullableString("logoUrl")),
             bannerUrl = safeMediaUrl(value.optNullableString("bannerUrl")),
-            followers = value.optInt("followers").coerceAtLeast(0),
+            followers = value.requiredNonNegativeInt("followers"),
             productsCount = value.optInt("productsCount").coerceAtLeast(0),
             rating = value.optDouble("rating").takeIf(Double::isFinite)?.coerceIn(0.0, 5.0) ?: 0.0,
             ratingCount = value.optInt("ratingCount").coerceAtLeast(0),

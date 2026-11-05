@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.AccountSessionRepository
-import com.nantty.android.data.CheckoutReceipt
 import com.nantty.android.data.FeedPost
 import com.nantty.android.data.FeedRepository
 import com.nantty.android.data.FollowRequestsRepository
@@ -30,6 +29,7 @@ internal fun SignedInApp(
     isGuest: Boolean,
     sessionRepository: AccountSessionRepository,
     onRequireSignIn: () -> Unit,
+    onRequireSignInWithAction: ((() -> Unit) -> Unit) = { onRequireSignIn() },
     onRequireFollowingSignIn: () -> Unit = onRequireSignIn,
     initialFollowingAfterSignIn: Boolean = false,
     onInitialFollowingHandled: () -> Unit = {},
@@ -53,14 +53,7 @@ internal fun SignedInApp(
     var selectedStoreId by rememberSaveable { mutableStateOf<String?>(null) }
     var searchScope by rememberSaveable { mutableStateOf("global") }
     var searchScopeLabel by rememberSaveable { mutableStateOf("Everywhere") }
-    var showingCart by rememberSaveable { mutableStateOf(false) }
-    var showingCheckout by rememberSaveable { mutableStateOf(false) }
-    var showingPayment by rememberSaveable { mutableStateOf(false) }
-    var checkoutId by rememberSaveable { mutableStateOf<String?>(null) }
-    var checkoutOrderId by rememberSaveable { mutableStateOf<String?>(null) }
-    var checkoutTotalMinor by rememberSaveable { mutableStateOf(0L) }
-    var checkoutCurrency by rememberSaveable { mutableStateOf("") }
-    var checkoutOrderCount by rememberSaveable { mutableStateOf(0) }
+    val purchaseState = rememberSaveable(saver = SignedInPurchaseState.Saver) { SignedInPurchaseState() }
     var pendingMartProductId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingMartCategoryId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingMartCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
@@ -86,8 +79,8 @@ internal fun SignedInApp(
     val repositories = rememberSignedInRepositories(sessionRepository)
     val (
         walletRepository,
-        cartRepository,
-        checkoutRepository,
+        _,
+        _,
         buyerOrdersRepository,
         disputeRepository,
         notificationsRepository,
@@ -120,6 +113,36 @@ internal fun SignedInApp(
         onOpenBuyerProfile = { selectedProfileId = it; profileOpenedFromConnections = false },
         onBack = { destination = Destination.Profile },
     )
+
+    val purchaseDestination = purchaseState.destination
+    if (purchaseDestination != null) {
+        SignedInPurchaseFlow(
+            destination = purchaseDestination,
+            orderId = purchaseState.orderId,
+            checkoutId = purchaseState.checkoutId,
+            totalMinor = purchaseState.totalMinor,
+            currency = purchaseState.currency,
+            orderCount = purchaseState.orderCount,
+            paymentConfirmed = purchaseState.paymentConfirmed,
+            repositories = repositories,
+            executor = executor,
+            onBackToPayment = purchaseState::backToPayment,
+            onBackFromPayment = purchaseState::backFromPayment,
+            onBackFromCheckout = purchaseState::backFromCheckout,
+            onBackFromCart = purchaseState::backFromCart,
+            onAuthenticationRequired = onSignOut,
+            onPaymentVerified = purchaseState::markPaymentVerified,
+            onViewPaymentProtection = purchaseState::showPaymentProtection,
+            onViewOrder = purchaseState::showPaidOrder,
+            onContinueShopping = {
+                purchaseState.continueShopping()
+                destination = Destination.Mart
+            },
+            onCheckoutCreated = purchaseState::checkoutCreated,
+            onProceedToCheckout = purchaseState::proceedToCheckout,
+        )
+        return
+    }
 
     fun refresh() {
         val requestedFeed = selectedFeed
@@ -340,57 +363,6 @@ internal fun SignedInApp(
         return
     }
 
-    if (showingPayment) {
-        SignedInPaymentDestination(
-            orderId = checkoutOrderId,
-            checkoutId = checkoutId,
-            totalMinor = checkoutTotalMinor,
-            currency = checkoutCurrency,
-            orderCount = checkoutOrderCount,
-            repository = checkoutRepository,
-            executor = executor,
-            onBack = { showingPayment = false; showingCart = true },
-            onAuthenticationRequired = onSignOut,
-            onViewOrders = { showingPayment = false; destination = Destination.Orders },
-        )
-        return
-    }
-
-    if (showingCheckout) {
-        HingeSafeContent {
-            CheckoutScreen(
-                repository = checkoutRepository,
-                executor = executor,
-                onBack = { showingCheckout = false; showingCart = true },
-                onAuthenticationRequired = onSignOut,
-                onCheckoutCreated = { receipt ->
-                    checkoutId = receipt.checkoutId
-                    checkoutOrderId = receipt.payableOrderId
-                    checkoutTotalMinor = receipt.total.amountMinor
-                    checkoutCurrency = receipt.total.currency
-                    checkoutOrderCount = receipt.orderCount
-                    showingCheckout = false
-                    showingPayment = true
-                    showingCart = false
-                },
-            )
-        }
-        return
-    }
-
-    if (showingCart) {
-        HingeSafeContent {
-            CartScreen(
-                repository = cartRepository,
-                executor = executor,
-                onBack = { showingCart = false },
-                onAuthenticationRequired = onSignOut,
-                onProceedToCheckout = { showingCart = false; showingCheckout = true },
-            )
-        }
-        return
-    }
-
     SignedInNavigationShell(
         destination = destination,
         isGuest = isGuest,
@@ -399,7 +371,7 @@ internal fun SignedInApp(
         onRefresh = ::refresh,
         onOpenMart = { destination = Destination.Mart },
         onSelectMart = { destination = if (it) Destination.Mart else Destination.Feed },
-        onOpenCart = { if (isGuest) onRequireSignIn() else showingCart = true },
+        onOpenCart = { if (isGuest) onRequireSignIn() else purchaseState.openCart() },
         onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders },
         onSignOut = if (isGuest) onRequireSignIn else onSignOut,
         topicSelector = {
@@ -414,6 +386,7 @@ internal fun SignedInApp(
                 canViewFollowing = !isGuest,
                 onSelectFeed = ::selectFeed,
                 onSignInRequired = onRequireSignIn,
+                onSignInRequiredWithAction = onRequireSignInWithAction,
                 onFollowingSignInRequired = onRequireFollowingSignIn,
                 onReauthenticate = onSignOut,
                 onRefresh = ::refresh,

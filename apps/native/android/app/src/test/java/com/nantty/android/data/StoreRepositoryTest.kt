@@ -45,18 +45,31 @@ class StoreRepositoryTest {
     @Test
     fun parserSanitizesExternalMediaClampsCountsAndRejectsMismatchedStoreIdentity() {
         val repository = StoreRepository("https://api.nantty.com", { null }, RecordingStoreTransport())
-        val payload = JSONObject("""{"id":"$STORE_ID","name":"Store","logoUrl":"javascript:alert(1)","bannerUrl":"https://cdn.nantty.com/banner.jpg","followers":-4,"productsCount":-2,"rating":99,"ratingCount":-1,"verified":true,"ownerUserId":"private-owner-id"}""")
+        val payload = JSONObject("""{"id":"$STORE_ID","name":"Store","logoUrl":"javascript:alert(1)","bannerUrl":"https://cdn.nantty.com/banner.jpg","followers":4,"productsCount":-2,"rating":99,"ratingCount":-1,"verified":true,"ownerUserId":"private-owner-id"}""")
 
         val store = repository.parseStore(payload, STORE_ID)
 
         assertEquals(null, store.logoUrl)
         assertEquals("https://cdn.nantty.com/banner.jpg", store.bannerUrl)
-        assertEquals(0, store.followers)
+        assertEquals(4, store.followers)
         assertEquals(0, store.productsCount)
         assertEquals(5.0, store.rating, 0.0)
         assertEquals(0, store.ratingCount)
         assertFalse(store.handle.isNotBlank())
         assertTrue(runCatching { repository.parseStore(payload, "another-store") }.isFailure)
+    }
+
+    @Test
+    fun parserRejectsUnavailableOrMalformedFollowerProjectionInsteadOfInventingZero() {
+        val repository = StoreRepository("https://api.nantty.com", { null }, RecordingStoreTransport())
+
+        listOf(
+            """{"id":"$STORE_ID","name":"Store"}""",
+            """{"id":"$STORE_ID","name":"Store","followers":null}""",
+            """{"id":"$STORE_ID","name":"Store","followers":-1}""",
+        ).forEach { payload ->
+            assertTrue(runCatching { repository.parseStore(JSONObject(payload), STORE_ID) }.isFailure)
+        }
     }
 
     @Test

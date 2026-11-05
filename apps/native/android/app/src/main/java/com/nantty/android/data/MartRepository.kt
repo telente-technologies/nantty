@@ -87,7 +87,13 @@ class MartRepository(
     private val accessTokenProvider: () -> String? = { null },
     private val openConnection: (URL) -> HttpURLConnection = { it.openConnection() as HttpURLConnection },
 ) {
+    private val interactionRepository by lazy { ProductInteractionRepository(baseUrl, accessTokenProvider, openConnection) }
+
     internal fun currentAccessToken(): String? = accessTokenProvider()
+
+    fun recordCategoryViewed(categoryId: String): Boolean = interactionRepository.recordCategoryViewed(categoryId)
+
+    fun recordProductClicked(productId: String): Boolean = interactionRepository.recordProductClicked(productId)
 
     fun loadHome(): MartResult = get(buildMartHomeUrl(baseUrl), ::parseHome)
 

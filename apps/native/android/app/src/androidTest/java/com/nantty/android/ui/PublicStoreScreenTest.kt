@@ -59,7 +59,7 @@ class PublicStoreScreenTest {
             baseUrl = "https://api.nantty.com",
             transport = StoreTransport { path, _ ->
                 when {
-                    path == "/api/v1/stores/$STORE_ID" -> JSONObject("""{"id":"$STORE_ID","name":"Ada Fabrics","productsCount":0}""")
+                    path == "/api/v1/stores/$STORE_ID" -> JSONObject("""{"id":"$STORE_ID","name":"Ada Fabrics","followers":0,"productsCount":0}""")
                     else -> JSONObject("""{"data":[],"nextCursor":null}""")
                 }
             },
