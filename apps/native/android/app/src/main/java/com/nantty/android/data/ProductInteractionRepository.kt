@@ -67,9 +67,9 @@ internal class ProductInteractionRepository(
                 setRequestProperty("Authorization", "Bearer $token")
             }
             connection.useInteractionConnection {
-                if (connection.responseCode !in 200..299) return@useConnection false
+                if (connection.responseCode !in 200..299) return@useInteractionConnection false
                 val body = connection.inputStream.use(::readInteractionResponse)
-                val rows = JSONObject(body).optJSONArray("data") ?: return@useConnection false
+                val rows = JSONObject(body).optJSONArray("data") ?: return@useInteractionConnection false
                 var analyticsGranted = false
                 var personalizationGranted = false
                 for (index in 0 until rows.length()) {
