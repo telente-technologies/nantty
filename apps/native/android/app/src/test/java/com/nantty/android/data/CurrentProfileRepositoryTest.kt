@@ -77,6 +77,28 @@ class CurrentProfileRepositoryTest {
     }
 
     @Test
+    fun updateSendsAvatarAndBannerMediaIdsOnlyWhenUploaded() {
+        val transport = RecordingCurrentProfileTransport(profilePayload())
+        val repository = CurrentProfileRepository(
+            baseUrl = "https://api.nantty.com",
+            transport = transport,
+            sessionProvider = { currentSession() },
+        )
+
+        repository.update(CurrentProfileUpdate(
+            name = "Ari",
+            bio = "Bio",
+            isPrivate = true,
+            avatarMediaId = "profile/avatar-1",
+            bannerMediaId = "profile/banner-1",
+        ))
+
+        assertEquals(setOf("name", "bio", "isPrivate", "avatarMediaId", "bannerMediaId"), transport.patchFields!!.keys().asSequence().toSet())
+        assertEquals("profile/avatar-1", transport.patchFields!!.getString("avatarMediaId"))
+        assertEquals("profile/banner-1", transport.patchFields!!.getString("bannerMediaId"))
+    }
+
+    @Test
     fun invalidLengthsNeverReachServer() {
         val transport = RecordingCurrentProfileTransport(profilePayload())
         val repository = CurrentProfileRepository(

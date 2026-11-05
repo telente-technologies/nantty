@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.material3.AlertDialog
@@ -33,20 +34,41 @@ internal fun AndroidConversationScreen(
 ) {
     var result by remember(repository, conversation.id) { mutableStateOf<ChatHistoryResult?>(null) }
     var refreshing by remember(repository, conversation.id) { mutableStateOf(false) }
+    var loadingOlder by remember(repository, conversation.id) { mutableStateOf(false) }
+    var olderMessagesError by remember(repository, conversation.id) { mutableStateOf<String?>(null) }
+    var requestGeneration by remember(repository, conversation.id) { mutableIntStateOf(0) }
     var readError by remember(repository, conversation.id) { mutableStateOf<String?>(null) }
     var showingInfo by remember(repository, conversation.id) { mutableStateOf(false) }
 
     fun refresh() {
         if (refreshing) return
+        requestGeneration += 1
+        val generation = requestGeneration
         refreshing = true
+        loadingOlder = false
+        olderMessagesError = null
         result = null
         executor.execute {
-            val loaded = repository.loadMessages(conversation.id)
-            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                result = loaded
-                refreshing = false
+            val loaded = repository.loadInitialHistory(conversation.id) { page ->
+                androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                    if (generation == requestGeneration) {
+                        result = ChatHistoryResult.Success(page)
+                        refreshing = false
+                        loadingOlder = page.nextCursor != null
+                    }
+                }
             }
-            if (loaded is ChatHistoryResult.Success) {
+            var committed = false
+            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                if (generation == requestGeneration) {
+                    result = loaded
+                    refreshing = false
+                    loadingOlder = false
+                    olderMessagesError = (loaded as? ChatHistoryResult.Success)?.continuationError
+                    committed = true
+                }
+            }
+            if (committed && loaded is ChatHistoryResult.Success && conversation.inboxFolder == com.nantty.android.data.MessagesInboxFolder.CHATS) {
                 repository.markConversationRead(conversation.id).onSuccess {
                     onConversationRead()
                 }.onFailure { error ->
@@ -58,7 +80,37 @@ internal fun AndroidConversationScreen(
         }
     }
 
+    fun loadOlderMessages() {
+        val current = result as? ChatHistoryResult.Success ?: return
+        val cursor = current.page.nextCursor ?: return
+        if (loadingOlder) return
+        val generation = requestGeneration
+        loadingOlder = true
+        olderMessagesError = null
+        executor.execute {
+            val loaded = repository.loadMessages(conversation.id, cursor)
+            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                if (generation != requestGeneration) return@withMutableSnapshot
+                loadingOlder = false
+                when (loaded) {
+                    is ChatHistoryResult.Failure -> olderMessagesError = loaded.message
+                    is ChatHistoryResult.Success -> {
+                        val latest = result as? ChatHistoryResult.Success ?: return@withMutableSnapshot
+                        if (latest.page.nextCursor != cursor) return@withMutableSnapshot
+                        result = ChatHistoryResult.Success(
+                            latest.page.copy(
+                                messages = (latest.page.messages + loaded.page.messages).distinctBy(EncryptedChatMessage::id),
+                                nextCursor = loaded.page.nextCursor,
+                            ),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     fun markRead() {
+        if (conversation.inboxFolder != com.nantty.android.data.MessagesInboxFolder.CHATS) return
         readError = null
         executor.execute {
             repository.markConversationRead(conversation.id).onSuccess {
@@ -102,6 +154,10 @@ internal fun AndroidConversationScreen(
         safetyCodeAvailable = false,
         safetyCodeLabel = null,
         retryingMessageIds = emptySet(),
+        hasOlderMessages = (current as? ChatHistoryResult.Success)?.page?.nextCursor != null,
+        loadingOlderMessages = loadingOlder,
+        olderMessagesError = olderMessagesError,
+        allowMarkRead = conversation.inboxFolder == com.nantty.android.data.MessagesInboxFolder.CHATS,
         onBack = onBack,
         onOpenPeerOrInfo = { showingInfo = true },
         onOpenSafetyCode = {},
@@ -110,6 +166,7 @@ internal fun AndroidConversationScreen(
         onDraftChange = {},
         onSendText = {},
         onRetryMessage = {},
+        onLoadOlderMessages = ::loadOlderMessages,
     )
     if (showingInfo) AlertDialog(
         onDismissRequest = { showingInfo = false },

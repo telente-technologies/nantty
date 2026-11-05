@@ -46,6 +46,7 @@ internal fun ProductReportDialog(
     submitted: Boolean,
     selectedReason: ProductReportReason?,
     errorMessage: String?,
+    canRetry: Boolean,
     onDismiss: () -> Unit,
     onSelectReason: (ProductReportReason) -> Unit,
     onRetry: () -> Unit,
@@ -97,7 +98,7 @@ internal fun ProductReportDialog(
         confirmButton = {
             when {
                 submitted -> TextButton(onClick = onDismiss) { Text(stringResource(R.string.report_product_dismiss)) }
-                errorMessage != null && selectedReason != null -> TextButton(onClick = onRetry, enabled = !submitting) {
+                errorMessage != null && selectedReason != null && canRetry -> TextButton(onClick = onRetry, enabled = !submitting) {
                     Text(stringResource(R.string.report_product_retry))
                 }
                 else -> TextButton(onClick = onDismiss, enabled = !submitting) { Text(stringResource(android.R.string.cancel)) }

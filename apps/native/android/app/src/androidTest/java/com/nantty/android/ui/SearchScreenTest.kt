@@ -149,8 +149,34 @@ class SearchScreenTest {
         compose.onNodeWithContentDescription("Search Mart category Clothing").performClick()
 
         compose.runOnIdle {
-            assertEquals("category_1" to "Clothing", openedCategory)
+            assertEquals("0192a4f0-0000-7000-8000-000000000001" to "Clothing", openedCategory)
             assertEquals(listOf("/api/v1/search?q=clothing&scope=global&type=top&limit=10"), transport.searchPaths())
+        }
+    }
+
+    @Test
+    fun officialStoreBrandSearchExposesRnStoreFiltersAndSendsSelectedScopeAndType() {
+        val transport = FakeTransport(officialStoreBrand = true)
+        compose.setContent {
+            MaterialTheme {
+                SearchScreen(SearchRepository("https://api.nantty.com", { null }, transport), Executor { it.run() })
+            }
+        }
+
+        searchFor("loom")
+        compose.onNodeWithContentDescription("Search the official store for Nigerian Loom").performClick()
+        compose.onNodeWithText("In: Nigerian Loom").assertIsDisplayed()
+        compose.onNodeWithText("All").assertIsDisplayed()
+        compose.onNodeWithText("Products").performClick()
+        searchFor("adire")
+
+        compose.onNodeWithTag("product-search-result-prod_1").assertIsDisplayed()
+        compose.runOnIdle {
+            assertTrue(
+                transport.searchPaths().contains(
+                    "/api/v1/search?q=adire&scope=store:$OFFICIAL_STORE_ID&type=products&limit=10",
+                ),
+            )
         }
     }
 
@@ -402,6 +428,7 @@ class SearchScreenTest {
         private val failFirst: Boolean = false,
         private val usersOnly: Boolean = false,
         private val categoriesOnly: Boolean = false,
+        private val officialStoreBrand: Boolean = false,
         private val recentEntries: List<JSONObject> = emptyList(),
         private val failHistory: Boolean = false,
     ) : SearchTransport {
@@ -428,7 +455,8 @@ class SearchScreenTest {
             if (failFirst && searchRequests.size == 1) error("Offline")
             if (path.contains("cursor=")) return JSONObject("""{"data":[{"type":"post","id":"post-2","caption":"Another API post","likes":2,"views":5}],"nextCursor":null,"scope":"global"}""")
             if (path.contains("type=products")) return JSONObject("""{"data":[{"type":"product","id":"prod_1","name":"Adire jacket","price":{"amountMinor":1250000,"currency":"NGN"},"imageUrl":"https://cdn.nantty.com/jacket.jpg","stock":3}],"nextCursor":null,"scope":"global"}""")
-            if (categoriesOnly) return JSONObject("""{"data":[{"type":"category","id":"category_1","name":"Clothing"}],"nextCursor":null,"scope":"global"}""")
+            if (categoriesOnly) return JSONObject("""{"data":[{"type":"category","id":"0192a4f0-0000-7000-8000-000000000001","name":"Clothing"}],"nextCursor":null,"scope":"global"}""")
+            if (officialStoreBrand) return JSONObject("""{"data":[{"type":"brand","id":"brand_1","name":"Nigerian Loom","officialStoreId":"$OFFICIAL_STORE_ID"}],"nextCursor":null,"scope":"global"}""")
             if (usersOnly) return JSONObject("""{"data":[{"type":"user","id":"user-1","name":"Ari","username":"ari","verified":true}],"nextCursor":null,"scope":"global"}""")
             return JSONObject("""{"data":[{"type":"post","id":"post-1","caption":"A real post result","thumbnailUrl":"https://cdn.nantty.com/post.jpg","likes":4,"views":12}],"nextCursor":"next-page","scope":"global"}""")
         }
@@ -448,6 +476,7 @@ class SearchScreenTest {
     companion object {
         private const val FIRST_UUID = "7b7d83c7-d9a8-49e8-9e98-c52aab1ba444"
         private const val SECOND_UUID = "e48546e1-c4e7-4cc1-bdaa-f11a9061bd7d"
+        private const val OFFICIAL_STORE_ID = "1d4b7a63-a205-4418-93be-58ae7ac624a4"
         private fun signedInSession() = AccountSession("search-token", "refresh", AccountUser("user-1", "Ari", "ari", null, null, emptyList()))
         private fun recent(query: String, id: String = FIRST_UUID) = JSONObject().put("id", id).put("query", query).put("scope", "global").put("searchedAt", "2026-11-04T12:00:00Z")
     }

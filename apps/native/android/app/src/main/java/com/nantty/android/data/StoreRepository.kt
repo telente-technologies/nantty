@@ -3,6 +3,7 @@ package com.nantty.android.data
 import com.nantty.android.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
+import java.math.BigDecimal
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -33,7 +34,7 @@ sealed interface PublicStoreResult {
 fun interface StoreTransport {
     fun get(path: String, accessToken: String?): JSONObject
     fun post(path: String, accessToken: String): JSONObject { error("This store transport does not support writes.") }
-    fun delete(path: String, accessToken: String): Unit { error("This store transport does not support writes.") }
+    fun delete(path: String, accessToken: String): JSONObject { error("This store transport does not support writes.") }
 }
 
 data class StoreFollowState(val storeId: String, val isFollowing: Boolean, val followers: Int)
@@ -47,6 +48,7 @@ class StoreRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val sessionProvider: () -> AccountSession? = { null },
     private val transport: StoreTransport = JdkStoreTransport(baseUrl),
+    private val refreshSessionProvider: () -> AccountSession? = { null },
 ) {
     fun currentAccessToken(): String? = sessionProvider()?.accessToken?.takeIf(String::isNotBlank)
 
@@ -71,17 +73,34 @@ class StoreRepository(
         val token = currentAccessToken() ?: return StoreFollowResult.Failure("Sign in to follow stores.", authenticationRequired = true)
         val path = "/api/v1/stores/${pathSegment(storeId)}/follow"
         return try {
-            if (follow) {
-                transport.post(path, token)
+            val state = if (follow) {
+                // The Social API returns authoritative membership state and follower count.
+                parseFollowState(followRequest(path, follow = true, token), storeId, expectedFollowing = true)
             } else {
-                transport.delete(path, token)
+                // DELETE returns the same authoritative state shape as POST. Avoid a follow-up
+                // read that could fail after the mutation already succeeded.
+                parseFollowState(followRequest(path, follow = false, token), storeId, expectedFollowing = false)
             }
-            val response = transport.get("/api/v1/stores/${pathSegment(storeId)}/follow-status", token)
-            StoreFollowResult.Success(parseFollowState(response, storeId, expectedFollowing = follow))
+            StoreFollowResult.Success(state)
         } catch (error: StoreTransportException) {
-            StoreFollowResult.Failure(error.message ?: "Could not update this store. Try again.", authenticationRequired = error.statusCode == 401)
+            StoreFollowResult.Failure(
+                error.message ?: "Could not update this store. Try again.",
+                authenticationRequired = error.statusCode in setOf(HttpURLConnection.HTTP_UNAUTHORIZED, HttpURLConnection.HTTP_FORBIDDEN),
+            )
         } catch (error: Exception) {
             StoreFollowResult.Failure(error.message ?: "Could not update this store. Check your connection and try again.")
+        }
+    }
+
+    private fun followRequest(path: String, follow: Boolean, accessToken: String): JSONObject {
+        fun request(token: String) = if (follow) transport.post(path, token) else transport.delete(path, token)
+        return try {
+            request(accessToken)
+        } catch (error: StoreTransportException) {
+            if (error.statusCode != HttpURLConnection.HTTP_UNAUTHORIZED) throw error
+            val refreshedToken = refreshSessionProvider()?.accessToken?.takeIf(String::isNotBlank)
+                ?: throw StoreTransportException(HttpURLConnection.HTTP_UNAUTHORIZED, "Your session has expired. Sign in again.")
+            request(refreshedToken)
         }
     }
 
@@ -90,7 +109,7 @@ class StoreRepository(
         val id = value.optString("storeId")
         val isFollowing = value.optBoolean("isFollowing")
         require(id == expectedId && isSafeMartIdentifier(id) && isFollowing == expectedFollowing) { "Nantty returned an invalid store-follow state." }
-        return StoreFollowState(id, isFollowing, value.optInt("followers").coerceAtLeast(0))
+        return StoreFollowState(id, isFollowing, value.requiredNonNegativeInt("followers"))
     }
 
     internal fun parseStore(payload: JSONObject, expectedId: String): PublicStore {
@@ -151,6 +170,14 @@ class StoreRepository(
 private fun pathSegment(value: String): String = URLEncoder.encode(value, Charsets.UTF_8.name()).replace("+", "%20")
 private fun queryValue(value: String): String = URLEncoder.encode(value, Charsets.UTF_8.name()).replace("+", "%20")
 private fun JSONObject.optNullableString(key: String): String? = optString(key).takeIf { it.isNotBlank() && it != "null" }
+private fun JSONObject.requiredNonNegativeInt(key: String): Int {
+    val raw = opt(key)
+    require(raw is Number) { "Nantty returned an invalid store-follow state." }
+    val count = runCatching { BigDecimal(raw.toString()).longValueExact() }
+        .getOrElse { error("Nantty returned an invalid store-follow state.") }
+    require(count in 0..Int.MAX_VALUE.toLong()) { "Nantty returned an invalid store-follow state." }
+    return count.toInt()
+}
 
 private class JdkStoreTransport(private val baseUrl: String) : StoreTransport {
     override fun get(path: String, accessToken: String?): JSONObject {
@@ -159,9 +186,7 @@ private class JdkStoreTransport(private val baseUrl: String) : StoreTransport {
 
     override fun post(path: String, accessToken: String): JSONObject = request(path, "POST", accessToken, allowEmpty = true)
 
-    override fun delete(path: String, accessToken: String) {
-        request(path, "DELETE", accessToken, allowEmpty = true)
-    }
+    override fun delete(path: String, accessToken: String): JSONObject = request(path, "DELETE", accessToken, allowEmpty = true)
 
     private fun request(path: String, method: String, accessToken: String?, allowEmpty: Boolean = false): JSONObject {
         val origin = trustedApiOrigin(baseUrl) ?: error("Configure an HTTPS Nantty API URL to view stores.")

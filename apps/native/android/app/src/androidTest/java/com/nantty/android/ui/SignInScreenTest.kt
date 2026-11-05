@@ -31,7 +31,7 @@ class SignInScreenTest {
         }
 
         compose.onNodeWithText("Sign in").assertIsNotEnabled()
-        compose.onNodeWithText("Email or username").performTextInput("  ari@example.com  ")
+        compose.onNodeWithText("Email").assertIsDisplayed().performTextInput("  ari@example.com  ")
         compose.onNodeWithText("Password").performTextInput("example-password")
         compose.onNodeWithText("Sign in").assertIsDisplayed().performClick()
         compose.runOnIdle {

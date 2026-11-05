@@ -3,12 +3,15 @@ package com.nantty.android.ui
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
@@ -69,6 +72,42 @@ class MessagesScreenTest {
     }
 
     @Test
+    fun searchesPeopleAndCreatesConversationThroughBackendBeforeOpeningThread() {
+        val personId = "66666666-6666-4666-8666-666666666666"
+        val conversationId = "77777777-7777-4777-8777-777777777777"
+        val requestedPaths = mutableListOf<String>()
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = MessagesTransport { _, _ -> JSONObject("""{"data":[],"nextCursor":null}""") },
+            threadTransport = ChatThreadTransport { method, path, _, body ->
+                requestedPaths += "$method $path"
+                when {
+                    method == "GET" && path.startsWith("/api/v1/conversations/search?") -> JSONObject("""{"data":{"conversations":[],"people":[{"id":"$personId","name":"Ari Oyinlola","username":"ari","avatarUrl":null}]}}""")
+                    method == "POST" && path == "/api/v1/conversations" -> {
+                        assertEquals(personId, body?.optString("userId"))
+                        JSONObject("""{"data":{"id":"$conversationId","kind":"direct","peer":{"id":"$personId","name":"Ari Oyinlola","username":"ari","avatarUrl":null},"lastMessageAt":"","unread":0}}""")
+                    }
+                    method == "GET" && path == "/api/v1/conversations/$conversationId/messages?limit=30" -> JSONObject("""{"data":[],"nextCursor":null}""")
+                    method == "POST" && path == "/api/v1/conversations/$conversationId/read" -> JSONObject()
+                    else -> error("Unexpected request: $method $path")
+                }
+            },
+        )
+
+        compose.setContent { MaterialTheme { MessagesScreen(repository, Executor { it.run() }) } }
+        compose.onNodeWithContentDescription("Search messages and people").performClick()
+        compose.onNodeWithText("Search messages and people").performTextInput("Ari")
+        compose.waitUntil(5_000) { compose.onAllNodesWithText("Ari Oyinlola").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText("Ari Oyinlola").performClick()
+        compose.onNodeWithText("Encrypted message. Secure decryption is not available in this Android build yet").assertIsDisplayed()
+        compose.runOnIdle {
+            assertEquals(true, requestedPaths.contains("GET /api/v1/conversations/search?q=Ari"))
+            assertEquals(true, requestedPaths.contains("POST /api/v1/conversations"))
+        }
+    }
+
+    @Test
     fun switchingToDirectResetsListAndDoesNotReuseAllFilterCursor() {
         val requestedPaths = mutableListOf<String>()
         val cursor = "33333333-3333-4333-8333-333333333333"
@@ -101,6 +140,64 @@ class MessagesScreenTest {
                 ),
                 requestedPaths,
             )
+        }
+    }
+
+    @Test
+    fun requestsFolderUsesServerFolderAndAcceptsTheRequest() {
+        val conversationId = "11111111-1111-4111-8111-111111111111"
+        var requestedFolder: String? = null
+        var actionRequest: String? = null
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = MessagesTransport { path, _ ->
+                requestedFolder = path
+                JSONObject("""{"data":[{"id":"$conversationId","kind":"direct","peer":{"id":"22222222-2222-4222-8222-222222222222","name":"Request sender"},"inboxFolder":"requests","lastMessageAt":"2026-10-01T12:00:00Z","unread":0}],"nextCursor":null}""")
+            },
+            threadTransport = ChatThreadTransport { method, path, _, body ->
+                assertEquals(null, body)
+                actionRequest = "$method $path"
+                JSONObject()
+            },
+        )
+
+        compose.setContent { MaterialTheme { MessagesScreen(repository, Executor { it.run() }) } }
+        compose.onNodeWithText("Chats").performClick()
+        compose.onNodeWithContentDescription("Requests inbox folder").performClick()
+        compose.onNodeWithText("Request sender").assertIsDisplayed()
+        compose.onNodeWithText("They won't see you've read this until you accept.").assertIsDisplayed()
+        compose.onNodeWithText("Accept").performClick()
+
+        compose.runOnIdle {
+            assertEquals("/api/v1/conversations?folder=requests&limit=20", requestedFolder)
+            assertEquals("POST /api/v1/conversations/$conversationId/accept", actionRequest)
+        }
+    }
+
+    @Test
+    fun openingRequestDoesNotSendReadReceiptOrExposeMarkReadAction() {
+        val conversationId = "11111111-1111-4111-8111-111111111111"
+        val threadRequests = mutableListOf<String>()
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = MessagesTransport { _, _ ->
+                JSONObject("""{"data":[{"id":"$conversationId","kind":"direct","peer":{"id":"22222222-2222-4222-8222-222222222222","name":"Request sender"},"inboxFolder":"requests","lastMessageAt":"2026-10-01T12:00:00Z","unread":0}],"nextCursor":null}""")
+            },
+            threadTransport = ChatThreadTransport { method, path, _, _ ->
+                threadRequests += "$method $path"
+                JSONObject("""{"data":[],"nextCursor":null}""")
+            },
+        )
+
+        compose.setContent { MaterialTheme { MessagesScreen(repository, Executor { it.run() }) } }
+        compose.onNodeWithText("Chats").performClick()
+        compose.onNodeWithContentDescription("Requests inbox folder").performClick()
+        compose.onNodeWithText("Request sender").performClick()
+        compose.onNodeWithContentDescription("Mark conversation as read").assertDoesNotExist()
+        compose.runOnIdle {
+            assertEquals(listOf("GET /api/v1/conversations/$conversationId/messages?limit=30"), threadRequests)
         }
     }
 
@@ -155,6 +252,53 @@ class MessagesScreenTest {
         compose.onNodeWithText("ciphertext-must-not-render").assertDoesNotExist()
         compose.onNodeWithText("plaintext must not render").assertDoesNotExist()
         compose.onNodeWithContentDescription("Send message").assertIsNotEnabled()
+    }
+
+    @Test
+    fun openingThreadLoadsOlderCursorPagesBeforeShowingFinalTimeline() {
+        val conversationId = "11111111-1111-4111-8111-111111111111"
+        val newestId = "33333333-3333-4333-8333-333333333333"
+        val olderId = "44444444-4444-4444-8444-444444444444"
+        val historyPaths = mutableListOf<String>()
+        val threadTransport = ChatThreadTransport { method, path, _, _ ->
+            when {
+                method == "GET" && path == "/api/v1/conversations/$conversationId/messages?limit=30" -> {
+                    historyPaths += path
+                    JSONObject("""{"data":[{"id":"$newestId","conversationId":"$conversationId","senderId":"22222222-2222-4222-8222-222222222222","createdAt":"2026-10-01T12:00:00.000Z","kind":"text","text":"must stay hidden","encryption":{"ciphertext":"opaque-new","protocol":"signal-v1"}}],"nextCursor":"$olderId"}""")
+                }
+                method == "GET" && path == "/api/v1/conversations/$conversationId/messages?limit=30&cursor=$olderId" -> {
+                    historyPaths += path
+                    JSONObject("""{"data":[{"id":"$olderId","conversationId":"$conversationId","senderId":"22222222-2222-4222-8222-222222222222","createdAt":"2026-10-01T11:00:00.000Z","kind":"text","text":"also hidden","encryption":{"ciphertext":"opaque-old","protocol":"signal-v1"}}],"nextCursor":null}""")
+                }
+                method == "POST" && path == "/api/v1/conversations/$conversationId/read" -> JSONObject()
+                else -> error("Unexpected thread request: $method $path")
+            }
+        }
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = FakeTransport(),
+            threadTransport = threadTransport,
+        )
+
+        compose.setContent { MaterialTheme { MessagesScreen(repository, Executor { it.run() }) } }
+        compose.onNodeWithText("Ari Oyinlola").performClick()
+        compose.waitForIdle()
+
+        compose.onAllNodesWithText("Encrypted message. Secure decryption is not available in this Android build yet")
+            .assertCountEquals(2)
+        compose.onNodeWithText("Load older messages").assertDoesNotExist()
+        compose.onNodeWithText("must stay hidden").assertDoesNotExist()
+        compose.onNodeWithText("also hidden").assertDoesNotExist()
+        compose.runOnIdle {
+            assertEquals(
+                listOf(
+                    "/api/v1/conversations/$conversationId/messages?limit=30",
+                    "/api/v1/conversations/$conversationId/messages?limit=30&cursor=$olderId",
+                ),
+                historyPaths,
+            )
+        }
     }
 
 

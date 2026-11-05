@@ -63,11 +63,14 @@ internal fun SearchScreen(
     exploreRepository: ExploreRepository? = null,
     profileRepository: PublicProfileRepository? = null,
     onRequireSignIn: () -> Unit = onReauthenticate,
+    initialScope: String = SearchRepository.GLOBAL_SCOPE,
+    initialScopeLabel: String = "Everywhere",
+    onScopeChanged: (String, String) -> Unit = { _, _ -> },
 ) {
     var query by remember(repository) { mutableStateOf("") }
-    var type by remember(repository) { mutableStateOf(SearchType.TOP) }
-    var scope by remember(repository) { mutableStateOf(SearchRepository.GLOBAL_SCOPE) }
-    var scopeLabel by remember(repository) { mutableStateOf("Everywhere") }
+    var type by remember(repository, initialScope) { mutableStateOf(if (initialScope == "mart") SearchType.PRODUCTS else SearchType.TOP) }
+    var scope by remember(repository, initialScope) { mutableStateOf(initialScope) }
+    var scopeLabel by remember(repository, initialScope, initialScopeLabel) { mutableStateOf(initialScopeLabel) }
     var result by remember(repository) { mutableStateOf<SearchResult?>(null) }
     var loading by remember(repository) { mutableStateOf(false) }
     var loadingMore by remember(repository) { mutableStateOf(false) }
@@ -235,6 +238,7 @@ internal fun SearchScreen(
                     scope = SearchRepository.GLOBAL_SCOPE
                     scopeLabel = "Everywhere"
                     type = SearchType.TOP
+                    onScopeChanged(scope, scopeLabel)
                 },
                 label = { Text("Everywhere") },
             )
@@ -244,28 +248,45 @@ internal fun SearchScreen(
                     scope = "mart"
                     scopeLabel = "Mart"
                     type = SearchType.PRODUCTS
+                    onScopeChanged(scope, scopeLabel)
                 },
                 label = { Text("Mart") },
             )
-            if (scope.startsWith("store:")) {
+            if (scope.startsWith("store:") || scope.startsWith("profile:")) {
                 androidx.compose.material3.FilterChip(selected = true, onClick = {
                     scope = SearchRepository.GLOBAL_SCOPE
                     scopeLabel = "Everywhere"
                     type = SearchType.TOP
+                    onScopeChanged(scope, scopeLabel)
                 }, label = { Text(scopeLabel, maxLines = 1, overflow = TextOverflow.Ellipsis) })
             }
         }
-        if (query.isNotBlank() && scope == SearchRepository.GLOBAL_SCOPE) {
+        val resultTypes = when {
+            scope == SearchRepository.GLOBAL_SCOPE -> SearchType.entries.map { it to it.label }
+            scope.startsWith("store:") -> listOf(
+                SearchType.TOP to "All",
+                SearchType.PRODUCTS to "Products",
+                SearchType.POSTS to "Posts",
+            )
+            scope.startsWith("profile:") -> listOf(
+                SearchType.TOP to "All",
+                SearchType.POSTS to "Posts",
+                SearchType.CLIPS to "Clips",
+                SearchType.PRODUCTS to "Products",
+            )
+            else -> emptyList()
+        }
+        if (query.isNotBlank() && resultTypes.isNotEmpty()) {
             androidx.compose.foundation.lazy.LazyRow(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items(SearchType.entries, key = SearchType::apiValue) { option ->
+                items(resultTypes, key = { (option, _) -> option.apiValue }) { (option, label) ->
                     androidx.compose.material3.FilterChip(
                         selected = type == option,
                         onClick = { type = option },
-                        label = { Text(option.label) },
+                        label = { Text(label) },
                     )
                 }
             }
@@ -326,6 +347,7 @@ internal fun SearchScreen(
                                 scopeLabel = item.title
                                 type = SearchType.TOP
                                 query = ""
+                                onScopeChanged(scope, scopeLabel)
                             })
                             else -> null
                         })

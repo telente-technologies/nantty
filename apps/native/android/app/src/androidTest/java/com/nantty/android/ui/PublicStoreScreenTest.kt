@@ -92,6 +92,9 @@ class PublicStoreScreenTest {
         assertEquals(listOf("/api/v1/stores/$STORE_ID/follow"), transport.posts)
 
         compose.onNodeWithText("Following").performClick()
+        compose.onNodeWithText("Unfollow store?").assertIsDisplayed()
+        assertEquals(emptyList<String>(), transport.deletes)
+        compose.onNodeWithText("Unfollow", useUnmergedTree = true).performClick()
         compose.waitUntil(5_000) {
             compose.onNodeWithText("Follow store").assertExists()
             true
@@ -128,10 +131,11 @@ private class FollowableStoreTransport : StoreTransport {
         return JSONObject("""{"storeId":"${PublicStoreScreenTest.STORE_ID}","isFollowing":true,"followers":$followers}""")
     }
 
-    override fun delete(path: String, accessToken: String) {
+    override fun delete(path: String, accessToken: String): JSONObject {
         assertEquals("store-token", accessToken)
         deletes += path
         isFollowing = false
         followers -= 1
+        return JSONObject("""{"storeId":"${PublicStoreScreenTest.STORE_ID}","isFollowing":false,"followers":$followers}""")
     }
 }

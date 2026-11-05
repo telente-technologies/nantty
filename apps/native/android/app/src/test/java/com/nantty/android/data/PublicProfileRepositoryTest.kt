@@ -145,6 +145,91 @@ class PublicProfileRepositoryTest {
     }
 
     @Test
+    fun subscriberPostsUseTheSameAuthenticatedProfileRouteWithExplicitVisibility() {
+        val transport = RecordingTransport(postsResponse = posts())
+        val repository = PublicProfileRepository(
+            "https://api.nantty.com",
+            transport,
+            sessionProvider = { testSession() },
+        )
+
+        val result = repository.loadPosts("user-42", visibility = PublicProfileRepository.SUBSCRIBER_VISIBILITY)
+
+        assertTrue(result is PublicProfilePostsResult.Success)
+        assertEquals("/api/v1/users/user-42/posts?visibility=subscribers", transport.paths.single())
+        assertEquals(listOf("test-access-token"), transport.tokens)
+    }
+
+    @Test
+    fun followerListUsesSearchCursorAndMapsPublicFieldsOnly() {
+        val connectionResponse = JSONObject(
+            """{"data":[{"id":"account-1","name":"Ari Friend","username":"ari_friend","avatarUrl":"https://cdn.nantty.com/ari.png","isFollowing":true,"followsYou":true,"mutualConnections":7,"followState":"accepted","email":"private@example.test"}],"nextCursor":"page-2"}""",
+        )
+        val transport = RecordingTransport(connectionsResponse = connectionResponse)
+        val repository = PublicProfileRepository("https://api.nantty.com", transport, sessionProvider = { testSession() })
+
+        val result = repository.loadConnections("user-42", "followers", " Ari ", "page 1") as ProfileConnectionsResult.Success
+
+        assertEquals("/api/v1/users/user-42/followers?q=Ari&cursor=page%201&limit=20", transport.paths.single())
+        assertEquals("test-access-token", transport.tokens.single())
+        assertEquals("account-1", result.page.entries.single().id)
+        assertEquals("Ari Friend", result.page.entries.single().name)
+        assertEquals("ari_friend", result.page.entries.single().username)
+        assertEquals("accepted", result.page.entries.single().followState)
+        assertTrue(result.page.entries.single().followsYou)
+        assertEquals(7, result.page.entries.single().mutualConnections)
+        assertEquals("page-2", result.page.nextCursor)
+    }
+
+    @Test
+    fun connectionListRejectsUnsafeTabsAndOversizedSearchBeforeRequest() {
+        val transport = RecordingTransport()
+        val repository = PublicProfileRepository("https://api.nantty.com", transport)
+
+        assertTrue(repository.loadConnections("user-42", "unsupported") is ProfileConnectionsResult.Failure)
+        assertTrue(repository.loadConnections("user-42", "followers", "x".repeat(101)) is ProfileConnectionsResult.Failure)
+        assertTrue(transport.paths.isEmpty())
+    }
+
+    @Test
+    fun ownerConnectionTabsUseReactNativeRoutesAndLocalSearchInputsAreNotSentForThoseTabs() {
+        val transport = RecordingTransport(connectionsResponse = JSONObject("""{"data":[],"nextCursor":null}"""))
+        val repository = PublicProfileRepository("https://api.nantty.com", transport, sessionProvider = { testSession() })
+
+        assertTrue(repository.loadConnections("viewer-1", "shopped", "Ari") is ProfileConnectionsResult.Success)
+        assertTrue(repository.loadConnections("viewer-1", "suggested", "Ari") is ProfileConnectionsResult.Success)
+        assertTrue(repository.loadConnections("viewer-1", "blocked", "Ari") is ProfileConnectionsResult.Success)
+
+        assertEquals(
+            listOf(
+                "/api/v1/users/viewer-1/connections?tab=shopped&limit=20",
+                "/api/v1/users/viewer-1/connections?tab=suggested&limit=20",
+                "/api/v1/users/me/blocked?limit=20",
+            ),
+            transport.paths,
+        )
+    }
+
+    @Test
+    fun forbiddenConnectionListIsDistinguishedForPrivateProfileMessaging() {
+        val transport = RecordingTransport(failConnections = true)
+        val repository = PublicProfileRepository("https://api.nantty.com", transport)
+
+        val result = repository.loadConnections("user-42", "followers") as ProfileConnectionsResult.Failure
+
+        assertTrue(result.isPrivate)
+    }
+
+    @Test
+    fun unsupportedPostVisibilityFailsBeforeCallingApi() {
+        val transport = RecordingTransport(postsResponse = posts())
+        val repository = PublicProfileRepository("https://api.nantty.com", transport)
+
+        assertTrue(repository.loadPosts("user-42", visibility = "all") is PublicProfilePostsResult.Failure)
+        assertTrue(transport.paths.isEmpty())
+    }
+
+    @Test
     fun malformedProfileIdsAndOversizedCursorsDoNotCallApi() {
         val transport = RecordingTransport(profile())
         val repository = PublicProfileRepository("https://api.nantty.com", transport)
@@ -175,6 +260,30 @@ class PublicProfileRepositoryTest {
         assertTrue(transport.writes.isEmpty())
     }
 
+    @Test
+    fun blockAndUnblockUseAuthenticatedExistingRoutes() {
+        val transport = RecordingTransport()
+        val repository = PublicProfileRepository("https://api.nantty.com", transport, sessionProvider = { testSession() })
+
+        assertEquals(BlockActionResult.Success, repository.setBlocked("user-42", true))
+        assertEquals(BlockActionResult.Success, repository.setBlocked("user-42", false))
+        assertEquals(
+            listOf("POST /api/v1/users/user-42/block", "DELETE /api/v1/users/user-42/block"),
+            transport.writes,
+        )
+        assertEquals(listOf("test-access-token", "test-access-token"), transport.writeTokens)
+    }
+
+    @Test
+    fun blockWritesFailClosedWithoutSessionAndForInvalidIds() {
+        val transport = RecordingTransport()
+        val guestRepository = PublicProfileRepository("https://api.nantty.com", transport)
+
+        assertTrue(guestRepository.setBlocked("user-42", true) is BlockActionResult.Failure)
+        assertTrue(guestRepository.setBlocked("../other", false) is BlockActionResult.Failure)
+        assertTrue(transport.writes.isEmpty())
+    }
+
     private fun profile(privateProfile: Boolean = false) = JSONObject(
         """{"data":{"id":"user-42","name":"Ari","username":"ari","avatarUrl":"https://cdn.nantty.com/ari.jpg","bannerUrl":"javascript:alert(1)","bio":"A public bio","followers":14,"following":21,"posts":5,"isPrivate":$privateProfile,"isFollowing":true,"verified":true,"email":"private@example.test","phone":"+10000000000","verification":{"status":"active","color":"blue","badgeVisible":true},"account":{"status":"active"}}}""",
     )
@@ -191,6 +300,8 @@ class PublicProfileRepositoryTest {
         private val profileResponse: JSONObject? = null,
         private val followState: String? = null,
         private val postsResponse: JSONObject? = null,
+        private val connectionsResponse: JSONObject? = null,
+        private val failConnections: Boolean = false,
         private val failFollowStatus: Boolean = false,
     ) : PublicProfileTransport {
         val paths = mutableListOf<String>()
@@ -201,6 +312,10 @@ class PublicProfileRepositoryTest {
         override fun get(path: String, accessToken: String?): JSONObject {
             paths += path
             tokens += accessToken
+            if (path.contains("/followers?") || path.contains("/following?") || path.contains("/connections?") || path.contains("/blocked?")) {
+                if (failConnections) throw PublicProfileHttpException(403)
+                return connectionsResponse ?: error("Unexpected connections request")
+            }
             return when {
                 path.endsWith("/follow-status") && failFollowStatus -> error("Unavailable")
                 path.endsWith("/follow-status") -> JSONObject().apply { followState?.let { put("state", it) } }

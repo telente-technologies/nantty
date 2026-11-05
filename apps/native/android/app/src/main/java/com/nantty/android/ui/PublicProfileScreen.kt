@@ -1,6 +1,7 @@
 package com.nantty.android.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -20,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -66,6 +68,8 @@ internal fun PublicProfileScreen(
     executor: Executor,
     onBack: () -> Unit,
     onOpenPost: (String) -> Unit,
+    onSearchProfile: (String, String) -> Unit = { _, _ -> },
+    onOpenConnections: (String, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
     var profile by remember(userId) { mutableStateOf<PublicProfile?>(null) }
@@ -207,6 +211,15 @@ internal fun PublicProfileScreen(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 }
                 Text("Profile", Modifier.weight(1f).semantics { heading() }, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                IconButton(
+                    onClick = { profile?.let { onSearchProfile(it.id, it.username) } },
+                    enabled = profile != null,
+                    modifier = Modifier.semantics {
+                        contentDescription = profile?.let { "Search @${it.username}'s posts" } ?: "Search profile posts"
+                    },
+                ) {
+                    Icon(Icons.Default.Search, contentDescription = null)
+                }
             }
             when {
                 profileLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -220,6 +233,7 @@ internal fun PublicProfileScreen(
                             showFollow = !current.isViewer && repository.viewerId() != null && current.followState != "blocked" && !current.isSuspended,
                             followBusy = followBusy,
                             followError = followError,
+                            onOpenConnections = onOpenConnections,
                             onFollow = {
                                 if (current.followState == "accepted" || current.followState == "requested") confirmUnfollow = true
                                 else updateFollow(true)
@@ -260,6 +274,7 @@ private fun ProfileHeader(
     showFollow: Boolean,
     followBusy: Boolean,
     followError: String?,
+    onOpenConnections: (String, String) -> Unit,
     onFollow: () -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().padding(horizontal = horizontal)) {
@@ -304,8 +319,12 @@ private fun ProfileHeader(
         Text("@${profile.username}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
         if (profile.bio.isNotBlank()) Text(profile.bio, Modifier.fillMaxWidth().padding(top = 12.dp), style = MaterialTheme.typography.bodyLarge)
         Row(Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ProfileCount(profile.following, "Following", Modifier.weight(1f))
-            ProfileCount(profile.followers, "Followers", Modifier.weight(1f))
+            ProfileCount(profile.following, "Following", Modifier.weight(1f), enabled = profile.canViewerSeePosts) {
+                onOpenConnections(profile.id, "following")
+            }
+            ProfileCount(profile.followers, "Followers", Modifier.weight(1f), enabled = profile.canViewerSeePosts) {
+                onOpenConnections(profile.id, "followers")
+            }
             ProfileCount(profile.posts, "Posts", Modifier.weight(1f))
         }
         Spacer(Modifier.height(18.dp))
@@ -314,8 +333,12 @@ private fun ProfileHeader(
 }
 
 @Composable
-private fun ProfileCount(value: Int, label: String, modifier: Modifier = Modifier) {
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+private fun ProfileCount(value: Int, label: String, modifier: Modifier = Modifier, enabled: Boolean = false, onClick: () -> Unit = {}) {
+    Column(
+        modifier.then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier)
+            .semantics { if (enabled) contentDescription = "Open $label" },
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Text(value.toString(), fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, maxLines = 1)
     }

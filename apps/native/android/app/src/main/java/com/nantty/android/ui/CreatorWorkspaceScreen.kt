@@ -45,7 +45,7 @@ import java.util.Locale
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 
-/** Bounded, read-only Creator Studio surface; this screen deliberately does not submit applications. */
+/** Creator Studio overview and application entry; creator metrics remain read-only here. */
 @Composable
 internal fun CreatorWorkspaceScreen(
     repository: CreatorWorkspaceRepository,
@@ -59,6 +59,7 @@ internal fun CreatorWorkspaceScreen(
     var eligibility by remember(repository) { mutableStateOf<CreatorWorkspaceResult<CreatorEligibility>?>(null) }
     var application by remember(repository) { mutableStateOf<CreatorWorkspaceResult<CreatorApplication?>?>(null) }
     var dashboard by remember(repository, period) { mutableStateOf<CreatorWorkspaceResult<CreatorDashboard>?>(null) }
+    var showingApplicationForm by remember(repository) { mutableStateOf(false) }
     val requestGeneration = remember(repository) { AtomicInteger() }
 
     LaunchedEffect(repository, period, refreshVersion) {
@@ -84,6 +85,22 @@ internal fun CreatorWorkspaceScreen(
         (application as? CreatorWorkspaceResult.Failure)?.authenticationRequired,
         (dashboard as? CreatorWorkspaceResult.Failure)?.authenticationRequired,
     ).any { it }
+
+    if (showingApplicationForm) {
+        CreatorApplicationForm(
+            repository = repository,
+            executor = executor,
+            onBack = { showingApplicationForm = false },
+            onReauthenticate = onReauthenticate,
+            onSubmitted = { submitted ->
+                application = CreatorWorkspaceResult.Success(submitted)
+                showingApplicationForm = false
+                refreshVersion += 1
+            },
+            modifier = modifier,
+        )
+        return
+    }
 
     Column(modifier.fillMaxSize()) {
         Row(
@@ -116,8 +133,12 @@ internal fun CreatorWorkspaceScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Column(Modifier.widthIn(max = 760.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        if (eligibilityValue != null && !approved) EligibilityCard(eligibilityValue)
-                        ApplicationCard(applicationValue, eligibilityValue)
+                        if (eligibilityValue != null && !approved) {
+                            EligibilityCard(eligibilityValue, canApply = applicationValue == null, onApply = {
+                                if (applicationValue == null && eligibilityValue.eligible) showingApplicationForm = true
+                            })
+                        }
+                        ApplicationCard(applicationValue, eligibilityValue, onApplyAgain = { showingApplicationForm = true })
                         if (approved) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 CreatorDashboardPeriod.entries.forEach { option ->
@@ -154,7 +175,7 @@ internal fun CreatorWorkspaceScreen(
 }
 
 @Composable
-private fun EligibilityCard(value: CreatorEligibility) {
+private fun EligibilityCard(value: CreatorEligibility, canApply: Boolean, onApply: () -> Unit) {
     Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Eligibility", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, modifier = Modifier.semantics { heading() })
@@ -169,22 +190,23 @@ private fun EligibilityCard(value: CreatorEligibility) {
                 }
             }
             Text(
-                if (value.eligible) "You can apply when the application flow is available." else "Continue building your account to meet the listed requirements.",
+                if (value.eligible) "You meet the current Creator Program requirements." else "Continue building your account to meet the listed requirements.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (value.eligible && canApply) Button(onClick = onApply) { Text("Apply as a creator") }
         }
     }
 }
 
 @Composable
-private fun ApplicationCard(application: CreatorApplication?, eligibility: CreatorEligibility?) {
+private fun ApplicationCard(application: CreatorApplication?, eligibility: CreatorEligibility?, onApplyAgain: () -> Unit) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Application", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, modifier = Modifier.semantics { heading() })
             if (application == null) {
                 Text("No creator application is on file.", style = MaterialTheme.typography.bodyMedium)
-                if (eligibility?.eligible == true) Text("You appear eligible to apply. Application submission is not available in this screen.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (eligibility?.eligible == true) Text("You meet the current Creator Program requirements and can submit an application.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else {
                 val statusText = when (application.status) {
                     "pending" -> "Under review"
@@ -192,15 +214,43 @@ private fun ApplicationCard(application: CreatorApplication?, eligibility: Creat
                     else -> "Not approved"
                 }
                 Text(statusText, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                Text("Submitted ${application.submittedAt}", style = MaterialTheme.typography.bodyMedium)
+                Text("Submitted ${formatCreatorDateTime(application.submittedAt)}", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    when (application.status) {
+                        "pending" -> "We’re reviewing your application. We’ll notify you when there’s a decision."
+                        "approved" -> "Your creator application is approved. Creator tools are available in this workspace."
+                        else -> "Review the reason below. You can apply again when the date shown is reached."
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 if (application.contentCategories.isNotEmpty()) Text("Categories: ${application.contentCategories.joinToString()}", style = MaterialTheme.typography.bodyMedium)
                 application.reviewedAt?.let { Text("Reviewed $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 application.rejectionReason?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error) }
-                application.reapplyAvailableAt?.let { Text("Re-application available: $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                application.reapplyAvailableAt?.let { Text("You can re-apply from ${formatCreatorDate(it)}.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                if (application.status == "rejected" && isCreatorReapplyAvailable(application.reapplyAvailableAt)) {
+                    Button(onClick = onApplyAgain) { Text("Apply again") }
+                }
             }
         }
     }
 }
+
+private fun isCreatorReapplyAvailable(value: String?): Boolean {
+    if (value == null) return true
+    val instant = runCatching { java.time.Instant.parse(value) }.getOrNull() ?: return false
+    return !instant.isAfter(java.time.Instant.now())
+}
+
+private fun formatCreatorDate(value: String): String = runCatching {
+    java.time.Instant.parse(value).atZone(java.time.ZoneId.systemDefault())
+        .format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM))
+}.getOrDefault(value)
+
+private fun formatCreatorDateTime(value: String): String = runCatching {
+    java.time.Instant.parse(value).atZone(java.time.ZoneId.systemDefault())
+        .format(java.time.format.DateTimeFormatter.ofLocalizedDateTime(java.time.format.FormatStyle.MEDIUM))
+}.getOrDefault(value)
 
 @Composable
 private fun DashboardCard(value: CreatorDashboard, refreshing: Boolean) {

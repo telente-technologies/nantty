@@ -48,10 +48,32 @@ data class MartProductDetail(
 )
 data class MartPage(val products: List<MartProduct>, val nextCursor: String?)
 data class MartHome(val categories: List<MartCategory>)
+sealed interface MartHighlightTarget {
+    data class Product(val productId: String, val name: String) : MartHighlightTarget
+    data class Collection(val collection: String, val name: String) : MartHighlightTarget
+    data class Category(val categoryId: String, val name: String) : MartHighlightTarget
+}
+data class MartSponsoredPlacement(
+    val campaignId: String,
+    val label: String,
+    val advertiserName: String,
+    val impressionToken: String,
+)
+data class MartHighlight(
+    val id: String,
+    val kind: String,
+    val title: String,
+    val subtitle: String?,
+    val imageUrl: String?,
+    val target: MartHighlightTarget,
+    val reasonLabel: String,
+    val sponsored: MartSponsoredPlacement?,
+)
 
 sealed interface MartResult {
     data class Home(val value: MartHome) : MartResult
     data class Products(val value: MartPage) : MartResult
+    data class Highlights(val value: List<MartHighlight>) : MartResult
     data class Failure(val message: String) : MartResult
 }
 
@@ -69,10 +91,53 @@ class MartRepository(
 
     fun loadHome(): MartResult = get(buildMartHomeUrl(baseUrl), ::parseHome)
 
-    fun loadProducts(categoryId: String? = null, cursor: String? = null): MartResult {
+    fun loadHighlights(limit: Int = MART_HIGHLIGHTS_PAGE_SIZE): MartResult {
+        if (limit !in 1..MART_HIGHLIGHTS_PAGE_SIZE) return MartResult.Failure("The Mart highlights request is invalid.")
+        return get(buildMartHighlightsUrl(baseUrl, limit), ::parseHighlights)
+    }
+
+    fun recordSponsoredEvent(placement: MartSponsoredPlacement, itemId: String, type: String): Boolean {
+        val token = accessTokenProvider()?.takeIf(String::isNotBlank) ?: return false
+        if (type !in setOf("impression", "click") || !isSafeMartIdentifier(itemId)) return false
+        return try {
+            val connection = openConnection(buildMartAdsEventsUrl(baseUrl)).apply {
+                requestMethod = "POST"
+                connectTimeout = 10_000
+                readTimeout = 15_000
+                instanceFollowRedirects = false
+                useCaches = false
+                doOutput = true
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("Content-Type", "application/json")
+                setRequestProperty("Authorization", "Bearer $token")
+            }
+            connection.useConnection {
+                val payload = JSONObject().put(
+                    "events",
+                    JSONArray().put(
+                        JSONObject()
+                            .put("campaignId", placement.campaignId)
+                            .put("placement", "mart")
+                            .put("type", type)
+                            .put("itemId", itemId)
+                            .put("token", placement.impressionToken)
+                            .put("occurredAt", java.time.Instant.now().toString()),
+                    ),
+                )
+                connection.outputStream.use { it.write(payload.toString().toByteArray(Charsets.UTF_8)) }
+                connection.responseCode in 200..299
+            }
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    fun loadProducts(categoryId: String? = null, cursor: String? = null, collection: String? = null): MartResult {
         if (categoryId != null && !isSafeMartIdentifier(categoryId)) return MartResult.Failure("Nantty returned an invalid category. Refresh the Mart and try again.")
         if (cursor != null && cursor.length > 300) return MartResult.Failure("The product page cursor is invalid. Refresh the Mart and try again.")
-        return get(buildMartProductsUrl(baseUrl, categoryId, cursor), ::parseProducts)
+        if (collection != null && collection !in MART_PRODUCT_COLLECTIONS) return MartResult.Failure("This Mart collection is not available.")
+        if (collection != null && categoryId != null) return MartResult.Failure("Choose a category or a collection, not both.")
+        return get(buildMartProductsUrl(baseUrl, categoryId, cursor, collection), ::parseProducts)
     }
 
     fun loadProductDetail(productId: String): MartProductDetailResult {
@@ -110,6 +175,7 @@ class MartRepository(
                 instanceFollowRedirects = false
                 useCaches = false
                 setRequestProperty("Accept", "application/json")
+                accessTokenProvider()?.takeIf(String::isNotBlank)?.let { setRequestProperty("Authorization", "Bearer $it") }
             }
             connection.useConnection {
                 val status = connection.responseCode
@@ -159,6 +225,56 @@ class MartRepository(
             }
         }
         return MartResult.Products(MartPage(products, root.optString("nextCursor").takeUnless { it.isBlank() || it == "null" }))
+    }
+
+    private fun parseHighlights(body: String): MartResult.Highlights {
+        val root = JSONObject(body)
+        val rows = root.optJSONArray("data") ?: JSONArray()
+        val highlights = buildList {
+            for (index in 0 until rows.length()) {
+                val row = rows.optJSONObject(index) ?: continue
+                val id = row.optString("id")
+                val title = row.optString("title").trim()
+                val kind = row.optString("kind").trim()
+                val targetJson = row.optJSONObject("target") ?: continue
+                if (!isSafeMartIdentifier(id) || title.isEmpty() || kind.isEmpty()) continue
+                val targetName = targetJson.optString("name").trim()
+                if (targetName.isEmpty()) continue
+                val target = when (targetJson.optString("type")) {
+                    "product" -> targetJson.optString("productId").takeIf(::isSafeMartIdentifier)?.let { MartHighlightTarget.Product(it, targetName) }
+                    "collection" -> targetJson.optString("collection").takeIf { it in MART_PRODUCT_COLLECTIONS }?.let { MartHighlightTarget.Collection(it, targetName) }
+                    "category" -> targetJson.optString("categoryId").takeIf(::isSafeMartIdentifier)?.let { MartHighlightTarget.Category(it, targetName) }
+                    else -> null
+                } ?: continue
+                val ranking = row.optJSONObject("ranking")?.optJSONObject("reason")
+                val sponsoredJson = row.optJSONObject("sponsored")
+                val sponsored = sponsoredJson?.let {
+                    val campaignId = it.optString("campaignId")
+                    val impressionToken = it.optString("impressionToken")
+                    if (isSafeMartIdentifier(campaignId) && impressionToken.isNotBlank() && impressionToken.length <= 2_000) {
+                        MartSponsoredPlacement(
+                            campaignId = campaignId,
+                            label = it.optString("label").trim().ifEmpty { "Sponsored" },
+                            advertiserName = it.optString("advertiserName").trim(),
+                            impressionToken = impressionToken,
+                        )
+                    } else null
+                }
+                add(
+                    MartHighlight(
+                        id = id,
+                        kind = kind,
+                        title = title,
+                        subtitle = row.optNullableString("subtitle"),
+                        imageUrl = safeMediaUrl(row.optNullableString("imageUrl")),
+                        target = target,
+                        reasonLabel = ranking?.optString("label")?.trim().orEmpty(),
+                        sponsored = sponsored,
+                    ),
+                )
+            }
+        }
+        return MartResult.Highlights(highlights)
     }
 
     internal fun parseProductDetail(body: String, expectedId: String): MartProductDetail {
@@ -241,11 +357,22 @@ class MartRepository(
 
 internal fun buildMartHomeUrl(origin: String): URL = URL("${validatedMartOrigin(origin)}/api/v1/mart/home")
 
-internal fun buildMartProductsUrl(origin: String, categoryId: String?, cursor: String?): URL {
+internal fun buildMartHighlightsUrl(origin: String, limit: Int = MART_HIGHLIGHTS_PAGE_SIZE): URL {
+    require(limit in 1..MART_HIGHLIGHTS_PAGE_SIZE)
+    return URL("${validatedMartOrigin(origin)}/api/v1/mart/highlights?limit=$limit")
+}
+
+internal fun buildMartAdsEventsUrl(origin: String): URL = URL("${validatedMartOrigin(origin)}/api/v1/ads/events")
+
+internal fun buildMartProductsUrl(origin: String, categoryId: String?, cursor: String?, collection: String? = null): URL {
     val parsed = URL(validatedMartOrigin(origin))
     val query = buildList {
         add("limit=20")
         categoryId?.let { add("categoryId=${URLEncoder.encode(it, "UTF-8")}") }
+        collection?.let {
+            require(it in MART_PRODUCT_COLLECTIONS)
+            add("collection=${URLEncoder.encode(it, "UTF-8")}")
+        }
         cursor?.let { add("cursor=${URLEncoder.encode(it, "UTF-8")}") }
     }.joinToString("&")
     return URL("${parsed.toString().trimEnd('/')}/api/v1/products?$query")
@@ -305,6 +432,9 @@ private fun validatedMartOrigin(origin: String): String {
 }
 
 internal fun isSafeMartIdentifier(value: String): Boolean = value.isNotBlank() && value.length <= 100 && value.matches(Regex("[A-Za-z0-9_-]+"))
+
+internal const val MART_HIGHLIGHTS_PAGE_SIZE = 6
+internal val MART_PRODUCT_COLLECTIONS = setOf("sales_of_the_day", "featured_brands", "new_arrivals")
 
 private inline fun <T> HttpURLConnection.useConnection(block: () -> T): T = try {
     block()

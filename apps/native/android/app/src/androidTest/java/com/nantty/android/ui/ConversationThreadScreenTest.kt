@@ -99,6 +99,18 @@ class ConversationThreadScreenTest {
     }
 
     @Test
+    fun olderHistoryActionIsShownOnlyWhenAnotherPageExistsAndCallsHost() {
+        var pageRequests = 0
+        setThread(hasOlderMessages = true, onLoadOlderMessages = { pageRequests++ })
+
+        compose.onNodeWithText("Load older messages").assertIsDisplayed().performClick()
+        compose.runOnIdle { assertEquals(1, pageRequests) }
+
+        setThread()
+        compose.onNodeWithText("Load older messages").assertDoesNotExist()
+    }
+
+    @Test
     fun headerActionsAreExplicitCallbacks() {
         var backs = 0
         var infos = 0
@@ -175,6 +187,8 @@ class ConversationThreadScreenTest {
         safetyCodeLabel: String? = null,
         safetyCodeAvailable: Boolean = safetyCodeLabel != null,
         retryingMessageIds: Set<String> = emptySet(),
+        hasOlderMessages: Boolean = false,
+        onLoadOlderMessages: () -> Unit = {},
         onBack: () -> Unit = {},
         onOpenPeerOrInfo: () -> Unit = {},
         onMarkRead: () -> Unit = {},
@@ -197,6 +211,7 @@ class ConversationThreadScreenTest {
                     safetyCodeAvailable = safetyCodeAvailable,
                     safetyCodeLabel = safetyCodeLabel,
                     retryingMessageIds = retryingMessageIds,
+                    hasOlderMessages = hasOlderMessages,
                     onBack = onBack,
                     onOpenPeerOrInfo = onOpenPeerOrInfo,
                     onOpenSafetyCode = {},
@@ -205,6 +220,7 @@ class ConversationThreadScreenTest {
                     onDraftChange = {},
                     onSendText = {},
                     onRetryMessage = onRetryMessage,
+                    onLoadOlderMessages = onLoadOlderMessages,
                 )
             }
         }

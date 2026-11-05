@@ -1,16 +1,18 @@
 package com.nantty.android.data
 
+import android.content.ContentResolver
+import android.net.Uri
 import com.nantty.android.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
 enum class CreatorDashboardPeriod(val apiValue: String, val label: String) {
     WEEK("week", "This week"), MONTH("month", "This month"), ALL("all", "All time"),
 }
-
 data class CreatorEligibilityRequirement(
     val key: String,
     val label: String,
@@ -75,19 +77,48 @@ fun interface CreatorWorkspaceTransport {
     fun get(path: String, accessToken: String): JSONObject
 }
 
-/** Read-only creator workspace access. Applications are never submitted from this repository. */
+/** Creator workspace access, including the creator application lifecycle. */
 class CreatorWorkspaceRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val sessionProvider: () -> AccountSession?,
     private val refreshSessionProvider: () -> AccountSession? = { null },
     private val transport: CreatorWorkspaceTransport = JdkCreatorWorkspaceTransport(baseUrl),
+    applicationTransport: CreatorApplicationTransport = JdkCreatorApplicationTransport(baseUrl),
+    payoutAccountsTransport: CreatorPayoutAccountsTransport = JdkCreatorPayoutAccountsTransport(baseUrl),
+    sampleMediaTransport: CreatorSampleMediaTransport = JdkCreatorSampleMediaTransport(baseUrl),
 ) {
+    private val applicationSubmission = CreatorApplicationRepository(
+        baseUrl = baseUrl,
+        sessionProvider = sessionProvider,
+        refreshSessionProvider = refreshSessionProvider,
+        transport = applicationTransport,
+        payoutAccountsTransport = payoutAccountsTransport,
+    )
+    private val sampleMedia = CreatorSampleMediaRepository(
+        baseUrl = baseUrl,
+        sessionProvider = sessionProvider,
+        refreshSessionProvider = refreshSessionProvider,
+        transport = sampleMediaTransport,
+    )
+
     fun loadEligibility(): CreatorWorkspaceResult<CreatorEligibility> = request(ELIGIBILITY_PATH, ::parseCreatorEligibility)
 
     fun loadApplication(): CreatorWorkspaceResult<CreatorApplication?> = request(APPLICATION_PATH, ::parseCreatorApplication)
 
     fun loadDashboard(period: CreatorDashboardPeriod): CreatorWorkspaceResult<CreatorDashboard> =
         request("$DASHBOARD_PATH?period=${period.apiValue}") { parseCreatorDashboard(it, period) }
+
+    fun submitApplication(submission: CreatorApplicationSubmission, idempotencyKey: String): CreatorWorkspaceResult<CreatorApplication> =
+        applicationSubmission.submit(submission, idempotencyKey)
+
+    fun listPayoutAccounts(): CreatorPayoutAccountsResult = applicationSubmission.listPayoutAccounts()
+
+    fun uploadSampleImage(
+        uri: Uri,
+        resolver: ContentResolver,
+        cacheDir: File,
+        cancellation: CreatorSampleCancellation,
+    ): CreatorSampleMediaResult = sampleMedia.upload(uri, resolver, cacheDir, cancellation)
 
     private fun <T> request(path: String, parse: (JSONObject) -> T): CreatorWorkspaceResult<T> {
         return try {

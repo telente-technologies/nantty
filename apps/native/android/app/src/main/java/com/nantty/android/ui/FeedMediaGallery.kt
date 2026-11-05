@@ -190,7 +190,7 @@ private fun FeedImagePreviewDialog(images: List<FeedMedia>, initialIndex: Int, o
                         Icon(Icons.Default.Close, contentDescription = null, tint = Color.White)
                     }
                 }
-                BoxWithConstraints(Modifier.fillMaxWidth().heightIn(min = 240.dp, max = 560.dp)) {
+                Box(Modifier.fillMaxWidth().heightIn(min = 240.dp, max = 560.dp)) {
                     HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
                         AsyncImage(
                             model = images[page].url,

@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import com.nantty.android.data.AccountNotificationSettingsRepository
 import com.nantty.android.data.BuyerOrdersRepository
 import com.nantty.android.data.CurrentProfileRepository
+import com.nantty.android.data.DisputeRepository
+import com.nantty.android.data.CreatorSampleMediaRepository
 import com.nantty.android.data.ExploreRepository
 import com.nantty.android.data.FeedPost
 import com.nantty.android.data.FeedResult
@@ -45,8 +47,10 @@ import com.nantty.android.data.FeedType
 import com.nantty.android.data.FollowRequestsRepository
 import com.nantty.android.data.MartRepository
 import com.nantty.android.data.MessagesRepository
+import com.nantty.android.data.InboxConversation
 import com.nantty.android.data.NotificationsRepository
 import com.nantty.android.data.PublicProfileRepository
+import com.nantty.android.data.ProfileImageRepository
 import com.nantty.android.data.SavedPostsRepository
 import com.nantty.android.data.SearchRepository
 import com.nantty.android.data.StoreRepository
@@ -69,6 +73,9 @@ internal fun MainContent(
     modifier: Modifier = Modifier,
     onOpenPost: (String) -> Unit = {},
     onOpenProfile: (String) -> Unit = {},
+    searchScope: String = SearchRepository.GLOBAL_SCOPE,
+    searchScopeLabel: String = "Everywhere",
+    onSearchScopeChanged: (String, String) -> Unit = { _, _ -> },
     onOpenProduct: (String) -> Unit = {},
     onOpenStore: (String) -> Unit = {},
     onOpenCategory: (String, String) -> Unit = { _, _ -> },
@@ -82,10 +89,11 @@ internal fun MainContent(
     loadMoreError: String? = null,
     onLoadMore: () -> Unit = {},
     walletRepository: WalletRepository? = null,
-    walletAccountKey: String? = null,
-    onOpenWallet: () -> Unit = {},
     buyerOrdersRepository: BuyerOrdersRepository? = null,
+    disputeRepository: DisputeRepository? = null,
+    privateMediaUploadsRepository: CreatorSampleMediaRepository? = null,
     currentProfileRepository: CurrentProfileRepository? = null,
+    profileImagesRepository: ProfileImageRepository? = null,
     followRequestsRepository: FollowRequestsRepository? = null,
     ioExecutor: Executor? = null,
     notificationsRepository: NotificationsRepository? = null,
@@ -95,6 +103,8 @@ internal fun MainContent(
     exploreRepository: ExploreRepository? = null,
     publicProfileRepository: PublicProfileRepository? = null,
     messagesRepository: MessagesRepository? = null,
+    initialMessageConversation: InboxConversation? = null,
+    onInitialMessageConversationHandled: () -> Unit = {},
     savedPostsRepository: SavedPostsRepository? = null,
     martRepository: MartRepository? = null,
     storeRepository: StoreRepository? = null,
@@ -102,6 +112,7 @@ internal fun MainContent(
     initialMartProductId: String? = null,
     onInitialMartProductHandled: () -> Unit = {},
     initialMartCategoryId: String? = null,
+    initialMartCategoryName: String? = null,
     onInitialMartCategoryHandled: () -> Unit = {},
     onOpenSavedPosts: () -> Unit = {},
     onBackFromSavedPosts: () -> Unit = {},
@@ -110,6 +121,8 @@ internal fun MainContent(
     onOpenMessages: () -> Unit = {},
     onOpenOrders: () -> Unit = {},
     onOpenFollowRequests: () -> Unit = {},
+    onSearchCurrentProfile: (String, String) -> Unit = { _, _ -> },
+    onOpenConnections: (String, String) -> Unit = { _, _ -> },
     onOpenBusinessTools: () -> Unit = {},
     businessContent: (@Composable () -> Unit)? = null,
 ) {
@@ -119,7 +132,12 @@ internal fun MainContent(
             executor = ioExecutor,
             modifier = modifier,
             onOpenBusinessTools = onOpenBusinessTools,
+            onOpenConnections = onOpenConnections,
             onOpenProfile = onOpenProfile,
+            onSearchProfile = onSearchCurrentProfile,
+            publicProfileRepository = publicProfileRepository,
+            profileImagesRepository = profileImagesRepository,
+            onOpenPost = onOpenPost,
             followRequestsRepository = followRequestsRepository,
             onReauthenticate = onReauthenticate,
         )
@@ -145,7 +163,14 @@ internal fun MainContent(
         return
     }
     if (destination == Destination.Messages && messagesRepository != null && ioExecutor != null) {
-        MessagesScreen(messagesRepository, ioExecutor, modifier, onReauthenticate)
+        MessagesScreen(
+            messagesRepository,
+            ioExecutor,
+            modifier,
+            onReauthenticate,
+            initialConversation = initialMessageConversation,
+            onInitialConversationHandled = onInitialMessageConversationHandled,
+        )
         return
     }
     if (destination == Destination.Notifications && notificationsRepository != null && ioExecutor != null) {
@@ -168,7 +193,15 @@ internal fun MainContent(
         return
     }
     if (destination == Destination.Orders && buyerOrdersRepository != null && ioExecutor != null) {
-        BuyerOrdersScreen(buyerOrdersRepository, ioExecutor, onBack = onBackFromOrders, onAuthenticationRequired = onReauthenticate, modifier = modifier)
+        BuyerOrdersScreen(
+            repository = buyerOrdersRepository,
+            executor = ioExecutor,
+            onBack = onBackFromOrders,
+            onAuthenticationRequired = onReauthenticate,
+            disputeRepository = disputeRepository,
+            privateMediaUploadsRepository = privateMediaUploadsRepository,
+            modifier = modifier,
+        )
         return
     }
     if (destination == Destination.Discover && searchRepository != null && ioExecutor != null) {
@@ -185,6 +218,9 @@ internal fun MainContent(
             exploreRepository = exploreRepository,
             profileRepository = publicProfileRepository,
             onRequireSignIn = onSignInRequired,
+            initialScope = searchScope,
+            initialScopeLabel = searchScopeLabel,
+            onScopeChanged = onSearchScopeChanged,
         )
         return
     }
@@ -199,6 +235,7 @@ internal fun MainContent(
             initialProductId = initialMartProductId,
             onInitialProductHandled = onInitialMartProductHandled,
             initialCategoryId = initialMartCategoryId,
+            initialCategoryName = initialMartCategoryName,
             onInitialCategoryHandled = onInitialMartCategoryHandled,
             onOpenStore = onOpenStore,
             storeRepository = storeRepository,
@@ -236,16 +273,13 @@ internal fun MainContent(
             EmptyState("${destination.title} is coming to the native app.", "Your Nantty account and content are safe. This area will appear here as native features are added.")
         } else when {
             loading && result == null -> Column(Modifier.fillMaxSize()) {
-                HomeWalletPreviewCardIfAvailable(canViewFollowing, walletRepository, walletAccountKey, ioExecutor, onOpenWallet)
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
             }
             result == FeedResult.AuthenticationRequired -> EmptyState("Sign in to view Following", "Your Following feed is private to your account. Sign in again to continue.", onReauthenticate)
             result is FeedResult.Failure -> Column(Modifier.fillMaxSize()) {
-                HomeWalletPreviewCardIfAvailable(canViewFollowing, walletRepository, walletAccountKey, ioExecutor, onOpenWallet)
                 EmptyState("Your feed could not load", result.message, onRefresh)
             }
             result is FeedResult.Success && result.posts.isEmpty() -> Column(Modifier.fillMaxSize()) {
-                HomeWalletPreviewCardIfAvailable(canViewFollowing, walletRepository, walletAccountKey, ioExecutor, onOpenWallet)
                 EmptyState("A little quiet here", "There are no posts to show right now. Pull your world back in when you’re ready.", onRefresh)
             }
             result is FeedResult.Success -> PullToRefreshBox(
@@ -254,11 +288,6 @@ internal fun MainContent(
                 modifier = Modifier.weight(1f).fillMaxWidth().testTag("feed-pull-to-refresh"),
             ) {
                 LazyColumn(Modifier.fillMaxSize()) {
-                    if (canViewFollowing) {
-                        item(key = "home-wallet-preview") {
-                            HomeWalletPreviewCardIfAvailable(canViewFollowing, walletRepository, walletAccountKey, ioExecutor, onOpenWallet)
-                        }
-                    }
                     items(result.posts, key = FeedPost::id) { FeedCard(it, onOpenPost, onLike, onRepost, onSave, onShare, canInteract = canViewFollowing, saveBusy = savingPostId == it.id, onOpenProfile = onOpenProfile) }
                     item(key = "feed-pagination") {
                         FeedPaginationFooter(
@@ -271,21 +300,6 @@ internal fun MainContent(
                 }
             }
             else -> EmptyState("Connecting to Nantty", "Your feed will show here.")
-        }
-    }
-}
-
-@Composable
-internal fun HomeWalletPreviewCardIfAvailable(
-    signedIn: Boolean,
-    repository: WalletRepository?,
-    accountKey: String?,
-    executor: Executor?,
-    onOpenWallet: () -> Unit,
-) {
-    if (signedIn && repository != null && accountKey != null && executor != null) {
-        androidx.compose.runtime.key(accountKey) {
-            HomeWalletPreviewCard(signedIn, accountKey, repository, executor, onOpenWallet)
         }
     }
 }

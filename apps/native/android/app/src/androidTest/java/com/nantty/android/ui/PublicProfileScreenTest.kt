@@ -46,6 +46,27 @@ class PublicProfileScreenTest {
     }
 
     @Test
+    fun publicProfileFollowerCountsOpenTheMatchingConnectionsTab() {
+        val transport = ProfileTransport()
+        var selectedConnections: Pair<String, String>? = null
+        compose.setContent {
+            MaterialTheme {
+                PublicProfileScreen(
+                    "user-42",
+                    PublicProfileRepository("https://api.nantty.com", transport),
+                    Executor { it.run() },
+                    onBack = {},
+                    onOpenPost = {},
+                    onOpenConnections = { id, tab -> selectedConnections = id to tab },
+                )
+            }
+        }
+
+        compose.onNodeWithText("Followers").performClick()
+        compose.runOnIdle { assertEquals("user-42" to "followers", selectedConnections) }
+    }
+
+    @Test
     fun privateProfileRemainsLockedAndDoesNotRequestPostsEvenIfResponseHasFollowFlag() {
         val transport = ProfileTransport(privateProfile = true)
         compose.setContent {
@@ -125,6 +146,26 @@ class PublicProfileScreenTest {
         }
 
         compose.onNodeWithContentDescription("Back").assertIsDisplayed()
+    }
+
+    @Test
+    fun profileSearchControlReturnsTheLoadedProfileIdentity() {
+        var searchTarget: Pair<String, String>? = null
+        compose.setContent {
+            MaterialTheme {
+                PublicProfileScreen(
+                    "user-42",
+                    PublicProfileRepository("https://api.nantty.com", ProfileTransport()),
+                    Executor { it.run() },
+                    onBack = {},
+                    onOpenPost = {},
+                    onSearchProfile = { id, username -> searchTarget = id to username },
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Search @ari's posts").assertIsDisplayed().performClick()
+        compose.runOnIdle { assertEquals("user-42" to "ari", searchTarget) }
     }
 
     @Test

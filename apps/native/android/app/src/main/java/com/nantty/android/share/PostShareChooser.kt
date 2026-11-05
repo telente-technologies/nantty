@@ -8,6 +8,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.service.chooser.ChooserResult
+import androidx.annotation.RequiresApi
 import androidx.core.content.IntentCompat
 import com.nantty.android.BuildConfig
 import com.nantty.android.NanttyApplication
@@ -50,15 +51,20 @@ internal fun sharePostFromAndroid(context: Context, postId: String, authorName: 
 }
 
 internal fun selectedShareTarget(intent: Intent, sdkInt: Int = Build.VERSION.SDK_INT): ComponentName? {
-    return if (sdkInt >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-        IntentCompat.getParcelableExtra(intent, Intent.EXTRA_CHOOSER_RESULT, ChooserResult::class.java)
-            ?.takeIf { it.type == ChooserResult.CHOOSER_RESULT_SELECTED_COMPONENT }
-            ?.selectedComponent
-    } else {
-        @Suppress("DEPRECATION")
-        intent.getParcelableExtra(Intent.EXTRA_CHOSEN_COMPONENT) as? ComponentName
+    if (sdkInt >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            selectedShareTargetFromApi35(intent)
+        } else null
     }
+    @Suppress("DEPRECATION")
+    return intent.getParcelableExtra(Intent.EXTRA_CHOSEN_COMPONENT) as? ComponentName
 }
+
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+private fun selectedShareTargetFromApi35(intent: Intent): ComponentName? =
+    IntentCompat.getParcelableExtra(intent, Intent.EXTRA_CHOOSER_RESULT, ChooserResult::class.java)
+        ?.takeIf { it.type == ChooserResult.CHOOSER_RESULT_SELECTED_COMPONENT }
+        ?.selectedComponent
 
 internal class PostShareSelectedReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {

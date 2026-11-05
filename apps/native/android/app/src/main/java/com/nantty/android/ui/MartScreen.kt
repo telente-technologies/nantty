@@ -1,5 +1,6 @@
 package com.nantty.android.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
@@ -47,6 +51,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import coil.compose.AsyncImage
 import com.nantty.android.data.MartCategory
+import com.nantty.android.data.MartHighlight
+import com.nantty.android.data.MartHighlightTarget
 import com.nantty.android.data.MartPage
 import com.nantty.android.data.MartProduct
 import com.nantty.android.data.MartRepository
@@ -70,14 +76,18 @@ internal fun MartScreen(
     initialProductId: String? = null,
     onInitialProductHandled: () -> Unit = {},
     initialCategoryId: String? = null,
+    initialCategoryName: String? = null,
     onInitialCategoryHandled: () -> Unit = {},
     onOpenStore: (String) -> Unit = {},
     storeRepository: StoreRepository? = null,
     reviewsRepositoryOverride: ProductReviewsRepository? = null,
 ) {
     var categories by remember { mutableStateOf<List<MartCategory>>(emptyList()) }
+    var highlights by remember { mutableStateOf<List<MartHighlight>>(emptyList()) }
     var products by remember { mutableStateOf<List<MartProduct>>(emptyList()) }
     var selectedCategoryId by rememberMartCategorySelection()
+    var selectedCollection by rememberSaveable { mutableStateOf<String?>(null) }
+    var focusedCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedProductId by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedReviewsProductId by rememberSaveable { mutableStateOf<String?>(null) }
     var nextCursor by remember { mutableStateOf<String?>(null) }
@@ -96,12 +106,21 @@ internal fun MartScreen(
         }
     }
 
-    LaunchedEffect(initialCategoryId) {
+    LaunchedEffect(initialCategoryId, initialCategoryName) {
         if (initialCategoryId != null) {
+            selectedCollection = null
             selectedCategoryId = initialCategoryId
+            focusedCategoryName = initialCategoryName?.trim()?.takeIf(String::isNotEmpty)
             onInitialCategoryHandled()
         }
     }
+
+    val exitCategoryBrowse = {
+        focusedCategoryName = null
+        selectedCategoryId = null
+        selectedCollection = null
+    }
+    BackHandler(enabled = focusedCategoryName != null, onBack = exitCategoryBrowse)
 
     selectedProductId?.takeIf { selectedReviewsProductId == null }?.let { productId ->
         MartProductDetailScreen(
@@ -127,7 +146,7 @@ internal fun MartScreen(
         return
     }
 
-    LaunchedEffect(selectedCategoryId, reloadGeneration) {
+    LaunchedEffect(selectedCategoryId, selectedCollection, reloadGeneration) {
         requestGeneration++
         val generation = requestGeneration
         loading = true
@@ -136,7 +155,7 @@ internal fun MartScreen(
         nextCursor = null
         errorMessage = null
         pageError = null
-        val result = withContext(Dispatchers.IO) { repository.loadProducts(selectedCategoryId) }
+        val result = withContext(Dispatchers.IO) { repository.loadProducts(selectedCategoryId, collection = selectedCollection) }
         if (generation != requestGeneration) return@LaunchedEffect
         when (result) {
             is MartResult.Products -> {
@@ -145,6 +164,7 @@ internal fun MartScreen(
             }
             is MartResult.Failure -> errorMessage = result.message
             is MartResult.Home -> Unit
+            is MartResult.Highlights -> Unit
         }
         loading = false
     }
@@ -154,23 +174,80 @@ internal fun MartScreen(
             is MartResult.Home -> categories = result.value.categories
             is MartResult.Failure -> if (categories.isEmpty()) errorMessage = result.message
             is MartResult.Products -> Unit
+            is MartResult.Highlights -> Unit
+        }
+    }
+
+    LaunchedEffect(repository) {
+        when (val result = withContext(Dispatchers.IO) { repository.loadHighlights() }) {
+            is MartResult.Highlights -> highlights = result.value
+            is MartResult.Failure, is MartResult.Home, is MartResult.Products -> Unit
         }
     }
 
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         Column(Modifier.fillMaxSize().widthIn(max = 1040.dp)) {
             Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
-                Text("Mart", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Text("Browse products from stores on Nantty.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            focusedCategoryName ?: stringResource(com.nantty.android.R.string.mart_title),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.semantics { heading() },
+                        )
+                        Text(
+                            stringResource(
+                                if (focusedCategoryName == null) com.nantty.android.R.string.mart_browse_description
+                                else com.nantty.android.R.string.mart_category_description,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    if (focusedCategoryName != null) {
+                        TextButton(onClick = exitCategoryBrowse) {
+                            Text(stringResource(com.nantty.android.R.string.mart_back_to_all))
+                        }
+                    }
+                }
+            }
+            if (focusedCategoryName == null) {
+                MartHighlights(
+                    highlights = highlights,
+                    onOpen = { highlight ->
+                        when (val target = highlight.target) {
+                            is MartHighlightTarget.Product -> selectedProductId = target.productId
+                            is MartHighlightTarget.Category -> {
+                                selectedCollection = null
+                                selectedCategoryId = target.categoryId
+                                focusedCategoryName = target.name
+                            }
+                            is MartHighlightTarget.Collection -> {
+                                selectedCategoryId = null
+                                selectedCollection = target.collection
+                                focusedCategoryName = target.name
+                            }
+                        }
+                        highlight.sponsored?.let { sponsored ->
+                            val itemId = (highlight.target as? MartHighlightTarget.Product)?.productId
+                            if (itemId != null) scope.launch(Dispatchers.IO) { repository.recordSponsoredEvent(sponsored, itemId, "click") }
+                        }
+                    },
+                    onViewed = { highlight ->
+                        val sponsored = highlight.sponsored ?: return@MartHighlights
+                        val itemId = (highlight.target as? MartHighlightTarget.Product)?.productId ?: return@MartHighlights
+                        scope.launch(Dispatchers.IO) { repository.recordSponsoredEvent(sponsored, itemId, "impression") }
+                    },
+                )
             }
             val loadMore = {
                 startLoadingMore(
-                    scope, repository, selectedCategoryId, nextCursor, products, loadingMore,
+                    scope, repository, selectedCategoryId, selectedCollection, nextCursor, products, loadingMore,
                     requestGeneration, { requestGeneration }, { products = it }, { nextCursor = it },
                     { pageError = it }, { loadingMore = it },
                 )
             }
-            if (showCategoryPane && categories.isNotEmpty()) {
+            if (showCategoryPane && categories.isNotEmpty() && focusedCategoryName == null) {
                 Row(Modifier.fillMaxSize()) {
                     MartCategoryPane(
                         categories = categories,
@@ -192,7 +269,7 @@ internal fun MartScreen(
                     )
                 }
             } else {
-                if (categories.isNotEmpty()) {
+                if (categories.isNotEmpty() && focusedCategoryName == null) {
                     MartCategoryChips(categories, selectedCategoryId) { selectedCategoryId = it }
                 }
                 MartProductResults(
@@ -360,6 +437,7 @@ private fun startLoadingMore(
     scope: kotlinx.coroutines.CoroutineScope,
     repository: MartRepository,
     categoryId: String?,
+    collection: String?,
     cursor: String?,
     current: List<MartProduct>,
     loading: Boolean,
@@ -374,7 +452,7 @@ private fun startLoadingMore(
     setLoading(true)
     setError(null)
     scope.launch {
-        val result = withContext(Dispatchers.IO) { repository.loadProducts(categoryId, cursor) }
+        val result = withContext(Dispatchers.IO) { repository.loadProducts(categoryId, cursor, collection) }
         if (currentGeneration() != expectedGeneration) return@launch
         when (result) {
             is MartResult.Products -> {
@@ -384,6 +462,7 @@ private fun startLoadingMore(
             }
             is MartResult.Failure -> setError(result.message)
             is MartResult.Home -> Unit
+            is MartResult.Highlights -> Unit
         }
         setLoading(false)
     }

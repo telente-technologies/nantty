@@ -19,6 +19,10 @@ enum class MessagesFilter(val apiValue: String, val label: String) {
     DIRECT("direct", "Direct Messages"),
 }
 
+enum class MessagesInboxFolder(val apiValue: String, val label: String) {
+    CHATS("chats", "Chats"), REQUESTS("requests", "Requests"), SPAM("spam", "Spam"),
+}
+
 data class InboxConversation(
     val id: String,
     val title: String,
@@ -27,6 +31,8 @@ data class InboxConversation(
     val type: ConversationType,
     val lastMessageAt: String,
     val unreadCount: Int,
+    val inboxFolder: MessagesInboxFolder = MessagesInboxFolder.CHATS,
+    val spamReason: String? = null,
 )
 
 data class ConversationPage(val conversations: List<InboxConversation>, val nextCursor: String?)
@@ -50,7 +56,7 @@ sealed interface MessagesResult {
 }
 
 sealed interface ChatHistoryResult {
-    data class Success(val page: ChatMessagePage) : ChatHistoryResult
+    data class Success(val page: ChatMessagePage, val continuationError: String? = null) : ChatHistoryResult
     data class Failure(val message: String, val authenticationRequired: Boolean = false) : ChatHistoryResult
 }
 
@@ -69,13 +75,23 @@ class MessagesRepository(
     private val refreshSessionProvider: () -> AccountSession? = { null },
     private val threadTransport: ChatThreadTransport = JdkChatThreadTransport(baseUrl),
 ) {
-    fun load(cursor: String? = null, filter: MessagesFilter = MessagesFilter.ALL): MessagesResult = try {
+    private val conversationSearchRepository = ConversationSearchRepository(sessionProvider, threadTransport, refreshSessionProvider)
+
+    fun search(query: String) = conversationSearchRepository.search(query)
+
+    fun startConversationWithPerson(personId: String) = conversationSearchRepository.startConversationWithPerson(personId)
+
+    fun load(
+        cursor: String? = null,
+        filter: MessagesFilter = MessagesFilter.ALL,
+        folder: MessagesInboxFolder = MessagesInboxFolder.CHATS,
+    ): MessagesResult = try {
         val session = sessionProvider() ?: error("Sign in to view your messages.")
         val token = session.accessToken.takeIf(String::isNotBlank) ?: error("Sign in to view your messages.")
         require(cursor == null || (cursor.length <= MAX_CURSOR_LENGTH && cursor.matches(UUID_PATTERN))) {
             "This inbox page cursor is invalid. Refresh your messages and try again."
         }
-        val path = buildConversationPath(filter, cursor)
+        val path = buildConversationPath(filter, cursor, folder)
         val payload = try {
             transport.get(path, token)
         } catch (error: MessagesHttpException) {
@@ -90,6 +106,26 @@ class MessagesRepository(
             error.message ?: "Could not load messages. Check your connection and try again.",
             authenticationRequired = error is MessagesHttpException && error.statusCode in setOf(401, 403),
         )
+    }
+
+    fun acceptMessageRequest(conversationId: String) = inboxAction(conversationId, "POST", "accept")
+    fun markConversationNotSpam(conversationId: String) = inboxAction(conversationId, "POST", "not-spam")
+    fun deleteMessageRequest(conversationId: String) = inboxAction(conversationId, "DELETE", "")
+    fun blockConversationPeer(conversationId: String) = inboxAction(conversationId, "POST", "block")
+
+    private fun inboxAction(conversationId: String, method: String, suffix: String): Result<Unit> = runCatching {
+        require(isUuid(conversationId)) { "This conversation link is invalid." }
+        val session = sessionProvider() ?: error("Sign in to manage message requests.")
+        val path = "/api/v1/conversations/$conversationId" + if (suffix.isEmpty()) "" else "/$suffix"
+        try {
+            threadTransport.request(method, path, requireToken(session.accessToken), null)
+        } catch (error: MessagesHttpException) {
+            if (error.statusCode != 401) throw error
+            val refreshed = refreshSessionProvider()?.accessToken?.takeIf(String::isNotBlank)
+                ?: throw MessagesHttpException(401)
+            threadTransport.request(method, path, refreshed, null)
+        }
+        Unit
     }
 
     fun loadMessages(conversationId: String, cursor: String? = null): ChatHistoryResult = try {
@@ -111,6 +147,40 @@ class MessagesRepository(
             error.message ?: "Could not load this conversation. Check your connection and try again.",
             authenticationRequired = error is MessagesHttpException && error.statusCode in setOf(401, 403),
         )
+    }
+
+    /** Loads the most recent page and follows older cursors, emitting each accumulated page as it arrives. */
+    fun loadInitialHistory(
+        conversationId: String,
+        onPageLoaded: (ChatMessagePage) -> Unit = {},
+    ): ChatHistoryResult {
+        var cursor: String? = null
+        var accumulated: ChatMessagePage? = null
+
+        repeat(MAX_INITIAL_HISTORY_PAGES) {
+            when (val loaded = loadMessages(conversationId, cursor)) {
+                is ChatHistoryResult.Failure -> {
+                    val existing = accumulated ?: return loaded
+                    return ChatHistoryResult.Success(existing, continuationError = loaded.message)
+                }
+                is ChatHistoryResult.Success -> {
+                    val previous = accumulated
+                    val merged = if (previous == null) {
+                        loaded.page
+                    } else {
+                        ChatMessagePage(
+                            messages = (previous.messages + loaded.page.messages).distinctBy(EncryptedChatMessage::id),
+                            nextCursor = loaded.page.nextCursor,
+                        )
+                    }
+                    accumulated = merged
+                    onPageLoaded(merged)
+                    cursor = loaded.page.nextCursor ?: return ChatHistoryResult.Success(merged)
+                }
+            }
+        }
+
+        return ChatHistoryResult.Success(checkNotNull(accumulated))
     }
 
     fun markConversationRead(conversationId: String): Result<Unit> = runCatching {
@@ -180,6 +250,8 @@ class MessagesRepository(
                     ConversationType.DIRECT -> peerName
                 }
                 val timestamp = row.optNullable("lastMessageAt") ?: continue
+                val inboxFolder = MessagesInboxFolder.entries.firstOrNull { it.apiValue == row.optString("inboxFolder") }
+                    ?: MessagesInboxFolder.CHATS
                 add(
                     InboxConversation(
                         id = id,
@@ -193,6 +265,8 @@ class MessagesRepository(
                         type = type,
                         lastMessageAt = timestamp,
                         unreadCount = row.optInt("unread").coerceAtLeast(0),
+                        inboxFolder = inboxFolder,
+                        spamReason = row.optNullable("spamReason"),
                     ),
                 )
             }
@@ -205,6 +279,7 @@ class MessagesRepository(
 
     companion object {
         const val PAGE_SIZE = 20
+        const val MAX_INITIAL_HISTORY_PAGES = 10
         const val MAX_CURSOR_LENGTH = 36
         private val UUID_PATTERN = Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}")
         internal fun isUuid(value: String) = UUID_PATTERN.matches(value)
@@ -212,23 +287,28 @@ class MessagesRepository(
     }
 }
 
-internal fun buildConversationPath(filter: MessagesFilter = MessagesFilter.ALL, cursor: String? = null): String = buildString {
-    append("/api/v1/conversations?filter=${java.net.URLEncoder.encode(filter.apiValue, Charsets.UTF_8.name())}&limit=${MessagesRepository.PAGE_SIZE}")
+internal fun buildConversationPath(
+    filter: MessagesFilter = MessagesFilter.ALL,
+    cursor: String? = null,
+    folder: MessagesInboxFolder = MessagesInboxFolder.CHATS,
+): String = buildString {
+    append("/api/v1/conversations?")
+    if (folder == MessagesInboxFolder.CHATS) append("filter=${java.net.URLEncoder.encode(filter.apiValue, Charsets.UTF_8.name())}")
+    else append("folder=${java.net.URLEncoder.encode(folder.apiValue, Charsets.UTF_8.name())}")
+    append("&limit=${MessagesRepository.PAGE_SIZE}")
     cursor?.takeIf(String::isNotBlank)?.let { append("&cursor=${java.net.URLEncoder.encode(it, Charsets.UTF_8.name())}") }
 }
 
 private fun JSONObject.optNullable(key: String): String? = optString(key).takeIf { it.isNotBlank() && it != "null" }
 
-private fun isSecureImageUrl(value: String): Boolean = runCatching {
-    val uri = java.net.URI(value)
-    uri.scheme.equals("https", ignoreCase = true) && !uri.host.isNullOrBlank() && uri.userInfo == null
-}.getOrDefault(false)
 
 private class JdkMessagesTransport(private val baseUrl: String) : MessagesTransport {
     override fun get(path: String, accessToken: String): JSONObject {
         require(
             path.startsWith("/api/v1/conversations?filter=all&limit=20") ||
-                path.startsWith("/api/v1/conversations?filter=direct&limit=20"),
+                path.startsWith("/api/v1/conversations?filter=direct&limit=20") ||
+                path.startsWith("/api/v1/conversations?folder=requests&limit=20") ||
+                path.startsWith("/api/v1/conversations?folder=spam&limit=20"),
         ) { "Unsupported messages request." }
         val origin = trustedApiOrigin(baseUrl) ?: error("Configure an HTTPS Nantty API URL to view messages.")
         val connection = (URL(origin + path).openConnection() as HttpURLConnection).apply {
@@ -268,8 +348,15 @@ private class JdkMessagesTransport(private val baseUrl: String) : MessagesTransp
 private class JdkChatThreadTransport(private val baseUrl: String) : ChatThreadTransport {
     override fun request(method: String, path: String, accessToken: String, body: JSONObject?): JSONObject {
         val endpointPath = path.substringBefore('?')
-        require(endpointPath.startsWith("/api/v1/conversations/") && (endpointPath.endsWith("/messages") || endpointPath.endsWith("/read"))) { "Unsupported conversation request." }
-        require((method == "GET" && endpointPath.endsWith("/messages")) || (method == "POST" && endpointPath.endsWith("/read"))) { "Unsupported conversation request." }
+        val supportedRequest = when {
+            endpointPath.startsWith("/api/v1/conversations/") && endpointPath.endsWith("/messages") -> method == "GET"
+            endpointPath.startsWith("/api/v1/conversations/") && endpointPath.endsWith("/read") -> method == "POST"
+            endpointPath.matches(Regex("/api/v1/conversations/[0-9a-fA-F-]{36}(/(accept|block|not-spam))?")) -> method == "POST" || method == "DELETE"
+            endpointPath == "/api/v1/conversations/search" -> method == "GET"
+            endpointPath == "/api/v1/conversations" -> method == "POST"
+            else -> false
+        }
+        require(supportedRequest) { "Unsupported conversation request." }
         val origin = trustedApiOrigin(baseUrl) ?: error("Configure an HTTPS Nantty API URL to use messages.")
         val connection = (URL(origin + path).openConnection() as HttpURLConnection).apply {
             requestMethod = method
@@ -319,3 +406,8 @@ internal class MessagesHttpException(val statusCode: Int) : Exception(
     if (statusCode == 401 || statusCode == 403) "Your session has expired. Sign in again to view messages."
     else "Messages request failed (HTTP $statusCode). Please try again.",
 )
+
+internal fun isSecureImageUrl(value: String): Boolean = runCatching {
+    val uri = java.net.URI(value)
+    uri.scheme.equals("https", ignoreCase = true) && !uri.host.isNullOrBlank() && uri.userInfo == null
+}.getOrDefault(false)

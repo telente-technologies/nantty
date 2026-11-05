@@ -118,6 +118,50 @@ class MessagesRepositoryTest {
     }
 
     @Test
+    fun requestsMessageRequestAndSpamFoldersAndParsesFolderMetadata() {
+        val repository = repositoryWithPayload(
+            """{"data":[{"id":"11111111-1111-4111-8111-111111111111","kind":"direct","peer":{"id":"22222222-2222-4222-8222-222222222222","name":"Ari"},"inboxFolder":"spam","spamReason":"Automated sending pattern","lastMessageAt":"2026-10-01T12:00:00Z","unread":1}],"nextCursor":null}""",
+        )
+
+        val spam = repository.load(folder = MessagesInboxFolder.SPAM) as MessagesResult.Success
+
+        assertEquals("/api/v1/conversations?folder=spam&limit=20", buildConversationPath(folder = MessagesInboxFolder.SPAM))
+        assertEquals(MessagesInboxFolder.SPAM, spam.page.conversations.single().inboxFolder)
+        assertEquals("Automated sending pattern", spam.page.conversations.single().spamReason)
+        assertEquals("/api/v1/conversations?folder=requests&limit=20", buildConversationPath(folder = MessagesInboxFolder.REQUESTS))
+    }
+
+    @Test
+    fun executesInboxActionsOnlyForValidatedConversationAndRetriesOnceAfterRefresh() {
+        val conversationId = "11111111-1111-4111-8111-111111111111"
+        val calls = mutableListOf<String>()
+        var refreshes = 0
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            refreshSessionProvider = {
+                refreshes += 1
+                signedInSession().copy(accessToken = "rotated-token")
+            },
+            transport = MessagesTransport { _, _ -> JSONObject("""{"data":[],"nextCursor":null}""") },
+            threadTransport = ChatThreadTransport { method, path, token, body ->
+                assertEquals(null, body)
+                calls += "$method $path $token"
+                if (calls.size == 1) throw MessagesHttpException(401)
+                JSONObject()
+            },
+        )
+
+        assertTrue(repository.acceptMessageRequest(conversationId).isSuccess)
+        assertTrue(repository.deleteMessageRequest("bad-id").isFailure)
+        assertEquals(
+            listOf("POST /api/v1/conversations/$conversationId/accept session-access", "POST /api/v1/conversations/$conversationId/accept rotated-token"),
+            calls,
+        )
+        assertEquals(1, refreshes)
+    }
+
+    @Test
     fun refreshesExpiredAccessTokenOnceAndRetriesInboxRequest() {
         val requestedTokens = mutableListOf<String>()
         var refreshes = 0

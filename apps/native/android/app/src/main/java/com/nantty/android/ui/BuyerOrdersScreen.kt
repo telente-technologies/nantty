@@ -44,6 +44,8 @@ import com.nantty.android.data.BuyerOrder
 import com.nantty.android.data.BuyerOrderFilter
 import com.nantty.android.data.BuyerOrdersPage
 import com.nantty.android.data.BuyerOrdersRepository
+import com.nantty.android.data.DisputeRepository
+import com.nantty.android.data.CreatorSampleMediaRepository
 import com.nantty.android.data.BuyerOrdersResult
 import com.nantty.android.data.appendUniqueBuyerOrders
 import com.nantty.android.data.formatWalletAmount
@@ -59,6 +61,8 @@ internal fun BuyerOrdersScreen(
     executor: Executor,
     onBack: () -> Unit,
     onAuthenticationRequired: () -> Unit,
+    disputeRepository: DisputeRepository? = null,
+    privateMediaUploadsRepository: CreatorSampleMediaRepository? = null,
     modifier: Modifier = Modifier,
 ) {
     var selectedFilter by rememberSaveable(repository) { mutableStateOf(BuyerOrderFilter.ALL) }
@@ -80,6 +84,8 @@ internal fun BuyerOrdersScreen(
             executor = executor,
             onBack = { selectedOrderId = null },
             onAuthenticationRequired = onAuthenticationRequired,
+            disputeRepository = disputeRepository,
+            privateMediaUploadsRepository = privateMediaUploadsRepository,
         )
         return
     }

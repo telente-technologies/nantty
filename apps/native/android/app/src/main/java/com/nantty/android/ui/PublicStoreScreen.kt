@@ -74,6 +74,7 @@ internal fun PublicStoreScreen(
     var requestGeneration by remember(storeId) { mutableStateOf(0) }
     var following by remember(storeId) { mutableStateOf(false) }
     var followingBusy by remember(storeId) { mutableStateOf(false) }
+    var confirmUnfollow by remember(storeId) { mutableStateOf(false) }
     var followError by remember(storeId) { mutableStateOf<String?>(null) }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
 
@@ -162,11 +163,16 @@ internal fun PublicStoreScreen(
                 following = following,
                 followingBusy = followingBusy,
                 followError = followError,
-                onToggleFollow = ::toggleFollow,
+                onToggleFollow = { if (following) confirmUnfollow = true else toggleFollow() },
                 onLoadMore = ::loadMore,
                 onRetry = { reloadGeneration++ },
             )
         }
+        StoreUnfollowConfirmationDialog(
+            visible = confirmUnfollow,
+            onDismiss = { confirmUnfollow = false },
+            onConfirm = { confirmUnfollow = false; toggleFollow() },
+        )
     }
 }
 

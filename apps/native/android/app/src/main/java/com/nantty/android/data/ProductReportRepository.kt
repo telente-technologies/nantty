@@ -20,7 +20,12 @@ internal enum class ProductReportReason(val apiValue: String) {
 
 internal sealed interface ProductReportResult {
     data class Success(val reportId: String) : ProductReportResult
-    data class Failure(val message: String, val authenticationRequired: Boolean = false) : ProductReportResult
+    data class Failure(
+        val message: String,
+        val authenticationRequired: Boolean = false,
+        val retryable: Boolean = true,
+        val rotateIdempotencyKeyOnRetry: Boolean = false,
+    ) : ProductReportResult
 }
 
 internal fun interface ProductReportTransport {
@@ -66,11 +71,13 @@ internal class ProductReportRepository(
             ProductReportResult.Failure(
                 message = when (error.statusCode) {
                     HttpURLConnection.HTTP_UNAUTHORIZED -> "Your session has expired. Sign in again to report this product."
-                    HttpURLConnection.HTTP_TOO_MANY_REQUESTS -> "You've sent too many reports. Try again later."
+                    429 -> "You've sent too many reports. Try again later."
                     HttpURLConnection.HTTP_NOT_FOUND -> "This product can no longer be reported."
-                    else -> "Couldn't submit your report. Please try again.",
+                    else -> "Couldn't submit your report. Please try again."
                 },
                 authenticationRequired = error.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED,
+                retryable = error.statusCode == 408 || error.statusCode == 429 || error.statusCode >= 500,
+                rotateIdempotencyKeyOnRetry = error.statusCode == 429,
             )
         } catch (_: Exception) {
             ProductReportResult.Failure("Couldn't reach Nantty. Check your connection and try again.")

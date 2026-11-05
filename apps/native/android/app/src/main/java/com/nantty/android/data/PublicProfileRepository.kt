@@ -27,6 +27,27 @@ data class PublicProfile(
 
 data class PublicProfilePosts(val posts: List<FeedPost>, val nextCursor: String?)
 
+data class ProfileConnection(
+    val id: String,
+    val name: String,
+    val username: String,
+    val avatarUrl: String?,
+    val isFollowing: Boolean,
+    val followState: String,
+    val verified: Boolean,
+    val followsYou: Boolean = false,
+    val mutualConnections: Int = 0,
+)
+
+data class ProfileConnectionPage(val entries: List<ProfileConnection>, val nextCursor: String?)
+
+sealed interface ProfileConnectionsResult {
+    data class Success(val page: ProfileConnectionPage) : ProfileConnectionsResult
+    data class Failure(val message: String, val isPrivate: Boolean = false) : ProfileConnectionsResult
+}
+
+internal class PublicProfileHttpException(val statusCode: Int) : IllegalStateException("Profile request failed (HTTP $statusCode). Please try again.")
+
 sealed interface PublicProfileResult {
     data class Success(val profile: PublicProfile) : PublicProfileResult
     data class Failure(val message: String) : PublicProfileResult
@@ -40,6 +61,11 @@ sealed interface PublicProfilePostsResult {
 sealed interface FollowActionResult {
     data class Success(val state: String) : FollowActionResult
     data class Failure(val message: String) : FollowActionResult
+}
+
+sealed interface BlockActionResult {
+    data object Success : BlockActionResult
+    data class Failure(val message: String) : BlockActionResult
 }
 
 interface PublicProfileTransport {
@@ -93,15 +119,31 @@ class PublicProfileRepository(
         FollowActionResult.Failure(error.message ?: "Could not update follow status. Try again.")
     }
 
+    fun setBlocked(userId: String, block: Boolean): BlockActionResult = try {
+        require(isSafeProfileId(userId)) { "This profile link is invalid." }
+        val token = sessionProvider()?.accessToken?.takeIf(String::isNotBlank)
+            ?: error("Sign in to manage blocked accounts.")
+        val path = "/api/v1/users/${pathSegment(userId)}/block"
+        if (block) transport.post(path, token) else transport.delete(path, token)
+        BlockActionResult.Success
+    } catch (error: Exception) {
+        BlockActionResult.Failure(error.message ?: "Could not update blocked accounts. Try again.")
+    }
+
     fun viewerId(): String? = sessionProvider()?.user?.id
 
-    fun loadPosts(userId: String, cursor: String? = null): PublicProfilePostsResult = try {
+    fun loadPosts(
+        userId: String,
+        cursor: String? = null,
+        visibility: String = PUBLIC_VISIBILITY,
+    ): PublicProfilePostsResult = try {
         require(isSafeProfileId(userId)) { "This profile link is invalid." }
         require(cursor == null || cursor.length <= MAX_CURSOR_LENGTH) { "This post page cursor is invalid. Refresh the profile and try again." }
+        require(visibility in POST_VISIBILITIES) { "This post visibility is not supported." }
         val path = buildString {
             append("/api/v1/users/${pathSegment(userId)}/posts?")
             cursor?.takeIf(String::isNotBlank)?.let { append("cursor=${queryValue(it)}&") }
-            append("visibility=public")
+            append("visibility=$visibility")
         }
         val response = transport.get(path, sessionProvider()?.accessToken)
         val parsed = FeedRepository(baseUrl).parsePage(response.toString())
@@ -112,6 +154,59 @@ class PublicProfileRepository(
         }
     } catch (error: Exception) {
         PublicProfilePostsResult.Failure(error.message ?: "Could not load public posts. Check your connection and try again.")
+    }
+
+    fun loadConnections(userId: String, tab: String, query: String = "", cursor: String? = null): ProfileConnectionsResult = try {
+        require(isSafeProfileId(userId)) { "This profile link is invalid." }
+        require(tab in CONNECTION_TABS) { "This connection list is not supported." }
+        require(query.length <= MAX_CONNECTION_QUERY_LENGTH) { "Search text is too long." }
+        require(cursor == null || cursor.length <= MAX_CURSOR_LENGTH) { "This connection page cursor is invalid. Refresh and try again." }
+        val path = buildString {
+            when (tab) {
+                "followers", "following" -> {
+                    append("/api/v1/users/${pathSegment(userId)}/$tab?")
+                    if (query.isNotBlank()) append("q=${queryValue(query.trim())}&")
+                }
+                "blocked" -> append("/api/v1/users/me/blocked?")
+                else -> append("/api/v1/users/${pathSegment(userId)}/connections?tab=$tab&")
+            }
+            cursor?.takeIf(String::isNotBlank)?.let { append("cursor=${queryValue(it)}&") }
+            append("limit=$CONNECTION_PAGE_SIZE")
+        }
+        val response = transport.get(path, sessionProvider()?.accessToken)
+        val payload = response.optJSONObject("data")?.let { data ->
+            if (data.has("data")) data else response
+        } ?: response
+        val rows = payload.optJSONArray("data") ?: error("Nantty returned an invalid connections response.")
+        val entries = buildList {
+            for (index in 0 until rows.length()) {
+                val row = rows.optJSONObject(index) ?: continue
+                val id = row.optString("id").takeIf(::isSafeProfileId) ?: continue
+                val username = row.optString("username").takeIf(String::isNotBlank) ?: continue
+                val state = row.optString("followState").takeIf { it in FOLLOW_STATES }
+                    ?: if (row.optBoolean("isFollowing")) "accepted" else "none"
+                add(ProfileConnection(
+                    id = id,
+                    name = row.optString("name").takeIf(String::isNotBlank) ?: username,
+                    username = username,
+                    avatarUrl = safeMediaUrl(row.optNullableString("avatarUrl")),
+                    isFollowing = row.optBoolean("isFollowing") || state == "accepted",
+                    followState = state,
+                    verified = row.optBoolean("verified"),
+                    followsYou = row.optBoolean("followsYou"),
+                    mutualConnections = row.optInt("mutualConnections").coerceAtLeast(0),
+                ))
+            }
+        }
+        ProfileConnectionsResult.Success(ProfileConnectionPage(
+            entries = entries,
+            nextCursor = payload.optString("nextCursor").takeUnless { it.isBlank() || it == "null" },
+        ))
+    } catch (error: Exception) {
+        ProfileConnectionsResult.Failure(
+            error.message ?: "Could not load this list. Check your connection and try again.",
+            isPrivate = error is PublicProfileHttpException && error.statusCode == HttpURLConnection.HTTP_FORBIDDEN,
+        )
     }
 
     internal fun parseProfile(payload: JSONObject): PublicProfile {
@@ -144,6 +239,12 @@ class PublicProfileRepository(
     companion object {
         const val MAX_CURSOR_LENGTH = 300
         const val MAX_BIO_LENGTH = 500
+        const val PUBLIC_VISIBILITY = "public"
+        const val SUBSCRIBER_VISIBILITY = "subscribers"
+        const val CONNECTION_PAGE_SIZE = 20
+        const val MAX_CONNECTION_QUERY_LENGTH = 100
+        private val POST_VISIBILITIES = setOf(PUBLIC_VISIBILITY, SUBSCRIBER_VISIBILITY)
+        private val CONNECTION_TABS = setOf("followers", "following", "shopped", "suggested", "blocked")
         private val VERIFICATION_COLORS = setOf("blue", "gold", "black")
         private val FOLLOW_STATES = setOf("none", "requested", "accepted", "rejected", "blocked")
     }
@@ -188,7 +289,7 @@ internal class JdkPublicProfileTransport(
             body?.let { payload -> connection.outputStream.use { it.write(payload.toByteArray(Charsets.UTF_8)) } }
             val status = connection.responseCode
             val body = (if (status in 200..299) connection.inputStream else connection.errorStream)?.use(::readBounded).orEmpty()
-            if (status !in 200..299) error("Profile request failed (HTTP $status). Please try again.")
+            if (status !in 200..299) throw PublicProfileHttpException(status)
             if (body.isBlank() && allowEmptyResponse) return JSONObject()
             if (body.isBlank()) error("Nantty returned an empty profile response.")
             return JSONObject(body)

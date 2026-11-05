@@ -1,25 +1,5 @@
 package com.nantty.android.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
-import androidx.compose.material3.adaptive.separatingVerticalHingeBounds
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -29,21 +9,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowSizeClass
-import com.nantty.android.data.AccountNotificationSettingsRepository
+import com.nantty.android.data.AccountUser
 import com.nantty.android.data.AccountSessionRepository
-import com.nantty.android.data.AdsWorkspaceRepository
-import com.nantty.android.data.BrandProfilesRepository
-import com.nantty.android.data.BuyerOrdersRepository
-import com.nantty.android.data.CartRepository
 import com.nantty.android.data.CheckoutReceipt
-import com.nantty.android.data.CheckoutRepository
-import com.nantty.android.data.CurrentProfileRepository
-import com.nantty.android.data.CreatorWorkspaceRepository
-import com.nantty.android.data.ExploreRepository
 import com.nantty.android.data.FeedPost
 import com.nantty.android.data.FeedRepository
 import com.nantty.android.data.FollowRequestsRepository
@@ -51,25 +19,14 @@ import com.nantty.android.data.FeedResult
 import com.nantty.android.data.FeedTopic
 import com.nantty.android.data.FeedTopicsResult
 import com.nantty.android.data.FeedType
-import com.nantty.android.data.MartRepository
-import com.nantty.android.data.MessagesRepository
-import com.nantty.android.data.NotificationsRepository
+import com.nantty.android.data.InboxConversation
 import com.nantty.android.data.PostDetailRepository
-import com.nantty.android.data.PublicProfileRepository
-import com.nantty.android.data.SavedPostsRepository
-import com.nantty.android.data.SearchRepository
-import com.nantty.android.data.StoreRepository
-import com.nantty.android.data.SellerWorkspaceRepository
-import com.nantty.android.data.WalletRepository
 import com.nantty.android.data.appendUniqueFeedPosts
-import com.nantty.android.share.sharePostFromAndroid
-import com.nantty.android.widget.QuickActionDestination
-import com.nantty.android.widget.quickActionDestination
 import java.util.concurrent.Executors
 
 @Composable
 internal fun SignedInApp(
-    accountUser: com.nantty.android.data.AccountUser?,
+    accountUser: AccountUser?,
     isGuest: Boolean,
     sessionRepository: AccountSessionRepository,
     onRequireSignIn: () -> Unit,
@@ -88,7 +45,14 @@ internal fun SignedInApp(
     var feedSelectionGeneration by rememberSaveable { mutableStateOf(0) }
     var selectedPostId by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedProfileId by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedConnectionsUserId by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedConnectionsTab by rememberSaveable { mutableStateOf("followers") }
+    var showingConnections by rememberSaveable { mutableStateOf(false) }
+    var pendingMessageConversation by remember { mutableStateOf<InboxConversation?>(null) }
+    var profileOpenedFromConnections by rememberSaveable { mutableStateOf(false) }
     var selectedStoreId by rememberSaveable { mutableStateOf<String?>(null) }
+    var searchScope by rememberSaveable { mutableStateOf("global") }
+    var searchScopeLabel by rememberSaveable { mutableStateOf("Everywhere") }
     var showingCart by rememberSaveable { mutableStateOf(false) }
     var showingCheckout by rememberSaveable { mutableStateOf(false) }
     var showingPayment by rememberSaveable { mutableStateOf(false) }
@@ -99,34 +63,16 @@ internal fun SignedInApp(
     var checkoutOrderCount by rememberSaveable { mutableStateOf(0) }
     var pendingMartProductId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingMartCategoryId by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingMartCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
     var showingComposer by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(requestedWidgetDestination) {
-        if (isGuest && requestedWidgetDestination != null) {
-            onRequireSignIn()
-            onWidgetDestinationHandled()
-            return@LaunchedEffect
-        }
-        when (quickActionDestination(requestedWidgetDestination)) {
-            QuickActionDestination.Feed -> {
-                destination = Destination.Feed
-                showingComposer = false
-            }
-            QuickActionDestination.NewPost -> {
-                destination = Destination.Feed
-                showingComposer = true
-            }
-            QuickActionDestination.Wallet -> {
-                destination = Destination.Wallet
-                showingComposer = false
-            }
-            QuickActionDestination.Messages -> {
-                destination = Destination.Messages
-                showingComposer = false
-            }
-            null -> return@LaunchedEffect
-        }
-        onWidgetDestinationHandled()
-    }
+    SignedInWidgetDestinationEffect(
+        requestedDestination = requestedWidgetDestination,
+        isGuest = isGuest,
+        onRequireSignIn = onRequireSignIn,
+        onSelectDestination = { destination = it },
+        onShowComposer = { showingComposer = it },
+        onHandled = onWidgetDestinationHandled,
+    )
     var result by remember { mutableStateOf<FeedResult?>(null) }
     var loading by remember { mutableStateOf(false) }
     var loadingMore by remember { mutableStateOf(false) }
@@ -137,81 +83,43 @@ internal fun SignedInApp(
     var interactionMessage by remember { mutableStateOf<String?>(null) }
     var savingPostId by remember { mutableStateOf<String?>(null) }
     val executor = remember { Executors.newSingleThreadExecutor() }
-    val walletRepository = remember(sessionRepository) { WalletRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val cartRepository = remember(sessionRepository) { CartRepository(accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken }) }
-    val checkoutRepository = remember(sessionRepository) { CheckoutRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val buyerOrdersRepository = remember(sessionRepository) { BuyerOrdersRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val notificationsRepository = remember(sessionRepository) { NotificationsRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val accountNotificationSettingsRepository = remember(sessionRepository) { AccountNotificationSettingsRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val messagesRepository = remember(sessionRepository) {
-        MessagesRepository(
-            sessionProvider = sessionRepository::sessionOrNull,
-            refreshSessionProvider = sessionRepository::refreshSession,
-        )
-    }
-    val searchRepository = remember(sessionRepository) { SearchRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val exploreRepository = remember(sessionRepository) { ExploreRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val savedPostsRepository = remember(sessionRepository) { SavedPostsRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val martRepository = remember(sessionRepository) {
-        MartRepository(accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken })
-    }
-    val publicProfileRepository = remember(sessionRepository) {
-        PublicProfileRepository(sessionProvider = sessionRepository::sessionOrNull)
-    }
-    val storeRepository = remember(sessionRepository) {
-        StoreRepository(sessionProvider = sessionRepository::sessionOrNull)
-    }
-    val currentProfileRepository = remember(sessionRepository) {
-        CurrentProfileRepository(sessionProvider = sessionRepository::sessionOrNull)
-    }
-    val followRequestsRepository = remember(sessionRepository) {
-        FollowRequestsRepository(sessionProvider = sessionRepository::sessionOrNull)
-    }
-    val sellerWorkspaceRepository = remember(sessionRepository) {
-        SellerWorkspaceRepository(sessionProvider = sessionRepository::sessionOrNull)
-    }
-    val creatorWorkspaceRepository = remember(sessionRepository) {
-        CreatorWorkspaceRepository(
-            sessionProvider = sessionRepository::sessionOrNull,
-            refreshSessionProvider = sessionRepository::refreshSession,
-        )
-    }
-    val brandProfilesRepository = remember(sessionRepository) {
-        BrandProfilesRepository(sessionProvider = sessionRepository::sessionOrNull)
-    }
-    val adsWorkspaceRepository = remember(sessionRepository) {
-        AdsWorkspaceRepository(
-            sessionProvider = sessionRepository::sessionOrNull,
-            refreshSessionProvider = sessionRepository::refreshSession,
-        )
-    }
-    val businessContent: @Composable () -> Unit = {
-        BusinessWorkspaceScreen(
-            sellerContent = { SellerWorkspaceScreen(sellerWorkspaceRepository) },
-            creatorContent = {
-                CreatorWorkspaceScreen(
-                    repository = creatorWorkspaceRepository,
-                    executor = executor,
-                    onReauthenticate = onSignOut,
-                )
-            },
-            brandContent = {
-                BrandProfilesScreen(
-                    repository = brandProfilesRepository,
-                    executor = executor,
-                    onReauthenticate = onSignOut,
-                )
-            },
-            adsContent = {
-                AdsWorkspaceScreen(
-                    repository = adsWorkspaceRepository,
-                    executor = executor,
-                    onReauthenticate = onSignOut,
-                )
-            },
-            onBack = { destination = Destination.Profile },
-        )
-    }
+    val repositories = rememberSignedInRepositories(sessionRepository)
+    val (
+        walletRepository,
+        cartRepository,
+        checkoutRepository,
+        buyerOrdersRepository,
+        disputeRepository,
+        notificationsRepository,
+        accountNotificationSettingsRepository,
+        messagesRepository,
+        searchRepository,
+        exploreRepository,
+        savedPostsRepository,
+        martRepository,
+        publicProfileRepository,
+        storeRepository,
+        currentProfileRepository,
+        followRequestsRepository,
+        sellerWorkspaceRepository,
+        creatorWorkspaceRepository,
+        brandProfilesRepository,
+        adsWorkspaceRepository,
+        profileImagesRepository,
+        privateMediaUploadsRepository,
+    ) = repositories
+    val businessContent = buildSignedInBusinessContent(
+        repositories = repositories,
+        executor = executor,
+        onReauthenticate = onSignOut,
+        onConversationStarted = { conversation ->
+            pendingMessageConversation = conversation
+            destination = Destination.Messages
+        },
+        onMessageFailure = { message, authenticationRequired -> if (authenticationRequired) onSignOut() else interactionMessage = message },
+        onOpenBuyerProfile = { selectedProfileId = it; profileOpenedFromConnections = false },
+        onBack = { destination = Destination.Profile },
+    )
 
     fun refresh() {
         val requestedFeed = selectedFeed
@@ -319,50 +227,15 @@ internal fun SignedInApp(
         })
     }
 
-    fun toggleFeedLike(post: FeedPost) {
-        interactionMessage = null
-        executor.execute {
-            val nextLiked = !post.liked
-            val outcome = PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull).setLiked(post.id, nextLiked)
-            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                if (outcome.isSuccess) applyFeedInteraction(post, liked = nextLiked)
-                else interactionMessage = outcome.exceptionOrNull()?.message ?: "Could not update your like. Try again."
-            }
-            if (outcome.isSuccess) refresh()
-        }
-    }
-
-    fun toggleFeedRepost(post: FeedPost) {
-        interactionMessage = null
-        executor.execute {
-            val nextReposted = !post.reposted
-            val outcome = PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull).setReposted(post.id, nextReposted)
-            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                if (outcome.isSuccess) applyFeedInteraction(post, reposted = nextReposted)
-                else interactionMessage = outcome.exceptionOrNull()?.message ?: "Could not update your repost. Try again."
-            }
-            if (outcome.isSuccess) refresh()
-        }
-    }
-
-    fun toggleFeedSaved(post: FeedPost) {
-        if (savingPostId == post.id) return
-        savingPostId = post.id
-        interactionMessage = null
-        executor.execute {
-            val nextSaved = !post.bookmarked
-            val outcome = PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull).setSaved(post.id, nextSaved)
-            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                savingPostId = null
-                if (outcome.isSuccess) applyFeedInteraction(post, bookmarked = nextSaved)
-                else interactionMessage = outcome.exceptionOrNull()?.message ?: "Could not update your saved posts. Try again."
-            }
-        }
-    }
-
-    fun shareFeedPost(post: FeedPost) {
-        sharePostFromAndroid(shareContext, post.id, post.authorName)
-    }
+    val feedActions = SignedInFeedActions(
+        executor = executor,
+        postRepository = { PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull) },
+        onMessage = { interactionMessage = it },
+        onSaving = { savingPostId = it },
+        isSaving = { savingPostId == it },
+        applyInteraction = { post, liked, reposted, bookmarked -> applyFeedInteraction(post, liked, reposted, bookmarked) },
+        refresh = ::refresh,
+    )
 
     LaunchedEffect(Unit) { refresh() }
     LaunchedEffect(accountUser?.id, isGuest, initialFollowingAfterSignIn) {
@@ -422,38 +295,64 @@ internal fun SignedInApp(
         return
     }
 
-    selectedProfileId?.let { profileId ->
-        HingeSafeContent {
-            PublicProfileScreen(
-                userId = profileId,
-                repository = publicProfileRepository,
-                executor = executor,
-                onBack = { selectedProfileId = null },
-                onOpenPost = { selectedPostId = it },
-            )
-        }
+    selectedProfileId?.takeIf { !showingConnections }?.let { profileId ->
+        PublicProfileDestination(
+            userId = profileId,
+            repository = publicProfileRepository,
+            executor = executor,
+            onBack = {
+                selectedProfileId = null
+                if (profileOpenedFromConnections) showingConnections = true
+                profileOpenedFromConnections = false
+            },
+            onOpenPost = { selectedPostId = it },
+            onSearchProfile = { userId, username ->
+                selectedProfileId = null
+                searchScope = "profile:$userId"
+                searchScopeLabel = "@" + username.removePrefix("@")
+                destination = Destination.Discover
+            },
+            onOpenConnections = { userId, tab ->
+                selectedConnectionsUserId = userId
+                selectedConnectionsTab = tab
+                showingConnections = true
+            },
+        )
+        return
+    }
+
+    if (showingConnections && selectedConnectionsUserId != null) {
+        ProfileConnectionsOverlay(
+            userId = selectedConnectionsUserId!!,
+            initialTab = selectedConnectionsTab,
+            repository = publicProfileRepository,
+            executor = executor,
+            messagesRepository = messagesRepository,
+            onBack = { showingConnections = false; selectedConnectionsUserId = null },
+            onOpenProfile = { userId ->
+                selectedProfileId = userId
+                profileOpenedFromConnections = true
+                showingConnections = false
+            },
+            onRequireSignIn = onRequireSignIn,
+            onOpenConversation = { conversation -> pendingMessageConversation = conversation; showingConnections = false; selectedConnectionsUserId = null; destination = Destination.Messages },
+        )
         return
     }
 
     if (showingPayment) {
-        val orderId = checkoutOrderId
-        if (orderId != null) {
-            HingeSafeContent {
-                CheckoutPaymentScreen(
-                    repository = checkoutRepository,
-                    executor = executor,
-                    receipt = CheckoutReceipt(
-                        checkoutId = checkoutId ?: orderId,
-                        payableOrderId = orderId,
-                        total = com.nantty.android.data.WalletMoney(checkoutTotalMinor, checkoutCurrency),
-                        orderCount = checkoutOrderCount,
-                    ),
-                    onBack = { showingPayment = false; showingCart = true },
-                    onAuthenticationRequired = onSignOut,
-                    onViewOrders = { showingPayment = false; destination = Destination.Orders },
-                )
-            }
-        }
+        SignedInPaymentDestination(
+            orderId = checkoutOrderId,
+            checkoutId = checkoutId,
+            totalMinor = checkoutTotalMinor,
+            currency = checkoutCurrency,
+            orderCount = checkoutOrderCount,
+            repository = checkoutRepository,
+            executor = executor,
+            onBack = { showingPayment = false; showingCart = true },
+            onAuthenticationRequired = onSignOut,
+            onViewOrders = { showingPayment = false; destination = Destination.Orders },
+        )
         return
     }
 
@@ -492,205 +391,109 @@ internal fun SignedInApp(
         return
     }
 
-    HingeSafeContent {
-    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        val adaptiveInfo = currentWindowAdaptiveInfoV2()
-        val windowSizeClass = adaptiveInfo.windowSizeClass
-        val hasExpandedWidth = windowSizeClass.isWidthAtLeastBreakpoint(
-            WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND,
-        )
-        val showMartCategoryPane = shouldShowMartCategoryPane(
-            windowSizeClass = windowSizeClass,
-            isTabletop = adaptiveInfo.windowPosture.isTabletop,
-            hasVerticalHinge = adaptiveInfo.windowPosture.separatingVerticalHingeBounds.isNotEmpty(),
-        )
-        val useNavigationRail = shouldUseNavigationRail(
-            windowSizeClass = windowSizeClass,
-            isTabletop = adaptiveInfo.windowPosture.isTabletop,
-        )
-        if (useNavigationRail) {
-            Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center) {
-                NavigationRail(Modifier.fillMaxHeight(), containerColor = MaterialTheme.colorScheme.background) {
-                    Spacer(Modifier.height(18.dp))
-                    BrandMark()
-                    Spacer(Modifier.height(28.dp))
-                    visibleDestinations(isGuest).forEach { item ->
-                        NavigationRailItem(
-                            selected = destination == item,
-                            onClick = { destination = item },
-                            icon = { DestinationIcon(item) },
-                            label = { Text(item.title) },
-                        )
-                    }
-                }
-                Column(
-                    Modifier
-                        .weight(1f)
-                        .widthIn(max = if (hasExpandedWidth) 680.dp else 620.dp)
-                        .fillMaxHeight(),
-                ) {
-                    AppHeader(onRefresh = ::refresh, onOpenMart = { destination = Destination.Mart }, onOpenCart = { if (isGuest) onRequireSignIn() else showingCart = true }, onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders }, accountUser = accountUser, onSignOut = if (isGuest) onRequireSignIn else onSignOut)
-                    if (destination == Destination.Feed || destination == Destination.Mart) {
-                        FeedMartSectionTabs(
-                            selectedMart = destination == Destination.Mart,
-                            onSelectMart = { destination = if (it) Destination.Mart else Destination.Feed },
-                        )
-                    }
-                    if (destination == Destination.Feed && !isGuest) {
-                        FeedTopicSelector(feedTopics, selectedTopicId, topicsLoading, topicsError, ::selectTopic) {
-                            loadTopics(sessionRepository.sessionOrNull()?.accessToken)
-                        }
-                    }
-                    MainContent(
-                        destination, result, loading,
-                        selectedFeed = selectedFeed,
-                        canViewFollowing = !isGuest,
-                        onSelectFeed = ::selectFeed,
-                        onSignInRequired = onRequireSignIn,
-                        onFollowingSignInRequired = onRequireFollowingSignIn,
-                        onReauthenticate = onSignOut,
-                        onRefresh = ::refresh,
-                        onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true },
-                        onOpenPost = { selectedPostId = it },
-                        onOpenProfile = { selectedProfileId = it },
-                        onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
-                        onOpenStore = { selectedStoreId = it },
-                        onOpenCategory = { categoryId, _ -> pendingMartCategoryId = categoryId; destination = Destination.Mart },
-                        onLike = { if (isGuest) onRequireSignIn() else toggleFeedLike(it) },
-                        onRepost = { if (isGuest) onRequireSignIn() else toggleFeedRepost(it) },
-                        onSave = { if (isGuest) onRequireSignIn() else toggleFeedSaved(it) },
-                        onShare = ::shareFeedPost,
-                        interactionMessage = interactionMessage,
-                        savingPostId = savingPostId,
-                        loadingMore = loadingMore,
-                        loadMoreError = loadMoreError,
-                        onLoadMore = ::loadMore,
-                        walletRepository = walletRepository,
-                        walletAccountKey = accountUser?.id,
-                        onOpenWallet = { if (isGuest) onRequireSignIn() else destination = Destination.Wallet },
-                        buyerOrdersRepository = buyerOrdersRepository,
-                        currentProfileRepository = currentProfileRepository,
-                        followRequestsRepository = followRequestsRepository,
-                        ioExecutor = executor,
-                        notificationsRepository = notificationsRepository,
-                        accountNotificationSettingsRepository = accountNotificationSettingsRepository,
-                        onNotificationReauthenticate = onSignOut,
-                        searchRepository = searchRepository,
-                        exploreRepository = exploreRepository,
-                        publicProfileRepository = publicProfileRepository,
-                        messagesRepository = messagesRepository,
-                        savedPostsRepository = savedPostsRepository,
-                        martRepository = martRepository,
-                        storeRepository = storeRepository,
-                        showMartCategoryPane = showMartCategoryPane,
-                        initialMartProductId = pendingMartProductId,
-                        onInitialMartProductHandled = { pendingMartProductId = null },
-                        initialMartCategoryId = pendingMartCategoryId,
-                        onInitialMartCategoryHandled = { pendingMartCategoryId = null },
-                        onOpenSavedPosts = { if (isGuest) onRequireSignIn() else destination = Destination.Saved },
-                        onBackFromSavedPosts = { destination = Destination.Feed },
-                        onBackFromOrders = { destination = Destination.Feed },
-                        onBackFromFollowRequests = { destination = Destination.Profile },
-                        onOpenMessages = { if (isGuest) onRequireSignIn() else destination = Destination.Messages },
-                        onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders },
-                        onOpenFollowRequests = { if (isGuest) onRequireSignIn() else destination = Destination.FollowRequests },
-                        onOpenBusinessTools = { if (isGuest) onRequireSignIn() else destination = Destination.Business },
-                        businessContent = businessContent,
-                    )
-                }
-                if (hasExpandedWidth) {
-                    Column(Modifier.width(280.dp).padding(start = 24.dp, top = 28.dp)) {
-                        Text("Your Nantty", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Spacer(Modifier.height(8.dp))
-                        Text("A calmer corner of your social world.", color = MaterialTheme.colorScheme.secondary)
-                    }
-                }
+    SignedInNavigationShell(
+        destination = destination,
+        isGuest = isGuest,
+        accountUser = accountUser,
+        onSelectDestination = { destination = it },
+        onRefresh = ::refresh,
+        onOpenMart = { destination = Destination.Mart },
+        onSelectMart = { destination = if (it) Destination.Mart else Destination.Feed },
+        onOpenCart = { if (isGuest) onRequireSignIn() else showingCart = true },
+        onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders },
+        onSignOut = if (isGuest) onRequireSignIn else onSignOut,
+        topicSelector = {
+            FeedTopicSelector(feedTopics, selectedTopicId, topicsLoading, topicsError, ::selectTopic) {
+                loadTopics(sessionRepository.sessionOrNull()?.accessToken)
             }
-        } else {
-            Column(Modifier.fillMaxSize()) {
-                AppHeader(onRefresh = ::refresh, onOpenMart = { destination = Destination.Mart }, onOpenCart = { if (isGuest) onRequireSignIn() else showingCart = true }, onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders }, accountUser = accountUser, onSignOut = if (isGuest) onRequireSignIn else onSignOut)
-                if (destination == Destination.Feed || destination == Destination.Mart) {
-                    FeedMartSectionTabs(
-                        selectedMart = destination == Destination.Mart,
-                        onSelectMart = { destination = if (it) Destination.Mart else Destination.Feed },
-                    )
-                }
-                if (destination == Destination.Feed && !isGuest) {
-                    FeedTopicSelector(feedTopics, selectedTopicId, topicsLoading, topicsError, ::selectTopic) {
-                        loadTopics(sessionRepository.sessionOrNull()?.accessToken)
-                    }
-                }
-                MainContent(
-                    destination, result, loading,
-                    selectedFeed = selectedFeed,
-                    canViewFollowing = !isGuest,
-                    onSelectFeed = ::selectFeed,
-                    onSignInRequired = onRequireSignIn,
-                    onFollowingSignInRequired = onRequireFollowingSignIn,
-                    onReauthenticate = onSignOut,
-                    onRefresh = ::refresh,
-                    onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true },
-                    modifier = Modifier.weight(1f),
-                    onOpenPost = { selectedPostId = it },
-                    onOpenProfile = { selectedProfileId = it },
-                    onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
-                    onOpenStore = { selectedStoreId = it },
-                    onOpenCategory = { categoryId, _ -> pendingMartCategoryId = categoryId; destination = Destination.Mart },
-                    onLike = { if (isGuest) onRequireSignIn() else toggleFeedLike(it) },
-                    onRepost = { if (isGuest) onRequireSignIn() else toggleFeedRepost(it) },
-                    onSave = { if (isGuest) onRequireSignIn() else toggleFeedSaved(it) },
-                    onShare = ::shareFeedPost,
-                    interactionMessage = interactionMessage,
-                    savingPostId = savingPostId,
-                    loadingMore = loadingMore,
-                    loadMoreError = loadMoreError,
-                    onLoadMore = ::loadMore,
-                    walletRepository = walletRepository,
-                    walletAccountKey = accountUser?.id,
-                    onOpenWallet = { if (isGuest) onRequireSignIn() else destination = Destination.Wallet },
-                    buyerOrdersRepository = buyerOrdersRepository,
-                    currentProfileRepository = currentProfileRepository,
-                    followRequestsRepository = followRequestsRepository,
-                    ioExecutor = executor,
-                    notificationsRepository = notificationsRepository,
-                    accountNotificationSettingsRepository = accountNotificationSettingsRepository,
-                    onNotificationReauthenticate = onSignOut,
-                    searchRepository = searchRepository,
-                    exploreRepository = exploreRepository,
-                    publicProfileRepository = publicProfileRepository,
-                    messagesRepository = messagesRepository,
-                    savedPostsRepository = savedPostsRepository,
-                    martRepository = martRepository,
-                    storeRepository = storeRepository,
-                    showMartCategoryPane = showMartCategoryPane,
-                    initialMartProductId = pendingMartProductId,
-                    onInitialMartProductHandled = { pendingMartProductId = null },
-                    initialMartCategoryId = pendingMartCategoryId,
-                    onInitialMartCategoryHandled = { pendingMartCategoryId = null },
-                    onOpenSavedPosts = { if (isGuest) onRequireSignIn() else destination = Destination.Saved },
-                    onBackFromSavedPosts = { destination = Destination.Feed },
-                    onBackFromOrders = { destination = Destination.Feed },
-                    onBackFromFollowRequests = { destination = Destination.Profile },
-                    onOpenMessages = { if (isGuest) onRequireSignIn() else destination = Destination.Messages },
-                    onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders },
-                    onOpenFollowRequests = { if (isGuest) onRequireSignIn() else destination = Destination.FollowRequests },
-                    onOpenBusinessTools = { if (isGuest) onRequireSignIn() else destination = Destination.Business },
-                    businessContent = businessContent,
-                )
-                NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                    visibleDestinations(isGuest).forEach { item ->
-                        NavigationBarItem(
-                            selected = destination == item,
-                            onClick = { destination = item },
-                            icon = { DestinationIcon(item) },
-                            label = { Text(item.title, maxLines = 1) },
-                        )
-                    }
-                }
-            }
-        }
-    }
-    }
+        },
+        destinationContent = { contentModifier, showMartCategoryPane ->
+            MainContent(
+                destination, result, loading,
+                selectedFeed = selectedFeed,
+                canViewFollowing = !isGuest,
+                onSelectFeed = ::selectFeed,
+                onSignInRequired = onRequireSignIn,
+                onFollowingSignInRequired = onRequireFollowingSignIn,
+                onReauthenticate = onSignOut,
+                onRefresh = ::refresh,
+                onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true },
+                modifier = contentModifier,
+                onOpenPost = { selectedPostId = it },
+                onOpenProfile = { selectedProfileId = it; profileOpenedFromConnections = false },
+                onOpenConnections = { userId, tab ->
+                    selectedConnectionsUserId = userId
+                    selectedConnectionsTab = tab
+                    showingConnections = true
+                },
+                onSearchCurrentProfile = { accountId, username ->
+                    searchScope = "profile:$accountId"
+                    searchScopeLabel = "@${username.removePrefix("@")}"
+                    destination = Destination.Discover
+                },
+                searchScope = searchScope,
+                searchScopeLabel = searchScopeLabel,
+                onSearchScopeChanged = { scope, label ->
+                    searchScope = scope
+                    searchScopeLabel = label
+                },
+                onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
+                onOpenStore = { selectedStoreId = it },
+                onOpenCategory = { categoryId, name ->
+                    pendingMartCategoryId = categoryId
+                    pendingMartCategoryName = name
+                    destination = Destination.Mart
+                },
+                onLike = { if (isGuest) onRequireSignIn() else feedActions.like(it) },
+                onRepost = { if (isGuest) onRequireSignIn() else feedActions.repost(it) },
+                onSave = { if (isGuest) onRequireSignIn() else feedActions.save(it) },
+                onShare = { feedActions.share(shareContext, it) },
+                interactionMessage = interactionMessage,
+                savingPostId = savingPostId,
+                loadingMore = loadingMore,
+                loadMoreError = loadMoreError,
+                onLoadMore = ::loadMore,
+                walletRepository = walletRepository,
+                buyerOrdersRepository = buyerOrdersRepository,
+                disputeRepository = disputeRepository,
+                privateMediaUploadsRepository = privateMediaUploadsRepository,
+                currentProfileRepository = currentProfileRepository,
+                profileImagesRepository = profileImagesRepository,
+                followRequestsRepository = followRequestsRepository,
+                ioExecutor = executor,
+                notificationsRepository = notificationsRepository,
+                accountNotificationSettingsRepository = accountNotificationSettingsRepository,
+                onNotificationReauthenticate = onSignOut,
+                searchRepository = searchRepository,
+                exploreRepository = exploreRepository,
+                publicProfileRepository = publicProfileRepository,
+                messagesRepository = messagesRepository,
+                initialMessageConversation = pendingMessageConversation,
+                onInitialMessageConversationHandled = { pendingMessageConversation = null },
+                savedPostsRepository = savedPostsRepository,
+                martRepository = martRepository,
+                storeRepository = storeRepository,
+                showMartCategoryPane = showMartCategoryPane,
+                initialMartProductId = pendingMartProductId,
+                onInitialMartProductHandled = { pendingMartProductId = null },
+                initialMartCategoryId = pendingMartCategoryId,
+                initialMartCategoryName = pendingMartCategoryName,
+                onInitialMartCategoryHandled = {
+                    pendingMartCategoryId = null
+                    pendingMartCategoryName = null
+                },
+                onOpenSavedPosts = { if (isGuest) onRequireSignIn() else destination = Destination.Saved },
+                onBackFromSavedPosts = { destination = Destination.Feed },
+                onBackFromOrders = { destination = Destination.Feed },
+                onBackFromFollowRequests = { destination = Destination.Profile },
+                onOpenMessages = { if (isGuest) onRequireSignIn() else destination = Destination.Messages },
+                onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders },
+                onOpenFollowRequests = { if (isGuest) onRequireSignIn() else destination = Destination.FollowRequests },
+                onOpenBusinessTools = { if (isGuest) onRequireSignIn() else destination = Destination.Business },
+                businessContent = businessContent,
+            )
+        },
+    )
 
 }
 

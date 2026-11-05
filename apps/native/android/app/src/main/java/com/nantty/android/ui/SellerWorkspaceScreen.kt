@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
@@ -45,9 +46,13 @@ import com.nantty.android.data.SellerWorkspace
 import com.nantty.android.data.SellerWorkspaceDashboard
 import com.nantty.android.data.SellerWorkspaceRepository
 import com.nantty.android.data.SellerWorkspaceResult
+import com.nantty.android.data.SellerOrdersRepository
+import com.nantty.android.data.SellerShipmentRepository
+import com.nantty.android.data.DisputeRepository
 import com.nantty.android.data.formatSellerMoney
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.concurrent.Executor
 
 private sealed interface SellerWorkspaceUiState {
     data object Loading : SellerWorkspaceUiState
@@ -57,10 +62,38 @@ private sealed interface SellerWorkspaceUiState {
 
 /** First read-only Seller workspace slice; entry/navigation is intentionally owned by the host app. */
 @Composable
-internal fun SellerWorkspaceScreen(repository: SellerWorkspaceRepository, modifier: Modifier = Modifier) {
+internal fun SellerWorkspaceScreen(
+    repository: SellerWorkspaceRepository,
+    sellerOrdersRepository: SellerOrdersRepository,
+    sellerShipmentRepository: SellerShipmentRepository,
+    disputeRepository: DisputeRepository,
+    executor: Executor,
+    onAuthenticationRequired: () -> Unit,
+    onMessageBuyer: (String) -> Unit,
+    onOpenBuyerProfile: (String) -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
     var period by rememberSaveable { mutableStateOf(SellerDashboardPeriod.TODAY) }
     var retryKey by rememberSaveable { mutableIntStateOf(0) }
     var state by remember { mutableStateOf<SellerWorkspaceUiState>(SellerWorkspaceUiState.Loading) }
+    var showingOrders by rememberSaveable { mutableStateOf(false) }
+
+    BackHandler(enabled = showingOrders) { showingOrders = false }
+
+    if (showingOrders) {
+        SellerOrdersScreen(
+            repository = sellerOrdersRepository,
+            shipmentRepository = sellerShipmentRepository,
+            disputeRepository = disputeRepository,
+            executor = executor,
+            onBack = { showingOrders = false },
+            onAuthenticationRequired = onAuthenticationRequired,
+            onMessageBuyer = onMessageBuyer,
+            onOpenBuyerProfile = onOpenBuyerProfile,
+            modifier = modifier,
+        )
+        return
+    }
 
     LaunchedEffect(period, retryKey, repository) {
         state = SellerWorkspaceUiState.Loading
@@ -88,6 +121,7 @@ internal fun SellerWorkspaceScreen(repository: SellerWorkspaceRepository, modifi
                     workspace = current.workspace,
                     period = period,
                     onPeriodChange = { period = it },
+                    onOpenOrders = { showingOrders = true },
                 )
             }
         }
@@ -120,6 +154,7 @@ private fun SellerWorkspaceContent(
     workspace: SellerWorkspace,
     period: SellerDashboardPeriod,
     onPeriodChange: (SellerDashboardPeriod) -> Unit,
+    onOpenOrders: () -> Unit,
 ) {
     val dashboard = workspace.dashboard
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -133,6 +168,7 @@ private fun SellerWorkspaceContent(
                 fontWeight = FontWeight.SemiBold,
             )
             SellerApplicationCard(workspace.application)
+            OutlinedButton(onClick = onOpenOrders, modifier = Modifier.fillMaxWidth()) { Text("View orders") }
             SellerPeriodSelector(period, onPeriodChange)
             if (dashboard == null) {
                 SellerEmptyCard("Dashboard data is not available yet.")

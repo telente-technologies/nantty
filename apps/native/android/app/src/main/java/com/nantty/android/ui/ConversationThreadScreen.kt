@@ -95,6 +95,10 @@ fun ConversationThreadScreen(
     safetyCodeAvailable: Boolean,
     safetyCodeLabel: String?,
     retryingMessageIds: Set<String>,
+    hasOlderMessages: Boolean = false,
+    loadingOlderMessages: Boolean = false,
+    olderMessagesError: String? = null,
+    allowMarkRead: Boolean = true,
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
     onOpenPeerOrInfo: () -> Unit,
@@ -104,6 +108,7 @@ fun ConversationThreadScreen(
     onDraftChange: (String) -> Unit,
     onSendText: (String) -> Unit,
     onRetryMessage: (String) -> Unit,
+    onLoadOlderMessages: () -> Unit = {},
 ) {
     var safetyCodeDialogOpen by remember { mutableStateOf(false) }
     val safeItems = remember(timeline) { timeline.filterNot { it.state == ConversationMessageState.READY && it.displayText == null } }
@@ -137,7 +142,7 @@ fun ConversationThreadScreen(
             IconButton(onClick = onOpenPeerOrInfo, modifier = Modifier.semantics { contentDescription = "Conversation info" }) {
                 Icon(Icons.Outlined.Info, contentDescription = null)
             }
-            IconButton(onClick = onMarkRead, modifier = Modifier.semantics { contentDescription = "Mark conversation as read" }) {
+            if (allowMarkRead) IconButton(onClick = onMarkRead, modifier = Modifier.semantics { contentDescription = "Mark conversation as read" }) {
                 Icon(Icons.Default.DoneAll, contentDescription = null)
             }
             IconButton(onClick = onRefresh, modifier = Modifier.semantics { contentDescription = "Refresh conversation" }) {
@@ -180,18 +185,39 @@ fun ConversationThreadScreen(
                     actionLabel = "Try again",
                     onAction = onRefresh,
                 )
-                ConversationTimelineState.READY -> if (safeItems.isEmpty()) {
-                    StateMessage("No displayable messages", "Encrypted or unavailable content is not shown as plaintext.")
-                } else {
-                    LazyColumn(
-                        Modifier.widthIn(max = 900.dp).fillMaxSize().align(Alignment.Center),
-                        reverseLayout = true,
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        // The API returns newest-first; reverseLayout anchors the newest row at
-                        // the bottom without reversing the chronology a second time.
-                        items(safeItems, key = ConversationTimelineItem::id) { item ->
-                            MessageBubble(item, retryingMessageIds.contains(item.id), onRetryMessage)
+                ConversationTimelineState.READY -> Column(Modifier.fillMaxSize()) {
+                    if (hasOlderMessages || loadingOlderMessages) {
+                        TextButton(
+                            onClick = onLoadOlderMessages,
+                            enabled = !loadingOlderMessages,
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                        ) {
+                            Text(if (loadingOlderMessages) "Loading older messages" else "Load older messages")
+                        }
+                    }
+                    olderMessagesError?.takeIf(String::isNotBlank)?.let {
+                        Text(
+                            it,
+                            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    if (safeItems.isEmpty()) {
+                        Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            StateMessage("No displayable messages", "Encrypted or unavailable content is not shown as plaintext.")
+                        }
+                    } else {
+                        LazyColumn(
+                            Modifier.weight(1f).widthIn(max = 900.dp).fillMaxWidth().align(Alignment.CenterHorizontally),
+                            reverseLayout = true,
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            // The API returns newest-first; reverseLayout anchors the newest row at
+                            // the bottom without reversing the chronology a second time.
+                            items(safeItems, key = ConversationTimelineItem::id) { item ->
+                                MessageBubble(item, retryingMessageIds.contains(item.id), onRetryMessage)
+                            }
                         }
                     }
                 }

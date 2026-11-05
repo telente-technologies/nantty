@@ -15,6 +15,9 @@ import com.nantty.android.data.MartRepository
 import com.nantty.android.data.CartRepository
 import com.nantty.android.data.CartTransport
 import com.nantty.android.data.ProductReviewsRepository
+import com.nantty.android.data.ProductReportRepository
+import com.nantty.android.data.ProductReportReason
+import com.nantty.android.data.ProductReportTransport
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.StoreRepository
@@ -23,6 +26,7 @@ import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.CopyOnWriteArrayList
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -31,6 +35,30 @@ import org.junit.Test
 class MartProductDetailNavigationTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @Test
+    fun serverDrivenCollectionHighlightOpensFilteredMartResults() {
+        val requestedUrls = CopyOnWriteArrayList<String>()
+        val repository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            openConnection = { url ->
+                requestedUrls += url.toString()
+                FakeMartConnection(url, responseFor(url))
+            },
+        )
+        composeRule.setContent { MaterialTheme { MartScreen(repository) } }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("New arrivals").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("New arrivals").performClick()
+        composeRule.waitUntil(5_000) {
+            requestedUrls.any { it.contains("/api/v1/products?") && it.contains("collection=new_arrivals") }
+        }
+        composeRule.onNodeWithText("New arrivals").assertIsDisplayed()
+        assertTrue(requestedUrls.any { it.contains("/api/v1/mart/highlights?limit=6") })
+        assertTrue(requestedUrls.any { it.contains("/api/v1/products?limit=20&collection=new_arrivals") })
+    }
 
     @Test
     fun catalogCardOpensReadOnlyDetailsAndBackReturnsToCatalog() {
@@ -115,11 +143,85 @@ class MartProductDetailNavigationTest {
             composeRule.onAllNodesWithText("Following store").fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onNodeWithText("Following store").performClick()
+        composeRule.onNodeWithText("Unfollow store?").assertExists()
+        assertEquals(emptyList<String>(), transport.deletes)
+        composeRule.onNodeWithText("Unfollow", useUnmergedTree = true).performClick()
         composeRule.waitUntil(5_000) {
             transport.deletes.isNotEmpty()
         }
         assertEquals(listOf("/api/v1/stores/store-1/follow"), transport.posts)
         assertEquals(listOf("/api/v1/stores/store-1/follow"), transport.deletes)
+    }
+
+    @Test
+    fun productReportSubmitsAuthenticatedSocialRequestAndShowsServerConfirmation() {
+        val transport = RecordingProductReportTransport()
+        val reportRepository = ProductReportRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "reporter-token" },
+            transport = transport,
+        )
+        val productRepository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            openConnection = { url -> FakeMartConnection(url, responseFor(url)) },
+        )
+
+        composeRule.setContent {
+            MaterialTheme {
+                MartProductDetailScreen(
+                    productId = "prd-1",
+                    repository = productRepository,
+                    onAuthenticationRequired = {},
+                    onBack = {},
+                    productReportRepositoryOverride = reportRepository,
+                )
+            }
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Report this product").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Report this product").performClick()
+        composeRule.onNodeWithText("Counterfeit / fake brand (trademark claim)").performClick()
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Thanks for reporting").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        assertEquals("/api/v1/reports", transport.path)
+        assertEquals("reporter-token", transport.accessToken)
+        assertTrue(transport.idempotencyKey?.isNotBlank() == true)
+        assertEquals("product", transport.body?.getString("targetType"))
+        assertEquals("prd-1", transport.body?.getString("targetId"))
+        assertEquals("counterfeit_product", transport.body?.getString("reason"))
+    }
+
+    @Test
+    fun guestProductReportAsksForSignInWithoutOpeningReportDialog() {
+        var signInRequested = false
+        val productRepository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            openConnection = { url -> FakeMartConnection(url, responseFor(url)) },
+        )
+
+        composeRule.setContent {
+            MaterialTheme {
+                MartProductDetailScreen(
+                    productId = "prd-1",
+                    repository = productRepository,
+                    onAuthenticationRequired = { signInRequested = true },
+                    onBack = {},
+                )
+            }
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Report this product").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Report this product").performClick()
+        composeRule.runOnIdle {
+            assertTrue(signInRequested)
+            assertTrue(composeRule.onAllNodesWithText("Choose the reason that best describes your concern.").fetchSemanticsNodes().isEmpty())
+        }
     }
 
     @Test
@@ -187,6 +289,7 @@ class MartProductDetailNavigationTest {
 
     @Test
     fun externalCategorySelectionLoadsProductsByCategoryId() {
+        val categoryId = "0192a4f0-0000-7000-8000-000000000001"
         val requestedUrls = mutableListOf<String>()
         var categoryHandled = false
         val repository = MartRepository(
@@ -201,16 +304,21 @@ class MartProductDetailNavigationTest {
             MaterialTheme {
                 MartScreen(
                     repository = repository,
-                    initialCategoryId = "category-fashion",
+                    initialCategoryId = categoryId,
+                    initialCategoryName = "Clothing",
                     onInitialCategoryHandled = { categoryHandled = true },
                 )
             }
         }
 
-        composeRule.waitUntil(5_000) { requestedUrls.any { it.contains("categoryId=category-fashion") } }
+        composeRule.waitUntil(5_000) { requestedUrls.any { it.contains("categoryId=$categoryId") } }
         composeRule.runOnIdle { assertTrue(categoryHandled) }
+        composeRule.onNodeWithText("Clothing").assertIsDisplayed()
+        composeRule.onNodeWithText("Products in this category.").assertIsDisplayed()
         composeRule.onNodeWithText("Silk wrap dress").assertIsDisplayed()
-        assertTrue(requestedUrls.any { it.endsWith("/api/v1/products?limit=20&categoryId=category-fashion") })
+        composeRule.onNodeWithText("All Mart").performClick()
+        composeRule.onNodeWithText("Browse products from stores on Nantty.").assertIsDisplayed()
+        assertTrue(requestedUrls.any { it.endsWith("/api/v1/products?limit=20&categoryId=$categoryId") })
     }
 
     @Test
@@ -248,6 +356,7 @@ class MartProductDetailNavigationTest {
 
 private fun responseFor(url: URL, productName: String = "Silk wrap dress"): String = when {
     url.path == "/api/v1/mart/home" -> """{"categories":[]}"""
+    url.path == "/api/v1/mart/highlights" -> """{"data":[{"id":"editorial-new-arrivals","kind":"new_arrivals","title":"New arrivals","subtitle":"Fresh this week","imageUrl":null,"target":{"type":"collection","collection":"new_arrivals","name":"New arrivals"},"ranking":{"score":0.6,"reason":{"code":"fresh_listings","label":"Just listed"}}}],"nextCursor":null}"""
     url.path == "/api/v1/products" -> """{"data":[{"id":"prd-1","name":"$productName","price":{"amountMinor":125000,"currency":"NGN"},"stock":3}],"nextCursor":null}"""
     url.path == "/api/v1/products/prd-1" -> """{"id":"prd-1","title":"$productName","price":{"amountMinor":125000,"currency":"NGN"},"stock":3,"images":[],"rating":0,"sizes":["S","M"],"colors":["Blue"],"shippingInfo":"Calculated at checkout.","description":"Hand-finished silk.","store":{"id":"store-1","name":"Adire House"},"variants":[{"id":"variant-1","title":"Medium / Blue","size":"M","color":"Blue","price":{"amountMinor":125000,"currency":"NGN"},"inStock":true}]}"""
     else -> error("Unexpected catalog URL: $url")
@@ -303,12 +412,28 @@ private class ProductStoreFollowTransport : StoreTransport {
         assertEquals("token", accessToken)
         posts += path
         isFollowing = true
-        return JSONObject()
+        return JSONObject("""{"storeId":"store-1","isFollowing":true,"followers":19}""")
     }
 
-    override fun delete(path: String, accessToken: String) {
+    override fun delete(path: String, accessToken: String): JSONObject {
         assertEquals("token", accessToken)
         deletes += path
         isFollowing = false
+        return JSONObject("""{"storeId":"store-1","isFollowing":false,"followers":18}""")
+    }
+}
+
+private class RecordingProductReportTransport : ProductReportTransport {
+    var path: String? = null
+    var accessToken: String? = null
+    var idempotencyKey: String? = null
+    var body: JSONObject? = null
+
+    override fun submit(path: String, accessToken: String, idempotencyKey: String, body: JSONObject): JSONObject {
+        this.path = path
+        this.accessToken = accessToken
+        this.idempotencyKey = idempotencyKey
+        this.body = body
+        return JSONObject("""{"data":{"id":"report-1","status":"received","priority":"normal"}}""")
     }
 }

@@ -25,6 +25,8 @@ data class CurrentProfileUpdate(
     val name: String,
     val bio: String,
     val isPrivate: Boolean,
+    val avatarMediaId: String? = null,
+    val bannerMediaId: String? = null,
 )
 
 sealed interface CurrentProfileResult {
@@ -54,6 +56,8 @@ class CurrentProfileRepository(
             .put("name", update.name.trim())
             .put("bio", update.bio.trim())
             .put("isPrivate", update.isPrivate)
+        update.avatarMediaId?.let { fields.put("avatarMediaId", it) }
+        update.bannerMediaId?.let { fields.put("bannerMediaId", it) }
         parseAndVerify(transport.patchMe(session.accessToken, fields), session.user.id)
     }
 

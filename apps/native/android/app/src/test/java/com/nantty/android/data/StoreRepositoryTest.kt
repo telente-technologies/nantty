@@ -67,22 +67,97 @@ class StoreRepositoryTest {
         assertTrue(guestResult.authenticationRequired)
         assertTrue(guestTransport.posts.isEmpty())
 
-        val transport = RecordingStoreTransport().apply {
-            statusResponses += JSONObject("""{"storeId":"$STORE_ID","isFollowing":true,"followers":19}""")
-            statusResponses += JSONObject("""{"storeId":"$STORE_ID","isFollowing":false,"followers":18}""")
-        }
+        val transport = RecordingStoreTransport()
         val repository = StoreRepository("https://api.nantty.com", ::session, transport)
         val followed = repository.setFollowing(STORE_ID, follow = true) as StoreFollowResult.Success
         assertEquals(StoreFollowState(STORE_ID, true, 19), followed.state)
         assertEquals(listOf("/api/v1/stores/$STORE_ID/follow"), transport.posts)
-        assertEquals("/api/v1/stores/$STORE_ID/follow-status", transport.paths.last())
+        assertFalse(transport.paths.any { it.endsWith("/follow-status") })
         assertEquals(listOf("store-token"), transport.writeTokens)
 
         val unfollowed = repository.setFollowing(STORE_ID, follow = false) as StoreFollowResult.Success
         assertEquals(StoreFollowState(STORE_ID, false, 18), unfollowed.state)
         assertEquals(listOf("/api/v1/stores/$STORE_ID/follow"), transport.deletes)
-        assertEquals("/api/v1/stores/$STORE_ID/follow-status", transport.paths.last())
-        assertEquals("store-token", transport.tokens.last())
+        assertFalse(transport.paths.any { it.endsWith("/follow-status") })
+    }
+
+    @Test
+    fun forbiddenStoreFollowResponseRequiresAuthentication() {
+        val repository = StoreRepository(
+            "https://api.nantty.com",
+            ::session,
+            object : StoreTransport {
+                override fun get(path: String, accessToken: String?): JSONObject = error("Unexpected read")
+                override fun post(path: String, accessToken: String): JSONObject = throw StoreTransportException(403, "Forbidden")
+            },
+        )
+
+        val result = repository.setFollowing(STORE_ID, follow = true) as StoreFollowResult.Failure
+
+        assertTrue("Expected 403 to be treated as authentication-required: $result", result.authenticationRequired)
+    }
+
+    @Test
+    fun storeFollowRefreshesExpiredTokenOnceAndUsesCanonicalRetryResponse() {
+        val tokens = mutableListOf<String>()
+        var refreshCount = 0
+        val transport = object : StoreTransport {
+            override fun get(path: String, accessToken: String?): JSONObject = error("Unexpected read")
+            override fun post(path: String, accessToken: String): JSONObject {
+                tokens += accessToken
+                if (tokens.size == 1) throw StoreTransportException(401, "Expired")
+                return JSONObject("""{"storeId":"$STORE_ID","isFollowing":true,"followers":19}""")
+            }
+        }
+        val refreshed = session().copy(accessToken = "refreshed-token")
+        val repository = StoreRepository(
+            "https://api.nantty.com",
+            ::session,
+            transport,
+            refreshSessionProvider = { refreshCount += 1; refreshed },
+        )
+
+        val result = repository.setFollowing(STORE_ID, follow = true) as StoreFollowResult.Success
+
+        assertEquals(StoreFollowState(STORE_ID, true, 19), result.state)
+        assertEquals(listOf("store-token", "refreshed-token"), tokens)
+        assertEquals(1, refreshCount)
+    }
+
+    @Test
+    fun storeFollowStopsAfterOneRefreshAndTreatsRevokedSessionAsAuthenticationRequired() {
+        var requestCount = 0
+        var refreshCount = 0
+        val transport = object : StoreTransport {
+            override fun get(path: String, accessToken: String?): JSONObject = error("Unexpected read")
+            override fun post(path: String, accessToken: String): JSONObject {
+                requestCount += 1
+                throw StoreTransportException(401, "Expired")
+            }
+        }
+        val repository = StoreRepository(
+            "https://api.nantty.com",
+            ::session,
+            transport,
+            refreshSessionProvider = { refreshCount += 1; null },
+        )
+
+        val result = repository.setFollowing(STORE_ID, follow = true) as StoreFollowResult.Failure
+
+        assertTrue(result.authenticationRequired)
+        assertEquals(1, requestCount)
+        assertEquals(1, refreshCount)
+    }
+
+    @Test
+    fun rejectsMalformedFollowerCountFromUnfollowResponseInsteadOfReplacingItWithZero() {
+        val transport = RecordingStoreTransport().apply {
+            deleteResponse = JSONObject("""{"storeId":"$STORE_ID","isFollowing":false}""")
+        }
+
+        val result = StoreRepository("https://api.nantty.com", ::session, transport).setFollowing(STORE_ID, follow = false)
+
+        assertTrue(result is StoreFollowResult.Failure)
     }
 
     private class RecordingStoreTransport : StoreTransport {
@@ -91,14 +166,14 @@ class StoreRepositoryTest {
         val posts = mutableListOf<String>()
         val deletes = mutableListOf<String>()
         val writeTokens = mutableListOf<String>()
-        val statusResponses = ArrayDeque<JSONObject>()
+        var deleteResponse: JSONObject? = null
 
         override fun get(path: String, accessToken: String?): JSONObject {
             paths += path
             tokens += accessToken
             return when {
                 path == "/api/v1/stores/$STORE_ID" -> JSONObject("""{"id":"$STORE_ID","name":"Ada Fabrics","handle":"adafabrics","bio":"Handmade textiles","logoUrl":"https://cdn.nantty.com/logo.png","followers":18,"productsCount":1,"rating":4.7,"ratingCount":5,"verified":true}""")
-                path == "/api/v1/stores/$STORE_ID/follow-status" -> statusResponses.removeFirst()
+                path == "/api/v1/stores/$STORE_ID/follow-status" -> JSONObject("""{"storeId":"$STORE_ID","isFollowing":false,"followers":18}""")
                 path.startsWith("/api/v1/stores/$STORE_ID/products") -> JSONObject("""{"data":[{"id":"product-1","name":"Indigo scarf","price":{"amountMinor":125000,"currency":"NGN"},"imageUrl":"https://cdn.nantty.com/scarf.jpg","stock":4}],"nextCursor":"next-page"}""")
                 else -> error("Unexpected store request: $path")
             }
@@ -107,12 +182,13 @@ class StoreRepositoryTest {
         override fun post(path: String, accessToken: String): JSONObject {
             posts += path
             writeTokens += accessToken
-            return JSONObject()
+            return JSONObject("""{"storeId":"$STORE_ID","isFollowing":true,"followers":19}""")
         }
 
-        override fun delete(path: String, accessToken: String) {
+        override fun delete(path: String, accessToken: String): JSONObject {
             deletes += path
             writeTokens += accessToken
+            return deleteResponse ?: JSONObject("""{"storeId":"$STORE_ID","isFollowing":false,"followers":18}""")
         }
     }
 
