@@ -160,7 +160,7 @@ describe("X3DH and Double Ratchet sessions", () => {
     const first = await send(alice, bob, "vector");
     expect(read(await bob.cipher.decrypt("alice", alice.identity.deviceId, first, async () => true))).toBe("vector");
     expect(hex(first)).toBe(
-      "3200002ef73f02845497983242c8980441c40146fb431d3b38aaa0b1bc7190063fa8cd47e79c9e47e840a70eea65710fe81d14cb3616259e675625401d94a69715075c755d0000000b000001f431fbcd555d85c93954cd96b2aefa79717663f2ba5e61a364a62c904c67ce57e01a00000000000000005860010d285d16dc95ce72abc0b0b4618619ef3d87c6",
+      "3200002ef73f02845497983242c8980441c40146fb431d3b38aaa0b1bc7190063fa8cd47e79c9e47e840a70eea65710fe81d14cb3616259e675625401d94a69715075c755d0000000b000001f431fbcd555d85c93954cd96b2aefa79717663f2ba5e61a364a62c904c67ce57e01a0000000000000000f4058f1517c11eb5deb332cfc34435eab7751be8aaf2",
     );
     expect(hex(text("x"))).toBe("78");
   });

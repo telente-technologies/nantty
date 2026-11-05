@@ -1,0 +1,44 @@
+{
+  "directEnvelope": {
+    "wire": "{\"v\":1,\"t\":\"p\",\"s\":\"device-sender\",\"p\":\"payload-ciphertext\",\"n\":\"nonce\",\"r\":[{\"u\":\"user-1\",\"d\":\"device-1\",\"b\":\"entry-ciphertext\"}]}",
+    "value": {
+      "v": 1,
+      "t": "p",
+      "s": "device-sender",
+      "p": "payload-ciphertext",
+      "n": "nonce",
+      "r": [{ "u": "user-1", "d": "device-1", "b": "entry-ciphertext" }]
+    }
+  },
+  "groupEnvelope": {
+    "wire": "{\"v\":1,\"t\":\"g\",\"s\":\"device-sender\",\"g\":\"group-ciphertext\",\"r\":[{\"u\":\"user-1\",\"d\":\"device-1\",\"b\":\"entry-ciphertext\"}]}",
+    "value": {
+      "v": 1,
+      "t": "g",
+      "s": "device-sender",
+      "g": "group-ciphertext",
+      "r": [{ "u": "user-1", "d": "device-1", "b": "entry-ciphertext" }]
+    }
+  },
+  "innerPayload": {
+    "wire": "{\"v\":1,\"text\":\"Hello 👋\",\"sentAt\":\"2026-11-05T12:00:00.000Z\",\"conversationId\":\"conversation-1\",\"linkPreview\":null}",
+    "input": {
+      "text": "Hello 👋",
+      "sentAt": "2026-11-05T12:00:00.000Z",
+      "conversationId": "conversation-1",
+      "linkPreview": null
+    },
+    "decoded": {
+      "v": 1,
+      "text": "Hello 👋",
+      "sentAt": "2026-11-05T12:00:00.000Z",
+      "conversationId": "conversation-1",
+      "linkPreview": null,
+      "sharedContent": null,
+      "attachment": null,
+      "location": null,
+      "poll": null,
+      "control": null
+    }
+  }
+}
