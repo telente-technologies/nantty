@@ -56,11 +56,29 @@ export function CategoryScreen({ navigation, route }: MainScreenProps<"Category"
             <ProductMasonry products={allProducts} />
           )
         }
-        onEndReached={() => products.hasNextPage && !products.isFetchingNextPage && products.fetchNextPage()}
+        testID="category-product-list"
+        onEndReached={() =>
+          products.hasNextPage &&
+          !products.isFetchingNextPage &&
+          !products.isFetchNextPageError &&
+          products.fetchNextPage()
+        }
         onEndReachedThreshold={0.5}
         refreshControl={refreshControl}
         contentContainerStyle={styles.content}
-        ListFooterComponent={products.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
+        ListFooterComponent={
+          products.isFetchingNextPage ? (
+            <BrandLoader size="sm" style={styles.footer} />
+          ) : products.isFetchNextPageError ? (
+            <ErrorState
+              error={products.error}
+              compact
+              message="Couldn't load more products."
+              onRetry={() => void products.fetchNextPage()}
+              retrying={products.isFetchingNextPage}
+            />
+          ) : null
+        }
       />
     </Screen>
   );

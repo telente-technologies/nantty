@@ -6,6 +6,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
+import { ORDER_SUCCESS_DESCRIPTION, ORDER_SUCCESS_SHOPPING_ROUTE } from "./orderSuccessCopy.util";
 
 export function OrderSuccessScreen({ navigation, route }: MainScreenProps<"OrderSuccess">) {
   const { colors } = useTheme();
@@ -20,13 +21,17 @@ export function OrderSuccessScreen({ navigation, route }: MainScreenProps<"Order
           Order placed
         </Text>
         <Text size={13} lineHeight={16.9} color={colors.textSubtle} align="center">
-          In Nigeria your payment stays locked in your own wallet, held by our licensed payment partner. The seller is paid only after you confirm the order arrived as described, or 3 days after delivery if you don't report a problem.
+          {ORDER_SUCCESS_DESCRIPTION}
         </Text>
       </View>
       <View style={styles.footer}>
         <Button title="See payment protection" onPress={() => navigation.replace("EscrowStatus", { orderId: route.params.orderId })} />
         <Button variant="subtle" title="View order" onPress={() => navigation.replace("OrderDetail", { orderId: route.params.orderId })} />
-        <Button variant="subtle" title="Continue shopping" onPress={() => navigation.popToTop()} />
+        <Button
+          variant="subtle"
+          title="Continue shopping"
+          onPress={() => navigation.replace(ORDER_SUCCESS_SHOPPING_ROUTE.name, ORDER_SUCCESS_SHOPPING_ROUTE.params)}
+        />
       </View>
     </Screen>
   );
