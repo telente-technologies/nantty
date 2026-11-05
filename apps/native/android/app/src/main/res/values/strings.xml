@@ -22,7 +22,12 @@
     <string name="mart_title">Mart</string>
     <string name="mart_browse_description">Browse products from stores on Nantty.</string>
     <string name="mart_category_description">Products in this category.</string>
+    <string name="mart_collection_description">Products in this collection.</string>
+    <string name="mart_collection_sales">Sales of the Day</string>
+    <string name="mart_collection_brands">Featured Brands</string>
+    <string name="mart_collection_arrivals">New Arrivals</string>
     <string name="mart_back_to_all">All Mart</string>
+    <string name="mart_back_to_discover">Back to Discover</string>
     <string name="messages_title">Messages</string>
     <string name="messages_search_action">Search messages and people</string>
     <string name="messages_search_close">Close message search</string>
