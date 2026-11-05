@@ -55,6 +55,27 @@ class NotificationsRepositoryTest {
     }
 
     @Test
+    fun conversationTargetTakesPrecedenceOverPostTargetLikeReactNative() {
+        val notification = ActivityNotification(
+            id = "n1",
+            category = "messages",
+            kind = null,
+            title = "Ari sent you a message",
+            body = "Open your chat",
+            createdAt = "now",
+            read = false,
+            actor = null,
+            postId = "post-123",
+            conversationId = "11111111-1111-4111-8111-111111111111",
+        )
+
+        assertEquals(
+            NotificationDestination.Conversation("11111111-1111-4111-8111-111111111111"),
+            resolveNotificationDestination(notification),
+        )
+    }
+
+    @Test
     fun requiresSessionBeforeMakingAnyRequest() {
         val transport = RecordingTransport(page())
 

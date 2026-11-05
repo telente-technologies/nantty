@@ -10,6 +10,7 @@ import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.Base64
+import java.util.UUID
 
 data class AdsWorkspaceMoney(val amountMinor: Long, val currency: String)
 
@@ -48,9 +49,25 @@ data class AdsWorkspaceBoost(
     val endsAt: String?,
     val durationDays: Int,
     val rejectionReason: String?,
+    val actions: AdsWorkspaceBoostActions,
+)
+
+data class AdsWorkspaceBoostActions(
+    val pause: Boolean,
+    val resume: Boolean,
+    val stop: Boolean,
 )
 
 data class AdsWorkspaceBoostPage(val boosts: List<AdsWorkspaceBoost>, val nextCursor: String?)
+data class AdsWorkspaceReportTotals(
+    val impressions: Long, val reach: Long, val clicks: Long, val results: Long,
+    val spend: AdsWorkspaceMoney, val costPerResult: AdsWorkspaceMoney?,
+)
+data class AdsWorkspaceReportPoint(
+    val date: String, val impressions: Long, val reach: Long, val clicks: Long,
+    val results: Long, val spend: AdsWorkspaceMoney,
+)
+data class AdsWorkspaceReport(val resultLabel: String, val totals: AdsWorkspaceReportTotals, val series: List<AdsWorkspaceReportPoint>)
 
 data class AdsWorkspaceBalance(
     val spendable: AdsWorkspaceMoney,
@@ -70,11 +87,16 @@ fun interface AdsWorkspaceTransport {
     fun get(path: String, accessToken: String): JSONObject
 }
 
+fun interface AdsWorkspaceMutationTransport {
+    fun post(path: String, accessToken: String, idempotencyKey: String, body: JSONObject): JSONObject
+}
+
 class AdsWorkspaceRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val sessionProvider: () -> AccountSession?,
     private val transport: AdsWorkspaceTransport = JdkAdsWorkspaceTransport(baseUrl),
     private val refreshSessionProvider: () -> AccountSession? = { null },
+    private val mutationTransport: AdsWorkspaceMutationTransport = JdkAdsWorkspaceTransport(baseUrl),
 ) {
     fun loadBoosts(filter: AdsWorkspaceFilter = AdsWorkspaceFilter.ALL, cursor: String? = null): AdsWorkspaceResult<AdsWorkspaceBoostPage> = try {
         val session = requireSession("view your ads")
@@ -96,6 +118,42 @@ class AdsWorkspaceRepository(
     } catch (error: Exception) {
         AdsWorkspaceResult.Failure(
             error.message ?: "Could not load your ad balance. Check your connection and try again.",
+            authenticationRequired = error is AdsWorkspaceHttpException && error.statusCode in setOf(401, 403),
+        )
+    }
+
+    fun loadBoost(boostId: String): AdsWorkspaceResult<AdsWorkspaceBoost> = loadBoostResource(boostId, "") { parseBoost(it) }
+
+    fun loadBoostReport(boostId: String): AdsWorkspaceResult<AdsWorkspaceReport> = loadBoostResource(boostId, "/report") { parseReport(it) }
+
+    fun changeBoostStatus(boostId: String, action: AdsWorkspaceStatusAction, idempotencyKey: String = UUID.randomUUID().toString()): AdsWorkspaceResult<AdsWorkspaceBoost> = try {
+        require(isAdsWorkspaceUuid(boostId)) { "This ad is unavailable." }
+        require(IDEMPOTENCY_PATTERN.matches(idempotencyKey)) { "This ad update is invalid. Try again." }
+        val session = requireSession("manage your ads")
+        val path = "/api/v1/ads/boosts/$boostId/${action.path}"
+        val response = try {
+            mutationTransport.post(path, session.accessToken, idempotencyKey, JSONObject())
+        } catch (error: AdsWorkspaceHttpException) {
+            if (error.statusCode != HttpURLConnection.HTTP_UNAUTHORIZED) throw error
+            val refreshed = refreshSessionProvider()?.accessToken?.takeIf(String::isNotBlank)
+                ?: throw AdsWorkspaceHttpException(HttpURLConnection.HTTP_UNAUTHORIZED)
+            mutationTransport.post(path, refreshed, idempotencyKey, JSONObject())
+        }
+        AdsWorkspaceResult.Success(parseBoost(response))
+    } catch (error: Exception) {
+        AdsWorkspaceResult.Failure(
+            error.message ?: "Couldn't update this ad. Check your connection and try again.",
+            authenticationRequired = error is AdsWorkspaceHttpException && error.statusCode in setOf(401, 403),
+        )
+    }
+
+    private fun <T> loadBoostResource(boostId: String, suffix: String, parse: (JSONObject) -> T): AdsWorkspaceResult<T> = try {
+        require(isAdsWorkspaceUuid(boostId)) { "This ad is unavailable." }
+        val session = requireSession("view your ads")
+        AdsWorkspaceResult.Success(parse(requestWithRefresh("/api/v1/ads/boosts/$boostId$suffix", session.accessToken)))
+    } catch (error: Exception) {
+        AdsWorkspaceResult.Failure(
+            error.message ?: "Could not load this ad. Check your connection and try again.",
             authenticationRequired = error is AdsWorkspaceHttpException && error.statusCode in setOf(401, 403),
         )
     }
@@ -143,6 +201,37 @@ class AdsWorkspaceRepository(
         )
     }
 
+    internal fun parseReport(payload: JSONObject): AdsWorkspaceReport {
+        val data = payload.optJSONObject("data") ?: payload
+        val totals = data.optJSONObject("totals") ?: error("Nantty returned an incomplete ad report.")
+        val rows = data.optJSONArray("series") ?: error("Nantty returned an incomplete ad report.")
+        val series = buildList {
+            for (index in 0 until rows.length()) {
+                val row = rows.optJSONObject(index) ?: error("Nantty returned an invalid ad report entry.")
+                add(AdsWorkspaceReportPoint(
+                    date = row.optNullableAdsString("date") ?: error("Nantty returned an invalid ad report date."),
+                    impressions = row.requiredNonNegativeLong("impressions"),
+                    reach = row.requiredNonNegativeLong("reach"),
+                    clicks = row.requiredNonNegativeLong("clicks"),
+                    results = row.requiredNonNegativeLong("results"),
+                    spend = row.requiredMoney("spend"),
+                ))
+            }
+        }
+        return AdsWorkspaceReport(
+            resultLabel = data.optNullableAdsString("resultLabel") ?: "Results",
+            totals = AdsWorkspaceReportTotals(
+                impressions = totals.requiredNonNegativeLong("impressions"),
+                reach = totals.requiredNonNegativeLong("reach"),
+                clicks = totals.requiredNonNegativeLong("clicks"),
+                results = totals.requiredNonNegativeLong("results"),
+                spend = totals.requiredMoney("spend"),
+                costPerResult = totals.optJSONObject("costPerResult")?.let { parseMoney(it) },
+            ),
+            series = series,
+        )
+    }
+
     private fun parseBoost(row: JSONObject): AdsWorkspaceBoost {
         val id = row.optNullableAdsString("id")?.takeIf(::isAdsWorkspaceUuid)
             ?: error("Nantty returned an ad with an invalid identity.")
@@ -165,6 +254,7 @@ class AdsWorkspaceRepository(
         results.requiredNonNegativeLong("productVisits")
         results.requiredNonNegativeLong("messages")
         val duration = row.requiredNonNegativeInt("durationDays")
+        val actions = row.optJSONObject("actions") ?: error("Nantty returned incomplete ad actions.")
         return AdsWorkspaceBoost(
             id = id,
             status = status,
@@ -177,7 +267,21 @@ class AdsWorkspaceRepository(
             endsAt = row.optNullableAdsString("endsAt"),
             durationDays = duration,
             rejectionReason = row.optNullableAdsString("rejectionReason"),
+            actions = AdsWorkspaceBoostActions(
+                pause = actions.optBoolean("pause", false),
+                resume = actions.optBoolean("resume", false),
+                stop = actions.optBoolean("stop", false),
+            ),
         )
+    }
+
+    private fun parseMoney(money: JSONObject): AdsWorkspaceMoney {
+        val amountValue = money.opt("amountMinor")
+        val amount = (amountValue as? Number)?.toString()?.let { runCatching { BigDecimal(it).longValueExact() }.getOrNull() }
+            ?: error("Nantty returned an invalid ad report amount.")
+        val currency = money.optNullableAdsString("currency")?.takeIf { it.matches(Regex("[A-Z]{3}")) }
+            ?: error("Nantty returned an invalid ad report currency.")
+        return AdsWorkspaceMoney(amount, currency)
     }
 
     companion object {
@@ -236,24 +340,48 @@ private fun JSONObject.requiredNonNegativeInt(key: String): Int {
 
 private fun JSONObject.optNullableAdsString(key: String): String? = optString(key).takeIf { it.isNotBlank() && it != "null" }
 
-private class JdkAdsWorkspaceTransport(private val baseUrl: String) : AdsWorkspaceTransport {
+enum class AdsWorkspaceStatusAction(val path: String) {
+    PAUSE("pause"), RESUME("resume"), STOP("cancel");
+}
+
+private class JdkAdsWorkspaceTransport(private val baseUrl: String) : AdsWorkspaceTransport, AdsWorkspaceMutationTransport {
     override fun get(path: String, accessToken: String): JSONObject {
-        require(path.startsWith("/api/v1/ads/boosts?") || path == "/api/v1/ads/boosts/balance") { "Unsupported ads workspace request." }
+        require(path.startsWith("/api/v1/ads/boosts?") || path == "/api/v1/ads/boosts/balance" ||
+            Regex("^/api/v1/ads/boosts/[0-9a-fA-F-]{36}(/report)?$").matches(path)) { "Unsupported ads workspace request." }
         require(accessToken.isNotBlank()) { "Sign in to view ads." }
         val origin = trustedApiOrigin(baseUrl) ?: error("Configure an HTTPS Nantty API URL to view ads.")
-        val connection = (URL(origin + path).openConnection() as HttpURLConnection).apply {
-            requestMethod = "GET"
+        return request(URL(origin + path), "GET", accessToken, null, null)
+    }
+
+    override fun post(path: String, accessToken: String, idempotencyKey: String, body: JSONObject): JSONObject {
+        require(path.matches(Regex("^/api/v1/ads/boosts/[0-9a-fA-F-]{36}/(pause|resume|cancel)$"))) { "Unsupported ads workspace operation." }
+        require(accessToken.isNotBlank()) { "Sign in to manage ads." }
+        require(IDEMPOTENCY_PATTERN.matches(idempotencyKey)) { "This ad update is invalid. Try again." }
+        val origin = trustedApiOrigin(baseUrl) ?: error("Configure an HTTPS Nantty API URL to manage ads.")
+        return request(URL(origin + path), "POST", accessToken, idempotencyKey, body)
+    }
+
+    private fun request(url: URL, method: String, accessToken: String, idempotencyKey: String?, body: JSONObject?): JSONObject {
+        val connection = (url.openConnection() as HttpURLConnection).apply {
+            requestMethod = method
             connectTimeout = 10_000
             readTimeout = 15_000
             instanceFollowRedirects = false
             useCaches = false
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Authorization", "Bearer $accessToken")
+            body?.let {
+                doOutput = true
+                setRequestProperty("Content-Type", "application/json")
+                setRequestProperty("Idempotency-Key", idempotencyKey)
+            }
         }
         try {
+            body?.let { connection.outputStream.use { output -> output.write(it.toString().toByteArray(StandardCharsets.UTF_8)) } }
             val status = connection.responseCode
+            val stream = if (status in 200..299) connection.inputStream else connection.errorStream
+            val response = stream?.use(::readAdsWorkspaceResponse).orEmpty()
             if (status !in 200..299) throw AdsWorkspaceHttpException(status)
-            val response = connection.inputStream.use(::readAdsWorkspaceResponse)
             return JSONObject(response)
         } finally {
             connection.disconnect()
@@ -274,6 +402,8 @@ private class JdkAdsWorkspaceTransport(private val baseUrl: String) : AdsWorkspa
 
     companion object { private const val MAX_RESPONSE_BYTES = 1_048_576 }
 }
+
+private val IDEMPOTENCY_PATTERN = Regex("^[A-Za-z0-9_-]{8,128}$")
 
 internal class AdsWorkspaceHttpException(val statusCode: Int) : Exception(
     if (statusCode == 401 || statusCode == 403) "Your session has expired. Sign in again to view ads."

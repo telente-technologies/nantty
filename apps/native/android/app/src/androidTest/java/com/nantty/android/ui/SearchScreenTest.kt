@@ -363,128 +363,6 @@ class SearchScreenTest {
         }
     }
 
-    @Test
-    fun signedInUserLoadsRecentSearchesAndSelectingOneRunsSearch() {
-        val transport = FakeTransport(recentEntries = listOf(recent("rain & sun")))
-        compose.setContent {
-            MaterialTheme {
-                SearchScreen(SearchRepository("https://api.nantty.com", ::signedInSession, transport), Executor { it.run() })
-            }
-        }
-
-        compose.onNodeWithContentDescription("Search rain & sun").assertIsDisplayed().performClick()
-        compose.mainClock.advanceTimeBy(400)
-        compose.waitForIdle()
-        compose.onNodeWithText("A real post result").assertIsDisplayed()
-        compose.runOnIdle {
-            assertTrue(transport.historyRequests().any { it.method == "GET" && it.path == "/api/v1/search/recent?scope=global" })
-            assertTrue(transport.searchPaths().contains("/api/v1/search?q=rain%20%26%20sun&scope=global&type=top&limit=10"))
-        }
-    }
-
-    @Test
-    fun signedInUserRecordsOnlyOnExplicitSubmitAndHistoryErrorsDoNotBlockSearchOrOpening() {
-        val transport = FakeTransport(failHistory = true)
-        var opened: String? = null
-        compose.setContent {
-            MaterialTheme {
-                SearchScreen(
-                    SearchRepository("https://api.nantty.com", ::signedInSession, transport),
-                    Executor { it.run() },
-                    onOpenPost = { opened = it },
-                )
-            }
-        }
-
-        compose.onNode(hasSetTextAction()).performTextInput("explicit term")
-        compose.mainClock.advanceTimeBy(400)
-        compose.waitForIdle()
-        compose.runOnIdle { assertEquals(0, transport.historyRequests().count { it.method == "POST" }) }
-
-        compose.onNode(hasSetTextAction()).performImeAction()
-        compose.waitForIdle()
-        compose.onNodeWithContentDescription("Open post: A real post result").performClick()
-        compose.runOnIdle {
-            assertEquals("post-1", opened)
-            assertTrue(transport.historyRequests().count { it.method == "POST" } >= 2)
-            assertTrue(transport.searchPaths().isNotEmpty())
-            assertTrue(transport.historyRequests().all { it.token == "search-token" })
-        }
-        compose.onNodeWithText("Recent searches couldn’t be updated.").assertIsDisplayed()
-    }
-
-    @Test
-    fun historyFailureIsShownAsNonBlockingNoticeAndDoesNotBlockSearch() {
-        val signedInTransport = FakeTransport(failHistory = true)
-        compose.setContent {
-            MaterialTheme {
-                SearchScreen(SearchRepository("https://api.nantty.com", ::signedInSession, signedInTransport), Executor { it.run() })
-            }
-        }
-        compose.onNodeWithText("Recent searches couldn’t be updated.").assertIsDisplayed()
-        searchFor("still searchable")
-        compose.onNodeWithText("A real post result").assertIsDisplayed()
-        compose.onNodeWithText("Recent searches couldn’t be updated.").assertIsDisplayed()
-    }
-
-    @Test
-    fun guestNeverRequestsRecentHistory() {
-        val guestTransport = FakeTransport()
-        compose.setContent {
-            MaterialTheme {
-                SearchScreen(SearchRepository("https://api.nantty.com", { null }, guestTransport), Executor { it.run() })
-            }
-        }
-        searchFor("guest search")
-        compose.onNodeWithText("A real post result").assertIsDisplayed()
-        compose.runOnIdle {
-            assertTrue(guestTransport.searchPaths().isNotEmpty())
-            assertTrue(guestTransport.historyPaths().isEmpty())
-        }
-    }
-
-    @Test
-    fun loggingOutClearsInMemoryRecentHistoryWithoutAnotherHistoryRequest() {
-        var session by mutableStateOf<AccountSession?>(signedInSession())
-        val transport = FakeTransport(recentEntries = listOf(recent("private account query")))
-        val repository = SearchRepository("https://api.nantty.com", { session }, transport)
-        compose.setContent {
-            MaterialTheme {
-                SearchScreen(repository, Executor { it.run() })
-            }
-        }
-
-        compose.onNodeWithContentDescription("Search private account query").assertIsDisplayed()
-        val callsBeforeLogout = transport.historyPaths().size
-        compose.runOnIdle { session = null }
-        compose.waitForIdle()
-
-        compose.onNodeWithContentDescription("Search private account query").assertDoesNotExist()
-        compose.onNodeWithText("Clear all").assertDoesNotExist()
-        compose.runOnIdle { assertEquals(callsBeforeLogout, transport.historyPaths().size) }
-    }
-
-    @Test
-    fun recentSearchCanBeRemovedOrCleared() {
-        val transport = FakeTransport(recentEntries = listOf(recent("old query"), recent("second query", SECOND_UUID)))
-        compose.setContent {
-            MaterialTheme {
-                SearchScreen(SearchRepository("https://api.nantty.com", ::signedInSession, transport), Executor { it.run() })
-            }
-        }
-
-        compose.onNodeWithContentDescription("Remove old query from recent searches").performClick()
-        compose.waitForIdle()
-        compose.runOnIdle {
-            assertTrue(transport.historyRequests().any { it.method == "DELETE" && it.path.endsWith(FIRST_UUID) })
-        }
-        compose.onNodeWithText("Clear all").performClick()
-        compose.waitForIdle()
-        compose.runOnIdle {
-            assertTrue(transport.historyRequests().any { it.method == "DELETE" && it.path == "/api/v1/search/recent?scope=global" })
-        }
-    }
-
     private fun searchFor(query: String) {
         compose.onNode(hasSetTextAction()).performTextInput(query)
         compose.mainClock.advanceTimeBy(400)
@@ -541,10 +419,7 @@ class SearchScreenTest {
     }
 
     companion object {
-        private const val FIRST_UUID = "7b7d83c7-d9a8-49e8-9e98-c52aab1ba444"
-        private const val SECOND_UUID = "e48546e1-c4e7-4cc1-bdaa-f11a9061bd7d"
         private const val OFFICIAL_STORE_ID = "1d4b7a63-a205-4418-93be-58ae7ac624a4"
         private fun signedInSession() = AccountSession("search-token", "refresh", AccountUser("user-1", "Ari", "ari", null, null, emptyList()))
-        private fun recent(query: String, id: String = FIRST_UUID) = JSONObject().put("id", id).put("query", query).put("scope", "global").put("searchedAt", "2026-11-04T12:00:00Z")
     }
 }

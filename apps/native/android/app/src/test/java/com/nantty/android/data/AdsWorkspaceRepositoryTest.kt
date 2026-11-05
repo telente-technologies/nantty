@@ -121,6 +121,89 @@ class AdsWorkspaceRepositoryTest {
     }
 
     @Test
+    fun loadsOwnedCampaignDetailAndReportUsingBackendReadRoutes() {
+        val detail = boostPage().getJSONArray("data").getJSONObject(0)
+        val report = JSONObject("""{"currency":"NGN","resultLabel":"Product views","totals":{"impressions":500,"reach":250,"clicks":23,"results":23,"spend":{"amountMinor":125000,"currency":"NGN"},"costPerResult":{"amountMinor":5434,"currency":"NGN"}},"series":[{"date":"2026-11-01","impressions":500,"reach":250,"clicks":23,"results":23,"spend":{"amountMinor":125000,"currency":"NGN"}}]}""")
+        val paths = mutableListOf<String>()
+        val repository = AdsWorkspaceRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = AdsWorkspaceTransport { path, _ ->
+                paths += path
+                if (path.endsWith("/report")) report else detail
+            },
+        )
+
+        val boostResult = repository.loadBoost(boostId) as AdsWorkspaceResult.Success
+        val reportResult = repository.loadBoostReport(boostId) as AdsWorkspaceResult.Success
+
+        assertEquals(listOf("/api/v1/ads/boosts/$boostId", "/api/v1/ads/boosts/$boostId/report"), paths)
+        assertEquals(AdsWorkspaceBoostStatus.ACTIVE, boostResult.value.status)
+        assertEquals("product_visits", boostResult.value.goal)
+        assertEquals(23L, reportResult.value.totals.results)
+        assertEquals("Product views", reportResult.value.resultLabel)
+        assertEquals("2026-11-01", reportResult.value.series.single().date)
+    }
+
+    @Test
+    fun changesBoostLifecycleWithAuthenticatedIdempotentPostAndParsesCanonicalResponse() {
+        val paths = mutableListOf<String>()
+        val tokens = mutableListOf<String>()
+        val keys = mutableListOf<String>()
+        val response = boostPage().getJSONArray("data").getJSONObject(0).apply {
+            put("status", "paused")
+            put("actions", JSONObject("""{"pause":false,"resume":true,"stop":true,"changeBudget":true,"resubmit":false}"""))
+        }
+        val repository = AdsWorkspaceRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = RecordingTransport(boostPage()),
+            mutationTransport = AdsWorkspaceMutationTransport { path, token, key, body ->
+                paths += path
+                tokens += token
+                keys += key
+                assertTrue(body.length() == 0)
+                response
+            },
+        )
+
+        val result = repository.changeBoostStatus(boostId, AdsWorkspaceStatusAction.PAUSE, "pause-key-123456") as AdsWorkspaceResult.Success
+
+        assertEquals(listOf("/api/v1/ads/boosts/$boostId/pause"), paths)
+        assertEquals(listOf("ads-access"), tokens)
+        assertEquals(listOf("pause-key-123456"), keys)
+        assertEquals(AdsWorkspaceBoostStatus.PAUSED, result.value.status)
+        assertFalse(result.value.actions.pause)
+        assertTrue(result.value.actions.resume)
+        assertTrue(result.value.actions.stop)
+    }
+
+    @Test
+    fun rejectsInvalidBoostLifecycleInputBeforeNetworkRequest() {
+        var calls = 0
+        val repository = AdsWorkspaceRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            mutationTransport = AdsWorkspaceMutationTransport { _, _, _, _ -> calls++; boostPage() },
+        )
+
+        assertTrue(repository.changeBoostStatus("bad-id", AdsWorkspaceStatusAction.STOP) is AdsWorkspaceResult.Failure)
+        assertTrue(repository.changeBoostStatus(boostId, AdsWorkspaceStatusAction.STOP, "bad key") is AdsWorkspaceResult.Failure)
+        assertEquals(0, calls)
+    }
+
+    @Test
+    fun rejectsMalformedReportValuesWithoutSubstitutingClientDefaults() {
+        val result = AdsWorkspaceRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = AdsWorkspaceTransport { _, _ -> JSONObject("""{"currency":"NGN","resultLabel":"Results","totals":{"impressions":-1}}""") },
+        ).loadBoostReport(boostId)
+
+        assertTrue(result is AdsWorkspaceResult.Failure)
+    }
+
+    @Test
     fun rejectsIncompleteOrInvalidPayloadsInsteadOfInventingValues() {
         val incompleteBalance = AdsWorkspaceRepository(
             "https://api.nantty.com", ::signedInSession, RecordingTransport(JSONObject("""{"data":{"balance":{"amountMinor":10,"currency":"NGN"}}}""")),

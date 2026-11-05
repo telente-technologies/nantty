@@ -36,6 +36,22 @@ class SignedInPurchaseStateTest {
     }
 
     @Test
+    fun selectedCartAddressIsPassedIntoCheckoutAndSurvivesBackNavigation() {
+        val state = SignedInPurchaseState()
+        val addressId = "8b3a4e12-1234-4234-9234-123456789abc"
+
+        state.openCart()
+        state.selectCartAddress(addressId)
+        state.proceedToCheckout()
+        assertEquals(SignedInPurchaseDestination.Checkout, state.destination)
+        assertEquals(addressId, state.cartAddressId)
+
+        state.backFromCheckout()
+        assertEquals(SignedInPurchaseDestination.Cart, state.destination)
+        assertEquals(addressId, state.cartAddressId)
+    }
+
+    @Test
     fun paymentProtectionAndOrderDetailReturnToPaymentAndOnlyServerCallbackMarksVerified() {
         val state = SignedInPurchaseState(destination = SignedInPurchaseDestination.Payment, orderId = "order-1")
 

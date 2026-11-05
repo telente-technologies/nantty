@@ -16,7 +16,7 @@ class PayoutAccountsRepositoryTest {
             JSONObject("""{"data":[{"id":"account-1","bankCode":"058","bankName":"Bank from API","accountNumberMasked":"••••4821","accountName":"A. User","countryCode":"NG","isDefault":true}]}""")
         }
 
-        val result = PayoutAccountsRepository("https://api.nantty.com", ::session, transport).list() as PayoutAccountsResult.Success
+        val result = PayoutAccountsRepository("https://api.nantty.com", ::session, transport = transport).list() as PayoutAccountsResult.Success
 
         assertEquals("Bank from API", result.accounts.single().bankName)
         assertEquals("••••4821", result.accounts.single().accountNumberMasked)
@@ -32,7 +32,7 @@ class PayoutAccountsRepositoryTest {
             JSONObject("""{"data":[{"code":"API-01","name":"API Bank","countryCode":"NG"}]}""")
         }
 
-        val result = PayoutAccountsRepository("https://api.nantty.com", ::session, transport).listBanks("ng") as PayoutBanksResult.Success
+        val result = PayoutAccountsRepository("https://api.nantty.com", ::session, transport = transport).listBanks("ng") as PayoutBanksResult.Success
 
         assertEquals(listOf(PayoutBank("API-01", "API Bank", "NG")), result.banks)
     }
@@ -45,13 +45,15 @@ class PayoutAccountsRepositoryTest {
             assertEquals("access-token", token)
             assertEquals("058", body?.optString("bankCode"))
             assertEquals("0123456789", body?.optString("accountNumber"))
-            assertEquals(setOf("bankCode", "accountNumber"), body?.keySet())
+            assertEquals(setOf("bankCode", "accountNumber"), body?.names()?.let { names ->
+                buildSet { for (index in 0 until names.length()) add(names.getString(index)) }
+            })
             assertEquals(mapOf("X-Step-Up-Token" to "grant-once"), headers)
             JSONObject("""{"data":{"id":"account-2"}}""")
         }
 
-        val result = PayoutAccountsRepository("https://api.nantty.com", ::session, transport)
-            .add("058", "0123456789", "NG", "grant-once")
+        val result = PayoutAccountsRepository("https://api.nantty.com", ::session, transport = transport)
+            .add("058", "0123456789", "grant-once")
 
         assertEquals(PayoutMutationResult.Success, result)
         assertEquals(1, transport.calls.size)
@@ -67,7 +69,7 @@ class PayoutAccountsRepositoryTest {
             JSONObject()
         }
 
-        val result = PayoutAccountsRepository("https://api.nantty.com", ::session, transport)
+        val result = PayoutAccountsRepository("https://api.nantty.com", ::session, transport = transport)
             .remove("123e4567-e89b-12d3-a456-426614174000", "fresh-grant")
 
         assertEquals(PayoutMutationResult.Success, result)
@@ -98,7 +100,7 @@ class PayoutAccountsRepositoryTest {
                 else -> error("Unexpected route $path")
             }
         }
-        val repository = PayoutAccountsRepository("https://api.nantty.com", ::session, transport)
+        val repository = PayoutAccountsRepository("https://api.nantty.com", ::session, transport = transport)
 
         val passwordGrant = repository.grantWithPassword("secret")
         assertEquals("password-grant", passwordGrant.getOrThrow().token)
@@ -120,8 +122,8 @@ class PayoutAccountsRepositoryTest {
     fun invalidAccountNumbersAreRejectedBeforeNetworkMutation() {
         val transport = RecordingPayoutTransport { _, _, _, _, _ -> error("Invalid account must not reach API") }
 
-        val result = PayoutAccountsRepository("https://api.nantty.com", ::session, transport)
-            .add("058", "123", "NG", "grant-once")
+        val result = PayoutAccountsRepository("https://api.nantty.com", ::session, transport = transport)
+            .add("058", "123", "grant-once")
 
         assertTrue(result is PayoutMutationResult.Failure)
         assertFalse(transport.calls.isNotEmpty())

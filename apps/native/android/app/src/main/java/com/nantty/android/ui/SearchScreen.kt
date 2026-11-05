@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -68,10 +69,10 @@ internal fun SearchScreen(
     initialScopeLabel: String = "Everywhere",
     onScopeChanged: (String, String) -> Unit = { _, _ -> },
 ) {
-    var query by remember(repository) { mutableStateOf("") }
-    var type by remember(repository, initialScope) { mutableStateOf(if (initialScope == "mart") SearchType.PRODUCTS else SearchType.TOP) }
-    var scope by remember(repository, initialScope) { mutableStateOf(initialScope) }
-    var scopeLabel by remember(repository, initialScope, initialScopeLabel) { mutableStateOf(initialScopeLabel) }
+    var query by rememberSaveable(repository) { mutableStateOf("") }
+    var type by rememberSaveable(repository, initialScope) { mutableStateOf(if (initialScope == "mart") SearchType.PRODUCTS else SearchType.TOP) }
+    var scope by rememberSaveable(repository, initialScope) { mutableStateOf(initialScope) }
+    var scopeLabel by rememberSaveable(repository, initialScope, initialScopeLabel) { mutableStateOf(initialScopeLabel) }
     var result by remember(repository) { mutableStateOf<SearchResult?>(null) }
     var loading by remember(repository) { mutableStateOf(false) }
     var loadingMore by remember(repository) { mutableStateOf(false) }

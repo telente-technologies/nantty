@@ -31,13 +31,28 @@ class SignInScreenTest {
         }
 
         compose.onNodeWithText("Sign in").assertIsNotEnabled()
-        compose.onNodeWithText("Email").assertIsDisplayed().performTextInput("  ari@example.com  ")
+        compose.onNodeWithText("Email or username").assertIsDisplayed().performTextInput("  ari@example.com  ")
         compose.onNodeWithText("Password").performTextInput("example-password")
         compose.onNodeWithText("Sign in").assertIsDisplayed().performClick()
         compose.runOnIdle {
             assertEquals("ari@example.com", submittedIdentifier)
             assertEquals("example-password", submittedPassword)
         }
+    }
+
+    @Test
+    fun signInAcceptsUsernameAsTheIdentifier() {
+        var submittedIdentifier = ""
+        compose.setContent {
+            MaterialTheme {
+                SignInScreen(loading = false, error = null, onSignIn = { identifier, _ -> submittedIdentifier = identifier })
+            }
+        }
+
+        compose.onNodeWithText("Email or username").performTextInput("  ari_dev  ")
+        compose.onNodeWithText("Password").performTextInput("example-password")
+        compose.onNodeWithText("Sign in").performClick()
+        compose.runOnIdle { assertEquals("ari_dev", submittedIdentifier) }
     }
 
     @Test

@@ -60,6 +60,27 @@ class RegistrationFlowScreenTest {
     }
 
     @Test
+    fun dismissibleWelcomeUsesNotNowWithoutSwitchingGuestMode() {
+        val calls = RecordingCallbacks()
+        compose.setContent {
+            MaterialTheme {
+                RegistrationFlowScreen(
+                    state = RegistrationFlowState(step = RegistrationStep.Welcome),
+                    callbacks = calls.callbacks(),
+                    dismissibleWelcome = true,
+                )
+            }
+        }
+
+        compose.onNodeWithText("Not now").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Browse as guest").assertDoesNotExist()
+        compose.runOnIdle {
+            assertEquals(1, calls.dismissWelcomeCount)
+            assertEquals(0, calls.guestBrowseCount)
+        }
+    }
+
+    @Test
     fun otpInputFiltersNonDigitsAndVerifiesOnceWhenSixDigitsAreEntered() {
         val calls = RecordingCallbacks()
         compose.setContent {
@@ -235,13 +256,14 @@ class RegistrationFlowScreenTest {
         var checkedUsername: String? = null
         var createdUsername: String? = null
         var guestBrowseCount = 0
+        var dismissWelcomeCount = 0
 
         fun callbacks() = RegistrationFlowCallbacks(
             onStartSignup = {},
             onContinueWithApple = {},
             onContinueWithGoogle = {},
             onLogin = {},
-            onWelcomeDismiss = {},
+            onWelcomeDismiss = { dismissWelcomeCount++ },
             onBrowseAsGuest = { guestBrowseCount++ },
             onBack = {},
             onSendCode = { sentEmail = it },

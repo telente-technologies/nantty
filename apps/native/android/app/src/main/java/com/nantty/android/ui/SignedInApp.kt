@@ -7,6 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.nantty.android.data.AccountUser
@@ -19,6 +20,7 @@ import com.nantty.android.data.FeedTopic
 import com.nantty.android.data.FeedTopicsResult
 import com.nantty.android.data.FeedType
 import com.nantty.android.data.InboxConversation
+import com.nantty.android.data.ConversationType
 import com.nantty.android.data.PostDetailRepository
 import com.nantty.android.data.appendUniqueFeedPosts
 import java.util.concurrent.Executors
@@ -57,6 +59,8 @@ internal fun SignedInApp(
     var pendingMartProductId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingMartCategoryId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingMartCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
+    var returnToDiscoverAfterCategory by rememberSaveable { mutableStateOf(false) }
+    val destinationStateHolder = rememberSaveableStateHolder()
     var showingComposer by rememberSaveable { mutableStateOf(false) }
     SignedInWidgetDestinationEffect(
         requestedDestination = requestedWidgetDestination,
@@ -124,6 +128,7 @@ internal fun SignedInApp(
             currency = purchaseState.currency,
             orderCount = purchaseState.orderCount,
             paymentConfirmed = purchaseState.paymentConfirmed,
+            cartAddressId = purchaseState.cartAddressId,
             repositories = repositories,
             executor = executor,
             onBackToPayment = purchaseState::backToPayment,
@@ -139,6 +144,7 @@ internal fun SignedInApp(
                 destination = Destination.Mart
             },
             onCheckoutCreated = purchaseState::checkoutCreated,
+            onSelectCartAddress = purchaseState::selectCartAddress,
             onProceedToCheckout = purchaseState::proceedToCheckout,
         )
         return
@@ -380,7 +386,8 @@ internal fun SignedInApp(
             }
         },
         destinationContent = { contentModifier, showMartCategoryPane ->
-            MainContent(
+            destinationStateHolder.SaveableStateProvider(destination.name) {
+                MainContent(
                 destination, result, loading,
                 selectedFeed = selectedFeed,
                 canViewFollowing = !isGuest,
@@ -415,6 +422,7 @@ internal fun SignedInApp(
                 onOpenCategory = { categoryId, name ->
                     pendingMartCategoryId = categoryId
                     pendingMartCategoryName = name
+                    returnToDiscoverAfterCategory = destination == Destination.Discover
                     destination = Destination.Mart
                 },
                 onLike = { if (isGuest) onRequireSignIn() else feedActions.like(it) },
@@ -451,6 +459,12 @@ internal fun SignedInApp(
                 onInitialMartProductHandled = { pendingMartProductId = null },
                 initialMartCategoryId = pendingMartCategoryId,
                 initialMartCategoryName = pendingMartCategoryName,
+                onBackFromInitialMartCategory = {
+                    if (returnToDiscoverAfterCategory) {
+                        returnToDiscoverAfterCategory = false
+                        destination = Destination.Discover
+                    }
+                },
                 onInitialMartCategoryHandled = {
                     pendingMartCategoryId = null
                     pendingMartCategoryName = null
@@ -460,11 +474,19 @@ internal fun SignedInApp(
                 onBackFromOrders = { destination = Destination.Feed },
                 onBackFromFollowRequests = { destination = Destination.Profile },
                 onOpenMessages = { if (isGuest) onRequireSignIn() else destination = Destination.Messages },
+                onOpenNotificationConversation = { conversation ->
+                    if (isGuest) onRequireSignIn()
+                    else {
+                        pendingMessageConversation = conversation
+                        destination = Destination.Messages
+                    }
+                },
                 onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders },
                 onOpenFollowRequests = { if (isGuest) onRequireSignIn() else destination = Destination.FollowRequests },
                 onOpenBusinessTools = { if (isGuest) onRequireSignIn() else destination = Destination.Business },
                 businessContent = businessContent,
             )
+            }
         },
     )
 

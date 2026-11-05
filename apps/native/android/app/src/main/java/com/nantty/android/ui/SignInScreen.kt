@@ -78,7 +78,7 @@ internal fun SignInScreen(
                     value = identifier,
                     onValueChange = { identifier = it },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Email") },
+                    label = { Text("Email or username") },
                     singleLine = true,
                     enabled = !loading,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next, autoCorrectEnabled = false),

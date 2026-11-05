@@ -57,12 +57,13 @@ import java.util.concurrent.Executor
 internal fun CheckoutScreen(
     repository: CheckoutRepository,
     executor: Executor,
+    initialAddressId: String? = null,
     onBack: () -> Unit,
     onAuthenticationRequired: () -> Unit,
     onCheckoutCreated: (CheckoutReceipt) -> Unit,
 ) {
     var addresses by remember(repository) { mutableStateOf<List<CheckoutAddress>?>(null) }
-    var selectedId by remember(repository) { mutableStateOf<String?>(null) }
+    var selectedId by remember(repository) { mutableStateOf(initialAddressId) }
     var cart by remember(repository) { mutableStateOf<com.nantty.android.data.CartSnapshot?>(null) }
     var loading by remember(repository) { mutableStateOf(true) }
     var placing by remember(repository) { mutableStateOf(false) }
@@ -81,7 +82,10 @@ internal fun CheckoutScreen(
         executor.execute {
             val addressResult = if (addresses == null || generation > 0) repository.loadAddresses() else CheckoutAddressesResult.Success(addresses.orEmpty())
             val rows = (addressResult as? CheckoutAddressesResult.Success)?.addresses
-            val selected = addressId ?: rows?.firstOrNull(CheckoutAddress::isDefault)?.id ?: rows?.firstOrNull()?.id
+            val selected = selectedId?.takeIf { candidate -> rows?.any { it.id == candidate } == true }
+                ?: addressId?.takeIf { candidate -> rows?.any { it.id == candidate } == true }
+                ?: rows?.firstOrNull(CheckoutAddress::isDefault)?.id
+                ?: rows?.firstOrNull()?.id
             val cartResult = if (selected != null) repository.quoteCart(selected) else null
             androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                 when (addressResult) {
@@ -91,7 +95,7 @@ internal fun CheckoutScreen(
                     }
                     is CheckoutAddressesResult.Success -> {
                         addresses = rows.orEmpty()
-                        if (selectedId == null) selectedId = selected
+                        if (selectedId != selected) selectedId = selected
                         when (cartResult) {
                             is CheckoutCartResult.Success -> cart = cartResult.cart
                             is CheckoutCartResult.Failure -> {

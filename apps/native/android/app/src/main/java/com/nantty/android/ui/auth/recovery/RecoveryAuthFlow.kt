@@ -1,5 +1,6 @@
 package com.nantty.android.ui.auth.recovery
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,6 +30,31 @@ internal fun RecoveryAuthFlow(
     var resendMessage by remember { mutableStateOf<String?>(null) }
     val errors = remember { mutableStateMapOf<RecoveryStep, String?>() }
     val loading = remember { mutableStateMapOf<RecoveryStep, Boolean>() }
+
+    fun handleBack() {
+        if (loading[step] == true) return
+        val previousStep = recoveryPreviousStep(step)
+        if (previousStep == null) {
+            onBackToSignIn()
+        } else {
+            when (step) {
+                RecoveryStep.Code -> {
+                    code = ""
+                    verifiedToken = null
+                }
+                RecoveryStep.NewPassword -> {
+                    // Match the RN stack: return to OTP entry while keeping the short-lived,
+                    // in-memory verification token available to the reset screen.
+                    newPassword = ""
+                    confirmPassword = ""
+                }
+                RecoveryStep.Email -> Unit
+            }
+            step = previousStep
+        }
+    }
+
+    BackHandler { handleBack() }
 
     LaunchedEffect(secondsRemaining) {
         if (secondsRemaining > 0) {
@@ -121,22 +147,13 @@ internal fun RecoveryAuthFlow(
             }
         },
         onComplete = onBackToSignIn,
-        onBack = {
-            when (step) {
-                RecoveryStep.Email -> onBackToSignIn()
-                RecoveryStep.Code -> { step = RecoveryStep.Email; code = ""; verifiedToken = null }
-                RecoveryStep.NewPassword -> {
-                    // The verified token is single-use; return to email entry instead of offering
-                    // the old OTP again after invalidating that token.
-                    step = RecoveryStep.Email
-                    code = ""
-                    verifiedToken = null
-                    newPassword = ""
-                    confirmPassword = ""
-                    secondsRemaining = 0
-                }
-            }
-        },
+        onBack = ::handleBack,
     )
+}
+
+internal fun recoveryPreviousStep(step: RecoveryStep): RecoveryStep? = when (step) {
+    RecoveryStep.Email -> null
+    RecoveryStep.Code -> RecoveryStep.Email
+    RecoveryStep.NewPassword -> RecoveryStep.Code
 }
 

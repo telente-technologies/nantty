@@ -48,6 +48,36 @@ class MessagesThreadRepositoryTest {
     }
 
     @Test
+    fun incrementalHistoryUsesVerifiedAfterContractAndKeepsEnvelopeOpaque() {
+        val newerId = "33333333-3333-4333-8333-333333333334"
+        var requestedPath: String? = null
+        val repository = repository { method, path, _, body ->
+            assertEquals("GET", method)
+            assertNull(body)
+            requestedPath = path
+            JSONObject("""{"data":[{"id":"$newerId","conversationId":"$conversationId","senderId":"$senderId","createdAt":"2026-10-01T12:01:00.000Z","kind":"text","text":"must never display","encryption":{"deviceId":"device-a","ciphertext":"opaque-envelope","protocol":"signal-v1"}}],"nextCursor":null}""")
+        }
+
+        val page = (repository.loadMessagesAfter(conversationId, messageId) as ChatHistoryResult.Success).page
+
+        assertEquals("/api/v1/conversations/$conversationId/messages?limit=30&after=$messageId", requestedPath)
+        assertEquals(listOf(newerId), page.messages.map(EncryptedChatMessage::id))
+        assertEquals("opaque-envelope", page.messages.single().ciphertext)
+        assertFalse(page.messages.toString().contains("must never display"))
+        assertNull(page.nextCursor)
+    }
+
+    @Test
+    fun incrementalHistoryRejectsInvalidOrConflictingCursorsBeforeNetwork() {
+        var requests = 0
+        val repository = repository { _, _, _, _ -> requests++; JSONObject("{\"data\":[]}") }
+
+        assertTrue((repository.loadMessagesAfter(conversationId, "invalid") as ChatHistoryResult.Failure).message.contains("sync cursor"))
+        assertTrue((repository.loadMessages(conversationId, messageId, messageId) as ChatHistoryResult.Failure).message.contains("either"))
+        assertEquals(0, requests)
+    }
+
+    @Test
     fun initialHistoryMergesNewestToOldestAndDeduplicatesBoundaryMessages() {
         val newestId = messageUuid(3)
         val boundaryId = messageUuid(2)

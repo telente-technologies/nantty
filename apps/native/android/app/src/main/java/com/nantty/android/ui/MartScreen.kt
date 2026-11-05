@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -21,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -77,17 +74,20 @@ internal fun MartScreen(
     onInitialProductHandled: () -> Unit = {},
     initialCategoryId: String? = null,
     initialCategoryName: String? = null,
+    onBackFromInitialCategory: () -> Unit = {},
     onInitialCategoryHandled: () -> Unit = {},
     onOpenStore: (String) -> Unit = {},
     storeRepository: StoreRepository? = null,
     reviewsRepositoryOverride: ProductReviewsRepository? = null,
 ) {
     var categories by remember { mutableStateOf<List<MartCategory>>(emptyList()) }
+    var martHome by remember { mutableStateOf<com.nantty.android.data.MartHome?>(null) }
     var highlights by remember { mutableStateOf<List<MartHighlight>>(emptyList()) }
     var products by remember { mutableStateOf<List<MartProduct>>(emptyList()) }
     var selectedCategoryId by rememberMartCategorySelection()
     var selectedCollection by rememberSaveable { mutableStateOf<String?>(null) }
     var focusedCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
+    var enteredFromInitialCategory by rememberSaveable { mutableStateOf(false) }
     var selectedProductId by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedReviewsProductId by rememberSaveable { mutableStateOf<String?>(null) }
     var nextCursor by remember { mutableStateOf<String?>(null) }
@@ -108,6 +108,7 @@ internal fun MartScreen(
 
     LaunchedEffect(initialCategoryId, initialCategoryName) {
         if (initialCategoryId != null) {
+            enteredFromInitialCategory = true
             selectedCollection = null
             selectedCategoryId = initialCategoryId
             focusedCategoryName = initialCategoryName?.trim()?.takeIf(String::isNotEmpty)
@@ -116,9 +117,14 @@ internal fun MartScreen(
     }
 
     val exitCategoryBrowse = {
-        focusedCategoryName = null
-        selectedCategoryId = null
-        selectedCollection = null
+        if (enteredFromInitialCategory) {
+            enteredFromInitialCategory = false
+            onBackFromInitialCategory()
+        } else {
+            focusedCategoryName = null
+            selectedCategoryId = null
+            selectedCollection = null
+        }
     }
     BackHandler(enabled = focusedCategoryName != null, onBack = exitCategoryBrowse)
 
@@ -172,7 +178,10 @@ internal fun MartScreen(
 
     LaunchedEffect(repository) {
         when (val result = withContext(Dispatchers.IO) { repository.loadHome() }) {
-            is MartResult.Home -> categories = result.value.categories
+            is MartResult.Home -> {
+                martHome = result.value
+                categories = result.value.categories
+            }
             is MartResult.Failure -> if (categories.isEmpty()) errorMessage = result.message
             is MartResult.Products -> Unit
             is MartResult.Highlights -> Unit
@@ -210,15 +219,23 @@ internal fun MartScreen(
                         )
                         Text(
                             stringResource(
-                                if (focusedCategoryName == null) com.nantty.android.R.string.mart_browse_description
-                                else com.nantty.android.R.string.mart_category_description,
+                                when {
+                                    focusedCategoryName == null -> com.nantty.android.R.string.mart_browse_description
+                                    selectedCollection != null -> com.nantty.android.R.string.mart_collection_description
+                                    else -> com.nantty.android.R.string.mart_category_description
+                                },
                             ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     if (focusedCategoryName != null) {
                         TextButton(onClick = exitCategoryBrowse) {
-                            Text(stringResource(com.nantty.android.R.string.mart_back_to_all))
+                            Text(
+                                stringResource(
+                                    if (enteredFromInitialCategory) com.nantty.android.R.string.mart_back_to_discover
+                                    else com.nantty.android.R.string.mart_back_to_all,
+                                ),
+                            )
                         }
                     }
                 }
@@ -251,6 +268,13 @@ internal fun MartScreen(
                         scope.launch(Dispatchers.IO) { repository.recordSponsoredEvent(sponsored, itemId, "impression") }
                     },
                 )
+                martHome?.let { home ->
+                    MartCollectionTiles(home, onOpenCollection = { collection, name ->
+                        selectedCategoryId = null
+                        selectedCollection = collection
+                        focusedCategoryName = name
+                    })
+                }
             }
             val loadMore = {
                 startLoadingMore(
@@ -303,56 +327,6 @@ internal fun MartScreen(
 
 @Composable
 internal fun rememberMartCategorySelection(): MutableState<String?> = rememberSaveable { mutableStateOf(null) }
-
-@Composable
-private fun MartCategoryChips(
-    categories: List<MartCategory>,
-    selectedCategoryId: String?,
-    onSelectCategory: (String?) -> Unit,
-) {
-    LazyRow(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        item {
-            FilterChip(selectedCategoryId == null, onClick = { onSelectCategory(null) }, label = { Text("All") })
-        }
-        items(categories, key = MartCategory::id) { category ->
-            FilterChip(
-                selected = selectedCategoryId == category.id,
-                onClick = { onSelectCategory(category.id) },
-                label = { Text(category.name, maxLines = 1) },
-            )
-        }
-    }
-}
-
-@Composable
-private fun MartCategoryPane(
-    categories: List<MartCategory>,
-    selectedCategoryId: String?,
-    onSelectCategory: (String?) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    LazyColumn(modifier = modifier.padding(start = 12.dp, end = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        item {
-            FilterChip(
-                selected = selectedCategoryId == null,
-                onClick = { onSelectCategory(null) },
-                label = { Text("All", maxLines = 1) },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        items(categories, key = MartCategory::id) { category ->
-            FilterChip(
-                selected = selectedCategoryId == category.id,
-                onClick = { onSelectCategory(category.id) },
-                label = { Text(category.name, maxLines = 2, overflow = TextOverflow.Ellipsis) },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-    }
-}
 
 @Composable
 private fun MartProductResults(

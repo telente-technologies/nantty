@@ -27,6 +27,7 @@ internal class SignedInPurchaseState(
     currency: String = "",
     orderCount: Int = 0,
     paymentConfirmed: Boolean = false,
+    cartAddressId: String? = null,
 ) {
     var destination by mutableStateOf(destination)
         private set
@@ -42,9 +43,15 @@ internal class SignedInPurchaseState(
         private set
     var paymentConfirmed by mutableStateOf(paymentConfirmed)
         private set
+    var cartAddressId by mutableStateOf(cartAddressId)
+        private set
 
     fun openCart() { destination = SignedInPurchaseDestination.Cart }
-    fun proceedToCheckout() { destination = SignedInPurchaseDestination.Checkout }
+    fun selectCartAddress(addressId: String?) { cartAddressId = addressId }
+    fun proceedToCheckout(addressId: String? = cartAddressId) {
+        cartAddressId = addressId
+        destination = SignedInPurchaseDestination.Checkout
+    }
     fun backFromCheckout() { destination = SignedInPurchaseDestination.Cart }
     fun backFromPayment() { destination = SignedInPurchaseDestination.Cart }
     fun backToPayment() { destination = SignedInPurchaseDestination.Payment }
@@ -75,6 +82,7 @@ internal class SignedInPurchaseState(
                     state.currency,
                     state.orderCount,
                     state.paymentConfirmed,
+                    state.cartAddressId.orEmpty(),
                 )
             },
             restore = { saved ->
@@ -88,6 +96,7 @@ internal class SignedInPurchaseState(
                     currency = (saved.getOrNull(4) as? String).orEmpty(),
                     orderCount = (saved.getOrNull(5) as? Int)?.coerceAtLeast(0) ?: 0,
                     paymentConfirmed = saved.getOrNull(6) as? Boolean ?: false,
+                    cartAddressId = (saved.getOrNull(7) as? String)?.takeIf(String::isNotBlank),
                 )
             },
         )
@@ -104,6 +113,7 @@ internal fun SignedInPurchaseFlow(
     currency: String,
     orderCount: Int,
     paymentConfirmed: Boolean,
+    cartAddressId: String?,
     repositories: SignedInRepositories,
     executor: Executor,
     onBackToPayment: () -> Unit,
@@ -116,7 +126,8 @@ internal fun SignedInPurchaseFlow(
     onViewOrder: () -> Unit,
     onContinueShopping: () -> Unit,
     onCheckoutCreated: (CheckoutReceipt) -> Unit,
-    onProceedToCheckout: () -> Unit,
+    onSelectCartAddress: (String?) -> Unit,
+    onProceedToCheckout: (String?) -> Unit,
 ) {
     when (destination) {
         SignedInPurchaseDestination.PaymentProtection -> orderId?.let {
@@ -170,6 +181,7 @@ internal fun SignedInPurchaseFlow(
             CheckoutScreen(
                 repository = repositories.checkout,
                 executor = executor,
+                initialAddressId = cartAddressId,
                 onBack = onBackFromCheckout,
                 onAuthenticationRequired = onAuthenticationRequired,
                 onCheckoutCreated = onCheckoutCreated,
@@ -179,7 +191,10 @@ internal fun SignedInPurchaseFlow(
         SignedInPurchaseDestination.Cart -> HingeSafeContent {
             CartScreen(
                 repository = repositories.cart,
+                checkoutRepository = repositories.checkout,
                 executor = executor,
+                selectedAddressId = cartAddressId,
+                onAddressSelected = onSelectCartAddress,
                 onBack = onBackFromCart,
                 onAuthenticationRequired = onAuthenticationRequired,
                 onProceedToCheckout = onProceedToCheckout,

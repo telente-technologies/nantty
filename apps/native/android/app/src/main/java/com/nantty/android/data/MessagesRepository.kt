@@ -55,6 +55,11 @@ sealed interface MessagesResult {
     data class Failure(val message: String, val authenticationRequired: Boolean = false) : MessagesResult
 }
 
+sealed interface ConversationLookupResult {
+    data class Success(val conversation: InboxConversation) : ConversationLookupResult
+    data class Failure(val message: String, val authenticationRequired: Boolean = false) : ConversationLookupResult
+}
+
 sealed interface ChatHistoryResult {
     data class Success(val page: ChatMessagePage, val continuationError: String? = null) : ChatHistoryResult
     data class Failure(val message: String, val authenticationRequired: Boolean = false) : ChatHistoryResult
@@ -80,6 +85,32 @@ class MessagesRepository(
     fun search(query: String) = conversationSearchRepository.search(query)
 
     fun startConversationWithPerson(personId: String) = conversationSearchRepository.startConversationWithPerson(personId)
+
+    fun loadConversationById(conversationId: String): ConversationLookupResult {
+        return try {
+            require(isUuid(conversationId)) { "This conversation link is invalid." }
+            val session = sessionProvider() ?: error("Sign in to view this conversation.")
+            val token = requireToken(session.accessToken)
+            val path = "/api/v1/conversations/$conversationId"
+            val payload = try {
+                threadTransport.request("GET", path, token, null)
+            } catch (error: MessagesHttpException) {
+                if (error.statusCode != 401) throw error
+                val refreshedToken = refreshSessionProvider()?.accessToken?.takeIf(String::isNotBlank)
+                    ?: return ConversationLookupResult.Failure("Your session has expired. Sign in again to view messages.", true)
+                threadTransport.request("GET", path, requireToken(refreshedToken), null)
+            }
+            val row = payload.optJSONObject("data") ?: payload
+            val conversation = parsePage(JSONObject().put("data", org.json.JSONArray().put(row))).conversations.singleOrNull()
+                ?: error("Nantty returned an incomplete conversation response.")
+            ConversationLookupResult.Success(conversation)
+        } catch (error: Exception) {
+            ConversationLookupResult.Failure(
+                error.message ?: "Could not open this conversation. Check your connection and try again.",
+                authenticationRequired = error is MessagesHttpException && error.statusCode in setOf(401, 403),
+            )
+        }
+    }
 
     fun load(
         cursor: String? = null,
@@ -128,11 +159,13 @@ class MessagesRepository(
         Unit
     }
 
-    fun loadMessages(conversationId: String, cursor: String? = null): ChatHistoryResult = try {
+    fun loadMessages(conversationId: String, cursor: String? = null, after: String? = null): ChatHistoryResult = try {
         require(isUuid(conversationId)) { "This conversation link is invalid." }
         require(cursor == null || isUuid(cursor)) { "This message page cursor is invalid. Refresh the conversation and try again." }
+        require(after == null || isUuid(after)) { "This message sync cursor is invalid. Refresh the conversation and try again." }
+        require(cursor == null || after == null) { "Choose either an older-page cursor or a newer-message cursor." }
         val session = sessionProvider() ?: error("Sign in to view this conversation.")
-        val path = buildMessageHistoryPath(conversationId, cursor)
+        val path = buildMessageHistoryPath(conversationId, cursor, after)
         val payload = try {
             threadTransport.request("GET", path, requireToken(session.accessToken), null)
         } catch (error: MessagesHttpException) {
@@ -148,6 +181,10 @@ class MessagesRepository(
             authenticationRequired = error is MessagesHttpException && error.statusCode in setOf(401, 403),
         )
     }
+
+    /** Uses the verified Social API `after` contract for incremental conversation synchronization. */
+    fun loadMessagesAfter(conversationId: String, messageId: String): ChatHistoryResult =
+        loadMessages(conversationId, after = messageId)
 
     /** Loads the most recent page and follows older cursors, emitting each accumulated page as it arrives. */
     fun loadInitialHistory(
@@ -393,12 +430,17 @@ private class JdkChatThreadTransport(private val baseUrl: String) : ChatThreadTr
     }
 }
 
-internal fun buildMessageHistoryPath(conversationId: String, cursor: String? = null): String = buildString {
+internal fun buildMessageHistoryPath(conversationId: String, cursor: String? = null, after: String? = null): String = buildString {
     require(MessagesRepository.isUuid(conversationId)) { "This conversation link is invalid." }
+    require(cursor == null || after == null) { "Choose either an older-page cursor or a newer-message cursor." }
     append("/api/v1/conversations/$conversationId/messages?limit=30")
     cursor?.takeIf(String::isNotBlank)?.let {
         require(MessagesRepository.isUuid(it)) { "This message page cursor is invalid." }
         append("&cursor=${java.net.URLEncoder.encode(it, Charsets.UTF_8.name())}")
+    }
+    after?.takeIf(String::isNotBlank)?.let {
+        require(MessagesRepository.isUuid(it)) { "This message sync cursor is invalid. Refresh the conversation and try again." }
+        append("&after=${java.net.URLEncoder.encode(it, Charsets.UTF_8.name())}")
     }
 }
 

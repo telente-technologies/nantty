@@ -52,6 +52,7 @@ private const val USERNAME_CHECK_DEBOUNCE_MS = 350L
 fun RegistrationFlowScreen(
     state: RegistrationFlowState,
     callbacks: RegistrationFlowCallbacks,
+    dismissibleWelcome: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
@@ -105,7 +106,7 @@ fun RegistrationFlowScreen(
                 .padding(horizontal = 24.dp, vertical = 16.dp),
         ) {
             when (state.step) {
-                RegistrationStep.Welcome -> WelcomeStep(state, callbacks)
+                RegistrationStep.Welcome -> WelcomeStep(state, callbacks, dismissibleWelcome)
                 RegistrationStep.Contact -> ContactStep(state, callbacks, email, { email = it })
                 RegistrationStep.VerifyCode -> VerificationStep(
                     state = state,

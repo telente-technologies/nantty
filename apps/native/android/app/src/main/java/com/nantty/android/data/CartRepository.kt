@@ -32,6 +32,26 @@ internal data class CartSnapshot(
     val discounts: WalletMoney? = null,
     val storeCredit: WalletMoney? = null,
     val shipping: WalletMoney? = null,
+    val addressId: String? = null,
+    val sellerGroups: List<CartSellerSummary> = emptyList(),
+)
+
+internal data class CartSellerSummary(
+    val storeId: String,
+    val storeName: String,
+    val subtotal: WalletMoney,
+    val discounts: WalletMoney,
+    val shipping: CartShippingQuote,
+    val total: WalletMoney,
+)
+
+internal data class CartShippingQuote(
+    val status: String,
+    val fee: WalletMoney?,
+    val message: String?,
+    val isFree: Boolean,
+    val freeThreshold: WalletMoney?,
+    val amountToFreeShipping: WalletMoney?,
 )
 
 internal sealed interface CartResult {
@@ -117,10 +137,12 @@ internal fun parseCartPayload(payload: JSONObject): CartSnapshot {
     val data = payload.optJSONObject("data") ?: payload
     val rows = mutableListOf<CartLine>()
     val groups = data.optJSONArray("groups")
+    val sellerSummaries = mutableListOf<CartSellerSummary>()
     if (groups != null) {
         for (groupIndex in 0 until groups.length()) {
             val group = groups.optJSONObject(groupIndex) ?: continue
             appendCartLines(group.optJSONArray("items"), group.optString("storeName"), rows)
+            sellerSummaries += parseCartSellerSummary(group)
         }
     } else {
         appendCartLines(data.optJSONArray("items"), "", rows)
@@ -129,6 +151,8 @@ internal fun parseCartPayload(payload: JSONObject): CartSnapshot {
     val currency = total.optString("currency").takeIf { it.matches(Regex("[A-Z]{3}")) }
         ?: error("Nantty returned an invalid cart currency.")
     require(total.has("amountMinor")) { "Nantty returned an incomplete cart total." }
+    val addressId = data.optString("addressId").takeIf { it.isNotBlank() && it != "null" }
+        ?.also { require(isSafeMartIdentifier(it)) { "Nantty returned an invalid cart address." } }
     return CartSnapshot(
         lines = rows,
         totalAmountMinor = total.optLong("amountMinor").coerceAtLeast(0L),
@@ -138,6 +162,34 @@ internal fun parseCartPayload(payload: JSONObject): CartSnapshot {
         discounts = data.optJSONObject("shopDiscount")?.toCartMoney(),
         storeCredit = data.optJSONObject("storeCredit")?.toCartMoney(),
         shipping = data.optJSONObject("shipping")?.toCartMoney(),
+        addressId = addressId,
+        sellerGroups = sellerSummaries,
+    )
+}
+
+private fun parseCartSellerSummary(group: JSONObject): CartSellerSummary {
+    val subtotal = group.optJSONObject("subtotal")?.toCartMoney() ?: error("Nantty returned an incomplete seller subtotal.")
+    val discounts = group.optJSONObject("discounts")?.toCartMoney() ?: error("Nantty returned incomplete seller discounts.")
+    val total = group.optJSONObject("total")?.toCartMoney() ?: error("Nantty returned an incomplete seller total.")
+    val shipping = group.optJSONObject("shipping") ?: error("Nantty returned an incomplete shipping quote.")
+    val status = shipping.optString("status").takeIf { it in CART_SHIPPING_STATUSES }
+        ?: error("Nantty returned an unknown shipping quote status.")
+    val storeId = group.optString("storeId").takeIf(::isSafeMartIdentifier)
+        ?: error("Nantty returned an invalid seller group.")
+    return CartSellerSummary(
+        storeId = storeId,
+        storeName = group.optString("storeName").filterNot(Char::isISOControl).take(100),
+        subtotal = subtotal,
+        discounts = discounts,
+        shipping = CartShippingQuote(
+            status = status,
+            fee = shipping.optJSONObject("fee")?.toCartMoney(),
+            message = shipping.optString("message").takeIf { it.isNotBlank() && it != "null" }?.filterNot(Char::isISOControl)?.take(240),
+            isFree = shipping.optBoolean("isFree", false),
+            freeThreshold = shipping.optJSONObject("freeThreshold")?.toCartMoney(),
+            amountToFreeShipping = shipping.optJSONObject("amountToFreeShipping")?.toCartMoney(),
+        ),
+        total = total,
     )
 }
 
@@ -146,6 +198,8 @@ private fun JSONObject.toCartMoney(): WalletMoney? {
     if (!currency.matches(Regex("[A-Z]{3}")) || !has("amountMinor")) return null
     return WalletMoney(optLong("amountMinor").coerceAtLeast(0L), currency)
 }
+
+private val CART_SHIPPING_STATUSES = setOf("needsAddress", "notDeliverable", "calculated")
 
 private class JdkCartTransport(private val baseUrl: String) : CartTransport {
     override fun get(path: String, accessToken: String): JSONObject {

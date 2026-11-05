@@ -37,6 +37,30 @@ class MartProductDetailNavigationTest {
     val composeRule = createComposeRule()
 
     @Test
+    fun martLandingCollectionTileOpensFilteredCollectionAndReturnsToMart() {
+        val requestedUrls = CopyOnWriteArrayList<String>()
+        val repository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            openConnection = { url ->
+                requestedUrls += url.toString()
+                FakeMartConnection(url, responseFor(url))
+            },
+        )
+        composeRule.setContent { MaterialTheme { MartScreen(repository) } }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Featured Brands").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Featured Brands").performClick()
+        composeRule.waitUntil(5_000) {
+            requestedUrls.any { it.endsWith("/api/v1/products?limit=20&collection=featured_brands") }
+        }
+        composeRule.onNodeWithText("Products in this collection.").assertIsDisplayed()
+        composeRule.onNodeWithText("All Mart").performClick()
+        composeRule.onNodeWithText("Browse products from stores on Nantty.").assertIsDisplayed()
+    }
+
+    @Test
     fun serverDrivenCollectionHighlightOpensFilteredMartResults() {
         val requestedUrls = CopyOnWriteArrayList<String>()
         val repository = MartRepository(

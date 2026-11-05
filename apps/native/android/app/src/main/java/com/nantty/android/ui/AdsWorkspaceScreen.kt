@@ -79,6 +79,7 @@ fun AdsWorkspaceScreen(
     var loadingBalance by remember(repository) { mutableStateOf(true) }
     var loadingMore by remember(repository) { mutableStateOf(false) }
     var pageError by remember(repository) { mutableStateOf<String?>(null) }
+    var selectedBoostId by remember(repository) { mutableStateOf<String?>(null) }
 
     fun refresh() {
         refreshVersion += 1
@@ -152,19 +153,30 @@ fun AdsWorkspaceScreen(
     }
 
     Column(modifier.fillMaxSize()) {
-        Row(
-            Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 18.dp, bottom = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text("Ads", Modifier.weight(1f).semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            IconButton(
-                onClick = ::refresh,
-                enabled = !loadingBoosts && !loadingBalance && !loadingMore,
-                modifier = Modifier.semantics { contentDescription = "Refresh ads and balance" },
-            ) { Icon(Icons.Default.Refresh, contentDescription = null) }
+        if (selectedBoostId == null) {
+            Row(
+                Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 18.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("Ads", Modifier.weight(1f).semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                IconButton(
+                    onClick = ::refresh,
+                    enabled = !loadingBoosts && !loadingBalance && !loadingMore,
+                    modifier = Modifier.semantics { contentDescription = "Refresh ads and balance" },
+                ) { Icon(Icons.Default.Refresh, contentDescription = null) }
+            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (selectedBoostId != null) {
+            AdsWorkspaceDetailScreen(
+                repository = repository,
+                boostId = selectedBoostId!!,
+                executor = executor,
+                onBack = { selectedBoostId = null },
+                onReauthenticate = onReauthenticate,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else BoxWithConstraints(Modifier.fillMaxSize()) {
             val wide = maxWidth >= 760.dp
             if (wide) {
                 Row(
@@ -188,6 +200,7 @@ fun AdsWorkspaceScreen(
                         onRetry = ::refresh,
                         onLoadMore = ::loadNextPage,
                         onReauthenticate = onReauthenticate,
+                        onOpenBoost = { selectedBoostId = it },
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -202,6 +215,7 @@ fun AdsWorkspaceScreen(
                     onRetry = ::refresh,
                     onLoadMore = ::loadNextPage,
                     onReauthenticate = onReauthenticate,
+                    onOpenBoost = { selectedBoostId = it },
                     balanceResult = balanceResult,
                     balanceLoading = loadingBalance,
                     onBalanceRetry = ::refresh,
@@ -223,6 +237,7 @@ private fun AdsBoostList(
     onRetry: () -> Unit,
     onLoadMore: () -> Unit,
     onReauthenticate: () -> Unit,
+    onOpenBoost: (String) -> Unit,
     modifier: Modifier = Modifier,
     balanceResult: AdsWorkspaceResult<AdsWorkspaceBalance>? = null,
     balanceLoading: Boolean = false,
@@ -272,7 +287,7 @@ private fun AdsBoostList(
             else -> Unit
         }
         if (page != null) {
-            items(page.boosts, key = AdsWorkspaceBoost::id) { boost -> AdsBoostCard(boost) }
+            items(page.boosts, key = AdsWorkspaceBoost::id) { boost -> AdsBoostCard(boost, onClick = { onOpenBoost(boost.id) }) }
             if (pageError != null) {
                 item(key = "ads-next-error") {
                     ErrorState(
@@ -346,7 +361,7 @@ private fun BalanceAmount(label: String, amount: com.nantty.android.data.AdsWork
 }
 
 @Composable
-private fun AdsBoostCard(boost: AdsWorkspaceBoost) {
+private fun AdsBoostCard(boost: AdsWorkspaceBoost, onClick: () -> Unit) {
     val statusColor = when (boost.status) {
         AdsWorkspaceBoostStatus.ACTIVE -> MaterialTheme.colorScheme.primary
         AdsWorkspaceBoostStatus.IN_REVIEW, AdsWorkspaceBoostStatus.PENDING_PAYMENT -> MaterialTheme.colorScheme.tertiary
@@ -366,7 +381,7 @@ private fun AdsBoostCard(boost: AdsWorkspaceBoost) {
     val progress = if (boost.totalBudget.amountMinor > 0) {
         (boost.spent.amountMinor.toDouble() / boost.totalBudget.amountMinor.toDouble()).coerceIn(0.0, 1.0).toFloat()
     } else 0f
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+    Card(onClick = onClick, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
         Column(
             Modifier.fillMaxWidth().padding(16.dp).semantics {
                 contentDescription = "$destination, ${boost.status.label}. $spent spent of $budget. ${boost.keyResultValue} ${boost.keyResultLabel}."
@@ -401,7 +416,7 @@ private fun AdsBoostCard(boost: AdsWorkspaceBoost) {
 }
 
 @Composable
-private fun LoadingState(label: String) {
+internal fun LoadingState(label: String) {
     Row(Modifier.fillMaxWidth().padding(20.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
         CircularProgressIndicator(Modifier.size(22.dp).semantics { contentDescription = label }, strokeWidth = 2.dp)
         Spacer(Modifier.width(10.dp))
@@ -410,7 +425,7 @@ private fun LoadingState(label: String) {
 }
 
 @Composable
-private fun ErrorState(title: String, message: String, actionLabel: String, onAction: () -> Unit) {
+internal fun ErrorState(title: String, message: String, actionLabel: String, onAction: () -> Unit) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onErrorContainer)
@@ -432,7 +447,7 @@ private fun EmptyState(title: String, message: String) {
     }
 }
 
-private fun formatAdsMoney(money: com.nantty.android.data.AdsWorkspaceMoney): String {
+internal fun formatAdsMoney(money: com.nantty.android.data.AdsWorkspaceMoney): String {
     val currency = runCatching { Currency.getInstance(money.currency) }.getOrNull()
         ?: return "${money.amountMinor} ${money.currency} minor units"
     val digits = currency.defaultFractionDigits.takeIf { it >= 0 } ?: return "${money.amountMinor} ${money.currency} minor units"

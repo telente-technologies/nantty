@@ -47,7 +47,13 @@ import com.nantty.android.data.CartLine
 import com.nantty.android.data.CartMutationResult
 import com.nantty.android.data.CartRepository
 import com.nantty.android.data.CartResult
+import com.nantty.android.data.CartSellerSummary
 import com.nantty.android.data.CartSnapshot
+import com.nantty.android.data.CheckoutAddress
+import com.nantty.android.data.CheckoutAddressInput
+import com.nantty.android.data.CheckoutAddressesResult
+import com.nantty.android.data.CheckoutCartResult
+import com.nantty.android.data.CheckoutRepository
 import com.nantty.android.data.WalletMoney
 import com.nantty.android.data.formatWalletAmount
 import java.util.concurrent.Executor
@@ -55,29 +61,87 @@ import java.util.concurrent.Executor
 @Composable
 internal fun CartScreen(
     repository: CartRepository,
+    checkoutRepository: CheckoutRepository,
     executor: Executor,
+    selectedAddressId: String?,
+    onAddressSelected: (String?) -> Unit,
     onBack: () -> Unit,
     onAuthenticationRequired: () -> Unit,
-    onProceedToCheckout: () -> Unit = {},
+    onProceedToCheckout: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var result by remember(repository) { mutableStateOf<CartResult?>(null) }
+    var addresses by remember(repository) { mutableStateOf<List<CheckoutAddress>>(emptyList()) }
+    var addressLoading by remember(repository) { mutableStateOf(true) }
+    var addressError by remember(repository) { mutableStateOf<String?>(null) }
+    var quoteLoading by remember(repository) { mutableStateOf(false) }
+    var quoteError by remember(repository) { mutableStateOf<String?>(null) }
     var loading by remember(repository) { mutableStateOf(true) }
     var busyItemId by remember(repository) { mutableStateOf<String?>(null) }
     var errorMessage by remember(repository) { mutableStateOf<String?>(null) }
     var refreshGeneration by remember(repository) { mutableStateOf(0) }
+    var localAddressId by remember(repository) { mutableStateOf(selectedAddressId) }
+    var showingAddressForm by remember(repository) { mutableStateOf(false) }
+    var savingAddress by remember(repository) { mutableStateOf(false) }
+    var addressSaveError by remember(repository) { mutableStateOf<String?>(null) }
+    var quoteRequestGeneration by remember(repository) { mutableStateOf(0) }
+
+    fun quoteAddress(addressId: String) {
+        val request = quoteRequestGeneration + 1
+        quoteRequestGeneration = request
+        quoteLoading = true
+        quoteError = null
+        executor.execute {
+            val outcome = checkoutRepository.quoteCart(addressId)
+            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                if (request == quoteRequestGeneration && addressId == localAddressId) {
+                    when (outcome) {
+                        is CheckoutCartResult.Success -> result = CartResult.Success(outcome.cart)
+                        is CheckoutCartResult.Failure -> {
+                            quoteError = outcome.message
+                            if (outcome.authenticationRequired) onAuthenticationRequired()
+                        }
+                    }
+                    quoteLoading = false
+                }
+            }
+        }
+    }
 
     BackHandler(onBack = onBack)
-    LaunchedEffect(repository, refreshGeneration) {
+    LaunchedEffect(repository, checkoutRepository, refreshGeneration) {
         loading = true
+        addressLoading = true
         errorMessage = null
         executor.execute {
             val loaded = repository.loadCart()
+            val addressResult = checkoutRepository.loadAddresses()
+            val fetchedAddresses = (addressResult as? CheckoutAddressesResult.Success)?.addresses.orEmpty()
+            val requested = localAddressId ?: (loaded as? CartResult.Success)?.cart?.addressId
+            // Match RN's explicit address-store selection: a saved default is not silently chosen.
+            val chosen = requested?.takeIf { id -> fetchedAddresses.any { it.id == id } }
+            val quote = chosen?.let(checkoutRepository::quoteCart)
             androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                result = loaded
+                result = if (quote is CheckoutCartResult.Success) CartResult.Success(quote.cart) else loaded
+                addresses = fetchedAddresses
+                addressLoading = false
+                localAddressId = chosen
+                onAddressSelected(chosen)
+                addressError = (addressResult as? CheckoutAddressesResult.Failure)?.message
+                quoteError = (quote as? CheckoutCartResult.Failure)?.message
+                if ((addressResult as? CheckoutAddressesResult.Failure)?.authenticationRequired == true ||
+                    (quote as? CheckoutCartResult.Failure)?.authenticationRequired == true
+                ) onAuthenticationRequired()
                 loading = false
                 if ((loaded as? CartResult.Failure)?.authenticationRequired == true) onAuthenticationRequired()
             }
+        }
+    }
+
+    LaunchedEffect(selectedAddressId) {
+        if (selectedAddressId != localAddressId) {
+            localAddressId = selectedAddressId
+            if (selectedAddressId != null && addresses.any { it.id == selectedAddressId }) quoteAddress(selectedAddressId)
         }
     }
 
@@ -136,14 +200,55 @@ internal fun CartScreen(
                         busyItemId = busyItemId,
                         controlsEnabled = !loading && busyItemId == null,
                         errorMessage = errorMessage,
+                        addresses = addresses,
+                        selectedAddressId = localAddressId,
+                        addressLoading = addressLoading,
+                        quoteLoading = quoteLoading,
+                        quoteError = quoteError ?: addressError,
+                        onSelectAddress = { address ->
+                            if (address.id != localAddressId) {
+                                localAddressId = address.id
+                                onAddressSelected(address.id)
+                                quoteAddress(address.id)
+                            }
+                        },
+                        onAddAddress = { addressSaveError = null; showingAddressForm = true },
+                        onRetryQuote = { localAddressId?.let(::quoteAddress) },
                         onChangeQuantity = { line, quantity -> mutate(line) { repository.changeQuantity(line.id, quantity) } },
                         onRemove = { line -> mutate(line) { repository.removeItem(line.id) } },
-                        onProceedToCheckout = onProceedToCheckout,
+                        onProceedToCheckout = { onProceedToCheckout(localAddressId) },
                     )
                 }
             }
             else -> CartMessage("Your cart is ready to load.", "Try again") { refreshGeneration++ }
         }
+    }
+    if (showingAddressForm) {
+        CheckoutAddressForm(
+            repository = checkoutRepository,
+            executor = executor,
+            saving = savingAddress,
+            saveError = addressSaveError,
+            onDismiss = { if (!savingAddress) showingAddressForm = false },
+            onSave = { input: CheckoutAddressInput ->
+                if (savingAddress) return@CheckoutAddressForm
+                savingAddress = true
+                addressSaveError = null
+                executor.execute {
+                    val outcome = runCatching { checkoutRepository.createAddress(input) }
+                    androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                        savingAddress = false
+                        outcome.onSuccess { saved ->
+                            addresses = addresses.filterNot { it.id == saved.id } + saved
+                            localAddressId = saved.id
+                            onAddressSelected(saved.id)
+                            showingAddressForm = false
+                            quoteAddress(saved.id)
+                        }.onFailure { addressSaveError = it.message ?: "Could not save this address. Check the details and try again." }
+                    }
+                }
+            },
+        )
     }
 }
 
@@ -153,6 +258,14 @@ private fun CartContent(
     busyItemId: String?,
     controlsEnabled: Boolean,
     errorMessage: String?,
+    addresses: List<CheckoutAddress>,
+    selectedAddressId: String?,
+    addressLoading: Boolean,
+    quoteLoading: Boolean,
+    quoteError: String?,
+    onSelectAddress: (CheckoutAddress) -> Unit,
+    onAddAddress: () -> Unit,
+    onRetryQuote: () -> Unit,
     onChangeQuantity: (CartLine, Int) -> Unit,
     onRemove: (CartLine) -> Unit,
     onProceedToCheckout: () -> Unit,
@@ -163,6 +276,23 @@ private fun CartContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (errorMessage != null) item { Text(errorMessage, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium) }
+        item {
+            CartDeliveryAddressPicker(
+                addresses = addresses,
+                selectedAddressId = selectedAddressId,
+                loading = addressLoading,
+                enabled = !quoteLoading,
+                onSelect = onSelectAddress,
+                onAddAddress = onAddAddress,
+            )
+        }
+        if (quoteError != null) item {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(quoteError, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                Button(onClick = onRetryQuote, enabled = !quoteLoading) { Text("Retry delivery quote") }
+            }
+        }
+        if (quoteLoading) item { Text("Updating delivery and total…", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         items(cart.lines, key = CartLine::id) { line ->
             CartLineCard(
                 line = line,
@@ -173,18 +303,16 @@ private fun CartContent(
                 onRemove = { onRemove(line) },
             )
         }
+        items(cart.sellerGroups, key = CartSellerSummary::storeId) { group -> CartSellerShippingSummary(group) }
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
-                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Cart total", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    Text(
-                        formatWalletAmount(WalletMoney(cart.totalAmountMinor, cart.currency)),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text("Delivery and final totals are confirmed at checkout.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
-                    Button(onClick = onProceedToCheckout, modifier = Modifier.fillMaxWidth()) { Text("Continue to checkout") }
-                }
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                CartOrderSummary(cart)
+                CartPurchaseTerms()
+                Button(
+                    onClick = onProceedToCheckout,
+                    enabled = selectedAddressId != null && cart.payableGroupCount > 0 && !quoteLoading && quoteError == null,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("Continue to checkout") }
             }
         }
     }

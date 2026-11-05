@@ -1,5 +1,6 @@
 package com.nantty.android.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +39,7 @@ internal fun AuthGatewayScreen(
     executor: Executor,
     initialError: String?,
     onRetryRestore: (() -> Unit)?,
+    dismissible: Boolean = false,
     onBrowseAsGuest: () -> Unit,
     onAuthenticated: (AccountSession) -> Unit,
 ) {
@@ -164,27 +166,46 @@ internal fun AuthGatewayScreen(
         }
     }
 
+    fun handleRegistrationBack() {
+        when (registration.step) {
+            RegistrationStep.Welcome -> route = AuthRoute.SignIn
+            RegistrationStep.Contact -> { password = ""; otpToken = null; route = AuthRoute.Welcome; update { it.copy(step = RegistrationStep.Welcome, destination = "") } }
+            RegistrationStep.VerifyCode -> update { it.copy(step = RegistrationStep.Contact, destination = "", verificationError = null) }
+            RegistrationStep.Birthday -> { otpToken = null; update { it.copy(step = RegistrationStep.Contact, destination = "", verificationError = null) } }
+            RegistrationStep.Password -> { password = ""; update { it.copy(step = RegistrationStep.Birthday) } }
+            RegistrationStep.Username -> { password = ""; update { it.copy(step = RegistrationStep.Password) } }
+            RegistrationStep.Personalization -> pendingSession?.let(onAuthenticated) ?: run { route = AuthRoute.SignIn }
+        }
+    }
+
+    fun handleSocialBirthdayBack() {
+        googleIdentity = null
+        socialBirthday = ""
+        socialBirthdayError = null
+        route = AuthRoute.Welcome
+    }
+
+    BackHandler(enabled = route == AuthRoute.SignIn || route == AuthRoute.Registration || route == AuthRoute.SocialBirthday) {
+        when (route) {
+            AuthRoute.SignIn -> route = AuthRoute.Welcome
+            AuthRoute.Registration -> handleRegistrationBack()
+            AuthRoute.SocialBirthday -> handleSocialBirthdayBack()
+            AuthRoute.Welcome, AuthRoute.Recovery -> Unit
+        }
+    }
+
     when (route) {
         AuthRoute.Welcome, AuthRoute.Registration -> RegistrationFlowScreen(
             state = registration,
+            dismissibleWelcome = dismissible,
             callbacks = RegistrationFlowCallbacks(
                 onStartSignup = { route = AuthRoute.Registration; update { it.copy(step = RegistrationStep.Contact, socialSignInError = null) } },
                 onContinueWithApple = {},
                 onContinueWithGoogle = ::startGoogleSignIn,
                 onLogin = { signInError = null; route = AuthRoute.SignIn },
-                onWelcomeDismiss = { route = AuthRoute.SignIn },
+                onWelcomeDismiss = { if (dismissible) onBrowseAsGuest() else route = AuthRoute.SignIn },
                 onBrowseAsGuest = onBrowseAsGuest,
-                onBack = {
-                    when (registration.step) {
-                        RegistrationStep.Welcome -> route = AuthRoute.SignIn
-                        RegistrationStep.Contact -> { password = ""; otpToken = null; route = AuthRoute.Welcome; update { it.copy(step = RegistrationStep.Welcome, destination = "") } }
-                        RegistrationStep.VerifyCode -> update { it.copy(step = RegistrationStep.Contact, destination = "", verificationError = null) }
-                        RegistrationStep.Birthday -> { otpToken = null; update { it.copy(step = RegistrationStep.Contact, destination = "", verificationError = null) } }
-                        RegistrationStep.Password -> { password = ""; update { it.copy(step = RegistrationStep.Birthday) } }
-                        RegistrationStep.Username -> { password = ""; update { it.copy(step = RegistrationStep.Password) } }
-                        RegistrationStep.Personalization -> pendingSession?.let(onAuthenticated) ?: run { route = AuthRoute.SignIn }
-                    }
-                },
+                onBack = ::handleRegistrationBack,
                 onSendCode = { email ->
                     submit(
                         start = { it.copy(isSendingCode = true, emailError = null, noticeMessage = null) },
@@ -341,7 +362,7 @@ internal fun AuthGatewayScreen(
             error = socialBirthdayError,
             busy = signInWorking,
             onValueChange = { input -> socialBirthday = input; socialBirthdayError = null },
-            onBack = { googleIdentity = null; socialBirthday = ""; socialBirthdayError = null; route = AuthRoute.Welcome },
+            onBack = ::handleSocialBirthdayBack,
             onContinue = {
                 val isoBirthday = AuthValidation.validBirthdayIso(socialBirthday)
                 val identity = googleIdentity

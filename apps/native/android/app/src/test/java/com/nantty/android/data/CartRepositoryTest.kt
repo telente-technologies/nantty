@@ -26,7 +26,7 @@ class CartRepositoryTest {
     fun loadsCartRowsAndGrandTotalFromServerResponse() {
         val transport = RecordingCartTransport().apply {
             response = JSONObject(
-                """{"itemsTotal":{"amountMinor":5400,"currency":"NGN"},"total":{"amountMinor":5900,"currency":"NGN"},"payableGroupCount":1,"groups":[{"storeName":"Demo store","items":[{"id":"cart_1","product":{"id":"product_1","name":"Tea","price":{"amountMinor":2700,"currency":"NGN"},"imageUrl":"https://cdn.example/tea.jpg"},"quantity":2,"variantDetail":{"title":"Large"}}]}]}""",
+                """{"itemsTotal":{"amountMinor":5400,"currency":"NGN"},"total":{"amountMinor":5900,"currency":"NGN"},"payableGroupCount":1,"groups":[{"storeId":"store_1","storeName":"Demo store","subtotal":{"amountMinor":5400,"currency":"NGN"},"discounts":{"amountMinor":0,"currency":"NGN"},"total":{"amountMinor":5900,"currency":"NGN"},"shipping":{"status":"calculated","fee":{"amountMinor":500,"currency":"NGN"},"message":null,"isFree":false,"freeThreshold":null,"amountToFreeShipping":null},"items":[{"id":"cart_1","product":{"id":"product_1","name":"Tea","price":{"amountMinor":2700,"currency":"NGN"},"imageUrl":"https://cdn.example/tea.jpg"},"quantity":2,"variantDetail":{"title":"Large"}}]}]}""",
             )
         }
 
@@ -41,6 +41,18 @@ class CartRepositoryTest {
         assertEquals("Tea", cart.lines.single().name)
         assertEquals("Large", cart.lines.single().variant)
         assertEquals("Demo store", cart.lines.single().storeName)
+        assertEquals("store_1", cart.sellerGroups.single().storeId)
+        assertEquals("calculated", cart.sellerGroups.single().shipping.status)
+        assertEquals(500L, cart.sellerGroups.single().shipping.fee?.amountMinor)
+    }
+
+    @Test
+    fun rejectsIncompleteSellerShippingQuoteInsteadOfHidingTheGroup() {
+        val transport = RecordingCartTransport().apply {
+            response = JSONObject("""{"total":{"amountMinor":100,"currency":"NGN"},"groups":[{"storeId":"store_1","storeName":"Shop","items":[],"subtotal":{"amountMinor":100,"currency":"NGN"}}]}""")
+        }
+
+        assertTrue(CartRepository("https://api.nantty.com", { "buyer-access" }, transport).loadCart() is CartResult.Failure)
     }
 
     @Test

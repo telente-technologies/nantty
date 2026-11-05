@@ -42,11 +42,44 @@ internal fun AndroidConversationScreen(
 
     fun refresh() {
         if (refreshing) return
+        val existing = result as? ChatHistoryResult.Success
+        val newestLoadedMessageId = existing?.page?.messages?.firstOrNull()?.id
         requestGeneration += 1
         val generation = requestGeneration
         refreshing = true
         loadingOlder = false
         olderMessagesError = null
+
+        // The backend's `after` query is the same incremental history contract used by RN.
+        // Keep rendered history in place while checking for newer envelopes.
+        if (existing != null && newestLoadedMessageId != null) {
+            executor.execute {
+                val loaded = repository.loadMessagesAfter(conversation.id, newestLoadedMessageId)
+                androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                    if (generation != requestGeneration) return@withMutableSnapshot
+                    refreshing = false
+                    when (loaded) {
+                        is ChatHistoryResult.Failure -> readError = loaded.message
+                        is ChatHistoryResult.Success -> {
+                            readError = null
+                            val newerMessages = loaded.page.messages.asReversed()
+                            result = existing.copy(
+                                page = existing.page.copy(
+                                    messages = (newerMessages + existing.page.messages).distinctBy(EncryptedChatMessage::id),
+                                ),
+                            )
+                        }
+                    }
+                }
+                if (loaded is ChatHistoryResult.Success && conversation.inboxFolder == com.nantty.android.data.MessagesInboxFolder.CHATS) {
+                    repository.markConversationRead(conversation.id).onSuccess {
+                        onConversationRead()
+                    }
+                }
+            }
+            return
+        }
+
         result = null
         executor.execute {
             val loaded = repository.loadInitialHistory(conversation.id) { page ->

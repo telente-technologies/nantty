@@ -96,10 +96,12 @@ class MartRepositoryTest {
     @Test
     fun parsesCategoriesAndProductsAndRejectsUnsafeImages() {
         val repository = MartRepository("https://api.nantty.com") { url ->
-            RecordingMartConnection(url, 200, """{"categories":[{"id":"cat-1","name":"Home","depth":0},{"id":"","name":"Invalid"}]}""")
+            RecordingMartConnection(url, 200, """{"categories":[{"id":"cat-1","name":"Home","depth":0},{"id":"","name":"Invalid"}],"salesOfTheDayImageUrl":"https://cdn.nantty.com/sales.jpg","featuredBrandsImageUrl":"http://unsafe.example/brands.jpg","newArrivalsImageUrl":null}""")
         }
         val home = repository.loadHome() as MartResult.Home
         assertEquals(listOf(MartCategory("cat-1", "Home", 0)), home.value.categories)
+        assertEquals("https://cdn.nantty.com/sales.jpg", home.value.salesOfTheDayImageUrl)
+        assertEquals(null, home.value.featuredBrandsImageUrl)
 
         val productsRepository = MartRepository("https://api.nantty.com") { url ->
             RecordingMartConnection(url, 200, """{"data":[{"id":"prd-1","name":"Table lamp","price":{"amountMinor":125000,"currency":"NGN"},"imageUrl":"https://cdn.nantty.com/lamp.jpg","stock":4},{"id":"prd-2","name":"Unsafe","price":{"amountMinor":10,"currency":"NGN"},"imageUrl":"http://evil.example/image.jpg","stock":-3}],"nextCursor":"page-2"}""")
@@ -110,6 +112,19 @@ class MartRepositoryTest {
         assertEquals(null, page.value.products[1].imageUrl)
         assertEquals(0, page.value.products[1].stock)
         assertEquals("page-2", page.value.nextCursor)
+    }
+
+    @Test
+    fun collectionBrowseUsesTheExistingProductsFilterAndCursorContract() {
+        lateinit var connection: RecordingMartConnection
+        val repository = MartRepository("https://api.nantty.com") { url ->
+            RecordingMartConnection(url, 200, """{"data":[],"nextCursor":"next-page"}""").also { connection = it }
+        }
+
+        val result = repository.loadProducts(collection = "featured_brands", cursor = "page 2") as MartResult.Products
+
+        assertEquals("https://api.nantty.com/api/v1/products?limit=20&collection=featured_brands&cursor=page+2", connection.url.toString())
+        assertEquals("next-page", result.value.nextCursor)
     }
 
     @Test

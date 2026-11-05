@@ -41,6 +41,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nantty.android.data.ActivityNotification
+import com.nantty.android.data.ConversationLookupResult
+import com.nantty.android.data.InboxConversation
+import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.NotificationFilter
 import com.nantty.android.data.NotificationPage
 import com.nantty.android.data.NotificationsRepository
@@ -51,13 +54,14 @@ import com.nantty.android.data.AccountNotificationSettingsRepository
 import java.util.concurrent.Executor
 
 @Composable
-internal fun NotificationsScreen(repository: NotificationsRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenPost: (String) -> Unit = {}, onOpenProfile: (String) -> Unit = {}, onOpenMessages: () -> Unit = {}, onOpenOrders: () -> Unit = {}, accountSettingsRepository: AccountNotificationSettingsRepository? = null, onOpenFollowRequests: () -> Unit = {}) {
+internal fun NotificationsScreen(repository: NotificationsRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenPost: (String) -> Unit = {}, onOpenProfile: (String) -> Unit = {}, onOpenMessages: () -> Unit = {}, onOpenConversation: (InboxConversation) -> Unit = {}, messagesRepository: MessagesRepository? = null, onOpenOrders: () -> Unit = {}, accountSettingsRepository: AccountNotificationSettingsRepository? = null, onOpenFollowRequests: () -> Unit = {}) {
     var showingSettings by remember(repository) { mutableStateOf(false) }
     var filter by remember(repository) { mutableStateOf(NotificationFilter.ALL) }
     var result by remember(repository) { mutableStateOf<NotificationsResult?>(null) }
     var loading by remember(repository) { mutableStateOf(false) }
     var loadingMore by remember(repository) { mutableStateOf(false) }
     var actionMessage by remember(repository) { mutableStateOf<String?>(null) }
+    var openingConversationId by remember(repository) { mutableStateOf<String?>(null) }
     var generation by remember(repository) { mutableStateOf(0) }
 
     fun refresh(clear: Boolean = false) {
@@ -187,6 +191,27 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
                         when (val destination = resolveNotificationDestination(item)) {
                             is NotificationDestination.Post -> onOpenPost(destination.postId)
                             is NotificationDestination.Profile -> onOpenProfile(destination.userId)
+                            is NotificationDestination.Conversation -> {
+                                val messages = messagesRepository
+                                if (messages == null) onOpenMessages()
+                                else if (openingConversationId == null) {
+                                    openingConversationId = destination.conversationId
+                                    actionMessage = null
+                                    executor.execute {
+                                        val lookup = messages.loadConversationById(destination.conversationId)
+                                        androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                                            openingConversationId = null
+                                            when (lookup) {
+                                                is ConversationLookupResult.Success -> onOpenConversation(lookup.conversation)
+                                                is ConversationLookupResult.Failure -> {
+                                                    actionMessage = lookup.message
+                                                    if (lookup.authenticationRequired) onReauthenticate()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                             NotificationDestination.Messages -> onOpenMessages()
                             NotificationDestination.Orders -> onOpenOrders()
                             NotificationDestination.FollowRequests -> onOpenFollowRequests()
@@ -196,6 +221,10 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
                 }
                 item(key = "notification-pagination") {
                     when {
+                        openingConversationId != null -> Row(Modifier.fillMaxWidth().padding(20.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(Modifier.size(18.dp))
+                            Text("Opening conversation…", Modifier.padding(start = 10.dp), style = MaterialTheme.typography.bodySmall)
+                        }
                         loadingMore -> CircularProgressIndicator(Modifier.padding(20.dp).semantics { contentDescription = "Loading more notifications" })
                         actionMessage != null -> TextButton(onClick = ::loadMore, modifier = Modifier.fillMaxWidth()) { Text("Try loading more") }
                         current.page.nextCursor != null -> TextButton(onClick = ::loadMore, modifier = Modifier.fillMaxWidth().padding(8.dp)) { Text("Load more") }

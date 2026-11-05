@@ -47,10 +47,11 @@ import com.nantty.android.R
 import com.nantty.android.data.AuthValidation
 
 @Composable
-internal fun WelcomeStep(state: RegistrationFlowState, callbacks: RegistrationFlowCallbacks) {
+internal fun WelcomeStep(state: RegistrationFlowState, callbacks: RegistrationFlowCallbacks, dismissible: Boolean = false) {
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            TextButton(onClick = callbacks.onBrowseAsGuest) { Text("Browse as guest") }
+            if (dismissible) TextButton(onClick = callbacks.onWelcomeDismiss) { Text("Not now") }
+            else TextButton(onClick = callbacks.onBrowseAsGuest) { Text("Browse as guest") }
         }
         WelcomeArtwork()
         Column(verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {

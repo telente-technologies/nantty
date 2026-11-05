@@ -47,7 +47,12 @@ data class MartProductDetail(
     val variants: List<MartProductVariant>,
 )
 data class MartPage(val products: List<MartProduct>, val nextCursor: String?)
-data class MartHome(val categories: List<MartCategory>)
+data class MartHome(
+    val categories: List<MartCategory>,
+    val salesOfTheDayImageUrl: String? = null,
+    val featuredBrandsImageUrl: String? = null,
+    val newArrivalsImageUrl: String? = null,
+)
 sealed interface MartHighlightTarget {
     data class Product(val productId: String, val name: String) : MartHighlightTarget
     data class Collection(val collection: String, val name: String) : MartHighlightTarget
@@ -196,7 +201,8 @@ class MartRepository(
     }
 
     private fun parseHome(body: String): MartResult.Home {
-        val rows = JSONObject(body).optJSONArray("categories") ?: JSONArray()
+        val root = JSONObject(body)
+        val rows = root.optJSONArray("categories") ?: JSONArray()
         val categories = buildList {
             for (index in 0 until rows.length()) {
                 val item = rows.optJSONObject(index) ?: continue
@@ -205,7 +211,14 @@ class MartRepository(
                 if (isSafeMartIdentifier(id) && name.isNotEmpty()) add(MartCategory(id, name, item.optInt("depth").coerceAtLeast(0)))
             }
         }
-        return MartResult.Home(MartHome(categories))
+        return MartResult.Home(
+            MartHome(
+                categories = categories,
+                salesOfTheDayImageUrl = safeMediaUrl(root.optNullableString("salesOfTheDayImageUrl")),
+                featuredBrandsImageUrl = safeMediaUrl(root.optNullableString("featuredBrandsImageUrl")),
+                newArrivalsImageUrl = safeMediaUrl(root.optNullableString("newArrivalsImageUrl")),
+            ),
+        )
     }
 
     private fun parseProducts(body: String): MartResult.Products {

@@ -174,6 +174,7 @@ fun NanttyApp(
                         executor = sessionExecutor,
                         initialError = null,
                         onRetryRestore = null,
+                        dismissible = true,
                         onBrowseAsGuest = ::cancelGuestAuth,
                         onAuthenticated = { authenticated ->
                             OrdersWidgetRefreshScheduler.refreshSoon(appContext, replaceExisting = true)
