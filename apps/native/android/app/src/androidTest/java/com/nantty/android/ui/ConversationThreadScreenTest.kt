@@ -39,6 +39,18 @@ class ConversationThreadScreenTest {
     }
 
     @Test
+    fun notificationTargetScrollsIntoViewAndIsHighlighted() {
+        val targetId = "target-message"
+        val timeline = (1..30).map { index -> item("message-$index", "Safe message $index") } + item(targetId, "Target content")
+
+        setThread(timeline = timeline, targetMessageId = targetId)
+
+        compose.onNodeWithContentDescription("Target message from notification").assertIsDisplayed()
+        compose.onNodeWithText("Opened from notification").assertIsDisplayed()
+        compose.onNodeWithText("Target content").assertIsDisplayed()
+    }
+
+    @Test
     fun neverRendersContentForDecryptFailureAndShowsRetrySeparately() {
         setThread(
             timeline = listOf(
@@ -187,6 +199,7 @@ class ConversationThreadScreenTest {
         safetyCodeLabel: String? = null,
         safetyCodeAvailable: Boolean = safetyCodeLabel != null,
         retryingMessageIds: Set<String> = emptySet(),
+        targetMessageId: String? = null,
         hasOlderMessages: Boolean = false,
         onLoadOlderMessages: () -> Unit = {},
         onBack: () -> Unit = {},
@@ -201,6 +214,7 @@ class ConversationThreadScreenTest {
                     peerName = "Ari Oyinlola",
                     subtitle = "Active now",
                     timeline = timeline,
+                    targetMessageId = targetMessageId,
                     timelineState = timelineState,
                     timelineError = timelineError,
                     composer = ConversationComposerState("", enabled = true, sendEnabled = true),

@@ -128,6 +128,8 @@ internal fun SignedInPurchaseFlow(
     onCheckoutCreated: (CheckoutReceipt) -> Unit,
     onSelectCartAddress: (String?) -> Unit,
     onProceedToCheckout: (String?) -> Unit,
+    onOpenStore: (String) -> Unit,
+    onOpenProduct: (String) -> Unit,
 ) {
     when (destination) {
         SignedInPurchaseDestination.PaymentProtection -> orderId?.let {
@@ -154,6 +156,11 @@ internal fun SignedInPurchaseFlow(
                     onAuthenticationRequired = onAuthenticationRequired,
                     disputeRepository = repositories.disputes,
                     privateMediaUploadsRepository = repositories.privateMediaUploads,
+                    onOpenStore = onOpenStore,
+                    onOpenProduct = { productId ->
+                        onContinueShopping()
+                        onOpenProduct(productId)
+                    },
                 )
             }
         }

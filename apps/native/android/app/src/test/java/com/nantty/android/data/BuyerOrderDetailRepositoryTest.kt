@@ -20,6 +20,7 @@ class BuyerOrderDetailRepositoryTest {
         assertEquals("order_123", result.order.id)
         assertEquals("NT-1042", result.order.reference)
         assertEquals("Ari Tech", result.order.storeName)
+        assertEquals("store_1", result.order.storeId)
         assertEquals("Headphones", result.order.items.single().name)
         assertEquals(2, result.order.items.single().quantity)
         assertEquals("Large", result.order.items.single().variant)
@@ -51,6 +52,16 @@ class BuyerOrderDetailRepositoryTest {
         assertEquals("That order could not be found.", result.message)
         assertNull(transport.path)
         assertNull(transport.token)
+    }
+
+    @Test
+    fun rejectsOrderDetailWithoutAUsableStoreId() {
+        val payload = detail().apply { getJSONObject("store").put("id", "../unsafe") }
+
+        val result = BuyerOrdersRepository("https://api.nantty.com", ::signedInSession, RecordingTransport(payload))
+            .loadDetail("order_123") as BuyerOrderDetailResult.Failure
+
+        assertEquals("Couldn't load this order. Check your connection and try again.", result.message)
     }
 
     @Test

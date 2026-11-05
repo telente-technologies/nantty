@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -63,6 +64,7 @@ class SellerOrdersScreenTest {
 
         compose.onNodeWithText("To ship").performClick()
         compose.onNodeWithText("NAN-NEW").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Product image: Canvas bag").assertIsDisplayed()
         compose.onAllNodesWithText("NAN-SHIPPED").assertCountEquals(0)
         compose.onNodeWithText("NAN-NEW").performClick()
         compose.onNodeWithText("Order NAN-NEW").assertIsDisplayed()
@@ -71,6 +73,17 @@ class SellerOrdersScreenTest {
         assertEquals("buyer-id", messagedBuyer)
         compose.onNodeWithText("View buyer profile").performClick()
         assertEquals("buyer-id", openedBuyerProfile)
+    }
+
+    @Test
+    fun paidOrdersUseReactNativeToShipStatusLabel() {
+        compose.setContent {
+            MaterialTheme {
+                SellerOrderStatus("paid")
+            }
+        }
+
+        compose.onNodeWithText("To ship").assertIsDisplayed()
     }
 
     @Test
@@ -122,7 +135,7 @@ class SellerOrdersScreenTest {
       "id":"$id","orderNumber":"$number","invoiceNumber":"INV-1",
       "buyer":{"id":"buyer-id","name":"Ari Buyer","username":"ari","phone":"08000000000"},
       "shippingAddress":{"recipientName":"Ari Buyer","phone":"08000000000","line1":"1 Main St","city":"Lagos","state":"Lagos","country":"NG"},
-      "lines":[{"id":"line-1","productId":"product-1","variantId":"variant-1","name":"Canvas bag","variantTitle":"Blue","sku":"BAG-BLUE","imageUrl":null,"quantity":1,"unitPrice":{"amountMinor":125000,"currency":"NGN"},"lineTotal":{"amountMinor":125000,"currency":"NGN"}}],
+      "lines":[{"id":"line-1","productId":"product-1","variantId":"variant-1","name":"Canvas bag","variantTitle":"Blue","sku":"BAG-BLUE","imageUrl":"https://cdn.nantty.com/$id.jpg","quantity":1,"unitPrice":{"amountMinor":125000,"currency":"NGN"},"lineTotal":{"amountMinor":125000,"currency":"NGN"}}],
       "subtotal":{"amountMinor":125000,"currency":"NGN"},"discount":{"amountMinor":0,"currency":"NGN"},
       "storeCredit":{"amountMinor":0,"currency":"NGN"},"shippingFee":{"amountMinor":0,"currency":"NGN"},
       "total":{"amountMinor":125000,"currency":"NGN"},"sellerPayout":{"amountMinor":125000,"currency":"NGN"},

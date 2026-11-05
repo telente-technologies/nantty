@@ -35,6 +35,7 @@ internal data class BuyerOrder(
 internal data class BuyerOrdersPage(val orders: List<BuyerOrder>, val nextCursor: String?)
 
 internal data class BuyerOrderItem(
+    val productId: String?,
     val name: String,
     val quantity: Int,
     val variant: String?,
@@ -47,6 +48,7 @@ internal data class BuyerOrderDetail(
     val fulfilmentStatus: String,
     val paymentStatus: String,
     val paymentMode: String,
+    val storeId: String,
     val storeName: String,
     val items: List<BuyerOrderItem>,
     val subtotalMinor: Long,
@@ -219,6 +221,8 @@ internal class BuyerOrdersRepository(
         val id = payload.optString("id").takeIf(String::isNotBlank)
             ?: error("Nantty returned an incomplete order response.")
         val store = payload.optJSONObject("store") ?: error("Nantty returned an incomplete order response.")
+        val storeId = store.optString("id").takeIf(::isSafeMartIdentifier)
+            ?: error("Nantty returned an incomplete order response.")
         val items = payload.optJSONArray("items") ?: error("Nantty returned an incomplete order response.")
         return BuyerOrderDetail(
             id = id,
@@ -227,6 +231,7 @@ internal class BuyerOrdersRepository(
             fulfilmentStatus = payload.optString("fulfilmentStatus").ifBlank { "unknown" },
             paymentStatus = payload.optString("paymentStatus").ifBlank { "unknown" },
             paymentMode = payload.optString("paymentMode").ifBlank { "escrow" },
+            storeId = storeId,
             storeName = store.optString("name").takeIf(String::isNotBlank) ?: "Nantty store",
             items = buildList {
                 for (index in 0 until items.length()) {
@@ -235,6 +240,7 @@ internal class BuyerOrdersRepository(
                     val name = product?.optString("name")?.takeIf(String::isNotBlank) ?: continue
                     add(
                         BuyerOrderItem(
+                            productId = product?.optString("id")?.takeIf(::isSafeMartIdentifier),
                             name = name.filterNot(Char::isISOControl).take(120),
                             quantity = row.optInt("quantity").coerceAtLeast(0),
                             variant = row.optString("variant").takeIf(String::isNotBlank),

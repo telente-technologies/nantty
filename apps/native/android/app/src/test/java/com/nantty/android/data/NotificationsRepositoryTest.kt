@@ -70,9 +70,21 @@ class NotificationsRepositoryTest {
         )
 
         assertEquals(
-            NotificationDestination.Conversation("11111111-1111-4111-8111-111111111111"),
+            NotificationDestination.Conversation("11111111-1111-4111-8111-111111111111", null),
             resolveNotificationDestination(notification),
         )
+    }
+
+    @Test
+    fun notificationCarriesOnlySafeMessageTargetIntoConversationDestination() {
+        val conversationId = "11111111-1111-4111-8111-111111111111"
+        val messageId = "33333333-3333-4333-8333-333333333333"
+        val payload = JSONObject("""{"data":[{"id":"n1","category":"messages","title":"Notice","body":"Body","createdAt":"now","read":false,"data":{"conversationId":"$conversationId","messageId":"$messageId"}}]}""")
+        val notification = NotificationsRepository("https://api.nantty.com", ::signedInSession, RecordingTransport(payload)).parsePage(payload).items.single()
+
+        assertEquals(messageId, notification.messageId)
+        assertEquals(NotificationDestination.Conversation(conversationId, messageId), resolveNotificationDestination(notification))
+        assertEquals(NotificationDestination.Conversation(conversationId, null), resolveNotificationDestination(notification.copy(messageId = "../message")))
     }
 
     @Test

@@ -134,6 +134,7 @@ class NotificationsScreenTest {
             notificationKind = null,
             conversationId = conversationId,
             includePostId = true,
+            messageId = "33333333-3333-4333-8333-333333333333",
         )
         val messagesRepository = MessagesRepository(
             baseUrl = "https://api.nantty.com",
@@ -164,6 +165,7 @@ class NotificationsScreenTest {
         compose.runOnIdle {
             assertEquals(conversationId, openedConversationId)
             assertNull(openedPost)
+            assertEquals("33333333-3333-4333-8333-333333333333", messagesRepository.consumeNotificationMessageTarget(conversationId))
         }
     }
 
@@ -231,6 +233,7 @@ class NotificationsScreenTest {
         private val includePostId: Boolean = true,
         private val notificationKind: String? = null,
         private val conversationId: String? = null,
+        private val messageId: String? = null,
     ) : NotificationsTransport {
         var calls = 0
         var lastMethod: String? = null
@@ -243,7 +246,7 @@ class NotificationsScreenTest {
             return if (path.contains("cursor=next-page")) secondPage() else firstPage()
         }
 
-        private fun firstPage() = JSONObject("""{"data":[{"id":"n1","category":"${if (conversationId != null) "messages" else "social"}","${notificationKind?.let { "\"kind\":\"$it\"," } ?: ""}"title":"Ari mentioned you","body":"Hello from Ari","createdAt":"2026-10-01T12:00:00.000Z","read":false,"actor":{"id":"u1","name":"Ari"},"url":"https://evil.example/post/forged"${if (includePostId || conversationId != null) ",\"data\":{${if (includePostId) "\"postId\":\"post-1\"" else ""}${if (includePostId && conversationId != null) "," else ""}${conversationId?.let { "\"conversationId\":\"$it\"" } ?: ""}}" else ""}}],"nextCursor":"next-page"}""")
+        private fun firstPage() = JSONObject("""{"data":[{"id":"n1","category":"${if (conversationId != null) "messages" else "social"}","${notificationKind?.let { "\"kind\":\"$it\"," } ?: ""}"title":"Ari mentioned you","body":"Hello from Ari","createdAt":"2026-10-01T12:00:00.000Z","read":false,"actor":{"id":"u1","name":"Ari"},"url":"https://evil.example/post/forged"${if (includePostId || conversationId != null) ",\"data\":{${if (includePostId) "\"postId\":\"post-1\"" else ""}${if (includePostId && conversationId != null) "," else ""}${conversationId?.let { "\"conversationId\":\"$it\"" } ?: ""}${if (conversationId != null && messageId != null) ",\"messageId\":\"$messageId\"" else ""}}" else ""}}],"nextCursor":"next-page"}""")
         private fun secondPage() = JSONObject("""{"data":[{"id":"n2","category":"social","title":"Second notification","body":"More activity","createdAt":"2026-10-01T11:00:00.000Z","read":true}],"nextCursor":null}""")
     }
 

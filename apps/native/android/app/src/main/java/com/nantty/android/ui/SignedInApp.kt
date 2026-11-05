@@ -145,6 +145,11 @@ internal fun SignedInApp(
             onCheckoutCreated = purchaseState::checkoutCreated,
             onSelectCartAddress = purchaseState::selectCartAddress,
             onProceedToCheckout = purchaseState::proceedToCheckout,
+            onOpenStore = { storeId ->
+                purchaseState.continueShopping()
+                selectedStoreId = storeId
+            },
+            onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
         )
         return
     }

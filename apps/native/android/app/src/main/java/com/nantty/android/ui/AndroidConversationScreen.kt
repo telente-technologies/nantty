@@ -39,6 +39,9 @@ internal fun AndroidConversationScreen(
     var requestGeneration by remember(repository, conversation.id) { mutableIntStateOf(0) }
     var readError by remember(repository, conversation.id) { mutableStateOf<String?>(null) }
     var showingInfo by remember(repository, conversation.id) { mutableStateOf(false) }
+    val notificationMessageId = remember(repository, conversation.id) {
+        repository.consumeNotificationMessageTarget(conversation.id)
+    }
 
     fun refresh() {
         if (refreshing) return
@@ -82,12 +85,16 @@ internal fun AndroidConversationScreen(
 
         result = null
         executor.execute {
-            val loaded = repository.loadInitialHistory(conversation.id) { page ->
-                androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                    if (generation == requestGeneration) {
-                        result = ChatHistoryResult.Success(page)
-                        refreshing = false
-                        loadingOlder = page.nextCursor != null
+            val loaded = if (notificationMessageId != null) {
+                repository.loadHistoryUntilMessage(conversation.id, notificationMessageId)
+            } else {
+                repository.loadInitialHistory(conversation.id) { page ->
+                    androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                        if (generation == requestGeneration) {
+                            result = ChatHistoryResult.Success(page)
+                            refreshing = false
+                            loadingOlder = page.nextCursor != null
+                        }
                     }
                 }
             }
@@ -97,7 +104,11 @@ internal fun AndroidConversationScreen(
                     result = loaded
                     refreshing = false
                     loadingOlder = false
-                    olderMessagesError = (loaded as? ChatHistoryResult.Success)?.continuationError
+                    olderMessagesError = (loaded as? ChatHistoryResult.Success)?.let { success ->
+                        success.continuationError ?: if (success.targetMessageFound == false && success.page.nextCursor != null) {
+                            "The linked message is older than recent history. Load older messages to continue searching."
+                        } else null
+                    }
                     committed = true
                 }
             }
@@ -176,6 +187,7 @@ internal fun AndroidConversationScreen(
             else -> conversation.type.label
         },
         timeline = timeline,
+        targetMessageId = notificationMessageId,
         timelineState = timelineState,
         timelineError = (current as? ChatHistoryResult.Failure)?.message,
         statusMessage = readError,

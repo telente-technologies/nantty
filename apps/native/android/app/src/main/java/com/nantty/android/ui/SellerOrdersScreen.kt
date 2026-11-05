@@ -2,6 +2,9 @@ package com.nantty.android.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +42,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.nantty.android.data.SellerOrder
 import com.nantty.android.data.SellerOrdersPage
 import com.nantty.android.data.SellerOrdersRepository
@@ -168,7 +172,22 @@ private fun SellerOrderRow(order: SellerOrder, onClick: () -> Unit) {
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(order.lines.firstOrNull()?.name ?: "Order ${order.orderNumber}", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                val firstLine = order.lines.firstOrNull()
+                Box(
+                    Modifier.size(52.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                ) {
+                    firstLine?.imageUrl?.let { imageUrl ->
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = firstLine.name.takeIf(String::isNotBlank)?.let { "Product image: $it" },
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                        )
+                    }
+                }
+                Text(firstLine?.name ?: "Order ${order.orderNumber}", Modifier.weight(1f).padding(start = 12.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 SellerOrderStatus(order.status)
             }
             Text("Buyer: ${order.buyer.name}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -184,7 +203,8 @@ private fun SellerOrderRow(order: SellerOrder, onClick: () -> Unit) {
 internal fun SellerOrderStatus(status: String) {
     val (label, container) = when (status) {
         "pending" -> "Unpaid" to MaterialTheme.colorScheme.surfaceVariant
-        "paid", "new" -> "To process" to MaterialTheme.colorScheme.primaryContainer
+        "paid" -> "To ship" to MaterialTheme.colorScheme.primaryContainer
+        "new" -> "To process" to MaterialTheme.colorScheme.primaryContainer
         "processing" -> "Preparing" to MaterialTheme.colorScheme.primaryContainer
         "ready" -> "Ready to ship" to MaterialTheme.colorScheme.primaryContainer
         "shipped" -> "Shipped" to MaterialTheme.colorScheme.tertiaryContainer

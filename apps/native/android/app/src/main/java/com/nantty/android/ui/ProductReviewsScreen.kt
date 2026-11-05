@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -27,6 +28,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +50,7 @@ import coil.compose.AsyncImage
 import com.nantty.android.data.ProductRatingSummary
 import com.nantty.android.data.ProductRatingSummaryResult
 import com.nantty.android.data.ProductReview
+import com.nantty.android.data.ProductReviewDeleteResult
 import com.nantty.android.data.ProductReviewPage
 import com.nantty.android.data.ProductReviewsRepository
 import com.nantty.android.data.ProductReviewsResult
@@ -69,6 +72,10 @@ internal fun ProductReviewsScreen(
     var summaryError by androidx.compose.runtime.remember(productId, repository) { mutableStateOf<String?>(null) }
     var loading by androidx.compose.runtime.remember(productId, repository) { mutableStateOf(true) }
     var loadingMore by androidx.compose.runtime.remember(productId, repository) { mutableStateOf(false) }
+    var viewerAccountId by androidx.compose.runtime.remember(productId, repository) { mutableStateOf<String?>(null) }
+    var pendingDelete by androidx.compose.runtime.remember(productId, repository) { mutableStateOf<ProductReview?>(null) }
+    var deletingReview by androidx.compose.runtime.remember(productId, repository) { mutableStateOf(false) }
+    var deleteError by androidx.compose.runtime.remember(productId, repository) { mutableStateOf<String?>(null) }
     var generation by androidx.compose.runtime.remember(productId, repository) { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
 
@@ -76,10 +83,11 @@ internal fun ProductReviewsScreen(
     LaunchedEffect(productId, repository, generation) {
         loading = true
         error = null
-        val (pageResult, summaryResult) = withContext(Dispatchers.IO) {
-            repository.loadPage(productId) to repository.loadRatingSummary(productId)
+        val (pageResult, summaryResult, viewerId) = withContext(Dispatchers.IO) {
+            Triple(repository.loadPage(productId), repository.loadRatingSummary(productId), repository.loadViewerAccountId())
         }
         Snapshot.withMutableSnapshot {
+            viewerAccountId = viewerId
             when (pageResult) {
                 is ProductReviewsResult.Success -> page = pageResult.value
                 is ProductReviewsResult.Failure -> error = pageResult.message
@@ -90,6 +98,39 @@ internal fun ProductReviewsScreen(
             }
             loading = false
         }
+    }
+
+    pendingDelete?.let { review ->
+        AlertDialog(
+            onDismissRequest = { if (!deletingReview) pendingDelete = null },
+            title = { Text("Delete your review?") },
+            text = { Text("Your rating and review will be removed from this product.") },
+            confirmButton = {
+                TextButton(
+                    enabled = !deletingReview,
+                    onClick = {
+                        if (!deletingReview) {
+                            deletingReview = true
+                            deleteError = null
+                            scope.launch {
+                                val result = withContext(Dispatchers.IO) { repository.deleteOwnReview(review.id) }
+                                when (result) {
+                                    ProductReviewDeleteResult.Success -> {
+                                        pendingDelete = null
+                                        generation++
+                                    }
+                                    is ProductReviewDeleteResult.Failure -> deleteError = result.message
+                                }
+                                deletingReview = false
+                            }
+                        }
+                    },
+                ) { Text(if (deletingReview) "Deleting…" else "Delete") }
+            },
+            dismissButton = {
+                TextButton(enabled = !deletingReview, onClick = { pendingDelete = null }) { Text("Cancel") }
+            },
+        )
     }
 
     Column(modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -109,33 +150,47 @@ internal fun ProductReviewsScreen(
             error != null && page == null -> ReviewError(error.orEmpty(), onRetry = { generation++ })
             page != null -> {
                 val currentPage = page ?: return@Column
-                LazyColumn(
-                    Modifier.fillMaxWidth().weight(1f),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                PullToRefreshBox(
+                    isRefreshing = loading && currentPage.reviews.isNotEmpty(),
+                    onRefresh = { generation++ },
+                    modifier = Modifier.fillMaxWidth().weight(1f),
                 ) {
-                    item(key = "rating-summary") {
-                        when {
-                            summary != null -> RatingSummaryCard(summary!!)
-                            summaryError != null -> Text(summaryError.orEmpty(), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
-                    if (currentPage.reviews.isEmpty()) {
-                        item(key = "empty-reviews") {
-                            Column(Modifier.fillMaxWidth().padding(vertical = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("No reviews yet", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                                Text("Buyers can rate this product after it’s delivered.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    LazyColumn(
+                        Modifier.fillMaxSize(),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        deleteError?.let { message -> item(key = "delete-error") {
+                            Text(message, color = MaterialTheme.colorScheme.error)
+                        } }
+                        item(key = "rating-summary") {
+                            when {
+                                summary != null -> RatingSummaryCard(summary!!)
+                                summaryError != null -> Text(summaryError.orEmpty(), color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
-                    } else {
-                        items(currentPage.reviews, key = ProductReview::id) { review -> ProductReviewRow(review) }
-                    }
-                    if (error != null) item(key = "page-error") {
-                        Text(error.orEmpty(), color = MaterialTheme.colorScheme.error)
-                        TextButton(onClick = { generation++ }) { Text("Retry") }
-                    }
-                    if (currentPage.nextCursor != null) item(key = "load-more") {
-                        Button(
+                        if (currentPage.reviews.isEmpty()) {
+                            item(key = "empty-reviews") {
+                                Column(Modifier.fillMaxWidth().padding(vertical = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text("No reviews yet", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                                    Text("Buyers can rate this product after it’s delivered.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        } else {
+                            items(currentPage.reviews, key = ProductReview::id) { review ->
+                                ProductReviewRow(
+                                    review = review,
+                                    isOwn = viewerAccountId != null && review.author.id == viewerAccountId,
+                                    onDelete = { pendingDelete = review; deleteError = null },
+                                )
+                            }
+                        }
+                        if (error != null) item(key = "page-error") {
+                            Text(error.orEmpty(), color = MaterialTheme.colorScheme.error)
+                            TextButton(onClick = { generation++ }) { Text("Retry") }
+                        }
+                        if (currentPage.nextCursor != null) item(key = "load-more") {
+                            Button(
                             onClick = {
                                 if (!loadingMore) {
                                     loadingMore = true
@@ -160,8 +215,9 @@ internal fun ProductReviewsScreen(
                             },
                             enabled = !loadingMore,
                             modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            if (loadingMore) CircularProgressIndicator(Modifier.size(18.dp)) else Text("Load more reviews")
+                            ) {
+                                if (loadingMore) CircularProgressIndicator(Modifier.size(18.dp)) else Text("Load more reviews")
+                            }
                         }
                     }
                 }
@@ -201,7 +257,7 @@ private fun RatingSummaryCard(summary: ProductRatingSummary) {
 }
 
 @Composable
-private fun ProductReviewRow(review: ProductReview) {
+private fun ProductReviewRow(review: ProductReview, isOwn: Boolean, onDelete: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             if (review.author.avatarUrl != null) {
@@ -212,7 +268,7 @@ private fun ProductReviewRow(review: ProductReview) {
                 )
             }
             Column(Modifier.weight(1f).padding(start = 10.dp)) {
-                Text(review.author.name.ifBlank { review.author.username.ifBlank { "Nantty customer" } }, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold)
+                Text(if (isOwn) "Your review" else review.author.name.ifBlank { review.author.username.ifBlank { "Nantty customer" } }, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold)
                 Text("${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}", color = MaterialTheme.colorScheme.primary, modifier = Modifier.semantics { contentDescription = "${review.rating} out of 5 stars" })
             }
             if (review.createdAt.isNotBlank()) Text(review.createdAt.take(10), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -228,6 +284,7 @@ private fun ProductReviewRow(review: ProductReview) {
                 }
             }
         }
+        if (isOwn) TextButton(onClick = onDelete, modifier = Modifier.align(Alignment.Start)) { Text("Delete my review", color = MaterialTheme.colorScheme.error) }
         Spacer(Modifier.fillMaxWidth().height(1.dp))
     }
 }

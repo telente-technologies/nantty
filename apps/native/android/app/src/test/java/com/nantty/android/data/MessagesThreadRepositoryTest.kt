@@ -132,6 +132,52 @@ class MessagesThreadRepositoryTest {
     }
 
     @Test
+    fun notificationHistoryLoadsOlderAuthenticatedPagesUntilTargetIsFound() {
+        val newestId = messageUuid(2)
+        val targetId = messageUuid(1)
+        val paths = mutableListOf<String>()
+        val repository = repository { _, path, _, _ ->
+            paths += path
+            if (paths.size == 1) JSONObject("""{"data":[${messageRow(newestId)}],"nextCursor":"$targetId"}""")
+            else JSONObject("""{"data":[${messageRow(targetId)}],"nextCursor":null}""")
+        }
+
+        val loaded = repository.loadHistoryUntilMessage(conversationId, targetId) as ChatHistoryResult.Success
+
+        assertEquals(listOf(
+            "/api/v1/conversations/$conversationId/messages?limit=30",
+            "/api/v1/conversations/$conversationId/messages?limit=30&cursor=$targetId",
+        ), paths)
+        assertEquals(listOf(newestId, targetId), loaded.page.messages.map(EncryptedChatMessage::id))
+        assertEquals(true, loaded.targetMessageFound)
+    }
+
+    @Test
+    fun notificationHistoryPreservesPartialHistoryAndReportsPageFailure() {
+        var requests = 0
+        val repository = repository { _, _, _, _ ->
+            requests += 1
+            if (requests == 1) JSONObject("""{"data":[${messageRow(messageUuid(2))}],"nextCursor":"${messageUuid(1)}"}""")
+            else throw IllegalStateException("History temporarily unavailable")
+        }
+
+        val loaded = repository.loadHistoryUntilMessage(conversationId, messageUuid(1)) as ChatHistoryResult.Success
+
+        assertEquals(1, loaded.page.messages.size)
+        assertEquals("History temporarily unavailable", loaded.continuationError)
+        assertEquals(false, loaded.targetMessageFound)
+    }
+
+    @Test
+    fun notificationHistoryRejectsUnsafeTargetsBeforeNetwork() {
+        var requests = 0
+        val repository = repository { _, _, _, _ -> requests++; JSONObject("{\"data\":[]}") }
+
+        assertTrue((repository.loadHistoryUntilMessage(conversationId, "../message") as ChatHistoryResult.Failure).message.contains("message link"))
+        assertEquals(0, requests)
+    }
+
+    @Test
     fun initialHistoryKeepsLoadedPagesAndExposesLaterPageFailureForRetry() {
         var requests = 0
         val repository = repository { _, _, _, _ ->

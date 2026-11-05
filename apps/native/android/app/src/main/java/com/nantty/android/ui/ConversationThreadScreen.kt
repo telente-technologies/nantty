@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -32,6 +33,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 
 /** UI-only status supplied by the chat/key-management owner. This component makes no crypto claim. */
 enum class SecureChatStatus { NOT_PROVIDED, CHECKING, AVAILABLE, UNAVAILABLE }
@@ -84,6 +87,7 @@ fun ConversationThreadScreen(
     peerName: String,
     subtitle: String?,
     timeline: List<ConversationTimelineItem>,
+    targetMessageId: String? = null,
     timelineState: ConversationTimelineState,
     timelineError: String?,
     statusMessage: String? = null,
@@ -111,7 +115,20 @@ fun ConversationThreadScreen(
     onLoadOlderMessages: () -> Unit = {},
 ) {
     var safetyCodeDialogOpen by remember { mutableStateOf(false) }
+    var highlightedMessageId by remember(targetMessageId) { mutableStateOf<String?>(null) }
     val safeItems = remember(timeline) { timeline.filterNot { it.state == ConversationMessageState.READY && it.displayText == null } }
+    val messageListState = rememberLazyListState()
+
+    LaunchedEffect(targetMessageId, safeItems) {
+        val targetId = targetMessageId ?: return@LaunchedEffect
+        val targetIndex = safeItems.indexOfFirst { it.id == targetId }
+        if (targetIndex >= 0) {
+            messageListState.animateScrollToItem(targetIndex)
+            highlightedMessageId = targetId
+            delay(3_500)
+            if (highlightedMessageId == targetId) highlightedMessageId = null
+        }
+    }
 
     if (safetyCodeDialogOpen) {
         AlertDialog(
@@ -210,13 +227,14 @@ fun ConversationThreadScreen(
                     } else {
                         LazyColumn(
                             Modifier.weight(1f).widthIn(max = 900.dp).fillMaxWidth().align(Alignment.CenterHorizontally),
+                            state = messageListState,
                             reverseLayout = true,
                             verticalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             // The API returns newest-first; reverseLayout anchors the newest row at
                             // the bottom without reversing the chronology a second time.
                             items(safeItems, key = ConversationTimelineItem::id) { item ->
-                                MessageBubble(item, retryingMessageIds.contains(item.id), onRetryMessage)
+                                MessageBubble(item, retryingMessageIds.contains(item.id), onRetryMessage, item.id == highlightedMessageId)
                             }
                         }
                     }
@@ -302,17 +320,21 @@ private fun SecurityStatusBanner(
 }
 
 @Composable
-private fun MessageBubble(item: ConversationTimelineItem, retrying: Boolean, onRetry: (String) -> Unit) {
+private fun MessageBubble(item: ConversationTimelineItem, retrying: Boolean, onRetry: (String) -> Unit, highlighted: Boolean = false) {
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = if (item.isOutgoing) Arrangement.End else Arrangement.Start,
     ) {
         Surface(
-            modifier = Modifier.widthIn(max = 680.dp),
+            modifier = Modifier.widthIn(max = 680.dp).semantics {
+                if (highlighted) contentDescription = "Target message from notification"
+            },
             shape = RoundedCornerShape(20.dp),
-            color = if (item.isOutgoing) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+            color = if (highlighted) MaterialTheme.colorScheme.tertiaryContainer
+            else if (item.isOutgoing) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                if (highlighted) Text("Opened from notification", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onTertiaryContainer)
                 if (item.author.isNotBlank()) Text(item.author, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (item.state == ConversationMessageState.DECRYPTION_ERROR) {
                     Text(item.errorLabel ?: "This message couldn’t be displayed securely.", style = MaterialTheme.typography.bodyLarge)

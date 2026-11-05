@@ -38,6 +38,11 @@ internal sealed interface ProductRatingSummaryResult {
     data class Failure(val message: String) : ProductRatingSummaryResult
 }
 
+internal sealed interface ProductReviewDeleteResult {
+    data object Success : ProductReviewDeleteResult
+    data class Failure(val message: String) : ProductReviewDeleteResult
+}
+
 internal class ProductReviewsRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val accessTokenProvider: () -> String? = { null },
@@ -72,6 +77,55 @@ internal class ProductReviewsRepository(
             }
         } catch (_: Exception) {
             ProductRatingSummaryResult.Failure("Could not reach Nantty. Check your connection and try again.")
+        }
+    }
+
+    /** Returns the signed-in account id from the authenticated profile contract, or null for guests/errors. */
+    fun loadViewerAccountId(): String? {
+        val token = accessTokenProvider()?.takeIf(String::isNotBlank) ?: return null
+        return try {
+            val url = URL("${validatedReviewsOrigin(baseUrl)}/api/v1/users/me")
+            openConnection(url).apply {
+                requestMethod = "GET"
+                connectTimeout = 10_000
+                readTimeout = 15_000
+                instanceFollowRedirects = false
+                useCaches = false
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("Authorization", "Bearer $token")
+            }.useReviewConnection { connection ->
+                if (connection.responseCode !in 200..299) return@useReviewConnection null
+                val body = connection.inputStream.use(::readReviewResponse)
+                val root = JSONObject(body)
+                val user = root.optJSONObject("data") ?: root
+                user.optString("id").takeIf(::isSafeMartIdentifier)
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    fun deleteOwnReview(reviewId: String): ProductReviewDeleteResult {
+        if (!isSafeMartIdentifier(reviewId)) return ProductReviewDeleteResult.Failure("This review link is invalid. Refresh and try again.")
+        val token = accessTokenProvider()?.takeIf(String::isNotBlank)
+            ?: return ProductReviewDeleteResult.Failure("Sign in to delete your review.")
+        return try {
+            val url = URL("${validatedReviewsOrigin(baseUrl)}/api/v1/reviews/$reviewId")
+            openConnection(url).apply {
+                requestMethod = "DELETE"
+                connectTimeout = 10_000
+                readTimeout = 15_000
+                instanceFollowRedirects = false
+                useCaches = false
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("Authorization", "Bearer $token")
+            }.useReviewConnection { connection ->
+                val status = connection.responseCode
+                if (status in 200..299) ProductReviewDeleteResult.Success
+                else ProductReviewDeleteResult.Failure("Couldn't delete your review (HTTP $status). Please try again.")
+            }
+        } catch (_: Exception) {
+            ProductReviewDeleteResult.Failure("Could not reach Nantty. Check your connection and try again.")
         }
     }
 

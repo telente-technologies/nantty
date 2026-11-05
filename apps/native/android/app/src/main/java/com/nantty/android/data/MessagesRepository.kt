@@ -61,7 +61,11 @@ sealed interface ConversationLookupResult {
 }
 
 sealed interface ChatHistoryResult {
-    data class Success(val page: ChatMessagePage, val continuationError: String? = null) : ChatHistoryResult
+    data class Success(
+        val page: ChatMessagePage,
+        val continuationError: String? = null,
+        val targetMessageFound: Boolean? = null,
+    ) : ChatHistoryResult
     data class Failure(val message: String, val authenticationRequired: Boolean = false) : ChatHistoryResult
 }
 
@@ -81,6 +85,21 @@ class MessagesRepository(
     private val threadTransport: ChatThreadTransport = JdkChatThreadTransport(baseUrl),
 ) {
     private val conversationSearchRepository = ConversationSearchRepository(sessionProvider, threadTransport, refreshSessionProvider)
+    private val notificationMessageTargets = mutableMapOf<String, String>()
+
+    /** Holds a validated notification target until the matching conversation screen consumes it. */
+    @Synchronized
+    fun setNotificationMessageTarget(conversationId: String, messageId: String?) {
+        require(isUuid(conversationId)) { "This conversation link is invalid." }
+        if (messageId == null) notificationMessageTargets.remove(conversationId)
+        else {
+            require(isUuid(messageId)) { "This message link is invalid." }
+            notificationMessageTargets[conversationId] = messageId
+        }
+    }
+
+    @Synchronized
+    fun consumeNotificationMessageTarget(conversationId: String): String? = notificationMessageTargets.remove(conversationId)
 
     fun search(query: String) = conversationSearchRepository.search(query)
 
@@ -218,6 +237,35 @@ class MessagesRepository(
         }
 
         return ChatHistoryResult.Success(checkNotNull(accumulated))
+    }
+
+    /** Loads authenticated older pages, without decrypting, until a notification target is found. */
+    fun loadHistoryUntilMessage(conversationId: String, messageId: String): ChatHistoryResult {
+        if (!isUuid(conversationId)) return ChatHistoryResult.Failure("This conversation link is invalid.")
+        if (!isUuid(messageId)) return ChatHistoryResult.Failure("This message link is invalid.")
+        var cursor: String? = null
+        var accumulated: ChatMessagePage? = null
+        repeat(MAX_INITIAL_HISTORY_PAGES) {
+            when (val loaded = loadMessages(conversationId, cursor)) {
+                is ChatHistoryResult.Failure -> {
+                    val existing = accumulated ?: return loaded
+                    return ChatHistoryResult.Success(existing, continuationError = loaded.message, targetMessageFound = false)
+                }
+                is ChatHistoryResult.Success -> {
+                    val previous = accumulated
+                    val merged = if (previous == null) loaded.page else ChatMessagePage(
+                        messages = (previous.messages + loaded.page.messages).distinctBy(EncryptedChatMessage::id),
+                        nextCursor = loaded.page.nextCursor,
+                    )
+                    accumulated = merged
+                    if (merged.messages.any { it.id == messageId }) {
+                        return ChatHistoryResult.Success(merged, targetMessageFound = true)
+                    }
+                    cursor = loaded.page.nextCursor ?: return ChatHistoryResult.Success(merged, targetMessageFound = false)
+                }
+            }
+        }
+        return ChatHistoryResult.Success(checkNotNull(accumulated), targetMessageFound = false)
     }
 
     fun markConversationRead(conversationId: String): Result<Unit> = runCatching {

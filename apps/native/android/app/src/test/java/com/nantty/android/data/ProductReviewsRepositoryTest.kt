@@ -79,6 +79,55 @@ class ProductReviewsRepositoryTest {
         assertTrue(repository.loadRatingSummary("../private") is ProductRatingSummaryResult.Failure)
         assertFalse(opened)
     }
+
+    @Test
+    fun loadsViewerIdentityOnlyFromAuthenticatedMeContract() {
+        lateinit var connection: ReviewsTestConnection
+        val repository = ProductReviewsRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "viewer-token" },
+            openConnection = { url ->
+                connection = ReviewsTestConnection(url, 200, """{"data":{"id":"account-1"}}""")
+                connection
+            },
+        )
+
+        assertEquals("account-1", repository.loadViewerAccountId())
+        assertEquals("https://api.nantty.com/api/v1/users/me", connection.url.toString())
+        assertEquals("Bearer viewer-token", connection.getRequestProperty("Authorization"))
+    }
+
+    @Test
+    fun deletesReviewUsingAuthenticatedOwnReviewContract() {
+        lateinit var connection: ReviewsTestConnection
+        val repository = ProductReviewsRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "viewer-token" },
+            openConnection = { url ->
+                connection = ReviewsTestConnection(url, 204, "")
+                connection
+            },
+        )
+
+        assertTrue(repository.deleteOwnReview("review-1") is ProductReviewDeleteResult.Success)
+        assertEquals("https://api.nantty.com/api/v1/reviews/review-1", connection.url.toString())
+        assertEquals("DELETE", connection.requestMethod)
+        assertEquals("Bearer viewer-token", connection.getRequestProperty("Authorization"))
+    }
+
+    @Test
+    fun guestOrInvalidReviewCannotTriggerDeleteRequest() {
+        var opened = false
+        val repository = ProductReviewsRepository("https://api.nantty.com", accessTokenProvider = { null }) { url ->
+            opened = true
+            ReviewsTestConnection(url, 204, "")
+        }
+
+        assertTrue(repository.deleteOwnReview("review-1") is ProductReviewDeleteResult.Failure)
+        assertTrue(repository.deleteOwnReview("../other") is ProductReviewDeleteResult.Failure)
+        assertEquals(null, repository.loadViewerAccountId())
+        assertFalse(opened)
+    }
 }
 
 private class ReviewsTestConnection(

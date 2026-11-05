@@ -205,7 +205,10 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
                                         androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                                             openingConversationId = null
                                             when (lookup) {
-                                                is ConversationLookupResult.Success -> onOpenConversation(lookup.conversation)
+                                                is ConversationLookupResult.Success -> {
+                                                    messages.setNotificationMessageTarget(destination.conversationId, destination.messageId)
+                                                    onOpenConversation(lookup.conversation)
+                                                }
                                                 is ConversationLookupResult.Failure -> {
                                                     conversationOpenError = lookup.message
                                                     if (lookup.authenticationRequired) onReauthenticate()

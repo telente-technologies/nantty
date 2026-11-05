@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -35,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -63,6 +65,8 @@ internal fun BuyerOrderDetailScreen(
     modifier: Modifier = Modifier,
     disputeRepository: DisputeRepository? = null,
     privateMediaUploadsRepository: CreatorSampleMediaRepository? = null,
+    onOpenStore: (String) -> Unit = {},
+    onOpenProduct: (String) -> Unit = {},
 ) {
     var result by remember(orderId) { mutableStateOf<BuyerOrderDetailResult?>(null) }
     var retry by remember(orderId) { mutableIntStateOf(0) }
@@ -156,6 +160,8 @@ internal fun BuyerOrderDetailScreen(
                     onConfirmReceipt = { showConfirmDialog = true },
                     onOpenDispute = { showOpenDispute = true },
                     onViewDispute = { disputeId -> activeDisputeId = disputeId },
+                    onOpenStore = { onOpenStore(current.order.storeId) },
+                    onOpenProduct = onOpenProduct,
                     onRefreshAfterConfirmation = {
                         val request = ++generation
                         refreshError = null
@@ -256,6 +262,8 @@ private fun BuyerOrderDetailContent(
     onConfirmReceipt: () -> Unit,
     onOpenDispute: () -> Unit,
     onViewDispute: (String) -> Unit,
+    onOpenStore: () -> Unit,
+    onOpenProduct: (String) -> Unit,
     onRefreshAfterConfirmation: () -> Unit,
 ) {
     LazyColumn(
@@ -273,7 +281,14 @@ private fun BuyerOrderDetailContent(
         item {
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(order.storeName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(order.storeName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        TextButton(onClick = onOpenStore) { Text("Visit store") }
+                    }
                     Text("${order.reference} · ${buyerOrderStatusLabel(order.status)}", color = MaterialTheme.colorScheme.secondary)
                     Text("Payment: ${order.paymentStatus} · ${order.paymentMode}", style = MaterialTheme.typography.bodyMedium)
                 }
@@ -281,7 +296,15 @@ private fun BuyerOrderDetailContent(
         }
         item { Text("Items", Modifier.semantics { heading() }, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
         items(order.items) { item ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                Modifier.fillMaxWidth().then(
+                    item.productId?.let { productId ->
+                        Modifier.clickable(role = Role.Button) { onOpenProduct(productId) }
+                            .semantics { contentDescription = "View ${item.name} product" }
+                    } ?: Modifier,
+                ),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
                 Text("${item.quantity} × ${item.name}", Modifier.weight(1f))
                 item.variant?.let { Text(it, color = MaterialTheme.colorScheme.secondary) }
             }

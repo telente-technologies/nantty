@@ -205,6 +205,8 @@ internal fun MainContent(
             onAuthenticationRequired = onReauthenticate,
             disputeRepository = disputeRepository,
             privateMediaUploadsRepository = privateMediaUploadsRepository,
+            onOpenStore = onOpenStore,
+            onOpenProduct = onOpenProduct,
             modifier = modifier,
         )
         return

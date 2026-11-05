@@ -63,6 +63,8 @@ internal fun BuyerOrdersScreen(
     onAuthenticationRequired: () -> Unit,
     disputeRepository: DisputeRepository? = null,
     privateMediaUploadsRepository: CreatorSampleMediaRepository? = null,
+    onOpenStore: (String) -> Unit = {},
+    onOpenProduct: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var selectedFilter by rememberSaveable(repository) { mutableStateOf(BuyerOrderFilter.ALL) }
@@ -86,6 +88,8 @@ internal fun BuyerOrdersScreen(
             onAuthenticationRequired = onAuthenticationRequired,
             disputeRepository = disputeRepository,
             privateMediaUploadsRepository = privateMediaUploadsRepository,
+            onOpenStore = onOpenStore,
+            onOpenProduct = onOpenProduct,
         )
         return
     }

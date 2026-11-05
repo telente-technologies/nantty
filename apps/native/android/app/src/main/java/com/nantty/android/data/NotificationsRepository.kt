@@ -22,12 +22,13 @@ data class ActivityNotification(
     val actor: NotificationActor?,
     val postId: String?,
     val conversationId: String? = null,
+    val messageId: String? = null,
 )
 
 sealed interface NotificationDestination {
     data class Post(val postId: String) : NotificationDestination
     data class Profile(val userId: String) : NotificationDestination
-    data class Conversation(val conversationId: String) : NotificationDestination
+    data class Conversation(val conversationId: String, val messageId: String? = null) : NotificationDestination
     data object Messages : NotificationDestination
     data object Orders : NotificationDestination
     data object FollowRequests : NotificationDestination
@@ -36,7 +37,9 @@ sealed interface NotificationDestination {
 fun resolveNotificationDestination(notification: ActivityNotification): NotificationDestination? {
     // Match the React Native route precedence: a request notification opens its inbox.
     if (notification.kind == "followRequest") return NotificationDestination.FollowRequests
-    notification.conversationId?.takeIf(MessagesRepository::isUuid)?.let { return NotificationDestination.Conversation(it) }
+    notification.conversationId?.takeIf(MessagesRepository::isUuid)?.let {
+        return NotificationDestination.Conversation(it, notification.messageId?.takeIf(MessagesRepository::isUuid))
+    }
     notification.postId?.takeIf(::isSafeNotificationId)?.let { return NotificationDestination.Post(it) }
     if (notification.category.equals("orders", ignoreCase = true)) return NotificationDestination.Orders
     if (notification.category.equals("messages", ignoreCase = true) ||
@@ -98,7 +101,8 @@ class NotificationsRepository(
                 }
                 val postId = row.optJSONObject("data")?.optString("postId")?.takeIf { it.isNotBlank() && it != "null" }
                 val conversationId = row.optJSONObject("data")?.optString("conversationId")?.takeIf { it.isNotBlank() && it != "null" }
-                add(ActivityNotification(id, row.optString("category"), row.optString("kind").takeIf { it.isNotBlank() && it != "null" }, row.optString("title"), row.optString("body"), row.optString("createdAt"), row.optBoolean("read"), actor, postId, conversationId))
+                val messageId = row.optJSONObject("data")?.optString("messageId")?.takeIf { it.isNotBlank() && it != "null" }
+                add(ActivityNotification(id, row.optString("category"), row.optString("kind").takeIf { it.isNotBlank() && it != "null" }, row.optString("title"), row.optString("body"), row.optString("createdAt"), row.optBoolean("read"), actor, postId, conversationId, messageId))
             }
         }
         return NotificationPage(items, payload.optString("nextCursor").takeIf { it.isNotBlank() && it != "null" })

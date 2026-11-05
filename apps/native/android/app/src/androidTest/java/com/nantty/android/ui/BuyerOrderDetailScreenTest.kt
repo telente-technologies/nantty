@@ -19,7 +19,9 @@ import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.Assert.assertEquals
 import java.util.concurrent.Executor
+import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(AndroidJUnit4::class)
 class BuyerOrderDetailScreenTest {
@@ -50,6 +52,52 @@ class BuyerOrderDetailScreenTest {
         compose.onNodeWithText("What went wrong?").assertIsDisplayed()
         compose.onNodeWithText("Photo evidence (optional)").assertIsDisplayed()
         compose.onNodeWithText("Only you, the seller and Nantty support can see them.", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun buyerCanVisitTheStoreFromOrderDetails() {
+        val session = AccountSession("buyer-token", "refresh", AccountUser("buyer-id", "Ari", "ari", null, null, emptyList()))
+        val orders = BuyerOrdersRepository("https://api.nantty.com", { session }, OrderTransport())
+        val openedStoreId = AtomicReference<String?>(null)
+
+        compose.setContent {
+            MaterialTheme {
+                BuyerOrderDetailScreen(
+                    orderId = "order-123",
+                    repository = orders,
+                    executor = Executor { it.run() },
+                    onBack = {},
+                    onAuthenticationRequired = {},
+                    onOpenStore = openedStoreId::set,
+                )
+            }
+        }
+
+        compose.onNodeWithText("Visit store").performScrollTo().performClick()
+        assertEquals("store-1", openedStoreId.get())
+    }
+
+    @Test
+    fun buyerCanOpenAProductFromOrderDetails() {
+        val session = AccountSession("buyer-token", "refresh", AccountUser("buyer-id", "Ari", "ari", null, null, emptyList()))
+        val orders = BuyerOrdersRepository("https://api.nantty.com", { session }, OrderTransport())
+        val openedProductId = AtomicReference<String?>(null)
+
+        compose.setContent {
+            MaterialTheme {
+                BuyerOrderDetailScreen(
+                    orderId = "order-123",
+                    repository = orders,
+                    executor = Executor { it.run() },
+                    onBack = {},
+                    onAuthenticationRequired = {},
+                    onOpenProduct = openedProductId::set,
+                )
+            }
+        }
+
+        compose.onNodeWithText("Beans").performScrollTo().performClick()
+        assertEquals("product-1", openedProductId.get())
     }
 
     private class OrderTransport : BuyerOrderReceiptTransport {
