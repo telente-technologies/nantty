@@ -60,7 +60,7 @@ export function CoinActivityScreen() {
         ListFooterComponent={
           activity.hasNextPage ? (
             <Button variant="subtle" title="Load more" loading={activity.isFetchingNextPage} onPress={() => activity.fetchNextPage()} style={styles.loadMore} />
-          ) : null
+          ) : undefined
         }
       />
     </Screen>

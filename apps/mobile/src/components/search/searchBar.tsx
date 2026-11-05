@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View, type TextInputInstance } from "react-native";
 
 import { Cancel20Icon, MagnifyingGlass20Icon } from "@/components/icons";
 import { Text } from "@/components/ui/text";
@@ -20,7 +20,7 @@ export interface SearchBarProps {
   readonly autoFocus?: boolean;
 }
 
-export const SearchBar = forwardRef<TextInput, SearchBarProps>(function SearchBar({ value, onChangeText, placeholder = "Search", scopeChip, onSubmitEditing, autoFocus }, ref) {
+export const SearchBar = forwardRef<TextInputInstance, SearchBarProps>(function SearchBar({ value, onChangeText, placeholder = "Search", scopeChip, onSubmitEditing, autoFocus }, ref) {
   const { colors } = useTheme();
   const styles = useStyles();
   return (

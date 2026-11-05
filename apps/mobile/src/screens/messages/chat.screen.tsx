@@ -218,7 +218,7 @@ export function ChatScreen({ navigation, route }: MainScreenProps<"Chat">) {
             }
             ItemSeparatorComponent={() => <View style={styles.bubbleGap} />}
             contentContainerStyle={styles.listContent}
-            ListHeaderComponent={usersTyping.length > 0 && !isGroupLike ? <TypingRow /> : null}
+            ListHeaderComponent={usersTyping.length > 0 && !isGroupLike ? <TypingRow /> : undefined}
             renderItem={({ item }) => (
               <ChatBubble
                 message={display?.isBusiness && conversation.data ? asSeenFromStoreChat(item, conversation.data, myUserId) : item}

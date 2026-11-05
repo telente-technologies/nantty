@@ -87,9 +87,9 @@ export function ThreadedCommentList({ listHeader, contentContainerStyle, comment
           </Text>
         )
       }
-      ListFooterComponent={query.isFetchingNextPage ? <BrandLoader size="sm" style={styles.status} /> : null}
+      ListFooterComponent={query.isFetchingNextPage ? <BrandLoader size="sm" style={styles.status} /> : undefined}
       refreshing={query.isRefetching && !query.isFetchingNextPage}
-      onRefresh={() => query.refetch()}
+      onRefresh={() => { void query.refetch(); }}
       renderItem={({ item }) => (
         <View style={{ paddingHorizontal: commentHorizontalPadding }}>
           {isQuoteThreadItem(item) ? (

@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useRef } from "react";
-import { FlatList, Pressable, StyleSheet, View, useWindowDimensions, type ViewToken } from "react-native";
+import { FlatList, Pressable, StyleSheet, View, useWindowDimensions, type FlatListProps } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { adEventsService } from "@/services/ads/adEvents.service";
@@ -27,7 +27,8 @@ export function SponsoredCarousel({ sponsored, placement, itemId }: SponsoredCar
   const { width } = useWindowDimensions();
   const cardWidth = Math.round(width * CARD_WIDTH_RATIO);
   const cards = sponsored.cards ?? [];
-  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+  type SponsoredViewToken = Parameters<NonNullable<FlatListProps<AdCard>["onViewableItemsChanged"]>>[0]["viewableItems"][number];
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: SponsoredViewToken[] }) => {
     for (const token of viewableItems) {
       if (token.isViewable && typeof token.index === "number") adEventsService.recordSponsoredCardViewOncePerSession(sponsored, placement, itemId, token.index);
     }

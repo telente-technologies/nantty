@@ -1,7 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
-import type { ViewToken } from "react-native";
-
 import type { AdEvent, AdPlacement, ID, SponsoredPlacement } from "@/types";
 
 import { useAuthStore } from "@/store/auth.store";
@@ -105,8 +103,13 @@ export const sponsoredImpressionViewabilityConfig = {
   minimumViewTime: SPONSORED_IMPRESSION_MINIMUM_VISIBLE_MS,
 } as const;
 
+interface SponsoredViewToken {
+  readonly isViewable: boolean;
+  readonly item: unknown;
+}
+
 export function recordImpressionsForViewableSponsoredItems(
-  viewableItems: readonly ViewToken[],
+  viewableItems: readonly SponsoredViewToken[],
   placement: AdPlacement,
 ) {
   for (const token of viewableItems) {

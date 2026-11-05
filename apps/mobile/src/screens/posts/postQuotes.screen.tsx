@@ -55,14 +55,14 @@ export function PostQuotesScreen({ navigation, route }: MainScreenProps<"PostQuo
           )}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
-          refreshControl={<RefreshControl refreshing={quotes.isRefetching && !quotes.isFetchingNextPage} onRefresh={() => quotes.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
+          refreshControl={<RefreshControl refreshing={quotes.isRefetching && !quotes.isFetchingNextPage} onRefresh={() => { void quotes.refetch(); }} tintColor={colors.primary} colors={[colors.primary]} />}
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text size={16} weight={600} lineHeight={20} align="center">No quotes to show</Text>
               <Text size={14} lineHeight={20} align="center" color={colors.textMuted}>Quotes from private accounts or ones you can't see stay hidden.</Text>
             </View>
           }
-          ListFooterComponent={quotes.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
+          ListFooterComponent={quotes.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : undefined}
         />
       )}
     </Screen>

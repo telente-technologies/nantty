@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useRef, useState } from "react";
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View, type ScrollViewInstance } from "react-native";
 
 import { DisputeMessageBubble } from "@/components/escrow/disputeMessageBubble";
 import { DisputeStatusHistory } from "@/components/escrow/disputeStatusHistory";
@@ -28,7 +28,7 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
   const queryClient = useQueryClient();
   const disputeQuery = useDisputeQuery(disputeId);
   const [draftMessage, setDraftMessage] = useState("");
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const isComposing = useRef(false);
   const keepLatestMessageVisible = () => {
     if (isComposing.current) scrollRef.current?.scrollToEnd({ animated: false });
@@ -69,7 +69,7 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
           onLayout={keepLatestMessageVisible}
           keyboardDismissMode="interactive"
           contentContainerStyle={styles.content}
-          refreshControl={<RefreshControl refreshing={disputeQuery.isRefetching} onRefresh={() => disputeQuery.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
+          refreshControl={<RefreshControl refreshing={disputeQuery.isRefetching} onRefresh={() => { void disputeQuery.refetch(); }} tintColor={colors.primary} colors={[colors.primary]} />}
         >
           <View style={styles.card}>
             <View style={styles.row}>

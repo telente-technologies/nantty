@@ -56,7 +56,7 @@ export function CreatorDashboardScreen({ navigation }: MainScreenProps<"CreatorD
       ) : (
         <ScrollView
           contentContainerStyle={styles.content}
-          refreshControl={<RefreshControl refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
+          refreshControl={<RefreshControl refreshing={dashboard.isRefetching} onRefresh={() => { void dashboard.refetch(); }} tintColor={colors.primary} colors={[colors.primary]} />}
         >
           <PayoutSetupCard context="creator" />
           <StudioCoinsSection onOpenActivity={() => navigation.navigate("CoinActivity")} />

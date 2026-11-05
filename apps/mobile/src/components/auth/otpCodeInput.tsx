@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View, type TextInputInstance } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -17,7 +17,7 @@ export interface OtpCodeInputProps {
 export function OtpCodeInput({ value, onChangeValue, onCodeComplete, invalid = false }: OtpCodeInputProps) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const hiddenInputRef = useRef<TextInput>(null);
+  const hiddenInputRef = useRef<TextInputInstance>(null);
   const [focused, setFocused] = useState(false);
 
   const updateCodeFromTypedText = (text: string) => {

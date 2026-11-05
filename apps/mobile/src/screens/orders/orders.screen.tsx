@@ -89,7 +89,7 @@ export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
         contentContainerStyle={styles.list}
         onEndReached={() => orders.hasNextPage && !orders.isFetchingNextPage && orders.fetchNextPage()}
         onEndReachedThreshold={0.5}
-        refreshControl={<RefreshControl refreshing={orders.isRefetching} onRefresh={() => orders.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
+        refreshControl={<RefreshControl refreshing={orders.isRefetching} onRefresh={() => { void orders.refetch(); }} tintColor={colors.primary} colors={[colors.primary]} />}
         renderSectionHeader={({ section }) => (
           <Text size={13} weight={600} lineHeight={16.9} color={colors.textMuted} style={styles.sectionTitle} accessibilityRole="header">
             {section.title} · {section.data.length}
@@ -113,7 +113,7 @@ export function OrdersScreen({ navigation }: MainScreenProps<"Orders">) {
             <Text align="center" color={colors.textSubtle} style={styles.state}>No orders here yet.</Text>
           )
         }
-        ListFooterComponent={orders.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
+        ListFooterComponent={orders.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : undefined}
       />
     </Screen>
   );

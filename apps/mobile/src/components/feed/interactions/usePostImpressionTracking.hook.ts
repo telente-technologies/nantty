@@ -1,6 +1,6 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useEffect, useRef } from "react";
-import { AppState, Dimensions, type View } from "react-native";
+import { AppState, Dimensions, type ViewInstance } from "react-native";
 
 import { feedInteractionsService, type FeedInteractionSurface, type FeedInteractionTarget } from "@/services/feed/feedInteractions.service";
 import { useAuthStore } from "@/store/auth.store";
@@ -30,7 +30,7 @@ AppState.addEventListener("change", (state) => {
 });
 
 export function usePostImpressionTracking(target: FeedInteractionTarget | null, surface: FeedInteractionSurface, position?: number) {
-  const ref = useRef<View>(null);
+  const ref = useRef<ViewInstance>(null);
   const isFocused = useIsFocused();
   const isSignedIn = useAuthStore((state) => state.status === "signedIn");
   const latest = useRef({ target, surface, position });

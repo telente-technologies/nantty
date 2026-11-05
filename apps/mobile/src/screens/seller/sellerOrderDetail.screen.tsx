@@ -63,7 +63,7 @@ export function SellerOrderDetailScreen({ navigation, route }: MainScreenProps<"
       <Header title={`Order ${order.reference}`} />
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={escrowQuery.isRefetching} onRefresh={() => Promise.all([orderQuery.refetch(), escrowQuery.refetch()])} tintColor={colors.primary} colors={[colors.primary]} />}
+        refreshControl={<RefreshControl refreshing={escrowQuery.isRefetching} onRefresh={() => { void Promise.all([orderQuery.refetch(), escrowQuery.refetch()]); }} tintColor={colors.primary} colors={[colors.primary]} />}
       >
         <EscrowSummaryCard escrow={escrow} viewerRole="seller" />
         {fundsHeld ? (

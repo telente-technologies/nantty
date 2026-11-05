@@ -1,5 +1,5 @@
 import { forwardRef, useState, type ReactNode } from "react";
-import { Pressable, StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from "react-native";
+import { Pressable, StyleSheet, TextInput, View, type StyleProp, type TextInputInstance, type TextInputProps, type ViewStyle } from "react-native";
 
 import { EyeClosed20Icon, Eye20Icon } from "@/components/icons";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -17,7 +17,7 @@ export interface TextFieldProps extends Omit<TextInputProps, "style"> {
   readonly boxStyle?: StyleProp<ViewStyle>;
 }
 
-export const TextField = forwardRef<TextInput, TextFieldProps>(function TextField(
+export const TextField = forwardRef<TextInputInstance, TextFieldProps>(function TextField(
   { label, password, right, left, invalid, style, boxStyle, onFocus, onBlur, ...props },
   ref,
 ) {

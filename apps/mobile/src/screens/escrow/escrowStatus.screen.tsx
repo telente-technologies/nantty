@@ -54,7 +54,7 @@ export function EscrowStatusScreen({ navigation, route }: MainScreenProps<"Escro
       <Header title="Payment protection" />
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={escrowQuery.isRefetching} onRefresh={() => escrowQuery.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
+        refreshControl={<RefreshControl refreshing={escrowQuery.isRefetching} onRefresh={() => { void escrowQuery.refetch(); }} tintColor={colors.primary} colors={[colors.primary]} />}
       >
         <EscrowSummaryCard escrow={escrow} viewerRole={viewerRole} />
         <View style={styles.card}>

@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
 import { useRef, useState } from "react";
-import { ScrollView, StyleSheet, View, type NativeScrollEvent } from "react-native";
+import { ScrollView, StyleSheet, View, type NativeScrollEvent, type ScrollViewInstance } from "react-native";
 
 import { BrandLoader } from "@/components/ui/brandLoader";
 import { makeThemedStyles } from "@/theme";
@@ -34,7 +34,7 @@ const isNearBottom = ({ layoutMeasurement, contentOffset, contentSize }: NativeS
 export function MartTab() {
   const styles = useStyles();
   const navigation = useNavigation();
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const scrollY = useRef(0);
   const categoriesY = useRef(0);
   const heroBottom = useRef(0);

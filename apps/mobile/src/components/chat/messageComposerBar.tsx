@@ -1,5 +1,5 @@
 import { type ReactNode, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, TextInput, View, type TextInputInstance } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
 
@@ -66,7 +66,7 @@ export function MessageComposerBar({
     [],
   );
   const [mentions, setMentions] = useState<readonly MentionEntity[]>([]);
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const mentionComposer = useMentionComposer({
     surface: mentionConversation?.surface ?? "group",
     conversationId: mentionConversation?.id,

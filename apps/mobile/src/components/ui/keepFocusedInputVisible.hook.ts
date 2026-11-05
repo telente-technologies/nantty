@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import { Keyboard, TextInput, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ScrollView } from "react-native";
+import { Keyboard, TextInput, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ViewInstance } from "react-native";
 
 export const FOCUSED_INPUT_BOTTOM_GAP = 24;
 
@@ -24,7 +24,7 @@ export function scrollOffsetRevealingInput(geometry: RevealGeometry): number | n
   return Math.abs(clamped - scrollOffset) < 1 ? null : clamped;
 }
 
-type HostInstance = NonNullable<ReturnType<ScrollView["getNativeScrollRef"]>>;
+type HostInstance = ViewInstance;
 export interface ScrollableHandle {
   getNativeScrollRef(): unknown;
   scrollTo?(options: { y: number; animated: boolean }): void;

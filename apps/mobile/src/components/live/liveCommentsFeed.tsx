@@ -1,6 +1,6 @@
 import { MentionText } from "@/components/mentions/mentionText";
 import { useRef } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View, type ScrollViewInstance } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { VerificationBadge } from "@/components/profile/verificationBadge";
@@ -75,7 +75,7 @@ export interface LiveCommentsFeedProps {
 }
 
 export function LiveCommentsFeed({ comments, isShownOverVideo }: LiveCommentsFeedProps) {
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<ScrollViewInstance>(null);
   const foreground = useLiveForeground(isShownOverVideo);
   const { colors } = useTheme();
   const reduceMotion = useReducedMotionPreference();

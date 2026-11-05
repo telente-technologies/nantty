@@ -47,7 +47,7 @@ export function SellerApplicationStatusScreen({ navigation }: MainScreenProps<"S
       ) : (
         <ScrollView
           contentContainerStyle={styles.content}
-          refreshControl={<RefreshControl refreshing={application.isRefetching} onRefresh={() => application.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
+          refreshControl={<RefreshControl refreshing={application.isRefetching} onRefresh={() => { void application.refetch(); }} tintColor={colors.primary} colors={[colors.primary]} />}
         >
           <View style={styles.hero}>
             <StatusPill label={STATUS_COPY[details.status].label} tone={STATUS_COPY[details.status].tone} />

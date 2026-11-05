@@ -8,7 +8,9 @@ const minorUnitExponentCache = new Map<string, number>();
 function getMinorUnitExponent(currency: string): number {
   const cached = minorUnitExponentCache.get(currency);
   if (cached !== undefined) return cached;
-  const exponent = new Intl.NumberFormat(detectDeviceLocaleTag(), { style: "currency", currency }).resolvedOptions().maximumFractionDigits;
+  // Intl's TypeScript declaration permits this option to be absent; ISO currencies
+  // without an explicit minor-unit rule use the standard two-digit default.
+  const exponent = new Intl.NumberFormat(detectDeviceLocaleTag(), { style: "currency", currency }).resolvedOptions().maximumFractionDigits ?? 2;
   minorUnitExponentCache.set(currency, exponent);
   return exponent;
 }

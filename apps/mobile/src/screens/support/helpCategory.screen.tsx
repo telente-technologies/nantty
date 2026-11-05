@@ -23,7 +23,7 @@ export function HelpCategoryScreen({ navigation, route }: MainScreenProps<"HelpC
         data={category.data?.topics ?? []}
         keyExtractor={(topic) => topic.id}
         contentContainerStyle={styles.list}
-        ListHeaderComponent={category.data ? <Text size={13} lineHeight={18} color={colors.textMuted} style={styles.description}>{category.data.category.description}</Text> : null}
+        ListHeaderComponent={category.data ? <Text size={13} lineHeight={18} color={colors.textMuted} style={styles.description}>{category.data.category.description}</Text> : undefined}
         renderItem={({ item }) => (
           <Pressable accessibilityRole="button" accessibilityLabel={item.title} onPress={() => navigation.navigate("HelpArticle", { topicSlug: item.slug })} style={styles.row}>
             <Text size={14} weight={500} lineHeight={16.8}>{item.title}</Text>

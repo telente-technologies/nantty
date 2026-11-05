@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { AccessibilityInfo, Pressable, StyleSheet, View, type TextInput } from "react-native";
+import { AccessibilityInfo, Pressable, StyleSheet, View, type TextInputInstance } from "react-native";
 
 import { Cancel20Icon, CaretLeft16Icon, CaretRight16Icon, Plus16Icon } from "@/components/icons";
 import { TextField } from "@/components/ui/input";
@@ -30,7 +30,7 @@ export function placeholderForOption(optionName: string): string {
 export function OptionValuesInput({ optionName, values, pendingText, onChange, onRemoveValue, autoFocus }: OptionValuesInputProps) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const latest = useRef({ values, pendingText });
   latest.current = { values, pendingText };
   const [error, setError] = useState<string | null>(null);

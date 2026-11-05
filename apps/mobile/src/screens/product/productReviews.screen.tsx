@@ -48,8 +48,8 @@ export function ProductReviewsScreen({ route }: MainScreenProps<"ProductReviews"
             if (reviews.hasNextPage && !reviews.isFetchingNextPage) void reviews.fetchNextPage();
           }}
           ListEmptyComponent={<EmptyState compact icon={<StarOutline16Icon size={24} color={colors.textMuted} />} title="No reviews yet" body="Buyers can rate this product after it's delivered." />}
-          ListHeaderComponent={summary.data && summary.data.count > 0 ? <View style={styles.summary}><RatingSummary summary={summary.data} /></View> : null}
-          ListFooterComponent={reviews.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} accessibilityLabel="Loading more reviews" /> : null}
+          ListHeaderComponent={summary.data && summary.data.count > 0 ? <View style={styles.summary}><RatingSummary summary={summary.data} /></View> : undefined}
+          ListFooterComponent={reviews.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} accessibilityLabel="Loading more reviews" /> : undefined}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           renderItem={({ item }) => {
             const isOwn = !!viewerId && item.author.id === viewerId;

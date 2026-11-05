@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { createElement, useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
-import { Text as NativeText, type NativeSyntheticEvent, type TextInput, type TextInputSelectionChangeEventData } from "react-native";
+import { Text as NativeText, type TextInputInstance, type TextInputSelectionChangeEvent } from "react-native";
 
 import { useTheme } from "@/theme";
 
@@ -27,7 +27,7 @@ export interface UseMentionComposerOptions {
   readonly text: string;
   readonly mentions: readonly MentionEntity[];
   readonly onChange: (text: string, mentions: readonly MentionEntity[]) => void;
-  readonly inputRef: RefObject<TextInput | null>;
+  readonly inputRef: RefObject<TextInputInstance | null>;
   readonly signInReason: string;
   readonly isEnabled?: boolean;
 }
@@ -104,7 +104,7 @@ export function useMentionComposer({ surface, conversationId, text, mentions, on
   const inputProps = {
     ...(highlightedChildren ? { children: highlightedChildren } : { value: text }),
     onChangeText: (nextText: string) => onChange(nextText, keepEntitiesMatchingEditedText(text, nextText, mentions)),
-    onSelectionChange: (event: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => {
+    onSelectionChange: (event: TextInputSelectionChangeEvent) => {
       setSelectionEnd(event.nativeEvent.selection.end);
       setForcedCaret(null);
     },

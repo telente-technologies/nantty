@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View, type ScrollViewInstance } from "react-native";
 
 import { formatFriendlyDateTime } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
@@ -39,7 +39,7 @@ export function SupportTicketDetailScreen({ route }: MainScreenProps<"SupportTic
     }).catch(() => undefined);
   }, [unreadCount, ticketId, queryClient]);
   const [draft, setDraft] = useState("");
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const isComposing = useRef(false);
   const keepLatestMessageVisible = () => {
     if (isComposing.current) scrollRef.current?.scrollToEnd({ animated: false });

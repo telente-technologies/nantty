@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
-import { AccessibilityInfo, Platform, type View } from "react-native";
+import { AccessibilityInfo, Platform, type ViewInstance } from "react-native";
 
 const FOCUS_DELAY_MS = 350;
 
 export function useAccessibilityFocusOnOpen(visible: boolean) {
-  const ref = useRef<View>(null);
+  const ref = useRef<ViewInstance>(null);
   useEffect(() => {
     if (!visible || Platform.OS === "web") return;
     const timer = setTimeout(() => {

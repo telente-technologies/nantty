@@ -101,7 +101,7 @@ export function SoundScreen({ navigation, route }: MainScreenProps<"Sound">) {
               <EmptyState compact title="No clips use this sound yet" body="Be the first. Tap Use sound to make a clip with it." />
             )
           }
-          ListFooterComponent={clipsUsingSound.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
+          ListFooterComponent={clipsUsingSound.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : undefined}
           renderItem={({ item }) => (
             <SoundClipThumbnail clip={item} width={tileWidth} onPress={() => navigation.navigate("Tabs", { screen: "Clips", params: { startId: item.id } })} />
           )}

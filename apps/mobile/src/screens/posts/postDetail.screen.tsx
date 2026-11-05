@@ -1,7 +1,7 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { FlatList, Platform, RefreshControl, Share, StyleSheet, View, type TextInput } from "react-native";
+import { FlatList, Platform, RefreshControl, Share, StyleSheet, View, type TextInputInstance } from "react-native";
 
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { CommentThreadContext, TOP_LEVEL_PARENT_KEY, useCommentThreadController } from "@/components/clips/commentThreadController.hook";
@@ -47,7 +47,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
   const { postId, highlight = false } = route.params;
   const [isPostHighlighted, setIsPostHighlighted] = useState(highlight);
   const { togglePostLike, followPostAuthor } = usePostInteractions();
-  const composerRef = useRef<TextInput>(null);
+  const composerRef = useRef<TextInputInstance>(null);
   const isGuest = useAuthStore((s) => s.status !== "signedIn");
   const post = useQuery({ queryKey: ["post", postId], queryFn: () => postsService.fetchPostById(postId) });
   const isScreenFocused = useIsFocused();
@@ -186,7 +186,7 @@ export function PostDetailScreen({ navigation, route }: MainScreenProps<"PostDet
               )
             }
             ListEmptyComponent={
-              !post.data ? null : threadQuery.isLoading ? (
+              !post.data ? undefined : threadQuery.isLoading ? (
                 <ThreadSkeleton />
               ) : threadQuery.isError && !conversation.isRestartingFromTop ? (
                 <ThreadErrorState onRetry={() => threadQuery.refetch()} />

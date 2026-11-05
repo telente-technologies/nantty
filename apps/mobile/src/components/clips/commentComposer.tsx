@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, TextInput, View, type TextInputInstance } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 
 import { Cancel20Icon, Gif24Icon, PaperPlaneTilt24Icon } from "@/components/icons";
@@ -34,7 +34,7 @@ export interface CommentComposerProps {
   readonly focusRequest?: number;
 }
 
-export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(function CommentComposer(
+export const CommentComposer = forwardRef<TextInputInstance, CommentComposerProps>(function CommentComposer(
   { myAvatarUrl, onSubmit, placeholder = "Add comment...", replyTarget, onCancelReply, avoidKeyboard = true, focusRequest = 0 },
   ref,
 ) {
@@ -47,7 +47,7 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
   const selectedProfile = commentProfiles.find((profile) => profile.id === selectedProfileId);
   const [text, setText] = useState("");
   const [mentions, setMentions] = useState<readonly MentionEntity[]>([]);
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const mentionComposer = useMentionComposer({
     surface: "comment",
     text,
@@ -60,7 +60,7 @@ export const CommentComposer = forwardRef<TextInput, CommentComposerProps>(funct
     },
   });
   const quote = useQuotedPostPreview(text);
-  useImperativeHandle(ref, () => inputRef.current as TextInput);
+  useImperativeHandle(ref, () => inputRef.current as TextInputInstance);
 
   const lastFocusRequest = useRef(focusRequest);
   useEffect(() => {

@@ -80,7 +80,7 @@ export function HiddenCommentsScreen() {
           <Text size={13} lineHeight={18} color={colors.textMuted} style={styles.intro}>
             Only you and each commenter can see these. Replies under a hidden comment are hidden too.
           </Text>
-        ) : null}
+        ) : undefined}
         renderItem={({ item }) => (
           <HiddenCommentRow comment={item} isUnhiding={unhide.isPending && unhide.variables?.id === item.id} onUnhide={() => !unhide.isPending && unhide.mutate(item)} />
         )}

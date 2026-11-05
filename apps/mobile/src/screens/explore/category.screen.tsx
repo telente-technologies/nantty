@@ -77,7 +77,7 @@ export function CategoryScreen({ navigation, route }: MainScreenProps<"Category"
               onRetry={() => void products.fetchNextPage()}
               retrying={products.isFetchingNextPage}
             />
-          ) : null
+          ) : undefined
         }
       />
     </Screen>

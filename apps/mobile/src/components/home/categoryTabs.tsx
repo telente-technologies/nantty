@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Pressable, ScrollView, StyleSheet } from "react-native";
+import { Pressable, ScrollView, StyleSheet, type ScrollViewInstance } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
@@ -18,7 +18,7 @@ export function CategoryTabs({ categories, selectedCategoryId, onSelectCategory,
   const { colors } = useTheme();
   const background = requestedBackground ?? colors.surface;
   const tabs = [{ id: null, name: "All" }, ...categories.filter((c) => c.name !== "All")];
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const rowWidth = useRef(0);
   const tabFrames = useRef(new Map<string, { x: number; width: number }>());
   const selectedKey = selectedCategoryId ?? "all";

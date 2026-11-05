@@ -36,15 +36,15 @@ export function LoginScreen({ navigation }: AuthScreenProps<"Login">) {
     <AuthStep actionTitle="Log in" actionDisabled={!identifier.trim() || !password} loading={loading} onAction={submitLoginForm}>
       <View style={styles.fields}>
         <TextField
-          label="Email"
-          placeholder="Enter your email"
+          label="Email or username"
+          placeholder="Enter your email or username"
           value={identifier}
           onChangeText={setIdentifier}
           autoCapitalize="none"
           autoComplete="username"
           autoFocus
           textContentType="username"
-          keyboardType="email-address"
+          keyboardType="default"
           returnKeyType="next"
         />
         <TextField

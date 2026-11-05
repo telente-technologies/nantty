@@ -63,7 +63,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={order.isRefetching} onRefresh={() => Promise.all([order.refetch(), escrow.refetch()])} tintColor={colors.primary} colors={[colors.primary]} />}
+        refreshControl={<RefreshControl refreshing={order.isRefetching} onRefresh={() => { void Promise.all([order.refetch(), escrow.refetch()]); }} tintColor={colors.primary} colors={[colors.primary]} />}
       >
         <Pressable
           accessibilityRole="button"

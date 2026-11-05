@@ -132,7 +132,7 @@ export function FeedTab() {
             )}
           </>
         }
-        ListFooterComponent={feed.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
+        ListFooterComponent={feed.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : undefined}
       />
       <PostProductsFlow products={openPostProducts?.products ?? null} attribution={openPostProducts?.attribution ?? null} onClose={() => setOpenPostProducts(null)} />
       <ReshareSheet post={reshareTarget} onClose={() => setReshareTarget(null)} />

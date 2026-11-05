@@ -97,7 +97,7 @@ export function SavedScreen({ navigation, route }: MainScreenProps<"Saved">) {
               </Text>
             </View>
           }
-          ListFooterComponent={savedItems.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : null}
+          ListFooterComponent={savedItems.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : undefined}
         />
       )}
     </Screen>

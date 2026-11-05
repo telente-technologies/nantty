@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, View, type TextInputInstance } from "react-native";
 
 import { useMentionComposer } from "@/components/mentions/mentionComposer.hook";
 import { MentionCountLabel, MentionSuggestionList } from "@/components/mentions/mentionSuggestionList";
@@ -25,7 +25,7 @@ export function useCaptionField({ text, mentions, onChange, placeholder, minHeig
   const { colors } = useTheme();
   const styles = useStyles();
   const [focused, setFocused] = useState(false);
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const mentionComposer = useMentionComposer({ surface: "post", text, mentions, inputRef, signInReason: "post", onChange });
   const overLimit = text.length > maxLength;
   const input = (

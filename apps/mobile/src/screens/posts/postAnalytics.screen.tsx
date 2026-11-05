@@ -62,7 +62,7 @@ export function PostAnalyticsScreen({ route }: MainScreenProps<"PostAnalytics">)
       <Header title={analyticsTitleFor(data)} />
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={analytics.isRefetching} onRefresh={() => analytics.refetch()} tintColor={colors.primary} colors={[colors.primary]} />}
+        refreshControl={<RefreshControl refreshing={analytics.isRefetching} onRefresh={() => { void analytics.refetch(); }} tintColor={colors.primary} colors={[colors.primary]} />}
       >
         <View style={styles.ownerNote}>
           <Analytics24Icon size={18} color={colors.primary} />

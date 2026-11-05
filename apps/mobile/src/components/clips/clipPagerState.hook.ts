@@ -1,6 +1,6 @@
 import { useIsFocused } from "@react-navigation/native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, type FlatList, type ViewToken, type ViewabilityConfigCallbackPairs } from "react-native";
+import { AppState, type FlatList, type FlatListProps } from "react-native";
 import { useSafeAreaFrame, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { prefetchUpcomingClipPosters } from "@/screens/clips/clipsPrefetch.util";
@@ -14,6 +14,8 @@ import { bottomSafeAreaNotCoveredByTabBar } from "./clipPageLayout.util";
 export const NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD = 2;
 const ACTIVE_CLIP_MINIMUM_VISIBLE_PERCENT = 60;
 const PAGE_RESIZE_SETTLE_MS = 600;
+type ClipViewabilityConfigCallbackPairs = NonNullable<FlatListProps<Clip>["viewabilityConfigCallbackPairs"]>;
+type ClipViewToken = Parameters<NonNullable<ClipViewabilityConfigCallbackPairs[number]["onViewableItemsChanged"]>>[0]["viewableItems"][number];
 
 export function useClipPagerState(clips: readonly Clip[]) {
   const insets = useSafeAreaInsets();
@@ -42,13 +44,13 @@ export function useClipPagerState(clips: readonly Clip[]) {
     prefetchUpcomingClipPosters(clips, activeClipIndex, NUMBER_OF_UPCOMING_CLIPS_TO_PRELOAD + 2);
   }, [clips, activeClipIndex]);
 
-  const updateActiveClipFromViewableItems = useCallback(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+  const updateActiveClipFromViewableItems = useCallback(({ viewableItems }: { viewableItems: ClipViewToken[] }) => {
     if (Date.now() < ignoreViewabilityUntilRef.current) return;
     const mostVisible = viewableItems.find((token) => token.isViewable && token.index !== null);
     if (mostVisible?.index !== undefined && mostVisible.index !== null) setActiveClipIndex(mostVisible.index);
   }, []);
 
-  const viewabilityConfigCallbackPairs = useRef<ViewabilityConfigCallbackPairs>([
+  const viewabilityConfigCallbackPairs = useRef<ClipViewabilityConfigCallbackPairs>([
     { viewabilityConfig: { itemVisiblePercentThreshold: ACTIVE_CLIP_MINIMUM_VISIBLE_PERCENT }, onViewableItemsChanged: updateActiveClipFromViewableItems },
     { viewabilityConfig: sponsoredImpressionViewabilityConfig, onViewableItemsChanged: ({ viewableItems }) => recordImpressionsForViewableSponsoredItems(viewableItems, "clips") },
   ]).current;

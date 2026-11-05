@@ -118,7 +118,7 @@ export function StoryAnalyticsScreen({ navigation, route }: MainScreenProps<"Sto
             </Text>
           )
         }
-        ListFooterComponent={viewers.isFetchingNextPage ? <BrandLoader size="sm" style={styles.viewersLoading} /> : null}
+        ListFooterComponent={viewers.isFetchingNextPage ? <BrandLoader size="sm" style={styles.viewersLoading} /> : undefined}
         onEndReached={() => { if (viewers.hasNextPage && !viewers.isFetchingNextPage) viewers.fetchNextPage().catch(() => undefined); }}
         onEndReachedThreshold={0.5}
       />

@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View, type TextInputInstance } from "react-native";
 
 import { Cancel20Icon, LockSimple24Icon } from "@/components/icons";
 import { useMentionComposer } from "@/components/mentions/mentionComposer.hook";
@@ -31,7 +31,7 @@ export interface ThreadComposerProps {
   readonly focusRequest?: number;
 }
 
-export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(function ThreadComposer(
+export const ThreadComposer = forwardRef<TextInputInstance, ThreadComposerProps>(function ThreadComposer(
   { postAuthorUsername, replyTarget, onCancelReply, onSubmit, replyRestriction, focusRequest = 0 },
   ref,
 ) {
@@ -41,7 +41,7 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
   const viewerAvatarUrl = useAuthStore((state) => state.user?.avatarUrl ?? null);
   const [text, setText] = useState("");
   const [mentions, setMentions] = useState<readonly MentionEntity[]>([]);
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const mentionComposer = useMentionComposer({
     surface: "comment",
     text,
@@ -54,7 +54,7 @@ export const ThreadComposer = forwardRef<TextInput, ThreadComposerProps>(functio
     },
   });
   const quote = useQuotedPostPreview(text);
-  useImperativeHandle(ref, () => inputRef.current as TextInput);
+  useImperativeHandle(ref, () => inputRef.current as TextInputInstance);
 
   const lastFocusRequest = useRef(focusRequest);
   useEffect(() => {

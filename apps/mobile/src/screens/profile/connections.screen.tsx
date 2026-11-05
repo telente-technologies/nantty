@@ -142,7 +142,7 @@ export function ConnectionsScreen({ navigation, route }: MainScreenProps<"Connec
           />
         )}
         ListEmptyComponent={
-          isLoading || error ? null : (
+          isLoading || error ? undefined : (
             <EmptyState
               compact
               icon={<Users24Icon color={colors.textMuted} />}
