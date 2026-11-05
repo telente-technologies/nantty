@@ -527,46 +527,54 @@ func init() {
 	creatorapplicationDescCreatedAt := creatorapplicationMixinFields0[1].Descriptor()
 	// creatorapplication.DefaultCreatedAt holds the default value on creation for the created_at field.
 	creatorapplication.DefaultCreatedAt = creatorapplicationDescCreatedAt.Default.(func() time.Time)
+	// creatorapplicationDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	creatorapplicationDescIdempotencyKey := creatorapplicationFields[1].Descriptor()
+	// creatorapplication.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	creatorapplication.IdempotencyKeyValidator = creatorapplicationDescIdempotencyKey.Validators[0].(func(string) error)
+	// creatorapplicationDescRequestHash is the schema descriptor for request_hash field.
+	creatorapplicationDescRequestHash := creatorapplicationFields[2].Descriptor()
+	// creatorapplication.RequestHashValidator is a validator for the "request_hash" field. It is called by the builders before save.
+	creatorapplication.RequestHashValidator = creatorapplicationDescRequestHash.Validators[0].(func(string) error)
 	// creatorapplicationDescDecisionNote is the schema descriptor for decision_note field.
-	creatorapplicationDescDecisionNote := creatorapplicationFields[4].Descriptor()
+	creatorapplicationDescDecisionNote := creatorapplicationFields[6].Descriptor()
 	// creatorapplication.DefaultDecisionNote holds the default value on creation for the decision_note field.
 	creatorapplication.DefaultDecisionNote = creatorapplicationDescDecisionNote.Default.(string)
 	// creatorapplication.DecisionNoteValidator is a validator for the "decision_note" field. It is called by the builders before save.
 	creatorapplication.DecisionNoteValidator = creatorapplicationDescDecisionNote.Validators[0].(func(string) error)
 	// creatorapplicationDescContentCategories is the schema descriptor for content_categories field.
-	creatorapplicationDescContentCategories := creatorapplicationFields[6].Descriptor()
+	creatorapplicationDescContentCategories := creatorapplicationFields[8].Descriptor()
 	// creatorapplication.DefaultContentCategories holds the default value on creation for the content_categories field.
 	creatorapplication.DefaultContentCategories = creatorapplicationDescContentCategories.Default.([]string)
 	// creatorapplicationDescSampleContentUrls is the schema descriptor for sample_content_urls field.
-	creatorapplicationDescSampleContentUrls := creatorapplicationFields[8].Descriptor()
+	creatorapplicationDescSampleContentUrls := creatorapplicationFields[10].Descriptor()
 	// creatorapplication.DefaultSampleContentUrls holds the default value on creation for the sample_content_urls field.
 	creatorapplication.DefaultSampleContentUrls = creatorapplicationDescSampleContentUrls.Default.([]string)
 	// creatorapplicationDescPayoutAccountID is the schema descriptor for payout_account_id field.
-	creatorapplicationDescPayoutAccountID := creatorapplicationFields[9].Descriptor()
+	creatorapplicationDescPayoutAccountID := creatorapplicationFields[11].Descriptor()
 	// creatorapplication.DefaultPayoutAccountID holds the default value on creation for the payout_account_id field.
 	creatorapplication.DefaultPayoutAccountID = creatorapplicationDescPayoutAccountID.Default.(string)
 	// creatorapplication.PayoutAccountIDValidator is a validator for the "payout_account_id" field. It is called by the builders before save.
 	creatorapplication.PayoutAccountIDValidator = creatorapplicationDescPayoutAccountID.Validators[0].(func(string) error)
 	// creatorapplicationDescAcceptedTermsVersion is the schema descriptor for accepted_terms_version field.
-	creatorapplicationDescAcceptedTermsVersion := creatorapplicationFields[10].Descriptor()
+	creatorapplicationDescAcceptedTermsVersion := creatorapplicationFields[12].Descriptor()
 	// creatorapplication.DefaultAcceptedTermsVersion holds the default value on creation for the accepted_terms_version field.
 	creatorapplication.DefaultAcceptedTermsVersion = creatorapplicationDescAcceptedTermsVersion.Default.(string)
 	// creatorapplication.AcceptedTermsVersionValidator is a validator for the "accepted_terms_version" field. It is called by the builders before save.
 	creatorapplication.AcceptedTermsVersionValidator = creatorapplicationDescAcceptedTermsVersion.Validators[0].(func(string) error)
 	// creatorapplicationDescReviewedBy is the schema descriptor for reviewed_by field.
-	creatorapplicationDescReviewedBy := creatorapplicationFields[11].Descriptor()
+	creatorapplicationDescReviewedBy := creatorapplicationFields[13].Descriptor()
 	// creatorapplication.DefaultReviewedBy holds the default value on creation for the reviewed_by field.
 	creatorapplication.DefaultReviewedBy = creatorapplicationDescReviewedBy.Default.(string)
 	// creatorapplication.ReviewedByValidator is a validator for the "reviewed_by" field. It is called by the builders before save.
 	creatorapplication.ReviewedByValidator = creatorapplicationDescReviewedBy.Validators[0].(func(string) error)
 	// creatorapplicationDescReviewedByName is the schema descriptor for reviewed_by_name field.
-	creatorapplicationDescReviewedByName := creatorapplicationFields[12].Descriptor()
+	creatorapplicationDescReviewedByName := creatorapplicationFields[14].Descriptor()
 	// creatorapplication.DefaultReviewedByName holds the default value on creation for the reviewed_by_name field.
 	creatorapplication.DefaultReviewedByName = creatorapplicationDescReviewedByName.Default.(string)
 	// creatorapplication.ReviewedByNameValidator is a validator for the "reviewed_by_name" field. It is called by the builders before save.
 	creatorapplication.ReviewedByNameValidator = creatorapplicationDescReviewedByName.Validators[0].(func(string) error)
 	// creatorapplicationDescDecisionReason is the schema descriptor for decision_reason field.
-	creatorapplicationDescDecisionReason := creatorapplicationFields[14].Descriptor()
+	creatorapplicationDescDecisionReason := creatorapplicationFields[16].Descriptor()
 	// creatorapplication.DefaultDecisionReason holds the default value on creation for the decision_reason field.
 	creatorapplication.DefaultDecisionReason = creatorapplicationDescDecisionReason.Default.(string)
 	// creatorapplication.DecisionReasonValidator is a validator for the "decision_reason" field. It is called by the builders before save.

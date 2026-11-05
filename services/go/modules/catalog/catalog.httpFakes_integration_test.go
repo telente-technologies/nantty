@@ -85,8 +85,34 @@ func (purchases *fakePurchases) FindReceivedPurchaseFromStore(context.Context, u
 
 type fakeStoreFollows struct {
 	followers map[uuid.UUID]int
+	following map[uuid.UUID]map[uuid.UUID]bool
+	err       error
 }
 
-func (follows *fakeStoreFollows) StoreFollowStats(_ context.Context, storeId uuid.UUID, viewer *uuid.UUID) (int, bool) {
-	return follows.followers[storeId], viewer != nil && follows.followers[storeId] > 0
+func (follows *fakeStoreFollows) StoreFollowStats(_ context.Context, storeId uuid.UUID, viewer *uuid.UUID) (int, bool, error) {
+	if follows.err != nil {
+		return 0, false, follows.err
+	}
+	return follows.followers[storeId], viewer != nil && follows.followers[storeId] > 0, nil
+}
+
+func (follows *fakeStoreFollows) SetStoreFollow(_ context.Context, storeId, followerId uuid.UUID, follow bool) (int, bool, error) {
+	if follows.err != nil {
+		return 0, false, follows.err
+	}
+	if follows.following == nil {
+		follows.following = map[uuid.UUID]map[uuid.UUID]bool{}
+	}
+	if follows.following[storeId] == nil {
+		follows.following[storeId] = map[uuid.UUID]bool{}
+	}
+	wasFollowing := follows.following[storeId][followerId]
+	if follow && !wasFollowing {
+		follows.following[storeId][followerId] = true
+		follows.followers[storeId]++
+	} else if !follow && wasFollowing {
+		delete(follows.following[storeId], followerId)
+		follows.followers[storeId]--
+	}
+	return follows.followers[storeId], follows.following[storeId][followerId], nil
 }

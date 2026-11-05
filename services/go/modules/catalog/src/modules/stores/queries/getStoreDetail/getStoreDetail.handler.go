@@ -42,7 +42,10 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.StoreDet
 	}
 	followers, isFollowing := 0, false
 	if handler.Container.StoreFollows != nil {
-		followers, isFollowing = handler.Container.StoreFollows.StoreFollowStats(ctx, row.ID, query.Viewer)
+		followers, isFollowing, err = handler.Container.StoreFollows.StoreFollowStats(ctx, row.ID, query.Viewer)
+		if err != nil {
+			return types.StoreDetailView{}, err
+		}
 	}
 	return types.StoreDetailView{
 		StoreSummaryView: summaries[row.ID], OwnerUserId: row.OwnerAccountID.String(), BannerUrl: row.BannerURL, Handle: row.Slug, Bio: row.Description,

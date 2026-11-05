@@ -19,6 +19,11 @@ type StoreSummaryView struct {
 	SuccessRate         *float64 `json:"successRate"`
 }
 
+type ProductStoreSummaryView struct {
+	StoreSummaryView
+	IsFollowing bool `json:"isFollowing"`
+}
+
 type StoreDetailView struct {
 	StoreSummaryView
 	OwnerUserId       string    `json:"ownerUserId"`
@@ -34,6 +39,12 @@ type StoreDetailView struct {
 	Currency          string    `json:"currency"`
 	BusinessProfileId string    `json:"businessProfileId"`
 	Posts             []any     `json:"posts"`
+}
+
+type StoreFollowView struct {
+	StoreId     string `json:"storeId"`
+	IsFollowing bool   `json:"isFollowing"`
+	Followers   int    `json:"followers"`
 }
 
 type ProductSummaryView struct {
@@ -60,18 +71,18 @@ type BrandTagView struct {
 
 type ProductDetailView struct {
 	ProductSummaryView
-	Images       []string             `json:"images"`
-	Title        string               `json:"title"`
-	Rating       float64              `json:"rating"`
-	Promo        *string              `json:"promo"`
-	Sizes        []string             `json:"sizes"`
-	Colors       []string             `json:"colors"`
-	ShippingInfo string               `json:"shippingInfo"`
-	Description  string               `json:"description"`
-	Store        StoreSummaryView     `json:"store"`
-	Related      []ProductSummaryView `json:"related"`
-	Brand        *BrandTagView        `json:"brand"`
-	Variants     []BuyerVariantView   `json:"variants"`
+	Images       []string                `json:"images"`
+	Title        string                  `json:"title"`
+	Rating       float64                 `json:"rating"`
+	Promo        *string                 `json:"promo"`
+	Sizes        []string                `json:"sizes"`
+	Colors       []string                `json:"colors"`
+	ShippingInfo string                  `json:"shippingInfo"`
+	Description  string                  `json:"description"`
+	Store        ProductStoreSummaryView `json:"store"`
+	Related      []ProductSummaryView    `json:"related"`
+	Brand        *BrandTagView           `json:"brand"`
+	Variants     []BuyerVariantView      `json:"variants"`
 }
 
 type BuyerVariantView struct {

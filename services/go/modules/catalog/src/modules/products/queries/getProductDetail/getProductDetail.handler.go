@@ -47,8 +47,15 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.ProductD
 	if err != nil {
 		return types.ProductDetailView{}, err
 	}
+	storeView := types.ProductStoreSummaryView{StoreSummaryView: storeSummary[store.ID]}
+	if handler.Container.StoreFollows != nil {
+		_, storeView.IsFollowing, err = handler.Container.StoreFollows.StoreFollowStats(ctx, store.ID, query.Viewer)
+		if err != nil {
+			return types.ProductDetailView{}, err
+		}
+	}
 	detail := types.ProductDetailView{
-		ProductSummaryView: summaries[0], Title: row.Name, Description: row.Description, Store: storeSummary[store.ID],
+		ProductSummaryView: summaries[0], Title: row.Name, Description: row.Description, Store: storeView,
 		Images: []string{}, Sizes: []string{}, Colors: []string{}, Related: []types.ProductSummaryView{}, Variants: []types.BuyerVariantView{},
 		ShippingInfo: "Shipping is calculated per seller at checkout.",
 	}

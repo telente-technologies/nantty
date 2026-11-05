@@ -41,6 +41,34 @@ func (_c *CreatorApplicationCreate) SetAccountID(v uuid.UUID) *CreatorApplicatio
 	return _c
 }
 
+// SetIdempotencyKey sets the "idempotency_key" field.
+func (_c *CreatorApplicationCreate) SetIdempotencyKey(v string) *CreatorApplicationCreate {
+	_c.mutation.SetIdempotencyKey(v)
+	return _c
+}
+
+// SetNillableIdempotencyKey sets the "idempotency_key" field if the given value is not nil.
+func (_c *CreatorApplicationCreate) SetNillableIdempotencyKey(v *string) *CreatorApplicationCreate {
+	if v != nil {
+		_c.SetIdempotencyKey(*v)
+	}
+	return _c
+}
+
+// SetRequestHash sets the "request_hash" field.
+func (_c *CreatorApplicationCreate) SetRequestHash(v string) *CreatorApplicationCreate {
+	_c.mutation.SetRequestHash(v)
+	return _c
+}
+
+// SetNillableRequestHash sets the "request_hash" field if the given value is not nil.
+func (_c *CreatorApplicationCreate) SetNillableRequestHash(v *string) *CreatorApplicationCreate {
+	if v != nil {
+		_c.SetRequestHash(*v)
+	}
+	return _c
+}
+
 // SetProfileID sets the "profile_id" field.
 func (_c *CreatorApplicationCreate) SetProfileID(v uuid.UUID) *CreatorApplicationCreate {
 	_c.mutation.SetProfileID(v)
@@ -306,6 +334,16 @@ func (_c *CreatorApplicationCreate) check() error {
 	if _, ok := _c.mutation.AccountID(); !ok {
 		return &ValidationError{Name: "account_id", err: errors.New(`ent: missing required field "CreatorApplication.account_id"`)}
 	}
+	if v, ok := _c.mutation.IdempotencyKey(); ok {
+		if err := creatorapplication.IdempotencyKeyValidator(v); err != nil {
+			return &ValidationError{Name: "idempotency_key", err: fmt.Errorf(`ent: validator failed for field "CreatorApplication.idempotency_key": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.RequestHash(); ok {
+		if err := creatorapplication.RequestHashValidator(v); err != nil {
+			return &ValidationError{Name: "request_hash", err: fmt.Errorf(`ent: validator failed for field "CreatorApplication.request_hash": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.ProfileID(); !ok {
 		return &ValidationError{Name: "profile_id", err: errors.New(`ent: missing required field "CreatorApplication.profile_id"`)}
 	}
@@ -421,6 +459,14 @@ func (_c *CreatorApplicationCreate) createSpec() (*CreatorApplication, *sqlgraph
 	if value, ok := _c.mutation.AccountID(); ok {
 		_spec.SetField(creatorapplication.FieldAccountID, field.TypeUUID, value)
 		_node.AccountID = value
+	}
+	if value, ok := _c.mutation.IdempotencyKey(); ok {
+		_spec.SetField(creatorapplication.FieldIdempotencyKey, field.TypeString, value)
+		_node.IdempotencyKey = &value
+	}
+	if value, ok := _c.mutation.RequestHash(); ok {
+		_spec.SetField(creatorapplication.FieldRequestHash, field.TypeString, value)
+		_node.RequestHash = &value
 	}
 	if value, ok := _c.mutation.ProfileID(); ok {
 		_spec.SetField(creatorapplication.FieldProfileID, field.TypeUUID, value)

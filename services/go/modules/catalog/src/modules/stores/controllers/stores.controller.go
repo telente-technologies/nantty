@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"nantty/modules/catalog/src/container"
+	catalogerrors "nantty/modules/catalog/src/errors"
 	"nantty/modules/catalog/src/middlewares"
 	createstore "nantty/modules/catalog/src/modules/stores/commands/createStore"
 	setstorestatus "nantty/modules/catalog/src/modules/stores/commands/setStoreStatus"
@@ -17,6 +18,7 @@ import (
 	listmystores "nantty/modules/catalog/src/modules/stores/queries/listMyStores"
 	"nantty/modules/catalog/src/modules/stores/validators"
 	"nantty/modules/catalog/src/services"
+	"nantty/modules/catalog/src/types"
 	"nantty/modules/catalog/src/utils"
 	"nantty/platform/httpserver"
 	"nantty/platform/jwtauth"
@@ -66,6 +68,26 @@ func (controller StoresController) GetStore(writer http.ResponseWriter, request 
 	}
 	view, err := (getstoredetail.Handler{Container: controller.Container}).Execute(request.Context(), query)
 	controller.respond(writer, request, http.StatusOK, view, err)
+}
+
+func (controller StoresController) SetStoreFollow(follow bool) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		storeId, err := utils.PathIdentifier(request, "storeId")
+		if err == nil {
+			if controller.Container.StoreFollowWrites == nil {
+				err = catalogerrors.StoreFollowUnavailable
+			} else {
+				var followers int
+				var isFollowing bool
+				followers, isFollowing, err = controller.Container.StoreFollowWrites.SetStoreFollow(request.Context(), storeId, middlewares.AccountIdFrom(request.Context()), follow)
+				if err == nil {
+					httpserver.WriteJsonResponse(writer, http.StatusOK, types.StoreFollowView{StoreId: storeId.String(), IsFollowing: isFollowing, Followers: followers})
+					return
+				}
+			}
+		}
+		controller.responder().Error(writer, request, err)
+	}
 }
 
 func (controller StoresController) GetSellerAccess(writer http.ResponseWriter, request *http.Request) {

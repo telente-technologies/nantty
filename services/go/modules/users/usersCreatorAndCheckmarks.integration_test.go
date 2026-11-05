@@ -44,7 +44,7 @@ func TestCreatorProgramDecisionsFollowTheAdminThresholds(t *testing.T) {
 			}
 			application := harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{
 				"contentCategories": []string{"tech"}, "socialLinks": []any{}, "sampleContentUrls": []string{}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1",
-			}, http.StatusCreated)
+			}, http.StatusCreated, "Idempotency-Key", "creator-case-key-0001")
 			if application["status"] != testCase.wantStatus {
 				t.Fatalf("unexpected application %v", application)
 			}
@@ -52,7 +52,7 @@ func TestCreatorProgramDecisionsFollowTheAdminThresholds(t *testing.T) {
 				if application["reapplyAvailableAt"] == nil || application["rejectionReason"] == nil {
 					t.Fatalf("a rejected application explains why and when to try again: %v", application)
 				}
-				harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{"tech"}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusConflict)
+				harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{"tech"}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusConflict, "Idempotency-Key", "creator-case-key-0002")
 			}
 			me := harness.expect("GET", "/api/v1/users/me", token, nil, http.StatusOK)
 			if (me["creatorStatus"] == "approved") != (testCase.wantStatus == "approved") {
@@ -66,9 +66,9 @@ func TestCreatorApplicationNeedsInputAndAdminReviewQueueDecides(t *testing.T) {
 	harness := startUsersModuleAgainstFreshSchema(t)
 	_, token := harness.newAccount("review.me", "Review Me")
 	harness.putSignals(harness.profileIdOf(token), map[string]any{"realFollowers": 650, "daysSinceLastViolation": 400})
-	harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusUnprocessableEntity)
-	harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{"tech"}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusCreated)
-	harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{"tech"}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusConflict)
+	harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusUnprocessableEntity, "Idempotency-Key", "creator-review-key-0001")
+	harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{"tech"}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusCreated, "Idempotency-Key", "creator-review-key-0002")
+	harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{"tech"}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusConflict, "Idempotency-Key", "creator-review-key-0003")
 
 	reviewer, reviewerStepUp := harness.staff("admin", "applications:creators")
 	denied, _ := harness.staff("admin", "users:read")
@@ -96,7 +96,7 @@ func TestEligibleCreatorCanApplyWithoutPayoutAccountAndIsHeldForManualReview(t *
 	harness.putSignals(harness.profileIdOf(token), map[string]any{"realFollowers": 1500, "originalPostsLast60Days": 12, "daysSinceLastViolation": 400, "fraudScore": 10})
 	application := harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{
 		"contentCategories": []string{"education"}, "acceptedCreatorTermsVersion": "1",
-	}, http.StatusCreated)
+	}, http.StatusCreated, "Idempotency-Key", "creator-payout-key-0001")
 	if application["status"] != "PENDING" || application["decision"] != "manual_review" {
 		t.Fatalf("an eligible applicant without a payout account must be manually reviewed: %v", application)
 	}

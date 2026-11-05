@@ -53,15 +53,16 @@ import (
 )
 
 type Collaborators struct {
-	Verifier     *jwtauth.AccessTokenVerifier
-	Publisher    platformevents.DomainEventPublisher
-	Staff        container.StaffVerifiers
-	Audit        interfaces.AuditTrail
-	Identity     interfaces.IdentityDirectory
-	PrivateMedia interfaces.PrivateMediaSigner
-	StoreFollows interfaces.StoreFollowStats
-	MartAds      interfaces.MartAdDecider
-	Linked       interfaces.LinkedProfileRegistry
+	Verifier          *jwtauth.AccessTokenVerifier
+	Publisher         platformevents.DomainEventPublisher
+	Staff             container.StaffVerifiers
+	Audit             interfaces.AuditTrail
+	Identity          interfaces.IdentityDirectory
+	PrivateMedia      interfaces.PrivateMediaSigner
+	StoreFollows      interfaces.StoreFollowStats
+	StoreFollowWrites interfaces.StoreFollowMutations
+	MartAds           interfaces.MartAdDecider
+	Linked            interfaces.LinkedProfileRegistry
 }
 
 type Module struct {
@@ -93,13 +94,14 @@ func NewCatalogModule(ctx context.Context, dependencies servicemodule.Dependenci
 	if err != nil {
 		return nil, err
 	}
+	storeFollows := integrations.NewSocialStoreFollows(settings.SocialInternalUrl, settings.SocialInternalToken)
 	return StartCatalogModuleWithSettings(ctx, settings, Collaborators{
 		Verifier: verifier, Publisher: publisher, Staff: staff,
 		Audit:        integrations.NewHttpAuditTrail(settings.AdminInternalUrl, settings.AdminInternalToken),
 		Identity:     integrations.NewHttpIdentityDirectory(settings.AdminInternalUrl, settings.UsersInternalToken),
 		PrivateMedia: integrations.NewHttpPrivateMediaSigner(settings.MediaInternalUrl, settings.MediaInternalToken),
-		StoreFollows: integrations.NewSocialStoreFollows(settings.SocialInternalUrl, settings.SocialInternalToken),
-		MartAds:      integrations.NewHttpMartAds(settings.AdsInternalUrl, settings.AdsInternalSecret),
+		StoreFollows: storeFollows, StoreFollowWrites: storeFollows,
+		MartAds: integrations.NewHttpMartAds(settings.AdsInternalUrl, settings.AdsInternalSecret),
 	}, dependencies)
 }
 
@@ -122,7 +124,7 @@ func StartCatalogModuleWithSettings(ctx context.Context, settings configs.Catalo
 		Client: ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database))), Database: database,
 		Users: usersdirectory.Reader{Database: database, Schema: "users"}, Rates: &viewerregion.RateReader{Database: database, Schema: "currency"}, Settings: settings, Logger: logger, Now: time.Now,
 		AccessVerifier: collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger),
-		Staff: collaborators.Staff, Audit: collaborators.Audit, Identity: collaborators.Identity, PrivateMedia: collaborators.PrivateMedia, StoreFollows: collaborators.StoreFollows, MartAds: collaborators.MartAds,
+		Staff: collaborators.Staff, Audit: collaborators.Audit, Identity: collaborators.Identity, PrivateMedia: collaborators.PrivateMedia, StoreFollows: collaborators.StoreFollows, StoreFollowWrites: collaborators.StoreFollowWrites, MartAds: collaborators.MartAds,
 		LinkedProfiles: collaborators.Linked,
 	}
 	if module.Container.LinkedProfiles == nil {

@@ -10275,6 +10275,8 @@ type CreatorApplicationMutation struct {
 	id                        *uuid.UUID
 	created_at                *time.Time
 	account_id                *uuid.UUID
+	idempotency_key           *string
+	request_hash              *string
 	profile_id                *uuid.UUID
 	status                    *creatorapplication.Status
 	decision                  *creatorapplication.Decision
@@ -10472,6 +10474,104 @@ func (m *CreatorApplicationMutation) OldAccountID(ctx context.Context) (v uuid.U
 // ResetAccountID resets all changes to the "account_id" field.
 func (m *CreatorApplicationMutation) ResetAccountID() {
 	m.account_id = nil
+}
+
+// SetIdempotencyKey sets the "idempotency_key" field.
+func (m *CreatorApplicationMutation) SetIdempotencyKey(s string) {
+	m.idempotency_key = &s
+}
+
+// IdempotencyKey returns the value of the "idempotency_key" field in the mutation.
+func (m *CreatorApplicationMutation) IdempotencyKey() (r string, exists bool) {
+	v := m.idempotency_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIdempotencyKey returns the old "idempotency_key" field's value of the CreatorApplication entity.
+// If the CreatorApplication object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorApplicationMutation) OldIdempotencyKey(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIdempotencyKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIdempotencyKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIdempotencyKey: %w", err)
+	}
+	return oldValue.IdempotencyKey, nil
+}
+
+// ClearIdempotencyKey clears the value of the "idempotency_key" field.
+func (m *CreatorApplicationMutation) ClearIdempotencyKey() {
+	m.idempotency_key = nil
+	m.clearedFields[creatorapplication.FieldIdempotencyKey] = struct{}{}
+}
+
+// IdempotencyKeyCleared returns if the "idempotency_key" field was cleared in this mutation.
+func (m *CreatorApplicationMutation) IdempotencyKeyCleared() bool {
+	_, ok := m.clearedFields[creatorapplication.FieldIdempotencyKey]
+	return ok
+}
+
+// ResetIdempotencyKey resets all changes to the "idempotency_key" field.
+func (m *CreatorApplicationMutation) ResetIdempotencyKey() {
+	m.idempotency_key = nil
+	delete(m.clearedFields, creatorapplication.FieldIdempotencyKey)
+}
+
+// SetRequestHash sets the "request_hash" field.
+func (m *CreatorApplicationMutation) SetRequestHash(s string) {
+	m.request_hash = &s
+}
+
+// RequestHash returns the value of the "request_hash" field in the mutation.
+func (m *CreatorApplicationMutation) RequestHash() (r string, exists bool) {
+	v := m.request_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestHash returns the old "request_hash" field's value of the CreatorApplication entity.
+// If the CreatorApplication object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreatorApplicationMutation) OldRequestHash(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRequestHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRequestHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestHash: %w", err)
+	}
+	return oldValue.RequestHash, nil
+}
+
+// ClearRequestHash clears the value of the "request_hash" field.
+func (m *CreatorApplicationMutation) ClearRequestHash() {
+	m.request_hash = nil
+	m.clearedFields[creatorapplication.FieldRequestHash] = struct{}{}
+}
+
+// RequestHashCleared returns if the "request_hash" field was cleared in this mutation.
+func (m *CreatorApplicationMutation) RequestHashCleared() bool {
+	_, ok := m.clearedFields[creatorapplication.FieldRequestHash]
+	return ok
+}
+
+// ResetRequestHash resets all changes to the "request_hash" field.
+func (m *CreatorApplicationMutation) ResetRequestHash() {
+	m.request_hash = nil
+	delete(m.clearedFields, creatorapplication.FieldRequestHash)
 }
 
 // SetProfileID sets the "profile_id" field.
@@ -11130,12 +11230,18 @@ func (m *CreatorApplicationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CreatorApplicationMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 19)
 	if m.created_at != nil {
 		fields = append(fields, creatorapplication.FieldCreatedAt)
 	}
 	if m.account_id != nil {
 		fields = append(fields, creatorapplication.FieldAccountID)
+	}
+	if m.idempotency_key != nil {
+		fields = append(fields, creatorapplication.FieldIdempotencyKey)
+	}
+	if m.request_hash != nil {
+		fields = append(fields, creatorapplication.FieldRequestHash)
 	}
 	if m.profile_id != nil {
 		fields = append(fields, creatorapplication.FieldProfileID)
@@ -11194,6 +11300,10 @@ func (m *CreatorApplicationMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case creatorapplication.FieldAccountID:
 		return m.AccountID()
+	case creatorapplication.FieldIdempotencyKey:
+		return m.IdempotencyKey()
+	case creatorapplication.FieldRequestHash:
+		return m.RequestHash()
 	case creatorapplication.FieldProfileID:
 		return m.ProfileID()
 	case creatorapplication.FieldStatus:
@@ -11237,6 +11347,10 @@ func (m *CreatorApplicationMutation) OldField(ctx context.Context, name string) 
 		return m.OldCreatedAt(ctx)
 	case creatorapplication.FieldAccountID:
 		return m.OldAccountID(ctx)
+	case creatorapplication.FieldIdempotencyKey:
+		return m.OldIdempotencyKey(ctx)
+	case creatorapplication.FieldRequestHash:
+		return m.OldRequestHash(ctx)
 	case creatorapplication.FieldProfileID:
 		return m.OldProfileID(ctx)
 	case creatorapplication.FieldStatus:
@@ -11289,6 +11403,20 @@ func (m *CreatorApplicationMutation) SetField(name string, value ent.Value) erro
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAccountID(v)
+		return nil
+	case creatorapplication.FieldIdempotencyKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIdempotencyKey(v)
+		return nil
+	case creatorapplication.FieldRequestHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestHash(v)
 		return nil
 	case creatorapplication.FieldProfileID:
 		v, ok := value.(uuid.UUID)
@@ -11425,6 +11553,12 @@ func (m *CreatorApplicationMutation) AddField(name string, value ent.Value) erro
 // mutation.
 func (m *CreatorApplicationMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(creatorapplication.FieldIdempotencyKey) {
+		fields = append(fields, creatorapplication.FieldIdempotencyKey)
+	}
+	if m.FieldCleared(creatorapplication.FieldRequestHash) {
+		fields = append(fields, creatorapplication.FieldRequestHash)
+	}
 	if m.FieldCleared(creatorapplication.FieldRequirements) {
 		fields = append(fields, creatorapplication.FieldRequirements)
 	}
@@ -11451,6 +11585,12 @@ func (m *CreatorApplicationMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *CreatorApplicationMutation) ClearField(name string) error {
 	switch name {
+	case creatorapplication.FieldIdempotencyKey:
+		m.ClearIdempotencyKey()
+		return nil
+	case creatorapplication.FieldRequestHash:
+		m.ClearRequestHash()
+		return nil
 	case creatorapplication.FieldRequirements:
 		m.ClearRequirements()
 		return nil
@@ -11476,6 +11616,12 @@ func (m *CreatorApplicationMutation) ResetField(name string) error {
 		return nil
 	case creatorapplication.FieldAccountID:
 		m.ResetAccountID()
+		return nil
+	case creatorapplication.FieldIdempotencyKey:
+		m.ResetIdempotencyKey()
+		return nil
+	case creatorapplication.FieldRequestHash:
+		m.ResetRequestHash()
 		return nil
 	case creatorapplication.FieldProfileID:
 		m.ResetProfileID()

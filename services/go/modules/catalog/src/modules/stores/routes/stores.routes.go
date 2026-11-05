@@ -12,6 +12,8 @@ func MountStoresRoutes(mux *http.ServeMux, deployed *container.Container) {
 	controller := controllers.StoresController{Container: deployed}
 	mux.Handle("POST /api/v1/stores", middlewares.Idempotent(deployed)(controller.CreateStore))
 	mux.Handle("GET /api/v1/stores/{storeId}", middlewares.OptionallyAuthenticated(deployed)(controller.GetStore))
+	mux.Handle("POST /api/v1/stores/{storeId}/follow", middlewares.OptionallyIdempotent(deployed)(controller.SetStoreFollow(true)))
+	mux.Handle("DELETE /api/v1/stores/{storeId}/follow", middlewares.OptionallyIdempotent(deployed)(controller.SetStoreFollow(false)))
 	mux.Handle("GET /api/v1/seller/access", middlewares.Authenticated(deployed)(controller.GetSellerAccess))
 	mux.Handle("GET /api/v1/seller/stores/mine", middlewares.Authenticated(deployed)(controller.ListMyStores))
 	mux.Handle("POST /api/v1/admin/stores/{storeId}/status", middlewares.StaffWithAnyPermission(deployed, []string{"users:suspend", "moderation:reports"}, true)(controller.SetStoreStatus))

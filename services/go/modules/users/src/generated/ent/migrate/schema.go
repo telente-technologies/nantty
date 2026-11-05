@@ -382,6 +382,8 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "account_id", Type: field.TypeUUID},
+		{Name: "idempotency_key", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "request_hash", Type: field.TypeString, Nullable: true, Size: 64},
 		{Name: "profile_id", Type: field.TypeUUID},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "approved", "rejected"}, Default: "pending"},
 		{Name: "decision", Type: field.TypeEnum, Enums: []string{"auto_approve", "manual_review", "not_eligible"}},
@@ -405,6 +407,11 @@ var (
 		PrimaryKey: []*schema.Column{CreatorApplicationsColumns[0]},
 		Indexes: []*schema.Index{
 			{
+				Name:    "creatorapplication_account_id_idempotency_key",
+				Unique:  true,
+				Columns: []*schema.Column{CreatorApplicationsColumns[2], CreatorApplicationsColumns[3]},
+			},
+			{
 				Name:    "creatorapplication_account_id_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{CreatorApplicationsColumns[2], CreatorApplicationsColumns[1]},
@@ -412,7 +419,7 @@ var (
 			{
 				Name:    "creatorapplication_status_created_at",
 				Unique:  false,
-				Columns: []*schema.Column{CreatorApplicationsColumns[4], CreatorApplicationsColumns[1]},
+				Columns: []*schema.Column{CreatorApplicationsColumns[6], CreatorApplicationsColumns[1]},
 			},
 		},
 	}

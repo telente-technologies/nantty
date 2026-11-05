@@ -2,13 +2,18 @@ package listproducts
 
 import (
 	"context"
+	"fmt"
+	"strings"
+	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"nantty/modules/catalog/src/container"
 	"nantty/modules/catalog/src/enums"
 	"nantty/modules/catalog/src/generated/ent"
 	"nantty/modules/catalog/src/generated/ent/category"
 	"nantty/modules/catalog/src/generated/ent/predicate"
 	"nantty/modules/catalog/src/generated/ent/product"
+	"nantty/modules/catalog/src/generated/ent/productvariant"
 	"nantty/modules/catalog/src/services"
 	"nantty/modules/catalog/src/types"
 	"nantty/platform/httpserver"
@@ -17,6 +22,15 @@ import (
 type Handler struct {
 	Container *container.Container
 }
+
+const (
+	collectionSalesOfTheDay = "sales_of_the_day"
+	collectionFeaturedBrands = "featured_brands"
+	collectionNewArrivals = "new_arrivals"
+	newArrivalsWindow = 7 * 24 * time.Hour
+)
+
+var supportedCollections = []string{collectionSalesOfTheDay, collectionFeaturedBrands, collectionNewArrivals}
 
 func PublicListingConditions() []predicate.Product {
 	return []predicate.Product{product.Status(enums.ProductActive), product.PublishedOnline(true), product.Visibility(enums.VisibilityPublic),
@@ -56,6 +70,13 @@ func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.Cur
 
 func (handler Handler) conditions(ctx context.Context, query Query) ([]predicate.Product, error) {
 	conditions := services.WithRegionCondition(PublicListingConditions(), services.ViewerCountry(ctx, handler.Container, query.Viewer), query.Viewer)
+	if query.Collection != "" {
+		condition, err := collectionCondition(query.Collection, handler.Container.Now())
+		if err != nil {
+			return nil, err
+		}
+		conditions = append(conditions, condition)
+	}
 	if query.CategoryId != nil {
 		conditions = append(conditions, product.CategoryID(*query.CategoryId))
 	}
@@ -92,4 +113,45 @@ func (handler Handler) conditions(ctx context.Context, query Query) ([]predicate
 		conditions = append(conditions, product.MinPriceMinorLTE(*query.MaxPrice))
 	}
 	return conditions, nil
+}
+
+func collectionCondition(collection string, now time.Time) (predicate.Product, error) {
+	switch collection {
+	case collectionSalesOfTheDay:
+		// Sale status is represented on product variants by a compare-at price
+		// greater than the current price (the same relationship used by the
+		// seller product pricing model).
+		return predicate.Product(func(selector *sql.Selector) {
+			selector.Where(sql.P(func(builder *sql.Builder) {
+				builder.WriteString("EXISTS (SELECT 1 FROM ").WriteString(productvariant.Table)
+				builder.WriteString(" AS collection_variant WHERE collection_variant.").WriteString(productvariant.FieldProductID)
+				builder.WriteString(" = ").WriteString(selector.C(product.FieldID))
+				builder.WriteString(" AND collection_variant.").WriteString(productvariant.FieldCompareAtPriceMinor)
+				builder.WriteString(" IS NOT NULL AND collection_variant.").WriteString(productvariant.FieldCompareAtPriceMinor)
+				builder.WriteString(" > collection_variant.").WriteString(productvariant.FieldPriceMinor).WriteString(")")
+			}))
+		}), nil
+	case collectionFeaturedBrands:
+		// The existing collection fixture defines featured-brand products as
+		// products rated at least 4.6 from verified stores. Compare the average
+		// exactly as 23/5 to avoid floating-point rounding in SQL.
+		return predicate.Product(func(selector *sql.Selector) {
+			selector.Where(sql.P(func(builder *sql.Builder) {
+				builder.WriteString("EXISTS (SELECT 1 FROM stores collection_store WHERE collection_store.id = ")
+				builder.WriteString(selector.C(product.FieldStoreID))
+				builder.WriteString(" AND collection_store.verified = TRUE)")
+			}))
+			selector.Where(sql.P(func(builder *sql.Builder) {
+				builder.WriteString(selector.C(product.FieldRatingCount)).WriteString(" > 0 AND CAST(")
+				builder.WriteString(selector.C(product.FieldRatingSum)).WriteString(" AS NUMERIC) * 5 >= CAST(")
+				builder.WriteString(selector.C(product.FieldRatingCount)).WriteString(" AS NUMERIC) * 23")
+			}))
+		}), nil
+	case collectionNewArrivals:
+		return product.PublishedAtGTE(now.UTC().Add(-newArrivalsWindow)), nil
+	default:
+		return nil, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{
+			Path: "collection", Message: fmt.Sprintf("must be one of %s", strings.Join(supportedCollections, ", ")),
+		}})
+	}
 }

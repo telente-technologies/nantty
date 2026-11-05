@@ -5,6 +5,7 @@ import (
 
 	"nantty/modules/users/src/container"
 	"nantty/modules/users/src/modules/creatorProgram/controllers"
+	"nantty/modules/users/src/modules/creatorProgram/middlewares"
 	"nantty/platform/httpserver"
 	"nantty/platform/identityports"
 	"nantty/platform/jwtauth"
@@ -20,7 +21,7 @@ func MountCreatorProgramRoutes(mux *http.ServeMux, container *container.Containe
 	reviewStepUp := guard.RequireStaff("applications:creators", true)
 	mux.Handle("GET /api/v1/creators/eligibility", requireAccessToken(http.HandlerFunc(controller.Eligibility)))
 	mux.Handle("GET /api/v1/creators/applications/me", requireAccessToken(http.HandlerFunc(controller.MyApplication)))
-	mux.Handle("POST /api/v1/creators/applications", requireAccessToken(http.HandlerFunc(controller.Submit)))
+	mux.Handle("POST /api/v1/creators/applications", requireAccessToken(middlewares.RequireCreatorApplicationIdempotencyKey(http.HandlerFunc(controller.Submit))))
 	mux.Handle("GET /api/v1/admin/applications/creators", review(http.HandlerFunc(controller.List)))
 	mux.Handle("GET /api/v1/admin/applications/creators/{applicationId}", review(http.HandlerFunc(controller.Detail)))
 	mux.Handle("POST /api/v1/admin/applications/creators/{applicationId}/approve", reviewStepUp(http.HandlerFunc(controller.Approve)))

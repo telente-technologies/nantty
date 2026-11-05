@@ -287,6 +287,12 @@ func (_u *CreatorApplicationUpdate) sqlSave(ctx context.Context) (_node int, err
 			}
 		}
 	}
+	if _u.mutation.IdempotencyKeyCleared() {
+		_spec.ClearField(creatorapplication.FieldIdempotencyKey, field.TypeString)
+	}
+	if _u.mutation.RequestHashCleared() {
+		_spec.ClearField(creatorapplication.FieldRequestHash, field.TypeString)
+	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(creatorapplication.FieldStatus, field.TypeEnum, value)
 	}
@@ -652,6 +658,12 @@ func (_u *CreatorApplicationUpdateOne) sqlSave(ctx context.Context) (_node *Crea
 				ps[i](selector)
 			}
 		}
+	}
+	if _u.mutation.IdempotencyKeyCleared() {
+		_spec.ClearField(creatorapplication.FieldIdempotencyKey, field.TypeString)
+	}
+	if _u.mutation.RequestHashCleared() {
+		_spec.ClearField(creatorapplication.FieldRequestHash, field.TypeString)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(creatorapplication.FieldStatus, field.TypeEnum, value)

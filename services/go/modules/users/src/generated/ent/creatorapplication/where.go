@@ -65,6 +65,16 @@ func AccountID(v uuid.UUID) predicate.CreatorApplication {
 	return predicate.CreatorApplication(sql.FieldEQ(FieldAccountID, v))
 }
 
+// IdempotencyKey applies equality check predicate on the "idempotency_key" field. It's identical to IdempotencyKeyEQ.
+func IdempotencyKey(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldEQ(FieldIdempotencyKey, v))
+}
+
+// RequestHash applies equality check predicate on the "request_hash" field. It's identical to RequestHashEQ.
+func RequestHash(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldEQ(FieldRequestHash, v))
+}
+
 // ProfileID applies equality check predicate on the "profile_id" field. It's identical to ProfileIDEQ.
 func ProfileID(v uuid.UUID) predicate.CreatorApplication {
 	return predicate.CreatorApplication(sql.FieldEQ(FieldProfileID, v))
@@ -198,6 +208,156 @@ func AccountIDLT(v uuid.UUID) predicate.CreatorApplication {
 // AccountIDLTE applies the LTE predicate on the "account_id" field.
 func AccountIDLTE(v uuid.UUID) predicate.CreatorApplication {
 	return predicate.CreatorApplication(sql.FieldLTE(FieldAccountID, v))
+}
+
+// IdempotencyKeyEQ applies the EQ predicate on the "idempotency_key" field.
+func IdempotencyKeyEQ(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldEQ(FieldIdempotencyKey, v))
+}
+
+// IdempotencyKeyNEQ applies the NEQ predicate on the "idempotency_key" field.
+func IdempotencyKeyNEQ(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldNEQ(FieldIdempotencyKey, v))
+}
+
+// IdempotencyKeyIn applies the In predicate on the "idempotency_key" field.
+func IdempotencyKeyIn(vs ...string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldIn(FieldIdempotencyKey, vs...))
+}
+
+// IdempotencyKeyNotIn applies the NotIn predicate on the "idempotency_key" field.
+func IdempotencyKeyNotIn(vs ...string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldNotIn(FieldIdempotencyKey, vs...))
+}
+
+// IdempotencyKeyGT applies the GT predicate on the "idempotency_key" field.
+func IdempotencyKeyGT(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldGT(FieldIdempotencyKey, v))
+}
+
+// IdempotencyKeyGTE applies the GTE predicate on the "idempotency_key" field.
+func IdempotencyKeyGTE(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldGTE(FieldIdempotencyKey, v))
+}
+
+// IdempotencyKeyLT applies the LT predicate on the "idempotency_key" field.
+func IdempotencyKeyLT(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldLT(FieldIdempotencyKey, v))
+}
+
+// IdempotencyKeyLTE applies the LTE predicate on the "idempotency_key" field.
+func IdempotencyKeyLTE(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldLTE(FieldIdempotencyKey, v))
+}
+
+// IdempotencyKeyContains applies the Contains predicate on the "idempotency_key" field.
+func IdempotencyKeyContains(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldContains(FieldIdempotencyKey, v))
+}
+
+// IdempotencyKeyHasPrefix applies the HasPrefix predicate on the "idempotency_key" field.
+func IdempotencyKeyHasPrefix(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldHasPrefix(FieldIdempotencyKey, v))
+}
+
+// IdempotencyKeyHasSuffix applies the HasSuffix predicate on the "idempotency_key" field.
+func IdempotencyKeyHasSuffix(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldHasSuffix(FieldIdempotencyKey, v))
+}
+
+// IdempotencyKeyIsNil applies the IsNil predicate on the "idempotency_key" field.
+func IdempotencyKeyIsNil() predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldIsNull(FieldIdempotencyKey))
+}
+
+// IdempotencyKeyNotNil applies the NotNil predicate on the "idempotency_key" field.
+func IdempotencyKeyNotNil() predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldNotNull(FieldIdempotencyKey))
+}
+
+// IdempotencyKeyEqualFold applies the EqualFold predicate on the "idempotency_key" field.
+func IdempotencyKeyEqualFold(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldEqualFold(FieldIdempotencyKey, v))
+}
+
+// IdempotencyKeyContainsFold applies the ContainsFold predicate on the "idempotency_key" field.
+func IdempotencyKeyContainsFold(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldContainsFold(FieldIdempotencyKey, v))
+}
+
+// RequestHashEQ applies the EQ predicate on the "request_hash" field.
+func RequestHashEQ(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldEQ(FieldRequestHash, v))
+}
+
+// RequestHashNEQ applies the NEQ predicate on the "request_hash" field.
+func RequestHashNEQ(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldNEQ(FieldRequestHash, v))
+}
+
+// RequestHashIn applies the In predicate on the "request_hash" field.
+func RequestHashIn(vs ...string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldIn(FieldRequestHash, vs...))
+}
+
+// RequestHashNotIn applies the NotIn predicate on the "request_hash" field.
+func RequestHashNotIn(vs ...string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldNotIn(FieldRequestHash, vs...))
+}
+
+// RequestHashGT applies the GT predicate on the "request_hash" field.
+func RequestHashGT(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldGT(FieldRequestHash, v))
+}
+
+// RequestHashGTE applies the GTE predicate on the "request_hash" field.
+func RequestHashGTE(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldGTE(FieldRequestHash, v))
+}
+
+// RequestHashLT applies the LT predicate on the "request_hash" field.
+func RequestHashLT(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldLT(FieldRequestHash, v))
+}
+
+// RequestHashLTE applies the LTE predicate on the "request_hash" field.
+func RequestHashLTE(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldLTE(FieldRequestHash, v))
+}
+
+// RequestHashContains applies the Contains predicate on the "request_hash" field.
+func RequestHashContains(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldContains(FieldRequestHash, v))
+}
+
+// RequestHashHasPrefix applies the HasPrefix predicate on the "request_hash" field.
+func RequestHashHasPrefix(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldHasPrefix(FieldRequestHash, v))
+}
+
+// RequestHashHasSuffix applies the HasSuffix predicate on the "request_hash" field.
+func RequestHashHasSuffix(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldHasSuffix(FieldRequestHash, v))
+}
+
+// RequestHashIsNil applies the IsNil predicate on the "request_hash" field.
+func RequestHashIsNil() predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldIsNull(FieldRequestHash))
+}
+
+// RequestHashNotNil applies the NotNil predicate on the "request_hash" field.
+func RequestHashNotNil() predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldNotNull(FieldRequestHash))
+}
+
+// RequestHashEqualFold applies the EqualFold predicate on the "request_hash" field.
+func RequestHashEqualFold(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldEqualFold(FieldRequestHash, v))
+}
+
+// RequestHashContainsFold applies the ContainsFold predicate on the "request_hash" field.
+func RequestHashContainsFold(v string) predicate.CreatorApplication {
+	return predicate.CreatorApplication(sql.FieldContainsFold(FieldRequestHash, v))
 }
 
 // ProfileIDEQ applies the EQ predicate on the "profile_id" field.

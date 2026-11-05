@@ -19,6 +19,10 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldAccountID holds the string denoting the account_id field in the database.
 	FieldAccountID = "account_id"
+	// FieldIdempotencyKey holds the string denoting the idempotency_key field in the database.
+	FieldIdempotencyKey = "idempotency_key"
+	// FieldRequestHash holds the string denoting the request_hash field in the database.
+	FieldRequestHash = "request_hash"
 	// FieldProfileID holds the string denoting the profile_id field in the database.
 	FieldProfileID = "profile_id"
 	// FieldStatus holds the string denoting the status field in the database.
@@ -58,6 +62,8 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldAccountID,
+	FieldIdempotencyKey,
+	FieldRequestHash,
 	FieldProfileID,
 	FieldStatus,
 	FieldDecision,
@@ -88,6 +94,10 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	IdempotencyKeyValidator func(string) error
+	// RequestHashValidator is a validator for the "request_hash" field. It is called by the builders before save.
+	RequestHashValidator func(string) error
 	// DefaultDecisionNote holds the default value on creation for the "decision_note" field.
 	DefaultDecisionNote string
 	// DecisionNoteValidator is a validator for the "decision_note" field. It is called by the builders before save.
@@ -187,6 +197,16 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByAccountID orders the results by the account_id field.
 func ByAccountID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAccountID, opts...).ToFunc()
+}
+
+// ByIdempotencyKey orders the results by the idempotency_key field.
+func ByIdempotencyKey(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIdempotencyKey, opts...).ToFunc()
+}
+
+// ByRequestHash orders the results by the request_hash field.
+func ByRequestHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRequestHash, opts...).ToFunc()
 }
 
 // ByProfileID orders the results by the profile_id field.

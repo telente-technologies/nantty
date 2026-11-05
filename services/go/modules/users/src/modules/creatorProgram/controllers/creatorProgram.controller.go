@@ -45,12 +45,13 @@ func (controller CreatorProgramController) MyApplication(writer http.ResponseWri
 }
 
 func (controller CreatorProgramController) Submit(writer http.ResponseWriter, request *http.Request) {
+	key := request.Header.Get("Idempotency-Key")
 	body, err := utils.DecodeAndValidate(writer, request, acceptAny[dtos.SubmitApplicationRequest])
 	if err != nil {
 		controller.respond(writer, request, 0, nil, err)
 		return
 	}
-	result, err := submitcreatorapplication.Handler{Container: controller.Container}.Execute(request.Context(), submitcreatorapplication.Command{AccountId: utils.AccountIdFromRequest(request), Input: body})
+	result, err := submitcreatorapplication.Handler{Container: controller.Container}.Execute(request.Context(), submitcreatorapplication.Command{AccountId: utils.AccountIdFromRequest(request), IdempotencyKey: key, Input: body})
 	controller.respond(writer, request, http.StatusCreated, result, err)
 }
 

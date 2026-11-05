@@ -37,6 +37,9 @@ var (
 	CannotReviewOwnStore   = Api(http.StatusForbidden, "CANNOT_REVIEW_OWN_STORE", "You cannot review your own store.")
 )
 
+var StoreFollowStatsUnavailable = Api(http.StatusServiceUnavailable, "STORE_FOLLOW_STATS_UNAVAILABLE", "Store follow information is temporarily unavailable. Try again shortly.")
+var StoreFollowUnavailable = Api(http.StatusServiceUnavailable, "STORE_FOLLOW_UNAVAILABLE", "Store follow could not be updated right now. Try again shortly.")
+
 var (
 	StaffNotFound       = Api(http.StatusNotFound, "STAFF_NOT_FOUND", "That team member could not be found.")
 	StaffExists         = Api(http.StatusConflict, "STAFF_EXISTS", "That person is already on this team.")

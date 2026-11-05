@@ -24,5 +24,9 @@ type PrivateMediaSigner interface {
 }
 
 type StoreFollowStats interface {
-	StoreFollowStats(ctx context.Context, storeId uuid.UUID, viewer *uuid.UUID) (followers int, isFollowing bool)
+	StoreFollowStats(ctx context.Context, storeId uuid.UUID, viewer *uuid.UUID) (followers int, isFollowing bool, err error)
+}
+
+type StoreFollowMutations interface {
+	SetStoreFollow(ctx context.Context, storeId, followerId uuid.UUID, follow bool) (followers int, isFollowing bool, err error)
 }

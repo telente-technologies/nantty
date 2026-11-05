@@ -19,6 +19,8 @@ func (CreatorApplication) Mixin() []ent.Mixin {
 func (CreatorApplication) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("account_id", uuid.UUID{}).Immutable(),
+		field.String("idempotency_key").Optional().Nillable().MaxLen(128).Immutable(),
+		field.String("request_hash").Optional().Nillable().MaxLen(64).Immutable(),
 		field.UUID("profile_id", uuid.UUID{}).Immutable(),
 		field.Enum("status").Values("pending", "approved", "rejected").Default("pending"),
 		field.Enum("decision").Values("auto_approve", "manual_review", "not_eligible").Immutable(),
@@ -38,5 +40,5 @@ func (CreatorApplication) Fields() []ent.Field {
 }
 
 func (CreatorApplication) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("account_id", "created_at"), index.Fields("status", "created_at")}
+	return []ent.Index{index.Fields("account_id", "idempotency_key").Unique(), index.Fields("account_id", "created_at"), index.Fields("status", "created_at")}
 }

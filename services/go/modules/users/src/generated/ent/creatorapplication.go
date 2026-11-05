@@ -23,6 +23,10 @@ type CreatorApplication struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// AccountID holds the value of the "account_id" field.
 	AccountID uuid.UUID `json:"account_id,omitempty"`
+	// IdempotencyKey holds the value of the "idempotency_key" field.
+	IdempotencyKey *string `json:"idempotency_key,omitempty"`
+	// RequestHash holds the value of the "request_hash" field.
+	RequestHash *string `json:"request_hash,omitempty"`
 	// ProfileID holds the value of the "profile_id" field.
 	ProfileID uuid.UUID `json:"profile_id,omitempty"`
 	// Status holds the value of the "status" field.
@@ -63,7 +67,7 @@ func (*CreatorApplication) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case creatorapplication.FieldRequirements, creatorapplication.FieldContentCategories, creatorapplication.FieldSocialLinks, creatorapplication.FieldSampleContentUrls:
 			values[i] = new([]byte)
-		case creatorapplication.FieldStatus, creatorapplication.FieldDecision, creatorapplication.FieldDecisionNote, creatorapplication.FieldPayoutAccountID, creatorapplication.FieldAcceptedTermsVersion, creatorapplication.FieldReviewedBy, creatorapplication.FieldReviewedByName, creatorapplication.FieldDecisionReason:
+		case creatorapplication.FieldIdempotencyKey, creatorapplication.FieldRequestHash, creatorapplication.FieldStatus, creatorapplication.FieldDecision, creatorapplication.FieldDecisionNote, creatorapplication.FieldPayoutAccountID, creatorapplication.FieldAcceptedTermsVersion, creatorapplication.FieldReviewedBy, creatorapplication.FieldReviewedByName, creatorapplication.FieldDecisionReason:
 			values[i] = new(sql.NullString)
 		case creatorapplication.FieldCreatedAt, creatorapplication.FieldReviewedAt, creatorapplication.FieldReapplyAvailableAt:
 			values[i] = new(sql.NullTime)
@@ -101,6 +105,20 @@ func (_m *CreatorApplication) assignValues(columns []string, values []any) error
 				return fmt.Errorf("unexpected type %T for field account_id", values[i])
 			} else if value != nil {
 				_m.AccountID = *value
+			}
+		case creatorapplication.FieldIdempotencyKey:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field idempotency_key", values[i])
+			} else if value.Valid {
+				_m.IdempotencyKey = new(string)
+				*_m.IdempotencyKey = value.String
+			}
+		case creatorapplication.FieldRequestHash:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field request_hash", values[i])
+			} else if value.Valid {
+				_m.RequestHash = new(string)
+				*_m.RequestHash = value.String
 			}
 		case creatorapplication.FieldProfileID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -239,6 +257,16 @@ func (_m *CreatorApplication) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("account_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.AccountID))
+	builder.WriteString(", ")
+	if v := _m.IdempotencyKey; v != nil {
+		builder.WriteString("idempotency_key=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.RequestHash; v != nil {
+		builder.WriteString("request_hash=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("profile_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ProfileID))

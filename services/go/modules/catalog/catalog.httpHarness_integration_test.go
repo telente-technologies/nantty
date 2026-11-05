@@ -90,7 +90,7 @@ func startHttpHarness(t *testing.T) *httpHarness {
 		return jwtauth.NewAccessTokenVerifierFromKeySetProvider(tokens.PublishedKeySet, identitytest.FakeIssuer, audience)
 	}
 	audit, follows := &fakeAudit{}, &fakeStoreFollows{followers: map[uuid.UUID]int{}}
-	collaborators := src.Collaborators{StoreFollows: follows,
+	collaborators := src.Collaborators{StoreFollows: follows, StoreFollowWrites: follows,
 		Verifier: verifier(identitytest.FakeAccountAudience), Audit: audit, Identity: fakeIdentity{},
 		Staff: container.StaffVerifiers{Access: verifier("nantty-admin"), StepUp: verifier("nantty-admin-step-up")},
 	}
