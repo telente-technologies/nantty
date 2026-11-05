@@ -11,6 +11,7 @@ export interface PaginatedResponse<T> {
   readonly limit: number;
 }
 export * from "./posts.contract";
+export * from "./storeFollow.contract";
 export * from "./feeds.contract";
 export * from "./follows.contract";
 export * from "./widgets.contract";
