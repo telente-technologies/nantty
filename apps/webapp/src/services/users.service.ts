@@ -44,5 +44,6 @@ export const usersService = {
   deleteShippingAddress: (addressId: string) => sendRequestToWebappServer<void>(`/api/v1/users/me/addresses/${addressId}`, { method: "DELETE" }),
   fetchMyUsernamePolicy: () => sendRequestToWebappServer<UsernamePolicy>("/api/v1/users/me/username-policy"),
   fetchMyAccountSettings: () => sendRequestToWebappServer<AccountSettings>("/api/v1/users/me/settings"),
+  updateMyAccountSettings: (update: Partial<AccountSettings>) => sendRequestToWebappServer<AccountSettings>("/api/v1/users/me/settings", { method: "PATCH", body: update }),
   changeMyUsername: (username: string) => sendRequestToWebappServer<User>("/api/v1/users/me/username", { method: "PATCH", body: { username } }),
 };

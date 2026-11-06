@@ -55,6 +55,7 @@ export const spacesService = {
   create: (input: {
     title: string;
     description: string;
+    giftsEnabled: boolean;
     scheduledAt?: string;
   }, key = createIdempotencyKey("space")) =>
     request<Space>("/api/v1/spaces", {
@@ -79,6 +80,10 @@ export const spacesService = {
     ),
   gift: (id: string, giftId: string, key: string) =>
     mutate<{ id: string; hostUserId: string; totalCoins: number; senderCoinBalance: number }>(id, "gifts", { giftId, quantity: 1 }, key),
+  setCoinDonations: (id: string, enabled: boolean) =>
+    request<{ spaceId: string; giftsEnabled: boolean }>(`${path(id)}/coin-donations`, { method: "PATCH", body: { enabled }, idempotencyKey: createIdempotencyKey("space-donations") }),
+  donateCoins: (id: string, coins: number, key: string) =>
+    request<{ id: string; hostUserId: string; totalCoins: number; senderCoinBalance: number }>(`${path(id)}/coin-donations`, { method: "POST", body: { coins }, idempotencyKey: key }),
   attachAnnouncement: (id: string, postId: string) =>
     mutate(id, "announcement", { postId }, `space-attachment-${postId}`),
 };

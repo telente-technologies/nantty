@@ -12,7 +12,7 @@ import styles from "./spaces.module.css";
 import { Avatar } from "@/components/ui/media";
 import { completeSpaceCreation, type SpaceCreationCheckpoint } from "@/utils/spaceCreation.util";
 import type { Space } from "@/services/spaces.service";
-import { SpaceGiftTray } from "./spaceGiftTray";
+import { SpaceCoinDonationPanel } from "./spaceCoinDonationPanel";
 
 export function Spaces({
   spaceId,
@@ -27,6 +27,7 @@ export function Spaces({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [schedule, setSchedule] = useState("");
+  const [coinDonationsEnabled, setCoinDonationsEnabled] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [announcement, setAnnouncement] = useState<string | null>(null);
@@ -176,6 +177,7 @@ export function Spaces({
                   try { created = await completeSpaceCreation(creation.current, () => spacesService.create({
                     title: title.trim(),
                     description: description.trim(),
+                    giftsEnabled: coinDonationsEnabled,
                     scheduledAt,
                   },creation.current.key), spacesService.announce, (space,postId)=>spacesService.attachAnnouncement(space.id,postId));
                   } catch (error) { if (creation.current.space) throw new Error("Your Space was created, but its announcement is not finished. Choose Retry announcement to continue. " + (error instanceof Error ? error.message : "")); throw error; }
@@ -211,6 +213,14 @@ export function Spaces({
                   value={schedule}
                   onChange={(event) => setSchedule(event.target.value)}
                 />
+              </label>
+              <label className={styles.coinSupportChoice}>
+                <input
+                  type="checkbox"
+                  checked={coinDonationsEnabled}
+                  onChange={(event) => setCoinDonationsEnabled(event.target.checked)}
+                />
+                Allow listeners to support you with coins
               </label>
               <p className={styles.muted}>
                 Times use your local timezone. Leave blank to start now. Anyone
@@ -420,12 +430,23 @@ export function Spaces({
                 )}
               </div>
               {space.state === "live" && space.giftsEnabled && grant && !host && (
-                <SpaceGiftTray spaceId={space.id} hostName={space.host.name || "the host"} />
+                <SpaceCoinDonationPanel spaceId={space.id} hostName={space.host.name || "the host"} />
               )}
               {host && (
                 <details className={styles.management}>
                   <summary>Manage Space</summary>
                   <div className={styles.actions}>
+                    {space.state === "live" && (
+                      <label className={styles.coinSupportChoice}>
+                        <input
+                          type="checkbox"
+                          checked={space.giftsEnabled === true}
+                          disabled={busy}
+                          onChange={(event) => void act(() => spacesService.setCoinDonations(spaceId, event.target.checked))}
+                        />
+                        Allow listeners to support you with coins
+                      </label>
+                    )}
                     {host &&
                       !space.announcementPostId &&
                       ["live", "scheduled"].includes(space.state) && (

@@ -29,15 +29,50 @@ const roleLabels = { owner: "Owner", admin: "Admin", member: "" } as const;
 export function GroupMembersSection({ conversation, viewerId, canManage, attributes, onChanged }: Props) {
   const [isAdding, setIsAdding] = useState(false);
   const [toAdd, setToAdd] = useState<readonly UserSummary[]>([]);
+  const [isInviting, setIsInviting] = useState(false);
+  const [toInvite, setToInvite] = useState<readonly UserSummary[]>([]);
+  const [invitationNotice, setInvitationNotice] = useState<string | null>(null);
   const members = useQuery({ queryKey: ["conversation-members", conversation.id], queryFn: () => chatGroupsService.fetchMembers(conversation.id) });
   const action = useMutation({ mutationFn: (run: () => Promise<unknown>) => run(), onSuccess: onChanged });
+  const invite = useMutation({
+    mutationFn: async (people: readonly UserSummary[]) => {
+      const outcomes = await Promise.allSettled(people.map((person) => chatGroupsService.createInvitation(conversation.id, person.id)));
+      return {
+        sentCount: outcomes.filter((outcome) => outcome.status === "fulfilled").length,
+        failedIds: outcomes.flatMap((outcome, index) => outcome.status === "rejected" ? [people[index]!.id] : []),
+      };
+    },
+    onSuccess: ({ sentCount, failedIds }, submittedPeople) => {
+      const failedPeople = submittedPeople.filter((person) => failedIds.includes(person.id));
+      setToInvite(failedPeople);
+      setInvitationNotice(failedIds.length > 0
+        ? `${sentCount} invitation${sentCount === 1 ? "" : "s"} sent; ${failedIds.length} couldn't be sent. Retry the remaining people.`
+        : `${sentCount} invitation${sentCount === 1 ? "" : "s"} sent. They must accept and complete secure key handoff before joining.`);
+      if (failedIds.length === 0) setIsInviting(false);
+      onChanged();
+    },
+  });
   const list = members.data ?? [];
   return (
     <section className={settingsStyles.block} aria-label="Members">
       <div className={settingsStyles.buttonRow}>
         <h2 className={settingsStyles.blockHeading}>{list.length} members</h2>
-        {canManage ? <Button variant="ghost" size="sm" onClick={() => setIsAdding((adding) => !adding)}>{isAdding ? "Cancel" : "Add members"}</Button> : null}
+        {canManage ? <span className={settingsStyles.buttonRow}>
+          <Button variant="ghost" size="sm" onClick={() => { setIsInviting((inviting) => !inviting); setInvitationNotice(null); }}>{isInviting ? "Cancel invite" : "Invite"}</Button>
+          <Button variant="ghost" size="sm" onClick={() => setIsAdding((adding) => !adding)}>{isAdding ? "Cancel add" : "Add members"}</Button>
+        </span> : null}
       </div>
+      {isInviting ? (
+        <div>
+          <p className={settingsStyles.muted}>Search by username and send an invitation. People join only after accepting and completing secure key handoff.</p>
+          <PeoplePicker selected={toInvite} excludedUserIds={list.map((member) => member.user.id)} onToggle={(person) => setToInvite((current) => togglePerson(current, person))} maximum={100} />
+          <Button disabled={toInvite.length === 0} busy={invite.isPending} onClick={() => invite.mutate(toInvite)}>
+            {toInvite.length > 0 ? `Send ${toInvite.length} invitation${toInvite.length === 1 ? "" : "s"}` : "Select people"}
+          </Button>
+          {invitationNotice ? <p className={settingsStyles.muted} role="status">{invitationNotice}</p> : null}
+          {invite.isError ? <p className={settingsStyles.errorText} role="alert">{readChatCryptoErrorMessage(invite.error) ?? readErrorMessageForDisplay(invite.error)}</p> : null}
+        </div>
+      ) : null}
       {isAdding ? (
         <div>
           <PeoplePicker selected={toAdd} excludedUserIds={list.map((member) => member.user.id)} onToggle={(person) => setToAdd((current) => togglePerson(current, person))} maximum={100} />

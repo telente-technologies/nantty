@@ -6,6 +6,7 @@ import { createMockRoute, type MockRoute } from "./registry.mock";
 
 let mockChatSettings: ChatSettings = {
   messageRequestsFrom: "everyone",
+  preventDirectGroupAdds: false,
   notifications: { messages: true, requests: true, groups: true, streakReminders: true, showMessagePreview: true },
 };
 
@@ -36,8 +37,8 @@ function muteUntil(duration: ChatMuteDuration, now: Date): string | null {
 export const chatE2eeMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/chat/settings", () => mockChatSettings),
   createMockRoute("PATCH", "/api/v1/chat/settings", ({ body }) => {
-    const update = (body ?? {}) as { messageRequestsFrom?: ChatSettings["messageRequestsFrom"]; notifications?: Partial<ChatSettings["notifications"]> };
-    mockChatSettings = { messageRequestsFrom: update.messageRequestsFrom ?? mockChatSettings.messageRequestsFrom, notifications: { ...mockChatSettings.notifications, ...update.notifications } };
+    const update = (body ?? {}) as { messageRequestsFrom?: ChatSettings["messageRequestsFrom"]; preventDirectGroupAdds?: boolean; notifications?: Partial<ChatSettings["notifications"]> };
+    mockChatSettings = { messageRequestsFrom: update.messageRequestsFrom ?? mockChatSettings.messageRequestsFrom, preventDirectGroupAdds: update.preventDirectGroupAdds ?? mockChatSettings.preventDirectGroupAdds, notifications: { ...mockChatSettings.notifications, ...update.notifications } };
     return mockChatSettings;
   }),
   createMockRoute("GET", "/api/v1/chat/content", ({ query }) => {

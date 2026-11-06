@@ -1,0 +1,11 @@
+.page { display: grid; align-content: start; gap: var(--space-5); max-width: 900px; margin-inline: auto; padding: var(--space-5); }
+.header { display: flex; align-items: start; justify-content: space-between; gap: var(--space-4); }
+.title { margin: 0; color: var(--ink-strong); font-size: var(--text-xl); }
+.subtitle { margin: var(--space-1) 0 0; color: var(--ink-muted); line-height: 1.5; }
+.backLink { color: var(--color-brand); font-weight: 600; white-space: nowrap; }
+.list { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.invitation { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--divider); border-radius: var(--radius-medium); background: var(--surface-card); }
+.invitationTitle { margin: 0; color: var(--ink-strong); font-size: var(--text-md); }
+.actions { display: flex; justify-content: end; gap: var(--space-2); }
+.error { color: var(--color-danger); }
+@media (max-width: 560px) { .header { flex-direction: column; } .actions { justify-content: stretch; } .actions > * { flex: 1; } }

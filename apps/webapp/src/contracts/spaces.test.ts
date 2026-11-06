@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import { dispatchMockApiRequest } from "@/mocks/dispatch.mock";
 import { mockSession, me, demoFanAccount } from "@/mocks/fixtures.mock";
 import { spaceIdFromAnnouncement } from "@/utils/spaceAnnouncement.util";
+import { readMockCoinBalance } from "@/mocks/coins.mock";
 import type { Space, SpaceGrant } from "@/services/spaces.service";
 const call = <T>(method: string, path: string, body?: unknown) =>
   dispatchMockApiRequest(
@@ -47,9 +48,13 @@ describe("Spaces flow", () => {
     mockSession.signedInUserId = me.id;
     const room = await call<Space>("POST", "/api/v1/spaces", {
       title: "Creator hour",
+      giftsEnabled: false,
       scheduledAt: new Date(Date.now() + 3600000).toISOString(),
     });
     assert.equal(room.state, "scheduled");
+    assert.equal(room.giftsEnabled, false);
+    await call("PATCH", `/api/v1/spaces/${room.id}/coin-donations`, { enabled: true });
+    assert.equal((await call<Space>("GET", `/api/v1/spaces/${room.id}`)).giftsEnabled, true);
     await assert.rejects(() => call("POST", `/api/v1/spaces/${room.id}/join`));
     const post = await call<{ id: string }>("POST", "/api/v1/posts", {
       text: `Join my Space: ${room.title}\nhttps://web.nantty.com/spaces/${room.id}`,
@@ -88,6 +93,12 @@ describe("Spaces flow", () => {
       `/api/v1/spaces/${room.id}/join`,
     );
     assert.equal(grant.role, "host");
+    mockSession.signedInUserId = demoFanAccount.id;
+    const senderBalanceBefore = readMockCoinBalance();
+    const donation = await call<{ totalCoins: number; senderCoinBalance: number }>("POST", `/api/v1/spaces/${room.id}/coin-donations`, { coins: 125 });
+    assert.equal(donation.totalCoins, 125);
+    assert.equal(donation.senderCoinBalance, senderBalanceBefore - 125);
+    mockSession.signedInUserId = me.id;
     await call("POST", `/api/v1/spaces/${room.id}/end`);
     await assert.rejects(() => call("POST", `/api/v1/spaces/${room.id}/start`));
     await assert.rejects(() =>

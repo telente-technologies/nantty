@@ -141,6 +141,12 @@ describe("encrypted chat in mock mode", () => {
     assert.equal(saved.messageRequestsFrom, "followers");
     assert.equal(saved.notifications.showMessagePreview, false);
     assert.equal(saved.notifications.messages, true);
+    const privacy = (await send("PATCH", "/api/v1/chat/settings", { preventDirectGroupAdds: true })) as ChatSettings;
+    assert.equal(privacy.preventDirectGroupAdds, true);
+    assert.equal(privacy.messageRequestsFrom, "followers");
+    assert.equal(privacy.notifications.showMessagePreview, false);
+    const unchanged = (await send("GET", "/api/v1/chat/settings")) as ChatSettings;
+    assert.equal(unchanged.preventDirectGroupAdds, true);
     const muted = (await send("PUT", "/api/v1/conversations/c_1/mute", { duration: "always" })) as { mutedUntil: string };
     assert.equal(muted.mutedUntil, "always");
   });

@@ -7,6 +7,24 @@
   gap: 20px;
   color: var(--ink-strong);
 }
+.coinSupportChoice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.coinDonationForm {
+  display: grid;
+  gap: 10px;
+}
+.coinDonationForm input {
+  min-height: 44px;
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  background: var(--surface-card);
+  color: var(--ink-strong);
+  padding: 0 12px;
+}
 .stageHeading {
   display: flex;
   width: 100%;

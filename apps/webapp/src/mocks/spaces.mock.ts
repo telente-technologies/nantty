@@ -3,6 +3,7 @@ import { createMockRoute, type MockRoute } from "./registry.mock";
 import { getSignedInMockUser, buildMockUserSummary } from "./fixtures.mock";
 import { signedInUserIsApprovedCreator } from "./creatorFixtures.mock";
 import { mockPostsState } from "./postCatalog.mock";
+import { spendMockCoinsOrThrow } from "./coins.mock";
 import type { Space, SpaceGrant } from "@/services/spaces.service";
 
 const host = { ...buildMockUserSummary(2), role: "host" as const };
@@ -16,6 +17,7 @@ const rooms = new Map<string, Space>([
         "An open conversation about making things, finding your audience, and starting again.",
       state: "live",
       host,
+      giftsEnabled: true,
       listenerCount: 128,
       speakers: [],
     },
@@ -30,6 +32,7 @@ const rooms = new Map<string, Space>([
       state: "scheduled",
       scheduledAt: new Date(Date.now() + 86400000).toISOString(),
       host,
+      giftsEnabled: true,
       listenerCount: 0,
       speakers: [],
     },
@@ -63,6 +66,27 @@ if (seed)
       liked: false,
     });
 export const spacesMocks: MockRoute[] = [
+  createMockRoute("PATCH", "/api/v1/spaces/:spaceId/coin-donations", ({ params, body }) => {
+    const room = find(params.spaceId!);
+    requireHost(room);
+    if (!body || typeof body !== "object" || typeof (body as { enabled?: unknown }).enabled !== "boolean")
+      throw new ApiError(422, "Choose whether coin support is enabled.", "VALIDATION_FAILED");
+    if (room.state !== "live" && room.state !== "scheduled")
+      throw new ApiError(409, "Coin support can only be changed for a live or scheduled Space.", "SPACE_STATE_CONFLICT");
+    room.giftsEnabled = (body as { enabled: boolean }).enabled;
+    return { spaceId: room.id, giftsEnabled: room.giftsEnabled };
+  }),
+  createMockRoute("POST", "/api/v1/spaces/:spaceId/coin-donations", ({ params, body }) => {
+    const room = find(params.spaceId!);
+    const viewer = getSignedInMockUser();
+    const coins = body && typeof body === "object" ? (body as { coins?: unknown }).coins : undefined;
+    if (typeof coins !== "number" || !Number.isSafeInteger(coins) || coins < 1)
+      throw new ApiError(422, "Enter a valid whole number of coins.", "INVALID_DONATION_AMOUNT");
+    if (!room.giftsEnabled || room.state !== "live" || viewer.id === room.host.id)
+      throw new ApiError(409, "Coin donations are unavailable for this Space.", "SPACE_GIFT_UNAVAILABLE");
+    const senderCoinBalance = spendMockCoinsOrThrow(coins);
+    return { id: `space_donation_${Date.now()}`, hostUserId: room.host.id, totalCoins: coins, senderCoinBalance };
+  }),
   createMockRoute(
     "POST",
     "/api/v1/spaces/:spaceId/announcement",
@@ -122,6 +146,7 @@ export const spacesMocks: MockRoute[] = [
     const input = body as {
       title?: string;
       description?: string;
+      giftsEnabled?: boolean;
       scheduledAt?: string;
     };
     if (!input.title?.trim() || input.title.length > 140)
@@ -137,6 +162,7 @@ export const spacesMocks: MockRoute[] = [
       description: input.description,
       state: input.scheduledAt ? "scheduled" : "live",
       scheduledAt: input.scheduledAt,
+      giftsEnabled: input.giftsEnabled ?? true,
       host: { ...getSignedInMockUser(), role: "host" },
       listenerCount: 0,
       speakers: [],

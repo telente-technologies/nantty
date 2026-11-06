@@ -161,6 +161,12 @@ export function ConversationListPanel({ activeConversationId }: { readonly activ
       <div className={styles.titleRow}>
         <InboxFolderMenu folder={folder} onSelect={setFolder} />
         <span className={styles.titleActions}>
+          <Link href="/chats/invitations" className={styles.newMessage} aria-label="Group invitations">
+            <AppIcon name="userPlus24" size={20} />
+          </Link>
+          <Link href="/channels/invitations" className={styles.newMessage} aria-label="Channel invitations">
+            <AppIcon name="share24" size={20} />
+          </Link>
           <Link href="/chats/settings" className={styles.newMessage} aria-label="Chat settings">
             <AppIcon name="slidersHorizontal24" size={20} />
           </Link>

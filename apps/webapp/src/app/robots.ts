@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { buildAbsoluteSiteUrl } from "@/utils/seoPaths.util";
 
-const privatePaths = ["/bff/", "/api/", "/me", "/settings", "/saved", "/cart", "/checkout", "/orders", "/chats", "/notifications", "/analytics", "/coins", "/subscriptions", "/store-rewards", "/verify-email", "/creator", "/login", "/signup", "/forgot-password", "/reset-password", "/welcome"];
+const privatePaths = ["/bff/", "/api/", "/me", "/settings", "/saved", "/cart", "/checkout", "/orders", "/chats", "/channels/invitations", "/notifications", "/analytics", "/coins", "/subscriptions", "/store-rewards", "/verify-email", "/creator", "/login", "/signup", "/forgot-password", "/reset-password", "/welcome"];
 
 export default function robots(): MetadataRoute.Robots {
   return {

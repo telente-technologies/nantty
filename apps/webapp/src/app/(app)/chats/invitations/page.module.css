@@ -1,0 +1,37 @@
+.page {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: clamp(var(--space-4), 4vw, var(--space-7));
+  background: var(--surface-app);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--divider);
+}
+
+.title,
+.invitationTitle { margin: 0; font-size: var(--text-xl); }
+.subtitle,
+.note { margin: var(--space-2) 0 0; color: var(--ink-muted); line-height: 1.5; }
+.backLink { display: inline-flex; min-height: 44px; align-items: center; color: var(--color-brand); font-weight: 700; text-underline-offset: 3px; }
+.list { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.invitation { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--divider); border-radius: var(--radius-medium); background: var(--surface-card); }
+.invitationCopy { min-width: 0; }
+.invitationTitle { font-size: var(--text-md); }
+.actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.note { padding: var(--space-3); border-radius: var(--radius-small); background: var(--surface-brand-tint); }
+.error { margin: 0; color: var(--color-danger); }
+
+@media (min-width: 768px) {
+  .page { overflow-y: auto; }
+  .invitation { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .note { grid-column: 1 / -1; }
+}

@@ -35,12 +35,16 @@ export default function ChatSettingsPage() {
     mutationFn: chatSettingsService.update,
     onMutate: async (change) => {
       const previous = queryClient.getQueryData<ChatSettings>(settingsKey);
-      if (previous) queryClient.setQueryData<ChatSettings>(settingsKey, { messageRequestsFrom: change.messageRequestsFrom ?? previous.messageRequestsFrom, notifications: { ...previous.notifications, ...change.notifications } });
+      if (previous) queryClient.setQueryData<ChatSettings>(settingsKey, { ...previous, messageRequestsFrom: change.messageRequestsFrom ?? previous.messageRequestsFrom, notifications: { ...previous.notifications, ...change.notifications } });
       return { previous };
     },
     onError: (_error, _change, context) => {
       if (context?.previous) queryClient.setQueryData(settingsKey, context.previous);
     },
+    onSuccess: (saved) => queryClient.setQueryData(settingsKey, saved),
+  });
+  const updateGroupPrivacy = useMutation({
+    mutationFn: (preventDirectGroupAdds: boolean) => chatSettingsService.update({ preventDirectGroupAdds }),
     onSuccess: (saved) => queryClient.setQueryData(settingsKey, saved),
   });
 
@@ -61,6 +65,17 @@ export default function ChatSettingsPage() {
             </label>
           ))}
         </fieldset>
+      </section>
+      <section className={settingsStyles.block}>
+        <h2 className={settingsStyles.blockHeading}>Group invitations</h2>
+        <ConsentToggleRow
+          label="Require invitations to join groups"
+          description="People can’t add you directly to new group chats. After accepting an invitation, secure membership setup may still be required."
+          enabled={data.preventDirectGroupAdds}
+          disabled={updateGroupPrivacy.isPending}
+          onChange={(enabled) => updateGroupPrivacy.mutate(enabled)}
+        />
+        {updateGroupPrivacy.isError ? <p className={settingsStyles.errorText} role="alert">{readErrorMessageForDisplay(updateGroupPrivacy.error)}</p> : null}
       </section>
       <section className={settingsStyles.block}>
         <h2 className={settingsStyles.blockHeading}>Notifications</h2>
