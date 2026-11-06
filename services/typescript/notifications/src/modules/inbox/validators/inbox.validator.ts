@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { isValidIanaTimeZone } from "../../reengagement/services/reengagementPolicy.service.js";
+
 import { preferenceCategories } from "../../../constants/notificationCategories.constant.js";
 import { validationError } from "../../../errors/notifications.error.js";
 
@@ -28,3 +30,6 @@ export const registerDeviceTokenBodySchema = z.strictObject({
 });
 
 export const removeDeviceTokenBodySchema = z.strictObject({ token: z.string().min(10).max(300) });
+export const activityHeartbeatBodySchema = z.strictObject({
+  timeZone: z.string().min(1).max(64).refine(isValidIanaTimeZone, "timeZone must be a valid IANA timezone."),
+});

@@ -3,7 +3,7 @@ import { requireAccountId } from "../../../middlewares/gatewayPrincipal.middlewa
 import type { RouteContext } from "../../../types/route.type.js";
 import { emptyResponse, json, readBoundedLimit, readJsonBody, readQuery } from "../../../utils/http.util.js";
 import {
-  listNotificationsQuerySchema, parseWithSchema, registerDeviceTokenBodySchema, removeDeviceTokenBodySchema, updatePreferenceBodySchema,
+  activityHeartbeatBodySchema, listNotificationsQuerySchema, parseWithSchema, registerDeviceTokenBodySchema, removeDeviceTokenBodySchema, updatePreferenceBodySchema,
 } from "../validators/inbox.validator.js";
 import type { PreferenceCategory } from "../../../types/notification.type.js";
 
@@ -48,6 +48,13 @@ export class InboxController {
     const userId = requireAccountId(request);
     const body = parseWithSchema(removeDeviceTokenBodySchema, readJsonBody(request));
     await this.container.removeDeviceToken.execute({ userId, token: body.token });
+    return emptyResponse();
+  };
+
+  public recordActivity = async ({ request }: RouteContext) => {
+    const userId = requireAccountId(request);
+    const body = parseWithSchema(activityHeartbeatBodySchema, readJsonBody(request));
+    await this.container.recordActivity.execute({ accountId: userId, timeZone: body.timeZone });
     return emptyResponse();
   };
 }

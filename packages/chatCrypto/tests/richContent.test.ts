@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { ChatControlLedger, ChatCryptoClient, InMemoryKeyDirectory, MemoryKeyValueStore, createPollOptions, nextPollVote, sanitizeControl, sanitizePoll } from "../src";
+import groupAttributesFixture from "../fixtures/group-attributes-v1.json";
+import { ChatControlLedger, ChatCryptoClient, InMemoryKeyDirectory, MemoryKeyValueStore, createPollOptions, decodeBase64, encodeBase64, nextPollVote, openGroupAttributes, sanitizeControl, sanitizePoll, sealGroupAttributes } from "../src";
 import { seededRandom } from "./testRandom";
 
 const group = "0190f0a0-0000-7000-8000-00000000c001";
@@ -71,6 +72,27 @@ describe("encrypted locations, polls and controls", () => {
 });
 
 describe("encrypted group attributes", () => {
+  it("matches the shared deterministic Android and React Native wire fixture", () => {
+    const fixture = groupAttributesFixture as {
+      groupKey: string;
+      encryptedAttributes: string;
+      attributes: { title: string; description: string | null; avatar: null };
+    };
+    const key = encodeBase64(Uint8Array.from({ length: 32 }, (_, index) => index));
+    const encryptedAttributes = sealGroupAttributes(
+      { title: "Nantty Makers", description: "Designing together", avatar: null },
+      key,
+      (length) => length === 32
+        ? Uint8Array.from({ length }, (_, index) => index)
+        : Uint8Array.from({ length }, (_, index) => index + 32),
+    );
+
+    expect(key).toBe(fixture.groupKey);
+    expect(encryptedAttributes).toBe(fixture.encryptedAttributes);
+    expect(decodeBase64(encryptedAttributes).slice(0, 12)).toEqual(Uint8Array.from({ length: 12 }, (_, index) => index + 32));
+    expect(openGroupAttributes(encryptedAttributes, [key])).toEqual(fixture.attributes);
+  });
+
   it("shares the group key inside group messages so only members can read the name", async () => {
     const world = createWorld();
     const owner = await world.device("owner", "ga-owner");

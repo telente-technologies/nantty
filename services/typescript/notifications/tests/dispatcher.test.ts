@@ -186,6 +186,23 @@ describe("push", () => {
     expect(harness.pushSender.sent).toHaveLength(1);
   });
 
+  it("rechecks explicit marketing consent at push dispatch time", async () => {
+    harness.identity.add(makeRecipient({ accountId: "u1", marketingConsent: false, pushEnabled: true }));
+    await harness.preferences.upsert("u1", "marketing", { push: true });
+    await harness.deviceTokens.register("u1", "ExponentPushToken[marketing-device]", "ios");
+
+    const outcome = await harness.dispatcher.dispatch({
+      eventId: "reengagement-consent-race",
+      recipientUserId: "u1",
+      preferenceCategory: "marketing",
+      push: { title: "Come back", body: "Explore when you are ready." },
+    });
+
+    expect(outcome.push).toBe("skipped:marketing_consent_required");
+    expect(harness.pushSender.sent).toHaveLength(0);
+    expect([...harness.deliveries.rows.values()].filter((row) => row.channel === "push")).toHaveLength(0);
+  });
+
   it("groups registrations by provider while preserving Expo as the omitted-provider default", async () => {
     await harness.deviceTokens.register("buyer1", "ExponentPushToken[expo-device-token]", "ios");
     await harness.deviceTokens.register("buyer1", "fcm-device-registration-token", "android", "fcm");

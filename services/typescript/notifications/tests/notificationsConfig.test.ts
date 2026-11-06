@@ -69,3 +69,19 @@ describe("notifications push provider configuration", () => {
     expect(() => loadNotificationsConfigFromEnvironment()).toThrow(/PUSH_PROVIDER must be one of/);
   });
 });
+
+describe("re-engagement quiet-hour configuration", () => {
+  it("defaults to 21:00–08:00 and accepts valid configured bounds", () => {
+    stubConfiguration("ses");
+    expect(loadNotificationsConfigFromEnvironment().reengagement).toEqual({ quietHoursStart: "21:00", quietHoursEnd: "08:00" });
+    vi.stubEnv("REENGAGEMENT_QUIET_HOURS_START", "22:15");
+    vi.stubEnv("REENGAGEMENT_QUIET_HOURS_END", "07:30");
+    expect(loadNotificationsConfigFromEnvironment().reengagement).toEqual({ quietHoursStart: "22:15", quietHoursEnd: "07:30" });
+  });
+
+  it("rejects malformed configured bounds", () => {
+    stubConfiguration("ses");
+    vi.stubEnv("REENGAGEMENT_QUIET_HOURS_START", "25:00");
+    expect(() => loadNotificationsConfigFromEnvironment()).toThrow(/REENGAGEMENT_QUIET_HOURS_START must use 24-hour HH:mm format/);
+  });
+});

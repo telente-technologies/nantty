@@ -22,6 +22,7 @@ import type { EmailSender } from "./interfaces/emailSender.interface.js";
 import type { IdentityDirectory } from "./interfaces/identityDirectory.interface.js";
 import type { JobQueue, MessageBroker, QueueReader } from "./interfaces/jobQueue.interface.js";
 import type { PushSender } from "./interfaces/pushSender.interface.js";
+import type { ReengagementRepository } from "./interfaces/reengagementRepository.interface.js";
 import type { DeliveryRepository, DeviceTokenRepository, NotificationRepository, PreferenceRepository, SuppressionRepository, UnsubscribeReceiptRepository } from "./interfaces/repositories.interface.js";
 import { StaffAuthenticator } from "./middlewares/staffAuth.middleware.js";
 import { DeliverEmailIfStillUnreadHandler } from "./modules/delivery/commands/deliverEmailIfStillUnread/deliverEmailIfStillUnread.handler.js";
@@ -54,6 +55,9 @@ import { MarkAllNotificationsReadHandler } from "./modules/inbox/commands/markAl
 import { MarkNotificationReadHandler } from "./modules/inbox/commands/markNotificationRead/markNotificationRead.handler.js";
 import { RegisterDeviceTokenHandler } from "./modules/inbox/commands/registerDeviceToken/registerDeviceToken.handler.js";
 import { RemoveDeviceTokenHandler } from "./modules/inbox/commands/removeDeviceToken/removeDeviceToken.handler.js";
+import { RecordActivityHandler } from "./modules/reengagement/commands/recordActivity/recordActivity.handler.js";
+import { ProcessReengagementHandler } from "./modules/reengagement/commands/processReengagement/processReengagement.handler.js";
+import { ReengagementPrismaRepository } from "./modules/reengagement/repositories/reengagement.prisma.repository.js";
 import { UpdateNotificationPreferenceHandler } from "./modules/inbox/commands/updateNotificationPreference/updateNotificationPreference.handler.js";
 import { DeviceTokenPrismaRepository } from "./modules/inbox/repositories/deviceToken.prisma.repository.js";
 import { NotificationPrismaRepository } from "./modules/inbox/repositories/notification.prisma.repository.js";
@@ -85,6 +89,7 @@ export interface ContainerOverrides {
   readonly legalVersions?: LegalVersionSource | null;
   readonly pause?: (milliseconds: number) => Promise<void>;
   readonly postNotificationSubscribers?: PostNotificationSubscriberSource | null;
+  readonly reengagementRepository?: ReengagementRepository;
 }
 
 export function createContainer(config: NotificationsConfig, logger: Logger, overrides: ContainerOverrides = {}) {
@@ -111,6 +116,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
   const campaigns: CampaignRepository = new CampaignPrismaRepository(prisma);
   const drafts: NoticeDraftRepository = new NoticeDraftPrismaRepository(prisma);
   const unsubscribeReceipts: UnsubscribeReceiptRepository = new UnsubscribeReceiptPrismaRepository(prisma);
+  const reengagementRepository: ReengagementRepository = overrides.reengagementRepository ?? new ReengagementPrismaRepository(prisma);
 
   const unsubscribeTokens = new UnsubscribeTokenService(config.unsubscribeSigningSecret, config.publicApiBaseUrl, config.unsubscribeTokenTtlSeconds);
   const emailDelivery = new EmailDeliveryService({ sender: emailSender, deliveries, suppressions, preferences, unsubscribeTokens, marketingMaxPerWeek: config.marketingMaxPerWeek, brand });
@@ -144,6 +150,9 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
     markAllNotificationsRead: new MarkAllNotificationsReadHandler(notifications),
     listNotificationPreferences: new ListNotificationPreferencesHandler(preferences),
     updateNotificationPreference: new UpdateNotificationPreferenceHandler(preferences),
+    reengagementRepository,
+    recordActivity: new RecordActivityHandler(reengagementRepository),
+    processReengagement: new ProcessReengagementHandler({ repository: reengagementRepository, identity, preferences, dispatcher, quietHours: config.reengagement }),
     registerDeviceToken: new RegisterDeviceTokenHandler(deviceTokens),
     removeDeviceToken: new RemoveDeviceTokenHandler(deviceTokens),
     listAdminEmailReferenceData: new ListAdminEmailReferenceDataHandler(identity),

@@ -8,8 +8,9 @@ import { parseDomainEventEnvelope, unwrapQueueMessageBody } from "../modules/eve
 import type { DeliverTemplateEmailCommand } from "../modules/delivery/commands/deliverTemplateEmail/deliverTemplateEmail.command.js";
 import { parseWidgetRefreshFanoutJob } from "../modules/widgetRefresh/commands/sendWidgetRefresh/sendWidgetRefresh.handler.js";
 import { parsePostNotificationFanoutJob } from "../modules/postNotifications/commands/runPostNotificationFanout/runPostNotificationFanout.handler.js";
+import { reengagementJobType } from "../modules/reengagement/services/reengagementPolicy.service.js";
 
-type Handlers = Pick<Container, "handleDomainEvent" | "processBulkBatch" | "deliverEmailIfStillUnread" | "deliverTemplateEmail" | "deliverSupportTicketAlert" | "deliverFailedEmailAlert" | "recordSesFeedback" | "runDigestBatch" | "runPostNotificationFanout" | "sendWidgetRefresh">;
+type Handlers = Pick<Container, "handleDomainEvent" | "processBulkBatch" | "deliverEmailIfStillUnread" | "deliverTemplateEmail" | "deliverSupportTicketAlert" | "deliverFailedEmailAlert" | "recordSesFeedback" | "runDigestBatch" | "runPostNotificationFanout" | "sendWidgetRefresh" | "processReengagement">;
 const preferenceCategories = new Set(["auth", "orders", "escrow", "seller", "payments", "creator", "checkmarks", "social", "milestones", "live", "trust", "privacy", "support", "marketing"]);
 
 function parseTemplateEmailJob(job: Record<string, unknown>): DeliverTemplateEmailCommand | null {
@@ -68,6 +69,9 @@ export function createJobMessageHandler(handlers: Handlers, logger: Logger): (bo
       const refresh = parseWidgetRefreshFanoutJob(job);
       if (refresh === null) throw new PoisonMessageError("invalid widget refresh fanout job");
       await handlers.sendWidgetRefresh.runFanout(refresh);
+    } else if (job["type"] === reengagementJobType) {
+      if (typeof job["deliveryId"] !== "string" || !/^[0-9a-f-]{36}$/i.test(job["deliveryId"])) throw new PoisonMessageError("invalid re-engagement delivery job");
+      await handlers.processReengagement.execute({ deliveryId: job["deliveryId"] });
     } else {
       logger.warn("unknown job type dead-lettered", { type: String(job["type"]) });
       throw new PoisonMessageError(`unknown job type ${String(job["type"])}`);

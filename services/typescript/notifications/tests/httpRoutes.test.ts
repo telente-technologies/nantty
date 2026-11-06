@@ -12,6 +12,7 @@ import { createTestHarness, silentLogger, type TestHarness } from "./fakes/testH
 
 let harness: TestHarness;
 let handle: ReturnType<typeof createRequestHandler>;
+const activityCalls: { accountId: string; timeZone: string }[] = [];
 
 function request(method: string, url: string, headers: Record<string, string> = {}, body?: unknown): HttpRequestContext {
   const path = url.split("?")[0]!;
@@ -26,12 +27,14 @@ async function call(method: string, url: string, headers: Record<string, string>
 
 beforeEach(async () => {
   harness = createTestHarness();
+  activityCalls.length = 0;
   const container = {
     listNotifications: new ListNotificationsHandler(harness.notifications),
     getUnreadCount: new GetUnreadCountHandler(harness.notifications),
     markNotificationRead: new MarkNotificationReadHandler(harness.notifications),
     unsubscribeTokens: harness.unsubscribeTokens,
     unsubscribeFromMarketing: new UnsubscribeFromMarketingHandler(harness.unsubscribeTokens, harness.identity, harness.unsubscribeReceipts),
+    recordActivity: { execute: async (input: { accountId: string; timeZone: string }) => { activityCalls.push(input); } },
   } as unknown as Container;
   handle = createRequestHandler(createRoutes(container), silentLogger);
   await harness.notifications.insertIfAbsent({ userId: "u1", dedupeKey: "k1", category: "orders", kind: null, templateKey: null, title: "Order shipped", body: "b", actor: null, data: {} });
@@ -59,6 +62,13 @@ describe("inbox routes", () => {
 
   it("returns 404 for unknown routes", async () => {
     expect((await call("GET", "/api/v1/nope")).status).toBe(404);
+  });
+
+  it("requires the authenticated account and a valid IANA timezone for activity heartbeats", async () => {
+    expect((await call("POST", "/api/v1/notifications/activity", {}, { timeZone: "Africa/Lagos" })).status).toBe(401);
+    expect((await call("POST", "/api/v1/notifications/activity", { "x-nantty-account-id": "u1" }, { timeZone: "Mars/Olympus" })).status).toBe(400);
+    expect((await call("POST", "/api/v1/notifications/activity", { "x-nantty-account-id": "u1" }, { timeZone: "Africa/Lagos" })).status).toBe(204);
+    expect(activityCalls).toEqual([{ accountId: "u1", timeZone: "Africa/Lagos" }]);
   });
 });
 

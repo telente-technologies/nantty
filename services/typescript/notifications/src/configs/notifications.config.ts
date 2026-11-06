@@ -22,6 +22,7 @@ export interface NotificationsConfig {
   readonly supportInbox?: { readonly recipients: readonly string[]; readonly adminBaseUrl: string };
   readonly otpEnvelopeKeys: Readonly<Record<string, Buffer>>;
   readonly marketingMaxPerWeek: number;
+  readonly reengagement: { readonly quietHoursStart: string; readonly quietHoursEnd: string };
   readonly policyNotice: { readonly batchSize: number; readonly ratePerSecond: number; readonly autoSend: boolean };
   readonly digestSource: { readonly baseUrl: string; readonly internalToken: string } | null;
   readonly pushProvider: PushProviderMode;
@@ -85,6 +86,10 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
     webBaseUrl: readOrDefault("NANTTY_WEB_BASE_URL", "https://nantty.com"),
     supportInbox: { recipients: readSupportInboxRecipients(problems), adminBaseUrl: readOrDefault("ADMIN_WEB_BASE_URL", "https://admin.nantty.com") },
     marketingMaxPerWeek: Number(readOrDefault("MARKETING_MAX_PER_WEEK", "3")),
+    reengagement: {
+      quietHoursStart: readOrDefault("REENGAGEMENT_QUIET_HOURS_START", "21:00"),
+      quietHoursEnd: readOrDefault("REENGAGEMENT_QUIET_HOURS_END", "08:00"),
+    },
     policyNotice: {
       batchSize: Number(readOrDefault("POLICY_NOTICE_BATCH_SIZE", "200")),
       ratePerSecond: Number(readOrDefault("POLICY_NOTICE_RATE_PER_SECOND", "14")),
@@ -101,6 +106,10 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
   if (!Number.isInteger(config.unsubscribeTokenTtlSeconds) || config.unsubscribeTokenTtlSeconds < 24 * 60 * 60 || config.unsubscribeTokenTtlSeconds > 365 * 24 * 60 * 60) problems.push("UNSUBSCRIBE_TOKEN_TTL_DAYS must be a whole number between 1 and 365");
   if (!(config.policyNotice.batchSize > 0) || !(config.policyNotice.ratePerSecond > 0)) problems.push("POLICY_NOTICE_BATCH_SIZE and POLICY_NOTICE_RATE_PER_SECOND must be positive");
   if (!(config.rabbitMq.prefetch > 0)) problems.push("RABBITMQ_PREFETCH must be positive");
+  for (const [name, value] of [["REENGAGEMENT_QUIET_HOURS_START", config.reengagement.quietHoursStart], ["REENGAGEMENT_QUIET_HOURS_END", config.reengagement.quietHoursEnd]] as const) {
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) problems.push(`${name} must use 24-hour HH:mm format`);
+  }
+  if (config.reengagement.quietHoursStart === config.reengagement.quietHoursEnd) problems.push("REENGAGEMENT_QUIET_HOURS_START and REENGAGEMENT_QUIET_HOURS_END must differ");
   if (problems.length > 0) throw new Error(`Invalid notifications configuration: ${problems.join("; ")}`);
   return config;
 }

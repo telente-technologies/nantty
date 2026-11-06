@@ -7,6 +7,7 @@ import { checkRabbitMqConnections } from "./integrations/rabbitMqConnection.inte
 import { createContainer, type Container, type ContainerOverrides } from "./container.js";
 import { createDomainEventMessageHandler, createJobMessageHandler, createSesFeedbackMessageHandler } from "./jobs/messageRouting.job.js";
 import { DigestSchedulerJob } from "./jobs/digestScheduler.job.js";
+import { ReengagementSchedulerJob } from "./jobs/reengagementScheduler.job.js";
 import { OutboxRelayJob, relayPendingOutboxEvents } from "./jobs/outboxRelay.job.js";
 import { QueueConsumerJob } from "./jobs/queueConsumer.job.js";
 import { createBulkCampaignRoutes } from "./modules/bulkCampaigns/routes/bulkCampaigns.routes.js";
@@ -85,6 +86,7 @@ export function createNotificationsApp(config: NotificationsConfig, options: { r
     ]
     : [];
   const digestScheduler = config.consumersEnabled && container.runDigestBatch !== null ? new DigestSchedulerJob(container.broker, config.queues.jobs) : null;
+  const reengagementScheduler = config.consumersEnabled ? new ReengagementSchedulerJob(container.reengagementRepository, container.broker, config.queues.jobs, logger, config.reengagement) : null;
   const outboxRelay = config.consumersEnabled ? new OutboxRelayJob(() => relayPendingOutboxEvents(container.prisma, container.broker), logger) : null;
   return {
     container,
@@ -94,10 +96,12 @@ export function createNotificationsApp(config: NotificationsConfig, options: { r
       await server.start();
       for (const consumer of consumers) consumer.start();
       digestScheduler?.start();
+      reengagementScheduler?.start();
       outboxRelay?.start();
     },
     async stop() {
       digestScheduler?.stop();
+      reengagementScheduler?.stop();
       outboxRelay?.stop();
       await Promise.all(consumers.map((consumer) => consumer.stop()));
       await server.stop();

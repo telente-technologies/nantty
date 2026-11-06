@@ -11,6 +11,7 @@ export function createInboxRoutes(container: Container): readonly RouteDefinitio
     { method: "GET", path: "/api/v1/notifications/preferences", handler: controller.listPreferences },
     { method: "PATCH", path: "/api/v1/notifications/preferences", handler: controller.updatePreference },
     { method: "POST", path: "/api/v1/notifications/device-tokens", handler: controller.registerDeviceToken },
+    { method: "POST", path: "/api/v1/notifications/activity", handler: controller.recordActivity },
     { method: "DELETE", path: "/api/v1/notifications/device-tokens", handler: controller.removeDeviceToken },
     { method: "POST", path: "/api/v1/notifications/:notificationId/read", handler: controller.markRead },
   ];
