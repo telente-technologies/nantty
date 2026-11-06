@@ -168,16 +168,17 @@ model SupportTicket {
 }
 
 model SupportTicketMessage {
-  id          String        @id @db.Uuid
-  ticketId    String        @map("ticket_id") @db.Uuid
-  authorKind  String        @map("author_kind")
-  authorId    String?       @map("author_id")
-  authorName  String        @map("author_name")
-  body        String
-  attachments Json          @default("[]")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-
+  id             String        @id @db.Uuid
+  ticketId       String        @map("ticket_id") @db.Uuid
+  authorKind     String        @map("author_kind")
+  authorId       String?       @map("author_id")
+  authorName     String        @map("author_name")
+  body           String
+  attachments    Json          @default("[]")
+  idempotencyKey String?       @map("idempotency_key")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  ticket         SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  @@unique([ticketId, authorId, idempotencyKey])
   @@index([ticketId, createdAt])
   @@map("ticket_messages")
 }

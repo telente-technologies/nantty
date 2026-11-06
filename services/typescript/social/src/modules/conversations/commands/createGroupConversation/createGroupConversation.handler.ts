@@ -6,6 +6,7 @@ import { conversationRepository } from "../../repositories/conversation.reposito
 import { loadConversationViewForMember } from "../../services/conversationViewById.service.js";
 import { requireSealedGroupAttributes, verifyEncryptedGroupPhoto } from "../../services/groupAttributes.service.js";
 import { resolveAddableMemberIds } from "../../services/groupMembers.service.js";
+import { requireDirectGroupAddsAllowed } from "../../services/directGroupAddPolicy.service.js";
 import type { CreateGroupConversationCommand } from "./createGroupConversation.command.js";
 
 export function createCreateGroupConversationHandler(context: HandlerContext): Handler<CreateGroupConversationCommand, ConversationView> {
@@ -15,6 +16,7 @@ export function createCreateGroupConversationHandler(context: HandlerContext): H
     const addable = await resolveAddableMemberIds(context, creatorId, memberIds, [creatorId]);
     const now = context.clock.now();
     const conversation = await context.database.transaction(async (transaction) => {
+      await requireDirectGroupAddsAllowed(transaction, addable);
       const created = await conversationRepository.create(transaction, { kind: "group", encryptedAttributes: sealed, createdById: creatorId, lastMessageAt: now, createdAt: now, ...(photoMediaId === undefined ? {} : { photoMediaId }) }, [
         { accountId: creatorId, role: "owner", inboxFolder: "chats" },
         ...addable.map((accountId) => ({ accountId, role: "member" as const, inboxFolder: "chats" as const })),

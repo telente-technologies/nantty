@@ -14,6 +14,6 @@ export function createChatSettingsController(route: RouteFactory, handlers: Chat
   return {
     get: route({ authentication: "required" }, ({ principal }) => handlers.getChatSettings({ accountId: principal.accountId })),
     update: route({ authentication: "required", body: updateChatSettingsBodySchema }, ({ principal, body }) =>
-      handlers.updateChatSettings({ accountId: principal.accountId, messageRequestsFrom: body.messageRequestsFrom, notifications: body.notifications, timezone: body.timezone })),
+      handlers.updateChatSettings({ accountId: principal.accountId, messageRequestsFrom: body.messageRequestsFrom, preventDirectGroupAdds: body.preventDirectGroupAdds, notifications: body.notifications, timezone: body.timezone })),
   };
 }

@@ -3,4 +3,5 @@ export interface PostCustomerReplyCommand {
   readonly ticketId: string;
   readonly text: string;
   readonly attachmentUrls: readonly string[];
+  readonly idempotencyKey: string | null;
 }

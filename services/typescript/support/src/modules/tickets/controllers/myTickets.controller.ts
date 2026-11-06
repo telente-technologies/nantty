@@ -8,7 +8,7 @@ import { handleCreateSupportTicket } from "../commands/createSupportTicket/creat
 import { handlePostCustomerReply } from "../commands/postCustomerReply/postCustomerReply.handler.js";
 import { handleRateTicket } from "../commands/rateTicket/rateTicket.handler.js";
 import { handleGetRequesterTicket } from "../queries/getRequesterTicket/getRequesterTicket.handler.js";
-import { presentTicketForRequester, presentTicketThreadForRequester } from "../services/ticketPresenter.service.js";
+import { presentRequesterMessage, presentTicketForRequester, presentTicketThreadForRequester } from "../services/ticketPresenter.service.js";
 import type { TicketModuleDependencies } from "../tickets.module.js";
 import { createTicketBodySchema, customerReplyBodySchema, rateTicketBodySchema, ticketIdSchema } from "../validators/ticket.validator.js";
 
@@ -42,9 +42,10 @@ export function createMyTicketsController(dependencies: TicketModuleDependencies
     reply: async (context: HttpRouterContext) => {
       const accountId = requireViewerAccountId(context);
       const body = parseWithSchema(customerReplyBodySchema, parseJsonBody(context.request.body));
-      const ticket = await handlePostCustomerReply(dependencies, { accountId, ticketId: readTicketId(context), text: body.text, attachmentUrls: body.attachmentUrls ?? [] });
-      const thread = presentTicketThreadForRequester(ticket);
-      return json(201, thread.messages[thread.messages.length - 1] ?? null);
+      const idempotencyKey = readIdempotencyKey(context);
+      const ticket = await handlePostCustomerReply(dependencies, { accountId, ticketId: readTicketId(context), text: body.text, attachmentUrls: body.attachmentUrls ?? [], idempotencyKey });
+      const message = idempotencyKey === null ? ticket.messages.at(-1) : ticket.messages.find((entry) => entry.idempotencyKey === idempotencyKey);
+      return json(201, message === undefined ? null : presentRequesterMessage(message));
     },
     markRead: async (context: HttpRouterContext) => {
       const ticket = await handleGetRequesterTicket(dependencies, { accountId: requireViewerAccountId(context), ticketId: readTicketId(context) });

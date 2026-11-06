@@ -1,5 +1,5 @@
 import type { DomainEventInput } from "../events/outbox.event.js";
-import type { AgentRecord, MacroRecord, NewHistoryEntry, NewTicket, NewTicketMessage, TicketQueueFilter, TicketRecord, TicketUpdate, TicketWithThread } from "../types/ticket.type.js";
+import type { AgentRecord, MacroRecord, NewHistoryEntry, NewTicket, NewTicketMessage, TicketMessageRecord, TicketQueueFilter, TicketRecord, TicketUpdate, TicketWithThread } from "../types/ticket.type.js";
 import type { TicketCategory } from "../enums/ticket.enum.js";
 
 export interface TicketWrite {
@@ -12,6 +12,7 @@ export interface TicketWrite {
 export interface TicketStore {
   createTicket(ticket: NewTicket, firstMessage: NewTicketMessage, buildEvents: (created: TicketRecord) => readonly DomainEventInput[]): Promise<TicketWithThread>;
   findTicketByIdempotencyKey(accountId: string, key: string): Promise<TicketWithThread | null>;
+  findMessageByIdempotencyKey(ticketId: string, authorId: string, key: string): Promise<TicketMessageRecord | null>;
   findTicket(ticketId: string): Promise<TicketWithThread | null>;
   findTicketByNumber(number: number): Promise<TicketWithThread | null>;
   listTicketsForRequester(accountId: string): Promise<readonly TicketRecord[]>;

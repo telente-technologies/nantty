@@ -70,6 +70,7 @@ model DeviceToken {
   userId    String
   token     String   @unique
   platform  String
+  provider  String   @default("expo")
   createdAt DateTime @default(now())
 
   @@index([userId])

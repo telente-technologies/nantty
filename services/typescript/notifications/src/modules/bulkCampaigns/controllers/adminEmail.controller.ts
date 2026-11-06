@@ -10,9 +10,9 @@ const emailPermissions = ["support:email", "marketing:email"] as const;
 export class AdminEmailController {
   public constructor(private readonly container: Container) {}
 
-  private async staff(context: RouteContext) {
+  private async staff(context: RouteContext, permissions: readonly string[] = emailPermissions) {
     const staff = await this.container.staffAuthenticator.authenticate(context.request);
-    requireAnyPermission(staff, emailPermissions);
+    requireAnyPermission(staff, permissions);
     return staff;
   }
 
@@ -34,6 +34,11 @@ export class AdminEmailController {
   public listFailedDeliveries = async (context: RouteContext) => {
     await this.staff(context);
     return json(200, { deliveries: await this.container.listFailedEmailDeliveries.execute() });
+  };
+
+  public listFailedPushDeliveries = async (context: RouteContext) => {
+    await this.staff(context, ["support:email"]);
+    return json(200, { deliveries: await this.container.listFailedPushDeliveries.execute() });
   };
 
   public preview = async (context: RouteContext) => {

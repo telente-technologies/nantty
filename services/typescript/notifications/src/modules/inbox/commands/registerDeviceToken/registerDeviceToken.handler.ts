@@ -5,6 +5,6 @@ export class RegisterDeviceTokenHandler {
   public constructor(private readonly deviceTokens: DeviceTokenRepository) {}
 
   public async execute(command: RegisterDeviceTokenCommand): Promise<void> {
-    await this.deviceTokens.register(command.userId, command.token, command.platform);
+    await this.deviceTokens.register(command.userId, command.token, command.platform, command.provider ?? "expo");
   }
 }

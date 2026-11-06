@@ -1,4 +1,5 @@
 import type { ActorSummary, DeliveryChannel, DeliveryStatus, InboxCategory, InboxKind, MailKind } from "../types/notification.type.js";
+import type { PushProvider, RegisteredDeviceToken } from "./pushSender.interface.js";
 
 export interface StoredNotification {
   readonly id: string;
@@ -58,6 +59,7 @@ export interface DeliveryRepository {
   finish(id: string, status: DeliveryStatus, detail: { readonly skipReason?: string; readonly providerMessageId?: string }): Promise<void>;
   countSentEmails(userId: string, mailKind: MailKind, since: Date): Promise<number>;
   listFailedEmails(limit: number): Promise<readonly FailedDeliveryRecord[]>;
+  listFailedPushes(limit: number): Promise<readonly FailedDeliveryRecord[]>;
   findUserIdByProviderMessageId(providerMessageId: string): Promise<string | null>;
 }
 
@@ -73,9 +75,10 @@ export interface PreferenceRepository {
 }
 
 export interface DeviceTokenRepository {
-  register(userId: string, token: string, platform: string): Promise<void>;
-  remove(userId: string, token: string): Promise<void>;
+  register(userId: string, token: string, platform: string, provider?: PushProvider): Promise<void>;
+  remove(userId: string, token: string, provider?: PushProvider): Promise<void>;
   listTokens(userId: string): Promise<readonly string[]>;
+  listRegistrations(userId: string): Promise<readonly RegisteredDeviceToken[]>;
 }
 
 export type SuppressionReason = "hard_bounce" | "complaint" | "manual";

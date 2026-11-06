@@ -4,7 +4,9 @@ import type { Logger } from "@nantty/fastify-platform";
 import type { NotificationsConfig } from "./configs/notifications.config.js";
 import { createPrismaClient, type PrismaClient } from "./databases/prisma.database.js";
 import { IdentityHttpDirectory } from "./integrations/identityDirectory.integration.js";
-import { ExpoPushSender, LoggingPushSender } from "./integrations/expoPush.integration.js";
+import { ExpoPushSender } from "./integrations/expoPush.integration.js";
+import { FcmPushSender } from "./integrations/fcmPush.integration.js";
+import { ProviderAwarePushSender } from "./integrations/providerAwarePush.integration.js";
 import { SocialHttpDigestSource } from "./integrations/digestSource.integration.js";
 import { SocialHttpPostNotificationSubscribers } from "./integrations/postNotificationSubscribers.integration.js";
 import type { PostNotificationSubscriberSource } from "./interfaces/postNotificationSubscribers.interface.js";
@@ -30,6 +32,7 @@ import { EmailDeliveryService } from "./modules/delivery/services/emailDelivery.
 import { NotificationDispatcherService } from "./modules/delivery/services/notificationDispatcher.service.js";
 import { SupportInboxAlertService } from "./modules/delivery/services/supportInboxAlert.service.js";
 import { ListFailedEmailDeliveriesHandler } from "./modules/delivery/queries/listFailedEmailDeliveries/listFailedEmailDeliveries.handler.js";
+import { ListFailedPushDeliveriesHandler } from "./modules/delivery/queries/listFailedPushDeliveries/listFailedPushDeliveries.handler.js";
 import { QueueAdminEmailHandler } from "./modules/bulkCampaigns/commands/queueAdminEmail/queueAdminEmail.handler.js";
 import { ProcessBulkBatchHandler } from "./modules/bulkCampaigns/commands/processBulkBatch/processBulkBatch.handler.js";
 import { QueueLegalNoticeHandler } from "./modules/bulkCampaigns/commands/queueLegalNotice/queueLegalNotice.handler.js";
@@ -91,7 +94,12 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
   const sesFeedbackReader = overrides.sesFeedbackReader !== undefined ? overrides.sesFeedbackReader : config.queues.sesFeedback === "" ? null : new SqsQueueClient(config.aws.region, config.aws.endpoint);
   const identity: IdentityDirectory = overrides.identity ?? new IdentityHttpDirectory(config.identity.baseUrl, config.identity.internalToken);
   const emailSender: EmailSender = overrides.emailSender ?? (config.emailProvider === "log" ? new LoggingEmailSender(logger) : new SesEmailSender({ region: config.aws.region, endpoint: config.aws.endpoint, fromAddress: config.email.fromAddress, configurationSet: config.email.configurationSet }));
-  const pushSender: PushSender = overrides.pushSender ?? (config.pushProvider === "expo" ? new ExpoPushSender() : new LoggingPushSender(logger));
+  const pushSender: PushSender = overrides.pushSender ?? new ProviderAwarePushSender(
+    config.pushProvider,
+    new ExpoPushSender(),
+    config.fcm === undefined ? null : new FcmPushSender(config.fcm),
+    logger,
+  );
   const brand = readEmailBrandFromEnvironment(process.env);
   const acceptUrl = `${config.webBaseUrl}/settings/legal/accept`;
 
@@ -141,6 +149,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
     listAdminEmailReferenceData: new ListAdminEmailReferenceDataHandler(identity),
     listAdminEmailSends: new ListAdminEmailSendsHandler(campaigns),
     listFailedEmailDeliveries: new ListFailedEmailDeliveriesHandler(deliveries),
+    listFailedPushDeliveries: new ListFailedPushDeliveriesHandler(deliveries),
     previewAdminEmail: new PreviewAdminEmailHandler(planner),
     queueAdminEmail: new QueueAdminEmailHandler({ planner, campaigns, jobQueue, jobsQueueUrl: config.queues.jobs, identity, batchSize, ratePerSecond }),
     noticeDraftProvisioner: new NoticeDraftProvisionerService(drafts, overrides.legalVersions !== undefined ? overrides.legalVersions : new IdentityLegalVersionSource(config.identity.baseUrl), config.webBaseUrl),

@@ -2,16 +2,27 @@ import { randomUUID } from "node:crypto";
 
 import type { Prisma, PrismaClient } from "../../../generated/prisma/client.js";
 import { buildOutboxRows, type DomainEventInput } from "../../../events/outbox.event.js";
-import { notFound } from "../../../errors/support.error.js";
+import { conflict, notFound } from "../../../errors/support.error.js";
 import type { TicketStore, TicketWrite } from "../../../interfaces/ticketStore.interface.js";
-import type { NewHistoryEntry, NewTicketMessage, TicketQueueFilter, TicketUpdate } from "../../../types/ticket.type.js";
+import type { NewHistoryEntry, NewTicketMessage, TicketMessageRecord, TicketQueueFilter, TicketUpdate } from "../../../types/ticket.type.js";
 import { mapTicketRow, mapTicketRowWithThread, threadInclude } from "./ticketMapping.repository.js";
 import { createSupportAuxiliaryRepository } from "./supportAuxiliary.prisma.repository.js";
 
 type Transaction = Prisma.TransactionClient;
 
 function messageRow(ticketId: string, message: NewTicketMessage) {
-  return { id: randomUUID(), ticketId, authorKind: message.authorKind, authorId: message.authorId, authorName: message.authorName, body: message.body, attachments: message.attachments as unknown as Prisma.InputJsonValue };
+  return { id: randomUUID(), ticketId, authorKind: message.authorKind, authorId: message.authorId, authorName: message.authorName, body: message.body, attachments: message.attachments as unknown as Prisma.InputJsonValue, idempotencyKey: message.idempotencyKey ?? null };
+}
+
+function isUniqueConstraintViolation(error: unknown): boolean {
+  return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
+}
+
+function ensureSameIdempotentMessage(existing: { readonly authorKind: string; readonly body: string; readonly attachments: unknown }, message: NewTicketMessage): void {
+  const incomingAttachments = message.attachments as unknown as Prisma.InputJsonValue;
+  if (existing.authorKind !== message.authorKind || existing.body !== message.body || JSON.stringify(existing.attachments) !== JSON.stringify(incomingAttachments)) {
+    throw conflict("IDEMPOTENCY_KEY_REUSED", "This Idempotency-Key was already used with a different reply.");
+  }
 }
 
 function historyRow(ticketId: string, entry: NewHistoryEntry) {
@@ -76,6 +87,13 @@ export function createTicketPrismaRepository(prisma: PrismaClient): TicketStore 
     async findTicketByIdempotencyKey(accountId, key) {
       return findWithThread({ requesterAccountId_idempotencyKey: { requesterAccountId: accountId, idempotencyKey: key } });
     },
+    async findMessageByIdempotencyKey(ticketId, authorId, key) {
+      const message = await prisma.supportTicketMessage.findUnique({ where: { ticketId_authorId_idempotencyKey: { ticketId, authorId, idempotencyKey: key } } });
+      if (message === null) return null;
+      return { id: message.id, ticketId: message.ticketId, authorKind: message.authorKind as TicketMessageRecord["authorKind"], authorId: message.authorId,
+        authorName: message.authorName, body: message.body, attachments: Array.isArray(message.attachments) ? message.attachments as unknown as TicketMessageRecord["attachments"] : [],
+        idempotencyKey: message.idempotencyKey, createdAt: message.createdAt };
+    },
     findTicket: (ticketId) => findWithThread({ id: ticketId }),
     findTicketByNumber: (number) => findWithThread({ number }),
     async listTicketsForRequester(accountId) {
@@ -91,14 +109,28 @@ export function createTicketPrismaRepository(prisma: PrismaClient): TicketStore 
       return { items: rows.map(mapTicketRow), total };
     },
     async writeTicket(ticketId, write: TicketWrite) {
-      await prisma.$transaction(async (transaction) => {
+      try {
+        await prisma.$transaction(async (transaction) => {
         const exists = await transaction.supportTicket.findUnique({ where: { id: ticketId }, select: { id: true } });
         if (exists === null) throw notFound("Ticket");
+        if (write.message?.idempotencyKey != null && write.message.authorId !== null) {
+          const prior = await transaction.supportTicketMessage.findUnique({ where: { ticketId_authorId_idempotencyKey: { ticketId, authorId: write.message.authorId, idempotencyKey: write.message.idempotencyKey } } });
+          if (prior !== null) {
+            ensureSameIdempotentMessage(prior, write.message);
+            return;
+          }
+        }
         if (write.message !== undefined) await transaction.supportTicketMessage.create({ data: messageRow(ticketId, write.message) });
         if (write.history !== undefined) await transaction.supportTicketEvent.create({ data: historyRow(ticketId, write.history) });
         if (write.update !== undefined) await transaction.supportTicket.update({ where: { id: ticketId }, data: updateData(write.update) });
         await appendOutbox(transaction, write.events);
-      });
+        });
+      } catch (error) {
+        if (!isUniqueConstraintViolation(error) || write.message?.idempotencyKey == null || write.message.authorId === null) throw error;
+        const prior = await prisma.supportTicketMessage.findUnique({ where: { ticketId_authorId_idempotencyKey: { ticketId, authorId: write.message.authorId, idempotencyKey: write.message.idempotencyKey } } });
+        if (prior === null) throw error;
+        ensureSameIdempotentMessage(prior, write.message);
+      }
       const updated = await findWithThread({ id: ticketId });
       if (updated === null) throw notFound("Ticket");
       return updated;

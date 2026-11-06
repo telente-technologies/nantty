@@ -2,6 +2,7 @@ import type { PrismaClient } from "../../../databases/prisma.database.js";
 import { Prisma } from "../../../generated/prisma/client.js";
 import type { DeliveryClaim, DeliveryRepository } from "../../../interfaces/repositories.interface.js";
 import type { DeliveryStatus } from "../../../types/notification.type.js";
+import { sanitizePushFailureReason } from "../../../utils/pushFailure.util.js";
 
 const pendingDeliveryLeaseMs = 15 * 60 * 1000;
 const maximumEmailAttempts = 4;
@@ -50,6 +51,17 @@ export class DeliveryPrismaRepository implements DeliveryRepository {
       select: { id: true, eventId: true, templateKey: true, attemptCount: true, failedAt: true, skipReason: true },
     });
     return rows.map((row) => ({ id: row.id, eventId: row.eventId, templateKey: row.templateKey, attemptCount: row.attemptCount, failedAt: row.failedAt, reason: row.skipReason }));
+  }
+
+  public async listFailedPushes(limit: number) {
+    const rows = await this.prisma.delivery.findMany({
+      where: { channel: "push", status: "failed" },
+      orderBy: { failedAt: "desc" },
+      take: Math.max(1, Math.min(100, limit)),
+      // Deliberately omit userId, payload, device tokens, and provider response bodies.
+      select: { id: true, eventId: true, templateKey: true, attemptCount: true, failedAt: true, skipReason: true },
+    });
+    return rows.map((row) => ({ id: row.id, eventId: row.eventId, templateKey: row.templateKey, attemptCount: row.attemptCount, failedAt: row.failedAt, reason: sanitizePushFailureReason(row.skipReason) }));
   }
 
   public async findUserIdByProviderMessageId(providerMessageId: string): Promise<string | null> {

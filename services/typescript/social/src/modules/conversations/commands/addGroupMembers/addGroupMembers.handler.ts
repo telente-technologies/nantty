@@ -5,6 +5,7 @@ import type { ConversationMemberView } from "../../models/conversation.model.js"
 import { conversationRepository } from "../../repositories/conversation.repository.js";
 import { requireConversationMember, requireGroupAdmin } from "../../services/conversationAccess.service.js";
 import { listMemberViews, resolveAddableMemberIds } from "../../services/groupMembers.service.js";
+import { requireDirectGroupAddsAllowed } from "../../services/directGroupAddPolicy.service.js";
 import type { AddGroupMembersCommand } from "./addGroupMembers.command.js";
 
 export function createAddGroupMembersHandler(context: HandlerContext): Handler<AddGroupMembersCommand, ConversationMemberView[]> {
@@ -13,6 +14,7 @@ export function createAddGroupMembersHandler(context: HandlerContext): Handler<A
     requireGroupAdmin(access);
     const addable = await resolveAddableMemberIds(context, actorId, userIds, access.conversation.members.map((member) => member.accountId));
     await context.database.transaction(async (transaction) => {
+      await requireDirectGroupAddsAllowed(transaction, addable);
       for (const accountId of addable) await conversationRepository.upsertMember(transaction, conversationId, accountId, "member", "chats");
       if (addable.length > 0) await appendDomainEventsToOutbox(transaction, [conversationUpdatedEvent(conversationId, { membersAdded: addable }, context.clock.now(), { memberIds: [...access.conversation.members.map((member) => member.accountId), ...addable] })]);
     });

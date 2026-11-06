@@ -1,4 +1,5 @@
 import { readGatewayIdentitySecretsFromEnvironment } from "../middlewares/gatewayIdentity.middleware.js";
+import type { PushProviderMode } from "../interfaces/pushSender.interface.js";
 
 export interface NotificationsConfig {
   readonly gatewayIdentitySecrets?: readonly string[];
@@ -23,7 +24,8 @@ export interface NotificationsConfig {
   readonly marketingMaxPerWeek: number;
   readonly policyNotice: { readonly batchSize: number; readonly ratePerSecond: number; readonly autoSend: boolean };
   readonly digestSource: { readonly baseUrl: string; readonly internalToken: string } | null;
-  readonly pushProvider: "expo" | "log";
+  readonly pushProvider: PushProviderMode;
+  readonly fcm?: { readonly projectId: string; readonly clientEmail: string; readonly privateKey: string };
   readonly emailProvider?: "ses" | "log";
 }
 
@@ -52,6 +54,14 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
   const messageBus = readOrDefault("EVENT_BUS", "rabbitmq") === "sqs" ? "sqs" : "rabbitmq";
   const emailProviderValue = readOrDefault("EMAIL_PROVIDER", "ses");
   if (emailProviderValue !== "ses" && emailProviderValue !== "log") problems.push("EMAIL_PROVIDER must be either 'ses' or 'log'");
+  const pushProviderValue = readOrDefault("PUSH_PROVIDER", "log");
+  if (!["log", "expo", "fcm", "multi"].includes(pushProviderValue)) problems.push("PUSH_PROVIDER must be one of 'log', 'expo', 'fcm', or 'multi'");
+  const fcmProjectId = process.env["FCM_PROJECT_ID"]?.trim() ?? "";
+  const fcmClientEmail = process.env["FCM_CLIENT_EMAIL"]?.trim() ?? "";
+  const fcmPrivateKey = process.env["FCM_PRIVATE_KEY"]?.replace(/\\n/g, "\n").trim() ?? "";
+  const fcmEnabled = pushProviderValue === "fcm" || pushProviderValue === "multi";
+  const fcmConfigured = fcmProjectId !== "" && fcmClientEmail !== "" && fcmPrivateKey !== "";
+  if (fcmEnabled && !fcmConfigured) problems.push("FCM_PROJECT_ID, FCM_CLIENT_EMAIL, and FCM_PRIVATE_KEY are required when PUSH_PROVIDER is 'fcm' or 'multi'");
   const config: NotificationsConfig = {
     gatewayIdentitySecrets: readGatewayIdentitySecretsFromEnvironment(problems),
     host: readOrDefault("HOST", "0.0.0.0"),
@@ -81,7 +91,8 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
       autoSend: readOrDefault("POLICY_NOTICE_AUTO_SEND", "false") === "true",
     },
     digestSource: process.env["SOCIAL_INTERNAL_URL"]?.trim() ? { baseUrl: process.env["SOCIAL_INTERNAL_URL"].trim(), internalToken: process.env["SOCIAL_INTERNAL_TOKEN"]?.trim() ?? "" } : null,
-    pushProvider: readOrDefault("PUSH_PROVIDER", "log") === "expo" ? "expo" : "log",
+    pushProvider: ["log", "expo", "fcm", "multi"].includes(pushProviderValue) ? pushProviderValue as PushProviderMode : "log",
+    ...(fcmEnabled && fcmConfigured ? { fcm: { projectId: fcmProjectId, clientEmail: fcmClientEmail, privateKey: fcmPrivateKey } } : {}),
     emailProvider: emailProviderValue === "log" ? "log" : "ses",
   };
   if (config.emailProvider === "log" && process.env["NODE_ENV"] === "production") problems.push("EMAIL_PROVIDER=log is for local development only");

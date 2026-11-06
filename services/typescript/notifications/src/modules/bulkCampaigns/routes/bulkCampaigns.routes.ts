@@ -11,6 +11,7 @@ export function createBulkCampaignRoutes(container: Container): readonly RouteDe
     { method: "GET", path: "/api/v1/admin/support/email/segments", handler: email.listSegments },
     { method: "GET", path: "/api/v1/admin/support/email/sends", handler: email.listSends },
     { method: "GET", path: "/api/v1/admin/support/email/deliveries/failed", handler: email.listFailedDeliveries },
+    { method: "GET", path: "/api/v1/admin/support/notifications/push/deliveries/failed", handler: email.listFailedPushDeliveries },
     { method: "POST", path: "/api/v1/admin/support/email/preview", handler: email.preview },
     { method: "POST", path: "/api/v1/admin/support/email/send", handler: email.send },
     { method: "GET", path: "/api/v1/admin/legal/versions/:versionId/notice-draft", handler: legal.getDraft },

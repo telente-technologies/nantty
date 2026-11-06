@@ -50,7 +50,7 @@ export function mapTicketRow(row: TicketRow): TicketRecord {
 export function mapTicketRowWithThread(row: TicketRowWithThread): TicketWithThread {
   const messages: TicketMessageRecord[] = row.messages.map((message) => ({
     id: message.id, ticketId: message.ticketId, authorKind: message.authorKind as MessageAuthorKind, authorId: message.authorId, authorName: message.authorName,
-    body: message.body, attachments: readAttachments(message.attachments), createdAt: message.createdAt,
+    body: message.body, attachments: readAttachments(message.attachments), idempotencyKey: message.idempotencyKey, createdAt: message.createdAt,
   }));
   const history: TicketHistoryRecord[] = row.history.map((entry) => ({
     id: entry.id, action: entry.action, actorId: entry.actorId, actorName: entry.actorName, reason: entry.reason,

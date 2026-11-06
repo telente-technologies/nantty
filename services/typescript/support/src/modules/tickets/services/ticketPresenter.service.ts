@@ -26,7 +26,7 @@ export function presentTicketForRequester(ticket: TicketRecord) {
   };
 }
 
-function presentRequesterMessage(message: TicketMessageRecord) {
+export function presentRequesterMessage(message: TicketMessageRecord) {
   return {
     id: message.id,
     fromSupport: message.authorKind !== "customer",

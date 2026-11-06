@@ -13,6 +13,8 @@ export interface TicketMessageRecord {
   readonly authorName: string;
   readonly body: string;
   readonly attachments: readonly TicketAttachment[];
+  /** Client retry key; intentionally omitted from public presenters. */
+  readonly idempotencyKey: string | null;
   readonly createdAt: Date;
 }
 
@@ -81,6 +83,7 @@ export interface NewTicketMessage {
   readonly authorName: string;
   readonly body: string;
   readonly attachments: readonly TicketAttachment[];
+  readonly idempotencyKey?: string | null;
 }
 
 export interface NewHistoryEntry {

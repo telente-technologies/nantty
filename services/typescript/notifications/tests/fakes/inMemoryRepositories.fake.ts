@@ -108,6 +108,13 @@ export class InMemoryDeliveryRepository implements DeliveryRepository {
       .map(({ id, eventId, templateKey, attemptCount, failedAt, skipReason }) => ({ id, eventId, templateKey, attemptCount, failedAt: failedAt ?? null, reason: skipReason ?? null }));
   }
 
+  public async listFailedPushes(limit: number) {
+    return [...this.rows.values()].filter((row) => row.channel === "push" && row.status === "failed")
+      .sort((left, right) => (right.failedAt?.getTime() ?? 0) - (left.failedAt?.getTime() ?? 0))
+      .slice(0, limit)
+      .map(({ id, eventId, templateKey, attemptCount, failedAt, skipReason }) => ({ id, eventId, templateKey, attemptCount, failedAt: failedAt ?? null, reason: skipReason ?? null }));
+  }
+
   public async findUserIdByProviderMessageId(providerMessageId: string) { return [...this.rows.values()].find((row) => row.providerMessageId === providerMessageId)?.userId ?? null; }
   public byChannel(channel: string) { return [...this.rows.values()].filter((row) => row.channel === channel); }
 }
@@ -125,9 +132,16 @@ export class InMemoryPreferenceRepository implements PreferenceRepository {
 
 export class InMemoryDeviceTokenRepository implements DeviceTokenRepository {
   public readonly tokens = new Map<string, string>();
-  public async register(userId: string, token: string, _platform: string) { this.tokens.set(token, userId); }
-  public async remove(userId: string, token: string) { if (this.tokens.get(token) === userId) this.tokens.delete(token); }
+  public readonly providers = new Map<string, "expo" | "fcm">();
+  public async register(userId: string, token: string, _platform: string, provider: "expo" | "fcm" = "expo") { this.tokens.set(token, userId); this.providers.set(token, provider); }
+  public async remove(userId: string, token: string, provider?: "expo" | "fcm") {
+    if (this.tokens.get(token) === userId && (provider === undefined || (this.providers.get(token) ?? "expo") === provider)) {
+      this.tokens.delete(token);
+      this.providers.delete(token);
+    }
+  }
   public async listTokens(userId: string) { return [...this.tokens].filter(([, owner]) => owner === userId).map(([token]) => token); }
+  public async listRegistrations(userId: string) { return [...this.tokens].filter(([, owner]) => owner === userId).map(([token]) => ({ token, provider: this.providers.get(token) ?? "expo" as const })); }
 }
 
 export class InMemorySuppressionRepository implements SuppressionRepository {

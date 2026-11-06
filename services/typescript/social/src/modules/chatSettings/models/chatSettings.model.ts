@@ -10,6 +10,7 @@ export interface ChatNotificationSettings {
 
 export interface ChatSettingsView {
   readonly messageRequestsFrom: MessageRequestAudience;
+  readonly preventDirectGroupAdds: boolean;
   readonly notifications: ChatNotificationSettings;
   readonly timezone: string;
 }

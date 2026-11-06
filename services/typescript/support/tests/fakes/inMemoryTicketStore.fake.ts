@@ -22,7 +22,7 @@ export class InMemoryTicketStore implements TicketStore {
   }
 
   private toMessage(ticketId: string, message: NewTicketMessage) {
-    return { id: randomUUID(), ticketId, ...message, createdAt: this.now() };
+    return { id: randomUUID(), ticketId, ...message, idempotencyKey: message.idempotencyKey ?? null, createdAt: this.now() };
   }
 
   private toHistory(entry: NewHistoryEntry) {
@@ -45,6 +45,11 @@ export class InMemoryTicketStore implements TicketStore {
   public async findTicketByIdempotencyKey(accountId: string, key: string) {
     const found = [...this.tickets.values()].find((ticket) => ticket.requesterAccountId === accountId && ticket.idempotencyKey === key);
     return found === undefined ? null : this.snapshot(found);
+  }
+
+  public async findMessageByIdempotencyKey(ticketId: string, authorId: string, key: string) {
+    const ticket = this.tickets.get(ticketId);
+    return structuredClone(ticket?.messages.find((message) => message.authorId === authorId && message.idempotencyKey === key) ?? null);
   }
 
   public async findTicket(ticketId: string) {

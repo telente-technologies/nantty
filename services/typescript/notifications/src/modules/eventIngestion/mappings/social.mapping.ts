@@ -91,6 +91,117 @@ export const messageRequestReceived: EventMapping = (event, data) => [
   }),
 ];
 
+export const groupInvitationCreated: EventMapping = (event, data) => [
+  intentFor(event, data.text("inviteeId"), {
+    category: "social",
+    inApp: {
+      category: "social",
+      kind: "groupInvitation",
+      title: "Group invitation",
+      body: "You received an invitation to join a group chat.",
+      data: { url: "/chats/invitations", screen: "GroupInvitations", invitationId: data.text("invitationId", event.subject), conversationId: data.text("conversationId") },
+    },
+    push: {
+      title: "Group invitation",
+      body: "You received an invitation to join a group chat.",
+      data: { url: "/chats/invitations", screen: "GroupInvitations" },
+    },
+  }),
+];
+
+export const groupInvitationAccepted: EventMapping = (event, data) => [
+  intentFor(event, data.text("inviterId"), {
+    category: "social",
+    inApp: {
+      category: "social",
+      kind: "groupInvitationAccepted",
+      title: "Invitation accepted",
+      body: "Your group invitation was accepted. Secure key setup is still required before membership begins.",
+      data: { url: "/chats/invitations", screen: "GroupInvitations", invitationId: data.text("invitationId", event.subject), conversationId: data.text("conversationId") },
+    },
+    push: {
+      title: "Invitation accepted",
+      body: "Secure key setup is still required before group membership begins.",
+      data: { url: "/chats/invitations", screen: "GroupInvitations" },
+    },
+  }),
+];
+
+export const groupInvitationDeclined: EventMapping = (event, data) => [
+  intentFor(event, data.text("inviterId"), {
+    category: "social",
+    inApp: {
+      category: "social",
+      kind: "groupInvitationDeclined",
+      title: "Invitation declined",
+      body: "Your group invitation was declined.",
+      data: { url: "/chats/invitations", screen: "GroupInvitations", invitationId: data.text("invitationId", event.subject), conversationId: data.text("conversationId") },
+    },
+    push: { title: "Invitation declined", body: "Your group invitation was declined.", data: { url: "/chats/invitations", screen: "GroupInvitations" } },
+  }),
+];
+
+const channelInvitationTarget = { url: "/channels/invitations", screen: "ChannelInvitations" } as const;
+
+export const channelInvitationCreated: EventMapping = (event, data) => [
+  intentFor(event, data.text("inviteeId"), {
+    category: "social",
+    inApp: {
+      category: "social",
+      kind: "channelInvitation",
+      title: "Channel invitation",
+      body: "You received an invitation to join a channel.",
+      data: { ...channelInvitationTarget, invitationId: data.text("invitationId", event.subject), channelId: data.text("channelId") },
+    },
+    push: { title: "Channel invitation", body: "You received an invitation to join a channel.", data: channelInvitationTarget },
+  }),
+];
+
+export const channelInvitationAccepted: EventMapping = (event, data) => [
+  intentFor(event, data.text("inviterId"), {
+    category: "social",
+    inApp: {
+      category: "social",
+      kind: "channelInvitationAccepted",
+      title: "Invitation accepted",
+      body: "Your channel invitation was accepted.",
+      data: { ...channelInvitationTarget, invitationId: data.text("invitationId", event.subject), channelId: data.text("channelId") },
+    },
+    push: { title: "Invitation accepted", body: "Your channel invitation was accepted.", data: channelInvitationTarget },
+  }),
+];
+
+export const channelInvitationDeclined: EventMapping = (event, data) => [
+  intentFor(event, data.text("inviterId"), {
+    category: "social",
+    inApp: {
+      category: "social",
+      kind: "channelInvitationDeclined",
+      title: "Invitation declined",
+      body: "Your channel invitation was declined.",
+      data: { ...channelInvitationTarget, invitationId: data.text("invitationId", event.subject), channelId: data.text("channelId") },
+    },
+    push: { title: "Invitation declined", body: "Your channel invitation was declined.", data: channelInvitationTarget },
+  }),
+];
+
+export const spaceInvitationCreated: EventMapping = (event, data) => [
+  intentFor(event, data.text("accountId"), {
+    category: "social",
+    inApp: {
+      category: "social",
+      title: "Space invitation",
+      body: "You were invited to join a Space.",
+      data: { url: "/spaces", screen: "SpaceInvitations", spaceId: event.subject, invitationId: data.text("invitationId") },
+    },
+    push: {
+      title: "Space invitation",
+      body: "You were invited to join a Space.",
+      data: { url: "/spaces", screen: "SpaceInvitations", spaceId: event.subject, invitationId: data.text("invitationId") },
+    },
+  }),
+];
+
 export const giftSent: EventMapping = (event, data) => {
   const sender = readActor(data, "sender");
   const giftCount = data.integer("quantity", 1);

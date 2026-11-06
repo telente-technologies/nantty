@@ -17,8 +17,11 @@ export class RecordingEmailSender implements EmailSender {
 export class RecordingPushSender implements PushSender {
   public readonly sent: { tokens: readonly string[]; content: PushContent }[] = [];
   public readonly silent: { tokens: readonly string[]; data: Readonly<Record<string, unknown>> }[] = [];
-  public async send(tokens: readonly string[], content: PushContent) { this.sent.push({ tokens, content }); }
-  public async sendSilent(tokens: readonly string[], data: Readonly<Record<string, unknown>>) { this.silent.push({ tokens, data }); }
+  public readonly providers: ("expo" | "fcm")[] = [];
+  public readonly silentProviders: ("expo" | "fcm")[] = [];
+  public nextResult: Awaited<ReturnType<PushSender["send"]>> | null = null;
+  public async send(tokens: readonly string[], content: PushContent, provider: "expo" | "fcm" = "expo") { this.sent.push({ tokens, content }); this.providers.push(provider); return this.nextResult ?? { acceptedCount: tokens.length, failures: [] }; }
+  public async sendSilent(tokens: readonly string[], data: Readonly<Record<string, unknown>>, provider: "expo" | "fcm" = "expo") { this.silent.push({ tokens, data }); this.silentProviders.push(provider); return this.nextResult ?? { acceptedCount: tokens.length, failures: [] }; }
 }
 
 export class RecordingJobQueue implements JobQueue {

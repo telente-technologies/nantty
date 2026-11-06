@@ -23,6 +23,8 @@ export const updatePreferenceBodySchema = z.strictObject({
 export const registerDeviceTokenBodySchema = z.strictObject({
   token: z.string().min(10).max(300),
   platform: z.enum(["ios", "android", "web"]),
+  // Existing clients omit provider and continue to register Expo tokens.
+  provider: z.enum(["expo", "fcm"]).default("expo"),
 });
 
 export const removeDeviceTokenBodySchema = z.strictObject({ token: z.string().min(10).max(300) });

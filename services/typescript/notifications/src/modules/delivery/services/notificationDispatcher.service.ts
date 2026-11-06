@@ -3,9 +3,10 @@ import { templateEmailJobType, unreadEmailJobType } from "../../../constants/del
 import { MissingEventFieldError } from "../../../errors/notifications.error.js";
 import type { IdentityDirectory } from "../../../interfaces/identityDirectory.interface.js";
 import type { JobQueue } from "../../../interfaces/jobQueue.interface.js";
-import type { PushSender } from "../../../interfaces/pushSender.interface.js";
+import type { PushProvider, PushSender, PushSendResult } from "../../../interfaces/pushSender.interface.js";
 import type { DeliveryRepository, DeviceTokenRepository, NotificationRepository, PreferenceRepository } from "../../../interfaces/repositories.interface.js";
 import type { EmailPlan, NotificationIntent, Recipient } from "../../../types/notification.type.js";
+import { normalizePushProviderCode } from "../../../utils/pushFailure.util.js";
 import type { EmailDeliveryService } from "./emailDelivery.service.js";
 
 export interface DispatchOutcome {
@@ -116,18 +117,75 @@ export class NotificationDispatcherService {
     if ((await this.deps.identity.getRecipient(intent.recipientUserId))?.pushEnabled === false) return "skipped:push_turned_off";
     const claim = await this.deps.deliveries.claim({ dedupeKey: `${baseKey}:push:${variant}`, eventId: intent.eventId, userId: intent.recipientUserId, channel: "push", templateKey: null, mailKind: null });
     if (claim.alreadyProcessed) return "duplicate";
-    const tokens = await this.deps.deviceTokens.listTokens(intent.recipientUserId);
-    if (tokens.length === 0) {
+    const registrations = await this.deps.deviceTokens.listRegistrations(intent.recipientUserId);
+    if (registrations.length === 0) {
       await this.deps.deliveries.finish(claim.id, "skipped", { skipReason: "no_device_tokens" });
       return "skipped:no_device_tokens";
     }
-    try {
-      await this.deps.pushSender.send(tokens, intent.push);
-      await this.deps.deliveries.finish(claim.id, "sent", {});
-      return "sent";
-    } catch (error) {
-      await this.deps.deliveries.finish(claim.id, "failed", { skipReason: error instanceof Error ? error.message.slice(0, 200) : "push_failed" });
+    let simulated = false;
+    const failures: { provider: PushProvider; failure: PushSendResult["failures"][number] }[] = [];
+    for (const [provider, tokens] of groupRegistrations(registrations)) {
+      let result: PushSendResult;
+      try {
+        result = await this.deps.pushSender.send(tokens, intent.push, provider);
+      } catch {
+        await this.deps.deliveries.finish(claim.id, "failed", { skipReason: `${provider}_push_transport_error:retryable` });
+        return "failed";
+      }
+      simulated ||= result.simulated === true;
+      failures.push(...result.failures.map((failure) => ({ provider, failure })));
+      const pruneFailures = await this.removeInvalidTokens(intent.recipientUserId, provider, result.failures);
+      if (pruneFailures > 0) {
+        await this.deps.deliveries.finish(claim.id, "failed", { skipReason: `push_provider_failure:${provider}:permanent:TOKEN_PRUNE_FAILED:${pruneFailures}`.slice(0, 200) });
+        return "failed";
+      }
+    }
+    if (failures.length > 0) {
+      const summary = summarizePushFailures(failures);
+      await this.deps.deliveries.finish(claim.id, "failed", { skipReason: summary });
       return "failed";
     }
+    if (simulated) {
+      await this.deps.deliveries.finish(claim.id, "skipped", { skipReason: "push_provider_log_only" });
+      return "skipped:push_provider_log_only";
+    }
+    await this.deps.deliveries.finish(claim.id, "sent", {});
+    return "sent";
   }
+
+  private async removeInvalidTokens(userId: string, provider: PushProvider, failures: readonly { readonly token: string; readonly code: string }[]): Promise<number> {
+    let failed = 0;
+    for (const failure of failures) {
+      if (!isUnregisteredToken(provider, failure.code)) continue;
+      try {
+        await this.deps.deviceTokens.remove(userId, failure.token, provider);
+      } catch {
+        failed += 1;
+      }
+    }
+    return failed;
+  }
+}
+
+function groupRegistrations(registrations: readonly { readonly token: string; readonly provider: PushProvider }[]): Map<PushProvider, string[]> {
+  const grouped = new Map<PushProvider, string[]>();
+  for (const registration of registrations) {
+    const group = grouped.get(registration.provider) ?? [];
+    group.push(registration.token);
+    grouped.set(registration.provider, group);
+  }
+  return grouped;
+}
+
+function isUnregisteredToken(provider: PushProvider, code: string): boolean {
+  return provider === "expo" ? code === "DeviceNotRegistered" : code === "UNREGISTERED";
+}
+
+function summarizePushFailures(failures: readonly { readonly provider: PushProvider; readonly failure: { readonly classification: string; readonly code: string } }[]): string {
+  const counts = new Map<string, number>();
+  for (const { provider, failure } of failures) {
+    const key = `${provider}:${failure.classification}:${normalizePushProviderCode(failure.code)}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return `push_provider_failure:${[...counts].map(([key, count]) => `${key}:${count}`).join(",")}`.slice(0, 200);
 }

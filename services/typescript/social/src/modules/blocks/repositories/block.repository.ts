@@ -12,6 +12,13 @@ export const blockRepository = {
   eitherDirection: async (db: Db, accountA: string, accountB: string) =>
     (await db.block.count({ where: { OR: [{ blockerId: accountA, blockedId: accountB }, { blockerId: accountB, blockedId: accountA }] } })) > 0,
 
+  hasBlockedPairWithAny: async (db: Db, accountId: string, candidateIds: readonly string[]) => {
+    if (candidateIds.length === 0) return false;
+    return (await db.block.count({
+      where: { OR: [{ blockerId: accountId, blockedId: { in: [...candidateIds] } }, { blockedId: accountId, blockerId: { in: [...candidateIds] } }] },
+    })) > 0;
+  },
+
   blockedByViewer: async (db: Db, viewerId: string, candidateIds: readonly string[]) => {
     const rows = await db.block.findMany({ where: { blockerId: viewerId, blockedId: { in: [...candidateIds] } }, select: { blockedId: true } });
     return new Set(rows.map((row) => row.blockedId));

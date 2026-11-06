@@ -39,6 +39,21 @@ enum MessageRequestAudience {
   nobody
 }
 
+enum GroupInvitationStatus {
+  pending
+  accepted
+  declined
+  revoked
+  expired
+}
+
+enum ChannelInvitationStatus {
+  pending
+  accepted
+  declined
+  expired
+}
+
 model Conversation {
   id                           String           @id @default(uuid(7)) @db.Uuid
   kind                         ConversationKind
@@ -59,6 +74,10 @@ model Conversation {
 
   members  ConversationMember[]
   messages Message[]
+  groupInvitations GroupMembershipInvitation[]
+  groupInvitationLinks GroupInvitationLink[]
+  channelInvitations ChannelInvitation[]
+  channelInvitationLinks ChannelInvitationLink[]
   streak   ChatStreak?
 
   @@index([lastMessageAt])
@@ -130,11 +149,82 @@ model ChatSettings {
   notifyGroups          Boolean                @default(true)
   notifyStreakReminders Boolean                @default(true)
   showMessagePreview    Boolean                @default(true)
+  preventDirectGroupAdds Boolean               @default(false)
   timezone              String                 @default("UTC")
   timezoneChangedAt     DateTime?
   updatedAt             DateTime               @updatedAt
 
   @@map("chat_settings")
+}
+
+model GroupMembershipInvitation {
+  id             String                @id @default(uuid(7)) @db.Uuid
+  conversationId String                @db.Uuid
+  inviterId      String                @db.Uuid
+  inviteeId      String                @db.Uuid
+  status         GroupInvitationStatus @default(pending)
+  createdAt      DateTime              @default(now())
+  expiresAt      DateTime
+  respondedAt    DateTime?
+  updatedAt      DateTime              @updatedAt
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([inviteeId, status, createdAt, id])
+  @@index([inviterId, status, createdAt, id])
+  @@unique([conversationId, inviteeId])
+  @@map("group_membership_invitations")
+}
+
+model GroupInvitationLink {
+  id             String       @id @default(uuid(7)) @db.Uuid
+  conversationId String       @db.Uuid
+  createdById    String       @db.Uuid
+  tokenHash      String       @unique
+  createdAt      DateTime     @default(now())
+  expiresAt      DateTime
+  revokedAt      DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, revokedAt, expiresAt])
+  @@index([createdById, createdAt])
+  @@map("group_invitation_links")
+}
+
+model ChannelInvitation {
+  id             String                  @id @default(uuid(7)) @db.Uuid
+  conversationId String                  @db.Uuid
+  inviterId      String                  @db.Uuid
+  inviteeId      String                  @db.Uuid
+  status         ChannelInvitationStatus @default(pending)
+  createdAt      DateTime                @default(now())
+  expiresAt      DateTime
+  respondedAt    DateTime?
+  updatedAt      DateTime                @updatedAt
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, inviteeId])
+  @@index([inviteeId, status, createdAt, id])
+  @@index([conversationId, inviteeId, status])
+  @@map("channel_invitations")
+}
+
+model ChannelInvitationLink {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  conversationId String   @db.Uuid
+  createdById    String   @db.Uuid
+  tokenHash      String   @unique
+  createdAt      DateTime @default(now())
+  expiresAt      DateTime
+  revokedAt      DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, revokedAt, expiresAt])
+  @@index([createdById, createdAt])
+  @@map("channel_invitation_links")
 }
 
 model SenderBehaviourMetric {

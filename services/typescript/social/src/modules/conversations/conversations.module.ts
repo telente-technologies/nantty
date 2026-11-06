@@ -30,6 +30,27 @@ import { createChannelsController } from "./controllers/channels.controller.js";
 import { registerChannelsRoutes } from "./routes/channels.routes.js";
 import { createInternalMembershipController } from "./controllers/internalMembership.controller.js";
 import { createGetInternalMembershipHandler } from "./queries/getInternalMembership/getInternalMembership.handler.js";
+import { createGroupInvitationsController } from "../groupInvitations/controllers/groupInvitations.controller.js";
+import { createGroupInvitationHandler } from "../groupInvitations/commands/createGroupInvitation/createGroupInvitation.handler.js";
+import { createListGroupInvitationsHandler } from "../groupInvitations/queries/listGroupInvitations/listGroupInvitations.handler.js";
+import { createRespondGroupInvitationHandler } from "../groupInvitations/commands/respondGroupInvitation/respondGroupInvitation.handler.js";
+import { createRevokeGroupInvitationHandler } from "../groupInvitations/commands/revokeGroupInvitation/revokeGroupInvitation.handler.js";
+import { registerGroupInvitationsRoutes } from "../groupInvitations/routes/groupInvitations.routes.js";
+import { createGroupInvitationLinkHandler } from "../groupInvitations/commands/createGroupInvitationLink/createGroupInvitationLink.handler.js";
+import { claimGroupInvitationLinkHandler } from "../groupInvitations/commands/claimGroupInvitationLink/claimGroupInvitationLink.handler.js";
+import { previewGroupInvitationLinkHandler } from "../groupInvitations/commands/previewGroupInvitationLink/previewGroupInvitationLink.handler.js";
+import { revokeGroupInvitationLinkHandler } from "../groupInvitations/commands/revokeGroupInvitationLink/revokeGroupInvitationLink.handler.js";
+import { listGroupInvitationLinksHandler } from "../groupInvitations/queries/listGroupInvitationLinks/listGroupInvitationLinks.handler.js";
+import { createChannelInvitationLinkHandler } from "../channelInvitations/commands/createChannelInvitationLink/createChannelInvitationLink.handler.js";
+import { previewChannelInvitationLinkHandler } from "../channelInvitations/commands/previewChannelInvitationLink/previewChannelInvitationLink.handler.js";
+import { claimChannelInvitationLinkHandler } from "../channelInvitations/commands/claimChannelInvitationLink/claimChannelInvitationLink.handler.js";
+import { acceptChannelInvitationHandler } from "../channelInvitations/commands/acceptChannelInvitation/acceptChannelInvitation.handler.js";
+import { declineChannelInvitationHandler } from "../channelInvitations/commands/declineChannelInvitation/declineChannelInvitation.handler.js";
+import { revokeChannelInvitationLinkHandler } from "../channelInvitations/commands/revokeChannelInvitationLink/revokeChannelInvitationLink.handler.js";
+import { listChannelInvitationLinksHandler } from "../channelInvitations/queries/listChannelInvitationLinks/listChannelInvitationLinks.handler.js";
+import { listChannelInvitationsHandler } from "../channelInvitations/queries/listChannelInvitations/listChannelInvitations.handler.js";
+import { createChannelInvitationsController } from "../channelInvitations/controllers/channelInvitations.controller.js";
+import { registerChannelInvitationsRoutes } from "../channelInvitations/routes/channelInvitations.routes.js";
 
 export function mountConversationsModule(router: HttpRouter, route: RouteFactory, context: HandlerContext, internalToken = ""): void {
   const internal = createInternalMembershipController(route, createGetInternalMembershipHandler(context), internalToken);
@@ -59,5 +80,26 @@ export function mountConversationsModule(router: HttpRouter, route: RouteFactory
     createChannel: createCreateChannelHandler(context),
     subscribeToChannel: createSubscribeToChannelHandler(context),
     unsubscribeFromChannel: createUnsubscribeFromChannelHandler(context),
+  }));
+  registerGroupInvitationsRoutes(router, createGroupInvitationsController(route, {
+    create: createGroupInvitationHandler(context),
+    list: createListGroupInvitationsHandler(context),
+    respond: createRespondGroupInvitationHandler(context),
+    revoke: createRevokeGroupInvitationHandler(context),
+    createLink: createGroupInvitationLinkHandler(context),
+    previewLink: previewGroupInvitationLinkHandler(context),
+    claimLink: claimGroupInvitationLinkHandler(context),
+    revokeLink: revokeGroupInvitationLinkHandler(context),
+    listLinks: listGroupInvitationLinksHandler(context),
+  }));
+  registerChannelInvitationsRoutes(router, createChannelInvitationsController(route, {
+    createLink: createChannelInvitationLinkHandler(context),
+    previewLink: previewChannelInvitationLinkHandler(context),
+    claimLink: claimChannelInvitationLinkHandler(context),
+    accept: acceptChannelInvitationHandler(context),
+    decline: declineChannelInvitationHandler(context),
+    revokeLink: revokeChannelInvitationLinkHandler(context),
+    listLinks: listChannelInvitationLinksHandler(context),
+    listInvitations: listChannelInvitationsHandler(context),
   }));
 }

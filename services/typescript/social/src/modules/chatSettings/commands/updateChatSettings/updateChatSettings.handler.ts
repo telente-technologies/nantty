@@ -8,7 +8,7 @@ import { chatSettingsRepository } from "../../repositories/chatSettings.reposito
 import type { UpdateChatSettingsCommand } from "./updateChatSettings.command.js";
 
 export function createUpdateChatSettingsHandler(context: HandlerContext): Handler<UpdateChatSettingsCommand, ChatSettingsView> {
-  return async ({ accountId, messageRequestsFrom, notifications, timezone }) => {
+  return async ({ accountId, messageRequestsFrom, preventDirectGroupAdds, notifications, timezone }) => {
     const db = context.database.client;
     const now = context.clock.now();
     const current = await chatSettingsRepository.find(db, accountId);
@@ -20,6 +20,7 @@ export function createUpdateChatSettingsHandler(context: HandlerContext): Handle
     }
     const row = await chatSettingsRepository.upsert(db, accountId, {
       ...(messageRequestsFrom === undefined ? {} : { messageRequestsFrom }),
+      ...(preventDirectGroupAdds === undefined ? {} : { preventDirectGroupAdds }),
       ...(notifications?.messages === undefined ? {} : { notifyMessages: notifications.messages }),
       ...(notifications?.requests === undefined ? {} : { notifyRequests: notifications.requests }),
       ...(notifications?.groups === undefined ? {} : { notifyGroups: notifications.groups }),
