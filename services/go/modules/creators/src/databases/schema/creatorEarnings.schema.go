@@ -48,6 +48,7 @@ func (TipTransaction) Fields() []ent.Field {
 		field.String("creator_user_id").NotEmpty().MaxLen(80).Immutable(),
 		field.Enum("target_type").Values("post", "clip", "live").Immutable(),
 		field.String("target_id").NotEmpty().MaxLen(80).Immutable(),
+		field.String("note").MaxLen(280).Default("").Immutable(),
 		field.Int64("coins").Immutable(),
 		field.Int64("creator_coins").Immutable(),
 		field.Int64("platform_fee_coins").Immutable(),

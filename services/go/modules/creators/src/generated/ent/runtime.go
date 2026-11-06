@@ -1572,8 +1572,14 @@ func init() {
 			return nil
 		}
 	}()
+	// tiptransactionDescNote is the schema descriptor for note field.
+	tiptransactionDescNote := tiptransactionFields[4].Descriptor()
+	// tiptransaction.DefaultNote holds the default value on creation for the note field.
+	tiptransaction.DefaultNote = tiptransactionDescNote.Default.(string)
+	// tiptransaction.NoteValidator is a validator for the "note" field. It is called by the builders before save.
+	tiptransaction.NoteValidator = tiptransactionDescNote.Validators[0].(func(string) error)
 	// tiptransactionDescIdempotencyKey is the schema descriptor for idempotency_key field.
-	tiptransactionDescIdempotencyKey := tiptransactionFields[8].Descriptor()
+	tiptransactionDescIdempotencyKey := tiptransactionFields[9].Descriptor()
 	// tiptransaction.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
 	tiptransaction.IdempotencyKeyValidator = func() func(string) error {
 		validators := tiptransactionDescIdempotencyKey.Validators
@@ -1591,7 +1597,7 @@ func init() {
 		}
 	}()
 	// tiptransactionDescRequestHash is the schema descriptor for request_hash field.
-	tiptransactionDescRequestHash := tiptransactionFields[9].Descriptor()
+	tiptransactionDescRequestHash := tiptransactionFields[10].Descriptor()
 	// tiptransaction.RequestHashValidator is a validator for the "request_hash" field. It is called by the builders before save.
 	tiptransaction.RequestHashValidator = func() func(string) error {
 		validators := tiptransactionDescRequestHash.Validators
@@ -1609,7 +1615,7 @@ func init() {
 		}
 	}()
 	// tiptransactionDescLedgerEntryID is the schema descriptor for ledger_entry_id field.
-	tiptransactionDescLedgerEntryID := tiptransactionFields[10].Descriptor()
+	tiptransactionDescLedgerEntryID := tiptransactionFields[11].Descriptor()
 	// tiptransaction.LedgerEntryIDValidator is a validator for the "ledger_entry_id" field. It is called by the builders before save.
 	tiptransaction.LedgerEntryIDValidator = tiptransactionDescLedgerEntryID.Validators[0].(func(string) error)
 	// tiptransactionDescID is the schema descriptor for id field.

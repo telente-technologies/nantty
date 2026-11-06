@@ -75,6 +75,11 @@ func TargetID(v string) predicate.TipTransaction {
 	return predicate.TipTransaction(sql.FieldEQ(FieldTargetID, v))
 }
 
+// Note applies equality check predicate on the "note" field. It's identical to NoteEQ.
+func Note(v string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldEQ(FieldNote, v))
+}
+
 // Coins applies equality check predicate on the "coins" field. It's identical to CoinsEQ.
 func Coins(v int64) predicate.TipTransaction {
 	return predicate.TipTransaction(sql.FieldEQ(FieldCoins, v))
@@ -363,6 +368,71 @@ func TargetIDEqualFold(v string) predicate.TipTransaction {
 // TargetIDContainsFold applies the ContainsFold predicate on the "target_id" field.
 func TargetIDContainsFold(v string) predicate.TipTransaction {
 	return predicate.TipTransaction(sql.FieldContainsFold(FieldTargetID, v))
+}
+
+// NoteEQ applies the EQ predicate on the "note" field.
+func NoteEQ(v string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldEQ(FieldNote, v))
+}
+
+// NoteNEQ applies the NEQ predicate on the "note" field.
+func NoteNEQ(v string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldNEQ(FieldNote, v))
+}
+
+// NoteIn applies the In predicate on the "note" field.
+func NoteIn(vs ...string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldIn(FieldNote, vs...))
+}
+
+// NoteNotIn applies the NotIn predicate on the "note" field.
+func NoteNotIn(vs ...string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldNotIn(FieldNote, vs...))
+}
+
+// NoteGT applies the GT predicate on the "note" field.
+func NoteGT(v string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldGT(FieldNote, v))
+}
+
+// NoteGTE applies the GTE predicate on the "note" field.
+func NoteGTE(v string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldGTE(FieldNote, v))
+}
+
+// NoteLT applies the LT predicate on the "note" field.
+func NoteLT(v string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldLT(FieldNote, v))
+}
+
+// NoteLTE applies the LTE predicate on the "note" field.
+func NoteLTE(v string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldLTE(FieldNote, v))
+}
+
+// NoteContains applies the Contains predicate on the "note" field.
+func NoteContains(v string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldContains(FieldNote, v))
+}
+
+// NoteHasPrefix applies the HasPrefix predicate on the "note" field.
+func NoteHasPrefix(v string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldHasPrefix(FieldNote, v))
+}
+
+// NoteHasSuffix applies the HasSuffix predicate on the "note" field.
+func NoteHasSuffix(v string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldHasSuffix(FieldNote, v))
+}
+
+// NoteEqualFold applies the EqualFold predicate on the "note" field.
+func NoteEqualFold(v string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldEqualFold(FieldNote, v))
+}
+
+// NoteContainsFold applies the ContainsFold predicate on the "note" field.
+func NoteContainsFold(v string) predicate.TipTransaction {
+	return predicate.TipTransaction(sql.FieldContainsFold(FieldNote, v))
 }
 
 // CoinsEQ applies the EQ predicate on the "coins" field.

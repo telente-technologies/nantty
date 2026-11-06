@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -16,6 +17,8 @@ import (
 
 	"nantty/modules/creators/src"
 	"nantty/modules/creators/src/configs"
+	"nantty/modules/creators/src/generated/ent/outboxevent"
+	"nantty/modules/creators/src/generated/ent/tiptransaction"
 	moneyservices "nantty/modules/creators/src/modules/creatorMoney/services"
 	"nantty/modules/creators/src/repositories"
 	ledgerconstants "nantty/modules/ledger/src/constants"
@@ -112,6 +115,9 @@ func TestTipsPayTheCreatorOnceAndShowInEarningsAndTheDashboard(t *testing.T) {
 	tip := func(token, key, targetType, targetId string, coins int64) (int, map[string]any) {
 		return harness.call(http.MethodPost, "/api/v1/tips", token, key, map[string]any{"targetType": targetType, "targetId": targetId, "coins": coins})
 	}
+	tipWithNote := func(token, key, targetType, targetId string, coins int64, note string) (int, map[string]any) {
+		return harness.call(http.MethodPost, "/api/v1/tips", token, key, map[string]any{"targetType": targetType, "targetId": targetId, "coins": coins, "note": note})
+	}
 	if status, _ := tip(fanToken, "", "post", "p1", 10); status != http.StatusBadRequest {
 		t.Fatalf("an Idempotency-Key is required: %d", status)
 	}
@@ -124,15 +130,34 @@ func TestTipsPayTheCreatorOnceAndShowInEarningsAndTheDashboard(t *testing.T) {
 	if status, body := tip(fanToken, "tip-ended-live", "live", "live-old", 10); status != http.StatusUnprocessableEntity || body["code"] != "LIVE_NOT_ACTIVE" {
 		t.Fatalf("ended live: %d %v", status, body)
 	}
-	status, receipt := tip(fanToken, "tip-post-0001", "post", "p1", 100)
+	status, receipt := tipWithNote(fanToken, "tip-post-0001", "post", "p1", 100, "  Keep going!  ")
 	if status != http.StatusCreated || receipt["balance"] != float64(900) || receipt["coinBalance"] != float64(900) {
 		t.Fatalf("tip: %d %v", status, receipt)
 	}
-	if _, replay := tip(fanToken, "tip-post-0001", "post", "p1", 100); replay["tipId"] != receipt["tipId"] || replay["balance"] != float64(900) {
+	if _, replay := tipWithNote(fanToken, "tip-post-0001", "post", "p1", 100, "Keep going!"); replay["tipId"] != receipt["tipId"] || replay["balance"] != float64(900) {
 		t.Fatalf("a replay charges once: %v", replay)
+	}
+	if status, body := tipWithNote(fanToken, "tip-post-0001", "post", "p1", 100, "Changed message"); status != http.StatusConflict || body["code"] != "IDEMPOTENCY_KEY_REUSED" {
+		t.Fatalf("changing note with an existing key must conflict: %d %v", status, body)
 	}
 	if status, body := tip(fanToken, "tip-post-0001", "post", "p1", 5); status != http.StatusConflict || body["code"] != "IDEMPOTENCY_KEY_REUSED" {
 		t.Fatalf("key reuse: %d %v", status, body)
+	}
+	client := harness.module.Container.Client(nil)
+	storedTip, err := client.TipTransaction.Query().Where(tiptransaction.IdempotencyKey("tip-post-0001")).Only(context.Background())
+	if err != nil || storedTip.Note != "Keep going!" {
+		t.Fatalf("normalized note must be durable on the tip transaction: tip=%+v err=%v", storedTip, err)
+	}
+	storedEvent, err := client.OutboxEvent.Query().Where(outboxevent.EventType("tip.sent")).Only(context.Background())
+	if err != nil {
+		t.Fatalf("tip recipient event should be enqueued: %v", err)
+	}
+	var eventPayload map[string]any
+	if err := json.Unmarshal(storedEvent.Payload, &eventPayload); err != nil || eventPayload["note"] != "Keep going!" || eventPayload["creatorUserId"] != creator {
+		t.Fatalf("tip recipient event should carry the bounded note: payload=%v err=%v", eventPayload, err)
+	}
+	if status, body := tipWithNote(fanToken, "tip-note-too-long", "post", "p1", 1, strings.Repeat("é", moneyservices.MaximumTipNoteRunes+1)); status != http.StatusBadRequest || body["code"] != "VALIDATION_FAILED" {
+		t.Fatalf("controller must reject notes over the character limit: %d %v", status, body)
 	}
 	if status, body := tip(fanToken, "tip-too-much-1", "live", "live-1", 5_000); status != http.StatusUnprocessableEntity || body["code"] != "INSUFFICIENT_COINS" {
 		t.Fatalf("no overdraft: %d %v", status, body)

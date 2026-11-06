@@ -523,6 +523,7 @@ var (
 		{Name: "creator_user_id", Type: field.TypeString, Size: 80},
 		{Name: "target_type", Type: field.TypeEnum, Enums: []string{"post", "clip", "live"}},
 		{Name: "target_id", Type: field.TypeString, Size: 80},
+		{Name: "note", Type: field.TypeString, Size: 280, Default: ""},
 		{Name: "coins", Type: field.TypeInt64},
 		{Name: "creator_coins", Type: field.TypeInt64},
 		{Name: "platform_fee_coins", Type: field.TypeInt64},
@@ -540,7 +541,7 @@ var (
 			{
 				Name:    "tiptransaction_sender_user_id_idempotency_key",
 				Unique:  true,
-				Columns: []*schema.Column{TipTransactionsColumns[2], TipTransactionsColumns[10]},
+				Columns: []*schema.Column{TipTransactionsColumns[2], TipTransactionsColumns[11]},
 			},
 			{
 				Name:    "tiptransaction_creator_user_id_created_at",

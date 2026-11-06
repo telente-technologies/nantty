@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"unicode/utf8"
 
 	"nantty/modules/creators/src/modules/creatorMoney/dtos"
 	"nantty/modules/creators/src/modules/creatorMoney/services"
@@ -85,6 +86,9 @@ func (controller CreatorMoneyController) SendTip(writer http.ResponseWriter, req
 		collector.RequireOneOf("targetType", body.TargetType, "post", "clip", "live", "profile")
 		collector.RequireLength("targetId", body.TargetId, 1, 80)
 		collector.RequireRange("coins", body.Coins, 1, services.MaximumTipCoins)
+		if utf8.RuneCountInString(services.NormalizeTipNote(body.Note)) > services.MaximumTipNoteRunes {
+			collector.Add("note", "must be at most 280 characters")
+		}
 		return collector.Result()
 	})
 	if err != nil {
@@ -92,7 +96,7 @@ func (controller CreatorMoneyController) SendTip(writer http.ResponseWriter, req
 		return
 	}
 	receipt, err := controller.Money.SendTip(request.Context(), services.TipRequest{
-		SenderId: principal.UserId, TargetType: body.TargetType, TargetId: body.TargetId, Coins: body.Coins, IdempotencyKey: key,
+		SenderId: principal.UserId, TargetType: body.TargetType, TargetId: body.TargetId, Coins: body.Coins, Note: services.NormalizeTipNote(body.Note), IdempotencyKey: key,
 	})
 	if err != nil {
 		controller.fail(writer, request, err)

@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -24,6 +26,9 @@ import (
 )
 
 const MaximumTipCoins = 100_000
+
+// MaximumTipNoteRunes bounds the optional recipient-visible message attached to a coin tip.
+const MaximumTipNoteRunes = 280
 
 var (
 	ErrTipTargetNotFound   = httpserver.NewApiError(http.StatusNotFound, "TARGET_NOT_FOUND", "This post or live was not found.")
@@ -48,6 +53,7 @@ type TipRequest struct {
 	TargetType     string
 	TargetId       string
 	Coins          int64
+	Note           string
 	IdempotencyKey string
 }
 
@@ -90,6 +96,10 @@ func (money CreatorMoney) resolveTipCreator(ctx context.Context, request TipRequ
 }
 
 func (money CreatorMoney) SendTip(ctx context.Context, request TipRequest) (TipReceipt, error) {
+	request.Note = NormalizeTipNote(request.Note)
+	if utf8.RuneCountInString(request.Note) > MaximumTipNoteRunes {
+		return TipReceipt{}, httpserver.NewApiError(http.StatusBadRequest, "VALIDATION_FAILED", "note must be at most 280 characters")
+	}
 	creatorId, err := money.resolveTipCreator(ctx, request)
 	if err != nil {
 		return TipReceipt{}, err
@@ -104,7 +114,7 @@ func (money CreatorMoney) SendTip(ctx context.Context, request TipRequest) (TipR
 	if blocked {
 		return TipReceipt{}, ErrTipBlocked
 	}
-	requestHash := ledgerutils.HashRequestFingerprint(request.TargetType, request.TargetId, request.Coins)
+	requestHash := tipRequestHash(request)
 	var receipt TipReceipt
 	err = databases.RunInMoneyTransaction(ctx, money.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		receipt, err = money.sendTipInTransaction(ctx, transaction, request, creatorId, requestHash)
@@ -170,7 +180,7 @@ func (money CreatorMoney) sendTipInTransaction(ctx context.Context, transaction 
 	}
 	now := money.Container.Now().UTC()
 	if err := client.TipTransaction.Create().SetID(tipId).SetSenderUserID(request.SenderId).SetCreatorUserID(creatorId).SetTargetType(tiptransaction.TargetType(request.TargetType)).
-		SetTargetID(request.TargetId).SetCoins(split.TotalCoins).SetCreatorCoins(split.CreatorAmountCoins).SetPlatformFeeCoins(split.PlatformFeeCoins).
+		SetTargetID(request.TargetId).SetNote(request.Note).SetCoins(split.TotalCoins).SetCreatorCoins(split.CreatorAmountCoins).SetPlatformFeeCoins(split.PlatformFeeCoins).
 		SetCreatorShareBps(split.CreatorShareBps).SetIdempotencyKey(request.IdempotencyKey).SetRequestHash(requestHash).SetLedgerEntryID(posted.Id.String()).SetCreatedAt(now).Exec(ctx); err != nil {
 		return TipReceipt{}, err
 	}
@@ -180,14 +190,31 @@ func (money CreatorMoney) sendTipInTransaction(ctx context.Context, transaction 
 	}); err != nil {
 		return TipReceipt{}, err
 	}
-	if err := money.Container.Outbox.EnqueueInTransaction(ctx, transaction, "tip.sent", creatorId, now, map[string]any{
+	event := map[string]any{
 		"tipId": tipId.String(), "senderUserId": request.SenderId, "creatorUserId": creatorId, "targetType": request.TargetType, "targetId": request.TargetId,
 		"coins": split.TotalCoins, "creatorCoins": split.CreatorAmountCoins, "createdAt": now.Format(time.RFC3339),
-	}); err != nil {
+	}
+	if request.Note != "" {
+		event["note"] = request.Note
+	}
+	if err := money.Container.Outbox.EnqueueInTransaction(ctx, transaction, "tip.sent", creatorId, now, event); err != nil {
 		return TipReceipt{}, err
 	}
 	balance, _ := posted.BalanceAfter(spendable)
 	return TipReceipt{TipId: tipId.String(), TargetType: request.TargetType, TargetId: request.TargetId, Coins: split.TotalCoins, Balance: balance, CoinBalance: balance}, nil
+}
+
+// NormalizeTipNote trims surrounding whitespace; internal whitespace is preserved as authored.
+func NormalizeTipNote(note string) string {
+	return strings.TrimSpace(note)
+}
+
+func tipRequestHash(request TipRequest) string {
+	if request.Note == "" {
+		// Preserve the established fingerprint for older clients that omit note.
+		return ledgerutils.HashRequestFingerprint(request.TargetType, request.TargetId, request.Coins)
+	}
+	return ledgerutils.HashRequestFingerprint(request.TargetType, request.TargetId, request.Coins, request.Note)
 }
 
 func splitTipCoins(targetType string, coins, creatorShareBps, platformFeeBps int64) (models.GiftSplit, error) {

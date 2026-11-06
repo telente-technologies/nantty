@@ -25,6 +25,8 @@ const (
 	FieldTargetType = "target_type"
 	// FieldTargetID holds the string denoting the target_id field in the database.
 	FieldTargetID = "target_id"
+	// FieldNote holds the string denoting the note field in the database.
+	FieldNote = "note"
 	// FieldCoins holds the string denoting the coins field in the database.
 	FieldCoins = "coins"
 	// FieldCreatorCoins holds the string denoting the creator_coins field in the database.
@@ -51,6 +53,7 @@ var Columns = []string{
 	FieldCreatorUserID,
 	FieldTargetType,
 	FieldTargetID,
+	FieldNote,
 	FieldCoins,
 	FieldCreatorCoins,
 	FieldPlatformFeeCoins,
@@ -79,6 +82,10 @@ var (
 	CreatorUserIDValidator func(string) error
 	// TargetIDValidator is a validator for the "target_id" field. It is called by the builders before save.
 	TargetIDValidator func(string) error
+	// DefaultNote holds the default value on creation for the "note" field.
+	DefaultNote string
+	// NoteValidator is a validator for the "note" field. It is called by the builders before save.
+	NoteValidator func(string) error
 	// IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
 	IdempotencyKeyValidator func(string) error
 	// RequestHashValidator is a validator for the "request_hash" field. It is called by the builders before save.
@@ -144,6 +151,11 @@ func ByTargetType(opts ...sql.OrderTermOption) OrderOption {
 // ByTargetID orders the results by the target_id field.
 func ByTargetID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTargetID, opts...).ToFunc()
+}
+
+// ByNote orders the results by the note field.
+func ByNote(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNote, opts...).ToFunc()
 }
 
 // ByCoins orders the results by the coins field.

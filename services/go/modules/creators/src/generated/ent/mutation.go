@@ -14972,6 +14972,7 @@ type TipTransactionMutation struct {
 	creator_user_id       *string
 	target_type           *tiptransaction.TargetType
 	target_id             *string
+	note                  *string
 	coins                 *int64
 	addcoins              *int64
 	creator_coins         *int64
@@ -15271,6 +15272,42 @@ func (m *TipTransactionMutation) OldTargetID(ctx context.Context) (v string, err
 // ResetTargetID resets all changes to the "target_id" field.
 func (m *TipTransactionMutation) ResetTargetID() {
 	m.target_id = nil
+}
+
+// SetNote sets the "note" field.
+func (m *TipTransactionMutation) SetNote(s string) {
+	m.note = &s
+}
+
+// Note returns the value of the "note" field in the mutation.
+func (m *TipTransactionMutation) Note() (r string, exists bool) {
+	v := m.note
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNote returns the old "note" field's value of the TipTransaction entity.
+// If the TipTransaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TipTransactionMutation) OldNote(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNote is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNote requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNote: %w", err)
+	}
+	return oldValue.Note, nil
+}
+
+// ResetNote resets all changes to the "note" field.
+func (m *TipTransactionMutation) ResetNote() {
+	m.note = nil
 }
 
 // SetCoins sets the "coins" field.
@@ -15639,7 +15676,7 @@ func (m *TipTransactionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TipTransactionMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, tiptransaction.FieldCreatedAt)
 	}
@@ -15654,6 +15691,9 @@ func (m *TipTransactionMutation) Fields() []string {
 	}
 	if m.target_id != nil {
 		fields = append(fields, tiptransaction.FieldTargetID)
+	}
+	if m.note != nil {
+		fields = append(fields, tiptransaction.FieldNote)
 	}
 	if m.coins != nil {
 		fields = append(fields, tiptransaction.FieldCoins)
@@ -15694,6 +15734,8 @@ func (m *TipTransactionMutation) Field(name string) (ent.Value, bool) {
 		return m.TargetType()
 	case tiptransaction.FieldTargetID:
 		return m.TargetID()
+	case tiptransaction.FieldNote:
+		return m.Note()
 	case tiptransaction.FieldCoins:
 		return m.Coins()
 	case tiptransaction.FieldCreatorCoins:
@@ -15727,6 +15769,8 @@ func (m *TipTransactionMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldTargetType(ctx)
 	case tiptransaction.FieldTargetID:
 		return m.OldTargetID(ctx)
+	case tiptransaction.FieldNote:
+		return m.OldNote(ctx)
 	case tiptransaction.FieldCoins:
 		return m.OldCoins(ctx)
 	case tiptransaction.FieldCreatorCoins:
@@ -15784,6 +15828,13 @@ func (m *TipTransactionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTargetID(v)
+		return nil
+	case tiptransaction.FieldNote:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNote(v)
 		return nil
 	case tiptransaction.FieldCoins:
 		v, ok := value.(int64)
@@ -15948,6 +15999,9 @@ func (m *TipTransactionMutation) ResetField(name string) error {
 		return nil
 	case tiptransaction.FieldTargetID:
 		m.ResetTargetID()
+		return nil
+	case tiptransaction.FieldNote:
+		m.ResetNote()
 		return nil
 	case tiptransaction.FieldCoins:
 		m.ResetCoins()

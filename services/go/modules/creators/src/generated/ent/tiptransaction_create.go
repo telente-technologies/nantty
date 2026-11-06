@@ -62,6 +62,20 @@ func (_c *TipTransactionCreate) SetTargetID(v string) *TipTransactionCreate {
 	return _c
 }
 
+// SetNote sets the "note" field.
+func (_c *TipTransactionCreate) SetNote(v string) *TipTransactionCreate {
+	_c.mutation.SetNote(v)
+	return _c
+}
+
+// SetNillableNote sets the "note" field if the given value is not nil.
+func (_c *TipTransactionCreate) SetNillableNote(v *string) *TipTransactionCreate {
+	if v != nil {
+		_c.SetNote(*v)
+	}
+	return _c
+}
+
 // SetCoins sets the "coins" field.
 func (_c *TipTransactionCreate) SetCoins(v int64) *TipTransactionCreate {
 	_c.mutation.SetCoins(v)
@@ -157,6 +171,10 @@ func (_c *TipTransactionCreate) defaults() {
 		v := tiptransaction.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.Note(); !ok {
+		v := tiptransaction.DefaultNote
+		_c.mutation.SetNote(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := tiptransaction.DefaultID()
 		_c.mutation.SetID(v)
@@ -198,6 +216,14 @@ func (_c *TipTransactionCreate) check() error {
 	if v, ok := _c.mutation.TargetID(); ok {
 		if err := tiptransaction.TargetIDValidator(v); err != nil {
 			return &ValidationError{Name: "target_id", err: fmt.Errorf(`ent: validator failed for field "TipTransaction.target_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Note(); !ok {
+		return &ValidationError{Name: "note", err: errors.New(`ent: missing required field "TipTransaction.note"`)}
+	}
+	if v, ok := _c.mutation.Note(); ok {
+		if err := tiptransaction.NoteValidator(v); err != nil {
+			return &ValidationError{Name: "note", err: fmt.Errorf(`ent: validator failed for field "TipTransaction.note": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Coins(); !ok {
@@ -292,6 +318,10 @@ func (_c *TipTransactionCreate) createSpec() (*TipTransaction, *sqlgraph.CreateS
 	if value, ok := _c.mutation.TargetID(); ok {
 		_spec.SetField(tiptransaction.FieldTargetID, field.TypeString, value)
 		_node.TargetID = value
+	}
+	if value, ok := _c.mutation.Note(); ok {
+		_spec.SetField(tiptransaction.FieldNote, field.TypeString, value)
+		_node.Note = value
 	}
 	if value, ok := _c.mutation.Coins(); ok {
 		_spec.SetField(tiptransaction.FieldCoins, field.TypeInt64, value)
@@ -404,6 +434,9 @@ func (u *TipTransactionUpsertOne) UpdateNewValues() *TipTransactionUpsertOne {
 		}
 		if _, exists := u.create.mutation.TargetID(); exists {
 			s.SetIgnore(tiptransaction.FieldTargetID)
+		}
+		if _, exists := u.create.mutation.Note(); exists {
+			s.SetIgnore(tiptransaction.FieldNote)
 		}
 		if _, exists := u.create.mutation.Coins(); exists {
 			s.SetIgnore(tiptransaction.FieldCoins)
@@ -654,6 +687,9 @@ func (u *TipTransactionUpsertBulk) UpdateNewValues() *TipTransactionUpsertBulk {
 			}
 			if _, exists := b.mutation.TargetID(); exists {
 				s.SetIgnore(tiptransaction.FieldTargetID)
+			}
+			if _, exists := b.mutation.Note(); exists {
+				s.SetIgnore(tiptransaction.FieldNote)
 			}
 			if _, exists := b.mutation.Coins(); exists {
 				s.SetIgnore(tiptransaction.FieldCoins)

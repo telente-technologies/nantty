@@ -28,6 +28,8 @@ type TipTransaction struct {
 	TargetType tiptransaction.TargetType `json:"target_type,omitempty"`
 	// TargetID holds the value of the "target_id" field.
 	TargetID string `json:"target_id,omitempty"`
+	// Note holds the value of the "note" field.
+	Note string `json:"note,omitempty"`
 	// Coins holds the value of the "coins" field.
 	Coins int64 `json:"coins,omitempty"`
 	// CreatorCoins holds the value of the "creator_coins" field.
@@ -52,7 +54,7 @@ func (*TipTransaction) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case tiptransaction.FieldCoins, tiptransaction.FieldCreatorCoins, tiptransaction.FieldPlatformFeeCoins, tiptransaction.FieldCreatorShareBps:
 			values[i] = new(sql.NullInt64)
-		case tiptransaction.FieldSenderUserID, tiptransaction.FieldCreatorUserID, tiptransaction.FieldTargetType, tiptransaction.FieldTargetID, tiptransaction.FieldIdempotencyKey, tiptransaction.FieldRequestHash, tiptransaction.FieldLedgerEntryID:
+		case tiptransaction.FieldSenderUserID, tiptransaction.FieldCreatorUserID, tiptransaction.FieldTargetType, tiptransaction.FieldTargetID, tiptransaction.FieldNote, tiptransaction.FieldIdempotencyKey, tiptransaction.FieldRequestHash, tiptransaction.FieldLedgerEntryID:
 			values[i] = new(sql.NullString)
 		case tiptransaction.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -108,6 +110,12 @@ func (_m *TipTransaction) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field target_id", values[i])
 			} else if value.Valid {
 				_m.TargetID = value.String
+			}
+		case tiptransaction.FieldNote:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field note", values[i])
+			} else if value.Valid {
+				_m.Note = value.String
 			}
 		case tiptransaction.FieldCoins:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -201,6 +209,9 @@ func (_m *TipTransaction) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("target_id=")
 	builder.WriteString(_m.TargetID)
+	builder.WriteString(", ")
+	builder.WriteString("note=")
+	builder.WriteString(_m.Note)
 	builder.WriteString(", ")
 	builder.WriteString("coins=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Coins))
