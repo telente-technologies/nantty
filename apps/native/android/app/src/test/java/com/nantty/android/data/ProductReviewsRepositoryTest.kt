@@ -1,8 +1,11 @@
 package com.nantty.android.data
 
+import com.nantty.android.ui.takeUtf8Bytes
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -128,6 +131,68 @@ class ProductReviewsRepositoryTest {
         assertEquals(null, repository.loadViewerAccountId())
         assertFalse(opened)
     }
+
+    @Test
+    fun submitsProductReviewWithAuthenticatedJsonAndIdempotencyKey() {
+        lateinit var connection: ReviewsTestConnection
+        val repository = ProductReviewsRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "review-token" },
+            openConnection = { url ->
+                connection = ReviewsTestConnection(url, 201, "{}")
+                connection
+            },
+        )
+        val result = repository.submitProductReview("product-1", 5, "  Great quality  ", "  Lovely  ", "review-submit-key-001")
+
+        assertTrue(result is ProductReviewSubmitResult.Success)
+        assertEquals("https://api.nantty.com/api/v1/products/product-1/reviews", connection.url.toString())
+        assertEquals("POST", connection.requestMethod)
+        assertEquals("Bearer review-token", connection.getRequestProperty("Authorization"))
+        assertEquals("review-submit-key-001", connection.getRequestProperty("Idempotency-Key"))
+        assertEquals("application/json; charset=utf-8", connection.getRequestProperty("Content-Type"))
+        JSONObject(connection.requestBody.toString(Charsets.UTF_8.name())).also { body ->
+            assertEquals(5, body.getInt("rating"))
+            assertEquals("Great quality", body.getString("text"))
+            assertEquals("Lovely", body.getString("title"))
+        }
+    }
+
+    @Test
+    fun rejectsInvalidReviewInputsAndGuestBeforeOpeningConnection() {
+        var opened = false
+        val repository = ProductReviewsRepository("https://api.nantty.com", accessTokenProvider = { null }) { url ->
+            opened = true
+            ReviewsTestConnection(url, 201, "{}")
+        }
+
+        assertTrue(repository.submitProductReview("product-1", 0, "Review", null) is ProductReviewSubmitResult.Failure)
+        assertTrue(repository.submitProductReview("product-1", 5, "   ", null) is ProductReviewSubmitResult.Failure)
+        assertTrue(repository.submitProductReview("../bad", 5, "Review", null) is ProductReviewSubmitResult.Failure)
+        val guest = repository.submitProductReview("product-1", 5, "Review", null)
+        assertTrue(guest is ProductReviewSubmitResult.Failure && guest.authenticationRequired)
+        assertFalse(opened)
+    }
+
+    @Test
+    fun mapsDuplicateAndPurchaseEligibilityResponses() {
+        fun submit(status: Int): ProductReviewSubmitResult = ProductReviewsRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "review-token" },
+            openConnection = { url -> ReviewsTestConnection(url, status, "{}") },
+        ).submitProductReview("product-1", 4, "Good", null, "review-submit-key-002")
+
+        assertTrue((submit(409) as ProductReviewSubmitResult.Failure).message.contains("already reviewed"))
+        assertTrue((submit(403) as ProductReviewSubmitResult.Failure).message.contains("delivered"))
+        assertTrue((submit(401) as ProductReviewSubmitResult.Failure).authenticationRequired)
+    }
+
+    @Test
+    fun reviewFieldLimitKeepsWholeUtf8CodePoints() {
+        assertEquals("ab", "ab🌍".takeUtf8Bytes(2))
+        assertEquals("🌍", "🌍x".takeUtf8Bytes(4))
+        assertEquals("", "🌍".takeUtf8Bytes(3))
+    }
 }
 
 private class ReviewsTestConnection(
@@ -136,12 +201,14 @@ private class ReviewsTestConnection(
     private val body: String,
 ) : HttpURLConnection(url) {
     private val requestHeaders = mutableMapOf<String, String>()
+    val requestBody = ByteArrayOutputStream()
     override fun connect() = Unit
     override fun disconnect() = Unit
     override fun usingProxy() = false
     override fun getResponseCode() = status
     override fun getInputStream() = ByteArrayInputStream(body.toByteArray())
     override fun getErrorStream() = ByteArrayInputStream(body.toByteArray())
+    override fun getOutputStream() = requestBody
     override fun setRequestProperty(key: String, value: String) { requestHeaders[key] = value }
     override fun getRequestProperty(key: String) = requestHeaders[key]
 }

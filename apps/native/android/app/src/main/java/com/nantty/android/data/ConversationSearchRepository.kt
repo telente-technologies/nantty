@@ -3,7 +3,13 @@ package com.nantty.android.data
 import org.json.JSONObject
 import java.net.URLEncoder
 
-data class ChatSearchPerson(val id: String, val name: String, val avatarUrl: String?)
+data class ChatSearchPerson(
+    val id: String,
+    val name: String,
+    val avatarUrl: String?,
+    val username: String? = null,
+    val verified: Boolean = false,
+)
 data class ChatSearchConversation(val id: String, val peer: ChatSearchPerson)
 data class ChatSearchResults(val conversations: List<ChatSearchConversation>, val people: List<ChatSearchPerson>)
 
@@ -54,6 +60,23 @@ internal class ConversationSearchRepository(
         )
     }
 
+    fun startConversationWithStore(storeId: String): StartConversationResult = try {
+        require(MessagesRepository.isUuid(storeId)) { "This Nantty store is unavailable." }
+        val session = sessionProvider() ?: error("Sign in to contact this store.")
+        val payload = requestWithRefresh(
+            "POST",
+            "/api/v1/conversations/stores/$storeId",
+            requireToken(session.accessToken),
+            null,
+        )
+        StartConversationResult.Success(parseStartedStoreConversation(payload, storeId))
+    } catch (error: Exception) {
+        StartConversationResult.Failure(
+            error.message ?: "Could not contact this store. Please try again.",
+            authenticationRequired = error is MessagesHttpException && error.statusCode in setOf(401, 403),
+        )
+    }
+
     private fun requestWithRefresh(method: String, path: String, token: String, body: JSONObject?): JSONObject = try {
         transport.request(method, path, token, body)
     } catch (error: MessagesHttpException) {
@@ -96,11 +119,40 @@ internal class ConversationSearchRepository(
         )
     }
 
+    private fun parseStartedStoreConversation(payload: JSONObject, expectedStoreId: String): InboxConversation {
+        val row = payload.optJSONObject("data") ?: payload
+        val id = row.optNullable("id")?.takeIf(MessagesRepository::isUuid)
+            ?: error("Nantty returned an invalid store conversation.")
+        require(row.optNullable("kind") == "business") { "Nantty returned an invalid store conversation." }
+        val store = row.optJSONObject("store") ?: error("Nantty returned an incomplete store conversation.")
+        val storeId = store.optNullable("id")?.takeIf(MessagesRepository::isUuid)
+            ?: error("Nantty returned an incomplete store conversation.")
+        require(storeId == expectedStoreId) { "Nantty returned a conversation for a different store." }
+        val storeName = store.optNullable("name")?.takeIf(String::isNotBlank)
+            ?: error("Nantty returned an incomplete store conversation.")
+        val avatarUrl = store.optNullable("avatarUrl")?.takeIf(::isSecureImageUrl)
+        return InboxConversation(
+            id = id,
+            title = storeName,
+            peerName = storeName,
+            avatarUrl = avatarUrl,
+            type = ConversationType.BUSINESS,
+            lastMessageAt = row.optNullable("lastMessageAt").orEmpty(),
+            unreadCount = row.optInt("unread").coerceAtLeast(0),
+        )
+    }
+
     private fun parsePerson(row: JSONObject?): ChatSearchPerson? {
         row ?: return null
         val id = row.optNullable("id")?.takeIf { MessagesRepository.isUuid(it) } ?: return null
         val name = row.optNullable("name")?.takeIf(String::isNotBlank) ?: return null
-        return ChatSearchPerson(id, name, row.optNullable("avatarUrl")?.takeIf(::isSecureImageUrl))
+        return ChatSearchPerson(
+            id = id,
+            name = name,
+            avatarUrl = row.optNullable("avatarUrl")?.takeIf(::isSecureImageUrl),
+            username = row.optNullable("username")?.trim()?.trimStart('@')?.takeIf(String::isNotBlank),
+            verified = row.optBoolean("verified"),
+        )
     }
 
     private fun requireToken(token: String) = token.takeIf(String::isNotBlank) ?: error("Sign in to search your messages.")

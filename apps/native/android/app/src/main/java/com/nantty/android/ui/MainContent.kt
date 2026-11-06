@@ -1,6 +1,5 @@
 package com.nantty.android.ui
 
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,15 +18,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -36,7 +32,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nantty.android.data.AccountNotificationSettingsRepository
+import com.nantty.android.data.CountryPreferenceRepository
+import com.nantty.android.data.ClipsRepository
+import com.nantty.android.data.ClipWatchTrackingRepository
+import com.nantty.android.data.ChatNotificationSettingsRepository
+import com.nantty.android.data.ChatPasscodeRepository
 import com.nantty.android.data.BuyerOrdersRepository
+import com.nantty.android.data.ProductReviewsRepository
+import com.nantty.android.data.BuyerOrderDetail
 import com.nantty.android.data.CurrentProfileRepository
 import com.nantty.android.data.DisputeRepository
 import com.nantty.android.data.CreatorSampleMediaRepository
@@ -48,12 +51,18 @@ import com.nantty.android.data.FollowRequestsRepository
 import com.nantty.android.data.MartRepository
 import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.InboxConversation
+import com.nantty.android.data.LiveCoinTipRepository
+import com.nantty.android.data.LiveSessionsRepository
 import com.nantty.android.data.NotificationsRepository
 import com.nantty.android.data.PublicProfileRepository
+import com.nantty.android.data.PostDetailRepository
 import com.nantty.android.data.ProfileImageRepository
 import com.nantty.android.data.SavedPostsRepository
 import com.nantty.android.data.SearchRepository
 import com.nantty.android.data.StoreRepository
+import com.nantty.android.data.SupportTicketRepository
+import com.nantty.android.data.SpacesRepository
+import com.nantty.android.data.StoriesRepository
 import com.nantty.android.data.WalletRepository
 import java.util.concurrent.Executor
 
@@ -73,24 +82,28 @@ internal fun MainContent(
     onCreatePost: () -> Unit = {},
     modifier: Modifier = Modifier,
     onOpenPost: (String) -> Unit = {},
+    onOpenPostComment: (String, String) -> Unit = { postId, _ -> onOpenPost(postId) },
     onOpenProfile: (String) -> Unit = {},
     searchScope: String = SearchRepository.GLOBAL_SCOPE,
     searchScopeLabel: String = "Everywhere",
     onSearchScopeChanged: (String, String) -> Unit = { _, _ -> },
     onOpenProduct: (String) -> Unit = {},
     onOpenStore: (String) -> Unit = {},
+    onOpenBrand: (String) -> Unit = {},
     onOpenCategory: (String, String) -> Unit = { _, _ -> },
     onLike: (FeedPost) -> Unit = {},
     onRepost: (FeedPost) -> Unit = {},
     onSave: (FeedPost) -> Unit = {},
     onShare: (FeedPost) -> Unit = {},
     interactionMessage: String? = null,
+    onMessageFailure: (String, Boolean) -> Unit = { _, _ -> },
     savingPostId: String? = null,
     loadingMore: Boolean = false,
     loadMoreError: String? = null,
     onLoadMore: () -> Unit = {},
     walletRepository: WalletRepository? = null,
     buyerOrdersRepository: BuyerOrdersRepository? = null,
+    productReviewsRepository: ProductReviewsRepository? = null,
     disputeRepository: DisputeRepository? = null,
     privateMediaUploadsRepository: CreatorSampleMediaRepository? = null,
     currentProfileRepository: CurrentProfileRepository? = null,
@@ -99,6 +112,16 @@ internal fun MainContent(
     ioExecutor: Executor? = null,
     notificationsRepository: NotificationsRepository? = null,
     accountNotificationSettingsRepository: AccountNotificationSettingsRepository? = null,
+    countryPreferenceRepository: CountryPreferenceRepository? = null,
+    countryPreferenceNavigation: CountryPreferenceNavigation? = null,
+    chatNotificationSettingsRepository: ChatNotificationSettingsRepository? = null,
+    chatPasscodeRepository: ChatPasscodeRepository? = null,
+    onOpenChatPasscodeSettings: () -> Unit = {},
+    onOpenChatNotificationSettings: () -> Unit = {},
+    onChatPasscodeUpdated: () -> Unit = {},
+    onOpenBlockedAccounts: () -> Unit = {},
+    messagesRefreshGeneration: Int = 0,
+    onChatNotificationsSaved: () -> Unit = {},
     onNotificationReauthenticate: () -> Unit = {},
     searchRepository: SearchRepository? = null,
     exploreRepository: ExploreRepository? = null,
@@ -106,9 +129,39 @@ internal fun MainContent(
     messagesRepository: MessagesRepository? = null,
     initialMessageConversation: InboxConversation? = null,
     onInitialMessageConversationHandled: () -> Unit = {},
+    initialNotificationConversationId: String? = null,
+    onInitialNotificationConversationHandled: () -> Unit = {},
+    initialNotificationOrderId: String? = null,
+    onInitialNotificationOrderHandled: () -> Unit = {},
+    initialGroupInvitations: Boolean = false,
+    onInitialGroupInvitationsHandled: () -> Unit = {},
+    initialChannelInvitations: Boolean = false,
+    onInitialChannelInvitationsHandled: () -> Unit = {},
+    initialGroupInvitationToken: String? = null,
+    onInitialGroupInvitationTokenHandled: () -> Unit = {},
+    initialChannelInvitationToken: String? = null,
+    onInitialChannelInvitationTokenHandled: () -> Unit = {},
+    initialSupportTicketId: String? = null,
+    onInitialSupportTicketHandled: () -> Unit = {},
+    initialDisputeId: String? = null,
+    onInitialDisputeHandled: () -> Unit = {},
+    initialClipId: String? = null,
+    onInitialClipHandled: () -> Unit = {},
     savedPostsRepository: SavedPostsRepository? = null,
     martRepository: MartRepository? = null,
     storeRepository: StoreRepository? = null,
+    supportTicketRepository: SupportTicketRepository? = null,
+    spacesRepository: SpacesRepository? = null,
+    liveSessionsRepository: LiveSessionsRepository? = null,
+    liveCoinTipRepository: LiveCoinTipRepository? = null,
+    initialLiveId: String? = null,
+    onBackFromLive: () -> Unit = {},
+    clipsRepository: ClipsRepository? = null,
+    clipWatchTrackingRepository: ClipWatchTrackingRepository = ClipWatchTrackingRepository(sessionProvider = { null }),
+    storiesRepository: StoriesRepository? = null,
+    postDetailRepository: PostDetailRepository? = null,
+    spacesAccessToken: String? = null,
+    spacesViewerId: String? = null,
     showMartCategoryPane: Boolean = false,
     initialMartProductId: String? = null,
     onInitialMartProductHandled: () -> Unit = {},
@@ -119,22 +172,101 @@ internal fun MainContent(
     onOpenSavedPosts: () -> Unit = {},
     onBackFromSavedPosts: () -> Unit = {},
     onBackFromOrders: () -> Unit = {},
+    onCheckBuyerOrderPayment: (BuyerOrderDetail) -> Unit = {},
     onBackFromFollowRequests: () -> Unit = {},
+    onBackFromSupportRequests: () -> Unit = {},
     onOpenMessages: () -> Unit = {},
     onOpenNotificationConversation: (InboxConversation) -> Unit = {},
-    onOpenOrders: () -> Unit = {},
-    onOpenFollowRequests: () -> Unit = {},
+    onOpenSearch: () -> Unit = {},
+    onClipReauthenticate: () -> Unit = onReauthenticate,
+    notificationActions: MainContentNotificationActions = MainContentNotificationActions(),
     onSearchCurrentProfile: (String, String) -> Unit = { _, _ -> },
     onOpenConnections: (String, String) -> Unit = { _, _ -> },
     onOpenBusinessTools: () -> Unit = {},
     businessContent: (@Composable () -> Unit)? = null,
 ) {
+    if (destination == Destination.Live && liveSessionsRepository != null && liveCoinTipRepository != null && ioExecutor != null && initialLiveId != null) {
+        com.nantty.android.ui.live.LiveWatchScreen(
+            liveId = initialLiveId,
+            sessions = liveSessionsRepository,
+            coinTips = liveCoinTipRepository,
+            executor = ioExecutor,
+            onBack = onBackFromLive,
+            onReauthenticate = onReauthenticate,
+            modifier = modifier,
+        )
+        return
+    }
+    if (destination == Destination.Clips && clipsRepository != null && postDetailRepository != null && publicProfileRepository != null && ioExecutor != null) {
+        com.nantty.android.ui.clips.ClipsScreen(
+            repository = clipsRepository,
+            postRepository = postDetailRepository,
+            profileRepository = publicProfileRepository,
+            executor = ioExecutor,
+            watchTrackingRepository = clipWatchTrackingRepository,
+            isGuest = !canViewFollowing,
+            onSignInRequiredWithAction = onSignInRequiredWithAction,
+            onReauthenticate = onClipReauthenticate,
+            onOpenSearch = onOpenSearch,
+            onOpenPost = onOpenPost,
+            onOpenProfile = onOpenProfile,
+            initialClipId = initialClipId,
+            onInitialClipHandled = onInitialClipHandled,
+            modifier = modifier,
+        )
+        return
+    }
+    if (destination == Destination.Spaces && spacesRepository != null && ioExecutor != null) {
+        com.nantty.android.ui.spaces.SpacesScreen(
+            repository = spacesRepository,
+            accessToken = spacesAccessToken,
+            viewerId = spacesViewerId,
+            executor = ioExecutor,
+            onSignInRequired = onSignInRequired,
+            modifier = modifier,
+        )
+        return
+    }
+    if (destination == Destination.CountryPreference && countryPreferenceRepository != null && countryPreferenceNavigation != null && ioExecutor != null) {
+        CountryPreferenceScreen(
+            repository = countryPreferenceRepository,
+            executor = ioExecutor,
+            onBack = countryPreferenceNavigation.returnToPrevious,
+            onReauthenticate = onReauthenticate,
+            onSaved = countryPreferenceNavigation.returnToPrevious,
+            modifier = modifier,
+        )
+        return
+    }
+    if (destination == Destination.ChatNotificationSettings && chatNotificationSettingsRepository != null && ioExecutor != null) {
+        ChatNotificationSettingsScreen(
+            repository = chatNotificationSettingsRepository,
+            executor = ioExecutor,
+            onBack = onBackFromSupportRequests,
+            onReauthenticate = onNotificationReauthenticate,
+            onOpenBlockedAccounts = onOpenBlockedAccounts,
+            onOpenPasscodeSettings = onOpenChatPasscodeSettings,
+            onSettingsChanged = onChatNotificationsSaved,
+            modifier = modifier,
+        )
+        return
+    }
+    if (destination == Destination.ChatPasscode && chatPasscodeRepository != null) {
+        ChatPasscodeSettingsScreen(
+            repository = chatPasscodeRepository,
+            onBack = onOpenChatNotificationSettings,
+            onPasscodeUpdated = onChatPasscodeUpdated,
+            modifier = modifier,
+        )
+        return
+    }
     if (destination == Destination.Profile && currentProfileRepository != null && ioExecutor != null) {
         CurrentProfileScreen(
             repository = currentProfileRepository,
             executor = ioExecutor,
             modifier = modifier,
             onOpenBusinessTools = onOpenBusinessTools,
+            onOpenCountryPreferences = countryPreferenceNavigation?.open ?: {},
             onOpenConnections = onOpenConnections,
             onOpenProfile = onOpenProfile,
             onSearchProfile = onSearchCurrentProfile,
@@ -142,6 +274,9 @@ internal fun MainContent(
             profileImagesRepository = profileImagesRepository,
             onOpenPost = onOpenPost,
             followRequestsRepository = followRequestsRepository,
+            supportTicketRepository = supportTicketRepository,
+            supportMediaRepository = privateMediaUploadsRepository,
+            buyerOrdersRepository = buyerOrdersRepository,
             onReauthenticate = onReauthenticate,
         )
         return
@@ -166,13 +301,22 @@ internal fun MainContent(
         return
     }
     if (destination == Destination.Messages && messagesRepository != null && ioExecutor != null) {
-        MessagesScreen(
-            messagesRepository,
-            ioExecutor,
-            modifier,
-            onReauthenticate,
-            initialConversation = initialMessageConversation,
+        MessagesDestination(
+            repository = messagesRepository, executor = ioExecutor, modifier = modifier,
+            onReauthenticate = onReauthenticate, initialConversation = initialMessageConversation,
             onInitialConversationHandled = onInitialMessageConversationHandled,
+            initialNotificationConversationId = initialNotificationConversationId,
+            onInitialNotificationConversationHandled = onInitialNotificationConversationHandled,
+            initialGroupInvitations = initialGroupInvitations,
+            onInitialGroupInvitationsHandled = onInitialGroupInvitationsHandled,
+            initialChannelInvitations = initialChannelInvitations,
+            onInitialChannelInvitationsHandled = onInitialChannelInvitationsHandled,
+            initialGroupInvitationToken = initialGroupInvitationToken,
+            onInitialGroupInvitationTokenHandled = onInitialGroupInvitationTokenHandled,
+            initialChannelInvitationToken = initialChannelInvitationToken,
+            onInitialChannelInvitationTokenHandled = onInitialChannelInvitationTokenHandled,
+            onOpenChatNotificationSettings = onOpenChatNotificationSettings,
+            externalRefreshGeneration = messagesRefreshGeneration, storiesRepository = storiesRepository,
         )
         return
     }
@@ -183,14 +327,44 @@ internal fun MainContent(
             modifier = modifier,
             onReauthenticate = onNotificationReauthenticate,
             onOpenPost = onOpenPost,
+            onOpenPostComment = onOpenPostComment,
             onOpenProfile = onOpenProfile,
             onOpenMessages = onOpenMessages,
-            onOpenConversation = onOpenNotificationConversation,
+            onOpenConversation = notificationActions.openConversation,
             messagesRepository = messagesRepository,
-            onOpenOrders = onOpenOrders,
+            onOpenOrders = notificationActions.openOrders,
             accountSettingsRepository = accountNotificationSettingsRepository,
-            onOpenFollowRequests = onOpenFollowRequests,
+            onOpenFollowRequests = notificationActions.openFollowRequests,
+            onOpenGroupInvitations = notificationActions.openGroupInvitations,
+            onOpenSpaces = notificationActions.openSpaces,
+            onOpenSupportTicket = notificationActions.openSupportTicket,
+            onOpenDispute = notificationActions.openDispute,
+            onOpenClip = notificationActions.openClip,
         )
+        return
+    }
+    if (destination == Destination.SupportRequests && supportTicketRepository != null && ioExecutor != null) {
+        SupportRequestsScreen(
+            repository = supportTicketRepository,
+            executor = ioExecutor,
+            onBack = onOpenMessages,
+            onAuthenticationRequired = onReauthenticate,
+            initialTicketId = initialSupportTicketId,
+            onInitialTicketHandled = onInitialSupportTicketHandled,
+            modifier = modifier,
+        )
+        return
+    }
+    if (destination == Destination.DisputeDetail && disputeRepository != null && ioExecutor != null && initialDisputeId != null) {
+        BuyerDisputeDetailScreen(
+            disputeId = initialDisputeId,
+            repository = disputeRepository,
+            executor = ioExecutor,
+            onBack = onBackFromOrders,
+            onReauthenticate = onReauthenticate,
+            modifier = modifier,
+        )
+        androidx.compose.runtime.LaunchedEffect(initialDisputeId) { onInitialDisputeHandled() }
         return
     }
     if (destination == Destination.Wallet && walletRepository != null && ioExecutor != null) {
@@ -207,6 +381,14 @@ internal fun MainContent(
             privateMediaUploadsRepository = privateMediaUploadsRepository,
             onOpenStore = onOpenStore,
             onOpenProduct = onOpenProduct,
+            onCheckPayment = onCheckBuyerOrderPayment,
+            reviewRepository = productReviewsRepository,
+            messagesRepository = messagesRepository,
+            supportTicketRepository = supportTicketRepository,
+            onOpenConversation = onOpenNotificationConversation,
+            onMessageFailure = onMessageFailure,
+            initialOrderId = initialNotificationOrderId,
+            onInitialOrderHandled = onInitialNotificationOrderHandled,
             modifier = modifier,
         )
         return
@@ -221,6 +403,7 @@ internal fun MainContent(
             onReauthenticate = onReauthenticate,
             onOpenProduct = onOpenProduct,
             onOpenStore = onOpenStore,
+            onOpenBrand = onOpenBrand,
             onOpenCategory = onOpenCategory,
             exploreRepository = exploreRepository,
             profileRepository = publicProfileRepository,
@@ -247,6 +430,7 @@ internal fun MainContent(
             onBackFromInitialCategory = onBackFromInitialMartCategory,
             onInitialCategoryHandled = onInitialMartCategoryHandled,
             onOpenStore = onOpenStore,
+            onOpenBrand = onOpenBrand,
             storeRepository = storeRepository,
         )
         return
@@ -312,84 +496,3 @@ internal fun MainContent(
         }
     }
 }
-
-@Composable
-internal fun FeedTabSelector(
-    selectedFeed: FeedType,
-    canViewFollowing: Boolean,
-    onSelectFeed: (FeedType) -> Unit,
-    onSignInRequired: () -> Unit,
-    onFollowingSignInRequired: () -> Unit = onSignInRequired,
-) {
-    TabRow(selectedTabIndex = FeedType.entries.indexOf(selectedFeed).coerceAtLeast(0)) {
-        FeedType.entries.forEach { feed ->
-            Tab(
-                selected = selectedFeed == feed,
-                onClick = {
-                    if (feed == FeedType.FOLLOWING && !canViewFollowing) onFollowingSignInRequired()
-                    else onSelectFeed(feed)
-                },
-                text = { Text(feed.title) },
-            )
-        }
-    }
-}
-
-@Composable
-internal fun FeedMartSectionTabs(
-    selectedMart: Boolean,
-    onSelectMart: (Boolean) -> Unit,
-) {
-    TabRow(
-        selectedTabIndex = if (selectedMart) 1 else 0,
-        modifier = Modifier.testTag("feed-mart-tabs").pointerInput(selectedMart) {
-            var horizontalDrag = 0f
-            detectHorizontalDragGestures(
-                onDragEnd = {
-                    resolveFeedMartSwipeTarget(selectedMart, horizontalDrag, 64.dp.toPx())
-                        ?.let(onSelectMart)
-                },
-                onHorizontalDrag = { change, dragAmount ->
-                    horizontalDrag += dragAmount
-                    change.consume()
-                },
-            )
-        },
-    ) {
-        Tab(selected = !selectedMart, onClick = { onSelectMart(false) }, text = { Text("Feed") })
-        Tab(selected = selectedMart, onClick = { onSelectMart(true) }, text = { Text("Mart") })
-    }
-}
-
-@Composable
-internal fun FeedPaginationFooter(
-    hasMore: Boolean,
-    loading: Boolean,
-    error: String?,
-    onLoadMore: () -> Unit,
-) {
-    when {
-        loading -> CircularProgressIndicator(Modifier.padding(20.dp).semantics { contentDescription = "Loading more posts" })
-        error != null -> Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-            TextButton(onClick = onLoadMore) { Text("Try loading more") }
-        }
-        hasMore -> TextButton(onClick = onLoadMore, modifier = Modifier.fillMaxWidth().padding(12.dp)) { Text("Load more posts") }
-        else -> Text("You’re all caught up", Modifier.fillMaxWidth().padding(20.dp), color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodySmall)
-    }
-}
-
-@Composable
-internal fun EmptyState(title: String, message: String, action: (() -> Unit)? = null) {
-    Column(
-        Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 36.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(10.dp))
-        Text(message, color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodyLarge)
-        action?.let { TextButton(onClick = it) { Text("Try again") } }
-    }
-}
-

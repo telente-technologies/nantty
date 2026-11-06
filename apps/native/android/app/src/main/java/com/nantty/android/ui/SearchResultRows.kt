@@ -95,7 +95,7 @@ internal fun SearchOtherRow(item: com.nantty.android.data.SearchOther, onClick: 
                 "hashtag" -> "Search posts with ${item.title}"
                 "store" -> "Open store ${item.title}"
                 "category" -> "Search Mart category ${item.title}"
-                "brand" -> if (item.associatedStoreId == null) "${item.title} brand; official store not available" else "Search the official store for ${item.title}"
+                "brand" -> "Open brand ${item.title}"
                 else -> "${item.title}, ${item.kind}"
             }
         }

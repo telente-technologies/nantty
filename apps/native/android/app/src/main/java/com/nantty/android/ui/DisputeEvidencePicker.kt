@@ -84,6 +84,10 @@ internal fun DisputeEvidencePicker(
                         uploadError = null
                         authenticationRequired = false
                     }
+                    is CreatorSampleMediaResult.VideoSuccess -> {
+                        uploadError = "Choose a photo for dispute evidence."
+                        authenticationRequired = false
+                    }
                     is CreatorSampleMediaResult.Failure -> {
                         uploadError = result.message
                         authenticationRequired = result.authenticationRequired

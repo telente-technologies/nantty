@@ -11,16 +11,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.PersonOutline
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Podcasts
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material3.DropdownMenu
@@ -130,8 +135,11 @@ internal fun BrandMark() {
 internal fun DestinationIcon(destination: Destination) {
     val image = when (destination) {
         Destination.Feed -> Icons.Default.Home
+        Destination.Clips -> Icons.Default.PlayArrow
         Destination.Mart -> Icons.Default.Storefront
         Destination.Discover -> Icons.Default.Explore
+        Destination.Spaces -> Icons.Default.Podcasts
+        Destination.Live -> Icons.Default.LiveTv
         Destination.Notifications -> Icons.Default.NotificationsNone
         Destination.Messages -> Icons.Outlined.ChatBubbleOutline
         Destination.Wallet -> Icons.Default.AccountBalanceWallet
@@ -140,6 +148,12 @@ internal fun DestinationIcon(destination: Destination) {
         Destination.Saved -> Icons.Default.BookmarkBorder
         Destination.Business -> Icons.Default.Storefront
         Destination.FollowRequests -> Icons.Default.PersonOutline
+        Destination.GroupInvitations -> Icons.Outlined.ChatBubbleOutline
+        Destination.SupportRequests -> Icons.Default.Settings
+        Destination.DisputeDetail -> Icons.AutoMirrored.Filled.ReceiptLong
+        Destination.CountryPreference -> Icons.Default.Settings
+        Destination.ChatNotificationSettings -> Icons.Default.Settings
+        Destination.ChatPasscode -> Icons.Default.Settings
     }
     Icon(image, contentDescription = null)
 }

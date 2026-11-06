@@ -24,16 +24,18 @@ import com.nantty.android.data.AccountSessionRepository
 import com.nantty.android.data.AuthFlowApi
 import com.nantty.android.ui.auth.PendingGuestAction
 import com.nantty.android.widget.OrdersWidgetRefreshScheduler
+import com.nantty.android.notifications.NativePushRegistration
+import com.nantty.android.notifications.PushTapTarget
 import java.util.concurrent.Executor
 
 internal enum class Destination(val title: String) {
-    Feed("Home"), Mart("Mart"), Discover("Discover"), Notifications("Activity"), Messages("Messages"), Wallet("Wallet"), Orders("Orders"), Profile("Profile"), Saved("Saved posts"), Business("Business tools"), FollowRequests("Follow requests")
+    Feed("Home"), Clips("Clips"), Mart("Mart"), Discover("Discover"), Spaces("Spaces"), Live("Live"), Notifications("Activity"), Messages("Messages"), Wallet("Wallet"), Orders("Orders"), Profile("Profile"), Saved("Saved posts"), Business("Business tools"), FollowRequests("Follow requests"), GroupInvitations("Group invitations"), SupportRequests("Support requests"), DisputeDetail("Dispute"), CountryPreference("Country & currency"), ChatNotificationSettings("Chat settings"), ChatPasscode("Chat passcode")
 }
 
 internal fun visibleDestinations(isGuest: Boolean): List<Destination> =
     Destination.entries.filter { item ->
-        if (isGuest) item == Destination.Feed || item == Destination.Mart || item == Destination.Discover
-        else item != Destination.Saved && item != Destination.Orders && item != Destination.Mart && item != Destination.Business && item != Destination.FollowRequests
+        if (isGuest) item == Destination.Feed || item == Destination.Clips || item == Destination.Mart || item == Destination.Discover || item == Destination.Spaces
+        else item != Destination.Saved && item != Destination.Orders && item != Destination.Mart && item != Destination.Live && item != Destination.Business && item != Destination.FollowRequests && item != Destination.GroupInvitations && item != Destination.SupportRequests && item != Destination.DisputeDetail && item != Destination.CountryPreference && item != Destination.ChatNotificationSettings && item != Destination.ChatPasscode
     }
 
 @Composable
@@ -44,6 +46,12 @@ fun NanttyApp(
     repository: FeedRepository = remember { FeedRepository() },
     requestedWidgetDestination: String? = null,
     onWidgetDestinationHandled: () -> Unit = {},
+    requestedNotificationTarget: PushTapTarget? = null,
+    onNotificationTargetHandled: () -> Unit = {},
+    requestedGroupInvitationToken: String? = null,
+    onGroupInvitationTokenHandled: () -> Unit = {},
+    requestedChannelInvitationToken: String? = null,
+    onChannelInvitationTokenHandled: () -> Unit = {},
 ) {
     val appContext = LocalContext.current.applicationContext
     var session by remember { mutableStateOf<AccountSession?>(null) }
@@ -63,6 +71,7 @@ fun NanttyApp(
                 val restored = sessionRepository.restore()
                 if (restored != null) {
                     OrdersWidgetRefreshScheduler.refreshSoon(appContext, replaceExisting = true)
+                    NativePushRegistration.enqueueSync(appContext)
                 } else {
                     OrdersWidgetRefreshScheduler.markSignedOut(appContext)
                 }
@@ -112,6 +121,7 @@ fun NanttyApp(
             onBrowseAsGuest = { guestBrowsing = true; sessionError = null },
             onAuthenticated = { authenticated ->
                 OrdersWidgetRefreshScheduler.refreshSoon(appContext, replaceExisting = true)
+                NativePushRegistration.enqueueSync(appContext)
                 session = authenticated
                 sessionError = null
                 sessionWorking = false
@@ -138,6 +148,9 @@ fun NanttyApp(
                 sessionError = null
                 sessionExecutor.execute {
                     try {
+                        sessionRepository.sessionOrNull()?.user?.id?.let {
+                            NativePushRegistration.unregisterBeforeSignOut(appContext, it)
+                        }
                         sessionRepository.signOut()
                         OrdersWidgetRefreshScheduler.markSignedOut(appContext)
                         androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
@@ -161,6 +174,12 @@ fun NanttyApp(
             repository = repository,
             requestedWidgetDestination = requestedWidgetDestination,
             onWidgetDestinationHandled = onWidgetDestinationHandled,
+            requestedNotificationTarget = requestedNotificationTarget,
+            onNotificationTargetHandled = onNotificationTargetHandled,
+            requestedGroupInvitationToken = requestedGroupInvitationToken,
+            onGroupInvitationTokenHandled = onGroupInvitationTokenHandled,
+            requestedChannelInvitationToken = requestedChannelInvitationToken,
+            onChannelInvitationTokenHandled = onChannelInvitationTokenHandled,
         )
         if (session == null && guestBrowsing && showingGuestAuth) {
             Dialog(
@@ -178,6 +197,7 @@ fun NanttyApp(
                         onBrowseAsGuest = ::cancelGuestAuth,
                         onAuthenticated = { authenticated ->
                             OrdersWidgetRefreshScheduler.refreshSoon(appContext, replaceExisting = true)
+                            NativePushRegistration.enqueueSync(appContext)
                             session = authenticated
                             guestBrowsing = false
                             showingGuestAuth = false

@@ -9,6 +9,8 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.data.PublicProfileTransport
+import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.StoriesTransport
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -42,6 +44,37 @@ class PublicProfileScreenTest {
         compose.runOnIdle {
             assertEquals("post-1", openedPost)
             assertEquals(listOf("/api/v1/users/user-42", "/api/v1/users/user-42/posts?visibility=public"), transport.paths)
+        }
+    }
+
+    @Test
+    fun activeStoryStatusAddsAccessibleRingAndOpensExistingViewer() {
+        val paths = mutableListOf<String>()
+        val stories = StoriesRepository(transport = object : StoriesTransport {
+            override fun get(path: String, accessToken: String?): JSONObject {
+                paths += path
+                return if (path.endsWith("/story-status")) JSONObject("""{"data":{"hasActiveStory":true,"hasUnseenStory":true}}""")
+                else JSONObject("""{"data":[]}""")
+            }
+            override fun post(path: String, accessToken: String) = JSONObject()
+        })
+        compose.setContent {
+            MaterialTheme {
+                PublicProfileScreen(
+                    userId = "user-42",
+                    repository = PublicProfileRepository("https://api.nantty.com", ProfileTransport()),
+                    executor = Executor { it.run() },
+                    storiesRepository = stories,
+                    onBack = {},
+                    onOpenPost = {},
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("View Ari O.'s story").assertIsDisplayed().performClick()
+        compose.onNodeWithText("No stories right now").assertIsDisplayed()
+        compose.runOnIdle {
+            assertEquals(listOf("/api/v1/users/user-42/story-status", "/api/v1/users/user-42/stories"), paths)
         }
     }
 

@@ -85,6 +85,8 @@ class MessagesRepository(
     private val threadTransport: ChatThreadTransport = JdkChatThreadTransport(baseUrl),
 ) {
     private val conversationSearchRepository = ConversationSearchRepository(sessionProvider, threadTransport, refreshSessionProvider)
+    internal val groupInvitationsRepository = GroupInvitationsRepository(sessionProvider, threadTransport, refreshSessionProvider)
+    internal val channelInvitationsRepository = ChannelInvitationsRepository(sessionProvider, threadTransport, refreshSessionProvider)
     private val notificationMessageTargets = mutableMapOf<String, String>()
 
     /** Holds a validated notification target until the matching conversation screen consumes it. */
@@ -104,6 +106,50 @@ class MessagesRepository(
     fun search(query: String) = conversationSearchRepository.search(query)
 
     fun startConversationWithPerson(personId: String) = conversationSearchRepository.startConversationWithPerson(personId)
+
+    fun startConversationWithStore(storeId: String) = conversationSearchRepository.startConversationWithStore(storeId)
+
+    fun listGroupInvitations(direction: GroupInvitationDirection, cursor: String? = null) =
+        groupInvitationsRepository.list(direction, cursor)
+
+    fun createGroupInvitation(conversationId: String, inviteeId: String) =
+        groupInvitationsRepository.create(conversationId, inviteeId)
+
+    fun acceptGroupInvitation(invitationId: String) = groupInvitationsRepository.accept(invitationId)
+
+    fun declineGroupInvitation(invitationId: String) = groupInvitationsRepository.decline(invitationId)
+
+    fun revokeGroupInvitation(conversationId: String, invitationId: String) =
+        groupInvitationsRepository.revoke(conversationId, invitationId)
+
+    fun createChannel(name: String, description: String?): ConversationLookupResult = try {
+        val normalizedName = name.trim()
+        val normalizedDescription = description?.trim().orEmpty()
+        require(normalizedName.isNotEmpty() && normalizedName.length <= 80) { "Channel names must be between 1 and 80 characters." }
+        require(normalizedDescription.length <= 500) { "Channel descriptions must be 500 characters or fewer." }
+        val session = sessionProvider() ?: error("Sign in to create a channel.")
+        val token = session.accessToken.takeIf(String::isNotBlank) ?: error("Sign in to create a channel.")
+        val body = JSONObject().put("name", normalizedName)
+        if (normalizedDescription.isNotEmpty()) body.put("description", normalizedDescription)
+        val payload = try {
+            threadTransport.request("POST", "/api/v1/channels", token, body)
+        } catch (error: MessagesHttpException) {
+            if (error.statusCode != 401) throw error
+            val refreshed = refreshSessionProvider()?.accessToken?.takeIf(String::isNotBlank)
+                ?: return ConversationLookupResult.Failure("Your session has expired. Sign in again to create a channel.", true)
+            threadTransport.request("POST", "/api/v1/channels", refreshed, body)
+        }
+        val row = payload.optJSONObject("data") ?: payload
+        val channel = parsePage(JSONObject().put("data", org.json.JSONArray().put(row))).conversations.singleOrNull()
+            ?.takeIf { it.type == ConversationType.CHANNEL }
+            ?: error("Nantty returned an incomplete channel response.")
+        ConversationLookupResult.Success(channel)
+    } catch (error: Exception) {
+        ConversationLookupResult.Failure(
+            error.message ?: "Could not create the channel. Check your connection and try again.",
+            authenticationRequired = error is MessagesHttpException && error.statusCode in setOf(401, 403),
+        )
+    }
 
     fun loadConversationById(conversationId: String): ConversationLookupResult {
         return try {
@@ -204,69 +250,6 @@ class MessagesRepository(
     /** Uses the verified Social API `after` contract for incremental conversation synchronization. */
     fun loadMessagesAfter(conversationId: String, messageId: String): ChatHistoryResult =
         loadMessages(conversationId, after = messageId)
-
-    /** Loads the most recent page and follows older cursors, emitting each accumulated page as it arrives. */
-    fun loadInitialHistory(
-        conversationId: String,
-        onPageLoaded: (ChatMessagePage) -> Unit = {},
-    ): ChatHistoryResult {
-        var cursor: String? = null
-        var accumulated: ChatMessagePage? = null
-
-        repeat(MAX_INITIAL_HISTORY_PAGES) {
-            when (val loaded = loadMessages(conversationId, cursor)) {
-                is ChatHistoryResult.Failure -> {
-                    val existing = accumulated ?: return loaded
-                    return ChatHistoryResult.Success(existing, continuationError = loaded.message)
-                }
-                is ChatHistoryResult.Success -> {
-                    val previous = accumulated
-                    val merged = if (previous == null) {
-                        loaded.page
-                    } else {
-                        ChatMessagePage(
-                            messages = (previous.messages + loaded.page.messages).distinctBy(EncryptedChatMessage::id),
-                            nextCursor = loaded.page.nextCursor,
-                        )
-                    }
-                    accumulated = merged
-                    onPageLoaded(merged)
-                    cursor = loaded.page.nextCursor ?: return ChatHistoryResult.Success(merged)
-                }
-            }
-        }
-
-        return ChatHistoryResult.Success(checkNotNull(accumulated))
-    }
-
-    /** Loads authenticated older pages, without decrypting, until a notification target is found. */
-    fun loadHistoryUntilMessage(conversationId: String, messageId: String): ChatHistoryResult {
-        if (!isUuid(conversationId)) return ChatHistoryResult.Failure("This conversation link is invalid.")
-        if (!isUuid(messageId)) return ChatHistoryResult.Failure("This message link is invalid.")
-        var cursor: String? = null
-        var accumulated: ChatMessagePage? = null
-        repeat(MAX_INITIAL_HISTORY_PAGES) {
-            when (val loaded = loadMessages(conversationId, cursor)) {
-                is ChatHistoryResult.Failure -> {
-                    val existing = accumulated ?: return loaded
-                    return ChatHistoryResult.Success(existing, continuationError = loaded.message, targetMessageFound = false)
-                }
-                is ChatHistoryResult.Success -> {
-                    val previous = accumulated
-                    val merged = if (previous == null) loaded.page else ChatMessagePage(
-                        messages = (previous.messages + loaded.page.messages).distinctBy(EncryptedChatMessage::id),
-                        nextCursor = loaded.page.nextCursor,
-                    )
-                    accumulated = merged
-                    if (merged.messages.any { it.id == messageId }) {
-                        return ChatHistoryResult.Success(merged, targetMessageFound = true)
-                    }
-                    cursor = loaded.page.nextCursor ?: return ChatHistoryResult.Success(merged, targetMessageFound = false)
-                }
-            }
-        }
-        return ChatHistoryResult.Success(checkNotNull(accumulated), targetMessageFound = false)
-    }
 
     fun markConversationRead(conversationId: String): Result<Unit> = runCatching {
         require(isUuid(conversationId)) { "This conversation link is invalid." }
@@ -434,11 +417,21 @@ private class JdkChatThreadTransport(private val baseUrl: String) : ChatThreadTr
     override fun request(method: String, path: String, accessToken: String, body: JSONObject?): JSONObject {
         val endpointPath = path.substringBefore('?')
         val supportedRequest = when {
+            endpointPath == "/api/v1/group-invitations" -> method == "GET"
+            endpointPath.matches(Regex("/api/v1/group-invitations/[0-9a-fA-F-]{36}/(accept|decline)")) -> method == "POST"
+            endpointPath.matches(Regex("/api/v1/conversations/[0-9a-fA-F-]{36}/invitations")) -> method == "POST"
+            endpointPath.matches(Regex("/api/v1/conversations/[0-9a-fA-F-]{36}/invitations/[0-9a-fA-F-]{36}")) -> method == "DELETE"
+            endpointPath.matches(Regex("/api/v1/conversations/[0-9a-fA-F-]{36}/invitation-links")) -> method in setOf("GET", "POST")
+            endpointPath.matches(Regex("/api/v1/conversations/invitation-links/[A-Za-z0-9_-]{43}/preview")) -> method == "GET"
+            endpointPath.matches(Regex("/api/v1/conversations/invitation-links/[A-Za-z0-9_-]{43}/claim")) -> method == "POST"
+            endpointPath.matches(Regex("/api/v1/conversations/[0-9a-fA-F-]{36}/invitation-links/[0-9a-fA-F-]{36}")) -> method == "DELETE"
             endpointPath.startsWith("/api/v1/conversations/") && endpointPath.endsWith("/messages") -> method == "GET"
             endpointPath.startsWith("/api/v1/conversations/") && endpointPath.endsWith("/read") -> method == "POST"
             endpointPath.matches(Regex("/api/v1/conversations/[0-9a-fA-F-]{36}(/(accept|block|not-spam))?")) -> method == "POST" || method == "DELETE"
             endpointPath == "/api/v1/conversations/search" -> method == "GET"
             endpointPath == "/api/v1/conversations" -> method == "POST"
+            endpointPath == "/api/v1/channels" -> method == "POST"
+            endpointPath.matches(Regex("/api/v1/conversations/stores/[0-9a-fA-F-]{36}")) -> method == "POST"
             else -> false
         }
         require(supportedRequest) { "Unsupported conversation request." }

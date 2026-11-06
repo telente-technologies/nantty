@@ -71,14 +71,29 @@ internal fun SellerWorkspaceScreen(
     onAuthenticationRequired: () -> Unit,
     onMessageBuyer: (String) -> Unit,
     onOpenBuyerProfile: (String) -> Unit = {},
+    onOpenCountryPreferences: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var period by rememberSaveable { mutableStateOf(SellerDashboardPeriod.TODAY) }
     var retryKey by rememberSaveable { mutableIntStateOf(0) }
     var state by remember { mutableStateOf<SellerWorkspaceUiState>(SellerWorkspaceUiState.Loading) }
     var showingOrders by rememberSaveable { mutableStateOf(false) }
+    var showingApplication by rememberSaveable { mutableStateOf(false) }
 
     BackHandler(enabled = showingOrders) { showingOrders = false }
+    BackHandler(enabled = showingApplication) { showingApplication = false }
+
+    if (showingApplication) {
+        SellerApplicationForm(
+            repository = repository,
+            executor = executor,
+            onBack = { showingApplication = false },
+            onSubmitted = { showingApplication = false; retryKey++ },
+            onAuthenticationRequired = onAuthenticationRequired,
+            onOpenCountryPreferences = onOpenCountryPreferences,
+        )
+        return
+    }
 
     if (showingOrders) {
         SellerOrdersScreen(
@@ -122,6 +137,7 @@ internal fun SellerWorkspaceScreen(
                     period = period,
                     onPeriodChange = { period = it },
                     onOpenOrders = { showingOrders = true },
+                    onStartApplication = { showingApplication = true },
                 )
             }
         }
@@ -155,11 +171,12 @@ private fun SellerWorkspaceContent(
     period: SellerDashboardPeriod,
     onPeriodChange: (SellerDashboardPeriod) -> Unit,
     onOpenOrders: () -> Unit,
+    onStartApplication: () -> Unit,
 ) {
     val dashboard = workspace.dashboard
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         if (workspace.access.storeId == null) {
-            SellerAccessEmptyState(workspace.application)
+            SellerAccessEmptyState(workspace.application, onStartApplication)
         } else {
             Text(
                 workspace.access.storeName?.takeIf(String::isNotBlank) ?: "Your store",
@@ -181,7 +198,7 @@ private fun SellerWorkspaceContent(
 }
 
 @Composable
-private fun SellerAccessEmptyState(application: SellerApplicationStatus?) {
+private fun SellerAccessEmptyState(application: SellerApplicationStatus?, onStartApplication: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SellerApplicationCard(application)
         SellerEmptyCard(
@@ -192,6 +209,11 @@ private fun SellerAccessEmptyState(application: SellerApplicationStatus?) {
                 else -> "No seller store is linked to this account yet. Apply to sell from Nantty to get started."
             },
         )
+        if (application == null || application.status.equals("rejected", ignoreCase = true)) {
+            Button(onClick = onStartApplication, modifier = Modifier.fillMaxWidth()) {
+                Text(if (application == null) "Start selling" else "Apply again")
+            }
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 package com.nantty.android.ui
 
 import com.nantty.android.data.CheckoutReceipt
+import com.nantty.android.data.BuyerOrderDetail
 import com.nantty.android.data.WalletMoney
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -78,4 +79,58 @@ class SignedInPurchaseStateTest {
         assertEquals(null, state.destination)
         assertEquals("order-1", state.orderId)
     }
+
+    @Test
+    fun existingPendingOrderPaymentUsesTheServerVerifiedPaymentRouteAndReturnsToOrders() {
+        val state = SignedInPurchaseState()
+
+        assertTrue(state.checkExistingOrderPayment(pendingOrder()))
+
+        assertEquals(SignedInPurchaseDestination.Payment, state.destination)
+        assertEquals("order-123", state.orderId)
+        assertEquals("order-123", state.checkoutId)
+        assertEquals(12_500L, state.totalMinor)
+        assertEquals("NGN", state.currency)
+        assertEquals(1, state.orderCount)
+        assertTrue(state.returnToOrdersAfterPayment)
+
+        state.markPaymentVerified()
+        assertTrue(state.paymentConfirmed)
+        state.backFromPayment()
+        assertEquals(null, state.destination)
+        assertFalse(state.returnToOrdersAfterPayment)
+        assertFalse(state.paymentConfirmed)
+    }
+
+    @Test
+    fun nonPendingOrderCannotEnterPaymentRoute() {
+        val state = SignedInPurchaseState()
+
+        assertFalse(state.checkExistingOrderPayment(pendingOrder().copy(status = "shipped")))
+        assertEquals(null, state.destination)
+        assertFalse(state.returnToOrdersAfterPayment)
+    }
+
+    private fun pendingOrder() = BuyerOrderDetail(
+        id = "order-123",
+        reference = "NT-123",
+        status = "pending",
+        fulfilmentStatus = "pending",
+        paymentStatus = "pending",
+        paymentMode = "escrow",
+        storeId = "store-1",
+        storeName = "Ayo Market",
+        items = emptyList(),
+        subtotalMinor = 12_500,
+        discountMinor = 0,
+        storeCreditMinor = 0,
+        shippingMinor = 0,
+        totalMinor = 12_500,
+        currency = "NGN",
+        createdAt = "2026-11-05T10:00:00Z",
+        escrowReleaseAt = null,
+        shipment = null,
+        delivery = null,
+        promotionIssue = null,
+    )
 }

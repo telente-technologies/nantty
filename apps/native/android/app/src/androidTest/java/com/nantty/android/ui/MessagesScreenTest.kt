@@ -1,6 +1,9 @@
 package com.nantty.android.ui
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertCountEquals
@@ -28,6 +31,80 @@ import java.util.concurrent.Executor
 @RunWith(AndroidJUnit4::class)
 class MessagesScreenTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test
+    fun reloadsInboxAfterChatNotificationSettingsAreSaved() {
+        var generation by mutableStateOf(0)
+        val transport = FakeTransport()
+        compose.setContent {
+            MaterialTheme {
+                MessagesScreen(
+                    MessagesRepository("https://api.nantty.com", ::signedInSession, transport),
+                    Executor { it.run() },
+                    externalRefreshGeneration = generation,
+                )
+            }
+        }
+        compose.waitForIdle()
+        assertEquals(1, transport.calls)
+
+        compose.runOnIdle { generation++ }
+        compose.waitForIdle()
+        compose.runOnIdle { assertEquals(2, transport.calls) }
+    }
+
+    @Test
+    fun inboxExposesAccessibleChatSettingsAction() {
+        var openedSettings = false
+        compose.setContent {
+            MaterialTheme {
+                MessagesScreen(
+                    MessagesRepository("https://api.nantty.com", ::signedInSession, FakeTransport()),
+                    Executor { it.run() },
+                    onOpenChatNotificationSettings = { openedSettings = true },
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Chat settings").assertIsDisplayed().performClick()
+        compose.runOnIdle { assertEquals(true, openedSettings) }
+    }
+
+    @Test
+    fun createsChannelThroughSocialApiAndOpensReadOnlyThread() {
+        val channelId = "77777777-7777-4777-8777-777777777777"
+        val requests = mutableListOf<String>()
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = MessagesTransport { _, _ -> JSONObject("""{"data":[],"nextCursor":null}""") },
+            threadTransport = ChatThreadTransport { method, path, token, body ->
+                requests += "$method $path"
+                assertEquals("inbox-access", token)
+                when {
+                    method == "POST" && path == "/api/v1/channels" -> {
+                        assertEquals("Studio Dispatch", body?.optString("name"))
+                        assertEquals("Weekly notes", body?.optString("description"))
+                        JSONObject(
+                            """{"data":{"id":"$channelId","peer":{"id":"$channelId","name":"Studio Dispatch","username":"","avatarUrl":null},"lastMessage":"","lastMessageKind":null,"lastMessageAt":"2026-11-05T12:00:00Z","unread":0,"kind":"channel","title":"Studio Dispatch","description":"Weekly notes","photoUrl":null,"photoMediaId":null,"memberCount":1,"myRole":"owner","inboxFolder":"chats"}}""",
+                        )
+                    }
+                    method == "GET" && path == "/api/v1/conversations/$channelId/messages?limit=30" -> JSONObject("""{"data":[],"nextCursor":null}""")
+                    else -> error("Unexpected request: $method $path")
+                }
+            },
+        )
+
+        compose.setContent { MaterialTheme { MessagesScreen(repository, Executor { it.run() }) } }
+        compose.onNodeWithContentDescription("Create broadcast channel").performClick()
+        compose.onNodeWithText("Create a public channel for followers. Channel posting on Android is unavailable until encrypted messaging compatibility is complete.").assertIsDisplayed()
+        compose.onNodeWithText("Channel name").performTextInput("Studio Dispatch")
+        compose.onNodeWithText("Description (optional)").performTextInput("Weekly notes")
+        compose.onNodeWithText("Create channel").performClick()
+        compose.onNodeWithText("Encrypted message. Secure decryption is not available in this Android build yet").assertIsDisplayed()
+
+        compose.runOnIdle { assertEquals(listOf("POST /api/v1/channels", "GET /api/v1/conversations/$channelId/messages?limit=30"), requests) }
+    }
 
     @Test
     fun displaysPeerTypeTimestampAndUnreadButNeverMessageContent() {

@@ -30,6 +30,7 @@ data class MartProductVariant(
     val color: String = "",
     val optionValues: Map<String, String> = emptyMap(),
 )
+data class MartBrandTag(val id: String, val name: String)
 data class MartProductDetail(
     val id: String,
     val title: String,
@@ -45,6 +46,7 @@ data class MartProductDetail(
     val description: String,
     val store: MartStoreSummary,
     val variants: List<MartProductVariant>,
+    val brand: MartBrandTag? = null,
 )
 data class MartPage(val products: List<MartProduct>, val nextCursor: String?)
 data class MartHome(
@@ -317,6 +319,12 @@ class MartRepository(
             }
         }
         val variantsJson = root.optJSONArray("variants") ?: JSONArray()
+        val brandJson = root.optJSONObject("brand")
+        val brand = brandJson?.let {
+            val brandId = it.optString("brandId")
+            val brandName = it.optString("name").trim()
+            if (isSafeMartIdentifier(brandId) && brandName.isNotEmpty()) MartBrandTag(brandId, brandName) else null
+        }
         val variants = buildList {
             for (index in 0 until variantsJson.length()) {
                 val variant = variantsJson.optJSONObject(index) ?: continue
@@ -370,6 +378,7 @@ class MartRepository(
                 isFollowing = storeJson.optBoolean("isFollowing"),
             ),
             variants = variants,
+            brand = brand,
         )
     }
 }

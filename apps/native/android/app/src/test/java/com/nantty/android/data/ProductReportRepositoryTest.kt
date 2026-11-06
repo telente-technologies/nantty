@@ -29,6 +29,114 @@ class ProductReportRepositoryTest {
     }
 
     @Test
+    fun submitsSpaceReportUsingExistingModerationTargetContract() {
+        val transport = RecordingProductReportTransport(JSONObject("""{"data":{"id":"report-space-1","status":"received"}}"""))
+        val repository = ProductReportRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "access-token" },
+            transport = transport,
+        )
+
+        val result = repository.submitSpace(
+            "00000000-0000-0000-0000-000000000001",
+            ProductReportReason.SPAM,
+            "Repeated promotional posts",
+            "space-report-key-1",
+        )
+
+        assertEquals(ProductReportResult.Success("report-space-1"), result)
+        assertEquals("space", transport.body!!.getString("targetType"))
+        assertEquals("00000000-0000-0000-0000-000000000001", transport.body!!.getString("targetId"))
+        assertEquals("spam", transport.body!!.getString("reason"))
+        assertEquals("Repeated promotional posts", transport.body!!.getString("details"))
+    }
+
+    @Test
+    fun submitsStoryAuthorReportAsUserAccountWithSelectedReasonAndDetails() {
+        val transport = RecordingProductReportTransport(JSONObject("""{"data":{"id":"report-user-1","status":"received"}}"""))
+        val repository = ProductReportRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "access-token" },
+            transport = transport,
+        )
+
+        val result = repository.submitUser(
+            authorId = "author-42",
+            reason = ProductReportReason.HATE_OR_HARASSMENT,
+            details = "  Repeated targeted harassment  ",
+            idempotencyKey = "story-author-report-1",
+        )
+
+        assertEquals(ProductReportResult.Success("report-user-1"), result)
+        assertEquals("/api/v1/reports", transport.path)
+        assertEquals("access-token", transport.accessToken)
+        assertEquals("story-author-report-1", transport.idempotencyKey)
+        assertEquals("user", transport.body!!.getString("targetType"))
+        assertEquals("author-42", transport.body!!.getString("targetId"))
+        assertEquals("author-42", transport.body!!.getString("reportedUserId"))
+        assertEquals("hate_or_harassment", transport.body!!.getString("reason"))
+        assertEquals("Repeated targeted harassment", transport.body!!.getString("details"))
+    }
+
+    @Test
+    fun invalidStoryAuthorIdsDoNotReachTransport() {
+        val transport = RecordingProductReportTransport(JSONObject("""{"id":"report-user-1","status":"received"}"""))
+        val repository = ProductReportRepository("https://api.nantty.com", { "access-token" }, transport)
+
+        val result = repository.submitUser(
+            authorId = "../private",
+            reason = ProductReportReason.SPAM,
+            details = "",
+            idempotencyKey = "story-author-report-2",
+        )
+
+        assertEquals(ProductReportResult.Failure("This account link is invalid."), result)
+        assertFalse(transport.called)
+    }
+
+    @Test
+    fun storyAuthorReportPreservesDetailsLengthValidation() {
+        val transport = RecordingProductReportTransport(JSONObject("""{"id":"report-user-1","status":"received"}"""))
+        val repository = ProductReportRepository("https://api.nantty.com", { "access-token" }, transport)
+
+        val result = repository.submitUser(
+            authorId = "author-42",
+            reason = ProductReportReason.SPAM,
+            details = "x".repeat(501),
+            idempotencyKey = "story-author-report-4",
+        )
+
+        assertEquals(ProductReportResult.Failure("Report details must be 500 characters or fewer."), result)
+        assertFalse(transport.called)
+    }
+
+    @Test
+    fun accountReportRequiresAuthenticationAndKeepsRetryKeyForRetryableFailures() {
+        val signedOutTransport = RecordingProductReportTransport(JSONObject("""{"id":"report-user-1","status":"received"}"""))
+        val signedOut = ProductReportRepository("https://api.nantty.com", { null }, signedOutTransport)
+            .submitUser("author-42", ProductReportReason.SPAM, "", "story-author-report-3") as ProductReportResult.Failure
+        assertTrue(signedOut.authenticationRequired)
+        assertEquals("Sign in to report this account.", signedOut.message)
+        assertFalse(signedOutTransport.called)
+
+        val retryable = ProductReportRepository(
+            "https://api.nantty.com",
+            { "access-token" },
+            FailingProductReportTransport(503),
+        ).submitUser("author-42", ProductReportReason.SPAM, "", "story-author-report-3") as ProductReportResult.Failure
+        assertTrue(retryable.retryable)
+        assertFalse(retryable.rotateIdempotencyKeyOnRetry)
+
+        val rateLimited = ProductReportRepository(
+            "https://api.nantty.com",
+            { "access-token" },
+            FailingProductReportTransport(429),
+        ).submitUser("author-42", ProductReportReason.SPAM, "", "story-author-report-3") as ProductReportResult.Failure
+        assertTrue(rateLimited.retryable)
+        assertTrue(rateLimited.rotateIdempotencyKeyOnRetry)
+    }
+
+    @Test
     fun signedOutAndInvalidRequestsDoNotReachTransport() {
         val transport = RecordingProductReportTransport(JSONObject("""{"id":"report-1","status":"received"}"""))
         val repository = ProductReportRepository("https://api.nantty.com", { null }, transport)

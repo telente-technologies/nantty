@@ -12,16 +12,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.AccountSessionRepository
-import com.nantty.android.data.FeedPost
+import com.nantty.android.data.ChatPasscodeRepository
 import com.nantty.android.data.FeedRepository
 import com.nantty.android.data.FollowRequestsRepository
 import com.nantty.android.data.FeedResult
-import com.nantty.android.data.FeedTopic
-import com.nantty.android.data.FeedTopicsResult
 import com.nantty.android.data.FeedType
 import com.nantty.android.data.InboxConversation
+import com.nantty.android.data.LiveCoinTipRepository
+import com.nantty.android.data.LiveSessionsRepository
 import com.nantty.android.data.PostDetailRepository
-import com.nantty.android.data.appendUniqueFeedPosts
+import com.nantty.android.data.PublicBrandRepository
+import com.nantty.android.data.SpacesRepository
+import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.SoundsRepository
+import com.nantty.android.notifications.PushTapTarget
 import java.util.concurrent.Executors
 
 @Composable
@@ -38,20 +42,40 @@ internal fun SignedInApp(
     repository: FeedRepository,
     requestedWidgetDestination: String?,
     onWidgetDestinationHandled: () -> Unit,
+    requestedNotificationTarget: PushTapTarget? = null,
+    onNotificationTargetHandled: () -> Unit = {},
+    requestedGroupInvitationToken: String? = null, onGroupInvitationTokenHandled: () -> Unit = {}, requestedChannelInvitationToken: String? = null, onChannelInvitationTokenHandled: () -> Unit = {},
 ) {
     val shareContext = LocalContext.current.applicationContext
     var destination by rememberSaveable { mutableStateOf(Destination.Feed) }
-    var selectedFeed by rememberSaveable { mutableStateOf(FeedType.FOR_YOU) }
-    var selectedTopicId by rememberSaveable { mutableStateOf<String?>(null) }
-    var feedSelectionGeneration by rememberSaveable { mutableStateOf(0) }
+    val countryPreferenceNavigation = rememberCountryPreferenceNavigation(destination) { destination = it }
+    val selectedFeedState = rememberSaveable { mutableStateOf(FeedType.FOR_YOU) }
+    var selectedFeed by selectedFeedState
+    val selectedTopicState = rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedTopicId by selectedTopicState
+    val feedSelectionGenerationState = rememberSaveable { mutableStateOf(0) }
     var selectedPostId by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedPostCommentId by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedProfileId by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedConnectionsUserId by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedConnectionsTab by rememberSaveable { mutableStateOf("followers") }
     var showingConnections by rememberSaveable { mutableStateOf(false) }
+    fun openConnections(userId: String, tab: String) {
+        selectedConnectionsUserId = userId
+        selectedConnectionsTab = tab
+        showingConnections = true
+    }
     var pendingMessageConversation by remember { mutableStateOf<InboxConversation?>(null) }
+    var pendingNotificationConversationId by rememberSaveable { mutableStateOf<String?>(null) }; var pendingNotificationOrderId by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingGroupInvitations by rememberSaveable { mutableStateOf(false) }; var pendingChannelInvitations by rememberSaveable { mutableStateOf(false) }
+    val pendingGroupInvitationToken = rememberGroupInvitationLinkRoute(requestedGroupInvitationToken, onGroupInvitationTokenHandled) { destination = Destination.Messages }
+    val channelInvitationNavigation = rememberChannelInvitationNavigation(requestedChannelInvitationToken, onChannelInvitationTokenHandled) { destination = Destination.Messages }
+    var pendingSupportTicketId by rememberSaveable { mutableStateOf<String?>(null) }; var pendingNotificationClipId by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingNotificationDisputeId by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingLiveId by rememberSaveable { mutableStateOf<String?>(null) }
+    var messagesRefreshGeneration by rememberSaveable { mutableStateOf(0) }
     var profileOpenedFromConnections by rememberSaveable { mutableStateOf(false) }
-    var selectedStoreId by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedStoreId by rememberSaveable { mutableStateOf<String?>(null) }; var selectedBrandId by rememberSaveable { mutableStateOf<String?>(null) }
     var searchScope by rememberSaveable { mutableStateOf("global") }
     var searchScopeLabel by rememberSaveable { mutableStateOf("Everywhere") }
     val purchaseState = rememberSaveable(saver = SignedInPurchaseState.Saver) { SignedInPurchaseState() }
@@ -69,25 +93,82 @@ internal fun SignedInApp(
         onShowComposer = { showingComposer = it },
         onHandled = onWidgetDestinationHandled,
     )
-    var result by remember { mutableStateOf<FeedResult?>(null) }
-    var loading by remember { mutableStateOf(false) }
-    var loadingMore by remember { mutableStateOf(false) }
-    var loadMoreError by remember { mutableStateOf<String?>(null) }
-    var feedTopics by remember { mutableStateOf<List<FeedTopic>>(emptyList()) }
-    var topicsLoading by remember { mutableStateOf(false) }
-    var topicsError by remember { mutableStateOf<String?>(null) }
-    var interactionMessage by remember { mutableStateOf<String?>(null) }
+    SignedInPushTargetEffect(
+        target = requestedNotificationTarget,
+        isGuest = isGuest,
+        onRequireSignIn = onRequireSignIn,
+        onHandled = onNotificationTargetHandled,
+        onOpenPost = { postId, commentId -> selectedPostId = postId; selectedPostCommentId = commentId; destination = Destination.Feed },
+        onOpenProfile = { selectedProfileId = it; profileOpenedFromConnections = false },
+        onOpenConversation = { pendingNotificationConversationId = it; destination = Destination.Messages },
+        onOpenOrder = { pendingNotificationOrderId = it; destination = Destination.Orders },
+        onSelectDestination = { destination = it },
+        onOpenGroupInvitations = { token -> if (token == null) pendingGroupInvitations = true else pendingGroupInvitationToken.value = token; destination = Destination.Messages },
+        onOpenChannelInvitations = { token -> if (token == null) pendingChannelInvitations = true else channelInvitationNavigation.open(token); destination = Destination.Messages },
+        onOpenSupportTicket = { pendingSupportTicketId = it; destination = Destination.SupportRequests },
+        onOpenDispute = { pendingNotificationDisputeId = it; destination = Destination.DisputeDetail },
+        onOpenClip = { pendingNotificationClipId = it; destination = Destination.Clips },
+        onOpenLive = { pendingLiveId = it; destination = Destination.Live },
+    )
+    val feedResultState = remember { mutableStateOf<FeedResult?>(null) }
+    var result by feedResultState
+    val feedLoadingState = remember { mutableStateOf(false) }
+    var loading by feedLoadingState
+    val feedLoadingMoreState = remember { mutableStateOf(false) }
+    var loadingMore by feedLoadingMoreState
+    val feedLoadMoreErrorState = remember { mutableStateOf<String?>(null) }
+    var loadMoreError by feedLoadMoreErrorState
+    val feedInteractionMessageState = remember { mutableStateOf<String?>(null) }
+    var interactionMessage by feedInteractionMessageState
     var savingPostId by remember { mutableStateOf<String?>(null) }
     val executor = remember { Executors.newSingleThreadExecutor() }
+    val feedController = remember(repository, sessionRepository, executor) {
+        SignedInFeedController(
+            executor = executor,
+            accessToken = { sessionRepository.sessionOrNull()?.accessToken },
+            loadPage = repository::load,
+            selection = SignedInFeedSelectionState(selectedFeedState, selectedTopicState, feedSelectionGenerationState),
+            content = SignedInFeedContentState(
+                result = feedResultState,
+                loading = feedLoadingState,
+                loadingMore = feedLoadingMoreState,
+                loadMoreError = feedLoadMoreErrorState,
+                interactionMessage = feedInteractionMessageState,
+            ),
+        )
+    }
+    val feedTopics = rememberSignedInFeedTopics(repository, executor)
     val repositories = rememberSignedInRepositories(sessionRepository)
+    val publicBrandRepository = remember(sessionRepository) {
+        PublicBrandRepository(sessionProvider = sessionRepository::sessionOrNull)
+    }
+    val spacesRepository = remember { SpacesRepository() }
+    val liveSessionsRepository = remember(sessionRepository) {
+        LiveSessionsRepository(
+            sessionProvider = sessionRepository::sessionOrNull,
+            refreshSessionProvider = sessionRepository::refreshSession,
+        )
+    }
+    val liveCoinTipRepository = remember(sessionRepository) {
+        LiveCoinTipRepository(
+            sessionProvider = sessionRepository::sessionOrNull,
+            refreshSessionProvider = sessionRepository::refreshSession,
+        )
+    }
+    val storiesRepository = remember(sessionRepository) { StoriesRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val soundsRepository = remember(sessionRepository) { SoundsRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val postDetailRepository = remember(sessionRepository) { PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val chatPasscodeRepository = remember(shareContext) { ChatPasscodeRepository(shareContext) }
     val (
         walletRepository,
         _,
         _,
         buyerOrdersRepository,
+        productReviewsRepository,
         disputeRepository,
         notificationsRepository,
         accountNotificationSettingsRepository,
+        countryPreferenceRepository,
         messagesRepository,
         searchRepository,
         exploreRepository,
@@ -108,157 +189,30 @@ internal fun SignedInApp(
         repositories = repositories,
         executor = executor,
         onReauthenticate = onSignOut,
-        onConversationStarted = { conversation ->
-            pendingMessageConversation = conversation
-            destination = Destination.Messages
-        },
+        onConversationStarted = { pendingMessageConversation = it; destination = Destination.Messages },
         onMessageFailure = { message, authenticationRequired -> if (authenticationRequired) onSignOut() else interactionMessage = message },
         onOpenBuyerProfile = { selectedProfileId = it; profileOpenedFromConnections = false },
+        onOpenCountryPreferences = countryPreferenceNavigation.open,
         onBack = { destination = Destination.Profile },
     )
-
     val purchaseDestination = purchaseState.destination
     if (purchaseDestination != null) {
-        SignedInPurchaseFlow(
-            destination = purchaseDestination,
-            orderId = purchaseState.orderId,
-            checkoutId = purchaseState.checkoutId,
-            totalMinor = purchaseState.totalMinor,
-            currency = purchaseState.currency,
-            orderCount = purchaseState.orderCount,
-            paymentConfirmed = purchaseState.paymentConfirmed,
-            cartAddressId = purchaseState.cartAddressId,
+        SignedInPurchaseDestinationContent(
+            state = purchaseState,
             repositories = repositories,
             executor = executor,
-            onBackToPayment = purchaseState::backToPayment,
-            onBackFromPayment = purchaseState::backFromPayment,
-            onBackFromCheckout = purchaseState::backFromCheckout,
-            onBackFromCart = purchaseState::backFromCart,
             onAuthenticationRequired = onSignOut,
-            onPaymentVerified = purchaseState::markPaymentVerified,
-            onViewPaymentProtection = purchaseState::showPaymentProtection,
-            onViewOrder = purchaseState::showPaidOrder,
-            onContinueShopping = {
-                purchaseState.continueShopping()
-                destination = Destination.Mart
-            },
-            onCheckoutCreated = purchaseState::checkoutCreated,
-            onSelectCartAddress = purchaseState::selectCartAddress,
-            onProceedToCheckout = purchaseState::proceedToCheckout,
-            onOpenStore = { storeId ->
-                purchaseState.continueShopping()
-                selectedStoreId = storeId
-            },
+            onReturnToOrders = { destination = Destination.Orders },
+            onContinueShopping = { destination = Destination.Mart },
+            onOpenStore = { selectedStoreId = it },
             onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
         )
         return
     }
-
-    fun refresh() {
-        val requestedFeed = selectedFeed
-        val requestedTopicId = selectedTopicId.takeIf { requestedFeed == FeedType.FOR_YOU }
-        val requestGeneration = feedSelectionGeneration
-        val accessToken = sessionRepository.sessionOrNull()?.accessToken
-        loading = true
-        loadMoreError = null
-        executor.execute {
-            val fetched = repository.load(requestedFeed, accessToken, topicId = requestedTopicId)
-            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                if (selectedFeed == requestedFeed && feedSelectionGeneration == requestGeneration) {
-                    result = fetched
-                    loading = false
-                }
-            }
-        }
-    }
-
-    fun selectFeed(feed: FeedType) {
-        if (feed == selectedFeed && selectedTopicId == null) return
-        if (feed == FeedType.FOLLOWING && sessionRepository.sessionOrNull()?.accessToken.isNullOrBlank()) {
-            interactionMessage = "Sign in to view posts from accounts you follow."
-            return
-        }
-        selectedFeed = feed
-        selectedTopicId = null
-        feedSelectionGeneration += 1
-        result = null
-        loading = true
-        loadingMore = false
-        loadMoreError = null
-        interactionMessage = null
-        refresh()
-    }
-
-    fun selectTopic(topicId: String?) {
-        if (selectedFeed == FeedType.FOR_YOU && selectedTopicId == topicId) return
-        selectedFeed = FeedType.FOR_YOU
-        selectedTopicId = topicId
-        feedSelectionGeneration += 1
-        result = null
-        loading = true
-        loadingMore = false
-        loadMoreError = null
-        interactionMessage = null
-        refresh()
-    }
-
-    fun loadTopics(accessToken: String?) {
-        if (topicsLoading) return
-        topicsLoading = true
-        topicsError = null
-        executor.execute {
-            val loaded = repository.loadFollowedTopics(accessToken)
-            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                when (loaded) {
-                    is FeedTopicsResult.Success -> feedTopics = loaded.topics
-                    is FeedTopicsResult.Failure -> topicsError = loaded.message
-                    FeedTopicsResult.AuthenticationRequired -> topicsError = "Sign in again to load your followed topics."
-                }
-                topicsLoading = false
-            }
-        }
-    }
-
-    fun loadMore() {
-        val page = result as? FeedResult.Success ?: return
-        val cursor = page.nextCursor ?: return
-        if (loadingMore) return
-        val requestedFeed = selectedFeed
-        val requestedTopicId = selectedTopicId.takeIf { requestedFeed == FeedType.FOR_YOU }
-        val requestGeneration = feedSelectionGeneration
-        val accessToken = sessionRepository.sessionOrNull()?.accessToken
-        loadingMore = true
-        loadMoreError = null
-        executor.execute {
-            val next = repository.load(requestedFeed, accessToken, cursor, requestedTopicId)
-            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
-                if (selectedFeed == requestedFeed && feedSelectionGeneration == requestGeneration) {
-                    when (next) {
-                        is FeedResult.Failure -> loadMoreError = next.message
-                        FeedResult.AuthenticationRequired -> result = next
-                        is FeedResult.Success -> {
-                            val currentPage = result as? FeedResult.Success ?: page
-                            result = currentPage.copy(posts = appendUniqueFeedPosts(currentPage.posts, next.posts), nextCursor = next.nextCursor)
-                        }
-                    }
-                    loadingMore = false
-                }
-            }
-        }
-    }
-
-    fun applyFeedInteraction(post: FeedPost, liked: Boolean? = null, reposted: Boolean? = null, bookmarked: Boolean? = null) {
-        val current = result as? FeedResult.Success ?: return
-        result = current.copy(posts = current.posts.map { item ->
-            if (item.id != post.id) item else item.copy(
-                liked = liked ?: item.liked,
-                likes = if (liked == null || liked == item.liked) item.likes else (item.likes + if (liked) 1 else -1).coerceAtLeast(0),
-                reposted = reposted ?: item.reposted,
-                reposts = if (reposted == null || reposted == item.reposted) item.reposts else (item.reposts + if (reposted) 1 else -1).coerceAtLeast(0),
-                bookmarked = bookmarked ?: item.bookmarked,
-            )
-        })
-    }
+    fun refresh() = feedController.refresh()
+    fun selectFeed(feed: FeedType) = feedController.selectFeed(feed)
+    fun selectTopic(topicId: String?) = feedController.selectTopic(topicId)
+    fun loadMore() = feedController.loadMore()
 
     val feedActions = SignedInFeedActions(
         executor = executor,
@@ -266,7 +220,7 @@ internal fun SignedInApp(
         onMessage = { interactionMessage = it },
         onSaving = { savingPostId = it },
         isSaving = { savingPostId == it },
-        applyInteraction = { post, liked, reposted, bookmarked -> applyFeedInteraction(post, liked, reposted, bookmarked) },
+        applyInteraction = { post, liked, reposted, bookmarked -> feedController.applyInteraction(post, liked, reposted, bookmarked) },
         refresh = ::refresh,
     )
 
@@ -277,101 +231,77 @@ internal fun SignedInApp(
             onInitialFollowingHandled()
         }
     }
-    LaunchedEffect(accountUser?.id) { if (!isGuest) loadTopics(sessionRepository.sessionOrNull()?.accessToken) }
-
-    if (showingComposer) {
-        HingeSafeContent {
-            PostComposerScreen(
-                sessionProvider = sessionRepository::sessionOrNull,
-                executor = executor,
-                onCancel = { showingComposer = false },
-                onPublished = { postId ->
-                    showingComposer = false
-                    selectedPostId = postId
-                    refresh()
-                },
-            )
-        }
-        return
+    LaunchedEffect(accountUser?.id) {
+        if (!isGuest) feedTopics.controller.load(sessionRepository.sessionOrNull()?.accessToken)
     }
 
-    selectedPostId?.let { postId ->
-        HingeSafeContent {
-            PostDetailScreen(
-                postId = postId,
-                sessionProvider = sessionRepository::sessionOrNull,
+    if (SignedInOverlayDestinations(
+            selection = SignedInOverlaySelection(
+                showingComposer = showingComposer,
+                selectedPostId = selectedPostId,
+                selectedPostCommentId = selectedPostCommentId,
+                selectedStoreId = selectedStoreId,
+                selectedBrandId = selectedBrandId,
+                isGuest = isGuest,
+                selectedProfileId = selectedProfileId,
+                showingConnections = showingConnections,
+                selectedConnectionsUserId = selectedConnectionsUserId,
+                selectedConnectionsTab = selectedConnectionsTab,
+            ),
+            dependencies = SignedInOverlayDependencies(
+                sessionRepository = sessionRepository,
+                publicProfileRepository = publicProfileRepository,
+                storeRepository = storeRepository,
+                brandRepository = publicBrandRepository,
+                messagesRepository = messagesRepository,
+                storiesRepository = storiesRepository,
+                soundsRepository = soundsRepository,
+                storyMediaRepository = privateMediaUploadsRepository,
                 executor = executor,
-                onBack = {
-                    selectedPostId = null
-                    refresh()
-                },
-            )
-        }
-        return
-    }
-
-    selectedStoreId?.let { storeId ->
-        HingeSafeContent {
-            PublicStoreScreen(
-                storeId = storeId,
-                repository = storeRepository,
-                executor = executor,
-                onBack = { selectedStoreId = null },
-                onRequireSignIn = onRequireSignIn,
-                onOpenProduct = { productId ->
+            ),
+            actions = SignedInOverlayActions(
+                cancelComposer = { showingComposer = false },
+                publishedPost = { postId -> showingComposer = false; selectedPostId = postId; refresh() },
+                storyPublished = { showingComposer = false; messagesRefreshGeneration++; destination = Destination.Messages },
+                backFromPost = { selectedPostId = null; selectedPostCommentId = null; refresh() },
+                backFromStore = { selectedStoreId = null },
+                backFromBrand = { selectedBrandId = null },
+                openStore = { storeId -> selectedBrandId = null; selectedStoreId = storeId },
+                openProduct = { productId ->
                     selectedStoreId = null
+                    selectedBrandId = null
                     pendingMartProductId = productId
                     destination = Destination.Mart
                 },
-            )
-        }
-        return
-    }
-
-    selectedProfileId?.takeIf { !showingConnections }?.let { profileId ->
-        PublicProfileDestination(
-            userId = profileId,
-            repository = publicProfileRepository,
-            executor = executor,
-            onBack = {
-                selectedProfileId = null
-                if (profileOpenedFromConnections) showingConnections = true
-                profileOpenedFromConnections = false
-            },
-            onOpenPost = { selectedPostId = it },
-            onSearchProfile = { userId, username ->
-                selectedProfileId = null
-                searchScope = "profile:$userId"
-                searchScopeLabel = "@" + username.removePrefix("@")
-                destination = Destination.Discover
-            },
-            onOpenConnections = { userId, tab ->
-                selectedConnectionsUserId = userId
-                selectedConnectionsTab = tab
-                showingConnections = true
-            },
-        )
-        return
-    }
-
-    if (showingConnections && selectedConnectionsUserId != null) {
-        ProfileConnectionsOverlay(
-            userId = selectedConnectionsUserId!!,
-            initialTab = selectedConnectionsTab,
-            repository = publicProfileRepository,
-            executor = executor,
-            messagesRepository = messagesRepository,
-            onBack = { showingConnections = false; selectedConnectionsUserId = null },
-            onOpenProfile = { userId ->
-                selectedProfileId = userId
-                profileOpenedFromConnections = true
-                showingConnections = false
-            },
-            onRequireSignIn = onRequireSignIn,
-            onOpenConversation = { conversation -> pendingMessageConversation = conversation; showingConnections = false; selectedConnectionsUserId = null; destination = Destination.Messages },
-        )
-        return
-    }
+                backFromProfile = {
+                    selectedProfileId = null
+                    if (profileOpenedFromConnections) showingConnections = true
+                    profileOpenedFromConnections = false
+                },
+                openProfilePost = { selectedPostId = it },
+                searchProfile = { userId, username ->
+                    selectedProfileId = null
+                    searchScope = "profile:$userId"
+                    searchScopeLabel = "@" + username.removePrefix("@")
+                    destination = Destination.Discover
+                },
+                openConnections = ::openConnections,
+                openConnectionProfile = { userId ->
+                    selectedProfileId = userId
+                    profileOpenedFromConnections = true
+                    showingConnections = false
+                },
+                backFromConnections = { showingConnections = false; selectedConnectionsUserId = null },
+                requireSignIn = onRequireSignIn,
+                requireSignInWithAction = onRequireSignInWithAction,
+                openConversation = { conversation ->
+                    pendingMessageConversation = conversation
+                    showingConnections = false
+                    selectedConnectionsUserId = null
+                    destination = Destination.Messages
+                },
+            ),
+        )) return
 
     SignedInNavigationShell(
         destination = destination,
@@ -385,12 +315,13 @@ internal fun SignedInApp(
         onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders },
         onSignOut = if (isGuest) onRequireSignIn else onSignOut,
         topicSelector = {
-            FeedTopicSelector(feedTopics, selectedTopicId, topicsLoading, topicsError, ::selectTopic) {
-                loadTopics(sessionRepository.sessionOrNull()?.accessToken)
+            SignedInFeedTopicSelector(feedTopics.state.value, selectedTopicId, ::selectTopic) {
+                feedTopics.controller.load(sessionRepository.sessionOrNull()?.accessToken)
             }
         },
         destinationContent = { contentModifier, showMartCategoryPane ->
             destinationStateHolder.SaveableStateProvider(destination.name) {
+                ChatLockBoundary(accountUser?.id, isGuest, destination, chatPasscodeRepository, executor, onSignOut) { onChatPasscodeUpdated ->
                 MainContent(
                 destination, result, loading,
                 selectedFeed = selectedFeed,
@@ -404,12 +335,12 @@ internal fun SignedInApp(
                 onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true },
                 modifier = contentModifier,
                 onOpenPost = { selectedPostId = it },
-                onOpenProfile = { selectedProfileId = it; profileOpenedFromConnections = false },
-                onOpenConnections = { userId, tab ->
-                    selectedConnectionsUserId = userId
-                    selectedConnectionsTab = tab
-                    showingConnections = true
+                onOpenPostComment = { postId, commentId ->
+                    selectedPostId = postId
+                    selectedPostCommentId = commentId
                 },
+                onOpenProfile = { selectedProfileId = it; profileOpenedFromConnections = false },
+                onOpenConnections = ::openConnections,
                 onSearchCurrentProfile = { accountId, username ->
                     searchScope = "profile:$accountId"
                     searchScopeLabel = "@${username.removePrefix("@")}"
@@ -423,6 +354,7 @@ internal fun SignedInApp(
                 },
                 onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
                 onOpenStore = { selectedStoreId = it },
+                onOpenBrand = { brandId -> selectedStoreId = null; selectedBrandId = brandId },
                 onOpenCategory = { categoryId, name ->
                     pendingMartCategoryId = categoryId
                     pendingMartCategoryName = name
@@ -434,12 +366,16 @@ internal fun SignedInApp(
                 onSave = { if (isGuest) onRequireSignIn() else feedActions.save(it) },
                 onShare = { feedActions.share(shareContext, it) },
                 interactionMessage = interactionMessage,
+                onMessageFailure = { message, authenticationRequired ->
+                    if (authenticationRequired) onSignOut() else interactionMessage = message
+                },
                 savingPostId = savingPostId,
                 loadingMore = loadingMore,
                 loadMoreError = loadMoreError,
                 onLoadMore = ::loadMore,
                 walletRepository = walletRepository,
                 buyerOrdersRepository = buyerOrdersRepository,
+                productReviewsRepository = productReviewsRepository,
                 disputeRepository = disputeRepository,
                 privateMediaUploadsRepository = privateMediaUploadsRepository,
                 currentProfileRepository = currentProfileRepository,
@@ -448,13 +384,50 @@ internal fun SignedInApp(
                 ioExecutor = executor,
                 notificationsRepository = notificationsRepository,
                 accountNotificationSettingsRepository = accountNotificationSettingsRepository,
+                countryPreferenceRepository = countryPreferenceRepository,
+                countryPreferenceNavigation = countryPreferenceNavigation,
+                chatNotificationSettingsRepository = repositories.chatNotificationSettings,
+                chatPasscodeRepository = chatPasscodeRepository,
+                onOpenChatNotificationSettings = { destination = Destination.ChatNotificationSettings },
+                onOpenChatPasscodeSettings = { destination = Destination.ChatPasscode },
+                onChatPasscodeUpdated = onChatPasscodeUpdated,
+                onOpenBlockedAccounts = { publicProfileRepository.viewerId()?.let { openConnections(it, "blocked") } },
+                messagesRefreshGeneration = messagesRefreshGeneration,
+                onChatNotificationsSaved = { messagesRefreshGeneration++ },
                 onNotificationReauthenticate = onSignOut,
                 searchRepository = searchRepository,
                 exploreRepository = exploreRepository,
                 publicProfileRepository = publicProfileRepository,
                 messagesRepository = messagesRepository,
+                supportTicketRepository = repositories.supportTickets,
+                spacesRepository = spacesRepository,
+                liveSessionsRepository = liveSessionsRepository,
+                liveCoinTipRepository = liveCoinTipRepository,
+                initialLiveId = pendingLiveId,
+                onBackFromLive = { pendingLiveId = null; destination = Destination.Feed },
+                clipsRepository = repositories.clips,
+                clipWatchTrackingRepository = repositories.clipWatchTracking,
+                storiesRepository = storiesRepository,
+                postDetailRepository = postDetailRepository,
+                spacesAccessToken = sessionRepository.sessionOrNull()?.accessToken,
+                spacesViewerId = accountUser?.id,
                 initialMessageConversation = pendingMessageConversation,
                 onInitialMessageConversationHandled = { pendingMessageConversation = null },
+                initialNotificationConversationId = pendingNotificationConversationId,
+                onInitialNotificationConversationHandled = { pendingNotificationConversationId = null },
+                initialNotificationOrderId = pendingNotificationOrderId,
+                onInitialNotificationOrderHandled = { pendingNotificationOrderId = null },
+                initialGroupInvitations = pendingGroupInvitations,
+                onInitialGroupInvitationsHandled = { pendingGroupInvitations = false },
+                initialChannelInvitations = pendingChannelInvitations,
+                onInitialChannelInvitationsHandled = { pendingChannelInvitations = false },
+                initialGroupInvitationToken = pendingGroupInvitationToken.value, onInitialGroupInvitationTokenHandled = { pendingGroupInvitationToken.value = null }, initialChannelInvitationToken = channelInvitationNavigation.token, onInitialChannelInvitationTokenHandled = channelInvitationNavigation::consume,
+                initialSupportTicketId = pendingSupportTicketId,
+                onInitialSupportTicketHandled = { pendingSupportTicketId = null },
+                initialDisputeId = pendingNotificationDisputeId,
+                onInitialDisputeHandled = { pendingNotificationDisputeId = null },
+                initialClipId = pendingNotificationClipId,
+                onInitialClipHandled = { pendingNotificationClipId = null },
                 savedPostsRepository = savedPostsRepository,
                 martRepository = martRepository,
                 storeRepository = storeRepository,
@@ -476,23 +449,29 @@ internal fun SignedInApp(
                 onOpenSavedPosts = { if (isGuest) onRequireSignIn() else destination = Destination.Saved },
                 onBackFromSavedPosts = { destination = Destination.Feed },
                 onBackFromOrders = { destination = Destination.Feed },
+                onCheckBuyerOrderPayment = { purchaseState.checkExistingOrderPayment(it) },
                 onBackFromFollowRequests = { destination = Destination.Profile },
                 onOpenMessages = { if (isGuest) onRequireSignIn() else destination = Destination.Messages },
-                onOpenNotificationConversation = { conversation ->
-                    if (isGuest) onRequireSignIn()
-                    else {
-                        pendingMessageConversation = conversation
-                        destination = Destination.Messages
-                    }
-                },
-                onOpenOrders = { if (isGuest) onRequireSignIn() else destination = Destination.Orders },
-                onOpenFollowRequests = { if (isGuest) onRequireSignIn() else destination = Destination.FollowRequests },
+                onOpenSearch = { destination = Destination.Discover },
+                onClipReauthenticate = onSignOut,
+                notificationActions = signedInNotificationActions(
+                    isGuest = isGuest,
+                    onRequireSignIn = onRequireSignIn,
+                    onSelectDestination = { destination = it },
+                    onSetPendingConversation = { pendingMessageConversation = it },
+                    onQueueGroupInvitations = { pendingGroupInvitations = true },
+                    onOpenSpaces = { destination = Destination.Spaces },
+                    onQueueSupportTicket = { pendingSupportTicketId = it },
+                    onQueueDispute = { pendingNotificationDisputeId = it },
+                    onQueueClip = { pendingNotificationClipId = it },
+                ),
+                onBackFromSupportRequests = { destination = Destination.Notifications },
                 onOpenBusinessTools = { if (isGuest) onRequireSignIn() else destination = Destination.Business },
                 businessContent = businessContent,
             )
+                }
             }
         },
     )
-
 }
 

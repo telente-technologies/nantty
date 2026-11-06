@@ -222,28 +222,44 @@ class SearchScreenTest {
     }
 
     @Test
-    fun officialStoreBrandSearchExposesRnStoreFiltersAndSendsSelectedScopeAndType() {
+    fun brandSearchResultOpensBrandDetailByBrandIdInsteadOfChangingSearchScope() {
         val transport = FakeTransport(officialStoreBrand = true)
+        var openedBrandId: String? = null
+        compose.setContent {
+            MaterialTheme {
+                SearchScreen(
+                    SearchRepository("https://api.nantty.com", { null }, transport),
+                    Executor { it.run() },
+                    onOpenBrand = { openedBrandId = it },
+                )
+            }
+        }
+
+        searchFor("loom")
+        compose.onNodeWithContentDescription("Open brand Nigerian Loom").performClick()
+        compose.runOnIdle {
+            assertEquals("brand_1", openedBrandId)
+            assertEquals(listOf("/api/v1/search?q=loom&scope=global&type=top&limit=10"), transport.searchPaths())
+        }
+    }
+
+    @Test
+    fun selectingHashtagSearchesPostsWithTheHashtagQuery() {
+        val transport = FakeTransport(hashtagsOnly = true)
         compose.setContent {
             MaterialTheme {
                 SearchScreen(SearchRepository("https://api.nantty.com", { null }, transport), Executor { it.run() })
             }
         }
 
-        searchFor("loom")
-        compose.onNodeWithContentDescription("Search the official store for Nigerian Loom").performClick()
-        compose.onNodeWithText("In: Nigerian Loom").assertIsDisplayed()
-        compose.onNodeWithText("All").assertIsDisplayed()
-        compose.onNodeWithText("Products").performClick()
-        searchFor("adire")
+        searchFor("textile")
+        compose.onNodeWithContentDescription("Search posts with #adire").performClick()
+        compose.mainClock.advanceTimeBy(400)
+        compose.waitForIdle()
 
-        compose.onNodeWithTag("product-search-result-prod_1").assertIsDisplayed()
+        compose.onNodeWithText("A real post result").assertIsDisplayed()
         compose.runOnIdle {
-            assertTrue(
-                transport.searchPaths().contains(
-                    "/api/v1/search?q=adire&scope=store:$OFFICIAL_STORE_ID&type=products&limit=10",
-                ),
-            )
+            assertTrue(transport.searchPaths().contains("/api/v1/search?q=%23adire&scope=global&type=posts&limit=10"))
         }
     }
 
@@ -374,6 +390,7 @@ class SearchScreenTest {
         private val usersOnly: Boolean = false,
         private val categoriesOnly: Boolean = false,
         private val officialStoreBrand: Boolean = false,
+        private val hashtagsOnly: Boolean = false,
         private val recentEntries: List<JSONObject> = emptyList(),
         private val failHistory: Boolean = false,
     ) : SearchTransport {
@@ -402,6 +419,7 @@ class SearchScreenTest {
             if (path.contains("type=products")) return JSONObject("""{"data":[{"type":"product","id":"prod_1","name":"Adire jacket","price":{"amountMinor":1250000,"currency":"NGN"},"imageUrl":"https://cdn.nantty.com/jacket.jpg","stock":3}],"nextCursor":null,"scope":"global"}""")
             if (categoriesOnly) return JSONObject("""{"data":[{"type":"category","id":"0192a4f0-0000-7000-8000-000000000001","name":"Clothing"}],"nextCursor":null,"scope":"global"}""")
             if (officialStoreBrand) return JSONObject("""{"data":[{"type":"brand","id":"brand_1","name":"Nigerian Loom","officialStoreId":"$OFFICIAL_STORE_ID"}],"nextCursor":null,"scope":"global"}""")
+            if (hashtagsOnly && path.contains("type=top")) return JSONObject("""{"data":[{"type":"hashtag","id":"tag-adire","tag":"adire","postCount":42}],"nextCursor":null,"scope":"global"}""")
             if (usersOnly) return JSONObject("""{"data":[{"type":"user","id":"user-1","name":"Ari","username":"ari","verified":true}],"nextCursor":null,"scope":"global"}""")
             return JSONObject("""{"data":[{"type":"post","id":"post-1","caption":"A real post result","thumbnailUrl":"https://cdn.nantty.com/post.jpg","likes":4,"views":12}],"nextCursor":"next-page","scope":"global"}""")
         }

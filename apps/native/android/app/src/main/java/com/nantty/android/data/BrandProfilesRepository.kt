@@ -42,11 +42,23 @@ class BrandProfilesRepository(
     private val transport: BrandProfilesTransport = JdkBrandProfilesTransport(baseUrl),
     private val sessionProvider: () -> AccountSession? = { null },
 ) {
+    @Volatile private var cachedActiveProfileId: String? = null
+
+    /** Reuses the existing acting-profile endpoint so interaction tracking can exclude owned posts. */
+    fun activeProfileIdOrNull(): String? {
+        cachedActiveProfileId?.let { return it }
+        return runCatching {
+            val token = requireSessionToken()
+            parseProfile(transport.get(ACTING_PROFILE_PATH, token)).id.also { cachedActiveProfileId = it }
+        }.getOrNull()
+    }
+
     fun load(): BrandProfilesResult = try {
         val token = requireSessionToken()
         val profiles = parseProfiles(transport.get(PROFILES_PATH, token))
         val active = parseProfile(transport.get(ACTING_PROFILE_PATH, token))
         require(profiles.any { it.id == active.id }) { "Nantty returned a current profile that is not in your profile list." }
+        cachedActiveProfileId = active.id
         BrandProfilesResult.Success(BrandProfilesState(
             profiles = profiles.map { it.copy(active = it.id == active.id) },
             activeProfile = active,
@@ -63,6 +75,7 @@ class BrandProfilesRepository(
         val token = requireSessionToken()
         val switched = parseProfile(transport.put(ACTING_PROFILE_PATH, token, JSONObject().put("profileId", profileId)))
         require(switched.id == profileId) { "Nantty returned a different profile than the one selected." }
+        cachedActiveProfileId = switched.id
         ActingProfileSwitchResult.Success(switched)
     } catch (error: Exception) {
         ActingProfileSwitchResult.Failure(

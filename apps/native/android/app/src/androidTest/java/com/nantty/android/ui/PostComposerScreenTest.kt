@@ -3,8 +3,10 @@ package com.nantty.android.ui
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -14,6 +16,10 @@ import com.nantty.android.data.AccountUser
 import com.nantty.android.data.PostComposerRepository
 import com.nantty.android.data.PostComposerAudience
 import com.nantty.android.data.PostPublishTransport
+import com.nantty.android.data.CreatorSampleMediaRepository
+import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.SoundsRepository
+import com.nantty.android.data.SoundsTransport
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -100,6 +106,71 @@ class PostComposerScreenTest {
         compose.runOnIdle {
             assertEquals(PostComposerAudience.FOLLOWERS.wireValue, transport.body?.getString("audience"))
         }
+    }
+
+    @Test
+    fun postComposerExposesPhotoStoryFlowWhenItsRepositoriesAreConfigured() {
+        val session = AccountSession("current-access", "current-refresh", AccountUser("u1", "Ari", "ari", null, null, emptyList()))
+        compose.setContent {
+            MaterialTheme {
+                PostComposerScreen(
+                    sessionProvider = { session },
+                    executor = Executor { it.run() },
+                    storiesRepository = StoriesRepository(sessionProvider = { session }),
+                    soundsRepository = SoundsRepository(sessionProvider = { session }),
+                    storyMediaRepository = CreatorSampleMediaRepository(sessionProvider = { session }),
+                    onCancel = {},
+                    onPublished = {},
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Create story").performClick()
+        compose.onNodeWithTag("story-create-title").assertIsDisplayed()
+        compose.onNodeWithTag("story-photo-choose").assertIsDisplayed()
+        compose.onNodeWithTag("story-camera-capture").assertIsDisplayed()
+        compose.onNodeWithTag("story-camera-record-video").assertIsDisplayed()
+        compose.onNodeWithTag("story-camera-capture").assertIsDisplayed()
+        compose.onNodeWithTag("story-photo-publish").assertIsNotEnabled()
+        compose.onNodeWithTag("story-sound-picker").assertIsDisplayed()
+        compose.onNodeWithText("Warm").assertIsDisplayed()
+    }
+
+    @Test
+    fun storySoundPickerListsReusableSoundsAndReturnsTheSelection() {
+        val session = AccountSession("current-access", "current-refresh", AccountUser("u1", "Ari", "ari", null, null, emptyList()))
+        val soundId = "00000000-0000-0000-0000-000000000001"
+        val sounds = SoundsRepository(
+            sessionProvider = { session },
+            transport = SoundsTransport { path, _ ->
+                assertEquals("/api/v1/sounds/trending?limit=20", path)
+                JSONObject("""{"data":{"data":[{"id":"$soundId","title":"Warm track","owner":{"name":"Ari","username":"ari"},"isOriginal":false,"allowReuse":true,"status":"available","usageCount":4}]}}""")
+            },
+        )
+        compose.setContent {
+            MaterialTheme {
+                PostComposerScreen(
+                    sessionProvider = { session },
+                    executor = Executor { it.run() },
+                    storiesRepository = StoriesRepository(sessionProvider = { session }),
+                    soundsRepository = sounds,
+                    storyMediaRepository = CreatorSampleMediaRepository(sessionProvider = { session }),
+                    onCancel = {},
+                    onPublished = {},
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Create story").performClick()
+        compose.onNodeWithTag("story-sound-picker").performClick()
+        compose.waitUntil(3_000) {
+            runCatching { compose.onNodeWithText("Warm track").assertIsDisplayed() }.isSuccess
+        }
+        compose.onNodeWithTag("story-sound-none").assertIsSelected()
+        compose.onNodeWithText("Warm track").performClick()
+        compose.onNodeWithTag("story-sound-picker").assertIsDisplayed()
+        compose.onNodeWithText("Warm track").assertIsDisplayed()
+        compose.onNodeWithTag("story-sound-$soundId").assertIsSelected()
     }
 
     private class RecordingPublishTransport : PostPublishTransport {

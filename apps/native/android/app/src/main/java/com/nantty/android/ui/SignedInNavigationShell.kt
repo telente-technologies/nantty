@@ -72,8 +72,10 @@ internal fun SignedInNavigationShell(
                     Column(
                         Modifier.weight(1f).widthIn(max = if (hasExpandedWidth) 680.dp else 620.dp).fillMaxHeight(),
                     ) {
-                        SignedInNavigationHeader(destination, accountUser, onRefresh, onOpenMart, onSelectMart, onOpenCart, onOpenOrders, onSignOut)
-                        if (destination == Destination.Feed && !isGuest) topicSelector()
+                        if (destination != Destination.Clips) {
+                            SignedInNavigationHeader(destination, accountUser, onRefresh, onOpenMart, onSelectMart, onOpenCart, onOpenOrders, onSignOut)
+                            if (destination == Destination.Feed && !isGuest) topicSelector()
+                        }
                         destinationContent(Modifier.weight(1f), showMartCategoryPane)
                     }
                     if (hasExpandedWidth) {
@@ -86,8 +88,10 @@ internal fun SignedInNavigationShell(
                 }
             } else {
                 Column(Modifier.fillMaxSize()) {
-                    SignedInNavigationHeader(destination, accountUser, onRefresh, onOpenMart, onSelectMart, onOpenCart, onOpenOrders, onSignOut)
-                    if (destination == Destination.Feed && !isGuest) topicSelector()
+                    if (destination != Destination.Clips) {
+                        SignedInNavigationHeader(destination, accountUser, onRefresh, onOpenMart, onSelectMart, onOpenCart, onOpenOrders, onSignOut)
+                        if (destination == Destination.Feed && !isGuest) topicSelector()
+                    }
                     destinationContent(Modifier.weight(1f), showMartCategoryPane)
                     NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                         visibleDestinations(isGuest).forEach { item ->

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -41,12 +42,15 @@ import androidx.compose.ui.platform.LocalContext
 import com.nantty.android.data.CurrentProfile
 import com.nantty.android.data.CurrentProfileRepository
 import com.nantty.android.data.CurrentProfileResult
+import com.nantty.android.data.CreatorSampleMediaRepository
+import com.nantty.android.data.BuyerOrdersRepository
 import com.nantty.android.data.FollowRequestsRepository
 import com.nantty.android.data.PublicProfilePosts
 import com.nantty.android.data.PublicProfilePostsResult
 import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.data.ProfileImageRepository
 import com.nantty.android.data.ProfileImageUploadResult
+import com.nantty.android.data.SupportTicketRepository
 import java.util.concurrent.Executor
 
 @Composable
@@ -55,6 +59,7 @@ internal fun CurrentProfileScreen(
     executor: Executor,
     modifier: Modifier = Modifier,
     onOpenBusinessTools: () -> Unit = {},
+    onOpenCountryPreferences: () -> Unit = {},
     onOpenConnections: (String, String) -> Unit = { _, _ -> },
     onOpenProfile: (String) -> Unit = {},
     onSearchProfile: (String, String) -> Unit = { _, _ -> },
@@ -62,6 +67,9 @@ internal fun CurrentProfileScreen(
     profileImagesRepository: ProfileImageRepository? = null,
     onOpenPost: (String) -> Unit = {},
     followRequestsRepository: FollowRequestsRepository? = null,
+    supportTicketRepository: SupportTicketRepository? = null,
+    supportMediaRepository: CreatorSampleMediaRepository? = null,
+    buyerOrdersRepository: BuyerOrdersRepository? = null,
     onReauthenticate: () -> Unit = {},
 ) {
     var profile by remember(repository) { mutableStateOf<CurrentProfile?>(null) }
@@ -71,6 +79,7 @@ internal fun CurrentProfileScreen(
     var message by remember(repository) { mutableStateOf<String?>(null) }
     var editing by remember(repository) { mutableStateOf(false) }
     var showingFollowRequests by remember(repository) { mutableStateOf(false) }
+    var showingSupportRequests by remember(repository) { mutableStateOf(false) }
     var reload by remember(repository) { mutableStateOf(0) }
     var publicPosts by remember(repository) { mutableStateOf(PublicProfilePosts(emptyList(), null)) }
     var subscriberPosts by remember(repository) { mutableStateOf(PublicProfilePosts(emptyList(), null)) }
@@ -79,6 +88,19 @@ internal fun CurrentProfileScreen(
     var postsError by remember(repository) { mutableStateOf<String?>(null) }
     var subscriberPostsError by remember(repository) { mutableStateOf<String?>(null) }
     val contentResolver = LocalContext.current.applicationContext.contentResolver
+
+    if (showingSupportRequests && supportTicketRepository != null) {
+        SupportRequestsScreen(
+            repository = supportTicketRepository,
+            executor = executor,
+            onBack = { showingSupportRequests = false },
+            onAuthenticationRequired = onReauthenticate,
+            mediaRepository = supportMediaRepository,
+            buyerOrdersRepository = buyerOrdersRepository,
+            modifier = modifier,
+        )
+        return
+    }
 
     if (showingFollowRequests && followRequestsRepository != null) {
         FollowRequestsScreen(
@@ -156,6 +178,9 @@ internal fun CurrentProfileScreen(
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                 )
+                if (supportTicketRepository != null) {
+                    TextButton(onClick = { showingSupportRequests = true }) { Text("Support") }
+                }
                 IconButton(
                     enabled = profile != null && !loading,
                     onClick = { profile?.let { onSearchProfile(it.accountId, it.username) } },
@@ -164,6 +189,12 @@ internal fun CurrentProfileScreen(
                     },
                 ) {
                     Icon(Icons.Default.Search, contentDescription = null)
+                }
+                IconButton(
+                    onClick = onOpenCountryPreferences,
+                    modifier = Modifier.semantics { contentDescription = "Country and currency settings" },
+                ) {
+                    Icon(Icons.Default.Settings, contentDescription = null)
                 }
             }
             HorizontalDivider()
@@ -195,6 +226,7 @@ internal fun CurrentProfileScreen(
                     allowProfileImageUpload = profileImagesRepository != null,
                     horizontalPadding = horizontalPadding,
                     onOpenBusinessTools = onOpenBusinessTools,
+                    onOpenCountryPreferences = onOpenCountryPreferences,
                     onOpenConnections = onOpenConnections,
                     onOpenFollowRequests = { showingFollowRequests = true },
                     onStartEditing = {

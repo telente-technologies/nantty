@@ -54,7 +54,7 @@ import com.nantty.android.data.AccountNotificationSettingsRepository
 import java.util.concurrent.Executor
 
 @Composable
-internal fun NotificationsScreen(repository: NotificationsRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenPost: (String) -> Unit = {}, onOpenProfile: (String) -> Unit = {}, onOpenMessages: () -> Unit = {}, onOpenConversation: (InboxConversation) -> Unit = {}, messagesRepository: MessagesRepository? = null, onOpenOrders: () -> Unit = {}, accountSettingsRepository: AccountNotificationSettingsRepository? = null, onOpenFollowRequests: () -> Unit = {}) {
+internal fun NotificationsScreen(repository: NotificationsRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenPost: (String) -> Unit = {}, onOpenPostComment: (String, String) -> Unit = { postId, _ -> onOpenPost(postId) }, onOpenProfile: (String) -> Unit = {}, onOpenMessages: () -> Unit = {}, onOpenConversation: (InboxConversation) -> Unit = {}, messagesRepository: MessagesRepository? = null, onOpenOrders: () -> Unit = {}, accountSettingsRepository: AccountNotificationSettingsRepository? = null, onOpenFollowRequests: () -> Unit = {}, onOpenGroupInvitations: () -> Unit = {}, onOpenSpaces: () -> Unit = {}, onOpenSupportTicket: (String) -> Unit = {}, onOpenDispute: (String) -> Unit = {}, onOpenClip: (String) -> Unit = {}) {
     var showingSettings by remember(repository) { mutableStateOf(false) }
     var filter by remember(repository) { mutableStateOf(NotificationFilter.ALL) }
     var result by remember(repository) { mutableStateOf<NotificationsResult?>(null) }
@@ -191,7 +191,7 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
                     NotificationRow(item, onClick = {
                         markOneRead(item)
                         when (val destination = resolveNotificationDestination(item)) {
-                            is NotificationDestination.Post -> onOpenPost(destination.postId)
+                            is NotificationDestination.Post -> destination.commentId?.let { onOpenPostComment(destination.postId, it) } ?: onOpenPost(destination.postId)
                             is NotificationDestination.Profile -> onOpenProfile(destination.userId)
                             is NotificationDestination.Conversation -> {
                                 val messages = messagesRepository
@@ -221,6 +221,11 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
                             NotificationDestination.Messages -> onOpenMessages()
                             NotificationDestination.Orders -> onOpenOrders()
                             NotificationDestination.FollowRequests -> onOpenFollowRequests()
+                            NotificationDestination.GroupInvitations -> onOpenGroupInvitations()
+                            NotificationDestination.Spaces -> onOpenSpaces()
+                            is NotificationDestination.SupportTicket -> onOpenSupportTicket(destination.ticketId)
+                            is NotificationDestination.Dispute -> onOpenDispute(destination.disputeId)
+                            is NotificationDestination.Clip -> onOpenClip(destination.clipId)
                             null -> Unit
                         }
                     })

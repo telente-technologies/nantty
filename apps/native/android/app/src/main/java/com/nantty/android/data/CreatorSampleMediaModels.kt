@@ -10,6 +10,12 @@ data class CreatorSampleImageInput(
     val openStream: () -> InputStream,
 )
 
+data class CreatorStoryVideoInput(
+    val fileName: String,
+    val mimeType: String,
+    val openStream: () -> InputStream,
+)
+
 data class PreparedCreatorSampleImage(
     val file: File,
     val sizeBytes: Long,
@@ -19,10 +25,16 @@ data class PreparedCreatorSampleImage(
 
 data class CreatorSampleMediaVariant(val url: String, val width: Int, val format: String)
 
+enum class NativeImageUploadPurpose(val wireValue: String) {
+    DISPUTE_EVIDENCE("dispute_evidence"),
+    STORY("story"),
+}
+
 data class UploadedCreatorSampleImage(val mediaId: String, val imageUrl: String, val width: Int, val height: Int)
 
 sealed interface CreatorSampleMediaResult {
     data class Success(val image: UploadedCreatorSampleImage) : CreatorSampleMediaResult
+    data class VideoSuccess(val mediaId: String) : CreatorSampleMediaResult
     data class Failure(val message: String, val authenticationRequired: Boolean = false) : CreatorSampleMediaResult
     data object Cancelled : CreatorSampleMediaResult
 }

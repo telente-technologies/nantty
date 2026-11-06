@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,12 +33,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.PostComposerRepository
 import com.nantty.android.data.PostComposerAudience
+import com.nantty.android.data.CreatorSampleMediaRepository
+import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.SoundsRepository
+import com.nantty.android.ui.stories.StoryPhotoComposer
 import java.util.UUID
 import java.util.concurrent.Executor
 
@@ -46,9 +52,15 @@ internal fun PostComposerScreen(
     sessionProvider: () -> AccountSession?,
     executor: Executor,
     repository: PostComposerRepository = remember { PostComposerRepository(sessionProvider = sessionProvider) },
+    storiesRepository: StoriesRepository? = null,
+    soundsRepository: SoundsRepository? = null,
+    storyMediaRepository: CreatorSampleMediaRepository? = null,
     onCancel: () -> Unit,
     onPublished: (String) -> Unit,
+    onStoryPublished: (String) -> Unit = onPublished,
+    onReauthenticate: () -> Unit = onCancel,
 ) {
+    var creatingStory by remember { mutableStateOf(false) }
     var content by remember { mutableStateOf(TextFieldValue()) }
     var audience by remember { mutableStateOf(PostComposerAudience.EVERYONE) }
     var requestKey by remember { mutableStateOf(UUID.randomUUID().toString()) }
@@ -58,6 +70,19 @@ internal fun PostComposerScreen(
     val withinLimit = content.text.length <= PostComposerRepository.MAX_POST_LENGTH
     val canPublish = trimmedText.isNotEmpty() && withinLimit && !isPublishing
 
+    if (creatingStory && storiesRepository != null && soundsRepository != null && storyMediaRepository != null) {
+        StoryPhotoComposer(
+            storiesRepository = storiesRepository,
+            soundsRepository = soundsRepository,
+            mediaRepository = storyMediaRepository,
+            executor = executor,
+            onCancel = { creatingStory = false },
+            onPublished = onStoryPublished,
+            onReauthenticate = onReauthenticate,
+        )
+        return
+    }
+
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -65,6 +90,12 @@ internal fun PostComposerScreen(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 }
                 Text("Create post", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                if (storiesRepository != null && soundsRepository != null && storyMediaRepository != null) {
+                    TextButton(
+                        onClick = { creatingStory = true },
+                        modifier = Modifier.semantics { contentDescription = "Create story" }.testTag("create-story-open"),
+                    ) { Text("Story") }
+                }
                 Spacer(Modifier.weight(1f))
                 Button(onClick = {
                     if (!canPublish) return@Button
@@ -86,7 +117,7 @@ internal fun PostComposerScreen(
                 }, enabled = canPublish, modifier = Modifier.semantics { contentDescription = "Publish post" }) {
                     if (isPublishing) CircularProgressIndicator()
                     else {
-                        Icon(Icons.Default.Send, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
                         Text("  Post")
                     }
                 }

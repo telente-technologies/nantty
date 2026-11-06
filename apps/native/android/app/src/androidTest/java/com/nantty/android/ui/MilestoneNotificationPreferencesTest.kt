@@ -71,12 +71,40 @@ class MilestoneNotificationPreferencesTest {
         compose.runOnIdle { assertEquals("GET", transport.method) }
     }
 
+    @Test
+    fun rendersApiReturnedCategoriesAndHonorsServerLock() {
+        val transport = FakePreferenceTransport(
+            additionalPreferences = listOf(
+                JSONObject().put("category", "auth").put("push", true).put("email", true).put("locked", true),
+                JSONObject().put("category", "marketing").put("push", false).put("email", true).put("locked", false),
+            ),
+        )
+        val repository = AccountNotificationSettingsRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = FakeAccountSettingsTransport(),
+            preferencesTransport = transport,
+        )
+
+        compose.setContent {
+            MaterialTheme {
+                AccountNotificationSettingsScreen(repository, Executor { it.run() }, onBack = {}, onReauthenticate = {})
+            }
+        }
+
+        compose.onNodeWithContentDescription("Account security: push").assertIsDisplayed().assertIsNotEnabled()
+        compose.onNodeWithContentDescription("News and offers: push").assertIsDisplayed()
+    }
+
     private class FakeAccountSettingsTransport : AccountNotificationSettingsTransport {
         override fun getSettings(accessToken: String) = JSONObject().put("pushNotificationsEnabled", true)
         override fun updateSettings(accessToken: String, fields: JSONObject) = JSONObject().put("pushNotificationsEnabled", fields.getBoolean("pushNotificationsEnabled"))
     }
 
-    private class FakePreferenceTransport(private val locked: Boolean = false) : NotificationPreferencesTransport {
+    private class FakePreferenceTransport(
+        private val locked: Boolean = false,
+        private val additionalPreferences: List<JSONObject> = emptyList(),
+    ) : NotificationPreferencesTransport {
         var method: String? = null
         var path: String? = null
         var accessToken: String? = null
@@ -85,7 +113,9 @@ class MilestoneNotificationPreferencesTest {
 
         override fun getPreferences(accessToken: String): JSONObject {
             record("GET", accessToken, null)
-            return JSONObject().put("data", JSONArray().put(preference()))
+            val rows = JSONArray().put(preference())
+            additionalPreferences.forEach(rows::put)
+            return JSONObject().put("data", rows)
         }
 
         override fun updatePreference(accessToken: String, fields: JSONObject): JSONObject {

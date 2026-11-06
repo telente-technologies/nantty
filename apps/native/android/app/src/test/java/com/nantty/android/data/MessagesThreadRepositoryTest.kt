@@ -282,6 +282,97 @@ class MessagesThreadRepositoryTest {
     }
 
     @Test
+    fun createChannelUsesAuthenticatedSocialContractAndMapsCreatedConversation() {
+        var requestedMethod: String? = null
+        var requestedPath: String? = null
+        var requestedToken: String? = null
+        var requestedBody: JSONObject? = null
+        val repository = repository { method, path, token, body ->
+            requestedMethod = method
+            requestedPath = path
+            requestedToken = token
+            requestedBody = body
+            JSONObject(
+                """{"data":{"id":"$conversationId","peer":{"id":"$conversationId","name":"Maker Notes","username":"","avatarUrl":null},"lastMessage":"","lastMessageKind":null,"lastMessageAt":"2026-11-05T12:00:00Z","unread":0,"isFriend":false,"kind":"channel","title":"Maker Notes","description":"Updates","encryptedAttributes":null,"photoUrl":null,"photoMediaId":null,"memberCount":1,"myRole":"owner","disappearingMessagesSeconds":null,"onlyAdminsCanMentionAll":true,"store":null,"inboxFolder":"chats","spamReason":null,"streak":null,"mutedUntil":null}}""",
+            )
+        }
+
+        val result = repository.createChannel("  Maker Notes  ", " Updates ") as ConversationLookupResult.Success
+
+        assertEquals("POST", requestedMethod)
+        assertEquals("/api/v1/channels", requestedPath)
+        assertEquals("session-access", requestedToken)
+        assertEquals(JSONObject().put("name", "Maker Notes").put("description", "Updates").toString(), requestedBody.toString())
+        assertEquals(conversationId, result.conversation.id)
+        assertEquals("Maker Notes", result.conversation.title)
+        assertEquals(ConversationType.CHANNEL, result.conversation.type)
+    }
+
+    @Test
+    fun createChannelOmitsBlankDescriptionAndRejectsInvalidInputBeforeNetwork() {
+        var requests = 0
+        var requestedBody: JSONObject? = null
+        val repository = repository { _, _, _, body ->
+            requests += 1
+            requestedBody = body
+            JSONObject(
+                """{"data":{"id":"$conversationId","peer":{"id":"$conversationId","name":"Channel","username":"","avatarUrl":null},"lastMessageAt":"2026-11-05T12:00:00Z","kind":"channel","title":"Channel"}}""",
+            )
+        }
+
+        assertTrue(repository.createChannel("  ", null) is ConversationLookupResult.Failure)
+        assertTrue(repository.createChannel("x".repeat(81), null) is ConversationLookupResult.Failure)
+        assertTrue(repository.createChannel("Channel", "x".repeat(501)) is ConversationLookupResult.Failure)
+        assertEquals(0, requests)
+
+        assertTrue(repository.createChannel(" Channel ", "   ") is ConversationLookupResult.Success)
+        assertEquals(JSONObject().put("name", "Channel").toString(), requestedBody.toString())
+        assertEquals(1, requests)
+    }
+
+    @Test
+    fun startingConversationWithStoreUsesAuthenticatedStoreContractAndCanonicalStoreIdentity() {
+        val storeId = "77777777-7777-4777-8777-777777777777"
+        var requestedMethod: String? = null
+        var requestedPath: String? = null
+        var requestedToken: String? = null
+        var requestBody: JSONObject? = JSONObject()
+        val repository = repository { method, path, token, body ->
+            requestedMethod = method
+            requestedPath = path
+            requestedToken = token
+            requestBody = body
+            JSONObject("""{"data":{"id":"$conversationId","peer":{"id":"$storeId","name":"Ari Fabrics","username":"","avatarUrl":null},"lastMessage":"","lastMessageKind":null,"lastMessageAt":"2026-11-04T12:00:00Z","unread":0,"isFriend":false,"kind":"business","title":null,"description":null,"encryptedAttributes":null,"photoUrl":null,"photoMediaId":null,"memberCount":2,"myRole":"member","disappearingMessagesSeconds":null,"onlyAdminsCanMentionAll":false,"store":{"id":"$storeId","name":"Ari Fabrics","avatarUrl":"https://cdn.nantty.com/store.png"},"inboxFolder":"chats","spamReason":null,"streak":null,"mutedUntil":null}}""")
+        }
+
+        val result = repository.startConversationWithStore(storeId) as StartConversationResult.Success
+
+        assertEquals("POST", requestedMethod)
+        assertEquals("/api/v1/conversations/stores/$storeId", requestedPath)
+        assertEquals("session-access", requestedToken)
+        assertNull(requestBody)
+        assertEquals(conversationId, result.conversation.id)
+        assertEquals("Ari Fabrics", result.conversation.title)
+        assertEquals("Ari Fabrics", result.conversation.peerName)
+        assertEquals("https://cdn.nantty.com/store.png", result.conversation.avatarUrl)
+        assertEquals(ConversationType.BUSINESS, result.conversation.type)
+    }
+
+    @Test
+    fun storeConversationRejectsInvalidOrMismatchedStoreIdentityBeforeOpening() {
+        var requests = 0
+        val expectedStoreId = "77777777-7777-4777-8777-777777777777"
+        val otherStoreId = "88888888-8888-4888-8888-888888888888"
+        val repository = repository { _, _, _, _ ->
+            requests++
+            JSONObject("""{"data":{"id":"$conversationId","peer":{"id":"$otherStoreId","name":"Other Store"},"lastMessage":"","lastMessageAt":"2026-11-04T12:00:00Z","unread":0,"kind":"business","store":{"id":"$otherStoreId","name":"Other Store","avatarUrl":null}}}""")
+        }
+        assertTrue(repository.startConversationWithStore("not-a-uuid") is StartConversationResult.Failure)
+        assertTrue(repository.startConversationWithStore(expectedStoreId) is StartConversationResult.Failure)
+        assertEquals(1, requests)
+    }
+
+    @Test
     fun conversationSearchRefreshesAnExpiredSessionOnce() {
         val tokens = mutableListOf<String>()
         var requests = 0

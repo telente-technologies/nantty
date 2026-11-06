@@ -129,14 +129,15 @@ internal fun ThreadCommentRow(
     onReply: (ThreadComment) -> Unit = {},
     onToggleLike: (ThreadComment) -> Unit = {},
     onOpenLink: (String) -> Unit = {},
+    highlightCommentId: String? = null,
 ) {
     Column(Modifier.fillMaxWidth().padding(start = (depth.coerceAtMost(4) * 16).dp, end = 12.dp, top = 4.dp, bottom = 4.dp)) {
         Surface(
-            Modifier.fillMaxWidth().semantics {
+            Modifier.fillMaxWidth().testTag("comment-${comment.id}").semantics {
                 contentDescription = "Reply by ${comment.authorName}${if (comment.username.isNotBlank()) ", @${comment.username}" else ""}, depth ${comment.depth}"
             },
             shape = RoundedCornerShape(14.dp),
-            color = MaterialTheme.colorScheme.surface,
+            color = if (comment.id == highlightCommentId) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
         ) {
             Column(Modifier.padding(14.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -193,6 +194,7 @@ internal fun ThreadCommentRow(
                 onReply = onReply,
                 onToggleLike = onToggleLike,
                 onOpenLink = onOpenLink,
+                highlightCommentId = highlightCommentId,
             )
         }
     }

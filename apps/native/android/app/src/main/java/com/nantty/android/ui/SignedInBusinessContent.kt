@@ -21,6 +21,7 @@ internal fun buildSignedInBusinessContent(
     onConversationStarted: (InboxConversation) -> Unit,
     onMessageFailure: (String, Boolean) -> Unit,
     onOpenBuyerProfile: (String) -> Unit,
+    onOpenCountryPreferences: () -> Unit,
     onBack: () -> Unit,
 ): @Composable () -> Unit = {
     SignedInBusinessContent(
@@ -43,6 +44,7 @@ internal fun buildSignedInBusinessContent(
             )
         },
         onOpenBuyerProfile = onOpenBuyerProfile,
+        onOpenCountryPreferences = onOpenCountryPreferences,
         onBack = onBack,
     )
 }
@@ -56,6 +58,23 @@ internal fun startSellerBuyerConversation(
 ) {
     executor.execute {
         when (val started = repository.startConversationWithPerson(buyerId)) {
+            is StartConversationResult.Success -> Snapshot.withMutableSnapshot { onStarted(started.conversation) }
+            is StartConversationResult.Failure -> Snapshot.withMutableSnapshot {
+                onFailed(started.message, started.authenticationRequired)
+            }
+        }
+    }
+}
+
+internal fun startBuyerStoreConversation(
+    storeId: String,
+    repository: MessagesRepository,
+    executor: Executor,
+    onStarted: (InboxConversation) -> Unit,
+    onFailed: (String, Boolean) -> Unit,
+) {
+    executor.execute {
+        when (val started = repository.startConversationWithStore(storeId)) {
             is StartConversationResult.Success -> Snapshot.withMutableSnapshot { onStarted(started.conversation) }
             is StartConversationResult.Failure -> Snapshot.withMutableSnapshot {
                 onFailed(started.message, started.authenticationRequired)
@@ -78,6 +97,7 @@ internal fun SignedInBusinessContent(
     onReauthenticate: () -> Unit,
     onMessageBuyer: (String) -> Unit,
     onOpenBuyerProfile: (String) -> Unit = {},
+    onOpenCountryPreferences: () -> Unit,
     onBack: () -> Unit,
 ) {
     BusinessWorkspaceScreen(
@@ -91,6 +111,7 @@ internal fun SignedInBusinessContent(
                 onAuthenticationRequired = onReauthenticate,
                 onMessageBuyer = onMessageBuyer,
                 onOpenBuyerProfile = onOpenBuyerProfile,
+                onOpenCountryPreferences = onOpenCountryPreferences,
             )
         },
         creatorContent = {

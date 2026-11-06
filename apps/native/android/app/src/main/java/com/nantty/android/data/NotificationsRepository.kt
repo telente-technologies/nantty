@@ -23,31 +23,94 @@ data class ActivityNotification(
     val postId: String?,
     val conversationId: String? = null,
     val messageId: String? = null,
+    val screen: String? = null,
+    val ticketId: String? = null,
+    val disputeId: String? = null,
+    val clipId: String? = null,
+    val commentId: String? = null,
+    val url: String? = null,
 )
 
 sealed interface NotificationDestination {
-    data class Post(val postId: String) : NotificationDestination
+    data class Post(val postId: String, val commentId: String? = null) : NotificationDestination
     data class Profile(val userId: String) : NotificationDestination
     data class Conversation(val conversationId: String, val messageId: String? = null) : NotificationDestination
     data object Messages : NotificationDestination
     data object Orders : NotificationDestination
     data object FollowRequests : NotificationDestination
+    data object GroupInvitations : NotificationDestination
+    data object Spaces : NotificationDestination
+    data class SupportTicket(val ticketId: String) : NotificationDestination
+    data class Dispute(val disputeId: String) : NotificationDestination
+    data class Clip(val clipId: String) : NotificationDestination
 }
 
 fun resolveNotificationDestination(notification: ActivityNotification): NotificationDestination? {
     // Match the React Native route precedence: a request notification opens its inbox.
     if (notification.kind == "followRequest") return NotificationDestination.FollowRequests
+    if (notification.screen == "GroupInvitations" || isGroupInvitationsPath(notification.url)) {
+        return NotificationDestination.GroupInvitations
+    }
+    if (notification.screen == "SpaceInvitations" || isSpaceInvitationsPath(notification.url)) {
+        return NotificationDestination.Spaces
+    }
+    resolveDisputeNotificationUrl(notification.url)?.let { return NotificationDestination.Dispute(it) }
+    if (notification.kind == "followRequestAccepted") {
+        notification.actor?.id?.takeIf(::isSafeNotificationId)?.let { return NotificationDestination.Profile(it) }
+    }
+    val commentId = notification.commentId?.takeIf(::isSafeNotificationId)
+    val postId = notification.postId?.takeIf(::isSafeNotificationId)
+    val clipId = notification.clipId?.takeIf(::isSafeNotificationId)
+    val commentPostId = postId ?: clipId
+    if (commentId != null && commentPostId != null) {
+        return NotificationDestination.Post(commentPostId, commentId)
+    }
+    clipId?.let { return NotificationDestination.Clip(it) }
     notification.conversationId?.takeIf(MessagesRepository::isUuid)?.let {
         return NotificationDestination.Conversation(it, notification.messageId?.takeIf(MessagesRepository::isUuid))
     }
-    notification.postId?.takeIf(::isSafeNotificationId)?.let { return NotificationDestination.Post(it) }
+    postId?.let { return NotificationDestination.Post(it) }
+    notification.disputeId?.takeIf(MessagesRepository::isUuid)?.let { return NotificationDestination.Dispute(it) }
     if (notification.category.equals("orders", ignoreCase = true)) return NotificationDestination.Orders
     if (notification.category.equals("messages", ignoreCase = true) ||
         notification.conversationId != null ||
         notification.kind in setOf("message", "newMessage", "chatMessage")
     ) return NotificationDestination.Messages
+    notification.ticketId?.takeIf(MessagesRepository::isUuid)?.let { return NotificationDestination.SupportTicket(it) }
     notification.actor?.id?.takeIf(::isSafeNotificationId)?.let { return NotificationDestination.Profile(it) }
     return null
+}
+
+private fun isGroupInvitationsPath(rawUrl: String?): Boolean {
+    if (rawUrl.isNullOrBlank()) return false
+    val path = runCatching {
+        val uri = java.net.URI(if (rawUrl.startsWith("/")) "https://nantty.com$rawUrl" else rawUrl)
+        val allowedHost = uri.host?.lowercase() in setOf("nantty.com", "www.nantty.com", "nantty.app", "www.nantty.app", "web.nantty.com")
+        if (allowedHost && uri.scheme.equals("https", ignoreCase = true)) uri.path else null
+    }.getOrNull()
+    return path == "/chats/invitations"
+}
+
+private fun isSpaceInvitationsPath(rawUrl: String?): Boolean {
+    if (rawUrl.isNullOrBlank()) return false
+    val path = runCatching {
+        val uri = java.net.URI(if (rawUrl.startsWith("/")) "https://nantty.com$rawUrl" else rawUrl)
+        val allowedHost = uri.host?.lowercase() in setOf("nantty.com", "www.nantty.com", "nantty.app", "www.nantty.app", "web.nantty.com")
+        if (allowedHost && uri.scheme.equals("https", ignoreCase = true)) uri.path else null
+    }.getOrNull()
+    return path == "/spaces"
+}
+
+private fun resolveDisputeNotificationUrl(rawUrl: String?): String? {
+    if (rawUrl.isNullOrBlank() || rawUrl.length > 2_048 || rawUrl.contains('\\')) return null
+    val uri = runCatching {
+        java.net.URI(if (rawUrl.startsWith("/")) "https://nantty.com$rawUrl" else rawUrl)
+    }.getOrNull() ?: return null
+    val trustedHost = uri.host?.lowercase() in setOf("nantty.com", "www.nantty.com", "nantty.app", "www.nantty.app", "web.nantty.com")
+    if (!trustedHost || !uri.scheme.equals("https", ignoreCase = true) || uri.rawUserInfo != null || uri.port != -1) return null
+    val segments = uri.path.split('/').filter(String::isNotEmpty)
+    if (segments.size != 2 || segments[0] != "disputes") return null
+    return segments[1].takeIf(MessagesRepository::isUuid)
 }
 
 private fun isSafeNotificationId(value: String): Boolean =
@@ -99,10 +162,31 @@ class NotificationsRepository(
                     val name = it.optString("name").takeIf(String::isNotBlank)
                     if (actorId != null && name != null) NotificationActor(actorId, name, safeMediaUrl(it.optString("avatarUrl").takeIf { url -> url.isNotBlank() && url != "null" })) else null
                 }
-                val postId = row.optJSONObject("data")?.optString("postId")?.takeIf { it.isNotBlank() && it != "null" }
-                val conversationId = row.optJSONObject("data")?.optString("conversationId")?.takeIf { it.isNotBlank() && it != "null" }
-                val messageId = row.optJSONObject("data")?.optString("messageId")?.takeIf { it.isNotBlank() && it != "null" }
-                add(ActivityNotification(id, row.optString("category"), row.optString("kind").takeIf { it.isNotBlank() && it != "null" }, row.optString("title"), row.optString("body"), row.optString("createdAt"), row.optBoolean("read"), actor, postId, conversationId, messageId))
+                val data = row.optJSONObject("data")
+                fun dataText(key: String) = data?.optString(key)?.takeIf { it.isNotBlank() && it != "null" }
+                val postId = dataText("postId")
+                val conversationId = dataText("conversationId")
+                val messageId = dataText("messageId")
+                val disputeId = dataText("disputeId")
+                add(ActivityNotification(
+                    id = id,
+                    category = row.optString("category"),
+                    kind = row.optString("kind").takeIf { it.isNotBlank() && it != "null" },
+                    title = row.optString("title"),
+                    body = row.optString("body"),
+                    createdAt = row.optString("createdAt"),
+                    read = row.optBoolean("read"),
+                    actor = actor,
+                    postId = postId,
+                    conversationId = conversationId,
+                    messageId = messageId,
+                    screen = dataText("screen"),
+                    ticketId = dataText("ticketId"),
+                    disputeId = disputeId,
+                    clipId = dataText("clipId"),
+                    commentId = dataText("commentId"),
+                    url = dataText("url") ?: row.optString("url").takeIf { it.isNotBlank() && it != "null" },
+                ))
             }
         }
         return NotificationPage(items, payload.optString("nextCursor").takeIf { it.isNotBlank() && it != "null" })

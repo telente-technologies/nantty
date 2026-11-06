@@ -41,12 +41,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nantty.android.data.BuyerOrder
+import com.nantty.android.data.BuyerOrderDetail
 import com.nantty.android.data.BuyerOrderFilter
 import com.nantty.android.data.BuyerOrdersPage
 import com.nantty.android.data.BuyerOrdersRepository
+import com.nantty.android.data.ProductReviewsRepository
 import com.nantty.android.data.DisputeRepository
 import com.nantty.android.data.CreatorSampleMediaRepository
 import com.nantty.android.data.BuyerOrdersResult
+import com.nantty.android.data.MessagesRepository
+import com.nantty.android.data.InboxConversation
+import com.nantty.android.data.SupportLinkedReference
+import com.nantty.android.data.SupportTicketRepository
+import com.nantty.android.data.SupportTicketResult
 import com.nantty.android.data.appendUniqueBuyerOrders
 import com.nantty.android.data.formatWalletAmount
 import java.time.Instant
@@ -54,6 +61,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.Executor
+import java.util.UUID
 
 @Composable
 internal fun BuyerOrdersScreen(
@@ -65,19 +73,108 @@ internal fun BuyerOrdersScreen(
     privateMediaUploadsRepository: CreatorSampleMediaRepository? = null,
     onOpenStore: (String) -> Unit = {},
     onOpenProduct: (String) -> Unit = {},
+    onCheckPayment: (BuyerOrderDetail) -> Unit = {},
+    reviewRepository: ProductReviewsRepository? = null,
+    messagesRepository: MessagesRepository? = null,
+    onOpenConversation: (InboxConversation) -> Unit = {},
+    onMessageFailure: (String, Boolean) -> Unit = { _, _ -> },
+    supportTicketRepository: SupportTicketRepository? = null,
+    initialOrderId: String? = null,
+    onInitialOrderHandled: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var selectedFilter by rememberSaveable(repository) { mutableStateOf(BuyerOrderFilter.ALL) }
     var selectedOrderId by rememberSaveable(repository) { mutableStateOf<String?>(null) }
+    LaunchedEffect(initialOrderId) {
+        if (initialOrderId != null) {
+            selectedOrderId = initialOrderId
+            onInitialOrderHandled()
+        }
+    }
     var result by remember(repository) { mutableStateOf<BuyerOrdersResult?>(null) }
     var loading by remember(repository) { mutableStateOf(true) }
     var loadingMore by remember(repository) { mutableStateOf(false) }
     var loadMoreFailure by remember(repository) { mutableStateOf<BuyerOrdersResult.Failure?>(null) }
     var retryGeneration by remember(repository) { mutableStateOf(0) }
     var requestGeneration by remember(repository) { mutableStateOf(0) }
+    var supportReference by remember(repository) { mutableStateOf<SupportLinkedReference?>(null) }
+    var supportTicketId by remember(repository) { mutableStateOf<String?>(null) }
+    var supportSubmitting by remember(repository) { mutableStateOf(false) }
+    var supportError by remember(repository) { mutableStateOf<String?>(null) }
     val success = result as? BuyerOrdersResult.Success
 
-    BackHandler(enabled = selectedOrderId != null) { selectedOrderId = null }
+    BackHandler(enabled = supportTicketId != null || supportReference != null) {
+        supportTicketId = null
+        supportReference = null
+        supportError = null
+    }
+    BackHandler(enabled = supportTicketId == null && supportReference == null && selectedOrderId != null) { selectedOrderId = null }
+
+    supportTicketId?.let { ticketId ->
+        val tickets = supportTicketRepository
+        if (tickets != null) {
+            SupportTicketThreadScreen(
+                ticketId = ticketId,
+                repository = tickets,
+                executor = executor,
+                onBack = { supportTicketId = null; supportReference = null },
+                onAuthenticationRequired = onAuthenticationRequired,
+            )
+        } else {
+            BuyerOrdersMessage("Support is unavailable", "Try again later.", { supportTicketId = null }, "Back")
+        }
+        return
+    }
+
+    supportReference?.let { reference ->
+        SupportTicketCreationWithRecentOrders(
+            initialLinkedReference = SupportLinkedReferenceInput(
+                kind = SupportLinkedReferenceKind.ORDER,
+                id = reference.id,
+                label = reference.label,
+            ),
+            mediaRepository = privateMediaUploadsRepository,
+            executor = executor,
+            buyerOrdersRepository = repository,
+            onAuthenticationRequired = onAuthenticationRequired,
+            isSubmitting = supportSubmitting,
+            submitError = supportError,
+            onCancel = { supportReference = null; supportError = null },
+            onCreate = { input ->
+                val tickets = supportTicketRepository
+                if (tickets == null) {
+                    supportError = "Support is unavailable. Try again later."
+                } else if (!supportSubmitting) {
+                    supportSubmitting = true
+                    supportError = null
+                    val linkedReference = input.linkedReference?.let {
+                        SupportLinkedReference(it.kind.apiValue, it.id, it.label)
+                    }
+                    executor.execute {
+                        val created = tickets.createTicket(
+                            category = input.category.apiValue,
+                            subject = input.subject,
+                            message = input.message,
+                            linkedReference = linkedReference,
+                            attachmentUrls = input.attachmentUrls,
+                            idempotencyKey = UUID.randomUUID().toString(),
+                        )
+                        androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                            supportSubmitting = false
+                            when (created) {
+                                is SupportTicketResult.Success -> supportTicketId = created.value.id
+                                is SupportTicketResult.Failure -> {
+                                    supportError = created.message
+                                    if (created.authenticationRequired) onAuthenticationRequired()
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+        )
+        return
+    }
 
     selectedOrderId?.let { orderId ->
         BuyerOrderDetailScreen(
@@ -90,6 +187,13 @@ internal fun BuyerOrdersScreen(
             privateMediaUploadsRepository = privateMediaUploadsRepository,
             onOpenStore = onOpenStore,
             onOpenProduct = onOpenProduct,
+            onCheckPayment = onCheckPayment,
+            reviewRepository = reviewRepository,
+            messagesRepository = messagesRepository,
+            supportAvailable = supportTicketRepository != null,
+            onOpenSupport = { supportReference = it; supportError = null },
+            onOpenConversation = onOpenConversation,
+            onMessageFailure = onMessageFailure,
         )
         return
     }

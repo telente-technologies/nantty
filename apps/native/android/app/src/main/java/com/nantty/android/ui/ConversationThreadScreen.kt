@@ -326,15 +326,18 @@ private fun MessageBubble(item: ConversationTimelineItem, retrying: Boolean, onR
         horizontalArrangement = if (item.isOutgoing) Arrangement.End else Arrangement.Start,
     ) {
         Surface(
-            modifier = Modifier.widthIn(max = 680.dp).semantics {
-                if (highlighted) contentDescription = "Target message from notification"
-            },
+            modifier = Modifier.widthIn(max = 680.dp),
             shape = RoundedCornerShape(20.dp),
             color = if (highlighted) MaterialTheme.colorScheme.tertiaryContainer
             else if (item.isOutgoing) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                if (highlighted) Text("Opened from notification", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onTertiaryContainer)
+                if (highlighted) Text(
+                    "Opened from notification",
+                    Modifier.semantics { contentDescription = "Target message from notification" },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                )
                 if (item.author.isNotBlank()) Text(item.author, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (item.state == ConversationMessageState.DECRYPTION_ERROR) {
                     Text(item.errorLabel ?: "This message couldn’t be displayed securely.", style = MaterialTheme.typography.bodyLarge)

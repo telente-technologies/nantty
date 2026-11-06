@@ -44,8 +44,12 @@ import com.nantty.android.data.BuyerOrderDetail
 import com.nantty.android.data.BuyerOrderDetailResult
 import com.nantty.android.data.BuyerOrderReceiptResult
 import com.nantty.android.data.BuyerOrdersRepository
+import com.nantty.android.data.ProductReviewsRepository
 import com.nantty.android.data.DisputeRepository
 import com.nantty.android.data.DisputeRepositoryResult
+import com.nantty.android.data.MessagesRepository
+import com.nantty.android.data.InboxConversation
+import com.nantty.android.data.SupportLinkedReference
 import com.nantty.android.data.OrderEscrowDetail
 import com.nantty.android.data.CreatorSampleMediaRepository
 import com.nantty.android.data.buyerCanOpenDispute
@@ -67,6 +71,13 @@ internal fun BuyerOrderDetailScreen(
     privateMediaUploadsRepository: CreatorSampleMediaRepository? = null,
     onOpenStore: (String) -> Unit = {},
     onOpenProduct: (String) -> Unit = {},
+    onCheckPayment: (BuyerOrderDetail) -> Unit = {},
+    reviewRepository: ProductReviewsRepository? = null,
+    messagesRepository: MessagesRepository? = null,
+    onOpenConversation: (InboxConversation) -> Unit = {},
+    onMessageFailure: (String, Boolean) -> Unit = { _, _ -> },
+    onOpenSupport: (SupportLinkedReference) -> Unit = {},
+    supportAvailable: Boolean = false,
 ) {
     var result by remember(orderId) { mutableStateOf<BuyerOrderDetailResult?>(null) }
     var retry by remember(orderId) { mutableIntStateOf(0) }
@@ -77,6 +88,8 @@ internal fun BuyerOrderDetailScreen(
     var receiptConfirmed by remember(orderId) { mutableStateOf(false) }
     var receiptError by remember(orderId) { mutableStateOf<BuyerOrderReceiptResult.Failure?>(null) }
     var refreshError by remember(orderId) { mutableStateOf<String?>(null) }
+    var contactingSeller by remember(orderId) { mutableStateOf(false) }
+    var contactSellerFailure by remember(orderId) { mutableStateOf<String?>(null) }
     var escrowResult by remember(orderId) { mutableStateOf<DisputeRepositoryResult<OrderEscrowDetail>?>(null) }
     var showOpenDispute by rememberSaveable(orderId) { mutableStateOf(false) }
     var activeDisputeId by rememberSaveable(orderId) { mutableStateOf<String?>(null) }
@@ -148,6 +161,9 @@ internal fun BuyerOrderDetailScreen(
             is BuyerOrderDetailResult.Success -> {
                 BuyerOrderDetailContent(
                     order = current.order,
+                    reviewRepository = reviewRepository,
+                    reviewExecutor = executor,
+                    onAuthenticationRequired = onAuthenticationRequired,
                     receiptConfirmed = receiptConfirmed,
                     confirmingReceipt = confirmingReceipt,
                     refreshError = refreshError,
@@ -162,6 +178,32 @@ internal fun BuyerOrderDetailScreen(
                     onViewDispute = { disputeId -> activeDisputeId = disputeId },
                     onOpenStore = { onOpenStore(current.order.storeId) },
                     onOpenProduct = onOpenProduct,
+                    onCheckPayment = { onCheckPayment(current.order) },
+                    onOpenSupport = { onOpenSupport(SupportLinkedReference("order", current.order.id, "Order ${current.order.reference}")) },
+                    supportAvailable = supportAvailable,
+                    contactingSeller = contactingSeller,
+                    contactSellerFailure = contactSellerFailure,
+                    contactSellerAvailable = messagesRepository != null,
+                    onContactSeller = {
+                        val messages = messagesRepository ?: return@BuyerOrderDetailContent
+                        if (contactingSeller) return@BuyerOrderDetailContent
+                        contactingSeller = true
+                        contactSellerFailure = null
+                        startBuyerStoreConversation(
+                            storeId = current.order.storeId,
+                            repository = messages,
+                            executor = executor,
+                            onStarted = { conversation ->
+                                contactingSeller = false
+                                onOpenConversation(conversation)
+                            },
+                            onFailed = { message, authenticationRequired ->
+                                contactingSeller = false
+                                contactSellerFailure = message
+                                onMessageFailure(message, authenticationRequired)
+                            },
+                        )
+                    },
                     onRefreshAfterConfirmation = {
                         val request = ++generation
                         refreshError = null
@@ -254,6 +296,9 @@ internal fun buyerReceiptConfirmationMessage(paymentMode: String, storeName: Str
 @Composable
 private fun BuyerOrderDetailContent(
     order: BuyerOrderDetail,
+    reviewRepository: ProductReviewsRepository?,
+    reviewExecutor: Executor,
+    onAuthenticationRequired: () -> Unit,
     receiptConfirmed: Boolean,
     confirmingReceipt: Boolean,
     refreshError: String?,
@@ -264,6 +309,13 @@ private fun BuyerOrderDetailContent(
     onViewDispute: (String) -> Unit,
     onOpenStore: () -> Unit,
     onOpenProduct: (String) -> Unit,
+    onCheckPayment: () -> Unit,
+    onOpenSupport: () -> Unit,
+    supportAvailable: Boolean,
+    contactingSeller: Boolean,
+    contactSellerFailure: String?,
+    contactSellerAvailable: Boolean,
+    onContactSeller: () -> Unit,
     onRefreshAfterConfirmation: () -> Unit,
 ) {
     LazyColumn(
@@ -294,6 +346,13 @@ private fun BuyerOrderDetailContent(
                 }
             }
         }
+        if (order.status == "pending") {
+            item {
+                Button(onClick = onCheckPayment, modifier = Modifier.fillMaxWidth()) {
+                    Text("Check payment")
+                }
+            }
+        }
         item { Text("Items", Modifier.semantics { heading() }, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
         items(order.items) { item ->
             Row(
@@ -307,6 +366,17 @@ private fun BuyerOrderDetailContent(
             ) {
                 Text("${item.quantity} × ${item.name}", Modifier.weight(1f))
                 item.variant?.let { Text(it, color = MaterialTheme.colorScheme.secondary) }
+            }
+        }
+        if (reviewRepository != null) {
+            item {
+                BuyerOrderReviewSection(
+                    status = order.status,
+                    products = order.items,
+                    repository = reviewRepository,
+                    executor = reviewExecutor,
+                    onAuthenticationRequired = onAuthenticationRequired,
+                )
             }
         }
         item {
@@ -365,6 +435,21 @@ private fun BuyerOrderDetailContent(
                 OutlinedButton(onClick = onOpenDispute, modifier = Modifier.fillMaxWidth()) {
                     Text("Open a dispute")
                 }
+            }
+        }
+        item {
+            OutlinedButton(
+                onClick = onContactSeller,
+                enabled = !contactingSeller && contactSellerAvailable,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text(if (contactingSeller) "Opening conversation…" else "Contact seller") }
+            if (contactSellerFailure != null) {
+                Text(contactSellerFailure, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        item {
+            OutlinedButton(onClick = onOpenSupport, enabled = supportAvailable, modifier = Modifier.fillMaxWidth()) {
+                Text("Get help with this order")
             }
         }
     }

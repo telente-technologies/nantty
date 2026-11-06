@@ -128,6 +128,41 @@ class NotificationsScreenTest {
     }
 
     @Test
+    fun groupInvitationNotificationOpensExistingInvitationFlow() {
+        var openedInvitations = false
+        compose.setContent {
+            MaterialTheme {
+                NotificationsScreen(
+                    routeRepository("""{"screen":"GroupInvitations","url":"/chats/invitations"}"""),
+                    Executor { it.run() },
+                    onOpenGroupInvitations = { openedInvitations = true },
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Group invitation Hello from Ari, unread").performClick()
+        compose.runOnIdle { assertEquals(true, openedInvitations) }
+    }
+
+    @Test
+    fun supportTicketNotificationOpensExistingTicketThreadRoute() {
+        val ticketId = "7b9e2f3a-1111-4222-8333-123456789abc"
+        var openedTicket: String? = null
+        compose.setContent {
+            MaterialTheme {
+                NotificationsScreen(
+                    routeRepository("""{"screen":"SupportTicketDetail","ticketId":"$ticketId"}"""),
+                    Executor { it.run() },
+                    onOpenSupportTicket = { openedTicket = it },
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Support replied Hello from Ari, unread").performClick()
+        compose.runOnIdle { assertEquals(ticketId, openedTicket) }
+    }
+
+    @Test
     fun messageNotificationOpensItsConversationBeforePostFallback() {
         val conversationId = "11111111-1111-4111-8111-111111111111"
         val notificationTransport = FakeTransport(
@@ -248,6 +283,13 @@ class NotificationsScreenTest {
 
         private fun firstPage() = JSONObject("""{"data":[{"id":"n1","category":"${if (conversationId != null) "messages" else "social"}","${notificationKind?.let { "\"kind\":\"$it\"," } ?: ""}"title":"Ari mentioned you","body":"Hello from Ari","createdAt":"2026-10-01T12:00:00.000Z","read":false,"actor":{"id":"u1","name":"Ari"},"url":"https://evil.example/post/forged"${if (includePostId || conversationId != null) ",\"data\":{${if (includePostId) "\"postId\":\"post-1\"" else ""}${if (includePostId && conversationId != null) "," else ""}${conversationId?.let { "\"conversationId\":\"$it\"" } ?: ""}${if (conversationId != null && messageId != null) ",\"messageId\":\"$messageId\"" else ""}}" else ""}}],"nextCursor":"next-page"}""")
         private fun secondPage() = JSONObject("""{"data":[{"id":"n2","category":"social","title":"Second notification","body":"More activity","createdAt":"2026-10-01T11:00:00.000Z","read":true}],"nextCursor":null}""")
+    }
+
+    private fun routeRepository(data: String): NotificationsRepository {
+        val transport = NotificationsTransport { method, _, _ ->
+            if (method == "GET") JSONObject("""{"data":[{"id":"route-1","category":"social","title":"${if (data.contains("GroupInvitations")) "Group invitation" else "Support replied"}","body":"Hello from Ari","createdAt":"2026-10-01T12:00:00.000Z","read":false,"actor":{"id":"u1","name":"Ari"},"data":$data}]}""") else JSONObject()
+        }
+        return NotificationsRepository("https://api.nantty.com", ::signedInSession, transport)
     }
 
     private class FakeAccountSettingsTransport : AccountNotificationSettingsTransport {

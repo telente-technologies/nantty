@@ -11,15 +11,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.clickable
 import androidx.activity.compose.BackHandler
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -28,12 +26,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,26 +39,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.nantty.android.R
 import com.nantty.android.data.ConversationPage
+import com.nantty.android.data.ConversationLookupResult
+import com.nantty.android.data.ConversationType
 import com.nantty.android.data.InboxConversation
 import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.MessagesFilter
 import com.nantty.android.data.MessagesHttpException
 import com.nantty.android.data.MessagesInboxFolder
 import com.nantty.android.data.MessagesResult
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import com.nantty.android.data.StoriesRepository
+import com.nantty.android.ui.stories.MessagesStoryViewer
+import com.nantty.android.ui.stories.rememberMessagesStoryNavigation
 import java.util.concurrent.Executor
 
 @Composable
@@ -73,7 +69,18 @@ internal fun MessagesScreen(
     onReauthenticate: () -> Unit = {},
     initialConversation: InboxConversation? = null,
     onInitialConversationHandled: () -> Unit = {},
+    initialNotificationConversationId: String? = null,
+    onInitialNotificationConversationHandled: () -> Unit = {},
+    initialGroupInvitations: Boolean = false,
+    onInitialGroupInvitationsHandled: () -> Unit = {},
+    initialChannelInvitations: Boolean = false,
+    onInitialChannelInvitationsHandled: () -> Unit = {},
+    initialGroupInvitationToken: String? = null, onInitialGroupInvitationTokenHandled: () -> Unit = {},
+    initialChannelInvitationToken: String? = null, onInitialChannelInvitationTokenHandled: () -> Unit = {},
     onOpenConversation: (InboxConversation) -> Unit = {},
+    onOpenChatNotificationSettings: () -> Unit = {},
+    externalRefreshGeneration: Int = 0,
+    storiesRepository: StoriesRepository? = null,
 ) {
     val searchActionDescription = stringResource(R.string.messages_search_action)
     var selectedConversation by remember(repository) { mutableStateOf<InboxConversation?>(null) }
@@ -90,15 +97,45 @@ internal fun MessagesScreen(
     var loadingMore by remember(repository) { mutableStateOf(false) }
     var pageError by remember(repository) { mutableStateOf<String?>(null) }
     var searchMode by remember(repository) { mutableStateOf(false) }
-
-    LaunchedEffect(repository, initialConversation?.id) {
-        initialConversation?.let {
-            selectedConversation = it
-            searchMode = false
-            onOpenConversation(it)
-            onInitialConversationHandled()
-        }
+    var showCreateChannel by remember(repository) { mutableStateOf(false) }
+    var channelName by remember(repository) { mutableStateOf("") }
+    var channelDescription by remember(repository) { mutableStateOf("") }
+    var creatingChannel by remember(repository) { mutableStateOf(false) }
+    var createChannelError by remember(repository) { mutableStateOf<String?>(null) }
+    var notificationTargetError by remember(repository) { mutableStateOf<String?>(null) }
+    var showGroupInvitations by remember(repository) { mutableStateOf(false) }
+    var showChannelInvitations by remember(repository) { mutableStateOf(false) }
+    var showChannelLinks by remember(repository) { mutableStateOf(false) }
+    var inviteGroupConversation by remember(repository) { mutableStateOf<InboxConversation?>(null) }
+    val storyNavigation = rememberMessagesStoryNavigation(storiesRepository, executor, onReauthenticate)
+    var lastStoriesRefreshGeneration by remember(repository) { mutableIntStateOf(externalRefreshGeneration) }
+    LaunchedEffect(externalRefreshGeneration) {
+        if (externalRefreshGeneration != lastStoriesRefreshGeneration) storyNavigation.refreshTray()
+        lastStoriesRefreshGeneration = externalRefreshGeneration
     }
+
+    MessagesNotificationEntryEffects(
+        repository = repository,
+        executor = executor,
+        initialConversation = initialConversation,
+        onInitialConversationHandled = onInitialConversationHandled,
+        conversationId = initialNotificationConversationId,
+        onConversationHandled = onInitialNotificationConversationHandled,
+        groupInvitations = initialGroupInvitations,
+        onGroupInvitationsHandled = onInitialGroupInvitationsHandled,
+        onShowGroupInvitations = { showGroupInvitations = true },
+        channelInvitations = initialChannelInvitations,
+        onChannelInvitationsHandled = onInitialChannelInvitationsHandled,
+        onShowChannelInvitations = { showChannelInvitations = true },
+        onOpenConversation = { conversation ->
+            selectedConversation = conversation
+            searchMode = false
+            onOpenConversation(conversation)
+        },
+        onReauthenticate = onReauthenticate,
+        onConversationFailure = { message -> notificationTargetError = message },
+    )
+
 
     fun refresh() {
         requestGeneration += 1
@@ -126,6 +163,34 @@ internal fun MessagesScreen(
         loadingMore = false
         pageError = null
         inboxActionError = null
+    }
+
+    fun createChannel() {
+        if (creatingChannel || channelName.isBlank()) return
+        val requestedName = channelName
+        val requestedDescription = channelDescription
+        creatingChannel = true
+        createChannelError = null
+        executor.execute {
+            val outcome = repository.createChannel(requestedName, requestedDescription)
+            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                creatingChannel = false
+                when (outcome) {
+                    is ConversationLookupResult.Success -> {
+                        showCreateChannel = false
+                        channelName = ""
+                        channelDescription = ""
+                        refresh()
+                        selectedConversation = outcome.conversation
+                        onOpenConversation(outcome.conversation)
+                    }
+                    is ConversationLookupResult.Failure -> {
+                        if (outcome.authenticationRequired) onReauthenticate()
+                        else createChannelError = outcome.message
+                    }
+                }
+            }
+        }
     }
 
     fun runInboxAction(conversation: InboxConversation, action: String) {
@@ -177,7 +242,7 @@ internal fun MessagesScreen(
         }
     }
 
-    LaunchedEffect(repository, filter, folder, refreshVersion) {
+    LaunchedEffect(repository, filter, folder, refreshVersion, externalRefreshGeneration) {
         val requestFilter = filter
         val requestFolder = folder
         val generation = requestGeneration + 1
@@ -254,8 +319,22 @@ internal fun MessagesScreen(
                     }
                 }
             }
+            TextButton(
+                onClick = { showGroupInvitations = true },
+                modifier = Modifier.semantics { contentDescription = "Open group invitations" },
+            ) { Text("Invites") }
+            ChannelInvitationToolbarActions({ showChannelInvitations = true }, { showChannelLinks = true })
             IconButton(onClick = { searchMode = true }, modifier = Modifier.semantics { contentDescription = searchActionDescription }) {
                 Icon(Icons.Default.Search, contentDescription = null)
+            }
+            IconButton(
+                onClick = { showCreateChannel = true; createChannelError = null },
+                modifier = Modifier.semantics { contentDescription = "Create broadcast channel" },
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+            }
+            IconButton(onClick = onOpenChatNotificationSettings, modifier = Modifier.semantics { contentDescription = "Chat settings" }) {
+                Icon(Icons.Default.Settings, contentDescription = null)
             }
             IconButton(onClick = ::refresh, enabled = !loading, modifier = Modifier.semantics { contentDescription = "Refresh messages" }) {
                 Icon(Icons.Default.Refresh, contentDescription = null)
@@ -273,6 +352,7 @@ internal fun MessagesScreen(
                 }
             }
         }
+        MessagesNotificationTargetError(notificationTargetError) { notificationTargetError = null }
         when {
             loading && result == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(Modifier.semantics { contentDescription = "Loading messages" })
@@ -297,30 +377,39 @@ internal fun MessagesScreen(
             result is MessagesResult.Success -> {
                 val page = (result as MessagesResult.Success).page
                 LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
+                    if (storiesRepository != null) {
+                        item(key = "stories-tray") {
+                            MessagesStoriesTrayItem(
+                                result = storyNavigation.trayResult,
+                                folder = folder,
+                                onStorySelected = storyNavigation.openStory,
+                                onRetry = storyNavigation.refreshTray,
+                                onReauthenticate = onReauthenticate,
+                            )
+                        }
+                    }
                     items(page.conversations, key = InboxConversation::id) { conversation ->
                         Column {
                             ConversationRow(conversation, onClick = {
                                 selectedConversation = conversation
                                 onOpenConversation(conversation)
                             })
+                            if (conversation.type == ConversationType.GROUP) {
+                                TextButton(
+                                    onClick = { inviteGroupConversation = conversation },
+                                    modifier = Modifier.padding(start = 76.dp, bottom = 4.dp)
+                                        .semantics { contentDescription = "Invite a member to ${conversation.title}" },
+                                ) { Text("Invite member") }
+                            }
                             if (folder != MessagesInboxFolder.CHATS) {
-                                Column(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    Text(
-                                        if (folder == MessagesInboxFolder.SPAM) conversation.spamReason ?: "Flagged by Nantty based on this account's activity." else "They won't see you've read this until you accept.",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                    if (inboxActionError != null && pendingActionConversationId == null) Text(inboxActionError.orEmpty(), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        if (folder == MessagesInboxFolder.REQUESTS) {
-                                            OutlinedButton(onClick = { runInboxAction(conversation, "accept") }, enabled = pendingActionConversationId == null) { Text(if (pendingActionConversationId == conversation.id) "Working…" else "Accept") }
-                                        } else {
-                                            OutlinedButton(onClick = { runInboxAction(conversation, "not-spam") }, enabled = pendingActionConversationId == null) { Text(if (pendingActionConversationId == conversation.id) "Working…" else "Not spam") }
-                                        }
-                                        OutlinedButton(onClick = { runInboxAction(conversation, "delete") }, enabled = pendingActionConversationId == null) { Text("Delete") }
-                                        OutlinedButton(onClick = { pendingBlockConversation = conversation }, enabled = pendingActionConversationId == null) { Text("Block") }
-                                    }
-                                }
+                                MessageRequestActions(
+                                    conversation = conversation,
+                                    folder = folder,
+                                    pendingActionConversationId = pendingActionConversationId,
+                                    actionError = inboxActionError,
+                                    onAction = { runInboxAction(conversation, it) },
+                                    onBlock = { pendingBlockConversation = conversation },
+                                )
                             }
                         }
                     }
@@ -354,73 +443,42 @@ internal fun MessagesScreen(
             dismissButton = { TextButton(onClick = { pendingBlockConversation = null }) { Text("Cancel") } },
         )
     }
-}
 
-@Composable
-private fun ConversationRow(conversation: InboxConversation, onClick: () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.background) {
-        Row(
-            Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick).semantics(mergeDescendants = true) {
-                contentDescription = buildString {
-                    append(conversation.title)
-                    append(", ${conversation.type.label}")
-                    append(", ${formatConversationTime(conversation.lastMessageAt)}")
-                    if (conversation.unreadCount > 0) append(", ${conversation.unreadCount} unread")
-                }
-            }.padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            Surface(
-                modifier = Modifier.size(48.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.secondaryContainer,
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    conversation.avatarUrl?.let { avatarUrl ->
-                        AsyncImage(
-                            model = avatarUrl,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize().clip(CircleShape),
-                            contentScale = ContentScale.Crop,
-                        )
-                    }
-                }
-            }
-            Column(Modifier.weight(1f).widthIn(max = 620.dp)) {
-                Text(conversation.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("${conversation.type.label} · ${formatConversationTime(conversation.lastMessageAt)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
-            }
-            if (conversation.unreadCount > 0) {
-                Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary) {
-                    Text(
-                        conversation.unreadCount.coerceAtMost(99).toString(),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp)
-                            .semantics { contentDescription = "${conversation.unreadCount} unread" },
-                    )
-                }
-            }
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    if (showCreateChannel) {
+        CreateChannelDialog(
+            name = channelName,
+            description = channelDescription,
+            busy = creatingChannel,
+            error = createChannelError,
+            onNameChange = { channelName = it },
+            onDescriptionChange = { channelDescription = it },
+            onDismiss = { showCreateChannel = false },
+            onCreate = ::createChannel,
+        )
     }
-}
 
-@Composable
-internal fun InboxState(title: String, message: String, action: String? = null, onAction: (() -> Unit)? = null) {
-    Column(
-        Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(title, Modifier.semantics { heading() }, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
-        if (action != null && onAction != null) TextButton(onClick = onAction) { Text(action) }
+    if (showGroupInvitations) {
+        GroupInvitationsDialog(
+            repository = repository,
+            executor = executor,
+            onDismiss = { showGroupInvitations = false },
+            onReauthenticate = onReauthenticate,
+        )
     }
-}
 
-private fun formatConversationTime(value: String): String = runCatching {
-    DateTimeFormatter.ofPattern("MMM d · h:mm a").format(Instant.parse(value).atZone(ZoneId.systemDefault()))
-}.getOrDefault("Recent")
+    ChannelInvitationOverlays(showChannelInvitations, showChannelLinks, availableChannelConversations((result as? MessagesResult.Success)?.page?.conversations.orEmpty()), initialChannelInvitationToken, repository, executor, { showChannelInvitations = it }, { showChannelLinks = it }, onInitialChannelInvitationTokenHandled, onReauthenticate)
+    GroupInvitationLinkRoute(initialGroupInvitationToken, repository, executor, onInitialGroupInvitationTokenHandled, { showGroupInvitations = true }, onReauthenticate)
+
+    inviteGroupConversation?.let { conversation ->
+        InviteGroupMemberDialog(
+            conversation = conversation,
+            repository = repository,
+            executor = executor,
+            onDismiss = { inviteGroupConversation = null },
+            onReauthenticate = onReauthenticate,
+            onInvitationSent = { refresh() },
+        )
+    }
+
+    MessagesStoryViewer(storiesRepository, executor, storyNavigation, onReauthenticate)
+}

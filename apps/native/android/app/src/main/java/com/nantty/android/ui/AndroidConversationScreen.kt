@@ -14,6 +14,8 @@ import com.nantty.android.data.ChatHistoryResult
 import com.nantty.android.data.EncryptedChatMessage
 import com.nantty.android.data.InboxConversation
 import com.nantty.android.data.MessagesRepository
+import com.nantty.android.data.loadHistoryUntilMessage
+import com.nantty.android.data.loadInitialHistory
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter

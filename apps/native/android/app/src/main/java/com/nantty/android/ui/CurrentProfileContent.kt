@@ -69,6 +69,7 @@ internal fun CurrentProfileContent(
     error: String?,
     horizontalPadding: Dp,
     onOpenBusinessTools: () -> Unit,
+    onOpenCountryPreferences: () -> Unit,
     onOpenConnections: (String, String) -> Unit,
     onOpenFollowRequests: () -> Unit,
     onStartEditing: () -> Unit,
@@ -170,6 +171,7 @@ internal fun CurrentProfileContent(
             onRetryPosts = onRetryPosts,
             onStartEditing = onStartEditing,
             onOpenBusinessTools = onOpenBusinessTools,
+            onOpenCountryPreferences = onOpenCountryPreferences,
             onOpenConnections = onOpenConnections,
             onOpenFollowRequests = onOpenFollowRequests,
         )
@@ -244,6 +246,7 @@ private fun ProfileOverview(
     onRetryPosts: () -> Unit,
     onStartEditing: () -> Unit,
     onOpenBusinessTools: () -> Unit,
+    onOpenCountryPreferences: () -> Unit,
     onOpenConnections: (String, String) -> Unit,
     onOpenFollowRequests: () -> Unit,
 ) {
@@ -254,6 +257,9 @@ private fun ProfileOverview(
         }
         OutlinedButton(onClick = onOpenBusinessTools, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
             Text("Seller, creator, brand & ads tools")
+        }
+        OutlinedButton(onClick = onOpenCountryPreferences, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            Text("Country & currency settings")
         }
         if (profile.isPrivate) {
             OutlinedButton(onClick = onOpenFollowRequests, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {

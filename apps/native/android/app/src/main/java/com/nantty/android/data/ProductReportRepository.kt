@@ -43,23 +43,49 @@ internal class ProductReportRepository(
         productId: String,
         reason: ProductReportReason,
         idempotencyKey: String = UUID.randomUUID().toString(),
+    ): ProductReportResult = submitTarget("product", productId, reason, idempotencyKey, targetLabel = "product")
+
+    fun submitSpace(
+        spaceId: String,
+        reason: ProductReportReason,
+        details: String,
+        idempotencyKey: String = UUID.randomUUID().toString(),
+    ): ProductReportResult = submitTarget("space", spaceId, reason, idempotencyKey, details, targetLabel = "Space")
+
+    /** Reports the person who authored a story; this targets their account, not the story itself. */
+    fun submitUser(
+        authorId: String,
+        reason: ProductReportReason,
+        details: String,
+        idempotencyKey: String = UUID.randomUUID().toString(),
+    ): ProductReportResult = submitTarget("user", authorId, reason, idempotencyKey, details, targetLabel = "account")
+
+    private fun submitTarget(
+        targetType: String,
+        targetId: String,
+        reason: ProductReportReason,
+        idempotencyKey: String,
+        details: String = "",
+        targetLabel: String,
     ): ProductReportResult {
-        if (!isSafeMartIdentifier(productId)) return ProductReportResult.Failure("This product link is invalid.")
+        if (!isSafeMartIdentifier(targetId)) return ProductReportResult.Failure("This $targetLabel link is invalid.")
         if (!idempotencyKey.matches(Regex("[A-Za-z0-9_-]{8,128}"))) {
             return ProductReportResult.Failure("Could not safely prepare this report. Please try again.")
         }
+        if (details.toByteArray(Charsets.UTF_8).size > 500) return ProductReportResult.Failure("Report details must be 500 characters or fewer.")
         val token = currentAccessToken()
-            ?: return ProductReportResult.Failure("Sign in to report this product.", authenticationRequired = true)
+            ?: return ProductReportResult.Failure("Sign in to report this $targetLabel.", authenticationRequired = true)
         return try {
             val response = transport.submit(
                 path = "/api/v1/reports",
                 accessToken = token,
                 idempotencyKey = idempotencyKey,
                 body = JSONObject()
-                    .put("targetType", "product")
-                    .put("targetId", productId)
+                    .put("targetType", targetType)
+                    .put("targetId", targetId)
+                    .apply { if (targetType == "user") put("reportedUserId", targetId) }
                     .put("reason", reason.apiValue)
-                    .put("details", ""),
+                    .put("details", details.trim()),
             )
             val data = response.optJSONObject("data") ?: response
             val reportId = data.optString("id")
@@ -70,9 +96,12 @@ internal class ProductReportRepository(
         } catch (error: ProductReportHttpException) {
             ProductReportResult.Failure(
                 message = when (error.statusCode) {
-                    HttpURLConnection.HTTP_UNAUTHORIZED -> "Your session has expired. Sign in again to report this product."
+                    HttpURLConnection.HTTP_UNAUTHORIZED -> {
+                        val expiredTargetLabel = if (targetType == "user") targetLabel else "product"
+                        "Your session has expired. Sign in again to report this $expiredTargetLabel."
+                    }
                     429 -> "You've sent too many reports. Try again later."
-                    HttpURLConnection.HTTP_NOT_FOUND -> "This product can no longer be reported."
+                    HttpURLConnection.HTTP_NOT_FOUND -> "This $targetLabel can no longer be reported."
                     else -> "Couldn't submit your report. Please try again."
                 },
                 authenticationRequired = error.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED,

@@ -1,5 +1,6 @@
 package com.nantty.android.data
 
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -97,6 +98,63 @@ class SellerWorkspaceRepositoryTest {
         assertTrue(runCatching {
             repository.parseDashboard("""{"totalSales":{"amountMinor":1,"currency":"NGN!"}}""")
         }.isFailure)
+    }
+
+    @Test
+    fun loadsServerOptionsAndSubmitsApplicationWithExplicitLogisticsAndIdempotency() {
+        val getPaths = mutableListOf<String>()
+        val posts = mutableListOf<Triple<String, String?, JSONObject>>()
+        val applicationTransport = object : SellerApplicationTransport {
+            override fun get(path: String, accessToken: String): String {
+                assertEquals("seller-token", accessToken)
+                getPaths += path
+                return when (path) {
+                    "/api/v1/users/me/settings" -> """{"data":{"countryCode":"NG"}}"""
+                    "/api/v1/categories" -> """{"data":{"items":[{"id":"11111111-1111-4111-8111-111111111111","name":"Fashion"}]}}"""
+                    "/api/v1/banks?country=NG" -> """{"data":[{"code":"058","name":"GTBank"}]}"""
+                    else -> error("Unexpected seller options route: $path")
+                }
+            }
+
+            override fun post(path: String, accessToken: String, idempotencyKey: String?, body: JSONObject): String {
+                assertEquals("seller-token", accessToken)
+                posts += Triple(path, idempotencyKey, JSONObject(body.toString()))
+                return """{"data":{"id":"22222222-2222-4222-8222-222222222222","status":"pending","storeName":"Ada Textiles","categoryName":"Fashion","submittedAt":"2026-11-05T10:00:00Z"}}"""
+            }
+        }
+        val repository = SellerWorkspaceRepository(
+            sessionProvider = ::sellerSession,
+            applicationTransport = applicationTransport,
+        )
+
+        val options = repository.loadApplicationOptions() as SellerApplicationOptionsResult.Success
+        assertEquals("NG", options.options.countryCode)
+        assertEquals("11111111-1111-4111-8111-111111111111", options.options.categories.single().id)
+        assertEquals("058", options.options.banks.single().code)
+        assertEquals(listOf("/api/v1/users/me/settings", "/api/v1/categories", "/api/v1/banks?country=NG"), getPaths)
+
+        val result = repository.submitApplication(
+            SellerApplicationSubmission(
+                storeName = " Ada Textiles ", categoryId = "11111111-1111-4111-8111-111111111111",
+                description = "Handwoven textiles made in Lagos.", phone = "+234 801 234 5678",
+                addressLine = "12 Allen Avenue", city = "Ikeja", state = "Lagos", enableLogistics = false,
+                documentType = "nin_slip", documentNumber = "12345678901", documentPhotoUrl = "https://media.nantty.com/kyc/document.jpg",
+                bankCode = "058", accountNumber = "0123456789",
+            ),
+            idempotencyKey = "seller-application-key-001",
+        )
+
+        assertTrue(result is SellerApplicationMutationResult.Success)
+        assertEquals("pending", (result as SellerApplicationMutationResult.Success).application.status)
+        assertEquals(1, posts.size)
+        assertEquals("/api/v1/seller/applications", posts.single().first)
+        assertEquals("seller-application-key-001", posts.single().second)
+        val body = posts.single().third
+        assertEquals("Ada Textiles", body.getString("storeName"))
+        assertEquals("+2348012345678", body.getString("phone"))
+        assertEquals(false, body.getBoolean("enableLogistics"))
+        assertEquals("nin_slip", body.getJSONObject("identityDocument").getString("documentType"))
+        assertEquals("0123456789", body.getJSONObject("payoutAccount").getString("accountNumber"))
     }
 
     private fun sellerSession() = AccountSession(

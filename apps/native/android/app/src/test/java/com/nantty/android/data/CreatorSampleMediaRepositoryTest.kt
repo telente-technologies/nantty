@@ -15,6 +15,53 @@ import java.util.concurrent.CancellationException
 
 class CreatorSampleMediaRepositoryTest {
     @Test
+    fun storyImageUploadUsesTheExistingStoryMediaPurpose() {
+        val transport = RecordingTransport()
+        val result = repository(transport).upload(
+            input(),
+            temporaryDirectory(),
+            purpose = NativeImageUploadPurpose.STORY,
+        )
+
+        assertTrue(result is CreatorSampleMediaResult.Success)
+        assertEquals(NativeImageUploadPurpose.STORY.wireValue, transport.createBody?.getString("purpose"))
+    }
+
+    @Test
+    fun storyVideoUploadPreservesVideoMimeAndUsesExistingStoryPurpose() {
+        val transport = RecordingTransport()
+        val directory = temporaryDirectory()
+        val result = repository(transport, videoDuration = { 60_000L }).uploadStoryVideo(
+            CreatorStoryVideoInput("story-video.mp4", "video/mp4") { ByteArrayInputStream(MP4_PREFIX) },
+            directory,
+        )
+
+        assertEquals(CreatorSampleMediaResult.VideoSuccess(MEDIA_ID), result)
+        assertEquals("video/mp4", transport.createBody?.getString("mimeType"))
+        assertEquals("story-video.mp4", transport.createBody?.getString("fileName"))
+        assertEquals(NativeImageUploadPurpose.STORY.wireValue, transport.createBody?.getString("purpose"))
+        assertEquals(MP4_PREFIX.size, transport.putBytes?.size)
+        assertTrue(directory.listFiles().orEmpty().isEmpty())
+    }
+
+    @Test
+    fun rejectsUnsupportedStoryVideoAndOverlongDurationBeforeCreatingUpload() {
+        val transport = RecordingTransport()
+        val invalid = repository(transport).uploadStoryVideo(
+            CreatorStoryVideoInput("story-video.mp4", "video/mp4") { ByteArrayInputStream("not-video".toByteArray()) },
+            temporaryDirectory(),
+        )
+        val tooLong = repository(transport, videoDuration = { 60_001L }).uploadStoryVideo(
+            CreatorStoryVideoInput("story-video.mp4", "video/mp4") { ByteArrayInputStream(MP4_PREFIX) },
+            temporaryDirectory(),
+        )
+
+        assertTrue(invalid is CreatorSampleMediaResult.Failure)
+        assertTrue(tooLong is CreatorSampleMediaResult.Failure)
+        assertEquals(null, transport.createBody)
+    }
+
+    @Test
     fun matchesRnDisputeEvidenceUploadContractAndExtractsPreferredImageUrl() {
         val transport = RecordingTransport()
         val repository = repository(transport)
@@ -164,12 +211,14 @@ class CreatorSampleMediaRepositoryTest {
         transport: RecordingTransport,
         refresh: () -> AccountSession? = { null },
         preparer: CreatorSampleImagePreparer = testPreparer(),
+        videoDuration: (File) -> Long? = { 30_000L },
     ) = CreatorSampleMediaRepository(
         baseUrl = "https://api.example.test",
         sessionProvider = { sampleSession() },
         refreshSessionProvider = refresh,
         transport = transport,
         imagePreparer = preparer,
+        storyVideoDurationMillis = videoDuration,
         processingTimeoutMillis = 50,
         processingPollIntervalMillis = 0,
     )
@@ -285,6 +334,7 @@ class CreatorSampleMediaRepositoryTest {
         const val UPLOADS_PATH = "/api/v1/media/uploads"
         const val MEDIA_PATH = "/api/v1/media"
         val PNG_PREFIX = byteArrayOf(0x89.toByte(), 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)
+        val MP4_PREFIX = byteArrayOf(0, 0, 0, 24, 'f'.code.toByte(), 't'.code.toByte(), 'y'.code.toByte(), 'p'.code.toByte(), 'i'.code.toByte(), 's'.code.toByte(), 'o'.code.toByte(), 'm'.code.toByte())
     }
 }
 

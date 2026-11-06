@@ -16,7 +16,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,8 +30,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -179,13 +183,30 @@ private fun EligibilityCard(value: CreatorEligibility, canApply: Boolean, onAppl
     Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Eligibility", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, modifier = Modifier.semantics { heading() })
+            CreatorDecisionBadge(value.decision)
             Text(value.decisionNote, style = MaterialTheme.typography.bodyMedium)
             value.requirements.forEach { requirement ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
-                    Text(if (requirement.met) "Met" else "In progress", style = MaterialTheme.typography.labelLarge, color = if (requirement.met) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
-                    Column(Modifier.weight(1f)) {
-                        Text(requirement.label, style = MaterialTheme.typography.bodyMedium)
-                        Text("${requirement.currentValue} / ${requirement.requiredValue}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+                        Text(if (requirement.met) "Met" else "In progress", style = MaterialTheme.typography.labelLarge, color = if (requirement.met) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                        Column(Modifier.weight(1f)) {
+                            Text(requirement.label, style = MaterialTheme.typography.bodyMedium)
+                            Text("${requirement.currentValue} / ${requirement.requiredValue}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    if (requirement.requiredValue > 1) {
+                        val progress = (requirement.currentValue.toFloat() / requirement.requiredValue.toFloat()).coerceIn(0f, 1f)
+                        LinearProgressIndicator(
+                            progress = { progress },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .semantics {
+                                    contentDescription = "${requirement.label} progress"
+                                    progressBarRangeInfo = ProgressBarRangeInfo(progress, 0f..1f)
+                                },
+                            color = if (requirement.met) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        )
                     }
                 }
             }
@@ -196,6 +217,18 @@ private fun EligibilityCard(value: CreatorEligibility, canApply: Boolean, onAppl
             )
             if (value.eligible && canApply) Button(onClick = onApply) { Text("Apply as a creator") }
         }
+    }
+}
+
+@Composable
+private fun CreatorDecisionBadge(decision: String) {
+    val (label, container, content) = when (decision) {
+        "auto_approve" -> Triple("Instant approval", MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer)
+        "manual_review" -> Triple("Manual review", MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer)
+        else -> Triple("Not eligible yet", MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    Surface(color = container, contentColor = content, shape = MaterialTheme.shapes.small) {
+        Text(label, Modifier.padding(horizontal = 10.dp, vertical = 5.dp), style = MaterialTheme.typography.labelMedium)
     }
 }
 

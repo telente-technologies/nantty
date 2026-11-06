@@ -95,6 +95,27 @@ class SearchRecentHistoryScreenTest {
     }
 
     @Test
+    fun whitespaceOnlyEditsDoNotRepeatTheNormalizedSearchRequest() {
+        val transport = RecentSearchTransport()
+        compose.setContent {
+            MaterialTheme {
+                SearchScreen(SearchRepository("https://api.nantty.com", ::signedInSession, transport), Executor { it.run() })
+            }
+        }
+
+        val field = compose.onNode(hasSetTextAction())
+        field.performTextInput("shoes")
+        compose.mainClock.advanceTimeBy(400)
+        compose.waitForIdle()
+        assertEquals(1, transport.searchPaths.size)
+
+        field.performTextInput(" ")
+        compose.mainClock.advanceTimeBy(400)
+        compose.waitForIdle()
+        assertEquals("Whitespace is trimmed before the debounce key, matching React Native.", 1, transport.searchPaths.size)
+    }
+
+    @Test
     fun guestNeverRequestsRecentHistory() {
         val transport = RecentSearchTransport()
         compose.setContent {

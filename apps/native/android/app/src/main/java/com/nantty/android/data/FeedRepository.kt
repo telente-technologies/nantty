@@ -30,6 +30,7 @@ data class FeedPost(
     val reposted: Boolean = false,
     val authorId: String = "",
     val bookmarked: Boolean = false,
+    val postedAsId: String? = null,
 )
 
 data class FeedTopic(val id: String, val name: String)
@@ -199,6 +200,7 @@ class FeedRepository(
                     reposted = item.optBoolean("reposted"),
                     authorId = author.optString("id"),
                     bookmarked = item.optBoolean("bookmarked", item.optBoolean("isSaved")),
+                    postedAsId = item.optJSONObject("postedAs")?.optString("id")?.takeIf { it.isNotBlank() && it != "null" },
                 ))
             }
         }

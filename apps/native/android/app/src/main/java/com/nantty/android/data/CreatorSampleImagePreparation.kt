@@ -14,6 +14,7 @@ internal fun copyCreatorSampleBounded(
     target: File,
     maximumBytes: Long,
     cancellation: CreatorSampleCancellation,
+    tooLargeMessage: String = "This photo is too large to prepare. Choose a smaller image.",
 ) {
     input.use { source -> FileOutputStream(target).use { output ->
         val buffer = ByteArray(8_192)
@@ -23,7 +24,7 @@ internal fun copyCreatorSampleBounded(
             val count = source.read(buffer)
             if (count < 0) break
             total += count
-            require(total <= maximumBytes) { "This photo is too large to prepare. Choose a smaller image." }
+            require(total <= maximumBytes) { tooLargeMessage }
             output.write(buffer, 0, count)
         }
     } }

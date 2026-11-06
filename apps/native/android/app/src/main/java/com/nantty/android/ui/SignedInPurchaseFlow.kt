@@ -8,6 +8,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.setValue
 import com.nantty.android.data.CheckoutReceipt
+import com.nantty.android.data.BuyerOrderDetail
 import java.util.concurrent.Executor
 
 internal enum class SignedInPurchaseDestination {
@@ -28,6 +29,7 @@ internal class SignedInPurchaseState(
     orderCount: Int = 0,
     paymentConfirmed: Boolean = false,
     cartAddressId: String? = null,
+    returnToOrdersAfterPayment: Boolean = false,
 ) {
     var destination by mutableStateOf(destination)
         private set
@@ -45,6 +47,8 @@ internal class SignedInPurchaseState(
         private set
     var cartAddressId by mutableStateOf(cartAddressId)
         private set
+    var returnToOrdersAfterPayment by mutableStateOf(returnToOrdersAfterPayment)
+        private set
 
     fun openCart() { destination = SignedInPurchaseDestination.Cart }
     fun selectCartAddress(addressId: String?) { cartAddressId = addressId }
@@ -53,7 +57,13 @@ internal class SignedInPurchaseState(
         destination = SignedInPurchaseDestination.Checkout
     }
     fun backFromCheckout() { destination = SignedInPurchaseDestination.Cart }
-    fun backFromPayment() { destination = SignedInPurchaseDestination.Cart }
+    fun backFromPayment(): Boolean {
+        val returnToOrders = returnToOrdersAfterPayment
+        destination = if (returnToOrders) null else SignedInPurchaseDestination.Cart
+        returnToOrdersAfterPayment = false
+        if (returnToOrders) paymentConfirmed = false
+        return returnToOrders
+    }
     fun backToPayment() { destination = SignedInPurchaseDestination.Payment }
     fun backFromCart() { destination = null }
     fun showPaymentProtection() { destination = SignedInPurchaseDestination.PaymentProtection }
@@ -68,7 +78,21 @@ internal class SignedInPurchaseState(
         currency = receipt.total.currency
         orderCount = receipt.orderCount
         paymentConfirmed = false
+        returnToOrdersAfterPayment = false
         destination = SignedInPurchaseDestination.Payment
+    }
+
+    fun checkExistingOrderPayment(order: BuyerOrderDetail): Boolean {
+        if (order.status != "pending") return false
+        orderId = order.id
+        checkoutId = order.id
+        totalMinor = order.totalMinor.coerceAtLeast(0L)
+        currency = order.currency
+        orderCount = 1
+        paymentConfirmed = false
+        returnToOrdersAfterPayment = true
+        destination = SignedInPurchaseDestination.Payment
+        return true
     }
 
     companion object {
@@ -83,6 +107,7 @@ internal class SignedInPurchaseState(
                     state.orderCount,
                     state.paymentConfirmed,
                     state.cartAddressId.orEmpty(),
+                    state.returnToOrdersAfterPayment,
                 )
             },
             restore = { saved ->
@@ -97,6 +122,7 @@ internal class SignedInPurchaseState(
                     orderCount = (saved.getOrNull(5) as? Int)?.coerceAtLeast(0) ?: 0,
                     paymentConfirmed = saved.getOrNull(6) as? Boolean ?: false,
                     cartAddressId = (saved.getOrNull(7) as? String)?.takeIf(String::isNotBlank),
+                    returnToOrdersAfterPayment = saved.getOrNull(8) as? Boolean ?: false,
                 )
             },
         )
@@ -113,6 +139,7 @@ internal fun SignedInPurchaseFlow(
     currency: String,
     orderCount: Int,
     paymentConfirmed: Boolean,
+    returnToOrdersAfterPayment: Boolean,
     cartAddressId: String?,
     repositories: SignedInRepositories,
     executor: Executor,
@@ -161,6 +188,7 @@ internal fun SignedInPurchaseFlow(
                         onContinueShopping()
                         onOpenProduct(productId)
                     },
+                    reviewRepository = repositories.productReviews,
                 )
             }
         }
@@ -177,6 +205,7 @@ internal fun SignedInPurchaseFlow(
                 onBack = onBackFromPayment,
                 onAuthenticationRequired = onAuthenticationRequired,
                 initiallyVerified = paymentConfirmed,
+                autoVerifyOnEnter = returnToOrdersAfterPayment,
                 onPaymentVerified = onPaymentVerified,
                 onViewPaymentProtection = onViewPaymentProtection,
                 onViewOrder = onViewOrder,

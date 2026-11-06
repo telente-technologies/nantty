@@ -55,6 +55,42 @@ class NotificationsRepositoryTest {
     }
 
     @Test
+    fun resolvesGroupInvitationAndSupportTicketTargetsOnlyForNativeRoutes() {
+        val base = ActivityNotification("n1", "social", null, "Title", "Body", "now", false, null, null)
+        val ticketId = "7b9e2f3a-1111-4222-8333-123456789abc"
+
+        assertEquals(NotificationDestination.GroupInvitations, resolveNotificationDestination(base.copy(screen = "GroupInvitations")))
+        assertEquals(NotificationDestination.GroupInvitations, resolveNotificationDestination(base.copy(url = "/chats/invitations")))
+        assertEquals(NotificationDestination.Spaces, resolveNotificationDestination(base.copy(screen = "SpaceInvitations", url = "/spaces")))
+        assertEquals(NotificationDestination.Spaces, resolveNotificationDestination(base.copy(url = "https://web.nantty.com/spaces")))
+        assertNull(resolveNotificationDestination(base.copy(screen = "Verification", url = "https://evil.example/chats/invitations")))
+        assertEquals(NotificationDestination.SupportTicket(ticketId), resolveNotificationDestination(base.copy(ticketId = ticketId)))
+        assertNull(resolveNotificationDestination(base.copy(ticketId = "../admin")))
+        assertEquals(NotificationDestination.Clip("clip-123"), resolveNotificationDestination(base.copy(clipId = "clip-123")))
+        assertNull(resolveNotificationDestination(base.copy(clipId = "../admin")))
+        assertEquals(
+            NotificationDestination.Post("clip-123", "comment-456"),
+            resolveNotificationDestination(base.copy(clipId = "clip-123", commentId = "comment-456")),
+        )
+        assertEquals(
+            NotificationDestination.Post("post-123", "comment-456"),
+            resolveNotificationDestination(base.copy(postId = "post-123", commentId = "comment-456")),
+        )
+        assertNull(resolveNotificationDestination(base.copy(screen = "Live", url = "https://nantty.com/live/live-123")))
+    }
+
+    @Test
+    fun acceptedFollowRequestOpensProfileBeforeConversationOrPostFallback() {
+        val notification = ActivityNotification(
+            id = "n1", category = "social", kind = "followRequestAccepted", title = "Accepted", body = "Body",
+            createdAt = "now", read = false, actor = NotificationActor("user-123", "Ari", null), postId = "post-123",
+            conversationId = "11111111-1111-4111-8111-111111111111",
+        )
+
+        assertEquals(NotificationDestination.Profile("user-123"), resolveNotificationDestination(notification))
+    }
+
+    @Test
     fun conversationTargetTakesPrecedenceOverPostTargetLikeReactNative() {
         val notification = ActivityNotification(
             id = "n1",
@@ -85,6 +121,32 @@ class NotificationsRepositoryTest {
         assertEquals(messageId, notification.messageId)
         assertEquals(NotificationDestination.Conversation(conversationId, messageId), resolveNotificationDestination(notification))
         assertEquals(NotificationDestination.Conversation(conversationId, null), resolveNotificationDestination(notification.copy(messageId = "../message")))
+    }
+
+    @Test
+    fun parsesNotificationScreenTicketAndUrlTargetFields() {
+        val ticketId = "7b9e2f3a-1111-4222-8333-123456789abc"
+        val payload = JSONObject("""{"data":[{"id":"n1","category":"system","title":"Support replied","body":"Open your request","createdAt":"now","read":false,"data":{"screen":"SupportTicketDetail","ticketId":"$ticketId","url":"https://nantty.com/help/tickets/$ticketId"}}]}""")
+
+        val notification = NotificationsRepository("https://api.nantty.com", ::signedInSession, RecordingTransport(payload)).parsePage(payload).items.single()
+
+        assertEquals("SupportTicketDetail", notification.screen)
+        assertEquals(ticketId, notification.ticketId)
+        assertEquals("https://nantty.com/help/tickets/$ticketId", notification.url)
+        assertEquals(NotificationDestination.SupportTicket(ticketId), resolveNotificationDestination(notification))
+    }
+
+    @Test
+    fun parsesAndResolvesDisputeNotificationTargetOnlyForUuid() {
+        val disputeId = "7b9e2f3a-1111-4222-8333-123456789abc"
+        val payload = JSONObject("""{"data":[{"id":"n1","category":"orders","title":"Dispute updated","body":"A resolution is ready","createdAt":"now","read":false,"data":{"disputeId":"$disputeId","url":"https://nantty.com/disputes/$disputeId"}}]}""")
+
+        val notification = NotificationsRepository("https://api.nantty.com", ::signedInSession, RecordingTransport(payload)).parsePage(payload).items.single()
+
+        assertEquals(disputeId, notification.disputeId)
+        assertEquals(NotificationDestination.Dispute(disputeId), resolveNotificationDestination(notification))
+        assertEquals(NotificationDestination.Dispute(disputeId), resolveNotificationDestination(notification.copy(disputeId = null)))
+        assertEquals(NotificationDestination.Orders, resolveNotificationDestination(notification.copy(disputeId = "../admin", url = null)))
     }
 
     @Test

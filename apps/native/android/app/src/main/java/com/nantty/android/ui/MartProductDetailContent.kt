@@ -54,6 +54,7 @@ internal fun ProductDetailContent(
     onQuantityChange: (Int) -> Unit,
     onOpenReviews: () -> Unit,
     onOpenStore: () -> Unit,
+    onOpenBrand: (String) -> Unit,
     onReportProduct: () -> Unit,
     isFollowingStore: Boolean,
     followingStoreBusy: Boolean,
@@ -74,7 +75,7 @@ internal fun ProductDetailContent(
                     item {
                         ProductInformation(
                             detail, selectedVariantId, onSelectVariant, quantity, onQuantityChange,
-                            onOpenReviews, onOpenStore, onReportProduct, isFollowingStore,
+                            onOpenReviews, onOpenStore, onOpenBrand, onReportProduct, isFollowingStore,
                             followingStoreBusy, storeFollowError, onToggleStoreFollow,
                         )
                     }
@@ -90,7 +91,7 @@ internal fun ProductDetailContent(
                 item {
                     ProductInformation(
                         detail, selectedVariantId, onSelectVariant, quantity, onQuantityChange,
-                        onOpenReviews, onOpenStore, onReportProduct, isFollowingStore,
+                        onOpenReviews, onOpenStore, onOpenBrand, onReportProduct, isFollowingStore,
                         followingStoreBusy, storeFollowError, onToggleStoreFollow,
                     )
                 }
@@ -146,6 +147,7 @@ private fun ProductInformation(
     onQuantityChange: (Int) -> Unit,
     onOpenReviews: () -> Unit,
     onOpenStore: () -> Unit,
+    onOpenBrand: (String) -> Unit,
     onReportProduct: () -> Unit,
     isFollowingStore: Boolean,
     followingStoreBusy: Boolean,
@@ -161,6 +163,11 @@ private fun ProductInformation(
         }
         TextButton(onClick = onOpenReviews) { Text("Read product reviews") }
         detail.promo?.let { Text(it, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold) }
+        detail.brand?.let { brand ->
+            TextButton(onClick = { onOpenBrand(brand.id) }, modifier = Modifier.semantics { contentDescription = "View ${brand.name} brand" }) {
+                Text("Brand · ${brand.name}")
+            }
+        }
         if (detail.sizes.isNotEmpty()) DetailLine("Sizes", detail.sizes.joinToString(" · "))
         if (detail.colors.isNotEmpty()) DetailLine("Colors", detail.colors.joinToString(" · "))
         DetailLine("Shipping", detail.shippingInfo.ifBlank { "Shipping details are provided at checkout." })

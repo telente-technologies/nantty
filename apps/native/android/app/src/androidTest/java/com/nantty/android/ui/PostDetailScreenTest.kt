@@ -87,6 +87,21 @@ class PostDetailScreenTest {
     }
 
     @Test
+    fun notificationCommentTargetLoadsFurtherPagesAndHighlightsTheComment() {
+        val transport = PagedThreadTransport()
+        val repository = PostDetailRepository("https://api.nantty.com", { null }, transport)
+        compose.setContent {
+            MaterialTheme {
+                PostDetailScreen("post-1", initialCommentId = "comment-2", sessionProvider = { null }, executor = Executor { it.run() }, onBack = {}, repository = repository)
+            }
+        }
+
+        compose.waitUntil(timeoutMillis = 5_000) { transport.threadPaths.any { it.contains("cursor=cursor-2") } }
+        compose.onNodeWithTag("comment-comment-2").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Second root reply").assertIsDisplayed()
+    }
+
+    @Test
     fun retryAfterLoadErrorShowsRealPostAndThread() {
         val repository = PostDetailRepository("https://api.nantty.com", { null }, RetryTransport())
         compose.setContent {

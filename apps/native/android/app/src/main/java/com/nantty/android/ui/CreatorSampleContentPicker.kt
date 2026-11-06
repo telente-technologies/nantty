@@ -84,6 +84,10 @@ internal fun CreatorSampleContentPicker(
                         uploadError = null
                         authenticationRequired = false
                     }
+                    is CreatorSampleMediaResult.VideoSuccess -> {
+                        uploadError = "Choose a photo for this creator application."
+                        authenticationRequired = false
+                    }
                     is CreatorSampleMediaResult.Failure -> {
                         uploadError = result.message
                         authenticationRequired = result.authenticationRequired

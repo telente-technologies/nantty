@@ -60,6 +60,7 @@ internal fun CheckoutPaymentScreen(
     executor: Executor,
     receipt: CheckoutReceipt,
     initiallyVerified: Boolean,
+    autoVerifyOnEnter: Boolean = false,
     onBack: () -> Unit,
     onAuthenticationRequired: () -> Unit,
     onPaymentVerified: () -> Unit,
@@ -118,6 +119,9 @@ internal fun CheckoutPaymentScreen(
         }
     }
     val verifyPaymentState = rememberUpdatedState<() -> Unit> { verifyPaymentStatus() }
+    androidx.compose.runtime.LaunchedEffect(receipt.payableOrderId, autoVerifyOnEnter) {
+        if (autoVerifyOnEnter && !verified) verifyPaymentState.value()
+    }
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -188,7 +192,18 @@ internal fun CheckoutPaymentScreen(
                         }
                     }
                 },
-            ) { if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp) else Text("Set up secure payment") }
+            ) {
+                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                else Text(if (autoVerifyOnEnter) "Finish payment" else "Set up secure payment")
+            }
+            OutlinedButton(
+                enabled = !busy,
+                onClick = ::verifyPaymentStatus,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                else Text("Check payment status")
+            }
         } else {
             Text(
                 "You will leave Nantty and continue at ${Uri.parse(payment!!.checkoutUrl).host}.",

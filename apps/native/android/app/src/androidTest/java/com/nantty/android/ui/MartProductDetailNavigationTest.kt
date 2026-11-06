@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -133,6 +134,28 @@ class MartProductDetailNavigationTest {
         }
         composeRule.onNodeWithContentDescription("View Adire House store").performClick()
         composeRule.runOnIdle { assertEquals("store-1", openedStoreId) }
+    }
+
+    @Test
+    fun productDetailOpensItsBrandByServerBrandId() {
+        var openedBrandId: String? = null
+        val repository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            openConnection = { url -> FakeMartConnection(url, responseFor(url)) },
+        )
+        composeRule.setContent {
+            MaterialTheme { MartScreen(repository, onOpenBrand = { openedBrandId = it }) }
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Silk wrap dress").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Silk wrap dress").performClick()
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithContentDescription("View Nigerian Loom brand").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithContentDescription("View Nigerian Loom brand").performClick()
+        composeRule.runOnIdle { assertEquals("brand-1", openedBrandId) }
     }
 
     @Test
@@ -383,7 +406,7 @@ private fun responseFor(url: URL, productName: String = "Silk wrap dress"): Stri
     url.path == "/api/v1/mart/home" -> """{"categories":[]}"""
     url.path == "/api/v1/mart/highlights" -> """{"data":[{"id":"editorial-new-arrivals","kind":"new_arrivals","title":"New arrivals","subtitle":"Fresh this week","imageUrl":null,"target":{"type":"collection","collection":"new_arrivals","name":"New arrivals"},"ranking":{"score":0.6,"reason":{"code":"fresh_listings","label":"Just listed"}}}],"nextCursor":null}"""
     url.path == "/api/v1/products" -> """{"data":[{"id":"prd-1","name":"$productName","price":{"amountMinor":125000,"currency":"NGN"},"stock":3}],"nextCursor":null}"""
-    url.path == "/api/v1/products/prd-1" -> """{"id":"prd-1","title":"$productName","price":{"amountMinor":125000,"currency":"NGN"},"stock":3,"images":[],"rating":0,"sizes":["S","M"],"colors":["Blue"],"shippingInfo":"Calculated at checkout.","description":"Hand-finished silk.","store":{"id":"store-1","name":"Adire House"},"variants":[{"id":"variant-1","title":"Medium / Blue","size":"M","color":"Blue","price":{"amountMinor":125000,"currency":"NGN"},"inStock":true}]}"""
+    url.path == "/api/v1/products/prd-1" -> """{"id":"prd-1","title":"$productName","price":{"amountMinor":125000,"currency":"NGN"},"stock":3,"images":[],"rating":0,"sizes":["S","M"],"colors":["Blue"],"shippingInfo":"Calculated at checkout.","description":"Hand-finished silk.","brand":{"id":"brand-1","name":"Nigerian Loom"},"store":{"id":"store-1","name":"Adire House"},"variants":[{"id":"variant-1","title":"Medium / Blue","size":"M","color":"Blue","price":{"amountMinor":125000,"currency":"NGN"},"inStock":true}]}"""
     else -> error("Unexpected catalog URL: $url")
 }
 

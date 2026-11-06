@@ -60,6 +60,7 @@ internal fun SearchScreen(
     onReauthenticate: () -> Unit = {},
     onOpenProduct: (String) -> Unit = {},
     onOpenStore: (String) -> Unit = {},
+    onOpenBrand: (String) -> Unit = {},
     onOpenCategory: (String, String) -> Unit = { _, _ -> },
     exploreRepository: ExploreRepository? = null,
     profileRepository: PublicProfileRepository? = null,
@@ -85,6 +86,7 @@ internal fun SearchScreen(
     // Read the repository's live session on every recomposition; the repository can outlive a login change.
     val signedIn = repository.hasAuthenticatedViewer()
     val keyboard = LocalSoftwareKeyboardController.current
+    val normalizedQuery = query.trim()
 
     fun refreshRecents() {
         if (!signedIn) return
@@ -162,10 +164,10 @@ internal fun SearchScreen(
         }
     }
 
-    LaunchedEffect(query, type, scope, repository, retryGeneration) {
+    LaunchedEffect(normalizedQuery, type, scope, repository, retryGeneration) {
         requestGeneration += 1
         val generation = requestGeneration
-        val cleanQuery = query.trim()
+        val cleanQuery = normalizedQuery
         result = null
         loading = false
         loadingMore = false
@@ -334,7 +336,7 @@ internal fun SearchScreen(
                             recordQuery(query)
                             when (item.kind) {
                                 "hashtag" -> {
-                                    query = item.title.removePrefix("#")
+                                    query = "#${item.title.removePrefix("#")}"
                                     type = SearchType.POSTS
                                 }
                                 "store" -> {
@@ -345,13 +347,7 @@ internal fun SearchScreen(
                                 }
                             }
                             })
-                            item.kind == "brand" && item.associatedStoreId != null -> ({
-                                scope = "store:${item.associatedStoreId}"
-                                scopeLabel = item.title
-                                type = SearchType.TOP
-                                query = ""
-                                onScopeChanged(scope, scopeLabel)
-                            })
+                            item.kind == "brand" -> ({ recordQuery(query); onOpenBrand(item.id) })
                             else -> null
                         })
                     }

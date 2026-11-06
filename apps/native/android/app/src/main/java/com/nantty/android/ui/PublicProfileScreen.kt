@@ -2,6 +2,7 @@ package com.nantty.android.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -36,6 +38,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,6 +60,10 @@ import com.nantty.android.data.PublicProfilePosts
 import com.nantty.android.data.PublicProfilePostsResult
 import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.data.PublicProfileResult
+import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.StoryRingStatus
+import com.nantty.android.data.StoryRingStatusResult
+import com.nantty.android.ui.stories.StoryViewerDialog
 import com.nantty.android.data.FollowActionResult
 import java.util.concurrent.Executor
 import androidx.compose.runtime.snapshots.Snapshot
@@ -66,10 +73,12 @@ internal fun PublicProfileScreen(
     userId: String,
     repository: PublicProfileRepository,
     executor: Executor,
+    storiesRepository: StoriesRepository? = null,
     onBack: () -> Unit,
     onOpenPost: (String) -> Unit,
     onSearchProfile: (String, String) -> Unit = { _, _ -> },
     onOpenConnections: (String, String) -> Unit = { _, _ -> },
+    onReauthenticate: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var profile by remember(userId) { mutableStateOf<PublicProfile?>(null) }
@@ -85,6 +94,9 @@ internal fun PublicProfileScreen(
     var followBusy by remember(userId) { mutableStateOf(false) }
     var followError by remember(userId) { mutableStateOf<String?>(null) }
     var confirmUnfollow by remember(userId) { mutableStateOf(false) }
+    var storyRingStatus by remember(userId) { mutableStateOf<StoryRingStatus?>(null) }
+    var showingStory by remember(userId) { mutableStateOf(false) }
+    var storyStatusGeneration by remember(userId) { mutableIntStateOf(0) }
 
     fun updateFollow(follow: Boolean) {
         if (followBusy) return
@@ -180,6 +192,22 @@ internal fun PublicProfileScreen(
         }
     }
 
+    LaunchedEffect(userId, profile?.id, profile?.isPrivate, profile?.canViewerSeePosts, profile?.isViewer, storiesRepository) {
+        val current = profile ?: return@LaunchedEffect
+        storyRingStatus = null
+        val stories = storiesRepository ?: return@LaunchedEffect
+        if ((current.isPrivate && !current.canViewerSeePosts && !current.isViewer) || current.isSuspended) return@LaunchedEffect
+        val generation = ++storyStatusGeneration
+        executor.execute {
+            val loaded = stories.loadStoryRingStatus(userId)
+            Snapshot.withMutableSnapshot {
+                if (storyStatusGeneration == generation) {
+                    storyRingStatus = (loaded as? StoryRingStatusResult.Success)?.status
+                }
+            }
+        }
+    }
+
     fun loadMore() {
         val cursor = posts.nextCursor ?: return
         if (postsLoadingMore || postsLoading) return
@@ -233,6 +261,8 @@ internal fun PublicProfileScreen(
                             showFollow = !current.isViewer && repository.viewerId() != null && current.followState != "blocked" && !current.isSuspended,
                             followBusy = followBusy,
                             followError = followError,
+                            storyRingStatus = storyRingStatus,
+                            onOpenStory = { showingStory = true },
                             onOpenConnections = onOpenConnections,
                             onFollow = {
                                 if (current.followState == "accepted" || current.followState == "requested") confirmUnfollow = true
@@ -265,6 +295,16 @@ internal fun PublicProfileScreen(
             }
         }
     }
+
+    if (showingStory && storyRingStatus?.hasActiveStory == true && storiesRepository != null) {
+        StoryViewerDialog(
+            repository = storiesRepository,
+            userId = userId,
+            executor = executor,
+            onClose = { showingStory = false; storyStatusGeneration++ },
+            onReauthenticate = onReauthenticate,
+        )
+    }
 }
 
 @Composable
@@ -274,6 +314,8 @@ private fun ProfileHeader(
     showFollow: Boolean,
     followBusy: Boolean,
     followError: String?,
+    storyRingStatus: StoryRingStatus?,
+    onOpenStory: () -> Unit,
     onOpenConnections: (String, String) -> Unit,
     onFollow: () -> Unit,
 ) {
@@ -282,7 +324,19 @@ private fun ProfileHeader(
             profile.bannerUrl?.let { AsyncImage(it, contentDescription = "${profile.name}'s profile banner", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
         }
         Row(Modifier.fillMaxWidth().padding(top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Surface(Modifier.size(88.dp), shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer) {
+            Surface(
+                modifier = Modifier.size(88.dp).then(
+                    if (storyRingStatus?.hasActiveStory == true) Modifier.clickable(onClick = onOpenStory) else Modifier,
+                ).semantics {
+                    if (storyRingStatus?.hasActiveStory == true) contentDescription = "View ${profile.name}'s story"
+                    else contentDescription = "${profile.name}'s profile photo"
+                },
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                border = storyRingStatus?.takeIf { it.hasActiveStory }?.let { status ->
+                    BorderStroke(2.dp, if (status.hasUnseenStory) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
+                },
+            ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(profile.name.firstOrNull()?.uppercase() ?: "N", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSecondaryContainer)
                     profile.avatarUrl?.let { AsyncImage(it, contentDescription = "${profile.name}'s profile photo", modifier = Modifier.fillMaxSize().clip(CircleShape), contentScale = ContentScale.Crop) }

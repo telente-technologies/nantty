@@ -77,6 +77,7 @@ internal fun MartScreen(
     onBackFromInitialCategory: () -> Unit = {},
     onInitialCategoryHandled: () -> Unit = {},
     onOpenStore: (String) -> Unit = {},
+    onOpenBrand: (String) -> Unit = {},
     storeRepository: StoreRepository? = null,
     reviewsRepositoryOverride: ProductReviewsRepository? = null,
 ) {
@@ -136,6 +137,7 @@ internal fun MartScreen(
             onBack = { selectedProductId = null },
             onOpenReviews = { selectedReviewsProductId = it },
             onOpenStore = onOpenStore,
+            onOpenBrand = onOpenBrand,
             storeRepository = storeRepository,
             modifier = modifier,
         )

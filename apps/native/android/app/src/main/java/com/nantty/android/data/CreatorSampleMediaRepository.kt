@@ -1,6 +1,7 @@
 package com.nantty.android.data
 
 import android.content.ContentResolver
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.OperationCanceledException
 import com.nantty.android.BuildConfig
@@ -11,13 +12,14 @@ import java.net.HttpURLConnection
 import java.util.concurrent.CancellationException
 import kotlin.math.ceil
 
-/** Uploads sample images through the same private dispute-evidence purpose used by RN PhotoEvidencePicker. */
+/** Uploads bounded, prepared images through the configured media purpose and existing chunked-upload API. */
 class CreatorSampleMediaRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val sessionProvider: () -> AccountSession?,
     private val refreshSessionProvider: () -> AccountSession? = { null },
     private val transport: CreatorSampleMediaTransport = JdkCreatorSampleMediaTransport(baseUrl),
     private val imagePreparer: CreatorSampleImagePreparer = AndroidCreatorSampleImagePreparer,
+    private val storyVideoDurationMillis: (File) -> Long? = ::readStoryVideoDurationMillis,
     private val processingTimeoutMillis: Long = MEDIA_PROCESSING_TIMEOUT_MS,
     private val processingPollIntervalMillis: Long = MEDIA_PROCESSING_POLL_INTERVAL_MS,
 ) {
@@ -26,31 +28,31 @@ class CreatorSampleMediaRepository(
         resolver: ContentResolver,
         cacheDir: File,
         cancellation: CreatorSampleCancellation = NoopCreatorSampleCancellation,
+        purpose: NativeImageUploadPurpose = NativeImageUploadPurpose.DISPUTE_EVIDENCE,
     ): CreatorSampleMediaResult {
         val mimeType = resolver.getType(uri)?.lowercase()?.trim()
             ?: return CreatorSampleMediaResult.Failure("Couldn't read that image. Choose another photo.")
         val name = uri.lastPathSegment?.substringAfterLast('/')?.takeIf(String::isNotBlank) ?: "creator-sample"
         return upload(CreatorSampleImageInput(name, mimeType) {
             resolver.openInputStream(uri) ?: error("Couldn't read that image. Choose another photo.")
-        }, cacheDir, cancellation)
+        }, cacheDir, cancellation, purpose)
     }
 
     fun upload(
         input: CreatorSampleImageInput,
         cacheDir: File,
         cancellation: CreatorSampleCancellation = NoopCreatorSampleCancellation,
+        purpose: NativeImageUploadPurpose = NativeImageUploadPurpose.DISPUTE_EVIDENCE,
     ): CreatorSampleMediaResult {
         var sourceFile: File? = null
         var prepared: PreparedCreatorSampleImage? = null
-        var uploadId: String? = null
-        var accessToken: String? = null
-        var completed = false
         return try {
             cancellation.throwIfCancelled()
-            require(trustedApiOrigin(baseUrl) != null) { "Configure a trusted HTTPS Nantty API URL to upload creator samples." }
-            val session = sessionProvider()?.takeIf { it.accessToken.isNotBlank() }
-                ?: return CreatorSampleMediaResult.Failure("Sign in to upload creator samples.", authenticationRequired = true)
-            accessToken = session.accessToken
+            val assetDescription = purpose.assetDescription
+            require(trustedApiOrigin(baseUrl) != null) { "Configure a trusted HTTPS Nantty API URL to upload $assetDescription." }
+            if (sessionProvider()?.accessToken.isNullOrBlank()) {
+                return CreatorSampleMediaResult.Failure("Sign in to upload $assetDescription.", authenticationRequired = true)
+            }
             require(input.mimeType.lowercase() in INPUT_IMAGE_MIME_TYPES) { "Choose a JPEG, PNG, WebP, HEIC or AVIF image." }
             require(cacheDir.exists() || cacheDir.mkdirs()) { "Creator sample upload storage is unavailable." }
 
@@ -65,48 +67,15 @@ class CreatorSampleMediaRepository(
             require(prepared!!.width > 0 && prepared!!.height > 0) { "Nantty couldn't read the selected image." }
             cancellation.throwIfCancelled()
 
-            val created = apiCall(cancellation, setToken = { accessToken = it }) { token ->
-                transport.createUploadSession(
-                    CREATE_UPLOAD_PATH,
-                    token,
-                    JSONObject()
-                        .put("fileName", creatorSampleSafeFileName(input.fileName))
-                        .put("mimeType", "image/jpeg")
-                        .put("sizeBytes", prepared!!.sizeBytes)
-                        .put("purpose", RN_PICKER_PURPOSE),
-                    cancellation,
-                )
-            }
-            val plan = parseSession(created)
-            uploadId = plan.uploadId
-            val expectedPartCount = ceil(prepared!!.sizeBytes.toDouble() / plan.chunkSizeBytes).toInt()
-            require(plan.totalChunks == expectedPartCount && plan.totalChunks in 1..MAX_CHUNKS) { "Nantty returned an invalid upload plan." }
-            require(plan.chunkSizeBytes in 1..MAX_CHUNK_BYTES) { "Nantty returned an unsupported chunk size." }
-
-            for (chunkIndex in 0 until plan.totalChunks) {
-                cancellation.throwIfCancelled()
-                val offset = chunkIndex.toLong() * plan.chunkSizeBytes
-                val expectedBytes = minOf(plan.chunkSizeBytes.toLong(), prepared!!.sizeBytes - offset).toInt()
-                val targetPayload = apiCall(cancellation, setToken = { accessToken = it }) { token ->
-                    transport.getChunkUploadUrl("$UPLOADS_PATH/${plan.uploadId}/chunks/$chunkIndex/url", token, cancellation)
-                }
-                val target = parseChunkTarget(targetPayload)
-                require(target.expectedBytes == expectedBytes) { "Nantty returned an invalid chunk size." }
-                require(isSafeCreatorSampleSignedObjectUrl(target.url)) { "Nantty returned an unsafe signed upload URL." }
-                require(target.expiresAtMillis > System.currentTimeMillis()) { "Nantty returned an expired upload URL. Try again." }
-                val bytes = readCreatorSampleChunk(prepared!!.file, offset, expectedBytes, cancellation)
-                transport.putSignedChunk(target.url, bytes, cancellation)
-            }
-
-            cancellation.throwIfCancelled()
-            val completion = apiCall(cancellation, setToken = { accessToken = it }) { token ->
-                transport.completeUpload("$UPLOADS_PATH/${plan.uploadId}/complete", token, cancellation)
-            }
-            val completedMediaId = parseCompletedMediaId(completion)
-            require(completedMediaId == plan.mediaId) { "Nantty completed a different media upload." }
-            completed = true
-
-            val readyAsset = pollUntilReady(completedMediaId, cancellation) { accessToken = it }
+            val readyAsset = uploadPreparedMedia(
+                file = prepared!!.file,
+                fileName = creatorSampleSafeFileName(input.fileName),
+                mimeType = "image/jpeg",
+                sizeBytes = prepared!!.sizeBytes,
+                cancellation = cancellation,
+                purpose = purpose,
+            )
+            val completedMediaId = readyAsset.id
             val displayUrl = selectImageUrl(readyAsset)
             CreatorSampleMediaResult.Success(
                 UploadedCreatorSampleImage(completedMediaId, displayUrl, readyAsset.width, readyAsset.height),
@@ -117,17 +86,129 @@ class CreatorSampleMediaRepository(
             CreatorSampleMediaResult.Cancelled
         } catch (error: Exception) {
             CreatorSampleMediaResult.Failure(
-                error.message ?: "Couldn't upload this sample image. Check your connection and try again.",
+                error.message ?: "Couldn't upload this ${purpose.assetDescription}. Check your connection and try again.",
                 authenticationRequired = error is CreatorSampleMediaHttpException && error.statusCode in setOf(401, 403),
             )
         } finally {
-            if (!completed && uploadId != null && accessToken != null) {
-                runCatching {
-                    transport.abortUpload("$UPLOADS_PATH/$uploadId", accessToken!!, NoopCreatorSampleCancellation)
-                }
-            }
             sourceFile?.delete()
             prepared?.file?.delete()
+        }
+    }
+
+    fun uploadStoryVideo(
+        uri: Uri,
+        resolver: ContentResolver,
+        cacheDir: File,
+        cancellation: CreatorSampleCancellation = NoopCreatorSampleCancellation,
+    ): CreatorSampleMediaResult {
+        val mimeType = resolver.getType(uri)?.lowercase()?.trim()
+            ?: return CreatorSampleMediaResult.Failure("Couldn't read that video. Choose another clip.")
+        val fileName = STORY_VIDEO_FILE_NAMES[mimeType]
+            ?: return CreatorSampleMediaResult.Failure("Choose an MP4, QuickTime or WebM video.")
+        return uploadStoryVideo(CreatorStoryVideoInput(fileName, mimeType) {
+            resolver.openInputStream(uri) ?: error("Couldn't read that video. Choose another clip.")
+        }, cacheDir, cancellation)
+    }
+
+    fun uploadStoryVideo(
+        input: CreatorStoryVideoInput,
+        cacheDir: File,
+        cancellation: CreatorSampleCancellation = NoopCreatorSampleCancellation,
+    ): CreatorSampleMediaResult {
+        var sourceFile: File? = null
+        return try {
+            cancellation.throwIfCancelled()
+            require(trustedApiOrigin(baseUrl) != null) { "Configure a trusted HTTPS Nantty API URL to upload a story video." }
+            if (sessionProvider()?.accessToken.isNullOrBlank()) {
+                return CreatorSampleMediaResult.Failure("Sign in to upload this story video.", authenticationRequired = true)
+            }
+            require(input.mimeType.lowercase() in STORY_VIDEO_MIME_TYPES) { "Choose an MP4, QuickTime or WebM video." }
+            require(cacheDir.exists() || cacheDir.mkdirs()) { "Story video upload storage is unavailable." }
+            sourceFile = File.createTempFile("story-video-source-", ".bin", cacheDir)
+            copyCreatorSampleBounded(
+                input.openStream(), sourceFile!!, MAX_STORY_VIDEO_BYTES, cancellation,
+                tooLargeMessage = "This story video is larger than 100 MiB. Choose a smaller video.",
+            )
+            require(sourceFile!!.length() > 0L) { "The selected video is empty." }
+            require(hasSupportedStoryVideoSignature(sourceFile!!, input.mimeType)) { "The selected file is not a supported video." }
+            val durationMillis = storyVideoDurationMillis(sourceFile!!)
+                ?: error("Nantty couldn't read this video's duration. Choose another video.")
+            require(durationMillis in 1..MAX_STORY_VIDEO_DURATION_MILLIS) { "Story videos can be up to 60 seconds long." }
+            cancellation.throwIfCancelled()
+            val readyAsset = uploadPreparedMedia(
+                file = sourceFile!!,
+                fileName = input.fileName,
+                mimeType = input.mimeType.lowercase(),
+                sizeBytes = sourceFile!!.length(),
+                cancellation = cancellation,
+                purpose = NativeImageUploadPurpose.STORY,
+            )
+            CreatorSampleMediaResult.VideoSuccess(readyAsset.id)
+        } catch (_: OperationCanceledException) {
+            CreatorSampleMediaResult.Cancelled
+        } catch (_: CancellationException) {
+            CreatorSampleMediaResult.Cancelled
+        } catch (error: Exception) {
+            CreatorSampleMediaResult.Failure(
+                error.message ?: "Couldn't upload this story video. Check your connection and try again.",
+                authenticationRequired = error is CreatorSampleMediaHttpException && error.statusCode in setOf(401, 403),
+            )
+        } finally {
+            sourceFile?.delete()
+        }
+    }
+
+    private fun uploadPreparedMedia(
+        file: File,
+        fileName: String,
+        mimeType: String,
+        sizeBytes: Long,
+        cancellation: CreatorSampleCancellation,
+        purpose: NativeImageUploadPurpose,
+    ): ParsedAsset {
+        var uploadId: String? = null
+        var accessToken: String? = null
+        var completed = false
+        try {
+            val created = apiCall(cancellation, setToken = { accessToken = it }) { token ->
+                transport.createUploadSession(
+                    CREATE_UPLOAD_PATH,
+                    token,
+                    JSONObject().put("fileName", fileName).put("mimeType", mimeType)
+                        .put("sizeBytes", sizeBytes).put("purpose", purpose.wireValue),
+                    cancellation,
+                )
+            }
+            val plan = parseSession(created)
+            uploadId = plan.uploadId
+            val expectedPartCount = ceil(sizeBytes.toDouble() / plan.chunkSizeBytes).toInt()
+            require(plan.totalChunks == expectedPartCount && plan.totalChunks in 1..MAX_CHUNKS) { "Nantty returned an invalid upload plan." }
+            require(plan.chunkSizeBytes in 1..MAX_CHUNK_BYTES) { "Nantty returned an unsupported upload chunk size." }
+            for (chunkIndex in 0 until plan.totalChunks) {
+                cancellation.throwIfCancelled()
+                val offset = chunkIndex.toLong() * plan.chunkSizeBytes
+                val expectedBytes = minOf(plan.chunkSizeBytes.toLong(), sizeBytes - offset).toInt()
+                val targetPayload = apiCall(cancellation, setToken = { accessToken = it }) { token ->
+                    transport.getChunkUploadUrl("$UPLOADS_PATH/${plan.uploadId}/chunks/$chunkIndex/url", token, cancellation)
+                }
+                val target = parseChunkTarget(targetPayload)
+                require(target.expectedBytes == expectedBytes) { "Nantty returned an invalid upload chunk size." }
+                require(isSafeCreatorSampleSignedObjectUrl(target.url)) { "Nantty returned an unsafe signed upload URL." }
+                require(target.expiresAtMillis > System.currentTimeMillis()) { "Nantty returned an expired signed upload URL. Try again." }
+                transport.putSignedChunk(target.url, readCreatorSampleChunk(file, offset, expectedBytes, cancellation), cancellation)
+            }
+            cancellation.throwIfCancelled()
+            val completion = apiCall(cancellation, setToken = { accessToken = it }) { token ->
+                transport.completeUpload("$UPLOADS_PATH/${plan.uploadId}/complete", token, cancellation)
+            }
+            val completedMediaId = parseCompletedMediaId(completion)
+            require(completedMediaId == plan.mediaId) { "Nantty completed a different media upload." }
+            completed = true
+            return pollUntilReady(completedMediaId, cancellation) { accessToken = it }
+        } finally {
+            if (!completed && uploadId != null && accessToken != null) {
+                runCatching { transport.abortUpload("$UPLOADS_PATH/$uploadId", accessToken!!, NoopCreatorSampleCancellation) }
+            }
         }
     }
 
@@ -144,9 +225,9 @@ class CreatorSampleMediaRepository(
             }.let(::parseMediaAsset)
             when (asset.status) {
                 "ready" -> return asset
-                "failed" -> error("Nantty couldn't process this image. Choose another image and try again.")
+                "failed" -> error("Nantty couldn't process this media. Choose another file and try again.")
                 "processing" -> Unit
-                else -> error("Nantty returned an unknown image processing status.")
+                else -> error("Nantty returned an unknown media processing status.")
             }
             if (System.currentTimeMillis() >= deadline) error("Image processing is taking longer than expected. Please try again.")
             creatorSampleCancellableDelay(processingPollIntervalMillis, cancellation)
@@ -159,7 +240,7 @@ class CreatorSampleMediaRepository(
         request: (String) -> T,
     ): T {
         var token = sessionProvider()?.accessToken?.takeIf(String::isNotBlank)
-            ?: error("Sign in to upload creator samples.")
+            ?: error("Sign in to continue this media upload.")
         setToken?.invoke(token)
         return try {
             cancellation.throwIfCancelled()
@@ -251,6 +332,9 @@ class CreatorSampleMediaRepository(
         const val MEDIA_PATH = "/api/v1/media"
         const val RN_PICKER_PURPOSE = "dispute_evidence"
         const val MAX_SOURCE_IMAGE_BYTES = 40 * 1024 * 1024L
+        const val MAX_STORY_VIDEO_BYTES = 100 * 1024 * 1024L
+        const val MAX_STORY_VIDEO_DURATION_MILLIS = 60_000L
+        const val MAX_STORY_VIDEO_DURATION_SECONDS = (MAX_STORY_VIDEO_DURATION_MILLIS / 1_000L).toInt()
         const val MAX_PREPARED_IMAGE_BYTES = 10 * 1024 * 1024L
         const val MAX_CHUNK_BYTES = 8 * 1024 * 1024
         const val MAX_CHUNKS = 16
@@ -259,5 +343,17 @@ class CreatorSampleMediaRepository(
         private const val MEDIA_PROCESSING_TIMEOUT_MS = 5 * 60_000L
         private const val MEDIA_PROCESSING_POLL_INTERVAL_MS = 1_000L
         private val INPUT_IMAGE_MIME_TYPES = setOf("image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "image/avif")
+        private val STORY_VIDEO_MIME_TYPES = setOf("video/mp4", "video/quicktime", "video/webm")
+        private val STORY_VIDEO_FILE_NAMES = mapOf(
+            "video/mp4" to "story-video.mp4",
+            "video/quicktime" to "story-video.mov",
+            "video/webm" to "story-video.webm",
+        )
     }
 }
+
+private val NativeImageUploadPurpose.assetDescription: String
+    get() = when (this) {
+        NativeImageUploadPurpose.DISPUTE_EVIDENCE -> "evidence image"
+        NativeImageUploadPurpose.STORY -> "story media"
+    }

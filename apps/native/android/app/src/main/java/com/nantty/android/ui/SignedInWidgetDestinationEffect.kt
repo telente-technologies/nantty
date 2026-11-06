@@ -21,6 +21,12 @@ internal fun SignedInWidgetDestinationEffect(
             onHandled()
             return@LaunchedEffect
         }
+        if (requestedDestination == "notifications") {
+            onSelectDestination(Destination.Notifications)
+            onShowComposer(false)
+            onHandled()
+            return@LaunchedEffect
+        }
         when (quickActionDestination(requestedDestination)) {
             QuickActionDestination.Feed -> {
                 onSelectDestination(Destination.Feed)

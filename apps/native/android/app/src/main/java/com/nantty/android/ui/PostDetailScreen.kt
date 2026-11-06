@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
@@ -58,12 +59,16 @@ import com.nantty.android.data.updateThreadCommentLike
 import com.nantty.android.share.sharePostFromAndroid
 import java.util.concurrent.Executor
 
+private fun commentContainsId(comment: ThreadComment, targetId: String): Boolean =
+    comment.id == targetId || comment.replies.any { reply -> commentContainsId(reply, targetId) }
+
 @Composable
 internal fun PostDetailScreen(
     postId: String,
     sessionProvider: () -> AccountSession?,
     executor: Executor,
     onBack: () -> Unit,
+    initialCommentId: String? = null,
     repository: PostDetailRepository? = null,
     onSharePost: ((PostDetail) -> Unit)? = null,
 ) {
@@ -92,10 +97,13 @@ internal fun PostDetailScreen(
     var profilesLoading by remember(postId, accountId) { mutableStateOf(false) }
     var profilesError by remember(postId, accountId) { mutableStateOf<String?>(null) }
     var selectedProfileId by remember(postId, accountId) { mutableStateOf<String?>(null) }
+    var initialCommentHandled by remember(postId, initialCommentId) { mutableStateOf(false) }
+    var initialCommentUnavailable by remember(postId, initialCommentId) { mutableStateOf(false) }
     var profileMenuExpanded by remember(postId, accountId) { mutableStateOf(false) }
     var threadSort by rememberSaveable(postId) { mutableStateOf(ThreadSort.RELEVANT) }
     var threadSortMenuExpanded by rememberSaveable(postId) { mutableStateOf(false) }
     val keyboard = LocalSoftwareKeyboardController.current
+    val threadListState = rememberLazyListState()
 
     fun load(cursor: String? = null, append: Boolean = false, sort: ThreadSort = threadSort) {
         if (append) {
@@ -212,6 +220,28 @@ internal fun PostDetailScreen(
         load(sort = threadSort)
     }
 
+    LaunchedEffect(postId, initialCommentId, result, loadingMore, loadMoreError) {
+        val targetId = initialCommentId ?: return@LaunchedEffect
+        if (initialCommentHandled || loadingMore) return@LaunchedEffect
+        val page = result as? PostDetailResult.Success ?: return@LaunchedEffect
+        val rootIndex = page.comments.indexOfFirst { comment -> commentContainsId(comment, targetId) }
+        when {
+            rootIndex >= 0 -> {
+                threadListState.animateScrollToItem(index = 3 + rootIndex)
+                initialCommentHandled = true
+            }
+            loadMoreError != null -> {
+                initialCommentUnavailable = true
+                initialCommentHandled = true
+            }
+            page.nextCursor != null -> load(page.nextCursor, append = true)
+            else -> {
+                initialCommentUnavailable = true
+                initialCommentHandled = true
+            }
+        }
+    }
+
     LaunchedEffect(postId, accountId) {
         commentProfiles = null
         selectedProfileId = null
@@ -244,7 +274,10 @@ internal fun PostDetailScreen(
                 TextButton(onClick = { load() }) { Text("Try again") }
             }
             is PostDetailResult.Success -> {
-                LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 16.dp)) {
+                if (initialCommentUnavailable) {
+                    Text("That comment could not be found.", Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                }
+                LazyColumn(state = threadListState, modifier = Modifier.weight(1f).fillMaxWidth(), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 16.dp)) {
                     item(key = "platform-identity") {
                         Text(
                             "Nantty for Android",
@@ -365,6 +398,7 @@ internal fun PostDetailScreen(
                                 canLike = accountId != null,
                                 likeBusyIds = commentLikeBusyIds,
                                 likeErrors = commentLikeErrors,
+                                highlightCommentId = initialCommentId,
                                 onReply = { replyTarget = it },
                                 onToggleLike = ::toggleCommentLike,
                                 onOpenLink = ::openPostLink,

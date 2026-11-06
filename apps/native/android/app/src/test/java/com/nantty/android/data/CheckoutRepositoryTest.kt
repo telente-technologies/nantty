@@ -143,6 +143,10 @@ class CheckoutRepositoryTest {
             postResponse = JSONObject("""{"data":{"status":"pending"}}""")
         }
         assertEquals(PaymentVerificationResult.Pending, repository(transport).verifyPayment(orderId))
+        assertEquals("/api/v1/payments/orders/$orderId/verify", transport.path)
+        assertEquals("buyer-token", transport.token)
+        assertEquals(0, transport.body?.length())
+        assertNull(transport.idempotencyKey)
         transport.postResponse = JSONObject("""{"data":{"status":"paid"}}""")
         assertEquals(PaymentVerificationResult.Paid, repository(transport).verifyPayment(orderId))
         transport.postResponse = JSONObject("""{"data":{"status":"failed"}}""")
