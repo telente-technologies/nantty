@@ -121,9 +121,12 @@ internal fun StoryViewerDialog(
             val neighbours = listOfNotNull(stories.getOrNull(storyIndex - 1)?.id, stories.getOrNull(storyIndex + 1)?.id).take(10)
             val slotsSinceLastAd = storySlotsSinceLastAd(slot, activeAdSession.lastAdViewedAt)
             executor.execute {
-                when (val decision = ads.decideStoryAd(target.id, sessionId, slotsSinceLastAd, neighbours, slot)) {
-                    is StoryAdDecisionResult.Success -> decision.ad?.let { activeAdSession.cacheAd(slot, it, sessionId) }
-                    is StoryAdDecisionResult.Failure -> if (decision.authenticationRequired) onReauthenticate()
+                val decision = ads.decideStoryAd(target.id, sessionId, slotsSinceLastAd, neighbours, slot)
+                Snapshot.withMutableSnapshot {
+                    when (decision) {
+                        is StoryAdDecisionResult.Success -> decision.ad?.let { activeAdSession.cacheAd(slot, it, sessionId) }
+                        is StoryAdDecisionResult.Failure -> if (decision.authenticationRequired) onReauthenticate()
+                    }
                 }
             }
         }
@@ -207,7 +210,11 @@ internal fun StoryViewerDialog(
                             story = current.stories[activeIndex.coerceIn(current.stories.indices)],
                             count = current.stories.size,
                             activeIndex = activeIndex,
-                            onPrevious = { if (activeIndex > 0) activeIndex-- else onPreviousUser() },
+                            onPrevious = {
+                                if (sponsoredAd != null) sponsoredAd = null
+                                else if (activeIndex > 0) activeIndex--
+                                else onPreviousUser()
+                            },
                             onNext = ::advanceStoryOrShowAd,
                             onClose = onClose,
                             onOpenAnalytics = { analyticsStory = it.takeIf(repository::canOpenOwnerAnalytics) },

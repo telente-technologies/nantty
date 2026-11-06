@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
@@ -68,6 +69,50 @@ class MessagesScreenTest {
 
         compose.onNodeWithContentDescription("Chat settings").assertIsDisplayed().performClick()
         compose.runOnIdle { assertEquals(true, openedSettings) }
+    }
+
+    @Test
+    fun newMessagePickerSearchesPeopleStartsConversationAndOpensThread() {
+        val conversationId = "11111111-1111-4111-8111-111111111111"
+        val peerId = "66666666-6666-4666-8666-666666666666"
+        val requests = mutableListOf<String>()
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = MessagesTransport { _, _ -> JSONObject("""{"data":[],"nextCursor":null}""") },
+            threadTransport = ChatThreadTransport { method, path, _, body ->
+                requests += "$method $path"
+                when {
+                    method == "GET" && path == "/api/v1/search/people?q=ari&limit=20" -> JSONObject(
+                        """{"data":[{"id":"$peerId","name":"Ari Oyinlola","username":"ari","avatarUrl":null,"verified":false}],"nextCursor":null}""",
+                    )
+                    method == "POST" && path == "/api/v1/conversations" -> {
+                        assertEquals(peerId, body?.optString("userId"))
+                        JSONObject("""{"data":{"id":"$conversationId","kind":"direct","peer":{"id":"$peerId","name":"Ari Oyinlola","username":"ari","avatarUrl":null},"lastMessageAt":"","unread":0}}""")
+                    }
+                    method == "GET" && path == "/api/v1/conversations/$conversationId/messages?limit=30" -> JSONObject("""{"data":[],"nextCursor":null}""")
+                    method == "POST" && path == "/api/v1/conversations/$conversationId/read" -> JSONObject()
+                    else -> error("Unexpected messaging request: $method $path")
+                }
+            },
+        )
+
+        compose.setContent { MaterialTheme { MessagesScreen(repository, Executor { it.run() }) } }
+        compose.onNodeWithContentDescription("New message").performClick()
+        compose.onNodeWithText("Search people").performTextInput("ari")
+        compose.waitUntil(5_000) { requests.any { it.startsWith("GET /api/v1/search/people") } }
+        compose.onNodeWithContentDescription("Ari Oyinlola, @ari").performClick()
+        compose.onNodeWithText("No messages yet").assertIsDisplayed()
+        compose.runOnIdle {
+            assertEquals(
+                listOf(
+                    "GET /api/v1/search/people?q=ari&limit=20",
+                    "POST /api/v1/conversations",
+                    "GET /api/v1/conversations/$conversationId/messages?limit=30",
+                ),
+                requests.take(3),
+            )
+        }
     }
 
     @Test

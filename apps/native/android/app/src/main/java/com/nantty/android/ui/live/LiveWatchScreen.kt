@@ -1,5 +1,6 @@
 package com.nantty.android.ui.live
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,9 @@ import androidx.compose.ui.unit.dp
 import com.nantty.android.data.LiveCoinTipReceipt
 import com.nantty.android.data.LiveCoinTipRepository
 import com.nantty.android.data.LiveCoinTipResult
+import com.nantty.android.data.LiveComment
+import com.nantty.android.data.LiveCommentsRepository
+import com.nantty.android.data.LiveCommentsResult
 import com.nantty.android.data.LiveMediaGrant
 import com.nantty.android.data.LiveSessionSnapshot
 import com.nantty.android.data.LiveSessionsRepository
@@ -42,6 +46,8 @@ import io.livekit.android.compose.state.rememberTracks
 import io.livekit.android.compose.ui.VideoTrackView
 import java.util.UUID
 import java.util.concurrent.Executor
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 /** Authenticated viewer route for an ordinary live; Spaces keep their independent audio-session flow. */
 @Composable
@@ -49,6 +55,7 @@ internal fun LiveWatchScreen(
     liveId: String,
     sessions: LiveSessionsRepository,
     coinTips: LiveCoinTipRepository,
+    comments: LiveCommentsRepository,
     executor: Executor,
     onBack: () -> Unit,
     onReauthenticate: () -> Unit,
@@ -62,6 +69,83 @@ internal fun LiveWatchScreen(
     var error by remember(liveId) { mutableStateOf<String?>(null) }
     var receipt by remember(liveId) { mutableStateOf<LiveCoinTipReceipt?>(null) }
     var selectedCoins by remember(liveId) { mutableStateOf(100L) }
+    var donationNote by remember(liveId) { mutableStateOf("") }
+    var liveComments by remember(liveId) { mutableStateOf(emptyList<LiveComment>()) }
+    var commentsLoading by remember(liveId) { mutableStateOf(false) }
+    var commentsError by remember(liveId) { mutableStateOf<String?>(null) }
+    var olderCommentsCursor by remember(liveId) { mutableStateOf<String?>(null) }
+    var olderCommentsLoading by remember(liveId) { mutableStateOf(false) }
+    var olderCommentsError by remember(liveId) { mutableStateOf<String?>(null) }
+    var commentDraft by remember(liveId) { mutableStateOf("") }
+    var commentSending by remember(liveId) { mutableStateOf(false) }
+
+    fun loadLiveComments(cursor: String? = null, older: Boolean = false) {
+        if (!joined || commentsLoading || (older && olderCommentsLoading)) return
+        if (older) {
+            if (cursor == null) return
+            olderCommentsLoading = true
+            olderCommentsError = null
+        } else {
+            commentsLoading = true
+        }
+        executor.execute {
+            when (val result = comments.list(liveId, cursor)) {
+                is LiveCommentsResult.Success -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                    val rows = result.value.comments.filterNot { it.kind == "gift" }
+                    liveComments = mergeLiveCommentHistory(liveComments, rows)
+                    if (older) {
+                        olderCommentsCursor = result.value.nextCursor
+                        olderCommentsError = null
+                        olderCommentsLoading = false
+                    } else {
+                        if (olderCommentsCursor == null) olderCommentsCursor = result.value.nextCursor
+                        commentsError = null
+                        commentsLoading = false
+                    }
+                }
+                is LiveCommentsResult.Failure -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                    if (older) {
+                        olderCommentsError = result.message
+                        olderCommentsLoading = false
+                    } else {
+                        commentsError = result.message
+                        commentsLoading = false
+                    }
+                    if (result.authenticationRequired) onReauthenticate()
+                }
+            }
+        }
+    }
+
+    fun sendLiveComment() {
+        val text = commentDraft.trim()
+        if (text.isEmpty() || commentSending) return
+        commentSending = true
+        commentsError = null
+        executor.execute {
+            when (val result = comments.create(liveId, text)) {
+                is LiveCommentsResult.Success -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                    liveComments = mergeLiveCommentHistory(liveComments, listOf(result.value))
+                    commentDraft = ""
+                    commentSending = false
+                    commentsError = null
+                }
+                is LiveCommentsResult.Failure -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                    commentsError = result.message
+                    commentSending = false
+                    if (result.authenticationRequired) onReauthenticate()
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(liveId, joined) {
+        if (!joined) return@LaunchedEffect
+        while (isActive) {
+            loadLiveComments()
+            delay(LIVE_COMMENTS_REFRESH_INTERVAL_MS)
+        }
+    }
 
     LaunchedEffect(liveId, sessions) {
         loading = true
@@ -173,16 +257,37 @@ internal fun LiveWatchScreen(
                                 disconnectOnDispose = true,
                             ) {
                                 val tracks by rememberTracks()
-                                if (tracks.isEmpty()) {
-                                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                        Text("Connected · waiting for the host’s video", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    }
-                                } else {
-                                    LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                        items(tracks.size) { index ->
-                                            VideoTrackView(trackReference = tracks[index], modifier = Modifier.fillMaxWidth().height(240.dp))
+                                Box(Modifier.fillMaxSize()) {
+                                    if (tracks.isEmpty()) {
+                                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                            Text("Connected · waiting for the host’s video", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                    } else {
+                                        LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            items(tracks.size) { index ->
+                                                VideoTrackView(trackReference = tracks[index], modifier = Modifier.fillMaxWidth().height(240.dp))
+                                            }
                                         }
                                     }
+                                    LiveCommentsPanel(
+                                        comments = liveComments,
+                                        loading = commentsLoading,
+                                        error = commentsError,
+                                        hasOlderComments = olderCommentsCursor != null,
+                                        loadingOlderComments = olderCommentsLoading,
+                                        olderCommentsError = olderCommentsError,
+                                        draft = commentDraft,
+                                        sending = commentSending,
+                                        onDraftChanged = { commentDraft = it },
+                                        onRetry = { loadLiveComments() },
+                                        onLoadOlderComments = { loadLiveComments(olderCommentsCursor, older = true) },
+                                        onSend = ::sendLiveComment,
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .fillMaxWidth()
+                                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.92f))
+                                            .padding(horizontal = 12.dp),
+                                    )
                                 }
                             }
                         }
@@ -196,6 +301,11 @@ internal fun LiveWatchScreen(
                                 else OutlinedButton(onClick = { selectedCoins = amount }) { Text("$amount") }
                             }
                         }
+                        LiveCoinDonationNoteField(
+                            note = donationNote,
+                            onNoteChanged = { donationNote = it },
+                            enabled = !working,
+                        )
                         Button(
                             onClick = {
                                 working = true
@@ -203,8 +313,12 @@ internal fun LiveWatchScreen(
                                 receipt = null
                                 val key = UUID.randomUUID().toString()
                                 executor.execute {
-                                    when (val result = coinTips.donate(liveId, selectedCoins, key)) {
-                                        is LiveCoinTipResult.Success -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot { receipt = result.receipt; working = false }
+                                    when (val result = coinTips.donate(liveId, selectedCoins, key, donationNote)) {
+                                        is LiveCoinTipResult.Success -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                                            receipt = result.receipt
+                                            donationNote = ""
+                                            working = false
+                                        }
                                         is LiveCoinTipResult.Failure -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                                             error = result.message
                                             working = false
@@ -221,12 +335,14 @@ internal fun LiveWatchScreen(
                         Text("Coin support is turned off by the host.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp)) }
-                    Text("Live comments and stage invitations are not yet available in this Android view.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 16.dp))
+                    Text("Stage invitations are not yet available in this Android view.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 16.dp))
                 }
             }
         }
     }
 }
+
+private const val LIVE_COMMENTS_REFRESH_INTERVAL_MS = 3_000L
 
 @Composable
 private fun LiveLoadError(error: String, onRetry: () -> Unit) {

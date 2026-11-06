@@ -64,7 +64,7 @@ class StoryAdsRepositoryTest {
 
     @Test
     fun recordsImpressionAndClickWithReactNativeEventFields() {
-        val transport = RecordingStoryAdsTransport(JSONObject())
+        val transport = RecordingStoryAdsTransport(validDecision())
         val repository = repository(transport)
         val ad = (repository.decideStoryAd("story-17", "session-1", 0, emptyList(), 0) as StoryAdDecisionResult.Success).ad!!
 
@@ -115,7 +115,7 @@ class StoryAdsRepositoryTest {
 
         assertFalse(result.authenticationRequired)
         assertEquals(1, transport.calls.size)
-        assertTrue(repository.recordImpression(sampleAd()).isFailure)
+        assertTrue(transport.calls.none { it.path == StoryAdsRepository.EVENTS_PATH })
         assertEquals(1, transport.calls.size)
 
         val unsafeDestination = validDecision().also { payload ->

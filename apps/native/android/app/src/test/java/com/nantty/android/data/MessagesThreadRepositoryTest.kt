@@ -282,6 +282,38 @@ class MessagesThreadRepositoryTest {
     }
 
     @Test
+    fun newMessagePeoplePickerUsesSharedPeopleSearchContractAndMapsProfiles() {
+        val peerId = "66666666-6666-4666-8666-666666666666"
+        var requestedPath: String? = null
+        var requestedToken: String? = null
+        val repository = repository { method, path, token, body ->
+            assertEquals("GET", method)
+            assertNull(body)
+            requestedPath = path
+            requestedToken = token
+            JSONObject("""{"data":[{"id":"$peerId","name":"Ari Oyinlola","username":"ari","avatarUrl":"https://cdn.nantty.com/avatar.png","verified":true}],"nextCursor":null}""")
+        }
+
+        val result = repository.searchPeopleToMessage(" ari oy ") as MessagePeopleResult.Success
+
+        assertEquals("/api/v1/search/people?q=ari%20oy&limit=20", requestedPath)
+        assertEquals("session-access", requestedToken)
+        assertEquals(peerId, result.people.single().id)
+        assertEquals("ari", result.people.single().username)
+        assertEquals(true, result.people.single().verified)
+    }
+
+    @Test
+    fun newMessagePeoplePickerDoesNotRequestEmptyQuery() {
+        var requests = 0
+        val repository = repository { _, _, _, _ -> requests++; JSONObject() }
+
+        assertTrue(repository.searchPeopleToMessage("  ") is MessagePeopleResult.Failure)
+        assertEquals(0, requests)
+        assertEquals("/api/v1/search/people?q=ari%20%26%20co&limit=20", buildPeopleToMessageSearchPath(" ari & co "))
+    }
+
+    @Test
     fun createChannelUsesAuthenticatedSocialContractAndMapsCreatedConversation() {
         var requestedMethod: String? = null
         var requestedPath: String? = null

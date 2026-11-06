@@ -84,6 +84,7 @@ internal fun SpacesScreen(
     var reportIdempotencyKey by remember { mutableStateOf(java.util.UUID.randomUUID().toString()) }
 
     fun loadInvitations(cursor: String? = null, append: Boolean = false) {
+        if (loadingInvitations) return
         val token = accessToken?.takeIf(String::isNotBlank) ?: run {
             invitationPage = null
             loadingInvitations = false
@@ -304,6 +305,11 @@ internal fun SpacesScreen(
             loadingInvitations = false
         } else loadInvitations()
     }
+
+    SpaceInvitationRefreshEffect(
+        enabled = !accessToken.isNullOrBlank() && !viewerId.isNullOrBlank() && selectedId == null && !showCreate,
+        onRefresh = { loadInvitations() },
+    )
 
     SpaceInviteSearchEffect(
         showInvite = showInvite,

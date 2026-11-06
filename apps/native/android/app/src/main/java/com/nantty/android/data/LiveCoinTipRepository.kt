@@ -38,22 +38,25 @@ class LiveCoinTipRepository(
         liveId: String,
         coins: Long,
         idempotencyKey: String,
+        note: String? = null,
     ): LiveCoinTipResult {
-        if (!SAFE_ID.matches(liveId) || coins !in 1..MAX_TIP_COINS || !SAFE_KEY.matches(idempotencyKey)) {
+        val normalizedNote = normalizeLiveTipNote(note)
+        val invalidNote = normalizedNote == null && !note.isNullOrBlank()
+        if (invalidNote || !SAFE_ID.matches(liveId) || coins !in 1..MAX_TIP_COINS || !SAFE_KEY.matches(idempotencyKey)) {
             return LiveCoinTipResult.Failure("This live coin donation is invalid.")
         }
         val initialSession = sessionProvider()?.takeIf { it.accessToken.isNotBlank() }
             ?: return LiveCoinTipResult.Failure("Sign in to donate coins.", HttpURLConnection.HTTP_UNAUTHORIZED, authenticationRequired = true)
 
         return try {
-            val receipt = send(initialSession, liveId, coins, idempotencyKey)
+            val receipt = send(initialSession, liveId, coins, idempotencyKey, normalizedNote)
             LiveCoinTipResult.Success(receipt)
         } catch (error: LiveCoinTipHttpException) {
             if (error.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
                 val refreshed = runCatching { refreshSessionProvider() }.getOrNull()?.takeIf { it.accessToken.isNotBlank() }
                     ?: return LiveCoinTipResult.Failure("Your session has expired. Sign in again to donate.", error.statusCode, authenticationRequired = true)
                 try {
-                    LiveCoinTipResult.Success(send(refreshed, liveId, coins, idempotencyKey))
+                    LiveCoinTipResult.Success(send(refreshed, liveId, coins, idempotencyKey, normalizedNote))
                 } catch (retryError: LiveCoinTipHttpException) {
                     failure(retryError)
                 } catch (_: Exception) {
@@ -67,12 +70,14 @@ class LiveCoinTipRepository(
         }
     }
 
-    private fun send(session: AccountSession, liveId: String, coins: Long, key: String): LiveCoinTipReceipt {
+    private fun send(session: AccountSession, liveId: String, coins: Long, key: String, note: String?): LiveCoinTipReceipt {
+        val body = JSONObject().put("targetType", "live").put("targetId", liveId).put("coins", coins)
+        note?.let { body.put("note", it) }
         val payload = transport.post(
             path = TIPS_PATH,
             accessToken = session.accessToken.trim(),
             idempotencyKey = key,
-            body = JSONObject().put("targetType", "live").put("targetId", liveId).put("coins", coins),
+            body = body,
         )
         val row = payload.optJSONObject("data") ?: payload
         val tipId = row.optString("tipId").takeIf(::isSafeId)

@@ -61,9 +61,12 @@ import com.nantty.android.data.PublicProfilePostsResult
 import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.data.PublicProfileResult
 import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.StoryAdsRepository
 import com.nantty.android.data.StoryRingStatus
 import com.nantty.android.data.StoryRingStatusResult
 import com.nantty.android.ui.stories.StoryViewerDialog
+import com.nantty.android.ui.stories.MessagesStoryViewer
+import com.nantty.android.ui.stories.rememberMessagesStoryNavigation
 import com.nantty.android.data.FollowActionResult
 import java.util.concurrent.Executor
 import androidx.compose.runtime.snapshots.Snapshot
@@ -74,13 +77,22 @@ internal fun PublicProfileScreen(
     repository: PublicProfileRepository,
     executor: Executor,
     storiesRepository: StoriesRepository? = null,
+    storyAdsRepository: StoryAdsRepository? = null,
     onBack: () -> Unit,
     onOpenPost: (String) -> Unit,
     onSearchProfile: (String, String) -> Unit = { _, _ -> },
     onOpenConnections: (String, String) -> Unit = { _, _ -> },
     onReauthenticate: () -> Unit = {},
+    onOpenStoryAdDestination: (com.nantty.android.data.StoryAdDestination) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    val hasStoryTraySession = !storiesRepository?.currentAccessToken().isNullOrBlank()
+    val storyNavigation = rememberMessagesStoryNavigation(
+        repository = storiesRepository.takeIf { hasStoryTraySession },
+        adsRepository = storyAdsRepository.takeIf { hasStoryTraySession },
+        executor = executor,
+        onReauthenticate = onReauthenticate,
+    )
     var profile by remember(userId) { mutableStateOf<PublicProfile?>(null) }
     var profileLoading by remember(userId) { mutableStateOf(true) }
     var profileError by remember(userId) { mutableStateOf<String?>(null) }
@@ -95,8 +107,14 @@ internal fun PublicProfileScreen(
     var followError by remember(userId) { mutableStateOf<String?>(null) }
     var confirmUnfollow by remember(userId) { mutableStateOf(false) }
     var storyRingStatus by remember(userId) { mutableStateOf<StoryRingStatus?>(null) }
-    var showingStory by remember(userId) { mutableStateOf(false) }
+    var anonymousStoryUserId by remember(userId) { mutableStateOf<String?>(null) }
+    var storyWasOpen by remember(userId) { mutableStateOf(false) }
     var storyStatusGeneration by remember(userId) { mutableIntStateOf(0) }
+    LaunchedEffect(storyNavigation.selectedStoryUserId, anonymousStoryUserId) {
+        val isOpen = storyNavigation.selectedStoryUserId != null || anonymousStoryUserId != null
+        if (storyWasOpen && !isOpen) storyStatusGeneration++
+        storyWasOpen = isOpen
+    }
 
     fun updateFollow(follow: Boolean) {
         if (followBusy) return
@@ -262,7 +280,10 @@ internal fun PublicProfileScreen(
                             followBusy = followBusy,
                             followError = followError,
                             storyRingStatus = storyRingStatus,
-                            onOpenStory = { showingStory = true },
+                            onOpenStory = {
+                                if (hasStoryTraySession) storyNavigation.openStory(userId)
+                                else anonymousStoryUserId = userId
+                            },
                             onOpenConnections = onOpenConnections,
                             onFollow = {
                                 if (current.followState == "accepted" || current.followState == "requested") confirmUnfollow = true
@@ -296,12 +317,22 @@ internal fun PublicProfileScreen(
         }
     }
 
-    if (showingStory && storyRingStatus?.hasActiveStory == true && storiesRepository != null) {
+    if (storyNavigation.selectedStoryUserId != null && storiesRepository != null && hasStoryTraySession) {
+        MessagesStoryViewer(
+            repository = storiesRepository,
+            adsRepository = storyAdsRepository,
+            executor = executor,
+            state = storyNavigation,
+            onReauthenticate = onReauthenticate,
+            onOpenAdDestination = onOpenStoryAdDestination,
+        )
+    }
+    if (anonymousStoryUserId != null && storyRingStatus?.hasActiveStory == true && storiesRepository != null) {
         StoryViewerDialog(
             repository = storiesRepository,
-            userId = userId,
+            userId = anonymousStoryUserId!!,
             executor = executor,
-            onClose = { showingStory = false; storyStatusGeneration++ },
+            onClose = { anonymousStoryUserId = null; storyStatusGeneration++ },
             onReauthenticate = onReauthenticate,
         )
     }

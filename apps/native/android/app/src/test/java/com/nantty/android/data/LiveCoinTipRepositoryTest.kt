@@ -32,6 +32,41 @@ class LiveCoinTipRepositoryTest {
     }
 
     @Test
+    fun trimsAndSendsOptionalNoteOnExistingTipsRequest() {
+        val transport = RecordingLiveCoinTipTransport(tipReceipt())
+        val result = LiveCoinTipRepository(
+            sessionProvider = { testSession("access-token", "refresh-token") },
+            transport = transport,
+        ).donate("live-456", 25, "donation-key-1", "  Keep it up 🎤  ")
+
+        assertTrue(result is LiveCoinTipResult.Success)
+        val request = transport.calls.single()
+        assertEquals("/api/v1/tips", request.path)
+        assertEquals("Keep it up 🎤", request.body.getString("note"))
+        assertEquals(setOf("targetType", "targetId", "coins", "note"), request.body.keys().asSequence().toSet())
+    }
+
+    @Test
+    fun accepts280UnicodeCodePointsAndRejects281WithoutCallingTransport() {
+        val acceptedTransport = RecordingLiveCoinTipTransport(tipReceipt())
+        val note = "😀".repeat(280)
+        val accepted = LiveCoinTipRepository(
+            sessionProvider = { testSession("token", "refresh") },
+            transport = acceptedTransport,
+        ).donate("live-456", 25, "donation-key-1", note)
+        assertTrue(accepted is LiveCoinTipResult.Success)
+        assertEquals(note, acceptedTransport.calls.single().body.getString("note"))
+
+        val rejectedTransport = RecordingLiveCoinTipTransport(tipReceipt())
+        val rejected = LiveCoinTipRepository(
+            sessionProvider = { testSession("token", "refresh") },
+            transport = rejectedTransport,
+        ).donate("live-456", 25, "donation-key-1", "😀".repeat(281))
+        assertTrue(rejected is LiveCoinTipResult.Failure)
+        assertTrue(rejectedTransport.calls.isEmpty())
+    }
+
+    @Test
     fun rejectsInvalidTargetAmountAndIdempotencyBeforeNetworkCall() {
         val transport = RecordingLiveCoinTipTransport(tipReceipt())
         val repository = LiveCoinTipRepository(sessionProvider = { testSession("token", "refresh") }, transport = transport)

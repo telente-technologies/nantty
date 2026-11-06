@@ -203,7 +203,7 @@ class LiveSessionsRepository(
     }
 }
 
-private class JdkLiveSessionsTransport(private val baseUrl: String) : LiveSessionsTransport {
+internal class JdkLiveSessionsTransport(private val baseUrl: String) : LiveSessionsTransport {
     override fun request(method: String, path: String, accessToken: String?, body: JSONObject?, idempotencyKey: String?): JSONObject {
         require(method in setOf("GET", "POST", "PATCH"))
         val origin = trustedApiOrigin(baseUrl) ?: error("Configure an HTTPS Nantty API URL before opening Live.")

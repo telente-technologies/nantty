@@ -261,6 +261,27 @@ class SpacesScreenTest {
         compose.onNodeWithText("Retry invitations").performClick()
         compose.onNodeWithText("No pending Space invitations").assertIsDisplayed()
     }
+
+    @Test
+    fun pendingInvitationsRefreshEveryThirtySecondsWhileSpacesIsActive() {
+        val transport = FakeSpacesTransport(hostRole = false)
+        compose.mainClock.autoAdvance = false
+        compose.setContent {
+            MaterialTheme {
+                com.nantty.android.ui.spaces.SpacesScreen(
+                    repository = SpacesRepository("https://api.nantty.test", transport),
+                    accessToken = "recipient-token",
+                    viewerId = "recipient-1",
+                    executor = Executor { it.run() },
+                    onSignInRequired = {},
+                )
+            }
+        }
+
+        compose.waitUntil(5_000) { transport.invitationRequests == 1 }
+        compose.mainClock.advanceTimeBy(com.nantty.android.ui.spaces.SPACE_INVITATION_REFRESH_INTERVAL_MS + 1L)
+        compose.waitUntil(5_000) { transport.invitationRequests >= 2 }
+    }
 }
 
 private class FakeSpacesTransport(

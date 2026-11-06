@@ -1,5 +1,7 @@
 package com.nantty.android.ui
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -18,8 +20,6 @@ import com.nantty.android.data.FollowRequestsRepository
 import com.nantty.android.data.FeedResult
 import com.nantty.android.data.FeedType
 import com.nantty.android.data.InboxConversation
-import com.nantty.android.data.LiveCoinTipRepository
-import com.nantty.android.data.LiveSessionsRepository
 import com.nantty.android.data.PostDetailRepository
 import com.nantty.android.data.PublicBrandRepository
 import com.nantty.android.data.SpacesRepository
@@ -143,18 +143,7 @@ internal fun SignedInApp(
         PublicBrandRepository(sessionProvider = sessionRepository::sessionOrNull)
     }
     val spacesRepository = remember { SpacesRepository() }
-    val liveSessionsRepository = remember(sessionRepository) {
-        LiveSessionsRepository(
-            sessionProvider = sessionRepository::sessionOrNull,
-            refreshSessionProvider = sessionRepository::refreshSession,
-        )
-    }
-    val liveCoinTipRepository = remember(sessionRepository) {
-        LiveCoinTipRepository(
-            sessionProvider = sessionRepository::sessionOrNull,
-            refreshSessionProvider = sessionRepository::refreshSession,
-        )
-    }
+    val liveRepositories = rememberSignedInLiveRepositories(sessionRepository)
     val storiesRepository = remember(sessionRepository) { StoriesRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val soundsRepository = remember(sessionRepository) { SoundsRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val postDetailRepository = remember(sessionRepository) { PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull) }
@@ -280,6 +269,29 @@ internal fun SignedInApp(
                     profileOpenedFromConnections = false
                 },
                 openProfilePost = { selectedPostId = it },
+                openStoryAdDestination = { adDestination ->
+                    dispatchStoryAdDestination(
+                        destination = adDestination,
+                        onProduct = { productId ->
+                            selectedStoreId = null
+                            selectedBrandId = null
+                            pendingMartProductId = productId
+                            destination = Destination.Mart
+                        },
+                        onStore = { selectedStoreId = it },
+                        onPost = { selectedPostId = it },
+                        onProfile = {
+                            selectedProfileId = it
+                            profileOpenedFromConnections = false
+                        },
+                        onMessages = { destination = Destination.Messages },
+                        onExternal = { uri -> runCatching {
+                            shareContext.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString())).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                            )
+                        } },
+                    )
+                },
                 searchProfile = { userId, username ->
                     selectedProfileId = null
                     searchScope = "profile:$userId"
@@ -402,13 +414,15 @@ internal fun SignedInApp(
                 messagesRepository = messagesRepository,
                 supportTicketRepository = repositories.supportTickets,
                 spacesRepository = spacesRepository,
-                liveSessionsRepository = liveSessionsRepository,
-                liveCoinTipRepository = liveCoinTipRepository,
+                liveSessionsRepository = liveRepositories.sessions,
+                liveCoinTipRepository = liveRepositories.coinTips,
+                liveCommentsRepository = liveRepositories.comments,
                 initialLiveId = pendingLiveId,
                 onBackFromLive = { pendingLiveId = null; destination = Destination.Feed },
                 clipsRepository = repositories.clips,
                 clipWatchTrackingRepository = repositories.clipWatchTracking,
                 storiesRepository = storiesRepository,
+                storyAdsRepository = repositories.storyAds,
                 postDetailRepository = postDetailRepository,
                 spacesAccessToken = sessionRepository.sessionOrNull()?.accessToken,
                 spacesViewerId = accountUser?.id,

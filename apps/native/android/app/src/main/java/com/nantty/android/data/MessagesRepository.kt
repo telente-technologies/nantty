@@ -105,6 +105,8 @@ class MessagesRepository(
 
     fun search(query: String) = conversationSearchRepository.search(query)
 
+    fun searchPeopleToMessage(query: String) = conversationSearchRepository.searchPeopleToMessage(query)
+
     fun startConversationWithPerson(personId: String) = conversationSearchRepository.startConversationWithPerson(personId)
 
     fun startConversationWithStore(storeId: String) = conversationSearchRepository.startConversationWithStore(storeId)

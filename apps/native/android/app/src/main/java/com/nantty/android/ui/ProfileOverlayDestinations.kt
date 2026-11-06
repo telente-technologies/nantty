@@ -5,6 +5,8 @@ import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.InboxConversation
 import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.StoryAdsRepository
+import com.nantty.android.data.StoryAdDestination
 import java.util.concurrent.Executor
 
 @Composable
@@ -12,24 +14,28 @@ internal fun PublicProfileDestination(
     userId: String,
     repository: PublicProfileRepository,
     storiesRepository: StoriesRepository,
+    storyAdsRepository: StoryAdsRepository,
     executor: Executor,
     onBack: () -> Unit,
     onOpenPost: (String) -> Unit,
     onSearchProfile: (String, String) -> Unit,
     onOpenConnections: (String, String) -> Unit,
     onReauthenticate: () -> Unit,
+    onOpenStoryAdDestination: (StoryAdDestination) -> Unit,
 ) {
     HingeSafeContent {
         PublicProfileScreen(
             userId = userId,
             repository = repository,
             storiesRepository = storiesRepository,
+            storyAdsRepository = storyAdsRepository,
             executor = executor,
             onBack = onBack,
             onOpenPost = onOpenPost,
             onSearchProfile = onSearchProfile,
             onOpenConnections = onOpenConnections,
             onReauthenticate = onReauthenticate,
+            onOpenStoryAdDestination = onOpenStoryAdDestination,
         )
     }
 }

@@ -18,6 +18,11 @@ sealed interface ChatSearchResult {
     data class Failure(val message: String, val authenticationRequired: Boolean = false) : ChatSearchResult
 }
 
+sealed interface MessagePeopleResult {
+    data class Success(val people: List<ChatSearchPerson>) : MessagePeopleResult
+    data class Failure(val message: String, val authenticationRequired: Boolean = false) : MessagePeopleResult
+}
+
 sealed interface StartConversationResult {
     data class Success(val conversation: InboxConversation) : StartConversationResult
     data class Failure(val message: String, val authenticationRequired: Boolean = false) : StartConversationResult
@@ -29,7 +34,10 @@ internal class ConversationSearchRepository(
     private val transport: ChatThreadTransport,
     private val refreshSessionProvider: () -> AccountSession? = { null },
 ) {
-    companion object { const val MAX_SEARCH_QUERY_LENGTH = 100 }
+    companion object {
+        const val MAX_SEARCH_QUERY_LENGTH = 100
+        private const val PEOPLE_TO_MESSAGE_PAGE_SIZE = 20
+    }
 
     fun search(query: String): ChatSearchResult = try {
         val path = buildConversationSearchPath(query)
@@ -39,6 +47,26 @@ internal class ConversationSearchRepository(
     } catch (error: Exception) {
         ChatSearchResult.Failure(
             error.message ?: "Could not search messages. Check your connection and try again.",
+            authenticationRequired = error is MessagesHttpException && error.statusCode in setOf(401, 403),
+        )
+    }
+
+    /** People-only picker contract used by React Native's New message screen. */
+    fun searchPeopleToMessage(query: String): MessagePeopleResult = try {
+        val cleanQuery = query.trim()
+        require(cleanQuery.length in 1..MAX_SEARCH_QUERY_LENGTH) {
+            "Enter a search between 1 and $MAX_SEARCH_QUERY_LENGTH characters."
+        }
+        val session = sessionProvider() ?: error("Sign in to search for people to message.")
+        val path = buildPeopleToMessageSearchPath(cleanQuery)
+        val payload = requestWithRefresh("GET", path, requireToken(session.accessToken), null)
+        val people = parseSpaceInvitePeople(payload, PEOPLE_TO_MESSAGE_PAGE_SIZE).map { person ->
+            ChatSearchPerson(person.id, person.name, person.avatarUrl, person.username, person.verified)
+        }
+        MessagePeopleResult.Success(people)
+    } catch (error: Exception) {
+        MessagePeopleResult.Failure(
+            error.message ?: "Could not search people. Check your connection and try again.",
             authenticationRequired = error is MessagesHttpException && error.statusCode in setOf(401, 403),
         )
     }
@@ -156,6 +184,7 @@ internal class ConversationSearchRepository(
     }
 
     private fun requireToken(token: String) = token.takeIf(String::isNotBlank) ?: error("Sign in to search your messages.")
+
 }
 
 internal fun buildConversationSearchPath(query: String): String {
@@ -164,6 +193,12 @@ internal fun buildConversationSearchPath(query: String): String {
         "Enter a search between 1 and ${ConversationSearchRepository.MAX_SEARCH_QUERY_LENGTH} characters."
     }
     return "/api/v1/conversations/search?q=${URLEncoder.encode(term, Charsets.UTF_8.name())}"
+}
+
+internal fun buildPeopleToMessageSearchPath(query: String): String {
+    val term = query.trim()
+    require(term.length in 1..100) { "Enter a search between 1 and 100 characters." }
+    return "/api/v1/search/people?q=${URLEncoder.encode(term, Charsets.UTF_8.name()).replace("+", "%20")}&limit=20"
 }
 
 private fun JSONObject.optNullable(key: String): String? = optString(key).takeIf { it.isNotBlank() && it != "null" }

@@ -3,7 +3,6 @@ package com.nantty.android.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,18 +12,10 @@ import androidx.compose.foundation.clickable
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.PrimaryTabRow
@@ -41,10 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nantty.android.R
 import com.nantty.android.data.ConversationPage
@@ -87,6 +76,7 @@ internal fun MessagesScreen(
     onOpenStoryAdDestination: (StoryAdDestination) -> Unit = {},
 ) {
     val searchActionDescription = stringResource(R.string.messages_search_action)
+    val newMessageActionDescription = stringResource(R.string.new_message_action)
     var selectedConversation by remember(repository) { mutableStateOf<InboxConversation?>(null) }
     var result by remember(repository) { mutableStateOf<MessagesResult?>(null) }
     var filter by remember(repository) { mutableStateOf(MessagesFilter.ALL) }
@@ -101,6 +91,7 @@ internal fun MessagesScreen(
     var loadingMore by remember(repository) { mutableStateOf(false) }
     var pageError by remember(repository) { mutableStateOf<String?>(null) }
     var searchMode by remember(repository) { mutableStateOf(false) }
+    var newMessageMode by remember(repository) { mutableStateOf(false) }
     var showCreateChannel by remember(repository) { mutableStateOf(false) }
     var channelName by remember(repository) { mutableStateOf("") }
     var channelDescription by remember(repository) { mutableStateOf("") }
@@ -290,6 +281,21 @@ internal fun MessagesScreen(
         return
     }
 
+    if (newMessageMode) {
+        NewMessagePickerScreen(
+            repository = repository,
+            executor = executor,
+            onBack = { newMessageMode = false },
+            onReauthenticate = onReauthenticate,
+            onOpenConversation = { conversation ->
+                newMessageMode = false
+                selectedConversation = conversation
+                onOpenConversation(conversation)
+            },
+        )
+        return
+    }
+
     if (searchMode) {
         MessagesSearchScreen(
             repository = repository,
@@ -305,45 +311,23 @@ internal fun MessagesScreen(
     }
 
     Column(modifier.fillMaxSize()) {
-        Row(
-            Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(Modifier.weight(1f)) {
-                TextButton(onClick = { folderMenuExpanded = true }) {
-                    Text(folder.label, Modifier.semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                }
-                DropdownMenu(expanded = folderMenuExpanded, onDismissRequest = { folderMenuExpanded = false }) {
-                    MessagesInboxFolder.entries.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(option.label) },
-                            onClick = { folderMenuExpanded = false; selectFolder(option) },
-                            modifier = Modifier.semantics { contentDescription = "${option.label} inbox folder" },
-                        )
-                    }
-                }
-            }
-            TextButton(
-                onClick = { showGroupInvitations = true },
-                modifier = Modifier.semantics { contentDescription = "Open group invitations" },
-            ) { Text("Invites") }
-            ChannelInvitationToolbarActions({ showChannelInvitations = true }, { showChannelLinks = true })
-            IconButton(onClick = { searchMode = true }, modifier = Modifier.semantics { contentDescription = searchActionDescription }) {
-                Icon(Icons.Default.Search, contentDescription = null)
-            }
-            IconButton(
-                onClick = { showCreateChannel = true; createChannelError = null },
-                modifier = Modifier.semantics { contentDescription = "Create broadcast channel" },
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-            }
-            IconButton(onClick = onOpenChatNotificationSettings, modifier = Modifier.semantics { contentDescription = "Chat settings" }) {
-                Icon(Icons.Default.Settings, contentDescription = null)
-            }
-            IconButton(onClick = ::refresh, enabled = !loading, modifier = Modifier.semantics { contentDescription = "Refresh messages" }) {
-                Icon(Icons.Default.Refresh, contentDescription = null)
-            }
-        }
+        MessagesInboxToolbar(
+            folder = folder,
+            folderMenuExpanded = folderMenuExpanded,
+            onFolderMenuExpandedChange = { folderMenuExpanded = it },
+            onSelectFolder = ::selectFolder,
+            onOpenGroupInvitations = { showGroupInvitations = true },
+            onOpenChannelInvitations = { showChannelInvitations = true },
+            onManageChannelLinks = { showChannelLinks = true },
+            onNewMessage = { newMessageMode = true; searchMode = false },
+            newMessageDescription = newMessageActionDescription,
+            onSearch = { searchMode = true },
+            searchDescription = searchActionDescription,
+            onCreateChannel = { showCreateChannel = true; createChannelError = null },
+            onOpenSettings = onOpenChatNotificationSettings,
+            onRefresh = ::refresh,
+            refreshing = loading,
+        )
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         if (folder == MessagesInboxFolder.CHATS) {
             PrimaryTabRow(selectedTabIndex = MessagesFilter.entries.indexOf(filter)) {

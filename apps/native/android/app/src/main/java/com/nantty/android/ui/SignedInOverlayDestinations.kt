@@ -8,6 +8,8 @@ import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.data.StoreRepository
 import com.nantty.android.data.PublicBrandRepository
 import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.StoryAdsRepository
+import com.nantty.android.data.StoryAdDestination
 import com.nantty.android.data.SoundsRepository
 import com.nantty.android.data.CreatorSampleMediaRepository
 import java.util.concurrent.Executor
@@ -33,6 +35,7 @@ internal data class SignedInOverlayDependencies(
     val brandRepository: PublicBrandRepository,
     val messagesRepository: MessagesRepository,
     val storiesRepository: StoriesRepository,
+    val storyAdsRepository: StoryAdsRepository,
     val soundsRepository: SoundsRepository,
     val storyMediaRepository: CreatorSampleMediaRepository,
     val executor: Executor,
@@ -49,6 +52,7 @@ internal data class SignedInOverlayActions(
     val openProduct: (String) -> Unit,
     val backFromProfile: () -> Unit,
     val openProfilePost: (String) -> Unit,
+    val openStoryAdDestination: (StoryAdDestination) -> Unit,
     val searchProfile: (String, String) -> Unit,
     val openConnections: (String, String) -> Unit,
     val openConnectionProfile: (String) -> Unit,
@@ -132,9 +136,11 @@ internal fun SignedInOverlayDestinations(
             userId = profileId,
             repository = dependencies.publicProfileRepository,
             storiesRepository = dependencies.storiesRepository,
+            storyAdsRepository = dependencies.storyAdsRepository,
             executor = dependencies.executor,
             onBack = actions.backFromProfile,
             onOpenPost = actions.openProfilePost,
+            onOpenStoryAdDestination = actions.openStoryAdDestination,
             onSearchProfile = actions.searchProfile,
             onOpenConnections = actions.openConnections,
             onReauthenticate = actions.requireSignIn,
