@@ -5,6 +5,8 @@ import androidx.compose.ui.Modifier
 import com.nantty.android.data.InboxConversation
 import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.StoryAdsRepository
+import com.nantty.android.data.StoryAdDestination
 import java.util.concurrent.Executor
 
 /** Keeps the inbox route wiring outside the cross-feature destination switch. */
@@ -29,6 +31,8 @@ internal fun MessagesDestination(
     onOpenChatNotificationSettings: () -> Unit,
     externalRefreshGeneration: Int,
     storiesRepository: StoriesRepository?,
+    storyAdsRepository: StoryAdsRepository?,
+    onOpenStoryAdDestination: (StoryAdDestination) -> Unit,
 ) {
     MessagesScreen(
         repository = repository,
@@ -50,5 +54,7 @@ internal fun MessagesDestination(
         onOpenChatNotificationSettings = onOpenChatNotificationSettings,
         externalRefreshGeneration = externalRefreshGeneration,
         storiesRepository = storiesRepository,
+        storyAdsRepository = storyAdsRepository,
+        onOpenStoryAdDestination = onOpenStoryAdDestination,
     )
 }

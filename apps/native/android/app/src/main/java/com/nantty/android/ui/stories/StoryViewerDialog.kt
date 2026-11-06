@@ -69,15 +69,16 @@ internal fun StoryViewerDialog(
     repository: StoriesRepository,
     userId: String,
     executor: Executor,
-    adsRepository: StoryAdsRepository?,
-    adSession: StoryAdSession,
+    adsRepository: StoryAdsRepository? = null,
+    adSession: StoryAdSession? = null,
     startAtLast: Boolean = false,
     onClose: () -> Unit,
     onPreviousUser: () -> Unit = {},
     onNextUser: () -> Unit = onClose,
     onReauthenticate: () -> Unit,
-    onOpenAdDestination: (StoryAdDestination) -> Unit,
+    onOpenAdDestination: (StoryAdDestination) -> Unit = {},
 ) {
+    val activeAdSession = adSession ?: remember(repository, userId) { StoryAdSession() }
     var result by remember(repository, userId) { mutableStateOf<StoryFeedResult?>(null) }
     var activeIndex by remember(userId) { mutableIntStateOf(0) }
     var refreshGeneration by remember(userId) { mutableIntStateOf(0) }
@@ -86,10 +87,10 @@ internal fun StoryViewerDialog(
     var deleteStory by remember(userId) { mutableStateOf<StoryItem?>(null) }
     var deletingStory by remember(userId) { mutableStateOf(false) }
     var deleteStoryError by remember(userId) { mutableStateOf<String?>(null) }
-    var sponsoredAd by remember(userId, adSession.sessionId) { mutableStateOf<StoryDecidedAd?>(null) }
+    var sponsoredAd by remember(userId, activeAdSession.sessionId) { mutableStateOf<StoryDecidedAd?>(null) }
     val reportRepository = remember(repository) { ProductReportRepository(accessTokenProvider = repository::currentAccessToken) }
     val requestGeneration = remember(repository) { AtomicInteger() }
-    val sessionOffset = remember(userId, adSession.sessionId) { adSession.viewedCount }
+    val sessionOffset = remember(userId, activeAdSession.sessionId) { activeAdSession.viewedCount }
     DisposableEffect(repository) {
         onDispose { requestGeneration.incrementAndGet() }
     }
@@ -110,18 +111,18 @@ internal fun StoryViewerDialog(
     val stories = (result as? StoryFeedResult.Success)?.stories.orEmpty()
     val story = stories.getOrNull(activeIndex)
 
-    LaunchedEffect(stories, sessionOffset, adsRepository, adSession.sessionId) {
+    LaunchedEffect(stories, sessionOffset, adsRepository, activeAdSession.sessionId) {
         val ads = adsRepository ?: return@LaunchedEffect
-        val sessionId = adSession.sessionId
+        val sessionId = activeAdSession.sessionId
         storyAdSlotsForStories(sessionOffset, stories.size).forEach { slot ->
             val storyIndex = slot - sessionOffset - 1
             val target = stories.getOrNull(storyIndex) ?: return@forEach
-            if (!adSession.requestSlotOnce(slot)) return@forEach
+            if (!activeAdSession.requestSlotOnce(slot)) return@forEach
             val neighbours = listOfNotNull(stories.getOrNull(storyIndex - 1)?.id, stories.getOrNull(storyIndex + 1)?.id).take(10)
-            val slotsSinceLastAd = storySlotsSinceLastAd(slot, adSession.lastAdViewedAt)
+            val slotsSinceLastAd = storySlotsSinceLastAd(slot, activeAdSession.lastAdViewedAt)
             executor.execute {
                 when (val decision = ads.decideStoryAd(target.id, sessionId, slotsSinceLastAd, neighbours, slot)) {
-                    is StoryAdDecisionResult.Success -> decision.ad?.let { adSession.cacheAd(slot, it, sessionId) }
+                    is StoryAdDecisionResult.Success -> decision.ad?.let { activeAdSession.cacheAd(slot, it, sessionId) }
                     is StoryAdDecisionResult.Failure -> if (decision.authenticationRequired) onReauthenticate()
                 }
             }
@@ -139,9 +140,9 @@ internal fun StoryViewerDialog(
             return
         }
         val slot = sessionOffset + activeIndex + 1
-        val ad = adSession.adsBySlot[slot]
+        val ad = activeAdSession.adsBySlot[slot]
         val adNotExpired = ad?.let { runCatching { Instant.parse(it.expiresAt).toEpochMilli() > System.currentTimeMillis() }.getOrDefault(false) } == true
-        if (ad != null && adNotExpired && !adSession.hasViewedAd(slot) && adSession.markAdViewed(slot)) {
+        if (ad != null && adNotExpired && !activeAdSession.hasViewedAd(slot) && activeAdSession.markAdViewed(slot)) {
             sponsoredAd = ad
         } else {
             advancePastCurrentStory()
@@ -151,7 +152,7 @@ internal fun StoryViewerDialog(
     val advanceLatest by rememberUpdatedState(newValue = { advanceStoryOrShowAd() })
     LaunchedEffect(story?.id) {
         if (story == null || story.seen) return@LaunchedEffect
-        adSession.recordStoryViewed()
+        activeAdSession.recordStoryViewed()
         executor.execute {
             val seenResult = repository.markSeen(story.id)
             if (seenResult is StorySeenResult.Failure && seenResult.authenticationRequired) {

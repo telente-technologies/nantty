@@ -35,6 +35,7 @@ import com.nantty.android.data.SellerShipmentRepository
 import com.nantty.android.data.StoreRepository
 import com.nantty.android.data.SupportTicketRepository
 import com.nantty.android.data.WalletRepository
+import com.nantty.android.data.StoryAdsRepository
 
 /** Session-scoped data dependencies shared by the signed-in app destinations. */
 internal data class SignedInRepositories(
@@ -67,6 +68,7 @@ internal data class SignedInRepositories(
     val chatNotificationSettings: ChatNotificationSettingsRepository,
     val supportTickets: SupportTicketRepository,
     val clipWatchTracking: ClipWatchTrackingRepository,
+    val storyAds: StoryAdsRepository,
     val clips: ClipsRepository,
 )
 
@@ -154,6 +156,12 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
         )
     }
     val clips = remember(sessionRepository) { ClipsRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val storyAds = remember(sessionRepository) {
+        StoryAdsRepository(
+            sessionProvider = sessionRepository::sessionOrNull,
+            refreshSessionProvider = sessionRepository::refreshSession,
+        )
+    }
 
     return remember(
         wallet,
@@ -185,6 +193,7 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
         chatNotificationSettings,
         supportTickets,
         clipWatchTracking,
+        storyAds,
         clips,
     ) {
         SignedInRepositories(
@@ -217,6 +226,7 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
             chatNotificationSettings,
             supportTickets,
             clipWatchTracking,
+            storyAds,
             clips,
         )
     }

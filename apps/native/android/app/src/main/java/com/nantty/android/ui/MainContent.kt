@@ -1,5 +1,7 @@
 package com.nantty.android.ui
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.selected
@@ -63,6 +66,8 @@ import com.nantty.android.data.StoreRepository
 import com.nantty.android.data.SupportTicketRepository
 import com.nantty.android.data.SpacesRepository
 import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.StoryAdsRepository
+import com.nantty.android.data.StoryAdDestination
 import com.nantty.android.data.WalletRepository
 import java.util.concurrent.Executor
 
@@ -159,6 +164,7 @@ internal fun MainContent(
     clipsRepository: ClipsRepository? = null,
     clipWatchTrackingRepository: ClipWatchTrackingRepository = ClipWatchTrackingRepository(sessionProvider = { null }),
     storiesRepository: StoriesRepository? = null,
+    storyAdsRepository: StoryAdsRepository? = null,
     postDetailRepository: PostDetailRepository? = null,
     spacesAccessToken: String? = null,
     spacesViewerId: String? = null,
@@ -185,6 +191,7 @@ internal fun MainContent(
     onOpenBusinessTools: () -> Unit = {},
     businessContent: (@Composable () -> Unit)? = null,
 ) {
+    val context = LocalContext.current
     if (destination == Destination.Live && liveSessionsRepository != null && liveCoinTipRepository != null && ioExecutor != null && initialLiveId != null) {
         com.nantty.android.ui.live.LiveWatchScreen(
             liveId = initialLiveId,
@@ -317,6 +324,21 @@ internal fun MainContent(
             onInitialChannelInvitationTokenHandled = onInitialChannelInvitationTokenHandled,
             onOpenChatNotificationSettings = onOpenChatNotificationSettings,
             externalRefreshGeneration = messagesRefreshGeneration, storiesRepository = storiesRepository,
+            storyAdsRepository = storyAdsRepository,
+            onOpenStoryAdDestination = { adDestination ->
+                val id = adDestination.targetId?.takeIf(String::isNotBlank)
+                when (adDestination.type) {
+                    "product" -> id?.let(onOpenProduct)
+                    "store" -> id?.let(onOpenStore)
+                    "post" -> id?.let(onOpenPost)
+                    "profile" -> id?.let(onOpenProfile)
+                    "url" -> adDestination.url?.let { rawUrl ->
+                        val safeUrl = runCatching { Uri.parse(rawUrl) }.getOrNull()
+                            ?.takeIf { it.scheme.equals("https", ignoreCase = true) && !it.host.isNullOrBlank() }
+                        safeUrl?.let { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, it)) } }
+                    }
+                }
+            },
         )
         return
     }

@@ -255,6 +255,7 @@ internal fun SignedInApp(
                 brandRepository = publicBrandRepository,
                 messagesRepository = messagesRepository,
                 storiesRepository = storiesRepository,
+                storyAdsRepository = repositories.storyAds,
                 soundsRepository = soundsRepository,
                 storyMediaRepository = privateMediaUploadsRepository,
                 executor = executor,
