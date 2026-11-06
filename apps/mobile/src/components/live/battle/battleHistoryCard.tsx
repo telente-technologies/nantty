@@ -46,7 +46,7 @@ export function BattleHistoryCard({ battle, onDismiss }: { battle: LiveBattle; o
       {battle.mvpGifter ? (
         <IconRow icon={<Star16Icon size={12} color={liveGlass.inkMuted} />}>
           <Text size={11} lineHeight={14} color={liveGlass.inkMuted}>
-            MVP supporter: @{battle.mvpGifter.user.username}
+            Top coin supporter: @{battle.mvpGifter.user.username}
           </Text>
         </IconRow>
       ) : null}

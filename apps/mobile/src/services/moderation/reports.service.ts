@@ -34,6 +34,8 @@ export interface LiveReportContext {
 export interface NewReportInput {
   readonly targetType: ReportTargetType;
   readonly targetId: ID;
+  /** Required by the moderation API when targetType is user. */
+  readonly reportedUserId?: ID;
   readonly reason: ReportReason | LiveReportReason;
   readonly details: string;
   readonly liveContext?: LiveReportContext;

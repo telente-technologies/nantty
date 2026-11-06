@@ -2,6 +2,8 @@ import { api, generateIdempotencyKey } from "./core/apiClient.service";
 
 export type SpaceState = "live" | "scheduled" | "ended" | "cancelled";
 export type SpaceRole = "host" | "moderator" | "speaker" | "listener";
+export type SpaceInviteRole = "listener" | "speaker" | "cohost";
+export type SpaceInvitationRole = "listener" | "speaker" | "moderator" | "cohost";
 export type SpaceVisibility = "public" | "followers" | "subscribers" | "invite_only";
 
 export interface SpacePerson {
@@ -41,6 +43,21 @@ export interface SpacePage {
   readonly nextCursor: string | null;
 }
 
+export interface SpaceInvitation {
+  readonly spaceId: string;
+  readonly invitationId: string;
+  readonly role: SpaceInvitationRole;
+  readonly title?: string;
+  readonly invitedAt: string;
+  readonly inviterId: string;
+  readonly space: SpaceSummary;
+}
+
+export interface SpaceInvitationPage {
+  readonly data: readonly SpaceInvitation[];
+  readonly nextCursor: string | null;
+}
+
 /** Short-lived, audio-only LiveKit grant returned by POST /spaces/:id/join. */
 export interface SpaceJoinGrant {
   readonly demo?: boolean;
@@ -56,6 +73,7 @@ export interface CreateSpaceInput {
   readonly title: string;
   readonly description?: string;
   readonly audiencePolicy: SpaceVisibility;
+  readonly giftsEnabled: boolean;
   readonly scheduledAt?: string;
 }
 
@@ -64,7 +82,13 @@ const pathFor = (spaceId: string) => `/api/v1/spaces/${encodeURIComponent(spaceI
 
 export const spacesService = {
   list: (cursor?: string) => api.getPage<SpaceSummary>("/api/v1/spaces", { state: "live,upcoming", cursor, limit: 30 }),
+  listInvitations: (cursor?: string) => api.getPage<SpaceInvitation>("/api/v1/spaces/invitations", { limit: 30, cursor }),
+  acceptInvitation: (spaceId: string, invitationId: string) =>
+    api.post<void>(`${pathFor(spaceId)}/invites/${encodeURIComponent(invitationId)}/accept`, undefined, mutationOptions()),
+  declineInvitation: (spaceId: string, invitationId: string) =>
+    api.post<void>(`${pathFor(spaceId)}/invites/${encodeURIComponent(invitationId)}/decline`, undefined, mutationOptions()),
   create: ({ audiencePolicy, ...input }: CreateSpaceInput, key = generateIdempotencyKey()) => api.post<SpaceSummary>("/api/v1/spaces", { ...input, visibility: audiencePolicy }, { idempotencyKey: key }),
+  setCoinDonations: (spaceId: string, enabled: boolean) => api.patch<{ spaceId: string; giftsEnabled: boolean }>(`${pathFor(spaceId)}/coin-donations`, { enabled }, { idempotencyKey: generateIdempotencyKey() }),
   detail: (spaceId: string) => api.get<SpaceDetails>(pathFor(spaceId)),
   join: (spaceId: string) => api.post<SpaceJoinGrant>(`${pathFor(spaceId)}/join`, undefined, mutationOptions()),
   leave: (spaceId: string) => api.post<void>(`${pathFor(spaceId)}/leave`, undefined, mutationOptions()),
@@ -78,7 +102,12 @@ export const spacesService = {
   end: (spaceId: string) => api.post<void>(`${pathFor(spaceId)}/end`, undefined, { idempotencyKey: generateIdempotencyKey() }),
   cancel: (spaceId: string) => api.post<void>(`${pathFor(spaceId)}/cancel`, undefined, { idempotencyKey: generateIdempotencyKey() }),
   announce: (spaceId: string, title: string, url: string) => api.post<{ id: string }>("/api/v1/posts", { text: `Join my Space: ${title}\n${url}`, audience: "everyone", mediaIds: [] }, { idempotencyKey: `space-announcement-${spaceId}` }),
-  sendGift: (spaceId: string, giftId: string, idempotencyKey: string) => api.post(`${pathFor(spaceId)}/gifts`, { giftId, quantity: 1 }, { idempotencyKey }),
+  sendCoinDonation: (spaceId: string, coins: number, idempotencyKey: string) => api.post<{ id: string; hostUserId: string; totalCoins: number; senderCoinBalance: number }>(`${pathFor(spaceId)}/coin-donations`, { coins }, { idempotencyKey }),
   attachAnnouncement: (spaceId: string, postId: string) => api.post(`${pathFor(spaceId)}/announcement`, { postId }, { idempotencyKey: `space-attachment-${postId}` }),
-  invite: (spaceId: string, accountId: string) => api.post<void>(`${pathFor(spaceId)}/invites`, { accountId }, mutationOptions()),
+  invite: (spaceId: string, accountId: string, role: SpaceInviteRole = "listener", title?: string) =>
+    api.post<void>(`${pathFor(spaceId)}/invites`, {
+      accountId,
+      role,
+      ...(title?.trim() ? { title: title.trim() } : {}),
+    }, mutationOptions()),
 };

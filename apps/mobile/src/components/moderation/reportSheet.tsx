@@ -45,7 +45,13 @@ export function ReportSheet({ target, onClose }: ReportSheetProps) {
   const submitReport = useMutation({
     mutationFn: () =>
       reportsService.submitReportForContent(
-        { targetType: target!.targetType, targetId: target!.targetId, reason: selectedReason!, details: details.trim() },
+        {
+          targetType: target!.targetType,
+          targetId: target!.targetId,
+          ...(target!.targetType === "user" ? { reportedUserId: target!.targetId } : {}),
+          reason: selectedReason!,
+          details: details.trim(),
+        },
         idempotencyKeyForThisReport.current,
       ),
   });

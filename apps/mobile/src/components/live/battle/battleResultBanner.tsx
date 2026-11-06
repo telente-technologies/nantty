@@ -53,7 +53,7 @@ export function BattleResultBanner({ battle }: { battle: LiveBattle }) {
       {battle.mvpGifter ? (
         <IconRow icon={<Star16Icon size={14} color={liveAccent.goldInk} />} justify="center">
           <Text size={12} lineHeight={16} color={liveAccent.goldInk} align="center" style={{ flexShrink: 1 }}>
-            MVP supporter: @{battle.mvpGifter.user.username} ({battle.mvpGifter.coins.toLocaleString("en-US")} coins)
+            Top coin supporter: @{battle.mvpGifter.user.username} ({battle.mvpGifter.coins.toLocaleString("en-US")} coins)
           </Text>
         </IconRow>
       ) : null}

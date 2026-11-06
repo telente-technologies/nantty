@@ -1,7 +1,7 @@
 import type { LiveMonetizationInput } from "@/types/socialGraph.type";
 import type { LiveCategory, LiveComment, LiveSessionDetails, Page, SuggestedLive, UserSummary } from "@/types";
 
-import { api } from "../core/apiClient.service";
+import { api, generateIdempotencyKey } from "../core/apiClient.service";
 
 export interface LiveHostHeartbeat {
   readonly liveId: string;
@@ -12,6 +12,8 @@ export interface LiveHostHeartbeat {
 
 export const liveService = {
   fetchLiveSessionById: (liveId: string) => api.get<LiveSessionDetails>(`/api/v1/lives/${liveId}`),
+  setCoinSupport: (liveId: string, enabled: boolean, idempotencyKey = generateIdempotencyKey()) =>
+    api.patch<{ readonly liveId: string; readonly giftsEnabled: boolean }>(`/api/v1/lives/${liveId}/coin-support`, { enabled }, { idempotencyKey }),
   joinLiveSession: (liveId: string) => api.post<void>(`/api/v1/lives/${liveId}/join`),
   leaveLiveSession: (liveId: string) => api.post<void>(`/api/v1/lives/${liveId}/leave`),
   fetchLiveComments: (liveId: string, cursor?: string) => api.get<Page<LiveComment>>(`/api/v1/lives/${liveId}/comments`, { cursor }),

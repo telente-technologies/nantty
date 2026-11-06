@@ -16,7 +16,7 @@ export interface LiveHostingGateProps {
 const gateCopy = {
   expoGo: {
     title: "Going live needs the Nantty app build",
-    body: "Expo Go can't stream live video, so going live is switched off here. Watching lives, chat and gifts still work.",
+    body: "Expo Go can't stream live video, so going live is switched off here. Watching lives, chat and coin support still work.",
     note: "Developers: install a development build (eas build --profile development) and open the project in it to go live.",
   },
   web: {

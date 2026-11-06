@@ -11,6 +11,7 @@ export interface SenderBehaviorMetadata {
 
 export let chatSettingsState: ChatSettings = {
   messageRequestsFrom: "everyone",
+  preventDirectGroupAdds: false,
   notifications: { messages: true, requests: true, groups: true, streakReminders: true, showMessagePreview: true },
 };
 

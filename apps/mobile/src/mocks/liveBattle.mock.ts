@@ -1,8 +1,7 @@
 import { ApiError } from "@/errors/api.error";
-import type { CreateLiveBattleInput, SendLiveBattleGiftInput } from "@/types/liveStage.type";
+import type { CreateLiveBattleInput, SendLiveBattleCoinsInput } from "@/types/liveStage.type";
 
-import { creditBattleGiftToParticipant, describeMockBattleStateAt, finishMockBattleEarly } from "./liveBattleEngine.mock";
-import { describeGiftGlyph, readMockGiftCatalog } from "./liveStageSeeds.mock";
+import { creditBattleCoinsToParticipant, describeMockBattleStateAt, finishMockBattleEarly } from "./liveBattleEngine.mock";
 import {
   findMockStageByBattleIdOrThrow,
   findOrCreateMockStageAdvancedToNow,
@@ -60,19 +59,13 @@ export const liveBattleMocks: MockRoute[] = [
     finishMockBattleEarly(stage.battle, Date.now(), "hostEnded");
     return serializeMockStage(findOrCreateMockStageAdvancedToNow(stage.liveId));
   }),
-  createMockRoute("POST", "/api/v1/battles/:battleId/gifts", ({ params, body }) => {
+  createMockRoute("POST", "/api/v1/battles/:battleId/coins", ({ params, body }) => {
     const stage = findMockStageByBattleIdOrThrow(params.battleId!);
     const battle = stage.battle;
-    const input = body as SendLiveBattleGiftInput;
-    const gift = readMockGiftCatalog().find((candidate) => candidate.id === input.giftId);
-    if (!gift) throw new ApiError(404, "Gift not found");
-    if (battle?.id === params.battleId && describeMockBattleStateAt(battle, Date.now()) === "active") {
-      creditBattleGiftToParticipant(
-        battle,
-        { sender: signedInMockUserSummary(), recipientUserId: input.recipientUserId, giftEmoji: describeGiftGlyph(gift), coins: gift.priceCoins * input.quantity },
-        stage.recentBattleGifts,
-      );
-    }
+    const input = body as SendLiveBattleCoinsInput;
+    if (!Number.isSafeInteger(input.coins) || input.coins <= 0) throw new ApiError(400, "Enter a positive whole number of coins.");
+    if (battle?.id === params.battleId && describeMockBattleStateAt(battle, Date.now()) === "active")
+      creditBattleCoinsToParticipant(battle, { sender: signedInMockUserSummary(), recipientUserId: input.recipientUserId, coins: input.coins });
     return serializeMockStage(stage);
   }),
   ...(["accept", "decline"] as const).map((consent) =>

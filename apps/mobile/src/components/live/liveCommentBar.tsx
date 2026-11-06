@@ -1,13 +1,13 @@
 import { useState, type ReactNode } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from "react-native";
 
-import { Coin24Icon, Gift24Icon, PaperPlaneTilt24Icon, Smiley24Icon, ViewProducts24Icon } from "@/components/icons";
+import { Coin24Icon, PaperPlaneTilt24Icon, Smiley24Icon, ViewProducts24Icon } from "@/components/icons";
 import { ComposerSlot } from "@/components/ui/composerSlot";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import { useTheme } from "@/theme";
 import { hasSendableContent } from "@/utils/sendableContent.util";
 
-import { liveAccent, useLiveForeground } from "./liveSurface.constant";
+import { useLiveForeground } from "./liveSurface.constant";
 
 const LIVE_COMMENT_MAX_LENGTH = 200;
 
@@ -15,7 +15,6 @@ export interface LiveCommentBarProps {
   readonly onSend: (text: string) => void;
   readonly onToggleReactions: () => void;
   readonly onPressProducts?: () => void;
-  readonly onPressGift?: () => void;
   readonly onPressTip?: () => void;
   readonly isShownOverVideo?: boolean;
   readonly isSending?: boolean;
@@ -36,7 +35,7 @@ function RoundAction({ label, onPress, background, border, children }: { label: 
   );
 }
 
-export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onPressGift, onPressTip, isShownOverVideo = true, isSending = false, hideComposer = false }: LiveCommentBarProps) {
+export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onPressTip, isShownOverVideo = true, isSending = false, hideComposer = false }: LiveCommentBarProps) {
   const [text, setText] = useState("");
   const { colors, isDark } = useTheme();
   const foreground = useLiveForeground(isShownOverVideo);
@@ -88,13 +87,8 @@ export function LiveCommentBar({ onSend, onToggleReactions, onPressProducts, onP
         )}
       </View>
       )}
-      {onPressGift ? (
-        <RoundAction label="Send a gift" onPress={onPressGift} background={liveAccent.gold}>
-          <Gift24Icon size={20} color={liveAccent.goldInk} />
-        </RoundAction>
-      ) : null}
       {onPressTip ? (
-        <RoundAction label="Tip the host with coins" onPress={onPressTip} background={foreground.chip} border={foreground.chipBorder}>
+        <RoundAction label="Donate coins to the host" onPress={onPressTip} background={foreground.chip} border={foreground.chipBorder}>
           <Coin24Icon size={20} />
         </RoundAction>
       ) : null}

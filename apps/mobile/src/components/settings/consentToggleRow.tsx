@@ -7,10 +7,11 @@ export interface ConsentToggleRowProps {
   readonly label: string;
   readonly description: string;
   readonly enabled: boolean;
+  readonly disabled?: boolean;
   readonly onChange: (enabled: boolean) => void;
 }
 
-export function ConsentToggleRow({ label, description, enabled, onChange }: ConsentToggleRowProps) {
+export function ConsentToggleRow({ label, description, enabled, disabled = false, onChange }: ConsentToggleRowProps) {
   const { colors } = useTheme();
   return (
     <View style={styles.row}>
@@ -21,6 +22,7 @@ export function ConsentToggleRow({ label, description, enabled, onChange }: Cons
       <Switch
         accessibilityLabel={label}
         value={enabled}
+        disabled={disabled}
         onValueChange={onChange}
         trackColor={{ true: colors.primary, false: colors.divider }}
       />

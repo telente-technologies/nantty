@@ -35,7 +35,7 @@ const MAXIMUM_IMAGE_BYTES_BEFORE_COMPRESSION = 40 * MEGABYTE;
 const MAXIMUM_VIDEO_BYTES_BY_PURPOSE: Record<MediaUploadPurpose, number> = {
   post: 1024 * MEGABYTE,
   clip: 512 * MEGABYTE,
-  story: 300 * MEGABYTE,
+  story: 100 * MEGABYTE,
   chat: 200 * MEGABYTE,
   product: 300 * MEGABYTE,
   avatar: 0,

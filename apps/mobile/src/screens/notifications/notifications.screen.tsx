@@ -47,6 +47,7 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
     const clipId = notification.data?.clipId ?? (reference?.kind === "clip" ? reference.id : undefined);
     const postId = notification.data?.postId ?? (reference?.kind === "post" ? reference.id : undefined);
     if (notification.kind === "followRequest") return navigation.navigate("FollowRequests");
+    if (notification.data?.screen === "GroupInvitations") return navigation.navigate("GroupInvitations");
     if (notification.kind === "followRequestAccepted" && notification.actor) {
       void queryClient.invalidateQueries({ queryKey: ["users", notification.actor.id] });
       return navigation.navigate("UserProfile", { userId: notification.actor.id });

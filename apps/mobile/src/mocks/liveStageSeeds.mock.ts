@@ -1,4 +1,4 @@
-import type { LiveGift, LiveSessionDetails, UserSummary } from "@/types";
+import type { LiveSessionDetails, UserSummary } from "@/types";
 import type {
   GuestSlot,
   LiveBattle,
@@ -14,7 +14,6 @@ import type {
 } from "@/types/liveStage.type";
 
 import { buildMockUserSummary } from "./fixtures.mock";
-import { giftsMocks } from "./gifts.mock";
 import { liveMocks } from "./live.mock";
 import type { MockRoute } from "./registry.mock";
 
@@ -126,32 +125,6 @@ const invokeMockGetRoute = <T>(routes: readonly MockRoute[], path: string, param
 };
 
 export const readMockLiveSession = (liveId: string) => invokeMockGetRoute<LiveSessionDetails>(liveMocks, "/api/v1/lives/:liveId", { liveId });
-export const readMockGiftCatalog = (): LiveGift[] => {
-  const catalog = invokeMockGetRoute<LiveGift[] | { data: LiveGift[] }>(giftsMocks, "/api/v1/gifts", {});
-  return Array.isArray(catalog) ? catalog : catalog.data;
-};
-
-export const describeGiftGlyph = (gift: LiveGift) => (gift as LiveGift & { emoji?: string }).emoji ?? "🎁";
-
-export const SIMULATED_GIFT_WEIGHTS: Readonly<Record<string, number>> = {
-  gift_rose: 40,
-  gift_jollof: 25,
-  gift_heart: 18,
-  gift_crown: 10,
-  gift_rocket: 5,
-  gift_lion: 2,
-};
-
-export const pickWeightedSimulatedGift = (random: () => number) => {
-  const catalog = readMockGiftCatalog();
-  const total = catalog.reduce((sum, gift) => sum + (SIMULATED_GIFT_WEIGHTS[gift.id] ?? 1), 0);
-  let roll = random() * total;
-  for (const gift of catalog) {
-    roll -= SIMULATED_GIFT_WEIGHTS[gift.id] ?? 1;
-    if (roll <= 0) return gift;
-  }
-  return catalog[0]!;
-};
 
 export const isMockCreatorProgramMember = (user: UserSummary) => user.isCreator === true || Math.abs(hashTextToSeed(user.id)) % 3 !== 0;
 

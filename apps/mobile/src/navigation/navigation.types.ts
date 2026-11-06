@@ -84,6 +84,8 @@ export type MainStackParamList = {
   SellerOrders: undefined;
   SellerOrderDetail: { orderId: string };
   Chat: { conversationId?: string; userId?: string; storeId?: string; name: string; messageId?: string };
+  GroupInvitations: { token?: string } | undefined;
+  ChannelInvitations: { token?: string } | undefined;
   NewMessage: undefined;
   NewGroup: { kind: "group" | "channel" };
   ConversationInfo: { conversationId: string };

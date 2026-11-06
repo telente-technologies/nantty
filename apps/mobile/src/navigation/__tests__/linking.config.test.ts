@@ -46,6 +46,12 @@ test("a quote deep link opens the normal composer with the quoted post attached"
   expect(route.params).toMatchObject({ mode: "post", quotePostId: "post_42" });
 });
 
+test("channel invitation deep links open the consent inbox with an encoded token", () => {
+  const token = "opaque-token-with-safe-characters";
+  const state = getStateFromPath(`channels/invitations/${encodeURIComponent(token)}`, deepLinking.config) as { routes: { name: string; params?: Record<string, unknown> }[] };
+  expect(state.routes.at(-1)).toMatchObject({ name: "ChannelInvitations", params: { token } });
+});
+
 test("an emailed offer link opens the web claim hand-off instead of a profile", () => {
   expect(focusedRouteNames("offer/Xq3v0mZp9bT2nR8kL5wA7cD1eF4gH6jK0lM2nP4qR6s")).toEqual(["SubscriptionOffer"]);
 });
@@ -59,6 +65,12 @@ test("a creator's affiliate link opens the exact product and keeps the link id f
 
 test("the creator affiliate workspace has its own link", () => {
   expect(focusedRouteNames("creator/affiliates")).toEqual(["CreatorAffiliates"]);
+});
+
+test("a group invitation link opens the invitation screen with its opaque token", () => {
+  const token = "A".repeat(43);
+  const state = getStateFromPath(`chats/invitations/${token}`, deepLinking.config) as { routes: { name: string; params?: Record<string, string> }[] };
+  expect(state.routes.at(-1)).toMatchObject({ name: "GroupInvitations", params: { token } });
 });
 
 test("web creator application and post analytics links resolve to their mobile screens", () => {

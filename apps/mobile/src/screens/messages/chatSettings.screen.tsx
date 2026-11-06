@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 
 import { ChatLockGate } from "@/components/chatSafety/chatLockGate";
 import { useChatSettingsQuery, useUpdateChatSettingsMutation } from "@/components/chatSafety/chatSettings.hook";
+import { GroupInvitationPrivacyRow } from "@/components/chatSafety/groupInvitationPrivacyRow";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { ErrorState } from "@/components/ui/errorState";
@@ -50,6 +51,14 @@ export function ChatSettingsScreen() {
                   onPress={() => updateSettings.mutate({ messageRequestsFrom: option.value })}
                 />
               ))}
+            </SettingsGroup>
+            <SettingsGroup>
+              <GroupInvitationPrivacyRow
+                enabled={settings.data.preventDirectGroupAdds}
+                disabled={updateSettings.isPending}
+                hasError={updateSettings.isError}
+                onChange={(value) => updateSettings.mutate({ preventDirectGroupAdds: value })}
+              />
             </SettingsGroup>
             <SettingsGroup>
               <SettingsRow label="Chat passcode" trailing={{ text: isPasscodeSet ? "On" : "Off", color: isPasscodeSet ? colors.primary : colors.textSubtle }} onPress={() => navigation.navigate("ChatPasscode")} />

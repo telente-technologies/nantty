@@ -58,7 +58,7 @@ export function BattleSetupSheet(props: BattleSetupSheetProps) {
     >
       <View style={styles.body}>
         <Text size={13} lineHeight={18} color={colors.textMuted}>
-          Viewers tap a streamer on stage to send them gifts. Every coin gifted adds to that streamer's score. Highest score when the timer ends wins.
+          Viewers can contribute coins to a participant during the battle. Contributions add to that participant's score; the highest score when the timer ends wins.
         </Text>
         <Text size={14} weight={600} lineHeight={17}>
           Who's battling ({selectedUserIds.length})
@@ -99,8 +99,8 @@ export function BattleSetupSheet(props: BattleSetupSheetProps) {
             </Text>
             <Text size={12} lineHeight={17} color={colors.textMuted}>
               {isWinnerTakesAll
-                ? "On: when the battle ends, every coin gifted to the other streamers during the battle goes to the winner. Every guest must accept first; if anyone declines, you can run a normal battle or cancel. A draw means everyone keeps their own coins."
-                : "Off (default): every streamer keeps the coins gifted to them, win or lose."}
+                ? "On: when the battle ends, every coin contributed to the other participants during the battle goes to the winner. Every guest must accept first; if anyone declines, you can run a normal battle or cancel. A draw means everyone keeps their own coins."
+                : "Off (default): every participant keeps the coins contributed to them, win or lose."}
             </Text>
           </View>
           <Switch
@@ -112,7 +112,7 @@ export function BattleSetupSheet(props: BattleSetupSheetProps) {
           />
         </View>
         <Text size={12} lineHeight={17} color={colors.textMuted}>
-          Anyone who leaves mid-battle forfeits and can't win. They keep their coins unless winner takes all is on. Guests outside the Creator Program can battle, but their coins are paid to you.
+          Anyone who leaves mid-battle forfeits and can't win. They keep their coins unless winner takes all is on. Contributions for guests outside the Creator Program are paid to you.
         </Text>
         {props.errorMessage ? (
           <Text size={12} lineHeight={16} color={colors.error} accessibilityLiveRegion="polite">

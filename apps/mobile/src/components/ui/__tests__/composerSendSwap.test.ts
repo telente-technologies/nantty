@@ -53,4 +53,14 @@ describe("LiveCommentBar", () => {
     expect(onSend).toHaveBeenCalledWith("🔥");
     expect(screen.getByLabelText("Reactions")).toBeTruthy();
   });
+
+  test("offers coin donation without a virtual-gift action", async () => {
+    await render(createElement(LiveCommentBar, {
+      onSend: jest.fn(),
+      onToggleReactions: jest.fn(),
+      onPressTip: jest.fn(),
+    }));
+    expect(screen.getByLabelText("Donate coins to the host")).toBeTruthy();
+    expect(screen.queryByLabelText("Send a gift")).toBeNull();
+  });
 });

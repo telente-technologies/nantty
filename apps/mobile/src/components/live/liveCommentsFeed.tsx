@@ -11,7 +11,7 @@ import { palette } from "@/constants/colors.constant";
 import { useTheme } from "@/theme";
 import type { LiveComment } from "@/types";
 
-import { liveGlass, useLiveForeground, type LiveForeground } from "./liveSurface.constant";
+import { useLiveForeground, type LiveForeground } from "./liveSurface.constant";
 
 const VISIBLE_COMMENT_COUNT = 12;
 const FEED_MAX_HEIGHT = 232;
@@ -20,10 +20,6 @@ const FADED_ROW_OPACITIES = [0.35, 0.6, 0.85];
 const describeSystemComment = (comment: LiveComment): string | null => {
   if (comment.kind === "joined") return "joined";
   if (comment.kind === "follow") return "followed the host";
-  if (comment.kind === "gift" && comment.gift) {
-    const quantityPrefix = comment.gift.quantity > 1 ? `${comment.gift.quantity} × ` : "";
-    return `sent ${quantityPrefix}${comment.gift.name}`;
-  }
   return null;
 };
 
@@ -34,16 +30,11 @@ function CommentTextWithMentions({ text, ink, mentionInk }: { text: string; ink:
 }
 
 function SystemRow({ comment, foreground }: { comment: LiveComment; foreground: LiveForeground }) {
-  const isGift = comment.kind === "gift";
   return (
-    <View style={[styles.systemRow, isGift ? styles.giftRow : { backgroundColor: foreground.chip }]}>
-      {isGift && comment.gift ? (
-        <Text size={16} lineHeight={20}>{comment.gift.emoji}</Text>
-      ) : (
-        <Avatar uri={comment.author.avatarUrl} size={18} />
-      )}
-      <Text size={12} lineHeight={16} color={isGift ? "#1A1400" : foreground.inkMuted} style={styles.flexText} numberOfLines={2}>
-        <Text size={12} weight={600} lineHeight={16} color={isGift ? "#1A1400" : foreground.ink}>
+    <View style={[styles.systemRow, { backgroundColor: foreground.chip }]}>
+      <Avatar uri={comment.author.avatarUrl} size={18} />
+      <Text size={12} lineHeight={16} color={foreground.inkMuted} style={styles.flexText} numberOfLines={2}>
+        <Text size={12} weight={600} lineHeight={16} color={foreground.ink}>
           {comment.author.username}
         </Text>{" "}
         {describeSystemComment(comment)}
@@ -79,7 +70,7 @@ export function LiveCommentsFeed({ comments, isShownOverVideo }: LiveCommentsFee
   const foreground = useLiveForeground(isShownOverVideo);
   const { colors } = useTheme();
   const reduceMotion = useReducedMotionPreference();
-  const visibleComments = comments.slice(-VISIBLE_COMMENT_COUNT);
+  const visibleComments = comments.filter((comment) => comment.kind !== "gift").slice(-VISIBLE_COMMENT_COUNT);
   const fadeStartsAt = visibleComments.length > 5 ? 0 : FADED_ROW_OPACITIES.length;
   const mentionInk = isShownOverVideo ? palette.primary[100] : colors.link;
   return (
@@ -93,7 +84,7 @@ export function LiveCommentsFeed({ comments, isShownOverVideo }: LiveCommentsFee
     >
       {visibleComments.map((comment, index) => {
         const rowOpacity = index >= fadeStartsAt && index < FADED_ROW_OPACITIES.length ? FADED_ROW_OPACITIES[index] : 1;
-        const isSystemRow = comment.kind === "joined" || comment.kind === "gift" || comment.kind === "follow";
+        const isSystemRow = comment.kind === "joined" || comment.kind === "follow";
         return (
           <Animated.View key={comment.id} entering={reduceMotion ? undefined : FadeInDown.duration(220)} style={{ opacity: rowOpacity }}>
             {isSystemRow ? <SystemRow comment={comment} foreground={foreground} /> : <CommentRow comment={comment} foreground={foreground} mentionInk={mentionInk} />}
@@ -109,7 +100,6 @@ const styles = StyleSheet.create({
   content: { gap: 6, justifyContent: "flex-end", flexGrow: 1, alignItems: "flex-start" },
   commentRow: { flexDirection: "row", alignItems: "flex-start", gap: 8, paddingLeft: 4, paddingRight: 12, paddingVertical: 5, borderRadius: 16, maxWidth: "100%" },
   systemRow: { flexDirection: "row", alignItems: "center", gap: 6, paddingLeft: 4, paddingRight: 10, paddingVertical: 4, borderRadius: 999, maxWidth: "100%" },
-  giftRow: { backgroundColor: "rgba(245, 197, 24, 0.92)", borderWidth: StyleSheet.hairlineWidth, borderColor: liveGlass.border },
   flexText: { flexShrink: 1 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 3 },
   shrink: { flexShrink: 1 },

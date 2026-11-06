@@ -1,5 +1,5 @@
 import type { UserSummary } from "@/types";
-import type { CreateLiveBattleInput, LiveStage, MuteStreamerInput, SendLiveBattleGiftInput } from "@/types/liveStage.type";
+import type { CreateLiveBattleInput, LiveStage, MuteStreamerInput, SendLiveBattleCoinsInput } from "@/types/liveStage.type";
 
 import { api, generateIdempotencyKey } from "../core/apiClient.service";
 
@@ -24,5 +24,6 @@ export const liveGuestsService = {
   cancelPendingBattle: (battleId: string) => api.post<LiveStage>(`${battlePath(battleId)}/cancel`),
   startPendingBattleWithoutWinnerTakesAll: (battleId: string) => api.post<LiveStage>(`${battlePath(battleId)}/start-without-winner-takes-all`),
   endLiveBattleEarly: (battleId: string) => api.post<LiveStage>(`${battlePath(battleId)}/end`),
-  creditLiveBattleGift: (battleId: string, input: SendLiveBattleGiftInput) => api.post<LiveStage>(`${battlePath(battleId)}/gifts`, input),
+  contributeBattleCoins: (battleId: string, input: SendLiveBattleCoinsInput, idempotencyKey = generateIdempotencyKey()) =>
+    api.post<LiveStage>(`${battlePath(battleId)}/coins`, input, { idempotencyKey }),
 };

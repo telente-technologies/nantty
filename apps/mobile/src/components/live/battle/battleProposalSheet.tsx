@@ -39,7 +39,7 @@ export function BattleProposalSheet(props: BattleProposalSheetProps) {
           <Swords24Icon size={22} color={colors.textMuted} />
         </View>
         <Text size={13} lineHeight={18} color={colors.textMuted}>
-          {props.isHostView ? "You" : props.hostName} proposed a {minutes}-minute winner-takes-all battle. When it ends, every coin gifted to the other streamers goes to the
+          {props.isHostView ? "You" : props.hostName} proposed a {minutes}-minute winner-takes-all battle. When it ends, every coin contributed to the other participants goes to the
           winner. A draw means everyone keeps their own coins. Every guest has to accept first.
         </Text>
         {props.isHostView

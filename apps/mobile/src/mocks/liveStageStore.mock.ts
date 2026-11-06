@@ -9,7 +9,7 @@ import {
   forfeitMockBattleParticipant,
   serializeMockBattle,
   settleMockBattleIfDue,
-  simulateViewerGiftsUntil,
+  simulateViewerContributionsUntil,
 } from "./liveBattleEngine.mock";
 import { resolveMockBattleProposalIfDue, serializeMockBattleProposal } from "./liveBattleProposal.mock";
 import {
@@ -168,7 +168,7 @@ const dropLastSimulatedGuestHalfwayThroughBigBattles = (stage: MockStage, now: n
   const leaver = battle.participants[battle.participants.length - 1]!;
   const isSimulatedGuest = leaver.user.id !== stage.host.id && leaver.user.id !== signedInMockUserSummary().id;
   if (now < dropAt || !isSimulatedGuest || leaver.state !== "active" || !isStreamerOnMockStage(stage, leaver.user.id)) return;
-  simulateViewerGiftsUntil(battle, dropAt, stage.recentBattleGifts);
+  simulateViewerContributionsUntil(battle, dropAt);
   removeStreamerFromMockStage(stage, leaver.user.id, dropAt, false);
 };
 
@@ -176,7 +176,7 @@ const advanceBattleAndArchiveWhenDone = (stage: MockStage, now: number) => {
   const battle = stage.battle;
   if (!battle) return;
   dropLastSimulatedGuestHalfwayThroughBigBattles(stage, now);
-  simulateViewerGiftsUntil(battle, now, stage.recentBattleGifts);
+  simulateViewerContributionsUntil(battle, now);
   settleMockBattleIfDue(battle, now, stage.host.id);
   if (describeMockBattleStateAt(battle, now) !== "archived") return;
   stage.battleHistory = [serializeMockBattle(battle, now), ...stage.battleHistory].slice(0, BATTLE_HISTORY_LIMIT);

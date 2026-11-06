@@ -38,6 +38,8 @@ import { ChangePasswordScreen } from "@/screens/settings/changePassword.screen";
 import { ChatNotificationSettingsScreen } from "@/screens/messages/chatNotificationSettings.screen";
 import { ChatPasscodeScreen } from "@/screens/messages/chatPasscode.screen";
 import { ChatSettingsScreen } from "@/screens/messages/chatSettings.screen";
+import { GroupInvitationsScreen } from "@/screens/messages/groupInvitations.screen";
+import { ChannelInvitationsScreen } from "@/screens/messages/channelInvitations.screen";
 import { BlockedUsersScreen } from "@/screens/settings/blockedUsers.screen";
 import { HiddenCommentsScreen } from "@/screens/settings/hiddenComments.screen";
 import { WalletScreen } from "@/screens/wallet/wallet.screen";
@@ -180,6 +182,8 @@ export function MainNavigator() {
       <Stack.Screen name="SellerOrders" component={SellerOrdersScreen} />
       <Stack.Screen name="SellerOrderDetail" component={SellerOrderDetailScreen} />
       <Stack.Screen name="Chat" component={ChatScreen} />
+      <Stack.Screen name="GroupInvitations" component={GroupInvitationsScreen} />
+      <Stack.Screen name="ChannelInvitations" component={ChannelInvitationsScreen} />
       <Stack.Screen name="NewMessage" component={NewMessageScreen} options={modal} />
       <Stack.Screen name="NewGroup" component={NewGroupScreen} options={modal} />
       <Stack.Screen name="ConversationInfo" component={ConversationInfoScreen} />

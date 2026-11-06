@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -14,9 +14,9 @@ import {
   Broadcast24Icon,
   CalendarDots24Icon,
   ChatCircle24Icon,
+  Coin24Icon,
   FileLock24Icon,
   GearSix24Icon,
-  Gift24Icon,
   Headset24Icon,
   Microphone24Icon,
   MicrophoneSlash24Icon,
@@ -47,10 +47,14 @@ import {
   type SpaceSummary,
   type SpaceJoinGrant,
   type SpacePerson,
+  type SpaceInviteRole,
+  type SpaceInvitation,
 } from "@/services/spaces.service";
+import { useAuthStore } from "@/store/auth.store";
+import { spaceInvitationRoleLabel } from "@/utils/spaceInvitation.util";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { SpaceSchedulePicker } from "./spaceSchedulePicker";
-import { SpaceGiftPickerSheet } from "./spaceGiftPickerSheet";
+import { SpaceCoinDonationSheet } from "./spaceCoinDonationSheet";
 import { completeSpaceCreation, type SpaceCreationCheckpoint } from "@/utils/spaceCreation.util";
 import { useSpaceAudioConnection } from "./useSpaceAudioConnection.hook";
 
@@ -60,6 +64,8 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
   const insets = useSafeAreaInsets();
   const creator = useCreatorEntry();
   const client = useQueryClient();
+  const isSignedIn = useAuthStore((state) => state.status === "signedIn");
+  const signedInUserId = useAuthStore((state) => state.user?.id ?? null);
   const { offerSendInChat, openSendInChat, sendInChatElement } = useShareToChat();
   const [spaceId, setSpaceId] = useState(route.params?.spaceId);
   const [creating, setCreating] = useState(route.params?.create === true);
@@ -67,9 +73,14 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
   const [description, setDescription] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [audiencePolicy, setAudiencePolicy] = useState<SpaceVisibility>("public");
+  const [coinDonationsEnabled, setCoinDonationsEnabled] = useState(true);
   const [inviteQuery, setInviteQuery] = useState("");
+  const [inviteRole, setInviteRole] = useState<SpaceInviteRole>("listener");
+  const [inviteTitle, setInviteTitle] = useState("");
   const [pendingAnnouncementRetry, setPendingAnnouncementRetry] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [invitationActionId, setInvitationActionId] = useState<string | null>(null);
+  const [invitationActionError, setInvitationActionError] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [grant, setGrant] = useState<SpaceJoinGrant | null>(null);
   const [panel, setPanel] = useState<"manage" | null>(null);
@@ -79,6 +90,14 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
   const listing = useQuery({
     queryKey: ["spaces"],
     queryFn: () => spacesService.list(),
+    refetchInterval: 30000,
+  });
+  const invitations = useInfiniteQuery({
+    queryKey: ["spaces", "invitations", signedInUserId],
+    queryFn: ({ pageParam }) => spacesService.listInvitations(pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (page) => page.nextCursor ?? undefined,
+    enabled: isSignedIn && !!signedInUserId && !spaceId && !creating,
     refetchInterval: 30000,
   });
   const detail = useQuery({
@@ -160,6 +179,21 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
     setMessage("");
     setSpaceId(item.id);
   };
+  const respondToInvitation = async (invitation: SpaceInvitation, accept: boolean) => {
+    if (!isSignedIn || !signedInUserId || invitationActionId) return;
+    setInvitationActionId(invitation.invitationId);
+    setInvitationActionError(null);
+    try {
+      if (accept) await spacesService.acceptInvitation(invitation.spaceId, invitation.invitationId);
+      else await spacesService.declineInvitation(invitation.spaceId, invitation.invitationId);
+      await client.invalidateQueries({ queryKey: ["spaces", "invitations", signedInUserId] });
+      if (accept) open(invitation.space);
+    } catch (error) {
+      setInvitationActionError(error instanceof Error ? error.message : "Couldn't respond to this invitation. Try again.");
+    } finally {
+      setInvitationActionId(null);
+    }
+  };
   const join = () =>
     act(async () => setGrant(await spacesService.join(spaceId!)));
   const leave = () =>
@@ -176,6 +210,7 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
         title: title.trim(),
         description: description.trim() || undefined,
         audiencePolicy,
+        giftsEnabled: coinDonationsEnabled,
         ...(scheduledAt ? { scheduledAt } : {}),
       };
       let created: SpaceSummary;
@@ -409,6 +444,19 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
                 <Text size={13} color={colors.textMuted}>
                   Audio only. Your camera stays off.
                 </Text>
+                <Pressable
+                  accessibilityRole="switch"
+                  accessibilityState={{ checked: coinDonationsEnabled }}
+                  onPress={() => setCoinDonationsEnabled((enabled) => !enabled)}
+                  style={styles.audienceChoice}
+                >
+                  <Coin24Icon size={19} color={coinDonationsEnabled ? colors.primary : colors.textMuted} />
+                  <View style={styles.audienceCopy}>
+                    <Text weight={600}>Allow coin support</Text>
+                    <Text size={12} color={colors.textMuted}>Listeners can support you with coins. You can turn this off while the Space is live.</Text>
+                  </View>
+                  <Text weight={600}>{coinDonationsEnabled ? "On" : "Off"}</Text>
+                </Pressable>
                 <Button
                   title={pendingAnnouncementRetry ? "Retry" : scheduledAt ? "Schedule" : "Go live"}
                   accessibilityLabel={pendingAnnouncementRetry ? "Retry Space announcement" : scheduledAt ? "Schedule Space" : "Start Space"}
@@ -593,6 +641,58 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
           </>
         ) : (
           <>
+            {isSignedIn ? (
+              <View style={styles.listSection}>
+                <Text size={18} weight={700}>Your invitations</Text>
+                {invitations.isLoading ? <Text accessibilityLiveRegion="polite">Loading invitations…</Text> : null}
+                {invitations.isError ? (
+                  <View>
+                    <Text accessibilityRole="alert" color={colors.error}>{invitations.error instanceof Error ? invitations.error.message : "Couldn't load your invitations."}</Text>
+                    <Button title="Retry invitations" variant="subtle" onPress={() => { void invitations.refetch(); }} loading={invitations.isRefetching} />
+                  </View>
+                ) : null}
+                {invitationActionError ? <Text accessibilityRole="alert" color={colors.error}>{invitationActionError}</Text> : null}
+                {!invitations.isLoading && !invitations.isError && (invitations.data?.pages.flatMap((page) => page.data).length ?? 0) === 0 ? (
+                  <Text color={colors.textMuted}>No pending Space invitations.</Text>
+                ) : null}
+                {invitations.data?.pages.flatMap((page) => page.data).map((invitation) => {
+                  const pending = invitationActionId === invitation.invitationId;
+                  const inviter = invitation.space.host.name || (invitation.space.host.username ? `@${invitation.space.host.username}` : "A Nantty member");
+                  const invitationRole = spaceInvitationRoleLabel(invitation.role);
+                  const invitedDate = Number.isNaN(Date.parse(invitation.invitedAt))
+                    ? null
+                    : new Date(invitation.invitedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+                  return (
+                    <View key={`${invitation.spaceId}:${invitation.invitationId}`} style={styles.invitationCard}>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Open invited Space ${invitation.space.title}`}
+                        onPress={() => open(invitation.space)}
+                      >
+                        <View style={styles.cardTop}>
+                          <Avatar uri={invitation.space.host.avatarUrl ?? undefined} size={42} />
+                          <View style={styles.cardCopy}>
+                            <Text size={13} weight={600}>Invited by {inviter}</Text>
+                            <Text size={12} color={colors.textMuted}>{invitationRole}{invitation.title ? ` · ${invitation.title}` : ""}</Text>
+                          </View>
+                        </View>
+                        <Text size={17} weight={700}>{invitation.space.title}</Text>
+                        {invitation.space.description ? <Text size={13} color={colors.textMuted} numberOfLines={2}>{invitation.space.description}</Text> : null}
+                        <Text size={12} color={colors.primary}>Open Space details</Text>
+                        {invitedDate ? <Text size={11} color={colors.textMuted}>Invited {invitedDate}</Text> : null}
+                      </Pressable>
+                      <View style={styles.invitationActions}>
+                        <Button title={pending ? "Accepting…" : "Accept"} height={40} disabled={!!invitationActionId} loading={pending} onPress={() => { void respondToInvitation(invitation, true); }} style={styles.invitationAction} />
+                        <Button title={pending ? "Please wait" : "Decline"} variant="subtle" height={40} disabled={!!invitationActionId} onPress={() => { void respondToInvitation(invitation, false); }} style={styles.invitationAction} />
+                      </View>
+                    </View>
+                  );
+                })}
+                {invitations.hasNextPage ? (
+                  <Button title="Load more invitations" variant="subtle" disabled={invitations.isFetchingNextPage} loading={invitations.isFetchingNextPage} onPress={() => { void invitations.fetchNextPage(); }} />
+                ) : null}
+              </View>
+            ) : null}
             <Text size={13} weight={600} color={colors.textMuted}>LIVE AUDIO · PUBLIC CONVERSATIONS</Text>
             {listing.isLoading ? <Text>Finding Spaces…</Text> : null}
             {listing.isError ? (
@@ -731,10 +831,10 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
                     )}
                     {!host && space.giftsEnabled ? (
                       <Button
-                        title="Gift"
-                        accessibilityLabel={`Gift coins to ${space.host.name}`}
+                        title="Support host"
+                        accessibilityLabel={`Donate coins to ${space.host.name}`}
                         variant="outline"
-                        icon={<Gift24Icon size={18} color={colors.text} />}
+                        icon={<Coin24Icon size={18} color={colors.text} />}
                         onPress={() => setGiftPickerOpen(true)}
                         style={styles.control}
                       />
@@ -775,7 +875,7 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
         </View>
       ) : null}
       {space && giftPickerOpen ? (
-        <SpaceGiftPickerSheet
+        <SpaceCoinDonationSheet
           spaceId={space.id}
           host={space.host}
           visible={giftPickerOpen}
@@ -804,6 +904,35 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
                         onChangeText={setInviteQuery}
                         autoCapitalize="none"
                       />
+                      <Text weight={600}>Invite as</Text>
+                      <View style={styles.manageRow} accessibilityRole="radiogroup" accessibilityLabel="Invitation role">
+                        {([
+                          ["listener", "Listener"],
+                          ["speaker", "Speaker"],
+                          ["cohost", "Co-host"],
+                        ] as const).map(([role, label]) => (
+                          <Pressable
+                            key={role}
+                            accessibilityRole="radio"
+                            accessibilityState={{ checked: inviteRole === role }}
+                            onPress={() => setInviteRole(role)}
+                            style={[styles.inviteRole, inviteRole === role && styles.inviteRoleSelected]}
+                          >
+                            <Text weight={inviteRole === role ? 700 : 500}>{label}</Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                      {inviteRole !== "listener" ? (
+                        <TextInput
+                          accessibilityLabel="Optional stage title"
+                          placeholder="Optional stage title"
+                          placeholderTextColor={colors.textSubtle}
+                          style={styles.input}
+                          value={inviteTitle}
+                          onChangeText={(value) => setInviteTitle(value.slice(0, 60))}
+                          maxLength={60}
+                        />
+                      ) : null}
                       {inviteSearch.isLoading ? <Text color={colors.textMuted}>Searching…</Text> : null}
                       {inviteSearch.isError ? <Button title="Retry search" variant="subtle" onPress={() => { void inviteSearch.refetch(); }} /> : null}
                       {inviteSearch.data?.map((person) => (
@@ -818,7 +947,7 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
                             variant="outline"
                             icon={<Users24Icon size={16} color={colors.text} />}
                             disabled={busy}
-                            onPress={() => act(() => spacesService.invite(space.id, person.id), `Invited @${person.username}. Share the preview in chat so they can open it.`)}
+                            onPress={() => act(() => spacesService.invite(space.id, person.id, inviteRole, inviteRole === "listener" ? undefined : inviteTitle), `Invited @${person.username} as ${inviteRole === "cohost" ? "co-host" : inviteRole}.`)}
                           />
                         </View>
                       ))}
@@ -838,6 +967,20 @@ export function SpacesScreen({ navigation, route }: MainScreenProps<"Spaces">) {
                       onPress={announce}
                     />
                   ) : null}
+                  <Pressable
+                    accessibilityRole="switch"
+                    accessibilityState={{ checked: space.giftsEnabled }}
+                    disabled={busy}
+                    onPress={() => act(() => spacesService.setCoinDonations(space.id, !space.giftsEnabled), !space.giftsEnabled ? "Coin support is on." : "Coin support is off.")}
+                    style={styles.audienceChoice}
+                  >
+                    <Coin24Icon size={19} color={space.giftsEnabled ? colors.primary : colors.textMuted} />
+                    <View style={styles.audienceCopy}>
+                      <Text weight={600}>Allow coin support</Text>
+                      <Text size={12} color={colors.textMuted}>Listeners can support the host with coins.</Text>
+                    </View>
+                    <Text weight={600}>{space.giftsEnabled ? "On" : "Off"}</Text>
+                  </Pressable>
                   <Text weight={700}>Microphone requests</Text>
                   {space.pendingSpeakerRequests?.length ? (
                     space.pendingSpeakerRequests.map((request) => (
@@ -1046,6 +1189,17 @@ const useStyles = makeThemedStyles((colors) =>
     control: { flex: 1 },
     exitControl: { minWidth: 80 },
     listSection: { gap: 0, marginTop: 8 },
+    invitationCard: {
+      borderWidth: 1,
+      borderColor: colors.divider,
+      borderRadius: 18,
+      backgroundColor: colors.surface,
+      padding: 14,
+      gap: 12,
+      marginTop: 10,
+    },
+    invitationActions: { flexDirection: "row", gap: 10 },
+    invitationAction: { flex: 1 },
     discoveryCard: {
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderColor: colors.divider,
@@ -1062,6 +1216,8 @@ const useStyles = makeThemedStyles((colors) =>
     manageSheet: { width: "100%", maxWidth: 640, alignSelf: "center" },
     panelBody: { gap: 18, paddingHorizontal: 16, paddingBottom: 20 },
     inviteRow: { flexDirection: "row", alignItems: "center", gap: 10, minHeight: 54 },
+    inviteRole: { minHeight: 38, justifyContent: "center", paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, borderColor: colors.divider },
+    inviteRoleSelected: { borderColor: colors.primary, backgroundColor: colors.primaryTint },
     manageRow: {
       flexDirection: "row",
       alignItems: "center",

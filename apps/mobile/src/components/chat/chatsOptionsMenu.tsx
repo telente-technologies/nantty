@@ -12,15 +12,19 @@ export interface ChatsOptionsMenuProps {
   readonly onClose: () => void;
   readonly onCreateGroup: () => void;
   readonly onCreateChannel: () => void;
+  readonly onOpenInvitations: () => void;
+  readonly onOpenChannelInvitations: () => void;
   readonly onOpenSettings: () => void;
 }
 
-export function ChatsOptionsMenu({ visible, topOffset, onClose, onCreateGroup, onCreateChannel, onOpenSettings }: ChatsOptionsMenuProps) {
+export function ChatsOptionsMenu({ visible, topOffset, onClose, onCreateGroup, onCreateChannel, onOpenInvitations, onOpenChannelInvitations, onOpenSettings }: ChatsOptionsMenuProps) {
   const styles = useStyles();
   const { colors } = useTheme();
   const menuItems = [
     { label: "New group", onPress: onCreateGroup, icon: <Users24Icon size={20} color={colors.textMuted} /> },
     { label: "New channel", onPress: onCreateChannel, icon: <Share24Icon size={20} color={colors.textMuted} /> },
+    { label: "Group invitations", onPress: onOpenInvitations, icon: <Users24Icon size={20} color={colors.textMuted} /> },
+    { label: "Channel invitations", onPress: onOpenChannelInvitations, icon: <Users24Icon size={20} color={colors.textMuted} /> },
     { label: "Chat settings", onPress: onOpenSettings, icon: <GearSix24Icon size={20} color={colors.textMuted} /> },
   ];
   return (

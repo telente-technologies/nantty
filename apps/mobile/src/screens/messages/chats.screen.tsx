@@ -145,6 +145,8 @@ export function ChatsScreen() {
         onClose={() => setIsOptionsMenuVisible(false)}
         onCreateGroup={() => navigation.navigate("NewGroup", { kind: "group" })}
         onCreateChannel={() => navigation.navigate("NewGroup", { kind: "channel" })}
+        onOpenInvitations={() => navigation.navigate("GroupInvitations")}
+        onOpenChannelInvitations={() => navigation.navigate("ChannelInvitations")}
         onOpenSettings={() => navigation.navigate("ChatSettings")}
       />
       </ChatLockGate>

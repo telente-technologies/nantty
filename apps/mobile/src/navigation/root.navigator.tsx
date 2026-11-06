@@ -1,5 +1,5 @@
-import { DarkTheme, DefaultTheme, NavigationContainer, type Theme as NavigationTheme } from "@react-navigation/native";
-import { useMemo } from "react";
+import { DarkTheme, DefaultTheme, NavigationContainer, type NavigationState, type PartialState, type Theme as NavigationTheme } from "@react-navigation/native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { GuestAuthReplayCoordinator } from "@/components/auth/guestAuthReplay";
 import { AccountThemePreferenceSync } from "@/components/settings/accountThemePreferenceSync";
@@ -17,6 +17,7 @@ import { usePolicyUpdates } from "@/hooks/usePolicyUpdates.hook";
 import { useAuthStore } from "@/store/auth.store";
 import { useGuestSessionStore } from "@/store/guestSession.store";
 import { useTheme } from "@/theme";
+import { clearHandledNotificationResponse, subscribeToNotificationResponses } from "@/services/notificationResponse.service";
 
 import { AuthNavigator } from "./auth.navigator";
 import { MainNavigator } from "./main.navigator";
@@ -44,6 +45,30 @@ export function RootNavigator() {
   const navigationTheme = useNavigationThemeFollowingAppTheme();
   const { blocking: blockingPolicyVersion } = usePolicyUpdates();
   const isUpdateRequired = useAppGateStore((s) => s.isUpdateRequired);
+  const isReadyForPrivateRoutes = useAuthStore((s) => s.status === "signedIn");
+  const [navigationReady, setNavigationReady] = useState(false);
+  const pendingNotificationRoute = useRef<PartialState<NavigationState> | null>(null);
+  const flushNotificationRoute = useCallback(() => {
+    const state = pendingNotificationRoute.current;
+    if (!isReadyForPrivateRoutes || !navigationReady || state === null || !rootNavigationRef.isReady()) return;
+    pendingNotificationRoute.current = null;
+    rootNavigationRef.resetRoot(state);
+    void clearHandledNotificationResponse();
+  }, [isReadyForPrivateRoutes, navigationReady]);
+  const flushNotificationRouteRef = useRef(flushNotificationRoute);
+  useEffect(() => {
+    flushNotificationRouteRef.current = flushNotificationRoute;
+  }, [flushNotificationRoute]);
+
+  useEffect(() => subscribeToNotificationResponses((state) => {
+    pendingNotificationRoute.current = state;
+    flushNotificationRouteRef.current();
+  }), []);
+
+  useEffect(() => {
+    flushNotificationRoute();
+  }, [flushNotificationRoute]);
+
   if (isUpdateRequired) {
     return (
       <>
@@ -64,7 +89,15 @@ export function RootNavigator() {
     );
   }
   return (
-    <NavigationContainer ref={rootNavigationRef} theme={navigationTheme} linking={canShowMainApp ? deepLinking : undefined}>
+    <NavigationContainer
+      ref={rootNavigationRef}
+      theme={navigationTheme}
+      linking={canShowMainApp ? deepLinking : undefined}
+      onReady={() => {
+        setNavigationReady(true);
+        flushNotificationRoute();
+      }}
+    >
       {canShowMainApp ? <MainNavigator /> : <AuthNavigator />}
       <AccountThemePreferenceSync />
       <GuestAuthReplayCoordinator />

@@ -16,6 +16,7 @@ export interface ChatNotificationSettings {
 
 export interface ChatSettings {
   readonly messageRequestsFrom: MessageRequestAudience;
+  readonly preventDirectGroupAdds: boolean;
   readonly notifications: ChatNotificationSettings;
 }
 

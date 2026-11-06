@@ -139,8 +139,7 @@ export interface MuteStreamerInput {
   readonly video?: boolean;
 }
 
-export interface SendLiveBattleGiftInput {
+export interface SendLiveBattleCoinsInput {
   readonly recipientUserId: ID;
-  readonly giftId: ID;
-  readonly quantity: number;
+  readonly coins: number;
 }

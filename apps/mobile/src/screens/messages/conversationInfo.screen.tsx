@@ -1,6 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, Share, StyleSheet, TextInput, View } from "react-native";
 
 import { BusinessLabel } from "@/components/chat/businessLabel";
 import { describeConversationForDisplay } from "@/components/chat/conversationDisplay.util";
@@ -24,7 +24,7 @@ import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily, typeScale } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { channelsService } from "@/services/social/channels.service";
+import { channelsService, type ChannelInvitationLink } from "@/services/social/channels.service";
 import { groupsService } from "@/services/social/groups.service";
 import { messagesService } from "@/services/chat/messages.service";
 import { useAuthStore } from "@/store/auth.store";
@@ -33,6 +33,8 @@ import { LockSimple24Icon } from "@/components/icons";
 import { IconRow } from "@/components/ui/iconRow";
 import { spacing } from "@/constants/spacing.constant";
 import { describeActionFailure } from "@/errors/errorExperience/describeError";
+import { webAppLinks } from "@/config/webAppLinks.config";
+import type { GroupInvitationLink, GroupInvitationLinkRecord } from "@/services/social/groups.service";
 
 export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"ConversationInfo">) {
   const { colors } = useTheme();
@@ -43,6 +45,9 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
   const [renamedTitle, setRenamedTitle] = useState<string | null>(null);
   const [isAddingMembers, setIsAddingMembers] = useState(false);
   const [peopleToAdd, setPeopleToAdd] = useState<readonly UserSummary[]>([]);
+  const [invitationError, setInvitationError] = useState<string | null>(null);
+  const [createdInviteLink, setCreatedInviteLink] = useState<GroupInvitationLink | null>(null);
+  const [createdChannelInviteLink, setCreatedChannelInviteLink] = useState<ChannelInvitationLink | null>(null);
 
   const conversation = useQuery({ queryKey: ["conversation", conversationId], queryFn: () => messagesService.fetchConversationById(conversationId) });
   const display = conversation.data ? describeConversationForDisplay(conversation.data) : null;
@@ -51,6 +56,22 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
     queryKey: ["conversation-members", conversationId],
     queryFn: () => groupsService.fetchConversationMembers(conversationId),
     enabled: !!display?.isGroup,
+  });
+  const invitationLinks = useInfiniteQuery({
+    queryKey: ["group-invitation-links", conversationId],
+    queryFn: ({ pageParam }) => groupsService.listGroupInvitationLinks(conversationId, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (page) => page.nextCursor ?? undefined,
+    enabled: display?.isGroup === true && display.isAdmin,
+    retry: false,
+  });
+  const channelInvitationLinks = useInfiniteQuery({
+    queryKey: ["channel-invitation-links", conversationId],
+    queryFn: ({ pageParam }) => channelsService.listInvitationLinks(conversationId, pageParam),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (page) => page.nextCursor ?? undefined,
+    enabled: display?.isChannel === true && display.isAdmin,
+    retry: false,
   });
 
   const refreshControl = usePullToRefresh(conversation.refetch, () => (display?.isGroup ? members.refetch() : undefined));
@@ -94,6 +115,67 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
     mutationFn: (action: () => Promise<unknown>) => action(),
     onSuccess: refreshConversationEverywhere,
   });
+  const inviteSelectedPeople = useMutation({
+    mutationFn: async (people: readonly UserSummary[]) => {
+      const outcomes = await Promise.allSettled(people.map((person) => groupsService.createGroupInvitation(conversationId, person.id)));
+      return {
+        sentCount: outcomes.filter((outcome) => outcome.status === "fulfilled").length,
+        failedIds: outcomes.flatMap((outcome, index) => outcome.status === "rejected" ? [people[index]!.id] : []),
+      };
+    },
+    onSuccess: async ({ sentCount, failedIds }, submittedPeople) => {
+      const failedPeople = submittedPeople.filter((person) => failedIds.includes(person.id));
+      setPeopleToAdd(failedPeople);
+      setInvitationError(failedIds.length > 0 ? `${sentCount} invitation${sentCount === 1 ? "" : "s"} sent; ${failedIds.length} couldn't be sent. Retry the remaining people.` : null);
+      if (failedIds.length === 0) setIsAddingMembers(false);
+      await queryClient.invalidateQueries({ queryKey: ["group-invitations"] });
+    },
+  });
+  const createInviteLink = useMutation({
+    mutationFn: () => groupsService.createGroupInvitationLink(conversationId),
+    onSuccess: async (link) => {
+      setCreatedInviteLink(link);
+      await queryClient.invalidateQueries({ queryKey: ["group-invitation-links", conversationId] });
+      try {
+        await shareGroupInviteLink(link);
+      } catch {
+        setInvitationError("The link was created, but the share sheet could not be opened. You can try sharing it again.");
+      }
+    },
+    onError: (error: Error) => setInvitationError(error.message || "Couldn't create a group invitation link."),
+  });
+  const revokeInviteLink = useMutation({
+    mutationFn: (linkId: string) => groupsService.revokeGroupInvitationLink(conversationId, linkId),
+    onSuccess: (_result, linkId) => {
+      if (createdInviteLink?.id === linkId) setCreatedInviteLink(null);
+      setInvitationError("Invitation link revoked.");
+      void queryClient.invalidateQueries({ queryKey: ["group-invitation-links", conversationId] });
+    },
+    onError: (error: Error) => setInvitationError(error.message || "Couldn't revoke the group invitation link."),
+  });
+  const createChannelInviteLink = useMutation({
+    mutationFn: () => channelsService.createInvitationLink(conversationId),
+    onSuccess: async (link) => {
+      setCreatedChannelInviteLink(link);
+      try {
+        await shareChannelInviteLink(link);
+        setInvitationError(null);
+      } catch {
+        setInvitationError("The link was created, but the share sheet could not be opened. Use Share link again before leaving this screen.");
+      }
+      await queryClient.invalidateQueries({ queryKey: ["channel-invitation-links", conversationId] });
+    },
+    onError: (error: Error) => setInvitationError(error.message || "Couldn't create a channel invitation link."),
+  });
+  const revokeChannelInviteLink = useMutation({
+    mutationFn: (linkId: string) => channelsService.revokeInvitationLink(conversationId, linkId),
+    onSuccess: () => {
+      setCreatedChannelInviteLink(null);
+      setInvitationError("Invitation link revoked.");
+      void queryClient.invalidateQueries({ queryKey: ["channel-invitation-links", conversationId] });
+    },
+    onError: (error: Error) => setInvitationError(error.message || "Couldn't revoke the channel invitation link."),
+  });
   const leaveConversation = useMutation({
     mutationFn: () => (display?.isChannel ? channelsService.unsubscribeFromChannel(conversationId) : groupsService.leaveConversation(conversationId)),
     onSuccess: () => {
@@ -103,16 +185,24 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
   });
 
   const addSelectedPeople = () => {
-    const userIds = peopleToAdd.map((person) => person.id);
-    runMemberAction.mutate(() => groupsService.addMembersToGroup(conversationId, userIds));
-    setPeopleToAdd([]);
-    setIsAddingMembers(false);
+    if (peopleToAdd.length === 0 || inviteSelectedPeople.isPending) return;
+    setInvitationError(null);
+    inviteSelectedPeople.mutate(peopleToAdd);
   };
 
   const togglePersonToAdd = (person: UserSummary) =>
     setPeopleToAdd((current) =>
       current.some((selected) => selected.id === person.id) ? current.filter((selected) => selected.id !== person.id) : [...current, person],
     );
+
+  const shareGroupInviteLink = async (link: GroupInvitationLink) => {
+    const url = webAppLinks.groupInvitation(link.token);
+    await Share.share({ message: `You're invited to join ${display?.displayName ?? "a Nantty group"}: ${url}`, url });
+  };
+  const shareChannelInviteLink = async (link: ChannelInvitationLink) => {
+    const url = webAppLinks.channelInvitation(link.token);
+    await Share.share({ message: `You're invited to follow ${display?.displayName ?? "a Nantty channel"}: ${url}`, url });
+  };
 
   const canEditGroup = !!(display?.isGroup || display?.isChannel) && !!display?.isAdmin;
   const canChangeDisappearing = !!display && !display.isChannel && (!display.isGroup || display.isAdmin);
@@ -210,15 +300,33 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
           </View>
         ) : null}
 
+        {display?.isChannel && display.isAdmin ? (
+          <View style={styles.section}>
+            <Text size={typeScale.md} weight={600} lineHeight={18}>Channel invitation links</Text>
+            <Text size={12} lineHeight={17} color={colors.textMuted}>People who open a link must request an invitation and explicitly accept it before they subscribe. Existing one-tap channel subscribe remains available.</Text>
+            <Button title="Create and share invite link" variant="outline" loading={createChannelInviteLink.isPending} disabled={createChannelInviteLink.isPending || revokeChannelInviteLink.isPending} onPress={() => createChannelInviteLink.mutate()} />
+            {createdChannelInviteLink ? <>
+              <Button title="Share link again" variant="subtle" disabled={revokeChannelInviteLink.isPending} onPress={() => { void shareChannelInviteLink(createdChannelInviteLink).catch(() => setInvitationError("The share sheet could not be opened. Try again.")); }} />
+              <Button title={revokeChannelInviteLink.isPending && revokeChannelInviteLink.variables === createdChannelInviteLink.id ? "Revoking…" : "Revoke this link"} variant="subtle" loading={revokeChannelInviteLink.isPending && revokeChannelInviteLink.variables === createdChannelInviteLink.id} disabled={revokeChannelInviteLink.isPending} onPress={() => revokeChannelInviteLink.mutate(createdChannelInviteLink.id)} />
+            </> : null}
+            {channelInvitationLinks.isPending ? <Text size={12} color={colors.textMuted}>Loading invitation links…</Text> : null}
+            {channelInvitationLinks.isError ? <Button title="Retry loading links" variant="subtle" onPress={() => { void channelInvitationLinks.refetch(); }} /> : null}
+            {(channelInvitationLinks.data?.pages.flatMap((page) => page.data) ?? []).map((link) => (
+              <InvitationLinkRow key={link.id} link={link} busy={revokeChannelInviteLink.isPending && revokeChannelInviteLink.variables === link.id} onRevoke={() => revokeChannelInviteLink.mutate(link.id)} />
+            ))}
+            {channelInvitationLinks.hasNextPage ? <Button title="Load more links" variant="subtle" loading={channelInvitationLinks.isFetchingNextPage} disabled={channelInvitationLinks.isFetchingNextPage} onPress={() => { void channelInvitationLinks.fetchNextPage(); }} /> : null}
+          </View>
+        ) : null}
+
         {display?.isGroup ? (
           <View style={styles.section}>
             <View style={styles.sectionTitleRow}>
               <Text size={typeScale.md} weight={600} lineHeight={16.8}>
                 {(members.data ?? []).length} members
               </Text>
-              {canEditGroup ? (
+                {canEditGroup ? (
                 <Text size={typeScale.sm} weight={500} lineHeight={16.9} color={colors.primary} accessibilityRole="button" onPress={() => setIsAddingMembers((adding) => !adding)}>
-                  {isAddingMembers ? "Cancel" : "Add members"}
+                  {isAddingMembers ? "Cancel" : "Invite people"}
                 </Text>
               ) : null}
             </View>
@@ -229,8 +337,23 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
                   onToggleSelectedPerson={togglePersonToAdd}
                   excludedUserIds={(members.data ?? []).map((member) => member.user.id)}
                   isInsideScrollView
+                  searchPurpose="invite"
                 />
-                <Button title={`Add ${peopleToAdd.length || ""}`.trim()} disabled={peopleToAdd.length === 0} onPress={addSelectedPeople} />
+                <Text size={12} lineHeight={17} color={colors.textMuted}>
+                  Invitations require each person to accept. Acceptance records consent only; secure key setup is still required before they become a member or can read messages.
+                </Text>
+                {invitationError ? <Text accessibilityRole="alert" size={12} lineHeight={17} color={colors.error}>{invitationError}</Text> : null}
+                <Button title={`Send invitation${peopleToAdd.length === 1 ? "" : "s"}${peopleToAdd.length ? ` · ${peopleToAdd.length}` : ""}`} disabled={peopleToAdd.length === 0} loading={inviteSelectedPeople.isPending} onPress={addSelectedPeople} />
+                <Text size={12} lineHeight={17} color={colors.textMuted}>
+                  Or create a shareable invitation link. Anyone with it must request an invite and explicitly accept; secure key setup remains required before joining.
+                </Text>
+                <Button title={createInviteLink.isPending ? "Creating link…" : "Create and share link"} variant="outline" loading={createInviteLink.isPending} disabled={createInviteLink.isPending || revokeInviteLink.isPending} onPress={() => createInviteLink.mutate()} />
+                {createdInviteLink ? (
+                  <>
+                    <Button title="Share link again" variant="subtle" disabled={revokeInviteLink.isPending} onPress={() => { void shareGroupInviteLink(createdInviteLink).catch(() => setInvitationError("The share sheet could not be opened. Try again.")); }} />
+                    <Button title={revokeInviteLink.isPending ? "Revoking…" : "Revoke this link"} variant="subtle" loading={revokeInviteLink.isPending} disabled={revokeInviteLink.isPending} onPress={() => revokeInviteLink.mutate(createdInviteLink.id)} />
+                  </>
+                ) : null}
               </View>
             ) : null}
             {(members.data ?? []).map((member) => (
@@ -250,6 +373,27 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
                 }
               />
             ))}
+          </View>
+        ) : null}
+
+        {display?.isGroup && display.isAdmin ? (
+          <View style={styles.section}>
+            <Text size={typeScale.md} weight={600} lineHeight={18}>Invitation links</Text>
+            {invitationLinks.isPending ? <Text size={12} color={colors.textMuted}>Loading invitation links…</Text> : null}
+            {invitationLinks.isError ? (
+              <Button title="Retry loading links" variant="subtle" onPress={() => { void invitationLinks.refetch(); }} />
+            ) : null}
+            {(invitationLinks.data?.pages.flatMap((page) => page.data) ?? []).map((link) => (
+              <InvitationLinkRow
+                key={link.id}
+                link={link}
+                busy={revokeInviteLink.isPending && revokeInviteLink.variables === link.id}
+                onRevoke={() => revokeInviteLink.mutate(link.id)}
+              />
+            ))}
+            {invitationLinks.hasNextPage ? (
+              <Button title="Load more links" variant="subtle" loading={invitationLinks.isFetchingNextPage} disabled={invitationLinks.isFetchingNextPage} onPress={() => { void invitationLinks.fetchNextPage(); }} />
+            ) : null}
           </View>
         ) : null}
 
@@ -282,6 +426,27 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
     </Screen>
   );
 }
+
+function InvitationLinkRow({ link, busy, onRevoke }: { readonly link: Pick<GroupInvitationLinkRecord, "id" | "expiresAt" | "revokedAt">; readonly busy: boolean; readonly onRevoke: () => void }) {
+  const { colors } = useTheme();
+  const status = link.revokedAt ? "Revoked ·" : "Invitation link · expires";
+  return (
+    <View style={[linkStyles.row, { backgroundColor: colors.background, borderColor: colors.divider }]}>
+      <View style={linkStyles.meta}>
+        <Text size={13} weight={600}>{status}</Text>
+        <Text size={11} lineHeight={15} color={colors.textMuted}>
+          {status} {new Date(link.expiresAt).toLocaleDateString()}
+        </Text>
+      </View>
+      {!link.revokedAt ? <Button title={busy ? "Revoking…" : "Revoke"} variant="subtle" height={36} loading={busy} disabled={busy} onPress={onRevoke} /> : null}
+    </View>
+  );
+}
+
+const linkStyles = StyleSheet.create({
+  row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, borderWidth: StyleSheet.hairlineWidth, borderRadius: 10, padding: 10 },
+  meta: { flex: 1, gap: 2 },
+});
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   encryptionNotice: { paddingHorizontal: spacing[6], paddingVertical: spacing[3] },

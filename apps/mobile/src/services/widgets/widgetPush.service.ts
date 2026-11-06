@@ -1,16 +1,19 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import * as TaskManager from "expo-task-manager";
-import { Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 
 import { widgetKinds, widgetStorageKeys, type WidgetKind } from "@/config/widgets.config";
 import { api } from "@/services/apiClient.service";
+import { registerSignOutHook } from "@/store/auth.store";
+import { usersService } from "@/services/account/users.service";
 
 type NotificationsModule = typeof import("expo-notifications");
 type WidgetSyncModule = typeof import("./widgetSync.service");
 
 export const WIDGET_PUSH_TASK_NAME = "nantty-widget-refresh-push";
 const widgetRefreshType = "widgetRefresh";
+const tokenStorageKey = widgetStorageKeys.pushToken;
 
 export function isWidgetPushSupported(): boolean {
   return (Platform.OS === "ios" || Platform.OS === "android") && Constants.executionEnvironment !== ExecutionEnvironment.StoreClient;
@@ -77,36 +80,104 @@ function readProjectId(): string | undefined {
   return extra?.eas?.projectId ?? Constants.easConfig?.projectId;
 }
 
-let hasStartedWidgetPush = false;
+let hasStartedWidgetRefreshListener = false;
 
-export async function startWidgetRefreshPush(): Promise<void> {
+/** Registers only the silent widget-refresh handler; it never asks for permission or registers a device token. */
+export async function startWidgetRefreshTask(): Promise<void> {
   const notifications = loadNotifications();
   if (notifications === null) return;
-  if (!hasStartedWidgetPush) {
-    hasStartedWidgetPush = true;
+  if (!hasStartedWidgetRefreshListener) {
+    hasStartedWidgetRefreshListener = true;
     notifications.addNotificationReceivedListener((notification) => {
       const kinds = readWidgetRefreshKinds(notification.request.content.data);
       if (kinds !== null) refreshWidgetsFromPush(kinds).catch(() => undefined);
     });
     await notifications.registerTaskAsync(WIDGET_PUSH_TASK_NAME).catch(() => undefined);
   }
-  await registerDeviceForWidgetPush(notifications);
 }
 
-async function registerDeviceForWidgetPush(notifications: NotificationsModule): Promise<void> {
+async function registerDeviceForAccountPush(notifications: NotificationsModule): Promise<void> {
   const projectId = readProjectId();
-  if (projectId === undefined) return;
-  const token = await notifications.getExpoPushTokenAsync({ projectId }).then((result) => result.data, () => null);
-  if (token === null) return;
-  if ((await AsyncStorage.getItem(widgetStorageKeys.pushToken)) === token) return;
+  if (projectId === undefined) throw new Error("Push notifications are not configured on this build.");
+  const token = (await notifications.getExpoPushTokenAsync({ projectId })).data;
+  const registeredToken = await AsyncStorage.getItem(tokenStorageKey);
+  if (registeredToken === token) return;
+  if (registeredToken !== null && !(await removeRegisteredDeviceToken(registeredToken))) {
+    throw new Error("The previous notification device could not be updated. Try again.");
+  }
   await api.post("/api/v1/notifications/device-tokens", { token, platform: Platform.OS });
-  await AsyncStorage.setItem(widgetStorageKeys.pushToken, token);
+  await AsyncStorage.setItem(tokenStorageKey, token);
+}
+
+async function removeRegisteredDeviceToken(token: string): Promise<boolean> {
+  try {
+    await api.delete("/api/v1/notifications/device-tokens", { body: { token } });
+    await AsyncStorage.removeItem(widgetStorageKeys.pushToken);
+    return true;
+  } catch {
+    // Keep the token locally so a later sign-out or rotation can retry deletion.
+    return false;
+  }
 }
 
 export async function unregisterDeviceFromWidgetPush(): Promise<void> {
-  if (!isWidgetPushSupported()) return;
-  const token = await AsyncStorage.getItem(widgetStorageKeys.pushToken);
+  const token = await AsyncStorage.getItem(tokenStorageKey);
   if (token === null) return;
-  await api.delete("/api/v1/notifications/device-tokens", { body: { token } }).catch(() => undefined);
-  await AsyncStorage.removeItem(widgetStorageKeys.pushToken);
+  await removeRegisteredDeviceToken(token);
 }
+
+export async function enableAccountPushNotifications(savePreference: (enabled: boolean) => Promise<unknown>): Promise<"granted" | "denied"> {
+  const notifications = loadNotifications();
+  if (notifications === null) throw new Error("Push notifications are unavailable in this app build.");
+  let permission = await notifications.getPermissionsAsync();
+  if (!permission.granted) permission = await notifications.requestPermissionsAsync();
+  if (!permission.granted) return "denied";
+  await savePreference(true);
+  try {
+    await registerDeviceForAccountPush(notifications);
+  } catch (error) {
+    await savePreference(false).catch(() => undefined);
+    await unregisterDeviceFromWidgetPush();
+    throw error;
+  }
+  return "granted";
+}
+
+export async function disableAccountPushNotifications(savePreference: (enabled: boolean) => Promise<unknown>): Promise<void> {
+  await savePreference(false);
+  await unregisterDeviceFromWidgetPush();
+}
+
+/** Revalidates token rotation without prompting; callers must first confirm account-level opt-in. */
+export async function syncAccountPushRegistrationIfPermitted(): Promise<void> {
+  const notifications = loadNotifications();
+  if (notifications === null) return;
+  const permission = await notifications.getPermissionsAsync();
+  if (!permission.granted) {
+    await unregisterDeviceFromWidgetPush();
+    return;
+  }
+  await registerDeviceForAccountPush(notifications);
+}
+
+let hasStartedAccountPushLifecycle = false;
+
+export function startAccountPushRegistrationLifecycle(): void {
+  if (hasStartedAccountPushLifecycle) return;
+  hasStartedAccountPushLifecycle = true;
+  AppState.addEventListener("change", (state) => {
+    if (state === "active") void syncAccountPushRegistrationForCurrentAccount();
+  });
+}
+
+export async function syncAccountPushRegistrationForCurrentAccount(): Promise<void> {
+  try {
+    const settings = await usersService.fetchMyAccountSettings();
+    if (settings.pushNotificationsEnabled) await syncAccountPushRegistrationIfPermitted();
+    else await unregisterDeviceFromWidgetPush();
+  } catch {
+    // A settings/network failure must never prompt or register a device.
+  }
+}
+
+registerSignOutHook(unregisterDeviceFromWidgetPush);

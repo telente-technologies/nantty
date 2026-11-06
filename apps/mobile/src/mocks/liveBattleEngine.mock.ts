@@ -1,15 +1,13 @@
 import type { UserSummary } from "@/types";
-import type { LiveBattle, LiveBattleEndReason, LiveBattleGiftEvent, LiveBattleState, LiveBattleTransfer } from "@/types/liveStage.type";
+import type { LiveBattle, LiveBattleEndReason, LiveBattleState, LiveBattleTransfer } from "@/types/liveStage.type";
 
 import {
   BATTLE_COUNTDOWN_MS,
   BATTLE_RESULT_MS,
   BATTLE_SETTLING_MS,
   createSeededRandom,
-  describeGiftGlyph,
   hashTextToSeed,
   mockAudienceUser,
-  pickWeightedSimulatedGift,
   type MockBattle,
   type MockBattleParticipant,
   type MockBattleSettlement,
@@ -17,7 +15,7 @@ import {
 
 const LAST_SECONDS_FRENZY = 10;
 const MOMENTUM_WINDOW_SECONDS = 15;
-const SIMULATED_GIFTER_POOL = 14;
+const SIMULATED_SUPPORTER_POOL = 14;
 
 const toIso = (time: number) => new Date(time).toISOString();
 
@@ -50,14 +48,12 @@ export const describeMockBattleStateAt = (battle: MockBattle, now: number): Live
   return "archived";
 };
 
-export const creditBattleGiftToParticipant = (battle: MockBattle, gift: Omit<LiveBattleGiftEvent, "id">, giftEvents: LiveBattleGiftEvent[]) => {
-  const participant = battle.participants.find((candidate) => candidate.user.id === gift.recipientUserId);
+export const creditBattleCoinsToParticipant = (battle: MockBattle, contribution: { readonly sender: UserSummary; readonly recipientUserId: string; readonly coins: number }) => {
+  const participant = battle.participants.find((candidate) => candidate.user.id === contribution.recipientUserId);
   if (!participant || participant.state !== "active") return false;
-  participant.score += gift.coins;
-  const gifter = participant.gifters.get(gift.sender.id);
-  participant.gifters.set(gift.sender.id, { userId: gift.sender.id, user: gift.sender, coins: (gifter?.coins ?? 0) + gift.coins });
-  giftEvents.push({ ...gift, id: `bg_${battle.id}_${giftEvents.length}_${Date.now().toString(36)}` });
-  if (giftEvents.length > 12) giftEvents.splice(0, giftEvents.length - 12);
+  participant.score += contribution.coins;
+  const supporter = participant.gifters.get(contribution.sender.id);
+  participant.gifters.set(contribution.sender.id, { userId: contribution.sender.id, user: contribution.sender, coins: (supporter?.coins ?? 0) + contribution.coins });
   return true;
 };
 
@@ -73,23 +69,19 @@ const pickMomentumWeightedRecipient = (battle: MockBattle, second: number, rando
   return activeParticipants[0];
 };
 
-export const simulateViewerGiftsUntil = (battle: MockBattle, now: number, giftEvents: LiveBattleGiftEvent[]) => {
+export const simulateViewerContributionsUntil = (battle: MockBattle, now: number) => {
   const lastSecond = Math.floor((Math.min(now, battle.endsAt) - battle.startsAt) / 1000);
   for (let second = battle.simulatedThroughSecond + 1; second <= lastSecond; second++) {
     const random = createSeededRandom(hashTextToSeed(battle.id) + second * 7919);
     const isFrenzy = battle.durationSeconds - second < LAST_SECONDS_FRENZY;
     const roll = random();
-    const giftCount = isFrenzy ? (roll < 0.5 ? 3 : 2) : roll < 0.55 ? 1 : roll < 0.7 ? 2 : 0;
-    for (let index = 0; index < giftCount; index++) {
+    const contributionCount = isFrenzy ? (roll < 0.5 ? 3 : 2) : roll < 0.55 ? 1 : roll < 0.7 ? 2 : 0;
+    for (let index = 0; index < contributionCount; index++) {
       const recipient = pickMomentumWeightedRecipient(battle, second, random);
       if (!recipient) continue;
-      const gift = pickWeightedSimulatedGift(random);
-      const quantity = random() < 0.15 ? 5 : 1;
-      creditBattleGiftToParticipant(
-        battle,
-        { sender: mockAudienceUser(Math.floor(random() * SIMULATED_GIFTER_POOL)), recipientUserId: recipient.user.id, giftEmoji: describeGiftGlyph(gift), coins: gift.priceCoins * quantity },
-        giftEvents,
-      );
+      const contributionAmounts = [10, 25, 50, 100] as const;
+      const coins = contributionAmounts[Math.floor(random() * contributionAmounts.length)]!;
+      creditBattleCoinsToParticipant(battle, { sender: mockAudienceUser(Math.floor(random() * SIMULATED_SUPPORTER_POOL)), recipientUserId: recipient.user.id, coins });
     }
   }
   battle.simulatedThroughSecond = Math.max(battle.simulatedThroughSecond, lastSecond);

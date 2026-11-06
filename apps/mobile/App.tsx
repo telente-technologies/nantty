@@ -34,6 +34,7 @@ import { localeService } from "@/services/geo/locale.service";
 import { cancelAndRemoveUpload } from "@/services/media/mediaUploadQueue.service";
 import { startAutomaticUploadResume } from "@/services/core/uploadBackgroundTask.service";
 import { startHomeScreenWidgetSync, syncHomeScreenWidgetsNow } from "@/services/widgets/widgetSync.service";
+import { startAccountPushRegistrationLifecycle, syncAccountPushRegistrationForCurrentAccount } from "@/services/widgets/widgetPush.service";
 import { forgetDecryptedAttachmentsInMemory } from "@/services/chatCrypto/encryptedAttachments.service";
 import { startDecryptedMediaHygiene, wipeDecryptedFiles } from "@/services/chatCrypto/ephemeralDecryptedFiles.service";
 import { useActingProfileStore } from "@/store/actingProfile.store";
@@ -65,6 +66,7 @@ export default function App() {
 
   useEffect(() => {
     startDecryptedMediaHygiene();
+    startAccountPushRegistrationLifecycle();
     useAuthStore.getState().restoreSavedSession().catch(() => useAuthStore.setState({ status: "signedOut" }));
   }, []);
 
@@ -83,6 +85,7 @@ export default function App() {
 
   useEffect(() => {
     if (authStatus !== "signedIn") return;
+    void syncAccountPushRegistrationForCurrentAccount();
     startAutomaticUploadResume();
     startHomeScreenWidgetSync();
     syncHomeScreenWidgetsNow({ force: true }).catch(() => undefined);

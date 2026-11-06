@@ -15,9 +15,6 @@ import { JoinLiveCard } from "@/components/live/joinLiveCard";
 import { describeLiveAccessLock } from "@/utils/liveAccessLock.util";
 import { TipSheet } from "@/components/coins/tipSheet";
 import { LikeBurst } from "@/components/clips/likeBurst";
-import { LiveGiftOverlay } from "@/components/live/gifts/liveGiftOverlay";
-import { LiveGiftPickerSheet } from "@/components/live/gifts/liveGiftPickerSheet";
-import { useLiveGiftComments } from "@/components/live/gifts/liveGiftComments.hook";
 import { LiveCommentBar } from "@/components/live/liveCommentBar";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { LiveCommentsFeed } from "@/components/live/liveCommentsFeed";
@@ -29,6 +26,7 @@ import { LiveReactionRail } from "@/components/live/liveReactionRail";
 import { useLiveSessionWithActions } from "@/components/live/liveSession.hook";
 import { useLiveHostConnection } from "@/components/live/liveHostConnection.hook";
 import { LiveHostStatusBanner } from "@/components/live/liveHostStatusBanner";
+import { LiveCoinSupportControl } from "@/components/live/liveCoinSupportControl";
 import { pickLiveHostNotice } from "@/services/live/liveMediaPolicy.util";
 import { useLiveMedia } from "@/components/live/media/liveMedia.hook";
 import { LiveHostControls } from "@/components/live/media/liveHostControls";
@@ -67,7 +65,6 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const [showShare, setShowShare] = useState(false);
   const { openSendInChat, sendInChatElement } = useShareToChat();
   const [showProducts, setShowProducts] = useState(false);
-  const [showGiftPicker, setShowGiftPicker] = useState(false);
   const [showTipSheet, setShowTipSheet] = useState(false);
   const [showPinProducts, setShowPinProducts] = useState(false);
   const [showViewerLiveOptions, setShowViewerLiveOptions] = useState(false);
@@ -78,7 +75,6 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
   const live = useLiveSessionWithActions(liveId, hasJoined);
   const livePoints = useLiveEngagementPoints(liveId, hasJoined && !isHost);
   const liveStage = useLiveStageWithActions(liveId, hasJoined);
-  const giftComments = useLiveGiftComments(liveId, live.session.data ? [live.session.data.host] : []);
   const { canGoLive, isCreatorStatusLoading } = useCreatorStatus();
   const creatorEntry = useCreatorEntry();
   const session = live.session.data;
@@ -111,7 +107,9 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       })
     : null;
   const isHostBlockedFromGoingLive = isHost && !isCreatorStatusLoading && !canGoLive;
-  const viewerCanSendGifts = !isHost && (session?.giftsEnabled ?? session?.hostIsCreator ?? false);
+  // Coin contributions are a host-controlled opt-in. Do not infer permission
+  // from creator status when reading a legacy session without this field.
+  const viewerCanDonateCoins = !isHost && session?.giftsEnabled === true;
   const [likeBurstKey, setLikeBurstKey] = useState(0);
   const lastStageTapAt = useRef(0);
   const likeLiveByDoubleTap = () => {
@@ -274,7 +272,6 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         liveId={liveId}
         session={session}
         controller={liveStage}
-        canViewerSendGifts={viewerCanSendGifts}
         isCameraPermissionGranted={isHostCameraAllowed}
         isPlaybackAllowed={isScreenFocused}
         media={media}
@@ -294,6 +291,9 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
         }}
         onMore={openLiveOptions}
       />
+      {isHost && session.status === "live" ? (
+        <LiveCoinSupportControl liveId={liveId} enabled={session.giftsEnabled === true} onUpdated={() => void live.session.refetch()} />
+      ) : null}
       {isHost ? (
         <LiveHostStatusBanner notice={hostNotice} topOffset={insets.top + 56} />
       ) : null}
@@ -305,7 +305,7 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       ) : null}
       <View style={styles.flex} />
       <View style={styles.bottomRow}>
-        <LiveCommentsFeed comments={[...(live.comments.data?.data ?? []), ...giftComments]} isShownOverVideo={isShownOverVideo} />
+        <LiveCommentsFeed comments={live.comments.data?.data ?? []} isShownOverVideo={isShownOverVideo} />
         {isSponsoredLive ? null : <LiveReactionRail expanded={reactionsExpanded} onReact={live.sendReaction} isShownOverVideo={isShownOverVideo} />}
       </View>
       <View style={isShownOverVideo ? null : styles.commentBarArea}>
@@ -318,17 +318,12 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
           onPressProducts={
             hostCanPinProductsToThisLive ? () => setShowPinProducts(true) : liveHasProducts ? () => setShowProducts(true) : undefined
           }
-          onPressGift={viewerCanSendGifts ? () => requireAuthThen(() => setShowGiftPicker(true), undefined, "send gifts") : undefined}
-          onPressTip={viewerCanSendGifts ? () => setShowTipSheet(true) : undefined}
+          onPressTip={viewerCanDonateCoins ? () => setShowTipSheet(true) : undefined}
         />
         <KeyboardSpacer />
       </View>
       {showTipSheet ? (
         <TipSheet target={{ targetType: "live", targetId: liveId, creatorName: session.host.name }} onClose={() => setShowTipSheet(false)} />
-      ) : null}
-      <LiveGiftOverlay liveId={liveId} streamer={session.host} isHost={isHost} topOffset={insets.top + 60} />
-      {viewerCanSendGifts ? (
-        <LiveGiftPickerSheet liveId={liveId} recipientUserId={session.host.id} visible={showGiftPicker} onClose={() => setShowGiftPicker(false)} />
       ) : null}
       {hostCanPinProductsToThisLive && liveStoreId ? (
         <LivePinProductsSheet

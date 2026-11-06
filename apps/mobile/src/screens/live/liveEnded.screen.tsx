@@ -4,8 +4,6 @@ import { Pressable, ScrollView, Share, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArrowLeft24Icon, Share24Icon } from "@/components/icons";
-import { LiveTopSupportersList } from "@/components/live/gifts/liveTopSupportersList";
-import { LiveTopSupporterCard } from "@/components/live/gifts/liveTopSupporterCard";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/errorState";
@@ -56,8 +54,6 @@ export function LiveEndedScreen({ navigation, route }: MainScreenProps<"LiveEnde
         {hostId ? (
           <Button title="View profile" variant="outline" height={36} style={styles.profileButton} onPress={() => navigation.replace("UserProfile", { userId: hostId })} />
         ) : null}
-        <LiveTopSupporterCard liveId={route.params.liveId} />
-        <LiveTopSupportersList liveId={route.params.liveId} />
       </View>
       {suggested.data && suggested.data.length > 0 ? (
         <View style={[styles.sheet, { paddingBottom: insets.bottom }]}>

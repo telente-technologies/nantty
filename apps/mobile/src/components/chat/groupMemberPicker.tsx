@@ -16,9 +16,10 @@ export interface GroupMemberPickerProps {
   readonly onToggleSelectedPerson: (person: UserSummary) => void;
   readonly excludedUserIds?: readonly string[];
   readonly isInsideScrollView?: boolean;
+  readonly searchPurpose?: "add" | "invite";
 }
 
-export function GroupMemberPicker({ selectedPeople, onToggleSelectedPerson, excludedUserIds = [], isInsideScrollView = false }: GroupMemberPickerProps) {
+export function GroupMemberPicker({ selectedPeople, onToggleSelectedPerson, excludedUserIds = [], isInsideScrollView = false, searchPurpose = "add" }: GroupMemberPickerProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,10 +48,10 @@ export function GroupMemberPicker({ selectedPeople, onToggleSelectedPerson, excl
         <TextInput
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholder="Search people to add"
+          placeholder={searchPurpose === "invite" ? "Search people to invite" : "Search people to add"}
           placeholderTextColor={colors.textSubtle}
           autoCapitalize="none"
-          accessibilityLabel="Search people to add"
+          accessibilityLabel={searchPurpose === "invite" ? "Search people to invite" : "Search people to add"}
           selectionColor={colors.primary}
           style={styles.searchInput}
         />

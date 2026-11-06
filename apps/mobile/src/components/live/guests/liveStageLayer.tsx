@@ -3,7 +3,7 @@ import { StyleSheet, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTickingServerNow } from "@/components/live/battle/battleClock.hook";
-import { BattleGiftPickerSheet } from "@/components/live/battle/battleGiftPickerSheet";
+import { BattleCoinContributionSheet } from "@/components/live/battle/battleCoinContributionSheet";
 import { BattleHistoryCard } from "@/components/live/battle/battleHistoryCard";
 import { BattleProposalSheet, isMyConsentPending } from "@/components/live/battle/battleProposalSheet";
 import { BattleSetupSheet } from "@/components/live/battle/battleSetupSheet";
@@ -29,18 +29,17 @@ export interface LiveStageLayerProps {
   readonly liveId: string;
   readonly session: LiveSessionDetails;
   readonly controller: LiveStageController;
-  readonly canViewerSendGifts: boolean;
   readonly isCameraPermissionGranted: boolean;
   readonly isPlaybackAllowed: boolean;
   readonly media?: LiveMedia;
 }
 
-export function LiveStageLayer({ liveId, session, controller, canViewerSendGifts, isCameraPermissionGranted, isPlaybackAllowed, media }: LiveStageLayerProps) {
+export function LiveStageLayer({ liveId, session, controller, isCameraPermissionGranted, isPlaybackAllowed, media }: LiveStageLayerProps) {
   const insets = useSafeAreaInsets();
   const window = useWindowDimensions();
   const [isGuestsSheetOpen, setIsGuestsSheetOpen] = useState(false);
   const [isBattleSetupOpen, setIsBattleSetupOpen] = useState(false);
-  const [giftRecipient, setGiftRecipient] = useState<LiveStageStreamer | null>(null);
+  const [contributionRecipient, setContributionRecipient] = useState<LiveStageStreamer | null>(null);
   const [dismissedHistoryBattleId, setDismissedHistoryBattleId] = useState<string | null>(null);
   const stage = controller.stage;
   const now = useTickingServerNow(controller.serverClockOffsetMs, !!stage?.activeBattle);
@@ -48,7 +47,7 @@ export function LiveStageLayer({ liveId, session, controller, canViewerSendGifts
   if (!stage) return null;
 
   const isHostView = stage.myRole === "host";
-  const canGiftStreamers = !isHostView && (canViewerSendGifts || stage.activeBattle !== null);
+  const canContributeToBattle = !isHostView && stage.activeBattle?.state === "active";
   const gridTop = insets.top + HEADER_CLEARANCE;
   const gridHeight = stageGridHeightForWidth(stage.streamers.length, window.width, window.height * GRID_MAXIMUM_SCREEN_SHARE);
   const belowGridTop = controller.isMultiGuestLayout ? gridTop + gridHeight + (stage.activeBattle?.participants.length === 2 ? 28 : 10) : gridTop + 40;
@@ -57,7 +56,9 @@ export function LiveStageLayer({ liveId, session, controller, canViewerSendGifts
 
   const pressStreamerTile = (streamer: LiveStageStreamer) => {
     if (isHostView) return setIsGuestsSheetOpen(true);
-    if (streamer.user.id !== controller.signedInUserId && canGiftStreamers) requireAuthThen(() => setGiftRecipient(streamer), undefined, "send gifts");
+    if (streamer.user.id !== controller.signedInUserId && canContributeToBattle) {
+      requireAuthThen(() => setContributionRecipient(streamer), undefined, "contribute coins");
+    }
   };
 
   const railButtons = isHostView
@@ -82,10 +83,10 @@ export function LiveStageLayer({ liveId, session, controller, canViewerSendGifts
               isCameraPermissionGranted={isCameraPermissionGranted}
               isPlaybackAllowed={isPlaybackAllowed}
               media={media}
-              tilePressHint={isHostView ? "Opens guest controls" : canGiftStreamers ? "Opens gifts for this streamer" : ""}
+              tilePressHint={isHostView ? "Opens guest controls" : canContributeToBattle ? "Opens coin contribution" : ""}
               onPressStreamer={pressStreamerTile}
               onPressEmptySeat={isHostView ? () => setIsGuestsSheetOpen(true) : undefined}
-              overlay={stage.activeBattle ? <BattleStageOverlay battle={stage.activeBattle} recentGifts={stage.recentBattleGifts} now={now} gridHeight={gridHeight} /> : null}
+              overlay={stage.activeBattle ? <BattleStageOverlay battle={stage.activeBattle} now={now} gridHeight={gridHeight} /> : null}
             />
           </View>
         </>
@@ -135,14 +136,12 @@ export function LiveStageLayer({ liveId, session, controller, canViewerSendGifts
         </>
       ) : (
         <>
-          <BattleGiftPickerSheet
-            liveId={liveId}
-            recipient={giftRecipient}
+          <BattleCoinContributionSheet
+            key={contributionRecipient?.user.id ?? "no-recipient"}
+            recipient={contributionRecipient}
             battle={stage.activeBattle}
-            hostName={session.host.name}
-            signedInUserId={controller.signedInUserId}
             onStageUpdated={controller.replaceStageSnapshot}
-            onClose={() => setGiftRecipient(null)}
+            onClose={() => setContributionRecipient(null)}
           />
           <LiveStageInvitePrompt
             invite={stage.invitationForMe}

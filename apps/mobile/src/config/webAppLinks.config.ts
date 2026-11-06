@@ -41,6 +41,8 @@ export const webAppLinks = {
   clip: (clipId: string) => `${webAppBaseUrl}/post/${encodeURIComponent(clipId)}`,
   live: (liveId: string) => `${webAppBaseUrl}/live/${encodeURIComponent(liveId)}`,
   space: (spaceId: string) => `${webAppBaseUrl}/spaces/${encodeURIComponent(spaceId)}`,
+  groupInvitation: (token: string) => `${webAppBaseUrl}/chats/invitations/${encodeURIComponent(token)}`,
+  channelInvitation: (token: string) => `${webAppBaseUrl}/channels/invitations/${encodeURIComponent(token)}`,
   subscriptionOffer: (token: string) => `${webAppBaseUrl}/offer/${encodeURIComponent(token)}`,
   goldForBusinessesCheckout: (input: { readonly profileIds: readonly string[]; readonly interval: "month" | "year"; readonly expectedTotalMinor: number }) =>
     `${webAppBaseUrl}/verification?goldProfiles=${encodeURIComponent(input.profileIds.join(","))}&goldInterval=${input.interval}`,

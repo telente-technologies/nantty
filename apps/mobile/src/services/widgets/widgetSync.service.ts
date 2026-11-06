@@ -9,7 +9,7 @@ import { useWidgetPreferencesStore } from "@/store/widgetPreferences.store";
 
 import { areHomeScreenWidgetsSupported, reloadHomeScreenWidgets } from "./widgetNativeBridge.service";
 import { clearWidgetSnapshotsForSignOut, refreshWidgetSnapshots } from "./widgetSnapshots.service";
-import { startWidgetRefreshPush, unregisterDeviceFromWidgetPush } from "./widgetPush.service";
+import { startWidgetRefreshTask } from "./widgetPush.service";
 import { forgetWidgetTokenOnThisDevice, rotateWidgetTokenWhenDue } from "./widgetToken.service";
 
 export const WIDGET_REFRESH_TASK_NAME = "nantty-refresh-home-screen-widgets";
@@ -32,7 +32,7 @@ export function syncHomeScreenWidgetsNow(options: { readonly force?: boolean; re
   lastSyncStartedAt = now;
   runningSync = (async () => {
     if (!(await ensureSessionRestored())) return;
-    await startWidgetRefreshPush().catch(() => undefined);
+    await startWidgetRefreshTask().catch(() => undefined);
     await rotateWidgetTokenWhenDue().catch(() => false);
     const written = await refreshWidgetSnapshots(useWidgetPreferencesStore.getState().hideAmounts, options.kinds);
     await reloadHomeScreenWidgets(written);
@@ -44,7 +44,6 @@ export function syncHomeScreenWidgetsNow(options: { readonly force?: boolean; re
 
 export async function clearHomeScreenWidgetsForSignOut(): Promise<void> {
   if (!areHomeScreenWidgetsSupported()) return;
-  await unregisterDeviceFromWidgetPush();
   await forgetWidgetTokenOnThisDevice(true);
   await clearWidgetSnapshotsForSignOut();
   await reloadHomeScreenWidgets();

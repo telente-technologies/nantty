@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { Gift24Icon, SealCheck20Icon } from "@/components/icons";
+import { Coin24Icon, Gift24Icon, SealCheck20Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/input";
@@ -35,6 +35,8 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
   const pendingTipIdempotencyKey = useRef<string | null>(null);
   const coins = customCoins ? Number.parseInt(customCoins, 10) : (selectedPresetCoins ?? 0);
   const isProfileGift = target?.targetType === "profile";
+  const isLiveDonation = target?.targetType === "live";
+  const actionLabel = isLiveDonation ? "Donate" : isProfileGift ? "Gift" : "Tip";
 
   const sendTip = useMutation({
     mutationFn: () => {
@@ -63,15 +65,15 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
 
   return (
     <>
-      <BottomSheet visible={!!target && !isBuyCoinsOpen} onClose={closeAndReset} title={`${isProfileGift ? "Gift" : "Tip"} ${target?.creatorName ?? ""}`} floating scrollable>
+      <BottomSheet visible={!!target && !isBuyCoinsOpen} onClose={closeAndReset} title={`${actionLabel} ${target?.creatorName ?? ""}`} subtitle={isLiveDonation ? "Send coins directly to the live host." : undefined} floating scrollable>
         <View style={styles.body}>
           <View style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.chip }}>
-            {sendTip.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : <Gift24Icon size={22} color={colors.textMuted} />}
+            {sendTip.isSuccess ? <SealCheck20Icon size={22} color={colors.textMuted} /> : isLiveDonation ? <Coin24Icon size={22} /> : <Gift24Icon size={22} color={colors.textMuted} />}
           </View>
           <CoinBalanceChip onPress={() => setIsBuyCoinsOpen(true)} />
           {sendTip.isSuccess ? (
             <Text size={14} lineHeight={16.8} color={colors.success} accessibilityLiveRegion="polite">
-              {isProfileGift ? `Gift credited to ${target?.creatorName}.` : `You tipped ${formatCoinAmount(sendTip.data.coins)}. Thank you for supporting ${target?.creatorName}!`}
+              {isLiveDonation ? `You donated ${formatCoinAmount(sendTip.data.coins)} to ${target?.creatorName}. Thank you for supporting this live.` : isProfileGift ? `Gift credited to ${target?.creatorName}.` : `You tipped ${formatCoinAmount(sendTip.data.coins)}. Thank you for supporting ${target?.creatorName}!`}
             </Text>
           ) : (
             <>
@@ -107,7 +109,7 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
                 </Text>
               ) : null}
               <Button
-                title={coins > 0 ? `Send ${formatCoinAmount(coins)}` : "Choose an amount"}
+                title={coins > 0 ? `${actionLabel} ${formatCoinAmount(coins)}` : "Choose an amount"}
                 disabled={!(coins > 0) || !target}
                 loading={sendTip.isPending}
                 onPress={() => sendTip.mutate()}

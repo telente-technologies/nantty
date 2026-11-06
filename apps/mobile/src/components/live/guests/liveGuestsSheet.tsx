@@ -39,7 +39,7 @@ export function LiveGuestsSheet({ liveId, visible, controller, onClose }: { live
         ) : null}
         <SectionTitle icon={<VideoCamera24Icon size={20} color={colors.textMuted} />}>On stage</SectionTitle>
         {stage.streamers.map((streamer) => (
-          <PersonRow key={streamer.user.id} user={streamer.user} caption={streamer.role === "host" ? "Host (you)" : `${streamer.audioMuted ? "Muted" : "Mic on"} · ${streamer.videoMuted ? "Camera off" : "Camera on"}${streamer.isCreatorProgramMember ? "" : " · gifts paid to you"}`}>
+          <PersonRow key={streamer.user.id} user={streamer.user} caption={streamer.role === "host" ? "Host (you)" : `${streamer.audioMuted ? "Muted" : "Mic on"} · ${streamer.videoMuted ? "Camera off" : "Camera on"}${streamer.isCreatorProgramMember ? "" : " · coin contributions paid to you"}`}>
             <SmallActionButton
               label={streamer.audioMuted ? "Unmute" : "Mute"}
               onPress={() => controller.setStreamerAudioMuted(streamer.user.id, !streamer.audioMuted)}

@@ -6,8 +6,63 @@ import { sendChatControl } from "../chat/messages.service";
 import { withDecryptedGroupDetails } from "../chat/groupDetails.service";
 import { chatCryptoService } from "../chatCrypto/chatCrypto.service";
 import { uploadEncryptedAttachment } from "../chatCrypto/encryptedAttachments.service";
-import { api } from "../core/apiClient.service";
+import { api, generateIdempotencyKey } from "../core/apiClient.service";
 import { type LocalMediaFile, resizeAndReencodeImageWithoutMetadata } from "../media/mediaPreparation.service";
+
+export type GroupInvitationDirection = "received" | "sent";
+export type GroupInvitationStatus = "pending" | "accepted" | "declined" | "revoked" | "expired";
+
+export interface GroupInvitation {
+  readonly id: string;
+  readonly conversationId: string;
+  readonly inviterId: string;
+  readonly inviteeId: string;
+  readonly status: GroupInvitationStatus;
+  readonly createdAt: string;
+  readonly expiresAt: string;
+  readonly counterpart: Pick<ConversationMember["user"], "id" | "name" | "username" | "avatarUrl" | "verified"> | null;
+  readonly membershipStatus: "not_joined" | "awaiting_secure_key_handoff";
+}
+
+export interface GroupInvitationPage {
+  readonly data: readonly GroupInvitation[];
+  readonly nextCursor: string | null;
+}
+
+export interface GroupInvitationLink {
+  readonly id: string;
+  readonly conversationId: string;
+  /** Opaque bearer token; the backend stores only its hash. */
+  readonly token: string;
+  readonly expiresAt: string;
+}
+
+export interface GroupInvitationLinkPreview {
+  readonly group: { readonly title: string | null; readonly memberCount: number };
+  readonly expiresAt: string;
+}
+
+export interface RevokedGroupInvitationLink {
+  readonly id: string;
+  readonly conversationId: string;
+  readonly revokedAt: string;
+}
+
+export interface GroupInvitationLinkRecord {
+  readonly id: string;
+  readonly conversationId: string;
+  readonly createdAt: string;
+  readonly expiresAt: string;
+  readonly revokedAt: string | null;
+}
+
+export interface GroupInvitationLinkPage {
+  readonly data: readonly GroupInvitationLinkRecord[];
+  readonly nextCursor: string | null;
+}
+
+const invitationPath = (invitationId: string) => `/api/v1/group-invitations/${encodeURIComponent(invitationId)}`;
+const mutationOptions = () => ({ idempotencyKey: generateIdempotencyKey() });
 
 const announceGroupKey = (conversationId: string) => sendChatControl(conversationId, { type: "groupUpdate" }).then(() => undefined);
 
@@ -47,6 +102,26 @@ export const groupsService = {
     return updated;
   },
   fetchConversationMembers: (conversationId: string) => api.getList<ConversationMember>(`/api/v1/conversations/${conversationId}/members`),
+  createGroupInvitation: (conversationId: string, inviteeId: string) =>
+    api.post<GroupInvitation>(`/api/v1/conversations/${encodeURIComponent(conversationId)}/invitations`, { inviteeId }, mutationOptions()),
+  listGroupInvitations: (direction: GroupInvitationDirection, cursor?: string) =>
+    api.getPage<GroupInvitation>("/api/v1/group-invitations", { direction, cursor, limit: 20 }),
+  acceptGroupInvitation: (invitationId: string) =>
+    api.post<GroupInvitation>(`${invitationPath(invitationId)}/accept`, undefined, mutationOptions()),
+  declineGroupInvitation: (invitationId: string) =>
+    api.post<GroupInvitation>(`${invitationPath(invitationId)}/decline`, undefined, mutationOptions()),
+  revokeGroupInvitation: (conversationId: string, invitationId: string) =>
+    api.delete<GroupInvitation>(`/api/v1/conversations/${encodeURIComponent(conversationId)}/invitations/${encodeURIComponent(invitationId)}`, mutationOptions()),
+  createGroupInvitationLink: (conversationId: string, expiresInHours: 24 | 168 | 720 = 168) =>
+    api.post<GroupInvitationLink>(`/api/v1/conversations/${encodeURIComponent(conversationId)}/invitation-links`, { expiresInHours }, mutationOptions()),
+  listGroupInvitationLinks: (conversationId: string, cursor?: string) =>
+    api.getPage<GroupInvitationLinkRecord>(`/api/v1/conversations/${encodeURIComponent(conversationId)}/invitation-links`, { cursor, limit: 20 }),
+  previewGroupInvitationLink: (token: string) =>
+    api.get<GroupInvitationLinkPreview>(`/api/v1/conversations/invitation-links/${encodeURIComponent(token)}/preview`),
+  claimGroupInvitationLink: (token: string) =>
+    api.post<GroupInvitation>(`/api/v1/conversations/invitation-links/${encodeURIComponent(token)}/claim`, undefined, mutationOptions()),
+  revokeGroupInvitationLink: (conversationId: string, linkId: string) =>
+    api.delete<RevokedGroupInvitationLink>(`/api/v1/conversations/${encodeURIComponent(conversationId)}/invitation-links/${encodeURIComponent(linkId)}`, mutationOptions()),
   addMembersToGroup: async (conversationId: string, userIds: readonly string[]) => {
     const members = await api.post<ConversationMember[]>(`/api/v1/conversations/${conversationId}/members`, { userIds });
     await announceGroupKey(conversationId).catch(() => undefined);
