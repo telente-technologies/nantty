@@ -57,6 +57,8 @@ import com.nantty.android.data.MessagesHttpException
 import com.nantty.android.data.MessagesInboxFolder
 import com.nantty.android.data.MessagesResult
 import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.StoryAdsRepository
+import com.nantty.android.data.StoryAdDestination
 import com.nantty.android.ui.stories.MessagesStoryViewer
 import com.nantty.android.ui.stories.rememberMessagesStoryNavigation
 import java.util.concurrent.Executor
@@ -81,6 +83,8 @@ internal fun MessagesScreen(
     onOpenChatNotificationSettings: () -> Unit = {},
     externalRefreshGeneration: Int = 0,
     storiesRepository: StoriesRepository? = null,
+    storyAdsRepository: StoryAdsRepository? = null,
+    onOpenStoryAdDestination: (StoryAdDestination) -> Unit = {},
 ) {
     val searchActionDescription = stringResource(R.string.messages_search_action)
     var selectedConversation by remember(repository) { mutableStateOf<InboxConversation?>(null) }
@@ -107,7 +111,7 @@ internal fun MessagesScreen(
     var showChannelInvitations by remember(repository) { mutableStateOf(false) }
     var showChannelLinks by remember(repository) { mutableStateOf(false) }
     var inviteGroupConversation by remember(repository) { mutableStateOf<InboxConversation?>(null) }
-    val storyNavigation = rememberMessagesStoryNavigation(storiesRepository, executor, onReauthenticate)
+    val storyNavigation = rememberMessagesStoryNavigation(storiesRepository, storyAdsRepository, executor, onReauthenticate)
     var lastStoriesRefreshGeneration by remember(repository) { mutableIntStateOf(externalRefreshGeneration) }
     LaunchedEffect(externalRefreshGeneration) {
         if (externalRefreshGeneration != lastStoriesRefreshGeneration) storyNavigation.refreshTray()
@@ -480,5 +484,5 @@ internal fun MessagesScreen(
         )
     }
 
-    MessagesStoryViewer(storiesRepository, executor, storyNavigation, onReauthenticate)
+    MessagesStoryViewer(storiesRepository, storyAdsRepository, executor, storyNavigation, onReauthenticate, onOpenStoryAdDestination)
 }

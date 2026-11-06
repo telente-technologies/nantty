@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
@@ -52,9 +53,14 @@ import com.nantty.android.data.StoryFeedResult
 import com.nantty.android.data.StoryItem
 import com.nantty.android.data.StoryDeleteResult
 import com.nantty.android.data.StorySeenResult
+import com.nantty.android.data.StoryAdsRepository
+import com.nantty.android.data.StoryAdDecisionResult
+import com.nantty.android.data.StoryAdDestination
+import com.nantty.android.data.StoryDecidedAd
 import com.nantty.android.R
 import com.nantty.android.ui.clips.ClipVideoPlayer
 import java.util.concurrent.Executor
+import java.time.Instant
 import kotlinx.coroutines.delay
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -63,11 +69,14 @@ internal fun StoryViewerDialog(
     repository: StoriesRepository,
     userId: String,
     executor: Executor,
+    adsRepository: StoryAdsRepository?,
+    adSession: StoryAdSession,
     startAtLast: Boolean = false,
     onClose: () -> Unit,
     onPreviousUser: () -> Unit = {},
     onNextUser: () -> Unit = onClose,
     onReauthenticate: () -> Unit,
+    onOpenAdDestination: (StoryAdDestination) -> Unit,
 ) {
     var result by remember(repository, userId) { mutableStateOf<StoryFeedResult?>(null) }
     var activeIndex by remember(userId) { mutableIntStateOf(0) }
@@ -77,8 +86,10 @@ internal fun StoryViewerDialog(
     var deleteStory by remember(userId) { mutableStateOf<StoryItem?>(null) }
     var deletingStory by remember(userId) { mutableStateOf(false) }
     var deleteStoryError by remember(userId) { mutableStateOf<String?>(null) }
+    var sponsoredAd by remember(userId, adSession.sessionId) { mutableStateOf<StoryDecidedAd?>(null) }
     val reportRepository = remember(repository) { ProductReportRepository(accessTokenProvider = repository::currentAccessToken) }
     val requestGeneration = remember(repository) { AtomicInteger() }
+    val sessionOffset = remember(userId, adSession.sessionId) { adSession.viewedCount }
     DisposableEffect(repository) {
         onDispose { requestGeneration.incrementAndGet() }
     }
@@ -98,8 +109,49 @@ internal fun StoryViewerDialog(
 
     val stories = (result as? StoryFeedResult.Success)?.stories.orEmpty()
     val story = stories.getOrNull(activeIndex)
+
+    LaunchedEffect(stories, sessionOffset, adsRepository, adSession.sessionId) {
+        val ads = adsRepository ?: return@LaunchedEffect
+        val sessionId = adSession.sessionId
+        storyAdSlotsForStories(sessionOffset, stories.size).forEach { slot ->
+            val storyIndex = slot - sessionOffset - 1
+            val target = stories.getOrNull(storyIndex) ?: return@forEach
+            if (!adSession.requestSlotOnce(slot)) return@forEach
+            val neighbours = listOfNotNull(stories.getOrNull(storyIndex - 1)?.id, stories.getOrNull(storyIndex + 1)?.id).take(10)
+            val slotsSinceLastAd = storySlotsSinceLastAd(slot, adSession.lastAdViewedAt)
+            executor.execute {
+                when (val decision = ads.decideStoryAd(target.id, sessionId, slotsSinceLastAd, neighbours, slot)) {
+                    is StoryAdDecisionResult.Success -> decision.ad?.let { adSession.cacheAd(slot, it, sessionId) }
+                    is StoryAdDecisionResult.Failure -> if (decision.authenticationRequired) onReauthenticate()
+                }
+            }
+        }
+    }
+
+    fun advancePastCurrentStory() {
+        if (activeIndex < stories.lastIndex) activeIndex += 1 else onNextUser()
+    }
+
+    fun advanceStoryOrShowAd() {
+        if (sponsoredAd != null) {
+            sponsoredAd = null
+            advancePastCurrentStory()
+            return
+        }
+        val slot = sessionOffset + activeIndex + 1
+        val ad = adSession.adsBySlot[slot]
+        val adNotExpired = ad?.let { runCatching { Instant.parse(it.expiresAt).toEpochMilli() > System.currentTimeMillis() }.getOrDefault(false) } == true
+        if (ad != null && adNotExpired && !adSession.hasViewedAd(slot) && adSession.markAdViewed(slot)) {
+            sponsoredAd = ad
+        } else {
+            advancePastCurrentStory()
+        }
+    }
+
+    val advanceLatest by rememberUpdatedState(newValue = { advanceStoryOrShowAd() })
     LaunchedEffect(story?.id) {
         if (story == null || story.seen) return@LaunchedEffect
+        adSession.recordStoryViewed()
         executor.execute {
             val seenResult = repository.markSeen(story.id)
             if (seenResult is StorySeenResult.Failure && seenResult.authenticationRequired) {
@@ -107,10 +159,10 @@ internal fun StoryViewerDialog(
             }
         }
     }
-    LaunchedEffect(story?.id, story?.media?.type, onNextUser) {
-        if (story?.media?.type != "image") return@LaunchedEffect
+    LaunchedEffect(story?.id, story?.media?.type, sponsoredAd) {
+        if (sponsoredAd != null || story?.media?.type != "image") return@LaunchedEffect
         delay(5_000)
-        if (activeIndex < stories.lastIndex) activeIndex += 1 else onNextUser()
+        advanceLatest()
     }
 
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -141,13 +193,21 @@ internal fun StoryViewerDialog(
                             Text("No stories right now", color = Color.White)
                             TextButton(onClick = onClose) { Text("Close", color = Color.White) }
                         }
+                    } else if (sponsoredAd != null && adsRepository != null) {
+                        SponsoredStoryPage(
+                            ad = sponsoredAd!!,
+                            repository = adsRepository,
+                            executor = executor,
+                            onFinished = { advanceStoryOrShowAd() },
+                            onOpenDestination = onOpenAdDestination,
+                        )
                     } else {
                         StoryPage(
                             story = current.stories[activeIndex.coerceIn(current.stories.indices)],
                             count = current.stories.size,
                             activeIndex = activeIndex,
                             onPrevious = { if (activeIndex > 0) activeIndex-- else onPreviousUser() },
-                            onNext = { if (activeIndex < current.stories.lastIndex) activeIndex++ else onNextUser() },
+                            onNext = ::advanceStoryOrShowAd,
                             onClose = onClose,
                             onOpenAnalytics = { analyticsStory = it.takeIf(repository::canOpenOwnerAnalytics) },
                             canOpenAnalytics = repository::canOpenOwnerAnalytics,
