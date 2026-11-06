@@ -28,6 +28,7 @@ import com.nantty.android.data.InboxConversation
 import com.nantty.android.data.LiveCoinTipRepository
 import com.nantty.android.data.LiveCommentsRepository
 import com.nantty.android.data.LiveSessionsRepository
+import com.nantty.android.data.LiveStageRepository
 import com.nantty.android.data.NotificationsRepository
 import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.data.PostDetailRepository
@@ -129,8 +130,10 @@ internal fun MainContent(
     supportTicketRepository: SupportTicketRepository? = null,
     spacesRepository: SpacesRepository? = null,
     liveSessionsRepository: LiveSessionsRepository? = null,
+    liveStageRepository: LiveStageRepository? = null,
     liveCoinTipRepository: LiveCoinTipRepository? = null,
     liveCommentsRepository: LiveCommentsRepository? = null,
+    liveReportRepository: com.nantty.android.data.ProductReportRepository? = null,
     initialLiveId: String? = null,
     onBackFromLive: () -> Unit = {},
     clipsRepository: ClipsRepository? = null,
@@ -164,12 +167,14 @@ internal fun MainContent(
     businessContent: (@Composable () -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    if (destination == Destination.Live && liveSessionsRepository != null && liveCoinTipRepository != null && liveCommentsRepository != null && ioExecutor != null && initialLiveId != null) {
+    if (destination == Destination.Live && liveSessionsRepository != null && liveCoinTipRepository != null && liveCommentsRepository != null && liveStageRepository != null && ioExecutor != null && initialLiveId != null) {
         com.nantty.android.ui.live.LiveWatchScreen(
             liveId = initialLiveId,
             sessions = liveSessionsRepository,
             coinTips = liveCoinTipRepository,
             comments = liveCommentsRepository,
+            stage = liveStageRepository,
+            reports = liveReportRepository,
             executor = ioExecutor,
             onBack = onBackFromLive,
             onReauthenticate = onReauthenticate,

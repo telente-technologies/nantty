@@ -7,6 +7,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.nantty.android.data.InboxConversation
+import com.nantty.android.data.ChannelInvitation
 import com.nantty.android.data.MessagesRepository
 import java.util.concurrent.Executor
 
@@ -28,11 +29,12 @@ internal fun ChannelInvitationOverlays(
     executor: Executor,
     onInvitationsVisibilityChange: (Boolean) -> Unit,
     onLinksVisibilityChange: (Boolean) -> Unit,
+    onChannelAccepted: (ChannelInvitation) -> Unit,
     onTokenHandled: () -> Unit,
     onReauthenticate: () -> Unit,
 ) {
     if (showInvitations) {
-        ChannelInvitationsDialog(repository, executor, { onInvitationsVisibilityChange(false) }, onReauthenticate)
+        ChannelInvitationsDialog(repository, executor, { onInvitationsVisibilityChange(false) }, onChannelAccepted, onReauthenticate)
     }
     if (showLinks) {
         ChannelInvitationLinksDialog(channels, repository, executor, { onLinksVisibilityChange(false) }, onReauthenticate)

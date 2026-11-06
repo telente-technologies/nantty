@@ -25,10 +25,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nantty.android.data.LiveCoinTipReceipt
@@ -41,6 +43,9 @@ import com.nantty.android.data.LiveMediaGrant
 import com.nantty.android.data.LiveSessionSnapshot
 import com.nantty.android.data.LiveSessionsRepository
 import com.nantty.android.data.LiveSessionsResult
+import com.nantty.android.data.LiveStageRepository
+import com.nantty.android.data.LiveStageViewerSnapshot
+import com.nantty.android.data.ProductReportRepository
 import io.livekit.android.compose.local.RoomScope
 import io.livekit.android.compose.state.rememberTracks
 import io.livekit.android.compose.ui.VideoTrackView
@@ -48,6 +53,8 @@ import java.util.UUID
 import java.util.concurrent.Executor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /** Authenticated viewer route for an ordinary live; Spaces keep their independent audio-session flow. */
 @Composable
@@ -56,6 +63,8 @@ internal fun LiveWatchScreen(
     sessions: LiveSessionsRepository,
     coinTips: LiveCoinTipRepository,
     comments: LiveCommentsRepository,
+    stage: LiveStageRepository,
+    reports: ProductReportRepository?,
     executor: Executor,
     onBack: () -> Unit,
     onReauthenticate: () -> Unit,
@@ -78,7 +87,13 @@ internal fun LiveWatchScreen(
     var olderCommentsError by remember(liveId) { mutableStateOf<String?>(null) }
     var commentDraft by remember(liveId) { mutableStateOf("") }
     var commentSending by remember(liveId) { mutableStateOf(false) }
-
+    var stageSnapshot by remember(liveId) { mutableStateOf<LiveStageViewerSnapshot?>(null) }
+    var stageActionWorking by remember(liveId) { mutableStateOf(false) }
+    var stageError by remember(liveId) { mutableStateOf<String?>(null) }
+    var stageMicrophoneEnabled by remember(liveId) { mutableStateOf(false) }
+    var stageCameraEnabled by remember(liveId) { mutableStateOf(false) }
+    var reportVisible by remember(liveId) { mutableStateOf(false) }
+    val latestStageSnapshot by rememberUpdatedState(stageSnapshot)
     fun loadLiveComments(cursor: String? = null, older: Boolean = false) {
         if (!joined || commentsLoading || (older && olderCommentsLoading)) return
         if (older) {
@@ -147,6 +162,24 @@ internal fun LiveWatchScreen(
         }
     }
 
+    LaunchedEffect(liveId, joined, stage) {
+        if (!joined) return@LaunchedEffect
+        while (isActive) {
+            if (!stageActionWorking) {
+                when (val result = withContext(Dispatchers.IO) { stage.load(liveId) }) {
+                    is LiveSessionsResult.Success -> {
+                        stageSnapshot = result.value
+                    }
+                    is LiveSessionsResult.Failure -> {
+                        stageError = result.message
+                        if (result.authenticationRequired) onReauthenticate()
+                    }
+                }
+            }
+            delay(LIVE_STAGE_REFRESH_INTERVAL_MS)
+        }
+    }
+
     LaunchedEffect(liveId, sessions) {
         loading = true
         executor.execute {
@@ -168,7 +201,10 @@ internal fun LiveWatchScreen(
 
     androidx.compose.runtime.DisposableEffect(liveId, joined, sessions) {
         onDispose {
-            if (joined) executor.execute { sessions.leave(liveId) }
+            if (joined) executor.execute {
+                if (latestStageSnapshot?.myRole == "guest") stage.leaveStage(liveId)
+                sessions.leave(liveId)
+            }
         }
     }
 
@@ -190,6 +226,11 @@ internal fun LiveWatchScreen(
                 Text(current.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(4.dp))
                 Text("@${current.host.username} · ${current.viewers} watching", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (reports != null) {
+                    TextButton(onClick = { reportVisible = true }, modifier = Modifier.testTag("live-report-open")) {
+                        Text(stringResource(com.nantty.android.R.string.live_report_action))
+                    }
+                }
                 Spacer(Modifier.height(12.dp))
 
                 if (!joined || mediaGrant == null) {
@@ -238,21 +279,12 @@ internal fun LiveWatchScreen(
                     if (!current.accessAllowed) TextButton(onClick = onBack) { Text("Back to Nantty") }
                 } else {
                     mediaGrant?.let { grant ->
-                        if (grant.canPublish) {
-                            Card(Modifier.fillMaxWidth()) {
-                                Text(
-                                    "You’re approved to join the stage. Stage camera and microphone controls are not available in this Android Live view yet.",
-                                    Modifier.padding(16.dp),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
                         Card(Modifier.fillMaxWidth().height(280.dp).testTag("live-media-stage")) {
                             RoomScope(
                                 url = grant.url,
                                 token = grant.token,
-                                audio = false,
-                                video = false,
+                                audio = grant.canPublish && stageMicrophoneEnabled,
+                                video = grant.canPublish && stageCameraEnabled,
                                 connect = true,
                                 disconnectOnDispose = true,
                             ) {
@@ -292,6 +324,75 @@ internal fun LiveWatchScreen(
                             }
                         }
                     }
+                    LiveStageAudienceControls(
+                        stage = stageSnapshot,
+                        busy = stageActionWorking,
+                        canPublish = mediaGrant?.canPublish == true,
+                        microphoneEnabled = stageMicrophoneEnabled,
+                        cameraEnabled = stageCameraEnabled,
+                        message = stageError,
+                        onRequestToJoin = {
+                            if (!stageActionWorking) {
+                                stageActionWorking = true
+                                executor.execute {
+                                    when (val result = stage.requestToJoin(liveId)) {
+                                        is LiveSessionsResult.Success -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                                            stageSnapshot = result.value
+                                            stageError = null
+                                            stageActionWorking = false
+                                        }
+                                        is LiveSessionsResult.Failure -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                                            stageError = result.message
+                                            stageActionWorking = false
+                                            if (result.authenticationRequired) onReauthenticate()
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        onLeaveStage = {
+                            stageActionWorking = true
+                            executor.execute {
+                                when (val result = stage.leaveStage(liveId)) {
+                                    is LiveSessionsResult.Success -> when (val grantResult = sessions.issueMediaToken(liveId)) {
+                                        is LiveSessionsResult.Success -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                                            stageSnapshot = result.value
+                                            mediaGrant = grantResult.value
+                                            stageMicrophoneEnabled = false
+                                            stageCameraEnabled = false
+                                            stageError = null
+                                            stageActionWorking = false
+                                        }
+                                        is LiveSessionsResult.Failure -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                                            stageSnapshot = result.value
+                                            mediaGrant = null
+                                            stageError = grantResult.message
+                                            stageActionWorking = false
+                                        }
+                                    }
+                                    is LiveSessionsResult.Failure -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                                        stageError = result.message
+                                        stageActionWorking = false
+                                    }
+                                }
+                            }
+                        },
+                        onToggleMicrophone = { stageMicrophoneEnabled = !stageMicrophoneEnabled },
+                        onToggleCamera = { stageCameraEnabled = !stageCameraEnabled },
+                    )
+                    LiveStageHostFlow(
+                        liveId = liveId,
+                        joined = joined,
+                        stage = stageSnapshot,
+                        busy = stageActionWorking,
+                        message = stageError,
+                        repository = stage,
+                        executor = executor,
+                        onStageChanged = { stageSnapshot = it },
+                        onBusyChanged = { stageActionWorking = it },
+                        onError = { stageError = it },
+                        onReauthenticate = onReauthenticate,
+                    )
                     Spacer(Modifier.height(12.dp))
                     if (current.coinSupportEnabled) {
                         Text("Support the host with coins", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -335,14 +436,46 @@ internal fun LiveWatchScreen(
                         Text("Coin support is turned off by the host.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp)) }
-                    Text("Stage invitations are not yet available in this Android view.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 16.dp))
                 }
             }
         }
     }
+
+    LiveStageInvitationFlow(
+        liveId = liveId,
+        hostName = session?.host?.name.orEmpty(),
+        joined = joined,
+        stageSnapshot = stageSnapshot,
+        mediaGrant = mediaGrant,
+        busy = stageActionWorking,
+        stage = stage,
+        sessions = sessions,
+        executor = executor,
+        onBusyChanged = { stageActionWorking = it },
+        onStageChanged = { stageSnapshot = it },
+        onMediaGrantChanged = { mediaGrant = it },
+        onPublishingEnabled = {
+            stageMicrophoneEnabled = it
+            stageCameraEnabled = it
+        },
+        onError = { stageError = it },
+        onReauthenticate = onReauthenticate,
+    )
+    reports?.let { reportRepository ->
+        LiveReportDialog(
+            visible = reportVisible,
+            liveId = liveId,
+            liveStartedAt = session?.startedAt,
+            repository = reportRepository,
+            executor = executor,
+            onDismiss = { reportVisible = false },
+            onReauthenticate = onReauthenticate,
+        )
+    }
 }
 
 private const val LIVE_COMMENTS_REFRESH_INTERVAL_MS = 3_000L
+private const val LIVE_STAGE_REFRESH_INTERVAL_MS = 1_000L
 
 @Composable
 private fun LiveLoadError(error: String, onRetry: () -> Unit) {

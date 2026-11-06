@@ -199,6 +199,7 @@ internal fun ChannelInvitationsDialog(
     repository: MessagesRepository,
     executor: Executor,
     onDismiss: () -> Unit,
+    onChannelAccepted: (ChannelInvitation) -> Unit,
     onReauthenticate: () -> Unit,
 ) {
     var page by remember(repository) { mutableStateOf<ChannelInvitationPage?>(null) }
@@ -244,6 +245,9 @@ internal fun ChannelInvitationsDialog(
                             executor.execute {
                                 val result = if (action == "accept") repository.channelInvitationsRepository.accept(invitation.id)
                                 else repository.channelInvitationsRepository.decline(invitation.id)
+                                val acceptedInvitation = (result as? ChannelInvitationResult.Success)
+                                    ?.value
+                                    ?.takeIf { action == "accept" }
                                 Snapshot.withMutableSnapshot {
                                     busyId = null
                                     when (result) {
@@ -258,6 +262,7 @@ internal fun ChannelInvitationsDialog(
                                         }
                                     }
                                 }
+                                acceptedInvitation?.let(onChannelAccepted)
                             }
                         })
                     }

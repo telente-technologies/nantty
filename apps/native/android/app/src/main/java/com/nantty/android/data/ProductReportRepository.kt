@@ -18,6 +18,11 @@ internal enum class ProductReportReason(val apiValue: String) {
     SOMETHING_ELSE("something_else"),
 }
 
+internal enum class LiveReportReason(val apiValue: String) {
+    CHILD_SAFETY("child_safety"), SELF_HARM("self_harm"), VIOLENCE("violence"), SEXUAL_CONTENT("sexual_content"),
+    HATE("hate"), HARASSMENT("harassment"), SCAM("scam"), INTELLECTUAL_PROPERTY("intellectual_property"), OTHER("other"),
+}
+
 internal sealed interface ProductReportResult {
     data class Success(val reportId: String) : ProductReportResult
     data class Failure(
@@ -43,14 +48,14 @@ internal class ProductReportRepository(
         productId: String,
         reason: ProductReportReason,
         idempotencyKey: String = UUID.randomUUID().toString(),
-    ): ProductReportResult = submitTarget("product", productId, reason, idempotencyKey, targetLabel = "product")
+    ): ProductReportResult = submitTarget("product", productId, reason.apiValue, idempotencyKey, targetLabel = "product")
 
     fun submitSpace(
         spaceId: String,
         reason: ProductReportReason,
         details: String,
         idempotencyKey: String = UUID.randomUUID().toString(),
-    ): ProductReportResult = submitTarget("space", spaceId, reason, idempotencyKey, details, targetLabel = "Space")
+    ): ProductReportResult = submitTarget("space", spaceId, reason.apiValue, idempotencyKey, details, targetLabel = "Space")
 
     /** Reports the person who authored a story; this targets their account, not the story itself. */
     fun submitUser(
@@ -58,15 +63,32 @@ internal class ProductReportRepository(
         reason: ProductReportReason,
         details: String,
         idempotencyKey: String = UUID.randomUUID().toString(),
-    ): ProductReportResult = submitTarget("user", authorId, reason, idempotencyKey, details, targetLabel = "account")
+    ): ProductReportResult = submitTarget("user", authorId, reason.apiValue, idempotencyKey, details, targetLabel = "account")
+
+    fun submitLive(
+        liveId: String,
+        reason: LiveReportReason,
+        details: String,
+        capturedAt: String,
+        offsetSeconds: Long?,
+        idempotencyKey: String = UUID.randomUUID().toString(),
+    ): ProductReportResult {
+        if (runCatching { java.time.Instant.parse(capturedAt) }.isFailure || offsetSeconds?.let { it < 0 || it > MAX_LIVE_REPORT_OFFSET_SECONDS } == true) {
+            return ProductReportResult.Failure("Could not safely prepare this report. Please try again.")
+        }
+        val context = JSONObject().put("capturedAt", capturedAt).put("frameRef", "live:$liveId@$capturedAt")
+        offsetSeconds?.let { context.put("offsetSeconds", it) }
+        return submitTarget("live", liveId, reason.apiValue, idempotencyKey, details, targetLabel = "Live", liveContext = context)
+    }
 
     private fun submitTarget(
         targetType: String,
         targetId: String,
-        reason: ProductReportReason,
+        reason: String,
         idempotencyKey: String,
         details: String = "",
         targetLabel: String,
+        liveContext: JSONObject? = null,
     ): ProductReportResult {
         if (!isSafeMartIdentifier(targetId)) return ProductReportResult.Failure("This $targetLabel link is invalid.")
         if (!idempotencyKey.matches(Regex("[A-Za-z0-9_-]{8,128}"))) {
@@ -84,8 +106,9 @@ internal class ProductReportRepository(
                     .put("targetType", targetType)
                     .put("targetId", targetId)
                     .apply { if (targetType == "user") put("reportedUserId", targetId) }
-                    .put("reason", reason.apiValue)
-                    .put("details", details.trim()),
+                    .put("reason", reason)
+                    .put("details", details.trim())
+                    .apply { liveContext?.let { put("liveContext", it) } },
             )
             val data = response.optJSONObject("data") ?: response
             val reportId = data.optString("id")
@@ -96,10 +119,7 @@ internal class ProductReportRepository(
         } catch (error: ProductReportHttpException) {
             ProductReportResult.Failure(
                 message = when (error.statusCode) {
-                    HttpURLConnection.HTTP_UNAUTHORIZED -> {
-                        val expiredTargetLabel = if (targetType == "user") targetLabel else "product"
-                        "Your session has expired. Sign in again to report this $expiredTargetLabel."
-                    }
+                    HttpURLConnection.HTTP_UNAUTHORIZED -> "Your session has expired. Sign in again to report this $targetLabel."
                     429 -> "You've sent too many reports. Try again later."
                     HttpURLConnection.HTTP_NOT_FOUND -> "This $targetLabel can no longer be reported."
                     else -> "Couldn't submit your report. Please try again."
@@ -113,6 +133,8 @@ internal class ProductReportRepository(
         }
     }
 }
+
+private const val MAX_LIVE_REPORT_OFFSET_SECONDS = 7L * 24 * 60 * 60
 
 private class JdkProductReportTransport(private val baseUrl: String) : ProductReportTransport {
     override fun submit(path: String, accessToken: String, idempotencyKey: String, body: JSONObject): JSONObject {

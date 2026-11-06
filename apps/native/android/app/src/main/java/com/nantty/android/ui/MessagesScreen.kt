@@ -454,7 +454,33 @@ internal fun MessagesScreen(
         )
     }
 
-    ChannelInvitationOverlays(showChannelInvitations, showChannelLinks, availableChannelConversations((result as? MessagesResult.Success)?.page?.conversations.orEmpty()), initialChannelInvitationToken, repository, executor, { showChannelInvitations = it }, { showChannelLinks = it }, onInitialChannelInvitationTokenHandled, onReauthenticate)
+    ChannelInvitationOverlays(
+        showInvitations = showChannelInvitations,
+        showLinks = showChannelLinks,
+        channels = availableChannelConversations((result as? MessagesResult.Success)?.page?.conversations.orEmpty()),
+        token = initialChannelInvitationToken,
+        repository = repository,
+        executor = executor,
+        onInvitationsVisibilityChange = { showChannelInvitations = it },
+        onLinksVisibilityChange = { showChannelLinks = it },
+        onChannelAccepted = channelAcceptanceHandler(
+            repository = repository,
+            executor = executor,
+            onOpened = { conversation ->
+                showChannelInvitations = false
+                refresh()
+                selectedConversation = conversation
+                searchMode = false
+                onOpenConversation(conversation)
+            },
+            onFailure = { message, authenticationRequired ->
+                inboxActionError = message
+                if (authenticationRequired) onReauthenticate()
+            },
+        ),
+        onTokenHandled = onInitialChannelInvitationTokenHandled,
+        onReauthenticate = onReauthenticate,
+    )
     GroupInvitationLinkRoute(initialGroupInvitationToken, repository, executor, onInitialGroupInvitationTokenHandled, { showGroupInvitations = true }, onReauthenticate)
 
     inviteGroupConversation?.let { conversation ->

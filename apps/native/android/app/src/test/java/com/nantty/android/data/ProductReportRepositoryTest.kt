@@ -159,6 +159,31 @@ class ProductReportRepositoryTest {
         assertEquals("You've sent too many reports. Try again later.", (rateLimited.submit("prd-1", ProductReportReason.SPAM) as ProductReportResult.Failure).message)
     }
 
+    @Test
+    fun submitsLiveReportWithCapturedMomentContextAndServerReason() {
+        val transport = RecordingProductReportTransport(JSONObject("""{"data":{"id":"report-live-1","status":"received"}}"""))
+        val repository = ProductReportRepository("https://api.nantty.com", { "access-token" }, transport)
+        val capturedAt = "2026-11-06T12:30:00Z"
+
+        val result = repository.submitLive(
+            liveId = "live-123",
+            reason = LiveReportReason.CHILD_SAFETY,
+            details = "  Please review the speaker  ",
+            capturedAt = capturedAt,
+            offsetSeconds = 87,
+            idempotencyKey = "live-report-key-01",
+        )
+
+        assertEquals(ProductReportResult.Success("report-live-1"), result)
+        assertEquals("live", transport.body!!.getString("targetType"))
+        assertEquals("live-123", transport.body!!.getString("targetId"))
+        assertEquals("child_safety", transport.body!!.getString("reason"))
+        assertEquals("Please review the speaker", transport.body!!.getString("details"))
+        assertEquals(87L, transport.body!!.getJSONObject("liveContext").getLong("offsetSeconds"))
+        assertEquals("live:live-123@$capturedAt", transport.body!!.getJSONObject("liveContext").getString("frameRef"))
+        assertEquals(capturedAt, transport.body!!.getJSONObject("liveContext").getString("capturedAt"))
+    }
+
     private class RecordingProductReportTransport(private val response: JSONObject) : ProductReportTransport {
         var called = false
         var path: String? = null
