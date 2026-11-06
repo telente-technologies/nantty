@@ -17,6 +17,65 @@ class PostDetailRepositoryTest {
             "/api/v1/posts/post-1/thread?sort=likes",
             buildPostThreadPath("post-1", ThreadSort.MOST_LIKED, null),
         )
+        assertEquals(
+            "/api/v1/posts/post-1/thread?sort=relevant&filter=quotes&cursor=cursor%20%2F%2B",
+            buildPostThreadPath("post-1", ThreadSort.RELEVANT, "cursor /+", PostThreadFilter.QUOTES),
+        )
+    }
+
+    @Test
+    fun quoteFilterLoadsTypedQuoteRowsAndPreservesQuotedPostPreview() {
+        val transport = RecordingTransport().apply {
+            responses += JSONObject("""{"data":{"id":"post-1","text":"Original post","quotes":1,"author":{"name":"Ari","username":"ari"}}}""")
+            responses += JSONObject("""{"data":[{"type":"quote","id":"quote-post-1","postId":"post-1","quotePost":{"id":"quote-post-1","kind":"post","author":{"name":"Bea","username":"bea","avatarUrl":"https://cdn.nantty.com/bea.jpg","verified":true,"verification":{"color":"blue"}},"text":"A quoted response","thumbnail":{"type":"image","url":"https://cdn.nantty.com/quote.jpg","blurhash":null},"mediaCount":1,"createdAt":"2026-11-06T10:00:00Z"},"likes":2,"commentCount":0,"isPostAuthor":false,"createdAt":"2026-11-06T10:00:00Z"}],"nextCursor":null}""")
+        }
+
+        val result = PostDetailRepository("https://api.nantty.com", { null }, transport)
+            .load("post-1", sort = ThreadSort.RELEVANT, filter = PostThreadFilter.QUOTES) as PostDetailResult.Success
+
+        assertEquals("/api/v1/posts/post-1/thread?sort=relevant&filter=quotes", transport.calls[1].path)
+        assertEquals(1, result.post.quotes)
+        assertTrue(result.comments.isEmpty())
+        assertEquals("quote-post-1", result.quotes.single().id)
+        assertEquals("Bea", result.quotes.single().quotedPost.authorName)
+        assertEquals("A quoted response", result.quotes.single().quotedPost.text)
+        assertEquals("https://cdn.nantty.com/quote.jpg", result.quotes.single().quotedPost.thumbnailUrl)
+        assertEquals(listOf(PostThreadRow.Quote(result.quotes.single())), result.threadRows)
+    }
+
+    @Test
+    fun commentThreadPathEncodesCommentIdAndPaginationCursor() {
+        assertEquals(
+            "/api/v1/comments/comment%20one%2Ftwo/thread?cursor=cursor%20%2F%2B",
+            buildCommentThreadPath("comment one/two", "cursor /+"),
+        )
+        assertEquals("/api/v1/comments/comment-1/thread", buildCommentThreadPath("comment-1", null))
+    }
+
+    @Test
+    fun commentRepliesUseExistingPaginatedThreadEndpointAndParseRows() {
+        val session = AccountSession("access-secret", "refresh-secret", AccountUser("u1", "Ari", "ari", null, null, emptyList()))
+        val transport = RecordingTransport().apply {
+            responses += JSONObject("""{"data":{"data":[{"id":"reply-1","text":"A nested reply","replyCount":0,"author":{"name":"Bea","username":"bea"}}],"nextCursor":"next /+"}}""")
+        }
+
+        val page = PostDetailRepository("https://api.nantty.com", { session }, transport)
+            .loadCommentReplies("comment one/two", "older cursor").getOrThrow()
+
+        assertEquals("GET", transport.calls.single().method)
+        assertEquals("/api/v1/comments/comment%20one%2Ftwo/thread?cursor=older%20cursor", transport.calls.single().path)
+        assertEquals("access-secret", transport.calls.single().accessToken)
+        assertEquals("reply-1", page.comments.single().id)
+        assertEquals("A nested reply", page.comments.single().text)
+        assertEquals("next /+", page.nextCursor)
+    }
+
+    @Test
+    fun commentRepliesRejectBlankIdWithoutNetworkRequest() {
+        val transport = RecordingTransport()
+
+        assertTrue(PostDetailRepository("https://api.nantty.com", { null }, transport).loadCommentReplies(" ").isFailure)
+        assertTrue(transport.calls.isEmpty())
     }
 
     @Test

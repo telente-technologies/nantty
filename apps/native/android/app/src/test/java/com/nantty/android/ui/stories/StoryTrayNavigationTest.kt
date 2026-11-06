@@ -25,9 +25,11 @@ class StoryTrayNavigationTest {
     }
 
     @Test
-    fun storyAuthorNavigationDoesNotWrapAtTrayEdgesOrForUnknownAuthor() {
+    fun storyAuthorNavigationDoesNotWrapAtTrayEdgesAndMatchesReactNativeForUnknownAuthor() {
         assertNull(adjacentStoryAuthor(entries, "u1", next = false))
         assertNull(adjacentStoryAuthor(entries, "u3", next = true))
-        assertNull(adjacentStoryAuthor(entries, "missing", next = true))
+        assertEquals(StoryAuthorTarget("u1", startAtLast = false), adjacentStoryAuthor(entries, "missing", next = true))
+        assertNull(adjacentStoryAuthor(emptyList(), "missing", next = true))
+        assertNull(adjacentStoryAuthor(entries, "missing", next = false))
     }
 }

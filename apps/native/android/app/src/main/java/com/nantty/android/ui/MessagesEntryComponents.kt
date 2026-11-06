@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +23,22 @@ import com.nantty.android.data.StoryTrayResult
 import com.nantty.android.data.StoriesRepository
 import com.nantty.android.ui.stories.StoriesTray
 import java.util.concurrent.Executor
+
+internal fun LazyListScope.messagesStoriesTrayItem(
+    enabled: Boolean,
+    result: StoryTrayResult?,
+    folder: MessagesInboxFolder,
+    myAvatarUrl: String?,
+    onStorySelected: (String) -> Unit,
+    onAddStory: () -> Unit,
+    onRetry: () -> Unit,
+    onReauthenticate: () -> Unit,
+) {
+    if (!enabled) return
+    item(key = "stories-tray") {
+        MessagesStoriesTrayItem(result, folder, myAvatarUrl, onStorySelected, onAddStory, onRetry, onReauthenticate)
+    }
+}
 
 @Composable
 internal fun MessagesNotificationEntryEffects(
@@ -83,22 +100,31 @@ internal fun MessagesNotificationTargetError(message: String?, onDismiss: () -> 
 internal fun MessagesStoriesTrayItem(
     result: StoryTrayResult?,
     folder: MessagesInboxFolder,
+    myAvatarUrl: String?,
     onStorySelected: (String) -> Unit,
+    onAddStory: () -> Unit,
     onRetry: () -> Unit,
     onReauthenticate: () -> Unit,
 ) {
-    when (result) {
-        is StoryTrayResult.Success -> if (result.entries.isNotEmpty()) {
-            StoriesTray(result.entries, onStorySelected, Modifier.fillMaxWidth().padding(vertical = 12.dp))
-        }
-        is StoryTrayResult.Failure -> if (result.authenticationRequired) {
-            TextButton(onClick = onReauthenticate, modifier = Modifier.fillMaxWidth()) { Text("Sign in to view stories") }
-        } else {
-            TextButton(onClick = onRetry, modifier = Modifier.fillMaxWidth()) { Text("Stories unavailable · Retry") }
-        }
-        null -> if (folder == MessagesInboxFolder.CHATS) {
-            Box(Modifier.fillMaxWidth().padding(14.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+    Column {
+        StoriesTray(
+            entries = (result as? StoryTrayResult.Success)?.entries.orEmpty(),
+            onStorySelected = onStorySelected,
+            myAvatarUrl = myAvatarUrl,
+            onAddStory = onAddStory,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        )
+        when (result) {
+            is StoryTrayResult.Success -> Unit
+            is StoryTrayResult.Failure -> if (result.authenticationRequired) {
+                TextButton(onClick = onReauthenticate, modifier = Modifier.fillMaxWidth()) { Text("Sign in to view stories") }
+            } else {
+                TextButton(onClick = onRetry, modifier = Modifier.fillMaxWidth()) { Text("Stories unavailable · Retry") }
+            }
+            null -> if (folder == MessagesInboxFolder.CHATS) {
+                Box(Modifier.fillMaxWidth().padding(14.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                }
             }
         }
     }

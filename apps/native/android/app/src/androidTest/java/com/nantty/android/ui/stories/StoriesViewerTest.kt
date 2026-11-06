@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
@@ -17,6 +18,7 @@ import com.nantty.android.data.StoryItem
 import com.nantty.android.data.StoryTrayEntry
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -124,6 +126,55 @@ class StoriesViewerTest {
             assertEquals(emptyList<String>(), seenStoryIds)
             assertEquals(true, requestedNextAuthor)
         }
+    }
+
+    @Test
+    fun imageStoryProgressPausesWithOptionsAndResumesAfterOptionsClose() {
+        compose.mainClock.autoAdvance = false
+        val session = AccountSession("access", "refresh", AccountUser("viewer", "Viewer", "viewer", null, null, emptyList()))
+        var advancedToNextUser = false
+        val repository = StoriesRepository(
+            sessionProvider = { session },
+            transport = object : StoriesTransport {
+                override fun get(path: String, accessToken: String?): JSONObject = JSONObject(
+                    """{"data":[{"id":"story-1","author":{"id":"author-1","name":"Ada","username":"ada"},"media":{"id":"media-1","type":"image","url":"https://cdn.nantty.com/one.jpg","status":"ready"},"createdAt":"2026-11-06T10:00:00.000Z","seen":true}]}""",
+                )
+                override fun post(path: String, accessToken: String) = JSONObject()
+            },
+        )
+
+        compose.setContent {
+            MaterialTheme {
+                StoryViewerDialog(
+                    repository,
+                    "author-1",
+                    Executor { it.run() },
+                    onClose = {},
+                    onNextUser = { advancedToNextUser = true },
+                    onReauthenticate = {},
+                )
+            }
+        }
+
+        compose.waitForIdle()
+        compose.mainClock.advanceTimeBy(1_000L)
+        compose.waitForIdle()
+        val beforeOptions = compose.onNodeWithTag("story-progress").fetchSemanticsNode()
+            .config[SemanticsProperties.ProgressBarRangeInfo].current
+        assertTrue(beforeOptions > 0f)
+
+        compose.onNodeWithTag("story-options").performClick()
+        compose.mainClock.advanceTimeBy(6_000L)
+        compose.waitForIdle()
+        val whileOptionsOpen = compose.onNodeWithTag("story-progress").fetchSemanticsNode()
+            .config[SemanticsProperties.ProgressBarRangeInfo].current
+        assertEquals(beforeOptions, whileOptionsOpen, 0.001f)
+        assertEquals(false, advancedToNextUser)
+
+        compose.onNodeWithTag("story-options-report").performClick()
+        compose.mainClock.advanceTimeBy(STORY_IMAGE_DURATION_MS)
+        compose.waitForIdle()
+        assertTrue(advancedToNextUser)
     }
 
     @Test

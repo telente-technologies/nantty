@@ -4,8 +4,57 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.IOException
 
 class PushRegistrationStateTest {
+    @Test
+    fun rotatedTokenIsUnregisteredBeforeNewTokenIsRegisteredAndStored() {
+        val events = mutableListOf<String>()
+
+        val synced = syncRotatedPushToken(
+            previousToken = "old-token",
+            currentToken = "new-token",
+            unregister = { token -> events += "unregister:$token"; Result.success(Unit) },
+            register = { token -> events += "register:$token"; Result.success(Unit) },
+            store = { token -> events += "store:$token" },
+        )
+
+        assertTrue(synced)
+        assertEquals(listOf("unregister:old-token", "register:new-token", "store:new-token"), events)
+    }
+
+    @Test
+    fun failedOldTokenCleanupRetriesWithoutRegisteringOrStoringNewToken() {
+        val events = mutableListOf<String>()
+
+        val synced = syncRotatedPushToken(
+            previousToken = "old-token",
+            currentToken = "new-token",
+            unregister = { token -> events += "unregister:$token"; Result.failure(IOException("network")) },
+            register = { token -> events += "register:$token"; Result.success(Unit) },
+            store = { token -> events += "store:$token" },
+        )
+
+        assertFalse(synced)
+        assertEquals(listOf("unregister:old-token"), events)
+    }
+
+    @Test
+    fun sameTokenDoesNotUnregisterAndRegistrationFailureLeavesStoredTokenUntouched() {
+        val events = mutableListOf<String>()
+
+        val synced = syncRotatedPushToken(
+            previousToken = "same-token",
+            currentToken = "same-token",
+            unregister = { token -> events += "unregister:$token"; Result.success(Unit) },
+            register = { token -> events += "register:$token"; Result.failure(IOException("network")) },
+            store = { token -> events += "store:$token" },
+        )
+
+        assertFalse(synced)
+        assertEquals(listOf("register:same-token"), events)
+    }
+
     @Test
     fun tokenRegistrationRequiresAccountOptInOsPermissionAndFirebaseProjectConfig() {
         assertFalse(mayRegisterPushToken(false, true, true))

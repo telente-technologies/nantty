@@ -8,6 +8,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.setValue
 import com.nantty.android.data.CheckoutReceipt
+import com.nantty.android.data.CheckoutPaymentMethod
 import com.nantty.android.data.BuyerOrderDetail
 import java.util.concurrent.Executor
 
@@ -27,6 +28,8 @@ internal class SignedInPurchaseState(
     totalMinor: Long = 0L,
     currency: String = "",
     orderCount: Int = 0,
+    paymentMethod: CheckoutPaymentMethod = CheckoutPaymentMethod.HOSTED,
+    saveCardOnDevice: Boolean = false,
     paymentConfirmed: Boolean = false,
     cartAddressId: String? = null,
     returnToOrdersAfterPayment: Boolean = false,
@@ -42,6 +45,10 @@ internal class SignedInPurchaseState(
     var currency by mutableStateOf(currency)
         private set
     var orderCount by mutableStateOf(orderCount)
+        private set
+    var paymentMethod by mutableStateOf(paymentMethod)
+        private set
+    var saveCardOnDevice by mutableStateOf(saveCardOnDevice)
         private set
     var paymentConfirmed by mutableStateOf(paymentConfirmed)
         private set
@@ -77,6 +84,8 @@ internal class SignedInPurchaseState(
         totalMinor = receipt.total.amountMinor
         currency = receipt.total.currency
         orderCount = receipt.orderCount
+        paymentMethod = receipt.paymentMethod
+        saveCardOnDevice = receipt.saveCardOnDevice
         paymentConfirmed = false
         returnToOrdersAfterPayment = false
         destination = SignedInPurchaseDestination.Payment
@@ -89,6 +98,7 @@ internal class SignedInPurchaseState(
         totalMinor = order.totalMinor.coerceAtLeast(0L)
         currency = order.currency
         orderCount = 1
+        paymentMethod = CheckoutPaymentMethod.HOSTED
         paymentConfirmed = false
         returnToOrdersAfterPayment = true
         destination = SignedInPurchaseDestination.Payment
@@ -105,9 +115,11 @@ internal class SignedInPurchaseState(
                     state.totalMinor,
                     state.currency,
                     state.orderCount,
+                    state.paymentMethod.name,
                     state.paymentConfirmed,
                     state.cartAddressId.orEmpty(),
                     state.returnToOrdersAfterPayment,
+                    state.saveCardOnDevice,
                 )
             },
             restore = { saved ->
@@ -120,9 +132,11 @@ internal class SignedInPurchaseState(
                     totalMinor = (saved.getOrNull(3) as? Long)?.coerceAtLeast(0L) ?: 0L,
                     currency = (saved.getOrNull(4) as? String).orEmpty(),
                     orderCount = (saved.getOrNull(5) as? Int)?.coerceAtLeast(0) ?: 0,
-                    paymentConfirmed = saved.getOrNull(6) as? Boolean ?: false,
-                    cartAddressId = (saved.getOrNull(7) as? String)?.takeIf(String::isNotBlank),
-                    returnToOrdersAfterPayment = saved.getOrNull(8) as? Boolean ?: false,
+                    paymentMethod = (saved.getOrNull(6) as? String)?.let { value -> CheckoutPaymentMethod.entries.firstOrNull { it.name == value } } ?: CheckoutPaymentMethod.HOSTED,
+                    paymentConfirmed = saved.getOrNull(7) as? Boolean ?: false,
+                    cartAddressId = (saved.getOrNull(8) as? String)?.takeIf(String::isNotBlank),
+                    returnToOrdersAfterPayment = saved.getOrNull(9) as? Boolean ?: false,
+                    saveCardOnDevice = saved.getOrNull(10) as? Boolean ?: false,
                 )
             },
         )
@@ -138,6 +152,8 @@ internal fun SignedInPurchaseFlow(
     totalMinor: Long,
     currency: String,
     orderCount: Int,
+    paymentMethod: CheckoutPaymentMethod,
+    saveCardOnDevice: Boolean,
     paymentConfirmed: Boolean,
     returnToOrdersAfterPayment: Boolean,
     cartAddressId: String?,
@@ -200,7 +216,12 @@ internal fun SignedInPurchaseFlow(
                 totalMinor = totalMinor,
                 currency = currency,
                 orderCount = orderCount,
+                paymentMethod = paymentMethod,
+                saveCardOnDevice = saveCardOnDevice,
                 repository = repositories.checkout,
+                providerWalletRepository = repositories.providerWalletPayments,
+                savedCardRepository = repositories.savedCards,
+                savedCardCredentialStore = repositories.savedCardCredentials,
                 executor = executor,
                 onBack = onBackFromPayment,
                 onAuthenticationRequired = onAuthenticationRequired,
@@ -216,6 +237,8 @@ internal fun SignedInPurchaseFlow(
         SignedInPurchaseDestination.Checkout -> HingeSafeContent {
             CheckoutScreen(
                 repository = repositories.checkout,
+                providerWalletRepository = repositories.providerWalletPayments,
+                savedCardCredentialStore = repositories.savedCardCredentials,
                 executor = executor,
                 initialAddressId = cartAddressId,
                 onBack = onBackFromCheckout,

@@ -42,6 +42,7 @@ internal fun ClipVideoPlayer(
     isActive: Boolean,
     modifier: Modifier = Modifier,
     loop: Boolean = true,
+    resizeMode: Int = AspectRatioFrameLayout.RESIZE_MODE_ZOOM,
     onPlaybackFinished: () -> Unit = {},
     onPlaybackPosition: (currentSeconds: Double, durationSeconds: Double) -> Unit = { _, _ -> },
 ) {
@@ -105,14 +106,17 @@ internal fun ClipVideoPlayer(
             factory = { viewContext ->
                 PlayerView(viewContext).apply {
                     useController = false
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                    this.resizeMode = resizeMode
                     setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING)
                     keepScreenOn = true
                     this.player = activePlayer
                     importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                 }
             },
-            update = { it.player = player },
+            update = {
+                it.player = player
+                it.resizeMode = resizeMode
+            },
             modifier = Modifier.fillMaxSize().testTag("clip-video-player"),
         )
         Slider(

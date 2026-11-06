@@ -41,6 +41,19 @@ class PostComposerRepositoryTest {
     }
 
     @Test
+    fun quotePostUsesExistingCreatePostContractWithQuotedPostId() {
+        val session = AccountSession("access-secret", "refresh-secret", AccountUser("u1", "Ari", "ari", null, null, emptyList()))
+        val transport = RecordingTransport(JSONObject("""{"data":{"id":"quote-1"}}"""))
+        val repository = PostComposerRepository("https://api.nantty.com", { session }, transport)
+
+        val result = repository.publishTextPost("A thought", "retry-key-quote1", quotedPostId = "original-42")
+
+        assertTrue(result.isSuccess)
+        assertEquals("original-42", transport.call!!.body.getString("quotedPostId"))
+        assertEquals("post", transport.call!!.body.getString("kind"))
+    }
+
+    @Test
     fun publishingRequiresSessionAndValidNonemptyTextWithinBackendLimit() {
         val transport = RecordingTransport(JSONObject("""{"id":"post-1"}"""))
         val signedOut = PostComposerRepository("https://api.nantty.com", { null }, transport)

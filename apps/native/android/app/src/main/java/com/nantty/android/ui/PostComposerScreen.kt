@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.PostComposerRepository
 import com.nantty.android.data.PostComposerAudience
+import com.nantty.android.data.FeedQuotedPost
 import com.nantty.android.data.CreatorSampleMediaRepository
 import com.nantty.android.data.StoriesRepository
 import com.nantty.android.data.SoundsRepository
@@ -55,12 +56,14 @@ internal fun PostComposerScreen(
     storiesRepository: StoriesRepository? = null,
     soundsRepository: SoundsRepository? = null,
     storyMediaRepository: CreatorSampleMediaRepository? = null,
+    startInStoryMode: Boolean = false,
+    quoteTarget: FeedQuotedPost? = null,
     onCancel: () -> Unit,
     onPublished: (String) -> Unit,
     onStoryPublished: (String) -> Unit = onPublished,
     onReauthenticate: () -> Unit = onCancel,
 ) {
-    var creatingStory by remember { mutableStateOf(false) }
+    var creatingStory by remember(startInStoryMode) { mutableStateOf(startInStoryMode) }
     var content by remember { mutableStateOf(TextFieldValue()) }
     var audience by remember { mutableStateOf(PostComposerAudience.EVERYONE) }
     var requestKey by remember { mutableStateOf(UUID.randomUUID().toString()) }
@@ -89,7 +92,7 @@ internal fun PostComposerScreen(
                 IconButton(onClick = onCancel, enabled = !isPublishing, modifier = Modifier.semantics { contentDescription = "Cancel post" }) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 }
-                Text("Create post", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(if (quoteTarget == null) "Create post" else "Quote post", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 if (storiesRepository != null && soundsRepository != null && storyMediaRepository != null) {
                     TextButton(
                         onClick = { creatingStory = true },
@@ -105,7 +108,7 @@ internal fun PostComposerScreen(
                     val submittedAudience = audience
                     val idempotencyKey = requestKey
                     executor.execute {
-                        val result = repository.publishTextPost(submittedText, idempotencyKey, submittedAudience)
+                        val result = repository.publishTextPost(submittedText, idempotencyKey, submittedAudience, quoteTarget?.id)
                         Snapshot.withMutableSnapshot {
                             isPublishing = false
                             result.fold(
@@ -123,6 +126,7 @@ internal fun PostComposerScreen(
                 }
             }
             Spacer(Modifier.height(20.dp))
+            quoteTarget?.let { FeedQuotedPostCard(quotedPost = it, unavailable = false) }
             OutlinedTextField(
                 value = content,
                 onValueChange = { next ->

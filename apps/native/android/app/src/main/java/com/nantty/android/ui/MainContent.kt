@@ -19,6 +19,7 @@ import com.nantty.android.data.DisputeRepository
 import com.nantty.android.data.CreatorSampleMediaRepository
 import com.nantty.android.data.ExploreRepository
 import com.nantty.android.data.FeedPost
+import com.nantty.android.data.FeedQuotedPost
 import com.nantty.android.data.FeedResult
 import com.nantty.android.data.FeedType
 import com.nantty.android.data.FollowRequestsRepository
@@ -57,8 +58,11 @@ internal fun MainContent(
     onReauthenticate: () -> Unit = {},
     onRefresh: () -> Unit,
     onCreatePost: () -> Unit = {},
+    onCreateStory: () -> Unit = onCreatePost,
+    currentAccountAvatarUrl: String? = null,
     modifier: Modifier = Modifier,
     onOpenPost: (String) -> Unit = {},
+    onOpenClipComments: (String) -> Unit = onOpenPost,
     onOpenPostComment: (String, String) -> Unit = { postId, _ -> onOpenPost(postId) },
     onOpenProfile: (String) -> Unit = {},
     searchScope: String = SearchRepository.GLOBAL_SCOPE,
@@ -66,12 +70,18 @@ internal fun MainContent(
     onSearchScopeChanged: (String, String) -> Unit = { _, _ -> },
     onOpenProduct: (String) -> Unit = {},
     onOpenStore: (String) -> Unit = {},
+    onBackToStoreSearch: (String) -> Unit = {},
+    onBackToProfileSearch: (String) -> Unit = {},
     onOpenBrand: (String) -> Unit = {},
     onOpenCategory: (String, String) -> Unit = { _, _ -> },
     onLike: (FeedPost) -> Unit = {},
+    onFollowAuthor: ((FeedPost) -> Unit)? = null,
     onRepost: (FeedPost) -> Unit = {},
     onSave: (FeedPost) -> Unit = {},
     onShare: (FeedPost) -> Unit = {},
+    currentAccountId: String? = null,
+    onReportPost: ((FeedPost) -> Unit)? = null,
+    onQuotePost: ((FeedQuotedPost) -> Unit)? = null,
     interactionMessage: String? = null,
     onMessageFailure: (String, Boolean) -> Unit = { _, _ -> },
     savingPostId: String? = null,
@@ -194,6 +204,7 @@ internal fun MainContent(
             onReauthenticate = onClipReauthenticate,
             onOpenSearch = onOpenSearch,
             onOpenPost = onOpenPost,
+            onOpenClipComments = onOpenClipComments,
             onOpenProfile = onOpenProfile,
             initialClipId = initialClipId,
             onInitialClipHandled = onInitialClipHandled,
@@ -314,6 +325,8 @@ internal fun MainContent(
                     onExternal = { uri -> runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString()))) } },
                 )
             },
+            currentUserAvatarUrl = currentAccountAvatarUrl,
+            onAddStory = onCreateStory,
         )
         return
     }
@@ -330,6 +343,7 @@ internal fun MainContent(
             onOpenConversation = notificationActions.openConversation,
             messagesRepository = messagesRepository,
             onOpenOrders = notificationActions.openOrders,
+            onOpenOrder = notificationActions.openOrder,
             accountSettingsRepository = accountNotificationSettingsRepository,
             onOpenFollowRequests = notificationActions.openFollowRequests,
             onOpenGroupInvitations = notificationActions.openGroupInvitations,
@@ -400,6 +414,8 @@ internal fun MainContent(
             onReauthenticate = onReauthenticate,
             onOpenProduct = onOpenProduct,
             onOpenStore = onOpenStore,
+            onBackToStore = onBackToStoreSearch,
+            onBackToProfile = onBackToProfileSearch,
             onOpenBrand = onOpenBrand,
             onOpenCategory = onOpenCategory,
             exploreRepository = exploreRepository,
@@ -447,6 +463,7 @@ internal fun MainContent(
         onOpenPost = onOpenPost,
         onOpenProfile = onOpenProfile,
         onLike = onLike,
+        onFollowAuthor = onFollowAuthor,
         onRepost = onRepost,
         onSave = onSave,
         onShare = onShare,
@@ -457,5 +474,8 @@ internal fun MainContent(
         loadMoreError = loadMoreError,
         onLoadMore = onLoadMore,
         onOpenSavedPosts = onOpenSavedPosts,
+        currentAccountId = currentAccountId,
+        onReportPost = onReportPost,
+        onQuotePost = onQuotePost,
     )
 }

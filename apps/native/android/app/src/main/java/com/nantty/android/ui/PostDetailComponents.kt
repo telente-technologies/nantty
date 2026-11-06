@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +46,7 @@ import coil.compose.AsyncImage
 import com.nantty.android.data.FeedMedia
 import com.nantty.android.data.PostDetail
 import com.nantty.android.data.ThreadComment
+import com.nantty.android.data.appendUniqueThreadComments
 import com.nantty.android.data.extractSafePostLinks
 import java.net.URI
 
@@ -128,9 +130,13 @@ internal fun ThreadCommentRow(
     likeErrors: Map<String, String> = emptyMap(),
     onReply: (ThreadComment) -> Unit = {},
     onToggleLike: (ThreadComment) -> Unit = {},
+    repliesController: CommentRepliesController? = null,
     onOpenLink: (String) -> Unit = {},
     highlightCommentId: String? = null,
 ) {
+    val repliesState = repliesController?.state(comment.id) ?: CommentRepliesUiState()
+    val visibleReplies = appendUniqueThreadComments(comment.replies, repliesState.comments)
+    val hiddenReplyCount = (comment.replyCount - visibleReplies.size).coerceAtLeast(0)
     Column(Modifier.fillMaxWidth().padding(start = (depth.coerceAtMost(4) * 16).dp, end = 12.dp, top = 4.dp, bottom = 4.dp)) {
         Surface(
             Modifier.fillMaxWidth().testTag("comment-${comment.id}").semantics {
@@ -176,6 +182,25 @@ internal fun ThreadCommentRow(
                         Text("${comment.likes} likes", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Text(" · ${comment.replyCount} replies", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if ((hiddenReplyCount > 0 && !repliesState.loaded) || repliesState.nextCursor != null || repliesState.error != null || repliesState.loading || repliesState.loadingMore) {
+                        TextButton(
+                            onClick = {
+                                if (!repliesState.expanded) repliesController?.expand(comment.id)
+                                else repliesController?.loadMore(comment.id)
+                            },
+                            enabled = !repliesState.loading && !repliesState.loadingMore,
+                            modifier = Modifier.testTag("thread-replies-${comment.id}"),
+                        ) {
+                            if (repliesState.loading || repliesState.loadingMore) {
+                                CircularProgressIndicator(Modifier.width(16.dp).height(16.dp), strokeWidth = 2.dp)
+                                Spacer(Modifier.width(6.dp))
+                            }
+                            Text(commentRepliesActionLabel(repliesState, hiddenReplyCount))
+                        }
+                    }
+                }
+                repliesState.error?.let { error ->
+                    Text(error, Modifier.testTag("thread-replies-error-${comment.id}"), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
                 }
                 likeErrors[comment.id]?.let { error ->
                     Text(error, Modifier.testTag("like-error-${comment.id}"), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -183,7 +208,7 @@ internal fun ThreadCommentRow(
                 if (canReply) TextButton(onClick = { onReply(comment) }, modifier = Modifier.testTag("reply-${comment.id}")) { Text("Reply") }
             }
         }
-        comment.replies.forEach { reply ->
+        visibleReplies.forEach { reply ->
             ThreadCommentRow(
                 comment = reply,
                 depth = depth + 1,
@@ -193,6 +218,7 @@ internal fun ThreadCommentRow(
                 likeErrors = likeErrors,
                 onReply = onReply,
                 onToggleLike = onToggleLike,
+                repliesController = repliesController,
                 onOpenLink = onOpenLink,
                 highlightCommentId = highlightCommentId,
             )

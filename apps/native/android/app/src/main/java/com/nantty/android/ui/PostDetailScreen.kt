@@ -18,12 +18,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -46,15 +44,20 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.nantty.android.R
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.CommentActingProfile
 import com.nantty.android.data.PostDetail
 import com.nantty.android.data.PostDetailRepository
 import com.nantty.android.data.PostDetailResult
+import com.nantty.android.data.PostThreadFilter
+import com.nantty.android.data.PostThreadRow
 import com.nantty.android.data.ThreadComment
 import com.nantty.android.data.ThreadSort
 import com.nantty.android.data.appendUniqueThreadComments
+import com.nantty.android.data.appendUniquePostThreadRows
 import com.nantty.android.data.isRepeatedThreadCursor
+import com.nantty.android.data.updatePostThreadCommentLike
 import com.nantty.android.data.updateThreadCommentLike
 import com.nantty.android.share.sharePostFromAndroid
 import java.util.concurrent.Executor
@@ -68,6 +71,7 @@ internal fun PostDetailScreen(
     sessionProvider: () -> AccountSession?,
     executor: Executor,
     onBack: () -> Unit,
+    onOpenPost: (String) -> Unit = {},
     initialCommentId: String? = null,
     repository: PostDetailRepository? = null,
     onSharePost: ((PostDetail) -> Unit)? = null,
@@ -79,11 +83,17 @@ internal fun PostDetailScreen(
     }
     val currentSession = sessionProvider()
     val accountId = currentSession?.takeIf { it.accessToken.isNotBlank() }?.user?.id
+    val repliesController = remember(dataRepository, executor, postId, accountId) {
+        CommentRepliesController(dataRepository, executor)
+    }
     var result by remember(postId, accountId) { mutableStateOf<PostDetailResult?>(null) }
     var loading by remember(postId) { mutableStateOf(false) }
     var loadingMore by remember(postId) { mutableStateOf(false) }
     var completedCursors by remember(postId) { mutableStateOf(emptySet<String>()) }
     var loadMoreError by remember(postId) { mutableStateOf<String?>(null) }
+    var threadRequestGeneration by remember(postId, accountId) { mutableStateOf(0L) }
+    var activeThreadSort by remember(postId, accountId) { mutableStateOf<ThreadSort?>(null) }
+    var activeThreadFilter by remember(postId, accountId) { mutableStateOf<PostThreadFilter?>(null) }
     var replyText by remember(postId) { mutableStateOf("") }
     var replyTarget by remember(postId) { mutableStateOf<ThreadComment?>(null) }
     var sending by remember(postId) { mutableStateOf(false) }
@@ -101,25 +111,31 @@ internal fun PostDetailScreen(
     var initialCommentUnavailable by remember(postId, initialCommentId) { mutableStateOf(false) }
     var profileMenuExpanded by remember(postId, accountId) { mutableStateOf(false) }
     var threadSort by rememberSaveable(postId) { mutableStateOf(ThreadSort.RELEVANT) }
+    var threadFilter by rememberSaveable(postId) { mutableStateOf(PostThreadFilter.REPLIES) }
     var threadSortMenuExpanded by rememberSaveable(postId) { mutableStateOf(false) }
     val keyboard = LocalSoftwareKeyboardController.current
     val threadListState = rememberLazyListState()
 
-    fun load(cursor: String? = null, append: Boolean = false, sort: ThreadSort = threadSort) {
+    fun load(cursor: String? = null, append: Boolean = false, sort: ThreadSort = threadSort, filter: PostThreadFilter = threadFilter) {
         if (append) {
             if (loadingMore || cursor.isNullOrBlank() || cursor in completedCursors) return
             loadingMore = true
             loadMoreError = null
         } else {
-            if (loading) return
+            if (loading && activeThreadSort == sort && activeThreadFilter == filter) return
             loading = true
             completedCursors = emptySet()
             loadMoreError = null
         }
+        val requestGeneration = threadRequestGeneration + 1
+        threadRequestGeneration = requestGeneration
+        activeThreadSort = sort
+        activeThreadFilter = filter
         executor.execute {
-            val next = dataRepository.load(postId, cursor, sort)
+            val next = dataRepository.load(postId, cursor, sort, filter)
             Snapshot.withMutableSnapshot {
-                if (threadSort != sort) {
+                if (threadRequestGeneration != requestGeneration) return@withMutableSnapshot
+                if (threadSort != sort || threadFilter != filter) {
                     loading = false
                     loadingMore = false
                 } else if (append && result is PostDetailResult.Success) {
@@ -127,8 +143,11 @@ internal fun PostDetailScreen(
                     if (next is PostDetailResult.Success) {
                         val repeatedCursor = isRepeatedThreadCursor(cursor.orEmpty(), next.nextCursor, completedCursors)
                         completedCursors = completedCursors + cursor.orEmpty()
+                        val threadRows = appendUniquePostThreadRows(previous.threadRows, next.threadRows)
                         result = next.copy(
                             comments = appendUniqueThreadComments(previous.comments, next.comments),
+                            quotes = threadRows.filterIsInstance<PostThreadRow.Quote>().map(PostThreadRow.Quote::value),
+                            threadRows = threadRows,
                             nextCursor = next.nextCursor.takeUnless { repeatedCursor },
                         )
                         if (repeatedCursor) loadMoreError = "The server repeated a reply page. Reload the thread to continue."
@@ -175,7 +194,11 @@ internal fun PostDetailScreen(
         if (comment.id in commentLikeBusyIds) return
         val current = result as? PostDetailResult.Success ?: return
         val nextLiked = !comment.liked
-        result = current.copy(comments = updateThreadCommentLike(current.comments, comment.id, nextLiked))
+        result = current.copy(
+            comments = updateThreadCommentLike(current.comments, comment.id, nextLiked),
+            threadRows = updatePostThreadCommentLike(current.threadRows, comment.id, nextLiked),
+        )
+        repliesController.updateLike(comment.id, nextLiked)
         commentLikeBusyIds = commentLikeBusyIds + comment.id
         commentLikeErrors = commentLikeErrors - comment.id
         executor.execute {
@@ -185,8 +208,12 @@ internal fun PostDetailScreen(
                 if (outcome.isFailure) {
                     val latest = result as? PostDetailResult.Success
                     if (latest != null) {
-                        result = latest.copy(comments = updateThreadCommentLike(latest.comments, comment.id, !nextLiked))
+                        result = latest.copy(
+                            comments = updateThreadCommentLike(latest.comments, comment.id, !nextLiked),
+                            threadRows = updatePostThreadCommentLike(latest.threadRows, comment.id, !nextLiked),
+                        )
                     }
+                    repliesController.updateLike(comment.id, !nextLiked)
                     commentLikeErrors = commentLikeErrors + (comment.id to (outcome.exceptionOrNull()?.message ?: "Could not update this comment like. Try again."))
                 }
                 commentLikeBusyIds = commentLikeBusyIds - comment.id
@@ -216,8 +243,8 @@ internal fun PostDetailScreen(
         }
     }
 
-    LaunchedEffect(postId, accountId, threadSort) {
-        load(sort = threadSort)
+    LaunchedEffect(postId, accountId, threadSort, threadFilter) {
+        load(sort = threadSort, filter = threadFilter)
     }
 
     LaunchedEffect(postId, initialCommentId, result, loadingMore, loadMoreError) {
@@ -277,7 +304,12 @@ internal fun PostDetailScreen(
                 if (initialCommentUnavailable) {
                     Text("That comment could not be found.", Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                 }
-                LazyColumn(state = threadListState, modifier = Modifier.weight(1f).fillMaxWidth(), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 16.dp)) {
+                PostDetailPullToRefresh(
+                    isRefreshing = loading,
+                    onRefresh = { load() },
+                    modifier = Modifier.weight(1f).fillMaxWidth().testTag("post-detail-pull-to-refresh"),
+                ) {
+                    LazyColumn(state = threadListState, modifier = Modifier.fillMaxSize(), contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 16.dp)) {
                     item(key = "platform-identity") {
                         Text(
                             "Nantty for Android",
@@ -340,69 +372,62 @@ internal fun PostDetailScreen(
                             },
                         )
                     }
-                    item(key = "thread-sort") {
-                        Row(
-                            Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text("Replies", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                            Box {
-                                TextButton(
-                                    onClick = { threadSortMenuExpanded = true },
-                                    enabled = !loading,
-                                    modifier = Modifier.semantics {
-                                        contentDescription = "Sort replies, currently ${threadSort.label}"
-                                    },
-                                ) { Text(threadSort.label) }
-                                DropdownMenu(
-                                    expanded = threadSortMenuExpanded,
-                                    onDismissRequest = { threadSortMenuExpanded = false },
-                                ) {
-                                    ThreadSort.entries.forEach { option ->
-                                        DropdownMenuItem(
-                                            text = { Text(option.label) },
-                                            leadingIcon = { RadioButton(selected = option == threadSort, onClick = null) },
-                                            onClick = {
-                                                threadSortMenuExpanded = false
-                                                if (option != threadSort) {
-                                                    completedCursors = emptySet()
-                                                    loadMoreError = null
-                                                    result = null
-                                                    threadSort = option
-                                                }
-                                            },
-                                            modifier = Modifier.semantics {
-                                                contentDescription = "Sort replies by ${option.label}"
-                                                selected = option == threadSort
-                                            },
-                                        )
-                                    }
+                    item(key = "thread-controls") {
+                        PostDetailThreadControls(
+                            filter = threadFilter,
+                            quoteCount = current.post.quotes,
+                            onFilterChange = { nextFilter ->
+                                if (nextFilter != threadFilter) {
+                                    completedCursors = emptySet()
+                                    loadMoreError = null
+                                    result = null
+                                    threadSortMenuExpanded = false
+                                    threadFilter = nextFilter
                                 }
-                            }
-                        }
+                            },
+                            sort = threadSort,
+                            sortMenuExpanded = threadSortMenuExpanded,
+                            onSortMenuExpandedChange = { threadSortMenuExpanded = it },
+                            onSortChange = { option ->
+                                if (option != threadSort) {
+                                    completedCursors = emptySet()
+                                    loadMoreError = null
+                                    result = null
+                                    threadSort = option
+                                }
+                            },
+                            enabled = !loading,
+                        )
                     }
-                    if (current.comments.isEmpty() && !loading) {
+                    if (current.threadRows.isEmpty() && !loading) {
                         item(key = "empty-thread") {
+                            val emptyThreadLabel = stringResource(
+                                if (threadFilter == PostThreadFilter.QUOTES) R.string.post_thread_no_quotes else R.string.post_thread_no_replies,
+                            )
                             Text(
-                                "No replies yet. Start the conversation.",
-                                Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 32.dp).semantics { contentDescription = "No replies yet" },
+                                emptyThreadLabel,
+                                Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 32.dp).semantics { contentDescription = emptyThreadLabel },
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 style = MaterialTheme.typography.bodyLarge,
                             )
                         }
                     } else {
-                        items(current.comments, key = ThreadComment::id) { comment ->
-                            ThreadCommentRow(
-                                comment,
-                                canReply = sessionProvider() != null,
-                                canLike = accountId != null,
-                                likeBusyIds = commentLikeBusyIds,
-                                likeErrors = commentLikeErrors,
-                                highlightCommentId = initialCommentId,
-                                onReply = { replyTarget = it },
-                                onToggleLike = ::toggleCommentLike,
-                                onOpenLink = ::openPostLink,
-                            )
+                        items(current.threadRows, key = PostThreadRow::id) { row ->
+                            when (row) {
+                                is PostThreadRow.Comment -> ThreadCommentRow(
+                                    row.value,
+                                    canReply = sessionProvider() != null,
+                                    canLike = accountId != null,
+                                    likeBusyIds = commentLikeBusyIds,
+                                    likeErrors = commentLikeErrors,
+                                    highlightCommentId = initialCommentId,
+                                    onReply = { replyTarget = it },
+                                    onToggleLike = ::toggleCommentLike,
+                                    repliesController = repliesController,
+                                    onOpenLink = ::openPostLink,
+                                )
+                                is PostThreadRow.Quote -> PostDetailQuoteRow(row.value, onOpen = onOpenPost)
+                            }
                         }
                     }
                     current.nextCursor?.let { cursor ->
@@ -427,7 +452,7 @@ internal fun PostDetailScreen(
                             }
                         }
                     }
-                    if (current.nextCursor == null && current.comments.isNotEmpty()) {
+                    if (current.nextCursor == null && current.threadRows.isNotEmpty()) {
                         item(key = "thread-end") {
                             Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                                 loadMoreError?.let { error ->
@@ -436,6 +461,7 @@ internal fun PostDetailScreen(
                                 } ?: Text("You’re all caught up.", Modifier.semantics { contentDescription = "End of replies" }, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
+                    }
                     }
                 }
 

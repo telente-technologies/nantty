@@ -27,6 +27,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nantty.android.data.FeedPost
+import com.nantty.android.data.FeedQuotedPost
 import com.nantty.android.data.FeedResult
 import com.nantty.android.data.FeedType
 
@@ -57,6 +58,10 @@ internal fun FeedDestinationContent(
     loadMoreError: String?,
     onLoadMore: () -> Unit,
     onOpenSavedPosts: () -> Unit,
+    currentAccountId: String? = null,
+    onReportPost: ((FeedPost) -> Unit)? = null,
+    onQuotePost: ((FeedQuotedPost) -> Unit)? = null,
+    onFollowAuthor: ((FeedPost) -> Unit)? = null,
 ) {
     Column(modifier.fillMaxSize()) {
         Row(
@@ -135,6 +140,11 @@ internal fun FeedDestinationContent(
                                 canInteract = canViewFollowing,
                                 saveBusy = savingPostId == it.id,
                                 onOpenProfile = onOpenProfile,
+                                canReportPost = it.authorId != currentAccountId,
+                                onReportPost = onReportPost,
+                                onQuotePost = onQuotePost,
+                                currentAccountId = currentAccountId,
+                                onFollowAuthor = onFollowAuthor,
                             )
                         }
                         item(key = "feed-pagination") {

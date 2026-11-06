@@ -11,6 +11,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -168,43 +169,47 @@ internal fun GroupInvitationLinkShareAction(
 ) {
     val context = LocalContext.current
     var creating by remember(conversation.id, repository) { mutableStateOf(false) }
+    var expiryHours by remember(conversation.id, repository) { mutableIntStateOf(DEFAULT_INVITATION_LINK_EXPIRY_HOURS) }
     var url by remember(conversation.id, repository) { mutableStateOf<String?>(null) }
     var error by remember(conversation.id, repository) { mutableStateOf<String?>(null) }
-    TextButton(
-        onClick = {
-            if (creating || !enabled) return@TextButton
-            creating = true
-            error = null
-            executor.execute {
-                val result = repository.createGroupInvitationLink(conversation.id)
-                Snapshot.withMutableSnapshot {
-                    creating = false
-                    when (result) {
-                        is GroupInvitationResult.Failure -> {
-                            error = result.message
-                            if (result.authenticationRequired) onReauthenticate()
-                        }
-                        is GroupInvitationResult.Success -> {
-                            onCreated()
-                            url = GroupInvitationDeepLink.shareUrl(BuildConfig.NANTTY_WEBAPP_URL, result.value.token)
-                            if (url == null) {
-                                error = "A secure sharing link could not be created on this app configuration."
-                            } else {
-                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, url)
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        InvitationLinkExpiryPicker("Group", expiryHours, enabled && !creating) { expiryHours = it }
+        TextButton(
+            onClick = {
+                if (creating || !enabled) return@TextButton
+                creating = true
+                error = null
+                executor.execute {
+                    val result = repository.createGroupInvitationLink(conversation.id, expiryHours)
+                    Snapshot.withMutableSnapshot {
+                        creating = false
+                        when (result) {
+                            is GroupInvitationResult.Failure -> {
+                                error = result.message
+                                if (result.authenticationRequired) onReauthenticate()
+                            }
+                            is GroupInvitationResult.Success -> {
+                                onCreated()
+                                url = GroupInvitationDeepLink.shareUrl(BuildConfig.NANTTY_WEBAPP_URL, result.value.token)
+                                if (url == null) {
+                                    error = "A secure sharing link could not be created on this app configuration."
+                                } else {
+                                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, url)
+                                    }
+                                    runCatching {
+                                        context.startActivity(Intent.createChooser(shareIntent, "Share group invitation"))
+                                    }.onFailure { error = "Link created. Copy it below to share." }
                                 }
-                                runCatching {
-                                    context.startActivity(Intent.createChooser(shareIntent, "Share group invitation"))
-                                }.onFailure { error = "Link created. Copy it below to share." }
                             }
                         }
                     }
                 }
-            }
-        },
-        enabled = enabled && !creating,
-    ) { Text(if (creating) "Creating link…" else "Create and share invite link") }
-    url?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-    error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+            },
+            enabled = enabled && !creating,
+        ) { Text(if (creating) "Creating link…" else "Create and share invite link") }
+        url?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+    }
 }

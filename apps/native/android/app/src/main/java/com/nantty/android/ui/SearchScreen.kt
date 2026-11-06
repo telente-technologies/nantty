@@ -12,9 +12,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -60,6 +62,8 @@ internal fun SearchScreen(
     onReauthenticate: () -> Unit = {},
     onOpenProduct: (String) -> Unit = {},
     onOpenStore: (String) -> Unit = {},
+    onBackToStore: (String) -> Unit = {},
+    onBackToProfile: (String) -> Unit = {},
     onOpenBrand: (String) -> Unit = {},
     onOpenCategory: (String, String) -> Unit = { _, _ -> },
     exploreRepository: ExploreRepository? = null,
@@ -218,7 +222,31 @@ internal fun SearchScreen(
     }
 
     Column(modifier.fillMaxSize()) {
-        Text("Discover", Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 8.dp).semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Row(
+            Modifier.fillMaxWidth().padding(start = 12.dp, end = 20.dp, top = 4.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (scope.startsWith("store:") || scope.startsWith("profile:")) {
+                val isStoreScope = scope.startsWith("store:")
+                IconButton(
+                    onClick = {
+                        if (isStoreScope) onBackToStore(scope.removePrefix("store:"))
+                        else onBackToProfile(scope.removePrefix("profile:"))
+                    },
+                    modifier = Modifier.semantics {
+                        contentDescription = if (isStoreScope) "Back to store" else "Back to profile"
+                    },
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                }
+            }
+            Text(
+                "Discover",
+                Modifier.weight(1f).padding(start = if (scope.startsWith("store:") || scope.startsWith("profile:")) 0.dp else 8.dp).semantics { heading() },
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+            )
+        }
         OutlinedTextField(
             value = query,
             onValueChange = { query = it.take(SearchRepository.MAX_QUERY_LENGTH) },

@@ -176,6 +176,12 @@ internal fun AccountNotificationSettingsScreen(
                 }
                 error?.let { Text(it, Modifier.padding(horizontal = 20.dp), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
                 HorizontalDivider()
+                MarketingConsentPreferences(
+                    repository = repository,
+                    executor = executor,
+                    onReauthenticate = onReauthenticate,
+                )
+                HorizontalDivider()
                 NotificationCategoryPreferences(
                     repository = repository,
                     executor = executor,

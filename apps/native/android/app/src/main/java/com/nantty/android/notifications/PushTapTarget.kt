@@ -58,6 +58,7 @@ internal fun resolvePushTapTarget(data: Map<String, String>): PushTapTarget? {
         clipId = data["clipId"],
         commentId = data["commentId"],
         url = url,
+        orderId = data["orderId"],
     )
     return when (val destination = resolveNotificationDestination(notification)) {
         is NotificationDestination.Post -> PushTapTarget(PushTapRoute.POST, destination.postId, destination.commentId)
@@ -65,6 +66,7 @@ internal fun resolvePushTapTarget(data: Map<String, String>): PushTapTarget? {
         is NotificationDestination.Conversation -> PushTapTarget(PushTapRoute.CONVERSATION, destination.conversationId, destination.messageId)
         NotificationDestination.Messages -> PushTapTarget(PushTapRoute.MESSAGES)
         NotificationDestination.Orders -> PushTapTarget(PushTapRoute.ORDERS, data["orderId"])
+        is NotificationDestination.OrderDetail -> PushTapTarget(PushTapRoute.ORDERS, destination.orderId)
         NotificationDestination.FollowRequests -> PushTapTarget(PushTapRoute.FOLLOW_REQUESTS)
         NotificationDestination.GroupInvitations -> PushTapTarget(PushTapRoute.GROUP_INVITATIONS)
         NotificationDestination.Spaces -> PushTapTarget(PushTapRoute.SPACES)

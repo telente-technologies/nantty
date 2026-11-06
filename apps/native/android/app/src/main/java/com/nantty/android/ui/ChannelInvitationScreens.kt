@@ -84,6 +84,7 @@ private fun ChannelInvitationLinksManager(
     var page by remember(channelId, repository) { mutableStateOf<ChannelInvitationLinkPage?>(null) }
     var loading by remember(channelId, repository) { mutableStateOf(false) }
     var busyId by remember(channelId, repository) { mutableStateOf<String?>(null) }
+    var expiryHours by remember(channelId, repository) { mutableIntStateOf(DEFAULT_INVITATION_LINK_EXPIRY_HOURS) }
     var error by remember(channelId, repository) { mutableStateOf<String?>(null) }
     var shareText by remember(channelId, repository) { mutableStateOf<String?>(null) }
     var reload by remember(channelId, repository) { mutableIntStateOf(0) }
@@ -106,13 +107,14 @@ private fun ChannelInvitationLinksManager(
         }
     }
 
+    InvitationLinkExpiryPicker("Channel", expiryHours, busyId == null) { expiryHours = it }
     TextButton(
         onClick = {
             if (busyId != null) return@TextButton
             busyId = "create"
             error = null
             executor.execute {
-                val result = repository.channelInvitationsRepository.createLink(channelId)
+                val result = repository.channelInvitationsRepository.createLink(channelId, expiryHours)
                 Snapshot.withMutableSnapshot {
                     busyId = null
                     when (result) {
@@ -146,10 +148,10 @@ private fun ChannelInvitationLinksManager(
         items(page?.links.orEmpty(), key = { it.id }) { link ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(Modifier.weight(1f)) {
-                    Text(if (link.revokedAt == null) "Active link" else "Revoked link", style = MaterialTheme.typography.bodySmall)
+                    Text(invitationLinkStatus(link.expiresAt, link.revokedAt).label, style = MaterialTheme.typography.bodySmall)
                     Text("Expires ${link.expiresAt}", style = MaterialTheme.typography.labelSmall)
                 }
-                if (link.revokedAt == null) TextButton(
+                if (invitationLinkStatus(link.expiresAt, link.revokedAt) != InvitationLinkStatus.REVOKED) TextButton(
                     onClick = {
                         busyId = link.id
                         executor.execute {

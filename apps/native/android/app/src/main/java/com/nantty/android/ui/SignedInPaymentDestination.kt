@@ -3,6 +3,10 @@ package com.nantty.android.ui
 import androidx.compose.runtime.Composable
 import com.nantty.android.data.CheckoutReceipt
 import com.nantty.android.data.CheckoutRepository
+import com.nantty.android.data.CheckoutPaymentMethod
+import com.nantty.android.data.ProviderWalletPaymentRepository
+import com.nantty.android.data.SavedCardCredentialStore
+import com.nantty.android.data.SavedCardRepository
 import com.nantty.android.data.WalletMoney
 import java.util.concurrent.Executor
 
@@ -14,7 +18,12 @@ internal fun SignedInPaymentDestination(
     totalMinor: Long,
     currency: String,
     orderCount: Int,
+    paymentMethod: CheckoutPaymentMethod,
+    saveCardOnDevice: Boolean,
     repository: CheckoutRepository,
+    providerWalletRepository: ProviderWalletPaymentRepository,
+    savedCardRepository: SavedCardRepository,
+    savedCardCredentialStore: SavedCardCredentialStore,
     executor: Executor,
     onBack: () -> Unit,
     onAuthenticationRequired: () -> Unit,
@@ -36,7 +45,12 @@ internal fun SignedInPaymentDestination(
                 payableOrderId = orderId,
                 total = WalletMoney(totalMinor, currency),
                 orderCount = orderCount,
+                paymentMethod = paymentMethod,
+                saveCardOnDevice = saveCardOnDevice,
             ),
+            providerWalletRepository = providerWalletRepository,
+            savedCardRepository = savedCardRepository,
+            savedCardCredentialStore = savedCardCredentialStore,
             initiallyVerified = initiallyVerified,
             autoVerifyOnEnter = autoVerifyOnEnter,
             onBack = onBack,

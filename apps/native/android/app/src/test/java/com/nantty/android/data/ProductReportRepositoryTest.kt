@@ -8,6 +8,39 @@ import org.junit.Test
 
 class ProductReportRepositoryTest {
     @Test
+    fun submitsPostReportUsingExistingAuthenticatedModerationContract() {
+        val transport = RecordingProductReportTransport(JSONObject("""{"data":{"id":"report-post-1","status":"received"}}"""))
+        val repository = ProductReportRepository("https://api.nantty.com", { "access-token" }, transport)
+
+        val result = repository.submitPost(
+            postId = "post-42",
+            reason = ProductReportReason.HATE_OR_HARASSMENT,
+            details = "  Targeted harassment  ",
+            idempotencyKey = "post-report-key-1",
+        )
+
+        assertEquals(ProductReportResult.Success("report-post-1"), result)
+        assertEquals("/api/v1/reports", transport.path)
+        assertEquals("access-token", transport.accessToken)
+        assertEquals("post-report-key-1", transport.idempotencyKey)
+        assertEquals("post", transport.body!!.getString("targetType"))
+        assertEquals("post-42", transport.body!!.getString("targetId"))
+        assertEquals("hate_or_harassment", transport.body!!.getString("reason"))
+        assertEquals("Targeted harassment", transport.body!!.getString("details"))
+    }
+
+    @Test
+    fun reportDetailsUseTheSharedCharacterLimitRatherThanUtf8ByteCount() {
+        val transport = RecordingProductReportTransport(JSONObject("""{"data":{"id":"report-post-unicode","status":"received"}}"""))
+        val details = "🔥".repeat(126) // 252 UTF-16 code units but more than 500 UTF-8 bytes.
+        val result = ProductReportRepository("https://api.nantty.com", { "access-token" }, transport)
+            .submitPost("post-43", ProductReportReason.SPAM, details, "post-report-key-2")
+
+        assertEquals(ProductReportResult.Success("report-post-unicode"), result)
+        assertEquals(details, transport.body!!.getString("details"))
+    }
+
+    @Test
     fun submitsProductReportUsingSocialApiContractAndStableRetryKey() {
         val transport = RecordingProductReportTransport(JSONObject("""{"data":{"id":"report-1","status":"received","priority":"normal"}}"""))
         val repository = ProductReportRepository(

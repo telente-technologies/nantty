@@ -12,11 +12,15 @@ import com.nantty.android.data.StoryAdsRepository
 import com.nantty.android.data.StoryAdDestination
 import com.nantty.android.data.SoundsRepository
 import com.nantty.android.data.CreatorSampleMediaRepository
+import com.nantty.android.data.FeedQuotedPost
 import java.util.concurrent.Executor
 
 /** Selection for full-screen destinations layered over the signed-in navigation shell. */
+internal enum class SignedInComposerMode { CLOSED, POST, STORY }
+
 internal data class SignedInOverlaySelection(
-    val showingComposer: Boolean,
+    val composerMode: SignedInComposerMode,
+    val quotedPostForComposer: FeedQuotedPost?,
     val selectedPostId: String?,
     val selectedPostCommentId: String?,
     val selectedStoreId: String?,
@@ -45,8 +49,9 @@ internal data class SignedInOverlayActions(
     val cancelComposer: () -> Unit,
     val publishedPost: (String) -> Unit,
     val storyPublished: (String) -> Unit,
-    val backFromPost: () -> Unit,
+    val backFromPost: (String?) -> Unit,
     val backFromStore: () -> Unit,
+    val searchStore: (String?, String?) -> Unit,
     val backFromBrand: () -> Unit,
     val openStore: (String) -> Unit,
     val openProduct: (String) -> Unit,
@@ -69,7 +74,7 @@ internal fun SignedInOverlayDestinations(
     dependencies: SignedInOverlayDependencies,
     actions: SignedInOverlayActions,
 ): Boolean {
-    if (selection.showingComposer) {
+    if (selection.composerMode != SignedInComposerMode.CLOSED) {
         HingeSafeContent {
             PostComposerScreen(
                 sessionProvider = dependencies.sessionRepository::sessionOrNull,
@@ -77,6 +82,8 @@ internal fun SignedInOverlayDestinations(
                 storiesRepository = dependencies.storiesRepository,
                 soundsRepository = dependencies.soundsRepository,
                 storyMediaRepository = dependencies.storyMediaRepository,
+                startInStoryMode = selection.composerMode == SignedInComposerMode.STORY,
+                quoteTarget = selection.quotedPostForComposer,
                 onCancel = actions.cancelComposer,
                 onPublished = actions.publishedPost,
                 onStoryPublished = actions.storyPublished,
@@ -93,7 +100,8 @@ internal fun SignedInOverlayDestinations(
                 initialCommentId = selection.selectedPostCommentId,
                 sessionProvider = dependencies.sessionRepository::sessionOrNull,
                 executor = dependencies.executor,
-                onBack = actions.backFromPost,
+                onBack = { actions.backFromPost(null) },
+                onOpenPost = { actions.backFromPost(it) },
             )
         }
         return true
@@ -108,6 +116,7 @@ internal fun SignedInOverlayDestinations(
                 onBack = actions.backFromStore,
                 onRequireSignIn = actions.requireSignIn,
                 onOpenProduct = actions.openProduct,
+                onSearchStore = actions.searchStore,
             )
         }
         return true

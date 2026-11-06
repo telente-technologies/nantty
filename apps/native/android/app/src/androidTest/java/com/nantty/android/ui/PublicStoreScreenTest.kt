@@ -27,6 +27,7 @@ class PublicStoreScreenTest {
     fun rendersApiStoreAndOpensProductThenBack() {
         var openedProduct: String? = null
         var wentBack = false
+        var searchedStore: Pair<String?, String?>? = null
         val repository = StoreRepository(
             baseUrl = "https://api.nantty.com",
             sessionProvider = ::signedInSession,
@@ -41,12 +42,21 @@ class PublicStoreScreenTest {
 
         compose.setContent {
             MaterialTheme {
-                PublicStoreScreen(STORE_ID, repository, Executor { it.run() }, onBack = { wentBack = true }, onOpenProduct = { openedProduct = it })
+                PublicStoreScreen(
+                    STORE_ID,
+                    repository,
+                    Executor { it.run() },
+                    onBack = { wentBack = true },
+                    onOpenProduct = { openedProduct = it },
+                    onSearchStore = { id, name -> searchedStore = id to name },
+                )
             }
         }
 
         compose.onNodeWithText("Ada Fabrics").assertIsDisplayed()
         compose.onNodeWithText("@adafabrics").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Search this store").performClick()
+        compose.runOnIdle { assertEquals(STORE_ID to "Ada Fabrics", searchedStore) }
         compose.onNodeWithTag("product-search-result-product-1").performClick()
         compose.runOnIdle { assertEquals("product-1", openedProduct) }
         compose.onNodeWithContentDescription("Back to search").performClick()

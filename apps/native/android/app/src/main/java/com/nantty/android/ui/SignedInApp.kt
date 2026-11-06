@@ -3,9 +3,9 @@ package com.nantty.android.ui
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -84,13 +84,13 @@ internal fun SignedInApp(
     var pendingMartCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
     var returnToDiscoverAfterCategory by rememberSaveable { mutableStateOf(false) }
     val destinationStateHolder = rememberSaveableStateHolder()
-    var showingComposer by rememberSaveable { mutableStateOf(false) }
+    var composerMode by rememberSaveable { mutableStateOf(SignedInComposerMode.CLOSED) }; val quoteTarget = remember { mutableStateOf<com.nantty.android.data.FeedQuotedPost?>(null) }
     SignedInWidgetDestinationEffect(
         requestedDestination = requestedWidgetDestination,
         isGuest = isGuest,
         onRequireSignIn = onRequireSignIn,
         onSelectDestination = { destination = it },
-        onShowComposer = { showingComposer = it },
+        onShowComposer = { composerMode = if (it) SignedInComposerMode.POST else SignedInComposerMode.CLOSED },
         onHandled = onWidgetDestinationHandled,
     )
     SignedInPushTargetEffect(
@@ -148,8 +148,10 @@ internal fun SignedInApp(
     val soundsRepository = remember(sessionRepository) { SoundsRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val postDetailRepository = remember(sessionRepository) { PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val chatPasscodeRepository = remember(shareContext) { ChatPasscodeRepository(shareContext) }
+    val reportPost = rememberFeedPostReportFlow(sessionRepository, isGuest, onRequireSignIn, onSignOut)
     val (
         walletRepository,
+        _,
         _,
         _,
         buyerOrdersRepository,
@@ -203,30 +205,23 @@ internal fun SignedInApp(
     fun selectTopic(topicId: String?) = feedController.selectTopic(topicId)
     fun loadMore() = feedController.loadMore()
 
-    val feedActions = SignedInFeedActions(
-        executor = executor,
-        postRepository = { PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull) },
-        onMessage = { interactionMessage = it },
-        onSaving = { savingPostId = it },
-        isSaving = { savingPostId == it },
-        applyInteraction = { post, liked, reposted, bookmarked -> feedController.applyInteraction(post, liked, reposted, bookmarked) },
-        refresh = ::refresh,
+    val feedActions = createSignedInFeedActions(
+        executor, { PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull) }, { publicProfileRepository },
+        { interactionMessage = it }, { savingPostId = it }, { savingPostId == it },
+        { post, liked, reposted, bookmarked -> feedController.applyInteraction(post, liked, reposted, bookmarked) },
+        feedController::applyAuthorFollow, ::refresh,
     )
 
     LaunchedEffect(Unit) { refresh() }
-    LaunchedEffect(accountUser?.id, isGuest, initialFollowingAfterSignIn) {
-        if (!isGuest && initialFollowingAfterSignIn) {
-            selectFeed(FeedType.FOLLOWING)
-            onInitialFollowingHandled()
-        }
-    }
-    LaunchedEffect(accountUser?.id) {
-        if (!isGuest) feedTopics.controller.load(sessionRepository.sessionOrNull()?.accessToken)
-    }
+    SignedInFeedStartupEffects(
+        accountUser?.id, isGuest, initialFollowingAfterSignIn, sessionRepository.sessionOrNull()?.accessToken,
+        ::selectFeed, onInitialFollowingHandled, feedTopics.controller::load,
+    )
 
     if (SignedInOverlayDestinations(
             selection = SignedInOverlaySelection(
-                showingComposer = showingComposer,
+                composerMode = composerMode,
+                quotedPostForComposer = quoteTarget.value,
                 selectedPostId = selectedPostId,
                 selectedPostCommentId = selectedPostCommentId,
                 selectedStoreId = selectedStoreId,
@@ -250,11 +245,12 @@ internal fun SignedInApp(
                 executor = executor,
             ),
             actions = SignedInOverlayActions(
-                cancelComposer = { showingComposer = false },
-                publishedPost = { postId -> showingComposer = false; selectedPostId = postId; refresh() },
-                storyPublished = { showingComposer = false; messagesRefreshGeneration++; destination = Destination.Messages },
-                backFromPost = { selectedPostId = null; selectedPostCommentId = null; refresh() },
+                cancelComposer = { composerMode = SignedInComposerMode.CLOSED; quoteTarget.value = null },
+                publishedPost = { postId -> composerMode = SignedInComposerMode.CLOSED; quoteTarget.value = null; selectedPostId = postId; refresh() },
+                storyPublished = { composerMode = SignedInComposerMode.CLOSED; quoteTarget.value = null; messagesRefreshGeneration++; destination = Destination.Messages },
+                backFromPost = { nextPostId -> if (nextPostId == null) { selectedPostId = null; selectedPostCommentId = null; refresh() } else { selectedPostId = nextPostId; selectedPostCommentId = null; refresh() } },
                 backFromStore = { selectedStoreId = null },
+                searchStore = { storeId, storeName -> searchScope = storeId?.let { "store:$it" } ?: "mart"; searchScopeLabel = storeName ?: "Mart"; selectedStoreId = null; destination = Destination.Discover },
                 backFromBrand = { selectedBrandId = null },
                 openStore = { storeId -> selectedBrandId = null; selectedStoreId = storeId },
                 openProduct = { productId ->
@@ -345,7 +341,9 @@ internal fun SignedInApp(
                 onFollowingSignInRequired = onRequireFollowingSignIn,
                 onReauthenticate = onSignOut,
                 onRefresh = ::refresh,
-                onCreatePost = { if (isGuest) onRequireSignIn() else showingComposer = true },
+                onCreatePost = { if (isGuest) onRequireSignIn() else { quoteTarget.value = null; composerMode = SignedInComposerMode.POST } },
+                onCreateStory = { if (isGuest) onRequireSignIn() else composerMode = SignedInComposerMode.STORY },
+                currentAccountAvatarUrl = accountUser?.avatarUrl,
                 modifier = contentModifier,
                 onOpenPost = { selectedPostId = it },
                 onOpenPostComment = { postId, commentId ->
@@ -359,6 +357,8 @@ internal fun SignedInApp(
                     searchScopeLabel = "@${username.removePrefix("@")}"
                     destination = Destination.Discover
                 },
+                onBackToStoreSearch = { storeId -> selectedStoreId = storeId },
+                onBackToProfileSearch = { profileId -> if (profileId == accountUser?.id) { selectedProfileId = null; destination = Destination.Profile } else selectedProfileId = profileId },
                 searchScope = searchScope,
                 searchScopeLabel = searchScopeLabel,
                 onSearchScopeChanged = { scope, label ->
@@ -375,9 +375,13 @@ internal fun SignedInApp(
                     destination = Destination.Mart
                 },
                 onLike = { if (isGuest) onRequireSignIn() else feedActions.like(it) },
+                onFollowAuthor = { if (isGuest) onRequireSignIn() else feedActions.followAuthor(it) },
                 onRepost = { if (isGuest) onRequireSignIn() else feedActions.repost(it) },
+                onQuotePost = { if (isGuest) onRequireSignIn() else { quoteTarget.value = it; composerMode = SignedInComposerMode.POST } },
                 onSave = { if (isGuest) onRequireSignIn() else feedActions.save(it) },
                 onShare = { feedActions.share(shareContext, it) },
+                currentAccountId = accountUser?.id,
+                onReportPost = reportPost,
                 interactionMessage = interactionMessage,
                 onMessageFailure = { message, authenticationRequired ->
                     if (authenticationRequired) onSignOut() else interactionMessage = message
@@ -481,6 +485,7 @@ internal fun SignedInApp(
                     onQueueSupportTicket = { pendingSupportTicketId = it },
                     onQueueDispute = { pendingNotificationDisputeId = it },
                     onQueueClip = { pendingNotificationClipId = it },
+                    onQueueOrder = { pendingNotificationOrderId = it },
                 ),
                 onBackFromSupportRequests = { destination = Destination.Notifications },
                 onOpenBusinessTools = { if (isGuest) onRequireSignIn() else destination = Destination.Business },

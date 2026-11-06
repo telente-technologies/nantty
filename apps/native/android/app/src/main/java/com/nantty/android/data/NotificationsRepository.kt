@@ -29,6 +29,7 @@ data class ActivityNotification(
     val clipId: String? = null,
     val commentId: String? = null,
     val url: String? = null,
+    val orderId: String? = null,
 )
 
 sealed interface NotificationDestination {
@@ -37,6 +38,7 @@ sealed interface NotificationDestination {
     data class Conversation(val conversationId: String, val messageId: String? = null) : NotificationDestination
     data object Messages : NotificationDestination
     data object Orders : NotificationDestination
+    data class OrderDetail(val orderId: String) : NotificationDestination
     data object FollowRequests : NotificationDestination
     data object GroupInvitations : NotificationDestination
     data object Spaces : NotificationDestination
@@ -71,12 +73,14 @@ fun resolveNotificationDestination(notification: ActivityNotification): Notifica
     }
     postId?.let { return NotificationDestination.Post(it) }
     notification.disputeId?.takeIf(MessagesRepository::isUuid)?.let { return NotificationDestination.Dispute(it) }
-    if (notification.category.equals("orders", ignoreCase = true)) return NotificationDestination.Orders
     if (notification.category.equals("messages", ignoreCase = true) ||
         notification.conversationId != null ||
         notification.kind in setOf("message", "newMessage", "chatMessage")
     ) return NotificationDestination.Messages
     notification.ticketId?.takeIf(MessagesRepository::isUuid)?.let { return NotificationDestination.SupportTicket(it) }
+    (notification.orderId?.takeIf(::isSafeNotificationId) ?: resolveOrderNotificationUrl(notification.url))
+        ?.let { return NotificationDestination.OrderDetail(it) }
+    if (notification.category.equals("orders", ignoreCase = true)) return NotificationDestination.Orders
     notification.actor?.id?.takeIf(::isSafeNotificationId)?.let { return NotificationDestination.Profile(it) }
     return null
 }
@@ -111,6 +115,18 @@ private fun resolveDisputeNotificationUrl(rawUrl: String?): String? {
     val segments = uri.path.split('/').filter(String::isNotEmpty)
     if (segments.size != 2 || segments[0] != "disputes") return null
     return segments[1].takeIf(MessagesRepository::isUuid)
+}
+
+private fun resolveOrderNotificationUrl(rawUrl: String?): String? {
+    if (rawUrl.isNullOrBlank() || rawUrl.length > 2_048 || rawUrl.contains('\\')) return null
+    val uri = runCatching {
+        java.net.URI(if (rawUrl.startsWith("/")) "https://nantty.com$rawUrl" else rawUrl)
+    }.getOrNull() ?: return null
+    val trustedHost = uri.host?.lowercase() in setOf("nantty.com", "www.nantty.com", "nantty.app", "www.nantty.app", "web.nantty.com")
+    if (!trustedHost || !uri.scheme.equals("https", ignoreCase = true) || uri.rawUserInfo != null || uri.port != -1) return null
+    val segments = uri.path.split('/').filter(String::isNotEmpty)
+    if (segments.size != 2 || segments[0] !in setOf("order", "orders")) return null
+    return segments[1].takeIf(::isSafeNotificationId)
 }
 
 private fun isSafeNotificationId(value: String): Boolean =
@@ -168,6 +184,7 @@ class NotificationsRepository(
                 val conversationId = dataText("conversationId")
                 val messageId = dataText("messageId")
                 val disputeId = dataText("disputeId")
+                val orderId = dataText("orderId")
                 add(ActivityNotification(
                     id = id,
                     category = row.optString("category"),
@@ -186,6 +203,7 @@ class NotificationsRepository(
                     clipId = dataText("clipId"),
                     commentId = dataText("commentId"),
                     url = dataText("url") ?: row.optString("url").takeIf { it.isNotBlank() && it != "null" },
+                    orderId = orderId,
                 ))
             }
         }

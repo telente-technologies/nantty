@@ -22,6 +22,7 @@ data class PostDetail(
     val liked: Boolean,
     val reposted: Boolean,
     val bookmarked: Boolean,
+    val quotes: Int = 0,
 )
 
 internal fun extractSafePostLinks(text: String): List<String> = Regex("https?://[^\\s<>]+", RegexOption.IGNORE_CASE)
@@ -53,6 +54,8 @@ data class ThreadComment(
     val replies: List<ThreadComment>,
     val liked: Boolean = false,
 )
+
+data class CommentRepliesPage(val comments: List<ThreadComment>, val nextCursor: String?)
 
 internal fun updateThreadCommentLike(
     comments: List<ThreadComment>,
@@ -90,7 +93,13 @@ enum class ThreadSort(val label: String, val apiValue: String) {
 }
 
 sealed interface PostDetailResult {
-    data class Success(val post: PostDetail, val comments: List<ThreadComment>, val nextCursor: String?) : PostDetailResult
+    data class Success(
+        val post: PostDetail,
+        val comments: List<ThreadComment>,
+        val nextCursor: String?,
+        val quotes: List<PostThreadQuote> = emptyList(),
+        val threadRows: List<PostThreadRow> = comments.map(PostThreadRow::Comment),
+    ) : PostDetailResult
     data class Failure(val message: String) : PostDetailResult
 }
 
@@ -133,14 +142,38 @@ class PostDetailRepository(
         }
     }
 
-    fun load(postId: String, cursor: String? = null, sort: ThreadSort = ThreadSort.RELEVANT): PostDetailResult = try {
+    fun load(
+        postId: String,
+        cursor: String? = null,
+        sort: ThreadSort = ThreadSort.RELEVANT,
+        filter: PostThreadFilter = PostThreadFilter.REPLIES,
+    ): PostDetailResult = try {
         val session = sessionProvider()
         val postRoot = transport.request("GET", "/api/v1/posts/${pathSegment(postId)}", session?.accessToken, null)
-        val threadPath = buildPostThreadPath(postId, sort, cursor)
+        val threadPath = buildPostThreadPath(postId, sort, cursor, filter)
         val threadRoot = transport.request("GET", threadPath, session?.accessToken, null)
-        PostDetailResult.Success(parsePost(postRoot), parseThread(threadRoot), nextCursor(threadRoot))
+        val rows = parseThreadRows(threadRoot)
+        PostDetailResult.Success(
+            post = parsePost(postRoot),
+            comments = rows.filterIsInstance<PostThreadRow.Comment>().map(PostThreadRow.Comment::value),
+            nextCursor = nextCursor(threadRoot),
+            quotes = rows.filterIsInstance<PostThreadRow.Quote>().map(PostThreadRow.Quote::value),
+            threadRows = rows,
+        )
     } catch (error: Exception) {
         PostDetailResult.Failure(error.message ?: "Could not load this post. Check your connection and try again.")
+    }
+
+    fun loadCommentReplies(commentId: String, cursor: String? = null): Result<CommentRepliesPage> = runCatching {
+        require(commentId.isNotBlank()) { "A comment ID is required to load replies." }
+        val session = sessionProvider()
+        val payload = transport.request(
+            "GET",
+            buildCommentThreadPath(commentId, cursor),
+            session?.accessToken?.takeIf(String::isNotBlank),
+            null,
+        )
+        CommentRepliesPage(parseThread(payload), nextCursor(payload))
     }
 
     fun reply(
@@ -235,20 +268,50 @@ class PostDetailRepository(
             liked = post.optBoolean("liked"),
             reposted = post.optBoolean("reposted"),
             bookmarked = post.optBoolean("bookmarked", post.optBoolean("isSaved")),
+            quotes = post.optInt("quotes").coerceAtLeast(0),
         )
     }
 
     internal fun parseThread(payload: JSONObject): List<ThreadComment> {
+        return parseThreadRows(payload).filterIsInstance<PostThreadRow.Comment>().map(PostThreadRow.Comment::value)
+    }
+
+    internal fun parseThreadRows(payload: JSONObject): List<PostThreadRow> {
         val page = payload.optJSONObject("data") ?: payload
         val rows = page.optJSONArray("data") ?: payload.optJSONArray("data") ?: JSONArray()
         return buildList {
             for (index in 0 until rows.length()) {
                 val item = rows.optJSONObject(index) ?: continue
-                // Quote entries are valid conversation rows but are not comments; this focused slice renders comments.
-                if (item.optString("type", "comment") == "quote") continue
-                add(parseComment(item))
+                when (item.optString("type", "comment")) {
+                    "quote" -> parseQuote(item)?.let { add(PostThreadRow.Quote(it)) }
+                    "comment" -> add(PostThreadRow.Comment(parseComment(item)))
+                }
             }
         }
+    }
+
+    private fun parseQuote(item: JSONObject): PostThreadQuote? {
+        val id = item.optString("id").takeIf(String::isNotBlank) ?: return null
+        val post = item.optJSONObject("quotePost") ?: return null
+        val quotedPostId = post.optString("id").takeIf(String::isNotBlank) ?: return null
+        val author = post.optJSONObject("author") ?: return null
+        val thumbnail = post.optJSONObject("thumbnail")
+        val verificationColor = author.optJSONObject("verification")?.optString("color")
+            ?.takeIf { it in setOf("blue", "gold", "black") }
+        return PostThreadQuote(
+            id = id,
+            quotedPost = FeedQuotedPost(
+                id = quotedPostId,
+                kind = post.optString("kind", "post"),
+                authorName = author.optString("name", "Nantty member"),
+                username = author.optString("username"),
+                avatarUrl = safeMediaUrl(author.optString("avatarUrl").takeIf(String::isNotBlank)),
+                verified = author.optBoolean("verified"),
+                verificationColor = verificationColor,
+                text = post.optString("text"),
+                thumbnailUrl = safeMediaUrl(thumbnail?.optString("url")?.takeIf(String::isNotBlank)),
+            ),
+        )
     }
 
     internal fun nextCursor(payload: JSONObject): String? {
@@ -312,12 +375,27 @@ class PostDetailRepository(
     private fun queryValue(value: String): String = java.net.URLEncoder.encode(value, Charsets.UTF_8.name()).replace("+", "%20")
 }
 
-internal fun buildPostThreadPath(postId: String, sort: ThreadSort, cursor: String?): String = buildString {
+internal fun buildPostThreadPath(
+    postId: String,
+    sort: ThreadSort,
+    cursor: String?,
+    filter: PostThreadFilter = PostThreadFilter.REPLIES,
+): String = buildString {
     val encodedPostId = java.net.URLEncoder.encode(postId, Charsets.UTF_8.name()).replace("+", "%20")
     append("/api/v1/posts/$encodedPostId/thread?sort=${sort.apiValue}")
+    if (filter == PostThreadFilter.QUOTES) append("&filter=${filter.apiValue}")
     cursor?.takeIf(String::isNotBlank)?.let {
         val encodedCursor = java.net.URLEncoder.encode(it, Charsets.UTF_8.name()).replace("+", "%20")
         append("&cursor=$encodedCursor")
+    }
+}
+
+internal fun buildCommentThreadPath(commentId: String, cursor: String?): String = buildString {
+    val encodedCommentId = java.net.URLEncoder.encode(commentId, Charsets.UTF_8.name()).replace("+", "%20")
+    append("/api/v1/comments/$encodedCommentId/thread")
+    cursor?.takeIf(String::isNotBlank)?.let {
+        val encodedCursor = java.net.URLEncoder.encode(it, Charsets.UTF_8.name()).replace("+", "%20")
+        append("?cursor=$encodedCursor")
     }
 }
 

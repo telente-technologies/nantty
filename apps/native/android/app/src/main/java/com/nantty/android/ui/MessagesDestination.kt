@@ -33,6 +33,8 @@ internal fun MessagesDestination(
     storiesRepository: StoriesRepository?,
     storyAdsRepository: StoryAdsRepository?,
     onOpenStoryAdDestination: (StoryAdDestination) -> Unit,
+    currentUserAvatarUrl: String?,
+    onAddStory: () -> Unit,
 ) {
     MessagesScreen(
         repository = repository,
@@ -56,5 +58,7 @@ internal fun MessagesDestination(
         storiesRepository = storiesRepository,
         storyAdsRepository = storyAdsRepository,
         onOpenStoryAdDestination = onOpenStoryAdDestination,
+        currentUserAvatarUrl = currentUserAvatarUrl,
+        onAddStory = onAddStory,
     )
 }

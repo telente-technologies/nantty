@@ -31,6 +31,22 @@ data class FeedPost(
     val authorId: String = "",
     val bookmarked: Boolean = false,
     val postedAsId: String? = null,
+    val quotedPost: FeedQuotedPost? = null,
+    val quotedPostUnavailable: Boolean = false,
+    val isQuote: Boolean = false,
+    val isFollowingAuthor: Boolean = false,
+)
+
+data class FeedQuotedPost(
+    val id: String,
+    val kind: String,
+    val authorName: String,
+    val username: String,
+    val avatarUrl: String?,
+    val verified: Boolean,
+    val verificationColor: String?,
+    val text: String,
+    val thumbnailUrl: String?,
 )
 
 data class FeedTopic(val id: String, val name: String)
@@ -158,6 +174,8 @@ class FeedRepository(
             for (index in 0 until rows.length()) {
                 val item = rows.optJSONObject(index) ?: continue
                 val author = item.optJSONObject("author") ?: JSONObject()
+                val quotedPostPayload = item.optJSONObject("resharedFrom")
+                val quotedPost = quotedPostPayload?.let(::parseQuotedPost)?.takeIf { it.id.isNotBlank() }
                 val verification = author.optJSONObject("verification")
                 val verificationColor = verification?.optString("color")?.takeIf {
                     verification.optBoolean("badgeVisible") && verification.optString("status") == "active" && it in setOf("blue", "gold", "black")
@@ -201,11 +219,43 @@ class FeedRepository(
                     authorId = author.optString("id"),
                     bookmarked = item.optBoolean("bookmarked", item.optBoolean("isSaved")),
                     postedAsId = item.optJSONObject("postedAs")?.optString("id")?.takeIf { it.isNotBlank() && it != "null" },
+                    quotedPost = quotedPost,
+                    quotedPostUnavailable = item.optBoolean("resharedFromUnavailable") || (quotedPostPayload != null && quotedPost == null),
+                    isQuote = item.optBoolean("isQuote"),
+                    isFollowingAuthor = item.optBoolean("isFollowingAuthor"),
                 ))
             }
         }
         FeedResult.Success(posts, root.optString("nextCursor").takeUnless { it == "" || it == "null" })
     }.getOrElse { FeedResult.Failure("Nantty returned a feed we could not read. Please try again later.") }
+}
+
+private fun parseQuotedPost(payload: JSONObject): FeedQuotedPost {
+    val author = payload.optJSONObject("author") ?: JSONObject()
+    val verification = author.optJSONObject("verification")
+    val verificationColor = verification?.optString("color")?.takeIf {
+        verification.optBoolean("badgeVisible") && verification.optString("status") == "active" && it in setOf("blue", "gold", "black")
+    }
+    val firstReadyMedia = payload.optJSONArray("media")?.let { media ->
+        (0 until media.length()).asSequence()
+            .mapNotNull(media::optJSONObject)
+            .firstOrNull { it.optString("status") == "ready" }
+    }
+    val rawThumbnail = firstReadyMedia?.let { media ->
+        if (media.optString("type") == "video") media.optString("posterUrl").takeIf(String::isNotBlank)
+            ?: media.optString("url") else media.optString("url")
+    }
+    return FeedQuotedPost(
+        id = payload.optString("id"),
+        kind = payload.optString("kind", "post"),
+        authorName = author.optString("name", "Nantty member"),
+        username = author.optString("username"),
+        avatarUrl = safeMediaUrl(author.optString("avatarUrl").takeUnless { it.isBlank() || it == "null" }),
+        verified = verificationColor != null || (verification == null && author.optBoolean("verified")),
+        verificationColor = verificationColor,
+        text = payload.optString("text"),
+        thumbnailUrl = safeMediaUrl(rawThumbnail),
+    )
 }
 
 internal fun buildForYouUrl(origin: String, cursor: String?, topicId: String? = null): URL {

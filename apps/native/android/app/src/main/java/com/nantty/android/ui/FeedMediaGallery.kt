@@ -7,14 +7,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -22,16 +18,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.OpenInFull
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -41,27 +37,36 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.nantty.android.data.FeedMedia
+import com.nantty.android.data.FeedPost
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun FeedMediaGallery(media: List<FeedMedia>) {
+@androidx.annotation.OptIn(markerClass = [androidx.media3.common.util.UnstableApi::class])
+internal fun FeedMediaGallery(
+    media: List<FeedMedia>,
+    post: FeedPost,
+    onLike: (() -> Unit)?,
+    onOpenComments: () -> Unit,
+    onRepost: (() -> Unit)?,
+    onSave: (() -> Unit)?,
+    saveBusy: Boolean,
+    onShare: (() -> Unit)?,
+) {
     if (media.isEmpty()) return
 
     val pagerState = rememberPagerState(pageCount = { media.size })
     val scope = rememberCoroutineScope()
     val images = remember(media) { media.filter { it.type == "image" } }
     var previewImageIndex by remember(media) { mutableIntStateOf(-1) }
+    var previewVideo by remember(media) { mutableStateOf<FeedMedia?>(null) }
 
     BoxWithConstraints(Modifier.fillMaxWidth().padding(top = 14.dp)) {
         val ratio = media.firstNotNullOfOrNull(::mediaAspectRatio) ?: DEFAULT_MEDIA_RATIO
@@ -91,7 +96,7 @@ internal fun FeedMediaGallery(media: List<FeedMedia>) {
                     }
                 }
             } else {
-                VideoPreview(item, Modifier.fillMaxSize())
+                VideoPreview(item, Modifier.fillMaxSize()) { previewVideo = item }
             }
         }
     }
@@ -127,21 +132,51 @@ internal fun FeedMediaGallery(media: List<FeedMedia>) {
         FeedImagePreviewDialog(
             images = images,
             initialIndex = previewImageIndex,
+            post = post,
+            onLike = onLike,
+            onOpenComments = {
+                previewImageIndex = -1
+                onOpenComments()
+            },
+            onRepost = {
+                previewImageIndex = -1
+                onRepost?.invoke()
+            },
+            onSave = onSave,
+            saveBusy = saveBusy,
+            onShare = onShare,
             onDismiss = { previewImageIndex = -1 },
+        )
+    }
+
+    previewVideo?.let { video ->
+        FeedVideoPreviewDialog(
+            media = video,
+            post = post,
+            onLike = onLike,
+            onOpenComments = {
+                previewVideo = null
+                onOpenComments()
+            },
+            onRepost = {
+                previewVideo = null
+                onRepost?.invoke()
+            },
+            onSave = onSave,
+            saveBusy = saveBusy,
+            onShare = onShare,
+            onDismiss = { previewVideo = null },
         )
     }
 }
 
 @Composable
-private fun VideoPreview(media: FeedMedia, modifier: Modifier = Modifier) {
+private fun VideoPreview(media: FeedMedia, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
         modifier.clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surfaceVariant)
-            .clearAndSetSemantics {
-                contentDescription = if (media.posterUrl.isNullOrBlank()) {
-                    "Video preview. No thumbnail is available, and playback is not available in this app yet."
-                } else {
-                    "Video thumbnail. Playback is not available in this app yet."
-                }
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics {
+                contentDescription = if (media.posterUrl.isNullOrBlank()) "Open video; no thumbnail is available" else "Open video"
             },
         contentAlignment = Alignment.Center,
     ) {
@@ -154,67 +189,19 @@ private fun VideoPreview(media: FeedMedia, modifier: Modifier = Modifier) {
             )
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                Icons.Default.PlayArrow,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.background(Color.Black.copy(alpha = 0.72f), CircleShape).padding(12.dp),
+            )
             Text(
-                "Video · playback unavailable",
-                Modifier.padding(top = 4.dp).background(Color.Black.copy(alpha = 0.72f), RoundedCornerShape(6.dp)).padding(horizontal = 10.dp, vertical = 6.dp),
+                "Play video",
+                Modifier.padding(top = 8.dp).background(Color.Black.copy(alpha = 0.72f), RoundedCornerShape(6.dp)).padding(horizontal = 10.dp, vertical = 6.dp),
                 color = Color.White,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
             )
-        }
-    }
-}
-
-@Composable
-private fun FeedImagePreviewDialog(images: List<FeedMedia>, initialIndex: Int, onDismiss: () -> Unit) {
-    val pagerState = rememberPagerState(initialPage = initialIndex, pageCount = { images.size })
-    val scope = rememberCoroutineScope()
-
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = true)) {
-        Surface(
-            Modifier.fillMaxWidth().widthIn(max = 720.dp),
-            shape = MaterialTheme.shapes.extraLarge,
-            color = Color.Black,
-        ) {
-            Column(Modifier.padding(12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Photo", Modifier.weight(1f), color = Color.White, style = MaterialTheme.typography.titleMedium)
-                    Text(
-                        "${pagerState.currentPage + 1} of ${images.size}",
-                        Modifier.semantics { contentDescription = "Photo ${pagerState.currentPage + 1} of ${images.size}" },
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    IconButton(onClick = onDismiss, modifier = Modifier.semantics { contentDescription = "Close image preview" }) {
-                        Icon(Icons.Default.Close, contentDescription = null, tint = Color.White)
-                    }
-                }
-                Box(Modifier.fillMaxWidth().heightIn(min = 240.dp, max = 560.dp)) {
-                    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
-                        AsyncImage(
-                            model = images[page].url,
-                            contentDescription = "Photo ${page + 1} of ${images.size}",
-                            modifier = Modifier.fillMaxSize().semantics { contentDescription = "Full-size photo ${page + 1} of ${images.size}" },
-                            contentScale = ContentScale.Fit,
-                        )
-                    }
-                    if (images.size > 1) {
-                        IconButton(
-                            onClick = { scope.launch { pagerState.scrollToPage(pagerState.currentPage - 1) } },
-                            enabled = pagerState.currentPage > 0,
-                            modifier = Modifier.align(Alignment.CenterStart).background(Color.Black.copy(alpha = 0.66f), CircleShape)
-                                .semantics { contentDescription = "Show previous photo" },
-                        ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White) }
-                        IconButton(
-                            onClick = { scope.launch { pagerState.scrollToPage(pagerState.currentPage + 1) } },
-                            enabled = pagerState.currentPage < images.lastIndex,
-                            modifier = Modifier.align(Alignment.CenterEnd).background(Color.Black.copy(alpha = 0.66f), CircleShape)
-                                .semantics { contentDescription = "Show next photo" },
-                        ) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color.White) }
-                    }
-                }
-            }
         }
     }
 }

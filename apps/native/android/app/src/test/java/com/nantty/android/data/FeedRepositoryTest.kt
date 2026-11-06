@@ -141,7 +141,7 @@ class FeedRepositoryTest {
     @Test
     fun parsesPostViewAuthorEngagementAndReadyMedia() {
         val result = FeedRepository().parsePage(
-            """{"data":[{"id":"post-1","kind":"clip","author":{"name":"Ari","username":"ari","avatarUrl":"https://cdn.nantty.com/ari.jpg","verified":true,"verification":{"status":"active","color":"gold","badgeVisible":true}},"postedAs":{"name":"Ari Studio","handle":"aristudio","avatarUrl":"https://cdn.nantty.com/studio.jpg"},"text":"A real post","likes":4,"comments":2,"reposts":1,"shares":3,"liked":true,"reposted":false,"bookmarked":true,"createdAt":"2026-11-02T10:00:00.000Z","media":[{"id":"image-1","type":"image","url":"https://cdn.nantty.com/post.jpg","status":"ready","width":1200,"height":800},{"id":"video-1","type":"video","url":"https://cdn.nantty.com/video.mp4","posterUrl":"https://cdn.nantty.com/poster.jpg","status":"ready"},{"id":"processing","type":"image","url":"https://cdn.nantty.com/wait.jpg","status":"processing"}]}],"nextCursor":"next"}""",
+            """{"data":[{"id":"post-1","kind":"clip","author":{"id":"author-1","name":"Ari","username":"ari","avatarUrl":"https://cdn.nantty.com/ari.jpg","verified":true,"verification":{"status":"active","color":"gold","badgeVisible":true}},"postedAs":{"name":"Ari Studio","handle":"aristudio","avatarUrl":"https://cdn.nantty.com/studio.jpg"},"text":"A real post","likes":4,"comments":2,"reposts":1,"shares":3,"liked":true,"reposted":false,"bookmarked":true,"isFollowingAuthor":true,"createdAt":"2026-11-02T10:00:00.000Z","media":[{"id":"image-1","type":"image","url":"https://cdn.nantty.com/post.jpg","status":"ready","width":1200,"height":800},{"id":"video-1","type":"video","url":"https://cdn.nantty.com/video.mp4","posterUrl":"https://cdn.nantty.com/poster.jpg","status":"ready"},{"id":"processing","type":"image","url":"https://cdn.nantty.com/wait.jpg","status":"processing"}]}],"nextCursor":"next"}""",
         ) as FeedResult.Success
 
         val post = result.posts.single()
@@ -157,9 +157,30 @@ class FeedRepositoryTest {
         assertEquals(true, post.liked)
         assertEquals(false, post.reposted)
         assertEquals(true, post.bookmarked)
+        assertEquals("author-1", post.authorId)
+        assertTrue(post.isFollowingAuthor)
         assertEquals(2, post.media.size)
         assertEquals("https://cdn.nantty.com/poster.jpg", post.media[1].posterUrl)
         assertEquals("next", result.nextCursor)
+    }
+
+    @Test
+    fun parsesEmbeddedQuotedPostAndUnavailableQuoteState() {
+        val result = FeedRepository().parsePage(
+            """{"data":[{"id":"quote-1","kind":"post","text":"My thought","isQuote":true,"resharedFromUnavailable":false,"resharedFrom":{"id":"original-1","kind":"post","text":"Original post text","createdAt":"2026-11-05T10:00:00Z","author":{"id":"author-1","name":"Ada","username":"ada","avatarUrl":"https://cdn.nantty.com/ada.jpg","verification":{"status":"active","color":"gold","badgeVisible":true}},"media":[{"id":"original-image","type":"image","url":"https://cdn.nantty.com/original.jpg","status":"ready"}]}},{"id":"quote-2","resharedFromUnavailable":true},{"id":"quote-3","resharedFrom":{"id":""}}]}""",
+        ) as FeedResult.Success
+
+        val embedded = result.posts.first()
+        assertEquals(true, embedded.isQuote)
+        assertEquals("original-1", embedded.quotedPost?.id)
+        assertEquals("Ada", embedded.quotedPost?.authorName)
+        assertEquals("gold", embedded.quotedPost?.verificationColor)
+        assertEquals("Original post text", embedded.quotedPost?.text)
+        assertEquals("https://cdn.nantty.com/original.jpg", embedded.quotedPost?.thumbnailUrl)
+        val unavailable = result.posts.last()
+        assertEquals(null, unavailable.quotedPost)
+        assertEquals(true, unavailable.quotedPostUnavailable)
+        assertEquals(true, result.posts[1].quotedPostUnavailable)
     }
 
     @Test

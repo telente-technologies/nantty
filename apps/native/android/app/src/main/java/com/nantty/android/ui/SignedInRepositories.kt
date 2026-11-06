@@ -16,6 +16,10 @@ import com.nantty.android.data.ChatNotificationSettingsRepository
 import com.nantty.android.data.ProductReviewsRepository
 import com.nantty.android.data.CartRepository
 import com.nantty.android.data.CheckoutRepository
+import com.nantty.android.data.ProviderWalletPaymentRepository
+import com.nantty.android.data.SavedCardCredentialStore
+import com.nantty.android.data.AndroidSavedCardCredentialStore
+import com.nantty.android.data.SavedCardRepository
 import com.nantty.android.data.CurrentProfileRepository
 import com.nantty.android.data.CreatorWorkspaceRepository
 import com.nantty.android.data.CreatorSampleMediaRepository
@@ -42,6 +46,7 @@ internal data class SignedInRepositories(
     val wallet: WalletRepository,
     val cart: CartRepository,
     val checkout: CheckoutRepository,
+    val providerWalletPayments: ProviderWalletPaymentRepository,
     val buyerOrders: BuyerOrdersRepository,
     val productReviews: ProductReviewsRepository,
     val disputes: DisputeRepository,
@@ -70,6 +75,8 @@ internal data class SignedInRepositories(
     val clipWatchTracking: ClipWatchTrackingRepository,
     val storyAds: StoryAdsRepository,
     val clips: ClipsRepository,
+    val savedCards: SavedCardRepository,
+    val savedCardCredentials: SavedCardCredentialStore,
 )
 
 @Composable
@@ -83,6 +90,11 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
     }
     val cart = remember(sessionRepository) { CartRepository(accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken }) }
     val checkout = remember(sessionRepository) { CheckoutRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val providerWalletPayments = remember(sessionRepository) { ProviderWalletPaymentRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val savedCards = remember(sessionRepository) { SavedCardRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val savedCardCredentials = remember(appContext, sessionRepository) {
+        AndroidSavedCardCredentialStore(appContext) { sessionRepository.sessionOrNull()?.user?.id }
+    }
     val buyerOrders = remember(sessionRepository) { BuyerOrdersRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val productReviews = remember(sessionRepository) { ProductReviewsRepository(accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken }) }
     val disputes = remember(sessionRepository) { DisputeRepository(sessionProvider = sessionRepository::sessionOrNull) }
@@ -167,6 +179,7 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
         wallet,
         cart,
         checkout,
+        providerWalletPayments,
         buyerOrders,
         productReviews,
         disputes,
@@ -195,11 +208,14 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
         clipWatchTracking,
         storyAds,
         clips,
+        savedCards,
+        savedCardCredentials,
     ) {
         SignedInRepositories(
             wallet,
             cart,
             checkout,
+            providerWalletPayments,
             buyerOrders,
             productReviews,
             disputes,
@@ -228,6 +244,8 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
             clipWatchTracking,
             storyAds,
             clips,
+            savedCards,
+            savedCardCredentials,
         )
     }
 }

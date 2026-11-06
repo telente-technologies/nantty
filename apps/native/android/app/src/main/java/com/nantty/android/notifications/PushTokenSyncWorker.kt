@@ -86,7 +86,8 @@ internal class PushTokenSyncWorker(context: Context, params: WorkerParameters) :
             sessionProvider = app.sessionRepository::sessionOrNull,
             refreshSessionProvider = app.sessionRepository::refreshSession,
         )
-        val storedTokenExists = !registeredTokens.read(session.user.id).isNullOrBlank()
+        val previousToken = registeredTokens.read(session.user.id)
+        val storedTokenExists = !previousToken.isNullOrBlank()
         if (!app.firebasePushConfigured) {
             return when (pushTokenSyncAction(false, false, false, storedTokenExists)) {
                 PushTokenSyncAction.REVOKE -> revokeRegisteredToken(repository, registeredTokens, session.user.id, firebaseConfigured = false)
@@ -112,10 +113,14 @@ internal class PushTokenSyncWorker(context: Context, params: WorkerParameters) :
             messaging.isAutoInitEnabled = true
             val token = Tasks.await(messaging.token, TOKEN_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             if (token.isBlank()) return Result.retry()
-            val registered = repository.register(token)
-            if (registered.isFailure) return Result.retry()
-            registeredTokens.write(session.user.id, token)
-            Result.success()
+            val synced = syncRotatedPushToken(
+                previousToken = previousToken,
+                currentToken = token,
+                unregister = repository::unregister,
+                register = repository::register,
+                store = { registeredTokens.write(session.user.id, it) },
+            )
+            if (synced) Result.success() else Result.retry()
         } catch (_: Exception) {
             Result.retry()
         }

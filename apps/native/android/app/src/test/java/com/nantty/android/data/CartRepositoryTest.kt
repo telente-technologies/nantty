@@ -42,8 +42,25 @@ class CartRepositoryTest {
         assertEquals("Large", cart.lines.single().variant)
         assertEquals("Demo store", cart.lines.single().storeName)
         assertEquals("store_1", cart.sellerGroups.single().storeId)
+        assertEquals(false, cart.sellerGroups.single().verified)
         assertEquals("calculated", cart.sellerGroups.single().shipping.status)
         assertEquals(500L, cart.sellerGroups.single().shipping.fee?.amountMinor)
+    }
+
+    @Test
+    fun carriesVerifiedEligibilityOnlyFromNestedServerStoreSummary() {
+        val transport = RecordingCartTransport().apply {
+            response = JSONObject(
+                """{"total":{"amountMinor":200,"currency":"NGN"},"groups":[
+                    {"storeId":"store_verified","storeName":"Verified","store":{"verified":true},"subtotal":{"amountMinor":100,"currency":"NGN"},"discounts":{"amountMinor":0,"currency":"NGN"},"total":{"amountMinor":100,"currency":"NGN"},"shipping":{"status":"calculated"},"items":[]},
+                    {"storeId":"store_unverified","storeName":"Unverified","store":{"verified":false},"subtotal":{"amountMinor":100,"currency":"NGN"},"discounts":{"amountMinor":0,"currency":"NGN"},"total":{"amountMinor":100,"currency":"NGN"},"shipping":{"status":"calculated"},"items":[]}
+                ]}""",
+            )
+        }
+
+        val result = CartRepository("https://api.nantty.com", { "buyer-access" }, transport).loadCart() as CartResult.Success
+
+        assertEquals(listOf(true, false), result.cart.sellerGroups.map(CartSellerSummary::verified))
     }
 
     @Test

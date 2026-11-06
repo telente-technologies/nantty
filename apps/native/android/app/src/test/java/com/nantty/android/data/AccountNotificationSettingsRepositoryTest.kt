@@ -1,6 +1,7 @@
 package com.nantty.android.data
 
 import org.json.JSONObject
+import org.json.JSONArray
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -102,6 +103,108 @@ class AccountNotificationSettingsRepositoryTest {
         assertEquals(null, preferencesTransport.method)
     }
 
+    @Test
+    fun missingMarketingConsentIsOptOutAndUsesServerFrequency() {
+        val marketing = RecordingMarketingTransport()
+        val repository = AccountNotificationSettingsRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = RecordingTransport(enabled = true),
+            marketingConsentTransport = marketing,
+        )
+
+        val result = repository.loadMarketingSettings() as AccountMarketingSettingsResult.Success
+
+        assertEquals(AccountMarketingSettings(false, MarketingFrequency.WEEKLY), result.settings)
+        assertEquals(listOf("GET /api/v1/users/me/consents", "GET /api/v1/users/me/marketing-preferences"), marketing.calls)
+    }
+
+    @Test
+    fun optingOutRevokesConsentBeforeSavingOffFrequency() {
+        val marketing = RecordingMarketingTransport(consentGranted = true)
+        val repository = AccountNotificationSettingsRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = RecordingTransport(enabled = true),
+            marketingConsentTransport = marketing,
+        )
+
+        val result = repository.updateMarketingFrequency(MarketingFrequency.OFF) as AccountMarketingSettingsResult.Success
+
+        assertEquals(AccountMarketingSettings(false, MarketingFrequency.OFF), result.settings)
+        assertEquals(
+            listOf(
+                "PUT /api/v1/users/me/consents",
+                "PUT /api/v1/users/me/marketing-preferences",
+                "GET /api/v1/users/me/consents",
+                "GET /api/v1/users/me/marketing-preferences",
+            ),
+            marketing.calls,
+        )
+        assertEquals(false, marketing.writes[0].getJSONObject("consents").getBoolean("marketing"))
+        assertEquals("off", marketing.writes[1].getString("frequency"))
+    }
+
+    @Test
+    fun selectingEmailFrequencySavesPreferenceBeforeGrantingConsent() {
+        val marketing = RecordingMarketingTransport()
+        val repository = AccountNotificationSettingsRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = RecordingTransport(enabled = true),
+            marketingConsentTransport = marketing,
+        )
+
+        val result = repository.updateMarketingFrequency(MarketingFrequency.IMPORTANT_ONLY) as AccountMarketingSettingsResult.Success
+
+        assertEquals(AccountMarketingSettings(true, MarketingFrequency.IMPORTANT_ONLY), result.settings)
+        assertEquals("/api/v1/users/me/marketing-preferences", marketing.calls[0].substringAfter(' '))
+        assertEquals("important_only", marketing.writes[0].getString("frequency"))
+        assertEquals("/api/v1/users/me/consents", marketing.calls[1].substringAfter(' '))
+        assertEquals(true, marketing.writes[1].getJSONObject("consents").getBoolean("marketing"))
+    }
+
+    @Test
+    fun enablingConsentAfterOffRestoresWeeklyBeforeOptingIn() {
+        val marketing = RecordingMarketingTransport(frequency = MarketingFrequency.OFF)
+        val repository = AccountNotificationSettingsRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = RecordingTransport(enabled = true),
+            marketingConsentTransport = marketing,
+        )
+
+        val result = repository.updateMarketingConsent(true) as AccountMarketingSettingsResult.Success
+
+        assertEquals(AccountMarketingSettings(true, MarketingFrequency.WEEKLY), result.settings)
+        assertEquals(
+            listOf(
+                "GET /api/v1/users/me/marketing-preferences",
+                "PUT /api/v1/users/me/marketing-preferences",
+                "PUT /api/v1/users/me/consents",
+                "GET /api/v1/users/me/consents",
+                "GET /api/v1/users/me/marketing-preferences",
+            ),
+            marketing.calls,
+        )
+        assertEquals("weekly", marketing.writes[0].getString("frequency"))
+        assertEquals(true, marketing.writes[1].getJSONObject("consents").getBoolean("marketing"))
+    }
+
+    @Test
+    fun missingSessionDoesNotCallMarketingConsentApi() {
+        val marketing = RecordingMarketingTransport()
+        val repository = AccountNotificationSettingsRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = { null },
+            transport = RecordingTransport(enabled = true),
+            marketingConsentTransport = marketing,
+        )
+
+        assertTrue(repository.loadMarketingSettings() is AccountMarketingSettingsResult.Failure)
+        assertEquals(emptyList<String>(), marketing.calls)
+    }
+
     private class RecordingTransport(private val enabled: Boolean) : AccountNotificationSettingsTransport {
         var method: String? = null
         var path: String? = null
@@ -150,6 +253,33 @@ class AccountNotificationSettingsRepositoryTest {
             path = "/api/v1/notifications/preferences"
             token = accessToken
             this.body = body
+        }
+    }
+
+    private class RecordingMarketingTransport(
+        consentGranted: Boolean = false,
+        frequency: MarketingFrequency = MarketingFrequency.WEEKLY,
+    ) : MarketingConsentTransport {
+        val calls = mutableListOf<String>()
+        val writes = mutableListOf<JSONObject>()
+        private var granted = consentGranted
+        private var storedFrequency = frequency
+
+        override fun request(method: String, path: String, accessToken: String, fields: JSONObject?): JSONObject {
+            calls += "$method $path"
+            if (method == "PUT") {
+                val body = requireNotNull(fields)
+                writes += JSONObject(body.toString())
+                if (path.endsWith("/consents")) granted = body.getJSONObject("consents").getBoolean("marketing")
+                else storedFrequency = MarketingFrequency.entries.first { it.apiValue == body.getString("frequency") }
+            }
+            return if (path.endsWith("/consents")) {
+                val rows = JSONArray()
+                if (granted) rows.put(JSONObject().put("consentType", "marketing").put("status", "granted"))
+                JSONObject().put("data", rows)
+            } else {
+                JSONObject().put("data", JSONObject().put("frequency", storedFrequency.apiValue))
+            }
         }
     }
 

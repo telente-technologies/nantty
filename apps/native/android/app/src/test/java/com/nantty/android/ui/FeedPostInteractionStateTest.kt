@@ -35,6 +35,21 @@ class FeedPostInteractionStateTest {
         assertEquals(2, result.posts.single().likes)
     }
 
+    @Test
+    fun followStateUpdatesEveryPostByTheSameAuthorWithoutChangingOtherPosts() {
+        val authorPost = post(id = "author-post").copy(authorId = "author-1")
+        val secondAuthorPost = post(id = "second-author-post").copy(authorId = "author-1")
+        val otherAuthorPost = post(id = "other-author-post").copy(authorId = "author-2")
+        val result = FeedResult.Success(listOf(authorPost, secondAuthorPost, otherAuthorPost), "next")
+
+        val followed = result.withAuthorFollowState("author-1", true) as FeedResult.Success
+
+        assertTrue(followed.posts[0].isFollowingAuthor)
+        assertTrue(followed.posts[1].isFollowingAuthor)
+        assertFalse(followed.posts[2].isFollowingAuthor)
+        assertEquals("next", followed.nextCursor)
+    }
+
     private fun post(id: String = "post", likes: Int = 0, liked: Boolean = false, reposts: Int = 0, reposted: Boolean = false) =
         FeedPost(id, "Ari", "ari", null, false, null, null, null, null, "post", "", emptyList(), likes, 0, reposts, 0, "2026-11-05", liked, reposted)
 }

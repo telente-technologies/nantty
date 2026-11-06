@@ -24,6 +24,7 @@ class PostComposerRepository(
         text: String,
         idempotencyKey: String = UUID.randomUUID().toString(),
         audience: PostComposerAudience = PostComposerAudience.EVERYONE,
+        quotedPostId: String? = null,
     ): Result<String> = runCatching {
         val session = sessionProvider() ?: error("Sign in to publish a post.")
         val cleanText = text.trim()
@@ -35,7 +36,9 @@ class PostComposerRepository(
             path = "/api/v1/posts",
             accessToken = session.accessToken,
             idempotencyKey = idempotencyKey,
-            body = JSONObject().put("text", cleanText).put("mediaIds", org.json.JSONArray()).put("audience", audience.wireValue).put("kind", "post"),
+            body = JSONObject().put("text", cleanText).put("mediaIds", org.json.JSONArray()).put("audience", audience.wireValue).put("kind", "post").apply {
+                quotedPostId?.takeIf(String::isNotBlank)?.let { put("quotedPostId", it) }
+            },
         )
         val post = response.optJSONObject("data") ?: response
         post.optString("id").takeIf(String::isNotBlank) ?: error("Nantty published the post but returned no post ID. Refresh your feed to check its status.")

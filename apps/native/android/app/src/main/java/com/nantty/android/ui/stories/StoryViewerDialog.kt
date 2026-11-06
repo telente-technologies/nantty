@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
@@ -30,6 +31,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -41,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -110,6 +113,9 @@ internal fun StoryViewerDialog(
 
     val stories = (result as? StoryFeedResult.Success)?.stories.orEmpty()
     val story = stories.getOrNull(activeIndex)
+    var imageProgress by remember(userId, story?.id) { mutableFloatStateOf(0f) }
+    var videoProgress by remember(userId, story?.id) { mutableFloatStateOf(0f) }
+    var optionsExpanded by remember(userId, story?.id) { mutableStateOf(false) }
 
     LaunchedEffect(stories, sessionOffset, adsRepository, activeAdSession.sessionId) {
         val ads = adsRepository ?: return@LaunchedEffect
@@ -163,9 +169,12 @@ internal fun StoryViewerDialog(
             }
         }
     }
-    LaunchedEffect(story?.id, story?.media?.type, sponsoredAd) {
-        if (sponsoredAd != null || story?.media?.type != "image") return@LaunchedEffect
-        delay(5_000)
+    LaunchedEffect(story?.id, story?.media?.type, sponsoredAd, optionsExpanded) {
+        if (sponsoredAd != null || story?.media?.type != "image" || optionsExpanded) return@LaunchedEffect
+        while (imageProgress < 1f) {
+            delay(STORY_PROGRESS_TICK_MS)
+            imageProgress = advanceStoryPlaybackProgress(imageProgress, STORY_PROGRESS_TICK_MS)
+        }
         advanceLatest()
     }
 
@@ -210,6 +219,12 @@ internal fun StoryViewerDialog(
                             story = current.stories[activeIndex.coerceIn(current.stories.indices)],
                             count = current.stories.size,
                             activeIndex = activeIndex,
+                            progress = if (story?.media?.type == "video") videoProgress else imageProgress,
+                            optionsExpanded = optionsExpanded,
+                            onOptionsExpandedChanged = { optionsExpanded = it },
+                            onVideoPlaybackPosition = { currentSeconds, durationSeconds ->
+                                videoProgress = storyVideoPlaybackProgress(currentSeconds, durationSeconds)
+                            },
                             onPrevious = {
                                 if (sponsoredAd != null) sponsoredAd = null
                                 else if (activeIndex > 0) activeIndex--
@@ -277,6 +292,10 @@ private fun StoryPage(
     story: StoryItem,
     count: Int,
     activeIndex: Int,
+    progress: Float,
+    optionsExpanded: Boolean,
+    onOptionsExpandedChanged: (Boolean) -> Unit,
+    onVideoPlaybackPosition: (currentSeconds: Double, durationSeconds: Double) -> Unit,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     onClose: () -> Unit,
@@ -287,16 +306,16 @@ private fun StoryPage(
     canReportAuthor: (StoryItem) -> Boolean,
     onReportAuthor: (StoryItem) -> Unit,
 ) {
-    var optionsExpanded by remember(story.id) { mutableStateOf(false) }
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         if (story.media.type == "video") {
             ClipVideoPlayer(
                 videoUrl = story.media.url,
                 muted = true,
-                isActive = true,
+                isActive = !optionsExpanded,
                 modifier = Modifier.fillMaxSize(),
                 loop = false,
                 onPlaybackFinished = onNext,
+                onPlaybackPosition = onVideoPlaybackPosition,
             )
         } else {
             AsyncImage(
@@ -307,10 +326,31 @@ private fun StoryPage(
             )
         }
         Column(Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics {
+                        contentDescription = "Story ${activeIndex + 1} of $count"
+                        progressBarRangeInfo = androidx.compose.ui.semantics.ProgressBarRangeInfo(progress, 0f..1f)
+                    }
+                    .testTag("story-progress"),
+            ) {
                 repeat(count) { index ->
-                    val progressColor = if (index <= activeIndex) Color.White else Color.White.copy(alpha = 0.38f)
-                    Box(Modifier.weight(1f).height(3.dp).background(progressColor, MaterialTheme.shapes.small))
+                    val completed = index < activeIndex
+                    val active = index == activeIndex
+                    Box(
+                        Modifier.weight(1f).height(3.dp)
+                            .background(if (completed) Color.White else Color.White.copy(alpha = 0.38f), RoundedCornerShape(2.dp))
+                            .then(if (active) Modifier.testTag("story-progress-active") else Modifier),
+                    ) {
+                        if (active) {
+                            Box(
+                                Modifier.fillMaxHeight().fillMaxWidth(progress.coerceIn(0f, 1f))
+                                    .background(Color.White, RoundedCornerShape(2.dp)),
+                            )
+                        }
+                    }
                 }
             }
             Row(Modifier.fillMaxWidth().padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -318,28 +358,28 @@ private fun StoryPage(
                     Text(story.authorName, color = Color.White, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                     Text(story.sound?.title ?: story.username.let { if (it.isBlank()) "Story" else "@$it" }, color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.labelSmall)
                 }
-                IconButton(onClick = { optionsExpanded = true }, modifier = Modifier.semantics { contentDescription = "Story options" }.testTag("story-options")) {
+                IconButton(onClick = { onOptionsExpandedChanged(true) }, modifier = Modifier.semantics { contentDescription = "Story options" }.testTag("story-options")) {
                     Icon(Icons.Default.MoreVert, contentDescription = null, tint = Color.White)
                 }
-                DropdownMenu(expanded = optionsExpanded, onDismissRequest = { optionsExpanded = false }) {
+                DropdownMenu(expanded = optionsExpanded, onDismissRequest = { onOptionsExpandedChanged(false) }) {
                     if (canOpenAnalytics(story)) {
                         DropdownMenuItem(
                             text = { Text("Story analytics") },
-                            onClick = { optionsExpanded = false; onOpenAnalytics(story) },
+                            onClick = { onOptionsExpandedChanged(false); onOpenAnalytics(story) },
                             modifier = Modifier.testTag("story-options-analytics"),
                         )
                     }
                     if (canDeleteStory(story)) {
                         DropdownMenuItem(
                             text = { Text("Delete story", color = MaterialTheme.colorScheme.error) },
-                            onClick = { optionsExpanded = false; onDeleteStory(story) },
+                            onClick = { onOptionsExpandedChanged(false); onDeleteStory(story) },
                             modifier = Modifier.testTag("story-options-delete"),
                         )
                     }
                     if (canReportAuthor(story)) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.story_report_author_action)) },
-                            onClick = { optionsExpanded = false; onReportAuthor(story) },
+                            onClick = { onOptionsExpandedChanged(false); onReportAuthor(story) },
                             modifier = Modifier.testTag("story-options-report"),
                         )
                     }

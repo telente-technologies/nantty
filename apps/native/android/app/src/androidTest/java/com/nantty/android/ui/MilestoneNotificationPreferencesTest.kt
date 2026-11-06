@@ -12,6 +12,7 @@ import com.nantty.android.data.AccountNotificationSettingsTransport
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.NotificationPreferencesTransport
+import com.nantty.android.data.MarketingConsentTransport
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -32,6 +33,7 @@ class MilestoneNotificationPreferencesTest {
             sessionProvider = ::signedInSession,
             transport = FakeAccountSettingsTransport(),
             preferencesTransport = transport,
+            marketingConsentTransport = FakeMarketingConsentTransport(),
         )
 
         compose.setContent {
@@ -59,6 +61,7 @@ class MilestoneNotificationPreferencesTest {
             sessionProvider = ::signedInSession,
             transport = FakeAccountSettingsTransport(),
             preferencesTransport = transport,
+            marketingConsentTransport = FakeMarketingConsentTransport(),
         )
 
         compose.setContent {
@@ -84,6 +87,7 @@ class MilestoneNotificationPreferencesTest {
             sessionProvider = ::signedInSession,
             transport = FakeAccountSettingsTransport(),
             preferencesTransport = transport,
+            marketingConsentTransport = FakeMarketingConsentTransport(),
         )
 
         compose.setContent {
@@ -99,6 +103,12 @@ class MilestoneNotificationPreferencesTest {
     private class FakeAccountSettingsTransport : AccountNotificationSettingsTransport {
         override fun getSettings(accessToken: String) = JSONObject().put("pushNotificationsEnabled", true)
         override fun updateSettings(accessToken: String, fields: JSONObject) = JSONObject().put("pushNotificationsEnabled", fields.getBoolean("pushNotificationsEnabled"))
+    }
+
+    private class FakeMarketingConsentTransport : MarketingConsentTransport {
+        override fun request(method: String, path: String, accessToken: String, fields: JSONObject?): JSONObject =
+            if (path.endsWith("/consents")) JSONObject().put("data", JSONArray())
+            else JSONObject().put("data", JSONObject().put("frequency", "weekly"))
     }
 
     private class FakePreferenceTransport(

@@ -55,6 +55,33 @@ class NotificationsRepositoryTest {
     }
 
     @Test
+    fun resolvesSpecificOrderTargetsFromStructuredDataOrTrustedInternalUrls() {
+        val base = ActivityNotification("n1", "social", null, "Title", "Body", "now", false, null, null)
+
+        assertEquals(NotificationDestination.OrderDetail("ord_123"), resolveNotificationDestination(base.copy(orderId = "ord_123")))
+        assertEquals(NotificationDestination.OrderDetail("ord_456"), resolveNotificationDestination(base.copy(url = "/orders/ord_456")))
+        assertEquals(NotificationDestination.OrderDetail("ord_789"), resolveNotificationDestination(base.copy(url = "https://web.nantty.com/order/ord_789")))
+        assertEquals(NotificationDestination.Orders, resolveNotificationDestination(base.copy(category = "orders")))
+        assertNull(resolveNotificationDestination(base.copy(orderId = "../admin")))
+        assertNull(resolveNotificationDestination(base.copy(url = "https://evil.example/orders/ord_123", category = "social")))
+        assertNull(resolveNotificationDestination(base.copy(url = "/orders/%2e%2e%2fadmin", category = "social")))
+    }
+
+    @Test
+    fun parsesOrderIdFromNotificationLinkData() {
+        val repository = NotificationsRepository(
+            "https://api.nantty.com",
+            ::signedInSession,
+            NotificationsTransport { _, _, _ -> JSONObject() },
+        )
+
+        val page = repository.parsePage(JSONObject("""{"data":[{"id":"n-order","category":"orders","title":"Order updated","body":"Open your order","createdAt":"now","read":false,"data":{"orderId":"ord_123"}}]}"""))
+
+        assertEquals("ord_123", page.items.single().orderId)
+        assertEquals(NotificationDestination.OrderDetail("ord_123"), resolveNotificationDestination(page.items.single()))
+    }
+
+    @Test
     fun resolvesGroupInvitationAndSupportTicketTargetsOnlyForNativeRoutes() {
         val base = ActivityNotification("n1", "social", null, "Title", "Body", "now", false, null, null)
         val ticketId = "7b9e2f3a-1111-4222-8333-123456789abc"

@@ -16,6 +16,7 @@ class SignedInNotificationActionsTest {
         var supportTicketId: String? = null
         var clipId: String? = null
         var disputeId: String? = null
+        var queuedOrderId: String? = null
         var signInRequested = false
         val actions = signedInNotificationActions(
             isGuest = false,
@@ -26,6 +27,7 @@ class SignedInNotificationActionsTest {
             onQueueSupportTicket = { supportTicketId = it },
             onQueueDispute = { disputeId = it },
             onQueueClip = { clipId = it },
+            onQueueOrder = { queuedOrderId = it },
         )
         val targetConversation = InboxConversation(
             id = "conversation-1", title = "Ari", peerName = "ari", avatarUrl = null,
@@ -48,6 +50,9 @@ class SignedInNotificationActionsTest {
         assertEquals("clip-1", clipId)
         assertEquals(Destination.Clips, destination)
         actions.openOrders()
+        assertEquals(Destination.Orders, destination)
+        actions.openOrder("ord_123")
+        assertEquals("ord_123", queuedOrderId)
         assertEquals(Destination.Orders, destination)
         actions.openFollowRequests()
         assertEquals(Destination.FollowRequests, destination)
@@ -73,6 +78,7 @@ class SignedInNotificationActionsTest {
         )
 
         actions.openOrders()
+        actions.openOrder("ord_123")
         actions.openFollowRequests()
         actions.openSpaces()
         actions.openGroupInvitations()
@@ -82,7 +88,7 @@ class SignedInNotificationActionsTest {
             InboxConversation("conversation-1", "Ari", "ari", null, ConversationType.DIRECT, "now", 0),
         )
 
-        assertEquals(7, signInRequests)
+        assertEquals(8, signInRequests)
         assertEquals(null, destination)
         assertFalse(conversationQueued)
     }

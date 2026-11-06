@@ -113,6 +113,75 @@ class CheckoutRepositoryTest {
     }
 
     @Test
+    fun checkoutSendsPerVerifiedStoreModesAndExplicitDirectAcceptance() {
+        val verified = sellerGroup("store_verified", verified = true)
+        val unverified = sellerGroup("store_unverified", verified = false)
+        val transport = RecordingTransport().apply {
+            postResponse = JSONObject("""{"data":{"checkoutId":"$checkoutId","payableOrderId":"$orderId","total":{"amountMinor":7200,"currency":"NGN"},"orders":[{}]}}""")
+        }
+
+        val result = repository(transport).placeOrder(
+            addressId,
+            idempotencyKey,
+            sellerGroups = listOf(verified, unverified),
+            paymentSelections = mapOf(
+                verified.storeId to CheckoutPaymentSelection(CheckoutPaymentMode.DIRECT, directConfirmed = true),
+                unverified.storeId to CheckoutPaymentSelection(CheckoutPaymentMode.DIRECT, directConfirmed = true),
+            ),
+        )
+
+        assertTrue(result is PlaceCheckoutResult.Success)
+        val modes = transport.body?.getJSONArray("paymentModes")
+        assertEquals(1, modes?.length())
+        assertEquals(verified.storeId, modes?.getJSONObject(0)?.getString("storeId"))
+        assertEquals("direct", modes?.getJSONObject(0)?.getString("paymentMode"))
+        assertEquals(true, transport.body?.getBoolean("directPaymentAccepted"))
+    }
+
+    @Test
+    fun directCheckoutRequiresConfirmationAndDoesNotCallApiWithoutIt() {
+        val verified = sellerGroup("store_verified", verified = true)
+        val transport = RecordingTransport()
+
+        val result = repository(transport).placeOrder(
+            addressId,
+            idempotencyKey,
+            sellerGroups = listOf(verified),
+            paymentSelections = mapOf(
+                verified.storeId to CheckoutPaymentSelection(CheckoutPaymentMode.DIRECT, directConfirmed = false),
+            ),
+        )
+
+        assertTrue(result is PlaceCheckoutResult.Failure)
+        assertNull(transport.path)
+    }
+
+    @Test
+    fun verifiedStoreWithoutSelectionIsSubmittedAsEscrowByDefault() {
+        val verified = sellerGroup("store_verified", verified = true)
+        val transport = RecordingTransport().apply {
+            postResponse = JSONObject("""{"data":{"checkoutId":"$checkoutId","payableOrderId":"$orderId","total":{"amountMinor":7200,"currency":"NGN"},"orders":[{}]}}""")
+        }
+
+        repository(transport).placeOrder(addressId, idempotencyKey, sellerGroups = listOf(verified))
+
+        val modes = transport.body?.getJSONArray("paymentModes")
+        assertEquals(1, modes?.length())
+        assertEquals("escrow", modes?.getJSONObject(0)?.getString("paymentMode"))
+        assertEquals(false, transport.body?.getBoolean("directPaymentAccepted"))
+    }
+
+    private fun sellerGroup(storeId: String, verified: Boolean) = CartSellerSummary(
+        storeId = storeId,
+        storeName = storeId,
+        verified = verified,
+        subtotal = WalletMoney(100, "NGN"),
+        discounts = WalletMoney(0, "NGN"),
+        shipping = CartShippingQuote("calculated", WalletMoney(0, "NGN"), null, false, null, null),
+        total = WalletMoney(100, "NGN"),
+    )
+
+    @Test
     fun rejectsBadAddressOrIdempotencyKeyBeforeCreatingAnOrder() {
         val transport = RecordingTransport()
         val repository = repository(transport)
@@ -138,6 +207,13 @@ class CheckoutRepositoryTest {
             repo.parseHostedPayment(JSONObject("""{"data":{"orderId":"$orderId","checkoutUrl":"https://payments.example/checkout/abc"}}"""), orderId),
         )
         assertTrue(runCatching { repo.parseHostedPayment(JSONObject("""{"checkoutUrl":"http://payments.example/pay"}"""), orderId) }.isFailure)
+        assertEquals(
+            HostedPayment(orderId, null, "pay-ref-123"),
+            repo.parseHostedPayment(JSONObject("""{"payment":{"reference":"pay-ref-123"}}"""), orderId, requireHostedUrl = false),
+        )
+        assertTrue(runCatching {
+            repo.parseHostedPayment(JSONObject("""{"payment":{"reference":"pay-ref-123"}}"""), orderId)
+        }.isFailure)
 
         val transport = RecordingTransport().apply {
             postResponse = JSONObject("""{"data":{"status":"pending"}}""")

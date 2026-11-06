@@ -50,6 +50,20 @@ internal class ProductReportRepository(
         idempotencyKey: String = UUID.randomUUID().toString(),
     ): ProductReportResult = submitTarget("product", productId, reason.apiValue, idempotencyKey, targetLabel = "product")
 
+    fun submitPost(
+        postId: String,
+        reason: ProductReportReason,
+        details: String,
+        idempotencyKey: String = UUID.randomUUID().toString(),
+    ): ProductReportResult = submitTarget("post", postId, reason.apiValue, idempotencyKey, details, targetLabel = "post")
+
+    fun submitComment(
+        commentId: String,
+        reason: ProductReportReason,
+        details: String,
+        idempotencyKey: String = UUID.randomUUID().toString(),
+    ): ProductReportResult = submitTarget("comment", commentId, reason.apiValue, idempotencyKey, details, targetLabel = "comment")
+
     fun submitSpace(
         spaceId: String,
         reason: ProductReportReason,
@@ -94,7 +108,7 @@ internal class ProductReportRepository(
         if (!idempotencyKey.matches(Regex("[A-Za-z0-9_-]{8,128}"))) {
             return ProductReportResult.Failure("Could not safely prepare this report. Please try again.")
         }
-        if (details.toByteArray(Charsets.UTF_8).size > 500) return ProductReportResult.Failure("Report details must be 500 characters or fewer.")
+        if (details.length > 500) return ProductReportResult.Failure("Report details must be 500 characters or fewer.")
         val token = currentAccessToken()
             ?: return ProductReportResult.Failure("Sign in to report this $targetLabel.", authenticationRequired = true)
         return try {

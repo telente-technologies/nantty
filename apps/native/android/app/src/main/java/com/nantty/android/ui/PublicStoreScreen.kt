@@ -15,11 +15,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -60,6 +62,7 @@ internal fun PublicStoreScreen(
     executor: Executor,
     onBack: () -> Unit,
     onOpenProduct: (String) -> Unit,
+    onSearchStore: (String?, String?) -> Unit = { _, _ -> },
     onRequireSignIn: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -147,6 +150,13 @@ internal fun PublicStoreScreen(
             TextButton(onClick = onBack, modifier = Modifier.semantics { contentDescription = "Back to search" }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = null)
                 Text("Back")
+            }
+            Spacer(Modifier.weight(1f))
+            IconButton(
+                onClick = { store?.let { onSearchStore(it.id, it.name) } ?: onSearchStore(null, null) },
+                modifier = Modifier.semantics { contentDescription = "Search this store" },
+            ) {
+                Icon(Icons.Default.Search, contentDescription = null)
             }
         }
         when {

@@ -8,6 +8,22 @@ internal fun mayRegisterPushToken(
 
 internal enum class PushTokenSyncAction { REGISTER, REVOKE, NO_OP }
 
+/** Removes an account's previous server registration before publishing a rotated FCM token. */
+internal fun syncRotatedPushToken(
+    previousToken: String?,
+    currentToken: String,
+    unregister: (String) -> Result<Unit>,
+    register: (String) -> Result<Unit>,
+    store: (String) -> Unit,
+): Boolean {
+    if (!previousToken.isNullOrBlank() && previousToken != currentToken) {
+        if (unregister(previousToken).isFailure) return false
+    }
+    if (register(currentToken).isFailure) return false
+    store(currentToken)
+    return true
+}
+
 internal fun pushTokenSyncAction(
     accountPreferenceEnabled: Boolean,
     osPermissionGranted: Boolean,

@@ -48,9 +48,23 @@ internal data class CheckoutReceipt(
     val payableOrderId: String,
     val total: WalletMoney,
     val orderCount: Int,
+    val paymentMethod: CheckoutPaymentMethod = CheckoutPaymentMethod.HOSTED,
+    val saveCardOnDevice: Boolean = false,
 )
 
-internal data class HostedPayment(val orderId: String, val checkoutUrl: String)
+internal enum class CheckoutPaymentMethod { HOSTED, PROVIDER_WALLET, SAVED_CARD }
+
+internal enum class CheckoutPaymentMode(val wireValue: String) {
+    ESCROW("escrow"),
+    DIRECT("direct"),
+}
+
+internal data class CheckoutPaymentSelection(
+    val mode: CheckoutPaymentMode,
+    val directConfirmed: Boolean = false,
+)
+
+internal data class HostedPayment(val orderId: String, val checkoutUrl: String?, val reference: String? = null)
 
 internal sealed interface CheckoutAddressesResult {
     data class Success(val addresses: List<CheckoutAddress>) : CheckoutAddressesResult
@@ -162,18 +176,38 @@ internal class CheckoutRepository(
         onFailure = { CheckoutCartResult.Failure(checkoutErrorMessage(it, "calculate delivery"), it.isCheckoutAuthFailure()) },
     )
 
-    fun placeOrder(addressId: String, idempotencyKey: String): PlaceCheckoutResult = runCatching {
+    fun placeOrder(
+        addressId: String,
+        idempotencyKey: String,
+        sellerGroups: List<CartSellerSummary> = emptyList(),
+        paymentSelections: Map<String, CheckoutPaymentSelection> = emptyMap(),
+    ): PlaceCheckoutResult = runCatching {
         require(isSafeAddressId(addressId)) { "Choose a valid delivery address." }
         require(idempotencyKey.matches(Regex("[A-Za-z0-9_-]{16,128}"))) { "Refresh checkout and try again." }
+        val verifiedStoreIds = sellerGroups.asSequence().filter(CartSellerSummary::verified).map(CartSellerSummary::storeId).toSet()
+        val directSelections = paymentSelections.filter { (storeId, selection) ->
+            storeId in verifiedStoreIds && selection.mode == CheckoutPaymentMode.DIRECT
+        }
+        require(directSelections.values.all(CheckoutPaymentSelection::directConfirmed)) {
+            "Confirm the direct-payment warning before placing this order."
+        }
         val token = requireToken("Sign in to place your order.")
+        val modes = JSONArray()
+        sellerGroups.filter(CartSellerSummary::verified).forEach { group ->
+            val selection = paymentSelections[group.storeId]
+                ?: CheckoutPaymentSelection(CheckoutPaymentMode.ESCROW)
+            modes.put(
+                JSONObject()
+                    .put("storeId", group.storeId)
+                    .put("paymentMode", selection.mode.wireValue),
+            )
+        }
         val payload = JSONObject()
             .put("addressId", addressId)
             .put("useStoreCredit", true)
             .put("promoCodes", JSONArray())
-            // Escrow is the safe Android default. Direct payment stays unavailable until the
-            // native flow has the same seller-trust disclosure and explicit buyer confirmation as RN.
-            .put("paymentModes", JSONArray())
-            .put("directPaymentAccepted", false)
+            .put("paymentModes", modes)
+            .put("directPaymentAccepted", directSelections.isNotEmpty())
         val response = transport.post("/api/v1/orders/checkout", token, payload, idempotencyKey)
         PlaceCheckoutResult.Success(parseCheckoutReceipt(response))
     }.fold(
@@ -181,7 +215,11 @@ internal class CheckoutRepository(
         onFailure = { PlaceCheckoutResult.Failure(checkoutErrorMessage(it, "place your order"), it.isCheckoutAuthFailure()) },
     )
 
-    fun initializePayment(orderId: String, idempotencyKey: String): HostedPaymentResult = runCatching {
+    fun initializePayment(
+        orderId: String,
+        idempotencyKey: String,
+        requireHostedUrl: Boolean = true,
+    ): HostedPaymentResult = runCatching {
         require(isSafeAddressId(orderId)) { "This order could not be paid. Return to your orders and try again." }
         require(idempotencyKey.matches(Regex("[A-Za-z0-9_-]{16,128}"))) { "Refresh payment and try again." }
         val token = requireToken("Sign in to continue payment.")
@@ -191,7 +229,7 @@ internal class CheckoutRepository(
             JSONObject().put("orderId", orderId),
             idempotencyKey,
         )
-        HostedPaymentResult.Success(parseHostedPayment(response, orderId))
+        HostedPaymentResult.Success(parseHostedPayment(response, orderId, requireHostedUrl))
     }.fold(
         onSuccess = { it as HostedPaymentResult.Success },
         onFailure = { HostedPaymentResult.Failure(checkoutErrorMessage(it, "start secure payment"), it.isCheckoutAuthFailure()) },
@@ -268,18 +306,27 @@ internal class CheckoutRepository(
         return CheckoutReceipt(checkoutId, payableOrderId, total, orderCount)
     }
 
-    internal fun parseHostedPayment(payload: JSONObject, fallbackOrderId: String): HostedPayment {
+    internal fun parseHostedPayment(
+        payload: JSONObject,
+        fallbackOrderId: String,
+        requireHostedUrl: Boolean = true,
+    ): HostedPayment {
         val data = unwrapCheckoutObject(payload)
         val orderId = data.optString("orderId").takeIf(::isSafeAddressId) ?: fallbackOrderId
         val candidate = data.optString("checkoutUrl").takeIf(String::isNotBlank)
             ?: data.optString("authorizationUrl").takeIf(String::isNotBlank)
             ?: data.optJSONObject("payment")?.optString("checkoutUrl")?.takeIf(String::isNotBlank)
-            ?: error("Nantty did not provide a secure payment page.")
-        val url = URL(candidate)
-        require(url.protocol == "https" && url.host.isNotBlank() && url.userInfo == null && url.query?.contains("\n") != true) {
-            "Nantty did not provide a secure payment page."
+        if (requireHostedUrl) require(!candidate.isNullOrBlank()) { "Nantty did not provide a secure payment page." }
+        val secureUrl = candidate?.let {
+            val url = URL(it)
+            require(url.protocol == "https" && url.host.isNotBlank() && url.userInfo == null && url.query?.contains("\n") != true) {
+                "Nantty did not provide a secure payment page."
+            }
+            url.toString()
         }
-        return HostedPayment(orderId, url.toString())
+        val reference = data.optString("reference").takeIf(String::isNotBlank)
+            ?: data.optJSONObject("payment")?.optString("reference")?.takeIf(String::isNotBlank)
+        return HostedPayment(orderId, secureUrl, reference)
     }
 }
 

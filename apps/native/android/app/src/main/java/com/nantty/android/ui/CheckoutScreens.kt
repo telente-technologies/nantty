@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -25,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,13 +42,23 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import com.nantty.android.data.CheckoutAddress
 import com.nantty.android.data.CheckoutAddressInput
 import com.nantty.android.data.CheckoutAddressesResult
 import com.nantty.android.data.CheckoutCartResult
 import com.nantty.android.data.CheckoutReceipt
+import com.nantty.android.data.CheckoutPaymentMode
+import com.nantty.android.data.CheckoutPaymentSelection
 import com.nantty.android.data.CheckoutRepository
+import com.nantty.android.data.CheckoutPaymentMethod
+import com.nantty.android.data.CheckoutProviderWallet
+import com.nantty.android.data.SavedCardCredentialStore
+import com.nantty.android.data.DeviceSavedCard
+import com.nantty.android.data.ProviderWalletLoadResult
+import com.nantty.android.data.ProviderWalletPaymentRepository
 import com.nantty.android.data.PlaceCheckoutResult
 import com.nantty.android.data.WalletMoney
 import com.nantty.android.data.formatWalletAmount
@@ -56,6 +68,8 @@ import java.util.concurrent.Executor
 @Composable
 internal fun CheckoutScreen(
     repository: CheckoutRepository,
+    providerWalletRepository: ProviderWalletPaymentRepository,
+    savedCardCredentialStore: SavedCardCredentialStore,
     executor: Executor,
     initialAddressId: String? = null,
     onBack: () -> Unit,
@@ -73,10 +87,18 @@ internal fun CheckoutScreen(
     var addressSaveError by remember(repository) { mutableStateOf<String?>(null) }
     var generation by remember(repository) { mutableStateOf(0) }
     var checkoutKey by rememberSaveable { mutableStateOf(UUID.randomUUID().toString()) }
+    var paymentSelections by remember(repository) { mutableStateOf<Map<String, CheckoutPaymentSelection>>(emptyMap()) }
+    var providerWallet by remember(providerWalletRepository) { mutableStateOf<CheckoutProviderWallet?>(null) }
+    var savedCard by remember(savedCardCredentialStore) { mutableStateOf<DeviceSavedCard?>(null) }
+    var saveCardOnDevice by rememberSaveable { mutableStateOf(false) }
+    var paymentMethod by rememberSaveable { mutableStateOf(CheckoutPaymentMethod.HOSTED) }
+    var paymentMethodChosen by rememberSaveable { mutableStateOf(false) }
+    var confirmingDirectStoreId by remember(repository) { mutableStateOf<String?>(null) }
+    var directConfirmationInput by remember(repository) { mutableStateOf("") }
     val addressId = selectedId ?: addresses?.firstOrNull(CheckoutAddress::isDefault)?.id ?: addresses?.firstOrNull()?.id
 
     BackHandler(onBack = onBack)
-    LaunchedEffect(repository, generation, addressId) {
+    LaunchedEffect(repository, providerWalletRepository, savedCardCredentialStore, generation, addressId) {
         loading = true
         error = null
         executor.execute {
@@ -87,7 +109,18 @@ internal fun CheckoutScreen(
                 ?: rows?.firstOrNull(CheckoutAddress::isDefault)?.id
                 ?: rows?.firstOrNull()?.id
             val cartResult = if (selected != null) repository.quoteCart(selected) else null
+            val providerWalletResult = providerWalletRepository.loadWallet()
+            val loadedWallet = (providerWalletResult as? ProviderWalletLoadResult.Success)?.wallet
+            val loadedSavedCard = runCatching(savedCardCredentialStore::readDisplay).getOrNull()
             androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                savedCard = loadedSavedCard
+                when (providerWalletResult) {
+                    is ProviderWalletLoadResult.Success -> providerWallet = loadedWallet
+                    is ProviderWalletLoadResult.Failure -> {
+                        providerWallet = null
+                        if (providerWalletResult.authenticationRequired) onAuthenticationRequired()
+                    }
+                }
                 when (addressResult) {
                     is CheckoutAddressesResult.Failure -> {
                         error = addressResult.message
@@ -105,6 +138,19 @@ internal fun CheckoutScreen(
                             null -> cart = null
                         }
                     }
+                }
+                val walletCanCover = (cartResult as? CheckoutCartResult.Success)?.cart?.let { currentCart ->
+                    loadedWallet?.let { wallet ->
+                        wallet.status == "active" && wallet.currency == currentCart.currency && wallet.spendableMinor >= currentCart.totalAmountMinor && currentCart.totalAmountMinor > 0
+                    }
+                } == true
+                if (!paymentMethodChosen) {
+                    paymentMethod = when {
+                        loadedSavedCard != null -> CheckoutPaymentMethod.SAVED_CARD
+                        else -> CheckoutPaymentMethod.HOSTED
+                    }
+                } else if (!walletCanCover && paymentMethod == CheckoutPaymentMethod.PROVIDER_WALLET) {
+                    paymentMethod = CheckoutPaymentMethod.HOSTED
                 }
                 loading = false
             }
@@ -188,23 +234,99 @@ internal fun CheckoutScreen(
                     }
                 }
                 item {
+                    CheckoutPaymentMethodOptions(
+                        wallet = providerWallet,
+                        savedCard = savedCard,
+                        total = cart?.let { WalletMoney(it.totalAmountMinor, it.currency) },
+                        selected = paymentMethod,
+                        saveCardOnDevice = saveCardOnDevice,
+                        onSaveCardOnDeviceChange = { saveCardOnDevice = it },
+                        onRemoveSavedCard = {
+                            runCatching(savedCardCredentialStore::remove).onSuccess {
+                                savedCard = null
+                                if (paymentMethod == CheckoutPaymentMethod.SAVED_CARD) {
+                                    paymentMethod = CheckoutPaymentMethod.HOSTED
+                                    paymentMethodChosen = true
+                                }
+                            }.onFailure { error = "Couldn't remove the saved card from this device." }
+                        },
+                        onSelect = { paymentMethod = it; paymentMethodChosen = true },
+                    )
+                }
+                item {
+                    val sellerGroups = cart?.sellerGroups.orEmpty()
+                    if (sellerGroups.isNotEmpty()) {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text("Payment protection", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                            sellerGroups.forEach { group ->
+                                CheckoutSellerPaymentOptions(
+                                    storeName = group.storeName,
+                                    verified = group.verified,
+                                    selection = paymentSelections[group.storeId]
+                                        ?: CheckoutPaymentSelection(CheckoutPaymentMode.ESCROW),
+                                    confirmingDirect = confirmingDirectStoreId == group.storeId,
+                                    confirmationInput = if (confirmingDirectStoreId == group.storeId) directConfirmationInput else "",
+                                    onSelectEscrow = {
+                                        paymentSelections = paymentSelections + (group.storeId to CheckoutPaymentSelection(CheckoutPaymentMode.ESCROW))
+                                        confirmingDirectStoreId = null
+                                        directConfirmationInput = ""
+                                        checkoutKey = UUID.randomUUID().toString()
+                                    },
+                                    onRequestDirect = {
+                                        confirmingDirectStoreId = group.storeId
+                                        directConfirmationInput = ""
+                                    },
+                                    onConfirmationInput = { value ->
+                                        directConfirmationInput = value
+                                        if (value.trim().uppercase() == "DIRECT") {
+                                            paymentSelections = paymentSelections + (
+                                                group.storeId to CheckoutPaymentSelection(
+                                                    mode = CheckoutPaymentMode.DIRECT,
+                                                    directConfirmed = true,
+                                                )
+                                            )
+                                            confirmingDirectStoreId = null
+                                            directConfirmationInput = ""
+                                            checkoutKey = UUID.randomUUID().toString()
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
+                item {
                     CheckoutInfoCard(
                         title = "Protected payment",
-                        body = "This Android checkout uses Nantty escrow. Funds remain protected under the order flow; payment is not confirmed until Nantty verifies it.",
+                        body = "Escrow remains the default. For a verified store, direct payment is optional and removes escrow protection. Payment is not confirmed until Nantty verifies it.",
                     )
                 }
                 item {
                     Button(
                         onClick = {
                             val chosen = addressId ?: return@Button
-                            if (placing || cart == null || cart?.lines.isNullOrEmpty()) return@Button
+                            val currentCart = cart ?: return@Button
+                            if (placing || currentCart.lines.isEmpty()) return@Button
+                            val sellerGroups = currentCart.sellerGroups
+                            val selections = paymentSelections
+                            val idempotencyKey = checkoutKey
                             placing = true
                             error = null
                             executor.execute {
-                                when (val result = repository.placeOrder(chosen, checkoutKey)) {
+                                when (val result = repository.placeOrder(
+                                    chosen,
+                                    idempotencyKey,
+                                    sellerGroups,
+                                    selections,
+                                )) {
                                     is PlaceCheckoutResult.Success -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                                         placing = false
-                                        onCheckoutCreated(result.receipt)
+                        onCheckoutCreated(
+                            result.receipt.copy(
+                                paymentMethod = paymentMethod,
+                                saveCardOnDevice = paymentMethod == CheckoutPaymentMethod.HOSTED && saveCardOnDevice,
+                            ),
+                        )
                                     }
                                     is PlaceCheckoutResult.Failure -> androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                                         placing = false
@@ -250,6 +372,91 @@ internal fun CheckoutScreen(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun CheckoutSellerPaymentOptions(
+    storeName: String,
+    verified: Boolean,
+    selection: CheckoutPaymentSelection,
+    confirmingDirect: Boolean,
+    confirmationInput: String,
+    onSelectEscrow: () -> Unit,
+    onRequestDirect: () -> Unit,
+    onConfirmationInput: (String) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(storeName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        if (!verified) {
+            Text(
+                "Escrow: locked in your own wallet until delivery",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            return@Column
+        }
+        Card(
+            modifier = Modifier.fillMaxWidth().clickable(onClick = onSelectEscrow),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        ) {
+            Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = selection.mode == CheckoutPaymentMode.ESCROW,
+                    onClick = onSelectEscrow,
+                    modifier = Modifier.semantics { contentDescription = "Escrow protection for $storeName" },
+                )
+                Column(Modifier.padding(start = 8.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text("Escrow protection (recommended)", fontWeight = FontWeight.Medium)
+                    Text("Money is held until you confirm delivery.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+        Card(
+            modifier = Modifier.fillMaxWidth().clickable(
+                enabled = selection.mode != CheckoutPaymentMode.DIRECT && !confirmingDirect,
+                onClick = onRequestDirect,
+            ),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        ) {
+            Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = selection.mode == CheckoutPaymentMode.DIRECT,
+                        onClick = if (selection.mode == CheckoutPaymentMode.DIRECT) null else onRequestDirect,
+                        modifier = Modifier.semantics { contentDescription = "Pay $storeName directly" },
+                    )
+                    Column(Modifier.padding(start = 8.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Text("Pay directly", fontWeight = FontWeight.Medium)
+                        Text("The seller is paid right away.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+                if (selection.mode == CheckoutPaymentMode.DIRECT || confirmingDirect) {
+                    Text(
+                        "You lose escrow protection. Refunds and disputes depend on the seller, and Nantty cannot hold or reverse this payment.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+                if (confirmingDirect) {
+                    Text(
+                        "Type DIRECT to confirm paying $storeName directly.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                    OutlinedTextField(
+                        value = confirmationInput,
+                        onValueChange = onConfirmationInput,
+                        label = { Text("Type DIRECT") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters, autoCorrectEnabled = false),
+                        modifier = Modifier.fillMaxWidth().semantics {
+                            contentDescription = "Type DIRECT to confirm paying $storeName directly"
+                        },
+                    )
+                }
+            }
+        }
     }
 }
 

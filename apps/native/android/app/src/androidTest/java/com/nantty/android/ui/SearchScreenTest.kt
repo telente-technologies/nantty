@@ -109,6 +109,46 @@ class SearchScreenTest {
     }
 
     @Test
+    fun storeScopedSearchCanReturnToTheStoreByItsServerId() {
+        val storeId = "0192a4f0-0000-7000-8000-000000000000"
+        var returnedStoreId: String? = null
+        compose.setContent {
+            MaterialTheme {
+                SearchScreen(
+                    SearchRepository("https://api.nantty.com", { null }, FakeTransport()),
+                    Executor { it.run() },
+                    initialScope = "store:$storeId",
+                    initialScopeLabel = "Ada Fabrics",
+                    onBackToStore = { returnedStoreId = it },
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Back to store").performClick()
+        compose.runOnIdle { assertEquals(storeId, returnedStoreId) }
+    }
+
+    @Test
+    fun profileScopedSearchCanReturnToTheProfileByItsAccountId() {
+        val accountId = "0192a4f0-0000-7000-8000-000000000001"
+        var returnedAccountId: String? = null
+        compose.setContent {
+            MaterialTheme {
+                SearchScreen(
+                    SearchRepository("https://api.nantty.com", { null }, FakeTransport()),
+                    Executor { it.run() },
+                    initialScope = "profile:$accountId",
+                    initialScopeLabel = "@ada",
+                    onBackToProfile = { returnedAccountId = it },
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Back to profile").performClick()
+        compose.runOnIdle { assertEquals(accountId, returnedAccountId) }
+    }
+
+    @Test
     fun guestExploreFollowIsDeferredUntilSignInThenReplayedOnTheSameScreen() {
         var viewer: AccountSession? = null
         var pendingAction: (() -> Unit)? = null

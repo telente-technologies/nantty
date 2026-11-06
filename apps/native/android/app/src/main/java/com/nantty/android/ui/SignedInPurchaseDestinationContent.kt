@@ -22,6 +22,8 @@ internal fun SignedInPurchaseDestinationContent(
         totalMinor = state.totalMinor,
         currency = state.currency,
         orderCount = state.orderCount,
+        paymentMethod = state.paymentMethod,
+        saveCardOnDevice = state.saveCardOnDevice,
         paymentConfirmed = state.paymentConfirmed,
         returnToOrdersAfterPayment = state.returnToOrdersAfterPayment,
         cartAddressId = state.cartAddressId,

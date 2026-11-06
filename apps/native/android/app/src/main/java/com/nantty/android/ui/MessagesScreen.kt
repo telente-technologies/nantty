@@ -74,6 +74,8 @@ internal fun MessagesScreen(
     storiesRepository: StoriesRepository? = null,
     storyAdsRepository: StoryAdsRepository? = null,
     onOpenStoryAdDestination: (StoryAdDestination) -> Unit = {},
+    currentUserAvatarUrl: String? = null,
+    onAddStory: () -> Unit = {},
 ) {
     val searchActionDescription = stringResource(R.string.messages_search_action)
     val newMessageActionDescription = stringResource(R.string.new_message_action)
@@ -365,17 +367,16 @@ internal fun MessagesScreen(
             result is MessagesResult.Success -> {
                 val page = (result as MessagesResult.Success).page
                 LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
-                    if (storiesRepository != null) {
-                        item(key = "stories-tray") {
-                            MessagesStoriesTrayItem(
-                                result = storyNavigation.trayResult,
-                                folder = folder,
-                                onStorySelected = storyNavigation.openStory,
-                                onRetry = storyNavigation.refreshTray,
-                                onReauthenticate = onReauthenticate,
-                            )
-                        }
-                    }
+                    messagesStoriesTrayItem(
+                        enabled = storiesRepository != null,
+                        result = storyNavigation.trayResult,
+                        folder = folder,
+                        myAvatarUrl = currentUserAvatarUrl,
+                        onStorySelected = storyNavigation.openStory,
+                        onAddStory = onAddStory,
+                        onRetry = storyNavigation.refreshTray,
+                        onReauthenticate = onReauthenticate,
+                    )
                     items(page.conversations, key = InboxConversation::id) { conversation ->
                         Column {
                             ConversationRow(conversation, onClick = {

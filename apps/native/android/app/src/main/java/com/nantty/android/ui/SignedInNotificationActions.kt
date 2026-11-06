@@ -5,6 +5,7 @@ import com.nantty.android.data.InboxConversation
 internal data class MainContentNotificationActions(
     val openConversation: (InboxConversation) -> Unit = {},
     val openOrders: () -> Unit = {},
+    val openOrder: (String) -> Unit = {},
     val openFollowRequests: () -> Unit = {},
     val openSpaces: () -> Unit = {},
     val openGroupInvitations: () -> Unit = {},
@@ -23,6 +24,7 @@ internal fun signedInNotificationActions(
     onQueueSupportTicket: (String) -> Unit,
     onQueueDispute: (String) -> Unit,
     onQueueClip: (String) -> Unit,
+    onQueueOrder: (String) -> Unit = {},
 ) = MainContentNotificationActions(
     openConversation = { conversation ->
         if (isGuest) onRequireSignIn()
@@ -32,6 +34,13 @@ internal fun signedInNotificationActions(
         }
     },
     openOrders = { if (isGuest) onRequireSignIn() else onSelectDestination(Destination.Orders) },
+    openOrder = { orderId ->
+        if (isGuest) onRequireSignIn()
+        else {
+            onQueueOrder(orderId)
+            onSelectDestination(Destination.Orders)
+        }
+    },
     openFollowRequests = { if (isGuest) onRequireSignIn() else onSelectDestination(Destination.FollowRequests) },
     openSpaces = { if (isGuest) onRequireSignIn() else onSelectDestination(Destination.Spaces) },
     openGroupInvitations = {

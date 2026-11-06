@@ -20,3 +20,10 @@ internal fun FeedResult?.withPostInteraction(
         )
     })
 }
+
+internal fun FeedResult?.withAuthorFollowState(authorId: String, following: Boolean): FeedResult? {
+    val page = this as? FeedResult.Success ?: return this
+    return page.copy(posts = page.posts.map { post ->
+        if (post.authorId == authorId) post.copy(isFollowingAuthor = following) else post
+    })
+}

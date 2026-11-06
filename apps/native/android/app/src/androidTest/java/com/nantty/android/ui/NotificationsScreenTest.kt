@@ -11,11 +11,13 @@ import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.AccountNotificationSettingsRepository
 import com.nantty.android.data.AccountNotificationSettingsTransport
+import com.nantty.android.data.MarketingConsentTransport
 import com.nantty.android.data.ChatThreadTransport
 import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.MessagesTransport
 import com.nantty.android.data.NotificationsRepository
 import com.nantty.android.data.NotificationsTransport
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -163,6 +165,23 @@ class NotificationsScreenTest {
     }
 
     @Test
+    fun orderNotificationOpensTheSpecificBuyerOrderDetail() {
+        var openedOrderId: String? = null
+        compose.setContent {
+            MaterialTheme {
+                NotificationsScreen(
+                    routeRepository("""{"orderId":"ord_123"}"""),
+                    Executor { it.run() },
+                    onOpenOrder = { openedOrderId = it },
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Order updated Hello from Ari, unread").performClick()
+        compose.runOnIdle { assertEquals("ord_123", openedOrderId) }
+    }
+
+    @Test
     fun messageNotificationOpensItsConversationBeforePostFallback() {
         val conversationId = "11111111-1111-4111-8111-111111111111"
         val notificationTransport = FakeTransport(
@@ -241,6 +260,7 @@ class NotificationsScreenTest {
             "https://api.nantty.com",
             ::signedInSession,
             accountSettingsTransport,
+            marketingConsentTransport = FakeMarketingConsentTransport(),
         )
         compose.setContent {
             MaterialTheme {
@@ -287,7 +307,7 @@ class NotificationsScreenTest {
 
     private fun routeRepository(data: String): NotificationsRepository {
         val transport = NotificationsTransport { method, _, _ ->
-            if (method == "GET") JSONObject("""{"data":[{"id":"route-1","category":"social","title":"${if (data.contains("GroupInvitations")) "Group invitation" else "Support replied"}","body":"Hello from Ari","createdAt":"2026-10-01T12:00:00.000Z","read":false,"actor":{"id":"u1","name":"Ari"},"data":$data}]}""") else JSONObject()
+            if (method == "GET") JSONObject("""{"data":[{"id":"route-1","category":"${if (data.contains("orderId")) "orders" else "social"}","title":"${when { data.contains("GroupInvitations") -> "Group invitation"; data.contains("orderId") -> "Order updated"; else -> "Support replied" }}","body":"Hello from Ari","createdAt":"2026-10-01T12:00:00.000Z","read":false,"actor":{"id":"u1","name":"Ari"},"data":$data}]}""") else JSONObject()
         }
         return NotificationsRepository("https://api.nantty.com", ::signedInSession, transport)
     }
@@ -312,6 +332,12 @@ class NotificationsScreenTest {
             updatedValue = fields.getBoolean("pushNotificationsEnabled")
             return JSONObject().put("pushNotificationsEnabled", updatedValue)
         }
+    }
+
+    private class FakeMarketingConsentTransport : MarketingConsentTransport {
+        override fun request(method: String, path: String, accessToken: String, fields: JSONObject?): JSONObject =
+            if (path.endsWith("/consents")) JSONObject().put("data", JSONArray())
+            else JSONObject().put("data", JSONObject().put("frequency", "weekly"))
     }
 
     companion object {

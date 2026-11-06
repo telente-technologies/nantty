@@ -2,7 +2,9 @@ package com.nantty.android.ui
 
 import android.content.Context
 import com.nantty.android.data.FeedPost
+import com.nantty.android.data.FollowActionResult
 import com.nantty.android.data.PostDetailRepository
+import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.share.sharePostFromAndroid
 import java.util.concurrent.Executor
 import androidx.compose.runtime.snapshots.Snapshot
@@ -11,10 +13,12 @@ import androidx.compose.runtime.snapshots.Snapshot
 internal class SignedInFeedActions(
     private val executor: Executor,
     private val postRepository: () -> PostDetailRepository,
+    private val profileRepository: () -> PublicProfileRepository,
     private val onMessage: (String?) -> Unit,
     private val onSaving: (String?) -> Unit,
     private val isSaving: (String) -> Boolean,
     private val applyInteraction: (FeedPost, Boolean?, Boolean?, Boolean?) -> Unit,
+    private val applyAuthorFollow: (String, Boolean) -> Unit,
     private val refresh: () -> Unit,
     private val shareAction: (Context, FeedPost) -> Unit = { context, post -> sharePostFromAndroid(context, post.id, post.authorName) },
 ) {
@@ -52,6 +56,33 @@ internal class SignedInFeedActions(
 
     fun share(context: Context, post: FeedPost) = shareAction(context, post)
 
+    fun followAuthor(post: FeedPost) {
+        val authorId = post.authorId.takeIf(String::isNotBlank) ?: return
+        onMessage(null)
+        applyAuthorFollow(authorId, true)
+        executor.execute {
+            val result = runCatching { profileRepository().setFollow(authorId, follow = true) }
+                .getOrElse { FollowActionResult.Failure(it.message ?: "Could not follow this account. Try again.") }
+            Snapshot.withMutableSnapshot {
+                when (result) {
+                    is FollowActionResult.Success -> {
+                        if (result.state == "accepted" || result.state == "requested") {
+                            applyAuthorFollow(authorId, true)
+                            onMessage(null)
+                        } else {
+                            applyAuthorFollow(authorId, false)
+                            onMessage("Nantty returned an unexpected follow status. Try again.")
+                        }
+                    }
+                    is FollowActionResult.Failure -> {
+                        applyAuthorFollow(authorId, false)
+                        onMessage(result.message)
+                    }
+                }
+            }
+        }
+    }
+
     private fun update(
         post: FeedPost,
         next: Boolean,
@@ -71,3 +102,25 @@ internal class SignedInFeedActions(
         }
     }
 }
+
+internal fun createSignedInFeedActions(
+    executor: Executor,
+    postRepository: () -> PostDetailRepository,
+    profileRepository: () -> PublicProfileRepository,
+    onMessage: (String?) -> Unit,
+    onSaving: (String?) -> Unit,
+    isSaving: (String) -> Boolean,
+    applyInteraction: (FeedPost, Boolean?, Boolean?, Boolean?) -> Unit,
+    applyAuthorFollow: (String, Boolean) -> Unit,
+    refresh: () -> Unit,
+) = SignedInFeedActions(
+    executor = executor,
+    postRepository = postRepository,
+    profileRepository = profileRepository,
+    onMessage = onMessage,
+    onSaving = onSaving,
+    isSaving = isSaving,
+    applyInteraction = applyInteraction,
+    applyAuthorFollow = applyAuthorFollow,
+    refresh = refresh,
+)

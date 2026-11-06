@@ -118,6 +118,7 @@ private fun parseSavedPost(id: String, item: JSONObject): FeedPost? {
         reposted = item.optBoolean("reposted"),
         authorId = authorId,
         bookmarked = true,
+        isFollowingAuthor = item.optBoolean("isFollowingAuthor"),
     )
 }
 

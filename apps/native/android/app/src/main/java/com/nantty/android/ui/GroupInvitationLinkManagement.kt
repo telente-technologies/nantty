@@ -75,10 +75,10 @@ internal fun GroupInvitationLinksManager(
             items(page?.links.orEmpty(), key = { it.id }) { link ->
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Column(Modifier.weight(1f)) {
-                        Text(if (link.revokedAt == null) "Active link" else "Revoked link", style = MaterialTheme.typography.bodySmall)
+                        Text(invitationLinkStatus(link.expiresAt, link.revokedAt).label, style = MaterialTheme.typography.bodySmall)
                         Text("Expires ${link.expiresAt}", style = MaterialTheme.typography.labelSmall)
                     }
-                    if (link.revokedAt == null) {
+                    if (invitationLinkStatus(link.expiresAt, link.revokedAt) != InvitationLinkStatus.REVOKED) {
                         TextButton(
                             onClick = {
                                 if (actionId != null) return@TextButton

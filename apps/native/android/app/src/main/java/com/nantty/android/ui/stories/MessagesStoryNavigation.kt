@@ -25,7 +25,10 @@ internal fun adjacentStoryAuthor(
     next: Boolean,
 ): StoryAuthorTarget? {
     val currentIndex = entries.indexOfFirst { it.userId == currentUserId }
-    if (currentIndex < 0) return null
+    if (currentIndex < 0) {
+        if (!next) return null
+        return entries.firstOrNull()?.let { StoryAuthorTarget(it.userId, startAtLast = false) }
+    }
     val targetIndex = if (next) currentIndex + 1 else currentIndex - 1
     val target = entries.getOrNull(targetIndex) ?: return null
     return StoryAuthorTarget(target.userId, startAtLast = !next)

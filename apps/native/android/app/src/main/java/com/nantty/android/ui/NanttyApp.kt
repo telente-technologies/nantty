@@ -25,6 +25,7 @@ import com.nantty.android.data.AuthFlowApi
 import com.nantty.android.ui.auth.PendingGuestAction
 import com.nantty.android.widget.OrdersWidgetRefreshScheduler
 import com.nantty.android.notifications.NativePushRegistration
+import com.nantty.android.notifications.ForegroundActivityHeartbeat
 import com.nantty.android.notifications.PushTapTarget
 import java.util.concurrent.Executor
 
@@ -101,6 +102,12 @@ fun NanttyApp(
             pendingGuestAction.takeAfterSignIn()?.invoke()
         }
     }
+
+    ForegroundActivityHeartbeat(
+        enabled = session != null,
+        sessionRepository = sessionRepository,
+        executor = sessionExecutor,
+    )
 
     fun cancelGuestAuth() {
         pendingGuestAction.discard()

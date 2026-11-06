@@ -3,15 +3,19 @@ package com.nantty.android.share
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.service.chooser.ChooserResult
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.IntentCompat
 import com.nantty.android.BuildConfig
 import com.nantty.android.NanttyApplication
+import com.nantty.android.R
 import com.nantty.android.data.PostDetailRepository
 import java.util.UUID
 
@@ -20,12 +24,23 @@ internal fun postShareText(
     authorName: String? = null,
     webAppBaseUrl: String = BuildConfig.NANTTY_WEBAPP_URL,
 ): String {
+    val url = postShareUrl(postId, webAppBaseUrl)
+    return authorName?.takeIf(String::isNotBlank)?.let { "$it on Nantty: $url" } ?: url
+}
+
+internal fun postShareUrl(postId: String, webAppBaseUrl: String = BuildConfig.NANTTY_WEBAPP_URL): String {
     val configuredBase = Uri.parse(webAppBaseUrl.trim().trimEnd('/'))
     val isSecure = configuredBase.scheme == "https" && !configuredBase.host.isNullOrBlank() && configuredBase.userInfo == null
     val isEmulatorDevelopment = configuredBase.scheme == "http" && configuredBase.host == "10.0.2.2" && configuredBase.userInfo == null
     val baseUrl = if (isSecure || isEmulatorDevelopment) configuredBase.toString() else "https://web.nantty.com"
-    val url = "$baseUrl/post/${Uri.encode(postId)}"
-    return authorName?.takeIf(String::isNotBlank)?.let { "$it on Nantty: $url" } ?: url
+    return "$baseUrl/post/${Uri.encode(postId)}"
+}
+
+internal fun copyPostLinkFromAndroid(context: Context, postId: String) {
+    if (postId.isBlank()) return
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager ?: return
+    clipboard.setPrimaryClip(ClipData.newPlainText(context.getString(R.string.feed_post_link_label), postShareUrl(postId)))
+    Toast.makeText(context, R.string.feed_post_link_copied, Toast.LENGTH_SHORT).show()
 }
 
 internal fun sharePostFromAndroid(context: Context, postId: String, authorName: String? = null) {

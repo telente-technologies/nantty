@@ -123,4 +123,8 @@ internal class SignedInFeedController(
     ) {
         content.result.value = content.result.value.withPostInteraction(post, liked, reposted, bookmarked)
     }
+
+    fun applyAuthorFollow(authorId: String, following: Boolean) {
+        content.result.value = content.result.value.withAuthorFollowState(authorId, following)
+    }
 }

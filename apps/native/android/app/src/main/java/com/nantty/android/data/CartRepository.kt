@@ -39,6 +39,7 @@ internal data class CartSnapshot(
 internal data class CartSellerSummary(
     val storeId: String,
     val storeName: String,
+    val verified: Boolean,
     val subtotal: WalletMoney,
     val discounts: WalletMoney,
     val shipping: CartShippingQuote,
@@ -179,6 +180,7 @@ private fun parseCartSellerSummary(group: JSONObject): CartSellerSummary {
     return CartSellerSummary(
         storeId = storeId,
         storeName = group.optString("storeName").filterNot(Char::isISOControl).take(100),
+        verified = group.optJSONObject("store")?.optBoolean("verified") == true,
         subtotal = subtotal,
         discounts = discounts,
         shipping = CartShippingQuote(
