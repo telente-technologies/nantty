@@ -11,6 +11,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
 import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.StoryAdsRepository
 import com.nantty.android.data.StoryTrayEntry
 import com.nantty.android.data.StoryTrayResult
 import java.util.concurrent.Executor
@@ -34,6 +35,7 @@ internal data class MessagesStoryNavigationState(
     val trayResult: StoryTrayResult?,
     val selectedStoryUserId: String?,
     val startAtLast: Boolean,
+    val adSession: StoryAdSession,
     val refreshTray: () -> Unit,
     val openStory: (String) -> Unit,
     val nextAuthor: () -> Unit,
@@ -44,6 +46,7 @@ internal data class MessagesStoryNavigationState(
 @Composable
 internal fun rememberMessagesStoryNavigation(
     repository: StoriesRepository?,
+    adsRepository: StoryAdsRepository?,
     executor: Executor,
     onReauthenticate: () -> Unit,
 ): MessagesStoryNavigationState {
@@ -51,6 +54,7 @@ internal fun rememberMessagesStoryNavigation(
     var selectedStoryUserId by remember(repository) { mutableStateOf<String?>(null) }
     var startAtLast by remember(repository) { mutableStateOf(false) }
     var refreshGeneration by remember(repository) { mutableIntStateOf(0) }
+    val adSession = remember(repository) { StoryAdSession() }
     val requestGeneration = remember(repository) { AtomicInteger() }
     val latestReauthenticate by rememberUpdatedState(onReauthenticate)
     DisposableEffect(repository) {
@@ -71,11 +75,12 @@ internal fun rememberMessagesStoryNavigation(
     }
 
     val entries = (trayResult as? StoryTrayResult.Success)?.entries.orEmpty()
-    return remember(repository, executor, trayResult, selectedStoryUserId, startAtLast, refreshGeneration) {
+    return remember(repository, adsRepository, executor, trayResult, selectedStoryUserId, startAtLast, refreshGeneration, adSession) {
         MessagesStoryNavigationState(
             trayResult = trayResult,
             selectedStoryUserId = selectedStoryUserId,
             startAtLast = startAtLast,
+            adSession = adSession,
             refreshTray = { refreshGeneration++ },
             openStory = { userId -> selectedStoryUserId = userId; startAtLast = false },
             nextAuthor = {
@@ -83,6 +88,7 @@ internal fun rememberMessagesStoryNavigation(
                     val target = adjacentStoryAuthor(entries, current, next = true)
                     selectedStoryUserId = target?.userId
                     startAtLast = target?.startAtLast ?: false
+                    if (target == null) adSession.reset()
                 }
             },
             previousAuthor = {
@@ -91,7 +97,7 @@ internal fun rememberMessagesStoryNavigation(
                     startAtLast = it.startAtLast
                 }
             },
-            closeViewer = { selectedStoryUserId = null; startAtLast = false; refreshGeneration++ },
+            closeViewer = { selectedStoryUserId = null; startAtLast = false; adSession.reset(); refreshGeneration++ },
         )
     }
 }
@@ -99,14 +105,18 @@ internal fun rememberMessagesStoryNavigation(
 @Composable
 internal fun MessagesStoryViewer(
     repository: StoriesRepository?,
+    adsRepository: StoryAdsRepository?,
     executor: Executor,
     state: MessagesStoryNavigationState,
     onReauthenticate: () -> Unit,
+    onOpenAdDestination: (com.nantty.android.data.StoryAdDestination) -> Unit,
 ) {
     val userId = state.selectedStoryUserId ?: return
     val activeRepository = repository ?: return
     StoryViewerDialog(
         repository = activeRepository,
+        adsRepository = adsRepository,
+        adSession = state.adSession,
         userId = userId,
         executor = executor,
         startAtLast = state.startAtLast,
@@ -114,5 +124,6 @@ internal fun MessagesStoryViewer(
         onPreviousUser = state.previousAuthor,
         onNextUser = state.nextAuthor,
         onReauthenticate = onReauthenticate,
+        onOpenAdDestination = onOpenAdDestination,
     )
 }
