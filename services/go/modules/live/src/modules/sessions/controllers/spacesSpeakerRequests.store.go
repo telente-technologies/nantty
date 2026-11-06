@@ -145,13 +145,15 @@ func (c SpacesController) controlSpaceParticipant(ctx context.Context, spaceID, 
 			}
 			update.SetState(spaceparticipant.StateRemoved).SetLeftAt(now)
 		case "demote":
-			if participant.Role != spaceparticipant.RoleSpeaker {
-				return httpserver.NewApiError(http.StatusConflict, "SPACE_NOT_SPEAKER", "Only speakers can be demoted.")
+			if participant.Role != spaceparticipant.RoleSpeaker && participant.Role != spaceparticipant.RoleModerator {
+				return httpserver.NewApiError(http.StatusConflict, "SPACE_NOT_SPEAKER", "Only speakers and cohosts can be demoted.")
 			}
-			if err := c.Container.Media.SetParticipantCanPublish(ctx, row.LivekitRoom, userID.String(), false); err != nil {
-				return err
+			if participant.Role == spaceparticipant.RoleSpeaker || participant.Role == spaceparticipant.RoleModerator {
+				if err := c.Container.Media.SetParticipantCanPublish(ctx, row.LivekitRoom, userID.String(), false); err != nil {
+					return err
+				}
 			}
-			update.SetRole(spaceparticipant.RoleListener).SetMutedByHost(false)
+			update.SetRole(spaceparticipant.RoleListener).SetStageTitle("").SetMutedByHost(false)
 		default:
 			return httpserver.NewApiError(http.StatusBadRequest, "SPACE_ACTION_INVALID", "Unsupported participant action.")
 		}
@@ -188,8 +190,8 @@ func (c SpacesController) muteSpeaker(ctx context.Context, spaceID, userID, acto
 		if err != nil {
 			return err
 		}
-		if participant.Role != spaceparticipant.RoleSpeaker {
-			return httpserver.NewApiError(http.StatusConflict, "SPACE_NOT_SPEAKER", "Only speakers can be muted.")
+		if participant.Role != spaceparticipant.RoleSpeaker && participant.Role != spaceparticipant.RoleModerator {
+			return httpserver.NewApiError(http.StatusConflict, "SPACE_NOT_SPEAKER", "Only stage speakers and cohosts can be muted.")
 		}
 		if err := c.Container.Media.SetParticipantCanPublish(ctx, row.LivekitRoom, userID.String(), !muted); err != nil {
 			return err

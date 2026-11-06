@@ -709,6 +709,18 @@ func (u *SpaceUpsert) UpdateUpdatedAt() *SpaceUpsert {
 	return u
 }
 
+// SetGiftsEnabled sets the "gifts_enabled" field.
+func (u *SpaceUpsert) SetGiftsEnabled(v bool) *SpaceUpsert {
+	u.Set(space.FieldGiftsEnabled, v)
+	return u
+}
+
+// UpdateGiftsEnabled sets the "gifts_enabled" field to the value that was provided on create.
+func (u *SpaceUpsert) UpdateGiftsEnabled() *SpaceUpsert {
+	u.SetExcluded(space.FieldGiftsEnabled)
+	return u
+}
+
 // SetMetadata sets the "metadata" field.
 func (u *SpaceUpsert) SetMetadata(v map[string]interface{}) *SpaceUpsert {
 	u.Set(space.FieldMetadata, v)
@@ -752,9 +764,6 @@ func (u *SpaceUpsertOne) UpdateNewValues() *SpaceUpsertOne {
 		}
 		if _, exists := u.create.mutation.LivekitRoom(); exists {
 			s.SetIgnore(space.FieldLivekitRoom)
-		}
-		if _, exists := u.create.mutation.GiftsEnabled(); exists {
-			s.SetIgnore(space.FieldGiftsEnabled)
 		}
 		if _, exists := u.create.mutation.VideoEnabled(); exists {
 			s.SetIgnore(space.FieldVideoEnabled)
@@ -979,6 +988,20 @@ func (u *SpaceUpsertOne) UpdateUpdatedAt() *SpaceUpsertOne {
 	})
 }
 
+// SetGiftsEnabled sets the "gifts_enabled" field.
+func (u *SpaceUpsertOne) SetGiftsEnabled(v bool) *SpaceUpsertOne {
+	return u.Update(func(s *SpaceUpsert) {
+		s.SetGiftsEnabled(v)
+	})
+}
+
+// UpdateGiftsEnabled sets the "gifts_enabled" field to the value that was provided on create.
+func (u *SpaceUpsertOne) UpdateGiftsEnabled() *SpaceUpsertOne {
+	return u.Update(func(s *SpaceUpsert) {
+		s.UpdateGiftsEnabled()
+	})
+}
+
 // SetMetadata sets the "metadata" field.
 func (u *SpaceUpsertOne) SetMetadata(v map[string]interface{}) *SpaceUpsertOne {
 	return u.Update(func(s *SpaceUpsert) {
@@ -1191,9 +1214,6 @@ func (u *SpaceUpsertBulk) UpdateNewValues() *SpaceUpsertBulk {
 			}
 			if _, exists := b.mutation.LivekitRoom(); exists {
 				s.SetIgnore(space.FieldLivekitRoom)
-			}
-			if _, exists := b.mutation.GiftsEnabled(); exists {
-				s.SetIgnore(space.FieldGiftsEnabled)
 			}
 			if _, exists := b.mutation.VideoEnabled(); exists {
 				s.SetIgnore(space.FieldVideoEnabled)
@@ -1416,6 +1436,20 @@ func (u *SpaceUpsertBulk) SetUpdatedAt(v time.Time) *SpaceUpsertBulk {
 func (u *SpaceUpsertBulk) UpdateUpdatedAt() *SpaceUpsertBulk {
 	return u.Update(func(s *SpaceUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetGiftsEnabled sets the "gifts_enabled" field.
+func (u *SpaceUpsertBulk) SetGiftsEnabled(v bool) *SpaceUpsertBulk {
+	return u.Update(func(s *SpaceUpsert) {
+		s.SetGiftsEnabled(v)
+	})
+}
+
+// UpdateGiftsEnabled sets the "gifts_enabled" field to the value that was provided on create.
+func (u *SpaceUpsertBulk) UpdateGiftsEnabled() *SpaceUpsertBulk {
+	return u.Update(func(s *SpaceUpsert) {
+		s.UpdateGiftsEnabled()
 	})
 }
 

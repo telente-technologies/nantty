@@ -14,6 +14,7 @@ type AutoApproveRules struct {
 	MinimumOriginalPostsInLast60Days int  `json:"minimumOriginalPostsInLast60Days"`
 	NoViolationsInDays               int  `json:"noViolationsInDays"`
 	MaximumFraudScore                int  `json:"maximumFraudScore"`
+	RequiresIdentityVerification     bool `json:"requiresIdentityVerification"`
 }
 
 type ManualReviewRules struct {
@@ -48,7 +49,9 @@ func LoadCreatorThresholds(ctx context.Context) CreatorThresholds {
 	if err != nil {
 		return thresholds
 	}
-	var configured CreatorThresholds
+	// Start from the historical defaults so older/partial stored documents that
+	// predate newer fields retain the same behavior instead of zeroing them.
+	configured := thresholds
 	if json.Unmarshal(raw, &configured) != nil {
 		return thresholds
 	}

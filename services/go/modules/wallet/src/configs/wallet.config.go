@@ -42,7 +42,7 @@ const defaultCoinCashValues = "NGN:1000,GHS:10,KES:100,ZAR:15,GBP:1,EUR:1,USD:1"
 func ReadWalletSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) WalletSettings {
 	settings := WalletSettings{
 		Money:                        loaders.ReadMoneyModuleSettingsFromEnvironment(reader, "wallet"),
-		CoinTransferFeeBps:           int64(reader.ReadIntegerOrDefault("COIN_TRANSFER_FEE_BPS", 2500)),
+		CoinTransferFeeBps:           int64(reader.ReadIntegerOrDefault("COIN_TRANSFER_FEE_BPS", 200)),
 		CoinCashValueMinorByCurrency: ParseCurrencyAmounts(reader.ReadStringOrDefault("COIN_CASH_VALUES", defaultCoinCashValues)),
 		MinimumPayoutMinorByCurrency: ParseCurrencyAmounts(reader.ReadStringOrDefault("CREATOR_MINIMUM_PAYOUTS", "NGN:1000,GHS:1000,KES:1000,ZAR:1000,GBP:1000,EUR:1000,USD:1000")),
 		MinimumWithdrawalMinor:       int64(reader.ReadIntegerOrDefault("WALLET_MINIMUM_WITHDRAWAL_MINOR", 100)),

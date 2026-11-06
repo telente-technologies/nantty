@@ -31,18 +31,20 @@ type spaceDetailsResponse struct {
 	Host                   spacePerson                `json:"host"`
 	Speakers               []spacePerson              `json:"speakers"`
 	ViewerRole             *string                    `json:"viewerRole,omitempty"`
+	ViewerStageTitle       *string                    `json:"viewerStageTitle,omitempty"`
 	ViewerJoined           *bool                      `json:"viewerJoined,omitempty"`
 	SpeakerRequestState    *spacespeakerrequest.State `json:"speakerRequestState,omitempty"`
 	PendingSpeakerRequests []pendingSpaceRequest      `json:"pendingSpeakerRequests,omitempty"`
 }
 
 type spacePerson struct {
-	ID        string  `json:"id"`
-	Name      *string `json:"name,omitempty"`
-	Username  *string `json:"username,omitempty"`
-	AvatarURL *string `json:"avatarUrl,omitempty"`
-	Role      string  `json:"role"`
-	Muted     bool    `json:"muted,omitempty"`
+	ID         string  `json:"id"`
+	Name       *string `json:"name,omitempty"`
+	Username   *string `json:"username,omitempty"`
+	AvatarURL  *string `json:"avatarUrl,omitempty"`
+	Role       string  `json:"role"`
+	StageTitle string  `json:"stageTitle,omitempty"`
+	Muted      bool    `json:"muted,omitempty"`
 }
 
 type pendingSpaceRequest struct {
@@ -92,7 +94,7 @@ func (c SpacesController) Detail(w http.ResponseWriter, r *http.Request) {
 	var viewerParticipant *ent.SpaceParticipant
 	var moderator bool
 	for _, participant := range active {
-		if participant.Role == spaceparticipant.RoleSpeaker {
+		if participant.Role == spaceparticipant.RoleSpeaker || participant.Role == spaceparticipant.RoleModerator {
 			profileIDs = append(profileIDs, participant.AccountID)
 		}
 		if viewer != nil && participant.AccountID == viewer.UserId {
@@ -137,8 +139,9 @@ func (c SpacesController) Detail(w http.ResponseWriter, r *http.Request) {
 		response.AnnouncementPostID = postID
 	}
 	for _, participant := range active {
-		if participant.Role == spaceparticipant.RoleSpeaker {
-			response.Speakers = append(response.Speakers, describeSpacePerson(participant.AccountID, "speaker", participant.MutedByHost, profiles))
+		if participant.Role == spaceparticipant.RoleSpeaker || participant.Role == spaceparticipant.RoleModerator {
+			role := string(participant.Role)
+			response.Speakers = append(response.Speakers, describeSpacePerson(participant.AccountID, role, participant.MutedByHost, profiles, participant.StageTitle))
 		}
 	}
 	if viewer != nil {
@@ -148,10 +151,15 @@ func (c SpacesController) Detail(w http.ResponseWriter, r *http.Request) {
 			role = "host"
 		} else if moderator {
 			role = "moderator"
+		} else if viewerParticipant != nil && viewerParticipant.Role == spaceparticipant.RoleModerator {
+			role = "moderator"
 		} else if viewerParticipant != nil && viewerParticipant.Role == spaceparticipant.RoleSpeaker {
 			role = "speaker"
 		}
 		response.ViewerRole, response.ViewerJoined = &role, &joined
+		if viewerParticipant != nil && viewerParticipant.StageTitle != "" {
+			response.ViewerStageTitle = &viewerParticipant.StageTitle
+		}
 		request, queryErr := c.Container.Client.SpaceSpeakerRequest.Query().Where(
 			spacespeakerrequest.SpaceID(id), spacespeakerrequest.AccountID(viewer.UserId),
 		).Order(ent.Desc(spacespeakerrequest.FieldCreatedAt)).First(r.Context())
@@ -245,8 +253,11 @@ func authorizeSpaceDetails(ctx context.Context, row *ent.Space, viewer *types.Ac
 	return httpserver.ErrNotFound
 }
 
-func describeSpacePerson(id uuid.UUID, role string, muted bool, profiles map[uuid.UUID]interfaces.Participant) spacePerson {
+func describeSpacePerson(id uuid.UUID, role string, muted bool, profiles map[uuid.UUID]interfaces.Participant, stageTitles ...string) spacePerson {
 	person := spacePerson{ID: id.String(), Role: role, Muted: muted}
+	if len(stageTitles) > 0 {
+		person.StageTitle = stageTitles[0]
+	}
 	if profile, ok := profiles[id]; ok {
 		if profile.Name != "" {
 			person.Name = &profile.Name

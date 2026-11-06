@@ -23,6 +23,7 @@ type CreateLiveRequest struct {
 	AcceptedLiveAdTermsVersion *string                `json:"acceptedLiveAdTermsVersion"`
 	SponsorshipLine            *string                `json:"sponsorshipLine"`
 	ScheduledAt                *string                `json:"scheduledAt"`
+	GiftsEnabled               *bool                  `json:"giftsEnabled"`
 }
 
 type UpdateLiveRequest struct {

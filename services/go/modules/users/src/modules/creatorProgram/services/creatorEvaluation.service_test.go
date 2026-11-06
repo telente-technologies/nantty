@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"testing"
 
 	"nantty/modules/users/src/generated/ent"
@@ -34,5 +35,43 @@ func TestQualifiesForManualReviewFollowsTheAdminConfiguredRules(t *testing.T) {
 	}
 	if qualifiesForManualReview(&ent.ProfileSignal{RealFollowers: 900, BorderlineContent: true, DaysSinceLastViolation: 400}, strict, 60, 30) {
 		t.Error("borderline content must block review when the admin disallows it")
+	}
+}
+
+func TestAdditionalAutoApproveRules(t *testing.T) {
+	verified := ent.ProfileSignal{IDVerified: true}
+	unverified := ent.ProfileSignal{}
+	cases := []struct {
+		name   string
+		signal *ent.ProfileSignal
+		rules  AutoApproveRules
+		want   bool
+	}{
+		{"identity verification is not required by default", &unverified, AutoApproveRules{}, true},
+		{"identity verification is required when configured", &unverified, AutoApproveRules{RequiresIdentityVerification: true}, false},
+		{"verified identity satisfies configured requirement", &verified, AutoApproveRules{RequiresIdentityVerification: true}, true},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			if got := meetsAdditionalAutoApproveRules(testCase.signal, testCase.rules); got != testCase.want {
+				t.Fatalf("got %v want %v", got, testCase.want)
+			}
+		})
+	}
+}
+
+func TestCreatorThresholdsMissingNewFieldsKeepHistoricalDefaults(t *testing.T) {
+	thresholds := DefaultCreatorThresholds()
+	if err := json.Unmarshal([]byte(`{"autoApprove":{"minimumAccountAgeDays":45},"manualReview":{}}`), &thresholds); err != nil {
+		t.Fatal(err)
+	}
+	if thresholds.AutoApprove.MinimumAccountAgeDays != 45 {
+		t.Fatalf("configured field not applied: got %d", thresholds.AutoApprove.MinimumAccountAgeDays)
+	}
+	if !thresholds.AutoApprove.RequiresVerifiedEmail || thresholds.AutoApprove.MinimumRealFollowers != 1000 || thresholds.AutoApprove.MaximumFraudScore != 30 {
+		t.Fatalf("omitted legacy fields lost historical defaults: %+v", thresholds.AutoApprove)
+	}
+	if thresholds.AutoApprove.RequiresIdentityVerification {
+		t.Fatalf("omitted new rules should remain disabled: %+v", thresholds.AutoApprove)
 	}
 }

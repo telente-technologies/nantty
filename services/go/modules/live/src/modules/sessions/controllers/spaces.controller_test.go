@@ -130,6 +130,25 @@ func TestSpaceHostAuthorization(t *testing.T) {
 	}
 }
 
+func TestCoinContributionsRequireExplicitHostOptIn(t *testing.T) {
+	enabled, disabled := true, false
+	for _, test := range []struct {
+		name       string
+		preference *bool
+		want       bool
+	}{
+		{name: "omitted preference defaults off"},
+		{name: "explicitly disabled", preference: &disabled},
+		{name: "explicitly enabled", preference: &enabled, want: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := coinContributionsEnabled(test.preference); got != test.want {
+				t.Fatalf("coin contributions enabled = %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
 func TestSpaceHostEligibilityRequiresCreatorProgramRole(t *testing.T) {
 	tests := []struct {
 		name     string

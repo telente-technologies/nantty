@@ -53,6 +53,35 @@ func (controller LiveMoneyGrpcController) ChargeSpaceCoinGift(ctx context.Contex
 	}, nil
 }
 
+func (controller LiveMoneyGrpcController) DonateSpaceCoins(ctx context.Context, request *moneyv1.DonateSpaceCoinsRequest) (*moneyv1.DonateSpaceCoinsResponse, error) {
+	receipt, err := controller.LiveMoney.DonateSpaceCoins(ctx, services.SpaceCoinDonationRequest{
+		SenderUserID: request.GetSenderUserId(), SpaceID: request.GetSpaceId(), Coins: request.GetCoins(), IdempotencyKey: request.GetIdempotencyKey(),
+	})
+	if err != nil {
+		return nil, controller.convertError(ctx, err)
+	}
+	return &moneyv1.DonateSpaceCoinsResponse{DonationId: receipt.DonationID, LedgerTransactionId: receipt.LedgerEntryID,
+		SenderUserId: receipt.SenderUserID, HostUserId: receipt.HostUserID, SpaceId: receipt.SpaceID,
+		TotalCoins: receipt.TotalCoins, PlatformFeeCoins: receipt.PlatformFeeCoins, CreatorAmountCoins: receipt.CreatorAmount,
+		SenderCoinBalance: receipt.SenderBalance, Replayed: receipt.Replayed}, nil
+}
+
+func (controller LiveMoneyGrpcController) ContributeBattleCoins(ctx context.Context, request *moneyv1.ContributeBattleCoinsRequest) (*moneyv1.ContributeBattleCoinsResponse, error) {
+	receipt, err := controller.LiveMoney.ContributeBattleCoins(ctx, services.BattleCoinContributionRequest{
+		SenderUserID: request.GetSenderUserId(), RecipientUserID: request.GetRecipientUserId(), BattleID: request.GetBattleId(),
+		Coins: request.GetCoins(), IdempotencyKey: request.GetIdempotencyKey(),
+	})
+	if err != nil {
+		return nil, controller.convertError(ctx, err)
+	}
+	return &moneyv1.ContributeBattleCoinsResponse{
+		ContributionId: receipt.ContributionID, LedgerTransactionId: receipt.LedgerEntryID, SenderUserId: receipt.SenderUserID,
+		RecipientUserId: receipt.RecipientUserID, BattleId: receipt.BattleID, LiveId: receipt.LiveID,
+		TotalCoins: receipt.TotalCoins, PlatformFeeCoins: receipt.PlatformFeeCoins, HoldingCoins: receipt.HoldingCoins,
+		SenderCoinBalance: receipt.SenderBalance, Replayed: receipt.Replayed,
+	}, nil
+}
+
 var participantOutcomes = map[moneyv1.BattleParticipantOutcome]models.ParticipantOutcome{
 	moneyv1.BattleParticipantOutcome_BATTLE_PARTICIPANT_OUTCOME_ACTIVE:          models.OutcomeActive,
 	moneyv1.BattleParticipantOutcome_BATTLE_PARTICIPANT_OUTCOME_FORFEITED:       models.OutcomeForfeited,
@@ -134,6 +163,10 @@ func (controller LiveMoneyGrpcController) convertError(ctx context.Context, err 
 		information := &errdetails.ErrorInfo{Reason: failure.Reason, Domain: "money.nantty.com", Metadata: map[string]string{}}
 		if failure.CoinBalance != nil {
 			information.Metadata["coinBalance"] = strconv.FormatInt(*failure.CoinBalance, 10)
+		}
+		if failure.Reason == "INVALID_DONATION_AMOUNT" || failure.Reason == "INVALID_BATTLE_CONTRIBUTION_AMOUNT" {
+			information.Metadata["minimumCoins"] = strconv.FormatInt(failure.MinimumCoins, 10)
+			information.Metadata["maximumCoins"] = strconv.FormatInt(failure.MaximumCoins, 10)
 		}
 		return withErrorInfo(code, failure.Message, information)
 	case errors.Is(err, services.ErrIdempotencyKeyReused):

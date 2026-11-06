@@ -32,10 +32,15 @@ func (c SpacesController) rateLimit(w http.ResponseWriter, r *http.Request, acto
 }
 
 type spaceCreateRequest struct {
-	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	Visibility  string     `json:"visibility"`
-	ScheduledAt *time.Time `json:"scheduledAt"`
+	Title        string     `json:"title"`
+	Description  string     `json:"description"`
+	Visibility   string     `json:"visibility"`
+	ScheduledAt  *time.Time `json:"scheduledAt"`
+	GiftsEnabled *bool      `json:"giftsEnabled"`
+}
+
+func coinContributionsEnabled(preference *bool) bool {
+	return preference != nil && *preference
 }
 
 func (c SpacesController) List(w http.ResponseWriter, r *http.Request) {
@@ -135,7 +140,10 @@ func (c SpacesController) Create(w http.ResponseWriter, r *http.Request) {
 		metadata["spaceAudiencePolicy"] = "invite_only"
 		metadata["invitedAccountIds"] = []string{}
 	}
-	query := c.Container.Client.Space.Create().SetHostID(actor.UserId).SetTitle(input.Title).SetDescription(input.Description).SetVisibility(space.Visibility(databaseVisibility)).SetLivekitRoom(room).SetGiftsEnabled(true).SetMetadata(metadata)
+	// Coin support is an explicit host opt-in. Older clients that omit the
+	// preference must not silently enable money contributions.
+	giftsEnabled := coinContributionsEnabled(input.GiftsEnabled)
+	query := c.Container.Client.Space.Create().SetHostID(actor.UserId).SetTitle(input.Title).SetDescription(input.Description).SetVisibility(space.Visibility(databaseVisibility)).SetLivekitRoom(room).SetGiftsEnabled(giftsEnabled).SetMetadata(metadata)
 	if input.ScheduledAt != nil {
 		if !input.ScheduledAt.After(c.Container.Now()) {
 			c.responder().Error(w, r, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "scheduledAt", Message: "must be in the future"}}))
@@ -263,14 +271,14 @@ func (c SpacesController) MediaToken(w http.ResponseWriter, r *http.Request) {
 					err = httpserver.ErrForbidden
 				}
 				if err == nil {
-					canPublish := participant.Role == spaceparticipant.RoleHost || participant.Role == spaceparticipant.RoleSpeaker && !participant.MutedByHost
+					canPublish := participant.Role == spaceparticipant.RoleHost || (participant.Role == spaceparticipant.RoleSpeaker || participant.Role == spaceparticipant.RoleModerator) && !participant.MutedByHost
 					token, issueErr := c.Container.Tokens.IssueParticipantToken(integrations.MediaGrant{
 						Room: row.LivekitRoom, Identity: actor.UserId.String(), Name: "Space participant", CanPublish: canPublish,
 						AudioOnly: true, Role: string(participant.Role), TimeToLive: c.Container.Settings.MediaTokenTimeToLive,
 					})
 					err = issueErr
 					if err == nil {
-						httpserver.WriteJsonResponse(w, http.StatusOK, map[string]any{"url": c.Container.Settings.LiveKitPublicUrl, "token": token, "canPublish": canPublish, "role": participant.Role})
+						httpserver.WriteJsonResponse(w, http.StatusOK, map[string]any{"url": c.Container.Settings.LiveKitPublicUrl, "token": token, "canPublish": canPublish, "role": participant.Role, "stageTitle": participant.StageTitle})
 						return
 					}
 				}

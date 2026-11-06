@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 
 	"nantty/modules/creators/src"
 	"nantty/modules/creators/src/configs"
@@ -88,6 +89,23 @@ func TestTipsPayTheCreatorOnceAndShowInEarningsAndTheDashboard(t *testing.T) {
 		Blocks: map[[2]string]bool{{blocked, creator}: true}, Followers: map[string]int64{creator: 42}, Applications: map[string]string{stranger: "pending"},
 	})
 	harness.makeCreator(creator, "top")
+	harness.module.Container.Settings.Revenue.CoinTransferFeeBps = 200
+	liveSchema := "tip_live_test_" + uuid.NewString()[:8]
+	harness.module.Container.Settings.LiveSchema = liveSchema
+	if _, err := harness.database.Exec(`CREATE SCHEMA ` + pgx.Identifier{liveSchema}.Sanitize()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := harness.database.Exec(`CREATE TABLE ` + pgx.Identifier{liveSchema, "live_sessions"}.Sanitize() + ` (id text PRIMARY KEY, host_id text NOT NULL, state text NOT NULL, gifts_enabled boolean NOT NULL)`); err != nil {
+		t.Fatal(err)
+	}
+	for _, live := range []struct {
+		id, state string
+		enabled   bool
+	}{{"live-1", "live", true}, {"live-disabled", "live", false}, {"live-old", "ended", true}} {
+		if _, err := harness.database.Exec(`INSERT INTO `+pgx.Identifier{liveSchema, "live_sessions"}.Sanitize()+` (id, host_id, state, gifts_enabled) VALUES ($1,$2,$3,$4)`, live.id, creator, live.state, live.enabled); err != nil {
+			t.Fatal(err)
+		}
+	}
 	harness.issueCoins(fan, 1_000)
 	harness.issueCoins(blocked, 100)
 	fanToken := harness.tokens.UserAccessToken(fan)
@@ -119,18 +137,28 @@ func TestTipsPayTheCreatorOnceAndShowInEarningsAndTheDashboard(t *testing.T) {
 	if status, body := tip(fanToken, "tip-too-much-1", "live", "live-1", 5_000); status != http.StatusUnprocessableEntity || body["code"] != "INSUFFICIENT_COINS" {
 		t.Fatalf("no overdraft: %d %v", status, body)
 	}
-	if earned := harness.balance(ledgermodels.CreatorEarnedCoinsAccount(creator)); earned != 70 {
-		t.Fatalf("the top tier keeps 70%%: %d", earned)
+	if status, body := tip(fanToken, "tip-live-disabled", "live", "live-disabled", 100); status != http.StatusUnprocessableEntity || body["code"] != "LIVE_COIN_SUPPORT_DISABLED" {
+		t.Fatalf("host opt-out must be enforced by the live tip service: %d %v", status, body)
+	}
+	if harness.balance(ledgermodels.UserSpendableCoinsAccount(fan)) != 900 {
+		t.Fatal("disabled live coin support must not debit the sender")
+	}
+	status, liveReceipt := tip(fanToken, "tip-live-enabled", "live", "live-1", 100)
+	if status != http.StatusCreated || liveReceipt["balance"] != float64(800) {
+		t.Fatalf("enabled live tip: %d %v", status, liveReceipt)
+	}
+	if earned := harness.balance(ledgermodels.CreatorEarnedCoinsAccount(creator)); earned != 168 {
+		t.Fatalf("profile tip keeps the existing top-tier split and live tip uses 2%%: %d", earned)
 	}
 	creatorToken := harness.tokens.UserAccessToken(creator)
 	_, earnings := harness.call(http.MethodGet, "/api/v1/creators/earnings", creatorToken, "", nil)
 	items := earnings["data"].([]any)
-	if len(items) != 1 || items[0].(map[string]any)["kind"] != "tip" || items[0].(map[string]any)["source"] != "gift" {
+	if len(items) != 2 || items[0].(map[string]any)["kind"] != "tip" || items[0].(map[string]any)["source"] != "gift" {
 		t.Fatalf("earnings: %v", earnings)
 	}
 	status, dashboard := harness.call(http.MethodGet, "/api/v1/creators/dashboard?period=week&currency=NGN", creatorToken, "", nil)
 	breakdown := dashboard["earnings"].(map[string]any)
-	if status != http.StatusOK || breakdown["tips"].(map[string]any)["amountMinor"] != float64(70_000) || dashboard["pendingBalance"].(map[string]any)["amountMinor"] != float64(70_000) {
+	if status != http.StatusOK || breakdown["tips"].(map[string]any)["amountMinor"] != float64(168_000) || dashboard["pendingBalance"].(map[string]any)["amountMinor"] != float64(168_000) {
 		t.Fatalf("dashboard: %d %v", status, dashboard)
 	}
 	if status, _ := harness.call(http.MethodGet, "/api/v1/creators/dashboard?period=year", creatorToken, "", nil); status != http.StatusBadRequest {

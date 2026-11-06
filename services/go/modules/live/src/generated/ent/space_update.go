@@ -206,6 +206,20 @@ func (_u *SpaceUpdate) SetUpdatedAt(v time.Time) *SpaceUpdate {
 	return _u
 }
 
+// SetGiftsEnabled sets the "gifts_enabled" field.
+func (_u *SpaceUpdate) SetGiftsEnabled(v bool) *SpaceUpdate {
+	_u.mutation.SetGiftsEnabled(v)
+	return _u
+}
+
+// SetNillableGiftsEnabled sets the "gifts_enabled" field if the given value is not nil.
+func (_u *SpaceUpdate) SetNillableGiftsEnabled(v *bool) *SpaceUpdate {
+	if v != nil {
+		_u.SetGiftsEnabled(*v)
+	}
+	return _u
+}
+
 // SetMetadata sets the "metadata" field.
 func (_u *SpaceUpdate) SetMetadata(v map[string]interface{}) *SpaceUpdate {
 	_u.mutation.SetMetadata(v)
@@ -343,6 +357,9 @@ func (_u *SpaceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(space.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.GiftsEnabled(); ok {
+		_spec.SetField(space.FieldGiftsEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(space.FieldMetadata, field.TypeJSON, value)
@@ -548,6 +565,20 @@ func (_u *SpaceUpdateOne) SetUpdatedAt(v time.Time) *SpaceUpdateOne {
 	return _u
 }
 
+// SetGiftsEnabled sets the "gifts_enabled" field.
+func (_u *SpaceUpdateOne) SetGiftsEnabled(v bool) *SpaceUpdateOne {
+	_u.mutation.SetGiftsEnabled(v)
+	return _u
+}
+
+// SetNillableGiftsEnabled sets the "gifts_enabled" field if the given value is not nil.
+func (_u *SpaceUpdateOne) SetNillableGiftsEnabled(v *bool) *SpaceUpdateOne {
+	if v != nil {
+		_u.SetGiftsEnabled(*v)
+	}
+	return _u
+}
+
 // SetMetadata sets the "metadata" field.
 func (_u *SpaceUpdateOne) SetMetadata(v map[string]interface{}) *SpaceUpdateOne {
 	_u.mutation.SetMetadata(v)
@@ -715,6 +746,9 @@ func (_u *SpaceUpdateOne) sqlSave(ctx context.Context) (_node *Space, err error)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(space.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.GiftsEnabled(); ok {
+		_spec.SetField(space.FieldGiftsEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(space.FieldMetadata, field.TypeJSON, value)

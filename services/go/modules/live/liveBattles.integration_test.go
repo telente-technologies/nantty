@@ -47,6 +47,38 @@ func (scene battleScene) gift(receiver liveUser, giftId string, quantity int) ma
 	}, http.StatusCreated)
 }
 
+func (scene battleScene) contributeCoins(sender, receiver liveUser, battleID string, coins int64, key string, wantStatus int) map[string]any {
+	return scene.harness.expect("POST", "/api/v1/battles/"+battleID+"/coins", &sender, key,
+		map[string]any{"recipientUserId": receiver.id.String(), "coins": coins}, wantStatus)
+}
+
+func TestBattleCoinContributionReturnsUpdatedStageAndRejectsNonParticipants(t *testing.T) {
+	scene := newBattleScene(t)
+	battleID := scene.startRunningBattle(false, scene.host, scene.first)
+	result := scene.contributeCoins(scene.host, scene.first, battleID, 100, "battle-coin-api-0001", http.StatusOK)
+	active := result["activeBattle"].(map[string]any)
+	if result["liveId"] != scene.liveId || active["id"] != battleID {
+		t.Fatalf("contribution should return the live stage snapshot: %v", result)
+	}
+	scores := scoresByUser(active)
+	if scores[scene.first.id.String()] != 100 {
+		t.Fatalf("stage score should reflect gross contribution coins, scores=%v", scores)
+	}
+	scene.contributeCoins(scene.fan, scene.first, battleID, 10, "battle-coin-outside-01", http.StatusForbidden)
+	ended := scene.respond(scene.host, battleID, "end")
+	settled := scene.waitForBattleState("settled")
+	if ended["activeBattle"] == nil || len(settled["payouts"].([]any)) == 0 {
+		t.Fatalf("battle holding must remain compatible with existing settlement: %v", settled)
+	}
+	for _, raw := range settled["payouts"].([]any) {
+		payout := raw.(map[string]any)
+		if payout["userId"] == scene.first.id.String() && payout["earnedCoins"] == float64(98) {
+			return
+		}
+	}
+	t.Fatalf("contribution net holding should be paid out by settlement: %v", settled["payouts"])
+}
+
 func (scene battleScene) stage() map[string]any { return scene.harness.stage(scene.liveId, scene.host) }
 
 func (scene battleScene) waitForBattleState(state string) map[string]any {

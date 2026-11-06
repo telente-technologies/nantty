@@ -17,6 +17,8 @@ type InMemoryMoneyGateway struct {
 	CreatorShareBps         int64
 	Charges                 map[string]interfaces.ChargedGift
 	chargeRequests          map[string]interfaces.ChargeGiftRequest
+	battleContributions     map[string]interfaces.BattleCoinContributionReceipt
+	battleContributionReqs  map[string]interfaces.BattleCoinContributionRequest
 	Settlements             map[string]interfaces.BattleSettlement
 	SettleCallCount         map[string]int
 	holdings                map[string]map[string]int64
@@ -31,6 +33,7 @@ func NewInMemoryMoneyGateway() *InMemoryMoneyGateway {
 	return &InMemoryMoneyGateway{
 		Balances: map[string]int64{}, DefaultBalance: 100_000, CreatorShareBps: 7000,
 		Charges: map[string]interfaces.ChargedGift{}, chargeRequests: map[string]interfaces.ChargeGiftRequest{},
+		battleContributions: map[string]interfaces.BattleCoinContributionReceipt{}, battleContributionReqs: map[string]interfaces.BattleCoinContributionRequest{},
 		Settlements: map[string]interfaces.BattleSettlement{}, SettleCallCount: map[string]int{},
 		holdings: map[string]map[string]int64{}, GiftEarnedCoins: map[string]int64{}, battleGross: map[string]map[string]interfaces.BattleGiftTotal{},
 	}
@@ -94,6 +97,44 @@ func (gateway *InMemoryMoneyGateway) GetCoinBalance(_ context.Context, userId st
 
 func (gateway *InMemoryMoneyGateway) ChargeSpaceCoinGift(_ context.Context, _ interfaces.ChargeSpaceCoinGiftRequest) (interfaces.SpaceCoinGiftReceipt, error) {
 	return interfaces.SpaceCoinGiftReceipt{}, interfaces.ErrSpaceGiftGatewayUnavailable
+}
+
+func (gateway *InMemoryMoneyGateway) DonateSpaceCoins(_ context.Context, _ interfaces.DonateSpaceCoinsRequest) (interfaces.SpaceCoinDonationReceipt, error) {
+	return interfaces.SpaceCoinDonationReceipt{}, interfaces.ErrSpaceGiftGatewayUnavailable
+}
+
+func (gateway *InMemoryMoneyGateway) ContributeBattleCoins(_ context.Context, request interfaces.BattleCoinContributionRequest) (interfaces.BattleCoinContributionReceipt, error) {
+	gateway.mutex.Lock()
+	defer gateway.mutex.Unlock()
+	key := request.SenderUserId + ":" + request.IdempotencyKey
+	if receipt, exists := gateway.battleContributions[key]; exists {
+		if gateway.battleContributionReqs[key] != request {
+			return interfaces.BattleCoinContributionReceipt{}, interfaces.ErrIdempotencyKeyReused
+		}
+		receipt.Replayed = true
+		return receipt, nil
+	}
+	if request.SenderUserId == request.RecipientUserId {
+		return interfaces.BattleCoinContributionReceipt{}, interfaces.ErrCannotGiftSelf
+	}
+	if request.Coins <= 0 {
+		return interfaces.BattleCoinContributionReceipt{}, interfaces.ErrMoneyRequestInvalid
+	}
+	if gateway.balanceLocked(request.SenderUserId) < request.Coins {
+		return interfaces.BattleCoinContributionReceipt{}, interfaces.ErrInsufficientCoins
+	}
+	fee := request.Coins / 50 // 2% policy in the deterministic in-memory gateway.
+	holding := request.Coins - fee
+	gateway.Balances[request.SenderUserId] = gateway.balanceLocked(request.SenderUserId) - request.Coins
+	if gateway.holdings[request.BattleId] == nil {
+		gateway.holdings[request.BattleId] = map[string]int64{}
+	}
+	gateway.holdings[request.BattleId][request.RecipientUserId] += holding
+	receipt := interfaces.BattleCoinContributionReceipt{ContributionId: uuid.NewString(), LedgerTransactionId: uuid.NewString(),
+		SenderUserId: request.SenderUserId, RecipientUserId: request.RecipientUserId, BattleId: request.BattleId,
+		TotalCoins: request.Coins, PlatformFeeCoins: fee, HoldingCoins: holding, SenderCoinBalance: gateway.Balances[request.SenderUserId]}
+	gateway.battleContributions[key], gateway.battleContributionReqs[key] = receipt, request
+	return receipt, nil
 }
 
 func (gateway *InMemoryMoneyGateway) chargeTotal(request interfaces.ChargeGiftRequest) int64 {

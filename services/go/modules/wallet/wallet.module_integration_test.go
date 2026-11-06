@@ -53,7 +53,7 @@ func startWalletHarness(t *testing.T, requireReview bool, adjustments ...func(*c
 	walletSchema := moneytesting.CreateFreshSchemaWithMigrations(t, money.Database, "wallet", walletmigrations.Files)
 	settings := configs.WalletSettings{
 		Money:                        moneytesting.MoneyModuleSettingsForTests("wallet", walletSchema, money.LedgerSchema),
-		CoinTransferFeeBps:           2500,
+		CoinTransferFeeBps:           200,
 		CoinCashValueMinorByCurrency: configs.ParseCurrencyAmounts("NGN:1000,USD:1"),
 		MinimumPayoutMinorByCurrency: configs.ParseCurrencyAmounts("NGN:1000,USD:1000"),
 		MinimumWithdrawalMinor:       100, DataEncryptionKey: bytes.Repeat([]byte{9}, 32),
@@ -145,19 +145,19 @@ func lastPurchaseReference(t *testing.T, harness *walletHarness, userId string) 
 	return reference
 }
 
-func TestCoinTransfersTakeTwentyFivePercentAndConcurrentTransfersNeverOverdraw(t *testing.T) {
+func TestCoinTransfersTakeTwoPercentAndConcurrentTransfersNeverOverdraw(t *testing.T) {
 	harness := startWalletHarness(t, true)
 	sender, recipient := uuid.NewString(), uuid.NewString()
 	harness.buyCoinsOnTheWeb(sender, "web-coins-1")
 	token := harness.Tokens.UserAccessToken(sender)
-	if quote := harness.Call(http.MethodGet, "/api/v1/coins/transfers/quote?coins=7", token, "", nil); quote.Body["feeCoins"].(float64) != 2 || quote.Body["netCoins"].(float64) != 5 {
+	if quote := harness.Call(http.MethodGet, "/api/v1/coins/transfers/quote?coins=7", token, "", nil); quote.Body["feeCoins"].(float64) != 1 || quote.Body["netCoins"].(float64) != 6 {
 		t.Fatalf("quote: %v", quote.Body)
 	}
 	body := map[string]any{"recipientUserId": recipient, "coins": 40}
 	first := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-key-1", body)
 	replay := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-key-1", body)
 	reused := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-key-1", map[string]any{"recipientUserId": recipient, "coins": 41})
-	if first.Status != http.StatusCreated || first.Body["netCoins"].(float64) != 30 || replay.Body["transferId"] != first.Body["transferId"] || reused.Status != http.StatusConflict {
+	if first.Status != http.StatusCreated || first.Body["netCoins"].(float64) != 39 || replay.Body["transferId"] != first.Body["transferId"] || reused.Status != http.StatusConflict {
 		t.Fatalf("transfer idempotency: %v / %v / %d", first.Body, replay.Body, reused.Status)
 	}
 	if self := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-self-1", map[string]any{"recipientUserId": sender, "coins": 1}); self.Status != http.StatusUnprocessableEntity {
@@ -184,8 +184,8 @@ func TestCoinTransfersTakeTwentyFivePercentAndConcurrentTransfersNeverOverdraw(t
 	if succeeded.Load() != 10 || refused.Load() != 10 || harness.balance(ledgermodels.UserSpendableCoinsAccount(sender)) != 0 {
 		t.Fatalf("succeeded=%d refused=%d balance=%d", succeeded.Load(), refused.Load(), harness.balance(ledgermodels.UserSpendableCoinsAccount(sender)))
 	}
-	if harness.balance(ledgermodels.UserSpendableCoinsAccount(recipient)) != 30+10*4 || harness.balance(ledgermodels.PlatformCoinTransferFeeRevenueAccount()) != 10+10*2 {
-		t.Fatal("transfer split not booked as 75/25")
+	if harness.balance(ledgermodels.UserSpendableCoinsAccount(recipient)) != 39+10*5 || harness.balance(ledgermodels.PlatformCoinTransferFeeRevenueAccount()) != 1+10 {
+		t.Fatal("transfer split not booked as 98/2")
 	}
 	harness.AssertLedgerHealthy()
 }

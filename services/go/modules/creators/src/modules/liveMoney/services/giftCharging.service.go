@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 
 	"nantty/modules/creators/src/container"
 	"nantty/modules/creators/src/generated/ent"
@@ -23,6 +24,8 @@ type LiveMoneyError struct {
 	Message      string
 	Precondition bool
 	CoinBalance  *int64
+	MinimumCoins int64
+	MaximumCoins int64
 }
 
 func (failure *LiveMoneyError) Error() string { return failure.Reason + ": " + failure.Message }
@@ -59,6 +62,14 @@ type ChargedGift struct {
 type LiveMoney struct {
 	Container *container.Container
 	Program   programservices.CreatorProgram
+}
+
+func (live LiveMoney) spaceDonationBounds() (int64, int64) {
+	minimum, maximum := live.Container.Settings.SpaceDonationMinimumCoins, live.Container.Settings.SpaceDonationMaximumCoins
+	if minimum < 1 || maximum < minimum || maximum > 1<<62 {
+		return 1, 10000
+	}
+	return minimum, maximum
 }
 
 func validateChargeGiftRequest(request ChargeGiftRequest) error {
@@ -103,6 +114,9 @@ func (live LiveMoney) chargeGiftInTransaction(ctx context.Context, transaction *
 		return ChargedGift{Transaction: existing, SenderCoinBalance: balance, Replayed: true}, err
 	}
 	if !ent.IsNotFound(err) {
+		return ChargedGift{}, err
+	}
+	if err := live.validateLiveCoinSupportForGift(ctx, transaction, request); err != nil {
 		return ChargedGift{}, err
 	}
 	credited, shareBps, err := live.Program.ResolveCreditedCreator(ctx, transaction, request.ReceiverUserId, request.HostUserId)
@@ -164,6 +178,40 @@ func (live LiveMoney) chargeGiftInTransaction(ctx context.Context, transaction *
 	}
 	balance, _ := posted.BalanceAfter(ledgermodels.UserSpendableCoinsAccount(request.SenderUserId))
 	return ChargedGift{Transaction: gift, SenderCoinBalance: balance}, nil
+}
+
+// Revalidate the live host, state, and coin-support preference inside the same
+// transaction as the ledger write. The FOR SHARE lock serializes this charge
+// with a host's FOR UPDATE coin-support toggle.
+func (live LiveMoney) validateLiveCoinSupportForGift(ctx context.Context, transaction *sql.Tx, request ChargeGiftRequest) error {
+	table := pgx.Identifier{live.Container.Settings.LiveSchema, "live_sessions"}.Sanitize()
+	var hostId, state string
+	var enabled bool
+	err := transaction.QueryRowContext(ctx, "SELECT host_id::text, state::text, gifts_enabled FROM "+table+" WHERE id::text = $1 FOR SHARE", request.LiveId).
+		Scan(&hostId, &state, &enabled)
+	if errors.Is(err, sql.ErrNoRows) {
+		return failedPrecondition("LIVE_NOT_FOUND", "This live is unavailable.")
+	}
+	if err != nil {
+		return fmt.Errorf("validate live coin-support preference: %w", err)
+	}
+	if err := validateLiveCoinSupportState(hostId, state, enabled, request.HostUserId); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateLiveCoinSupportState(hostId, state string, enabled bool, requestedHostId string) error {
+	if hostId != requestedHostId {
+		return failedPrecondition("LIVE_HOST_MISMATCH", "The live host changed; refresh and try again.")
+	}
+	if state != "live" {
+		return failedPrecondition("LIVE_NOT_ACTIVE", "This live has ended.")
+	}
+	if !enabled {
+		return failedPrecondition("LIVE_COIN_SUPPORT_DISABLED", "This host isn't accepting coin support right now.")
+	}
+	return nil
 }
 
 func giftSentEventData(gift *ent.GiftTransaction) map[string]any {

@@ -10,6 +10,7 @@ import (
 	"nantty/modules/live/src/generated/ent"
 	"nantty/modules/live/src/generated/ent/space"
 	"nantty/modules/live/src/generated/ent/spaceparticipant"
+	"nantty/modules/live/src/services"
 	"nantty/platform/httpserver"
 )
 
@@ -29,14 +30,24 @@ func (c SpacesController) joinSpace(ctx context.Context, id, userID uuid.UUID) (
 			return httpserver.NewApiError(http.StatusConflict, "SPACE_NOT_LIVE", "This Space is not accepting listeners.")
 		}
 		now := spaceTime(c)
+		invitation, invited := services.AcceptedSpaceInvitation(row, userID)
+		invitedRole := spaceparticipant.RoleListener
+		if invited {
+			switch invitation.Role {
+			case "speaker":
+				invitedRole = spaceparticipant.RoleSpeaker
+			case "moderator", "cohost":
+				invitedRole = spaceparticipant.RoleModerator
+			}
+		}
 		participant, err := tx.SpaceParticipant.Query().Where(spaceparticipant.SpaceID(id), spaceparticipant.AccountID(userID)).ForUpdate().Only(ctx)
 		changed := false
 		if ent.IsNotFound(err) {
-			role = spaceparticipant.RoleListener
+			role = invitedRole
 			if userID == row.HostID {
 				role = spaceparticipant.RoleHost
 			}
-			participant, err = tx.SpaceParticipant.Create().SetSpaceID(id).SetAccountID(userID).SetRole(role).SetJoinedAt(now).SetLastSeenAt(now).Save(ctx)
+			participant, err = tx.SpaceParticipant.Create().SetSpaceID(id).SetAccountID(userID).SetRole(role).SetStageTitle(invitation.Title).SetJoinedAt(now).SetLastSeenAt(now).Save(ctx)
 			changed = err == nil
 		} else if err == nil {
 			if participant.State == spaceparticipant.StateRemoved {
@@ -45,7 +56,12 @@ func (c SpacesController) joinSpace(ctx context.Context, id, userID uuid.UUID) (
 			role = participant.Role
 			muted = participant.MutedByHost
 			changed = participant.State != spaceparticipant.StateActive
-			participant, err = participant.Update().SetState(spaceparticipant.StateActive).SetLastSeenAt(now).ClearLeftAt().Save(ctx)
+			update := participant.Update().SetState(spaceparticipant.StateActive).SetLastSeenAt(now).ClearLeftAt()
+			if invited && participant.Role != spaceparticipant.RoleHost {
+				role = invitedRole
+				update.SetRole(role).SetStageTitle(invitation.Title)
+			}
+			participant, err = update.Save(ctx)
 		}
 		if err != nil {
 			return err
@@ -91,7 +107,7 @@ func (c SpacesController) leaveSpace(ctx context.Context, id, userID uuid.UUID) 
 			return nil
 		}
 		now := spaceTime(c)
-		if participant.Role == spaceparticipant.RoleSpeaker {
+		if participant.Role == spaceparticipant.RoleSpeaker || participant.Role == spaceparticipant.RoleModerator {
 			if err := c.Container.Media.SetParticipantCanPublish(ctx, row.LivekitRoom, userID.String(), false); err != nil {
 				return err
 			}

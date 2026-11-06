@@ -23,6 +23,8 @@ const (
 	FieldAccountID = "account_id"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
+	// FieldStageTitle holds the string denoting the stage_title field in the database.
+	FieldStageTitle = "stage_title"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
 	// FieldMutedByHost holds the string denoting the muted_by_host field in the database.
@@ -44,6 +46,7 @@ var Columns = []string{
 	FieldSpaceID,
 	FieldAccountID,
 	FieldRole,
+	FieldStageTitle,
 	FieldState,
 	FieldMutedByHost,
 	FieldJoinedAt,
@@ -64,6 +67,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultStageTitle holds the default value on creation for the "stage_title" field.
+	DefaultStageTitle string
 	// DefaultMutedByHost holds the default value on creation for the "muted_by_host" field.
 	DefaultMutedByHost bool
 	// DefaultJoinedAt holds the default value on creation for the "joined_at" field.
@@ -84,9 +89,10 @@ const DefaultRole = RoleListener
 
 // Role values.
 const (
-	RoleHost     Role = "host"
-	RoleListener Role = "listener"
-	RoleSpeaker  Role = "speaker"
+	RoleHost      Role = "host"
+	RoleListener  Role = "listener"
+	RoleSpeaker   Role = "speaker"
+	RoleModerator Role = "moderator"
 )
 
 func (r Role) String() string {
@@ -96,7 +102,7 @@ func (r Role) String() string {
 // RoleValidator is a validator for the "role" field enum values. It is called by the builders before save.
 func RoleValidator(r Role) error {
 	switch r {
-	case RoleHost, RoleListener, RoleSpeaker:
+	case RoleHost, RoleListener, RoleSpeaker, RoleModerator:
 		return nil
 	default:
 		return fmt.Errorf("spaceparticipant: invalid enum value for role field: %q", r)
@@ -156,6 +162,11 @@ func ByAccountID(opts ...sql.OrderTermOption) OrderOption {
 // ByRole orders the results by the role field.
 func ByRole(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRole, opts...).ToFunc()
+}
+
+// ByStageTitle orders the results by the stage_title field.
+func ByStageTitle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStageTitle, opts...).ToFunc()
 }
 
 // ByState orders the results by the state field.

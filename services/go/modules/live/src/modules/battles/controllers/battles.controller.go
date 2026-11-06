@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"encoding/json"
+	"errors"
+	"io"
 	"nantty/modules/live/src/container"
 	cancelpendingbattle "nantty/modules/live/src/modules/battles/commands/cancelPendingBattle"
 	createlivebattle "nantty/modules/live/src/modules/battles/commands/createLiveBattle"
@@ -9,6 +12,7 @@ import (
 	startpendingbattlewithoutwinnertakesall "nantty/modules/live/src/modules/battles/commands/startPendingBattleWithoutWinnerTakesAll"
 	getbattle "nantty/modules/live/src/modules/battles/queries/getBattle"
 	"nantty/modules/live/src/modules/battles/validators"
+	"nantty/modules/live/src/services"
 	"nantty/modules/live/src/types"
 	"nantty/modules/live/src/utils"
 	"nantty/platform/httpserver"
@@ -72,6 +76,46 @@ func (controller BattlesController) ActOnBattle(writer http.ResponseWriter, requ
 		return
 	}
 	utils.RespondWithStage(controller.Container, writer, request, actor, liveId, nil)
+}
+
+func (controller BattlesController) ContributeCoins(writer http.ResponseWriter, request *http.Request) {
+	actor, err := utils.ActorFrom(request)
+	var battleID uuid.UUID
+	if err == nil {
+		battleID, err = utils.PathIdentifier(request, "battleId")
+	}
+	if err != nil {
+		controller.responder().Error(writer, request, err)
+		return
+	}
+	var body struct {
+		RecipientUserID string `json:"recipientUserId"`
+		Coins           int64  `json:"coins"`
+	}
+	decoder := json.NewDecoder(http.MaxBytesReader(writer, request.Body, 1024))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&body); err != nil {
+		controller.responder().Error(writer, request, httpserver.NewApiError(http.StatusBadRequest, "INVALID_BATTLE_CONTRIBUTION", "Send recipientUserId and a positive integer coins amount."))
+		return
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
+		controller.responder().Error(writer, request, httpserver.NewApiError(http.StatusBadRequest, "INVALID_BATTLE_CONTRIBUTION", "Send one JSON object containing recipientUserId and coins."))
+		return
+	}
+	recipientID, parseErr := uuid.Parse(body.RecipientUserID)
+	if parseErr != nil || body.Coins < 1 {
+		controller.responder().Error(writer, request, httpserver.NewApiError(http.StatusUnprocessableEntity, "INVALID_BATTLE_CONTRIBUTION", "recipientUserId must be a UUID and coins must be a positive integer."))
+		return
+	}
+	liveID, err := (services.NewLiveService(controller.Container)).ContributeCoinsToBattle(request.Context(), actor, battleID, services.BattleCoinContributionInput{
+		RecipientUserID: recipientID, Coins: body.Coins, IdempotencyKey: request.Header.Get("Idempotency-Key"),
+	})
+	if err != nil {
+		controller.responder().Error(writer, request, err)
+		return
+	}
+	utils.RespondWithStage(controller.Container, writer, request, actor, liveID, nil)
 }
 
 func (controller BattlesController) runBattleAction(request *http.Request, actor types.Actor, battleId uuid.UUID, action string) (uuid.UUID, error) {

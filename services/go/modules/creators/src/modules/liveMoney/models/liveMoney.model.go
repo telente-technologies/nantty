@@ -10,6 +10,8 @@ const MaximumCreatorGiftShareBps = 7000
 
 var (
 	ErrInvalidGiftAmount = errors.New("gift quantity or price is out of range")
+	ErrInvalidDonation   = errors.New("space coin donation amount is out of range")
+	ErrInvalidCoinFeeBps = errors.New("coin platform fee must be between 0 and 10000 basis points")
 	ErrUnknownWinner     = errors.New("the winner is not a battle participant")
 )
 
@@ -32,6 +34,36 @@ func SplitGiftCoins(quantity, unitPriceCoins, creatorShareBps int64) (GiftSplit,
 	coins := int64(total)
 	creator := coins/10_000*share + coins%10_000*share/10_000
 	return GiftSplit{TotalCoins: coins, CreatorAmountCoins: creator, PlatformFeeCoins: coins - creator, CreatorShareBps: share}, nil
+}
+
+// SplitSpaceDonationCoins validates a server-bounded coin amount and computes
+// the existing creator/platform share without multiplying the full amount.
+func SplitSpaceDonationCoins(coins, creatorShareBps, minimumCoins, maximumCoins int64) (GiftSplit, error) {
+	if minimumCoins < 1 || maximumCoins < minimumCoins || maximumCoins > 1<<62 || coins < minimumCoins || coins > maximumCoins {
+		return GiftSplit{}, ErrInvalidDonation
+	}
+	share := min(max(creatorShareBps, int64(0)), int64(MaximumCreatorGiftShareBps))
+	creator := coins/10_000*share + coins%10_000*share/10_000
+	return GiftSplit{TotalCoins: coins, CreatorAmountCoins: creator, PlatformFeeCoins: coins - creator, CreatorShareBps: share}, nil
+}
+
+// SplitCoinsByPlatformFeeBps applies a fixed platform fee and gives the
+// remainder to the recipient. Quotient/remainder arithmetic avoids overflow
+// from multiplying an arbitrary coin amount by basis points.
+func SplitCoinsByPlatformFeeBps(coins, platformFeeBps int64) (GiftSplit, error) {
+	if coins <= 0 {
+		return GiftSplit{}, ErrInvalidDonation
+	}
+	if platformFeeBps < 0 || platformFeeBps > 10_000 {
+		return GiftSplit{}, ErrInvalidCoinFeeBps
+	}
+	platformFee := coins/10_000*platformFeeBps + coins%10_000*platformFeeBps/10_000
+	return GiftSplit{
+		TotalCoins:         coins,
+		CreatorAmountCoins: coins - platformFee,
+		PlatformFeeCoins:   platformFee,
+		CreatorShareBps:    10_000 - platformFeeBps,
+	}, nil
 }
 
 type ParticipantOutcome string

@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"encoding/json"
+	"errors"
+	"io"
 	"nantty/modules/live/src/container"
 	awardengagementpoints "nantty/modules/live/src/modules/points/commands/awardEngagementPoints"
 	createlivesession "nantty/modules/live/src/modules/sessions/commands/createLiveSession"
@@ -12,6 +15,7 @@ import (
 	recordhostheartbeat "nantty/modules/live/src/modules/sessions/commands/recordHostHeartbeat"
 	startlivesession "nantty/modules/live/src/modules/sessions/commands/startLiveSession"
 	unpinproductfromlive "nantty/modules/live/src/modules/sessions/commands/unpinProductFromLive"
+	updatelivecoinsupport "nantty/modules/live/src/modules/sessions/commands/updateLiveCoinSupport"
 	updatelivemonetization "nantty/modules/live/src/modules/sessions/commands/updateLiveMonetization"
 	"nantty/modules/live/src/modules/sessions/dtos"
 	gethostlivestatus "nantty/modules/live/src/modules/sessions/queries/getHostLiveStatus"
@@ -49,7 +53,8 @@ func (controller SessionsController) CreateLiveSession(writer http.ResponseWrite
 	}
 	input := types.CreateLiveSessionInput{
 		Title: body.Title, Category: body.Category, Visibility: body.Visibility, StartNow: startNowFor(body),
-		CountryCode: utils.ClientRegion(request), Monetization: buildMonetization(body.LiveAdSettings, body.AcceptedLiveAdTermsVersion, body.SponsorshipLine),
+		GiftsEnabled: body.GiftsEnabled,
+		CountryCode:  utils.ClientRegion(request), Monetization: buildMonetization(body.LiveAdSettings, body.AcceptedLiveAdTermsVersion, body.SponsorshipLine),
 	}
 	input.ScheduledAt = scheduledAtFor(body)
 	if input.Visibility == "" {
@@ -192,6 +197,65 @@ func (controller SessionsController) UpdateLiveMonetization(writer http.Response
 		}
 		return err
 	})
+}
+
+// UpdateLiveCoinSupport toggles coin support for an ordinary Live session.
+// The idempotent middleware protects retries; the command performs the
+// host/state check and row-locked update.
+func (controller SessionsController) UpdateLiveCoinSupport(writer http.ResponseWriter, request *http.Request) {
+	controller.responder().WithActorAndLive(writer, request, func(actor types.Actor, liveId uuid.UUID) error {
+		enabled, err := decodeLiveCoinSupportRequest(http.MaxBytesReader(writer, request.Body, 1024))
+		if err != nil {
+			return err
+		}
+		result, err := (updatelivecoinsupport.Handler{Container: controller.Container}).Execute(request.Context(), actor.UserId, liveId, enabled)
+		if err == nil {
+			httpserver.WriteJsonResponse(writer, http.StatusOK, result)
+		}
+		return err
+	})
+}
+
+func decodeLiveCoinSupportRequest(reader io.Reader) (bool, error) {
+	decoder := json.NewDecoder(reader)
+	invalid := func() (bool, error) {
+		return false, httpserver.NewApiError(http.StatusBadRequest, "INVALID_COIN_SUPPORT_REQUEST", "Send exactly one JSON field: enabled (boolean).")
+	}
+	opening, err := decoder.Token()
+	if err != nil || opening != json.Delim('{') {
+		return invalid()
+	}
+	seenEnabled := false
+	var enabled bool
+	for decoder.More() {
+		keyToken, err := decoder.Token()
+		key, ok := keyToken.(string)
+		if err != nil || !ok || key != "enabled" || seenEnabled {
+			return invalid()
+		}
+		seenEnabled = true
+		var rawEnabled json.RawMessage
+		if err := decoder.Decode(&rawEnabled); err != nil {
+			return invalid()
+		}
+		switch string(rawEnabled) {
+		case "true":
+			enabled = true
+		case "false":
+			enabled = false
+		default:
+			return invalid()
+		}
+	}
+	closing, err := decoder.Token()
+	if err != nil || closing != json.Delim('}') || !seenEnabled {
+		return invalid()
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
+		return invalid()
+	}
+	return enabled, nil
 }
 
 func (controller SessionsController) IssueMediaToken(writer http.ResponseWriter, request *http.Request) {

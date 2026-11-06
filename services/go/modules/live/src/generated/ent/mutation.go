@@ -25873,6 +25873,7 @@ type SpaceParticipantMutation struct {
 	space_id      *uuid.UUID
 	account_id    *uuid.UUID
 	role          *spaceparticipant.Role
+	stage_title   *string
 	state         *spaceparticipant.State
 	muted_by_host *bool
 	joined_at     *time.Time
@@ -26132,6 +26133,42 @@ func (m *SpaceParticipantMutation) ResetRole() {
 	m.role = nil
 }
 
+// SetStageTitle sets the "stage_title" field.
+func (m *SpaceParticipantMutation) SetStageTitle(s string) {
+	m.stage_title = &s
+}
+
+// StageTitle returns the value of the "stage_title" field in the mutation.
+func (m *SpaceParticipantMutation) StageTitle() (r string, exists bool) {
+	v := m.stage_title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStageTitle returns the old "stage_title" field's value of the SpaceParticipant entity.
+// If the SpaceParticipant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SpaceParticipantMutation) OldStageTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStageTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStageTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStageTitle: %w", err)
+	}
+	return oldValue.StageTitle, nil
+}
+
+// ResetStageTitle resets all changes to the "stage_title" field.
+func (m *SpaceParticipantMutation) ResetStageTitle() {
+	m.stage_title = nil
+}
+
 // SetState sets the "state" field.
 func (m *SpaceParticipantMutation) SetState(s spaceparticipant.State) {
 	m.state = &s
@@ -26359,7 +26396,7 @@ func (m *SpaceParticipantMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SpaceParticipantMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, spaceparticipant.FieldCreatedAt)
 	}
@@ -26371,6 +26408,9 @@ func (m *SpaceParticipantMutation) Fields() []string {
 	}
 	if m.role != nil {
 		fields = append(fields, spaceparticipant.FieldRole)
+	}
+	if m.stage_title != nil {
+		fields = append(fields, spaceparticipant.FieldStageTitle)
 	}
 	if m.state != nil {
 		fields = append(fields, spaceparticipant.FieldState)
@@ -26403,6 +26443,8 @@ func (m *SpaceParticipantMutation) Field(name string) (ent.Value, bool) {
 		return m.AccountID()
 	case spaceparticipant.FieldRole:
 		return m.Role()
+	case spaceparticipant.FieldStageTitle:
+		return m.StageTitle()
 	case spaceparticipant.FieldState:
 		return m.State()
 	case spaceparticipant.FieldMutedByHost:
@@ -26430,6 +26472,8 @@ func (m *SpaceParticipantMutation) OldField(ctx context.Context, name string) (e
 		return m.OldAccountID(ctx)
 	case spaceparticipant.FieldRole:
 		return m.OldRole(ctx)
+	case spaceparticipant.FieldStageTitle:
+		return m.OldStageTitle(ctx)
 	case spaceparticipant.FieldState:
 		return m.OldState(ctx)
 	case spaceparticipant.FieldMutedByHost:
@@ -26476,6 +26520,13 @@ func (m *SpaceParticipantMutation) SetField(name string, value ent.Value) error 
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRole(v)
+		return nil
+	case spaceparticipant.FieldStageTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStageTitle(v)
 		return nil
 	case spaceparticipant.FieldState:
 		v, ok := value.(spaceparticipant.State)
@@ -26581,6 +26632,9 @@ func (m *SpaceParticipantMutation) ResetField(name string) error {
 		return nil
 	case spaceparticipant.FieldRole:
 		m.ResetRole()
+		return nil
+	case spaceparticipant.FieldStageTitle:
+		m.ResetStageTitle()
 		return nil
 	case spaceparticipant.FieldState:
 		m.ResetState()

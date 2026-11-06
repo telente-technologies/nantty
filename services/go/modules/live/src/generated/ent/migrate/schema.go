@@ -645,7 +645,7 @@ var (
 		{Name: "viewers", Type: field.TypeInt, Default: 0},
 		{Name: "peak_viewers", Type: field.TypeInt, Default: 0},
 		{Name: "cover_url", Type: field.TypeString, Nullable: true},
-		{Name: "gifts_enabled", Type: field.TypeBool, Default: true},
+		{Name: "gifts_enabled", Type: field.TypeBool, Default: false},
 		{Name: "host_is_creator", Type: field.TypeBool, Default: false},
 		{Name: "store_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "pinned_product_id", Type: field.TypeUUID, Nullable: true},
@@ -905,7 +905,8 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "space_id", Type: field.TypeUUID},
 		{Name: "account_id", Type: field.TypeUUID},
-		{Name: "role", Type: field.TypeEnum, Enums: []string{"host", "listener", "speaker"}, Default: "listener"},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"host", "listener", "speaker", "moderator"}, Default: "listener"},
+		{Name: "stage_title", Type: field.TypeString, Default: ""},
 		{Name: "state", Type: field.TypeEnum, Enums: []string{"active", "left", "removed"}, Default: "active"},
 		{Name: "muted_by_host", Type: field.TypeBool, Default: false},
 		{Name: "joined_at", Type: field.TypeTime},
@@ -926,12 +927,12 @@ var (
 			{
 				Name:    "spaceparticipant_space_id_state_role",
 				Unique:  false,
-				Columns: []*schema.Column{SpaceParticipantsColumns[2], SpaceParticipantsColumns[5], SpaceParticipantsColumns[4]},
+				Columns: []*schema.Column{SpaceParticipantsColumns[2], SpaceParticipantsColumns[6], SpaceParticipantsColumns[4]},
 			},
 			{
 				Name:    "spaceparticipant_state_last_seen_at",
 				Unique:  false,
-				Columns: []*schema.Column{SpaceParticipantsColumns[5], SpaceParticipantsColumns[8]},
+				Columns: []*schema.Column{SpaceParticipantsColumns[6], SpaceParticipantsColumns[9]},
 			},
 		},
 	}

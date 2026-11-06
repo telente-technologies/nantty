@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
@@ -87,6 +88,35 @@ func (client *MoneyClient) ChargeSpaceCoinGift(ctx context.Context, request inte
 	}, nil
 }
 
+func (client *MoneyClient) DonateSpaceCoins(ctx context.Context, request interfaces.DonateSpaceCoinsRequest) (interfaces.SpaceCoinDonationReceipt, error) {
+	message := &moneyv1.DonateSpaceCoinsRequest{SenderUserId: request.SenderUserId, SpaceId: request.SpaceId, Coins: request.Coins, IdempotencyKey: request.IdempotencyKey}
+	response, err := callWithRetryOnUnavailable(ctx, client.options, request.IdempotencyKey != "", func(attempt context.Context) (*moneyv1.DonateSpaceCoinsResponse, error) {
+		return client.service.DonateSpaceCoins(attempt, message)
+	})
+	if err != nil {
+		return interfaces.SpaceCoinDonationReceipt{}, translateMoneyError(err)
+	}
+	return interfaces.SpaceCoinDonationReceipt{DonationId: response.GetDonationId(), LedgerTransactionId: response.GetLedgerTransactionId(),
+		SenderUserId: response.GetSenderUserId(), HostUserId: response.GetHostUserId(), SpaceId: response.GetSpaceId(),
+		TotalCoins: response.GetTotalCoins(), PlatformFeeCoins: response.GetPlatformFeeCoins(), CreatorAmountCoins: response.GetCreatorAmountCoins(),
+		SenderCoinBalance: response.GetSenderCoinBalance(), Replayed: response.GetReplayed()}, nil
+}
+
+func (client *MoneyClient) ContributeBattleCoins(ctx context.Context, request interfaces.BattleCoinContributionRequest) (interfaces.BattleCoinContributionReceipt, error) {
+	message := &moneyv1.ContributeBattleCoinsRequest{SenderUserId: request.SenderUserId, RecipientUserId: request.RecipientUserId,
+		BattleId: request.BattleId, Coins: request.Coins, IdempotencyKey: request.IdempotencyKey}
+	response, err := callWithRetryOnUnavailable(ctx, client.options, request.IdempotencyKey != "", func(attempt context.Context) (*moneyv1.ContributeBattleCoinsResponse, error) {
+		return client.service.ContributeBattleCoins(attempt, message)
+	})
+	if err != nil {
+		return interfaces.BattleCoinContributionReceipt{}, translateMoneyError(err)
+	}
+	return interfaces.BattleCoinContributionReceipt{ContributionId: response.GetContributionId(), LedgerTransactionId: response.GetLedgerTransactionId(),
+		SenderUserId: response.GetSenderUserId(), RecipientUserId: response.GetRecipientUserId(), BattleId: response.GetBattleId(), LiveId: response.GetLiveId(),
+		TotalCoins: response.GetTotalCoins(), PlatformFeeCoins: response.GetPlatformFeeCoins(), HoldingCoins: response.GetHoldingCoins(),
+		SenderCoinBalance: response.GetSenderCoinBalance(), Replayed: response.GetReplayed()}, nil
+}
+
 func (client *MoneyClient) GetCoinBalance(ctx context.Context, userId string) (int64, error) {
 	response, err := callWithRetryOnUnavailable(ctx, client.options, true, func(attempt context.Context) (*moneyv1.GetCoinBalanceResponse, error) {
 		return client.service.GetCoinBalance(attempt, &moneyv1.GetCoinBalanceRequest{UserId: userId})
@@ -122,10 +152,50 @@ func translateMoneyError(err error) error {
 	switch {
 	case reason == "INSUFFICIENT_COINS":
 		return interfaces.ErrInsufficientCoins
+	case reason == "INVALID_DONATION_AMOUNT":
+		var minimum, maximum int64
+		for _, detail := range grpcStatus.Details() {
+			if info, isInfo := detail.(*errdetails.ErrorInfo); isInfo {
+				minimum, _ = strconv.ParseInt(info.GetMetadata()["minimumCoins"], 10, 64)
+				maximum, _ = strconv.ParseInt(info.GetMetadata()["maximumCoins"], 10, 64)
+			}
+		}
+		return &interfaces.DonationAmountPolicyError{MinimumCoins: minimum, MaximumCoins: maximum}
+	case reason == "CANNOT_DONATE_TO_SELF":
+		return interfaces.ErrCannotGiftSelf
+	case reason == "CANNOT_CONTRIBUTE_TO_SELF":
+		return interfaces.ErrCannotGiftSelf
+	case reason == "IDEMPOTENCY_KEY_REUSED":
+		return interfaces.ErrIdempotencyKeyReused
+	case reason == "BATTLE_NOT_ACTIVE":
+		return interfaces.ErrBattleNotActive
+	case reason == "BATTLE_PARTICIPANT_INACTIVE":
+		return interfaces.ErrBattleParticipantInactive
+	case reason == "RECIPIENT_CANNOT_RECEIVE_COINS":
+		return interfaces.ErrBattleRecipientIneligible
+	case reason == "INVALID_BATTLE_CONTRIBUTION_AMOUNT":
+		var minimum, maximum int64
+		for _, detail := range grpcStatus.Details() {
+			if info, isInfo := detail.(*errdetails.ErrorInfo); isInfo {
+				minimum, _ = strconv.ParseInt(info.GetMetadata()["minimumCoins"], 10, 64)
+				maximum, _ = strconv.ParseInt(info.GetMetadata()["maximumCoins"], 10, 64)
+			}
+		}
+		return &interfaces.BattleContributionAmountPolicyError{MinimumCoins: minimum, MaximumCoins: maximum}
+	case reason == "SPACE_DONATIONS_DISABLED":
+		return interfaces.ErrSpaceDonationsDisabled
+	case reason == "SPACE_DONATION_BLOCKED":
+		return interfaces.ErrSpaceDonationBlocked
+	case reason == "SPACE_DONATION_UNAVAILABLE":
+		return interfaces.ErrSpaceDonationUnavailable
 	case reason == "CANNOT_GIFT_SELF":
 		return interfaces.ErrCannotGiftSelf
 	case reason == "RECIPIENT_CANNOT_RECEIVE_GIFTS":
 		return interfaces.ErrRecipientCannotReceiveGifts
+	case reason == "LIVE_COIN_SUPPORT_DISABLED":
+		return interfaces.ErrLiveCoinSupportDisabled
+	case reason == "LIVE_NOT_ACTIVE":
+		return interfaces.ErrLiveNotActive
 	case reason == "IDEMPOTENCY_KEY_REUSED":
 		return interfaces.ErrIdempotencyKeyReused
 	case reason == "BATTLE_ALREADY_SETTLED_DIFFERENTLY":
@@ -138,6 +208,8 @@ func translateMoneyError(err error) error {
 		return interfaces.ErrSpaceHostNotCreator
 	case reason == "SPACE_GIFT_BLOCKED":
 		return interfaces.ErrSpaceGiftBlocked
+	case reason == "SPACE_NOT_FOUND":
+		return interfaces.ErrSpaceGiftUnavailable
 	case grpcStatus.Code() == codes.InvalidArgument:
 		return errors.Join(interfaces.ErrMoneyRequestInvalid, err)
 	}

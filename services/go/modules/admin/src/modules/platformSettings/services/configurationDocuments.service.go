@@ -118,7 +118,7 @@ func defaultPlansConfiguration() PlansConfiguration {
 func defaultRevenueRules() RevenueRulesConfiguration {
 	rules := RevenueRulesConfiguration{
 		SupportedCurrencies: launchCurrencies, CreatorAdShareBasisPoints: 4000, GiftCreatorShareBasisPoints: 5000, GiftCreatorShareCeilingBasisPoints: maximumCreatorShareBps,
-		CoinTransferFeeBasisPoints: 2500, CoinUnitValues: []MoneyValue{
+		CoinTransferFeeBasisPoints: 200, CoinUnitValues: []MoneyValue{
 			{AmountMinor: 1000, Currency: "NGN"}, {AmountMinor: 10, Currency: "GHS"}, {AmountMinor: 100, Currency: "KES"}, {AmountMinor: 15, Currency: "ZAR"},
 			{AmountMinor: 1, Currency: "GBP"}, {AmountMinor: 1, Currency: "EUR"}, {AmountMinor: 1, Currency: "USD"},
 		},

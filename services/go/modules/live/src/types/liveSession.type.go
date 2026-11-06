@@ -13,6 +13,7 @@ type CreateLiveSessionInput struct {
 	StoreId      *uuid.UUID
 	ProductIds   []uuid.UUID
 	StartNow     bool
+	GiftsEnabled *bool
 	ScheduledAt  *time.Time
 	CountryCode  string
 	Monetization LiveMonetizationInput

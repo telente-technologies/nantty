@@ -10,6 +10,8 @@ var (
 	ErrInsufficientCoins           = errors.New("insufficient coins")
 	ErrCannotGiftSelf              = errors.New("cannot gift self")
 	ErrRecipientCannotReceiveGifts = errors.New("recipient cannot receive gifts")
+	ErrLiveCoinSupportDisabled     = errors.New("live coin support disabled")
+	ErrLiveNotActive               = errors.New("live not active")
 	ErrIdempotencyKeyReused        = errors.New("idempotency key reused with a different request")
 	ErrBattleSettledDifferently    = errors.New("battle already settled differently")
 	ErrMoneyRequestInvalid         = errors.New("money request invalid")
@@ -18,7 +20,37 @@ var (
 	ErrSpaceHostNotCreator         = errors.New("space host is not an approved creator")
 	ErrSpaceGiftBlocked            = errors.New("space gift unavailable between these accounts")
 	ErrSpaceGiftGatewayUnavailable = errors.New("space coin gifts are unavailable in this gateway")
+	ErrInvalidDonationAmount       = errors.New("space coin donation amount is outside policy")
+	ErrSpaceDonationUnavailable    = errors.New("space coin donation unavailable")
+	ErrSpaceDonationsDisabled      = errors.New("space coin donations disabled")
+	ErrSpaceDonationBlocked        = errors.New("space coin donation unavailable between these accounts")
+	ErrBattleContributionAmount    = errors.New("battle contribution amount outside policy")
+	ErrBattleNotActive             = errors.New("battle not active")
+	ErrBattleParticipantInactive   = errors.New("battle participant inactive")
+	ErrBattleRecipientIneligible   = errors.New("battle recipient ineligible")
 )
+
+type DonationAmountPolicyError struct {
+	MinimumCoins int64
+	MaximumCoins int64
+}
+
+type BattleContributionAmountPolicyError struct {
+	MinimumCoins int64
+	MaximumCoins int64
+}
+
+func (failure *BattleContributionAmountPolicyError) Error() string {
+	return ErrBattleContributionAmount.Error()
+}
+func (failure *BattleContributionAmountPolicyError) Is(target error) bool {
+	return target == ErrBattleContributionAmount
+}
+
+func (failure *DonationAmountPolicyError) Error() string { return ErrInvalidDonationAmount.Error() }
+func (failure *DonationAmountPolicyError) Is(target error) bool {
+	return target == ErrInvalidDonationAmount
+}
 
 type ChargeGiftRequest struct {
 	SenderUserId   string
@@ -68,6 +100,48 @@ type SpaceCoinGiftReceipt struct {
 	TotalCoins          int64
 	PlatformFeeCoins    int64
 	CreatorAmountCoins  int64
+	SenderCoinBalance   int64
+	Replayed            bool
+}
+
+type DonateSpaceCoinsRequest struct {
+	SenderUserId   string
+	SpaceId        string
+	Coins          int64
+	IdempotencyKey string
+}
+
+type SpaceCoinDonationReceipt struct {
+	DonationId          string
+	LedgerTransactionId string
+	SenderUserId        string
+	HostUserId          string
+	SpaceId             string
+	TotalCoins          int64
+	PlatformFeeCoins    int64
+	CreatorAmountCoins  int64
+	SenderCoinBalance   int64
+	Replayed            bool
+}
+
+type BattleCoinContributionRequest struct {
+	SenderUserId    string
+	RecipientUserId string
+	BattleId        string
+	Coins           int64
+	IdempotencyKey  string
+}
+
+type BattleCoinContributionReceipt struct {
+	ContributionId      string
+	LedgerTransactionId string
+	SenderUserId        string
+	RecipientUserId     string
+	BattleId            string
+	LiveId              string
+	TotalCoins          int64
+	PlatformFeeCoins    int64
+	HoldingCoins        int64
 	SenderCoinBalance   int64
 	Replayed            bool
 }
@@ -128,6 +202,8 @@ type MoneyGateway interface {
 	GetBattleGiftTotals(ctx context.Context, battleId string) ([]BattleGiftTotal, error)
 	ChargeGiftAndCreditCreator(ctx context.Context, request ChargeGiftRequest) (ChargedGift, error)
 	ChargeSpaceCoinGift(ctx context.Context, request ChargeSpaceCoinGiftRequest) (SpaceCoinGiftReceipt, error)
+	DonateSpaceCoins(ctx context.Context, request DonateSpaceCoinsRequest) (SpaceCoinDonationReceipt, error)
+	ContributeBattleCoins(ctx context.Context, request BattleCoinContributionRequest) (BattleCoinContributionReceipt, error)
 	SettleBattle(ctx context.Context, request SettleBattleRequest) (BattleSettlement, error)
 	GetCoinBalance(ctx context.Context, userId string) (int64, error)
 }

@@ -64,6 +64,20 @@ func (_c *SpaceParticipantCreate) SetNillableRole(v *spaceparticipant.Role) *Spa
 	return _c
 }
 
+// SetStageTitle sets the "stage_title" field.
+func (_c *SpaceParticipantCreate) SetStageTitle(v string) *SpaceParticipantCreate {
+	_c.mutation.SetStageTitle(v)
+	return _c
+}
+
+// SetNillableStageTitle sets the "stage_title" field if the given value is not nil.
+func (_c *SpaceParticipantCreate) SetNillableStageTitle(v *string) *SpaceParticipantCreate {
+	if v != nil {
+		_c.SetStageTitle(*v)
+	}
+	return _c
+}
+
 // SetState sets the "state" field.
 func (_c *SpaceParticipantCreate) SetState(v spaceparticipant.State) *SpaceParticipantCreate {
 	_c.mutation.SetState(v)
@@ -191,6 +205,10 @@ func (_c *SpaceParticipantCreate) defaults() {
 		v := spaceparticipant.DefaultRole
 		_c.mutation.SetRole(v)
 	}
+	if _, ok := _c.mutation.StageTitle(); !ok {
+		v := spaceparticipant.DefaultStageTitle
+		_c.mutation.SetStageTitle(v)
+	}
 	if _, ok := _c.mutation.State(); !ok {
 		v := spaceparticipant.DefaultState
 		_c.mutation.SetState(v)
@@ -231,6 +249,9 @@ func (_c *SpaceParticipantCreate) check() error {
 		if err := spaceparticipant.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "SpaceParticipant.role": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.StageTitle(); !ok {
+		return &ValidationError{Name: "stage_title", err: errors.New(`ent: missing required field "SpaceParticipant.stage_title"`)}
 	}
 	if _, ok := _c.mutation.State(); !ok {
 		return &ValidationError{Name: "state", err: errors.New(`ent: missing required field "SpaceParticipant.state"`)}
@@ -300,6 +321,10 @@ func (_c *SpaceParticipantCreate) createSpec() (*SpaceParticipant, *sqlgraph.Cre
 	if value, ok := _c.mutation.Role(); ok {
 		_spec.SetField(spaceparticipant.FieldRole, field.TypeEnum, value)
 		_node.Role = value
+	}
+	if value, ok := _c.mutation.StageTitle(); ok {
+		_spec.SetField(spaceparticipant.FieldStageTitle, field.TypeString, value)
+		_node.StageTitle = value
 	}
 	if value, ok := _c.mutation.State(); ok {
 		_spec.SetField(spaceparticipant.FieldState, field.TypeEnum, value)
@@ -382,6 +407,18 @@ func (u *SpaceParticipantUpsert) SetRole(v spaceparticipant.Role) *SpaceParticip
 // UpdateRole sets the "role" field to the value that was provided on create.
 func (u *SpaceParticipantUpsert) UpdateRole() *SpaceParticipantUpsert {
 	u.SetExcluded(spaceparticipant.FieldRole)
+	return u
+}
+
+// SetStageTitle sets the "stage_title" field.
+func (u *SpaceParticipantUpsert) SetStageTitle(v string) *SpaceParticipantUpsert {
+	u.Set(spaceparticipant.FieldStageTitle, v)
+	return u
+}
+
+// UpdateStageTitle sets the "stage_title" field to the value that was provided on create.
+func (u *SpaceParticipantUpsert) UpdateStageTitle() *SpaceParticipantUpsert {
+	u.SetExcluded(spaceparticipant.FieldStageTitle)
 	return u
 }
 
@@ -519,6 +556,20 @@ func (u *SpaceParticipantUpsertOne) SetRole(v spaceparticipant.Role) *SpaceParti
 func (u *SpaceParticipantUpsertOne) UpdateRole() *SpaceParticipantUpsertOne {
 	return u.Update(func(s *SpaceParticipantUpsert) {
 		s.UpdateRole()
+	})
+}
+
+// SetStageTitle sets the "stage_title" field.
+func (u *SpaceParticipantUpsertOne) SetStageTitle(v string) *SpaceParticipantUpsertOne {
+	return u.Update(func(s *SpaceParticipantUpsert) {
+		s.SetStageTitle(v)
+	})
+}
+
+// UpdateStageTitle sets the "stage_title" field to the value that was provided on create.
+func (u *SpaceParticipantUpsertOne) UpdateStageTitle() *SpaceParticipantUpsertOne {
+	return u.Update(func(s *SpaceParticipantUpsert) {
+		s.UpdateStageTitle()
 	})
 }
 
@@ -834,6 +885,20 @@ func (u *SpaceParticipantUpsertBulk) SetRole(v spaceparticipant.Role) *SpacePart
 func (u *SpaceParticipantUpsertBulk) UpdateRole() *SpaceParticipantUpsertBulk {
 	return u.Update(func(s *SpaceParticipantUpsert) {
 		s.UpdateRole()
+	})
+}
+
+// SetStageTitle sets the "stage_title" field.
+func (u *SpaceParticipantUpsertBulk) SetStageTitle(v string) *SpaceParticipantUpsertBulk {
+	return u.Update(func(s *SpaceParticipantUpsert) {
+		s.SetStageTitle(v)
+	})
+}
+
+// UpdateStageTitle sets the "stage_title" field to the value that was provided on create.
+func (u *SpaceParticipantUpsertBulk) UpdateStageTitle() *SpaceParticipantUpsertBulk {
+	return u.Update(func(s *SpaceParticipantUpsert) {
+		s.UpdateStageTitle()
 	})
 }
 

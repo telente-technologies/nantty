@@ -107,7 +107,7 @@ func (money CreatorMoney) RevenueRules(ctx context.Context, currency string) Rev
 	return RevenueRulesView{
 		GiftCreatorSharePercentUpTo: giftCeiling, TipCreatorSharePercent: giftCeiling,
 		SubscriptionCreatorSharePercent: 80, SubscriptionShareBasis: "net", AdsRevenueCreatorSharePercent: platform.CreatorAdShareBps(ctx, orDefault(revenue.AdsCreatorShareBps, 4000)) / 100,
-		CoinTransferPlatformFeePercent: platform.CoinTransferFeeBps(ctx, orDefault(revenue.CoinTransferFeeBps, 2500)) / 100, AffiliateCommissionReleasedAfterEscrow: true,
+		CoinTransferPlatformFeePercent: platform.CoinTransferFeeBps(ctx, orDefault(revenue.CoinTransferFeeBps, 200)) / 100, AffiliateCommissionReleasedAfterEscrow: true,
 		AffiliateCommissionMaximumPercent: orDefault(revenue.MaximumAffiliateBps, 5000) / 100,
 		CoinCashValue:                     Money{money.coinCashValue(ctx, currency), currency}, MinimumPayout: Money{orDefault(revenue.MinimumPayoutMinorByCurrency[currency], 1000), currency},
 		WithdrawalFeeDescription: "Withdrawals pass on the payment provider's bank transfer fee; the exact fee is shown before you confirm.",

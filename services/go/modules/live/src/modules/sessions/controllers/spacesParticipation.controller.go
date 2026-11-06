@@ -20,6 +20,7 @@ import (
 type spaceJoinResponse struct {
 	SpaceID    string `json:"spaceId"`
 	Role       string `json:"role"`
+	StageTitle string `json:"stageTitle,omitempty"`
 	Token      string `json:"token"`
 	URL        string `json:"url"`
 	CanPublish bool   `json:"canPublish"`
@@ -50,7 +51,12 @@ func (c SpacesController) Join(w http.ResponseWriter, r *http.Request) {
 		c.responder().Error(w, r, err)
 		return
 	}
-	canPublish := role == spaceparticipant.RoleHost || role == spaceparticipant.RoleSpeaker && !muted
+	participant, participantErr := c.Container.Client.SpaceParticipant.Query().Where(spaceparticipant.SpaceID(id), spaceparticipant.AccountID(actor.UserId), spaceparticipant.StateEQ(spaceparticipant.StateActive)).Only(r.Context())
+	if participantErr != nil {
+		c.responder().Error(w, r, participantErr)
+		return
+	}
+	canPublish := role == spaceparticipant.RoleHost || (role == spaceparticipant.RoleSpeaker || role == spaceparticipant.RoleModerator) && !muted
 	grant, err := c.Container.Tokens.IssueParticipantToken(integrations.MediaGrant{
 		Room: row.LivekitRoom, Identity: actor.UserId.String(), Name: "Space participant", Role: string(role),
 		CanPublish: canPublish, AudioOnly: true, TimeToLive: c.Container.Settings.MediaTokenTimeToLive,
@@ -59,7 +65,7 @@ func (c SpacesController) Join(w http.ResponseWriter, r *http.Request) {
 		c.responder().Error(w, r, err)
 		return
 	}
-	httpserver.WriteJsonResponse(w, http.StatusOK, spaceJoinResponse{SpaceID: id.String(), Role: string(role), Token: grant, URL: c.Container.Settings.LiveKitPublicUrl, CanPublish: canPublish, Listeners: listeners})
+	httpserver.WriteJsonResponse(w, http.StatusOK, spaceJoinResponse{SpaceID: id.String(), Role: string(role), StageTitle: participant.StageTitle, Token: grant, URL: c.Container.Settings.LiveKitPublicUrl, CanPublish: canPublish, Listeners: listeners})
 }
 
 func (c SpacesController) Leave(w http.ResponseWriter, r *http.Request) {
@@ -246,6 +252,13 @@ func (c SpacesController) authorizeSpaceAudience(ctx context.Context, row *ent.S
 func (c SpacesController) isSpaceModerator(ctx context.Context, row *ent.Space, userID uuid.UUID) (bool, error) {
 	if row.HostID == userID {
 		return true, nil
+	}
+	cohost, err := c.Container.Client.SpaceParticipant.Query().Where(
+		spaceparticipant.SpaceID(row.ID), spaceparticipant.AccountID(userID),
+		spaceparticipant.StateEQ(spaceparticipant.StateActive), spaceparticipant.RoleEQ(spaceparticipant.RoleModerator),
+	).Exist(ctx)
+	if err != nil || cohost {
+		return cohost, err
 	}
 	defaults, err := c.Container.Client.LiveHostDefault.Get(ctx, row.HostID)
 	if ent.IsNotFound(err) {

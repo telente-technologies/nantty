@@ -28,7 +28,7 @@ func (Space) Fields() []ent.Field {
 		field.Int("peak_listeners").Default(0),
 		field.String("moderation_visibility").Default("visible"),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
-		field.Bool("gifts_enabled").Default(false).Immutable(),
+		field.Bool("gifts_enabled").Default(false),
 		field.Bool("video_enabled").Default(false).Immutable(),
 		field.JSON("metadata", map[string]any{}).Optional().SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 	}

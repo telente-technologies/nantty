@@ -18,6 +18,10 @@ import (
 
 var liveAdPlacements = []string{"beforeJoin", "naturalBreak", "betweenSegments", "overlay", "end"}
 
+func liveCoinSupportEnabled(preference *bool) bool {
+	return preference != nil && *preference
+}
+
 func (service *LiveService) buildLiveAdSettingsRecord(input types.LiveMonetizationInput) (map[string]any, *string, error) {
 	if input.LiveAdSettings == nil {
 		return nil, nil, nil
@@ -110,6 +114,10 @@ func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.A
 			SetCategory(livesession.Category(input.Category)).SetVisibility(livesession.Visibility(input.Visibility)).
 			SetLivekitRoom("live-" + identifier.String()).SetHostIsCreator(actor.HasRole("creator")).SetCountryCode(input.CountryCode).
 			SetNillableStoreID(input.StoreId).SetNillableScheduledAt(input.ScheduledAt)
+		// New ordinary Lives are opt-in. The schema default and this explicit
+		// assignment protect both ORM and direct creation paths; legacy rows remain
+		// unchanged by the accompanying default-only migration.
+		builder.SetGiftsEnabled(liveCoinSupportEnabled(input.GiftsEnabled))
 		if adSettings != nil {
 			builder.SetLiveAdSettings(adSettings).SetNillableAcceptedLiveAdTermsVersion(termsVersion)
 			if termsVersion != nil {

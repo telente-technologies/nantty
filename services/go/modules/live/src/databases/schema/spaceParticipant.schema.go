@@ -17,7 +17,8 @@ func (SpaceParticipant) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("space_id", uuid.UUID{}).Immutable(),
 		field.UUID("account_id", uuid.UUID{}).Immutable(),
-		field.Enum("role").Values("host", "listener", "speaker").Default("listener"),
+		field.Enum("role").Values("host", "listener", "speaker", "moderator").Default("listener"),
+		field.String("stage_title").Default(""),
 		field.Enum("state").Values("active", "left", "removed").Default("active"),
 		field.Bool("muted_by_host").Default(false),
 		field.Time("joined_at").Default(time.Now),

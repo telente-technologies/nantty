@@ -26,6 +26,8 @@ type SpaceParticipant struct {
 	AccountID uuid.UUID `json:"account_id,omitempty"`
 	// Role holds the value of the "role" field.
 	Role spaceparticipant.Role `json:"role,omitempty"`
+	// StageTitle holds the value of the "stage_title" field.
+	StageTitle string `json:"stage_title,omitempty"`
 	// State holds the value of the "state" field.
 	State spaceparticipant.State `json:"state,omitempty"`
 	// MutedByHost holds the value of the "muted_by_host" field.
@@ -46,7 +48,7 @@ func (*SpaceParticipant) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case spaceparticipant.FieldMutedByHost:
 			values[i] = new(sql.NullBool)
-		case spaceparticipant.FieldRole, spaceparticipant.FieldState:
+		case spaceparticipant.FieldRole, spaceparticipant.FieldStageTitle, spaceparticipant.FieldState:
 			values[i] = new(sql.NullString)
 		case spaceparticipant.FieldCreatedAt, spaceparticipant.FieldJoinedAt, spaceparticipant.FieldLastSeenAt, spaceparticipant.FieldLeftAt:
 			values[i] = new(sql.NullTime)
@@ -96,6 +98,12 @@ func (_m *SpaceParticipant) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field role", values[i])
 			} else if value.Valid {
 				_m.Role = spaceparticipant.Role(value.String)
+			}
+		case spaceparticipant.FieldStageTitle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field stage_title", values[i])
+			} else if value.Valid {
+				_m.StageTitle = value.String
 			}
 		case spaceparticipant.FieldState:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -175,6 +183,9 @@ func (_m *SpaceParticipant) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("role=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Role))
+	builder.WriteString(", ")
+	builder.WriteString("stage_title=")
+	builder.WriteString(_m.StageTitle)
 	builder.WriteString(", ")
 	builder.WriteString("state=")
 	builder.WriteString(fmt.Sprintf("%v", _m.State))

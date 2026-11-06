@@ -70,6 +70,11 @@ func AccountID(v uuid.UUID) predicate.SpaceParticipant {
 	return predicate.SpaceParticipant(sql.FieldEQ(FieldAccountID, v))
 }
 
+// StageTitle applies equality check predicate on the "stage_title" field. It's identical to StageTitleEQ.
+func StageTitle(v string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldEQ(FieldStageTitle, v))
+}
+
 // MutedByHost applies equality check predicate on the "muted_by_host" field. It's identical to MutedByHostEQ.
 func MutedByHost(v bool) predicate.SpaceParticipant {
 	return predicate.SpaceParticipant(sql.FieldEQ(FieldMutedByHost, v))
@@ -228,6 +233,71 @@ func RoleIn(vs ...Role) predicate.SpaceParticipant {
 // RoleNotIn applies the NotIn predicate on the "role" field.
 func RoleNotIn(vs ...Role) predicate.SpaceParticipant {
 	return predicate.SpaceParticipant(sql.FieldNotIn(FieldRole, vs...))
+}
+
+// StageTitleEQ applies the EQ predicate on the "stage_title" field.
+func StageTitleEQ(v string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldEQ(FieldStageTitle, v))
+}
+
+// StageTitleNEQ applies the NEQ predicate on the "stage_title" field.
+func StageTitleNEQ(v string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldNEQ(FieldStageTitle, v))
+}
+
+// StageTitleIn applies the In predicate on the "stage_title" field.
+func StageTitleIn(vs ...string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldIn(FieldStageTitle, vs...))
+}
+
+// StageTitleNotIn applies the NotIn predicate on the "stage_title" field.
+func StageTitleNotIn(vs ...string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldNotIn(FieldStageTitle, vs...))
+}
+
+// StageTitleGT applies the GT predicate on the "stage_title" field.
+func StageTitleGT(v string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldGT(FieldStageTitle, v))
+}
+
+// StageTitleGTE applies the GTE predicate on the "stage_title" field.
+func StageTitleGTE(v string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldGTE(FieldStageTitle, v))
+}
+
+// StageTitleLT applies the LT predicate on the "stage_title" field.
+func StageTitleLT(v string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldLT(FieldStageTitle, v))
+}
+
+// StageTitleLTE applies the LTE predicate on the "stage_title" field.
+func StageTitleLTE(v string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldLTE(FieldStageTitle, v))
+}
+
+// StageTitleContains applies the Contains predicate on the "stage_title" field.
+func StageTitleContains(v string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldContains(FieldStageTitle, v))
+}
+
+// StageTitleHasPrefix applies the HasPrefix predicate on the "stage_title" field.
+func StageTitleHasPrefix(v string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldHasPrefix(FieldStageTitle, v))
+}
+
+// StageTitleHasSuffix applies the HasSuffix predicate on the "stage_title" field.
+func StageTitleHasSuffix(v string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldHasSuffix(FieldStageTitle, v))
+}
+
+// StageTitleEqualFold applies the EqualFold predicate on the "stage_title" field.
+func StageTitleEqualFold(v string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldEqualFold(FieldStageTitle, v))
+}
+
+// StageTitleContainsFold applies the ContainsFold predicate on the "stage_title" field.
+func StageTitleContainsFold(v string) predicate.SpaceParticipant {
+	return predicate.SpaceParticipant(sql.FieldContainsFold(FieldStageTitle, v))
 }
 
 // StateEQ applies the EQ predicate on the "state" field.

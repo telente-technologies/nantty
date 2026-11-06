@@ -981,16 +981,20 @@ func init() {
 	spaceparticipantDescCreatedAt := spaceparticipantMixinFields0[1].Descriptor()
 	// spaceparticipant.DefaultCreatedAt holds the default value on creation for the created_at field.
 	spaceparticipant.DefaultCreatedAt = spaceparticipantDescCreatedAt.Default.(func() time.Time)
+	// spaceparticipantDescStageTitle is the schema descriptor for stage_title field.
+	spaceparticipantDescStageTitle := spaceparticipantFields[3].Descriptor()
+	// spaceparticipant.DefaultStageTitle holds the default value on creation for the stage_title field.
+	spaceparticipant.DefaultStageTitle = spaceparticipantDescStageTitle.Default.(string)
 	// spaceparticipantDescMutedByHost is the schema descriptor for muted_by_host field.
-	spaceparticipantDescMutedByHost := spaceparticipantFields[4].Descriptor()
+	spaceparticipantDescMutedByHost := spaceparticipantFields[5].Descriptor()
 	// spaceparticipant.DefaultMutedByHost holds the default value on creation for the muted_by_host field.
 	spaceparticipant.DefaultMutedByHost = spaceparticipantDescMutedByHost.Default.(bool)
 	// spaceparticipantDescJoinedAt is the schema descriptor for joined_at field.
-	spaceparticipantDescJoinedAt := spaceparticipantFields[5].Descriptor()
+	spaceparticipantDescJoinedAt := spaceparticipantFields[6].Descriptor()
 	// spaceparticipant.DefaultJoinedAt holds the default value on creation for the joined_at field.
 	spaceparticipant.DefaultJoinedAt = spaceparticipantDescJoinedAt.Default.(func() time.Time)
 	// spaceparticipantDescLastSeenAt is the schema descriptor for last_seen_at field.
-	spaceparticipantDescLastSeenAt := spaceparticipantFields[6].Descriptor()
+	spaceparticipantDescLastSeenAt := spaceparticipantFields[7].Descriptor()
 	// spaceparticipant.DefaultLastSeenAt holds the default value on creation for the last_seen_at field.
 	spaceparticipant.DefaultLastSeenAt = spaceparticipantDescLastSeenAt.Default.(func() time.Time)
 	// spaceparticipant.UpdateDefaultLastSeenAt holds the default value on update for the last_seen_at field.

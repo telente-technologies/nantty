@@ -18,7 +18,8 @@ func TestSpaceMutationRoutesRejectUnauthenticatedRequests(t *testing.T) {
 		"/api/v1/spaces/00000000-0000-0000-0000-000000000001/cancel",
 		"/api/v1/spaces/00000000-0000-0000-0000-000000000001/join",
 		"/api/v1/spaces/00000000-0000-0000-0000-000000000001/invites",
-		"/api/v1/spaces/00000000-0000-0000-0000-000000000001/gifts",
+		"/api/v1/spaces/00000000-0000-0000-0000-000000000001/invites/00000000-0000-0000-0000-000000000002/accept",
+		"/api/v1/spaces/00000000-0000-0000-0000-000000000001/invites/00000000-0000-0000-0000-000000000002/decline",
 		"/api/v1/spaces/00000000-0000-0000-0000-000000000001/announcement",
 		"/api/v1/spaces/00000000-0000-0000-0000-000000000001/leave",
 		"/api/v1/spaces/00000000-0000-0000-0000-000000000001/speaker-requests",
@@ -31,6 +32,56 @@ func TestSpaceMutationRoutesRejectUnauthenticatedRequests(t *testing.T) {
 				t.Fatalf("status = %d, want %d; body: %s", recorder.Code, http.StatusUnauthorized, recorder.Body.String())
 			}
 		})
+	}
+}
+
+func TestPendingSpaceInvitationRouteRejectsUnauthenticatedRequests(t *testing.T) {
+	mux := http.NewServeMux()
+	MountSessionsRoutes(mux, &container.Container{})
+	recorder := httptest.NewRecorder()
+	mux.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/api/v1/spaces/invitations", nil))
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusUnauthorized)
+	}
+}
+
+func TestSpaceGiftCatalogRouteIsRetired(t *testing.T) {
+	mux := http.NewServeMux()
+	MountSessionsRoutes(mux, &container.Container{})
+	recorder := httptest.NewRecorder()
+	mux.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/api/v1/spaces/00000000-0000-0000-0000-000000000001/gifts", nil))
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want %d; Space contributions use amount-only coin donations", recorder.Code, http.StatusNotFound)
+	}
+}
+
+func TestSpaceCoinDonationSettingsRouteRejectsUnauthenticatedRequests(t *testing.T) {
+	mux := http.NewServeMux()
+	MountSessionsRoutes(mux, &container.Container{})
+	recorder := httptest.NewRecorder()
+	mux.ServeHTTP(recorder, httptest.NewRequest(http.MethodPatch, "/api/v1/spaces/00000000-0000-0000-0000-000000000001/coin-donations", nil))
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d; body: %s", recorder.Code, http.StatusUnauthorized, recorder.Body.String())
+	}
+}
+
+func TestLiveCoinSupportRouteRejectsUnauthenticatedRequests(t *testing.T) {
+	mux := http.NewServeMux()
+	MountSessionsRoutes(mux, &container.Container{})
+	recorder := httptest.NewRecorder()
+	mux.ServeHTTP(recorder, httptest.NewRequest(http.MethodPatch, "/api/v1/lives/00000000-0000-0000-0000-000000000001/coin-support", nil))
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d; body: %s", recorder.Code, http.StatusUnauthorized, recorder.Body.String())
+	}
+}
+
+func TestSpaceCoinDonationRouteRejectsUnauthenticatedRequests(t *testing.T) {
+	mux := http.NewServeMux()
+	MountSessionsRoutes(mux, &container.Container{})
+	recorder := httptest.NewRecorder()
+	mux.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/api/v1/spaces/00000000-0000-0000-0000-000000000001/coin-donations", nil))
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d; body: %s", recorder.Code, http.StatusUnauthorized, recorder.Body.String())
 	}
 }
 

@@ -82,6 +82,8 @@ func TestTranslateSpaceCoinGiftErrors(t *testing.T) {
 		{"SPACE_NOT_FOUND", codes.FailedPrecondition, interfaces.ErrSpaceGiftUnavailable},
 		{"SPACE_HOST_NOT_CREATOR", codes.FailedPrecondition, interfaces.ErrSpaceHostNotCreator},
 		{"SPACE_GIFT_BLOCKED", codes.FailedPrecondition, interfaces.ErrSpaceGiftBlocked},
+		{"LIVE_COIN_SUPPORT_DISABLED", codes.FailedPrecondition, interfaces.ErrLiveCoinSupportDisabled},
+		{"LIVE_NOT_ACTIVE", codes.FailedPrecondition, interfaces.ErrLiveNotActive},
 		{"IDEMPOTENCY_KEY_REUSED", codes.AlreadyExists, interfaces.ErrIdempotencyKeyReused},
 	}
 	for _, test := range tests {

@@ -67,7 +67,7 @@ func TestSpaceCreateDirectoryFailureThenSameKeyRetryPersistsOnce(t *testing.T) {
 			t.Fatalf("attempt %d: persisted %d Spaces, want %d", attempt, persisted, attempt)
 		}
 	}
-	if !spaceGiftsEnabled {
-		t.Fatal("new Spaces must enable host-only coin gifts")
+	if spaceGiftsEnabled {
+		t.Fatal("new Spaces without an explicit coin-support opt-in must keep contributions disabled")
 	}
 }

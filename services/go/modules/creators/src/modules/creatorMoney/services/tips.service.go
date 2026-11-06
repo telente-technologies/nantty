@@ -4,10 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 
 	"nantty/modules/creators/src/container"
 	"nantty/modules/creators/src/generated/ent"
@@ -29,6 +31,7 @@ var (
 	ErrTipBlocked          = httpserver.NewApiError(http.StatusUnprocessableEntity, "TIP_BLOCKED", "You cannot tip this creator.")
 	ErrCreatorCannotEarn   = httpserver.NewApiError(http.StatusUnprocessableEntity, "RECIPIENT_CANNOT_RECEIVE_TIPS", "This creator isn't in the Creator Program yet.")
 	ErrTipLiveNotActive    = httpserver.NewApiError(http.StatusUnprocessableEntity, "LIVE_NOT_ACTIVE", "This live has ended.")
+	ErrLiveCoinSupportOff  = httpserver.NewApiError(http.StatusUnprocessableEntity, "LIVE_COIN_SUPPORT_DISABLED", "This host isn't accepting coin support right now.")
 	ErrCreatorProgramOnly  = httpserver.NewApiError(http.StatusForbidden, "CREATOR_PROGRAM_REQUIRED", "This is available to approved creators.")
 	ErrTipIdempotencyReuse = ledgerutils.ErrIdempotencyKeyReused
 )
@@ -127,6 +130,11 @@ func (money CreatorMoney) sendTipInTransaction(ctx context.Context, transaction 
 	if !ent.IsNotFound(err) {
 		return TipReceipt{}, err
 	}
+	if request.TargetType == "live" {
+		if err := money.lockAndValidateLiveCoinSupport(ctx, transaction, request.TargetId, creatorId); err != nil {
+			return TipReceipt{}, err
+		}
+	}
 	share, approved, err := money.Program.ApprovedCreatorShare(ctx, transaction, creatorId)
 	if err != nil {
 		return TipReceipt{}, err
@@ -134,8 +142,11 @@ func (money CreatorMoney) sendTipInTransaction(ctx context.Context, transaction 
 	if !approved {
 		return TipReceipt{}, ErrCreatorCannotEarn
 	}
-	split, err := models.SplitGiftCoins(1, request.Coins, share)
+	split, err := splitTipCoins(request.TargetType, request.Coins, share, money.Container.Settings.Revenue.CoinTransferFeeBps)
 	if err != nil {
+		if errors.Is(err, models.ErrInvalidCoinFeeBps) {
+			return TipReceipt{}, fmt.Errorf("invalid coin transfer fee configuration: %w", err)
+		}
 		return TipReceipt{}, httpserver.NewApiError(http.StatusBadRequest, "VALIDATION_FAILED", "coins must be 1-100000")
 	}
 	tipId := uuid.Must(uuid.NewV7())
@@ -177,4 +188,38 @@ func (money CreatorMoney) sendTipInTransaction(ctx context.Context, transaction 
 	}
 	balance, _ := posted.BalanceAfter(spendable)
 	return TipReceipt{TipId: tipId.String(), TargetType: request.TargetType, TargetId: request.TargetId, Coins: split.TotalCoins, Balance: balance, CoinBalance: balance}, nil
+}
+
+func splitTipCoins(targetType string, coins, creatorShareBps, platformFeeBps int64) (models.GiftSplit, error) {
+	if targetType == "live" {
+		return models.SplitCoinsByPlatformFeeBps(coins, platformFeeBps)
+	}
+	return models.SplitGiftCoins(1, coins, creatorShareBps)
+}
+
+// lockAndValidateLiveCoinSupport re-checks the live session after taking a
+// row-level share lock in the posting transaction. A concurrent host toggle
+// or live-end update must serialize with this coin transfer.
+func (money CreatorMoney) lockAndValidateLiveCoinSupport(ctx context.Context, transaction *sql.Tx, liveId, creatorId string) error {
+	table := pgx.Identifier{money.Container.Settings.LiveSchema, "live_sessions"}.Sanitize()
+	var hostId, state string
+	var supportEnabled bool
+	err := transaction.QueryRowContext(ctx, "SELECT host_id::text, state::text, gifts_enabled FROM "+table+" WHERE id::text = $1 FOR SHARE", liveId).
+		Scan(&hostId, &state, &supportEnabled)
+	if errors.Is(err, sql.ErrNoRows) {
+		return ErrTipTargetNotFound
+	}
+	if err != nil {
+		return err
+	}
+	if hostId != creatorId {
+		return ErrTipTargetNotFound
+	}
+	if state != "live" {
+		return ErrTipLiveNotActive
+	}
+	if !supportEnabled {
+		return ErrLiveCoinSupportOff
+	}
+	return nil
 }

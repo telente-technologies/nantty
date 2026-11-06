@@ -137,6 +137,10 @@ func (service *LiveService) chargeGift(ctx context.Context, actor types.Actor, s
 		return interfaces.ChargedGift{}, liveerrors.CannotGiftSelf
 	case errors.Is(err, interfaces.ErrRecipientCannotReceiveGifts):
 		return interfaces.ChargedGift{}, liveerrors.Api(409, "RECIPIENT_CANNOT_RECEIVE_GIFTS", "Neither the recipient nor the host can receive gifts yet.")
+	case errors.Is(err, interfaces.ErrLiveCoinSupportDisabled):
+		return interfaces.ChargedGift{}, liveerrors.Api(409, "LIVE_COIN_SUPPORT_DISABLED", "This host isn't accepting coin support right now.")
+	case errors.Is(err, interfaces.ErrLiveNotActive):
+		return interfaces.ChargedGift{}, liveerrors.Api(409, "LIVE_NOT_ACTIVE", "This live has ended.")
 	case errors.Is(err, interfaces.ErrIdempotencyKeyReused):
 		return interfaces.ChargedGift{}, liveerrors.Unprocessable("IDEMPOTENCY_KEY_REUSED", "This Idempotency-Key was used with a different request.")
 	}

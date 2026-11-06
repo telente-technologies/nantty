@@ -42,6 +42,20 @@ func (_u *SpaceParticipantUpdate) SetNillableRole(v *spaceparticipant.Role) *Spa
 	return _u
 }
 
+// SetStageTitle sets the "stage_title" field.
+func (_u *SpaceParticipantUpdate) SetStageTitle(v string) *SpaceParticipantUpdate {
+	_u.mutation.SetStageTitle(v)
+	return _u
+}
+
+// SetNillableStageTitle sets the "stage_title" field if the given value is not nil.
+func (_u *SpaceParticipantUpdate) SetNillableStageTitle(v *string) *SpaceParticipantUpdate {
+	if v != nil {
+		_u.SetStageTitle(*v)
+	}
+	return _u
+}
+
 // SetState sets the "state" field.
 func (_u *SpaceParticipantUpdate) SetState(v spaceparticipant.State) *SpaceParticipantUpdate {
 	_u.mutation.SetState(v)
@@ -181,6 +195,9 @@ func (_u *SpaceParticipantUpdate) sqlSave(ctx context.Context) (_node int, err e
 	if value, ok := _u.mutation.Role(); ok {
 		_spec.SetField(spaceparticipant.FieldRole, field.TypeEnum, value)
 	}
+	if value, ok := _u.mutation.StageTitle(); ok {
+		_spec.SetField(spaceparticipant.FieldStageTitle, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.State(); ok {
 		_spec.SetField(spaceparticipant.FieldState, field.TypeEnum, value)
 	}
@@ -229,6 +246,20 @@ func (_u *SpaceParticipantUpdateOne) SetRole(v spaceparticipant.Role) *SpacePart
 func (_u *SpaceParticipantUpdateOne) SetNillableRole(v *spaceparticipant.Role) *SpaceParticipantUpdateOne {
 	if v != nil {
 		_u.SetRole(*v)
+	}
+	return _u
+}
+
+// SetStageTitle sets the "stage_title" field.
+func (_u *SpaceParticipantUpdateOne) SetStageTitle(v string) *SpaceParticipantUpdateOne {
+	_u.mutation.SetStageTitle(v)
+	return _u
+}
+
+// SetNillableStageTitle sets the "stage_title" field if the given value is not nil.
+func (_u *SpaceParticipantUpdateOne) SetNillableStageTitle(v *string) *SpaceParticipantUpdateOne {
+	if v != nil {
+		_u.SetStageTitle(*v)
 	}
 	return _u
 }
@@ -401,6 +432,9 @@ func (_u *SpaceParticipantUpdateOne) sqlSave(ctx context.Context) (_node *SpaceP
 	}
 	if value, ok := _u.mutation.Role(); ok {
 		_spec.SetField(spaceparticipant.FieldRole, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.StageTitle(); ok {
+		_spec.SetField(spaceparticipant.FieldStageTitle, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.State(); ok {
 		_spec.SetField(spaceparticipant.FieldState, field.TypeEnum, value)

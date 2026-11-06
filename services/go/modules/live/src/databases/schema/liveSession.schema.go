@@ -29,7 +29,7 @@ func (LiveSession) Fields() []ent.Field {
 		field.Int("viewers").Default(0),
 		field.Int("peak_viewers").Default(0),
 		field.String("cover_url").Optional().Nillable(),
-		field.Bool("gifts_enabled").Default(true),
+		field.Bool("gifts_enabled").Default(false),
 		field.Bool("host_is_creator").Default(false),
 		field.UUID("store_id", uuid.UUID{}).Optional().Nillable(),
 		field.UUID("pinned_product_id", uuid.UUID{}).Optional().Nillable(),
