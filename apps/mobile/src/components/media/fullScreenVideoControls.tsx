@@ -27,6 +27,7 @@ export interface FullScreenVideoControlsProps {
   readonly isPaused: boolean;
   readonly isMuted: boolean;
   readonly canSeek: boolean;
+  readonly bottomOffset?: number;
   readonly topCenter?: ReactNode;
   readonly topRight?: ReactNode;
   readonly onTogglePlay: () => void;
@@ -91,7 +92,7 @@ export function FullScreenVideoControls(props: FullScreenVideoControlsProps) {
       </View>
       <View
         pointerEvents="box-none"
-        style={[styles.bottom, { paddingBottom: Math.max(insets.bottom, EDGE / 2), paddingLeft: Math.max(insets.left, EDGE), paddingRight: Math.max(insets.right, EDGE) }]}
+        style={[styles.bottom, { bottom: props.bottomOffset ?? 0, paddingBottom: Math.max(insets.bottom, EDGE / 2), paddingLeft: Math.max(insets.left, EDGE), paddingRight: Math.max(insets.right, EDGE) }]}
       >
         <View pointerEvents="box-none" style={styles.bottomRow}>
           <Text size={13} weight={600} lineHeight={16} color={INK} accessibilityLabel={`${formatPlaybackTime(progress.currentSeconds)} of ${formatPlaybackTime(progress.durationSeconds)}`}>

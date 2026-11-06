@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Animated, FlatList, Pressable, StyleSheet, View, useWindowDimensions } from "react-native";
+import { Animated, FlatList, Pressable, StyleSheet, View, useWindowDimensions, type GestureResponderEvent } from "react-native";
 
 import { SpeakerHigh24Icon, ViewProducts24Icon } from "@/components/icons";
 import { VideoPosterOnly, type VideoPlaybackController } from "@/components/media/clipVideoPlayer";
@@ -50,7 +50,7 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
   const [fullScreenVideo, setFullScreenVideo] = useState<Media | null>(null);
   const [openedImageIndex, setOpenedImageIndex] = useState<number | null>(null);
   const [activePageIndex, setActivePageIndex] = useState(0);
-  const scrollOffsetX = useRef(new Animated.Value(0)).current;
+  const [scrollOffsetX] = useState(() => new Animated.Value(0));
   const pages: readonly Media[] = media.length > 0 ? media : [{ type: "image", url: null }];
   const imagePages = pages.filter((item) => item.type === "image");
   const isMuted = useVideoAudioStore((state) => state.isMuted);
@@ -69,6 +69,10 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
   const openImageAtPagerIndex = (pagerIndex: number) => {
     const position = pages.slice(0, pagerIndex).filter((item) => item.type === "image").length;
     setOpenedImageIndex(position);
+  };
+  const openImageFromFeed = (event: GestureResponderEvent, pagerIndex: number) => {
+    event.stopPropagation();
+    openImageAtPagerIndex(pagerIndex);
   };
 
   const updateActivePageFromScrollOffset = (offsetX: number) => {
@@ -119,7 +123,8 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Play video full screen"
-                  onPress={() => {
+                  onPress={(event) => {
+                    event.stopPropagation();
                     setFullScreenStartSeconds(activeVideoPositionSeconds.current);
                     setFullScreenVideo(item);
                   }}
@@ -135,7 +140,7 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`Open image ${index + 1} full screen`}
-                onPress={() => openImageAtPagerIndex(index)}
+                onPress={(event) => openImageFromFeed(event, index)}
                 style={StyleSheet.absoluteFill}
               />
             ) : null}
@@ -157,14 +162,25 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
               accessibilityLabel={isMuted ? "Unmute video" : "Mute video"}
               accessibilityState={{ selected: isMuted }}
               hitSlop={10}
-              onPress={toggleMute}
+              onPress={(event) => {
+                event.stopPropagation();
+                toggleMute();
+              }}
               style={isMuted ? styles.mutedSpeaker : undefined}
             >
               <SpeakerHigh24Icon />
             </Pressable>
           ) : null}
           {onPressViewProducts ? (
-            <Pressable accessibilityRole="button" accessibilityLabel="View products in this post" hitSlop={10} onPress={onPressViewProducts}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="View products in this post"
+              hitSlop={10}
+              onPress={(event) => {
+                event.stopPropagation();
+                onPressViewProducts();
+              }}
+            >
               <ViewProducts24Icon />
             </Pressable>
           ) : null}
@@ -181,6 +197,7 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
         }}
         saveTarget={saveTarget}
         savedAccordingToServer={savedAccordingToServer}
+        postActions={postActions}
         look={look}
       />
       {openedImageIndex !== null ? (

@@ -35,6 +35,7 @@ import { cancelAndRemoveUpload } from "@/services/media/mediaUploadQueue.service
 import { startAutomaticUploadResume } from "@/services/core/uploadBackgroundTask.service";
 import { startHomeScreenWidgetSync, syncHomeScreenWidgetsNow } from "@/services/widgets/widgetSync.service";
 import { startAccountPushRegistrationLifecycle, syncAccountPushRegistrationForCurrentAccount } from "@/services/widgets/widgetPush.service";
+import { startActivityHeartbeatLifecycle } from "@/services/activityHeartbeat.lifecycle";
 import { forgetDecryptedAttachmentsInMemory } from "@/services/chatCrypto/encryptedAttachments.service";
 import { startDecryptedMediaHygiene, wipeDecryptedFiles } from "@/services/chatCrypto/ephemeralDecryptedFiles.service";
 import { useActingProfileStore } from "@/store/actingProfile.store";
@@ -67,7 +68,9 @@ export default function App() {
   useEffect(() => {
     startDecryptedMediaHygiene();
     startAccountPushRegistrationLifecycle();
+    const stopActivityHeartbeatLifecycle = startActivityHeartbeatLifecycle();
     useAuthStore.getState().restoreSavedSession().catch(() => useAuthStore.setState({ status: "signedOut" }));
+    return stopActivityHeartbeatLifecycle;
   }, []);
 
   useEffect(() => {

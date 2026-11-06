@@ -1,7 +1,8 @@
 import { StyleSheet, View } from "react-native";
 
-import { LikeActionIcon, ReplyActionIcon, RepostActionIcon, ShareActionIcon } from "@/components/icons";
-import type { Post } from "@/types";
+import { BookmarkActionIcon, LikeActionIcon, ReplyActionIcon, RepostActionIcon, ShareActionIcon } from "@/components/icons";
+import { useSaveToggle } from "@/hooks/useSaveToggle.hook";
+import { saveTargetForPost, type Post } from "@/types";
 
 import { PostActionButton } from "./postActionButton";
 
@@ -14,6 +15,8 @@ export interface MediaLightboxPostActionsProps {
 }
 
 export function MediaLightboxPostActions({ post, onToggleLike, onPressComments, onRepost, onShare }: MediaLightboxPostActionsProps) {
+  const { isSaved, toggleSaved } = useSaveToggle(saveTargetForPost(post), post.bookmarked);
+
   return (
     <View style={styles.row}>
       <PostActionButton
@@ -41,6 +44,15 @@ export function MediaLightboxPostActions({ post, onToggleLike, onPressComments, 
         onPress={onRepost}
         defaultInk="#FFFFFF"
         renderIcon={(ink) => <RepostActionIcon size={21} color={ink} />}
+      />
+      <PostActionButton
+        label={isSaved ? "Remove post from saved" : "Save post"}
+        tone="bookmark"
+        active={isSaved}
+        popOnActivate
+        onPress={() => void toggleSaved()}
+        defaultInk="#FFFFFF"
+        renderIcon={(ink) => <BookmarkActionIcon size={21} color={ink} filled={isSaved} />}
       />
       <PostActionButton
         label="Share"

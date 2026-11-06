@@ -1,6 +1,7 @@
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { Platform, Pressable, StatusBar, StyleSheet, View, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ArrowsOutSimple24Icon } from "@/components/icons";
 import { FrameAwareModal } from "@/components/ui/frameAwareModal";
@@ -8,6 +9,7 @@ import { mediaGlass } from "@/components/ui/modalChrome.constant";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
+import { MediaLightboxPostActions, type MediaLightboxPostActionsProps } from "@/components/feed/mediaLightboxPostActions";
 import type { Media, SaveTarget } from "@/types";
 
 import { ClipVideoPlayer, type VideoPlaybackController, type VideoPlaybackProgress } from "./clipVideoPlayer";
@@ -24,11 +26,15 @@ export interface LandscapeVideoFullScreenModalProps {
   readonly startAtSeconds?: number;
   readonly saveTarget?: SaveTarget;
   readonly savedAccordingToServer?: boolean;
+  readonly postActions?: MediaLightboxPostActionsProps;
   readonly look?: string | null;
 }
 
 const canLockScreenOrientation = Platform.OS === "ios" || Platform.OS === "android";
 const CONTROLS_AUTO_HIDE_MS = 3000;
+const POST_ACTIONS_ROW_HEIGHT = 52;
+const POST_ACTIONS_BOTTOM_GAP = 12;
+const PLAYBACK_CONTROLS_GAP = 8;
 
 export function LandscapeVideoFullScreenModal(props: LandscapeVideoFullScreenModalProps) {
   const { media } = props;
@@ -97,6 +103,7 @@ interface FullScreenVideoStageProps extends LandscapeVideoFullScreenModalProps {
 function FullScreenVideoStage({ media, controllerRef, rotatedSize, onRotate, onExit, canSeek = true, startAtSeconds, ...props }: FullScreenVideoStageProps) {
   const { colors } = useTheme();
   const styles = useStyles();
+  const safeAreaInsets = useSafeAreaInsets();
   const [progress, setProgress] = useState<VideoPlaybackProgress>({ currentSeconds: startAtSeconds ?? 0, durationSeconds: media.durationSeconds ?? 0 });
   const [isPaused, setIsPaused] = useState(false);
   const [isScrubbing, setIsScrubbing] = useState(false);
@@ -104,6 +111,10 @@ function FullScreenVideoStage({ media, controllerRef, rotatedSize, onRotate, onE
   const [lastInteractionAt, setLastInteractionAt] = useState(0);
   const [mutedHere, setMutedHere] = useState<boolean | null>(null);
   const isMuted = mutedHere ?? props.isMuted;
+  const actionBarBottomPadding = Math.max(safeAreaInsets.bottom, 16) + POST_ACTIONS_BOTTOM_GAP;
+  const playbackControlsBottomOffset = props.postActions
+    ? actionBarBottomPadding + POST_ACTIONS_ROW_HEIGHT + PLAYBACK_CONTROLS_GAP - Math.max(safeAreaInsets.bottom, 8)
+    : 0;
 
   useEffect(() => {
     if (!areControlsVisible || isPaused || isScrubbing) return;
@@ -162,6 +173,7 @@ function FullScreenVideoStage({ media, controllerRef, rotatedSize, onRotate, onE
               setMutedHere(!isMuted);
               props.onToggleMute?.();
             }}
+            bottomOffset={playbackControlsBottomOffset}
             onExit={onExit}
             topCenter={
               onRotate ? (
@@ -183,6 +195,15 @@ function FullScreenVideoStage({ media, controllerRef, rotatedSize, onRotate, onE
           />
         ) : null}
       </View>
+      {props.postActions ? (
+        <View
+          pointerEvents="box-none"
+          style={[styles.postActions, { paddingBottom: actionBarBottomPadding }]}
+          testID="fullscreen-video-post-actions"
+        >
+          <MediaLightboxPostActions {...props.postActions} />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -191,6 +212,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.black, alignItems: "center", justifyContent: "center" },
   stage: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
   rotatedStage: { transform: [{ rotate: "90deg" }] },
+  postActions: { position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 2, elevation: 2 },
   saveCircle: {
     width: 36,
     height: 36,
