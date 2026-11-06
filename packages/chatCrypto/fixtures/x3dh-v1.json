@@ -1,0 +1,17 @@
+{
+  "initiatorSeed": "x3dh-alice-identity",
+  "responderSeed": "x3dh-bob-identity",
+  "signedPreKeySeed": "x3dh-bob-spk",
+  "oneTimePreKeySeed": "x3dh-bob-opk",
+  "baseKeySeed": "x3dh-alice-base",
+  "signedPreKeyId": 42,
+  "oneTimePreKeyId": 77,
+  "aliceIdentityPublic": "1651820cc14a348015b8bab09f27bf73f05af350cd2c4610b9df9242a9c15450",
+  "bobIdentityPublic": "4bc7e6c99924abf42df4aa0b859ec596205b6db74a63b7019b69503fc3ffb2d7",
+  "signedPreKeyPublic": "a7a63eec96f4ca62ad10ead61085c30e0d8c57029df797551ad30166e502eb36",
+  "signedPreKeySignature": "381f649ec7b19d0ec56b2887bd5822897635f82d5e06c18e7b238de6bad5382543a842cf1a159dff038145249fbf761ca793f45a571926b88e01279eeaf52a04",
+  "oneTimePreKeyPublic": "70c8fedc6e99ac7c6eb677b7465cfd9e39bc35763f866afcb1698378b1016251",
+  "baseKeyPublic": "27bd923208d8030fd7fecebd090640ec10c68de300820fe1bca51872627a225e",
+  "sharedSecret": "c24aad4dde9760783e051f906734b20b720137c4d7523cc56ae8213eae927566",
+  "associatedData": "1651820cc14a348015b8bab09f27bf73f05af350cd2c4610b9df9242a9c154504bc7e6c99924abf42df4aa0b859ec596205b6db74a63b7019b69503fc3ffb2d7"
+}
