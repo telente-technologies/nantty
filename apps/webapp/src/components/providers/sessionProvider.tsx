@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode }
 
 import { useRealtimeBridge } from "@/components/realtime/useRealtimeBridge.hook";
 import { chatCryptoService } from "@/services/chatCrypto/chatCrypto.service";
+import { startActivityHeartbeatLifecycle } from "@/services/activityHeartbeat.lifecycle";
 import { rememberCsrfTokenForRequests } from "@/services/clientApi.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { User } from "@/types";
@@ -22,6 +23,7 @@ export function SessionProvider({ viewer, csrfToken, children }: SessionContextV
     return { viewer, csrfToken };
   }, [viewer, csrfToken]);
   const syncAuthStore = useAuthStore((state) => state.setViewerFromSession);
+  const isAuthenticated = useAuthStore((state) => state.status === "signedIn");
   const queryClient = useQueryClient();
   const previousViewerId = useRef(viewer?.id ?? null);
   useRealtimeBridge(viewer?.id ?? null);
@@ -43,6 +45,11 @@ export function SessionProvider({ viewer, csrfToken, children }: SessionContextV
     const timer = setTimeout(() => void chatCryptoService.ensureReady(viewer.id).catch(() => undefined), 1_500);
     return () => clearTimeout(timer);
   }, [viewer?.id]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    return startActivityHeartbeatLifecycle();
+  }, [isAuthenticated]);
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
