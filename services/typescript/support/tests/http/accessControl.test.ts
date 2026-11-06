@@ -68,6 +68,24 @@ describe("tickets need an account", () => {
   it("validates the ticket form", async () => {
     expect((await post("/api/v1/support/tickets", { category: "nonsense", subject: "x", message: "y" }, asUser(requesterId))).status).toBe(400);
   });
+
+  it("deduplicates customer replies at the HTTP boundary and rejects key reuse", async () => {
+    const created = await post("/api/v1/support/tickets", { category: "order", subject: "Where is my order?", message: "I need help locating the order I purchased." }, asUser(requesterId));
+    const ticket = (await created.json()) as { id: string };
+    const headers = { ...asUser(requesterId), "idempotency-key": "http-reply-0001" };
+    const replyBody = { text: "The seller has not shared tracking yet." };
+    const first = await post(`/api/v1/support/tickets/${ticket.id}/messages`, replyBody, headers);
+    const replay = await post(`/api/v1/support/tickets/${ticket.id}/messages`, replyBody, headers);
+
+    expect(first.status).toBe(201);
+    expect(replay.status).toBe(201);
+    expect(await replay.json()).toMatchObject({ id: (await first.json() as { id: string }).id, text: replyBody.text });
+    expect((await server.harness.ticketStore.findTicket(ticket.id))?.messageCount).toBe(2);
+
+    const reused = await post(`/api/v1/support/tickets/${ticket.id}/messages`, { text: "A different message with the same key." }, headers);
+    expect(reused.status).toBe(409);
+    expect(await reused.json()).toMatchObject({ code: "IDEMPOTENCY_KEY_REUSED" });
+  });
 });
 
 describe("staff endpoints", () => {

@@ -49,7 +49,7 @@ describe("ticket lifecycle", () => {
     const url = `https://media.nantty.com/m/${mine}/display.jpg`;
     const ticket = await openTicket(harness, { attachmentUrls: [url, `https://media.nantty.com/m/${mine}/thumb.jpg`] });
     expect(ticket.messages[0]?.attachments).toEqual([{ url, contentType: "image/jpeg" }, { url: `https://media.nantty.com/m/${mine}/thumb.jpg`, contentType: "image/jpeg" }]);
-    await expect(handlePostCustomerReply(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, text: "Another one", attachmentUrls: [`https://media.nantty.com/m/${theirs}/display.jpg`] })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
+    await expect(handlePostCustomerReply(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, text: "Another one", attachmentUrls: [`https://media.nantty.com/m/${theirs}/display.jpg`], idempotencyKey: null })).rejects.toMatchObject({ code: "INVALID_ATTACHMENT" });
   });
 
   it("refuses attachments when the media service is not configured, but still accepts plain messages", async () => {
@@ -78,9 +78,40 @@ describe("ticket lifecycle", () => {
     const harness = await createSupportHarness();
     const ticket = await openTicket(harness);
     await handlePostStaffReply(harness.ticketDependencies, { staff, ticketId: ticket.id, body: "Can you share the bank name?", isInternalNote: false, statusAfterReply: undefined });
-    const answered = await handlePostCustomerReply(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, text: "It is GTBank.", attachmentUrls: [] });
+    const answered = await handlePostCustomerReply(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, text: "It is GTBank.", attachmentUrls: [], idempotencyKey: null });
     expect(answered).toMatchObject({ status: "awaiting_support", requesterUnread: 0 });
-    await expect(handlePostCustomerReply(harness.ticketDependencies, { accountId: otherRequesterId, ticketId: ticket.id, text: "hi", attachmentUrls: [] })).rejects.toMatchObject({ status: 404 });
+    await expect(handlePostCustomerReply(harness.ticketDependencies, { accountId: otherRequesterId, ticketId: ticket.id, text: "hi", attachmentUrls: [], idempotencyKey: null })).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("replays a customer reply with the same key and rejects key reuse with a different payload", async () => {
+    const harness = await createSupportHarness();
+    const ticket = await openTicket(harness);
+    const command = { accountId: requesterId, ticketId: ticket.id, text: "The transfer reference is ABC123.", attachmentUrls: [], idempotencyKey: "reply-retry-0001" };
+    const first = await handlePostCustomerReply(harness.ticketDependencies, command);
+    const eventCount = harness.ticketStore.events.length;
+    const replay = await handlePostCustomerReply(harness.ticketDependencies, command);
+
+    expect(replay.messages.filter((message) => message.idempotencyKey === command.idempotencyKey)).toHaveLength(1);
+    expect(replay.messageCount).toBe(first.messageCount);
+    expect(harness.ticketStore.events).toHaveLength(eventCount);
+    await expect(handlePostCustomerReply(harness.ticketDependencies, { ...command, text: "A different transfer reference." })).rejects.toMatchObject({ code: "IDEMPOTENCY_KEY_REUSED", status: 409 });
+  });
+
+  it("replays a committed attachment reply without requiring the media record to remain active", async () => {
+    const harness = await createSupportHarness();
+    const ticket = await openTicket(harness);
+    const mediaId = "0b6a3c9e-5a2d-4c3b-9f00-1d2e3f4a5b6c";
+    const url = `https://media.nantty.com/m/${mediaId}/proof.jpg`;
+    harness.media.add({ id: mediaId, ownerId: requesterId, purpose: "support", kind: "image", status: "ready" });
+    const command = { accountId: requesterId, ticketId: ticket.id, text: "Here is the transfer receipt.", attachmentUrls: [url], idempotencyKey: "reply-attachment-retry-1" };
+    await handlePostCustomerReply(harness.ticketDependencies, command);
+    const lookupsAfterCommit = harness.media.lookups;
+    harness.media.records.set(mediaId, { id: mediaId, ownerId: requesterId, purpose: "support", kind: "image", status: "deleted" });
+
+    const replay = await handlePostCustomerReply(harness.ticketDependencies, command);
+
+    expect(replay.messages.filter((message) => message.idempotencyKey === command.idempotencyKey)).toHaveLength(1);
+    expect(harness.media.lookups).toBe(lookupsAfterCommit);
   });
 
   it("resolves with a ticket.resolved event, queues the auto-FAQ, allows rating, reopens within 7 days and then closes", async () => {
@@ -92,11 +123,11 @@ describe("ticket lifecycle", () => {
     expect(harness.ticketStore.events.map((event) => event.eventType)).toEqual(["ticket.created", "ticket.replied", "ticket.resolved"]);
     expect((await handleRateTicket(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, score: 4, comment: "Quick" })).satisfactionScore).toBe(4);
     harness.advanceMinutes(60);
-    const reopened = await handlePostCustomerReply(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, text: "Still nothing.", attachmentUrls: [] });
+    const reopened = await handlePostCustomerReply(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, text: "Still nothing.", attachmentUrls: [], idempotencyKey: null });
     expect(reopened.status).toBe("awaiting_support");
     expect(reopened.history.map((entry) => entry.action)).toContain("support.ticket_reopened");
     await handleChangeTicketStatus(harness.ticketDependencies, { actor: staff, ticketId: ticket.id, status: "closed", reason: null });
-    await expect(handlePostCustomerReply(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, text: "hello?", attachmentUrls: [] })).rejects.toMatchObject({ code: "TICKET_CLOSED" });
+    await expect(handlePostCustomerReply(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, text: "hello?", attachmentUrls: [], idempotencyKey: null })).rejects.toMatchObject({ code: "TICKET_CLOSED" });
     await expect(handlePostStaffReply(harness.ticketDependencies, { staff, ticketId: ticket.id, body: "Hello again", isInternalNote: false, statusAfterReply: undefined })).rejects.toMatchObject({ code: "TICKET_CLOSED" });
   });
 
@@ -105,7 +136,7 @@ describe("ticket lifecycle", () => {
     const ticket = await openTicket(harness);
     await handlePostStaffReply(harness.ticketDependencies, { staff, ticketId: ticket.id, body: "This is sorted now, thank you for waiting.", isInternalNote: false, statusAfterReply: "resolved" });
     harness.advanceMinutes(8 * 24 * 60);
-    await expect(handlePostCustomerReply(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, text: "again", attachmentUrls: [] })).rejects.toMatchObject({ code: "TICKET_CLOSED" });
+    await expect(handlePostCustomerReply(harness.ticketDependencies, { accountId: requesterId, ticketId: ticket.id, text: "again", attachmentUrls: [], idempotencyKey: null })).rejects.toMatchObject({ code: "TICKET_CLOSED" });
     expect(await harness.ticketStore.closeResolvedTicketsBefore(new Date(harness.clock.now().getTime() - 7 * 86_400_000), harness.clock.now())).toBe(1);
   });
 

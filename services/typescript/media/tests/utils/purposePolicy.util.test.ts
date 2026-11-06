@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { purposePolicies } from "../../src/constants/purposePolicy.constant.js";
+import { purposePolicies, videoMimeTypes } from "../../src/constants/purposePolicy.constant.js";
 import { MediaError } from "../../src/errors/media.error.js";
 import { expectedChunkBytes, planUpload } from "../../src/utils/chunkPlan.util.js";
 import { requireUploadAllowed } from "../../src/utils/purposePolicy.util.js";
@@ -8,6 +8,22 @@ import { requireUploadAllowed } from "../../src/utils/purposePolicy.util.js";
 const mebibyte = 1024 * 1024;
 
 describe("upload allowlists per purpose", () => {
+  it("allows Story video MIME types up to 100 MiB and 60 seconds", () => {
+    const storyVideoRule = purposePolicies.story.rules.find((rule) => rule.kind === "video");
+
+    expect(storyVideoRule).toMatchObject({
+      mimeTypes: videoMimeTypes,
+      maximumBytes: 100 * mebibyte,
+      maximumDurationSeconds: 60,
+    });
+    for (const mimeType of videoMimeTypes) {
+      expect(requireUploadAllowed("story", mimeType, 100 * mebibyte).kind).toBe("video");
+    }
+    expect(() => requireUploadAllowed("story", "video/mp4", 100 * mebibyte + 1)).toThrow(
+      expect.objectContaining({ status: 413, code: "FILE_TOO_LARGE" }),
+    );
+  });
+
   it("accepts allowed type and size combinations", () => {
     expect(requireUploadAllowed("avatar", "image/jpeg", 2 * mebibyte).kind).toBe("image");
     expect(requireUploadAllowed("post", "video/mp4", 400 * mebibyte).kind).toBe("video");

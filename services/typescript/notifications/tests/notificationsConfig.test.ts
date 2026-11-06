@@ -38,3 +38,34 @@ describe("notifications email provider configuration", () => {
     expect(() => loadNotificationsConfigFromEnvironment()).toThrow(/EMAIL_PROVIDER must be either 'ses' or 'log'/);
   });
 });
+
+describe("notifications push provider configuration", () => {
+  it("keeps push delivery in log-only mode by default", () => {
+    stubConfiguration("ses");
+    vi.stubEnv("PUSH_PROVIDER", "log");
+    expect(loadNotificationsConfigFromEnvironment().pushProvider).toBe("log");
+  });
+
+  it("retains the existing Expo-only deployment mode", () => {
+    stubConfiguration("ses");
+    vi.stubEnv("PUSH_PROVIDER", "expo");
+    expect(loadNotificationsConfigFromEnvironment().pushProvider).toBe("expo");
+  });
+
+  it("requires all FCM secrets before enabling FCM or multi-provider delivery", () => {
+    stubConfiguration("ses");
+    vi.stubEnv("PUSH_PROVIDER", "fcm");
+    expect(() => loadNotificationsConfigFromEnvironment()).toThrow(/FCM_PROJECT_ID, FCM_CLIENT_EMAIL, and FCM_PRIVATE_KEY are required/);
+
+    vi.stubEnv("FCM_PROJECT_ID", "nantty-test");
+    vi.stubEnv("FCM_CLIENT_EMAIL", "push@example.test");
+    vi.stubEnv("FCM_PRIVATE_KEY", "secret-is-read-but-never-printed");
+    expect(loadNotificationsConfigFromEnvironment().fcm?.projectId).toBe("nantty-test");
+  });
+
+  it("fails closed for unknown push providers", () => {
+    stubConfiguration("ses");
+    vi.stubEnv("PUSH_PROVIDER", "firebase-unofficial");
+    expect(() => loadNotificationsConfigFromEnvironment()).toThrow(/PUSH_PROVIDER must be one of/);
+  });
+});

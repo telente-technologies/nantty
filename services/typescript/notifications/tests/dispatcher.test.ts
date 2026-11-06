@@ -85,7 +85,7 @@ describe("idempotency by event id", () => {
       supportInbox,
       logger: silentLogger,
     });
-    const command = { ...delivery, preferenceCategory: "account" as const, props: {}, attempt: 4 };
+    const command = { ...delivery, preferenceCategory: "auth" as const, props: {}, attempt: 4 };
 
     harness.jobQueue.failNext = true;
     await expect(deliveryHandler.execute(command)).rejects.toThrow("queue unavailable");
@@ -184,6 +184,71 @@ describe("push", () => {
     await harness.preferences.upsert("buyer1", "orders", { push: false });
     await handle("order.delivered");
     expect(harness.pushSender.sent).toHaveLength(1);
+  });
+
+  it("groups registrations by provider while preserving Expo as the omitted-provider default", async () => {
+    await harness.deviceTokens.register("buyer1", "ExponentPushToken[expo-device-token]", "ios");
+    await harness.deviceTokens.register("buyer1", "fcm-device-registration-token", "android", "fcm");
+
+    await handle("order.shipped");
+
+    expect(harness.pushSender.providers).toEqual(["expo", "fcm"]);
+    expect(harness.pushSender.sent.map((entry) => entry.tokens)).toEqual([
+      ["ExponentPushToken[expo-device-token]"],
+      ["fcm-device-registration-token"],
+    ]);
+  });
+
+  it("prunes only permanent unregistered Expo tokens and records token-safe failure diagnostics", async () => {
+    const invalidToken = "ExponentPushToken[invalid-device-token]";
+    const healthyToken = "ExponentPushToken[healthy-device-token]";
+    await harness.deviceTokens.register("buyer1", invalidToken, "ios");
+    await harness.deviceTokens.register("buyer1", healthyToken, "android");
+    harness.pushSender.nextResult = {
+      acceptedCount: 1,
+      failures: [{ token: invalidToken, classification: "permanent", code: "DeviceNotRegistered" }],
+    };
+
+    await handle("order.shipped");
+
+    expect(await harness.deviceTokens.listTokens("buyer1")).toEqual([healthyToken]);
+    const failed = await harness.deliveries.listFailedPushes(10);
+    expect(failed).toHaveLength(1);
+    expect(failed[0]).toMatchObject({ eventId: "evt-order.shipped", reason: "push_provider_failure:expo:permanent:DeviceNotRegistered:1" });
+    expect(JSON.stringify(failed)).not.toContain("buyer1");
+    expect(JSON.stringify(failed)).not.toContain("ExponentPushToken");
+  });
+
+  it("prunes only FCM UNREGISTERED tokens, not other permanent FCM errors", async () => {
+    const stale = "stale-fcm-registration-token";
+    await harness.deviceTokens.register("buyer1", stale, "android", "fcm");
+    harness.pushSender.nextResult = { acceptedCount: 0, failures: [{ token: stale, classification: "permanent", code: "UNREGISTERED" }] };
+
+    await handle("order.shipped");
+
+    expect(await harness.deviceTokens.listTokens("buyer1")).toEqual([]);
+    expect((await harness.deliveries.listFailedPushes(10))[0]?.reason).toBe("push_provider_failure:fcm:permanent:UNREGISTERED:1");
+  });
+
+  it("does not send or create failed-delivery records when the recipient opted out", async () => {
+    await harness.deviceTokens.register("buyer1", "ExponentPushToken[abcdefghij]", "ios");
+    await harness.preferences.upsert("buyer1", "orders", { push: false });
+
+    await handle("order.shipped");
+
+    expect(harness.pushSender.sent).toHaveLength(0);
+    expect(await harness.deliveries.listFailedPushes(10)).toEqual([]);
+  });
+
+  it("records log-adapter pushes as skipped rather than delivered", async () => {
+    await harness.deviceTokens.register("buyer1", "ExponentPushToken[log-only-token]", "ios");
+    harness.pushSender.nextResult = { acceptedCount: 0, failures: [], simulated: true };
+
+    await handle("order.shipped");
+
+    expect([...harness.deliveries.rows.values()].filter((row) => row.channel === "push")).toMatchObject([
+      { status: "skipped", skipReason: "push_provider_log_only" },
+    ]);
   });
 });
 
