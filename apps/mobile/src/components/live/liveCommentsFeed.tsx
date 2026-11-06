@@ -1,6 +1,6 @@
 import { MentionText } from "@/components/mentions/mentionText";
-import { useRef } from "react";
-import { ScrollView, StyleSheet, View, type ScrollViewInstance } from "react-native";
+import { useCallback } from "react";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, View, type ListRenderItemInfo } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { VerificationBadge } from "@/components/profile/verificationBadge";
@@ -13,7 +13,6 @@ import type { LiveComment } from "@/types";
 
 import { useLiveForeground, type LiveForeground } from "./liveSurface.constant";
 
-const VISIBLE_COMMENT_COUNT = 12;
 const FEED_MAX_HEIGHT = 232;
 const FADED_ROW_OPACITIES = [0.35, 0.6, 0.85];
 
@@ -63,41 +62,75 @@ function CommentRow({ comment, foreground, mentionInk }: { comment: LiveComment;
 export interface LiveCommentsFeedProps {
   readonly comments: readonly LiveComment[];
   readonly isShownOverVideo: boolean;
+  readonly canLoadOlder?: boolean;
+  readonly isLoadingOlder?: boolean;
+  readonly olderError?: boolean;
+  readonly onLoadOlder?: () => void;
+  readonly onRetryOlder?: () => void;
 }
 
-export function LiveCommentsFeed({ comments, isShownOverVideo }: LiveCommentsFeedProps) {
-  const scrollViewRef = useRef<ScrollViewInstance>(null);
+export function LiveCommentsFeed({ comments, isShownOverVideo, canLoadOlder = false, isLoadingOlder = false, olderError = false, onLoadOlder, onRetryOlder }: LiveCommentsFeedProps) {
   const foreground = useLiveForeground(isShownOverVideo);
   const { colors } = useTheme();
   const reduceMotion = useReducedMotionPreference();
-  const visibleComments = comments.filter((comment) => comment.kind !== "gift").slice(-VISIBLE_COMMENT_COUNT);
-  const fadeStartsAt = visibleComments.length > 5 ? 0 : FADED_ROW_OPACITIES.length;
+  // The source is newest-first; inverted FlatList keeps the newest row at the bottom.
+  const visibleComments = comments.filter((comment) => comment.kind !== "gift");
+  const fadeStartsAt = visibleComments.length > 5 ? Math.max(0, visibleComments.length - 3) : visibleComments.length;
   const mentionInk = isShownOverVideo ? palette.primary[100] : colors.link;
+  const renderComment = useCallback(({ item, index }: ListRenderItemInfo<LiveComment>) => {
+    // The list is newest-first. Fade only the three oldest rows, preserving full
+    // opacity for the newest comments at the bottom of the inverted list.
+    const fadeIndex = visibleComments.length - 1 - index;
+    const rowOpacity = index >= fadeStartsAt && fadeIndex >= 0 && fadeIndex < FADED_ROW_OPACITIES.length
+      ? FADED_ROW_OPACITIES[fadeIndex]
+      : 1;
+    const isSystemRow = item.kind === "joined" || item.kind === "follow";
+    return (
+      <Animated.View entering={reduceMotion ? undefined : FadeInDown.duration(220)} style={{ opacity: rowOpacity }}>
+        {isSystemRow ? <SystemRow comment={item} foreground={foreground} /> : <CommentRow comment={item} foreground={foreground} mentionInk={mentionInk} />}
+      </Animated.View>
+    );
+  }, [fadeStartsAt, foreground, mentionInk, reduceMotion, visibleComments.length]);
+
+  const historyControl = olderError ? (
+    <Pressable accessibilityRole="button" onPress={onRetryOlder} style={styles.historyControl}>
+      <Text size={11} color={foreground.inkMuted}>Couldn’t load earlier comments. Tap to retry.</Text>
+    </Pressable>
+  ) : isLoadingOlder ? (
+    <View style={styles.historyControl}><ActivityIndicator size="small" color={foreground.inkMuted} /></View>
+  ) : canLoadOlder ? (
+    <Pressable accessibilityRole="button" onPress={onLoadOlder} style={styles.historyControl}>
+      <Text size={11} color={foreground.inkMuted}>Scroll for earlier comments</Text>
+    </Pressable>
+  ) : undefined;
+
   return (
-    <ScrollView
-      ref={scrollViewRef}
+    <FlatList
+      data={visibleComments}
+      renderItem={renderComment}
+      keyExtractor={(comment) => comment.id}
+      inverted
       style={styles.feed}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
       accessibilityLabel="Live comments"
-      onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: !reduceMotion })}
-    >
-      {visibleComments.map((comment, index) => {
-        const rowOpacity = index >= fadeStartsAt && index < FADED_ROW_OPACITIES.length ? FADED_ROW_OPACITIES[index] : 1;
-        const isSystemRow = comment.kind === "joined" || comment.kind === "follow";
-        return (
-          <Animated.View key={comment.id} entering={reduceMotion ? undefined : FadeInDown.duration(220)} style={{ opacity: rowOpacity }}>
-            {isSystemRow ? <SystemRow comment={comment} foreground={foreground} /> : <CommentRow comment={comment} foreground={foreground} mentionInk={mentionInk} />}
-          </Animated.View>
-        );
-      })}
-    </ScrollView>
+      onEndReached={canLoadOlder ? onLoadOlder : undefined}
+      onEndReachedThreshold={0.35}
+      ListFooterComponent={historyControl}
+      maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
+      initialNumToRender={8}
+      maxToRenderPerBatch={8}
+      windowSize={5}
+      removeClippedSubviews
+      keyboardShouldPersistTaps="handled"
+    />
   );
 }
 
 const styles = StyleSheet.create({
   feed: { maxHeight: FEED_MAX_HEIGHT, flex: 1, maxWidth: 320 },
-  content: { gap: 6, justifyContent: "flex-end", flexGrow: 1, alignItems: "flex-start" },
+  content: { gap: 6, justifyContent: "flex-start", flexGrow: 1, alignItems: "flex-start" },
+  historyControl: { minHeight: 28, justifyContent: "center", alignItems: "center", alignSelf: "stretch" },
   commentRow: { flexDirection: "row", alignItems: "flex-start", gap: 8, paddingLeft: 4, paddingRight: 12, paddingVertical: 5, borderRadius: 16, maxWidth: "100%" },
   systemRow: { flexDirection: "row", alignItems: "center", gap: 6, paddingLeft: 4, paddingRight: 10, paddingVertical: 4, borderRadius: 999, maxWidth: "100%" },
   flexText: { flexShrink: 1 },

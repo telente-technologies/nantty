@@ -305,7 +305,15 @@ export function LiveScreen({ navigation, route }: MainScreenProps<"Live">) {
       ) : null}
       <View style={styles.flex} />
       <View style={styles.bottomRow}>
-        <LiveCommentsFeed comments={live.comments.data?.data ?? []} isShownOverVideo={isShownOverVideo} />
+        <LiveCommentsFeed
+          comments={live.comments.data?.data ?? []}
+          isShownOverVideo={isShownOverVideo}
+          canLoadOlder={live.comments.canLoadOlder}
+          isLoadingOlder={live.comments.isFetchingOlder}
+          olderError={live.comments.olderError}
+          onLoadOlder={live.comments.loadOlder}
+          onRetryOlder={live.comments.retryOlder}
+        />
         {isSponsoredLive ? null : <LiveReactionRail expanded={reactionsExpanded} onReact={live.sendReaction} isShownOverVideo={isShownOverVideo} />}
       </View>
       <View style={isShownOverVideo ? null : styles.commentBarArea}>

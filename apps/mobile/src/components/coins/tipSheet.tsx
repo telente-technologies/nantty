@@ -31,6 +31,7 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
   const queryClient = useQueryClient();
   const [selectedPresetCoins, setSelectedPresetCoins] = useState<number | null>(PRESET_TIP_AMOUNTS[1]);
   const [customCoins, setCustomCoins] = useState("");
+  const [donationNote, setDonationNote] = useState("");
   const [isBuyCoinsOpen, setIsBuyCoinsOpen] = useState(false);
   const pendingTipIdempotencyKey = useRef<string | null>(null);
   const coins = customCoins ? Number.parseInt(customCoins, 10) : (selectedPresetCoins ?? 0);
@@ -41,7 +42,13 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
   const sendTip = useMutation({
     mutationFn: () => {
       pendingTipIdempotencyKey.current ??= generateIdempotencyKey();
-      return coinsService.sendTip({ targetType: target!.targetType, targetId: target!.targetId, coins }, pendingTipIdempotencyKey.current);
+      const note = donationNote.trim();
+      return coinsService.sendTip({
+        targetType: target!.targetType,
+        targetId: target!.targetId,
+        coins,
+        ...(isLiveDonation && note ? { note } : {}),
+      }, pendingTipIdempotencyKey.current);
     },
     onSuccess: () => {
       pendingTipIdempotencyKey.current = null;
@@ -60,6 +67,7 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
 
   const closeAndReset = () => {
     changeAmount(() => setCustomCoins(""));
+    setDonationNote("");
     onClose();
   };
 
@@ -103,6 +111,19 @@ export function TipSheet({ target, onClose }: { target: TipTarget | null; onClos
                 onChangeText={(text) => changeAmount(() => setCustomCoins(text.replace(/[^0-9]/g, "").slice(0, 6)))}
                 keyboardType="number-pad"
               />
+              {isLiveDonation ? (
+                <TextField
+                  label="Add a note (optional)"
+                  testID="live-tip-note-field"
+                  value={donationNote}
+                  onChangeText={(value) => setDonationNote(Array.from(value).slice(0, 280).join(""))}
+                  multiline
+                  maxLength={280}
+                  textAlignVertical="top"
+                  boxStyle={{ height: 88, alignItems: "flex-start", paddingVertical: 8 }}
+                  accessibilityHint="Add a message for the live host, up to 280 characters."
+                />
+              ) : null}
               {sendTip.isError ? (
                 <Text size={12} lineHeight={16.8} color={colors.error}>
                   {describeCoinError(sendTip.error)}

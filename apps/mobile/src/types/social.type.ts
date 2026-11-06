@@ -252,6 +252,7 @@ export interface SendTipInput {
   readonly targetType: TipTargetType;
   readonly targetId: ID;
   readonly coins: number;
+  readonly note?: string;
 }
 
 export interface TipReceipt {

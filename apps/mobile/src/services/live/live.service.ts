@@ -16,7 +16,7 @@ export const liveService = {
     api.patch<{ readonly liveId: string; readonly giftsEnabled: boolean }>(`/api/v1/lives/${liveId}/coin-support`, { enabled }, { idempotencyKey }),
   joinLiveSession: (liveId: string) => api.post<void>(`/api/v1/lives/${liveId}/join`),
   leaveLiveSession: (liveId: string) => api.post<void>(`/api/v1/lives/${liveId}/leave`),
-  fetchLiveComments: (liveId: string, cursor?: string) => api.get<Page<LiveComment>>(`/api/v1/lives/${liveId}/comments`, { cursor }),
+  fetchLiveComments: (liveId: string, cursor?: string) => api.get<Page<LiveComment>>(`/api/v1/lives/${liveId}/comments`, { cursor, order: "newest" }),
   sendCommentToLive: (liveId: string, text: string) => api.post<LiveComment>(`/api/v1/lives/${liveId}/comments`, { text }),
   sendReactionToLive: (liveId: string, emoji: string) => api.post<void>(`/api/v1/lives/${liveId}/reactions`, { emoji }),
   startLiveSessionWithTitle: (title: string, category: LiveCategory, monetization?: LiveMonetizationInput, storeId?: string | null) =>
