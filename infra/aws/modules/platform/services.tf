@@ -13,7 +13,7 @@ locals {
     go-commerce = {
       port         = 8080, cpu = 512, memory = 1024, health = "/healthz", ready = "/readyz", database = true, rabbit = true, min = 2, max = 10
       public_rules = [], internal = true, request_target = 0, valkey = true, node = false
-      secret_keys  = ["ADDRESS_PHONE_ENCRYPTION_KEY", "CATALOG_INTERNAL_API_TOKEN", "ORDERS_MONEY_GRPC_TOKEN", "SELLER_PLAN_ENTITLEMENTS_TOKEN", "MONEY_INTERNAL_API_TOKEN", "CATALOG_SOCIAL_INTERNAL_TOKEN", "ADMIN_INTERNAL_API_TOKEN", "ADS_INTERNAL_SHARED_SECRET", "CATALOG_DATA_ENCRYPTION_KEY", "USERS_INTERNAL_API_TOKEN", "MEDIA_INTERNAL_TOKEN", "ORDERS_SOCIAL_INTERNAL_TOKEN"]
+      secret_keys  = ["ADDRESS_PHONE_ENCRYPTION_KEY", "CATALOG_INTERNAL_API_TOKEN", "ORDERS_MONEY_GRPC_TOKEN", "SELLER_PLAN_ENTITLEMENTS_TOKEN", "MONEY_INTERNAL_API_TOKEN", "CATALOG_SOCIAL_INTERNAL_TOKEN", "ADMIN_INTERNAL_API_TOKEN", "ADS_INTERNAL_SHARED_SECRET", "CATALOG_DATA_ENCRYPTION_KEY", "USERS_INTERNAL_API_TOKEN", "MEDIA_INTERNAL_TOKEN", "ORDERS_SOCIAL_INTERNAL_TOKEN", "INTELLIGENCE_SHARED_SECRET", "INTELLIGENCE_ID_HASH_SECRET"]
     }
     go-money = {
       port         = 8080, cpu = 1024, memory = 2048, health = "/healthz", ready = "/readyz", database = true, rabbit = true, min = 2, max = 8, extra_ports = [9103]
