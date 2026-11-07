@@ -106,4 +106,8 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
         "nanttyX3dhFixture",
         rootProject.file("../../../packages/chatCrypto/fixtures/x3dh-v1.json").absolutePath,
     )
+    systemProperty(
+        "nanttyGroupAttributesFixture",
+        rootProject.file("../../../packages/chatCrypto/fixtures/group-attributes-v1.json").absolutePath,
+    )
 }
