@@ -16,3 +16,33 @@ func TestMartTileServesOnlyProductCreativesInTheMartPlacement(t *testing.T) {
 		}
 	}
 }
+
+func TestFeedProductSlotServesOnlyProductCreativesInFeedPlacement(t *testing.T) {
+	placement, known := PlacementForSlotKind(SlotFeedProduct)
+	if !known || placement != "feed" {
+		t.Fatalf("feedProduct must map to the feed placement, got %q %v", placement, known)
+	}
+	if !CreativeFitsSlotKind("product", SlotFeedProduct) {
+		t.Fatal("product creatives must fit the feed product slot")
+	}
+	for _, format := range []string{"feed_post", "clip", "story", "live", "store"} {
+		if CreativeFitsSlotKind(format, SlotFeedProduct) {
+			t.Fatalf("%s must not serve in the feed product slot", format)
+		}
+	}
+}
+
+func TestSearchTileServesOnlyProductCreativesInSearchPlacement(t *testing.T) {
+	placement, known := PlacementForSlotKind(SlotSearchTile)
+	if !known || placement != "search" {
+		t.Fatalf("searchTile must map to the search placement, got %q %v", placement, known)
+	}
+	if !CreativeFitsSlotKind("product", SlotSearchTile) {
+		t.Fatal("product creatives must fit the search tile")
+	}
+	for _, format := range []string{"feed_post", "clip", "story", "live", "store"} {
+		if CreativeFitsSlotKind(format, SlotSearchTile) {
+			t.Fatalf("%s must not serve in the search tile", format)
+		}
+	}
+}

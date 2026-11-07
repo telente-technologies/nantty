@@ -36,6 +36,9 @@ type CatalogSettings struct {
 	MartCountries          []string
 	AdsInternalUrl         string
 	AdsInternalSecret      string
+	IntelligenceUrl        string
+	IntelligenceSecret     string
+	IntelligenceIdHashKey  string
 }
 
 func (settings CatalogSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -67,6 +70,9 @@ func ReadCatalogSettingsFromEnvironment(reader *platformconfig.EnvironmentReader
 		MartCountries:          reader.ReadCommaSeparatedListOrDefault("CATALOG_MART_COUNTRIES", []string{"NG", "GH", "KE", "ZA", "GB", "US"}),
 		AdsInternalUrl:         reader.ReadStringOrDefault("CATALOG_ADS_INTERNAL_URL", ""),
 		AdsInternalSecret:      reader.ReadStringOrDefault("ADS_INTERNAL_SHARED_SECRET", ""),
+		IntelligenceUrl:        reader.ReadStringOrDefault("INTELLIGENCE_URL", ""),
+		IntelligenceSecret:     reader.ReadStringOrDefault("INTELLIGENCE_SHARED_SECRET", ""),
+		IntelligenceIdHashKey:  reader.ReadStringOrDefault("INTELLIGENCE_ID_HASH_SECRET", ""),
 	}
 	settings.DataEncryptionKey = ReadDataEncryptionKey(reader, settings.IsProduction())
 	if settings.IsProduction() {

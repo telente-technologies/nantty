@@ -2,6 +2,8 @@ package dtos
 
 type InviteGuestRequest struct {
 	UserId string `json:"userId"`
+	Role   string `json:"role,omitempty"`
+	Title  string `json:"title,omitempty"`
 }
 
 type MuteRequest struct {

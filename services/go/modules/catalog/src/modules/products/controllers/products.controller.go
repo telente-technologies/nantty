@@ -14,6 +14,7 @@ import (
 	setproductreaction "nantty/modules/catalog/src/modules/products/commands/setProductReaction"
 	getmarthome "nantty/modules/catalog/src/modules/products/queries/getMartHome"
 	getproductdetail "nantty/modules/catalog/src/modules/products/queries/getProductDetail"
+	getrecommendedproducts "nantty/modules/catalog/src/modules/products/queries/getRecommendedProducts"
 	listproducts "nantty/modules/catalog/src/modules/products/queries/listProducts"
 	"nantty/modules/catalog/src/utils"
 	"nantty/platform/httpserver"
@@ -43,6 +44,11 @@ func viewerOf(request *http.Request) *uuid.UUID {
 func (controller ProductsController) GetMartHome(writer http.ResponseWriter, request *http.Request) {
 	home, err := (getmarthome.Handler{Container: controller.Container}).Execute(request.Context(), getmarthome.Query{})
 	controller.respond(writer, request, http.StatusOK, home, err)
+}
+
+func (controller ProductsController) GetRecommendedProducts(writer http.ResponseWriter, request *http.Request) {
+	products, err := (getrecommendedproducts.Handler{Container: controller.Container}).Execute(request.Context(), viewerOf(request))
+	controller.respond(writer, request, http.StatusOK, products, err)
 }
 
 func (controller ProductsController) listing(featured bool) http.HandlerFunc {

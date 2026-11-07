@@ -15,6 +15,7 @@ const (
 	SlotClipBetween = "clipBetween"
 	SlotMartTile    = "martTile"
 	SlotSearchTile  = "searchTile"
+	SlotFeedProduct = "feedProduct"
 	SlotStory       = "story"
 	SlotLiveBreak   = "liveBreak"
 
@@ -23,12 +24,12 @@ const (
 
 var placementBySlotKind = map[string]string{
 	SlotFeedPost: "feed", SlotPreRoll: "feed", SlotPostRoll: "feed", SlotClipBetween: "clips",
-	SlotMartTile: "mart", SlotSearchTile: "search", SlotStory: "stories", SlotLiveBreak: "live", SlotFeedCommentThread: "feed",
+	SlotMartTile: "mart", SlotSearchTile: "search", SlotFeedProduct: "feed", SlotStory: "stories", SlotLiveBreak: "live", SlotFeedCommentThread: "feed",
 }
 
 var creativeFormatsBySlotKind = map[string][]string{
 	SlotFeedPost: {"feed_post", "live", "product", "store"}, SlotPreRoll: {"feed_post", "clip"}, SlotPostRoll: {"feed_post", "clip"},
-	SlotClipBetween: {"clip", "live"}, SlotMartTile: {"product"}, SlotSearchTile: {"product"}, SlotStory: {"story", "clip"}, SlotLiveBreak: {"live"},
+	SlotClipBetween: {"clip", "live"}, SlotMartTile: {"product"}, SlotSearchTile: {"product"}, SlotFeedProduct: {"product"}, SlotStory: {"story", "clip"}, SlotLiveBreak: {"live"},
 	SlotFeedCommentThread: {"feed_post", "product", "store"},
 }
 

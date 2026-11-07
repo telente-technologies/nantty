@@ -54,7 +54,12 @@ func (controller StageController) InviteGuest(writer http.ResponseWriter, reques
 		if err != nil {
 			return err
 		}
-		return (inviteguesttostage.Handler{Container: controller.Container}).Execute(request.Context(), inviteguesttostage.Command{Actor: actor, LiveId: liveId, GuestUserId: uuid.MustParse(body.UserId)})
+		if body.Role == "" {
+			body.Role = "speaker"
+		}
+		return (inviteguesttostage.Handler{Container: controller.Container}).Execute(request.Context(), inviteguesttostage.Command{
+			Actor: actor, LiveId: liveId, GuestUserId: uuid.MustParse(body.UserId), StageRole: body.Role, StageTitle: body.Title,
+		})
 	})
 }
 

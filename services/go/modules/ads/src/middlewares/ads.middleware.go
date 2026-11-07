@@ -34,6 +34,13 @@ func Idempotent(deployed *container.Container) func(http.HandlerFunc) http.Handl
 	}
 }
 
+// OptionallyIdempotent protects replaying clients while keeping older clients compatible.
+func OptionallyIdempotent(deployed *container.Container) func(http.HandlerFunc) http.Handler {
+	return func(handler http.HandlerFunc) http.Handler {
+		return jwtauth.RequireVerifiedAccessToken(deployed.AccessVerifier)(idempotency.ReplayWhenIdempotencyKeyPresent(deployed.IdempotencyStore, idempotency.DefaultTimeToLive, deployed.Logger)(handler))
+	}
+}
+
 func requireIdempotencyKey(deployed *container.Container, handler http.HandlerFunc) http.Handler {
 	if deployed.IdempotencyStore != nil || deployed.Settings.IsProduction() {
 		return idempotency.RequireIdempotencyKeyAndReplayCompletedResponses(deployed.IdempotencyStore, idempotency.MoneyMovingTimeToLive, deployed.Logger)(handler)

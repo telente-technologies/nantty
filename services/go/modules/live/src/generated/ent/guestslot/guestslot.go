@@ -23,6 +23,10 @@ const (
 	FieldUserID = "user_id"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
+	// FieldStageRole holds the string denoting the stage_role field in the database.
+	FieldStageRole = "stage_role"
+	// FieldStageTitle holds the string denoting the stage_title field in the database.
+	FieldStageTitle = "stage_title"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
 	// FieldExpiresAt holds the string denoting the expires_at field in the database.
@@ -54,6 +58,8 @@ var Columns = []string{
 	FieldLiveID,
 	FieldUserID,
 	FieldRole,
+	FieldStageRole,
+	FieldStageTitle,
 	FieldState,
 	FieldExpiresAt,
 	FieldStateDeadlineAt,
@@ -79,6 +85,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// StageTitleValidator is a validator for the "stage_title" field. It is called by the builders before save.
+	StageTitleValidator func(string) error
 	// DefaultAudioMutedByHost holds the default value on creation for the "audio_muted_by_host" field.
 	DefaultAudioMutedByHost bool
 	// DefaultVideoMutedByHost holds the default value on creation for the "video_muted_by_host" field.
@@ -114,6 +122,32 @@ func RoleValidator(r Role) error {
 		return nil
 	default:
 		return fmt.Errorf("guestslot: invalid enum value for role field: %q", r)
+	}
+}
+
+// StageRole defines the type for the "stage_role" enum field.
+type StageRole string
+
+// StageRoleSpeaker is the default value of the StageRole enum.
+const DefaultStageRole = StageRoleSpeaker
+
+// StageRole values.
+const (
+	StageRoleSpeaker StageRole = "speaker"
+	StageRoleCohost  StageRole = "cohost"
+)
+
+func (sr StageRole) String() string {
+	return string(sr)
+}
+
+// StageRoleValidator is a validator for the "stage_role" field enum values. It is called by the builders before save.
+func StageRoleValidator(sr StageRole) error {
+	switch sr {
+	case StageRoleSpeaker, StageRoleCohost:
+		return nil
+	default:
+		return fmt.Errorf("guestslot: invalid enum value for stage_role field: %q", sr)
 	}
 }
 
@@ -177,6 +211,16 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 // ByRole orders the results by the role field.
 func ByRole(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRole, opts...).ToFunc()
+}
+
+// ByStageRole orders the results by the stage_role field.
+func ByStageRole(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStageRole, opts...).ToFunc()
+}
+
+// ByStageTitle orders the results by the stage_title field.
+func ByStageTitle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStageTitle, opts...).ToFunc()
 }
 
 // ByState orders the results by the state field.

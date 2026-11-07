@@ -271,6 +271,8 @@ var (
 		{Name: "live_id", Type: field.TypeUUID},
 		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"host", "guest"}, Default: "guest"},
+		{Name: "stage_role", Type: field.TypeEnum, Enums: []string{"speaker", "cohost"}, Default: "speaker"},
+		{Name: "stage_title", Type: field.TypeString, Nullable: true, Size: 32},
 		{Name: "state", Type: field.TypeEnum, Enums: []string{"invited", "joining", "onStage", "reconnecting", "left", "removed", "declined", "expired", "cancelled", "failed"}, Default: "invited"},
 		{Name: "expires_at", Type: field.TypeTime},
 		{Name: "state_deadline_at", Type: field.TypeTime, Nullable: true},
@@ -299,17 +301,17 @@ var (
 			{
 				Name:    "guestslot_live_id_state",
 				Unique:  false,
-				Columns: []*schema.Column{GuestSlotsColumns[2], GuestSlotsColumns[5]},
+				Columns: []*schema.Column{GuestSlotsColumns[2], GuestSlotsColumns[7]},
 			},
 			{
 				Name:    "guestslot_state_expires_at",
 				Unique:  false,
-				Columns: []*schema.Column{GuestSlotsColumns[5], GuestSlotsColumns[6]},
+				Columns: []*schema.Column{GuestSlotsColumns[7], GuestSlotsColumns[8]},
 			},
 			{
 				Name:    "guestslot_state_state_deadline_at",
 				Unique:  false,
-				Columns: []*schema.Column{GuestSlotsColumns[5], GuestSlotsColumns[7]},
+				Columns: []*schema.Column{GuestSlotsColumns[7], GuestSlotsColumns[9]},
 			},
 		},
 	}

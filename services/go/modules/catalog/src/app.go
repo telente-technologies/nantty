@@ -53,16 +53,17 @@ import (
 )
 
 type Collaborators struct {
-	Verifier          *jwtauth.AccessTokenVerifier
-	Publisher         platformevents.DomainEventPublisher
-	Staff             container.StaffVerifiers
-	Audit             interfaces.AuditTrail
-	Identity          interfaces.IdentityDirectory
-	PrivateMedia      interfaces.PrivateMediaSigner
-	StoreFollows      interfaces.StoreFollowStats
-	StoreFollowWrites interfaces.StoreFollowMutations
-	MartAds           interfaces.MartAdDecider
-	Linked            interfaces.LinkedProfileRegistry
+	Verifier           *jwtauth.AccessTokenVerifier
+	Publisher          platformevents.DomainEventPublisher
+	Staff              container.StaffVerifiers
+	Audit              interfaces.AuditTrail
+	Identity           interfaces.IdentityDirectory
+	PrivateMedia       interfaces.PrivateMediaSigner
+	StoreFollows       interfaces.StoreFollowStats
+	StoreFollowWrites  interfaces.StoreFollowMutations
+	MartAds            interfaces.MartAdDecider
+	ProductRecommender interfaces.ProductRecommender
+	Linked             interfaces.LinkedProfileRegistry
 }
 
 type Module struct {
@@ -101,7 +102,8 @@ func NewCatalogModule(ctx context.Context, dependencies servicemodule.Dependenci
 		Identity:     integrations.NewHttpIdentityDirectory(settings.AdminInternalUrl, settings.UsersInternalToken),
 		PrivateMedia: integrations.NewHttpPrivateMediaSigner(settings.MediaInternalUrl, settings.MediaInternalToken),
 		StoreFollows: storeFollows, StoreFollowWrites: storeFollows,
-		MartAds: integrations.NewHttpMartAds(settings.AdsInternalUrl, settings.AdsInternalSecret),
+		MartAds:            integrations.NewHttpMartAds(settings.AdsInternalUrl, settings.AdsInternalSecret),
+		ProductRecommender: integrations.NewHttpProductRecommender(settings.IntelligenceUrl, settings.IntelligenceSecret, settings.IntelligenceIdHashKey),
 	}, dependencies)
 }
 
@@ -124,7 +126,7 @@ func StartCatalogModuleWithSettings(ctx context.Context, settings configs.Catalo
 		Client: ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database))), Database: database,
 		Users: usersdirectory.Reader{Database: database, Schema: "users"}, Rates: &viewerregion.RateReader{Database: database, Schema: "currency"}, Settings: settings, Logger: logger, Now: time.Now,
 		AccessVerifier: collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger),
-		Staff: collaborators.Staff, Audit: collaborators.Audit, Identity: collaborators.Identity, PrivateMedia: collaborators.PrivateMedia, StoreFollows: collaborators.StoreFollows, StoreFollowWrites: collaborators.StoreFollowWrites, MartAds: collaborators.MartAds,
+		Staff: collaborators.Staff, Audit: collaborators.Audit, Identity: collaborators.Identity, PrivateMedia: collaborators.PrivateMedia, StoreFollows: collaborators.StoreFollows, StoreFollowWrites: collaborators.StoreFollowWrites, MartAds: collaborators.MartAds, ProductRecommender: collaborators.ProductRecommender,
 		LinkedProfiles: collaborators.Linked,
 	}
 	if module.Container.LinkedProfiles == nil {

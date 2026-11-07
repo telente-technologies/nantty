@@ -107,7 +107,7 @@ func (service *LiveService) attachSlots(view *types.LiveStageView, slots []*ent.
 				view.MyRole = "guest"
 			}
 			view.Streamers = append(view.Streamers, types.StageStreamer{
-				SlotId: slot.ID.String(), User: summaries[slot.UserID], Role: string(slot.Role), State: string(slot.State),
+				SlotId: slot.ID.String(), User: summaries[slot.UserID], Role: string(slot.Role), StageRole: string(slot.StageRole), Title: stageSlotTitle(slot), State: string(slot.State),
 				AudioMuted: slot.AudioMutedByHost || slot.AudioMutedBySelf, VideoMuted: slot.VideoMutedByHost || slot.VideoMutedBySelf,
 				GiftEligible: !forfeited[slot.UserID], IsCreatorProgramMember: participants[slot.UserID].IsCreatorProgramMember, Position: position,
 			})
@@ -126,10 +126,17 @@ func (service *LiveService) attachSlots(view *types.LiveStageView, slots []*ent.
 
 func presentGuestSlot(slot *ent.GuestSlot, user types.UserSummary, position int) types.GuestSlotView {
 	return types.GuestSlotView{
-		Id: slot.ID.String(), LiveId: slot.LiveID.String(), User: user, State: string(slot.State), InvitedAt: formatTime(slot.CreatedAt),
+		Id: slot.ID.String(), LiveId: slot.LiveID.String(), User: user, StageRole: string(slot.StageRole), Title: stageSlotTitle(slot), State: string(slot.State), InvitedAt: formatTime(slot.CreatedAt),
 		ExpiresAt: formatTime(slot.ExpiresAt), JoinedAt: formatOptionalTime(slot.JoinedAt), LeftAt: formatOptionalTime(slot.LeftAt),
 		AudioMutedByHost: slot.AudioMutedByHost, VideoMutedByHost: slot.VideoMutedByHost, Position: position,
 	}
+}
+
+func stageSlotTitle(slot *ent.GuestSlot) string {
+	if slot.StageTitle == nil {
+		return ""
+	}
+	return *slot.StageTitle
 }
 
 func (service *LiveService) attachJoinRequests(view *types.LiveStageView, requests []*ent.JoinRequest, summaries map[uuid.UUID]types.UserSummary, viewer *uuid.UUID, hostId uuid.UUID) {

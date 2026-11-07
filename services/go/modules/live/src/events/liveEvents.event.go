@@ -134,6 +134,8 @@ type GuestInvitedEventData struct {
 	LiveId    string      `json:"liveId"`
 	UserId    string      `json:"userId"`
 	SlotId    string      `json:"slotId"`
+	StageRole string      `json:"stageRole"`
+	Title     string      `json:"title,omitempty"`
 	Live      InvitedLive `json:"live"`
 	ExpiresAt string      `json:"expiresAt"`
 }

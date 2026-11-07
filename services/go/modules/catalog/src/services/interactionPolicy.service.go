@@ -16,12 +16,15 @@ type InteractionInput struct {
 }
 
 type InteractionActor struct {
-	AccountId string
-	SessionId string
+	AccountId       string
+	SessionId       string
+	IdHashSecret    string
+	IntelligenceKey string
 }
 
 var personalizationEvents = map[string]bool{
-	"product.viewed": true, "product.clicked": true, "search.performed": true, "seller.viewed": true, "category.viewed": true,
+	"product.viewed": true, "product.clicked": true, "product.addedToCart": true, "product.removedFromCart": true,
+	"search.performed": true, "seller.viewed": true, "category.viewed": true,
 }
 
 var acceptedFromClients = map[string]bool{
@@ -46,6 +49,12 @@ func BuildInteractionEventData(input InteractionInput, actor InteractionActor, c
 		}
 	}
 	personalized := !personalizationEvents[input.Event] || consent.Personalization
+	if personalized && (input.Event == "search.performed" || (input.Event == "product.clicked" && data["surface"] == "search")) {
+		if query, ok := data["query"].(string); ok {
+			data["queryHash"] = HashSearchQuery(query, actor.IdHashSecret, actor.IntelligenceKey)
+			delete(data, "query")
+		}
+	}
 	data["personalized"] = personalized
 	if personalized && actor.AccountId != "" {
 		data["actorId"] = actor.AccountId

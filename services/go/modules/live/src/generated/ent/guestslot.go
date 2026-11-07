@@ -26,6 +26,10 @@ type GuestSlot struct {
 	UserID uuid.UUID `json:"user_id,omitempty"`
 	// Role holds the value of the "role" field.
 	Role guestslot.Role `json:"role,omitempty"`
+	// StageRole holds the value of the "stage_role" field.
+	StageRole guestslot.StageRole `json:"stage_role,omitempty"`
+	// StageTitle holds the value of the "stage_title" field.
+	StageTitle *string `json:"stage_title,omitempty"`
 	// State holds the value of the "state" field.
 	State guestslot.State `json:"state,omitempty"`
 	// ExpiresAt holds the value of the "expires_at" field.
@@ -56,7 +60,7 @@ func (*GuestSlot) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case guestslot.FieldAudioMutedByHost, guestslot.FieldVideoMutedByHost, guestslot.FieldAudioMutedBySelf, guestslot.FieldVideoMutedBySelf:
 			values[i] = new(sql.NullBool)
-		case guestslot.FieldRole, guestslot.FieldState, guestslot.FieldEndReason:
+		case guestslot.FieldRole, guestslot.FieldStageRole, guestslot.FieldStageTitle, guestslot.FieldState, guestslot.FieldEndReason:
 			values[i] = new(sql.NullString)
 		case guestslot.FieldCreatedAt, guestslot.FieldExpiresAt, guestslot.FieldStateDeadlineAt, guestslot.FieldJoinedAt, guestslot.FieldLeftAt:
 			values[i] = new(sql.NullTime)
@@ -106,6 +110,19 @@ func (_m *GuestSlot) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field role", values[i])
 			} else if value.Valid {
 				_m.Role = guestslot.Role(value.String)
+			}
+		case guestslot.FieldStageRole:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field stage_role", values[i])
+			} else if value.Valid {
+				_m.StageRole = guestslot.StageRole(value.String)
+			}
+		case guestslot.FieldStageTitle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field stage_title", values[i])
+			} else if value.Valid {
+				_m.StageTitle = new(string)
+				*_m.StageTitle = value.String
 			}
 		case guestslot.FieldState:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -218,6 +235,14 @@ func (_m *GuestSlot) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("role=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Role))
+	builder.WriteString(", ")
+	builder.WriteString("stage_role=")
+	builder.WriteString(fmt.Sprintf("%v", _m.StageRole))
+	builder.WriteString(", ")
+	if v := _m.StageTitle; v != nil {
+		builder.WriteString("stage_title=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("state=")
 	builder.WriteString(fmt.Sprintf("%v", _m.State))

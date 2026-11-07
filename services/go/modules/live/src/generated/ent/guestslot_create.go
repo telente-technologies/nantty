@@ -64,6 +64,34 @@ func (_c *GuestSlotCreate) SetNillableRole(v *guestslot.Role) *GuestSlotCreate {
 	return _c
 }
 
+// SetStageRole sets the "stage_role" field.
+func (_c *GuestSlotCreate) SetStageRole(v guestslot.StageRole) *GuestSlotCreate {
+	_c.mutation.SetStageRole(v)
+	return _c
+}
+
+// SetNillableStageRole sets the "stage_role" field if the given value is not nil.
+func (_c *GuestSlotCreate) SetNillableStageRole(v *guestslot.StageRole) *GuestSlotCreate {
+	if v != nil {
+		_c.SetStageRole(*v)
+	}
+	return _c
+}
+
+// SetStageTitle sets the "stage_title" field.
+func (_c *GuestSlotCreate) SetStageTitle(v string) *GuestSlotCreate {
+	_c.mutation.SetStageTitle(v)
+	return _c
+}
+
+// SetNillableStageTitle sets the "stage_title" field if the given value is not nil.
+func (_c *GuestSlotCreate) SetNillableStageTitle(v *string) *GuestSlotCreate {
+	if v != nil {
+		_c.SetStageTitle(*v)
+	}
+	return _c
+}
+
 // SetState sets the "state" field.
 func (_c *GuestSlotCreate) SetState(v guestslot.State) *GuestSlotCreate {
 	_c.mutation.SetState(v)
@@ -253,6 +281,10 @@ func (_c *GuestSlotCreate) defaults() {
 		v := guestslot.DefaultRole
 		_c.mutation.SetRole(v)
 	}
+	if _, ok := _c.mutation.StageRole(); !ok {
+		v := guestslot.DefaultStageRole
+		_c.mutation.SetStageRole(v)
+	}
 	if _, ok := _c.mutation.State(); !ok {
 		v := guestslot.DefaultState
 		_c.mutation.SetState(v)
@@ -296,6 +328,19 @@ func (_c *GuestSlotCreate) check() error {
 	if v, ok := _c.mutation.Role(); ok {
 		if err := guestslot.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "GuestSlot.role": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.StageRole(); !ok {
+		return &ValidationError{Name: "stage_role", err: errors.New(`ent: missing required field "GuestSlot.stage_role"`)}
+	}
+	if v, ok := _c.mutation.StageRole(); ok {
+		if err := guestslot.StageRoleValidator(v); err != nil {
+			return &ValidationError{Name: "stage_role", err: fmt.Errorf(`ent: validator failed for field "GuestSlot.stage_role": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.StageTitle(); ok {
+		if err := guestslot.StageTitleValidator(v); err != nil {
+			return &ValidationError{Name: "stage_title", err: fmt.Errorf(`ent: validator failed for field "GuestSlot.stage_title": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.State(); !ok {
@@ -372,6 +417,14 @@ func (_c *GuestSlotCreate) createSpec() (*GuestSlot, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Role(); ok {
 		_spec.SetField(guestslot.FieldRole, field.TypeEnum, value)
 		_node.Role = value
+	}
+	if value, ok := _c.mutation.StageRole(); ok {
+		_spec.SetField(guestslot.FieldStageRole, field.TypeEnum, value)
+		_node.StageRole = value
+	}
+	if value, ok := _c.mutation.StageTitle(); ok {
+		_spec.SetField(guestslot.FieldStageTitle, field.TypeString, value)
+		_node.StageTitle = &value
 	}
 	if value, ok := _c.mutation.State(); ok {
 		_spec.SetField(guestslot.FieldState, field.TypeEnum, value)
@@ -637,6 +690,12 @@ func (u *GuestSlotUpsertOne) UpdateNewValues() *GuestSlotUpsertOne {
 		}
 		if _, exists := u.create.mutation.Role(); exists {
 			s.SetIgnore(guestslot.FieldRole)
+		}
+		if _, exists := u.create.mutation.StageRole(); exists {
+			s.SetIgnore(guestslot.FieldStageRole)
+		}
+		if _, exists := u.create.mutation.StageTitle(); exists {
+			s.SetIgnore(guestslot.FieldStageTitle)
 		}
 	}))
 	return u
@@ -1031,6 +1090,12 @@ func (u *GuestSlotUpsertBulk) UpdateNewValues() *GuestSlotUpsertBulk {
 			}
 			if _, exists := b.mutation.Role(); exists {
 				s.SetIgnore(guestslot.FieldRole)
+			}
+			if _, exists := b.mutation.StageRole(); exists {
+				s.SetIgnore(guestslot.FieldStageRole)
+			}
+			if _, exists := b.mutation.StageTitle(); exists {
+				s.SetIgnore(guestslot.FieldStageTitle)
 			}
 		}
 	}))

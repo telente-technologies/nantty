@@ -70,6 +70,11 @@ func UserID(v uuid.UUID) predicate.GuestSlot {
 	return predicate.GuestSlot(sql.FieldEQ(FieldUserID, v))
 }
 
+// StageTitle applies equality check predicate on the "stage_title" field. It's identical to StageTitleEQ.
+func StageTitle(v string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldEQ(FieldStageTitle, v))
+}
+
 // ExpiresAt applies equality check predicate on the "expires_at" field. It's identical to ExpiresAtEQ.
 func ExpiresAt(v time.Time) predicate.GuestSlot {
 	return predicate.GuestSlot(sql.FieldEQ(FieldExpiresAt, v))
@@ -253,6 +258,101 @@ func RoleIn(vs ...Role) predicate.GuestSlot {
 // RoleNotIn applies the NotIn predicate on the "role" field.
 func RoleNotIn(vs ...Role) predicate.GuestSlot {
 	return predicate.GuestSlot(sql.FieldNotIn(FieldRole, vs...))
+}
+
+// StageRoleEQ applies the EQ predicate on the "stage_role" field.
+func StageRoleEQ(v StageRole) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldEQ(FieldStageRole, v))
+}
+
+// StageRoleNEQ applies the NEQ predicate on the "stage_role" field.
+func StageRoleNEQ(v StageRole) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldNEQ(FieldStageRole, v))
+}
+
+// StageRoleIn applies the In predicate on the "stage_role" field.
+func StageRoleIn(vs ...StageRole) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldIn(FieldStageRole, vs...))
+}
+
+// StageRoleNotIn applies the NotIn predicate on the "stage_role" field.
+func StageRoleNotIn(vs ...StageRole) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldNotIn(FieldStageRole, vs...))
+}
+
+// StageTitleEQ applies the EQ predicate on the "stage_title" field.
+func StageTitleEQ(v string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldEQ(FieldStageTitle, v))
+}
+
+// StageTitleNEQ applies the NEQ predicate on the "stage_title" field.
+func StageTitleNEQ(v string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldNEQ(FieldStageTitle, v))
+}
+
+// StageTitleIn applies the In predicate on the "stage_title" field.
+func StageTitleIn(vs ...string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldIn(FieldStageTitle, vs...))
+}
+
+// StageTitleNotIn applies the NotIn predicate on the "stage_title" field.
+func StageTitleNotIn(vs ...string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldNotIn(FieldStageTitle, vs...))
+}
+
+// StageTitleGT applies the GT predicate on the "stage_title" field.
+func StageTitleGT(v string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldGT(FieldStageTitle, v))
+}
+
+// StageTitleGTE applies the GTE predicate on the "stage_title" field.
+func StageTitleGTE(v string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldGTE(FieldStageTitle, v))
+}
+
+// StageTitleLT applies the LT predicate on the "stage_title" field.
+func StageTitleLT(v string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldLT(FieldStageTitle, v))
+}
+
+// StageTitleLTE applies the LTE predicate on the "stage_title" field.
+func StageTitleLTE(v string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldLTE(FieldStageTitle, v))
+}
+
+// StageTitleContains applies the Contains predicate on the "stage_title" field.
+func StageTitleContains(v string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldContains(FieldStageTitle, v))
+}
+
+// StageTitleHasPrefix applies the HasPrefix predicate on the "stage_title" field.
+func StageTitleHasPrefix(v string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldHasPrefix(FieldStageTitle, v))
+}
+
+// StageTitleHasSuffix applies the HasSuffix predicate on the "stage_title" field.
+func StageTitleHasSuffix(v string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldHasSuffix(FieldStageTitle, v))
+}
+
+// StageTitleIsNil applies the IsNil predicate on the "stage_title" field.
+func StageTitleIsNil() predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldIsNull(FieldStageTitle))
+}
+
+// StageTitleNotNil applies the NotNil predicate on the "stage_title" field.
+func StageTitleNotNil() predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldNotNull(FieldStageTitle))
+}
+
+// StageTitleEqualFold applies the EqualFold predicate on the "stage_title" field.
+func StageTitleEqualFold(v string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldEqualFold(FieldStageTitle, v))
+}
+
+// StageTitleContainsFold applies the ContainsFold predicate on the "stage_title" field.
+func StageTitleContainsFold(v string) predicate.GuestSlot {
+	return predicate.GuestSlot(sql.FieldContainsFold(FieldStageTitle, v))
 }
 
 // StateEQ applies the EQ predicate on the "state" field.

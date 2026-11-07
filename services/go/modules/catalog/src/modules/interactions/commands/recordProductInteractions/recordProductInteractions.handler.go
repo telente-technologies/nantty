@@ -40,7 +40,12 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Inter
 				continue
 			}
 			seen[key] = true
-			if err := events.EnqueueOutboxEventInTransaction(ctx, tx, record.Event, subjectOf(data), occurredAt, data); err != nil {
+			intelligenceData := services.IntelligenceInteractionPayload(
+				data,
+				handler.Container.Settings.IntelligenceIdHashKey,
+				handler.Container.Settings.IntelligenceSecret,
+			)
+			if err := events.EnqueueOutboxEventInTransaction(ctx, tx, record.Event, subjectOf(data), occurredAt, intelligenceData); err != nil {
 				return err
 			}
 			if err := services.RecordStoreTrafficInTransaction(ctx, tx, record.Event, data, occurredAt); err != nil {

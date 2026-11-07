@@ -10,7 +10,7 @@ import (
 
 func MountTrackingRoutes(mux *http.ServeMux, deployed *container.Container) {
 	controller := controllers.TrackingController{Container: deployed}
-	mux.Handle("POST /api/v1/ads/events", middlewares.Authenticated(deployed)(controller.RecordEvents))
+	mux.Handle("POST /api/v1/ads/events", middlewares.OptionallyIdempotent(deployed)(controller.RecordEvents))
 	mux.HandleFunc("GET /api/v1/ads/r/{token}", controller.RedirectClick)
 	mux.Handle("POST /internal/v1/ads/conversions", middlewares.Internal(deployed)(controller.RecordConversion))
 }

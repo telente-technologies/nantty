@@ -5,6 +5,7 @@ import (
 	liveerrors "nantty/modules/live/src/errors"
 	"nantty/modules/live/src/events"
 	"nantty/modules/live/src/types"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,7 +14,7 @@ import (
 	"nantty/modules/live/src/generated/ent/guestslot"
 )
 
-func (service *LiveService) InviteGuestToStage(ctx context.Context, actor types.Actor, liveId, guestUserId uuid.UUID) error {
+func (service *LiveService) InviteGuestToStage(ctx context.Context, actor types.Actor, liveId, guestUserId uuid.UUID, stageRole, stageTitle string) error {
 	return service.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		session, err := service.lockLiveForStageChange(ctx, tx, liveId, &actor, true)
 		if err != nil {
@@ -34,7 +35,14 @@ func (service *LiveService) InviteGuestToStage(ctx context.Context, actor types.
 			return liveerrors.StageFull
 		}
 		now := service.Now()
-		slot, err := tx.GuestSlot.Create().SetLiveID(liveId).SetUserID(guestUserId).
+		if stageRole == "" {
+			stageRole = "speaker"
+		}
+		create := tx.GuestSlot.Create().SetLiveID(liveId).SetUserID(guestUserId).SetStageRole(guestslot.StageRole(stageRole))
+		if title := strings.TrimSpace(stageTitle); title != "" {
+			create.SetStageTitle(title)
+		}
+		slot, err := create.
 			SetExpiresAt(now.Add(InvitationLifetimeSeconds * time.Second)).Save(ctx)
 		if err != nil {
 			return err
@@ -45,6 +53,7 @@ func (service *LiveService) InviteGuestToStage(ctx context.Context, actor types.
 		}
 		err = events.EnqueueOutboxEventInTransaction(ctx, tx, events.GuestInvited, liveId.String(), now, events.GuestInvitedEventData{
 			LiveId: liveId.String(), UserId: guestUserId.String(), SlotId: slot.ID.String(), ExpiresAt: formatTime(slot.ExpiresAt),
+			StageRole: string(slot.StageRole), Title: stageSlotTitle(slot),
 			Live: events.InvitedLive{Id: liveId.String(), Title: session.Title, Host: summarise(participants[session.HostID])},
 		})
 		if err != nil {

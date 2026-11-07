@@ -18,6 +18,8 @@ type StageStreamer struct {
 	SlotId                 string      `json:"slotId"`
 	User                   UserSummary `json:"user"`
 	Role                   string      `json:"role"`
+	StageRole              string      `json:"stageRole"`
+	Title                  string      `json:"title,omitempty"`
 	State                  string      `json:"state"`
 	AudioMuted             bool        `json:"audioMuted"`
 	VideoMuted             bool        `json:"videoMuted"`
@@ -30,6 +32,8 @@ type GuestSlotView struct {
 	Id               string      `json:"id"`
 	LiveId           string      `json:"liveId"`
 	User             UserSummary `json:"user"`
+	StageRole        string      `json:"stageRole"`
+	Title            string      `json:"title,omitempty"`
 	State            string      `json:"state"`
 	InvitedAt        string      `json:"invitedAt"`
 	ExpiresAt        string      `json:"expiresAt"`

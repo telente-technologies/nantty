@@ -7497,6 +7497,8 @@ type GuestSlotMutation struct {
 	live_id             *uuid.UUID
 	user_id             *uuid.UUID
 	role                *guestslot.Role
+	stage_role          *guestslot.StageRole
+	stage_title         *string
 	state               *guestslot.State
 	expires_at          *time.Time
 	state_deadline_at   *time.Time
@@ -7759,6 +7761,91 @@ func (m *GuestSlotMutation) OldRole(ctx context.Context) (v guestslot.Role, err 
 // ResetRole resets all changes to the "role" field.
 func (m *GuestSlotMutation) ResetRole() {
 	m.role = nil
+}
+
+// SetStageRole sets the "stage_role" field.
+func (m *GuestSlotMutation) SetStageRole(gr guestslot.StageRole) {
+	m.stage_role = &gr
+}
+
+// StageRole returns the value of the "stage_role" field in the mutation.
+func (m *GuestSlotMutation) StageRole() (r guestslot.StageRole, exists bool) {
+	v := m.stage_role
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStageRole returns the old "stage_role" field's value of the GuestSlot entity.
+// If the GuestSlot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GuestSlotMutation) OldStageRole(ctx context.Context) (v guestslot.StageRole, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStageRole is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStageRole requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStageRole: %w", err)
+	}
+	return oldValue.StageRole, nil
+}
+
+// ResetStageRole resets all changes to the "stage_role" field.
+func (m *GuestSlotMutation) ResetStageRole() {
+	m.stage_role = nil
+}
+
+// SetStageTitle sets the "stage_title" field.
+func (m *GuestSlotMutation) SetStageTitle(s string) {
+	m.stage_title = &s
+}
+
+// StageTitle returns the value of the "stage_title" field in the mutation.
+func (m *GuestSlotMutation) StageTitle() (r string, exists bool) {
+	v := m.stage_title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStageTitle returns the old "stage_title" field's value of the GuestSlot entity.
+// If the GuestSlot object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GuestSlotMutation) OldStageTitle(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStageTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStageTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStageTitle: %w", err)
+	}
+	return oldValue.StageTitle, nil
+}
+
+// ClearStageTitle clears the value of the "stage_title" field.
+func (m *GuestSlotMutation) ClearStageTitle() {
+	m.stage_title = nil
+	m.clearedFields[guestslot.FieldStageTitle] = struct{}{}
+}
+
+// StageTitleCleared returns if the "stage_title" field was cleared in this mutation.
+func (m *GuestSlotMutation) StageTitleCleared() bool {
+	_, ok := m.clearedFields[guestslot.FieldStageTitle]
+	return ok
+}
+
+// ResetStageTitle resets all changes to the "stage_title" field.
+func (m *GuestSlotMutation) ResetStageTitle() {
+	m.stage_title = nil
+	delete(m.clearedFields, guestslot.FieldStageTitle)
 }
 
 // SetState sets the "state" field.
@@ -8207,7 +8294,7 @@ func (m *GuestSlotMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GuestSlotMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 16)
 	if m.created_at != nil {
 		fields = append(fields, guestslot.FieldCreatedAt)
 	}
@@ -8219,6 +8306,12 @@ func (m *GuestSlotMutation) Fields() []string {
 	}
 	if m.role != nil {
 		fields = append(fields, guestslot.FieldRole)
+	}
+	if m.stage_role != nil {
+		fields = append(fields, guestslot.FieldStageRole)
+	}
+	if m.stage_title != nil {
+		fields = append(fields, guestslot.FieldStageTitle)
 	}
 	if m.state != nil {
 		fields = append(fields, guestslot.FieldState)
@@ -8266,6 +8359,10 @@ func (m *GuestSlotMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case guestslot.FieldRole:
 		return m.Role()
+	case guestslot.FieldStageRole:
+		return m.StageRole()
+	case guestslot.FieldStageTitle:
+		return m.StageTitle()
 	case guestslot.FieldState:
 		return m.State()
 	case guestslot.FieldExpiresAt:
@@ -8303,6 +8400,10 @@ func (m *GuestSlotMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldUserID(ctx)
 	case guestslot.FieldRole:
 		return m.OldRole(ctx)
+	case guestslot.FieldStageRole:
+		return m.OldStageRole(ctx)
+	case guestslot.FieldStageTitle:
+		return m.OldStageTitle(ctx)
 	case guestslot.FieldState:
 		return m.OldState(ctx)
 	case guestslot.FieldExpiresAt:
@@ -8359,6 +8460,20 @@ func (m *GuestSlotMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRole(v)
+		return nil
+	case guestslot.FieldStageRole:
+		v, ok := value.(guestslot.StageRole)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStageRole(v)
+		return nil
+	case guestslot.FieldStageTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStageTitle(v)
 		return nil
 	case guestslot.FieldState:
 		v, ok := value.(guestslot.State)
@@ -8460,6 +8575,9 @@ func (m *GuestSlotMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *GuestSlotMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(guestslot.FieldStageTitle) {
+		fields = append(fields, guestslot.FieldStageTitle)
+	}
 	if m.FieldCleared(guestslot.FieldStateDeadlineAt) {
 		fields = append(fields, guestslot.FieldStateDeadlineAt)
 	}
@@ -8486,6 +8604,9 @@ func (m *GuestSlotMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *GuestSlotMutation) ClearField(name string) error {
 	switch name {
+	case guestslot.FieldStageTitle:
+		m.ClearStageTitle()
+		return nil
 	case guestslot.FieldStateDeadlineAt:
 		m.ClearStateDeadlineAt()
 		return nil
@@ -8517,6 +8638,12 @@ func (m *GuestSlotMutation) ResetField(name string) error {
 		return nil
 	case guestslot.FieldRole:
 		m.ResetRole()
+		return nil
+	case guestslot.FieldStageRole:
+		m.ResetStageRole()
+		return nil
+	case guestslot.FieldStageTitle:
+		m.ResetStageTitle()
 		return nil
 	case guestslot.FieldState:
 		m.ResetState()

@@ -15,24 +15,25 @@ import (
 )
 
 type Container struct {
-	Client            *ent.Client
-	Database          *sql.DB
-	Users             interfaces.UserDirectory
-	Rates             *viewerregion.RateReader
-	Settings          configs.CatalogSettings
-	Logger            *slog.Logger
-	Now               func() time.Time
-	AccessVerifier    *jwtauth.AccessTokenVerifier
-	IdempotencyStore  *idempotency.RedisStore
-	Jobs              platformevents.JobQueue
-	Staff             StaffVerifiers
-	Audit             interfaces.AuditTrail
-	Identity          interfaces.IdentityDirectory
-	PrivateMedia      interfaces.PrivateMediaSigner
-	StoreFollows      interfaces.StoreFollowStats
-	StoreFollowWrites interfaces.StoreFollowMutations
-	MartAds           interfaces.MartAdDecider
-	LinkedProfiles    interfaces.LinkedProfileRegistry
+	Client             *ent.Client
+	Database           *sql.DB
+	Users              interfaces.UserDirectory
+	Rates              *viewerregion.RateReader
+	Settings           configs.CatalogSettings
+	Logger             *slog.Logger
+	Now                func() time.Time
+	AccessVerifier     *jwtauth.AccessTokenVerifier
+	IdempotencyStore   *idempotency.RedisStore
+	Jobs               platformevents.JobQueue
+	Staff              StaffVerifiers
+	Audit              interfaces.AuditTrail
+	Identity           interfaces.IdentityDirectory
+	PrivateMedia       interfaces.PrivateMediaSigner
+	StoreFollows       interfaces.StoreFollowStats
+	StoreFollowWrites  interfaces.StoreFollowMutations
+	MartAds            interfaces.MartAdDecider
+	ProductRecommender interfaces.ProductRecommender
+	LinkedProfiles     interfaces.LinkedProfileRegistry
 }
 
 type StaffVerifiers struct {

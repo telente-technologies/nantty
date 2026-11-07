@@ -21,6 +21,8 @@ func (GuestSlot) Fields() []ent.Field {
 		field.UUID("live_id", uuid.UUID{}).Immutable(),
 		field.UUID("user_id", uuid.UUID{}).Immutable(),
 		field.Enum("role").Values("host", "guest").Default("guest").Immutable(),
+		field.Enum("stage_role").Values("speaker", "cohost").Default("speaker").Immutable(),
+		field.String("stage_title").Optional().Nillable().MaxLen(32).Immutable(),
 		field.Enum("state").Values("invited", "joining", "onStage", "reconnecting", "left", "removed", "declined", "expired", "cancelled", "failed").Default("invited"),
 		field.Time("expires_at"),
 		field.Time("state_deadline_at").Optional().Nillable(),

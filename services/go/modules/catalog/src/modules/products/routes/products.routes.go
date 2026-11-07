@@ -13,6 +13,7 @@ func MountProductsRoutes(mux *http.ServeMux, deployed *container.Container) {
 	optional := middlewares.OptionallyAuthenticated(deployed)
 	signedIn := middlewares.Authenticated(deployed)
 	mux.Handle("GET /api/v1/mart/home", optional(controller.GetMartHome))
+	mux.Handle("GET /api/v1/mart/recommendations/for-you", optional(controller.GetRecommendedProducts))
 	mux.Handle("GET /api/v1/products", optional(controller.ListProducts))
 	mux.Handle("GET /api/v1/products/featured", optional(controller.ListFeaturedProducts))
 	mux.Handle("GET /api/v1/products/{productId}", optional(controller.GetProduct))

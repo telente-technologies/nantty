@@ -18,6 +18,7 @@ type fakeDirectory struct {
 	mutex     sync.Mutex
 	profiles  map[uuid.UUID]usersdirectory.ProfileName
 	countries map[uuid.UUID]string
+	privacy   map[uuid.UUID]usersdirectory.PrivacyChoices
 }
 
 func (directory *fakeDirectory) add(handle string) uuid.UUID {
@@ -88,8 +89,20 @@ func (directory *fakeDirectory) setCountry(accountId uuid.UUID, country string) 
 	directory.countries[accountId] = country
 }
 
-func (directory *fakeDirectory) PrivacyChoicesOf(context.Context, uuid.UUID) (usersdirectory.PrivacyChoices, bool, error) {
-	return usersdirectory.PrivacyChoices{}, false, nil
+func (directory *fakeDirectory) PrivacyChoicesOf(_ context.Context, accountId uuid.UUID) (usersdirectory.PrivacyChoices, bool, error) {
+	directory.mutex.Lock()
+	defer directory.mutex.Unlock()
+	choices, found := directory.privacy[accountId]
+	return choices, found, nil
+}
+
+func (directory *fakeDirectory) setPrivacy(accountId uuid.UUID, choices usersdirectory.PrivacyChoices) {
+	directory.mutex.Lock()
+	defer directory.mutex.Unlock()
+	if directory.privacy == nil {
+		directory.privacy = map[uuid.UUID]usersdirectory.PrivacyChoices{}
+	}
+	directory.privacy[accountId] = choices
 }
 
 type fakeLocations struct {

@@ -21,8 +21,33 @@ func TestInteractionPayloadRejectsMalformedValues(t *testing.T) {
 			t.Fatalf("invalid %s was copied: %v", key, data[key])
 		}
 	}
-	if data["categoryId"] != "0192f0a0-0000-7000-8000-0000000000aa" || len([]rune(data["query"].(string))) != maximumInteractionQueryLength {
+	if data["categoryId"] != "0192f0a0-0000-7000-8000-0000000000aa" || data["queryHash"] == nil {
 		t.Fatalf("valid fields were not kept or bounded: %v", data)
+	}
+	if _, found := data["query"]; found {
+		t.Fatalf("raw search text must not enter the outbox payload: %v", data)
+	}
+}
+
+func TestHashSearchQueryMatchesIntelligenceHasherContract(t *testing.T) {
+	if actual := HashSearchQuery(" Shoes ", "test-key", "shared"); actual != "q_e57b8eee5257afd69de3da0ee901bd9ebabd40e9" {
+		t.Fatalf("unexpected query hash: %s", actual)
+	}
+}
+
+func TestIntelligenceInteractionPayloadUsesSamePseudonymAsRecommendationCalls(t *testing.T) {
+	const accountId = "0192f0a0-0000-7000-8000-0000000000aa"
+	data := map[string]any{"actorId": accountId, "productId": "0192f0a0-0000-7000-8000-0000000000bb"}
+	published := IntelligenceInteractionPayload(data, "id-key", "shared-key")
+	want := HashIntelligenceUserId(accountId, "id-key", "shared-key")
+	if published["actorId"] != want {
+		t.Fatalf("outbox actor key = %v, want recommendation pseudonym %s", published["actorId"], want)
+	}
+	if data["actorId"] != accountId {
+		t.Fatalf("catalog-local actor id was mutated: %v", data["actorId"])
+	}
+	if published["productId"] != data["productId"] {
+		t.Fatalf("interaction payload fields were not preserved: %v", published)
 	}
 }
 

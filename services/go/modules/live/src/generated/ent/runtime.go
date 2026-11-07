@@ -304,20 +304,24 @@ func init() {
 	guestslotDescCreatedAt := guestslotMixinFields0[1].Descriptor()
 	// guestslot.DefaultCreatedAt holds the default value on creation for the created_at field.
 	guestslot.DefaultCreatedAt = guestslotDescCreatedAt.Default.(func() time.Time)
+	// guestslotDescStageTitle is the schema descriptor for stage_title field.
+	guestslotDescStageTitle := guestslotFields[4].Descriptor()
+	// guestslot.StageTitleValidator is a validator for the "stage_title" field. It is called by the builders before save.
+	guestslot.StageTitleValidator = guestslotDescStageTitle.Validators[0].(func(string) error)
 	// guestslotDescAudioMutedByHost is the schema descriptor for audio_muted_by_host field.
-	guestslotDescAudioMutedByHost := guestslotFields[8].Descriptor()
+	guestslotDescAudioMutedByHost := guestslotFields[10].Descriptor()
 	// guestslot.DefaultAudioMutedByHost holds the default value on creation for the audio_muted_by_host field.
 	guestslot.DefaultAudioMutedByHost = guestslotDescAudioMutedByHost.Default.(bool)
 	// guestslotDescVideoMutedByHost is the schema descriptor for video_muted_by_host field.
-	guestslotDescVideoMutedByHost := guestslotFields[9].Descriptor()
+	guestslotDescVideoMutedByHost := guestslotFields[11].Descriptor()
 	// guestslot.DefaultVideoMutedByHost holds the default value on creation for the video_muted_by_host field.
 	guestslot.DefaultVideoMutedByHost = guestslotDescVideoMutedByHost.Default.(bool)
 	// guestslotDescAudioMutedBySelf is the schema descriptor for audio_muted_by_self field.
-	guestslotDescAudioMutedBySelf := guestslotFields[10].Descriptor()
+	guestslotDescAudioMutedBySelf := guestslotFields[12].Descriptor()
 	// guestslot.DefaultAudioMutedBySelf holds the default value on creation for the audio_muted_by_self field.
 	guestslot.DefaultAudioMutedBySelf = guestslotDescAudioMutedBySelf.Default.(bool)
 	// guestslotDescVideoMutedBySelf is the schema descriptor for video_muted_by_self field.
-	guestslotDescVideoMutedBySelf := guestslotFields[11].Descriptor()
+	guestslotDescVideoMutedBySelf := guestslotFields[13].Descriptor()
 	// guestslot.DefaultVideoMutedBySelf holds the default value on creation for the video_muted_by_self field.
 	guestslot.DefaultVideoMutedBySelf = guestslotDescVideoMutedBySelf.Default.(bool)
 	// guestslotDescID is the schema descriptor for id field.

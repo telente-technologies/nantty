@@ -12,5 +12,5 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, command Command) error {
-	return services.NewLiveService(handler.Container).InviteGuestToStage(ctx, command.Actor, command.LiveId, command.GuestUserId)
+	return services.NewLiveService(handler.Container).InviteGuestToStage(ctx, command.Actor, command.LiveId, command.GuestUserId, command.StageRole, command.StageTitle)
 }

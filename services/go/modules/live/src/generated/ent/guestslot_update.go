@@ -246,6 +246,9 @@ func (_u *GuestSlotUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
+	if _u.mutation.StageTitleCleared() {
+		_spec.ClearField(guestslot.FieldStageTitle, field.TypeString)
+	}
 	if value, ok := _u.mutation.State(); ok {
 		_spec.SetField(guestslot.FieldState, field.TypeEnum, value)
 	}
@@ -555,6 +558,9 @@ func (_u *GuestSlotUpdateOne) sqlSave(ctx context.Context) (_node *GuestSlot, er
 				ps[i](selector)
 			}
 		}
+	}
+	if _u.mutation.StageTitleCleared() {
+		_spec.ClearField(guestslot.FieldStageTitle, field.TypeString)
 	}
 	if value, ok := _u.mutation.State(); ok {
 		_spec.SetField(guestslot.FieldState, field.TypeEnum, value)

@@ -32,7 +32,11 @@ func (controller InteractionsController) RecordInteractions(writer http.Response
 		Analytics: request.Header.Get("X-Consent-Analytics") == "true", Personalization: request.Header.Get("X-Consent-Personalization") == "true",
 	}
 	if principal, signedIn := jwtauth.PrincipalFromContext(request.Context()); signedIn {
-		actor = services.InteractionActor{AccountId: principal.UserId, SessionId: principal.SessionId}
+		actor = services.InteractionActor{
+			AccountId: principal.UserId, SessionId: principal.SessionId,
+			IdHashSecret:    controller.Container.Settings.IntelligenceIdHashKey,
+			IntelligenceKey: controller.Container.Settings.IntelligenceSecret,
+		}
 		choices, found, lookupError := controller.Container.Users.PrivacyChoicesOf(request.Context(), middlewares.AccountIdFrom(request.Context()))
 		if lookupError != nil {
 			responder.Error(writer, request, lookupError)
