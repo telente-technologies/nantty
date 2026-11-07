@@ -13,6 +13,7 @@ from src.repositories.online_feature_keyspace_repository import (
     ACCOUNT_AFFINITY_KIND,
     ACCOUNT_DELETED_FIELD,
     AFFINITY_HALF_LIFE_SECONDS,
+    ITEM_AFFINITY_KIND,
     PERSONALIZATION_OPT_OUT_FIELD,
     TOPIC_AFFINITY_KIND,
     OnlineFeatureKeyspace,
@@ -95,7 +96,14 @@ class OnlineFeatureStore:
         read_unix_time_seconds = now.timestamp()
         unique_item_ids = list(dict.fromkeys(item_ids))
         seen_keys = [self.keyspace.recently_seen_items_key(viewer_user_id)] if include_recently_seen_items else []
-        personalization_allowed, topic_affinity, account_affinity, item_rows, seen_rows = await asyncio.gather(
+        (
+            personalization_allowed,
+            topic_affinity,
+            account_affinity,
+            item_affinity,
+            item_rows,
+            seen_rows,
+        ) = await asyncio.gather(
             self.is_personalization_allowed(viewer_user_id),
             self.read_decayed_member_scores(
                 self.keyspace.affinity_base_key(TOPIC_AFFINITY_KIND, viewer_user_id),
@@ -106,6 +114,12 @@ class OnlineFeatureStore:
             self.read_decayed_member_scores(
                 self.keyspace.affinity_base_key(ACCOUNT_AFFINITY_KIND, viewer_user_id),
                 account_ids,
+                AFFINITY_HALF_LIFE_SECONDS,
+                read_unix_time_seconds,
+            ),
+            self.read_decayed_member_scores(
+                self.keyspace.affinity_base_key(ITEM_AFFINITY_KIND, viewer_user_id),
+                unique_item_ids,
                 AFFINITY_HALF_LIFE_SECONDS,
                 read_unix_time_seconds,
             ),
@@ -120,6 +134,7 @@ class OnlineFeatureStore:
         return ViewerOnlineFeatures(
             topic_affinity_by_topic=topic_affinity,
             account_affinity_by_account=account_affinity,
+            item_affinity_by_item=item_affinity,
             item_statistics_by_item=dict(zip(unique_item_ids, item_rows, strict=True)),
             recently_seen_item_ids=seen_item_ids,
         )
@@ -131,6 +146,18 @@ class OnlineFeatureStore:
             return []
         return await self.read_decayed_highest_members(
             self.keyspace.affinity_base_key(TOPIC_AFFINITY_KIND, viewer_user_id),
+            limit,
+            AFFINITY_HALF_LIFE_SECONDS,
+            now.timestamp(),
+        )
+
+    async def read_viewer_top_item_affinities(
+        self, viewer_user_id: str, limit: int, now: datetime
+    ) -> list[tuple[str, float]]:
+        if not await self.is_personalization_allowed(viewer_user_id):
+            return []
+        return await self.read_decayed_highest_members(
+            self.keyspace.affinity_base_key(ITEM_AFFINITY_KIND, viewer_user_id),
             limit,
             AFFINITY_HALF_LIFE_SECONDS,
             now.timestamp(),

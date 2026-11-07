@@ -37,7 +37,13 @@ SAVED_TARGET_TYPES = {"post": "post", "video": "post", "clip": "clip", "product"
 
 TOPIC_SLUG_PATTERN = re.compile(r"^[a-z0-9_\-]{1,64}$")
 MAXIMUM_FORWARDED_TOPICS = 20
-UNATTRIBUTED_EVENT_TYPES = {"product.purchased", "product.viewed"}
+UNATTRIBUTED_EVENT_TYPES = {
+    "product.purchased",
+    "product.viewed",
+    "product.clicked",
+    "product.addedToCart",
+    "search.performed",
+}
 
 
 def item_topics(data: dict[str, Any]) -> dict[str, Any]:
@@ -214,6 +220,28 @@ def normalize_contract_envelope(body: Any) -> Any:
         return {**flat, **normalize_product_purchased(data)}
     if event_type == "product.viewed":
         return {**flat, **normalize_product_viewed(data)}
+    if event_type == "product.clicked":
+        flat["actorId"] = data.get("actorId")
+        flat["payload"] = {
+            key: data[key]
+            for key in ("productId", "storeId", "categoryId", "queryHash", "resultCount", "surface")
+            if data.get(key) is not None
+        }
+        return flat
+    if event_type == "product.addedToCart":
+        flat["actorId"] = data.get("actorId")
+        flat["payload"] = {
+            key: data[key] for key in ("productId", "storeId", "quantity", "sourcePostId") if data.get(key) is not None
+        }
+        return flat
+    if event_type == "search.performed":
+        flat["actorId"] = data.get("actorId")
+        flat["payload"] = {
+            key: data[key]
+            for key in ("queryHash", "resultCount", "clickedItemId", "clickedItemType")
+            if data.get(key) is not None
+        }
+        return flat
     if event_type == "report.created":
         return {**flat, **normalize_report_created(data, body)}
     social = normalize_social_engagement(event_type, data, flat)

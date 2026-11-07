@@ -13,7 +13,7 @@ from src.validators.common_field_validator import (
     TopicSlug,
 )
 
-ProductRecommendationSurface = Literal["similar", "bought_together", "featured_with", "mart_home"]
+ProductRecommendationSurface = Literal["similar", "bought_together", "featured_with", "mart_home", "for_you"]
 
 
 class ProductCandidate(ContractModel):
@@ -26,6 +26,7 @@ class ProductCandidate(ContractModel):
     sales_count: NonNegativeCount = 0
     view_count: NonNegativeCount = 0
     country: CountryCode | None = None
+    store_verified: bool = False
     in_stock: bool = True
 
 
@@ -33,11 +34,23 @@ class ProductRecommendationRequest(ContractModel):
     request_id: OpaqueIdentifier | None = None
     surface: ProductRecommendationSurface
     viewer: ViewerContext
+    personalization_allowed: bool = False
     anchor_product: ProductCandidate | None = None
     candidates: list[ProductCandidate] = Field(default_factory=list, max_length=MAXIMUM_RANKING_CANDIDATES)
     excluded_product_ids: list[OpaqueIdentifier] = Field(default_factory=list, max_length=1000)
     limit: int = Field(default=20, ge=1, le=100)
     now: AwareDatetime | None = None
+
+
+class ProductCandidateRecallRequest(ContractModel):
+    viewer: ViewerContext
+    personalization_allowed: bool = False
+    limit: int = Field(default=50, ge=1, le=100)
+    now: AwareDatetime | None = None
+
+
+class ProductCandidateRecallResponse(ContractModel):
+    item_ids: list[OpaqueIdentifier]
 
 
 class RecommendedItem(ContractModel):

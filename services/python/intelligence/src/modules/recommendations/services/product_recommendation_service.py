@@ -1,3 +1,4 @@
+import hashlib
 import math
 from collections.abc import Mapping
 
@@ -7,6 +8,7 @@ from src.modules.model_registry.models.model_bundle_model import ItemSimilarityB
 from src.modules.model_registry.services.active_model_holder_service import ActiveModelHolder
 from src.modules.recommendations.dtos.recommendation_dto import (
     ProductCandidate,
+    ProductCandidateRecallRequest,
     ProductRecommendationRequest,
     RecommendationResponse,
     RecommendedItem,
@@ -25,6 +27,7 @@ SURFACE_WEIGHTS: dict[str, tuple[float, float, float, float]] = {
     "bought_together": (0.75, 0.1, 0.0, 0.15),
     "featured_with": (0.3, 0.0, 0.5, 0.2),
     "mart_home": (0.0, 0.0, 0.6, 0.4),
+    "for_you": (0.0, 0.0, 0.45, 0.15),
 }
 STORE_DIVERSITY_RULES = DiversityRules(
     max_consecutive_same_author=2,
@@ -72,6 +75,18 @@ def calculate_product_popularity(candidate: ProductCandidate, maximum_log_popula
     return 0.8 * raw_popularity / maximum_log_popularity + 0.2 * rating_bonus
 
 
+def calculate_product_exploration_tiebreaker(request: ProductRecommendationRequest, product_id: str) -> float:
+    """Give each viewer a stable shortlist within a day, with gentle daily exploration."""
+    exploration_window = resolve_request_time(request.now).date().isoformat()
+    seed = f"{request.viewer.user_id}:{request.surface}:{exploration_window}:{product_id}".encode()
+    value = int.from_bytes(hashlib.sha256(seed).digest()[:4], "big") / 0xFFFFFFFF
+    return (value - 0.5) * 0.04
+
+
+def calculate_product_item_affinity(candidate: ProductCandidate, online_features: ViewerOnlineFeatures) -> float:
+    return max(read_normalized_affinity(online_features.item_affinity_by_item, candidate.product_id), 0.0)
+
+
 def score_product_candidates(
     request: ProductRecommendationRequest,
     online_features: ViewerOnlineFeatures,
@@ -105,6 +120,12 @@ def score_product_candidates(
             * calculate_product_personal_affinity(candidate, online_features, chosen_topics, request.viewer.country)
             + popularity_weight * calculate_product_popularity(candidate, maximum_log_popularity)
         )
+        if request.surface == "for_you":
+            score += 0.4 * calculate_product_item_affinity(candidate, online_features)
+            # Prefer verified stores without excluding eligible non-verified
+            # stores; the small exploration offset prevents a static shortlist.
+            score += 0.08 if candidate.store_verified else 0.0
+            score += calculate_product_exploration_tiebreaker(request, candidate.product_id)
         scored[candidate.product_id] = DiversityCandidate(
             candidate.product_id, score, candidate.store_id, None, False, frozenset(candidate.topics)
         )
@@ -125,26 +146,44 @@ class ProductRecommendationService:
         self.feature_store = feature_store
         self.model_holder = model_holder
 
+    async def recall_product_candidates(self, request: ProductCandidateRecallRequest) -> list[str]:
+        if not request.personalization_allowed or self.feature_store is None:
+            return []
+        rows = await self.feature_store.read_viewer_top_item_affinities(
+            request.viewer.user_id, request.limit, resolve_request_time(request.now)
+        )
+        return [item_id for item_id, score in rows if score > 0.0]
+
     async def recommend_products(self, request: ProductRecommendationRequest) -> RecommendationResponse:
         now = resolve_request_time(request.now)
         loaded_bundle = self.model_holder.get_active_bundle("item_similarity")
         bundle = loaded_bundle if isinstance(loaded_bundle, ItemSimilarityBundle) else None
         anchor_id = request.anchor_product.product_id if request.anchor_product else None
         neighbours = read_model_neighbours(bundle, request.surface, anchor_id)
-        online_features, degraded = await read_viewer_online_features_safely(
-            self.feature_store,
-            request.viewer.user_id,
-            sorted({candidate.store_id for candidate in request.candidates}),
-            sorted({topic for candidate in request.candidates for topic in candidate.topics}),
-            [],
-            now,
-            False,
-        )
+        if request.personalization_allowed:
+            online_features, degraded = await read_viewer_online_features_safely(
+                self.feature_store,
+                request.viewer.user_id,
+                sorted({candidate.store_id for candidate in request.candidates}),
+                sorted({topic for candidate in request.candidates for topic in candidate.topics}),
+                sorted({candidate.product_id for candidate in request.candidates}),
+                now,
+                False,
+            )
+        else:
+            online_features, degraded = ViewerOnlineFeatures(), False
         if request.candidates:
             scored = score_product_candidates(request, online_features, neighbours)
             ordered = rerank_candidates_for_diversity(scored, STORE_DIVERSITY_RULES, request.limit)
+            verified_by_id = {candidate.product_id: candidate.store_verified for candidate in request.candidates}
             items = [
-                RecommendedItem(item_id=item.item_id, score=round(item.score, 8), reason=request.surface)
+                RecommendedItem(
+                    item_id=item.item_id,
+                    score=round(item.score, 8),
+                    reason=("verified_store" if verified_by_id.get(item.item_id) else "personalized")
+                    if request.surface == "for_you"
+                    else request.surface,
+                )
                 for item in ordered
             ]
             source = "model" if neighbours else "rules"

@@ -1,7 +1,10 @@
 from fastapi import APIRouter
 
 from src.modules.recommendations.controllers.recommendations_controller import RecommendationsController
-from src.modules.recommendations.dtos.recommendation_dto import RecommendationResponse
+from src.modules.recommendations.dtos.recommendation_dto import (
+    ProductCandidateRecallResponse,
+    RecommendationResponse,
+)
 
 
 def build_recommendations_router(controller: RecommendationsController) -> APIRouter:
@@ -11,6 +14,12 @@ def build_recommendations_router(controller: RecommendationsController) -> APIRo
         controller.recommend_products,
         methods=["POST"],
         response_model=RecommendationResponse,
+    )
+    router.add_api_route(
+        "/recommendations/products/candidates",
+        controller.recall_product_candidates,
+        methods=["POST"],
+        response_model=ProductCandidateRecallResponse,
     )
     router.add_api_route(
         "/recommendations/accounts",

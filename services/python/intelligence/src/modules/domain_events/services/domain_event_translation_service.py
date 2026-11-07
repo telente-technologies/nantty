@@ -11,15 +11,21 @@ from src.events.domain_event_dto import (
     PostLikedDomainEvent,
     PostSharedDomainEvent,
     PostViewedDomainEvent,
+    ProductAddedToCartDomainEvent,
+    ProductClickedDomainEvent,
     ProductPurchasedDomainEvent,
     ProductViewedDomainEvent,
     ReportCreatedDomainEvent,
+    SearchPerformedDomainEvent,
 )
 from src.services.identifier_hashing_service import OpaqueIdentifierHasher
 
 PERSONALIZATION_DOMAIN_EVENT_TYPES = frozenset(
     {
         "product.viewed",
+        "product.clicked",
+        "product.addedToCart",
+        "search.performed",
         "product.purchased",
         "follow.created",
         "ad.impressionRecorded",
@@ -53,6 +59,14 @@ def resolve_intelligence_event_type(event: DomainEvent) -> str | None:
     match event:
         case ProductViewedDomainEvent():
             event_type = "product_viewed"
+        case ProductClickedDomainEvent() if event.payload.query_hash:
+            event_type = "searched"
+        case ProductClickedDomainEvent():
+            event_type = "product_viewed"
+        case ProductAddedToCartDomainEvent():
+            event_type = "added_to_cart"
+        case SearchPerformedDomainEvent():
+            event_type = "searched"
         case ProductPurchasedDomainEvent():
             event_type = "purchased"
         case FollowCreatedDomainEvent():
@@ -101,6 +115,20 @@ def translate_to_intelligence_event(
     payload = event.payload.model_dump(
         by_alias=True, mode="json", exclude_none=True, exclude=DOMAIN_ONLY_PAYLOAD_FIELDS
     )
+    if isinstance(event, ProductClickedDomainEvent):
+        if event.payload.query_hash:
+            payload = {
+                "queryHash": event.payload.query_hash,
+                "resultCount": event.payload.result_count,
+                "clickedItemId": event.payload.product_id,
+                "clickedItemType": "product",
+            }
+        else:
+            payload = {
+                "productId": event.payload.product_id,
+                "storeId": event.payload.store_id,
+                **({"categoryId": event.payload.category_id} if event.payload.category_id else {}),
+            }
     if event.event_type == "gift.sent":
         # Value-flow scoring needs only a stable pseudonymous counterparty and amount.
         payload = {

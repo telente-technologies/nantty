@@ -6,8 +6,10 @@ from src.modules.model_registry.models.model_bundle_model import ItemSimilarityB
 from src.modules.recommendations.dtos.recommendation_dto import (
     AccountRecommendationRequest,
     ClipSuggestionRequest,
+    ProductCandidateRecallRequest,
     ProductRecommendationRequest,
 )
+from src.modules.recommendations.services import product_recommendation_service
 from src.modules.search.dtos.search_rerank_dto import SearchRerankRequest
 from tests.conftest import build_event, build_viewer
 
@@ -29,6 +31,21 @@ def install_similarity_bundle(container: ApplicationContainer) -> None:
 
 def build_product(product_id: str, store_id: str, **overrides: Any) -> dict[str, Any]:
     return {"productId": product_id, "storeId": store_id, **overrides}
+
+
+def test_product_for_you_exploration_is_stable_within_a_day_and_rotates_daily(monkeypatch: Any) -> None:
+    base = {"surface": "for_you", "viewer": build_viewer(userId="viewer_1"), "candidates": []}
+    request = ProductRecommendationRequest.model_validate(base)
+    day_one = datetime.fromisoformat("2026-11-07T08:00:00+00:00")
+    same_day = datetime.fromisoformat("2026-11-07T23:00:00+00:00")
+    next_day = datetime.fromisoformat("2026-11-08T08:00:00+00:00")
+
+    monkeypatch.setattr(product_recommendation_service, "resolve_request_time", lambda _requested: day_one)
+    first_score = product_recommendation_service.calculate_product_exploration_tiebreaker(request, "product_1")
+    monkeypatch.setattr(product_recommendation_service, "resolve_request_time", lambda _requested: same_day)
+    assert product_recommendation_service.calculate_product_exploration_tiebreaker(request, "product_1") == first_score
+    monkeypatch.setattr(product_recommendation_service, "resolve_request_time", lambda _requested: next_day)
+    assert product_recommendation_service.calculate_product_exploration_tiebreaker(request, "product_1") != first_score
 
 
 async def recommend(
@@ -74,6 +91,81 @@ async def test_mart_home_never_shows_more_than_two_consecutive_products_from_one
     stores = [item_id.split("_")[0] for item_id, _reason in items]
     assert len(stores) == 8
     assert all(not (stores[index] == stores[index + 1] == stores[index + 2]) for index in range(len(stores) - 2))
+
+
+async def test_product_for_you_prefers_verified_stores_without_excluding_other_stores(
+    application_container: ApplicationContainer,
+) -> None:
+    candidates = [
+        build_product("unverified", "store_a", salesCount=10, viewCount=20),
+        build_product("verified", "store_b", salesCount=10, viewCount=20, storeVerified=True),
+    ]
+    items = await recommend(application_container, "for_you", candidates, requestId="stable-request")
+
+    assert [item_id for item_id, _reason in items] == ["verified", "unverified"]
+    assert items[0][1] == "verified_store"
+    assert items[1][1] == "personalized"
+
+
+async def test_product_for_you_uses_product_views_and_search_clicks_as_personal_signals(
+    application_container: ApplicationContainer, reference_now: datetime
+) -> None:
+    events = [
+        build_event(
+            "view_interested",
+            "product_viewed",
+            "viewer_1",
+            reference_now,
+            {"productId": "interested", "storeId": "store_a"},
+        ),
+        build_event(
+            "cart_interested",
+            "added_to_cart",
+            "viewer_1",
+            reference_now,
+            {"productId": "interested", "storeId": "store_a", "quantity": 1},
+        ),
+        build_event(
+            "search_click_interested",
+            "searched",
+            "viewer_1",
+            reference_now,
+            {
+                "queryHash": "fashion-query",
+                "resultCount": 2,
+                "clickedItemId": "interested",
+                "clickedItemType": "product",
+            },
+        ),
+    ]
+    await application_container.event_ingestion_service.ingest_event_batch(events, reference_now)
+
+    recalled = await application_container.product_recommendation_service.recall_product_candidates(
+        ProductCandidateRecallRequest.model_validate(
+            {"viewer": build_viewer(), "personalizationAllowed": True, "now": reference_now.isoformat()}
+        )
+    )
+    assert recalled == ["interested"]
+    withheld = await application_container.product_recommendation_service.recall_product_candidates(
+        ProductCandidateRecallRequest.model_validate(
+            {"viewer": build_viewer(), "personalizationAllowed": False, "now": reference_now.isoformat()}
+        )
+    )
+    assert withheld == []
+
+    items = await recommend(
+        application_container,
+        "for_you",
+        [
+            build_product("popular", "store_b", viewCount=100_000),
+            build_product("interested", "store_a"),
+        ],
+        viewer=build_viewer(),
+        requestId="interaction-test",
+        now=reference_now.isoformat(),
+    )
+
+    assert [item_id for item_id, _reason in items] == ["interested", "popular"]
 
 
 async def test_without_candidates_model_neighbours_or_popular_fallback_are_served(

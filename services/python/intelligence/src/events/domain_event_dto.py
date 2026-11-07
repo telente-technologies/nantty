@@ -4,6 +4,7 @@ from pydantic import AwareDatetime, Field, TypeAdapter
 
 from src.dtos.common_dto import ContractModel
 from src.events.event_payload_dto import (
+    AddedToCartPayload,
     AdImpressionPayload,
     ClipWatchedPayload,
     FollowedPayload,
@@ -15,6 +16,7 @@ from src.events.event_payload_dto import (
     PurchasedPayload,
     ReportedPayload,
     SavedPayload,
+    SearchedPayload,
     SharedPayload,
 )
 from src.validators.common_field_validator import CountryCode, OpaqueIdentifier
@@ -82,6 +84,30 @@ class EmptyPayload(ContractModel):
 class ProductViewedDomainEvent(DomainEnvelopeBase):
     event_type: Literal["product.viewed"]
     payload: ProductViewedPayload
+
+
+class ProductClickedPayload(ContractModel):
+    product_id: OpaqueIdentifier
+    store_id: OpaqueIdentifier
+    category_id: OpaqueIdentifier | None = None
+    query_hash: OpaqueIdentifier | None = None
+    result_count: int = Field(default=0, ge=0, le=1_000_000)
+    surface: str | None = Field(default=None, max_length=40)
+
+
+class ProductClickedDomainEvent(DomainEnvelopeBase):
+    event_type: Literal["product.clicked"]
+    payload: ProductClickedPayload
+
+
+class ProductAddedToCartDomainEvent(DomainEnvelopeBase):
+    event_type: Literal["product.addedToCart"]
+    payload: AddedToCartPayload
+
+
+class SearchPerformedDomainEvent(DomainEnvelopeBase):
+    event_type: Literal["search.performed"]
+    payload: SearchedPayload
 
 
 class ProductPurchasedDomainEvent(DomainEnvelopeBase):
@@ -201,6 +227,9 @@ class ClipWatchedDomainEvent(DomainEnvelopeBase):
 
 type DomainEvent = Annotated[
     ProductViewedDomainEvent
+    | ProductClickedDomainEvent
+    | ProductAddedToCartDomainEvent
+    | SearchPerformedDomainEvent
     | ProductPurchasedDomainEvent
     | FollowCreatedDomainEvent
     | PostCreatedDomainEvent

@@ -17,6 +17,7 @@ from src.events.event_envelope_dto import (
     PurchasedEvent,
     ReportedEvent,
     SavedEvent,
+    SearchedEvent,
     SharedEvent,
 )
 from src.interfaces.feature_backend_interface import (
@@ -38,6 +39,7 @@ from src.repositories.online_feature_keyspace_repository import (
     CLIP_TOPIC_POPULARITY_HALF_LIFE_SECONDS,
     DAILY_COUNTER_TTL_SECONDS,
     EXPERIMENT_COUNTER_TTL_SECONDS,
+    ITEM_AFFINITY_KIND,
     ITEM_STATISTICS_TTL_SECONDS,
     SEEN_ITEMS_RETENTION_COUNT,
     SEEN_ITEMS_TTL_SECONDS,
@@ -76,6 +78,8 @@ def calculate_affinity_signal_weight(event: IntelligenceEvent) -> float:
             weight = event.payload.watch_fraction + 0.5 * min(event.payload.loop_count, 4)
         case ProductViewedEvent():
             weight = 0.5
+        case SearchedEvent() if event.payload.clicked_item_type == "product" and event.payload.clicked_item_id:
+            weight = 1.5
         case AddedToCartEvent():
             weight = 2.0
         case PurchasedEvent():
@@ -114,6 +118,20 @@ def find_affinity_targets(event: IntelligenceEvent) -> tuple[list[str], list[str
         case _:
             targets = [], []
     return targets
+
+
+def find_item_affinity_targets(event: IntelligenceEvent) -> list[tuple[str, float]]:
+    match event:
+        case ProductViewedEvent():
+            return [(event.payload.product_id, 0.5)]
+        case AddedToCartEvent():
+            return [(event.payload.product_id, 2.0)]
+        case PurchasedEvent():
+            return [(item.product_id, 5.0 * item.quantity) for item in event.payload.items]
+        case SearchedEvent() if event.payload.clicked_item_type == "product" and event.payload.clicked_item_id:
+            return [(event.payload.clicked_item_id, 1.5)]
+        case _:
+            return []
 
 
 def build_item_statistics_increments(event: IntelligenceEvent) -> list[tuple[str, str, float]]:
@@ -230,14 +248,23 @@ def plan_online_feature_updates_for_events(
                     event_unix_time,
                     AFFINITY_HALF_LIFE_SECONDS,
                 )
-            for topic_id in dict.fromkeys(topic_ids):
+        for item_id, item_weight in find_item_affinity_targets(event):
+            if item_weight != 0.0:
                 operations += build_forward_decayed_increment_operations(
-                    keyspace.affinity_base_key(TOPIC_AFFINITY_KIND, event.actor_id),
-                    topic_id,
-                    affinity_weight,
+                    keyspace.affinity_base_key(ITEM_AFFINITY_KIND, event.actor_id),
+                    item_id,
+                    item_weight,
                     event_unix_time,
                     AFFINITY_HALF_LIFE_SECONDS,
                 )
+        for topic_id in dict.fromkeys(topic_ids):
+            operations += build_forward_decayed_increment_operations(
+                keyspace.affinity_base_key(TOPIC_AFFINITY_KIND, event.actor_id),
+                topic_id,
+                affinity_weight,
+                event_unix_time,
+                AFFINITY_HALF_LIFE_SECONDS,
+            )
         for item_id, field_name, amount in build_item_statistics_increments(event):
             item_key = keyspace.item_statistics_key(item_id)
             operations += [
