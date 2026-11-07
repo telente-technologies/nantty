@@ -25,6 +25,7 @@ import type { Post } from "@/types";
 import { isPromotedEntityAd } from "@/utils/promotedEntityAd.util";
 
 import { PromotedEntityAdCard } from "./promotedEntityAdCard";
+import { SponsoredProductFeedAd } from "./sponsoredProductFeedAd";
 import styles from "./postCard.module.css";
 import swipeStyles from "./postSwipe.module.css";
 import { useDoubleTapToLike } from "./doubleTapToLike.hook";
@@ -47,6 +48,7 @@ import type { FeedInteractionSurface } from "@/utils/feedInteractionQueue.util";
 import { feedInteractionsService } from "@/services/feedInteractions.service";
 import { PostSurfaceProvider, usePostImpressionRef, usePostSurface } from "./interactions/feedInteractions.hook";
 import { attributionSourceForPostKind, rememberSaleAttribution } from "@/utils/saleAttribution.util";
+import { isProductSponsoredFeedAd } from "@/utils/productSponsoredFeedAd.util";
 
 export interface PostCardProps {
   readonly post: Post;
@@ -60,6 +62,7 @@ export interface PostCardProps {
 export function PostCard(props: PostCardProps) {
   const { sponsored } = props.post;
   if (isPromotedEntityAd(sponsored)) return <PromotedEntityAdCard sponsored={sponsored} placement="feed" itemId={props.post.id} media={props.post.media} primaryText={props.post.text} />;
+  if (isProductSponsoredFeedAd(sponsored)) return <SponsoredProductFeedAd sponsored={sponsored} itemId={props.post.id} primaryText={props.post.text} />;
   return <OrganicPostCard {...props} />;
 }
 
