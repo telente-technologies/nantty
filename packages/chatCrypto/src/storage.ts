@@ -6,7 +6,11 @@ export interface KeyValueStore {
   set(key: string, value: string): Promise<void>;
   delete(key: string): Promise<void>;
   keys(prefix: string): Promise<string[]>;
+  /** Applies all operations atomically within this store's namespace. */
+  batch?(operations: readonly KeyValueOperation[]): Promise<void>;
 }
+
+export type KeyValueOperation = { readonly type: "set"; readonly key: string; readonly value: string } | { readonly type: "delete"; readonly key: string };
 
 export interface Sealer {
   seal(plaintext: Bytes, associatedData: Bytes): Promise<Bytes>;
@@ -14,7 +18,7 @@ export interface Sealer {
 }
 
 export class MemoryKeyValueStore implements KeyValueStore {
-  private readonly entries = new Map<string, string>();
+  private entries = new Map<string, string>();
 
   public async get(key: string) {
     return this.entries.get(key) ?? null;
@@ -30,6 +34,15 @@ export class MemoryKeyValueStore implements KeyValueStore {
 
   public async keys(prefix: string) {
     return [...this.entries.keys()].filter((key) => key.startsWith(prefix));
+  }
+
+  public async batch(operations: readonly KeyValueOperation[]) {
+    const next = new Map(this.entries);
+    for (const operation of operations) {
+      if (operation.type === "set") next.set(operation.key, operation.value);
+      else next.delete(operation.key);
+    }
+    this.entries = next;
   }
 
   public snapshot(): ReadonlyMap<string, string> {
@@ -67,6 +80,16 @@ export class SealedKeyValueStore implements KeyValueStore {
 
   public delete(key: string) {
     return this.inner.delete(key);
+  }
+
+  public async batch(operations: readonly KeyValueOperation[]) {
+    if (this.inner.batch === undefined) throw new Error("The underlying key-value store does not support atomic batches.");
+    const sealed: KeyValueOperation[] = await Promise.all(operations.map(async (operation) =>
+      operation.type === "delete"
+        ? operation
+        : { type: "set", key: operation.key, value: encodeBase64(await this.sealer.seal(utf8Encode(operation.value), utf8Encode(operation.key))) },
+    ));
+    await this.inner.batch(sealed);
   }
 
   public keys(prefix: string) {

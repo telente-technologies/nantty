@@ -1,11 +1,39 @@
 import { describe, expect, it } from "vitest";
 
+import pairwiseFixture from "../fixtures/pairwise-message-v1.json";
 import { decodePairwiseMessage, encodePairwiseMessage } from "../src/wireMessage";
 import { maximumSkippedPerChain } from "../src/doubleRatchet";
+import { MemoryKeyValueStore, type KeyValueOperation, type KeyValueStore } from "../src/storage";
 import { connect, createTestDevice, read, receive, send, text } from "./sessionHarness";
 import { hex } from "./testRandom";
 
 const codeOf = async (promise: Promise<unknown>) => promise.then(() => "ok", (error: { code?: string }) => error.code ?? "unknown");
+
+class FailOnceBatchStore implements KeyValueStore {
+  private failed = false;
+  public constructor(private readonly inner: MemoryKeyValueStore) {}
+  public get = (key: string) => this.inner.get(key);
+  public set = (key: string, value: string) => this.inner.set(key, value);
+  public delete = (key: string) => this.inner.delete(key);
+  public keys = (prefix: string) => this.inner.keys(prefix);
+  public async batch(operations: readonly KeyValueOperation[]) {
+    if (!this.failed) {
+      this.failed = true;
+      const partial = new Proxy([...operations], {
+        get: (target, property, receiver) => property === Symbol.iterator
+          ? function* () {
+              const first = target[0];
+              if (first !== undefined) yield first;
+              throw new Error("injected mid-batch failure");
+            }
+          : Reflect.get(target, property, receiver),
+      });
+      await this.inner.batch?.(partial);
+      throw new Error("injected mid-batch failure");
+    }
+    await this.inner.batch?.(operations);
+  }
+}
 
 describe("X3DH and Double Ratchet sessions", () => {
   it("runs a full conversation with ratchet turns", async () => {
@@ -92,6 +120,24 @@ describe("X3DH and Double Ratchet sessions", () => {
     expect(await codeOf(receive(bob, alice, first))).toBe("PREKEY_NOT_FOUND");
   });
 
+  it("keeps the first-message session and one-time prekey unchanged after batch failure and decrypts on retry", async () => {
+    const records = new FailOnceBatchStore(new MemoryKeyValueStore());
+    const alice = createTestDevice("alice", "atomic-a");
+    const bob = createTestDevice("bob", "atomic-b", records);
+    await connect(alice, bob);
+    const first = await send(alice, bob, "retry me");
+    const wire = decodePairwiseMessage(first);
+    if (wire.type !== "preKey" || wire.oneTimePreKeyId === null) throw new Error("expected a prekey message with a one-time prekey");
+
+    await expect(bob.cipher.decrypt("alice", alice.identity.deviceId, first, async () => true)).rejects.toThrow("injected mid-batch failure");
+    expect((await bob.store.loadSession("alice", alice.identity.deviceId)).current).toBeNull();
+    expect(await bob.store.loadOneTimePreKey(wire.oneTimePreKeyId)).not.toBeNull();
+
+    expect(await receive(bob, alice, first)).toBe("retry me");
+    expect((await bob.store.loadSession("alice", alice.identity.deviceId)).current).not.toBeNull();
+    expect(await bob.store.loadOneTimePreKey(wire.oneTimePreKeyId)).toBeNull();
+  });
+
   it("rejects tampered ciphertexts and headers without corrupting the session", async () => {
     const alice = createTestDevice("alice", "a7");
     const bob = createTestDevice("bob", "b7");
@@ -159,9 +205,7 @@ describe("X3DH and Double Ratchet sessions", () => {
     await connect(alice, bob);
     const first = await send(alice, bob, "vector");
     expect(read(await bob.cipher.decrypt("alice", alice.identity.deviceId, first, async () => true))).toBe("vector");
-    expect(hex(first)).toBe(
-      "3200002ef73f02845497983242c8980441c40146fb431d3b38aaa0b1bc7190063fa8cd47e79c9e47e840a70eea65710fe81d14cb3616259e675625401d94a69715075c755d0000000b000001f431fbcd555d85c93954cd96b2aefa79717663f2ba5e61a364a62c904c67ce57e01a0000000000000000f4058f1517c11eb5deb332cfc34435eab7751be8aaf2",
-    );
+    expect(hex(first)).toBe(pairwiseFixture.firstMessageHex);
     expect(hex(text("x"))).toBe("78");
   });
 });

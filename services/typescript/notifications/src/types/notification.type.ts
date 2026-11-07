@@ -1,7 +1,7 @@
 import type { EmailTemplateKey } from "@nantty/email-templates";
 
 export type InboxCategory = "orders" | "social" | "system";
-export type InboxKind = "mention" | "videoReply" | "quote" | "repost" | "followRequest" | "followRequestAccepted" | "groupInvitation" | "groupInvitationAccepted" | "groupInvitationDeclined" | "channelInvitation" | "channelInvitationAccepted" | "channelInvitationDeclined";
+export type InboxKind = "mention" | "videoReply" | "quote" | "repost" | "followRequest" | "followRequestAccepted" | "groupInvitation" | "groupInvitationAccepted" | "groupInvitationDeclined" | "channelInvitation" | "channelInvitationAccepted" | "channelInvitationDeclined" | "streakMilestone" | "streakEndingSoon";
 export type MailKind = "transactional" | "security" | "legal" | "marketing";
 export type DeliveryChannel = "in_app" | "email" | "push" | "fanout";
 export type DeliveryStatus = "pending" | "sent" | "skipped" | "failed";

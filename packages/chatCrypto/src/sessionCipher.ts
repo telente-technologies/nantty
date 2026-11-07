@@ -66,8 +66,9 @@ export class SessionCipher {
     const x3dh = respondX3dh(this.identity, signedPreKey.keyPair, oneTimePreKey?.keyPair ?? null, wire.identityKey, wire.baseKey);
     const responder = initializeResponder(x3dh, signedPreKey.keyPair, wire.identityKey, wire.baseKey);
     const { state, plaintext } = ratchetDecrypt(responder, message.header, message.ciphertext, this.random);
-    await this.store.saveSession(userId, deviceId, withCurrent(record, state, wire.baseKey));
-    if (oneTimePreKey !== null) await this.store.removeOneTimePreKey(oneTimePreKey.keyId);
+    const updated = withCurrent(record, state, wire.baseKey);
+    if (oneTimePreKey !== null) await this.store.saveSessionAndConsumeOneTimePreKey(userId, deviceId, updated, oneTimePreKey.keyId);
+    else await this.store.saveSession(userId, deviceId, updated);
     return plaintext;
   }
 

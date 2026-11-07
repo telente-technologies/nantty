@@ -3,13 +3,13 @@ import type { PreKeyBundle } from "../src/directory";
 import { createDeviceIdentity, createOneTimePreKeys, createSignedPreKey } from "../src/keys";
 import { ProtocolStore } from "../src/protocolStore";
 import { SessionCipher } from "../src/sessionCipher";
-import { MemoryKeyValueStore } from "../src/storage";
+import { MemoryKeyValueStore, type KeyValueStore } from "../src/storage";
 import { seededRandom } from "./testRandom";
 
-export function createTestDevice(userId: string, seed: string) {
+export function createTestDevice(userId: string, seed: string, records: KeyValueStore = new MemoryKeyValueStore()) {
   const random = seededRandom(seed);
   const identity = createDeviceIdentity(userId, random);
-  const store = new ProtocolStore({ secrets: new MemoryKeyValueStore(), records: new MemoryKeyValueStore() });
+  const store = new ProtocolStore({ secrets: new MemoryKeyValueStore(), records });
   const cipher = new SessionCipher(store, identity, random);
   return {
     identity, store, cipher, random,

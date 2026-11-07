@@ -7,6 +7,7 @@ const id = "0192f0a0-0000-7000-8000-0000000000bb";
 describe("catalog routes", () => {
   it("serves anonymous mart reads from commerce", () => {
     expect(resolveUpstreamRouteForRequest("GET", "/api/v1/mart/highlights")).toMatchObject({ upstream: "commerce", authentication: "optional" });
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/mart/recommendations/for-you")).toMatchObject({ upstream: "commerce", authentication: "optional" });
     expect(resolveUpstreamRouteForRequest("GET", "/api/v1/sitemap/products")).toMatchObject({ upstream: "commerce", authentication: "optional" });
     expect(resolveUpstreamRouteForRequest("GET", "/api/v1/sitemap/stores")).toMatchObject({ upstream: "commerce", authentication: "optional" });
     expect(resolveUpstreamRouteForRequest("GET", "/api/v1/sitemap/profiles")?.upstream).toBe("identity");

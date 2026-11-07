@@ -51,6 +51,7 @@ export const socialEventTypes = {
   messageRequestReceived: "messageRequest.received",
   messageRequestAccepted: "messageRequest.accepted",
   streakMilestoneReached: "streak.milestoneReached",
+  streakReminderDue: "streak.reminderDue",
   streakRestored: "streak.restored",
   reportSubmitted: "report.created",
   chatMediaExpired: "chatMedia.expired",

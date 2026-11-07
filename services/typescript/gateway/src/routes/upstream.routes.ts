@@ -176,6 +176,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/returns", upstream: "commerce", authentication: "required" },
   { pathPrefix: "/api/v1/seller/returns", upstream: "commerce", authentication: "required" },
   { pathPrefix: "/api/v1/mart/home", upstream: "commerce", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/mart/recommendations/for-you", upstream: "commerce", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/mart/highlights", upstream: "commerce", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/sitemap/products", upstream: "commerce", authentication: "optional", methods: ["GET"], exactPathOnly: true },
   { pathPrefix: "/api/v1/sitemap/stores", upstream: "commerce", authentication: "optional", methods: ["GET"], exactPathOnly: true },

@@ -105,6 +105,8 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "comment.created": { data: { recipientUserId: "u1", actor, target: "post", excerpt: "Love it" }, templates: [], inAppRecipients: ["u1"] },
   "videoReply.created": { data: { recipientUserId: "u1", actor }, templates: [], inAppRecipients: ["u1"] },
   "messageRequest.received": { data: { recipientUserId: "u1", actor }, templates: [], inAppRecipients: ["u1"] },
+  "streak.milestoneReached": { data: { conversationId: "0192f0a1-7c3e-7000-8000-00000000c1a4", accountIds: ["u1", "u2"], days: 7 }, templates: [], inAppRecipients: ["u1", "u2"] },
+  "streak.reminderDue": { data: { conversationId: "0192f0a1-7c3e-7000-8000-00000000c1a4", accountId: "u1", localDay: "2026-11-07", count: 7 }, templates: [], inAppRecipients: ["u1"] },
   "conversation.groupInvitationCreated": { data: { invitationId: "inv-1", conversationId: "conversation-1", inviterId: "u1", inviteeId: "u2" }, templates: [], inAppRecipients: ["u2"] },
   "conversation.groupInvitationAccepted": { data: { invitationId: "inv-1", conversationId: "conversation-1", inviterId: "u1", inviteeId: "u2" }, templates: [], inAppRecipients: ["u1"] },
   "conversation.groupInvitationDeclined": { data: { invitationId: "inv-1", conversationId: "conversation-1", inviterId: "u1", inviteeId: "u2" }, templates: [], inAppRecipients: ["u1"] },

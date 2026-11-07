@@ -41,6 +41,7 @@ import { createSnsDomainEventPublisher, noopDomainEventPublisher } from "./integ
 import type { DomainEventPublisher } from "./interfaces/domainEventPublisher.interface.js";
 import { systemClock } from "./interfaces/clock.interface.js";
 import { startChatMediaExpiryJob } from "./jobs/scheduler.job.js";
+import { startStreakExpiryReminderJob } from "./jobs/streakExpiryReminders.job.js";
 import { startScheduledPostPublisher } from "./jobs/publishScheduledPosts.job.js";
 import { startContentEventConsumer } from "./jobs/contentEvents.job.js";
 import { createRabbitMqMessageConsumerFactory } from "./integrations/rabbitMqMessageConsumerFactory.integration.js";
@@ -103,6 +104,7 @@ export async function createSocialApp(config: SocialConfig, internalToken: strin
         stoppers.push(startOutboxRelay({ database, publisher, clock: systemClock, logger, intervalMs: config.outboxPollIntervalMs }));
         stoppers.push(() => void (publisher as { close?: () => Promise<void> }).close?.());
         stoppers.push(startChatMediaExpiryJob(context, logger, config.mediaExpiryIntervalMs));
+        stoppers.push(startStreakExpiryReminderJob(context, logger, config.streakReminderIntervalMs));
         stoppers.push(startScheduledPostPublisher(context, logger, 15_000));
         if (config.messageBus === "rabbitmq" && config.rabbitMqUrl !== "") {
           const consumers = createRabbitMqMessageConsumerFactory(config.rabbitMqUrl, config.rabbitMqPrefetch, logger);

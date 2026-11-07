@@ -91,6 +91,44 @@ export const messageRequestReceived: EventMapping = (event, data) => [
   }),
 ];
 
+export const streakMilestoneReached: EventMapping = (event, data) => {
+  const conversationId = data.text("conversationId");
+  const days = data.integer("days");
+  if (!Number.isSafeInteger(days) || days < 1) return [];
+  const recipients = [...new Set(data.textList("accountIds"))].filter((accountId) => accountId.length > 0);
+  return recipients.map((recipientUserId) => intentFor(event, recipientUserId, {
+    category: "social",
+    variant: `streak-${recipientUserId}`,
+    inApp: {
+      category: "social",
+      kind: "streakMilestone",
+      title: "Streak milestone unlocked",
+      body: `Your chat streak reached ${days} days. Keep it going together!`,
+      data: { screen: "Chat", conversationId },
+    },
+    push: {
+      title: `${days}-day chat streak!`,
+      body: "You and your friend reached a new milestone. Send a message to keep it going.",
+      data: { screen: "Chat", conversationId },
+    },
+  }));
+};
+
+export const streakReminderDue: EventMapping = (event, data) => {
+  const conversationId = data.text("conversationId");
+  const recipientUserId = data.text("accountId");
+  const count = data.integer("count");
+  if (!Number.isSafeInteger(count) || count < 1) return [];
+  const title = `Your ${count}-day chat streak is ending soon`;
+  const body = "Send a message today to keep it going with your friend.";
+  const target = { screen: "Chat", conversationId };
+  return [intentFor(event, recipientUserId, {
+    category: "social",
+    inApp: { category: "social", kind: "streakEndingSoon", title, body, data: target },
+    push: { title, body, data: target },
+  })];
+};
+
 export const groupInvitationCreated: EventMapping = (event, data) => [
   intentFor(event, data.text("inviteeId"), {
     category: "social",

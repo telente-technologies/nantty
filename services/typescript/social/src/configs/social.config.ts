@@ -14,6 +14,7 @@ export interface SocialConfig {
   readonly awsEndpointUrl: string | undefined;
   readonly outboxPollIntervalMs: number;
   readonly mediaExpiryIntervalMs: number;
+  readonly streakReminderIntervalMs: number;
   readonly jobsEnabled: boolean;
   readonly domainEventsQueue: string;
   readonly rabbitMqPrefetch: number;
@@ -80,6 +81,7 @@ export function loadSocialConfigFromEnvironment(): SocialConfig {
     awsEndpointUrl: process.env["AWS_ENDPOINT_URL"]?.trim() || undefined,
     outboxPollIntervalMs: Number(readOrDefault("OUTBOX_POLL_INTERVAL_MS", "500")),
     mediaExpiryIntervalMs: Number(readOrDefault("MEDIA_EXPIRY_INTERVAL_MS", String(60 * 60 * 1000))),
+    streakReminderIntervalMs: Number(readOrDefault("STREAK_REMINDER_INTERVAL_MS", String(5 * 60 * 1000))),
     jobsEnabled: readOrDefault("JOBS_ENABLED", "true") === "true",
     domainEventsQueue: readOrDefault("SOCIAL_DOMAIN_EVENTS_QUEUE", "social-domain-events"),
     rabbitMqPrefetch: Number(readOrDefault("RABBITMQ_PREFETCH", "20")),
@@ -95,6 +97,7 @@ export function loadSocialConfigFromEnvironment(): SocialConfig {
     intelligence: readIntelligence(problems),
   };
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
+  if (!Number.isInteger(config.streakReminderIntervalMs) || config.streakReminderIntervalMs <= 0) problems.push("STREAK_REMINDER_INTERVAL_MS must be a positive integer");
   problems.push(...collectPlaceholderSecretProblems(process.env));
   if (problems.length > 0) throw new Error(`Invalid social configuration: ${problems.join("; ")}`);
   return config;

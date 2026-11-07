@@ -86,6 +86,8 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "comment.created": social.commentCreated,
   "videoReply.created": social.videoReplyCreated,
   "messageRequest.received": social.messageRequestReceived,
+  "streak.milestoneReached": social.streakMilestoneReached,
+  "streak.reminderDue": social.streakReminderDue,
   "conversation.groupInvitationCreated": social.groupInvitationCreated,
   "conversation.groupInvitationAccepted": social.groupInvitationAccepted,
   "conversation.groupInvitationDeclined": social.groupInvitationDeclined,

@@ -2,7 +2,7 @@ import type { RatchetState } from "./doubleRatchet";
 import type { DeviceIdentity, OneTimePreKey, SignedPreKey } from "./keys";
 import type { ChatPayload } from "./payload";
 import type { OwnSenderKey, PeerSenderKeyRecord } from "./senderKeys";
-import { type KeyValueStore, deserializeRecord, serializeRecord } from "./storage";
+import { type KeyValueOperation, type KeyValueStore, deserializeRecord, serializeRecord } from "./storage";
 import type { TrustRecord } from "./identityTrust";
 
 export interface SessionRecord {
@@ -61,6 +61,15 @@ export class ProtocolStore {
   public loadSession = async (userId: string, deviceId: string): Promise<SessionRecord> =>
     (await this.read<SessionRecord>(this.storage.records, `session:${address(userId, deviceId)}`)) ?? { current: null, archived: [] };
   public saveSession = (userId: string, deviceId: string, record: SessionRecord) => this.write(this.storage.records, `session:${address(userId, deviceId)}`, record);
+  public async saveSessionAndConsumeOneTimePreKey(userId: string, deviceId: string, record: SessionRecord, preKeyId: number): Promise<void> {
+    const batch = this.storage.records.batch;
+    if (batch === undefined) throw new Error("Atomic session and one-time prekey storage is required.");
+    const operations: KeyValueOperation[] = [
+      { type: "set", key: `session:${address(userId, deviceId)}`, value: serializeRecord(record) },
+      { type: "delete", key: `opk:${preKeyId}` },
+    ];
+    await batch.call(this.storage.records, operations);
+  }
   public deleteSession = (userId: string, deviceId: string) => this.storage.records.delete(`session:${address(userId, deviceId)}`);
   public async sessionDeviceIds(userId: string): Promise<string[]> {
     const prefix = `session:${userId}:`;

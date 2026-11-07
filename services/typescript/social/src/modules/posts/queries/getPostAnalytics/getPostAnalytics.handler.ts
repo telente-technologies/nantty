@@ -57,7 +57,9 @@ export function createGetPostAnalyticsHandler(context: HandlerContext): Handler<
     const [stats, totals, uniqueViewers, saves, authors, viewerKeys] = await Promise.all([
       db.postDailyStat.findMany({ where: { postId, day: { gte: since } } }),
       db.postDailyStat.aggregate({ where: { postId }, _sum: { videoViews: true, watchTimeSeconds: true, completedViews: true, linkClicks: true, newFollows: true } }),
-      db.postViewer.count({ where: { postId, lastViewedAt: { not: null } } }),
+      post.kind === "story"
+        ? db.storyView.count({ where: { storyId: postId } })
+        : db.postViewer.count({ where: { postId, lastViewedAt: { not: null } } }),
       db.savedItem.count({ where: { targetId: postId, type: { in: ["post", "video", "clip"] } } }),
       context.directory.findUserSummaries([viewerId]),
       db.postViewer.findMany({ where: { postId, viewerKey: { not: "anonymous" }, lastViewedAt: { not: null } }, select: { viewerKey: true }, take: 5000 }),
@@ -67,7 +69,8 @@ export function createGetPostAnalyticsHandler(context: HandlerContext): Handler<
     const hasVideo = post.media.some((media) => media.type === "video");
     return {
       postId, kind: post.kind, hasLink: post.linkPreview !== null, author: authors.get(viewerId) ?? { id: viewerId, name: "", username: "", avatarUrl: null, verified: false, isCreator: false }, postedAt: post.createdAt.toISOString(),
-      impressions: post.viewCount, uniqueViewers, reach: uniqueViewers, likes: post.likeCount, comments: post.commentCount, reposts: post.repostCount, shares: post.shareCount, saves,
+      impressions: post.kind === "story" ? uniqueViewers : post.viewCount,
+      uniqueViewers, reach: uniqueViewers, likes: post.likeCount, comments: post.commentCount, reposts: post.repostCount, shares: post.shareCount, saves,
       profileVisits: post.profileVisitCount, linkClicks: totals._sum.linkClicks ?? 0, newFollows: totals._sum.newFollows ?? 0, ...engagement,
       video: hasVideo ? buildVideoAnalytics(totals._sum.videoViews ?? 0, totals._sum.watchTimeSeconds ?? 0, totals._sum.completedViews ?? 0) : null,
       audience: buildAudienceSplit(followerViewers, viewerKeys.length), daily: buildLastSevenDays(now, new Map(stats.map((stat) => [stat.day, stat.impressions]))),

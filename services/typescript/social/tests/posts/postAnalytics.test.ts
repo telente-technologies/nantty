@@ -73,4 +73,27 @@ describe("post analytics data sources", () => {
     await expect(createGetPostAnalyticsHandler(context)({ viewerId, postId: post.id }))
       .rejects.toMatchObject({ status: 403, code: "NOT_POST_OWNER" });
   });
+
+  it("uses persisted story-view events for story impressions and unique viewers", async () => {
+    const post = buildPostRow({ authorId: viewerId, kind: "story", viewCount: 0, likeCount: 2, commentCount: 1, shareCount: 3 });
+    const database = {
+      post: { findFirst: async () => post },
+      postDailyStat: {
+        findMany: async () => [],
+        aggregate: async () => ({ _sum: { videoViews: 0, watchTimeSeconds: 0, completedViews: 0, linkClicks: 0, newFollows: 0 } }),
+      },
+      storyView: { count: async ({ where }: { where: { storyId: string } }) => (where.storyId === post.id ? 4 : 0) },
+      postViewer: { count: async () => 0, findMany: async () => [] },
+      savedItem: { count: async () => 0 },
+    };
+    const context = {
+      database: { client: database },
+      directory: { findUserSummaries: async () => new Map([[viewerId, { id: viewerId, name: "Owner", username: "owner", avatarUrl: null, verified: false, isCreator: false }]]) },
+      clock: { now: () => new Date("2026-10-26T12:00:00Z") },
+    } as unknown as HandlerContext;
+
+    const result = await createGetPostAnalyticsHandler(context)({ viewerId, postId: post.id });
+
+    expect(result).toMatchObject({ kind: "story", impressions: 4, uniqueViewers: 4, reach: 4, likes: 2, comments: 1, shares: 3 });
+  });
 });
