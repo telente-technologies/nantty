@@ -4,11 +4,14 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
@@ -27,12 +30,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
 import com.nantty.android.R
+import com.nantty.android.data.SuggestedLiveCard
 import com.nantty.android.data.StoryTrayEntry
 
 @Composable
 internal fun StoriesTray(
     entries: List<StoryTrayEntry>,
     onStorySelected: (String) -> Unit,
+    liveEntries: List<SuggestedLiveCard> = emptyList(),
+    onLiveSelected: (String) -> Unit = {},
     myAvatarUrl: String? = null,
     onAddStory: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -79,7 +85,46 @@ internal fun StoriesTray(
             }
             Text(stringResource(R.string.add_story), style = MaterialTheme.typography.labelSmall, maxLines = 1)
         }
+        liveEntries.forEach { live ->
+            Column(
+                modifier = Modifier
+                    .testTag("stories-live-${live.id}")
+                    .semantics { contentDescription = "${live.host.name} is live, open livestream" }
+                    .clickable(role = Role.Button) { onLiveSelected(live.id) },
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Surface(
+                        modifier = Modifier.size(64.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.error),
+                    ) {
+                        live.host.avatarUrl?.let { url ->
+                            AsyncImage(
+                                model = url,
+                                contentDescription = null,
+                                modifier = Modifier.size(60.dp).clip(CircleShape),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                            )
+                        } ?: Box(contentAlignment = Alignment.Center) {
+                            Text(live.host.name.take(1).uppercase(), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    Surface(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        shape = RoundedCornerShape(4.dp),
+                        color = MaterialTheme.colorScheme.error,
+                    ) {
+                        Text("LIVE", Modifier.padding(horizontal = 5.dp, vertical = 1.dp), color = MaterialTheme.colorScheme.onError, style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+                Text(live.host.name, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            }
+        }
         entries.forEach { entry ->
+            if (liveEntries.any { it.host.id == entry.userId }) return@forEach
             Column(
                 modifier = Modifier
                     .semantics { contentDescription = if (entry.hasUnseen) "View ${entry.name}'s unseen story" else "View ${entry.name}'s story" }

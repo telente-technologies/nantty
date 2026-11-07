@@ -134,7 +134,7 @@ internal fun StoryAnalyticsDialog(
                             else TextButton(onClick = { reload++ }) { Text("Try again") }
                         }
                     }
-                    is StoryAnalyticsResult.Success -> item { StoryAnalyticsMetrics(result.analytics) }
+                    is StoryAnalyticsResult.Success -> item { StoryAnalyticsMetrics(result.analytics, viewers?.total) }
                 }
                 item {
                     HorizontalDivider()
@@ -179,11 +179,12 @@ internal fun StoryAnalyticsDialog(
 }
 
 @Composable
-private fun StoryAnalyticsMetrics(data: StoryAnalytics) {
+private fun StoryAnalyticsMetrics(data: StoryAnalytics, uniqueStoryViewers: Int?) {
     val metrics = listOf(
-        "Views" to data.impressions,
-        "Unique viewers" to data.uniqueViewers,
-        "Replies" to data.comments,
+        "Impressions" to data.impressions,
+        "Unique viewers" to uniqueStoryViewers,
+        "Likes" to data.likes,
+        "Comments" to data.comments,
         "Shares" to data.shares,
         "Profile visits" to data.profileVisits,
         "New follows" to data.newFollows,
@@ -193,7 +194,7 @@ private fun StoryAnalyticsMetrics(data: StoryAnalytics) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEach { (label, value) ->
                     Column(Modifier.weight(1f).padding(vertical = 6.dp)) {
-                        Text(java.text.NumberFormat.getIntegerInstance().format(value), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Text(value?.let { java.text.NumberFormat.getIntegerInstance().format(it) } ?: "—", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                         Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }

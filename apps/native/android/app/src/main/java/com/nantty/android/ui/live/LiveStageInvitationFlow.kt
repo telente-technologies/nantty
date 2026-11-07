@@ -109,6 +109,8 @@ internal fun LiveStageInvitationFlow(
     val stageJoinApproved = stageSnapshot?.myRole == "guest" && mediaGrant?.canPublish != true
     LiveStageInvitationDialog(
         hostName = hostName,
+        invitationRole = stageSnapshot?.invitationRole ?: "speaker",
+        invitationTitle = stageSnapshot?.invitationTitle,
         invitedByHost = invitedByHost,
         visible = joined && (invitedByHost || stageJoinApproved),
         busy = busy,

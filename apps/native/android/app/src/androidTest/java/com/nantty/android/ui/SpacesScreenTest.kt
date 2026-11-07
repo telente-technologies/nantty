@@ -54,6 +54,32 @@ class SpacesScreenTest {
     }
 
     @Test
+    fun initialSpaceLinkOpensTheRequestedSpaceDetail() {
+        val transport = FakeSpacesTransport(hostRole = false)
+        var initialSpaceHandled = false
+        compose.setContent {
+            MaterialTheme {
+                com.nantty.android.ui.spaces.SpacesScreen(
+                    repository = SpacesRepository("https://api.nantty.test", transport),
+                    accessToken = "session-token",
+                    viewerId = "viewer-2",
+                    executor = Executor { it.run() },
+                    onSignInRequired = {},
+                    initialSpaceId = "space-1",
+                    onInitialSpaceHandled = { initialSpaceHandled = true },
+                )
+            }
+        }
+
+        compose.onNodeWithText("LIVE SPACE").assertIsDisplayed()
+        compose.onNodeWithText("Studio talk").assertIsDisplayed()
+        compose.runOnIdle {
+            assertTrue(transport.paths.contains("/api/v1/spaces/space-1"))
+            assertTrue(initialSpaceHandled)
+        }
+    }
+
+    @Test
     fun hostCanStartScheduledSpaceAndToggleCoinSupportThroughApi() {
         val transport = FakeSpacesTransport(hostRole = true, initialState = "scheduled")
         compose.setContent {

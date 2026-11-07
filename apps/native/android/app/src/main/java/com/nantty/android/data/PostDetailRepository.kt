@@ -230,15 +230,32 @@ class PostDetailRepository(
         Unit
     }
 
-    fun recordPostLinkClick(postId: String, expectedAccountId: String): Result<Unit> = runCatching {
+    fun resolveFeedLinkPreview(rawUrl: String, expectedAccountId: String): Result<FeedLinkPreview?> = runCatching {
+        val session = sessionProvider()?.takeIf { it.accessToken.isNotBlank() }
+            ?: error("Sign in to load link previews.")
+        require(session.user.id == expectedAccountId) { "Your account changed. Reload before loading this link preview." }
+        val parsed = runCatching { URI(rawUrl.trim()) }.getOrNull()
+            ?: error("This link preview is unavailable.")
+        require(
+            rawUrl.length <= 2_048 && parsed.scheme.equals("https", ignoreCase = true) &&
+                !parsed.host.isNullOrBlank() && parsed.rawUserInfo == null,
+        ) { "Only safe HTTPS links can be previewed." }
+        val path = "/api/v1/link-previews/resolve?url=${queryValue(parsed.toASCIIString())}"
+        val response = transport.request("GET", path, session.accessToken, null)
+        val payload = if (response.has("data")) response.optJSONObject("data") else response
+        parseFeedLinkPreview(payload)
+    }
+
+    fun recordPostLinkClick(postId: String, expectedAccountId: String, surface: String = "post_detail"): Result<Unit> = runCatching {
         require(postId.isNotBlank()) { "A post ID is required to record a link click." }
+        require(surface in FEED_INTERACTION_SURFACES) { "This link interaction surface is unavailable." }
         val session = sessionProvider()?.takeIf { it.accessToken.isNotBlank() }
             ?: error("Sign in to record link clicks.")
         require(session.user.id == expectedAccountId) { "Your account changed. Reload before opening this link." }
         val event = JSONObject()
             .put("postId", postId)
             .put("kind", "link_click")
-            .put("surface", "post_detail")
+            .put("surface", surface)
         val body = JSONObject().put("events", JSONArray().put(event))
         transport.request("POST", "/api/v1/feeds/interactions/batch", session.accessToken, body)
         Unit
@@ -373,6 +390,10 @@ class PostDetailRepository(
 
     private fun pathSegment(value: String): String = queryValue(value)
     private fun queryValue(value: String): String = java.net.URLEncoder.encode(value, Charsets.UTF_8.name()).replace("+", "%20")
+
+    private companion object {
+        val FEED_INTERACTION_SURFACES = setOf("feed", "clips", "profile", "post_detail", "explore", "hashtag", "search")
+    }
 }
 
 internal fun buildPostThreadPath(

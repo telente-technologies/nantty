@@ -7,6 +7,7 @@ import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.StoriesRepository
 import com.nantty.android.data.StoryAdsRepository
 import com.nantty.android.data.StoryAdDestination
+import com.nantty.android.data.LiveSessionsRepository
 import java.util.concurrent.Executor
 
 /** Keeps the inbox route wiring outside the cross-feature destination switch. */
@@ -32,6 +33,8 @@ internal fun MessagesDestination(
     externalRefreshGeneration: Int,
     storiesRepository: StoriesRepository?,
     storyAdsRepository: StoryAdsRepository?,
+    liveSessionsRepository: LiveSessionsRepository?,
+    onOpenLive: (String) -> Unit,
     onOpenStoryAdDestination: (StoryAdDestination) -> Unit,
     currentUserAvatarUrl: String?,
     onAddStory: () -> Unit,
@@ -57,6 +60,8 @@ internal fun MessagesDestination(
         externalRefreshGeneration = externalRefreshGeneration,
         storiesRepository = storiesRepository,
         storyAdsRepository = storyAdsRepository,
+        liveSessionsRepository = liveSessionsRepository,
+        onOpenLive = onOpenLive,
         onOpenStoryAdDestination = onOpenStoryAdDestination,
         currentUserAvatarUrl = currentUserAvatarUrl,
         onAddStory = onAddStory,

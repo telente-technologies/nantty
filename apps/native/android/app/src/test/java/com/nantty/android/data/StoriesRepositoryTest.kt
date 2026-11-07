@@ -115,7 +115,7 @@ class StoriesRepositoryTest {
         var token: String? = null
         val repository = StoriesRepository(sessionProvider = { session }, transport = object : StoriesTransport {
             override fun get(path: String, accessToken: String?) = JSONObject(
-                """{"data":{"impressions":120,"uniqueViewers":85,"comments":4,"shares":7,"profileVisits":3,"newFollows":2,"postedAt":"2026-11-06T10:00:00.000Z"}}""",
+                """{"data":{"impressions":120,"uniqueViewers":85,"likes":5,"comments":4,"shares":7,"profileVisits":3,"newFollows":2,"postedAt":"2026-11-06T10:00:00.000Z"}}""",
             ).also { requestedPath = path; token = accessToken }
             override fun post(path: String, accessToken: String) = JSONObject()
         })
@@ -124,7 +124,7 @@ class StoriesRepositoryTest {
 
         assertEquals("/api/v1/posts/story-1/analytics", requestedPath)
         assertEquals("access", token)
-        assertEquals(StoryAnalyticsResult.Success(StoryAnalytics(120, 85, 4, 7, 3, 2, "2026-11-06T10:00:00.000Z")), result)
+        assertEquals(StoryAnalyticsResult.Success(StoryAnalytics(120, 85, 5, 4, 7, 3, 2, "2026-11-06T10:00:00.000Z")), result)
     }
 
     @Test

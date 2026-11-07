@@ -34,13 +34,29 @@ class SqliteChatCryptoValueDao(
 
     @Synchronized
     override fun set(namespace: ChatCryptoNamespace, key: String, ciphertext: ByteArray) {
-        val values = ContentValues(3).apply {
-            put(COLUMN_NAMESPACE, namespace.databaseValue)
-            put(COLUMN_KEY, key)
-            put(COLUMN_CIPHERTEXT, ciphertext)
-        }
-        check(helper.writableDatabase.insertWithOnConflict(TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1L) {
-            "Could not persist encrypted chat value"
+        writeSet(helper.writableDatabase, namespace, key, ciphertext)
+    }
+
+    @Synchronized
+    override fun applyBatch(mutations: List<ChatCryptoValueMutation>) {
+        if (mutations.isEmpty()) return
+        val database = helper.writableDatabase
+        database.beginTransaction()
+        try {
+            mutations.forEach { mutation ->
+                when (mutation) {
+                    is ChatCryptoValueMutation.Set -> writeSet(database, mutation.namespace, mutation.key, mutation.ciphertext)
+                    is ChatCryptoValueMutation.Delete -> database.delete(
+                        TABLE_NAME,
+                        "$COLUMN_NAMESPACE = ? AND $COLUMN_KEY = ?",
+                        arrayOf(mutation.namespace.databaseValue, mutation.key),
+                    )
+                }
+            }
+            database.setTransactionSuccessful()
+        } finally {
+            // SQLite rolls back unless setTransactionSuccessful was reached.
+            database.endTransaction()
         }
     }
 
@@ -69,6 +85,17 @@ class SqliteChatCryptoValueDao(
 
     @Synchronized
     override fun close() = helper.close()
+
+    private fun writeSet(database: SQLiteDatabase, namespace: ChatCryptoNamespace, key: String, ciphertext: ByteArray) {
+        val values = ContentValues(3).apply {
+            put(COLUMN_NAMESPACE, namespace.databaseValue)
+            put(COLUMN_KEY, key)
+            put(COLUMN_CIPHERTEXT, ciphertext)
+        }
+        check(database.insertWithOnConflict(TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1L) {
+            "Could not persist encrypted chat value"
+        }
+    }
 
     private class ChatCryptoDatabaseHelper(context: Context, name: String) : SQLiteOpenHelper(context, name, null, DATABASE_VERSION) {
         override fun onConfigure(database: SQLiteDatabase) {

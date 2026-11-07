@@ -12,15 +12,33 @@ data class LiveStageViewerSnapshot(
     val myRole: String,
     val invitationId: String?,
     val joinRequestState: String?,
+    val invitationRole: String = "speaker",
+    val invitationTitle: String? = null,
     val streamers: List<LiveStageStreamerSummary> = emptyList(),
     val invitations: List<LiveStageGuestInvitation> = emptyList(),
     val joinRequests: List<LiveStageJoinRequestSummary> = emptyList(),
 )
 
 data class LiveStageUserSummary(val id: String, val name: String, val username: String, val avatarUrl: String?, val verified: Boolean)
-data class LiveStageStreamerSummary(val slotId: String, val user: LiveStageUserSummary, val role: String, val state: String, val audioMuted: Boolean, val videoMuted: Boolean)
-data class LiveStageGuestInvitation(val id: String, val user: LiveStageUserSummary, val state: String)
+data class LiveStageStreamerSummary(
+    val slotId: String,
+    val user: LiveStageUserSummary,
+    val role: String,
+    val state: String,
+    val audioMuted: Boolean,
+    val videoMuted: Boolean,
+    val stageRole: String = "speaker",
+    val title: String? = null,
+)
+data class LiveStageGuestInvitation(
+    val id: String,
+    val user: LiveStageUserSummary,
+    val state: String,
+    val stageRole: String = "speaker",
+    val title: String? = null,
+)
 data class LiveStageJoinRequestSummary(val id: String, val user: LiveStageUserSummary, val state: String)
+data class LiveStageInviteRequest(val userId: String, val role: String, val title: String)
 
 data class LiveStageInvitationResponse(
     val stage: LiveStageViewerSnapshot,
@@ -72,8 +90,14 @@ class LiveStageRepository(
         }
     }
 
-    fun inviteViewer(liveId: String, userId: String): LiveSessionsResult<LiveStageViewerSnapshot> =
-        stageAction(liveId, userId, "/guests/invitations", JSONObject().put("userId", userId))
+    fun inviteViewer(liveId: String, userId: String, stageRole: String = "speaker", title: String = ""): LiveSessionsResult<LiveStageViewerSnapshot> {
+        if (stageRole !in LIVE_STAGE_INVITE_ROLES) return invalid()
+        val safeTitle = title.trim()
+        if (safeTitle.length > LIVE_STAGE_TITLE_MAX_LENGTH || safeTitle.any { it.isISOControl() }) return invalid()
+        val body = JSONObject().put("userId", userId).put("role", stageRole)
+        if (safeTitle.isNotEmpty()) body.put("title", safeTitle)
+        return stageAction(liveId, userId, "/guests/invitations", body)
+    }
 
     fun decideJoinRequest(liveId: String, requestId: String, approve: Boolean): LiveSessionsResult<LiveStageViewerSnapshot> {
         if (!SAFE_ID.matches(liveId) || !SAFE_ID.matches(requestId)) return invalid()
@@ -160,6 +184,8 @@ private fun parseStage(row: JSONObject, expectedLiveId: String): LiveStageViewer
     val invitation = row.optJSONObject("invitationForMe")
     val invitationId = invitation?.optString("id")?.takeIf { SAFE_STAGE_ID.matches(it) }
     if (invitation != null && invitationId == null) error("Nantty returned an invalid stage invitation.")
+    val invitationRole = invitation?.optString("stageRole")?.takeIf { it in LIVE_STAGE_INVITE_ROLES } ?: "speaker"
+    val invitationTitle = invitation?.optString("title")?.trim()?.takeIf(String::isNotEmpty)
     val joinRequest = row.optJSONObject("myJoinRequest")
     val joinRequestState = joinRequest?.optString("state")?.takeIf { it in LIVE_STAGE_JOIN_STATES }
     if (joinRequest != null && joinRequestState == null) error("Nantty returned an invalid stage request.")
@@ -168,6 +194,8 @@ private fun parseStage(row: JSONObject, expectedLiveId: String): LiveStageViewer
         myRole = role,
         invitationId = invitationId,
         joinRequestState = joinRequestState,
+        invitationRole = invitationRole,
+        invitationTitle = invitationTitle,
         streamers = parseRows(row.optJSONArray("streamers")) { value ->
             LiveStageStreamerSummary(
                 slotId = value.optString("slotId").takeIf(SAFE_STAGE_ID::matches) ?: error("Invalid stage seat."),
@@ -176,6 +204,8 @@ private fun parseStage(row: JSONObject, expectedLiveId: String): LiveStageViewer
                 state = value.optString("state").takeIf { it in LIVE_GUEST_STATES } ?: error("Invalid guest state."),
                 audioMuted = value.optBoolean("audioMuted"),
                 videoMuted = value.optBoolean("videoMuted"),
+                stageRole = value.optString("stageRole").takeIf { it in LIVE_STAGE_INVITE_ROLES } ?: "speaker",
+                title = value.optString("title").trim().takeIf(String::isNotEmpty),
             )
         },
         invitations = parseRows(row.optJSONArray("invitations")) { value ->
@@ -183,6 +213,8 @@ private fun parseStage(row: JSONObject, expectedLiveId: String): LiveStageViewer
                 id = value.optString("id").takeIf(SAFE_STAGE_ID::matches) ?: error("Invalid stage invitation."),
                 user = parseStageUser(value.optJSONObject("user") ?: error("Invitation user is missing.")),
                 state = value.optString("state").takeIf { it in LIVE_GUEST_STATES } ?: error("Invalid invitation state."),
+                stageRole = value.optString("stageRole").takeIf { it in LIVE_STAGE_INVITE_ROLES } ?: "speaker",
+                title = value.optString("title").trim().takeIf(String::isNotEmpty),
             )
         },
         joinRequests = parseRows(row.optJSONArray("joinRequests")) { value ->
@@ -223,5 +255,7 @@ private fun parseMediaGrant(row: JSONObject): LiveMediaGrant {
 
 private val SAFE_STAGE_ID = Regex("^[A-Za-z0-9_-]{1,80}$")
 private val LIVE_STAGE_ROLES = setOf("host", "guest", "viewer")
+private val LIVE_STAGE_INVITE_ROLES = setOf("speaker", "cohost")
+private const val LIVE_STAGE_TITLE_MAX_LENGTH = 32
 private val LIVE_STAGE_JOIN_STATES = setOf("pending", "approved", "declined")
 private val LIVE_GUEST_STATES = setOf("invited", "joining", "onStage", "reconnecting", "left", "removed", "declined", "expired", "cancelled", "failed")

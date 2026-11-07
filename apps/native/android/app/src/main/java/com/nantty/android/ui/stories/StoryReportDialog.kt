@@ -35,7 +35,6 @@ import com.nantty.android.R
 import com.nantty.android.data.ProductReportReason
 import com.nantty.android.data.ProductReportRepository
 import com.nantty.android.data.ProductReportResult
-import com.nantty.android.data.StoryItem
 import java.util.UUID
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
@@ -53,19 +52,20 @@ private val storyReportOptions = listOf(
 )
 
 @Composable
-internal fun StoryReportDialog(
+internal fun UserReportDialog(
     repository: ProductReportRepository,
-    story: StoryItem,
+    authorId: String,
+    reportKey: String,
     executor: Executor,
     onDismiss: () -> Unit,
     onReauthenticate: () -> Unit,
 ) {
-    var selectedReason by remember(story.id) { mutableStateOf<ProductReportReason?>(null) }
-    var details by remember(story.id) { mutableStateOf("") }
-    var result by remember(story.id) { mutableStateOf<ProductReportResult?>(null) }
-    var submitting by remember(story.id) { mutableStateOf(false) }
-    var idempotencyKey by remember(story.id) { mutableStateOf(UUID.randomUUID().toString()) }
-    val generation = remember(story.id) { AtomicInteger() }
+    var selectedReason by remember(reportKey) { mutableStateOf<ProductReportReason?>(null) }
+    var details by remember(reportKey) { mutableStateOf("") }
+    var result by remember(reportKey) { mutableStateOf<ProductReportResult?>(null) }
+    var submitting by remember(reportKey) { mutableStateOf(false) }
+    var idempotencyKey by remember(reportKey) { mutableStateOf(UUID.randomUUID().toString()) }
+    val generation = remember(reportKey) { AtomicInteger() }
     DisposableEffect(generation) { onDispose { generation.incrementAndGet() } }
 
     fun submit() {
@@ -75,7 +75,7 @@ internal fun StoryReportDialog(
         val requestId = generation.get()
         val key = idempotencyKey
         executor.execute {
-            val submitted = repository.submitUser(story.authorId, reason, details, key)
+            val submitted = repository.submitUser(authorId, reason, details, key)
             if (generation.get() != requestId) return@execute
             Snapshot.withMutableSnapshot {
                 submitting = false
@@ -111,6 +111,7 @@ internal fun StoryReportDialog(
                                 selected = selectedReason == option.reason,
                                 onClick = { selectedReason = option.reason },
                                 enabled = !submitting,
+                                modifier = Modifier.testTag("user-report-reason-${option.reason.name.lowercase()}"),
                             )
                             Text(label, style = MaterialTheme.typography.bodyMedium)
                         }

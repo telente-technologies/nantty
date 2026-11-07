@@ -98,12 +98,41 @@ class LiveStageRepositoryTest {
         transport.response = JSONObject(stageJson().toString())
         assertTrue(repository.inviteViewer("live-123", "viewer-123") is LiveSessionsResult.Success)
         assertEquals("viewer-123", JSONObject(transport.calls.last().body).optString("userId"))
+        assertEquals("speaker", JSONObject(transport.calls.last().body).optString("role"))
         assertTrue(repository.decideJoinRequest("live-123", "request-123", true) is LiveSessionsResult.Success)
         assertTrue(transport.calls.last().path.endsWith("/guests/requests/request-123/approve"))
         assertTrue(repository.removeGuest("live-123", "viewer-123") is LiveSessionsResult.Success)
         assertTrue(transport.calls.last().path.endsWith("/guests/viewer-123/remove"))
         assertTrue(repository.muteStreamer("live-123", "viewer-123", audio = true) is LiveSessionsResult.Success)
         assertEquals(true, JSONObject(transport.calls.last().body).optBoolean("audio"))
+    }
+
+    @Test
+    fun hostInvitationSendsRoleAndOptionalTitleAndParsesInviteDesignation() {
+        val transport = RecordingStageTransport(stageJson())
+        val repository = stageRepository(transport)
+
+        assertTrue(repository.inviteViewer("live-123", "viewer-123", "cohost", "Guest expert") is LiveSessionsResult.Success)
+        val request = JSONObject(transport.calls.single().body)
+        assertEquals("cohost", request.optString("role"))
+        assertEquals("Guest expert", request.optString("title"))
+
+        val response = JSONObject(stageJson().toString()).put(
+            "invitationForMe",
+            JSONObject("""{"id":"slot-456","stageRole":"cohost","title":"Guest expert"}"""),
+        )
+        val invite = stageRepository(RecordingStageTransport(response)).load("live-123") as LiveSessionsResult.Success
+        assertEquals("cohost", invite.value.invitationRole)
+        assertEquals("Guest expert", invite.value.invitationTitle)
+    }
+
+    @Test
+    fun rejectsInvalidLiveInvitationRoleAndOverlongTitleBeforeTransport() {
+        val transport = RecordingStageTransport(stageJson())
+        val repository = stageRepository(transport)
+        assertTrue(repository.inviteViewer("live-123", "viewer-123", "admin", "Title") is LiveSessionsResult.Failure)
+        assertTrue(repository.inviteViewer("live-123", "viewer-123", "speaker", "x".repeat(33)) is LiveSessionsResult.Failure)
+        assertTrue(transport.calls.isEmpty())
     }
 }
 

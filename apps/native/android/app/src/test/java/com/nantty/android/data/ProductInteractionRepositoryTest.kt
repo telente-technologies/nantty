@@ -65,6 +65,53 @@ class ProductInteractionRepositoryTest {
         assertFalse(opened)
     }
 
+    @Test
+    fun recordsConsentGatedSearchesAndProductClicksWithSearchContext() {
+        val requests = mutableListOf<InteractionConnection>()
+        val repository = ProductInteractionRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "viewer-token" },
+            openConnection = { url ->
+                InteractionConnection(url, when {
+                    url.path.endsWith("/users/me/consents") -> 200 to """{"data":[{"consentType":"analytics","status":"granted"},{"consentType":"personalization","status":"granted"}]}"""
+                    else -> 202 to "{}"
+                }).also(requests::add)
+            },
+        )
+
+        assertTrue(repository.recordSearchPerformed("shoes", 4))
+        assertTrue(repository.recordSearchProductClicked("product-1", "shoes", 4))
+
+        val searchPayload = eventPayload(requests[1])
+        assertEquals("search.performed", eventName(requests[1]))
+        assertEquals("shoes", searchPayload.getString("query"))
+        assertEquals(4, searchPayload.getInt("resultCount"))
+        val clickPayload = eventPayload(requests[2])
+        assertEquals("product.clicked", eventName(requests[2]))
+        assertEquals("search", clickPayload.getString("surface"))
+        assertEquals("shoes", clickPayload.getString("query"))
+        assertEquals(4, clickPayload.getInt("resultCount"))
+    }
+
+    @Test
+    fun recordsRecommendationClicksWithTheirSurfaceAttribution() {
+        val requests = mutableListOf<InteractionConnection>()
+        val repository = ProductInteractionRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "viewer-token" },
+            openConnection = { url ->
+                InteractionConnection(url, when {
+                    url.path.endsWith("/users/me/consents") -> 200 to """{"data":[{"consentType":"analytics","status":"granted"},{"consentType":"personalization","status":"granted"}]}"""
+                    else -> 202 to "{}"
+                }).also(requests::add)
+            },
+        )
+
+        assertTrue(repository.recordProductClicked("product-1", "mart_recommendations"))
+
+        assertEquals("mart_recommendations", eventPayload(requests.last()).getString("surface"))
+    }
+
     private fun assertEvent(connection: InteractionConnection, eventName: String, payloadKey: String, payloadValue: String) {
         assertEquals("POST", connection.requestMethod)
         assertEquals("https://api.nantty.com/api/v1/analytics/product-interactions", connection.url.toString())
@@ -73,6 +120,12 @@ class ProductInteractionRepositoryTest {
         assertEquals(payloadValue, row.getJSONObject("payload").getString(payloadKey))
         assertTrue(row.getString("occurredAt").isNotBlank())
     }
+
+    private fun eventName(connection: InteractionConnection): String =
+        JSONObject(connection.requestBody.toString(Charsets.UTF_8.name())).getJSONArray("events").getJSONObject(0).getString("event")
+
+    private fun eventPayload(connection: InteractionConnection): JSONObject =
+        JSONObject(connection.requestBody.toString(Charsets.UTF_8.name())).getJSONArray("events").getJSONObject(0).getJSONObject("payload")
 }
 
 private class InteractionConnection(url: URL, private val response: Pair<Int, String>) : HttpURLConnection(url) {

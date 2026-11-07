@@ -17,6 +17,8 @@ data class ProtocolSessionRecord(
     /** Ratchet state is kept as a JSON object until the Android ratchet implementation is interoperable. */
     val current: Map<String, Any?>?,
     val archived: List<Map<String, Any?>>,
+    /** RN's bounded replay guard for initial X3DH/prekey messages. */
+    val seenBaseKeys: List<String> = emptyList(),
 )
 
 data class ProtocolCachedPlaintext(
@@ -65,14 +67,33 @@ class ProtocolStore(private val storage: ChatCryptoStorage) {
             ProtocolSessionRecord(
                 current = objectValue.optionalObject("current"),
                 archived = objectValue.requiredArray("archived").map { it.asObject() },
+                seenBaseKeys = objectValue.optionalArray("seenBaseKeys")?.map { it.asString() }.orEmpty().also {
+                    require(it.size <= MAX_SEEN_BASE_KEYS) { "Too many remembered prekey base keys" }
+                    it.forEach { encoded ->
+                        require(ChatCryptoPrimitives.decodeBase64(encoded).size == 32) { "Invalid remembered prekey base key" }
+                    }
+                },
             )
         } ?: ProtocolSessionRecord(current = null, archived = emptyList())
 
-    fun saveSession(userId: String, deviceId: String, record: ProtocolSessionRecord) = write(
-        storage.records,
-        "session:${address(userId, deviceId)}",
-        mapOf("current" to record.current, "archived" to record.archived),
-    )
+    fun saveSession(userId: String, deviceId: String, record: ProtocolSessionRecord) =
+        write(storage.records, sessionKey(userId, deviceId), sessionValue(record))
+
+    /** Commits first-session ratchet state and one-time-prekey consumption as one storage batch. */
+    fun saveSessionAndConsumeOneTimePreKey(
+        userId: String,
+        deviceId: String,
+        record: ProtocolSessionRecord,
+        preKeyId: Int,
+    ) {
+        require(preKeyId in 1..MAXIMUM_ONE_TIME_PREKEY_ID) { "One-time prekey id is invalid" }
+        storage.records.applyBatch(
+            listOf(
+                ChatCryptoKeyValueMutation.Set(sessionKey(userId, deviceId), stringify(sessionValue(record))),
+                ChatCryptoKeyValueMutation.Delete("opk:$preKeyId"),
+            ),
+        )
+    }
 
     fun deleteSession(userId: String, deviceId: String) = storage.records.delete("session:${address(userId, deviceId)}")
     fun sessionDeviceIds(userId: String): List<String> {
@@ -164,8 +185,18 @@ class ProtocolStore(private val storage: ChatCryptoStorage) {
         private const val COUNTERS_KEY = "prekeys:counters"
         private const val PLAINTEXT_PREFIX = "plain:"
         private const val MAX_GROUP_KEYS = 8
+        private const val MAX_SEEN_BASE_KEYS = 64
+        private const val MAXIMUM_ONE_TIME_PREKEY_ID = 0x7fff_ffff
 
         private fun address(userId: String, deviceId: String) = "$userId:$deviceId"
+
+        private fun sessionKey(userId: String, deviceId: String) = "session:${address(userId, deviceId)}"
+
+        private fun sessionValue(record: ProtocolSessionRecord) = mapOf(
+            "current" to record.current,
+            "archived" to record.archived,
+            "seenBaseKeys" to record.seenBaseKeys.takeLast(MAX_SEEN_BASE_KEYS),
+        )
 
         private fun toJson(value: Any?): Any = when (value) {
             null -> JSONObject.NULL
@@ -210,6 +241,7 @@ class ProtocolStore(private val storage: ChatCryptoStorage) {
         private fun Map<String, Any?>.requiredString(key: String) = (this[key] ?: throw JSONException("Missing $key")).asString()
         private fun Map<String, Any?>.requiredInt(key: String) = (this[key] ?: throw JSONException("Missing $key")).asInt()
         private fun Map<String, Any?>.requiredArray(key: String) = (this[key] ?: throw JSONException("Missing $key")).asArray()
+        private fun Map<String, Any?>.optionalArray(key: String) = this[key]?.asArray()
         private fun Map<String, Any?>.requiredObject(key: String) = (this[key] ?: throw JSONException("Missing $key")).asObject()
         private fun Map<String, Any?>.optionalObject(key: String): Map<String, Any?>? = this[key]?.asObject()
         private fun Map<String, Any?>.optionalString(key: String): String? = this[key]?.asString()

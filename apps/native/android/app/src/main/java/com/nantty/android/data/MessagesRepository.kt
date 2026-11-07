@@ -33,6 +33,7 @@ data class InboxConversation(
     val unreadCount: Int,
     val inboxFolder: MessagesInboxFolder = MessagesInboxFolder.CHATS,
     val spamReason: String? = null,
+    val streak: ChatStreak? = null,
 )
 
 data class ConversationPage(val conversations: List<InboxConversation>, val nextCursor: String?)
@@ -88,6 +89,7 @@ class MessagesRepository(
     internal val groupInvitationsRepository = GroupInvitationsRepository(sessionProvider, threadTransport, refreshSessionProvider)
     internal val channelInvitationsRepository = ChannelInvitationsRepository(sessionProvider, threadTransport, refreshSessionProvider)
     private val notificationMessageTargets = mutableMapOf<String, String>()
+    private val conversationStreakRepository = ConversationStreakRepository(sessionProvider, threadTransport, refreshSessionProvider)
 
     /** Holds a validated notification target until the matching conversation screen consumes it. */
     @Synchronized
@@ -123,6 +125,10 @@ class MessagesRepository(
 
     fun revokeGroupInvitation(conversationId: String, invitationId: String) =
         groupInvitationsRepository.revoke(conversationId, invitationId)
+
+    fun restoreStreak(conversationId: String): StreakRestoreResult = conversationStreakRepository.restore(conversationId)
+
+    fun acknowledgeStreakCelebration(conversationId: String): Result<Unit> = conversationStreakRepository.acknowledge(conversationId)
 
     fun createChannel(name: String, description: String?): ConversationLookupResult = try {
         val normalizedName = name.trim()
@@ -337,6 +343,7 @@ class MessagesRepository(
                         unreadCount = row.optInt("unread").coerceAtLeast(0),
                         inboxFolder = inboxFolder,
                         spamReason = row.optNullable("spamReason"),
+                        streak = parseChatStreak(row.optJSONObject("streak")),
                     ),
                 )
             }
@@ -413,64 +420,6 @@ private class JdkMessagesTransport(private val baseUrl: String) : MessagesTransp
     }
 
     companion object { private const val MAX_RESPONSE_BYTES = 1_048_576 }
-}
-
-private class JdkChatThreadTransport(private val baseUrl: String) : ChatThreadTransport {
-    override fun request(method: String, path: String, accessToken: String, body: JSONObject?): JSONObject {
-        val endpointPath = path.substringBefore('?')
-        val supportedRequest = when {
-            endpointPath == "/api/v1/group-invitations" -> method == "GET"
-            endpointPath.matches(Regex("/api/v1/group-invitations/[0-9a-fA-F-]{36}/(accept|decline)")) -> method == "POST"
-            endpointPath.matches(Regex("/api/v1/conversations/[0-9a-fA-F-]{36}/invitations")) -> method == "POST"
-            endpointPath.matches(Regex("/api/v1/conversations/[0-9a-fA-F-]{36}/invitations/[0-9a-fA-F-]{36}")) -> method == "DELETE"
-            endpointPath.matches(Regex("/api/v1/conversations/[0-9a-fA-F-]{36}/invitation-links")) -> method in setOf("GET", "POST")
-            endpointPath.matches(Regex("/api/v1/conversations/invitation-links/[A-Za-z0-9_-]{43}/preview")) -> method == "GET"
-            endpointPath.matches(Regex("/api/v1/conversations/invitation-links/[A-Za-z0-9_-]{43}/claim")) -> method == "POST"
-            endpointPath.matches(Regex("/api/v1/conversations/[0-9a-fA-F-]{36}/invitation-links/[0-9a-fA-F-]{36}")) -> method == "DELETE"
-            endpointPath.startsWith("/api/v1/conversations/") && endpointPath.endsWith("/messages") -> method == "GET"
-            endpointPath.startsWith("/api/v1/conversations/") && endpointPath.endsWith("/read") -> method == "POST"
-            endpointPath.matches(Regex("/api/v1/conversations/[0-9a-fA-F-]{36}(/(accept|block|not-spam))?")) -> method == "POST" || method == "DELETE"
-            endpointPath == "/api/v1/conversations/search" -> method == "GET"
-            endpointPath == "/api/v1/conversations" -> method == "POST"
-            endpointPath == "/api/v1/channels" -> method == "POST"
-            endpointPath.matches(Regex("/api/v1/conversations/stores/[0-9a-fA-F-]{36}")) -> method == "POST"
-            else -> false
-        }
-        require(supportedRequest) { "Unsupported conversation request." }
-        val origin = trustedApiOrigin(baseUrl) ?: error("Configure an HTTPS Nantty API URL to use messages.")
-        val connection = (URL(origin + path).openConnection() as HttpURLConnection).apply {
-            requestMethod = method
-            connectTimeout = 10_000
-            readTimeout = 15_000
-            instanceFollowRedirects = false
-            useCaches = false
-            setRequestProperty("Accept", "application/json")
-            setRequestProperty("Authorization", "Bearer $accessToken")
-            if (body != null) {
-                doOutput = true
-                setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            }
-        }
-        try {
-            body?.let { connection.outputStream.use { out -> out.write(it.toString().toByteArray(Charsets.UTF_8)) } }
-            val status = connection.responseCode
-            if (status !in 200..299) throw MessagesHttpException(status)
-            val response = (if (status == HttpURLConnection.HTTP_NO_CONTENT) null else connection.inputStream)?.use(::readThreadResponse).orEmpty()
-            return if (response.isBlank()) JSONObject() else JSONObject(response)
-        } finally { connection.disconnect() }
-    }
-
-    private fun readThreadResponse(input: java.io.InputStream): String {
-        val output = ByteArrayOutputStream()
-        val buffer = ByteArray(8_192)
-        while (true) {
-            val read = input.read(buffer)
-            if (read < 0) break
-            require(output.size() + read <= 1_048_576) { "Nantty returned an unexpectedly large conversation response." }
-            output.write(buffer, 0, read)
-        }
-        return output.toString(Charsets.UTF_8.name())
-    }
 }
 
 internal fun buildMessageHistoryPath(conversationId: String, cursor: String? = null, after: String? = null): String = buildString {

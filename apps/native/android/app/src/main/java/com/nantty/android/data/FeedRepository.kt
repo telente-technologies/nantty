@@ -7,6 +7,7 @@ import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
 import java.net.URLEncoder
+import java.util.Locale
 
 data class FeedPost(
     val id: String,
@@ -31,10 +32,33 @@ data class FeedPost(
     val authorId: String = "",
     val bookmarked: Boolean = false,
     val postedAsId: String? = null,
+    val views: Int = 0,
     val quotedPost: FeedQuotedPost? = null,
     val quotedPostUnavailable: Boolean = false,
     val isQuote: Boolean = false,
     val isFollowingAuthor: Boolean = false,
+    val viewerNotificationsMuted: Boolean = false,
+    val products: List<FeedTaggedProduct> = emptyList(),
+    val linkPreview: FeedLinkPreview? = null,
+    val isSponsored: Boolean = false,
+)
+
+data class FeedLinkPreview(
+    val url: String,
+    val domain: String,
+    val title: String,
+    val description: String?,
+    val imageUrl: String?,
+    val siteName: String?,
+)
+
+data class FeedTaggedProduct(
+    val id: String,
+    val name: String,
+    val amountMinor: Long,
+    val currency: String,
+    val imageUrl: String?,
+    val stock: Int,
 )
 
 data class FeedQuotedPost(
@@ -55,6 +79,23 @@ sealed interface FeedTopicsResult {
     data class Success(val topics: List<FeedTopic>) : FeedTopicsResult
     data class Failure(val message: String) : FeedTopicsResult
     data object AuthenticationRequired : FeedTopicsResult
+}
+
+enum class FeedFeedbackKind(val apiValue: String) {
+    NOT_INTERESTED("not_interested"),
+    HIDE("hide"),
+}
+
+sealed interface FeedFeedbackResult {
+    data object Success : FeedFeedbackResult
+    data object AuthenticationRequired : FeedFeedbackResult
+    data class Failure(val message: String) : FeedFeedbackResult
+}
+
+sealed interface PostNotificationMuteResult {
+    data class Success(val muted: Boolean) : PostNotificationMuteResult
+    data object AuthenticationRequired : PostNotificationMuteResult
+    data class Failure(val message: String) : PostNotificationMuteResult
 }
 
 data class FeedMedia(
@@ -85,6 +126,72 @@ class FeedRepository(
         load(FeedType.FOR_YOU, accessToken, cursor, topicId)
 
     fun loadFollowing(accessToken: String?, cursor: String? = null): FeedResult = load(FeedType.FOLLOWING, accessToken, cursor)
+
+    fun recordFeedback(postId: String, kind: FeedFeedbackKind, accessToken: String?): FeedFeedbackResult {
+        if (accessToken.isNullOrBlank()) return FeedFeedbackResult.AuthenticationRequired
+        if (!isSafeFeedPostId(postId)) return FeedFeedbackResult.Failure("This post is unavailable.")
+        val origin = baseUrl.trim().trimEnd('/')
+        val parsed = runCatching { URL(origin) }.getOrNull()
+            ?: return FeedFeedbackResult.Failure("Feed feedback is unavailable: the configured API address is invalid.")
+        if (parsed.protocol != "https" && !(parsed.protocol == "http" && parsed.host == "10.0.2.2")) {
+            return FeedFeedbackResult.Failure("Feed feedback is unavailable: the API address must use HTTPS (emulator development may use 10.0.2.2).")
+        }
+        return try {
+            val connection = openConnection(URL("$origin/api/v1/feeds/feedback"))
+            connection.apply {
+                requestMethod = "POST"
+                doOutput = true
+                connectTimeout = 10_000
+                readTimeout = 15_000
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("Content-Type", "application/json; charset=utf-8")
+                setRequestProperty("Authorization", "Bearer $accessToken")
+            }
+            connection.useConnection {
+                connection.outputStream.use { it.write(JSONObject().put("postId", postId).put("type", kind.apiValue).toString().toByteArray(Charsets.UTF_8)) }
+                val status = connection.responseCode
+                if (status == HttpURLConnection.HTTP_UNAUTHORIZED) return@useConnection FeedFeedbackResult.AuthenticationRequired
+                if (status !in 200..299) return@useConnection FeedFeedbackResult.Failure("Could not update your feed preferences. Please try again.")
+                FeedFeedbackResult.Success
+            }
+        } catch (_: Exception) {
+            FeedFeedbackResult.Failure("Could not reach Nantty. Check your connection and try again.")
+        }
+    }
+
+    fun setPostNotificationsMuted(postId: String, muted: Boolean, accessToken: String?): PostNotificationMuteResult {
+        if (accessToken.isNullOrBlank()) return PostNotificationMuteResult.AuthenticationRequired
+        if (!isSafeFeedPostId(postId)) return PostNotificationMuteResult.Failure("This post is unavailable.")
+        val origin = baseUrl.trim().trimEnd('/')
+        val parsed = runCatching { URL(origin) }.getOrNull()
+            ?: return PostNotificationMuteResult.Failure("Post notifications are unavailable: the configured API address is invalid.")
+        if (parsed.protocol != "https" && !(parsed.protocol == "http" && parsed.host == "10.0.2.2")) {
+            return PostNotificationMuteResult.Failure("Post notifications are unavailable: the API address must use HTTPS (emulator development may use 10.0.2.2).")
+        }
+        return try {
+            val method = if (muted) "PUT" else "DELETE"
+            val connection = openConnection(URL("$origin/api/v1/posts/$postId/notifications-mute"))
+            connection.apply {
+                requestMethod = method
+                connectTimeout = 10_000
+                readTimeout = 15_000
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("Authorization", "Bearer $accessToken")
+            }
+            connection.useConnection {
+                val status = connection.responseCode
+                if (status == HttpURLConnection.HTTP_UNAUTHORIZED || status == HttpURLConnection.HTTP_FORBIDDEN) {
+                    return@useConnection PostNotificationMuteResult.AuthenticationRequired
+                }
+                if (status !in 200..299) {
+                    return@useConnection PostNotificationMuteResult.Failure("Could not update post notifications. Please try again.")
+                }
+                PostNotificationMuteResult.Success(muted)
+            }
+        } catch (_: Exception) {
+            PostNotificationMuteResult.Failure("Could not reach Nantty. Check your connection and try again.")
+        }
+    }
 
     fun load(feedType: FeedType, accessToken: String? = null, cursor: String? = null, topicId: String? = null): FeedResult {
         if (feedType == FeedType.FOLLOWING && accessToken.isNullOrBlank()) return FeedResult.AuthenticationRequired
@@ -219,15 +326,55 @@ class FeedRepository(
                     authorId = author.optString("id"),
                     bookmarked = item.optBoolean("bookmarked", item.optBoolean("isSaved")),
                     postedAsId = item.optJSONObject("postedAs")?.optString("id")?.takeIf { it.isNotBlank() && it != "null" },
+                    views = item.optInt("views").coerceAtLeast(0),
                     quotedPost = quotedPost,
                     quotedPostUnavailable = item.optBoolean("resharedFromUnavailable") || (quotedPostPayload != null && quotedPost == null),
                     isQuote = item.optBoolean("isQuote"),
                     isFollowingAuthor = item.optBoolean("isFollowingAuthor"),
+                    viewerNotificationsMuted = item.optBoolean("viewerNotificationsMuted"),
+                    products = item.optJSONArray("products")?.let { productRows ->
+                        buildList {
+                            for (productIndex in 0 until productRows.length()) {
+                                val product = productRows.optJSONObject(productIndex) ?: continue
+                                val id = product.optString("id").takeIf(String::isNotBlank) ?: continue
+                                val name = product.optString("name").takeIf(String::isNotBlank) ?: continue
+                                val price = product.optJSONObject("price") ?: continue
+                                val currency = price.optString("currency").uppercase(Locale.ROOT).takeIf { it.length == 3 } ?: continue
+                                add(FeedTaggedProduct(
+                                    id = id,
+                                    name = name,
+                                    amountMinor = price.optLong("amountMinor").coerceAtLeast(0),
+                                    currency = currency,
+                                    imageUrl = safeMediaUrl(product.optString("imageUrl").takeUnless { it.isBlank() || it == "null" }),
+                                    stock = product.optInt("stock").coerceAtLeast(0),
+                                ))
+                            }
+                        }
+                    }.orEmpty(),
+                    linkPreview = parseFeedLinkPreview(item.optJSONObject("linkPreview")),
+                    isSponsored = item.optJSONObject("sponsored") != null,
                 ))
             }
         }
         FeedResult.Success(posts, root.optString("nextCursor").takeUnless { it == "" || it == "null" })
     }.getOrElse { FeedResult.Failure("Nantty returned a feed we could not read. Please try again later.") }
+}
+
+internal fun parseFeedLinkPreview(payload: JSONObject?): FeedLinkPreview? {
+    payload ?: return null
+    val url = payload.optString("url").trim()
+    val parsedUrl = runCatching { URI(url) }.getOrNull() ?: return null
+    if (!parsedUrl.scheme.equals("https", ignoreCase = true) || parsedUrl.host.isNullOrBlank() || parsedUrl.rawUserInfo != null || url.length > 2_048) return null
+    val title = payload.optString("title").trim().takeIf(String::isNotEmpty) ?: return null
+    val domain = payload.optString("domain").trim().ifEmpty { parsedUrl.host.orEmpty() }
+    return FeedLinkPreview(
+        url = parsedUrl.toASCIIString(),
+        domain = domain,
+        title = title,
+        description = payload.optNullableString("description")?.trim()?.takeIf(String::isNotEmpty),
+        imageUrl = safeMediaUrl(payload.optNullableString("imageUrl")),
+        siteName = payload.optNullableString("siteName")?.trim()?.takeIf(String::isNotEmpty),
+    )
 }
 
 private fun parseQuotedPost(payload: JSONObject): FeedQuotedPost {
@@ -286,6 +433,10 @@ internal fun appendUniqueFeedPosts(current: List<FeedPost>, incoming: List<FeedP
     return current + incoming.filter { seenIds.add(it.id) }
 }
 
+private fun isSafeFeedPostId(value: String): Boolean = value.length in 1..200 && value.all {
+    it.isLetterOrDigit() || it == '_' || it == '-'
+}
+
 internal fun safeMediaUrl(raw: String?): String? = raw?.let { value ->
     runCatching {
         val uri = URI(value.trim())
@@ -295,6 +446,8 @@ internal fun safeMediaUrl(raw: String?): String? = raw?.let { value ->
         if (scheme == "https" || (scheme == "http" && host == "10.0.2.2")) uri.toASCIIString() else null
     }.getOrNull()
 }
+
+private fun JSONObject.optNullableString(key: String): String? = optString(key).takeUnless { it.isBlank() || it == "null" }
 
 private inline fun <T> HttpURLConnection.useConnection(block: () -> T): T = try {
     block()

@@ -21,9 +21,36 @@ interface ChatCryptoValueDao : AutoCloseable {
     fun get(namespace: ChatCryptoNamespace, key: String): ByteArray?
     fun set(namespace: ChatCryptoNamespace, key: String, ciphertext: ByteArray)
     fun delete(namespace: ChatCryptoNamespace, key: String)
+    /** Applies every namespaced ciphertext mutation atomically or leaves the store unchanged. */
+    fun applyBatch(mutations: List<ChatCryptoValueMutation>)
     fun keys(namespace: ChatCryptoNamespace, prefix: String): List<String>
 
     override fun close() = Unit
+}
+
+/** Ciphertext-only mutations; the namespace is explicit so a batch cannot cross store boundaries implicitly. */
+sealed interface ChatCryptoValueMutation {
+    val namespace: ChatCryptoNamespace
+    val key: String
+
+    data class Set(
+        override val namespace: ChatCryptoNamespace,
+        override val key: String,
+        val ciphertext: ByteArray,
+    ) : ChatCryptoValueMutation
+
+    data class Delete(
+        override val namespace: ChatCryptoNamespace,
+        override val key: String,
+    ) : ChatCryptoValueMutation
+}
+
+/** Plaintext mutations accepted only at a namespace-bound encrypted key/value store. */
+sealed interface ChatCryptoKeyValueMutation {
+    val key: String
+
+    data class Set(override val key: String, val value: String) : ChatCryptoKeyValueMutation
+    data class Delete(override val key: String) : ChatCryptoKeyValueMutation
 }
 
 /** Mirrors packages/chatCrypto's string-key storage operations and prefix enumeration. */
@@ -31,6 +58,7 @@ interface ChatCryptoKeyValueStore {
     fun get(key: String): String?
     fun set(key: String, value: String)
     fun delete(key: String)
+    fun applyBatch(mutations: List<ChatCryptoKeyValueMutation>)
     fun keys(prefix: String): List<String>
 }
 
@@ -74,6 +102,27 @@ class EncryptedChatCryptoKeyValueStore internal constructor(
     }
 
     override fun set(key: String, value: String) {
+        dao.set(namespace, key, encrypt(key, value))
+    }
+
+    override fun applyBatch(mutations: List<ChatCryptoKeyValueMutation>) {
+        if (mutations.isEmpty()) return
+        // Do all cryptographic work before opening the DAO transaction. A cipher/key failure
+        // therefore cannot leave a partially applied logical update.
+        val encrypted = mutations.map { mutation ->
+            when (mutation) {
+                is ChatCryptoKeyValueMutation.Set -> ChatCryptoValueMutation.Set(
+                    namespace = namespace,
+                    key = mutation.key,
+                    ciphertext = encrypt(mutation.key, mutation.value),
+                )
+                is ChatCryptoKeyValueMutation.Delete -> ChatCryptoValueMutation.Delete(namespace, mutation.key)
+            }
+        }
+        dao.applyBatch(encrypted)
+    }
+
+    private fun encrypt(key: String, value: String): ByteArray {
         val cipher = cipherFactory.create()
         cipher.init(Cipher.ENCRYPT_MODE, this.key)
         val nonce = requireNotNull(cipher.iv) { "AES-GCM provider did not return an encryption nonce" }
@@ -84,7 +133,7 @@ class EncryptedChatCryptoKeyValueStore internal constructor(
         STORAGE_VERSION.copyInto(packed)
         nonce.copyInto(packed, STORAGE_VERSION.size)
         ciphertext.copyInto(packed, STORAGE_VERSION.size + nonce.size)
-        dao.set(namespace, key, packed)
+        return packed
     }
 
     override fun delete(key: String) = dao.delete(namespace, key)

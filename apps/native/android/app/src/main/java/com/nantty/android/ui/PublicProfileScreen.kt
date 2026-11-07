@@ -90,6 +90,7 @@ internal fun PublicProfileScreen(
     val storyNavigation = rememberMessagesStoryNavigation(
         repository = storiesRepository.takeIf { hasStoryTraySession },
         adsRepository = storyAdsRepository.takeIf { hasStoryTraySession },
+        liveSessionsRepository = null,
         executor = executor,
         onReauthenticate = onReauthenticate,
     )

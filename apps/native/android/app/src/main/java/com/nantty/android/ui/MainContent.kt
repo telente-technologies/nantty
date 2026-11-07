@@ -6,7 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.nantty.android.data.AccountNotificationSettingsRepository
+import com.nantty.android.data.AccountHealthRepository
+import com.nantty.android.data.IdentityVerificationRepository
 import com.nantty.android.data.CountryPreferenceRepository
+import com.nantty.android.data.ContentPreferencesRepository
 import com.nantty.android.data.ClipsRepository
 import com.nantty.android.data.ClipWatchTrackingRepository
 import com.nantty.android.data.ChatNotificationSettingsRepository
@@ -19,7 +22,6 @@ import com.nantty.android.data.DisputeRepository
 import com.nantty.android.data.CreatorSampleMediaRepository
 import com.nantty.android.data.ExploreRepository
 import com.nantty.android.data.FeedPost
-import com.nantty.android.data.FeedQuotedPost
 import com.nantty.android.data.FeedResult
 import com.nantty.android.data.FeedType
 import com.nantty.android.data.FollowRequestsRepository
@@ -37,6 +39,8 @@ import com.nantty.android.data.ProfileImageRepository
 import com.nantty.android.data.SavedPostsRepository
 import com.nantty.android.data.SearchRepository
 import com.nantty.android.data.StoreRepository
+import com.nantty.android.data.CartRepository
+import com.nantty.android.data.ProductAdsRepository
 import com.nantty.android.data.SupportTicketRepository
 import com.nantty.android.data.SpacesRepository
 import com.nantty.android.data.StoriesRepository
@@ -65,10 +69,14 @@ internal fun MainContent(
     onOpenClipComments: (String) -> Unit = onOpenPost,
     onOpenPostComment: (String, String) -> Unit = { postId, _ -> onOpenPost(postId) },
     onOpenProfile: (String) -> Unit = {},
+    onOpenLive: (String) -> Unit = {},
     searchScope: String = SearchRepository.GLOBAL_SCOPE,
     searchScopeLabel: String = "Everywhere",
     onSearchScopeChanged: (String, String) -> Unit = { _, _ -> },
     onOpenProduct: (String) -> Unit = {},
+    feedProductAdsRepository: ProductAdsRepository? = null,
+    cartRepository: CartRepository? = null,
+    onOpenCart: () -> Unit = {},
     onOpenStore: (String) -> Unit = {},
     onBackToStoreSearch: (String) -> Unit = {},
     onBackToProfileSearch: (String) -> Unit = {},
@@ -80,8 +88,9 @@ internal fun MainContent(
     onSave: (FeedPost) -> Unit = {},
     onShare: (FeedPost) -> Unit = {},
     currentAccountId: String? = null,
-    onReportPost: ((FeedPost) -> Unit)? = null,
-    onQuotePost: ((FeedQuotedPost) -> Unit)? = null,
+    activeProfileId: String? = null,
+    onOpenAnalytics: ((String) -> Unit)? = null,
+    feedPostActions: FeedDestinationPostActions = FeedDestinationPostActions(),
     interactionMessage: String? = null,
     onMessageFailure: (String, Boolean) -> Unit = { _, _ -> },
     savingPostId: String? = null,
@@ -99,11 +108,17 @@ internal fun MainContent(
     ioExecutor: Executor? = null,
     notificationsRepository: NotificationsRepository? = null,
     accountNotificationSettingsRepository: AccountNotificationSettingsRepository? = null,
+    accountHealthRepository: AccountHealthRepository? = null,
+    identityVerificationRepository: IdentityVerificationRepository? = null,
     countryPreferenceRepository: CountryPreferenceRepository? = null,
     countryPreferenceNavigation: CountryPreferenceNavigation? = null,
+    contentPreferencesRepository: ContentPreferencesRepository? = null,
+    onBackFromContentPreferences: () -> Unit = {},
     chatNotificationSettingsRepository: ChatNotificationSettingsRepository? = null,
     chatPasscodeRepository: ChatPasscodeRepository? = null,
     onOpenChatPasscodeSettings: () -> Unit = {},
+    onOpenContentPreferences: () -> Unit = {},
+    onContentPreferencesChanged: () -> Unit = {},
     onOpenChatNotificationSettings: () -> Unit = {},
     onChatPasscodeUpdated: () -> Unit = {},
     onOpenBlockedAccounts: () -> Unit = {},
@@ -139,6 +154,8 @@ internal fun MainContent(
     storeRepository: StoreRepository? = null,
     supportTicketRepository: SupportTicketRepository? = null,
     spacesRepository: SpacesRepository? = null,
+    initialSpaceId: String? = null,
+    onInitialSpaceHandled: () -> Unit = {},
     liveSessionsRepository: LiveSessionsRepository? = null,
     liveStageRepository: LiveStageRepository? = null,
     liveCoinTipRepository: LiveCoinTipRepository? = null,
@@ -166,6 +183,7 @@ internal fun MainContent(
     onCheckBuyerOrderPayment: (BuyerOrderDetail) -> Unit = {},
     onBackFromFollowRequests: () -> Unit = {},
     onBackFromSupportRequests: () -> Unit = {},
+    onBackFromAccountStatus: () -> Unit = onBackFromSupportRequests,
     onOpenMessages: () -> Unit = {},
     onOpenNotificationConversation: (InboxConversation) -> Unit = {},
     onOpenSearch: () -> Unit = {},
@@ -219,75 +237,53 @@ internal fun MainContent(
             viewerId = spacesViewerId,
             executor = ioExecutor,
             onSignInRequired = onSignInRequired,
+            initialSpaceId = initialSpaceId,
+            onInitialSpaceHandled = onInitialSpaceHandled,
             modifier = modifier,
         )
         return
     }
-    if (destination == Destination.CountryPreference && countryPreferenceRepository != null && countryPreferenceNavigation != null && ioExecutor != null) {
-        CountryPreferenceScreen(
-            repository = countryPreferenceRepository,
+    if (AccountSettingsDestination(
+            destination = destination,
+            countryPreferenceRepository = countryPreferenceRepository,
+            countryPreferenceNavigation = countryPreferenceNavigation,
+            contentPreferencesRepository = contentPreferencesRepository,
+            chatNotificationSettingsRepository = chatNotificationSettingsRepository,
+            chatPasscodeRepository = chatPasscodeRepository,
             executor = ioExecutor,
-            onBack = countryPreferenceNavigation.returnToPrevious,
             onReauthenticate = onReauthenticate,
-            onSaved = countryPreferenceNavigation.returnToPrevious,
-            modifier = modifier,
-        )
-        return
-    }
-    if (destination == Destination.ChatNotificationSettings && chatNotificationSettingsRepository != null && ioExecutor != null) {
-        ChatNotificationSettingsScreen(
-            repository = chatNotificationSettingsRepository,
-            executor = ioExecutor,
-            onBack = onBackFromSupportRequests,
-            onReauthenticate = onNotificationReauthenticate,
+            onNotificationReauthenticate = onNotificationReauthenticate,
+            onBackFromContentPreferences = onBackFromContentPreferences,
+            onContentPreferencesChanged = onContentPreferencesChanged,
+            onBackFromChatSettings = onBackFromSupportRequests,
             onOpenBlockedAccounts = onOpenBlockedAccounts,
             onOpenPasscodeSettings = onOpenChatPasscodeSettings,
-            onSettingsChanged = onChatNotificationsSaved,
+            onChatNotificationsSaved = onChatNotificationsSaved,
+            onBackFromChatPasscode = onOpenChatNotificationSettings,
+            onChatPasscodeUpdated = onChatPasscodeUpdated,
             modifier = modifier,
-        )
-        return
-    }
-    if (destination == Destination.ChatPasscode && chatPasscodeRepository != null) {
-        ChatPasscodeSettingsScreen(
-            repository = chatPasscodeRepository,
-            onBack = onOpenChatNotificationSettings,
-            onPasscodeUpdated = onChatPasscodeUpdated,
-            modifier = modifier,
-        )
-        return
-    }
-    if (destination == Destination.Profile && currentProfileRepository != null && ioExecutor != null) {
-        CurrentProfileScreen(
-            repository = currentProfileRepository,
+        )) return
+    if (ProfileDestination(
+            destination = destination,
+            profileRepository = currentProfileRepository,
+            followRequestsRepository = followRequestsRepository,
             executor = ioExecutor,
             modifier = modifier,
             onOpenBusinessTools = onOpenBusinessTools,
             onOpenCountryPreferences = countryPreferenceNavigation?.open ?: {},
+            onOpenContentPreferences = onOpenContentPreferences,
             onOpenConnections = onOpenConnections,
             onOpenProfile = onOpenProfile,
             onSearchProfile = onSearchCurrentProfile,
             publicProfileRepository = publicProfileRepository,
             profileImagesRepository = profileImagesRepository,
             onOpenPost = onOpenPost,
-            followRequestsRepository = followRequestsRepository,
             supportTicketRepository = supportTicketRepository,
             supportMediaRepository = privateMediaUploadsRepository,
             buyerOrdersRepository = buyerOrdersRepository,
+            onBackFromFollowRequests = onBackFromFollowRequests,
             onReauthenticate = onReauthenticate,
-        )
-        return
-    }
-    if (destination == Destination.FollowRequests && followRequestsRepository != null && ioExecutor != null) {
-        FollowRequestsScreen(
-            repository = followRequestsRepository,
-            executor = ioExecutor,
-            onBack = onBackFromFollowRequests,
-            onReauthenticate = onReauthenticate,
-            onOpenProfile = onOpenProfile,
-            modifier = modifier,
-        )
-        return
-    }
+        )) return
     if (destination == Destination.Business && businessContent != null) {
         businessContent()
         return
@@ -314,6 +310,8 @@ internal fun MainContent(
             onOpenChatNotificationSettings = onOpenChatNotificationSettings,
             externalRefreshGeneration = messagesRefreshGeneration, storiesRepository = storiesRepository,
             storyAdsRepository = storyAdsRepository,
+            liveSessionsRepository = liveSessionsRepository,
+            onOpenLive = onOpenLive,
             onOpenStoryAdDestination = { adDestination ->
                 dispatchStoryAdDestination(
                     destination = adDestination,
@@ -348,12 +346,19 @@ internal fun MainContent(
             onOpenFollowRequests = notificationActions.openFollowRequests,
             onOpenGroupInvitations = notificationActions.openGroupInvitations,
             onOpenSpaces = notificationActions.openSpaces,
+            onOpenAccountStatus = { notificationActions.openAccountPolicy(Destination.AccountStatus) },
+            onOpenIdentityVerification = { notificationActions.openAccountPolicy(Destination.IdentityVerification) },
             onOpenSupportTicket = notificationActions.openSupportTicket,
             onOpenDispute = notificationActions.openDispute,
             onOpenClip = notificationActions.openClip,
         )
         return
     }
+    if (AccountPolicyDestination(
+            destination, accountHealthRepository, identityVerificationRepository, ioExecutor, modifier,
+            onBackFromAccountStatus, onNotificationReauthenticate,
+        )
+    ) return
     if (destination == Destination.SupportRequests && supportTicketRepository != null && ioExecutor != null) {
         SupportRequestsScreen(
             repository = supportTicketRepository,
@@ -425,6 +430,7 @@ internal fun MainContent(
             initialScope = searchScope,
             initialScopeLabel = searchScopeLabel,
             onScopeChanged = onSearchScopeChanged,
+            productAdsRepository = feedProductAdsRepository,
         )
         return
     }
@@ -445,6 +451,7 @@ internal fun MainContent(
             onOpenStore = onOpenStore,
             onOpenBrand = onOpenBrand,
             storeRepository = storeRepository,
+            productAdsRepositoryOverride = feedProductAdsRepository,
         )
         return
     }
@@ -475,7 +482,14 @@ internal fun MainContent(
         onLoadMore = onLoadMore,
         onOpenSavedPosts = onOpenSavedPosts,
         currentAccountId = currentAccountId,
-        onReportPost = onReportPost,
-        onQuotePost = onQuotePost,
+        activeProfileId = activeProfileId,
+        onOpenAnalytics = onOpenAnalytics,
+        postActions = feedPostActions,
+        onOpenProduct = onOpenProduct,
+        productAdsRepository = feedProductAdsRepository,
+        cartRepository = cartRepository,
+        ioExecutor = ioExecutor,
+        onSignInRequiredWithAction = onSignInRequiredWithAction,
+        onOpenCart = onOpenCart,
     )
 }

@@ -90,7 +90,11 @@ class NotificationsRepositoryTest {
         assertEquals(NotificationDestination.GroupInvitations, resolveNotificationDestination(base.copy(url = "/chats/invitations")))
         assertEquals(NotificationDestination.Spaces, resolveNotificationDestination(base.copy(screen = "SpaceInvitations", url = "/spaces")))
         assertEquals(NotificationDestination.Spaces, resolveNotificationDestination(base.copy(url = "https://web.nantty.com/spaces")))
-        assertNull(resolveNotificationDestination(base.copy(screen = "Verification", url = "https://evil.example/chats/invitations")))
+        assertEquals(NotificationDestination.AccountStatus, resolveNotificationDestination(base.copy(screen = "AccountStatus")))
+        assertEquals(
+            NotificationDestination.IdentityVerification,
+            resolveNotificationDestination(base.copy(screen = "Verification", url = "https://evil.example/chats/invitations")),
+        )
         assertEquals(NotificationDestination.SupportTicket(ticketId), resolveNotificationDestination(base.copy(ticketId = ticketId)))
         assertNull(resolveNotificationDestination(base.copy(ticketId = "../admin")))
         assertEquals(NotificationDestination.Clip("clip-123"), resolveNotificationDestination(base.copy(clipId = "clip-123")))

@@ -14,17 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.AccountSessionRepository
-import com.nantty.android.data.ChatPasscodeRepository
 import com.nantty.android.data.FeedRepository
 import com.nantty.android.data.FollowRequestsRepository
-import com.nantty.android.data.FeedResult
 import com.nantty.android.data.FeedType
 import com.nantty.android.data.InboxConversation
 import com.nantty.android.data.PostDetailRepository
-import com.nantty.android.data.PublicBrandRepository
-import com.nantty.android.data.SpacesRepository
-import com.nantty.android.data.StoriesRepository
-import com.nantty.android.data.SoundsRepository
 import com.nantty.android.notifications.PushTapTarget
 import java.util.concurrent.Executors
 
@@ -47,25 +41,34 @@ internal fun SignedInApp(
     requestedGroupInvitationToken: String? = null, onGroupInvitationTokenHandled: () -> Unit = {}, requestedChannelInvitationToken: String? = null, onChannelInvitationTokenHandled: () -> Unit = {},
 ) {
     val shareContext = LocalContext.current.applicationContext
-    var destination by rememberSaveable { mutableStateOf(Destination.Feed) }
+    val destinationState = rememberSaveable { mutableStateOf(Destination.Feed) }
+    var destination by destinationState
     val countryPreferenceNavigation = rememberCountryPreferenceNavigation(destination) { destination = it }
     val selectedFeedState = rememberSaveable { mutableStateOf(FeedType.FOR_YOU) }
     var selectedFeed by selectedFeedState
     val selectedTopicState = rememberSaveable { mutableStateOf<String?>(null) }
     var selectedTopicId by selectedTopicState
     val feedSelectionGenerationState = rememberSaveable { mutableStateOf(0) }
-    var selectedPostId by rememberSaveable { mutableStateOf<String?>(null) }
-    var selectedPostCommentId by rememberSaveable { mutableStateOf<String?>(null) }
-    var selectedProfileId by rememberSaveable { mutableStateOf<String?>(null) }
-    var selectedConnectionsUserId by rememberSaveable { mutableStateOf<String?>(null) }
+    val selectedPostIdState = rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedPostId by selectedPostIdState
+    val selectedPostCommentIdState = rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedPostCommentId by selectedPostCommentIdState
+    val selectedPostAnalyticsIdState = rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedPostAnalyticsId by selectedPostAnalyticsIdState
+    val selectedProfileIdState = rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedProfileId by selectedProfileIdState
+    val selectedConnectionsUserIdState = rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedConnectionsUserId by selectedConnectionsUserIdState
     var selectedConnectionsTab by rememberSaveable { mutableStateOf("followers") }
-    var showingConnections by rememberSaveable { mutableStateOf(false) }
+    val showingConnectionsState = rememberSaveable { mutableStateOf(false) }
+    var showingConnections by showingConnectionsState
     fun openConnections(userId: String, tab: String) {
         selectedConnectionsUserId = userId
         selectedConnectionsTab = tab
         showingConnections = true
     }
-    var pendingMessageConversation by remember { mutableStateOf<InboxConversation?>(null) }
+    val pendingMessageConversationState = remember { mutableStateOf<InboxConversation?>(null) }
+    var pendingMessageConversation by pendingMessageConversationState
     var pendingNotificationConversationId by rememberSaveable { mutableStateOf<String?>(null) }; var pendingNotificationOrderId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingGroupInvitations by rememberSaveable { mutableStateOf(false) }; var pendingChannelInvitations by rememberSaveable { mutableStateOf(false) }
     val pendingGroupInvitationToken = rememberGroupInvitationLinkRoute(requestedGroupInvitationToken, onGroupInvitationTokenHandled) { destination = Destination.Messages }
@@ -73,18 +76,29 @@ internal fun SignedInApp(
     var pendingSupportTicketId by rememberSaveable { mutableStateOf<String?>(null) }; var pendingNotificationClipId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingNotificationDisputeId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingLiveId by rememberSaveable { mutableStateOf<String?>(null) }
-    var messagesRefreshGeneration by rememberSaveable { mutableStateOf(0) }
-    var profileOpenedFromConnections by rememberSaveable { mutableStateOf(false) }
-    var selectedStoreId by rememberSaveable { mutableStateOf<String?>(null) }; var selectedBrandId by rememberSaveable { mutableStateOf<String?>(null) }
-    var searchScope by rememberSaveable { mutableStateOf("global") }
-    var searchScopeLabel by rememberSaveable { mutableStateOf("Everywhere") }
+    var pendingSharedSpaceId by rememberSaveable { mutableStateOf<String?>(null) }
+    val messagesRefreshGenerationState = rememberSaveable { mutableStateOf(0) }
+    var messagesRefreshGeneration by messagesRefreshGenerationState
+    val profileOpenedFromConnectionsState = rememberSaveable { mutableStateOf(false) }
+    var profileOpenedFromConnections by profileOpenedFromConnectionsState
+    val selectedStoreIdState = rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedStoreId by selectedStoreIdState
+    val selectedBrandIdState = rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedBrandId by selectedBrandIdState
+    val searchScopeState = rememberSaveable { mutableStateOf("global") }
+    var searchScope by searchScopeState
+    val searchScopeLabelState = rememberSaveable { mutableStateOf("Everywhere") }
+    var searchScopeLabel by searchScopeLabelState
     val purchaseState = rememberSaveable(saver = SignedInPurchaseState.Saver) { SignedInPurchaseState() }
-    var pendingMartProductId by rememberSaveable { mutableStateOf<String?>(null) }
+    val pendingMartProductIdState = rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingMartProductId by pendingMartProductIdState
     var pendingMartCategoryId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingMartCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
     var returnToDiscoverAfterCategory by rememberSaveable { mutableStateOf(false) }
     val destinationStateHolder = rememberSaveableStateHolder()
-    var composerMode by rememberSaveable { mutableStateOf(SignedInComposerMode.CLOSED) }; val quoteTarget = remember { mutableStateOf<com.nantty.android.data.FeedQuotedPost?>(null) }
+    val composerModeState = rememberSaveable { mutableStateOf(SignedInComposerMode.CLOSED) }
+    var composerMode by composerModeState
+    val quoteTarget = remember { mutableStateOf<com.nantty.android.data.FeedQuotedPost?>(null) }
     SignedInWidgetDestinationEffect(
         requestedDestination = requestedWidgetDestination,
         isGuest = isGuest,
@@ -110,45 +124,24 @@ internal fun SignedInApp(
         onOpenClip = { pendingNotificationClipId = it; destination = Destination.Clips },
         onOpenLive = { pendingLiveId = it; destination = Destination.Live },
     )
-    val feedResultState = remember { mutableStateOf<FeedResult?>(null) }
-    var result by feedResultState
-    val feedLoadingState = remember { mutableStateOf(false) }
-    var loading by feedLoadingState
-    val feedLoadingMoreState = remember { mutableStateOf(false) }
-    var loadingMore by feedLoadingMoreState
-    val feedLoadMoreErrorState = remember { mutableStateOf<String?>(null) }
-    var loadMoreError by feedLoadMoreErrorState
-    val feedInteractionMessageState = remember { mutableStateOf<String?>(null) }
-    var interactionMessage by feedInteractionMessageState
     var savingPostId by remember { mutableStateOf<String?>(null) }
     val executor = remember { Executors.newSingleThreadExecutor() }
-    val feedController = remember(repository, sessionRepository, executor) {
-        SignedInFeedController(
-            executor = executor,
-            accessToken = { sessionRepository.sessionOrNull()?.accessToken },
-            loadPage = repository::load,
-            selection = SignedInFeedSelectionState(selectedFeedState, selectedTopicState, feedSelectionGenerationState),
-            content = SignedInFeedContentState(
-                result = feedResultState,
-                loading = feedLoadingState,
-                loadingMore = feedLoadingMoreState,
-                loadMoreError = feedLoadMoreErrorState,
-                interactionMessage = feedInteractionMessageState,
-            ),
-        )
-    }
-    val feedTopics = rememberSignedInFeedTopics(repository, executor)
+    val feedRuntime = rememberSignedInFeedRuntime(
+        repository = repository,
+        sessionRepository = sessionRepository,
+        executor = executor,
+        selection = SignedInFeedSelectionState(selectedFeedState, selectedTopicState, feedSelectionGenerationState),
+    )
+    val feedController = feedRuntime.controller
+    val feedTopics = feedRuntime.topics
+    val result by feedRuntime.content.result
+    val loading by feedRuntime.content.loading
+    val loadingMore by feedRuntime.content.loadingMore
+    val loadMoreError by feedRuntime.content.loadMoreError
+    val interactionMessage = feedController.interactionMessage
     val repositories = rememberSignedInRepositories(sessionRepository)
-    val publicBrandRepository = remember(sessionRepository) {
-        PublicBrandRepository(sessionProvider = sessionRepository::sessionOrNull)
-    }
-    val spacesRepository = remember { SpacesRepository() }
-    val liveRepositories = rememberSignedInLiveRepositories(sessionRepository)
-    val storiesRepository = remember(sessionRepository) { StoriesRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val soundsRepository = remember(sessionRepository) { SoundsRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val postDetailRepository = remember(sessionRepository) { PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val chatPasscodeRepository = remember(shareContext) { ChatPasscodeRepository(shareContext) }
-    val reportPost = rememberFeedPostReportFlow(sessionRepository, isGuest, onRequireSignIn, onSignOut)
+    val auxiliaryRepositories = rememberSignedInAuxiliaryRepositories(sessionRepository, executor)
+    val reportFlows = rememberSignedInReportFlows(sessionRepository, isGuest, onRequireSignIn, onSignOut)
     val (
         walletRepository,
         _,
@@ -176,12 +169,13 @@ internal fun SignedInApp(
         profileImagesRepository,
         privateMediaUploadsRepository,
     ) = repositories
+    val activeProfileId = rememberSignedInActiveProfileId(accountUser?.id, isGuest, brandProfilesRepository, executor)
     val businessContent = buildSignedInBusinessContent(
         repositories = repositories,
         executor = executor,
         onReauthenticate = onSignOut,
         onConversationStarted = { pendingMessageConversation = it; destination = Destination.Messages },
-        onMessageFailure = { message, authenticationRequired -> if (authenticationRequired) onSignOut() else interactionMessage = message },
+        onMessageFailure = { message, authenticationRequired -> if (authenticationRequired) onSignOut() else feedController.showInteractionMessage(message) },
         onOpenBuyerProfile = { selectedProfileId = it; profileOpenedFromConnections = false },
         onOpenCountryPreferences = countryPreferenceNavigation.open,
         onBack = { destination = Destination.Profile },
@@ -205,11 +199,10 @@ internal fun SignedInApp(
     fun selectTopic(topicId: String?) = feedController.selectTopic(topicId)
     fun loadMore() = feedController.loadMore()
 
-    val feedActions = createSignedInFeedActions(
-        executor, { PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull) }, { publicProfileRepository },
-        { interactionMessage = it }, { savingPostId = it }, { savingPostId == it },
-        { post, liked, reposted, bookmarked -> feedController.applyInteraction(post, liked, reposted, bookmarked) },
-        feedController::applyAuthorFollow, ::refresh,
+    val feedActions = createSignedInFeedActionsForScreen(
+        executor, { PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull) }, publicProfileRepository,
+        sessionRepository, repository, feedController, feedController::showInteractionMessage, { savingPostId = it },
+        { savingPostId == it }, ::refresh,
     )
 
     LaunchedEffect(Unit) { refresh() }
@@ -223,7 +216,9 @@ internal fun SignedInApp(
                 composerMode = composerMode,
                 quotedPostForComposer = quoteTarget.value,
                 selectedPostId = selectedPostId,
+                selectedPostAnalyticsId = selectedPostAnalyticsId,
                 selectedPostCommentId = selectedPostCommentId,
+                canReportSelectedPostComments = selectedPostId != null && reportFlows.clipComments.reportablePostId == selectedPostId,
                 selectedStoreId = selectedStoreId,
                 selectedBrandId = selectedBrandId,
                 isGuest = isGuest,
@@ -236,79 +231,48 @@ internal fun SignedInApp(
                 sessionRepository = sessionRepository,
                 publicProfileRepository = publicProfileRepository,
                 storeRepository = storeRepository,
-                brandRepository = publicBrandRepository,
+                brandRepository = auxiliaryRepositories.publicBrand,
                 messagesRepository = messagesRepository,
-                storiesRepository = storiesRepository,
+                storiesRepository = auxiliaryRepositories.stories,
                 storyAdsRepository = repositories.storyAds,
-                soundsRepository = soundsRepository,
+                soundsRepository = auxiliaryRepositories.sounds,
                 storyMediaRepository = privateMediaUploadsRepository,
+                postAnalyticsRepository = auxiliaryRepositories.postAnalytics,
                 executor = executor,
             ),
-            actions = SignedInOverlayActions(
-                cancelComposer = { composerMode = SignedInComposerMode.CLOSED; quoteTarget.value = null },
-                publishedPost = { postId -> composerMode = SignedInComposerMode.CLOSED; quoteTarget.value = null; selectedPostId = postId; refresh() },
-                storyPublished = { composerMode = SignedInComposerMode.CLOSED; quoteTarget.value = null; messagesRefreshGeneration++; destination = Destination.Messages },
-                backFromPost = { nextPostId -> if (nextPostId == null) { selectedPostId = null; selectedPostCommentId = null; refresh() } else { selectedPostId = nextPostId; selectedPostCommentId = null; refresh() } },
-                backFromStore = { selectedStoreId = null },
-                searchStore = { storeId, storeName -> searchScope = storeId?.let { "store:$it" } ?: "mart"; searchScopeLabel = storeName ?: "Mart"; selectedStoreId = null; destination = Destination.Discover },
-                backFromBrand = { selectedBrandId = null },
-                openStore = { storeId -> selectedBrandId = null; selectedStoreId = storeId },
-                openProduct = { productId ->
-                    selectedStoreId = null
-                    selectedBrandId = null
-                    pendingMartProductId = productId
-                    destination = Destination.Mart
-                },
-                backFromProfile = {
-                    selectedProfileId = null
-                    if (profileOpenedFromConnections) showingConnections = true
-                    profileOpenedFromConnections = false
-                },
-                openProfilePost = { selectedPostId = it },
-                openStoryAdDestination = { adDestination ->
-                    dispatchStoryAdDestination(
-                        destination = adDestination,
-                        onProduct = { productId ->
-                            selectedStoreId = null
-                            selectedBrandId = null
-                            pendingMartProductId = productId
-                            destination = Destination.Mart
-                        },
-                        onStore = { selectedStoreId = it },
-                        onPost = { selectedPostId = it },
-                        onProfile = {
-                            selectedProfileId = it
-                            profileOpenedFromConnections = false
-                        },
-                        onMessages = { destination = Destination.Messages },
-                        onExternal = { uri -> runCatching {
-                            shareContext.startActivity(
-                                Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString())).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                            )
-                        } },
-                    )
-                },
-                searchProfile = { userId, username ->
-                    selectedProfileId = null
-                    searchScope = "profile:$userId"
-                    searchScopeLabel = "@" + username.removePrefix("@")
-                    destination = Destination.Discover
-                },
-                openConnections = ::openConnections,
-                openConnectionProfile = { userId ->
-                    selectedProfileId = userId
-                    profileOpenedFromConnections = true
-                    showingConnections = false
-                },
-                backFromConnections = { showingConnections = false; selectedConnectionsUserId = null },
-                requireSignIn = onRequireSignIn,
-                requireSignInWithAction = onRequireSignInWithAction,
-                openConversation = { conversation ->
-                    pendingMessageConversation = conversation
-                    showingConnections = false
-                    selectedConnectionsUserId = null
-                    destination = Destination.Messages
-                },
+            actions = createSignedInOverlayActions(
+                navigation = SignedInOverlayNavigationState(
+                    destination = destinationState,
+                    composerMode = composerModeState,
+                    quoteTarget = quoteTarget,
+                    selectedPostId = selectedPostIdState,
+                    selectedPostCommentId = selectedPostCommentIdState,
+                    selectedPostAnalyticsId = selectedPostAnalyticsIdState,
+                    selectedStoreId = selectedStoreIdState,
+                    selectedBrandId = selectedBrandIdState,
+                    selectedProfileId = selectedProfileIdState,
+                    showingConnections = showingConnectionsState,
+                    selectedConnectionsUserId = selectedConnectionsUserIdState,
+                    profileOpenedFromConnections = profileOpenedFromConnectionsState,
+                    searchScope = searchScopeState,
+                    searchScopeLabel = searchScopeLabelState,
+                    pendingMartProductId = pendingMartProductIdState,
+                    pendingMessageConversation = pendingMessageConversationState,
+                    messagesRefreshGeneration = messagesRefreshGenerationState,
+                ),
+                environment = SignedInOverlayActionEnvironment(
+                    refresh = ::refresh,
+                    leaveClipPost = reportFlows.clipComments.leaveClipPost,
+                    reportClipComment = reportFlows.clipComments.reportComment,
+                    openConnections = ::openConnections,
+                    requireSignIn = onRequireSignIn,
+                    requireSignInWithAction = onRequireSignInWithAction,
+                    openExternalStoryDestination = { uri -> runCatching {
+                        shareContext.startActivity(
+                            Intent(Intent.ACTION_VIEW, Uri.parse(uri.toString())).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    } },
+                ),
             ),
         )) return
 
@@ -330,7 +294,7 @@ internal fun SignedInApp(
         },
         destinationContent = { contentModifier, showMartCategoryPane ->
             destinationStateHolder.SaveableStateProvider(destination.name) {
-                ChatLockBoundary(accountUser?.id, isGuest, destination, chatPasscodeRepository, executor, onSignOut) { onChatPasscodeUpdated ->
+                ChatLockBoundary(accountUser?.id, isGuest, destination, auxiliaryRepositories.chatPasscode, executor, onSignOut) { onChatPasscodeUpdated ->
                 MainContent(
                 destination, result, loading,
                 selectedFeed = selectedFeed,
@@ -345,12 +309,14 @@ internal fun SignedInApp(
                 onCreateStory = { if (isGuest) onRequireSignIn() else composerMode = SignedInComposerMode.STORY },
                 currentAccountAvatarUrl = accountUser?.avatarUrl,
                 modifier = contentModifier,
-                onOpenPost = { selectedPostId = it },
+                onOpenPost = { if (destination == Destination.Clips) reportFlows.clipComments.openComments(it) else reportFlows.clipComments.leaveClipPost(); selectedPostId = it },
                 onOpenPostComment = { postId, commentId ->
                     selectedPostId = postId
                     selectedPostCommentId = commentId
                 },
+                onOpenAnalytics = { postId -> selectedPostId = null; selectedPostCommentId = null; selectedPostAnalyticsId = postId },
                 onOpenProfile = { selectedProfileId = it; profileOpenedFromConnections = false },
+                onOpenLive = { pendingLiveId = it; destination = Destination.Live },
                 onOpenConnections = ::openConnections,
                 onSearchCurrentProfile = { accountId, username ->
                     searchScope = "profile:$accountId"
@@ -366,6 +332,8 @@ internal fun SignedInApp(
                     searchScopeLabel = label
                 },
                 onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
+                cartRepository = repositories.cart,
+                onOpenCart = { if (isGuest) onRequireSignIn() else purchaseState.openCart() },
                 onOpenStore = { selectedStoreId = it },
                 onOpenBrand = { brandId -> selectedStoreId = null; selectedBrandId = brandId },
                 onOpenCategory = { categoryId, name ->
@@ -377,14 +345,34 @@ internal fun SignedInApp(
                 onLike = { if (isGuest) onRequireSignIn() else feedActions.like(it) },
                 onFollowAuthor = { if (isGuest) onRequireSignIn() else feedActions.followAuthor(it) },
                 onRepost = { if (isGuest) onRequireSignIn() else feedActions.repost(it) },
-                onQuotePost = { if (isGuest) onRequireSignIn() else { quoteTarget.value = it; composerMode = SignedInComposerMode.POST } },
                 onSave = { if (isGuest) onRequireSignIn() else feedActions.save(it) },
                 onShare = { feedActions.share(shareContext, it) },
                 currentAccountId = accountUser?.id,
-                onReportPost = reportPost,
+                activeProfileId = activeProfileId,
+                feedPostActions = signedInFeedPostActions(reportFlows.post, isGuest, onRequireSignIn, feedActions) { quote ->
+                    quoteTarget.value = quote
+                    composerMode = SignedInComposerMode.POST
+                }.copy(
+                    resolveSharedContent = feedActions::resolveSharedContent,
+                    openSharedContent = { card ->
+                        when (card.reference.kind) {
+                            "post" -> { selectedPostId = card.reference.id; selectedPostCommentId = null }
+                            "clip" -> { pendingNotificationClipId = card.reference.id; destination = Destination.Clips }
+                            "product" -> { pendingMartProductId = card.reference.id; destination = Destination.Mart }
+                            "store" -> selectedStoreId = card.reference.id
+                            "live" -> { pendingLiveId = card.reference.id; destination = Destination.Live }
+                            "order" -> { pendingNotificationOrderId = card.reference.id; destination = Destination.Orders }
+                            "profile" -> {
+                                selectedProfileId = card.profileUserId ?: card.reference.id
+                                profileOpenedFromConnections = false
+                            }
+                            "space" -> { pendingSharedSpaceId = card.reference.id; destination = Destination.Spaces }
+                        }
+                    },
+                ),
                 interactionMessage = interactionMessage,
                 onMessageFailure = { message, authenticationRequired ->
-                    if (authenticationRequired) onSignOut() else interactionMessage = message
+                    if (authenticationRequired) onSignOut() else feedController.showInteractionMessage(message)
                 },
                 savingPostId = savingPostId,
                 loadingMore = loadingMore,
@@ -401,12 +389,17 @@ internal fun SignedInApp(
                 ioExecutor = executor,
                 notificationsRepository = notificationsRepository,
                 accountNotificationSettingsRepository = accountNotificationSettingsRepository,
+                accountHealthRepository = repositories.accountHealth, identityVerificationRepository = repositories.identityVerification,
                 countryPreferenceRepository = countryPreferenceRepository,
                 countryPreferenceNavigation = countryPreferenceNavigation,
                 chatNotificationSettingsRepository = repositories.chatNotificationSettings,
-                chatPasscodeRepository = chatPasscodeRepository,
+                chatPasscodeRepository = auxiliaryRepositories.chatPasscode,
                 onOpenChatNotificationSettings = { destination = Destination.ChatNotificationSettings },
                 onOpenChatPasscodeSettings = { destination = Destination.ChatPasscode },
+                onOpenContentPreferences = { destination = Destination.ContentPreferences },
+                onBackFromContentPreferences = { destination = Destination.Profile },
+                contentPreferencesRepository = auxiliaryRepositories.contentPreferences,
+                onContentPreferencesChanged = ::refresh,
                 onChatPasscodeUpdated = onChatPasscodeUpdated,
                 onOpenBlockedAccounts = { publicProfileRepository.viewerId()?.let { openConnections(it, "blocked") } },
                 messagesRefreshGeneration = messagesRefreshGeneration,
@@ -417,19 +410,21 @@ internal fun SignedInApp(
                 publicProfileRepository = publicProfileRepository,
                 messagesRepository = messagesRepository,
                 supportTicketRepository = repositories.supportTickets,
-                spacesRepository = spacesRepository,
-                liveSessionsRepository = liveRepositories.sessions,
-                liveStageRepository = liveRepositories.stage,
-                liveCoinTipRepository = liveRepositories.coinTips,
-                liveCommentsRepository = liveRepositories.comments,
-                liveReportRepository = liveRepositories.reports,
+                spacesRepository = auxiliaryRepositories.spaces,
+                initialSpaceId = pendingSharedSpaceId,
+                onInitialSpaceHandled = { pendingSharedSpaceId = null },
+                liveSessionsRepository = auxiliaryRepositories.live.sessions,
+                liveStageRepository = auxiliaryRepositories.live.stage,
+                liveCoinTipRepository = auxiliaryRepositories.live.coinTips,
+                liveCommentsRepository = auxiliaryRepositories.live.comments,
+                liveReportRepository = auxiliaryRepositories.live.reports,
                 initialLiveId = pendingLiveId,
                 onBackFromLive = { pendingLiveId = null; destination = Destination.Feed },
                 clipsRepository = repositories.clips,
                 clipWatchTrackingRepository = repositories.clipWatchTracking,
-                storiesRepository = storiesRepository,
+                storiesRepository = auxiliaryRepositories.stories,
                 storyAdsRepository = repositories.storyAds,
-                postDetailRepository = postDetailRepository,
+                postDetailRepository = auxiliaryRepositories.postDetails,
                 spacesAccessToken = sessionRepository.sessionOrNull()?.accessToken,
                 spacesViewerId = accountUser?.id,
                 initialMessageConversation = pendingMessageConversation,
@@ -451,6 +446,7 @@ internal fun SignedInApp(
                 onInitialClipHandled = { pendingNotificationClipId = null },
                 savedPostsRepository = savedPostsRepository,
                 martRepository = martRepository,
+                feedProductAdsRepository = auxiliaryRepositories.productAds,
                 storeRepository = storeRepository,
                 showMartCategoryPane = showMartCategoryPane,
                 initialMartProductId = pendingMartProductId,
@@ -476,16 +472,17 @@ internal fun SignedInApp(
                 onOpenSearch = { destination = Destination.Discover },
                 onClipReauthenticate = onSignOut,
                 notificationActions = signedInNotificationActions(
-                    isGuest = isGuest,
-                    onRequireSignIn = onRequireSignIn,
-                    onSelectDestination = { destination = it },
-                    onSetPendingConversation = { pendingMessageConversation = it },
-                    onQueueGroupInvitations = { pendingGroupInvitations = true },
-                    onOpenSpaces = { destination = Destination.Spaces },
-                    onQueueSupportTicket = { pendingSupportTicketId = it },
-                    onQueueDispute = { pendingNotificationDisputeId = it },
-                    onQueueClip = { pendingNotificationClipId = it },
-                    onQueueOrder = { pendingNotificationOrderId = it },
+                    isGuest, onRequireSignIn,
+                    SignedInNotificationRoutes(
+                        selectDestination = { destination = it },
+                        setPendingConversation = { pendingMessageConversation = it },
+                        queueGroupInvitations = { pendingGroupInvitations = true },
+                        openSpaces = { destination = Destination.Spaces },
+                        queueSupportTicket = { pendingSupportTicketId = it },
+                        queueDispute = { pendingNotificationDisputeId = it },
+                        queueClip = { pendingNotificationClipId = it },
+                        queueOrder = { pendingNotificationOrderId = it },
+                    ),
                 ),
                 onBackFromSupportRequests = { destination = Destination.Notifications },
                 onOpenBusinessTools = { if (isGuest) onRequireSignIn() else destination = Destination.Business },

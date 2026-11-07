@@ -17,9 +17,12 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,6 +46,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.nantty.android.R
 import coil.compose.AsyncImage
 import com.nantty.android.data.FeedMedia
 import com.nantty.android.data.PostDetail
@@ -49,6 +55,9 @@ import com.nantty.android.data.ThreadComment
 import com.nantty.android.data.appendUniqueThreadComments
 import com.nantty.android.data.extractSafePostLinks
 import java.net.URI
+
+internal fun commentContainsId(comment: ThreadComment, targetId: String): Boolean =
+    comment.id == targetId || comment.replies.any { reply -> commentContainsId(reply, targetId) }
 
 @Composable
 internal fun PostDetailCard(
@@ -133,6 +142,7 @@ internal fun ThreadCommentRow(
     repliesController: CommentRepliesController? = null,
     onOpenLink: (String) -> Unit = {},
     highlightCommentId: String? = null,
+    onReportComment: ((String) -> Unit)? = null,
 ) {
     val repliesState = repliesController?.state(comment.id) ?: CommentRepliesUiState()
     val visibleReplies = appendUniqueThreadComments(comment.replies, repliesState.comments)
@@ -154,6 +164,22 @@ internal fun ThreadCommentRow(
                     Column {
                         Text(comment.authorName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         if (comment.username.isNotBlank()) Text("@${comment.username}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    if (onReportComment != null) {
+                        var menuExpanded by remember(comment.id) { mutableStateOf(false) }
+                        Box {
+                            IconButton(
+                                onClick = { menuExpanded = true },
+                                modifier = Modifier.testTag("comment-options-${comment.id}").semantics { contentDescription = "Comment options" },
+                            ) { Icon(Icons.Default.MoreVert, contentDescription = null) }
+                            DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.report_comment_action)) },
+                                    onClick = { menuExpanded = false; onReportComment(comment.id) },
+                                    modifier = Modifier.testTag("report-comment-${comment.id}"),
+                                )
+                            }
+                        }
                     }
                 }
                 Text(comment.text, Modifier.fillMaxWidth().padding(top = 9.dp), style = MaterialTheme.typography.bodyMedium)
@@ -221,6 +247,7 @@ internal fun ThreadCommentRow(
                 repliesController = repliesController,
                 onOpenLink = onOpenLink,
                 highlightCommentId = highlightCommentId,
+                onReportComment = onReportComment,
             )
         }
     }

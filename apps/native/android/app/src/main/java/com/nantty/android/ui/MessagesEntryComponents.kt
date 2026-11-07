@@ -21,6 +21,7 @@ import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.MessagesInboxFolder
 import com.nantty.android.data.StoryTrayResult
 import com.nantty.android.data.StoriesRepository
+import com.nantty.android.data.SuggestedLiveCard
 import com.nantty.android.ui.stories.StoriesTray
 import java.util.concurrent.Executor
 
@@ -29,14 +30,16 @@ internal fun LazyListScope.messagesStoriesTrayItem(
     result: StoryTrayResult?,
     folder: MessagesInboxFolder,
     myAvatarUrl: String?,
+    liveEntries: List<SuggestedLiveCard>,
     onStorySelected: (String) -> Unit,
+    onLiveSelected: (String) -> Unit,
     onAddStory: () -> Unit,
     onRetry: () -> Unit,
     onReauthenticate: () -> Unit,
 ) {
     if (!enabled) return
     item(key = "stories-tray") {
-        MessagesStoriesTrayItem(result, folder, myAvatarUrl, onStorySelected, onAddStory, onRetry, onReauthenticate)
+        MessagesStoriesTrayItem(result, folder, myAvatarUrl, liveEntries, onStorySelected, onLiveSelected, onAddStory, onRetry, onReauthenticate)
     }
 }
 
@@ -101,7 +104,9 @@ internal fun MessagesStoriesTrayItem(
     result: StoryTrayResult?,
     folder: MessagesInboxFolder,
     myAvatarUrl: String?,
+    liveEntries: List<SuggestedLiveCard>,
     onStorySelected: (String) -> Unit,
+    onLiveSelected: (String) -> Unit,
     onAddStory: () -> Unit,
     onRetry: () -> Unit,
     onReauthenticate: () -> Unit,
@@ -109,7 +114,9 @@ internal fun MessagesStoriesTrayItem(
     Column {
         StoriesTray(
             entries = (result as? StoryTrayResult.Success)?.entries.orEmpty(),
+            liveEntries = liveEntries,
             onStorySelected = onStorySelected,
+            onLiveSelected = onLiveSelected,
             myAvatarUrl = myAvatarUrl,
             onAddStory = onAddStory,
             modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),

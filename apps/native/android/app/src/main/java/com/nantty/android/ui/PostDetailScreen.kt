@@ -62,9 +62,6 @@ import com.nantty.android.data.updateThreadCommentLike
 import com.nantty.android.share.sharePostFromAndroid
 import java.util.concurrent.Executor
 
-private fun commentContainsId(comment: ThreadComment, targetId: String): Boolean =
-    comment.id == targetId || comment.replies.any { reply -> commentContainsId(reply, targetId) }
-
 @Composable
 internal fun PostDetailScreen(
     postId: String,
@@ -75,6 +72,7 @@ internal fun PostDetailScreen(
     initialCommentId: String? = null,
     repository: PostDetailRepository? = null,
     onSharePost: ((PostDetail) -> Unit)? = null,
+    onReportComment: ((String) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -425,6 +423,7 @@ internal fun PostDetailScreen(
                                     onToggleLike = ::toggleCommentLike,
                                     repliesController = repliesController,
                                     onOpenLink = ::openPostLink,
+                                    onReportComment = onReportComment,
                                 )
                                 is PostThreadRow.Quote -> PostDetailQuoteRow(row.value, onOpen = onOpenPost)
                             }

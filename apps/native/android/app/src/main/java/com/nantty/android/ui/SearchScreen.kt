@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,8 +50,15 @@ import com.nantty.android.data.SearchRepository
 import com.nantty.android.data.SearchResult
 import com.nantty.android.data.SearchType
 import com.nantty.android.data.SearchUser
+import com.nantty.android.data.ProductAdResult
+import com.nantty.android.data.ProductAdsRepository
+import com.nantty.android.data.MartProductAd
 import java.util.concurrent.Executor
+import java.util.UUID
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 internal fun SearchScreen(
@@ -73,6 +81,7 @@ internal fun SearchScreen(
     initialScope: String = SearchRepository.GLOBAL_SCOPE,
     initialScopeLabel: String = "Everywhere",
     onScopeChanged: (String, String) -> Unit = { _, _ -> },
+    productAdsRepository: ProductAdsRepository? = null,
 ) {
     var query by rememberSaveable(repository) { mutableStateOf("") }
     var type by rememberSaveable(repository, initialScope) { mutableStateOf(if (initialScope == "mart") SearchType.PRODUCTS else SearchType.TOP) }
@@ -87,10 +96,16 @@ internal fun SearchScreen(
     var recentEntries by remember(repository) { mutableStateOf<List<SearchRecent>>(emptyList()) }
     var recentError by remember(repository) { mutableStateOf<String?>(null) }
     var recentLoading by remember(repository) { mutableStateOf(false) }
+    var searchProductAd by remember(repository, productAdsRepository) { mutableStateOf<MartProductAd?>(null) }
+    val searchAdSessionId = remember(productAdsRepository) { "search_ads_${UUID.randomUUID().toString().replace("-", "")}" }
+    val requestedSearchAdKeys = remember(repository, productAdsRepository) { mutableSetOf<String>() }
+    val coroutineScope = rememberCoroutineScope()
     // Read the repository's live session on every recomposition; the repository can outlive a login change.
     val signedIn = repository.hasAuthenticatedViewer()
     val keyboard = LocalSoftwareKeyboardController.current
     val normalizedQuery = query.trim()
+    val searchAdKey = normalizedSearchAdKey(normalizedQuery, type, scope, productAdsRepository)
+    var resultSearchKey by remember(repository) { mutableStateOf<String?>(null) }
 
     fun refreshRecents() {
         if (!signedIn) return
@@ -172,7 +187,10 @@ internal fun SearchScreen(
         requestGeneration += 1
         val generation = requestGeneration
         val cleanQuery = normalizedQuery
+        val generationSearchKey = normalizedSearchAdKey(cleanQuery, type, scope, productAdsRepository)
         result = null
+        resultSearchKey = null
+        searchProductAd = null
         loading = false
         loadingMore = false
         paginationError = false
@@ -183,13 +201,31 @@ internal fun SearchScreen(
             loading = true
             executor.execute {
                 val next = repository.search(cleanQuery, type, scope = scope)
+                if (next is SearchResult.Success) {
+                    val count = next.page.posts.size + next.page.users.size + next.page.products.size + next.page.otherResults.size
+                    repository.recordSearchInteraction(cleanQuery, count)
+                }
                 androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
                     if (requestGeneration == generation) {
                         result = next
+                        resultSearchKey = if (next is SearchResult.Success) generationSearchKey else null
                         loading = false
                     }
                 }
             }
+        }
+    }
+
+    LaunchedEffect(resultSearchKey, searchAdKey, productAdsRepository) {
+        val adRepository = productAdsRepository ?: return@LaunchedEffect
+        val key = searchAdKey ?: return@LaunchedEffect
+        if (resultSearchKey != key) return@LaunchedEffect
+        val page = (result as? SearchResult.Success)?.page ?: return@LaunchedEffect
+        if (page.products.isEmpty() || !requestedSearchAdKeys.add(key)) return@LaunchedEffect
+
+        val decision = withContext(Dispatchers.IO) { adRepository.decideSearchProductAd(searchAdSessionId) }
+        if (searchAdKey == key) {
+            searchProductAd = (decision as? ProductAdResult.Success)?.ad
         }
     }
 
@@ -379,8 +415,29 @@ internal fun SearchScreen(
                             else -> null
                         })
                     }
+                    if (page.products.isNotEmpty() && searchProductAd != null && productAdsRepository != null) {
+                        item(key = "search-product-ad:${searchProductAd!!.adId}") {
+                            val ad = requireNotNull(searchProductAd)
+                            FeedProductAdCard(
+                                ad = ad,
+                                testTag = "search-product-ad",
+                                ctaTestTag = "search-product-ad-cta",
+                                onOpenProduct = {
+                                    coroutineScope.launch(Dispatchers.IO) { productAdsRepository.recordClick(ad) }
+                                    onOpenProduct(ad.productId)
+                                },
+                                onViewed = { viewed ->
+                                    withContext(Dispatchers.IO) { productAdsRepository.recordImpression(viewed) }
+                                },
+                            )
+                        }
+                    }
                     items(page.products, key = { "product:${it.id}" }) { product ->
-                        SearchProductRow(product, onClick = { recordQuery(query); onOpenProduct(product.id) })
+                        SearchProductRow(product, onClick = {
+                            recordQuery(query)
+                            repository.recordSearchProductClick(product.id, query.trim(), page.products.size)
+                            onOpenProduct(product.id)
+                        })
                     }
                     items(page.users, key = { "user:${it.id}" }) { user -> SearchUserRow(user, onClick = { recordQuery(query); onOpenProfile(user.id) }) }
                     items(page.posts, key = { "post:${it.id}" }) {
@@ -401,4 +458,16 @@ internal fun SearchScreen(
             }
         }
     }
+}
+
+private fun normalizedSearchAdKey(
+    query: String,
+    type: SearchType,
+    scope: String,
+    repository: ProductAdsRepository?,
+): String? {
+    if (repository == null || query.isBlank()) return null
+    if (scope != SearchRepository.GLOBAL_SCOPE && scope != "mart") return null
+    if (type != SearchType.TOP && type != SearchType.PRODUCTS) return null
+    return "$scope:${type.apiValue}:$query"
 }

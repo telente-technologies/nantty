@@ -119,6 +119,7 @@ private fun parseSavedPost(id: String, item: JSONObject): FeedPost? {
         authorId = authorId,
         bookmarked = true,
         isFollowingAuthor = item.optBoolean("isFollowingAuthor"),
+        linkPreview = parseFeedLinkPreview(item.optJSONObject("linkPreview")),
     )
 }
 

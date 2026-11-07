@@ -39,6 +39,8 @@ internal fun SignedInPushTargetEffect(
             PushTapRoute.SPACES -> onSelectDestination(Destination.Spaces)
             PushTapRoute.GROUP_INVITATIONS -> onOpenGroupInvitations(pushTarget.id)
             PushTapRoute.CHANNEL_INVITATIONS -> onOpenChannelInvitations(pushTarget.id)
+            PushTapRoute.ACCOUNT_STATUS -> onSelectDestination(Destination.AccountStatus)
+            PushTapRoute.IDENTITY_VERIFICATION -> onSelectDestination(Destination.IdentityVerification)
             PushTapRoute.SUPPORT_TICKET -> pushTarget.id?.let(onOpenSupportTicket)
             PushTapRoute.DISPUTE -> pushTarget.id?.let(onOpenDispute)
             PushTapRoute.CLIP -> pushTarget.id?.let(onOpenClip)

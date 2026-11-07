@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import com.nantty.android.data.ChatStreak
 import kotlinx.coroutines.delay
 
 /** UI-only status supplied by the chat/key-management owner. This component makes no crypto claim. */
@@ -113,8 +114,17 @@ fun ConversationThreadScreen(
     onSendText: (String) -> Unit,
     onRetryMessage: (String) -> Unit,
     onLoadOlderMessages: () -> Unit = {},
+    streak: ChatStreak? = null,
+    streakRestorePending: Boolean = false,
+    streakRestoreError: String? = null,
+    streakRestoreCelebration: Boolean = false,
+    onRestoreStreak: () -> Unit = {},
+    onDismissStreakRestoreCelebration: () -> Unit = {},
+    onAcknowledgeStreakCelebration: () -> Unit = {},
 ) {
     var safetyCodeDialogOpen by remember { mutableStateOf(false) }
+    var streakDialogOpen by remember { mutableStateOf(false) }
+    var milestoneCelebrationDismissed by remember(streak?.milestoneDays) { mutableStateOf(false) }
     var highlightedMessageId by remember(targetMessageId) { mutableStateOf<String?>(null) }
     val safeItems = remember(timeline) { timeline.filterNot { it.state == ConversationMessageState.READY && it.displayText == null } }
     val messageListState = rememberLazyListState()
@@ -139,6 +149,35 @@ fun ConversationThreadScreen(
         )
     }
 
+    if (streakDialogOpen && streak != null) {
+        ConversationStreakDialog(
+            peerName = peerName,
+            streak = streak,
+            restorePending = streakRestorePending,
+            restoreError = streakRestoreError,
+            onRestore = onRestoreStreak,
+            onDismiss = { streakDialogOpen = false },
+        )
+    }
+
+    if (streakRestoreCelebration && streak != null) {
+        ConversationStreakCelebration(
+            peerName = peerName,
+            days = streak.count,
+            restored = true,
+            onDismiss = onDismissStreakRestoreCelebration,
+        )
+    } else if (streak?.milestoneCelebrationPending == true && !milestoneCelebrationDismissed) {
+        ConversationStreakCelebration(
+            peerName = peerName,
+            days = streak.milestoneDays ?: streak.countBeforeBreak,
+            onDismiss = {
+                milestoneCelebrationDismissed = true
+                onAcknowledgeStreakCelebration()
+            },
+        )
+    }
+
     Column(modifier.fillMaxSize().imePadding()) {
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
@@ -158,6 +197,20 @@ fun ConversationThreadScreen(
             }
             IconButton(onClick = onOpenPeerOrInfo, modifier = Modifier.semantics { contentDescription = "Conversation info" }) {
                 Icon(Icons.Outlined.Info, contentDescription = null)
+            }
+            streak?.takeIf { it.state != "none" }?.let { currentStreak ->
+                TextButton(onClick = { streakDialogOpen = true }, modifier = Modifier.semantics {
+                    contentDescription = when {
+                        currentStreak.state == "broken" -> "Restore streak with $peerName"
+                        currentStreak.hourglass -> "${currentStreak.count} day streak ending soon"
+                        else -> "${currentStreak.count} day streak"
+                    }
+                }) {
+                    Text(when {
+                        currentStreak.state == "broken" -> "Restore"
+                        else -> "${currentStreak.count}d"
+                    }, maxLines = 1)
+                }
             }
             if (allowMarkRead) IconButton(onClick = onMarkRead, modifier = Modifier.semantics { contentDescription = "Mark conversation as read" }) {
                 Icon(Icons.Default.DoneAll, contentDescription = null)

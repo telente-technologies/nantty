@@ -50,6 +50,8 @@ class PushTapTargetTest {
         assertEquals(PushTapTarget(PushTapRoute.CLIP, "clip-1"), resolvePushTapTarget(mapOf("clipId" to "clip-1")))
         assertEquals(PushTapTarget(PushTapRoute.DISPUTE, DISPUTE_ID), resolvePushTapTarget(mapOf("disputeId" to DISPUTE_ID)))
         assertEquals(PushTapTarget(PushTapRoute.LIVE, "live_1"), resolvePushTapTarget(mapOf("screen" to "Live", "liveId" to "live_1")))
+        assertEquals(PushTapTarget(PushTapRoute.ACCOUNT_STATUS), resolvePushTapTarget(mapOf("screen" to "AccountStatus")))
+        assertEquals(PushTapTarget(PushTapRoute.IDENTITY_VERIFICATION), resolvePushTapTarget(mapOf("screen" to "Verification")))
         assertNull(resolvePushTapTarget(mapOf("screen" to "Live", "liveId" to "../admin")))
         assertNull(resolvePushTapTarget(mapOf("disputeId" to "../admin")))
     }

@@ -1,6 +1,7 @@
 package com.nantty.android.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +53,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -240,62 +242,65 @@ private fun FeedMediaActionBar(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (onLike != null) Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-            IconButton(
-                onClick = onLike,
-                modifier = Modifier.testTag("feed-media-like").semantics {
+        if (onLike != null) Column(
+            Modifier.weight(1f).heightIn(min = 64.dp)
+                .clickable(role = Role.Button, onClick = onLike)
+                .testTag("feed-media-like").semantics {
                     contentDescription = if (post.liked) "Unlike post" else "Like post"
                 },
-            ) {
-                Icon(
-                    if (post.liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = null,
-                    tint = if (post.liked) MaterialTheme.colorScheme.error else Color.White,
-                )
-            }
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                if (post.liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = null,
+                tint = if (post.liked) MaterialTheme.colorScheme.error else Color.White,
+            )
             Text(post.likes.toString(), color = Color.White, style = MaterialTheme.typography.labelSmall, maxLines = 1)
         }
-        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-            IconButton(
-                onClick = onOpenComments,
-                modifier = Modifier.testTag("feed-media-comments").semantics {
+        Column(
+            Modifier.weight(1f).heightIn(min = 64.dp)
+                .clickable(role = Role.Button, onClick = onOpenComments)
+                .testTag("feed-media-comments").semantics {
                     contentDescription = "Open ${post.comments} comments"
                 },
-            ) {
-                Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = null, tint = Color.White)
-            }
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = null, tint = Color.White)
             Text(post.comments.toString(), color = Color.White, style = MaterialTheme.typography.labelSmall, maxLines = 1)
         }
-        if (onRepost != null) Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-            IconButton(
-                onClick = onRepost,
-                modifier = Modifier.testTag("feed-media-repost").semantics {
+        if (onRepost != null) Column(
+            Modifier.weight(1f).heightIn(min = 64.dp)
+                .clickable(role = Role.Button, onClick = onRepost)
+                .testTag("feed-media-repost").semantics {
                     contentDescription = if (post.reposted) "Undo repost" else "Repost"
                 },
-            ) {
-                Icon(
-                    Icons.Default.Repeat,
-                    contentDescription = null,
-                    tint = if (post.reposted) MaterialTheme.colorScheme.primary else Color.White,
-                )
-            }
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                Icons.Default.Repeat,
+                contentDescription = null,
+                tint = if (post.reposted) MaterialTheme.colorScheme.primary else Color.White,
+            )
             Text(post.reposts.toString(), color = Color.White, style = MaterialTheme.typography.labelSmall, maxLines = 1)
         }
-        if (onSave != null) Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-            IconButton(
-                onClick = onSave,
-                enabled = !saveBusy,
-                modifier = Modifier.testTag("feed-media-save").semantics {
+        if (onSave != null) Column(
+            Modifier.weight(1f).heightIn(min = 64.dp)
+                .clickable(enabled = !saveBusy, role = Role.Button, onClick = onSave)
+                .testTag("feed-media-save").semantics {
                     contentDescription = if (saveBusy) "Saving post" else if (post.bookmarked) "Remove post from saved" else "Save post"
                     selected = post.bookmarked
                 },
-            ) {
-                Icon(
-                    if (post.bookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                    contentDescription = null,
-                    tint = if (post.bookmarked) MaterialTheme.colorScheme.primary else Color.White,
-                )
-            }
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                if (post.bookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                contentDescription = null,
+                tint = if (post.bookmarked) MaterialTheme.colorScheme.primary else Color.White,
+            )
             Text(
                 if (post.bookmarked) "Saved" else "Save",
                 color = Color.White,
@@ -303,14 +308,15 @@ private fun FeedMediaActionBar(
                 maxLines = 1,
             )
         }
-        if (onShare != null) Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+        if (onShare != null) Column(
+            Modifier.weight(1f).heightIn(min = 64.dp)
+                .clickable(role = Role.Button, onClick = { shareMenuExpanded = true })
+                .testTag("feed-media-share").semantics { contentDescription = "Share post" },
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
             Box {
-                IconButton(
-                    onClick = { shareMenuExpanded = true },
-                    modifier = Modifier.testTag("feed-media-share").semantics { contentDescription = "Share post" },
-                ) {
-                    Icon(Icons.Default.Share, contentDescription = null, tint = Color.White)
-                }
+                Icon(Icons.Default.Share, contentDescription = null, tint = Color.White)
                 DropdownMenu(expanded = shareMenuExpanded, onDismissRequest = { shareMenuExpanded = false }) {
                     DropdownMenuItem(
                         text = { Text(androidx.compose.ui.res.stringResource(com.nantty.android.R.string.feed_copy_link)) },

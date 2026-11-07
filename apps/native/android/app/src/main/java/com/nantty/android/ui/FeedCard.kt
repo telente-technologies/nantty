@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -52,6 +53,12 @@ import com.nantty.android.R
 import coil.compose.AsyncImage
 import com.nantty.android.data.FeedPost
 import com.nantty.android.data.FeedQuotedPost
+import com.nantty.android.data.FeedFeedbackKind
+import com.nantty.android.data.CartRepository
+import com.nantty.android.data.SharedContentReference
+import com.nantty.android.data.SharedContentResult
+import com.nantty.android.data.SharedContentCard
+import java.util.concurrent.Executor
 
 @Composable
 internal fun FeedCard(
@@ -67,12 +74,27 @@ internal fun FeedCard(
     onOpenComments: (String) -> Unit = onOpenPost,
     canReportPost: Boolean = true,
     onReportPost: ((FeedPost) -> Unit)? = null,
+    onFeedFeedback: ((FeedPost, FeedFeedbackKind) -> Unit)? = null,
+    onTogglePostNotifications: ((FeedPost) -> Unit)? = null,
     onQuotePost: ((FeedQuotedPost) -> Unit)? = null,
     currentAccountId: String? = null,
+    activeProfileId: String? = null,
+    onOpenAnalytics: ((String) -> Unit)? = null,
     onFollowAuthor: ((FeedPost) -> Unit)? = null,
+    onOpenProduct: ((String) -> Unit)? = null,
+    cartRepository: CartRepository? = null,
+    ioExecutor: Executor? = null,
+    onRequireSignInWithAction: ((() -> Unit) -> Unit) = {},
+    onOpenCart: () -> Unit = {},
+    onResolveFeedLinkPreview: ((String, String, (com.nantty.android.data.FeedLinkPreview?) -> Unit) -> Unit)? = null,
+    onRecordFeedLinkClick: ((FeedPost) -> Unit)? = null,
+    onOpenExternalFeedLink: ((String) -> Boolean)? = null,
+    onResolveSharedContent: ((SharedContentReference, (SharedContentResult) -> Unit) -> Unit)? = null,
+    onOpenSharedContent: ((SharedContentCard) -> Unit)? = null,
 ) {
     var reportMenuExpanded by remember(post.id) { mutableStateOf(false) }
     var repostActionsVisible by remember(post.id) { mutableStateOf(false) }
+    var taggedProductsVisible by remember(post.id) { mutableStateOf(false) }
     val requestRepostAction = {
         if (onRepost != null) {
             if (onQuotePost != null) repostActionsVisible = true else onRepost(post)
@@ -80,10 +102,17 @@ internal fun FeedCard(
     }
     val morePostOptionsLabel = stringResource(R.string.feed_post_more_options)
     val reportPostLabel = stringResource(R.string.report_post_title)
+    val notInterestedLabel = stringResource(R.string.feed_not_interested)
+    val hidePostLabel = stringResource(R.string.feed_hide_post)
+    val postNotificationsLabel = stringResource(
+        if (post.viewerNotificationsMuted) R.string.feed_turn_notifications_on else R.string.feed_turn_notifications_off,
+    )
     val followAuthorLabel = stringResource(R.string.feed_follow_author)
     val followAuthorDescription = post.username.takeIf(String::isNotBlank)?.let {
         stringResource(R.string.feed_follow_author_description, it)
     } ?: followAuthorLabel
+    val canOpenAnalytics = (post.authorId.isNotBlank() && post.authorId == currentAccountId) ||
+        (!post.postedAsId.isNullOrBlank() && post.postedAsId == activeProfileId)
     Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp).clickable { onOpenPost(post.id) }, shape = RoundedCornerShape(18.dp), tonalElevation = 1.dp) {
         Column(Modifier.padding(18.dp)) {
             Row(
@@ -129,6 +158,34 @@ internal fun FeedCard(
                             modifier = Modifier.semantics { contentDescription = morePostOptionsLabel },
                         ) { Icon(Icons.Default.MoreVert, contentDescription = null) }
                         DropdownMenu(expanded = reportMenuExpanded, onDismissRequest = { reportMenuExpanded = false }) {
+                            if (onFeedFeedback != null && canReportPost) {
+                                DropdownMenuItem(
+                                    text = { Text(notInterestedLabel) },
+                                    onClick = {
+                                        reportMenuExpanded = false
+                                        onFeedFeedback(post, FeedFeedbackKind.NOT_INTERESTED)
+                                    },
+                                    modifier = Modifier.semantics { contentDescription = notInterestedLabel },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(hidePostLabel) },
+                                    onClick = {
+                                        reportMenuExpanded = false
+                                        onFeedFeedback(post, FeedFeedbackKind.HIDE)
+                                    },
+                                    modifier = Modifier.semantics { contentDescription = hidePostLabel },
+                                )
+                            }
+                            if (onTogglePostNotifications != null && canReportPost) {
+                                DropdownMenuItem(
+                                    text = { Text(postNotificationsLabel) },
+                                    onClick = {
+                                        reportMenuExpanded = false
+                                        onTogglePostNotifications(post)
+                                    },
+                                    modifier = Modifier.semantics { contentDescription = postNotificationsLabel },
+                                )
+                            }
                             DropdownMenuItem(
                                 text = { Text(reportPostLabel) },
                                 onClick = {
@@ -156,6 +213,16 @@ internal fun FeedCard(
                     onOpen = onOpenPost,
                 )
             }
+            FeedPostLinkPreview(
+                post = post,
+                currentAccountId = currentAccountId,
+                onResolve = onResolveFeedLinkPreview,
+                onRecordClick = onRecordFeedLinkClick,
+                onOpen = onOpenExternalFeedLink,
+                onResolveSharedContent = onResolveSharedContent,
+                onOpenSharedContent = onOpenSharedContent,
+                onRequireSignInWithAction = onRequireSignInWithAction,
+            )
             FeedMediaGallery(
                 media = post.media,
                 post = post,
@@ -166,6 +233,14 @@ internal fun FeedCard(
                 saveBusy = saveBusy,
                 onShare = onShare?.let { action -> { action(post) } },
             )
+            if (post.products.isNotEmpty() && onOpenProduct != null) {
+                TextButton(
+                    onClick = { taggedProductsVisible = true },
+                    modifier = Modifier.testTag("feed-view-tagged-products-${post.id}"),
+                ) {
+                    Text(stringResource(R.string.feed_view_products, post.products.size))
+                }
+            }
             Row(Modifier.fillMaxWidth().padding(top = 18.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 if (canInteract) {
                     IconButton(onClick = { onLike?.invoke(post) }, modifier = Modifier.semantics { contentDescription = if (post.liked) "Unlike post" else "Like post" }) {
@@ -187,13 +262,20 @@ internal fun FeedCard(
                         Icon(Icons.Default.Repeat, contentDescription = null, tint = if (post.reposted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
                     }
                     Text(post.reposts.toString(), color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.labelMedium)
+                } else EngagementCount(Icons.Default.Repeat, post.reposts, "reposts")
+                FeedPostViewsAction(
+                    views = post.views,
+                    canOpenAnalytics = canOpenAnalytics && onOpenAnalytics != null,
+                    onOpenAnalytics = { onOpenAnalytics?.invoke(post.id) },
+                )
+                if (canInteract) {
                     IconButton(onClick = { onSave?.invoke(post) }, enabled = !saveBusy, modifier = Modifier.semantics {
                         contentDescription = if (post.bookmarked) "Remove post from saved" else "Save post"
                         selected = post.bookmarked
                     }) {
                         Icon(if (post.bookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder, contentDescription = null, tint = if (post.bookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
                     }
-                } else EngagementCount(Icons.Default.Repeat, post.reposts, "reposts")
+                }
                 IconButton(onClick = { onShare?.invoke(post) }, modifier = Modifier.semantics { contentDescription = "Share post" }) {
                     Icon(Icons.Default.Share, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
                 }
@@ -207,6 +289,21 @@ internal fun FeedCard(
             onDismiss = { repostActionsVisible = false },
             onRepost = onRepost,
             onQuote = onQuotePost,
+        )
+    }
+    if (taggedProductsVisible && onOpenProduct != null) {
+        FeedTaggedProductsSheet(
+            products = post.products,
+            onDismiss = { taggedProductsVisible = false },
+            onOpenProduct = { productId ->
+                taggedProductsVisible = false
+                onOpenProduct(productId)
+            },
+            cartRepository = cartRepository,
+            ioExecutor = ioExecutor,
+            canInteract = canInteract,
+            onRequireSignInWithAction = onRequireSignInWithAction,
+            onOpenCart = onOpenCart,
         )
     }
 }

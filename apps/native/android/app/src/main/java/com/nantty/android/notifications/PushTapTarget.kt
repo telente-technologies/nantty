@@ -11,6 +11,7 @@ enum class PushTapRoute(val key: String) {
     POST("post"), PROFILE("profile"), CONVERSATION("conversation"), MESSAGES("messages"),
     ORDERS("orders"), FOLLOW_REQUESTS("follow_requests"), GROUP_INVITATIONS("group_invitations"), SPACES("spaces"), LIVE("live"),
     CHANNEL_INVITATIONS("channel_invitations"), SUPPORT_TICKET("support_ticket"), DISPUTE("dispute"), CLIP("clip"),
+    ACCOUNT_STATUS("account_status"), IDENTITY_VERIFICATION("identity_verification"),
 }
 
 data class PushTapTarget(
@@ -70,6 +71,8 @@ internal fun resolvePushTapTarget(data: Map<String, String>): PushTapTarget? {
         NotificationDestination.FollowRequests -> PushTapTarget(PushTapRoute.FOLLOW_REQUESTS)
         NotificationDestination.GroupInvitations -> PushTapTarget(PushTapRoute.GROUP_INVITATIONS)
         NotificationDestination.Spaces -> PushTapTarget(PushTapRoute.SPACES)
+        NotificationDestination.AccountStatus -> PushTapTarget(PushTapRoute.ACCOUNT_STATUS)
+        NotificationDestination.IdentityVerification -> PushTapTarget(PushTapRoute.IDENTITY_VERIFICATION)
         is NotificationDestination.SupportTicket -> PushTapTarget(PushTapRoute.SUPPORT_TICKET, destination.ticketId)
         is NotificationDestination.Dispute -> PushTapTarget(PushTapRoute.DISPUTE, destination.disputeId)
         is NotificationDestination.Clip -> PushTapTarget(PushTapRoute.CLIP, destination.clipId)
@@ -146,7 +149,8 @@ private fun isValidPushTapTarget(target: PushTapTarget): Boolean {
         PushTapRoute.GROUP_INVITATIONS, PushTapRoute.CHANNEL_INVITATIONS ->
             (id == null || id.matches(INVITATION_TOKEN_PATTERN)) && secondaryId == null
         PushTapRoute.LIVE -> id.isSafePushId() && secondaryId == null
-        PushTapRoute.MESSAGES, PushTapRoute.FOLLOW_REQUESTS, PushTapRoute.SPACES -> id == null && secondaryId == null
+        PushTapRoute.MESSAGES, PushTapRoute.FOLLOW_REQUESTS, PushTapRoute.SPACES,
+        PushTapRoute.ACCOUNT_STATUS, PushTapRoute.IDENTITY_VERIFICATION -> id == null && secondaryId == null
     }
 }
 

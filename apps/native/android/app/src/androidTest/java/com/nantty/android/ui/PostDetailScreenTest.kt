@@ -35,6 +35,21 @@ class PostDetailScreenTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
+    fun clipCommentReportActionIsAvailableOnlyWhenClipOriginProvidesHandler() {
+        var reportedCommentId: String? = null
+        val repository = PostDetailRepository("https://api.nantty.com", { null }, SuccessfulThreadTransport())
+        compose.setContent {
+            MaterialTheme {
+                PostDetailScreen("post-1", { null }, Executor { it.run() }, onBack = {}, repository = repository, onReportComment = { reportedCommentId = it })
+            }
+        }
+
+        compose.onNodeWithTag("comment-options-comment-1").performScrollTo().performClick()
+        compose.onNodeWithTag("report-comment-comment-1").performClick()
+        compose.runOnIdle { org.junit.Assert.assertEquals("comment-1", reportedCommentId) }
+    }
+
+    @Test
     fun postAndCommentLinksOpenSafelyAndRecordOnlyPostClickContext() {
         val session = AccountSession("access-current", "refresh-current", AccountUser("u1", "Ari", "ari", null, null, emptyList()))
         val transport = PostLinkTrackingTransport()

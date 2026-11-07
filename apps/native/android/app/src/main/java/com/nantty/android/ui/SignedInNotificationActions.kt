@@ -9,9 +9,39 @@ internal data class MainContentNotificationActions(
     val openFollowRequests: () -> Unit = {},
     val openSpaces: () -> Unit = {},
     val openGroupInvitations: () -> Unit = {},
+    val openAccountPolicy: (Destination) -> Unit = {},
     val openSupportTicket: (String) -> Unit = {},
     val openDispute: (String) -> Unit = {},
     val openClip: (String) -> Unit = {},
+)
+
+internal data class SignedInNotificationRoutes(
+    val selectDestination: (Destination) -> Unit,
+    val setPendingConversation: (InboxConversation) -> Unit,
+    val queueGroupInvitations: () -> Unit,
+    val openSpaces: () -> Unit,
+    val queueSupportTicket: (String) -> Unit,
+    val queueDispute: (String) -> Unit,
+    val queueClip: (String) -> Unit,
+    val queueOrder: (String) -> Unit,
+)
+
+internal fun signedInNotificationActions(
+    isGuest: Boolean,
+    onRequireSignIn: () -> Unit,
+    routes: SignedInNotificationRoutes,
+) = signedInNotificationActions(
+    isGuest = isGuest,
+    onRequireSignIn = onRequireSignIn,
+    onSelectDestination = routes.selectDestination,
+    onSetPendingConversation = routes.setPendingConversation,
+    onQueueGroupInvitations = routes.queueGroupInvitations,
+    onOpenSpaces = routes.openSpaces,
+    onQueueSupportTicket = routes.queueSupportTicket,
+    onQueueDispute = routes.queueDispute,
+    onQueueClip = routes.queueClip,
+    onQueueOrder = routes.queueOrder,
+    onOpenAccountPolicyDestination = routes.selectDestination,
 )
 
 internal fun signedInNotificationActions(
@@ -20,6 +50,7 @@ internal fun signedInNotificationActions(
     onSelectDestination: (Destination) -> Unit,
     onSetPendingConversation: (InboxConversation) -> Unit,
     onQueueGroupInvitations: () -> Unit,
+    onOpenAccountPolicyDestination: (Destination) -> Unit = {},
     onOpenSpaces: () -> Unit = {},
     onQueueSupportTicket: (String) -> Unit,
     onQueueDispute: (String) -> Unit,
@@ -50,6 +81,7 @@ internal fun signedInNotificationActions(
             onSelectDestination(Destination.Messages)
         }
     },
+    openAccountPolicy = { destination -> if (isGuest) onRequireSignIn() else onOpenAccountPolicyDestination(destination) },
     openSupportTicket = { ticketId ->
         if (isGuest) onRequireSignIn()
         else {

@@ -54,7 +54,7 @@ import com.nantty.android.data.AccountNotificationSettingsRepository
 import java.util.concurrent.Executor
 
 @Composable
-internal fun NotificationsScreen(repository: NotificationsRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenPost: (String) -> Unit = {}, onOpenPostComment: (String, String) -> Unit = { postId, _ -> onOpenPost(postId) }, onOpenProfile: (String) -> Unit = {}, onOpenMessages: () -> Unit = {}, onOpenConversation: (InboxConversation) -> Unit = {}, messagesRepository: MessagesRepository? = null, onOpenOrders: () -> Unit = {}, accountSettingsRepository: AccountNotificationSettingsRepository? = null, onOpenFollowRequests: () -> Unit = {}, onOpenGroupInvitations: () -> Unit = {}, onOpenSpaces: () -> Unit = {}, onOpenSupportTicket: (String) -> Unit = {}, onOpenDispute: (String) -> Unit = {}, onOpenClip: (String) -> Unit = {}, onOpenOrder: (String) -> Unit = {}) {
+internal fun NotificationsScreen(repository: NotificationsRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenPost: (String) -> Unit = {}, onOpenPostComment: (String, String) -> Unit = { postId, _ -> onOpenPost(postId) }, onOpenProfile: (String) -> Unit = {}, onOpenMessages: () -> Unit = {}, onOpenConversation: (InboxConversation) -> Unit = {}, messagesRepository: MessagesRepository? = null, onOpenOrders: () -> Unit = {}, accountSettingsRepository: AccountNotificationSettingsRepository? = null, onOpenFollowRequests: () -> Unit = {}, onOpenGroupInvitations: () -> Unit = {}, onOpenSpaces: () -> Unit = {}, onOpenAccountStatus: () -> Unit = {}, onOpenIdentityVerification: () -> Unit = {}, onOpenSupportTicket: (String) -> Unit = {}, onOpenDispute: (String) -> Unit = {}, onOpenClip: (String) -> Unit = {}, onOpenOrder: (String) -> Unit = {}) {
     var showingSettings by remember(repository) { mutableStateOf(false) }
     var filter by remember(repository) { mutableStateOf(NotificationFilter.ALL) }
     var result by remember(repository) { mutableStateOf<NotificationsResult?>(null) }
@@ -224,6 +224,8 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
                             NotificationDestination.FollowRequests -> onOpenFollowRequests()
                             NotificationDestination.GroupInvitations -> onOpenGroupInvitations()
                             NotificationDestination.Spaces -> onOpenSpaces()
+                            NotificationDestination.AccountStatus -> onOpenAccountStatus()
+                            NotificationDestination.IdentityVerification -> onOpenIdentityVerification()
                             is NotificationDestination.SupportTicket -> onOpenSupportTicket(destination.ticketId)
                             is NotificationDestination.Dispute -> onOpenDispute(destination.disputeId)
                             is NotificationDestination.Clip -> onOpenClip(destination.clipId)

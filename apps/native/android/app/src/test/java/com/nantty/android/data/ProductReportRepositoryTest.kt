@@ -30,6 +30,20 @@ class ProductReportRepositoryTest {
     }
 
     @Test
+    fun submitsClipCommentReportUsingAuthenticatedModerationContract() {
+        val transport = RecordingProductReportTransport(JSONObject("""{"data":{"id":"report-comment-1","status":"received"}}"""))
+        val result = ProductReportRepository("https://api.nantty.com", { "access-token" }, transport)
+            .submitComment("comment-42", ProductReportReason.HATE_OR_HARASSMENT, "Targeted abuse", "comment-report-key-1")
+
+        assertEquals(ProductReportResult.Success("report-comment-1"), result)
+        assertEquals("/api/v1/reports", transport.path)
+        assertEquals("comment", transport.body!!.getString("targetType"))
+        assertEquals("comment-42", transport.body!!.getString("targetId"))
+        assertEquals("hate_or_harassment", transport.body!!.getString("reason"))
+        assertEquals("Targeted abuse", transport.body!!.getString("details"))
+    }
+
+    @Test
     fun reportDetailsUseTheSharedCharacterLimitRatherThanUtf8ByteCount() {
         val transport = RecordingProductReportTransport(JSONObject("""{"data":{"id":"report-post-unicode","status":"received"}}"""))
         val details = "🔥".repeat(126) // 252 UTF-16 code units but more than 500 UTF-8 bytes.

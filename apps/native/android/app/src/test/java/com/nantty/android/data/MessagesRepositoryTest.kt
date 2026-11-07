@@ -62,6 +62,63 @@ class MessagesRepositoryTest {
     }
 
     @Test
+    fun parsesServerStreakViewWithoutReadingMessageContent() {
+        val repository = repositoryWithPayload(
+            """{"data":[{"id":"11111111-1111-4111-8111-111111111111","kind":"direct","peer":{"name":"Ari"},"lastMessageAt":"2026-10-01T12:00:00Z","streak":{"count":8,"state":"active","hourglass":true,"secondsUntilMyDayEnds":7200,"sentToday":{"me":false,"peer":true},"restoresRemaining":2,"restoresPerMonth":3,"restorableUntil":null,"countBeforeBreak":0,"milestoneDays":null,"milestoneCelebrationPending":false}}],"nextCursor":null}""",
+        )
+
+        val streak = (repository.load() as MessagesResult.Success).page.conversations.single().streak
+
+        assertEquals(8, streak?.count)
+        assertEquals("active", streak?.state)
+        assertTrue(streak?.hourglass == true)
+        assertEquals(7_200, streak?.secondsUntilMyDayEnds)
+        assertFalse(streak?.sentTodayMe == true)
+        assertTrue(streak?.sentTodayPeer == true)
+        assertEquals(2, streak?.restoresRemaining)
+    }
+
+    @Test
+    fun restoresStreakThroughAuthenticatedConversationEndpoint() {
+        val conversationId = "11111111-1111-4111-8111-111111111111"
+        val calls = mutableListOf<String>()
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = MessagesTransport { _, _ -> JSONObject() },
+            threadTransport = ChatThreadTransport { method, path, token, body ->
+                calls += "$method $path $token ${body == null}"
+                JSONObject("""{"data":{"count":8,"state":"active","hourglass":false,"secondsUntilMyDayEnds":3600,"sentToday":{"me":true,"peer":true},"restoresRemaining":2,"restoresPerMonth":3,"restorableUntil":null,"countBeforeBreak":0,"milestoneDays":null,"milestoneCelebrationPending":false}}""")
+            },
+        )
+
+        val result = repository.restoreStreak(conversationId) as StreakRestoreResult.Success
+
+        assertEquals(listOf("POST /api/v1/conversations/$conversationId/streak/restore session-access true"), calls)
+        assertEquals(8, result.streak.count)
+        assertEquals("active", result.streak.state)
+    }
+
+    @Test
+    fun acknowledgesStreakCelebrationThroughAuthenticatedConversationEndpoint() {
+        val conversationId = "11111111-1111-4111-8111-111111111111"
+        val calls = mutableListOf<String>()
+        val repository = MessagesRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::signedInSession,
+            transport = MessagesTransport { _, _ -> JSONObject() },
+            threadTransport = ChatThreadTransport { method, path, token, body ->
+                calls += "$method $path $token ${body == null}"
+                JSONObject()
+            },
+        )
+
+        repository.acknowledgeStreakCelebration(conversationId).getOrThrow()
+
+        assertEquals(listOf("POST /api/v1/conversations/$conversationId/streak/celebrated session-access true"), calls)
+    }
+
+    @Test
     fun mapsGroupAndBusinessTitlesWithoutDecryptingEncryptedAttributes() {
         val repository = repositoryWithPayload(
             """{"data":[{"id":"11111111-1111-4111-8111-111111111111","kind":"group","peer":{"id":"11111111-1111-4111-8111-111111111111","name":""},"encryptedAttributes":"opaque","lastMessage":"secret","lastMessageAt":"2026-10-01T12:00:00.000Z","unread":0},{"id":"22222222-2222-4222-8222-222222222222","kind":"business","peer":{"id":"33333333-3333-4333-8333-333333333333","name":"Merchant"},"store":{"id":"44444444-4444-4444-8444-444444444444","name":"Nantty Store"},"lastMessage":"secret","lastMessageAt":"2026-10-01T11:00:00.000Z","unread":1}],"nextCursor":null}""",

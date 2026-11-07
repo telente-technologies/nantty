@@ -1,27 +1,13 @@
 package com.nantty.android.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -33,33 +19,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import coil.compose.AsyncImage
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.nantty.android.data.MartCategory
 import com.nantty.android.data.MartHighlight
 import com.nantty.android.data.MartHighlightTarget
-import com.nantty.android.data.MartPage
 import com.nantty.android.data.MartProduct
+import com.nantty.android.data.MartProductAd
 import com.nantty.android.data.MartRepository
 import com.nantty.android.data.MartResult
+import com.nantty.android.data.MartRecommendationsResult
+import com.nantty.android.data.ProductAdResult
+import com.nantty.android.data.ProductAdsRepository
 import com.nantty.android.data.ProductReviewsRepository
 import com.nantty.android.data.StoreRepository
-import java.math.BigDecimal
-import java.text.NumberFormat
-import java.util.Currency
-import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,11 +60,18 @@ internal fun MartScreen(
     onOpenBrand: (String) -> Unit = {},
     storeRepository: StoreRepository? = null,
     reviewsRepositoryOverride: ProductReviewsRepository? = null,
+    productAdsRepositoryOverride: ProductAdsRepository? = null,
 ) {
     var categories by remember { mutableStateOf<List<MartCategory>>(emptyList()) }
     var martHome by remember { mutableStateOf<com.nantty.android.data.MartHome?>(null) }
     var highlights by remember { mutableStateOf<List<MartHighlight>>(emptyList()) }
+    var productAd by remember { mutableStateOf<MartProductAd?>(null) }
     var products by remember { mutableStateOf<List<MartProduct>>(emptyList()) }
+    val recommendationAccountId = repository.currentAccountId()
+    var recommendedProducts by remember(repository, recommendationAccountId) { mutableStateOf<List<MartProduct>?>(null) }
+    var recommendationSource by remember(repository, recommendationAccountId) { mutableStateOf<String?>(null) }
+    var recommendationError by remember(repository, recommendationAccountId) { mutableStateOf<String?>(null) }
+    var recommendationReload by remember { mutableStateOf(0) }
     var selectedCategoryId by rememberMartCategorySelection()
     var selectedCollection by rememberSaveable { mutableStateOf<String?>(null) }
     var focusedCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
@@ -99,6 +86,14 @@ internal fun MartScreen(
     var reloadGeneration by remember { mutableStateOf(0) }
     var requestGeneration by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
+    val productAdsRepository = productAdsRepositoryOverride
+        ?: remember(repository) { ProductAdsRepository(accessTokenProvider = repository::currentAccessToken) }
+    val productAdSessionId = remember { "mart_ads_${java.util.UUID.randomUUID()}" }
+
+    LaunchedEffect(productAdsRepository, productAdSessionId) {
+        val result = withContext(Dispatchers.IO) { productAdsRepository.decideMartProductAd(productAdSessionId) }
+        productAd = (result as? ProductAdResult.Success)?.ad
+    }
 
     LaunchedEffect(initialProductId) {
         if (initialProductId != null) {
@@ -197,6 +192,19 @@ internal fun MartScreen(
         }
     }
 
+    LaunchedEffect(repository, recommendationAccountId, recommendationReload) {
+        recommendedProducts = null
+        recommendationSource = null
+        recommendationError = null
+        when (val result = withContext(Dispatchers.IO) { repository.loadProductRecommendations() }) {
+            is MartRecommendationsResult.Success -> {
+                recommendedProducts = result.value.products
+                recommendationSource = result.value.source
+            }
+            is MartRecommendationsResult.Failure -> recommendationError = result.message
+        }
+    }
+
     LaunchedEffect(repository, selectedCategoryId) {
         selectedCategoryId?.let { categoryId ->
             withContext(Dispatchers.IO) { repository.recordCategoryViewed(categoryId) }
@@ -205,6 +213,10 @@ internal fun MartScreen(
 
     val openProduct = { productId: String ->
         scope.launch(Dispatchers.IO) { repository.recordProductClicked(productId) }
+        selectedProductId = productId
+    }
+    val openRecommendedProduct = { productId: String ->
+        scope.launch(Dispatchers.IO) { repository.recordProductClicked(productId, "mart_recommendations") }
         selectedProductId = productId
     }
 
@@ -297,7 +309,20 @@ internal fun MartScreen(
                         modifier = Modifier.weight(0.72f).fillMaxHeight(),
                         loading = loading,
                         products = products,
+                        productAd = productAd,
+                        onProductAdViewed = { ad -> scope.launch(Dispatchers.IO) { productAdsRepository.recordImpression(ad) } },
+                        onProductAdClick = { ad ->
+                            scope.launch(Dispatchers.IO) { productAdsRepository.recordClick(ad) }
+                            selectedProductId = ad.productId
+                        },
+                        recommendedProducts = recommendedProducts,
+                        recommendationSource = recommendationSource,
+                        recommendationError = recommendationError,
+                        // React Native keeps this shelf in the Mart tab while category chips/pane filters change.
+                        showRecommendations = focusedCategoryName == null,
                         onOpenProduct = openProduct,
+                        onOpenRecommendedProduct = openRecommendedProduct,
+                        onRetryRecommendations = { recommendationReload++ },
                         errorMessage = errorMessage,
                         pageError = pageError,
                         nextCursor = nextCursor,
@@ -314,7 +339,20 @@ internal fun MartScreen(
                     modifier = Modifier.fillMaxSize(),
                     loading = loading,
                     products = products,
+                    productAd = productAd,
+                    onProductAdViewed = { ad -> scope.launch(Dispatchers.IO) { productAdsRepository.recordImpression(ad) } },
+                    onProductAdClick = { ad ->
+                        scope.launch(Dispatchers.IO) { productAdsRepository.recordClick(ad) }
+                        selectedProductId = ad.productId
+                    },
+                    recommendedProducts = recommendedProducts,
+                    recommendationSource = recommendationSource,
+                    recommendationError = recommendationError,
+                    // Keep recommendations visible for in-place category filtering, matching React Native Mart.
+                    showRecommendations = focusedCategoryName == null,
                     onOpenProduct = openProduct,
+                    onOpenRecommendedProduct = openRecommendedProduct,
+                    onRetryRecommendations = { recommendationReload++ },
                     errorMessage = errorMessage,
                     pageError = pageError,
                     nextCursor = nextCursor,
@@ -326,100 +364,8 @@ internal fun MartScreen(
         }
     }
 }
-
 @Composable
 internal fun rememberMartCategorySelection(): MutableState<String?> = rememberSaveable { mutableStateOf(null) }
-
-@Composable
-private fun MartProductResults(
-    modifier: Modifier,
-    loading: Boolean,
-    products: List<MartProduct>,
-    onOpenProduct: (String) -> Unit,
-    errorMessage: String?,
-    pageError: String?,
-    nextCursor: String?,
-    loadingMore: Boolean,
-    onRetry: () -> Unit,
-    onLoadMore: () -> Unit,
-) {
-    when {
-        loading && products.isEmpty() -> Box(modifier, contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        errorMessage != null && products.isEmpty() -> Box(modifier, contentAlignment = Alignment.Center) {
-            MartMessage("Mart is unavailable", errorMessage, onRetry)
-        }
-        products.isEmpty() -> Box(modifier, contentAlignment = Alignment.Center) {
-            MartMessage("No products here yet", "Try another category or check back later.", null)
-        }
-        else -> LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 156.dp),
-            modifier = modifier,
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            items(products, key = MartProduct::id) { product -> MartProductCard(product, onOpen = { onOpenProduct(product.id) }) }
-            if (pageError != null) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    MartMessage("Could not load more products", pageError, onLoadMore)
-                }
-            } else if (nextCursor != null || loadingMore) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    TextButton(
-                        enabled = !loadingMore,
-                        onClick = onLoadMore,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                    ) {
-                        if (loadingMore) CircularProgressIndicator(Modifier.size(18.dp)) else Text("Load more")
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun MartProductCard(product: MartProduct, onOpen: () -> Unit) {
-    Card(
-        onClick = onOpen,
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Column {
-            Box(
-                Modifier.fillMaxWidth().height(148.dp)
-                    .background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.surfaceContainerLow))),
-                contentAlignment = Alignment.Center,
-            ) {
-                product.imageUrl?.let { imageUrl ->
-                    AsyncImage(imageUrl, contentDescription = product.name, modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)), contentScale = ContentScale.Crop)
-                } ?: Text("N", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
-            }
-            Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
-                Text(product.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                Spacer(Modifier.height(4.dp))
-                Text(formatMartPrice(product.amountMinor, product.currency), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                if (product.stock == 0) Text("Out of stock", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
-            }
-        }
-    }
-}
-
-@Composable
-private fun MartMessage(title: String, body: String, action: (() -> Unit)?) {
-    Column(
-        Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 36.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(8.dp))
-        Text(body, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
-        action?.let { TextButton(onClick = it) { Text("Try again") } }
-    }
-}
 
 private fun startLoadingMore(
     scope: kotlinx.coroutines.CoroutineScope,
@@ -455,10 +401,3 @@ private fun startLoadingMore(
         setLoading(false)
     }
 }
-
-private fun formatMartPrice(amountMinor: Long, currencyCode: String): String = runCatching {
-    val currency = Currency.getInstance(currencyCode)
-    val scale = currency.defaultFractionDigits.coerceAtLeast(0)
-    NumberFormat.getCurrencyInstance(Locale.getDefault()).apply { this.currency = currency }
-        .format(BigDecimal.valueOf(amountMinor, scale))
-}.getOrElse { "$currencyCode $amountMinor" }

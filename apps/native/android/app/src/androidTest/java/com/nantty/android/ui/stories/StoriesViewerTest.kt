@@ -2,6 +2,7 @@ package com.nantty.android.ui.stories
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -29,6 +30,47 @@ class StoriesViewerTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
+    fun previouslySeenStoriesStillCountTowardTheSessionAdCadence() {
+        compose.mainClock.autoAdvance = false
+        val session = AccountSession("access", "refresh", AccountUser("viewer", "Viewer", "viewer", null, null, emptyList()))
+        val repository = StoriesRepository(
+            sessionProvider = { session },
+            transport = object : StoriesTransport {
+                override fun get(path: String, accessToken: String?): JSONObject = JSONObject(
+                    """{"data":[
+                        {"id":"story-seen","author":{"id":"author-1","name":"Ada","username":"ada"},"media":{"id":"media-1","type":"image","url":"https://cdn.nantty.com/one.jpg","status":"ready"},"createdAt":"2026-11-06T10:00:00.000Z","seen":true},
+                        {"id":"story-unseen","author":{"id":"author-1","name":"Ada","username":"ada"},"media":{"id":"media-2","type":"image","url":"https://cdn.nantty.com/two.jpg","status":"ready"},"createdAt":"2026-11-06T10:01:00.000Z","seen":false}
+                    ]}""",
+                )
+                override fun post(path: String, accessToken: String) = JSONObject()
+            },
+        )
+        val adSession = StoryAdSession("story_ads_test")
+
+        compose.setContent {
+            MaterialTheme {
+                StoryViewerDialog(
+                    repository = repository,
+                    userId = "author-1",
+                    executor = Executor { it.run() },
+                    adSession = adSession,
+                    onClose = {},
+                    onReauthenticate = {},
+                )
+            }
+        }
+
+        compose.onNodeWithText("Ada").assertIsDisplayed()
+        compose.mainClock.advanceTimeBy(1L)
+        compose.waitForIdle()
+        compose.runOnIdle { assertEquals(1, adSession.viewedCount) }
+        compose.onNodeWithTag("story-next").performClick()
+        compose.mainClock.advanceTimeBy(1L)
+        compose.waitForIdle()
+        compose.runOnIdle { assertEquals(2, adSession.viewedCount) }
+    }
+
+    @Test
     fun storyTrayExposesAccessibleStoryItemsAndSelection() {
         var selectedUserId: String? = null
         compose.setContent {
@@ -54,9 +96,9 @@ class StoriesViewerTest {
                 override fun get(path: String, accessToken: String?): JSONObject {
                     requestedPaths += path
                     return when {
-                        path == "/api/v1/posts/story-1/analytics" -> JSONObject("""{"data":{"impressions":20,"uniqueViewers":12,"comments":2,"shares":3,"profileVisits":1,"newFollows":1,"postedAt":"2026-11-06T10:00:00.000Z"}}""")
-                        path == "/api/v1/stories/story-1/viewers" -> JSONObject("""{"data":{"viewers":[{"id":"viewer-1","name":"Sam","username":"sam"}],"total":2,"nextCursor":"next"}}""")
-                        path == "/api/v1/stories/story-1/viewers?cursor=next" -> JSONObject("""{"data":{"viewers":[{"id":"viewer-2","name":"Lee","username":"lee"}],"total":2,"nextCursor":null}}""")
+                        path == "/api/v1/posts/story-1/analytics" -> JSONObject("""{"data":{"impressions":20,"uniqueViewers":12,"likes":3,"comments":2,"shares":3,"profileVisits":1,"newFollows":1,"postedAt":"2026-11-06T10:00:00.000Z"}}""")
+                        path == "/api/v1/stories/story-1/viewers" -> JSONObject("""{"data":{"viewers":[{"id":"viewer-1","name":"Sam","username":"sam"}],"total":22,"nextCursor":"next"}}""")
+                        path == "/api/v1/stories/story-1/viewers?cursor=next" -> JSONObject("""{"data":{"viewers":[{"id":"viewer-2","name":"Lee","username":"lee"}],"total":22,"nextCursor":null}}""")
                         else -> JSONObject()
                     }
                 }
@@ -72,12 +114,47 @@ class StoriesViewerTest {
         }
 
         compose.onNodeWithTag("story-analytics-metrics").assertIsDisplayed()
+        compose.onNodeWithText("Likes").assertIsDisplayed()
+        compose.onNodeWithText("Comments").assertIsDisplayed()
+        compose.onNodeWithText("Impressions").assertIsDisplayed()
+        compose.onNodeWithText("3").assertIsDisplayed()
+        compose.onNodeWithText("22").assertIsDisplayed()
         compose.onNodeWithText("Sam").assertIsDisplayed()
         compose.onNodeWithTag("story-viewers-load-more").performClick()
         compose.onNodeWithText("Lee").assertIsDisplayed()
         compose.runOnIdle {
             assertEquals(listOf("/api/v1/posts/story-1/analytics", "/api/v1/stories/story-1/viewers", "/api/v1/stories/story-1/viewers?cursor=next"), requestedPaths)
         }
+    }
+
+    @Test
+    fun storyAnalyticsEntryIsHiddenFromNonOwners() {
+        val session = AccountSession("access", "refresh", AccountUser("viewer-1", "Viewer", "viewer", null, null, emptyList()))
+        val repository = StoriesRepository(
+            sessionProvider = { session },
+            transport = object : StoriesTransport {
+                override fun get(path: String, accessToken: String?): JSONObject = JSONObject(
+                    """{"data":[{"id":"story-1","author":{"id":"author-1","name":"Ada","username":"ada"},"media":{"id":"media-1","type":"image","url":"https://cdn.nantty.com/story.jpg","status":"ready"},"createdAt":"2026-11-06T10:00:00.000Z","seen":true}]}""",
+                )
+                override fun post(path: String, accessToken: String) = JSONObject()
+            },
+        )
+
+        compose.setContent {
+            MaterialTheme {
+                StoryViewerDialog(
+                    repository = repository,
+                    userId = "author-1",
+                    executor = Executor { it.run() },
+                    onClose = {},
+                    onReauthenticate = {},
+                )
+            }
+        }
+
+        compose.onNodeWithTag("story-options").performClick()
+        compose.onNodeWithTag("story-options-analytics").assertDoesNotExist()
+        compose.onNodeWithTag("story-options-report").assertIsDisplayed()
     }
 
     @Test

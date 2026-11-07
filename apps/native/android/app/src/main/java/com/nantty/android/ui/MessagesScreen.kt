@@ -1,21 +1,10 @@
 package com.nantty.android.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.clickable
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.PrimaryTabRow
@@ -28,23 +17,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.nantty.android.R
 import com.nantty.android.data.ConversationPage
 import com.nantty.android.data.ConversationLookupResult
-import com.nantty.android.data.ConversationType
 import com.nantty.android.data.InboxConversation
 import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.MessagesFilter
 import com.nantty.android.data.MessagesHttpException
 import com.nantty.android.data.MessagesInboxFolder
 import com.nantty.android.data.MessagesResult
+import com.nantty.android.data.LiveSessionsRepository
 import com.nantty.android.data.StoriesRepository
 import com.nantty.android.data.StoryAdsRepository
 import com.nantty.android.data.StoryAdDestination
@@ -73,6 +58,8 @@ internal fun MessagesScreen(
     externalRefreshGeneration: Int = 0,
     storiesRepository: StoriesRepository? = null,
     storyAdsRepository: StoryAdsRepository? = null,
+    liveSessionsRepository: LiveSessionsRepository? = null,
+    onOpenLive: (String) -> Unit = {},
     onOpenStoryAdDestination: (StoryAdDestination) -> Unit = {},
     currentUserAvatarUrl: String? = null,
     onAddStory: () -> Unit = {},
@@ -104,7 +91,7 @@ internal fun MessagesScreen(
     var showChannelInvitations by remember(repository) { mutableStateOf(false) }
     var showChannelLinks by remember(repository) { mutableStateOf(false) }
     var inviteGroupConversation by remember(repository) { mutableStateOf<InboxConversation?>(null) }
-    val storyNavigation = rememberMessagesStoryNavigation(storiesRepository, storyAdsRepository, executor, onReauthenticate)
+    val storyNavigation = rememberMessagesStoryNavigation(storiesRepository, storyAdsRepository, liveSessionsRepository, executor, onReauthenticate)
     var lastStoriesRefreshGeneration by remember(repository) { mutableIntStateOf(externalRefreshGeneration) }
     LaunchedEffect(externalRefreshGeneration) {
         if (externalRefreshGeneration != lastStoriesRefreshGeneration) storyNavigation.refreshTray()
@@ -343,79 +330,32 @@ internal fun MessagesScreen(
             }
         }
         MessagesNotificationTargetError(notificationTargetError) { notificationTargetError = null }
-        when {
-            loading && result == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(Modifier.semantics { contentDescription = "Loading messages" })
-            }
-            result is MessagesResult.Failure -> {
-                val failure = result as MessagesResult.Failure
-                InboxState("Messages could not load", failure.message, if (failure.authenticationRequired) "Sign in again" else "Try again", if (failure.authenticationRequired) onReauthenticate else ::refresh)
-            }
-            result is MessagesResult.Success && (result as MessagesResult.Success).page.conversations.isEmpty() ->
-                InboxState(
-                    when (folder) {
-                        MessagesInboxFolder.CHATS -> "No conversations yet"
-                        MessagesInboxFolder.REQUESTS -> "No message requests"
-                        MessagesInboxFolder.SPAM -> "No chats flagged as spam"
-                    },
-                    when (folder) {
-                        MessagesInboxFolder.CHATS -> "Your messages will appear here when you start a conversation."
-                        MessagesInboxFolder.REQUESTS -> "New message requests will appear here."
-                        MessagesInboxFolder.SPAM -> "Chats flagged as spam will appear here."
-                    },
-                )
-            result is MessagesResult.Success -> {
-                val page = (result as MessagesResult.Success).page
-                LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
-                    messagesStoriesTrayItem(
-                        enabled = storiesRepository != null,
-                        result = storyNavigation.trayResult,
-                        folder = folder,
-                        myAvatarUrl = currentUserAvatarUrl,
-                        onStorySelected = storyNavigation.openStory,
-                        onAddStory = onAddStory,
-                        onRetry = storyNavigation.refreshTray,
-                        onReauthenticate = onReauthenticate,
-                    )
-                    items(page.conversations, key = InboxConversation::id) { conversation ->
-                        Column {
-                            ConversationRow(conversation, onClick = {
-                                selectedConversation = conversation
-                                onOpenConversation(conversation)
-                            })
-                            if (conversation.type == ConversationType.GROUP) {
-                                TextButton(
-                                    onClick = { inviteGroupConversation = conversation },
-                                    modifier = Modifier.padding(start = 76.dp, bottom = 4.dp)
-                                        .semantics { contentDescription = "Invite a member to ${conversation.title}" },
-                                ) { Text("Invite member") }
-                            }
-                            if (folder != MessagesInboxFolder.CHATS) {
-                                MessageRequestActions(
-                                    conversation = conversation,
-                                    folder = folder,
-                                    pendingActionConversationId = pendingActionConversationId,
-                                    actionError = inboxActionError,
-                                    onAction = { runInboxAction(conversation, it) },
-                                    onBlock = { pendingBlockConversation = conversation },
-                                )
-                            }
-                        }
-                    }
-                    item(key = "messages-pagination") {
-                        when {
-                            loadingMore -> Box(Modifier.fillMaxWidth().padding(20.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                            pageError != null -> Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(pageError.orEmpty(), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                                TextButton(onClick = ::loadMore) { Text("Try loading more") }
-                            }
-                            page.nextCursor != null -> TextButton(onClick = ::loadMore, modifier = Modifier.fillMaxWidth().padding(12.dp)) { Text("Load more conversations") }
-                        }
-                    }
-                }
-            }
-            else -> InboxState("Connecting to Nantty", "Your conversations will appear here.")
-        }
+        MessagesInboxContent(
+            result = result,
+            folder = folder,
+            loading = loading,
+            loadingMore = loadingMore,
+            pageError = pageError,
+            storiesRepository = storiesRepository,
+            currentUserAvatarUrl = currentUserAvatarUrl,
+            storyNavigation = storyNavigation,
+            pendingActionConversationId = pendingActionConversationId,
+            inboxActionError = inboxActionError,
+            onReauthenticate = onReauthenticate,
+            onAddStory = onAddStory,
+            onLiveSelected = onOpenLive,
+            onStorySelected = storyNavigation.openStory,
+            onRetryStories = storyNavigation.refreshTray,
+            onOpenConversation = { conversation ->
+                selectedConversation = conversation
+                onOpenConversation(conversation)
+            },
+            onInviteGroupMember = { inviteGroupConversation = it },
+            onInboxAction = ::runInboxAction,
+            onBlock = { pendingBlockConversation = it },
+            onLoadMore = ::loadMore,
+            onRefresh = ::refresh,
+        )
     }
 
     pendingBlockConversation?.let { conversation ->

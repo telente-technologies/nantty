@@ -14,6 +14,9 @@ import com.nantty.android.data.StoriesRepository
 import com.nantty.android.data.StoryAdsRepository
 import com.nantty.android.data.StoryTrayEntry
 import com.nantty.android.data.StoryTrayResult
+import com.nantty.android.data.LiveSessionsRepository
+import com.nantty.android.data.LiveSessionsResult
+import com.nantty.android.data.SuggestedLiveCard
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -36,6 +39,7 @@ internal fun adjacentStoryAuthor(
 
 internal data class MessagesStoryNavigationState(
     val trayResult: StoryTrayResult?,
+    val liveEntries: List<SuggestedLiveCard>,
     val selectedStoryUserId: String?,
     val startAtLast: Boolean,
     val adSession: StoryAdSession,
@@ -50,37 +54,46 @@ internal data class MessagesStoryNavigationState(
 internal fun rememberMessagesStoryNavigation(
     repository: StoriesRepository?,
     adsRepository: StoryAdsRepository?,
+    liveSessionsRepository: LiveSessionsRepository?,
     executor: Executor,
     onReauthenticate: () -> Unit,
 ): MessagesStoryNavigationState {
     var trayResult by remember(repository) { mutableStateOf<StoryTrayResult?>(null) }
+    var liveEntries by remember(repository, liveSessionsRepository) { mutableStateOf<List<SuggestedLiveCard>>(emptyList()) }
     var selectedStoryUserId by remember(repository) { mutableStateOf<String?>(null) }
     var startAtLast by remember(repository) { mutableStateOf(false) }
     var refreshGeneration by remember(repository) { mutableIntStateOf(0) }
     val adSession = remember(repository) { StoryAdSession() }
     val requestGeneration = remember(repository) { AtomicInteger() }
     val latestReauthenticate by rememberUpdatedState(onReauthenticate)
-    DisposableEffect(repository) {
+    DisposableEffect(repository, liveSessionsRepository) {
         onDispose { requestGeneration.incrementAndGet() }
     }
 
-    LaunchedEffect(repository, refreshGeneration) {
-        val stories = repository ?: return@LaunchedEffect
+    LaunchedEffect(repository, liveSessionsRepository, refreshGeneration) {
+        val stories = repository
+        val lives = liveSessionsRepository
+        if (stories == null && lives == null) return@LaunchedEffect
         val request = requestGeneration.incrementAndGet()
         executor.execute {
-            val loaded = stories.loadTray()
+            val loaded = stories?.loadTray()
+            val loadedLives = lives?.suggested() as? LiveSessionsResult.Success
             if (requestGeneration.get() != request) return@execute
             Snapshot.withMutableSnapshot {
-                trayResult = loaded
-                if (loaded is StoryTrayResult.Failure && loaded.authenticationRequired) latestReauthenticate()
+                loaded?.let {
+                    trayResult = it
+                    if (it is StoryTrayResult.Failure && it.authenticationRequired) latestReauthenticate()
+                }
+                loadedLives?.let { liveEntries = it.value.items }
             }
         }
     }
 
     val entries = (trayResult as? StoryTrayResult.Success)?.entries.orEmpty()
-    return remember(repository, adsRepository, executor, trayResult, selectedStoryUserId, startAtLast, refreshGeneration, adSession) {
+    return remember(repository, adsRepository, liveSessionsRepository, executor, trayResult, liveEntries, selectedStoryUserId, startAtLast, refreshGeneration, adSession) {
         MessagesStoryNavigationState(
             trayResult = trayResult,
+            liveEntries = liveEntries,
             selectedStoryUserId = selectedStoryUserId,
             startAtLast = startAtLast,
             adSession = adSession,

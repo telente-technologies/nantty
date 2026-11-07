@@ -230,6 +230,7 @@ internal fun LiveWatchScreen(
                     TextButton(onClick = { reportVisible = true }, modifier = Modifier.testTag("live-report-open")) {
                         Text(stringResource(com.nantty.android.R.string.live_report_action))
                     }
+                    LiveHostAccountReportAction(liveId, current.host.id, current.host.username, reports, executor, onReauthenticate)
                 }
                 Spacer(Modifier.height(12.dp))
 

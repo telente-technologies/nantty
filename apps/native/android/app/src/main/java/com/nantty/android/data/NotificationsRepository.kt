@@ -42,6 +42,8 @@ sealed interface NotificationDestination {
     data object FollowRequests : NotificationDestination
     data object GroupInvitations : NotificationDestination
     data object Spaces : NotificationDestination
+    data object AccountStatus : NotificationDestination
+    data object IdentityVerification : NotificationDestination
     data class SupportTicket(val ticketId: String) : NotificationDestination
     data class Dispute(val disputeId: String) : NotificationDestination
     data class Clip(val clipId: String) : NotificationDestination
@@ -56,6 +58,8 @@ fun resolveNotificationDestination(notification: ActivityNotification): Notifica
     if (notification.screen == "SpaceInvitations" || isSpaceInvitationsPath(notification.url)) {
         return NotificationDestination.Spaces
     }
+    if (notification.screen == "AccountStatus") return NotificationDestination.AccountStatus
+    if (notification.screen == "Verification") return NotificationDestination.IdentityVerification
     resolveDisputeNotificationUrl(notification.url)?.let { return NotificationDestination.Dispute(it) }
     if (notification.kind == "followRequestAccepted") {
         notification.actor?.id?.takeIf(::isSafeNotificationId)?.let { return NotificationDestination.Profile(it) }

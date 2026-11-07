@@ -27,3 +27,10 @@ internal fun FeedResult?.withAuthorFollowState(authorId: String, following: Bool
         if (post.authorId == authorId) post.copy(isFollowingAuthor = following) else post
     })
 }
+
+internal fun FeedResult?.withPostNotificationsMuted(postId: String, muted: Boolean): FeedResult? {
+    val page = this as? FeedResult.Success ?: return this
+    return page.copy(posts = page.posts.map { post ->
+        if (post.id == postId) post.copy(viewerNotificationsMuted = muted) else post
+    })
+}

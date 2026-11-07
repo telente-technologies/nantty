@@ -14,6 +14,7 @@ import com.nantty.android.data.ChatHistoryResult
 import com.nantty.android.data.EncryptedChatMessage
 import com.nantty.android.data.InboxConversation
 import com.nantty.android.data.MessagesRepository
+import com.nantty.android.data.StreakRestoreResult
 import com.nantty.android.data.loadHistoryUntilMessage
 import com.nantty.android.data.loadInitialHistory
 import java.time.Instant
@@ -41,6 +42,10 @@ internal fun AndroidConversationScreen(
     var requestGeneration by remember(repository, conversation.id) { mutableIntStateOf(0) }
     var readError by remember(repository, conversation.id) { mutableStateOf<String?>(null) }
     var showingInfo by remember(repository, conversation.id) { mutableStateOf(false) }
+    var streak by remember(repository, conversation.id) { mutableStateOf(conversation.streak) }
+    var restoringStreak by remember(repository, conversation.id) { mutableStateOf(false) }
+    var streakRestoreError by remember(repository, conversation.id) { mutableStateOf<String?>(null) }
+    var streakRestoreCelebration by remember(repository, conversation.id) { mutableStateOf(false) }
     val notificationMessageId = remember(repository, conversation.id) {
         repository.consumeNotificationMessageTarget(conversation.id)
     }
@@ -169,6 +174,36 @@ internal fun AndroidConversationScreen(
         }
     }
 
+    fun restoreStreak() {
+        if (restoringStreak || streak?.state != "broken") return
+        restoringStreak = true
+        streakRestoreError = null
+        executor.execute {
+            val restored = repository.restoreStreak(conversation.id)
+            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                restoringStreak = false
+                when (restored) {
+                    is StreakRestoreResult.Failure -> {
+                        streakRestoreError = restored.message
+                        if (restored.authenticationRequired) onReauthenticate()
+                    }
+                    is StreakRestoreResult.Success -> {
+                        streak = restored.streak
+                        streakRestoreError = null
+                        streakRestoreCelebration = true
+                    }
+                }
+            }
+        }
+    }
+
+    fun acknowledgeStreakCelebration() {
+        executor.execute {
+            // Best-effort acknowledgement is safe to retry on a later inbox refresh if the network fails.
+            repository.acknowledgeStreakCelebration(conversation.id)
+        }
+    }
+
     LaunchedEffect(repository, conversation.id) { refresh() }
 
     val current = result
@@ -214,6 +249,13 @@ internal fun AndroidConversationScreen(
         onSendText = {},
         onRetryMessage = {},
         onLoadOlderMessages = ::loadOlderMessages,
+        streak = streak,
+        streakRestorePending = restoringStreak,
+        streakRestoreError = streakRestoreError,
+        streakRestoreCelebration = streakRestoreCelebration,
+        onRestoreStreak = ::restoreStreak,
+        onDismissStreakRestoreCelebration = { streakRestoreCelebration = false },
+        onAcknowledgeStreakCelebration = ::acknowledgeStreakCelebration,
     )
     if (showingInfo) AlertDialog(
         onDismissRequest = { showingInfo = false },

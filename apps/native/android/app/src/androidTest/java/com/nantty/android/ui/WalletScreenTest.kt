@@ -44,8 +44,18 @@ class WalletScreenTest {
         compose.onNodeWithText("No transactions yet. Payments, refunds and payouts will appear here.").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("No orders are currently held in escrow.").performScrollTo().assertIsDisplayed()
         compose.runOnIdle {
-            assertEquals(listOf("/api/v1/wallets/me", "/api/v1/wallets/me/transactions?limit=20", "/api/v1/wallets/me/escrow-holds"), transport.paths)
-            assertEquals(listOf("wallet-access", "wallet-access", "wallet-access"), transport.tokens)
+            assertEquals(
+                setOf(
+                    "/api/v1/wallets/me",
+                    "/api/v1/wallets/me/transactions?limit=20",
+                    "/api/v1/wallets/me/escrow-holds",
+                    "/api/v1/payments/payout-onboarding/me",
+                    "/api/v1/payments/payout-fees",
+                ),
+                transport.paths.toSet(),
+            )
+            assertEquals("wallet-access", transport.tokens[transport.paths.indexOf("/api/v1/payments/payout-onboarding/me")])
+            assertEquals(null, transport.tokens[transport.paths.indexOf("/api/v1/payments/payout-fees")])
         }
     }
 

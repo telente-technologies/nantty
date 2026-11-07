@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.nantty.android.data.ChatStreak
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -148,6 +149,80 @@ class ConversationThreadScreenTest {
     }
 
     @Test
+    fun streakActionShowsStatusAndRestoreInvokesServerCallback() {
+        var restores = 0
+        val brokenStreak = ChatStreak(
+            count = 0,
+            state = "broken",
+            hourglass = false,
+            secondsUntilMyDayEnds = 0,
+            sentTodayMe = false,
+            sentTodayPeer = false,
+            restoresRemaining = 2,
+            restoresPerMonth = 3,
+            restorableUntil = "2026-11-08T12:00:00Z",
+            countBeforeBreak = 12,
+            milestoneDays = null,
+            milestoneCelebrationPending = false,
+        )
+        setThread(streak = brokenStreak, onRestoreStreak = { restores++ })
+
+        compose.onNodeWithContentDescription("Restore streak with Ari Oyinlola").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Bring back your 12-day streak for both of you before the restore window closes.").assertIsDisplayed()
+        compose.onNodeWithText("Restore streak").assertIsDisplayed().performClick()
+
+        compose.runOnIdle { assertEquals(1, restores) }
+    }
+
+    @Test
+    fun pendingMilestoneShowsBrandedCelebrationAndAcknowledgesOnDismiss() {
+        var acknowledgements = 0
+        val milestone = ChatStreak(
+            count = 30,
+            state = "active",
+            hourglass = false,
+            secondsUntilMyDayEnds = 8 * 60 * 60,
+            sentTodayMe = true,
+            sentTodayPeer = true,
+            restoresRemaining = 2,
+            restoresPerMonth = 3,
+            restorableUntil = null,
+            countBeforeBreak = 0,
+            milestoneDays = 30,
+            milestoneCelebrationPending = true,
+        )
+
+        setThread(streak = milestone, onAcknowledgeStreakCelebration = { acknowledgements++ })
+
+        compose.onNodeWithText("30 day streak!").assertIsDisplayed()
+        compose.onNodeWithText("You and Ari Oyinlola kept the streak alive. Send a message to keep celebrating together.").assertIsDisplayed()
+        compose.onNodeWithText("Keep chatting").performClick()
+        compose.runOnIdle { assertEquals(1, acknowledgements) }
+    }
+
+    @Test
+    fun restoredStreakShowsSuccessCelebration() {
+        val restored = ChatStreak(
+            count = 12,
+            state = "active",
+            hourglass = false,
+            secondsUntilMyDayEnds = 8 * 60 * 60,
+            sentTodayMe = true,
+            sentTodayPeer = true,
+            restoresRemaining = 1,
+            restoresPerMonth = 3,
+            restorableUntil = null,
+            countBeforeBreak = 0,
+            milestoneDays = null,
+            milestoneCelebrationPending = false,
+        )
+        setThread(streak = restored, streakRestoreCelebration = true)
+
+        compose.onNodeWithText("Streak restored!").assertIsDisplayed()
+        compose.onNodeWithText("Your 12-day streak with Ari Oyinlola is back. Keep the conversation going!").assertIsDisplayed()
+    }
+
+    @Test
     fun composerUsesCallerStateAndSendsOnlyEnabledNonBlankDraft() {
         val composer = mutableStateOf(ConversationComposerState(draft = "", enabled = true, sendEnabled = true))
         val sent = mutableListOf<String>()
@@ -207,6 +282,10 @@ class ConversationThreadScreenTest {
         onMarkRead: () -> Unit = {},
         onRefresh: () -> Unit = {},
         onRetryMessage: (String) -> Unit = {},
+        streak: ChatStreak? = null,
+        streakRestoreCelebration: Boolean = false,
+        onRestoreStreak: () -> Unit = {},
+        onAcknowledgeStreakCelebration: () -> Unit = {},
     ) {
         compose.setContent {
             MaterialTheme {
@@ -235,6 +314,10 @@ class ConversationThreadScreenTest {
                     onSendText = {},
                     onRetryMessage = onRetryMessage,
                     onLoadOlderMessages = onLoadOlderMessages,
+                    streak = streak,
+                    streakRestoreCelebration = streakRestoreCelebration,
+                    onRestoreStreak = onRestoreStreak,
+                    onAcknowledgeStreakCelebration = onAcknowledgeStreakCelebration,
                 )
             }
         }

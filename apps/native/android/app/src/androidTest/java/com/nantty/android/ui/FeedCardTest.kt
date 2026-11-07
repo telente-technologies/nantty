@@ -1,6 +1,7 @@
 package com.nantty.android.ui
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -11,12 +12,66 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.onNodeWithTag
 import com.nantty.android.data.FeedMedia
 import com.nantty.android.data.FeedPost
+import com.nantty.android.data.FeedFeedbackKind
 import org.junit.Rule
 import org.junit.Test
 
 class FeedCardTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @Test
+    fun feedMenuOffersHideAndNotInterestedFeedbackActions() {
+        var feedback: Pair<String, FeedFeedbackKind>? = null
+        val post = FeedPost(
+            id = "post-feedback", authorId = "author-2", authorName = "Ari", username = "ari", avatarUrl = null,
+            verified = false, verificationColor = null, postedAsName = null, postedAsHandle = null, postedAsAvatarUrl = null,
+            kind = "post", text = "Tune this feed", media = emptyList(), likes = 0, comments = 0,
+            reposts = 0, shares = 0, createdAt = "2026-11-07T10:00:00Z",
+        )
+        composeRule.setContent {
+            MaterialTheme {
+                FeedCard(
+                    post = post,
+                    currentAccountId = "viewer-1",
+                    onReportPost = {},
+                    onFeedFeedback = { target, kind -> feedback = target.id to kind },
+                )
+            }
+        }
+
+        composeRule.onNodeWithContentDescription("More post options").performClick()
+        composeRule.onNodeWithText("Not interested").assertIsDisplayed().performClick()
+        composeRule.runOnIdle { org.junit.Assert.assertEquals("post-feedback" to FeedFeedbackKind.NOT_INTERESTED, feedback) }
+        composeRule.onNodeWithContentDescription("More post options").performClick()
+        composeRule.onNodeWithText("Hide this post").assertIsDisplayed().performClick()
+        composeRule.runOnIdle { org.junit.Assert.assertEquals("post-feedback" to FeedFeedbackKind.HIDE, feedback) }
+    }
+
+    @Test
+    fun feedMenuTogglesNotificationsForThisPost() {
+        var toggledPostId: String? = null
+        val post = FeedPost(
+            id = "post-notifications", authorId = "author-2", authorName = "Ari", username = "ari", avatarUrl = null,
+            verified = false, verificationColor = null, postedAsName = null, postedAsHandle = null, postedAsAvatarUrl = null,
+            kind = "post", text = "Follow this post", media = emptyList(), likes = 0, comments = 0,
+            reposts = 0, shares = 0, createdAt = "2026-11-07T10:00:00Z",
+        )
+        composeRule.setContent {
+            MaterialTheme {
+                FeedCard(
+                    post = post,
+                    currentAccountId = "viewer-1",
+                    onReportPost = {},
+                    onTogglePostNotifications = { toggledPostId = it.id },
+                )
+            }
+        }
+
+        composeRule.onNodeWithContentDescription("More post options").performClick()
+        composeRule.onNodeWithText("Turn off notifications for this post").assertIsDisplayed().performClick()
+        composeRule.runOnIdle { org.junit.Assert.assertEquals("post-notifications", toggledPostId) }
+    }
 
     @Test
     fun rendersPostIdentityContentAndReadOnlyEngagementCounts() {
@@ -153,6 +208,54 @@ class FeedCardTest {
         }
 
         composeRule.onNodeWithContentDescription("Follow @ari").assertDoesNotExist()
+    }
+
+    @Test
+    fun authorViewsActionOpensAnalyticsOnlyForTheOwningAccount() {
+        var analyticsPostId: String? = null
+        composeRule.setContent {
+            MaterialTheme {
+                FeedCard(
+                    FeedPost(
+                        id = "post-analytics", authorId = "owner-1", authorName = "Ari", username = "ari", avatarUrl = null,
+                        verified = false, verificationColor = null, postedAsName = null, postedAsHandle = null,
+                        postedAsAvatarUrl = null, kind = "post", text = "Analytics owner", media = emptyList(),
+                        likes = 3, comments = 2, reposts = 1, shares = 0, createdAt = "2026-11-07T10:00:00Z", views = 42,
+                    ),
+                    currentAccountId = "owner-1",
+                    onOpenAnalytics = { analyticsPostId = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithContentDescription("Views, 42").assertIsDisplayed().performClick()
+        composeRule.runOnIdle { org.junit.Assert.assertEquals("post-analytics", analyticsPostId) }
+    }
+
+    @Test
+    fun postedAsOwnerCanOpenAnalyticsAndOtherViewersSeeTheViewsExplanation() {
+        var analyticsPostId: String? = null
+        val currentAccountId = mutableStateOf("brand-owner")
+        val post = FeedPost(
+            id = "post-as-brand", authorId = "brand-owner", authorName = "Ari Studio", username = "aristudio", avatarUrl = null,
+            verified = false, verificationColor = null, postedAsName = "Ari Studio", postedAsHandle = "aristudio",
+            postedAsAvatarUrl = null, postedAsId = "brand-1", kind = "post", text = "Posted as a brand", media = emptyList(),
+            likes = 0, comments = 0, reposts = 0, shares = 0, createdAt = "2026-11-07T10:00:00Z", views = 19,
+        )
+        composeRule.setContent {
+            MaterialTheme {
+                FeedCard(post, currentAccountId = currentAccountId.value, activeProfileId = if (currentAccountId.value == "brand-owner") "brand-1" else "other-brand", onOpenAnalytics = { analyticsPostId = it })
+            }
+        }
+        composeRule.onNodeWithContentDescription("Views, 19").performClick()
+        composeRule.runOnIdle { org.junit.Assert.assertEquals("post-as-brand", analyticsPostId) }
+
+        analyticsPostId = null
+        composeRule.runOnIdle { currentAccountId.value = "viewer-2" }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithContentDescription("Views, 19").performClick()
+        composeRule.onNodeWithText("Times this post was seen. A view counts each time it appears on someone else’s screen, including repeat views. The author’s own views don’t count.").assertIsDisplayed()
+        composeRule.runOnIdle { org.junit.Assert.assertNull(analyticsPostId) }
     }
 
     @Test
@@ -295,10 +398,39 @@ class FeedCardTest {
                 ),
                 events,
             )
-            org.junit.Assert.assertTrue(
-                composeRule.onAllNodesWithContentDescription("Close image preview").fetchSemanticsNodes().isEmpty(),
-            )
         }
+        composeRule.onNodeWithContentDescription("Close image preview").assertDoesNotExist()
+    }
+
+    @Test
+    fun repostFromImageViewerOpensTheFeedRepostChoicesAndSubmitsTheSelectedAction() {
+        var repostedPostId: String? = null
+        composeRule.setContent {
+            MaterialTheme {
+                FeedCard(
+                    FeedPost(
+                        id = "post-image-repost", authorName = "Ari", username = "ari", avatarUrl = null,
+                        verified = false, verificationColor = null, postedAsName = null, postedAsHandle = null,
+                        postedAsAvatarUrl = null, kind = "post", text = "Reshare this image",
+                        media = listOf(FeedMedia("image-repost", "image", "https://cdn.nantty.com/repost.jpg", null, 1200, 800)),
+                        likes = 1, comments = 2, reposts = 3, shares = 0, createdAt = "2026-11-06T10:00:00Z",
+                    ),
+                    onRepost = { repostedPostId = it.id },
+                    onQuotePost = {},
+                    canInteract = true,
+                )
+            }
+        }
+
+        composeRule.onNodeWithContentDescription("Open image 1 of 1 full screen").performClick()
+        composeRule.onNodeWithTag("feed-media-repost").performClick()
+        composeRule.onNodeWithText("Share this post").assertIsDisplayed()
+        composeRule.onNodeWithTag("feed-repost-confirm").performClick()
+
+        composeRule.runOnIdle {
+            org.junit.Assert.assertEquals("post-image-repost", repostedPostId)
+        }
+        composeRule.onNodeWithContentDescription("Close image preview").assertDoesNotExist()
     }
 
     @Test

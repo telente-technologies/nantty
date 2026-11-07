@@ -49,6 +49,8 @@ internal fun SpacesScreen(
     viewerId: String?,
     executor: Executor,
     onSignInRequired: () -> Unit,
+    initialSpaceId: String? = null,
+    onInitialSpaceHandled: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var page by remember { mutableStateOf<SpacePage?>(null) }
@@ -304,6 +306,11 @@ internal fun SpacesScreen(
         if (accessToken.isNullOrBlank()) {
             loadingInvitations = false
         } else loadInvitations()
+    }
+
+    LaunchedEffect(initialSpaceId) {
+        initialSpaceId?.takeIf(String::isNotBlank)?.let(::loadDetail)
+        if (initialSpaceId != null) onInitialSpaceHandled()
     }
 
     SpaceInvitationRefreshEffect(

@@ -3,6 +3,8 @@ package com.nantty.android.ui
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.FeedPost
+import com.nantty.android.data.FeedFeedbackKind
+import com.nantty.android.data.FeedRepository
 import com.nantty.android.data.FollowActionResult
 import com.nantty.android.data.PostDetailRepository
 import com.nantty.android.data.PublicProfileRepository
@@ -11,8 +13,83 @@ import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.ByteArrayOutputStream
+import java.io.ByteArrayInputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 class SignedInFeedActionsTest {
+    @Test
+    fun failedFeedFeedbackRestoresOptimisticallyRemovedPostAndReportsError() {
+        val messages = mutableListOf<String?>()
+        val restored = mutableListOf<Pair<FeedPost, FeedPostRemoval>>()
+        val repository = FeedRepository("https://api.nantty.com") { url ->
+            object : HttpURLConnection(url) {
+                private val requestBody = ByteArrayOutputStream()
+                override fun getResponseCode() = HttpURLConnection.HTTP_INTERNAL_ERROR
+                override fun getErrorStream() = ByteArrayInputStream("{}".toByteArray())
+                override fun getOutputStream() = requestBody
+                override fun connect() = Unit
+                override fun disconnect() = Unit
+                override fun usingProxy() = false
+            }
+        }
+        val actions = SignedInFeedActions(
+            executor = java.util.concurrent.Executor { it.run() },
+            postRepository = { PostDetailRepository(sessionProvider = { null }) },
+            profileRepository = { profileRepository { JSONObject() } },
+            onMessage = { messages += it },
+            onSaving = {},
+            isSaving = { false },
+            applyInteraction = { _, _, _, _ -> },
+            applyAuthorFollow = { _, _ -> },
+            refresh = {},
+            feedRepository = repository,
+            accessToken = { "access-token" },
+            removePost = { FeedPostRemoval(index = 2, selectionGeneration = 7) },
+            restorePost = { post, removal -> restored += post to removal },
+        )
+
+        actions.sendFeedFeedback(post(), FeedFeedbackKind.HIDE)
+
+        assertEquals(listOf(post() to FeedPostRemoval(2, 7)), restored)
+        assertTrue(messages.last().orEmpty().contains("Could not update"))
+    }
+
+    @Test
+    fun failedPostNotificationMuteRollsBackOptimisticState() {
+        val muteStates = mutableListOf<Boolean>()
+        val messages = mutableListOf<String?>()
+        val repository = FeedRepository("https://api.nantty.com") { url ->
+            object : HttpURLConnection(url) {
+                override fun getResponseCode() = HttpURLConnection.HTTP_INTERNAL_ERROR
+                override fun getErrorStream() = ByteArrayInputStream("{}".toByteArray())
+                override fun connect() = Unit
+                override fun disconnect() = Unit
+                override fun usingProxy() = false
+            }
+        }
+        val actions = SignedInFeedActions(
+            executor = java.util.concurrent.Executor { it.run() },
+            postRepository = { PostDetailRepository(sessionProvider = { null }) },
+            profileRepository = { profileRepository { JSONObject() } },
+            onMessage = { messages += it },
+            onSaving = {},
+            isSaving = { false },
+            applyInteraction = { _, _, _, _ -> },
+            applyAuthorFollow = { _, _ -> },
+            refresh = {},
+            feedRepository = repository,
+            accessToken = { "access-token" },
+            applyPostNotificationsMuted = { _, muted -> muteStates += muted },
+        )
+
+        actions.togglePostNotifications(post())
+
+        assertEquals(listOf(true, false), muteStates)
+        assertTrue(messages.last().orEmpty().contains("Could not update post notifications"))
+    }
+
     @Test
     fun followAuthorUsesServerStateAndRefreshesFeedAfterSuccess() {
         val followWrites = mutableListOf<String>()

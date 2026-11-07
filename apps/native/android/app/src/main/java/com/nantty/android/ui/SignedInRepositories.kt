@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.nantty.android.data.AccountNotificationSettingsRepository
+import com.nantty.android.data.AccountHealthRepository
+import com.nantty.android.data.IdentityVerificationRepository
 import com.nantty.android.data.AccountSessionRepository
 import com.nantty.android.data.ClipWatchTrackingRepository
 import com.nantty.android.data.SharedPreferencesClipWatchPendingInteractionStore
@@ -14,6 +16,7 @@ import com.nantty.android.data.BuyerOrdersRepository
 import com.nantty.android.data.CountryPreferenceRepository
 import com.nantty.android.data.ChatNotificationSettingsRepository
 import com.nantty.android.data.ProductReviewsRepository
+import com.nantty.android.data.ProductInteractionRepository
 import com.nantty.android.data.CartRepository
 import com.nantty.android.data.CheckoutRepository
 import com.nantty.android.data.ProviderWalletPaymentRepository
@@ -30,6 +33,7 @@ import com.nantty.android.data.MartRepository
 import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.NotificationsRepository
 import com.nantty.android.data.PublicProfileRepository
+import com.nantty.android.data.PublicBrandRepository
 import com.nantty.android.data.ProfileImageRepository
 import com.nantty.android.data.SavedPostsRepository
 import com.nantty.android.data.SearchRepository
@@ -77,6 +81,8 @@ internal data class SignedInRepositories(
     val clips: ClipsRepository,
     val savedCards: SavedCardRepository,
     val savedCardCredentials: SavedCardCredentialStore,
+    val accountHealth: AccountHealthRepository,
+    val identityVerification: IdentityVerificationRepository,
 )
 
 @Composable
@@ -100,10 +106,22 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
     val disputes = remember(sessionRepository) { DisputeRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val notifications = remember(sessionRepository) { NotificationsRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val accountNotificationSettings = remember(sessionRepository) { AccountNotificationSettingsRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val accountHealth = remember(sessionRepository) { AccountHealthRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val identityVerification = remember(sessionRepository) {
+        IdentityVerificationRepository(
+            sessionProvider = sessionRepository::sessionOrNull,
+            refreshSessionProvider = sessionRepository::refreshSession,
+        )
+    }
     val countryPreference = remember(sessionRepository) {
         CountryPreferenceRepository(
             sessionProvider = sessionRepository::sessionOrNull,
             refreshSessionProvider = sessionRepository::refreshSession,
+        )
+    }
+    val productInteractions = remember(sessionRepository) {
+        ProductInteractionRepository(
+            accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken },
         )
     }
     val messages = remember(sessionRepository) {
@@ -112,10 +130,17 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
             refreshSessionProvider = sessionRepository::refreshSession,
         )
     }
-    val search = remember(sessionRepository) { SearchRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val search = remember(sessionRepository, productInteractions) {
+        SearchRepository(sessionProvider = sessionRepository::sessionOrNull, productInteractionRepository = productInteractions)
+    }
     val explore = remember(sessionRepository) { ExploreRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val savedPosts = remember(sessionRepository) { SavedPostsRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val mart = remember(sessionRepository) { MartRepository(accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken }) }
+    val mart = remember(sessionRepository) {
+        MartRepository(
+            accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken },
+            accountIdProvider = { sessionRepository.sessionOrNull()?.user?.id },
+        )
+    }
     val publicProfile = remember(sessionRepository) { PublicProfileRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val store = remember(sessionRepository) {
         StoreRepository(
@@ -210,6 +235,8 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
         clips,
         savedCards,
         savedCardCredentials,
+        accountHealth,
+        identityVerification,
     ) {
         SignedInRepositories(
             wallet,
@@ -246,6 +273,12 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
             clips,
             savedCards,
             savedCardCredentials,
+            accountHealth,
+            identityVerification,
         )
     }
 }
+
+@Composable
+internal fun rememberPublicBrandRepository(sessionRepository: AccountSessionRepository): PublicBrandRepository =
+    remember(sessionRepository) { PublicBrandRepository(sessionProvider = sessionRepository::sessionOrNull) }

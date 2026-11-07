@@ -32,6 +32,7 @@ data class StorySoundSummary(val id: String, val title: String, val ownerUsernam
 data class StoryAnalytics(
     val impressions: Int,
     val uniqueViewers: Int,
+    val likes: Int,
     val comments: Int,
     val shares: Int,
     val profileVisits: Int,
@@ -203,6 +204,7 @@ class StoriesRepository(
                 StoryAnalytics(
                     impressions = payload.optInt("impressions").coerceAtLeast(0),
                     uniqueViewers = payload.optInt("uniqueViewers").coerceAtLeast(0),
+                    likes = payload.optInt("likes").coerceAtLeast(0),
                     comments = payload.optInt("comments").coerceAtLeast(0),
                     shares = payload.optInt("shares").coerceAtLeast(0),
                     profileVisits = payload.optInt("profileVisits").coerceAtLeast(0),

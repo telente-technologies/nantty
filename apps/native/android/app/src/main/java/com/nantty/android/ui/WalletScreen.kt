@@ -179,10 +179,15 @@ internal fun WalletScreen(
                     onRetryTransactions = ::refreshTransactions,
                     onLoadMoreTransactions = ::loadMoreTransactions,
                     onManagePayoutAccounts = { managingPayoutAccounts = true },
+                    repository = repository,
+                    executor = executor,
+                    onRefreshWallet = ::refreshWallet,
+                    onWithdrawalSuccess = { refreshWallet(); refreshTransactions() },
                 )
             }
         }
     }
+
 }
 
 @Composable
@@ -198,6 +203,10 @@ private fun WalletContent(
     onRetryTransactions: () -> Unit,
     onLoadMoreTransactions: () -> Unit,
     onManagePayoutAccounts: () -> Unit,
+    repository: WalletRepository,
+    executor: Executor,
+    onRefreshWallet: () -> Unit,
+    onWithdrawalSuccess: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.widthIn(max = 760.dp).fillMaxSize(),
@@ -239,6 +248,17 @@ private fun WalletContent(
                     }
                 }
             }
+        }
+
+        item {
+            WalletWithdrawalSection(
+                repository = repository,
+                executor = executor,
+                wallet = wallet,
+                onManagePayoutAccounts = onManagePayoutAccounts,
+                onRefreshWallet = onRefreshWallet,
+                onWithdrawalSuccess = onWithdrawalSuccess,
+            )
         }
 
         item {

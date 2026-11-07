@@ -68,6 +68,8 @@ internal fun LiveStageInvitationDialog(
     message: String?,
     onAccept: () -> Unit,
     onDecline: () -> Unit,
+    invitationRole: String = "speaker",
+    invitationTitle: String? = null,
 ) {
     if (!visible) return
     AlertDialog(
@@ -75,7 +77,8 @@ internal fun LiveStageInvitationDialog(
         title = { Text(if (invitedByHost) "Stage invitation" else "Stage request approved") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(if (invitedByHost) "$hostName invited you to join this Live." else "$hostName approved your request to join this Live.")
+                val designation = invitationTitle?.takeIf(String::isNotBlank) ?: if (invitationRole == "cohost") "Co-host" else "Speaker"
+                Text(if (invitedByHost) "$hostName invited you to join this Live as $designation." else "$hostName approved your request to join this Live.")
                 Text("Your camera and microphone will be shared with viewers. You can turn either off or leave the stage at any time.")
                 message?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             }

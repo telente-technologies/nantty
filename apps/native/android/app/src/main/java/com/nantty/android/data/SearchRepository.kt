@@ -61,8 +61,15 @@ class SearchRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val sessionProvider: () -> AccountSession?,
     private val transport: SearchTransport = JdkSearchTransport(baseUrl),
+    private val productInteractionRepository: ProductInteractionRepository? = null,
 ) {
     fun hasAuthenticatedViewer(): Boolean = sessionProvider()?.accessToken?.isNotBlank() == true
+
+    fun recordSearchInteraction(query: String, resultCount: Int): Boolean =
+        productInteractionRepository?.recordSearchPerformed(query, resultCount) ?: false
+
+    fun recordSearchProductClick(productId: String, query: String, resultCount: Int): Boolean =
+        productInteractionRepository?.recordSearchProductClicked(productId, query, resultCount) ?: false
 
     fun search(query: String, type: SearchType, cursor: String? = null, scope: String = GLOBAL_SCOPE): SearchResult = try {
         val cleanQuery = query.trim()

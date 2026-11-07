@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
@@ -22,21 +23,25 @@ import com.nantty.android.data.FeedRepository
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountSessionRepository
 import com.nantty.android.data.AuthFlowApi
+import com.nantty.android.data.ChatDeviceKeyDirectoryRepository
 import com.nantty.android.ui.auth.PendingGuestAction
 import com.nantty.android.widget.OrdersWidgetRefreshScheduler
 import com.nantty.android.notifications.NativePushRegistration
 import com.nantty.android.notifications.ForegroundActivityHeartbeat
 import com.nantty.android.notifications.PushTapTarget
+import com.nantty.android.security.chatcrypto.AndroidChatCryptoStorage
+import com.nantty.android.security.chatcrypto.DeviceKeyRegistration
+import com.nantty.android.security.chatcrypto.ProtocolStore
 import java.util.concurrent.Executor
 
 internal enum class Destination(val title: String) {
-    Feed("Home"), Clips("Clips"), Mart("Mart"), Discover("Discover"), Spaces("Spaces"), Live("Live"), Notifications("Activity"), Messages("Messages"), Wallet("Wallet"), Orders("Orders"), Profile("Profile"), Saved("Saved posts"), Business("Business tools"), FollowRequests("Follow requests"), GroupInvitations("Group invitations"), SupportRequests("Support requests"), DisputeDetail("Dispute"), CountryPreference("Country & currency"), ChatNotificationSettings("Chat settings"), ChatPasscode("Chat passcode")
+    Feed("Home"), Clips("Clips"), Mart("Mart"), Discover("Discover"), Spaces("Spaces"), Live("Live"), Notifications("Activity"), Messages("Messages"), Wallet("Wallet"), Orders("Orders"), Profile("Profile"), Saved("Saved posts"), Business("Business tools"), FollowRequests("Follow requests"), GroupInvitations("Group invitations"), AccountStatus("Account status"), IdentityVerification("Verification"), SupportRequests("Support requests"), DisputeDetail("Dispute"), CountryPreference("Country & currency"), ContentPreferences("Content preferences"), ChatNotificationSettings("Chat settings"), ChatPasscode("Chat passcode")
 }
 
 internal fun visibleDestinations(isGuest: Boolean): List<Destination> =
     Destination.entries.filter { item ->
         if (isGuest) item == Destination.Feed || item == Destination.Clips || item == Destination.Mart || item == Destination.Discover || item == Destination.Spaces
-        else item != Destination.Saved && item != Destination.Orders && item != Destination.Mart && item != Destination.Live && item != Destination.Business && item != Destination.FollowRequests && item != Destination.GroupInvitations && item != Destination.SupportRequests && item != Destination.DisputeDetail && item != Destination.CountryPreference && item != Destination.ChatNotificationSettings && item != Destination.ChatPasscode
+        else item != Destination.Saved && item != Destination.Orders && item != Destination.Mart && item != Destination.Live && item != Destination.Business && item != Destination.FollowRequests && item != Destination.GroupInvitations && item != Destination.AccountStatus && item != Destination.IdentityVerification && item != Destination.SupportRequests && item != Destination.DisputeDetail && item != Destination.CountryPreference && item != Destination.ContentPreferences && item != Destination.ChatNotificationSettings && item != Destination.ChatPasscode
     }
 
 @Composable
@@ -55,6 +60,19 @@ fun NanttyApp(
     onChannelInvitationTokenHandled: () -> Unit = {},
 ) {
     val appContext = LocalContext.current.applicationContext
+    val chatCryptoStorage = remember(appContext) { AndroidChatCryptoStorage(appContext) }
+    val chatDeviceKeyRegistration = remember(chatCryptoStorage, sessionRepository) {
+        DeviceKeyRegistration(
+            store = ProtocolStore(chatCryptoStorage),
+            directory = ChatDeviceKeyDirectoryRepository(
+                sessionProvider = sessionRepository::sessionOrNull,
+                refreshSessionProvider = sessionRepository::refreshSession,
+            ),
+        )
+    }
+    DisposableEffect(chatCryptoStorage) {
+        onDispose { chatCryptoStorage.close() }
+    }
     var session by remember { mutableStateOf<AccountSession?>(null) }
     var guestBrowsing by rememberSaveable { mutableStateOf(false) }
     var showingGuestAuth by rememberSaveable { mutableStateOf(false) }
@@ -84,6 +102,7 @@ fun NanttyApp(
                 }
             } catch (error: Exception) {
                 if (error is com.nantty.android.data.AuthApiException && error.statusCode in setOf(401, 403)) {
+                    chatDeviceKeyRegistration.signOut()
                     OrdersWidgetRefreshScheduler.markSignedOut(appContext)
                 }
                 androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
@@ -101,6 +120,11 @@ fun NanttyApp(
         if (session != null) {
             pendingGuestAction.takeAfterSignIn()?.invoke()
         }
+    }
+
+    LaunchedEffect(session?.user?.id, chatDeviceKeyRegistration) {
+        val userId = session?.user?.id ?: return@LaunchedEffect
+        sessionExecutor.execute { runCatching { chatDeviceKeyRegistration.ensureReady(userId) } }
     }
 
     ForegroundActivityHeartbeat(
@@ -157,6 +181,7 @@ fun NanttyApp(
                     try {
                         sessionRepository.sessionOrNull()?.user?.id?.let {
                             NativePushRegistration.unregisterBeforeSignOut(appContext, it)
+                            chatDeviceKeyRegistration.signOut(it)
                         }
                         sessionRepository.signOut()
                         OrdersWidgetRefreshScheduler.markSignedOut(appContext)

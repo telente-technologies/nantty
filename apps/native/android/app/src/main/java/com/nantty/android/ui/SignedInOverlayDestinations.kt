@@ -7,6 +7,7 @@ import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.data.StoreRepository
 import com.nantty.android.data.PublicBrandRepository
+import com.nantty.android.data.PostAnalyticsRepository
 import com.nantty.android.data.StoriesRepository
 import com.nantty.android.data.StoryAdsRepository
 import com.nantty.android.data.StoryAdDestination
@@ -22,7 +23,9 @@ internal data class SignedInOverlaySelection(
     val composerMode: SignedInComposerMode,
     val quotedPostForComposer: FeedQuotedPost?,
     val selectedPostId: String?,
+    val selectedPostAnalyticsId: String?,
     val selectedPostCommentId: String?,
+    val canReportSelectedPostComments: Boolean,
     val selectedStoreId: String?,
     val selectedBrandId: String?,
     val isGuest: Boolean,
@@ -42,6 +45,7 @@ internal data class SignedInOverlayDependencies(
     val storyAdsRepository: StoryAdsRepository,
     val soundsRepository: SoundsRepository,
     val storyMediaRepository: CreatorSampleMediaRepository,
+    val postAnalyticsRepository: PostAnalyticsRepository,
     val executor: Executor,
 )
 
@@ -50,6 +54,8 @@ internal data class SignedInOverlayActions(
     val publishedPost: (String) -> Unit,
     val storyPublished: (String) -> Unit,
     val backFromPost: (String?) -> Unit,
+    val backFromPostAnalytics: () -> Unit,
+    val reportClipComment: (String) -> Unit,
     val backFromStore: () -> Unit,
     val searchStore: (String?, String?) -> Unit,
     val backFromBrand: () -> Unit,
@@ -93,11 +99,25 @@ internal fun SignedInOverlayDestinations(
         return true
     }
 
+    selection.selectedPostAnalyticsId?.let { postId ->
+        HingeSafeContent {
+            PostAnalyticsScreen(
+                postId = postId,
+                repository = dependencies.postAnalyticsRepository,
+                executor = dependencies.executor,
+                onBack = actions.backFromPostAnalytics,
+                onReauthenticate = actions.requireSignIn,
+            )
+        }
+        return true
+    }
+
     selection.selectedPostId?.let { postId ->
         HingeSafeContent {
             PostDetailScreen(
                 postId = postId,
                 initialCommentId = selection.selectedPostCommentId,
+                onReportComment = if (selection.canReportSelectedPostComments) actions.reportClipComment else null,
                 sessionProvider = dependencies.sessionRepository::sessionOrNull,
                 executor = dependencies.executor,
                 onBack = { actions.backFromPost(null) },

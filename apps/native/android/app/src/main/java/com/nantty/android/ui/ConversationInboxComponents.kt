@@ -71,7 +71,23 @@ internal fun ConversationRow(conversation: InboxConversation, onClick: () -> Uni
             }
             Column(Modifier.weight(1f).widthIn(max = 620.dp)) {
                 Text(conversation.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("${conversation.type.label} · ${formatConversationTime(conversation.lastMessageAt)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("${conversation.type.label} · ${formatConversationTime(conversation.lastMessageAt)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    conversation.streak?.takeIf { it.state != "none" }?.let { streak ->
+                        Text(
+                            when {
+                                streak.state == "broken" -> "Restore streak"
+                                streak.hourglass -> "${streak.count} days · ending soon"
+                                else -> "${streak.count}-day streak"
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (streak.hourglass || streak.state == "broken") MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.semantics { contentDescription = "${streak.count} day streak with ${conversation.title}" },
+                        )
+                    }
+                }
             }
             if (conversation.unreadCount > 0) {
                 Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary) {

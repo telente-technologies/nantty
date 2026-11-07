@@ -1,6 +1,7 @@
 package com.nantty.android.ui
 
 import androidx.compose.runtime.mutableStateOf
+import com.nantty.android.data.FeedPost
 import com.nantty.android.data.FeedResult
 import com.nantty.android.data.FeedType
 import org.junit.Assert.assertEquals
@@ -10,6 +11,34 @@ import org.junit.Test
 import java.util.concurrent.Executor
 
 class SignedInFeedControllerTest {
+    @Test
+    fun removesFeedPostForFeedbackAndRestoresAtOriginalPositionOnFailure() {
+        val fixture = controller(load = { _, _, _, _ -> FeedResult.Success(emptyList(), null) })
+        val first = feedPost("first")
+        val hidden = feedPost("hidden")
+        val last = feedPost("last")
+        fixture.content.result.value = FeedResult.Success(listOf(first, hidden, last), "next")
+
+        val removal = fixture.controller.removePost(hidden.id)
+        assertEquals(listOf("first", "last"), (fixture.content.result.value as FeedResult.Success).posts.map(FeedPost::id))
+
+        fixture.controller.restorePost(hidden, requireNotNull(removal))
+        assertEquals(listOf("first", "hidden", "last"), (fixture.content.result.value as FeedResult.Success).posts.map(FeedPost::id))
+    }
+
+    @Test
+    fun doesNotRestoreOldFeedPostAfterFeedSelectionChanges() {
+        val fixture = controller(load = { _, _, _, _ -> FeedResult.Success(emptyList(), null) })
+        val post = feedPost("old-feed-post")
+        fixture.content.result.value = FeedResult.Success(listOf(post), null)
+        val removal = requireNotNull(fixture.controller.removePost(post.id))
+
+        fixture.controller.selectTopic("new-topic")
+        fixture.controller.restorePost(post, removal)
+
+        assertEquals(emptyList<String>(), (fixture.content.result.value as FeedResult.Success).posts.map(FeedPost::id))
+    }
+
     @Test
     fun followingSelectionRequiresSessionWithoutChangingSelection() {
         var requests = 0
@@ -95,5 +124,12 @@ class SignedInFeedControllerTest {
         val controller: SignedInFeedController,
         val selection: SignedInFeedSelectionState,
         val content: SignedInFeedContentState,
+    )
+
+    private fun feedPost(id: String) = FeedPost(
+        id = id, authorName = "Ari", username = "ari", avatarUrl = null, verified = false,
+        verificationColor = null, postedAsName = null, postedAsHandle = null, postedAsAvatarUrl = null,
+        kind = "post", text = id, media = emptyList(), likes = 0, comments = 0, reposts = 0,
+        shares = 0, createdAt = "2026-11-07T10:00:00Z",
     )
 }

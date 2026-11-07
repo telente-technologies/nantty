@@ -9,6 +9,7 @@ import com.nantty.android.data.LiveSessionsResult
 import com.nantty.android.data.LiveStageRepository
 import com.nantty.android.data.LiveStageUserSummary
 import com.nantty.android.data.LiveStageViewerSnapshot
+import com.nantty.android.data.LiveStageInviteRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -78,7 +79,7 @@ internal fun LiveStageHostFlow(
         busy = busy,
         message = message,
         onSearchChanged = { query = it.take(80) },
-        onInvite = { userId -> perform { repository.inviteViewer(liveId, userId) } },
+        onInvite = { request -> perform { repository.inviteViewer(liveId, request.userId, request.role, request.title) } },
         onApprove = { requestId -> perform { repository.decideJoinRequest(liveId, requestId, true) } },
         onDecline = { requestId -> perform { repository.decideJoinRequest(liveId, requestId, false) } },
         onRemove = { userId -> perform { repository.removeGuest(liveId, userId) } },

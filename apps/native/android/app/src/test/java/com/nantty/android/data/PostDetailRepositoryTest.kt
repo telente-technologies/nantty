@@ -356,6 +356,36 @@ class PostDetailRepositoryTest {
     }
 
     @Test
+    fun linkClickUsesFeedSurfaceWhenOpenedFromFeed() {
+        val session = AccountSession("access-secret", "refresh-secret", AccountUser("u1", "Ari", "ari", null, null, emptyList()))
+        val transport = RecordingTransport().apply { responses += JSONObject("""{"accepted":1,"skipped":0}""") }
+
+        PostDetailRepository("https://api.nantty.com", { session }, transport)
+            .recordPostLinkClick("post-1", expectedAccountId = "u1", surface = "feed").getOrThrow()
+
+        assertEquals("feed", transport.calls.single().body?.getJSONArray("events")?.getJSONObject(0)?.getString("surface"))
+    }
+
+    @Test
+    fun feedLinkPreviewUsesAuthenticatedResolverAndRejectsUnsafeUrls() {
+        val session = AccountSession("access-secret", "refresh-secret", AccountUser("u1", "Ari", "ari", null, null, emptyList()))
+        val transport = RecordingTransport().apply {
+            responses += JSONObject("""{"data":{"url":"https://example.com/story","domain":"example.com","title":"A useful story","description":null,"siteName":"Example","imageUrl":null}}""")
+        }
+        val repository = PostDetailRepository("https://api.nantty.com", { session }, transport)
+
+        val preview = repository.resolveFeedLinkPreview("https://example.com/story?q=a%20b", "u1").getOrThrow()
+
+        assertEquals("A useful story", preview?.title)
+        assertEquals("GET", transport.calls.single().method)
+        assertEquals("/api/v1/link-previews/resolve?url=https%3A%2F%2Fexample.com%2Fstory%3Fq%3Da%2520b", transport.calls.single().path)
+        assertEquals("access-secret", transport.calls.single().accessToken)
+        assertTrue(repository.resolveFeedLinkPreview("http://example.com/story", "u1").isFailure)
+        assertTrue(repository.resolveFeedLinkPreview("https://user:pass@example.com/story", "u1").isFailure)
+        assertEquals(1, transport.calls.size)
+    }
+
+    @Test
     fun linkClickRejectsSignedOutAndChangedAccountsBeforeNetworkRequest() {
         val transport = RecordingTransport()
         val session = AccountSession("access-secret", "refresh-secret", AccountUser("u1", "Ari", "ari", null, null, emptyList()))

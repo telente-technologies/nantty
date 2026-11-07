@@ -160,8 +160,9 @@ internal fun StoryViewerDialog(
 
     val advanceLatest by rememberUpdatedState(newValue = { advanceStoryOrShowAd() })
     LaunchedEffect(story?.id) {
-        if (story == null || story.seen) return@LaunchedEffect
+        if (story == null) return@LaunchedEffect
         activeAdSession.recordStoryViewed()
+        if (story.seen) return@LaunchedEffect
         executor.execute {
             val seenResult = repository.markSeen(story.id)
             if (seenResult is StorySeenResult.Failure && seenResult.authenticationRequired) {
@@ -248,7 +249,7 @@ internal fun StoryViewerDialog(
         StoryAnalyticsDialog(repository, selectedStory, executor, onDismiss = { analyticsStory = null }, onReauthenticate = onReauthenticate)
     }
     reportStory?.let { selectedStory ->
-        StoryReportDialog(reportRepository, selectedStory, executor, onDismiss = { reportStory = null }, onReauthenticate = onReauthenticate)
+        UserReportDialog(reportRepository, selectedStory.authorId, selectedStory.id, executor, onDismiss = { reportStory = null }, onReauthenticate = onReauthenticate)
     }
     deleteStory?.let { selectedStory ->
         AlertDialog(

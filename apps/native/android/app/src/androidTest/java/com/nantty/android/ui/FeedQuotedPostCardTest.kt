@@ -49,6 +49,35 @@ class FeedQuotedPostCardTest {
     }
 
     @Test
+    fun plainRepostPreviewOpensOriginalInsteadOfRepost() {
+        var openedPostId: String? = null
+        compose.setContent {
+            MaterialTheme {
+                FeedCard(
+                    post = parentPost().copy(
+                        isQuote = false,
+                        quotedPost = FeedQuotedPost(
+                            id = "original-repost-1",
+                            kind = "post",
+                            authorName = "Ari",
+                            username = "ari",
+                            avatarUrl = null,
+                            verified = false,
+                            verificationColor = null,
+                            text = "Original post text",
+                            thumbnailUrl = null,
+                        ),
+                    ),
+                    onOpenPost = { openedPostId = it },
+                )
+            }
+        }
+
+        compose.onNodeWithTag("feed-quoted-post").assertIsDisplayed().performClick()
+        compose.runOnIdle { assertEquals("original-repost-1", openedPostId) }
+    }
+
+    @Test
     fun unavailableQuotedPostShowsNonInteractiveFallback() {
         compose.setContent {
             MaterialTheme {

@@ -2,10 +2,13 @@ package com.nantty.android.ui.live
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.runtime.mutableStateOf
 import com.nantty.android.data.LiveStageViewerSnapshot
+import com.nantty.android.data.LiveStageInviteRequest
 import com.nantty.android.data.LiveStageUserSummary
 import com.nantty.android.data.LiveStageStreamerSummary
 import com.nantty.android.ui.theme.NanttyTheme
@@ -18,18 +21,16 @@ class LiveStageAudienceControlsTest {
 
     @Test
     fun viewerCanRequestStageAndSeesPendingState() {
-        val stage = LiveStageViewerSnapshot("live-1", "viewer", null, null)
+        val stage = mutableStateOf(LiveStageViewerSnapshot("live-1", "viewer", null, null))
         compose.setContent {
             NanttyTheme {
-                LiveStageAudienceControls(stage, false, false, false, false, null, {}, {}, {}, {})
+                LiveStageAudienceControls(stage.value, false, false, false, false, null, {}, {}, {}, {})
             }
         }
         compose.onNodeWithTag("live-stage-request").assertIsDisplayed()
 
-        compose.setContent {
-            NanttyTheme {
-                LiveStageAudienceControls(stage.copy(joinRequestState = "pending"), false, false, false, false, null, {}, {}, {}, {})
-            }
+        compose.runOnIdle {
+            stage.value = stage.value.copy(joinRequestState = "pending")
         }
         compose.onNodeWithText("Your request to join is waiting for the host.").assertIsDisplayed()
         compose.onNodeWithTag("live-stage-request").assertDoesNotExist()
@@ -67,6 +68,32 @@ class LiveStageAudienceControlsTest {
         compose.onNodeWithText("Ada Viewer").assertIsDisplayed()
         compose.onNodeWithText("@ada").assertIsDisplayed()
         compose.onNodeWithTag("live-stage-invite-viewer-1").assertIsDisplayed()
+    }
+
+    @Test
+    fun hostCanAssignCoHostRoleAndOptionalTitleToInvitation() {
+        val stage = LiveStageViewerSnapshot("live-1", "host", null, null)
+        var invite: LiveStageInviteRequest? = null
+        compose.setContent {
+            NanttyTheme {
+                LiveStageHostControls(
+                    stage = stage,
+                    viewers = listOf(LiveStageUserSummary("viewer-1", "Ada Viewer", "ada", null, true)),
+                    searchQuery = "ada",
+                    searching = false,
+                    busy = false,
+                    message = null,
+                    onSearchChanged = {}, onInvite = { invite = it }, onApprove = {}, onDecline = {}, onRemove = {}, onMute = { _, _, _ -> },
+                )
+            }
+        }
+
+        compose.onNodeWithTag("live-stage-manage").performClick()
+        compose.onNodeWithTag("live-stage-role-cohost").performClick()
+        compose.onNodeWithTag("live-stage-invite-title").performTextInput("Guest expert")
+        compose.onNodeWithTag("live-stage-invite-viewer-1").performClick()
+
+        assertEquals(LiveStageInviteRequest("viewer-1", "cohost", "Guest expert"), invite)
     }
 
     @Test

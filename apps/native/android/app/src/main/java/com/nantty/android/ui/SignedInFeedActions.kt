@@ -2,11 +2,20 @@ package com.nantty.android.ui
 
 import android.content.Context
 import com.nantty.android.data.FeedPost
+import com.nantty.android.data.FeedRepository
+import com.nantty.android.data.FeedFeedbackKind
+import com.nantty.android.data.FeedFeedbackResult
+import com.nantty.android.data.PostNotificationMuteResult
+import com.nantty.android.data.AccountSessionRepository
 import com.nantty.android.data.FollowActionResult
 import com.nantty.android.data.PostDetailRepository
+import com.nantty.android.data.SharedContentRepository
+import com.nantty.android.data.SharedContentReference
+import com.nantty.android.data.SharedContentResult
 import com.nantty.android.data.PublicProfileRepository
 import com.nantty.android.share.sharePostFromAndroid
 import java.util.concurrent.Executor
+import java.util.concurrent.ConcurrentHashMap
 import androidx.compose.runtime.snapshots.Snapshot
 
 /** Owns feed mutations so navigation/state coordination stays readable in SignedInApp. */
@@ -21,7 +30,16 @@ internal class SignedInFeedActions(
     private val applyAuthorFollow: (String, Boolean) -> Unit,
     private val refresh: () -> Unit,
     private val shareAction: (Context, FeedPost) -> Unit = { context, post -> sharePostFromAndroid(context, post.id, post.authorName) },
+    private val feedRepository: FeedRepository? = null,
+    private val accessToken: () -> String? = { null },
+    private val removePost: (String) -> FeedPostRemoval? = { null },
+    private val restorePost: (FeedPost, FeedPostRemoval) -> Unit = { _, _ -> },
+    private val applyPostNotificationsMuted: (String, Boolean) -> Unit = { _, _ -> },
+    private val sharedContentRepository: SharedContentRepository = SharedContentRepository(),
 ) {
+    private val feedbackInFlight = ConcurrentHashMap.newKeySet<String>()
+    private val notificationMuteInFlight = ConcurrentHashMap.newKeySet<String>()
+
     fun like(post: FeedPost) = update(
         post = post,
         next = !post.liked,
@@ -55,6 +73,80 @@ internal class SignedInFeedActions(
     }
 
     fun share(context: Context, post: FeedPost) = shareAction(context, post)
+
+    fun resolveFeedLinkPreview(url: String, expectedAccountId: String, onResult: (com.nantty.android.data.FeedLinkPreview?) -> Unit) {
+        executor.execute {
+            val result = runCatching { postRepository().resolveFeedLinkPreview(url, expectedAccountId).getOrNull() }.getOrNull()
+            Snapshot.withMutableSnapshot { onResult(result) }
+        }
+    }
+
+    fun recordFeedLinkClick(post: FeedPost, expectedAccountId: String) {
+        executor.execute {
+            runCatching { postRepository().recordPostLinkClick(post.id, expectedAccountId, surface = "feed") }
+        }
+    }
+
+    fun resolveSharedContent(reference: SharedContentReference, onResult: (SharedContentResult) -> Unit) {
+        executor.execute {
+            val result = runCatching { sharedContentRepository.resolve(reference, accessToken()) }
+                .getOrElse { SharedContentResult.Failure("Could not load this Nantty link. Try again.") }
+            Snapshot.withMutableSnapshot { onResult(result) }
+        }
+    }
+
+    fun sendFeedFeedback(post: FeedPost, kind: FeedFeedbackKind) {
+        val repository = feedRepository ?: return
+        if (post.id in feedbackInFlight) return
+        feedbackInFlight += post.id
+        onMessage(null)
+        val removedAt = removePost(post.id)
+        executor.execute {
+            val result = repository.recordFeedback(post.id, kind, accessToken())
+            Snapshot.withMutableSnapshot {
+                feedbackInFlight -= post.id
+                when (result) {
+                    FeedFeedbackResult.Success -> onMessage(null)
+                    FeedFeedbackResult.AuthenticationRequired -> {
+                        if (removedAt != null) restorePost(post, removedAt)
+                        onMessage("Your session expired. Sign in again to update your feed.")
+                    }
+                    is FeedFeedbackResult.Failure -> {
+                        if (removedAt != null) restorePost(post, removedAt)
+                        onMessage(result.message)
+                    }
+                }
+            }
+        }
+    }
+
+    fun togglePostNotifications(post: FeedPost) {
+        val repository = feedRepository ?: return
+        if (!notificationMuteInFlight.add(post.id)) return
+        val nextMuted = !post.viewerNotificationsMuted
+        onMessage(null)
+        applyPostNotificationsMuted(post.id, nextMuted)
+        executor.execute {
+            val result = repository.setPostNotificationsMuted(post.id, nextMuted, accessToken())
+            Snapshot.withMutableSnapshot {
+                notificationMuteInFlight -= post.id
+                when (result) {
+                    is PostNotificationMuteResult.Success -> {
+                        applyPostNotificationsMuted(post.id, result.muted)
+                        onMessage(null)
+                    }
+                    PostNotificationMuteResult.AuthenticationRequired -> {
+                        applyPostNotificationsMuted(post.id, post.viewerNotificationsMuted)
+                        onMessage("Your session expired. Sign in again to update post notifications.")
+                    }
+                    is PostNotificationMuteResult.Failure -> {
+                        applyPostNotificationsMuted(post.id, post.viewerNotificationsMuted)
+                        onMessage(result.message)
+                    }
+                }
+            }
+        }
+    }
 
     fun followAuthor(post: FeedPost) {
         val authorId = post.authorId.takeIf(String::isNotBlank) ?: return
@@ -113,6 +205,11 @@ internal fun createSignedInFeedActions(
     applyInteraction: (FeedPost, Boolean?, Boolean?, Boolean?) -> Unit,
     applyAuthorFollow: (String, Boolean) -> Unit,
     refresh: () -> Unit,
+    feedRepository: FeedRepository? = null,
+    accessToken: () -> String? = { null },
+    removePost: (String) -> FeedPostRemoval? = { null },
+    restorePost: (FeedPost, FeedPostRemoval) -> Unit = { _, _ -> },
+    applyPostNotificationsMuted: (String, Boolean) -> Unit = { _, _ -> },
 ) = SignedInFeedActions(
     executor = executor,
     postRepository = postRepository,
@@ -123,4 +220,69 @@ internal fun createSignedInFeedActions(
     applyInteraction = applyInteraction,
     applyAuthorFollow = applyAuthorFollow,
     refresh = refresh,
+    feedRepository = feedRepository,
+    accessToken = accessToken,
+    removePost = removePost,
+    restorePost = restorePost,
+    applyPostNotificationsMuted = applyPostNotificationsMuted,
+)
+
+internal fun createSignedInFeedActionsForScreen(
+    executor: Executor,
+    postRepository: () -> PostDetailRepository,
+    profileRepository: PublicProfileRepository,
+    sessionRepository: AccountSessionRepository,
+    feedRepository: FeedRepository,
+    controller: SignedInFeedController,
+    onMessage: (String?) -> Unit,
+    onSaving: (String?) -> Unit,
+    isSaving: (String) -> Boolean,
+    refresh: () -> Unit,
+    applyPostNotificationsMuted: (String, Boolean) -> Unit = controller::applyPostNotificationsMuted,
+): SignedInFeedActions = createSignedInFeedActions(
+    executor = executor,
+    postRepository = postRepository,
+    profileRepository = { profileRepository },
+    onMessage = onMessage,
+    onSaving = onSaving,
+    isSaving = isSaving,
+    applyInteraction = controller::applyInteraction,
+    applyAuthorFollow = controller::applyAuthorFollow,
+    refresh = refresh,
+    feedRepository = feedRepository,
+    accessToken = { sessionRepository.sessionOrNull()?.accessToken },
+    removePost = controller::removePost,
+    restorePost = controller::restorePost,
+    applyPostNotificationsMuted = applyPostNotificationsMuted,
+)
+
+internal fun signedInFeedFeedbackAction(
+    isGuest: Boolean,
+    requireSignIn: () -> Unit,
+    actions: SignedInFeedActions,
+): FeedFeedbackAction = { post, kind ->
+    if (isGuest) requireSignIn() else actions.sendFeedFeedback(post, kind)
+}
+
+internal fun signedInPostNotificationMuteAction(
+    isGuest: Boolean,
+    requireSignIn: () -> Unit,
+    actions: SignedInFeedActions,
+): (FeedPost) -> Unit = { post ->
+    if (isGuest) requireSignIn() else actions.togglePostNotifications(post)
+}
+
+internal fun signedInFeedPostActions(
+    report: ((FeedPost) -> Unit)?,
+    isGuest: Boolean,
+    requireSignIn: () -> Unit,
+    actions: SignedInFeedActions,
+    onQuote: (com.nantty.android.data.FeedQuotedPost) -> Unit,
+) = FeedDestinationPostActions(
+    report = report,
+    feedback = signedInFeedFeedbackAction(isGuest, requireSignIn, actions),
+    quote = { post -> if (isGuest) requireSignIn() else onQuote(post) },
+    togglePostNotifications = signedInPostNotificationMuteAction(isGuest, requireSignIn, actions),
+    resolveLinkPreview = if (isGuest) null else actions::resolveFeedLinkPreview,
+    recordLinkClick = if (isGuest) null else actions::recordFeedLinkClick,
 )

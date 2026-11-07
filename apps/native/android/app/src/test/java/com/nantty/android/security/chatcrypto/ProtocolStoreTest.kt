@@ -126,6 +126,19 @@ class ProtocolStoreTest {
             override fun delete(namespace: ChatCryptoNamespace, key: String) {
                 rows.remove(namespace to key)
             }
+            override fun applyBatch(mutations: List<ChatCryptoValueMutation>) {
+                synchronized(rows) {
+                    val staged = rows.mapValues { (_, value) -> value.copyOf() }.toMutableMap()
+                    mutations.forEach { mutation ->
+                        when (mutation) {
+                            is ChatCryptoValueMutation.Set -> staged[mutation.namespace to mutation.key] = mutation.ciphertext.copyOf()
+                            is ChatCryptoValueMutation.Delete -> staged.remove(mutation.namespace to mutation.key)
+                        }
+                    }
+                    rows.clear()
+                    rows.putAll(staged)
+                }
+            }
             override fun keys(namespace: ChatCryptoNamespace, prefix: String): List<String> = rows.keys
                 .asSequence()
                 .filter { (storedNamespace, storedKey) -> storedNamespace == namespace && storedKey.startsWith(prefix) }

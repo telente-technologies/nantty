@@ -70,6 +70,7 @@ internal fun CurrentProfileContent(
     horizontalPadding: Dp,
     onOpenBusinessTools: () -> Unit,
     onOpenCountryPreferences: () -> Unit,
+    onOpenContentPreferences: () -> Unit,
     onOpenConnections: (String, String) -> Unit,
     onOpenFollowRequests: () -> Unit,
     onStartEditing: () -> Unit,
@@ -172,6 +173,7 @@ internal fun CurrentProfileContent(
             onStartEditing = onStartEditing,
             onOpenBusinessTools = onOpenBusinessTools,
             onOpenCountryPreferences = onOpenCountryPreferences,
+            onOpenContentPreferences = onOpenContentPreferences,
             onOpenConnections = onOpenConnections,
             onOpenFollowRequests = onOpenFollowRequests,
         )
@@ -247,6 +249,7 @@ private fun ProfileOverview(
     onStartEditing: () -> Unit,
     onOpenBusinessTools: () -> Unit,
     onOpenCountryPreferences: () -> Unit,
+    onOpenContentPreferences: () -> Unit,
     onOpenConnections: (String, String) -> Unit,
     onOpenFollowRequests: () -> Unit,
 ) {
@@ -260,6 +263,9 @@ private fun ProfileOverview(
         }
         OutlinedButton(onClick = onOpenCountryPreferences, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
             Text("Country & currency settings")
+        }
+        OutlinedButton(onClick = onOpenContentPreferences, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            Text("Content preferences")
         }
         if (profile.isPrivate) {
             OutlinedButton(onClick = onOpenFollowRequests, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {

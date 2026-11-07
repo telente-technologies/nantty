@@ -1,12 +1,61 @@
 package com.nantty.android.ui
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.Snapshot
+import com.nantty.android.data.AccountSessionRepository
+import com.nantty.android.data.FeedRepository
 import com.nantty.android.data.FeedPost
 import com.nantty.android.data.FeedResult
 import com.nantty.android.data.FeedType
 import com.nantty.android.data.appendUniqueFeedPosts
 import java.util.concurrent.Executor
+
+@Composable
+internal fun rememberSignedInFeedController(
+    repository: FeedRepository,
+    sessionRepository: AccountSessionRepository,
+    executor: Executor,
+    selection: SignedInFeedSelectionState,
+    content: SignedInFeedContentState,
+): SignedInFeedController = remember(repository, sessionRepository, executor) {
+    SignedInFeedController(
+        executor = executor,
+        accessToken = { sessionRepository.sessionOrNull()?.accessToken },
+        loadPage = repository::load,
+        selection = selection,
+        content = content,
+    )
+}
+
+internal data class SignedInFeedRuntime(
+    val controller: SignedInFeedController,
+    val topics: SignedInFeedTopicsFeature,
+    val content: SignedInFeedContentState,
+)
+
+@Composable
+internal fun rememberSignedInFeedRuntime(
+    repository: FeedRepository,
+    sessionRepository: AccountSessionRepository,
+    executor: Executor,
+    selection: SignedInFeedSelectionState,
+): SignedInFeedRuntime {
+    val content = remember(repository, sessionRepository) {
+        SignedInFeedContentState(
+            result = mutableStateOf<FeedResult?>(null),
+            loading = mutableStateOf(false),
+            loadingMore = mutableStateOf(false),
+            loadMoreError = mutableStateOf<String?>(null),
+            interactionMessage = mutableStateOf<String?>(null),
+        )
+    }
+    val controller = rememberSignedInFeedController(repository, sessionRepository, executor, selection, content)
+    val topics = rememberSignedInFeedTopics(repository, executor)
+    return remember(controller, topics, content) { SignedInFeedRuntime(controller, topics, content) }
+}
 
 /** Saveable feed selection is kept by the composition; this controller owns feed loading transitions. */
 internal data class SignedInFeedSelectionState(
@@ -23,6 +72,8 @@ internal data class SignedInFeedContentState(
     val interactionMessage: MutableState<String?>,
 )
 
+internal data class FeedPostRemoval(val index: Int, val selectionGeneration: Int)
+
 internal class SignedInFeedController(
     private val executor: Executor,
     private val accessToken: () -> String?,
@@ -35,6 +86,10 @@ internal class SignedInFeedController(
     val loadingMore: Boolean get() = content.loadingMore.value
     val loadMoreError: String? get() = content.loadMoreError.value
     val interactionMessage: String? get() = content.interactionMessage.value
+
+    fun showInteractionMessage(message: String?) {
+        content.interactionMessage.value = message
+    }
 
     fun refresh() {
         val requestedFeed = selection.feed.value
@@ -126,5 +181,25 @@ internal class SignedInFeedController(
 
     fun applyAuthorFollow(authorId: String, following: Boolean) {
         content.result.value = content.result.value.withAuthorFollowState(authorId, following)
+    }
+
+    fun applyPostNotificationsMuted(postId: String, muted: Boolean) {
+        content.result.value = content.result.value.withPostNotificationsMuted(postId, muted)
+    }
+
+    fun removePost(postId: String): FeedPostRemoval? {
+        val current = content.result.value as? FeedResult.Success ?: return null
+        val index = current.posts.indexOfFirst { it.id == postId }
+        if (index < 0) return null
+        content.result.value = current.copy(posts = current.posts.filterNot { it.id == postId })
+        return FeedPostRemoval(index, selection.generation.value)
+    }
+
+    fun restorePost(post: FeedPost, removal: FeedPostRemoval) {
+        if (selection.generation.value != removal.selectionGeneration) return
+        val current = content.result.value as? FeedResult.Success ?: return
+        if (current.posts.any { it.id == post.id }) return
+        val restored = current.posts.toMutableList().apply { add(removal.index.coerceIn(0, size), post) }
+        content.result.value = current.copy(posts = restored)
     }
 }

@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.nantty.android.data.LiveStageJoinRequestSummary
+import com.nantty.android.data.LiveStageInviteRequest
 import com.nantty.android.data.LIVE_STAGE_MAXIMUM_STREAMERS
 import com.nantty.android.data.LiveStageStreamerSummary
 import com.nantty.android.data.LiveStageUserSummary
@@ -42,7 +43,7 @@ internal fun LiveStageHostControls(
     busy: Boolean,
     message: String?,
     onSearchChanged: (String) -> Unit,
-    onInvite: (String) -> Unit,
+    onInvite: (LiveStageInviteRequest) -> Unit,
     onApprove: (String) -> Unit,
     onDecline: (String) -> Unit,
     onRemove: (String) -> Unit,
@@ -51,6 +52,8 @@ internal fun LiveStageHostControls(
     if (stage?.myRole != "host") return
     var sheetOpen by remember(stage.liveId) { mutableStateOf(false) }
     var pendingRemoval by remember(stage.liveId) { mutableStateOf<LiveStageUserSummary?>(null) }
+    var inviteRole by remember(stage.liveId) { mutableStateOf("speaker") }
+    var inviteTitle by remember(stage.liveId) { mutableStateOf("") }
     val reservedSeats = stage.streamers.size + stage.invitations.count { it.state == "invited" }
     OutlinedButton(onClick = { sheetOpen = true }, enabled = !busy, modifier = Modifier.fillMaxWidth().testTag("live-stage-manage")) {
         Text("Manage stage · $reservedSeats/$LIVE_STAGE_MAXIMUM_STREAMERS seats reserved")
@@ -70,6 +73,20 @@ internal fun LiveStageHostControls(
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Invite viewers", style = MaterialTheme.typography.titleMedium)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (inviteRole == "speaker") Button(onClick = { inviteRole = "speaker" }, enabled = !busy, modifier = Modifier.testTag("live-stage-role-speaker")) { Text("Speaker") }
+                        else OutlinedButton(onClick = { inviteRole = "speaker" }, enabled = !busy, modifier = Modifier.testTag("live-stage-role-speaker")) { Text("Speaker") }
+                        if (inviteRole == "cohost") Button(onClick = { inviteRole = "cohost" }, enabled = !busy, modifier = Modifier.testTag("live-stage-role-cohost")) { Text("Co-host") }
+                        else OutlinedButton(onClick = { inviteRole = "cohost" }, enabled = !busy, modifier = Modifier.testTag("live-stage-role-cohost")) { Text("Co-host") }
+                    }
+                    OutlinedTextField(
+                        value = inviteTitle,
+                        onValueChange = { inviteTitle = it.take(32) },
+                        enabled = !busy,
+                        singleLine = true,
+                        label = { Text("Optional title") },
+                        modifier = Modifier.fillMaxWidth().testTag("live-stage-invite-title"),
+                    )
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = onSearchChanged,
@@ -90,9 +107,13 @@ internal fun LiveStageHostControls(
                         Column(Modifier.weight(1f)) {
                             Text(viewer.name, style = MaterialTheme.typography.bodyLarge)
                             Text("@${viewer.username}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            val invitation = stage.invitations.lastOrNull { it.user.id == viewer.id && it.state == "invited" }
+                            invitation?.let {
+                                Text("Invited as ${it.title?.takeIf(String::isNotBlank) ?: if (it.stageRole == "cohost") "Co-host" else "Speaker"}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         }
                         Button(
-                            onClick = { onInvite(viewer.id) },
+                            onClick = { onInvite(LiveStageInviteRequest(viewer.id, inviteRole, inviteTitle.trim())) },
                             enabled = !busy && !invited && reservedSeats < LIVE_STAGE_MAXIMUM_STREAMERS,
                             modifier = Modifier.testTag("live-stage-invite-${viewer.id}"),
                         ) { Text(if (invited) "Invited" else "Invite") }
@@ -131,7 +152,8 @@ private fun LiveStageStreamerRow(
 ) {
     Column(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(streamer.user.name, style = MaterialTheme.typography.bodyLarge)
-        Text("@${streamer.user.username} · ${if (streamer.role == "host") "Host" else "Guest"}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        val designation = streamer.title?.takeIf(String::isNotBlank) ?: if (streamer.stageRole == "cohost") "Co-host" else "Speaker"
+        Text("@${streamer.user.username} · ${if (streamer.role == "host") "Host" else designation}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         if (streamer.role == "guest") Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             TextButton(onClick = { onMute(streamer.user.id, !streamer.audioMuted, null) }, enabled = !busy) { Text(if (streamer.audioMuted) "Unmute" else "Mute") }
             TextButton(onClick = { onMute(streamer.user.id, null, !streamer.videoMuted) }, enabled = !busy) { Text(if (streamer.videoMuted) "Camera on" else "Camera off") }

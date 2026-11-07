@@ -81,6 +81,7 @@ internal fun FeedPostReportDialog(
     repository: ProductReportRepository,
     onDismiss: () -> Unit,
     onAuthenticationRequired: () -> Unit,
+    targetType: String = "post",
 ) {
     if (postId.isNullOrBlank()) return
 
@@ -100,7 +101,8 @@ internal fun FeedPostReportDialog(
         errorMessage = null
         scope.launch {
             val result = withContext(Dispatchers.IO) {
-                repository.submitPost(postId, reason, details.trim(), idempotencyKey)
+                if (targetType == "comment") repository.submitComment(postId, reason, details.trim(), idempotencyKey)
+                else repository.submitPost(postId, reason, details.trim(), idempotencyKey)
             }
             submitting = false
             when (result) {
@@ -121,16 +123,16 @@ internal fun FeedPostReportDialog(
 
     AlertDialog(
         onDismissRequest = { if (!submitting) onDismiss() },
-        title = { Text(stringResource(if (submitted) R.string.report_post_success_title else R.string.report_post_title)) },
+        title = { Text(stringResource(if (submitted) R.string.report_post_success_title else if (targetType == "comment") R.string.report_comment_title else R.string.report_post_title)) },
         text = {
             if (submitted) {
-                Text(stringResource(R.string.report_post_success_message))
+                Text(stringResource(if (targetType == "comment") R.string.report_comment_success_message else R.string.report_post_success_message))
             } else {
                 Column(
                     modifier = Modifier.heightIn(max = 480.dp).verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text(stringResource(R.string.report_post_description), style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(if (targetType == "comment") R.string.report_comment_description else R.string.report_post_description), style = MaterialTheme.typography.bodyMedium)
                     feedReportOptions.forEach { option ->
                         val label = stringResource(option.labelResource)
                         Row(

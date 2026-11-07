@@ -2,6 +2,7 @@ package com.nantty.android.data
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.ByteArrayInputStream
@@ -11,6 +12,21 @@ import java.net.URL
 
 class MartRepositoryTest {
     @Test
+    fun exposesCurrentAccountIdForAccountScopedRecommendationState() {
+        var accountId: String? = "account-one"
+        val repository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            accountIdProvider = { accountId },
+        )
+
+        assertEquals("account-one", repository.currentAccountId())
+        accountId = "account-two"
+        assertEquals("account-two", repository.currentAccountId())
+        accountId = null
+        assertNull(repository.currentAccountId())
+    }
+
+    @Test
     fun buildsBoundedPublicCatalogRoutesAndEncodesFilters() {
         assertEquals(
             "https://api.nantty.com/api/v1/products?limit=20&categoryId=home_goods&cursor=opaque+cursor%2F%2B%3D%3D",
@@ -18,6 +34,10 @@ class MartRepositoryTest {
         )
         assertEquals("https://api.nantty.com/api/v1/mart/home", buildMartHomeUrl("https://api.nantty.com").toString())
         assertEquals("https://api.nantty.com/api/v1/mart/highlights?limit=6", buildMartHighlightsUrl("https://api.nantty.com").toString())
+        assertEquals(
+            "https://api.nantty.com/api/v1/mart/recommendations/for-you",
+            buildMartRecommendationsUrl("https://api.nantty.com/").toString(),
+        )
         assertEquals(
             "https://api.nantty.com/api/v1/products?limit=20&collection=featured_brands&cursor=page+2",
             buildMartProductsUrl("https://api.nantty.com", null, "page 2", "featured_brands").toString(),
@@ -28,6 +48,62 @@ class MartRepositoryTest {
         assertTrue(runCatching { buildMartProductsUrl("http://10.0.2.2:8080", null, null) }.isSuccess)
         assertTrue(runCatching { buildMartProductsUrl("https://api.nantty.com", null, null, "invented") }.isFailure)
         assertTrue(runCatching { buildMartHighlightsUrl("https://api.nantty.com", MART_HIGHLIGHTS_PAGE_SIZE + 1) }.isFailure)
+        assertTrue(runCatching { buildMartRecommendationsUrl("https://api.nantty.com/?token=secret") }.isFailure)
+    }
+
+    @Test
+    fun loadsPersonalizedRecommendationsUsingAuthenticatedPublicGoRoute() {
+        lateinit var connection: RecordingMartConnection
+        val repository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "viewer-token" },
+            openConnection = { url ->
+                connection = RecordingMartConnection(
+                    url,
+                    200,
+                    """{"source":"personalized","products":[{"id":"prd-1","name":"Loom tote","price":{"amountMinor":450000,"currency":"NGN"},"imageUrl":"https://cdn.nantty.com/tote.jpg","stock":4}]}""",
+                )
+                connection
+            },
+        )
+
+        val result = repository.loadProductRecommendations() as MartRecommendationsResult.Success
+
+        assertEquals("https://api.nantty.com/api/v1/mart/recommendations/for-you", connection.url.toString())
+        assertEquals("GET", connection.requestMethod)
+        assertEquals("Bearer viewer-token", connection.getRequestProperty("Authorization"))
+        assertEquals("personalized", result.value.source)
+        assertEquals(
+            MartProduct("prd-1", "Loom tote", 450000, "NGN", "https://cdn.nantty.com/tote.jpg", 4),
+            result.value.products.single(),
+        )
+    }
+
+    @Test
+    fun keepsPopularFallbackSourceAndSkipsMalformedRecommendationRows() {
+        val repository = MartRepository("https://api.nantty.com") { url ->
+            RecordingMartConnection(
+                url,
+                200,
+                """{"source":"popular","products":[{"id":"prd-2","name":"Adire scarf","price":{"amountMinor":100000,"currency":"NGN"},"stock":2},{"id":"../unsafe","name":"Unsafe","price":{"amountMinor":20,"currency":"NGN"}},{"id":"prd-3","name":"Bad currency","price":{"amountMinor":20,"currency":"wat"}}]}""",
+            )
+        }
+
+        val result = repository.loadProductRecommendations() as MartRecommendationsResult.Success
+
+        assertEquals("popular", result.value.source)
+        assertEquals(listOf("prd-2"), result.value.products.map(MartProduct::id))
+    }
+
+    @Test
+    fun recommendationFailuresAndUnknownSourceAreReportedWithoutThrowing() {
+        val unavailable = MartRepository("https://api.nantty.com") { url -> RecordingMartConnection(url, 503, "{}").also { } }
+        assertTrue(unavailable.loadProductRecommendations() is MartRecommendationsResult.Failure)
+
+        val invalidSource = MartRepository("https://api.nantty.com") { url ->
+            RecordingMartConnection(url, 200, """{"source":"guess","products":[]}""")
+        }
+        assertTrue(invalidSource.loadProductRecommendations() is MartRecommendationsResult.Failure)
     }
 
     @Test

@@ -38,6 +38,10 @@ data class WalletSummary(
     val coins: WalletCoins,
     val verification: WalletVerification,
 )
+data class WalletPayoutReadiness(val withdrawalsEnabled: Boolean, val status: String, val message: String?)
+data class WalletPayoutFee(val amount: WalletMoney, val kind: String, val arrivalEstimate: String, val firstPayoutNote: String)
+data class WalletWithdrawalQuote(val amount: WalletMoney, val fee: WalletMoney, val netAmount: WalletMoney, val payoutAccountId: String)
+data class WalletWithdrawalSubmission(val id: String, val status: String)
 
 sealed interface WalletResult {
     data class Success(val wallet: WalletSummary) : WalletResult
@@ -54,15 +58,33 @@ sealed interface WalletEscrowHoldsResult {
     data class Failure(val message: String) : WalletEscrowHoldsResult
 }
 
+sealed interface WalletPayoutReadinessResult {
+    data class Success(val value: WalletPayoutReadiness) : WalletPayoutReadinessResult
+    data class Failure(val message: String) : WalletPayoutReadinessResult
+}
+sealed interface WalletPayoutFeeResult {
+    data class Success(val value: WalletPayoutFee) : WalletPayoutFeeResult
+    data class Failure(val message: String) : WalletPayoutFeeResult
+}
+sealed interface WalletWithdrawalResult {
+    data class Success(val value: WalletWithdrawalSubmission) : WalletWithdrawalResult
+    data class Failure(val message: String, val code: String? = null, val authenticationRequired: Boolean = false, val stepUpRequired: Boolean = false) : WalletWithdrawalResult
+}
+
 fun interface WalletTransport {
     fun get(path: String, accessToken: String?): JSONObject
+
+    fun request(method: String, path: String, accessToken: String?, body: JSONObject? = null, headers: Map<String, String> = emptyMap()): JSONObject {
+        require(method == "GET" && body == null && headers.isEmpty()) { "This wallet transport does not support that request." }
+        return get(path, accessToken)
+    }
 }
 
 class WalletRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val sessionProvider: () -> AccountSession?,
     private val transport: WalletTransport = JdkWalletTransport(baseUrl),
-    refreshSessionProvider: () -> AccountSession? = { null },
+    private val refreshSessionProvider: () -> AccountSession? = { null },
 ) {
     internal val payoutAccountsRepository = PayoutAccountsRepository(
         baseUrl = baseUrl,
@@ -71,12 +93,94 @@ class WalletRepository(
     )
 
     fun load(): WalletResult = try {
-        val session = sessionProvider() ?: error("Sign in to view your wallet.")
-        val payload = transport.get("/api/v1/wallets/me", session.accessToken)
+        val payload = authenticated { token -> transport.get("/api/v1/wallets/me", token) }
         WalletResult.Success(parse(payload.optJSONObject("data") ?: payload))
     } catch (error: Exception) {
         WalletResult.Failure(error.message ?: "Could not load your wallet. Check your connection and try again.")
     }
+
+    fun loadPayoutReadiness(): WalletPayoutReadinessResult = try {
+        val payload = authenticated { token -> transport.get(PAYOUT_ONBOARDING_PATH, token) }
+        val data = payload.optJSONObject("data") ?: payload
+        WalletPayoutReadinessResult.Success(
+            WalletPayoutReadiness(
+                withdrawalsEnabled = data.optBoolean("withdrawalsEnabled", false),
+                status = data.optString("status").takeIf(String::isNotBlank) ?: "unknown",
+                message = data.optNullableString("message"),
+            ),
+        )
+    } catch (error: Exception) {
+        WalletPayoutReadinessResult.Failure(error.message ?: "Could not load payout status. Try again.")
+    }
+
+    fun loadPayoutFee(): WalletPayoutFeeResult = try {
+        val payload = transport.get(PAYOUT_FEES_PATH, null)
+        val data = payload.optJSONObject("data") ?: payload
+        val fee = data.optJSONObject("fee")?.toWalletMoney() ?: error("Nantty returned an incomplete payout fee.")
+        WalletPayoutFeeResult.Success(
+            WalletPayoutFee(fee, data.optString("kind"), data.optString("arrivalEstimate"), data.optString("firstPayoutNote")),
+        )
+    } catch (error: Exception) {
+        WalletPayoutFeeResult.Failure(error.message ?: "Could not load payout fees. Try again.")
+    }
+
+    fun quoteWithdrawal(payoutAccountId: String, amount: WalletMoney): Result<WalletWithdrawalQuote> = runCatching {
+        require(payoutAccountId.isNotBlank() && amount.amountMinor > 0 && amount.currency.isNotBlank()) { "Enter a valid withdrawal amount and payout account." }
+        val path = "$WITHDRAWAL_QUOTE_PATH?payoutAccountId=${encodeWalletQuery(payoutAccountId)}&amountMinor=${amount.amountMinor}&currency=${encodeWalletQuery(amount.currency)}"
+        val payload = authenticated { token -> transport.get(path, token) }
+        val data = payload.optJSONObject("data") ?: payload
+        WalletWithdrawalQuote(
+            amount = data.optJSONObject("amount")?.toWalletMoney() ?: error("Nantty returned an incomplete withdrawal quote."),
+            fee = data.optJSONObject("fee")?.toWalletMoney() ?: error("Nantty returned an incomplete withdrawal quote."),
+            netAmount = data.optJSONObject("netAmount")?.toWalletMoney() ?: error("Nantty returned an incomplete withdrawal quote."),
+            payoutAccountId = data.optString("payoutAccountId").takeIf(String::isNotBlank) ?: error("Nantty returned an incomplete withdrawal quote."),
+        )
+    }
+
+    fun requestWithdrawal(payoutAccountId: String, amount: WalletMoney, stepUpToken: String, idempotencyKey: String): WalletWithdrawalResult = try {
+        require(payoutAccountId.isNotBlank() && amount.amountMinor > 0 && amount.currency.isNotBlank()) { "Enter a valid withdrawal amount and payout account." }
+        require(stepUpToken.isNotBlank()) { "Confirm it's you to continue." }
+        require(idempotencyKey.isNotBlank()) { "Retry this withdrawal to continue." }
+        val body = JSONObject().put("payoutAccountId", payoutAccountId)
+            .put("amount", JSONObject().put("amountMinor", amount.amountMinor).put("currency", amount.currency))
+        val payload = authenticated { token ->
+            transport.request(
+                "POST", WITHDRAWALS_PATH, token, body,
+                mapOf(STEP_UP_HEADER to stepUpToken, IDEMPOTENCY_HEADER to idempotencyKey),
+            )
+        }
+        val data = payload.optJSONObject("data") ?: payload
+        WalletWithdrawalResult.Success(
+            WalletWithdrawalSubmission(
+                id = data.optString("id"),
+                status = data.optString("withdrawalStatus").takeIf(String::isNotBlank)
+                    ?: data.optString("status").takeIf(String::isNotBlank) ?: "pending",
+            ),
+        )
+    } catch (error: Exception) {
+        val apiError = error as? PayoutHttpException
+        WalletWithdrawalResult.Failure(
+            error.message ?: "Could not request this withdrawal. Try again.",
+            code = apiError?.code,
+            authenticationRequired = error.isWalletAuthenticationFailure(),
+            stepUpRequired = apiError?.code in setOf("STEP_UP_REQUIRED", "STEP_UP_REUSED"),
+        )
+    }
+
+    private fun <T> authenticated(call: (String) -> T): T {
+        val accessToken = sessionProvider()?.accessToken?.takeIf(String::isNotBlank)
+            ?: error("Sign in to manage your wallet.")
+        return try {
+            call(accessToken)
+        } catch (failure: PayoutHttpException) {
+            if (failure.statusCode != HttpURLConnection.HTTP_UNAUTHORIZED) throw failure
+            val refreshed = refreshSessionProvider()?.accessToken?.takeIf(String::isNotBlank)
+                ?: throw PayoutHttpException(HttpURLConnection.HTTP_UNAUTHORIZED, "Your session has expired. Sign in again.")
+            call(refreshed)
+        }
+    }
+
+    private fun Exception.isWalletAuthenticationFailure(): Boolean = this is PayoutHttpException && statusCode in setOf(401, 403)
 
     fun loadRecentTransactions(cursor: String? = null): WalletTransactionsResult = try {
         val session = sessionProvider() ?: error("Sign in to view your wallet transactions.")
@@ -173,6 +277,15 @@ class WalletRepository(
             ),
         )
     }
+
+    companion object {
+        const val PAYOUT_ONBOARDING_PATH = "/api/v1/payments/payout-onboarding/me"
+        const val PAYOUT_FEES_PATH = "/api/v1/payments/payout-fees"
+        const val WITHDRAWAL_QUOTE_PATH = "/api/v1/wallets/me/withdrawals/quote"
+        const val WITHDRAWALS_PATH = "/api/v1/wallets/me/withdrawals"
+        const val STEP_UP_HEADER = "X-Step-Up-Token"
+        const val IDEMPOTENCY_HEADER = "Idempotency-Key"
+    }
 }
 
 internal fun formatWalletAmount(money: WalletMoney, locale: Locale = Locale.getDefault()): String {
@@ -194,23 +307,40 @@ private fun encodeWalletQuery(value: String) = java.net.URLEncoder.encode(value,
 private class JdkWalletTransport(baseUrl: String) : WalletTransport {
     private val baseUrl = baseUrl
 
-    override fun get(path: String, accessToken: String?): JSONObject {
-        require(isAllowedWalletReadPath(path)) { "Unsupported wallet request." }
+    override fun get(path: String, accessToken: String?): JSONObject = request("GET", path, accessToken)
+
+    override fun request(method: String, path: String, accessToken: String?, body: JSONObject?, headers: Map<String, String>): JSONObject {
+        val allowed = if (method == "POST") path == WalletRepository.WITHDRAWALS_PATH else method == "GET" && isAllowedWalletReadPath(path)
+        require(allowed) { "Unsupported wallet request." }
         val origin = trustedApiOrigin(baseUrl) ?: error("Configure an HTTPS Nantty API URL to view your wallet.")
         val connection = (URL(origin + path).openConnection() as HttpURLConnection).apply {
-            requestMethod = "GET"
+            requestMethod = method
             connectTimeout = 10_000
             readTimeout = 15_000
             instanceFollowRedirects = false
             useCaches = false
             setRequestProperty("Accept", "application/json")
-            setRequestProperty("Authorization", "Bearer $accessToken")
+            accessToken?.takeIf(String::isNotBlank)?.let { setRequestProperty("Authorization", "Bearer $it") }
+            headers.forEach { (key, value) -> setRequestProperty(key, value) }
+            if (body != null) {
+                doOutput = true
+                setRequestProperty("Content-Type", "application/json")
+            }
         }
         try {
+            body?.let { connection.outputStream.use { stream -> stream.write(it.toString().toByteArray(Charsets.UTF_8)) } }
             val status = connection.responseCode
             val response = (if (status in 200..299) connection.inputStream else connection.errorStream)?.use(::readBounded).orEmpty()
-            if (status !in 200..299) error("Wallet request failed (HTTP $status). Please try again.")
-            return JSONObject(response)
+            if (status !in 200..299) {
+                val failure = runCatching { JSONObject(response) }.getOrNull()
+                val errorObject = failure?.optJSONObject("error") ?: failure?.optJSONObject("data") ?: failure
+                throw PayoutHttpException(
+                    status,
+                    errorObject?.optString("message")?.takeIf(String::isNotBlank) ?: "Wallet request failed (HTTP $status). Please try again.",
+                    errorObject?.optString("code")?.takeIf(String::isNotBlank),
+                )
+            }
+            return if (response.isBlank()) JSONObject() else JSONObject(response)
         } finally {
             connection.disconnect()
         }
@@ -232,6 +362,9 @@ private class JdkWalletTransport(baseUrl: String) : WalletTransport {
 private fun isAllowedWalletReadPath(path: String): Boolean {
     if (path == "/api/v1/wallets/me") return true
     if (path == "/api/v1/wallets/me/escrow-holds") return true
+    if (path == WalletRepository.PAYOUT_ONBOARDING_PATH) return true
+    if (path == WalletRepository.PAYOUT_FEES_PATH) return true
+    if (path.startsWith(WalletRepository.WITHDRAWAL_QUOTE_PATH + "?")) return true
     val transactionPrefix = "/api/v1/wallets/me/transactions?"
     if (!path.startsWith(transactionPrefix)) return false
     val query = path.removePrefix(transactionPrefix).split('&')

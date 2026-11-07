@@ -94,6 +94,54 @@ class ChatCryptoKeyValueStorageTest {
         assertTrue(storage.records.get("message") == "Nantty — 👋🏽 — 𐐷")
     }
 
+    @Test
+    fun encryptedBatchCommitsSetAndDeleteAndStoresCiphertextOnly() {
+        storage.records.set("session:user:device", "old-session")
+        storage.records.set("opk:500", "one-time-private-key")
+
+        storage.records.applyBatch(
+            listOf(
+                ChatCryptoKeyValueMutation.Set("session:user:device", "new-session"),
+                ChatCryptoKeyValueMutation.Delete("opk:500"),
+            ),
+        )
+
+        assertTrue(storage.records.get("session:user:device") == "new-session")
+        assertNull(storage.records.get("opk:500"))
+        val ciphertext = requireNotNull(dao.get(ChatCryptoNamespace.RECORDS, "session:user:device"))
+        assertFalse(String(ciphertext, StandardCharsets.UTF_8).contains("new-session"))
+    }
+
+    @Test
+    fun encryptionFailureBeforeDaoBatchLeavesExistingValuesUnchanged() {
+        val cipherCount = intArrayOf(0)
+        val failingStorage = AndroidChatCryptoStorage(
+            dao,
+            TestChatCryptoKeyProvider,
+            ChatCryptoCipherFactory {
+                cipherCount[0] += 1
+                if (cipherCount[0] == 2) throw IllegalStateException("injected encryption failure")
+                javax.crypto.Cipher.getInstance("AES/GCM/NoPadding")
+            },
+        )
+        storage.records.set("session:user:device", "old-session")
+        storage.records.set("opk:500", "one-time-private-key")
+
+        assertThrows(IllegalStateException::class.java) {
+            failingStorage.records.applyBatch(
+                listOf(
+                    ChatCryptoKeyValueMutation.Set("session:user:device", "new-session"),
+                    ChatCryptoKeyValueMutation.Set("other", "other-value"),
+                    ChatCryptoKeyValueMutation.Delete("opk:500"),
+                ),
+            )
+        }
+
+        assertTrue(failingStorage.records.get("session:user:device") == "old-session")
+        assertNull(failingStorage.records.get("other"))
+        assertTrue(failingStorage.records.get("opk:500") == "one-time-private-key")
+    }
+
     private class InMemoryChatCryptoValueDao : ChatCryptoValueDao {
         private val values = ConcurrentHashMap<Pair<ChatCryptoNamespace, String>, ByteArray>()
 
@@ -103,6 +151,19 @@ class ChatCryptoKeyValueStorageTest {
         }
         override fun delete(namespace: ChatCryptoNamespace, key: String) {
             values.remove(namespace to key)
+        }
+        override fun applyBatch(mutations: List<ChatCryptoValueMutation>) {
+            synchronized(values) {
+                val staged = values.mapValues { (_, value) -> value.copyOf() }.toMutableMap()
+                mutations.forEach { mutation ->
+                    when (mutation) {
+                        is ChatCryptoValueMutation.Set -> staged[mutation.namespace to mutation.key] = mutation.ciphertext.copyOf()
+                        is ChatCryptoValueMutation.Delete -> staged.remove(mutation.namespace to mutation.key)
+                    }
+                }
+                values.clear()
+                values.putAll(staged)
+            }
         }
         override fun keys(namespace: ChatCryptoNamespace, prefix: String): List<String> =
             values.keys.asSequence().filter { (storedNamespace, key) -> storedNamespace == namespace && key.startsWith(prefix) }

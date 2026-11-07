@@ -60,6 +60,7 @@ internal fun CurrentProfileScreen(
     modifier: Modifier = Modifier,
     onOpenBusinessTools: () -> Unit = {},
     onOpenCountryPreferences: () -> Unit = {},
+    onOpenContentPreferences: () -> Unit = {},
     onOpenConnections: (String, String) -> Unit = { _, _ -> },
     onOpenProfile: (String) -> Unit = {},
     onSearchProfile: (String, String) -> Unit = { _, _ -> },
@@ -227,6 +228,7 @@ internal fun CurrentProfileScreen(
                     horizontalPadding = horizontalPadding,
                     onOpenBusinessTools = onOpenBusinessTools,
                     onOpenCountryPreferences = onOpenCountryPreferences,
+                    onOpenContentPreferences = onOpenContentPreferences,
                     onOpenConnections = onOpenConnections,
                     onOpenFollowRequests = { showingFollowRequests = true },
                     onStartEditing = {
