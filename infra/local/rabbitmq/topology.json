@@ -48,7 +48,7 @@
     "intelligence-domain-events": [
       "account.registered", "account.loggedIn", "account.deletionRequested", "account.deletionExecuted",
       "ad.impressionRecorded", "block.created", "consent.granted", "consent.withdrawn", "follow.created",
-      "gift.sent", "media.processed", "message.sent", "post.created", "product.viewed", "product.purchased", "report.created",
+      "gift.sent", "media.processed", "message.sent", "post.created", "product.viewed", "product.clicked", "product.addedToCart", "product.purchased", "search.performed", "report.created",
       "post.liked", "post.shared", "comment.created", "comment.hidden", "comment.unhidden", "content.saved", "post.viewed", "clip.watched"
     ]
   },

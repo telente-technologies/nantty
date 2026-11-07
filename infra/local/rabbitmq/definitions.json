@@ -5083,7 +5083,31 @@
       "vhost": "nantty",
       "destination": "intelligence-domain-events",
       "destination_type": "queue",
+      "routing_key": "product.clicked",
+      "arguments": {}
+    },
+    {
+      "source": "nantty.events",
+      "vhost": "nantty",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "product.addedToCart",
+      "arguments": {}
+    },
+    {
+      "source": "nantty.events",
+      "vhost": "nantty",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
       "routing_key": "product.purchased",
+      "arguments": {}
+    },
+    {
+      "source": "nantty.events",
+      "vhost": "nantty",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
+      "routing_key": "search.performed",
       "arguments": {}
     },
     {
