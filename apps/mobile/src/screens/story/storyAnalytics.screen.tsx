@@ -15,43 +15,41 @@ import { postsService } from "@/services/content/posts.service";
 import { storiesService } from "@/services/clips/stories.service";
 import { useAuthStore } from "@/store/auth.store";
 import { formatCountWithThousandsSuffix, formatTimeSincePosted } from "@/utils/formatDate.util";
+import type { UserSummary } from "@/types";
+
+export function uniqueStoryViewerRows(pages: readonly { readonly viewers: readonly UserSummary[] }[]): UserSummary[] {
+  const seen = new Set<string>();
+  return pages.flatMap((page) => page.viewers).filter((viewer) => {
+    if (seen.has(viewer.id)) return false;
+    seen.add(viewer.id);
+    return true;
+  });
+}
 
 export function StoryAnalyticsScreen({ navigation, route }: MainScreenProps<"StoryAnalytics">) {
   const { colors } = useTheme();
   const styles = useStyles();
   const { storyId } = route.params;
   const isCreator = useAuthStore((s) => s.user?.isCreator ?? false);
-  const analytics = useQuery({ queryKey: ["post-analytics", storyId], queryFn: () => postsService.fetchPostAnalytics(storyId) });
+  const viewerId = useAuthStore((s) => s.user?.id ?? "guest");
+  const analytics = useQuery({ queryKey: ["post-analytics", storyId, viewerId], queryFn: () => postsService.fetchPostAnalytics(storyId) });
   const viewers = useInfiniteQuery({
-    queryKey: ["story-viewers", storyId],
+    queryKey: ["story-viewers", storyId, viewerId],
     queryFn: ({ pageParam }) => storiesService.fetchStoryViewers(storyId, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
-  const viewerList = viewers.data?.pages.flatMap((page) => page.viewers) ?? [];
+  const viewerList = uniqueStoryViewerRows(viewers.data?.pages ?? []);
   const totalViewers = viewers.data?.pages[0]?.total ?? viewerList.length;
-
-  if (!analytics.data) {
-    return (
-      <Screen>
-        <Header title="Story analytics" />
-        {analytics.isError ? (
-          <ErrorState error={analytics.error} onRetry={() => analytics.refetch()} />
-        ) : (
-          <ListSkeleton />
-        )}
-      </Screen>
-    );
-  }
-
   const data = analytics.data;
   const metrics = [
-    { label: "Views", value: data.impressions },
-    { label: "Unique viewers", value: data.uniqueViewers },
-    { label: "Replies", value: data.comments },
-    { label: "Shares", value: data.shares },
-    { label: "Profile visits", value: data.profileVisits },
-    { label: "New follows", value: data.newFollows },
+    { label: "Impressions", value: data?.impressions ?? null },
+    { label: "Unique viewers", value: viewers.data?.pages[0]?.total ?? null },
+    { label: "Likes", value: data?.likes ?? null },
+    { label: "Comments", value: data?.comments ?? null },
+    { label: "Shares", value: data?.shares ?? null },
+    { label: "Profile visits", value: data?.profileVisits ?? null },
+    { label: "New follows", value: data?.newFollows ?? null },
   ];
 
   return (
@@ -70,14 +68,20 @@ export function StoryAnalyticsScreen({ navigation, route }: MainScreenProps<"Sto
                 Only you can see these numbers.
               </Text>
             </View>
-            <View style={styles.grid}>
-              {metrics.map((metric) => (
-                <View key={metric.label} style={styles.metric}>
-                  <Text size={21} weight={600} lineHeight={25.2}>{formatCountWithThousandsSuffix(metric.value)}</Text>
-                  <Text size={12} lineHeight={16.8} color={colors.textMuted}>{metric.label}</Text>
-                </View>
-              ))}
-            </View>
+            {data ? (
+              <View style={styles.grid}>
+                {metrics.map((metric) => (
+                  <View key={metric.label} style={styles.metric}>
+                    <Text size={21} weight={600} lineHeight={25.2}>{metric.value === null ? "—" : formatCountWithThousandsSuffix(metric.value)}</Text>
+                    <Text size={12} lineHeight={16.8} color={colors.textMuted}>{metric.label}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : analytics.isError ? (
+              <View testID="storyAnalyticsLoadError">
+                <ErrorState error={analytics.error} onRetry={() => analytics.refetch()} />
+              </View>
+            ) : <ListSkeleton />}
             {isCreator ? (
               <Pressable
                 accessibilityRole="button"
@@ -88,7 +92,7 @@ export function StoryAnalyticsScreen({ navigation, route }: MainScreenProps<"Sto
                 <View style={styles.earningsText}>
                   <Text size={15} weight={600} lineHeight={20}>How you earn</Text>
                   <Text size={13} lineHeight={17} color={colors.textMuted}>
-                    Story ads, gifts and subscriptions pay into your creator balance.
+                    Story ads, coin donations and subscriptions pay into your creator balance.
                   </Text>
                 </View>
                 <Text size={14} weight={700} lineHeight={18} color={colors.primary}>
@@ -97,8 +101,10 @@ export function StoryAnalyticsScreen({ navigation, route }: MainScreenProps<"Sto
               </Pressable>
             ) : null}
             <View style={styles.viewersHeader}>
-              <Text size={16} weight={600} lineHeight={19.2}>Viewed by {formatCountWithThousandsSuffix(totalViewers)}</Text>
-              <Text size={12} lineHeight={16.8} color={colors.textMuted}>Posted {formatTimeSincePosted(data.postedAt)}</Text>
+              <Text size={16} weight={600} lineHeight={19.2}>
+                {viewers.isError ? "Viewers unavailable" : `Viewed by ${viewers.data ? formatCountWithThousandsSuffix(totalViewers) : "—"}`}
+              </Text>
+              {data ? <Text size={12} lineHeight={16.8} color={colors.textMuted}>Posted {formatTimeSincePosted(data.postedAt)}</Text> : null}
             </View>
           </View>
         }
@@ -112,13 +118,26 @@ export function StoryAnalyticsScreen({ navigation, route }: MainScreenProps<"Sto
           </View>
         )}
         ListEmptyComponent={
-          viewers.isPending ? <BrandLoader size="md" style={styles.viewersLoading} /> : (
+          viewers.isPending ? <BrandLoader size="md" style={styles.viewersLoading} /> : viewers.isError ? (
+            <View style={styles.viewersEmptyState}>
+              <Text size={13} lineHeight={18} color={colors.textMuted} align="center">
+                Could not load story viewers. Your story analytics are still private to you.
+              </Text>
+              <Pressable accessibilityRole="button" onPress={() => viewers.refetch()} style={styles.retryViewers}>
+                <Text size={14} weight={600} lineHeight={18} color={colors.primary}>Retry loading viewers</Text>
+              </Pressable>
+            </View>
+          ) : (
             <Text size={13} lineHeight={18} color={colors.textMuted} align="center" style={styles.viewersEmpty}>
               No views yet. Share your story to get it seen.
             </Text>
           )
         }
-        ListFooterComponent={viewers.isFetchingNextPage ? <BrandLoader size="sm" style={styles.viewersLoading} /> : undefined}
+        ListFooterComponent={viewers.isFetchingNextPage ? <BrandLoader size="sm" style={styles.viewersLoading} /> : viewers.isFetchNextPageError ? (
+          <Pressable accessibilityRole="button" onPress={() => viewers.fetchNextPage()} style={styles.retryViewers}>
+            <Text size={14} weight={600} lineHeight={18} color={colors.primary} align="center">Retry loading more viewers</Text>
+          </Pressable>
+        ) : undefined}
         onEndReached={() => { if (viewers.hasNextPage && !viewers.isFetchingNextPage) viewers.fetchNextPage().catch(() => undefined); }}
         onEndReachedThreshold={0.5}
       />
@@ -140,4 +159,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   viewerTexts: { flex: 1, gap: 1 },
   viewersLoading: { paddingVertical: 24 },
   viewersEmpty: { paddingVertical: 24 },
+  viewersEmptyState: { alignItems: "center", gap: 8, paddingVertical: 24 },
+  retryViewers: { alignSelf: "center", paddingHorizontal: 12, paddingVertical: 8 },
 }));

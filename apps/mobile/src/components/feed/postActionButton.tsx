@@ -1,5 +1,5 @@
 import { useEffect, useRef, type ReactElement } from "react";
-import { Animated, Pressable, StyleSheet, View } from "react-native";
+import { Animated, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
@@ -27,9 +27,10 @@ export interface PostActionButtonProps {
   readonly popKey?: number;
   readonly onPress?: () => void;
   readonly defaultInk?: string;
+  readonly containerStyle?: StyleProp<ViewStyle>;
 }
 
-export function PostActionButton({ label, tone, renderIcon, count, active = false, popOnActivate = false, popKey = 0, onPress, defaultInk }: PostActionButtonProps) {
+export function PostActionButton({ label, tone, renderIcon, count, active = false, popOnActivate = false, popKey = 0, onPress, defaultInk, containerStyle }: PostActionButtonProps) {
   const { colors } = useTheme();
   const tint = usePostActionTint(tone);
   const isReducedMotionPreferred = useReducedMotionPreference();
@@ -57,7 +58,7 @@ export function PostActionButton({ label, tone, renderIcon, count, active = fals
       accessibilityState={popOnActivate ? { selected: active } : undefined}
       disabled={!onPress}
       onPress={handlePress}
-      style={styles.button}
+      style={[styles.button, containerStyle]}
     >
       {({ pressed }) => {
         const ink = active || pressed ? tint : defaultInk ?? colors.textMuted;

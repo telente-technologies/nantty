@@ -10,6 +10,7 @@ import { renderIntoDeviceFrameOverlay } from "./renderIntoDeviceFrameOverlay";
 export interface FrameAwareModalProps extends Pick<ModalProps, "animationType" | "transparent" | "statusBarTranslucent" | "supportedOrientations"> {
   readonly visible: boolean;
   readonly onRequestClose: () => void;
+  readonly onDismiss?: () => void;
   readonly children: ReactNode;
 }
 
@@ -24,12 +25,12 @@ function CloseOnEscapeKey({ onRequestClose }: { onRequestClose: () => void }) {
   return null;
 }
 
-export function FrameAwareModal({ visible, onRequestClose, children, transparent, ...modalProps }: FrameAwareModalProps) {
+export function FrameAwareModal({ visible, onRequestClose, onDismiss, children, transparent, ...modalProps }: FrameAwareModalProps) {
   const overlayRootElement = useDeviceFrameOverlayRootElement();
   const { colors } = useTheme();
   if (Platform.OS !== "web" || !overlayRootElement) {
     return (
-      <Modal visible={visible} transparent={transparent} onRequestClose={onRequestClose} {...modalProps}>
+      <Modal visible={visible} transparent={transparent} onRequestClose={onRequestClose} onDismiss={onDismiss} {...modalProps}>
         <View style={styles.fill} onStartShouldSetResponder={dismissKeyboardOnEmptyTap}>
           {children}
         </View>

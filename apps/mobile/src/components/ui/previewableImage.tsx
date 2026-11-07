@@ -18,7 +18,7 @@ export function useImagePreview() {
   }, []);
 
   const imagePreviewElement = previewState ? (
-    <MediaLightbox images={previewState.images} initialIndex={previewState.initialIndex} onClose={() => setPreviewState(null)} />
+    <MediaLightbox images={previewState.images} initialIndex={previewState.initialIndex} visible onClose={() => setPreviewState(null)} />
   ) : null;
 
   return { openImagePreview, imagePreviewElement };

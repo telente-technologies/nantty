@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { ProductMasonry } from "@/components/home/productMasonry";
+import { SearchProductAd } from "@/components/search/searchProductAd";
 import { BrandRow } from "@/components/store/brandRow";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
@@ -70,7 +71,13 @@ function OrderRow({ item, onPress }: { readonly item: SearchOrderItem; readonly 
   );
 }
 
-export function SearchResultSections({ items, handlers }: { readonly items: readonly SearchItem[]; readonly handlers: SearchResultHandlers }) {
+export function SearchResultSections({ items, handlers, searchQuery, searchResultCount, searchScope }: {
+  readonly items: readonly SearchItem[];
+  readonly handlers: SearchResultHandlers;
+  readonly searchQuery?: string;
+  readonly searchResultCount?: number;
+  readonly searchScope?: import("@/types/search.type").SearchScopeKey;
+}) {
   const { colors } = useTheme();
   const people = pick(items, "user");
   const stores = pick(items, "store");
@@ -125,7 +132,8 @@ export function SearchResultSections({ items, handlers }: { readonly items: read
       {products.length > 0 ? (
         <View>
           <Text size={typeScale.sm} weight={500} lineHeight={16.9} color={colors.textMuted} style={styles.productsTitle}>Products</Text>
-          <ProductMasonry products={products} adPlacement="search" />
+          {searchQuery?.trim() && searchScope ? <SearchProductAd query={searchQuery.trim()} scope={searchScope} /> : null}
+          <ProductMasonry products={products} adPlacement="search" searchQuery={searchQuery} searchResultCount={searchResultCount} />
         </View>
       ) : null}
     </View>

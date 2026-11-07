@@ -27,11 +27,17 @@ import { EmptyState } from "@/components/ui/emptyState";
 import { ErrorState } from "@/components/ui/errorState";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { spacing } from "@/constants/spacing.constant";
+import { createFeedProductAdSessionId, productAdSponsoredPlacement, productAdsService, usableFeedProductAd } from "@/services/ads/productAds.service";
+import { useAuthStore } from "@/store/auth.store";
+import { useFeedViewabilityTracking } from "@/components/feed/feedVisibility.hook";
+import { FeedProductAdCard } from "@/components/ads/feedProductAdCard";
+import { insertFeedProductAd, shouldDecideFeedProductAd } from "@/components/ads/feedProductAdRows.util";
 
 type FeedMode = "for-you" | "following";
 export function FeedTab() {
   const styles = useStyles();
   const navigation = useNavigation();
+  const viewerId = useAuthStore((state) => state.status === "signedIn" ? state.user?.id ?? null : null);
   const [feedMode, setFeedMode] = useState<FeedMode>("for-you");
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [openPostProducts, setOpenPostProducts] = useState<{ readonly products: readonly ProductSummary[]; readonly attribution: SaleAttribution } | null>(null);
@@ -65,7 +71,32 @@ export function FeedTab() {
     return unique;
   }, [feed.data]);
   const modules = useFeedModules(posts);
-  const rows = modules.rows;
+  const organicPosts = posts.filter((post) => !post.sponsored);
+  const feedAlreadyHasAd = posts.some((post) => Boolean(post.sponsored));
+  const feedAdSessionKey = JSON.stringify([viewerId, feedMode, selectedTopicId, organicPosts[0]?.id ?? null]);
+  const feedProductAdSessionId = useMemo(
+    () => {
+      const scopeHash = [...feedAdSessionKey].reduce((hash, character) => (hash * 31 + character.charCodeAt(0)) >>> 0, 0).toString(36);
+      return `${createFeedProductAdSessionId()}_${scopeHash}`;
+    },
+    [feedAdSessionKey],
+  );
+  const feedProductDecision = useQuery({
+    queryKey: ["ads", "feed-product-slot", viewerId, feedMode, selectedTopicId, feedProductAdSessionId],
+    queryFn: () => productAdsService.decideFeedProductAd(organicPosts[7]!.id, organicPosts.slice(7, 9).map((post) => post.id), feedProductAdSessionId),
+    enabled: shouldDecideFeedProductAd(feedMode, Boolean(viewerId), feedAlreadyHasAd, organicPosts.length),
+    staleTime: Infinity,
+    retry: false,
+  });
+  const decidedFeedProductAd = feedMode === "for-you" && usableFeedProductAd(feedProductDecision.data?.ad, feedProductDecision.data?.receivedAt ?? 0)
+    ? feedProductDecision.data.ad
+    : null;
+  const feedProductSponsored = decidedFeedProductAd ? productAdSponsoredPlacement(decidedFeedProductAd) : null;
+  const rows = useMemo(
+    () => insertFeedProductAd(modules.rows, decidedFeedProductAd, feedProductSponsored),
+    [modules.rows, decidedFeedProductAd, feedProductSponsored],
+  );
+  const viewabilityPairs = useFeedViewabilityTracking("feed", rows);
   const selectTopic = (topicId: string | null) => {
     setFeedMode("for-you");
     setSelectedTopicId(topicId);
@@ -76,7 +107,7 @@ export function FeedTab() {
       <GuestFeedBanner />
       <FlatList
         data={rows}
-        keyExtractor={(row) => (row.type === "post" ? row.post.id : feedModuleRowKey(row.slot))}
+        keyExtractor={(row) => row.type === "product-ad" ? row.key : row.type === "post" ? row.post.id : feedModuleRowKey(row.slot)}
         ListHeaderComponent={
           <TopicFilterRow
             topics={topics.data ?? []}
@@ -95,8 +126,11 @@ export function FeedTab() {
         }
         stickyHeaderIndices={[0]}
         showsVerticalScrollIndicator={false}
+        viewabilityConfigCallbackPairs={viewabilityPairs}
         renderItem={({ item }) =>
-          item.type === "module" ? (
+          item.type === "product-ad" ? (
+            <FeedProductAdCard ad={item.ad} />
+          ) : item.type === "module" ? (
             <FeedModuleRow slot={item.slot} modules={modules} onPressRailMore={setRailOptionsClipIds} />
           ) : (
             <PostCard

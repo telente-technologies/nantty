@@ -70,6 +70,16 @@ describe("group invitation API contract", () => {
     expect(pending.membershipStatus).toBe("not_joined");
   });
 
+  it.each([24, 168, 720] as const)("sends the selected %i-hour group-link expiry to the API", async (expiresInHours) => {
+    mockedApi.post.mockResolvedValueOnce({ id: "link-1", conversationId: "group-4", token: "a".repeat(43), expiresAt: "2026-11-13T12:00:00.000Z" });
+    await groupsService.createGroupInvitationLink("group-4", expiresInHours);
+    expect(mockedApi.post).toHaveBeenCalledWith(
+      "/api/v1/conversations/group-4/invitation-links",
+      { expiresInHours },
+      { idempotencyKey: "group-invitation-key" },
+    );
+  });
+
   it("lists safe invitation-link metadata without requesting or returning the raw token", async () => {
     const page = { data: [{ id: "link-1", conversationId: "group-4", createdAt: "2026-11-06T12:00:00Z", expiresAt: "2026-11-13T12:00:00Z", revokedAt: null }], nextCursor: "link-cursor" };
     mockedApi.getPage.mockResolvedValueOnce(page);

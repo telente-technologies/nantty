@@ -130,10 +130,12 @@ export const isMockCreatorProgramMember = (user: UserSummary) => user.isCreator 
 
 export const willSimulatedStreamerDeclineWinnerTakesAll = (userId: string) => Math.abs(hashTextToSeed(userId)) % 5 === 4;
 
-export const buildStreamer = (user: UserSummary, role: "host" | "guest", slotId: string): LiveStageStreamer => ({
+export const buildStreamer = (user: UserSummary, role: "host" | "guest", slotId: string, stageRole: "speaker" | "cohost" = "speaker", title?: string): LiveStageStreamer => ({
   slotId,
   user,
   role,
+  stageRole,
+  ...(title ? { title } : {}),
   state: "onStage",
   audioMuted: false,
   videoMuted: false,

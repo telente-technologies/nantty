@@ -4,6 +4,7 @@ export const MAXIMUM_STREAMERS_ON_STAGE = 10;
 
 export type LiveStagePhase = "idle" | "inviting" | "onStage" | "battlePending" | "battleCountdown" | "battling" | "settling" | "result";
 export type LiveStageRole = "host" | "guest" | "viewer";
+export type LiveStageInviteRole = "speaker" | "cohost";
 export type LiveStageLayout = "grid" | "spotlight" | "battle";
 export type GuestSlotState = "invited" | "joining" | "onStage" | "reconnecting" | "left" | "removed" | "declined" | "expired" | "cancelled" | "failed";
 export type LiveBattleState = "pending" | "countdown" | "active" | "ended" | "settling" | "settled" | "cancelled";
@@ -14,6 +15,8 @@ export interface LiveStageStreamer {
   readonly slotId: ID;
   readonly user: UserSummary;
   readonly role: "host" | "guest";
+  readonly stageRole?: LiveStageInviteRole;
+  readonly title?: string;
   readonly state: GuestSlotState;
   readonly audioMuted: boolean;
   readonly videoMuted: boolean;
@@ -26,6 +29,8 @@ export interface GuestSlot {
   readonly id: ID;
   readonly liveId: ID;
   readonly user: UserSummary;
+  readonly stageRole?: LiveStageInviteRole;
+  readonly title?: string;
   readonly state: GuestSlotState;
   readonly invitedAt: string;
   readonly expiresAt: string;

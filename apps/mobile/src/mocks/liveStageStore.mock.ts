@@ -68,10 +68,10 @@ export const isStreamerOnMockStage = (stage: MockStage, userId: string) => stage
 export const countReservedStageSeats = (stage: MockStage) =>
   stage.streamers.length + stage.invitations.filter((slot) => slot.state === "invited" && !slot.isForMe).length;
 
-export const addGuestToMockStageOrThrow = (stage: MockStage, user: UserSummary, slotId = nextSlotId(stage)) => {
+export const addGuestToMockStageOrThrow = (stage: MockStage, user: UserSummary, slotId = nextSlotId(stage), stageRole: "speaker" | "cohost" = "speaker", title?: string) => {
   if (isStreamerOnMockStage(stage, user.id)) return;
   if (stage.streamers.length >= MAXIMUM_STREAMERS_ON_STAGE) throw new ApiError(409, "The stage is full. Up to 10 people can be on stage.", "STAGE_FULL");
-  stage.streamers.push(buildStreamer(user, "guest", slotId));
+  stage.streamers.push(buildStreamer(user, "guest", slotId, stageRole, title));
 };
 
 export const removeStreamerFromMockStage = (stage: MockStage, userId: string, now: number, isRemovedByHost: boolean) => {
@@ -148,7 +148,7 @@ const resolveDueInvitationsAndRequests = (stage: MockStage, now: number) => {
   }
 };
 
-export const buildMockGuestSlot = (stage: MockStage, user: UserSummary, now: number, simulation: Pick<MockGuestSlot, "resolvesAt" | "willAccept" | "isForMe">): MockGuestSlot => ({
+export const buildMockGuestSlot = (stage: MockStage, user: UserSummary, now: number, simulation: Pick<MockGuestSlot, "resolvesAt" | "willAccept" | "isForMe">, designation: Pick<MockGuestSlot, "stageRole" | "title"> = {}): MockGuestSlot => ({
   id: nextSlotId(stage),
   liveId: stage.liveId,
   user,
@@ -158,6 +158,8 @@ export const buildMockGuestSlot = (stage: MockStage, user: UserSummary, now: num
   audioMutedByHost: false,
   videoMutedByHost: false,
   position: stage.streamers.length,
+  stageRole: designation.stageRole ?? "speaker",
+  ...(designation.title?.trim() ? { title: designation.title.trim() } : {}),
   ...simulation,
 });
 

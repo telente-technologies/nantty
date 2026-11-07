@@ -120,7 +120,7 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
         ) : (
           <>
             <PostSurfaceProvider surface={debouncedQuery.trim().startsWith("#") ? "hashtag" : "search"}>
-              <SearchResultSections items={items} handlers={handlers} />
+              <SearchResultSections items={items} handlers={handlers} searchQuery={debouncedQuery} searchResultCount={items.length} searchScope={context.scope} />
             </PostSurfaceProvider>
             {results.hasNextPage ? (
               <View style={styles.more}>

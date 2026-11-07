@@ -20,6 +20,7 @@ import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/m
 import type { LocalMediaFile } from "@/services/media/mediaPreparation.service";
 import type { UserSummary } from "@/types";
 import { describeActionFailure } from "@/errors/errorExperience/describeError";
+import { ApiError } from "@/errors/api.error";
 
 const MAXIMUM_GROUP_NAME_LENGTH = 60;
 
@@ -32,6 +33,23 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
   const [description, setDescription] = useState("");
   const [selectedPeople, setSelectedPeople] = useState<readonly UserSummary[]>([]);
   const [photo, setPhoto] = useState<{ previewUri: string; uploadJobId: string | null; file: LocalMediaFile } | null>(null);
+  const [invitationFallbackRequired, setInvitationFallbackRequired] = useState(false);
+  const [fallbackGroup, setFallbackGroup] = useState<{ id: string; title?: string | null } | null>(null);
+  const [fallbackFailedPeople, setFallbackFailedPeople] = useState<readonly UserSummary[]>([]);
+  const [fallbackSentCount, setFallbackSentCount] = useState(0);
+
+  const openGroup = (group: { id: string; title?: string | null }) => {
+    queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    navigation.replace("Chat", { conversationId: group.id, name: group.title ?? name.trim() });
+  };
+
+  const sendInvitations = async (conversationId: string, people: readonly UserSummary[]) => {
+    const outcomes = await Promise.allSettled(people.map((person) => groupsService.createGroupInvitation(conversationId, person.id)));
+    return {
+      sentCount: outcomes.filter((outcome) => outcome.status === "fulfilled").length,
+      failedPeople: people.filter((_person, index) => outcomes[index]?.status === "rejected"),
+    };
+  };
 
   const pickGroupPhotoAndStartUploading = async () => {
     const [pickedPhoto] = await pickPhotosAndVideosFromLibrary(1);
@@ -51,9 +69,35 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
       const photoMediaId = photo?.uploadJobId ? await waitForUploadedMediaId(photo.uploadJobId) : undefined;
       return channelsService.createBroadcastChannel({ name: name.trim(), description: description.trim() || undefined, photoMediaId });
     },
-    onSuccess: (conversation) => {
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
-      navigation.replace("Chat", { conversationId: conversation.id, name: conversation.title ?? name.trim() });
+    onSuccess: openGroup,
+    onError: (error) => {
+      if (error instanceof ApiError && error.code === "GROUP_INVITATION_REQUIRED") setInvitationFallbackRequired(true);
+    },
+  });
+  const createGroupAndInvite = useMutation({
+    mutationFn: async () => {
+      // Create an owner-only group, then use the consent-based invitation endpoint.
+      // The server remains authoritative; this fallback is offered only after its policy conflict.
+      const conversation = await groupsService.createGroupConversation({ name: name.trim(), memberIds: [], photo: photo?.file ?? null });
+      const invitations = await sendInvitations(conversation.id, selectedPeople);
+      return { conversation, ...invitations };
+    },
+    onSuccess: ({ conversation, sentCount, failedPeople }) => {
+      setFallbackSentCount((count) => count + sentCount);
+      setFallbackFailedPeople(failedPeople);
+      if (failedPeople.length === 0) openGroup(conversation);
+      else setFallbackGroup({ id: conversation.id, title: conversation.title });
+    },
+  });
+  const retryInvitations = useMutation({
+    mutationFn: async () => {
+      if (!fallbackGroup) return { sentCount: 0, failedPeople: fallbackFailedPeople };
+      return sendInvitations(fallbackGroup.id, fallbackFailedPeople);
+    },
+    onSuccess: ({ sentCount, failedPeople }) => {
+      setFallbackSentCount((count) => count + sentCount);
+      setFallbackFailedPeople(failedPeople);
+      if (failedPeople.length === 0 && fallbackGroup) openGroup(fallbackGroup);
     },
   });
 
@@ -108,17 +152,34 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
         )}
       </View>
       <KeyboardStickyFooter style={styles.footer} backgroundColor={colors.surface}>
-        {createConversation.error ? (
+        {invitationFallbackRequired ? (
+          <Text size={13} lineHeight={18} color={colors.textMuted}>
+            Someone you selected only accepts group invitations. Create the group first and send each selected person an invitation; they must accept, and secure key handoff is still required before they can join or read group history.
+          </Text>
+        ) : createConversation.error ? (
           <Text size={13} lineHeight={16.9} color={colors.error}>
             {describeActionFailure(createConversation.error)}
           </Text>
         ) : null}
+        {fallbackGroup && fallbackFailedPeople.length > 0 ? (
+          <>
+            <Text size={13} lineHeight={18} color={colors.error} accessibilityRole="alert">
+              Group created; {fallbackSentCount} invitation{fallbackSentCount === 1 ? " was" : "s were"} sent, but {fallbackFailedPeople.length} could not be sent. Retry the remaining invitations or open the group to manage them later.
+            </Text>
+            <Button title="Retry failed invitations" loading={retryInvitations.isPending} disabled={retryInvitations.isPending} onPress={() => retryInvitations.mutate()} />
+            <Button title="Open group" variant="subtle" onPress={() => openGroup(fallbackGroup)} />
+          </>
+        ) : null}
+        {!fallbackGroup ? (
         <Button
-          title={isChannel ? "Create channel" : `Create group${selectedPeople.length > 0 ? ` (${selectedPeople.length + 1})` : ""}`}
-          disabled={!canCreate}
-          loading={createConversation.isPending}
-          onPress={() => createConversation.mutate()}
+          title={isChannel ? "Create channel" : invitationFallbackRequired ? "Create group and send invitations" : `Create group${selectedPeople.length > 0 ? ` (${selectedPeople.length + 1})` : ""}`}
+          disabled={!canCreate || (invitationFallbackRequired && selectedPeople.length === 0)}
+          loading={createConversation.isPending || createGroupAndInvite.isPending}
+          onPress={() => invitationFallbackRequired ? createGroupAndInvite.mutate() : createConversation.mutate()}
         />
+        ) : null}
+        {createGroupAndInvite.error ? <Text size={13} lineHeight={17} color={colors.error} accessibilityRole="alert">{describeActionFailure(createGroupAndInvite.error, "Couldn't create the group. Try again.")}</Text> : null}
+        {retryInvitations.error ? <Text size={13} lineHeight={17} color={colors.error} accessibilityRole="alert">{describeActionFailure(retryInvitations.error, "Couldn't retry these invitations. Try again.")}</Text> : null}
       </KeyboardStickyFooter>
     </Screen>
   );

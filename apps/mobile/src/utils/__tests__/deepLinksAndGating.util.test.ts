@@ -27,11 +27,22 @@ describe("internal link parsing", () => {
 
   it("opens a shared order card on the order screen", () => {
     expect(buildInternalRoute({ kind: "order", id: "ord_1" })).toEqual({ name: "OrderDetail", params: { orderId: "ord_1" } });
+    expect(readInternalReferenceFromUrl("https://web.nantty.com/orders/ord_1")).toEqual({ kind: "order", id: "ord_1" });
+    expect(readInternalReferenceFromUrl("/order/ord_2")).toEqual({ kind: "order", id: "ord_2" });
   });
 
   it("reads products from /p/<slug>-<id> and ignores external hosts", () => {
     expect(readInternalReferenceFromUrl("https://web.nantty.com/p/ankara-wrap-midi-dress-pr_f1")).toEqual({ kind: "product", id: "pr_f1" });
     expect(readInternalReferenceFromUrl("https://evil.example/ada")).toBeNull();
+  });
+
+  it("opens a shared reel in the Clips tab at the referenced clip", () => {
+    const reference = readInternalReferenceFromUrl("https://web.nantty.com/clips/clip_123");
+    expect(reference).toEqual({ kind: "clip", id: "clip_123" });
+    expect(buildInternalRoute(reference!)).toEqual({
+      name: "Tabs",
+      params: { screen: "Clips", params: { startId: "clip_123" } },
+    });
   });
 
   it("preserves the exact post comment or clip comment target from internal notification URLs", () => {

@@ -12,7 +12,12 @@ import type { AdPlacement, ProductSummary } from "@/types";
 const TALL_IMAGE = 227;
 const SHORT_IMAGE = 183;
 
-export function ProductMasonry({ products, adPlacement = "mart" }: { products: readonly ProductSummary[]; adPlacement?: AdPlacement }) {
+export function ProductMasonry({ products, adPlacement = "mart", searchQuery, searchResultCount }: {
+  products: readonly ProductSummary[];
+  adPlacement?: AdPlacement;
+  searchQuery?: string;
+  searchResultCount?: number;
+}) {
   const navigation = useNavigation();
   const { addProductToCart } = useCartActions();
   const [pickerProductId, setPickerProductId] = useState<string | null>(null);
@@ -46,7 +51,10 @@ export function ProductMasonry({ products, adPlacement = "mart" }: { products: r
               width="100%"
               imageHeight={(rowIndex + columnIndex) % 2 === 0 ? TALL_IMAGE : SHORT_IMAGE}
               onPress={() => {
-                void trackProductInteraction("product.clicked", { productId: product.id });
+                void trackProductInteraction("product.clicked", {
+                  productId: product.id,
+                  ...(adPlacement === "search" && searchQuery ? { surface: "search", query: searchQuery, resultCount: searchResultCount ?? 0 } : {}),
+                });
                 navigation.navigate("ProductDetail", { productId: product.id });
               }}
               onAddToCart={() => quickAdd(product)}

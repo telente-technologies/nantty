@@ -1,5 +1,5 @@
 import type { UserSummary } from "@/types";
-import type { CreateLiveBattleInput, LiveStage, MuteStreamerInput, SendLiveBattleCoinsInput } from "@/types/liveStage.type";
+import type { CreateLiveBattleInput, LiveStage, LiveStageInviteRole, MuteStreamerInput, SendLiveBattleCoinsInput } from "@/types/liveStage.type";
 
 import { api, generateIdempotencyKey } from "../core/apiClient.service";
 
@@ -9,7 +9,8 @@ const battlePath = (battleId: string) => `/api/v1/battles/${battleId}`;
 export const liveGuestsService = {
   fetchLiveStage: (liveId: string) => api.get<LiveStage>(`${livePath(liveId)}/stage`),
   searchLiveViewersToInvite: (liveId: string, query: string) => api.getList<UserSummary>(`${livePath(liveId)}/viewers`, { q: query }),
-  inviteViewerToStage: (liveId: string, userId: string) => api.post<LiveStage>(`${livePath(liveId)}/guests/invitations`, { userId }),
+  inviteViewerToStage: (liveId: string, userId: string, role: LiveStageInviteRole = "speaker", title?: string) =>
+    api.post<LiveStage>(`${livePath(liveId)}/guests/invitations`, { userId, role, ...(title?.trim() ? { title: title.trim() } : {}) }),
   respondToStageInvitation: (liveId: string, slotId: string, response: "accept" | "decline") =>
     api.post<LiveStage>(`${livePath(liveId)}/guests/invitations/${slotId}/${response}`),
   requestToJoinStage: (liveId: string) => api.post<LiveStage>(`${livePath(liveId)}/guests/requests`),

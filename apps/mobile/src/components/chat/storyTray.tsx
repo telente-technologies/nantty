@@ -5,10 +5,11 @@ import { LiveAvatarRing } from "@/components/live/liveAvatarRing";
 import { Avatar } from "@/components/ui/avatar";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
-import type { StoryTrayItem } from "@/types";
+import type { StoryTrayItem, SuggestedLive, UserSummary } from "@/types";
 
 export interface StoryTrayProps {
   readonly items: readonly StoryTrayItem[];
+  readonly liveItems?: readonly SuggestedLive[];
   readonly myAvatarUrl: string | null;
   readonly onPressAddStory: () => void;
   readonly onPressStory: (userId: string) => void;
@@ -18,9 +19,19 @@ export interface StoryTrayProps {
 const sortLiveCreatorsFirst = (items: readonly StoryTrayItem[]) =>
   [...items].sort((left, right) => Number(Boolean(right.user.live)) - Number(Boolean(left.user.live)));
 
-export function StoryTray({ items, myAvatarUrl, onPressAddStory, onPressStory, onPressLive }: StoryTrayProps) {
+export function StoryTray({ items, liveItems = [], myAvatarUrl, onPressAddStory, onPressStory, onPressLive }: StoryTrayProps) {
   const { colors } = useTheme();
   const styles = useStyles();
+  const activeLives = new Map<string, { readonly id: string; readonly host: UserSummary }>(liveItems.map((live) => [live.host.id, { id: live.id, host: live.host }]));
+  for (const item of items) {
+    if (item.user.live && !activeLives.has(item.user.id)) {
+      activeLives.set(item.user.id, {
+        id: item.user.live.liveId,
+        host: item.user,
+      });
+    }
+  }
+  const liveHostIds = new Set(activeLives.keys());
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
       <Pressable accessibilityRole="button" accessibilityLabel="Add story" onPress={onPressAddStory} style={styles.item}>
@@ -34,25 +45,25 @@ export function StoryTray({ items, myAvatarUrl, onPressAddStory, onPressStory, o
           Add Story
         </Text>
       </Pressable>
-      {sortLiveCreatorsFirst(items).map((item) =>
-        item.user.live ? (
-          <Pressable
-            key={item.user.id}
-            accessibilityRole="button"
-            accessibilityLabel={`${item.user.name} is live, open livestream`}
-            onPress={() => onPressLive(item.user.live!.liveId)}
-            style={styles.item}
-          >
-            <View style={styles.liveBubble}>
-              <LiveAvatarRing size={50}>
-                <Avatar uri={item.user.avatarUrl} size={50} />
-              </LiveAvatarRing>
-            </View>
-            <Text size={13} weight={500} lineHeight={16.9} align="center" numberOfLines={1}>
-              {item.user.name}
-            </Text>
-          </Pressable>
-        ) : (
+      {[...activeLives.values()].map((live) => (
+        <Pressable
+          key={`live-${live.id}`}
+          accessibilityRole="button"
+          accessibilityLabel={`${live.host.name} is live, open livestream`}
+          onPress={() => onPressLive(live.id)}
+          style={styles.item}
+        >
+          <View style={styles.liveBubble}>
+            <LiveAvatarRing size={50}>
+              <Avatar uri={live.host.avatarUrl} size={50} />
+            </LiveAvatarRing>
+          </View>
+          <Text size={13} weight={500} lineHeight={16.9} align="center" numberOfLines={1}>
+            {live.host.name}
+          </Text>
+        </Pressable>
+      ))}
+      {sortLiveCreatorsFirst(items.filter((item) => !liveHostIds.has(item.user.id))).map((item) => (
           <Pressable
             key={item.user.id}
             accessibilityRole="button"
@@ -70,8 +81,7 @@ export function StoryTray({ items, myAvatarUrl, onPressAddStory, onPressStory, o
               {item.user.name}
             </Text>
           </Pressable>
-        ),
-      )}
+      ))}
     </ScrollView>
   );
 }

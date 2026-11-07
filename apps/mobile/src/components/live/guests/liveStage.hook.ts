@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/services/core/apiClient.service";
 import { liveGuestsService } from "@/services/live/liveGuests.service";
 import { useAuthStore } from "@/store/auth.store";
-import type { CreateLiveBattleInput, LiveStage } from "@/types/liveStage.type";
+import type { CreateLiveBattleInput, LiveStage, LiveStageInviteRole } from "@/types/liveStage.type";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 
 const STAGE_POLL_INTERVAL_MS = 1_000;
@@ -40,7 +40,7 @@ export function useLiveStageWithActions(liveId: string, isWatching: boolean) {
     isActionPending: stageAction.isPending,
     actionErrorMessage: stageAction.isError ? describeStageActionError(stageAction.error) : null,
     clearActionError: () => stageAction.reset(),
-    inviteViewerToStage: (userId: string) => run(() => liveGuestsService.inviteViewerToStage(liveId, userId)),
+    inviteViewerToStage: (userId: string, role: LiveStageInviteRole = "speaker", title?: string) => run(() => liveGuestsService.inviteViewerToStage(liveId, userId, role, title)),
     acceptStageInvitation: (slotId: string) => run(() => liveGuestsService.respondToStageInvitation(liveId, slotId, "accept")),
     declineStageInvitation: (slotId: string) => run(() => liveGuestsService.respondToStageInvitation(liveId, slotId, "decline")),
     requestToJoinStage: () => requireAuthThen(() => run(() => liveGuestsService.requestToJoinStage(liveId)), undefined, "join the live as a guest"),

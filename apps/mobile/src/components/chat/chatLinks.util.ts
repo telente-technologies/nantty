@@ -3,7 +3,7 @@ import type { SharedContentKind, SharedContentReference } from "@/types";
 
 const INTERNAL_HOSTS = ["nantty.app", "www.nantty.app", "nantty.com", "www.nantty.com", "web.nantty.com"];
 const URL_PATTERN = /https?:\/\/[^\s<>"']+/gi;
-const INTERNAL_PATH_KINDS: Record<string, SharedContentKind> = { product: "product", products: "product", post: "post", posts: "post", p: "product", clip: "clip", clips: "clip", u: "profile", live: "live", lives: "live", spaces: "space", store: "store", stores: "store" };
+const INTERNAL_PATH_KINDS: Record<string, SharedContentKind> = { product: "product", products: "product", post: "post", posts: "post", p: "product", clip: "clip", clips: "clip", u: "profile", live: "live", lives: "live", spaces: "space", store: "store", stores: "store", order: "order", orders: "order" };
 const KNOWN_SHORTENER_DOMAINS = ["bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "is.gd", "cutt.ly", "rb.gy", "shorturl.at"];
 const SUSPICIOUS_TOP_LEVEL_DOMAINS = [".zip", ".mov", ".top", ".click", ".xyz", ".gq", ".tk"];
 
@@ -93,6 +93,8 @@ export const buildInternalRoute = (reference: SharedContentReference, profileUse
   switch (reference.kind) {
     case "product":
       return { name: "ProductDetail", params: { productId: reference.id } } as const;
+    case "clip":
+      return { name: "Tabs", params: { screen: "Clips", params: { startId: reference.id } } } as const;
     case "store":
       return { name: "Store", params: { storeId: reference.id } } as const;
     case "live":

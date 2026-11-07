@@ -4,6 +4,8 @@ import { openDatabaseSync, type SQLiteDatabase } from "expo-sqlite";
 
 import { secureStorage } from "@/utils/secureStorage.util";
 
+type KeyValueOperation = Parameters<NonNullable<KeyValueStore["batch"]>>[0][number];
+
 const secureKeyPrefix = "nantty.chatCrypto.";
 const secureIndexKey = `${secureKeyPrefix}index`;
 const storageKeyName = `${secureKeyPrefix}storageKey`;
@@ -60,6 +62,16 @@ class SqliteKeyValueStore implements KeyValueStore {
     openRecordsDatabase().runSync("DELETE FROM records WHERE key = ?", [key]);
   }
 
+  public async batch(operations: readonly KeyValueOperation[]) {
+    const database = openRecordsDatabase();
+    database.withTransactionSync(() => {
+      for (const operation of operations) {
+        if (operation.type === "set") database.runSync("INSERT OR REPLACE INTO records (key, value) VALUES (?, ?)", [operation.key, operation.value]);
+        else database.runSync("DELETE FROM records WHERE key = ?", [operation.key]);
+      }
+    });
+  }
+
   public async keys(prefix: string) {
     return openRecordsDatabase().getAllSync<{ key: string }>("SELECT key FROM records WHERE substr(key, 1, ?) = ?", [prefix.length, prefix]).map((row) => row.key);
   }
@@ -90,6 +102,10 @@ class LazySealedStore implements KeyValueStore {
 
   public async keys(prefix: string) {
     return (await this.ready).keys(prefix);
+  }
+
+  public async batch(operations: readonly KeyValueOperation[]) {
+    await (await this.ready).batch(operations);
   }
 }
 

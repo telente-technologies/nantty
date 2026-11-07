@@ -7,6 +7,8 @@ import { api } from "../core/apiClient.service";
 
 export const productsService = {
   fetchMartHome: () => api.get<MartHome>("/api/v1/mart/home"),
+  fetchProductsYouMightLike: () =>
+    api.get<{ readonly products: readonly ProductSummary[]; readonly source: "personalized" | "popular" }>("/api/v1/mart/recommendations/for-you"),
   fetchMartHighlights: (cursor: string | null, limit = 6) =>
     api.getPage<MartHighlight>("/api/v1/mart/highlights", { cursor: cursor ?? undefined, limit }),
   fetchProductsPage: (categoryId: string | null, cursor: string | null) =>

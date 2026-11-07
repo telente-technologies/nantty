@@ -35,6 +35,7 @@ import { spacing } from "@/constants/spacing.constant";
 import { describeActionFailure } from "@/errors/errorExperience/describeError";
 import { webAppLinks } from "@/config/webAppLinks.config";
 import type { GroupInvitationLink, GroupInvitationLinkRecord } from "@/services/social/groups.service";
+import { DEFAULT_INVITATION_LINK_EXPIRY_HOURS, invitationLinkExpiryLabel, invitationLinkExpiryOptions, invitationLinkStatus, type InvitationLinkExpiryHours } from "@/utils/invitationLink.util";
 
 export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"ConversationInfo">) {
   const { colors } = useTheme();
@@ -48,6 +49,15 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
   const [invitationError, setInvitationError] = useState<string | null>(null);
   const [createdInviteLink, setCreatedInviteLink] = useState<GroupInvitationLink | null>(null);
   const [createdChannelInviteLink, setCreatedChannelInviteLink] = useState<ChannelInvitationLink | null>(null);
+  const [inviteLinkExpiryHours, setInviteLinkExpiryHours] = useState<InvitationLinkExpiryHours>(DEFAULT_INVITATION_LINK_EXPIRY_HOURS);
+  const chooseInviteLinkExpiry = () => showAlertWithButtons(
+    "Invitation link expiry",
+    "Choose how long the link can be used to request an invitation.",
+    [
+      ...invitationLinkExpiryOptions.map((option) => ({ text: option.label, onPress: () => setInviteLinkExpiryHours(option.hours) })),
+      { text: "Cancel", style: "cancel" as const },
+    ],
+  );
 
   const conversation = useQuery({ queryKey: ["conversation", conversationId], queryFn: () => messagesService.fetchConversationById(conversationId) });
   const display = conversation.data ? describeConversationForDisplay(conversation.data) : null;
@@ -132,7 +142,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
     },
   });
   const createInviteLink = useMutation({
-    mutationFn: () => groupsService.createGroupInvitationLink(conversationId),
+    mutationFn: () => groupsService.createGroupInvitationLink(conversationId, inviteLinkExpiryHours),
     onSuccess: async (link) => {
       setCreatedInviteLink(link);
       await queryClient.invalidateQueries({ queryKey: ["group-invitation-links", conversationId] });
@@ -154,7 +164,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
     onError: (error: Error) => setInvitationError(error.message || "Couldn't revoke the group invitation link."),
   });
   const createChannelInviteLink = useMutation({
-    mutationFn: () => channelsService.createInvitationLink(conversationId),
+    mutationFn: () => channelsService.createInvitationLink(conversationId, inviteLinkExpiryHours),
     onSuccess: async (link) => {
       setCreatedChannelInviteLink(link);
       try {
@@ -304,6 +314,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
           <View style={styles.section}>
             <Text size={typeScale.md} weight={600} lineHeight={18}>Channel invitation links</Text>
             <Text size={12} lineHeight={17} color={colors.textMuted}>People who open a link must request an invitation and explicitly accept it before they subscribe. Existing one-tap channel subscribe remains available.</Text>
+            <Button title={`Link expiry · ${invitationLinkExpiryLabel(inviteLinkExpiryHours)}`} variant="subtle" onPress={chooseInviteLinkExpiry} />
             <Button title="Create and share invite link" variant="outline" loading={createChannelInviteLink.isPending} disabled={createChannelInviteLink.isPending || revokeChannelInviteLink.isPending} onPress={() => createChannelInviteLink.mutate()} />
             {createdChannelInviteLink ? <>
               <Button title="Share link again" variant="subtle" disabled={revokeChannelInviteLink.isPending} onPress={() => { void shareChannelInviteLink(createdChannelInviteLink).catch(() => setInvitationError("The share sheet could not be opened. Try again.")); }} />
@@ -347,6 +358,7 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
                 <Text size={12} lineHeight={17} color={colors.textMuted}>
                   Or create a shareable invitation link. Anyone with it must request an invite and explicitly accept; secure key setup remains required before joining.
                 </Text>
+                <Button title={`Link expiry · ${invitationLinkExpiryLabel(inviteLinkExpiryHours)}`} variant="subtle" onPress={chooseInviteLinkExpiry} />
                 <Button title={createInviteLink.isPending ? "Creating link…" : "Create and share link"} variant="outline" loading={createInviteLink.isPending} disabled={createInviteLink.isPending || revokeInviteLink.isPending} onPress={() => createInviteLink.mutate()} />
                 {createdInviteLink ? (
                   <>
@@ -429,16 +441,17 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
 
 function InvitationLinkRow({ link, busy, onRevoke }: { readonly link: Pick<GroupInvitationLinkRecord, "id" | "expiresAt" | "revokedAt">; readonly busy: boolean; readonly onRevoke: () => void }) {
   const { colors } = useTheme();
-  const status = link.revokedAt ? "Revoked ·" : "Invitation link · expires";
+  const status = invitationLinkStatus(link.expiresAt, link.revokedAt);
+  const statusLabel = { active: "Active link", expired: "Expired link", revoked: "Revoked link", unknown: "Expiry unavailable" }[status];
   return (
     <View style={[linkStyles.row, { backgroundColor: colors.background, borderColor: colors.divider }]}>
       <View style={linkStyles.meta}>
-        <Text size={13} weight={600}>{status}</Text>
+        <Text size={13} weight={600}>{statusLabel}</Text>
         <Text size={11} lineHeight={15} color={colors.textMuted}>
-          {status} {new Date(link.expiresAt).toLocaleDateString()}
+          Expires {Number.isFinite(Date.parse(link.expiresAt)) ? new Date(link.expiresAt).toLocaleString() : "date unavailable"}
         </Text>
       </View>
-      {!link.revokedAt ? <Button title={busy ? "Revoking…" : "Revoke"} variant="subtle" height={36} loading={busy} disabled={busy} onPress={onRevoke} /> : null}
+      {status !== "revoked" ? <Button title={busy ? "Revoking…" : "Revoke"} variant="subtle" height={36} loading={busy} disabled={busy} onPress={onRevoke} /> : null}
     </View>
   );
 }

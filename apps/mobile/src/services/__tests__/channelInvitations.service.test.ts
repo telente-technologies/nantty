@@ -18,6 +18,16 @@ describe("channel invitation API contract", () => {
     expect(mockedApi.post).toHaveBeenCalledWith("/api/v1/channels/channel%2F1/invitation-links", { expiresInHours: 24 }, { idempotencyKey: "channel-invitation-key" });
   });
 
+  it.each([24, 168, 720] as const)("sends the selected %i-hour channel-link expiry to the API", async (expiresInHours) => {
+    mockedApi.post.mockResolvedValueOnce({ id: "link-1", channelId: "channel-1", token: "opaque-token", expiresAt: "2026-11-13T12:00:00Z" });
+    await channelsService.createInvitationLink("channel-1", expiresInHours);
+    expect(mockedApi.post).toHaveBeenCalledWith(
+      "/api/v1/channels/channel-1/invitation-links",
+      { expiresInHours },
+      { idempotencyKey: "channel-invitation-key" },
+    );
+  });
+
   it("previews and claims an encoded opaque token; claim is only a pending invitation", async () => {
     const pending = { id: "inv-1", channelId: "channel-1", status: "pending" as const };
     mockedApi.get.mockResolvedValueOnce({ channel: { title: "Updates", subscriberCount: 5 }, expiresAt: "2026-11-13T12:00:00Z" });

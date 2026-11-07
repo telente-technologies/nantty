@@ -9,7 +9,7 @@ import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
 import { liveGuestsService } from "@/services/live/liveGuests.service";
-import { MAXIMUM_STREAMERS_ON_STAGE } from "@/types/liveStage.type";
+import { MAXIMUM_STREAMERS_ON_STAGE, type LiveStageInviteRole } from "@/types/liveStage.type";
 
 import { LiveSheetActionButton as SmallActionButton, LiveSheetPersonRow as PersonRow, LiveSheetSectionTitle as SectionTitle } from "../liveSheetParts";
 import type { LiveStageController } from "./liveStage.hook";
@@ -17,6 +17,8 @@ import type { LiveStageController } from "./liveStage.hook";
 export function LiveGuestsSheet({ liveId, visible, controller, onClose }: { liveId: string; visible: boolean; controller: LiveStageController; onClose: () => void }) {
   const { colors } = useTheme();
   const [searchText, setSearchText] = useState("");
+  const [inviteRole, setInviteRole] = useState<LiveStageInviteRole>("speaker");
+  const [inviteTitle, setInviteTitle] = useState("");
   const stage = controller.stage;
   const viewers = useQuery({
     queryKey: ["live-stage-viewers", liveId, searchText.trim()],
@@ -69,6 +71,17 @@ export function LiveGuestsSheet({ liveId, visible, controller, onClose }: { live
         ))}
         <SectionTitle icon={<Users24Icon size={20} color={colors.textMuted} />}>Invite viewers</SectionTitle>
         <TextField placeholder="Search viewers" value={searchText} onChangeText={setSearchText} autoCapitalize="none" accessibilityLabel="Search viewers" />
+        <View style={styles.inviteRoles} accessibilityRole="radiogroup" accessibilityLabel="Stage invitation role">
+          <SmallActionButton label="Speaker" tone={inviteRole === "speaker" ? "primary" : "neutral"} onPress={() => setInviteRole("speaker")} />
+          <SmallActionButton label="Co-host" tone={inviteRole === "cohost" ? "primary" : "neutral"} onPress={() => setInviteRole("cohost")} />
+        </View>
+        <TextField
+          placeholder="Optional title"
+          value={inviteTitle}
+          onChangeText={setInviteTitle}
+          maxLength={32}
+          accessibilityLabel="Optional stage title"
+        />
         {isStageFull ? (
           <Text size={12} lineHeight={16} color={colors.textMuted}>
             The stage is full. Remove a guest to invite someone else.
@@ -86,7 +99,7 @@ export function LiveGuestsSheet({ liveId, visible, controller, onClose }: { live
                 label={inviteStatus === "invited" ? "Invited" : "Invite"}
                 tone="primary"
                 disabled={inviteStatus === "invited" || isStageFull}
-                onPress={() => controller.inviteViewerToStage(viewer.id)}
+                onPress={() => controller.inviteViewerToStage(viewer.id, inviteRole, inviteTitle)}
               />
             </PersonRow>
           );
@@ -98,4 +111,5 @@ export function LiveGuestsSheet({ liveId, visible, controller, onClose }: { live
 
 const styles = StyleSheet.create({
   body: { gap: 10 },
+  inviteRoles: { flexDirection: "row", gap: 8 },
 });

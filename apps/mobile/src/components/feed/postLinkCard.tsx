@@ -3,17 +3,18 @@ import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { buildInternalRoute, findFirstExternalUrl, findFirstInternalReference, readFullDomain } from "@/components/chat/chatLinks.util";
+import { buildInternalRoute, findFirstInternalReference, readFullDomain } from "@/components/chat/chatLinks.util";
 import { SharedContentCardView } from "@/components/chatSafety/sharedContentCardView";
 import { confirmRiskyLink, inAppBrowserColorsFromTheme, openInAppBrowser } from "@/components/links/openLink.util";
 import { Text } from "@/components/ui/text";
-import { postsService } from "@/services/content/posts.service";
+import { resolveLinkPreview } from "@/services/content/linkPreviews.service";
 import { feedInteractionsService, interactionTargetOf } from "@/services/feed/feedInteractions.service";
 import { useAuthStore } from "@/store/auth.store";
 import { makeThemedStyles, useTheme } from "@/theme";
 import type { LinkPreview, Post, SharedContentReference } from "@/types";
 
 import { usePostSurface } from "./interactions/postSurface.context";
+import { findFirstSafeExternalFeedUrl, isSafeFeedPreviewUrl } from "./feedLinkPreviewSafety.util";
 
 const internalKindLabels: Readonly<Record<SharedContentReference["kind"], string>> = { product: "Product", store: "Store", profile: "Profile", live: "Live", space: "Space", post: "Post", clip: "Clip", order: "Order" };
 
@@ -59,10 +60,11 @@ export function PostLinkCard({ post }: { readonly post: Post }) {
   const isSignedIn = useAuthStore((state) => state.status === "signedIn");
   const surface = usePostSurface();
   const internalReference = findFirstInternalReference(post.text);
-  const externalUrl = !internalReference && !post.linkPreview ? findFirstExternalUrl(post.text) : null;
+  const attachedPreview = post.linkPreview && isSafeFeedPreviewUrl(post.linkPreview.url) ? post.linkPreview : null;
+  const externalUrl = !internalReference && !attachedPreview ? findFirstSafeExternalFeedUrl(post.text) : null;
   const onDemand = useQuery({
     queryKey: ["posts", post.id, "link-preview"],
-    queryFn: () => postsService.refreshPostLinkPreview(post.id),
+    queryFn: () => externalUrl ? resolveLinkPreview(externalUrl) : Promise.resolve(null),
     enabled: !!externalUrl && isSignedIn,
     retry: false,
     staleTime: Infinity,
@@ -70,7 +72,7 @@ export function PostLinkCard({ post }: { readonly post: Post }) {
   if (internalReference) {
     return <View style={styles.wrap}>{isSignedIn ? <SharedContentCardView reference={internalReference} /> : <GuestInternalLinkCard reference={internalReference} />}</View>;
   }
-  const preview = post.linkPreview ?? onDemand.data ?? null;
+  const preview = attachedPreview ?? onDemand.data ?? null;
   return preview ? <View style={styles.wrap}><ExternalLinkCard preview={preview} onOpen={() => feedInteractionsService.recordLinkClick(interactionTargetOf(post), surface)} /></View> : null;
 }
 

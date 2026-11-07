@@ -18,12 +18,14 @@ const ZOOMED_SCALE = 2.5;
 export interface MediaLightboxProps {
   readonly images: readonly Media[];
   readonly initialIndex: number;
+  readonly visible: boolean;
   readonly onClose: () => void;
+  readonly onDismiss?: () => void;
   readonly onDownloadImage?: (media: Media) => void;
   readonly postActions?: MediaLightboxPostActionsProps;
 }
 
-export function MediaLightbox({ images, initialIndex, onClose, onDownloadImage, postActions }: MediaLightboxProps) {
+export function MediaLightbox({ images, initialIndex, visible, onClose, onDismiss, onDownloadImage, postActions }: MediaLightboxProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const { width, height } = useWindowDimensions();
@@ -36,8 +38,8 @@ export function MediaLightbox({ images, initialIndex, onClose, onDownloadImage, 
   if (images.length === 0) return null;
 
   return (
-    <FrameAwareModal visible animationType="fade" transparent onRequestClose={onClose} supportedOrientations={["portrait", "landscape"]}>
-      <View style={styles.root}>
+    <FrameAwareModal visible={visible} animationType="fade" transparent onRequestClose={onClose} onDismiss={onDismiss} supportedOrientations={["portrait", "landscape"]}>
+      {visible ? <View style={styles.root}>
         <FlatList
           data={images}
           horizontal
@@ -94,7 +96,7 @@ export function MediaLightbox({ images, initialIndex, onClose, onDownloadImage, 
             <MediaLightboxPostActions {...postActions} />
           </View>
         ) : null}
-      </View>
+      </View> : null}
     </FrameAwareModal>
   );
 }

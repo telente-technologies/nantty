@@ -41,7 +41,14 @@ export const liveGuestsMocks: MockRoute[] = [
   }),
   createMockRoute("POST", "/api/v1/lives/:liveId/guests/invitations", ({ params, body }) => {
     const stage = requireHostedStage(params.liveId!);
-    const { userId } = body as { userId: string };
+    const { userId, role = "speaker", title } = body as { userId: string; role?: string; title?: string };
+    if (role !== "speaker" && role !== "cohost") throw new ApiError(422, "Role must be speaker or cohost.", "INVALID_STAGE_ROLE");
+    const normalizedTitle = title?.trim();
+    const hasControlCharacter = [...(normalizedTitle ?? "")].some((character) => {
+      const codePoint = character.codePointAt(0) ?? 0;
+      return codePoint <= 31 || (codePoint >= 127 && codePoint <= 159);
+    });
+    if ([...(normalizedTitle ?? "")].length > 32 || hasControlCharacter) throw new ApiError(422, "Title must be at most 32 characters and contain no control characters.", "INVALID_STAGE_TITLE");
     const user = listMockAudienceUsers().find((candidate) => candidate.id === userId);
     if (!user) throw new ApiError(422, "That viewer has left the live.", "USER_NOT_FOLLOWING_OR_BLOCKED");
     if (countReservedStageSeats(stage) >= MAXIMUM_STREAMERS_ON_STAGE) throw new ApiError(409, "The stage is full. Up to 10 people can be on stage.", "STAGE_FULL");
@@ -52,7 +59,7 @@ export const liveGuestsMocks: MockRoute[] = [
       resolvesAt: now + INVITE_RESPONSE_DELAY_MS,
       willAccept: Math.abs(hashTextToSeed(userId)) % 4 !== 3,
       isForMe: false,
-    });
+    }, { stageRole: role, title: normalizedTitle });
     stage.invitations.push(slot);
     return serializeMockStage(stage);
   }),
@@ -61,7 +68,7 @@ export const liveGuestsMocks: MockRoute[] = [
     const slot = stage.invitations.find((candidate) => candidate.id === params.slotId && candidate.isForMe);
     if (!slot || slot.state !== "invited") throw new ApiError(410, "This invite has expired.");
     slot.state = params.response === "accept" ? "onStage" : "declined";
-    if (slot.state === "onStage") addGuestToMockStageOrThrow(stage, slot.user, slot.id);
+    if (slot.state === "onStage") addGuestToMockStageOrThrow(stage, slot.user, slot.id, slot.stageRole, slot.title);
     return serializeMockStage(stage);
   }),
   createMockRoute("POST", "/api/v1/lives/:liveId/guests/requests", ({ params }) => {

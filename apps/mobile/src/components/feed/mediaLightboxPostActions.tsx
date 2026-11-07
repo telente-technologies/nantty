@@ -20,6 +20,7 @@ export function MediaLightboxPostActions({ post, onToggleLike, onPressComments, 
   return (
     <View style={styles.row}>
       <PostActionButton
+        containerStyle={styles.actionSlot}
         label={post.liked ? "Unlike" : "Like"}
         tone="like"
         count={post.likes}
@@ -30,6 +31,7 @@ export function MediaLightboxPostActions({ post, onToggleLike, onPressComments, 
         renderIcon={(ink) => <LikeActionIcon size={21} color={ink} filled={post.liked} />}
       />
       <PostActionButton
+        containerStyle={styles.actionSlot}
         label="Reply"
         tone="reply"
         count={post.comments}
@@ -38,6 +40,7 @@ export function MediaLightboxPostActions({ post, onToggleLike, onPressComments, 
         renderIcon={(ink) => <ReplyActionIcon size={21} color={ink} />}
       />
       <PostActionButton
+        containerStyle={styles.actionSlot}
         label="Repost"
         tone="repost"
         count={post.reposts}
@@ -46,6 +49,7 @@ export function MediaLightboxPostActions({ post, onToggleLike, onPressComments, 
         renderIcon={(ink) => <RepostActionIcon size={21} color={ink} />}
       />
       <PostActionButton
+        containerStyle={styles.actionSlot}
         label={isSaved ? "Remove post from saved" : "Save post"}
         tone="bookmark"
         active={isSaved}
@@ -55,6 +59,7 @@ export function MediaLightboxPostActions({ post, onToggleLike, onPressComments, 
         renderIcon={(ink) => <BookmarkActionIcon size={21} color={ink} filled={isSaved} />}
       />
       <PostActionButton
+        containerStyle={styles.actionSlot}
         label="Share"
         tone="reply"
         onPress={onShare}
@@ -76,6 +81,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(12,12,18,0.74)",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
   },
+  actionSlot: { flex: 1, minWidth: 0, justifyContent: "center" },
 });

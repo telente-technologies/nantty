@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Animated, FlatList, Pressable, StyleSheet, View, useWindowDimensions, type GestureResponderEvent } from "react-native";
+import { Animated, FlatList, Platform, Pressable, StyleSheet, View, useWindowDimensions, type GestureResponderEvent } from "react-native";
 
 import { SpeakerHigh24Icon, ViewProducts24Icon } from "@/components/icons";
 import { VideoPosterOnly, type VideoPlaybackController } from "@/components/media/clipVideoPlayer";
@@ -35,6 +35,10 @@ export interface MediaPagerProps {
 
 const MAXIMUM_PAGER_WIDTH = 393;
 const DEFAULT_PHOTO_PAGER_HEIGHT = 335;
+// React Native exposes Modal.onDismiss on iOS, but not Android. Keep enough
+// time for Android's fade dismissal to finish before presenting the separate
+// feed-level repost sheet (presenting two native modals at once can hide it).
+const NATIVE_MODAL_DISMISS_FALLBACK_MS = 750;
 
 export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen = true, onPressViewProducts, saveTarget, savedAccordingToServer, overlay, onDownloadMedia, look, watermarkHandle, postActions }: MediaPagerProps) {
   const styles = useStyles();
@@ -56,10 +60,45 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
   const isMuted = useVideoAudioStore((state) => state.isMuted);
   const toggleMute = useVideoAudioStore((state) => state.toggleMute);
   const activeVideoController = useRef<VideoPlaybackController | null>(null);
+  const pendingRepostAction = useRef<(() => void) | null>(null);
+  const repostDismissFallback = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeVideoPositionSeconds = useRef(0);
   const [fullScreenStartSeconds, setFullScreenStartSeconds] = useState(0);
   const activePageMedia = pages[activePageIndex];
   const isActivePageVideo = activePageMedia?.type === "video";
+
+  const openCommentsFromMediaViewer = () => {
+    setOpenedImageIndex(null);
+    setFullScreenVideo(null);
+    postActions?.onPressComments();
+  };
+  const runPendingRepostAction = () => {
+    if (repostDismissFallback.current) clearTimeout(repostDismissFallback.current);
+    repostDismissFallback.current = null;
+    const action = pendingRepostAction.current;
+    pendingRepostAction.current = null;
+    action?.();
+  };
+  const openRepostFromMediaViewer = () => {
+    pendingRepostAction.current = postActions?.onRepost ?? null;
+    setOpenedImageIndex(null);
+    setFullScreenVideo(null);
+    // Present the feed-level repost sheet only after the media modal has closed.
+    // Android doesn't emit Modal.onDismiss; keep the same bounded fallback on
+    // iOS too in case a native dismissal callback is skipped during navigation.
+    if (Platform.OS === "android" || Platform.OS === "ios") {
+      if (repostDismissFallback.current) clearTimeout(repostDismissFallback.current);
+      repostDismissFallback.current = setTimeout(runPendingRepostAction, NATIVE_MODAL_DISMISS_FALLBACK_MS);
+    } else if (Platform.OS === "web") {
+      requestAnimationFrame(() => requestAnimationFrame(runPendingRepostAction));
+    }
+  };
+  useEffect(() => () => {
+    if (repostDismissFallback.current) clearTimeout(repostDismissFallback.current);
+  }, []);
+  const mediaViewerPostActions = postActions
+    ? { ...postActions, onPressComments: openCommentsFromMediaViewer, onRepost: openRepostFromMediaViewer }
+    : undefined;
 
   useEffect(() => {
     if (!isActivePageVideo || isMuted || !isVisibleOnScreen) return;
@@ -197,12 +236,19 @@ export function MediaPager({ media, height: requestedHeight, isVisibleOnScreen =
         }}
         saveTarget={saveTarget}
         savedAccordingToServer={savedAccordingToServer}
-        postActions={postActions}
+        postActions={mediaViewerPostActions}
+        onDismiss={runPendingRepostAction}
         look={look}
       />
-      {openedImageIndex !== null ? (
-        <MediaLightbox images={imagePages} initialIndex={openedImageIndex} onClose={() => setOpenedImageIndex(null)} onDownloadImage={onDownloadMedia} postActions={postActions} />
-      ) : null}
+      <MediaLightbox
+        images={imagePages}
+        initialIndex={openedImageIndex ?? 0}
+        visible={openedImageIndex !== null}
+        onClose={() => setOpenedImageIndex(null)}
+        onDismiss={runPendingRepostAction}
+        onDownloadImage={onDownloadMedia}
+        postActions={mediaViewerPostActions}
+      />
     </View>
   );
 }

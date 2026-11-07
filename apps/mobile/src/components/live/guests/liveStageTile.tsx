@@ -137,10 +137,10 @@ export function LiveStageTile(props: LiveStageTileProps) {
         <Text size={11} weight={600} lineHeight={13} color={liveGlass.ink} numberOfLines={1} style={styles.nameText}>
           {props.isMe ? "You" : streamer.user.name}
         </Text>
-        {streamer.role === "host" ? (
+        {streamer.role === "host" || streamer.title?.trim() || streamer.stageRole === "cohost" ? (
           <View style={styles.hostChip}>
             <Text size={9} weight={700} lineHeight={11} color={liveGlass.ink}>
-              HOST
+              {streamer.role === "host" ? "HOST" : streamer.title?.trim() || "CO-HOST"}
             </Text>
           </View>
         ) : null}

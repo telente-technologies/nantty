@@ -19,6 +19,8 @@ import { ErrorState } from "@/components/ui/errorState";
 import { GridSkeleton } from "@/components/ui/gridSkeleton";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { spacing } from "@/constants/spacing.constant";
+import { MartProductAd } from "@/components/ads/martProductAd";
+import { ProductsYouMightLike } from "@/components/home/productsYouMightLike";
 
 const COLLECTION_FOR_TILE = {
   sales: { collection: "sales_of_the_day", name: "Sales of the Day" },
@@ -112,6 +114,8 @@ export function MartTab() {
         <CategoryTabs categories={martHome.data?.categories ?? []} selectedCategoryId={selectedCategoryId} onSelectCategory={selectCategory} />
       </View>
       <View style={styles.content}>
+        <MartProductAd />
+        <ProductsYouMightLike />
         {products.isLoading ? (
           <GridSkeleton />
         ) : allProducts.length === 0 && products.isError ? (

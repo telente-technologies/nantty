@@ -31,7 +31,7 @@ export function LiveStageInvitePrompt({ invite, host, isResponding, onAccept, on
           <UserPlus24Icon size={22} color={colors.textMuted} />
         </View>
         <Text size={18} weight={600} lineHeight={24} align="center" accessibilityRole="header" style={styles.title}>
-          {host.name} invited you to join the LIVE
+          {host.name} invited you to join the LIVE as {invite?.title?.trim() || (invite?.stageRole === "cohost" ? "Co-host" : "Speaker")}
         </Text>
         <Text size={14} lineHeight={20} color={colors.textMuted} align="center">
           Your camera and mic will be shown to everyone watching. You can leave the stage anytime.

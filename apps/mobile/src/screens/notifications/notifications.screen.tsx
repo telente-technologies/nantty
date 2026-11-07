@@ -46,6 +46,7 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
     const commentId = notification.data?.commentId ?? target?.commentId;
     const clipId = notification.data?.clipId ?? (reference?.kind === "clip" ? reference.id : undefined);
     const postId = notification.data?.postId ?? (reference?.kind === "post" ? reference.id : undefined);
+    const orderId = notification.data?.orderId ?? (reference?.kind === "order" ? reference.id : undefined);
     if (notification.kind === "followRequest") return navigation.navigate("FollowRequests");
     if (notification.data?.screen === "GroupInvitations") return navigation.navigate("GroupInvitations");
     if (notification.kind === "followRequestAccepted" && notification.actor) {
@@ -59,6 +60,7 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
     else if (notification.data?.screen === "AccountStatus") navigation.navigate("AccountStatus");
     else if (notification.data?.screen === "Verification") navigation.navigate("IdentityVerification");
     else if (notification.data?.ticketId) navigation.navigate("SupportTicketDetail", { ticketId: notification.data.ticketId });
+    else if (orderId) navigation.navigate("OrderDetail", { orderId });
     else if (reference) {
       const route = buildInternalRoute(reference);
       navigation.navigate(route.name, route.params as never);

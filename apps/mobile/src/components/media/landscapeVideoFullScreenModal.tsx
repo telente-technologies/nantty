@@ -21,6 +21,7 @@ export interface LandscapeVideoFullScreenModalProps {
   readonly media: Media | null;
   readonly isMuted: boolean;
   readonly onClose: (positionSeconds?: number) => void;
+  readonly onDismiss?: () => void;
   readonly onToggleMute?: () => void;
   readonly canSeek?: boolean;
   readonly startAtSeconds?: number;
@@ -75,7 +76,7 @@ export function LandscapeVideoFullScreenModal(props: LandscapeVideoFullScreenMod
   };
 
   return (
-    <FrameAwareModal visible={isOpen} animationType="fade" onRequestClose={close} supportedOrientations={["portrait", "landscape"]}>
+    <FrameAwareModal visible={isOpen} animationType="fade" onRequestClose={close} onDismiss={props.onDismiss} supportedOrientations={["portrait", "landscape"]}>
       <StatusBar hidden />
       {media ? (
         <FullScreenVideoStage

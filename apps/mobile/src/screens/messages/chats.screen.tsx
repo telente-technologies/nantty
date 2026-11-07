@@ -24,6 +24,7 @@ import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import { storiesService } from "@/services/clips/stories.service";
+import { liveService } from "@/services/live/live.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { ConversationFilter, InboxFolder } from "@/types";
 
@@ -46,6 +47,7 @@ export function ChatsScreen() {
     },
   });
   const storyTray = useQuery({ queryKey: ["story-tray"], queryFn: storiesService.fetchStoryTray });
+  const suggestedLives = useQuery({ queryKey: ["suggested-lives"], queryFn: liveService.fetchSuggestedLives });
 
   const isEmpty = conversations.isSuccess && conversations.data.length === 0;
   const goBackFromChats = () => (isSearching ? setIsSearching(false) : navigation.navigate("Tabs", { screen: "Home" }));
@@ -93,6 +95,7 @@ export function ChatsScreen() {
               <View style={styles.tray}>
                 <StoryTray
                   items={storyTray.data ?? []}
+                  liveItems={suggestedLives.data ?? []}
                   myAvatarUrl={myAvatarUrl}
                   onPressAddStory={() => navigation.navigate("CreatePost", { mode: "story" })}
                   onPressStory={(userId) => navigation.navigate("Story", { userId })}
