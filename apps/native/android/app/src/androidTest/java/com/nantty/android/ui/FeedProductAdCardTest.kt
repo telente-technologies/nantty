@@ -3,6 +3,7 @@ package com.nantty.android.ui
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -15,7 +16,7 @@ class FeedProductAdCardTest {
     @get:Rule val composeRule = createComposeRule()
 
     @Test
-    fun displaysDisclosureAndProductCreativeThenNavigatesOnCta() {
+    fun displaysAdvertiserIdentityAndProductCreativeThenNavigatesOnCta() {
         composeRule.mainClock.autoAdvance = false
         val ad = feedAd()
         var opened = false
@@ -27,17 +28,32 @@ class FeedProductAdCardTest {
         }
 
         composeRule.onNodeWithTag("feed-product-ad").assertIsDisplayed()
-        composeRule.onNodeWithText("Ad").assertIsDisplayed()
+        composeRule.onNodeWithText("Sponsored").assertIsDisplayed()
+        composeRule.onNodeWithText("@adaatelier").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Verified business").assertIsDisplayed()
         composeRule.onNodeWithText("Handwoven tote").assertIsDisplayed()
         composeRule.mainClock.advanceTimeBy(500)
         composeRule.runOnIdle { assertEquals(0, viewed) }
         composeRule.mainClock.advanceTimeBy(600)
         composeRule.runOnIdle { assertEquals(1, viewed) }
-        composeRule.onNodeWithText("Shop now").performClick()
+        composeRule.onNodeWithContentDescription("Shop now, Handwoven tote").performClick()
         composeRule.runOnIdle {
             assertEquals(true, opened)
             assertEquals(1, viewed)
         }
+    }
+
+    @Test
+    fun productPreviewIsAnAccessibleLinkToTheSameProduct() {
+        var opened = false
+        composeRule.setContent {
+            MaterialTheme {
+                FeedProductAdCard(feedAd(), onOpenProduct = { opened = true }, onViewed = { true })
+            }
+        }
+
+        composeRule.onNodeWithContentDescription("Handwoven tote, sponsored product").assertIsDisplayed().performClick()
+        composeRule.runOnIdle { assertEquals(true, opened) }
     }
 
     @Test
@@ -67,6 +83,7 @@ class FeedProductAdCardTest {
         callToAction = "shop_now", imageUrl = "https://cdn.nantty.test/tote.jpg",
         advertiserName = "Ada Atelier", verifiedBusiness = true, productId = "product-1",
         placement = "feed", slotKind = "feedProduct",
+        advertiserHandle = "adaatelier", advertiserAvatarUrl = "https://cdn.nantty.test/ada-avatar.jpg",
     )
 
 }

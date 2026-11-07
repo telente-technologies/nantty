@@ -50,7 +50,7 @@ class SearchProductAdTest {
         compose.mainClock.advanceTimeBy(400)
         compose.waitForIdle()
         compose.onNodeWithTag("search-product-ad").assertIsDisplayed()
-        compose.onNodeWithText("Ad").assertIsDisplayed()
+        compose.onNodeWithText("Sponsored").assertIsDisplayed()
         compose.mainClock.advanceTimeBy(1_100)
         compose.waitUntil(5_000) { adTransport.calls.any { it.path == ProductAdsRepository.EVENTS_PATH } }
         compose.onNodeWithTag("search-product-ad-cta").performClick()

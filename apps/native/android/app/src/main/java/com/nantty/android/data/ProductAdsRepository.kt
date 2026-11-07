@@ -24,6 +24,8 @@ data class MartProductAd(
     val productId: String,
     val placement: String = ProductAdsRepository.MART_PLACEMENT,
     val slotKind: String = ProductAdsRepository.MART_SLOT_KIND,
+    val advertiserHandle: String = "",
+    val advertiserAvatarUrl: String? = null,
 )
 
 sealed interface ProductAdResult {
@@ -146,7 +148,8 @@ class ProductAdsRepository(
         val creative = row.optJSONObject("creative") ?: error("Nantty returned an incomplete product ad.")
         require(row.optString("placement") == expectedPlacement && row.optString("slotKind") == expectedSlotKind)
         require(row.optString("format") == "product" && creative.optString("format") == "product")
-        val label = row.optString("label").takeIf { it == "Ad" } ?: error("Nantty returned an unsupported ad label.")
+        val label = row.optString("label").takeIf { it == "Ad" || it == "Sponsored" }
+            ?: error("Nantty returned an unsupported ad label.")
         val adId = row.optString("adId").takeIf(SAFE_ID::matches) ?: error("Nantty returned an invalid ad ID.")
         val impressionToken = row.optString("impressionToken").takeIf(SAFE_TOKEN::matches) ?: error("Nantty returned an invalid impression token.")
         val expiresAt = row.optString("expiresAt").takeIf(String::isNotBlank) ?: error("Nantty returned no ad expiry.")
@@ -160,10 +163,24 @@ class ProductAdsRepository(
         val identity = creative.optJSONObject("identity") ?: error("Nantty returned no advertiser identity.")
         val headline = creative.optString("headline").trim().takeIf(String::isNotEmpty) ?: error("Nantty returned no product headline.")
         val advertiserName = identity.optString("name").trim().takeIf(String::isNotEmpty) ?: error("Nantty returned no advertiser name.")
+        val advertiserHandle = identity.optString("handle").trim().removePrefix("@").trim()
+        val advertiserAvatarUrl = identity.optNullableString("avatarUrl")?.takeIf(::isTrustedHttps)
         return MartProductAd(
-            adId, impressionToken, expiresAt, label, headline, creative.optString("primaryText").trim(),
-            creative.optString("callToAction").trim().ifEmpty { "shop_now" }, image, advertiserName,
-            identity.optBoolean("verifiedBusiness"), productId, expectedPlacement, expectedSlotKind,
+            adId = adId,
+            impressionToken = impressionToken,
+            expiresAt = expiresAt,
+            label = label,
+            headline = headline,
+            primaryText = creative.optString("primaryText").trim(),
+            callToAction = creative.optString("callToAction").trim().ifEmpty { "shop_now" },
+            imageUrl = image,
+            advertiserName = advertiserName,
+            verifiedBusiness = identity.optBoolean("verifiedBusiness"),
+            productId = productId,
+            placement = expectedPlacement,
+            slotKind = expectedSlotKind,
+            advertiserHandle = advertiserHandle,
+            advertiserAvatarUrl = advertiserAvatarUrl,
         )
     }
 

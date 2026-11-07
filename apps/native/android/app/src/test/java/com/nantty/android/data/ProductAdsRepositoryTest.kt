@@ -30,6 +30,8 @@ class ProductAdsRepositoryTest {
         assertEquals("product-ad-1", ad.adId)
         assertEquals("Canvas tote", ad.headline)
         assertEquals("https://cdn.nantty.test/tote.jpg", ad.imageUrl)
+        assertEquals("adaatelier", ad.advertiserHandle)
+        assertEquals("https://cdn.nantty.test/ada-avatar.jpg", ad.advertiserAvatarUrl)
         assertEquals("product-1", ad.productId)
         assertTrue(ad.verifiedBusiness)
     }
@@ -198,7 +200,7 @@ class ProductAdsRepositoryTest {
     }
 
     private fun validDecision(placement: String = "mart", slotKind: String = "martTile"): JSONObject = JSONObject(
-        """{"ad":{"adId":"product-ad-1","impressionToken":"signed-token-123","expiresAt":"2099-11-07T13:00:00Z","placement":"$placement","slotKind":"$slotKind","format":"product","label":"Ad","creative":{"format":"product","media":[{"kind":"image","url":"https://cdn.nantty.test/tote.jpg"}],"headline":"Canvas tote","primaryText":"Woven by hand","callToAction":"shop_now","destination":{"type":"product","targetId":"product-1"},"identity":{"name":"Ada Atelier","handle":"adaatelier","verifiedBusiness":true}}}}""",
+        """{"ad":{"adId":"product-ad-1","impressionToken":"signed-token-123","expiresAt":"2099-11-07T13:00:00Z","placement":"$placement","slotKind":"$slotKind","format":"product","label":"Ad","creative":{"format":"product","media":[{"kind":"image","url":"https://cdn.nantty.test/tote.jpg"}],"headline":"Canvas tote","primaryText":"Woven by hand","callToAction":"shop_now","destination":{"type":"product","targetId":"product-1"},"identity":{"name":"Ada Atelier","handle":"adaatelier","avatarUrl":"https://cdn.nantty.test/ada-avatar.jpg","verifiedBusiness":true}}}}""",
     )
 }
 
