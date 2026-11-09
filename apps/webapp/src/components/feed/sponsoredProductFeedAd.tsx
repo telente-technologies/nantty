@@ -9,12 +9,10 @@ import { productsService } from "@/services/products.service";
 import type { ID, SponsoredPlacement } from "@/types";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { MediaImage } from "@/components/ui/media";
+import { qualifiesAsProductAdImpression, PRODUCT_AD_VIEWABILITY_THRESHOLD } from "@/utils/productAdViewability.util";
 
 import { AdAction } from "./sponsoredAd";
 import styles from "./sponsoredProductFeedAd.module.css";
-
-const VIEWABILITY_THRESHOLD = 0.5;
-const MINIMUM_VIEW_MS = 1_000;
 
 export function SponsoredProductFeedAd({ sponsored, itemId, primaryText }: { readonly sponsored: SponsoredPlacement; readonly itemId: ID; readonly primaryText: string }) {
   const productId = sponsored.destination?.type === "product" ? sponsored.destination.targetId : null;
@@ -26,38 +24,55 @@ export function SponsoredProductFeedAd({ sponsored, itemId, primaryText }: { rea
     retry: false,
   });
   const impressionRef = useRef<HTMLElement | null>(null);
+  const product = productQuery.data;
+  const price = product?.price;
+  const productReady = Boolean(product && price);
 
   useEffect(() => {
     const element = impressionRef.current;
-    if (!element || !productId || typeof IntersectionObserver === "undefined") return;
+    if (!element || !productId || !productReady || typeof IntersectionObserver === "undefined") return;
     let visibleSince: number | null = null;
     let recorded = false;
+    let intersectionRatio = 0;
     const recordIfViewable = () => {
-      if (recorded || visibleSince === null || Date.now() - visibleSince < MINIMUM_VIEW_MS) return;
+      if (recorded || visibleSince === null || !qualifiesAsProductAdImpression({ productReady, pageVisible: document.visibilityState === "visible", intersectionRatio, visibleForMs: Date.now() - visibleSince })) return;
       recorded = true;
       void adEventsService.recordImpressionOncePerSession(sponsored, "feed", itemId);
       observer.disconnect();
     };
     const observer = new IntersectionObserver(([entry]) => {
-      if (!entry?.isIntersecting || entry.intersectionRatio < VIEWABILITY_THRESHOLD) {
+      if (!entry?.isIntersecting || entry.intersectionRatio < PRODUCT_AD_VIEWABILITY_THRESHOLD) {
         visibleSince = null;
+        intersectionRatio = 0;
         return;
       }
+      intersectionRatio = entry.intersectionRatio;
       if (visibleSince === null) visibleSince = Date.now();
       recordIfViewable();
-    }, { threshold: [0, VIEWABILITY_THRESHOLD, 1] });
+    }, { threshold: [0, PRODUCT_AD_VIEWABILITY_THRESHOLD, 1] });
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") {
+        visibleSince = null;
+        intersectionRatio = 0;
+        return;
+      }
+      visibleSince = null;
+      intersectionRatio = 0;
+      observer.unobserve(element);
+      observer.observe(element);
+    };
     const timer = window.setInterval(recordIfViewable, 250);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     observer.observe(element);
     return () => {
       observer.disconnect();
       window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [itemId, productId, productQuery.data?.id, sponsored]);
+  }, [itemId, productId, productReady, sponsored]);
 
   if (!productId) return null;
-  if (productQuery.isLoading) return <div ref={(element) => { impressionRef.current = element; }}><ListRowsSkeleton label="Loading sponsored product" rows={1} /></div>;
-  const product = productQuery.data;
-  const price = product?.price;
+  if (productQuery.isLoading) return <div><ListRowsSkeleton label="Loading sponsored product" rows={1} /></div>;
   if (!product || !price) return null;
 
   return (
