@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BookmarkBorder
@@ -41,6 +45,7 @@ import com.nantty.android.data.SavedPostsRepository
 import com.nantty.android.data.SavedPostsResult
 import com.nantty.android.data.SavedPostType
 import com.nantty.android.data.appendUniqueSavedPosts
+import com.nantty.android.data.appendUniqueSavedProducts
 import java.util.concurrent.Executor
 
 @Composable
@@ -51,6 +56,7 @@ internal fun SavedPostsScreen(
     onOpenPost: (String) -> Unit,
     onAuthenticationRequired: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenProduct: (String) -> Unit = {},
 ) {
     var result by remember(repository) { mutableStateOf<SavedPostsResult?>(null) }
     var loading by remember(repository) { mutableStateOf(true) }
@@ -94,7 +100,11 @@ internal fun SavedPostsScreen(
                         is SavedPostsResult.Success -> {
                             val current = (result as? SavedPostsResult.Success)?.page ?: page
                             result = SavedPostsResult.Success(
-                                SavedPostsPage(appendUniqueSavedPosts(current.posts, next.page.posts), next.page.nextCursor),
+                                SavedPostsPage(
+                                    posts = appendUniqueSavedPosts(current.posts, next.page.posts),
+                                    nextCursor = next.page.nextCursor,
+                                    products = appendUniqueSavedProducts(current.products, next.page.products),
+                                ),
                             )
                         }
                     }
@@ -124,19 +134,36 @@ internal fun SavedPostsScreen(
             }
             Spacer(Modifier.width(8.dp))
             Column {
-                Text(if (selectedType == SavedPostType.POSTS) "Saved posts" else "Saved videos", Modifier.semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Text(
+                    when (selectedType) {
+                        SavedPostType.POSTS -> "Saved posts"
+                        SavedPostType.VIDEOS -> "Saved videos"
+                        SavedPostType.PRODUCTS -> "Saved products"
+                    },
+                    Modifier.semantics { heading() },
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                )
                 Text("Only you can see these", color = MaterialTheme.colorScheme.secondary, style = MaterialTheme.typography.bodySmall)
             }
         }
         Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilterChip(selectedType == SavedPostType.POSTS, onClick = { selectType(SavedPostType.POSTS) }, label = { Text("Posts") })
             FilterChip(selectedType == SavedPostType.VIDEOS, onClick = { selectType(SavedPostType.VIDEOS) }, label = { Text("Videos") })
+            FilterChip(selectedType == SavedPostType.PRODUCTS, onClick = { selectType(SavedPostType.PRODUCTS) }, label = { Text("Products") })
         }
         when {
             loading && result == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     CircularProgressIndicator()
-                    Text(if (selectedType == SavedPostType.POSTS) "Loading saved posts" else "Loading saved videos", color = MaterialTheme.colorScheme.secondary)
+                    Text(
+                        when (selectedType) {
+                            SavedPostType.POSTS -> "Loading saved posts"
+                            SavedPostType.VIDEOS -> "Loading saved videos"
+                            SavedPostType.PRODUCTS -> "Loading saved products"
+                        },
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
                 }
             }
             result is SavedPostsResult.Failure && success == null -> {
@@ -148,11 +175,43 @@ internal fun SavedPostsScreen(
                     actionLabel = if (failure.authenticationRequired) "Sign in again" else "Retry",
                 )
             }
-            success != null && success.page.posts.isEmpty() -> CenterSavedPostsMessage(
-                title = if (selectedType == SavedPostType.POSTS) "No saved posts yet" else "No saved videos yet",
-                message = if (selectedType == SavedPostType.POSTS) "Save a post from your feed and it will be easy to find here." else "Save a video from your feed and it will be easy to find here.",
+            success != null && when (selectedType) {
+                SavedPostType.POSTS -> success.page.posts.isEmpty()
+                SavedPostType.VIDEOS -> success.page.posts.isEmpty()
+                SavedPostType.PRODUCTS -> success.page.products.isEmpty()
+            } -> CenterSavedPostsMessage(
+                title = when (selectedType) {
+                    SavedPostType.POSTS -> "No saved posts yet"
+                    SavedPostType.VIDEOS -> "No saved videos yet"
+                    SavedPostType.PRODUCTS -> "No saved products yet"
+                },
+                message = when (selectedType) {
+                    SavedPostType.POSTS -> "Save a post from your feed and it will be easy to find here."
+                    SavedPostType.VIDEOS -> "Save a video from your feed and it will be easy to find here."
+                    SavedPostType.PRODUCTS -> "Save a product from Mart and it will be easy to find here."
+                },
                 icon = true,
             )
+            success != null && selectedType == SavedPostType.PRODUCTS -> LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 156.dp),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                items(success.page.products, key = { it.saveId }) { saved ->
+                    MartProductCard(saved.product) { onOpenProduct(saved.product.id) }
+                }
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    SavedItemsPagination(
+                        loadingMore = loadingMore,
+                        failure = loadMoreFailure,
+                        hasNextPage = success.page.nextCursor != null,
+                        onAuthenticationRequired = onAuthenticationRequired,
+                        onRetry = ::loadMore,
+                    )
+                }
+            }
             success != null -> LazyColumn(Modifier.fillMaxSize()) {
                 items(success.page.posts, key = SavedPost::saveId) { saved ->
                     FeedCard(
@@ -179,6 +238,30 @@ internal fun SavedPostsScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SavedItemsPagination(
+    loadingMore: Boolean,
+    failure: SavedPostsResult.Failure?,
+    hasNextPage: Boolean,
+    onAuthenticationRequired: () -> Unit,
+    onRetry: () -> Unit,
+) {
+    when {
+        loadingMore -> Box(Modifier.fillMaxWidth().padding(20.dp), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(Modifier.semantics { contentDescription = "Loading more saved items" })
+        }
+        failure != null -> Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("Couldn't load the next page.", color = MaterialTheme.colorScheme.error)
+            TextButton(onClick = { if (failure.authenticationRequired) onAuthenticationRequired() else onRetry() }) {
+                Text(if (failure.authenticationRequired) "Sign in again" else "Try again")
+            }
+        }
+        hasNextPage -> TextButton(onClick = onRetry, modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+            Text("Load more saved products")
         }
     }
 }

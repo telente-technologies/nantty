@@ -47,6 +47,8 @@ import com.nantty.android.data.SellerWorkspaceDashboard
 import com.nantty.android.data.SellerWorkspaceRepository
 import com.nantty.android.data.SellerWorkspaceResult
 import com.nantty.android.data.SellerOrdersRepository
+import com.nantty.android.data.SellerReturnsRepository
+import com.nantty.android.data.SellerCatalogRepository
 import com.nantty.android.data.SellerShipmentRepository
 import com.nantty.android.data.DisputeRepository
 import com.nantty.android.data.formatSellerMoney
@@ -65,7 +67,9 @@ private sealed interface SellerWorkspaceUiState {
 internal fun SellerWorkspaceScreen(
     repository: SellerWorkspaceRepository,
     sellerOrdersRepository: SellerOrdersRepository,
+    sellerCatalogRepository: SellerCatalogRepository,
     sellerShipmentRepository: SellerShipmentRepository,
+    sellerReturnsRepository: SellerReturnsRepository,
     disputeRepository: DisputeRepository,
     executor: Executor,
     onAuthenticationRequired: () -> Unit,
@@ -78,9 +82,11 @@ internal fun SellerWorkspaceScreen(
     var retryKey by rememberSaveable { mutableIntStateOf(0) }
     var state by remember { mutableStateOf<SellerWorkspaceUiState>(SellerWorkspaceUiState.Loading) }
     var showingOrders by rememberSaveable { mutableStateOf(false) }
+    var showingCatalog by rememberSaveable { mutableStateOf(false) }
     var showingApplication by rememberSaveable { mutableStateOf(false) }
 
     BackHandler(enabled = showingOrders) { showingOrders = false }
+    BackHandler(enabled = showingCatalog) { showingCatalog = false }
     BackHandler(enabled = showingApplication) { showingApplication = false }
 
     if (showingApplication) {
@@ -96,15 +102,30 @@ internal fun SellerWorkspaceScreen(
     }
 
     if (showingOrders) {
+        val sellerWorkspace = (state as? SellerWorkspaceUiState.Loaded)?.workspace
+        val activeStoreId = sellerWorkspace?.access?.storeId
         SellerOrdersScreen(
             repository = sellerOrdersRepository,
             shipmentRepository = sellerShipmentRepository,
             disputeRepository = disputeRepository,
+            sellerReturnsRepository = sellerReturnsRepository.takeIf { activeStoreId != null },
+            sellerStoreId = activeStoreId,
+            canManageReturns = "orders:manage" in sellerWorkspace?.access?.permissions.orEmpty(),
             executor = executor,
             onBack = { showingOrders = false },
             onAuthenticationRequired = onAuthenticationRequired,
             onMessageBuyer = onMessageBuyer,
             onOpenBuyerProfile = onOpenBuyerProfile,
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showingCatalog) {
+        SellerCatalogScreen(
+            repository = sellerCatalogRepository,
+            onBack = { showingCatalog = false },
+            onAuthenticationRequired = onAuthenticationRequired,
             modifier = modifier,
         )
         return
@@ -137,6 +158,7 @@ internal fun SellerWorkspaceScreen(
                     period = period,
                     onPeriodChange = { period = it },
                     onOpenOrders = { showingOrders = true },
+                    onOpenCatalog = { showingCatalog = true },
                     onStartApplication = { showingApplication = true },
                 )
             }
@@ -171,6 +193,7 @@ private fun SellerWorkspaceContent(
     period: SellerDashboardPeriod,
     onPeriodChange: (SellerDashboardPeriod) -> Unit,
     onOpenOrders: () -> Unit,
+    onOpenCatalog: () -> Unit,
     onStartApplication: () -> Unit,
 ) {
     val dashboard = workspace.dashboard
@@ -185,6 +208,7 @@ private fun SellerWorkspaceContent(
                 fontWeight = FontWeight.SemiBold,
             )
             SellerApplicationCard(workspace.application)
+            OutlinedButton(onClick = onOpenCatalog, modifier = Modifier.fillMaxWidth()) { Text("Manage products") }
             OutlinedButton(onClick = onOpenOrders, modifier = Modifier.fillMaxWidth()) { Text("View orders") }
             SellerPeriodSelector(period, onPeriodChange)
             if (dashboard == null) {

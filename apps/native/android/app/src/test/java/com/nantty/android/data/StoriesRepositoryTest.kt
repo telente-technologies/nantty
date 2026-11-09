@@ -178,6 +178,50 @@ class StoriesRepositoryTest {
     }
 
     @Test
+    fun activeManagedProfileCanReachOwnerActionsAfterAsyncStoryLoadRefreshesIdentity() {
+        val session = AccountSession("access", "refresh", AccountUser("account-1", "Owner", "owner", null, null, emptyList()))
+        var activeProfileId: String? = null
+        val repository = StoriesRepository(
+            sessionProvider = { session },
+            transport = object : StoriesTransport {
+                override fun get(path: String, accessToken: String?): JSONObject {
+                    return JSONObject("""{"data":[{
+                        "id":"story-1",
+                        "author":{"id":"collaborator-1","name":"Brand","username":"brand"},
+                        "postedAs":{"id":"managed-profile-1","kind":"brand","name":"Brand","handle":"brand"},
+                        "media":{"id":"media-1","type":"image","url":"https://cdn.nantty.com/story.jpg"}
+                    }]}""")
+                }
+                override fun post(path: String, accessToken: String) = JSONObject()
+            },
+            activeProfileIdProvider = { activeProfileId },
+        )
+
+        activeProfileId = "managed-profile-1"
+
+        val loadedStory = (repository.loadUserStories("collaborator-1") as StoryFeedResult.Success).stories.single()
+
+        assertEquals("managed-profile-1", loadedStory.postedAsId)
+        assertTrue(repository.canOpenOwnerAnalytics(loadedStory))
+        assertTrue(repository.canOpenOwnerAnalytics(loadedStory)) // Same gate controls owner analytics and delete actions.
+    }
+
+    @Test
+    fun aDifferentManagedProfileDoesNotExposeOwnerActions() {
+        val repository = StoriesRepository(
+            sessionProvider = { AccountSession("access", "refresh", AccountUser("account-1", "Owner", "owner", null, null, emptyList())) },
+            activeProfileIdProvider = { "active-profile" },
+        )
+        val story = StoryItem(
+            "story-1", "collaborator-1", "Brand", "brand", null,
+            FeedMedia("m1", "image", "https://cdn.nantty.com/story.jpg", null, null, null),
+            "", false, null, null, postedAsId = "another-profile",
+        )
+
+        assertFalse(repository.canOpenOwnerAnalytics(story))
+    }
+
+    @Test
     fun trayRequiresAuthenticationAndDoesNotCallTransport() {
         var requested = false
         val repository = StoriesRepository(

@@ -27,6 +27,7 @@ internal fun SignedInPurchaseDestinationContent(
         paymentConfirmed = state.paymentConfirmed,
         returnToOrdersAfterPayment = state.returnToOrdersAfterPayment,
         cartAddressId = state.cartAddressId,
+        productSignals = state.productSignals,
         repositories = repositories,
         executor = executor,
         onBackToPayment = state::backToPayment,
@@ -34,7 +35,7 @@ internal fun SignedInPurchaseDestinationContent(
         onBackFromCheckout = state::backFromCheckout,
         onBackFromCart = state::backFromCart,
         onAuthenticationRequired = onAuthenticationRequired,
-        onPaymentVerified = state::markPaymentVerified,
+        onPaymentVerified = { state.markPaymentVerified(repositories.mart) },
         onViewPaymentProtection = state::showPaymentProtection,
         onViewOrder = state::showPaidOrder,
         onContinueShopping = {

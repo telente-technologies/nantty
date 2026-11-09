@@ -34,6 +34,7 @@ import com.nantty.android.data.MartHighlightTarget
 import com.nantty.android.data.MartProduct
 import com.nantty.android.data.MartProductAd
 import com.nantty.android.data.MartRepository
+import com.nantty.android.data.SaleAttribution
 import com.nantty.android.data.MartResult
 import com.nantty.android.data.MartRecommendationsResult
 import com.nantty.android.data.ProductAdResult
@@ -51,13 +52,16 @@ internal fun MartScreen(
     showCategoryPane: Boolean = false,
     onAuthenticationRequired: () -> Unit = {},
     initialProductId: String? = null,
+    initialAffiliateLinkId: String? = null,
     onInitialProductHandled: () -> Unit = {},
+    initialSaleAttribution: SaleAttribution? = null,
     initialCategoryId: String? = null,
     initialCategoryName: String? = null,
     onBackFromInitialCategory: () -> Unit = {},
     onInitialCategoryHandled: () -> Unit = {},
     onOpenStore: (String) -> Unit = {},
     onOpenBrand: (String) -> Unit = {},
+    onOpenCart: () -> Unit = {},
     storeRepository: StoreRepository? = null,
     reviewsRepositoryOverride: ProductReviewsRepository? = null,
     productAdsRepositoryOverride: ProductAdsRepository? = null,
@@ -77,6 +81,7 @@ internal fun MartScreen(
     var focusedCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
     var enteredFromInitialCategory by rememberSaveable { mutableStateOf(false) }
     var selectedProductId by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedProductAttribution by remember { mutableStateOf<SaleAttribution?>(null) }
     var selectedReviewsProductId by rememberSaveable { mutableStateOf<String?>(null) }
     var nextCursor by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
@@ -88,6 +93,8 @@ internal fun MartScreen(
     val scope = rememberCoroutineScope()
     val productAdsRepository = productAdsRepositoryOverride
         ?: remember(repository) { ProductAdsRepository(accessTokenProvider = repository::currentAccessToken) }
+    val productReviewsRepository = reviewsRepositoryOverride
+        ?: remember(repository) { ProductReviewsRepository(accessTokenProvider = repository::currentAccessToken) }
     val productAdSessionId = remember { "mart_ads_${java.util.UUID.randomUUID()}" }
 
     LaunchedEffect(productAdsRepository, productAdSessionId) {
@@ -95,11 +102,17 @@ internal fun MartScreen(
         productAd = (result as? ProductAdResult.Success)?.ad
     }
 
-    LaunchedEffect(initialProductId) {
-        if (initialProductId != null) {
-            selectedProductId = initialProductId
-            onInitialProductHandled()
+    LaunchedEffect(initialProductId, initialAffiliateLinkId) {
+        val productId = initialProductId ?: return@LaunchedEffect
+        selectedProductId = productId
+        selectedProductAttribution = initialSaleAttribution
+        if (initialAffiliateLinkId != null) {
+            val attribution = withContext(Dispatchers.IO) {
+                repository.recordAffiliateLinkClick(initialAffiliateLinkId, productId)
+            }
+            if (selectedProductId == productId) selectedProductAttribution = attribution
         }
+        onInitialProductHandled()
     }
 
     LaunchedEffect(initialCategoryId, initialCategoryName) {
@@ -127,13 +140,20 @@ internal fun MartScreen(
     selectedProductId?.takeIf { selectedReviewsProductId == null }?.let { productId ->
         MartProductDetailScreen(
             productId = productId,
+            saleAttribution = selectedProductAttribution?.takeIf { it.toCartPayload() != null },
             repository = repository,
             onAuthenticationRequired = onAuthenticationRequired,
-            onBack = { selectedProductId = null },
+            onBack = { selectedProductId = null; selectedProductAttribution = null },
             onOpenReviews = { selectedReviewsProductId = it },
+            onOpenRelatedProduct = { relatedProductId ->
+                selectedProductId = relatedProductId
+                selectedProductAttribution = null
+            },
             onOpenStore = onOpenStore,
             onOpenBrand = onOpenBrand,
+            onOpenCart = onOpenCart,
             storeRepository = storeRepository,
+            reviewsRepositoryOverride = productReviewsRepository,
             modifier = modifier,
         )
         return
@@ -142,7 +162,7 @@ internal fun MartScreen(
     selectedReviewsProductId?.let { productId ->
         ProductReviewsScreen(
             productId = productId,
-            repository = reviewsRepositoryOverride ?: remember(repository) { ProductReviewsRepository(accessTokenProvider = repository::currentAccessToken) },
+            repository = productReviewsRepository,
             onBack = { selectedReviewsProductId = null },
             modifier = modifier,
         )
@@ -214,10 +234,12 @@ internal fun MartScreen(
     val openProduct = { productId: String ->
         scope.launch(Dispatchers.IO) { repository.recordProductClicked(productId) }
         selectedProductId = productId
+        selectedProductAttribution = null
     }
     val openRecommendedProduct = { productId: String ->
         scope.launch(Dispatchers.IO) { repository.recordProductClicked(productId, "mart_recommendations") }
         selectedProductId = productId
+        selectedProductAttribution = null
     }
 
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {

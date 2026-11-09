@@ -36,7 +36,14 @@ internal object MartHttpTransport {
         accessToken: String,
         payload: JSONObject,
         openConnection: (URL) -> HttpURLConnection,
-    ): Int {
+    ): Int = postJsonResponse(url, accessToken, payload, openConnection).status
+
+    fun postJsonResponse(
+        url: URL,
+        accessToken: String?,
+        payload: JSONObject,
+        openConnection: (URL) -> HttpURLConnection,
+    ): MartHttpResponse {
         val connection = openConnection(url).apply {
             requestMethod = "POST"
             connectTimeout = MART_CONNECT_TIMEOUT_MILLIS
@@ -46,11 +53,14 @@ internal object MartHttpTransport {
             doOutput = true
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Content-Type", "application/json")
-            setRequestProperty("Authorization", "Bearer $accessToken")
+            accessToken?.takeIf(String::isNotBlank)?.let { setRequestProperty("Authorization", "Bearer $it") }
         }
         return connection.useMartConnection {
             connection.outputStream.use { it.write(payload.toString().toByteArray(Charsets.UTF_8)) }
-            connection.responseCode
+            val status = connection.responseCode
+            val body = (if (status in 200..299) connection.inputStream else connection.errorStream)
+                ?.use(::readBoundedMartResponse).orEmpty()
+            MartHttpResponse(status, body)
         }
     }
 }

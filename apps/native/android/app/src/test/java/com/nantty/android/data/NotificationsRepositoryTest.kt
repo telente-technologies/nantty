@@ -36,6 +36,58 @@ class NotificationsRepositoryTest {
     }
 
     @Test
+    fun resolvesSafeExternalNotificationUrlsBeforeActorFallback() {
+        val notification = ActivityNotification(
+            id = "n1", category = "social", kind = null, title = "Link", body = "Open this",
+            createdAt = "now", read = false, actor = NotificationActor("user-123", "Ari", null), postId = null,
+            url = "https://shop.example/products/one?ref=notification",
+        )
+
+        assertEquals(
+            NotificationDestination.ExternalLink("https://shop.example/products/one?ref=notification", "shop.example", false),
+            resolveNotificationDestination(notification),
+        )
+        assertEquals(NotificationDestination.Profile("user-123"), resolveNotificationDestination(notification, includeExternalUrl = false))
+    }
+
+    @Test
+    fun confirmsKnownShortenersAndSuspiciousHosts() {
+        assertEquals(true, resolveNotificationExternalLink("https://bit.ly/abc")?.requiresConfirmation)
+        assertEquals(true, resolveNotificationExternalLink("https://offers.example.top/item")?.requiresConfirmation)
+        assertEquals(true, resolveNotificationExternalLink("https://192.0.2.4/path")?.requiresConfirmation)
+        assertEquals(true, resolveNotificationExternalLink("https://bücher.example/path")?.requiresConfirmation)
+        assertEquals(true, resolveNotificationExternalLink("https://[2001:db8::1]/path")?.requiresConfirmation)
+        assertEquals(false, resolveNotificationExternalLink("https://shop.example/products")?.requiresConfirmation)
+    }
+
+    @Test
+    fun rejectsMalformedCredentialBearingAndNonWebNotificationUrls() {
+        listOf(
+            null,
+            "//outside.example/path",
+            "https:///missing-host",
+            "https://user:password@shop.example/path",
+            "javascript:alert(1)",
+            "file:///etc/passwd",
+            "https://shop.example:99999/path",
+            "https://shop.example:/path",
+            "https://999.999.999.999/path",
+            "https://shop.example/a path",
+            "https://shop.example\\\\@outside.example/path",
+            "https://shop.example/${"x".repeat(2_048)}",
+        ).forEach { assertNull("Rejected: $it", resolveNotificationExternalLink(it)) }
+    }
+
+    @Test
+    fun structuredTargetsKeepTheirExistingPrecedenceOverExternalUrls() {
+        val base = ActivityNotification("n1", "social", null, "Title", "Body", "now", false, NotificationActor("user-123", "Ari", null), "post-123", url = "https://shop.example/path")
+
+        assertEquals(NotificationDestination.Post("post-123"), resolveNotificationDestination(base))
+        assertEquals(NotificationDestination.Post("post-123"), resolveNotificationDestination(base.copy(category = "orders")))
+        assertEquals(NotificationDestination.GroupInvitations, resolveNotificationDestination(base.copy(screen = "GroupInvitations")))
+    }
+
+    @Test
     fun resolvesNotificationRoutesForSupportedMessagesOrdersAndProfiles() {
         val base = ActivityNotification("n1", "social", null, "Title", "Body", "now", false, null, null)
 
@@ -63,7 +115,10 @@ class NotificationsRepositoryTest {
         assertEquals(NotificationDestination.OrderDetail("ord_789"), resolveNotificationDestination(base.copy(url = "https://web.nantty.com/order/ord_789")))
         assertEquals(NotificationDestination.Orders, resolveNotificationDestination(base.copy(category = "orders")))
         assertNull(resolveNotificationDestination(base.copy(orderId = "../admin")))
-        assertNull(resolveNotificationDestination(base.copy(url = "https://evil.example/orders/ord_123", category = "social")))
+        assertEquals(
+            NotificationDestination.ExternalLink("https://evil.example/orders/ord_123", "evil.example", false),
+            resolveNotificationDestination(base.copy(url = "https://evil.example/orders/ord_123", category = "social")),
+        )
         assertNull(resolveNotificationDestination(base.copy(url = "/orders/%2e%2e%2fadmin", category = "social")))
     }
 
@@ -107,7 +162,10 @@ class NotificationsRepositoryTest {
             NotificationDestination.Post("post-123", "comment-456"),
             resolveNotificationDestination(base.copy(postId = "post-123", commentId = "comment-456")),
         )
-        assertNull(resolveNotificationDestination(base.copy(screen = "Live", url = "https://nantty.com/live/live-123")))
+        assertEquals(
+            NotificationDestination.ExternalLink("https://nantty.com/live/live-123", "nantty.com", false),
+            resolveNotificationDestination(base.copy(screen = "Live", url = "https://nantty.com/live/live-123")),
+        )
     }
 
     @Test

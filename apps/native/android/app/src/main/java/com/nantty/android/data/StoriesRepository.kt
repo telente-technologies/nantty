@@ -26,6 +26,7 @@ data class StoryItem(
     val seen: Boolean,
     val sound: StorySoundSummary?,
     val look: String?,
+    val postedAsId: String? = null,
 )
 
 data class StorySoundSummary(val id: String, val title: String, val ownerUsername: String?)
@@ -92,6 +93,7 @@ class StoriesRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val sessionProvider: () -> AccountSession? = { null },
     private val transport: StoriesTransport = JdkStoriesTransport(baseUrl),
+    private val activeProfileIdProvider: () -> String? = { null },
 ) {
     fun currentAccessToken(): String? = sessionProvider()?.accessToken?.takeIf(String::isNotBlank)
 
@@ -172,8 +174,11 @@ class StoriesRepository(
         }
     }
 
-    fun canOpenOwnerAnalytics(story: StoryItem): Boolean =
-        sessionProvider()?.user?.id?.let { it == story.authorId } == true
+    fun canOpenOwnerAnalytics(story: StoryItem): Boolean {
+        val accountId = sessionProvider()?.user?.id ?: return false
+        return accountId == story.authorId ||
+            (!story.postedAsId.isNullOrBlank() && story.postedAsId == activeProfileIdProvider())
+    }
 
     /** Deletes only the signed-in account's own story through the existing posts endpoint. */
     fun deleteOwnStory(storyId: String, idempotencyKey: String = java.util.UUID.randomUUID().toString()): StoryDeleteResult {
@@ -307,6 +312,8 @@ class StoriesRepository(
                         seen = row.optBoolean("seen"),
                         sound = sound,
                         look = row.optNullableString("look")?.takeIf { it in STORY_LOOKS },
+                        postedAsId = row.optJSONObject("postedAs")?.optNullableString("id")
+                            ?.takeIf(::isSafeStoryId),
                     ),
                 )
             }

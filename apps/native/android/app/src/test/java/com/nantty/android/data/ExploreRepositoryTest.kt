@@ -51,14 +51,23 @@ class ExploreRepositoryTest {
 
     @Test
     fun followSuggestionsPassLimitAndParseNestedUserContract() {
-        val transport = RecordingExploreTransport("""{"data":[{"user":{"id":"user-1","name":"Ada","username":"ada","avatarUrl":"https://cdn.nantty.com/ada.jpg","verified":true},"reason":{"code":"popular_in_region","label":"Popular in your region"},"isOfficial":false,"checkmarkTier":"none","isPrivate":false},null]}""")
+        val transport = RecordingExploreTransport("""{"data":[{"user":{"id":"user-1","name":"Ada","username":"ada","avatarUrl":"https://cdn.nantty.com/ada.jpg","verified":true,"verification":{"status":"active","type":"business","color":"gold","tier":"PREMIUM","badgeVisible":true}},"reason":{"code":"popular_in_region","label":"Popular in your region"},"isOfficial":false,"checkmarkTier":"PREMIUM","isPrivate":false},null]}""")
         val result = ExploreRepository(transport = transport).loadWhoToFollow(5) as ExploreResult.Success
 
         assertEquals("/api/v1/explore/who-to-follow?limit=5", transport.path)
         assertEquals(
-            ExploreSuggestion(ExploreUserSummary("user-1", "Ada", "ada", "https://cdn.nantty.com/ada.jpg", true), "popular_in_region", "Popular in your region", false, "none", false),
+            ExploreSuggestion(ExploreUserSummary("user-1", "Ada", "ada", "https://cdn.nantty.com/ada.jpg", true, "gold"), "popular_in_region", "Popular in your region", false, "PREMIUM", false),
             result.value.single(),
         )
+    }
+
+    @Test
+    fun followSuggestionsCanIncludePrivateAccountsForTheSignedInFeedModule() {
+        val transport = RecordingExploreTransport("""{"data":[]}""")
+        val result = ExploreRepository(transport = transport).loadWhoToFollow(20, includePrivate = true)
+
+        assertTrue(result is ExploreResult.Success)
+        assertEquals("/api/v1/explore/who-to-follow?limit=20&includePrivate=true", transport.path)
     }
 
     @Test

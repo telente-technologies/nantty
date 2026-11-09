@@ -43,6 +43,7 @@ import com.nantty.android.data.CreatorDashboardPeriod
 import com.nantty.android.data.CreatorEligibility
 import com.nantty.android.data.CreatorWorkspaceRepository
 import com.nantty.android.data.CreatorWorkspaceResult
+import com.nantty.android.data.CreatorAffiliatesRepository
 import java.text.NumberFormat
 import java.util.Currency
 import java.util.Locale
@@ -53,6 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger
 @Composable
 internal fun CreatorWorkspaceScreen(
     repository: CreatorWorkspaceRepository,
+    affiliatesRepository: CreatorAffiliatesRepository,
     executor: Executor,
     modifier: Modifier = Modifier,
     onReauthenticate: () -> Unit = {},
@@ -64,6 +66,7 @@ internal fun CreatorWorkspaceScreen(
     var application by remember(repository) { mutableStateOf<CreatorWorkspaceResult<CreatorApplication?>?>(null) }
     var dashboard by remember(repository, period) { mutableStateOf<CreatorWorkspaceResult<CreatorDashboard>?>(null) }
     var showingApplicationForm by remember(repository) { mutableStateOf(false) }
+    var showingAffiliates by remember(repository) { mutableStateOf(false) }
     val requestGeneration = remember(repository) { AtomicInteger() }
 
     LaunchedEffect(repository, period, refreshVersion) {
@@ -89,6 +92,16 @@ internal fun CreatorWorkspaceScreen(
         (application as? CreatorWorkspaceResult.Failure)?.authenticationRequired,
         (dashboard as? CreatorWorkspaceResult.Failure)?.authenticationRequired,
     ).any { it }
+
+    if (showingAffiliates) {
+        CreatorAffiliatesScreen(
+            repository = affiliatesRepository,
+            onBack = { showingAffiliates = false },
+            onAuthenticationRequired = onReauthenticate,
+            modifier = modifier,
+        )
+        return
+    }
 
     if (showingApplicationForm) {
         CreatorApplicationForm(
@@ -144,6 +157,9 @@ internal fun CreatorWorkspaceScreen(
                         }
                         ApplicationCard(applicationValue, eligibilityValue, onApplyAgain = { showingApplicationForm = true })
                         if (approved) {
+                            Button(onClick = { showingAffiliates = true }, modifier = Modifier.fillMaxWidth()) {
+                                Text("Affiliate tools")
+                            }
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 CreatorDashboardPeriod.entries.forEach { option ->
                                     FilterChip(

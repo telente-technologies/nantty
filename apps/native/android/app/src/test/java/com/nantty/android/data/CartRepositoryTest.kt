@@ -6,6 +6,11 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.UUID
 
 class CartRepositoryTest {
     @Test
@@ -20,6 +25,121 @@ class CartRepositoryTest {
         assertEquals("product_1", transport.body?.getString("productId"))
         assertEquals("variant_2", transport.body?.getString("variantId"))
         assertEquals(2, transport.body?.getInt("quantity"))
+    }
+
+    @Test
+    fun addsIndependentProductOptionsUsingTheReactNativeCartContract() {
+        val transport = RecordingCartTransport()
+        val result = CartRepository("https://api.nantty.com", { "buyer-access" }, transport).addProduct(
+            productId = "product_1",
+            variantId = null,
+            quantity = 2,
+            size = "M",
+            color = "Blue",
+            options = mapOf("Material" to "Silk"),
+        )
+
+        assertEquals(AddToCartResult.Success, result)
+        assertEquals("M", transport.body?.getString("size"))
+        assertEquals("Blue", transport.body?.getString("color"))
+        assertEquals("Silk", transport.body?.getJSONObject("options")?.getString("Material"))
+        assertEquals(false, transport.body?.has("variantId"))
+    }
+
+    @Test
+    fun rejectsConflictingOrMalformedProductOptionPayloadsBeforeRequest() {
+        val transport = RecordingCartTransport()
+        val repository = CartRepository("https://api.nantty.com", { "buyer-access" }, transport)
+
+        assertTrue(repository.addProduct("product_1", "variant_1", size = "M") is AddToCartResult.Failure)
+        assertTrue(repository.addProduct("product_1", null, options = mapOf("Material" to "  ")) is AddToCartResult.Failure)
+        assertNull(transport.path)
+    }
+
+    @Test
+    fun cartAddCarriesOnlyLiveCanonicalSaleAttribution() {
+        val validId = UUID.randomUUID().toString()
+        val transport = RecordingCartTransport()
+        val repository = CartRepository("https://api.nantty.com", { "buyer-access" }, transport)
+
+        assertEquals(
+            AddToCartResult.Success,
+            repository.addProduct("product_1", null, attribution = SaleAttribution(SaleAttributionSource.POST, validId, System.currentTimeMillis() + 60_000)),
+        )
+        assertEquals("post", transport.body?.getJSONObject("attribution")?.getString("source"))
+        assertEquals(validId, transport.body?.getJSONObject("attribution")?.getString("id"))
+
+        val invalid = RecordingCartTransport()
+        CartRepository("https://api.nantty.com", { "buyer-access" }, invalid).addProduct(
+            "product_1", null, attribution = SaleAttribution(SaleAttributionSource.CLIP, "not-a-uuid", System.currentTimeMillis() + 60_000),
+        )
+        assertFalse(invalid.body?.has("attribution") == true)
+
+        val expired = RecordingCartTransport()
+        CartRepository("https://api.nantty.com", { "buyer-access" }, expired).addProduct(
+            "product_1", null, attribution = SaleAttribution(SaleAttributionSource.LINK, validId, System.currentTimeMillis() - 1),
+        )
+        assertFalse(expired.body?.has("attribution") == true)
+    }
+
+    @Test
+    fun feedAttributionAcceptsOnlyTrustedUuidBackedNonSponsoredPosts() {
+        val id = UUID.randomUUID().toString()
+        val post = FeedPost(
+            id = id, authorName = "Maker", username = "maker", avatarUrl = null, verified = false,
+            verificationColor = null, postedAsName = null, postedAsHandle = null, postedAsAvatarUrl = null,
+            kind = "post", text = "Tagged product", media = emptyList(), likes = 0, comments = 0,
+            reposts = 0, shares = 0, createdAt = "2026-11-07T10:00:00Z",
+        )
+        assertEquals(SaleAttributionSource.POST, saleAttributionForFeedPost(post)?.source)
+        assertEquals(SaleAttributionSource.CLIP, saleAttributionForFeedPost(post.copy(kind = "clip"))?.source)
+        assertNull(saleAttributionForFeedPost(post.copy(id = "post_123")))
+        assertNull(saleAttributionForFeedPost(post.copy(isSponsored = true)))
+        assertNull(restoreSaleAttribution("unknown", id, System.currentTimeMillis() + 10_000))
+        assertNull(restoreSaleAttribution("post", id, System.currentTimeMillis() - 1))
+    }
+
+    @Test
+    fun recordsAddToCartOnlyAfterTheCartServerAcceptsTheProduct() {
+        val requests = mutableListOf<CartInteractionConnection>()
+        val interactions = ProductInteractionRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "buyer-access" },
+            openConnection = { url ->
+                CartInteractionConnection(
+                    url,
+                    if (url.path.endsWith("/users/me/consents")) {
+                        """{"data":[{"consentType":"analytics","status":"granted"}]}"""
+                    } else "{}",
+                ).also(requests::add)
+            },
+        )
+        val successfulCart = RecordingCartTransport()
+        val repository = CartRepository(
+            "https://api.nantty.com",
+            { "buyer-access" },
+            successfulCart,
+            interactions,
+        )
+
+        assertEquals(AddToCartResult.Success, repository.addProduct("product_1", "variant_1", 2))
+        assertEquals(2, requests.size)
+        val recorded = JSONObject(requests.last().requestBody.toString(Charsets.UTF_8.name()))
+            .getJSONArray("events").getJSONObject(0)
+        assertEquals("product.addedToCart", recorded.getString("event"))
+        assertEquals("product_1", recorded.getJSONObject("payload").getString("productId"))
+        assertEquals(2, recorded.getJSONObject("payload").getInt("quantity"))
+
+        val failedCart = RecordingCartTransport().apply { failureStatusCode = 422 }
+        val failedRepository = CartRepository(
+            "https://api.nantty.com",
+            { "buyer-access" },
+            failedCart,
+            interactions,
+        )
+        val requestCountBeforeFailure = requests.size
+        assertTrue(failedRepository.addProduct("product_2", "variant_1") is AddToCartResult.Failure)
+        assertEquals(requestCountBeforeFailure, requests.size)
     }
 
     @Test
@@ -195,4 +315,14 @@ class CartRepositoryTest {
             failIfConfigured()
         }
     }
+}
+
+private class CartInteractionConnection(url: URL, private val responseBody: String) : HttpURLConnection(url) {
+    val requestBody = ByteArrayOutputStream()
+    override fun getResponseCode(): Int = 200
+    override fun getInputStream() = ByteArrayInputStream(responseBody.toByteArray())
+    override fun getOutputStream() = requestBody
+    override fun usingProxy(): Boolean = false
+    override fun connect() = Unit
+    override fun disconnect() = Unit
 }

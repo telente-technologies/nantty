@@ -4,8 +4,11 @@ import androidx.compose.runtime.Composable
 import com.nantty.android.data.AdsWorkspaceRepository
 import com.nantty.android.data.BrandProfilesRepository
 import com.nantty.android.data.CreatorWorkspaceRepository
+import com.nantty.android.data.CreatorAffiliatesRepository
 import com.nantty.android.data.SellerWorkspaceRepository
 import com.nantty.android.data.SellerOrdersRepository
+import com.nantty.android.data.SellerReturnsRepository
+import com.nantty.android.data.SellerCatalogRepository
 import com.nantty.android.data.SellerShipmentRepository
 import com.nantty.android.data.DisputeRepository
 import com.nantty.android.data.InboxConversation
@@ -27,9 +30,12 @@ internal fun buildSignedInBusinessContent(
     SignedInBusinessContent(
         sellerRepository = repositories.sellerWorkspace,
         creatorRepository = repositories.creatorWorkspace,
+        creatorAffiliatesRepository = repositories.creatorAffiliates,
         brandRepository = repositories.brandProfiles,
         adsRepository = repositories.adsWorkspace,
         sellerOrdersRepository = repositories.sellerOrders,
+        sellerReturnsRepository = repositories.sellerReturns,
+        sellerCatalogRepository = repositories.sellerCatalog,
         sellerShipmentRepository = repositories.sellerShipment,
         disputeRepository = repositories.disputes,
         executor = executor,
@@ -88,9 +94,12 @@ internal fun startBuyerStoreConversation(
 internal fun SignedInBusinessContent(
     sellerRepository: SellerWorkspaceRepository,
     creatorRepository: CreatorWorkspaceRepository,
+    creatorAffiliatesRepository: CreatorAffiliatesRepository,
     brandRepository: BrandProfilesRepository,
     adsRepository: AdsWorkspaceRepository,
     sellerOrdersRepository: SellerOrdersRepository,
+    sellerReturnsRepository: SellerReturnsRepository,
+    sellerCatalogRepository: SellerCatalogRepository,
     sellerShipmentRepository: SellerShipmentRepository,
     disputeRepository: DisputeRepository,
     executor: Executor,
@@ -105,6 +114,8 @@ internal fun SignedInBusinessContent(
             SellerWorkspaceScreen(
                 repository = sellerRepository,
                 sellerOrdersRepository = sellerOrdersRepository,
+                sellerReturnsRepository = sellerReturnsRepository,
+                sellerCatalogRepository = sellerCatalogRepository,
                 sellerShipmentRepository = sellerShipmentRepository,
                 disputeRepository = disputeRepository,
                 executor = executor,
@@ -117,6 +128,7 @@ internal fun SignedInBusinessContent(
         creatorContent = {
             CreatorWorkspaceScreen(
                 repository = creatorRepository,
+                affiliatesRepository = creatorAffiliatesRepository,
                 executor = executor,
                 onReauthenticate = onReauthenticate,
             )

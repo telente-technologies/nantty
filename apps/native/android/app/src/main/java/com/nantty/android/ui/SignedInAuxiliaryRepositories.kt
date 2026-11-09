@@ -2,6 +2,7 @@ package com.nantty.android.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import com.nantty.android.data.AccountSessionRepository
 import com.nantty.android.data.ChatPasscodeRepository
@@ -34,6 +35,7 @@ internal data class SignedInAuxiliaryRepositories(
 internal fun rememberSignedInAuxiliaryRepositories(
     sessionRepository: AccountSessionRepository,
     executor: Executor,
+    activeProfileId: String?,
 ): SignedInAuxiliaryRepositories {
     val appContext = LocalContext.current.applicationContext
     val adEventStore = remember(appContext) { EncryptedProductAdEventStore(appContext) }
@@ -54,7 +56,13 @@ internal fun rememberSignedInAuxiliaryRepositories(
         )
     }
     val live = rememberSignedInLiveRepositories(sessionRepository)
-    val stories = remember(sessionRepository) { StoriesRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val currentActiveProfileId = rememberUpdatedState(activeProfileId)
+    val stories = remember(sessionRepository) {
+        StoriesRepository(
+            sessionProvider = sessionRepository::sessionOrNull,
+            activeProfileIdProvider = { currentActiveProfileId.value },
+        )
+    }
     val sounds = remember(sessionRepository) { SoundsRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val postDetails = remember(sessionRepository) { PostDetailRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val postAnalytics = remember(sessionRepository) { PostAnalyticsRepository(sessionProvider = sessionRepository::sessionOrNull) }

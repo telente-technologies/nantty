@@ -10,6 +10,9 @@ import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.CreatorWorkspaceRepository
 import com.nantty.android.data.CreatorWorkspaceTransport
+import com.nantty.android.data.CreatorAffiliatesRepository
+import com.nantty.android.data.CreatorAffiliatesTransport
+import com.nantty.android.data.CreatorAffiliatesResponse
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
@@ -36,10 +39,14 @@ class CreatorWorkspaceScreenTest {
             },
         )
         val directExecutor = Executor { command -> command.run() }
+        val affiliatesRepository = CreatorAffiliatesRepository(
+            sessionProvider = ::signedInSession,
+            transport = CreatorAffiliatesTransport { _, _, _, _ -> CreatorAffiliatesResponse(500, "{}") },
+        )
 
         compose.setContent {
             MaterialTheme {
-                CreatorWorkspaceScreen(repository = repository, executor = directExecutor)
+                CreatorWorkspaceScreen(repository = repository, affiliatesRepository = affiliatesRepository, executor = directExecutor)
             }
         }
 

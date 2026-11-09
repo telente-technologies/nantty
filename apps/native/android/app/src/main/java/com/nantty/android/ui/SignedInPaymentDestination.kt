@@ -8,6 +8,7 @@ import com.nantty.android.data.ProviderWalletPaymentRepository
 import com.nantty.android.data.SavedCardCredentialStore
 import com.nantty.android.data.SavedCardRepository
 import com.nantty.android.data.WalletMoney
+import com.nantty.android.data.ProductPurchaseSignal
 import java.util.concurrent.Executor
 
 /** Renders the signed-in checkout payment route while its navigation state stays in SignedInApp. */
@@ -18,6 +19,7 @@ internal fun SignedInPaymentDestination(
     totalMinor: Long,
     currency: String,
     orderCount: Int,
+    productSignals: List<ProductPurchaseSignal>,
     paymentMethod: CheckoutPaymentMethod,
     saveCardOnDevice: Boolean,
     repository: CheckoutRepository,
@@ -45,6 +47,7 @@ internal fun SignedInPaymentDestination(
                 payableOrderId = orderId,
                 total = WalletMoney(totalMinor, currency),
                 orderCount = orderCount,
+                productSignals = productSignals,
                 paymentMethod = paymentMethod,
                 saveCardOnDevice = saveCardOnDevice,
             ),

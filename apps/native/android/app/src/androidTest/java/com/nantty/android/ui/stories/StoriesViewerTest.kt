@@ -1,8 +1,10 @@
 package com.nantty.android.ui.stories
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -115,7 +117,8 @@ class StoriesViewerTest {
         compose.onNodeWithTag("story-analytics-metrics").assertIsDisplayed()
         compose.onNodeWithText("Likes").assertIsDisplayed()
         compose.onNodeWithText("Comments").assertIsDisplayed()
-        compose.onNodeWithText("Impressions").assertIsDisplayed()
+        compose.onAllNodesWithText("Impressions").assertCountEquals(0)
+        compose.onNodeWithText("Unique viewers").assertIsDisplayed()
         compose.onNodeWithText("3").assertIsDisplayed()
         compose.onNodeWithText("22").assertIsDisplayed()
         compose.onNodeWithText("Sam").assertIsDisplayed()

@@ -71,6 +71,8 @@ internal fun CurrentProfileContent(
     onOpenBusinessTools: () -> Unit,
     onOpenCountryPreferences: () -> Unit,
     onOpenContentPreferences: () -> Unit,
+    onOpenMentionPrivacy: () -> Unit,
+    onOpenShippingAddresses: () -> Unit,
     onOpenConnections: (String, String) -> Unit,
     onOpenFollowRequests: () -> Unit,
     onStartEditing: () -> Unit,
@@ -174,6 +176,8 @@ internal fun CurrentProfileContent(
             onOpenBusinessTools = onOpenBusinessTools,
             onOpenCountryPreferences = onOpenCountryPreferences,
             onOpenContentPreferences = onOpenContentPreferences,
+            onOpenMentionPrivacy = onOpenMentionPrivacy,
+            onOpenShippingAddresses = onOpenShippingAddresses,
             onOpenConnections = onOpenConnections,
             onOpenFollowRequests = onOpenFollowRequests,
         )
@@ -250,6 +254,8 @@ private fun ProfileOverview(
     onOpenBusinessTools: () -> Unit,
     onOpenCountryPreferences: () -> Unit,
     onOpenContentPreferences: () -> Unit,
+    onOpenMentionPrivacy: () -> Unit,
+    onOpenShippingAddresses: () -> Unit,
     onOpenConnections: (String, String) -> Unit,
     onOpenFollowRequests: () -> Unit,
 ) {
@@ -266,6 +272,12 @@ private fun ProfileOverview(
         }
         OutlinedButton(onClick = onOpenContentPreferences, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
             Text("Content preferences")
+        }
+        OutlinedButton(onClick = onOpenMentionPrivacy, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            Text("Who can mention me")
+        }
+        OutlinedButton(onClick = onOpenShippingAddresses, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            Text("Shipping addresses")
         }
         if (profile.isPrivate) {
             OutlinedButton(onClick = onOpenFollowRequests, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {

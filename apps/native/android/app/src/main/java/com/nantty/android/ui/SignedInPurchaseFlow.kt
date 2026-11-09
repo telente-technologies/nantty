@@ -10,6 +10,10 @@ import androidx.compose.runtime.setValue
 import com.nantty.android.data.CheckoutReceipt
 import com.nantty.android.data.CheckoutPaymentMethod
 import com.nantty.android.data.BuyerOrderDetail
+import com.nantty.android.data.ProductPurchaseSignal
+import com.nantty.android.data.MartRepository
+import com.nantty.android.data.decodeProductPurchaseSignals
+import com.nantty.android.data.encodeProductPurchaseSignals
 import java.util.concurrent.Executor
 
 internal enum class SignedInPurchaseDestination {
@@ -33,6 +37,8 @@ internal class SignedInPurchaseState(
     paymentConfirmed: Boolean = false,
     cartAddressId: String? = null,
     returnToOrdersAfterPayment: Boolean = false,
+    productSignals: List<ProductPurchaseSignal> = emptyList(),
+    purchaseSignalsRecorded: Boolean = false,
 ) {
     var destination by mutableStateOf(destination)
         private set
@@ -56,6 +62,10 @@ internal class SignedInPurchaseState(
         private set
     var returnToOrdersAfterPayment by mutableStateOf(returnToOrdersAfterPayment)
         private set
+    var productSignals by mutableStateOf(productSignals)
+        private set
+    var purchaseSignalsRecorded by mutableStateOf(purchaseSignalsRecorded)
+        private set
 
     fun openCart() { destination = SignedInPurchaseDestination.Cart }
     fun selectCartAddress(addressId: String?) { cartAddressId = addressId }
@@ -75,7 +85,13 @@ internal class SignedInPurchaseState(
     fun backFromCart() { destination = null }
     fun showPaymentProtection() { destination = SignedInPurchaseDestination.PaymentProtection }
     fun showPaidOrder() { destination = SignedInPurchaseDestination.PaidOrderDetail }
-    fun markPaymentVerified() { paymentConfirmed = true }
+    fun markPaymentVerified(martRepository: MartRepository? = null) {
+        paymentConfirmed = true
+        if (martRepository != null && !purchaseSignalsRecorded) {
+            productSignals.forEach { signal -> martRepository.recordProductPurchased(signal.productId, signal.quantity) }
+            purchaseSignalsRecorded = true
+        }
+    }
     fun continueShopping() { destination = null }
 
     fun checkoutCreated(receipt: CheckoutReceipt) {
@@ -86,6 +102,8 @@ internal class SignedInPurchaseState(
         orderCount = receipt.orderCount
         paymentMethod = receipt.paymentMethod
         saveCardOnDevice = receipt.saveCardOnDevice
+        productSignals = receipt.productSignals
+        purchaseSignalsRecorded = false
         paymentConfirmed = false
         returnToOrdersAfterPayment = false
         destination = SignedInPurchaseDestination.Payment
@@ -98,6 +116,8 @@ internal class SignedInPurchaseState(
         totalMinor = order.totalMinor.coerceAtLeast(0L)
         currency = order.currency
         orderCount = 1
+        productSignals = emptyList()
+        purchaseSignalsRecorded = true
         paymentMethod = CheckoutPaymentMethod.HOSTED
         paymentConfirmed = false
         returnToOrdersAfterPayment = true
@@ -120,6 +140,8 @@ internal class SignedInPurchaseState(
                     state.cartAddressId.orEmpty(),
                     state.returnToOrdersAfterPayment,
                     state.saveCardOnDevice,
+                    encodeProductPurchaseSignals(state.productSignals),
+                    state.purchaseSignalsRecorded,
                 )
             },
             restore = { saved ->
@@ -137,6 +159,8 @@ internal class SignedInPurchaseState(
                     cartAddressId = (saved.getOrNull(8) as? String)?.takeIf(String::isNotBlank),
                     returnToOrdersAfterPayment = saved.getOrNull(9) as? Boolean ?: false,
                     saveCardOnDevice = saved.getOrNull(10) as? Boolean ?: false,
+                    productSignals = (saved.getOrNull(11) as? String)?.let(::decodeProductPurchaseSignals).orEmpty(),
+                    purchaseSignalsRecorded = saved.getOrNull(12) as? Boolean ?: false,
                 )
             },
         )
@@ -157,6 +181,7 @@ internal fun SignedInPurchaseFlow(
     paymentConfirmed: Boolean,
     returnToOrdersAfterPayment: Boolean,
     cartAddressId: String?,
+    productSignals: List<ProductPurchaseSignal>,
     repositories: SignedInRepositories,
     executor: Executor,
     onBackToPayment: () -> Unit,
@@ -194,6 +219,7 @@ internal fun SignedInPurchaseFlow(
                 BuyerOrderDetailScreen(
                     orderId = it,
                     repository = repositories.buyerOrders,
+                    returnRepository = repositories.buyerReturns,
                     executor = executor,
                     onBack = onBackToPayment,
                     onAuthenticationRequired = onAuthenticationRequired,
@@ -216,6 +242,7 @@ internal fun SignedInPurchaseFlow(
                 totalMinor = totalMinor,
                 currency = currency,
                 orderCount = orderCount,
+                productSignals = productSignals,
                 paymentMethod = paymentMethod,
                 saveCardOnDevice = saveCardOnDevice,
                 repository = repositories.checkout,

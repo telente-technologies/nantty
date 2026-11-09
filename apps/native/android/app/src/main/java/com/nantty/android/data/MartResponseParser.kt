@@ -152,6 +152,7 @@ internal object MartResponseParser {
             }
         }
         val variantsJson = root.optJSONArray("variants") ?: JSONArray()
+        val relatedJson = root.optJSONArray("related") ?: JSONArray()
         val brandJson = root.optJSONObject("brand")
         val brand = brandJson?.let {
             val brandId = it.optString("brandId")
@@ -212,9 +213,35 @@ internal object MartResponseParser {
             ),
             variants = variants,
             brand = brand,
+            related = buildList {
+                val seenIds = mutableSetOf(id)
+                for (index in 0 until minOf(relatedJson.length(), MART_RELATED_PRODUCTS_LIMIT)) {
+                    val product = relatedJson.optJSONObject(index)?.let(::parseProductSummary) ?: continue
+                    if (seenIds.add(product.id)) add(product)
+                }
+            },
+        )
+    }
+
+    private fun parseProductSummary(item: JSONObject): MartProduct? {
+        val id = item.optString("id")
+        val name = item.optString("name").trim()
+        val price = item.optJSONObject("price") ?: return null
+        val amount = runCatching { readNonNegativeMinorUnits(price, "amountMinor") }.getOrNull() ?: return null
+        val currency = runCatching { readCurrency(price) }.getOrNull() ?: return null
+        if (!isSafeMartIdentifier(id) || name.isEmpty()) return null
+        return MartProduct(
+            id = id,
+            name = name,
+            amountMinor = amount,
+            currency = currency,
+            imageUrl = safeMediaUrl(item.optNullableString("imageUrl")),
+            stock = item.optInt("stock").coerceAtLeast(0),
         )
     }
 }
+
+private const val MART_RELATED_PRODUCTS_LIMIT = 6
 
 private fun readNonNegativeMinorUnits(value: JSONObject, key: String): Long {
     val raw = value.opt(key)

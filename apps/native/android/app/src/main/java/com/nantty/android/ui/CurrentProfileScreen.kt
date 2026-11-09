@@ -61,6 +61,8 @@ internal fun CurrentProfileScreen(
     onOpenBusinessTools: () -> Unit = {},
     onOpenCountryPreferences: () -> Unit = {},
     onOpenContentPreferences: () -> Unit = {},
+    onOpenMentionPrivacy: () -> Unit = {},
+    onOpenShippingAddresses: () -> Unit = {},
     onOpenConnections: (String, String) -> Unit = { _, _ -> },
     onOpenProfile: (String) -> Unit = {},
     onSearchProfile: (String, String) -> Unit = { _, _ -> },
@@ -229,6 +231,8 @@ internal fun CurrentProfileScreen(
                     onOpenBusinessTools = onOpenBusinessTools,
                     onOpenCountryPreferences = onOpenCountryPreferences,
                     onOpenContentPreferences = onOpenContentPreferences,
+                    onOpenMentionPrivacy = onOpenMentionPrivacy,
+                    onOpenShippingAddresses = onOpenShippingAddresses,
                     onOpenConnections = onOpenConnections,
                     onOpenFollowRequests = { showingFollowRequests = true },
                     onStartEditing = {

@@ -11,13 +11,12 @@ import java.util.UUID
 
 internal enum class BuyerOrderFilter(val apiValue: String?, val label: String) {
     ALL(null, "All"),
-    PENDING("pending", "Pending"),
-    PAID("paid", "In progress"),
-    SHIPPED("shipped", "Shipped"),
-    DELIVERED("delivered", "Delivered"),
+    TO_SHIP("to_ship", "To ship"),
+    ON_THE_WAY("shipped", "On the way"),
+    TO_CONFIRM("delivered", "To confirm"),
     COMPLETED("completed", "Completed"),
-    CANCELLED("cancelled", "Cancelled"),
     DISPUTED("disputed", "Disputed"),
+    CANCELLED("cancelled", "Cancelled"),
 }
 
 internal data class BuyerOrder(
@@ -35,6 +34,7 @@ internal data class BuyerOrder(
 internal data class BuyerOrdersPage(val orders: List<BuyerOrder>, val nextCursor: String?)
 
 internal data class BuyerOrderItem(
+    val orderItemId: String?,
     val productId: String?,
     val name: String,
     val quantity: Int,
@@ -95,12 +95,21 @@ internal sealed interface BuyerOrderReceiptResult {
     data class Failure(val message: String, val authenticationRequired: Boolean = false) : BuyerOrderReceiptResult
 }
 
+internal sealed interface BuyerOrderCancellationResult {
+    data class Success(val order: BuyerOrderDetail) : BuyerOrderCancellationResult
+    data class Failure(val message: String, val authenticationRequired: Boolean = false) : BuyerOrderCancellationResult
+}
+
 internal fun interface BuyerOrdersTransport {
     fun get(path: String, accessToken: String): JSONObject
 }
 
 internal interface BuyerOrderReceiptTransport : BuyerOrdersTransport {
     fun post(path: String, accessToken: String, idempotencyKey: String): JSONObject
+}
+
+internal interface BuyerOrderCancellationTransport : BuyerOrdersTransport {
+    fun cancel(path: String, accessToken: String, reason: String): JSONObject
 }
 
 internal class BuyerOrdersRepository(
@@ -187,6 +196,35 @@ internal class BuyerOrdersRepository(
         }
     }
 
+    fun cancelOrder(orderId: String, reason: String = "Cancelled by buyer"): BuyerOrderCancellationResult {
+        if (!orderId.matches(Regex("[A-Za-z0-9_-]{1,128}")) || reason.trim().length !in 1..500) {
+            return BuyerOrderCancellationResult.Failure("That order could not be cancelled.")
+        }
+        val token = sessionProvider()?.accessToken?.takeIf(String::isNotBlank)
+            ?: return BuyerOrderCancellationResult.Failure("Sign in to cancel this order.", true)
+        val cancellationTransport = transport as? BuyerOrderCancellationTransport
+            ?: return BuyerOrderCancellationResult.Failure("Order cancellation is unavailable. Please try again.")
+        return try {
+            val order = parseDetail(cancellationTransport.cancel(buildBuyerOrderCancelPath(orderId), token, reason.trim()))
+            if (order.status == "cancelled") BuyerOrderCancellationResult.Success(order)
+            else BuyerOrderCancellationResult.Failure("Nantty could not confirm cancellation. Refresh the order before trying again.")
+        } catch (error: Exception) {
+            val httpError = error as? BuyerOrdersHttpException
+            val authenticationRequired = httpError?.statusCode == 401 || httpError?.statusCode == 403
+            BuyerOrderCancellationResult.Failure(
+                when {
+                    authenticationRequired -> "Your session has expired. Sign in again to cancel this order."
+                    httpError?.statusCode == HttpURLConnection.HTTP_NOT_FOUND -> "That order could not be found."
+                    httpError?.statusCode == HttpURLConnection.HTTP_CONFLICT || httpError?.statusCode == 422 -> "This order can no longer be cancelled. Refresh it to see the latest status."
+                    httpError != null -> "Couldn't cancel this order. Please try again."
+                    else -> "Couldn't cancel this order. Check your connection and try again."
+                }, authenticationRequired,
+            )
+        }
+    }
+
+    internal fun buyerReturnsRepository(): BuyerReturnsRepository = BuyerReturnsRepository(baseUrl, sessionProvider)
+
     internal fun parsePage(payload: JSONObject): BuyerOrdersPage {
         val rows = payload.optJSONArray("data") ?: error("Nantty returned an incomplete orders response.")
         val orders = buildList {
@@ -240,6 +278,7 @@ internal class BuyerOrdersRepository(
                     val name = product?.optString("name")?.takeIf(String::isNotBlank) ?: continue
                     add(
                         BuyerOrderItem(
+                            orderItemId = row.optString("id").takeIf(MessagesRepository::isUuid),
                             productId = product?.optString("id")?.takeIf(::isSafeMartIdentifier),
                             name = name.filterNot(Char::isISOControl).take(120),
                             quantity = row.optInt("quantity").coerceAtLeast(0),
@@ -301,6 +340,13 @@ internal fun buildBuyerOrderConfirmReceiptPath(orderId: String): String {
     return "/api/v1/orders/$orderId/confirm-receipt"
 }
 
+internal fun buildBuyerOrderCancelPath(orderId: String): String {
+    require(orderId.matches(Regex("[A-Za-z0-9_-]{1,128}"))) { "That order could not be found." }
+    return "/api/v1/orders/$orderId/cancel"
+}
+
+internal fun buyerCanCancelOrder(status: String): Boolean = status == "new" || status == "pending"
+
 internal fun buyerCanConfirmReceipt(status: String): Boolean = status == "shipped" || status == "delivered"
 
 internal fun appendUniqueBuyerOrders(current: List<BuyerOrder>, incoming: List<BuyerOrder>): List<BuyerOrder> {
@@ -323,7 +369,7 @@ private fun JSONArray?.orderItemNames(): List<String> {
     }
 }
 
-private class JdkBuyerOrdersTransport(baseUrl: String) : BuyerOrderReceiptTransport {
+private class JdkBuyerOrdersTransport(baseUrl: String) : BuyerOrderReceiptTransport, BuyerOrderCancellationTransport {
     private val origin = trustedApiOrigin(baseUrl)
 
     override fun get(path: String, accessToken: String): JSONObject {
@@ -393,6 +439,28 @@ private class JdkBuyerOrdersTransport(baseUrl: String) : BuyerOrderReceiptTransp
         } finally {
             connection.disconnect()
         }
+    }
+
+    override fun cancel(path: String, accessToken: String, reason: String): JSONObject {
+        require(path.matches(Regex("/api/v1/orders/[A-Za-z0-9_-]{1,128}/cancel"))) { "Unsupported buyer order request." }
+        val apiOrigin = origin ?: error("Configure an HTTPS Nantty API URL to cancel this order.")
+        val connection = (URL(apiOrigin + path).openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            connectTimeout = 10_000
+            readTimeout = 15_000
+            instanceFollowRedirects = false
+            useCaches = false
+            doOutput = true
+            setRequestProperty("Accept", "application/json")
+            setRequestProperty("Content-Type", "application/json")
+            setRequestProperty("Authorization", "Bearer $accessToken")
+        }
+        try {
+            connection.outputStream.use { it.write(JSONObject().put("reason", reason).toString().toByteArray(Charsets.UTF_8)) }
+            val status = connection.responseCode
+            if (status !in 200..299) throw BuyerOrdersHttpException(status)
+            return JSONObject(connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() })
+        } finally { connection.disconnect() }
     }
 
     companion object {

@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.nantty.android.data.MartRepository
 import com.nantty.android.data.CartRepository
 import com.nantty.android.data.CartTransport
@@ -19,6 +20,9 @@ import com.nantty.android.data.ProductReviewsRepository
 import com.nantty.android.data.ProductReportRepository
 import com.nantty.android.data.ProductReportReason
 import com.nantty.android.data.ProductReportTransport
+import com.nantty.android.data.ProductSaveRepository
+import com.nantty.android.data.ProductSaveResponse
+import com.nantty.android.data.ProductSaveTransport
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.StoreRepository
@@ -115,6 +119,35 @@ class MartProductDetailNavigationTest {
     }
 
     @Test
+    fun relatedProductCardOpensItsProductDetailFromTheExistingDetailRoute() {
+        val requestedPaths = CopyOnWriteArrayList<String>()
+        val repository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            openConnection = { url ->
+                requestedPaths += url.path
+                FakeMartConnection(url, responseFor(url))
+            },
+        )
+        composeRule.setContent { MaterialTheme { MartScreen(repository) } }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Silk wrap dress").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Silk wrap dress").performClick()
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithText("Woven sandals").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeRule.onNodeWithText("Woven sandals").performClick()
+        composeRule.waitUntil(5_000) {
+            requestedPaths.contains("/api/v1/products/prd-2") &&
+                composeRule.onAllNodesWithText("Silk wrap dress").fetchSemanticsNodes().isEmpty()
+        }
+        composeRule.onNodeWithText("Woven sandals").assertIsDisplayed()
+        assertTrue(requestedPaths.contains("/api/v1/products/prd-2"))
+    }
+
+    @Test
     fun productDetailOpensItsStoreByServerStoreId() {
         var openedStoreId: String? = null
         val repository = MartRepository(
@@ -198,6 +231,49 @@ class MartProductDetailNavigationTest {
         }
         assertEquals(listOf("/api/v1/stores/store-1/follow"), transport.posts)
         assertEquals(listOf("/api/v1/stores/store-1/follow"), transport.deletes)
+    }
+
+    @Test
+    fun productDetailLoadsSavedStateAndTogglesUsingTheSharedSocialSaveApi() {
+        val calls = mutableListOf<Triple<String, String, JSONObject?>>()
+        val saveRepository = ProductSaveRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "viewer-token" },
+            transport = ProductSaveTransport { method, path, _, body ->
+                calls += Triple(method, path, body)
+                if (method == "GET") ProductSaveResponse(200, """{"data":{"isSaved":true}}""")
+                else ProductSaveResponse(HttpURLConnection.HTTP_NO_CONTENT, "")
+            },
+        )
+        val productRepository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "viewer-token" },
+            openConnection = { url -> FakeMartConnection(url, responseFor(url)) },
+        )
+
+        composeRule.setContent {
+            MaterialTheme {
+                MartProductDetailScreen(
+                    productId = "prd-1",
+                    repository = productRepository,
+                    onAuthenticationRequired = {},
+                    onBack = {},
+                    productSaveRepositoryOverride = saveRepository,
+                )
+            }
+        }
+
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithContentDescription("Remove product from Saved").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithContentDescription("Remove product from Saved").performClick()
+        composeRule.waitUntil(5_000) {
+            calls.any { it.first == "DELETE" }
+        }
+        assertEquals("GET", calls.first().first)
+        assertEquals("/api/v1/saves/status?type=product&targetId=prd-1", calls.first().second)
+        assertEquals("DELETE", calls.last().first)
+        assertEquals("/api/v1/saves?type=product&targetId=prd-1", calls.last().second)
     }
 
     @Test
@@ -296,6 +372,7 @@ class MartProductDetailNavigationTest {
     @Test
     fun selectedQuantityIsSentWithProductAddRequest() {
         val cartTransport = RecordingProductCartTransport()
+        var openedCart = false
         val cartRepository = CartRepository(
             baseUrl = "https://api.nantty.com",
             accessTokenProvider = { "synthetic-buyer-token" },
@@ -313,6 +390,7 @@ class MartProductDetailNavigationTest {
                     repository = productRepository,
                     onAuthenticationRequired = {},
                     onBack = {},
+                    onOpenCart = { openedCart = true },
                     cartRepositoryOverride = cartRepository,
                 )
             }
@@ -321,6 +399,9 @@ class MartProductDetailNavigationTest {
         composeRule.waitUntil(5_000) {
             composeRule.onAllNodesWithText("Silk wrap dress").fetchSemanticsNodes().isNotEmpty()
         }
+        composeRule.onNodeWithText("M").performClick()
+        composeRule.onNodeWithText("Blue").performClick()
+        composeRule.onNodeWithText("Silk").performClick()
         composeRule.onNodeWithContentDescription("Increase quantity").performClick()
         composeRule.onNodeWithContentDescription("Increase quantity").performClick()
         composeRule.onNodeWithContentDescription("Product quantity: 3").assertIsDisplayed()
@@ -331,7 +412,11 @@ class MartProductDetailNavigationTest {
 
         assertEquals(3, cartTransport.body?.getInt("quantity"))
         assertEquals("prd-1", cartTransport.body?.getString("productId"))
-        assertEquals("variant-1", cartTransport.body?.getString("variantId"))
+        assertEquals("M", cartTransport.body?.getString("size"))
+        assertEquals("Blue", cartTransport.body?.getString("color"))
+        assertEquals("Silk", cartTransport.body?.getJSONObject("options")?.getString("Material"))
+        assertEquals(false, cartTransport.body?.has("variantId"))
+        composeRule.runOnIdle { assertTrue("Successful add should continue to the cart", openedCart) }
     }
 
     @Test
@@ -389,9 +474,12 @@ class MartProductDetailNavigationTest {
         }
         composeRule.onNodeWithText("Silk wrap dress").performClick()
         composeRule.waitUntil(5_000) {
-            composeRule.onAllNodesWithText("Read product reviews").fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithText("See all 1 review").fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText("Read product reviews").performClick()
+        composeRule.onNodeWithText("See all 1 review").performScrollTo()
+        composeRule.onNodeWithText("Ratings & reviews").assertIsDisplayed()
+        composeRule.onNodeWithText("Lovely quality.").assertIsDisplayed()
+        composeRule.onNodeWithText("See all 1 review").performClick()
         composeRule.waitUntil(5_000) {
             composeRule.onAllNodesWithText("Product reviews").fetchSemanticsNodes().isNotEmpty()
         }
@@ -406,7 +494,12 @@ private fun responseFor(url: URL, productName: String = "Silk wrap dress"): Stri
     url.path == "/api/v1/mart/home" -> """{"categories":[]}"""
     url.path == "/api/v1/mart/highlights" -> """{"data":[{"id":"editorial-new-arrivals","kind":"new_arrivals","title":"New arrivals","subtitle":"Fresh this week","imageUrl":null,"target":{"type":"collection","collection":"new_arrivals","name":"New arrivals"},"ranking":{"score":0.6,"reason":{"code":"fresh_listings","label":"Just listed"}}}],"nextCursor":null}"""
     url.path == "/api/v1/products" -> """{"data":[{"id":"prd-1","name":"$productName","price":{"amountMinor":125000,"currency":"NGN"},"stock":3}],"nextCursor":null}"""
-    url.path == "/api/v1/products/prd-1" -> """{"id":"prd-1","title":"$productName","price":{"amountMinor":125000,"currency":"NGN"},"stock":3,"images":[],"rating":0,"sizes":["S","M"],"colors":["Blue"],"shippingInfo":"Calculated at checkout.","description":"Hand-finished silk.","brand":{"id":"brand-1","name":"Nigerian Loom"},"store":{"id":"store-1","name":"Adire House"},"variants":[{"id":"variant-1","title":"Medium / Blue","size":"M","color":"Blue","price":{"amountMinor":125000,"currency":"NGN"},"inStock":true}]}"""
+    url.path.startsWith("/api/v1/products/") -> {
+        val id = url.path.substringAfterLast('/')
+        val title = if (id == "prd-2") "Woven sandals" else productName
+        val relatedField = if (id == "prd-1") ",\"related\":[{\"id\":\"prd-2\",\"name\":\"Woven sandals\",\"price\":{\"amountMinor\":99000,\"currency\":\"NGN\"},\"imageUrl\":null,\"stock\":5}]," else ","
+        """{"id":"$id","title":"$title","price":{"amountMinor":125000,"currency":"NGN"},"stock":3,"images":[],"rating":0,"sizes":["S","M"],"colors":["Blue"],"shippingInfo":"Calculated at checkout.","description":"Hand-finished silk.","brand":{"brandId":"brand-1","name":"Nigerian Loom"},"store":{"id":"store-1","name":"Adire House"}$relatedField"variants":[{"id":"variant-1","title":"Medium / Blue / Silk","size":"M","color":"Blue","optionValues":{"Material":"Silk"},"price":{"amountMinor":125000,"currency":"NGN"},"inStock":true}]}"""
+    }
     else -> error("Unexpected catalog URL: $url")
 }
 

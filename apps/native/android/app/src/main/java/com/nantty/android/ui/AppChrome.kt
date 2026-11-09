@@ -154,7 +154,9 @@ internal fun DestinationIcon(destination: Destination) {
         Destination.SupportRequests -> Icons.Default.Settings
         Destination.DisputeDetail -> Icons.AutoMirrored.Filled.ReceiptLong
         Destination.CountryPreference -> Icons.Default.Settings
+        Destination.ShippingAddresses -> Icons.Default.Settings
         Destination.ContentPreferences -> Icons.Default.Settings
+        Destination.MentionPrivacy -> Icons.Default.Settings
         Destination.ChatNotificationSettings -> Icons.Default.Settings
         Destination.ChatPasscode -> Icons.Default.Settings
     }

@@ -1,10 +1,12 @@
 package com.nantty.android.ui
 
+import android.content.Intent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nantty.android.data.AccountSession
@@ -104,6 +106,51 @@ class NotificationsScreenTest {
             assertEquals("u1", openedProfile)
             assertEquals("/api/v1/notifications/n1/read", transport.lastPath)
         }
+    }
+
+    @Test
+    fun shortenedNotificationUrlRequiresConfirmationAndOpensWithActionView() {
+        val transport = FakeTransport(includePostId = false, notificationUrl = "https://bit.ly/abc")
+        var openedIntent: Intent? = null
+        compose.setContent {
+            MaterialTheme {
+                NotificationsScreen(
+                    NotificationsRepository("https://api.nantty.com", ::signedInSession, transport),
+                    Executor { it.run() },
+                    onLaunchExternalUrl = { openedIntent = it },
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Ari mentioned you Hello from Ari, unread").performClick()
+        compose.onNodeWithText("Check this link").assertIsDisplayed()
+        compose.onNodeWithTag("notification-link-confirm-open").performClick()
+
+        compose.runOnIdle {
+            assertEquals(Intent.ACTION_VIEW, openedIntent?.action)
+            assertEquals("https://bit.ly/abc", openedIntent?.dataString)
+        }
+    }
+
+    @Test
+    fun cancellingRiskyNotificationUrlDoesNotLaunchAnIntent() {
+        val transport = FakeTransport(includePostId = false, notificationUrl = "https://bit.ly/abc")
+        var openedIntent: Intent? = null
+        compose.setContent {
+            MaterialTheme {
+                NotificationsScreen(
+                    NotificationsRepository("https://api.nantty.com", ::signedInSession, transport),
+                    Executor { it.run() },
+                    onLaunchExternalUrl = { openedIntent = it },
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Ari mentioned you Hello from Ari, unread").performClick()
+        compose.onNodeWithTag("notification-link-cancel-open").performClick()
+
+        compose.runOnIdle { assertNull(openedIntent) }
+        compose.onNodeWithText("Check this link").assertDoesNotExist()
     }
 
     @Test
@@ -289,6 +336,7 @@ class NotificationsScreenTest {
         private val notificationKind: String? = null,
         private val conversationId: String? = null,
         private val messageId: String? = null,
+        private val notificationUrl: String? = null,
     ) : NotificationsTransport {
         var calls = 0
         var lastMethod: String? = null
@@ -301,7 +349,7 @@ class NotificationsScreenTest {
             return if (path.contains("cursor=next-page")) secondPage() else firstPage()
         }
 
-        private fun firstPage() = JSONObject("""{"data":[{"id":"n1","category":"${if (conversationId != null) "messages" else "social"}","${notificationKind?.let { "\"kind\":\"$it\"," } ?: ""}"title":"Ari mentioned you","body":"Hello from Ari","createdAt":"2026-10-01T12:00:00.000Z","read":false,"actor":{"id":"u1","name":"Ari"},"url":"https://evil.example/post/forged"${if (includePostId || conversationId != null) ",\"data\":{${if (includePostId) "\"postId\":\"post-1\"" else ""}${if (includePostId && conversationId != null) "," else ""}${conversationId?.let { "\"conversationId\":\"$it\"" } ?: ""}${if (conversationId != null && messageId != null) ",\"messageId\":\"$messageId\"" else ""}}" else ""}}],"nextCursor":"next-page"}""")
+        private fun firstPage() = JSONObject("""{"data":[{"id":"n1","category":"${if (conversationId != null) "messages" else "social"}","${notificationKind?.let { "\"kind\":\"$it\"," } ?: ""}"title":"Ari mentioned you","body":"Hello from Ari","createdAt":"2026-10-01T12:00:00.000Z","read":false,"actor":{"id":"u1","name":"Ari"}${notificationUrl?.let { ",\"url\":\"$it\"" } ?: ""}${if (includePostId || conversationId != null) ",\"data\":{${if (includePostId) "\"postId\":\"post-1\"" else ""}${if (includePostId && conversationId != null) "," else ""}${conversationId?.let { "\"conversationId\":\"$it\"" } ?: ""}${if (conversationId != null && messageId != null) ",\"messageId\":\"$messageId\"" else ""}}" else ""}}],"nextCursor":"next-page"}""")
         private fun secondPage() = JSONObject("""{"data":[{"id":"n2","category":"social","title":"Second notification","body":"More activity","createdAt":"2026-10-01T11:00:00.000Z","read":true}],"nextCursor":null}""")
     }
 

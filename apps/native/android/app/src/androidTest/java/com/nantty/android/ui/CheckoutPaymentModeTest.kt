@@ -69,6 +69,49 @@ class CheckoutPaymentModeTest {
     }
 
     @Test
+    fun checkoutDisplaysServerConfiguredPaymentChannelsAndIgnoresUnknownValues() {
+        val transport = RecordingCheckoutTransport().apply {
+            channelsResponse = JSONObject("""{"channels":["card","bank","bank_transfer","ussd","crypto"]}""")
+        }
+        compose.setContent {
+            MaterialTheme {
+                CheckoutScreen(
+                    repository = CheckoutRepository("https://api.nantty.com", { testSession() }, transport),
+                    providerWalletRepository = ProviderWalletPaymentRepository("https://api.nantty.com", { testSession() }, transport),
+                    savedCardCredentialStore = TestSavedCardCredentialStore(),
+                    executor = Executor { it.run() },
+                    onBack = {},
+                    onAuthenticationRequired = {},
+                    onCheckoutCreated = {},
+                )
+            }
+        }
+
+        compose.onNodeWithText("Card, Bank, Bank transfer, USSD").assertIsDisplayed()
+        compose.runOnIdle { assertTrue("/api/v1/payments/channels" in transport.getPaths) }
+    }
+
+    @Test
+    fun checkoutUsesSafeFallbackWhenServerHasNoConfiguredPaymentChannels() {
+        val transport = RecordingCheckoutTransport().apply { channelsResponse = JSONObject("""{"channels":[]}""") }
+        compose.setContent {
+            MaterialTheme {
+                CheckoutScreen(
+                    repository = CheckoutRepository("https://api.nantty.com", { testSession() }, transport),
+                    providerWalletRepository = ProviderWalletPaymentRepository("https://api.nantty.com", { testSession() }, transport),
+                    savedCardCredentialStore = TestSavedCardCredentialStore(),
+                    executor = Executor { it.run() },
+                    onBack = {},
+                    onAuthenticationRequired = {},
+                    onCheckoutCreated = {},
+                )
+            }
+        }
+
+        compose.onNodeWithText("Card, bank transfer or USSD").assertIsDisplayed()
+    }
+
+    @Test
     fun directModeIsSubmittedOnlyAfterTypingDirect() {
         val transport = RecordingCheckoutTransport()
         var checkoutCreated = false
@@ -143,16 +186,22 @@ class CheckoutPaymentModeTest {
 
     private class RecordingCheckoutTransport : CheckoutTransport {
         var checkoutBody: JSONObject? = null
+        var channelsResponse = JSONObject("""{"channels":["card","bank_transfer","ussd"]}""")
+        val getPaths = mutableListOf<String>()
         private val addressId = "2b3a4e12-1234-4234-9234-123456789abc"
 
-        override fun get(path: String, accessToken: String): JSONObject = when (path) {
-            "/api/v1/payments/wallet/me" -> JSONObject(
-                """{"wallet":{"status":"active","currency":"NGN"},"balances":{"currency":"NGN","availableMinor":5000,"depositHoldMinor":0,"debtMinor":0}}""",
-            )
-            "/api/v1/users/me/addresses" -> JSONObject(
-                """{"data":[{"id":"$addressId","fullName":"Buyer","phone":"+2348000000000","line1":"12 Market Road","city":"Lagos","state":"Lagos","country":"Nigeria","isDefault":true}]}""",
-            )
-            else -> error("Unexpected GET $path")
+        override fun get(path: String, accessToken: String): JSONObject {
+            getPaths += path
+            return when (path) {
+                "/api/v1/payments/wallet/me" -> JSONObject(
+                    """{"wallet":{"status":"active","currency":"NGN"},"balances":{"currency":"NGN","availableMinor":5000,"depositHoldMinor":0,"debtMinor":0}}""",
+                )
+                "/api/v1/users/me/addresses" -> JSONObject(
+                    """{"data":[{"id":"$addressId","fullName":"Buyer","phone":"+2348000000000","line1":"12 Market Road","city":"Lagos","state":"Lagos","country":"Nigeria","isDefault":true}]}""",
+                )
+                "/api/v1/payments/channels" -> channelsResponse
+                else -> error("Unexpected GET $path")
+            }
         }
 
         override fun post(path: String, accessToken: String, body: JSONObject, idempotencyKey: String?): JSONObject = when (path) {

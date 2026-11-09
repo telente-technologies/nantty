@@ -11,12 +11,14 @@ import com.nantty.android.data.CartRepository
 import com.nantty.android.data.CartTransport
 import com.nantty.android.data.FeedPost
 import com.nantty.android.data.FeedTaggedProduct
+import com.nantty.android.data.SaleAttributionSource
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.Executor
+import java.util.UUID
 
 class FeedTaggedProductsTest {
     @get:Rule
@@ -25,11 +27,16 @@ class FeedTaggedProductsTest {
     @Test
     fun taggedFeedProductOpensTheNativeProductDetailDestination() {
         var openedProductId: String? = null
+        var openedAttribution: com.nantty.android.data.SaleAttribution? = null
         composeRule.setContent {
             MaterialTheme {
                 FeedCard(
                     post = taggedFeedPost(listOf(FeedTaggedProduct("product-42", "Linen set", 1_250_000, "NGN", null, 4))),
                     onOpenProduct = { openedProductId = it },
+                    onOpenProductWithAttribution = { productId, attribution ->
+                        openedProductId = productId
+                        openedAttribution = attribution
+                    },
                 )
             }
         }
@@ -37,18 +44,24 @@ class FeedTaggedProductsTest {
         composeRule.onNodeWithText("View products (1)").performClick()
         composeRule.onNodeWithTag("feed-tagged-products-sheet").assertIsDisplayed()
         composeRule.onNodeWithTag("feed-tagged-product-product-42").performClick()
-        composeRule.runOnIdle { assertEquals("product-42", openedProductId) }
+        composeRule.runOnIdle {
+            assertEquals("product-42", openedProductId)
+            assertEquals(SaleAttributionSource.POST, openedAttribution?.source)
+            assertEquals(TEST_POST_ID, openedAttribution?.id)
+        }
     }
 
     @Test
     fun taggedProductsAddIndividuallyAndBulkAddUsesTheExistingSingleItemContract() {
         val addedProductIds = mutableListOf<String>()
+        val recordedBodies = mutableListOf<JSONObject>()
         var openedCart = false
         val transport = object : CartTransport {
             override fun get(path: String, accessToken: String) = JSONObject()
             override fun add(path: String, accessToken: String, body: JSONObject) {
                 assertEquals("/api/v1/cart/items", path)
                 addedProductIds += body.getString("productId")
+                recordedBodies += JSONObject(body.toString())
                 assertEquals(1, body.getInt("quantity"))
             }
             override fun patch(path: String, accessToken: String, body: JSONObject) = Unit
@@ -85,10 +98,12 @@ class FeedTaggedProductsTest {
             assertEquals(listOf("product-42", "product-43"), addedProductIds)
             assertTrue(openedCart)
         }
+        assertEquals("post", recordedBodies.first().getJSONObject("attribution").getString("source"))
+        assertEquals(TEST_POST_ID, recordedBodies.first().getJSONObject("attribution").getString("id"))
     }
 
     private fun taggedFeedPost(products: List<FeedTaggedProduct>) = FeedPost(
-        id = "post-products",
+        id = TEST_POST_ID,
         authorName = "Ari",
         username = "ari",
         avatarUrl = null,
@@ -107,4 +122,8 @@ class FeedTaggedProductsTest {
         createdAt = "2026-11-07T10:00:00Z",
         products = products,
     )
+
+    companion object {
+        private val TEST_POST_ID = UUID.fromString("23a7b4a2-aef6-41c1-a1d0-0b7e6e02a629").toString()
+    }
 }

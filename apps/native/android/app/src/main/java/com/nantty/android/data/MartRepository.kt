@@ -5,22 +5,59 @@ import java.net.HttpURLConnection
 import java.net.URL
 import org.json.JSONArray
 import org.json.JSONObject
+import java.time.Instant
 
 class MartRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val accessTokenProvider: () -> String? = { null },
     private val accountIdProvider: () -> String? = { null },
+    private val affiliateVisitorIdProvider: () -> String? = { null },
     private val openConnection: (URL) -> HttpURLConnection = { it.openConnection() as HttpURLConnection },
 ) {
     private val interactionRepository by lazy { ProductInteractionRepository(baseUrl, accessTokenProvider, openConnection) }
 
     internal fun currentAccessToken(): String? = accessTokenProvider()
 
+    internal fun apiBaseUrl(): String = baseUrl
+
     internal fun currentAccountId(): String? = accountIdProvider()?.takeIf(String::isNotBlank)
+
+    internal fun productInteractions(): ProductInteractionRepository = interactionRepository
 
     fun recordCategoryViewed(categoryId: String): Boolean = interactionRepository.recordCategoryViewed(categoryId)
 
     fun recordProductClicked(productId: String, surface: String? = null): Boolean = interactionRepository.recordProductClicked(productId, surface)
+
+    fun recordProductViewed(productId: String): Boolean = interactionRepository.recordProductViewed(productId)
+
+    fun recordProductPurchased(productId: String, quantity: Int): Boolean =
+        interactionRepository.recordProductPurchased(productId, quantity)
+
+    /** Records an affiliate landing with the canonical backend contract and returns only matching attribution. */
+    internal fun recordAffiliateLinkClick(linkId: String, expectedProductId: String): SaleAttribution? {
+        if (!linkId.matches(AFFILIATE_LINK_ID_PATTERN) || !isSafeMartIdentifier(expectedProductId)) return null
+        val visitorId = affiliateVisitorIdProvider()?.takeIf(::isSafeAffiliateVisitorId) ?: return null
+        return runCatching {
+            val response = MartHttpTransport.postJsonResponse(
+                buildAffiliateLinkClickUrl(baseUrl, linkId),
+                accessTokenProvider(),
+                JSONObject().put("visitorId", visitorId),
+                openConnection,
+            )
+            if (response.status !in 200..299 || response.body.isBlank()) return null
+            val root = JSONObject(response.body)
+            val payload = root.optJSONObject("data") ?: root
+            val attribution = payload.optJSONObject("attribution") ?: return null
+            val productId = payload.optString("productId")
+            val source = attribution.optString("source")
+            val returnedLinkId = attribution.optString("id")
+            val expiresAt = Instant.parse(payload.optString("expiresAt")).toEpochMilli()
+            if (productId != expectedProductId || source != SaleAttributionSource.LINK.apiValue ||
+                returnedLinkId != linkId || expiresAt <= System.currentTimeMillis()
+            ) return null
+            SaleAttribution(SaleAttributionSource.LINK, linkId, expiresAt)
+        }.getOrNull()
+    }
 
     fun loadHome(): MartResult = get(buildMartHomeUrl(baseUrl), MartResponseParser::parseHome)
 
@@ -104,3 +141,8 @@ class MartRepository(
         }
     }
 }
+
+private val AFFILIATE_LINK_ID_PATTERN = Regex("[A-Za-z0-9_-]{1,80}")
+
+private fun isSafeAffiliateVisitorId(value: String): Boolean =
+    value.length in 8..80 && value.all { it.isLetterOrDigit() || it == '-' || it == '_' }

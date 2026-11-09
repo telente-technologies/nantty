@@ -18,7 +18,8 @@ class ProductInteractionRepository(
     private val origin = trustedApiOrigin(baseUrl)
     private var consentToken: String? = null
     private var consentLoadedAt = 0L
-    private var canPersonalize = false
+    private var analyticsGranted = false
+    private var personalizationGranted = false
 
     fun recordCategoryViewed(categoryId: String): Boolean = record("category.viewed", JSONObject().put("categoryId", categoryId))
 
@@ -27,6 +28,21 @@ class ProductInteractionRepository(
         val payload = JSONObject().put("productId", productId)
         surface?.let { payload.put("surface", it) }
         return record("product.clicked", payload)
+    }
+
+    fun recordProductViewed(productId: String): Boolean = recordProductEvent("product.viewed", productId)
+
+    fun recordProductAddedToCart(productId: String, quantity: Int): Boolean =
+        recordProductEvent("product.addedToCart", productId, quantity)
+
+    fun recordProductPurchased(productId: String, quantity: Int): Boolean =
+        recordProductEvent("product.purchased", productId, quantity)
+
+    private fun recordProductEvent(event: String, productId: String, quantity: Int? = null): Boolean {
+        if (!isSafeMartIdentifier(productId) || quantity?.let { it !in 1..MAX_PRODUCT_QUANTITY } == true) return false
+        val payload = JSONObject().put("productId", productId)
+        quantity?.let { payload.put("quantity", it) }
+        return record(event, payload)
     }
 
     fun recordSearchPerformed(query: String, resultCount: Int): Boolean {
@@ -49,7 +65,7 @@ class ProductInteractionRepository(
         val token = accessTokenProvider()?.takeIf(String::isNotBlank) ?: return false
         if (payload.has("productId") && !isSafeMartIdentifier(payload.optString("productId"))) return false
         if (payload.has("categoryId") && !isSafeMartIdentifier(payload.optString("categoryId"))) return false
-        if (!hasRequiredConsent(token)) return false
+        if (!hasRequiredConsent(token, event)) return false
         return try {
             val connection = openConnection(interactionEventsUrl(origin ?: error("Configure the Nantty API URL."))).apply {
                 requestMethod = "POST"
@@ -75,9 +91,11 @@ class ProductInteractionRepository(
         }
     }
 
-    private fun hasRequiredConsent(token: String): Boolean {
+    private fun hasRequiredConsent(token: String, event: String): Boolean {
         val currentTime = nowMillis()
-        if (consentToken == token && currentTime - consentLoadedAt < CONSENT_CACHE_TTL_MS) return canPersonalize
+        if (consentToken == token && currentTime - consentLoadedAt < CONSENT_CACHE_TTL_MS) {
+            return analyticsGranted && (!requiresPersonalizationConsent(event) || personalizationGranted)
+        }
         val allowed = try {
             val connection = openConnection(consentUrl(origin ?: error("Configure the Nantty API URL."))).apply {
                 requestMethod = "GET"
@@ -89,28 +107,29 @@ class ProductInteractionRepository(
                 setRequestProperty("Authorization", "Bearer $token")
             }
             connection.useInteractionConnection {
-                if (connection.responseCode !in 200..299) return@useInteractionConnection false
+                if (connection.responseCode !in 200..299) return@useInteractionConnection (false to false)
                 val body = connection.inputStream.use(::readInteractionResponse)
-                val rows = JSONObject(body).optJSONArray("data") ?: return@useInteractionConnection false
-                var analyticsGranted = false
-                var personalizationGranted = false
+                val rows = JSONObject(body).optJSONArray("data") ?: return@useInteractionConnection (false to false)
+                var hasAnalyticsConsent = false
+                var hasPersonalizationConsent = false
                 for (index in 0 until rows.length()) {
                     val row = rows.optJSONObject(index) ?: continue
                     if (row.optString("status") != "granted") continue
                     when (row.optString("consentType")) {
-                        "analytics" -> analyticsGranted = true
-                        "personalization" -> personalizationGranted = true
+                        "analytics" -> hasAnalyticsConsent = true
+                        "personalization" -> hasPersonalizationConsent = true
                     }
                 }
-                analyticsGranted && personalizationGranted
+                hasAnalyticsConsent to hasPersonalizationConsent
             }
         } catch (_: Exception) {
-            false
+            false to false
         }
         consentToken = token
         consentLoadedAt = currentTime
-        canPersonalize = allowed
-        return allowed
+        analyticsGranted = allowed.first
+        personalizationGranted = allowed.second
+        return analyticsGranted && (!requiresPersonalizationConsent(event) || personalizationGranted)
     }
 
     private fun readInteractionResponse(input: java.io.InputStream): String {
@@ -131,6 +150,14 @@ class ProductInteractionRepository(
         private const val CONSENT_CACHE_TTL_MS = 60_000L
         private const val MAX_CONSENT_RESPONSE_BYTES = 256 * 1024
         private const val MAX_SEARCH_QUERY_LENGTH = 200
+        private const val MAX_PRODUCT_QUANTITY = 99
+        private fun requiresPersonalizationConsent(event: String): Boolean = event in setOf(
+            "product.viewed",
+            "product.clicked",
+            "search.performed",
+            "seller.viewed",
+            "category.viewed",
+        )
     }
 }
 

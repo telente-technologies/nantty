@@ -13,23 +13,27 @@ import com.nantty.android.data.ClipsRepository
 import com.nantty.android.data.AdsWorkspaceRepository
 import com.nantty.android.data.BrandProfilesRepository
 import com.nantty.android.data.BuyerOrdersRepository
+import com.nantty.android.data.BuyerReturnsRepository
 import com.nantty.android.data.CountryPreferenceRepository
 import com.nantty.android.data.ChatNotificationSettingsRepository
 import com.nantty.android.data.ProductReviewsRepository
 import com.nantty.android.data.ProductInteractionRepository
 import com.nantty.android.data.CartRepository
 import com.nantty.android.data.CheckoutRepository
+import com.nantty.android.data.ShippingAddressesRepository
 import com.nantty.android.data.ProviderWalletPaymentRepository
 import com.nantty.android.data.SavedCardCredentialStore
 import com.nantty.android.data.AndroidSavedCardCredentialStore
 import com.nantty.android.data.SavedCardRepository
 import com.nantty.android.data.CurrentProfileRepository
 import com.nantty.android.data.CreatorWorkspaceRepository
+import com.nantty.android.data.CreatorAffiliatesRepository
 import com.nantty.android.data.CreatorSampleMediaRepository
 import com.nantty.android.data.DisputeRepository
 import com.nantty.android.data.ExploreRepository
 import com.nantty.android.data.FollowRequestsRepository
 import com.nantty.android.data.MartRepository
+import com.nantty.android.data.MentionPrivacyRepository
 import com.nantty.android.data.MessagesRepository
 import com.nantty.android.data.NotificationsRepository
 import com.nantty.android.data.PublicProfileRepository
@@ -39,6 +43,8 @@ import com.nantty.android.data.SavedPostsRepository
 import com.nantty.android.data.SearchRepository
 import com.nantty.android.data.SellerWorkspaceRepository
 import com.nantty.android.data.SellerOrdersRepository
+import com.nantty.android.data.SellerReturnsRepository
+import com.nantty.android.data.SellerCatalogRepository
 import com.nantty.android.data.SellerShipmentRepository
 import com.nantty.android.data.StoreRepository
 import com.nantty.android.data.SupportTicketRepository
@@ -52,11 +58,13 @@ internal data class SignedInRepositories(
     val checkout: CheckoutRepository,
     val providerWalletPayments: ProviderWalletPaymentRepository,
     val buyerOrders: BuyerOrdersRepository,
+    val buyerReturns: BuyerReturnsRepository,
     val productReviews: ProductReviewsRepository,
     val disputes: DisputeRepository,
     val notifications: NotificationsRepository,
     val accountNotificationSettings: AccountNotificationSettingsRepository,
     val countryPreference: CountryPreferenceRepository,
+    val mentionPrivacy: MentionPrivacyRepository,
     val messages: MessagesRepository,
     val search: SearchRepository,
     val explore: ExploreRepository,
@@ -68,11 +76,13 @@ internal data class SignedInRepositories(
     val followRequests: FollowRequestsRepository,
     val sellerWorkspace: SellerWorkspaceRepository,
     val creatorWorkspace: CreatorWorkspaceRepository,
+    val creatorAffiliates: CreatorAffiliatesRepository,
     val brandProfiles: BrandProfilesRepository,
     val adsWorkspace: AdsWorkspaceRepository,
     val profileImages: ProfileImageRepository,
     val privateMediaUploads: CreatorSampleMediaRepository,
     val sellerOrders: SellerOrdersRepository,
+    val sellerCatalog: SellerCatalogRepository,
     val sellerShipment: SellerShipmentRepository,
     val chatNotificationSettings: ChatNotificationSettingsRepository,
     val supportTickets: SupportTicketRepository,
@@ -83,6 +93,8 @@ internal data class SignedInRepositories(
     val savedCardCredentials: SavedCardCredentialStore,
     val accountHealth: AccountHealthRepository,
     val identityVerification: IdentityVerificationRepository,
+    val shippingAddresses: ShippingAddressesRepository,
+    val sellerReturns: SellerReturnsRepository,
 )
 
 @Composable
@@ -94,7 +106,18 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
             refreshSessionProvider = sessionRepository::refreshSession,
         )
     }
-    val cart = remember(sessionRepository) { CartRepository(accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken }) }
+    val affiliateVisitorIds = remember(appContext) { com.nantty.android.data.AffiliateVisitorIdStore(appContext) }
+    val productInteractions = remember(sessionRepository) {
+        ProductInteractionRepository(
+            accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken },
+        )
+    }
+    val cart = remember(sessionRepository, productInteractions) {
+        CartRepository(
+            accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken },
+            productInteractionRepository = productInteractions,
+        )
+    }
     val checkout = remember(sessionRepository) { CheckoutRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val providerWalletPayments = remember(sessionRepository) { ProviderWalletPaymentRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val savedCards = remember(sessionRepository) { SavedCardRepository(sessionProvider = sessionRepository::sessionOrNull) }
@@ -102,6 +125,7 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
         AndroidSavedCardCredentialStore(appContext) { sessionRepository.sessionOrNull()?.user?.id }
     }
     val buyerOrders = remember(sessionRepository) { BuyerOrdersRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val buyerReturns = remember(sessionRepository) { BuyerReturnsRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val productReviews = remember(sessionRepository) { ProductReviewsRepository(accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken }) }
     val disputes = remember(sessionRepository) { DisputeRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val notifications = remember(sessionRepository) { NotificationsRepository(sessionProvider = sessionRepository::sessionOrNull) }
@@ -113,15 +137,22 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
             refreshSessionProvider = sessionRepository::refreshSession,
         )
     }
+    val shippingAddresses = remember(sessionRepository) {
+        ShippingAddressesRepository(
+            sessionProvider = sessionRepository::sessionOrNull,
+            refreshSessionProvider = sessionRepository::refreshSession,
+        )
+    }
     val countryPreference = remember(sessionRepository) {
         CountryPreferenceRepository(
             sessionProvider = sessionRepository::sessionOrNull,
             refreshSessionProvider = sessionRepository::refreshSession,
         )
     }
-    val productInteractions = remember(sessionRepository) {
-        ProductInteractionRepository(
-            accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken },
+    val mentionPrivacy = remember(sessionRepository) {
+        MentionPrivacyRepository(
+            sessionProvider = sessionRepository::sessionOrNull,
+            refreshSessionProvider = sessionRepository::refreshSession,
         )
     }
     val messages = remember(sessionRepository) {
@@ -135,10 +166,11 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
     }
     val explore = remember(sessionRepository) { ExploreRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val savedPosts = remember(sessionRepository) { SavedPostsRepository(sessionProvider = sessionRepository::sessionOrNull) }
-    val mart = remember(sessionRepository) {
+    val mart = remember(sessionRepository, affiliateVisitorIds) {
         MartRepository(
             accessTokenProvider = { sessionRepository.sessionOrNull()?.accessToken },
             accountIdProvider = { sessionRepository.sessionOrNull()?.user?.id },
+            affiliateVisitorIdProvider = affiliateVisitorIds::getOrCreate,
         )
     }
     val publicProfile = remember(sessionRepository) { PublicProfileRepository(sessionProvider = sessionRepository::sessionOrNull) }
@@ -153,6 +185,12 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
     val sellerWorkspace = remember(sessionRepository) { SellerWorkspaceRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val creatorWorkspace = remember(sessionRepository) {
         CreatorWorkspaceRepository(
+            sessionProvider = sessionRepository::sessionOrNull,
+            refreshSessionProvider = sessionRepository::refreshSession,
+        )
+    }
+    val creatorAffiliates = remember(sessionRepository) {
+        CreatorAffiliatesRepository(
             sessionProvider = sessionRepository::sessionOrNull,
             refreshSessionProvider = sessionRepository::refreshSession,
         )
@@ -172,6 +210,10 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
         )
     }
     val sellerOrders = remember(sessionRepository) { SellerOrdersRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val sellerReturns = remember(sessionRepository) { SellerReturnsRepository(sessionProvider = sessionRepository::sessionOrNull) }
+    val sellerCatalog = remember(sessionRepository, privateMediaUploads) {
+        SellerCatalogRepository(sessionProvider = sessionRepository::sessionOrNull, mediaUploads = privateMediaUploads)
+    }
     val sellerShipment = remember(sessionRepository) { SellerShipmentRepository(sessionProvider = sessionRepository::sessionOrNull) }
     val chatNotificationSettings = remember(sessionRepository) {
         ChatNotificationSettingsRepository(
@@ -206,11 +248,13 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
         checkout,
         providerWalletPayments,
         buyerOrders,
+        buyerReturns,
         productReviews,
         disputes,
         notifications,
         accountNotificationSettings,
         countryPreference,
+        mentionPrivacy,
         messages,
         search,
         explore,
@@ -222,11 +266,13 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
         followRequests,
         sellerWorkspace,
         creatorWorkspace,
+        creatorAffiliates,
         brandProfiles,
         adsWorkspace,
         profileImages,
         privateMediaUploads,
         sellerOrders,
+        sellerCatalog,
         sellerShipment,
         chatNotificationSettings,
         supportTickets,
@@ -237,6 +283,8 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
         savedCardCredentials,
         accountHealth,
         identityVerification,
+        shippingAddresses,
+        sellerReturns,
     ) {
         SignedInRepositories(
             wallet,
@@ -244,11 +292,13 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
             checkout,
             providerWalletPayments,
             buyerOrders,
+            buyerReturns,
             productReviews,
             disputes,
             notifications,
             accountNotificationSettings,
             countryPreference,
+            mentionPrivacy,
             messages,
             search,
             explore,
@@ -260,11 +310,13 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
             followRequests,
             sellerWorkspace,
             creatorWorkspace,
+            creatorAffiliates,
             brandProfiles,
             adsWorkspace,
             profileImages,
             privateMediaUploads,
             sellerOrders,
+            sellerCatalog,
             sellerShipment,
             chatNotificationSettings,
             supportTickets,
@@ -275,6 +327,8 @@ internal fun rememberSignedInRepositories(sessionRepository: AccountSessionRepos
             savedCardCredentials,
             accountHealth,
             identityVerification,
+            shippingAddresses,
+            sellerReturns,
         )
     }
 }

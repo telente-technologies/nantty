@@ -163,6 +163,29 @@ class BuyerOrderDetailRepositoryTest {
     }
 
     @Test
+    fun cancellationUsesBuyerRouteAndOnlyAcceptsConfirmedCancelledStatus() {
+        val transport = RecordingTransport(detail(status = "cancelled"))
+        val result = BuyerOrdersRepository("https://api.nantty.com", ::signedInSession, transport)
+            .cancelOrder("order_123") as BuyerOrderCancellationResult.Success
+
+        assertEquals("/api/v1/orders/order_123/cancel", transport.cancelPath)
+        assertEquals("orders-access", transport.cancelToken)
+        assertEquals("Cancelled by buyer", transport.cancelReason)
+        assertEquals("cancelled", result.order.status)
+    }
+
+    @Test
+    fun cancellationEligibilityMatchesBuyerBackendStatusRules() {
+        assertTrue(buyerCanCancelOrder("new"))
+        assertTrue(buyerCanCancelOrder("pending"))
+        assertFalse(buyerCanCancelOrder("paid"))
+        assertFalse(buyerCanCancelOrder("shipped"))
+        assertFalse(buyerCanCancelOrder("cancelled"))
+        assertEquals("/api/v1/orders/order_123/cancel", buildBuyerOrderCancelPath("order_123"))
+        assertFalse(runCatching { buildBuyerOrderCancelPath("../foreign") }.isSuccess)
+    }
+
+    @Test
     fun rejectsMalformedOrderIdAndMissingSessionBeforePosting() {
         val transport = RecordingTransport(detail())
         val repository = BuyerOrdersRepository("https://api.nantty.com", ::signedInSession, transport)
@@ -205,7 +228,7 @@ class BuyerOrderDetailRepositoryTest {
     private class RecordingTransport(
         private val response: JSONObject,
         private val statusCode: Int = 200,
-    ) : BuyerOrderReceiptTransport {
+    ) : BuyerOrderReceiptTransport, BuyerOrderCancellationTransport {
         var path: String? = null
         var token: String? = null
         var postPath: String? = null
@@ -213,6 +236,9 @@ class BuyerOrderDetailRepositoryTest {
         var idempotencyKey: String = ""
         val idempotencyKeys = mutableListOf<String>()
         var postCalls = 0
+        var cancelPath: String? = null
+        var cancelToken: String? = null
+        var cancelReason: String? = null
 
         override fun get(path: String, accessToken: String): JSONObject {
             this.path = path
@@ -227,6 +253,14 @@ class BuyerOrderDetailRepositoryTest {
             this.idempotencyKey = idempotencyKey
             idempotencyKeys += idempotencyKey
             postCalls += 1
+            if (statusCode !in 200..299) throw BuyerOrdersHttpException(statusCode)
+            return response
+        }
+
+        override fun cancel(path: String, accessToken: String, reason: String): JSONObject {
+            cancelPath = path
+            cancelToken = accessToken
+            cancelReason = reason
             if (statusCode !in 200..299) throw BuyerOrdersHttpException(statusCode)
             return response
         }

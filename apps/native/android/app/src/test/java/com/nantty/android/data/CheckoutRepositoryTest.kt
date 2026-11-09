@@ -240,6 +240,28 @@ class CheckoutRepositoryTest {
         assertFalse(failure.message.isBlank())
     }
 
+    @Test
+    fun loadsOnlySupportedConfiguredPaymentChannelsFromTheExistingPublicRoute() {
+        val transport = RecordingTransport().apply {
+            getResponse = JSONObject("""{"channels":["card","bank","bank_transfer","ussd","CARD","crypto","bank"]}""")
+        }
+
+        val channels = repository(transport).loadPaymentChannels()
+
+        assertEquals("/api/v1/payments/channels", transport.path)
+        assertEquals("buyer-token", transport.token)
+        assertEquals(listOf("card", "bank", "bank_transfer", "ussd"), channels)
+    }
+
+    @Test
+    fun unavailableOrUnauthenticatedPaymentChannelConfigurationFallsBackWithoutThrowing() {
+        val transport = RecordingTransport().apply { getResponse = JSONObject("""{"channels":[]}""") }
+
+        assertTrue(repository(transport).loadPaymentChannels().isEmpty())
+        assertTrue(CheckoutRepository("https://api.nantty.com", { null }, transport).loadPaymentChannels().isEmpty())
+        assertEquals(1, transport.calls)
+    }
+
     private fun repository(transport: RecordingTransport = RecordingTransport()) =
         CheckoutRepository("https://api.nantty.com", { AccountSession("buyer-token", "refresh", AccountUser("u", "Buyer", "buyer", null, null, emptyList())) }, transport)
 
@@ -248,16 +270,19 @@ class CheckoutRepositoryTest {
         var token: String? = null
         var body: JSONObject? = null
         var idempotencyKey: String? = null
+        var calls = 0
         var getResponse = JSONObject()
         var postResponse = JSONObject()
 
         override fun get(path: String, accessToken: String): JSONObject {
+            calls += 1
             this.path = path
             token = accessToken
             return getResponse
         }
 
         override fun post(path: String, accessToken: String, body: JSONObject, idempotencyKey: String?): JSONObject {
+            calls += 1
             this.path = path
             token = accessToken
             this.body = body

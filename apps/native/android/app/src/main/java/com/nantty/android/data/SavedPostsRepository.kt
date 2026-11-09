@@ -9,8 +9,13 @@ import java.net.URL
 import java.net.URLEncoder
 
 data class SavedPost(val saveId: String, val post: FeedPost, val savedAt: String)
-data class SavedPostsPage(val posts: List<SavedPost>, val nextCursor: String?)
-enum class SavedPostType(val apiValue: String) { POSTS("post"), VIDEOS("video") }
+data class SavedProductItem(val saveId: String, val product: MartProduct, val savedAt: String)
+data class SavedPostsPage(
+    val posts: List<SavedPost>,
+    val nextCursor: String?,
+    val products: List<SavedProductItem> = emptyList(),
+)
+enum class SavedPostType(val apiValue: String) { POSTS("post"), VIDEOS("video"), PRODUCTS("product") }
 
 sealed interface SavedPostsResult {
     data class Success(val page: SavedPostsPage) : SavedPostsResult
@@ -47,15 +52,45 @@ class SavedPostsRepository(
                 if (row.optString("type") != type.apiValue) continue
                 val id = row.optString("id").takeIf(::isUuid) ?: continue
                 val targetId = row.optString("targetId").takeIf(::isUuid) ?: continue
+                if (type == SavedPostType.PRODUCTS) continue
                 val postJson = row.optJSONObject("post") ?: continue
                 if (postJson.optString("id") != targetId) continue
                 val post = parseSavedPost(targetId, postJson) ?: continue
                 add(SavedPost(id, post, row.optString("savedAt")))
             }
         }
+        val products = if (type != SavedPostType.PRODUCTS) emptyList() else buildList {
+            for (index in 0 until rows.length()) {
+                val row = rows.optJSONObject(index) ?: continue
+                if (row.optString("type") != SavedPostType.PRODUCTS.apiValue) continue
+                val saveId = row.optString("id").takeIf(::isUuid) ?: continue
+                val targetId = row.optString("targetId").takeIf(::isUuid) ?: continue
+                val productJson = row.optJSONObject("product") ?: continue
+                if (productJson.optString("id") != targetId) continue
+                val name = productJson.optString("name").trim().takeIf(String::isNotEmpty) ?: continue
+                val price = productJson.optJSONObject("price") ?: continue
+                val amountMinor = readSavedProductMinorUnits(price) ?: continue
+                val currency = readSavedProductCurrency(price) ?: continue
+                val imageUrl = safeMediaUrl(productJson.optNullableString("imageUrl"))
+                add(
+                    SavedProductItem(
+                        saveId = saveId,
+                        product = MartProduct(
+                            id = targetId,
+                            name = name,
+                            amountMinor = amountMinor,
+                            currency = currency,
+                            imageUrl = imageUrl,
+                            stock = productJson.optInt("stock").coerceAtLeast(0),
+                        ),
+                        savedAt = row.optString("savedAt"),
+                    ),
+                )
+            }
+        }
         val cursor = payload.optString("nextCursor").takeIf { it.isNotBlank() && it != "null" }
         require(cursor == null || isUuid(cursor)) { "Nantty returned an invalid saved-posts page cursor." }
-        return SavedPostsPage(posts, cursor)
+        return SavedPostsPage(posts, cursor, products)
     }
 
     companion object {
@@ -70,6 +105,11 @@ internal fun buildSavedPostsPath(cursor: String? = null, type: SavedPostType = S
 
 internal fun appendUniqueSavedPosts(current: List<SavedPost>, incoming: List<SavedPost>): List<SavedPost> {
     val seen = current.mapTo(mutableSetOf(), SavedPost::saveId)
+    return current + incoming.filter { seen.add(it.saveId) }
+}
+
+internal fun appendUniqueSavedProducts(current: List<SavedProductItem>, incoming: List<SavedProductItem>): List<SavedProductItem> {
+    val seen = current.mapTo(mutableSetOf(), SavedProductItem::saveId)
     return current + incoming.filter { seen.add(it.saveId) }
 }
 
@@ -125,13 +165,26 @@ private fun parseSavedPost(id: String, item: JSONObject): FeedPost? {
 
 private fun JSONObject.optNullableString(key: String): String? = optString(key).takeIf { it.isNotBlank() && it != "null" }
 
+private fun readSavedProductMinorUnits(price: JSONObject): Long? {
+    val raw = price.opt("amountMinor") as? Number ?: return null
+    val amount = raw.toLong()
+    return amount.takeIf { it >= 0 && raw.toDouble() == it.toDouble() }
+}
+
+private fun readSavedProductCurrency(price: JSONObject): String? {
+    val code = price.optString("currency")
+    if (!code.matches(Regex("[A-Z]{3}"))) return null
+    return code.takeIf { runCatching { java.util.Currency.getInstance(it) }.isSuccess }
+}
+
 private fun isUuid(value: String): Boolean = UUID_PATTERN.matches(value)
 
 private val UUID_PATTERN = Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")
 
 private class JdkSavedPostsTransport(private val baseUrl: String) : SavedPostsTransport {
     override fun get(path: String, accessToken: String): JSONObject {
-        require(path == buildSavedPostsPath() || path.startsWith("${buildSavedPostsPath()}&cursor=")) { "Unsupported saved-posts request." }
+        val supportedPaths = SavedPostType.entries.map { type -> buildSavedPostsPath(type = type) }
+        require(supportedPaths.any { prefix -> path == prefix || path.startsWith("$prefix&cursor=") }) { "Unsupported saved-items request." }
         val origin = trustedApiOrigin(baseUrl) ?: error("Configure an HTTPS Nantty API URL to view saved posts.")
         val connection = (URL(origin + path).openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"

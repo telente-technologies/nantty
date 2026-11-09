@@ -56,6 +56,8 @@ data class AdsWorkspaceBoostActions(
     val pause: Boolean,
     val resume: Boolean,
     val stop: Boolean,
+    val changeBudget: Boolean = false,
+    val resubmit: Boolean = false,
 )
 
 data class AdsWorkspaceBoostPage(val boosts: List<AdsWorkspaceBoost>, val nextCursor: String?)
@@ -91,12 +93,18 @@ fun interface AdsWorkspaceMutationTransport {
     fun post(path: String, accessToken: String, idempotencyKey: String, body: JSONObject): JSONObject
 }
 
-class AdsWorkspaceRepository(
+internal class AdsWorkspaceRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val sessionProvider: () -> AccountSession?,
     private val transport: AdsWorkspaceTransport = JdkAdsWorkspaceTransport(baseUrl),
     private val refreshSessionProvider: () -> AccountSession? = { null },
     private val mutationTransport: AdsWorkspaceMutationTransport = JdkAdsWorkspaceTransport(baseUrl),
+    internal val campaignRepository: AdsCampaignRepository = AdsCampaignRepository(sessionProvider, refreshSessionProvider),
+    internal val balanceRepository: AdsBalanceRepository = AdsBalanceRepository(
+        baseUrl = baseUrl,
+        sessionProvider = sessionProvider,
+        refreshSessionProvider = refreshSessionProvider,
+    ),
 ) {
     fun loadBoosts(filter: AdsWorkspaceFilter = AdsWorkspaceFilter.ALL, cursor: String? = null): AdsWorkspaceResult<AdsWorkspaceBoostPage> = try {
         val session = requireSession("view your ads")
@@ -271,6 +279,8 @@ class AdsWorkspaceRepository(
                 pause = actions.optBoolean("pause", false),
                 resume = actions.optBoolean("resume", false),
                 stop = actions.optBoolean("stop", false),
+                changeBudget = actions.optBoolean("changeBudget", false),
+                resubmit = actions.optBoolean("resubmit", false),
             ),
         )
     }

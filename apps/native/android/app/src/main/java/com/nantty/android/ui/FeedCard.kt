@@ -58,6 +58,8 @@ import com.nantty.android.data.CartRepository
 import com.nantty.android.data.SharedContentReference
 import com.nantty.android.data.SharedContentResult
 import com.nantty.android.data.SharedContentCard
+import com.nantty.android.data.SaleAttribution
+import com.nantty.android.data.saleAttributionForFeedPost
 import java.util.concurrent.Executor
 
 @Composable
@@ -82,6 +84,7 @@ internal fun FeedCard(
     onOpenAnalytics: ((String) -> Unit)? = null,
     onFollowAuthor: ((FeedPost) -> Unit)? = null,
     onOpenProduct: ((String) -> Unit)? = null,
+    onOpenProductWithAttribution: ((String, SaleAttribution?) -> Unit)? = null,
     cartRepository: CartRepository? = null,
     ioExecutor: Executor? = null,
     onRequireSignInWithAction: ((() -> Unit) -> Unit) = {},
@@ -294,10 +297,12 @@ internal fun FeedCard(
     if (taggedProductsVisible && onOpenProduct != null) {
         FeedTaggedProductsSheet(
             products = post.products,
+            attribution = saleAttributionForFeedPost(post),
             onDismiss = { taggedProductsVisible = false },
             onOpenProduct = { productId ->
                 taggedProductsVisible = false
-                onOpenProduct(productId)
+                onOpenProductWithAttribution?.invoke(productId, saleAttributionForFeedPost(post))
+                    ?: onOpenProduct(productId)
             },
             cartRepository = cartRepository,
             ioExecutor = ioExecutor,

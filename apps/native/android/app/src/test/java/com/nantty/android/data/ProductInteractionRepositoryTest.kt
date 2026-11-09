@@ -112,6 +112,65 @@ class ProductInteractionRepositoryTest {
         assertEquals("mart_recommendations", eventPayload(requests.last()).getString("surface"))
     }
 
+    @Test
+    fun recordsProductViewAndCartSignalsWithOnlyProductAndQuantityData() {
+        val requests = mutableListOf<InteractionConnection>()
+        val repository = ProductInteractionRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "viewer-token" },
+            openConnection = { url ->
+                InteractionConnection(url, when {
+                    url.path.endsWith("/users/me/consents") -> 200 to """{"data":[{"consentType":"analytics","status":"granted"},{"consentType":"personalization","status":"granted"}]}"""
+                    else -> 202 to "{}"
+                }).also(requests::add)
+            },
+        )
+
+        assertTrue(repository.recordProductViewed("product-1"))
+        assertTrue(repository.recordProductAddedToCart("product-1", 2))
+
+        assertEquals(listOf("product.viewed", "product.addedToCart"), requests.drop(1).map(::eventName))
+        requests.drop(1).forEach { request ->
+            val payload = eventPayload(request)
+            assertEquals("product-1", payload.getString("productId"))
+            assertFalse(payload.has("query"))
+            assertFalse(payload.has("email"))
+            assertFalse(payload.has("userId"))
+        }
+        assertEquals(2, eventPayload(requests[2]).getInt("quantity"))
+    }
+
+    @Test
+    fun cartEventsRequireAnalyticsButNotPersonalizationConsentLikeReactNative() {
+        val requests = mutableListOf<InteractionConnection>()
+        val repository = ProductInteractionRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "viewer-token" },
+            openConnection = { url ->
+                InteractionConnection(url, when {
+                    url.path.endsWith("/users/me/consents") -> 200 to """{"data":[{"consentType":"analytics","status":"granted"}]}"""
+                    else -> 202 to "{}"
+                }).also(requests::add)
+            },
+        )
+
+        assertFalse(repository.recordProductViewed("product-1"))
+        assertTrue(repository.recordProductAddedToCart("product-1", 1))
+        assertEquals(listOf("product.addedToCart"), requests.drop(1).map(::eventName))
+    }
+
+    @Test
+    fun rejectsInvalidProductSignalIdentifiersAndQuantities() {
+        val repository = ProductInteractionRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "viewer-token" },
+            openConnection = { error("Invalid signals must not make requests") },
+        )
+
+        assertFalse(repository.recordProductViewed("../private"))
+        assertFalse(repository.recordProductAddedToCart("product-1", 0))
+    }
+
     private fun assertEvent(connection: InteractionConnection, eventName: String, payloadKey: String, payloadValue: String) {
         assertEquals("POST", connection.requestMethod)
         assertEquals("https://api.nantty.com/api/v1/analytics/product-interactions", connection.url.toString())

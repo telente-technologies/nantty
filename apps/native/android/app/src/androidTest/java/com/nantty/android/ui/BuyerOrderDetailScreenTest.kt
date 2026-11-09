@@ -2,16 +2,21 @@ package com.nantty.android.ui
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nantty.android.data.AccountSession
 import com.nantty.android.data.AccountUser
 import com.nantty.android.data.BuyerOrderReceiptTransport
+import com.nantty.android.data.BuyerReturnsRepository
+import com.nantty.android.data.BuyerReturnsTransport
 import com.nantty.android.data.BuyerOrderDetail
 import com.nantty.android.data.BuyerOrdersRepository
 import com.nantty.android.data.BuyerOrdersTransport
@@ -168,12 +173,81 @@ class BuyerOrderDetailScreenTest {
         assertEquals("NGN", selectedOrder.get()?.currency)
     }
 
-    private class OrderTransport(private val status: String = "shipped", private val storeId: String = "store-1") : BuyerOrderReceiptTransport {
-        override fun get(path: String, accessToken: String): JSONObject = JSONObject(
-            """{"id":"order-123","reference":"NT-123","status":"$status","fulfilmentStatus":"in_transit","paymentStatus":"paid","paymentMode":"escrow","store":{"id":"$storeId","name":"Ayo Market"},"items":[{"product":{"id":"product-1","name":"Beans"},"quantity":2}],"subtotal":{"amountMinor":10000,"currency":"NGN"},"discount":{"amountMinor":0,"currency":"NGN"},"storeCredit":{"amountMinor":0,"currency":"NGN"},"shipping":{"amountMinor":2500,"currency":"NGN"},"total":{"amountMinor":12500,"currency":"NGN"},"shipment":{"courierName":"Swift","trackingNumber":"TRACK-123","shippedAt":"2026-11-03T10:00:00Z","estimatedDeliveryAt":null},"createdAt":"2026-11-03T10:00:00Z"}""",
+    @Test
+    fun deliveredBuyerCanSelectPurchasedQuantityAndSubmitReturnRequest() {
+        val session = AccountSession("buyer-token", "refresh", AccountUser("buyer-id", "Ari", "ari", null, null, emptyList()))
+        val transport = OrderTransport(status = "delivered")
+        val orders = BuyerOrdersRepository("https://api.nantty.com", { session }, transport)
+        val returns = BuyerReturnsRepository("https://api.nantty.com", { session }, transport)
+
+        compose.setContent {
+            MaterialTheme {
+                BuyerOrderDetailScreen(
+                    orderId = "order-123",
+                    repository = orders,
+                    returnRepository = returns,
+                    executor = Executor { it.run() },
+                    onBack = {},
+                    onAuthenticationRequired = {},
+                )
+            }
+        }
+
+        compose.onNodeWithText("Request a return").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Select Beans for return").performClick()
+        compose.onNodeWithContentDescription("Increase return quantity for Beans").performClick()
+        compose.onNodeWithText("Quantity: 2 of 2").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Increase return quantity for Beans").assertIsNotEnabled()
+        compose.onNodeWithContentDescription("Reason for return").performTextInput("The item arrived damaged")
+        compose.onNodeWithContentDescription("Submit return request for NT-123").performScrollTo().performClick()
+        compose.onNodeWithText("Return request submitted").performScrollTo().assertIsDisplayed()
+
+        assertEquals("/api/v1/orders/order-123/returns", transport.returnPath)
+        assertEquals("buyer-token", transport.returnToken)
+        assertEquals("The item arrived damaged", transport.returnBody?.getString("reason"))
+        assertEquals("123e4567-e89b-42d3-a456-426614174002", transport.returnBody?.getJSONArray("lines")?.getJSONObject(0)?.getString("orderItemId"))
+        assertEquals(2, transport.returnBody?.getJSONArray("lines")?.getJSONObject(0)?.getInt("quantity"))
+    }
+
+    @Test
+    fun returnRequestFormIsNotShownBeforeDelivery() {
+        val session = AccountSession("buyer-token", "refresh", AccountUser("buyer-id", "Ari", "ari", null, null, emptyList()))
+        val orders = BuyerOrdersRepository("https://api.nantty.com", { session }, OrderTransport(status = "shipped"))
+
+        compose.setContent {
+            MaterialTheme {
+                BuyerOrderDetailScreen(
+                    orderId = "order-123",
+                    repository = orders,
+                    executor = Executor { it.run() },
+                    onBack = {},
+                    onAuthenticationRequired = {},
+                )
+            }
+        }
+
+        compose.onAllNodesWithText("Request a return").assertCountEquals(0)
+    }
+
+    private class OrderTransport(private val status: String = "shipped", private val storeId: String = "store-1") : BuyerOrderReceiptTransport, BuyerReturnsTransport {
+        var returnPath: String? = null
+        var returnToken: String? = null
+        var returnBody: JSONObject? = null
+
+        override fun get(path: String, accessToken: String): JSONObject = if (path.startsWith("/api/v1/returns?")) {
+            JSONObject("""{"data":[],"nextCursor":null}""")
+        } else JSONObject(
+            """{"id":"order-123","reference":"NT-123","status":"$status","fulfilmentStatus":"in_transit","paymentStatus":"paid","paymentMode":"escrow","store":{"id":"$storeId","name":"Ayo Market"},"items":[{"id":"123e4567-e89b-42d3-a456-426614174002","product":{"id":"product-1","name":"Beans"},"quantity":2}],"subtotal":{"amountMinor":10000,"currency":"NGN"},"discount":{"amountMinor":0,"currency":"NGN"},"storeCredit":{"amountMinor":0,"currency":"NGN"},"shipping":{"amountMinor":2500,"currency":"NGN"},"total":{"amountMinor":12500,"currency":"NGN"},"shipment":{"courierName":"Swift","trackingNumber":"TRACK-123","shippedAt":"2026-11-03T10:00:00Z","estimatedDeliveryAt":null},"createdAt":"2026-11-03T10:00:00Z"}""",
         )
 
         override fun post(path: String, accessToken: String, idempotencyKey: String): JSONObject = error("Not expected in this test")
+
+        override fun post(path: String, accessToken: String, body: JSONObject): JSONObject {
+            returnPath = path
+            returnToken = accessToken
+            returnBody = body
+            return JSONObject("""{"id":"123e4567-e89b-42d3-a456-426614174003","orderId":"order-123","orderNumber":"NT-123","buyerName":"Ari","lines":[],"reason":"The item arrived damaged","status":"requested","declineNote":null,"refundAmount":{"amountMinor":12500,"currency":"NGN"},"createdAt":"2026-11-03T10:00:00Z"}""")
+        }
     }
 
     private class EscrowTransport : DisputeTransport {

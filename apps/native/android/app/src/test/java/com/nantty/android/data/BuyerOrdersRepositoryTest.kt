@@ -28,9 +28,9 @@ class BuyerOrdersRepositoryTest {
         val transport = RecordingTransport(JSONObject("""{"data":[],"nextCursor":null}"""))
         val repository = BuyerOrdersRepository("https://api.nantty.com", ::signedInSession, transport)
 
-        repository.load(BuyerOrderFilter.PAID, "cursor /+=")
+        repository.load(BuyerOrderFilter.TO_SHIP, "cursor /+=")
 
-        assertEquals("/api/v1/orders?limit=20&status=paid&cursor=cursor%20%2F%2B%3D", transport.path)
+        assertEquals("/api/v1/orders?limit=20&status=to_ship&cursor=cursor%20%2F%2B%3D", transport.path)
     }
 
     @Test

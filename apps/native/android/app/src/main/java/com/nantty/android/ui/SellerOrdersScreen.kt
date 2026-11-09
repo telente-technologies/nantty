@@ -47,6 +47,7 @@ import com.nantty.android.data.SellerOrder
 import com.nantty.android.data.SellerOrdersPage
 import com.nantty.android.data.SellerOrdersRepository
 import com.nantty.android.data.SellerOrdersResult
+import com.nantty.android.data.SellerReturnsRepository
 import com.nantty.android.data.SellerShipmentRepository
 import com.nantty.android.data.DisputeRepository
 import com.nantty.android.data.formatWalletAmount
@@ -71,16 +72,32 @@ internal fun SellerOrdersScreen(
     onAuthenticationRequired: () -> Unit,
     onMessageBuyer: (String) -> Unit,
     onOpenBuyerProfile: (String) -> Unit = {},
+    sellerReturnsRepository: SellerReturnsRepository? = null,
+    sellerStoreId: String? = null,
+    canManageReturns: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     var selectedOrderId by rememberSaveable(repository) { mutableStateOf<String?>(null) }
+    var showingReturns by rememberSaveable(repository, sellerReturnsRepository) { mutableStateOf(false) }
     var selectedFilter by rememberSaveable(repository) { mutableStateOf(SellerOrderFilter.ALL) }
     var retryKey by rememberSaveable(repository) { mutableIntStateOf(0) }
     var result by remember(repository) { mutableStateOf<SellerOrdersResult<SellerOrdersPage>?>(null) }
     var loading by remember(repository) { mutableStateOf(true) }
     val success = result as? SellerOrdersResult.Success<SellerOrdersPage>
 
-    BackHandler(enabled = selectedOrderId != null) { selectedOrderId = null }
+    BackHandler(enabled = selectedOrderId != null || showingReturns) {
+        if (selectedOrderId != null) selectedOrderId = null else showingReturns = false
+    }
+    if (showingReturns && sellerReturnsRepository != null && sellerStoreId != null) {
+        SellerReturnsScreen(
+            repository = sellerReturnsRepository,
+            storeId = sellerStoreId,
+            canManage = canManageReturns,
+            onBack = { showingReturns = false },
+            onAuthenticationRequired = onAuthenticationRequired,
+        )
+        return
+    }
     selectedOrderId?.let { orderId ->
         SellerOrderDetailScreen(
             orderId = orderId,
@@ -115,6 +132,9 @@ internal fun SellerOrdersScreen(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
             }
             Text("Orders", Modifier.weight(1f).semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            if (sellerReturnsRepository != null && sellerStoreId != null) {
+                TextButton(onClick = { showingReturns = true }) { Text("Return requests") }
+            }
             IconButton(onClick = { retryKey++ }, modifier = Modifier.semantics { contentDescription = "Refresh seller orders" }) {
                 Icon(Icons.Default.Refresh, contentDescription = null)
             }

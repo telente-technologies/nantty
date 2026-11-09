@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,6 +38,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.nantty.android.data.MartProductDetail
+import com.nantty.android.data.MartProduct
+import com.nantty.android.data.ProductReviewsRepository
+import com.nantty.android.data.ProductOptionGroup
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.Currency
@@ -48,11 +50,15 @@ import java.util.Locale
 @Composable
 internal fun ProductDetailContent(
     detail: MartProductDetail,
-    selectedVariantId: String?,
-    onSelectVariant: (String) -> Unit,
+    optionGroups: List<ProductOptionGroup>,
+    selectedOptions: Map<String, String>,
+    onSelectOption: (String, String) -> Unit,
+    isOptionAvailable: (String, String) -> Boolean,
     quantity: Int,
     onQuantityChange: (Int) -> Unit,
+    reviewsRepository: ProductReviewsRepository,
     onOpenReviews: () -> Unit,
+    onOpenRelatedProduct: (String) -> Unit,
     onOpenStore: () -> Unit,
     onOpenBrand: (String) -> Unit,
     onReportProduct: () -> Unit,
@@ -74,9 +80,9 @@ internal fun ProductDetailContent(
                 LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(end = 20.dp, bottom = 32.dp)) {
                     item {
                         ProductInformation(
-                            detail, selectedVariantId, onSelectVariant, quantity, onQuantityChange,
-                            onOpenReviews, onOpenStore, onOpenBrand, onReportProduct, isFollowingStore,
-                            followingStoreBusy, storeFollowError, onToggleStoreFollow,
+                            detail, optionGroups, selectedOptions, onSelectOption, isOptionAvailable, quantity, onQuantityChange,
+                            reviewsRepository, onOpenReviews, onOpenStore, onOpenBrand, onReportProduct, isFollowingStore,
+                            followingStoreBusy, storeFollowError, onToggleStoreFollow, onOpenRelatedProduct,
                         )
                     }
                 }
@@ -90,9 +96,9 @@ internal fun ProductDetailContent(
                 item { ProductImages(detail, wide = false) }
                 item {
                     ProductInformation(
-                        detail, selectedVariantId, onSelectVariant, quantity, onQuantityChange,
-                        onOpenReviews, onOpenStore, onOpenBrand, onReportProduct, isFollowingStore,
-                        followingStoreBusy, storeFollowError, onToggleStoreFollow,
+                        detail, optionGroups, selectedOptions, onSelectOption, isOptionAvailable, quantity, onQuantityChange,
+                        reviewsRepository, onOpenReviews, onOpenStore, onOpenBrand, onReportProduct, isFollowingStore,
+                        followingStoreBusy, storeFollowError, onToggleStoreFollow, onOpenRelatedProduct,
                     )
                 }
             }
@@ -141,10 +147,13 @@ private fun ProductImages(detail: MartProductDetail, wide: Boolean) {
 @Composable
 private fun ProductInformation(
     detail: MartProductDetail,
-    selectedVariantId: String?,
-    onSelectVariant: (String) -> Unit,
+    optionGroups: List<ProductOptionGroup>,
+    selectedOptions: Map<String, String>,
+    onSelectOption: (String, String) -> Unit,
+    isOptionAvailable: (String, String) -> Boolean,
     quantity: Int,
     onQuantityChange: (Int) -> Unit,
+    reviewsRepository: ProductReviewsRepository,
     onOpenReviews: () -> Unit,
     onOpenStore: () -> Unit,
     onOpenBrand: (String) -> Unit,
@@ -153,6 +162,7 @@ private fun ProductInformation(
     followingStoreBusy: Boolean,
     storeFollowError: String?,
     onToggleStoreFollow: (() -> Unit)?,
+    onOpenRelatedProduct: (String) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(detail.title, Modifier.semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
@@ -161,17 +171,20 @@ private fun ProductInformation(
             Text(if (detail.stock > 0) "In stock" else "Out of stock", color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (detail.rating > 0) Text("${"%.1f".format(Locale.ROOT, detail.rating)} · customer rating", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        TextButton(onClick = onOpenReviews) { Text("Read product reviews") }
         detail.promo?.let { Text(it, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold) }
         detail.brand?.let { brand ->
             TextButton(onClick = { onOpenBrand(brand.id) }, modifier = Modifier.semantics { contentDescription = "View ${brand.name} brand" }) {
                 Text("Brand · ${brand.name}")
             }
         }
-        if (detail.sizes.isNotEmpty()) DetailLine("Sizes", detail.sizes.joinToString(" · "))
-        if (detail.colors.isNotEmpty()) DetailLine("Colors", detail.colors.joinToString(" · "))
         DetailLine("Shipping", detail.shippingInfo.ifBlank { "Shipping details are provided at checkout." })
         if (detail.description.isNotBlank()) DetailLine("About this product", detail.description)
+        ProductReviewsPreview(
+            productId = detail.id,
+            repository = reviewsRepository,
+            onSeeAll = onOpenReviews,
+            modifier = Modifier.fillMaxWidth(),
+        )
         HorizontalDetailDivider()
         Text("Sold by", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -207,25 +220,37 @@ private fun ProductInformation(
         TextButton(onClick = onReportProduct, modifier = Modifier.semantics { contentDescription = "Report this product" }) {
             Text(stringResource(com.nantty.android.R.string.report_product_action))
         }
-        if (detail.variants.isNotEmpty()) {
+        if (detail.related.isNotEmpty()) {
             HorizontalDetailDivider()
-            Text("Choose an option", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            detail.variants.forEach { variant ->
-                FilterChip(
-                    selected = selectedVariantId == variant.id,
-                    onClick = { if (variant.inStock) onSelectVariant(variant.id) },
-                    enabled = variant.inStock,
-                    label = {
-                        Text(
-                            "${variant.title} · ${formatDetailPrice(variant.priceMinor, variant.currency)} · ${if (variant.inStock) "In stock" else "Sold out"}",
-                            maxLines = 2,
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
+            RelatedProducts(detail.related, onOpenRelatedProduct)
+        }
+        if (optionGroups.isNotEmpty()) {
+            HorizontalDetailDivider()
+            optionGroups.forEach { group ->
+                ProductOptionGroupSelector(
+                    group = group,
+                    selectedValue = selectedOptions[group.key],
+                    onSelect = { value -> onSelectOption(group.key, value) },
+                    isAvailable = { value -> isOptionAvailable(group.key, value) },
                 )
             }
         }
         ProductQuantityControl(quantity = quantity, onQuantityChange = onQuantityChange)
+    }
+}
+
+@Composable
+private fun RelatedProducts(products: List<MartProduct>, onOpenProduct: (String) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Featured with", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.semantics { heading() })
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            itemsIndexed(products, key = { _, product -> product.id }) { _, product ->
+                Box(Modifier.widthIn(min = 168.dp, max = 200.dp)) {
+                    MartProductCard(product) { onOpenProduct(product.id) }
+                }
+            }
+        }
     }
 }
 

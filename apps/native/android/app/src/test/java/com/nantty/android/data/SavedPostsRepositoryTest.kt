@@ -82,6 +82,40 @@ class SavedPostsRepositoryTest {
     }
 
     @Test
+    fun requestsAndParsesOnlyCurrentUsersSavedProducts() {
+        val productId = "e2222222-2222-4222-8222-222222222222"
+        val payload = JSONObject("""{"data":[
+            {"id":"$saveId","type":"product","targetId":"$productId","savedAt":"2026-11-02T10:00:00Z","product":{"id":"$productId","name":"Nantty tote","price":{"amountMinor":125000,"currency":"NGN"},"imageUrl":"https://cdn.nantty.com/tote.jpg","stock":8}},
+            {"id":"d4444444-4444-4444-8444-444444444444","type":"product","targetId":"d5555555-5555-4555-8555-555555555555","product":{"id":"d5555555-5555-4555-8555-555555555555","name":"Invalid currency","price":{"amountMinor":100,"currency":"XYZ"},"stock":2}},
+            {"id":"d6666666-6666-4666-8666-666666666666","type":"post","targetId":"$postId","post":${postJson()}}
+        ],"nextCursor":"$cursorId"}""")
+        val transport = RecordingTransport(payload)
+        val repository = SavedPostsRepository("https://api.nantty.com", ::signedInSession, transport)
+
+        val result = repository.load(type = SavedPostType.PRODUCTS) as SavedPostsResult.Success
+
+        assertEquals("/api/v1/saves?type=product", transport.path)
+        assertEquals("saved-access", transport.token)
+        assertEquals(listOf(saveId), result.page.products.map(SavedProductItem::saveId))
+        assertEquals(productId, result.page.products.single().product.id)
+        assertEquals("Nantty tote", result.page.products.single().product.name)
+        assertEquals(125000L, result.page.products.single().product.amountMinor)
+        assertEquals("NGN", result.page.products.single().product.currency)
+        assertEquals("https://cdn.nantty.com/tote.jpg", result.page.products.single().product.imageUrl)
+        assertEquals(8, result.page.products.single().product.stock)
+        assertEquals(cursorId, result.page.nextCursor)
+        assertTrue(result.page.posts.isEmpty())
+    }
+
+    @Test
+    fun encodesProductTypeWithCursorOnSubsequentPage() {
+        assertEquals(
+            "/api/v1/saves?type=product&cursor=$cursorId",
+            buildSavedPostsPath(cursorId, SavedPostType.PRODUCTS),
+        )
+    }
+
+    @Test
     fun encodesVideoTypeWithCursorOnSubsequentPage() {
         assertEquals(
             "/api/v1/saves?type=video&cursor=$cursorId",
@@ -136,6 +170,20 @@ class SavedPostsRepositoryTest {
 
         assertEquals(listOf("same-save", "next-save"), appendUniqueSavedPosts(listOf(first), listOf(duplicate, next)).map(SavedPost::saveId))
         assertFalse(appendUniqueSavedPosts(emptyList(), listOf(first)).isEmpty())
+    }
+
+    @Test
+    fun deduplicatesSavedProductsAcrossCursorPagesBySaveIdentity() {
+        val product = MartProduct("product-1", "Tote", 1200, "NGN", null, 4)
+        val first = SavedProductItem("same-save", product, "first")
+        val duplicate = SavedProductItem("same-save", product.copy(name = "duplicate"), "later")
+        val next = SavedProductItem("next-save", product.copy(id = "product-2"), "next")
+
+        assertEquals(
+            listOf("same-save", "next-save"),
+            appendUniqueSavedProducts(listOf(first), listOf(duplicate, next)).map(SavedProductItem::saveId),
+        )
+        assertEquals("Tote", appendUniqueSavedProducts(listOf(first), listOf(duplicate)).single().product.name)
     }
 
     @Test

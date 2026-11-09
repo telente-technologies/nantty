@@ -1,5 +1,8 @@
 package com.nantty.android.ui
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -51,10 +55,14 @@ import com.nantty.android.data.NotificationsResult
 import com.nantty.android.data.NotificationDestination
 import com.nantty.android.data.resolveNotificationDestination
 import com.nantty.android.data.AccountNotificationSettingsRepository
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.testTag
+import com.nantty.android.R
 import java.util.concurrent.Executor
 
 @Composable
-internal fun NotificationsScreen(repository: NotificationsRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenPost: (String) -> Unit = {}, onOpenPostComment: (String, String) -> Unit = { postId, _ -> onOpenPost(postId) }, onOpenProfile: (String) -> Unit = {}, onOpenMessages: () -> Unit = {}, onOpenConversation: (InboxConversation) -> Unit = {}, messagesRepository: MessagesRepository? = null, onOpenOrders: () -> Unit = {}, accountSettingsRepository: AccountNotificationSettingsRepository? = null, onOpenFollowRequests: () -> Unit = {}, onOpenGroupInvitations: () -> Unit = {}, onOpenSpaces: () -> Unit = {}, onOpenAccountStatus: () -> Unit = {}, onOpenIdentityVerification: () -> Unit = {}, onOpenSupportTicket: (String) -> Unit = {}, onOpenDispute: (String) -> Unit = {}, onOpenClip: (String) -> Unit = {}, onOpenOrder: (String) -> Unit = {}) {
+internal fun NotificationsScreen(repository: NotificationsRepository, executor: Executor, modifier: Modifier = Modifier, onReauthenticate: () -> Unit = {}, onOpenPost: (String) -> Unit = {}, onOpenPostComment: (String, String) -> Unit = { postId, _ -> onOpenPost(postId) }, onOpenProfile: (String) -> Unit = {}, onOpenMessages: () -> Unit = {}, onOpenConversation: (InboxConversation) -> Unit = {}, messagesRepository: MessagesRepository? = null, onOpenOrders: () -> Unit = {}, accountSettingsRepository: AccountNotificationSettingsRepository? = null, onOpenFollowRequests: () -> Unit = {}, onOpenGroupInvitations: () -> Unit = {}, onOpenSpaces: () -> Unit = {}, onOpenAccountStatus: () -> Unit = {}, onOpenIdentityVerification: () -> Unit = {}, onOpenSupportTicket: (String) -> Unit = {}, onOpenDispute: (String) -> Unit = {}, onOpenClip: (String) -> Unit = {}, onOpenOrder: (String) -> Unit = {}, onLaunchExternalUrl: ((Intent) -> Unit)? = null) {
+    val context = LocalContext.current
     var showingSettings by remember(repository) { mutableStateOf(false) }
     var filter by remember(repository) { mutableStateOf(NotificationFilter.ALL) }
     var result by remember(repository) { mutableStateOf<NotificationsResult?>(null) }
@@ -63,7 +71,16 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
     var actionMessage by remember(repository) { mutableStateOf<String?>(null) }
     var conversationOpenError by remember(repository) { mutableStateOf<String?>(null) }
     var openingConversationId by remember(repository) { mutableStateOf<String?>(null) }
+    var pendingExternalLink by remember(repository) { mutableStateOf<NotificationDestination.ExternalLink?>(null) }
     var generation by remember(repository) { mutableStateOf(0) }
+
+    fun openExternalLink(destination: NotificationDestination.ExternalLink) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(destination.url))
+        runCatching {
+            if (onLaunchExternalUrl != null) onLaunchExternalUrl(intent) else context.startActivity(intent)
+        }
+            .onFailure { actionMessage = "Could not open this link. Check that a browser is available and try again." }
+    }
 
     fun refresh(clear: Boolean = false) {
         if (loading) return
@@ -229,6 +246,11 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
                             is NotificationDestination.SupportTicket -> onOpenSupportTicket(destination.ticketId)
                             is NotificationDestination.Dispute -> onOpenDispute(destination.disputeId)
                             is NotificationDestination.Clip -> onOpenClip(destination.clipId)
+                            is NotificationDestination.ExternalLink -> if (destination.requiresConfirmation) {
+                                pendingExternalLink = destination
+                            } else {
+                                openExternalLink(destination)
+                            }
                             null -> Unit
                         }
                     })
@@ -246,6 +268,29 @@ internal fun NotificationsScreen(repository: NotificationsRepository, executor: 
                 }
             }
         }
+    }
+
+    pendingExternalLink?.let { destination ->
+        AlertDialog(
+            onDismissRequest = { pendingExternalLink = null },
+            title = { Text(stringResource(R.string.feed_link_safety_title)) },
+            text = { Text(stringResource(R.string.feed_link_safety_message, destination.host)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        pendingExternalLink = null
+                        openExternalLink(destination)
+                    },
+                    modifier = Modifier.testTag("notification-link-confirm-open"),
+                ) { Text(stringResource(R.string.feed_link_open_anyway)) }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { pendingExternalLink = null },
+                    modifier = Modifier.testTag("notification-link-cancel-open"),
+                ) { Text(stringResource(R.string.feed_link_cancel)) }
+            },
+        )
     }
 }
 

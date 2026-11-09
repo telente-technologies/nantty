@@ -61,7 +61,7 @@ internal fun resolvePushTapTarget(data: Map<String, String>): PushTapTarget? {
         url = url,
         orderId = data["orderId"],
     )
-    return when (val destination = resolveNotificationDestination(notification)) {
+    return when (val destination = resolveNotificationDestination(notification, includeExternalUrl = false)) {
         is NotificationDestination.Post -> PushTapTarget(PushTapRoute.POST, destination.postId, destination.commentId)
         is NotificationDestination.Profile -> PushTapTarget(PushTapRoute.PROFILE, destination.userId)
         is NotificationDestination.Conversation -> PushTapTarget(PushTapRoute.CONVERSATION, destination.conversationId, destination.messageId)
@@ -76,6 +76,7 @@ internal fun resolvePushTapTarget(data: Map<String, String>): PushTapTarget? {
         is NotificationDestination.SupportTicket -> PushTapTarget(PushTapRoute.SUPPORT_TICKET, destination.ticketId)
         is NotificationDestination.Dispute -> PushTapTarget(PushTapRoute.DISPUTE, destination.disputeId)
         is NotificationDestination.Clip -> PushTapTarget(PushTapRoute.CLIP, destination.clipId)
+        is NotificationDestination.ExternalLink -> null
         null -> data["orderId"]?.let { PushTapTarget(PushTapRoute.ORDERS, it) }
     }?.takeIf(::isValidPushTapTarget)
 }

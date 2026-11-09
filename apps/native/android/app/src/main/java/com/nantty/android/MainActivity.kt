@@ -20,6 +20,7 @@ class MainActivity : FragmentActivity() {
     private var widgetDestination by mutableStateOf<String?>(null)
     private var invitationToken by mutableStateOf<String?>(null)
     private var channelInvitationToken by mutableStateOf<String?>(null)
+    private var affiliateProductLink by mutableStateOf<AffiliateProductDeepLink?>(null)
     private var notificationTarget by mutableStateOf<PushTapTarget?>(null)
 
     private fun consumeIntent(intent: android.content.Intent?) {
@@ -34,6 +35,7 @@ class MainActivity : FragmentActivity() {
             .getOrNull()?.takeIf(String::isNotBlank) ?: "web.nantty.com"
         invitationToken = GroupInvitationDeepLink.tokenFrom(intent?.dataString, trustedHost)
         channelInvitationToken = ChannelInvitationDeepLink.tokenFrom(intent?.dataString, trustedHost)
+        affiliateProductLink = AffiliateProductDeepLinkParser.parse(intent?.dataString, trustedHost)
     }
 
     override fun onResume() {
@@ -59,6 +61,8 @@ class MainActivity : FragmentActivity() {
                     onGroupInvitationTokenHandled = { invitationToken = null },
                     requestedChannelInvitationToken = channelInvitationToken,
                     onChannelInvitationTokenHandled = { channelInvitationToken = null },
+                    requestedAffiliateProductLink = affiliateProductLink,
+                    onAffiliateProductLinkHandled = { affiliateProductLink = null },
                 )
             }
         }

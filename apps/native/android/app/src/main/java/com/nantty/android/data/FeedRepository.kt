@@ -84,6 +84,7 @@ sealed interface FeedTopicsResult {
 enum class FeedFeedbackKind(val apiValue: String) {
     NOT_INTERESTED("not_interested"),
     HIDE("hide"),
+    LESS("less"),
 }
 
 sealed interface FeedFeedbackResult {

@@ -54,6 +54,7 @@ import com.nantty.android.data.CheckoutPaymentMode
 import com.nantty.android.data.CheckoutPaymentSelection
 import com.nantty.android.data.CheckoutRepository
 import com.nantty.android.data.CheckoutPaymentMethod
+import com.nantty.android.data.ProductPurchaseSignal
 import com.nantty.android.data.CheckoutProviderWallet
 import com.nantty.android.data.SavedCardCredentialStore
 import com.nantty.android.data.DeviceSavedCard
@@ -89,6 +90,7 @@ internal fun CheckoutScreen(
     var checkoutKey by rememberSaveable { mutableStateOf(UUID.randomUUID().toString()) }
     var paymentSelections by remember(repository) { mutableStateOf<Map<String, CheckoutPaymentSelection>>(emptyMap()) }
     var providerWallet by remember(providerWalletRepository) { mutableStateOf<CheckoutProviderWallet?>(null) }
+    var paymentChannels by remember(repository) { mutableStateOf<List<String>>(emptyList()) }
     var savedCard by remember(savedCardCredentialStore) { mutableStateOf<DeviceSavedCard?>(null) }
     var saveCardOnDevice by rememberSaveable { mutableStateOf(false) }
     var paymentMethod by rememberSaveable { mutableStateOf(CheckoutPaymentMethod.HOSTED) }
@@ -98,6 +100,12 @@ internal fun CheckoutScreen(
     val addressId = selectedId ?: addresses?.firstOrNull(CheckoutAddress::isDefault)?.id ?: addresses?.firstOrNull()?.id
 
     BackHandler(onBack = onBack)
+    LaunchedEffect(repository) {
+        executor.execute {
+            val channels = repository.loadPaymentChannels()
+            androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot { paymentChannels = channels }
+        }
+    }
     LaunchedEffect(repository, providerWalletRepository, savedCardCredentialStore, generation, addressId) {
         loading = true
         error = null
@@ -238,6 +246,7 @@ internal fun CheckoutScreen(
                         wallet = providerWallet,
                         savedCard = savedCard,
                         total = cart?.let { WalletMoney(it.totalAmountMinor, it.currency) },
+                        paymentChannels = paymentChannels,
                         selected = paymentMethod,
                         saveCardOnDevice = saveCardOnDevice,
                         onSaveCardOnDeviceChange = { saveCardOnDevice = it },
@@ -325,6 +334,11 @@ internal fun CheckoutScreen(
                             result.receipt.copy(
                                 paymentMethod = paymentMethod,
                                 saveCardOnDevice = paymentMethod == CheckoutPaymentMethod.HOSTED && saveCardOnDevice,
+                                                productSignals = currentCart.lines
+                                                    .groupBy { it.productId }
+                                                    .map { (productId, lines) ->
+                                                        ProductPurchaseSignal(productId, lines.sumOf { it.quantity }.coerceIn(1, 99))
+                                                    },
                             ),
                         )
                                     }

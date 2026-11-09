@@ -82,6 +82,32 @@ class SavedPostsScreenTest {
     }
 
     @Test
+    fun productFilterLoadsSavedProductAndOpensExistingProductDetail() {
+        val transport = FakeTransport()
+        var openedProduct: String? = null
+        compose.setContent {
+            MaterialTheme {
+                SavedPostsScreen(
+                    SavedPostsRepository("https://api.nantty.com", ::signedInSession, transport),
+                    Executor { it.run() },
+                    onBack = {},
+                    onOpenPost = {},
+                    onOpenProduct = { openedProduct = it },
+                    onAuthenticationRequired = {},
+                )
+            }
+        }
+
+        compose.onNodeWithText("Products").performClick()
+        compose.onNodeWithText("Saved products").assertIsDisplayed()
+        compose.onNodeWithText("Nantty tote").assertIsDisplayed().performClick()
+        compose.runOnIdle {
+            assertEquals("/api/v1/saves?type=product", transport.paths.last())
+            assertEquals("d2222222-2222-4222-8222-222222222222", openedProduct)
+        }
+    }
+
+    @Test
     fun initialFailureCanRetryWithoutLosingTheScreen() {
         val transport = FakeTransport(failFirst = true)
         compose.setContent {
@@ -196,6 +222,9 @@ class SavedPostsScreenTest {
             if (failFirst && calls == 1) error("Offline")
             if (failCursor && path.contains("cursor=") && calls == 2) error("Offline")
             if (empty) return JSONObject("""{"data":[],"nextCursor":null}""")
+            if (path.contains("type=product")) return JSONObject(
+                """{"data":[{"id":"d1111111-1111-4111-8111-111111111111","type":"product","targetId":"d2222222-2222-4222-8222-222222222222","savedAt":"2026-11-02T10:00:00Z","product":{"id":"d2222222-2222-4222-8222-222222222222","name":"Nantty tote","price":{"amountMinor":125000,"currency":"NGN"},"imageUrl":"https://cdn.nantty.com/tote.jpg","stock":8}}],"nextCursor":null}""",
+            )
             if (path.contains("cursor=")) return JSONObject("""{"data":[${savedItem("d1111111-1111-4111-8111-111111111111", "d2222222-2222-4222-8222-222222222222", "Duplicate saved row")},${savedItem("e1111111-1111-4111-8111-111111111111", "e2222222-2222-4222-8222-222222222222", "Second saved post")}],"nextCursor":null}""")
             if (path.contains("type=video")) return JSONObject("""{"data":[${savedItem("d1111111-1111-4111-8111-111111111111", "d2222222-2222-4222-8222-222222222222", "A saved video", "video")}],"nextCursor":null}""")
             val nextCursor = if (twoPages || failCursor) "d3333333-3333-4333-8333-333333333333" else null

@@ -28,6 +28,7 @@ data class CreatorSampleMediaVariant(val url: String, val width: Int, val format
 enum class NativeImageUploadPurpose(val wireValue: String) {
     DISPUTE_EVIDENCE("dispute_evidence"),
     STORY("story"),
+    PRODUCT("product"),
 }
 
 data class UploadedCreatorSampleImage(val mediaId: String, val imageUrl: String, val width: Int, val height: Int)

@@ -13,11 +13,13 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.nantty.android.data.AccountUser
+import com.nantty.android.AffiliateProductDeepLink
 import com.nantty.android.data.AccountSessionRepository
 import com.nantty.android.data.FeedRepository
 import com.nantty.android.data.FollowRequestsRepository
 import com.nantty.android.data.FeedType
 import com.nantty.android.data.InboxConversation
+import com.nantty.android.data.restoreSaleAttribution
 import com.nantty.android.data.PostDetailRepository
 import com.nantty.android.notifications.PushTapTarget
 import java.util.concurrent.Executors
@@ -39,6 +41,8 @@ internal fun SignedInApp(
     requestedNotificationTarget: PushTapTarget? = null,
     onNotificationTargetHandled: () -> Unit = {},
     requestedGroupInvitationToken: String? = null, onGroupInvitationTokenHandled: () -> Unit = {}, requestedChannelInvitationToken: String? = null, onChannelInvitationTokenHandled: () -> Unit = {},
+    requestedAffiliateProductLink: AffiliateProductDeepLink? = null,
+    onAffiliateProductLinkHandled: () -> Unit = {},
 ) {
     val shareContext = LocalContext.current.applicationContext
     val destinationState = rememberSaveable { mutableStateOf(Destination.Feed) }
@@ -92,6 +96,15 @@ internal fun SignedInApp(
     val purchaseState = rememberSaveable(saver = SignedInPurchaseState.Saver) { SignedInPurchaseState() }
     val pendingMartProductIdState = rememberSaveable { mutableStateOf<String?>(null) }
     var pendingMartProductId by pendingMartProductIdState
+    var pendingMartAttributionSource by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingMartAttributionId by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingMartAttributionExpiry by rememberSaveable { mutableStateOf<Long?>(null) }
+    var pendingMartAffiliateLinkId by rememberSaveable { mutableStateOf<String?>(null) }
+    val pendingMartSaleAttribution = restoreSaleAttribution(
+        pendingMartAttributionSource,
+        pendingMartAttributionId,
+        pendingMartAttributionExpiry,
+    )
     var pendingMartCategoryId by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingMartCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
     var returnToDiscoverAfterCategory by rememberSaveable { mutableStateOf(false) }
@@ -99,6 +112,16 @@ internal fun SignedInApp(
     val composerModeState = rememberSaveable { mutableStateOf(SignedInComposerMode.CLOSED) }
     var composerMode by composerModeState
     val quoteTarget = remember { mutableStateOf<com.nantty.android.data.FeedQuotedPost?>(null) }
+    LaunchedEffect(requestedAffiliateProductLink) {
+        val link = requestedAffiliateProductLink ?: return@LaunchedEffect
+        pendingMartProductId = link.productId
+        pendingMartAttributionSource = null
+        pendingMartAttributionId = null
+        pendingMartAttributionExpiry = null
+        pendingMartAffiliateLinkId = link.affiliateLinkId
+        destination = Destination.Mart
+        onAffiliateProductLinkHandled()
+    }
     SignedInWidgetDestinationEffect(
         requestedDestination = requestedWidgetDestination,
         isGuest = isGuest,
@@ -140,7 +163,6 @@ internal fun SignedInApp(
     val loadMoreError by feedRuntime.content.loadMoreError
     val interactionMessage = feedController.interactionMessage
     val repositories = rememberSignedInRepositories(sessionRepository)
-    val auxiliaryRepositories = rememberSignedInAuxiliaryRepositories(sessionRepository, executor)
     val reportFlows = rememberSignedInReportFlows(sessionRepository, isGuest, onRequireSignIn, onSignOut)
     val (
         walletRepository,
@@ -148,11 +170,13 @@ internal fun SignedInApp(
         _,
         _,
         buyerOrdersRepository,
+        buyerReturnsRepository,
         productReviewsRepository,
         disputeRepository,
         notificationsRepository,
         accountNotificationSettingsRepository,
         countryPreferenceRepository,
+        mentionPrivacyRepository,
         messagesRepository,
         searchRepository,
         exploreRepository,
@@ -164,12 +188,15 @@ internal fun SignedInApp(
         followRequestsRepository,
         sellerWorkspaceRepository,
         creatorWorkspaceRepository,
+        creatorAffiliatesRepository,
         brandProfilesRepository,
         adsWorkspaceRepository,
         profileImagesRepository,
         privateMediaUploadsRepository,
     ) = repositories
-    val activeProfileId = rememberSignedInActiveProfileId(accountUser?.id, isGuest, brandProfilesRepository, executor)
+    val activeProfile = rememberSignedInActiveProfile(accountUser?.id, isGuest, brandProfilesRepository, executor)
+    val activeProfileId = activeProfile?.id
+    val auxiliaryRepositories = rememberSignedInAuxiliaryRepositories(sessionRepository, executor, activeProfileId)
     val businessContent = buildSignedInBusinessContent(
         repositories = repositories,
         executor = executor,
@@ -190,7 +217,14 @@ internal fun SignedInApp(
             onReturnToOrders = { destination = Destination.Orders },
             onContinueShopping = { destination = Destination.Mart },
             onOpenStore = { selectedStoreId = it },
-            onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
+            onOpenProduct = {
+                pendingMartProductId = it
+                pendingMartAffiliateLinkId = null
+                pendingMartAttributionSource = null
+                pendingMartAttributionId = null
+                pendingMartAttributionExpiry = null
+                destination = Destination.Mart
+            },
         )
         return
     }
@@ -310,6 +344,7 @@ internal fun SignedInApp(
                 currentAccountAvatarUrl = accountUser?.avatarUrl,
                 modifier = contentModifier,
                 onOpenPost = { if (destination == Destination.Clips) reportFlows.clipComments.openComments(it) else reportFlows.clipComments.leaveClipPost(); selectedPostId = it },
+                onOpenClip = { pendingNotificationClipId = it; destination = Destination.Clips },
                 onOpenPostComment = { postId, commentId ->
                     selectedPostId = postId
                     selectedPostCommentId = commentId
@@ -331,7 +366,23 @@ internal fun SignedInApp(
                     searchScope = scope
                     searchScopeLabel = label
                 },
-                onOpenProduct = { pendingMartProductId = it; destination = Destination.Mart },
+                onOpenProduct = {
+                    pendingMartProductId = it
+                    pendingMartAffiliateLinkId = null
+                    pendingMartAttributionSource = null
+                    pendingMartAttributionId = null
+                    pendingMartAttributionExpiry = null
+                    destination = Destination.Mart
+                },
+                onOpenProductWithAttribution = { productId, attribution ->
+                    pendingMartProductId = productId
+                    pendingMartAffiliateLinkId = null
+                    pendingMartAttributionSource = attribution?.source?.apiValue
+                    pendingMartAttributionId = attribution?.id
+                    pendingMartAttributionExpiry = attribution?.expiresAtMillis
+                    destination = Destination.Mart
+                },
+                initialMartSaleAttribution = pendingMartSaleAttribution,
                 cartRepository = repositories.cart,
                 onOpenCart = { if (isGuest) onRequireSignIn() else purchaseState.openCart() },
                 onOpenStore = { selectedStoreId = it },
@@ -348,7 +399,7 @@ internal fun SignedInApp(
                 onSave = { if (isGuest) onRequireSignIn() else feedActions.save(it) },
                 onShare = { feedActions.share(shareContext, it) },
                 currentAccountId = accountUser?.id,
-                activeProfileId = activeProfileId,
+                activeProfile = activeProfile,
                 feedPostActions = signedInFeedPostActions(reportFlows.post, isGuest, onRequireSignIn, feedActions) { quote ->
                     quoteTarget.value = quote
                     composerMode = SignedInComposerMode.POST
@@ -358,7 +409,7 @@ internal fun SignedInApp(
                         when (card.reference.kind) {
                             "post" -> { selectedPostId = card.reference.id; selectedPostCommentId = null }
                             "clip" -> { pendingNotificationClipId = card.reference.id; destination = Destination.Clips }
-                            "product" -> { pendingMartProductId = card.reference.id; destination = Destination.Mart }
+                            "product" -> { pendingMartProductId = card.reference.id; pendingMartAffiliateLinkId = null; destination = Destination.Mart }
                             "store" -> selectedStoreId = card.reference.id
                             "live" -> { pendingLiveId = card.reference.id; destination = Destination.Live }
                             "order" -> { pendingNotificationOrderId = card.reference.id; destination = Destination.Orders }
@@ -380,6 +431,7 @@ internal fun SignedInApp(
                 onLoadMore = ::loadMore,
                 walletRepository = walletRepository,
                 buyerOrdersRepository = buyerOrdersRepository,
+                buyerReturnsRepository = buyerReturnsRepository,
                 productReviewsRepository = productReviewsRepository,
                 disputeRepository = disputeRepository,
                 privateMediaUploadsRepository = privateMediaUploadsRepository,
@@ -392,13 +444,21 @@ internal fun SignedInApp(
                 accountHealthRepository = repositories.accountHealth, identityVerificationRepository = repositories.identityVerification,
                 countryPreferenceRepository = countryPreferenceRepository,
                 countryPreferenceNavigation = countryPreferenceNavigation,
+                shippingAddressesRepository = repositories.shippingAddresses,
+                checkoutRepository = repositories.checkout,
+                onOpenShippingAddresses = { destination = Destination.ShippingAddresses },
+                onBackFromShippingAddresses = { destination = Destination.Profile },
                 chatNotificationSettingsRepository = repositories.chatNotificationSettings,
                 chatPasscodeRepository = auxiliaryRepositories.chatPasscode,
                 onOpenChatNotificationSettings = { destination = Destination.ChatNotificationSettings },
                 onOpenChatPasscodeSettings = { destination = Destination.ChatPasscode },
                 onOpenContentPreferences = { destination = Destination.ContentPreferences },
+                onOpenMentionPrivacy = { destination = Destination.MentionPrivacy },
                 onBackFromContentPreferences = { destination = Destination.Profile },
                 contentPreferencesRepository = auxiliaryRepositories.contentPreferences,
+                mentionPrivacyRepository = mentionPrivacyRepository,
+                onBackFromMentionPrivacy = { destination = Destination.Profile },
+                onMentionPrivacyReauthenticate = onSignOut,
                 onContentPreferencesChanged = ::refresh,
                 onChatPasscodeUpdated = onChatPasscodeUpdated,
                 onOpenBlockedAccounts = { publicProfileRepository.viewerId()?.let { openConnections(it, "blocked") } },
@@ -450,7 +510,14 @@ internal fun SignedInApp(
                 storeRepository = storeRepository,
                 showMartCategoryPane = showMartCategoryPane,
                 initialMartProductId = pendingMartProductId,
-                onInitialMartProductHandled = { pendingMartProductId = null },
+                initialMartAffiliateLinkId = pendingMartAffiliateLinkId,
+                onInitialMartProductHandled = {
+                    pendingMartProductId = null
+                    pendingMartAffiliateLinkId = null
+                    pendingMartAttributionSource = null
+                    pendingMartAttributionId = null
+                    pendingMartAttributionExpiry = null
+                },
                 initialMartCategoryId = pendingMartCategoryId,
                 initialMartCategoryName = pendingMartCategoryName,
                 onBackFromInitialMartCategory = {

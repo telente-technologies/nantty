@@ -28,6 +28,21 @@ class CreatorSampleMediaRepositoryTest {
     }
 
     @Test
+    fun productImageUploadUsesTheProductPurposeAndReturnsAReusableMediaId() {
+        val transport = RecordingTransport()
+
+        val result = repository(transport).upload(
+            input(),
+            temporaryDirectory(),
+            purpose = NativeImageUploadPurpose.PRODUCT,
+        )
+
+        assertTrue(result is CreatorSampleMediaResult.Success)
+        assertEquals("product", transport.createBody?.getString("purpose"))
+        assertEquals(MEDIA_ID, (result as CreatorSampleMediaResult.Success).image.mediaId)
+    }
+
+    @Test
     fun storyVideoUploadPreservesVideoMimeAndUsesExistingStoryPurpose() {
         val transport = RecordingTransport()
         val directory = temporaryDirectory()

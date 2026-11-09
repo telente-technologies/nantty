@@ -49,6 +49,59 @@ class MartRepositoryTest {
         assertTrue(runCatching { buildMartProductsUrl("https://api.nantty.com", null, null, "invented") }.isFailure)
         assertTrue(runCatching { buildMartHighlightsUrl("https://api.nantty.com", MART_HIGHLIGHTS_PAGE_SIZE + 1) }.isFailure)
         assertTrue(runCatching { buildMartRecommendationsUrl("https://api.nantty.com/?token=secret") }.isFailure)
+        assertEquals(
+            "https://api.nantty.com/api/v1/affiliate-links/creator_link_1/clicks",
+            buildAffiliateLinkClickUrl("https://api.nantty.com", "creator_link_1").toString(),
+        )
+        assertTrue(runCatching { buildAffiliateLinkClickUrl("https://api.nantty.com", "../unsafe") }.isFailure)
+    }
+
+    @Test
+    fun affiliateClickRequiresMatchingProductAndReturnsUnexpiredLinkAttribution() {
+        lateinit var connection: RecordingMartConnection
+        val linkId = "link-123"
+        val productId = "product-123"
+        val expiresAt = java.time.Instant.now().plusSeconds(3600).toString()
+        val repository = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            affiliateVisitorIdProvider = { "visitor-123" },
+            openConnection = { url ->
+                connection = RecordingMartConnection(
+                    url,
+                    200,
+                    """{"data":{"productId":"$productId","attribution":{"source":"link","id":"$linkId"},"expiresAt":"$expiresAt"}}""",
+                )
+                connection
+            },
+        )
+
+        val attribution = repository.recordAffiliateLinkClick(linkId, productId)
+
+        assertEquals("https://api.nantty.com/api/v1/affiliate-links/$linkId/clicks", connection.url.toString())
+        assertEquals("POST", connection.requestMethod)
+        assertEquals("application/json", connection.getRequestProperty("Content-Type"))
+        assertEquals("visitor-123", org.json.JSONObject(connection.requestBody.toString(Charsets.UTF_8.name())).getString("visitorId"))
+        assertEquals(SaleAttribution(SaleAttributionSource.LINK, linkId, java.time.Instant.parse(expiresAt).toEpochMilli()), attribution)
+    }
+
+    @Test
+    fun affiliateClickFailsClosedForMismatchedExpiredMalformedOrMissingVisitor() {
+        val linkId = "link-123"
+        val productId = "product-123"
+        fun repository(body: String, visitorId: String? = "visitor-123", status: Int = 200) = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            affiliateVisitorIdProvider = { visitorId },
+            openConnection = { url -> RecordingMartConnection(url, status, body) },
+        )
+
+        val valid = """{"data":{"productId":"$productId","attribution":{"source":"link","id":"$linkId"},"expiresAt":"${java.time.Instant.now().plusSeconds(3600)}"}}"""
+        val mismatchedProduct = valid.replace(productId, "another-product")
+        val expiredBody = """{"data":{"productId":"$productId","attribution":{"source":"link","id":"$linkId"},"expiresAt":"${java.time.Instant.now().minusSeconds(60)}"}}"""
+        assertNull(repository(mismatchedProduct).recordAffiliateLinkClick(linkId, productId))
+        assertNull(repository(expiredBody).recordAffiliateLinkClick(linkId, productId))
+        assertNull(repository("not-json").recordAffiliateLinkClick(linkId, productId))
+        assertNull(repository(valid, visitorId = null).recordAffiliateLinkClick(linkId, productId))
+        assertNull(repository(valid, status = 404).recordAffiliateLinkClick(linkId, productId))
     }
 
     @Test
@@ -216,7 +269,7 @@ class MartRepositoryTest {
 
     @Test
     fun loadsDirectProductDetailRouteWithOptionalBearerAndParsesPublicFields() {
-        val body = """{"id":"prd-1","name":"Silk wrap","price":{"amountMinor":125000,"currency":"NGN"},"imageUrl":"javascript:alert(1)","stock":3,"images":["https://cdn.nantty.com/front.jpg","http://evil.example/back.jpg"],"title":"Silk wrap dress","rating":4.5,"promo":"New","sizes":["S","M"],"colors":["Blue"],"shippingInfo":"Calculated at checkout.","description":"Hand-finished silk.","store":{"id":"store-1","name":"Adire House","logoUrl":"https://cdn.nantty.com/store.jpg","rating":4.8,"ratingCount":12,"reviewCount":9},"related":[],"brand":null,"variants":[{"id":"var-1","title":"Blue / M","size":"M","color":"Blue","optionValues":{"Material":"Silk"},"price":{"amountMinor":125000,"currency":"NGN"},"inStock":true}]}"""
+        val body = """{"id":"prd-1","name":"Silk wrap","price":{"amountMinor":125000,"currency":"NGN"},"imageUrl":"javascript:alert(1)","stock":3,"images":["https://cdn.nantty.com/front.jpg","http://evil.example/back.jpg"],"title":"Silk wrap dress","rating":4.5,"promo":"New","sizes":["S","M"],"colors":["Blue"],"shippingInfo":"Calculated at checkout.","description":"Hand-finished silk.","store":{"id":"store-1","name":"Adire House","logoUrl":"https://cdn.nantty.com/store.jpg","rating":4.8,"ratingCount":12,"reviewCount":9},"related":[{"id":"prd-2","name":"Woven sandals","price":{"amountMinor":99000,"currency":"NGN"},"imageUrl":"https://cdn.nantty.com/sandals.jpg","stock":5},{"id":"prd-1","name":"Current product","price":{"amountMinor":1,"currency":"NGN"},"stock":1},{"id":"unsafe/../id","name":"Unsafe","price":{"amountMinor":1,"currency":"NGN"},"stock":1},{"id":"prd-3","name":"Unsafe image","price":{"amountMinor":1200,"currency":"NGN"},"imageUrl":"http://evil.example/image.jpg","stock":-2}],"brand":null,"variants":[{"id":"var-1","title":"Blue / M","size":"M","color":"Blue","optionValues":{"Material":"Silk"},"price":{"amountMinor":125000,"currency":"NGN"},"inStock":true}]}"""
         lateinit var connection: RecordingMartConnection
         val repository = MartRepository(
             baseUrl = "https://api.nantty.com",
@@ -236,10 +289,27 @@ class MartRepositoryTest {
         assertEquals("Silk wrap dress", result.value.title)
         assertEquals(listOf("https://cdn.nantty.com/front.jpg"), result.value.images)
         assertEquals("Adire House", result.value.store.name)
+        assertEquals(
+            listOf(MartProduct("prd-2", "Woven sandals", 99000, "NGN", "https://cdn.nantty.com/sandals.jpg", 5),
+                MartProduct("prd-3", "Unsafe image", 1200, "NGN", null, 0)),
+            result.value.related,
+        )
         assertEquals(1, result.value.variants.size)
         assertEquals("M", result.value.variants.single().size)
         assertEquals("Blue", result.value.variants.single().color)
         assertEquals(mapOf("Material" to "Silk"), result.value.variants.single().optionValues)
+    }
+
+    @Test
+    fun parsesOnlyTheServerBoundedNumberOfRelatedProductsAndSkipsMalformedRows() {
+        val rows = (1..8).joinToString(",") { index ->
+            """{"id":"prd-$index","name":"Product $index","price":{"amountMinor":$index,"currency":"NGN"},"stock":1}"""
+        }
+        val body = """{"id":"prd-current","title":"Current","price":{"amountMinor":100,"currency":"NGN"},"store":{"id":"store-1","name":"Shop"},"related":[$rows]}"""
+
+        val detail = MartRepository("https://api.nantty.com").parseProductDetail(body, "prd-current")
+
+        assertEquals((1..6).map { "prd-$it" }, detail.related.map(MartProduct::id))
     }
 
     @Test

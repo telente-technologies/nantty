@@ -9,15 +9,19 @@ import com.nantty.android.data.AccountNotificationSettingsRepository
 import com.nantty.android.data.AccountHealthRepository
 import com.nantty.android.data.IdentityVerificationRepository
 import com.nantty.android.data.CountryPreferenceRepository
+import com.nantty.android.data.CheckoutRepository
 import com.nantty.android.data.ContentPreferencesRepository
+import com.nantty.android.data.MentionPrivacyRepository
 import com.nantty.android.data.ClipsRepository
 import com.nantty.android.data.ClipWatchTrackingRepository
 import com.nantty.android.data.ChatNotificationSettingsRepository
 import com.nantty.android.data.ChatPasscodeRepository
 import com.nantty.android.data.BuyerOrdersRepository
+import com.nantty.android.data.BuyerReturnsRepository
 import com.nantty.android.data.ProductReviewsRepository
 import com.nantty.android.data.BuyerOrderDetail
 import com.nantty.android.data.CurrentProfileRepository
+import com.nantty.android.data.BrandActingProfile
 import com.nantty.android.data.DisputeRepository
 import com.nantty.android.data.CreatorSampleMediaRepository
 import com.nantty.android.data.ExploreRepository
@@ -40,6 +44,8 @@ import com.nantty.android.data.SavedPostsRepository
 import com.nantty.android.data.SearchRepository
 import com.nantty.android.data.StoreRepository
 import com.nantty.android.data.CartRepository
+import com.nantty.android.data.SaleAttribution
+import com.nantty.android.data.ShippingAddressesRepository
 import com.nantty.android.data.ProductAdsRepository
 import com.nantty.android.data.SupportTicketRepository
 import com.nantty.android.data.SpacesRepository
@@ -66,6 +72,7 @@ internal fun MainContent(
     currentAccountAvatarUrl: String? = null,
     modifier: Modifier = Modifier,
     onOpenPost: (String) -> Unit = {},
+    onOpenClip: (String) -> Unit = {},
     onOpenClipComments: (String) -> Unit = onOpenPost,
     onOpenPostComment: (String, String) -> Unit = { postId, _ -> onOpenPost(postId) },
     onOpenProfile: (String) -> Unit = {},
@@ -74,6 +81,8 @@ internal fun MainContent(
     searchScopeLabel: String = "Everywhere",
     onSearchScopeChanged: (String, String) -> Unit = { _, _ -> },
     onOpenProduct: (String) -> Unit = {},
+    onOpenProductWithAttribution: (String, SaleAttribution?) -> Unit = { productId, _ -> onOpenProduct(productId) },
+    initialMartSaleAttribution: SaleAttribution? = null,
     feedProductAdsRepository: ProductAdsRepository? = null,
     cartRepository: CartRepository? = null,
     onOpenCart: () -> Unit = {},
@@ -88,7 +97,7 @@ internal fun MainContent(
     onSave: (FeedPost) -> Unit = {},
     onShare: (FeedPost) -> Unit = {},
     currentAccountId: String? = null,
-    activeProfileId: String? = null,
+    activeProfile: BrandActingProfile? = null,
     onOpenAnalytics: ((String) -> Unit)? = null,
     feedPostActions: FeedDestinationPostActions = FeedDestinationPostActions(),
     interactionMessage: String? = null,
@@ -112,7 +121,15 @@ internal fun MainContent(
     identityVerificationRepository: IdentityVerificationRepository? = null,
     countryPreferenceRepository: CountryPreferenceRepository? = null,
     countryPreferenceNavigation: CountryPreferenceNavigation? = null,
+    shippingAddressesRepository: ShippingAddressesRepository? = null,
+    checkoutRepository: CheckoutRepository? = null,
+    onOpenShippingAddresses: () -> Unit = {},
+    onBackFromShippingAddresses: () -> Unit = {},
     contentPreferencesRepository: ContentPreferencesRepository? = null,
+    mentionPrivacyRepository: MentionPrivacyRepository? = null,
+    onBackFromMentionPrivacy: () -> Unit = {},
+    onMentionPrivacyReauthenticate: () -> Unit = onReauthenticate,
+    onOpenMentionPrivacy: () -> Unit = {},
     onBackFromContentPreferences: () -> Unit = {},
     chatNotificationSettingsRepository: ChatNotificationSettingsRepository? = null,
     chatPasscodeRepository: ChatPasscodeRepository? = null,
@@ -172,6 +189,7 @@ internal fun MainContent(
     spacesViewerId: String? = null,
     showMartCategoryPane: Boolean = false,
     initialMartProductId: String? = null,
+    initialMartAffiliateLinkId: String? = null,
     onInitialMartProductHandled: () -> Unit = {},
     initialMartCategoryId: String? = null,
     initialMartCategoryName: String? = null,
@@ -193,73 +211,64 @@ internal fun MainContent(
     onOpenConnections: (String, String) -> Unit = { _, _ -> },
     onOpenBusinessTools: () -> Unit = {},
     businessContent: (@Composable () -> Unit)? = null,
+    buyerReturnsRepository: BuyerReturnsRepository? = null,
 ) {
     val context = LocalContext.current
-    if (destination == Destination.Live && liveSessionsRepository != null && liveCoinTipRepository != null && liveCommentsRepository != null && liveStageRepository != null && ioExecutor != null && initialLiveId != null) {
-        com.nantty.android.ui.live.LiveWatchScreen(
-            liveId = initialLiveId,
-            sessions = liveSessionsRepository,
-            coinTips = liveCoinTipRepository,
-            comments = liveCommentsRepository,
-            stage = liveStageRepository,
-            reports = liveReportRepository,
-            executor = ioExecutor,
-            onBack = onBackFromLive,
-            onReauthenticate = onReauthenticate,
-            modifier = modifier,
-        )
-        return
-    }
-    if (destination == Destination.Clips && clipsRepository != null && postDetailRepository != null && publicProfileRepository != null && ioExecutor != null) {
-        com.nantty.android.ui.clips.ClipsScreen(
-            repository = clipsRepository,
-            postRepository = postDetailRepository,
-            profileRepository = publicProfileRepository,
-            executor = ioExecutor,
-            watchTrackingRepository = clipWatchTrackingRepository,
-            isGuest = !canViewFollowing,
+    if (MainRealtimeDestination(
+            destination = destination,
+            liveSessionsRepository = liveSessionsRepository,
+            liveCoinTipRepository = liveCoinTipRepository,
+            liveCommentsRepository = liveCommentsRepository,
+            liveStageRepository = liveStageRepository,
+            liveReportRepository = liveReportRepository,
+            initialLiveId = initialLiveId,
+            clipsRepository = clipsRepository,
+            postDetailRepository = postDetailRepository,
+            publicProfileRepository = publicProfileRepository,
+            ioExecutor = ioExecutor,
+            clipWatchTrackingRepository = clipWatchTrackingRepository,
+            canViewFollowing = canViewFollowing,
+            onSignInRequired = onSignInRequired,
             onSignInRequiredWithAction = onSignInRequiredWithAction,
-            onReauthenticate = onClipReauthenticate,
+            onReauthenticate = onReauthenticate,
+            onClipReauthenticate = onClipReauthenticate,
             onOpenSearch = onOpenSearch,
             onOpenPost = onOpenPost,
             onOpenClipComments = onOpenClipComments,
             onOpenProfile = onOpenProfile,
             initialClipId = initialClipId,
             onInitialClipHandled = onInitialClipHandled,
-            modifier = modifier,
-        )
-        return
-    }
-    if (destination == Destination.Spaces && spacesRepository != null && ioExecutor != null) {
-        com.nantty.android.ui.spaces.SpacesScreen(
-            repository = spacesRepository,
-            accessToken = spacesAccessToken,
-            viewerId = spacesViewerId,
-            executor = ioExecutor,
-            onSignInRequired = onSignInRequired,
+            spacesRepository = spacesRepository,
+            spacesAccessToken = spacesAccessToken,
+            spacesViewerId = spacesViewerId,
             initialSpaceId = initialSpaceId,
             onInitialSpaceHandled = onInitialSpaceHandled,
+            onBackFromLive = onBackFromLive,
             modifier = modifier,
-        )
-        return
-    }
+        )) return
     if (AccountSettingsDestination(
             destination = destination,
             countryPreferenceRepository = countryPreferenceRepository,
             countryPreferenceNavigation = countryPreferenceNavigation,
             contentPreferencesRepository = contentPreferencesRepository,
+            mentionPrivacyRepository = mentionPrivacyRepository,
             chatNotificationSettingsRepository = chatNotificationSettingsRepository,
             chatPasscodeRepository = chatPasscodeRepository,
+            shippingAddressesRepository = shippingAddressesRepository,
+            checkoutRepository = checkoutRepository,
             executor = ioExecutor,
             onReauthenticate = onReauthenticate,
             onNotificationReauthenticate = onNotificationReauthenticate,
             onBackFromContentPreferences = onBackFromContentPreferences,
             onContentPreferencesChanged = onContentPreferencesChanged,
+            onBackFromMentionPrivacy = onBackFromMentionPrivacy,
+            onMentionPrivacyReauthenticate = onMentionPrivacyReauthenticate,
             onBackFromChatSettings = onBackFromSupportRequests,
             onOpenBlockedAccounts = onOpenBlockedAccounts,
             onOpenPasscodeSettings = onOpenChatPasscodeSettings,
             onChatNotificationsSaved = onChatNotificationsSaved,
             onBackFromChatPasscode = onOpenChatNotificationSettings,
+            onBackFromShippingAddresses = onBackFromShippingAddresses,
             onChatPasscodeUpdated = onChatPasscodeUpdated,
             modifier = modifier,
         )) return
@@ -272,6 +281,8 @@ internal fun MainContent(
             onOpenBusinessTools = onOpenBusinessTools,
             onOpenCountryPreferences = countryPreferenceNavigation?.open ?: {},
             onOpenContentPreferences = onOpenContentPreferences,
+            onOpenMentionPrivacy = onOpenMentionPrivacy,
+            onOpenShippingAddresses = onOpenShippingAddresses,
             onOpenConnections = onOpenConnections,
             onOpenProfile = onOpenProfile,
             onSearchProfile = onSearchCurrentProfile,
@@ -289,7 +300,15 @@ internal fun MainContent(
         return
     }
     if (destination == Destination.Saved && savedPostsRepository != null && ioExecutor != null) {
-        SavedPostsScreen(savedPostsRepository, ioExecutor, onBackFromSavedPosts, onOpenPost, onReauthenticate, modifier)
+        SavedPostsScreen(
+            repository = savedPostsRepository,
+            executor = ioExecutor,
+            onBack = onBackFromSavedPosts,
+            onOpenPost = onOpenPost,
+            onOpenProduct = onOpenProduct,
+            onAuthenticationRequired = onReauthenticate,
+            modifier = modifier,
+        )
         return
     }
     if (destination == Destination.Messages && messagesRepository != null && ioExecutor != null) {
@@ -371,44 +390,30 @@ internal fun MainContent(
         )
         return
     }
-    if (destination == Destination.DisputeDetail && disputeRepository != null && ioExecutor != null && initialDisputeId != null) {
-        BuyerDisputeDetailScreen(
-            disputeId = initialDisputeId,
-            repository = disputeRepository,
-            executor = ioExecutor,
-            onBack = onBackFromOrders,
-            onReauthenticate = onReauthenticate,
-            modifier = modifier,
-        )
-        androidx.compose.runtime.LaunchedEffect(initialDisputeId) { onInitialDisputeHandled() }
-        return
-    }
-    if (destination == Destination.Wallet && walletRepository != null && ioExecutor != null) {
-        WalletScreen(walletRepository, ioExecutor, modifier)
-        return
-    }
-    if (destination == Destination.Orders && buyerOrdersRepository != null && ioExecutor != null) {
-        BuyerOrdersScreen(
-            repository = buyerOrdersRepository,
-            executor = ioExecutor,
-            onBack = onBackFromOrders,
-            onAuthenticationRequired = onReauthenticate,
+    if (MainCommerceDestination(
+            destination = destination,
+            walletRepository = walletRepository,
+            buyerOrdersRepository = buyerOrdersRepository,
+            buyerReturnsRepository = buyerReturnsRepository,
+            productReviewsRepository = productReviewsRepository,
             disputeRepository = disputeRepository,
             privateMediaUploadsRepository = privateMediaUploadsRepository,
-            onOpenStore = onOpenStore,
-            onOpenProduct = onOpenProduct,
-            onCheckPayment = onCheckBuyerOrderPayment,
-            reviewRepository = productReviewsRepository,
             messagesRepository = messagesRepository,
             supportTicketRepository = supportTicketRepository,
+            executor = ioExecutor,
+            onReauthenticate = onReauthenticate,
+            onBackFromOrders = onBackFromOrders,
+            onCheckBuyerOrderPayment = onCheckBuyerOrderPayment,
+            onOpenStore = onOpenStore,
+            onOpenProduct = onOpenProduct,
             onOpenConversation = onOpenNotificationConversation,
             onMessageFailure = onMessageFailure,
             initialOrderId = initialNotificationOrderId,
             onInitialOrderHandled = onInitialNotificationOrderHandled,
+            initialDisputeId = initialDisputeId,
+            onInitialDisputeHandled = onInitialDisputeHandled,
             modifier = modifier,
-        )
-        return
-    }
+        )) return
     if (destination == Destination.Discover && searchRepository != null && ioExecutor != null) {
         SearchScreen(
             repository = searchRepository,
@@ -443,7 +448,9 @@ internal fun MainContent(
                 if (canViewFollowing) onReauthenticate() else onSignInRequired()
             },
             initialProductId = initialMartProductId,
+            initialAffiliateLinkId = initialMartAffiliateLinkId,
             onInitialProductHandled = onInitialMartProductHandled,
+            initialSaleAttribution = initialMartSaleAttribution,
             initialCategoryId = initialMartCategoryId,
             initialCategoryName = initialMartCategoryName,
             onBackFromInitialCategory = onBackFromInitialMartCategory,
@@ -452,6 +459,7 @@ internal fun MainContent(
             onOpenBrand = onOpenBrand,
             storeRepository = storeRepository,
             productAdsRepositoryOverride = feedProductAdsRepository,
+            onOpenCart = onOpenCart,
         )
         return
     }
@@ -482,14 +490,22 @@ internal fun MainContent(
         onLoadMore = onLoadMore,
         onOpenSavedPosts = onOpenSavedPosts,
         currentAccountId = currentAccountId,
-        activeProfileId = activeProfileId,
+        activeProfileId = activeProfile?.id,
+        activeProfile = activeProfile,
         onOpenAnalytics = onOpenAnalytics,
         postActions = feedPostActions,
         onOpenProduct = onOpenProduct,
+        onOpenProductWithAttribution = onOpenProductWithAttribution,
         productAdsRepository = feedProductAdsRepository,
+        martRepository = martRepository,
         cartRepository = cartRepository,
         ioExecutor = ioExecutor,
         onSignInRequiredWithAction = onSignInRequiredWithAction,
         onOpenCart = onOpenCart,
+        onOpenSearch = onOpenSearch,
+        exploreRepository = exploreRepository,
+        publicProfileRepository = publicProfileRepository,
+        clipsRepository = clipsRepository,
+        onOpenClip = onOpenClip,
     )
 }

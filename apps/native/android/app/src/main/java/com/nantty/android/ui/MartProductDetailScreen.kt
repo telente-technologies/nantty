@@ -1,5 +1,9 @@
 package com.nantty.android.ui
 
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,22 +20,28 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -40,11 +50,22 @@ import com.nantty.android.data.MartProductDetailResult
 import com.nantty.android.data.MartRepository
 import com.nantty.android.data.AddToCartResult
 import com.nantty.android.data.CartRepository
+import com.nantty.android.data.SaleAttribution
 import com.nantty.android.data.StoreFollowResult
 import com.nantty.android.data.StoreRepository
 import com.nantty.android.data.ProductReportReason
 import com.nantty.android.data.ProductReportRepository
 import com.nantty.android.data.ProductReportResult
+import com.nantty.android.data.ProductSaveMutationResult
+import com.nantty.android.data.ProductSaveRepository
+import com.nantty.android.data.ProductSaveStatusResult
+import com.nantty.android.data.ProductReviewsRepository
+import com.nantty.android.data.PRODUCT_VARIANT_ID_OPTION_KEY
+import com.nantty.android.data.productOptionGroups
+import com.nantty.android.data.productOptionHasStock
+import com.nantty.android.data.resolveProductVariant
+import com.nantty.android.share.copyProductLinkFromAndroid
+import com.nantty.android.share.shareProductFromAndroid
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,23 +74,31 @@ import kotlinx.coroutines.withContext
 @Composable
 internal fun MartProductDetailScreen(
     productId: String,
+    saleAttribution: SaleAttribution? = null,
     repository: MartRepository,
     onAuthenticationRequired: () -> Unit,
     onBack: () -> Unit,
     onOpenReviews: (String) -> Unit = {},
+    onOpenRelatedProduct: (String) -> Unit = {},
     onOpenStore: (String) -> Unit = {},
     onOpenBrand: (String) -> Unit = {},
+    onOpenCart: () -> Unit = {},
     storeRepository: StoreRepository? = null,
+    reviewsRepositoryOverride: ProductReviewsRepository? = null,
     modifier: Modifier = Modifier,
     cartRepositoryOverride: CartRepository? = null,
     productReportRepositoryOverride: ProductReportRepository? = null,
+    productSaveRepositoryOverride: ProductSaveRepository? = null,
 ) {
     var result by remember(productId, repository) { mutableStateOf<MartProductDetailResult?>(null) }
     var loading by remember(productId, repository) { mutableStateOf(true) }
     var retryCount by remember(productId) { mutableIntStateOf(0) }
-    var selectedVariantId by rememberSaveable(productId) { mutableStateOf<String?>(null) }
+    var selectedOptions by rememberSaveable(productId, stateSaver = productOptionSelectionsSaver) {
+        mutableStateOf(emptyMap<String, String>())
+    }
     var quantity by rememberSaveable(productId) { mutableIntStateOf(1) }
     var addToCartResult by remember(productId) { mutableStateOf<AddToCartResult?>(null) }
+    var productViewRecorded by rememberSaveable(productId) { mutableStateOf(false) }
     var addingToCart by remember(productId) { mutableStateOf(false) }
     var followingStore by remember(productId) { mutableStateOf(false) }
     var followingStoreBusy by remember(productId) { mutableStateOf(false) }
@@ -82,12 +111,26 @@ internal fun MartProductDetailScreen(
     var reportError by remember(productId) { mutableStateOf<String?>(null) }
     var reportCanRetry by remember(productId) { mutableStateOf(true) }
     var reportIdempotencyKey by rememberSaveable(productId) { mutableStateOf(UUID.randomUUID().toString()) }
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var savedProduct by rememberSaveable(productId) { mutableStateOf<Boolean?>(null) }
+    var savingProduct by remember(productId) { mutableStateOf(false) }
+    var saveProductError by remember(productId) { mutableStateOf<String?>(null) }
+    var shareMenuExpanded by remember(productId) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val cartRepository = remember(productId, repository, cartRepositoryOverride) {
-        cartRepositoryOverride ?: CartRepository(accessTokenProvider = repository::currentAccessToken)
+        cartRepositoryOverride ?: CartRepository(
+            accessTokenProvider = repository::currentAccessToken,
+            productInteractionRepository = repository.productInteractions(),
+        )
     }
     val productReportRepository = remember(productId, repository, productReportRepositoryOverride) {
         productReportRepositoryOverride ?: ProductReportRepository(accessTokenProvider = repository::currentAccessToken)
+    }
+    val productSaveRepository = remember(productId, repository, productSaveRepositoryOverride) {
+        productSaveRepositoryOverride ?: ProductSaveRepository(baseUrl = repository.apiBaseUrl(), accessTokenProvider = repository::currentAccessToken)
+    }
+    val productReviewsRepository = remember(productId, repository, reviewsRepositoryOverride) {
+        reviewsRepositoryOverride ?: ProductReviewsRepository(baseUrl = repository.apiBaseUrl(), accessTokenProvider = repository::currentAccessToken)
     }
 
     fun submitProductReport(reason: ProductReportReason) {
@@ -145,6 +188,57 @@ internal fun MartProductDetailScreen(
             if (loaded is MartProductDetailResult.Success) followingStore = loaded.value.store.isFollowing
             loading = false
         }
+        if (loaded is MartProductDetailResult.Success && !productViewRecorded) {
+            productViewRecorded = true
+            withContext(Dispatchers.IO) { repository.recordProductViewed(loaded.value.id) }
+        }
+    }
+    LaunchedEffect(productId, productSaveRepository) {
+        savedProduct = null
+        saveProductError = null
+        if (repository.currentAccessToken() == null) {
+            savedProduct = false
+        } else {
+            val outcome = withContext(Dispatchers.IO) { productSaveRepository.loadStatus(productId) }
+            Snapshot.withMutableSnapshot {
+                when (outcome) {
+                    is ProductSaveStatusResult.Success -> savedProduct = outcome.isSaved
+                    ProductSaveStatusResult.AuthenticationRequired -> savedProduct = false
+                    is ProductSaveStatusResult.Failure -> {
+                        savedProduct = false
+                        saveProductError = outcome.message
+                    }
+                }
+            }
+        }
+    }
+
+    fun toggleProductSaved() {
+        if (savingProduct) return
+        if (repository.currentAccessToken() == null) {
+            onAuthenticationRequired()
+            return
+        }
+        val previous = savedProduct ?: false
+        val next = !previous
+        savingProduct = true
+        savedProduct = next
+        saveProductError = null
+        scope.launch {
+            val outcome = withContext(Dispatchers.IO) { productSaveRepository.setSaved(productId, next) }
+            savingProduct = false
+            when (outcome) {
+                ProductSaveMutationResult.Success -> savedProduct = next
+                ProductSaveMutationResult.AuthenticationRequired -> {
+                    savedProduct = previous
+                    onAuthenticationRequired()
+                }
+                is ProductSaveMutationResult.Failure -> {
+                    savedProduct = previous
+                    saveProductError = outcome.message
+                }
+            }
+        }
     }
 
     Column(modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -156,6 +250,44 @@ internal fun MartProductDetailScreen(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
             }
             Text("Product details", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.weight(1f))
+            IconButton(
+                onClick = ::toggleProductSaved,
+                enabled = !savingProduct && savedProduct != null,
+                modifier = Modifier.semantics {
+                    contentDescription = if (savedProduct == true) "Remove product from Saved" else "Save product"
+                },
+            ) {
+                Icon(
+                    imageVector = if (savedProduct == true) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                    contentDescription = null,
+                    tint = if (savedProduct == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Box {
+                IconButton(
+                    onClick = { shareMenuExpanded = true },
+                    modifier = Modifier.semantics { contentDescription = "Share product" },
+                ) { Icon(Icons.Filled.Share, contentDescription = null) }
+                DropdownMenu(expanded = shareMenuExpanded, onDismissRequest = { shareMenuExpanded = false }) {
+                    DropdownMenuItem(
+                        text = { Text("Copy product link") },
+                        onClick = {
+                            shareMenuExpanded = false
+                            val detail = (result as? MartProductDetailResult.Success)?.value ?: return@DropdownMenuItem
+                            copyProductLinkFromAndroid(context, detail.id, detail.title)
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Share product link") },
+                        onClick = {
+                            shareMenuExpanded = false
+                            val detail = (result as? MartProductDetailResult.Success)?.value ?: return@DropdownMenuItem
+                            shareProductFromAndroid(context, detail.id, detail.title)
+                        },
+                    )
+                }
+            }
         }
 
         when {
@@ -168,15 +300,23 @@ internal fun MartProductDetailScreen(
             )
             result is MartProductDetailResult.Success -> {
                 val detail = (result as MartProductDetailResult.Success).value
-                val effectiveVariantId = selectedVariantId ?: detail.variants.singleOrNull()?.id
+                val optionGroups = remember(detail) { productOptionGroups(detail) }
+                val selectedVariant = resolveProductVariant(detail, optionGroups, selectedOptions)
+                val missingOption = optionGroups.firstOrNull { it.key !in selectedOptions }
                 Column(Modifier.weight(1f)) {
                     ProductDetailContent(
                         detail = detail,
-                        selectedVariantId = effectiveVariantId,
-                        onSelectVariant = { selectedVariantId = it; addToCartResult = null },
+                        optionGroups = optionGroups,
+                        selectedOptions = selectedOptions,
+                        onSelectOption = { key, value -> selectedOptions = selectedOptions + (key to value); addToCartResult = null },
+                        isOptionAvailable = { key, value ->
+                            productOptionHasStock(detail.variants, selectedOptions.filterKeys { it == key }, key, value)
+                        },
                         quantity = quantity,
                         onQuantityChange = { quantity = it; addToCartResult = null },
+                        reviewsRepository = productReviewsRepository,
                         onOpenReviews = { onOpenReviews(detail.id) },
+                        onOpenRelatedProduct = onOpenRelatedProduct,
                         onOpenStore = { onOpenStore(detail.store.id) },
                         onOpenBrand = onOpenBrand,
                         isFollowingStore = followingStore,
@@ -196,8 +336,29 @@ internal fun MartProductDetailScreen(
                         },
                         modifier = Modifier.weight(1f),
                     )
-                    val selectedVariant = detail.variants.firstOrNull { it.id == effectiveVariantId }
+                    saveProductError?.let { message ->
+                        Text(
+                            message,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
+                        )
+                    }
                     val canAdd = detail.stock > 0 && selectedVariant?.inStock == true && !addingToCart
+                    val selectionMessage = when {
+                        detail.stock <= 0 -> "This product is currently sold out."
+                        missingOption != null -> "Choose ${missingOption.label.lowercase()} to continue."
+                        selectedVariant == null -> "That combination is unavailable. Choose another option."
+                        !selectedVariant.inStock -> "This option is currently sold out."
+                        else -> null
+                    }
+                    selectionMessage?.let { message ->
+                        Text(
+                            message,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp)
+                                .semantics { contentDescription = message },
+                        )
+                    }
                     addToCartResult?.let { outcome ->
                         val text = when (outcome) {
                             AddToCartResult.Success -> "Added to your cart."
@@ -216,12 +377,24 @@ internal fun MartProductDetailScreen(
                             addToCartResult = null
                             scope.launch {
                                 val outcome = withContext(Dispatchers.IO) {
-                                    cartRepository.addProduct(detail.id, selectedVariant?.id, quantity)
+                                    val variant = selectedVariant ?: return@withContext AddToCartResult.Failure("Choose all product options first.")
+                                    val useVariantId = optionGroups.isEmpty() || optionGroups.any { it.key == PRODUCT_VARIANT_ID_OPTION_KEY }
+                                    cartRepository.addProduct(
+                                        productId = detail.id,
+                                        variantId = variant.id.takeIf { useVariantId },
+                                        quantity = quantity,
+                                        attribution = saleAttribution,
+                                        size = variant.size.takeIf { !useVariantId && it.isNotBlank() },
+                                        color = variant.color.takeIf { !useVariantId && it.isNotBlank() },
+                                        options = if (useVariantId) emptyMap() else variant.optionValues,
+                                    )
                                 }
                                 addingToCart = false
                                 addToCartResult = outcome
                                 if ((outcome as? AddToCartResult.Failure)?.authenticationRequired == true) {
                                     onAuthenticationRequired()
+                                } else if (outcome == AddToCartResult.Success) {
+                                    onOpenCart()
                                 }
                             }
                         },
@@ -266,6 +439,17 @@ internal fun MartProductDetailScreen(
         onRetry = { reportSelectedReason?.let(::submitProductReport) },
     )
 }
+
+private val productOptionSelectionsSaver: Saver<Map<String, String>, Any> = listSaver<Map<String, String>, String>(
+    save = { selections -> selections.flatMap { (key, value) -> listOf(key, value) } },
+    restore = { values: List<String> ->
+        values.chunked(2).mapNotNull { pair ->
+            val key = pair.getOrNull(0)?.takeIf(String::isNotBlank)
+            val value = pair.getOrNull(1)?.takeIf(String::isNotBlank)
+            if (key == null || value == null) null else key to value
+        }.toMap()
+    },
+)
 
 @Composable
 private fun ProductDetailError(message: String, onRetry: () -> Unit) {

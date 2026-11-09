@@ -34,6 +34,11 @@ internal fun buildMartProductDetailUrl(origin: String, productId: String): URL {
     return URL("${validatedMartOrigin(origin)}/api/v1/products/$productId")
 }
 
+internal fun buildAffiliateLinkClickUrl(origin: String, linkId: String): URL {
+    require(linkId.matches(Regex("[A-Za-z0-9_-]{1,80}"))) { "Invalid affiliate link identifier." }
+    return URL("${validatedMartOrigin(origin)}/api/v1/affiliate-links/$linkId/clicks")
+}
+
 private fun validatedMartOrigin(origin: String): String {
     val parsed = runCatching { URL(origin.trim().trimEnd('/')) }.getOrElse { throw IllegalArgumentException("Invalid API URL", it) }
     val allowed = parsed.protocol == "https" || (parsed.protocol == "http" && parsed.host == "10.0.2.2")

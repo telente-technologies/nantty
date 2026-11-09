@@ -47,6 +47,7 @@ import com.nantty.android.R
 import com.nantty.android.data.FeedTaggedProduct
 import com.nantty.android.data.AddToCartResult
 import com.nantty.android.data.CartRepository
+import com.nantty.android.data.SaleAttribution
 import java.util.concurrent.Executor
 
 private data class FeedTaggedProductsMessage(
@@ -60,6 +61,7 @@ private data class FeedTaggedProductsMessage(
 @Composable
 internal fun FeedTaggedProductsSheet(
     products: List<FeedTaggedProduct>,
+    attribution: SaleAttribution? = null,
     onDismiss: () -> Unit,
     onOpenProduct: (String) -> Unit,
     cartRepository: CartRepository? = null,
@@ -86,7 +88,7 @@ internal fun FeedTaggedProductsSheet(
         addingProductId = product.id
         actionMessage = null
         executor.execute {
-            val result = repository.addProduct(product.id, variantId = null, quantity = 1)
+            val result = repository.addProduct(product.id, variantId = null, quantity = 1, attribution = attribution)
             mainHandler.post {
                 addingProductId = null
                 when (result) {
@@ -129,7 +131,7 @@ internal fun FeedTaggedProductsSheet(
             var authenticationRequired = false
             var failureCount = 0
             for (product in remaining) {
-                when (val result = repository.addProduct(product.id, variantId = null, quantity = 1)) {
+                when (val result = repository.addProduct(product.id, variantId = null, quantity = 1, attribution = attribution)) {
                     AddToCartResult.Success -> {
                         successes++
                         mainHandler.post { addedProductIds = addedProductIds + product.id }

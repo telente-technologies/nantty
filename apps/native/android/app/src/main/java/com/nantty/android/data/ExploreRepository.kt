@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
+import java.time.Instant
 
 data class ExploreCategory(val id: String, val label: String)
 
@@ -42,6 +43,7 @@ data class ExploreUserSummary(
     val username: String,
     val avatarUrl: String?,
     val verified: Boolean,
+    val verificationColor: String? = null,
 )
 
 data class ExploreSuggestion(
@@ -141,9 +143,13 @@ class ExploreRepository(
         }
     }
 
-    fun loadWhoToFollow(limit: Int = DEFAULT_FOLLOW_LIMIT): ExploreResult<List<ExploreSuggestion>> {
+    fun loadWhoToFollow(
+        limit: Int = DEFAULT_FOLLOW_LIMIT,
+        includePrivate: Boolean = false,
+    ): ExploreResult<List<ExploreSuggestion>> {
         if (limit !in 1..30) return ExploreResult.Failure("Explore follow-suggestion limit is invalid.")
-        return request("/api/v1/explore/who-to-follow?limit=$limit") { payload ->
+        val includePrivateParameter = if (includePrivate) "&includePrivate=true" else ""
+        return request("/api/v1/explore/who-to-follow?limit=$limit$includePrivateParameter") { payload ->
             val rows = payload.optJSONArray("data") ?: error("Nantty returned an incomplete follow-suggestions response.")
             buildList {
                 for (index in 0 until rows.length()) {
@@ -152,13 +158,16 @@ class ExploreRepository(
                     val userId = user.optNullableString("id") ?: continue
                     val username = user.optNullableString("username") ?: continue
                     val reason = row.optJSONObject("reason")
+                    val verification = user.optJSONObject("verification")
+                    val verificationColor = verification?.let(::visibleExploreVerificationColor)
                     add(ExploreSuggestion(
                         user = ExploreUserSummary(
                             id = userId,
                             name = user.optNullableString("name") ?: username,
                             username = username,
                             avatarUrl = safeMediaUrl(user.optNullableString("avatarUrl")),
-                            verified = user.optBoolean("verified"),
+                            verified = verificationColor != null || (verification == null && user.optBoolean("verified")),
+                            verificationColor = verificationColor,
                         ),
                         reasonCode = reason?.optNullableString("code").orEmpty(),
                         reasonLabel = reason?.optNullableString("label").orEmpty(),
@@ -239,6 +248,22 @@ class ExploreRepository(
 
         internal fun categoryParameter(category: String): String? = category.takeUnless { it == "for_you" || it == "trending" }
     }
+}
+
+private fun visibleExploreVerificationColor(verification: JSONObject): String? {
+    val color = verification.optString("color")
+    val expectedColor = when (verification.optString("type")) {
+        "personal" -> "blue"
+        "business" -> "gold"
+        "government" -> "black"
+        else -> return null
+    }
+    if (color != expectedColor || !verification.optBoolean("badgeVisible") || verification.optString("tier") == "ESSENTIAL") return null
+    val status = verification.optString("status")
+    if (status == "active") return color
+    if (status != "expired" || color != "black") return null
+    val graceEnd = runCatching { Instant.parse(verification.optString("graceEndsAt")).toEpochMilli() }.getOrNull()
+    return color.takeIf { graceEnd != null && graceEnd > System.currentTimeMillis() }
 }
 
 data class ExploreTrendPage(val scope: String, val items: List<ExploreTrend>)

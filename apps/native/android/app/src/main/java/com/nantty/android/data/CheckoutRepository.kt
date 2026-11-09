@@ -50,7 +50,24 @@ internal data class CheckoutReceipt(
     val orderCount: Int,
     val paymentMethod: CheckoutPaymentMethod = CheckoutPaymentMethod.HOSTED,
     val saveCardOnDevice: Boolean = false,
+    val productSignals: List<ProductPurchaseSignal> = emptyList(),
 )
+
+internal data class ProductPurchaseSignal(val productId: String, val quantity: Int)
+
+internal fun encodeProductPurchaseSignals(signals: List<ProductPurchaseSignal>): String = JSONArray().apply {
+    signals.forEach { signal -> put(JSONObject().put("productId", signal.productId).put("quantity", signal.quantity)) }
+}.toString()
+
+internal fun decodeProductPurchaseSignals(encoded: String): List<ProductPurchaseSignal> = runCatching {
+    val rows = JSONArray(encoded)
+    (0 until rows.length()).mapNotNull { index ->
+        val row = rows.optJSONObject(index) ?: return@mapNotNull null
+        val productId = row.optString("productId")
+        val quantity = row.optInt("quantity")
+        if (isSafeMartIdentifier(productId) && quantity in 1..99) ProductPurchaseSignal(productId, quantity) else null
+    }
+}.getOrDefault(emptyList())
 
 internal enum class CheckoutPaymentMethod { HOSTED, PROVIDER_WALLET, SAVED_CARD }
 
@@ -110,6 +127,11 @@ internal class CheckoutRepository(
         onSuccess = CheckoutAddressesResult::Success,
         onFailure = { CheckoutAddressesResult.Failure(checkoutErrorMessage(it, "load your addresses"), it.isCheckoutAuthFailure()) },
     )
+
+    fun loadPaymentChannels(): List<String> = runCatching {
+        val token = requireToken("Sign in to continue checkout.")
+        parseCheckoutPaymentChannels(transport.get("/api/v1/payments/channels", token))
+    }.getOrDefault(emptyList())
 
     fun loadGeoCountries(): List<CheckoutGeoCountry> {
         val token = requireToken("Sign in to add a delivery address.")
@@ -358,6 +380,17 @@ private fun checkoutErrorMessage(error: Throwable, action: String): String = whe
 }
 
 internal class CheckoutHttpException(val statusCode: Int) : Exception()
+
+internal fun parseCheckoutPaymentChannels(payload: JSONObject): List<String> {
+    val supported = setOf("card", "bank", "bank_transfer", "ussd")
+    val rows = payload.optJSONArray("channels") ?: return emptyList()
+    return buildList {
+        for (index in 0 until rows.length()) {
+            val value = rows.optString(index).trim().lowercase()
+            if (value in supported && value !in this) add(value)
+        }
+    }
+}
 
 internal class JdkCheckoutTransport(private val baseUrl: String) : CheckoutTransport {
     override fun get(path: String, accessToken: String): JSONObject = JSONObject(request(path, accessToken, "GET"))

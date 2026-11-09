@@ -29,19 +29,20 @@ import com.nantty.android.widget.OrdersWidgetRefreshScheduler
 import com.nantty.android.notifications.NativePushRegistration
 import com.nantty.android.notifications.ForegroundActivityHeartbeat
 import com.nantty.android.notifications.PushTapTarget
+import com.nantty.android.AffiliateProductDeepLink
 import com.nantty.android.security.chatcrypto.AndroidChatCryptoStorage
 import com.nantty.android.security.chatcrypto.DeviceKeyRegistration
 import com.nantty.android.security.chatcrypto.ProtocolStore
 import java.util.concurrent.Executor
 
 internal enum class Destination(val title: String) {
-    Feed("Home"), Clips("Clips"), Mart("Mart"), Discover("Discover"), Spaces("Spaces"), Live("Live"), Notifications("Activity"), Messages("Messages"), Wallet("Wallet"), Orders("Orders"), Profile("Profile"), Saved("Saved posts"), Business("Business tools"), FollowRequests("Follow requests"), GroupInvitations("Group invitations"), AccountStatus("Account status"), IdentityVerification("Verification"), SupportRequests("Support requests"), DisputeDetail("Dispute"), CountryPreference("Country & currency"), ContentPreferences("Content preferences"), ChatNotificationSettings("Chat settings"), ChatPasscode("Chat passcode")
+    Feed("Home"), Clips("Clips"), Mart("Mart"), Discover("Discover"), Spaces("Spaces"), Live("Live"), Notifications("Activity"), Messages("Messages"), Wallet("Wallet"), Orders("Orders"), Profile("Profile"), Saved("Saved posts"), Business("Business tools"), FollowRequests("Follow requests"), GroupInvitations("Group invitations"), AccountStatus("Account status"), IdentityVerification("Verification"), SupportRequests("Support requests"), DisputeDetail("Dispute"), CountryPreference("Country & currency"), ShippingAddresses("Shipping addresses"), ContentPreferences("Content preferences"), MentionPrivacy("Mention privacy"), ChatNotificationSettings("Chat settings"), ChatPasscode("Chat passcode")
 }
 
 internal fun visibleDestinations(isGuest: Boolean): List<Destination> =
     Destination.entries.filter { item ->
         if (isGuest) item == Destination.Feed || item == Destination.Clips || item == Destination.Mart || item == Destination.Discover || item == Destination.Spaces
-        else item != Destination.Saved && item != Destination.Orders && item != Destination.Mart && item != Destination.Live && item != Destination.Business && item != Destination.FollowRequests && item != Destination.GroupInvitations && item != Destination.AccountStatus && item != Destination.IdentityVerification && item != Destination.SupportRequests && item != Destination.DisputeDetail && item != Destination.CountryPreference && item != Destination.ContentPreferences && item != Destination.ChatNotificationSettings && item != Destination.ChatPasscode
+        else item != Destination.Saved && item != Destination.Orders && item != Destination.Mart && item != Destination.Live && item != Destination.Business && item != Destination.FollowRequests && item != Destination.GroupInvitations && item != Destination.AccountStatus && item != Destination.IdentityVerification && item != Destination.SupportRequests && item != Destination.DisputeDetail && item != Destination.CountryPreference && item != Destination.ShippingAddresses && item != Destination.ContentPreferences && item != Destination.MentionPrivacy && item != Destination.ChatNotificationSettings && item != Destination.ChatPasscode
     }
 
 @Composable
@@ -58,6 +59,8 @@ fun NanttyApp(
     onGroupInvitationTokenHandled: () -> Unit = {},
     requestedChannelInvitationToken: String? = null,
     onChannelInvitationTokenHandled: () -> Unit = {},
+    requestedAffiliateProductLink: AffiliateProductDeepLink? = null,
+    onAffiliateProductLinkHandled: () -> Unit = {},
 ) {
     val appContext = LocalContext.current.applicationContext
     val chatCryptoStorage = remember(appContext) { AndroidChatCryptoStorage(appContext) }
@@ -212,6 +215,8 @@ fun NanttyApp(
             onGroupInvitationTokenHandled = onGroupInvitationTokenHandled,
             requestedChannelInvitationToken = requestedChannelInvitationToken,
             onChannelInvitationTokenHandled = onChannelInvitationTokenHandled,
+            requestedAffiliateProductLink = requestedAffiliateProductLink,
+            onAffiliateProductLinkHandled = onAffiliateProductLinkHandled,
         )
         if (session == null && guestBrowsing && showingGuestAuth) {
             Dialog(

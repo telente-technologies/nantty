@@ -181,7 +181,6 @@ internal fun StoryAnalyticsDialog(
 @Composable
 private fun StoryAnalyticsMetrics(data: StoryAnalytics, uniqueStoryViewers: Int?) {
     val metrics = listOf(
-        "Impressions" to data.impressions,
         "Unique viewers" to uniqueStoryViewers,
         "Likes" to data.likes,
         "Comments" to data.comments,

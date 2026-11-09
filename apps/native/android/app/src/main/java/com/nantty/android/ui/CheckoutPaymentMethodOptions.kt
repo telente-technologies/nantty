@@ -30,6 +30,7 @@ internal fun CheckoutPaymentMethodOptions(
     wallet: CheckoutProviderWallet?,
     savedCard: DeviceSavedCard?,
     total: WalletMoney?,
+    paymentChannels: List<String> = emptyList(),
     selected: CheckoutPaymentMethod,
     saveCardOnDevice: Boolean,
     onSaveCardOnDeviceChange: (Boolean) -> Unit,
@@ -97,7 +98,11 @@ internal fun CheckoutPaymentMethodOptions(
                 RadioButton(selected = selected == CheckoutPaymentMethod.HOSTED, onClick = null)
                 Column(Modifier.weight(1f).padding(start = 8.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text("Secure payment window", fontWeight = FontWeight.Medium)
-                    Text("Card, bank transfer, or USSD", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        checkoutPaymentChannelSummary(paymentChannels),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }
@@ -112,3 +117,13 @@ internal fun CheckoutPaymentMethodOptions(
         }
     }
 }
+
+internal fun checkoutPaymentChannelSummary(channels: List<String>): String = channels.mapNotNull { channel ->
+    when (channel) {
+        "card" -> "Card"
+        "bank" -> "Bank"
+        "bank_transfer" -> "Bank transfer"
+        "ussd" -> "USSD"
+        else -> null
+    }
+}.distinct().joinToString(", ").ifBlank { "Card, bank transfer or USSD" }

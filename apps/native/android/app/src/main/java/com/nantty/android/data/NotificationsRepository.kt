@@ -4,6 +4,7 @@ import com.nantty.android.BuildConfig
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
+import java.net.IDN
 import java.net.URL
 
 enum class NotificationFilter(val apiValue: String, val label: String) {
@@ -47,9 +48,10 @@ sealed interface NotificationDestination {
     data class SupportTicket(val ticketId: String) : NotificationDestination
     data class Dispute(val disputeId: String) : NotificationDestination
     data class Clip(val clipId: String) : NotificationDestination
+    data class ExternalLink(val url: String, val host: String, val requiresConfirmation: Boolean) : NotificationDestination
 }
 
-fun resolveNotificationDestination(notification: ActivityNotification): NotificationDestination? {
+fun resolveNotificationDestination(notification: ActivityNotification, includeExternalUrl: Boolean = true): NotificationDestination? {
     // Match the React Native route precedence: a request notification opens its inbox.
     if (notification.kind == "followRequest") return NotificationDestination.FollowRequests
     if (notification.screen == "GroupInvitations" || isGroupInvitationsPath(notification.url)) {
@@ -85,9 +87,60 @@ fun resolveNotificationDestination(notification: ActivityNotification): Notifica
     (notification.orderId?.takeIf(::isSafeNotificationId) ?: resolveOrderNotificationUrl(notification.url))
         ?.let { return NotificationDestination.OrderDetail(it) }
     if (notification.category.equals("orders", ignoreCase = true)) return NotificationDestination.Orders
+    if (includeExternalUrl) resolveNotificationExternalLink(notification.url)?.let { return it }
     notification.actor?.id?.takeIf(::isSafeNotificationId)?.let { return NotificationDestination.Profile(it) }
     return null
 }
+
+fun resolveNotificationExternalLink(rawUrl: String?): NotificationDestination.ExternalLink? {
+    if (rawUrl.isNullOrBlank() || rawUrl.length > 2_048 || rawUrl != rawUrl.trim() || rawUrl.contains('\\') || rawUrl.any { it.isWhitespace() || it.isISOControl() }) return null
+    val uri = runCatching { java.net.URI(rawUrl) }.getOrNull() ?: return null
+    if (!uri.isAbsolute || uri.isOpaque || !uri.scheme.equals("http", ignoreCase = true) && !uri.scheme.equals("https", ignoreCase = true) || uri.rawUserInfo != null) return null
+    val authority = uri.rawAuthority ?: return null
+    val rawHost: String
+    val port: Int?
+    if (authority.startsWith("[")) {
+        val closingBracket = authority.indexOf(']')
+        if (closingBracket < 0) return null
+        rawHost = authority.substring(0, closingBracket + 1)
+        val portSuffix = authority.substring(closingBracket + 1)
+        port = if (portSuffix.isEmpty()) null else parseNotificationPort(portSuffix.removePrefix(":"))?.takeIf { portSuffix.startsWith(":") } ?: return null
+        val address = rawHost.substring(1, rawHost.length - 1)
+        if (runCatching { java.net.InetAddress.getByName(address) !is java.net.Inet6Address }.getOrDefault(true)) return null
+    } else {
+        val separator = authority.lastIndexOf(':')
+        if (separator >= 0 && authority.indexOf(':') != separator) return null
+        rawHost = if (separator >= 0) authority.substring(0, separator) else authority
+        port = if (separator >= 0) parseNotificationPort(authority.substring(separator + 1)) ?: return null else null
+    }
+    if (rawHost.isBlank()) return null
+    val host = runCatching {
+        if (rawHost.startsWith("[")) rawHost.lowercase()
+        else IDN.toASCII(rawHost, IDN.USE_STD3_ASCII_RULES).lowercase()
+    }.getOrNull()?.takeIf(String::isNotBlank) ?: return null
+    val shortenedHosts = setOf("bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "is.gd", "cutt.ly", "rb.gy", "shorturl.at")
+    val suspiciousSuffixes = setOf(".zip", ".mov", ".top", ".click", ".xyz", ".gq", ".tk")
+    val ipv4 = Regex("^\\d+(\\.\\d+){3}$").matches(host)
+    if (ipv4 && host.split('.').any { octet -> octet.toIntOrNull()?.let { it !in 0..255 } ?: true }) return null
+    val nonDefaultPort = port != null && port != if (uri.scheme.equals("https", ignoreCase = true)) 443 else 80
+    val numericHost = host.all { it.isDigit() || it == '.' }
+    val localHost = host == "localhost" || host.endsWith(".localhost") || host.endsWith(".local")
+    val suspicious = host in shortenedHosts || ipv4 || numericHost || localHost || host.startsWith('[') || host.contains("xn--") || host.endsWith('.') ||
+        host.split('.').size > 4 || suspiciousSuffixes.any(host::endsWith) || nonDefaultPort
+    val safeAuthority = host + (port?.let { ":$it" } ?: "")
+    val normalizedUrl = buildString {
+        append(uri.scheme.lowercase())
+        append("://")
+        append(safeAuthority)
+        append(uri.rawPath.orEmpty())
+        uri.rawQuery?.let { append('?').append(it) }
+        uri.rawFragment?.let { append('#').append(it) }
+    }.let { runCatching { java.net.URI(it).toASCIIString() }.getOrNull() } ?: return null
+    return NotificationDestination.ExternalLink(normalizedUrl, host.removePrefix("www."), suspicious)
+}
+
+private fun parseNotificationPort(rawPort: String): Int? = rawPort.takeIf { it.isNotEmpty() && it.all(Char::isDigit) }
+    ?.toIntOrNull()?.takeIf { it in 1..65_535 }
 
 private fun isGroupInvitationsPath(rawUrl: String?): Boolean {
     if (rawUrl.isNullOrBlank()) return false

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -58,6 +59,89 @@ import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+/** Compact detail-page parity for the RN rating summary and three-review preview. */
+@Composable
+internal fun ProductReviewsPreview(
+    productId: String,
+    repository: ProductReviewsRepository,
+    onSeeAll: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var page by androidx.compose.runtime.remember(productId, repository) { mutableStateOf<ProductReviewPage?>(null) }
+    var summary by androidx.compose.runtime.remember(productId, repository) { mutableStateOf<ProductRatingSummary?>(null) }
+    var pageFailed by androidx.compose.runtime.remember(productId, repository) { mutableStateOf(false) }
+    var summaryFailed by androidx.compose.runtime.remember(productId, repository) { mutableStateOf(false) }
+    var viewerAccountId by androidx.compose.runtime.remember(productId, repository) { mutableStateOf<String?>(null) }
+    var loading by androidx.compose.runtime.remember(productId, repository) { mutableStateOf(true) }
+    var generation by androidx.compose.runtime.remember(productId, repository) { mutableIntStateOf(0) }
+
+    LaunchedEffect(productId, repository, generation) {
+        loading = true
+        val (pageResult, summaryResult, viewerId) = withContext(Dispatchers.IO) {
+            Triple(
+                repository.loadPage(productId, limit = PRODUCT_REVIEW_PREVIEW_LIMIT),
+                repository.loadRatingSummary(productId),
+                repository.loadViewerAccountId(),
+            )
+        }
+        Snapshot.withMutableSnapshot {
+            when (pageResult) {
+                is ProductReviewsResult.Success -> {
+                    page = pageResult.value
+                    pageFailed = false
+                }
+                is ProductReviewsResult.Failure -> pageFailed = true
+            }
+            when (summaryResult) {
+                is ProductRatingSummaryResult.Success -> {
+                    summary = summaryResult.value
+                    summaryFailed = false
+                }
+                is ProductRatingSummaryResult.Failure -> summaryFailed = true
+            }
+            viewerAccountId = viewerId
+            loading = false
+        }
+    }
+
+    val count = summary?.count ?: page?.count ?: 0
+    Column(
+        modifier.fillMaxWidth().widthIn(max = 720.dp).padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text("Ratings & reviews", Modifier.semantics { heading() }, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        if (summaryFailed && pageFailed) {
+            TextButton(onClick = { generation++ }, modifier = Modifier.semantics { contentDescription = "Retry loading product reviews" }) {
+                Text("Couldn't load reviews. Tap to try again.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        if (summary != null && count > 0) RatingSummaryCard(summary!!)
+        if (summary != null && count == 0) {
+            Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("No reviews yet", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                Text("Buyers can rate this product after it's delivered.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        page?.reviews.orEmpty().forEachIndexed { index, review ->
+            if (index > 0) androidx.compose.material3.HorizontalDivider()
+            ProductReviewRow(
+                review = review,
+                isOwn = viewerAccountId != null && review.author.id == viewerAccountId,
+                onDelete = null,
+            )
+        }
+        if (count > 0) {
+            TextButton(onClick = onSeeAll, modifier = Modifier.semantics { contentDescription = "See all $count ${if (count == 1) "review" else "reviews"}" }) {
+                Text("See all $count ${if (count == 1) "review" else "reviews"}")
+            }
+        } else if (loading && page == null && summary == null) {
+            CircularProgressIndicator(Modifier.size(20.dp).semantics { contentDescription = "Loading product reviews" })
+        }
+    }
+}
+
+private const val PRODUCT_REVIEW_PREVIEW_LIMIT = 3
 
 @Composable
 internal fun ProductReviewsScreen(
@@ -257,7 +341,7 @@ private fun RatingSummaryCard(summary: ProductRatingSummary) {
 }
 
 @Composable
-private fun ProductReviewRow(review: ProductReview, isOwn: Boolean, onDelete: () -> Unit) {
+private fun ProductReviewRow(review: ProductReview, isOwn: Boolean, onDelete: (() -> Unit)?) {
     Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             if (review.author.avatarUrl != null) {
@@ -284,7 +368,7 @@ private fun ProductReviewRow(review: ProductReview, isOwn: Boolean, onDelete: ()
                 }
             }
         }
-        if (isOwn) TextButton(onClick = onDelete, modifier = Modifier.align(Alignment.Start)) { Text("Delete my review", color = MaterialTheme.colorScheme.error) }
+        if (isOwn && onDelete != null) TextButton(onClick = onDelete, modifier = Modifier.align(Alignment.Start)) { Text("Delete my review", color = MaterialTheme.colorScheme.error) }
         Spacer(Modifier.fillMaxWidth().height(1.dp))
     }
 }

@@ -50,6 +50,7 @@ internal fun AdsWorkspaceDetailScreen(
     executor: Executor,
     onBack: () -> Unit,
     onReauthenticate: () -> Unit,
+    onResubmit: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     BackHandler(onBack = onBack)
@@ -146,6 +147,9 @@ internal fun AdsWorkspaceDetailScreen(
                             Text("${details.keyResultValue} ${details.keyResultLabel}", style = MaterialTheme.typography.bodyMedium)
                             details.endsAt?.let { Text("Ends $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                             details.rejectionReason?.let { Text("Why it wasn't approved: $it", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+                            if (details.actions.resubmit && details.status == com.nantty.android.data.AdsWorkspaceBoostStatus.REJECTED) {
+                                TextButton(onClick = { onResubmit(details.id) }) { Text("Edit and resubmit") }
+                            }
                             if (details.actions.pause || details.actions.resume || details.actions.stop) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     if (details.actions.pause) TextButton(enabled = statusAction == null, onClick = { changeStatus(AdsWorkspaceStatusAction.PAUSE) }) {

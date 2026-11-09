@@ -356,4 +356,5 @@ private val NativeImageUploadPurpose.assetDescription: String
     get() = when (this) {
         NativeImageUploadPurpose.DISPUTE_EVIDENCE -> "evidence image"
         NativeImageUploadPurpose.STORY -> "story media"
+        NativeImageUploadPurpose.PRODUCT -> "product photo"
     }

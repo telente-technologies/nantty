@@ -76,6 +76,7 @@ internal class CartRepository(
     private val baseUrl: String = BuildConfig.NANTTY_API_BASE_URL,
     private val accessTokenProvider: () -> String?,
     private val transport: CartTransport = JdkCartTransport(baseUrl),
+    private val productInteractionRepository: ProductInteractionRepository? = null,
 ) {
     fun loadCart(): CartResult {
         val token = accessTokenProvider()?.takeIf(String::isNotBlank)
@@ -87,8 +88,20 @@ internal class CartRepository(
         }
     }
 
-    fun addProduct(productId: String, variantId: String?, quantity: Int = 1): AddToCartResult {
-        if (!isSafeMartIdentifier(productId) || variantId?.let(::isSafeMartIdentifier) == false || quantity !in 1..99) {
+    fun addProduct(
+        productId: String,
+        variantId: String?,
+        quantity: Int = 1,
+        attribution: SaleAttribution? = null,
+        size: String? = null,
+        color: String? = null,
+        options: Map<String, String> = emptyMap(),
+    ): AddToCartResult {
+        if (!isSafeMartIdentifier(productId) || variantId?.let(::isSafeMartIdentifier) == false || quantity !in 1..99 ||
+            size?.let(::isSafeCartOption) == false || color?.let(::isSafeCartOption) == false ||
+            options.size > MAX_CART_OPTION_COUNT || options.any { (name, value) -> !isSafeCartOption(name) || !isSafeCartOption(value) } ||
+            (variantId != null && (size != null || color != null || options.isNotEmpty()))
+        ) {
             return AddToCartResult.Failure("Choose a valid product option and quantity.")
         }
         val token = accessTokenProvider()?.takeIf(String::isNotBlank)
@@ -96,7 +109,12 @@ internal class CartRepository(
         return try {
             val body = JSONObject().put("productId", productId).put("quantity", quantity)
             variantId?.let { body.put("variantId", it) }
+            size?.let { body.put("size", it) }
+            color?.let { body.put("color", it) }
+            if (options.isNotEmpty()) body.put("options", JSONObject(options))
+            attribution?.toCartPayload()?.let { body.put("attribution", it) }
             transport.add("/api/v1/cart/items", token, body)
+            productInteractionRepository?.recordProductAddedToCart(productId, quantity)
             AddToCartResult.Success
         } catch (error: Exception) {
             AddToCartResult.Failure(cartMutationFailureMessage(error, "add this product"), error.isAuthenticationFailure())
@@ -133,6 +151,12 @@ internal class CartRepository(
     }
 
 }
+
+private const val MAX_CART_OPTION_COUNT = 32
+private const val MAX_CART_OPTION_LENGTH = 120
+
+private fun isSafeCartOption(value: String): Boolean =
+    value.isNotBlank() && value == value.trim() && value.length <= MAX_CART_OPTION_LENGTH && value.none(Char::isISOControl)
 
 internal fun parseCartPayload(payload: JSONObject): CartSnapshot {
     val data = payload.optJSONObject("data") ?: payload

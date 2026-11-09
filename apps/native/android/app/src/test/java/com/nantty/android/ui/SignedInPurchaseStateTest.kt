@@ -2,11 +2,19 @@ package com.nantty.android.ui
 
 import com.nantty.android.data.CheckoutReceipt
 import com.nantty.android.data.BuyerOrderDetail
+import com.nantty.android.data.CheckoutPaymentMethod
+import com.nantty.android.data.MartRepository
+import com.nantty.android.data.ProductPurchaseSignal
 import com.nantty.android.data.WalletMoney
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 class SignedInPurchaseStateTest {
     @Test
@@ -111,6 +119,38 @@ class SignedInPurchaseStateTest {
         assertFalse(state.returnToOrdersAfterPayment)
     }
 
+    @Test
+    fun productPurchaseTrackingHappensOnceWhenServerVerificationCallbackRuns() {
+        val requests = mutableListOf<PurchaseTrackingConnection>()
+        val mart = MartRepository(
+            baseUrl = "https://api.nantty.com",
+            accessTokenProvider = { "buyer-token" },
+            openConnection = { url -> PurchaseTrackingConnection(url).also(requests::add) },
+        )
+        val state = SignedInPurchaseState()
+        state.checkoutCreated(
+            CheckoutReceipt(
+                checkoutId = "checkout-1",
+                payableOrderId = "order-1",
+                total = WalletMoney(12_500, "NGN"),
+                orderCount = 1,
+                paymentMethod = CheckoutPaymentMethod.HOSTED,
+                productSignals = listOf(ProductPurchaseSignal("product_1", 2)),
+            ),
+        )
+
+        assertTrue(requests.isEmpty())
+        state.markPaymentVerified(mart)
+        state.markPaymentVerified(mart)
+
+        assertEquals(2, requests.size)
+        val event = JSONObject(requests.last().requestBody.toString(Charsets.UTF_8.name()))
+            .getJSONArray("events").getJSONObject(0)
+        assertEquals("product.purchased", event.getString("event"))
+        assertEquals("product_1", event.getJSONObject("payload").getString("productId"))
+        assertEquals(2, event.getJSONObject("payload").getInt("quantity"))
+    }
+
     private fun pendingOrder() = BuyerOrderDetail(
         id = "order-123",
         reference = "NT-123",
@@ -133,4 +173,18 @@ class SignedInPurchaseStateTest {
         delivery = null,
         promotionIssue = null,
     )
+}
+
+private class PurchaseTrackingConnection(url: URL) : HttpURLConnection(url) {
+    val requestBody = ByteArrayOutputStream()
+    override fun getResponseCode(): Int = if (url.path.endsWith("/users/me/consents")) 200 else 202
+    override fun getInputStream() = ByteArrayInputStream(
+        if (url.path.endsWith("/users/me/consents")) {
+            """{"data":[{"consentType":"analytics","status":"granted"}]}""".toByteArray()
+        } else "{}".toByteArray(),
+    )
+    override fun getOutputStream() = requestBody
+    override fun usingProxy(): Boolean = false
+    override fun connect() = Unit
+    override fun disconnect() = Unit
 }

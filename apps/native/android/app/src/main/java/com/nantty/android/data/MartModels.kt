@@ -38,6 +38,7 @@ data class MartProductDetail(
     val store: MartStoreSummary,
     val variants: List<MartProductVariant>,
     val brand: MartBrandTag? = null,
+    val related: List<MartProduct> = emptyList(),
 )
 data class MartPage(val products: List<MartProduct>, val nextCursor: String?)
 data class MartRecommendations(val products: List<MartProduct>, val source: String)

@@ -72,6 +72,24 @@ class ProductReviewsRepositoryTest {
     }
 
     @Test
+    fun detailPreviewCanRequestThreeReviewsWithoutChangingPagedDefault() {
+        lateinit var connection: ReviewsTestConnection
+        val repository = ProductReviewsRepository(
+            baseUrl = "https://api.nantty.com",
+            openConnection = { url ->
+                connection = ReviewsTestConnection(url, 200, """{"average":4.0,"count":4,"reviews":[],"nextCursor":"next"}""")
+                connection
+            },
+        )
+
+        val result = repository.loadPage("prod-1", limit = 3) as ProductReviewsResult.Success
+
+        assertEquals("https://api.nantty.com/api/v1/products/prod-1/reviews?limit=3", connection.url.toString())
+        assertEquals(4, result.value.count)
+        assertEquals("next", result.value.nextCursor)
+    }
+
+    @Test
     fun invalidProductIdDoesNotMakeNetworkRequest() {
         var opened = false
         val repository = ProductReviewsRepository("https://api.nantty.com") {

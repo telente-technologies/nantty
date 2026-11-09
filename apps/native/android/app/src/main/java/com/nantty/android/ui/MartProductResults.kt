@@ -33,6 +33,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.items
@@ -133,7 +134,7 @@ internal fun MartRecommendationsSection(
 ) {
     // Match React Native: do not leave an empty personalized shelf in the Mart catalog.
     if (products != null && products.isEmpty() && errorMessage == null) return
-    Column(Modifier.fillMaxWidth().padding(start = 16.dp, top = 8.dp, bottom = 16.dp)) {
+    Column(Modifier.fillMaxWidth().padding(start = 16.dp, top = 8.dp, bottom = 16.dp).testTag("mart-recommendations-section")) {
         Text(
             stringResource(com.nantty.android.R.string.mart_recommendations_title),
             style = MaterialTheme.typography.titleLarge,
@@ -194,7 +195,7 @@ internal fun MartRecommendationsSection(
 }
 
 @Composable
-private fun MartProductCard(product: MartProduct, onOpen: () -> Unit) {
+internal fun MartProductCard(product: MartProduct, onOpen: () -> Unit) {
     Card(
         onClick = onOpen,
         shape = RoundedCornerShape(18.dp),

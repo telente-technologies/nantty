@@ -61,9 +61,9 @@ import java.util.Currency
 import java.util.Locale
 import java.util.concurrent.Executor
 
-/** Read-only ads overview. Deliberately has no campaign or balance mutation callbacks. */
+/** Ads workspace for reviewing campaigns and creating or resubmitting eligible ads. */
 @Composable
-fun AdsWorkspaceScreen(
+internal fun AdsWorkspaceScreen(
     repository: AdsWorkspaceRepository,
     executor: Executor,
     modifier: Modifier = Modifier,
@@ -80,6 +80,9 @@ fun AdsWorkspaceScreen(
     var loadingMore by remember(repository) { mutableStateOf(false) }
     var pageError by remember(repository) { mutableStateOf<String?>(null) }
     var selectedBoostId by remember(repository) { mutableStateOf<String?>(null) }
+    var createFromBoostId by remember(repository) { mutableStateOf<String?>(null) }
+    var showCreate by remember(repository) { mutableStateOf(false) }
+    var manageBalance by remember(repository) { mutableStateOf(false) }
 
     fun refresh() {
         refreshVersion += 1
@@ -153,12 +156,15 @@ fun AdsWorkspaceScreen(
     }
 
     Column(modifier.fillMaxSize()) {
-        if (selectedBoostId == null) {
+        if (selectedBoostId == null && !showCreate && !manageBalance) {
             Row(
                 Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 18.dp, bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text("Ads", Modifier.weight(1f).semantics { heading() }, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                TextButton(onClick = { createFromBoostId = null; showCreate = true }) {
+                    Text("Create ad")
+                }
                 IconButton(
                     onClick = ::refresh,
                     enabled = !loadingBoosts && !loadingBalance && !loadingMore,
@@ -167,13 +173,38 @@ fun AdsWorkspaceScreen(
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
-        if (selectedBoostId != null) {
+        if (manageBalance) {
+            AdsBalanceScreen(
+                repository = repository.balanceRepository,
+                executor = executor,
+                onBack = { manageBalance = false; refresh() },
+                onReauthenticate = onReauthenticate,
+                onBalanceChanged = ::refresh,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else if (showCreate) {
+            AdsCreateScreen(
+                repository = repository.campaignRepository,
+                executor = executor,
+                resubmitBoostId = createFromBoostId,
+                onBack = { showCreate = false; createFromBoostId = null },
+                onReauthenticate = onReauthenticate,
+                onSubmitted = { boostId ->
+                    selectedBoostId = boostId
+                    showCreate = false
+                    createFromBoostId = null
+                    refresh()
+                },
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else if (selectedBoostId != null) {
             AdsWorkspaceDetailScreen(
                 repository = repository,
                 boostId = selectedBoostId!!,
                 executor = executor,
                 onBack = { selectedBoostId = null },
                 onReauthenticate = onReauthenticate,
+                onResubmit = { boostId -> createFromBoostId = boostId; showCreate = true },
                 modifier = Modifier.fillMaxSize(),
             )
         } else BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -188,6 +219,7 @@ fun AdsWorkspaceScreen(
                         loading = loadingBalance,
                         onRetry = ::refresh,
                         onReauthenticate = onReauthenticate,
+                        onManageBalance = { manageBalance = true },
                         modifier = Modifier.widthIn(min = 260.dp, max = 320.dp),
                     )
                     AdsBoostList(
@@ -219,6 +251,7 @@ fun AdsWorkspaceScreen(
                     balanceResult = balanceResult,
                     balanceLoading = loadingBalance,
                     onBalanceRetry = ::refresh,
+                    onManageBalance = { manageBalance = true },
                     modifier = Modifier.fillMaxSize(),
                 )
             }
@@ -242,6 +275,7 @@ private fun AdsBoostList(
     balanceResult: AdsWorkspaceResult<AdsWorkspaceBalance>? = null,
     balanceLoading: Boolean = false,
     onBalanceRetry: () -> Unit = {},
+    onManageBalance: () -> Unit = {},
 ) {
     val page = (result as? AdsWorkspaceResult.Success)?.value
     LazyColumn(
@@ -251,7 +285,7 @@ private fun AdsBoostList(
     ) {
         if (balanceResult != null || balanceLoading) {
             item(key = "ads-balance") {
-                AdsBalancePanel(balanceResult, balanceLoading, onBalanceRetry, onReauthenticate)
+                AdsBalancePanel(balanceResult, balanceLoading, onBalanceRetry, onReauthenticate, onManageBalance = onManageBalance)
             }
         }
         item(key = "ads-filters") {
@@ -315,6 +349,7 @@ private fun AdsBalancePanel(
     onRetry: () -> Unit,
     onReauthenticate: () -> Unit,
     modifier: Modifier = Modifier,
+    onManageBalance: () -> Unit = {},
 ) {
     val balance = (result as? AdsWorkspaceResult.Success)?.value
     Card(
@@ -342,6 +377,7 @@ private fun AdsBalancePanel(
                     BalanceAmount("Committed", balance.committed)
                     BalanceAmount("Withdrawable", balance.withdrawable)
                     BalanceAmount("Pending settlement", balance.pendingSettlement)
+                    TextButton(onClick = onManageBalance, modifier = Modifier.fillMaxWidth()) { Text("Manage balance") }
                 }
             }
         }

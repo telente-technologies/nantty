@@ -45,6 +45,7 @@ import com.nantty.android.data.BuyerOrderDetail
 import com.nantty.android.data.BuyerOrderFilter
 import com.nantty.android.data.BuyerOrdersPage
 import com.nantty.android.data.BuyerOrdersRepository
+import com.nantty.android.data.BuyerReturnsRepository
 import com.nantty.android.data.ProductReviewsRepository
 import com.nantty.android.data.DisputeRepository
 import com.nantty.android.data.CreatorSampleMediaRepository
@@ -62,6 +63,18 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.Executor
 import java.util.UUID
+
+private data class BuyerOrderSection(val id: String, val title: String, val statuses: Set<String>, val filter: BuyerOrderFilter)
+
+private val BUYER_ORDER_SECTIONS = listOf(
+    BuyerOrderSection("preparing", "Seller preparing", setOf("paid"), BuyerOrderFilter.TO_SHIP),
+    BuyerOrderSection("payment", "Awaiting payment", setOf("pending"), BuyerOrderFilter.TO_SHIP),
+    BuyerOrderSection("shipped", "On the way", setOf("shipped"), BuyerOrderFilter.ON_THE_WAY),
+    BuyerOrderSection("delivered", "Delivered — please confirm", setOf("delivered"), BuyerOrderFilter.TO_CONFIRM),
+    BuyerOrderSection("disputed", "In dispute", setOf("disputed"), BuyerOrderFilter.DISPUTED),
+    BuyerOrderSection("completed", "Completed", setOf("completed"), BuyerOrderFilter.COMPLETED),
+    BuyerOrderSection("cancelled", "Cancelled & refunded", setOf("cancelled", "refunded", "returned"), BuyerOrderFilter.CANCELLED),
+)
 
 @Composable
 internal fun BuyerOrdersScreen(
@@ -82,6 +95,7 @@ internal fun BuyerOrdersScreen(
     initialOrderId: String? = null,
     onInitialOrderHandled: () -> Unit = {},
     modifier: Modifier = Modifier,
+    returnRepository: BuyerReturnsRepository? = null,
 ) {
     var selectedFilter by rememberSaveable(repository) { mutableStateOf(BuyerOrderFilter.ALL) }
     var selectedOrderId by rememberSaveable(repository) { mutableStateOf<String?>(null) }
@@ -180,6 +194,7 @@ internal fun BuyerOrdersScreen(
         BuyerOrderDetailScreen(
             orderId = orderId,
             repository = repository,
+            returnRepository = returnRepository,
             executor = executor,
             onBack = { selectedOrderId = null },
             onAuthenticationRequired = onAuthenticationRequired,
@@ -241,6 +256,13 @@ internal fun BuyerOrdersScreen(
         }
     }
 
+    val visibleSections = success?.page?.orders.orEmpty().let { orders ->
+        BUYER_ORDER_SECTIONS
+            .filter { selectedFilter == BuyerOrderFilter.ALL || it.filter == selectedFilter }
+            .mapNotNull { section -> section to orders.filter { it.status in section.statuses } }
+            .filter { (_, ordersInSection) -> ordersInSection.isNotEmpty() }
+    }
+
     Column(modifier.fillMaxSize()) {
         Row(
             Modifier.fillMaxWidth().padding(start = 8.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
@@ -286,12 +308,22 @@ internal fun BuyerOrdersScreen(
                     actionLabel = if (failure.authenticationRequired) "Sign in again" else "Retry",
                 )
             }
-            success != null && success.page.orders.isEmpty() -> BuyerOrdersMessage(
+            success != null && visibleSections.isEmpty() -> BuyerOrdersMessage(
                 title = if (selectedFilter == BuyerOrderFilter.ALL) "No orders yet" else "No ${selectedFilter.label.lowercase()} orders",
                 message = "Orders you place on Nantty will appear here.",
             )
             success != null -> LazyColumn(Modifier.fillMaxSize()) {
-                items(success.page.orders, key = BuyerOrder::id) { order -> BuyerOrderRow(order) { selectedOrderId = order.id } }
+                visibleSections.forEach { (section, sectionOrders) ->
+                    item(key = "section-${section.id}") {
+                        Text(
+                            "${section.title} · ${sectionOrders.size}",
+                            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp).semantics { heading() },
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    items(sectionOrders, key = BuyerOrder::id) { order -> BuyerOrderRow(order) { selectedOrderId = order.id } }
+                }
                 item(key = "buyer-orders-pagination") {
                     when {
                         loadingMore -> Box(Modifier.fillMaxWidth().padding(20.dp), contentAlignment = Alignment.Center) {
@@ -352,7 +384,7 @@ internal fun BuyerOrdersMessage(title: String, message: String, action: (() -> U
 
 internal fun buyerOrderStatusLabel(status: String): String = when (status) {
     "pending" -> "Pending payment"
-    "new" -> "Paid"
+    "paid", "new" -> "Paid"
     "processing" -> "Processing"
     "ready" -> "Ready"
     "shipped" -> "Shipped"

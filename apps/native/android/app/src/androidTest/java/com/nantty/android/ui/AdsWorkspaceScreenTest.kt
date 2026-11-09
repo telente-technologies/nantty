@@ -12,6 +12,8 @@ import com.nantty.android.data.AccountUser
 import com.nantty.android.data.AdsWorkspaceRepository
 import com.nantty.android.data.AdsWorkspaceMutationTransport
 import com.nantty.android.data.AdsWorkspaceTransport
+import com.nantty.android.data.AdsBalanceRepository
+import com.nantty.android.data.AdsBalanceTransport
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -97,6 +99,46 @@ class AdsWorkspaceScreenTest {
         }
     }
 
+    @Test
+    fun balancePanelOpensManageScreenAndLoadsLedgerHistory() {
+        val balanceRequests = mutableListOf<String>()
+        val fullBalance = AdsBalanceRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::adsSession,
+            transport = AdsBalanceTransport { method, path, _, _, _ ->
+                balanceRequests += "$method $path"
+                when (path) {
+                    AdsBalanceRepository.BALANCE_PATH -> fullBalanceJson()
+                    AdsBalanceRepository.TRANSACTIONS_PATH -> JSONObject("""{"data":{"data":[],"nextCursor":null}}""")
+                    else -> error("Unexpected balance route $path")
+                }
+            },
+        )
+        val workspace = AdsWorkspaceRepository(
+            baseUrl = "https://api.nantty.com",
+            sessionProvider = ::adsSession,
+            transport = AdsWorkspaceTransport { path, _ ->
+                when {
+                    path.startsWith("/api/v1/ads/boosts?") -> JSONObject("""{"data":[],"nextCursor":null}""")
+                    path == "/api/v1/ads/boosts/balance" -> balanceJson()
+                    else -> error("Unexpected workspace route $path")
+                }
+            },
+            balanceRepository = fullBalance,
+        )
+        compose.setContent { MaterialTheme { AdsWorkspaceScreen(workspace, Executor { it.run() }) } }
+
+        compose.onNodeWithText("Manage balance").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Top up ad balance").assertIsDisplayed()
+        compose.onNodeWithText("Withdraw ad balance").assertIsDisplayed()
+        compose.runOnIdle {
+            assertEquals(
+                listOf("GET ${AdsBalanceRepository.BALANCE_PATH}", "GET ${AdsBalanceRepository.TRANSACTIONS_PATH}"),
+                balanceRequests,
+            )
+        }
+    }
+
     private fun adsSession() = AccountSession(
         accessToken = "ads-access",
         refreshToken = "ads-refresh",
@@ -115,6 +157,10 @@ class AdsWorkspaceScreenTest {
 
     private fun balanceJson() = JSONObject(
         """{"data":{"balance":{"amountMinor":300000,"currency":"NGN"},"credit":{"amountMinor":150000,"currency":"NGN"},"committed":{"amountMinor":50000,"currency":"NGN"},"spendable":{"amountMinor":400000,"currency":"NGN"},"withdrawable":{"amountMinor":100000,"currency":"NGN"},"pendingSettlement":{"amountMinor":20000,"currency":"NGN"}}}""",
+    )
+
+    private fun fullBalanceJson() = JSONObject(
+        """{"data":{"accountId":"account-1","balance":{"amountMinor":300000,"currency":"NGN"},"credit":{"amountMinor":150000,"currency":"NGN"},"committed":{"amountMinor":50000,"currency":"NGN"},"spendable":{"amountMinor":400000,"currency":"NGN"},"withdrawable":{"amountMinor":100000,"currency":"NGN"},"pendingSettlement":{"amountMinor":20000,"currency":"NGN"},"creditLots":[],"cashback":{"enabled":false,"percent":0},"topUp":{"available":true,"reasonCode":null,"reason":null,"minimum":{"amountMinor":1000,"currency":"NGN"},"maximum":{"amountMinor":500000,"currency":"NGN"},"suggested":[{"amountMinor":1000,"currency":"NGN"}]},"withdrawal":{"available":true,"reasonCode":null,"reason":null,"minimum":{"amountMinor":5000,"currency":"NGN"}}}}""",
     )
 
     private companion object { const val BOOST_ID = "11111111-1111-4111-8111-111111111111" }
