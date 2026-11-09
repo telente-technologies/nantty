@@ -1,4 +1,4 @@
-h1:Osr5gubd9N7JpR2i88WvTk7JCKMjDwTbXaRxJBDa1V8=
+h1:IpyFnadFnvZ3ZitW16aQqvRFsg9zu5hfcZDhCHT5ep4=
 20261003112651_create_creators_tables.down.sql h1:9g4x2KFJB1Q6VPJt7XWDxtONl+1fzH/95njetHa8Ce8=
 20261003112651_create_creators_tables.up.sql h1:fIssQXrsjsj3UcKftYWQ4kI+t0S5o8UzryEOOTZKHtE=
 20261003112751_grant_read_access_to_other_services.down.sql h1:aADpgW+IqsAiYeo3mPO40nMvQ5MbFSO00z5045XoJi4=
@@ -25,3 +25,5 @@ h1:Osr5gubd9N7JpR2i88WvTk7JCKMjDwTbXaRxJBDa1V8=
 20261105140000_space_coin_donations.up.sql h1:KFj9ByqhiOyix6DKrkluLVqabX5pgEnxICfJ4E2bd2o=
 20261105170000_live_battle_coin_contributions.down.sql h1:SWALAzgncM2JqgWGcOCmJxVQQbn6uK7loY4BDlGNQcE=
 20261105170000_live_battle_coin_contributions.up.sql h1:LbhuFNV6TGST574rMqv17uT0UsUKoq3hFOhhrP3DkUo=
+20261106120000_tip_transaction_notes.down.sql h1:C//JsPLqYB6K7tI1lPqGBM5U6MAMCmcqm9QdR28ayfI=
+20261106120000_tip_transaction_notes.up.sql h1:OOvY/5Due/CkSnKGEF32RgN7O60P1xbB2S+yL8Xq2Z4=
