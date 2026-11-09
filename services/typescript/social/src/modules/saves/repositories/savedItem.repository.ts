@@ -34,6 +34,9 @@ export const savedItemRepository = {
 
   findById: (db: Db, id: string) => db.savedItem.findUnique({ where: { id } }),
 
+  isSaved: async (db: Db, userId: string, type: SavedItemType, targetId: string): Promise<boolean> =>
+    (await db.savedItem.findUnique({ where: { userId_type_targetId: { userId, type, targetId } }, select: { id: true } })) !== null,
+
   setCollection: (db: Db, id: string, collectionId: string | null) => db.savedItem.update({ where: { id }, data: { collectionId } }),
 
   page: (db: Db, userId: string, types: readonly SavedItemType[] | undefined, collectionId: string | undefined, limit: number, cursor: string | undefined) =>

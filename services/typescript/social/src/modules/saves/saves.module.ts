@@ -9,6 +9,7 @@ import { createUnsaveItemHandler } from "./commands/unsaveItem/unsaveItem.handle
 import { createSavesController } from "./controllers/saves.controller.js";
 import { createListSaveCollectionsHandler } from "./queries/listSaveCollections/listSaveCollections.handler.js";
 import { createListSavedItemsHandler } from "./queries/listSavedItems/listSavedItems.handler.js";
+import { createGetSavedItemStatusHandler } from "./queries/getSavedItemStatus/getSavedItemStatus.handler.js";
 import { registerSavesRoutes } from "./routes/saves.routes.js";
 
 export function mountSavesModule(router: HttpRouter, route: RouteFactory, context: HandlerContext): void {
@@ -18,6 +19,7 @@ export function mountSavesModule(router: HttpRouter, route: RouteFactory, contex
     createSaveCollection: createCreateSaveCollectionHandler(context),
     moveSavedItem: createMoveSavedItemHandler(context),
     listSavedItems: createListSavedItemsHandler(context),
+    getSavedItemStatus: createGetSavedItemStatusHandler(context),
     listSaveCollections: createListSaveCollectionsHandler(context),
   }));
 }

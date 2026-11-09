@@ -65,6 +65,40 @@ model NotificationPreference {
   @@map("notification_preferences")
 }
 
+model ActivityHeartbeat {
+  accountId                   String                 @id @map("account_id") @db.Uuid
+  lastActivityAt              DateTime               @map("last_activity_at")
+  timeZone                    String                 @map("time_zone") @db.VarChar(64)
+  lastReengagementAttemptAt   DateTime?              @map("last_reengagement_attempt_at")
+  createdAt                   DateTime               @default(now()) @map("created_at")
+  updatedAt                   DateTime               @updatedAt @map("updated_at")
+  reengagementDeliveries      ReengagementDelivery[]
+
+  @@index([lastActivityAt, lastReengagementAttemptAt])
+  @@map("activity_heartbeats")
+}
+
+model ReengagementDelivery {
+  id              String           @id @default(uuid()) @db.Uuid
+  accountId       String           @map("account_id") @db.Uuid
+  campaignId      String           @map("campaign_id") @db.VarChar(80)
+  contentKey      String           @map("content_key") @db.VarChar(120)
+  dedupeKey       String           @unique @map("dedupe_key") @db.VarChar(240)
+  activityAt      DateTime         @map("activity_at")
+  status          String           @default("pending") @db.VarChar(20)
+  outcomeReason   String?          @map("outcome_reason") @db.VarChar(200)
+  queueLeaseUntil DateTime?        @map("queue_lease_until")
+  queueLockToken  String?          @map("queue_lock_token") @db.Uuid
+  sentAt          DateTime?        @map("sent_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  activity        ActivityHeartbeat @relation(fields: [accountId], references: [accountId], onDelete: Cascade)
+
+  @@unique([accountId, campaignId, contentKey])
+  @@index([status, queueLeaseUntil, createdAt])
+  @@map("reengagement_deliveries")
+}
+
 model DeviceToken {
   id        String   @id @default(uuid())
   userId    String

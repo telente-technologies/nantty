@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # build context: repository root
-FROM node:24.22.1-alpine AS build
+FROM node:26.13.0-alpine AS build
 RUN corepack enable
 WORKDIR /repo
 COPY . .
@@ -9,7 +9,7 @@ RUN pnpm install --frozen-lockfile --filter @nantty/social... && pnpm --filter @
     && cp -r services/typescript/social/prisma services/typescript/social/prisma.config.ts /out/ \
     && cp -r services/typescript/social/dist /out/dist
 
-FROM node:24.22.1-alpine
+FROM node:26.13.0-alpine
 ENV NODE_ENV=production
 WORKDIR /app
 # The runtime only runs node; drop the bundled package managers (their own deps carry CVEs).

@@ -15,6 +15,7 @@ This slice makes Expo's **push-ticket response** actionable and adds an opt-in p
 - Failed push delivery rows store normalized provider codes/counts only. The staff endpoint `GET /api/v1/admin/support/notifications/push/deliveries/failed` requires the existing `support:email` permission and returns at most 50 rows (repository cap: 100). It omits recipient IDs, device tokens, push contents, and provider response bodies. Legacy push failure text is redacted to `legacy_provider_failure`.
 - Widget-refresh push failures use the same ticket parsing and permanent-token pruning; diagnostics contain only widget type, counts, and normalized codes.
 - Group-invitation created/accepted/declined outbox events now produce social-category in-app and push intents. New invitations route to the group-invitation inbox; acceptance wording explicitly states secure key setup is still required before membership begins. These are user-triggered transactional social notifications, not inactivity/random campaigns. They do not send email.
+- Social's scheduled `streak.reminderDue` and `streak.milestoneReached` events produce per-conversation inbox/push notifications through the ordinary social preference and device-token path. Expiry scheduling is recipient-local-day and per-chat opt-out aware; milestone pushes are created by the Social streak engine. These are not inactivity or suggested-content campaigns and do not send email. See the Social streak job and `docs/parity-android-messaging.md` for eligibility and idempotency.
 
 ## Deliberate limits
 
