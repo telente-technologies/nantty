@@ -259,6 +259,10 @@ def normalize_contract_envelope(body: Any) -> Any:
         flat["actorId"] = data.get("followerId") or body.get("subject")
         flat["payload"] = {"targetAccountId": data.get("followeeId"), "targetKind": "user"}
         return flat
+    if event_type == "store.followed":
+        flat["actorId"] = data.get("followerId") or body.get("subject")
+        flat["payload"] = {"targetAccountId": data.get("storeId"), "targetKind": "store"}
+        return flat
     if event_type == "block.created":
         flat["actorId"] = data.get("blockerId") or body.get("subject")
         flat["payload"] = {"blockedAccountId": data.get("blockedId")}

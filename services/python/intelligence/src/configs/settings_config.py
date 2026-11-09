@@ -102,6 +102,10 @@ class IntelligenceSettings(BaseSettings):
     rate_limit_requests_per_second: float = Field(default=2000.0, gt=0)
     rate_limit_burst_size: int = Field(default=4000, ge=1)
 
+    product_recommendation_verified_store_bonus: float = Field(default=0.08, ge=0.0, le=0.20)
+    product_recommendation_exploration_max_offset: float = Field(default=0.02, ge=0.0, le=0.05)
+    product_recommendation_exploration_rotation_hours: int = Field(default=24, ge=1, le=168)
+
     feature_log_flush_interval_seconds: float = Field(default=10.0, gt=0)
     feature_log_max_buffered_rows: int = Field(default=20_000, ge=100)
     event_deduplication_retention_seconds: int = Field(default=7 * 24 * 3600, ge=3600)

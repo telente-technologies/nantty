@@ -11,7 +11,7 @@ from src.modules.recommendations.dtos.recommendation_dto import (
 )
 from src.modules.recommendations.services import product_recommendation_service
 from src.modules.search.dtos.search_rerank_dto import SearchRerankRequest
-from tests.conftest import build_event, build_viewer
+from tests.conftest import SignedIntelligenceClient, build_event, build_viewer
 
 
 def install_similarity_bundle(container: ApplicationContainer) -> None:
@@ -41,11 +41,52 @@ def test_product_for_you_exploration_is_stable_within_a_day_and_rotates_daily(mo
     next_day = datetime.fromisoformat("2026-11-08T08:00:00+00:00")
 
     monkeypatch.setattr(product_recommendation_service, "resolve_request_time", lambda _requested: day_one)
-    first_score = product_recommendation_service.calculate_product_exploration_tiebreaker(request, "product_1")
+    first_score = product_recommendation_service.calculate_product_exploration_tiebreaker(
+        request, "product_1", 0.02, 24
+    )
     monkeypatch.setattr(product_recommendation_service, "resolve_request_time", lambda _requested: same_day)
-    assert product_recommendation_service.calculate_product_exploration_tiebreaker(request, "product_1") == first_score
+    assert (
+        product_recommendation_service.calculate_product_exploration_tiebreaker(request, "product_1", 0.02, 24)
+        == first_score
+    )
     monkeypatch.setattr(product_recommendation_service, "resolve_request_time", lambda _requested: next_day)
-    assert product_recommendation_service.calculate_product_exploration_tiebreaker(request, "product_1") != first_score
+    assert (
+        product_recommendation_service.calculate_product_exploration_tiebreaker(request, "product_1", 0.02, 24)
+        != first_score
+    )
+    assert product_recommendation_service.calculate_product_exploration_tiebreaker(request, "product_1", 0.0, 24) == 0.0
+    assert (
+        abs(product_recommendation_service.calculate_product_exploration_tiebreaker(request, "product_1", 1.0, 24))
+        <= 0.05
+    )
+
+
+async def test_internal_product_candidate_recall_route_is_signed_and_consent_gated(
+    signed_client: SignedIntelligenceClient, reference_now: datetime
+) -> None:
+    event = build_event(
+        "candidate-recall-view",
+        "product_viewed",
+        "u_viewer_hash",
+        reference_now,
+        {"productId": "product_long_tail", "storeId": "store_1"},
+    )
+    ingestion = await signed_client.post("/v1/events", {"events": [event]})
+    assert ingestion.status_code == 200, ingestion.text
+
+    recalled = await signed_client.post(
+        "/v1/recommendations/products/candidates",
+        {"viewer": build_viewer("u_viewer_hash"), "personalizationAllowed": True, "limit": 50},
+    )
+    assert recalled.status_code == 200, recalled.text
+    assert recalled.json()["itemIds"] == ["product_long_tail"]
+
+    withheld = await signed_client.post(
+        "/v1/recommendations/products/candidates",
+        {"viewer": build_viewer("u_viewer_hash"), "personalizationAllowed": False, "limit": 50},
+    )
+    assert withheld.status_code == 200, withheld.text
+    assert withheld.json()["itemIds"] == []
 
 
 async def recommend(
@@ -161,6 +202,7 @@ async def test_product_for_you_uses_product_views_and_search_clicks_as_personal_
             build_product("interested", "store_a"),
         ],
         viewer=build_viewer(),
+        personalizationAllowed=True,
         requestId="interaction-test",
         now=reference_now.isoformat(),
     )

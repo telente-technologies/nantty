@@ -2,11 +2,11 @@ from fastapi import APIRouter
 
 from src.container import ApplicationContainer
 from src.modules.recommendations.controllers.recommendations_controller import RecommendationsController
-from src.modules.recommendations.queries.recommend_accounts.recommend_accounts_handler import RecommendAccountsHandler
-from src.modules.recommendations.queries.recommend_products.recommend_products_handler import RecommendProductsHandler
 from src.modules.recommendations.queries.recall_product_candidates.recall_product_candidates_handler import (
     RecallProductCandidatesHandler,
 )
+from src.modules.recommendations.queries.recommend_accounts.recommend_accounts_handler import RecommendAccountsHandler
+from src.modules.recommendations.queries.recommend_products.recommend_products_handler import RecommendProductsHandler
 from src.modules.recommendations.queries.suggest_clips.suggest_clips_handler import SuggestClipsHandler
 from src.modules.recommendations.routes.recommendations_routes import build_recommendations_router
 

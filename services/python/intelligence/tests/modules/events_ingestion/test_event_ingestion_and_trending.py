@@ -6,11 +6,22 @@ from typing import Any
 import pytest
 
 from src.container import ApplicationContainer
+from src.events.event_envelope_dto import intelligence_event_type_adapter
 from src.integrations.dataset_storage_integration import build_local_dataset_storage_location
+from src.interfaces.feature_backend_interface import SortedSetIncrement
+from src.modules.events_ingestion.services.event_feature_update_service import (
+    find_affinity_targets,
+    plan_online_feature_updates_for_events,
+)
 from src.modules.events_ingestion.services.event_ingestion_service import EventStorageUnavailableError
 from src.modules.trending.dtos.trending_dto import TrendingRequest
 from src.modules.trending.services.trending_service import TrendingSignal, calculate_trending_score
-from src.repositories.online_feature_keyspace_repository import AFFINITY_HALF_LIFE_SECONDS, TOPIC_AFFINITY_KIND
+from src.repositories.online_feature_keyspace_repository import (
+    ACCOUNT_AFFINITY_KIND,
+    AFFINITY_HALF_LIFE_SECONDS,
+    TOPIC_AFFINITY_KIND,
+    OnlineFeatureKeyspace,
+)
 from src.utils.dataset_loading_util import load_raw_events
 from src.utils.decay_math_util import (
     calculate_forward_decay_read_multiplier,
@@ -18,6 +29,34 @@ from src.utils.decay_math_util import (
     find_forward_decay_generation,
 )
 from tests.conftest import SignedIntelligenceClient, build_event
+
+
+def test_store_follow_feature_update_targets_store_affinity(reference_now: datetime) -> None:
+    event = intelligence_event_type_adapter.validate_python(
+        build_event(
+            "store-follow-feature",
+            "followed",
+            "u_viewer_hash",
+            reference_now,
+            {"targetAccountId": "store_1", "targetKind": "store"},
+        )
+    )
+    account_ids, topic_ids = find_affinity_targets(event)
+    assert account_ids == ["store_1"]
+    assert topic_ids == []
+
+    keyspace = OnlineFeatureKeyspace("test-intelligence")
+    plan = plan_online_feature_updates_for_events([event], keyspace)
+    affinity_key_prefix = keyspace.affinity_base_key(ACCOUNT_AFFINITY_KIND, "u_viewer_hash")
+    store_updates = [
+        operation
+        for operation in plan.write_operations
+        if isinstance(operation, SortedSetIncrement)
+        and operation.key.startswith(affinity_key_prefix)
+        and operation.member == "store_1"
+    ]
+    assert len(store_updates) == 1
+    assert store_updates[0].amount > 0
 
 
 def build_like(

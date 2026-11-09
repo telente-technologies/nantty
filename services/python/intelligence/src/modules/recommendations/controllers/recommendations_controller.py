@@ -6,11 +6,11 @@ from src.modules.recommendations.dtos.recommendation_dto import (
     ProductRecommendationRequest,
     RecommendationResponse,
 )
-from src.modules.recommendations.queries.recommend_accounts.recommend_accounts_query import RecommendAccountsQuery
-from src.modules.recommendations.queries.recommend_products.recommend_products_query import RecommendProductsQuery
 from src.modules.recommendations.queries.recall_product_candidates.recall_product_candidates_query import (
     RecallProductCandidatesQuery,
 )
+from src.modules.recommendations.queries.recommend_accounts.recommend_accounts_query import RecommendAccountsQuery
+from src.modules.recommendations.queries.recommend_products.recommend_products_query import RecommendProductsQuery
 from src.modules.recommendations.queries.suggest_clips.suggest_clips_query import SuggestClipsQuery
 from src.utils.cqrs_util import QueryBus
 from src.utils.request_deadline_util import run_within_request_deadline

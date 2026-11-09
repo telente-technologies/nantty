@@ -75,12 +75,19 @@ def calculate_product_popularity(candidate: ProductCandidate, maximum_log_popula
     return 0.8 * raw_popularity / maximum_log_popularity + 0.2 * rating_bonus
 
 
-def calculate_product_exploration_tiebreaker(request: ProductRecommendationRequest, product_id: str) -> float:
-    """Give each viewer a stable shortlist within a day, with gentle daily exploration."""
-    exploration_window = resolve_request_time(request.now).date().isoformat()
-    seed = f"{request.viewer.user_id}:{request.surface}:{exploration_window}:{product_id}".encode()
+def calculate_product_exploration_tiebreaker(
+    request: ProductRecommendationRequest,
+    product_id: str,
+    maximum_offset: float,
+    rotation_hours: int,
+) -> float:
+    """Return a reproducible, bounded tie-breaker; it is not a random eligibility signal."""
+    bounded_offset = min(max(maximum_offset, 0.0), 0.05)
+    bounded_rotation_hours = min(max(rotation_hours, 1), 168)
+    window = int(resolve_request_time(request.now).timestamp() // (bounded_rotation_hours * 3600))
+    seed = f"{request.viewer.user_id}:{request.surface}:{window}:{product_id}".encode()
     value = int.from_bytes(hashlib.sha256(seed).digest()[:4], "big") / 0xFFFFFFFF
-    return (value - 0.5) * 0.04
+    return (value - 0.5) * 2.0 * bounded_offset
 
 
 def calculate_product_item_affinity(candidate: ProductCandidate, online_features: ViewerOnlineFeatures) -> float:
@@ -91,6 +98,9 @@ def score_product_candidates(
     request: ProductRecommendationRequest,
     online_features: ViewerOnlineFeatures,
     model_neighbours: Mapping[str, float],
+    verified_store_bonus: float,
+    exploration_max_offset: float,
+    exploration_rotation_hours: int,
 ) -> list[DiversityCandidate]:
     model_weight, attribute_weight, personal_weight, popularity_weight = SURFACE_WEIGHTS[request.surface]
     excluded = frozenset(request.excluded_product_ids) | frozenset(request.viewer.hidden_item_ids)
@@ -124,8 +134,10 @@ def score_product_candidates(
             score += 0.4 * calculate_product_item_affinity(candidate, online_features)
             # Prefer verified stores without excluding eligible non-verified
             # stores; the small exploration offset prevents a static shortlist.
-            score += 0.08 if candidate.store_verified else 0.0
-            score += calculate_product_exploration_tiebreaker(request, candidate.product_id)
+            score += verified_store_bonus if candidate.store_verified else 0.0
+            score += calculate_product_exploration_tiebreaker(
+                request, candidate.product_id, exploration_max_offset, exploration_rotation_hours
+            )
         scored[candidate.product_id] = DiversityCandidate(
             candidate.product_id, score, candidate.store_id, None, False, frozenset(candidate.topics)
         )
@@ -142,9 +154,19 @@ def read_model_neighbours(
 
 
 class ProductRecommendationService:
-    def __init__(self, feature_store: OnlineFeatureStore | None, model_holder: ActiveModelHolder) -> None:
+    def __init__(
+        self,
+        feature_store: OnlineFeatureStore | None,
+        model_holder: ActiveModelHolder,
+        verified_store_bonus: float,
+        exploration_max_offset: float,
+        exploration_rotation_hours: int,
+    ) -> None:
         self.feature_store = feature_store
         self.model_holder = model_holder
+        self.verified_store_bonus = verified_store_bonus
+        self.exploration_max_offset = exploration_max_offset
+        self.exploration_rotation_hours = exploration_rotation_hours
 
     async def recall_product_candidates(self, request: ProductCandidateRecallRequest) -> list[str]:
         if not request.personalization_allowed or self.feature_store is None:
@@ -173,14 +195,25 @@ class ProductRecommendationService:
         else:
             online_features, degraded = ViewerOnlineFeatures(), False
         if request.candidates:
-            scored = score_product_candidates(request, online_features, neighbours)
+            scored = score_product_candidates(
+                request,
+                online_features,
+                neighbours,
+                self.verified_store_bonus,
+                self.exploration_max_offset,
+                self.exploration_rotation_hours,
+            )
             ordered = rerank_candidates_for_diversity(scored, STORE_DIVERSITY_RULES, request.limit)
             verified_by_id = {candidate.product_id: candidate.store_verified for candidate in request.candidates}
             items = [
                 RecommendedItem(
                     item_id=item.item_id,
                     score=round(item.score, 8),
-                    reason=("verified_store" if verified_by_id.get(item.item_id) else "personalized")
+                    reason=(
+                        "verified_store"
+                        if verified_by_id.get(item.item_id) and self.verified_store_bonus > 0
+                        else "personalized"
+                    )
                     if request.surface == "for_you"
                     else request.surface,
                 )

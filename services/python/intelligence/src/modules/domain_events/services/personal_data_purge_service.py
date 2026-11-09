@@ -15,6 +15,7 @@ from src.repositories.online_feature_keyspace_repository import (
     AFFINITY_HALF_LIFE_SECONDS,
     BEHAVIOUR_RETENTION_DAYS,
     DAILY_COUNTER_TTL_SECONDS,
+    ITEM_AFFINITY_KIND,
     PERSONALIZATION_OPT_OUT_FIELD,
     SECONDS_PER_DAY,
     TOPIC_AFFINITY_KIND,
@@ -35,7 +36,8 @@ def ad_frequency_purge_bucket_count() -> int:
 
 def list_all_generation_keys(base_key: str, half_life_seconds: float) -> list[str]:
     current = find_forward_decay_generation(time.time(), half_life_seconds).generation_index
-    return [append_generation_suffix(base_key, index) for index in range(current + 1)]
+    # Event ingestion accepts slight future clock drift, which can land in the next generation.
+    return [append_generation_suffix(base_key, index) for index in range(current + 2)]
 
 
 class PersonalDataPurgeService:
@@ -61,7 +63,7 @@ class PersonalDataPurgeService:
         )
         now = datetime.now(UTC)
         keys = [self.keyspace.recently_seen_items_key(user_id)]
-        for kind in (TOPIC_AFFINITY_KIND, ACCOUNT_AFFINITY_KIND):
+        for kind in (TOPIC_AFFINITY_KIND, ACCOUNT_AFFINITY_KIND, ITEM_AFFINITY_KIND):
             keys += list_all_generation_keys(self.keyspace.affinity_base_key(kind, user_id), AFFINITY_HALF_LIFE_SECONDS)
         keys += [
             self.keyspace.ad_frequency_key(day, user_id)

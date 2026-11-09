@@ -120,6 +120,11 @@ class FollowCreatedDomainEvent(DomainEnvelopeBase):
     payload: FollowedPayload
 
 
+class StoreFollowedDomainEvent(DomainEnvelopeBase):
+    event_type: Literal["store.followed"]
+    payload: FollowedPayload
+
+
 class PostCreatedDomainEvent(DomainEnvelopeBase):
     event_type: Literal["post.created"]
     payload: PostCreatedPayload
@@ -232,6 +237,7 @@ type DomainEvent = Annotated[
     | SearchPerformedDomainEvent
     | ProductPurchasedDomainEvent
     | FollowCreatedDomainEvent
+    | StoreFollowedDomainEvent
     | PostCreatedDomainEvent
     | MediaProcessedDomainEvent
     | GiftSentDomainEvent

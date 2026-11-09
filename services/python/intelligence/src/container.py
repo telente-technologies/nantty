@@ -244,7 +244,13 @@ def build_application_container(
         feed_ranking_service=FeedRankingService(feature_store, model_holder, feature_log_sink, suggestion_service),
         clip_ranking_service=clip_ranking_service,
         ad_selection_service=AdSelectionService(feature_store, model_holder, feature_log_sink),
-        product_recommendation_service=ProductRecommendationService(feature_store, model_holder),
+        product_recommendation_service=ProductRecommendationService(
+            feature_store,
+            model_holder,
+            settings.product_recommendation_verified_store_bonus,
+            settings.product_recommendation_exploration_max_offset,
+            settings.product_recommendation_exploration_rotation_hours,
+        ),
         account_and_clip_recommendation_service=AccountAndClipRecommendationService(
             feature_store, clip_ranking_service
         ),

@@ -1,7 +1,7 @@
 import asyncio
 import json
 import time
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import patch
 
@@ -9,13 +9,19 @@ import pytest
 
 from src.container import ApplicationContainer
 from src.databases.in_memory_feature_database import InMemoryFeatureBackend
+from src.interfaces.feature_backend_interface import SortedSetAssignScore
 from src.modules.domain_events.repositories.sqs_domain_event_queue_repository import SqsDomainEventQueuePoller
 from src.repositories.online_feature_keyspace_repository import (
     AFFINITY_HALF_LIFE_SECONDS,
+    ITEM_AFFINITY_KIND,
     TOPIC_AFFINITY_KIND,
     format_utc_day_bucket,
 )
-from src.utils.decay_math_util import find_forward_decay_generation
+from src.utils.decay_math_util import (
+    FORWARD_DECAY_BASE_EPOCH_SECONDS,
+    HALF_LIVES_PER_FORWARD_DECAY_GENERATION,
+    find_forward_decay_generation,
+)
 
 
 def domain_event(event_id: str, event_type: str, actor_id: str, occurred_at: datetime, payload: dict[str, Any]) -> str:
@@ -103,6 +109,68 @@ async def test_opt_back_in_resumes_personalization(
         )
     await consumer.process_message_body(product_viewed("evt_pv_c", "user_3", reference_now))
     assert await read_topic_affinity(feature_backend, application_container, "user_3") == 1
+
+
+def future_affinity_generation() -> tuple[datetime, int]:
+    generation_span = AFFINITY_HALF_LIFE_SECONDS * HALF_LIVES_PER_FORWARD_DECAY_GENERATION
+    read_time = datetime.fromtimestamp(FORWARD_DECAY_BASE_EPOCH_SECONDS + 4 * generation_span, UTC)
+    generation = find_forward_decay_generation(read_time.timestamp(), AFFINITY_HALF_LIFE_SECONDS).generation_index
+    return read_time, generation
+
+
+async def seed_item_affinity_generations(
+    backend: InMemoryFeatureBackend, keyspace: Any, viewer_id: str, generation: int
+) -> list[str]:
+    base_key = keyspace.affinity_base_key(ITEM_AFFINITY_KIND, viewer_id)
+    keys = [f"{base_key}:g{index}" for index in range(generation + 2)]
+    await backend.apply_write_operations(
+        [SortedSetAssignScore(key, "product_1", float(index + 1)) for index, key in enumerate(keys)]
+    )
+    return keys
+
+
+async def test_opt_out_and_regrant_cannot_recall_any_item_affinity_generation(
+    application_container: ApplicationContainer,
+    feature_backend: InMemoryFeatureBackend,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    viewer_id = hashed(application_container, "item_opt_out_user")
+    keyspace = application_container.feature_store.keyspace
+    read_time, generation = future_affinity_generation()
+    purge_timestamp = read_time.timestamp()
+    monkeypatch.setattr(
+        "src.modules.domain_events.services.personal_data_purge_service.time.time", lambda: purge_timestamp
+    )
+    keys = await seed_item_affinity_generations(feature_backend, keyspace, viewer_id, generation)
+    store = application_container.feature_store
+    recalled_before_purge = await store.read_viewer_top_item_affinities(viewer_id, 10, read_time)
+    assert [product_id for product_id, _score in recalled_before_purge] == ["product_1"]
+
+    purge_service = application_container.domain_event_consumer_service.purge_service
+    await purge_service.record_personalization_choice(viewer_id, False)
+    await purge_service.record_personalization_choice(viewer_id, True)
+
+    assert await store.read_viewer_top_item_affinities(viewer_id, 10, read_time) == []
+    assert await feature_backend.read_sorted_set_highest_members(keys, 10) == [[] for _ in keys]
+
+
+async def test_account_purge_deletes_all_item_affinity_generations(
+    application_container: ApplicationContainer,
+    feature_backend: InMemoryFeatureBackend,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    viewer_id = hashed(application_container, "item_erasure_user")
+    keyspace = application_container.feature_store.keyspace
+    read_time, generation = future_affinity_generation()
+    purge_timestamp = read_time.timestamp()
+    monkeypatch.setattr(
+        "src.modules.domain_events.services.personal_data_purge_service.time.time", lambda: purge_timestamp
+    )
+    keys = await seed_item_affinity_generations(feature_backend, keyspace, viewer_id, generation)
+
+    await application_container.domain_event_consumer_service.purge_service.purge_account(viewer_id)
+
+    assert await feature_backend.read_sorted_set_highest_members(keys, 10) == [[] for _ in keys]
 
 
 async def test_account_deletion_purges_features_and_blocks_late_events(
