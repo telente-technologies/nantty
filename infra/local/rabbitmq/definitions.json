@@ -5043,6 +5043,14 @@
       "vhost": "nantty",
       "destination": "intelligence-domain-events",
       "destination_type": "queue",
+      "routing_key": "store.followed",
+      "arguments": {}
+    },
+    {
+      "source": "nantty.events",
+      "vhost": "nantty",
+      "destination": "intelligence-domain-events",
+      "destination_type": "queue",
       "routing_key": "gift.sent",
       "arguments": {}
     },
