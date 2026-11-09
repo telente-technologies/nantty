@@ -19,10 +19,10 @@ import (
 )
 
 const (
-	maximumRecommendationCandidates = 100
+	maximumRecommendationCandidates      = 100
 	personalizedRecommendationCandidates = 50
-	popularRecommendationCandidates = 70
-	recentRecommendationCandidates  = maximumRecommendationCandidates - popularRecommendationCandidates
+	popularRecommendationCandidates      = 70
+	recentRecommendationCandidates       = maximumRecommendationCandidates - popularRecommendationCandidates
 )
 
 var recommendationTopicPattern = regexp.MustCompile(`^[a-z0-9][a-z0-9_-]{0,63}$`)

@@ -23,7 +23,7 @@ var interactionSurfacePattern = regexp.MustCompile(`^[A-Za-z0-9_.:-]{1,40}$`)
 
 const intelligenceIdentifierHashLabel = "nantty:intelligence:user-id-hash"
 
-var interactionIntegerBounds = map[string]float64{"position": 10_000, "resultCount": 1_000_000}
+var interactionIntegerBounds = map[string]float64{"position": 10_000, "resultCount": 1_000_000, "quantity": 10_000}
 
 func sanitizeInteractionValue(key string, value any) (any, bool) {
 	switch key {
@@ -50,6 +50,12 @@ func sanitizeInteractionValue(key string, value any) (any, bool) {
 	case "position", "resultCount":
 		number, isNumber := value.(float64)
 		if !isNumber || number != math.Trunc(number) || number < 0 || number > interactionIntegerBounds[key] {
+			return nil, false
+		}
+		return int(number), true
+	case "quantity":
+		number, isNumber := value.(float64)
+		if !isNumber || number != math.Trunc(number) || number < 1 || number > interactionIntegerBounds[key] {
 			return nil, false
 		}
 		return int(number), true
@@ -94,6 +100,7 @@ func IntelligenceInteractionPayload(data map[string]any, idHashSecret, sharedSec
 	for key, value := range data {
 		payload[key] = value
 	}
+	delete(payload, "sessionId")
 	if actorId, found := data["actorId"].(string); found && actorId != "" {
 		payload["actorId"] = HashIntelligenceUserId(actorId, idHashSecret, sharedSecret)
 	}

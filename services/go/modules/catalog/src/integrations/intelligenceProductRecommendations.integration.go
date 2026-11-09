@@ -3,7 +3,10 @@ package integrations
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -18,7 +21,7 @@ import (
 )
 
 const (
-	productRecommendationsPath         = "/v1/recommendations/products"
+	productRecommendationsPath          = "/v1/recommendations/products"
 	productRecommendationCandidatesPath = "/v1/recommendations/products/candidates"
 )
 
@@ -53,11 +56,12 @@ type pythonProductCandidate struct {
 }
 
 type pythonProductRecommendationRequest struct {
-	Surface            string                   `json:"surface"`
-	Viewer             map[string]any           `json:"viewer"`
-	Candidates         []pythonProductCandidate `json:"candidates"`
-	ExcludedProductIds []string                 `json:"excludedProductIds"`
-	Limit              int                      `json:"limit"`
+	Surface                string                   `json:"surface"`
+	Viewer                 map[string]any           `json:"viewer"`
+	PersonalizationAllowed bool                     `json:"personalizationAllowed"`
+	Candidates             []pythonProductCandidate `json:"candidates"`
+	ExcludedProductIds     []string                 `json:"excludedProductIds"`
+	Limit                  int                      `json:"limit"`
 }
 
 type pythonProductRecommendationResponse struct {
@@ -153,7 +157,8 @@ func (client *HttpProductRecommender) RankProducts(
 		requestCandidates = append(requestCandidates, item)
 	}
 	raw, err := json.Marshal(pythonProductRecommendationRequest{
-		Surface: "for_you", Viewer: viewer, Candidates: requestCandidates, ExcludedProductIds: []string{}, Limit: 20,
+		Surface: "for_you", Viewer: viewer, PersonalizationAllowed: personalizationAllowed,
+		Candidates: requestCandidates, ExcludedProductIds: []string{}, Limit: 20,
 	})
 	if err != nil {
 		return nil, err

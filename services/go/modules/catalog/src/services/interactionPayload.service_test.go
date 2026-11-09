@@ -9,14 +9,14 @@ import (
 func TestInteractionPayloadRejectsMalformedValues(t *testing.T) {
 	payload := map[string]any{
 		"productId": map[string]any{"nested": strings.Repeat("x", 1000)}, "storeId": "not-a-uuid", "categoryId": "0192f0a0-0000-7000-8000-0000000000aa",
-		"query": strings.Repeat("q", 5000), "surface": "<script>", "position": 1.5, "resultCount": -3,
+		"query": strings.Repeat("q", 5000), "surface": "<script>", "position": 1.5, "resultCount": -3, "quantity": float64(10_001),
 	}
 	data, kept := BuildInteractionEventData(InteractionInput{Event: "search.performed", Payload: payload, OccurredAt: time.Now()},
 		InteractionActor{AccountId: "a"}, ConsentChoices{Analytics: true, Personalization: true})
 	if !kept {
 		t.Fatal("event should be kept with its invalid fields stripped")
 	}
-	for _, key := range []string{"productId", "storeId", "surface", "position", "resultCount"} {
+	for _, key := range []string{"productId", "storeId", "surface", "position", "resultCount", "quantity"} {
 		if _, found := data[key]; found {
 			t.Fatalf("invalid %s was copied: %v", key, data[key])
 		}
@@ -37,7 +37,7 @@ func TestHashSearchQueryMatchesIntelligenceHasherContract(t *testing.T) {
 
 func TestIntelligenceInteractionPayloadUsesSamePseudonymAsRecommendationCalls(t *testing.T) {
 	const accountId = "0192f0a0-0000-7000-8000-0000000000aa"
-	data := map[string]any{"actorId": accountId, "productId": "0192f0a0-0000-7000-8000-0000000000bb"}
+	data := map[string]any{"actorId": accountId, "sessionId": "session-secret", "productId": "0192f0a0-0000-7000-8000-0000000000bb"}
 	published := IntelligenceInteractionPayload(data, "id-key", "shared-key")
 	want := HashIntelligenceUserId(accountId, "id-key", "shared-key")
 	if published["actorId"] != want {
@@ -49,13 +49,26 @@ func TestIntelligenceInteractionPayloadUsesSamePseudonymAsRecommendationCalls(t 
 	if published["productId"] != data["productId"] {
 		t.Fatalf("interaction payload fields were not preserved: %v", published)
 	}
+	if _, exists := published["sessionId"]; exists {
+		t.Fatalf("session identifiers must not be exported to intelligence: %v", published)
+	}
 }
 
 func TestInteractionPayloadKeepsWellFormedNumbers(t *testing.T) {
-	data, _ := BuildInteractionEventData(InteractionInput{Event: "product.clicked", Payload: map[string]any{"position": float64(4), "surface": "mart_home"}, OccurredAt: time.Now()},
+	data, _ := BuildInteractionEventData(InteractionInput{Event: "product.addedToCart", Payload: map[string]any{"position": float64(4), "quantity": float64(3), "surface": "mart_home"}, OccurredAt: time.Now()},
 		InteractionActor{}, ConsentChoices{Analytics: true})
-	if data["position"] != 4 || data["surface"] != "mart_home" {
+	if data["position"] != 4 || data["quantity"] != 3 || data["surface"] != "mart_home" {
 		t.Fatalf("unexpected data %v", data)
+	}
+}
+
+func TestInteractionPayloadDropsInvalidProductQuantity(t *testing.T) {
+	for _, quantity := range []float64{0, 1.5, 10_001} {
+		data, _ := BuildInteractionEventData(InteractionInput{Event: "product.addedToCart", Payload: map[string]any{"quantity": quantity}, OccurredAt: time.Now()},
+			InteractionActor{}, ConsentChoices{Analytics: true})
+		if _, found := data["quantity"]; found {
+			t.Fatalf("invalid quantity %v was copied: %v", quantity, data)
+		}
 	}
 }
 

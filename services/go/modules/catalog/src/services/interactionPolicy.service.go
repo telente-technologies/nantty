@@ -32,7 +32,7 @@ var acceptedFromClients = map[string]bool{
 	"search.performed": true, "seller.viewed": true, "category.viewed": true,
 }
 
-var allowedPayloadKeys = []string{"productId", "storeId", "categoryId", "query", "surface", "position", "resultCount", "variantId"}
+var allowedPayloadKeys = []string{"productId", "storeId", "categoryId", "query", "surface", "position", "resultCount", "variantId", "quantity"}
 
 func IsAcceptedInteractionEvent(event string) bool { return acceptedFromClients[event] }
 

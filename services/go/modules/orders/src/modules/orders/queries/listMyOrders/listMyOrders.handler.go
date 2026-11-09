@@ -20,6 +20,7 @@ type Handler struct {
 
 var statusesByBuyerFilter = map[string][]string{
 	"pending":   {enums.StatusPending},
+	"to_ship":   {enums.StatusPending, enums.StatusNew, enums.StatusProcessing, enums.StatusReady},
 	"paid":      {enums.StatusNew, enums.StatusProcessing, enums.StatusReady},
 	"shipped":   {enums.StatusShipped},
 	"delivered": {enums.StatusDelivered},

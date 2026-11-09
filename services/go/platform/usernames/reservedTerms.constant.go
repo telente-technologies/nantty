@@ -44,7 +44,7 @@ var wellKnownBrands = []string{
 	"google", "apple", "facebook", "instagram", "meta", "whatsapp", "tiktok", "twitter", "youtube", "snapchat", "linkedin", "telegram",
 	"amazon", "microsoft", "netflix", "spotify", "paypal", "visa", "mastercard", "samsung", "jumia", "konga", "flutterwave",
 	"opay", "palmpay", "moniepoint", "kuda", "mtn", "airtel", "glo", "dangote", "access", "gtbank", "zenithbank", "firstbank", "uba",
-	"stanbic", "nike", "adidas", "cocacola", "pepsi", "shoprite", "bolt", "uber", "chowdeck", "glovo", "zudomart",
+	"stanbic", "nike", "adidas", "cocacola", "pepsi", "shoprite", "bolt", "uber", "chowdeck", "glovo", "nantty",
 }
 
 var brandImpersonationAffixes = []string{

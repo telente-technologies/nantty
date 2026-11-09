@@ -34,8 +34,9 @@ func TestHttpProductRecommenderSignsRequestAndPseudonymizesViewer(t *testing.T) 
 			t.Error("request signature did not match body")
 		}
 		var payload struct {
-			Viewer     map[string]any   `json:"viewer"`
-			Candidates []map[string]any `json:"candidates"`
+			Viewer                 map[string]any   `json:"viewer"`
+			PersonalizationAllowed bool             `json:"personalizationAllowed"`
+			Candidates             []map[string]any `json:"candidates"`
 		}
 		if err := json.Unmarshal(body, &payload); err != nil {
 			t.Fatal(err)
@@ -43,7 +44,7 @@ func TestHttpProductRecommenderSignsRequestAndPseudonymizesViewer(t *testing.T) 
 		if payload.Viewer["userId"] != "u_345e9e93e0908cbeed547fdd65a486f1fafe6869" {
 			t.Errorf("viewer id was not pseudonymized consistently: %v", payload.Viewer["userId"])
 		}
-		if payload.Viewer["country"] != "NG" || payload.Candidates[0]["storeVerified"] != true {
+		if payload.Viewer["country"] != "NG" || payload.Candidates[0]["storeVerified"] != true || !payload.PersonalizationAllowed {
 			t.Errorf("expected country and authoritative verified-store signal in request: %+v", payload)
 		}
 		writer.Header().Set("content-type", "application/json")
@@ -69,12 +70,13 @@ func TestHttpProductRecommenderUsesContextualViewerWhenPersonalizationIsOff(t *t
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		body, _ := io.ReadAll(request.Body)
 		var payload struct {
-			Viewer map[string]any `json:"viewer"`
+			Viewer                 map[string]any `json:"viewer"`
+			PersonalizationAllowed bool           `json:"personalizationAllowed"`
 		}
 		if err := json.Unmarshal(body, &payload); err != nil {
 			t.Fatal(err)
 		}
-		if payload.Viewer["userId"] != "contextual-viewer" {
+		if payload.Viewer["userId"] != "contextual-viewer" || payload.PersonalizationAllowed {
 			t.Errorf("unexpected personalized viewer id: %v", payload.Viewer["userId"])
 		}
 		_, _ = io.WriteString(writer, `{"items":[],"metadata":{"requestId":"r1","rankingSource":"products:for_you:rules","degraded":false,"generatedAt":"2026-11-07T00:00:00Z"}}`)
