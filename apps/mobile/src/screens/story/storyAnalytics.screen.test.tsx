@@ -33,7 +33,7 @@ describe("StoryAnalyticsScreen", () => {
     mockFetchStoryViewers.mockReset();
   });
 
-  it("shows backend likes/comments and uses the story-viewer total for unique story viewers", async () => {
+  it("shows the canonical unique-viewer metric without duplicating it as impressions", async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
     mockFetchPostAnalytics.mockResolvedValue({
       impressions: 27,
@@ -58,7 +58,8 @@ describe("StoryAnalyticsScreen", () => {
 
     await waitFor(() => expect(view.getByText("Likes")).toBeTruthy());
     expect(view.getByText("Comments")).toBeTruthy();
-    expect(view.getByText("Impressions")).toBeTruthy();
+    expect(view.queryByText("Impressions")).toBeNull();
+    expect(view.getAllByText("Unique viewers")).toHaveLength(1);
     expect(view.getByText("8")).toBeTruthy();
     expect(view.queryByText("99")).toBeNull();
     await queryClient.cancelQueries();

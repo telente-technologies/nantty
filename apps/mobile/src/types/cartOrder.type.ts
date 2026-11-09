@@ -59,6 +59,35 @@ export interface Order {
   readonly promotionIssue?: PromotionIssue | null;
 }
 
+export interface ReturnRequestLineInput {
+  readonly orderItemId: ID;
+  readonly quantity: number;
+}
+
+export interface ReturnRequestInput {
+  readonly lines: readonly ReturnRequestLineInput[];
+  readonly reason: string;
+}
+
+export interface ReturnRequestLineView {
+  readonly orderLineId: ID;
+  readonly name: string;
+  readonly quantity: number;
+}
+
+export interface ReturnRequestView {
+  readonly id: ID;
+  readonly orderId: ID;
+  readonly orderNumber: string;
+  readonly buyerName: string;
+  readonly lines: readonly ReturnRequestLineView[];
+  readonly reason: string;
+  readonly status: string;
+  readonly declineNote: string | null;
+  readonly refundAmount: Money;
+  readonly createdAt: ISODate;
+}
+
 export interface PromotionIssue {
   readonly code: string;
   readonly message: string;

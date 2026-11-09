@@ -23,7 +23,12 @@ describe("feed module cadence", () => {
     const slots = planFeedModuleSlots({
       postCount: 200,
       isModuleEnabled: everything,
-      cadence: { getVerified: { firstAfterPosts: 5, repeatEveryPosts: null }, suggestedClips: { firstAfterPosts: 5, repeatEveryPosts: 10 }, peopleYouMayKnow: { firstAfterPosts: 5, repeatEveryPosts: 10 } },
+      cadence: {
+        getVerified: { firstAfterPosts: 5, repeatEveryPosts: null },
+        suggestedClips: { firstAfterPosts: 5, repeatEveryPosts: 10 },
+        peopleYouMayKnow: { firstAfterPosts: 5, repeatEveryPosts: 10 },
+        productsYouMightLike: { firstAfterPosts: 8, repeatEveryPosts: 12 },
+      },
     });
     const positions = slots.map((slot) => slot.afterPostCount);
     for (let index = 1; index < positions.length; index++) expect(positions[index]! - positions[index - 1]!).toBeGreaterThanOrEqual(1);

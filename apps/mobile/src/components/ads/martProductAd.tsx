@@ -1,7 +1,7 @@
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
 import { adEventsService } from "@/services/ads/adEvents.service";
@@ -12,8 +12,25 @@ import { makeThemedStyles, useTheme } from "@/theme";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { labelForCallToAction } from "@/utils/adCreativeMapping.util";
+import {
+  MART_PRODUCT_AD_MINIMUM_VISIBLE_FRACTION,
+  MART_PRODUCT_AD_MINIMUM_VISIBLE_MILLIS,
+  martProductAdVisibleFraction,
+} from "./martProductAdViewability.util";
 
-export function MartProductAd() {
+export interface MartProductAdViewport {
+  scrollOffset: number;
+  viewportHeight: number;
+  contentTop: number;
+}
+
+export function MartProductAd({
+  viewport,
+  registerViewabilityEvaluator,
+}: {
+  readonly viewport: MutableRefObject<MartProductAdViewport>;
+  readonly registerViewabilityEvaluator: (evaluator: (() => void) | null) => void;
+}) {
   const styles = useStyles();
   const { colors } = useTheme();
   const focused = useIsFocused();
@@ -29,16 +46,50 @@ export function MartProductAd() {
   const ad = usableMartProductAd(decision.data?.ad, decision.data?.receivedAt ?? 0) ? decision.data.ad : null;
   const sponsored = ad ? productAdSponsoredPlacement(ad) : null;
   const media = ad?.creative.media.find((item) => item.kind === "image");
+  const [cardBounds, setCardBounds] = useState<{ readonly top: number; readonly height: number } | null>(null);
+  const [isSufficientlyVisible, setIsSufficientlyVisible] = useState(false);
+  const impressionRecorded = useRef<string | null>(null);
+
+  const evaluateViewability = useCallback(() => {
+    if (!cardBounds) {
+      setIsSufficientlyVisible(false);
+      return;
+    }
+    const fraction = martProductAdVisibleFraction({
+      contentTop: viewport.current.contentTop,
+      cardTop: cardBounds.top,
+      cardHeight: cardBounds.height,
+      scrollOffset: viewport.current.scrollOffset,
+      viewportHeight: viewport.current.viewportHeight,
+    });
+    setIsSufficientlyVisible(fraction >= MART_PRODUCT_AD_MINIMUM_VISIBLE_FRACTION);
+  }, [cardBounds, viewport]);
 
   useEffect(() => {
-    if (focused && sponsored && ad) adEventsService.recordSponsoredImpressionOncePerSession(sponsored, "mart", ad.adId);
-  }, [focused, sponsored, ad]);
+    registerViewabilityEvaluator(evaluateViewability);
+    return () => registerViewabilityEvaluator(null);
+  }, [evaluateViewability, registerViewabilityEvaluator]);
+
+  useEffect(() => {
+    if (!focused || !isSufficientlyVisible || !sponsored || !ad || impressionRecorded.current === ad.adId) return;
+    const timeout = setTimeout(() => {
+      impressionRecorded.current = ad.adId;
+      adEventsService.recordSponsoredImpressionOncePerSession(sponsored, "mart", ad.adId);
+    }, MART_PRODUCT_AD_MINIMUM_VISIBLE_MILLIS);
+    return () => clearTimeout(timeout);
+  }, [focused, isSufficientlyVisible, sponsored, ad]);
 
   if (!ad || !sponsored) return null;
   const open = () => void openSponsoredTarget({ sponsored, placement: "mart", itemId: ad.adId, target: { kind: "cta" }, navigation });
 
   return (
-    <View style={styles.card} testID="mart-product-ad">
+    <View
+      style={styles.card}
+      testID="mart-product-ad"
+      onLayout={({ nativeEvent }) => {
+        setCardBounds({ top: nativeEvent.layout.y, height: nativeEvent.layout.height });
+      }}
+    >
       <View style={styles.identityRow}>
         <Text size={13} weight={600} lineHeight={17} numberOfLines={1} style={styles.identity}>{ad.creative.identity.name}</Text>
         {ad.creative.identity.verifiedBusiness ? <Text size={11} lineHeight={14} color={colors.textMuted}>Verified business</Text> : null}

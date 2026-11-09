@@ -84,7 +84,7 @@ export type { StoreFollowState } from "@nantty/contracts";
 
 export type PaymentProvider = "flutterwave";
 
-export type PaymentChannel = "card" | "bank_transfer" | "ussd";
+export type PaymentChannel = "card" | "bank" | "bank_transfer" | "ussd";
 
 export interface PaymentInitialization {
   readonly orderId: ID;

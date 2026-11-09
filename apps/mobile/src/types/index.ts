@@ -1,6 +1,7 @@
 export * from "./account.type";
 export * from "./adCreative.type";
 export * from "./commerce.type";
+export * from "./cartOrder.type";
 export * from "./liveGift.type";
 export * from "./models.type";
 export * from "./walletSeller.type";

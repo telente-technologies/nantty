@@ -24,10 +24,12 @@ import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useCartActions } from "@/hooks/useCart.hook";
 import { useSaveToggle } from "@/hooks/useSaveToggle.hook";
+import { useAuthStore } from "@/store/auth.store";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { trackProductInteraction } from "@/services/sellers/productInteractions.service";
 import { productsService } from "@/services/sellers/products.service";
+import { savesService } from "@/services/social/saves.service";
 import { ApiError } from "@/services/core/apiClient.service";
 import { storesService } from "@/services/sellers/stores.service";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
@@ -42,6 +44,7 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
   const { colors } = useTheme();
   const styles = useStyles();
   const queryClient = useQueryClient();
+  const isSignedIn = useAuthStore((state) => state.status === "signedIn");
   const { productId, aff: affiliateLinkId } = route.params;
   const product = useQuery({ queryKey: ["products", "detail", productId], queryFn: () => productsService.fetchProductDetailById(productId) });
   useEffect(() => {
@@ -61,7 +64,13 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
   const [variantSelections, setVariantSelections] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const { offerSendInChat, sendInChatElement } = useShareToChat();
-  const productSave = useSaveToggle({ type: "product", targetId: productId }, product.data?.savedByViewer ?? false);
+  const saveTarget = { type: "product" as const, targetId: productId };
+  const productSaveStatus = useQuery({
+    queryKey: ["saves", "status", saveTarget.type, productId],
+    queryFn: () => savesService.fetchSaveStatus(saveTarget),
+    enabled: isSignedIn && !!product.data,
+  });
+  const productSave = useSaveToggle(saveTarget, productSaveStatus.data?.isSaved ?? product.data?.savedByViewer ?? false);
   const [followingShopOverride, setFollowingShopOverride] = useState<{ readonly productId: string; readonly isFollowing: boolean } | null>(null);
   const followingShop = (followingShopOverride?.productId === productId ? followingShopOverride.isFollowing : null)
     ?? product.data?.store.isFollowing

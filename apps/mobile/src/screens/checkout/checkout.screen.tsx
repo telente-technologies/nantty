@@ -40,6 +40,7 @@ const isHandledProblem = (error: unknown) => describePaymentProblem(error) !== n
 
 const CHANNEL_LABELS: Record<PaymentChannel, { name: string; note: string }> = {
   card: { name: "Card", note: "Debit or credit card" },
+  bank: { name: "Bank", note: "Pay through your bank" },
   bank_transfer: { name: "Bank transfer", note: "Pay from your bank app" },
   ussd: { name: "USSD", note: "Pay with a code from your phone" },
 };
@@ -208,7 +209,7 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
           <SelectableRow selected={!useSavedCard && !usingWallet} onPress={() => { setPayFromWallet(false); setUseSavedCard(false); }} accessibilityLabel="Pay in the secure payment window">
             <Text size={typeScale.md} weight={500} lineHeight={16.8}>{savedCard ? "Another way to pay" : "Secure payment window"}</Text>
             <Text size={typeScale.sm} lineHeight={16.9} color={colors.textMuted}>
-              {(channels.data?.channels ?? []).map((channel) => CHANNEL_LABELS[channel].name).join(", ") || "Card, bank transfer or USSD"}
+              {(channels.data?.channels ?? []).map((channel) => CHANNEL_LABELS[channel]?.name).filter((name): name is string => !!name).join(", ") || "Card, bank transfer or USSD"}
             </Text>
           </SelectableRow>
           {!useSavedCard && !usingWallet ? (

@@ -7,6 +7,7 @@ import type { FeedModuleSlot } from "@/utils/feedModuleLayout.util";
 import type { FeedModules } from "./feedModules.hook";
 import { GetVerifiedCard } from "./getVerifiedCard";
 import { PeopleYouMayKnowRow } from "./peopleYouMayKnowRow";
+import { ProductsYouMightLike } from "./productsYouMightLike";
 import { suggestedVideoStartQueryKey } from "./suggestedClipsStream.hook";
 import { SuggestedClipsRow } from "./suggestedClipsRow";
 
@@ -32,6 +33,15 @@ export function FeedModuleRow({ slot, modules, onPressRailMore }: FeedModuleRowP
         onDismiss={people.dismiss}
         onPressProfile={(userId) => navigation.navigate("UserProfile", { userId })}
         onSeeAll={() => navigation.navigate("Search", { scope: "global" })}
+      />
+    );
+  }
+  if (slot.kind === "productsYouMightLike") {
+    return (
+      <ProductsYouMightLike
+        recommendations={modules.productsYouMightLike}
+        interactionSurface="feed_recommendations"
+        optional
       />
     );
   }

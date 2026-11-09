@@ -10,6 +10,10 @@ jest.mock("react-native-safe-area-context", () => {
   const { View } = jest.requireActual("react-native");
   return { SafeAreaView: View, useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }) };
 });
+jest.mock("react-native-reanimated", () => ({
+  useSharedValue: (value: number) => ({ value }),
+  withTiming: (value: number) => value,
+}));
 jest.mock("@/services/auth/appleSignIn.service", () => ({ checkIfAppleSignInIsAvailableOnThisDevice: () => Promise.resolve(true) }));
 jest.mock("@/services/auth/auth.service", () => ({ authService: { beginSocialSignIn: jest.fn(), completeSocialSignInWithBirthday: jest.fn() } }));
 jest.mock("@/store/auth.store", () => ({ useAuthStore: (selector: (state: unknown) => unknown) => selector({ saveSignedInSession: jest.fn() }) }));

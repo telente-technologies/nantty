@@ -31,6 +31,7 @@ const order = (id: string) => ({
 
 describe("OrdersScreen cursor pagination", () => {
   let client: QueryClient;
+  let unmount: (() => void) | undefined;
   const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client }, children);
 
   beforeEach(() => {
@@ -43,10 +44,15 @@ describe("OrdersScreen cursor pagination", () => {
     );
   });
 
-  afterEach(() => client.clear());
+  afterEach(async () => {
+    unmount?.();
+    unmount = undefined;
+    await client.cancelQueries();
+    client.clear();
+  });
 
   it("fetches and displays later buyer-order pages when the list reaches its end", async () => {
-    render(createElement(OrdersScreen, { navigation: { navigate: jest.fn() } as never }), { wrapper });
+    ({ unmount } = render(createElement(OrdersScreen, { navigation: { navigate: jest.fn() } as never }), { wrapper }));
 
     await waitFor(() => expect(screen.getByText("order-page-1")).toBeTruthy());
     await fireEvent(screen.getByTestId("buyer-orders-list"), "onEndReached");

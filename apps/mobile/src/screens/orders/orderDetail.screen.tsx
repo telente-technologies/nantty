@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
 
 import { ConfirmActionSheet } from "@/components/escrow/confirmActionSheet";
 import { useConfirmReceiptMutation, useEscrowForOrderQuery } from "@/components/escrow/escrowQueries.hook";
@@ -8,10 +8,12 @@ import { canBuyerOpenDispute, ESCROW_STAGE_APPEARANCE, formatFriendlyDate } from
 import { StatusPill } from "@/components/escrow/statusPill";
 import { CaretRight24Icon, Shield24Icon } from "@/components/icons";
 import { CartItemSummary } from "@/components/order/cartItemSummary";
+import { ReturnRequestForm } from "@/components/order/returnRequestForm";
 import { DELIVERY_STATUS_APPEARANCE } from "@/components/order/deliveryStatus.util";
 import { RatePurchaseCard } from "@/components/reviews/ratePurchaseCard";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -27,9 +29,36 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
   const styles = useStyles();
   const { orderId } = route.params;
   const [confirmSheetVisible, setConfirmSheetVisible] = useState(false);
+  const [cancelSheetVisible, setCancelSheetVisible] = useState(false);
+  const queryClient = useQueryClient();
   const order = useQuery({ queryKey: ["orders", "detail", orderId], queryFn: () => ordersService.fetchOrderById(orderId) });
+  const returnRequests = useQuery({
+    queryKey: ["returns", "mine", 100],
+    queryFn: () => ordersService.fetchMyReturnsPage(null, 100),
+    enabled: order.data?.status === "delivered" || order.data?.status === "completed",
+  });
   const escrow = useEscrowForOrderQuery(orderId);
   const confirmReceipt = useConfirmReceiptMutation(orderId);
+  const cancelOrder = useMutation({
+    mutationFn: () => ordersService.cancelOrder(orderId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["orders"] }),
+        queryClient.invalidateQueries({ queryKey: ["escrow", orderId] }),
+      ]);
+      setCancelSheetVisible(false);
+      await order.refetch();
+    },
+  });
+  const requestReturn = useMutation({
+    mutationFn: (input: Parameters<typeof ordersService.requestReturn>[1]) => ordersService.requestReturn(orderId, input),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["orders"] }),
+        queryClient.invalidateQueries({ queryKey: ["returns", "mine"] }),
+      ]);
+    },
+  });
 
   if (!order.data) {
     return (
@@ -60,7 +89,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
   return (
     <Screen>
       <Header title={`Order ${detail.reference}`} />
-      <ScrollView
+      <KeyboardAwareForm
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={order.isRefetching} onRefresh={() => { void Promise.all([order.refetch(), escrow.refetch()]); }} tintColor={colors.primary} colors={[colors.primary]} />}
@@ -149,9 +178,20 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
           order={detail}
           onRate={(product) => navigation.navigate("WriteReview", { productId: product.id, productName: product.name, imageUrl: product.imageUrl })}
         />
-      </ScrollView>
+        {detail.status === "delivered" || detail.status === "completed" ? (
+          <ReturnRequestForm
+            items={detail.items}
+            knownRequest={returnRequests.data?.data.find((request) => request.orderId === orderId)}
+            submittedRequest={requestReturn.data}
+            submitting={requestReturn.isPending}
+            errorMessage={requestReturn.isError ? describeActionFailure(requestReturn.error) : null}
+            onSubmit={(input) => requestReturn.mutate(input)}
+          />
+        ) : null}
+      </KeyboardAwareForm>
       <View style={styles.footer}>
         {detail.status === "pending" ? <Button title="Check payment" onPress={() => navigation.navigate("Payment", { orderId })} /> : null}
+        {detail.status === "pending" || detail.status === "new" ? <Button variant="subtle" title="Cancel order" onPress={() => setCancelSheetVisible(true)} /> : null}
         {canConfirm ? <Button title="Confirm receipt" onPress={() => setConfirmSheetVisible(true)} /> : null}
         {escrow.data?.disputeId ? (
           <Button variant="subtle" title="View dispute" onPress={() => navigation.navigate("DisputeDetail", { disputeId: escrow.data!.disputeId! })} />
@@ -172,6 +212,17 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
         errorMessage={confirmReceipt.isError ? describeActionFailure(confirmReceipt.error) : null}
         onConfirm={() => confirmReceipt.mutate(undefined, { onSuccess: () => { setConfirmSheetVisible(false); order.refetch(); } })}
         onClose={() => setConfirmSheetVisible(false)}
+      />
+      <ConfirmActionSheet
+        visible={cancelSheetVisible}
+        title="Cancel this order?"
+        message="Cancellation depends on the order’s current status. If payment has been made, the seller may need to process a refund."
+        confirmTitle="Cancel order"
+        destructive
+        confirming={cancelOrder.isPending}
+        errorMessage={cancelOrder.isError ? describeActionFailure(cancelOrder.error) : null}
+        onConfirm={() => cancelOrder.mutate()}
+        onClose={() => setCancelSheetVisible(false)}
       />
     </Screen>
   );

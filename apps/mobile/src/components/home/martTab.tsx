@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigation } from "@react-navigation/native";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ScrollView, StyleSheet, View, type NativeScrollEvent, type ScrollViewInstance } from "react-native";
 
 import { BrandLoader } from "@/components/ui/brandLoader";
@@ -19,7 +19,7 @@ import { ErrorState } from "@/components/ui/errorState";
 import { GridSkeleton } from "@/components/ui/gridSkeleton";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { spacing } from "@/constants/spacing.constant";
-import { MartProductAd } from "@/components/ads/martProductAd";
+import { MartProductAd, type MartProductAdViewport } from "@/components/ads/martProductAd";
 import { ProductsYouMightLike } from "@/components/home/productsYouMightLike";
 
 const COLLECTION_FOR_TILE = {
@@ -40,6 +40,12 @@ export function MartTab() {
   const scrollY = useRef(0);
   const categoriesY = useRef(0);
   const heroBottom = useRef(0);
+  const martAdViewport = useRef<MartProductAdViewport>({ scrollOffset: 0, viewportHeight: 0, contentTop: 0 });
+  const martAdViewabilityEvaluator = useRef<(() => void) | null>(null);
+  const registerMartAdViewabilityEvaluator = useCallback((evaluator: (() => void) | null) => {
+    martAdViewabilityEvaluator.current = evaluator;
+    evaluator?.();
+  }, []);
   const [pinned, setPinned] = useState(false);
   const [heroVisible, setHeroVisible] = useState(true);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -71,6 +77,9 @@ export function MartTab() {
   const onScroll = (event: NativeScrollEvent) => {
     const y = event.contentOffset.y;
     scrollY.current = y;
+    martAdViewport.current.scrollOffset = y;
+    martAdViewport.current.viewportHeight = event.layoutMeasurement.height;
+    martAdViewabilityEvaluator.current?.();
     const nextPinned = categoriesY.current > 0 && y >= categoriesY.current;
     if (nextPinned !== pinned) setPinned(nextPinned);
     const nextHeroVisible = heroBottom.current === 0 || y < heroBottom.current;
@@ -113,8 +122,14 @@ export function MartTab() {
       >
         <CategoryTabs categories={martHome.data?.categories ?? []} selectedCategoryId={selectedCategoryId} onSelectCategory={selectCategory} />
       </View>
-      <View style={styles.content}>
-        <MartProductAd />
+      <View
+        style={styles.content}
+        onLayout={({ nativeEvent }) => {
+          martAdViewport.current.contentTop = nativeEvent.layout.y;
+          martAdViewabilityEvaluator.current?.();
+        }}
+      >
+        <MartProductAd viewport={martAdViewport} registerViewabilityEvaluator={registerMartAdViewabilityEvaluator} />
         <ProductsYouMightLike />
         {products.isLoading ? (
           <GridSkeleton />

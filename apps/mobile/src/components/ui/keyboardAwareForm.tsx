@@ -28,6 +28,7 @@ export interface KeyboardAwareFormProps {
   readonly safeAreaHandledByParent?: boolean;
   readonly refreshControl?: ReactElement<RefreshControlProps>;
   readonly showsVerticalScrollIndicator?: boolean;
+  readonly bounces?: boolean;
   readonly keyboardDismissMode?: ScrollViewProps["keyboardDismissMode"];
   readonly testID?: string;
 }
@@ -42,6 +43,7 @@ export function KeyboardAwareForm({
   safeAreaHandledByParent = false,
   refreshControl,
   showsVerticalScrollIndicator,
+  bounces,
   keyboardDismissMode,
   testID,
 }: KeyboardAwareFormProps) {
@@ -55,6 +57,7 @@ export function KeyboardAwareForm({
     contentContainerStyle,
     refreshControl,
     showsVerticalScrollIndicator,
+    bounces,
     keyboardDismissMode,
     keyboardShouldPersistTaps: "handled",
   };

@@ -19,20 +19,38 @@ const CARD_WIDTH = 160;
 
 export const productsYouMightLikeQueryKey = (viewerId: string) => ["mart", "recommendations", "for-you", viewerId] as const;
 
-export function ProductsYouMightLike() {
-  const styles = useStyles();
-  const navigation = useNavigation();
+export function useProductsYouMightLikeRecommendations({ enabled = true }: { readonly enabled?: boolean } = {}) {
   const viewerId = useAuthStore((state) => state.user?.id ?? "guest");
-  const [pickerProductId, setPickerProductId] = useState<string | null>(null);
-  const recommendations = useQuery({
+  return useQuery({
     // Recommendations are personalized server-side; never reuse one account's
     // cached response after an account switch in the same app session.
     queryKey: productsYouMightLikeQueryKey(viewerId),
     queryFn: productsService.fetchProductsYouMightLike,
+    enabled,
     staleTime: 5 * 60 * 1000,
   });
+}
+
+type ProductsYouMightLikeQuery = ReturnType<typeof useProductsYouMightLikeRecommendations>;
+
+export function ProductsYouMightLike({
+  recommendations: providedRecommendations,
+  interactionSurface = "mart_recommendations",
+  optional = false,
+}: {
+  readonly recommendations?: ProductsYouMightLikeQuery;
+  readonly interactionSurface?: "mart_recommendations" | "feed_recommendations";
+  readonly optional?: boolean;
+} = {}) {
+  const styles = useStyles();
+  const navigation = useNavigation();
+  const [pickerProductId, setPickerProductId] = useState<string | null>(null);
+  const internalRecommendations = useProductsYouMightLikeRecommendations({ enabled: providedRecommendations === undefined });
+  const recommendations = providedRecommendations ?? internalRecommendations;
   const { addProductToCart } = useCartActions();
   const products = recommendations.data?.products ?? [];
+
+  if (optional && (recommendations.isLoading || recommendations.isError || products.length === 0)) return null;
 
   if (recommendations.isLoading) {
     return (
@@ -82,7 +100,7 @@ export function ProductsYouMightLike() {
             width={CARD_WIDTH}
             imageHeight={183}
             onPress={() => {
-              void trackProductInteraction("product.clicked", { productId: product.id, surface: "mart_recommendations" });
+              void trackProductInteraction("product.clicked", { productId: product.id, surface: interactionSurface });
               navigation.navigate("ProductDetail", { productId: product.id });
             }}
             onAddToCart={() => addToCart(product)}

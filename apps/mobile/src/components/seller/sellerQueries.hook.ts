@@ -9,6 +9,9 @@ export const sellerQueryKeys = {
   product: (productId: string) => ["seller", "products", productId] as const,
   orders: ["seller", "orders"] as const,
   order: (orderId: string) => ["seller", "orders", orderId] as const,
+  returns: ["seller", "returns"] as const,
+  returnsPage: (status: string | null) => ["seller", "returns", status ?? "all"] as const,
+  locations: ["seller", "locations"] as const,
   application: ["seller", "application"] as const,
 };
 

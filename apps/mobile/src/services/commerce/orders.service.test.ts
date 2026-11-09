@@ -1,8 +1,10 @@
 const mockGet = jest.fn();
 const mockGetList = jest.fn();
+const mockPost = jest.fn();
+const mockGetPage = jest.fn();
 
 jest.mock("../core/apiClient.service", () => ({
-  api: { get: (...args: unknown[]) => mockGet(...args), getList: (...args: unknown[]) => mockGetList(...args) },
+  api: { get: (...args: unknown[]) => mockGet(...args), getList: (...args: unknown[]) => mockGetList(...args), getPage: (...args: unknown[]) => mockGetPage(...args), post: (...args: unknown[]) => mockPost(...args) },
 }));
 
 import { ordersService } from "./orders.service";
@@ -11,6 +13,8 @@ describe("ordersService pagination", () => {
   beforeEach(() => {
     mockGet.mockReset();
     mockGetList.mockReset();
+    mockPost.mockReset();
+    mockGetPage.mockReset();
   });
 
   it("requests the first buyer-orders page without a cursor", async () => {
@@ -35,5 +39,30 @@ describe("ordersService pagination", () => {
 
     await expect(ordersService.fetchMyOrders(null)).resolves.toBe(orders);
     expect(mockGetList).toHaveBeenCalledWith("/api/v1/orders", { status: undefined });
+  });
+
+  it("cancels an order through the authenticated buyer order route", async () => {
+    const cancelled = { id: "order/1", status: "cancelled" };
+    mockPost.mockResolvedValue(cancelled);
+
+    await expect(ordersService.cancelOrder("order/1")).resolves.toBe(cancelled);
+    expect(mockPost).toHaveBeenCalledWith("/api/v1/orders/order%2F1/cancel", { reason: "Cancelled by buyer" });
+  });
+
+  it("loads the buyer's cursor-paginated return requests", async () => {
+    const page = { data: [{ id: "return-1" }], nextCursor: "next" };
+    mockGetPage.mockResolvedValue(page);
+
+    await expect(ordersService.fetchMyReturnsPage(null)).resolves.toBe(page);
+    expect(mockGetPage).toHaveBeenCalledWith("/api/v1/returns", { cursor: undefined, limit: 100 });
+  });
+
+  it("submits the requested lines and reason to the order return route", async () => {
+    const created = { id: "return-1", orderId: "order/1", status: "requested" };
+    const input = { lines: [{ orderItemId: "line-1", quantity: 2 }], reason: "Item arrived damaged" };
+    mockPost.mockResolvedValue(created);
+
+    await expect(ordersService.requestReturn("order/1", input)).resolves.toBe(created);
+    expect(mockPost).toHaveBeenCalledWith("/api/v1/orders/order%2F1/returns", input);
   });
 });

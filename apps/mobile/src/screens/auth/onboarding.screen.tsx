@@ -1,9 +1,10 @@
 import { Image } from "expo-image";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { LegalText } from "@/components/auth/legalText";
 import { Apple24Icon, Google24Icon, UserCircle24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Screen } from "@/components/ui/screen";
 import { SocialBirthdayPrompt } from "@/components/auth/socialBirthdayPrompt";
 import { Text } from "@/components/ui/text";
@@ -55,7 +56,7 @@ export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboard
           </Text>
         </Pressable>
       </View>
-      <ScrollView contentContainerStyle={styles.content} bounces={false}>
+      <KeyboardAwareForm contentContainerStyle={styles.content} bounces={false}>
         <View style={styles.rows} accessible={false} importantForAccessibility="no-hide-descendants">
           {ROWS.map((offset, row) => (
             <View key={row} style={[styles.row, { marginLeft: offset }]}>
@@ -144,7 +145,7 @@ export function OnboardingScreen({ navigation, route }: AuthScreenProps<"Onboard
             </Text>
           </View> : null}
         </View>
-      </ScrollView>
+      </KeyboardAwareForm>
     </Screen>
   );
 }

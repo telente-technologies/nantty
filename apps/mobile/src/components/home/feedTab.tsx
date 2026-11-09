@@ -70,7 +70,7 @@ export function FeedTab() {
     }
     return unique;
   }, [feed.data]);
-  const modules = useFeedModules(posts);
+  const modules = useFeedModules(posts, feedMode === "for-you");
   const organicPosts = posts.filter((post) => !post.sponsored);
   const feedAlreadyHasAd = posts.some((post) => Boolean(post.sponsored));
   const feedAdSessionKey = JSON.stringify([viewerId, feedMode, selectedTopicId, organicPosts[0]?.id ?? null]);

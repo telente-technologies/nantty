@@ -1,4 +1,4 @@
-export type FeedModuleKind = "getVerified" | "suggestedClips" | "peopleYouMayKnow";
+export type FeedModuleKind = "getVerified" | "suggestedClips" | "peopleYouMayKnow" | "productsYouMightLike";
 
 export interface FeedModuleCadence {
   readonly firstAfterPosts: number;
@@ -9,9 +9,10 @@ export const feedModuleCadence: Readonly<Record<FeedModuleKind, FeedModuleCadenc
   getVerified: { firstAfterPosts: 3, repeatEveryPosts: null },
   suggestedClips: { firstAfterPosts: 6, repeatEveryPosts: 18 },
   peopleYouMayKnow: { firstAfterPosts: 10, repeatEveryPosts: 30 },
+  productsYouMightLike: { firstAfterPosts: 16, repeatEveryPosts: 45 },
 };
 
-export const feedModulePriority: readonly FeedModuleKind[] = ["getVerified", "suggestedClips", "peopleYouMayKnow"];
+export const feedModulePriority: readonly FeedModuleKind[] = ["getVerified", "suggestedClips", "peopleYouMayKnow", "productsYouMightLike"];
 
 export const minimumPostsBetweenFeedModules = 1;
 

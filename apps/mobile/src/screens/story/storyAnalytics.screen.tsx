@@ -43,7 +43,6 @@ export function StoryAnalyticsScreen({ navigation, route }: MainScreenProps<"Sto
   const totalViewers = viewers.data?.pages[0]?.total ?? viewerList.length;
   const data = analytics.data;
   const metrics = [
-    { label: "Impressions", value: data?.impressions ?? null },
     { label: "Unique viewers", value: viewers.data?.pages[0]?.total ?? null },
     { label: "Likes", value: data?.likes ?? null },
     { label: "Comments", value: data?.comments ?? null },
