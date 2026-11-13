@@ -141,7 +141,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
                 <Text size={12} lineHeight={16.8} style={styles.deliveryValue}>{detail.shipment.trackingNumber}</Text>
               </View>
             ) : null}
-            <Text size={12} lineHeight={16.8} color={colors.textMuted}>Delivery updates are shown here in Nantty.</Text>
+            <Text size={12} lineHeight={16.8} color={colors.textMuted}>Delivery updates are recorded here in Nantty from seller order actions. Live courier tracking may not be available.</Text>
             {detail.delivery.riderName || detail.delivery.riderPhone ? (
               <View style={styles.row}>
                 <Text size={12} lineHeight={16.8} color={colors.textMuted}>Rider</Text>

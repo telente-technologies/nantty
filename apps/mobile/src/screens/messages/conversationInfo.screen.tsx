@@ -1,18 +1,13 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Pressable, Share, StyleSheet, TextInput, View } from "react-native";
+import { Pressable, Share, TextInput, View } from "react-native";
 
-import { BusinessLabel } from "@/components/chat/businessLabel";
 import { describeConversationForDisplay } from "@/components/chat/conversationDisplay.util";
 import { DisappearingMessagesPicker } from "@/components/chat/disappearingMessagesPicker";
-import { SecurityCodeRow } from "@/components/chatSafety/securityCode";
 import { useChatReportLauncher } from "@/components/chatReport/chatReportLauncher.hook";
-import { GroupMemberPicker } from "@/components/chat/groupMemberPicker";
-import { GroupMemberRow } from "@/components/chat/groupMemberRow";
 import { pickPhotosAndVideosFromLibrary } from "@/components/create/pickMedia.util";
 import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
 import { ArrowLeft24Icon } from "@/components/icons";
-import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { ErrorState } from "@/components/ui/errorState";
@@ -21,21 +16,21 @@ import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { showAlertWithButtons } from "@/utils/crossPlatformAlert.util";
-import { makeThemedStyles, useTheme } from "@/theme";
-import { calculateDefaultLetterSpacing, fontFamily, typeScale } from "@/constants/typography.constant";
+import { useTheme } from "@/theme";
+import { typeScale } from "@/constants/typography.constant";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { channelsService, type ChannelInvitationLink } from "@/services/social/channels.service";
 import { groupsService } from "@/services/social/groups.service";
 import { messagesService } from "@/services/chat/messages.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { Conversation, ConversationSettingsUpdate, UserSummary } from "@/types";
-import { LockSimple24Icon } from "@/components/icons";
-import { IconRow } from "@/components/ui/iconRow";
-import { spacing } from "@/constants/spacing.constant";
-import { describeActionFailure } from "@/errors/errorExperience/describeError";
 import { webAppLinks } from "@/config/webAppLinks.config";
-import type { GroupInvitationLink, GroupInvitationLinkRecord } from "@/services/social/groups.service";
-import { DEFAULT_INVITATION_LINK_EXPIRY_HOURS, invitationLinkExpiryLabel, invitationLinkExpiryOptions, invitationLinkStatus, type InvitationLinkExpiryHours } from "@/utils/invitationLink.util";
+import type { GroupInvitationLink } from "@/services/social/groups.service";
+import { DEFAULT_INVITATION_LINK_EXPIRY_HOURS, invitationLinkExpiryLabel, invitationLinkExpiryOptions, type InvitationLinkExpiryHours } from "@/utils/invitationLink.util";
+import { ConversationGroupMembersSection } from "./conversationGroupMembersSection";
+import { ConversationIdentitySection } from "./conversationIdentitySection";
+import { ConversationInvitationLinksSection } from "./conversationInvitationLinksSection";
+import { useStyles } from "./conversationInfo.styles";
 
 export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"ConversationInfo">) {
   const { colors } = useTheme();
@@ -234,43 +229,14 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
         <ListSkeleton rows={5} />
       ) : (
       <KeyboardAwareForm contentContainerStyle={styles.content} refreshControl={refreshControl}>
-        <View style={styles.encryptionNotice} accessibilityRole="text">
-          <IconRow icon={<LockSimple24Icon size={14} color={colors.textMuted} />} justify="center" gap={6}>
-            <Text size={typeScale.xs} lineHeight={17} color={colors.textMuted} align="center" style={{ flexShrink: 1 }}>
-              Messages are end-to-end encrypted. Only people in this chat can read them.
-            </Text>
-          </IconRow>
-        </View>
-        <View style={styles.identity}>
-          {display?.isGroup && display.isAdmin && conversation.data?.hasGroupKey ? (
-            <Pressable accessibilityRole="button" accessibilityLabel="Change group photo" disabled={changeGroupPhoto.isPending} onPress={openGroupPhotoOptions}>
-              <Avatar uri={display.avatarUrl ?? null} size={72} placeholderColor={colors.placeholder} />
-            </Pressable>
-          ) : (
-            <Avatar uri={display?.avatarUrl ?? null} size={72} placeholderColor={colors.placeholder} />
-          )}
-          {changeGroupPhoto.error ? (
-            <Text size={typeScale.sm} lineHeight={16.9} color={colors.error}>
-              {describeActionFailure(changeGroupPhoto.error)}
-            </Text>
-          ) : null}
-          <View style={styles.nameRow}>
-            <Text size={18} weight={600} lineHeight={21.6} align="center">
-              {display?.displayName ?? ""}
-            </Text>
-            {display?.isBusiness ? <BusinessLabel /> : null}
-          </View>
-          {display?.subtitle ? (
-            <Text size={typeScale.sm} lineHeight={16.9} color={colors.textMuted}>
-              {display.subtitle}
-            </Text>
-          ) : null}
-        </View>
-
-        {display && !display.isGroup && !display.isChannel && conversation.data ? (
-          <View style={styles.section}>
-            <SecurityCodeRow peerId={conversation.data.peer.id} />
-          </View>
+        {display && conversation.data ? (
+          <ConversationIdentitySection
+            conversation={conversation.data}
+            display={display}
+            photoChangePending={changeGroupPhoto.isPending}
+            photoChangeError={changeGroupPhoto.error}
+            onChangeGroupPhoto={openGroupPhotoOptions}
+          />
         ) : null}
 
         {canEditGroup ? (
@@ -322,39 +288,45 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
             </> : null}
             {channelInvitationLinks.isPending ? <Text size={12} color={colors.textMuted}>Loading invitation links…</Text> : null}
             {channelInvitationLinks.isError ? <Button title="Retry loading links" variant="subtle" onPress={() => { void channelInvitationLinks.refetch(); }} /> : null}
-            {(channelInvitationLinks.data?.pages.flatMap((page) => page.data) ?? []).map((link) => (
-              <InvitationLinkRow key={link.id} link={link} busy={revokeChannelInviteLink.isPending && revokeChannelInviteLink.variables === link.id} onRevoke={() => revokeChannelInviteLink.mutate(link.id)} />
-            ))}
-            {channelInvitationLinks.hasNextPage ? <Button title="Load more links" variant="subtle" loading={channelInvitationLinks.isFetchingNextPage} disabled={channelInvitationLinks.isFetchingNextPage} onPress={() => { void channelInvitationLinks.fetchNextPage(); }} /> : null}
+            <ConversationInvitationLinksSection
+              title="Active channel invitation links"
+              links={channelInvitationLinks.data?.pages.flatMap((page) => page.data) ?? []}
+              isPending={channelInvitationLinks.isPending}
+              isError={channelInvitationLinks.isError}
+              hasNextPage={!!channelInvitationLinks.hasNextPage}
+              isFetchingNextPage={channelInvitationLinks.isFetchingNextPage}
+              isRevoking={revokeChannelInviteLink.isPending}
+              revokingLinkId={revokeChannelInviteLink.variables}
+              onRetry={() => { void channelInvitationLinks.refetch(); }}
+              onLoadMore={() => { void channelInvitationLinks.fetchNextPage(); }}
+              onRevoke={(linkId) => revokeChannelInviteLink.mutate(linkId)}
+            />
           </View>
         ) : null}
 
         {display?.isGroup ? (
-          <View style={styles.section}>
-            <View style={styles.sectionTitleRow}>
-              <Text size={typeScale.md} weight={600} lineHeight={16.8}>
-                {(members.data ?? []).length} members
-              </Text>
-                {canEditGroup ? (
-                <Text size={typeScale.sm} weight={500} lineHeight={16.9} color={colors.primary} accessibilityRole="button" onPress={() => setIsAddingMembers((adding) => !adding)}>
-                  {isAddingMembers ? "Cancel" : "Invite people"}
-                </Text>
-              ) : null}
-            </View>
+          <>
+            <ConversationGroupMembersSection
+              members={members.data ?? []}
+              myUserId={myUserId}
+              canManageMembers={canEditGroup}
+              isAddingMembers={isAddingMembers}
+              onToggleAddingMembers={() => setIsAddingMembers((adding) => !adding)}
+              selectedPeople={peopleToAdd}
+              onToggleSelectedPerson={togglePersonToAdd}
+              invitationError={invitationError}
+              isSendingInvitations={inviteSelectedPeople.isPending}
+              onSendInvitations={addSelectedPeople}
+              onPromote={(member) => runMemberAction.mutate(() => groupsService.promoteMemberToAdmin(conversationId, member.user.id))}
+              onDemote={(member) => runMemberAction.mutate(() => groupsService.demoteAdminToMember(conversationId, member.user.id))}
+              onReport={(member) => report.reportMember(member.user)}
+              onRemove={(member) => showAlertWithButtons(`Remove ${member.user.name}?`, "They'll stop getting messages from this group.", [
+                { text: "Cancel", style: "cancel" },
+                { text: "Remove", style: "destructive", onPress: () => runMemberAction.mutate(() => groupsService.removeMemberFromGroup(conversationId, member.user.id)) },
+              ], { intent: "removeMember" })}
+            />
             {isAddingMembers ? (
-              <View style={styles.addMembers}>
-                <GroupMemberPicker
-                  selectedPeople={peopleToAdd}
-                  onToggleSelectedPerson={togglePersonToAdd}
-                  excludedUserIds={(members.data ?? []).map((member) => member.user.id)}
-                  isInsideScrollView
-                  searchPurpose="invite"
-                />
-                <Text size={12} lineHeight={17} color={colors.textMuted}>
-                  Invitations require each person to accept. Acceptance records consent only; secure key setup is still required before they become a member or can read messages.
-                </Text>
-                {invitationError ? <Text accessibilityRole="alert" size={12} lineHeight={17} color={colors.error}>{invitationError}</Text> : null}
-                <Button title={`Send invitation${peopleToAdd.length === 1 ? "" : "s"}${peopleToAdd.length ? ` · ${peopleToAdd.length}` : ""}`} disabled={peopleToAdd.length === 0} loading={inviteSelectedPeople.isPending} onPress={addSelectedPeople} />
+              <View style={styles.section}>
                 <Text size={12} lineHeight={17} color={colors.textMuted}>
                   Or create a shareable invitation link. Anyone with it must request an invite and explicitly accept; secure key setup remains required before joining.
                 </Text>
@@ -368,44 +340,24 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
                 ) : null}
               </View>
             ) : null}
-            {(members.data ?? []).map((member) => (
-              <GroupMemberRow
-                key={member.user.id}
-                member={member}
-                isMe={member.user.id === myUserId || member.user.id === "u_me"}
-                canManageMembers={canEditGroup}
-                onPromoteToAdmin={() => runMemberAction.mutate(() => groupsService.promoteMemberToAdmin(conversationId, member.user.id))}
-                onDemoteToMember={() => runMemberAction.mutate(() => groupsService.demoteAdminToMember(conversationId, member.user.id))}
-                onReport={() => report.reportMember(member.user)}
-                onRemoveFromGroup={() =>
-                  showAlertWithButtons(`Remove ${member.user.name}?`, "They'll stop getting messages from this group.", [
-                    { text: "Cancel", style: "cancel" },
-                    { text: "Remove", style: "destructive", onPress: () => runMemberAction.mutate(() => groupsService.removeMemberFromGroup(conversationId, member.user.id)) },
-                  ], { intent: "removeMember" })
-                }
-              />
-            ))}
-          </View>
+          </>
         ) : null}
 
         {display?.isGroup && display.isAdmin ? (
           <View style={styles.section}>
-            <Text size={typeScale.md} weight={600} lineHeight={18}>Invitation links</Text>
-            {invitationLinks.isPending ? <Text size={12} color={colors.textMuted}>Loading invitation links…</Text> : null}
-            {invitationLinks.isError ? (
-              <Button title="Retry loading links" variant="subtle" onPress={() => { void invitationLinks.refetch(); }} />
-            ) : null}
-            {(invitationLinks.data?.pages.flatMap((page) => page.data) ?? []).map((link) => (
-              <InvitationLinkRow
-                key={link.id}
-                link={link}
-                busy={revokeInviteLink.isPending && revokeInviteLink.variables === link.id}
-                onRevoke={() => revokeInviteLink.mutate(link.id)}
-              />
-            ))}
-            {invitationLinks.hasNextPage ? (
-              <Button title="Load more links" variant="subtle" loading={invitationLinks.isFetchingNextPage} disabled={invitationLinks.isFetchingNextPage} onPress={() => { void invitationLinks.fetchNextPage(); }} />
-            ) : null}
+            <ConversationInvitationLinksSection
+              title="Invitation links"
+              links={invitationLinks.data?.pages.flatMap((page) => page.data) ?? []}
+              isPending={invitationLinks.isPending}
+              isError={invitationLinks.isError}
+              hasNextPage={!!invitationLinks.hasNextPage}
+              isFetchingNextPage={invitationLinks.isFetchingNextPage}
+              isRevoking={revokeInviteLink.isPending}
+              revokingLinkId={revokeInviteLink.variables}
+              onRetry={() => { void invitationLinks.refetch(); }}
+              onLoadMore={() => { void invitationLinks.fetchNextPage(); }}
+              onRevoke={(linkId) => revokeInviteLink.mutate(linkId)}
+            />
           </View>
         ) : null}
 
@@ -438,47 +390,3 @@ export function ConversationInfoScreen({ navigation, route }: MainScreenProps<"C
     </Screen>
   );
 }
-
-function InvitationLinkRow({ link, busy, onRevoke }: { readonly link: Pick<GroupInvitationLinkRecord, "id" | "expiresAt" | "revokedAt">; readonly busy: boolean; readonly onRevoke: () => void }) {
-  const { colors } = useTheme();
-  const status = invitationLinkStatus(link.expiresAt, link.revokedAt);
-  const statusLabel = { active: "Active link", expired: "Expired link", revoked: "Revoked link", unknown: "Expiry unavailable" }[status];
-  return (
-    <View style={[linkStyles.row, { backgroundColor: colors.background, borderColor: colors.divider }]}>
-      <View style={linkStyles.meta}>
-        <Text size={13} weight={600}>{statusLabel}</Text>
-        <Text size={11} lineHeight={15} color={colors.textMuted}>
-          Expires {Number.isFinite(Date.parse(link.expiresAt)) ? new Date(link.expiresAt).toLocaleString() : "date unavailable"}
-        </Text>
-      </View>
-      {status !== "revoked" ? <Button title={busy ? "Revoking…" : "Revoke"} variant="subtle" height={36} loading={busy} disabled={busy} onPress={onRevoke} /> : null}
-    </View>
-  );
-}
-
-const linkStyles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, borderWidth: StyleSheet.hairlineWidth, borderRadius: 10, padding: 10 },
-  meta: { flex: 1, gap: 2 },
-});
-
-const useStyles = makeThemedStyles((colors) => StyleSheet.create({
-  encryptionNotice: { paddingHorizontal: spacing[6], paddingVertical: spacing[3] },
-  header: { height: 49, paddingHorizontal: spacing[4], flexDirection: "row", alignItems: "center", gap: spacing[5] },
-  content: { paddingHorizontal: spacing[4], paddingBottom: spacing[8], gap: spacing[6] },
-  identity: { alignItems: "center", gap: spacing[2], paddingTop: spacing[2] },
-  nameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  section: { gap: 10 },
-  sectionTitleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  addMembers: { gap: spacing[3] },
-  nameInput: {
-    height: 44,
-    borderWidth: 1,
-    borderColor: colors.divider,
-    borderRadius: 8,
-    paddingHorizontal: spacing[3],
-    fontFamily: fontFamily[500],
-    fontSize: 15,
-    letterSpacing: calculateDefaultLetterSpacing(15),
-    color: colors.text,
-  },
-}));

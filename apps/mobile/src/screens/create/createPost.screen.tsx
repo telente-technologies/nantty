@@ -1,11 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { CreateHeader } from "@/components/create/createHeader";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
-import { buildLiveMonetizationInput, DEFAULT_LIVE_MONETIZATION_DRAFT, type LiveMonetizationDraft } from "@/components/create/liveMonetization.constant";
-import { LiveSetupPanel, type LiveStreamCredentials } from "@/components/create/liveSetupPanel";
+import { LiveSetupPanel } from "@/components/create/liveSetupPanel";
 import { ClipComposer, type ClipComposerSeed } from "@/components/create/clip/clipComposer";
 import type { ClipLookId } from "@/components/create/clip/clipLook.constant";
 import { DraftsButton, DraftsSheet } from "@/components/create/draftsSheet";
@@ -23,32 +22,29 @@ import { StoryCapturePanel } from "@/components/create/storyCapturePanel";
 import { VideoReplyStage } from "@/components/clips/videoReply/videoReplyStage";
 import { DEFAULT_STICKER_LAYOUT } from "@/components/clips/videoReply/videoReply.util";
 import { LiveBadge } from "@/components/live/liveBadge";
-import { useLiveHostStore } from "@/components/live/liveHostStore.hook";
 import { LiveHostingGate } from "@/components/live/liveHostingGate";
-import { canPreviewLiveHostingWithMocks, decideLiveHostingGate, detectLiveHostingSupport, type LiveHostingGateKind } from "@/services/live/liveHostingSupport.service";
-import { ensureLiveCameraAndMicrophone, promptToEnableLiveMediaInSettings } from "@/services/live/liveMediaPermissions.service";
 import { Screen } from "@/components/ui/screen";
 import { RoleGateScreen } from "@/components/roleGate/roleGateScreen";
 import { useCreateMenuAccess } from "@/hooks/useCreateMenuAccess.hook";
 import { openCreatorProgramOrSettings, useCreatorEntry, useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
-import { liveService } from "@/services/live/live.service";
 import type { LocalMediaFile } from "@/services/media/mediaPreparation.service";
 import { enqueueLocalMediaForUpload, waitForUploadedMediaId } from "@/services/media/mediaUploadQueue.service";
 import { storiesService } from "@/services/clips/stories.service";
 import { useActingProfileStore } from "@/store/actingProfile.store";
 import { useComposerDraftsStore, type ComposerDraft } from "@/store/composerDrafts.store";
 import { useToastStore } from "@/store/toast.store";
-import type { CommentStickerLayout, CreateMode, ID, LiveCategory, LiveSource } from "@/types";
-import { readLiveErrorMessage, readRunningLiveId } from "@/utils/liveStoreErrors.util";
+import type { CommentStickerLayout, CreateMode, ID } from "@/types";
 import { shiftMentionsAfterTrimmingStart } from "@/utils/mentions.util";
+import { useCreateLiveSession } from "./useCreateLiveSession.hook";
 
 const EMPTY_POST_DRAFT: PostComposerDraft = { text: "", mentions: [], audience: "everyone", kind: "photo", ...DEFAULT_POST_SETTINGS };
 
 export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreatePost">) {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
+  const showToast = useToastStore((state) => state.showToast);
   const videoReply = route.params?.videoReply;
   const [mode, setMode] = useState<CreateMode>(videoReply ? "clip" : (route.params?.mode ?? "post"));
   const [stickerLayout, setStickerLayout] = useState<CommentStickerLayout>(DEFAULT_STICKER_LAYOUT);
@@ -76,15 +72,6 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
       return current.kind === kind ? current : { ...current, kind };
     });
   }, [mode, draftContainsVideo]);
-  const [liveTitle, setLiveTitle] = useState("");
-  const [isEditingLiveTitle, setIsEditingLiveTitle] = useState(false);
-  const [liveSource, setLiveSource] = useState<LiveSource>("camera");
-  const [liveCategory, setLiveCategory] = useState<LiveCategory>("justChatting");
-  const hostStore = useLiveHostStore();
-  const canSellDuringLive = Boolean(hostStore.storeId);
-  const showToast = useToastStore((state) => state.showToast);
-  const [liveMonetization, setLiveMonetization] = useState<LiveMonetizationDraft>(DEFAULT_LIVE_MONETIZATION_DRAFT);
-  const [liveCredentials, setLiveCredentials] = useState<LiveStreamCredentials | null>(null);
   const actingProfileId = useActingProfileStore((s) => s.actingProfile?.id ?? null);
   const saveDraft = useComposerDraftsStore((s) => s.saveDraft);
   const closeDraftsSheet = useComposerDraftsStore((s) => s.closeDraftsSheet);
@@ -206,6 +193,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     },
   });
   const { canGoLive, isCreatorStatusLoading } = useCreatorStatus();
+  const live = useCreateLiveSession({ canGoLive, navigation });
   const creatorEntry = useCreatorEntry();
   const createAccess = useCreateMenuAccess();
   const requestedMode = route.params?.mode;
@@ -219,54 +207,6 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
     if (mode === "live" && isLiveModeLockedForViewer) setMode("post");
     if (mode === "product" && createAccess.isApprovedSeller) navigation.replace("ProductForm");
   }, [mode, isLiveModeLockedForViewer, createAccess.isApprovedSeller, navigation]);
-  const goLive = useMutation({
-    mutationFn: async () => {
-      if (!canGoLive) throw new Error("Join the Creator Program to go live");
-      const category = liveCategory === "shopping" && !hostStore.storeId ? "justChatting" : liveCategory;
-      const session = await liveService.startLiveSessionWithTitle(liveTitle || "Live on Nantty", category, buildLiveMonetizationInput(liveMonetization), hostStore.storeId);
-      if (liveSource !== "external") return { session, credentials: null as LiveStreamCredentials | null };
-      const issued = await liveService.issueStreamKey(session.id);
-      return { session, credentials: { liveId: session.id, ...issued } satisfies LiveStreamCredentials };
-    },
-    onSuccess: ({ session, credentials }) => {
-      if (credentials) {
-        setLiveCredentials(credentials);
-        return;
-      }
-      navigation.replace("Live", { liveId: session.id, host: true });
-    },
-    onError: (error) => {
-      const runningLiveId = readRunningLiveId(error);
-      if (runningLiveId) {
-        navigation.replace("Live", { liveId: runningLiveId, host: true });
-        return;
-      }
-      showToast(readLiveErrorMessage(error, error instanceof Error && error.message ? error.message : "We couldn't start your live. Try again."));
-    },
-  });
-  const isStartingLive = useRef(false);
-  const [liveHostingGate, setLiveHostingGate] = useState<LiveHostingGateKind | null>(null);
-  const [hasAcceptedMockLivePreview, setHasAcceptedMockLivePreview] = useState(false);
-  const startGoingLive = async () => {
-    if (isStartingLive.current || goLive.isPending) return;
-    const gate = decideLiveHostingGate(detectLiveHostingSupport(), liveSource, hasAcceptedMockLivePreview);
-    if (gate) {
-      setLiveHostingGate(gate);
-      return;
-    }
-    isStartingLive.current = true;
-    try {
-      if (liveSource !== "external" && (await ensureLiveCameraAndMicrophone(liveSource === "camera")) === "denied") {
-        promptToEnableLiveMediaInSettings(liveSource === "camera");
-        return;
-      }
-      await goLive.mutateAsync().catch(() => undefined);
-    } finally {
-      isStartingLive.current = false;
-    }
-  };
-  const openLiveRoom = (liveId: string) => navigation.replace("Live", { liveId, host: true });
-
   const switchCreateMode = (next: CreateMode) => {
     if (videoReply) return;
     if (next === "product") {
@@ -293,7 +233,7 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
 
   const closeOrStepBack = () => {
     if ((mode === "post" || mode === "clip") && postStage === "settings") setPostStage("compose");
-    else if (mode === "live" && isEditingLiveTitle) setIsEditingLiveTitle(false);
+    else if (mode === "live" && live.isEditingTitle) live.finishEditingTitle();
     else navigation.goBack();
   };
 
@@ -329,9 +269,8 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
         {mode === "live" ? (
           <CreateHeader
             onClose={closeOrStepBack}
-            useBackArrow={isEditingLiveTitle || liveTitle.length > 0}
+            useBackArrow={live.isEditingTitle || live.title.length > 0}
             afterTitle={<LiveBadge />}
-            
           />
         ) : (
           <CreateHeader
@@ -384,38 +323,32 @@ export function CreatePostScreen({ navigation, route }: MainScreenProps<"CreateP
           <StoryCapturePanel publishing={publishStory.isPending} onChangeMode={switchCreateMode} onCaptured={(captured) => publishStory.mutate(captured)} />
         ) : (
           <LiveSetupPanel
-            title={liveTitle}
-            onChangeTitle={setLiveTitle}
-            isEditingTitle={isEditingLiveTitle}
-            onStartEditingTitle={() => setIsEditingLiveTitle(true)}
-            onFinishEditingTitle={() => setIsEditingLiveTitle(false)}
+            title={live.title}
+            onChangeTitle={live.setTitle}
+            isEditingTitle={live.isEditingTitle}
+            onStartEditingTitle={live.startEditingTitle}
+            onFinishEditingTitle={live.finishEditingTitle}
             onChangeMode={switchCreateMode}
-            category={liveCategory}
-            onChangeCategory={setLiveCategory}
-            canSell={canSellDuringLive}
-            source={liveSource}
-            onChangeSource={(next) => {
-              setLiveSource(next);
-              if (next !== "external") setLiveCredentials(null);
-            }}
-            credentials={liveCredentials}
-            onOpenLiveRoom={openLiveRoom}
-            starting={goLive.isPending || hostStore.isLoading}
-            onGoLive={() => void startGoingLive()}
-            monetization={liveMonetization}
-            onChangeMonetization={setLiveMonetization}
+            category={live.category}
+            onChangeCategory={live.setCategory}
+            canSell={live.canSell}
+            source={live.source}
+            onChangeSource={live.setSource}
+            credentials={live.credentials}
+            onOpenLiveRoom={live.openLiveRoom}
+            starting={live.goLive.isPending || live.hostStore.isLoading}
+            onGoLive={() => void live.start()}
+            monetization={live.monetization}
+            onChangeMonetization={live.setMonetization}
           />
         )}
       </View>
-      {mode === "live" && liveHostingGate ? (
+      {mode === "live" && live.hostingGate ? (
         <LiveHostingGate
-          support={liveHostingGate}
-          canPreviewWithMocks={canPreviewLiveHostingWithMocks()}
-          onPreviewWithMocks={() => {
-            setHasAcceptedMockLivePreview(true);
-            setLiveHostingGate(null);
-          }}
-          onClose={() => setLiveHostingGate(null)}
+          support={live.hostingGate}
+          canPreviewWithMocks={live.canPreviewWithMocks()}
+          onPreviewWithMocks={live.acceptMockPreview}
+          onClose={() => live.setHostingGate(null)}
         />
       ) : null}
       <DraftsSheet onResume={resumeDraft} />

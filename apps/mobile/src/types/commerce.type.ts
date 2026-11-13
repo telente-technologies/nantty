@@ -147,6 +147,7 @@ export type EscrowStage =
 export interface ShipmentDetails {
   readonly courierName: string;
   readonly trackingNumber: string;
+  readonly trackingUrl?: string | null;
   readonly shippedAt: ISODate;
   readonly estimatedDeliveryAt: ISODate | null;
 }
