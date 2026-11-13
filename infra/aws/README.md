@@ -116,16 +116,37 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
    `MONEY_MIGRATION_DATABASE_URL` from the `svc_migrator` secret and run `--migrate-money`; it must not receive the
    runtime database URL. Create PostGIS as required by the other service schemas and apply the reviewed grants before
    rollout.
-6. RabbitMQ topology is **BLOCKED pending an AWS-safe importer**. Do not upload
+6. RabbitMQ definitions are **not applied by Terraform**. Do not upload
    `infra/local/rabbitmq/topology.json` to the RabbitMQ definitions API: it is
-   Natty's custom topology model, not RabbitMQ's definitions format. Do not upload
-   `infra/local/rabbitmq/definitions.json` either: its generated user hashes are
-   intentionally local-only. Before staging, implement and review an
-   environment-aware conversion/import step that provisions per-service users
-   from the matching `nantty/<env>/mq/<service>` secrets, applies the reviewed
-   grants, and imports the converted topology using
-   `nantty/<env>/mq/admin`. Verify the resulting broker topology and permissions
-   after import; Terraform creation of the broker alone does not apply them.
+   Nantty's custom topology model, not RabbitMQ's definitions format. Do not
+   upload `infra/local/rabbitmq/definitions.json` either: its generated user
+   hashes are intentionally local-only. The reviewed converter/importer is
+   `infra/aws/modules/messaging/bootstrapTopology.mjs`; it converts the custom
+   manifest, reads environment-scoped admin and per-service credentials from
+   `nantty/<env>/mq/*`, creates service users, applies grants, imports vhost
+   definitions, then verifies expected exchanges, queues, bindings and
+   permissions. It is additive and does not delete definitions absent from the
+   manifest. RabbitMQ can partially apply imports on failure, so inspect broker
+   state before retrying a failed write.
+   First run the no-write plan from a checkout of the reviewed revision:
+   ```bash
+   node infra/aws/modules/messaging/bootstrapTopology.mjs --environment staging
+   ```
+   For an actual staging import, use an approved operator host with private VPC
+   reachability to the broker HTTPS management endpoint and AWS credentials
+   limited to reading `nantty/staging/mq/admin` and each
+   `nantty/staging/mq/<service>` secret (plus their KMS decrypt permission):
+   ```bash
+   node infra/aws/modules/messaging/bootstrapTopology.mjs --environment staging --apply
+   ```
+   Production additionally requires `--confirm-prod` and the protected
+   production change procedure. Do not put secret values in arguments, shell
+   history, or logs. This checkout has only run mocked importer tests and the
+   no-write dry run; no AWS secrets were read and no broker was changed. Broker
+   management ingress is limited to the ECS tasks security group; use only an
+   approved network path with that source identity and never widen it to public
+   CIDRs. Terraform creating the broker and secrets alone does not install the
+   topology or prove recommendation-event delivery.
    The event-operations queue endpoint also requires a separate monitoring-only
    RabbitMQ account. After broker creation, run
    `infra/aws/modules/messaging/bootstrapMonitoringUser.mjs` from a trusted
