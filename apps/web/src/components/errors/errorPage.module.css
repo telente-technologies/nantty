@@ -10,14 +10,6 @@
   gap: clamp(48px, 7vw, 80px);
 }
 
-.experience [data-error-kind] > div:first-child > span:first-child:not(:last-child) {
-  font-size: clamp(112px, 28vw, 240px);
-  font-weight: 900;
-  letter-spacing: -0.08em;
-  background: none;
-  color: color-mix(in srgb, var(--color-brand) 22%, var(--color-bg));
-}
-
 .experience [data-error-kind] > div:last-child {
   width: 100%;
   max-width: 640px;
