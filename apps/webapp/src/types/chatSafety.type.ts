@@ -1,4 +1,4 @@
-import type { ID } from "./models.type";
+import type { ID } from "./primitive.type";
 
 export type InboxFolder = "chats" | "requests" | "spam";
 

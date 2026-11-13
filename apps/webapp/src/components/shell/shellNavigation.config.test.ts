@@ -9,7 +9,7 @@ test("mobile web navigation follows the five primary React Native tabs", () => {
   }
 });
 
-test("mobile navigation keeps unread message counts and marks nested routes active", () => {
+test("mobile navigation marks nested destinations active without treating Home as every route", () => {
   assert.equal(isNavItemActive("/clips", "/clips/following"), true);
   assert.equal(isNavItemActive("/", "/clips"), false);
 });

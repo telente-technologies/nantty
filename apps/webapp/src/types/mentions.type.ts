@@ -1,4 +1,5 @@
-import type { ID, UserSummary } from "./models.type";
+import type { UserSummary } from "./identityModels.type";
+import type { ID } from "./primitive.type";
 
 export const maximumMentionsPerText = 20;
 

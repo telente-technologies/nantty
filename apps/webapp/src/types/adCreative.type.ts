@@ -1,4 +1,4 @@
-import type { ID } from "./models.type";
+import type { ID } from "./primitive.type";
 
 export type AdCreativeType = "single" | "carousel" | "app_install" | "promoted_post";
 export type AdPlatform = "ios" | "android" | "web";

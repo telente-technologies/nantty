@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { getBottomNavigationHrefs } from "./shellNavigation.routes";
 export { getBottomNavigationHrefs, MOBILE_PRIMARY_NAVIGATION_HREFS, isNavItemActive } from "./shellNavigation.routes";
 
 import {
@@ -62,12 +63,13 @@ export function buildSidebarNavigationGroups(isSignedIn: boolean, counts: ShellB
 }
 
 export function buildBottomNavigationItems(isSignedIn: boolean, counts: ShellBadgeCounts): readonly NavItem[] {
+  const [homeHref, clipsHref, createHref, chatsHref, profileHref] = getBottomNavigationHrefs(isSignedIn);
   return [
-    { href: "/", label: "Home", icon: <HomeOutlineIcon />, activeIcon: <HomeIcon /> },
-    { href: "/clips", label: "Clips", icon: <ClipsNavigationIcon /> },
-    { href: "/post/new", label: "Create", icon: <PlusIcon /> },
-    { href: "/chats", label: "Chats", icon: <ChatIcon />, badgeCount: counts.chats },
-    { href: isSignedIn ? "/me" : "/login", label: "Me", icon: <UserIcon /> },
+    { href: homeHref!, label: "Home", icon: <HomeOutlineIcon />, activeIcon: <HomeIcon /> },
+    { href: clipsHref!, label: "Clips", icon: <ClipsNavigationIcon /> },
+    { href: createHref!, label: "Create", icon: <PlusIcon /> },
+    { href: chatsHref!, label: "Chats", icon: <ChatIcon />, badgeCount: counts.chats },
+    { href: profileHref!, label: "Me", icon: <UserIcon /> },
   ];
 }
 

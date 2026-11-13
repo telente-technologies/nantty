@@ -1,7 +1,9 @@
 export const MOBILE_PRIMARY_NAVIGATION_HREFS = ["/", "/clips", "/post/new", "/chats"] as const;
 
-export function getBottomNavigationHrefs(isSignedIn: boolean): readonly string[] {
-  return [...MOBILE_PRIMARY_NAVIGATION_HREFS, isSignedIn ? "/me" : "/login"];
+export type BottomNavigationHrefs = readonly [string, string, string, string, string];
+
+export function getBottomNavigationHrefs(isSignedIn: boolean): BottomNavigationHrefs {
+  return [...MOBILE_PRIMARY_NAVIGATION_HREFS, isSignedIn ? "/me" : "/login"] as const;
 }
 
 export function isNavItemActive(href: string, pathname: string): boolean {

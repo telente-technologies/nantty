@@ -1,4 +1,5 @@
-import type { ID, VerificationColor } from "./models.type";
+import type { VerificationColor } from "./identityModels.type";
+import type { ID } from "./primitive.type";
 
 export interface TaggedUser {
   readonly id: ID;

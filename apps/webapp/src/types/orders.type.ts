@@ -1,4 +1,6 @@
-import type { ID, ISODate, ProductSummary, StoreSummary, UserSummary } from "./models.type";
+import type { ProductSummary, StoreSummary } from "./catalogModels.type";
+import type { UserSummary } from "./identityModels.type";
+import type { ID, ISODate } from "./primitive.type";
 import type { Money } from "./money.type";
 
 export interface CartItem {
