@@ -76,6 +76,11 @@ export default function CheckoutPage() {
   const isNigeria = (verificationQuery.data?.country ?? "NG") === "NG";
   const placeOrder = useMutation({
     mutationFn: async () => {
+      const emailStatus = await accountEmailQuery.refetch();
+      if (emailStatus.isError) throw emailStatus.error;
+      if (emailStatus.data?.emailVerified !== true) {
+        throw new WebappRequestError(403, "VERIFY_EMAIL_REQUIRED", "Verify your email to continue.");
+      }
       if (!addressId) throw new Error("Choose a shipping address first.");
       if (!currentQuote?.shippingQuoteRevision) throw new Error("Refresh delivery details before placing your order.");
       const directChoices = Object.fromEntries(
@@ -101,6 +106,11 @@ export default function CheckoutPage() {
       }
     },
     onError: async (caught) => {
+      if (caught instanceof WebappRequestError && caught.code === "VERIFY_EMAIL_REQUIRED") {
+        setError(null);
+        router.push("/verify-email?next=/checkout");
+        return;
+      }
       if (caught instanceof WebappRequestError && caught.code === countryRequiredCode) {
         setError(null);
         setCountryNeeded(true);
@@ -281,7 +291,16 @@ export default function CheckoutPage() {
             <span>Total</span>
             <span>{currentQuote ? formatMoneyForDisplay(currentQuote.total) : quoteQuery.isError ? "Unavailable" : quoteQuery.isFetching ? "Calculating" : "Choose an address"}</span>
           </div>
-          {accountEmailQuery.data?.emailVerified === false ? (
+          {accountEmailQuery.isPending ? (
+            <p className={styles.verifyEmailNotice} role="status">Checking email verification before checkout…</p>
+          ) : accountEmailQuery.isError ? (
+            <div className={styles.verifyEmailNotice} role="alert">
+              <p>We couldn’t confirm your email verification, so checkout is paused.</p>
+              <Button variant="secondary" size="sm" onClick={() => void accountEmailQuery.refetch()}>
+                Check again
+              </Button>
+            </div>
+          ) : accountEmailQuery.data?.emailVerified !== true ? (
             <p className={styles.verifyEmailNotice} role="status">
               Verify your email to continue. <Link href="/verify-email?next=/checkout">Verify email</Link>
             </p>

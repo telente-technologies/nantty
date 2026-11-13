@@ -19,17 +19,26 @@ import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { isOrderReviewable } from "@/utils/productReviews.util";
 import type { DeliveryStatus, OrderStatus } from "@/types";
+import { canConfirmOrderReceipt, orderProgressSteps, resolveOrderProgress } from "@nantty/contracts";
 
 import styles from "./page.module.css";
 import { DetailSkeleton } from "@/components/ui/pageSkeletons";
+import { ReturnRequestForm } from "@/components/order/returnRequestForm";
+import { MessageStoreButton } from "@/components/messages/messageStoreButton";
+import { buildSafePhoneLink } from "@/utils/phoneLink.util";
 
 const statusTone: Record<OrderStatus, "neutral" | "brand" | "success" | "warning" | "error"> = {
   pending: "warning",
   paid: "brand",
+  new: "brand",
+  processing: "brand",
+  ready: "brand",
   shipped: "brand",
   delivered: "success",
   completed: "success",
   cancelled: "error",
+  returned: "error",
+  refunded: "error",
   disputed: "error",
 };
 
@@ -46,14 +55,6 @@ const deliveryStatusPresentation: Record<DeliveryStatus, { readonly label: strin
 
 const buyerCancellableStatuses = new Set(["pending", "new"]);
 
-const statusSteps: readonly { readonly status: OrderStatus; readonly label: string }[] = [
-  { status: "pending", label: "Order placed" },
-  { status: "paid", label: "Paid" },
-  { status: "shipped", label: "Shipped" },
-  { status: "delivered", label: "Delivered" },
-  { status: "completed", label: "Completed" },
-];
-
 export default function OrderDetailPage({ params }: { readonly params: Promise<{ readonly orderId: string }> }) {
   const { orderId } = use(params);
   const queryClient = useQueryClient();
@@ -66,6 +67,18 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
     queryKey: ["orders", "detail", orderId],
     queryFn: () => ordersService.fetchOrderById(orderId),
     retry: false,
+  });
+
+  const returnRequests = useQuery({
+    queryKey: ["returns", "mine", orderId, 100],
+    queryFn: () => ordersService.fetchMyReturnsPage(100, orderId),
+    enabled: orderQuery.data?.status === "delivered" || orderQuery.data?.status === "completed",
+  });
+  const requestReturn = useMutation({
+    mutationFn: (input: Parameters<typeof ordersService.requestReturn>[1]) => ordersService.requestReturn(orderId, input),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["returns", "mine"] });
+    },
   });
 
   const isDirectOrder = orderQuery.data?.paymentMode === "direct";
@@ -133,7 +146,8 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
 
   const order = orderQuery.data;
   const isDirect = order.paymentMode === "direct";
-  const activeStepIndex = statusSteps.findIndex((step) => step.status === order.status);
+  const orderProgress = resolveOrderProgress(order.status, order.timeline);
+  const riderPhoneLink = order.delivery?.riderPhone ? buildSafePhoneLink(order.delivery.riderPhone) : null;
 
   return (
     <div className={styles.page}>
@@ -188,16 +202,19 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
       <section className={styles.panel}>
         <h2 className={styles.panelTitle}>Progress</h2>
         <ol className={styles.timeline}>
-          {statusSteps.map((step, index) => {
-            const state = order.status === "cancelled" || order.status === "disputed" ? (index <= 0 ? "done" : "blocked") : index < activeStepIndex ? "done" : index === activeStepIndex ? "current" : "todo";
+          {orderProgress.currentIndex !== null ? orderProgressSteps.map((label, index) => {
+            const state = orderProgress.terminalMessage
+              ? index <= orderProgress.currentIndex! ? "done" : "blocked"
+              : index < orderProgress.currentIndex! ? "done" : index === orderProgress.currentIndex ? "current" : "todo";
             return (
-              <li key={step.status} className={styles.timelineStep} data-state={state}>
+              <li key={label} className={styles.timelineStep} data-state={state}>
                 <span className={styles.timelineMarker} aria-hidden="true" />
-                <span className={styles.timelineLabel}>{isDirect && step.status === "paid" ? "Paid to seller" : step.label}</span>
+                <span className={styles.timelineLabel}>{isDirect && label === "Payment confirmed" ? "Paid to seller" : label}</span>
               </li>
             );
-          })}
+          }) : null}
         </ol>
+        {orderProgress.terminalMessage ? <p className={styles.escrowNote} role="status">{orderProgress.terminalMessage}</p> : null}
         <p className={styles.escrowNote}>
           {isDirect
             ? `Paid directly: ${order.store.name} was paid right away. For a refund, contact the seller or support.`
@@ -234,7 +251,7 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
                 <dt>Rider</dt>
                 <dd>
                   {order.delivery.riderName ?? "Assigned"}
-                  {order.delivery.riderPhone ? <> · <a href={`tel:${order.delivery.riderPhone}`}>{order.delivery.riderPhone}</a></> : null}
+                  {order.delivery.riderPhone ? <> · {riderPhoneLink ? <a href={riderPhoneLink}>{order.delivery.riderPhone}</a> : order.delivery.riderPhone}</> : null}
                 </dd>
               </div>
             ) : null}
@@ -256,6 +273,12 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
           {order.delivery.status === "failed" ? <p className={styles.deliveryNote}>The seller will try again. Contact them if your address or phone number has changed.</p> : null}
         </section>
       ) : null}
+
+      <section className={styles.panel} aria-labelledby="order-contact-title">
+        <h2 className={styles.panelTitle} id="order-contact-title">Need help with this order?</h2>
+        <p className={styles.escrowNote}>Message the store about this order. For account or payment issues, contact support below.</p>
+        <MessageStoreButton storeId={order.store.id} storeName={order.store.name} label="Contact seller" />
+      </section>
 
       {order.timeline?.length ? (
         <section className={styles.panel} aria-labelledby="order-updates-title">
@@ -300,10 +323,20 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
         </div>
       </section>
 
-      {order.status === "delivered" ? (
+      {canConfirmOrderReceipt(order.status) ? (
         <Button size="lg" busy={confirmReceipt.isPending} onClick={() => confirmReceipt.mutate()}>
           Confirm delivery
         </Button>
+      ) : null}
+      {order.status === "delivered" || order.status === "completed" ? (
+        <ReturnRequestForm
+          items={order.items}
+          knownRequest={returnRequests.data?.data.find((request) => request.orderId === orderId)}
+          submittedRequest={requestReturn.data}
+          submitting={requestReturn.isPending}
+          errorMessage={requestReturn.isError ? readErrorMessageForDisplay(requestReturn.error) : null}
+          onSubmit={(input) => requestReturn.mutate(input)}
+        />
       ) : null}
       {order.fulfilmentStatus && buyerCancellableStatuses.has(order.fulfilmentStatus) ? (
         <div className={styles.escrowNote}>

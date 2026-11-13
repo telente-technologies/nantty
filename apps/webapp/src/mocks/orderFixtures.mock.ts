@@ -58,7 +58,11 @@ const deliveryStatusForOrderStatus = (status: OrderStatus): DeliveryStatus => {
     case "pending":
       return "pending";
     case "paid":
+    case "new":
+    case "processing":
       return "preparing";
+    case "ready":
+      return "ready_for_pickup";
     case "shipped":
       return "in_transit";
     case "delivered":
@@ -66,7 +70,10 @@ const deliveryStatusForOrderStatus = (status: OrderStatus): DeliveryStatus => {
     case "disputed":
       return "delivered";
     case "cancelled":
+    case "refunded":
       return "cancelled";
+    case "returned":
+      return "returned";
   }
 };
 

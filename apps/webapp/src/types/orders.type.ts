@@ -20,7 +20,7 @@ export interface Cart {
 
 export type PaymentMode = "escrow" | "direct";
 
-export type OrderStatus = "pending" | "paid" | "shipped" | "delivered" | "completed" | "cancelled" | "disputed";
+export type OrderStatus = "pending" | "paid" | "new" | "processing" | "ready" | "shipped" | "delivered" | "completed" | "cancelled" | "returned" | "refunded" | "disputed";
 
 export type DeliveryStatus = "pending" | "preparing" | "ready_for_pickup" | "in_transit" | "delivered" | "failed" | "cancelled" | "returned";
 
@@ -63,6 +63,35 @@ export interface Order {
   readonly delivery?: DeliveryDetails | null;
   readonly timeline?: readonly OrderTimelineEvent[];
   readonly promotionIssue?: PromotionIssue | null;
+}
+
+export interface ReturnRequestLineInput {
+  readonly orderItemId: ID;
+  readonly quantity: number;
+}
+
+export interface ReturnRequestInput {
+  readonly lines: readonly ReturnRequestLineInput[];
+  readonly reason: string;
+}
+
+export interface ReturnRequestLineView {
+  readonly orderLineId: ID;
+  readonly name: string;
+  readonly quantity: number;
+}
+
+export interface ReturnRequestView {
+  readonly id: ID;
+  readonly orderId: ID;
+  readonly orderNumber: string;
+  readonly buyerName: string;
+  readonly lines: readonly ReturnRequestLineView[];
+  readonly reason: string;
+  readonly status: string;
+  readonly declineNote: string | null;
+  readonly refundAmount: Money;
+  readonly createdAt: ISODate;
 }
 
 export interface PromotionIssue {

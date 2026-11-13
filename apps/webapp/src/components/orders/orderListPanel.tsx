@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Badge, EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ordersService } from "@/services/orders.service";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import type { OrderStatus } from "@/types";
@@ -15,10 +16,15 @@ import styles from "./orderListPanel.module.css";
 const statusTone: Record<OrderStatus, "neutral" | "brand" | "success" | "warning" | "error"> = {
   pending: "warning",
   paid: "brand",
+  new: "brand",
+  processing: "brand",
+  ready: "brand",
   shipped: "brand",
   delivered: "success",
   completed: "success",
   cancelled: "error",
+  returned: "error",
+  refunded: "error",
   disputed: "error",
 };
 
@@ -49,7 +55,14 @@ function OrderListSkeleton() {
 
 export function OrderListPanel({ activeOrderId }: { readonly activeOrderId: string | null }) {
   const [status, setStatus] = useState<OrderStatus | null>(null);
-  const ordersQuery = useQuery({ queryKey: ["orders", status], queryFn: () => ordersService.fetchMyOrders(status), retry: false });
+  const ordersQuery = useInfiniteQuery({
+    queryKey: ["orders", status],
+    queryFn: ({ pageParam }) => ordersService.fetchMyOrdersPage(pageParam, status),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    retry: false,
+  });
+  const orders = ordersQuery.data?.pages.flatMap((page) => page.data) ?? [];
 
   return (
     <div className={styles.page}>
@@ -73,7 +86,7 @@ export function OrderListPanel({ activeOrderId }: { readonly activeOrderId: stri
         <OrderListSkeleton />
       ) : ordersQuery.isError ? (
         <ErrorState description="We couldn't load your orders." error={ordersQuery.error} onRetry={() => void ordersQuery.refetch()} />
-      ) : (ordersQuery.data ?? []).length === 0 ? (
+      ) : orders.length === 0 ? (
         <EmptyState kind="orders" title="No orders yet" description="When you place an order it will show up here with live escrow status." action={
             <Link href="/mart" className={styles.cta}>
               Start shopping
@@ -81,7 +94,7 @@ export function OrderListPanel({ activeOrderId }: { readonly activeOrderId: stri
           } />
       ) : (
         <ul className={styles.list}>
-          {ordersQuery.data?.map((order) => (
+          {orders.map((order) => (
             <li key={order.id}>
               <Link
                 href={`/orders/${order.id}`}
@@ -110,6 +123,13 @@ export function OrderListPanel({ activeOrderId }: { readonly activeOrderId: stri
           ))}
         </ul>
       )}
+      {ordersQuery.isFetchNextPageError ? (
+        <ErrorState description="We couldn't load older orders." error={ordersQuery.error} onRetry={() => void ordersQuery.fetchNextPage()} />
+      ) : ordersQuery.isFetchingNextPage ? (
+        <OrderListSkeleton />
+      ) : ordersQuery.hasNextPage ? (
+        <Button variant="secondary" onClick={() => void ordersQuery.fetchNextPage()}>Load older orders</Button>
+      ) : null}
     </div>
   );
 }

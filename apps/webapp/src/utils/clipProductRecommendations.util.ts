@@ -1,3 +1,5 @@
+import { maximumProductsPerClipRecommendationShelfContract } from "@nantty/contracts";
+
 import type { ProductSummary } from "@/types";
 
 export interface ClipRecommendationCadence {
@@ -35,7 +37,7 @@ export function shouldShowClipProductRecommendations(
 export function clipProductRecommendations(
   products: readonly ProductSummary[],
   taggedProductIds: readonly string[],
-  limit = 6,
+  limit = maximumProductsPerClipRecommendationShelfContract,
 ): readonly ProductSummary[] {
   const tagged = new Set(taggedProductIds);
   return products.filter((product) => !tagged.has(product.id)).slice(0, Math.max(0, limit));

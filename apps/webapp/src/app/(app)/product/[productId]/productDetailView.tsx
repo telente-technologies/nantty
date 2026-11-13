@@ -312,7 +312,7 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
 
         <div className={styles.productDetails}>
           <section className={styles.panel}>
-            <h2 className={styles.panelTitle}>Shipping &amp; returns</h2>
+            <h2 className={styles.panelTitle}>Delivery</h2>
             <dl className={styles.specs}>
               <div>
                 <dt>Delivery information</dt>
@@ -320,22 +320,23 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
               </div>
             </dl>
             <p className={styles.shippingPolicyNote}>
-              Delivery availability and the final shipping cost are confirmed for your delivery address at checkout. Review the quote before paying.
+              Delivery availability and cost are confirmed for your address at checkout. Seller delivery updates appear in Nantty; live courier tracking may not be available.
             </p>
-            {product.attributes?.some(({ name, value }) => name.trim() && value.trim()) ? (
-              <>
-                <h3 className={styles.panelTitle}>Product details</h3>
-                <dl className={styles.specs}>
-                  {product.attributes.filter(({ name, value }) => name.trim() && value.trim()).map(({ name, value }, index) => (
-                    <div key={`${name}-${index}`}>
-                      <dt>{name}</dt>
-                      <dd>{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </>
-            ) : null}
           </section>
+
+          {product.attributes?.some(({ name, value }) => name.trim() && value.trim()) ? (
+            <section className={styles.panel} aria-labelledby="product-details-title">
+              <h2 className={styles.panelTitle} id="product-details-title">Product details</h2>
+              <dl className={styles.specs}>
+                {product.attributes.filter(({ name, value }) => name.trim() && value.trim()).map(({ name, value }, index) => (
+                  <div key={`${name}-${index}`}>
+                    <dt>{name}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ) : null}
 
           <details className={[styles.panel, styles.descriptionPanel].join(" ")} open>
             <summary className={styles.descriptionSummary}>

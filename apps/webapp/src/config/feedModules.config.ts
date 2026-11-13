@@ -1,3 +1,5 @@
+import { productRecommendationCadenceContract } from "@nantty/contracts";
+
 export type FeedModuleKind = "getVerified" | "suggestedClips" | "peopleYouMayKnow" | "productsYouMightLike";
 
 export interface FeedModuleCadence {
@@ -9,7 +11,7 @@ export const feedModuleCadence: Readonly<Record<FeedModuleKind, FeedModuleCadenc
   getVerified: { firstAfterPosts: 3, repeatEveryPosts: null },
   suggestedClips: { firstAfterPosts: 6, repeatEveryPosts: 18 },
   peopleYouMayKnow: { firstAfterPosts: 10, repeatEveryPosts: 30 },
-  productsYouMightLike: { firstAfterPosts: 16, repeatEveryPosts: 45 },
+  productsYouMightLike: productRecommendationCadenceContract,
 };
 
 // Product recommendations use an organic-post-aware planner, separate from
