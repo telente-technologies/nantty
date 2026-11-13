@@ -149,7 +149,12 @@ export function OrderDetailView({ orderId }: { readonly orderId: string }) {
               <br />
               {order.shippingAddress.line1}
               <br />
+              {order.shippingAddress.line2 ? <>{order.shippingAddress.line2}<br /></> : null}
+              {order.shippingAddress.details ? <>{order.shippingAddress.details}<br /></> : null}
               {order.shippingAddress.city}, {order.shippingAddress.state}
+              {order.shippingAddress.postalCode ? <> {order.shippingAddress.postalCode}</> : null}
+              <br />
+              {order.shippingAddress.country}
               <br />
               {order.shippingAddress.phone}
             </address>

@@ -59,9 +59,12 @@ export function OrderInvoiceView({ orderId, documentKind }: { readonly orderId: 
             <strong>{order.buyer.name}</strong> (@{order.buyer.username})
           </p>
           <p>{order.shippingAddress.line1}</p>
+          {order.shippingAddress.line2 ? <p>{order.shippingAddress.line2}</p> : null}
+          {order.shippingAddress.details ? <p>{order.shippingAddress.details}</p> : null}
           <p>
             {order.shippingAddress.city}, {order.shippingAddress.state}, {order.shippingAddress.country}
           </p>
+          {order.shippingAddress.postalCode ? <p>{order.shippingAddress.postalCode}</p> : null}
           <p>{order.shippingAddress.phone}</p>
         </section>
         <table className={styles.itemsTable}>

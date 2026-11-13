@@ -55,6 +55,9 @@ export interface ShippingAddress {
   readonly recipientName: string;
   readonly phone: string;
   readonly line1: string;
+	readonly line2?: string;
+	readonly postalCode?: string;
+	readonly details?: string;
   readonly city: string;
   readonly state: string;
   readonly country: string;
