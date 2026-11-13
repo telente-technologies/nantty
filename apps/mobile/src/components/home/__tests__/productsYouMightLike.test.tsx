@@ -48,11 +48,13 @@ const renderSection = async (
   optional = false,
   recommendations: Record<string, unknown> = { isLoading: false, isError: false, data: { products: [product], source: "personalized" } },
   presentation: "shelf" | "clips" = "shelf",
+  excludedProductIds: readonly string[] = [],
 ) => {
   return await render(createElement(ProductsYouMightLike, {
     interactionSurface,
     optional,
     presentation,
+    excludedProductIds,
     recommendations: recommendations as never,
   }));
 };
@@ -116,6 +118,31 @@ test("tracks Clips carousel clicks with the consent-gated Clips surface", async 
     position: 0,
     surface: "clips_recommendations",
   });
+});
+
+test("Clips recommendations omit products already tagged on the preceding clip", async () => {
+  const view = await renderSection("clips_recommendations", false, {
+    isLoading: false,
+    isError: false,
+    data: { products: [product, secondProduct], source: "personalized" },
+  }, "clips", [product.id]);
+
+  expect(view.queryByLabelText("Open Handwoven Tote")).toBeNull();
+  expect(view.getByLabelText("Open Woven Scarf")).toBeTruthy();
+  expect(view.getByLabelText("Products you might like, 1 product")).toBeTruthy();
+});
+
+test("Clips recommendation carousel matches the web shelf product cap", async () => {
+  const products = Array.from({ length: 8 }, (_, index) => ({ ...product, id: `clip-product-${index}`, name: `Clip product ${index}` }));
+  const view = await renderSection("clips_recommendations", false, {
+    isLoading: false,
+    isError: false,
+    data: { products, source: "personalized" },
+  }, "clips");
+
+  expect(view.getByLabelText("Open Clip product 5")).toBeTruthy();
+  expect(view.queryByLabelText("Open Clip product 6")).toBeNull();
+  expect(view.getByLabelText("Products you might like, 6 products")).toBeTruthy();
 });
 
 test("keeps loading and failed optional feed recommendations silent", async () => {

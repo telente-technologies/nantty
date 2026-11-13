@@ -3,11 +3,12 @@ import type { ProductRecommendationSlot } from "@/utils/productsYouMightLikeLayo
 
 export type ClipsPagerItem =
   | { readonly kind: "clip"; readonly key: string; readonly clip: Clip; readonly clipIndex: number }
-  | { readonly kind: "productRecommendations"; readonly key: string; readonly occurrence: number };
+  | { readonly kind: "productRecommendations"; readonly key: string; readonly occurrence: number; readonly excludedProductIds: readonly string[] };
 
 export function buildClipsPagerItems(
   clips: readonly Clip[],
   productSlots: readonly ProductRecommendationSlot[],
+  recommendedProductIds?: readonly string[],
 ): ClipsPagerItem[] {
   const slotsByBoundary = new Map<number, ProductRecommendationSlot[]>();
   for (const slot of productSlots) {
@@ -20,7 +21,15 @@ export function buildClipsPagerItems(
   clips.forEach((clip, clipIndex) => {
     items.push({ kind: "clip", key: `clip-${clip.id}`, clip, clipIndex });
     for (const slot of slotsByBoundary.get(clipIndex + 1) ?? []) {
-      items.push({ kind: "productRecommendations", key: `product-recommendations-${slot.occurrence}`, occurrence: slot.occurrence });
+      const excludedProductIds = clip.products.map((product) => product.id);
+      const excludedProducts = new Set(excludedProductIds);
+      if (recommendedProductIds && !recommendedProductIds.some((productId) => !excludedProducts.has(productId))) continue;
+      items.push({
+        kind: "productRecommendations",
+        key: `product-recommendations-${slot.occurrence}`,
+        occurrence: slot.occurrence,
+        excludedProductIds,
+      });
     }
   });
   return items;

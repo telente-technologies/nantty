@@ -3,7 +3,7 @@ import { phosphorBadgeIcon } from "./phosphorIcon";
 
 const ROUNDED_TILE = { box: 32, radius: 8, fill: "#D9D9D9", glyph: 20, glyphInk: "#000000" } as const;
 
-export const Frame30132Icon = phosphorBadgeIcon(PlusIcon, { box: 32, radius: 16, fill: "#3A2BFF", glyph: 18, glyphInk: "#FFFFFF" });
+export const Frame30132Icon = phosphorBadgeIcon(PlusIcon, { box: 32, radius: 16, fill: "#2043F5", glyph: 18, glyphInk: "#FFFFFF" });
 export const Frame75132Icon = phosphorBadgeIcon(DotsThreeVerticalIcon, ROUNDED_TILE);
 export const Frame75232Icon = phosphorBadgeIcon(MagnifyingGlassIcon, ROUNDED_TILE);
 export const Frame75332Icon = phosphorBadgeIcon(ArrowLeftIcon, ROUNDED_TILE);

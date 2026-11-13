@@ -75,7 +75,12 @@ export function ClipPagerList({ pager, items, recommendations, listKeyPrefix, on
         extraData={{ activeClipIndex, isMuted, isPlaybackAllowed }}
         renderItem={({ item, index }) => item.kind === "productRecommendations" ? recommendations ? (
           <View style={{ height: pageHeight, paddingTop: pager.insets.top + 72, paddingBottom: pager.uncoveredBottomInset + 24, paddingHorizontal: 16, backgroundColor: themeColors.background }}>
-            <ProductsYouMightLike recommendations={recommendations} interactionSurface="clips_recommendations" presentation="clips" />
+            <ProductsYouMightLike
+              recommendations={recommendations}
+              interactionSurface="clips_recommendations"
+              presentation="clips"
+              excludedProductIds={item.excludedProductIds}
+            />
           </View>
         ) : null : (
           <ClipPage

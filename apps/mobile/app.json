@@ -23,7 +23,7 @@
         "foregroundImage": "./assets/adaptiveIconForeground.png",
         "backgroundImage": "./assets/adaptiveIconBackground.png",
         "monochromeImage": "./assets/adaptiveIconMonochrome.png",
-        "backgroundColor": "#3A2BFF"
+        "backgroundColor": "#2043F5"
       },
       "permissions": [
         "android.permission.RECORD_AUDIO",
@@ -101,7 +101,7 @@
         "expo-notifications",
         {
           "enableBackgroundRemoteNotifications": true,
-          "color": "#3A2BFF"
+          "color": "#2043F5"
         }
       ],
       "@bacons/apple-targets",

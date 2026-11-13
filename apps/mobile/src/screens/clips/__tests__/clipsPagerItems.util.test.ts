@@ -3,15 +3,17 @@ import type { ProductRecommendationSlot } from "@/utils/productsYouMightLikeLayo
 
 import { buildClipsPagerItems, clipForPagerAdImpression, clipOrdinalAtOrBeforePagerItem, clipsPagerItemIndexForClip } from "../clipsPagerItems.util";
 
-const clips = (count: number) => Array.from({ length: count }, (_, index) => ({ id: `clip-${index}` }) as unknown as Clip);
+const clips = (count: number) => Array.from({ length: count }, (_, index) => ({ id: `clip-${index}`, products: [] }) as unknown as Clip);
 
 describe("Clips product recommendation pages", () => {
   it("places the recommendation carousel after its organic clip boundary without replacing clip pages", () => {
-    const items = buildClipsPagerItems(clips(18), [{ kind: "productsYouMightLike", occurrence: 0, afterPostCount: 16 }]);
+    const sourceClips = clips(18);
+    sourceClips[15] = { ...sourceClips[15]!, products: [{ id: "tagged-product" }] } as unknown as Clip;
+    const items = buildClipsPagerItems(sourceClips, [{ kind: "productsYouMightLike", occurrence: 0, afterPostCount: 16 }]);
 
     expect(items).toHaveLength(19);
     expect(items[15]).toMatchObject({ kind: "clip", key: "clip-clip-15", clipIndex: 15 });
-    expect(items[16]).toEqual({ kind: "productRecommendations", key: "product-recommendations-0", occurrence: 0 });
+    expect(items[16]).toEqual({ kind: "productRecommendations", key: "product-recommendations-0", occurrence: 0, excludedProductIds: ["tagged-product"] });
     expect(items[17]).toMatchObject({ kind: "clip", key: "clip-clip-16", clipIndex: 16 });
     expect(clipsPagerItemIndexForClip(items, 16)).toBe(17);
     expect(clipOrdinalAtOrBeforePagerItem(items, 16)).toBe(15);
@@ -31,6 +33,20 @@ describe("Clips product recommendation pages", () => {
       "product-recommendations-0",
       "product-recommendations-1",
     ]);
+    expect(items.filter((item) => item.kind === "productRecommendations").every((item) => item.excludedProductIds.length === 0)).toBe(true);
     expect(clipsPagerItemIndexForClip(items, 61)).toBe(63);
+  });
+
+  it("omits a recommendation page when every ranked product is already tagged on the preceding clip", () => {
+    const sourceClips = clips(18);
+    sourceClips[15] = { ...sourceClips[15]!, products: [{ id: "tagged-product" }] } as unknown as Clip;
+    const items = buildClipsPagerItems(
+      sourceClips,
+      [{ kind: "productsYouMightLike", occurrence: 0, afterPostCount: 16 }],
+      ["tagged-product"],
+    );
+
+    expect(items.some((item) => item.kind === "productRecommendations")).toBe(false);
+    expect(items).toHaveLength(18);
   });
 });

@@ -1,5 +1,5 @@
 {
-  "brandPalette": { "brand": "#3A2BFF" },
-  "lightColors": { "surface": "#FFFFFF", "sunken": "#F0F2FA", "text": "#0A0A14", "textMuted": "#5B5B6B", "brandSolid": "#3A2BFF", "borderStrong": "#CDD1E6", "danger": "#EF4444" },
-  "darkColors": { "canvas": "#15161A", "surface": "#1E2024", "text": "#E8E9EB", "textMuted": "#9A9DA3", "brandSolid": "#4E40FF", "borderStrong": "#3A3D43", "danger": "#F87171" }
+  "brandPalette": { "brand": "#2043F5" },
+  "lightColors": { "surface": "#FFFFFF", "sunken": "#F0F2FA", "text": "#0A0A14", "textMuted": "#5B5B6B", "brandSolid": "#2043F5", "borderStrong": "#CDD1E6", "danger": "#EF4444" },
+  "darkColors": { "canvas": "#15161A", "surface": "#1E2024", "text": "#E8E9EB", "textMuted": "#9A9DA3", "brandSolid": "#4563F7", "borderStrong": "#3A3D43", "danger": "#F87171" }
 }

@@ -57,7 +57,11 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     recommendations.isPending || recommendations.isError || (recommendations.data?.products.length ?? 0) > 0,
     tab === "forYou",
   ), [clips, recommendations.isPending, recommendations.isError, recommendations.data, tab]);
-  const pagerItems = useMemo(() => buildClipsPagerItems(clips, productSlots), [clips, productSlots]);
+  const recommendedProducts = recommendations.data?.products;
+  const pagerItems = useMemo(
+    () => buildClipsPagerItems(clips, productSlots, recommendedProducts?.map((product) => product.id)),
+    [clips, productSlots, recommendedProducts],
+  );
   const pager = useClipPagerState(pagerItems);
   const { pageHeight, openListAtClip, setCommentsForClipId, commentsForClipId } = pager;
   const clipsCursorExpired = isCommentsCursorExpiredError(clipsFeed.error);

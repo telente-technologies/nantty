@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
+import { maximumProductsPerClipRecommendationShelfContract } from "@nantty/contracts";
 
 import { ProductCard } from "@/components/product/productCard";
 import { VariantPickerSheet } from "@/components/product/variantPickerSheet";
@@ -40,11 +41,13 @@ export function ProductsYouMightLike({
   interactionSurface = "mart_recommendations",
   optional = false,
   presentation = "shelf",
+  excludedProductIds = [],
 }: {
   readonly recommendations?: ProductsYouMightLikeQuery;
   readonly interactionSurface?: "mart_recommendations" | "feed_recommendations" | "clips_recommendations";
   readonly optional?: boolean;
   readonly presentation?: "shelf" | "clips";
+  readonly excludedProductIds?: readonly string[];
 } = {}) {
   const styles = useStyles();
   const { width: windowWidth } = useWindowDimensions();
@@ -53,12 +56,17 @@ export function ProductsYouMightLike({
   const internalRecommendations = useProductsYouMightLikeRecommendations({ enabled: providedRecommendations === undefined });
   const recommendations = providedRecommendations ?? internalRecommendations;
   const { addProductToCart } = useCartActions();
-  const products = recommendations.data?.products ?? [];
   const isClipsPresentation = presentation === "clips";
+  const excludedProducts = new Set(excludedProductIds);
+  const eligibleProducts = (recommendations.data?.products ?? []).filter((product) => !excludedProducts.has(product.id));
+  const products = isClipsPresentation
+    ? eligibleProducts.slice(0, maximumProductsPerClipRecommendationShelfContract)
+    : eligibleProducts;
   const cardWidth = isClipsPresentation ? Math.min(320, Math.max(220, windowWidth * 0.74)) : CARD_WIDTH;
   const imageHeight = isClipsPresentation ? Math.round(cardWidth * 1.03) : 183;
   const sectionStyle = isClipsPresentation ? styles.clipsSection : styles.section;
   const cardsStyle = isClipsPresentation ? [styles.cards, styles.clipsCards] : styles.cards;
+  const productCountLabel = products.length === 1 ? "product" : "products";
 
   if (optional && (recommendations.isLoading || recommendations.isError || products.length === 0)) return null;
 
@@ -99,7 +107,7 @@ export function ProductsYouMightLike({
   }, undefined, "add to cart");
 
   return (
-    <View style={sectionStyle} testID="productsYouMightLike" accessibilityLabel={`Products you might like, ${products.length} products`}>
+    <View style={sectionStyle} testID="productsYouMightLike" accessibilityLabel={`Products you might like, ${products.length} ${productCountLabel}`}>
       <Text size={18} weight={700}>Products you might like</Text>
       <ScrollView
         horizontal
