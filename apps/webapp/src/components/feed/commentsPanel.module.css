@@ -145,6 +145,7 @@
 
 .commentActions {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
   margin-left: calc(var(--space-2) * -1);
 }
@@ -153,7 +154,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  min-height: var(--control-sm);
+  min-height: max(var(--control-sm), 44px);
   padding-inline: var(--space-2);
   border: 0;
   border-radius: var(--radius-pill);

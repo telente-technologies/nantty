@@ -23,7 +23,18 @@ export function TopBar({ badgeCounts }: { readonly badgeCounts: ShellBadgeCounts
         <div className={styles.topBarActions}>
           {isHome ? (
             <Link href="/explore" className={[styles.iconButton, styles.homeSearchButton].join(" ")} aria-label="Search people, posts and products">
-              <SearchIcon size={21} />
+              <SearchIcon size={24} />
+            </Link>
+          ) : null}
+          {!isHome || badgeCounts.cart > 0 ? (
+            <Link href="/cart" className={styles.iconButton} aria-label={`Cart${badgeCounts.cart ? `, ${badgeCounts.cart} items` : ""}`}>
+              <CartIcon size={24} />
+              {badgeCounts.cart ? <span className={styles.actionDot}>{formatBadgeCount(badgeCounts.cart)}</span> : null}
+            </Link>
+          ) : null}
+          {isHome ? (
+            <Link href="/spaces" className={[styles.iconButton, styles.homeSpacesButton].join(" ")} aria-label="Explore Spaces">
+              <SpacesIcon size={24} />
             </Link>
           ) : null}
           <Link
@@ -31,20 +42,9 @@ export function TopBar({ badgeCounts }: { readonly badgeCounts: ShellBadgeCounts
             className={styles.iconButton}
             aria-label={`Notifications${badgeCounts.notifications ? `, ${badgeCounts.notifications} unread` : ""}`}
           >
-            <BellIcon size={21} />
+            <BellIcon size={24} />
             {badgeCounts.notifications ? <span className={styles.actionDot}>{formatBadgeCount(badgeCounts.notifications)}</span> : null}
           </Link>
-          {!isHome || badgeCounts.cart > 0 ? (
-            <Link href="/cart" className={styles.iconButton} aria-label={`Cart${badgeCounts.cart ? `, ${badgeCounts.cart} items` : ""}`}>
-              <CartIcon size={21} />
-              {badgeCounts.cart ? <span className={styles.actionDot}>{formatBadgeCount(badgeCounts.cart)}</span> : null}
-            </Link>
-          ) : null}
-          {isHome ? (
-            <Link href="/spaces" className={[styles.iconButton, styles.homeSpacesButton].join(" ")} aria-label="Explore Spaces">
-              <SpacesIcon size={21} />
-            </Link>
-          ) : null}
           {isHome ? <span className={styles.homeDesktopUser}><UserMenu /></span> : <UserMenu />}
         </div>
       </div>

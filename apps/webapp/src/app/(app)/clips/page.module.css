@@ -39,7 +39,7 @@
 
 .feed {
   height: var(--clip-feed-height);
-  min-height: 420px;
+  min-height: min(420px, var(--clip-feed-height));
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   overscroll-behavior: contain;
