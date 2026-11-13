@@ -44,4 +44,20 @@ describe("reportsService moderation contract", () => {
       details: "",
     }, { idempotencyKey: "post-report-key" });
   });
+
+  it("submits a store report through the shared moderation endpoint", async () => {
+    await reportsService.submitReportForContent({
+      targetType: "store",
+      targetId: "store-42",
+      reason: "scam_or_fraud",
+      details: "The store is advertising a counterfeit item.",
+    }, "store-report-key");
+
+    expect(mockedApi.post).toHaveBeenCalledWith("/api/v1/reports", {
+      targetType: "store",
+      targetId: "store-42",
+      reason: "scam_or_fraud",
+      details: "The store is advertising a counterfeit item.",
+    }, { idempotencyKey: "store-report-key" });
+  });
 });

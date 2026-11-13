@@ -17,7 +17,7 @@ import { requireAuthAfterClosingModal } from "@/utils/requireAuth.util";
 import { ReportSheet, type ReportTarget } from "./reportSheet";
 
 export interface ContentOptionsTarget {
-  readonly targetType: Extract<ReportTargetType, "post" | "clip" | "live" | "user" | "product">;
+  readonly targetType: Extract<ReportTargetType, "post" | "clip" | "live" | "user" | "product" | "store">;
   readonly targetId: ID;
   readonly authorId?: ID | null;
   readonly shareUrl?: string;

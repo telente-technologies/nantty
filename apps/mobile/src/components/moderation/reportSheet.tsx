@@ -33,7 +33,7 @@ export interface ReportSheetProps {
 }
 
 const describeReportTarget = (targetType: ReportTargetType) =>
-  ({ post: "post", clip: "clip", comment: "comment", live: "live", space: "Space", user: "account", product: "product", message: "message", sound: "sound" })[targetType];
+  ({ post: "post", clip: "clip", comment: "comment", live: "live", space: "Space", user: "account", product: "product", store: "store", message: "message", sound: "sound" })[targetType];
 
 export function ReportSheet({ target, onClose }: ReportSheetProps) {
   const { colors } = useTheme();

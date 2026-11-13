@@ -2,7 +2,7 @@ import type { ID } from "@/types";
 
 import { api, generateIdempotencyKey } from "../core/apiClient.service";
 
-export type ReportTargetType = "post" | "clip" | "comment" | "live" | "space" | "user" | "product" | "message" | "sound";
+export type ReportTargetType = "post" | "clip" | "comment" | "live" | "space" | "user" | "product" | "store" | "message" | "sound";
 
 export type ReportReason =
   | "spam"

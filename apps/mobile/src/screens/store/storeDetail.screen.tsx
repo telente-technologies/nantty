@@ -7,11 +7,13 @@ import { BusinessDocumentsNudge } from "@/components/seller/businessDocumentsNud
 import { PostCard } from "@/components/feed/postCard";
 import { useConfirmedFollowToggle } from "@/components/profile/confirmedFollowToggle.hook";
 import { ProductMasonry } from "@/components/home/productMasonry";
-import { Frame75132Icon, Frame75232Icon, Frame75332Icon } from "@/components/icons";
+import { DotsThreeVertical24Icon, Frame75132Icon, Frame75232Icon, Frame75332Icon } from "@/components/icons";
+import { ContentOptionsSheet } from "@/components/moderation/contentOptionsSheet";
 import { StoreProfileHeader } from "@/components/store/storeProfileHeader";
 import { StoreTabs, type StoreTab } from "@/components/store/storeTabs";
 import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/screen";
+import { webAppLinks } from "@/config/webAppLinks.config";
 import { useTheme } from "@/theme";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { trackProductInteraction } from "@/services/sellers/productInteractions.service";
@@ -30,6 +32,7 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
   const queryClient = useQueryClient();
   const signedInUserId = useAuthStore((state) => state.user?.id);
   const [activeTab, setActiveTab] = useState<StoreTab>("products");
+  const [isStoreOptionsOpen, setIsStoreOptionsOpen] = useState(false);
   const store = useQuery({ queryKey: ["stores", storeId], queryFn: () => storesService.fetchStoreById(storeId) });
   const products = useQuery({ queryKey: ["products", "store", storeId], queryFn: () => storesService.fetchStoreProducts(storeId) });
   const myStores = useQuery({ queryKey: ["my-stores"], queryFn: storesService.fetchMyStores, enabled: Boolean(signedInUserId), retry: false, staleTime: 5 * 60_000 });
@@ -49,17 +52,29 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
 
   const topBar = (
     <View style={styles.topBar}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Go back" hitSlop={8} onPress={() => navigation.goBack()}>
+      <Pressable style={styles.topActionButton} accessibilityRole="button" accessibilityLabel="Go back" onPress={() => navigation.goBack()}>
         <Frame75332Icon />
       </Pressable>
       <View style={styles.topActions}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Search" hitSlop={8} onPress={() => navigation.navigate("Search", store.data ? { scope: `store:${storeId}`, scopeLabel: store.data.name } : { scope: "mart" })}>
+        <Pressable style={styles.topActionButton} accessibilityRole="button" accessibilityLabel="Search" onPress={() => navigation.navigate("Search", store.data ? { scope: `store:${storeId}`, scopeLabel: store.data.name } : { scope: "mart" })}>
           <Frame75232Icon />
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="Share store" hitSlop={8} onPress={() => offerSendInChat({ kind: "store", id: storeId })}>
+        <Pressable style={styles.topActionButton} accessibilityRole="button" accessibilityLabel="Share store" onPress={() => offerSendInChat({ kind: "store", id: storeId })}>
           <Frame75132Icon />
         </Pressable>
+        <Pressable style={styles.topActionButton} accessibilityRole="button" accessibilityLabel="More store options" onPress={() => setIsStoreOptionsOpen(true)}>
+          <DotsThreeVertical24Icon />
+        </Pressable>
       </View>
+      <ContentOptionsSheet
+        target={store.data && isStoreOptionsOpen ? {
+          targetType: "store",
+          targetId: store.data.id,
+          authorId: store.data.ownerUserId,
+          shareUrl: webAppLinks.store(store.data.id),
+        } : null}
+        onClose={() => setIsStoreOptionsOpen(false)}
+      />
       {sendInChatElement}
     </View>
   );
@@ -121,8 +136,9 @@ export function StoreScreen({ navigation, route }: MainScreenProps<"Store">) {
 }
 
 const styles = StyleSheet.create({
-  topBar: { height: 48, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  topActions: { flexDirection: "row", gap: 12 },
+  topBar: { minHeight: 48, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  topActions: { flexDirection: "row", gap: 2 },
+  topActionButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
   content: { paddingTop: 8, paddingBottom: 24 },
   tabBody: { marginTop: 12 },
   promote: { marginHorizontal: 16, marginTop: 12 },
