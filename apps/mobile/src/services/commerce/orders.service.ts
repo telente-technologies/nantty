@@ -15,8 +15,8 @@ export const ordersService = {
   fetchMyOrdersPage: (status: OrderStatus | null, cursor: string | null) =>
     api.get<Page<Order>>("/api/v1/orders", { status: status ?? undefined, cursor: cursor ?? undefined }),
   fetchOrderById: (orderId: string) => api.get<Order>(`/api/v1/orders/${orderId}`),
-  fetchMyReturnsPage: (cursor: string | null, limit = 100) =>
-    api.getPage<ReturnRequestView>("/api/v1/returns", { cursor: cursor ?? undefined, limit }),
+  fetchMyReturnsPage: (cursor: string | null, limit = 100, orderId?: string) =>
+    api.getPage<ReturnRequestView>("/api/v1/returns", { cursor: cursor ?? undefined, limit, orderId }),
   requestReturn: (orderId: string, input: ReturnRequestInput) =>
     api.post<ReturnRequestView>(`/api/v1/orders/${encodeURIComponent(orderId)}/returns`, input),
   confirmOrderReceipt: (orderId: string, idempotencyKey: string) =>

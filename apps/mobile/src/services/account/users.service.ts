@@ -11,10 +11,23 @@ export interface ProfileDetailsUpdate {
   readonly isPrivate?: boolean;
 }
 
+export interface EmailVerificationCodeRequest {
+  readonly expiresIn: number;
+  readonly resendAfterSeconds: number;
+}
+
+export interface AccountEmailStatus {
+  readonly email: string | null;
+  readonly emailVerified: boolean;
+}
+
 const withDisplayNameFallback = (user: User): User => (user.name ? user : { ...user, name: user.username });
 
 export const usersService = {
   fetchMyProfile: () => api.get<User>("/api/v1/users/me").then(withDisplayNameFallback),
+  sendMyEmailVerificationCode: () => api.post<EmailVerificationCodeRequest>("/api/v1/users/me/email/verification"),
+  confirmMyEmailVerificationCode: (code: string) =>
+    api.post<AccountEmailStatus>("/api/v1/users/me/email/verification/confirm", { code }),
   fetchUserProfileById: (userId: string) => api.get<User>(`/api/v1/users/${encodeURIComponent(userId)}`).then(withDisplayNameFallback),
   fetchUserIdByUsername: (username: string) => api.get<{ id: string }>(`/api/v1/users/by-username/${encodeURIComponent(username)}`),
   fetchPostsByUserId: (userId: string, cursor?: string, visibility: "public" | "subscribers" = "public") =>

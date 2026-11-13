@@ -51,6 +51,7 @@ export interface User extends UserSummary {
   readonly bio: string;
   readonly bannerUrl: string | null;
   readonly email?: string;
+  readonly emailVerified?: boolean;
   readonly phone?: string | null;
   readonly followers: number;
   readonly following: number;

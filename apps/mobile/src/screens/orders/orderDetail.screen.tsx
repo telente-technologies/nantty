@@ -8,8 +8,10 @@ import { canBuyerOpenDispute, ESCROW_STAGE_APPEARANCE, formatFriendlyDate } from
 import { StatusPill } from "@/components/escrow/statusPill";
 import { CaretRight24Icon, Shield24Icon } from "@/components/icons";
 import { CartItemSummary } from "@/components/order/cartItemSummary";
+import { OrderProgress } from "@/components/order/orderProgress";
 import { ReturnRequestForm } from "@/components/order/returnRequestForm";
 import { DELIVERY_STATUS_APPEARANCE } from "@/components/order/deliveryStatus.util";
+import { canConfirmOrderReceipt } from "@nantty/contracts";
 import { RatePurchaseCard } from "@/components/reviews/ratePurchaseCard";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
@@ -34,8 +36,8 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
   const queryClient = useQueryClient();
   const order = useQuery({ queryKey: ["orders", "detail", orderId], queryFn: () => ordersService.fetchOrderById(orderId) });
   const returnRequests = useQuery({
-    queryKey: ["returns", "mine", 100],
-    queryFn: () => ordersService.fetchMyReturnsPage(null, 100),
+    queryKey: ["returns", "mine", orderId, 100],
+    queryFn: () => ordersService.fetchMyReturnsPage(null, 100, orderId),
     enabled: order.data?.status === "delivered" || order.data?.status === "completed",
   });
   const escrow = useEscrowForOrderQuery(orderId);
@@ -77,7 +79,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
   const detail = order.data;
   const riderPhone = detail.delivery?.riderPhone;
   const stage = escrow.data?.stage;
-  const canConfirm = detail.status === "shipped" || detail.status === "delivered";
+  const canConfirm = canConfirmOrderReceipt(detail.status);
   const isDirect = detail.paymentMode === "direct";
   const canDispute = canBuyerOpenDispute(detail.status, isDirect, escrow.data, escrow.isSuccess);
   const releaseLine = isDirect
@@ -94,7 +96,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
       <KeyboardAwareForm
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={order.isRefetching} onRefresh={() => { void Promise.all([order.refetch(), escrow.refetch()]); }} tintColor={colors.primary} colors={[colors.primary]} />}
+        refreshControl={<RefreshControl refreshing={order.isRefetching || returnRequests.isRefetching} onRefresh={() => { void Promise.all([order.refetch(), escrow.refetch(), returnRequests.refetch()]); }} tintColor={colors.primary} colors={[colors.primary]} />}
       >
         <Pressable
           accessibilityRole="button"
@@ -112,6 +114,8 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
           </View>
           <CaretRight24Icon />
         </Pressable>
+
+        <OrderProgress status={detail.status} timeline={detail.timeline} />
 
         {detail.promotionIssue ? (
           <View style={styles.card}>

@@ -54,7 +54,15 @@ describe("ordersService pagination", () => {
     mockGetPage.mockResolvedValue(page);
 
     await expect(ordersService.fetchMyReturnsPage(null)).resolves.toBe(page);
-    expect(mockGetPage).toHaveBeenCalledWith("/api/v1/returns", { cursor: undefined, limit: 100 });
+    expect(mockGetPage).toHaveBeenCalledWith("/api/v1/returns", { cursor: undefined, limit: 100, orderId: undefined });
+  });
+
+  it("filters buyer return requests to the order being viewed", async () => {
+    mockGetPage.mockResolvedValue({ data: [], nextCursor: null });
+
+    await ordersService.fetchMyReturnsPage(null, 100, "order-1");
+
+    expect(mockGetPage).toHaveBeenCalledWith("/api/v1/returns", { cursor: undefined, limit: 100, orderId: "order-1" });
   });
 
   it("submits the reviewed shipping quote revision with checkout", async () => {

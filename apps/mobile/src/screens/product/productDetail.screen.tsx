@@ -233,9 +233,9 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
         <View style={styles.divider} />
         <View style={styles.info}>
           <ProductInfoSection
-            title="Shipping & returns"
+            title="Delivery"
             body={detail.shippingInfo}
-            note="Delivery availability and the final shipping cost are confirmed for your delivery address at checkout. Review the quote before paying."
+            note="Delivery availability and cost are confirmed for your address at checkout. Seller delivery updates appear in Nantty; live courier tracking may not be available."
           />
           <ProductAttributesSection attributes={detail.attributes ?? []} />
           <ProductInfoSection title="Description" body={detail.description} collapsible />

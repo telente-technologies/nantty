@@ -12,6 +12,7 @@ import { WriteReviewScreen } from "@/screens/product/writeReview.screen";
 import { StoreScreen } from "@/screens/store/storeDetail.screen";
 import { CartScreen } from "@/screens/cart/cart.screen";
 import { CheckoutScreen } from "@/screens/checkout/checkout.screen";
+import { EmailVerificationScreen } from "@/screens/account/emailVerification.screen";
 import { PaymentScreen } from "@/screens/checkout/payment.screen";
 import { OrderSuccessScreen } from "@/screens/checkout/orderSuccess.screen";
 import { OrdersScreen } from "@/screens/orders/orders.screen";
@@ -140,6 +141,7 @@ export function MainNavigator() {
       <Stack.Screen name="Store" component={StoreScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="Checkout" component={CheckoutScreen} />
+      <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
       <Stack.Screen name="Payment" component={PaymentScreen} />
       <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
       <Stack.Screen name="Orders" component={OrdersScreen} />

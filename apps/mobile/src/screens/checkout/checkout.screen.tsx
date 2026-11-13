@@ -37,6 +37,7 @@ import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
 import { isCheckoutShippingQuoteReady } from "@/utils/checkoutShippingQuote.util";
 import { ApiError } from "@/errors/api.error";
+import { requireVerifiedCheckoutEmail } from "@/utils/requireVerifiedCheckoutEmail.util";
 
 const isHandledProblem = (error: unknown) => describePaymentProblem(error) !== null;
 
@@ -92,6 +93,9 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
 
   const placeOrderAndStartPayment = useMutation({
     mutationFn: async () => {
+      // Payment requires a verified account email. Check it before checkout
+      // creates order groups and consumes the cart.
+      await requireVerifiedCheckoutEmail();
       const revision = cart.data?.shippingQuoteRevision;
       if (!revision) throw new Error("Refresh delivery details before placing your order.");
       const result = await ordersService.checkoutCartIntoOrders(addressId!, revision, checkoutKey.current, directChoicesFor(cart.data?.groups ?? [], paymentModes));
@@ -126,6 +130,10 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
       navigation.replace("Payment", { orderId: payment.orderId, authorizationUrl: payment.authorizationUrl });
     },
     onError: (error) => {
+      if (error instanceof ApiError && error.code === "VERIFY_EMAIL_REQUIRED") {
+        navigation.navigate("EmailVerification");
+        return;
+      }
       if (error instanceof ApiError && error.code === "CART_CHANGED") {
         checkoutKey.current = generateIdempotencyKey();
         setPayFromWallet(false);

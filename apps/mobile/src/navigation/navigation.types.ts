@@ -42,6 +42,7 @@ export type MainStackParamList = {
   Store: { storeId: string };
   Cart: undefined;
   Checkout: undefined;
+  EmailVerification: undefined;
   Payment: { orderId: string; authorizationUrl?: string };
   OrderSuccess: { orderId: string };
   Orders: undefined;

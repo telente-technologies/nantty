@@ -17,6 +17,7 @@ import { mockBusinessProfiles } from "./businessProfiles.mock";
 import { SUSPENDED_USER_IDS, directoryUsers, directoryUsersExcludingAccounts, findDirectoryUserById, summariseUser } from "./userDirectory.mock";
 
 const profileEditsByUserId = new Map<string, Partial<User>>();
+const mockEmailVerificationCodes = new Map<string, string>();
 
 export const applyProfileEditForSignedInUser = (patch: Partial<User>) => {
   const userId = getSignedInMockUser().id;
@@ -29,9 +30,20 @@ export const signedInProfile = (): User => {
   // When the viewer switched to a business/brand/store profile, /users/me
   // presents that profile so the Me screen shows its posts, clips and shop.
   if (acting && acting.id !== base.id) {
-    return { ...base, ...actingProfileAsUserFields(acting.id), ...profileEditsByUserId.get(acting.id) };
+    return {
+      ...base,
+      ...actingProfileAsUserFields(acting.id),
+      ...profileEditsByUserId.get(acting.id),
+      email: base.email,
+      emailVerified: profileEditsByUserId.get(base.id)?.emailVerified ?? false,
+    };
   }
-  return { ...base, ...profileEditsByUserId.get(base.id), following: base.id === "u_me" ? followedUserIds.size + 403 : base.following };
+  return {
+    ...base,
+    emailVerified: false,
+    ...profileEditsByUserId.get(base.id),
+    following: base.id === "u_me" ? followedUserIds.size + 403 : base.following,
+  };
 };
 
 /** Business/brand/store profiles present like normal profiles (posts, reposts, clips, shop) when viewed by others. */
@@ -125,6 +137,22 @@ const previewUrlByMediaId = new Map<string, string>();
 
 export const usersMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/users/me", () => signedInProfile()),
+  createMockRoute("POST", "/api/v1/users/me/email/verification", () => {
+    const profile = signedInProfile();
+    if (!profile.email) throw new ApiError(422, "Add an email address to your account first.", "EMAIL_MISSING");
+    if (profile.emailVerified) throw new ApiError(409, "This email is already verified.", "ALREADY_VERIFIED");
+    mockEmailVerificationCodes.set(profile.id, "123456");
+    return { expiresIn: 600, resendAfterSeconds: 60 };
+  }),
+  createMockRoute("POST", "/api/v1/users/me/email/verification/confirm", ({ body }) => {
+    const profile = signedInProfile();
+    const { code } = body as { code: string };
+    if (!mockEmailVerificationCodes.has(profile.id)) throw new ApiError(409, "Request a verification code first.", "CODE_NOT_SENT");
+    if (code !== mockEmailVerificationCodes.get(profile.id)) throw new ApiError(400, "That code is incorrect. Check it and try again.", "INVALID_CODE");
+    mockEmailVerificationCodes.delete(profile.id);
+    applyProfileEditForSignedInUser({ emailVerified: true });
+    return { email: profile.email ?? null, emailVerified: true };
+  }),
   createMockRoute("POST", "/api/v1/users/me/media/upload-intents", ({ body }) => {
     const { purpose, previewUri } = body as { purpose: string; previewUri?: string };
     const mediaId = `media_${purpose}_${Date.now().toString(36)}`;
