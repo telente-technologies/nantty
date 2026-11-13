@@ -7,6 +7,10 @@
   border-bottom: 1px solid var(--divider);
 }
 
+.topBarHome {
+  border-bottom: 0;
+}
+
 .topBarInner {
   display: flex;
   align-items: center;
@@ -30,6 +34,16 @@
   align-items: center;
   gap: var(--space-1);
   margin-left: auto;
+}
+
+.homeTabs,
+.homeSearchButton,
+.homeSpacesButton {
+  display: none;
+}
+
+.homeDesktopUser {
+  display: inline-flex;
 }
 
 .iconButton {
@@ -138,5 +152,45 @@
 
   .topBarSearchMobile {
     display: none;
+  }
+
+  .homeDesktopUser {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 767px) {
+  .topBarHome {
+    position: sticky;
+    background: var(--surface-card);
+    backdrop-filter: none;
+  }
+
+  .topBarHome .topBarInner {
+    min-height: 56px;
+    gap: var(--space-2);
+    padding-block: var(--space-1);
+  }
+
+  .homeTabs,
+  .homeSearchButton,
+  .homeSpacesButton {
+    display: inline-flex;
+  }
+
+  .topBarHome .topBarActions {
+    gap: 0;
+    margin-left: 0;
+  }
+
+  .topBarHome .homeDesktopUser {
+    display: none;
+  }
+
+  .topBarHome .iconButton {
+    width: var(--control-lg);
+    min-width: 44px;
+    height: var(--control-lg);
+    min-height: 44px;
   }
 }

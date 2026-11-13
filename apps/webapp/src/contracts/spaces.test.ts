@@ -123,4 +123,16 @@ describe("Spaces flow", () => {
       null,
     );
   });
+  it("accepts a Space report through the same web reporting endpoint", async () => {
+    mockSession.signedInUserId = demoFanAccount.id;
+    const room = (await call<Space[]>("GET", "/api/v1/spaces")).find((entry) => entry.state === "live")!;
+    const report = await call<{ id: string; status: string }>("POST", "/api/v1/reports", {
+      targetType: "space",
+      targetId: room.id,
+      reason: "other",
+      details: "Safety concern reported from the Space room.",
+    });
+    assert.ok(report.id);
+    assert.equal(report.status, "received");
+  });
 });

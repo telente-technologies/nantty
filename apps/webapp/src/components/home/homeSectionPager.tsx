@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactNode } from "react";
 
 import { SearchScopeRegistrar } from "@/components/search/searchScopeRegistrar";
 import {
@@ -9,12 +9,12 @@ import {
   isHorizontalSectionSwipe,
   resolveSectionIndexAfterRelease,
   sectionIndexOf,
-  type HomeSection,
 } from "@/utils/homeSectionSwipe.util";
 
+import { useHomeSection } from "./homeSection.context";
+import { HomeSectionTabs } from "./homeSectionTabs";
 import styles from "./homeSectionPager.module.css";
 
-const sectionLabels: Readonly<Record<HomeSection, string>> = { feed: "Feed", mart: "Mart" };
 const IGNORE_SWIPE_SELECTOR = "[data-swipe-ignore], input, textarea, select, [contenteditable=true]";
 
 function isInsideHorizontalScroller(target: Element, boundary: Element | null): boolean {
@@ -26,24 +26,12 @@ function isInsideHorizontalScroller(target: Element, boundary: Element | null): 
   return false;
 }
 
-function readSectionFromLocation(): HomeSection {
-  return new URLSearchParams(window.location.search).get("section") === "mart" ? "mart" : "feed";
-}
-
-function writeSectionToLocation(section: HomeSection) {
-  const url = new URL(window.location.href);
-  if (section === "mart") url.searchParams.set("section", "mart");
-  else url.searchParams.delete("section");
-  window.history.replaceState(window.history.state, "", url);
-}
-
 export function HomeSectionPager({ feed, mart }: { readonly feed: ReactNode; readonly mart: ReactNode }) {
-  const [activeSection, setActiveSection] = useState<HomeSection>("feed");
+  const { activeSection, selectSection } = useHomeSection();
   const [hasOpenedMart, setHasOpenedMart] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const scrollPositions = useRef<Record<HomeSection, number>>({ feed: 0, mart: 0 });
   const suppressNextClick = useRef(false);
   const gesture = useRef({ pointerId: -1, startX: 0, startY: 0, lastX: 0, lastTime: 0, velocity: 0, phase: "idle" as "idle" | "pending" | "dragging" | "abandoned" });
 
@@ -58,22 +46,9 @@ export function HomeSectionPager({ feed, mart }: { readonly feed: ReactNode; rea
     else pager?.style.setProperty("--pager-position", String(-offsetPixels / width));
   }, []);
 
-  const showSection = useCallback((section: HomeSection) => {
-    setActiveSection((current) => {
-      if (current !== section) {
-        scrollPositions.current[current] = window.scrollY;
-        requestAnimationFrame(() => window.scrollTo({ top: scrollPositions.current[section] }));
-      }
-      return section;
-    });
-    if (section === "mart") setHasOpenedMart(true);
-    writeSectionToLocation(section);
-  }, []);
-
   useEffect(() => {
-    const initialSection = readSectionFromLocation();
-    if (initialSection === "mart") showSection("mart");
-  }, [showSection]);
+    if (activeSection === "mart") setHasOpenedMart(true);
+  }, [activeSection]);
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const target = event.target as Element;
@@ -118,7 +93,7 @@ export function HomeSectionPager({ feed, mart }: { readonly feed: ReactNode; rea
     if (isCancelled) return;
     const width = viewportRef.current?.clientWidth ?? window.innerWidth;
     const nextIndex = resolveSectionIndexAfterRelease(sectionIndexOf(activeSection), event.clientX - state.startX, state.velocity, width);
-    showSection(homeSections[nextIndex] ?? activeSection);
+    selectSection(homeSections[nextIndex] ?? activeSection);
   };
 
   const onClickCapture = (event: MouseEvent<HTMLDivElement>) => {
@@ -128,38 +103,11 @@ export function HomeSectionPager({ feed, mart }: { readonly feed: ReactNode; rea
     event.stopPropagation();
   };
 
-  const onTabKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
-    event.preventDefault();
-    const nextIndex = Math.min(homeSections.length - 1, Math.max(0, sectionIndexOf(activeSection) + (event.key === "ArrowRight" ? 1 : -1)));
-    const nextSection = homeSections[nextIndex] ?? activeSection;
-    showSection(nextSection);
-    document.getElementById(`home-section-tab-${nextSection}`)?.focus();
-  };
-
   const activeIndex = sectionIndexOf(activeSection);
   return (
     <div className={styles.pager} style={{ "--pager-active-index": activeIndex } as CSSProperties} data-dragging={isDragging || undefined}>
       {activeSection === "mart" ? <SearchScopeRegistrar scope="mart" label="Mart" /> : null}
-      <div className={styles.tabs} role="tablist" aria-label="Home sections" onKeyDown={onTabKeyDown}>
-        {homeSections.map((section, index) => (
-          <button
-            key={section}
-            id={`home-section-tab-${section}`}
-            type="button"
-            role="tab"
-            aria-selected={activeSection === section}
-            aria-controls={`home-section-panel-${section}`}
-            tabIndex={activeSection === section ? 0 : -1}
-            className={styles.tab}
-            style={{ "--tab-index": index } as CSSProperties}
-            onClick={() => showSection(section)}
-          >
-            <span className={styles.tabLabel}>{sectionLabels[section]}</span>
-            <span className={styles.tabLabelActive} aria-hidden="true">{sectionLabels[section]}</span>
-          </button>
-        ))}
-      </div>
+      <HomeSectionTabs desktopOnly />
       <div
         ref={viewportRef}
         className={styles.viewport}
@@ -175,7 +123,7 @@ export function HomeSectionPager({ feed, mart }: { readonly feed: ReactNode; rea
               key={section}
               id={`home-section-panel-${section}`}
               role="tabpanel"
-              aria-labelledby={`home-section-tab-${section}`}
+              aria-labelledby={`home-section-tab-${section} mobile-home-section-tab-${section}`}
               className={styles.panel}
               data-active={activeSection === section || undefined}
               inert={activeSection !== section && !isDragging ? true : undefined}

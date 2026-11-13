@@ -95,7 +95,7 @@ export function StoreDetailView({ initialStore, initialProducts }: StoreDetailVi
           </Button>
           <MessageStoreButton storeId={store.id} storeName={store.name} />
           {showsPromoteStore ? <Button size="sm" variant="secondary" onClick={() => router.push(promoteHrefFor({ type: "store", targetId: store.id }))}>Promote store</Button> : null}
-          <ContentActionsMenu shareKind="store" reportTargetType="user" targetId={store.ownerUserId} canonicalPath={buildStorePath(store.id)} />
+          <ContentActionsMenu shareKind="store" reportTargetType="store" targetId={store.id} canonicalPath={buildStorePath(store.id)} />
         </div>
       </header>
       {follow.isError ? <p className={styles.followError} role="alert">Couldn’t update this store. Check your connection and try again.</p> : null}

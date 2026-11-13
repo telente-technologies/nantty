@@ -24,7 +24,8 @@ const reportReasons = [
   { value: "other", label: "Something else" },
 ] as const;
 
-const targetNames: Record<ReportTargetType, string> = { post: "post", clip: "clip", comment: "comment", live: "live", user: "account", product: "product", message: "message" };
+const targetNames: Record<ReportTargetType, string> = { post: "post", clip: "clip", comment: "comment", live: "live", space: "Space", user: "account", product: "product", store: "store", sound: "sound", message: "message" };
+const maxReportDetailsLength = 500;
 
 interface ReportDialogProps {
   readonly isOpen: boolean;
@@ -44,26 +45,32 @@ export function ReportDialog({ isOpen, onClose, targetType, targetId }: ReportDi
     mutationFn: () => reportsService.submitReport(targetType, targetId, reason, details.trim()),
     onSuccess: () => {
       showToast({ text: "Report sent. Thanks for helping keep Nantty safe." });
-      setReason("");
-      setDetails("");
-      onClose();
+      closeDialog();
     },
   });
 
+  function closeDialog() {
+    setReason("");
+    setDetails("");
+    setIsClaimOpen(false);
+    reportMutation.reset();
+    onClose();
+  }
+
   if (isClaimOpen) {
-    return <CopyrightClaimDialog isOpen={isOpen} onClose={() => { setIsClaimOpen(false); setReason(""); onClose(); }} targetType={targetType as "post" | "clip" | "live"} targetId={targetId} />;
+    return <CopyrightClaimDialog isOpen={isOpen} onClose={closeDialog} targetType={targetType as "post" | "clip" | "live"} targetId={targetId} />;
   }
 
   return (
     <ModalDialog
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={closeDialog}
       title={`Report this ${targetNames[targetType]}`}
       description="Reports are anonymous. The person you report won't know it was you."
       intent="report"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={closeDialog}>
             Cancel
           </Button>
           {routesToCopyrightClaim ? (
@@ -88,7 +95,8 @@ export function ReportDialog({ isOpen, onClose, targetType, targetId }: ReportDi
       <label className={styles.label} htmlFor="report-details">
         Anything else we should know? (optional)
       </label>
-      <textarea id="report-details" className={styles.textarea} maxLength={500} value={details} onChange={(event) => setDetails(event.target.value)} />
+      <textarea id="report-details" className={styles.textarea} maxLength={maxReportDetailsLength} aria-describedby="report-details-count" value={details} onChange={(event) => setDetails(event.target.value)} />
+      <p id="report-details-count" className={styles.muted} aria-live="polite">{details.length}/{maxReportDetailsLength}</p>
       {reportMutation.isError ? (
         <p className={styles.error} role="alert">
           {readErrorMessageForDisplay(reportMutation.error)}

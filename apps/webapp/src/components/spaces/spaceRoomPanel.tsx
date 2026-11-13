@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { Avatar } from "@/components/ui/media";
 import { spacesService, type Space, type SpaceGrant } from "@/services/spaces.service";
 
@@ -42,7 +43,16 @@ export function SpaceRoomPanel({
       <span className={styles.pill}>
         {space.state === "live" ? "SPACE · LIVE AUDIO" : space.state.toUpperCase()}
       </span>
-      <h1>{space.title}</h1>
+      <div className={styles.spaceTitleRow}>
+        <h1>{space.title}</h1>
+        <ContentActionsMenu
+          shareKind={null}
+          reportTargetType="space"
+          targetId={space.id}
+          canonicalPath={`/spaces/${encodeURIComponent(space.id)}`}
+          isOwnContent={host}
+        />
+      </div>
       <p className={styles.muted}>{space.description}</p>
       {space.scheduledAt && space.state === "scheduled" ? (
         <p>Starts {new Date(space.scheduledAt).toLocaleString()}</p>

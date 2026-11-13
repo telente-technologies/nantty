@@ -168,6 +168,12 @@ export function SocialSignInButtons({ redirectTo = "/" }: { readonly redirectTo?
     void completeSocialSignIn(birthdayChallenge.provider, birthdayChallenge.identity, birthday);
   };
 
+  const handleBirthdayCancel = () => {
+    setBirthdayChallenge(null);
+    setBirthday("");
+    setNotice(null);
+  };
+
   const birthdayText = birthday ? (() => {
     const [year, month, day] = birthday.split("-");
     return `${day}/${month}/${year}`;
@@ -180,24 +186,32 @@ export function SocialSignInButtons({ redirectTo = "/" }: { readonly redirectTo?
       {appleClientId ? <Script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js" strategy="afterInteractive" onReady={() => setAppleSdkReady(true)} onError={() => setProviderSdkError("Apple sign-in couldn’t load. Check your connection and try again.")} /> : null}
       {birthdayChallenge ? (
         <div className={formStyles.socialBirthday}>
-          <p className={formStyles.helperText}>Add your birthday to finish creating your account. It won’t be shown publicly.</p>
+          <p className={formStyles.stepTitle} role="heading" aria-level={3}>
+            Add your birthday to continue with {birthdayChallenge.provider === "apple" ? "Apple" : "Google"}
+          </p>
+          <p className={formStyles.helperText}>Nantty requires your birthday to create an account. It won’t be shown publicly.</p>
           <TextField label="Birthday" type="date" autoComplete="bday" value={birthday} onChange={(event) => setBirthday(event.target.value)} />
           {birthday && !birthdayIsValid ? <p className={formStyles.formError} role="alert">Enter a valid birthday. You must be at least 13 to use Nantty.</p> : null}
           <Button fullWidth size="lg" busy={signingInWith === birthdayChallenge.provider} disabled={!birthdayIsValid || signingInWith !== null} onClick={handleBirthdayContinue}>
             Continue with {birthdayChallenge.provider === "apple" ? "Apple" : "Google"}
           </Button>
+          <Button variant="secondary" fullWidth size="lg" disabled={signingInWith !== null} onClick={handleBirthdayCancel}>
+            Cancel
+          </Button>
         </div>
       ) : null}
-      <Button variant="secondary" fullWidth size="lg" leadingIcon={<AppIcon name="apple24" size={24} />} busy={signingInWith === "apple"} disabled={signingInWith !== null || birthdayChallenge !== null || (Boolean(appleClientId) && !appleSdkReady)} onClick={() => void startAppleSignIn()}>
-        Continue with Apple
-      </Button>
-      {googleClientId ? <div ref={googleButtonRef} className={formStyles.googleIdentityButton} aria-label="Continue with Google" aria-busy={signingInWith === "google"} hidden={birthdayChallenge !== null || signingInWith === "google"} data-ready={googleSdkReady ? "true" : "false"}>
-        {!googleSdkReady ? <span role="status">Loading Google sign-in…</span> : null}
-      </div> : (
-        <Button variant="secondary" fullWidth size="lg" leadingIcon={<AppIcon name="google24" size={24} />} busy={signingInWith === "google"} disabled={signingInWith !== null || birthdayChallenge !== null} onClick={() => void completeSocialSignIn("google")}>
-          Continue with Google
+      {!birthdayChallenge ? <>
+        <Button variant="secondary" fullWidth size="lg" leadingIcon={<AppIcon name="apple24" size={24} />} busy={signingInWith === "apple"} disabled={signingInWith !== null || (Boolean(appleClientId) && !appleSdkReady)} onClick={() => void startAppleSignIn()}>
+          Continue with Apple
         </Button>
-      )}
+        {googleClientId ? <div ref={googleButtonRef} className={formStyles.googleIdentityButton} aria-label="Continue with Google" aria-busy={signingInWith === "google"} hidden={signingInWith === "google"} data-ready={googleSdkReady ? "true" : "false"}>
+          {!googleSdkReady ? <span role="status">Loading Google sign-in…</span> : null}
+        </div> : (
+          <Button variant="secondary" fullWidth size="lg" leadingIcon={<AppIcon name="google24" size={24} />} busy={signingInWith === "google"} disabled={signingInWith !== null} onClick={() => void completeSocialSignIn("google")}>
+            Continue with Google
+          </Button>
+        )}
+      </> : null}
       {providerSdkError ? <p className={formStyles.formError} role="alert">{providerSdkError}</p> : null}
       {notice ? (
         <p className={formStyles.formError} role="alert">

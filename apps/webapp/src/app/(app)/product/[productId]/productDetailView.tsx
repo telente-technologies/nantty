@@ -387,6 +387,29 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
           ) : null}
         </div>
       </div>
+      <div className={styles.mobilePurchaseBar} role="group" aria-label="Purchase actions">
+        <strong className={styles.mobilePurchasePrice}>{formatProductPriceForDisplay(selectedVariant ?? product)}</strong>
+        {message ? <p className={styles.mobilePurchaseMessage} role="status">{message}</p> : null}
+        <div className={styles.mobilePurchaseActions}>
+          <Button
+            size="md"
+            variant="secondary"
+            disabled={isOutOfStock}
+            busy={addToCart.isPending}
+            onClick={() => requireAuthThen(() => handleAddToCart(false), "Sign in to add items to your cart.")}
+          >
+            Add to cart
+          </Button>
+          <Button
+            size="md"
+            disabled={isOutOfStock}
+            busy={addToCart.isPending}
+            onClick={() => requireAuthThen(() => handleAddToCart(true), "Sign in to buy with escrow protection.")}
+          >
+            Buy now
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

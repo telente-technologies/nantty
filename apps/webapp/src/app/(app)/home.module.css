@@ -16,6 +16,12 @@
   margin-inline: auto;
 }
 
+@media (max-width: 767px) {
+  .feedList {
+    gap: 0;
+  }
+}
+
 .feedEnd {
   padding: var(--space-5) 0;
   color: var(--ink-faint);

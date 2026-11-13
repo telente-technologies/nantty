@@ -5,46 +5,9 @@
   gap: var(--space-4);
 }
 
-.tabs {
-  display: flex;
-  gap: var(--space-4);
-  width: 100%;
-  max-width: var(--reading-width);
-  margin-inline: auto;
-}
-
-.tab {
-  position: relative;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  cursor: pointer;
-}
-
-.tab:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 4px;
-  border-radius: 4px;
-}
-
-.tabLabel {
-  color: var(--color-text-subtle);
-}
-
-.tabLabelActive {
-  position: absolute;
-  inset: 0;
-  color: var(--color-brand);
-  opacity: calc(1 - min(1, max(var(--pager-position) - var(--tab-index), var(--tab-index) - var(--pager-position))));
-  transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
 .viewport {
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
   touch-action: pan-y;
 }
 
@@ -55,8 +18,7 @@
   will-change: transform;
 }
 
-.pager[data-dragging] .track,
-.pager[data-dragging] .tabLabelActive {
+.pager[data-dragging] .track {
   transition: none;
 }
 
@@ -75,8 +37,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .track,
-  .tabLabelActive {
+  .track {
     transition: none;
   }
 }

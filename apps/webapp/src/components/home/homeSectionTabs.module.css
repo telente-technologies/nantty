@@ -1,0 +1,62 @@
+.tabs {
+  --tab-active-index: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--reading-width);
+  margin-inline: auto;
+}
+
+.compact {
+  width: auto;
+  flex: 1 1 auto;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.desktopOnly {
+  display: none;
+}
+
+.tab {
+  position: relative;
+  min-height: var(--control-lg);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-subtle);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+}
+
+.tab:focus-visible {
+  border-radius: var(--radius-small);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.labelActive {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  color: var(--color-brand);
+  opacity: calc(1 - min(1, max(var(--pager-position, var(--tab-active-index)) - var(--tab-index), var(--tab-index) - var(--pager-position, var(--tab-active-index)))));
+  transition: opacity var(--motion-base) var(--motion-ease);
+}
+
+@media (min-width: 768px) {
+  .desktopOnly {
+    display: flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .labelActive {
+    transition: none;
+  }
+}

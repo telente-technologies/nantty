@@ -37,4 +37,11 @@ describe("web welcome screen", () => {
     assert.match(socialButtons, /completeSocialSignIn\(birthdayChallenge\.provider, birthdayChallenge\.identity, birthday\)/);
     assert.match(socialButtons, /readNonceFromIdentityToken\(idToken\) !== nonce/);
   });
+
+  it("replaces provider choices with an accessible birthday challenge and lets the user cancel it", () => {
+    assert.match(socialButtons, /role="heading" aria-level=\{3\}/);
+    assert.match(socialButtons, /\{!birthdayChallenge \? <>[\s\S]*Continue with Apple[\s\S]*Continue with Google[\s\S]*<\/> : null\}/);
+    assert.match(socialButtons, /const handleBirthdayCancel = \(\) => \{\s*setBirthdayChallenge\(null\);\s*setBirthday\(""\);\s*setNotice\(null\);/);
+    assert.match(socialButtons, /<Button variant="secondary" fullWidth size="lg" disabled=\{signingInWith !== null\} onClick=\{handleBirthdayCancel\}>\s*Cancel/);
+  });
 });

@@ -113,7 +113,7 @@ function OrganicPostCard({ post, priority = false, swipeable = false, showPinned
 
   const card = (
     <PostSurfaceProvider surface={surface}>
-    <article ref={impressionRef} className={[styles.card, swipe.isActive ? swipeStyles.card : ""].filter(Boolean).join(" ")}>
+    <article ref={impressionRef} data-surface={surface} className={[styles.card, swipe.isActive ? swipeStyles.card : ""].filter(Boolean).join(" ")}>
       <header className={styles.header}>
         <Link href={buildProfilePath(post.author.username)} className={styles.author} onClick={() => feedInteractionsService.recordProfileClick(interactionTarget, surface)}>
           <Avatar name={post.author.name} src={post.author.avatarUrl} size="md" />

@@ -3,7 +3,7 @@ import { ApiError } from "@/errors/api.error";
 import { isChatReportBody, submitChatReportMock } from "./chatReports.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
-const VALID_REPORT_TARGET_TYPES = ["post", "clip", "comment", "live", "user", "product", "message"];
+const VALID_REPORT_TARGET_TYPES = ["post", "clip", "comment", "live", "space", "user", "product", "message"];
 const receivedReports: { id: string; targetType: string; targetId: string; reason: string; details: string }[] = [];
 export const receivedMockFeedFeedback: { postId: string; type?: string; kind?: string }[] = [];
 

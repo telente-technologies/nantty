@@ -17,7 +17,7 @@ import type { CreatorSubscriptionCheckout, CreatorSubscriptionPlan, CreatorSubsc
 
 import { createIdempotencyKey, sendListRequestToWebappServer, sendRequestToWebappServer } from "./clientApi.service";
 
-export type ReportTargetType = "post" | "clip" | "comment" | "live" | "user" | "product" | "message";
+export type ReportTargetType = "post" | "clip" | "comment" | "live" | "space" | "user" | "product" | "store" | "sound" | "message";
 export type ShareReferenceKind = "post" | "clip" | "video" | "product" | "live" | "store" | "profile";
 
 export interface ShareEncryption {

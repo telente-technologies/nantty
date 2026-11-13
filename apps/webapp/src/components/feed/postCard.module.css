@@ -9,6 +9,21 @@
   box-shadow: var(--shadow-card);
 }
 
+@media (max-width: 767px) {
+  .card[data-surface="feed"] {
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .card[data-surface="feed"] .doubleTapArea {
+    margin-inline: calc(var(--space-4) * -1);
+  }
+}
+
 .header {
   display: flex;
   align-items: center;

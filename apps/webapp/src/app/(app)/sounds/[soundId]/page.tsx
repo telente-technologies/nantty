@@ -6,6 +6,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
+import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
+import { useSession } from "@/components/providers/sessionProvider";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { soundsService } from "@/services/sounds.service";
@@ -15,6 +17,7 @@ import styles from "../page.module.css";
 export default function SoundDetailPage() {
   const params = useParams<{ soundId: string }>();
   const soundId = params.soundId;
+  const { viewer } = useSession();
   const queryClient = useQueryClient();
   const sound = useQuery({ queryKey: ["sounds", soundId], queryFn: () => soundsService.fetchSoundById(soundId) });
   const clips = useQuery({ queryKey: ["sounds", soundId, "clips"], queryFn: () => soundsService.fetchClipsUsingSound(soundId), enabled: !!sound.data });
@@ -28,8 +31,13 @@ export default function SoundDetailPage() {
   const data = sound.data;
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>{data.isOriginal ? "Original sound" : data.title}</h1>
-      <p className={styles.note}>@{data.owner.username} · {data.usageCount.toLocaleString()} uses · {data.status}</p>
+      <header className={styles.soundHeader}>
+        <div>
+          <h1 className={styles.title}>{data.isOriginal ? "Original sound" : data.title}</h1>
+          <p className={styles.note}>@{data.owner.username} · {data.usageCount.toLocaleString()} uses · {data.status}</p>
+        </div>
+        <ContentActionsMenu shareKind={null} reportTargetType="sound" targetId={data.id} canonicalPath={`/sounds/${encodeURIComponent(data.id)}`} soundId={data.id} isOwnContent={viewer?.id === data.owner.id} />
+      </header>
       {data.audioUrl ? (
         <audio className={styles.media} src={data.audioUrl} controls preload="none" aria-label={data.title} />
       ) : null}

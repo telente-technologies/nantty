@@ -20,6 +20,10 @@
   padding: var(--space-5) var(--gutter) calc(var(--bottom-bar-height) + var(--space-7));
 }
 
+.bodyHome {
+  padding-top: var(--space-5);
+}
+
 .content {
   min-width: 0;
 }
@@ -170,6 +174,16 @@
     inset: 0;
     z-index: calc(var(--z-nav) - 1);
     background: var(--color-overlay);
+  }
+}
+
+@media (max-width: 767px) {
+  .bodyHome {
+    padding: 0 0 calc(var(--bottom-bar-height) + var(--space-7) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .bodyHome .content {
+    width: 100%;
   }
 }
 

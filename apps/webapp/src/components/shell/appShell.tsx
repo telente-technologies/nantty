@@ -5,8 +5,11 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { PolicyUpdateHost } from "@/components/legal/policyUpdateHost";
+import { HomeSectionProvider } from "@/components/home/homeSection.context";
 import { useSession } from "@/components/providers/sessionProvider";
+import { Avatar } from "@/components/ui/media";
 import { OfflineBanner } from "@/components/ui/offlineBanner";
+import type { User } from "@/types";
 
 import styles from "./appShell.module.css";
 import { RightRail } from "./rightRail";
@@ -35,7 +38,7 @@ function storeDesktopCollapse(isCollapsed: boolean): void {
   }
 }
 
-function BottomNavigation({ navItems }: { readonly navItems: readonly NavItem[] }) {
+function BottomNavigation({ navItems, viewer }: { readonly navItems: readonly NavItem[]; readonly viewer: User | null }) {
   const pathname = usePathname();
   return (
     <nav className={styles.bottomNav} aria-label="Primary">
@@ -45,7 +48,9 @@ function BottomNavigation({ navItems }: { readonly navItems: readonly NavItem[] 
           return (
             <li key={item.href}>
               <Link href={item.href} className={[styles.bottomNavItem, active ? styles.bottomNavItemActive : "", item.href === "/post/new" ? styles.bottomNavCreate : ""].filter(Boolean).join(" ")} aria-current={active ? "page" : undefined} aria-label={item.label}>
-                <span className={[styles.bottomNavIcon, item.href === "/post/new" ? styles.bottomNavCreateIcon : ""].filter(Boolean).join(" ")}>{active ? item.activeIcon ?? item.icon : item.icon}</span>
+                <span className={[styles.bottomNavIcon, item.href === "/post/new" ? styles.bottomNavCreateIcon : ""].filter(Boolean).join(" ")}>
+                  {item.href === "/me" && viewer?.avatarUrl ? <Avatar name={viewer.name} src={viewer.avatarUrl} size="xs" ring={active} /> : active ? item.activeIcon ?? item.icon : item.icon}
+                </span>
                 <span className="visuallyHidden">{item.label}</span>
                 {item.badgeCount ? <span className={styles.bottomNavBadge}>{formatBadgeCount(item.badgeCount)}</span> : null}
               </Link>
@@ -109,36 +114,39 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
     styles.body,
     styles[`content_${layout.contentWidth}`],
     hasRightRail ? styles[`rail_${layout.rightRailVisibility}`] : "",
+    pathname === "/" ? styles.bodyHome : "",
   ].join(" ");
 
   return (
-    <div className={shellClasses}>
-      <SideNavigation
-        navigationGroups={navigationGroups}
-        isExpandedOnTablet={isExpandedOnTablet}
-        isCollapsedOnDesktop={isCollapsedOnDesktop}
-        onToggle={toggleNavigation}
-        onNavigate={closeTabletNavigation}
-      />
-      {isExpandedOnTablet ? <div className={styles.navScrim} onClick={closeTabletNavigation} aria-hidden="true" /> : null}
+    <HomeSectionProvider>
+      <div className={shellClasses}>
+        <SideNavigation
+          navigationGroups={navigationGroups}
+          isExpandedOnTablet={isExpandedOnTablet}
+          isCollapsedOnDesktop={isCollapsedOnDesktop}
+          onToggle={toggleNavigation}
+          onNavigate={closeTabletNavigation}
+        />
+        {isExpandedOnTablet ? <div className={styles.navScrim} onClick={closeTabletNavigation} aria-hidden="true" /> : null}
 
-      <div className={styles.mainColumn}>
-        <TopBar badgeCounts={counts} />
-        <OfflineBanner />
-        <PolicyUpdateHost />
-        <div className={bodyClasses}>
-          <main id="main-content" className={styles.content} tabIndex={-1}>
-            {children}
-          </main>
-          {hasRightRail ? (
-            <div className={styles.railSlot}>
-              <RightRail modules={isSignedIn ? layout.rightRailModules : layout.rightRailModules.filter((moduleName) => moduleName === "trending" || moduleName === "suggestedAccounts")} />
-            </div>
-          ) : null}
+        <div className={styles.mainColumn}>
+          <TopBar badgeCounts={counts} />
+          <OfflineBanner />
+          <PolicyUpdateHost />
+          <div className={bodyClasses}>
+            <main id="main-content" className={styles.content} tabIndex={-1}>
+              {children}
+            </main>
+            {hasRightRail ? (
+              <div className={styles.railSlot}>
+                <RightRail modules={isSignedIn ? layout.rightRailModules : layout.rightRailModules.filter((moduleName) => moduleName === "trending" || moduleName === "suggestedAccounts")} />
+              </div>
+            ) : null}
+          </div>
         </div>
-      </div>
 
-      <BottomNavigation navItems={bottomNavItems} />
-    </div>
+        <BottomNavigation navItems={bottomNavItems} viewer={viewer} />
+      </div>
+    </HomeSectionProvider>
   );
 }
