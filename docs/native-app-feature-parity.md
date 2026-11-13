@@ -1,5 +1,7 @@
 # Native app feature parity map
 
+> **Archived reference (2026-11-12):** The standalone Kotlin Android and SwiftUI app projects have been retired. React Native in `apps/mobile` is the maintained mobile client; the Expo WidgetKit extension under `apps/mobile/targets/widgets` remains. The comparisons below preserve historical implementation and test evidence and must not be read as current native-app status.
+
 ## Scope
 
 This is a source-based orientation for planning native Android/iOS work against the existing React Native app (`apps/mobile`) and Next.js web app (`apps/webapp`). It samples navigation, representative screens, and service/API boundaries for major product areas. It is not a route-by-route audit, runtime comparison, or confirmation that every listed flow works against production services. Presence in source can include mock-backed states; confirm each flow's data source and end-to-end behavior before treating it as shipped parity.
