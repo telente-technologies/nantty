@@ -49,7 +49,9 @@ export default function CartPage() {
 
   const addressesQuery = useQuery({ queryKey: addressesQueryKey, queryFn: ordersService.fetchMyShippingAddresses, retry: false });
   const defaultAddress = addressesQuery.data?.find((address) => address.isDefault) ?? addressesQuery.data?.[0] ?? null;
-  const quote = useShippingQuote(defaultAddress?.id ?? null).data ?? null;
+  const quoteQuery = useShippingQuote(defaultAddress?.id ?? null);
+  const quote = quoteQuery.data ?? null;
+  const unavailableItemCount = Math.max(cartQuery.data?.unavailableItemCount ?? cartQuery.data?.unavailableItems?.length ?? 0, quote?.unavailableItemCount ?? 0);
 
   const invalidateCart = async () => {
     await queryClient.invalidateQueries({ queryKey: ["cart"] });
@@ -81,7 +83,7 @@ export default function CartPage() {
   if (cartQuery.isError) return <ErrorState description="We couldn't load your cart." error={cartQuery.error} onRetry={() => void cartQuery.refetch()} />;
 
   const cart = cartQuery.data;
-  if (!cart || cart.items.length === 0) {
+  if (!cart || (cart.items.length === 0 && (cart.unavailableItems?.length ?? 0) === 0)) {
     return (
       <EmptyState
         kind="cart"
@@ -92,14 +94,30 @@ export default function CartPage() {
     );
   }
 
-  const hasDiscount = cart.shopDiscount.amountMinor > 0;
-
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Cart</h1>
 
       <div className={styles.layout}>
         <div className={styles.storeGroups}>
+          {(cart.unavailableItems ?? []).length > 0 ? (
+            <section className={styles.storeGroup} aria-label="Unavailable products">
+              <h2 className={styles.storeName}>Unavailable products</h2>
+              <ul className={styles.itemList}>
+                {cart.unavailableItems?.map((item) => (
+                  <li key={item.id} className={styles.item}>
+                    <div className={styles.itemBody}>
+                      <p className={styles.itemName}>This product is no longer available</p>
+                      <p className={styles.itemVariant}>Remove it from your cart to continue.</p>
+                    </div>
+                    <button type="button" className={styles.removeButton} aria-label="Remove unavailable product from cart" onClick={() => removeItem.mutate(item.id)} disabled={removeItem.isPending}>
+                      <CloseIcon size={16} /> Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
           {groupCartItemsByStore(cart.items).map((group) => (
             <section key={group.storeId} className={styles.storeGroup} aria-label={`Items from ${group.store?.name ?? "this seller"}`}>
               <header className={styles.storeHeader}>
@@ -121,6 +139,7 @@ export default function CartPage() {
                         {item.product.name}
                       </Link>
                       {item.variant ? <p className={styles.itemVariant}>{item.variant}</p> : null}
+                      {item.available === false ? <p className={styles.unavailableNotice} role="status">Out of stock — remove this item to continue.</p> : null}
                       <p className={styles.itemPrice}>{formatMoneyForDisplay(multiplyMoneyByQuantity(item.product.price, item.quantity))}</p>
 
                       <div className={styles.itemControls}>
@@ -150,7 +169,7 @@ export default function CartPage() {
                                 quantity: Math.min(99, item.quantity + 1),
                               })
                             }
-                            disabled={updateQuantity.isPending}
+                            disabled={updateQuantity.isPending || item.available === false}
                           >
                             +
                           </button>
@@ -175,17 +194,34 @@ export default function CartPage() {
         </div>
 
         <aside className={styles.summary}>
-          <h2 className={styles.summaryTitle}>Summary</h2>
-          <SellerGroupedSummary items={cart.items} quote={quote} />
-          <MoneyRow label="Items total" value={formatMoneyForDisplay(cart.itemsTotal)} />
-          {hasDiscount ? <MoneyRow label="Discount" value={`−${formatMoneyForDisplay(cart.shopDiscount)}`} muted /> : null}
-          {cart.storeCredit.amountMinor > 0 ? <MoneyRow label="Store credit" value={`−${formatMoneyForDisplay(cart.storeCredit)}`} muted /> : null}
-          <MoneyRow label="Shipping" value={quote ? formatMoneyForDisplay(quote.shipping) : "Add an address to calculate"} muted />
-          <div className={styles.summaryDivider} />
-          <MoneyRow label="Total" value={formatMoneyForDisplay(quote ? quote.total : cart.total)} strong />
-          <Button size="lg" fullWidth onClick={() => router.push("/checkout")}>
-            Proceed to checkout
-          </Button>
+          {cart.items.length > 0 ? (
+            <>
+              <h2 className={styles.summaryTitle}>Summary</h2>
+              <SellerGroupedSummary items={cart.items} quote={quote} />
+              <MoneyRow label={quote ? "Items deliverable to this address" : "Items total"} value={formatMoneyForDisplay(quote?.itemsTotal ?? cart.itemsTotal)} />
+              {(quote?.shopDiscount ?? cart.shopDiscount).amountMinor > 0 ? <MoneyRow label="Discount" value={`−${formatMoneyForDisplay(quote?.shopDiscount ?? cart.shopDiscount)}`} muted /> : null}
+              {(quote?.storeCredit ?? cart.storeCredit).amountMinor > 0 ? <MoneyRow label="Store credit" value={`−${formatMoneyForDisplay(quote?.storeCredit ?? cart.storeCredit)}`} muted /> : null}
+              <MoneyRow label="Shipping" value={quote ? formatMoneyForDisplay(quote.shipping) : "Add an address to calculate"} muted />
+              {quoteQuery.isError ? (
+                <p className={styles.shippingError} role="alert">
+                  We couldn’t calculate delivery for this address. <button type="button" onClick={() => void quoteQuery.refetch()}>Try again</button>
+                </p>
+              ) : null}
+              <div className={styles.summaryDivider} />
+              <MoneyRow label="Total" value={formatMoneyForDisplay(quote ? quote.total : cart.total)} strong />
+              {unavailableItemCount > 0 ? (
+                <p className={styles.shippingError} role="alert">Remove unavailable products before checkout.</p>
+              ) : null}
+              <Button size="lg" fullWidth disabled={unavailableItemCount > 0} onClick={() => router.push("/checkout")}>
+                Proceed to checkout
+              </Button>
+            </>
+          ) : (
+            <>
+              <h2 className={styles.summaryTitle}>Cart needs attention</h2>
+              <p className={styles.shippingError}>Remove the unavailable product above. Your cart total will be recalculated afterward.</p>
+            </>
+          )}
           <Link href="/mart" className={styles.continueLink}>
             Continue shopping
           </Link>

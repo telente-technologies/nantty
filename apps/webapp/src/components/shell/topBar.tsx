@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import { BellIcon, CartIcon } from "@/components/ui/icons";
+import { BellIcon, CartIcon, SearchIcon } from "@/components/ui/icons";
 
 import { ScopedSearchBar as SearchBar } from "./scopedSearchBar";
 import { formatBadgeCount, type ShellBadgeCounts } from "./shellNavigation.config";
@@ -10,6 +11,7 @@ import styles from "./topBar.module.css";
 import { UserMenu } from "./userMenu";
 
 export function TopBar({ badgeCounts }: { readonly badgeCounts: ShellBadgeCounts }) {
+  const isHome = usePathname() === "/";
   return (
     <header className={styles.topBar}>
       <div className={styles.topBarInner}>
@@ -17,6 +19,11 @@ export function TopBar({ badgeCounts }: { readonly badgeCounts: ShellBadgeCounts
           <SearchBar />
         </div>
         <div className={styles.topBarActions}>
+          {isHome ? (
+            <Link href="/explore" className={styles.iconButton} aria-label="Search people, posts and products">
+              <SearchIcon size={21} />
+            </Link>
+          ) : null}
           <Link
             href="/notifications"
             className={styles.iconButton}
@@ -32,9 +39,7 @@ export function TopBar({ badgeCounts }: { readonly badgeCounts: ShellBadgeCounts
           <UserMenu />
         </div>
       </div>
-      <div className={styles.topBarSearchMobile}>
-        <SearchBar />
-      </div>
+      {!isHome ? <div className={styles.topBarSearchMobile}><SearchBar /></div> : null}
     </header>
   );
 }

@@ -5,9 +5,11 @@ import {
   BookmarkIcon,
   ChatIcon,
   ClipsIcon,
+  ClipsNavigationIcon,
   CompassIcon,
   CreatorIcon,
   HomeIcon,
+  HomeOutlineIcon,
   LiveIcon,
   OrdersIcon,
   PlusIcon,
@@ -22,6 +24,7 @@ export interface NavItem {
   readonly href: string;
   readonly label: string;
   readonly icon: ReactNode;
+  readonly activeIcon?: ReactNode;
   readonly badgeCount?: number;
 }
 
@@ -34,10 +37,10 @@ export interface ShellBadgeCounts {
 export function buildSidebarNavigationGroups(isSignedIn: boolean, counts: ShellBadgeCounts): readonly (readonly NavItem[])[] {
   const groups: (readonly NavItem[])[] = [
     [
-      { href: "/", label: "Home", icon: <HomeIcon /> },
+      { href: "/", label: "Home", icon: <HomeOutlineIcon />, activeIcon: <HomeIcon /> },
       { href: "/explore", label: "Explore", icon: <CompassIcon /> },
       { href: "/mart", label: "Mart", icon: <StoreIcon /> },
-      { href: "/clips", label: "Clips", icon: <ClipsIcon /> },
+      { href: "/clips", label: "Clips", icon: <ClipsNavigationIcon /> },
       { href: "/live", label: "Live", icon: <LiveIcon /> },
       { href: "/spaces", label: "Spaces", icon: <SpacesIcon /> },
     ],
@@ -60,10 +63,9 @@ export function buildSidebarNavigationGroups(isSignedIn: boolean, counts: ShellB
 
 export function buildBottomNavigationItems(isSignedIn: boolean, counts: ShellBadgeCounts): readonly NavItem[] {
   return [
-    { href: "/", label: "Home", icon: <HomeIcon /> },
-    { href: "/mart", label: "Mart", icon: <StoreIcon /> },
-    { href: "/clips", label: "Clips", icon: <ClipsIcon /> },
-    ...(isSignedIn ? [{ href: "/post/new", label: "Create", icon: <PlusIcon /> }] : []),
+    { href: "/", label: "Home", icon: <HomeOutlineIcon />, activeIcon: <HomeIcon /> },
+    { href: "/clips", label: "Clips", icon: <ClipsNavigationIcon /> },
+    { href: "/post/new", label: "Create", icon: <PlusIcon /> },
     { href: "/chats", label: "Chats", icon: <ChatIcon />, badgeCount: counts.chats },
     { href: isSignedIn ? "/me" : "/login", label: "Me", icon: <UserIcon /> },
   ];

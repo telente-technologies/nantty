@@ -1,7 +1,8 @@
 import { ApiError } from "@/errors/api.error";
 
-import { describeVariant, mockCartState, MOCK_SHIPPING_QUOTE_REVISION, summariseMockCart } from "./commerceFixtures.mock";
+import { describeVariant, mockCartState, MOCK_SHIPPING_QUOTE_REVISION, mockStoreCreditBalanceUsdCentsByStore, summariseMockCart } from "./commerceFixtures.mock";
 import { findSignedInAddress } from "./settings.mock";
+import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 import { quoteSellerShipping } from "./shippingEngine.mock";
 import { groupCartItemsByStore } from "@/utils/groupCartItemsByStore.util";
 import { findCatalogSeedByProductId } from "./productCatalog.mock";
@@ -27,8 +28,15 @@ export const cartMocks: MockRoute[] = [
     const sum = (amounts: readonly number[]) => amounts.reduce((total, amount) => total + amount, 0);
     const shipping = { ...cart.shipping, amountMinor: sum(groups.map((group) => group.fee?.amountMinor ?? 0)) };
     const itemsMinor = sum(shippedItems.map((item) => item.product.price.amountMinor * item.quantity));
+    const storeCredit = {
+      ...cart.storeCredit,
+      amountMinor: groupCartItemsByStore(shippedItems).reduce((total, group) => {
+        const credit = convertUsdCentsToViewerCurrency(mockStoreCreditBalanceUsdCentsByStore[group.storeId] ?? 0);
+        return total + Math.min(group.subtotal.amountMinor, credit.amountMinor);
+      }, 0),
+    };
     const wireGroups = groups.map(({ storeId, ...quote }) => ({ storeId, shipping: quote }));
-    return { ...cart, addressId: address.id, shippingQuoteRevision: MOCK_SHIPPING_QUOTE_REVISION, groups: wireGroups, shipping, total: { ...cart.total, amountMinor: itemsMinor + shipping.amountMinor } };
+    return { ...cart, addressId: address.id, shippingQuoteRevision: MOCK_SHIPPING_QUOTE_REVISION, groups: wireGroups, itemsTotal: { ...cart.itemsTotal, amountMinor: itemsMinor }, storeCredit, shipping, total: { ...cart.total, amountMinor: itemsMinor - storeCredit.amountMinor + shipping.amountMinor } };
   }),
   createMockRoute("POST", "/api/v1/cart/items", ({ body }) => {
     const { productId, quantity, size, color } = body as AddToCartBody;

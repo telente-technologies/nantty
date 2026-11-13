@@ -7,10 +7,18 @@ export interface CartItem {
   readonly quantity: number;
   readonly variant: string | null;
   readonly store?: StoreSummary | null;
+  readonly available?: boolean;
+}
+
+export interface UnavailableCartItem {
+  readonly id: ID;
 }
 
 export interface Cart {
   readonly items: readonly CartItem[];
+  readonly unavailableItems?: readonly UnavailableCartItem[];
+  readonly unavailableItemCount?: number;
+  readonly payableGroupCount?: number;
   readonly itemsTotal: Money;
   readonly shopDiscount: Money;
   readonly storeCredit: Money;

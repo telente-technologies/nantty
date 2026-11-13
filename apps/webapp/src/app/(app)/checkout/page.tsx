@@ -69,7 +69,13 @@ export default function CheckoutPage() {
   const currentQuote = quoteReady ? quote : null;
   const deliverableGroupCount = currentQuote?.groups.filter((group) => group.status === "calculated").length ?? 0;
   const blockedGroupCount = currentQuote?.groups.filter((group) => group.status === "notDeliverable").length ?? 0;
+  const unavailableItemCount = Math.max(currentQuote?.unavailableItemCount ?? 0, cartQuery.data?.unavailableItemCount ?? cartQuery.data?.unavailableItems?.length ?? 0);
   const hasShippableGroup = deliverableGroupCount > 0;
+  const deliverableStoreIds = new Set(currentQuote?.groups.filter((group) => group.status === "calculated").map((group) => group.storeId) ?? []);
+  const checkoutItems = currentQuote
+    ? (cartQuery.data?.items ?? []).filter((item) => deliverableStoreIds.has(item.store?.id ?? ""))
+    : cartQuery.data?.items ?? [];
+  const checkoutStoreGroups = groupCartItemsByStore(cartQuery.data?.items ?? []).filter((group) => deliverableStoreIds.has(group.storeId));
 
   const orderTotal = currentQuote?.total ?? null;
   const walletChosen = paymentSource === "wallet" && canPayFromWallet(walletQuery.data, orderTotal);
@@ -154,7 +160,8 @@ export default function CheckoutPage() {
 
   const cart = cartQuery.data;
   if (!cart || cart.items.length === 0) {
-    return <EmptyState kind="cart" title="Nothing to check out" description="Add items to your cart first." action={<Button onClick={() => router.push("/")}>Browse the mart</Button>} />;
+    const hasUnavailableItems = (cart?.unavailableItemCount ?? cart?.unavailableItems?.length ?? 0) > 0;
+    return <EmptyState kind="cart" title={hasUnavailableItems ? "Your cart needs attention" : "Nothing to check out"} description={hasUnavailableItems ? "Remove unavailable products from your cart before checkout." : "Add items to your cart first."} action={<Button onClick={() => router.push(hasUnavailableItems ? "/cart" : "/")}>{hasUnavailableItems ? "Review your cart" : "Browse the mart"}</Button>} />;
   }
 
   return (
@@ -181,6 +188,11 @@ export default function CheckoutPage() {
         <div className={styles.sections}>
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Shipping address</h2>
+            {unavailableItemCount > 0 ? (
+              <p className={styles.shippingNotice} role="alert">
+                {unavailableItemCount} {unavailableItemCount === 1 ? "product is" : "products are"} unavailable. <Link href="/cart">Return to your cart</Link> to remove {unavailableItemCount === 1 ? "it" : "them"} before checkout.
+              </p>
+            ) : null}
             {addressesQuery.isError && !addressesQuery.data ? (
               <ErrorState description="We couldn't load your addresses." error={addressesQuery.error} onRetry={() => void addressesQuery.refetch()} />
             ) : (addressesQuery.data ?? []).length === 0 ? (
@@ -253,18 +265,19 @@ export default function CheckoutPage() {
 
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>How to pay each seller</h2>
-            <PaymentModeChooser groups={groupCartItemsByStore(cart.items)} modes={paymentModes} onChange={choosePaymentMode} />
+            <PaymentModeChooser groups={checkoutStoreGroups} modes={paymentModes} onChange={choosePaymentMode} />
           </section>
 
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Items</h2>
+            <h2 className={styles.sectionTitle}>{currentQuote ? "Items in this checkout" : "Cart items"}</h2>
             <ul className={styles.itemList}>
-              {cart.items.map((item) => (
+              {checkoutItems.map((item) => (
                 <li key={item.id} className={styles.item}>
                   <span className={styles.itemName}>{item.product.name}</span>
                   <span className={styles.itemQty}>× {item.quantity}</span>
                 </li>
               ))}
+              {currentQuote && checkoutItems.length === 0 ? <li className={styles.shippingNotice}>No items from this cart can be checked out to this address.</li> : null}
             </ul>
           </section>
         </div>
@@ -273,17 +286,23 @@ export default function CheckoutPage() {
           <h2 className={styles.summaryTitle}>Order summary</h2>
           <SellerGroupedSummary items={cart.items} quote={currentQuote} />
           <div className={styles.moneyRow}>
-            <span>Items total</span>
-            <span>{formatMoneyForDisplay(cart.itemsTotal)}</span>
+            <span>Items in this checkout</span>
+            <span>{currentQuote ? formatMoneyForDisplay(currentQuote.itemsTotal) : quoteQuery.isFetching ? "Calculating" : "Choose an address"}</span>
           </div>
           <div className={styles.moneyRow}>
             <span>Shipping</span>
             <span>{currentQuote ? formatMoneyForDisplay(currentQuote.shipping) : quoteQuery.isError ? "Unavailable" : quoteQuery.isFetching ? "Calculating" : "Choose an address"}</span>
           </div>
-          {cart.storeCredit.amountMinor > 0 ? (
+          {currentQuote && currentQuote.shopDiscount.amountMinor > 0 ? (
+            <div className={styles.moneyRow}>
+              <span>Discount</span>
+              <span>−{formatMoneyForDisplay(currentQuote.shopDiscount)}</span>
+            </div>
+          ) : null}
+          {currentQuote && currentQuote.storeCredit.amountMinor > 0 ? (
             <div className={styles.moneyRow}>
               <span>Store credit</span>
-              <span>−{formatMoneyForDisplay(cart.storeCredit)}</span>
+              <span>−{formatMoneyForDisplay(currentQuote.storeCredit)}</span>
             </div>
           ) : null}
           <div className={styles.divider} />
@@ -305,7 +324,7 @@ export default function CheckoutPage() {
               Verify your email to continue. <Link href="/verify-email?next=/checkout">Verify email</Link>
             </p>
           ) : (
-            <Button size="lg" fullWidth busy={placeOrder.isPending} disabled={!addressId || !quoteReady || !hasShippableGroup || placeOrder.isSuccess} onClick={() => {
+            <Button size="lg" fullWidth busy={placeOrder.isPending} disabled={!addressId || !quoteReady || !hasShippableGroup || unavailableItemCount > 0 || placeOrder.isSuccess} onClick={() => {
               if (placeOrderInFlight.current) return;
               placeOrderInFlight.current = true;
               placeOrder.mutate(undefined, { onError: () => { placeOrderInFlight.current = false; } });

@@ -62,5 +62,17 @@ function toSellerShippingQuote(group: GroupWire): SellerShippingQuote {
 }
 
 export function readShippingQuoteFromWire(wire: CartWire): CartShippingQuote {
-  return { addressId: wire.addressId ?? null, shippingQuoteRevision: wire.shippingQuoteRevision ?? null, groups: (wire.groups ?? []).map(toSellerShippingQuote), shipping: wire.shipping, total: wire.total };
+  return {
+    addressId: wire.addressId ?? null,
+    shippingQuoteRevision: wire.shippingQuoteRevision ?? null,
+    groups: (wire.groups ?? []).map(toSellerShippingQuote),
+    unavailableItems: wire.unavailableItems,
+    unavailableItemCount: wire.unavailableItemCount,
+    payableGroupCount: wire.payableGroupCount,
+    itemsTotal: wire.itemsTotal,
+    shopDiscount: wire.shopDiscount,
+    storeCredit: wire.storeCredit,
+    shipping: wire.shipping,
+    total: wire.total,
+  };
 }

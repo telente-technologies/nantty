@@ -40,6 +40,12 @@ export interface CartShippingQuote {
   readonly addressId: string | null;
   readonly shippingQuoteRevision: string | null;
   readonly groups: readonly SellerShippingQuote[];
+  readonly unavailableItems?: readonly { readonly id: string }[];
+  readonly unavailableItemCount?: number;
+  readonly payableGroupCount?: number;
+  readonly itemsTotal: Money;
+  readonly shopDiscount: Money;
+  readonly storeCredit: Money;
   readonly shipping: Money;
   readonly total: Money;
 }

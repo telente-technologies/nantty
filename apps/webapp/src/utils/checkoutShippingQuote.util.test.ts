@@ -9,6 +9,9 @@ const quote: CartShippingQuote = {
   addressId: "address-current",
   shippingQuoteRevision: "a".repeat(64),
   groups: [],
+  itemsTotal: { amountMinor: 10_000, currency: "NGN" },
+  shopDiscount: { amountMinor: 0, currency: "NGN" },
+  storeCredit: { amountMinor: 0, currency: "NGN" },
   shipping: { amountMinor: 0, currency: "NGN" },
   total: { amountMinor: 10_000, currency: "NGN" },
 };
@@ -21,6 +24,9 @@ test("keeps the server-selected address on a shipping quote", () => {
     itemsTotal: { amountMinor: 10_000, currency: "NGN" },
     shopDiscount: { amountMinor: 0, currency: "NGN" },
     storeCredit: { amountMinor: 0, currency: "NGN" },
+    unavailableItems: [{ id: "stale-item" }],
+    unavailableItemCount: 1,
+    payableGroupCount: 0,
     shipping: { amountMinor: 0, currency: "NGN" },
     total: { amountMinor: 10_000, currency: "NGN" },
     groups: [],
@@ -28,6 +34,10 @@ test("keeps the server-selected address on a shipping quote", () => {
 
   assert.equal(parsed.addressId, "address-current");
   assert.equal(parsed.shippingQuoteRevision, "b".repeat(64));
+  assert.equal(parsed.itemsTotal.amountMinor, 10_000);
+  assert.equal(parsed.storeCredit.amountMinor, 0);
+  assert.equal(parsed.unavailableItemCount, 1);
+  assert.equal(parsed.unavailableItems?.[0]?.id, "stale-item");
 });
 
 test("accepts a resolved quote for the selected address", () => {

@@ -2,7 +2,7 @@ import {
   ArrowRightIcon as PhArrowRight, ArrowSquareOutIcon, BookmarkSimpleIcon, CaretLeftIcon, ChartBarIcon, ChatCircleIcon, CheckCircleIcon as PhCheckCircle, CompassIcon as PhCompass, CopyIcon as PhCopy, CopyrightIcon as PhCopyright, DownloadSimpleIcon, EnvelopeIcon,
   ExportIcon, FileTextIcon, FlagIcon as PhFlag, GearIcon, GiftIcon as PhGift, HeartIcon as PhHeart, LinkSimpleIcon as PhLinkSimple, MonitorIcon as PhMonitor, MoonIcon as PhMoon, PackageIcon as PhPackage,
   PaperPlaneTiltIcon, PauseIcon as PhPause, PhoneIcon as PhPhone, ProhibitIcon as PhProhibit, PushPinIcon as PhPushPin, QuotesIcon, ShieldCheckIcon, SignInIcon as PhSignIn, SignOutIcon, SpeakerHighIcon as PhSpeakerHigh, SpeakerXIcon as PhSpeakerX, SunIcon as PhSun, TrendUpIcon,
-  UsersIcon, WalletIcon as PhWallet, WarningIcon, BellIcon as PhBell, BellRingingIcon, BellSlashIcon, UserMinusIcon,
+  UsersIcon, WalletIcon as PhWallet, WarningIcon, BellIcon as PhBell, BellRingingIcon, BellSlashIcon, UserMinusIcon, HouseIcon as PhHouse, TelevisionSimpleIcon,
   ArrowClockwiseIcon, ArrowCounterClockwiseIcon, CalendarDotsIcon as PhCalendarDots, CornersInIcon, CornersOutIcon, MicrophoneIcon as PhMicrophone, StopIcon as PhStop,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon, IconProps as PhosphorIconProps, IconWeight } from "@phosphor-icons/react";
@@ -32,6 +32,7 @@ export const MailIcon = createIcon(EnvelopeIcon);
 export const PhoneIcon = createIcon(PhPhone);
 
 export const HomeIcon = createFigmaIcon("home33");
+export const HomeOutlineIcon = createIcon(PhHouse);
 export const CartIcon = createFigmaIcon("shoppingCart24");
 export const ChatIcon = createFigmaIcon("chatCircle24");
 export const UserIcon = createFigmaIcon("userCircle24");
@@ -60,6 +61,7 @@ export const TagIcon = createFigmaIcon("tag24");
 export const BookmarkIcon = createFigmaIcon("bookmarkSimple24");
 export const CoinIcon = createFigmaIcon("coin24");
 export const ClipsIcon = createFigmaIcon("flips34");
+export const ClipsNavigationIcon = createIcon(TelevisionSimpleIcon);
 export const GiftIcon = createFigmaIcon("gift24");
 export const LiveIcon = createFigmaIcon("videoCamera24");
 export const SpacesIcon = createFigmaIcon("headset24");

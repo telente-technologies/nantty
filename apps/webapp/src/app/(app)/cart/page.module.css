@@ -99,6 +99,12 @@
   color: var(--ink-muted);
 }
 
+.unavailableNotice {
+  margin: 0;
+  color: var(--color-danger-text);
+  font-size: 0.8125rem;
+}
+
 .itemPrice {
   font-size: var(--text-lg);
   font-weight: 800;
@@ -192,6 +198,29 @@
 
 .moneyRowMuted {
   font-size: var(--text-sm);
+}
+
+.shippingError {
+  margin: 0;
+  color: var(--color-danger-text);
+  font-size: var(--text-sm);
+}
+
+.shippingError button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--color-brand);
+  font: inherit;
+  font-weight: 750;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.shippingError button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-small);
 }
 
 .summaryDivider {
