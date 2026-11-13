@@ -35,6 +35,8 @@ import { checkoutEscrowNote } from "@/utils/paymentCopy.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
+import { isCheckoutShippingQuoteReady } from "@/utils/checkoutShippingQuote.util";
+import { ApiError } from "@/errors/api.error";
 
 const isHandledProblem = (error: unknown) => describePaymentProblem(error) !== null;
 
@@ -58,6 +60,7 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
   const inFlight = useRef(false);
   const providerWallet = useProviderWallet();
   const [countryNeeded, setCountryNeeded] = useState(false);
+  const [quoteChanged, setQuoteChanged] = useState(false);
   useEffect(() => {
     void readSavedCardDisplay().then((card) => {
       setSavedCard(card);
@@ -72,13 +75,26 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
   };
   const addressId = chosenAddressId ?? addresses.data?.find((a) => a.isDefault)?.id ?? addresses.data?.[0]?.id ?? null;
   const cart = useMyCart(addressId);
-  const totalMinor = cart.data?.total.amountMinor ?? 0;
-  const walletCovers = !!providerWallet.active && totalMinor > 0 && providerWallet.spendableMinor >= totalMinor;
+  const shippingQuoteReady = isCheckoutShippingQuoteReady({
+    selectedAddressId: addressId,
+    quoteAddressId: cart.data?.addressId,
+    shippingQuoteRevision: cart.data?.shippingQuoteRevision,
+    hasQuote: Boolean(cart.data),
+    isFetching: cart.isFetching,
+    isPlaceholderData: cart.isPlaceholderData,
+    isError: cart.isError,
+  });
+  const deliverableGroupCount = cart.data?.groups.filter((group) => group.shipping.status === "calculated").length ?? 0;
+  const blockedGroupCount = cart.data?.groups.filter((group) => group.shipping.status === "notDeliverable").length ?? 0;
+  const totalMinor = shippingQuoteReady ? (cart.data?.total.amountMinor ?? 0) : 0;
+  const walletCovers = shippingQuoteReady && !!providerWallet.active && totalMinor > 0 && providerWallet.spendableMinor >= totalMinor;
   const usingWallet = payFromWallet && walletCovers;
 
   const placeOrderAndStartPayment = useMutation({
     mutationFn: async () => {
-      const result = await ordersService.checkoutCartIntoOrders(addressId!, checkoutKey.current, directChoicesFor(cart.data?.groups ?? [], paymentModes));
+      const revision = cart.data?.shippingQuoteRevision;
+      if (!revision) throw new Error("Refresh delivery details before placing your order.");
+      const result = await ordersService.checkoutCartIntoOrders(addressId!, revision, checkoutKey.current, directChoicesFor(cart.data?.groups ?? [], paymentModes));
       if (usingWallet) {
         const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, `${checkoutKey.current}-pay`);
         await providerWalletService.payFromWallet(payment.reference, `${checkoutKey.current}-wallet`);
@@ -110,6 +126,13 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
       navigation.replace("Payment", { orderId: payment.orderId, authorizationUrl: payment.authorizationUrl });
     },
     onError: (error) => {
+      if (error instanceof ApiError && error.code === "CART_CHANGED") {
+        checkoutKey.current = generateIdempotencyKey();
+        setPayFromWallet(false);
+        setQuoteChanged(true);
+        void cart.refetch();
+        return;
+      }
       const needsCountry = isCountryRequiredError(error);
       setCountryNeeded(needsCountry);
       if (needsCountry) return;
@@ -151,12 +174,12 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
           <>
             {placeOrderAndStartPayment.isError && !countryNeeded && !isHandledProblem(placeOrderAndStartPayment.error) ? (
               <Text size={typeScale.xs} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
-                Couldn't place your order. Please try again.
+                Couldn&apos;t place your order. Please try again.
               </Text>
             ) : null}
             <Button
               title={usingWallet ? "Pay from wallet" : "Pay securely"}
-              disabled={!addressId || !cart.data || cart.data.payableGroupCount === 0}
+              disabled={!addressId || !shippingQuoteReady || !cart.data || cart.data.payableGroupCount === 0}
               loading={placeOrderAndStartPayment.isPending}
               onPress={startPayment}
             />
@@ -174,6 +197,11 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
         ) : null}
         <View style={styles.section}>
           <Text size={typeScale.md} weight={600} lineHeight={16.8} accessibilityRole="header">Shipping address</Text>
+          {quoteChanged ? (
+            <Text size={typeScale.sm} lineHeight={19} color={colors.textMuted} accessibilityRole="status">
+              Your cart or delivery details changed. We refreshed the quote; review the updated total before placing your order.
+            </Text>
+          ) : null}
           {(addresses.data ?? []).map((address) => (
             <SelectableRow
               key={address.id}
@@ -189,6 +217,38 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
             </SelectableRow>
           ))}
           <Button variant="subtle" title="Add new address" onPress={() => navigation.navigate("AddressForm")} />
+          {!addressId ? (
+            <Text size={typeScale.sm} lineHeight={19} color={colors.textMuted} accessibilityRole="status">
+              Choose an address to calculate delivery and your order total.
+            </Text>
+          ) : null}
+          {addresses.isError ? (
+            <ErrorState
+              error={addresses.error}
+              compact
+              message={addresses.data?.length ? "Your saved addresses may be out of date." : "Couldn't load your saved addresses."}
+              onRetry={() => addresses.refetch()}
+              retrying={addresses.isRefetching}
+            />
+          ) : null}
+          {addressId && cart.isError ? (
+            <View accessibilityRole="alert">
+              <Text size={typeScale.sm} lineHeight={19} color={colors.error}>
+                We couldn’t calculate delivery for this address. Try again before placing your order.
+              </Text>
+              <Button variant="subtle" title={cart.isRefetching ? "Retrying delivery quote…" : "Retry delivery quote"} disabled={cart.isRefetching} onPress={() => { void cart.refetch(); }} />
+            </View>
+          ) : null}
+          {addressId && cart.isFetching && !cart.isError ? (
+            <Text size={typeScale.sm} lineHeight={19} color={colors.textMuted} accessibilityRole="status">
+              Calculating delivery for this address…
+            </Text>
+          ) : null}
+          {addressId && cart.data && !cart.data.shippingQuoteRevision ? (
+            <Text size={typeScale.sm} lineHeight={19} color={colors.error} accessibilityRole="alert">
+              We couldn’t verify this delivery quote. Refresh delivery details before placing your order.
+            </Text>
+          ) : null}
         </View>
         <View style={styles.section}>
           <Text size={typeScale.md} weight={600} lineHeight={16.8} accessibilityRole="header">Payment method</Text>
@@ -229,10 +289,20 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
         {cart.data ? (
           <View style={styles.section}>
             <Text size={typeScale.md} weight={600} lineHeight={16.8} accessibilityRole="header">Sellers and shipping</Text>
+            {shippingQuoteReady && blockedGroupCount > 0 && deliverableGroupCount > 0 ? (
+              <Text size={typeScale.sm} lineHeight={19} color={colors.textMuted} accessibilityRole="alert">
+                Some sellers can’t deliver to this address. Those items will stay in your cart while the deliverable items are checked out.
+              </Text>
+            ) : null}
+            {shippingQuoteReady && blockedGroupCount > 0 && deliverableGroupCount === 0 ? (
+              <Text size={typeScale.sm} lineHeight={19} color={colors.error} accessibilityRole="alert">
+                None of these sellers can deliver to this address. Choose another address or update your cart to continue.
+              </Text>
+            ) : null}
             {cart.data.groups.map((group) => (
-              <CartSellerGroupCard key={group.storeId} group={group} showItems={false} />
+              <CartSellerGroupCard key={group.storeId} group={group} showItems={false} shippingQuoteReady={shippingQuoteReady} />
             ))}
-            <CartGrandTotalCard cart={cart.data} />
+            <CartGrandTotalCard cart={cart.data} shippingQuoteReady={shippingQuoteReady} />
           </View>
         ) : null}
         <Text size={typeScale.xs} lineHeight={16.8} color={colors.textMuted}>

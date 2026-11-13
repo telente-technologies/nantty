@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { Linking, Pressable, RefreshControl, StyleSheet, View } from "react-native";
 
 import { ConfirmActionSheet } from "@/components/escrow/confirmActionSheet";
 import { useConfirmReceiptMutation, useEscrowForOrderQuery } from "@/components/escrow/escrowQueries.hook";
@@ -23,6 +23,7 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
 import { describeActionFailure } from "@/errors/errorExperience/describeError";
+import { buildSafePhoneLink } from "@/utils/phoneLink.util";
 
 export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderDetail">) {
   const { colors } = useTheme();
@@ -74,6 +75,7 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
   }
 
   const detail = order.data;
+  const riderPhone = detail.delivery?.riderPhone;
   const stage = escrow.data?.stage;
   const canConfirm = detail.status === "shipped" || detail.status === "delivered";
   const isDirect = detail.paymentMode === "direct";
@@ -139,7 +141,21 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
             {detail.delivery.riderName || detail.delivery.riderPhone ? (
               <View style={styles.row}>
                 <Text size={12} lineHeight={16.8} color={colors.textMuted}>Rider</Text>
-                <Text size={12} lineHeight={16.8} style={styles.deliveryValue}>{[detail.delivery.riderName, detail.delivery.riderPhone].filter(Boolean).join(" · ")}</Text>
+                <View style={styles.riderContact}>
+                  {detail.delivery.riderName ? <Text size={12} lineHeight={16.8} style={styles.deliveryValue}>{detail.delivery.riderName}</Text> : null}
+                  {riderPhone ? (
+                    <Pressable
+                      accessibilityRole="link"
+                      accessibilityLabel={`Call delivery rider at ${riderPhone}`}
+                      onPress={() => {
+                        const url = buildSafePhoneLink(riderPhone);
+                        if (url) void Linking.openURL(url).catch(() => undefined);
+                      }}
+                    >
+                      <Text size={12} lineHeight={16.8} color={colors.primary}>{riderPhone}</Text>
+                    </Pressable>
+                  ) : null}
+                </View>
               </View>
             ) : null}
             {detail.delivery.estimatedDeliveryAt ? (
@@ -156,6 +172,19 @@ export function OrderDetailScreen({ navigation, route }: MainScreenProps<"OrderD
             ) : null}
             {detail.delivery.lastAttemptNote ? <Text size={12} lineHeight={16.8} color={colors.textMuted}>Last attempt: {detail.delivery.lastAttemptNote}</Text> : null}
             {detail.delivery.status === "failed" ? <Text size={12} lineHeight={16.8} color={colors.textMuted}>The seller will try again. Contact them if your address or phone number has changed.</Text> : null}
+          </View>
+        ) : null}
+
+        {detail.timeline?.length ? (
+          <View style={styles.card} accessibilityLabel="Order updates">
+            <Text size={14} weight={600} lineHeight={16.8} accessibilityRole="header">Order updates</Text>
+            {[...detail.timeline].slice(-8).reverse().map((event) => (
+              <View key={event.id} style={styles.timelineEvent}>
+                <Text size={12} weight={600} lineHeight={16.8}>{event.summary}</Text>
+                <Text size={11} lineHeight={15.4} color={colors.textMuted}>{formatFriendlyDate(event.createdAt)}</Text>
+              </View>
+            ))}
+            <Text size={11} lineHeight={15.4} color={colors.textMuted}>Updates are recorded by Nantty from seller order actions. Live courier tracking may not be available.</Text>
           </View>
         ) : null}
 
@@ -235,6 +264,8 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 12 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
   deliveryValue: { flexShrink: 1, textAlign: "right" },
+  riderContact: { alignItems: "flex-end" },
+  timelineEvent: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.background, paddingTop: 10, gap: 2 },
   divider: { height: 1, backgroundColor: colors.background },
   footer: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 12 },
   footerRow: { flexDirection: "row", gap: 12 },

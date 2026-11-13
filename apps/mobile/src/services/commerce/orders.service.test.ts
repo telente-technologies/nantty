@@ -57,6 +57,18 @@ describe("ordersService pagination", () => {
     expect(mockGetPage).toHaveBeenCalledWith("/api/v1/returns", { cursor: undefined, limit: 100 });
   });
 
+  it("submits the reviewed shipping quote revision with checkout", async () => {
+    const checkout = { payableOrderId: "order-1" };
+    mockPost.mockResolvedValue(checkout);
+
+    await expect(ordersService.checkoutCartIntoOrders("address-1", "a".repeat(64), "checkout-key", { "store-1": "escrow" })).resolves.toBe(checkout);
+    expect(mockPost).toHaveBeenCalledWith(
+      "/api/v1/orders/checkout",
+      { addressId: "address-1", shippingQuoteRevision: "a".repeat(64), paymentModes: [{ storeId: "store-1", paymentMode: "escrow" }], directPaymentAccepted: false },
+      { idempotencyKey: "checkout-key" },
+    );
+  });
+
   it("submits the requested lines and reason to the order return route", async () => {
     const created = { id: "return-1", orderId: "order/1", status: "requested" };
     const input = { lines: [{ orderItemId: "line-1", quantity: 2 }], reason: "Item arrived damaged" };

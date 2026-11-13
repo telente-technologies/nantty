@@ -29,6 +29,8 @@ export function ProductReviewsScreen({ route }: MainScreenProps<"ProductReviews"
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
+  const firstPage = reviews.data?.pages[0];
+  const summaryForDisplay = summary.data ?? firstPage;
   const items = reviews.data?.pages.flatMap((page) => page.reviews) ?? [];
   const refreshControl = usePullToRefresh(reviews.refetch, summary.refetch);
 
@@ -42,14 +44,25 @@ export function ProductReviewsScreen({ route }: MainScreenProps<"ProductReviews"
           data={items}
           refreshControl={refreshControl}
           keyExtractor={(review) => review.id}
+          testID="product-reviews-list"
           contentContainerStyle={styles.list}
           onEndReachedThreshold={0.4}
           onEndReached={() => {
-            if (reviews.hasNextPage && !reviews.isFetchingNextPage) void reviews.fetchNextPage();
+            if (reviews.hasNextPage && !reviews.isFetchingNextPage && !reviews.isFetchNextPageError) void reviews.fetchNextPage();
           }}
           ListEmptyComponent={<EmptyState compact icon={<StarOutline16Icon size={24} color={colors.textMuted} />} title="No reviews yet" body="Buyers can rate this product after it's delivered." />}
-          ListHeaderComponent={summary.data && summary.data.count > 0 ? <View style={styles.summary}><RatingSummary summary={summary.data} /></View> : undefined}
-          ListFooterComponent={reviews.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} accessibilityLabel="Loading more reviews" /> : undefined}
+          ListHeaderComponent={summaryForDisplay && summaryForDisplay.count > 0 ? <View style={styles.summary}><RatingSummary summary={summaryForDisplay} /></View> : undefined}
+          ListFooterComponent={reviews.isFetchingNextPage ? (
+            <BrandLoader size="sm" style={styles.footer} accessibilityLabel="Loading more reviews" />
+          ) : reviews.isFetchNextPageError ? (
+            <ErrorState
+              error={reviews.error}
+              compact
+              message="Couldn't load more reviews."
+              onRetry={() => { void reviews.fetchNextPage(); }}
+              retrying={reviews.isFetchingNextPage}
+            />
+          ) : undefined}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           renderItem={({ item }) => {
             const isOwn = !!viewerId && item.author.id === viewerId;

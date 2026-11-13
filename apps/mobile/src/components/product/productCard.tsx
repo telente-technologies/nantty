@@ -8,6 +8,7 @@ import { makeThemedStyles, useTheme } from "@/theme";
 import { adEventsService } from "@/services/ads/adEvents.service";
 import type { AdPlacement, ProductSummary } from "@/types";
 import { formatProductPriceForDisplay } from "@/utils/formatMoney.util";
+import { VerificationBadge } from "@/components/profile/verificationBadge";
 
 export interface ProductCardProps {
   readonly product: ProductSummary;
@@ -44,6 +45,12 @@ export function ProductCard({ product, variant = "grid", imageHeight, width = 17
           <Text size={12} lineHeight={16.8} numberOfLines={1}>
             {product.name}
           </Text>
+          {product.storeName ? (
+            <View style={styles.storeIdentity}>
+              <Text size={11} lineHeight={14} numberOfLines={1} color={colors.textMuted}>{product.storeName}</Text>
+              {product.storeVerified ? <VerificationBadge checkmarkColor="gold" size={14} /> : null}
+            </View>
+          ) : null}
           <View style={styles.priceRow}>
             <Text size={14} weight={500} lineHeight={16.8}>
               {formatProductPriceForDisplay(product)}
@@ -102,6 +109,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   card: { gap: 8 },
   image: { width: "100%", backgroundColor: colors.placeholder, overflow: "hidden" },
   martInfo: { paddingHorizontal: 8, gap: 4 },
+  storeIdentity: { flexDirection: "row", alignItems: "center", gap: 3 },
   priceRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   gridInfo: { flexDirection: "row", justifyContent: "space-between", gap: 19 },
   gridText: { flex: 1, gap: 2 },

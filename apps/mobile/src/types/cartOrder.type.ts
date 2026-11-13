@@ -18,6 +18,7 @@ export interface Cart {
   readonly total: Money;
   readonly groups: readonly CartSellerGroup[];
   readonly addressId: string | null;
+  readonly shippingQuoteRevision?: string | null;
   readonly payableGroupCount: number;
 }
 
@@ -43,6 +44,13 @@ export interface OrderShipment {
   readonly estimatedDeliveryAt: ISODate | null;
 }
 
+export interface OrderTimelineEvent {
+	readonly id: ID;
+	readonly kind: string;
+	readonly summary: string;
+	readonly createdAt: ISODate;
+}
+
 export interface Order {
   readonly id: ID;
   readonly reference: string;
@@ -56,6 +64,7 @@ export interface Order {
   readonly paymentMode?: PaymentMode;
   readonly shipment?: OrderShipment | null;
   readonly delivery?: DeliveryDetails | null;
+  readonly timeline?: readonly OrderTimelineEvent[];
   readonly promotionIssue?: PromotionIssue | null;
 }
 

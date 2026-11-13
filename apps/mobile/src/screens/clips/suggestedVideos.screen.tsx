@@ -20,6 +20,8 @@ import { ForcedColorSchemeScope, useTheme } from "@/theme";
 import type { Clip, Post } from "@/types";
 import { buildSuggestedVideoSequence } from "@/utils/suggestedVideoSequence.util";
 
+import { buildClipsPagerItems } from "./clipsPagerItems.util";
+
 type SuggestedVideosScreenProps = NativeStackScreenProps<MainStackParamList, "SuggestedVideos">;
 
 const wellFormedClipIdPattern = /^[A-Za-z0-9_-]{1,64}$/;
@@ -60,7 +62,8 @@ export function SuggestedVideosScreen({ navigation, route }: SuggestedVideosScre
     enabled: streamEnabled,
   });
   const clips = useMemo(() => buildSuggestedVideoSequence(startClip, (stream.data?.pages ?? []).map((page) => page.data)), [startClip, stream.data]);
-  const pager = useClipPagerState(clips);
+  const pagerItems = useMemo(() => buildClipsPagerItems(clips, []), [clips]);
+  const pager = useClipPagerState(pagerItems);
 
   const goBack = () => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate("Tabs", { screen: "Home" }));
 
@@ -78,7 +81,7 @@ export function SuggestedVideosScreen({ navigation, route }: SuggestedVideosScre
     <View style={styles.root} onLayout={(event) => pager.keepActiveClipWhenPageHeightChanges(event.nativeEvent.layout.height)}>
       <ClipPagerList
         pager={pager}
-        clips={clips}
+        items={pagerItems}
         listKeyPrefix="suggested-videos"
         onEndReached={() => {
           if (stream.hasNextPage && !stream.isFetchingNextPage) stream.fetchNextPage().catch(() => undefined);

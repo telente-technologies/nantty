@@ -1,7 +1,6 @@
 import type { PostLocationTag } from "./clipCreate.type";
 import type { AdAppInstall, AdCard, AdClickLinks, AdCreativeType, AdDestination, AdPromotedEntity } from "./adCreative.type";
 import type { Money } from "./money.type";
-import type { Order } from "./cartOrder.type";
 import type { FollowState } from "./socialGraph.type";
 import type { MentionEntity } from "./mention.type";
 import type { TaggedUser } from "./taggedUser.type";
@@ -99,6 +98,18 @@ export interface ProductVariantGroup {
   readonly options: readonly string[];
 }
 
+export interface ProductVariant {
+  readonly id: ID;
+  readonly title: string;
+  readonly size: string;
+  readonly color: string;
+  readonly price: Money;
+  readonly approxPrice?: Money | null;
+  readonly priceIsRegional?: boolean;
+  readonly inStock: boolean;
+  readonly optionValues: Readonly<Record<string, string>>;
+}
+
 export interface ProductSummary {
   readonly id: ID;
   readonly name: string;
@@ -106,6 +117,8 @@ export interface ProductSummary {
   readonly approxPrice?: Money | null;
   readonly priceIsRegional?: boolean;
   readonly imageUrl: string | null;
+  readonly storeName?: string | null;
+  readonly storeVerified?: boolean;
   readonly liked?: boolean;
   readonly stock?: number;
   readonly sponsored?: SponsoredPlacement | null;
@@ -121,11 +134,18 @@ export interface Product extends ProductSummary {
   readonly promo: string | null;
   readonly sizes: readonly string[];
   readonly colors: readonly string[];
-  readonly variantGroups: readonly ProductVariantGroup[];
+  readonly variantGroups?: readonly ProductVariantGroup[] | null;
+  readonly variants?: readonly ProductVariant[];
   readonly shippingInfo: string;
   readonly description: string;
+  readonly attributes?: readonly ProductAttribute[];
   readonly store: ProductStoreSummary;
   readonly related: readonly ProductSummary[];
+}
+
+export interface ProductAttribute {
+  readonly name: string;
+  readonly value: string;
 }
 
 export type MediaProcessingStatus = "processing" | "ready" | "failed";

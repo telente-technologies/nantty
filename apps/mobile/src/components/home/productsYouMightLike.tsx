@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { ProductCard } from "@/components/product/productCard";
 import { VariantPickerSheet } from "@/components/product/variantPickerSheet";
@@ -17,47 +17,57 @@ import { requireAuthThen } from "@/utils/requireAuth.util";
 
 const CARD_WIDTH = 160;
 
-export const productsYouMightLikeQueryKey = (viewerId: string) => ["mart", "recommendations", "for-you", viewerId] as const;
+export type ProductRecommendationSurface = "for_you" | "mart_home" | "clips";
 
-export function useProductsYouMightLikeRecommendations({ enabled = true }: { readonly enabled?: boolean } = {}) {
+export const productsYouMightLikeQueryKey = (viewerId: string, surface: ProductRecommendationSurface = "for_you") => ["mart", "recommendations", surface, viewerId] as const;
+
+export function useProductsYouMightLikeRecommendations({ enabled = true, surface = "for_you" }: { readonly enabled?: boolean; readonly surface?: ProductRecommendationSurface } = {}) {
   const viewerId = useAuthStore((state) => state.user?.id ?? "guest");
   return useQuery({
     // Recommendations are personalized server-side; never reuse one account's
     // cached response after an account switch in the same app session.
-    queryKey: productsYouMightLikeQueryKey(viewerId),
-    queryFn: productsService.fetchProductsYouMightLike,
+    queryKey: productsYouMightLikeQueryKey(viewerId, surface),
+    queryFn: () => productsService.fetchProductsYouMightLike(surface),
     enabled,
     staleTime: 5 * 60 * 1000,
   });
 }
 
-type ProductsYouMightLikeQuery = ReturnType<typeof useProductsYouMightLikeRecommendations>;
+export type ProductsYouMightLikeQuery = ReturnType<typeof useProductsYouMightLikeRecommendations>;
 
 export function ProductsYouMightLike({
   recommendations: providedRecommendations,
   interactionSurface = "mart_recommendations",
   optional = false,
+  presentation = "shelf",
 }: {
   readonly recommendations?: ProductsYouMightLikeQuery;
-  readonly interactionSurface?: "mart_recommendations" | "feed_recommendations";
+  readonly interactionSurface?: "mart_recommendations" | "feed_recommendations" | "clips_recommendations";
   readonly optional?: boolean;
+  readonly presentation?: "shelf" | "clips";
 } = {}) {
   const styles = useStyles();
+  const { width: windowWidth } = useWindowDimensions();
   const navigation = useNavigation();
   const [pickerProductId, setPickerProductId] = useState<string | null>(null);
   const internalRecommendations = useProductsYouMightLikeRecommendations({ enabled: providedRecommendations === undefined });
   const recommendations = providedRecommendations ?? internalRecommendations;
   const { addProductToCart } = useCartActions();
   const products = recommendations.data?.products ?? [];
+  const isClipsPresentation = presentation === "clips";
+  const cardWidth = isClipsPresentation ? Math.min(320, Math.max(220, windowWidth * 0.74)) : CARD_WIDTH;
+  const imageHeight = isClipsPresentation ? Math.round(cardWidth * 1.03) : 183;
+  const sectionStyle = isClipsPresentation ? styles.clipsSection : styles.section;
+  const cardsStyle = isClipsPresentation ? [styles.cards, styles.clipsCards] : styles.cards;
 
   if (optional && (recommendations.isLoading || recommendations.isError || products.length === 0)) return null;
 
   if (recommendations.isLoading) {
     return (
-      <View style={styles.section} testID="productsYouMightLikeLoading" accessibilityState={{ busy: true }}>
+      <View style={sectionStyle} testID="productsYouMightLikeLoading" accessibilityState={{ busy: true }}>
         <Text size={18} weight={700}>Products you might like</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cards}>
-          {[0, 1, 2].map((item) => <View key={item} style={styles.placeholder} />)}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={cardsStyle}>
+          {[0, 1, 2].map((item) => <View key={item} style={[styles.placeholder, isClipsPresentation ? { width: cardWidth, height: imageHeight } : null]} />)}
         </ScrollView>
       </View>
     );
@@ -65,7 +75,7 @@ export function ProductsYouMightLike({
 
   if (recommendations.isError) {
     return (
-      <View style={styles.section} testID="productsYouMightLikeError">
+      <View style={sectionStyle} testID="productsYouMightLikeError">
         <Text size={18} weight={700}>Products you might like</Text>
         <ErrorState
           error={recommendations.error}
@@ -89,18 +99,28 @@ export function ProductsYouMightLike({
   }, undefined, "add to cart");
 
   return (
-    <View style={styles.section} testID="productsYouMightLike" accessibilityLabel={`Products you might like, ${products.length} products`}>
+    <View style={sectionStyle} testID="productsYouMightLike" accessibilityLabel={`Products you might like, ${products.length} products`}>
       <Text size={18} weight={700}>Products you might like</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cards}>
-        {products.map((product) => (
+      <ScrollView
+        horizontal
+        testID={isClipsPresentation ? "clipsProductRecommendationsCarousel" : undefined}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={cardsStyle}
+        snapToInterval={isClipsPresentation ? cardWidth + 16 : undefined}
+        snapToAlignment={isClipsPresentation ? "start" : undefined}
+        decelerationRate={isClipsPresentation ? "fast" : undefined}
+        nestedScrollEnabled={isClipsPresentation}
+      >
+        {products.map((product, position) => (
           <ProductCard
             key={product.id}
             product={product}
             variant="mart"
-            width={CARD_WIDTH}
-            imageHeight={183}
+            width={cardWidth}
+            imageHeight={imageHeight}
+            adPlacement={isClipsPresentation ? "clips" : "feed"}
             onPress={() => {
-              void trackProductInteraction("product.clicked", { productId: product.id, surface: interactionSurface });
+              void trackProductInteraction("product.clicked", { productId: product.id, position, surface: interactionSurface });
               navigation.navigate("ProductDetail", { productId: product.id });
             }}
             onAddToCart={() => addToCart(product)}
@@ -119,5 +139,7 @@ export function ProductsYouMightLike({
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   section: { gap: 12, paddingVertical: 16 },
   cards: { gap: 12, paddingHorizontal: 1 },
+  clipsSection: { flex: 1, justifyContent: "center", gap: 20, paddingVertical: 32 },
+  clipsCards: { gap: 16, paddingHorizontal: 24 },
   placeholder: { width: CARD_WIDTH, height: 240, borderRadius: 4, backgroundColor: colors.skeleton },
 }));

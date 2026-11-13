@@ -12,6 +12,7 @@ import { ClipsFeedState } from "@/components/clips/clipsFeedState";
 import { ClipsHeader } from "@/components/clips/clipsHeader";
 import { rememberClipGestureTipsSeen, shouldShowClipGestureTips } from "@/components/clips/clipGestureTipsSeen.util";
 import { GestureTipsOverlay } from "@/components/clips/gestureTipsOverlay";
+import { useProductsYouMightLikeRecommendations } from "@/components/home/productsYouMightLike";
 import { colors } from "@/constants/colors.constant";
 import type { MainStackParamList, MainTabParamList } from "@/navigation/navigation.types";
 import { clipsService } from "@/services/clips/clips.service";
@@ -19,6 +20,9 @@ import { useAuthStore } from "@/store/auth.store";
 import { isCommentsCursorExpiredError } from "@/hooks/useRestartCommentsOnExpiredCursor.hook";
 import { requireAuthThen } from "@/utils/requireAuth.util";
 import type { ClipsFeedTab } from "@/types";
+import { planProductsYouMightLikeSlots, shouldFetchProductsYouMightLike } from "@/utils/productsYouMightLikeLayout.util";
+
+import { buildClipsPagerItems } from "./clipsPagerItems.util";
 
 type ClipsScreenProps = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, "Clips">,
@@ -42,7 +46,19 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
   const clips = useMemo(() => clipsFeed.data?.pages.flatMap((page) => page.data) ?? [], [clipsFeed.data]);
-  const pager = useClipPagerState(clips);
+  const organicClipCount = clips.reduce((count, clip) => count + (clip.sponsored ? 0 : 1), 0);
+  const recommendations = useProductsYouMightLikeRecommendations({
+    enabled: shouldFetchProductsYouMightLike(organicClipCount, tab === "forYou"),
+    surface: "clips",
+  });
+  const productSlots = useMemo(() => planProductsYouMightLikeSlots(
+    clips,
+    [],
+    recommendations.isPending || recommendations.isError || (recommendations.data?.products.length ?? 0) > 0,
+    tab === "forYou",
+  ), [clips, recommendations.isPending, recommendations.isError, recommendations.data, tab]);
+  const pagerItems = useMemo(() => buildClipsPagerItems(clips, productSlots), [clips, productSlots]);
+  const pager = useClipPagerState(pagerItems);
   const { pageHeight, openListAtClip, setCommentsForClipId, commentsForClipId } = pager;
   const clipsCursorExpired = isCommentsCursorExpiredError(clipsFeed.error);
   useEffect(() => {
@@ -98,7 +114,8 @@ export function ClipsScreen({ navigation, route }: ClipsScreenProps) {
     <View style={styles.root} onLayout={(e) => pager.keepActiveClipWhenPageHeightChanges(e.nativeEvent.layout.height)}>
       <ClipPagerList
         pager={pager}
-        clips={clips}
+        items={pagerItems}
+        recommendations={recommendations}
         listKeyPrefix="clips-list"
         onEndReached={() => {
           if (clipsFeed.hasNextPage && !clipsFeed.isFetchingNextPage) clipsFeed.fetchNextPage().catch(() => undefined);

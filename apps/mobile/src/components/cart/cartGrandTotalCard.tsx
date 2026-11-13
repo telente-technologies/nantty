@@ -18,21 +18,35 @@ function GrandTotalLine({ label, amount, strong = false, negative = false }: { l
   );
 }
 
-export function CartGrandTotalCard({ cart }: { cart: Cart }) {
+export function CartGrandTotalCard({ cart, shippingQuoteReady = true }: { cart: Cart; shippingQuoteReady?: boolean }) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const excludedCount = cart.addressId ? cart.groups.length - cart.payableGroupCount : 0;
+  const excludedCount = shippingQuoteReady && cart.addressId ? cart.groups.length - cart.payableGroupCount : 0;
   return (
     <View style={styles.section}>
       <Text size={14} weight={600} lineHeight={16.8} accessibilityRole="header">Order total</Text>
       <View style={styles.card}>
         <GrandTotalLine label="Items" amount={cart.itemsTotal} />
-        <GrandTotalLine label="Shipping" amount={cart.shipping} />
+        {shippingQuoteReady ? (
+          <GrandTotalLine label="Shipping" amount={cart.shipping} />
+        ) : (
+          <View style={styles.line}>
+            <Text size={13} lineHeight={16.9}>Shipping</Text>
+            <Text size={13} lineHeight={16.9} color={colors.textMuted}>Quote pending</Text>
+          </View>
+        )}
         {cart.storeCredit.amountMinor > 0 ? <GrandTotalLine label="Store credit" amount={cart.storeCredit} negative /> : null}
-        <GrandTotalLine label="Total" amount={cart.total} strong />
+        {shippingQuoteReady ? (
+          <GrandTotalLine label="Total" amount={cart.total} strong />
+        ) : (
+          <View style={styles.line} accessibilityRole="text" accessibilityLabel="Total pending delivery quote">
+            <Text size={13} weight={600} lineHeight={16.9}>Total</Text>
+            <Text size={13} weight={600} lineHeight={16.9} color={colors.textMuted}>—</Text>
+          </View>
+        )}
         {excludedCount > 0 ? (
           <Text size={12} lineHeight={16.8} color={colors.textMuted}>
-            {excludedCount} {excludedCount === 1 ? "seller is" : "sellers are"} not included because they don't ship to your location.
+            {excludedCount} {excludedCount === 1 ? "seller is" : "sellers are"} not included because they do not ship to your location.
           </Text>
         ) : null}
       </View>

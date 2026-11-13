@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ScrollView, Share, StyleSheet, View } from "react-native";
 
 import { affiliateLinksService } from "@/services/commerce/affiliateLinks.service";
@@ -9,6 +9,7 @@ import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import { Frame69424Icon } from "@/components/icons";
 import { AboutShopCard } from "@/components/product/aboutShopCard";
 import { FeaturedProductsGrid } from "@/components/product/featuredProductsGrid";
+import { ProductAttributesSection } from "@/components/product/productAttributesSection";
 import { OptionSelect } from "@/components/product/optionSelect";
 import { ProductGallery } from "@/components/product/productGallery";
 import { ProductInfoSection } from "@/components/product/productInfoSection";
@@ -35,16 +36,19 @@ import { storesService } from "@/services/sellers/stores.service";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
 import { ErrorState } from "@/components/ui/errorState";
 import { webAppLinks } from "@/config/webAppLinks.config";
+import { findSelectedProductVariant, productPurchaseAvailability, readProductVariantGroups } from "@/utils/productVariants.util";
 import type { BrandedProduct } from "@/types/brand.type";
 import type { StoreDetail } from "@/types/commerce.type";
 
-const QUANTITY_OPTIONS = Array.from({ length: 10 }, (_, i) => String(i + 1));
+// Keep the picker within the cart API's accepted 1..99 line-quantity range.
+const QUANTITY_OPTIONS = Array.from({ length: 99 }, (_, i) => String(i + 1));
 
 export function ProductDetailScreen({ navigation, route }: MainScreenProps<"ProductDetail">) {
   const { colors } = useTheme();
   const styles = useStyles();
   const queryClient = useQueryClient();
   const isSignedIn = useAuthStore((state) => state.status === "signedIn");
+  const viewerId = useAuthStore((state) => state.user?.id ?? null);
   const { productId, aff: affiliateLinkId } = route.params;
   const product = useQuery({ queryKey: ["products", "detail", productId], queryFn: () => productsService.fetchProductDetailById(productId) });
   useEffect(() => {
@@ -56,9 +60,14 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
       () => undefined,
     );
   }, [affiliateLinkId, productId]);
+  const lastViewedKey = useRef<string | null>(null);
   useEffect(() => {
+    if (product.data?.id !== productId) return;
+    const viewKey = `${viewerId ?? "guest"}:${productId}`;
+    if (lastViewedKey.current === viewKey) return;
+    lastViewedKey.current = viewKey;
     void trackProductInteraction("product.viewed", { productId });
-  }, [productId]);
+  }, [product.data?.id, productId, viewerId]);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [variantSelections, setVariantSelections] = useState<Record<string, string>>({});
@@ -99,7 +108,7 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
     }
   };
 
-  const addSelectedProductToCart = () => {
+  const addSelectedProductToCart = (destination: "cart" | "checkout") => {
     const detail = product.data;
     if (!detail) return;
     if (detail.sizes.length > 0 && !selectedSize) {
@@ -110,16 +119,26 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
       setCartError("Choose a color first.");
       return;
     }
-    const missingGroup = (detail.variantGroups ?? []).find((group) => !variantSelections[group.name]);
+    const missingGroup = readProductVariantGroups(detail.variantGroups, detail.variants).find((group) => !variantSelections[group.name]);
     if (missingGroup) {
       setCartError(`Choose ${missingGroup.name} first.`);
       return;
     }
+    const selectedVariant = findSelectedProductVariant(detail, readProductVariantGroups(detail.variantGroups, detail.variants), selectedSize, selectedColor, variantSelections);
+    const purchaseAvailability = productPurchaseAvailability(detail, selectedVariant, false);
+    if (purchaseAvailability === "invalid_options") {
+      setCartError("These options aren't available together.");
+      return;
+    }
+    if (purchaseAvailability === "out_of_stock") {
+      setCartError("This option is currently out of stock.");
+      return;
+    }
     setCartError(null);
-    requireAuthThen(addValidatedProductToCart, undefined, "add to cart");
+    requireAuthThen(() => addValidatedProductToCart(destination), undefined, destination === "checkout" ? "buy now" : "add to cart");
   };
 
-  const addValidatedProductToCart = async () => {
+  const addValidatedProductToCart = async (destination: "cart" | "checkout") => {
     try {
       await addProductToCart.mutateAsync({
         productId,
@@ -128,7 +147,7 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
         color: selectedColor,
         variants: Object.keys(variantSelections).length > 0 ? variantSelections : null,
       });
-      navigation.navigate("Cart");
+      navigation.navigate(destination === "checkout" ? "Checkout" : "Cart");
     } catch {
       setCartError("Couldn't add to cart. Try again.");
     }
@@ -163,16 +182,23 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
   }
 
   const detail = product.data;
+  const variantGroups = readProductVariantGroups(detail.variantGroups, detail.variants);
+  const selectedVariant = findSelectedProductVariant(detail, variantGroups, selectedSize, selectedColor, variantSelections);
+  const needsOptionChoice = (detail.sizes.length > 0 && !selectedSize)
+    || (detail.colors.length > 0 && !selectedColor)
+    || variantGroups.some((group) => !variantSelections[group.name]);
+  const purchaseAvailability = productPurchaseAvailability(detail, selectedVariant, needsOptionChoice);
+  const isOutOfStock = purchaseAvailability === "out_of_stock";
   return (
     <Screen>
       {header}
       {sendInChatElement}
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.gallery}>
-          <ProductGallery images={detail.images} promo={detail.promo} />
+          <ProductGallery images={detail.images} fallbackImageUrl={detail.imageUrl} promo={detail.promo} />
         </View>
         <ProductPriceBlock
-          product={detail}
+          product={selectedVariant ? { ...detail, price: selectedVariant.price, approxPrice: selectedVariant.approxPrice ?? null } : detail}
           bookmarked={productSave.isSaved}
           saveCount={(detail.saveCount ?? 0) + productSave.savedDelta}
           onShare={() => offerSendInChat({ kind: "product", id: detail.id }, () => Share.share({ message: `${detail.name} on Nantty: ${webAppLinks.product(detail)}` }))}
@@ -185,7 +211,7 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
         <View style={styles.selectors}>
           {detail.sizes.length > 0 ? <OptionSelect label="Size" placeholder="Size (UK)" options={detail.sizes} value={selectedSize} onChange={setSelectedSize} /> : null}
           {detail.colors.length > 0 ? <OptionSelect label="Color" placeholder="Select an option" options={detail.colors} value={selectedColor} onChange={setSelectedColor} /> : null}
-          {(detail.variantGroups ?? []).map((group) => (
+          {variantGroups.map((group) => (
             <OptionSelect
               key={group.name}
               label={group.name}
@@ -206,7 +232,12 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
         </View>
         <View style={styles.divider} />
         <View style={styles.info}>
-          <ProductInfoSection title="Shipping & returns" body={detail.shippingInfo} />
+          <ProductInfoSection
+            title="Shipping & returns"
+            body={detail.shippingInfo}
+            note="Delivery availability and the final shipping cost are confirmed for your delivery address at checkout. Review the quote before paying."
+          />
+          <ProductAttributesSection attributes={detail.attributes ?? []} />
           <ProductInfoSection title="Description" body={detail.description} collapsible />
         </View>
         <View style={styles.divider} />
@@ -240,12 +271,33 @@ export function ProductDetailScreen({ navigation, route }: MainScreenProps<"Prod
         </View>
       </ScrollView>
       <View style={styles.bottomBar}>
+        {isOutOfStock ? (
+          <Text size={12} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
+            Out of stock
+          </Text>
+        ) : null}
         {cartError ? (
           <Text size={12} lineHeight={14.4} color={colors.error} align="center" accessibilityRole="alert">
             {cartError}
           </Text>
         ) : null}
-        <Button title="Add to Cart" loading={addProductToCart.isPending} onPress={addSelectedProductToCart} />
+        <View style={styles.purchaseActions}>
+          <Button
+            title="Add to Cart"
+            variant="subtle"
+            loading={addProductToCart.isPending}
+            disabled={isOutOfStock}
+            onPress={() => addSelectedProductToCart("cart")}
+            style={styles.purchaseAction}
+          />
+          <Button
+            title="Buy now"
+            loading={addProductToCart.isPending}
+            disabled={isOutOfStock}
+            onPress={() => addSelectedProductToCart("checkout")}
+            style={styles.purchaseAction}
+          />
+        </View>
       </View>
       <ReportProductSheet productId={productId} visible={reportSheetVisible} onClose={() => setReportSheetVisible(false)} />
     </Screen>
@@ -269,4 +321,6 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
     shadowRadius: 8,
     elevation: 12,
   },
+  purchaseActions: { flexDirection: "row", gap: 8 },
+  purchaseAction: { flex: 1 },
 }));

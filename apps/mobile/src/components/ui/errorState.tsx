@@ -13,7 +13,7 @@ import { makeThemedStyles, useTheme } from "@/theme";
 import { spacing } from "@/constants/spacing.constant";
 import { typeScale } from "@/constants/typography.constant";
 
-import { ErrorHalo } from "./errorHalo";
+import { ErrorHalo, readToneColors } from "./errorHalo";
 import { ErrorReference } from "./errorReference";
 import { Text } from "./text";
 
@@ -73,6 +73,7 @@ export function ErrorState(props: ErrorStateProps) {
   const heroSize = Math.max(112, Math.min(192, availableWidth * 0.4));
   const isOnline = useOfflineStore((state) => state.isOnline);
   const descriptor = describeError({ error: props.error, kind: props.kind, subject: props.subject, reference: props.reference, code: props.code, isOnline });
+  const toneColors = readToneColors(descriptor.tone, colors);
   const useCallerCopy = props.kind !== undefined || genericErrorKinds.has(descriptor.kind);
   const title = (useCallerCopy ? (props.title ?? props.message) : undefined) ?? descriptor.title;
   const description = (useCallerCopy ? (props.description ?? props.detail) : undefined) ?? descriptor.description;
@@ -106,7 +107,7 @@ export function ErrorState(props: ErrorStateProps) {
       accessibilityLiveRegion={descriptor.live === "alert" ? "assertive" : "polite"}
       testID={`error-state-${descriptor.kind}`}
       onLayout={({ nativeEvent }) => setContainerWidth(nativeEvent.layout.width)}
-      style={[styles.root, styles[variant], stackInline ? styles.stackedInline : null, variant === "compact" ? { backgroundColor: colors.surface, borderColor: colors.divider } : null, isInline ? { backgroundColor: colors.sunken } : null]}
+      style={[styles.root, styles[variant], stackInline ? styles.stackedInline : null, !isInline ? { backgroundColor: colors.surface, borderColor: toneColors.tint } : null, isInline ? { backgroundColor: colors.sunken } : null]}
     >
       <View style={styles.visual}>
         {variant === "page" && descriptor.hero ? (
@@ -170,9 +171,9 @@ export function ErrorScreen(props: Omit<ErrorStateProps, "variant" | "compact">)
 
 const useStyles = makeThemedStyles(() => StyleSheet.create({
   root: { minWidth: 0, alignItems: "center", justifyContent: "center", gap: spacing[5], paddingHorizontal: spacing[6], alignSelf: "stretch" },
-  page: { flexGrow: 1, minHeight: 420, paddingVertical: spacing[9], gap: spacing[8] },
-  section: { minHeight: 260, paddingVertical: spacing[7] },
-  compact: { alignSelf: "center", width: "100%", maxWidth: 480, paddingVertical: spacing[6], gap: spacing[3], borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, marginVertical: spacing[3] },
+  page: { flexGrow: 1, width: "100%", maxWidth: 960, minHeight: 420, paddingVertical: spacing[9], gap: spacing[7], alignSelf: "center", borderWidth: StyleSheet.hairlineWidth, borderRadius: 32, overflow: "hidden" },
+  section: { minHeight: 260, paddingVertical: spacing[7], borderRadius: 24, borderWidth: StyleSheet.hairlineWidth },
+  compact: { alignSelf: "center", width: "100%", maxWidth: 480, paddingVertical: spacing[6], gap: spacing[3], borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, marginVertical: spacing[3] },
   inline: { flexDirection: "row", gap: spacing[3], paddingVertical: spacing[3], paddingHorizontal: spacing[4], borderRadius: 12, marginVertical: spacing[2] },
   visual: { alignItems: "center", justifyContent: "center" },
   hero: { position: "absolute", opacity: 0.12, letterSpacing: -6 },

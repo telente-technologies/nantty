@@ -8,16 +8,18 @@ import { makeThemedStyles } from "@/theme";
 
 export interface ProductGalleryProps {
   readonly images: readonly string[];
+  readonly fallbackImageUrl?: string | null;
   readonly promo: string | null;
 }
 
-export function ProductGallery({ images, promo }: ProductGalleryProps) {
+export function ProductGallery({ images, fallbackImageUrl, promo }: ProductGalleryProps) {
   const styles = useStyles();
   const { width } = useWindowDimensions();
   const pageWidth = Math.min(width, 393);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const { openImagePreview, imagePreviewElement } = useImagePreview();
-  const pages: (string | null)[] = images.length > 0 ? [...images] : [null, null, null, null];
+  const galleryImages = images.length > 0 ? images : fallbackImageUrl ? [fallbackImageUrl] : [];
+  const pages: (string | null)[] = galleryImages.length > 0 ? [...galleryImages] : [null, null, null, null];
 
   return (
     <View>
@@ -39,7 +41,7 @@ export function ProductGallery({ images, promo }: ProductGalleryProps) {
             accessibilityLabel={`Product image ${index + 1} of ${pages.length}`}
             accessibilityHint={item ? "Opens the image full screen" : undefined}
             disabled={!item}
-            onPress={() => openImagePreview(images, index)}
+            onPress={() => openImagePreview(galleryImages, index)}
           >
             {item ? <Image source={{ uri: item }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
           </Pressable>

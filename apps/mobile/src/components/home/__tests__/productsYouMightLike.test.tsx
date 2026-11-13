@@ -41,15 +41,18 @@ const product: ProductSummary = {
   imageUrl: null,
   hasVariants: false,
 };
+const secondProduct: ProductSummary = { ...product, id: "product_2", name: "Woven Scarf" };
 
 const renderSection = async (
-  interactionSurface?: "mart_recommendations" | "feed_recommendations",
+  interactionSurface?: "mart_recommendations" | "feed_recommendations" | "clips_recommendations",
   optional = false,
   recommendations: Record<string, unknown> = { isLoading: false, isError: false, data: { products: [product], source: "personalized" } },
+  presentation: "shelf" | "clips" = "shelf",
 ) => {
   return await render(createElement(ProductsYouMightLike, {
     interactionSurface,
     optional,
+    presentation,
     recommendations: recommendations as never,
   }));
 };
@@ -76,12 +79,43 @@ test("renders recommended products and hides the section for an empty response",
 });
 
 test("tracks the organic feed recommendation click surface and opens product detail", async () => {
-  const view = await renderSection("feed_recommendations");
+  const view = await renderSection("feed_recommendations", false, {
+    isLoading: false,
+    isError: false,
+    data: { products: [product, secondProduct], source: "personalized" },
+  });
+
+  fireEvent.press(view.getByLabelText("Open Woven Scarf"));
+
+  expect(trackProductInteraction).toHaveBeenCalledWith("product.clicked", { productId: "product_2", position: 1, surface: "feed_recommendations" });
+  expect(mockNavigate).toHaveBeenCalledWith("ProductDetail", { productId: "product_2" });
+});
+
+test("uses a swipe-snapping horizontal carousel presentation for Clips recommendations", async () => {
+  const view = await renderSection("feed_recommendations", false, undefined, "clips");
+  const carousel = view.getByTestId("clipsProductRecommendationsCarousel");
+
+  expect(carousel.props.horizontal).toBe(true);
+  expect(carousel.props.snapToInterval).toBeGreaterThan(0);
+  expect(carousel.props.snapToAlignment).toBe("start");
+  expect(carousel.props.decelerationRate).toBe("fast");
+  expect(carousel.props.nestedScrollEnabled).toBe(true);
+});
+
+test("tracks Clips carousel clicks with the consent-gated Clips surface", async () => {
+  const view = await renderSection("clips_recommendations", false, {
+    isLoading: false,
+    isError: false,
+    data: { products: [product], source: "personalized" },
+  }, "clips");
 
   fireEvent.press(view.getByLabelText("Open Handwoven Tote"));
 
-  expect(trackProductInteraction).toHaveBeenCalledWith("product.clicked", { productId: "product_1", surface: "feed_recommendations" });
-  expect(mockNavigate).toHaveBeenCalledWith("ProductDetail", { productId: "product_1" });
+  expect(trackProductInteraction).toHaveBeenCalledWith("product.clicked", {
+    productId: "product_1",
+    position: 0,
+    surface: "clips_recommendations",
+  });
 });
 
 test("keeps loading and failed optional feed recommendations silent", async () => {
@@ -105,5 +139,6 @@ test("keeps loading and failed optional feed recommendations silent", async () =
 
 test("does not reuse another account's personalized recommendation cache", () => {
   expect(productsYouMightLikeQueryKey("account-1")).not.toEqual(productsYouMightLikeQueryKey("account-2"));
+  expect(productsYouMightLikeQueryKey("account-1", "for_you")).not.toEqual(productsYouMightLikeQueryKey("account-1", "mart_home"));
 });
 

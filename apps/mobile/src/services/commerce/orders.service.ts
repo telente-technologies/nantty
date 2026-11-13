@@ -5,10 +5,10 @@ import { api } from "../core/apiClient.service";
 
 export const ordersService = {
   fetchMyShippingAddresses: () => api.getList<Address>("/api/v1/users/me/addresses"),
-  checkoutCartIntoOrders: (addressId: string, idempotencyKey: string, paymentModes: Readonly<Record<string, PaymentMode>> = {}) =>
+  checkoutCartIntoOrders: (addressId: string, shippingQuoteRevision: string, idempotencyKey: string, paymentModes: Readonly<Record<string, PaymentMode>> = {}) =>
     api.post<CheckoutResult>(
       "/api/v1/orders/checkout",
-      { addressId, paymentModes: Object.entries(paymentModes).map(([storeId, paymentMode]) => ({ storeId, paymentMode })), directPaymentAccepted: Object.values(paymentModes).includes("direct") },
+      { addressId, shippingQuoteRevision, paymentModes: Object.entries(paymentModes).map(([storeId, paymentMode]) => ({ storeId, paymentMode })), directPaymentAccepted: Object.values(paymentModes).includes("direct") },
       { idempotencyKey },
     ),
   fetchMyOrders: (status: OrderStatus | null) => api.getList<Order>("/api/v1/orders", { status: status ?? undefined }),

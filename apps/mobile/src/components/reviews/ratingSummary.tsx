@@ -7,10 +7,12 @@ import { ratingBreakdown, starsLabel } from "@/utils/productReviews.util";
 
 import { StarRating } from "./starRating";
 
-export function RatingSummary({ summary }: { summary: ProductRatingSummary }) {
+type RatingSummaryData = Pick<ProductRatingSummary, "average" | "count"> & { readonly distribution?: ProductRatingSummary["distribution"] };
+
+export function RatingSummary({ summary }: { summary: RatingSummaryData }) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const rows = ratingBreakdown(summary);
+  const rows = summary.distribution ? ratingBreakdown({ count: summary.count, distribution: summary.distribution }) : [];
   return (
     <View style={styles.wrap}>
       <View style={styles.headline} accessible accessibilityLabel={`Rated ${starsLabel(summary.average)} from ${summary.count} ${summary.count === 1 ? "review" : "reviews"}`}>
@@ -20,7 +22,7 @@ export function RatingSummary({ summary }: { summary: ProductRatingSummary }) {
           {summary.count} {summary.count === 1 ? "review" : "reviews"}
         </Text>
       </View>
-      <View style={styles.bars}>
+      {rows.length ? <View style={styles.bars}>
         {rows.map((row) => (
           <View key={row.star} style={styles.barRow} accessible accessibilityLabel={`${row.star} stars: ${row.count} ${row.count === 1 ? "review" : "reviews"}`}>
             <Text size={12} lineHeight={14.4} color={colors.textMuted} style={styles.starLabel}>{row.star}</Text>
@@ -30,7 +32,7 @@ export function RatingSummary({ summary }: { summary: ProductRatingSummary }) {
             <Text size={12} lineHeight={14.4} color={colors.textSubtle} style={styles.count}>{row.count}</Text>
           </View>
         ))}
-      </View>
+      </View> : null}
     </View>
   );
 }

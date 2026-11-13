@@ -10,9 +10,10 @@ export interface ProductInfoSectionProps {
   readonly title: string;
   readonly body: string;
   readonly collapsible?: boolean;
+  readonly note?: string;
 }
 
-export function ProductInfoSection({ title, body, collapsible = false }: ProductInfoSectionProps) {
+export function ProductInfoSection({ title, body, collapsible = false, note }: ProductInfoSectionProps) {
   const { colors } = useTheme();
   const [expanded, setExpanded] = useState(true);
   const heading = (
@@ -36,7 +37,10 @@ export function ProductInfoSection({ title, body, collapsible = false }: Product
         <View style={styles.titleRow}>{heading}</View>
       )}
       {expanded ? (
-        <MentionText text={body} size={13} lineHeight={16.9} color={colors.textMuted} />
+        <>
+          <MentionText text={body} size={13} lineHeight={16.9} color={colors.textMuted} />
+          {note ? <Text size={12} lineHeight={16.8} color={colors.textSubtle}>{note}</Text> : null}
+        </>
       ) : null}
     </View>
   );

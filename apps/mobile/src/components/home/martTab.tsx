@@ -20,7 +20,8 @@ import { GridSkeleton } from "@/components/ui/gridSkeleton";
 import { usePullToRefresh } from "@/components/ui/pullToRefresh.hook";
 import { spacing } from "@/constants/spacing.constant";
 import { MartProductAd, type MartProductAdViewport } from "@/components/ads/martProductAd";
-import { ProductsYouMightLike } from "@/components/home/productsYouMightLike";
+import { useProductsYouMightLikeRecommendations } from "./productsYouMightLike";
+import { prioritizeMartRecommendations } from "@/utils/martRecommendations.util";
 
 const COLLECTION_FOR_TILE = {
   sales: { collection: "sales_of_the_day", name: "Sales of the Day" },
@@ -50,6 +51,7 @@ export function MartTab() {
   const [heroVisible, setHeroVisible] = useState(true);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const martHome = useQuery({ queryKey: ["mart-home"], queryFn: productsService.fetchMartHome });
+  const recommendations = useProductsYouMightLikeRecommendations({ enabled: selectedCategoryId === null, surface: "mart_home" });
   const highlights = useMartHighlights();
   const products = useInfiniteQuery({
     queryKey: ["products", "page", selectedCategoryId],
@@ -58,6 +60,9 @@ export function MartTab() {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
   const allProducts = (products.data?.pages ?? []).flatMap((page) => page.data);
+  const martProducts = selectedCategoryId || !recommendations.data?.products.length
+    ? allProducts
+    : prioritizeMartRecommendations(allProducts, recommendations.data.products);
   const refreshControl = usePullToRefresh(products.refetch, martHome.refetch, highlights.refetch);
 
   const openHighlight = (highlight: MartHighlight) => {
@@ -130,15 +135,14 @@ export function MartTab() {
         }}
       >
         <MartProductAd viewport={martAdViewport} registerViewabilityEvaluator={registerMartAdViewabilityEvaluator} />
-        <ProductsYouMightLike />
         {products.isLoading ? (
           <GridSkeleton />
-        ) : allProducts.length === 0 && products.isError ? (
+        ) : martProducts.length === 0 && products.isError ? (
           <ErrorState error={products.error} compact message="Couldn't load products." onRetry={() => products.refetch()} retrying={products.isRefetching} />
-        ) : allProducts.length === 0 ? (
+        ) : martProducts.length === 0 ? (
           <EmptyState compact title="No products here yet" body="Try another category or search the mart." actionLabel="Search the mart" onAction={() => navigation.navigate("Search", { scope: "mart" })} />
         ) : (
-          <ProductMasonry products={allProducts} />
+          <ProductMasonry products={martProducts} adPlacement="mart" interactionSurface="mart_home" />
         )}
         {products.isFetchingNextPage ? <BrandLoader size="sm" style={styles.footer} /> : <View style={styles.footer} />}
       </View>

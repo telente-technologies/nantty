@@ -66,11 +66,12 @@ const markCheckoutGroupAsPaid = (orderId: string) => {
 
 export const ordersMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/orders/checkout", ({ body }) => {
-    const { addressId } = body as { addressId?: string };
+    const { addressId, shippingQuoteRevision } = body as { addressId?: string; shippingQuoteRevision?: string };
     const address = addressId ? findSignedInAddress(addressId) : undefined;
     if (!address) throw new ApiError(422, "Choose a delivery address");
     if (mockCartState.lines.length === 0) throw new ApiError(422, "Your cart is empty");
     const cart = summariseMockCart({ countryId: address.countryId, stateId: address.stateId, lgaId: address.lgaId, cityId: address.cityId }, address.id);
+    if (shippingQuoteRevision !== cart.shippingQuoteRevision) throw new ApiError(409, "Your cart or delivery details changed. Refresh the quote before checkout.", "CART_CHANGED");
     const payableStoreIds = cart.groups.filter(isGroupPayable).map((group) => group.storeId);
     if (payableStoreIds.length === 0) throw new ApiError(422, "None of the sellers in your cart ship to this address");
     const records = createOrderRecordsFromCart(payableStoreIds);

@@ -50,9 +50,9 @@ export function ProductPriceBlock({ product, bookmarked, saveCount, onShare, onT
           {product.title}
         </Text>
       </View>
-      <Pressable accessibilityRole="button" accessibilityLabel={`Rated ${starsLabel(product.rating)}, see reviews`} onPress={onPressRating} style={styles.rating}>
+      <Pressable accessibilityRole="button" accessibilityLabel={product.rating > 0 ? `Rated ${starsLabel(product.rating)}, see reviews` : "No ratings yet, see reviews"} onPress={onPressRating} style={styles.rating}>
         <Text size={12} weight={500} lineHeight={14.4}>
-          {product.rating.toFixed(1)}
+          {product.rating > 0 ? product.rating.toFixed(1) : "New"}
         </Text>
         <Star16Icon />
       </Pressable>

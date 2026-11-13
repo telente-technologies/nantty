@@ -4,12 +4,13 @@ import { CartItemRow } from "@/components/cart/cartItemRow";
 import { ShippingStatusLine } from "@/components/cart/shippingStatusLine";
 import { MoneyAmount } from "@/components/product/moneyAmount";
 import { Text } from "@/components/ui/text";
-import { makeThemedStyles } from "@/theme";
+import { makeThemedStyles, useTheme } from "@/theme";
 import type { CartSellerGroup, Money } from "@/types";
 
 export interface CartSellerGroupCardProps {
   readonly group: CartSellerGroup;
   readonly showItems?: boolean;
+  readonly shippingQuoteReady?: boolean;
   readonly onOpenProduct?: (productId: string) => void;
   readonly onChangeQuantity?: (cartItemId: string, quantity: number) => void;
   readonly onRemove?: (cartItemId: string) => void;
@@ -25,7 +26,8 @@ function AmountLine({ label, amount, strong = false }: { label: string; amount: 
   );
 }
 
-export function CartSellerGroupCard({ group, showItems = true, onOpenProduct, onChangeQuantity, onRemove }: CartSellerGroupCardProps) {
+export function CartSellerGroupCard({ group, showItems = true, shippingQuoteReady = true, onOpenProduct, onChangeQuantity, onRemove }: CartSellerGroupCardProps) {
+  const { colors } = useTheme();
   const styles = useStyles();
   const isBlocked = group.shipping.status === "notDeliverable";
   return (
@@ -45,8 +47,16 @@ export function CartSellerGroupCard({ group, showItems = true, onOpenProduct, on
       <View style={styles.lines}>
         <AmountLine label="Subtotal" amount={group.subtotal} />
         <AmountLine label="Discounts" amount={group.discounts} />
-        <ShippingStatusLine group={group} />
-        {isBlocked ? null : <AmountLine label="Seller total" amount={group.total} strong />}
+        {shippingQuoteReady ? (
+          <>
+            <ShippingStatusLine group={group} />
+            {isBlocked ? null : <AmountLine label="Seller total" amount={group.total} strong />}
+          </>
+        ) : (
+          <Text size={12} lineHeight={16.8} color={colors.textMuted} accessibilityRole="status">
+            Delivery total updates after the address quote is ready.
+          </Text>
+        )}
       </View>
     </View>
   );

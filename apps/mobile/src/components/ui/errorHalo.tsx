@@ -51,11 +51,8 @@ export function ErrorHalo({ icon, tone, motion, size, animated = true }: ErrorHa
   const enabled = animated && !reduceMotion;
   const motionStyle = useMotionStyle(motion, enabled);
   const { ink, tint } = readToneColors(tone, colors);
-  const ring = Math.round(size * 0.14);
   return (
-    <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden style={{ width: size + ring * 4, height: size + ring * 4, alignItems: "center", justifyContent: "center" }}>
-      <View style={[StyleSheet.absoluteFill, { borderRadius: 999, backgroundColor: tint, opacity: 0.35 }]} />
-      <View style={{ position: "absolute", width: size + ring * 2, height: size + ring * 2, borderRadius: 999, backgroundColor: tint, opacity: 0.7 }} />
+    <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden style={{ width: size + 28, height: size + 28, alignItems: "center", justifyContent: "center" }}>
       <Animated.View style={[styles.core, { width: size, height: size, backgroundColor: colors.surface, borderColor: tint, shadowColor: ink }, enabled ? motionStyle : null]}>
         <ErrorGlyph name={icon} size={Math.round(size * 0.46)} color={ink} />
       </Animated.View>
@@ -64,5 +61,5 @@ export function ErrorHalo({ icon, tone, motion, size, animated = true }: ErrorHa
 }
 
 const styles = StyleSheet.create({
-  core: { borderRadius: 999, borderWidth: 3, alignItems: "center", justifyContent: "center", shadowOpacity: 0.22, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 6 },
+  core: { borderRadius: 999, borderWidth: StyleSheet.hairlineWidth, alignItems: "center", justifyContent: "center", shadowOpacity: 0.24, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 4 },
 });

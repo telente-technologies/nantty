@@ -12,17 +12,18 @@ import type { AdPlacement, ProductSummary } from "@/types";
 const TALL_IMAGE = 227;
 const SHORT_IMAGE = 183;
 
-export function ProductMasonry({ products, adPlacement = "mart", searchQuery, searchResultCount }: {
+export function ProductMasonry({ products, adPlacement = "mart", searchQuery, searchResultCount, interactionSurface }: {
   products: readonly ProductSummary[];
   adPlacement?: AdPlacement;
   searchQuery?: string;
   searchResultCount?: number;
+  interactionSurface?: "mart_home";
 }) {
   const navigation = useNavigation();
   const { addProductToCart } = useCartActions();
   const [pickerProductId, setPickerProductId] = useState<string | null>(null);
-  const columns: [ProductSummary[], ProductSummary[]] = [[], []];
-  products.forEach((product, index) => columns[index % 2]!.push(product));
+  const columns: [{ product: ProductSummary; position: number }[], { product: ProductSummary; position: number }[]] = [[], []];
+  products.forEach((product, position) => columns[position % 2]!.push({ product, position }));
 
   const quickAdd = (product: ProductSummary) => {
     requireAuthThen(
@@ -42,7 +43,7 @@ export function ProductMasonry({ products, adPlacement = "mart", searchQuery, se
     <View style={styles.grid}>
       {columns.map((column, columnIndex) => (
         <View key={columnIndex} style={styles.column}>
-          {column.map((product, rowIndex) => (
+          {column.map(({ product, position }, rowIndex) => (
             <ProductCard
               key={product.id}
               product={product}
@@ -53,6 +54,8 @@ export function ProductMasonry({ products, adPlacement = "mart", searchQuery, se
               onPress={() => {
                 void trackProductInteraction("product.clicked", {
                   productId: product.id,
+                  position,
+                  ...(interactionSurface ? { surface: interactionSurface } : {}),
                   ...(adPlacement === "search" && searchQuery ? { surface: "search", query: searchQuery, resultCount: searchResultCount ?? 0 } : {}),
                 });
                 navigation.navigate("ProductDetail", { productId: product.id });
