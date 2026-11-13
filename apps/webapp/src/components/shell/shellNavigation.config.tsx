@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
+export { getBottomNavigationHrefs, MOBILE_PRIMARY_NAVIGATION_HREFS, isNavItemActive } from "./shellNavigation.routes";
 
 import {
   BellIcon,
   BookmarkIcon,
   ChatIcon,
-  ClipsIcon,
   ClipsNavigationIcon,
   CompassIcon,
   CreatorIcon,
@@ -69,12 +69,6 @@ export function buildBottomNavigationItems(isSignedIn: boolean, counts: ShellBad
     { href: "/chats", label: "Chats", icon: <ChatIcon />, badgeCount: counts.chats },
     { href: isSignedIn ? "/me" : "/login", label: "Me", icon: <UserIcon /> },
   ];
-}
-
-export function isNavItemActive(href: string, pathname: string): boolean {
-  if (href === "/") return pathname === "/";
-  if (href === "/me") return pathname === "/me";
-  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function formatBadgeCount(count: number): string {
