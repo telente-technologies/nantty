@@ -11,10 +11,9 @@ import { SelectField, TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
 import { Pagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
-import { Toolbar } from "@/components/ui/surfaces";
+import { Card, Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
 import { UserIdentity } from "@/components/ui/userIdentity";
-import { Card } from "@/components/ui/surfaces";
 import { supportAssigneeTabs, supportCategoryOptions, supportPriorityOptions, supportStatusOptions } from "@/constants/supportOptions.constant";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { fetchSupportTickets } from "@/services/supportApi.service";
@@ -71,10 +70,10 @@ export function TicketsWorkspace() {
     setPage(1);
   }
 
-  function searchDeveloperArea(term: "developer" | "sandbox") {
+  function filterDeveloperArea(category: Extract<SupportTicketSummary["category"], "DEVELOPER" | "SANDBOX">) {
     updateFilter(() => {
-      setSearchText(term);
-      setCategory("");
+      setSearchText("");
+      setCategory(category);
     });
   }
 
@@ -89,17 +88,17 @@ export function TicketsWorkspace() {
       <SegmentedTabs label="Assignee" items={supportAssigneeTabs} activeKey={assignee} onChange={(key) => updateFilter(() => setAssignee(key))} />
       <Card title="Developer Portal & Sandbox triage">
         <div className={styles.triageIntro}>
-          <p>Use the existing ticket queue while these products have no dedicated support categories in the support API.</p>
-          <p className={styles.muted}>Quick searches match ticket subject, linked reference, requester username, or ticket number — not message bodies. They do not change a ticket’s category.</p>
+          <p>Use the dedicated ticket categories to route integration requests through the existing support queue.</p>
+          <p className={styles.muted}>Select a category to filter the ticket list. This does not change ticket status, assignment, or the underlying support workflow.</p>
         </div>
         <div className={styles.triageActions}>
           <div className={styles.triageAction}>
             <div className={styles.triageTitle}><strong>Developer Portal</strong><span className={styles.muted}>Access, credentials, API requests</span></div>
-            <Button iconName="textIndent24" onClick={() => searchDeveloperArea("developer")}>Search matching subjects</Button>
+            <Button iconName="textIndent24" aria-pressed={category === "DEVELOPER"} onClick={() => filterDeveloperArea("DEVELOPER")}>Filter Developer Portal tickets</Button>
           </div>
           <div className={styles.triageAction}>
             <div className={styles.triageTitle}><strong>Sandbox</strong><span className={styles.muted}>Test environment and integrations</span></div>
-            <Button iconName="play24" onClick={() => searchDeveloperArea("sandbox")}>Search matching subjects</Button>
+            <Button iconName="play24" aria-pressed={category === "SANDBOX"} onClick={() => filterDeveloperArea("SANDBOX")}>Filter Sandbox tickets</Button>
           </div>
         </div>
         <p className={styles.triageSafety}>Triage note: request the environment, timestamp, endpoint, response status, and request ID. Never ask customers to share secret keys or access tokens.</p>
