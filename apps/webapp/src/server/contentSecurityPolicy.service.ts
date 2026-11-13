@@ -48,12 +48,12 @@ export function buildContentSecurityPolicyHeaderValue(options: { readonly isIden
   const extraOrigins = options.isIdentityVerification ? smileIdOrigins : [];
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
-    "script-src": ["'self'", "'unsafe-inline'", "https://challenges.cloudflare.com", ...(isDevelopmentBuild ? ["'unsafe-eval'"] : []), ...(options.isIdentityVerification ? ["https://cdn.smileidentity.com"] : [])],
-    "frame-src": ["https://challenges.cloudflare.com", ...extraOrigins],
+    "script-src": ["'self'", "'unsafe-inline'", "https://challenges.cloudflare.com", "https://accounts.google.com", "https://appleid.cdn-apple.com", ...(isDevelopmentBuild ? ["'unsafe-eval'"] : []), ...(options.isIdentityVerification ? ["https://cdn.smileidentity.com"] : [])],
+    "frame-src": ["https://challenges.cloudflare.com", "https://accounts.google.com", "https://appleid.apple.com", ...extraOrigins],
     "style-src": ["'self'", "'unsafe-inline'"],
     "img-src": ["'self'", "data:", "blob:", "https:", ...(isDevelopmentBuild ? ["http:"] : [])],
     "font-src": ["'self'"],
-    "connect-src": ["'self'", readRealtimeConnectOrigin(), ...readMediaUploadOrigins(), ...readLiveKitOrigins(), ...extraOrigins],
+    "connect-src": ["'self'", "https://accounts.google.com", "https://appleid.apple.com", readRealtimeConnectOrigin(), ...readMediaUploadOrigins(), ...readLiveKitOrigins(), ...extraOrigins],
     "media-src": ["'self'", "https:", ...(isDevelopmentBuild ? ["http:"] : [])],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],

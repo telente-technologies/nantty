@@ -40,6 +40,13 @@ export interface OrderShipment {
   readonly estimatedDeliveryAt: ISODate | null;
 }
 
+export interface OrderTimelineEvent {
+	readonly id: ID;
+	readonly kind: string;
+	readonly summary: string;
+	readonly createdAt: ISODate;
+}
+
 export interface Order {
   readonly id: ID;
   readonly reference: string;
@@ -54,6 +61,7 @@ export interface Order {
   readonly fulfilmentStatus?: string;
   readonly shipment?: OrderShipment | null;
   readonly delivery?: DeliveryDetails | null;
+  readonly timeline?: readonly OrderTimelineEvent[];
   readonly promotionIssue?: PromotionIssue | null;
 }
 

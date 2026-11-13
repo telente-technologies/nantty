@@ -12,7 +12,9 @@ const providerDisplayNames: Record<SocialProvider, string> = { apple: "Apple", g
 interface SocialSignInBody {
   readonly provider?: unknown;
   readonly idToken?: unknown;
+  readonly identityToken?: unknown;
   readonly nonce?: unknown;
+  readonly birthday?: unknown;
   readonly fullName?: { readonly givenName?: string | null; readonly familyName?: string | null } | null;
 }
 
@@ -22,6 +24,19 @@ function buildDemoIdentityToken(provider: SocialProvider): string {
   return [encodeSegment({ alg: "none", typ: "JWT" }), encodeSegment({ sub: `nantty-demo-${provider}`, aud: provider, iat: issuedAt, exp: issuedAt + 900 }), encodeSegment({ demo: true })].join(".");
 }
 
+function isRealIsoBirthday(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (year < 1 || month < 1 || month > 12 || day < 1) return false;
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day <= daysInMonth[month - 1]!;
+}
+
 export async function POST(request: NextRequest) {
   if (!isRequestFromWebappOrigin(request)) return respondWithBffError(403, "CSRF_REJECTED", "This sign-in request could not be verified.");
 
@@ -29,17 +44,25 @@ export async function POST(request: NextRequest) {
   const provider: SocialProvider | null = body?.provider === "apple" || body?.provider === "google" ? body.provider : null;
   if (!provider) return respondWithBffError(400, "VALIDATION_FAILED", "Choose Google or Apple to continue.");
 
-  const exchangePath = provider === "google" ? "/api/v1/auth/google" : "/api/v1/auth/apple";
-  const suppliedIdToken = typeof body?.idToken === "string" && body.idToken.length > 0 ? body.idToken : null;
-  const demoToken = suppliedIdToken ?? (shouldUseRealBackend(exchangePath) ? null : buildDemoIdentityToken(provider));
+  if (body?.birthday !== undefined && body.birthday !== null && !isRealIsoBirthday(body.birthday)) {
+    return respondWithBffError(400, "VALIDATION_FAILED", "Enter a valid birthday to continue.");
+  }
 
-  if (!demoToken) {
+  const exchangePath = provider === "google" ? "/api/v1/auth/google" : "/api/v1/auth/apple";
+  const suppliedToken = provider === "apple" ? body?.identityToken : body?.idToken;
+  const identityToken = typeof suppliedToken === "string" && suppliedToken.length > 0 ? suppliedToken : null;
+  const providerToken = identityToken ?? (shouldUseRealBackend(exchangePath) ? null : buildDemoIdentityToken(provider));
+
+  if (!providerToken) {
     return respondWithBffError(501, "SOCIAL_SIGN_IN_NOT_CONFIGURED", `${providerDisplayNames[provider]} sign-in isn't configured yet.`);
   }
 
   const nonce = typeof body?.nonce === "string" ? body.nonce : undefined;
   const fullName = provider === "apple" ? (body?.fullName ?? undefined) : undefined;
-  const exchangeBody = provider === "google" ? { idToken: demoToken, nonce } : { identityToken: demoToken, nonce, fullName };
+  const birthday = typeof body?.birthday === "string" ? body.birthday : undefined;
+  const exchangeBody = provider === "google"
+    ? { idToken: providerToken, nonce, ...(birthday ? { birthday } : {}) }
+    : { identityToken: providerToken, nonce, fullName, ...(birthday ? { birthday } : {}) };
 
   const result = await callAuthEndpoint(exchangePath, exchangeBody);
   if (!result.session) return respondWithBffError(result.status, result.error?.code ?? "SOCIAL_SIGN_IN_FAILED", result.error?.message ?? `${providerDisplayNames[provider]} sign-in failed. Try again.`);

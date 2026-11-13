@@ -4,6 +4,7 @@ export interface MockContext {
   readonly params: Record<string, string>;
   readonly query: URLSearchParams;
   readonly body: unknown;
+  readonly headers?: Readonly<Record<string, string>>;
 }
 
 export interface MockRoute {

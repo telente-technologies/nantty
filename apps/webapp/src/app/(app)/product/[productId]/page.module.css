@@ -29,15 +29,35 @@
 .layout {
   display: grid;
   grid-template-columns: 1fr;
+  grid-template-areas:
+    "gallery"
+    "purchase"
+    "details"
+    "seller";
   gap: var(--space-5);
 }
 
-.left,
-.right {
+.gallerySlot,
+.infoCard,
+.productDetails,
+.storeSection {
+  min-width: 0;
+}
+
+.gallerySlot { grid-area: gallery; }
+.infoCard { grid-area: purchase; }
+.productDetails { grid-area: details; }
+.storeSection { grid-area: seller; }
+
+.productDetails,
+.storeSection {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  min-width: 0;
+}
+
+.storeSection {
+  gap: var(--space-2);
 }
 
 .panel {
@@ -55,10 +75,48 @@
   font-weight: 800;
 }
 
+.descriptionPanel {
+  display: block;
+}
+
+.descriptionSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  cursor: pointer;
+  list-style: none;
+}
+
+.descriptionSummary::-webkit-details-marker {
+  display: none;
+}
+
+.descriptionSummary:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+  border-radius: var(--radius-small);
+}
+
+.descriptionChevron {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border-right: 2px solid var(--ink-muted);
+  border-bottom: 2px solid var(--ink-muted);
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform var(--motion-base) var(--motion-ease);
+}
+
+.descriptionPanel:not([open]) .descriptionChevron {
+  transform: rotate(-45deg);
+}
+
 .description {
   color: var(--ink-muted);
   line-height: 1.7;
   white-space: pre-wrap;
+  margin-top: var(--space-3);
 }
 
 .specs {
@@ -80,6 +138,14 @@
 
 .specs dd {
   margin: var(--space-1) 0 0;
+  line-height: 1.55;
+}
+
+.shippingPolicyNote {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  line-height: 1.55;
 }
 
 .relatedGrid {
@@ -89,6 +155,7 @@
 }
 
 .infoCard {
+  align-self: start;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -231,13 +298,17 @@
 @media (min-width: 900px) {
   .layout {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-areas:
+      "gallery purchase"
+      "details seller";
     gap: var(--space-6);
   }
 
-  .right {
-    position: sticky;
-    top: calc(60px + var(--space-5));
-    align-self: start;
+  .infoCard {
+    /* Keep the purchase panel in document flow: product attributes and
+       reviews can make it taller than the viewport, where sticky positioning
+       causes the next grid row to paint over the purchase controls. */
+    position: static;
   }
 
   .actions {

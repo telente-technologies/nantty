@@ -8,8 +8,12 @@ import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { confirmFollowChange } from "@/components/follow/useFollowUser.hook";
 import { ProductCard } from "@/components/commerce/productCard";
 import { ProductGallery } from "@/components/commerce/productGallery";
+import { ProductReviewsPreview } from "./productReviewsPreview";
+import { CheckmarkBadge } from "@/components/verification/checkmarkBadge";
+import { useProductInteraction } from "@/components/commerce/useProductInteraction.hook";
 import { ContentActionsMenu } from "@/components/actions/contentActionsMenu";
 import { ShareToChatButton } from "@/components/actions/shareToChatButton";
+import { MentionText } from "@/components/mentions/mentionText";
 import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import { Button } from "@/components/ui/button";
 import { ErrorState, Badge } from "@/components/ui/feedback";
@@ -25,6 +29,7 @@ import { formatProductPriceForDisplay } from "@/utils/formatMoney.util";
 import { followConfirmationCopy } from "@/utils/followToggle.util";
 import { readSaleAttribution, rememberSaleAttribution } from "@/utils/saleAttribution.util";
 import { buildProductPath, buildStorePath } from "@/utils/seoPaths.util";
+import { findSelectedProductVariant, productPurchaseAvailability, readProductVariantGroups } from "@/utils/productVariants.util";
 import type { BrandedProduct } from "@/types/brand.type";
 import type { StoreDetail } from "@/types/commerce.type";
 
@@ -36,6 +41,7 @@ import { IconLabel } from "@/components/ui/appIcon";
 export function ProductDetailView({ productId, initialProduct }: { readonly productId: string; readonly initialProduct: BrandedProduct | null }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { track: trackInteraction, canTrack, viewerId } = useProductInteraction();
   const affiliateLinkId = useSearchParams().get("aff");
 
   useEffect(() => {
@@ -58,15 +64,25 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
 
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [variantSelections, setVariantSelections] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState<string | null>(null);
   const addToCartInFlight = useRef(false);
+  const lastViewedKey = useRef<string | null>(null);
+
+  useEffect(() => {
+    const viewKey = `${viewerId ?? "guest"}:${productId}`;
+    if (!productQuery.data || !canTrack || lastViewedKey.current === viewKey) return;
+    lastViewedKey.current = viewKey;
+    trackInteraction("product.viewed", { productId });
+  }, [canTrack, productId, productQuery.data, trackInteraction, viewerId]);
 
   const addToCart = useMutation({
     mutationFn: () =>
-      cartsService.addProductToCart({ productId, quantity, size: selectedSize, color: selectedColor, attribution: readSaleAttribution(productId) }),
+      cartsService.addProductToCart({ productId, quantity, size: selectedSize, color: selectedColor, variants: variantSelections, attribution: readSaleAttribution(productId) }),
     onSuccess: async () => {
       setMessage("Added to cart.");
+      trackInteraction("product.addedToCart", { productId, quantity });
       await queryClient.invalidateQueries({ queryKey: ["shell", "cart"] });
       await queryClient.invalidateQueries({ queryKey: ["cart"] });
     },
@@ -120,11 +136,26 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
   }
 
   const product = productQuery.data;
-  const needsOptionChoice = (product.sizes.length > 0 && !selectedSize) || (product.colors.length > 0 && !selectedColor);
+  const variantGroups = readProductVariantGroups(product.variantGroups, product.variants);
+  const selectedVariant = findSelectedProductVariant(product, variantGroups, selectedSize, selectedColor, variantSelections);
+  const needsOptionChoice = (product.sizes.length > 0 && !selectedSize)
+    || (product.colors.length > 0 && !selectedColor)
+    || variantGroups.some((group) => !variantSelections[group.name]);
+  const purchaseAvailability = productPurchaseAvailability(product, selectedVariant, needsOptionChoice);
+  const isOutOfStock = purchaseAvailability === "out_of_stock";
 
   function handleAddToCart(goToCart: boolean) {
-    if (needsOptionChoice) {
-      setMessage("Choose an option first.");
+    if (purchaseAvailability === "choose_options") {
+      const missingGroup = variantGroups.find((group) => !variantSelections[group.name]);
+      setMessage(missingGroup ? `Choose ${missingGroup.name} first.` : "Choose an option first.");
+      return;
+    }
+    if (purchaseAvailability === "invalid_options") {
+      setMessage("These options aren't available together.");
+      return;
+    }
+    if (purchaseAvailability === "out_of_stock") {
+      setMessage("This option is currently out of stock.");
       return;
     }
     if (addToCartInFlight.current) return;
@@ -161,35 +192,12 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
       </nav>
 
       <div className={styles.layout}>
-        <div className={styles.left}>
+        <div className={styles.gallerySlot}>
           <ProductGallery images={product.images.length > 0 ? product.images : [product.imageUrl ?? ""]} name={product.title} priority />
-
-          <section className={styles.panel}>
-            <h2 className={styles.panelTitle}>Description</h2>
-            <p className={styles.description}>{product.description}</p>
-            <dl className={styles.specs}>
-              <div>
-                <dt>Shipping</dt>
-                <dd>{product.shippingInfo}</dd>
-              </div>
-            </dl>
-          </section>
-
-          {product.related.length > 0 ? (
-            <section className={styles.panel}>
-              <h2 className={styles.panelTitle}>You may also like</h2>
-              <div className={styles.relatedGrid}>
-                {product.related.map((related) => (
-                  <ProductCard key={related.id} product={related} />
-                ))}
-              </div>
-            </section>
-          ) : null}
         </div>
 
-        <div className={styles.right}>
-          <div className={styles.infoCard}>
-            <div className={styles.brandRow}>
+        <div className={styles.infoCard}>
+          <div className={styles.brandRow}>
               {product.brand ? (
                 <span className={styles.brandTag}>
                   <Avatar name={product.brand.name} src={product.brand.logoUrl} size="xs" />
@@ -203,10 +211,10 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
               </Link>
             </div>
 
-            <h1 className={styles.title}>{product.title}</h1>
+          <h1 className={styles.title}>{product.title}</h1>
 
-            <p className={styles.price}>{formatProductPriceForDisplay(product)}</p>
-            {product.promo ? <Badge tone="success">{product.promo}</Badge> : null}
+            <p className={styles.price}>{formatProductPriceForDisplay(selectedVariant ?? product)}</p>
+            {isOutOfStock ? <Badge tone="error">Out of stock</Badge> : product.promo ? <Badge tone="success">{product.promo}</Badge> : null}
 
             {product.sizes.length > 0 ? (
               <fieldset className={controlStyles.optionGroup}>
@@ -246,6 +254,25 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
               </fieldset>
             ) : null}
 
+            {variantGroups.map((group) => (
+              <fieldset key={group.name} className={controlStyles.optionGroup}>
+                <legend className={controlStyles.optionLabel}>{group.name}</legend>
+                <div className={controlStyles.options}>
+                  {group.options.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      className={[controlStyles.option, variantSelections[group.name] === option ? controlStyles.optionActive : ""].filter(Boolean).join(" ")}
+                      aria-pressed={variantSelections[group.name] === option}
+                      onClick={() => setVariantSelections((current) => ({ ...current, [group.name]: option }))}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            ))}
+
             <div className={controlStyles.optionGroup}>
               <span className={controlStyles.optionLabel}>Quantity</span>
               <div className={controlStyles.quantity}>
@@ -268,10 +295,10 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
             ) : null}
 
             <div className={styles.actions}>
-              <Button size="lg" onClick={() => requireAuthThen(() => handleAddToCart(false), "Sign in to add items to your cart.")} busy={addToCart.isPending}>
+              <Button size="lg" disabled={isOutOfStock} onClick={() => requireAuthThen(() => handleAddToCart(false), "Sign in to add items to your cart.")} busy={addToCart.isPending}>
                 Add to cart
               </Button>
-              <Button size="lg" variant="secondary" onClick={() => requireAuthThen(() => handleAddToCart(true), "Sign in to buy with escrow protection.")} busy={addToCart.isPending}>
+              <Button size="lg" variant="secondary" disabled={isOutOfStock} onClick={() => requireAuthThen(() => handleAddToCart(true), "Sign in to buy with escrow protection.")} busy={addToCart.isPending}>
                 Buy now
               </Button>
             </div>
@@ -281,13 +308,53 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
               <ShareToChatButton kind="product" referenceId={product.id} className={styles.ghostAction} />
               <ContentActionsMenu shareKind={null} reportTargetType="product" targetId={product.id} canonicalPath={buildProductPath(product)} />
             </div>
-          </div>
+        </div>
 
+        <div className={styles.productDetails}>
+          <section className={styles.panel}>
+            <h2 className={styles.panelTitle}>Shipping &amp; returns</h2>
+            <dl className={styles.specs}>
+              <div>
+                <dt>Delivery information</dt>
+                <dd>{product.shippingInfo}</dd>
+              </div>
+            </dl>
+            <p className={styles.shippingPolicyNote}>
+              Delivery availability and the final shipping cost are confirmed for your delivery address at checkout. Review the quote before paying.
+            </p>
+            {product.attributes?.some(({ name, value }) => name.trim() && value.trim()) ? (
+              <>
+                <h3 className={styles.panelTitle}>Product details</h3>
+                <dl className={styles.specs}>
+                  {product.attributes.filter(({ name, value }) => name.trim() && value.trim()).map(({ name, value }, index) => (
+                    <div key={`${name}-${index}`}>
+                      <dt>{name}</dt>
+                      <dd>{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </>
+            ) : null}
+          </section>
+
+          <details className={[styles.panel, styles.descriptionPanel].join(" ")} open>
+            <summary className={styles.descriptionSummary}>
+              <h2 className={styles.panelTitle}>Description</h2>
+              <span className={styles.descriptionChevron} aria-hidden="true" />
+            </summary>
+            <p className={styles.description}><MentionText text={product.description} /></p>
+          </details>
+
+          <ProductReviewsPreview productId={productId} />
+        </div>
+
+        <div className={styles.storeSection}>
           <Link href={buildStorePath(product.store.id)} className={styles.storeCard}>
             <Avatar name={product.store.name} src={product.store.logoUrl} size="lg" />
             <span className={styles.storeText}>
               <span className={styles.storeName}>
                 <StoreIcon size={16} /> {product.store.name}
+                {product.store.verification?.badgeVisible ? <CheckmarkBadge color={product.store.verification.color} /> : null}
               </span>
               <span className={styles.storeMeta}>
                 <IconLabel name="star16" size={12}>{product.store.rating > 0 ? product.store.rating.toFixed(1) : "New"} · {formatCountWithThousandsSuffix(product.store.reviewCount)} reviews</IconLabel>
@@ -307,6 +374,16 @@ export function ProductDetailView({ productId, initialProduct }: { readonly prod
               {product.store.isFollowing ? "Following store" : "Follow store"}
             </Button>
           </div>
+          {product.related.length > 0 ? (
+            <section className={styles.panel}>
+              <h2 className={styles.panelTitle}>You may also like</h2>
+              <div className={styles.relatedGrid}>
+                {product.related.map((related) => (
+                  <ProductCard key={related.id} product={related} />
+                ))}
+              </div>
+            </section>
+          ) : null}
         </div>
       </div>
     </div>

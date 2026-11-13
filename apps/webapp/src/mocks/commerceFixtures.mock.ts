@@ -12,6 +12,7 @@ import {
 import { storeSummaryById } from "./storeDirectory.mock";
 
 export const SHIPPING_FEE_PER_STORE_IN_USD_CENTS = 250;
+export const MOCK_SHIPPING_QUOTE_REVISION = "a".repeat(64);
 
 export const buildMockProductSummary = (index: number, name?: string, _legacyUsdCents?: number): ProductSummary => {
   const seedWithSameName = name ? catalogProductSeeds.find((seed) => seed.name.toLowerCase().includes(name.toLowerCase().split(" ")[0]!)) : undefined;

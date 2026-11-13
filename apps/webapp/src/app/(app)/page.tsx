@@ -47,15 +47,15 @@ function FeedSection({ feedMode, topicId, isGuest }: { readonly feedMode: FeedMo
 
   const posts = removeDuplicatePosts((feedQuery.data?.pages ?? []).flatMap((page) => page.data));
 
-  if (feedQuery.isLoading) return <PostFeedSkeleton />;
-  if (feedQuery.isError) return <ErrorState description="We couldn't load your feed." error={feedQuery.error} onRetry={() => void feedQuery.refetch()} />;
+  if (feedQuery.isLoading) return <div className={styles.feedList}><PostFeedSkeleton /></div>;
+  if (feedQuery.isError) return <div className={styles.feedList}><ErrorState description="We couldn't load your feed." error={feedQuery.error} onRetry={() => void feedQuery.refetch()} /></div>;
   if (posts.length === 0) {
-    return <EmptyState kind="feed" title="Your feed is warming up" description="Follow a few people or topics and their posts will show up here." action={<InlineLink href="/explore">Find people to follow</InlineLink>} />;
+    return <div className={styles.feedList}><EmptyState kind="feed" title="Your feed is warming up" description="Follow a few people or topics and their posts will show up here." action={<InlineLink href="/explore">Find people to follow</InlineLink>} /></div>;
   }
 
   return (
     <div className={styles.feedList}>
-      <FeedPostsWithModules posts={posts} />
+      <FeedPostsWithModules posts={posts} isForYouFeed={isGuest || feedMode === "for-you"} />
       <div ref={sentinelRef} />
       {feedQuery.isFetchingNextPage ? <Spinner label="Loading more posts" /> : null}
       {!feedQuery.hasNextPage ? <p className={styles.feedEnd}>You're all caught up.</p> : null}

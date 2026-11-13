@@ -58,6 +58,18 @@ const buildStoreDetail = (storeId: string): StoreDetail => {
 };
 
 export const productsMocks: MockRoute[] = [
+  createMockRoute("GET", "/api/v1/mart/recommendations/for-you", ({ query }) => {
+    const surface = query.get("surface") ?? "for_you";
+    if (surface !== "for_you" && surface !== "mart_home" && surface !== "clips") {
+      throw new ApiError(400, "Unsupported product recommendation surface", "VALIDATION_FAILED");
+    }
+    const candidates = listMartProductSummaries(null).map(withLikeState);
+    const products = [
+      ...candidates.filter((product) => product.storeVerified === true),
+      ...candidates.filter((product) => product.storeVerified !== true),
+    ].slice(0, 20);
+    return { products, source: "popular" as const };
+  }),
   createMockRoute("GET", "/api/v1/mart/home", (): MartHome => ({
     banners: [
       { id: "b_1", imageUrl: martImageUrl("heroBanner", 1200) },

@@ -1,7 +1,7 @@
 import { ApiError } from "@/errors/api.error";
 import type { OrderStatus } from "@/types";
 
-import { mockCartState, storeIdForProduct, summariseMockCart } from "./commerceFixtures.mock";
+import { mockCartState, MOCK_SHIPPING_QUOTE_REVISION, storeIdForProduct, summariseMockCart } from "./commerceFixtures.mock";
 import { buildEscrowDetailFromRecord, buildOrderFromRecord } from "./escrowBuilders.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { SIGNED_IN_BUYER, findOrderRecord, mockOrderRecords, type MockOrderRecord } from "./orderFixtures.mock";
@@ -66,7 +66,10 @@ const markCheckoutGroupAsPaid = (orderId: string) => {
 };
 
 export const ordersMocks: MockRoute[] = [
-  createMockRoute("POST", "/api/v1/orders/checkout", () => {
+  createMockRoute("POST", "/api/v1/orders/checkout", ({ body }) => {
+    if ((body as { shippingQuoteRevision?: string }).shippingQuoteRevision !== MOCK_SHIPPING_QUOTE_REVISION) {
+      throw new ApiError(409, "Your cart or delivery details changed. Refresh the quote before checkout.", "CART_CHANGED");
+    }
     if (mockCartState.lines.length === 0) throw new ApiError(422, "Your cart is empty");
     const cart = summariseMockCart();
     const records = createOrderRecordsFromCart();

@@ -18,6 +18,8 @@ const allowedApiPathPattern = /^\/api\/v1(\/[A-Za-z0-9._~:@%,-]+)+$/;
 const stateChangingGetApiPathPattern = /^\/api\/v1\/ads\/r\/[^/]+$/;
 
 const publicApiRoutes = [
+  { method: "POST", path: "/api/v1/ads/events" },
+  { method: "POST", path: "/api/v1/analytics/product-interactions" },
   { method: "POST", path: "/api/v1/auth/otp/send" },
   { method: "POST", path: "/api/v1/auth/otp/verify" },
   { method: "POST", path: "/api/v1/auth/password/reset" },
@@ -26,7 +28,7 @@ const publicApiRoutes = [
   { method: "GET", path: "/api/v1/topics" },
 ];
 
-function isPublicApiRequest(method: string, apiPath: string): boolean {
+export function isPublicApiRequest(method: string, apiPath: string): boolean {
   return publicApiRoutes.some((route) => route.method === method && route.path === apiPath);
 }
 
@@ -119,6 +121,12 @@ export async function forwardBffRequestToWebappApi(request: NextRequest, pathSeg
     if (headerName === "x-client-region" && !isSafeHttpMethod(request.method)) continue;
     const headerValue = request.headers.get(headerName);
     if (headerValue && headerValue.length <= (longForwardedHeaderNames.has(headerName) ? 4096 : 256)) forwardedHeaders[headerName] = headerValue;
+  }
+  if (request.method === "POST" && apiPath === "/api/v1/analytics/product-interactions") {
+    for (const headerName of ["x-consent-analytics", "x-consent-personalization"]) {
+      const headerValue = request.headers.get(headerName);
+      if (headerValue === "true" || headerValue === "false") forwardedHeaders[headerName] = headerValue;
+    }
   }
 
   const sendToBackend = () =>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 
@@ -9,6 +9,12 @@ import { EmptyState, ErrorState, Skeleton, Spinner } from "@/components/ui/feedb
 import { SegmentedControl } from "@/components/ui/controls";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
 import { discoveryService } from "@/services/discovery.service";
+import { productsService } from "@/services/products.service";
+import { useProductInteraction } from "@/components/commerce/useProductInteraction.hook";
+import { ProductCard } from "@/components/commerce/productCard";
+import { useSession } from "@/components/providers/sessionProvider";
+import { feedModuleCadence } from "@/config/feedModules.config";
+import { clipProductRecommendationIndexes, clipProductRecommendations } from "@/utils/clipProductRecommendations.util";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
 import { SpeakerHighIcon, SpeakerMutedIcon } from "@/components/ui/icons";
 import type { Clip } from "@/types";
@@ -27,8 +33,11 @@ export default function ClipsPage() {
   const startClipId = searchParams.get("start");
   const [tab, setTab] = useState<ClipsTab>("forYou");
   const [activeClipId, setActiveClipId] = useState<string | null>(startClipId);
+  const [isRecommendationPageActive, setIsRecommendationPageActive] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const queryClient = useQueryClient();
+  const viewerId = useSession().viewer?.id ?? null;
+  const { track: trackProductInteraction } = useProductInteraction();
   const { engagementFor, toggleLikeOnClip, likeClipWithDoubleTap, toggleFollowOnClipAuthor, shareClipLink, shareCountFor } = useClipInteractions();
   const [commentsForClip, setCommentsForClip] = useState<Clip | null>(null);
   const feedRef = useRef<HTMLDivElement | null>(null);
@@ -40,21 +49,46 @@ export default function ClipsPage() {
   });
   const sentinelRef = useInfiniteScrollSentinel({ hasNextPage: clipsQuery.hasNextPage, isFetchingNextPage: clipsQuery.isFetchingNextPage, fetchNextPage: clipsQuery.fetchNextPage, rootMargin: "1200px" });
   const clips = (clipsQuery.data?.pages ?? []).flatMap((page) => page.data);
+  const organicClipCount = clips.reduce((count, clip) => count + (clip.sponsored ? 0 : 1), 0);
+  const productRecommendations = useQuery({
+    queryKey: ["mart", "recommendations", "clips", viewerId ?? "guest"],
+    queryFn: () => productsService.fetchProductsYouMightLike("clips"),
+    enabled: tab === "forYou" && organicClipCount >= feedModuleCadence.productsYouMightLike.firstAfterPosts,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  const recommendationProducts = productRecommendations.data?.products ?? [];
+  const recommendationCadence = feedModuleCadence.productsYouMightLike;
+  const recommendationIndexes = clipProductRecommendationIndexes(clips, recommendationCadence, tab === "forYou", recommendationProducts.length > 0);
+  const feedItems = clips.flatMap((clip, index) => {
+    const item = [{ kind: "clip" as const, key: `clip:${clip.id}`, clip }];
+    const products = recommendationIndexes.has(index) ? clipProductRecommendations(recommendationProducts, clip.products.map((product) => product.id)) : [];
+    if (products.length === 0) return item;
+    return [...item, { kind: "productRecommendations" as const, key: `product-recommendations:${clip.id}`, products }];
+  });
 
   useEffect(() => {
     const feed = feedRef.current;
     if (!feed) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        const mostVisible = entries.filter((entry) => entry.isIntersecting && entry.intersectionRatio > 0.6)[0];
-        const clipId = mostVisible?.target.getAttribute("data-clip-id");
-        if (clipId) setActiveClipId(clipId);
+        const mostVisible = entries.filter((entry) => entry.isIntersecting && entry.intersectionRatio > 0.6).sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
+        if (!mostVisible) return;
+        if (mostVisible.target.hasAttribute("data-product-recommendations")) {
+          setIsRecommendationPageActive(true);
+          return;
+        }
+        const clipId = mostVisible.target.getAttribute("data-clip-id");
+        if (clipId) {
+          setIsRecommendationPageActive(false);
+          setActiveClipId(clipId);
+        }
       },
       { root: feed, threshold: [0.6] },
     );
-    feed.querySelectorAll("[data-clip-id]").forEach((element) => observer.observe(element));
+    feed.querySelectorAll("[data-clip-id], [data-product-recommendations]").forEach((element) => observer.observe(element));
     return () => observer.disconnect();
-  }, [clips.length]);
+  }, [feedItems.length]);
 
   useEffect(() => {
     if (!startClipId || clips.length === 0) return;
@@ -125,20 +159,32 @@ export default function ClipsPage() {
         )
       ) : (
         <div ref={feedRef} className={styles.feed} tabIndex={0} onKeyDown={handleFeedKeys} aria-label="Clips. Use the arrow keys to move between clips.">
-          {clips.map((clip, index) => (
+          {feedItems.map((item, index) => item.kind === "productRecommendations" ? (
+            <section key={item.key} className={styles.recommendationPage} data-product-recommendations aria-label="Products you might like">
+              <h2 className={styles.recommendationPageTitle}>Products you might like</h2>
+              <p className={styles.recommendationPageDescription}>Picked for you from Nantty stores.</p>
+              <div className={styles.recommendationPageSlider}>
+                {item.products.map((product, position) => (
+                  <div className={styles.recommendationPageCard} key={product.id}>
+                    <ProductCard product={product} showStoreDetails onClick={() => trackProductInteraction("product.clicked", { productId: product.id, surface: "clips_recommendations", position })} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : (
             <ClipPlayerCard
-              key={clip.id}
-              clip={clip}
-              isActive={activeClipId ? activeClipId === clip.id : index === 0}
+              key={item.key}
+              clip={item.clip}
+              isActive={!isRecommendationPageActive && (activeClipId ? activeClipId === item.clip.id : index === 0)}
               isMuted={isMuted}
-              engagement={engagementFor(clip)}
-              shareCount={shareCountFor(clip)}
+              engagement={engagementFor(item.clip)}
+              shareCount={shareCountFor(item.clip)}
               onToggleMute={() => setIsMuted((muted) => !muted)}
-              onToggleLike={() => toggleLikeOnClip(clip)}
-              onLikeByDoubleTap={() => likeClipWithDoubleTap(clip)}
-              onToggleFollow={() => toggleFollowOnClipAuthor(clip)}
-              onOpenComments={() => setCommentsForClip(clip)}
-              onShareLink={() => shareClipLink(clip)}
+              onToggleLike={() => toggleLikeOnClip(item.clip)}
+              onLikeByDoubleTap={() => likeClipWithDoubleTap(item.clip)}
+              onToggleFollow={() => toggleFollowOnClipAuthor(item.clip)}
+              onOpenComments={() => setCommentsForClip(item.clip)}
+              onShareLink={() => shareClipLink(item.clip)}
             />
           ))}
           <div ref={sentinelRef} className={styles.sentinel}>

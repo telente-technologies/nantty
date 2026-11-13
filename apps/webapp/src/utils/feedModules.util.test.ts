@@ -4,7 +4,7 @@ import { describe, it } from "node:test";
 import { millisecondsPerDay, type FeedModuleKind } from "@/config/feedModules.config";
 import type { MyVerification, VerificationDiscounts } from "@/types/verification.type";
 
-import { interleaveFeedModules, planFeedModuleSlots, takeChunkForOccurrence } from "./feedModuleLayout.util";
+import { interleaveFeedModules, planFeedModuleSlots, planProductsYouMightLikeSlots, shouldFetchProductsYouMightLike, takeChunkForOccurrence } from "./feedModuleLayout.util";
 import { canShowGetVerifiedCard, emptyGetVerifiedCardHistory, offerIdsNotYetSurfaced, recordGetVerifiedCardDismissal, recordGetVerifiedCardImpression, recordGetVerifiedCardNeverAgain, recordOffersSurfaced } from "./getVerifiedCardFrequency.util";
 import { pickGetVerifiedDiscountHighlight, resolveGetVerifiedCardState } from "./getVerifiedCardState.util";
 import { buildSuggestedVideoSequence, collectSuggestedRailClips } from "./suggestedVideoSequence.util";
@@ -26,7 +26,7 @@ describe("feed module cadence", () => {
     const slots = planFeedModuleSlots({
       postCount: 120,
       isModuleEnabled: () => true,
-      cadence: { getVerified: { firstAfterPosts: 4, repeatEveryPosts: null }, suggestedClips: { firstAfterPosts: 4, repeatEveryPosts: 8 }, peopleYouMayKnow: { firstAfterPosts: 4, repeatEveryPosts: 8 } },
+      cadence: { getVerified: { firstAfterPosts: 4, repeatEveryPosts: null }, suggestedClips: { firstAfterPosts: 4, repeatEveryPosts: 8 }, peopleYouMayKnow: { firstAfterPosts: 4, repeatEveryPosts: 8 }, productsYouMightLike: { firstAfterPosts: 4, repeatEveryPosts: 8 } },
     });
     const rows = interleaveFeedModules(Array.from({ length: 120 }, (_, index) => index), slots);
     for (let index = 1; index < rows.length; index++) assert.ok(!(rows[index]!.type === "module" && rows[index - 1]!.type === "module"));
@@ -42,6 +42,28 @@ describe("feed module cadence", () => {
     const stream = Array.from({ length: 17 }, (_, index) => index);
     assert.deepEqual(takeChunkForOccurrence(stream, 1, 8), [8, 9, 10, 11, 12, 13, 14, 15]);
     assert.deepEqual(takeChunkForOccurrence(stream, 2, 8), [16]);
+  });
+});
+
+describe("product recommendation feed placement", () => {
+  it("matches mobile cadence after 16 organic posts and every 45 thereafter", () => {
+    const posts = Array.from({ length: 62 }, (_, index) => ({ sponsored: null, id: index }));
+    const slots = planProductsYouMightLikeSlots(posts, [], true, true);
+    assert.deepEqual(slots.map((slot) => slot.afterPostCount), [16, 61]);
+  });
+
+  it("does not count sponsored posts and avoids an occupied module boundary", () => {
+    const posts = Array.from({ length: 17 }, (_, index) => ({ sponsored: index === 3 ? { id: "ad" } : null }));
+    const occupied = [{ kind: "suggestedClips" as const, occurrence: 0, afterPostCount: 16 }];
+    const slots = planProductsYouMightLikeSlots(posts, occupied, true, true);
+    assert.deepEqual(slots.map((slot) => slot.afterPostCount), [17]);
+  });
+
+  it("fetches only after enough organic posts on the For You feed", () => {
+    assert.equal(shouldFetchProductsYouMightLike(15, true), false);
+    assert.equal(shouldFetchProductsYouMightLike(16, true), true);
+    assert.equal(shouldFetchProductsYouMightLike(100, false), false);
+    assert.deepEqual(planProductsYouMightLikeSlots(Array.from({ length: 30 }, () => ({})), [], true, false), []);
   });
 });
 

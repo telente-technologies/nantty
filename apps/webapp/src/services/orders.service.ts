@@ -7,10 +7,10 @@ import { sendRequestToWebappServer, sendListRequestToWebappServer } from "./clie
 
 export const ordersService = {
   fetchMyShippingAddresses: () => sendListRequestToWebappServer<Address>("/api/v1/users/me/addresses"),
-  checkoutCartIntoOrders: (addressId: string, idempotencyKey: string, paymentModes: Readonly<Record<string, PaymentMode>> = {}) =>
+  checkoutCartIntoOrders: (addressId: string, shippingQuoteRevision: string, idempotencyKey: string, paymentModes: Readonly<Record<string, PaymentMode>> = {}) =>
     sendRequestToWebappServer<CheckoutResult>("/api/v1/orders/checkout", {
       method: "POST",
-      body: { addressId, paymentModes: toPaymentModeChoices(paymentModes), directPaymentAccepted: Object.values(paymentModes).includes("direct") },
+      body: { addressId, shippingQuoteRevision, paymentModes: toPaymentModeChoices(paymentModes), directPaymentAccepted: Object.values(paymentModes).includes("direct") },
       idempotencyKey,
     }),
   fetchMyOrders: (status: OrderStatus | null) => sendListRequestToWebappServer<Order>("/api/v1/orders", { query: { status: status ?? undefined } }),

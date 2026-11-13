@@ -167,6 +167,53 @@
   font-weight: 800;
 }
 
+.recommendationPage {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+  height: 100%;
+  padding: clamp(var(--space-3), 4vw, var(--space-8));
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-large);
+  background: var(--surface-card);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.recommendationPageTitle {
+  margin: 0;
+  color: var(--ink-strong);
+  font-size: var(--text-xl);
+}
+
+.recommendationPageDescription {
+  margin: calc(-1 * var(--space-2)) 0 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.recommendationPageSlider {
+  display: flex;
+  gap: var(--space-3);
+  max-height: min(58%, 520px);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: var(--divider-strong) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.recommendationPageCard {
+  flex: 0 0 clamp(148px, 24vw, 220px);
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.recommendationPage :global(a:focus-visible) { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+
 .actionColumn {
   position: absolute;
   right: var(--space-3);

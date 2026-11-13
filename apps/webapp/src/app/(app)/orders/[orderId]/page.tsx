@@ -251,9 +251,24 @@ export default function OrderDetailPage({ params }: { readonly params: Promise<{
               </div>
             ) : null}
           </dl>
-          <p className={styles.escrowNote}>Delivery updates are shown here in Nantty.</p>
+          <p className={styles.escrowNote}>Delivery updates are shown here in Nantty. Tracking details are provided by the seller; live courier tracking may not be available.</p>
           {order.delivery.lastAttemptNote ? <p className={styles.deliveryNote}>Last attempt: {order.delivery.lastAttemptNote}</p> : null}
           {order.delivery.status === "failed" ? <p className={styles.deliveryNote}>The seller will try again. Contact them if your address or phone number has changed.</p> : null}
+        </section>
+      ) : null}
+
+      {order.timeline?.length ? (
+        <section className={styles.panel} aria-labelledby="order-updates-title">
+          <h2 className={styles.panelTitle} id="order-updates-title">Order updates</h2>
+          <ol className={styles.eventList}>
+            {[...order.timeline].slice(-8).reverse().map((event) => (
+              <li key={event.id} className={styles.event}>
+                <strong>{event.summary}</strong>
+                <time dateTime={event.createdAt}>{new Date(event.createdAt).toLocaleString()}</time>
+              </li>
+            ))}
+          </ol>
+          <p className={styles.escrowNote}>Updates are recorded by Nantty from seller order actions. Live courier tracking may not be available.</p>
         </section>
       ) : null}
 

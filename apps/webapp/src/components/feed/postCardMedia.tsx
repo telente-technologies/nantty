@@ -22,8 +22,9 @@ export function PostMedia({ media, priority, watchHref }: { readonly media: read
   const images = visible.filter((entry): entry is Media & { readonly type: "image"; readonly url: string } => entry.type === "image" && Boolean(entry.url));
 
   if (visible.length > 1) {
+    const mediaFrameClassName = [styles.mediaFrame, active && canPlayInline(active) ? styles.videoMediaFrame : ""].filter(Boolean).join(" ");
     return (
-      <div className={styles.mediaFrame}>
+      <div className={mediaFrameClassName}>
         <div
           className={styles.mediaScroller}
           data-swipe-ignore
@@ -72,7 +73,7 @@ export function PostMedia({ media, priority, watchHref }: { readonly media: read
   }
 
   return (
-    <div className={styles.mediaFrame}>
+    <div className={[styles.mediaFrame, active?.type === "video" && canPlayInline(active) ? styles.videoMediaFrame : ""].filter(Boolean).join(" ")}>
       {active?.type === "video" && canPlayInline(active) ? (
         <PostCardVideo media={active} priority={priority} />
       ) : active?.type === "image" && active.url ? (

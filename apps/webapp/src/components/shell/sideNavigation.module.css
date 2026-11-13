@@ -17,8 +17,7 @@
 }
 
 .brandMark {
-  display: block;
-  flex: none;
+  display: none;
 }
 
 .nav {
@@ -176,6 +175,10 @@
     display: block;
   }
 
+  .sideNav:not(.expandedOnTablet) .brandMark {
+    display: block;
+  }
+
   .sideNav:not(.expandedOnTablet) .toggle :global(span[aria-hidden]) {
     transform: none;
   }
@@ -223,6 +226,10 @@
     display: none;
   }
 
+  .sideNav:not(.collapsedOnDesktop) .brandMark {
+    display: none;
+  }
+
   .sideNav:not(.collapsedOnDesktop) .toggle :global(span[aria-hidden]) {
     transform: scaleX(-1);
   }
@@ -236,6 +243,10 @@
   .collapsedOnDesktop .navBadge,
   .collapsedOnDesktop .toggleLabel {
     display: none;
+  }
+
+  .collapsedOnDesktop .brandMark {
+    display: block;
   }
 
   .collapsedOnDesktop .navItem,

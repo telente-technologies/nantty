@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { MapPinIcon } from "@/components/ui/icons";
 import { cartsService } from "@/services/carts.service";
-import { createIdempotencyKey, readErrorMessageForDisplay, sendRequestToWebappServer, WebappRequestError } from "@/services/clientApi.service";
+import { createIdempotencyKey, readErrorMessageForDisplay, WebappRequestError } from "@/services/clientApi.service";
 import { CountryRequiredPicker, countryRequiredCode } from "@/components/commerce/countryRequiredPicker";
 import { ordersService } from "@/services/orders.service";
 import { emailVerificationService } from "@/services/webActions.service";
@@ -23,10 +23,10 @@ import { CheckoutPaymentChoice, canPayFromWallet, type CheckoutPaymentSource } f
 import { providerWalletQueryKeys, providerWalletService } from "@/services/providerWallet.service";
 import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 import { paymentsService } from "@/services/payments.service";
-import type { CheckoutResult } from "@/types/commerce.type";
 import type { PaymentMode } from "@/types";
 import { groupCartItemsByStore } from "@/utils/groupCartItemsByStore.util";
-import { isDirectPaymentStore, toPaymentModeChoices } from "@/utils/paymentMode.util";
+import { isCheckoutShippingQuoteReady } from "@/utils/checkoutShippingQuote.util";
+import { isDirectPaymentStore } from "@/utils/paymentMode.util";
 import { openHostedCheckout } from "@/utils/hostedCheckout.util";
 import { forgetPendingValue, pendingSubscriptionStorageKey, rememberPendingOrderPayment } from "@/utils/paymentReturn.util";
 import { presentPaymentProblem } from "@/utils/paymentProblem.util";
@@ -60,24 +60,30 @@ export default function CheckoutPage() {
   const [isAddingAddress, setAddingAddress] = useState(false);
   const quoteQuery = useShippingQuote(addressId);
   const quote = quoteQuery.data ?? null;
-  const hasShippableGroup = quote?.groups.some((group) => group.status === "calculated") ?? false;
+  const quoteReady = isCheckoutShippingQuoteReady({
+    selectedAddressId: addressId,
+    quote,
+    isFetching: quoteQuery.isFetching,
+    isError: quoteQuery.isError,
+  });
+  const currentQuote = quoteReady ? quote : null;
+  const deliverableGroupCount = currentQuote?.groups.filter((group) => group.status === "calculated").length ?? 0;
+  const blockedGroupCount = currentQuote?.groups.filter((group) => group.status === "notDeliverable").length ?? 0;
+  const hasShippableGroup = deliverableGroupCount > 0;
 
-  const orderTotal = quote ? quote.total : (cartQuery.data?.total ?? null);
+  const orderTotal = currentQuote?.total ?? null;
   const walletChosen = paymentSource === "wallet" && canPayFromWallet(walletQuery.data, orderTotal);
   const isNigeria = (verificationQuery.data?.country ?? "NG") === "NG";
   const placeOrder = useMutation({
     mutationFn: async () => {
       if (!addressId) throw new Error("Choose a shipping address first.");
+      if (!currentQuote?.shippingQuoteRevision) throw new Error("Refresh delivery details before placing your order.");
       const directChoices = Object.fromEntries(
         groupCartItemsByStore(cartQuery.data?.items ?? [])
           .filter((group) => isDirectPaymentStore(group.store))
           .map((group) => [group.storeId, paymentModes[group.storeId] ?? "escrow"] as const),
       );
-      const result = await sendRequestToWebappServer<CheckoutResult>("/api/v1/orders/checkout", {
-        method: "POST",
-        body: { addressId, paymentModes: toPaymentModeChoices(directChoices), directPaymentAccepted: Object.values(directChoices).includes("direct") },
-        idempotencyKey: checkoutKey.current,
-      });
+      const result = await ordersService.checkoutCartIntoOrders(addressId, currentQuote.shippingQuoteRevision, checkoutKey.current, directChoices);
       const payment = await paymentsService.initializeOrderPayment(result.payableOrderId, `${checkoutKey.current}-pay`);
       forgetPendingValue(pendingSubscriptionStorageKey);
       rememberPendingOrderPayment({ orderId: payment.orderId, reference: payment.reference, checkoutUrl: payment.checkoutUrl || payment.authorizationUrl });
@@ -106,6 +112,14 @@ export default function CheckoutPage() {
       }
       const problemKind = describeErrorSignal(readErrorSignal(caught)).kind;
       if (problemKind === "cartChanged" || problemKind === "checkoutExpired") {
+        if (problemKind === "cartChanged") {
+          checkoutKey.current = createIdempotencyKey("checkout");
+          setCheckoutProblem(null);
+          setError("Your cart or delivery details changed. We refreshed the quote; review the updated total before placing your order.");
+          void quoteQuery.refetch();
+          void cartQuery.refetch();
+          return;
+        }
         setError(null);
         setCheckoutProblem(caught);
         void cartQuery.refetch();
@@ -157,7 +171,7 @@ export default function CheckoutPage() {
         <div className={styles.sections}>
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Shipping address</h2>
-            {addressesQuery.isError ? (
+            {addressesQuery.isError && !addressesQuery.data ? (
               <ErrorState description="We couldn't load your addresses." error={addressesQuery.error} onRetry={() => void addressesQuery.refetch()} />
             ) : (addressesQuery.data ?? []).length === 0 ? (
               <div className={styles.emptyAddress}>
@@ -187,6 +201,9 @@ export default function CheckoutPage() {
                 ))}
               </ul>
             )}
+            {addressesQuery.isError && addressesQuery.data ? (
+              <ErrorState variant="inline" description="Your saved addresses may be out of date." error={addressesQuery.error} onRetry={() => void addressesQuery.refetch()} />
+            ) : null}
             <Button variant="secondary" onClick={() => setAddingAddress(true)}>
               Add a new address
             </Button>
@@ -196,6 +213,21 @@ export default function CheckoutPage() {
               onClose={() => setAddingAddress(false)}
               onSaved={(saved) => setChosenAddressId(saved.id)}
             />
+            {quoteQuery.isError ? (
+              <p className={styles.shippingNotice} role="alert">
+                We couldn’t calculate delivery for this address. <button type="button" onClick={() => void quoteQuery.refetch()}>Try again</button>
+              </p>
+            ) : null}
+            {currentQuote && blockedGroupCount > 0 && hasShippableGroup ? (
+              <p className={styles.shippingNotice} role="status">
+                Some sellers can’t deliver to this address. Those items will stay in your cart while the deliverable items are checked out.
+              </p>
+            ) : null}
+            {currentQuote && blockedGroupCount > 0 && !hasShippableGroup ? (
+              <p className={styles.shippingNotice} role="alert">
+                None of these sellers can deliver to this address. Choose another address or update your cart to continue.
+              </p>
+            ) : null}
           </section>
 
           <section className={styles.section}>
@@ -229,14 +261,14 @@ export default function CheckoutPage() {
 
         <aside className={styles.summary}>
           <h2 className={styles.summaryTitle}>Order summary</h2>
-          <SellerGroupedSummary items={cart.items} quote={quote} />
+          <SellerGroupedSummary items={cart.items} quote={currentQuote} />
           <div className={styles.moneyRow}>
             <span>Items total</span>
             <span>{formatMoneyForDisplay(cart.itemsTotal)}</span>
           </div>
           <div className={styles.moneyRow}>
             <span>Shipping</span>
-            <span>{quote ? formatMoneyForDisplay(quote.shipping) : quoteQuery.isFetching ? "Calculating" : "Choose an address"}</span>
+            <span>{currentQuote ? formatMoneyForDisplay(currentQuote.shipping) : quoteQuery.isError ? "Unavailable" : quoteQuery.isFetching ? "Calculating" : "Choose an address"}</span>
           </div>
           {cart.storeCredit.amountMinor > 0 ? (
             <div className={styles.moneyRow}>
@@ -247,14 +279,14 @@ export default function CheckoutPage() {
           <div className={styles.divider} />
           <div className={styles.moneyRowTotal}>
             <span>Total</span>
-            <span>{formatMoneyForDisplay(quote ? quote.total : cart.total)}</span>
+            <span>{currentQuote ? formatMoneyForDisplay(currentQuote.total) : quoteQuery.isError ? "Unavailable" : quoteQuery.isFetching ? "Calculating" : "Choose an address"}</span>
           </div>
           {accountEmailQuery.data?.emailVerified === false ? (
             <p className={styles.verifyEmailNotice} role="status">
               Verify your email to continue. <Link href="/verify-email?next=/checkout">Verify email</Link>
             </p>
           ) : (
-            <Button size="lg" fullWidth busy={placeOrder.isPending} disabled={!addressId || quoteQuery.isFetching || !hasShippableGroup || placeOrder.isSuccess} onClick={() => {
+            <Button size="lg" fullWidth busy={placeOrder.isPending} disabled={!addressId || !quoteReady || !hasShippableGroup || placeOrder.isSuccess} onClick={() => {
               if (placeOrderInFlight.current) return;
               placeOrderInFlight.current = true;
               placeOrder.mutate(undefined, { onError: () => { placeOrderInFlight.current = false; } });

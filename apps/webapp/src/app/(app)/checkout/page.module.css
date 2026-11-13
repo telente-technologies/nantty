@@ -17,6 +17,27 @@
   font-weight: 600;
 }
 
+.shippingNotice {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-medium);
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.shippingNotice button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-brand);
+  font: inherit;
+  font-weight: 750;
+  text-decoration: underline;
+}
+
 .layout {
   display: grid;
   grid-template-columns: 1fr;

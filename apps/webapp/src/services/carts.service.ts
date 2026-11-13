@@ -9,6 +9,7 @@ export interface AddProductToCartInput {
   readonly quantity: number;
   readonly size?: string | null;
   readonly color?: string | null;
+  readonly variants?: Readonly<Record<string, string>> | null;
   readonly attribution?: SaleAttribution | null;
 }
 
@@ -18,7 +19,14 @@ export const cartsService = {
   fetchMyCart: () => requestCart("/api/v1/cart"),
   fetchShippingQuote: async (addressId: string): Promise<CartShippingQuote> =>
     readShippingQuoteFromWire(await sendRequestToWebappServer<CartWire>("/api/v1/cart/shipping-quote", { method: "POST", body: { addressId } })),
-  addProductToCart: ({ attribution, ...input }: AddProductToCartInput) => requestCart("/api/v1/cart/items", { method: "POST", body: attribution ? { ...input, attribution } : input }),
+  addProductToCart: ({ attribution, variants, ...input }: AddProductToCartInput) => requestCart("/api/v1/cart/items", {
+    method: "POST",
+    body: {
+      ...input,
+      ...(variants && Object.keys(variants).length > 0 ? { options: variants } : {}),
+      ...(attribution ? { attribution } : {}),
+    },
+  }),
   changeCartItemQuantity: (cartItemId: string, quantity: number) => requestCart(`/api/v1/cart/items/${cartItemId}`, { method: "PATCH", body: { quantity } }),
   removeCartItem: (cartItemId: string) => requestCart(`/api/v1/cart/items/${cartItemId}`, { method: "DELETE" }),
 };

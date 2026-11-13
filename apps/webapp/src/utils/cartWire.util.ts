@@ -25,6 +25,8 @@ interface GroupWire {
 }
 
 export interface CartWire extends Cart {
+  readonly addressId?: string | null;
+  readonly shippingQuoteRevision?: string | null;
   readonly items: readonly (CartItem & { readonly storeId?: string })[];
   readonly groups?: readonly GroupWire[];
 }
@@ -60,5 +62,5 @@ function toSellerShippingQuote(group: GroupWire): SellerShippingQuote {
 }
 
 export function readShippingQuoteFromWire(wire: CartWire): CartShippingQuote {
-  return { groups: (wire.groups ?? []).map(toSellerShippingQuote), shipping: wire.shipping, total: wire.total };
+  return { addressId: wire.addressId ?? null, shippingQuoteRevision: wire.shippingQuoteRevision ?? null, groups: (wire.groups ?? []).map(toSellerShippingQuote), shipping: wire.shipping, total: wire.total };
 }

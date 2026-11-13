@@ -50,7 +50,7 @@ function EntityRow({ href, name, meta, avatarUrl, onOpen, impression }: { readon
   );
 }
 
-export function SearchResultSections({ items, onOpenResult, onSearchHashtag, surface = "search" }: { readonly items: readonly SearchItem[]; readonly onOpenResult: () => void; readonly onSearchHashtag: (tag: string) => void; readonly surface?: FeedInteractionSurface }) {
+export function SearchResultSections({ items, onOpenResult, onSearchHashtag, onProductClick, surface = "search" }: { readonly items: readonly SearchItem[]; readonly onOpenResult: () => void; readonly onSearchHashtag: (tag: string) => void; readonly onProductClick?: (productId: string, position: number) => void; readonly surface?: FeedInteractionSurface }) {
   const products: ProductSummary[] = pick(items, "product").map(({ type: _type, ...product }) => product);
   const posts = [...pick(items, "post"), ...pick(items, "clip")];
   const people = pick(items, "user");
@@ -94,7 +94,16 @@ export function SearchResultSections({ items, onOpenResult, onSearchHashtag, sur
       {products.length ? (
         <Section title="Products">
           <div className={styles.productGrid}>
-            {products.map((product) => <ProductCard key={product.id} product={product} />)}
+            {products.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onClick={() => {
+                  onOpenResult();
+                  onProductClick?.(product.id, index);
+                }}
+              />
+            ))}
           </div>
         </Section>
       ) : null}

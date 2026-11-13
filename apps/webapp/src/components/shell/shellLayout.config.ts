@@ -16,7 +16,7 @@ const startsWithAny = (prefixes: readonly string[]) => (pathname: string) =>
   prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
 const routeLayoutRules: readonly RouteLayoutRule[] = [
-  { matches: (pathname) => pathname === "/", contentWidth: "reading", rightRailVisibility: "desktop", rightRailModules: ["wallet", "suggestedAccounts", "trending"] },
+  { matches: (pathname) => pathname === "/", contentWidth: "wide", rightRailVisibility: "desktop", rightRailModules: ["wallet", "suggestedAccounts", "trending"] },
   { matches: startsWithAny(["/post", "/notifications"]), contentWidth: "reading", rightRailVisibility: "desktop", rightRailModules: ["suggestedAccounts", "trending"] },
   { matches: startsWithAny(["/explore"]), contentWidth: "wide", rightRailVisibility: "desktop", rightRailModules: ["trending", "suggestedAccounts"] },
   { matches: startsWithAny(["/mart", "/category", "/collections"]), contentWidth: "wide", rightRailVisibility: "wideDesktop", rightRailModules: ["cartSummary", "wallet"] },

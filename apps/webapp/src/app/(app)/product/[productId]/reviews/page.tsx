@@ -1,6 +1,6 @@
 "use client";
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use } from "react";
@@ -12,6 +12,9 @@ import { RetryButton } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui/feedback";
 import { ArrowLeftIcon } from "@/components/ui/icons";
 import { useInfiniteScrollSentinel } from "@/components/ui/useInfiniteScrollSentinel.hook";
+import { useSession } from "@/components/providers/sessionProvider";
+import { requestConfirmation } from "@/components/ui/confirmDialog";
+import { showToast } from "@/components/ui/toast";
 import { reviewsService } from "@/services/reviews.service";
 import { formatCountWithThousandsSuffix } from "@/utils/formatDate.util";
 import { ratingBreakdown } from "@/utils/productReviews.util";
@@ -19,6 +22,8 @@ import { ratingBreakdown } from "@/utils/productReviews.util";
 export default function ProductReviewsPage({ params }: { readonly params: Promise<{ readonly productId: string }> }) {
   const { productId } = use(params);
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { viewer } = useSession();
   const summary = useQuery({ queryKey: ["product", productId, "ratingSummary"], queryFn: () => reviewsService.fetchRatingSummary(productId), retry: false });
   const reviews = useInfiniteQuery({
     queryKey: ["product", productId, "reviews"],
@@ -26,11 +31,33 @@ export default function ProductReviewsPage({ params }: { readonly params: Promis
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
+  const deleteReview = useMutation({
+    mutationFn: (reviewId: string) => reviewsService.deleteOwnReview(reviewId),
+    onSuccess: () => {
+      showToast({ text: "Your review was deleted" });
+      void queryClient.invalidateQueries({ queryKey: ["product", productId] });
+      void queryClient.invalidateQueries({ queryKey: ["products", "reviews", productId] });
+      void queryClient.invalidateQueries({ queryKey: ["products", "detail", productId] });
+    },
+    onError: () => showToast({ text: "Couldn't delete your review. Try again.", tone: "error" }),
+  });
   const sentinelRef = useInfiniteScrollSentinel({ hasNextPage: reviews.hasNextPage && !reviews.isError, isFetchingNextPage: reviews.isFetchingNextPage, fetchNextPage: reviews.fetchNextPage });
   const firstPage = reviews.data?.pages[0];
   const items = reviews.data?.pages.flatMap((page) => page.reviews) ?? [];
   const average = summary.data?.average ?? firstPage?.average ?? 0;
   const count = summary.data?.count ?? firstPage?.count ?? 0;
+
+  async function confirmDeleteOwnReview(reviewId: string) {
+    if (deleteReview.isPending) return;
+    const confirmed = await requestConfirmation({
+      title: "Delete your review?",
+      description: "Your rating and review will be removed from this product.",
+      confirmLabel: "Delete",
+      cancelLabel: "Keep review",
+      intent: "delete",
+    });
+    if (confirmed) deleteReview.mutate(reviewId);
+  }
 
   return (
     <div className={styles.page}>
@@ -66,7 +93,18 @@ export default function ProductReviewsPage({ params }: { readonly params: Promis
             <EmptyState kind="reviews" title="No reviews yet" description="Buyers can review this product once their order is delivered." action={<Link href={`/product/${encodeURIComponent(productId)}`}>Back to product</Link>} />
           ) : (
             <div className={styles.list}>
-              {items.map((review) => <ReviewCard key={review.id} review={review} />)}
+              {items.map((review) => {
+                const isOwn = Boolean(viewer?.id && review.author.id === viewer.id);
+                return (
+                  <ReviewCard
+                    key={review.id}
+                    review={review}
+                    isOwn={isOwn}
+                    isDeleting={deleteReview.isPending && deleteReview.variables === review.id}
+                    onDelete={isOwn ? () => void confirmDeleteOwnReview(review.id) : undefined}
+                  />
+                );
+              })}
             </div>
           )}
           <div ref={sentinelRef} />

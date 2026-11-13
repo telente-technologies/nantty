@@ -83,9 +83,28 @@ export interface ProductStoreSummary extends StoreSummary {
   readonly isFollowing?: boolean;
 }
 
+export interface ProductVariantGroup {
+  readonly name: string;
+  readonly options: readonly string[];
+}
+
+export interface ProductVariant {
+  readonly id: ID;
+  readonly title: string;
+  readonly size: string;
+  readonly color: string;
+  readonly price: Money;
+  readonly approxPrice?: Money | null;
+  readonly priceIsRegional?: boolean;
+  readonly inStock: boolean;
+  readonly optionValues: Readonly<Record<string, string>>;
+}
+
 export interface ProductSummary {
   readonly id: ID;
   readonly name: string;
+  readonly storeName?: string | null;
+  readonly storeVerified?: boolean;
   readonly price: Money;
   readonly approxPrice?: Money | null;
   readonly priceIsRegional?: boolean;
@@ -104,10 +123,18 @@ export interface Product extends ProductSummary {
   readonly promo: string | null;
   readonly sizes: readonly string[];
   readonly colors: readonly string[];
+  readonly variantGroups?: readonly ProductVariantGroup[] | null;
+  readonly variants?: readonly ProductVariant[];
   readonly shippingInfo: string;
   readonly description: string;
+  readonly attributes?: readonly ProductAttribute[];
   readonly store: ProductStoreSummary;
   readonly related: readonly ProductSummary[];
+}
+
+export interface ProductAttribute {
+  readonly name: string;
+  readonly value: string;
 }
 
 export type MediaProcessingStatus = "processing" | "ready" | "failed";

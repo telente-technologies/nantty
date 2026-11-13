@@ -20,21 +20,39 @@
 
 .collectionRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--space-3);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-areas: "sales brands" "sales arrivals";
+  height: 240px;
+  gap: var(--space-2);
 }
 
 .collectionTile {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  gap: 2px;
-  min-height: 92px;
+  gap: var(--space-1);
+  min-width: 0;
+  min-height: 0;
   padding: var(--space-4);
   border-radius: var(--radius-large);
-  background: linear-gradient(135deg, var(--color-brand-solid) 0%, var(--color-inverse) 100%);
-  color: var(--color-on-brand);
+  overflow: hidden;
+  background: var(--color-brand-tint);
+  color: var(--color-text);
   transition: transform var(--motion-base) var(--motion-ease), box-shadow var(--motion-base) ease;
+}
+
+.collectionTileSales { grid-area: sales; }
+.collectionTileBrands { grid-area: brands; }
+.collectionTileArrivals { grid-area: arrivals; }
+
+.collectionTileFallback {
+  background: var(--color-brand-tint);
+}
+
+.collectionImage {
+  z-index: 0;
 }
 
 .collectionTile:hover {
@@ -42,14 +60,32 @@
   box-shadow: var(--shadow-float);
 }
 
+.collectionTile:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
 .collectionLabel {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  padding: 2px 6px;
+  border-radius: var(--radius-small);
+  background: var(--surface-card);
+  color: var(--ink-strong);
   font-size: var(--text-md);
   font-weight: 800;
 }
 
 .collectionCaption {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  padding: 2px 6px;
+  border-radius: var(--radius-small);
+  background: var(--surface-card);
+  color: var(--ink-strong);
   font-size: var(--text-xs);
-  opacity: 0.82;
 }
 
 .productGrid {
@@ -59,6 +95,10 @@
 }
 
 @media (min-width: 768px) {
+  .collectionRow {
+    height: clamp(240px, 22vw, 320px);
+  }
+
   .productGrid {
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
     gap: var(--space-4);

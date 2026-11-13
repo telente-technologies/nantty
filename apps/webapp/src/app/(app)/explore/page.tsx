@@ -2,7 +2,7 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect, useRef } from "react";
 
 import { ProductGridSkeleton } from "@/components/commerce/productCardSkeleton";
 import { ExploreHome } from "@/components/explore/exploreHome";
@@ -16,6 +16,7 @@ import { buildExploreSearchHref, defaultSearchResultType, globalSearchContext, r
 import styles from "./page.module.css";
 import { RecentSearchList } from "./recentSearchList";
 import { SearchResultSections } from "./searchResultSections";
+import { useProductInteraction } from "@/components/commerce/useProductInteraction.hook";
 
 function ExploreResults() {
   const router = useRouter();
@@ -25,6 +26,8 @@ function ExploreResults() {
   const tabs = searchResultTypesForScope(context.scope);
   const requestedType = searchParams.get("type") as SearchResultType | null;
   const type = requestedType && tabs.some((tab) => tab.type === requestedType) ? requestedType : defaultSearchResultType(context.scope);
+  const { track: trackInteraction, canTrack, viewerId } = useProductInteraction();
+  const lastTrackedSearchKey = useRef<string | null>(null);
   const recents = useRecentSearches(context.scope);
   const { recordSearch } = recents;
 
@@ -36,6 +39,13 @@ function ExploreResults() {
     enabled: query.length > 0,
     retry: false,
   });
+
+  useEffect(() => {
+    const searchKey = `${viewerId ?? "guest"}:${context.scope}:${type}:${query}`;
+    if (!query || !canTrack || lastTrackedSearchKey.current === searchKey) return;
+    lastTrackedSearchKey.current = searchKey;
+    trackInteraction("search.performed", { query, surface: context.scope });
+  }, [canTrack, context.scope, query, trackInteraction, type, viewerId]);
 
   const searchFor = (nextQuery: string) => router.push(buildExploreSearchHref(nextQuery, context));
 
@@ -81,7 +91,19 @@ function ExploreResults() {
           action={context.scope === "global" ? undefined : <Button variant="secondary" onClick={() => router.push(buildExploreSearchHref(query, globalSearchContext))}>Search everywhere</Button>}
         />
       ) : (
-        <SearchResultSections items={items} surface={query.trim().startsWith("#") ? "hashtag" : "search"} onOpenResult={() => recordSearch(query)} onSearchHashtag={(tag) => searchFor(`#${tag}`)} />
+        <SearchResultSections
+          items={items}
+          surface={query.trim().startsWith("#") ? "hashtag" : "search"}
+          onOpenResult={() => recordSearch(query)}
+          onSearchHashtag={(tag) => searchFor(`#${tag}`)}
+          onProductClick={(productId, position) => trackInteraction("product.clicked", {
+            productId,
+            surface: "search",
+            query,
+            resultCount: items.length,
+            position,
+          })}
+        />
       )}
 
       {resultsQuery.hasNextPage ? (

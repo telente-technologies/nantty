@@ -10,8 +10,8 @@ import { takeRememberedFeedScrollPosition } from "@/utils/feedScrollRestoration.
 import { FeedModuleRow } from "./feedModuleRow";
 import { useFeedModules } from "./feedModules.hook";
 
-export function FeedPostsWithModules({ posts }: { readonly posts: readonly Post[] }) {
-  const modules = useFeedModules(posts);
+export function FeedPostsWithModules({ posts, isForYouFeed = true }: { readonly posts: readonly Post[]; readonly isForYouFeed?: boolean }) {
+  const modules = useFeedModules(posts, isForYouFeed);
   const restored = useRef(false);
   useEffect(() => {
     if (restored.current || posts.length === 0) return;

@@ -18,6 +18,7 @@ import { CheckmarkBadge } from "@/components/verification/checkmarkBadge";
 
 import { MentionText } from "@/components/mentions/mentionText";
 import { commentVideoReplyHref } from "@/utils/commentVideoReply.util";
+import { commentAuthorProfileHref } from "./commentAuthorProfileHref.util";
 import { describeCommentLikeAccessibility } from "./commentLikeAccessibility.util";
 import { commentVerificationColor } from "./commentVerificationColor.util";
 
@@ -95,18 +96,21 @@ function CommentRow({ comment, postId, postAuthorId, isReply, connectBelow = fal
   const isPostAuthor = comment.isPostAuthor ?? (postAuthorId !== undefined && comment.author.id === postAuthorId);
   const displayName = comment.postedAs?.name ?? comment.author.name;
   const displayAvatar = comment.postedAs?.avatarUrl ?? comment.author.avatarUrl;
+  const authorHref = commentAuthorProfileHref(comment);
   const verificationColor = commentVerificationColor(comment);
   const likeAccessibility = describeCommentLikeAccessibility(isLiked, formatCountWithThousandsSuffix(likeCount), displayName);
 
   return (
-    <div className={[styles.comment, isReply ? styles.reply : ""].join(" ")}>
+    <article className={styles.comment} aria-label={`Comment by ${displayName}`}>
       <span className={styles.avatarRail}>
-        <Avatar name={displayName} src={displayAvatar} size={isReply ? "xs" : "sm"} />
+        <span className={styles.avatarLabel} role="img" aria-label={`${displayName} profile picture`}>
+          <Avatar name={displayName} src={displayAvatar} size={isReply ? "xs" : "sm"} />
+        </span>
         {connectBelow ? <span className={styles.chainLine} aria-hidden="true" /> : null}
       </span>
       <div className={styles.commentBody}>
         <p className={styles.commentMeta}>
-          <strong>{displayName}</strong>
+          <Link className={styles.authorName} href={authorHref}>{displayName}</Link>
           {verificationColor ? <CheckmarkBadge color={verificationColor} /> : null}
           {comment.postedAs ? <span className={styles.profileAttribution}>@{comment.postedAs.handle} · {comment.postedAs.kind}</span> : null}
           {isPostAuthor ? <span className={styles.authorBadge}>Author</span> : null}
@@ -169,7 +173,7 @@ function CommentRow({ comment, postId, postAuthorId, isReply, connectBelow = fal
         </div>
       </div>
       <ReportDialog isOpen={isReportOpen} onClose={() => setIsReportOpen(false)} targetType="comment" targetId={comment.id} />
-    </div>
+    </article>
   );
 }
 
@@ -192,6 +196,7 @@ function CommentBranch({
   const [replyTarget, setReplyTarget] = useState<Comment | null>(null);
   const [localReplies, setLocalReplies] = useState<readonly Comment[]>([]);
   const previewReplies = previewPool.filter((reply) => reply.parentCommentId === comment.id);
+  const displayName = comment.postedAs?.name ?? comment.author.name;
   const repliesQuery = useInfiniteQuery({
     queryKey: ["commentReplies", comment.id],
     queryFn: ({ pageParam }) => commentsService.fetchReplies(comment.id, pageParam),
@@ -201,7 +206,6 @@ function CommentBranch({
   });
   const serverReplies = isExpanded ? (repliesQuery.data?.pages ?? []).flatMap((page) => page.data) : previewReplies;
   const replies = [...serverReplies, ...localReplies.filter((local) => !serverReplies.some((reply) => reply.id === local.id))];
-  const isChain = !isExpanded;
   const hiddenReplyCount = isExpanded ? Math.max(0, comment.replyCount - serverReplies.length) : Math.max(0, comment.replyCount - previewReplies.length);
   const canShowMore = isExpanded ? repliesQuery.hasNextPage === true : hiddenReplyCount > 0;
   const showMoreLabel = repliesQuery.isFetching ? "Loading replies…" : isExpanded ? "Show more replies" : `Show ${hiddenReplyCount} more ${hiddenReplyCount === 1 ? "reply" : "replies"}`;
@@ -209,18 +213,22 @@ function CommentBranch({
 
   return (
     <div className={styles.thread} style={branchIndent ? { marginLeft: branchIndent } : undefined}>
-      <CommentRow comment={comment} postId={postId} postAuthorId={postAuthorId} isReply={nestingLevel === 1} connectBelow={isChain && replies.length > 0} onReply={setReplyTarget} onReplyWithVideo={onReplyWithVideo} />
-      {replies.map((reply) => (
-        <CommentBranch
-          key={reply.id}
-          comment={reply}
-          postId={postId}
-          postAuthorId={postAuthorId}
-          previewPool={previewPool}
-          nestingLevel={nestingLevel + 1}
-          onReplyWithVideo={onReplyWithVideo}
-        />
-      ))}
+      <CommentRow comment={comment} postId={postId} postAuthorId={postAuthorId} isReply={nestingLevel === 1} connectBelow={replies.length > 0} onReply={setReplyTarget} onReplyWithVideo={onReplyWithVideo} />
+      {replies.length > 0 ? (
+        <div className={styles.replyGroup} role="group" aria-label={`Replies to ${displayName}`}>
+          {replies.map((reply) => (
+            <CommentBranch
+              key={reply.id}
+              comment={reply}
+              postId={postId}
+              postAuthorId={postAuthorId}
+              previewPool={previewPool}
+              nestingLevel={nestingLevel + 1}
+              onReplyWithVideo={onReplyWithVideo}
+            />
+          ))}
+        </div>
+      ) : null}
       {canShowMore ? (
         <button
           type="button"

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { classifyReviewSubmitError, isOrderReviewable, ratingBreakdown, starsLabel, toSubmitReviewInput, validateReviewDraft } from "./productReviews.util";
+import { classifyReviewSubmitError, isOrderReviewable, ratingBreakdown, resolveReviewPreviewMetrics, starsLabel, toSubmitReviewInput, validateReviewDraft } from "./productReviews.util";
 
 describe("product reviews", () => {
   it("only offers reviews after delivery", () => {
@@ -28,5 +28,12 @@ describe("product reviews", () => {
     assert.equal(rows[0]?.star, "5");
     assert.equal(rows[0]?.share, 0.5);
     assert.equal(starsLabel(4.25), "4.3 out of 5 stars");
+  });
+
+  it("keeps product rating metrics when the paginated review preview is unavailable", () => {
+    assert.deepEqual(resolveReviewPreviewMetrics({ average: 4.6, count: 12 }, undefined), { average: 4.6, count: 12 });
+    assert.deepEqual(resolveReviewPreviewMetrics(undefined, { average: 4.2, count: 3 }), { average: 4.2, count: 3 });
+    assert.deepEqual(resolveReviewPreviewMetrics({ average: 4.6, count: 12 }, { average: 4.2, count: 3 }), { average: 4.6, count: 3 });
+    assert.deepEqual(resolveReviewPreviewMetrics(undefined, undefined), { average: 0, count: 0 });
   });
 });

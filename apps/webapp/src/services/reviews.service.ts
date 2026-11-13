@@ -10,4 +10,6 @@ export const reviewsService = {
   fetchRatingSummary: (productId: string) => sendRequestToWebappServer<ProductRatingSummary>(`/api/v1/products/${encodeURIComponent(productId)}/rating-summary`),
   submitProductReview: (productId: string, input: SubmitReviewInput, idempotencyKey: string) =>
     sendRequestToWebappServer<ProductReview>(`/api/v1/products/${encodeURIComponent(productId)}/reviews`, { method: "POST", body: input, idempotencyKey }),
+  deleteOwnReview: (reviewId: string) =>
+    sendRequestToWebappServer<void>(`/api/v1/reviews/${encodeURIComponent(reviewId)}`, { method: "DELETE" }),
 };

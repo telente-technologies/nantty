@@ -26,7 +26,7 @@ function findMatchingRoute(method: string, path: string): { route: MockRoute; pa
   return null;
 }
 
-export async function dispatchMockApiRequest(method: string, path: string, query: URLSearchParams, body: Uint8Array | null): Promise<unknown> {
+export async function dispatchMockApiRequest(method: string, path: string, query: URLSearchParams, body: Uint8Array | null, headers: Readonly<Record<string, string>> = {}): Promise<unknown> {
   const match = findMatchingRoute(method, path);
   if (!match) throw new ApiError(404, `No mock for ${method} ${path}`, "MOCK_ROUTE_NOT_FOUND");
   let parsedBody: unknown = undefined;
@@ -37,7 +37,7 @@ export async function dispatchMockApiRequest(method: string, path: string, query
       parsedBody = undefined;
     }
   }
-  return match.route.handler({ params: match.params, query, body: parsedBody });
+  return match.route.handler({ params: match.params, query, body: parsedBody, headers });
 }
 
 (globalThis as Record<string, unknown>).__nanttyMockBackend = "nantty-mock-backend-bundled";

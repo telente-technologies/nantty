@@ -3,8 +3,8 @@
   min-height: 100dvh;
   align-content: center;
   width: 100%;
-  max-width: var(--reading-width);
+  max-width: var(--content-width);
   margin-inline: auto;
   min-width: 0;
-  padding: var(--space-6) 0;
+  padding: clamp(24px, 5vw, 64px) var(--gutter);
 }

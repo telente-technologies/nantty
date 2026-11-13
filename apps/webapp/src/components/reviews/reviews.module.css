@@ -151,6 +151,29 @@
   white-space: pre-wrap;
 }
 
+.deleteReview {
+  align-self: flex-start;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-danger-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.deleteReview:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.deleteReview:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 3px;
+  border-radius: var(--radius-small);
+}
+
 .reply {
   padding: var(--space-3);
   border-left: 2px solid var(--divider);

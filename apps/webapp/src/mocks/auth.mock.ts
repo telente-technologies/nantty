@@ -23,6 +23,12 @@ const TOPICS = [
 
 const MINIMUM_IDENTITY_TOKEN_LENGTH = 20;
 
+const requireBirthdayForNewSocialAccount = (birthday: unknown) => {
+  if (typeof birthday !== "string" || !birthday) {
+    throw new ApiError(422, "Add your birthday to finish creating your account.", "BIRTHDAY_REQUIRED");
+  }
+};
+
 const requireIdentityTokenInBody = (token: unknown, fieldName: string) => {
   if (typeof token !== "string" || token.split(".").length !== 3 || token.length < MINIMUM_IDENTITY_TOKEN_LENGTH) {
     throw new ApiError(400, `${fieldName} must be a signed identity token`, "INVALID_IDENTITY_TOKEN");
@@ -31,12 +37,15 @@ const requireIdentityTokenInBody = (token: unknown, fieldName: string) => {
 
 export const authMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/auth/google", ({ body }) => {
-    requireIdentityTokenInBody((body as { idToken?: unknown }).idToken, "idToken");
+    const request = body as { idToken?: unknown; birthday?: unknown };
+    requireBirthdayForNewSocialAccount(request.birthday);
+    requireIdentityTokenInBody(request.idToken, "idToken");
     mockSession.signedInUserId = me.id;
     return buildMockAuthSession();
   }),
   createMockRoute("POST", "/api/v1/auth/apple", ({ body }) => {
-    const { identityToken, fullName } = body as { identityToken?: unknown; fullName?: { givenName?: string | null; familyName?: string | null } };
+    const { identityToken, fullName, birthday } = body as { identityToken?: unknown; birthday?: unknown; fullName?: { givenName?: string | null; familyName?: string | null } };
+    requireBirthdayForNewSocialAccount(birthday);
     requireIdentityTokenInBody(identityToken, "identityToken");
     mockSession.signedInUserId = demoFanAccount.id;
     const displayName = [fullName?.givenName, fullName?.familyName].filter(Boolean).join(" ");

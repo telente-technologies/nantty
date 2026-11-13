@@ -70,3 +70,32 @@ export const feedModuleRowKey = (slot: FeedModuleSlot) => `${slot.kind}-${slot.o
 export function takeChunkForOccurrence<Item>(items: readonly Item[], occurrence: number, chunkSize: number): Item[] {
   return items.slice(occurrence * chunkSize, (occurrence + 1) * chunkSize);
 }
+
+/** Keep product recommendations on the For You feed and count only organic posts for cadence. */
+export function planProductsYouMightLikeSlots<Post extends { readonly sponsored?: unknown }>(
+  posts: readonly Post[], existingSlots: readonly FeedModuleSlot[], recommendationsAvailable: boolean, isForYouFeed: boolean,
+): FeedModuleSlot[] {
+  if (!isForYouFeed || !recommendationsAvailable) return [];
+  const cadence = feedModuleCadence.productsYouMightLike;
+  const desiredBoundaries: number[] = [];
+  let organicPostCount = 0;
+  posts.forEach((post, index) => {
+    if (post.sponsored != null && post.sponsored !== false) return;
+    organicPostCount += 1;
+    if (organicPostCount >= cadence.firstAfterPosts && (organicPostCount - cadence.firstAfterPosts) % (cadence.repeatEveryPosts ?? Number.POSITIVE_INFINITY) === 0) desiredBoundaries.push(index + 1);
+  });
+  const occupiedBoundaries = existingSlots.map((slot) => slot.afterPostCount);
+  const productSlots: FeedModuleSlot[] = [];
+  for (const desiredBoundary of desiredBoundaries) {
+    let afterPostCount = desiredBoundary;
+    while (afterPostCount <= posts.length && occupiedBoundaries.some((occupied) => Math.abs(occupied - afterPostCount) < minimumPostsBetweenFeedModules)) afterPostCount += 1;
+    if (afterPostCount > posts.length) continue;
+    productSlots.push({ kind: "productsYouMightLike", occurrence: productSlots.length, afterPostCount });
+    occupiedBoundaries.push(afterPostCount);
+  }
+  return productSlots;
+}
+
+export function shouldFetchProductsYouMightLike(organicPostCount: number, isForYouFeed: boolean): boolean {
+  return isForYouFeed && organicPostCount >= feedModuleCadence.productsYouMightLike.firstAfterPosts;
+}

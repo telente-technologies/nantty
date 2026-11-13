@@ -88,7 +88,7 @@ function LoginForm() {
       </Button>
 
       <div className={styles.socialStack}>
-        <SocialSignInButtons />
+        <SocialSignInButtons redirectTo={readSafeRelativeRedirectPath(searchParams.get("next"), "/")} />
       </div>
 
       <p className={styles.switchPrompt}>

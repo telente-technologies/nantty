@@ -27,7 +27,7 @@ export function SideNavigation({ navigationGroups, isExpandedOnTablet, isCollaps
         <Link href="/" className={styles.brand} aria-label="Nantty home" onClick={onNavigate}>
           <NanttyLogoMark size={36} className={styles.brandMark} />
           <span className={styles.brandWordmark}>
-            <NanttyWordmark />
+            <NanttyWordmark height={30} />
           </span>
         </Link>
       </div>

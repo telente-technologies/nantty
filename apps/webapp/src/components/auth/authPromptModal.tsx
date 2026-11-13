@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
-import { OfficialStoreBadges } from "@nantty/web-kit";
+import { OfficialStoreBadges, ThemeAwareNanttyWordmark } from "@nantty/web-kit";
 
 import { useSession } from "@/components/providers/sessionProvider";
 import { storeLinks } from "@/config/brandContact.config";
@@ -62,7 +62,7 @@ export function AuthPromptModal() {
   }
 
   return (
-    <Dialog isOpen={isOpen} onClose={closeAuthPrompt} title="Sign in to Nantty" description={reason ?? undefined} layout="sheet" intent="signIn">
+    <Dialog isOpen={isOpen} onClose={closeAuthPrompt} title="Sign in to Nantty" description={reason ?? undefined} layout="sheet" intent="signIn" icon={<ThemeAwareNanttyWordmark height={28} />} hideIntentIcon plainIcon>
       <form className={styles.form} onSubmit={signInWithoutLeavingThePage} noValidate>
         {formError ? (
           <p className={styles.error} role="alert">

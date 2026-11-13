@@ -48,9 +48,12 @@ export const isMartSponsoredSeed = (seed: CatalogProductSeed) => MART_SPONSORED_
 
 export function buildCatalogProductSummary(seed: CatalogProductSeed, options: { sponsored?: boolean } = {}): ProductSummary {
   const productId = productIdForKey(seed.key);
+  const store = findDirectoryStoreById(seed.storeId);
   return {
     id: productId,
     name: seed.name,
+    storeName: store.name,
+    storeVerified: store.verified,
     price: convertUsdCentsToViewerCurrency(discountedUsdCents(seed)),
     imageUrl: productImageUrlsForProduct(seed.key)[0] ?? null,
     liked: false,

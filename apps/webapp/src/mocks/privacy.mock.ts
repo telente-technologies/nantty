@@ -1,6 +1,7 @@
 import { currentPolicyVersion } from "@/config/legalLinks.config";
 import { ApiError } from "@/errors/api.error";
 import type { DataExportRequest } from "@/types/privacy.type";
+import type { ProductInteractionRecord } from "@/types/privacy.type";
 
 import { recordMockPolicyAcceptance } from "./legal.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -10,6 +11,7 @@ const readyAfterMilliseconds = 9000;
 const exportLinkLifetimeMilliseconds = 7 * 24 * 60 * 60 * 1000;
 const deletionGracePeriodMilliseconds = 30 * 24 * 60 * 60 * 1000;
 const deletionConfirmationWord = "DELETE";
+export const receivedProductInteractions: ProductInteractionRecord[] = [];
 
 const optionalConsentTypes = ["analytics", "personalization", "advertising", "marketing"] as const;
 let consentPolicyVersion = currentPolicyVersion;
@@ -62,5 +64,12 @@ export const privacyMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/users/me/deletion-request", ({ body }) => {
     if ((body as { confirm?: boolean }).confirm !== true) throw new ApiError(422, `Type ${deletionConfirmationWord} to confirm`);
     return { id: "deletion_mock", status: "scheduled", reason: "", requestedAt: new Date().toISOString(), scheduledFor: new Date(Date.now() + deletionGracePeriodMilliseconds).toISOString(), cancelledAt: null, executedAt: null, retentionPolicy: [] };
+  }),
+  createMockRoute("POST", "/api/v1/analytics/product-interactions", ({ body, headers }) => {
+    const consentHeader = headers?.["x-consent-analytics"];
+    const analyticsAllowed = consentHeader === "true" || (consentHeader === undefined && grantedConsentTypes.get("analytics")?.granted === true);
+    const events = (body as { events?: ProductInteractionRecord[] } | null)?.events ?? [];
+    if (analyticsAllowed) receivedProductInteractions.push(...events);
+    return { accepted: analyticsAllowed ? events.length : 0, dropped: analyticsAllowed ? 0 : events.length };
   }),
 ];

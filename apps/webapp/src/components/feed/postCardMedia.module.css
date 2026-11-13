@@ -191,6 +191,22 @@
   gap: 5px;
 }
 
+@media (min-width: 1024px) {
+  .mediaFrame:not(.videoFrame) {
+    height: min(50dvh, 560px);
+    aspect-ratio: auto;
+  }
+
+  .videoMediaFrame {
+    height: min(50dvh, 560px);
+    aspect-ratio: auto;
+  }
+
+  .mediaFrame:not(.videoFrame) img {
+    object-fit: contain;
+  }
+}
+
 .mediaDot {
   width: 6px;
   height: 6px;

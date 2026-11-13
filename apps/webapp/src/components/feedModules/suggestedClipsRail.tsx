@@ -57,7 +57,7 @@ export function SuggestedClipsRail({ clips, onOpenClip }: SuggestedClipsRailProp
   ];
 
   return (
-    <section className={styles.module} aria-label="Suggested clips">
+    <section className={[styles.module, styles.suggestedClips].join(" ")} aria-label="Suggested clips">
       <div className={styles.header} ref={menu.containerRef}>
         <h2 className={styles.title}>Suggested clips</h2>
         <button type="button" ref={menu.triggerRef} className={styles.iconButton} aria-label="More options for suggested clips" {...menu.triggerProps}>
@@ -92,7 +92,7 @@ export function SuggestedClipsRail({ clips, onOpenClip }: SuggestedClipsRailProp
           return (
             <li key={clip.id}>
               <button type="button" className={styles.clipTile} onClick={() => onOpenClip(clip)} aria-label={`Play suggested clip by ${clip.author.name}`}>
-                <MediaImage src={poster} alt="" sizes="140px" />
+                <MediaImage src={poster} alt="" sizes="(max-width: 480px) 34vw, (max-width: 737px) 140px, (max-width: 968px) 19vw, 184px" />
                 <span className={styles.clipTileAuthor} aria-hidden="true">{clip.author.name}</span>
               </button>
             </li>

@@ -5,7 +5,17 @@ import { formatTimeSincePosted } from "@/utils/formatDate.util";
 import { StarRatingDisplay } from "./starRating";
 import styles from "./reviews.module.css";
 
-export function ReviewCard({ review }: { readonly review: ProductReview }) {
+export function ReviewCard({
+  review,
+  isOwn = false,
+  isDeleting = false,
+  onDelete,
+}: {
+  readonly review: ProductReview;
+  readonly isOwn?: boolean;
+  readonly isDeleting?: boolean;
+  readonly onDelete?: () => void;
+}) {
   return (
     <article className={styles.review}>
       <header className={styles.reviewHeader}>
@@ -23,6 +33,11 @@ export function ReviewCard({ review }: { readonly review: ProductReview }) {
           <strong>Reply from {review.reply.authorName}</strong>
           <p>{review.reply.body}</p>
         </div>
+      ) : null}
+      {isOwn && onDelete ? (
+        <button type="button" className={styles.deleteReview} disabled={isDeleting} onClick={onDelete}>
+          {isDeleting ? "Deleting review…" : "Delete my review"}
+        </button>
       ) : null}
     </article>
   );

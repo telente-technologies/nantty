@@ -2,6 +2,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  width: 100%;
+  max-width: min(var(--reading-width), 100%);
+  margin-inline: auto;
 }
 
 .feedList {
@@ -9,7 +12,7 @@
   flex-direction: column;
   gap: var(--space-4);
   width: 100%;
-  max-width: var(--reading-width);
+  max-width: min(var(--reading-width), 100%);
   margin-inline: auto;
 }
 

@@ -7,6 +7,8 @@ import { sendListRequestToWebappServer, sendRequestToWebappServer } from "./clie
 
 export const productsService = {
   fetchMartHome: () => sendRequestToWebappServer<MartHome>("/api/v1/mart/home"),
+  fetchProductsYouMightLike: (surface: "for_you" | "mart_home" | "clips" = "for_you") =>
+    sendRequestToWebappServer<{ readonly products: readonly ProductSummary[]; readonly source: "personalized" | "popular" }>("/api/v1/mart/recommendations/for-you", { query: { surface } }),
   fetchMartHighlights: (limit = 6) => sendRequestToWebappServer<Page<MartHighlight>>("/api/v1/mart/highlights", { query: { limit } }),
   fetchProductsPage: (categoryId: string | null, cursor: string | null) =>
     sendRequestToWebappServer<Page<ProductSummary>>("/api/v1/products", { query: { categoryId: categoryId ?? undefined, cursor: cursor ?? undefined } }),

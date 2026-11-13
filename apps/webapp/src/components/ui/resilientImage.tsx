@@ -15,5 +15,5 @@ export function ResilientImage({ src, alt, sizes, className, priority }: { reado
       </span>
     );
   }
-  return <Image src={src} alt={alt} fill sizes={sizes} className={[styles.fill, className ?? ""].filter(Boolean).join(" ")} priority={priority} onError={() => setFailedSrc(src)} />;
+  return <Image src={src} alt={alt} fill sizes={sizes} className={[styles.fill, className ?? ""].filter(Boolean).join(" ")} loading={priority ? "eager" : "lazy"} onError={() => setFailedSrc(src)} />;
 }

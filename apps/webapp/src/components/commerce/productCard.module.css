@@ -52,6 +52,28 @@
   gap: 6px;
 }
 
+.storeIdentity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  line-height: 1.25;
+}
+
+.storeName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.verifiedStore {
+  display: inline-flex;
+  flex: none;
+  color: var(--yellow-600);
+}
+
 .name {
   font-size: var(--text-base);
   font-weight: 650;

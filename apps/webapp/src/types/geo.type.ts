@@ -37,6 +37,8 @@ export interface SellerShippingQuote {
 }
 
 export interface CartShippingQuote {
+  readonly addressId: string | null;
+  readonly shippingQuoteRevision: string | null;
   readonly groups: readonly SellerShippingQuote[];
   readonly shipping: Money;
   readonly total: Money;

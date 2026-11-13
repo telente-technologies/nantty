@@ -20,13 +20,21 @@ describe("web welcome screen", () => {
     assert.doesNotMatch(welcome, /"Email"/);
   });
 
-  it("gives every sign-in option the same size, width and 24px icon", () => {
-    const buttons = [...`${socialButtons}\n${welcome}`.matchAll(/<Button\b([\s\S]*?)>/g)].map((match) => match[1]!);
-    assert.equal(buttons.length, 3);
+  it("keeps Nantty-styled Apple and mock Google options consistent and renders the verified Google button when configured", () => {
+    const buttons = [...socialButtons.matchAll(/<Button\b([\s\S]*?)>/g)].map((match) => match[1]!).filter((props) => props.includes("leadingIcon="));
+    assert.equal(buttons.length, 2);
     for (const props of buttons) {
       assert.match(props, /\bfullWidth\b/);
       assert.match(props, /size="lg"/);
       assert.match(props, /size=\{24\}/);
     }
+    assert.match(socialButtons, /googleIdentity\.renderButton/);
+    assert.match(socialButtons, /client_id: googleClientId/);
+  });
+
+  it("reuses the provider identity and nonce when the birthday challenge is submitted", () => {
+    assert.match(socialButtons, /setBirthdayChallenge\(\{ provider, identity \}\)/);
+    assert.match(socialButtons, /completeSocialSignIn\(birthdayChallenge\.provider, birthdayChallenge\.identity, birthday\)/);
+    assert.match(socialButtons, /readNonceFromIdentityToken\(idToken\) !== nonce/);
   });
 });

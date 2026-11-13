@@ -30,4 +30,12 @@ describe("runtime content security policy", () => {
     assert.match(buildContentSecurityPolicyHeaderValue({ isIdentityVerification: true }), /smileidentity/);
     assert.doesNotMatch(buildContentSecurityPolicyHeaderValue(), /smileidentity/);
   });
+
+  it("allows only the configured first-party social sign-in SDK origins", () => {
+    const policy = buildContentSecurityPolicyHeaderValue();
+    assert.match(policy, /script-src [^;]*https:\/\/accounts\.google\.com/);
+    assert.match(policy, /script-src [^;]*https:\/\/appleid\.cdn-apple\.com/);
+    assert.match(policy, /frame-src [^;]*https:\/\/appleid\.apple\.com/);
+    assert.match(policy, /connect-src [^;]*https:\/\/accounts\.google\.com/);
+  });
 });

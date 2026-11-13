@@ -1,5 +1,5 @@
 import type { Order, OrderStatus } from "@/types/orders.type";
-import type { ProductRatingSummary, RatingStar, SubmitReviewInput } from "@/types/commerce.type";
+import type { ProductRatingSummary, ProductReviewSummary, RatingStar, SubmitReviewInput } from "@/types/commerce.type";
 
 export const REVIEW_TEXT_MAX_BYTES = 2000;
 export const REVIEW_TITLE_MAX_BYTES = 120;
@@ -22,6 +22,16 @@ export function ratingBreakdown(summary: Pick<ProductRatingSummary, "count" | "d
     const count = summary.distribution[star] ?? 0;
     return { star, count, share: total > 0 ? count / total : 0 };
   });
+}
+
+export function resolveReviewPreviewMetrics(
+  summary: Pick<ProductRatingSummary, "average" | "count"> | undefined,
+  preview: Pick<ProductReviewSummary, "average" | "count"> | undefined,
+) {
+  return {
+    average: summary?.average ?? preview?.average ?? 0,
+    count: preview?.count ?? summary?.count ?? 0,
+  };
 }
 
 export const isOrderReviewable = (order: Pick<Order, "status">) => REVIEWABLE_STATUSES.includes(order.status);

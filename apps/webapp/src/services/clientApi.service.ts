@@ -63,6 +63,9 @@ export interface WebappRequestOptions {
   readonly stepUpToken?: string;
   readonly signal?: AbortSignal;
   readonly skipHumanVerification?: boolean;
+  /** Background telemetry must not interrupt guest browsing with auth UI or redirects. */
+  readonly suppressAuthHandling?: boolean;
+  readonly interactionConsent?: { readonly analytics: boolean; readonly personalization: boolean };
 }
 
 export function buildQueryString(query: WebappRequestOptions["query"]): string {
@@ -99,6 +102,10 @@ export async function sendRequestToWebappServer<Payload>(apiPath: string, option
   if (method !== "GET" && currentCsrfToken) headers["X-CSRF-Token"] = currentCsrfToken;
   if (options.idempotencyKey) headers["Idempotency-Key"] = options.idempotencyKey;
   if (options.stepUpToken) headers["X-Step-Up-Token"] = options.stepUpToken;
+  if (options.interactionConsent) {
+    headers["X-Consent-Analytics"] = String(options.interactionConsent.analytics);
+    headers["X-Consent-Personalization"] = String(options.interactionConsent.personalization);
+  }
   let body: BodyInit | undefined;
   if (options.body !== undefined) {
     headers["Content-Type"] = "application/json";
@@ -122,8 +129,10 @@ export async function sendRequestToWebappServer<Payload>(apiPath: string, option
 
   if (response.status === 401) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null;
-    if (errorBody?.code === "SESSION_EXPIRED") handleExpiredSession();
-    else if (method !== "GET" && errorBody?.code === "UNAUTHENTICATED") promptSignInAfterUnauthenticatedResponse();
+    if (!options.suppressAuthHandling) {
+      if (errorBody?.code === "SESSION_EXPIRED") handleExpiredSession();
+      else if (method !== "GET" && errorBody?.code === "UNAUTHENTICATED") promptSignInAfterUnauthenticatedResponse();
+    }
     throw new WebappRequestError(401, errorBody?.code ?? "UNAUTHENTICATED", errorBody?.message ?? "Sign in to continue.", undefined, undefined, readResponseMeta(response));
   }
   if (!response.ok) {

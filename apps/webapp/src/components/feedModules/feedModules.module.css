@@ -63,6 +63,28 @@
   display: none;
 }
 
+.productSlider {
+  display: grid;
+  grid-auto-columns: minmax(156px, 22%);
+  grid-auto-flow: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0 var(--space-4);
+  overflow-x: auto;
+  list-style: none;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--divider-strong) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.productSlider > li { min-width: 0; scroll-snap-align: start; }
+.productSlider a { height: 100%; }
+
+@media (max-width: 640px) {
+  .productSlider { grid-auto-columns: minmax(148px, 42vw); gap: var(--space-2); scroll-snap-type: x mandatory; }
+}
+
 .clipTile {
   position: relative;
   flex: 0 0 auto;
@@ -88,6 +110,102 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Suggested clips keeps the shared Nantty feed-module structure while giving
+   this media rail responsive cards and theme-aware controls. */
+.suggestedClips {
+  gap: var(--space-3);
+  padding-block: var(--space-4);
+  background: var(--surface-card);
+}
+
+.suggestedClips .header {
+  min-height: var(--control-md);
+}
+
+.suggestedClips .title {
+  font-size: var(--text-md);
+  font-weight: 700;
+}
+
+.suggestedClips .iconButton {
+  flex: 0 0 auto;
+  width: var(--control-md);
+  height: var(--control-md);
+  color: var(--ink-muted);
+  transition: background-color var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
+}
+
+.suggestedClips .slider {
+  gap: var(--space-3);
+  padding-block: 2px var(--space-2);
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: var(--space-4);
+  scrollbar-color: var(--divider-strong) transparent;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.suggestedClips .slider::-webkit-scrollbar {
+  display: block;
+  height: 6px;
+}
+
+.suggestedClips .slider::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-pill);
+  background: var(--divider-strong);
+}
+
+.suggestedClips .clipTile {
+  width: clamp(140px, 19vw, 184px);
+  border: 1px solid var(--divider);
+  background: var(--surface-sunken);
+  box-shadow: var(--shadow-card);
+  transition: border-color var(--motion-fast) var(--motion-ease), box-shadow var(--motion-fast) var(--motion-ease), transform var(--motion-fast) var(--motion-ease);
+}
+
+.suggestedClips .clipTile :global(img) {
+  transition: transform var(--motion-base) var(--motion-ease);
+}
+
+.suggestedClips .clipTile:hover {
+  border-color: var(--divider-strong);
+  box-shadow: var(--shadow-float);
+  transform: translateY(-2px);
+}
+
+.suggestedClips .clipTile:hover :global(img) {
+  transform: scale(1.025);
+}
+
+.suggestedClips .clipTile:focus-visible,
+.suggestedClips .iconButton:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .suggestedClips .slider {
+    gap: var(--space-2);
+    scroll-snap-type: x mandatory;
+  }
+
+  .suggestedClips .clipTile {
+    width: clamp(132px, 34vw, 160px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .suggestedClips .iconButton,
+  .suggestedClips .clipTile,
+  .suggestedClips .clipTile :global(img) {
+    transition: none;
+  }
+
+  .suggestedClips .clipTile:hover {
+    transform: none;
+  }
 }
 
 .clipTile:focus-visible,
