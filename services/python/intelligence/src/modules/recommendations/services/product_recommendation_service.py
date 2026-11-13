@@ -28,6 +28,7 @@ SURFACE_WEIGHTS: dict[str, tuple[float, float, float, float]] = {
     "featured_with": (0.3, 0.0, 0.5, 0.2),
     "mart_home": (0.0, 0.0, 0.6, 0.4),
     "for_you": (0.0, 0.0, 0.45, 0.15),
+    "clips": (0.0, 0.0, 0.45, 0.15),
 }
 STORE_DIVERSITY_RULES = DiversityRules(
     max_consecutive_same_author=2,
@@ -130,11 +131,15 @@ def score_product_candidates(
             * calculate_product_personal_affinity(candidate, online_features, chosen_topics, request.viewer.country)
             + popularity_weight * calculate_product_popularity(candidate, maximum_log_popularity)
         )
-        if request.surface == "for_you":
+        if request.surface in {"for_you", "mart_home", "clips"}:
             score += 0.4 * calculate_product_item_affinity(candidate, online_features)
-            # Prefer verified stores without excluding eligible non-verified
-            # stores; the small exploration offset prevents a static shortlist.
+            # Keep verified merchants discoverable first while still ranking
+            # by viewer fit within each trust tier. Eligible non-verified stores
+            # remain available after verified candidates.
             score += verified_store_bonus if candidate.store_verified else 0.0
+            # Bounded daily exploration prevents a static catalogue shortlist
+            # on both discovery surfaces. Verified-store ordering is applied
+            # as a trust tier below, so exploration only reorders within tiers.
             score += calculate_product_exploration_tiebreaker(
                 request, candidate.product_id, exploration_max_offset, exploration_rotation_hours
             )
@@ -203,8 +208,17 @@ class ProductRecommendationService:
                 self.exploration_max_offset,
                 self.exploration_rotation_hours,
             )
-            ordered = rerank_candidates_for_diversity(scored, STORE_DIVERSITY_RULES, request.limit)
+            # Rank the complete bounded candidate pool before applying the
+            # response limit. Otherwise an unverified product can occupy the
+            # initial top-N and hide verified stores before the trust tier is
+            # applied below.
+            ordered = rerank_candidates_for_diversity(scored, STORE_DIVERSITY_RULES, len(scored))
             verified_by_id = {candidate.product_id: candidate.store_verified for candidate in request.candidates}
+            if request.surface in {"for_you", "mart_home", "clips"}:
+                ordered = [item for item in ordered if verified_by_id.get(item.item_id, False)] + [
+                    item for item in ordered if not verified_by_id.get(item.item_id, False)
+                ]
+            ordered = ordered[: request.limit]
             items = [
                 RecommendedItem(
                     item_id=item.item_id,
@@ -214,7 +228,7 @@ class ProductRecommendationService:
                         if verified_by_id.get(item.item_id) and self.verified_store_bonus > 0
                         else "personalized"
                     )
-                    if request.surface == "for_you"
+                    if request.surface in {"for_you", "clips"}
                     else request.surface,
                 )
                 for item in ordered

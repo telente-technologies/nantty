@@ -25,9 +25,11 @@ async def synthetic_client(tmp_path: Path) -> AsyncIterator[tuple[SignedIntellig
         child_safety_hash_provider="synthetic",
         child_safety_synthetic_hashes=hashlib.sha256(flagged).hexdigest(),
     )
-    application = create_application(settings, InMemoryFeatureBackend(), start_background_tasks=False)
+    feature_backend = InMemoryFeatureBackend()
+    application = create_application(settings, feature_backend, start_background_tasks=False)
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=application), base_url="http://intel") as http:
-        yield SignedIntelligenceClient(http), flagged
+        client = SignedIntelligenceClient(http, feature_backend, application.state.container.feature_store.keyspace)
+        yield client, flagged
 
 
 async def test_scan_media_endpoint_reports_a_block_in_the_media_contract(

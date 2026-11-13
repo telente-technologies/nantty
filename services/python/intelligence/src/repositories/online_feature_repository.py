@@ -51,7 +51,13 @@ class OnlineFeatureStore:
     async def is_personalization_allowed(self, user_id: str) -> bool:
         rows = await self.feature_backend.read_hash_fields([self.keyspace.consent_key(user_id)])
         flags = rows[0]
-        return not (flags.get(PERSONALIZATION_OPT_OUT_FIELD, 0.0) or flags.get(ACCOUNT_DELETED_FIELD, 0.0))
+        # A missing consent record is not consent. Domain consent events persist 0.0
+        # for an explicit grant and 1.0 for a withdrawal; default-deny until then.
+        return (
+            PERSONALIZATION_OPT_OUT_FIELD in flags
+            and not flags[PERSONALIZATION_OPT_OUT_FIELD]
+            and not flags.get(ACCOUNT_DELETED_FIELD, 0.0)
+        )
 
     async def read_decayed_member_scores(
         self, base_key: str, members: Sequence[str], half_life_seconds: float, read_unix_time_seconds: float

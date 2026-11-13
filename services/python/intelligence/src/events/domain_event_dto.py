@@ -92,6 +92,7 @@ class ProductClickedPayload(ContractModel):
     category_id: OpaqueIdentifier | None = None
     query_hash: OpaqueIdentifier | None = None
     result_count: int = Field(default=0, ge=0, le=1_000_000)
+    position: int | None = Field(default=None, ge=0, le=10_000)
     surface: str | None = Field(default=None, max_length=40)
 
 

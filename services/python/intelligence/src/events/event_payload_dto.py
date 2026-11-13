@@ -83,6 +83,7 @@ class SearchedPayload(ContractModel):
     result_count: NonNegativeCount
     clicked_item_id: OpaqueIdentifier | None = None
     clicked_item_type: TargetType | None = None
+    position: int | None = Field(default=None, ge=0, le=10_000)
 
 
 class AdImpressionPayload(ContractModel):

@@ -72,6 +72,9 @@ async def test_product_view_updates_affinity_and_is_idempotent(
     application_container: ApplicationContainer, feature_backend: InMemoryFeatureBackend, reference_now: datetime
 ) -> None:
     consumer = application_container.domain_event_consumer_service
+    await consumer.process_message_body(
+        domain_event("evt_pv_1_consent", "consent.granted", "user_1", reference_now, {"consentType": "personalization"})
+    )
     await consumer.process_message_body(product_viewed("evt_pv_1", "user_1", reference_now))
     await consumer.process_message_body(product_viewed("evt_pv_1", "user_1", reference_now))
     assert await read_topic_affinity(feature_backend, application_container, "user_1") == 1
@@ -84,6 +87,9 @@ async def test_opted_out_user_gets_no_personalization_features(
     application_container: ApplicationContainer, feature_backend: InMemoryFeatureBackend, reference_now: datetime
 ) -> None:
     consumer = application_container.domain_event_consumer_service
+    await consumer.process_message_body(
+        domain_event("evt_pv_a_consent", "consent.granted", "user_2", reference_now, {"consentType": "personalization"})
+    )
     await consumer.process_message_body(product_viewed("evt_pv_a", "user_2", reference_now))
     assert await read_topic_affinity(feature_backend, application_container, "user_2") == 1
     await consumer.process_message_body(
@@ -143,6 +149,9 @@ async def test_opt_out_and_regrant_cannot_recall_any_item_affinity_generation(
     )
     keys = await seed_item_affinity_generations(feature_backend, keyspace, viewer_id, generation)
     store = application_container.feature_store
+    await application_container.domain_event_consumer_service.purge_service.record_personalization_choice(
+        viewer_id, True
+    )
     recalled_before_purge = await store.read_viewer_top_item_affinities(viewer_id, 10, read_time)
     assert [product_id for product_id, _score in recalled_before_purge] == ["product_1"]
 
@@ -275,6 +284,11 @@ async def test_contract_envelope_shape_and_deletion_request_stops_personalizatio
     application_container: ApplicationContainer, feature_backend: InMemoryFeatureBackend, reference_now: datetime
 ) -> None:
     consumer = application_container.domain_event_consumer_service
+    await consumer.process_message_body(
+        domain_event(
+            "evt_env_pv_consent", "consent.granted", "user_5", reference_now, {"consentType": "personalization"}
+        )
+    )
     await consumer.process_message_body(product_viewed("evt_env_pv", "user_5", reference_now))
     assert await read_topic_affinity(feature_backend, application_container, "user_5") == 1
     envelope = {

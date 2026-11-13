@@ -61,8 +61,10 @@ def build_signed_headers(
 
 
 class SignedIntelligenceClient:
-    def __init__(self, http_client: httpx.AsyncClient) -> None:
+    def __init__(self, http_client: httpx.AsyncClient, feature_backend: InMemoryFeatureBackend, keyspace: Any) -> None:
         self.http_client = http_client
+        self.feature_backend = feature_backend
+        self.keyspace = keyspace
 
     async def post(self, path: str, payload: Any) -> httpx.Response:
         body = json.dumps(payload).encode("utf-8")
@@ -79,7 +81,7 @@ async def signed_client(
     application = create_application(intelligence_settings, feature_backend, start_background_tasks=False)
     transport = httpx.ASGITransport(app=application)
     async with httpx.AsyncClient(transport=transport, base_url="http://intelligence.internal") as http_client:
-        yield SignedIntelligenceClient(http_client)
+        yield SignedIntelligenceClient(http_client, feature_backend, application.state.container.feature_store.keyspace)
 
 
 def build_event(

@@ -2,6 +2,9 @@ import json
 from datetime import datetime
 from typing import Any
 
+import pytest
+from pydantic import ValidationError
+
 from src.events.contract_envelope_normalizer import normalize_contract_envelope
 from src.events.domain_event_dto import (
     ProductAddedToCartDomainEvent,
@@ -35,6 +38,7 @@ def test_search_click_is_forwarded_as_pseudonymous_product_affinity(reference_no
             "surface": "search",
             "queryHash": "q_a1b2c3",
             "resultCount": 8,
+            "position": 2,
             "personalized": True,
         },
         reference_now,
@@ -51,8 +55,45 @@ def test_search_click_is_forwarded_as_pseudonymous_product_affinity(reference_no
         "resultCount": 8,
         "clickedItemId": "product_1",
         "clickedItemType": "product",
+        "position": 2,
     }
     assert "viewer_1" not in json.dumps(translated)
+
+
+def test_mart_product_click_preserves_surface_and_rank_position(reference_now: datetime) -> None:
+    envelope = interaction_envelope(
+        "product.clicked",
+        {
+            "actorId": "viewer_1",
+            "productId": "product_1",
+            "storeId": "store_1",
+            "surface": "mart_home",
+            "position": 4,
+            "personalized": True,
+        },
+        reference_now,
+    )
+    event = domain_event_type_adapter.validate_python(normalize_contract_envelope(envelope))
+    assert isinstance(event, ProductClickedDomainEvent)
+
+    translated = translate_to_intelligence_event(event, True, OpaqueIdentifierHasher(b"test-key"))
+    assert translated is not None
+    assert translated["payload"] == {
+        "productId": "product_1",
+        "storeId": "store_1",
+        "position": 4,
+        "surface": "mart_home",
+    }
+
+
+def test_product_click_rejects_out_of_range_position(reference_now: datetime) -> None:
+    envelope = interaction_envelope(
+        "product.clicked",
+        {"actorId": "viewer_1", "productId": "product_1", "storeId": "store_1", "position": 10_001},
+        reference_now,
+    )
+    with pytest.raises(ValidationError):
+        domain_event_type_adapter.validate_python(normalize_contract_envelope(envelope))
 
 
 def test_cart_add_is_forwarded_only_with_personalization_consent(reference_now: datetime) -> None:

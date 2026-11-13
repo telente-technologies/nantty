@@ -13,7 +13,7 @@ from src.validators.common_field_validator import (
     TopicSlug,
 )
 
-ProductRecommendationSurface = Literal["similar", "bought_together", "featured_with", "mart_home", "for_you"]
+ProductRecommendationSurface = Literal["similar", "bought_together", "featured_with", "mart_home", "for_you", "clips"]
 
 
 class ProductCandidate(ContractModel):

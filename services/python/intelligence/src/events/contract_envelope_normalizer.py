@@ -224,7 +224,7 @@ def normalize_contract_envelope(body: Any) -> Any:
         flat["actorId"] = data.get("actorId")
         flat["payload"] = {
             key: data[key]
-            for key in ("productId", "storeId", "categoryId", "queryHash", "resultCount", "surface")
+            for key in ("productId", "storeId", "categoryId", "queryHash", "resultCount", "position", "surface")
             if data.get(key) is not None
         }
         return flat

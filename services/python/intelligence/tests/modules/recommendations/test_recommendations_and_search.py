@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any
 
 from src.container import ApplicationContainer
+from src.interfaces.feature_backend_interface import HashFieldAssign
 from src.modules.model_registry.models.model_bundle_model import ItemSimilarityBundle, LoadedModel
 from src.modules.recommendations.dtos.recommendation_dto import (
     AccountRecommendationRequest,
@@ -11,6 +12,7 @@ from src.modules.recommendations.dtos.recommendation_dto import (
 )
 from src.modules.recommendations.services import product_recommendation_service
 from src.modules.search.dtos.search_rerank_dto import SearchRerankRequest
+from src.repositories.online_feature_keyspace_repository import PERSONALIZATION_OPT_OUT_FIELD
 from tests.conftest import SignedIntelligenceClient, build_event, build_viewer
 
 
@@ -64,6 +66,9 @@ def test_product_for_you_exploration_is_stable_within_a_day_and_rotates_daily(mo
 async def test_internal_product_candidate_recall_route_is_signed_and_consent_gated(
     signed_client: SignedIntelligenceClient, reference_now: datetime
 ) -> None:
+    await signed_client.feature_backend.apply_write_operations(
+        [HashFieldAssign(signed_client.keyspace.consent_key("u_viewer_hash"), PERSONALIZATION_OPT_OUT_FIELD, 0.0)]
+    )
     event = build_event(
         "candidate-recall-view",
         "product_viewed",
@@ -138,7 +143,10 @@ async def test_product_for_you_prefers_verified_stores_without_excluding_other_s
     application_container: ApplicationContainer,
 ) -> None:
     candidates = [
-        build_product("unverified", "store_a", salesCount=10, viewCount=20),
+        # The non-verified product has much stronger popularity, but trust tier
+        # remains the first ordering constraint; behavior/popularity rank within
+        # each tier and non-verified products are not excluded.
+        build_product("unverified", "store_a", salesCount=100_000, viewCount=200_000),
         build_product("verified", "store_b", salesCount=10, viewCount=20, storeVerified=True),
     ]
     items = await recommend(application_container, "for_you", candidates, requestId="stable-request")
@@ -148,9 +156,78 @@ async def test_product_for_you_prefers_verified_stores_without_excluding_other_s
     assert items[1][1] == "personalized"
 
 
+async def test_clips_surface_prefers_verified_stores_without_excluding_other_stores(
+    application_container: ApplicationContainer,
+) -> None:
+    candidates = [
+        build_product("unverified", "store_a", salesCount=100_000, viewCount=200_000),
+        build_product("verified", "store_b", salesCount=10, viewCount=20, storeVerified=True),
+    ]
+    items = await recommend(application_container, "clips", candidates, requestId="clips-request")
+
+    assert [item_id for item_id, _reason in items] == ["verified", "unverified"]
+    assert items[0][1] == "verified_store"
+
+
+async def test_mart_home_applies_verified_tier_before_page_limit(
+    application_container: ApplicationContainer,
+) -> None:
+    candidates = [
+        build_product("unverified_top_seller", "store_a", salesCount=100_000, viewCount=200_000),
+        build_product("verified_store", "store_b", salesCount=1, viewCount=1, storeVerified=True),
+    ]
+
+    items = await recommend(application_container, "mart_home", candidates, limit=1)
+
+    assert [item_id for item_id, _reason in items] == ["verified_store"]
+
+
+async def test_mart_home_rotates_equivalent_products_within_verified_tier(
+    application_container: ApplicationContainer, monkeypatch: Any,
+) -> None:
+    monkeypatch.setattr(product_recommendation_service, "resolve_request_time", lambda requested: requested)
+    candidates = [
+        build_product(f"verified_{index:02d}", f"verified_store_{index}", storeVerified=True, salesCount=1)
+        for index in range(8)
+    ] + [
+        build_product(f"other_{index:02d}", f"other_store_{index}", salesCount=1)
+        for index in range(4)
+    ]
+    before_rotation = await recommend(
+        application_container,
+        "mart_home",
+        candidates,
+        limit=12,
+        now="2026-11-07T08:00:00+00:00",
+    )
+    after_rotation = await recommend(
+        application_container,
+        "mart_home",
+        candidates,
+        limit=12,
+        now="2026-11-08T08:00:00+00:00",
+    )
+
+    before_ids = [item_id for item_id, _reason in before_rotation]
+    after_ids = [item_id for item_id, _reason in after_rotation]
+    assert set(before_ids) == set(after_ids) == {candidate["productId"] for candidate in candidates}
+    assert before_ids != after_ids
+    assert all(item_id.startswith("verified_") for item_id in before_ids[:8])
+    assert all(item_id.startswith("verified_") for item_id in after_ids[:8])
+
+
 async def test_product_for_you_uses_product_views_and_search_clicks_as_personal_signals(
     application_container: ApplicationContainer, reference_now: datetime
 ) -> None:
+    await application_container.feature_store.feature_backend.apply_write_operations(
+        [
+            HashFieldAssign(
+                application_container.feature_store.keyspace.consent_key("viewer_1"),
+                PERSONALIZATION_OPT_OUT_FIELD,
+                0.0,
+            )
+        ]
+    )
     events = [
         build_event(
             "view_interested",

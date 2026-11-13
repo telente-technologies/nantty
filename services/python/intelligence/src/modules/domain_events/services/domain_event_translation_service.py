@@ -124,12 +124,15 @@ def translate_to_intelligence_event(
                 "resultCount": event.payload.result_count,
                 "clickedItemId": event.payload.product_id,
                 "clickedItemType": "product",
+                **({"position": event.payload.position} if event.payload.position is not None else {}),
             }
         else:
             payload = {
                 "productId": event.payload.product_id,
                 "storeId": event.payload.store_id,
                 **({"categoryId": event.payload.category_id} if event.payload.category_id else {}),
+                **({"position": event.payload.position} if event.payload.position is not None else {}),
+                **({"surface": event.payload.surface} if event.payload.surface else {}),
             }
     if event.event_type == "gift.sent":
         # Value-flow scoring needs only a stable pseudonymous counterparty and amount.
