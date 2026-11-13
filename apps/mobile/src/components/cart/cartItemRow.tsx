@@ -27,6 +27,7 @@ export function CartItemRow({ item, onChangeQuantity, onRemove, onPress }: CartI
           <Text size={14} weight={500} lineHeight={16.8} numberOfLines={1}>
             {item.product.name}
           </Text>
+          {item.available === false ? <Text size={12} lineHeight={16} color={colors.error} accessibilityRole="text">Out of stock — remove this item to continue.</Text> : null}
           <View style={styles.stepper}>
             <Pressable
               accessibilityRole="button"
@@ -41,7 +42,7 @@ export function CartItemRow({ item, onChangeQuantity, onRemove, onPress }: CartI
             <Text size={14} weight={500} lineHeight={16.8} color={colors.primary} accessibilityLabel={`Quantity ${item.quantity}`}>
               {item.quantity}
             </Text>
-            <Pressable accessibilityRole="button" accessibilityLabel="Increase quantity" hitSlop={8} onPress={() => onChangeQuantity(item.quantity + 1)}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Increase quantity" disabled={item.available === false} hitSlop={8} onPress={() => onChangeQuantity(item.quantity + 1)} style={item.available === false ? styles.disabled : undefined}>
               <Plus16AltIcon />
             </Pressable>
           </View>

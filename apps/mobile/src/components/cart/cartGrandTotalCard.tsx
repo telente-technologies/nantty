@@ -27,6 +27,7 @@ export function CartGrandTotalCard({ cart, shippingQuoteReady = true }: { cart: 
       <Text size={14} weight={600} lineHeight={16.8} accessibilityRole="header">Order total</Text>
       <View style={styles.card}>
         <GrandTotalLine label="Items" amount={cart.itemsTotal} />
+        {cart.shopDiscount.amountMinor > 0 ? <GrandTotalLine label="Discount" amount={cart.shopDiscount} negative /> : null}
         {shippingQuoteReady ? (
           <GrandTotalLine label="Shipping" amount={cart.shipping} />
         ) : (
@@ -47,6 +48,11 @@ export function CartGrandTotalCard({ cart, shippingQuoteReady = true }: { cart: 
         {excludedCount > 0 ? (
           <Text size={12} lineHeight={16.8} color={colors.textMuted}>
             {excludedCount} {excludedCount === 1 ? "seller is" : "sellers are"} not included because they do not ship to your location.
+          </Text>
+        ) : null}
+        {(cart.unavailableItemCount ?? cart.unavailableItems?.length ?? 0) > 0 ? (
+          <Text size={12} lineHeight={16.8} color={colors.error} accessibilityRole="alert">
+            Remove unavailable products before checkout.
           </Text>
         ) : null}
       </View>

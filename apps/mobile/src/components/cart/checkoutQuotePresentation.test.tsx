@@ -62,4 +62,10 @@ describe("checkout quote presentation", () => {
     expect(screen.queryByText("Quoted shipping detail")).toBeNull();
     expect(screen.queryByText("Seller total")).toBeNull();
   });
+
+  it("explains that unavailable products must be removed before checkout", async () => {
+    await render(<CartGrandTotalCard cart={{ ...cart, unavailableItemCount: 1 }} />);
+
+    expect(screen.getByText("Remove unavailable products before checkout.")).toBeTruthy();
+  });
 });

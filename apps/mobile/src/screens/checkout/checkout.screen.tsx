@@ -87,6 +87,8 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
   });
   const deliverableGroupCount = cart.data?.groups.filter((group) => group.shipping.status === "calculated").length ?? 0;
   const blockedGroupCount = cart.data?.groups.filter((group) => group.shipping.status === "notDeliverable").length ?? 0;
+  const unavailableItemCount = cart.data?.unavailableItemCount ?? cart.data?.unavailableItems?.length ?? 0;
+  const payableGroups = cart.data?.groups.filter((group) => group.shipping.status === "calculated") ?? [];
   const totalMinor = shippingQuoteReady ? (cart.data?.total.amountMinor ?? 0) : 0;
   const walletCovers = shippingQuoteReady && !!providerWallet.active && totalMinor > 0 && providerWallet.spendableMinor >= totalMinor;
   const usingWallet = payFromWallet && walletCovers;
@@ -171,6 +173,19 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
     );
   }
 
+  if (cart.data && cart.data.items.length === 0 && (cart.data.unavailableItemCount ?? cart.data.unavailableItems?.length ?? 0) > 0) {
+    return (
+      <Screen>
+        <Header title="Checkout" paddingHorizontal={12} />
+        <View style={styles.unavailableOnly}>
+          <Text size={15} weight={600} lineHeight={20} accessibilityRole="header">Your cart needs attention</Text>
+          <Text size={13} lineHeight={19} color={colors.textMuted}>Remove unavailable products from your cart before checkout.</Text>
+          <Button variant="subtle" title="Review your cart" onPress={() => navigation.navigate("Cart")} />
+        </View>
+      </Screen>
+    );
+  }
+
   return (
     <Screen>
       <Header title="Checkout" paddingHorizontal={12} />
@@ -187,7 +202,7 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
             ) : null}
             <Button
               title={usingWallet ? "Pay from wallet" : "Pay securely"}
-              disabled={!addressId || !shippingQuoteReady || !cart.data || cart.data.payableGroupCount === 0}
+              disabled={!addressId || !shippingQuoteReady || !cart.data || cart.data.payableGroupCount === 0 || unavailableItemCount > 0}
               loading={placeOrderAndStartPayment.isPending}
               onPress={startPayment}
             />
@@ -257,6 +272,14 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
               We couldn’t verify this delivery quote. Refresh delivery details before placing your order.
             </Text>
           ) : null}
+          {shippingQuoteReady && unavailableItemCount > 0 ? (
+            <View accessibilityRole="alert">
+              <Text size={typeScale.sm} lineHeight={19} color={colors.error}>
+                {unavailableItemCount} {unavailableItemCount === 1 ? "product is" : "products are"} unavailable. Remove {unavailableItemCount === 1 ? "it" : "them"} from your cart before checkout.
+              </Text>
+              <Button variant="subtle" title="Return to cart" onPress={() => navigation.navigate("Cart")} />
+            </View>
+          ) : null}
         </View>
         <View style={styles.section}>
           <Text size={typeScale.md} weight={600} lineHeight={16.8} accessibilityRole="header">Payment method</Text>
@@ -289,7 +312,7 @@ export function CheckoutScreen({ navigation }: MainScreenProps<"Checkout">) {
         {cart.data ? (
           <View style={styles.section}>
             <Text size={typeScale.md} weight={600} lineHeight={16.8} accessibilityRole="header">How to pay each seller</Text>
-            {cart.data.groups.map((group) => (
+            {payableGroups.map((group) => (
               <PaymentModeChooser key={group.storeId} group={group} mode={paymentModes[group.storeId] ?? "escrow"} onChange={(mode) => choosePaymentMode(group.storeId, mode)} />
             ))}
           </View>
@@ -326,4 +349,5 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing[3], paddingTop: spacing[2], paddingBottom: spacing[6], gap: spacing[6] },
   section: { gap: spacing[3] },
   footer: { paddingHorizontal: spacing[4], paddingTop: spacing[2], paddingBottom: spacing[3], gap: spacing[2] },
+  unavailableOnly: { flex: 1, justifyContent: "center", paddingHorizontal: spacing[4], gap: spacing[3] },
 });
