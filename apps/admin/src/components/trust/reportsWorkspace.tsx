@@ -53,7 +53,7 @@ export function ReportsWorkspace() {
 
   return (
     <>
-      <PageHeader area="Trust & safety" title="Reports" description="Reported posts, comments, clips, lives, profiles, products and messages. Highest priority and oldest first." />
+      <PageHeader area="Trust & safety" title="Reports" description="Reported posts, comments, clips, lives, Spaces, profiles, products and messages. Highest priority and oldest first." />
       <SegmentedTabs label="Report status" items={statusTabs} activeKey={statusTab} onChange={(key) => { setStatusTab(key); setFilters((current) => ({ ...current, cursor: undefined })); }} />
       <Toolbar>
         <div className={styles.filters}>

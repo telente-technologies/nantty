@@ -14,6 +14,7 @@ import { StatusBadge } from "@/components/ui/statusBadge";
 import { Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
 import { UserIdentity } from "@/components/ui/userIdentity";
+import { Card } from "@/components/ui/surfaces";
 import { supportAssigneeTabs, supportCategoryOptions, supportPriorityOptions, supportStatusOptions } from "@/constants/supportOptions.constant";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { fetchSupportTickets } from "@/services/supportApi.service";
@@ -70,6 +71,13 @@ export function TicketsWorkspace() {
     setPage(1);
   }
 
+  function searchDeveloperArea(term: "developer" | "sandbox") {
+    updateFilter(() => {
+      setSearchText(term);
+      setCategory("");
+    });
+  }
+
   return (
     <>
       <PageHeader
@@ -79,6 +87,23 @@ export function TicketsWorkspace() {
         actions={<Button iconName="textIndent24" onClick={() => setIsMacrosOpen(true)}>{can("support:assign") ? "Manage macros" : "View macros"}</Button>}
       />
       <SegmentedTabs label="Assignee" items={supportAssigneeTabs} activeKey={assignee} onChange={(key) => updateFilter(() => setAssignee(key))} />
+      <Card title="Developer Portal & Sandbox triage">
+        <div className={styles.triageIntro}>
+          <p>Use the existing ticket queue while these products have no dedicated support categories in the support API.</p>
+          <p className={styles.muted}>Quick searches match ticket subject, linked reference, requester username, or ticket number — not message bodies. They do not change a ticket’s category.</p>
+        </div>
+        <div className={styles.triageActions}>
+          <div className={styles.triageAction}>
+            <div className={styles.triageTitle}><strong>Developer Portal</strong><span className={styles.muted}>Access, credentials, API requests</span></div>
+            <Button iconName="textIndent24" onClick={() => searchDeveloperArea("developer")}>Search matching subjects</Button>
+          </div>
+          <div className={styles.triageAction}>
+            <div className={styles.triageTitle}><strong>Sandbox</strong><span className={styles.muted}>Test environment and integrations</span></div>
+            <Button iconName="play24" onClick={() => searchDeveloperArea("sandbox")}>Search matching subjects</Button>
+          </div>
+        </div>
+        <p className={styles.triageSafety}>Triage note: request the environment, timestamp, endpoint, response status, and request ID. Never ask customers to share secret keys or access tokens.</p>
+      </Card>
       <Toolbar>
         <TextField label="Search tickets" isLabelHidden placeholder="Ticket, order or dispute ID, or subject" value={searchText} onChange={(event) => updateFilter(() => setSearchText(event.target.value))} className={styles.search} />
         <SelectField label="Status" isLabelHidden options={supportStatusOptions} value={status} onChange={(event) => updateFilter(() => setStatus(event.target.value))} />
