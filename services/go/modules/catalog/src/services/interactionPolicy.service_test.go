@@ -37,6 +37,36 @@ func TestPersonalizedEventsKeepActorWithConsent(t *testing.T) {
 	}
 }
 
+func TestSearchProductClicksHashQueryAndPreserveRankSignals(t *testing.T) {
+	data, kept := BuildInteractionEventData(InteractionInput{
+		Event: "product.clicked",
+		Payload: map[string]any{
+			"productId": "0192a4f0-0000-7000-8000-000000000001",
+			"surface": "search",
+			"query": "linen shirts",
+			"resultCount": float64(12),
+			"position": float64(2),
+		},
+		OccurredAt: time.Now(),
+	}, InteractionActor{AccountId: "account-1", SessionId: "session-1", IdHashSecret: "id-key", IntelligenceKey: "shared-key"}, ConsentChoices{Analytics: true, Personalization: true})
+	if !kept {
+		t.Fatal("expected consented product search click to be kept")
+	}
+	if data["query"] != nil {
+		t.Fatal("raw search query must not be placed on the outbox event")
+	}
+	if queryHash, ok := data["queryHash"].(string); !ok || len(queryHash) != 42 || queryHash[:2] != "q_" {
+		t.Fatalf("expected opaque query hash, got %v", data["queryHash"])
+	}
+	if data["productId"] != "0192a4f0-0000-7000-8000-000000000001" || data["resultCount"] != 12 || data["position"] != 2 {
+		t.Fatalf("product ranking signal missing from interaction: %v", data)
+	}
+	published := IntelligenceInteractionPayload(data, "id-key", "shared-key")
+	if published["actorId"] == "account-1" || published["sessionId"] != nil {
+		t.Fatalf("raw account/session identifiers must not be published: %v", published)
+	}
+}
+
 func TestClientsCannotReportPurchases(t *testing.T) {
 	if _, kept := BuildInteractionEventData(InteractionInput{Event: "product.purchased"}, InteractionActor{}, ConsentChoices{Analytics: true, Personalization: true}); kept {
 		t.Fatal("purchases may only come from orders")

@@ -24,6 +24,7 @@ import (
 type CheckoutRequest struct {
 	BuyerId               uuid.UUID
 	AddressId             uuid.UUID
+	ShippingQuoteRevision string
 	IdempotencyKey        string
 	UseStoreCredit        bool
 	PromoCodes            map[uuid.UUID]string
@@ -32,7 +33,7 @@ type CheckoutRequest struct {
 }
 
 func (request CheckoutRequest) Fingerprint() string {
-	return container.FingerprintOfRequest(request.AddressId, request.UseStoreCredit, request.PromoCodes, request.PaymentModes, request.DirectPaymentAccepted)
+	return container.FingerprintOfRequest(request.AddressId, request.ShippingQuoteRevision, request.UseStoreCredit, request.PromoCodes, request.PaymentModes, request.DirectPaymentAccepted)
 }
 
 type CheckoutService struct {
@@ -50,6 +51,9 @@ func (service CheckoutService) Checkout(ctx context.Context, request CheckoutReq
 		return types.CheckoutResultView{}, err
 	}
 	plan, err := BuildCheckoutPlan(ctx, service.Container, request.BuyerId, request.AddressId, request.UseStoreCredit, request.PromoCodes)
+	if err == nil && plan.ShippingQuoteRevision != request.ShippingQuoteRevision {
+		return types.CheckoutResultView{}, httpserver.NewApiError(http.StatusConflict, "CART_CHANGED", "Shipping or cart details changed. Refresh the quote and review the updated total before placing your order.")
+	}
 	if err == nil {
 		err = ResolvePaymentModes(&plan, request.PaymentModes, request.DirectPaymentAccepted)
 	}

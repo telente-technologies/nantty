@@ -126,6 +126,7 @@ func (client *HttpProductRecommender) RankProducts(
 	viewerId uuid.UUID,
 	personalizationAllowed bool,
 	country string,
+	surface string,
 	candidates []interfaces.ProductRankingCandidate,
 ) ([]string, error) {
 	if client == nil || client.BaseUrl == "" || client.Secret == "" || len(candidates) == 0 || len(candidates) > 500 {
@@ -157,7 +158,7 @@ func (client *HttpProductRecommender) RankProducts(
 		requestCandidates = append(requestCandidates, item)
 	}
 	raw, err := json.Marshal(pythonProductRecommendationRequest{
-		Surface: "for_you", Viewer: viewer, PersonalizationAllowed: personalizationAllowed,
+		Surface: surface, Viewer: viewer, PersonalizationAllowed: personalizationAllowed,
 		Candidates: requestCandidates, ExcludedProductIds: []string{}, Limit: 20,
 	})
 	if err != nil {

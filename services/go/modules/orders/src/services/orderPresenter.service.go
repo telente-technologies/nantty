@@ -7,6 +7,7 @@ import (
 
 	"nantty/modules/orders/src/container"
 	"nantty/modules/orders/src/generated/ent"
+	"nantty/modules/orders/src/generated/ent/orderevent"
 	"nantty/modules/orders/src/generated/ent/orderitem"
 	"nantty/modules/orders/src/types"
 	"nantty/platform/money"
@@ -40,6 +41,14 @@ func orderItemView(item *ent.OrderItem, currency string) types.CartItemView {
 }
 
 func BuyerOrderViews(ctx context.Context, deployed *container.Container, groups []*ent.OrderGroup) ([]types.OrderView, error) {
+	return buyerOrderViews(ctx, deployed, groups, false)
+}
+
+func BuyerOrderViewsWithTimeline(ctx context.Context, deployed *container.Container, groups []*ent.OrderGroup) ([]types.OrderView, error) {
+	return buyerOrderViews(ctx, deployed, groups, true)
+}
+
+func buyerOrderViews(ctx context.Context, deployed *container.Container, groups []*ent.OrderGroup, includeTimeline bool) ([]types.OrderView, error) {
 	if len(groups) == 0 {
 		return []types.OrderView{}, nil
 	}
@@ -50,6 +59,16 @@ func BuyerOrderViews(ctx context.Context, deployed *container.Container, groups 
 	items, err := LoadItemsByGroup(ctx, deployed, groupIds)
 	if err != nil {
 		return nil, err
+	}
+	eventsByGroup := make(map[uuid.UUID][]*ent.OrderEvent, len(groups))
+	if includeTimeline {
+		events, err := deployed.Client.OrderEvent.Query().Where(orderevent.OrderGroupIDIn(groupIds...)).Order(ent.Asc(orderevent.FieldCreatedAt)).All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, event := range events {
+			eventsByGroup[event.OrderGroupID] = append(eventsByGroup[event.OrderGroupID], event)
+		}
 	}
 	catalog, err := deployed.Catalog()
 	if err != nil {
@@ -63,7 +82,7 @@ func BuyerOrderViews(ctx context.Context, deployed *container.Container, groups 
 	profiles, _ := deployed.Users.PersonalProfilesByAccount(ctx, UniqueIdentifiers(groups, func(group *ent.OrderGroup) uuid.UUID { return group.BuyerAccountID }))
 	views := make([]types.OrderView, 0, len(groups))
 	for _, group := range groups {
-		views = append(views, buyerOrderView(group, items[group.ID], stores[group.StoreID], profiles[group.BuyerAccountID], successRateOf(rates, group.StoreID)))
+		views = append(views, buyerOrderView(group, items[group.ID], stores[group.StoreID], profiles[group.BuyerAccountID], successRateOf(rates, group.StoreID), eventsByGroup[group.ID]))
 	}
 	return views, nil
 }

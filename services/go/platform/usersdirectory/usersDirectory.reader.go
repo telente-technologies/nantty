@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -51,6 +52,7 @@ type ShippingAddress struct {
 	RegionName    string
 	AdminAreaName string
 	CityName      string
+	UpdatedAt     time.Time
 }
 
 type GeoRegion struct {
@@ -105,14 +107,14 @@ func (reader Reader) FindShippingAddress(ctx context.Context, accountId, address
 	var address ShippingAddress
 	var sealedPhone []byte
 	err := reader.Database.QueryRowContext(ctx, `SELECT a.id, a.account_id, a.recipient_name, a.phone, a.phone_sealed, a.line1, a.line2, a.postal_code, a.details, a.country_code,
-		a.region_id, a.admin_area_id, a.city_id, COALESCE(r.name, a.free_text_state, ''), COALESCE(aa.name, ''), COALESCE(c.name, a.free_text_city, '')
+		a.region_id, a.admin_area_id, a.city_id, COALESCE(r.name, a.free_text_state, ''), COALESCE(aa.name, ''), COALESCE(c.name, a.free_text_city, ''), a.updated_at
 		FROM `+reader.table("shipping_addresses")+` a
 		LEFT JOIN `+reader.table("geo_regions")+` r ON r.id = a.region_id
 		LEFT JOIN `+reader.table("geo_admin_areas")+` aa ON aa.id = a.admin_area_id
 		LEFT JOIN `+reader.table("geo_cities")+` c ON c.id = a.city_id
 		WHERE a.id = $1 AND a.account_id = $2`, addressId, accountId).
 		Scan(&address.Id, &address.AccountId, &address.RecipientName, &address.Phone, &sealedPhone, &address.Line1, &address.Line2, &address.PostalCode, &address.Details, &address.CountryCode,
-			&address.RegionId, &address.AdminAreaId, &address.CityId, &address.RegionName, &address.AdminAreaName, &address.CityName)
+			&address.RegionId, &address.AdminAreaId, &address.CityId, &address.RegionName, &address.AdminAreaName, &address.CityName, &address.UpdatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return ShippingAddress{}, false, nil
 	}

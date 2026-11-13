@@ -23,7 +23,7 @@ var exactTerms = []string{
 }
 
 var webRouteTerms = []string{
-	"analytics", "bff", "brand", "brands", "cart", "category", "categories", "chat", "chats", "checkout", "clip", "clips", "coins",
+	"analytics", "bff", "brand", "brands", "cart", "category", "categories", "channel", "channels", "chat", "chats", "checkout", "clip", "clips", "coins",
 	"collection", "collections", "creator", "creators", "feed", "forgot-password", "live", "lives", "me", "notifications", "order",
 	"offer", "offers", "orders", "pay", "post", "posts", "product", "products", "profile", "reset-password", "saved", "scheduled", "settings", "store-rewards", "stores",
 	"subscriptions", "user", "users", "verify-email", "watch", "welcome", "security-check", "cookies", "guidelines", "community-guidelines",
@@ -44,7 +44,7 @@ var wellKnownBrands = []string{
 	"google", "apple", "facebook", "instagram", "meta", "whatsapp", "tiktok", "twitter", "youtube", "snapchat", "linkedin", "telegram",
 	"amazon", "microsoft", "netflix", "spotify", "paypal", "visa", "mastercard", "samsung", "jumia", "konga", "flutterwave",
 	"opay", "palmpay", "moniepoint", "kuda", "mtn", "airtel", "glo", "dangote", "access", "gtbank", "zenithbank", "firstbank", "uba",
-	"stanbic", "nike", "adidas", "cocacola", "pepsi", "shoprite", "bolt", "uber", "chowdeck", "glovo", "nantty",
+	"stanbic", "nike", "adidas", "cocacola", "pepsi", "shoprite", "bolt", "uber", "chowdeck", "glovo", "nantty", "zudomart",
 }
 
 var brandImpersonationAffixes = []string{

@@ -22,5 +22,5 @@ type ProductRankingCandidate struct {
 
 type ProductRecommender interface {
 	RecallProductIds(ctx context.Context, viewerId uuid.UUID, personalizationAllowed bool, limit int) ([]string, error)
-	RankProducts(ctx context.Context, viewerId uuid.UUID, personalizationAllowed bool, country string, candidates []ProductRankingCandidate) ([]string, error)
+	RankProducts(ctx context.Context, viewerId uuid.UUID, personalizationAllowed bool, country string, surface string, candidates []ProductRankingCandidate) ([]string, error)
 }

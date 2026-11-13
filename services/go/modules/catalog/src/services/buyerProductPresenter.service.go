@@ -11,14 +11,32 @@ import (
 	"nantty/modules/catalog/src/generated/ent/productmedia"
 	"nantty/modules/catalog/src/generated/ent/productreaction"
 	"nantty/modules/catalog/src/generated/ent/productvariant"
+	"nantty/modules/catalog/src/generated/ent/store"
 	"nantty/modules/catalog/src/types"
 	"nantty/platform/commerceports"
 )
 
 func LoadProductSummaries(ctx context.Context, deployed *container.Container, products []*ent.Product, viewer *uuid.UUID) ([]types.ProductSummaryView, error) {
+	if len(products) == 0 {
+		return []types.ProductSummaryView{}, nil
+	}
 	productIds := make([]uuid.UUID, 0, len(products))
+	storeIds := make([]uuid.UUID, 0, len(products))
+	seenStoreIds := make(map[uuid.UUID]struct{}, len(products))
 	for _, product := range products {
 		productIds = append(productIds, product.ID)
+		if _, found := seenStoreIds[product.StoreID]; !found {
+			seenStoreIds[product.StoreID] = struct{}{}
+			storeIds = append(storeIds, product.StoreID)
+		}
+	}
+	storeRows, err := deployed.Client.Store.Query().Where(store.IDIn(storeIds...)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	storesById := make(map[uuid.UUID]*ent.Store, len(storeRows))
+	for _, row := range storeRows {
+		storesById[row.ID] = row
 	}
 	media, err := deployed.Client.ProductMedia.Query().Where(productmedia.ProductIDIn(productIds...)).Order(ent.Asc(productmedia.FieldPosition)).All(ctx)
 	if err != nil {
@@ -56,6 +74,7 @@ func LoadProductSummaries(ctx context.Context, deployed *container.Container, pr
 	views := make([]types.ProductSummaryView, 0, len(products))
 	for _, product := range products {
 		displayed := pricing.ForProduct(product, variantsByProduct[product.ID])
+		storeRow := storesById[product.StoreID]
 		options := make([]types.OptionView, 0, len(product.Options))
 		for _, option := range product.Options {
 			options = append(options, types.OptionView{Name: option.Name, Values: option.Values})
@@ -64,6 +83,10 @@ func LoadProductSummaries(ctx context.Context, deployed *container.Container, pr
 			Id: product.ID.String(), Name: product.Name, Price: displayed.Price, PriceIsRegional: displayed.IsRegional, ApproxPrice: displayed.Approx,
 			Liked: liked[product.ID], Stock: stock[product.ID], StoreId: product.StoreID.String(),
 			HasVariants: len(variantsByProduct[product.ID]) > 1 || len(options) > 0, Options: options,
+		}
+		if storeRow != nil {
+			view.StoreName = storeRow.Name
+			view.StoreVerified = storeRow.Verified
 		}
 		if url, found := firstImage[product.ID]; found {
 			view.ImageUrl = &url

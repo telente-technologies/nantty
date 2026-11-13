@@ -38,13 +38,14 @@ type PromotionIssue struct {
 }
 
 type CheckoutPlan struct {
-	Groups        []PlannedGroup
-	Blocked       []uuid.UUID
-	Address       schema.AddressSnapshot
-	AddressRow    usersdirectory.ShippingAddress
-	Currency      money.CurrencyCode
-	TotalMinor    int64
-	ConsumedItems []uuid.UUID
+	Groups                []PlannedGroup
+	Blocked               []uuid.UUID
+	Address               schema.AddressSnapshot
+	AddressRow            usersdirectory.ShippingAddress
+	Currency              money.CurrencyCode
+	TotalMinor            int64
+	ConsumedItems         []uuid.UUID
+	ShippingQuoteRevision string
 }
 
 func AddressSnapshotOf(address usersdirectory.ShippingAddress) schema.AddressSnapshot {
@@ -110,12 +111,14 @@ func planGroups(ctx context.Context, deployed *container.Container, buyerId uuid
 	if err != nil {
 		return *plan, err
 	}
+	revisionGroups := make([]shippingQuoteRevisionGroup, 0, len(groups))
 	for _, group := range groups {
 		store := loaded.stores[group.StoreId]
 		if store.OwnerAccountId == buyerId {
 			return *plan, ordererrors.CannotBuyOwnProduct
 		}
 		result := CalculateShippingForOrderGroup(loaded.profiles[group.StoreId], DeliveryLocationOf(plan.AddressRow), group.SubtotalMinor)
+		revisionGroups = append(revisionGroups, revisionGroupFor(group, result, loaded.profiles[group.StoreId]))
 		if result.Outcome == enums.ShippingNotDeliverable {
 			plan.Blocked = append(plan.Blocked, group.StoreId)
 			continue
@@ -152,6 +155,7 @@ func planGroups(ctx context.Context, deployed *container.Container, buyerId uuid
 	if !CheckoutCurrencySupported(deployed.Settings.CheckoutCurrencies, string(plan.Currency)) {
 		return *plan, ordererrors.CheckoutCurrencyNotSupported
 	}
+	plan.ShippingQuoteRevision = shippingQuoteRevisionFor(plan.AddressRow, revisionGroups)
 	return *plan, nil
 }
 

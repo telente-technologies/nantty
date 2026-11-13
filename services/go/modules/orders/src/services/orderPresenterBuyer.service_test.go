@@ -52,7 +52,7 @@ func TestBuyerOrderViewDoesNotExposeCarrierTrackingURL(t *testing.T) {
 		Reference: "ZM-TEST-0001", Currency: "NGN", Status: "shipped", PaymentStatus: "paid", PaymentMode: "escrow",
 		CourierName: &courier, TrackingNumber: &trackingNumber, TrackingURL: &trackingURL, ShippedAt: &now,
 	}
-	view := buyerOrderView(group, nil, commerceports.StoreSnapshot{}, usersdirectory.ProfileName{}, nil)
+	view := buyerOrderView(group, nil, commerceports.StoreSnapshot{}, usersdirectory.ProfileName{}, nil, nil)
 	if view.Shipment == nil || view.Shipment.TrackingNumber != trackingNumber {
 		t.Fatalf("buyer shipment must retain its number but not the carrier URL: %+v", view.Shipment)
 	}
@@ -62,5 +62,28 @@ func TestBuyerOrderViewDoesNotExposeCarrierTrackingURL(t *testing.T) {
 	}
 	if strings.Contains(string(encoded), trackingURL) || strings.Contains(string(encoded), "trackingUrl") {
 		t.Fatalf("buyer order response leaked carrier URL: %s", encoded)
+	}
+}
+
+func TestBuyerOrderViewExposesSafeOrderTimelineOnly(t *testing.T) {
+	created := time.Date(2026, 11, 13, 10, 30, 0, 0, time.UTC)
+	group := &ent.OrderGroup{ID: uuid.New(), CheckoutID: uuid.New(), BuyerAccountID: uuid.New(), StoreID: uuid.New(), Currency: "NGN"}
+	events := []*ent.OrderEvent{
+		{ID: uuid.New(), Kind: "shipped", Summary: "raw seller summary with private landmark", CreatedAt: created},
+		{ID: uuid.New(), Kind: "note", Summary: "Internal note: buyer's personal detail", CreatedAt: created.Add(time.Minute)},
+	}
+	view := buyerOrderView(group, nil, commerceports.StoreSnapshot{}, usersdirectory.ProfileName{}, nil, events)
+	if len(view.Timeline) != 1 {
+		t.Fatalf("only buyer-safe status events should be returned: %+v", view.Timeline)
+	}
+	if view.Timeline[0].Summary != "Order marked as shipped" || !view.Timeline[0].CreatedAt.Equal(created) {
+		t.Fatalf("buyer timeline should use safe copy and preserve event time: %+v", view.Timeline[0])
+	}
+	encoded, err := json.Marshal(view)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(encoded), "private landmark") || strings.Contains(string(encoded), "Internal note") {
+		t.Fatalf("buyer timeline leaked seller/internal event text: %s", encoded)
 	}
 }

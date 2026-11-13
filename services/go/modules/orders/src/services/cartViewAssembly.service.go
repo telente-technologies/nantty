@@ -40,6 +40,14 @@ func assembleCartView(groups []SellerGroup, unavailable map[uuid.UUID]bool, load
 	if address != nil {
 		identifier := address.Id.String()
 		view.AddressId = &identifier
+		revisionGroups := make([]shippingQuoteRevisionGroup, 0, len(groups))
+		for _, group := range groups {
+			profile := loaded.profiles[group.StoreId]
+			_, result := QuoteForGroup(group, profile, address)
+			revisionGroups = append(revisionGroups, revisionGroupFor(group, result, profile))
+		}
+		revision := shippingQuoteRevisionFor(*address, revisionGroups)
+		view.ShippingQuoteRevision = &revision
 	}
 	for _, group := range groups {
 		if group.Currency != currency {

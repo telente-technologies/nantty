@@ -48,13 +48,15 @@ type StoreFollowView struct {
 }
 
 type ProductSummaryView struct {
-	Id       string      `json:"id"`
-	Name     string      `json:"name"`
-	Price    money.Money `json:"price"`
-	ImageUrl *string     `json:"imageUrl"`
-	Liked    bool        `json:"liked"`
-	Stock    int         `json:"stock"`
-	StoreId  string      `json:"storeId"`
+	Id            string      `json:"id"`
+	Name          string      `json:"name"`
+	StoreName     string      `json:"storeName"`
+	StoreVerified bool        `json:"storeVerified"`
+	Price         money.Money `json:"price"`
+	ImageUrl      *string     `json:"imageUrl"`
+	Liked         bool        `json:"liked"`
+	Stock         int         `json:"stock"`
+	StoreId       string      `json:"storeId"`
 
 	PriceIsRegional bool         `json:"priceIsRegional"`
 	ApproxPrice     *money.Money `json:"approxPrice"`
@@ -79,6 +81,7 @@ type ProductDetailView struct {
 	Colors       []string                `json:"colors"`
 	ShippingInfo string                  `json:"shippingInfo"`
 	Description  string                  `json:"description"`
+	Attributes   []AttributeView         `json:"attributes"`
 	Store        ProductStoreSummaryView `json:"store"`
 	Related      []ProductSummaryView    `json:"related"`
 	Brand        *BrandTagView           `json:"brand"`

@@ -47,7 +47,17 @@ func (controller ProductsController) GetMartHome(writer http.ResponseWriter, req
 }
 
 func (controller ProductsController) GetRecommendedProducts(writer http.ResponseWriter, request *http.Request) {
-	products, err := (getrecommendedproducts.Handler{Container: controller.Container}).Execute(request.Context(), viewerOf(request))
+	surface := request.URL.Query().Get("surface")
+	if surface == "" {
+		surface = "for_you"
+	}
+	if surface != "for_you" && surface != "mart_home" && surface != "clips" {
+		issues := utils.Issues{}
+		issues.Add("surface", "must be for_you, mart_home, or clips")
+		controller.respond(writer, request, 0, nil, issues.AsError())
+		return
+	}
+	products, err := (getrecommendedproducts.Handler{Container: controller.Container}).Execute(request.Context(), viewerOf(request), surface)
 	controller.respond(writer, request, http.StatusOK, products, err)
 }
 

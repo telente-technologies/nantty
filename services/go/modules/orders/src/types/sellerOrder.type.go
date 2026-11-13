@@ -17,6 +17,9 @@ type SellerAddressView struct {
 	RecipientName string `json:"recipientName"`
 	Phone         string `json:"phone"`
 	Line1         string `json:"line1"`
+	Line2         string `json:"line2"`
+	PostalCode    string `json:"postalCode"`
+	Details       string `json:"details"`
 	City          string `json:"city"`
 	State         string `json:"state"`
 	Country       string `json:"country"`

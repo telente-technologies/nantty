@@ -62,7 +62,7 @@ func sellerOrderView(group *ent.OrderGroup, items []*ent.OrderItem, timeline []*
 	view := types.SellerOrderView{
 		Id: group.ID.String(), OrderNumber: group.Reference, InvoiceNumber: group.InvoiceNumber,
 		Buyer:           types.SellerBuyerView{Id: group.BuyerAccountID.String(), Name: group.BuyerName, Username: group.BuyerUsername, Phone: &phone},
-		ShippingAddress: types.SellerAddressView{RecipientName: address.RecipientName, Phone: address.Phone, Line1: address.Line1, City: firstNonEmpty(address.CityName, address.AdminAreaName), State: address.RegionName, Country: address.CountryCode},
+		ShippingAddress: types.SellerAddressView{RecipientName: address.RecipientName, Phone: address.Phone, Line1: address.Line1, Line2: address.Line2, PostalCode: address.PostalCode, Details: address.Details, City: firstNonEmpty(address.CityName, address.AdminAreaName), State: address.RegionName, Country: address.CountryCode},
 		Lines:           []types.SellerOrderLineView{}, Subtotal: groupMoney(group, group.SubtotalMinor), Discount: groupMoney(group, group.DiscountMinor), StoreCredit: groupMoney(group, group.StoreCreditMinor), ShippingFee: groupMoney(group, group.ShippingMinor),
 		Total: groupMoney(group, group.TotalMinor), SellerPayout: groupMoney(group, group.SubtotalMinor-group.DiscountMinor-group.StoreCreditMinor), Status: group.Status, EscrowStatus: EscrowStatusFor(group),
 		EscrowReleaseAt: group.EscrowReleaseAt, CreatedAt: group.CreatedAt, DeliveredAt: group.DeliveredAt, PaymentStatus: group.PaymentStatus, PaymentMode: group.PaymentMode, PaymentProvider: "transfer",

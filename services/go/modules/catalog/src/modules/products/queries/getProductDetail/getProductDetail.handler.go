@@ -56,8 +56,11 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.ProductD
 	}
 	detail := types.ProductDetailView{
 		ProductSummaryView: summaries[0], Title: row.Name, Description: row.Description, Store: storeView,
-		Images: []string{}, Sizes: []string{}, Colors: []string{}, Related: []types.ProductSummaryView{}, Variants: []types.BuyerVariantView{},
+		Images: []string{}, Sizes: []string{}, Colors: []string{}, Attributes: []types.AttributeView{}, Related: []types.ProductSummaryView{}, Variants: []types.BuyerVariantView{},
 		ShippingInfo: "Shipping is calculated per seller at checkout.",
+	}
+	for _, attribute := range row.Attributes {
+		detail.Attributes = append(detail.Attributes, types.AttributeView{Name: attribute.Name, Value: attribute.Value})
 	}
 	if row.RatingCount > 0 {
 		detail.Rating = float64(row.RatingSum) / float64(row.RatingCount)

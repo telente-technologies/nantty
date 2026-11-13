@@ -3,6 +3,7 @@ package getrecommendedproducts
 import (
 	"context"
 	"regexp"
+	"sort"
 	"slices"
 	"strings"
 
@@ -36,7 +37,7 @@ type RecommendedProducts struct {
 	Source   string                     `json:"source"`
 }
 
-func (handler Handler) Execute(ctx context.Context, viewer *uuid.UUID) (RecommendedProducts, error) {
+func (handler Handler) Execute(ctx context.Context, viewer *uuid.UUID, surface string) (RecommendedProducts, error) {
 	country := services.ViewerCountry(ctx, handler.Container, viewer)
 	personalizationAllowed := false
 	var viewerId uuid.UUID
@@ -116,7 +117,6 @@ func (handler Handler) Execute(ctx context.Context, viewer *uuid.UUID) (Recommen
 	}
 
 	candidates := make([]interfaces.ProductRankingCandidate, 0, len(rows))
-	fallbackIds := make([]string, 0, len(rows))
 	for _, row := range rows {
 		view, hasView := productViewById[row.ID.String()]
 		storeRow := storesById[row.StoreID]
@@ -137,12 +137,24 @@ func (handler Handler) Execute(ctx context.Context, viewer *uuid.UUID) (Recommen
 			Rating: rating, SalesCount: row.UnitsSold, Country: storeRow.CountryCode,
 			StoreVerified: storeRow.Verified, InStock: true,
 		})
-		if len(fallbackIds) < 20 {
-			fallbackIds = append(fallbackIds, row.ID.String())
-		}
 	}
 	if len(candidates) == 0 {
 		return RecommendedProducts{Products: []types.ProductSummaryView{}, Source: "popular"}, nil
+	}
+	// Keep the degraded/fallback response aligned with the recommender contract:
+	// verified stores rank first while eligible unverified stores remain visible.
+	sort.SliceStable(candidates, func(left, right int) bool {
+		if candidates[left].StoreVerified != candidates[right].StoreVerified {
+			return candidates[left].StoreVerified
+		}
+		return candidates[left].SalesCount > candidates[right].SalesCount
+	})
+	fallbackIds := make([]string, 0, 20)
+	for _, candidate := range candidates {
+		if len(fallbackIds) == 20 {
+			break
+		}
+		fallbackIds = append(fallbackIds, candidate.ProductId)
 	}
 
 	orderedIds := fallbackIds
@@ -151,7 +163,7 @@ func (handler Handler) Execute(ctx context.Context, viewer *uuid.UUID) (Recommen
 		source = "personalized"
 	}
 	if handler.Container.ProductRecommender != nil {
-		if rankedIds, rankError := handler.Container.ProductRecommender.RankProducts(ctx, viewerId, personalizationAllowed, country, candidates); rankError == nil {
+		if rankedIds, rankError := handler.Container.ProductRecommender.RankProducts(ctx, viewerId, personalizationAllowed, country, surface, candidates); rankError == nil {
 			validated := retainKnownUniqueProductIds(rankedIds, productById)
 			if len(validated) > 0 {
 				orderedIds = validated

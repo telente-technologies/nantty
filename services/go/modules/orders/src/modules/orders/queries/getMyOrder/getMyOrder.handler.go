@@ -23,7 +23,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (types.OrderVie
 	if err != nil {
 		return types.OrderView{}, err
 	}
-	views, err := services.BuyerOrderViews(ctx, handler.Container, []*ent.OrderGroup{group})
+	views, err := services.BuyerOrderViewsWithTimeline(ctx, handler.Container, []*ent.OrderGroup{group})
 	if err != nil {
 		return types.OrderView{}, err
 	}

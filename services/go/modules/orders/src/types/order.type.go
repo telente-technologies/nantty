@@ -26,27 +26,35 @@ type StoreSummaryView struct {
 }
 
 type OrderView struct {
-	Id               string              `json:"id"`
-	Reference        string              `json:"reference"`
-	Status           string              `json:"status"`
-	FulfilmentStatus string              `json:"fulfilmentStatus"`
-	PaymentStatus    string              `json:"paymentStatus"`
-	PaymentMode      string              `json:"paymentMode"`
-	Items            []CartItemView      `json:"items"`
-	Subtotal         money.Money         `json:"subtotal"`
-	Discount         money.Money         `json:"discount"`
-	StoreCredit      money.Money         `json:"storeCredit"`
-	Shipping         money.Money         `json:"shipping"`
-	Total            money.Money         `json:"total"`
-	Buyer            UserSummaryView     `json:"buyer"`
-	Store            StoreSummaryView    `json:"store"`
-	CheckoutId       string              `json:"checkoutId"`
-	CreatedAt        time.Time           `json:"createdAt"`
-	EscrowReleaseAt  *time.Time          `json:"escrowReleaseAt"`
-	Shipment         *ShipmentView       `json:"shipment"`
-	Delivery         *DeliveryView       `json:"delivery"`
-	PromotionIssue   *PromotionIssueView `json:"promotionIssue"`
-	DeliveredAt      *time.Time          `json:"deliveredAt"`
+	Id               string                   `json:"id"`
+	Reference        string                   `json:"reference"`
+	Status           string                   `json:"status"`
+	FulfilmentStatus string                   `json:"fulfilmentStatus"`
+	PaymentStatus    string                   `json:"paymentStatus"`
+	PaymentMode      string                   `json:"paymentMode"`
+	Items            []CartItemView           `json:"items"`
+	Subtotal         money.Money              `json:"subtotal"`
+	Discount         money.Money              `json:"discount"`
+	StoreCredit      money.Money              `json:"storeCredit"`
+	Shipping         money.Money              `json:"shipping"`
+	Total            money.Money              `json:"total"`
+	Buyer            UserSummaryView          `json:"buyer"`
+	Store            StoreSummaryView         `json:"store"`
+	CheckoutId       string                   `json:"checkoutId"`
+	CreatedAt        time.Time                `json:"createdAt"`
+	EscrowReleaseAt  *time.Time               `json:"escrowReleaseAt"`
+	Shipment         *ShipmentView            `json:"shipment"`
+	Delivery         *DeliveryView            `json:"delivery"`
+	Timeline         []OrderTimelineEventView `json:"timeline"`
+	PromotionIssue   *PromotionIssueView      `json:"promotionIssue"`
+	DeliveredAt      *time.Time               `json:"deliveredAt"`
+}
+
+type OrderTimelineEventView struct {
+	Id        string    `json:"id"`
+	Kind      string    `json:"kind"`
+	Summary   string    `json:"summary"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type PromotionIssueView struct {
