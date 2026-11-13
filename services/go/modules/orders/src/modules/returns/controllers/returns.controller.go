@@ -57,7 +57,12 @@ func (controller ReturnsController) ListSeller(writer http.ResponseWriter, reque
 
 func (controller ReturnsController) ListMine(writer http.ResponseWriter, request *http.Request) {
 	buyerId := middlewares.AccountIdFrom(request.Context())
-	controller.list(writer, request, listsellerreturns.Query{BuyerId: &buyerId})
+	orderId, err := utils.OptionalQueryIdentifier(request, "orderId")
+	if err != nil {
+		controller.respond(writer, request, 0, nil, err)
+		return
+	}
+	controller.list(writer, request, listsellerreturns.Query{BuyerId: &buyerId, OrderId: orderId})
 }
 
 func (controller ReturnsController) Request(writer http.ResponseWriter, request *http.Request) {

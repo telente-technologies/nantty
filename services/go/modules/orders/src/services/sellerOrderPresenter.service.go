@@ -34,14 +34,14 @@ func SellerOrderViews(ctx context.Context, deployed *container.Container, groups
 	}
 	timelines, notes := map[uuid.UUID][]*ent.OrderEvent{}, map[uuid.UUID][]*ent.OrderNote{}
 	if withDetail {
-		events, err := deployed.Client.OrderEvent.Query().Where(orderevent.OrderGroupIDIn(groupIds...)).Order(ent.Asc(orderevent.FieldID)).All(ctx)
+		events, err := deployed.Client.OrderEvent.Query().Where(orderevent.OrderGroupIDIn(groupIds...)).Order(ent.Asc(orderevent.FieldCreatedAt), ent.Asc(orderevent.FieldID)).All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, row := range events {
 			timelines[row.OrderGroupID] = append(timelines[row.OrderGroupID], row)
 		}
-		noteRows, err := deployed.Client.OrderNote.Query().Where(ordernote.OrderGroupIDIn(groupIds...)).Order(ent.Asc(ordernote.FieldID)).All(ctx)
+		noteRows, err := deployed.Client.OrderNote.Query().Where(ordernote.OrderGroupIDIn(groupIds...)).Order(ent.Asc(ordernote.FieldCreatedAt), ent.Asc(ordernote.FieldID)).All(ctx)
 		if err != nil {
 			return nil, err
 		}

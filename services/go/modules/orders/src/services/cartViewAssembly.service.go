@@ -1,6 +1,8 @@
 package services
 
 import (
+	"sort"
+
 	"github.com/google/uuid"
 
 	"nantty/modules/orders/src/types"
@@ -29,8 +31,9 @@ func cartItemView(line PricedCartLine, unavailable map[uuid.UUID]bool) types.Car
 }
 
 func assembleCartView(groups []SellerGroup, unavailable map[uuid.UUID]bool, loaded cartContext, address *usersdirectory.ShippingAddress) types.CartView {
-	view := types.CartView{Items: []types.CartItemView{}, Groups: []types.CartSellerGroupView{}}
+	view := types.CartView{Items: []types.CartItemView{}, Groups: []types.CartSellerGroupView{}, UnavailableItems: []types.UnavailableCartItemView{}, UnavailableItemCount: unavailableCartItemCount(unavailable)}
 	if len(groups) == 0 {
+		view.UnavailableItems = unavailableCartItems(unavailable, nil)
 		return view
 	}
 	currency := groups[0].Currency
@@ -77,15 +80,55 @@ func assembleCartView(groups []SellerGroup, unavailable map[uuid.UUID]bool, load
 			shipping = quote.Fee.AmountMinor
 		}
 		groupView.Total = money.Money{AmountMinor: group.SubtotalMinor - credit + shipping, Currency: currency}
-		if quote.Status == "calculated" && allAvailable {
+		if quote.Status == "calculated" && allAvailable && len(unavailable) == 0 {
 			view.PayableGroupCount++
+			view.ItemsTotal.AmountMinor += group.SubtotalMinor
 			view.Shipping.AmountMinor += shipping
 			view.StoreCredit.AmountMinor += credit
 		}
-		view.ItemsTotal.AmountMinor += group.SubtotalMinor
+		if address == nil {
+			// Without a destination, the cart summary describes the whole basket.
+			// With a destination, ItemsTotal is the subtotal that can actually be
+			// checked out; non-deliverable or unavailable seller groups stay out.
+			view.ItemsTotal.AmountMinor += group.SubtotalMinor
+		}
 		view.Groups = append(view.Groups, groupView)
 	}
+	visibleItems := make(map[string]struct{}, len(view.Items))
+	for _, item := range view.Items {
+		visibleItems[item.Id] = struct{}{}
+	}
+	view.UnavailableItems = unavailableCartItems(unavailable, visibleItems)
 	view.Total.AmountMinor = view.ItemsTotal.AmountMinor - view.StoreCredit.AmountMinor + view.Shipping.AmountMinor
 	view.GrandTotal = view.Total
 	return view
+}
+
+func unavailableCartItemCount(unavailable map[uuid.UUID]bool) int {
+	count := 0
+	for _, isUnavailable := range unavailable {
+		if isUnavailable {
+			count++
+		}
+	}
+	return count
+}
+
+func unavailableCartItems(unavailable map[uuid.UUID]bool, visible map[string]struct{}) []types.UnavailableCartItemView {
+	ids := make([]uuid.UUID, 0, len(unavailable))
+	for id, isUnavailable := range unavailable {
+		if !isUnavailable {
+			continue
+		}
+		if _, found := visible[id.String()]; found {
+			continue
+		}
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(left, right int) bool { return ids[left].String() < ids[right].String() })
+	result := make([]types.UnavailableCartItemView, 0, len(ids))
+	for _, id := range ids {
+		result = append(result, types.UnavailableCartItemView{Id: id.String()})
+	}
+	return result
 }

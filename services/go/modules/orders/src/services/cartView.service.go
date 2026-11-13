@@ -70,7 +70,7 @@ func PriceCartItems(ctx context.Context, deployed *container.Container, items []
 
 func BuildCartView(ctx context.Context, deployed *container.Container, accountId uuid.UUID, address *usersdirectory.ShippingAddress) (types.CartView, error) {
 	contents, err := LoadCartContents(ctx, deployed.Client, accountId)
-	view := types.CartView{Items: []types.CartItemView{}, Groups: []types.CartSellerGroupView{}}
+	view := types.CartView{Items: []types.CartItemView{}, Groups: []types.CartSellerGroupView{}, UnavailableItems: []types.UnavailableCartItemView{}}
 	if err != nil || len(contents.Items) == 0 {
 		return view, err
 	}

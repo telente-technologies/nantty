@@ -29,6 +29,10 @@ type CartItemView struct {
 	Attribution   *SaleAttributionView `json:"attribution"`
 }
 
+type UnavailableCartItemView struct {
+	Id string `json:"id"`
+}
+
 var SaleAttributionSources = []string{"post", "clip", "live", "link"}
 
 type SaleAttributionView struct {
@@ -60,17 +64,19 @@ type CartSellerGroupView struct {
 }
 
 type CartView struct {
-	Items                 []CartItemView        `json:"items"`
-	ItemsTotal            money.Money           `json:"itemsTotal"`
-	ShopDiscount          money.Money           `json:"shopDiscount"`
-	StoreCredit           money.Money           `json:"storeCredit"`
-	Shipping              money.Money           `json:"shipping"`
-	Total                 money.Money           `json:"total"`
-	GrandTotal            money.Money           `json:"grandTotal"`
-	Currency              string                `json:"currency"`
-	Groups                []CartSellerGroupView `json:"groups"`
-	AddressId             *string               `json:"addressId"`
-	ShippingQuoteRevision *string               `json:"shippingQuoteRevision,omitempty"`
-	PayableGroupCount     int                   `json:"payableGroupCount"`
-	MixedCurrencies       bool                  `json:"mixedCurrencies"`
+	Items                 []CartItemView            `json:"items"`
+	UnavailableItems      []UnavailableCartItemView `json:"unavailableItems"`
+	UnavailableItemCount  int                       `json:"unavailableItemCount"`
+	ItemsTotal            money.Money               `json:"itemsTotal"`
+	ShopDiscount          money.Money               `json:"shopDiscount"`
+	StoreCredit           money.Money               `json:"storeCredit"`
+	Shipping              money.Money               `json:"shipping"`
+	Total                 money.Money               `json:"total"`
+	GrandTotal            money.Money               `json:"grandTotal"`
+	Currency              string                    `json:"currency"`
+	Groups                []CartSellerGroupView     `json:"groups"`
+	AddressId             *string                   `json:"addressId"`
+	ShippingQuoteRevision *string                   `json:"shippingQuoteRevision,omitempty"`
+	PayableGroupCount     int                       `json:"payableGroupCount"`
+	MixedCurrencies       bool                      `json:"mixedCurrencies"`
 }

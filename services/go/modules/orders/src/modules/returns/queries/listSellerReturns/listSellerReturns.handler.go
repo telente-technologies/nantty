@@ -26,6 +26,9 @@ func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.Cur
 	if query.BuyerId != nil {
 		conditions = append(conditions, returnrequest.BuyerAccountID(*query.BuyerId))
 	}
+	if query.OrderId != nil {
+		conditions = append(conditions, returnrequest.OrderGroupID(*query.OrderId))
+	}
 	if query.Status != "" && query.Status != "all" {
 		conditions = append(conditions, returnrequest.Status(query.Status))
 	}
