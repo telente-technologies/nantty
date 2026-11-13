@@ -7,7 +7,7 @@
 > Logistics V1; the documented Kwikpik integration target is its separate
 > Partnership API v2.
 
-Last reviewed: 2026-11-03.
+Last reviewed: 2026-11-13.
 
 ## 0. Founder-approved v1 market and contact rules
 
@@ -591,3 +591,11 @@ have no duplicate financial or delivery effect.
   `services/go/modules/orders/src/databases/schema/logistics.schema.go`,
   `services/go/modules/orders/src/services/checkoutPlan.service.go`, and
   `services/go/modules/orders/src/configs/orders.config.go`.
+
+## 12. Buyer and seller delivery visibility (2026-11-13)
+
+- Checkout remains quote-driven: delivery price is calculated by the backend for the chosen saved address and current cart revision; stale quotes must be refreshed and reviewed before payment. Product-detail shipping text is informational and does not substitute for a checkout quote.
+- Seller fulfillment views now preserve the saved address snapshot's second line, postal code, and delivery details in order detail, invoice, and packing slip. These fields are visible to the fulfilling seller for that order; they are not included in buyer-facing or staff logistics summaries.
+- Buyer order detail in web and React Native now renders a bounded event history from the buyer-authorized order-detail endpoint. Only recognized order-state events are exposed with fixed buyer-safe wording; internal notes and arbitrary event summaries remain seller-only. This timeline is an audit of Nantty order/seller updates, not carrier tracking.
+- Courier selection, provider booking, carrier webhooks, and live carrier tracking remain unimplemented. The buyer UI discloses that live courier tracking may not be available, and seller-entered tracking remains the current manual path. Do not represent this as a live logistics-provider integration.
+- Verification for this increment: `go test ./...` in the orders module passed; webapp/seller TypeScript checks, mobile `tsc --noEmit`, focused mobile product/review/checkout tests, targeted ESLint, and whitespace checks passed. Provider sandbox, production API, payment, and device-level validation were not run.

@@ -33,7 +33,7 @@ Expo inlines `EXPO_PUBLIC_*` at bundle time: restart Metro after changing it. Ne
 - Go services decode request bodies strictly: an unknown field is a `400 VALIDATION_FAILED`. Send only the DTO fields; extra UI-only fields break real calls even though the mocks accept them.
 - Errors are `{ message, code, issues? }`. A 401 with no session opens the guest sign-in prompt (mobile: non-GET only; webapp: non-GET with `UNAUTHENTICATED`/`SESSION_EXPIRED`); with a session, one refresh then a retry, then sign-out. The gateway answers `UNAUTHENTICATED`.
 - Profile images use upload intents and send `avatarMediaId`/`bannerMediaId`.
-- Social sign-in sends the raw nonce. `503 SOCIAL_SIGN_IN_NOT_CONFIGURED` is shown as "not configured".
+- Social sign-in sends a provider ID token plus the original nonce through the webapp BFF. Google uses Google Identity Services; Apple uses Sign in with Apple JS. The browser checks the returned token nonce, and the Go identity service verifies the signature, audience, expiry and nonce before creating a session. If the backend replies `BIRTHDAY_REQUIRED`, webapp retains that exact provider proof and retries it with the validated birthday rather than starting a second provider flow.
 - Username errors: 409 `USERNAME_TAKEN`, 422 `USERNAME_INVALID|USERNAME_UNAVAILABLE`, 429 `USERNAME_CHANGE_TOO_SOON`; availability carries `reason`.
 - `GET /lives/suggested` and `GET /lives/:id/viewers` are envelopes. Studio live comments are `Page<{author{...}}>`.
 
@@ -49,7 +49,7 @@ Apps: mobile, webapp, studio, seller, ads. Backend: go-identity behind the gatew
 - [ ] Login by email and by username; wrong password shows the server message.
 - [ ] Refresh rotation; reusing an old refresh token signs the user out.
 - [ ] Password reset and change return 204; change keeps the current session.
-- [ ] Google/Apple sign-in with the raw nonce (needs provider config; otherwise "not configured").
+- [ ] Google/Apple sign-in with configured provider client IDs and authorized web origin (webapp: `NEXT_PUBLIC_GOOGLE_CLIENT_ID`, `NEXT_PUBLIC_APPLE_CLIENT_ID`; Apple also needs the web domain and return URL registered with Apple). Webapp keeps provider tokens in memory only and exchanges them through the same-origin BFF. With client IDs absent, mock mode uses its local demo identity; real mode reports provider sign-in as not configured.
 - [ ] Guest 401 opens the sign-in prompt.
 
 ### 2. Users (`/api/v1/users`, `/api/v1/locale`, `/api/v1/currencies`, `/api/v1/geo`, `/api/v1/business-categories`)
