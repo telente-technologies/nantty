@@ -520,16 +520,48 @@ Semantics:
  "candidates": [{"productId": "pr_2", "storeId": "st_2", "categoryId": "cat_shoes", "topics": ["fashion"],
                  "price": {"amountMinor": 2800000, "currency": "NGN"}, "rating": 4.6, "salesCount": 40,
                  "viewCount": 900, "country": "NG", "inStock": true}],
- "excludedProductIds": [], "limit": 20}
+"excludedProductIds": [], "limit": 20, "personalizationAllowed": true}
 ```
 
-`surface`: `similar` \| `bought_together` \| `featured_with` \| `mart_home`. `candidates` optional (≤500):
+`surface`: `similar` \| `bought_together` \| `featured_with` \| `mart_home` \| `for_you`. `candidates` optional (≤500):
 - with candidates: Python scores them (model similarity to the anchor, attribute similarity, personal
-  store/topic affinity, popularity — weights per surface) and diversifies (≤2 consecutive per store).
+  store/topic/item affinity, popularity — weights per surface) and diversifies (≤2 consecutive per store).
   Out-of-stock, excluded, hidden and blocked-store products are dropped. For `featured_with`, send the
   products co-featured in the same posts as candidates.
+- For `for_you`, product views, cart additions, purchases, and clicked product results from searches
+  contribute decayed per-viewer item affinity. Verified stores receive a modest ranking preference, not
+  an eligibility guarantee; eligible non-verified stores remain in the pool and a stable small exploration
+  offset is stable for one viewer within the configured rotation window. Ranking is tunable with
+  `INTELLIGENCE_PRODUCT_RECOMMENDATION_VERIFIED_STORE_BONUS` (default `0.08`, range `0..0.20`),
+  `INTELLIGENCE_PRODUCT_RECOMMENDATION_EXPLORATION_MAX_OFFSET` (default `0.02`, range `0..0.05`), and
+  `INTELLIGENCE_PRODUCT_RECOMMENDATION_EXPLORATION_ROTATION_HOURS` (default `24`, range `1..168`). The
+  exploration value is a reproducible score offset in `[-maxOffset, +maxOffset]`, not eligibility or
+  unbounded random insertion. The upstream commerce service must supply candidates and verification /
+  availability facts, derive viewer identity from its authenticated session, and send only the service's
+  pseudonymous viewer key. Do not expose this internal endpoint to clients or accept caller-selected viewer
+  identity from mobile/web requests.
+- Personalization opt-out prevents per-viewer item/store/topic affinity from being read. Non-personalized
+  ranking can still use eligible catalogue facts and popularity.
 - without candidates: returns precomputed neighbours of the anchor from the item-similarity model, or
   popular products. **These ids were not pre-validated — the API must filter them.**
+
+`personalizationAllowed` is an internal caller assertion derived from the catalog's saved privacy choice; it defaults to
+false. When false, the scorer must not read per-viewer feature-store signals. The request is HMAC-signed and its viewer
+key is a keyed pseudonym, never a client-supplied account id.
+
+### 7.5.1 POST /v1/recommendations/products/candidates
+
+Internal-only, HMAC-signed candidate recall used by the catalog before it asks the rank endpoint to score products:
+
+```json
+{"viewer":{"userId":"u_...","country":"NG"},"personalizationAllowed":true,"limit":50}
+```
+
+The endpoint returns `{"itemIds":[...]}` from the viewer's decayed product-affinity sorted set. It returns no IDs unless
+`personalizationAllowed` is true and the online feature store permits personalization. The catalog remains authoritative:
+it filters recalled IDs by public listing, region/shipping, store state, stock and current product summaries, merges them
+with popular/recent candidates (maximum 100), then revalidates ranked IDs before responding. This endpoint must not be
+called directly by apps or browsers.
 
 Response (`RecommendationResponse`, shared by all recommendation endpoints):
 
@@ -846,7 +878,7 @@ actor = `data.accountId` (gift.sent: `data.sender.userId`, falling back to `subj
 | gift.sent (v1) | contract | value-flow risk graph (giftTransactionId, receiverUserId, totalCoins, liveId) |
 
 Expected from social/commerce/ads; must match their contract schemas once published (names and flat payloads are provisional):
-`product.viewed`, `follow.created`, `post.created`, `message.sent`, `report.created`, `block.created`, `ad.impressionRecorded`.
+`product.viewed`, `product.clicked`, `follow.created`, `post.created`, `message.sent`, `report.created`, `block.created`, `ad.impressionRecorded`.
 
 Social engagement (contract envelope `data`, personalization-gated, translated with hashed ids):
 
@@ -859,6 +891,7 @@ Social engagement (contract envelope `data`, personalization-gated, translated w
 | post.viewed | postId, authorId (or postAuthorId), viewerId (social sends actorId), dwellMs?, position?, isProductPost? | `post_viewed` (impression; seen set + dwell). Hashtags that are not `[a-z0-9_-]` slugs are dropped, not rejected |
 | clip.watched | clipId (social sends postId), creatorId (social sends authorId/postAuthorId), viewerId (social sends actorId), watchFraction, loopCount?, durationMs | `clip_watched` |
 | product.viewed (go-commerce) | productId, storeId, categoryId?, sourcePostId?, actorId (only when personalized) | `product_viewed` (actor `actorId`); events without `actorId` are acked as `skipped_unattributed` |
+| product.clicked (go-commerce) | productId, storeId, categoryId?, queryHash?, resultCount?, position? (0..10 000), surface?, actorId (only when personalized) | Search clicks become `searched` with clicked product and position; other product clicks preserve product/store affinity plus position and surface |
 | product.purchased (go-commerce, one per order item) | productId, storeId, variantId, quantity, orderGroupId, unitPrice (Money), actorId (only when the buyer allows personalization), sourcePostId? | `purchased` with one item (actor `actorId`); events without `actorId` are acked as `skipped_unattributed` (never attributed, never dead-lettered) |
 `message.sent` carries metadata only: `{recipientId, conversationId, containsLink?, linkReported?, deviceId?, ipHash?}`; extra fields reject the event.
 Personalization-gated: product.viewed, product.purchased, follow.created, ad.impressionRecorded, report.created affinity. Safety counters (messages, logins, reports, blocks, posts) are kept for abuse scoring.
