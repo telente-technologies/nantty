@@ -30,6 +30,10 @@ export interface DialogProps {
   readonly description?: ReactNode;
   readonly intent?: DialogIntent;
   readonly icon?: ReactNode;
+  /** Suppress the intent glyph when a product-specific brand mark is supplied as the icon. */
+  readonly hideIntentIcon?: boolean;
+  /** Render a supplied brand mark without the default circular intent badge. */
+  readonly plainIcon?: boolean;
   readonly tone?: DialogTone;
   readonly layout?: DialogLayout;
   readonly size?: DialogSize;
@@ -69,6 +73,8 @@ export function Dialog({
   description,
   intent,
   icon,
+  hideIntentIcon = false,
+  plainIcon = false,
   tone,
   layout = "centered",
   size = "small",
@@ -96,7 +102,7 @@ export function Dialog({
 
   if (!isRendered) return null;
   const resolvedTone = resolveDialogTone(tone, intent);
-  const leadingIcon = icon ?? (intent ? <DialogIntentIcon intent={intent} /> : null);
+  const leadingIcon = icon ?? (!hideIntentIcon && intent ? <DialogIntentIcon intent={intent} /> : null);
   const isStacked = !!leadingIcon && size === "small" && layout !== "sidePanel";
   const wantsClose = (showCloseButton ?? true) && dismissible;
   const hasActions = (actions?.length ?? 0) > 0;
@@ -137,7 +143,7 @@ export function Dialog({
         ) : null}
         <header {...(isSheet ? dragHandlers : {})} data-part="header" className={joinClasses(styles.header, isStacked && styles.headerStacked, isSheet && styles.dragZone)}>
           {leadingIcon ? (
-            <span className={styles.iconBadge} aria-hidden="true" data-part="icon">
+            <span className={joinClasses(styles.iconBadge, plainIcon && styles.iconPlain)} aria-hidden="true" data-part="icon" data-icon-presentation={plainIcon ? "plain" : "badge"}>
               {leadingIcon}
             </span>
           ) : null}

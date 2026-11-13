@@ -26,3 +26,7 @@ export interface FeedInteractionBatchResultContract {
 export const feedInteractionBatchPathContract = "/api/v1/feeds/interactions/batch";
 export const maximumFeedInteractionsPerBatchContract = 50;
 export const feedInteractionRepeatCooldownMsContract = 600_000;
+
+/** Keep recommendation insertion cadence identical across the web and mobile feed clients. */
+export const productRecommendationCadenceContract = { firstAfterPosts: 16, repeatEveryPosts: 45 } as const;
+export const maximumProductsPerClipRecommendationShelfContract = 6;

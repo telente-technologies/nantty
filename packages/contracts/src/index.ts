@@ -15,3 +15,4 @@ export * from "./storeFollow.contract";
 export * from "./feeds.contract";
 export * from "./follows.contract";
 export * from "./widgets.contract";
+export * from "./orderProgress.contract";

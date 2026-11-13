@@ -147,6 +147,25 @@
   color: var(--dialog-tone-ink);
 }
 
+.iconPlain {
+  display: flex;
+  width: auto;
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.header:not(.headerStacked) .iconPlain {
+  width: auto;
+  height: auto;
+}
+
+.iconPlain svg {
+  display: block;
+}
+
 .header:not(.headerStacked) .iconBadge {
   width: 44px;
   height: 44px;

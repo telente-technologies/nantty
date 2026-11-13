@@ -41,6 +41,14 @@ describe("Dialog markup", () => {
     assert.match(html, /data-part="icon"/);
   });
 
+  it("uses an explicitly provided brand mark without rendering the generic intent glyph", () => {
+    const html = renderToStaticMarkup(<Dialog isOpen onClose={noop} title="Sign in to Nantty" intent="signIn" icon={<span data-testid="nantty-brand">Nantty</span>} hideIntentIcon plainIcon />);
+    assert.match(html, /data-testid="nantty-brand"/);
+    assert.doesNotMatch(html, /data-icon="signIn"/);
+    assert.match(html, /data-icon-presentation="plain"/);
+    assert.match(html, /class="[^"]*iconPlain/);
+  });
+
   it("renders the destructive action with the danger variant", () => {
     const html = renderToStaticMarkup(<Dialog isOpen onClose={noop} title="Block Ada?" intent="block" actions={[{ label: "Block", variant: "danger", onClick: noop }, { label: "Cancel", onClick: noop }]} />);
     assert.match(html, /<button[^>]*data-variant="danger"/);
