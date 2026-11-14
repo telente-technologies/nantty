@@ -12,9 +12,11 @@ import styles from "./topBar.module.css";
 import { UserMenu } from "./userMenu";
 
 export function TopBar({ badgeCounts }: { readonly badgeCounts: ShellBadgeCounts }) {
-  const isHome = usePathname() === "/";
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const isClips = pathname === "/clips" || pathname.startsWith("/clips/");
   return (
-    <header className={[styles.topBar, isHome ? styles.topBarHome : ""].filter(Boolean).join(" ")}>
+    <header className={[styles.topBar, isHome ? styles.topBarHome : "", isClips ? styles.topBarClips : ""].filter(Boolean).join(" ")}>
       <div className={styles.topBarInner}>
         <div className={styles.topBarSearch}>
           <SearchBar />

@@ -28,7 +28,7 @@ export function NewTicketForm() {
   const initialCategory = ticketCategoryOptions.find((option) => option.value === searchParams.get("category"))?.value ?? "order";
   const [category, setCategory] = useState<SupportTicketCategory>(initialCategory);
   const [linkedReference, setLinkedReference] = useState(() => readLinkedReference(new URLSearchParams(searchParams.toString())));
-  const [subject, setSubject] = useState("");
+  const [subject, setSubject] = useState(() => (searchParams.get("subject") ?? "").trim().slice(0, 120));
   const [message, setMessage] = useState("");
   const idempotencyKey = useRef(createIdempotencyKey("ticket"));
   const create = useMutation({
@@ -63,7 +63,7 @@ export function NewTicketForm() {
       </label>
       <label className={styles.field}>
         Tell us more
-        <textarea className={styles.textarea} value={message} onChange={(event) => setMessage(event.target.value)} minLength={10} maxLength={5000} required placeholder="Include what happened and what you've tried. Add order numbers if they help." />
+        <textarea className={styles.textarea} value={message} onChange={(event) => setMessage(event.target.value)} minLength={10} maxLength={5000} required placeholder={category === "developer" || category === "sandbox" ? "Include the environment, endpoint, request or event ID, and a redacted error. Never include credentials or customer message content." : "Include what happened and what you've tried. Add order numbers if they help."} />
       </label>
       <p className={styles.muted}>Never share your password, card PIN or one-time codes. Nantty will never ask for them.</p>
       {create.isError ? <p className={styles.error} role="alert">{readErrorMessageForDisplay(create.error)}</p> : null}

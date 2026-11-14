@@ -178,6 +178,14 @@
 }
 
 @media (max-width: 767px) {
+  .bodyClips {
+    padding: 0 0 calc(var(--bottom-bar-height) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .bodyClips .content {
+    width: 100%;
+  }
+
   .bodyHome {
     padding: 0 0 calc(var(--bottom-bar-height) + var(--space-7) + env(safe-area-inset-bottom, 0px));
   }

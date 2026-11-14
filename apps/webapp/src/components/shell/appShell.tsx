@@ -115,6 +115,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
     styles[`content_${layout.contentWidth}`],
     hasRightRail ? styles[`rail_${layout.rightRailVisibility}`] : "",
     pathname === "/" ? styles.bodyHome : "",
+    pathname === "/clips" || pathname.startsWith("/clips/") ? styles.bodyClips : "",
   ].join(" ");
 
   return (

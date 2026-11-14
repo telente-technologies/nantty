@@ -1,6 +1,6 @@
 import type { ID, ISODate } from "./models.type";
 
-export type SupportTicketCategory = "order" | "payment" | "account" | "seller" | "verification" | "creator" | "live" | "ads" | "safety" | "other";
+export type SupportTicketCategory = "order" | "payment" | "account" | "seller" | "verification" | "creator" | "live" | "ads" | "developer" | "sandbox" | "safety" | "other";
 export type SupportTicketStatus = "open" | "awaiting_you" | "awaiting_support" | "resolved" | "closed";
 
 export interface SupportLinkedReference {

@@ -43,15 +43,15 @@
 .overlay {
   flex-direction: column;
   gap: var(--space-1);
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-pill);
-  background: var(--color-overlay);
+  background: transparent;
   color: var(--color-on-brand);
 }
 
 .overlay:hover {
-  background: color-mix(in srgb, var(--color-overlay), black 25%);
+  background: var(--color-overlay);
 }
 
 .saved {

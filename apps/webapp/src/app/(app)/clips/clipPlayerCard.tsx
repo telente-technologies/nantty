@@ -7,11 +7,11 @@ import { SaveToggleButton } from "@/components/saves/saveToggleButton";
 import {
   EnterFullscreenIcon,
   EyeIcon,
+  ChatIcon,
   LikeActionIcon,
   LikeFilledActionIcon,
   PlayIcon,
   ReplyActionIcon,
-  ShareActionIcon,
   SpeakerHighIcon,
   SpeakerMutedIcon,
   TrashIcon,
@@ -29,7 +29,7 @@ import { ClipTaggedPill } from "@/components/taggedPeople/clipTaggedPill";
 import type { Clip } from "@/types";
 
 import styles from "./page.module.css";
-import { IconLabel } from "@/components/ui/appIcon";
+import { AppIcon, IconLabel } from "@/components/ui/appIcon";
 import { findDownloadTargetForPost } from "@/utils/brandedDownload.util";
 import { describeCount } from "@/utils/countLabel.util";
 import { ViewsExplainerDialog } from "@/components/feed/viewsExplainerDialog";
@@ -274,7 +274,7 @@ export function ClipPlayerCard({
             title={engagement.liked ? "Unlike" : "Like"}
             onClick={onToggleLike}
           >
-            {engagement.liked ? <LikeFilledActionIcon size={24} /> : <LikeActionIcon size={24} />}
+            {engagement.liked ? <LikeFilledActionIcon size={26} /> : <LikeActionIcon size={26} />}
           </button>
           <span className={styles.actionCount}>{formatCompactCount(engagement.likes)}</span>
         </span>
@@ -286,7 +286,7 @@ export function ClipPlayerCard({
             title="Comments"
             onClick={() => requireAuthThen(onOpenComments, "Sign in to join the conversation.")}
           >
-            <ReplyActionIcon size={24} />
+            <ReplyActionIcon size={26} />
           </button>
           <span className={styles.actionCount}>{formatCompactCount(clip.comments)}</span>
         </span>
@@ -298,26 +298,26 @@ export function ClipPlayerCard({
             title="Copy link"
             onClick={onShareLink}
           >
-            <ShareActionIcon size={24} />
+            <AppIcon name="share24" size={24} />
           </button>
           <span className={styles.actionCount}>{formatCompactCount(shareCount)}</span>
         </span>
         <span className={styles.actionItem}>
-          <ShareToChatButton kind="clip" referenceId={clip.id} className={styles.actionCircle} iconOnly />
+          <ShareToChatButton kind="clip" referenceId={clip.id} className={styles.actionCircle} icon={<ChatIcon size={26} />} iconOnly />
           <span className={styles.actionCount}>Chat</span>
         </span>
         <span className={styles.actionItem}>
-          <SaveToggleButton targetType="clip" targetId={clip.id} initiallySaved={clip.bookmarked} appearance="overlay" iconSize={24} />
+          <SaveToggleButton targetType="clip" targetId={clip.id} initiallySaved={clip.bookmarked} appearance="overlay" iconSize={26} />
           <span className={styles.actionCount}>{formatCompactCount(clip.saveCount ?? 0)}</span>
         </span>
         <span className={styles.actionItem}>
           {isOwnClip ? (
             <Link href={`/analytics/post/${clip.id}`} className={styles.actionCircle} aria-label={`View clip analytics, ${describeCount(clip.views, "view", "views")}`} title="Clip analytics">
-              <EyeIcon size={24} />
+              <EyeIcon size={26} />
             </Link>
           ) : (
             <button type="button" className={styles.actionCircle} aria-haspopup="dialog" aria-label={`Views, ${describeCount(clip.views, "view", "views")}. What are views`} title="Views" onClick={() => setIsViewsInfoOpen(true)}>
-              <EyeIcon size={24} />
+              <EyeIcon size={26} />
             </button>
           )}
           <span className={styles.actionCount}>{formatCompactCount(clip.views)}</span>
