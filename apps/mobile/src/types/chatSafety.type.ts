@@ -12,6 +12,12 @@ export interface ChatNotificationSettings {
   readonly groups: boolean;
   readonly streakReminders: boolean;
   readonly showMessagePreview: boolean;
+  readonly sound: boolean;
+  readonly vibration: boolean;
+  readonly bubbles: boolean;
+  readonly bubbleMode: "all" | "selected";
+  readonly bubbleConversationIds: readonly ID[];
+  readonly bubbleExcludedConversationIds: readonly ID[];
 }
 
 export interface ChatSettings {

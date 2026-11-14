@@ -49,6 +49,7 @@ export function NotificationsScreen({ navigation }: MainScreenProps<"Notificatio
     const orderId = notification.data?.orderId ?? (reference?.kind === "order" ? reference.id : undefined);
     if (notification.kind === "followRequest") return navigation.navigate("FollowRequests");
     if (notification.data?.screen === "GroupInvitations") return navigation.navigate("GroupInvitations");
+    if (notification.data?.screen === "MessengerLoginAuthorization") return navigation.navigate("SettingsSecurity");
     if (notification.kind === "followRequestAccepted" && notification.actor) {
       void queryClient.invalidateQueries({ queryKey: ["users", notification.actor.id] });
       return navigation.navigate("UserProfile", { userId: notification.actor.id });

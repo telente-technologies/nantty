@@ -35,6 +35,7 @@ export const deepLinking: LinkingOptions<RootStackParamList> = {
       CreatorAffiliates: "creator/affiliates",
       Story: "stories/:userId",
       SettingsWidgets: "settings/widgets",
+      SettingsSecurity: "settings/security",
       ManageProfiles: "settings/profiles",
       CreateBusinessProfile: "settings/profiles/business/new",
       CreateBrand: "settings/profiles/brand/new",
