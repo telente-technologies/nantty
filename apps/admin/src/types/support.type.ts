@@ -3,7 +3,7 @@ import type { PlatformUserSummary } from "@/types/platformUser.type";
 
 export type SupportTicketStatus = "OPEN" | "AWAITING_USER" | "AWAITING_SUPPORT" | "RESOLVED" | "CLOSED";
 export type SupportTicketPriority = "LOW" | "NORMAL" | "HIGH" | "URGENT";
-export type SupportTicketCategory = "ORDER" | "PAYMENT" | "ACCOUNT" | "SELLER" | "VERIFICATION" | "CREATOR" | "LIVE" | "ADS" | "SAFETY" | "OTHER";
+export type SupportTicketCategory = "ORDER" | "PAYMENT" | "ACCOUNT" | "SELLER" | "VERIFICATION" | "CREATOR" | "LIVE" | "ADS" | "SAFETY" | "DEVELOPER" | "SANDBOX" | "OTHER";
 export type SupportTicketChannel = "FORM" | "CHAT";
 export type SupportAutoFaqStatus = "NONE" | "QUEUED" | "PUBLISHED" | "APPENDED" | "PENDING_REVIEW" | "SKIPPED";
 export type SupportAssigneeFilter = "me" | "unassigned" | "all";

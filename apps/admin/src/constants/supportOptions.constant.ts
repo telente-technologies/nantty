@@ -29,6 +29,8 @@ export const supportCategoryOptions = [
   { value: "LIVE", label: "Live" },
   { value: "ADS", label: "Ads" },
   { value: "SAFETY", label: "Safety" },
+  { value: "DEVELOPER", label: "Developer Portal" },
+  { value: "SANDBOX", label: "Sandbox" },
   { value: "OTHER", label: "Other" },
 ];
 
