@@ -45,7 +45,6 @@ export function PortalShell({ children, homeHref = "/" }: { readonly children: R
               <NanttyWordmark height={22} />
               <span className={styles.productLabel}>Developers</span>
             </Link>
-            <PortalSwitcher />
           </div>
           <div className={styles.topbarLeading}>
             <span className={styles.environment}>Preview · services not connected</span>
@@ -61,6 +60,7 @@ export function PortalShell({ children, homeHref = "/" }: { readonly children: R
       </header>
       <div ref={mobileMenuRef} id="developer-mobile-navigation" className={styles.mobileMenu} hidden={!mobileMenuOpen}>
         <PortalNavigation groups={developerNavigationGroups} homeHref={homeHref} onNavigate={() => setMobileMenuOpen(false)} />
+        <PortalSwitcher onNavigate={() => setMobileMenuOpen(false)} />
         <div className={styles.mobileMenuBottom}>
           <ThemeSwitcher label="Appearance" showLabel />
           <nav aria-label="Developer help and legal"><a href={readDeveloperSupportUrl()}>Contact support</a><a href={new URL("/terms", readNanttyWebUrl()).toString()}>Terms</a><a href={new URL("/privacy", readNanttyWebUrl()).toString()}>Privacy</a></nav>
@@ -68,6 +68,7 @@ export function PortalShell({ children, homeHref = "/" }: { readonly children: R
       </div>
       <aside className={styles.sidebar}>
         <PortalNavigation groups={developerNavigationGroups} homeHref={homeHref} />
+        <PortalSwitcher />
         <p className={styles.sidebarNote}>Business access is scoped, approved, and audited.</p>
       </aside>
       <main id="main-content" className={styles.main} tabIndex={-1}>

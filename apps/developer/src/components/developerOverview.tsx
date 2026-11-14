@@ -5,7 +5,7 @@ import { GatewayReadiness } from "./gatewayReadiness";
 import styles from "./developerOverview.module.css";
 
 const platformServices = [
-  { label: "Organization access", status: "Not available", href: "/applications", detail: "Organization and role APIs are not mounted." },
+  { label: "Organization access", status: "Backend foundation", href: "/applications", detail: "Authenticated organization create/list APIs exist; this portal is not connected yet." },
   { label: "Business API", status: "Contract only", href: readDeveloperDocsHref(), detail: "No public business API routes are mounted." },
   { label: "Credentials", status: "Not available", href: "/credentials", detail: "Credential issuance and rotation are not connected." },
   { label: "Request logs and usage", status: "Not available", href: "/requests", detail: "No developer traffic or usage ledger is recorded." },
@@ -31,17 +31,8 @@ export function DeveloperOverview() {
         <Link href={readDeveloperDocsHref()} className={styles.docsLink}>Read API documentation <span aria-hidden="true">↗</span></Link>
       </header>
 
-      <nav className={styles.pageTabs} aria-label="Developer workspace sections">
-        <Link href="/dashboard" aria-current="page">Overview</Link>
-        <Link href="/applications">Applications</Link>
-        <Link href="/webhooks">Webhooks</Link>
-        <Link href="/requests">Request logs</Link>
-        <Link href="/credentials">Credentials</Link>
-      </nav>
-
-      <div className={styles.previewNotice} role="status">
-        <span className={styles.noticeMark} aria-hidden="true" />
-        <div><strong>Workspace preview</strong><span>Developer organization, credential, webhook, billing, and request-log services are not connected.</span></div>
+      <div className={styles.previewNotice} role="note">
+        <div><strong>Workspace preview</strong><span>Organization APIs are available in Go Identity but are not connected to this portal yet. Credentials, webhooks, billing, and request logs are not connected.</span></div>
         <Link href={readDeveloperDocsHref()}>See what is available</Link>
       </div>
 
