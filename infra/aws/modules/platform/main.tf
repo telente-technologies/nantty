@@ -79,29 +79,31 @@ resource "aws_security_group_rule" "tasks_from_public_alb" {
 }
 
 module "dns" {
-  source                         = "../dns"
-  zone_name                      = var.zone_name
-  create_zone                    = var.create_zone
-  api_domain                     = local.api_domain
-  media_domain                   = local.media_domain
-  alb_dns_name                   = module.edge.alb_dns_name
-  alb_zone_id                    = module.edge.alb_zone_id
-  media_distribution_domain_name = module.storage.media_distribution_domain_name
-  media_distribution_zone_id     = module.storage.media_distribution_zone_id
-  providers                      = { aws = aws, aws.us_east_1 = aws.us_east_1 }
+  source             = "../dns"
+  zone_name          = var.zone_name
+  create_zone        = var.create_zone
+  cloudflare_zone_id = var.cloudflare_zone_id
+  api_domain         = local.api_domain
+  media_domain       = local.media_domain
+  extra_api_domains  = var.livekit_mode == "self_hosted" ? [local.livekit_domain] : []
+  providers          = { aws = aws, aws.us_east_1 = aws.us_east_1, cloudflare = cloudflare }
 }
 
+data "cloudflare_ip_ranges" "edge" {}
+
 module "edge" {
-  source              = "../edge"
-  environment         = var.environment
-  vpc_id              = module.network.vpc_id
-  vpc_cidr            = var.vpc_cidr
-  public_subnet_ids   = module.network.public_subnet_ids
-  certificate_arn     = module.dns.api_certificate_arn
-  logs_bucket_id      = module.storage.logs_bucket.id
-  logs_kms_key_arn    = module.kms.key_arns["logs"]
-  deletion_protection = var.deletion_protection
-  log_retention_days  = var.log_retention_days
+  source                = "../edge"
+  environment           = var.environment
+  vpc_id                = module.network.vpc_id
+  vpc_cidr              = var.vpc_cidr
+  public_subnet_ids     = module.network.public_subnet_ids
+  certificate_arn       = module.dns.api_certificate_arn
+  logs_bucket_id        = module.storage.logs_bucket.id
+  logs_kms_key_arn      = module.kms.key_arns["logs"]
+  cloudflare_ipv4_cidrs = data.cloudflare_ip_ranges.edge.ipv4_cidrs
+  cloudflare_ipv6_cidrs = data.cloudflare_ip_ranges.edge.ipv6_cidrs
+  deletion_protection   = var.deletion_protection
+  log_retention_days    = var.log_retention_days
 }
 
 module "ecr" {

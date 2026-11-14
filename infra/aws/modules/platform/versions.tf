@@ -6,6 +6,7 @@ terraform {
       version               = "~> 5.70"
       configuration_aliases = [aws.us_east_1, aws.dr]
     }
-    random = { source = "hashicorp/random", version = "~> 3.6" }
+    random     = { source = "hashicorp/random", version = "~> 3.6" }
+    cloudflare = { source = "cloudflare/cloudflare", version = "~> 5.28.0" }
   }
 }

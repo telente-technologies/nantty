@@ -6,6 +6,7 @@ terraform {
       version               = "~> 5.70"
       configuration_aliases = [aws.us_east_1]
     }
+    cloudflare = { source = "cloudflare/cloudflare", version = "~> 5.28.0" }
   }
 }
 
@@ -57,11 +58,11 @@ resource "aws_route53_record" "validation" {
 
 resource "aws_acm_certificate_validation" "api" {
   certificate_arn         = aws_acm_certificate.api.arn
-  validation_record_fqdns = [for key, record in aws_route53_record.validation : record.fqdn if startswith(key, "api-")]
+  validation_record_fqdns = [for key, record in cloudflare_dns_record.validation : "${trimsuffix(record.name, ".")}." if startswith(key, "api-")]
 }
 
 resource "aws_acm_certificate_validation" "media" {
   provider                = aws.us_east_1
   certificate_arn         = aws_acm_certificate.media.arn
-  validation_record_fqdns = [for key, record in aws_route53_record.validation : record.fqdn if startswith(key, "media-")]
+  validation_record_fqdns = [for key, record in cloudflare_dns_record.validation : "${trimsuffix(record.name, ".")}." if startswith(key, "media-")]
 }

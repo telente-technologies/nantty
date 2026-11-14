@@ -4,6 +4,7 @@ module "platform" {
     aws           = aws
     aws.us_east_1 = aws.us_east_1
     aws.dr        = aws.dr
+    cloudflare    = cloudflare
   }
 
   environment                  = var.environment
@@ -11,6 +12,7 @@ module "platform" {
   dr_region                    = var.dr_region
   enable_dr                    = var.enable_dr
   zone_name                    = var.zone_name
+  cloudflare_zone_id           = var.cloudflare_zone_id
   create_zone                  = var.create_zone
   app_domain                   = var.app_domain
   mail_domain                  = var.mail_domain
@@ -22,6 +24,7 @@ module "platform" {
   create_github_oidc_provider  = var.create_github_oidc_provider
   app_origins                  = var.app_origins
   admin_ip_allow_list          = var.admin_ip_allow_list
+  blocked_client_ip_cidrs      = var.blocked_client_ip_cidrs
   image_tag                    = var.image_tag
   min_tasks                    = var.min_tasks
   max_tasks_cap                = var.max_tasks_cap

@@ -5,6 +5,8 @@ variable "public_subnet_ids" { type = list(string) }
 variable "certificate_arn" { type = string }
 variable "logs_bucket_id" { type = string }
 variable "logs_kms_key_arn" { type = string }
+variable "cloudflare_ipv4_cidrs" { type = list(string) }
+variable "cloudflare_ipv6_cidrs" { type = list(string) }
 variable "deletion_protection" {
   type    = bool
   default = true

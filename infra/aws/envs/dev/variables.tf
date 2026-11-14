@@ -24,6 +24,10 @@ variable "create_zone" {
   type    = bool
   default = false
 }
+variable "cloudflare_zone_id" {
+  description = "Authoritative Cloudflare zone ID used for app and API DNS."
+  type        = string
+}
 variable "app_domain" {
   description = "Domain for this environment, for example staging.nantty.com (api., media. and livekit. are prefixed)."
   type        = string
@@ -60,6 +64,11 @@ variable "app_origins" {
 }
 variable "admin_ip_allow_list" {
   description = "CIDR ranges permitted to reach admin routes through the gateway."
+  type        = list(string)
+  default     = []
+}
+variable "blocked_client_ip_cidrs" {
+  description = "Optional IPv4/IPv6 CIDRs to block at the API gateway; use /32 or /128 for one address."
   type        = list(string)
   default     = []
 }
