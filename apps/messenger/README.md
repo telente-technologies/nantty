@@ -27,7 +27,7 @@ src/
   navigation/MessengerAppShell.tsx adaptive phone tabs / tablet side rail
   screens/SignInScreen.tsx        existing Nantty login endpoint
   screens/InboxScreen.tsx         server-backed conversation list, search, retry/refresh
-  screens/StoriesScreen.tsx       explicit integration boundary (no fake Story content)
+  screens/StoriesScreen.tsx       shared Story tray, photo viewer, and seen-state updates
   screens/ConversationScreen.tsx   encrypted conversation view and text composer
   screens/SettingsScreen.tsx      bubble, preview, sound, vibration, push and session settings
   ui/FloatingConversationBubbles.tsx in-app draggable bubbles and compact conversation modal
@@ -75,7 +75,7 @@ The Android Bubble notification renderer is supplied by `plugins/withAndroidChat
 The following are deliberately visible gaps, not hidden placeholders:
 
 1. **Conversation richness:** this Messenger surface currently sends encrypted text and renders encrypted text history. It does not yet include quote-replies, reactions, attachment upload/rendering, message pagination, or the main mobile app's complete control-message folding UI.
-2. **Stories:** the shared Story API/viewer/replies/privacy/expiry are not connected; Messenger shows an explicit integration state and contains no ads.
+2. **Stories:** the shared authenticated tray, per-user viewer, photo media, and seen-state endpoint are connected. Story publishing, encrypted replies, and video playback are not yet connected; video Stories show their available poster and an honest playback notice. Story privacy and expiry remain server-enforced; Messenger adds no ads.
 3. **Native/device release checks:** bubble visibility, notification action presentation, device revocation, and OS setting behavior still require a built Android device/emulator and iOS device/simulator. An installed development build has not been exercised in this workspace.
 4. **Production readiness:** verify push credentials, migration application, deployed API reachability, App Links/Universal Links, app signing, privacy disclosures, secure-store behavior, and native E2E tests before release.
 
