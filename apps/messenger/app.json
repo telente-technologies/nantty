@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Nantty Messenger",
+    "slug": "nantty-messenger",
+    "platforms": ["android", "ios"],
+    "version": "0.1.0",
+    "orientation": "default",
+    "icon": "../mobile/assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nantty.messenger"
+    },
+    "android": {
+      "package": "com.nantty.messenger",
+      "softwareKeyboardLayoutMode": "resize",
+      "adaptiveIcon": {
+        "foregroundImage": "../mobile/assets/adaptiveIconForeground.png",
+        "backgroundImage": "../mobile/assets/adaptiveIconBackground.png",
+        "monochromeImage": "../mobile/assets/adaptiveIconMonochrome.png",
+        "backgroundColor": "#2043F5"
+      }
+    },
+    "scheme": "nantty-messenger",
+    "extra": {
+      "apiUrl": "https://api.nantty.com",
+      "eas": { "projectId": "47fadf5d-9059-49f9-8673-56453ca26a58" }
+    },
+    "plugins": [
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true
+        }
+      ],
+      "expo-notifications",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Nantty Messenger to select a photo to send in an encrypted conversation."
+        }
+      ],
+      "./plugins/withAndroidChatBubbles"
+    ]
+  }
+}
