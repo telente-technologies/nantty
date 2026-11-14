@@ -18,6 +18,7 @@ import { toggleInAppConversation } from "../api/chatBubblePreferences.util";
 import { parseConversationList, type ConversationSummary } from "../api/conversations";
 import { conversationIdFromUrl, isBubbleTestUrl, isCompactBubbleUrl, subscribeToConversationOpen } from "./notificationNavigation.service";
 import { subscribeToMessengerEvents } from "../api/messengerRealtime.service";
+import { shouldShowFloatingConversations } from "../ui/floatingConversationVisibility.util";
 
 export type MessengerSection = "chats" | "stories" | "settings";
 
@@ -186,7 +187,7 @@ export function MessengerAppShell() {
           ) : null}
         </View>
       </View>
-      {bubblePreferences?.inAppEnabled && section === "chats" && !selectedConversation ? (
+      {bubblePreferences?.inAppEnabled && shouldShowFloatingConversations(section, selectedConversation !== null) ? (
         <FloatingConversationBubbles
           conversations={visibleBubbles}
           onDismiss={(conversationId) => {
