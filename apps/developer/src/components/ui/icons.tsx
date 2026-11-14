@@ -1,6 +1,7 @@
 import {
   ArrowsLeftRightIcon as PhArrowsLeftRight,
   BookOpenIcon as PhBookOpen,
+  BuildingsIcon as PhBuildings,
   BriefcaseIcon as PhBriefcase,
   CaretRightIcon as PhCaretRight,
   ChartLineUpIcon as PhChartLineUp,
@@ -32,6 +33,7 @@ function createIcon(IconComponent: Icon) {
 export const ActivityIcon = createIcon(PhChartLineUp);
 export const ArrowsLeftRightIcon = createIcon(PhArrowsLeftRight);
 export const BookOpenIcon = createIcon(PhBookOpen);
+export const BuildingsIcon = createIcon(PhBuildings);
 export const BriefcaseIcon = createIcon(PhBriefcase);
 export const CaretRightIcon = createIcon(PhCaretRight);
 export const ChatCircleTextIcon = createIcon(PhChatCircleText);

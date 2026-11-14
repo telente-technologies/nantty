@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
 
-import { ActivityIcon, BookOpenIcon, BriefcaseIcon, ChatCircleTextIcon, KeyIcon, ListMagnifyingGlassIcon, PlugsConnectedIcon, SquaresFourIcon, type IconProps } from "@/components/ui/icons";
+import { ActivityIcon, BookOpenIcon, BriefcaseIcon, BuildingsIcon, ChatCircleTextIcon, KeyIcon, ListMagnifyingGlassIcon, PlugsConnectedIcon, SquaresFourIcon, type IconProps } from "@/components/ui/icons";
 import { readDeveloperDocsHref } from "@/config/site.config";
 
 import styles from "./portalShell.module.css";
@@ -12,7 +12,7 @@ import styles from "./portalShell.module.css";
 export interface PortalNavigationItem {
   readonly href: string;
   readonly label: string;
-  readonly icon: "activity" | "book" | "briefcase" | "key" | "messaging" | "requests" | "usage" | "webhook";
+  readonly icon: "activity" | "book" | "briefcase" | "key" | "messaging" | "organization" | "requests" | "usage" | "webhook";
 }
 
 export interface PortalNavigationGroup {
@@ -26,6 +26,7 @@ const icons: Record<PortalNavigationItem["icon"], ComponentType<IconProps>> = {
   briefcase: BriefcaseIcon,
   key: KeyIcon,
   messaging: ChatCircleTextIcon,
+  organization: BuildingsIcon,
   requests: ListMagnifyingGlassIcon,
   usage: ActivityIcon,
   webhook: PlugsConnectedIcon,

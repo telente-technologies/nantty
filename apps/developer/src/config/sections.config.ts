@@ -1,5 +1,11 @@
 export const developerNavigationGroups = [
   {
+    label: "Workspace",
+    items: [
+      { href: "/organization", label: "Organization", icon: "organization" },
+    ],
+  },
+  {
     label: "Build",
     items: [
       { href: "/applications", label: "Applications", icon: "briefcase" },
