@@ -67,6 +67,104 @@ var (
 			},
 		},
 	}
+	// MessengerAuthorizationsColumns holds the columns for the "messenger_authorizations" table.
+	MessengerAuthorizationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "proof_hash", Type: field.TypeString},
+		{Name: "installation_hash", Type: field.TypeString, Size: 64},
+		{Name: "platform", Type: field.TypeEnum, Enums: []string{"android", "ios", "other"}},
+		{Name: "device_name", Type: field.TypeString, Size: 120},
+		{Name: "user_agent", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "ip_address", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "approved", "denied", "completed"}, Default: "pending"},
+		{Name: "approval_method", Type: field.TypeString, Nullable: true, Size: 24},
+		{Name: "approved_by_session_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "code_hash", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "code_expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "code_issued_at", Type: field.TypeTime, Nullable: true},
+		{Name: "code_attempts", Type: field.TypeInt, Default: 0},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "completed_session_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "account_id", Type: field.TypeUUID},
+	}
+	// MessengerAuthorizationsTable holds the schema information for the "messenger_authorizations" table.
+	MessengerAuthorizationsTable = &schema.Table{
+		Name:       "messenger_authorizations",
+		Columns:    MessengerAuthorizationsColumns,
+		PrimaryKey: []*schema.Column{MessengerAuthorizationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "messenger_authorizations_accounts_messenger_authorizations",
+				Columns:    []*schema.Column{MessengerAuthorizationsColumns[18]},
+				RefColumns: []*schema.Column{AccountsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "messengerauthorization_proof_hash",
+				Unique:  true,
+				Columns: []*schema.Column{MessengerAuthorizationsColumns[2]},
+			},
+			{
+				Name:    "messengerauthorization_account_id_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{MessengerAuthorizationsColumns[18], MessengerAuthorizationsColumns[1]},
+			},
+			{
+				Name:    "messengerauthorization_account_id_status_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{MessengerAuthorizationsColumns[18], MessengerAuthorizationsColumns[8], MessengerAuthorizationsColumns[15]},
+			},
+		},
+	}
+	// MessengerTrustedDevicesColumns holds the columns for the "messenger_trusted_devices" table.
+	MessengerTrustedDevicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "token_hash", Type: field.TypeString, Size: 64},
+		{Name: "installation_hash", Type: field.TypeString, Size: 64},
+		{Name: "platform", Type: field.TypeEnum, Enums: []string{"android", "ios", "other"}},
+		{Name: "device_name", Type: field.TypeString, Size: 120},
+		{Name: "user_agent", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "last_used_at", Type: field.TypeTime},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
+		{Name: "account_id", Type: field.TypeUUID},
+	}
+	// MessengerTrustedDevicesTable holds the schema information for the "messenger_trusted_devices" table.
+	MessengerTrustedDevicesTable = &schema.Table{
+		Name:       "messenger_trusted_devices",
+		Columns:    MessengerTrustedDevicesColumns,
+		PrimaryKey: []*schema.Column{MessengerTrustedDevicesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "messenger_trusted_devices_accounts_messenger_trusted_devices",
+				Columns:    []*schema.Column{MessengerTrustedDevicesColumns[10]},
+				RefColumns: []*schema.Column{AccountsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "messengertrusteddevice_token_hash",
+				Unique:  true,
+				Columns: []*schema.Column{MessengerTrustedDevicesColumns[2]},
+			},
+			{
+				Name:    "messengertrusteddevice_account_id_revoked_at",
+				Unique:  false,
+				Columns: []*schema.Column{MessengerTrustedDevicesColumns[10], MessengerTrustedDevicesColumns[9]},
+			},
+			{
+				Name:    "messengertrusteddevice_account_id_installation_hash_revoked_at",
+				Unique:  false,
+				Columns: []*schema.Column{MessengerTrustedDevicesColumns[10], MessengerTrustedDevicesColumns[3], MessengerTrustedDevicesColumns[9]},
+			},
+		},
+	}
 	// OneTimeCodesColumns holds the columns for the "one_time_codes" table.
 	OneTimeCodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -283,6 +381,8 @@ var (
 	Tables = []*schema.Table{
 		AccountsTable,
 		AgeGateRefusalsTable,
+		MessengerAuthorizationsTable,
+		MessengerTrustedDevicesTable,
 		OneTimeCodesTable,
 		OutboxEventsTable,
 		RefreshTokensTable,
@@ -294,6 +394,8 @@ var (
 )
 
 func init() {
+	MessengerAuthorizationsTable.ForeignKeys[0].RefTable = AccountsTable
+	MessengerTrustedDevicesTable.ForeignKeys[0].RefTable = AccountsTable
 	RefreshTokensTable.ForeignKeys[0].RefTable = SessionsTable
 	SessionsTable.ForeignKeys[0].RefTable = AccountsTable
 	SocialIdentitiesTable.ForeignKeys[0].RefTable = AccountsTable

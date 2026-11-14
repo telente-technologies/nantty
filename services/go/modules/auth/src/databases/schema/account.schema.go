@@ -33,7 +33,12 @@ func (Account) Fields() []ent.Field {
 }
 
 func (Account) Edges() []ent.Edge {
-	return []ent.Edge{edge.To("sessions", Session.Type), edge.To("social_identities", SocialIdentity.Type)}
+	return []ent.Edge{
+		edge.To("sessions", Session.Type),
+		edge.To("social_identities", SocialIdentity.Type),
+		edge.To("messenger_authorizations", MessengerAuthorization.Type),
+		edge.To("messenger_trusted_devices", MessengerTrustedDevice.Type),
+	}
 }
 
 func (Account) Indexes() []ent.Index {

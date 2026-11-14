@@ -32,6 +32,30 @@ func (f AgeGateRefusalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AgeGateRefusalMutation", m)
 }
 
+// The MessengerAuthorizationFunc type is an adapter to allow the use of ordinary
+// function as MessengerAuthorization mutator.
+type MessengerAuthorizationFunc func(context.Context, *ent.MessengerAuthorizationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MessengerAuthorizationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.MessengerAuthorizationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MessengerAuthorizationMutation", m)
+}
+
+// The MessengerTrustedDeviceFunc type is an adapter to allow the use of ordinary
+// function as MessengerTrustedDevice mutator.
+type MessengerTrustedDeviceFunc func(context.Context, *ent.MessengerTrustedDeviceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MessengerTrustedDeviceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.MessengerTrustedDeviceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MessengerTrustedDeviceMutation", m)
+}
+
 // The OneTimeCodeFunc type is an adapter to allow the use of ordinary
 // function as OneTimeCode mutator.
 type OneTimeCodeFunc func(context.Context, *ent.OneTimeCodeMutation) (ent.Value, error)

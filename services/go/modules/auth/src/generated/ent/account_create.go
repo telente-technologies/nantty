@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"nantty/modules/auth/src/generated/ent/account"
+	"nantty/modules/auth/src/generated/ent/messengerauthorization"
+	"nantty/modules/auth/src/generated/ent/messengertrusteddevice"
 	"nantty/modules/auth/src/generated/ent/session"
 	"nantty/modules/auth/src/generated/ent/socialidentity"
 	"time"
@@ -203,6 +205,36 @@ func (_c *AccountCreate) AddSocialIdentities(v ...*SocialIdentity) *AccountCreat
 		ids[i] = v[i].ID
 	}
 	return _c.AddSocialIdentityIDs(ids...)
+}
+
+// AddMessengerAuthorizationIDs adds the "messenger_authorizations" edge to the MessengerAuthorization entity by IDs.
+func (_c *AccountCreate) AddMessengerAuthorizationIDs(ids ...uuid.UUID) *AccountCreate {
+	_c.mutation.AddMessengerAuthorizationIDs(ids...)
+	return _c
+}
+
+// AddMessengerAuthorizations adds the "messenger_authorizations" edges to the MessengerAuthorization entity.
+func (_c *AccountCreate) AddMessengerAuthorizations(v ...*MessengerAuthorization) *AccountCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddMessengerAuthorizationIDs(ids...)
+}
+
+// AddMessengerTrustedDeviceIDs adds the "messenger_trusted_devices" edge to the MessengerTrustedDevice entity by IDs.
+func (_c *AccountCreate) AddMessengerTrustedDeviceIDs(ids ...uuid.UUID) *AccountCreate {
+	_c.mutation.AddMessengerTrustedDeviceIDs(ids...)
+	return _c
+}
+
+// AddMessengerTrustedDevices adds the "messenger_trusted_devices" edges to the MessengerTrustedDevice entity.
+func (_c *AccountCreate) AddMessengerTrustedDevices(v ...*MessengerTrustedDevice) *AccountCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddMessengerTrustedDeviceIDs(ids...)
 }
 
 // Mutation returns the AccountMutation object of the builder.
@@ -417,6 +449,38 @@ func (_c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(socialidentity.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.MessengerAuthorizationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerAuthorizationsTable,
+			Columns: []string{account.MessengerAuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengerauthorization.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.MessengerTrustedDevicesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerTrustedDevicesTable,
+			Columns: []string{account.MessengerTrustedDevicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengertrusteddevice.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

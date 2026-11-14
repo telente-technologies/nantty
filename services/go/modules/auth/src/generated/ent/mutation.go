@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"nantty/modules/auth/src/generated/ent/account"
 	"nantty/modules/auth/src/generated/ent/agegaterefusal"
+	"nantty/modules/auth/src/generated/ent/messengerauthorization"
+	"nantty/modules/auth/src/generated/ent/messengertrusteddevice"
 	"nantty/modules/auth/src/generated/ent/onetimecode"
 	"nantty/modules/auth/src/generated/ent/outboxevent"
 	"nantty/modules/auth/src/generated/ent/predicate"
@@ -33,45 +35,53 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAccount           = "Account"
-	TypeAgeGateRefusal    = "AgeGateRefusal"
-	TypeOneTimeCode       = "OneTimeCode"
-	TypeOutboxEvent       = "OutboxEvent"
-	TypeRefreshToken      = "RefreshToken"
-	TypeRegistrationBlock = "RegistrationBlock"
-	TypeSession           = "Session"
-	TypeSigningKey        = "SigningKey"
-	TypeSocialIdentity    = "SocialIdentity"
+	TypeAccount                = "Account"
+	TypeAgeGateRefusal         = "AgeGateRefusal"
+	TypeMessengerAuthorization = "MessengerAuthorization"
+	TypeMessengerTrustedDevice = "MessengerTrustedDevice"
+	TypeOneTimeCode            = "OneTimeCode"
+	TypeOutboxEvent            = "OutboxEvent"
+	TypeRefreshToken           = "RefreshToken"
+	TypeRegistrationBlock      = "RegistrationBlock"
+	TypeSession                = "Session"
+	TypeSigningKey             = "SigningKey"
+	TypeSocialIdentity         = "SocialIdentity"
 )
 
 // AccountMutation represents an operation that mutates the Account nodes in the graph.
 type AccountMutation struct {
 	config
-	op                       Op
-	typ                      string
-	id                       *uuid.UUID
-	created_at               *time.Time
-	email                    *string
-	username                 *string
-	password_hash            *string
-	name                     *string
-	birthday                 *time.Time
-	roles                    *[]string
-	appendroles              []string
-	email_verified_at        *time.Time
-	status                   *account.Status
-	must_change_password     *bool
-	updated_at               *time.Time
-	clearedFields            map[string]struct{}
-	sessions                 map[uuid.UUID]struct{}
-	removedsessions          map[uuid.UUID]struct{}
-	clearedsessions          bool
-	social_identities        map[uuid.UUID]struct{}
-	removedsocial_identities map[uuid.UUID]struct{}
-	clearedsocial_identities bool
-	done                     bool
-	oldValue                 func(context.Context) (*Account, error)
-	predicates               []predicate.Account
+	op                               Op
+	typ                              string
+	id                               *uuid.UUID
+	created_at                       *time.Time
+	email                            *string
+	username                         *string
+	password_hash                    *string
+	name                             *string
+	birthday                         *time.Time
+	roles                            *[]string
+	appendroles                      []string
+	email_verified_at                *time.Time
+	status                           *account.Status
+	must_change_password             *bool
+	updated_at                       *time.Time
+	clearedFields                    map[string]struct{}
+	sessions                         map[uuid.UUID]struct{}
+	removedsessions                  map[uuid.UUID]struct{}
+	clearedsessions                  bool
+	social_identities                map[uuid.UUID]struct{}
+	removedsocial_identities         map[uuid.UUID]struct{}
+	clearedsocial_identities         bool
+	messenger_authorizations         map[uuid.UUID]struct{}
+	removedmessenger_authorizations  map[uuid.UUID]struct{}
+	clearedmessenger_authorizations  bool
+	messenger_trusted_devices        map[uuid.UUID]struct{}
+	removedmessenger_trusted_devices map[uuid.UUID]struct{}
+	clearedmessenger_trusted_devices bool
+	done                             bool
+	oldValue                         func(context.Context) (*Account, error)
+	predicates                       []predicate.Account
 }
 
 var _ ent.Mutation = (*AccountMutation)(nil)
@@ -749,6 +759,114 @@ func (m *AccountMutation) ResetSocialIdentities() {
 	m.removedsocial_identities = nil
 }
 
+// AddMessengerAuthorizationIDs adds the "messenger_authorizations" edge to the MessengerAuthorization entity by ids.
+func (m *AccountMutation) AddMessengerAuthorizationIDs(ids ...uuid.UUID) {
+	if m.messenger_authorizations == nil {
+		m.messenger_authorizations = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.messenger_authorizations[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMessengerAuthorizations clears the "messenger_authorizations" edge to the MessengerAuthorization entity.
+func (m *AccountMutation) ClearMessengerAuthorizations() {
+	m.clearedmessenger_authorizations = true
+}
+
+// MessengerAuthorizationsCleared reports if the "messenger_authorizations" edge to the MessengerAuthorization entity was cleared.
+func (m *AccountMutation) MessengerAuthorizationsCleared() bool {
+	return m.clearedmessenger_authorizations
+}
+
+// RemoveMessengerAuthorizationIDs removes the "messenger_authorizations" edge to the MessengerAuthorization entity by IDs.
+func (m *AccountMutation) RemoveMessengerAuthorizationIDs(ids ...uuid.UUID) {
+	if m.removedmessenger_authorizations == nil {
+		m.removedmessenger_authorizations = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.messenger_authorizations, ids[i])
+		m.removedmessenger_authorizations[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMessengerAuthorizations returns the removed IDs of the "messenger_authorizations" edge to the MessengerAuthorization entity.
+func (m *AccountMutation) RemovedMessengerAuthorizationsIDs() (ids []uuid.UUID) {
+	for id := range m.removedmessenger_authorizations {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MessengerAuthorizationsIDs returns the "messenger_authorizations" edge IDs in the mutation.
+func (m *AccountMutation) MessengerAuthorizationsIDs() (ids []uuid.UUID) {
+	for id := range m.messenger_authorizations {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMessengerAuthorizations resets all changes to the "messenger_authorizations" edge.
+func (m *AccountMutation) ResetMessengerAuthorizations() {
+	m.messenger_authorizations = nil
+	m.clearedmessenger_authorizations = false
+	m.removedmessenger_authorizations = nil
+}
+
+// AddMessengerTrustedDeviceIDs adds the "messenger_trusted_devices" edge to the MessengerTrustedDevice entity by ids.
+func (m *AccountMutation) AddMessengerTrustedDeviceIDs(ids ...uuid.UUID) {
+	if m.messenger_trusted_devices == nil {
+		m.messenger_trusted_devices = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.messenger_trusted_devices[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMessengerTrustedDevices clears the "messenger_trusted_devices" edge to the MessengerTrustedDevice entity.
+func (m *AccountMutation) ClearMessengerTrustedDevices() {
+	m.clearedmessenger_trusted_devices = true
+}
+
+// MessengerTrustedDevicesCleared reports if the "messenger_trusted_devices" edge to the MessengerTrustedDevice entity was cleared.
+func (m *AccountMutation) MessengerTrustedDevicesCleared() bool {
+	return m.clearedmessenger_trusted_devices
+}
+
+// RemoveMessengerTrustedDeviceIDs removes the "messenger_trusted_devices" edge to the MessengerTrustedDevice entity by IDs.
+func (m *AccountMutation) RemoveMessengerTrustedDeviceIDs(ids ...uuid.UUID) {
+	if m.removedmessenger_trusted_devices == nil {
+		m.removedmessenger_trusted_devices = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.messenger_trusted_devices, ids[i])
+		m.removedmessenger_trusted_devices[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMessengerTrustedDevices returns the removed IDs of the "messenger_trusted_devices" edge to the MessengerTrustedDevice entity.
+func (m *AccountMutation) RemovedMessengerTrustedDevicesIDs() (ids []uuid.UUID) {
+	for id := range m.removedmessenger_trusted_devices {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MessengerTrustedDevicesIDs returns the "messenger_trusted_devices" edge IDs in the mutation.
+func (m *AccountMutation) MessengerTrustedDevicesIDs() (ids []uuid.UUID) {
+	for id := range m.messenger_trusted_devices {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMessengerTrustedDevices resets all changes to the "messenger_trusted_devices" edge.
+func (m *AccountMutation) ResetMessengerTrustedDevices() {
+	m.messenger_trusted_devices = nil
+	m.clearedmessenger_trusted_devices = false
+	m.removedmessenger_trusted_devices = nil
+}
+
 // Where appends a list predicates to the AccountMutation builder.
 func (m *AccountMutation) Where(ps ...predicate.Account) {
 	m.predicates = append(m.predicates, ps...)
@@ -1079,12 +1197,18 @@ func (m *AccountMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AccountMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.sessions != nil {
 		edges = append(edges, account.EdgeSessions)
 	}
 	if m.social_identities != nil {
 		edges = append(edges, account.EdgeSocialIdentities)
+	}
+	if m.messenger_authorizations != nil {
+		edges = append(edges, account.EdgeMessengerAuthorizations)
+	}
+	if m.messenger_trusted_devices != nil {
+		edges = append(edges, account.EdgeMessengerTrustedDevices)
 	}
 	return edges
 }
@@ -1105,18 +1229,36 @@ func (m *AccountMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case account.EdgeMessengerAuthorizations:
+		ids := make([]ent.Value, 0, len(m.messenger_authorizations))
+		for id := range m.messenger_authorizations {
+			ids = append(ids, id)
+		}
+		return ids
+	case account.EdgeMessengerTrustedDevices:
+		ids := make([]ent.Value, 0, len(m.messenger_trusted_devices))
+		for id := range m.messenger_trusted_devices {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AccountMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.removedsessions != nil {
 		edges = append(edges, account.EdgeSessions)
 	}
 	if m.removedsocial_identities != nil {
 		edges = append(edges, account.EdgeSocialIdentities)
+	}
+	if m.removedmessenger_authorizations != nil {
+		edges = append(edges, account.EdgeMessengerAuthorizations)
+	}
+	if m.removedmessenger_trusted_devices != nil {
+		edges = append(edges, account.EdgeMessengerTrustedDevices)
 	}
 	return edges
 }
@@ -1137,18 +1279,36 @@ func (m *AccountMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case account.EdgeMessengerAuthorizations:
+		ids := make([]ent.Value, 0, len(m.removedmessenger_authorizations))
+		for id := range m.removedmessenger_authorizations {
+			ids = append(ids, id)
+		}
+		return ids
+	case account.EdgeMessengerTrustedDevices:
+		ids := make([]ent.Value, 0, len(m.removedmessenger_trusted_devices))
+		for id := range m.removedmessenger_trusted_devices {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AccountMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.clearedsessions {
 		edges = append(edges, account.EdgeSessions)
 	}
 	if m.clearedsocial_identities {
 		edges = append(edges, account.EdgeSocialIdentities)
+	}
+	if m.clearedmessenger_authorizations {
+		edges = append(edges, account.EdgeMessengerAuthorizations)
+	}
+	if m.clearedmessenger_trusted_devices {
+		edges = append(edges, account.EdgeMessengerTrustedDevices)
 	}
 	return edges
 }
@@ -1161,6 +1321,10 @@ func (m *AccountMutation) EdgeCleared(name string) bool {
 		return m.clearedsessions
 	case account.EdgeSocialIdentities:
 		return m.clearedsocial_identities
+	case account.EdgeMessengerAuthorizations:
+		return m.clearedmessenger_authorizations
+	case account.EdgeMessengerTrustedDevices:
+		return m.clearedmessenger_trusted_devices
 	}
 	return false
 }
@@ -1182,6 +1346,12 @@ func (m *AccountMutation) ResetEdge(name string) error {
 		return nil
 	case account.EdgeSocialIdentities:
 		m.ResetSocialIdentities()
+		return nil
+	case account.EdgeMessengerAuthorizations:
+		m.ResetMessengerAuthorizations()
+		return nil
+	case account.EdgeMessengerTrustedDevices:
+		m.ResetMessengerTrustedDevices()
 		return nil
 	}
 	return fmt.Errorf("unknown Account edge %s", name)
@@ -1679,6 +1849,2376 @@ func (m *AgeGateRefusalMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AgeGateRefusalMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown AgeGateRefusal edge %s", name)
+}
+
+// MessengerAuthorizationMutation represents an operation that mutates the MessengerAuthorization nodes in the graph.
+type MessengerAuthorizationMutation struct {
+	config
+	op                     Op
+	typ                    string
+	id                     *uuid.UUID
+	created_at             *time.Time
+	proof_hash             *string
+	installation_hash      *string
+	platform               *messengerauthorization.Platform
+	device_name            *string
+	user_agent             *string
+	ip_address             *string
+	status                 *messengerauthorization.Status
+	approval_method        *string
+	approved_by_session_id *uuid.UUID
+	code_hash              *string
+	code_expires_at        *time.Time
+	code_issued_at         *time.Time
+	code_attempts          *int
+	addcode_attempts       *int
+	expires_at             *time.Time
+	completed_at           *time.Time
+	completed_session_id   *uuid.UUID
+	clearedFields          map[string]struct{}
+	account                *uuid.UUID
+	clearedaccount         bool
+	done                   bool
+	oldValue               func(context.Context) (*MessengerAuthorization, error)
+	predicates             []predicate.MessengerAuthorization
+}
+
+var _ ent.Mutation = (*MessengerAuthorizationMutation)(nil)
+
+// messengerauthorizationOption allows management of the mutation configuration using functional options.
+type messengerauthorizationOption func(*MessengerAuthorizationMutation)
+
+// newMessengerAuthorizationMutation creates new mutation for the MessengerAuthorization entity.
+func newMessengerAuthorizationMutation(c config, op Op, opts ...messengerauthorizationOption) *MessengerAuthorizationMutation {
+	m := &MessengerAuthorizationMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeMessengerAuthorization,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withMessengerAuthorizationID sets the ID field of the mutation.
+func withMessengerAuthorizationID(id uuid.UUID) messengerauthorizationOption {
+	return func(m *MessengerAuthorizationMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *MessengerAuthorization
+		)
+		m.oldValue = func(ctx context.Context) (*MessengerAuthorization, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().MessengerAuthorization.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withMessengerAuthorization sets the old MessengerAuthorization of the mutation.
+func withMessengerAuthorization(node *MessengerAuthorization) messengerauthorizationOption {
+	return func(m *MessengerAuthorizationMutation) {
+		m.oldValue = func(context.Context) (*MessengerAuthorization, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m MessengerAuthorizationMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m MessengerAuthorizationMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of MessengerAuthorization entities.
+func (m *MessengerAuthorizationMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *MessengerAuthorizationMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *MessengerAuthorizationMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().MessengerAuthorization.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *MessengerAuthorizationMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *MessengerAuthorizationMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *MessengerAuthorizationMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *MessengerAuthorizationMutation) SetAccountID(u uuid.UUID) {
+	m.account = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *MessengerAuthorizationMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *MessengerAuthorizationMutation) ResetAccountID() {
+	m.account = nil
+}
+
+// SetProofHash sets the "proof_hash" field.
+func (m *MessengerAuthorizationMutation) SetProofHash(s string) {
+	m.proof_hash = &s
+}
+
+// ProofHash returns the value of the "proof_hash" field in the mutation.
+func (m *MessengerAuthorizationMutation) ProofHash() (r string, exists bool) {
+	v := m.proof_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProofHash returns the old "proof_hash" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldProofHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProofHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProofHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProofHash: %w", err)
+	}
+	return oldValue.ProofHash, nil
+}
+
+// ResetProofHash resets all changes to the "proof_hash" field.
+func (m *MessengerAuthorizationMutation) ResetProofHash() {
+	m.proof_hash = nil
+}
+
+// SetInstallationHash sets the "installation_hash" field.
+func (m *MessengerAuthorizationMutation) SetInstallationHash(s string) {
+	m.installation_hash = &s
+}
+
+// InstallationHash returns the value of the "installation_hash" field in the mutation.
+func (m *MessengerAuthorizationMutation) InstallationHash() (r string, exists bool) {
+	v := m.installation_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInstallationHash returns the old "installation_hash" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldInstallationHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInstallationHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInstallationHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInstallationHash: %w", err)
+	}
+	return oldValue.InstallationHash, nil
+}
+
+// ResetInstallationHash resets all changes to the "installation_hash" field.
+func (m *MessengerAuthorizationMutation) ResetInstallationHash() {
+	m.installation_hash = nil
+}
+
+// SetPlatform sets the "platform" field.
+func (m *MessengerAuthorizationMutation) SetPlatform(value messengerauthorization.Platform) {
+	m.platform = &value
+}
+
+// Platform returns the value of the "platform" field in the mutation.
+func (m *MessengerAuthorizationMutation) Platform() (r messengerauthorization.Platform, exists bool) {
+	v := m.platform
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlatform returns the old "platform" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldPlatform(ctx context.Context) (v messengerauthorization.Platform, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlatform is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlatform requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlatform: %w", err)
+	}
+	return oldValue.Platform, nil
+}
+
+// ResetPlatform resets all changes to the "platform" field.
+func (m *MessengerAuthorizationMutation) ResetPlatform() {
+	m.platform = nil
+}
+
+// SetDeviceName sets the "device_name" field.
+func (m *MessengerAuthorizationMutation) SetDeviceName(s string) {
+	m.device_name = &s
+}
+
+// DeviceName returns the value of the "device_name" field in the mutation.
+func (m *MessengerAuthorizationMutation) DeviceName() (r string, exists bool) {
+	v := m.device_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeviceName returns the old "device_name" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldDeviceName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeviceName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeviceName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeviceName: %w", err)
+	}
+	return oldValue.DeviceName, nil
+}
+
+// ResetDeviceName resets all changes to the "device_name" field.
+func (m *MessengerAuthorizationMutation) ResetDeviceName() {
+	m.device_name = nil
+}
+
+// SetUserAgent sets the "user_agent" field.
+func (m *MessengerAuthorizationMutation) SetUserAgent(s string) {
+	m.user_agent = &s
+}
+
+// UserAgent returns the value of the "user_agent" field in the mutation.
+func (m *MessengerAuthorizationMutation) UserAgent() (r string, exists bool) {
+	v := m.user_agent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserAgent returns the old "user_agent" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldUserAgent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserAgent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserAgent: %w", err)
+	}
+	return oldValue.UserAgent, nil
+}
+
+// ResetUserAgent resets all changes to the "user_agent" field.
+func (m *MessengerAuthorizationMutation) ResetUserAgent() {
+	m.user_agent = nil
+}
+
+// SetIPAddress sets the "ip_address" field.
+func (m *MessengerAuthorizationMutation) SetIPAddress(s string) {
+	m.ip_address = &s
+}
+
+// IPAddress returns the value of the "ip_address" field in the mutation.
+func (m *MessengerAuthorizationMutation) IPAddress() (r string, exists bool) {
+	v := m.ip_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIPAddress returns the old "ip_address" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldIPAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIPAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIPAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIPAddress: %w", err)
+	}
+	return oldValue.IPAddress, nil
+}
+
+// ResetIPAddress resets all changes to the "ip_address" field.
+func (m *MessengerAuthorizationMutation) ResetIPAddress() {
+	m.ip_address = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *MessengerAuthorizationMutation) SetStatus(value messengerauthorization.Status) {
+	m.status = &value
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *MessengerAuthorizationMutation) Status() (r messengerauthorization.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldStatus(ctx context.Context) (v messengerauthorization.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *MessengerAuthorizationMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetApprovalMethod sets the "approval_method" field.
+func (m *MessengerAuthorizationMutation) SetApprovalMethod(s string) {
+	m.approval_method = &s
+}
+
+// ApprovalMethod returns the value of the "approval_method" field in the mutation.
+func (m *MessengerAuthorizationMutation) ApprovalMethod() (r string, exists bool) {
+	v := m.approval_method
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldApprovalMethod returns the old "approval_method" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldApprovalMethod(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldApprovalMethod is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldApprovalMethod requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldApprovalMethod: %w", err)
+	}
+	return oldValue.ApprovalMethod, nil
+}
+
+// ClearApprovalMethod clears the value of the "approval_method" field.
+func (m *MessengerAuthorizationMutation) ClearApprovalMethod() {
+	m.approval_method = nil
+	m.clearedFields[messengerauthorization.FieldApprovalMethod] = struct{}{}
+}
+
+// ApprovalMethodCleared returns if the "approval_method" field was cleared in this mutation.
+func (m *MessengerAuthorizationMutation) ApprovalMethodCleared() bool {
+	_, ok := m.clearedFields[messengerauthorization.FieldApprovalMethod]
+	return ok
+}
+
+// ResetApprovalMethod resets all changes to the "approval_method" field.
+func (m *MessengerAuthorizationMutation) ResetApprovalMethod() {
+	m.approval_method = nil
+	delete(m.clearedFields, messengerauthorization.FieldApprovalMethod)
+}
+
+// SetApprovedBySessionID sets the "approved_by_session_id" field.
+func (m *MessengerAuthorizationMutation) SetApprovedBySessionID(u uuid.UUID) {
+	m.approved_by_session_id = &u
+}
+
+// ApprovedBySessionID returns the value of the "approved_by_session_id" field in the mutation.
+func (m *MessengerAuthorizationMutation) ApprovedBySessionID() (r uuid.UUID, exists bool) {
+	v := m.approved_by_session_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldApprovedBySessionID returns the old "approved_by_session_id" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldApprovedBySessionID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldApprovedBySessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldApprovedBySessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldApprovedBySessionID: %w", err)
+	}
+	return oldValue.ApprovedBySessionID, nil
+}
+
+// ClearApprovedBySessionID clears the value of the "approved_by_session_id" field.
+func (m *MessengerAuthorizationMutation) ClearApprovedBySessionID() {
+	m.approved_by_session_id = nil
+	m.clearedFields[messengerauthorization.FieldApprovedBySessionID] = struct{}{}
+}
+
+// ApprovedBySessionIDCleared returns if the "approved_by_session_id" field was cleared in this mutation.
+func (m *MessengerAuthorizationMutation) ApprovedBySessionIDCleared() bool {
+	_, ok := m.clearedFields[messengerauthorization.FieldApprovedBySessionID]
+	return ok
+}
+
+// ResetApprovedBySessionID resets all changes to the "approved_by_session_id" field.
+func (m *MessengerAuthorizationMutation) ResetApprovedBySessionID() {
+	m.approved_by_session_id = nil
+	delete(m.clearedFields, messengerauthorization.FieldApprovedBySessionID)
+}
+
+// SetCodeHash sets the "code_hash" field.
+func (m *MessengerAuthorizationMutation) SetCodeHash(s string) {
+	m.code_hash = &s
+}
+
+// CodeHash returns the value of the "code_hash" field in the mutation.
+func (m *MessengerAuthorizationMutation) CodeHash() (r string, exists bool) {
+	v := m.code_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCodeHash returns the old "code_hash" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldCodeHash(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCodeHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCodeHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCodeHash: %w", err)
+	}
+	return oldValue.CodeHash, nil
+}
+
+// ClearCodeHash clears the value of the "code_hash" field.
+func (m *MessengerAuthorizationMutation) ClearCodeHash() {
+	m.code_hash = nil
+	m.clearedFields[messengerauthorization.FieldCodeHash] = struct{}{}
+}
+
+// CodeHashCleared returns if the "code_hash" field was cleared in this mutation.
+func (m *MessengerAuthorizationMutation) CodeHashCleared() bool {
+	_, ok := m.clearedFields[messengerauthorization.FieldCodeHash]
+	return ok
+}
+
+// ResetCodeHash resets all changes to the "code_hash" field.
+func (m *MessengerAuthorizationMutation) ResetCodeHash() {
+	m.code_hash = nil
+	delete(m.clearedFields, messengerauthorization.FieldCodeHash)
+}
+
+// SetCodeExpiresAt sets the "code_expires_at" field.
+func (m *MessengerAuthorizationMutation) SetCodeExpiresAt(t time.Time) {
+	m.code_expires_at = &t
+}
+
+// CodeExpiresAt returns the value of the "code_expires_at" field in the mutation.
+func (m *MessengerAuthorizationMutation) CodeExpiresAt() (r time.Time, exists bool) {
+	v := m.code_expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCodeExpiresAt returns the old "code_expires_at" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldCodeExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCodeExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCodeExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCodeExpiresAt: %w", err)
+	}
+	return oldValue.CodeExpiresAt, nil
+}
+
+// ClearCodeExpiresAt clears the value of the "code_expires_at" field.
+func (m *MessengerAuthorizationMutation) ClearCodeExpiresAt() {
+	m.code_expires_at = nil
+	m.clearedFields[messengerauthorization.FieldCodeExpiresAt] = struct{}{}
+}
+
+// CodeExpiresAtCleared returns if the "code_expires_at" field was cleared in this mutation.
+func (m *MessengerAuthorizationMutation) CodeExpiresAtCleared() bool {
+	_, ok := m.clearedFields[messengerauthorization.FieldCodeExpiresAt]
+	return ok
+}
+
+// ResetCodeExpiresAt resets all changes to the "code_expires_at" field.
+func (m *MessengerAuthorizationMutation) ResetCodeExpiresAt() {
+	m.code_expires_at = nil
+	delete(m.clearedFields, messengerauthorization.FieldCodeExpiresAt)
+}
+
+// SetCodeIssuedAt sets the "code_issued_at" field.
+func (m *MessengerAuthorizationMutation) SetCodeIssuedAt(t time.Time) {
+	m.code_issued_at = &t
+}
+
+// CodeIssuedAt returns the value of the "code_issued_at" field in the mutation.
+func (m *MessengerAuthorizationMutation) CodeIssuedAt() (r time.Time, exists bool) {
+	v := m.code_issued_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCodeIssuedAt returns the old "code_issued_at" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldCodeIssuedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCodeIssuedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCodeIssuedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCodeIssuedAt: %w", err)
+	}
+	return oldValue.CodeIssuedAt, nil
+}
+
+// ClearCodeIssuedAt clears the value of the "code_issued_at" field.
+func (m *MessengerAuthorizationMutation) ClearCodeIssuedAt() {
+	m.code_issued_at = nil
+	m.clearedFields[messengerauthorization.FieldCodeIssuedAt] = struct{}{}
+}
+
+// CodeIssuedAtCleared returns if the "code_issued_at" field was cleared in this mutation.
+func (m *MessengerAuthorizationMutation) CodeIssuedAtCleared() bool {
+	_, ok := m.clearedFields[messengerauthorization.FieldCodeIssuedAt]
+	return ok
+}
+
+// ResetCodeIssuedAt resets all changes to the "code_issued_at" field.
+func (m *MessengerAuthorizationMutation) ResetCodeIssuedAt() {
+	m.code_issued_at = nil
+	delete(m.clearedFields, messengerauthorization.FieldCodeIssuedAt)
+}
+
+// SetCodeAttempts sets the "code_attempts" field.
+func (m *MessengerAuthorizationMutation) SetCodeAttempts(i int) {
+	m.code_attempts = &i
+	m.addcode_attempts = nil
+}
+
+// CodeAttempts returns the value of the "code_attempts" field in the mutation.
+func (m *MessengerAuthorizationMutation) CodeAttempts() (r int, exists bool) {
+	v := m.code_attempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCodeAttempts returns the old "code_attempts" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldCodeAttempts(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCodeAttempts is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCodeAttempts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCodeAttempts: %w", err)
+	}
+	return oldValue.CodeAttempts, nil
+}
+
+// AddCodeAttempts adds i to the "code_attempts" field.
+func (m *MessengerAuthorizationMutation) AddCodeAttempts(i int) {
+	if m.addcode_attempts != nil {
+		*m.addcode_attempts += i
+	} else {
+		m.addcode_attempts = &i
+	}
+}
+
+// AddedCodeAttempts returns the value that was added to the "code_attempts" field in this mutation.
+func (m *MessengerAuthorizationMutation) AddedCodeAttempts() (r int, exists bool) {
+	v := m.addcode_attempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCodeAttempts resets all changes to the "code_attempts" field.
+func (m *MessengerAuthorizationMutation) ResetCodeAttempts() {
+	m.code_attempts = nil
+	m.addcode_attempts = nil
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (m *MessengerAuthorizationMutation) SetExpiresAt(t time.Time) {
+	m.expires_at = &t
+}
+
+// ExpiresAt returns the value of the "expires_at" field in the mutation.
+func (m *MessengerAuthorizationMutation) ExpiresAt() (r time.Time, exists bool) {
+	v := m.expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiresAt returns the old "expires_at" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldExpiresAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiresAt: %w", err)
+	}
+	return oldValue.ExpiresAt, nil
+}
+
+// ResetExpiresAt resets all changes to the "expires_at" field.
+func (m *MessengerAuthorizationMutation) ResetExpiresAt() {
+	m.expires_at = nil
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (m *MessengerAuthorizationMutation) SetCompletedAt(t time.Time) {
+	m.completed_at = &t
+}
+
+// CompletedAt returns the value of the "completed_at" field in the mutation.
+func (m *MessengerAuthorizationMutation) CompletedAt() (r time.Time, exists bool) {
+	v := m.completed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCompletedAt returns the old "completed_at" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldCompletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCompletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCompletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCompletedAt: %w", err)
+	}
+	return oldValue.CompletedAt, nil
+}
+
+// ClearCompletedAt clears the value of the "completed_at" field.
+func (m *MessengerAuthorizationMutation) ClearCompletedAt() {
+	m.completed_at = nil
+	m.clearedFields[messengerauthorization.FieldCompletedAt] = struct{}{}
+}
+
+// CompletedAtCleared returns if the "completed_at" field was cleared in this mutation.
+func (m *MessengerAuthorizationMutation) CompletedAtCleared() bool {
+	_, ok := m.clearedFields[messengerauthorization.FieldCompletedAt]
+	return ok
+}
+
+// ResetCompletedAt resets all changes to the "completed_at" field.
+func (m *MessengerAuthorizationMutation) ResetCompletedAt() {
+	m.completed_at = nil
+	delete(m.clearedFields, messengerauthorization.FieldCompletedAt)
+}
+
+// SetCompletedSessionID sets the "completed_session_id" field.
+func (m *MessengerAuthorizationMutation) SetCompletedSessionID(u uuid.UUID) {
+	m.completed_session_id = &u
+}
+
+// CompletedSessionID returns the value of the "completed_session_id" field in the mutation.
+func (m *MessengerAuthorizationMutation) CompletedSessionID() (r uuid.UUID, exists bool) {
+	v := m.completed_session_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCompletedSessionID returns the old "completed_session_id" field's value of the MessengerAuthorization entity.
+// If the MessengerAuthorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerAuthorizationMutation) OldCompletedSessionID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCompletedSessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCompletedSessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCompletedSessionID: %w", err)
+	}
+	return oldValue.CompletedSessionID, nil
+}
+
+// ClearCompletedSessionID clears the value of the "completed_session_id" field.
+func (m *MessengerAuthorizationMutation) ClearCompletedSessionID() {
+	m.completed_session_id = nil
+	m.clearedFields[messengerauthorization.FieldCompletedSessionID] = struct{}{}
+}
+
+// CompletedSessionIDCleared returns if the "completed_session_id" field was cleared in this mutation.
+func (m *MessengerAuthorizationMutation) CompletedSessionIDCleared() bool {
+	_, ok := m.clearedFields[messengerauthorization.FieldCompletedSessionID]
+	return ok
+}
+
+// ResetCompletedSessionID resets all changes to the "completed_session_id" field.
+func (m *MessengerAuthorizationMutation) ResetCompletedSessionID() {
+	m.completed_session_id = nil
+	delete(m.clearedFields, messengerauthorization.FieldCompletedSessionID)
+}
+
+// ClearAccount clears the "account" edge to the Account entity.
+func (m *MessengerAuthorizationMutation) ClearAccount() {
+	m.clearedaccount = true
+	m.clearedFields[messengerauthorization.FieldAccountID] = struct{}{}
+}
+
+// AccountCleared reports if the "account" edge to the Account entity was cleared.
+func (m *MessengerAuthorizationMutation) AccountCleared() bool {
+	return m.clearedaccount
+}
+
+// AccountIDs returns the "account" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AccountID instead. It exists only for internal usage by the builders.
+func (m *MessengerAuthorizationMutation) AccountIDs() (ids []uuid.UUID) {
+	if id := m.account; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAccount resets all changes to the "account" edge.
+func (m *MessengerAuthorizationMutation) ResetAccount() {
+	m.account = nil
+	m.clearedaccount = false
+}
+
+// Where appends a list predicates to the MessengerAuthorizationMutation builder.
+func (m *MessengerAuthorizationMutation) Where(ps ...predicate.MessengerAuthorization) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the MessengerAuthorizationMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *MessengerAuthorizationMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.MessengerAuthorization, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *MessengerAuthorizationMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *MessengerAuthorizationMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (MessengerAuthorization).
+func (m *MessengerAuthorizationMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *MessengerAuthorizationMutation) Fields() []string {
+	fields := make([]string, 0, 18)
+	if m.created_at != nil {
+		fields = append(fields, messengerauthorization.FieldCreatedAt)
+	}
+	if m.account != nil {
+		fields = append(fields, messengerauthorization.FieldAccountID)
+	}
+	if m.proof_hash != nil {
+		fields = append(fields, messengerauthorization.FieldProofHash)
+	}
+	if m.installation_hash != nil {
+		fields = append(fields, messengerauthorization.FieldInstallationHash)
+	}
+	if m.platform != nil {
+		fields = append(fields, messengerauthorization.FieldPlatform)
+	}
+	if m.device_name != nil {
+		fields = append(fields, messengerauthorization.FieldDeviceName)
+	}
+	if m.user_agent != nil {
+		fields = append(fields, messengerauthorization.FieldUserAgent)
+	}
+	if m.ip_address != nil {
+		fields = append(fields, messengerauthorization.FieldIPAddress)
+	}
+	if m.status != nil {
+		fields = append(fields, messengerauthorization.FieldStatus)
+	}
+	if m.approval_method != nil {
+		fields = append(fields, messengerauthorization.FieldApprovalMethod)
+	}
+	if m.approved_by_session_id != nil {
+		fields = append(fields, messengerauthorization.FieldApprovedBySessionID)
+	}
+	if m.code_hash != nil {
+		fields = append(fields, messengerauthorization.FieldCodeHash)
+	}
+	if m.code_expires_at != nil {
+		fields = append(fields, messengerauthorization.FieldCodeExpiresAt)
+	}
+	if m.code_issued_at != nil {
+		fields = append(fields, messengerauthorization.FieldCodeIssuedAt)
+	}
+	if m.code_attempts != nil {
+		fields = append(fields, messengerauthorization.FieldCodeAttempts)
+	}
+	if m.expires_at != nil {
+		fields = append(fields, messengerauthorization.FieldExpiresAt)
+	}
+	if m.completed_at != nil {
+		fields = append(fields, messengerauthorization.FieldCompletedAt)
+	}
+	if m.completed_session_id != nil {
+		fields = append(fields, messengerauthorization.FieldCompletedSessionID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *MessengerAuthorizationMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case messengerauthorization.FieldCreatedAt:
+		return m.CreatedAt()
+	case messengerauthorization.FieldAccountID:
+		return m.AccountID()
+	case messengerauthorization.FieldProofHash:
+		return m.ProofHash()
+	case messengerauthorization.FieldInstallationHash:
+		return m.InstallationHash()
+	case messengerauthorization.FieldPlatform:
+		return m.Platform()
+	case messengerauthorization.FieldDeviceName:
+		return m.DeviceName()
+	case messengerauthorization.FieldUserAgent:
+		return m.UserAgent()
+	case messengerauthorization.FieldIPAddress:
+		return m.IPAddress()
+	case messengerauthorization.FieldStatus:
+		return m.Status()
+	case messengerauthorization.FieldApprovalMethod:
+		return m.ApprovalMethod()
+	case messengerauthorization.FieldApprovedBySessionID:
+		return m.ApprovedBySessionID()
+	case messengerauthorization.FieldCodeHash:
+		return m.CodeHash()
+	case messengerauthorization.FieldCodeExpiresAt:
+		return m.CodeExpiresAt()
+	case messengerauthorization.FieldCodeIssuedAt:
+		return m.CodeIssuedAt()
+	case messengerauthorization.FieldCodeAttempts:
+		return m.CodeAttempts()
+	case messengerauthorization.FieldExpiresAt:
+		return m.ExpiresAt()
+	case messengerauthorization.FieldCompletedAt:
+		return m.CompletedAt()
+	case messengerauthorization.FieldCompletedSessionID:
+		return m.CompletedSessionID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *MessengerAuthorizationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case messengerauthorization.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case messengerauthorization.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case messengerauthorization.FieldProofHash:
+		return m.OldProofHash(ctx)
+	case messengerauthorization.FieldInstallationHash:
+		return m.OldInstallationHash(ctx)
+	case messengerauthorization.FieldPlatform:
+		return m.OldPlatform(ctx)
+	case messengerauthorization.FieldDeviceName:
+		return m.OldDeviceName(ctx)
+	case messengerauthorization.FieldUserAgent:
+		return m.OldUserAgent(ctx)
+	case messengerauthorization.FieldIPAddress:
+		return m.OldIPAddress(ctx)
+	case messengerauthorization.FieldStatus:
+		return m.OldStatus(ctx)
+	case messengerauthorization.FieldApprovalMethod:
+		return m.OldApprovalMethod(ctx)
+	case messengerauthorization.FieldApprovedBySessionID:
+		return m.OldApprovedBySessionID(ctx)
+	case messengerauthorization.FieldCodeHash:
+		return m.OldCodeHash(ctx)
+	case messengerauthorization.FieldCodeExpiresAt:
+		return m.OldCodeExpiresAt(ctx)
+	case messengerauthorization.FieldCodeIssuedAt:
+		return m.OldCodeIssuedAt(ctx)
+	case messengerauthorization.FieldCodeAttempts:
+		return m.OldCodeAttempts(ctx)
+	case messengerauthorization.FieldExpiresAt:
+		return m.OldExpiresAt(ctx)
+	case messengerauthorization.FieldCompletedAt:
+		return m.OldCompletedAt(ctx)
+	case messengerauthorization.FieldCompletedSessionID:
+		return m.OldCompletedSessionID(ctx)
+	}
+	return nil, fmt.Errorf("unknown MessengerAuthorization field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MessengerAuthorizationMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case messengerauthorization.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case messengerauthorization.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case messengerauthorization.FieldProofHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProofHash(v)
+		return nil
+	case messengerauthorization.FieldInstallationHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInstallationHash(v)
+		return nil
+	case messengerauthorization.FieldPlatform:
+		v, ok := value.(messengerauthorization.Platform)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlatform(v)
+		return nil
+	case messengerauthorization.FieldDeviceName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeviceName(v)
+		return nil
+	case messengerauthorization.FieldUserAgent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserAgent(v)
+		return nil
+	case messengerauthorization.FieldIPAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIPAddress(v)
+		return nil
+	case messengerauthorization.FieldStatus:
+		v, ok := value.(messengerauthorization.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case messengerauthorization.FieldApprovalMethod:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetApprovalMethod(v)
+		return nil
+	case messengerauthorization.FieldApprovedBySessionID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetApprovedBySessionID(v)
+		return nil
+	case messengerauthorization.FieldCodeHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCodeHash(v)
+		return nil
+	case messengerauthorization.FieldCodeExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCodeExpiresAt(v)
+		return nil
+	case messengerauthorization.FieldCodeIssuedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCodeIssuedAt(v)
+		return nil
+	case messengerauthorization.FieldCodeAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCodeAttempts(v)
+		return nil
+	case messengerauthorization.FieldExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiresAt(v)
+		return nil
+	case messengerauthorization.FieldCompletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCompletedAt(v)
+		return nil
+	case messengerauthorization.FieldCompletedSessionID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCompletedSessionID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MessengerAuthorization field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *MessengerAuthorizationMutation) AddedFields() []string {
+	var fields []string
+	if m.addcode_attempts != nil {
+		fields = append(fields, messengerauthorization.FieldCodeAttempts)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *MessengerAuthorizationMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case messengerauthorization.FieldCodeAttempts:
+		return m.AddedCodeAttempts()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MessengerAuthorizationMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case messengerauthorization.FieldCodeAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCodeAttempts(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MessengerAuthorization numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *MessengerAuthorizationMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(messengerauthorization.FieldApprovalMethod) {
+		fields = append(fields, messengerauthorization.FieldApprovalMethod)
+	}
+	if m.FieldCleared(messengerauthorization.FieldApprovedBySessionID) {
+		fields = append(fields, messengerauthorization.FieldApprovedBySessionID)
+	}
+	if m.FieldCleared(messengerauthorization.FieldCodeHash) {
+		fields = append(fields, messengerauthorization.FieldCodeHash)
+	}
+	if m.FieldCleared(messengerauthorization.FieldCodeExpiresAt) {
+		fields = append(fields, messengerauthorization.FieldCodeExpiresAt)
+	}
+	if m.FieldCleared(messengerauthorization.FieldCodeIssuedAt) {
+		fields = append(fields, messengerauthorization.FieldCodeIssuedAt)
+	}
+	if m.FieldCleared(messengerauthorization.FieldCompletedAt) {
+		fields = append(fields, messengerauthorization.FieldCompletedAt)
+	}
+	if m.FieldCleared(messengerauthorization.FieldCompletedSessionID) {
+		fields = append(fields, messengerauthorization.FieldCompletedSessionID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *MessengerAuthorizationMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *MessengerAuthorizationMutation) ClearField(name string) error {
+	switch name {
+	case messengerauthorization.FieldApprovalMethod:
+		m.ClearApprovalMethod()
+		return nil
+	case messengerauthorization.FieldApprovedBySessionID:
+		m.ClearApprovedBySessionID()
+		return nil
+	case messengerauthorization.FieldCodeHash:
+		m.ClearCodeHash()
+		return nil
+	case messengerauthorization.FieldCodeExpiresAt:
+		m.ClearCodeExpiresAt()
+		return nil
+	case messengerauthorization.FieldCodeIssuedAt:
+		m.ClearCodeIssuedAt()
+		return nil
+	case messengerauthorization.FieldCompletedAt:
+		m.ClearCompletedAt()
+		return nil
+	case messengerauthorization.FieldCompletedSessionID:
+		m.ClearCompletedSessionID()
+		return nil
+	}
+	return fmt.Errorf("unknown MessengerAuthorization nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *MessengerAuthorizationMutation) ResetField(name string) error {
+	switch name {
+	case messengerauthorization.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case messengerauthorization.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case messengerauthorization.FieldProofHash:
+		m.ResetProofHash()
+		return nil
+	case messengerauthorization.FieldInstallationHash:
+		m.ResetInstallationHash()
+		return nil
+	case messengerauthorization.FieldPlatform:
+		m.ResetPlatform()
+		return nil
+	case messengerauthorization.FieldDeviceName:
+		m.ResetDeviceName()
+		return nil
+	case messengerauthorization.FieldUserAgent:
+		m.ResetUserAgent()
+		return nil
+	case messengerauthorization.FieldIPAddress:
+		m.ResetIPAddress()
+		return nil
+	case messengerauthorization.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case messengerauthorization.FieldApprovalMethod:
+		m.ResetApprovalMethod()
+		return nil
+	case messengerauthorization.FieldApprovedBySessionID:
+		m.ResetApprovedBySessionID()
+		return nil
+	case messengerauthorization.FieldCodeHash:
+		m.ResetCodeHash()
+		return nil
+	case messengerauthorization.FieldCodeExpiresAt:
+		m.ResetCodeExpiresAt()
+		return nil
+	case messengerauthorization.FieldCodeIssuedAt:
+		m.ResetCodeIssuedAt()
+		return nil
+	case messengerauthorization.FieldCodeAttempts:
+		m.ResetCodeAttempts()
+		return nil
+	case messengerauthorization.FieldExpiresAt:
+		m.ResetExpiresAt()
+		return nil
+	case messengerauthorization.FieldCompletedAt:
+		m.ResetCompletedAt()
+		return nil
+	case messengerauthorization.FieldCompletedSessionID:
+		m.ResetCompletedSessionID()
+		return nil
+	}
+	return fmt.Errorf("unknown MessengerAuthorization field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *MessengerAuthorizationMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.account != nil {
+		edges = append(edges, messengerauthorization.EdgeAccount)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *MessengerAuthorizationMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case messengerauthorization.EdgeAccount:
+		if id := m.account; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *MessengerAuthorizationMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *MessengerAuthorizationMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *MessengerAuthorizationMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedaccount {
+		edges = append(edges, messengerauthorization.EdgeAccount)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *MessengerAuthorizationMutation) EdgeCleared(name string) bool {
+	switch name {
+	case messengerauthorization.EdgeAccount:
+		return m.clearedaccount
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *MessengerAuthorizationMutation) ClearEdge(name string) error {
+	switch name {
+	case messengerauthorization.EdgeAccount:
+		m.ClearAccount()
+		return nil
+	}
+	return fmt.Errorf("unknown MessengerAuthorization unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *MessengerAuthorizationMutation) ResetEdge(name string) error {
+	switch name {
+	case messengerauthorization.EdgeAccount:
+		m.ResetAccount()
+		return nil
+	}
+	return fmt.Errorf("unknown MessengerAuthorization edge %s", name)
+}
+
+// MessengerTrustedDeviceMutation represents an operation that mutates the MessengerTrustedDevice nodes in the graph.
+type MessengerTrustedDeviceMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *uuid.UUID
+	created_at        *time.Time
+	token_hash        *string
+	installation_hash *string
+	platform          *messengertrusteddevice.Platform
+	device_name       *string
+	user_agent        *string
+	last_used_at      *time.Time
+	expires_at        *time.Time
+	revoked_at        *time.Time
+	clearedFields     map[string]struct{}
+	account           *uuid.UUID
+	clearedaccount    bool
+	done              bool
+	oldValue          func(context.Context) (*MessengerTrustedDevice, error)
+	predicates        []predicate.MessengerTrustedDevice
+}
+
+var _ ent.Mutation = (*MessengerTrustedDeviceMutation)(nil)
+
+// messengertrusteddeviceOption allows management of the mutation configuration using functional options.
+type messengertrusteddeviceOption func(*MessengerTrustedDeviceMutation)
+
+// newMessengerTrustedDeviceMutation creates new mutation for the MessengerTrustedDevice entity.
+func newMessengerTrustedDeviceMutation(c config, op Op, opts ...messengertrusteddeviceOption) *MessengerTrustedDeviceMutation {
+	m := &MessengerTrustedDeviceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeMessengerTrustedDevice,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withMessengerTrustedDeviceID sets the ID field of the mutation.
+func withMessengerTrustedDeviceID(id uuid.UUID) messengertrusteddeviceOption {
+	return func(m *MessengerTrustedDeviceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *MessengerTrustedDevice
+		)
+		m.oldValue = func(ctx context.Context) (*MessengerTrustedDevice, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().MessengerTrustedDevice.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withMessengerTrustedDevice sets the old MessengerTrustedDevice of the mutation.
+func withMessengerTrustedDevice(node *MessengerTrustedDevice) messengertrusteddeviceOption {
+	return func(m *MessengerTrustedDeviceMutation) {
+		m.oldValue = func(context.Context) (*MessengerTrustedDevice, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m MessengerTrustedDeviceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m MessengerTrustedDeviceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of MessengerTrustedDevice entities.
+func (m *MessengerTrustedDeviceMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *MessengerTrustedDeviceMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *MessengerTrustedDeviceMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().MessengerTrustedDevice.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *MessengerTrustedDeviceMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *MessengerTrustedDeviceMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the MessengerTrustedDevice entity.
+// If the MessengerTrustedDevice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerTrustedDeviceMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *MessengerTrustedDeviceMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *MessengerTrustedDeviceMutation) SetAccountID(u uuid.UUID) {
+	m.account = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *MessengerTrustedDeviceMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the MessengerTrustedDevice entity.
+// If the MessengerTrustedDevice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerTrustedDeviceMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *MessengerTrustedDeviceMutation) ResetAccountID() {
+	m.account = nil
+}
+
+// SetTokenHash sets the "token_hash" field.
+func (m *MessengerTrustedDeviceMutation) SetTokenHash(s string) {
+	m.token_hash = &s
+}
+
+// TokenHash returns the value of the "token_hash" field in the mutation.
+func (m *MessengerTrustedDeviceMutation) TokenHash() (r string, exists bool) {
+	v := m.token_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTokenHash returns the old "token_hash" field's value of the MessengerTrustedDevice entity.
+// If the MessengerTrustedDevice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerTrustedDeviceMutation) OldTokenHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTokenHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTokenHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTokenHash: %w", err)
+	}
+	return oldValue.TokenHash, nil
+}
+
+// ResetTokenHash resets all changes to the "token_hash" field.
+func (m *MessengerTrustedDeviceMutation) ResetTokenHash() {
+	m.token_hash = nil
+}
+
+// SetInstallationHash sets the "installation_hash" field.
+func (m *MessengerTrustedDeviceMutation) SetInstallationHash(s string) {
+	m.installation_hash = &s
+}
+
+// InstallationHash returns the value of the "installation_hash" field in the mutation.
+func (m *MessengerTrustedDeviceMutation) InstallationHash() (r string, exists bool) {
+	v := m.installation_hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInstallationHash returns the old "installation_hash" field's value of the MessengerTrustedDevice entity.
+// If the MessengerTrustedDevice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerTrustedDeviceMutation) OldInstallationHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInstallationHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInstallationHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInstallationHash: %w", err)
+	}
+	return oldValue.InstallationHash, nil
+}
+
+// ResetInstallationHash resets all changes to the "installation_hash" field.
+func (m *MessengerTrustedDeviceMutation) ResetInstallationHash() {
+	m.installation_hash = nil
+}
+
+// SetPlatform sets the "platform" field.
+func (m *MessengerTrustedDeviceMutation) SetPlatform(value messengertrusteddevice.Platform) {
+	m.platform = &value
+}
+
+// Platform returns the value of the "platform" field in the mutation.
+func (m *MessengerTrustedDeviceMutation) Platform() (r messengertrusteddevice.Platform, exists bool) {
+	v := m.platform
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlatform returns the old "platform" field's value of the MessengerTrustedDevice entity.
+// If the MessengerTrustedDevice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerTrustedDeviceMutation) OldPlatform(ctx context.Context) (v messengertrusteddevice.Platform, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlatform is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlatform requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlatform: %w", err)
+	}
+	return oldValue.Platform, nil
+}
+
+// ResetPlatform resets all changes to the "platform" field.
+func (m *MessengerTrustedDeviceMutation) ResetPlatform() {
+	m.platform = nil
+}
+
+// SetDeviceName sets the "device_name" field.
+func (m *MessengerTrustedDeviceMutation) SetDeviceName(s string) {
+	m.device_name = &s
+}
+
+// DeviceName returns the value of the "device_name" field in the mutation.
+func (m *MessengerTrustedDeviceMutation) DeviceName() (r string, exists bool) {
+	v := m.device_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeviceName returns the old "device_name" field's value of the MessengerTrustedDevice entity.
+// If the MessengerTrustedDevice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerTrustedDeviceMutation) OldDeviceName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeviceName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeviceName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeviceName: %w", err)
+	}
+	return oldValue.DeviceName, nil
+}
+
+// ResetDeviceName resets all changes to the "device_name" field.
+func (m *MessengerTrustedDeviceMutation) ResetDeviceName() {
+	m.device_name = nil
+}
+
+// SetUserAgent sets the "user_agent" field.
+func (m *MessengerTrustedDeviceMutation) SetUserAgent(s string) {
+	m.user_agent = &s
+}
+
+// UserAgent returns the value of the "user_agent" field in the mutation.
+func (m *MessengerTrustedDeviceMutation) UserAgent() (r string, exists bool) {
+	v := m.user_agent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserAgent returns the old "user_agent" field's value of the MessengerTrustedDevice entity.
+// If the MessengerTrustedDevice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerTrustedDeviceMutation) OldUserAgent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserAgent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserAgent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserAgent: %w", err)
+	}
+	return oldValue.UserAgent, nil
+}
+
+// ResetUserAgent resets all changes to the "user_agent" field.
+func (m *MessengerTrustedDeviceMutation) ResetUserAgent() {
+	m.user_agent = nil
+}
+
+// SetLastUsedAt sets the "last_used_at" field.
+func (m *MessengerTrustedDeviceMutation) SetLastUsedAt(t time.Time) {
+	m.last_used_at = &t
+}
+
+// LastUsedAt returns the value of the "last_used_at" field in the mutation.
+func (m *MessengerTrustedDeviceMutation) LastUsedAt() (r time.Time, exists bool) {
+	v := m.last_used_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUsedAt returns the old "last_used_at" field's value of the MessengerTrustedDevice entity.
+// If the MessengerTrustedDevice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerTrustedDeviceMutation) OldLastUsedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUsedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUsedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUsedAt: %w", err)
+	}
+	return oldValue.LastUsedAt, nil
+}
+
+// ResetLastUsedAt resets all changes to the "last_used_at" field.
+func (m *MessengerTrustedDeviceMutation) ResetLastUsedAt() {
+	m.last_used_at = nil
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (m *MessengerTrustedDeviceMutation) SetExpiresAt(t time.Time) {
+	m.expires_at = &t
+}
+
+// ExpiresAt returns the value of the "expires_at" field in the mutation.
+func (m *MessengerTrustedDeviceMutation) ExpiresAt() (r time.Time, exists bool) {
+	v := m.expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiresAt returns the old "expires_at" field's value of the MessengerTrustedDevice entity.
+// If the MessengerTrustedDevice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerTrustedDeviceMutation) OldExpiresAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiresAt: %w", err)
+	}
+	return oldValue.ExpiresAt, nil
+}
+
+// ResetExpiresAt resets all changes to the "expires_at" field.
+func (m *MessengerTrustedDeviceMutation) ResetExpiresAt() {
+	m.expires_at = nil
+}
+
+// SetRevokedAt sets the "revoked_at" field.
+func (m *MessengerTrustedDeviceMutation) SetRevokedAt(t time.Time) {
+	m.revoked_at = &t
+}
+
+// RevokedAt returns the value of the "revoked_at" field in the mutation.
+func (m *MessengerTrustedDeviceMutation) RevokedAt() (r time.Time, exists bool) {
+	v := m.revoked_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevokedAt returns the old "revoked_at" field's value of the MessengerTrustedDevice entity.
+// If the MessengerTrustedDevice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessengerTrustedDeviceMutation) OldRevokedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevokedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevokedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevokedAt: %w", err)
+	}
+	return oldValue.RevokedAt, nil
+}
+
+// ClearRevokedAt clears the value of the "revoked_at" field.
+func (m *MessengerTrustedDeviceMutation) ClearRevokedAt() {
+	m.revoked_at = nil
+	m.clearedFields[messengertrusteddevice.FieldRevokedAt] = struct{}{}
+}
+
+// RevokedAtCleared returns if the "revoked_at" field was cleared in this mutation.
+func (m *MessengerTrustedDeviceMutation) RevokedAtCleared() bool {
+	_, ok := m.clearedFields[messengertrusteddevice.FieldRevokedAt]
+	return ok
+}
+
+// ResetRevokedAt resets all changes to the "revoked_at" field.
+func (m *MessengerTrustedDeviceMutation) ResetRevokedAt() {
+	m.revoked_at = nil
+	delete(m.clearedFields, messengertrusteddevice.FieldRevokedAt)
+}
+
+// ClearAccount clears the "account" edge to the Account entity.
+func (m *MessengerTrustedDeviceMutation) ClearAccount() {
+	m.clearedaccount = true
+	m.clearedFields[messengertrusteddevice.FieldAccountID] = struct{}{}
+}
+
+// AccountCleared reports if the "account" edge to the Account entity was cleared.
+func (m *MessengerTrustedDeviceMutation) AccountCleared() bool {
+	return m.clearedaccount
+}
+
+// AccountIDs returns the "account" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AccountID instead. It exists only for internal usage by the builders.
+func (m *MessengerTrustedDeviceMutation) AccountIDs() (ids []uuid.UUID) {
+	if id := m.account; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAccount resets all changes to the "account" edge.
+func (m *MessengerTrustedDeviceMutation) ResetAccount() {
+	m.account = nil
+	m.clearedaccount = false
+}
+
+// Where appends a list predicates to the MessengerTrustedDeviceMutation builder.
+func (m *MessengerTrustedDeviceMutation) Where(ps ...predicate.MessengerTrustedDevice) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the MessengerTrustedDeviceMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *MessengerTrustedDeviceMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.MessengerTrustedDevice, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *MessengerTrustedDeviceMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *MessengerTrustedDeviceMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (MessengerTrustedDevice).
+func (m *MessengerTrustedDeviceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *MessengerTrustedDeviceMutation) Fields() []string {
+	fields := make([]string, 0, 10)
+	if m.created_at != nil {
+		fields = append(fields, messengertrusteddevice.FieldCreatedAt)
+	}
+	if m.account != nil {
+		fields = append(fields, messengertrusteddevice.FieldAccountID)
+	}
+	if m.token_hash != nil {
+		fields = append(fields, messengertrusteddevice.FieldTokenHash)
+	}
+	if m.installation_hash != nil {
+		fields = append(fields, messengertrusteddevice.FieldInstallationHash)
+	}
+	if m.platform != nil {
+		fields = append(fields, messengertrusteddevice.FieldPlatform)
+	}
+	if m.device_name != nil {
+		fields = append(fields, messengertrusteddevice.FieldDeviceName)
+	}
+	if m.user_agent != nil {
+		fields = append(fields, messengertrusteddevice.FieldUserAgent)
+	}
+	if m.last_used_at != nil {
+		fields = append(fields, messengertrusteddevice.FieldLastUsedAt)
+	}
+	if m.expires_at != nil {
+		fields = append(fields, messengertrusteddevice.FieldExpiresAt)
+	}
+	if m.revoked_at != nil {
+		fields = append(fields, messengertrusteddevice.FieldRevokedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *MessengerTrustedDeviceMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case messengertrusteddevice.FieldCreatedAt:
+		return m.CreatedAt()
+	case messengertrusteddevice.FieldAccountID:
+		return m.AccountID()
+	case messengertrusteddevice.FieldTokenHash:
+		return m.TokenHash()
+	case messengertrusteddevice.FieldInstallationHash:
+		return m.InstallationHash()
+	case messengertrusteddevice.FieldPlatform:
+		return m.Platform()
+	case messengertrusteddevice.FieldDeviceName:
+		return m.DeviceName()
+	case messengertrusteddevice.FieldUserAgent:
+		return m.UserAgent()
+	case messengertrusteddevice.FieldLastUsedAt:
+		return m.LastUsedAt()
+	case messengertrusteddevice.FieldExpiresAt:
+		return m.ExpiresAt()
+	case messengertrusteddevice.FieldRevokedAt:
+		return m.RevokedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *MessengerTrustedDeviceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case messengertrusteddevice.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case messengertrusteddevice.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case messengertrusteddevice.FieldTokenHash:
+		return m.OldTokenHash(ctx)
+	case messengertrusteddevice.FieldInstallationHash:
+		return m.OldInstallationHash(ctx)
+	case messengertrusteddevice.FieldPlatform:
+		return m.OldPlatform(ctx)
+	case messengertrusteddevice.FieldDeviceName:
+		return m.OldDeviceName(ctx)
+	case messengertrusteddevice.FieldUserAgent:
+		return m.OldUserAgent(ctx)
+	case messengertrusteddevice.FieldLastUsedAt:
+		return m.OldLastUsedAt(ctx)
+	case messengertrusteddevice.FieldExpiresAt:
+		return m.OldExpiresAt(ctx)
+	case messengertrusteddevice.FieldRevokedAt:
+		return m.OldRevokedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown MessengerTrustedDevice field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MessengerTrustedDeviceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case messengertrusteddevice.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case messengertrusteddevice.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case messengertrusteddevice.FieldTokenHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTokenHash(v)
+		return nil
+	case messengertrusteddevice.FieldInstallationHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInstallationHash(v)
+		return nil
+	case messengertrusteddevice.FieldPlatform:
+		v, ok := value.(messengertrusteddevice.Platform)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlatform(v)
+		return nil
+	case messengertrusteddevice.FieldDeviceName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeviceName(v)
+		return nil
+	case messengertrusteddevice.FieldUserAgent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserAgent(v)
+		return nil
+	case messengertrusteddevice.FieldLastUsedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUsedAt(v)
+		return nil
+	case messengertrusteddevice.FieldExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiresAt(v)
+		return nil
+	case messengertrusteddevice.FieldRevokedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevokedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MessengerTrustedDevice field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *MessengerTrustedDeviceMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *MessengerTrustedDeviceMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MessengerTrustedDeviceMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown MessengerTrustedDevice numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *MessengerTrustedDeviceMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(messengertrusteddevice.FieldRevokedAt) {
+		fields = append(fields, messengertrusteddevice.FieldRevokedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *MessengerTrustedDeviceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *MessengerTrustedDeviceMutation) ClearField(name string) error {
+	switch name {
+	case messengertrusteddevice.FieldRevokedAt:
+		m.ClearRevokedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown MessengerTrustedDevice nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *MessengerTrustedDeviceMutation) ResetField(name string) error {
+	switch name {
+	case messengertrusteddevice.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case messengertrusteddevice.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case messengertrusteddevice.FieldTokenHash:
+		m.ResetTokenHash()
+		return nil
+	case messengertrusteddevice.FieldInstallationHash:
+		m.ResetInstallationHash()
+		return nil
+	case messengertrusteddevice.FieldPlatform:
+		m.ResetPlatform()
+		return nil
+	case messengertrusteddevice.FieldDeviceName:
+		m.ResetDeviceName()
+		return nil
+	case messengertrusteddevice.FieldUserAgent:
+		m.ResetUserAgent()
+		return nil
+	case messengertrusteddevice.FieldLastUsedAt:
+		m.ResetLastUsedAt()
+		return nil
+	case messengertrusteddevice.FieldExpiresAt:
+		m.ResetExpiresAt()
+		return nil
+	case messengertrusteddevice.FieldRevokedAt:
+		m.ResetRevokedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown MessengerTrustedDevice field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *MessengerTrustedDeviceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.account != nil {
+		edges = append(edges, messengertrusteddevice.EdgeAccount)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *MessengerTrustedDeviceMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case messengertrusteddevice.EdgeAccount:
+		if id := m.account; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *MessengerTrustedDeviceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *MessengerTrustedDeviceMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *MessengerTrustedDeviceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedaccount {
+		edges = append(edges, messengertrusteddevice.EdgeAccount)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *MessengerTrustedDeviceMutation) EdgeCleared(name string) bool {
+	switch name {
+	case messengertrusteddevice.EdgeAccount:
+		return m.clearedaccount
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *MessengerTrustedDeviceMutation) ClearEdge(name string) error {
+	switch name {
+	case messengertrusteddevice.EdgeAccount:
+		m.ClearAccount()
+		return nil
+	}
+	return fmt.Errorf("unknown MessengerTrustedDevice unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *MessengerTrustedDeviceMutation) ResetEdge(name string) error {
+	switch name {
+	case messengertrusteddevice.EdgeAccount:
+		m.ResetAccount()
+		return nil
+	}
+	return fmt.Errorf("unknown MessengerTrustedDevice edge %s", name)
 }
 
 // OneTimeCodeMutation represents an operation that mutates the OneTimeCode nodes in the graph.

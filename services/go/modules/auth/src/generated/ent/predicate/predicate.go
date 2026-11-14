@@ -12,6 +12,12 @@ type Account func(*sql.Selector)
 // AgeGateRefusal is the predicate function for agegaterefusal builders.
 type AgeGateRefusal func(*sql.Selector)
 
+// MessengerAuthorization is the predicate function for messengerauthorization builders.
+type MessengerAuthorization func(*sql.Selector)
+
+// MessengerTrustedDevice is the predicate function for messengertrusteddevice builders.
+type MessengerTrustedDevice func(*sql.Selector)
+
 // OneTimeCode is the predicate function for onetimecode builders.
 type OneTimeCode func(*sql.Selector)
 

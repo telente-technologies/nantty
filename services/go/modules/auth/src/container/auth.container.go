@@ -2,6 +2,7 @@ package container
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -17,6 +18,7 @@ import (
 
 type Container struct {
 	Client         *ent.Client
+	Database       *sql.DB
 	Settings       configs.AuthSettings
 	Passwords      *utils.PasswordHasher
 	TokenIssuer    *signingkeys.AccessTokenIssuer

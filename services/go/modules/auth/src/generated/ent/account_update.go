@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"nantty/modules/auth/src/generated/ent/account"
+	"nantty/modules/auth/src/generated/ent/messengerauthorization"
+	"nantty/modules/auth/src/generated/ent/messengertrusteddevice"
 	"nantty/modules/auth/src/generated/ent/predicate"
 	"nantty/modules/auth/src/generated/ent/session"
 	"nantty/modules/auth/src/generated/ent/socialidentity"
@@ -216,6 +218,36 @@ func (_u *AccountUpdate) AddSocialIdentities(v ...*SocialIdentity) *AccountUpdat
 	return _u.AddSocialIdentityIDs(ids...)
 }
 
+// AddMessengerAuthorizationIDs adds the "messenger_authorizations" edge to the MessengerAuthorization entity by IDs.
+func (_u *AccountUpdate) AddMessengerAuthorizationIDs(ids ...uuid.UUID) *AccountUpdate {
+	_u.mutation.AddMessengerAuthorizationIDs(ids...)
+	return _u
+}
+
+// AddMessengerAuthorizations adds the "messenger_authorizations" edges to the MessengerAuthorization entity.
+func (_u *AccountUpdate) AddMessengerAuthorizations(v ...*MessengerAuthorization) *AccountUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddMessengerAuthorizationIDs(ids...)
+}
+
+// AddMessengerTrustedDeviceIDs adds the "messenger_trusted_devices" edge to the MessengerTrustedDevice entity by IDs.
+func (_u *AccountUpdate) AddMessengerTrustedDeviceIDs(ids ...uuid.UUID) *AccountUpdate {
+	_u.mutation.AddMessengerTrustedDeviceIDs(ids...)
+	return _u
+}
+
+// AddMessengerTrustedDevices adds the "messenger_trusted_devices" edges to the MessengerTrustedDevice entity.
+func (_u *AccountUpdate) AddMessengerTrustedDevices(v ...*MessengerTrustedDevice) *AccountUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddMessengerTrustedDeviceIDs(ids...)
+}
+
 // Mutation returns the AccountMutation object of the builder.
 func (_u *AccountUpdate) Mutation() *AccountMutation {
 	return _u.mutation
@@ -261,6 +293,48 @@ func (_u *AccountUpdate) RemoveSocialIdentities(v ...*SocialIdentity) *AccountUp
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveSocialIdentityIDs(ids...)
+}
+
+// ClearMessengerAuthorizations clears all "messenger_authorizations" edges to the MessengerAuthorization entity.
+func (_u *AccountUpdate) ClearMessengerAuthorizations() *AccountUpdate {
+	_u.mutation.ClearMessengerAuthorizations()
+	return _u
+}
+
+// RemoveMessengerAuthorizationIDs removes the "messenger_authorizations" edge to MessengerAuthorization entities by IDs.
+func (_u *AccountUpdate) RemoveMessengerAuthorizationIDs(ids ...uuid.UUID) *AccountUpdate {
+	_u.mutation.RemoveMessengerAuthorizationIDs(ids...)
+	return _u
+}
+
+// RemoveMessengerAuthorizations removes "messenger_authorizations" edges to MessengerAuthorization entities.
+func (_u *AccountUpdate) RemoveMessengerAuthorizations(v ...*MessengerAuthorization) *AccountUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMessengerAuthorizationIDs(ids...)
+}
+
+// ClearMessengerTrustedDevices clears all "messenger_trusted_devices" edges to the MessengerTrustedDevice entity.
+func (_u *AccountUpdate) ClearMessengerTrustedDevices() *AccountUpdate {
+	_u.mutation.ClearMessengerTrustedDevices()
+	return _u
+}
+
+// RemoveMessengerTrustedDeviceIDs removes the "messenger_trusted_devices" edge to MessengerTrustedDevice entities by IDs.
+func (_u *AccountUpdate) RemoveMessengerTrustedDeviceIDs(ids ...uuid.UUID) *AccountUpdate {
+	_u.mutation.RemoveMessengerTrustedDeviceIDs(ids...)
+	return _u
+}
+
+// RemoveMessengerTrustedDevices removes "messenger_trusted_devices" edges to MessengerTrustedDevice entities.
+func (_u *AccountUpdate) RemoveMessengerTrustedDevices(v ...*MessengerTrustedDevice) *AccountUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMessengerTrustedDeviceIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -473,6 +547,96 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.MessengerAuthorizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerAuthorizationsTable,
+			Columns: []string{account.MessengerAuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengerauthorization.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedMessengerAuthorizationsIDs(); len(nodes) > 0 && !_u.mutation.MessengerAuthorizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerAuthorizationsTable,
+			Columns: []string{account.MessengerAuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengerauthorization.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MessengerAuthorizationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerAuthorizationsTable,
+			Columns: []string{account.MessengerAuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengerauthorization.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.MessengerTrustedDevicesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerTrustedDevicesTable,
+			Columns: []string{account.MessengerTrustedDevicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengertrusteddevice.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedMessengerTrustedDevicesIDs(); len(nodes) > 0 && !_u.mutation.MessengerTrustedDevicesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerTrustedDevicesTable,
+			Columns: []string{account.MessengerTrustedDevicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengertrusteddevice.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MessengerTrustedDevicesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerTrustedDevicesTable,
+			Columns: []string{account.MessengerTrustedDevicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengertrusteddevice.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{account.Label}
@@ -677,6 +841,36 @@ func (_u *AccountUpdateOne) AddSocialIdentities(v ...*SocialIdentity) *AccountUp
 	return _u.AddSocialIdentityIDs(ids...)
 }
 
+// AddMessengerAuthorizationIDs adds the "messenger_authorizations" edge to the MessengerAuthorization entity by IDs.
+func (_u *AccountUpdateOne) AddMessengerAuthorizationIDs(ids ...uuid.UUID) *AccountUpdateOne {
+	_u.mutation.AddMessengerAuthorizationIDs(ids...)
+	return _u
+}
+
+// AddMessengerAuthorizations adds the "messenger_authorizations" edges to the MessengerAuthorization entity.
+func (_u *AccountUpdateOne) AddMessengerAuthorizations(v ...*MessengerAuthorization) *AccountUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddMessengerAuthorizationIDs(ids...)
+}
+
+// AddMessengerTrustedDeviceIDs adds the "messenger_trusted_devices" edge to the MessengerTrustedDevice entity by IDs.
+func (_u *AccountUpdateOne) AddMessengerTrustedDeviceIDs(ids ...uuid.UUID) *AccountUpdateOne {
+	_u.mutation.AddMessengerTrustedDeviceIDs(ids...)
+	return _u
+}
+
+// AddMessengerTrustedDevices adds the "messenger_trusted_devices" edges to the MessengerTrustedDevice entity.
+func (_u *AccountUpdateOne) AddMessengerTrustedDevices(v ...*MessengerTrustedDevice) *AccountUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddMessengerTrustedDeviceIDs(ids...)
+}
+
 // Mutation returns the AccountMutation object of the builder.
 func (_u *AccountUpdateOne) Mutation() *AccountMutation {
 	return _u.mutation
@@ -722,6 +916,48 @@ func (_u *AccountUpdateOne) RemoveSocialIdentities(v ...*SocialIdentity) *Accoun
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveSocialIdentityIDs(ids...)
+}
+
+// ClearMessengerAuthorizations clears all "messenger_authorizations" edges to the MessengerAuthorization entity.
+func (_u *AccountUpdateOne) ClearMessengerAuthorizations() *AccountUpdateOne {
+	_u.mutation.ClearMessengerAuthorizations()
+	return _u
+}
+
+// RemoveMessengerAuthorizationIDs removes the "messenger_authorizations" edge to MessengerAuthorization entities by IDs.
+func (_u *AccountUpdateOne) RemoveMessengerAuthorizationIDs(ids ...uuid.UUID) *AccountUpdateOne {
+	_u.mutation.RemoveMessengerAuthorizationIDs(ids...)
+	return _u
+}
+
+// RemoveMessengerAuthorizations removes "messenger_authorizations" edges to MessengerAuthorization entities.
+func (_u *AccountUpdateOne) RemoveMessengerAuthorizations(v ...*MessengerAuthorization) *AccountUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMessengerAuthorizationIDs(ids...)
+}
+
+// ClearMessengerTrustedDevices clears all "messenger_trusted_devices" edges to the MessengerTrustedDevice entity.
+func (_u *AccountUpdateOne) ClearMessengerTrustedDevices() *AccountUpdateOne {
+	_u.mutation.ClearMessengerTrustedDevices()
+	return _u
+}
+
+// RemoveMessengerTrustedDeviceIDs removes the "messenger_trusted_devices" edge to MessengerTrustedDevice entities by IDs.
+func (_u *AccountUpdateOne) RemoveMessengerTrustedDeviceIDs(ids ...uuid.UUID) *AccountUpdateOne {
+	_u.mutation.RemoveMessengerTrustedDeviceIDs(ids...)
+	return _u
+}
+
+// RemoveMessengerTrustedDevices removes "messenger_trusted_devices" edges to MessengerTrustedDevice entities.
+func (_u *AccountUpdateOne) RemoveMessengerTrustedDevices(v ...*MessengerTrustedDevice) *AccountUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveMessengerTrustedDeviceIDs(ids...)
 }
 
 // Where appends a list predicates to the AccountUpdate builder.
@@ -957,6 +1193,96 @@ func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(socialidentity.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.MessengerAuthorizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerAuthorizationsTable,
+			Columns: []string{account.MessengerAuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengerauthorization.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedMessengerAuthorizationsIDs(); len(nodes) > 0 && !_u.mutation.MessengerAuthorizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerAuthorizationsTable,
+			Columns: []string{account.MessengerAuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengerauthorization.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MessengerAuthorizationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerAuthorizationsTable,
+			Columns: []string{account.MessengerAuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengerauthorization.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.MessengerTrustedDevicesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerTrustedDevicesTable,
+			Columns: []string{account.MessengerTrustedDevicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengertrusteddevice.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedMessengerTrustedDevicesIDs(); len(nodes) > 0 && !_u.mutation.MessengerTrustedDevicesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerTrustedDevicesTable,
+			Columns: []string{account.MessengerTrustedDevicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengertrusteddevice.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.MessengerTrustedDevicesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   account.MessengerTrustedDevicesTable,
+			Columns: []string{account.MessengerTrustedDevicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(messengertrusteddevice.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

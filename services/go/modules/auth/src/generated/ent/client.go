@@ -13,6 +13,8 @@ import (
 
 	"nantty/modules/auth/src/generated/ent/account"
 	"nantty/modules/auth/src/generated/ent/agegaterefusal"
+	"nantty/modules/auth/src/generated/ent/messengerauthorization"
+	"nantty/modules/auth/src/generated/ent/messengertrusteddevice"
 	"nantty/modules/auth/src/generated/ent/onetimecode"
 	"nantty/modules/auth/src/generated/ent/outboxevent"
 	"nantty/modules/auth/src/generated/ent/refreshtoken"
@@ -39,6 +41,10 @@ type Client struct {
 	Account *AccountClient
 	// AgeGateRefusal is the client for interacting with the AgeGateRefusal builders.
 	AgeGateRefusal *AgeGateRefusalClient
+	// MessengerAuthorization is the client for interacting with the MessengerAuthorization builders.
+	MessengerAuthorization *MessengerAuthorizationClient
+	// MessengerTrustedDevice is the client for interacting with the MessengerTrustedDevice builders.
+	MessengerTrustedDevice *MessengerTrustedDeviceClient
 	// OneTimeCode is the client for interacting with the OneTimeCode builders.
 	OneTimeCode *OneTimeCodeClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
@@ -66,6 +72,8 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Account = NewAccountClient(c.config)
 	c.AgeGateRefusal = NewAgeGateRefusalClient(c.config)
+	c.MessengerAuthorization = NewMessengerAuthorizationClient(c.config)
+	c.MessengerTrustedDevice = NewMessengerTrustedDeviceClient(c.config)
 	c.OneTimeCode = NewOneTimeCodeClient(c.config)
 	c.OutboxEvent = NewOutboxEventClient(c.config)
 	c.RefreshToken = NewRefreshTokenClient(c.config)
@@ -163,17 +171,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:               ctx,
-		config:            cfg,
-		Account:           NewAccountClient(cfg),
-		AgeGateRefusal:    NewAgeGateRefusalClient(cfg),
-		OneTimeCode:       NewOneTimeCodeClient(cfg),
-		OutboxEvent:       NewOutboxEventClient(cfg),
-		RefreshToken:      NewRefreshTokenClient(cfg),
-		RegistrationBlock: NewRegistrationBlockClient(cfg),
-		Session:           NewSessionClient(cfg),
-		SigningKey:        NewSigningKeyClient(cfg),
-		SocialIdentity:    NewSocialIdentityClient(cfg),
+		ctx:                    ctx,
+		config:                 cfg,
+		Account:                NewAccountClient(cfg),
+		AgeGateRefusal:         NewAgeGateRefusalClient(cfg),
+		MessengerAuthorization: NewMessengerAuthorizationClient(cfg),
+		MessengerTrustedDevice: NewMessengerTrustedDeviceClient(cfg),
+		OneTimeCode:            NewOneTimeCodeClient(cfg),
+		OutboxEvent:            NewOutboxEventClient(cfg),
+		RefreshToken:           NewRefreshTokenClient(cfg),
+		RegistrationBlock:      NewRegistrationBlockClient(cfg),
+		Session:                NewSessionClient(cfg),
+		SigningKey:             NewSigningKeyClient(cfg),
+		SocialIdentity:         NewSocialIdentityClient(cfg),
 	}, nil
 }
 
@@ -191,17 +201,19 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:               ctx,
-		config:            cfg,
-		Account:           NewAccountClient(cfg),
-		AgeGateRefusal:    NewAgeGateRefusalClient(cfg),
-		OneTimeCode:       NewOneTimeCodeClient(cfg),
-		OutboxEvent:       NewOutboxEventClient(cfg),
-		RefreshToken:      NewRefreshTokenClient(cfg),
-		RegistrationBlock: NewRegistrationBlockClient(cfg),
-		Session:           NewSessionClient(cfg),
-		SigningKey:        NewSigningKeyClient(cfg),
-		SocialIdentity:    NewSocialIdentityClient(cfg),
+		ctx:                    ctx,
+		config:                 cfg,
+		Account:                NewAccountClient(cfg),
+		AgeGateRefusal:         NewAgeGateRefusalClient(cfg),
+		MessengerAuthorization: NewMessengerAuthorizationClient(cfg),
+		MessengerTrustedDevice: NewMessengerTrustedDeviceClient(cfg),
+		OneTimeCode:            NewOneTimeCodeClient(cfg),
+		OutboxEvent:            NewOutboxEventClient(cfg),
+		RefreshToken:           NewRefreshTokenClient(cfg),
+		RegistrationBlock:      NewRegistrationBlockClient(cfg),
+		Session:                NewSessionClient(cfg),
+		SigningKey:             NewSigningKeyClient(cfg),
+		SocialIdentity:         NewSocialIdentityClient(cfg),
 	}, nil
 }
 
@@ -231,8 +243,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Account, c.AgeGateRefusal, c.OneTimeCode, c.OutboxEvent, c.RefreshToken,
-		c.RegistrationBlock, c.Session, c.SigningKey, c.SocialIdentity,
+		c.Account, c.AgeGateRefusal, c.MessengerAuthorization, c.MessengerTrustedDevice,
+		c.OneTimeCode, c.OutboxEvent, c.RefreshToken, c.RegistrationBlock, c.Session,
+		c.SigningKey, c.SocialIdentity,
 	} {
 		n.Use(hooks...)
 	}
@@ -242,8 +255,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Account, c.AgeGateRefusal, c.OneTimeCode, c.OutboxEvent, c.RefreshToken,
-		c.RegistrationBlock, c.Session, c.SigningKey, c.SocialIdentity,
+		c.Account, c.AgeGateRefusal, c.MessengerAuthorization, c.MessengerTrustedDevice,
+		c.OneTimeCode, c.OutboxEvent, c.RefreshToken, c.RegistrationBlock, c.Session,
+		c.SigningKey, c.SocialIdentity,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -256,6 +270,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Account.mutate(ctx, m)
 	case *AgeGateRefusalMutation:
 		return c.AgeGateRefusal.mutate(ctx, m)
+	case *MessengerAuthorizationMutation:
+		return c.MessengerAuthorization.mutate(ctx, m)
+	case *MessengerTrustedDeviceMutation:
+		return c.MessengerTrustedDevice.mutate(ctx, m)
 	case *OneTimeCodeMutation:
 		return c.OneTimeCode.mutate(ctx, m)
 	case *OutboxEventMutation:
@@ -408,6 +426,38 @@ func (c *AccountClient) QuerySocialIdentities(_m *Account) *SocialIdentityQuery 
 			sqlgraph.From(account.Table, account.FieldID, id),
 			sqlgraph.To(socialidentity.Table, socialidentity.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, account.SocialIdentitiesTable, account.SocialIdentitiesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMessengerAuthorizations queries the messenger_authorizations edge of a Account.
+func (c *AccountClient) QueryMessengerAuthorizations(_m *Account) *MessengerAuthorizationQuery {
+	query := (&MessengerAuthorizationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(messengerauthorization.Table, messengerauthorization.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.MessengerAuthorizationsTable, account.MessengerAuthorizationsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMessengerTrustedDevices queries the messenger_trusted_devices edge of a Account.
+func (c *AccountClient) QueryMessengerTrustedDevices(_m *Account) *MessengerTrustedDeviceQuery {
+	query := (&MessengerTrustedDeviceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(messengertrusteddevice.Table, messengertrusteddevice.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.MessengerTrustedDevicesTable, account.MessengerTrustedDevicesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -570,6 +620,304 @@ func (c *AgeGateRefusalClient) mutate(ctx context.Context, m *AgeGateRefusalMuta
 		return (&AgeGateRefusalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown AgeGateRefusal mutation op: %q", m.Op())
+	}
+}
+
+// MessengerAuthorizationClient is a client for the MessengerAuthorization schema.
+type MessengerAuthorizationClient struct {
+	config
+}
+
+// NewMessengerAuthorizationClient returns a client for the MessengerAuthorization from the given config.
+func NewMessengerAuthorizationClient(c config) *MessengerAuthorizationClient {
+	return &MessengerAuthorizationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `messengerauthorization.Hooks(f(g(h())))`.
+func (c *MessengerAuthorizationClient) Use(hooks ...Hook) {
+	c.hooks.MessengerAuthorization = append(c.hooks.MessengerAuthorization, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `messengerauthorization.Intercept(f(g(h())))`.
+func (c *MessengerAuthorizationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.MessengerAuthorization = append(c.inters.MessengerAuthorization, interceptors...)
+}
+
+// Create returns a builder for creating a MessengerAuthorization entity.
+func (c *MessengerAuthorizationClient) Create() *MessengerAuthorizationCreate {
+	mutation := newMessengerAuthorizationMutation(c.config, OpCreate)
+	return &MessengerAuthorizationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MessengerAuthorization entities.
+func (c *MessengerAuthorizationClient) CreateBulk(builders ...*MessengerAuthorizationCreate) *MessengerAuthorizationCreateBulk {
+	return &MessengerAuthorizationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MessengerAuthorizationClient) MapCreateBulk(slice any, setFunc func(*MessengerAuthorizationCreate, int)) *MessengerAuthorizationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MessengerAuthorizationCreateBulk{err: fmt.Errorf("calling to MessengerAuthorizationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MessengerAuthorizationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MessengerAuthorizationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MessengerAuthorization.
+func (c *MessengerAuthorizationClient) Update() *MessengerAuthorizationUpdate {
+	mutation := newMessengerAuthorizationMutation(c.config, OpUpdate)
+	return &MessengerAuthorizationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MessengerAuthorizationClient) UpdateOne(_m *MessengerAuthorization) *MessengerAuthorizationUpdateOne {
+	mutation := newMessengerAuthorizationMutation(c.config, OpUpdateOne, withMessengerAuthorization(_m))
+	return &MessengerAuthorizationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MessengerAuthorizationClient) UpdateOneID(id uuid.UUID) *MessengerAuthorizationUpdateOne {
+	mutation := newMessengerAuthorizationMutation(c.config, OpUpdateOne, withMessengerAuthorizationID(id))
+	return &MessengerAuthorizationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MessengerAuthorization.
+func (c *MessengerAuthorizationClient) Delete() *MessengerAuthorizationDelete {
+	mutation := newMessengerAuthorizationMutation(c.config, OpDelete)
+	return &MessengerAuthorizationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MessengerAuthorizationClient) DeleteOne(_m *MessengerAuthorization) *MessengerAuthorizationDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MessengerAuthorizationClient) DeleteOneID(id uuid.UUID) *MessengerAuthorizationDeleteOne {
+	builder := c.Delete().Where(messengerauthorization.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MessengerAuthorizationDeleteOne{builder}
+}
+
+// Query returns a query builder for MessengerAuthorization.
+func (c *MessengerAuthorizationClient) Query() *MessengerAuthorizationQuery {
+	return &MessengerAuthorizationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMessengerAuthorization},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a MessengerAuthorization entity by its id.
+func (c *MessengerAuthorizationClient) Get(ctx context.Context, id uuid.UUID) (*MessengerAuthorization, error) {
+	return c.Query().Where(messengerauthorization.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MessengerAuthorizationClient) GetX(ctx context.Context, id uuid.UUID) *MessengerAuthorization {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAccount queries the account edge of a MessengerAuthorization.
+func (c *MessengerAuthorizationClient) QueryAccount(_m *MessengerAuthorization) *AccountQuery {
+	query := (&AccountClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(messengerauthorization.Table, messengerauthorization.FieldID, id),
+			sqlgraph.To(account.Table, account.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, messengerauthorization.AccountTable, messengerauthorization.AccountColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MessengerAuthorizationClient) Hooks() []Hook {
+	return c.hooks.MessengerAuthorization
+}
+
+// Interceptors returns the client interceptors.
+func (c *MessengerAuthorizationClient) Interceptors() []Interceptor {
+	return c.inters.MessengerAuthorization
+}
+
+func (c *MessengerAuthorizationClient) mutate(ctx context.Context, m *MessengerAuthorizationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MessengerAuthorizationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MessengerAuthorizationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MessengerAuthorizationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MessengerAuthorizationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown MessengerAuthorization mutation op: %q", m.Op())
+	}
+}
+
+// MessengerTrustedDeviceClient is a client for the MessengerTrustedDevice schema.
+type MessengerTrustedDeviceClient struct {
+	config
+}
+
+// NewMessengerTrustedDeviceClient returns a client for the MessengerTrustedDevice from the given config.
+func NewMessengerTrustedDeviceClient(c config) *MessengerTrustedDeviceClient {
+	return &MessengerTrustedDeviceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `messengertrusteddevice.Hooks(f(g(h())))`.
+func (c *MessengerTrustedDeviceClient) Use(hooks ...Hook) {
+	c.hooks.MessengerTrustedDevice = append(c.hooks.MessengerTrustedDevice, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `messengertrusteddevice.Intercept(f(g(h())))`.
+func (c *MessengerTrustedDeviceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.MessengerTrustedDevice = append(c.inters.MessengerTrustedDevice, interceptors...)
+}
+
+// Create returns a builder for creating a MessengerTrustedDevice entity.
+func (c *MessengerTrustedDeviceClient) Create() *MessengerTrustedDeviceCreate {
+	mutation := newMessengerTrustedDeviceMutation(c.config, OpCreate)
+	return &MessengerTrustedDeviceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MessengerTrustedDevice entities.
+func (c *MessengerTrustedDeviceClient) CreateBulk(builders ...*MessengerTrustedDeviceCreate) *MessengerTrustedDeviceCreateBulk {
+	return &MessengerTrustedDeviceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MessengerTrustedDeviceClient) MapCreateBulk(slice any, setFunc func(*MessengerTrustedDeviceCreate, int)) *MessengerTrustedDeviceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MessengerTrustedDeviceCreateBulk{err: fmt.Errorf("calling to MessengerTrustedDeviceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MessengerTrustedDeviceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MessengerTrustedDeviceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MessengerTrustedDevice.
+func (c *MessengerTrustedDeviceClient) Update() *MessengerTrustedDeviceUpdate {
+	mutation := newMessengerTrustedDeviceMutation(c.config, OpUpdate)
+	return &MessengerTrustedDeviceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MessengerTrustedDeviceClient) UpdateOne(_m *MessengerTrustedDevice) *MessengerTrustedDeviceUpdateOne {
+	mutation := newMessengerTrustedDeviceMutation(c.config, OpUpdateOne, withMessengerTrustedDevice(_m))
+	return &MessengerTrustedDeviceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MessengerTrustedDeviceClient) UpdateOneID(id uuid.UUID) *MessengerTrustedDeviceUpdateOne {
+	mutation := newMessengerTrustedDeviceMutation(c.config, OpUpdateOne, withMessengerTrustedDeviceID(id))
+	return &MessengerTrustedDeviceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MessengerTrustedDevice.
+func (c *MessengerTrustedDeviceClient) Delete() *MessengerTrustedDeviceDelete {
+	mutation := newMessengerTrustedDeviceMutation(c.config, OpDelete)
+	return &MessengerTrustedDeviceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MessengerTrustedDeviceClient) DeleteOne(_m *MessengerTrustedDevice) *MessengerTrustedDeviceDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MessengerTrustedDeviceClient) DeleteOneID(id uuid.UUID) *MessengerTrustedDeviceDeleteOne {
+	builder := c.Delete().Where(messengertrusteddevice.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MessengerTrustedDeviceDeleteOne{builder}
+}
+
+// Query returns a query builder for MessengerTrustedDevice.
+func (c *MessengerTrustedDeviceClient) Query() *MessengerTrustedDeviceQuery {
+	return &MessengerTrustedDeviceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMessengerTrustedDevice},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a MessengerTrustedDevice entity by its id.
+func (c *MessengerTrustedDeviceClient) Get(ctx context.Context, id uuid.UUID) (*MessengerTrustedDevice, error) {
+	return c.Query().Where(messengertrusteddevice.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MessengerTrustedDeviceClient) GetX(ctx context.Context, id uuid.UUID) *MessengerTrustedDevice {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAccount queries the account edge of a MessengerTrustedDevice.
+func (c *MessengerTrustedDeviceClient) QueryAccount(_m *MessengerTrustedDevice) *AccountQuery {
+	query := (&AccountClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(messengertrusteddevice.Table, messengertrusteddevice.FieldID, id),
+			sqlgraph.To(account.Table, account.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, messengertrusteddevice.AccountTable, messengertrusteddevice.AccountColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MessengerTrustedDeviceClient) Hooks() []Hook {
+	return c.hooks.MessengerTrustedDevice
+}
+
+// Interceptors returns the client interceptors.
+func (c *MessengerTrustedDeviceClient) Interceptors() []Interceptor {
+	return c.inters.MessengerTrustedDevice
+}
+
+func (c *MessengerTrustedDeviceClient) mutate(ctx context.Context, m *MessengerTrustedDeviceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MessengerTrustedDeviceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MessengerTrustedDeviceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MessengerTrustedDeviceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MessengerTrustedDeviceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown MessengerTrustedDevice mutation op: %q", m.Op())
 	}
 }
 
@@ -1571,12 +1919,14 @@ func (c *SocialIdentityClient) mutate(ctx context.Context, m *SocialIdentityMuta
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Account, AgeGateRefusal, OneTimeCode, OutboxEvent, RefreshToken,
-		RegistrationBlock, Session, SigningKey, SocialIdentity []ent.Hook
+		Account, AgeGateRefusal, MessengerAuthorization, MessengerTrustedDevice,
+		OneTimeCode, OutboxEvent, RefreshToken, RegistrationBlock, Session, SigningKey,
+		SocialIdentity []ent.Hook
 	}
 	inters struct {
-		Account, AgeGateRefusal, OneTimeCode, OutboxEvent, RefreshToken,
-		RegistrationBlock, Session, SigningKey, SocialIdentity []ent.Interceptor
+		Account, AgeGateRefusal, MessengerAuthorization, MessengerTrustedDevice,
+		OneTimeCode, OutboxEvent, RefreshToken, RegistrationBlock, Session, SigningKey,
+		SocialIdentity []ent.Interceptor
 	}
 )
 

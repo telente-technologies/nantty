@@ -42,6 +42,10 @@ const (
 	EdgeSessions = "sessions"
 	// EdgeSocialIdentities holds the string denoting the social_identities edge name in mutations.
 	EdgeSocialIdentities = "social_identities"
+	// EdgeMessengerAuthorizations holds the string denoting the messenger_authorizations edge name in mutations.
+	EdgeMessengerAuthorizations = "messenger_authorizations"
+	// EdgeMessengerTrustedDevices holds the string denoting the messenger_trusted_devices edge name in mutations.
+	EdgeMessengerTrustedDevices = "messenger_trusted_devices"
 	// Table holds the table name of the account in the database.
 	Table = "accounts"
 	// SessionsTable is the table that holds the sessions relation/edge.
@@ -58,6 +62,20 @@ const (
 	SocialIdentitiesInverseTable = "social_identities"
 	// SocialIdentitiesColumn is the table column denoting the social_identities relation/edge.
 	SocialIdentitiesColumn = "account_id"
+	// MessengerAuthorizationsTable is the table that holds the messenger_authorizations relation/edge.
+	MessengerAuthorizationsTable = "messenger_authorizations"
+	// MessengerAuthorizationsInverseTable is the table name for the MessengerAuthorization entity.
+	// It exists in this package in order to avoid circular dependency with the "messengerauthorization" package.
+	MessengerAuthorizationsInverseTable = "messenger_authorizations"
+	// MessengerAuthorizationsColumn is the table column denoting the messenger_authorizations relation/edge.
+	MessengerAuthorizationsColumn = "account_id"
+	// MessengerTrustedDevicesTable is the table that holds the messenger_trusted_devices relation/edge.
+	MessengerTrustedDevicesTable = "messenger_trusted_devices"
+	// MessengerTrustedDevicesInverseTable is the table name for the MessengerTrustedDevice entity.
+	// It exists in this package in order to avoid circular dependency with the "messengertrusteddevice" package.
+	MessengerTrustedDevicesInverseTable = "messenger_trusted_devices"
+	// MessengerTrustedDevicesColumn is the table column denoting the messenger_trusted_devices relation/edge.
+	MessengerTrustedDevicesColumn = "account_id"
 )
 
 // Columns holds all SQL columns for account fields.
@@ -223,6 +241,34 @@ func BySocialIdentities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption 
 		sqlgraph.OrderByNeighborTerms(s, newSocialIdentitiesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByMessengerAuthorizationsCount orders the results by messenger_authorizations count.
+func ByMessengerAuthorizationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newMessengerAuthorizationsStep(), opts...)
+	}
+}
+
+// ByMessengerAuthorizations orders the results by messenger_authorizations terms.
+func ByMessengerAuthorizations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMessengerAuthorizationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByMessengerTrustedDevicesCount orders the results by messenger_trusted_devices count.
+func ByMessengerTrustedDevicesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newMessengerTrustedDevicesStep(), opts...)
+	}
+}
+
+// ByMessengerTrustedDevices orders the results by messenger_trusted_devices terms.
+func ByMessengerTrustedDevices(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMessengerTrustedDevicesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newSessionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -235,5 +281,19 @@ func newSocialIdentitiesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SocialIdentitiesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, SocialIdentitiesTable, SocialIdentitiesColumn),
+	)
+}
+func newMessengerAuthorizationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MessengerAuthorizationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, MessengerAuthorizationsTable, MessengerAuthorizationsColumn),
+	)
+}
+func newMessengerTrustedDevicesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MessengerTrustedDevicesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, MessengerTrustedDevicesTable, MessengerTrustedDevicesColumn),
 	)
 }

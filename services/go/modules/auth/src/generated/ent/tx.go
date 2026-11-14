@@ -18,6 +18,10 @@ type Tx struct {
 	Account *AccountClient
 	// AgeGateRefusal is the client for interacting with the AgeGateRefusal builders.
 	AgeGateRefusal *AgeGateRefusalClient
+	// MessengerAuthorization is the client for interacting with the MessengerAuthorization builders.
+	MessengerAuthorization *MessengerAuthorizationClient
+	// MessengerTrustedDevice is the client for interacting with the MessengerTrustedDevice builders.
+	MessengerTrustedDevice *MessengerTrustedDeviceClient
 	// OneTimeCode is the client for interacting with the OneTimeCode builders.
 	OneTimeCode *OneTimeCodeClient
 	// OutboxEvent is the client for interacting with the OutboxEvent builders.
@@ -165,6 +169,8 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
 	tx.AgeGateRefusal = NewAgeGateRefusalClient(tx.config)
+	tx.MessengerAuthorization = NewMessengerAuthorizationClient(tx.config)
+	tx.MessengerTrustedDevice = NewMessengerTrustedDeviceClient(tx.config)
 	tx.OneTimeCode = NewOneTimeCodeClient(tx.config)
 	tx.OutboxEvent = NewOutboxEventClient(tx.config)
 	tx.RefreshToken = NewRefreshTokenClient(tx.config)

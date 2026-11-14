@@ -17,7 +17,9 @@ import (
 	"nantty/modules/auth/src/generated/ent"
 	"nantty/modules/auth/src/integrations"
 	"nantty/modules/auth/src/migrations"
+	developerorganizations "nantty/modules/auth/src/modules/developerOrganizations"
 	emailverification "nantty/modules/auth/src/modules/emailVerification"
+	messengerauth "nantty/modules/auth/src/modules/messengerAuth"
 	onetimecodes "nantty/modules/auth/src/modules/oneTimeCodes"
 	"nantty/modules/auth/src/modules/passwords"
 	realtimetokens "nantty/modules/auth/src/modules/realtimeTokens"
@@ -85,7 +87,7 @@ func StartAuthModuleWithSettings(ctx context.Context, settings configs.AuthSetti
 	}
 	tokenIssuer := signingkeyservices.NewAccessTokenIssuer(keys, settings.TokenIssuer, settings.TokenAudience, settings.AccessTokenTimeToLive, time.Now)
 	authContainer := &container.Container{
-		Client: client, Settings: settings, Passwords: utils.NewPasswordHasher(utils.RecommendedArgon2idParameters), TokenIssuer: tokenIssuer,
+		Client: client, Database: database, Settings: settings, Passwords: utils.NewPasswordHasher(utils.RecommendedArgon2idParameters), TokenIssuer: tokenIssuer,
 		Delivery: integrations.DevelopmentLogDelivery{Logger: logger}, Social: social, Keys: keys, Logger: logger, Now: time.Now,
 		AccessVerifier: jwtauth.NewAccessTokenVerifierFromKeySetProvider(keys.PublishedPublicKeySet, settings.TokenIssuer, settings.TokenAudience),
 	}
@@ -112,6 +114,8 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	stepup.Mount(mux, module.container)
 	widgettokens.Mount(mux, module.container)
 	realtimetokens.Mount(mux, module.container)
+	messengerauth.Mount(mux, module.container)
+	developerorganizations.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
