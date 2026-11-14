@@ -68,7 +68,26 @@ export const messageSent: EventMapping = (event, data) => {
     return intentFor(event, recipient.text("userId"), {
       category: "social",
       variant: "chat",
-      push: { title, body, data: { url: `/chats/${conversationId}`, conversationId } },
+      push: {
+        title,
+        body,
+        data: {
+          url: `/chats/${conversationId}`,
+          conversationId,
+          messageId: data.text("messageId"),
+          ...(showPreview && data.optionalText("senderName") ? { senderName: data.text("senderName") } : {}),
+          ...(showPreview && data.optionalText("conversationKind") ? { conversationKind: data.text("conversationKind") } : {}),
+          tag: `nantty-chat-${conversationId}`,
+          categoryId: "NANTTY_CHAT",
+          threadIdentifier: conversationId,
+          vibrate: String(recipient.bool("vibration", true)),
+          bubbleAllowed: String(recipient.bool("bubbleAllowed", false)),
+        },
+        categoryId: "NANTTY_CHAT",
+        threadId: conversationId,
+        channelId: `nantty-chat-${recipient.bool("sound", true) ? "sound" : "silent"}-${recipient.bool("vibration", true) ? "vibrate" : "still"}`,
+        sound: recipient.bool("sound", true) ? "default" : null,
+      },
     });
   });
 };

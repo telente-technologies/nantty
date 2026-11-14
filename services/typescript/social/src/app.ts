@@ -32,6 +32,7 @@ import { createHttpMediaDownloadVariantClient } from "./integrations/httpMediaDo
 import { createHttpMediaDescriptorResolver } from "./integrations/httpMediaDescriptorResolver.integration.js";
 import { createHttpAdDecisionClient } from "./integrations/httpAdDecisionClient.integration.js";
 import { createHttpProductCatalog } from "./integrations/httpProductCatalog.integration.js";
+import { createHttpReportTargetResolver } from "./integrations/httpReportTargetResolver.integration.js";
 import { createIntelligenceSocialProofSelector } from "./integrations/intelligenceSocialProof.integration.js";
 import { createHttpPostMediaCleaner } from "./integrations/httpPostMediaCleaner.integration.js";
 import { createHttpChatMediaAccess } from "./integrations/httpChatMediaAccess.integration.js";
@@ -76,6 +77,7 @@ export async function createSocialApp(config: SocialConfig, internalToken: strin
     rankingSettings: config.adminInternal === undefined ? staticRankingSettings : createAdminRankingSettingsSource(config.adminInternal),
     ...(config.intelligence === undefined ? {} : { intelligenceExplore: createIntelligenceExploreClient({ baseUrl: config.intelligence.baseUrl, sharedSecret: config.intelligence.sharedSecret, timeoutMs: config.intelligence.exploreTimeoutMs, hasher: intelligenceHasher(config.intelligence) }) }),
     ...(config.commerceInternal === undefined ? {} : { products: createHttpProductCatalog(config.commerceInternal), storeInboxTeam: createHttpStoreInboxTeam(config.commerceInternal) }),
+    reportTargets: createHttpReportTargetResolver({ commerce: config.commerceInternal, live: config.liveInternal }),
     ...(config.adsInternal === undefined ? {} : { ads: createHttpAdDecisionClient(config.adsInternal) }),
     ...(config.intelligence === undefined ? {} : { socialProof: createIntelligenceSocialProofSelector({ baseUrl: config.intelligence.baseUrl, sharedSecret: config.intelligence.sharedSecret, hasher: intelligenceHasher(config.intelligence) }) }),
     shareCards: createHttpShareCardResolver({ commerce: config.commerceInternal, live: config.liveInternal }),

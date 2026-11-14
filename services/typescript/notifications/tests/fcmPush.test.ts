@@ -39,6 +39,42 @@ describe("FcmPushSender", () => {
     expect(JSON.stringify(result)).not.toContain("short-lived-access-token");
   });
 
+  it("sends bubble-eligible chat as high-priority data-only FCM for native bubble rendering", async () => {
+    const calls: { url: string; init: RequestInit | undefined }[] = [];
+    const fetcher: typeof fetch = async (input, init) => {
+      const url = String(input);
+      calls.push({ url, init });
+      if (url === "https://oauth2.googleapis.com/token") {
+        return new Response(JSON.stringify({ access_token: "access", expires_in: 3600 }), { status: 200 });
+      }
+      return new Response(JSON.stringify({ name: "projects/nantty-test/messages/chat" }), { status: 200 });
+    };
+    const sender = await makeSender(fetcher);
+
+    const result = await sender.send(["fcm-device-registration"], {
+      title: "Nantty",
+      body: "New message",
+      categoryId: "NANTTY_CHAT",
+      threadId: "conversation-1",
+      channelId: "nantty-chat-sound-still",
+      data: { conversationId: "conversation-1", bubbleAllowed: "true" },
+    });
+
+    expect(result).toEqual({ acceptedCount: 1, failures: [] });
+    const requestBody = JSON.parse(String(calls[1]?.init?.body)) as { message: Record<string, unknown> };
+    expect(requestBody.message["notification"]).toBeUndefined();
+    expect(requestBody.message["android"]).toEqual({ priority: "HIGH" });
+    expect(requestBody.message["data"]).toMatchObject({
+      title: "Nantty",
+      message: "New message",
+      conversationId: "conversation-1",
+      bubbleAllowed: "true",
+      categoryId: "NANTTY_CHAT",
+      threadIdentifier: "conversation-1",
+      channelId: "nantty-chat-sound-still",
+    });
+  });
+
   it("classifies an unregistered FCM token for provider-specific pruning", async () => {
     let sendCalls = 0;
     const fetcher: typeof fetch = async (input) => {

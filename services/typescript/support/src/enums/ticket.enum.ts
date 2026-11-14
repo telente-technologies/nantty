@@ -1,7 +1,7 @@
 export const ticketStatuses = ["open", "awaiting_user", "awaiting_support", "resolved", "closed"] as const;
 export type TicketStatus = (typeof ticketStatuses)[number];
 
-export const ticketCategories = ["order", "payment", "account", "seller", "verification", "creator", "live", "ads", "safety", "other"] as const;
+export const ticketCategories = ["order", "payment", "account", "seller", "verification", "creator", "live", "ads", "developer", "sandbox", "safety", "other"] as const;
 export type TicketCategory = (typeof ticketCategories)[number];
 
 export const ticketPriorities = ["urgent", "high", "normal", "low"] as const;

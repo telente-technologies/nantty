@@ -204,7 +204,7 @@ describe("policy acceptance gate", () => {
     await gated.stop();
   });
 
-  it("fails open when the policy lookup is unavailable", async () => {
+  it("fails closed when the policy lookup is unavailable", async () => {
     const upstreamUrl = `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`;
     const gated = createGatewayServer({
       config: { ...buildConfig(upstreamUrl), port: 0 },
@@ -214,6 +214,7 @@ describe("policy acceptance gate", () => {
     await gated.start();
     const response = await fetch(`http://127.0.0.1:${gated.address?.port}/api/v1/posts`, { method: "POST", headers: { authorization: `Bearer ${await signAccessToken("5m")}`, "content-type": "application/json" }, body: "{}" });
     await gated.stop();
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ code: "POLICY_GATE_UNAVAILABLE" });
   });
 });

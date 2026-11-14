@@ -65,13 +65,16 @@ export async function applyMessageDelivery(db: Db, request: DeliveryRequest): Pr
 
 type Member = ConversationRow["members"][number];
 
-async function selectPushRecipients(db: Db, conversation: ConversationRow, recipients: readonly Member[], now: Date): Promise<{ readonly userId: string; readonly showPreview: boolean }[]> {
+async function selectPushRecipients(db: Db, conversation: ConversationRow, recipients: readonly Member[], now: Date): Promise<{ readonly userId: string; readonly showPreview: boolean; readonly sound: boolean; readonly vibration: boolean; readonly bubbleAllowed: boolean }[]> {
   const audible = recipients.filter((member) => member.inboxFolder === "chats" && !member.mutedAlways && (member.mutedUntil === null || member.mutedUntil <= now));
   if (audible.length === 0) return [];
   const settings = new Map((await chatSettingsRepository.findMany(db, audible.map((member) => member.accountId))).map((row) => [row.accountId, row]));
   return audible.flatMap((member) => {
     const row = settings.get(member.accountId);
     const wanted = row === undefined || (conversation.kind === "direct" || conversation.kind === "business" ? row.notifyMessages : row.notifyGroups);
-    return wanted ? [{ userId: member.accountId, showPreview: row?.showMessagePreview ?? true }] : [];
+    const bubbleAllowed = row?.notifyMessageBubbles === true && (row.messageBubbleMode === "all"
+      ? !row.messageBubbleExcludedConversationIds.includes(conversation.id)
+      : row.messageBubbleConversationIds.includes(conversation.id));
+    return wanted ? [{ userId: member.accountId, showPreview: row?.showMessagePreview ?? true, sound: row?.notifyMessageSound ?? true, vibration: row?.notifyMessageVibration ?? true, bubbleAllowed }] : [];
   });
 }

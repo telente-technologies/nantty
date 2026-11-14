@@ -149,6 +149,12 @@ model ChatSettings {
   notifyGroups          Boolean                @default(true)
   notifyStreakReminders Boolean                @default(true)
   showMessagePreview    Boolean                @default(true)
+  notifyMessageSound   Boolean                @default(true)
+  notifyMessageVibration Boolean              @default(true)
+  notifyMessageBubbles Boolean               @default(false)
+  messageBubbleMode    String                 @default("selected") @db.VarChar(12)
+  messageBubbleConversationIds String[]       @default([])
+  messageBubbleExcludedConversationIds String[] @default([])
   preventDirectGroupAdds Boolean               @default(false)
   timezone              String                 @default("UTC")
   timezoneChangedAt     DateTime?

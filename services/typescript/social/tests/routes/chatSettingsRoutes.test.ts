@@ -11,7 +11,7 @@ const route = createRouteFactory({ run: async (_request, execute) => ({ ...(awai
 const settings: ChatSettingsView = {
   messageRequestsFrom: "everyone",
   preventDirectGroupAdds: false,
-  notifications: { messages: true, requests: true, groups: true, streakReminders: false, showMessagePreview: true },
+  notifications: { messages: true, requests: true, groups: true, streakReminders: false, showMessagePreview: true, sound: true, vibration: true, bubbles: false, bubbleMode: "selected", bubbleConversationIds: [], bubbleExcludedConversationIds: [] },
   timezone: "Africa/Lagos",
 };
 

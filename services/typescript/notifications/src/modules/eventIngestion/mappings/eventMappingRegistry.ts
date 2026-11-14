@@ -67,6 +67,7 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "session.revoked": identity.sessionRevoked,
   "session.refreshTokenReuseDetected": identity.refreshTokenReuseDetected,
   "signIn.newDeviceDetected": identity.newSignInDetected,
+  "messenger.loginApprovalRequested": identity.messengerLoginApprovalRequested,
   "twoFactor.enabled": identity.twoFactorEnabled,
   "account.warned": identity.accountWarned,
   "account.restricted": identity.accountRestricted,

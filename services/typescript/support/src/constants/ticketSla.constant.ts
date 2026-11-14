@@ -12,6 +12,8 @@ export const defaultPriorityByCategory: Readonly<Record<TicketCategory, TicketPr
   creator: "normal",
   live: "normal",
   ads: "low",
+  developer: "high",
+  sandbox: "normal",
   safety: "high",
   other: "low",
 };

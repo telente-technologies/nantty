@@ -39,13 +39,31 @@ export class FcmPushSender implements PushSender {
 
   public async send(tokens: readonly string[], content: PushContent, provider: PushProvider = "fcm"): Promise<PushSendResult> {
     if (provider !== "fcm") return disabledProviderResult(tokens);
-    return this.sendMessages(tokens, (token) => ({
-      token,
-      notification: { title: content.title, body: content.body },
-      data: toFcmData(content.data ?? {}),
-      android: { priority: "HIGH" },
-      apns: { headers: { "apns-priority": "10" }, payload: { aps: { sound: "default" } } },
-    }));
+    const isBubbleEligibleChat = content.data?.["bubbleAllowed"] === "true";
+    const data = {
+      ...(content.data ?? {}),
+      ...(content.categoryId ? { categoryId: content.categoryId } : {}),
+      ...(content.threadId ? { threadIdentifier: content.threadId } : {}),
+      ...(content.channelId ? { channelId: content.channelId } : {}),
+      ...(content.sound === null ? { sound: "" } : {}),
+      ...(isBubbleEligibleChat ? { title: content.title, message: content.body } : {}),
+    };
+
+    return this.sendMessages(tokens, (token) => isBubbleEligibleChat
+      ? {
+          token,
+          // A notification payload is rendered directly by Android in the background,
+          // bypassing Expo's receiver where Nantty attaches BubbleMetadata.
+          data: toFcmData(data),
+          android: { priority: "HIGH" },
+        }
+      : {
+          token,
+          notification: { title: content.title, body: content.body },
+          data: toFcmData(data),
+          android: { priority: "HIGH", ...(content.channelId ? { notification: { channel_id: content.channelId } } : {}) },
+          apns: { headers: { "apns-priority": "10" }, payload: { aps: { ...(content.sound === null ? {} : { sound: "default" }), ...(content.threadId ? { "thread-id": content.threadId } : {}), ...(content.categoryId ? { category: content.categoryId } : {}) } } },
+        });
   }
 
   public async sendSilent(tokens: readonly string[], data: Readonly<Record<string, unknown>>, provider: PushProvider = "fcm"): Promise<PushSendResult> {

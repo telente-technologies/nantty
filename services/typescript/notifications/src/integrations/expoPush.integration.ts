@@ -28,7 +28,16 @@ const permanentExpoErrors = new Set(["DeviceNotRegistered", "MessageTooBig", "In
 export class ExpoPushSender implements PushSender {
   public async send(tokens: readonly string[], content: PushContent, provider: PushProvider = "expo"): Promise<PushSendResult> {
     if (provider !== "expo") return disabledProviderResult(tokens);
-    return postExpoMessages(tokens.map((to) => ({ to, title: content.title, body: content.body, data: content.data ?? {}, sound: "default" })));
+    return postExpoMessages(tokens.map((to) => ({
+      to,
+      title: content.title,
+      body: content.body,
+      data: content.data ?? {},
+      sound: content.sound === undefined ? "default" : content.sound,
+      ...(content.categoryId === undefined ? {} : { categoryId: content.categoryId }),
+      ...(content.threadId === undefined ? {} : { threadId: content.threadId }),
+      ...(content.channelId === undefined ? {} : { channelId: content.channelId }),
+    })));
   }
 
   public async sendSilent(tokens: readonly string[], data: Readonly<Record<string, unknown>>, provider: PushProvider = "expo"): Promise<PushSendResult> {

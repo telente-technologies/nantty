@@ -9,7 +9,6 @@ export class ValkeyRateLimitStore implements RateLimitStore {
 
   public constructor(
     private readonly connection: Pick<ValkeyConnection, "command">,
-    private readonly fallback: RateLimitStore,
     private readonly onFailure: (error: unknown) => void = () => undefined,
     private readonly now: () => number = Date.now,
   ) {}
@@ -17,7 +16,7 @@ export class ValkeyRateLimitStore implements RateLimitStore {
   public async hit(key: string, limit: number, windowSeconds: number): Promise<RateLimitDecision> {
     if (limit <= 0) return { allowed: true, retryAfterSeconds: 0 };
     const moment = this.now();
-    if (moment < this.circuitOpenUntil) return this.fallback.hit(key, limit, windowSeconds);
+    if (moment < this.circuitOpenUntil) return { allowed: false, retryAfterSeconds: Math.max(1, Math.ceil((this.circuitOpenUntil - moment) / 1000)) };
     const position = locateSlidingWindow(moment, windowSeconds);
     try {
       const reply = await this.connection.command(["EVAL", slidingWindowScript, 2, `{${key}}:${position.index}`, `{${key}}:${position.index - 1}`, windowSeconds * 2000]);
@@ -26,7 +25,7 @@ export class ValkeyRateLimitStore implements RateLimitStore {
     } catch (error) {
       this.circuitOpenUntil = moment + circuitOpenMilliseconds;
       this.onFailure(error);
-      return this.fallback.hit(key, limit, windowSeconds);
+      return { allowed: false, retryAfterSeconds: Math.ceil(circuitOpenMilliseconds / 1000) };
     }
   }
 }

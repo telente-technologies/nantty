@@ -18,6 +18,7 @@ import type { SpamScoreProvider } from "../interfaces/spamScoreProvider.interfac
 import type { PlacesProvider } from "../interfaces/placesProvider.interface.js";
 import type { PremiumEntitlements } from "../interfaces/premiumEntitlements.interface.js";
 import type { PostMediaCleaner } from "../interfaces/postMediaCleaner.interface.js";
+import type { ReportTargetResolver } from "../interfaces/reportTargetResolver.interface.js";
 
 export interface HandlerContext {
   readonly database: SocialDatabase;
@@ -32,6 +33,7 @@ export interface HandlerContext {
   readonly chatMedia?: ChatMediaAccess;
   readonly storeInboxTeam?: StoreInboxTeam;
   readonly postMedia?: PostMediaCleaner;
+  readonly reportTargets?: ReportTargetResolver;
   readonly products?: ProductCatalog;
   readonly ads?: AdDecisionClient;
   readonly socialProof?: SocialProofSelector;

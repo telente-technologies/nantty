@@ -60,12 +60,15 @@ describe("chat message pushes", () => {
       ["ExponentPushToken[a]", "Fabric lovers", "Ada sent a message"],
       ["ExponentPushToken[b]", "Nantty", "New message"],
     ]);
-    expect(harness.pushSender.sent[0]?.content.data).toEqual({ url: "/chats/c1", conversationId: "c1" });
+    expect(harness.pushSender.sent[0]?.content.data).toEqual({ url: "/chats/c1", conversationId: "c1", messageId: "m1", senderName: "Ada", conversationKind: "group", tag: "nantty-chat-c1", categoryId: "NANTTY_CHAT", threadIdentifier: "c1", vibrate: "true", bubbleAllowed: "false" });
+    expect(harness.pushSender.sent[1]?.content.data).not.toHaveProperty("senderName");
+    expect(harness.pushSender.sent[1]?.content.data).not.toHaveProperty("conversationKind");
+    expect(harness.pushSender.sent[0]?.content).toMatchObject({ categoryId: "NANTTY_CHAT", threadId: "c1", channelId: "nantty-chat-sound-vibrate", sound: "default" });
   });
 
   it("names the sender in a direct chat and ignores events without a push list", async () => {
     const { harness, handler } = await setup("a");
-    await handler.execute({ event: makeEvent("message.sent", { conversationId: "c2", conversationKind: "direct", senderName: "Ada", pushRecipients: [{ userId: "a", showPreview: true }] }) });
+    await handler.execute({ event: makeEvent("message.sent", { conversationId: "c2", messageId: "m2", conversationKind: "direct", senderName: "Ada", pushRecipients: [{ userId: "a", showPreview: true }] }) });
     await handler.execute({ event: makeEvent("message.sent", { conversationId: "c3", recipientIds: ["a"] }, "evt-old") });
     expect(harness.pushSender.sent.map((push) => [push.content.title, push.content.body])).toEqual([["Ada", "Sent you a message"]]);
   });

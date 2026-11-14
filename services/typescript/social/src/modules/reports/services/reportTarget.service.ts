@@ -8,7 +8,10 @@ const missing = () => notFound("TARGET_NOT_FOUND", "We couldn't find what you're
 
 async function findLocalOwner(db: Db, targetType: ReportTargetType, targetId: string): Promise<string | null | undefined> {
   if (targetType === "user") return targetId;
-  if (!uuidPattern.test(targetId)) return targetType === "post" || targetType === "clip" || targetType === "comment" || targetType === "sound" || targetType === "space" ? null : undefined;
+  if (!uuidPattern.test(targetId)) {
+    if (targetType === "live" || targetType === "space" || targetType === "product" || targetType === "store") return undefined;
+    return targetType === "post" || targetType === "clip" || targetType === "comment" || targetType === "sound" ? null : undefined;
+  }
   if (targetType === "post" || targetType === "clip") {
     const post = await db.post.findFirst({ where: { id: targetId, ...publishedPostToViewers, moderationVisibility: { not: "removed" } }, select: { authorId: true } });
     return post?.authorId ?? null;
@@ -18,9 +21,11 @@ async function findLocalOwner(db: Db, targetType: ReportTargetType, targetId: st
   return undefined;
 }
 
-export async function assertReportableBy(db: Db, reporterId: string, target: { readonly targetType: ReportTargetType; readonly targetId: string; readonly reportedUserId: string | undefined }): Promise<void> {
+export async function assertReportableBy(db: Db, reporterId: string, target: { readonly targetType: ReportTargetType; readonly targetId: string; readonly reportedUserId: string | undefined }): Promise<string | undefined> {
   if (target.reportedUserId === reporterId) throw unprocessable("SELF_REPORT", "You can't report your own content.");
   const ownerId = await findLocalOwner(db, target.targetType, target.targetId);
   if (ownerId === null) throw missing();
   if (ownerId === reporterId) throw unprocessable("SELF_REPORT", "You can't report your own content.");
+  if (ownerId !== undefined && target.reportedUserId !== undefined && ownerId !== target.reportedUserId) throw unprocessable("REPORT_TARGET_MISMATCH", "The reported account doesn't match this content.");
+  return ownerId;
 }
