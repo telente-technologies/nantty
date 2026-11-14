@@ -32,12 +32,16 @@ import { useAuthStore } from "@/store/auth.store";
 import { useFeedViewabilityTracking } from "@/components/feed/feedVisibility.hook";
 import { FeedProductAdCard } from "@/components/ads/feedProductAdCard";
 import { insertFeedProductAd, shouldDecideFeedProductAd } from "@/components/ads/feedProductAdRows.util";
+import { StoryTray } from "@/components/chat/storyTray";
+import { liveService } from "@/services/live/live.service";
+import { storiesService } from "@/services/clips/stories.service";
 
 type FeedMode = "for-you" | "following";
 export function FeedTab() {
   const styles = useStyles();
   const navigation = useNavigation();
   const viewerId = useAuthStore((state) => state.status === "signedIn" ? state.user?.id ?? null : null);
+  const myAvatarUrl = useAuthStore((state) => state.user?.avatarUrl ?? null);
   const [feedMode, setFeedMode] = useState<FeedMode>("for-you");
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [openPostProducts, setOpenPostProducts] = useState<{ readonly products: readonly ProductSummary[]; readonly attribution: SaleAttribution } | null>(null);
@@ -46,6 +50,8 @@ export function FeedTab() {
   const { offerSendInChat, sendInChatElement } = useShareToChat();
 
   const topics = useQuery({ queryKey: ["topics", "mine"], queryFn: feedsService.fetchMyFollowedTopics });
+  const storyTray = useQuery({ queryKey: ["story-tray"], queryFn: storiesService.fetchStoryTray, enabled: viewerId !== null });
+  const suggestedLives = useQuery({ queryKey: ["suggested-lives"], queryFn: liveService.fetchSuggestedLives, enabled: viewerId !== null });
   const [railOptionsClipIds, setRailOptionsClipIds] = useState<readonly string[] | null>(null);
   const feed = useInfiniteQuery({
     queryKey: [...feedQueryKeyPrefix, feedMode, selectedTopicId],
@@ -105,6 +111,18 @@ export function FeedTab() {
   return (
     <View style={styles.root}>
       <GuestFeedBanner />
+      {viewerId ? (
+        <View style={styles.storyTray}>
+          <StoryTray
+            items={storyTray.data ?? []}
+            liveItems={suggestedLives.data ?? []}
+            myAvatarUrl={myAvatarUrl}
+            onPressAddStory={() => navigation.navigate("CreatePost", { mode: "story" })}
+            onPressStory={(userId) => navigation.navigate("Story", { userId })}
+            onPressLive={(liveId) => navigation.navigate("Live", { liveId })}
+          />
+        </View>
+      ) : null}
       <FlatList
         data={rows}
         keyExtractor={(row) => row.type === "product-ad" ? row.key : row.type === "post" ? row.post.id : feedModuleRowKey(row.slot)}
@@ -178,5 +196,6 @@ export function FeedTab() {
 
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.surface },
+  storyTray: { minHeight: 81, justifyContent: "center", paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.divider },
   footer: { paddingVertical: spacing[4] },
 }));

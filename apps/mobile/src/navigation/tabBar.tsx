@@ -1,6 +1,6 @@
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Chat37AltAltIcon, Flips34AltAltIcon, Home33AltIcon, Home33Icon, Plus28Icon, UserProfile45AltIcon } from "@/components/icons";
@@ -81,6 +81,7 @@ export function TabBar({ state, navigation, descriptors }: BottomTabBarProps) {
               style={styles.item}
             >
               {renderTabIcon(route.name, focused)}
+              <Text numberOfLines={1} style={[styles.label, focused && styles.labelActive]}>{LABELS[route.name] ?? route.name}</Text>
             </Pressable>
           );
         })}
@@ -103,9 +104,11 @@ const useStyles = makeThemedStyles((colors, scheme) => StyleSheet.create({
     shadowRadius: 4,
     elevation: 8,
   },
-  row: { height: 44, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  item: { minWidth: 45, height: 44, alignItems: "center", justifyContent: "center" },
-  create: { width: 83, height: 44, borderRadius: 999, backgroundColor: colors.primarySolid, alignItems: "center", justifyContent: "center" },
+  row: { height: 54, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  item: { flex: 1, minWidth: 45, height: 54, alignItems: "center", justifyContent: "center", gap: 2 },
+  label: { maxWidth: "100%", color: colors.textMuted, fontSize: 10, fontWeight: "600", lineHeight: 13 },
+  labelActive: { color: colors.primary, fontWeight: "700" },
+  create: { width: 48, height: 34, borderRadius: 999, backgroundColor: colors.primarySolid, alignItems: "center", justifyContent: "center" },
   avatarRing: { borderRadius: 16, padding: 1, borderWidth: 1, borderColor: "transparent" },
   avatarRingActive: { borderColor: colors.primary },
 }));

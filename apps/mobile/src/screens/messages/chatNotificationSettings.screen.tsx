@@ -8,11 +8,15 @@ import { Text } from "@/components/ui/text";
 import { useTheme } from "@/theme";
 import type { ChatNotificationSettings } from "@/types";
 
-const TOGGLES: readonly { readonly key: keyof ChatNotificationSettings; readonly label: string; readonly description?: string }[] = [
+type BooleanSettingKey = { [Key in keyof ChatNotificationSettings]: ChatNotificationSettings[Key] extends boolean ? Key : never }[keyof ChatNotificationSettings];
+
+const TOGGLES: readonly { readonly key: BooleanSettingKey; readonly label: string; readonly description?: string }[] = [
   { key: "messages", label: "Messages" },
   { key: "requests", label: "Message requests" },
   { key: "groups", label: "Groups and channels" },
   { key: "streakReminders", label: "Streak reminders", description: "A nudge 4 hours before your day ends if a streak is at risk" },
+  { key: "sound", label: "Notification sounds" },
+  { key: "vibration", label: "Vibration" },
   { key: "showMessagePreview", label: "Show message preview", description: "Show the sender and text in notifications" },
 ];
 
