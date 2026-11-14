@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.nantty.com/events/messenger.loginApprovalRequested.v1.json",
+  "title": "messenger.loginApprovalRequested",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["accountId", "authorizationId", "device", "platform", "requestedAt", "expiresAt"],
+  "properties": {
+    "accountId": { "type": "string", "format": "uuid" },
+    "authorizationId": { "type": "string", "format": "uuid" },
+    "device": { "type": "string", "maxLength": 120 },
+    "platform": { "type": "string", "enum": ["android", "ios"] },
+    "requestedAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "approximateLocation": { "type": ["string", "null"] }
+  }
+}
