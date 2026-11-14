@@ -18,5 +18,5 @@ export default async function SandboxSectionPage({ params }: { readonly params: 
   const { section } = await params;
   if (!isSandboxSectionKey(section)) notFound();
   const details = sandboxSectionDetails[section];
-  return <PortalShell><PortalSectionView section={details} /></PortalShell>;
+  return <PortalShell><PortalSectionView section={details} isDocumentationPage={section === "docs" || section === "messaging"} /></PortalShell>;
 }
