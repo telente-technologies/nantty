@@ -1,8 +1,16 @@
 package developerorganizations
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type CreateRequest struct {
+	Name string `json:"name"`
+	Slug string `json:"slug"`
+}
+
+type UpdateOrganizationRequest struct {
 	Name string `json:"name"`
 	Slug string `json:"slug"`
 }
@@ -46,4 +54,16 @@ type OrganizationMember struct {
 type OrganizationMemberDetail struct {
 	OrganizationMember
 	OrganizationRole OrganizationRole `json:"organizationAccess"`
+}
+
+type OrganizationAuditEntry struct {
+	ID             string          `json:"id"`
+	ActorAccountID string          `json:"actorAccountId"`
+	ActorRole      string          `json:"actorRole"`
+	Action         string          `json:"action"`
+	SubjectType    string          `json:"subjectType"`
+	SubjectID      string          `json:"subjectId"`
+	BeforeState    json.RawMessage `json:"beforeState"`
+	AfterState     json.RawMessage `json:"afterState"`
+	CreatedAt      time.Time       `json:"createdAt"`
 }

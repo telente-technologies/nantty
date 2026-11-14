@@ -3,6 +3,7 @@ package developerorganizations
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"nantty/modules/auth/src/container"
 	"nantty/modules/auth/src/utils"
@@ -32,6 +33,64 @@ func (controller Controller) Get(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	httpserver.WriteJsonResponse(writer, http.StatusOK, organization)
+}
+
+func (controller Controller) Update(writer http.ResponseWriter, request *http.Request) {
+	principal, authenticated := jwtauth.PrincipalFromContext(request.Context())
+	if !authenticated {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.ErrUnauthorized)
+		return
+	}
+	body, err := utils.DecodeAndValidate[UpdateOrganizationRequest](writer, request, func(value UpdateOrganizationRequest) error {
+		return validateCreateRequest(CreateRequest{Name: value.Name, Slug: value.Slug})
+	})
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	organization, err := (Service{Container: controller.Container}).Update(request.Context(), principal.UserId, request.PathValue("organizationID"), body)
+	if err != nil {
+		switch {
+		case errors.Is(err, errInvalidAccount):
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.ErrUnauthorized)
+		case errors.Is(err, errOrganizationAccessNotFound):
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusNotFound, "ORGANIZATION_NOT_FOUND", "The organization was not found."))
+		case errors.Is(err, errOrganizationForbidden):
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewForbiddenError("You do not have permission to update this organization."))
+		case errors.Is(err, errInvalidName), errors.Is(err, errInvalidSlug):
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_ORGANIZATION", err.Error()))
+		case errors.Is(err, errSlugTaken):
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusConflict, "ORGANIZATION_SLUG_TAKEN", "That organization URL is already in use."))
+		default:
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		}
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, organization)
+}
+
+func (controller Controller) AuditLog(writer http.ResponseWriter, request *http.Request) {
+	principal, authenticated := jwtauth.PrincipalFromContext(request.Context())
+	if !authenticated {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.ErrUnauthorized)
+		return
+	}
+	limit, _ := strconv.Atoi(request.URL.Query().Get("limit"))
+	entries, err := (Service{Container: controller.Container}).AuditLog(request.Context(), principal.UserId, request.PathValue("organizationID"), limit)
+	if err != nil {
+		switch {
+		case errors.Is(err, errInvalidAccount):
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.ErrUnauthorized)
+		case errors.Is(err, errOrganizationAccessNotFound):
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusNotFound, "ORGANIZATION_NOT_FOUND", "The organization was not found."))
+		case errors.Is(err, errOrganizationForbidden):
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewForbiddenError("You do not have permission to view organization security events."))
+		default:
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		}
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"entries": entries})
 }
 
 func (controller Controller) List(writer http.ResponseWriter, request *http.Request) {
