@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { SpaceAnnouncement } from "@/components/spaces/spaceAnnouncement";
+import { spaceAnnouncementDisplayText } from "@/utils/spaceAnnouncement.util";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -154,7 +155,7 @@ function OrganicPostCard({ post, priority = false, swipeable = false, showPinned
       <SpaceAnnouncement text={post.text} />
       {post.text ? (
         <p className={styles.text}>
-          <MentionText text={post.text} mentions={post.mentions} />
+          <MentionText text={spaceAnnouncementDisplayText(post.text)} mentions={post.mentions} />
         </p>
       ) : null}
       <PostLinkCard post={post} />

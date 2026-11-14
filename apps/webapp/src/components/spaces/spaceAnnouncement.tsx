@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { spacesService } from "@/services/spaces.service";
 import { spaceIdFromAnnouncement } from "@/utils/spaceAnnouncement.util";
-import styles from "./spaces.module.css";
+import styles from "./spaceAnnouncement.module.css";
 export function SpaceAnnouncement({ text }: { text: string }) {
   const id = spaceIdFromAnnouncement(text);
   const detail = useQuery({
@@ -15,7 +15,7 @@ export function SpaceAnnouncement({ text }: { text: string }) {
   if (!id) return null;
   const space = detail.data;
   return (
-    <aside className={styles.card}>
+    <aside className={styles.announcement}>
       <div className={styles.copy}>
         <strong>Audio Space</strong>
         <span>
@@ -30,7 +30,7 @@ export function SpaceAnnouncement({ text }: { text: string }) {
                   : "Open the conversation"}
         </span>
       </div>
-      <Link className={styles.button} href={`/spaces/${id}`}>
+      <Link className={styles.action} href={`/spaces/${id}`}>
         {space?.state === "live" ? "Join Space" : "View Space"}
       </Link>
     </aside>

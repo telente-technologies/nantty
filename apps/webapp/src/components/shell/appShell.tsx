@@ -47,11 +47,11 @@ function BottomNavigation({ navItems, viewer }: { readonly navItems: readonly Na
           const active = isNavItemActive(item.href, pathname);
           return (
             <li key={item.href}>
-              <Link href={item.href} className={[styles.bottomNavItem, active ? styles.bottomNavItemActive : "", item.href === "/post/new" ? styles.bottomNavCreate : ""].filter(Boolean).join(" ")} aria-current={active ? "page" : undefined} aria-label={item.label}>
+              <Link href={item.href} className={[styles.bottomNavItem, active ? styles.bottomNavItemActive : "", item.href === "/post/new" ? styles.bottomNavCreate : ""].filter(Boolean).join(" ")} aria-current={active ? "page" : undefined} aria-label={`${item.label}${item.badgeCount ? `, ${formatBadgeCount(item.badgeCount)} unread` : ""}`}>
                 <span className={[styles.bottomNavIcon, item.href === "/post/new" ? styles.bottomNavCreateIcon : ""].filter(Boolean).join(" ")}>
                   {item.href === "/me" && viewer?.avatarUrl ? <Avatar name={viewer.name} src={viewer.avatarUrl} size="xs" ring={active} /> : active ? item.activeIcon ?? item.icon : item.icon}
                 </span>
-                <span className="visuallyHidden">{item.label}</span>
+                <span className={styles.bottomNavLabel}>{item.label}</span>
                 {item.badgeCount ? <span className={styles.bottomNavBadge}>{formatBadgeCount(item.badgeCount)}</span> : null}
               </Link>
             </li>

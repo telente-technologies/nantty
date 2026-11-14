@@ -9,6 +9,7 @@ import { MartBrowser } from "@/components/commerce/martBrowser";
 import { FeedTopicFilterRow, type FeedMode } from "@/components/feed/feedTopicFilterRow";
 import { HomeSectionPager } from "@/components/home/homeSectionPager";
 import { FeedPostsWithModules } from "@/components/feedModules/feedPostsWithModules";
+import { FeedStoryTray } from "@/components/feed/feedStoryTray";
 import { PostFeedSkeleton } from "@/components/feed/postCardSkeleton";
 import { InlineLink } from "@/components/ui/controls";
 import { EmptyState, ErrorState, Spinner } from "@/components/ui/feedback";
@@ -70,6 +71,7 @@ export default function HomePage() {
 
   const feed = (
     <div className={styles.page}>
+      {!isGuest ? <FeedStoryTray /> : null}
       {isGuest ? (
         <p className={styles.guestNote}>Popular on Nantty right now. Sign in to get a feed picked for you.</p>
       ) : (
