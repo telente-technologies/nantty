@@ -49,7 +49,6 @@ export function PortalShell({ children }: { readonly children: ReactNode }) {
               <NanttyWordmark height={22} />
               <span className={styles.productLabel}>Sandbox</span>
             </Link>
-            <PortalSwitcher />
           </div>
           <div className={styles.topbarLeading}>
             <span className={styles.environment}>Test environment · isolated</span>
@@ -74,6 +73,7 @@ export function PortalShell({ children }: { readonly children: ReactNode }) {
       <div ref={mobileMenuRef} id="sandbox-mobile-navigation" className={styles.mobileMenu} hidden={!mobileMenuOpen}>
         <div className={styles.mobileMenuContent}>
           <PortalNavigation groups={sandboxNavigationGroups} mobile onNavigate={() => setMobileMenuOpen(false)} />
+          <PortalSwitcher onNavigate={() => setMobileMenuOpen(false)} />
           <p className={styles.mobileSafetyNote}>Synthetic data only. Never use production credentials here.</p>
           <ThemeSwitcher label="Appearance" showLabel className={styles.mobileThemeSwitcher} />
         </div>
@@ -85,6 +85,7 @@ export function PortalShell({ children }: { readonly children: ReactNode }) {
       </div>
       <aside className={styles.sidebar}>
         <PortalNavigation groups={sandboxNavigationGroups} />
+        <PortalSwitcher />
         <p className={styles.sidebarNote}>Synthetic data only. Never use production credentials here.</p>
       </aside>
 

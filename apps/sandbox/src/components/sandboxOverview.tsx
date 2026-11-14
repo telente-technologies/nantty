@@ -29,14 +29,6 @@ export function SandboxOverview() {
         <Link href="/docs" className={styles.docsLink}>Sandbox guide</Link>
       </header>
 
-      <nav className={styles.pageTabs} aria-label="Sandbox workspace sections">
-        <Link href="/" aria-current="page">Overview</Link>
-        <Link href="/test-apps">Test applications</Link>
-        <Link href="/explorer">API explorer</Link>
-        <Link href="/scenarios">Scenarios</Link>
-        <Link href="/requests">Request log</Link>
-      </nav>
-
       <dl className={styles.environmentSummary} aria-label="Sandbox availability">
         <div>
           <dt>Environment</dt>

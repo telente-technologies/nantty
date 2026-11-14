@@ -36,7 +36,7 @@
 .menuToggleButton[aria-expanded="true"] .menuToggleBars { transform: translateY(0) rotate(45deg); }
 .menuToggleButton[aria-expanded="true"] .menuToggleBars::before { top: 0; transform: rotate(-90deg); }
 .srOnly { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
-.mobileMenu { position: fixed; z-index: 49; inset: 72px var(--space-3) var(--space-3); display: none; flex-direction: column; justify-content: space-between; gap: var(--space-5); overflow-y: auto; padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); color: var(--color-text); }
+.mobileMenu { position: fixed; z-index: 49; inset: 72px auto var(--space-3) 0; display: none; width: min(86vw, 340px); flex-direction: column; justify-content: space-between; gap: var(--space-5); overflow-y: auto; padding: var(--space-4); border: 1px solid var(--color-border); border-left: 0; border-radius: 0 var(--radius-lg) var(--radius-lg) 0; background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-float); }
 .mobileMenu[hidden] { display: none; }
 .mobileMenuContent { display: grid; align-content: start; gap: var(--space-4); }
 .mobileNavigation { min-height: 0; }
@@ -53,21 +53,21 @@
 .notice { display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-5); padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-border); font-size: var(--fs-12); }
 .notice strong { flex: none; font-weight: 600; }
 .notice span { color: var(--color-text-muted); }
-.footer { grid-column: 2; margin-top: var(--space-8); padding: var(--space-7) clamp(var(--space-4), 5vw, var(--space-8)) var(--space-4); overflow: hidden; border-top: 1px solid #34363b; background: #17181b; color: #b9bbc0; }
+.footer { grid-column: 2; margin-top: var(--space-8); padding: var(--space-7) clamp(var(--space-4), 5vw, var(--space-8)) var(--space-4); overflow: hidden; border-top: 1px solid var(--footer-border); background: var(--footer-background); color: var(--footer-muted); }
 .footerInner { width: min(1480px, 100%); margin-inline: auto; }
 .footerTop { display: grid; grid-template-columns: minmax(220px, .8fr) minmax(0, 1.2fr); gap: var(--space-7); }
 .footerNavigation { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); }
 .footerBrand { display: grid; align-content: start; justify-items: start; gap: var(--space-3); max-width: 420px; }
-.footerBrand p { margin: 0; color: #b9bbc0; font-size: var(--fs-13); }
-.footerBrand a, .footerGroup a { color: #b9bbc0; font-size: var(--fs-13); text-underline-offset: 3px; }
-.footerBrand a:hover, .footerGroup a:hover { color: #f0f1f2; }
-.footerGroup h2 { margin: 0 0 var(--space-2); color: #f0f1f2; font-size: var(--fs-12); font-weight: 650; letter-spacing: .035em; text-transform: uppercase; }
+.footerBrand p { margin: 0; color: var(--footer-muted); font-size: var(--fs-13); }
+.footerBrand a, .footerGroup a { color: var(--footer-muted); font-size: var(--fs-13); text-underline-offset: 3px; }
+.footerBrand a:hover, .footerGroup a:hover { color: var(--footer-foreground); }
+.footerGroup h2 { margin: 0 0 var(--space-2); color: var(--footer-foreground); font-size: var(--fs-12); font-weight: 650; letter-spacing: .035em; text-transform: uppercase; }
 .footerNavigation .footerGroup { display: grid; align-content: start; justify-items: start; gap: var(--space-1); }
 .footerGroup ul { display: grid; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
 .footerGroup a { display: inline-flex; align-items: center; min-height: 30px; }
-.footerBottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); margin-top: var(--space-6); padding-top: var(--space-3); border-top: 1px solid #34363b; color: #a7a9ae; font-size: var(--fs-12); }
+.footerBottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); margin-top: var(--space-6); padding-top: var(--space-3); border-top: 1px solid var(--footer-border); color: var(--footer-subtle); font-size: var(--fs-12); }
 .footerBottom p { margin: 0; }
-.footerWordmark { width: min(100%, 1440px); margin: clamp(40px, 6vw, 80px) auto -0.11em; overflow: hidden; color: #383a3f; font-size: clamp(4rem, 25vw, 17rem); font-weight: 800; letter-spacing: -.09em; line-height: .82; text-align: center; white-space: nowrap; user-select: none; }
+.footerWordmark { width: min(100%, 1440px); margin: clamp(40px, 6vw, 80px) auto -0.11em; overflow: hidden; color: var(--blue-500); font-size: clamp(4rem, 25vw, 17rem); font-weight: 800; letter-spacing: -.09em; line-height: .82; text-align: center; white-space: nowrap; user-select: none; }
 @media (min-width: 1100px) { .topbarActions > fieldset { display: flex; } }
 @media (max-width: 1099px) { .topbarActions > fieldset { display: none; } }
 @media (max-width: 860px) and (min-width: 761px) { .shell { grid-template-columns: 212px minmax(0, 1fr); } .sidebar { padding-inline: var(--space-2); } .main { padding-inline: var(--space-4); } }
@@ -91,7 +91,7 @@
   .footerBottom { align-items: flex-start; flex-direction: column; }
   .footer { grid-column: 1; margin-top: var(--space-5); }
 }
-@media (max-width: 400px) { .footerBrand { grid-column: 1; } .footerNavigation { grid-template-columns: 1fr; } .footerNavigation .footerGroup:last-child { grid-column: auto; } .footerWordmark { font-size: clamp(4rem, 26vw, 10rem); } .mobileMenu { inset-inline: var(--space-2); padding: var(--space-3); } }
+@media (max-width: 400px) { .footerBrand { grid-column: 1; } .footerNavigation { grid-template-columns: 1fr; } .footerNavigation .footerGroup:last-child { grid-column: auto; } .footerWordmark { font-size: clamp(4rem, 26vw, 10rem); } .mobileMenu { inset-inline-start: 0; inset-inline-end: auto; width: min(88vw, 340px); padding: var(--space-3); } }
 @media (prefers-reduced-motion: reduce) { .skipLink, .menuToggleBars, .menuToggleBars::before { transition: none; } }
 
 /* Match the full-width Nantty web-app frame across every sandbox route. */
@@ -129,6 +129,16 @@
   .footerNavigation .footerGroup:last-child { grid-column: auto; }
 }
 
+.sidebar > .navigation { flex: 1; }
+.workspaceSwitcher { display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-2) 0; border-top: 1px solid var(--color-border); }
+.workspaceSwitcherLabel { margin: 0; color: var(--color-text-subtle); font-size: var(--fs-12); font-weight: 650; letter-spacing: .035em; }
+.workspaceSwitcherList { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.workspaceCurrent, .workspaceLink { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 36px; padding-inline: var(--space-3); border-radius: var(--radius-sm); color: var(--color-text-muted); font-size: var(--fs-13); font-weight: 550; text-decoration: none; }
+.workspaceCurrent { background: var(--color-surface-hover); color: var(--color-text); font-weight: 650; }
+.workspaceLink:hover { background: var(--color-surface-hover); color: var(--color-text); text-decoration: none; }
+.workspaceLink:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.mobileMenuContent .workspaceSwitcher { margin-top: var(--space-2); }
+
 /* Keep all sandbox routes on the same Nantty shell and brand palette. */
 .navigationLink[aria-current="page"], .mobileNavigationLink[aria-current="page"] { border-left-color: var(--color-brand); background: var(--color-brand-tint); color: var(--color-brand); }
 .navigationLink[aria-current="page"] svg { color: var(--color-brand); }
@@ -136,5 +146,5 @@
 .publicSiteLink { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--control-md); padding-inline: var(--space-2); color: var(--color-brand); font-size: var(--fs-12); font-weight: 650; text-decoration: none; white-space: nowrap; }
 .publicSiteLink:hover { color: var(--color-brand-solid-hover); text-decoration: underline; text-underline-offset: 3px; }
 .productSwitcherLink:focus-visible, .brand:focus-visible, .navigationLink:focus-visible, .mobileNavigationLink:focus-visible, .footer a:focus-visible { outline-color: var(--color-focus); }
-.footerWordmark { color: #383a3f; }
+.footerWordmark { color: var(--blue-500); }
 @media (max-width: 760px) { .publicSiteLink { display: none; } }
