@@ -218,7 +218,7 @@ It consumes `realtime-domain-events` from RabbitMQ (`lib/realtime/events/amqp.co
 
 **Chat is end-to-end encrypted.** `packages/chatCrypto` implements X3DH, the Double Ratchet and sender keys for groups, with per-device keys; mobile, webapp and seller use it. The social service stores public key bundles (`modules/messagingKeys`) and ciphertext only, and refuses plaintext message bodies (`assertNoPlaintext`, `ENCRYPTION_REQUIRED`). There is no plaintext fallback.
 
-More detail: [realtime.md](realtime.md), [liveSafety.md](liveSafety.md).
+More detail: [realtime.md](realtime.md), [liveSafety.md](liveSafety.md), and the [Messenger and business messaging status/plan](messenger-and-business-messaging.md). The latter distinguishes the shared messaging foundation from the not-yet-implemented public business API and Developer/Sandbox apps.
 
 ## 10. Widgets
 

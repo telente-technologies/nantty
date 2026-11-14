@@ -40,7 +40,7 @@ Rule: Phoenix only **fans out facts** it consumed from the bus. It never debits,
 
 | Feature | Path | Topic / event | Status |
 | --- | --- | --- | --- |
-| Messaging | client POST message to TS/Phoenix persistence, then `message.created` | `conversation:<id>` / `message.created` | router EXISTING, producer + membership PROPOSED |
+| Messaging | Social persists an authorized encrypted message and writes the outbox event transactionally; realtime authorizes conversation membership and routes `message.created` | `conversation:<id>` / `message.created` | producer + membership EXISTING in source; deployment/load behavior still requires environment verification |
 | Typing | client frame `typing` relayed over PubSub | `conversation:<id>` / `typing` | EXISTING |
 | Live chat | PROPOSED: comment via go-live API (moderation filter, rate limit) then event | `live:<id>` / `live.comment` (name not in router yet) | PROPOSED |
 | Gift animations | `gift.sent` from go-live after money confirms | `live:<id>` / `gift.sent`, `gift.goal.progress`, `gift.goal.completed` | router EXISTING, producer ABSENT |
