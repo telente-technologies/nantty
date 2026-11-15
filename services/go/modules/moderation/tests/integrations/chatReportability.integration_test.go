@@ -1,4 +1,4 @@
-package integrations
+package integrations_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"nantty/modules/moderation/src/configs"
+	"nantty/modules/moderation/src/integrations"
 	"nantty/platform/httpserver"
 )
 
@@ -35,9 +36,9 @@ func TestChatReportabilityFailsClosedAndPassesSocialRefusalsThrough(t *testing.T
 		answers[request.URL.Query().Get("reporterId")](writer)
 	}))
 	defer server.Close()
-	checker := NewHttpChatReportability(map[string]configs.InternalSource{"social": {BaseUrl: server.URL, Token: "internal-secret"}}, true)
+	checker := integrations.NewHttpChatReportability(map[string]configs.InternalSource{"social": {BaseUrl: server.URL, Token: "internal-secret"}}, true)
 	check := func(reporter string) error {
-		return checker.RequireReportable(context.Background(), ChatReportabilityRequest{ConversationId: conversationId, ReporterId: reporter})
+		return checker.RequireReportable(context.Background(), integrations.ChatReportabilityRequest{ConversationId: conversationId, ReporterId: reporter})
 	}
 	if err := check("member"); err != nil || token != "internal-secret" {
 		t.Fatalf("a member may report: %v (token %q)", err, token)
@@ -48,11 +49,11 @@ func TestChatReportabilityFailsClosedAndPassesSocialRefusalsThrough(t *testing.T
 	if status, _ := codeOf(check("broken")); status != http.StatusServiceUnavailable {
 		t.Fatalf("an unavailable social service fails closed, got %d", status)
 	}
-	if status, code := codeOf(checker.RequireReportable(context.Background(), ChatReportabilityRequest{ConversationId: "conv-1", ReporterId: "member"})); status != http.StatusForbidden || code != "NOT_A_MEMBER" {
+	if status, code := codeOf(checker.RequireReportable(context.Background(), integrations.ChatReportabilityRequest{ConversationId: "conv-1", ReporterId: "member"})); status != http.StatusForbidden || code != "NOT_A_MEMBER" {
 		t.Fatalf("a conversation id that cannot exist is refused, got %d %s", status, code)
 	}
-	unconfigured := NewHttpChatReportability(map[string]configs.InternalSource{}, true)
-	if status, _ := codeOf(unconfigured.RequireReportable(context.Background(), ChatReportabilityRequest{ConversationId: conversationId, ReporterId: "member"})); status != http.StatusServiceUnavailable {
+	unconfigured := integrations.NewHttpChatReportability(map[string]configs.InternalSource{}, true)
+	if status, _ := codeOf(unconfigured.RequireReportable(context.Background(), integrations.ChatReportabilityRequest{ConversationId: conversationId, ReporterId: "member"})); status != http.StatusServiceUnavailable {
 		t.Fatalf("production without the social source fails closed, got %d", status)
 	}
 }

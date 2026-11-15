@@ -1,10 +1,11 @@
-package services
+package services_test
 
 import (
 	"strings"
 	"testing"
 
 	"nantty/modules/ads/src/modules/reporting/dtos"
+	"nantty/modules/ads/src/modules/reporting/services"
 	"nantty/modules/ads/src/types"
 )
 
@@ -12,7 +13,7 @@ func TestCsvExportPrefixesFormulaCellsAndShowsCurrencyInMoneyHeaders(t *testing.
 	response := dtos.ReportResponse{Currency: "NGN", Query: dtos.ReportQuery{Breakdown: "campaign"}, Rows: []dtos.ReportRow{{
 		Key: "1", Label: "=HYPERLINK(\"http://evil\")", Metrics: dtos.ReportMetrics{Impressions: 10, Spend: types.Money{AmountMinor: 123_456, Currency: "NGN"}},
 	}}}
-	output, err := BuildReportCsv(response, []string{"spend", "impressions"})
+	output, err := services.BuildReportCsv(response, []string{"spend", "impressions"})
 	if err != nil {
 		t.Fatal(err)
 	}

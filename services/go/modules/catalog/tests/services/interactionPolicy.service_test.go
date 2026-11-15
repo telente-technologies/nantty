@@ -1,20 +1,22 @@
-package services
+package services_test
 
 import (
 	"testing"
 	"time"
+
+	"nantty/modules/catalog/src/services"
 )
 
 func TestInteractionsAreDroppedWithoutAnalyticsConsent(t *testing.T) {
-	_, kept := BuildInteractionEventData(InteractionInput{Event: "product.viewed", OccurredAt: time.Now()}, InteractionActor{AccountId: "a"}, ConsentChoices{})
+	_, kept := services.BuildInteractionEventData(services.InteractionInput{Event: "product.viewed", OccurredAt: time.Now()}, services.InteractionActor{AccountId: "a"}, services.ConsentChoices{})
 	if kept {
 		t.Fatal("event kept without analytics consent")
 	}
 }
 
 func TestPersonalizationEventsLoseActorWithoutPersonalizationConsent(t *testing.T) {
-	input := InteractionInput{Event: "search.performed", Payload: map[string]any{"query": "shoes", "surface": "mart"}, OccurredAt: time.Now()}
-	data, kept := BuildInteractionEventData(input, InteractionActor{AccountId: "a", SessionId: "s"}, ConsentChoices{Analytics: true})
+	input := services.InteractionInput{Event: "search.performed", Payload: map[string]any{"query": "shoes", "surface": "mart"}, OccurredAt: time.Now()}
+	data, kept := services.BuildInteractionEventData(input, services.InteractionActor{AccountId: "a", SessionId: "s"}, services.ConsentChoices{Analytics: true})
 	if !kept || data["personalized"] != false {
 		t.Fatalf("expected an aggregated event, got %v kept=%v", data, kept)
 	}
@@ -27,8 +29,8 @@ func TestPersonalizationEventsLoseActorWithoutPersonalizationConsent(t *testing.
 }
 
 func TestPersonalizedEventsKeepActorWithConsent(t *testing.T) {
-	data, kept := BuildInteractionEventData(InteractionInput{Event: "product.viewed", Payload: map[string]any{"productId": "p", "ignored": "x"}, OccurredAt: time.Now()},
-		InteractionActor{AccountId: "a", SessionId: "s"}, ConsentChoices{Analytics: true, Personalization: true})
+	data, kept := services.BuildInteractionEventData(services.InteractionInput{Event: "product.viewed", Payload: map[string]any{"productId": "p", "ignored": "x"}, OccurredAt: time.Now()},
+		services.InteractionActor{AccountId: "a", SessionId: "s"}, services.ConsentChoices{Analytics: true, Personalization: true})
 	if !kept || data["actorId"] != "a" || data["sessionId"] != "s" {
 		t.Fatalf("unexpected data %v", data)
 	}
@@ -38,17 +40,17 @@ func TestPersonalizedEventsKeepActorWithConsent(t *testing.T) {
 }
 
 func TestSearchProductClicksHashQueryAndPreserveRankSignals(t *testing.T) {
-	data, kept := BuildInteractionEventData(InteractionInput{
+	data, kept := services.BuildInteractionEventData(services.InteractionInput{
 		Event: "product.clicked",
 		Payload: map[string]any{
-			"productId": "0192a4f0-0000-7000-8000-000000000001",
-			"surface": "search",
-			"query": "linen shirts",
+			"productId":   "0192a4f0-0000-7000-8000-000000000001",
+			"surface":     "search",
+			"query":       "linen shirts",
 			"resultCount": float64(12),
-			"position": float64(2),
+			"position":    float64(2),
 		},
 		OccurredAt: time.Now(),
-	}, InteractionActor{AccountId: "account-1", SessionId: "session-1", IdHashSecret: "id-key", IntelligenceKey: "shared-key"}, ConsentChoices{Analytics: true, Personalization: true})
+	}, services.InteractionActor{AccountId: "account-1", SessionId: "session-1", IdHashSecret: "id-key", IntelligenceKey: "shared-key"}, services.ConsentChoices{Analytics: true, Personalization: true})
 	if !kept {
 		t.Fatal("expected consented product search click to be kept")
 	}
@@ -61,14 +63,14 @@ func TestSearchProductClicksHashQueryAndPreserveRankSignals(t *testing.T) {
 	if data["productId"] != "0192a4f0-0000-7000-8000-000000000001" || data["resultCount"] != 12 || data["position"] != 2 {
 		t.Fatalf("product ranking signal missing from interaction: %v", data)
 	}
-	published := IntelligenceInteractionPayload(data, "id-key", "shared-key")
+	published := services.IntelligenceInteractionPayload(data, "id-key", "shared-key")
 	if published["actorId"] == "account-1" || published["sessionId"] != nil {
 		t.Fatalf("raw account/session identifiers must not be published: %v", published)
 	}
 }
 
 func TestClientsCannotReportPurchases(t *testing.T) {
-	if _, kept := BuildInteractionEventData(InteractionInput{Event: "product.purchased"}, InteractionActor{}, ConsentChoices{Analytics: true, Personalization: true}); kept {
+	if _, kept := services.BuildInteractionEventData(services.InteractionInput{Event: "product.purchased"}, services.InteractionActor{}, services.ConsentChoices{Analytics: true, Personalization: true}); kept {
 		t.Fatal("purchases may only come from orders")
 	}
 }

@@ -1,10 +1,11 @@
-package validators
+package validators_test
 
 import (
 	"testing"
 	"time"
 
 	"nantty/modules/catalog/src/modules/sellerProducts/dtos"
+	"nantty/modules/catalog/src/modules/sellerProducts/validators"
 )
 
 func validRequest() dtos.ProductUpsertRequest {
@@ -18,7 +19,7 @@ func validRequest() dtos.ProductUpsertRequest {
 }
 
 func TestValidProductPasses(t *testing.T) {
-	if err := ValidateProductUpsertAt(validRequest(), time.Now()); err != nil {
+	if err := validators.ValidateProductUpsertAt(validRequest(), time.Now()); err != nil {
 		t.Fatalf("expected valid product, got %v", err)
 	}
 }
@@ -38,7 +39,7 @@ func TestValidProductParcelFieldsPass(t *testing.T) {
 	request.Variants[0].LengthMm = intPointer(300)
 	request.Variants[0].WidthMm = intPointer(200)
 	request.Variants[0].HeightMm = intPointer(50)
-	if err := ValidateProductUpsertAt(request, time.Now()); err != nil {
+	if err := validators.ValidateProductUpsertAt(request, time.Now()); err != nil {
 		t.Fatalf("expected valid parcel fields, got %v", err)
 	}
 }
@@ -79,7 +80,7 @@ func TestProductValidationRejectsBrokenVariants(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			request := validRequest()
 			mutate(&request)
-			if err := ValidateProductUpsertAt(request, time.Now()); err == nil {
+			if err := validators.ValidateProductUpsertAt(request, time.Now()); err == nil {
 				t.Fatal("expected a validation error")
 			}
 		})
@@ -87,10 +88,10 @@ func TestProductValidationRejectsBrokenVariants(t *testing.T) {
 }
 
 func TestEan13CheckDigit(t *testing.T) {
-	if !IsValidEan13("4006381333931") {
+	if !validators.IsValidEan13("4006381333931") {
 		t.Fatal("known valid EAN-13 rejected")
 	}
-	if IsValidEan13("4006381333932") {
+	if validators.IsValidEan13("4006381333932") {
 		t.Fatal("wrong check digit accepted")
 	}
 }

@@ -1,8 +1,10 @@
-package services
+package services_test
 
 import (
 	"testing"
 	"time"
+
+	"nantty/modules/moderation/src/modules/chatReports/services"
 )
 
 func TestPriorityAndSlaFollowTheReason(t *testing.T) {
@@ -18,12 +20,12 @@ func TestPriorityAndSlaFollowTheReason(t *testing.T) {
 		{"spam_or_scam", "low", 72 * time.Hour},
 	}
 	for _, testCase := range cases {
-		priority := PriorityForReason(testCase.reason)
-		if priority != testCase.priority || SlaFor(priority) != testCase.sla {
-			t.Errorf("%s: got %s/%s", testCase.reason, priority, SlaFor(priority))
+		priority := services.PriorityForReason(testCase.reason)
+		if priority != testCase.priority || services.SlaFor(priority) != testCase.sla {
+			t.Errorf("%s: got %s/%s", testCase.reason, priority, services.SlaFor(priority))
 		}
 	}
-	if PriorityRank("urgent") >= PriorityRank("low") {
+	if services.PriorityRank("urgent") >= services.PriorityRank("low") {
 		t.Error("urgent must sort before low")
 	}
 }
@@ -31,10 +33,10 @@ func TestPriorityAndSlaFollowTheReason(t *testing.T) {
 func TestEvidenceHashIsComputedOverTheCompactedArrayAsSent(t *testing.T) {
 	pretty := []byte("[ {\"messageId\": \"m1\", \"senderId\": \"u1\"} ]")
 	compact := []byte("[{\"messageId\":\"m1\",\"senderId\":\"u1\"}]")
-	if HashEvidenceExactlyAsSent(pretty) != HashEvidenceExactlyAsSent(compact) {
+	if services.HashEvidenceExactlyAsSent(pretty) != services.HashEvidenceExactlyAsSent(compact) {
 		t.Fatal("whitespace must not change the hash")
 	}
-	if HashEvidenceExactlyAsSent(compact) == HashEvidenceExactlyAsSent([]byte("[{\"messageId\":\"m2\"}]")) {
+	if services.HashEvidenceExactlyAsSent(compact) == services.HashEvidenceExactlyAsSent([]byte("[{\"messageId\":\"m2\"}]")) {
 		t.Fatal("different evidence must hash differently")
 	}
 }

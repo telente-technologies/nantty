@@ -1,4 +1,4 @@
-package integrations
+package integrations_test
 
 import (
 	"testing"
@@ -6,17 +6,11 @@ import (
 
 	"github.com/livekit/protocol/auth"
 	"github.com/livekit/protocol/livekit"
+	"nantty/modules/live/src/integrations"
 )
 
-func TestAudioOnlyPublisherSourcesExcludeVideoAndScreenShare(t *testing.T) {
-	sources := publisherSourcesFor(true)
-	if len(sources) != 1 || sources[0] != livekit.TrackSource_MICROPHONE {
-		t.Fatalf("audio-only sources = %v, want microphone only", sources)
-	}
-}
-
 func TestSpaceTokensEnforceListenerAndSpeakerAudioGrants(t *testing.T) {
-	issuer := &TokenIssuer{ApiKey: "test-key", ApiSecret: "test-secret"}
+	issuer := &integrations.TokenIssuer{ApiKey: "test-key", ApiSecret: "test-secret"}
 	tests := []struct {
 		name       string
 		canPublish bool
@@ -27,7 +21,7 @@ func TestSpaceTokensEnforceListenerAndSpeakerAudioGrants(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			token, err := issuer.IssueParticipantToken(MediaGrant{Room: "space-test", Identity: "user", CanPublish: test.canPublish, AudioOnly: true, Role: "space", TimeToLive: time.Minute})
+			token, err := issuer.IssueParticipantToken(integrations.MediaGrant{Room: "space-test", Identity: "user", CanPublish: test.canPublish, AudioOnly: true, Role: "space", TimeToLive: time.Minute})
 			if err != nil {
 				t.Fatal(err)
 			}

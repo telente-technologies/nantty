@@ -1,8 +1,10 @@
-package utils
+package utils_test
 
 import (
 	"testing"
 	"time"
+
+	"nantty/modules/auth/src/utils"
 )
 
 func TestAgeBracketFromBirthdayNeverExposesTheDate(t *testing.T) {
@@ -18,7 +20,7 @@ func TestAgeBracketFromBirthdayNeverExposesTheDate(t *testing.T) {
 		"turns 18 tomorrow": {&eighteenTomorrow, "minor"},
 	}
 	for name, testCase := range cases {
-		if got := AgeBracketFromBirthday(testCase.birthday, now); got != testCase.want {
+		if got := utils.AgeBracketFromBirthday(testCase.birthday, now); got != testCase.want {
 			t.Fatalf("%s: got %q, want %q", name, got, testCase.want)
 		}
 	}

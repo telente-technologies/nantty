@@ -1,16 +1,17 @@
-package validators
+package validators_test
 
 import (
 	"testing"
 	"time"
 
 	"nantty/modules/catalog/src/modules/sellerProducts/dtos"
+	"nantty/modules/catalog/src/modules/sellerProducts/validators"
 )
 
 func TestRegionalPricesAreOptionalAndValidated(t *testing.T) {
 	request := validRequest()
 	request.Variants[0].RegionalPrices = []dtos.RegionalPriceRequest{{Currency: "GHS", PriceMinor: 9000}, {Currency: "USD", PriceMinor: 700}}
-	if err := ValidateProductUpsertAt(request, time.Now()); err != nil {
+	if err := validators.ValidateProductUpsertAt(request, time.Now()); err != nil {
 		t.Fatalf("valid regional prices must pass: %v", err)
 	}
 	compare := int64(100)
@@ -23,7 +24,7 @@ func TestRegionalPricesAreOptionalAndValidated(t *testing.T) {
 	for name, prices := range cases {
 		broken := validRequest()
 		broken.Variants[0].RegionalPrices = prices
-		if err := ValidateProductUpsertAt(broken, time.Now()); err == nil {
+		if err := validators.ValidateProductUpsertAt(broken, time.Now()); err == nil {
 			t.Errorf("%s: expected a validation error", name)
 		}
 	}

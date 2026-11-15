@@ -1,4 +1,4 @@
-package services
+package services_test
 
 import (
 	"testing"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"nantty/modules/escrow/src/generated/ent"
+	"nantty/modules/escrow/src/modules/escrows/services"
 )
 
 func TestConvertEscrowToUndeliveredReviewRowIncludesOnlySafeTrackingLinks(t *testing.T) {
@@ -23,7 +24,7 @@ func TestConvertEscrowToUndeliveredReviewRowIncludesOnlySafeTrackingLinks(t *tes
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			row := ConvertEscrowToUndeliveredReviewRow(&ent.Escrow{
+			row := services.ConvertEscrowToUndeliveredReviewRow(&ent.Escrow{
 				ID: uuid.New(), UndeliveredReviewAt: &reviewSince, TrackingURL: test.tracking,
 			})
 			if got := row.TrackingUrl != nil; got != test.wantLink {
