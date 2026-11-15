@@ -2,6 +2,8 @@ package integrations
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -16,6 +18,41 @@ import (
 func readGooglePlayFixture(t *testing.T, name string) []byte {
 	t.Helper()
 	raw, err := os.ReadFile("testdata/googlePlay/" + name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return raw
+}
+
+func googlePlayNotificationForPackage(t *testing.T, raw []byte, packageName string) []byte {
+	t.Helper()
+	var envelope map[string]any
+	if err := json.Unmarshal(raw, &envelope); err != nil {
+		t.Fatal(err)
+	}
+	message, ok := envelope["message"].(map[string]any)
+	if !ok {
+		t.Fatal("notification fixture has no message")
+	}
+	encoded, ok := message["data"].(string)
+	if !ok {
+		t.Fatal("notification fixture has no data")
+	}
+	data, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var notification map[string]any
+	if err := json.Unmarshal(data, &notification); err != nil {
+		t.Fatal(err)
+	}
+	notification["packageName"] = packageName
+	data, err = json.Marshal(notification)
+	if err != nil {
+		t.Fatal(err)
+	}
+	message["data"] = base64.StdEncoding.EncodeToString(data)
+	raw, err = json.Marshal(envelope)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,11 +130,11 @@ func TestGooglePlayVerifierChecksPurchasesWithThePublisherApi(t *testing.T) {
 func TestGooglePlayRealTimeNotificationsNeedThePushTokenAndPackage(t *testing.T) {
 	verifier, calls := startGooglePlayFixtureServer(t, "productPurchase.response.json")
 	withToken := http.Header{GooglePlayPushTokenHeader: {"push-secret"}}
-	voided, err := verifier.VerifySignedRefundNotification(context.Background(), readGooglePlayFixture(t, "rtdn.voided.json"), withToken)
+	voided, err := verifier.VerifySignedRefundNotification(context.Background(), googlePlayNotificationForPackage(t, readGooglePlayFixture(t, "rtdn.voided.json"), "com.nantty.app"), withToken)
 	if err != nil || !voided.IsRefund() || voided.StoreTransactionId != "GPA.3301-1111-2222-33333" || voided.NotificationId != "voided-message-1" {
 		t.Fatalf("voided %+v err %v", voided, err)
 	}
-	renewed, err := verifier.VerifySignedRefundNotification(context.Background(), readGooglePlayFixture(t, "rtdn.renewed.json"), withToken)
+	renewed, err := verifier.VerifySignedRefundNotification(context.Background(), googlePlayNotificationForPackage(t, readGooglePlayFixture(t, "rtdn.renewed.json"), "com.nantty.app"), withToken)
 	if err != nil || renewed.Kind != interfaces.StoreNotificationRenewed || renewed.ExpiresAt == nil {
 		t.Fatalf("renewed %+v err %v", renewed, err)
 	}

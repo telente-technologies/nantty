@@ -41,11 +41,42 @@ func TestApplicationCapabilitiesRequireBothRoleAndApplicationGrant(t *testing.T)
 	if !AllowsOrganizationCapability("billing", "billing.manage") {
 		t.Fatal("billing role was denied billing management")
 	}
+	if !AllowsOrganizationCapability("owner", "security.manage") {
+		t.Fatal("owner was denied organization audit access")
+	}
+	if AllowsOrganizationCapability("admin", "security.manage") || AllowsOrganizationCapability("analyst", "security.manage") {
+		t.Fatal("non-owner role was granted organization audit access")
+	}
 	if AllowsOrganizationCapability("admin", "billing.manage") {
 		t.Fatal("admin was granted billing management")
 	}
 	if AllowsOrganizationCapability("unknown", "organization.read") {
 		t.Fatal("unknown role was granted access")
+	}
+}
+
+func TestApplicationAccessSeparatesEligibleCapabilitiesFromActiveGrants(t *testing.T) {
+	active, eligible := applicationCapabilitiesForGrant("developer", nil)
+	if len(active) != 0 || !reflect.DeepEqual(eligible, []string{"applications.read", "credentials.manage", "webhooks.manage", "request_logs.read", "usage.read"}) {
+		t.Fatalf("without grants, application access = active %v, eligible %v", active, eligible)
+	}
+	active, eligible = applicationCapabilitiesForGrant("developer", []string{"credentials.manage", "billing.manage"})
+	if !reflect.DeepEqual(active, []string{"credentials.manage"}) || len(eligible) != 5 {
+		t.Fatalf("grant intersection = active %v, eligible %v", active, eligible)
+	}
+}
+
+func TestEligibleApplicationCapabilitiesReturnsCopyAndRoleSubset(t *testing.T) {
+	eligible := EligibleApplicationCapabilities("analyst")
+	if !reflect.DeepEqual(eligible, []string{"request_logs.read", "usage.read"}) {
+		t.Fatalf("analyst eligible capabilities = %v", eligible)
+	}
+	eligible[0] = "credentials.manage"
+	if EligibleApplicationCapabilities("analyst")[0] != "request_logs.read" {
+		t.Fatal("eligible application capabilities exposed mutable role state")
+	}
+	if len(EligibleApplicationCapabilities("billing")) != 0 {
+		t.Fatal("billing role received application capabilities")
 	}
 }
 
