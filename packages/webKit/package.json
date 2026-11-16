@@ -9,14 +9,14 @@
     "test": "tsx --import ./src/dialog/__tests__/registerCssStub.mjs --test src/dialog/__tests__/dialog.test.tsx src/loader/__tests__/brandLoader.test.tsx src/errorExperience/__tests__/*.tsx"
   },
   "peerDependencies": {
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "jsdom": "30.1.3",
     "tsx": "^4.23.15"
   },

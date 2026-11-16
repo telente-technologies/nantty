@@ -21,8 +21,8 @@
     "@nantty/web-kit": "workspace:*",
     "livekit-client": "2.22.4",
     "next": "^16.4.2",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "zustand": "^5.0.15"
   },
   "devDependencies": {

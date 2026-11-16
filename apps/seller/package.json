@@ -17,8 +17,8 @@
     "@nantty/design-tokens": "workspace:*",
     "@nantty/web-kit": "workspace:*",
     "next": "^16.4.2",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
