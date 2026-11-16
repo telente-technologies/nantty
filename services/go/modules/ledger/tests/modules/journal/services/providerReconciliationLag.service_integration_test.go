@@ -1,4 +1,4 @@
-package services
+package services_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	"nantty/modules/ledger/src/databases"
 	"nantty/modules/ledger/src/modules/journal/models"
+	ledgerservices "nantty/modules/ledger/src/modules/journal/services"
 )
 
 func TestReconciliationMatchesByReferenceWhateverThePostedDate(t *testing.T) {
@@ -20,8 +21,8 @@ func TestReconciliationMatchesByReferenceWhateverThePostedDate(t *testing.T) {
 		{Account: models.PlatformProviderBalanceAccount("flutterwave", "NGN"), Direction: models.Debit, AmountMinor: 900},
 		{Account: models.SellerAvailableAccount("hana", "NGN"), Direction: models.Credit, AmountMinor: 900},
 	}})
-	run := func(request ReconcileProviderSettlementsRequest) ReconciliationReport {
-		var report ReconciliationReport
+	run := func(request ledgerservices.ReconcileProviderSettlementsRequest) ledgerservices.ReconciliationReport {
+		var report ledgerservices.ReconciliationReport
 		err := databases.RunInMoneyTransaction(context.Background(), harness.database, func(ctx context.Context, transaction *sql.Tx) error {
 			var err error
 			report, err = harness.ledger.ReconcileProviderSettlements(ctx, transaction, request)
@@ -32,13 +33,13 @@ func TestReconciliationMatchesByReferenceWhateverThePostedDate(t *testing.T) {
 		}
 		return report
 	}
-	oldWindow := run(ReconcileProviderSettlementsRequest{Provider: "flutterwave", WindowStartsAt: time.Now().Add(-10 * 24 * time.Hour), WindowEndsAt: time.Now().Add(-9 * 24 * time.Hour),
-		Items: []ProviderSettlementItem{{ProviderReference: "ps_settled_late", AmountMinor: 4000, Currency: "NGN"}}})
+	oldWindow := run(ledgerservices.ReconcileProviderSettlementsRequest{Provider: "flutterwave", WindowStartsAt: time.Now().Add(-10 * 24 * time.Hour), WindowEndsAt: time.Now().Add(-9 * 24 * time.Hour),
+		Items: []ledgerservices.ProviderSettlementItem{{ProviderReference: "ps_settled_late", AmountMinor: 4000, Currency: "NGN"}}})
 	if oldWindow.MatchedCount != 1 || len(oldWindow.Breaks) != 0 {
 		t.Fatalf("a settlement reported outside the posting window must still match: %+v", oldWindow)
 	}
-	current := run(ReconcileProviderSettlementsRequest{Provider: "flutterwave", WindowStartsAt: time.Now().Add(-time.Hour), WindowEndsAt: time.Now().Add(time.Hour), SettlementGrace: 72 * time.Hour,
-		Items: []ProviderSettlementItem{{ProviderReference: "ps_settled_late", AmountMinor: 4000, Currency: "NGN"}}})
+	current := run(ledgerservices.ReconcileProviderSettlementsRequest{Provider: "flutterwave", WindowStartsAt: time.Now().Add(-time.Hour), WindowEndsAt: time.Now().Add(time.Hour), SettlementGrace: 72 * time.Hour,
+		Items: []ledgerservices.ProviderSettlementItem{{ProviderReference: "ps_settled_late", AmountMinor: 4000, Currency: "NGN"}}})
 	if current.MatchedCount != 1 || current.AwaitingSettlement != 1 || len(current.Breaks) != 0 {
 		t.Fatalf("a fresh collection inside the settlement grace is not a break: %+v", current)
 	}

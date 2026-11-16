@@ -1,4 +1,4 @@
-package services
+package services_test
 
 import (
 	"context"
@@ -104,7 +104,7 @@ func TestConcurrentGiftsSpreadOverPlatformStripesAndTheLedgerStaysBalanced(t *te
 	if total := harness.balance(models.PlatformGiftRevenueCoinsAccount()); total != senders*3*10 {
 		t.Fatalf("platform revenue = %d", total)
 	}
-	stripes, err := harness.ledger.clientFor(harness.database).LedgerAccount.Query().
+	stripes, err := harness.client().LedgerAccount.Query().
 		Where(ledgeraccount.CodeHasPrefix(models.PlatformGiftRevenueCoinsAccount().Code + ":stripe:")).Count(context.Background())
 	if err != nil || stripes < 4 {
 		t.Fatalf("gifts used %d platform stripes: %v", stripes, err)
@@ -118,7 +118,7 @@ func TestConcurrentGiftsSpreadOverPlatformStripesAndTheLedgerStaysBalanced(t *te
 func TestPostedJournalRowsCannotBeUpdatedOrDeletedAtTheDatabase(t *testing.T) {
 	harness := startLedgerAgainstFreshSchema(t)
 	harness.seedCoins("immutable", 10)
-	schema := harness.ledger.schemaConfig.JournalEntry
+	schema := harness.schema
 	for _, statement := range []string{
 		`UPDATE "` + schema + `".journal_entries SET description = 'edited'`,
 		`DELETE FROM "` + schema + `".journal_lines`,

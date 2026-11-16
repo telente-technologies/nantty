@@ -51,6 +51,13 @@ func startWalletHarness(t *testing.T, requireReview bool, adjustments ...func(*c
 	t.Helper()
 	money := paymentstesting.StartMoneyHarnessWithPayments(t, map[string]interfaces.StoreReceiptVerifier{"apple_iap": fakeStoreVerifier{store: "apple_iap"}})
 	walletSchema := moneytesting.CreateFreshSchemaWithMigrations(t, money.Database, "wallet", walletmigrations.Files)
+	var walletTables string
+	if err := money.Database.QueryRow("SELECT COALESCE(string_agg(table_name, ',' ORDER BY table_name), '') FROM information_schema.tables WHERE table_schema = $1 AND table_name IN ('coin_packages', 'coin_purchases', 'coin_transfers')", walletSchema).Scan(&walletTables); err != nil {
+		t.Fatal(err)
+	}
+	if walletTables != "coin_packages,coin_purchases,coin_transfers" {
+		t.Fatalf("wallet test schema is missing required migrations: %s", walletTables)
+	}
 	settings := configs.WalletSettings{
 		Money:                        moneytesting.MoneyModuleSettingsForTests("wallet", walletSchema, money.LedgerSchema),
 		CoinTransferFeeBps:           200,

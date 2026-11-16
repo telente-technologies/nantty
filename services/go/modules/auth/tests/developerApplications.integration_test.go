@@ -13,7 +13,9 @@ func TestDeveloperApplicationsAreOrganizationScopedAndAudited(t *testing.T) {
 	harness := startAuthModuleAgainstFreshSchema(t)
 	owner := registerDeveloperTestAccount(t, harness, "application-owner@example.com")
 	developer := registerDeveloperTestAccount(t, harness, "application-developer@example.com")
-	organization := harness.expect("POST", "/api/v1/developer/organizations", owner, map[string]string{"name": "Application Team", "slug": "application-team"}, 201)
+	var ownerID string
+	harness.queryRow("SELECT id::text FROM accounts WHERE email='application-owner@example.com'", &ownerID)
+	organization := harness.expectWithHeaders("POST", "/api/v1/developer/organizations", owner, map[string]string{"name": "Application Team", "slug": "application-team"}, map[string]string{"Idempotency-Key": uuid.NewString()}, 201)
 	organizationID := organization["id"].(string)
 	var developerID string
 	harness.queryRow("SELECT id::text FROM accounts WHERE email='application-developer@example.com'", &developerID)
@@ -62,13 +64,35 @@ func TestDeveloperApplicationsAreOrganizationScopedAndAudited(t *testing.T) {
 	if status != 200 || len(list["applications"].([]any)) != 0 {
 		t.Fatalf("ungranted developer application listing = %d %v, want an empty authorized result", status, list)
 	}
-	status, _ = harness.call("POST", path, developer, map[string]any{"name": "Denied CRM", "purpose": "Connect a support tool to business messaging.", "callbackOrigins": []string{}, "requestedScopes": []string{"messages:send"}})
+	status, _ = harness.callWithHeaders("POST", path, developer, map[string]any{"name": "Denied CRM", "purpose": "Connect a support tool to business messaging.", "callbackOrigins": []string{}, "requestedScopes": []string{"messages:send"}}, map[string]string{"Idempotency-Key": uuid.NewString()})
 	if status != 403 {
 		t.Fatalf("non-admin application create = %d, want 403", status)
 	}
 	appPath := path + "/" + app["id"].(string)
+	capabilitiesPath := appPath + "/capabilities/me"
+	status, capabilityResult := harness.call("GET", capabilitiesPath, owner, nil)
+	if status != 200 || capabilityResult["actorAccountId"] != ownerID || capabilityResult["applicationName"] != "Nantty CRM" || !containsString(capabilityResult["capabilities"], "credentials.manage") {
+		t.Fatalf("owner effective application capabilities = %d %v", status, capabilityResult)
+	}
+	status, _ = harness.call("GET", capabilitiesPath, "", nil)
+	if status != 401 {
+		t.Fatalf("unauthenticated effective application capabilities = %d, want 401", status)
+	}
+	outsider := registerDeveloperTestAccount(t, harness, "application-capability-outsider@example.com")
+	status, _ = harness.call("GET", capabilitiesPath, outsider, nil)
+	if status != 404 {
+		t.Fatalf("outsider effective application capabilities = %d, want 404", status)
+	}
+	status, _ = harness.call("GET", path+"/"+uuid.NewString()+"/capabilities/me", owner, nil)
+	if status != 404 {
+		t.Fatalf("unknown application capabilities = %d, want 404", status)
+	}
+	status, capabilityResult = harness.call("GET", capabilitiesPath, developer, nil)
+	if status != 200 || containsString(capabilityResult["capabilities"], "credentials.manage") {
+		t.Fatalf("ungranted developer effective capabilities = %d %v", status, capabilityResult)
+	}
 	var developerMembershipID string
-	harness.queryRow("SELECT id::text FROM developer_organization_memberships WHERE organization_id=$1 AND account_id=$2", &developerMembershipID, organizationID, developerID)
+	harness.queryRowWithArgs("SELECT id::text FROM developer_organization_memberships WHERE organization_id=$1 AND account_id=$2", []any{organizationID, developerID}, &developerMembershipID)
 	grantListPath := appPath + "/members"
 	status, grants := harness.call("GET", grantListPath, developer, nil)
 	if status != 403 || grants["code"] != "FORBIDDEN" {
@@ -77,6 +101,10 @@ func TestDeveloperApplicationsAreOrganizationScopedAndAudited(t *testing.T) {
 	status, replaced := harness.call("PUT", grantListPath+"/"+developerMembershipID+"/grants", owner, map[string]any{"capabilities": []string{"credentials.manage", "applications.read", "applications.read"}})
 	if status != 200 || replaced["role"] != "developer" || len(replaced["capabilities"].([]any)) != 2 {
 		t.Fatalf("replace developer application grants = %d %v", status, replaced)
+	}
+	status, capabilityResult = harness.call("GET", capabilitiesPath, developer, nil)
+	if status != 200 || !containsString(capabilityResult["capabilities"], "credentials.manage") {
+		t.Fatalf("granted developer effective capabilities = %d %v", status, capabilityResult)
 	}
 	status, list = harness.call("GET", path, developer, nil)
 	applications, ok = list["applications"].([]any)
@@ -121,17 +149,21 @@ func TestDeveloperApplicationsAreOrganizationScopedAndAudited(t *testing.T) {
 		t.Fatalf("analyst without applications.read accessed app metadata = %d, want 403", status)
 	}
 	var remainingGrantRows int
-	harness.queryRow("SELECT count(*) FROM developer_application_member_grants WHERE organization_id=$1 AND membership_id=$2", &remainingGrantRows, organizationID, developerMembershipID)
+	harness.queryRowWithArgs("SELECT count(*) FROM developer_application_member_grants WHERE organization_id=$1 AND membership_id=$2 AND capability NOT IN ('request_logs.read', 'usage.read')", []any{organizationID, developerMembershipID}, &remainingGrantRows)
 	if remainingGrantRows != 0 {
 		t.Fatalf("role downgrade retained ineligible grant rows = %d", remainingGrantRows)
 	}
+	status, capabilityResult = harness.call("GET", capabilitiesPath, developer, nil)
+	if status != 200 || containsString(capabilityResult["capabilities"], "credentials.manage") {
+		t.Fatalf("downgraded member retained credential capability = %d %v", status, capabilityResult)
+	}
 	var grantAuditCount int
-	harness.queryRow("SELECT count(*) FROM developer_organization_audit_logs WHERE organization_id=$1 AND action='application.member_grants_replaced'", &grantAuditCount, organizationID)
+	harness.queryRowWithArgs("SELECT count(*) FROM developer_organization_audit_logs WHERE organization_id=$1 AND action='application.member_grants_replaced'", []any{organizationID}, &grantAuditCount)
 	if grantAuditCount != 2 {
 		t.Fatalf("application grant replacement audit count = %d, want initial and analyst grant events", grantAuditCount)
 	}
 	var pruneAuditCount int
-	harness.queryRow("SELECT count(*) FROM developer_organization_audit_logs WHERE organization_id=$1 AND action='application.member_grants_pruned'", &pruneAuditCount, organizationID)
+	harness.queryRowWithArgs("SELECT count(*) FROM developer_organization_audit_logs WHERE organization_id=$1 AND action='application.member_grants_pruned'", []any{organizationID}, &pruneAuditCount)
 	if pruneAuditCount != 1 {
 		t.Fatalf("application grant pruning audit count = %d, want one role-change event", pruneAuditCount)
 	}
@@ -146,9 +178,26 @@ func TestDeveloperApplicationsAreOrganizationScopedAndAudited(t *testing.T) {
 	if status != 404 {
 		t.Fatalf("archived application read = %d, want 404", status)
 	}
+	status, _ = harness.call("GET", capabilitiesPath, owner, nil)
+	if status != 404 {
+		t.Fatalf("archived application capabilities = %d, want 404", status)
+	}
 	var auditCount int
-	harness.queryRow("SELECT count(*) FROM developer_organization_audit_logs WHERE organization_id=$1 AND action IN ('application.created','application.archived')", &auditCount, organizationID)
+	harness.queryRowWithArgs("SELECT count(*) FROM developer_organization_audit_logs WHERE organization_id=$1 AND action IN ('application.created','application.archived')", []any{organizationID}, &auditCount)
 	if auditCount != 2 {
 		t.Fatalf("application lifecycle audit entries = %d, want 2", auditCount)
 	}
+}
+
+func containsString(value any, wanted string) bool {
+	values, ok := value.([]any)
+	if !ok {
+		return false
+	}
+	for _, item := range values {
+		if item == wanted {
+			return true
+		}
+	}
+	return false
 }

@@ -1,4 +1,4 @@
-package services
+package services_test
 
 import (
 	"context"
@@ -14,21 +14,28 @@ import (
 
 	"nantty/modules/ledger/src/databases"
 	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
+	"nantty/modules/ledger/src/generated/ent"
 	"nantty/modules/ledger/src/generated/ent/journalentry"
 	"nantty/modules/ledger/src/migrations"
+	ledgerservices "nantty/modules/ledger/src/modules/journal/services"
 )
 
 type ledgerHarness struct {
 	t        *testing.T
 	database *sql.DB
-	ledger   *Ledger
+	schema   string
+	ledger   *ledgerservices.Ledger
 }
 
 func startLedgerAgainstFreshSchema(t *testing.T) *ledgerHarness {
 	t.Helper()
 	database := moneytesting.OpenTestDatabaseOrSkip(t)
 	schema := moneytesting.CreateFreshSchemaWithMigrations(t, database, "ledger", migrations.Files)
-	return &ledgerHarness{t: t, database: database, ledger: NewLedgerInSchema(schema)}
+	return &ledgerHarness{t: t, database: database, schema: schema, ledger: ledgerservices.NewLedgerInSchema(schema)}
+}
+
+func (harness *ledgerHarness) client() *ent.Client {
+	return ent.NewClient(ent.Driver(databases.EntDriverForExecutor(harness.database)), ent.AlternateSchema(ledgerservices.SchemaConfigForLedgerTables(harness.schema)))
 }
 
 func (harness *ledgerHarness) post(request models.JournalEntryRequest) (models.PostedJournalEntry, error) {
@@ -177,7 +184,7 @@ func TestReversalRestoresBalancesOnceAndPostedRowsCannotBeMutated(t *testing.T) 
 		var posted models.PostedJournalEntry
 		err := databases.RunInMoneyTransaction(context.Background(), harness.database, func(ctx context.Context, transaction *sql.Tx) error {
 			var reverseError error
-			posted, reverseError = harness.ledger.ReverseJournalEntry(ctx, transaction, ReverseJournalEntryRequest{OriginalEntryId: spent.Id, ReversalReference: reference, Reason: "test refund"})
+			posted, reverseError = harness.ledger.ReverseJournalEntry(ctx, transaction, ledgerservices.ReverseJournalEntryRequest{OriginalEntryId: spent.Id, ReversalReference: reference, Reason: "test refund"})
 			return reverseError
 		})
 		return posted, err
@@ -195,7 +202,7 @@ func TestReversalRestoresBalancesOnceAndPostedRowsCannotBeMutated(t *testing.T) 
 	if _, err := reverse("spend-1:reversed-again"); !errors.Is(err, models.ErrJournalEntryAlreadyReversed) {
 		t.Fatalf("expected already reversed, got %v", err)
 	}
-	client := harness.ledger.clientFor(harness.database)
+	client := harness.client()
 	if err := client.JournalEntry.Update().Where(journalentry.ID(spent.Id)).Exec(context.Background()); err == nil {
 		t.Fatal("posted journal entry was updated")
 	}
@@ -211,7 +218,7 @@ func TestStatementListsNewestFirstWithCursor(t *testing.T) {
 	for index := range 5 {
 		harness.mustPost(spendCoinsEntry(fmt.Sprintf("spend-%d", index), "frank", 1))
 	}
-	request := StatementPageRequest{Accounts: []models.AccountRef{models.UserSpendableCoinsAccount("frank")}, Limit: 4}
+	request := ledgerservices.StatementPageRequest{Accounts: []models.AccountRef{models.UserSpendableCoinsAccount("frank")}, Limit: 4}
 	firstPage, cursor, err := harness.ledger.ListStatementLinesNewestFirst(context.Background(), harness.database, request)
 	if err != nil || len(firstPage) != 4 || cursor == nil || firstPage[0].BalanceAfterMinor != 95 || firstPage[0].IncreasesBalance {
 		t.Fatalf("first page wrong: %+v %v %v", firstPage, cursor, err)
@@ -234,12 +241,12 @@ func TestReconciliationClassifiesEveryBreak(t *testing.T) {
 	collect("ps_matched", 5000)
 	collect("ps_wrong_amount", 7000)
 	collect("ps_not_at_provider", 1000)
-	var report ReconciliationReport
+	var report ledgerservices.ReconciliationReport
 	err := databases.RunInMoneyTransaction(context.Background(), harness.database, func(ctx context.Context, transaction *sql.Tx) error {
 		var reconcileError error
-		report, reconcileError = harness.ledger.ReconcileProviderSettlements(ctx, transaction, ReconcileProviderSettlementsRequest{
+		report, reconcileError = harness.ledger.ReconcileProviderSettlements(ctx, transaction, ledgerservices.ReconcileProviderSettlementsRequest{
 			Provider: "flutterwave", WindowStartsAt: time.Now().Add(-time.Hour), WindowEndsAt: time.Now().Add(time.Hour),
-			Items: []ProviderSettlementItem{
+			Items: []ledgerservices.ProviderSettlementItem{
 				{ProviderReference: "ps_matched", AmountMinor: 5000, Currency: "NGN"},
 				{ProviderReference: "ps_wrong_amount", AmountMinor: 6900, Currency: "NGN"},
 				{ProviderReference: "ps_missed_webhook", AmountMinor: 2500, Currency: "NGN"},

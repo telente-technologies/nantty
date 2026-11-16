@@ -1,4 +1,4 @@
-package privacy
+package privacy_test
 
 import (
 	"fmt"

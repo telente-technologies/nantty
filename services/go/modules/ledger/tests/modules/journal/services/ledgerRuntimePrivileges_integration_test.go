@@ -1,4 +1,4 @@
-package services
+package services_test
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 
 	"nantty/modules/ledger/src/databases/moneyTesting"
+	ledgerservices "nantty/modules/ledger/src/modules/journal/services"
 )
 
 func TestLedgerRuntimeRoleIsLeastPrivilegeAndTransactionsRemainAtomic(t *testing.T) {
@@ -132,7 +133,7 @@ func TestLedgerRuntimeRoleIsLeastPrivilegeAndTransactionsRemainAtomic(t *testing
 		t.Fatalf("FK/runtime privileges are not narrow: owner-key-update=%t owner-table-update=%t runtime-key-update=%t", ownerCanKeyLock, ownerCanUpdateJournal, runtimeCanUpdateJournalID)
 	}
 
-	ledger := NewLedgerInSchema("ledger")
+	ledger := ledgerservices.NewLedgerInSchema("ledger")
 	reference := "runtime-atomicity-" + uuid.NewString()
 	userID := uuid.NewString()
 	request := issueCoinsEntry(reference, userID, 321)

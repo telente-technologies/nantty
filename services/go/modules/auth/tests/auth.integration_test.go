@@ -97,7 +97,7 @@ func startAuthModuleAgainstFreshSchema(t *testing.T, adjustments ...func(*config
 	server := httptest.NewServer(mux)
 	t.Cleanup(func() { server.Close(); stopWorkers(); _ = module.Close(ctx) })
 	next := harnessClientIpCounter.Add(1)
-	clientIp := fmt.Sprintf("198.51.%d.%d", 100+next/250, 1+next%250)
+	clientIp := fmt.Sprintf("198.18.%d.%d", (next/250)%256, 1+next%250)
 	return &authTestHarness{t: t, server: server, logs: logs, publisher: publisher, settings: settings, clientIp: clientIp}
 }
 
@@ -107,6 +107,10 @@ func dropSchemaAndClose(administrator *sql.DB, schema string) {
 }
 
 func (harness *authTestHarness) call(method, path, accessToken string, body any) (int, map[string]any) {
+	return harness.callWithHeaders(method, path, accessToken, body, nil)
+}
+
+func (harness *authTestHarness) callWithHeaders(method, path, accessToken string, body any, headers map[string]string) (int, map[string]any) {
 	harness.t.Helper()
 	var reader *bytes.Reader
 	if body == nil {
@@ -123,6 +127,9 @@ func (harness *authTestHarness) call(method, path, accessToken string, body any)
 	if accessToken != "" {
 		request.Header.Set("Authorization", "Bearer "+accessToken)
 	}
+	for name, value := range headers {
+		request.Header.Set(name, value)
+	}
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		harness.t.Fatal(err)
@@ -134,8 +141,12 @@ func (harness *authTestHarness) call(method, path, accessToken string, body any)
 }
 
 func (harness *authTestHarness) expect(method, path, accessToken string, body any, wantStatus int) map[string]any {
+	return harness.expectWithHeaders(method, path, accessToken, body, nil, wantStatus)
+}
+
+func (harness *authTestHarness) expectWithHeaders(method, path, accessToken string, body any, headers map[string]string, wantStatus int) map[string]any {
 	harness.t.Helper()
-	status, decoded := harness.call(method, path, accessToken, body)
+	status, decoded := harness.callWithHeaders(method, path, accessToken, body, headers)
 	if status != wantStatus {
 		harness.t.Fatalf("%s %s = %d %v, want %d", method, path, status, decoded, wantStatus)
 	}

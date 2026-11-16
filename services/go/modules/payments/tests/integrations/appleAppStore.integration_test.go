@@ -1,4 +1,4 @@
-package integrations
+package integrations_test
 
 import (
 	"context"
@@ -12,26 +12,27 @@ import (
 	"testing"
 	"time"
 
+	storeintegrations "nantty/modules/payments/src/integrations"
 	"nantty/modules/payments/src/interfaces"
 )
 
 func readAppStoreFixture(t *testing.T, name string) []byte {
 	t.Helper()
-	raw, err := os.ReadFile("testdata/appStore/" + name)
+	raw, err := os.ReadFile("../../src/integrations/testdata/appStore/" + name)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return raw
 }
 
-func newFixtureAppleVerifier(t *testing.T, apiBaseUrl string, withApiKey bool) (*AppleAppStoreVerifier, testAppleSigner) {
+func newFixtureAppleVerifier(t *testing.T, apiBaseUrl string, withApiKey bool) (*storeintegrations.AppleAppStoreVerifier, testAppleSigner) {
 	t.Helper()
 	signer := newTestAppleSigner(t)
-	settings := AppleAppStoreSettings{BundleId: "com.nantty.app", Environment: "Sandbox", RootCertificatesPem: signer.rootPem, StoreFeeBasisPoints: 3000, ApiBaseUrl: apiBaseUrl, IssuerId: "issuer-1", KeyId: "KEY123"}
+	settings := storeintegrations.AppleAppStoreSettings{BundleId: "com.nantty.app", Environment: "Sandbox", RootCertificatesPem: signer.rootPem, StoreFeeBasisPoints: 3000, ApiBaseUrl: apiBaseUrl, IssuerId: "issuer-1", KeyId: "KEY123"}
 	if withApiKey {
 		settings.PrivateKeyPem = readAppStoreFixture(t, "apiSigningKey.p8")
 	}
-	verifier, err := NewAppleAppStoreVerifier(settings)
+	verifier, err := storeintegrations.NewAppleAppStoreVerifier(settings)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +147,7 @@ func TestAppleVerifierAcceptsSignedTransactionsAndRejectsForgeries(t *testing.T)
 
 func TestAppleVerifierRejectsChainsFromAnotherRoot(t *testing.T) {
 	otherRoot := []byte(strings.ReplaceAll(string(readAppStoreFixture(t, "rootCertificate.pem")), "A", "B"))
-	if _, err := NewAppleAppStoreVerifier(AppleAppStoreSettings{RootCertificatesPem: otherRoot}); err == nil {
+	if _, err := storeintegrations.NewAppleAppStoreVerifier(storeintegrations.AppleAppStoreSettings{RootCertificatesPem: otherRoot}); err == nil {
 		t.Fatal("a corrupted root must not load")
 	}
 	verifier, signer := newFixtureAppleVerifier(t, "", false)
@@ -158,17 +159,17 @@ func TestAppleVerifierRejectsChainsFromAnotherRoot(t *testing.T) {
 
 func TestAppleVerifierFetchesTransactionFromServerApiWithSignedToken(t *testing.T) {
 	var authorization, path string
-	verifier, signer := newFixtureAppleVerifier(t, "", true)
-	response, err := json.Marshal(map[string]string{"signedTransactionInfo": reSignAppStoreFixture(t, signer, "signedTransaction.consumable.jws", "com.nantty.app")})
-	if err != nil {
-		t.Fatal(err)
-	}
+	var response []byte
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		authorization, path = request.Header.Get("Authorization"), request.URL.Path
 		_, _ = writer.Write(response)
 	}))
 	defer server.Close()
-	verifier.settings.ApiBaseUrl = server.URL
+	verifier, signer := newFixtureAppleVerifier(t, server.URL, true)
+	response, err := json.Marshal(map[string]string{"signedTransactionInfo": reSignAppStoreFixture(t, signer, "signedTransaction.consumable.jws", "com.nantty.app")})
+	if err != nil {
+		t.Fatal(err)
+	}
 	verified, err := verifier.VerifyPurchaseReceipt(context.Background(), interfaces.StoreReceipt{TransactionId: "2000000111", ProductId: "coins.pack.1500"})
 	if err != nil || verified.StoreTransactionId != "2000000111" || verified.Currency != "NGN" {
 		t.Fatalf("verified %+v err %v", verified, err)

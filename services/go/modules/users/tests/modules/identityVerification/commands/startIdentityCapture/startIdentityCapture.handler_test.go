@@ -1,0 +1,24 @@
+package startidentitycapture_test
+
+import (
+	"context"
+	"testing"
+
+	"nantty/modules/users/src/configs"
+	"nantty/modules/users/src/container"
+	startidentitycapture "nantty/modules/users/src/modules/identityVerification/commands/startIdentityCapture"
+)
+
+func TestCaptureNeedsExplicitCurrentConsentAndASupportedPhotoId(t *testing.T) {
+	handler := startidentitycapture.Handler{Container: &container.Container{Settings: configs.UsersSettings{Verification: configs.IdentityVerificationSettings{ConsentVersion: "2026-10-04"}}}}
+	cases := []startidentitycapture.Command{
+		{ConsentAccepted: false, ConsentVersion: "2026-10-04", DocumentCountry: "NG", DocumentType: "NIN_SLIP"},
+		{ConsentAccepted: true, ConsentVersion: "2025-01-01", DocumentCountry: "NG", DocumentType: "NIN_SLIP"},
+		{ConsentAccepted: true, ConsentVersion: "2026-10-04", DocumentCountry: "NG", DocumentType: "STUDENT_CARD"},
+	}
+	for _, command := range cases {
+		if _, err := handler.Execute(context.Background(), command); err == nil {
+			t.Fatalf("capture must be refused for %+v", command)
+		}
+	}
+}

@@ -1,4 +1,4 @@
-package integrations
+package integrations_test
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	storeintegrations "nantty/modules/payments/src/integrations"
 	"nantty/modules/payments/src/interfaces"
 )
 
@@ -17,7 +18,7 @@ const creatorSubscriptionV2 = `{"subscriptionState":"SUBSCRIPTION_STATE_ACTIVE",
 "acknowledgementState":"ACKNOWLEDGEMENT_STATE_PENDING","testPurchase":{},"externalAccountIdentifiers":{"obfuscatedExternalAccountId":"0199A3F2-0000-7000-8000-000000000001"},
 "lineItems":[{"productId":"nantty.creatorsub.tier_1000.s1.monthly","expiryTime":"2026-10-21T10:00:00Z","autoRenewingPlan":{"recurringPrice":{"currencyCode":"NGN","units":"1200","nanos":500000000}}}]}`
 
-func startCreatorGooglePlay(t *testing.T) (*GooglePlayVerifier, *[]string) {
+func startCreatorGooglePlay(t *testing.T) (*storeintegrations.GooglePlayVerifier, *[]string) {
 	t.Helper()
 	var calls []string
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
@@ -35,7 +36,7 @@ func startCreatorGooglePlay(t *testing.T) (*GooglePlayVerifier, *[]string) {
 	}))
 	t.Cleanup(server.Close)
 	account := strings.ReplaceAll(string(readGooglePlayFixture(t, "serviceAccount.json")), "TOKEN_URI", server.URL+"/token")
-	verifier, err := NewGooglePlayVerifier(GooglePlaySettings{
+	verifier, err := storeintegrations.NewGooglePlayVerifier(storeintegrations.GooglePlaySettings{
 		PackageName: "com.nantty.app", ServiceAccountJson: []byte(account), ApiBaseUrl: server.URL, PushToken: "push-secret", SubscriptionPrefixes: []string{"nantty.creatorsub."},
 	})
 	if err != nil {
@@ -67,7 +68,7 @@ func TestGooglePlayCreatorSubscriptionsUseTheRecurringPriceAndAcknowledge(t *tes
 		data, _ := json.Marshal(map[string]any{"packageName": "com.nantty.app", "eventTimeMillis": "1790000000000",
 			"subscriptionNotification": map[string]any{"notificationType": notificationType, "purchaseToken": "purchase-token-1", "subscriptionId": "nantty.creatorsub.tier_1000.s1.monthly"}})
 		raw, _ := json.Marshal(map[string]any{"message": map[string]any{"messageId": "m-" + string(rune('a'+notificationType)), "data": base64.StdEncoding.EncodeToString(data)}})
-		notification, err := verifier.VerifySignedRefundNotification(ctx, raw, http.Header{GooglePlayPushTokenHeader: []string{"push-secret"}})
+		notification, err := verifier.VerifySignedRefundNotification(ctx, raw, http.Header{storeintegrations.GooglePlayPushTokenHeader: []string{"push-secret"}})
 		if err != nil {
 			t.Fatalf("type %d: %v", notificationType, err)
 		}
@@ -83,7 +84,7 @@ func TestGooglePlayCreatorSubscriptionsUseTheRecurringPriceAndAcknowledge(t *tes
 			t.Fatalf("type %d mapped to %s", notificationType, got.Kind)
 		}
 	}
-	if _, err := verifier.VerifySignedRefundNotification(ctx, []byte(`{}`), http.Header{GooglePlayPushTokenHeader: []string{"wrong"}}); err == nil {
+	if _, err := verifier.VerifySignedRefundNotification(ctx, []byte(`{}`), http.Header{storeintegrations.GooglePlayPushTokenHeader: []string{"wrong"}}); err == nil {
 		t.Fatal("a push without the shared token must be rejected")
 	}
 }

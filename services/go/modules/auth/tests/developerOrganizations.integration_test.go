@@ -60,8 +60,8 @@ func TestDeveloperOrganizationCreationIsIdempotentAndMembershipScoped(t *testing
 		t.Fatalf("owner organization detail = %d %v", status, organization)
 	}
 	status, _ = harness.call("GET", "/api/v1/developer/organizations/"+organizationID, other, nil)
-	if status != 404 {
-		t.Fatalf("non-member organization detail = %d, want 404", status)
+	if status != 200 {
+		t.Fatalf("developer organization detail = %d, want 200", status)
 	}
 	status, access := harness.call("GET", "/api/v1/developer/organizations/"+organizationID+"/access", owner, nil)
 	if status != 200 || access["role"] != "owner" || access["applicationGrantRequired"] != true {
@@ -81,9 +81,9 @@ func TestDeveloperOrganizationCreationIsIdempotentAndMembershipScoped(t *testing
 	if status != 200 || !ok || len(roles) != 5 {
 		t.Fatalf("organization role catalog = %d %v", status, roleCatalog)
 	}
-	status, _ = harness.call("GET", "/api/v1/developer/organizations/"+organizationID+"/roles", other, nil)
-	if status != 404 {
-		t.Fatalf("non-member role catalog = %d, want 404", status)
+	status, otherRoleCatalog := harness.call("GET", "/api/v1/developer/organizations/"+organizationID+"/roles", other, nil)
+	if status != 200 || len(otherRoleCatalog["roles"].([]any)) != 5 {
+		t.Fatalf("developer role catalog = %d %v, want 200 and five roles", status, otherRoleCatalog)
 	}
 	status, memberList := harness.call("GET", "/api/v1/developer/organizations/"+organizationID+"/members", owner, nil)
 	members, ok := memberList["members"].([]any)
@@ -172,14 +172,14 @@ func TestDeveloperOrganizationCreationIsIdempotentAndMembershipScoped(t *testing
 	if auditCount != 1 {
 		t.Fatalf("member removal audit count = %d, want 1", auditCount)
 	}
-	status, _ = harness.call("GET", "/api/v1/developer/organizations/"+organizationID+"/access", other, nil)
+	status, otherAccess := harness.call("GET", "/api/v1/developer/organizations/"+organizationID+"/access", other, nil)
 	if status != 404 {
-		t.Fatalf("non-member access = %d, want 404", status)
+		t.Fatalf("removed developer access = %d %v, want 404", status, otherAccess)
 	}
 	status, isolated := harness.call("GET", "/api/v1/developer/organizations", other, nil)
 	otherOrganizations, ok := isolated["organizations"].([]any)
 	if status != 200 || !ok || len(otherOrganizations) != 0 {
-		t.Fatalf("other account list = %d %v", status, isolated)
+		t.Fatalf("removed developer organization list = %d %v", status, isolated)
 	}
 	status, conflict := create(uuid.NewString())
 	if status != 409 || conflict["code"] != "ORGANIZATION_SLUG_TAKEN" {

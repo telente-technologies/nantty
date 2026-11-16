@@ -37,6 +37,10 @@ func (harness *authTestHarness) callFromDevice(method, path, deviceId string, bo
 }
 
 func (harness *authTestHarness) queryRow(statement string, destinations ...any) {
+	harness.queryRowWithArgs(statement, nil, destinations...)
+}
+
+func (harness *authTestHarness) queryRowWithArgs(statement string, arguments []any, destinations ...any) {
 	harness.t.Helper()
 	scoped, err := postgres.ScopeDatabaseUrlToSchema(harness.settings.DatabaseUrl, harness.settings.DatabaseSchema)
 	if err != nil {
@@ -47,7 +51,7 @@ func (harness *authTestHarness) queryRow(statement string, destinations ...any) 
 		harness.t.Fatal(err)
 	}
 	defer database.Close()
-	if err := database.QueryRow(statement).Scan(destinations...); err != nil {
+	if err := database.QueryRow(statement, arguments...).Scan(destinations...); err != nil {
 		harness.t.Fatal(err)
 	}
 }

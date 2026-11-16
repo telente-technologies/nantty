@@ -61,8 +61,8 @@ func TestLostCoinPurchaseChargebacksAccumulateAndRecordSpentCoinDebt(t *testing.
 		t.Fatalf("spend coins before chargeback: %d %s", transfer.Status, transfer.Raw)
 	}
 	creatorBalance := harness.balance(ledgermodels.UserSpendableCoinsAccount(creator))
-	if creatorBalance != 60 {
-		t.Fatalf("recipient balance after transfer = %d; want 60", creatorBalance)
+	if creatorBalance != 78 {
+		t.Fatalf("recipient balance after 2%% transfer fee = %d; want 78", creatorBalance)
 	}
 	harness.creditEarnedCoins(creator, 35)
 	creatorGiftEarnings := harness.balance(ledgermodels.CreatorEarnedCoinsAccount(creator))

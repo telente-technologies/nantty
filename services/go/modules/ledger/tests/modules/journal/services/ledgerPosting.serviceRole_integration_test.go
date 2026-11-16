@@ -1,4 +1,4 @@
-package services
+package services_test
 
 import (
 	"context"
@@ -14,6 +14,7 @@ import (
 	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
 	"nantty/modules/ledger/src/migrations"
 	"nantty/modules/ledger/src/modules/journal/models"
+	ledgerservices "nantty/modules/ledger/src/modules/journal/services"
 	"nantty/platform/postgres"
 )
 
@@ -73,7 +74,7 @@ func TestPostingAsRealServiceRolesWorksAndHistoryStaysAppendOnly(t *testing.T) {
 	for _, role := range []string{"svc_money", "svc_ledger"} {
 		t.Run(role, func(t *testing.T) {
 			database, schema := openAsServiceRole(t, role, role+"_local_only")
-			ledger := NewLedgerInSchema(schema)
+			ledger := ledgerservices.NewLedgerInSchema(schema)
 			posted, err := runPost(database, ledger, issueCoinsEntry("role-issue-1", "dana", 50))
 			if err != nil {
 				t.Fatalf("balanced entry with lines must post as %s: %v", role, err)
@@ -102,7 +103,7 @@ func TestPostingAsRealServiceRolesWorksAndHistoryStaysAppendOnly(t *testing.T) {
 	}
 }
 
-func runPost(database *sql.DB, ledger *Ledger, request models.JournalEntryRequest) (models.PostedJournalEntry, error) {
+func runPost(database *sql.DB, ledger *ledgerservices.Ledger, request models.JournalEntryRequest) (models.PostedJournalEntry, error) {
 	var posted models.PostedJournalEntry
 	err := databases.RunInMoneyTransaction(context.Background(), database, func(ctx context.Context, transaction *sql.Tx) error {
 		var postError error

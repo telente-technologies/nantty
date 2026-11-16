@@ -1,4 +1,4 @@
-package staffauth
+package staffauth_test
 
 import (
 	"context"
@@ -8,6 +8,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"nantty/platform/staffauth"
 )
 
 type fixedNetworkPolicy struct {
@@ -34,9 +36,11 @@ func TestRemoteNetworkPolicyAsksIdentityOnceAndCachesTheAnswerBriefly(t *testing
 		_, _ = writer.Write([]byte(`{"allowed":false}`))
 	}))
 	defer server.Close()
-	policy := NewRemoteNetworkPolicy(server.URL+"/", "internal-token")
 	clock := time.Now()
-	policy.now = func() time.Time { return clock }
+	policy := staffauth.NewRemoteNetworkPolicyWithOptions(server.URL+"/", "internal-token", staffauth.RemoteNetworkPolicyOptions{
+		CacheTTL: time.Second,
+		Now:      func() time.Time { return clock },
+	})
 	ctx := context.Background()
 	for range 3 {
 		if allowed, err := policy.IsStaffAddressAllowed(ctx, "staff-1", "203.0.113.40"); err != nil || !allowed {
@@ -49,12 +53,12 @@ func TestRemoteNetworkPolicyAsksIdentityOnceAndCachesTheAnswerBriefly(t *testing
 	if calls.Load() != 2 {
 		t.Fatalf("answers must be cached, identity was asked %d times", calls.Load())
 	}
-	clock = clock.Add(networkPolicyCacheTtl + time.Second)
+	clock = clock.Add(2 * time.Second)
 	_, _ = policy.IsStaffAddressAllowed(ctx, "staff-1", "203.0.113.40")
 	if calls.Load() != 3 {
 		t.Fatalf("an expired answer must be asked again, calls %d", calls.Load())
 	}
-	if _, err := NewRemoteNetworkPolicy(server.URL, "wrong").IsStaffAddressAllowed(ctx, "staff-1", "203.0.113.40"); err == nil {
+	if _, err := staffauth.NewRemoteNetworkPolicy(server.URL, "wrong").IsStaffAddressAllowed(ctx, "staff-1", "203.0.113.40"); err == nil {
 		t.Fatal("a refused policy call must be an error, never an allow")
 	}
 }
@@ -63,14 +67,14 @@ func TestNetworkGateFailsClosedInProductionAndRefusesDisallowedAddresses(t *test
 	request := httptest.NewRequest(http.MethodGet, "/api/v1/admin/reports", nil)
 	cases := []struct {
 		name string
-		gate NetworkGate
+		gate staffauth.NetworkGate
 		want int
 	}{
-		{"unconfigured outside production", NetworkGate{}, 0},
-		{"unconfigured in production", NetworkGate{FailClosed: true}, http.StatusServiceUnavailable},
-		{"policy unreachable", NetworkGate{Policy: fixedNetworkPolicy{err: errors.New("down")}}, http.StatusServiceUnavailable},
-		{"address not allowed", NetworkGate{Policy: fixedNetworkPolicy{allowed: false}, FailClosed: true}, http.StatusForbidden},
-		{"address allowed", NetworkGate{Policy: fixedNetworkPolicy{allowed: true}, FailClosed: true}, 0},
+		{"unconfigured outside production", staffauth.NetworkGate{}, 0},
+		{"unconfigured in production", staffauth.NetworkGate{FailClosed: true}, http.StatusServiceUnavailable},
+		{"policy unreachable", staffauth.NetworkGate{Policy: fixedNetworkPolicy{err: errors.New("down")}}, http.StatusServiceUnavailable},
+		{"address not allowed", staffauth.NetworkGate{Policy: fixedNetworkPolicy{allowed: false}, FailClosed: true}, http.StatusForbidden},
+		{"address allowed", staffauth.NetworkGate{Policy: fixedNetworkPolicy{allowed: true}, FailClosed: true}, 0},
 	}
 	for _, testCase := range cases {
 		failure := testCase.gate.Refuse(request, "staff-1")
@@ -82,8 +86,8 @@ func TestNetworkGateFailsClosedInProductionAndRefusesDisallowedAddresses(t *test
 			t.Fatalf("%s: status %d, want %d", testCase.name, status, testCase.want)
 		}
 	}
-	restore := UseNetworkGate(NetworkGate{Policy: fixedNetworkPolicy{allowed: false}})
-	if failure := RefuseDisallowedStaffNetwork(request, "staff-1"); failure == nil || failure.Code != "IP_NOT_ALLOWED" {
+	restore := staffauth.UseNetworkGate(staffauth.NetworkGate{Policy: fixedNetworkPolicy{allowed: false}})
+	if failure := staffauth.RefuseDisallowedStaffNetwork(request, "staff-1"); failure == nil || failure.Code != "IP_NOT_ALLOWED" {
 		t.Fatalf("the process gate must refuse: %+v", failure)
 	}
 	restore()
@@ -94,13 +98,13 @@ func TestNetworkGateFromEnvironmentFailsClosedInProductionWithoutAPolicy(t *test
 	t.Setenv("STAFF_NETWORK_POLICY_URL", "")
 	t.Setenv("ADMIN_INTERNAL_URL", "")
 	t.Setenv("MODERATION_USERS_INTERNAL_URL", "")
-	gate := NetworkGateFromEnvironment()
+	gate := staffauth.NetworkGateFromEnvironment()
 	if gate.Policy != nil || !gate.FailClosed {
 		t.Fatalf("production without a policy must fail closed: %+v", gate)
 	}
 	t.Setenv("ADMIN_INTERNAL_URL", "http://go-identity:8080")
 	t.Setenv("ADMIN_INTERNAL_API_TOKEN", "internal-token")
-	if gate := NetworkGateFromEnvironment(); gate.Policy == nil {
+	if gate := staffauth.NetworkGateFromEnvironment(); gate.Policy == nil {
 		t.Fatal("the admin internal url and token configure the policy")
 	}
 }

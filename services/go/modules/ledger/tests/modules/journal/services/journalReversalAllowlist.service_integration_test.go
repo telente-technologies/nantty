@@ -1,4 +1,4 @@
-package services
+package services_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	"nantty/modules/ledger/src/databases"
 	"nantty/modules/ledger/src/modules/journal/models"
+	ledgerservices "nantty/modules/ledger/src/modules/journal/services"
 )
 
 func TestStaffCanReverseOnlyAllowlistedJournalKinds(t *testing.T) {
@@ -19,7 +20,7 @@ func TestStaffCanReverseOnlyAllowlistedJournalKinds(t *testing.T) {
 	corrected := harness.mustPost(correction)
 	reverseAsStaff := func(entry models.PostedJournalEntry) error {
 		return databases.RunInMoneyTransaction(context.Background(), harness.database, func(ctx context.Context, transaction *sql.Tx) error {
-			_, err := harness.ledger.ReverseJournalEntry(ctx, transaction, ReverseJournalEntryRequest{
+			_, err := harness.ledger.ReverseJournalEntry(ctx, transaction, ledgerservices.ReverseJournalEntryRequest{
 				OriginalEntryId: entry.Id, ReversalReference: "admin-reversal:" + entry.Id.String(), Reason: "staff fix", StaffInitiated: true,
 			})
 			return err

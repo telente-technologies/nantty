@@ -1,4 +1,4 @@
-package integrations
+package integrations_test
 
 import (
 	"context"
@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	storeintegrations "nantty/modules/payments/src/integrations"
 	"nantty/modules/payments/src/interfaces"
 )
 
@@ -24,6 +25,16 @@ type testAppleSigner struct {
 	rootPem []byte
 	leafKey *ecdsa.PrivateKey
 	chain   []string
+}
+
+var (
+	testAppleLeafMarker         = asn1.ObjectIdentifier{1, 2, 840, 113635, 100, 6, 11, 1}
+	testAppleIntermediateMarker = asn1.ObjectIdentifier{1, 2, 840, 113635, 100, 6, 2, 1}
+)
+
+func encodeJwsTestSegment(value any) string {
+	raw, _ := json.Marshal(value)
+	return base64.RawURLEncoding.EncodeToString(raw)
 }
 
 func newTestAppleSigner(t *testing.T) testAppleSigner {
@@ -50,8 +61,8 @@ func newTestAppleSigner(t *testing.T) testAppleSigner {
 	}
 	rootKey, intermediateKey, leafKey := newKey(), newKey(), newKey()
 	root := issue(valid(1, "Test Root", true, nil), valid(1, "Test Root", true, nil), rootKey, rootKey)
-	intermediate := issue(valid(2, "Test Intermediate", true, appleIntermediateCertificateMarkerOid), root, intermediateKey, rootKey)
-	leaf := issue(valid(3, "Test Leaf", false, appleLeafCertificateMarkerOid), intermediate, leafKey, intermediateKey)
+	intermediate := issue(valid(2, "Test Intermediate", true, testAppleIntermediateMarker), root, intermediateKey, rootKey)
+	leaf := issue(valid(3, "Test Leaf", false, testAppleLeafMarker), intermediate, leafKey, intermediateKey)
 	return testAppleSigner{
 		rootPem: pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: root.Raw}), leafKey: leafKey,
 		chain: []string{base64.StdEncoding.EncodeToString(leaf.Raw), base64.StdEncoding.EncodeToString(intermediate.Raw), base64.StdEncoding.EncodeToString(root.Raw)},
@@ -60,8 +71,8 @@ func newTestAppleSigner(t *testing.T) testAppleSigner {
 
 func (signer testAppleSigner) sign(t *testing.T, payload any) string {
 	t.Helper()
-	header := encodeJwsSegment(map[string]any{"alg": "ES256", "x5c": signer.chain})
-	input := header + "." + encodeJwsSegment(payload)
+	header := encodeJwsTestSegment(map[string]any{"alg": "ES256", "x5c": signer.chain})
+	input := header + "." + encodeJwsTestSegment(payload)
 	digest := sha256.Sum256([]byte(input))
 	r, s, err := ecdsa.Sign(rand.Reader, signer.leafKey, digest[:])
 	if err != nil {
@@ -83,7 +94,7 @@ func creatorTransaction(transactionId string) map[string]any {
 
 func TestAppleCreatorSubscriptionReceiptsCarryTheAccountTokenAndPrice(t *testing.T) {
 	signer := newTestAppleSigner(t)
-	verifier, err := NewAppleAppStoreVerifier(AppleAppStoreSettings{BundleId: "com.nantty.app", Environment: "Sandbox", RootCertificatesPem: signer.rootPem})
+	verifier, err := storeintegrations.NewAppleAppStoreVerifier(storeintegrations.AppleAppStoreSettings{BundleId: "com.nantty.app", Environment: "Sandbox", RootCertificatesPem: signer.rootPem})
 	if err != nil {
 		t.Fatal(err)
 	}

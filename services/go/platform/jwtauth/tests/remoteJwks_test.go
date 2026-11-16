@@ -1,4 +1,4 @@
-package jwtauth
+package jwtauth_test
 
 import (
 	"context"
@@ -8,10 +8,13 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"nantty/platform/jwtauth"
+	"nantty/platform/jwtauth/tests/support"
 )
 
 func TestRemoteJwksThatWasDownAtStartupNeverHangsRequestsAndRecoversWithoutWaitingForTheRefreshInterval(t *testing.T) {
-	signingKey, publicSet := createSigningKeyAndPublicSet(t, "key-1")
+	signingKey, publicSet := support.CreateSigningKeyAndPublicSet(t, "key-1")
 	var up atomic.Bool
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
 		if !up.Load() {
@@ -24,16 +27,16 @@ func TestRemoteJwksThatWasDownAtStartupNeverHangsRequestsAndRecoversWithoutWaiti
 	t.Cleanup(server.Close)
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	verifier, err := NewAccessTokenVerifierFromRemoteJwks(ctx, server.URL, "https://auth.nantty.test", "nantty-api")
+	verifier, err := jwtauth.NewAccessTokenVerifierFromRemoteJwks(ctx, server.URL, "https://auth.nantty.test", "nantty-api")
 	if err != nil {
 		t.Fatal(err)
 	}
-	token := signTestToken(t, signingKey, "nantty-api", time.Now().Add(time.Minute), "session-1")
+	token := support.SignTestToken(t, signingKey, "nantty-api", time.Now().Add(time.Minute), "session-1")
 	started := time.Now()
 	if _, err := verifier.VerifyAccessTokenAndExtractPrincipal(context.Background(), token); err == nil {
 		t.Fatal("a token cannot be verified while the key set is unavailable")
 	}
-	if waited := time.Since(started); waited > jwksColdFetchTimeout+time.Second {
+	if waited := time.Since(started); waited > 6*time.Second {
 		t.Fatalf("a request must not hang while the key set is unavailable: waited %s", waited)
 	}
 	up.Store(true)

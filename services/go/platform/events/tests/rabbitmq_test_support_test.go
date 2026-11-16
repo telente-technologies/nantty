@@ -1,4 +1,4 @@
-package events
+package events_test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"nantty/platform/events"
 )
 
 type recordedPublish struct {
@@ -103,12 +104,13 @@ func (channel *fakeAmqpChannel) publishedMessages() []recordedPublish {
 }
 
 type fakeChannelOpener struct {
-	mutex    sync.Mutex
-	channels []*fakeAmqpChannel
-	opened   int
+	mutex          sync.Mutex
+	channels       []*fakeAmqpChannel
+	openedChannels []*fakeAmqpChannel
+	opened         int
 }
 
-func (opener *fakeChannelOpener) OpenChannel(ctx context.Context) (amqpChannel, error) {
+func (opener *fakeChannelOpener) OpenChannel(ctx context.Context) (events.AMQPChannel, error) {
 	opener.mutex.Lock()
 	defer opener.mutex.Unlock()
 	if ctx.Err() != nil {
@@ -116,10 +118,13 @@ func (opener *fakeChannelOpener) OpenChannel(ctx context.Context) (amqpChannel, 
 	}
 	opener.opened++
 	if len(opener.channels) == 0 {
-		return newFakeAmqpChannel(), nil
+		next := newFakeAmqpChannel()
+		opener.openedChannels = append(opener.openedChannels, next)
+		return next, nil
 	}
 	next := opener.channels[0]
 	opener.channels = opener.channels[1:]
+	opener.openedChannels = append(opener.openedChannels, next)
 	return next, nil
 }
 
@@ -158,23 +163,5 @@ func (acknowledger *fakeAcknowledger) Nack(tag uint64, _ bool, requeue bool) err
 func (acknowledger *fakeAcknowledger) Reject(tag uint64, requeue bool) error {
 	return acknowledger.record(settlement{tag: tag, requeue: requeue})
 }
-
-type fakeRetrySink struct {
-	mutex     sync.Mutex
-	published []outgoingMessage
-	failWith  error
-}
-
-func (sink *fakeRetrySink) publishConfirmed(_ context.Context, messages []outgoingMessage) error {
-	sink.mutex.Lock()
-	defer sink.mutex.Unlock()
-	if sink.failWith != nil {
-		return sink.failWith
-	}
-	sink.published = append(sink.published, messages...)
-	return nil
-}
-
-func (sink *fakeRetrySink) Close() error { return nil }
 
 var errHandlerFailed = errors.New("downstream unavailable")

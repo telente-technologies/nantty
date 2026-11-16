@@ -1,4 +1,4 @@
-package controllers
+package controllers_test
 
 import (
 	"context"
@@ -10,6 +10,8 @@ import (
 	"nantty/modules/live/src/generated/ent"
 	"nantty/modules/live/src/generated/ent/space"
 	"nantty/modules/live/src/interfaces"
+	"nantty/modules/live/src/modules/sessions/controllers"
+	"nantty/modules/live/src/services"
 	"nantty/modules/live/src/types"
 )
 
@@ -81,7 +83,7 @@ func TestPresentSpaceSummariesUsesMobileShapeAndFiltersInaccessibleRows(t *testi
 		publicHost:       {Id: publicHost, Name: "Public Host", Username: "public-host"},
 		secondPublicHost: {Id: secondPublicHost, Name: "Second Host"},
 	}}
-	controller := SpacesController{Container: &container.Container{
+	controller := controllers.SpacesController{Container: &container.Container{
 		Directory: directory,
 		Relations: spaceListRelations{
 			private: map[uuid.UUID]bool{privateHost: true}, blocked: map[uuid.UUID]bool{blockedHost: true},
@@ -93,7 +95,7 @@ func TestPresentSpaceSummariesUsesMobileShapeAndFiltersInaccessibleRows(t *testi
 		{ID: uuid.New(), HostID: privateHost, Title: "Private profile", State: space.StateLive, Visibility: space.VisibilityPublic, ModerationVisibility: "visible"},
 		{ID: uuid.New(), HostID: blockedHost, Title: "Blocked host", State: space.StateLive, Visibility: space.VisibilityPublic, ModerationVisibility: "visible"},
 	}
-	views, err := controller.presentSpaceSummaries(context.Background(), rows, &types.Actor{UserId: viewerID})
+	views, err := controller.PresentSpaceSummaries(context.Background(), rows, &types.Actor{UserId: viewerID})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,10 +124,10 @@ func TestPresentSpaceSummariesUsesMobileShapeAndFiltersInaccessibleRows(t *testi
 
 func TestSpaceHostAuthorization(t *testing.T) {
 	host, other := uuid.New(), uuid.New()
-	if !spaceHostAuthorized(host, host) {
+	if !controllers.SpaceHostAuthorized(host, host) {
 		t.Fatal("host must be authorized")
 	}
-	if spaceHostAuthorized(host, other) {
+	if controllers.SpaceHostAuthorized(host, other) {
 		t.Fatal("non-host must be denied")
 	}
 }
@@ -142,7 +144,7 @@ func TestCoinContributionsRequireExplicitHostOptIn(t *testing.T) {
 		{name: "explicitly enabled", preference: &enabled, want: true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			if got := coinContributionsEnabled(test.preference); got != test.want {
+			if got := services.LiveCoinSupportEnabled(test.preference); got != test.want {
 				t.Fatalf("coin contributions enabled = %v, want %v", got, test.want)
 			}
 		})
@@ -162,7 +164,7 @@ func TestSpaceHostEligibilityRequiresCreatorProgramRole(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			if got := spaceHostIsCreator(types.Actor{Roles: test.roles}); got != test.eligible {
+			if got := (types.Actor{Roles: test.roles}).HasRole("creator"); got != test.eligible {
 				t.Fatalf("eligible = %v, want %v", got, test.eligible)
 			}
 		})
@@ -183,8 +185,8 @@ func TestSpaceHostEligibilityUsesCurrentCreatorProgramMembership(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			controller := SpacesController{Container: &container.Container{Directory: test.dir}}
-			err := controller.ensureSpaceHostEligible(context.Background(), actor)
+			controller := controllers.SpacesController{Container: &container.Container{Directory: test.dir}}
+			err := controller.EnsureSpaceHostEligible(context.Background(), actor)
 			if (err != nil) != test.wantErr {
 				t.Fatalf("error = %v, wantErr %v", err, test.wantErr)
 			}
@@ -195,12 +197,12 @@ func TestSpaceHostEligibilityUsesCurrentCreatorProgramMembership(t *testing.T) {
 func TestSpaceStateTransitions(t *testing.T) {
 	allowed := [][2]string{{"scheduled", "live"}, {"scheduled", "cancelled"}, {"live", "ended"}}
 	for _, transition := range allowed {
-		if !spaceTransitionAllowed(transition[0], transition[1]) {
+		if !controllers.SpaceTransitionAllowed(transition[0], transition[1]) {
 			t.Errorf("expected %s -> %s", transition[0], transition[1])
 		}
 	}
 	for _, transition := range [][2]string{{"ended", "live"}, {"cancelled", "live"}, {"live", "cancelled"}, {"ended", "cancelled"}, {"scheduled", "ended"}} {
-		if spaceTransitionAllowed(transition[0], transition[1]) {
+		if controllers.SpaceTransitionAllowed(transition[0], transition[1]) {
 			t.Errorf("unexpected %s -> %s", transition[0], transition[1])
 		}
 	}

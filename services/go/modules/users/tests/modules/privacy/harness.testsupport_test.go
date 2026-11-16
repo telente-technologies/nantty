@@ -1,4 +1,4 @@
-package privacy
+package privacy_test
 
 import (
 	"bytes"
@@ -26,6 +26,7 @@ import (
 	"nantty/modules/users/src/generated/ent"
 	"nantty/modules/users/src/migrations"
 	exportservices "nantty/modules/users/src/modules/dataExport/services"
+	privacyModule "nantty/modules/users/src/modules/privacy"
 	"nantty/platform/identityports"
 	"nantty/platform/identityports/identitytest"
 	"nantty/platform/jwtauth"
@@ -134,11 +135,11 @@ func startPrivacyHarness(t *testing.T, adjust ...func(*configs.PrivacySettings))
 		Client: client, Settings: configs.UsersSettings{Privacy: privacy}, Now: clock.now, AccessVerifier: verifier,
 		Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 	}
-	if err := SeedReferenceData(ctx, c); err != nil {
+	if err := privacyModule.SeedReferenceData(ctx, c); err != nil {
 		t.Fatal(err)
 	}
 	mux := http.NewServeMux()
-	Mount(mux, c)
+	privacyModule.Mount(mux, c)
 	server := httptest.NewServer(mux)
 	t.Cleanup(server.Close)
 	return &privacyHarness{t: t, server: server, container: c, clock: clock, tokens: tokens, directory: directory, audit: audit}

@@ -1,4 +1,4 @@
-package integrations
+package integrations_test
 
 import (
 	"context"
@@ -12,12 +12,13 @@ import (
 	"testing"
 	"time"
 
+	storeintegrations "nantty/modules/payments/src/integrations"
 	"nantty/modules/payments/src/interfaces"
 )
 
 func readGooglePlayFixture(t *testing.T, name string) []byte {
 	t.Helper()
-	raw, err := os.ReadFile("testdata/googlePlay/" + name)
+	raw, err := os.ReadFile("../../src/integrations/testdata/googlePlay/" + name)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +60,7 @@ func googlePlayNotificationForPackage(t *testing.T, raw []byte, packageName stri
 	return raw
 }
 
-func startGooglePlayFixtureServer(t *testing.T, productFixture string) (*GooglePlayVerifier, *[]string) {
+func startGooglePlayFixtureServer(t *testing.T, productFixture string) (*storeintegrations.GooglePlayVerifier, *[]string) {
 	t.Helper()
 	var calls []string
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
@@ -83,9 +84,9 @@ func startGooglePlayFixtureServer(t *testing.T, productFixture string) (*GoogleP
 	}))
 	t.Cleanup(server.Close)
 	account := strings.ReplaceAll(string(readGooglePlayFixture(t, "serviceAccount.json")), "TOKEN_URI", server.URL+"/token")
-	verifier, err := NewGooglePlayVerifier(GooglePlaySettings{
+	verifier, err := storeintegrations.NewGooglePlayVerifier(storeintegrations.GooglePlaySettings{
 		PackageName: "com.nantty.app", ServiceAccountJson: []byte(account), ApiBaseUrl: server.URL, PushToken: "push-secret",
-		ProductPrices:          map[string]GooglePlayProductPrice{"coins.pack.1500": {AmountMinor: 150000, Currency: "NGN"}, "blue.monthly": {AmountMinor: 250000, Currency: "NGN"}},
+		ProductPrices:          map[string]storeintegrations.GooglePlayProductPrice{"coins.pack.1500": {AmountMinor: 150000, Currency: "NGN"}, "blue.monthly": {AmountMinor: 250000, Currency: "NGN"}},
 		SubscriptionProductIds: []string{"blue.monthly"},
 	})
 	if err != nil {
@@ -129,7 +130,7 @@ func TestGooglePlayVerifierChecksPurchasesWithThePublisherApi(t *testing.T) {
 
 func TestGooglePlayRealTimeNotificationsNeedThePushTokenAndPackage(t *testing.T) {
 	verifier, calls := startGooglePlayFixtureServer(t, "productPurchase.response.json")
-	withToken := http.Header{GooglePlayPushTokenHeader: {"push-secret"}}
+	withToken := http.Header{storeintegrations.GooglePlayPushTokenHeader: {"push-secret"}}
 	voided, err := verifier.VerifySignedRefundNotification(context.Background(), googlePlayNotificationForPackage(t, readGooglePlayFixture(t, "rtdn.voided.json"), "com.nantty.app"), withToken)
 	if err != nil || !voided.IsRefund() || voided.StoreTransactionId != "GPA.3301-1111-2222-33333" || voided.NotificationId != "voided-message-1" {
 		t.Fatalf("voided %+v err %v", voided, err)
@@ -147,7 +148,7 @@ func TestGooglePlayRealTimeNotificationsNeedThePushTokenAndPackage(t *testing.T)
 		headers http.Header
 	}{
 		{"missing token", readGooglePlayFixture(t, "rtdn.voided.json"), http.Header{}},
-		{"wrong token", readGooglePlayFixture(t, "rtdn.voided.json"), http.Header{GooglePlayPushTokenHeader: {"guess"}}},
+		{"wrong token", readGooglePlayFixture(t, "rtdn.voided.json"), http.Header{storeintegrations.GooglePlayPushTokenHeader: {"guess"}}},
 		{"other package", readGooglePlayFixture(t, "rtdn.otherPackage.json"), withToken},
 	}
 	for _, rejection := range rejections {
