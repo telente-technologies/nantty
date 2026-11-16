@@ -47,7 +47,7 @@ export function PortalShell({ children, homeHref = "/" }: { readonly children: R
             </Link>
           </div>
           <div className={styles.topbarLeading}>
-            <span className={styles.environment}>Preview · services not connected</span>
+            <span className={styles.environment}>Preview · organization rollout pending</span>
             <div className={styles.topbarActions}>
               <a className={styles.publicSiteLink} href={readNanttyWebUrl()}>Nantty.com <span aria-hidden="true">↗</span></a>
               <ThemeSwitcher iconOnly label="Colour theme" className={styles.desktopThemeSwitcher} />

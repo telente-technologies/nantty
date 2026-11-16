@@ -6,6 +6,7 @@
     "dev": "next dev --port 3700",
     "build": "next build",
     "start": "next start --port 3700",
+    "test": "tsx --test tests/*.test.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint -c ../../packages/eslintConfig/next.config.mjs src"
   },
@@ -23,6 +24,7 @@
     "@types/react-dom": "^19.3.0",
     "@nantty/eslint-config": "workspace:*",
     "eslint": "^10.12.0",
+    "tsx": "^4.23.15",
     "typescript": "~7.0.2"
   }
 }

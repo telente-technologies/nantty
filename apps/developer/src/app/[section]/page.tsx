@@ -4,9 +4,12 @@ import { PortalSectionView } from "@/components/portalSectionView";
 import { developerSectionDetails, developerSections, isDeveloperSectionKey } from "@/config/sections.config";
 import { PortalShell } from "@/components/portalShell";
 import { BusinessMessagingDocs } from "@/components/businessMessagingDocs";
+import { OrganizationApplicationsWorkspace } from "@/components/organizationApplicationsWorkspace";
+import { DeveloperCredentialsWorkspace } from "@/components/developerCredentialsWorkspace";
+import { DeveloperWebhooksWorkspace } from "@/components/developerWebhooksWorkspace";
 
 export function generateStaticParams() {
-  return developerSections.filter(({ href }) => href !== "/docs").map(({ href }) => ({ section: href.slice(1) }));
+  return developerSections.filter(({ href }) => href !== "/docs" && href !== "/organization").map(({ href }) => ({ section: href.slice(1) }));
 }
 
 export async function generateMetadata({ params }: { readonly params: Promise<{ section: string }> }) {
@@ -21,5 +24,5 @@ export default async function DeveloperSectionPage({ params }: { readonly params
   if (!isDeveloperSectionKey(section)) notFound();
   const details = developerSectionDetails[section];
 
-  return <PortalShell homeHref="/dashboard">{section === "messaging" ? <BusinessMessagingDocs /> : <PortalSectionView section={details} isDocumentationPage={section === "docs"} />}</PortalShell>;
+  return <PortalShell homeHref="/dashboard">{section === "messaging" ? <BusinessMessagingDocs /> : section === "applications" ? <OrganizationApplicationsWorkspace /> : section === "credentials" ? <DeveloperCredentialsWorkspace /> : section === "webhooks" ? <DeveloperWebhooksWorkspace /> : <PortalSectionView section={details} isDocumentationPage={section === "docs"} />}</PortalShell>;
 }

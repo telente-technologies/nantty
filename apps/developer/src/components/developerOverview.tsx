@@ -5,9 +5,10 @@ import { GatewayReadiness } from "./gatewayReadiness";
 import styles from "./developerOverview.module.css";
 
 const platformServices = [
-  { label: "Organization access", status: "Backend foundation", href: "/applications", detail: "Authenticated organization create/list APIs exist; this portal is not connected yet." },
+  { label: "Organization access", status: "UI/API wired · unavailable", href: "/organization", detail: "Identity handlers are connected in source; database migrations, gateway configuration, and production SSO still prevent rollout." },
   { label: "Business API", status: "Contract only", href: readDeveloperDocsHref(), detail: "No public business API routes are mounted." },
-  { label: "Credentials", status: "Not available", href: "/credentials", detail: "Credential issuance and rotation are not connected." },
+  { label: "Credentials", status: "Sandbox flow · verification pending", href: "/credentials", detail: "Identity-authorized test credential issue, rotation, expiry, revoke, and audit are implemented; signed-in deployment verification remains open." },
+  { label: "Sandbox webhooks", status: "Implemented · rollout pending", href: "/webhooks", detail: "Sandbox endpoint management, encrypted signing secrets, queued delivery, retries, and delivery history are implemented; production webhook service is not available." },
   { label: "Request logs and usage", status: "Not available", href: "/requests", detail: "No developer traffic or usage ledger is recorded." },
 ] as const;
 
@@ -32,7 +33,7 @@ export function DeveloperOverview() {
       </header>
 
       <div className={styles.previewNotice} role="note">
-        <div><strong>Workspace preview</strong><span>Organization APIs are available in Go Identity but are not connected to this portal yet. Credentials, webhooks, billing, and request logs are not connected.</span></div>
+        <div><strong>Developer services are in staged rollout</strong><span>Organization and application services are connected in source. Sandbox credentials and webhooks are implemented but need signed-in deployment verification; production SSO, business API traffic, billing, and request logs are not available.</span></div>
         <Link href={readDeveloperDocsHref()}>See what is available</Link>
       </div>
 

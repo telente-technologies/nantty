@@ -8,14 +8,14 @@ import styles from "./developerLanding.module.css";
 
 const serviceReadiness = [
   { label: "Business Messaging API", state: "Contract preview · not accepting requests", icon: ChatCircleTextIcon },
-  { label: "Sandbox control plane", state: "Not connected", icon: PlugsConnectedIcon },
-  { label: "Organization and credential services", state: "Not connected", icon: ActivityIcon },
+  { label: "Sandbox control plane", state: "Credentials and webhooks implemented · rollout pending", icon: PlugsConnectedIcon },
+  { label: "Organization and credential services", state: "Identity routes connected · database/SSO verification pending", icon: ActivityIcon },
 ] as const;
 
 const integrationSteps = [
   { title: "Review the API contract", description: "Understand scopes, consent requirements, request limits, and webhook events before building." },
-  { title: "Create an organization and application", description: "This onboarding flow is not available yet; no application or credentials are created from this preview." },
-  { title: "Test in an isolated sandbox", description: "The sandbox service is not connected. No test messages or webhook deliveries are simulated here." },
+  { title: "Create an organization and application", description: "Organization and application workflows are connected to Identity; the combined signed-in portal workflow is still being verified." },
+  { title: "Test in an isolated sandbox", description: "The Sandbox service supports isolated synthetic conversations, test credentials, and signed webhook delivery when its dedicated database and encryption key are configured." },
 ] as const;
 
 export function DeveloperLanding() {
@@ -45,7 +45,7 @@ export function DeveloperLanding() {
           <div className={styles.heroCopy}>
             <p className={styles.eyebrow}>Nantty for Developers</p>
             <h1 id="developer-title">Build business integrations around conversations.</h1>
-            <p className={styles.intro}>Explore the proposed Business Messaging API and the controls it will require. Developer onboarding, credentials, sandbox execution, and production API access are not available yet.</p>
+            <p className={styles.intro}>Review the Business Messaging contract and use the staged organization, test-credential, and Sandbox webhook workflows. Production business API traffic, billing, and production credentials remain unavailable.</p>
             <div className={styles.actions}>
               <Link className={styles.primaryAction} href={readDeveloperDocsHref("business-messaging")}>Read the contract preview</Link>
               <Link className={styles.secondaryAction} href="/dashboard">View workspace readiness</Link>
