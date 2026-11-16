@@ -167,6 +167,10 @@ func TestGovernmentBlackCheckoutFailsClosedWhenPaymentsGatewayIsNil(t *testing.T
 	}
 	harness := startSubscriptionsHarness(t, identity)
 	harness.module.Billing.Container.Payments = nil
+	_, retryErr := harness.module.Billing.AdminRetryGovernmentBlack(context.Background(), uuid.NewString(), uuid.New(), "retry requested")
+	if !errors.Is(retryErr, services.ErrUsdRecurringUnsupported) {
+		t.Fatalf("expected admin retry to fail closed when Payments gateway is nil, got %v", retryErr)
+	}
 
 	view, err := harness.module.Billing.GetGovernmentBlackBilling(context.Background(), ownerNg, govNg)
 	if err != nil {

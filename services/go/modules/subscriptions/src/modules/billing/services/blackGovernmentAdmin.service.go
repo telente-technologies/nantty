@@ -176,6 +176,9 @@ func (billing Billing) AdminCancelGovernmentBlack(ctx context.Context, staffId s
 }
 
 func (billing Billing) AdminRetryGovernmentBlack(ctx context.Context, staffId string, subscriptionId uuid.UUID, reason string) (GovernmentSubscriptionView, error) {
+	if billing.Container.Payments == nil {
+		return GovernmentSubscriptionView{}, ErrUsdRecurringUnsupported
+	}
 	row, err := billing.Container.Client(billing.Container.Resources.Database).Subscription.Query().
 		Where(subscription.ID(subscriptionId), subscription.PlanCodeEQ(constants.PlanBlack)).Only(ctx)
 	if ent.IsNotFound(err) {
