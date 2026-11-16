@@ -51,6 +51,7 @@ type MetricsSourceSchemas struct {
 	Payments string
 	Escrow   string
 	Wallet   string
+	Ledger   string
 }
 
 func (settings AdminSettings) IsProduction() bool { return settings.Environment == "production" }
@@ -82,6 +83,7 @@ func ReadAdminSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 			Payments: reader.ReadStringOrDefault("PAYMENTS_DATABASE_SCHEMA", "payments"),
 			Escrow:   reader.ReadStringOrDefault("ESCROW_DATABASE_SCHEMA", "escrow"),
 			Wallet:   reader.ReadStringOrDefault("WALLET_DATABASE_SCHEMA", "wallet"),
+			Ledger:   reader.ReadStringOrDefault("LEDGER_DATABASE_SCHEMA", "ledger"),
 		},
 		RabbitMQManagement: readRabbitMQManagementSettings(reader, environment == "production"),
 	}
