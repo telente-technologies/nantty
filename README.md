@@ -59,7 +59,7 @@ docs/          architecture, database, integrations, legal, plans, handoff notes
 
 ## Quick start
 
-You need Node 24+, pnpm 11+ and Docker. The real backend also needs Go 1.26; Elixir 1.19 is only needed for realtime (chat and live sockets), and Python 3.14 with uv only for the intelligence service.
+You need Node 26.13+, pnpm 11+ and Docker. The real backend also needs Go 1.26; Elixir 1.19 is only needed for realtime (chat and live sockets), and Python 3.14 with uv only for the intelligence service.
 
 ```bash
 pnpm install
@@ -76,6 +76,8 @@ pnpm --filter @nantty/sandbox dev      # http://localhost:3800
 ```
 
 The Developer and Sandbox workspaces are separate web applications. Their current routes are responsive, branded foundations with explicit disconnected states; they do not yet create credentials, call the public business API, or simulate successful sandbox requests. See [docs/architecture/messenger-and-business-messaging.md](docs/architecture/messenger-and-business-messaging.md) for the service/security boundary and remaining acceptance gates.
+
+The cross-product implementation status, repository boundaries, prioritized backlog and current blockers are tracked in [docs/master](docs/master/README.md). Organization management is partially connected in source; this does not mean Developer APIs, billing, webhooks or Sandbox execution are live.
 
 Each app's demo sign-ins are shown on its sign-in page in mock mode.
 
