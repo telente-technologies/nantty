@@ -1,0 +1,2 @@
+DROP TABLE developer_application_idempotency;
+DROP TABLE developer_applications;
