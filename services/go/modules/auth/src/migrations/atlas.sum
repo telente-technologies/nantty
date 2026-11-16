@@ -1,4 +1,4 @@
-h1:ywN7yjZKahT72bCK8pn24UDdfL1vK1CI5D5F+j5hsEU=
+h1:WYIlyLo+y5Dl3EoKbfTxtdiDhBNTpKi8viwDgL7EqXs=
 20261003094035_create_auth_tables.up.sql h1:KtaB3JZqg9eMzXAQZ13OTwIzR/UCL/D/Pd6ovWwq10I=
 20261003094100_grant_read_access_to_other_services.up.sql h1:H47OiswGxjuOqv/qj+ImQCXFbCLBJ45N7XZePh87dEU=
 20261003100736_add_social_identities.up.sql h1:/ZhAX0L0xtUUkB2+guudIFRMEGeeX87tCJ3e0lLrHS4=
@@ -10,3 +10,9 @@ h1:ywN7yjZKahT72bCK8pn24UDdfL1vK1CI5D5F+j5hsEU=
 20261017154209_add_age_gate_refusals.up.sql h1:AYZsx0Wl6vFQ8u6jssvEHdv3KJcoUD25yYncwqUjH0E=
 20261017154300_expose_account_age_brackets.up.sql h1:jVHq4lWlpeO0k4xXCyKiaOiybSrFKFdi8n8UoGky63g=
 20261103133000_add_auth_outbox_retry_state.up.sql h1:NLPs39U+LFaQfIMHbe5OEh8WFOTja9KKpVGKJTSJxvo=
+20261113100000_add_messenger_authorizations.up.sql h1:/7KRWyTNNb5Dywv6ltEVKbye5UV/giXWV7wATKF5TGA=
+20261114120000_add_developer_organizations.up.sql h1:/qdlTgA/32zDYtY6qU/QuY8bB1YcKkj/yPJzozlE6Is=
+20261114150000_add_developer_organization_audit_logs.up.sql h1:/NwyHXXjZgO46rPoVP5UZyfo1SmixtwTVx7dZp/v+OM=
+20261114170000_add_developer_organization_invitations.up.sql h1:qGdc4cvGNr8XgruSF6BIBoT6QrZ7rQ855vzyOUGSb9E=
+20261114190000_add_developer_applications.up.sql h1:xzyGkuTwI3Bm0o7A3nsFnKTNINcrsU9uOxVSfilpPaQ=
+20261114200000_add_developer_application_grants.up.sql h1:awN7pq4hFbeYqMa0dJ+sHZEBclpsILiI/t62WuDGQrA=
