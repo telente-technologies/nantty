@@ -106,7 +106,11 @@ func (controller FinanceReportsController) Export(writer http.ResponseWriter, re
 		httprequests.RespondWithError(writer, request, controller.Container.Logger, err)
 		return
 	}
-	actor, _ := staffauth.StaffFromContext(request.Context())
+	actor, ok := staffauth.StaffFromContext(request.Context())
+	if !ok || !actor.SteppedUp {
+		httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.ErrForbidden)
+		return
+	}
 	filename, payload, err := exportfinancereport.Handler{Container: controller.Container}.Execute(request.Context(), actor, body)
 	if err != nil {
 		httprequests.RespondWithError(writer, request, controller.Container.Logger, err)

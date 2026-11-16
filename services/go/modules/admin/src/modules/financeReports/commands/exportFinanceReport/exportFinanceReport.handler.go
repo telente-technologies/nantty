@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"strings"
+	"unicode"
 
 	"nantty/modules/admin/src/container"
 	adminerrors "nantty/modules/admin/src/errors"
@@ -15,6 +16,7 @@ import (
 	getmoneybyaspect "nantty/modules/admin/src/modules/financeReports/queries/getMoneyByAspect"
 	listescrows "nantty/modules/admin/src/modules/financeReports/queries/listEscrows"
 	listfinanceissues "nantty/modules/admin/src/modules/financeReports/queries/listFinanceIssues"
+	metricsservices "nantty/modules/admin/src/modules/platformMetrics/services"
 	"nantty/modules/admin/src/repositories"
 	jsonencoding "nantty/modules/admin/src/utils/jsonEncoding"
 	"nantty/platform/identityports"
@@ -26,7 +28,8 @@ type Handler struct {
 }
 
 func NeutralizeCsvCell(cell string) string {
-	if cell != "" && strings.ContainsRune("=+-@\t\r", rune(cell[0])) {
+	trimmed := strings.TrimLeftFunc(cell, unicode.IsSpace)
+	if trimmed != "" && strings.ContainsRune("=+-@", []rune(trimmed)[0]) {
 		return "'" + cell
 	}
 	return cell
@@ -43,6 +46,12 @@ func (handler Handler) Execute(ctx context.Context, actor staffauth.Staff, req m
 	rangeName := req.Range
 	if rangeName == "" {
 		rangeName = "7d"
+	}
+	if _, valid := metricsservices.ResolveMetricsWindow(rangeName, handler.Container.Now()); !valid {
+		return "", nil, adminerrors.ValidationFailedFor("range", "must be 24h, 7d or 30d")
+	}
+	if currency := strings.TrimSpace(req.Currency); currency != "" && len(currency) != 3 {
+		return "", nil, adminerrors.ValidationFailedFor("currency", "must be a three-letter currency code")
 	}
 
 	var rows [][]string
@@ -109,7 +118,7 @@ func (handler Handler) Execute(ctx context.Context, actor staffauth.Staff, req m
 	if err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		return repositories.RecordAuditEventInTransaction(ctx, tx, identityports.AuditEvent{
 			ActorId: actor.Id, ActorName: actor.Name, ActorRole: actor.Role, Action: "finance.report.exported",
-			SubjectType: "finance_report", SubjectId: reportType, Reason: strings.TrimSpace(req.Reason), StepUpVerified: true,
+			SubjectType: "finance_report", SubjectId: reportType, Reason: strings.TrimSpace(req.Reason), StepUpVerified: actor.SteppedUp,
 			After: jsonencoding.MustMarshalJson(map[string]any{"reportType": reportType, "range": rangeName, "currency": req.Currency, "rows": max(len(rows)-1, 0)}),
 		})
 	}); err != nil {
@@ -123,9 +132,14 @@ func (handler Handler) Execute(ctx context.Context, actor staffauth.Staff, req m
 		for index, cell := range row {
 			safe[index] = NeutralizeCsvCell(cell)
 		}
-		_ = writer.Write(safe)
+		if err := writer.Write(safe); err != nil {
+			return "", nil, fmt.Errorf("write finance CSV row: %w", err)
+		}
 	}
 	writer.Flush()
+	if err := writer.Error(); err != nil {
+		return "", nil, fmt.Errorf("flush finance CSV: %w", err)
+	}
 	return fmt.Sprintf("finance-%s-%s.csv", reportType, rangeName), buffer.Bytes(), nil
 }
 

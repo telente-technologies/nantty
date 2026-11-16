@@ -23,6 +23,9 @@ func TestFinanceHelpers(t *testing.T) {
 	if got := exportfinancereport.NeutralizeCsvCell("=SUM(A1:A2)"); got != "'=SUM(A1:A2)" {
 		t.Fatalf("expected formula prefix, got %q", got)
 	}
+	if got := exportfinancereport.NeutralizeCsvCell("  =SUM(A1:A2)"); got != "'  =SUM(A1:A2)" {
+		t.Fatalf("expected whitespace-prefixed formula to be neutralized, got %q", got)
+	}
 	if got := exportfinancereport.NeutralizeCsvCell("NGN"); got != "NGN" {
 		t.Fatalf("expected unchanged safe cell, got %q", got)
 	}
