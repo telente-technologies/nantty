@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 import styles from "./sandboxOverview.module.css";
 
 const sandboxServices = [
-  { label: "Test applications and credentials", status: "Not connected", href: "/test-apps" },
-  { label: "Isolated API data plane", status: "Not connected", href: "/explorer" },
-  { label: "Messaging test environment", status: "Not connected", href: "/messaging" },
-  { label: "Scenario runner", status: "Not connected", href: "/scenarios" },
-  { label: "Request and event inspection", status: "Not connected", href: "/requests" },
+  { label: "Test applications and credentials", status: "Available (requires Identity + Sandbox env)", href: "/test-apps" },
+  { label: "Isolated API data plane", status: "Available (ntsb_test_ keys only)", href: "/explorer" },
+  { label: "Messaging test environment", status: "Available (synthetic customers)", href: "/messaging" },
+  { label: "Scenario runner", status: "Available (deterministic fixtures)", href: "/scenarios" },
+  { label: "Request and event inspection", status: "Available (redacted & signed)", href: "/requests" },
 ] as const;
 
 const sandboxSteps = [
@@ -39,7 +39,7 @@ export function SandboxOverview() {
 
   const connectionLabel = connectionState === "checking" ? "Checking" : connectionState === "ready" ? "Gateway ready" : connectionState === "unavailable" ? "Unavailable" : "Not configured";
   const connectionDescription = connectionState === "ready"
-    ? "The Sandbox gateway readiness check passed. Tenant, credential, and scenario services are checked separately and remain unavailable until connected."
+    ? "The Sandbox gateway readiness check passed. Authenticated organization members with application grants can manage test credentials, run scenarios, and inspect logs."
     : connectionState === "unavailable"
       ? "The configured Sandbox gateway did not return a ready response. No test data or API request was sent."
       : "No dedicated Sandbox API gateway is configured. The portal does not contact the production API.";

@@ -18,6 +18,8 @@ import (
 
 const creatorRenewalLease = 15 * time.Minute
 
+var ErrCreatorRenewalClaimConflict = errors.New("creator renewal attempt was already claimed by another worker")
+
 func (service CreatorSubscriptions) RunDueRenewals(ctx context.Context, limit int) int {
 	service.expireEndedSubscriptions(ctx, limit)
 	now := service.Container.Now().UTC()
@@ -109,8 +111,14 @@ func (service CreatorSubscriptions) renewSubscription(ctx context.Context, id uu
 	if reference == "" {
 		attempt := charge.AttemptCount + 1
 		reference = models.RenewalChargeReference(charge.IdempotencyKey, attempt)
-		if err := charge.Update().SetAttemptCount(attempt).SetPaymentReference(reference).SetStatus(creatorsubscriptioncharge.StatusPending).Exec(ctx); err != nil {
+		claimed, err := client.CreatorSubscriptionCharge.Update().
+			Where(creatorsubscriptioncharge.ID(charge.ID), creatorsubscriptioncharge.AttemptCount(charge.AttemptCount), creatorsubscriptioncharge.PaymentReference(charge.PaymentReference)).
+			SetAttemptCount(attempt).SetPaymentReference(reference).SetStatus(creatorsubscriptioncharge.StatusPending).Save(ctx)
+		if err != nil {
 			return err
+		}
+		if claimed == 0 {
+			return ErrCreatorRenewalClaimConflict
 		}
 	}
 	result, err := service.Container.Payments.ChargeBillingAuthorization(ctx, paymentservices.BillingAuthorizationCharge{

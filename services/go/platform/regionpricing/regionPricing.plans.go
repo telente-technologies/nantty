@@ -17,7 +17,12 @@ type PlanRegionalPrice struct {
 	NotChargeableOnWeb  bool              `json:"-"`
 }
 
-const UsdBillingNote = "Billed in USD"
+const (
+	UsdBillingNote                     = "Billed in USD"
+	BlackUsdMonthlyNigeriaMinor  int64 = 30_000
+	BlackUsdMonthlyIntlMinor     int64 = 50_000
+	BlackCurrencyCode                  = "USD"
+)
 
 type monthlyPair struct{ web, app int64 }
 
@@ -30,7 +35,7 @@ var defaultMonthlyPlanPrices = map[string]map[string]int64{
 	"seller_pro":      {"NG": 500_000, "GH": 6_000, "KE": 100_000, "ZA": 14_999, "GB": 1_500, "EU": 1_700, "US": 1_700},
 	"seller_business": {"NG": 3_000_000, "GH": 18_000, "KE": 300_000, "ZA": 44_999, "GB": 4_500, "EU": 4_900, "US": 4_900},
 	"gold_only":       {"NG": 300_000, "GH": 3_600, "KE": 60_000, "ZA": 8_999, "GB": 900, "EU": 1_000, "US": 1_000},
-	"black":           {"NG": 5_000_000, "GH": 60_000, "KE": 1_000_000, "ZA": 149_999, "GB": 14_900, "EU": 16_900, "US": 16_900},
+	"black":           {"NG": BlackUsdMonthlyNigeriaMinor, "GH": BlackUsdMonthlyIntlMinor, "KE": BlackUsdMonthlyIntlMinor, "ZA": BlackUsdMonthlyIntlMinor, "GB": BlackUsdMonthlyIntlMinor, "EU": BlackUsdMonthlyIntlMinor, "US": BlackUsdMonthlyIntlMinor},
 }
 
 func DefaultStoreProductId(planCode, interval string) string {
@@ -55,9 +60,15 @@ func DefaultPlanPrices() []PlanRegionalPrice {
 	for _, region := range supportedRegions {
 		for planCode, byRegion := range defaultMonthlyPlanPrices {
 			webMonthly := byRegion[region.Code]
+			currency := region.Currency
+			webYearly := YearlyFromMonthly(webMonthly, DefaultYearlyDiscountBps, currency)
+			if planCode == "black" {
+				currency = BlackCurrencyCode
+				webYearly = 0
+			}
 			price := PlanRegionalPrice{
-				PlanCode: planCode, Region: region.Code, Currency: region.Currency,
-				WebMonthlyMinor: webMonthly, WebYearlyMinor: YearlyFromMonthly(webMonthly, DefaultYearlyDiscountBps, region.Currency),
+				PlanCode: planCode, Region: region.Code, Currency: currency,
+				WebMonthlyMinor: webMonthly, WebYearlyMinor: webYearly,
 				StoreProductIds: defaultStoreProductIds(planCode),
 			}
 			if inAppPlans[planCode] {
@@ -67,6 +78,23 @@ func DefaultPlanPrices() []PlanRegionalPrice {
 		}
 	}
 	return prices
+}
+
+func BlackMonthlyPriceForJurisdiction(countryCode string) PlanRegionalPrice {
+	region, found := RegionForCountry(countryCode)
+	regionCode := FallbackRegion.Code
+	monthly := BlackUsdMonthlyIntlMinor
+	if found && region.Code == "NG" {
+		regionCode = "NG"
+		monthly = BlackUsdMonthlyNigeriaMinor
+	}
+	return PlanRegionalPrice{
+		PlanCode:        "black",
+		Region:          regionCode,
+		Currency:        BlackCurrencyCode,
+		WebMonthlyMinor: monthly,
+		StoreProductIds: map[string]string{},
+	}
 }
 
 func FindDefaultPlanPrice(planCode, region string) (PlanRegionalPrice, bool) {

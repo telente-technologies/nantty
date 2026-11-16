@@ -6,6 +6,7 @@ import (
 
 	"nantty/modules/users/src/container"
 	"nantty/modules/users/src/generated/ent"
+	"nantty/modules/users/src/generated/ent/blackapplication"
 	"nantty/modules/users/src/generated/ent/profile"
 	"nantty/modules/users/src/generated/ent/profilecheckmark"
 	"nantty/modules/users/src/generated/ent/verificationapplication"
@@ -30,11 +31,12 @@ type Application struct {
 }
 
 type Result struct {
-	Current             *Current     `json:"current"`
-	Subscription        any          `json:"subscription"`
-	Application         *Application `json:"application"`
-	HandleReserved      bool         `json:"handleReserved"`
-	ReverificationDueAt *string      `json:"reverificationDueAt"`
+	Current             *Current                       `json:"current"`
+	Subscription        any                            `json:"subscription"`
+	Application         *Application                   `json:"application"`
+	BlackApplication    *services.BlackApplicationView `json:"blackApplication,omitempty"`
+	HandleReserved      bool                           `json:"handleReserved"`
+	ReverificationDueAt *string                        `json:"reverificationDueAt"`
 }
 
 type Handler struct {
@@ -73,6 +75,22 @@ func (handler Handler) Execute(ctx context.Context, accountId string) (Result, e
 		}
 	} else if !ent.IsNotFound(err) {
 		return result, err
+	}
+	if acting.ProfileType == profile.ProfileTypeGovernment {
+		blackApp, blackErr := handler.Container.Client.BlackApplication.Query().Where(blackapplication.ProfileID(acting.ID)).Order(ent.Desc(blackapplication.FieldID)).First(ctx)
+		if blackErr == nil {
+			if view, viewErr := services.BuildBlackApplicationView(ctx, handler.Container, blackApp); viewErr == nil {
+				result.BlackApplication = &view
+				if blackApp.HandleReserved {
+					result.HandleReserved = true
+				}
+				if result.Current != nil && result.Current.Color == "black" && result.Current.Status == "revoked" && blackApp.Status == blackapplication.StatusApproved {
+					result.Current.Status = "paused"
+				}
+			}
+		} else if !ent.IsNotFound(blackErr) {
+			return result, blackErr
+		}
 	}
 	return result, nil
 }

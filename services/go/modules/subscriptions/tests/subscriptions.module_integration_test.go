@@ -129,14 +129,14 @@ func TestBlackKeepsItsBadgeForTheGracePeriodAndGoldGetsTheBundle(t *testing.T) {
 	if err != nil || quote.AmountMinor != 255_000 || quote.DiscountKind != "bundle" {
 		t.Fatalf("gold with blue: %+v %v", quote, err)
 	}
-	if blackQuote, _, _ := harness.module.Billing.QuoteForOwner(ctx, client, owner, "black", "NG", "month"); blackQuote.DiscountKind != "none" || blackQuote.AmountMinor != 5_000_000 {
-		t.Fatalf("black never gets the bundle: %+v", blackQuote)
+	if blackQuote, currency, err := harness.module.Billing.QuoteForOwner(ctx, client, owner, "black", "NG", "month"); err != nil || currency != "USD" || blackQuote.DiscountKind != "none" || blackQuote.AmountMinor != 30_000 {
+		t.Fatalf("black never gets the bundle and NG is USD 300/mo: %+v %s %v", blackQuote, currency, err)
 	}
 	if blocked := harness.Call(http.MethodPost, "/api/v1/subscriptions/checkout", harness.Tokens.UserAccessToken(owner), "", map[string]any{"profileId": agency, "planCode": "black"}); blocked.Status != http.StatusForbidden {
 		t.Fatalf("black is invitation only: %d", blocked.Status)
 	}
 	black := client.Subscription.Create().SetProfileID(agency).SetProfileType("government").SetOwnerUserID(owner).SetPlanCode("black").SetInterval("month").SetChannel("web_checkout").
-		SetStatus("active").SetListAmountMinor(5_000_000).SetAmountMinor(5_000_000).SetCurrency("NGN").SetBillingReference("sub-black-1").SetCreatedAt(time.Now()).SaveX(ctx)
+		SetStatus("active").SetListAmountMinor(30_000).SetAmountMinor(30_000).SetCurrency("USD").SetBillingReference("sub-black-1").SetCreatedAt(time.Now()).SaveX(ctx)
 	mustNotify := func(status string) {
 		t.Helper()
 		if err := harness.module.Billing.HandleBillingSubscriptionChangedForTest(ctx, black.BillingReference, status); err != nil {
@@ -145,15 +145,7 @@ func TestBlackKeepsItsBadgeForTheGracePeriodAndGoldGetsTheBundle(t *testing.T) {
 	}
 	mustNotify("canceled")
 	row := client.Subscription.GetX(ctx, black.ID)
-	if row.Status != subscription.StatusGrace || row.GraceEndsAt == nil {
-		t.Fatalf("black must enter the 14-day grace period: %s", row.Status)
-	}
-	harness.clock = harness.clock.Add(13 * 24 * time.Hour)
-	if expired := harness.module.Billing.ExpireGracePeriods(ctx, 10); expired != 0 {
-		t.Fatal("grace ended early")
-	}
-	harness.clock = harness.clock.Add(2 * 24 * time.Hour)
-	if expired := harness.module.Billing.ExpireGracePeriods(ctx, 10); expired != 1 || client.Subscription.GetX(ctx, black.ID).Status != subscription.StatusExpired {
-		t.Fatal("black must expire after the grace period")
+	if row.Status != subscription.StatusDowngraded || row.GraceEndsAt != nil {
+		t.Fatalf("black must not receive unpaid grace extensions by default: %s", row.Status)
 	}
 }

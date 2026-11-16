@@ -20,6 +20,34 @@ func (controller SavedCardsController) fail(writer http.ResponseWriter, request 
 	httpserver.WriteErrorResponse(writer, request, controller.Application.Container.Resources.Logger, err)
 }
 
+func (controller SavedCardsController) ListSavedCards(writer http.ResponseWriter, request *http.Request) {
+	principal, err := ledgerutils.RequirePrincipal(request)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	cards, err := controller.Application.Gateway.ListBillingAuthorizations(request.Context(), principal.UserId)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"data": cards, "nextCursor": nil})
+}
+
+func (controller SavedCardsController) RevokeSavedCard(writer http.ResponseWriter, request *http.Request) {
+	principal, err := ledgerutils.RequirePrincipal(request)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	card, err := controller.Application.Gateway.RevokeBillingAuthorization(request.Context(), principal.UserId, request.PathValue("authorizationId"), "payment_method_removed")
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, card)
+}
+
 func (controller SavedCardsController) StartSavedCardSetup(writer http.ResponseWriter, request *http.Request) {
 	principal, err := ledgerutils.RequirePrincipal(request)
 	if err != nil {

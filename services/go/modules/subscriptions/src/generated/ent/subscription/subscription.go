@@ -333,6 +333,7 @@ const (
 	StatusActive        Status = "active"
 	StatusPastDue       Status = "past_due"
 	StatusGrace         Status = "grace"
+	StatusPaused        Status = "paused"
 	StatusCanceled      Status = "canceled"
 	StatusDowngraded    Status = "downgraded"
 	StatusExpired       Status = "expired"
@@ -346,7 +347,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPending, StatusAwaitingCard, StatusTrialing, StatusActive, StatusPastDue, StatusGrace, StatusCanceled, StatusDowngraded, StatusExpired, StatusTrialRejected:
+	case StatusPending, StatusAwaitingCard, StatusTrialing, StatusActive, StatusPastDue, StatusGrace, StatusPaused, StatusCanceled, StatusDowngraded, StatusExpired, StatusTrialRejected:
 		return nil
 	default:
 		return fmt.Errorf("subscription: invalid enum value for status field: %q", s)

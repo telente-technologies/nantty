@@ -10,9 +10,9 @@ Status: implementation specification, dated 2026-10-29. It records founder-appro
 | Blue Premium | eligible personal accounts, including creators | Blue | NGN 20,000 (Nigeria web) | web and store prices configured separately | Yes |
 | Gold Basic | verified businesses, brands and stores | Gold | NGN 5,000 (Nigeria web) | web-first; channel availability explicitly configured | Yes |
 | Gold Premium | verified businesses, brands and stores | Gold | NGN 30,000/month confirmed by founder for Nigeria web pricing | web-first; channel availability explicitly configured | Yes |
-| Black Government | approved government institutions and authorized accounts | Black | USD 300/month working proposal; do not enable checkout until conflict and provider eligibility confirmed | web only | Not applicable |
+| Black Government | approved government institutions and authorized accounts | Black | **USD 300/month (NG) / USD 500/month (international)** based on verified legal jurisdiction | web only (private authorized checkout; monthly-only; no discounts) | Not applicable |
 
-The founder confirmed NGN 30,000/month for Gold Premium on 2026-10-29, superseding the prior NGN 17,000 working assumption. Black Government remains unresolved at USD 300 vs USD 500. Do not activate or publicly expose either Black price before confirmation and provider readiness. Nigeria’s founder-set prices are fixed source-of-truth overrides and must never be overwritten by international benchmark calculations. Existing subscriber prices/history must not be rewritten by changing defaults.
+The founder confirmed NGN 30,000/month for Gold Premium on 2026-10-29, superseding the prior NGN 17,000 working assumption, and finalized Black Government pricing on 2026-11-16 at **USD 300/month (Nigeria legal jurisdiction)** and **USD 500/month (international)**, USD-only, monthly-only, web-only, with no discounts, zero unpaid grace days, and mandatory recurring USD card authorization. Existing subscriber prices/history must not be rewritten by changing defaults.
 
 Exactly three badge colors exist: blue, gold and black. Tier changes features/limits, never badge color. Verification/eligibility approval and billing are separate state machines: a paid subscription cannot make an unverified identity eligible, and verification cannot imply a paid subscription. Black is a government vetting class, not an admin role.
 
@@ -110,7 +110,7 @@ Do not apply persistence migrations or alter active price records until the migr
 
 ## Release gates
 
-- Confirm Black Government monthly price.
+- **Resolved 2026-11-16:** Black Government is USD 300/month for Nigeria and USD 500/month internationally. Authorized monetization administrators may change future regional prices through audited effective-dated versions; existing subscriber terms and price history are not rewritten.
 - Confirm bundle discount meaning and stacking with annual reduction.
 - Confirm ad-load interpretation, priority-support SLA, and Gold Premium seller entitlement reconciliation.
 - Approve Black annual eligibility (default off) and confirm Flutterwave USD recurring capability with account-specific evidence.

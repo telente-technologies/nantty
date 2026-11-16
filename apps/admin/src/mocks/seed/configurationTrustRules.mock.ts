@@ -22,7 +22,7 @@ export function buildInitialCheckmarkPricing(): CheckmarkPricingRules {
   return {
     bundleDiscountPercent: 15,
     bundleMaximumBusinesses: 3,
-    blackGraceDays: 14,
+    blackGraceDays: 0,
     multiBusinessSingleProfilePercent: 5,
     multiBusinessBasePercent: 10,
     multiBusinessStepPercent: 2,

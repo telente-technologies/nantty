@@ -2,6 +2,52 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-11-16 — PR #60 Audit Remediation (Admin Black Billing, Price Migration, Nil Gateway, Disclosures & Cursor Pagination)
+
+- **Admin Black Billing UI & API (`apps/admin/src/{components/people/blackBillingAdminPanel.tsx,services/safetyApi.service.ts,contracts/blackGovernmentContracts.test.ts}`):**
+  - Routed all four admin control actions (`reconcile`, `retry`, `pause`, `cancel`) through `ConfirmActionDialog` (`requiresStepUp`, audit `reason` required), made `reason` mandatory in `controlAdminGovernmentBlack`, and gated success toasts / dialog close / table reload strictly on a non-null mutation result so failed requests never display success or close the dialog.
+  - Added cursor pagination controls (`cursor` / `nextCursor`) and contract assertions verifying `stepUp: true` and `reason: true` on both control route families.
+- **Subscriptions Migration Reversibility & Staff Price Preservation (`services/go/modules/subscriptions/src/migrations/20261116120000_black_government_billing.{up,down}.sql`):**
+  - Removed the `INSERT INTO "plan_price_versions"` backfill so existing staff-updated `plan_prices` rows (`updated_by_staff_id <> ''`) and existing `plan_price_versions` are never overridden, and `.down.sql` restores `plan_prices` from `black_government_billing_price_backup` without leaving an immutable `'system'` version behind. (`atlas.sum` requires `atlas migrate hash` refresh in an environment with `atlas` installed.)
+- **Nil-Gateway Fail-Closed, Cent Disclosures, Immediate Cancel & Cursor Pagination (`services/go/modules/subscriptions/`):**
+  - `blackGovernmentCheckout.service.go`, `blackGovernmentBilling.service.go`, `blackGovernmentActions.service.go`, and `blackGovernmentAdmin.service.go` now fail closed with `ErrUsdRecurringUnsupported` and `RecurringCardEnabled: false` whenever `Container.Payments == nil`.
+  - Added `FormatUsdMonthlyDisclosure` in `blackGovernmentBilling.service.go` to preserve exact cents (`USD 300.50/month`) instead of truncating (`minor / 100`), added `SubscriptionId` / `CardLabel` JSON fields on `GovernmentSubscriptionView` to match admin/webapp contracts, and propagated `listBlackBillingEvents` errors.
+  - Cleared `SetCancelAtPeriodEnd(false)` on immediate `StatusCanceled` + `entitlement.revoked` transitions in `AdminCancelGovernmentBlack` and `HandleBlackApplicationDecidedEvent`.
+  - Updated `AdminListGovernmentBlack` (`blackGovernmentAdmin.service.go`, `blackGovernment.controller.go`) with bounded `limit` + `RFC3339Nano|uuid` cursor pagination and error propagation, and required audit `reason` validation on `AdminRetryGovernmentBlack` / `AdminReconcileGovernmentBlack`.
+  - Added unit and integration regression tests in `services/go/modules/subscriptions/tests/blackGovernmentBilling_integration_test.go`.
+
+## 2026-11-16 — Audit Hardening (`ZM-017`, `ZM-020`, `ZM-007`) & Sandbox Quotas/Scenarios/Portal Wiring
+
+- **`ZM-017` (`services/go/modules/subscriptions/`):**
+  - Replaced read-modify-write attempt/reference updates in `src/modules/billing/services/renewalEngine.service.go` and `src/modules/creatorSubscriptions/services/creatorRenewals.service.go` with atomic Ent CAS `Update().Where(ID, AttemptCount(prev), PaymentReference(prev)).Save(ctx)` returning `ErrRenewalClaimConflict` / `ErrCreatorRenewalClaimConflict` when `claimed == 0`.
+  - Added `TestConcurrentRenewalWorkersClaimTheAttemptAtMostOnce` in `tests/subscriptions.renewalExactlyOnce_integration_test.go`.
+- **`ZM-020` (`services/typescript/gateway/`):**
+  - Added `/api/v1/seller/conversations/`, `/api/v1/seller/wallet/`, `/api/v1/seller/finance/`, and `/api/v1/developer/` to `privateResourceFamilies` in `src/services/security/accessProbeClassifier.service.ts` + assertions in `tests/accessProbeDetection.service.test.ts`.
+- **`ZM-007` (`packages/webKit/`):**
+  - Mapped `REALTIME_UNAVAILABLE`, `ACCOUNT_SUSPENDED_SECURITY`, `CORS_ORIGIN_FORBIDDEN`, `CORS_ORIGIN_REQUIRED`, `WIDGET_TOKEN_SCOPE`, `POLICY_ACCEPTANCE_REQUIRED`, `INSTITUTIONAL_EMAIL_NOT_VERIFIED`, `BLACK_ANNUAL_DISABLED`, `BLACK_DISCOUNTS_DISABLED`, `USERNAME_TAKEN`, and `VALIDATION_FAILED` in `src/errorExperience/errorMapper.ts` + `__tests__/errorMapper.test.tsx`.
+- **Sandbox Service & Portals (`services/typescript/sandbox/`, `apps/developer/`, `apps/sandbox/`):**
+  - Added `prisma/migrations/20261116130000_sandbox_quotas_and_scenarios/migration.sql`, `src/sandboxUsage.ts`, `src/messagingRoutes.ts`, `src/controlInspectionRoutes.ts`, refactored `src/sandboxApp.ts`, and split `tests/sandboxApp.test.ts` into `credentialControl.test.ts` and `controlInspection.test.ts` (all Sandbox source/test files `<= 263` lines).
+  - Wired Identity-capability-gated (`request_logs.read`, `usage.read`) BFF routes + UIs for `/requests` and `/usage` in `apps/developer`, and wired `/api/sandbox/*` BFFs + interactive UIs (`/test-apps`, `/messaging`, `/scenarios`, `/events`, `/requests`, `/explorer`) in `apps/sandbox` (using Identity-valid capabilities and updated section copy).
+- **Repo-Wide Go Hygiene (`services/go/modules/{auth,ads,payments}/`):**
+  - Split 5 oversized `auth` files (`developerApplications.{grants,service}.go`, `developerOrganizations.{controller,service}.go`, `messengerAuth.service.go`) into same-package files `<= 300` lines.
+  - Relocated `adsReportsAndMedia.integration_test.go` and `payments.refundRetries_integration_test.go` into `tests/` with `package ads_test` / `package payments_test` (`669/669` Go test files under `tests/`).
+- **Verification:** `services/scripts/check-backend-file-lengths.sh`, `services/scripts/check-no-raw-sql-in-typescript.sh`, and `git diff --check` all pass repo-wide (`exit 0`); runtime Go/Vitest/Next/Postgres checks await CI/local `go` + `pnpm` + `psql` environment.
+
+## 2026-11-16 — Black Government Verification, Private USD Monthly Billing, and Card-Removal Pause
+
+- **Pricing & Plan Rules (`services/go/platform/regionpricing/`, `services/go/modules/subscriptions/src/{constants,loaders,models,modules/billing/services}/`, `apps/admin/src/mocks/seed/`):**
+  - Updated Black pricing to USD-only, monthly-only, web-only: `USD 300/month` (`30000`) for Nigeria (`NG`) and `USD 500/month` (`50000`) for international (`BlackMonthlyPriceForJurisdiction`).
+  - Disabled Black annual billing (`AnnualDisabled: true`, `ErrBlackAnnualDisabled`), discounts (`DiscountsDisabled: true`, `ErrBlackDiscountsDisabled`, offer-link & claim filters), and unpaid grace (`GracePeriodEligible: false`, `BlackGraceDays: 0`).
+- **Government Verification Pipeline (`services/go/modules/users/`):**
+  - Added migration `20261116120000_black_government_verification_extensions.{up,down}.sql` (`black_applications` legal/jurisdiction/OTP/private-checkout columns, `black_institutional_email_otps`, `black_verification_appeals`, `nantty_readers` grants) and `StatusPending` / `StatusReverificationRequired` enums.
+  - Implemented intake validation, SHA-256 institutional email OTP (`send-otp` / `verify`), OTP enforcement prior to approval, two-admin approval gating private checkout (14 days) + reserving handle without granting live badge until paid settlement, `entitlement.paused` -> `StatusSuspended` with preserved handle, re-verification triggers, and appeals (`controllers/checkmarksBlack.controller.go`, `services/{blackApplicationStore,blackAppeals}.service.go`).
+- **Recurring Card Revocation & Government Billing (`services/go/modules/payments/`, `services/go/modules/subscriptions/`, `services/typescript/gateway/`):**
+  - Added `GET`/`DELETE /api/v1/payments/saved-cards`, `SupportsRecurringCardCurrency`, `"black_card"` tokenization, and `BillingAuthorizationRevokedObserver` so deleting a card pauses active Black subscriptions and emits `entitlement.paused`.
+  - Added migration `20261116120000_black_government_billing.{up,down}.sql`, `StatusPaused`, `SqlIdentityDirectory.FindBlackApplicationForProfile`, private checkout & card-replacement/reactivation/cancel endpoints (`/api/v1/verification/black/*`), admin Black billing & reconciliation endpoints (`/api/v1/admin/subscriptions/government-black*`), `black_billing_events`, `blackApplication.decided` revocation sync, and `gateway/src/routes/verificationMoney.routes.ts`.
+- **Webapp, Admin UI, Mocks & Docs (`apps/webapp/`, `apps/admin/`, `product-analysis/`, `docs/master/`):**
+  - Added `GovernmentBlackHub`, updated `BlackApplicationsWorkspace` + `BlackBillingAdminPanel` + `PlanPriceRowDialog` + mock handlers/contracts, and reconciled `product-analysis/` + `docs/master/NANTTY_IMPLEMENTATION_BACKLOG.md`.
+- **Verification:** `check-backend-file-lengths.sh` passes for all added/modified Go files (`<= 300` lines); `git diff --check` clean; Go/TS/Next suites added and updated (`blackGovernmentBilling_integration_test.go`, `usersCreatorAndCheckmarks.integration_test.go`, `applyEntitlement.handler_test.go`, `upstreamRoutes.routes.test.ts`, `governmentBlackMocks.test.ts`, `blackGovernmentContracts.test.ts`) for CI execution (`go`, `pnpm`, `tsc`, `psql` absent in sandbox).
+
 ## 2026-11-16 — Backend conventions, gateway routing, live bug fixes, and Finance Admin surface
 
 **1. Backend file-length CI gate (`<= 300` lines/file):**

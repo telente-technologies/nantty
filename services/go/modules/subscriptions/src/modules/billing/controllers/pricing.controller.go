@@ -91,16 +91,28 @@ func (controller BillingController) ListPriceTable(writer http.ResponseWriter, r
 	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"data": rows, "regions": regionpricing.SupportedRegions(), "nextCursor": nil})
 }
 
-func ValidatePriceRow(region string, body dtos.PriceRowRequestDto, now time.Time) error {
+func ValidatePriceRow(planCode, region string, body dtos.PriceRowRequestDto, now time.Time) error {
 	collector := &ledgerutils.IssueCollector{}
 	expected, known := regionpricing.FindRegion(region)
+	expectedCurrency := expected.Currency
+	if planCode == constants.PlanBlack {
+		expectedCurrency = regionpricing.BlackCurrencyCode
+	}
 	switch {
 	case !known:
 		collector.Add("countryCode", "must be a pricing region: NG, GH, KE, ZA, GB, EU or US")
-	case !currencyPattern.MatchString(body.Currency) || body.Currency != expected.Currency:
-		collector.Add("currency", "must be "+expected.Currency+" for this region")
+	case !currencyPattern.MatchString(body.Currency) || body.Currency != expectedCurrency:
+		collector.Add("currency", "must be "+expectedCurrency+" for this region")
 	}
 	collector.RequireRange("monthlyAmountMinor", body.MonthlyAmountMinor, 1, 100_000_000_000)
+	if planCode == constants.PlanBlack {
+		if body.YearlyAmountMinor != 0 {
+			collector.Add("yearlyAmountMinor", "must be 0 because annual billing is disabled for Black")
+		}
+		if len(body.StoreProductIds) > 0 || body.IosMonthlyAmountMinor != 0 || body.IosYearlyAmountMinor != 0 || body.AndroidMonthlyAmountMinor != 0 || body.AndroidYearlyAmountMinor != 0 {
+			collector.Add("storeProductIds", "Black is web-only and cannot set app store pricing")
+		}
+	}
 	for path, amount := range map[string]int64{"yearlyAmountMinor": body.YearlyAmountMinor, "iosMonthlyAmountMinor": body.IosMonthlyAmountMinor, "iosYearlyAmountMinor": body.IosYearlyAmountMinor,
 		"androidMonthlyAmountMinor": body.AndroidMonthlyAmountMinor, "androidYearlyAmountMinor": body.AndroidYearlyAmountMinor} {
 		collector.RequireRange(path, amount, 0, 1_000_000_000_000)
@@ -124,7 +136,7 @@ func (controller BillingController) UpsertPrice(writer http.ResponseWriter, requ
 	staff, _ := staffauth.StaffFromContext(request.Context())
 	planCode, region := request.PathValue("planCode"), strings.ToUpper(request.PathValue("countryCode"))
 	now := controller.Billing.Container.Now().UTC()
-	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body dtos.PriceRowRequestDto) error { return ValidatePriceRow(region, body, now) })
+	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body dtos.PriceRowRequestDto) error { return ValidatePriceRow(planCode, region, body, now) })
 	if err != nil {
 		controller.fail(writer, request, err)
 		return

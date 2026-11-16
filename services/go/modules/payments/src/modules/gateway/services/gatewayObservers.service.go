@@ -9,10 +9,11 @@ import (
 )
 
 type gatewayObservers struct {
-	mutex        sync.RWMutex
-	billing      []models.BillingSubscriptionObserver
-	savedCards   []models.SavedCardObserver
-	storeNotices []models.StoreSubscriptionNotificationHandler
+	mutex          sync.RWMutex
+	billing        []models.BillingSubscriptionObserver
+	savedCards     []models.SavedCardObserver
+	authRevoked    []models.BillingAuthorizationRevokedObserver
+	storeNotices   []models.StoreSubscriptionNotificationHandler
 }
 
 func (gateway *PaymentGateway) RegisterBillingSubscriptionObserver(observer models.BillingSubscriptionObserver) {
@@ -25,6 +26,12 @@ func (gateway *PaymentGateway) RegisterSavedCardObserver(observer models.SavedCa
 	gateway.observers.mutex.Lock()
 	defer gateway.observers.mutex.Unlock()
 	gateway.observers.savedCards = append(gateway.observers.savedCards, observer)
+}
+
+func (gateway *PaymentGateway) RegisterBillingAuthorizationRevokedObserver(observer models.BillingAuthorizationRevokedObserver) {
+	gateway.observers.mutex.Lock()
+	defer gateway.observers.mutex.Unlock()
+	gateway.observers.authRevoked = append(gateway.observers.authRevoked, observer)
 }
 
 func (gateway *PaymentGateway) RegisterStoreSubscriptionNotificationHandler(handler models.StoreSubscriptionNotificationHandler) {
@@ -51,6 +58,18 @@ func (gateway *PaymentGateway) notifySavedCardObservers(ctx context.Context, tra
 	gateway.observers.mutex.RUnlock()
 	for _, observer := range observers {
 		if err := observer.HandleSavedCardFingerprint(ctx, transaction, card); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (gateway *PaymentGateway) notifyBillingAuthorizationRevokedObservers(ctx context.Context, transaction *sql.Tx, revoked models.BillingAuthorizationRevoked) error {
+	gateway.observers.mutex.RLock()
+	observers := append([]models.BillingAuthorizationRevokedObserver{}, gateway.observers.authRevoked...)
+	gateway.observers.mutex.RUnlock()
+	for _, observer := range observers {
+		if err := observer.HandleBillingAuthorizationRevoked(ctx, transaction, revoked); err != nil {
 			return err
 		}
 	}

@@ -27,21 +27,38 @@ type Approval struct {
 }
 
 type BlackApplicationView struct {
-	Id                       string                              `json:"id"`
-	User                     accountservices.PlatformUserSummary `json:"user"`
-	AgencyName               string                              `json:"agencyName"`
-	Handle                   string                              `json:"handle"`
-	RepresentativeName       string                              `json:"representativeName"`
-	RepresentativeRole       string                              `json:"representativeRole"`
-	Status                   string                              `json:"status"`
-	SubmittedAt              string                              `json:"submittedAt"`
-	Checklist                []ChecklistItem                     `json:"checklist"`
-	FirstApproval            *Approval                           `json:"firstApproval"`
-	SecondApproval           *Approval                           `json:"secondApproval"`
-	DecisionReason           *string                             `json:"decisionReason"`
-	ReverificationDueAt      *string                             `json:"reverificationDueAt"`
-	ReverificationRemindedAt *string                             `json:"reverificationRemindedAt"`
-	HandleReserved           bool                                `json:"handleReserved"`
+	Id                           string                              `json:"id"`
+	User                         accountservices.PlatformUserSummary `json:"user"`
+	AgencyName                   string                              `json:"agencyName"`
+	Handle                       string                              `json:"handle"`
+	RepresentativeName           string                              `json:"representativeName"`
+	RepresentativeRole           string                              `json:"representativeRole"`
+	LegalIdentityName            string                              `json:"legalIdentityName,omitempty"`
+	LegalRegistrationRef         string                              `json:"legalRegistrationRef,omitempty"`
+	JurisdictionCountryCode      string                              `json:"jurisdictionCountryCode,omitempty"`
+	OfficialWebsite              string                              `json:"officialWebsite,omitempty"`
+	OfficialContactPhone         string                              `json:"officialContactPhone,omitempty"`
+	InstitutionalEmail           string                              `json:"institutionalEmail,omitempty"`
+	InstitutionalEmailVerified   bool                                `json:"institutionalEmailVerified"`
+	InstitutionalEmailVerifiedAt *string                             `json:"institutionalEmailVerifiedAt,omitempty"`
+	RepresentativeEmail          string                              `json:"representativeEmail,omitempty"`
+	RepresentativeIdRef          string                              `json:"representativeIdRef,omitempty"`
+	EvidenceNotes                string                              `json:"evidenceNotes,omitempty"`
+	PrivateCheckoutEnabled       bool                                `json:"privateCheckoutEnabled"`
+	PrivateCheckoutAuthorizedBy  string                              `json:"privateCheckoutAuthorizedBy,omitempty"`
+	PrivateCheckoutAuthorizedAt  *string                             `json:"privateCheckoutAuthorizedAt,omitempty"`
+	PrivateCheckoutExpiresAt     *string                             `json:"privateCheckoutExpiresAt,omitempty"`
+	PrivateCheckoutRevokedAt     *string                             `json:"privateCheckoutRevokedAt,omitempty"`
+	Status                       string                              `json:"status"`
+	SubmittedAt                  string                              `json:"submittedAt"`
+	Checklist                    []ChecklistItem                     `json:"checklist"`
+	FirstApproval                *Approval                           `json:"firstApproval"`
+	SecondApproval               *Approval                           `json:"secondApproval"`
+	DecisionReason               *string                             `json:"decisionReason"`
+	ReverificationDueAt          *string                             `json:"reverificationDueAt"`
+	ReverificationRemindedAt     *string                             `json:"reverificationRemindedAt"`
+	HandleReserved               bool                                `json:"handleReserved"`
+	Appeals                      []BlackAppealView                   `json:"appeals,omitempty"`
 }
 
 var ChecklistDefinitions = []ChecklistItem{
@@ -73,11 +90,20 @@ func BuildBlackApplicationView(ctx context.Context, application *container.Conta
 	if err != nil {
 		return BlackApplicationView{}, err
 	}
+	details, _ := LoadBlackApplicationDetails(ctx, application.Database, row.ID)
+	appeals, _ := ListBlackAppeals(ctx, application.Database, row.ID.String())
 	view := BlackApplicationView{
 		Id: row.ID.String(), User: summary, AgencyName: row.AgencyName, Handle: row.Handle, RepresentativeName: row.RepresentativeName, RepresentativeRole: row.RepresentativeRole,
+		LegalIdentityName: details.LegalIdentityName, LegalRegistrationRef: details.LegalRegistrationRef, JurisdictionCountryCode: details.JurisdictionCountryCode,
+		OfficialWebsite: details.OfficialWebsite, OfficialContactPhone: details.OfficialContactPhone, InstitutionalEmail: details.InstitutionalEmail,
+		InstitutionalEmailVerified: details.InstitutionalEmailVerified, InstitutionalEmailVerifiedAt: formatOptional(details.InstitutionalEmailVerifiedAt),
+		RepresentativeEmail: details.RepresentativeEmail, RepresentativeIdRef: details.RepresentativeIdRef, EvidenceNotes: details.EvidenceNotes,
+		PrivateCheckoutEnabled: details.PrivateCheckoutEnabled, PrivateCheckoutAuthorizedBy: details.PrivateCheckoutAuthorizedBy,
+		PrivateCheckoutAuthorizedAt: formatOptional(details.PrivateCheckoutAuthorizedAt), PrivateCheckoutExpiresAt: formatOptional(details.PrivateCheckoutExpiresAt),
+		PrivateCheckoutRevokedAt: formatOptional(details.PrivateCheckoutRevokedAt),
 		Status: strings.ToUpper(string(row.Status)), SubmittedAt: row.CreatedAt.UTC().Format(time.RFC3339), Checklist: DecodeChecklist(row),
 		FirstApproval: approvalOf(row.FirstApprovalBy, row.FirstApprovalByName, row.FirstApprovalAt), SecondApproval: approvalOf(row.SecondApprovalBy, row.SecondApprovalByName, row.SecondApprovalAt),
-		HandleReserved: row.HandleReserved,
+		HandleReserved: row.HandleReserved, Appeals: appeals,
 	}
 	if row.DecisionReason != "" {
 		view.DecisionReason = &row.DecisionReason

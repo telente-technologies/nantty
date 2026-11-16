@@ -136,10 +136,12 @@ const DefaultStatus = StatusInReview
 
 // Status values.
 const (
+	StatusPending                Status = "pending"
 	StatusInReview               Status = "in_review"
 	StatusAwaitingSecondApproval Status = "awaiting_second_approval"
 	StatusApproved               Status = "approved"
 	StatusRejected               Status = "rejected"
+	StatusReverificationRequired Status = "reverification_required"
 	StatusRevoked                Status = "revoked"
 )
 
@@ -150,7 +152,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusInReview, StatusAwaitingSecondApproval, StatusApproved, StatusRejected, StatusRevoked:
+	case StatusPending, StatusInReview, StatusAwaitingSecondApproval, StatusApproved, StatusRejected, StatusReverificationRequired, StatusRevoked:
 		return nil
 	default:
 		return fmt.Errorf("blackapplication: invalid enum value for status field: %q", s)

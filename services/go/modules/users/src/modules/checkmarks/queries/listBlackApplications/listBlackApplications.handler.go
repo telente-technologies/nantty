@@ -29,7 +29,7 @@ func (handler Handler) Execute(ctx context.Context, status, search, cursor strin
 	var predicates []predicate.BlackApplication
 	switch normalized := strings.ToUpper(status); normalized {
 	case "", "OPEN":
-		predicates = append(predicates, blackapplication.StatusIn(blackapplication.StatusInReview, blackapplication.StatusAwaitingSecondApproval))
+		predicates = append(predicates, blackapplication.StatusIn(blackapplication.StatusPending, blackapplication.StatusInReview, blackapplication.StatusAwaitingSecondApproval, blackapplication.StatusReverificationRequired))
 	case "REVERIFY":
 		predicates = append(predicates, blackapplication.StatusEQ(blackapplication.StatusApproved), blackapplication.ReverificationDueAtLTE(handler.Container.Now().AddDate(0, 0, 30)))
 	case "ALL":

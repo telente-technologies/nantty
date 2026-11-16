@@ -1,4 +1,6 @@
 import type { UpstreamName } from "../configs/gateway.config.js";
+import { developerOrganizationRoutes } from "./developerOrganization.routes.js";
+import { verificationMoneyRoutes } from "./verificationMoney.routes.js";
 import { widgetRoutes } from "./widget.routes.js";
 
 export type AuthenticationRequirement = "required" | "optional";
@@ -21,22 +23,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/auth/sessions", upstream: "identity", authentication: "required" },
   { pathPrefix: "/api/v1/auth/password/change", upstream: "identity", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/auth/step-up", upstream: "identity", authentication: "required", methods: ["POST"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations", upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*", upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*", upstream: "identity", authentication: "required", methods: ["PATCH"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/roles", upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/audit-log", upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/members", upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/members/*", upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/members/*", upstream: "identity", authentication: "required", methods: ["PATCH"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/members/*", upstream: "identity", authentication: "required", methods: ["DELETE"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/access", upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/ownership-transfer", upstream: "identity", authentication: "required", methods: ["POST"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/invitations", upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/invitations/*", upstream: "identity", authentication: "required", methods: ["DELETE"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/applications", upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/applications/*", upstream: "identity", authentication: "required", methods: ["GET", "PATCH", "DELETE"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/developer/organizations/*/applications/*/capabilities/me", upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true },
+  ...developerOrganizationRoutes,
   { pathPrefix: "/api/v1/developer/organizations/*/applications/*/members", upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true },
   { pathPrefix: "/api/v1/developer/organizations/*/applications/*/members/*/grants", upstream: "identity", authentication: "required", methods: ["PUT"], exactPathOnly: true },
   { pathPrefix: "/api/v1/developer/invitations", upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true },
@@ -45,9 +32,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/legal/policy-versions/current", upstream: "identity", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/creators/eligibility", upstream: "identity", authentication: "required" },
   { pathPrefix: "/api/v1/creators/applications", upstream: "identity", authentication: "required" },
-  { pathPrefix: "/api/v1/verification/plans", upstream: "money", authentication: "required", methods: ["GET"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/verification/discounts", upstream: "money", authentication: "required", methods: ["GET"], exactPathOnly: true },
-  { pathPrefix: "/api/v1/verification/subscription/cancel", upstream: "money", authentication: "required", methods: ["POST"], exactPathOnly: true },
+  ...verificationMoneyRoutes,
   { pathPrefix: "/api/v1/creators/me", upstream: "money", authentication: "required", methods: ["GET"], exactPathOnly: true },
   { pathPrefix: "/api/v1/creators/me/subscription-plans", upstream: "money", authentication: "required" },
   { pathPrefix: "/api/v1/creators/me/subscribers", upstream: "money", authentication: "required", methods: ["GET"] },

@@ -1,6 +1,6 @@
 import { sendAdminApiRequest } from "@/services/adminApiClient.service";
 import type { AdminCreatedAccount, CheckmarkGrant, CreateAccountInput, GrantCheckmarkInput } from "@/types/accountsAdmin.type";
-import type { BlackApplication, BlackChecklistKey } from "@/types/blackApplications.type";
+import type { AdminGovernmentBlackSummary, BlackAppeal, BlackApplication, BlackChecklistKey } from "@/types/blackApplications.type";
 import type { BusinessDocumentAccess, BusinessDocumentFilters, BusinessDocumentSubmission } from "@/types/businessDocuments.type";
 import type { PagedList } from "@/types/api.type";
 import type { SuspendedAccount, SuspendedAccountFilters, SuspensionCaseDetail, SuspensionCaseSummary, SuspensionQueueFilters, SuspensionReasonCode } from "@/types/suspensions.type";
@@ -73,10 +73,33 @@ export function updateBlackChecklistItem(applicationId: string, input: { key: Bl
   return sendAdminApiRequest(blackPath(applicationId, "checklist"), { method: "POST", body: input });
 }
 
-export function decideBlackApplication(applicationId: string, action: "approve" | "reject" | "revoke", reason: string): Promise<BlackApplication> {
+export function decideBlackApplication(applicationId: string, action: "approve" | "reject" | "revoke" | "require-reverification", reason: string): Promise<BlackApplication> {
   return sendAdminApiRequest(blackPath(applicationId, action), { method: "POST", body: { reason } });
 }
 
 export function sendBlackReverificationReminder(applicationId: string): Promise<BlackApplication> {
   return sendAdminApiRequest(blackPath(applicationId, "reverification-reminder"), { method: "POST", body: {} });
+}
+
+export function updateBlackCheckoutAuthorization(applicationId: string, input: { enabled: boolean; expiresInHours?: number; reason: string }): Promise<BlackApplication> {
+  return sendAdminApiRequest(blackPath(applicationId, "checkout-authorization"), { method: "POST", body: input });
+}
+
+export function fetchBlackAppeals(applicationId?: string, signal?: AbortSignal): Promise<PagedList<BlackAppeal>> {
+  return sendAdminApiRequest("/admin/black-applications/appeals", { query: applicationId ? { applicationId } : {}, signal });
+}
+
+export function decideBlackAppeal(appealId: string, input: { decision: "reopen_review" | "uphold"; note: string }): Promise<BlackAppeal> {
+  return sendAdminApiRequest(`/admin/black-applications/appeals/${encodeURIComponent(appealId)}/decide`, { method: "POST", body: input });
+}
+
+export function fetchAdminGovernmentBlack(filters?: { cursor?: string; limit?: number }, signal?: AbortSignal): Promise<PagedList<AdminGovernmentBlackSummary>> {
+  return sendAdminApiRequest("/admin/subscriptions/government-black", { query: filters ? { ...filters } : undefined, signal });
+}
+
+export function controlAdminGovernmentBlack(subscriptionId: string, action: "pause" | "cancel" | "retry" | "reconcile", reason: string): Promise<unknown> {
+  return sendAdminApiRequest(`/admin/subscriptions/government-black/${encodeURIComponent(subscriptionId)}/${action}`, {
+    method: "POST",
+    body: { reason },
+  });
 }

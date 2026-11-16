@@ -1,13 +1,13 @@
 # Black Government verification and billing flow
 
-Status: proposed. Monthly price is USD 300 as the latest working assumption but is unresolved against the previously stated USD 500. No public/self-serve checkout or persistent active price until the founder confirms. Government annual billing is disabled until separately approved.
+Status: **partially implemented; not verified end to end**. Owner-approved monthly prices are **USD 300/month** for verified Nigeria (`NG`) legal jurisdiction and **USD 500/month** internationally. Monetization administrators may change regional prices using the audited effective-dated price table. Black remains USD-only, monthly-only, web-only, without discounts or unpaid grace, and requires recurring card authorization. Public/self-serve checkout remains disabled.
 
 ## Existing source evidence
 
 - `services/go/modules/users/src/modules/checkmarks/commands/submitBlackApplication/submitBlackApplication.handler.go` accepts only a government profile and records agency, representative, role and a checklist-backed application. It blocks duplicate open/approved applications.
 - `services/go/modules/users/src/modules/checkmarks/services/blackApplicationView.service.go` displays official evidence checklist and approval metadata. The checklist includes an official letter, official-channel verification, representative identity/role and proof the institution exists.
 - Existing admin UI `apps/admin/src/components/people/blackApplicationsWorkspace.tsx` describes manual vetting and two distinct admins. Go integration test `services/go/modules/users/usersCreatorAndCheckmarks.integration_test.go` verifies the separate-admin rule and handle reservation/revocation.
-- Subscription catalogue/code calls Black “Official,” is non-self-serve and has 20% normal ad-load in configuration. The actual current path was not verified to include government email OTP, secure checkout invitation, payment activation, recurring USD billing or complete cancellation/retry integration.
+- Subscription catalogue/code calls Black “Official,” is non-self-serve and has 20% normal ad-load in configuration. Current source does not deliver the generated OTP: its outbox event omits the code and has no matching email consumer. Secure single-use checkout invitations, end-to-end payment activation, merchant-specific recurring USD billing and complete cancellation/retry integration are not verified.
 
 ## Separate state machines
 
@@ -27,7 +27,7 @@ No state may grant administrative permissions, wallet/payment privileges, visibi
 3. Review institution legitimacy independently using official published government channels/domain, official registry/gazette, letterhead authorization and direct callback to a published number. Verify the representative’s authority and scope. Do not rely only on documents uploaded by the applicant or a `.gov` string.
 4. Authorized reviewer records checklist decisions, evidence references (not unnecessary raw copies), rationale and audit timestamps. First approval moves to second review; second approver must be distinct and must not approve their own application. Reject/return-for-evidence with reasons and appeal path.
 5. On application approval, a permitted staff role may issue a checkout invitation. The invitation is generated randomly, stored hashed, single-use, short-lived, account/profile/application-bound, and delivered to the verified official contact. It cannot change recipient/account/profile. Reissue revokes the previous token. Do not put token in analytics, logs, referrers or support screenshots.
-6. Invite opens HTTPS web-only page. Reauthenticate the approved account (step-up auth recommended), validate invitation server-side and show institution/profile, USD 300 proposed monthly price (not live until confirmed), taxes/settlement details, renewal interval/date, failure/cancellation/refund terms and explicit recurring-billing consent. No annual option unless separately approved.
+6. Invite opens HTTPS web-only page. Reauthenticate the approved account (step-up auth recommended), validate invitation server-side and show institution/profile, the current admin-managed monthly USD price, taxes/settlement details, renewal interval/date, failure/cancellation/refund terms and explicit recurring-billing consent. No annual option.
 7. Provider-hosted/tokenized checkout collects payment details; Nantty never receives/stores PAN or CVV. Create a pending commercial subscription linked to approved application, profile and provider customer/subscription reference.
 8. Activate billing entitlement only after a verified provider success event for the exact amount/currency/quote, with idempotency and replay protection, AND valid admin approval. A browser redirect or client callback is not payment proof. Record event ID, provider transaction, price version, payment/renewal state and audit trail.
 9. Renewal uses provider-authenticated event/reconciliation. Handle provider failure/retries/grace/cancellation according to disclosed policy; notify verified contact. Never let a stale event restore revoked institution approval. A refund/chargeback may suspend subscription while preserving the separate verification decision and evidence trail for review.
@@ -46,7 +46,7 @@ No state may grant administrative permissions, wallet/payment privileges, visibi
 
 ## Pricing/provider gates
 
-- Proposed USD 300/month conflicts with prior USD 500/month; neither is activated until founder choice and an approved price record exists.
+- The owner resolved the price conflict: USD 300/month in Nigeria and USD 500/month internationally. Admin changes must be audited, effective-dated, and must not rewrite existing subscription terms or immutable price history.
 - Public Flutterwave Payment Plan documentation supports recurring plans in general; it does not prove merchant-specific USD recurring card collection and settlement in the target country. Confirm account enablement, USD card coverage, tokenization, cross-border recurring authorization, settlement currencies, refunds, dunning, webhook signing and provider terms with Flutterwave. Run sandbox-only evidence before enabling.
 - Black is web-only by this specification. No mobile external link should bypass store billing rules; no in-app purchase is enabled without distinct compliance/product approval.
 - Annual Black is off by default even if the engine supports a yearly amount.

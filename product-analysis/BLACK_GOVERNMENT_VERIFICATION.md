@@ -1,22 +1,19 @@
 # Black government verification
 
-> **Updated 2026-10-29:** This file’s earlier “noncommercial” recommendation is superseded. Black Government is now a paid, manually approved, web-only subscription under the new founder direction. USD 300/month is the latest working assumption but remains unresolved against USD 500/month; do not enable or publicly expose either amount until confirmed. Black annual billing is separately gated and off by default.
+> **Updated 2026-11-16 (owner-approved pricing; implementation remains incomplete):** Black Government is intended to be a paid, manually approved, web-only, monthly-only, USD-only subscription with mandatory recurring card authorization and no discounts or annual billing:
+> - **Nigeria:** **USD 300/month** (`30000` minor USD) based on verified legal jurisdiction (`NG`).
+> - **International (all non-NG jurisdictions):** **USD 500/month** (`50000` minor USD) based on verified legal jurisdiction.
+> - **Zero unpaid grace period:** `BlackGraceDays = 0` (`GracePeriodEligible: false`). Removing a recurring card pauses entitlement immediately (`StatusPaused` / `entitlement.paused`). Failed renewals never extend the badge unpaid beyond paid coverage.
+> - Authorized monetization administrators may change a regional monthly price through an audited, effective-dated price version with a required reason. Existing subscription terms and price history must remain unchanged.
 
-Current source: `black` maps to government profiles, is not self-serve (`services/go/modules/subscriptions/src/constants/plans.constant.go`), and the plan catalogue forces Black non-purchasable. Regional price defaults nevertheless contain an obsolete NGN ₦50,000 row, which must not be treated as approved public pricing. The current working web-only proposal is USD 300/month versus a previously mentioned USD 500; founder confirmation is still pending. Ad-load defaults are 20% of normal load.
+Current source (`services/go/modules/subscriptions`, `services/go/modules/users`, `services/go/modules/payments`): `black` maps exclusively to `government` profiles, disables public self-serve checkout (`SelfServe: false`, `AnnualDisabled: true`, `DiscountsDisabled: true`, `GracePeriodEligible: false`), and keeps `AdLoadPercent: 20`.
 
-## Current direction and verification recommendation
+## Product rules and implementation status
 
-- Keep Black as one government verification category with a single Black badge color. Payment is a separate subscription state; approval alone does not activate paid benefits, and payment alone never grants the badge.
-- Verify institution legal status, official domain/contact, authorized representative and the account’s actual authority to speak for the institution. Require independent reviewer approval and auditable evidence; elevate scrutiny for high-impact government identities.
-- Separate institution verification from account role grants. Black must not confer admin privileges, special financial treatment, moderation immunity, ad targeting access or trusted-user bypass.
-- Set revalidation cadence and revocation/appeal processes for a government affiliation change. The code/docs currently mention manual checks and renewal windows; align this into one policy.
-- Preserve the current 20% of normal ad-load setting unless the founder explicitly changes it; define exactly which platform-controlled inventory this covers.
-- Keep public self-serve checkout disabled. After manual application approval and representative-authority verification, staff may send an account-bound, single-use, expiring checkout invitation. Use provider tokenization, verified idempotent payment events and explicit recurring consent.
-- Seeded regional Black prices are legacy data, not approved USD subscription pricing. Keep them out of public checkout and never overwrite historical purchase records.
+The price decision is approved. This does not mean the full verification and billing journey is implemented: OTP email delivery, a single-use private checkout invitation, provider-specific recurring USD capability, and end-to-end payment lifecycle verification remain incomplete.
 
-## Current risks / decisions
-
-1. A region price row exists for Black despite non-self-serve plan status; verify API/UI never exposes a payable checkout path.
-2. `government` profile type and staff verification do not automatically prove an official account is authorized.
-3. Confirm whether Black accounts should be eligible for any commercial Blue/Gold functionality; recommendation is no automatic cross-entitlement.
-4. Approve the exact evidence standard and re-verification interval with Trust/legal before launch.
+- Intended policy: keep Black as one government verification category with a single Black badge color. Verification (`users.black_applications`) and commercial billing (`subscriptions`) are strictly separated. The current implementation has review/approval and checkout-state fields, but the complete two-admin approval, verified institutional email OTP, private single-use checkout authorization, recurring-card authorization, and payment-gated badge lifecycle are not yet verified end to end.
+- Required policy: institutional email 6-digit OTP verification (`black_institutional_email_otps`) must precede admin approval (`INSTITUTIONAL_EMAIL_NOT_VERIFIED`). Email OTP verifies mailbox control only and never grants approval. Current OTP issuance is not connected to secure email delivery, so this requirement is incomplete.
+- Keep public self-serve checkout and offer-link discounts disabled for `black`. Private checkout (`/api/v1/verification/black/checkout`) resolves price strictly from verified `black_applications.jurisdiction_country_code` (never IP/headers), requires recurring disclosures (`termsAccepted` + `recurringConsent`), and verifies Flutterwave USD recurring card capability (`SupportsRecurringCardCurrency("USD")`).
+- Deleting or revoking the saved card authorization (`DELETE /api/v1/payments/saved-cards/{authorizationId}`) fires `BillingAuthorizationRevokedObserver`, immediately pausing the Black subscription (`status = 'paused'`) and emitting `entitlement.paused` (`StatusSuspended`, badge hidden).
+- Supports re-verification triggers (`require-reverification`), written appeals (`black_verification_appeals`), and admin Black billing controls (`pause`, `cancel`, `retry`, `reconcile`).

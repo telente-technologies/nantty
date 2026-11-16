@@ -51,7 +51,7 @@ func LoadSuggestionRules(ctx context.Context) SuggestionRules {
 }
 
 func LoadPricingRules(ctx context.Context) PricingRules {
-	rules := PricingRules{BlackGraceDays: 14}
+	rules := PricingRules{BlackGraceDays: 0}
 	readSetting(ctx, "checkmark-pricing", &rules)
 	return rules
 }

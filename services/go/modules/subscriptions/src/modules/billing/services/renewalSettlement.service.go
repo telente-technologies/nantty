@@ -107,6 +107,34 @@ func (billing Billing) settlePeriodInTransaction(ctx context.Context, transactio
 			return err
 		}
 	}
+	if row.PlanCode == constants.PlanBlack {
+		effectiveAuth := firstNonEmpty(authorizationId, row.BillingAuthorizationID)
+		app, found, appErr := billing.findBlackEligibility(ctx, row.ProfileID)
+		if appErr != nil {
+			return appErr
+		}
+		if found && app.Status != "approved" {
+			row, err = row.Update().SetStatus(subscription.StatusPaused).ClearNextChargeAt().SetLastError("Government verification is not approved.").AddVersion(1).Save(ctx)
+			if err != nil {
+				return err
+			}
+			_, _ = transaction.ExecContext(ctx, `UPDATE subscriptions SET paused_reason = 'verification_not_approved' WHERE id = $1`, row.ID)
+			return billing.emit(ctx, transaction, "entitlement.paused", row.ProfileID, entitlementData(row, string(subscription.StatusPaused)))
+		}
+		if effectiveAuth == "" {
+			pausedRow, pauseErr := row.Update().SetStatus(subscription.StatusPaused).ClearNextChargeAt().SetLastError("Recurring USD payment authorization is required.").AddVersion(1).Save(ctx)
+			if pauseErr != nil {
+				return pauseErr
+			}
+			_, _ = transaction.ExecContext(ctx, `UPDATE subscriptions SET paused_reason = 'recurring_authorization_required' WHERE id = $1`, pausedRow.ID)
+			billing.recordBlackBillingEvent(ctx, transaction, BlackBillingEventView{
+				SubscriptionId: pausedRow.ID.String(), ProfileId: pausedRow.ProfileID, OwnerUserId: pausedRow.OwnerUserID,
+				EventKind: "paused_missing_card", ActorKind: "system",
+				Summary: "Payment settled without reusable recurring card; paused Black entitlement until recurring card is authorized",
+			})
+			return billing.emit(ctx, transaction, "entitlement.paused", pausedRow.ProfileID, entitlementData(pausedRow, string(pausedRow.Status)))
+		}
+	}
 	update := row.Update().SetPlanCode(period.PlanCode).SetInterval(subscription.Interval(period.Interval)).SetStatus(subscription.StatusActive).
 		SetDunningAttempts(0).ClearDunningDueAt().ClearGraceEndsAt().SetLastError("").SetCheckmarkIncluded(period.CheckmarkIncluded).
 		SetCurrency(period.Currency).SetAmountMinor(period.SubtotalMinor).SetListAmountMinor(period.PeriodPriceMinor).SetPeriodPriceMinor(period.PeriodPriceMinor).
@@ -150,6 +178,15 @@ func (billing Billing) settlePeriodInTransaction(ctx context.Context, transactio
 		if err := billing.settleCombinedGoldCoverageInTransaction(ctx, transaction, row, period, paymentReference); err != nil {
 			return err
 		}
+	}
+	if row.PlanCode == constants.PlanBlack {
+		_, _ = transaction.ExecContext(ctx, `UPDATE subscriptions SET paused_reason = '' WHERE id = $1`, row.ID)
+		billing.recordBlackBillingEvent(ctx, transaction, BlackBillingEventView{
+			SubscriptionId: row.ID.String(), ProfileId: row.ProfileID, OwnerUserId: row.OwnerUserID,
+			EventKind: "payment_verified", ActorKind: "system",
+			Summary: "Verified USD payment and activated Black Government entitlement",
+			Metadata: map[string]any{"periodId": period.ID.String(), "paymentReference": paymentReference, "amountMinor": period.AmountDueMinor},
+		})
 	}
 	if err := billing.emit(ctx, transaction, "entitlement.granted", row.ProfileID, entitlementData(row, string(row.Status))); err != nil {
 		return err

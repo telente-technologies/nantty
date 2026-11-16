@@ -1,4 +1,4 @@
-package ads
+package ads_test
 
 import (
 	"bytes"

@@ -16,8 +16,8 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, command Command) error {
-	if command.Event != "lapsed" && command.Event != "restored" && command.Event != "ended" {
-		return usersErrors.ValidationFailedFor("event", "must be lapsed, restored or ended")
+	if command.Event != "lapsed" && command.Event != "restored" && command.Event != "ended" && command.Event != "paused" {
+		return usersErrors.ValidationFailedFor("event", "must be lapsed, restored, paused or ended")
 	}
 	return handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		row, err := tx.ProfileCheckmark.Query().Where(profilecheckmark.ProfileID(command.ProfileId)).ForUpdate().Only(ctx)
@@ -27,7 +27,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		if err != nil {
 			return err
 		}
-		if row.Source == profilecheckmark.SourceLifetimeGrant || row.Status == profilecheckmark.StatusRevoked || row.Status == profilecheckmark.StatusSuspended {
+		if row.Source == profilecheckmark.SourceLifetimeGrant || row.Status == profilecheckmark.StatusRevoked || (row.Status == profilecheckmark.StatusSuspended && row.Color != profilecheckmark.ColorBlack) {
 			return nil
 		}
 		profile, err := tx.Profile.Get(ctx, row.ProfileID)
@@ -38,9 +38,21 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		now := handler.Container.Now()
 		switch {
 		case command.Event == "restored":
+			if row.Color == profilecheckmark.ColorBlack {
+				approved, err := services.IsBlackApplicationApproved(ctx, handler.Container.Database, row.ProfileID)
+				if err != nil || !approved {
+					return err
+				}
+			}
 			change.Status = profilecheckmark.StatusVerified
+		case command.Event == "paused":
+			change.Status = profilecheckmark.StatusSuspended
 		case row.Color == profilecheckmark.ColorBlack && command.Event == "lapsed":
-			change.Status, change.GraceEndsAt = profilecheckmark.StatusGrace, graceEnd(ctx, now)
+			if end := graceEnd(ctx, now); end != nil {
+				change.Status, change.GraceEndsAt = profilecheckmark.StatusGrace, end
+			} else {
+				change.Status = profilecheckmark.StatusExpired
+			}
 		default:
 			change.Status = profilecheckmark.StatusExpired
 		}
@@ -49,7 +61,6 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 		}
 		notice := services.NoticeBase(profile, string(row.Color))
 		notice.Price, notice.FailedAt = command.Price, now.UTC().Format(time.RFC3339)
-		notice.GraceEndsAt = now.AddDate(0, 0, 7).UTC().Format(time.RFC3339)
 		if change.GraceEndsAt != nil {
 			notice.GraceEndsAt = change.GraceEndsAt.UTC().Format(time.RFC3339)
 		}
@@ -58,6 +69,10 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 }
 
 func graceEnd(ctx context.Context, now time.Time) *time.Time {
-	end := now.AddDate(0, 0, services.LoadPricingRules(ctx).BlackGraceDays)
+	days := services.LoadPricingRules(ctx).BlackGraceDays
+	if days <= 0 {
+		return nil
+	}
+	end := now.AddDate(0, 0, days)
 	return &end
 }

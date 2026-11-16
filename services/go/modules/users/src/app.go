@@ -79,7 +79,7 @@ func StartUsersModuleWithSettings(ctx context.Context, settings configs.UsersSet
 	}
 	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database)))
 	usersContainer := &container.Container{
-		Client: client, Settings: settings, Logger: logger, Now: time.Now,
+		Client: client, Database: database, Settings: settings, Logger: logger, Now: time.Now,
 		PlatformSettings: identityports.NewCachedPlatformSettings(identityports.Default, settings.PlatformSettingsTtl, logger),
 		OwnedStores:      integrations.CatalogOwnedStores{Database: database, Schema: settings.CatalogSchema},
 		Catalog:          integrations.CatalogOwnedStores{Database: database, Schema: settings.CatalogSchema},
@@ -121,6 +121,8 @@ func StartUsersModuleWithSettings(ctx context.Context, settings configs.UsersSet
 }
 
 func (module *Module) Name() string { return "users" }
+
+func (module *Module) Container() *container.Container { return module.container }
 
 func (module *Module) MountRoutes(mux *http.ServeMux) {
 	profiles.Mount(mux, module.container)
@@ -193,8 +195,6 @@ func createDomainEventPublisher(ctx context.Context, settings configs.UsersSetti
 		DeployableName: dependencies.DeployableName, Logger: dependencies.Logger, IsProduction: settings.IsProduction(), LegacySnsTopicArn: settings.DomainEventsTopicArn,
 	})
 }
-
-func (module *Module) Container() *container.Container { return module.container }
 
 func attachIdentityVerificationClients(usersContainer *container.Container) {
 	settings := usersContainer.Settings.Verification

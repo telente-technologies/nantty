@@ -6,6 +6,8 @@ import { PortalShell } from "@/components/portalShell";
 import { BusinessMessagingDocs } from "@/components/businessMessagingDocs";
 import { OrganizationApplicationsWorkspace } from "@/components/organizationApplicationsWorkspace";
 import { DeveloperCredentialsWorkspace } from "@/components/developerCredentialsWorkspace";
+import { DeveloperRequestsWorkspace } from "@/components/developerRequestsWorkspace";
+import { DeveloperUsageWorkspace } from "@/components/developerUsageWorkspace";
 import { DeveloperWebhooksWorkspace } from "@/components/developerWebhooksWorkspace";
 
 export function generateStaticParams() {
@@ -24,5 +26,15 @@ export default async function DeveloperSectionPage({ params }: { readonly params
   if (!isDeveloperSectionKey(section)) notFound();
   const details = developerSectionDetails[section];
 
-  return <PortalShell homeHref="/dashboard">{section === "messaging" ? <BusinessMessagingDocs /> : section === "applications" ? <OrganizationApplicationsWorkspace /> : section === "credentials" ? <DeveloperCredentialsWorkspace /> : section === "webhooks" ? <DeveloperWebhooksWorkspace /> : <PortalSectionView section={details} isDocumentationPage={section === "docs"} />}</PortalShell>;
+  return (
+    <PortalShell homeHref="/dashboard">
+      {section === "messaging" ? <BusinessMessagingDocs />
+        : section === "applications" ? <OrganizationApplicationsWorkspace />
+        : section === "credentials" ? <DeveloperCredentialsWorkspace />
+        : section === "webhooks" ? <DeveloperWebhooksWorkspace />
+        : section === "requests" ? <DeveloperRequestsWorkspace />
+        : section === "usage" ? <DeveloperUsageWorkspace />
+        : <PortalSectionView section={details} isDocumentationPage={section === "docs"} />}
+    </PortalShell>
+  );
 }

@@ -1,9 +1,14 @@
 package users_test
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/google/uuid"
+
+	checkmarkservices "nantty/modules/users/src/modules/checkmarks/services"
 )
 
 var internalToken = []string{"X-Internal-Token", strings.Repeat("u", 32)}
@@ -160,17 +165,27 @@ func TestCheckmarkRulesFollowTheProfileTypeAndLifetimeGrantsRespectThem(t *testi
 
 func TestGovernmentBlackNeedsTwoDifferentAdminsAndKeepsTheHandleWhenRevoked(t *testing.T) {
 	harness := startUsersModuleAgainstFreshSchema(t)
-	_, token := harness.newAccount("agency.owner", "Agency Owner")
+	accountId, token := harness.newAccount("agency.owner", "Agency Owner")
 	gov := harness.expect("POST", "/api/v1/users/me/business-profiles", token, map[string]any{
 		"displayName": "Federal Agency", "handle": "northern.records.office", "description": "Official", "businessType": "government", "categories": []map[string]any{{"customName": "Government"}},
 	}, http.StatusCreated)
-	harness.expect("PUT", "/api/v1/users/me/acting-profile", token, map[string]string{"profileId": gov["id"].(string)}, http.StatusOK)
+	govId := gov["id"].(string)
+	harness.expect("PUT", "/api/v1/users/me/acting-profile", token, map[string]string{"profileId": govId}, http.StatusOK)
 	harness.expect("POST", "/api/v1/verification/black-applications", token, map[string]any{"agencyName": "A", "representativeName": "", "representativeRole": ""}, http.StatusBadRequest)
-	created := harness.expect("POST", "/api/v1/verification/black-applications", token, map[string]any{"agencyName": "Federal Agency", "representativeName": "Ada Officer", "representativeRole": "Director"}, http.StatusCreated)
+	created := harness.expect("POST", "/api/v1/verification/black-applications", token, map[string]any{
+		"agencyName": "Federal Agency", "legalIdentityName": "Federal Agency of Records", "legalRegistrationRef": "REG-NG-01",
+		"jurisdictionCountryCode": "NG", "officialWebsite": "https://records.gov.ng", "officialContactPhone": "+2348000000001",
+		"institutionalEmail": "admin@records.gov.ng", "representativeName": "Ada Officer", "representativeRole": "Director",
+		"representativeEmail": "ada@records.gov.ng", "evidenceNotes": "Official gazette filing",
+	}, http.StatusCreated)
 	if created["applicationId"] == nil {
 		t.Fatalf("unexpected %v", created)
 	}
-	harness.expect("POST", "/api/v1/verification/black-applications", token, map[string]any{"agencyName": "Federal Agency", "representativeName": "Ada Officer", "representativeRole": "Director"}, http.StatusConflict)
+	appId := created["applicationId"].(string)
+	harness.expect("POST", "/api/v1/verification/black-applications", token, map[string]any{
+		"agencyName": "Federal Agency", "jurisdictionCountryCode": "NG", "institutionalEmail": "admin@records.gov.ng",
+		"representativeName": "Ada Officer", "representativeRole": "Director",
+	}, http.StatusConflict)
 	harness.expect("GET", "/api/v1/verification/suggestions", token, nil, http.StatusOK)
 
 	first, firstStepUp := harness.staff("admin", "verification:review", "verification:revoke", "users:read")
@@ -182,6 +197,18 @@ func TestGovernmentBlackNeedsTwoDifferentAdminsAndKeepsTheHandleWhenRevoked(t *t
 	id := list[0].(map[string]any)["id"].(string)
 	base := "/api/v1/admin/black-applications/" + id
 	approve := map[string]string{"reason": "vetting complete and documents match"}
+	emailUnverified := harness.expect("POST", base+"/approve", first, approve, http.StatusConflict, firstStepUp...)
+	if emailUnverified["code"] != "INSTITUTIONAL_EMAIL_NOT_VERIFIED" {
+		t.Fatalf("must require institutional email OTP before approval: %v", emailUnverified)
+	}
+	otpCode, _, err := checkmarkservices.IssueInstitutionalEmailOtp(context.Background(), harness.module.Container(), uuid.MustParse(appId), uuid.MustParse(accountId), "admin@records.gov.ng")
+	if err != nil {
+		t.Fatalf("issue otp: %v", err)
+	}
+	verified := harness.expect("POST", "/api/v1/verification/black-applications/"+appId+"/email/verify", token, map[string]string{"code": otpCode}, http.StatusOK)
+	if verified["institutionalEmailVerified"] != true || verified["status"] != "IN_REVIEW" {
+		t.Fatalf("expected verified email to advance to IN_REVIEW only: %v", verified)
+	}
 	incomplete := harness.expect("POST", base+"/approve", first, approve, http.StatusConflict, firstStepUp...)
 	if incomplete["code"] != "CHECKLIST_INCOMPLETE" {
 		t.Fatalf("unexpected %v", incomplete)
@@ -200,16 +227,43 @@ func TestGovernmentBlackNeedsTwoDifferentAdminsAndKeepsTheHandleWhenRevoked(t *t
 		t.Fatalf("unexpected %v", sameAdmin)
 	}
 	done := harness.expect("POST", base+"/approve", second, approve, http.StatusOK, secondStepUp...)
-	if done["status"] != "APPROVED" || done["handleReserved"] != true || done["reverificationDueAt"] == nil {
-		t.Fatalf("two approvals grant Black, reserve the handle and set the yearly re-verification: %v", done)
+	if done["status"] != "APPROVED" || done["handleReserved"] != true || done["reverificationDueAt"] == nil || done["privateCheckoutEnabled"] != true {
+		t.Fatalf("two approvals authorize private checkout, reserve the handle and set yearly re-verification: %v", done)
 	}
-	if mine := harness.expect("GET", "/api/v1/verification/me", token, nil, http.StatusOK); mine["current"].(map[string]any)["color"] != "black" || mine["handleReserved"] != true {
-		t.Fatalf("unexpected %v", mine)
+	// Approval alone must NOT make the Black badge visible before paid USD subscription settlement.
+	if mine := harness.expect("GET", "/api/v1/verification/me", token, nil, http.StatusOK); mine["current"].(map[string]any)["badgeVisible"] != false || mine["handleReserved"] != true {
+		t.Fatalf("badge must remain hidden until payment activates entitlement: %v", mine)
+	}
+	// Entitlement grant activates the visible badge, and pause hides it without revoking verification.
+	harness.expect("POST", "/api/v1/internal/entitlements/events", "", map[string]any{
+		"eventId": uuid.NewString(), "eventType": "entitlement.granted", "profileId": govId, "plan": "black", "checkmark": "black",
+	}, http.StatusNoContent, internalToken...)
+	if active := harness.expect("GET", "/api/v1/verification/me", token, nil, http.StatusOK); active["current"].(map[string]any)["badgeVisible"] != true || active["current"].(map[string]any)["color"] != "black" {
+		t.Fatalf("entitlement.granted must show black badge for approved org: %v", active)
+	}
+	harness.expect("POST", "/api/v1/internal/entitlements/events", "", map[string]any{
+		"eventId": uuid.NewString(), "eventType": "entitlement.paused", "profileId": govId, "plan": "black", "checkmark": "black",
+	}, http.StatusNoContent, internalToken...)
+	if paused := harness.expect("GET", "/api/v1/verification/me", token, nil, http.StatusOK); paused["current"].(map[string]any)["badgeVisible"] != false || paused["current"].(map[string]any)["status"] != "paused" {
+		t.Fatalf("entitlement.paused must hide badge while keeping approval: %v", paused)
 	}
 	harness.expect("POST", base+"/reverification-reminder", first, nil, http.StatusOK)
 	revoked := harness.expect("POST", base+"/revoke", first, map[string]string{"reason": "misuse of the badge"}, http.StatusOK, firstStepUp...)
 	if revoked["status"] != "REVOKED" || revoked["handleReserved"] != true {
 		t.Fatalf("revoking keeps the handle reserved: %v", revoked)
+	}
+	appeal := harness.expect("POST", "/api/v1/verification/black-applications/"+appId+"/appeals", token, map[string]string{
+		"reason": "Updated ministry documentation attached", "supportingDetails": "Official gazette #992",
+	}, http.StatusCreated)
+	appeals := harness.expect("GET", "/api/v1/admin/black-applications/appeals", first, nil, http.StatusOK)["data"].([]any)
+	if len(appeals) != 1 {
+		t.Fatalf("expected appeal in admin list: %v", appeals)
+	}
+	decided := harness.expect("POST", "/api/v1/admin/black-applications/appeals/"+appeal["id"].(string)+"/decide", second, map[string]string{
+		"decision": "reopen_review", "note": "Reopened for second verification check",
+	}, http.StatusOK, secondStepUp...)
+	if decided["status"] != "approved" {
+		t.Fatalf("expected appeal approval to reopen application: %v", decided)
 	}
 	harness.waitForPublishedEvents("checkmark.approved", "checkmark.revoked", "blackApplication.reverificationDue")
 }

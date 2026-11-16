@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"nantty/modules/ledger/src/databases"
+	"nantty/modules/subscriptions/src/constants"
 	"nantty/modules/subscriptions/src/generated/ent"
 	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
 	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferlink"
@@ -58,7 +59,7 @@ func offerStatusError(status string) error {
 func eligibleOfferPlansFor(link *ent.SubscriptionOfferLink, profileType string) []string {
 	plans := []string{}
 	for _, code := range link.PlanCodes {
-		if PlanAllowedForProfile(code, profileType) {
+		if def, known := constants.Plans[code]; known && !def.DiscountsDisabled && PlanAllowedForProfile(code, profileType) {
 			plans = append(plans, code)
 		}
 	}
