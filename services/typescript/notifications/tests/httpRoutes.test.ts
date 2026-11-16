@@ -79,6 +79,9 @@ describe("public unsubscribe route", () => {
     expect(harness.identity.withdrawn).toEqual([]);
     expect((await call("POST", `/api/v1/email/unsubscribe?token=${token}`, {}, "List-Unsubscribe=One-Click")).status).toBe(200);
     expect(harness.identity.withdrawn).toEqual(["u1"]);
+    const bodyToken = harness.unsubscribeTokens.sign("u2");
+    expect((await call("POST", "/api/v1/email/unsubscribe", {}, { token: bodyToken })).status).toBe(200);
+    expect(harness.identity.withdrawn).toEqual(["u1", "u2"]);
     expect((await call("POST", "/api/v1/email/unsubscribe?token=bad")).status).toBe(400);
   });
 });

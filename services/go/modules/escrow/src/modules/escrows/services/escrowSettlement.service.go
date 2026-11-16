@@ -112,7 +112,10 @@ func (service EscrowService) ResolveEscrowPartiallyInTransaction(ctx context.Con
 		return EscrowSettlementResult{}, ErrLegacyEscrowCustody
 	}
 	commissionKept := models.CommissionKeptOnRemainder(held.CommissionMinor, held.AmountMinor, held.AmountMinor-resolution.RefundMinor)
-	sellerKeeps := max(held.AmountMinor-resolution.RefundMinor-commissionKept-held.ProcessingFeeMinor, 0)
+	sellerKeeps := held.AmountMinor - resolution.RefundMinor - commissionKept - held.ProcessingFeeMinor
+	if sellerKeeps < 0 {
+		return EscrowSettlementResult{}, models.ErrPartialRefundExceedsNet
+	}
 	resolved, err := service.partiallyRefundBuyerWalletInTransaction(ctx, transaction, held, resolution.RefundMinor, sellerKeeps, commissionKept)
 	if err != nil {
 		return EscrowSettlementResult{}, err

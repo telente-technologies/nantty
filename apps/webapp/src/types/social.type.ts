@@ -262,6 +262,7 @@ export interface CoinPackage {
   readonly coins: number;
   readonly bonusCoins?: number;
   readonly price: import("./money.type").Money;
+  readonly billingNote?: string;
 }
 
 export type CoinPurchaseChannel = "web_checkout" | "store_iap";

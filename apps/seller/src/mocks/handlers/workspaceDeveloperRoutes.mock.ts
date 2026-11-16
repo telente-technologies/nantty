@@ -131,7 +131,7 @@ function registerWebhookRoutes(): void {
     const state = readMockWorkspaceState();
     const webhook = state.webhooks.find((candidate) => candidate.id === request.params.webhookId);
     if (!webhook) throw new MockHttpError(404, "WEBHOOK_NOT_FOUND", "That webhook no longer exists.");
-    const delivery = { id: createMockIdentifier("whd"), webhookId: webhook.id, event: webhook.events[0] ?? "order.created", responseStatus: 200, durationMilliseconds: 212, outcome: "delivered" as const, attemptedAt: new Date().toISOString() };
+    const delivery = { id: createMockIdentifier("whd"), webhookId: webhook.id, event: webhook.events[0] ?? "order.created", responseStatus: null, durationMilliseconds: null, outcome: "retrying" as const, attemptedAt: new Date().toISOString() };
     state.webhookDeliveries.unshift(delivery);
     return respondWithJson(201, delivery);
   });

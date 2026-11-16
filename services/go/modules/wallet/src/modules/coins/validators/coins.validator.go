@@ -49,5 +49,8 @@ func ValidateConvertEarnedCoinsRequest(request dtos.ConvertEarnedCoinsRequestDto
 	if request.Currency != "" {
 		collector.RequireOneOf("currency", request.Currency, "NGN", "GHS", "KES", "ZAR", "GBP", "EUR", "USD")
 	}
+	if request.ExpectedCashMinor != nil && *request.ExpectedCashMinor <= 0 {
+		collector.Add("expectedCashMinor", "must be positive")
+	}
 	return collector.Result()
 }

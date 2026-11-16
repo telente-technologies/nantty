@@ -1,9 +1,29 @@
 import Link from "next/link";
 
 import { BookOpenIcon, ChatCircleTextIcon, LockIcon, WarningCircleIcon } from "@/components/ui/icons";
-import { readDeveloperSupportUrl } from "@/config/site.config";
+import { readDeveloperDocsHref, readDeveloperSupportUrl, readSandboxPortalUrl } from "@/config/site.config";
 
 import styles from "./businessMessagingDocs.module.css";
+
+const sandboxEndpoints = [
+  ["POST", "/v1/customers", "Create or update a synthetic Sandbox customer"],
+  ["POST", "/v1/customers/{customerId}/conversations", "Open a synthetic conversation for a Sandbox customer"],
+  ["POST", "/v1/conversations/{conversationId}/messages", "Send an idempotent synthetic business message (monthly quota enforced)"],
+  ["GET", "/v1/conversations/{conversationId}/messages", "List up to 100 latest messages in a Sandbox conversation"],
+] as const;
+
+const sandboxErrors = [
+  ["400", "IDEMPOTENCY_KEY_REQUIRED / INVALID_REQUEST", "Missing valid Idempotency-Key or invalid JSON body"],
+  ["401", "UNAUTHORIZED", "Missing, invalid, revoked, or expired ntsb_test_ bearer credential"],
+  ["404", "CUSTOMER_NOT_FOUND / CONVERSATION_NOT_FOUND", "Target resource does not exist under this Sandbox application"],
+  ["409", "IDEMPOTENCY_CONFLICT", "Idempotency-Key reused with a different message payload"],
+  ["429", "SANDBOX_QUOTA_EXCEEDED", "Monthly Sandbox message quota exhausted; includes resetAt details"],
+] as const;
+
+const changelogEntries = [
+  ["2026-11-16", "Published OpenAPI 3.1.0 specification (/openapi.json), Sandbox monthly quota error contract (429 SANDBOX_QUOTA_EXCEEDED), and HMAC-SHA256 webhook verification docs."],
+  ["2026-11-15", "Added Sandbox credential rotation/revocation, signed webhook delivery worker with SSRF defenses, and synthetic conversation controls."],
+] as const;
 
 const endpointGroups = [
   {
@@ -64,9 +84,9 @@ export function BusinessMessagingDocs() {
       <section className={styles.status} role="status" aria-labelledby="contract-state-title">
         <span className={styles.statusIcon}><WarningCircleIcon size={20} /></span>
         <div>
-          <p className={styles.statusLabel}>DRAFT CONTRACT · REQUESTS DISABLED</p>
-          <h2 id="contract-state-title">This public API is not live yet</h2>
-          <p>These routes describe the proposed v1 surface from the internal specification. They are not routed by the production API gateway, and this page does not send requests or return simulated success.</p>
+          <p className={styles.statusLabel}>SANDBOX AVAILABLE · PRODUCTION DRAFT DISABLED</p>
+          <h2 id="contract-state-title">Production Business Messaging API is not live yet</h2>
+          <p>Production <code>/v1/business/*</code> routes describe the proposed v1 contract and are not mounted on the production API gateway. Synthetic integration testing is available in the <a href={readSandboxPortalUrl()}>Nantty Sandbox</a> using <code>ntsb_test_</code> credentials. Machine-readable <a href={readDeveloperDocsHref("openapi.json")}>OpenAPI 3.1 JSON</a> is published for both contracts.</p>
         </div>
       </section>
 
@@ -75,8 +95,36 @@ export function BusinessMessagingDocs() {
         <p>Integrations can only access business conversations where their business is an authorized participant and the customer is eligible for messaging. They do not access personal end-to-end encrypted conversations. Automated handling must be disclosed; customers can withdraw consent, report, or block.</p>
       </section>
 
+      <section className={styles.panel} aria-labelledby="sandbox-quickstart-title">
+        <div className={styles.panelHeading}><div><p className={styles.eyebrow}>Sandbox quickstart</p><h2 id="sandbox-quickstart-title">Send a synthetic Sandbox message</h2></div><span className={styles.draftPill}>Sandbox · ntsb_test_</span></div>
+        <pre className={styles.code}><code>{`curl -X POST "${readSandboxPortalUrl()}/v1/conversations/<conversation-id>/messages" \\
+  -H "Authorization: Bearer ntsb_test_<credential-secret>" \\
+  -H "Content-Type: application/json" \\
+  -H "Idempotency-Key: msg-2026-11-16-001" \\
+  -d '{"text":"Your order is ready for delivery."}'`}</code></pre>
+        <div className={styles.endpointTableScroll}>
+          <table className={styles.endpointTable}>
+            <thead><tr><th scope="col">Method</th><th scope="col">Sandbox endpoint</th><th scope="col">Purpose</th></tr></thead>
+            <tbody>{sandboxEndpoints.map(([method, path, description]) => <tr key={`${method}:${path}`}>
+              <td><span className={styles.method}>{method}</span></td><td><code>{path}</code></td><td>{description}</td>
+            </tr>)}</tbody>
+          </table>
+        </div>
+        <p className={styles.note}>Sandbox credentials begin with <code>ntsb_test_</code>, never authorize production requests, and enforce atomic monthly message quotas (<code>429 SANDBOX_QUOTA_EXCEEDED</code>).</p>
+      </section>
+
+      <section className={styles.panel} aria-labelledby="webhook-verify-title">
+        <div className={styles.panelHeading}><div><p className={styles.eyebrow}>Webhook security</p><h2 id="webhook-verify-title">Verify signed webhook deliveries</h2></div><span className={styles.draftPill}>HMAC-SHA256</span></div>
+        <pre className={styles.code}><code>{`// Header: nantty-signature: t=<unix-seconds>,v1=<hex-hmac-sha256>
+// Header: nantty-event-id: <uuid> (deduplicate at-least-once deliveries)
+const signedPayload = \`\${timestamp}.\${rawRequestBody}\`;
+const expected = createHmac("sha256", webhookSecret).update(signedPayload).digest("hex");
+const valid = timingSafeEqual(Buffer.from(v1Signature, "hex"), Buffer.from(expected, "hex"));`}</code></pre>
+        <p className={styles.note}>Reject deliveries whose <code>t=</code> timestamp falls outside your replay window (for example, 300 seconds) and compare digests in constant time.</p>
+      </section>
+
       <section className={styles.panel} aria-labelledby="request-contract-title">
-        <div className={styles.panelHeading}><div><p className={styles.eyebrow}>Request contract</p><h2 id="request-contract-title">Send a business text</h2></div><span className={styles.draftPill}>Proposed · v1</span></div>
+        <div className={styles.panelHeading}><div><p className={styles.eyebrow}>Proposed production contract</p><h2 id="request-contract-title">Send a business text</h2></div><span className={styles.draftPill}>Proposed · v1</span></div>
         <pre className={styles.code}><code>{`POST /v1/business/messages
 Authorization: Bearer <business-scoped-access-token>
 Content-Type: application/json
@@ -116,6 +164,33 @@ Idempotency-Key: <unique-request-id>
           <h3 className={styles.subheading}>Initial event types</h3>
           <ul className={styles.eventList}>{webhookEvents.map((event) => <li key={event}><code>{event}</code></li>)}</ul>
           <p className={styles.note}>Signatures, timestamp/replay checks, endpoint verification, SSRF defenses, bounded retries, durable event IDs, and dead-letter inspection are release gates—not live capabilities yet.</p>
+        </section>
+      </div>
+
+      <div className={styles.columns}>
+        <section className={styles.panel} aria-labelledby="errors-title">
+          <div className={styles.panelHeading}><div><p className={styles.eyebrow}>Error contract</p><h2 id="errors-title">Sandbox error responses</h2></div></div>
+          <div className={styles.endpointTableScroll}>
+            <table className={styles.endpointTable}>
+              <thead><tr><th scope="col">Status</th><th scope="col">Code</th><th scope="col">Meaning</th></tr></thead>
+              <tbody>{sandboxErrors.map(([status, code, meaning]) => <tr key={code}>
+                <td><span className={styles.method}>{status}</span></td><td><code>{code}</code></td><td>{meaning}</td>
+              </tr>)}</tbody>
+            </table>
+          </div>
+          <p className={styles.note}>Error responses follow <code>{`{"error":{"code","message","details?"}}`}</code>. See <a href={readDeveloperDocsHref("openapi.json")}>OpenAPI 3.1 JSON</a> for full schema definitions.</p>
+        </section>
+
+        <section className={styles.panel} aria-labelledby="changelog-title">
+          <div className={styles.panelHeading}><div><p className={styles.eyebrow}>API changelog</p><h2 id="changelog-title">Contract updates</h2></div></div>
+          <div className={styles.endpointTableScroll}>
+            <table className={styles.endpointTable}>
+              <thead><tr><th scope="col">Date</th><th scope="col">Update</th></tr></thead>
+              <tbody>{changelogEntries.map(([date, update]) => <tr key={date}>
+                <td><code>{date}</code></td><td>{update}</td>
+              </tr>)}</tbody>
+            </table>
+          </div>
         </section>
       </div>
 

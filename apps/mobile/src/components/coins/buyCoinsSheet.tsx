@@ -58,6 +58,11 @@ export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose:
                     +{coinPackage.bonusCoins.toLocaleString("en-US")} bonus
                   </Text>
                 ) : null}
+                {coinPackage.billingNote ? (
+                  <Text size={11} lineHeight={14.4} color={colors.textMuted}>
+                    {coinPackage.billingNote}
+                  </Text>
+                ) : null}
               </View>
             </View>
             <Text size={14} weight={600} lineHeight={16.8} color={colors.primary}>

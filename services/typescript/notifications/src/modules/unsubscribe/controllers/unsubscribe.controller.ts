@@ -13,7 +13,11 @@ export class UnsubscribeController {
   };
 
   public unsubscribe = async ({ request }: RouteContext) => {
-    const token = readQuery(request).get("token") ?? "";
+    const bodyToken =
+      typeof request.body === "object" && request.body !== null && "token" in request.body && typeof (request.body as { readonly token?: unknown }).token === "string"
+        ? (request.body as { readonly token: string }).token.trim()
+        : "";
+    const token = bodyToken !== "" ? bodyToken : (readQuery(request).get("token") ?? "");
     if (token === "") throw validationError("token is required.");
     return json(200, await this.container.unsubscribeFromMarketing.execute({ token }));
   };

@@ -58,6 +58,7 @@ async function weeklyDigests(context: HandlerContext, query: ListDigestPageQuery
   const groups = await db.follow.groupBy({ by: ["followerId"], where: { state: "accepted", ...(query.cursor === undefined ? {} : { followerId: { gt: query.cursor } }) }, orderBy: { followerId: "asc" }, take: query.limit });
   const data: DigestEntry[] = [];
   for (const group of groups) {
+    if (!(await context.directory.hasPersonalizationConsent(group.followerId))) continue;
     const followed = await followRepository.allFollowedAccountIds(db, group.followerId, 100);
     const posts = await db.post.findMany({ where: { authorId: { in: followed }, kind: { in: ["post", "clip"] }, audience: "everyone", visibility: "public", ...publishedPostToViewers, createdAt: { gte: weekAgo } }, orderBy: [{ likeCount: "desc" }, { id: "desc" }], take: sampleSize });
     if (posts.length === 0) continue;

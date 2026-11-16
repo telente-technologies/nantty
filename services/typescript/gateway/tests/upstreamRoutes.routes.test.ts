@@ -276,4 +276,10 @@ describe("seller order refunds", () => {
     expect(route?.upstream).toBe("commerce");
     expect(route?.authentication).toBe("required");
   });
+
+  it("keeps exactPathOnly required routes protected when a trailing slash is present", () => {
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/auth/step-up/")).toMatchObject({ upstream: "identity", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/users/me/")).toMatchObject({ upstream: "identity", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/tips/")).toMatchObject({ upstream: "money", authentication: "required" });
+  });
 });

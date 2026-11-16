@@ -16,7 +16,7 @@ export function proxy(request: NextRequest) {
   const destination = request.nextUrl.clone();
   if (pathname === "/") {
     destination.pathname = "/docs";
-  } else if (pathname === "/robots.txt" || pathname === "/sitemap.xml") {
+  } else if (pathname === "/robots.txt" || pathname === "/sitemap.xml" || pathname === "/openapi.json") {
     destination.pathname = `/docs${pathname}`;
   } else if (pathname !== "/docs" && !pathname.startsWith("/docs/")) {
     destination.pathname = `/docs${pathname}`;

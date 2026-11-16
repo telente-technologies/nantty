@@ -134,6 +134,12 @@ describe("per-route rate limits", () => {
     expect(classifyRequestForRateLimit("GET", "/api/v1/sitemap/profiles?page=2")).toBe("sitemapRead");
     expect(classifyRequestForRateLimit("GET", "/api/v1/search/people")).toBe("search");
     expect(classifyRequestForRateLimit("GET", "/api/v1/auth/login")).toBeUndefined();
+    expect(classifyRequestForRateLimit("POST", "/api/v1/email/unsubscribe?token=abc")).toBe("unsubscribe");
+    expect(classifyRequestForRateLimit("GET", "/api/v1/link-previews/resolve?url=https%3A%2F%2Fnantty.com")).toBe("linkPreview");
+    expect(classifyRequestForRateLimit("GET", "/api/v1/seller/nantty-users?q=ada")).toBe("sellerPeopleSearch");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/reports/?source=app")).toBe("report");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/posts/")).toBe("postWrite");
+    expect(classifyRequestForRateLimit("POST", "/api/v1/admin/auth/login/")).toBe("login");
   });
 
   it("uses count/window policies and opaque identity-plus-IP buckets for pre-auth actions", async () => {

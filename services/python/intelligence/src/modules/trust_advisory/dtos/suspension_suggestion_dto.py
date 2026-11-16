@@ -17,4 +17,6 @@ class SuspensionSuggestion(ContractModel):
     score: float
     evidence: list[SuspensionEvidence]
     advisory_only: Literal[True] = True
+    requires_human_review: Literal[True] = True
+    appeal_path: str = "/account/status"
     generated_at: datetime

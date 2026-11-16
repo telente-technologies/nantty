@@ -21,6 +21,15 @@ func (controller DecisionController) responder() utils.Responder {
 	return utils.Responder{Logger: controller.Container.Logger}
 }
 
+func ResolveSignedInViewer(userId, country string, hints *dtos.ViewerHints) types.Viewer {
+	viewer := types.Viewer{UserId: userId, Country: country}
+	if hints != nil {
+		// CustomAudienceIds is always derived server-side from AudienceIdsContaining; never trust caller-supplied audience IDs.
+		viewer.Region, viewer.AgeBand, viewer.Gender, viewer.Topics = hints.Region, hints.AgeBand, hints.Gender, hints.Topics
+	}
+	return viewer
+}
+
 func (controller DecisionController) DecideForSignedInViewer(writer http.ResponseWriter, request *http.Request) {
 	controller.responder().Run(writer, request, func() error {
 		userId, err := utils.ActorUserId(request)
@@ -34,10 +43,7 @@ func (controller DecisionController) DecideForSignedInViewer(writer http.Respons
 		if err := validators.ValidateSlot(body.Slot, body.SessionId); err != nil {
 			return err
 		}
-		viewer := types.Viewer{UserId: userId.String(), Country: utils.TrustedViewerCountry(request)}
-		if body.Viewer != nil {
-			viewer.Region, viewer.AgeBand, viewer.Gender, viewer.Topics, viewer.CustomAudienceIds = body.Viewer.Region, body.Viewer.AgeBand, body.Viewer.Gender, body.Viewer.Topics, body.Viewer.CustomAudienceIds
-		}
+		viewer := ResolveSignedInViewer(userId.String(), utils.TrustedViewerCountry(request), body.Viewer)
 		return controller.decide(writer, request, decideadforslot.Command{UserId: userId.String(), SessionId: body.SessionId, Slot: body.Slot, Viewer: viewer})
 	})
 }

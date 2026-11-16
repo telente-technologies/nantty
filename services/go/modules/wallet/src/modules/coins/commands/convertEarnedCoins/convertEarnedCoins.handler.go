@@ -19,9 +19,14 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.CoinC
 	if err := handler.Application.Container.Payments.RequireVerificationLevel(ctx, input.UserId, paymentmodels.VerificationLevelPayout); err != nil {
 		return dtos.CoinConversionReceiptDto{}, false, err
 	}
+	var expectedCash int64
+	hasExpectedCash := input.ExpectedCashMinor != nil
+	if hasExpectedCash {
+		expectedCash = *input.ExpectedCashMinor
+	}
 	return ledgerutils.RunIdempotentMoneyCommand(ctx, handler.Application.Container.Resources.Database, handler.Application.Container.Idempotency, ledgerutils.IdempotentCommand[dtos.CoinConversionReceiptDto]{
 		Scope: input.UserId + ":coins.convert", Key: input.IdempotencyKey,
-		RequestHash: ledgerutils.HashRequestFingerprint(input.Coins, input.Currency),
+		RequestHash: ledgerutils.HashRequestFingerprint(input.Coins, input.Currency, hasExpectedCash, expectedCash),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (dtos.CoinConversionReceiptDto, error) {
 			return handler.Application.Balances.ConvertEarnedCoinsToCashInTransaction(ctx, transaction, input)
 		},

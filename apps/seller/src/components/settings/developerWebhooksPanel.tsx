@@ -69,7 +69,7 @@ export function DeveloperWebhooksPanel() {
               align: "end",
               render: (webhook) => (
                 <span className={styles.inlineActions}>
-                  <Button size="small" variant="ghost" isBusy={busyWebhookId === webhook.id} onClick={() => void runWebhookAction(webhook, () => sendSellerApiRequest(`/seller/developers/webhooks/${encodeURIComponent(webhook.id)}/test`, { method: "POST" }), "Test event sent.")}>Send test</Button>
+                  <Button size="small" variant="ghost" isBusy={busyWebhookId === webhook.id} onClick={() => void runWebhookAction(webhook, () => sendSellerApiRequest(`/seller/developers/webhooks/${encodeURIComponent(webhook.id)}/test`, { method: "POST" }), "Test event queued.")}>Send test</Button>
                   <Button size="small" variant="ghost" onClick={() => void runWebhookAction(webhook, () => sendSellerApiRequest(`/seller/developers/webhooks/${encodeURIComponent(webhook.id)}`, { method: "PATCH", body: { active: !webhook.active } }), webhook.active ? "Webhook paused." : "Webhook resumed.")}>{webhook.active ? "Pause" : "Resume"}</Button>
                   <Button size="small" variant="ghost" onClick={() => setEditingWebhook(webhook)}>Edit</Button>
                   <Button size="small" variant="ghost" onClick={() => setWebhookPendingDelete(webhook)}>Delete</Button>
