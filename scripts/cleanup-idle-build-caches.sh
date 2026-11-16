@@ -44,7 +44,7 @@ has_active_project_tool() {
         fi
         case "$command_line" in
             *"playwright"*"test-server"*) continue ;;
-            *"next dev"*|*"next build"*|*"next start"*|*"next-server"*|*"vite"*|*"webpack"*|*"metro"*|*"expo start"*|*"playwright"*|*"jest"*|*"vitest"*|*"pnpm"*|*"npm run"*|*"yarn"*|*"bun run"*|*"GradleWrapperMain"*|*"gradle.*assemble"*|*"gradle.*test"*|*"gradle.*build"*|*"xcodebuild"*|*"swift build"*)
+            *"next dev"*|*"next build"*|*"next start"*|*"next-server"*|*"vite"*|*"webpack"*|*"metro"*|*"expo start"*|*"playwright"*|*"jest"*|*"vitest"*|*"pnpm"*|*"npm run"*|*"yarn"*|*"bun run"*|*"xcodebuild"*|*"swift build"*)
                 return 0
                 ;;
         esac
@@ -63,8 +63,6 @@ cache_paths=(
     "$PROJECT_ROOT/apps/seller/.next"
     "$PROJECT_ROOT/apps/studio/.next"
     "$PROJECT_ROOT/apps/ads/.next"
-    "$PROJECT_ROOT/apps/native/android/app/build"
-    "$PROJECT_ROOT/apps/native/android/.gradle"
     "$PROJECT_ROOT/apps/mobile/.expo"
 )
 
