@@ -19,6 +19,8 @@ import (
 
 const renewalLease = 15 * time.Minute
 
+var ErrRenewalClaimConflict = errors.New("renewal attempt was already claimed by another worker")
+
 func IsEngineManaged(row *ent.Subscription) bool {
 	return IsWebCheckoutChannel(row.Channel) && row.BillingAuthorizationID != "" && row.ProviderPlanCode == ""
 }
@@ -175,8 +177,14 @@ func (billing Billing) chargeDuePeriod(ctx context.Context, row *ent.Subscriptio
 	if reference == "" {
 		attempt++
 		reference = models.RenewalChargeReference(period.IdempotencyKey, attempt)
-		if err := client.SubscriptionPeriod.UpdateOneID(period.ID).SetAttemptCount(attempt).SetPaymentReference(reference).Exec(ctx); err != nil {
+		claimed, err := client.SubscriptionPeriod.Update().
+			Where(subscriptionperiod.ID(period.ID), subscriptionperiod.AttemptCount(period.AttemptCount), subscriptionperiod.PaymentReference(period.PaymentReference)).
+			SetAttemptCount(attempt).SetPaymentReference(reference).Save(ctx)
+		if err != nil {
 			return err
+		}
+		if claimed == 0 {
+			return ErrRenewalClaimConflict
 		}
 	}
 	result, err := billing.Container.Payments.ChargeBillingAuthorization(ctx, paymentservices.BillingAuthorizationCharge{

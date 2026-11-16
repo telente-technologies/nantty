@@ -22,6 +22,7 @@ it.skipIf(!databaseUrl)("persists sandbox credential issue, list, rotate, expiry
   const schema = `sandbox_credential_${randomUUID().replaceAll("-", "")}`;
   const schemaIdentifier = `"${schema}"`;
   const migration = await readFile(new URL("../prisma/migrations/20261115120000_sandbox_core/migration.sql", import.meta.url), "utf8");
+  const quotaMigration = await readFile(new URL("../prisma/migrations/20261116130000_sandbox_quotas_and_scenarios/migration.sql", import.meta.url), "utf8");
   const schemaClient = await adminPool!.connect();
   let database: Pool | null = null;
   let app: ReturnType<typeof createSandboxApp> | null = null;
@@ -29,6 +30,7 @@ it.skipIf(!databaseUrl)("persists sandbox credential issue, list, rotate, expiry
     await schemaClient.query(`CREATE SCHEMA ${schemaIdentifier}`);
     await schemaClient.query(`SET search_path TO ${schemaIdentifier}, public`);
     await schemaClient.query(migration);
+    await schemaClient.query(quotaMigration);
     database = new Pool({ connectionString: databaseUrl, options: `-c search_path=${schema},public` });
     app = createSandboxApp({ database, controlToken });
 

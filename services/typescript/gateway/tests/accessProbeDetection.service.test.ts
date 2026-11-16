@@ -26,6 +26,9 @@ describe("probe classification", () => {
   it("counts 404s and 403s on other people's private resources but not public social privacy walls", () => {
     expect(classifyCompletedRequest({ path: `/api/v1/orders/${orderId(1)}`, status: 404, hasConsumerPrincipal: true })?.kind).toBe("privateNotFound");
     expect(classifyCompletedRequest({ path: `/api/v1/conversations/${orderId(1)}/messages`, status: 403, hasConsumerPrincipal: true })?.kind).toBe("forbidden");
+    expect(classifyCompletedRequest({ path: `/api/v1/seller/conversations/${orderId(1)}`, status: 403, hasConsumerPrincipal: true })?.resourceType).toBe("sellerConversation");
+    expect(classifyCompletedRequest({ path: `/api/v1/seller/wallet/payouts/${orderId(1)}`, status: 404, hasConsumerPrincipal: true })?.resourceType).toBe("sellerWallet");
+    expect(classifyCompletedRequest({ path: `/api/v1/developer/organizations/${orderId(1)}/applications`, status: 403, hasConsumerPrincipal: true })?.resourceType).toBe("developerResource");
     expect(classifyCompletedRequest({ path: `/api/v1/posts/${orderId(1)}`, status: 403, hasConsumerPrincipal: true })).toBeUndefined();
     expect(classifyCompletedRequest({ path: "/api/v1/orders", status: 404, hasConsumerPrincipal: true })).toBeUndefined();
     expect(classifyCompletedRequest({ path: `/api/v1/orders/${orderId(1)}`, status: 200, hasConsumerPrincipal: true })).toBeUndefined();

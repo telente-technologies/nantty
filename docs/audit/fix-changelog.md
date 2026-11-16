@@ -2,6 +2,23 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-11-16 — Audit Hardening (`ZM-017`, `ZM-020`, `ZM-007`) & Sandbox Quotas/Scenarios/Portal Wiring
+
+- **`ZM-017` (`services/go/modules/subscriptions/`):**
+  - Replaced read-modify-write attempt/reference updates in `src/modules/billing/services/renewalEngine.service.go` and `src/modules/creatorSubscriptions/services/creatorRenewals.service.go` with atomic Ent CAS `Update().Where(ID, AttemptCount(prev), PaymentReference(prev)).Save(ctx)` returning `ErrRenewalClaimConflict` / `ErrCreatorRenewalClaimConflict` when `claimed == 0`.
+  - Added `TestConcurrentRenewalWorkersClaimTheAttemptAtMostOnce` in `tests/subscriptions.renewalExactlyOnce_integration_test.go`.
+- **`ZM-020` (`services/typescript/gateway/`):**
+  - Added `/api/v1/seller/conversations/`, `/api/v1/seller/wallet/`, `/api/v1/seller/finance/`, and `/api/v1/developer/` to `privateResourceFamilies` in `src/services/security/accessProbeClassifier.service.ts` + assertions in `tests/accessProbeDetection.service.test.ts`.
+- **`ZM-007` (`packages/webKit/`):**
+  - Mapped `REALTIME_UNAVAILABLE`, `ACCOUNT_SUSPENDED_SECURITY`, `CORS_ORIGIN_FORBIDDEN`, `CORS_ORIGIN_REQUIRED`, `WIDGET_TOKEN_SCOPE`, `POLICY_ACCEPTANCE_REQUIRED`, `INSTITUTIONAL_EMAIL_NOT_VERIFIED`, `BLACK_ANNUAL_DISABLED`, `BLACK_DISCOUNTS_DISABLED`, `USERNAME_TAKEN`, and `VALIDATION_FAILED` in `src/errorExperience/errorMapper.ts` + `__tests__/errorMapper.test.tsx`.
+- **Sandbox Service & Portals (`services/typescript/sandbox/`, `apps/developer/`, `apps/sandbox/`):**
+  - Added `prisma/migrations/20261116130000_sandbox_quotas_and_scenarios/migration.sql`, `src/sandboxUsage.ts`, `src/messagingRoutes.ts`, `src/controlInspectionRoutes.ts`, refactored `src/sandboxApp.ts`, and split `tests/sandboxApp.test.ts` into `credentialControl.test.ts` and `controlInspection.test.ts` (all Sandbox source/test files `<= 263` lines).
+  - Wired Identity-capability-gated (`request_logs.read`, `usage.read`) BFF routes + UIs for `/requests` and `/usage` in `apps/developer`, and wired `/api/sandbox/*` BFFs + interactive UIs (`/test-apps`, `/messaging`, `/scenarios`, `/events`, `/requests`, `/explorer`) in `apps/sandbox` (using Identity-valid capabilities and updated section copy).
+- **Repo-Wide Go Hygiene (`services/go/modules/{auth,ads,payments}/`):**
+  - Split 5 oversized `auth` files (`developerApplications.{grants,service}.go`, `developerOrganizations.{controller,service}.go`, `messengerAuth.service.go`) into same-package files `<= 300` lines.
+  - Relocated `adsReportsAndMedia.integration_test.go` and `payments.refundRetries_integration_test.go` into `tests/` with `package ads_test` / `package payments_test` (`669/669` Go test files under `tests/`).
+- **Verification:** `services/scripts/check-backend-file-lengths.sh`, `services/scripts/check-no-raw-sql-in-typescript.sh`, and `git diff --check` all pass repo-wide (`exit 0`); runtime Go/Vitest/Next/Postgres checks await CI/local `go` + `pnpm` + `psql` environment.
+
 ## 2026-11-16 — Black Government Verification, Private USD Monthly Billing, and Card-Removal Pause
 
 - **Pricing & Plan Rules (`services/go/platform/regionpricing/`, `services/go/modules/subscriptions/src/{constants,loaders,models,modules/billing/services}/`, `apps/admin/src/mocks/seed/`):**
