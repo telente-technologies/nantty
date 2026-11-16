@@ -132,11 +132,49 @@ describe("scheduled post creation and publication", () => {
     await (controller.publishNow as unknown as (input: unknown) => Promise<unknown>)(request);
     await (controller.cancel as unknown as (input: unknown) => Promise<unknown>)(request);
 
-    expect(definitions).toHaveLength(4);
+    expect(definitions).toHaveLength(5);
     expect(definitions.every((definition) => definition.authentication === "required")).toBe(true);
     expect(authorWhere).toHaveLength(5);
     expect(authorWhere.every((where) => where["authorId"] === viewerId)).toBe(true);
     expect(authorWhere.slice(1).every((where) => where["id"] === targetId && where["publicationState"] !== undefined)).toBe(true);
+  });
+
+  it("isolates per-post transactions and cancels posts hidden by moderation before publication", async () => {
+    const store = createStore();
+    const hidden = { ...buildPostRow({ id: "0192f0a0-0000-7000-8000-0000000000f5", authorId: viewerId, publicationState: "scheduled", moderationVisibility: "hidden", scheduledAt: new Date("2026-10-10T11:58:00Z") }) } as Row;
+    const flaky = { ...buildPostRow({ id: "0192f0a0-0000-7000-8000-0000000000f6", authorId: "0192f0a0-0000-7000-8000-00000000b099", publicationState: "scheduled", scheduledAt: new Date("2026-10-10T11:58:30Z") }) } as Row;
+    const healthy = { ...buildPostRow({ id: "0192f0a0-0000-7000-8000-0000000000f7", authorId: viewerId, publicationState: "scheduled", scheduledAt: new Date("2026-10-10T11:59:00Z") }) } as Row;
+    store.posts.push(hidden, flaky, healthy);
+    store.context.directory.findMentionTargetStatuses = async (ids) => {
+      if (ids.includes("0192f0a0-0000-7000-8000-00000000b099")) throw new Error("transient directory outage");
+      return new Map(ids.map((id) => [id, { username: null, status: "active" as const }]));
+    };
+
+    const result = await publishDueScheduledPosts(store.context, now);
+    expect(result).toEqual({ published: 1, failed: 1, waitingForMedia: 0 });
+    expect(hidden).toMatchObject({ publicationState: "cancelled", scheduledAt: null });
+    expect(flaky).toMatchObject({ publicationState: "scheduled" });
+    expect(healthy).toMatchObject({ publicationState: "published", createdAt: now });
+  });
+
+  it("updates scheduled post text and audience when entitled and preserves existing mentions", async () => {
+    const store = createStore();
+    store.context.premium.canSchedulePosts = async () => true;
+    const mention = { start: 0, length: 5, userId: authorId };
+    const scheduled = { ...buildPostRow({ id: "0192f0a0-0000-7000-8000-0000000000f8", authorId: viewerId, text: "@alex Before", mentions: [mention], publicationState: "scheduled", scheduledAt: new Date("2026-10-10T13:00:00Z") }) } as Row;
+    store.posts.push(scheduled);
+    const route = ((_definition: unknown, handler: unknown) => handler) as unknown as RouteFactory;
+    const controller = createScheduledPostsController(route, store.context);
+
+    await expect((controller.editContent as unknown as (input: unknown) => Promise<unknown>)(
+      { principal: { accountId: viewerId }, params: { postId: scheduled["id"] }, body: {} },
+    )).rejects.toMatchObject({ code: "EMPTY_UPDATE" });
+
+    const updated = await (controller.editContent as unknown as (input: unknown) => Promise<{ id: string; text: string; status: string }>)(
+      { principal: { accountId: viewerId }, params: { postId: scheduled["id"] }, body: { text: "@alex After edit", audience: "followers", topics: ["art"] } },
+    );
+    expect(updated).toMatchObject({ id: scheduled["id"], text: "@alex After edit", status: "scheduled" });
+    expect(scheduled).toMatchObject({ text: "@alex After edit", audience: "followers", topics: ["art"], mentions: [mention] });
   });
 
   it("denies rescheduling when the exact profile is not entitled and preserves the scheduled row", async () => {
