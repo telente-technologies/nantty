@@ -20,9 +20,9 @@ func TestBundleAndYearlyDiscountsNeverStackAndTheBiggerWins(t *testing.T) {
 		{"yearly beats the bundle", rules, models.PricingInput{MonthlyAmountMinor: 300_000, Interval: "year", BundleEligiblePlan: true, HasActiveBlue: true}, 2_880_000, "yearly"},
 		{"bundle beats a smaller yearly discount", models.PricingRules{YearlyDiscountBps: 1000, BundleDiscountBps: 1500, BundleMaximumBusinesses: 3}, models.PricingInput{MonthlyAmountMinor: 300_000, Interval: "year", BundleEligiblePlan: true, HasActiveBlue: true}, 3_060_000, "bundle"},
 		{"fourth business loses the bundle", rules, models.PricingInput{MonthlyAmountMinor: 500_000, Interval: "month", BundleEligiblePlan: true, HasActiveBlue: true, BundledBusinessCount: 3}, 500_000, "none"},
-		{"black never gets the bundle", rules, models.PricingInput{MonthlyAmountMinor: 5_000_000, Interval: "month", BundleEligiblePlan: false, HasActiveBlue: true}, 5_000_000, "none"},
+		{"black never gets the bundle", rules, models.PricingInput{MonthlyAmountMinor: 30_000, Interval: "month", BundleEligiblePlan: false, HasActiveBlue: true, DiscountsDisabled: true}, 30_000, "none"},
 		{"an explicit regional yearly price is charged as is", rules, models.PricingInput{MonthlyAmountMinor: 599, YearlyAmountMinor: 5_799, Interval: "year"}, 5_799, "yearly"},
-		{"black yearly still gets the yearly discount", rules, models.PricingInput{MonthlyAmountMinor: 5_000_000, Interval: "year"}, 48_000_000, "yearly"},
+		{"black never gets any discount even when discounts are requested", rules, models.PricingInput{MonthlyAmountMinor: 50_000, Interval: "year", BundleEligiblePlan: true, HasActiveBlue: true, DiscountsDisabled: true}, 600_000, "none"},
 	}
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {

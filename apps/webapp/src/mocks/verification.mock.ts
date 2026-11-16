@@ -1,5 +1,5 @@
 import { ApiError } from "@/errors/api.error";
-import type { MyVerification, VerificationApplicationInput, VerificationPlan } from "@/types/verification.type";
+import type { BlackApplicationInput, BlackApplicationSummary, GovernmentBlackBillingDashboard, MyVerification, SavedCardSummary, VerificationApplicationInput, VerificationPlan } from "@/types/verification.type";
 
 import { getSignedInMockUser, isoDateHoursAgo } from "./fixtures.mock";
 import { convertUsdCentsToViewerCurrency } from "./locale.mock";
@@ -88,4 +88,69 @@ export const verificationMocks: MockRoute[] = [
     verificationStateByUserId.set(getSignedInMockUser().id, updated);
     return updated;
   }),
+  createMockRoute("POST", "/api/v1/verification/black-applications", ({ body }) => {
+    const input = body as BlackApplicationInput;
+    if (!input.agencyName || !input.institutionalEmail || !input.jurisdictionCountryCode) throw new ApiError(400, "Missing required government fields");
+    const appId = `blk_${Date.now()}`;
+    const app: BlackApplicationSummary = {
+      id: appId, agencyName: input.agencyName, handle: "mock.gov", status: "PENDING",
+      legalIdentityName: input.legalIdentityName, legalRegistrationRef: input.legalRegistrationRef,
+      jurisdictionCountryCode: input.jurisdictionCountryCode.toUpperCase(), officialWebsite: input.officialWebsite,
+      officialContactPhone: input.officialContactPhone, institutionalEmail: input.institutionalEmail,
+      institutionalEmailVerified: false, representativeName: input.representativeName,
+      representativeRole: input.representativeRole, privateCheckoutEnabled: false, handleReserved: false,
+      submittedAt: new Date().toISOString(),
+    };
+    verificationStateByUserId.set(getSignedInMockUser().id, { ...myState(), blackApplication: app });
+    return { applicationId: appId, institutionalEmailVerificationRequired: true };
+  }),
+  createMockRoute("POST", "/api/v1/verification/black-applications/:id/email/send-otp", () => ({ sent: true, expiresAt: isoDateHoursAgo(-1) })),
+  createMockRoute("POST", "/api/v1/verification/black-applications/:id/email/verify", ({ body }) => {
+    const { code } = body as { code?: string };
+    if (!code || code.length !== 6) throw new ApiError(400, "Invalid verification code");
+    const current = myState().blackApplication;
+    if (!current) throw new ApiError(404, "Application not found");
+    const updated: BlackApplicationSummary = { ...current, institutionalEmailVerified: true, status: "IN_REVIEW" };
+    verificationStateByUserId.set(getSignedInMockUser().id, { ...myState(), blackApplication: updated });
+    return updated;
+  }),
+  createMockRoute("POST", "/api/v1/verification/black-applications/:id/appeals", () => ({ id: `apl_${Date.now()}`, status: "pending" })),
+  createMockRoute("GET", "/api/v1/verification/black/billing", () => {
+    const app = myState().blackApplication;
+    if (!app) throw new ApiError(403, "BLACK_VERIFICATION_REQUIRED");
+    const amountMinor = app.jurisdictionCountryCode === "NG" ? 30_000 : 50_000;
+    const dashboard: GovernmentBlackBillingDashboard = {
+      verification: {
+        applicationId: app.id, profileId: "prof_gov_mock", agencyName: app.agencyName, handle: app.handle,
+        status: app.status.toLowerCase(), jurisdictionCountryCode: app.jurisdictionCountryCode,
+        institutionalEmail: app.institutionalEmail, institutionalEmailVerified: app.institutionalEmailVerified,
+        privateCheckoutEnabled: app.privateCheckoutEnabled,
+      },
+      pricing: app.status === "APPROVED" && app.institutionalEmailVerified ? {
+        planCode: "black", interval: "month", currency: "USD", price: { amountMinor, currency: "USD" },
+        annualBillingDisabled: true, discountsDisabled: true, recurringCardRequired: true, recurringCardEnabled: true, regionBasis: "verified_legal_jurisdiction",
+      } : null,
+      disclosures: app.status === "APPROVED" ? {
+        monthlyAmountFormatted: `USD ${amountMinor / 100}/month`, currency: "USD",
+        billingCadence: "Monthly recurring charge billed automatically every month.",
+        autoRenewalTerms: "Your authorized USD payment card will be charged automatically each month until cancelled or paused.",
+        nextBillingNotice: "Your first billing period starts upon verified server-side payment.",
+        cancellationTerms: "You may cancel at any time; cancellation stops future renewals at period end.",
+        failureConsequences: "Failed renewal charges suspend the Black checkmark once paid coverage ends.",
+        cardRemovalConsequences: "Removing your recurring card immediately pauses your Black entitlement.",
+      } : null,
+      subscription: null, invoices: [], events: [],
+    };
+    return dashboard;
+  }),
+  createMockRoute("POST", "/api/v1/verification/black/checkout", () => ({
+    subscriptionId: `sub_black_${Date.now()}`, authorizationUrl: "https://checkout.flutterwave.com/v3/hosted/pay/mock-black", reference: `flw_black_${Date.now()}`,
+  })),
+  createMockRoute("POST", "/api/v1/verification/black/payment-method", () => ({
+    setupId: `set_${Date.now()}`, authorizationUrl: "https://checkout.flutterwave.com/v3/hosted/pay/mock-black-card", reference: `flw_card_${Date.now()}`,
+  })),
+  createMockRoute("POST", "/api/v1/verification/black/reactivate", () => ({ reactivated: true })),
+  createMockRoute("POST", "/api/v1/verification/black/cancel", () => ({ cancelled: true })),
+  createMockRoute("GET", "/api/v1/payments/saved-cards", (): SavedCardSummary[] => []),
+  createMockRoute("DELETE", "/api/v1/payments/saved-cards/:authorizationId", ({ params }) => ({ revoked: true, authorizationId: params.authorizationId ?? "" })),
 ];

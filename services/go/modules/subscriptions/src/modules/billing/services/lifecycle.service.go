@@ -121,6 +121,29 @@ func (billing Billing) emitLifecycleEvents(ctx context.Context, transaction *sql
 }
 
 func (billing Billing) HandleSavedCardFingerprint(ctx context.Context, transaction *sql.Tx, card paymentmodels.SavedCardFingerprint) error {
+	if card.Purpose == "black_card" {
+		subscriptionId, err := uuid.Parse(card.SubjectId)
+		if err != nil || card.BillingAuthorizationId == "" {
+			return nil
+		}
+		client := billing.Container.Client(transaction)
+		row, err := client.Subscription.Query().Where(subscription.ID(subscriptionId), subscription.PlanCodeEQ(constants.PlanBlack)).ForUpdate().Only(ctx)
+		if err != nil {
+			return nil
+		}
+		updated, err := row.Update().SetBillingAuthorizationID(card.BillingAuthorizationId).SetProviderCustomerID(card.ProviderCustomerId).
+			SetCardLabel(truncate(card.CardLabel, 60)).SetCardExpiryMonth(card.CardExpiryMonth).SetCardExpiryYear(card.CardExpiryYear).
+			ClearCardExpiryNoticedAt().AddVersion(1).Save(ctx)
+		if err != nil {
+			return err
+		}
+		billing.recordBlackBillingEvent(ctx, transaction, BlackBillingEventView{
+			SubscriptionId: updated.ID.String(), ProfileId: updated.ProfileID, OwnerUserId: updated.OwnerUserID,
+			EventKind: "card_replaced", ActorKind: "user", ActorId: updated.OwnerUserID,
+			Summary: "Updated recurring USD card on Black Government subscription (" + card.CardLabel + ")",
+		})
+		return nil
+	}
 	if card.Purpose != "trial" {
 		return nil
 	}

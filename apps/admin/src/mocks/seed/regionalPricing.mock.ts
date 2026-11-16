@@ -19,7 +19,7 @@ const monthlyPlanPrices: Record<string, Record<PricingRegionCode, WebAndApp>> = 
   seller_pro: { NG: [500_000, 0], GH: [6_000, 0], KE: [100_000, 0], ZA: [14_999, 0], GB: [1_500, 0], EU: [1_700, 0], US: [1_700, 0] },
   seller_business: { NG: [3_000_000, 0], GH: [18_000, 0], KE: [300_000, 0], ZA: [44_999, 0], GB: [4_500, 0], EU: [4_900, 0], US: [4_900, 0] },
   gold_only: { NG: [300_000, 0], GH: [3_600, 0], KE: [60_000, 0], ZA: [8_999, 0], GB: [900, 0], EU: [1_000, 0], US: [1_000, 0] },
-  black: { NG: [5_000_000, 0], GH: [60_000, 0], KE: [1_000_000, 0], ZA: [149_999, 0], GB: [14_900, 0], EU: [16_900, 0], US: [16_900, 0] },
+  black: { NG: [30_000, 0], GH: [50_000, 0], KE: [50_000, 0], ZA: [50_000, 0], GB: [50_000, 0], EU: [50_000, 0], US: [50_000, 0] },
 };
 
 function roundUpToStep(amountMinor: number, stepMinor: number): number {
@@ -45,9 +45,11 @@ export function buildInitialPlanPriceRows(): PlanPriceRow[] {
   return Object.entries(monthlyPlanPrices).flatMap(([planCode, byRegion]) =>
     pricingRegions.map(({ region, currency }) => {
       const [web, app] = byRegion[region];
+      const rowCurrency = planCode === "black" ? "USD" : currency;
+      const yearly = planCode === "black" ? 0 : yearlyFromMonthly(web, rowCurrency);
       return {
-        planCode, countryCode: region, currency, monthlyAmountMinor: web, yearlyAmountMinor: yearlyFromMonthly(web, currency),
-        iosMonthlyAmountMinor: app, iosYearlyAmountMinor: yearlyFromMonthly(app, currency), androidMonthlyAmountMinor: app, androidYearlyAmountMinor: yearlyFromMonthly(app, currency),
+        planCode, countryCode: region, currency: rowCurrency, monthlyAmountMinor: web, yearlyAmountMinor: yearly,
+        iosMonthlyAmountMinor: app, iosYearlyAmountMinor: yearlyFromMonthly(app, rowCurrency), androidMonthlyAmountMinor: app, androidYearlyAmountMinor: yearlyFromMonthly(app, rowCurrency),
         storeProductIds: storeProductIdsFor(planCode, app > 0), active: true, effectiveFrom: "2026-01-01T00:00:00.000Z",
       };
     }),

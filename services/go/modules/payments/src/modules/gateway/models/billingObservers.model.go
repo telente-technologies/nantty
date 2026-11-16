@@ -45,6 +45,17 @@ type SavedCardObserver interface {
 	HandleSavedCardFingerprint(ctx context.Context, transaction *sql.Tx, card SavedCardFingerprint) error
 }
 
+type BillingAuthorizationRevoked struct {
+	OwnerUserId     string
+	AuthorizationId string
+	Reason          string
+	RevokedAt       time.Time
+}
+
+type BillingAuthorizationRevokedObserver interface {
+	HandleBillingAuthorizationRevoked(ctx context.Context, transaction *sql.Tx, revoked BillingAuthorizationRevoked) error
+}
+
 type StoreSubscriptionNotice struct {
 	Store                 string
 	Kind                  string

@@ -25,6 +25,7 @@ func TestEntitlementEventsMapToCheckmarkAndPlanState(t *testing.T) {
 		{"seller business after KYB", applyentitlement.Command{EventType: "entitlement.granted", Plan: "seller_business", Checkmark: "gold", SellerPlan: "business"}, profilecheckmark.ColorGold, true, true, profilecheckmark.StatusVerified, profilesignal.SellerPlanBUSINESS, nil},
 		{"seller plan revoked", applyentitlement.Command{EventType: "entitlement.revoked", Plan: "seller_pro", Checkmark: "gold", SellerPlan: "pro"}, profilecheckmark.ColorGold, true, true, profilecheckmark.StatusExpired, profilesignal.SellerPlanFREE, nil},
 		{"black grace", applyentitlement.Command{EventType: "entitlement.graceStarted", Plan: "black", Checkmark: "black"}, profilecheckmark.ColorBlack, false, true, profilecheckmark.StatusGrace, "", nil},
+		{"black paused", applyentitlement.Command{EventType: "entitlement.paused", Plan: "black", Checkmark: "black"}, profilecheckmark.ColorBlack, false, true, profilecheckmark.StatusSuspended, "", nil},
 		{"premium granted", applyentitlement.Command{EventType: "entitlement.granted", Plan: "premium"}, profilecheckmark.ColorBlue, false, false, "", "", pointer(true)},
 		{"premium revoked", applyentitlement.Command{EventType: "entitlement.revoked", Plan: "premium"}, profilecheckmark.ColorBlue, false, false, "", "", pointer(false)},
 	}

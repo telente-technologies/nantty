@@ -103,11 +103,12 @@ func (directory SqlIdentityDirectory) FindProfileCheckmark(ctx context.Context, 
 }
 
 type StaticIdentityDirectory struct {
-	Profiles   map[string]BillingProfile
-	Accounts   map[string]AccountSignals
-	Countries  map[string]string
-	Acting     map[string]string
-	Checkmarks map[string]ProfileCheckmark
+	Profiles          map[string]BillingProfile
+	Accounts          map[string]AccountSignals
+	Countries         map[string]string
+	Acting            map[string]string
+	Checkmarks        map[string]ProfileCheckmark
+	BlackApplications map[string]BlackApplicationEligibility
 }
 
 func (directory StaticIdentityDirectory) FindProfileCheckmark(_ context.Context, profileId string) (ProfileCheckmark, bool, error) {

@@ -29,6 +29,8 @@ type PlanDefinition struct {
 	SelfServe           bool
 	GracePeriodEligible bool
 	InAppAllowed        bool
+	AnnualDisabled      bool
+	DiscountsDisabled   bool
 	Tier                string
 }
 
@@ -36,7 +38,7 @@ var Plans = map[string]PlanDefinition{
 	PlanSellerPro:      {Code: PlanSellerPro, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", SellerPlan: "pro", TrialAllowed: true, BundleEligible: true, SelfServe: true, InAppAllowed: true, Tier: "PRO"},
 	PlanSellerBusiness: {Code: PlanSellerBusiness, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", SellerPlan: "business", TrialAllowed: true, BundleEligible: true, SelfServe: true, InAppAllowed: true, Tier: "BUSINESS"},
 	PlanGoldOnly:       {Code: PlanGoldOnly, ProfileTypes: []string{ProfileBusiness, ProfileBrand}, Checkmark: "gold", TrialAllowed: true, BundleEligible: true, SelfServe: true, Tier: "GOLD"},
-	PlanBlack:          {Code: PlanBlack, ProfileTypes: []string{ProfileGovernment}, Checkmark: "black", GracePeriodEligible: true, Tier: "OFFICIAL"},
+	PlanBlack:          {Code: PlanBlack, ProfileTypes: []string{ProfileGovernment}, Checkmark: "black", GracePeriodEligible: false, AnnualDisabled: true, DiscountsDisabled: true, Tier: "OFFICIAL"},
 	PlanBlueEssential:  {Code: PlanBlueEssential, ProfileTypes: []string{ProfilePersonal}, SelfServe: true, InAppAllowed: true, Tier: "ESSENTIAL"},
 	PlanBlue:           {Code: PlanBlue, ProfileTypes: []string{ProfilePersonal}, Checkmark: "blue", SelfServe: true, InAppAllowed: true, Tier: "VERIFIED"},
 	PlanGoldCombined:   {Code: PlanGoldCombined, ProfileTypes: []string{ProfilePersonal}, Checkmark: "gold", SelfServe: true, Tier: "GOLD_COMBINED"},
@@ -44,3 +46,5 @@ var Plans = map[string]PlanDefinition{
 }
 
 var LiveStatuses = []string{"trialing", "active", "past_due", "grace"}
+
+func IsBlackPlan(planCode string) bool { return planCode == PlanBlack }

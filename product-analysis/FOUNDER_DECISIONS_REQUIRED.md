@@ -7,11 +7,11 @@ No changes were implemented. Decisions below unblock the entitlement/pricing des
 ## Product model
 
 1. **Resolved 2026-10-29:** Gold Premium Nigeria web monthly price is ₦30,000 (supersedes ₦17,000 working assumption). Existing active database rows still require an effective-dated admin price change; this confirmation alone does not reprice subscribers.
-2. Confirm Black Government monthly price: USD 300 working assumption or USD 500 previously mentioned.
+2. **Resolved 2026-11-16 (Founder Decision):** Black Government monthly price is **USD 300/month** for verified Nigeria (`NG`) legal jurisdiction and **USD 500/month** for all non-Nigeria international jurisdictions. Annual billing and discounts are permanently disabled; web-only; mandatory recurring USD card; `BlackGraceDays = 0`.
 3. Confirm Blue + Gold combo discount interpretation: 10% off combined subtotal, or a discount amount equal to 10% of only the more expensive plan. Also confirm whether it can combine with the annual reduction; default remains no stacking until specified.
 4. Confirm ad-load percentages mean a percentage of normal inventory (Blue Basic 60%, Gold Basic 50%, Black 20%), rather than “percent reduced.”
 5. Confirm a priority-support response target only if a staffed operating SLA will exist.
-6. Approve Black annual billing separately (default disabled). Confirm Flutterwave merchant-specific USD recurring capabilities before any government checkout activation.
+6. **Resolved 2026-11-16:** Black annual billing is disabled (`AnnualDisabled: true`, `WebYearlyMinor: 0`); Flutterwave USD card tokenization (`"USD": "card"`) is enabled with live recurring-currency capability verification (`SupportsRecurringCardCurrency("USD")`) before checkout/card replacement. Production Flutterwave merchant USD settlement credentials remain an operational environment check.
 
 ## Pricing and billing
 

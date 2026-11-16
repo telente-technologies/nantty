@@ -11,6 +11,8 @@ import (
 func MountSavedCardsRoutes(mux *http.ServeMux, application *gateway.Application) {
 	controller := controllers.SavedCardsController{Application: application}
 	requireUser := middlewares.RequireUserAccessToken(application.Container.Resources.AccessVerifier)
+	mux.Handle("GET /api/v1/payments/saved-cards", requireUser(http.HandlerFunc(controller.ListSavedCards)))
+	mux.Handle("DELETE /api/v1/payments/saved-cards/{authorizationId}", requireUser(http.HandlerFunc(controller.RevokeSavedCard)))
 	mux.Handle("POST /api/v1/payments/saved-cards/setups", requireUser(http.HandlerFunc(controller.StartSavedCardSetup)))
 	mux.Handle("POST /api/v1/payments/saved-cards/setups/{reference}/complete", requireUser(http.HandlerFunc(controller.CompleteSavedCardSetup)))
 	mux.Handle("POST /api/v1/payments/saved-cards/charges", requireUser(http.HandlerFunc(controller.ChargeSavedCard)))

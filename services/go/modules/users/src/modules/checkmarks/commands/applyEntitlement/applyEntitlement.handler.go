@@ -29,12 +29,15 @@ type Decision struct {
 func DecideEntitlementChange(command Command, profileColor profilecheckmark.Color, goldVerified bool) Decision {
 	active := command.EventType == "entitlement.granted"
 	grace := command.EventType == "entitlement.graceStarted"
+	paused := command.EventType == "entitlement.paused"
 	decision := Decision{}
 	if color := profilecheckmark.Color(strings.ToLower(command.Checkmark)); color != "" && color == profileColor && (color != profilecheckmark.ColorGold || goldVerified || !active) {
 		decision.Checkmark, decision.ChangeCheckmark = color, true
 		switch {
 		case active:
 			decision.CheckmarkStatus = profilecheckmark.StatusVerified
+		case paused:
+			decision.CheckmarkStatus = profilecheckmark.StatusSuspended
 		case grace:
 			decision.CheckmarkStatus = profilecheckmark.StatusGrace
 		default:
@@ -85,9 +88,22 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 			return err
 		}
 		if decision.ChangeCheckmark && !opened {
-			protected := existing != nil && (existing.Source == profilecheckmark.SourceLifetimeGrant || existing.Status == profilecheckmark.StatusRevoked || existing.Status == profilecheckmark.StatusSuspended)
+			blackGraceBlocked := decision.Checkmark == profilecheckmark.ColorBlack && decision.CheckmarkStatus == profilecheckmark.StatusGrace && services.LoadPricingRules(ctx).BlackGraceDays <= 0
+			if blackGraceBlocked {
+				decision.CheckmarkStatus = profilecheckmark.StatusExpired
+			}
+			blackVerified := true
+			if decision.Checkmark == profilecheckmark.ColorBlack && decision.CheckmarkStatus == profilecheckmark.StatusVerified {
+				if ok, checkErr := services.IsBlackApplicationApproved(ctx, handler.Container.Database, owner.ID); checkErr != nil {
+					return checkErr
+				} else {
+					blackVerified = ok
+				}
+			}
+			// Suspended state on Black can be restored when subscription is reactivated, so only LifetimeGrant and Revoked block subscription updates for Black.
+			protected := existing != nil && (existing.Source == profilecheckmark.SourceLifetimeGrant || existing.Status == profilecheckmark.StatusRevoked || (existing.Status == profilecheckmark.StatusSuspended && decision.Checkmark != profilecheckmark.ColorBlack))
 			skipRevoke := existing == nil && decision.CheckmarkStatus != profilecheckmark.StatusVerified
-			if !protected && !skipRevoke {
+			if !protected && !skipRevoke && blackVerified {
 				change := services.CheckmarkChange{Profile: owner, Color: decision.Checkmark, Status: decision.CheckmarkStatus, Source: profilecheckmark.SourceSubscription, CurrentPeriodEnd: command.ValidUntil}
 				if existing != nil && existing.Source == profilecheckmark.SourceBlackVetting {
 					change.Source, change.ReserveHandle, change.ReverificationDueAt = existing.Source, existing.HandleReserved, existing.ReverificationDueAt

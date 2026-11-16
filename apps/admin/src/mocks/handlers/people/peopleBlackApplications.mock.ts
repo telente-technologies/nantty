@@ -25,12 +25,16 @@ function checklist(verifiedKeys: readonly BlackChecklistKey[]): BlackChecklistIt
 }
 
 function buildSeed(): BlackRecord[] {
-  const base = { firstApproval: null, secondApproval: null, decisionReason: null, reverificationDueAt: null, reverificationRemindedAt: null, handleReserved: false } as const;
+  const base = {
+    firstApproval: null, secondApproval: null, decisionReason: null, reverificationDueAt: null,
+    reverificationRemindedAt: null, reverificationReason: null, handleReserved: false, privateCheckoutEnabled: false,
+    privateCheckoutExpiresAt: null, officialWebsite: "https://agency.gov.ng", officialContactPhone: "+2348000000001",
+  } as const;
   const approved = { name: "Tolu Adeyemi", at: isoMinutesAgo(300 * dayMinutes) };
   return [
-    { ...base, id: "blk_0001", userId: "usr_0011", agencyName: "Federal Ministry of Arts", handle: "fmarts.gov", representativeName: "Ifeoma Uche", representativeRole: "Director, Communications", status: "IN_REVIEW", submittedAt: isoMinutesAgo(3 * dayMinutes), checklist: checklist(["LETTERHEAD_LETTER"]) },
-    { ...base, id: "blk_0002", userId: "usr_0022", agencyName: "Ogun State Tourism Board", handle: "ogun.tourism.gov", representativeName: "Tomisin Ajayi", representativeRole: "General Manager", status: "AWAITING_SECOND_APPROVAL", submittedAt: isoMinutesAgo(9 * dayMinutes), checklist: checklist(["LETTERHEAD_LETTER", "OFFICIAL_CHANNEL", "REPRESENTATIVE", "ENTITY_PROOF"]), firstApproval: { adminId: "adm_0002", name: "Chidi Okafor", at: isoMinutesAgo(dayMinutes) } },
-    { ...base, id: "blk_0003", userId: "usr_0010", agencyName: "Lagos State Government", handle: "lagosstate.gov", representativeName: "Biodun Salami", representativeRole: "Head of Digital", status: "APPROVED", submittedAt: isoMinutesAgo(320 * dayMinutes), checklist: checklist(["LETTERHEAD_LETTER", "OFFICIAL_CHANNEL", "REPRESENTATIVE", "ENTITY_PROOF"]), firstApproval: { adminId: "adm_0002", name: "Chidi Okafor", at: isoMinutesAgo(301 * dayMinutes) }, secondApproval: { adminId: "adm_0001", name: approved.name, at: approved.at }, reverificationDueAt: isoMinutesFromNow(20 * dayMinutes), reverificationRemindedAt: null, handleReserved: true },
+    { ...base, id: "blk_0001", userId: "usr_0011", agencyName: "Federal Ministry of Arts", handle: "fmarts.gov", legalIdentityName: "Federal Ministry of Arts", jurisdictionCountryCode: "NG", institutionalEmail: "press@fmarts.gov.ng", institutionalEmailVerified: true, representativeName: "Ifeoma Uche", representativeRole: "Director, Communications", status: "IN_REVIEW", submittedAt: isoMinutesAgo(3 * dayMinutes), checklist: checklist(["LETTERHEAD_LETTER"]) },
+    { ...base, id: "blk_0002", userId: "usr_0022", agencyName: "Ogun State Tourism Board", handle: "ogun.tourism.gov", legalIdentityName: "Ogun State Tourism Board", jurisdictionCountryCode: "NG", institutionalEmail: "info@oguntourism.gov.ng", institutionalEmailVerified: true, representativeName: "Tomisin Ajayi", representativeRole: "General Manager", status: "AWAITING_SECOND_APPROVAL", submittedAt: isoMinutesAgo(9 * dayMinutes), checklist: checklist(["LETTERHEAD_LETTER", "OFFICIAL_CHANNEL", "REPRESENTATIVE", "ENTITY_PROOF"]), firstApproval: { adminId: "adm_0002", name: "Chidi Okafor", at: isoMinutesAgo(dayMinutes) } },
+    { ...base, id: "blk_0003", userId: "usr_0010", agencyName: "Lagos State Government", handle: "lagosstate.gov", legalIdentityName: "Lagos State Government", jurisdictionCountryCode: "NG", institutionalEmail: "digital@lagosstate.gov.ng", institutionalEmailVerified: true, representativeName: "Biodun Salami", representativeRole: "Head of Digital", status: "APPROVED", submittedAt: isoMinutesAgo(320 * dayMinutes), checklist: checklist(["LETTERHEAD_LETTER", "OFFICIAL_CHANNEL", "REPRESENTATIVE", "ENTITY_PROOF"]), firstApproval: { adminId: "adm_0002", name: "Chidi Okafor", at: isoMinutesAgo(301 * dayMinutes) }, secondApproval: { adminId: "adm_0001", name: approved.name, at: approved.at }, reverificationDueAt: isoMinutesFromNow(20 * dayMinutes), reverificationRemindedAt: null, handleReserved: true, privateCheckoutEnabled: true, privateCheckoutExpiresAt: isoMinutesFromNow(14 * dayMinutes) },
   ];
 }
 
@@ -71,7 +75,7 @@ export function registerPeopleBlackApplicationMockHandlers(): void {
     requireMockPermission(request, "verification:review", "verification:revoke");
     const status = request.query.get("status") ?? "OPEN";
     const search = request.query.get("search");
-    const items = readRecords().map(present).filter((item) => (status === "OPEN" ? item.status === "IN_REVIEW" || item.status === "AWAITING_SECOND_APPROVAL" : status === "REVERIFY" ? item.status === "APPROVED" : status === "ALL" || item.status === status)).filter((item) => matchesSearchText(search, item.agencyName, item.handle, item.id)).sort((first, second) => first.submittedAt.localeCompare(second.submittedAt));
+    const items = readRecords().map(present).filter((item) => (status === "OPEN" ? item.status === "PENDING" || item.status === "IN_REVIEW" || item.status === "AWAITING_SECOND_APPROVAL" || item.status === "REVERIFICATION_REQUIRED" : status === "REVERIFY" ? item.status === "APPROVED" : status === "ALL" || item.status === status)).filter((item) => matchesSearchText(search, item.agencyName, item.handle, item.id)).sort((first, second) => first.submittedAt.localeCompare(second.submittedAt));
     return respondWithJson(200, paginateByCursor(items, request));
   });
 
@@ -107,9 +111,12 @@ export function registerPeopleBlackApplicationMockHandlers(): void {
     record.secondApproval = approval;
     record.status = "APPROVED";
     record.reverificationDueAt = isoMinutesFromNow(365 * dayMinutes);
-    asMutablePlatformUser(findPlatformUserForPeopleOrFail(record.userId)).verification = { color: "BLACK", tier: "OFFICIAL", status: "VERIFIED", badgeVisible: true };
+    record.privateCheckoutEnabled = true;
+    record.privateCheckoutExpiresAt = isoMinutesFromNow(14 * dayMinutes);
+    // Verification unlocks private checkout & reserves the handle, but badge remains hidden until paid USD subscription settles.
+    asMutablePlatformUser(findPlatformUserForPeopleOrFail(record.userId)).verification = { color: "BLACK", tier: "OFFICIAL", status: "EXPIRED", badgeVisible: false };
     reserveHandle(request, record);
-    audit(request, record, "approved", reason, before, { status: record.status, makers: [record.firstApproval.name, principal.name], handleReserved: true, reverificationDueAt: record.reverificationDueAt });
+    audit(request, record, "approved", reason, before, { status: record.status, makers: [record.firstApproval.name, principal.name], handleReserved: true, privateCheckoutEnabled: true, reverificationDueAt: record.reverificationDueAt });
     return respondWithJson(200, present(record));
   });
 
@@ -147,5 +154,57 @@ export function registerPeopleBlackApplicationMockHandlers(): void {
     record.reverificationRemindedAt = readIsoNow();
     audit(request, record, "reverification_reminder_sent", null, null, { remindedAt: record.reverificationRemindedAt });
     return respondWithJson(200, present(record));
+  });
+
+  registerMockRoute("POST", "/admin/black-applications/:applicationId/require-reverification", (request) => {
+    requireMockPermission(request, "verification:review");
+    requireMockStepUp(request);
+    const reason = readRequiredReason(readJsonObjectBody(request));
+    const record = findOrFail(request);
+    record.status = "REVERIFICATION_REQUIRED";
+    record.reverificationReason = reason;
+    record.privateCheckoutEnabled = false;
+    audit(request, record, "reverification_required", reason, null, { status: record.status });
+    return respondWithJson(200, present(record));
+  });
+
+  registerMockRoute("POST", "/admin/black-applications/:applicationId/checkout-authorization", (request) => {
+    requireMockPermission(request, "verification:review");
+    requireMockStepUp(request);
+    const body = readJsonObjectBody(request);
+    const reason = readRequiredReason(body);
+    const record = findOrFail(request);
+    record.privateCheckoutEnabled = body.enabled === true;
+    record.privateCheckoutExpiresAt = record.privateCheckoutEnabled ? isoMinutesFromNow(14 * dayMinutes) : null;
+    audit(request, record, "checkout_authorization_updated", reason, null, { enabled: record.privateCheckoutEnabled });
+    return respondWithJson(200, present(record));
+  });
+
+  registerMockRoute("GET", "/admin/black-applications/appeals", (request) => {
+    requireMockPermission(request, "verification:review", "verification:revoke");
+    return respondWithJson(200, { items: [], nextCursor: null });
+  });
+
+  registerMockRoute("GET", "/admin/subscriptions/government-black", (request) => {
+    requireMockPermission(request, "config:read", "config:plans", "config:revenue");
+    return respondWithJson(200, {
+      data: [
+        {
+          subscription: {
+            subscriptionId: "sub_black_lagos", profileId: "prof_lagos", status: "active",
+            cardLabel: "Visa •••• 4242", billingAuthorizationId: "auth_lagos", cardUsable: true,
+            currentPeriodEnd: isoMinutesFromNow(25 * dayMinutes), nextChargeAt: isoMinutesFromNow(25 * dayMinutes),
+            cancelAtPeriodEnd: false, price: { amountMinor: 30_000, currency: "USD" },
+          },
+          verification: {
+            applicationId: "blk_0003", agencyName: "Lagos State Government", handle: "lagosstate.gov",
+            status: "approved", jurisdictionCountryCode: "NG", institutionalEmail: "digital@lagosstate.gov.ng",
+            institutionalEmailVerified: true, privateCheckoutEnabled: true,
+          },
+          recentPeriods: [], recentEvents: [],
+        },
+      ],
+      nextCursor: null,
+    });
   });
 }

@@ -28,6 +28,7 @@ var (
 	ErrPlanNotSelfServe    = httpserver.NewApiError(http.StatusForbidden, "PLAN_BY_INVITATION_ONLY", "This plan is available by invitation only.")
 	ErrAlreadySubscribed   = httpserver.NewApiError(http.StatusConflict, "ALREADY_SUBSCRIBED", "This profile already has this plan.")
 	ErrWebCurrencyDisabled = httpserver.NewApiError(http.StatusUnprocessableEntity, "WEB_CURRENCY_NOT_ENABLED", WebCurrencyNotEnabledMessage)
+	ErrBlackAnnualDisabled = httpserver.NewApiError(http.StatusUnprocessableEntity, "BLACK_ANNUAL_DISABLED", "Annual billing is disabled for Black Government subscriptions.")
 )
 
 const WebCurrencyNotEnabledMessage = "Web checkout isn't available in your currency or in USD yet. Buy in the Nantty app, or try again later."
@@ -62,6 +63,9 @@ func (billing Billing) QuoteForOwnerOnChannel(ctx context.Context, executor *ent
 	definition, known := constants.Plans[planCode]
 	if !known {
 		return models.PriceQuote{}, regionpricing.PlanRegionalPrice{}, ErrPlanNotFound
+	}
+	if definition.AnnualDisabled && interval == "year" {
+		return models.PriceQuote{}, regionpricing.PlanRegionalPrice{}, ErrBlackAnnualDisabled
 	}
 	price, err := billing.RegionalPriceFor(ctx, executor, planCode, countryCode, channel)
 	if err != nil {
@@ -103,7 +107,7 @@ func (billing Billing) QuoteForOwnerOnChannel(ctx context.Context, executor *ent
 		return models.PriceQuote{}, price, err
 	}
 	return models.QuotePlanPrice(pricing.Pricing, models.PricingInput{
-		MonthlyAmountMinor: monthly, YearlyAmountMinor: yearly, Interval: interval, BundleEligiblePlan: definition.BundleEligible, HasActiveBlue: hasBlue, BundledBusinessCount: bundled,
+		MonthlyAmountMinor: monthly, YearlyAmountMinor: yearly, Interval: interval, BundleEligiblePlan: definition.BundleEligible, HasActiveBlue: hasBlue, BundledBusinessCount: bundled, DiscountsDisabled: definition.DiscountsDisabled,
 	}), price, nil
 }
 

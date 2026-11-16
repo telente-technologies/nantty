@@ -68,7 +68,13 @@ func (controller CheckmarksController) ApplyBlack(writer http.ResponseWriter, re
 		return
 	}
 	id, err := submitblackapplication.Handler{Container: controller.Container}.Execute(request.Context(), submitblackapplication.Command{
-		AccountId: utils.AccountIdFromRequest(request), AgencyName: body.AgencyName, RepresentativeName: body.RepresentativeName, RepresentativeRole: body.RepresentativeRole,
+		AccountId: utils.AccountIdFromRequest(request), AgencyName: body.AgencyName,
+		LegalIdentityName: body.LegalIdentityName, LegalRegistrationRef: body.LegalRegistrationRef,
+		JurisdictionCountryCode: body.JurisdictionCountryCode, OfficialWebsite: body.OfficialWebsite,
+		OfficialContactPhone: body.OfficialContactPhone, InstitutionalEmail: body.InstitutionalEmail,
+		RepresentativeName: body.RepresentativeName, RepresentativeRole: body.RepresentativeRole,
+		RepresentativeEmail: body.RepresentativeEmail, RepresentativeIdRef: body.RepresentativeIdRef,
+		EvidenceNotes: body.EvidenceNotes,
 	})
-	controller.respond(writer, request, http.StatusCreated, map[string]string{"applicationId": id}, err)
+	controller.respond(writer, request, http.StatusCreated, map[string]any{"applicationId": id, "institutionalEmailVerificationRequired": true}, err)
 }

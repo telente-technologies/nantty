@@ -26,6 +26,9 @@ func MountCheckmarksRoutes(mux *http.ServeMux, container *container.Container) {
 	mux.Handle("GET /api/v1/verification/me", user(controller.Me))
 	mux.Handle("POST /api/v1/verification/applications", user(controller.Apply))
 	mux.Handle("POST /api/v1/verification/black-applications", user(controller.ApplyBlack))
+	mux.Handle("POST /api/v1/verification/black-applications/{blackId}/email/send-otp", user(controller.SendBlackInstitutionalEmailOtp))
+	mux.Handle("POST /api/v1/verification/black-applications/{blackId}/email/verify", user(controller.VerifyBlackInstitutionalEmail))
+	mux.Handle("POST /api/v1/verification/black-applications/{blackId}/appeals", user(controller.SubmitBlackAppeal))
 
 	mux.Handle("GET /api/v1/admin/verifications", review(http.HandlerFunc(controller.ListVerifications)))
 	mux.Handle("GET /api/v1/admin/verifications/{verificationId}", review(http.HandlerFunc(controller.GetVerification)))
@@ -43,10 +46,14 @@ func MountCheckmarksRoutes(mux *http.ServeMux, container *container.Container) {
 	mux.Handle("POST /api/v1/admin/accounts", guard.RequireStaff("verification:grant", true)(http.HandlerFunc(controller.CreateAccount)))
 
 	mux.Handle("GET /api/v1/admin/black-applications", review(http.HandlerFunc(controller.ListBlack)))
+	mux.Handle("GET /api/v1/admin/black-applications/appeals", review(http.HandlerFunc(controller.ListBlackAppeals)))
+	mux.Handle("POST /api/v1/admin/black-applications/appeals/{appealId}/decide", reviewStepUp(http.HandlerFunc(controller.DecideBlackAppeal)))
 	mux.Handle("POST /api/v1/admin/black-applications/{blackId}/checklist", guard.RequireStaff("verification:review", false)(controller.BlackTransitionHandler(transitionblackapplication.ActionChecklist)))
 	mux.Handle("POST /api/v1/admin/black-applications/{blackId}/approve", reviewStepUp(controller.BlackTransitionHandler(transitionblackapplication.ActionApprove)))
 	mux.Handle("POST /api/v1/admin/black-applications/{blackId}/reject", reviewStepUp(controller.BlackTransitionHandler(transitionblackapplication.ActionReject)))
 	mux.Handle("POST /api/v1/admin/black-applications/{blackId}/revoke", revokeStepUp(controller.BlackTransitionHandler(transitionblackapplication.ActionRevoke)))
+	mux.Handle("POST /api/v1/admin/black-applications/{blackId}/require-reverification", reviewStepUp(controller.BlackTransitionHandler(transitionblackapplication.ActionRequireReverification)))
+	mux.Handle("POST /api/v1/admin/black-applications/{blackId}/checkout-authorization", reviewStepUp(http.HandlerFunc(controller.UpdateBlackCheckoutAuthorization)))
 	mux.Handle("POST /api/v1/admin/black-applications/{blackId}/reverification-reminder", guard.RequireStaff("verification:review", false)(controller.BlackTransitionHandler(transitionblackapplication.ActionReminder)))
 	mux.Handle("POST /api/v1/internal/checkmarks/{profileId}/billing-events", internalToken(http.HandlerFunc(controller.BillingEvent)))
 }

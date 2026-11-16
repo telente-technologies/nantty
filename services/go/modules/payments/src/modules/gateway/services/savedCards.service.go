@@ -136,7 +136,7 @@ func (handler CardVerificationPayments) HandleSucceededPayment(ctx context.Conte
 		return err
 	}
 	label, authorizationId, expiryMonth, expiryYear := "", "", 0, 0
-	if setup.Purpose == "trial" || setup.Purpose == "device" {
+	if setup.Purpose == "trial" || setup.Purpose == "device" || setup.Purpose == "black_card" || setup.Purpose == "subscription_card" {
 		if authorizationId, err = gateway.StoreBillingAuthorizationInTransaction(ctx, transaction, payment.OwnerUserId, payment.Provider, payment.ProviderCustomerId, card); err != nil {
 			return err
 		}

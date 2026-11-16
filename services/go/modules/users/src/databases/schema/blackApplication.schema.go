@@ -24,7 +24,7 @@ func (BlackApplication) Fields() []ent.Field {
 		field.String("handle").MaxLen(30).Immutable(),
 		field.String("representative_name").MaxLen(120).Immutable(),
 		field.String("representative_role").MaxLen(120).Immutable(),
-		field.Enum("status").Values("in_review", "awaiting_second_approval", "approved", "rejected", "revoked").Default("in_review"),
+		field.Enum("status").Values("pending", "in_review", "awaiting_second_approval", "approved", "rejected", "reverification_required", "revoked").Default("in_review"),
 		field.Bytes("checklist").SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
 		field.String("first_approval_by").Default("").MaxLen(64),
 		field.String("first_approval_by_name").Default("").MaxLen(120),

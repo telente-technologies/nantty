@@ -44,8 +44,14 @@ func (worker ReverificationWorker) moveLapsedCheckmarks(ctx context.Context) err
 	}
 	graceDays := LoadPricingRules(ctx).BlackGraceDays
 	for _, row := range overdue {
-		grace := now.AddDate(0, 0, graceDays)
-		if err := worker.changeStatus(ctx, row, profilecheckmark.StatusGrace, &grace); err != nil {
+		if graceDays > 0 {
+			grace := now.AddDate(0, 0, graceDays)
+			if err := worker.changeStatus(ctx, row, profilecheckmark.StatusGrace, &grace); err != nil {
+				return err
+			}
+			continue
+		}
+		if err := worker.changeStatus(ctx, row, profilecheckmark.StatusExpired, nil); err != nil {
 			return err
 		}
 	}

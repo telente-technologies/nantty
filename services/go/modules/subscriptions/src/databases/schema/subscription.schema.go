@@ -27,7 +27,7 @@ func (Subscription) Fields() []ent.Field {
 		field.String("plan_code").NotEmpty().MaxLen(40),
 		field.Enum("interval").Values("month", "year"),
 		field.Enum("channel").Values("web_checkout", "apple_iap", "google_play", "admin_grant").Immutable(),
-		field.Enum("status").Values("pending", "awaiting_card", "trialing", "active", "past_due", "grace", "canceled", "downgraded", "expired", "trial_rejected").Default("pending"),
+		field.Enum("status").Values("pending", "awaiting_card", "trialing", "active", "past_due", "grace", "paused", "canceled", "downgraded", "expired", "trial_rejected").Default("pending"),
 		field.Int64("list_amount_minor"),
 		field.Int64("amount_minor"),
 		field.String("currency").NotEmpty().MaxLen(3),

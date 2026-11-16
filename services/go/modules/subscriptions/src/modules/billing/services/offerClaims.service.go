@@ -58,7 +58,7 @@ func offerStatusError(status string) error {
 func eligibleOfferPlansFor(link *ent.SubscriptionOfferLink, profileType string) []string {
 	plans := []string{}
 	for _, code := range link.PlanCodes {
-		if PlanAllowedForProfile(code, profileType) {
+		if def, known := constants.Plans[code]; known && !def.DiscountsDisabled && PlanAllowedForProfile(code, profileType) {
 			plans = append(plans, code)
 		}
 	}

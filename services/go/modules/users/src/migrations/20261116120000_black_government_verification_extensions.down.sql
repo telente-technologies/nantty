@@ -1,0 +1,18 @@
+DROP TABLE IF EXISTS "black_verification_appeals";
+DROP TABLE IF EXISTS "black_institutional_email_otps";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "private_checkout_revoked_at";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "private_checkout_expires_at";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "private_checkout_authorized_at";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "private_checkout_authorized_by";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "private_checkout_enabled";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "evidence_notes";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "representative_id_ref";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "representative_email";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "institutional_email_verified_at";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "institutional_email_verified";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "institutional_email";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "official_contact_phone";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "official_website";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "jurisdiction_country_code";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "legal_registration_ref";
+ALTER TABLE "black_applications" DROP COLUMN IF EXISTS "legal_identity_name";

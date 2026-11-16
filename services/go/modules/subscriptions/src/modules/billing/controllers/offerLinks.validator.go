@@ -26,7 +26,7 @@ const (
 
 func isOfferPlanCode(planCode string) bool {
 	definition, known := constants.Plans[planCode]
-	return known && definition.SelfServe
+	return known && definition.SelfServe && !definition.DiscountsDisabled
 }
 
 func isPricingCurrency(currency string) bool {

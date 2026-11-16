@@ -13,8 +13,15 @@ func TestEveryPlanHasAPricePerRegionInThatRegionsCurrency(t *testing.T) {
 	}
 	for _, price := range prices {
 		region, _ := FindRegion(price.Region)
-		if price.Currency != region.Currency || price.WebMonthlyMinor <= 0 || price.WebYearlyMinor >= price.WebMonthlyMinor*12 {
+		expectedCurrency := region.Currency
+		if price.PlanCode == "black" {
+			expectedCurrency = BlackCurrencyCode
+		}
+		if price.Currency != expectedCurrency || price.WebMonthlyMinor <= 0 || price.WebYearlyMinor >= price.WebMonthlyMinor*12 {
 			t.Fatalf("bad price %+v", price)
+		}
+		if price.PlanCode == "black" && price.WebYearlyMinor != 0 {
+			t.Fatalf("black annual billing must be disabled: %+v", price)
 		}
 		hasInAppProduct := price.StoreProductIdFor("ios", "month") != ""
 		if hasInAppProduct && (price.IosMonthlyMinor < price.WebMonthlyMinor || price.StoreProductIdFor("android", "month") == "") {
@@ -44,7 +51,11 @@ func TestPriceLookupPerCountry(t *testing.T) {
 		{"ZA", "blue", "web", "month", 5_999, "ZAR"},
 		{"GB", "blue", "web", "year", 5_799, "GBP"},
 		{"IE", "premium", "web", "month", 1_099, "EUR"},
-		{"US", "black", "web", "month", 16_900, "USD"},
+		{"NG", "black", "web", "month", 30_000, "USD"},
+		{"NG", "black", "web", "year", 0, "USD"},
+		{"GH", "black", "web", "month", 50_000, "USD"},
+		{"GB", "black", "web", "month", 50_000, "USD"},
+		{"US", "black", "web", "month", 50_000, "USD"},
 		{"JP", "blue", "web", "month", 599, "USD"},
 	}
 	for _, testCase := range cases {

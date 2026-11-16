@@ -2,6 +2,21 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-11-16 — Black Government Verification, Private USD Monthly Billing, and Card-Removal Pause
+
+- **Pricing & Plan Rules (`services/go/platform/regionpricing/`, `services/go/modules/subscriptions/src/{constants,loaders,models,modules/billing/services}/`, `apps/admin/src/mocks/seed/`):**
+  - Updated Black pricing to USD-only, monthly-only, web-only: `USD 300/month` (`30000`) for Nigeria (`NG`) and `USD 500/month` (`50000`) for international (`BlackMonthlyPriceForJurisdiction`).
+  - Disabled Black annual billing (`AnnualDisabled: true`, `ErrBlackAnnualDisabled`), discounts (`DiscountsDisabled: true`, `ErrBlackDiscountsDisabled`, offer-link & claim filters), and unpaid grace (`GracePeriodEligible: false`, `BlackGraceDays: 0`).
+- **Government Verification Pipeline (`services/go/modules/users/`):**
+  - Added migration `20261116120000_black_government_verification_extensions.{up,down}.sql` (`black_applications` legal/jurisdiction/OTP/private-checkout columns, `black_institutional_email_otps`, `black_verification_appeals`, `nantty_readers` grants) and `StatusPending` / `StatusReverificationRequired` enums.
+  - Implemented intake validation, SHA-256 institutional email OTP (`send-otp` / `verify`), OTP enforcement prior to approval, two-admin approval gating private checkout (14 days) + reserving handle without granting live badge until paid settlement, `entitlement.paused` -> `StatusSuspended` with preserved handle, re-verification triggers, and appeals (`controllers/checkmarksBlack.controller.go`, `services/{blackApplicationStore,blackAppeals}.service.go`).
+- **Recurring Card Revocation & Government Billing (`services/go/modules/payments/`, `services/go/modules/subscriptions/`, `services/typescript/gateway/`):**
+  - Added `GET`/`DELETE /api/v1/payments/saved-cards`, `SupportsRecurringCardCurrency`, `"black_card"` tokenization, and `BillingAuthorizationRevokedObserver` so deleting a card pauses active Black subscriptions and emits `entitlement.paused`.
+  - Added migration `20261116120000_black_government_billing.{up,down}.sql`, `StatusPaused`, `SqlIdentityDirectory.FindBlackApplicationForProfile`, private checkout & card-replacement/reactivation/cancel endpoints (`/api/v1/verification/black/*`), admin Black billing & reconciliation endpoints (`/api/v1/admin/subscriptions/government-black*`), `black_billing_events`, `blackApplication.decided` revocation sync, and `gateway/src/routes/verificationMoney.routes.ts`.
+- **Webapp, Admin UI, Mocks & Docs (`apps/webapp/`, `apps/admin/`, `product-analysis/`, `docs/master/`):**
+  - Added `GovernmentBlackHub`, updated `BlackApplicationsWorkspace` + `BlackBillingAdminPanel` + `PlanPriceRowDialog` + mock handlers/contracts, and reconciled `product-analysis/` + `docs/master/NANTTY_IMPLEMENTATION_BACKLOG.md`.
+- **Verification:** `check-backend-file-lengths.sh` passes for all added/modified Go files (`<= 300` lines); `git diff --check` clean; Go/TS/Next suites added and updated (`blackGovernmentBilling_integration_test.go`, `usersCreatorAndCheckmarks.integration_test.go`, `applyEntitlement.handler_test.go`, `upstreamRoutes.routes.test.ts`, `governmentBlackMocks.test.ts`, `blackGovernmentContracts.test.ts`) for CI execution (`go`, `pnpm`, `tsc`, `psql` absent in sandbox).
+
 ## 2026-11-16 — Backend conventions, gateway routing, live bug fixes, and Finance Admin surface
 
 **1. Backend file-length CI gate (`<= 300` lines/file):**

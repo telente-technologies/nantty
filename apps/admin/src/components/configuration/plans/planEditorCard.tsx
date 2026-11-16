@@ -43,8 +43,8 @@ export function PlanEditorCard({ plan, canWrite, onChange }: PlanEditorCardProps
         <div className={styles.planColumn}>
           <TextField label="Name shown to people" value={plan.displayName} disabled={!canWrite} maxLength={40} onChange={(event) => onChange((current) => ({ ...current, displayName: event.target.value }))} />
           {isOfficial ? (
-            <NoticeBanner tone="info" title="Never purchasable">
-              Black Official is granted only through the manual official process for governments and public institutions. It has no price in any currency.
+            <NoticeBanner tone="info" title="Private verified government billing">
+              Black Official requires manual government vetting, verified institutional email, and two independent admin approvals before private USD monthly checkout is unlocked ($300/month Nigeria, $500/month international; web-only, monthly-only, no discounts).
             </NoticeBanner>
           ) : (
             <CheckboxField label="Available to buy" description="Turning this off hides the plan from checkout. Current subscribers keep it until renewal." checked={plan.isPurchasable} disabled={!canWrite} onChange={(event) => onChange((current) => ({ ...current, isPurchasable: event.target.checked }))} />

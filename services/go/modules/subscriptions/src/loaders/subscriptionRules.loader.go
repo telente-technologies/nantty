@@ -47,7 +47,7 @@ func ReadTrialRules(ctx context.Context, source *ledgerloaders.PlatformSettingsS
 }
 
 func ReadCheckmarkPricing(ctx context.Context, source *ledgerloaders.PlatformSettingsSource, yearlyDiscountBps int64) CheckmarkPricing {
-	pricing := CheckmarkPricing{Pricing: models.PricingRules{YearlyDiscountBps: yearlyDiscountBps, BundleDiscountBps: 1500, BundleMaximumBusinesses: 3}, BlackGraceDays: 14,
+	pricing := CheckmarkPricing{Pricing: models.PricingRules{YearlyDiscountBps: yearlyDiscountBps, BundleDiscountBps: 1500, BundleMaximumBusinesses: 3}, BlackGraceDays: 0,
 		CombinedGold: models.DefaultCombinedGoldRules(yearlyDiscountBps)}
 	raw, found := source.ReadValue(ctx, constants.CheckmarkPricingSettingKey)
 	if !found {

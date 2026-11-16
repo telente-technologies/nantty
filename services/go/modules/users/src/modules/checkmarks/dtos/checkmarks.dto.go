@@ -19,9 +19,38 @@ type ApplicationRequest struct {
 }
 
 type BlackApplicationRequest struct {
-	AgencyName         string `json:"agencyName"`
-	RepresentativeName string `json:"representativeName"`
-	RepresentativeRole string `json:"representativeRole"`
+	AgencyName              string `json:"agencyName"`
+	LegalIdentityName       string `json:"legalIdentityName"`
+	LegalRegistrationRef    string `json:"legalRegistrationRef"`
+	JurisdictionCountryCode string `json:"jurisdictionCountryCode"`
+	OfficialWebsite         string `json:"officialWebsite"`
+	OfficialContactPhone    string `json:"officialContactPhone"`
+	InstitutionalEmail      string `json:"institutionalEmail"`
+	RepresentativeName      string `json:"representativeName"`
+	RepresentativeRole      string `json:"representativeRole"`
+	RepresentativeEmail     string `json:"representativeEmail"`
+	RepresentativeIdRef     string `json:"representativeIdRef"`
+	EvidenceNotes           string `json:"evidenceNotes"`
+}
+
+type VerifyBlackEmailRequest struct {
+	Code string `json:"code"`
+}
+
+type BlackCheckoutAuthRequest struct {
+	Enabled        bool   `json:"enabled"`
+	ExpiresInHours int    `json:"expiresInHours"`
+	Reason         string `json:"reason"`
+}
+
+type BlackAppealRequest struct {
+	Reason            string `json:"reason"`
+	SupportingDetails string `json:"supportingDetails"`
+}
+
+type BlackAppealDecisionRequest struct {
+	Decision string `json:"decision"`
+	Note     string `json:"note"`
 }
 
 type ReasonRequest struct {

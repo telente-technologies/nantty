@@ -10,6 +10,7 @@ import (
 
 	"nantty/modules/ledger/src/databases"
 	paymentservices "nantty/modules/payments/src/modules/gateway/services"
+	"nantty/modules/subscriptions/src/constants"
 	"nantty/modules/subscriptions/src/generated/ent"
 	"nantty/modules/subscriptions/src/generated/ent/subscription"
 	"nantty/modules/subscriptions/src/generated/ent/subscriptionperiod"
@@ -124,6 +125,25 @@ func (billing Billing) ensureDuePeriod(ctx context.Context, row *ent.Subscriptio
 }
 
 func (billing Billing) chargeDuePeriod(ctx context.Context, row *ent.Subscription) error {
+	if row.PlanCode == constants.PlanBlack {
+		app, found, err := billing.findBlackEligibility(ctx, row.ProfileID)
+		if err != nil {
+			return err
+		}
+		if found && app.Status != "approved" {
+			return billing.HandleBlackApplicationDecidedEvent(ctx, row.ProfileID, app.Status, "verification_not_approved")
+		}
+		if row.BillingAuthorizationID == "" {
+			return billing.inTransaction(ctx, row.ID, func(ctx context.Context, transaction *sql.Tx, locked *ent.Subscription) error {
+				paused, err := locked.Update().SetStatus(subscription.StatusPaused).ClearNextChargeAt().SetLastError("Recurring USD payment card is missing.").AddVersion(1).Save(ctx)
+				if err != nil {
+					return err
+				}
+				_, _ = transaction.ExecContext(ctx, `UPDATE subscriptions SET paused_reason = 'payment_method_removed' WHERE id = $1`, paused.ID)
+				return billing.emit(ctx, transaction, "entitlement.paused", paused.ProfileID, entitlementData(paused, string(paused.Status)))
+			})
+		}
+	}
 	period, err := billing.ensureDuePeriod(ctx, row)
 	if err != nil {
 		return err

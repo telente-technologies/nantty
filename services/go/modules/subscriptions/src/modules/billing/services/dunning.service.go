@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"nantty/modules/subscriptions/src/constants"
 	"nantty/modules/subscriptions/src/generated/ent"
 	"nantty/modules/subscriptions/src/generated/ent/subscription"
 	"nantty/modules/subscriptions/src/generated/ent/subscriptionperiod"
@@ -40,6 +41,11 @@ func (billing Billing) recordFailedAttemptInTransaction(ctx context.Context, tra
 	due := period.PeriodStartsAt
 	attempts := row.DunningAttempts + 1
 	step := models.NextDunningStep(due, attempts, trial)
+	_, pricing := billing.rules(ctx)
+	noBlackGrace := row.PlanCode == constants.PlanBlack && pricing.BlackGraceDays <= 0
+	if noBlackGrace && step.Action == models.DunningGrace {
+		step.Action = models.DunningDowngrade
+	}
 	update := row.Update().SetDunningAttempts(attempts).SetDunningDueAt(due).SetLastError(truncate(reason, 300)).AddVersion(1)
 	data, err := billing.subscriptionEventData(ctx, row)
 	if err != nil {
@@ -53,7 +59,24 @@ func (billing Billing) recordFailedAttemptInTransaction(ctx context.Context, tra
 			return err
 		}
 		data["retryAt"] = step.At.Format(time.RFC3339)
-		return billing.emit(ctx, transaction, "subscriptionPayment.failed", row.ID.String(), data)
+		if err := billing.emit(ctx, transaction, "subscriptionPayment.failed", row.ID.String(), data); err != nil {
+			return err
+		}
+		if row.PlanCode == constants.PlanBlack {
+			billing.recordBlackBillingEvent(ctx, transaction, BlackBillingEventView{
+				SubscriptionId: row.ID.String(), ProfileId: row.ProfileID, OwnerUserId: row.OwnerUserID,
+				EventKind: "payment_failed", ActorKind: "system", Summary: "Renewal charge failed: " + reason,
+				Metadata: map[string]any{"attempt": attempts, "retryAt": step.At.Format(time.RFC3339)},
+			})
+			if noBlackGrace && !due.After(billing.Container.Now().UTC()) {
+				revoked, err := billing.revokedEntitlementData(ctx, transaction, row)
+				if err != nil {
+					return err
+				}
+				return billing.emit(ctx, transaction, "entitlement.revoked", row.ProfileID, revoked)
+			}
+		}
+		return nil
 	case models.DunningGrace:
 		if row, err = update.SetStatus(subscription.StatusGrace).SetGraceEndsAt(step.At).SetNextChargeAt(step.At).Save(ctx); err != nil {
 			return err

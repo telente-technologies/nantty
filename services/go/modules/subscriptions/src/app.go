@@ -53,6 +53,7 @@ func StartSubscriptionsModuleWithSettings(ctx context.Context, settings configs.
 	}
 	payments.RegisterBillingSubscriptionObserver(billing)
 	payments.RegisterSavedCardObserver(billing)
+	payments.RegisterBillingAuthorizationRevokedObserver(billing)
 	payments.RegisterStoreSubscriptionNotificationHandler(billing)
 	payments.RegisterStoreRefundHandler(paymentconstants.PurposeSubscription, billing)
 	creatorSubscriptions := creatorservices.CreatorSubscriptions{Container: billing.Container}
@@ -76,6 +77,17 @@ func StartSubscriptionsModuleWithSettings(ctx context.Context, settings configs.
 			return err
 		}
 		return billing.HandleProviderCancelRequested(ctx, request.SubscriptionId)
+	})
+	loaders.RegisterMoneyDomainEventHandler("blackApplication.decided", func(ctx context.Context, envelope platformevents.EventEnvelope) error {
+		var decision struct {
+			ProfileId string `json:"profileId"`
+			Status    string `json:"status"`
+			Reason    string `json:"reason"`
+		}
+		if err := loaders.DecodeEventData(envelope, &decision); err != nil {
+			return err
+		}
+		return billing.HandleBlackApplicationDecidedEvent(ctx, decision.ProfileId, decision.Status, decision.Reason)
 	})
 	return &Module{Billing: billing, CreatorSubscriptions: creatorSubscriptions}, nil
 }

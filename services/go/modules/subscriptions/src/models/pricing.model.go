@@ -21,6 +21,7 @@ type PricingInput struct {
 	BundleEligiblePlan   bool
 	HasActiveBlue        bool
 	BundledBusinessCount int
+	DiscountsDisabled    bool
 }
 
 func discounted(amountMinor, discountBps int64) int64 {
@@ -34,6 +35,9 @@ func QuotePlanPrice(rules PricingRules, input PricingInput) PriceQuote {
 	listAmount := input.MonthlyAmountMinor
 	if input.Interval == "year" {
 		listAmount = input.MonthlyAmountMinor * 12
+	}
+	if input.DiscountsDisabled {
+		return PriceQuote{ListAmountMinor: listAmount, AmountMinor: listAmount, DiscountKind: "none"}
 	}
 	bundleBps := int64(0)
 	if input.BundleEligiblePlan && input.HasActiveBlue && input.BundledBusinessCount < rules.BundleMaximumBusinesses {

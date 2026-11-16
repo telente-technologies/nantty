@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"nantty/modules/ledger/src/databases"
+	"nantty/modules/subscriptions/src/constants"
 	"nantty/modules/subscriptions/src/generated/ent"
 	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferlink"
 	"nantty/modules/subscriptions/src/models"
@@ -110,6 +111,11 @@ func (billing Billing) convertOfferLink(link *ent.SubscriptionOfferLink) OfferLi
 }
 
 func (billing Billing) CreateOfferLink(ctx context.Context, request NewOfferLink) (OfferLinkView, error) {
+	for _, code := range request.PlanCodes {
+		if def, known := constants.Plans[code]; !known || def.DiscountsDisabled {
+			return OfferLinkView{}, ErrBlackDiscountsDisabled
+		}
+	}
 	salt, err := newOfferLinkTokenSalt()
 	if err != nil {
 		return OfferLinkView{}, err

@@ -1,0 +1,219 @@
+package controllers
+
+import (
+	"net/http"
+
+	"github.com/google/uuid"
+
+	ledgerutils "nantty/modules/ledger/src/utils"
+	"nantty/modules/subscriptions/src/modules/billing/services"
+	"nantty/platform/httpserver"
+)
+
+type blackCheckoutDto struct {
+	ProfileId        string `json:"profileId"`
+	Interval         string `json:"interval"`
+	OfferClaimId     string `json:"offerClaimId"`
+	TermsAccepted    bool   `json:"termsAccepted"`
+	RecurringConsent bool   `json:"recurringConsent"`
+	ReturnTo         string `json:"returnTo"`
+	ClientPlatform   string `json:"clientPlatform"`
+}
+
+type blackProfileActionDto struct {
+	ProfileId string `json:"profileId"`
+	ReturnTo  string `json:"returnTo"`
+}
+
+type blackAdminReasonDto struct {
+	Reason string `json:"reason"`
+}
+
+func (controller BillingController) GetGovernmentBlackBilling(writer http.ResponseWriter, request *http.Request) {
+	principal, err := ledgerutils.RequirePrincipal(request)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	view, err := controller.Billing.GetGovernmentBlackBilling(request.Context(), principal.UserId, request.URL.Query().Get("profileId"))
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, view)
+}
+
+func (controller BillingController) StartGovernmentBlackCheckout(writer http.ResponseWriter, request *http.Request) {
+	principal, err := ledgerutils.RequirePrincipal(request)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body blackCheckoutDto) error {
+		collector := &ledgerutils.IssueCollector{}
+		collector.RequireLength("returnTo", body.ReturnTo, 0, 300)
+		return collector.Result()
+	})
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	view, err := controller.Billing.StartGovernmentBlackCheckout(request.Context(), principal.UserId, services.BlackCheckoutRequest{
+		ProfileId: body.ProfileId, Interval: body.Interval, OfferClaimId: body.OfferClaimId,
+		TermsAccepted: body.TermsAccepted, RecurringConsent: body.RecurringConsent,
+		ReturnTo: body.ReturnTo, ClientPlatform: body.ClientPlatform,
+	})
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusCreated, view)
+}
+
+func (controller BillingController) StartGovernmentBlackCardReplacement(writer http.ResponseWriter, request *http.Request) {
+	principal, err := ledgerutils.RequirePrincipal(request)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body blackProfileActionDto) error {
+		collector := &ledgerutils.IssueCollector{}
+		collector.RequireLength("returnTo", body.ReturnTo, 0, 300)
+		return collector.Result()
+	})
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	view, err := controller.Billing.StartGovernmentBlackCardReplacement(request.Context(), principal.UserId, body.ProfileId, body.ReturnTo)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusCreated, view)
+}
+
+func (controller BillingController) ReactivateGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
+	principal, err := ledgerutils.RequirePrincipal(request)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(_ blackProfileActionDto) error { return nil })
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	view, err := controller.Billing.ReactivateGovernmentBlackSubscription(request.Context(), principal.UserId, body.ProfileId)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, view)
+}
+
+func (controller BillingController) CancelGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
+	principal, err := ledgerutils.RequirePrincipal(request)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(_ blackProfileActionDto) error { return nil })
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	view, err := controller.Billing.CancelGovernmentBlackSubscription(request.Context(), principal.UserId, body.ProfileId)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, view)
+}
+
+func (controller BillingController) AdminListGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
+	rows, err := controller.Billing.AdminListGovernmentBlack(request.Context())
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"data": rows, "nextCursor": nil})
+}
+
+func (controller BillingController) AdminPauseGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
+	staff := ledgerutils.StaffFromRequest(request)
+	id, err := uuid.Parse(request.PathValue("subscriptionId"))
+	if err != nil {
+		controller.fail(writer, request, services.ErrSubscriptionMissing)
+		return
+	}
+	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body blackAdminReasonDto) error {
+		collector := &ledgerutils.IssueCollector{}
+		collector.RequireLength("reason", body.Reason, 4, 300)
+		return collector.Result()
+	})
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	view, err := controller.Billing.AdminPauseGovernmentBlack(request.Context(), staff.StaffId, id, body.Reason)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, view)
+}
+
+func (controller BillingController) AdminCancelGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
+	staff := ledgerutils.StaffFromRequest(request)
+	id, err := uuid.Parse(request.PathValue("subscriptionId"))
+	if err != nil {
+		controller.fail(writer, request, services.ErrSubscriptionMissing)
+		return
+	}
+	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body blackAdminReasonDto) error {
+		collector := &ledgerutils.IssueCollector{}
+		collector.RequireLength("reason", body.Reason, 4, 300)
+		return collector.Result()
+	})
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	view, err := controller.Billing.AdminCancelGovernmentBlack(request.Context(), staff.StaffId, id, body.Reason)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, view)
+}
+
+func (controller BillingController) AdminRetryGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
+	staff := ledgerutils.StaffFromRequest(request)
+	id, err := uuid.Parse(request.PathValue("subscriptionId"))
+	if err != nil {
+		controller.fail(writer, request, services.ErrSubscriptionMissing)
+		return
+	}
+	view, err := controller.Billing.AdminRetryGovernmentBlack(request.Context(), staff.StaffId, id)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, view)
+}
+
+func (controller BillingController) AdminReconcileGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
+	staff := ledgerutils.StaffFromRequest(request)
+	id, err := uuid.Parse(request.PathValue("subscriptionId"))
+	if err != nil {
+		controller.fail(writer, request, services.ErrSubscriptionMissing)
+		return
+	}
+	view, err := controller.Billing.AdminReconcileGovernmentBlack(request.Context(), staff.StaffId, id)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, view)
+}

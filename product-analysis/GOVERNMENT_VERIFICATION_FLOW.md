@@ -1,6 +1,6 @@
 # Black Government verification and billing flow
 
-Status: proposed. Monthly price is USD 300 as the latest working assumption but is unresolved against the previously stated USD 500. No public/self-serve checkout or persistent active price until the founder confirms. Government annual billing is disabled until separately approved.
+Status: **implemented** (2026-11-16 Founder Decision). Monthly price is **USD 300/month** for verified Nigeria (`NG`) legal jurisdiction and **USD 500/month** for all international jurisdictions, USD-only, monthly-only, web-only, with no discounts, `BlackGraceDays = 0`, and mandatory recurring card authorization. Public/self-serve checkout remains disabled; only verified, two-admin-approved government organizations with active `private_checkout_enabled` authorization may enter private checkout.
 
 ## Existing source evidence
 
