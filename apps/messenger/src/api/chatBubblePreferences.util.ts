@@ -9,6 +9,14 @@ export function conversationBubbleDraftKey(accountId: string, conversationId: st
   return `bubbleDraft:${encodeURIComponent(accountId)}:${encodeURIComponent(conversationId)}`;
 }
 
+export function bubblePositionStorageKeys(accountId: string, conversationId: string): { readonly position: string; readonly index: string } {
+  const accountKey = encodeURIComponent(accountId);
+  return {
+    position: `nantty.messenger.bubblePosition.${accountKey}.${encodeURIComponent(conversationId)}`,
+    index: `nantty.messenger.bubblePositions.index.${accountKey}`,
+  };
+}
+
 export function toggleInAppConversation(conversationIds: readonly string[], conversationId: string): string[] {
   return conversationIds.includes(conversationId)
     ? conversationIds.filter((id) => id !== conversationId)

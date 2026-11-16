@@ -1,28 +1,24 @@
-# Chat Bubbles test matrix
+# Chat Bubbles test and acceptance matrix
 
-| Scenario | Automated/source check | Device verification |
-| --- | --- | --- |
-| Bubble-eligible Android FCM has no `notification` payload | Notifications FCM unit test | Not run |
-| Generic title/body and conversation/channel metadata retained | Notifications FCM unit test | Not run |
-| Bubble deep link parses encoded conversation ID and compact surface | Messenger navigation unit test | Not run |
-| Invalid links do not become conversation routes | Messenger navigation unit test | Not run |
-| Regular non-bubble FCM still uses notification payload | Existing FCM test | Not run |
-| In-app multi-conversation rendering and interactions | TypeScript compilation only | Not run |
-| None/all/selected preference evaluation and exclusion toggling | Unit tests | Not run |
-| In-app active conversation selection is independent from Android system selection | Unit test plus settings/shell source inspection | Not run on device |
-| Draft isolation while switching between in-app conversations | Unit test for conversation-keyed draft updates and account-scoped record keys | React Native component/SQLite lifecycle not run on device |
-| Draft persistence across process recreation | AEAD-sealed SQLite adapter tests verify persistence semantics, account/conversation isolation, deletion and write ordering | Process-kill/relaunch against Expo SQLite not run on device |
-| Accessible dismissal without dragging | React Native accessibility action in source | Not run with TalkBack/VoiceOver |
-| Terminal session failure clears sensitive state; transient failures preserve session | Unit test for 401/403 vs 5xx/network classification; AuthProvider cleanup path in source | Not run against a revoked trusted device |
-| Logout removes/invalidates conversation shortcuts and notifications | Kotlin cleanup path inspected; Android ShortcutManager API verified against official API reference | Not compiled or run on Android |
-| First-use Android setup, OS notification permission, and system-settings recovery | Source/typecheck only | Not run |
-| Searchable selection of authorized conversations | Existing authenticated conversation-list API + UI typecheck | Not run |
-| Local notification test distinguishes local alert from remote delivery | Source/typecheck only | Not run |
-| Android shortcut/bubble metadata and fallback | Source inspection only | Not run; Android Gradle blocked by incomplete NDK and no emulator/device |
-| Conversation channel association and Android channel settings deep link | Source inspection only | Not run |
-| Android RemoteInput, cold-start and duplicate reply handling | Source inspection only | Not run |
-| iOS reply, mark-read, grouping and deep links | Source inspection only | Not run; no Xcode/Simulator |
-| Revocation, E2EE, offline, mute/block and cross-client sync | Existing infrastructure source inspection | Not run end-to-end |
-| Cross-app notification behavior with main Nantty app installed | Provider routing tests verify intentional delivery to both app provider groups per user's choice | Actual dual-install delivery and duplicate behavior not run on device; stale/same-provider token correlation remains unimplemented |
+| Area | Verification in repository | Runtime evidence still required |
+|---|---|---|
+| Preference filtering, account-scoped drafts/positions and in-app bubble eligibility | Messenger unit tests | Process restart, account switch and accessibility on Android/iOS devices |
+| Troubleshooting status formatting and Android app bubble preference | Messenger unit tests cover OS preference labels, channel state and blocked/importance descriptions | Rendered mobile UI, native query against real Android notification channels, OS permissions/settings and push-token registration on devices |
+| Reply action policy and notification deep-link parsing | Messenger unit tests | Expo notification callbacks in foreground/background/cold launch |
+| Recipient routing and no-plaintext push mapping | Notifications mapping/FCM tests | Provider delivery, duplicate tokens and cross-app behavior on devices |
+| Same-conversation notification replacement | Notifications mapping and FCM provider tests (13) verify stable account/conversation tag reaches the Android data payload and delimiter-collision separation | FCM/OEM notification replacement and active-bubble updates on device |
+| Android plugin configuration | Expo config evaluation; plugin syntax check | Fresh native generation review, Kotlin compilation, Android install |
+| Android conversation shortcut/channel/BubbleMetadata | Source inspection only; account+conversation scoping implemented | Real Android 11+ bubble, system promotion, multiple conversations, settings overrides and OEM behavior |
+| iOS actions and in-app bubbles | Source/unit coverage | Xcode build and installed-device notification action tests |
+| Authorization/E2EE/revocation | Existing services are reused; source/unit tests cover selected utilities | Forged IDs, expired/revoked sessions, real secure replies and multi-device synchronization |
+| Offline reply delivery | Existing sealed outbox path reused | Airplane mode, process kill/restart, duplicate delivery and manual retry on device |
 
-Before release, execute the Android and iOS acceptance lists in the product requirement on installed builds. Capture settings, collapsed/expanded/multiple bubbles and a real encrypted reply; do not substitute mock conversations or compilation results.
+## Commands run for the current troubleshooting-screen change
+
+- Messenger: `npm run typecheck` passed; `npm test` over the configured 11 test files — 37 passed. Expo prebuild configuration evaluation and `node --check plugins/withAndroidChatBubbles.js` passed.
+- Notifications: `vitest run tests/storeActivityMapping.test.ts tests/fcmPush.test.ts` — 13 passed; source and test TypeScript compilation passed for mapping/provider changes.
+- Gradle/iOS builds and device acceptance were not performed in this increment; existing blockers are documented in `CHAT_BUBBLES_IMPLEMENTATION_STATUS.md`.
+
+## Required device scenarios
+
+Use the complete Android and iOS acceptance lists in the approved Chat Bubbles specification. At minimum, verify real inbound push over another app, correct authorized history, encrypted reply and recipient receipt, a second conversation, draft isolation, dismissal, system-setting changes, logout/revocation cleanup, iOS reply/deep-link behavior and lock-screen privacy. Capture screenshots only from actual installed builds; do not substitute mock screens.

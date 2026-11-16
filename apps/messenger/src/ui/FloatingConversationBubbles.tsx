@@ -48,11 +48,13 @@ export function FloatingConversationBubbles({ conversations, onDismiss, onOpenFu
   }, [user?.id]);
   useEffect(() => {
     let active = true;
-    void Promise.all(conversations.map(async ({ id }) => [id, await getBubblePosition(id)] as const)).then((values) => {
+    const accountId = user?.id;
+    if (!accountId) { setSavedPositions({}); return () => { active = false; }; }
+    void Promise.all(conversations.map(async ({ id }) => [id, await getBubblePosition(accountId, id)] as const)).then((values) => {
       if (active) setSavedPositions(Object.fromEntries(values.filter((entry): entry is readonly [string, BubblePosition] => entry[1] !== null)));
     });
     return () => { active = false; };
-  }, [conversations]);
+  }, [conversations, user?.id]);
   useEffect(() => {
     let active = true;
     const accountId = user?.id;
@@ -91,7 +93,7 @@ export function FloatingConversationBubbles({ conversations, onDismiss, onOpenFu
           reduceMotion={reduceMotion}
           onPress={() => setExpandedId(conversation.id)}
           onDismiss={() => onDismiss(conversation.id)}
-          onPositionChange={(position) => { setSavedPositions((current) => ({ ...current, [conversation.id]: position })); void saveBubblePosition(conversation.id, position); }}
+          onPositionChange={(position) => { setSavedPositions((current) => ({ ...current, [conversation.id]: position })); if (user?.id) void saveBubblePosition(user.id, conversation.id, position); }}
         />
       ))}
       <Modal visible={activeConversation !== null} animationType={reduceMotion ? "none" : "slide"} transparent statusBarTranslucent onRequestClose={() => setExpandedId(null)}>

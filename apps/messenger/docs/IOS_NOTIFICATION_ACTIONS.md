@@ -1,5 +1,9 @@
 # iOS notification actions
 
-Messenger registers the `NANTTY_CHAT` category with a text-input Reply action and Mark as read action through Expo Notifications. Incoming message notifications use a conversation thread identifier and generic content; private message text is not placed in the push payload. A reply opens Messenger so the current trusted session, conversation membership and E2EE implementation remain authoritative.
+Messenger uses Expo Notifications categories for reply and mark-read actions, conversation thread identifiers for grouping, and the standard notification deep link to open a conversation. Notification replies foreground Messenger so the existing authenticated session, conversation authorization and end-to-end encryption path can process the response. A secure background-send guarantee is not claimed.
 
-iOS does not provide a public API for system-wide floating chat heads. The supported floating conversation UI is in-app only. Notification actions and grouping have not been verified in an iOS build or on a device in this Linux workspace. Background action execution is not promised; when secure background processing is unavailable, Messenger must foreground and authenticate before sending.
+iOS has no public API for a general floating chat window over other apps. The supported floating experience is the optional in-app React Native conversation bubble. There is intentionally no system-wide bubble toggle, Picture-in-Picture chat, Live Activity, CallKit, background-audio, private-API or accessibility workaround.
+
+On iOS, verify notification permission and lock-screen preview settings in system Settings. Test reply, mark-read, grouping, deep link, expired-session fallback, logout cleanup and in-app bubbles on an installed iOS build. This Linux workspace has no Xcode or iOS simulator, so these runtime behaviors remain unverified here.
+
+Reference: [Apple actionable notification types](https://developer.apple.com/documentation/usernotifications/declaring-your-actionable-notification-types).

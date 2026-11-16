@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View, type ImageStyle } from "react-native";
-import { ArrowLeft, ArrowRight, BookOpenText, CaretLeft, CaretRight, WarningCircle, X } from "phosphor-react-native";
+import { ActivityIndicator, Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type ImageStyle } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import * as Crypto from "expo-crypto";
+import { ArrowLeft, ArrowRight, BookOpenText, CaretLeft, CaretRight, ImageSquare, PaperPlaneRight, WarningCircle, X } from "phosphor-react-native";
 
 import { useMessengerAuth } from "../auth/AuthProvider";
 import { ApiError } from "../api/apiClient";
 import { messengerStoriesService, type MessengerStory, type MessengerStoryTrayItem } from "../api/messengerStories.service";
+import { publishMessengerPhotoStory } from "../api/messengerStoryPublish.service";
+import { sendEncryptedStoryReply } from "../api/messengerChat.service";
+import { StoryVideoPlayer } from "./StoryVideoPlayer";
 import { useMessengerColors } from "../ui/useMessengerColors";
 import { StatePanel } from "../ui/StatePanel";
 import { ScreenFrame } from "../ui/ScreenFrame";
@@ -13,7 +18,7 @@ type LoadState = "loading" | "ready" | "error";
 
 export function StoriesScreen() {
   const colors = useMessengerColors();
-  const { request } = useMessengerAuth();
+  const { request, user } = useMessengerAuth();
   const [tray, setTray] = useState<readonly MessengerStoryTrayItem[]>([]);
   const [trayState, setTrayState] = useState<LoadState>("loading");
   const [trayError, setTrayError] = useState<string | null>(null);
@@ -21,10 +26,46 @@ export function StoriesScreen() {
   const [stories, setStories] = useState<readonly MessengerStory[]>([]);
   const [storyState, setStoryState] = useState<LoadState>("ready");
   const [storyError, setStoryError] = useState<string | null>(null);
+  const [publishingStory, setPublishingStory] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [publishNotice, setPublishNotice] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [replyDraft, setReplyDraft] = useState("");
+  const [failedReply, setFailedReply] = useState<{ readonly text: string; readonly idempotencyKey: string } | null>(null);
+  const [replySending, setReplySending] = useState(false);
+  const [replyError, setReplyError] = useState<string | null>(null);
+  const [replyNotice, setReplyNotice] = useState<string | null>(null);
   const storyRequestId = useRef(0);
   const activeStory = stories[activeIndex];
   const activeUser = useMemo(() => tray.find(({ user }) => user.id === activeUserId)?.user ?? activeStory?.author ?? null, [activeStory?.author, activeUserId, tray]);
+
+  useEffect(() => {
+    setReplyDraft("");
+    setFailedReply(null);
+    setReplyError(null);
+    setReplyNotice(null);
+  }, [activeStory?.id]);
+
+  const submitStoryReply = async (retry = false) => {
+    if (!activeStory || !user?.id || replySending) return;
+    const text = retry && failedReply ? failedReply.text : replyDraft.trim();
+    if (!text) return;
+    const idempotencyKey = retry && failedReply ? failedReply.idempotencyKey : Crypto.randomUUID();
+    setReplySending(true);
+    setReplyError(null);
+    setReplyNotice(null);
+    try {
+      await sendEncryptedStoryReply(request, activeStory.author.id, activeStory.id, text, idempotencyKey);
+      setReplyDraft("");
+      setFailedReply(null);
+      setReplyNotice("Reply sent securely.");
+    } catch (cause) {
+      setFailedReply({ text, idempotencyKey });
+      setReplyError(cause instanceof ApiError ? cause.message : "Could not send this reply. Your text stays here; retry when you’re ready.");
+    } finally {
+      setReplySending(false);
+    }
+  };
 
   const loadTray = useCallback(async () => {
     setTrayState("loading");
@@ -37,6 +78,31 @@ export function StoriesScreen() {
       setTrayState("error");
     }
   }, [request]);
+
+  const addPhotoStory = async () => {
+    setPublishError(null);
+    setPublishNotice(null);
+    setPublishingStory(true);
+    try {
+      let permission = await ImagePicker.getMediaLibraryPermissionsAsync();
+      if (!permission.granted && permission.canAskAgain) permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        setPublishError("Allow photo library access to choose a Story photo.");
+        if (!permission.canAskAgain) Alert.alert("Photo access needed", "Enable photo access in your device settings to add a Story photo.", [{ text: "Not now", style: "cancel" }, { text: "Open settings", onPress: () => { void Linking.openSettings(); } }]);
+        return;
+      }
+      const selection = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsEditing: false, quality: 0.9 });
+      if (selection.canceled || !selection.assets[0]) return;
+      const image = selection.assets[0];
+      await publishMessengerPhotoStory(request, { uri: image.uri, width: image.width, height: image.height });
+      await loadTray();
+      setPublishNotice("Your photo Story was published.");
+    } catch (cause) {
+      setPublishError(cause instanceof ApiError ? cause.message : cause instanceof Error ? cause.message : "Could not publish this Story.");
+    } finally {
+      setPublishingStory(false);
+    }
+  };
 
   useEffect(() => { void loadTray(); }, [loadTray]);
 
@@ -124,15 +190,21 @@ export function StoriesScreen() {
             </View>
             {activeStory.media.status === "processing" ? (
               <View style={styles.centerState}><ActivityIndicator color={colors.brand} /><Text style={[styles.body, { color: colors.muted }]}>This Story is still processing.</Text></View>
-            ) : activeStory.media.url || activeStory.media.posterUrl ? (
+            ) : activeStory.media.type === "video" && activeStory.media.url ? (
+              <StoryVideoPlayer key={activeStory.id} url={activeStory.media.url} posterUrl={activeStory.media.posterUrl} authorName={activeStory.author.name} />
+            ) : activeStory.media.type === "image" && activeStory.media.url ? (
               <View style={styles.mediaFrame}>
                 <Image
-                  accessibilityLabel={activeStory.media.type === "video" ? "Video Story preview" : "Photo Story"}
-                  source={{ uri: activeStory.media.type === "video" ? activeStory.media.posterUrl ?? activeStory.media.url ?? undefined : activeStory.media.url ?? undefined }}
+                  accessibilityLabel="Photo Story"
+                  source={{ uri: activeStory.media.url }}
                   resizeMode="cover"
                   style={styles.media as ImageStyle}
                 />
-                {activeStory.media.type === "video" ? <Text style={[styles.videoNotice, { color: colors.onBrand, backgroundColor: colors.scrim }]}>Video playback is not available in Messenger yet.</Text> : null}
+              </View>
+            ) : activeStory.media.type === "video" && activeStory.media.posterUrl ? (
+              <View style={styles.mediaFrame}>
+                <Image accessibilityLabel="Video Story preview" source={{ uri: activeStory.media.posterUrl }} resizeMode="cover" style={styles.media as ImageStyle} />
+                <Text style={[styles.videoNotice, { color: colors.onBrand, backgroundColor: colors.scrim }]}>Video is not available to play right now.</Text>
               </View>
             ) : (
               <View style={styles.centerState}><BookOpenText size={30} color={colors.muted} /><Text style={[styles.body, { color: colors.muted }]}>This Story has no viewable media.</Text></View>
@@ -146,6 +218,35 @@ export function StoriesScreen() {
                 <Text style={[styles.navLabel, { color: colors.onBrand }]}>Next</Text><CaretRight size={20} color={colors.onBrand} />
               </Pressable>
             </View>
+            {user?.id && user.id !== activeStory.author.id ? (
+              <View style={[styles.replyComposer, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+                <TextInput
+                  accessibilityLabel={`Reply to ${activeStory.author.name}'s Story`}
+                  accessibilityHint="Replies are sent as encrypted Messenger messages."
+                  editable={!replySending}
+                  multiline
+                  maxLength={4000}
+                  onChangeText={(value) => { setReplyDraft(value); setFailedReply(null); setReplyError(null); }}
+                  onSubmitEditing={() => void submitStoryReply()}
+                  placeholder="Reply to this Story…"
+                  placeholderTextColor={colors.muted}
+                  returnKeyType="send"
+                  style={[styles.replyInput, { color: colors.text }]}
+                  value={replyDraft}
+                />
+                {failedReply ? (
+                  <Pressable accessibilityRole="button" accessibilityLabel="Retry sending Story reply" accessibilityState={{ disabled: replySending, busy: replySending }} disabled={replySending} onPress={() => void submitStoryReply(true)} style={[styles.replySendButton, { borderColor: colors.border }]}>
+                    {replySending ? <ActivityIndicator color={colors.brand} size="small" /> : <Text style={[styles.retryLabel, { color: colors.text }]}>Retry</Text>}
+                  </Pressable>
+                ) : (
+                  <Pressable accessibilityRole="button" accessibilityLabel="Send encrypted Story reply" accessibilityState={{ disabled: replySending || !replyDraft.trim(), busy: replySending }} disabled={replySending || !replyDraft.trim()} onPress={() => void submitStoryReply()} style={[styles.replySendButton, { backgroundColor: colors.brand }, (replySending || !replyDraft.trim()) && styles.disabledButton]}>
+                    {replySending ? <ActivityIndicator color={colors.onBrand} size="small" /> : <PaperPlaneRight size={18} color={colors.onBrand} />}
+                  </Pressable>
+                )}
+              </View>
+            ) : null}
+            {replyError ? <Text accessibilityRole="alert" style={[styles.replyMessage, { color: colors.danger }]}>{replyError}</Text> : null}
+            {replyNotice ? <Text accessibilityRole="status" style={[styles.replyMessage, { color: colors.brand }]}>{replyNotice}</Text> : null}
           </View>
         )}
       </View>
@@ -154,6 +255,18 @@ export function StoriesScreen() {
 
   return (
     <ScreenFrame title="Stories" eyebrow="NANTTY MESSENGER" backgroundColor={colors.background}>
+      <View style={[styles.storyComposer, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+        <View style={styles.storyComposerCopy}>
+          <Text style={[styles.storyComposerTitle, { color: colors.text }]}>Share a photo Story</Text>
+          <Text style={[styles.storyComposerHint, { color: colors.muted }]}>Stories use Nantty’s public audience; photos are checked before they appear.</Text>
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel={publishingStory ? "Publishing photo Story" : "Add photo Story"} accessibilityState={{ disabled: publishingStory, busy: publishingStory }} disabled={publishingStory} onPress={() => void addPhotoStory()} style={[styles.addStoryButton, { backgroundColor: colors.brand }, publishingStory && styles.disabledButton]}>
+          {publishingStory ? <ActivityIndicator color={colors.onBrand} size="small" /> : <ImageSquare size={18} color={colors.onBrand} />}
+          <Text style={[styles.addStoryLabel, { color: colors.onBrand }]}>{publishingStory ? "Publishing…" : "Add photo"}</Text>
+        </Pressable>
+      </View>
+      {publishError ? <Text accessibilityRole="alert" style={[styles.publishMessage, { color: colors.danger }]}>{publishError}</Text> : null}
+      {publishNotice ? <Text accessibilityRole="status" style={[styles.publishMessage, { color: colors.brand }]}>{publishNotice}</Text> : null}
       {trayState === "loading" ? (
         <View style={styles.loading} accessibilityRole="progressbar" accessibilityLabel="Loading Stories"><ActivityIndicator color={colors.brand} /><Text style={[styles.body, { color: colors.muted }]}>Loading Stories…</Text></View>
       ) : trayState === "error" ? (
@@ -205,6 +318,19 @@ const styles = StyleSheet.create({
   navButton: { minHeight: 44, minWidth: 104, borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
   navLabel: { fontSize: 13, fontWeight: "600" },
   storyCount: { fontSize: 12 },
+  replyComposer: { minHeight: 48, maxHeight: 112, borderWidth: StyleSheet.hairlineWidth, borderRadius: 14, paddingLeft: 14, paddingRight: 6, flexDirection: "row", alignItems: "center", gap: 8 },
+  replyInput: { flex: 1, minHeight: 42, maxHeight: 96, paddingVertical: 10, fontSize: 14, lineHeight: 20 },
+  replySendButton: { width: 40, height: 40, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, alignItems: "center", justifyContent: "center" },
+  retryLabel: { fontSize: 11, fontWeight: "600" },
+  replyMessage: { fontSize: 12, lineHeight: 17 },
+  storyComposer: { minHeight: 78, marginHorizontal: 16, marginBottom: 12, paddingHorizontal: 14, paddingVertical: 12, borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, flexDirection: "row", alignItems: "center", gap: 12 },
+  storyComposerCopy: { flex: 1, minWidth: 0, gap: 3 },
+  storyComposerTitle: { fontSize: 14, fontWeight: "600" },
+  storyComposerHint: { fontSize: 12, lineHeight: 17 },
+  addStoryButton: { minHeight: 42, paddingHorizontal: 12, borderRadius: 10, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7 },
+  addStoryLabel: { fontSize: 13, fontWeight: "600" },
+  disabledButton: { opacity: 0.62 },
+  publishMessage: { marginHorizontal: 18, marginBottom: 10, fontSize: 13, lineHeight: 18 },
   loading: { minHeight: 120, alignItems: "center", justifyContent: "center", gap: 10 },
   body: { fontSize: 14, lineHeight: 20, textAlign: "center" },
   tray: { paddingHorizontal: 18, paddingBottom: 20 },

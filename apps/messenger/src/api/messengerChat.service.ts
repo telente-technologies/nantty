@@ -5,6 +5,7 @@ import { openDatabaseSync, type SQLiteDatabase } from "expo-sqlite";
 
 import { ApiError, type ApiRequestOptions } from "./apiClient";
 import type { ConversationSummary } from "./conversations";
+import { messengerStoriesService } from "./messengerStories.service";
 import { parseMessagePagePayload } from "./messagePage.util";
 import { createBubbleDraftStore } from "./bubbleDrafts.store";
 
@@ -35,6 +36,7 @@ interface PendingEncryptedMessage {
   readonly text: string;
   readonly createdAt: string;
   readonly body: { readonly kind: "text"; readonly encryption: { readonly deviceId: string; readonly ciphertext: string; readonly protocol: string }; readonly linkPreview?: string | null };
+  readonly storyReply?: { readonly storyId: string; readonly recipientId: string };
 }
 
 export type MessengerRequest = <T>(path: string, options?: Omit<ApiRequestOptions, "accessToken">) => Promise<T>;
@@ -178,20 +180,63 @@ function isMessageRecord(value: unknown): value is MessengerMessage & { encrypti
 }
 
 export async function sendEncryptedText(request: MessengerRequest, conversation: ConversationSummary, text: string, idempotencyKey: string): Promise<MessengerMessage> {
+  const normalizedText = text.trim();
+  const senderId = await ensureMessengerEncryption(request);
+  if (!normalizedText || normalizedText.length > 4000 || !idempotencyKey) throw new ApiError("Enter a valid message before sending.", null, "INVALID_MESSAGE");
   const key = outboxKey(idempotencyKey);
   let pending = await outboxStore.get(key).then((value) => value === null ? null : JSON.parse(value) as PendingEncryptedMessage);
+  if (pending !== null && (pending.senderId !== senderId || pending.conversationId !== conversation.id || pending.text !== normalizedText || pending.storyReply !== undefined)) {
+    throw new ApiError("This message key is already associated with a different message.", null, "IDEMPOTENCY_KEY_CONFLICT");
+  }
   if (pending === null) {
-    const userId = await ensureMessengerEncryption(request);
     const recipients = await request<{ readonly userIds: readonly string[] }>(`/api/v1/conversations/${encodeURIComponent(conversation.id)}/recipients`);
     const group = conversation.kind === "group" || conversation.kind === "channel" || conversation.kind === "business";
-    const encrypted = await getCryptoClient(request).encryptMessage({ kind: group ? "group" : "direct", conversationId: conversation.id, memberUserIds: [...recipients.userIds] }, { text: text.trim() });
+    const encrypted = await getCryptoClient(request).encryptMessage({ kind: group ? "group" : "direct", conversationId: conversation.id, memberUserIds: [...recipients.userIds] }, { text: normalizedText });
     pending = {
       idempotencyKey,
       conversationId: conversation.id,
-      senderId: userId,
-      text: text.trim(),
+      senderId,
+      text: normalizedText,
       createdAt: new Date().toISOString(),
       body: { kind: "text", encryption: encrypted.encryption, ...(encrypted.linkPreview ? { linkPreview: encrypted.linkPreview } : {}) },
+    };
+    confirmationCallbacks.set(idempotencyKey, (messageId) => encrypted.confirmSent(messageId, null));
+    await outboxStore.set(key, JSON.stringify(pending));
+  }
+  return deliverPendingMessage(request, pending);
+}
+
+export async function sendEncryptedStoryReply(request: MessengerRequest, recipientId: string, storyId: string, text: string, idempotencyKey: string): Promise<MessengerMessage> {
+  const normalizedText = text.trim();
+  if (!recipientId || !storyId || !idempotencyKey || !normalizedText || normalizedText.length > 4000) {
+    throw new ApiError("Enter a valid Story reply before sending.", null, "INVALID_STORY_REPLY");
+  }
+
+  const senderId = await ensureMessengerEncryption(request);
+  if (senderId === recipientId) throw new ApiError("You cannot reply to your own Story.", null, "CANNOT_REPLY_TO_OWN_STORY");
+  const key = outboxKey(idempotencyKey);
+  let pending = await outboxStore.get(key).then((value) => value === null ? null : JSON.parse(value) as PendingEncryptedMessage);
+  if (pending !== null) {
+    if (pending.senderId !== senderId || pending.storyReply?.storyId !== storyId || pending.storyReply.recipientId !== recipientId || pending.text !== normalizedText) {
+      throw new ApiError("This reply is already queued for a different message. Start a new reply.", null, "IDEMPOTENCY_KEY_CONFLICT");
+    }
+  } else {
+    const conversation = await request<{ readonly id: string }>("/api/v1/conversations", { method: "POST", body: { userId: recipientId } });
+    if (!conversation.id) throw new ApiError("Could not start a secure conversation for this Story reply.", null, "CONVERSATION_UNAVAILABLE");
+    const recipients = await request<{ readonly userIds: readonly string[] }>(`/api/v1/conversations/${encodeURIComponent(conversation.id)}/recipients`);
+    const encrypted = await getCryptoClient(request).encryptMessage({ kind: "direct", conversationId: conversation.id, memberUserIds: [...recipients.userIds] }, {
+      text: normalizedText,
+      storyId,
+      sharedContent: { kind: "story", id: storyId },
+    });
+    pending = {
+      idempotencyKey,
+      conversationId: conversation.id,
+      senderId,
+      text: normalizedText,
+      createdAt: new Date().toISOString(),
+      body: { kind: "text", encryption: encrypted.encryption, ...(encrypted.linkPreview ? { linkPreview: encrypted.linkPreview } : {}) },
+      storyReply: { storyId, recipientId },
     };
     confirmationCallbacks.set(idempotencyKey, (messageId) => encrypted.confirmSent(messageId, null));
     await outboxStore.set(key, JSON.stringify(pending));
@@ -228,11 +273,14 @@ export async function sendEncryptedImage(request: MessengerRequest, conversation
 }
 
 async function deliverPendingMessage(request: MessengerRequest, pending: PendingEncryptedMessage): Promise<MessengerMessage> {
-  const sent = await request<MessengerMessage>(`/api/v1/conversations/${encodeURIComponent(pending.conversationId)}/messages`, {
-    method: "POST",
-    headers: { "Idempotency-Key": pending.idempotencyKey },
-    body: pending.body,
-  });
+  const sent = pending.storyReply
+    ? await messengerStoriesService.replyToStory(request, pending.storyReply.storyId, pending.body.encryption, pending.idempotencyKey)
+      .then((result) => ({ ...result, conversationId: pending.conversationId, senderId: pending.senderId, createdAt: pending.createdAt, text: pending.text }))
+    : await request<MessengerMessage>(`/api/v1/conversations/${encodeURIComponent(pending.conversationId)}/messages`, {
+      method: "POST",
+      headers: { "Idempotency-Key": pending.idempotencyKey },
+      body: pending.body,
+    });
   await confirmationCallbacks.get(pending.idempotencyKey)?.(sent.id).catch(() => undefined);
   confirmationCallbacks.delete(pending.idempotencyKey);
   await outboxStore.set(sentPlaintextCache(sent.id), pending.text);

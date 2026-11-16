@@ -36,13 +36,14 @@ private class NanttyBubblePresentationDelegate(context: Context) : ExpoPresentat
     val trigger = notification.notificationRequest.trigger as? FirebaseNotificationTrigger ?: return standard
     val remoteMessage = trigger.remoteMessage
     val conversationId = remoteMessage.data["conversationId"]?.takeIf(String::isNotBlank) ?: return standard
+    val accountId = remoteMessage.data["recipientAccountId"]?.takeIf(String::isNotBlank) ?: return standard
     if (remoteMessage.data["bubbleAllowed"] != "true") return standard
 
-    return runCatching { addConversationBubble(remoteMessage, conversationId, standard) }.getOrElse { standard }
+    return runCatching { addConversationBubble(remoteMessage, accountId, conversationId, standard) }.getOrElse { standard }
   }
 
   @RequiresApi(Build.VERSION_CODES.R)
-  private fun addConversationBubble(remoteMessage: RemoteMessage, conversationId: String, standard: Notification): Notification {
+  private fun addConversationBubble(remoteMessage: RemoteMessage, accountId: String, conversationId: String, standard: Notification): Notification {
     val manager = context.getSystemService(NotificationManager::class.java) ?: return standard
     if (!manager.areBubblesAllowed() || manager.bubblePreference == NotificationManager.BUBBLE_PREFERENCE_NONE) return standard
     val parentChannelId = standard.channelId ?: remoteMessage.data["channelId"] ?: return standard
@@ -52,7 +53,8 @@ private class NanttyBubblePresentationDelegate(context: Context) : ExpoPresentat
 
     val shortcutManager = context.getSystemService(ShortcutManager::class.java) ?: return standard
     val encodedConversation = Uri.encode(conversationId)
-    val shortcutId = "nantty-chat-" + UUID.nameUUIDFromBytes(conversationId.toByteArray()).toString()
+    val scopedIdentity = UUID.nameUUIDFromBytes("\${accountId.length}:$accountId:\${conversationId.length}:$conversationId".toByteArray(Charsets.UTF_8)).toString()
+    val shortcutId = "nantty-chat-$scopedIdentity"
     val deepLink = Intent(Intent.ACTION_VIEW, Uri.parse("nantty-messenger://chats/$encodedConversation?surface=bubble"))
       .setClass(context, NanttyBubbleActivity::class.java)
       .setPackage(context.packageName)
@@ -72,7 +74,7 @@ private class NanttyBubblePresentationDelegate(context: Context) : ExpoPresentat
     }
     shortcutManager.addDynamicShortcuts(listOf(shortcut))
 
-    val conversationChannelId = "nantty-conversation-" + UUID.nameUUIDFromBytes(conversationId.toByteArray()).toString()
+    val conversationChannelId = "nantty-conversation-$scopedIdentity"
     val conversationChannel = manager.getNotificationChannel(conversationChannelId)
       ?: NotificationChannel(conversationChannelId, "Conversation", parentChannel.importance).apply {
         setConversationId(parentChannelId, shortcutId)
@@ -178,12 +180,17 @@ class NanttyChatBubblesModule(private val reactContext: ReactApplicationContext)
   }
 
   @ReactMethod
-  fun openConversationNotificationSettings(conversationId: String, promise: Promise) {
+  fun openConversationNotificationSettings(accountId: String, conversationId: String, promise: Promise) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
       promise.resolve(Arguments.createMap().apply { putBoolean("opened", false); putString("status", "unsupported") })
       return
     }
-    val channelId = "nantty-conversation-" + java.util.UUID.nameUUIDFromBytes(conversationId.toByteArray()).toString()
+    if (accountId.isBlank() || conversationId.isBlank()) {
+      promise.resolve(Arguments.createMap().apply { putBoolean("opened", false); putString("status", "invalid_identity") })
+      return
+    }
+    val identity = "\${accountId.length}:$accountId:\${conversationId.length}:$conversationId"
+    val channelId = "nantty-conversation-" + java.util.UUID.nameUUIDFromBytes(identity.toByteArray(Charsets.UTF_8)).toString()
     val channelExists = reactContext.getSystemService(NotificationManager::class.java)?.getNotificationChannel(channelId) != null
     if (!channelExists) {
       promise.resolve(Arguments.createMap().apply { putBoolean("opened", false); putString("status", "channel_not_created") })
@@ -197,6 +204,31 @@ class NanttyChatBubblesModule(private val reactContext: ReactApplicationContext)
     promise.resolve(Arguments.createMap().apply {
       putBoolean("opened", opened)
       putString("status", if (opened) "opened" else "unavailable")
+    })
+  }
+
+  @ReactMethod
+  fun getConversationNotificationChannelStatus(accountId: String, conversationId: String, promise: Promise) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      promise.resolve(Arguments.createMap().apply { putString("status", "unsupported"); putBoolean("channelExists", false); putNull("canBubble"); putNull("importance") })
+      return
+    }
+    if (accountId.isBlank() || conversationId.isBlank()) {
+      promise.resolve(Arguments.createMap().apply { putString("status", "invalid_identity"); putBoolean("channelExists", false); putNull("canBubble"); putNull("importance") })
+      return
+    }
+    val identity = "\${accountId.length}:$accountId:\${conversationId.length}:$conversationId"
+    val channelId = "nantty-conversation-" + java.util.UUID.nameUUIDFromBytes(identity.toByteArray(Charsets.UTF_8)).toString()
+    val channel = reactContext.getSystemService(NotificationManager::class.java)?.getNotificationChannel(channelId)
+    promise.resolve(Arguments.createMap().apply {
+      putBoolean("channelExists", channel != null)
+      putNull("canBubble")
+      putNull("importance")
+      putString("status", if (channel == null) "channel_not_created" else "available")
+      if (channel != null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) putBoolean("canBubble", channel.canBubble())
+        putInt("importance", channel.importance)
+      }
     })
   }
 

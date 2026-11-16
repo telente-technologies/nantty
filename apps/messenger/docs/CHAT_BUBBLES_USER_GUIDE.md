@@ -1,9 +1,9 @@
-# Chat Bubbles user guide
+# Chat Bubbles
 
-Messenger can keep selected conversations as floating bubbles inside Messenger. On Android 11 and later, eligible message notifications can also be presented as Android system bubbles when Android notification and bubble settings allow it. iPhone supports in-app bubbles and interactive message notifications, but not floating bubbles over other apps.
+Chat Bubbles keep selected conversations easy to reach while you use Messenger. On Android, the system may show eligible conversations as bubbles over other apps. On both Android and iOS, Messenger can optionally show floating conversations while you move around inside Messenger.
 
-Open Settings → Chat bubbles to enable in-app floating conversations. On Android, system bubbles have a separate setting. Choose selected or all chats, then use the bubble control beside a conversation in Chats. Tap a bubble to open it, switch conversations from the compact view, or use the open-conversation action to return to the full chat. Dismissal of an in-app bubble does not delete a conversation.
+Open Messenger Settings → Notifications → Chat Bubbles to choose conversations, manage in-app floating chats, adjust previews and see setup status. Android's notification and bubble settings must also allow bubbles; Messenger cannot change those system settings for you.
 
-On Android, system bubbles depend on notification permission and Android's own app/conversation bubble preferences. If Android does not show one, the ordinary notification should remain available. Message contents are not included in push text; lock-screen visibility is controlled by device settings.
+Tap an Android bubble to expand it, use Android's controls to collapse or dismiss it, and use the conversation action to open the full chat. Dismissing a bubble does not delete or mute the conversation. On iOS, notification replies open Messenger for secure processing; floating conversations are available only inside Messenger.
 
-On Android, Settings shows a capability status and a local “Test chat bubble” notification. It contains no real message and does not contact another user. The result reports eligibility, not whether Android actually expanded the bubble.
+Message previews follow your privacy preference and the device's lock-screen settings. Choose hidden previews if you do not want message identity or copy shown in notifications. Standard notifications remain available when bubbles are unsupported or disabled.

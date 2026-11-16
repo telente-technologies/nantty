@@ -10,12 +10,26 @@ export interface AndroidBubbleCapabilities {
   readonly status: AndroidBubbleStatus;
 }
 
+export interface AndroidConversationChannelStatus {
+  readonly status: "unsupported" | "invalid_identity" | "channel_not_created" | "available" | string;
+  readonly channelExists: boolean;
+  readonly canBubble: boolean | null;
+  readonly importance: number | null;
+}
+
 interface NativeChatBubblesModule {
   getCapabilities(): Promise<AndroidBubbleCapabilities>;
   openBubbleSettings(): Promise<{ readonly opened: boolean; readonly status: string }>;
-  openConversationNotificationSettings(conversationId: string): Promise<{ readonly opened: boolean; readonly status: string }>;
+  openConversationNotificationSettings(accountId: string, conversationId: string): Promise<{ readonly opened: boolean; readonly status: string }>;
+  getConversationNotificationChannelStatus(accountId: string, conversationId: string): Promise<AndroidConversationChannelStatus>;
   sendTestBubble(): Promise<{ readonly notificationPosted?: boolean; readonly bubbleEligible?: boolean; readonly status: string }>;
   clearAccountBubbleState(): Promise<boolean>;
+}
+
+export async function getAndroidConversationChannelStatus(accountId: string, conversationId: string): Promise<AndroidConversationChannelStatus> {
+  if (Platform.OS !== "android" || !nativeModule) return { status: "unsupported", channelExists: false, canBubble: null, importance: null };
+  try { return await nativeModule.getConversationNotificationChannelStatus(accountId, conversationId); }
+  catch { return { status: "unavailable", channelExists: false, canBubble: null, importance: null }; }
 }
 
 const nativeModule = NativeModules.NanttyChatBubbles as NativeChatBubblesModule | undefined;
@@ -34,9 +48,9 @@ export async function openAndroidBubbleSettings(): Promise<boolean> {
   catch { return false; }
 }
 
-export async function openAndroidConversationNotificationSettings(conversationId: string): Promise<string> {
+export async function openAndroidConversationNotificationSettings(accountId: string, conversationId: string): Promise<string> {
   if (Platform.OS !== "android" || !nativeModule) return "unsupported";
-  try { return (await nativeModule.openConversationNotificationSettings(conversationId)).status; }
+  try { return (await nativeModule.openConversationNotificationSettings(accountId, conversationId)).status; }
   catch { return "unavailable"; }
 }
 

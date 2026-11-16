@@ -1,8 +1,10 @@
 import * as SecureStore from "expo-secure-store";
+import { bubblePositionStorageKeys } from "./chatBubblePreferences.util";
 export { isConversationBubbleEnabled, toggleConversationBubble } from "./chatBubblePreferences.util";
 
 const preferencesKey = "nantty.messenger.chatBubbles.v1";
-const positionIndexKey = "nantty.messenger.bubblePositions.index";
+const legacyPositionIndexKey = "nantty.messenger.bubblePositions.index";
+let positionIndexWrite: Promise<void> = Promise.resolve();
 
 export interface ChatBubblePreferences {
   readonly enabled: boolean;
@@ -64,20 +66,28 @@ export async function saveChatBubblePreferences(update: Partial<ChatBubblePrefer
   return next;
 }
 
-export async function clearChatBubblePreferences(): Promise<void> {
-  const positions = await SecureStore.getItemAsync(positionIndexKey).catch(() => null);
-  let positionIds: string[] = [];
-  try {
-    const parsed: unknown = positions ? JSON.parse(positions) : [];
-    if (Array.isArray(parsed)) positionIds = parsed.filter((id): id is string => typeof id === "string");
-  } catch { positionIds = []; }
-  await Promise.all([preferencesKey, positionIndexKey, ...positionIds.map(positionKey)].map((key) => SecureStore.deleteItemAsync(key).catch(() => undefined)));
+export async function clearChatBubblePreferences(accountId?: string | null): Promise<void> {
+  await positionIndexWrite;
+  const indexKeys = [legacyPositionIndexKey, ...(accountId ? [bubblePositionStorageKeys(accountId, "").index] : [])];
+  const indexes = await Promise.all(indexKeys.map((key) => SecureStore.getItemAsync(key).catch(() => null)));
+  const positionIds = new Set<string>();
+  for (const value of indexes) {
+    try {
+      const parsed: unknown = value ? JSON.parse(value) : [];
+      if (Array.isArray(parsed)) parsed.filter((id): id is string => typeof id === "string").forEach((id) => positionIds.add(id));
+    } catch { /* Invalid indexes are removed with the preference records. */ }
+  }
+  const positionKeys = [...positionIds].flatMap((id) => [legacyPositionKey(id), ...(accountId ? [positionKey(accountId, id)] : [])]);
+  await Promise.all([preferencesKey, ...indexKeys, ...positionKeys].map((key) => SecureStore.deleteItemAsync(key).catch(() => undefined)));
 }
 
-const positionKey = (conversationId: string) => `nantty.messenger.bubblePosition.${conversationId.replace(/[^A-Za-z0-9._-]/g, "_")}`;
+const positionKey = (accountId: string, conversationId: string) => bubblePositionStorageKeys(accountId, conversationId).position;
+const positionIndexKey = (accountId: string) => bubblePositionStorageKeys(accountId, "").index;
+const legacyPositionKey = (conversationId: string) => `nantty.messenger.bubblePosition.${conversationId.replace(/[^A-Za-z0-9._-]/g, "_")}`;
 
-export async function getBubblePosition(conversationId: string): Promise<{ readonly x: number; readonly y: number } | null> {
-  const value = await SecureStore.getItemAsync(positionKey(conversationId));
+export async function getBubblePosition(accountId: string, conversationId: string): Promise<{ readonly x: number; readonly y: number } | null> {
+  if (!accountId) return null;
+  const value = await SecureStore.getItemAsync(positionKey(accountId, conversationId));
   if (!value) return null;
   try {
     const point = JSON.parse(value) as { x?: unknown; y?: unknown };
@@ -85,11 +95,17 @@ export async function getBubblePosition(conversationId: string): Promise<{ reado
   } catch { return null; }
 }
 
-export async function saveBubblePosition(conversationId: string, point: { readonly x: number; readonly y: number }): Promise<void> {
-  await SecureStore.setItemAsync(positionKey(conversationId), JSON.stringify(point));
-  const saved = await SecureStore.getItemAsync(positionIndexKey);
-  let ids: string[] = [];
-  try { ids = saved ? JSON.parse(saved) as string[] : []; } catch { ids = []; }
-  if (!ids.includes(conversationId)) await SecureStore.setItemAsync(positionIndexKey, JSON.stringify([...ids, conversationId]));
+export async function saveBubblePosition(accountId: string, conversationId: string, point: { readonly x: number; readonly y: number }): Promise<void> {
+  if (!accountId) return;
+  await SecureStore.setItemAsync(positionKey(accountId, conversationId), JSON.stringify(point));
+  const indexKey = positionIndexKey(accountId);
+  const write = positionIndexWrite.then(async () => {
+    const saved = await SecureStore.getItemAsync(indexKey);
+    let ids: string[] = [];
+    try { ids = saved ? JSON.parse(saved) as string[] : []; } catch { ids = []; }
+    if (!ids.includes(conversationId)) await SecureStore.setItemAsync(indexKey, JSON.stringify([...ids, conversationId]));
+  });
+  positionIndexWrite = write.catch(() => undefined);
+  await write;
 }
 

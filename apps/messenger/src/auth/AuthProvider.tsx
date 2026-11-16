@@ -97,8 +97,9 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     setStatus("signedIn");
   }, []);
 
-  const clearLocalSession = useCallback(async (sessionAccessToken: string | null = accessTokenRef.current) => {
+  const clearLocalSession = useCallback(async (sessionAccessToken: string | null = accessTokenRef.current, sessionAccountId?: string | null) => {
     const accessToken = sessionAccessToken;
+    const accountId = sessionAccountId ?? userRef.current?.id ?? null;
     accessTokenRef.current = null;
     refreshTokenRef.current = null;
     userRef.current = null;
@@ -122,7 +123,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     await import("../api/messengerChat.service").then(({ clearMessengerChatCrypto }) => clearMessengerChatCrypto()).catch(() => undefined);
     await import("../api/messengerImageAttachment.service").then(({ clearDecryptedMessengerImages }) => clearDecryptedMessengerImages()).catch(() => undefined);
     await import("../api/messengerRealtime.service").then(({ clearMessengerRealtime }) => clearMessengerRealtime()).catch(() => undefined);
-    await import("../api/chatBubblePreferences.service").then(({ clearChatBubblePreferences }) => clearChatBubblePreferences()).catch(() => undefined);
+    await import("../api/chatBubblePreferences.service").then(({ clearChatBubblePreferences }) => clearChatBubblePreferences(accountId)).catch(() => undefined);
     await import("../api/messengerNotifications.service").then(({ disableMessengerPush }) => disableMessengerPush()).catch(() => undefined);
     await import("../api/chatBubblesNative.service").then(({ clearAccountBubbleState }) => clearAccountBubbleState()).catch(() => undefined);
     await import("expo-notifications").then(async (Notifications) => {
@@ -134,6 +135,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
   const signOut = useCallback(async () => {
     const accessToken = accessTokenRef.current;
     const refreshToken = refreshTokenRef.current;
+    const accountId = userRef.current?.id ?? null;
     accessTokenRef.current = null;
     refreshTokenRef.current = null;
     userRef.current = null;
@@ -142,7 +144,7 @@ export function AuthProvider({ children }: { readonly children: ReactNode }) {
     setAuthorization(null);
     setStatus("signedOut");
     const trustedDeviceId = await SecureStore.getItemAsync(TRUSTED_DEVICE_ID_KEY).catch(() => null);
-    await clearLocalSession(accessToken);
+    await clearLocalSession(accessToken, accountId);
     try {
       if (trustedDeviceId && accessToken) {
         await requestJson<void>(`/api/v1/auth/messenger/devices/${encodeURIComponent(trustedDeviceId)}`, { method: "DELETE", accessToken });

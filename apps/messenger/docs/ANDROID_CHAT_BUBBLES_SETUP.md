@@ -1,30 +1,32 @@
-# Android Chat Bubbles setup
+# Android Chat Bubbles setup and build
 
-## Requirements
+## Project integration
 
-- Android 11 (API 30) or newer for system bubbles.
-- A custom development/release build; Expo Go does not include Nantty's notification receiver.
-- Firebase Messaging configured for the Android application and valid server-side FCM credentials for the Notifications service.
-- Notification permission and Android's system bubble settings must permit the conversation.
+Messenger uses Expo/React Native for conversation UI and a config plugin plus app-local Kotlin integrations for Android's official notification Bubbles API. The plugin is registered in `app.json`; do not rely on Expo Go for this feature. The bubble activity reuses the existing React Native host and must remain non-exported. No overlay permission, foreground service, or accessibility workaround is used.
 
-## Repository commands
+## Build
 
-From the repository root:
+From the repository root, use the Messenger development build scripts:
 
 ```sh
-pnpm --filter @nantty/messenger typecheck
-pnpm --filter @nantty/messenger test
+pnpm --filter @nantty/messenger exec expo start --dev-client
 pnpm --filter @nantty/messenger android
 ```
 
-When native directories are generated from Expo config, apply the plugin in a disposable/expected prebuild workflow before compiling. Do not use Expo Go to validate bubbles. This workspace's Gradle build is currently blocked by an incomplete local NDK installation; no device was attached.
+Native source/plugin changes require a new development or release build; a JavaScript OTA update cannot add native notification behavior. Regenerate native projects only through the repository's reviewed Expo prebuild workflow, after checking for local native changes. Do not run destructive prebuild commands over uncommitted native work.
 
-## Current implementation notes
+## Setup on device
 
-- The plugin generates non-exported `NanttyBubbleActivity`, a subclass of the existing RN host, with `android:allowEmbedded="true"` and `android:resizeableActivity="true"`. The launcher Activity remains separate.
-- `NanttyChatBubblesModule` reports API/notification/app bubble status, opens the Android notification bubble settings with safe fallbacks, posts a local test-only `MessagingStyle` notification with a long-lived shortcut and bubble metadata, and removes active notifications/shortcuts on logout.
-- The plugin removes `SYSTEM_ALERT_WINDOW`, including debug-manifest merges. Nantty does not need “display over other apps” permission for the official Bubbles API.
-- Bubble metadata is added only to data-only FCM messages explicitly eligible under server preferences and only when the system/channel permits it. Pushes include a stable message ID for reply idempotency.
-- For an eligible conversation, the native delegate creates a stable Android conversation channel associated with the long-lived shortcut. It copies parent sound, vibration, and lock-screen visibility only at channel creation; existing user channel choices are not overwritten. From a conversation header, users can open that Android channel's settings once it exists.
-- If a bubble is not displayed, Android should still present the ordinary message notification.
-- The test notification is local and clearly labeled. It does not insert a conversation or send a message. A posted result does not prove Android displayed or expanded a bubble; device verification is still required.
+1. Grant Messenger notification permission if Android requests it.
+2. In Messenger Settings → Notifications → Chat Bubbles, enable the feature and choose eligible conversations.
+3. Open Android notification/bubble settings from that screen if system bubbles are disabled.
+4. Post the local test notification. Android may require promoting a conversation notification to a bubble; the app cannot grant that setting itself.
+5. Send a real message from another authorized account and test the bubble while another app is foregrounded.
+
+Android's global bubble setting, app notification permission, channel overrides, focus mode and manufacturer policy remain authoritative. Standard notifications are the fallback.
+
+## Current environment gate
+
+The last recorded local Gradle attempt stopped before Kotlin compilation because Android NDK `27.1.12297006` lacked `source.properties`; no emulator/device was attached. Repair the NDK in a suitable Android development environment, then build/install and complete the Android scenarios in `CHAT_BUBBLES_TEST_MATRIX.md`. Do not treat Expo config evaluation as a native build.
+
+Official references: [Android bubbles](https://developer.android.com/develop/ui/views/notifications/bubbles), [Android conversations](https://developer.android.com/develop/ui/views/notifications/conversations), [FCM receive messages](https://firebase.google.com/docs/cloud-messaging/android/receive-messages), [Expo config plugins and native modules](https://docs.expo.dev/modules/config-plugin-and-native-module-tutorial/).

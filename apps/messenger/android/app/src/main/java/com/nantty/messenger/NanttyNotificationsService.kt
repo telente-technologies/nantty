@@ -32,13 +32,14 @@ private class NanttyBubblePresentationDelegate(context: Context) : ExpoPresentat
     val trigger = notification.notificationRequest.trigger as? FirebaseNotificationTrigger ?: return standard
     val remoteMessage = trigger.remoteMessage
     val conversationId = remoteMessage.data["conversationId"]?.takeIf(String::isNotBlank) ?: return standard
+    val accountId = remoteMessage.data["recipientAccountId"]?.takeIf(String::isNotBlank) ?: return standard
     if (remoteMessage.data["bubbleAllowed"] != "true") return standard
 
-    return runCatching { addConversationBubble(remoteMessage, conversationId, standard) }.getOrElse { standard }
+    return runCatching { addConversationBubble(remoteMessage, accountId, conversationId, standard) }.getOrElse { standard }
   }
 
   @RequiresApi(Build.VERSION_CODES.R)
-  private fun addConversationBubble(remoteMessage: RemoteMessage, conversationId: String, standard: Notification): Notification {
+  private fun addConversationBubble(remoteMessage: RemoteMessage, accountId: String, conversationId: String, standard: Notification): Notification {
     val manager = context.getSystemService(NotificationManager::class.java) ?: return standard
     if (!manager.areBubblesAllowed() || manager.bubblePreference == NotificationManager.BUBBLE_PREFERENCE_NONE) return standard
     val parentChannelId = standard.channelId ?: remoteMessage.data["channelId"] ?: return standard
@@ -48,7 +49,8 @@ private class NanttyBubblePresentationDelegate(context: Context) : ExpoPresentat
 
     val shortcutManager = context.getSystemService(ShortcutManager::class.java) ?: return standard
     val encodedConversation = Uri.encode(conversationId)
-    val shortcutId = "nantty-chat-" + UUID.nameUUIDFromBytes(conversationId.toByteArray()).toString()
+    val scopedIdentity = UUID.nameUUIDFromBytes("${accountId.length}:$accountId:${conversationId.length}:$conversationId".toByteArray(Charsets.UTF_8)).toString()
+    val shortcutId = "nantty-chat-$scopedIdentity"
     val deepLink = Intent(Intent.ACTION_VIEW, Uri.parse("nantty-messenger://chats/$encodedConversation?surface=bubble"))
       .setClass(context, NanttyBubbleActivity::class.java)
       .setPackage(context.packageName)
@@ -65,7 +67,7 @@ private class NanttyBubblePresentationDelegate(context: Context) : ExpoPresentat
       .build()
     shortcutManager.addDynamicShortcuts(listOf(shortcut))
 
-    val conversationChannelId = "nantty-conversation-" + UUID.nameUUIDFromBytes(conversationId.toByteArray()).toString()
+    val conversationChannelId = "nantty-conversation-$scopedIdentity"
     val conversationChannel = manager.getNotificationChannel(conversationChannelId)
       ?: NotificationChannel(conversationChannelId, "Conversation", parentChannel.importance).apply {
         setConversationId(parentChannelId, shortcutId)

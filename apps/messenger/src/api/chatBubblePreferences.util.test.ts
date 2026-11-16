@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { conversationBubbleDraftKey, isConversationBubbleEnabled, toggleConversationBubble, toggleInAppConversation, updateConversationDraft, type BubbleSelection } from "./chatBubblePreferences.util";
+import { bubblePositionStorageKeys, conversationBubbleDraftKey, isConversationBubbleEnabled, toggleConversationBubble, toggleInAppConversation, updateConversationDraft, type BubbleSelection } from "./chatBubblePreferences.util";
 
 const base: BubbleSelection = { enabled: true, mode: "selected", conversationIds: ["one"], excludedConversationIds: [] };
 
@@ -37,6 +37,15 @@ test("persisted bubble draft keys are isolated by account and conversation", () 
   assert.notEqual(conversationBubbleDraftKey("account-a", "conversation-1"), conversationBubbleDraftKey("account-b", "conversation-1"));
   assert.notEqual(conversationBubbleDraftKey("account-a", "conversation-1"), conversationBubbleDraftKey("account-a", "conversation-2"));
   assert.notEqual(conversationBubbleDraftKey("a:b", "c"), conversationBubbleDraftKey("a", "b:c"));
+});
+
+test("persisted floating positions are isolated by account and conversation", () => {
+  const first = bubblePositionStorageKeys("account-a", "conversation-1");
+  assert.notEqual(first.position, bubblePositionStorageKeys("account-b", "conversation-1").position);
+  assert.notEqual(first.position, bubblePositionStorageKeys("account-a", "conversation-2").position);
+  assert.notEqual(bubblePositionStorageKeys("a:b", "c").position, bubblePositionStorageKeys("a", "b:c").position);
+  assert.equal(first.index, bubblePositionStorageKeys("account-a", "conversation-2").index);
+  assert.notEqual(first.index, bubblePositionStorageKeys("account-b", "conversation-1").index);
 });
 
 test("in-app conversation selection changes independently of Android system selection", () => {

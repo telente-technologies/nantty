@@ -12,6 +12,7 @@ import { getAndroidBubbleCapabilities, openAndroidBubbleSettings, sendAndroidBub
 import { conversationDisplayName, parseConversationList, type ConversationSummary } from "../api/conversations";
 import * as Notifications from "expo-notifications";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ChatBubblesTroubleshootingScreen } from "./ChatBubblesTroubleshootingScreen";
 
 interface ChatSettingsResponse {
   readonly notifications: { readonly messages: boolean; readonly groups: boolean; readonly showMessagePreview: boolean; readonly sound: boolean; readonly vibration: boolean; readonly bubbles: boolean; readonly bubbleMode: "all" | "selected"; readonly bubbleConversationIds: readonly string[]; readonly bubbleExcludedConversationIds: readonly string[] };
@@ -31,6 +32,7 @@ export function SettingsScreen() {
   const [setupStep, setSetupStep] = useState(0);
   const [setupMessage, setSetupMessage] = useState<string | null>(null);
   const [setupSeen, setSetupSeen] = useState(false);
+  const [troubleshootingVisible, setTroubleshootingVisible] = useState(false);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerSearch, setPickerSearch] = useState("");
   const [pickerLoading, setPickerLoading] = useState(false);
@@ -145,8 +147,7 @@ export function SettingsScreen() {
   const sendLocalNotificationTest = async () => {
     try {
       const permission = await Notifications.getPermissionsAsync();
-      const granted = permission.granted || (await Notifications.requestPermissionsAsync()).granted;
-      if (!granted) { setBubbleTestMessage("Notifications are not permitted. Enable them in device settings to receive alerts."); return; }
+      if (!permission.granted) { setBubbleTestMessage("Notifications are not permitted. Enable them in device settings to receive alerts."); return; }
       await Notifications.scheduleNotificationAsync({ content: { title: "Nantty notification test", body: "Notifications are enabled on this device.", data: { type: "local-test" }, sound: false }, trigger: null });
       setBubbleTestMessage("A local test notification was posted. This does not test remote message delivery or replies.");
     } catch { setBubbleTestMessage("The local test notification could not be posted."); }
@@ -205,6 +206,7 @@ export function SettingsScreen() {
         <View style={[styles.settingsSection, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.sectionHeading}><ChatCircleDots size={19} color={colors.brand} /><Text style={[styles.sectionTitle, { color: colors.text }]}>Chat bubbles</Text></View>
           <Text style={[styles.sectionCopy, { color: colors.muted }]}>{Platform.OS === "ios" ? "Floating conversations stay inside Nantty Messenger. iOS does not provide system-wide chat bubbles." : "In-app floating conversations and Android system bubbles are separate. Android availability also depends on notification and system bubble settings."}</Text>
+          {Platform.OS === "ios" ? <Pressable accessibilityRole="button" onPress={() => { setSetupStep(7); setSetupVisible(true); }} style={[styles.helpLink, { borderTopColor: colors.border }]}><Text style={[styles.nativeActionText, { color: colors.brand }]}>Set up floating conversations and replies</Text></Pressable> : null}
           {Platform.OS === "android" ? <SettingToggle label="Android system bubbles" description="Allow eligible conversation notifications to use Android’s Bubbles feature when the device and system settings permit it." value={bubbleSettings.enabled} disabled={busyKey !== null} onChange={requestSystemBubbleEnable} /> : null}
           {Platform.OS === "android" ? <View style={[styles.bubbleStatus, { borderTopColor: colors.border }]}>
             <Text style={[styles.toggleLabel, { color: colors.text }]}>Android availability</Text>
@@ -243,7 +245,7 @@ export function SettingsScreen() {
           </View> : null}
           <SettingToggle label="Show unread counts" value={bubbleSettings.showUnreadCount} disabled={busyKey !== null} onChange={(showUnreadCount) => void saveBubbles({ showUnreadCount })} />
           {Platform.OS === "android" ? bubbleSettings.mode === "selected" ? <Pressable accessibilityRole="button" onPress={() => void openConversationPicker()} style={[styles.manageButton, { borderColor: colors.border }]}><Text style={[styles.nativeActionText, { color: colors.text }]}>Choose conversations ({bubbleSettings.conversationIds.length})</Text></Pressable> : <Pressable accessibilityRole="button" onPress={() => void openConversationPicker()} style={[styles.manageButton, { borderColor: colors.border }]}><Text style={[styles.nativeActionText, { color: colors.text }]}>Manage exclusions ({bubbleSettings.excludedConversationIds.length})</Text></Pressable> : <Text style={[styles.hint, { color: colors.muted }]}>To add or remove an in-app floating conversation, use the chat-bubble action in that conversation.</Text>}
-          <Pressable accessibilityRole="button" onPress={() => { setSetupStep(3); setSetupVisible(true); }} style={[styles.helpLink, { borderTopColor: colors.border }]}><Text style={[styles.nativeActionText, { color: colors.brand }]}>Help and troubleshooting</Text></Pressable>
+          <Pressable accessibilityRole="button" onPress={() => setTroubleshootingVisible(true)} style={[styles.helpLink, { borderTopColor: colors.border }]}><Text style={[styles.nativeActionText, { color: colors.brand }]}>Help and troubleshooting</Text></Pressable>
         </View>
         <View style={[styles.settingsSection, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.sectionHeading}><Bell size={19} color={colors.brand} /><Text style={[styles.sectionTitle, { color: colors.text }]}>Message notifications</Text></View>
@@ -273,6 +275,7 @@ export function SettingsScreen() {
       </View>
       <Modal visible={setupVisible} transparent animationType="slide" onRequestClose={() => setSetupVisible(false)}>
         <View style={styles.modalBackdrop}><View style={[styles.modalCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          {setupStep === 7 ? <><Text style={[styles.modalTitle, { color: colors.text }]}>Set up Messenger on iPhone</Text><Text style={[styles.modalCopy, { color: colors.muted }]}>iPhone does not support chat heads over other apps. You can keep selected conversations floating inside Messenger, and reply from supported message notifications.</Text><Text style={[styles.modalCopy, { color: colors.muted }]}>1. Turn on Push notifications and Reply and mark as read below. 2. Enable In-app floating conversations and choose chats from each conversation. 3. Use iPhone Settings to allow Nantty notifications and choose lock-screen preview behavior. Message text is not included in Nantty push notifications.</Text><View style={styles.nativeActions}><Pressable accessibilityRole="button" onPress={() => setSetupVisible(false)} style={[styles.nativeAction, { borderColor: colors.border }]}><Text style={[styles.nativeActionText, { color: colors.text }]}>Done</Text></Pressable><Pressable accessibilityRole="button" onPress={() => { setSetupVisible(false); void Linking.openSettings(); }} style={[styles.nativeAction, { borderColor: colors.brand }]}><Text style={[styles.nativeActionText, { color: colors.brand }]}>Open iPhone settings</Text></Pressable></View></> : null}
           {setupStep === 0 ? <><Text style={[styles.modalTitle, { color: colors.text }]}>Chat bubbles</Text><View style={[styles.setupPreview, { borderColor: colors.border }]}><ChatCircleDots size={24} color={colors.brand} /><View style={styles.toggleCopy}><Text style={[styles.toggleLabel, { color: colors.text }]}>New message</Text><Text style={[styles.toggleDescription, { color: colors.muted }]}>Open a conversation while using another app</Text></View></View><Text style={[styles.modalCopy, { color: colors.muted }]}>Chat bubbles let you open and reply to conversations while using other apps. Android controls whether eligible conversations can appear as bubbles; Nantty cannot override those system settings.</Text><View style={styles.nativeActions}><Pressable accessibilityRole="button" onPress={() => setSetupVisible(false)} style={[styles.nativeAction, { borderColor: colors.border }]}><Text style={[styles.nativeActionText, { color: colors.text }]}>Not now</Text></Pressable><Pressable accessibilityRole="button" onPress={() => setSetupStep(1)} style={[styles.nativeAction, { borderColor: colors.brand }]}><Text style={[styles.nativeActionText, { color: colors.brand }]}>Continue</Text></Pressable></View></> : null}
           {setupStep === 1 ? <><Text style={[styles.modalTitle, { color: colors.text }]}>Allow notifications</Text><Text style={[styles.modalCopy, { color: colors.muted }]}>Android needs notification permission before Nantty can post a conversation bubble. You can change this any time in system settings.</Text><View style={styles.nativeActions}><Pressable accessibilityRole="button" onPress={() => setSetupVisible(false)} style={[styles.nativeAction, { borderColor: colors.border }]}><Text style={[styles.nativeActionText, { color: colors.text }]}>Not now</Text></Pressable><Pressable accessibilityRole="button" disabled={busyKey !== null} onPress={() => void completeSetup()} style={[styles.nativeAction, { borderColor: colors.brand }]}><Text style={[styles.nativeActionText, { color: colors.brand }]}>{busyKey === "setup" ? "Checking…" : "Allow and continue"}</Text></Pressable></View></> : null}
           {setupStep === 2 ? <><Text style={[styles.modalTitle, { color: colors.text }]}>Finish in Android settings</Text><Text style={[styles.modalCopy, { color: colors.muted }]}>Android currently blocks bubbles for Nantty. Enable the available conversation bubble preference, return here, then continue. Nantty cannot change this setting on your behalf.</Text><View style={styles.nativeActions}><Pressable accessibilityRole="button" onPress={() => { setSetupStep(1); void completeSetup(); }} style={[styles.nativeAction, { borderColor: colors.border }]}><Text style={[styles.nativeActionText, { color: colors.text }]}>Check again</Text></Pressable><Pressable accessibilityRole="button" onPress={() => void openAndroidBubbleSettings()} style={[styles.nativeAction, { borderColor: colors.brand }]}><Text style={[styles.nativeActionText, { color: colors.brand }]}>Open settings</Text></Pressable></View></> : null}
@@ -293,6 +296,9 @@ export function SettingsScreen() {
           <Pressable accessibilityRole="button" onPress={() => { const update = bubbleSettings.mode === "all" ? { excludedConversationIds: selectedIds } : { mode: "selected" as const, conversationIds: selectedIds }; void saveBubbles(update).then((saved) => { if (saved) setPickerVisible(false); }); }} style={[styles.saveSelection, { backgroundColor: colors.brand }]}><Text style={{ color: colors.onBrand, fontWeight: "700" }}>{bubbleSettings.mode === "all" ? "Save exclusions" : `Save selection (${selectedIds.length})`}</Text></Pressable>
           </KeyboardAvoidingView>
         </SafeAreaView>
+      </Modal>
+      <Modal visible={troubleshootingVisible} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setTroubleshootingVisible(false)}>
+        {troubleshootingVisible ? <ChatBubblesTroubleshootingScreen onBack={() => setTroubleshootingVisible(false)} /> : null}
       </Modal>
     </ScreenFrame>
   );

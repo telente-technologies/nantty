@@ -22,6 +22,16 @@ export interface MessengerStory {
   readonly seen: boolean;
 }
 
+export interface MessengerStoryPublishInput {
+  readonly mediaId: string;
+}
+
+export interface MessengerStoryReplyEncryption {
+  readonly deviceId: string;
+  readonly ciphertext: string;
+  readonly protocol?: string;
+}
+
 function listPayload(value: unknown): readonly unknown[] {
   if (Array.isArray(value)) return value;
   if (value !== null && typeof value === "object" && Array.isArray((value as { data?: unknown }).data)) return (value as { data: readonly unknown[] }).data;
@@ -72,4 +82,8 @@ export const messengerStoriesService = {
   fetchTray: (request: MessengerStoryRequest) => request<unknown>("/api/v1/stories/tray").then(parseStoryTray),
   fetchForUser: (request: MessengerStoryRequest, userId: string) => request<unknown>(`/api/v1/users/${encodeURIComponent(userId)}/stories`).then(parseUserStories),
   markSeen: (request: MessengerStoryRequest, storyId: string) => request<void>(`/api/v1/stories/${encodeURIComponent(storyId)}/seen`, { method: "POST" }),
+  replyToStory: (request: MessengerStoryRequest, storyId: string, encryption: MessengerStoryReplyEncryption, idempotencyKey: string) =>
+    request<{ readonly id: string }>(`/api/v1/stories/${encodeURIComponent(storyId)}/replies`, { method: "POST", headers: { "Idempotency-Key": idempotencyKey }, body: { encryption } }),
+  publishPhoto: (request: MessengerStoryRequest, input: MessengerStoryPublishInput) =>
+    request<unknown>("/api/v1/stories", { method: "POST", body: input }),
 };

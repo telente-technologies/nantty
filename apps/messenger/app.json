@@ -37,7 +37,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Nantty Messenger to select a photo to send in an encrypted conversation."
+          "photosPermission": "Allow Nantty Messenger to select a photo for an encrypted conversation or to share as a Story."
         }
       ],
       "./plugins/withAndroidChatBubbles"

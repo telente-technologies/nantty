@@ -27,7 +27,7 @@ src/
   navigation/MessengerAppShell.tsx adaptive phone tabs / tablet side rail
   screens/SignInScreen.tsx        existing Nantty login endpoint
   screens/InboxScreen.tsx         server-backed conversation list, search, retry/refresh
-  screens/StoriesScreen.tsx       shared Story tray, photo viewer, and seen-state updates
+  screens/StoriesScreen.tsx       shared Story tray, photo viewer, seen updates, and photo publishing
   screens/ConversationScreen.tsx   encrypted conversation view and text composer
   screens/SettingsScreen.tsx      bubble, preview, sound, vibration, push and session settings
   ui/FloatingConversationBubbles.tsx in-app draggable bubbles and compact conversation modal
@@ -75,8 +75,8 @@ The Android Bubble notification renderer is supplied by `plugins/withAndroidChat
 The following are deliberately visible gaps, not hidden placeholders:
 
 1. **Conversation richness:** this Messenger surface currently sends encrypted text and renders encrypted text history. It does not yet include quote-replies, reactions, attachment upload/rendering, message pagination, or the main mobile app's complete control-message folding UI.
-2. **Stories:** the shared authenticated tray, per-user viewer, photo media, and seen-state endpoint are connected. Story publishing, encrypted replies, and video playback are not yet connected; video Stories show their available poster and an honest playback notice. Story privacy and expiry remain server-enforced; Messenger adds no ads.
-3. **Native/device release checks:** bubble visibility, notification action presentation, device revocation, and OS setting behavior still require a built Android device/emulator and iOS device/simulator. An installed development build has not been exercised in this workspace.
+2. **Stories:** the shared authenticated tray, per-user viewer, photo publishing, video playback, seen state, and encrypted Story replies use the existing Media/Social/chat-crypto paths. Story replies use the encrypted offline outbox and retry idempotency; video playback reuses Expo Video, defaults muted, pauses outside the foreground, and does not enable PiP. The signed-in native upload, playback and reply workflows remain unverified. Story privacy and expiry remain server-enforced; Messenger adds no ads.
+3. **Native/device release checks:** bubble visibility, notification action presentation, device revocation, and OS setting behavior still require a built Android device/emulator and iOS device/simulator. Android Gradle configuration currently stops because the installed NDK `27.1.12297006` is incomplete (`source.properties` is missing); no Android device is attached, and this Linux environment has no Xcode/iOS Simulator. An installed development build has not been exercised in this workspace.
 4. **Production readiness:** verify push credentials, migration application, deployed API reachability, App Links/Universal Links, app signing, privacy disclosures, secure-store behavior, and native E2E tests before release.
 
 The pasted Messenger/API specifications remain the broader product target. This implementation must not be described as a complete or production-ready Messenger client until the remaining gaps and native release tests are closed.

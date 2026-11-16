@@ -34,6 +34,7 @@ export function ConversationScreen({ conversation, compact = false, onBack, onCl
   const [messages, setMessages] = useState<readonly MessengerMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingOlder, setLoadingOlder] = useState(false);
+  const [olderError, setOlderError] = useState<string | null>(null);
   const [draft, setDraft] = useState(draftValue ?? "");
   const [error, setError] = useState<string | null>(null);
   const [failedDraft, setFailedDraft] = useState<{ readonly text: string; readonly idempotencyKey: string } | null>(null);
@@ -99,13 +100,14 @@ export function ConversationScreen({ conversation, compact = false, onBack, onCl
     if (!nextCursor || loadingOlderRef.current) return;
     loadingOlderRef.current = true;
     setLoadingOlder(true);
+    setOlderError(null);
     try {
       const page = await fetchEncryptedMessagePage(request, conversation.id, nextCursor);
       setMessages((current) => mergeMessages(current, page.data));
       nextCursorRef.current = page.nextCursor;
       setNextCursor(page.nextCursor);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Earlier messages could not be loaded.");
+      setOlderError(cause instanceof Error ? cause.message : "Earlier messages could not be loaded.");
     } finally {
       loadingOlderRef.current = false;
       setLoadingOlder(false);
@@ -215,7 +217,7 @@ export function ConversationScreen({ conversation, compact = false, onBack, onCl
           <Text style={[styles.subtitle, { color: colors.muted }]}>{conversation.kind === "group" || conversation.kind === "channel" ? "Encrypted group conversation" : "End-to-end encrypted"}</Text>
         </View>
         {compact && onOpenFull ? <Pressable accessibilityRole="button" accessibilityLabel="Open full conversation" onPress={onOpenFull} style={styles.headerAction}><ChatCircleDots size={21} color={colors.text} /></Pressable> : null}
-        {!compact && Platform.OS === "android" ? <Pressable accessibilityRole="button" accessibilityLabel="Open Android notification settings for this conversation" onPress={() => { void openAndroidConversationNotificationSettings(conversation.id).then((status) => { if (status !== "opened") Alert.alert("Conversation settings unavailable", status === "channel_not_created" ? "Android creates conversation notification settings after an eligible message notification has arrived." : "Android could not open notification settings for this conversation."); }); }} style={styles.headerAction}><GearSix size={19} color={colors.text} /></Pressable> : null}
+        {!compact && Platform.OS === "android" ? <Pressable accessibilityRole="button" accessibilityLabel="Open Android notification settings for this conversation" onPress={() => { void openAndroidConversationNotificationSettings(user?.id ?? "", conversation.id).then((status) => { if (status !== "opened") Alert.alert("Conversation settings unavailable", status === "channel_not_created" ? "Android creates conversation notification settings after an eligible message notification has arrived." : "Android could not open notification settings for this conversation."); }); }} style={styles.headerAction}><GearSix size={19} color={colors.text} /></Pressable> : null}
         {!compact && onToggleBubble ? <Pressable accessibilityRole="button" accessibilityLabel={isBubbleActive ? "Remove conversation from in-app floating chats" : "Keep conversation in in-app floating chats"} onPress={onToggleBubble} style={styles.headerAction}><ChatCircleDots size={21} color={isBubbleActive ? colors.brand : colors.text} weight={isBubbleActive ? "fill" : "regular"} /></Pressable> : null}
       </View>
 
@@ -228,6 +230,7 @@ export function ConversationScreen({ conversation, compact = false, onBack, onCl
           data={visibleMessages}
           keyExtractor={(message) => message.id}
           contentContainerStyle={styles.messages}
+          maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
           onEndReached={() => void loadOlder()}
           onEndReachedThreshold={0.35}
           ListFooterComponent={loadingOlder ? <View style={styles.olderLoading}><ActivityIndicator color={colors.brand} size="small" /><Text style={[styles.loadingText, { color: colors.muted }]}>Loading earlier messages…</Text></View> : undefined}
@@ -251,6 +254,7 @@ export function ConversationScreen({ conversation, compact = false, onBack, onCl
       )}
 
       {error && messages.length > 0 ? <View style={[styles.errorLine, { borderTopColor: colors.border }]}><Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>{failedDraft ? <Pressable accessibilityRole="button" disabled={sending} onPress={() => void send(true)}><Text style={[styles.retry, { color: colors.brand }]}>{sending ? "Retrying…" : "Retry"}</Text></Pressable> : null}</View> : null}
+      {olderError ? <View style={[styles.errorLine, { borderTopColor: colors.border }]}><Text accessibilityLiveRegion="polite" style={[styles.errorText, { color: colors.danger }]}>{olderError}</Text><Pressable accessibilityRole="button" accessibilityState={{ disabled: loadingOlder }} disabled={loadingOlder} onPress={() => void loadOlder()}><Text style={[styles.retry, { color: colors.brand }]}>{loadingOlder ? "Retrying…" : "Retry earlier messages"}</Text></Pressable></View> : null}
       {peerTyping ? <Text accessibilityLiveRegion="polite" style={[styles.typing, { color: colors.muted }]}>Typing…</Text> : null}
       <View style={[styles.composer, { borderTopColor: colors.border, backgroundColor: colors.surface, paddingBottom: compact ? 8 : Math.max(insets.bottom, 8) }]}>
         <Pressable accessibilityRole="button" accessibilityLabel="Attach an encrypted image" accessibilityState={{ disabled: sending || sendingAttachment, busy: sendingAttachment }} disabled={sending || sendingAttachment} onPress={() => void pickAndSendImage()} style={styles.attachmentButton}>{sendingAttachment ? <ActivityIndicator color={colors.brand} size="small" /> : <ImageSquare size={20} color={colors.muted} />}</Pressable>

@@ -65,12 +65,17 @@ class NanttyChatBubblesModule(private val reactContext: ReactApplicationContext)
   }
 
   @ReactMethod
-  fun openConversationNotificationSettings(conversationId: String, promise: Promise) {
+  fun openConversationNotificationSettings(accountId: String, conversationId: String, promise: Promise) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
       promise.resolve(Arguments.createMap().apply { putBoolean("opened", false); putString("status", "unsupported") })
       return
     }
-    val channelId = "nantty-conversation-" + java.util.UUID.nameUUIDFromBytes(conversationId.toByteArray()).toString()
+    if (accountId.isBlank() || conversationId.isBlank()) {
+      promise.resolve(Arguments.createMap().apply { putBoolean("opened", false); putString("status", "invalid_identity") })
+      return
+    }
+    val identity = "${accountId.length}:$accountId:${conversationId.length}:$conversationId"
+    val channelId = "nantty-conversation-" + java.util.UUID.nameUUIDFromBytes(identity.toByteArray(Charsets.UTF_8)).toString()
     val channelExists = reactContext.getSystemService(NotificationManager::class.java)?.getNotificationChannel(channelId) != null
     if (!channelExists) {
       promise.resolve(Arguments.createMap().apply { putBoolean("opened", false); putString("status", "channel_not_created") })
@@ -84,6 +89,31 @@ class NanttyChatBubblesModule(private val reactContext: ReactApplicationContext)
     promise.resolve(Arguments.createMap().apply {
       putBoolean("opened", opened)
       putString("status", if (opened) "opened" else "unavailable")
+    })
+  }
+
+  @ReactMethod
+  fun getConversationNotificationChannelStatus(accountId: String, conversationId: String, promise: Promise) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      promise.resolve(Arguments.createMap().apply { putString("status", "unsupported"); putBoolean("channelExists", false); putNull("canBubble"); putNull("importance") })
+      return
+    }
+    if (accountId.isBlank() || conversationId.isBlank()) {
+      promise.resolve(Arguments.createMap().apply { putString("status", "invalid_identity"); putBoolean("channelExists", false); putNull("canBubble"); putNull("importance") })
+      return
+    }
+    val identity = "${accountId.length}:$accountId:${conversationId.length}:$conversationId"
+    val channelId = "nantty-conversation-" + java.util.UUID.nameUUIDFromBytes(identity.toByteArray(Charsets.UTF_8)).toString()
+    val channel = reactContext.getSystemService(NotificationManager::class.java)?.getNotificationChannel(channelId)
+    promise.resolve(Arguments.createMap().apply {
+      putBoolean("channelExists", channel != null)
+      putNull("canBubble")
+      putNull("importance")
+      putString("status", if (channel == null) "channel_not_created" else "available")
+      if (channel != null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) putBoolean("canBubble", channel.canBubble())
+        putInt("importance", channel.importance)
+      }
     })
   }
 
