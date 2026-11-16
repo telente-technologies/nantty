@@ -74,10 +74,11 @@ export const messageSent: EventMapping = (event, data) => {
         data: {
           url: `/chats/${conversationId}`,
           conversationId,
+          recipientAccountId: recipient.text("userId"),
           messageId: data.text("messageId"),
           ...(showPreview && data.optionalText("senderName") ? { senderName: data.text("senderName") } : {}),
           ...(showPreview && data.optionalText("conversationKind") ? { conversationKind: data.text("conversationKind") } : {}),
-          tag: `nantty-chat-${conversationId}`,
+          tag: `nantty-chat-${recipient.text("userId").length}:${recipient.text("userId")}:${conversationId.length}:${conversationId}`,
           categoryId: "NANTTY_CHAT",
           threadIdentifier: conversationId,
           vibrate: String(recipient.bool("vibration", true)),

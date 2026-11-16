@@ -57,7 +57,7 @@ describe("FcmPushSender", () => {
       categoryId: "NANTTY_CHAT",
       threadId: "conversation-1",
       channelId: "nantty-chat-sound-still",
-      data: { conversationId: "conversation-1", bubbleAllowed: "true" },
+      data: { conversationId: "conversation-1", recipientAccountId: "account-1", bubbleAllowed: "true", tag: "nantty-chat-9:account-1:13:conversation-1" },
     });
 
     expect(result).toEqual({ acceptedCount: 1, failures: [] });
@@ -68,7 +68,9 @@ describe("FcmPushSender", () => {
       title: "Nantty",
       message: "New message",
       conversationId: "conversation-1",
+      recipientAccountId: "account-1",
       bubbleAllowed: "true",
+      tag: "nantty-chat-9:account-1:13:conversation-1",
       categoryId: "NANTTY_CHAT",
       threadIdentifier: "conversation-1",
       channelId: "nantty-chat-sound-still",

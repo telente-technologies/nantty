@@ -86,6 +86,8 @@ describe("developer organization routes", () => {
     const application = `${organization}/19a6e03c-d5ce-40c9-a9d2-8aa8657e5738`;
     for (const method of ["GET", "PATCH", "DELETE"]) expect(resolveUpstreamRouteForRequest(method, application)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET", "PATCH", "DELETE"], exactPathOnly: true });
     expect(resolveUpstreamRouteForRequest("GET", `${application}/members`)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("GET", `${application}/capabilities/me`)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("POST", `${application}/capabilities/me`)).toBeUndefined();
     expect(resolveUpstreamRouteForRequest("PUT", `${application}/members/6de1c79a-00fd-4bed-ae23-fbfb678c0a19/grants`)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["PUT"], exactPathOnly: true });
     expect(resolveUpstreamRouteForRequest("POST", `${application}/members/6de1c79a-00fd-4bed-ae23-fbfb678c0a19/grants`)).toBeUndefined();
     expect(resolveUpstreamRouteForRequest("POST", application)).toBeUndefined();

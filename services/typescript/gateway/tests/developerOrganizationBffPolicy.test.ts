@@ -20,6 +20,7 @@ describe("Developer portal organization BFF allowlist", () => {
       ["GET", [organizationId, "applications"]], ["POST", [organizationId, "applications"]],
       ["GET", [organizationId, "applications", resourceId]], ["PATCH", [organizationId, "applications", resourceId]],
       ["DELETE", [organizationId, "applications", resourceId]],
+      ["GET", [organizationId, "applications", resourceId, "capabilities", "me"]],
       ["GET", [organizationId, "applications", resourceId, "members"]],
       ["PUT", [organizationId, "applications", resourceId, "members", organizationId, "grants"]],
     ];
@@ -48,6 +49,8 @@ describe("Developer portal organization BFF allowlist", () => {
       ["POST", [organizationId, "access"], organizationBase], ["GET", [organizationId, "members", resourceId, "extra"], organizationBase],
       ["POST", [organizationId, "applications", resourceId], organizationBase], ["GET", [organizationId, "applications", "bad-id"], organizationBase],
       ["POST", [organizationId, "applications", resourceId, "members"], organizationBase],
+      ["POST", [organizationId, "applications", resourceId, "capabilities", "me"], organizationBase],
+      ["GET", [organizationId, "applications", resourceId, "capabilities", "other"], organizationBase],
       ["PUT", [organizationId, "applications", resourceId, "members", "invalid", "grants"], organizationBase],
       ["POST", ["not-a-uuid"], invitationBase], ["GET", [], "/api/v1/developer/credentials"],
     ];

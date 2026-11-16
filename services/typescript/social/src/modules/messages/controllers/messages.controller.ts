@@ -32,8 +32,8 @@ export interface MessagesHandlers {
 export function createMessagesController(route: RouteFactory, handlers: MessagesHandlers) {
   const messageOnly = { authentication: "required", params: messageParamsSchema } as const;
   return {
-    replyToStory: route({ authentication: "required", params: storyReplyParamsSchema, body: storyReplyBodySchema, successStatus: 201 }, ({ principal, params, body }) =>
-      handlers.replyToStory({ viewerId: principal.accountId, storyId: params.storyId, encryption: body.encryption })),
+    replyToStory: route({ authentication: "required", params: storyReplyParamsSchema, body: storyReplyBodySchema, successStatus: 201 }, ({ principal, params, body, idempotencyKey }) =>
+      handlers.replyToStory({ viewerId: principal.accountId, storyId: params.storyId, encryption: body.encryption, idempotencyKey })),
     send: route({ authentication: "required", params: conversationMessagesParamsSchema, body: sendMessageBodySchema, successStatus: 201 }, ({ principal, params, body, idempotencyKey }) =>
       handlers.sendMessage({
         senderId: principal.accountId, conversationId: params.conversationId, idempotencyKey, mentions: body.mentions,
