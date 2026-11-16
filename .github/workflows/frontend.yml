@@ -2,10 +2,10 @@ name: Frontend
 
 on:
   pull_request:
-    paths: ["apps/**", "packages/**", "pnpm-lock.yaml", "pnpm-workspace.yaml", "stylelint.config.mjs", ".github/workflows/frontend.yml"]
+    paths: ["apps/**", "packages/**", "pnpm-lock.yaml", "pnpm-workspace.yaml", "stylelint.config.mjs", "scripts/checkNoMocksInBuild.mjs", ".github/workflows/frontend.yml"]
   push:
     branches: [main]
-    paths: ["apps/**", "packages/**", "pnpm-lock.yaml"]
+    paths: ["apps/**", "packages/**", "pnpm-lock.yaml", "scripts/checkNoMocksInBuild.mjs"]
 
 permissions:
   contents: read
@@ -28,6 +28,8 @@ jobs:
       studio: ${{ steps.filter.outputs.studio }}
       admin: ${{ steps.filter.outputs.admin }}
       ads: ${{ steps.filter.outputs.ads }}
+      developer: ${{ steps.filter.outputs.developer }}
+      sandbox: ${{ steps.filter.outputs.sandbox }}
       mobile: ${{ steps.filter.outputs.mobile }}
     steps:
       - uses: actions/checkout@v7.0.1
@@ -40,12 +42,15 @@ jobs:
               - "pnpm-lock.yaml"
               - "pnpm-workspace.yaml"
               - "stylelint.config.mjs"
+              - "scripts/checkNoMocksInBuild.mjs"
             web: ["apps/web/**"]
             webapp: ["apps/webapp/**"]
             seller: ["apps/seller/**"]
             studio: ["apps/studio/**"]
             admin: ["apps/admin/**"]
             ads: ["apps/ads/**"]
+            developer: ["apps/developer/**"]
+            sandbox: ["apps/sandbox/**"]
             mobile: ["apps/mobile/**"]
 
   plan:
@@ -63,9 +68,11 @@ jobs:
           STUDIO: ${{ needs.changes.outputs.studio }}
           ADMIN: ${{ needs.changes.outputs.admin }}
           ADS: ${{ needs.changes.outputs.ads }}
+          DEVELOPER: ${{ needs.changes.outputs.developer }}
+          SANDBOX: ${{ needs.changes.outputs.sandbox }}
         run: |
           apps=()
-          for pair in web:$WEB webapp:$WEBAPP seller:$SELLER studio:$STUDIO admin:$ADMIN ads:$ADS; do
+          for pair in web:$WEB webapp:$WEBAPP seller:$SELLER studio:$STUDIO admin:$ADMIN ads:$ADS developer:$DEVELOPER sandbox:$SANDBOX; do
             name=${pair%%:*}; changed=${pair##*:}
             if [ "$SHARED" = "true" ] || [ "$changed" = "true" ]; then apps+=("\"$name\""); fi
           done
@@ -101,9 +108,27 @@ jobs:
       - name: Contract tests
         run: pnpm --filter "./apps/${{ matrix.app }}" run --if-present test:contracts
       - name: Next build
+        if: matrix.app != 'developer' && matrix.app != 'sandbox'
         run: pnpm --filter "./apps/${{ matrix.app }}" run build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+      - name: Build developer portal
+        if: matrix.app == 'developer'
+        run: pnpm --filter ./apps/developer run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          NEXT_PUBLIC_SITE_URL: https://developers.nantty.com
+          NEXT_PUBLIC_DOCS_SITE_URL: https://docs.nantty.com
+          NEXT_PUBLIC_SANDBOX_PORTAL_URL: https://sandbox.nantty.com
+          NEXT_PUBLIC_NANTTY_WEB_URL: https://nantty.com
+      - name: Build sandbox portal
+        if: matrix.app == 'sandbox'
+        run: pnpm --filter ./apps/sandbox run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          NEXT_PUBLIC_SITE_URL: https://sandbox.nantty.com
+          NEXT_PUBLIC_DEVELOPER_PORTAL_URL: https://developers.nantty.com
+          NEXT_PUBLIC_NANTTY_WEB_URL: https://nantty.com
       - name: No mock code in the production build
         run: node scripts/checkNoMocksInBuild.mjs "${{ matrix.app }}" --require-build
 
