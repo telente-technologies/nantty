@@ -49,6 +49,13 @@ describe("mobile seller product form", () => {
     expect(request.brand).toBeNull();
   });
 
+  it("parses comma-formatted prices accurately and rejects malformed numbers", () => {
+    const request = buildCatalogProductUpsertRequest({ form: { ...EMPTY_PRODUCT_FORM, name: "Loom", priceInMajorUnits: "1,250.50", stock: "2" }, images: [], brand: null, existing: null, defaultLocationId: "l1", skuSeed: "X" });
+    expect(request.variants[0]?.priceMinor).toBe(125_050);
+    expect(validateProductForm({ ...EMPTY_PRODUCT_FORM, name: "Loom", priceInMajorUnits: "1,250.50", stock: "2" }, [], true)).toBeNull();
+    expect(validateProductForm({ ...EMPTY_PRODUCT_FORM, name: "Loom", priceInMajorUnits: "12abc", stock: "2" }, [], true)).toMatch(/above zero/);
+  });
+
   it("validates like the catalog", () => {
     expect(validateProductForm({ ...EMPTY_PRODUCT_FORM, name: "P" }, [], true)).toMatch(/2 to 120/);
     expect(validateProductForm({ ...EMPTY_PRODUCT_FORM, name: "Pot", priceInMajorUnits: "5", stock: "" }, [], true)).toMatch(/stock/);

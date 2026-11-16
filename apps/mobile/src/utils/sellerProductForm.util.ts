@@ -1,12 +1,13 @@
 import type { ProductFormValues } from "@/components/seller/productFormFields";
 import type { Money } from "@/types/money.type";
 import type { CatalogProduct, CatalogProductImage, CatalogProductUpsertRequest, CatalogProductVariant, CatalogVariantUpsertRequest, ProductBrandRelationship } from "@/types/sellerCatalog.type";
+import { parseMajorAmountToMinorUnits } from "@/utils/amountInput.util";
 import { combinationKeyFor, createOptionGroupDraft, optionValueCombinations, projectExistingVariantsOntoOptions, usableOptionGroups, validateOptionGroups } from "@/utils/productOptions.util";
 
 export const MAXIMUM_PRODUCT_IMAGES = 10;
 
 export const EMPTY_PRODUCT_FORM: ProductFormValues = { name: "", description: "", priceInMajorUnits: "", stock: "", optionGroups: [] };
-export const convertMajorUnitTextToMinorUnits = (value: string) => Math.round(Number.parseFloat(value || "0") * 100);
+export const convertMajorUnitTextToMinorUnits = (value: string) => parseMajorAmountToMinorUnits(value) ?? 0;
 
 export interface ChosenBrand {
   readonly id: string;

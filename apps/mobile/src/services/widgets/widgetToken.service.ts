@@ -1,5 +1,5 @@
 import { widgetStorageKeys, widgetTokenRotateBeforeExpiryMs } from "@/config/widgets.config";
-import { api } from "@/services/apiClient.service";
+import { api } from "@/services/core/apiClient.service";
 
 import { readWidgetSecret, readWidgetSharedValue, writeWidgetSecret, writeWidgetSharedValue } from "./widgetNativeBridge.service";
 

@@ -4,7 +4,7 @@ import * as TaskManager from "expo-task-manager";
 import { AppState, Platform } from "react-native";
 
 import { widgetKinds, widgetStorageKeys, type WidgetKind } from "@/config/widgets.config";
-import { api } from "@/services/apiClient.service";
+import { api } from "@/services/core/apiClient.service";
 import { registerSignOutHook } from "@/store/auth.store";
 import { usersService } from "@/services/account/users.service";
 

@@ -68,24 +68,24 @@ func (sources FinanceSources) ReadFinanceIssues(ctx context.Context, now time.Ti
 		intents := Table(sources.Schemas.Payments, "payment_intents")
 		accounts := Table(sources.Schemas.Ledger, "ledger_accounts")
 
-		countQueries := []struct {
+		counts := []struct {
 			key   string
 			query string
 			args  []any
 		}{
 			{"stuck_escrows", `SELECT count(*) FROM ` + escrows + ` WHERE status IN ('held', 'partiallyRefunded') AND auto_release_at IS NULL`, nil},
 			{"open_disputes", `SELECT count(*) FROM ` + disputes + ` WHERE status IN ('awaiting_seller', 'under_review') AND created_at <= $1`, []any{now.Add(-48 * time.Hour)}},
-			{"aged_processing_payouts", `SELECT count(*) FROM ` + withdrawals + ` WHERE status = 'processing' AND created_at <= $1`, []any{now.Add(-time.Hour)}},
+			{"aged_processing_payouts", `SELECT count(*) FROM ` + withdrawals + ` WHERE status = 'processing' AND created_at <= $1`, []any{now.Add(-1 * time.Hour)}},
 			{"pending_review_payouts", `SELECT count(*) FROM ` + withdrawals + ` WHERE status = 'pending_review' AND created_at <= $1`, []any{now.Add(-24 * time.Hour)}},
 			{"failed_payments", `SELECT count(*) FROM ` + intents + ` WHERE status = 'failed' AND created_at >= $1`, []any{now.Add(-7 * 24 * time.Hour)}},
 			{"seller_debt_accounts", `SELECT count(*) FROM ` + accounts + ` WHERE owner_type = 'seller_debt' OR balance_minor < 0`, nil},
 		}
-		for _, countQuery := range countQueries {
-			count, err := scanCount(ctx, sources.Database, countQuery.query, countQuery.args...)
+		for _, item := range counts {
+			count, err := scanCount(ctx, sources.Database, item.query, item.args...)
 			if err != nil {
 				return err
 			}
-			result.QueueCounts[countQuery.key] = count
+			result.QueueCounts[item.key] = count
 		}
 
 		readers := []struct {

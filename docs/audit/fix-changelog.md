@@ -2,6 +2,46 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-11-16 — Backend conventions, gateway routing, live bug fixes, and Finance Admin surface
+
+**1. Backend file-length CI gate (`<= 300` lines/file):**
+- **Why:** `services/scripts/check-backend-file-lengths.sh` failed on 7 files exceeding 300 lines, blocking the CI `conventions` job.
+- **Edits:**
+  - `services/go/modules/creators/src/eventValidation.go` (extracted 9 event validation helpers from `app.go`).
+  - `services/go/modules/live/src/modules/sessions/controllers/sessionsMonetization.controller.go` (extracted monetization/product-pin handlers from `sessions.controller.go`).
+  - `services/go/modules/live/src/modules/sessions/controllers/spacesAuthorization.controller.go` (extracted space authorization helpers from `spacesParticipation.controller.go`).
+  - `services/go/modules/ads/adsReportsAndMedia.integration_test.go` (split report/analyst/media integration tests from `adsAudiencesReports.integration_test.go`).
+  - `services/go/modules/payments/payments.refundRetries_integration_test.go` (split refund retry/concurrency integration tests from `payments.webhookInboxAndRefunds_integration_test.go`).
+  - `services/python/intelligence/tests/modules/domain_events/{helpers,test_domain_event_privacy}.py` (split shared fakes and privacy/erasure tests from `test_domain_event_consumer.py`).
+  - `services/python/intelligence/tests/modules/recommendations/test_account_clip_and_search.py` (split account/clip/search tests from `test_recommendations_and_search.py`).
+
+**2. Gateway upstream routing and rate-limit policy:**
+- **Why:** Admin logistics shipments, channel invitations, group invitations, and new finance report routes were missing or duplicated in gateway routing/throttling.
+- **Edits:**
+  - `services/typescript/gateway/src/routes/upstream.routes.ts`: Added `/api/v1/admin/logistics/` (`commerce`), `/api/v1/admin/finance/` (`identity`), `/api/v1/channel-invitations` and `/api/v1/group-invitations` (`social`, `authentication: "required"`), and removed the duplicate `/api/v1/seller/nantty-users` entry.
+  - `services/typescript/gateway/src/services/routeRateLimitPolicy.service.ts`: Added `financeRead` (60/min) bucket for `/api/v1/admin/finance/*` and mapped invitation writes to `conversationWrite`.
+  - `services/typescript/gateway/tests/socialGraphRoutes.routes.test.ts`: Added unit assertions for invitation routes and `financeRead`.
+
+**3. Verified bug fixes, scheduled post hardening, and mobile service cleanup:**
+- **PAY-4 (`apps/mobile/src/utils/sellerProductForm.util.ts`):** Replaced `Number.parseFloat` with `parseMajorAmountToMinorUnits(value) ?? 0` so comma-formatted prices parse cleanly and malformed inputs (`"12abc"`) are rejected; added tests in `apps/mobile/src/utils/__tests__/sellerProductForm.util.test.ts`.
+- **TOK-06 (`apps/webapp/src/utils/embedSecurity.util.ts`, `apps/webapp/src/services/discovery.service.ts`):** Updated `readEmbedClientKey` to prefer `realIp` or the rightmost `x-forwarded-for` entry (mitigating client-spoofable XFF prefixes) and URL-encoded `videoId` in `fetchVideoById`; moved test to `apps/webapp/src/utils/__tests__/embedSecurity.util.test.ts` (and updated `apps/webapp/package.json` `test:units`).
+- **TOK-07 (`services/go/modules/live/src/`):** Added `ListFollowedUserIds` to `SocialRelations` (`interfaces/collaborators.interface.go`, `integrations/schemaSocialRelations.integration.go`, `integrations/inMemorySocialRelations.integration.go`) and updated `modules/widgets/queries/listFollowedLives/listFollowedLives.handler.go` to filter `HostIDIn(followedIds...)` directly so popular global streams no longer crowd out followed hosts.
+- **Scheduled posts (`services/typescript/social/`):**
+  - `src/jobs/publishScheduledPosts.job.ts`: Isolated each due post inside its own transaction with per-post error recovery (preventing one failure from rolling back the entire 25-post batch) and added publication-time `moderationVisibility` checks (`hidden`/`removed` cancels cleanly without publishing).
+  - `src/modules/posts/{controllers/scheduledPosts.controller.ts,routes/scheduledPosts.routes.ts,validators/posts.validator.ts}`: Added `PATCH /api/v1/posts/:postId/schedule/content` (`editContent`) preserving existing mentions when omitted, rejecting empty payloads, and enforcing author ownership plus profile-scoped `canSchedulePosts`.
+  - `tests/posts/scheduledPosts.test.ts`: Added tests for per-post transaction isolation, moderation cancellation, and `editContent`.
+- **Mobile service tree (`apps/mobile/src/services/`):** Migrated remaining imports/tests (`core/realtime.service.ts`, `core/__tests__/realtimeSocketToken.test.ts`, `widgets/*.ts`, `screens/spaces/{spaces.screen,useSpacesScreenQueries.hook}.ts`, `__tests__/{stories,stores}.service.test.ts`, `money/__tests__/wallets.service.test.ts`) onto canonical `<domain>/<name>.service` files and removed 89 stale duplicated root `*.service.ts` files.
+
+**4. Finance Admin profile (`docs/finance-admin-profile-plan.md`):**
+- **Why:** `finance:reports` existed in the permission catalog and `Finance Admin` template, but had no backend handlers or `/finance/*` console pages.
+- **Edits:**
+  - `services/go/modules/admin/src/configs/admin.config.go` & `app.go`: Added `Ledger` schema configuration and mounted `modules/financeReports`.
+  - `services/go/modules/admin/src/modules/financeReports/**`: Added read-only cross-schema reporting queries strictly over `nantty_readers`-granted columns (`overview`, `money-by-aspect`, `escrow-held`, `stuck-escrows`, `issues`, `lookup`, `reports`) plus step-up/reason-gated CSV export (`POST /api/v1/admin/finance/reports/export`) with formula neutralization and `finance.report.exported` audit logging; added unit tests in `tests/financeReports_test.go`.
+  - `apps/admin/src/`: Added `financeRoutes` (`config/apiRoutes.config.ts`), `"Finance"` navigation group (`config/navigation.config.ts`), `types/finance.type.ts`, `services/financeApi.service.ts`, `/finance/*` App Router pages & components (`components/finance/*`, `app/(console)/finance/**`), permission-gated cross-links, mocks (`mocks/handlers/money/finance.mock.ts`), and contract/access tests (`contracts/{adminAccessRules,moneyContracts}.test.ts`).
+
+**Verified in sandbox:** `check-backend-file-lengths.sh` (all <= 300 lines), `check-no-raw-sql-in-typescript.sh`, `checkEventContracts.mjs` (0 errors across 270 messages / 362 schemas), `checkEventContracts.test.mjs` (3/3), `python3 -m py_compile` on edited Python test files, zero broken relative/`@/` imports across all 6 frontend apps, and static `apps/admin` route/navigation alignment.
+**Not run in sandbox (run in CI):** `go test ./...`, Vitest suites (`gateway`, `social`, `mobile`), and `apps/admin` / `apps/webapp` `tsx --test` + `tsc` + `eslint` (toolchain binaries and `node_modules` are absent in sandbox).
+
 ## 2026-10-27 — Audit record reconciliation and regression re-check
 
 **Audit:** Reconciled the issue index and detailed findings in `frontend-backend-audit.md` with current code and focused regression tests.

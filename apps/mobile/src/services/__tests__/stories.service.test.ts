@@ -1,10 +1,10 @@
-jest.mock("../apiClient.service", () => ({
+jest.mock("../core/apiClient.service", () => ({
   api: { getList: jest.fn(), get: jest.fn(), post: jest.fn() },
 }));
 jest.mock("../chatCrypto/chatCrypto.service", () => ({ chatCryptoService: {} }));
 
-import { api } from "../apiClient.service";
-import { storiesService } from "../stories.service";
+import { api } from "../core/apiClient.service";
+import { storiesService } from "../clips/stories.service";
 
 const mockedApi = api as jest.Mocked<typeof api>;
 

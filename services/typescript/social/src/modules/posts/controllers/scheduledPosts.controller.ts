@@ -2,6 +2,7 @@ import { forbidden, notFound, unprocessable } from "../../../errors/social.error
 import { Prisma } from "../../../generated/prisma/client.js";
 import type { HandlerContext } from "../../../types/handlerContext.type.js";
 import type { RouteFactory } from "../../../utils/route.util.js";
+import type { MediaReferenceInput } from "../commands/createPost/createPost.command.js";
 import type { MentionEntity } from "../../mentions/models/mention.model.js";
 import { keepMentionsWithinText, prepareMentionsForWrite } from "../../mentions/services/mentionWrite.service.js";
 import { prepareAudienceSettingsForPublishing } from "../services/postAudienceRules.service.js";
@@ -89,16 +90,23 @@ export function createScheduledPostsController(route: RouteFactory, context: Han
       }
       const existing = await context.database.client.post.findFirst({
         where: { id: params.postId, authorId: principal.accountId, deletedAt: null, kind: "post", publicationState: { in: ["scheduled", "failed"] } },
-        include: { media: { orderBy: { position: "asc" } } },
       });
       if (existing === null) throw notFound("SCHEDULED_POST_NOT_FOUND", "Scheduled post not found.");
       if (!(await context.premium.canSchedulePosts(principal.accountId, existing.authorProfileId ?? undefined))) {
         throw forbidden("PAID_SCHEDULING_REQUIRED", "An active Blue or Gold subscription is required to edit scheduled posts.");
       }
       const nextText = body.text ?? existing.text;
-      const resolvedMedia = body.mediaIds === undefined ? existing.media : await resolveOwnedPostMedia(context, principal.accountId, body.mediaIds);
-      assertMediaFitsPostKind("post", nextText, resolvedMedia.map((item) => ({
-        id: "id" in item ? item.id : item.mediaId,
+      const existingMedia = body.mediaIds === undefined
+        ? await context.database.client.postMedia.findMany({ where: { postId: existing.id }, orderBy: { position: "asc" } })
+        : [];
+      const resolvedMedia: MediaReferenceInput[] = body.mediaIds === undefined
+        ? []
+        : await resolveOwnedPostMedia(context, principal.accountId, body.mediaIds);
+      const mediaForValidation = body.mediaIds === undefined
+        ? existingMedia.map((item) => ({ id: item.mediaId, type: item.type, durationSeconds: item.durationSeconds ?? undefined, status: item.status }))
+        : resolvedMedia.map((item) => ({ id: item.id, type: item.type, durationSeconds: item.durationSeconds, status: item.url == null ? "processing" as const : "ready" as const }));
+      assertMediaFitsPostKind("post", nextText, mediaForValidation.map((item) => ({
+        id: item.id,
         type: item.type,
         status: item.status === "failed" ? "failed" : item.status === "ready" ? "ready" : "processing",
       })));
@@ -119,11 +127,10 @@ export function createScheduledPostsController(route: RouteFactory, context: Han
         if (body.mediaIds !== undefined) {
           await transaction.postMedia.deleteMany({ where: { postId: existing.id } });
           for (const [position, item] of resolvedMedia.entries()) {
-            const mediaId = "id" in item ? item.id : item.mediaId;
             await transaction.postMedia.create({
               data: {
                 postId: existing.id,
-                mediaId,
+                mediaId: item.id,
                 position,
                 type: item.type,
                 url: item.url ?? null,

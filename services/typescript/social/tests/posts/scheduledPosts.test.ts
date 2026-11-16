@@ -160,9 +160,12 @@ describe("scheduled post creation and publication", () => {
   it("updates scheduled post text and audience when entitled and preserves existing mentions", async () => {
     const store = createStore();
     store.context.premium.canSchedulePosts = async () => true;
-    const mention = { start: 0, length: 5, userId: authorId };
+    const mention = { start: 0, length: 5, userId: authorId, username: "alex" };
     const scheduled = { ...buildPostRow({ id: "0192f0a0-0000-7000-8000-0000000000f8", authorId: viewerId, text: "@alex Before", mentions: [mention], publicationState: "scheduled", scheduledAt: new Date("2026-10-10T13:00:00Z") }) } as Row;
     store.posts.push(scheduled);
+    store.context.directory.findUserSummaries = async (ids) => new Map(ids.map((id) => [id, { id, name: "Alex", username: "alex", avatarUrl: null, verified: false, isCreator: false }]));
+    store.context.directory.findMentionTargetStatuses = async (ids) => new Map(ids.map((id) => [id, { username: "alex", status: "active" as const }]));
+    store.context.directory.findMentionPrivacy = async () => new Map();
     const route = ((_definition: unknown, handler: unknown) => handler) as unknown as RouteFactory;
     const controller = createScheduledPostsController(route, store.context);
 

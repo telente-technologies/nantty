@@ -183,3 +183,24 @@ func (relations SchemaSocialRelations) FollowedAmong(ctx context.Context, follow
 	}
 	return followed, rows.Err()
 }
+
+func (relations SchemaSocialRelations) ListFollowedUserIds(ctx context.Context, followerId uuid.UUID) ([]uuid.UUID, error) {
+	query := `SELECT "followeeId" FROM "` + relations.SocialSchema + `"."follows" WHERE "followerId" = $1 AND "state" = 'accepted' LIMIT 2000`
+	rows, err := relations.Database.QueryContext(ctx, query, followerId.String())
+	if err != nil {
+		if relations.tolerate(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	defer rows.Close()
+	var followed []uuid.UUID
+	for rows.Next() {
+		var followeeId uuid.UUID
+		if err := rows.Scan(&followeeId); err != nil {
+			return nil, err
+		}
+		followed = append(followed, followeeId)
+	}
+	return followed, rows.Err()
+}

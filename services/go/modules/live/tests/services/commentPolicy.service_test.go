@@ -159,6 +159,9 @@ func (mentionRelations) ListLiveAlertRecipients(context.Context, uuid.UUID, int)
 func (mentionRelations) FollowedAmong(context.Context, uuid.UUID, []uuid.UUID) (map[uuid.UUID]bool, error) {
 	return map[uuid.UUID]bool{}, nil
 }
+func (mentionRelations) ListFollowedUserIds(context.Context, uuid.UUID) ([]uuid.UUID, error) {
+	return nil, nil
+}
 func (mentionRelations) PrivateAccountsAmong(context.Context, []uuid.UUID) (map[uuid.UUID]bool, error) {
 	return map[uuid.UUID]bool{}, nil
 }

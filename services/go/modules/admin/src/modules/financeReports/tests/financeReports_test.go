@@ -20,10 +20,13 @@ func TestFinanceHelpers(t *testing.T) {
 	if got := services.NormalizeCurrency("invalid"); got != "" {
 		t.Fatalf("expected empty currency, got %q", got)
 	}
+	if got := services.NormalizeCurrency("N$G"); got != "" {
+		t.Fatalf("expected malformed currency to be rejected, got %q", got)
+	}
 	if got := exportfinancereport.NeutralizeCsvCell("=SUM(A1:A2)"); got != "'=SUM(A1:A2)" {
 		t.Fatalf("expected formula prefix, got %q", got)
 	}
-	if got := exportfinancereport.NeutralizeCsvCell("  =SUM(A1:A2)"); got != "'  =SUM(A1:A2)" {
+	if got := exportfinancereport.NeutralizeCsvCell(" \t=HYPERLINK(\"https://example.invalid\")"); got != "' \t=HYPERLINK(\"https://example.invalid\")" {
 		t.Fatalf("expected whitespace-prefixed formula to be neutralized, got %q", got)
 	}
 	if got := exportfinancereport.NeutralizeCsvCell("NGN"); got != "NGN" {

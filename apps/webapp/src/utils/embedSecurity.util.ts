@@ -86,6 +86,8 @@ export class EmbedResponseCache {
 }
 
 export function readEmbedClientKey(forwardedFor: string | null, realIp: string | null): string {
-  const first = (forwardedFor ?? "").split(",")[0]?.trim();
-  return first !== undefined && first !== "" ? first : (realIp ?? "unknown");
+  const real = realIp?.trim();
+  if (real !== undefined && real !== "") return real;
+  const entries = (forwardedFor ?? "").split(",").map((entry) => entry.trim()).filter((entry) => entry !== "");
+  return entries.at(-1) ?? "unknown";
 }

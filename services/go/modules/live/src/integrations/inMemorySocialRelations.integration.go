@@ -137,6 +137,18 @@ func (relations *InMemorySocialRelations) FollowedAmong(_ context.Context, follo
 	return followed, nil
 }
 
+func (relations *InMemorySocialRelations) ListFollowedUserIds(_ context.Context, followerId uuid.UUID) ([]uuid.UUID, error) {
+	relations.mutex.Lock()
+	defer relations.mutex.Unlock()
+	var followed []uuid.UUID
+	for pair := range relations.follows {
+		if pair[0] == followerId {
+			followed = append(followed, pair[1])
+		}
+	}
+	return followed, nil
+}
+
 func (relations *InMemorySocialRelations) MakeAccountPrivate(userId uuid.UUID, isPrivate bool) {
 	relations.mutex.Lock()
 	defer relations.mutex.Unlock()

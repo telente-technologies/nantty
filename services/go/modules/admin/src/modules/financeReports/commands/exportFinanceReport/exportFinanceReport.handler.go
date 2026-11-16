@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"nantty/modules/admin/src/container"
 	adminerrors "nantty/modules/admin/src/errors"
@@ -28,16 +29,18 @@ type Handler struct {
 }
 
 func NeutralizeCsvCell(cell string) string {
-	trimmed := strings.TrimLeftFunc(cell, unicode.IsSpace)
-	if trimmed != "" && strings.ContainsRune("=+-@", []rune(trimmed)[0]) {
+	first := strings.TrimLeftFunc(cell, unicode.IsSpace)
+	if first != "" && strings.ContainsRune("=+-@", []rune(first)[0]) {
 		return "'" + cell
 	}
 	return cell
 }
 
 func (handler Handler) Execute(ctx context.Context, actor staffauth.Staff, req models.ExportRequest) (string, []byte, error) {
-	if len(strings.TrimSpace(req.Reason)) < 5 {
-		return "", nil, adminerrors.ValidationFailedFor("reason", "must be at least 5 characters")
+	reason := strings.TrimSpace(req.Reason)
+	reasonLength := utf8.RuneCountInString(reason)
+	if reasonLength < 5 || reasonLength > 500 {
+		return "", nil, adminerrors.ValidationFailedFor("reason", "must be between 5 and 500 characters")
 	}
 	reportType := strings.TrimSpace(req.ReportType)
 	if reportType == "" {
@@ -118,7 +121,7 @@ func (handler Handler) Execute(ctx context.Context, actor staffauth.Staff, req m
 	if err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		return repositories.RecordAuditEventInTransaction(ctx, tx, identityports.AuditEvent{
 			ActorId: actor.Id, ActorName: actor.Name, ActorRole: actor.Role, Action: "finance.report.exported",
-			SubjectType: "finance_report", SubjectId: reportType, Reason: strings.TrimSpace(req.Reason), StepUpVerified: actor.SteppedUp,
+			SubjectType: "finance_report", SubjectId: reportType, Reason: reason, StepUpVerified: actor.SteppedUp,
 			After: jsonencoding.MustMarshalJson(map[string]any{"reportType": reportType, "range": rangeName, "currency": req.Currency, "rows": max(len(rows)-1, 0)}),
 		})
 	}); err != nil {
@@ -133,12 +136,12 @@ func (handler Handler) Execute(ctx context.Context, actor staffauth.Staff, req m
 			safe[index] = NeutralizeCsvCell(cell)
 		}
 		if err := writer.Write(safe); err != nil {
-			return "", nil, fmt.Errorf("write finance CSV row: %w", err)
+			return "", nil, err
 		}
 	}
 	writer.Flush()
 	if err := writer.Error(); err != nil {
-		return "", nil, fmt.Errorf("flush finance CSV: %w", err)
+		return "", nil, err
 	}
 	return fmt.Sprintf("finance-%s-%s.csv", reportType, rangeName), buffer.Bytes(), nil
 }

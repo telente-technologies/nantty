@@ -260,4 +260,3 @@ export function registerSandboxWebhookControlRoutes(app: FastifyInstance, option
     }
   });
 }
-

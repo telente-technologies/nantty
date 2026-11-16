@@ -108,4 +108,3 @@ export async function saveBubblePosition(accountId: string, conversationId: stri
   positionIndexWrite = write.catch(() => undefined);
   await write;
 }
-

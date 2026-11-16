@@ -32,21 +32,76 @@ function scheduledMentions(value: unknown): MentionEntity[] {
     ("userId" in entity || ("type" in entity && entity.type === "all")));
 }
 
+function sameScheduledSnapshot(left: PostRow, right: PostRow): boolean {
+  const fields = (post: PostRow) => ({
+    authorId: post.authorId,
+    authorProfileId: post.authorProfileId,
+    authorProfileKind: post.authorProfileKind,
+    kind: post.kind,
+    text: post.text,
+    audience: post.audience,
+    visibility: post.visibility,
+    isAiGenerated: post.isAiGenerated,
+    soundId: post.soundId,
+    resharedFromId: post.resharedFromId,
+    replyToCommentId: post.replyToCommentId,
+    replyToClipId: post.replyToClipId,
+    replyToCommenterId: post.replyToCommenterId,
+    stickerLayout: post.stickerLayout,
+    mentions: post.mentions,
+    replyPolicy: post.replyPolicy,
+    sensitiveLabels: post.sensitiveLabels,
+    authorSensitiveLabels: post.authorSensitiveLabels,
+    moderationSensitiveLabels: post.moderationSensitiveLabels,
+    advisorySensitiveLabels: post.advisorySensitiveLabels,
+    sensitiveLabelsReviewed: post.sensitiveLabelsReviewed,
+    moderationVisibility: post.moderationVisibility,
+    topics: post.topics,
+    productIds: post.productIds,
+    clipEdit: post.clipEdit,
+    location: post.location,
+    expiresAt: post.expiresAt,
+    isQuote: post.isQuote,
+    scheduledAt: post.scheduledAt,
+    scheduledTaggedUserIds: post.scheduledTaggedUserIds,
+    media: post.media,
+  });
+  return JSON.stringify(fields(left)) === JSON.stringify(fields(right));
+}
+
 async function publishScheduledPostInTransaction(context: HandlerContext, post: PostRow, now: Date): Promise<CandidateOutcome> {
+	const readyToPublish = post.moderationVisibility !== "hidden" && post.moderationVisibility !== "removed" && post.media.every((media) => media.status === "ready");
+	const authorStatus = readyToPublish ? (await context.directory.findMentionTargetStatuses([post.authorId])).get(post.authorId)?.status : undefined;
+	const profileUnavailable = readyToPublish && post.authorProfileId !== null && await context.directory.findOwnedPostableProfile(post.authorId, post.authorProfileId, "publish") === null;
+	const actor = readyToPublish && authorStatus === "active" && !profileUnavailable ? await resolveEventActor(context.directory, post.authorId) : null;
+	const mentionResult = actor === null ? { entities: [], userIdsToNotify: [], mentionsAll: false } : await prepareMentionsForWrite(context, { surface: "post", authorId: post.authorId, text: post.text, entities: scheduledMentions(post.mentions) });
+	const taggedUserIds = readyToPublish && authorStatus === "active" && !profileUnavailable ? await selectTaggableUserIds(context, post.authorId, scheduledTags(post.scheduledTaggedUserIds)) : [];
+
   return context.database.transaction(async (transaction) => {
     const dueWhere = { id: post.id, publicationState: "scheduled" as const, scheduledAt: { lte: now }, deletedAt: null };
-    if (post.moderationVisibility === "hidden" || post.moderationVisibility === "removed") {
+    const current = await transaction.post.findFirst({ where: dueWhere, include: { media: { orderBy: { position: "asc" } } } });
+    if (current === null || !sameScheduledSnapshot(post, current)) return "skipped";
+
+    if (current.moderationVisibility === "hidden" || current.moderationVisibility === "removed") {
       const cancelled = await transaction.post.updateMany({ where: dueWhere, data: { publicationState: "cancelled", scheduledAt: null, scheduledTaggedUserIds: [] } });
       return cancelled.count === 1 ? "failed" : "skipped";
     }
-    if (post.media.some((media) => media.status === "failed")) {
+    if (current.media.some((media) => media.status === "failed")) {
       const result = await transaction.post.updateMany({ where: dueWhere, data: { publicationState: "failed", publicationFailureReason: "media_failed" } });
       return result.count === 1 ? "failed" : "skipped";
     }
-    if (post.media.some((media) => media.status !== "ready")) {
-      const processingExpired = post.scheduledAt !== null && now.getTime() - post.scheduledAt.getTime() >= maximumMediaProcessingDelayMs;
+    if (current.media.some((media) => media.status !== "ready")) {
+      const processingExpired = current.scheduledAt !== null && now.getTime() - current.scheduledAt.getTime() >= maximumMediaProcessingDelayMs;
       if (!processingExpired) return "waitingForMedia";
       const result = await transaction.post.updateMany({ where: dueWhere, data: { publicationState: "failed", publicationFailureReason: "media_processing_timeout" } });
+      return result.count === 1 ? "failed" : "skipped";
+    }
+
+    if (authorStatus !== "active" || profileUnavailable || actor === null) {
+      const result = await transaction.post.updateMany({
+        where: dueWhere,
+        data: { publicationState: "failed", publicationFailureReason: profileUnavailable ? "profile_unavailable" : "author_unavailable" },
+      });
       return result.count === 1 ? "failed" : "skipped";
     }
 
@@ -55,20 +110,6 @@ async function publishScheduledPostInTransaction(context: HandlerContext, post: 
       data: { publicationState: "published", scheduledAt: null, scheduledTaggedUserIds: [], publicationFailureReason: null, createdAt: now },
     });
     if (claimed.count !== 1) return "skipped";
-
-    const authorStatus = (await context.directory.findMentionTargetStatuses([post.authorId])).get(post.authorId)?.status;
-    const profileUnavailable = post.authorProfileId !== null && await context.directory.findOwnedPostableProfile(post.authorId, post.authorProfileId, "publish") === null;
-    if (authorStatus !== "active" || profileUnavailable) {
-      await transaction.post.updateMany({
-        where: { id: post.id, publicationState: "published", createdAt: now },
-        data: { publicationState: "failed", scheduledAt: post.scheduledAt, publicationFailureReason: profileUnavailable ? "profile_unavailable" : "author_unavailable" },
-      });
-      return "failed";
-    }
-
-    const actor = await resolveEventActor(context.directory, post.authorId);
-    const mentionResult = await prepareMentionsForWrite(context, { surface: "post", authorId: post.authorId, text: post.text, entities: scheduledMentions(post.mentions) });
-    const taggedUserIds = await selectTaggableUserIds(context, post.authorId, scheduledTags(post.scheduledTaggedUserIds));
     const events: DomainEventInput[] = [{
       eventType: socialEventTypes.postCreated,
       subject: post.id,

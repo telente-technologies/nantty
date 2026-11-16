@@ -21,17 +21,26 @@ type Handler struct {
 
 func (handler Handler) Execute(ctx context.Context, query Query) (dtos.LiveNowWidgetPayload, error) {
 	payload := dtos.LiveNowWidgetPayload{Lives: []dtos.LiveNowWidgetItem{}, GeneratedAt: handler.Container.Now().UTC().Format(time.RFC3339)}
+	followedIds, err := handler.Container.Relations.ListFollowedUserIds(ctx, query.ViewerId)
+	if err != nil || len(followedIds) == 0 {
+		return payload, err
+	}
+	candidateLimit := max(query.Limit*4, 50)
+	if candidateLimit > liveCandidatesScanned {
+		candidateLimit = liveCandidatesScanned
+	}
 	rows, err := handler.Container.Client.LiveSession.Query().
-		Where(livesession.StateEQ(livesession.StateLive), livesession.HostIDNEQ(query.ViewerId), livesession.ModerationVisibilityIn("visible", "restricted")).
-		Order(ent.Desc(livesession.FieldViewers), ent.Desc(livesession.FieldCreatedAt)).Limit(liveCandidatesScanned).All(ctx)
+		Where(
+			livesession.StateEQ(livesession.StateLive),
+			livesession.HostIDNEQ(query.ViewerId),
+			livesession.HostIDIn(followedIds...),
+			livesession.ModerationVisibilityIn("visible", "restricted"),
+		).
+		Order(ent.Desc(livesession.FieldViewers), ent.Desc(livesession.FieldCreatedAt)).Limit(candidateLimit).All(ctx)
 	if err != nil || len(rows) == 0 {
 		return payload, err
 	}
 	hosts := uniqueHosts(rows)
-	followed, err := handler.Container.Relations.FollowedAmong(ctx, query.ViewerId, hosts)
-	if err != nil {
-		return payload, err
-	}
 	blocked, err := handler.Container.Relations.BlockedEitherWay(ctx, query.ViewerId, hosts)
 	if err != nil {
 		return payload, err
@@ -41,7 +50,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (dtos.LiveNowWi
 		if len(visible) == query.Limit {
 			break
 		}
-		if !followed[row.HostID] || blocked[row.HostID] || !handler.viewerMayWatch(ctx, query.ViewerId, row) {
+		if blocked[row.HostID] || !handler.viewerMayWatch(ctx, query.ViewerId, row) {
 			continue
 		}
 		visible = append(visible, row)

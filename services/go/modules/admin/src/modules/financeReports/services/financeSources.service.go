@@ -38,10 +38,15 @@ func ClampLimit(raw int, fallback int) int {
 
 func NormalizeCurrency(raw string) string {
 	trimmed := strings.ToUpper(strings.TrimSpace(raw))
-	if len(trimmed) == 3 {
-		return trimmed
+	if len(trimmed) != 3 {
+		return ""
 	}
-	return ""
+	for _, character := range trimmed {
+		if character < 'A' || character > 'Z' {
+			return ""
+		}
+	}
+	return trimmed
 }
 
 func (sources FinanceSources) bounded(ctx context.Context, work func(ctx context.Context) error) error {
@@ -55,7 +60,7 @@ func (sources FinanceSources) ReadPaymentsOverview(ctx context.Context, window m
 	intents := Table(sources.Schemas.Payments, "payment_intents")
 	return sources.bounded(ctx, func(ctx context.Context) error {
 		gmv, err := readMoneyRows(ctx, sources.Database,
-			`SELECT p.currency, coalesce(sum(p.amount_minor), 0) FROM `+payables+` p JOIN `+intents+` i ON i.subject_id = p.checkout_id AND i.purpose = 'order_checkout' AND i.status = 'succeeded' WHERE i.paid_at >= $1 AND ($2 = '' OR p.currency = $2) GROUP BY p.currency`,
+			`SELECT p.currency, coalesce(sum(p.amount_minor), 0) FROM `+payables+` p WHERE EXISTS (SELECT 1 FROM `+intents+` i WHERE i.subject_id = p.checkout_id AND i.purpose = 'order_checkout' AND i.status = 'succeeded' AND i.paid_at >= $1) AND ($2 = '' OR p.currency = $2) GROUP BY p.currency`,
 			window.Since, currency)
 		if err != nil {
 			return err

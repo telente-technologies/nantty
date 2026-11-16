@@ -61,6 +61,9 @@ func (spaceListRelations) MentionPrivacyOf(context.Context, []uuid.UUID) (map[uu
 func (spaceListRelations) ListLiveAlertRecipients(context.Context, uuid.UUID, int) ([]uuid.UUID, bool, error) {
 	return nil, false, nil
 }
+func (spaceListRelations) ListFollowedUserIds(context.Context, uuid.UUID) ([]uuid.UUID, error) {
+	return nil, nil
+}
 func (relations spaceListRelations) FollowedAmong(_ context.Context, _ uuid.UUID, candidates []uuid.UUID) (map[uuid.UUID]bool, error) {
 	return selectSpaceRelation(candidates, relations.followed), nil
 }

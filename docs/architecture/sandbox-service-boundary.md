@@ -1,7 +1,7 @@
 # ADR: Isolated Sandbox service boundary
 
-**Status:** Accepted; implementation in progress  
-**Date:** 2026-11-14  
+**Status:** Accepted; implementation in progress
+**Date:** 2026-11-14
 **Deciders:** Nantty engineering
 
 ## Context

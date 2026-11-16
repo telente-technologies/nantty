@@ -12,4 +12,3 @@ export function hashSandboxCredential(token: string): string {
 export function isSandboxCredentialFormat(token: string): boolean {
   return /^ntsb_test_[A-Za-z0-9_-]{40,50}$/.test(token);
 }
-

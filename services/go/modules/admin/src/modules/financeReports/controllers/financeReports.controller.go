@@ -106,8 +106,8 @@ func (controller FinanceReportsController) Export(writer http.ResponseWriter, re
 		httprequests.RespondWithError(writer, request, controller.Container.Logger, err)
 		return
 	}
-	actor, ok := staffauth.StaffFromContext(request.Context())
-	if !ok || !actor.SteppedUp {
+	actor, found := staffauth.StaffFromContext(request.Context())
+	if !found || !actor.SteppedUp {
 		httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.ErrForbidden)
 		return
 	}
