@@ -114,7 +114,7 @@ export function registerPeopleBlackApplicationMockHandlers(): void {
     record.privateCheckoutEnabled = true;
     record.privateCheckoutExpiresAt = isoMinutesFromNow(14 * dayMinutes);
     // Verification unlocks private checkout & reserves the handle, but badge remains hidden until paid USD subscription settles.
-    asMutablePlatformUser(findPlatformUserForPeopleOrFail(record.userId)).verification = { color: "BLACK", tier: "OFFICIAL", status: "EXPIRED", badgeVisible: false };
+    asMutablePlatformUser(findPlatformUserForPeopleOrFail(record.userId)).verification = { color: "BLACK", tier: "OFFICIAL", status: "PENDING", badgeVisible: false };
     reserveHandle(request, record);
     audit(request, record, "approved", reason, before, { status: record.status, makers: [record.firstApproval.name, principal.name], handleReserved: true, privateCheckoutEnabled: true, reverificationDueAt: record.reverificationDueAt });
     return respondWithJson(200, present(record));

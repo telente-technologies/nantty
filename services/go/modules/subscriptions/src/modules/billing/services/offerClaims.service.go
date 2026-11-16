@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"nantty/modules/ledger/src/databases"
+	"nantty/modules/subscriptions/src/constants"
 	"nantty/modules/subscriptions/src/generated/ent"
 	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferclaim"
 	"nantty/modules/subscriptions/src/generated/ent/subscriptionofferlink"

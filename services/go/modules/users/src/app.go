@@ -196,8 +196,6 @@ func createDomainEventPublisher(ctx context.Context, settings configs.UsersSetti
 	})
 }
 
-func (module *Module) Container() *container.Container { return module.container }
-
 func attachIdentityVerificationClients(usersContainer *container.Container) {
 	settings := usersContainer.Settings.Verification
 	if settings.SmileIdConfigured() {

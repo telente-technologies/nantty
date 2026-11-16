@@ -23,6 +23,7 @@ var (
 	ErrBlackCheckoutNotAuthorized = httpserver.NewApiError(http.StatusForbidden, "BLACK_CHECKOUT_NOT_AUTHORIZED", "Private Black checkout is not currently authorized for this organization.")
 	ErrBlackCheckoutExpired       = httpserver.NewApiError(http.StatusForbidden, "BLACK_CHECKOUT_EXPIRED", "This private checkout authorization has expired. Request a new authorization from verification support.")
 	ErrBlackJurisdictionMissing   = httpserver.NewApiError(http.StatusUnprocessableEntity, "BLACK_JURISDICTION_REQUIRED", "Verified legal jurisdiction is required before private Black pricing can be determined.")
+	ErrBlackPriceUnavailable      = httpserver.NewApiError(http.StatusServiceUnavailable, "BLACK_PRICE_UNAVAILABLE", "Government subscription pricing is temporarily unavailable. Please try again later.")
 	ErrBlackDiscountsDisabled     = httpserver.NewApiError(http.StatusUnprocessableEntity, "BLACK_DISCOUNTS_DISABLED", "Discounts are disabled for Black Government subscriptions.")
 	ErrUsdRecurringUnsupported    = httpserver.NewApiError(http.StatusUnprocessableEntity, "USD_RECURRING_UNSUPPORTED", "Recurring USD card billing is not enabled on the payment provider.")
 	ErrBlackTermsRequired         = httpserver.NewApiError(http.StatusUnprocessableEntity, "BLACK_TERMS_REQUIRED", "You must review and accept the recurring USD billing terms before checkout.")
@@ -144,16 +145,23 @@ func (billing Billing) resolveAuthoritativeBlackPrice(ctx context.Context, juris
 	if !isoCountryRegex.MatchString(code) {
 		return regionpricing.PlanRegionalPrice{}, ErrBlackJurisdictionMissing
 	}
-	targetRegion := regionpricing.FallbackRegion.Code
-	if code == "NG" {
-		targetRegion = "NG"
+	target, supported := regionpricing.RegionForCountry(code)
+	if !supported {
+		target = regionpricing.FallbackRegion
 	}
 	client := billing.Container.Client(billing.Container.Resources.Database)
-	price, err := billing.RegionalPriceFor(ctx, client, constants.PlanBlack, targetRegion, "web")
-	if err == nil && price.Currency == regionpricing.BlackCurrencyCode && price.WebMonthlyMinor > 0 {
-		return price, nil
+	row, err := billing.effectivePrice(ctx, client, constants.PlanBlack, target.Code)
+	if err != nil {
+		return regionpricing.PlanRegionalPrice{}, ErrBlackPriceUnavailable
 	}
-	return regionpricing.BlackMonthlyPriceForJurisdiction(code), nil
+	price := row.regional()
+	if price.Currency != regionpricing.BlackCurrencyCode || price.WebMonthlyMinor <= 0 {
+		return regionpricing.PlanRegionalPrice{}, ErrBlackPriceUnavailable
+	}
+	price.WebYearlyMinor = 0
+	price.IosMonthlyMinor, price.IosYearlyMinor = 0, 0
+	price.AndroidMonthlyMinor, price.AndroidYearlyMinor = 0, 0
+	return price, nil
 }
 
 func (billing Billing) GetGovernmentBlackBilling(ctx context.Context, userId, profileId string) (GovernmentBlackDashboardView, error) {

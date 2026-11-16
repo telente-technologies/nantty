@@ -1,4 +1,4 @@
-h1:yM1iKmpzXF40epDL+qNx8U/9Bu1jO9PMI2psL8elTU0=
+h1:AdVsYtQWgSTuKagZosID79H+utSnjFT/AeHs7S50Su8=
 20261003101347_create_users_core_tables.up.sql h1:dNCI103B0TCx9zazGKCl3Ln/N+7bPYPmbcR+7djUkCU=
 20261003101400_grant_read_access_to_other_services.up.sql h1:eEPXFCo3CMsKVE8S8PUToJ0SWFBhOzzSwZyhsSm/JXA=
 20261003101713_add_privacy_geo_and_address_tables.up.sql h1:sBOLU/FidxMAy6Qx/STvr6/Rz/skMIfasQJijHB80QA=
@@ -27,3 +27,4 @@ h1:yM1iKmpzXF40epDL+qNx8U/9Bu1jO9PMI2psL8elTU0=
 20261017151000_premium_business_profile_limits.up.sql h1:bDaCU9/V+kArCV5RVs0wWuBxbLj2W/1KJH986wZb/J8=
 20261103153000_add_users_outbox_retry_state.up.sql h1:j2sgwJ616sNfG4EdvyflOmgI3Xzf++bawBmCYqtae3M=
 20261105120000_add_creator_application_idempotency.up.sql h1:7Wz3mOnazYUfmxCRee/Kgjwyn3dhRVsdQCySGGk2RxQ=
+20261116120000_black_government_verification_extensions.up.sql h1:CCX5XRr/MdgcoubJn5+2CWBMUPY4mzZkNONcHbl41qY=

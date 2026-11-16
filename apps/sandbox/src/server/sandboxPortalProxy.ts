@@ -113,7 +113,7 @@ function requiredCapabilities(action: SandboxControlAction): readonly string[] {
   if (action.startsWith("webhooks.")) return ["webhooks.manage"];
   if (action === "requests.list") return ["request_logs.read"];
   if (action === "usage.read") return ["usage.read"];
-  if (action === "conversations.list") return ["applications.read", "credentials.manage"];
+  if (action === "conversations.list") return ["credentials.manage"];
   return ["credentials.manage"];
 }
 

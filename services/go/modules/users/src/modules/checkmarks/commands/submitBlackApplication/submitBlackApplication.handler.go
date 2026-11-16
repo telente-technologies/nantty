@@ -66,7 +66,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (string, er
 	}
 	jurisdiction := strings.ToUpper(strings.TrimSpace(command.JurisdictionCountryCode))
 	if jurisdiction == "" {
-		jurisdiction = strings.ToUpper(strings.TrimSpace(acting.CountryCode))
+		if acting.CountryCode != nil {
+			jurisdiction = strings.ToUpper(strings.TrimSpace(*acting.CountryCode))
+		}
 	}
 	if !countryCodePattern.MatchString(jurisdiction) {
 		return "", usersErrors.ValidationFailedFor("jurisdictionCountryCode", "a 2-letter verified legal jurisdiction country code is required")

@@ -7,8 +7,8 @@ import styles from "./developerCredentialsWorkspace.module.css";
 type Organization = { readonly id: string; readonly name: string };
 type Application = { readonly id: string; readonly name: string; readonly status: string };
 type UsagePeriod = {
-  readonly periodStart: string;
-  readonly periodEnd: string;
+  readonly billingPeriod: string;
+  readonly resetAt: string;
   readonly messagesSent: number;
   readonly requestsCount: number;
   readonly scenariosRun: number;
@@ -138,7 +138,7 @@ export function DeveloperUsageWorkspace() {
               </thead>
               <tbody>
                 <tr>
-                  <td>{formatDate(usage.periodStart)} – {formatDate(usage.periodEnd)}</td>
+                  <td>{usage.billingPeriod} · resets {formatDate(usage.resetAt)}</td>
                   <td>{usage.messagesSent}</td>
                   <td>{usage.remainingMessages}</td>
                   <td>{usage.quotaLimitMessages}</td>

@@ -8,6 +8,7 @@ import (
 	ledgerutils "nantty/modules/ledger/src/utils"
 	"nantty/modules/subscriptions/src/modules/billing/services"
 	"nantty/platform/httpserver"
+	"nantty/platform/staffauth"
 )
 
 type blackCheckoutDto struct {
@@ -141,7 +142,7 @@ func (controller BillingController) AdminListGovernmentBlack(writer http.Respons
 }
 
 func (controller BillingController) AdminPauseGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
-	staff := ledgerutils.StaffFromRequest(request)
+	staff, _ := staffauth.StaffFromContext(request.Context())
 	id, err := uuid.Parse(request.PathValue("subscriptionId"))
 	if err != nil {
 		controller.fail(writer, request, services.ErrSubscriptionMissing)
@@ -156,7 +157,7 @@ func (controller BillingController) AdminPauseGovernmentBlack(writer http.Respon
 		controller.fail(writer, request, err)
 		return
 	}
-	view, err := controller.Billing.AdminPauseGovernmentBlack(request.Context(), staff.StaffId, id, body.Reason)
+	view, err := controller.Billing.AdminPauseGovernmentBlack(request.Context(), staff.Id, id, body.Reason)
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
@@ -165,7 +166,7 @@ func (controller BillingController) AdminPauseGovernmentBlack(writer http.Respon
 }
 
 func (controller BillingController) AdminCancelGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
-	staff := ledgerutils.StaffFromRequest(request)
+	staff, _ := staffauth.StaffFromContext(request.Context())
 	id, err := uuid.Parse(request.PathValue("subscriptionId"))
 	if err != nil {
 		controller.fail(writer, request, services.ErrSubscriptionMissing)
@@ -180,7 +181,7 @@ func (controller BillingController) AdminCancelGovernmentBlack(writer http.Respo
 		controller.fail(writer, request, err)
 		return
 	}
-	view, err := controller.Billing.AdminCancelGovernmentBlack(request.Context(), staff.StaffId, id, body.Reason)
+	view, err := controller.Billing.AdminCancelGovernmentBlack(request.Context(), staff.Id, id, body.Reason)
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
@@ -189,13 +190,13 @@ func (controller BillingController) AdminCancelGovernmentBlack(writer http.Respo
 }
 
 func (controller BillingController) AdminRetryGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
-	staff := ledgerutils.StaffFromRequest(request)
+	staff, _ := staffauth.StaffFromContext(request.Context())
 	id, err := uuid.Parse(request.PathValue("subscriptionId"))
 	if err != nil {
 		controller.fail(writer, request, services.ErrSubscriptionMissing)
 		return
 	}
-	view, err := controller.Billing.AdminRetryGovernmentBlack(request.Context(), staff.StaffId, id)
+	view, err := controller.Billing.AdminRetryGovernmentBlack(request.Context(), staff.Id, id)
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
@@ -204,13 +205,13 @@ func (controller BillingController) AdminRetryGovernmentBlack(writer http.Respon
 }
 
 func (controller BillingController) AdminReconcileGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
-	staff := ledgerutils.StaffFromRequest(request)
+	staff, _ := staffauth.StaffFromContext(request.Context())
 	id, err := uuid.Parse(request.PathValue("subscriptionId"))
 	if err != nil {
 		controller.fail(writer, request, services.ErrSubscriptionMissing)
 		return
 	}
-	view, err := controller.Billing.AdminReconcileGovernmentBlack(request.Context(), staff.StaffId, id)
+	view, err := controller.Billing.AdminReconcileGovernmentBlack(request.Context(), staff.Id, id)
 	if err != nil {
 		controller.fail(writer, request, err)
 		return

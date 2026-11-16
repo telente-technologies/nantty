@@ -108,7 +108,7 @@ func TestGovernmentBlackPrivateCheckoutPricingAndCardRevocationPause(t *testing.
 		t.Fatalf("removing card must pause Black subscription: %s", pausedView.Raw)
 	}
 	pausedOutbox := harness.module.Billing.Container.Client(harness.Database).OutboxEvent.Query().
-		Where(outboxevent.EventType("entitlement.paused"), outboxevent.AggregateID(govNg)).ExistX(context.Background())
+		Where(outboxevent.EventType("entitlement.paused"), outboxevent.Subject(govNg)).ExistX(context.Background())
 	if !pausedOutbox {
 		t.Fatal("entitlement.paused outbox event must be emitted on card removal")
 	}

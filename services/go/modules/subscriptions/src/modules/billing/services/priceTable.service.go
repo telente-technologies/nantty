@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"sort"
 	"strings"
 	"time"
@@ -62,17 +63,10 @@ func (billing Billing) SeedDefaultPricesWhenMissing(ctx context.Context) error {
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return err
 		}
-		if price.PlanCode == constants.PlanBlack {
-			err = client.PlanPrice.Update().Where(planprice.PlanCode(price.PlanCode), planprice.CountryCode(price.Region), planprice.UpdatedByStaffID("")).
-				SetCurrency(price.Currency).SetMonthlyAmountMinor(price.WebMonthlyMinor).SetYearlyAmountMinor(0).
-				SetIosMonthlyAmountMinor(0).SetIosYearlyAmountMinor(0).SetAndroidMonthlyAmountMinor(0).SetAndroidYearlyAmountMinor(0).
-				SetStoreProductIds(map[string]string{}).Exec(ctx)
-		} else {
-			err = client.PlanPrice.Update().Where(planprice.PlanCode(price.PlanCode), planprice.CountryCode(price.Region), planprice.UpdatedByStaffID(""),
-				planprice.MonthlyAmountMinor(price.WebMonthlyMinor), planprice.YearlyAmountMinor(0)).
-				SetYearlyAmountMinor(price.WebYearlyMinor).SetIosMonthlyAmountMinor(price.IosMonthlyMinor).SetIosYearlyAmountMinor(price.IosYearlyMinor).
-				SetAndroidMonthlyAmountMinor(price.AndroidMonthlyMinor).SetAndroidYearlyAmountMinor(price.AndroidYearlyMinor).SetStoreProductIds(price.StoreProductIds).Exec(ctx)
-		}
+		err = client.PlanPrice.Update().Where(planprice.PlanCode(price.PlanCode), planprice.CountryCode(price.Region), planprice.UpdatedByStaffID(""),
+			planprice.MonthlyAmountMinor(price.WebMonthlyMinor), planprice.YearlyAmountMinor(0)).
+			SetYearlyAmountMinor(price.WebYearlyMinor).SetIosMonthlyAmountMinor(price.IosMonthlyMinor).SetIosYearlyAmountMinor(price.IosYearlyMinor).
+			SetAndroidMonthlyAmountMinor(price.AndroidMonthlyMinor).SetAndroidYearlyAmountMinor(price.AndroidYearlyMinor).SetStoreProductIds(price.StoreProductIds).Exec(ctx)
 		if err != nil {
 			return err
 		}

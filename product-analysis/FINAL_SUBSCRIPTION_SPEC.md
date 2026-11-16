@@ -110,7 +110,7 @@ Do not apply persistence migrations or alter active price records until the migr
 
 ## Release gates
 
-- Confirm Black Government monthly price.
+- **Resolved 2026-11-16:** Black Government is USD 300/month for Nigeria and USD 500/month internationally. Authorized monetization administrators may change future regional prices through audited effective-dated versions; existing subscriber terms and price history are not rewritten.
 - Confirm bundle discount meaning and stacking with annual reduction.
 - Confirm ad-load interpretation, priority-support SLA, and Gold Premium seller entitlement reconciliation.
 - Approve Black annual eligibility (default off) and confirm Flutterwave USD recurring capability with account-specific evidence.

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { apiRoutes } from "@/config/apiRoutes.config";
+import { adminApiRouteTable } from "@/config/apiRoutes.config";
 import { buildInitialCheckmarkPricing } from "@/mocks/seed/configurationTrustRules.mock";
 import { buildInitialPlanPriceRows } from "@/mocks/seed/regionalPricing.mock";
 
@@ -22,7 +22,7 @@ describe("black government configuration and route contracts", () => {
   });
 
   it("requires step-up and audit permissions on Black verification and government billing control routes", () => {
-    const routePaths = new Set(apiRoutes.map((route) => `${route.method} ${route.path}`));
+    const routePaths = new Set(adminApiRouteTable.map((route) => `${route.method} ${route.path}`));
     for (const expected of [
       "GET /admin/black-applications/appeals",
       "POST /admin/black-applications/appeals/:id/decide",

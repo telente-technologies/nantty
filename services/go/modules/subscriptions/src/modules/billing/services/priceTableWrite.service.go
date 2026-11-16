@@ -57,7 +57,7 @@ func (billing Billing) UpsertPrice(ctx context.Context, staffId, reason string, 
 	version, err := tx.PlanPriceVersion.Create().SetPlanCode(row.PlanCode).SetCountryCode(row.CountryCode).SetCurrency(row.Currency).
 		SetMonthlyAmountMinor(row.MonthlyAmountMinor).SetYearlyAmountMinor(row.YearlyAmountMinor).
 		SetIosMonthlyAmountMinor(row.IosMonthlyMinor).SetIosYearlyAmountMinor(row.IosYearlyMinor).
-		SetAndroidMonthlyAmountMinor(row.AndroidMonthlyMinor).SetAndroidYearlyAmountMinor(row.AndroidYearlyAmountMinor).SetStoreProductIds(row.StoreProductIds).
+		SetAndroidMonthlyAmountMinor(row.AndroidMonthlyMinor).SetAndroidYearlyAmountMinor(row.AndroidYearlyMinor).SetStoreProductIds(row.StoreProductIds).
 		SetActive(row.Active).SetEffectiveFrom(effectiveFrom.UTC()).SetCreatedByStaffID(staffId).SetChangeReason(reason).Save(ctx)
 	if err != nil {
 		return PlanPriceRow{}, err

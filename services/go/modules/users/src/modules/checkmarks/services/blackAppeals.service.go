@@ -11,8 +11,8 @@ import (
 	usersErrors "nantty/modules/users/src/errors"
 	"nantty/modules/users/src/generated/ent"
 	"nantty/modules/users/src/generated/ent/blackapplication"
-	"nantty/modules/users/src/types"
 	usersservices "nantty/modules/users/src/services"
+	"nantty/modules/users/src/types"
 )
 
 func SubmitBlackAppeal(ctx context.Context, c *container.Container, accountId, applicationId, reason, supportingDetails string) (BlackAppealView, error) {
@@ -122,7 +122,7 @@ func DecideBlackAppeal(ctx context.Context, c *container.Container, actor types.
 	}
 	if decision == "overturned" {
 		// Reopen to in_review so two-admin approval & payment gates remain mandatory.
-		_, _ = c.Client.BlackApplication.UpdateOneID(appId).SetStatus(blackapplication.StatusInReview).
+		_ = c.Client.BlackApplication.UpdateOneID(appId).SetStatus(blackapplication.StatusInReview).
 			SetFirstApprovalBy("").SetFirstApprovalByName("").ClearFirstApprovalAt().
 			SetSecondApprovalBy("").SetSecondApprovalByName("").ClearSecondApprovalAt().
 			SetDecisionReason("Appeal overturned: " + note).Exec(ctx)

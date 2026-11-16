@@ -98,8 +98,7 @@ export function fetchAdminGovernmentBlack(signal?: AbortSignal): Promise<PagedLi
 }
 
 export function controlAdminGovernmentBlack(subscriptionId: string, action: "pause" | "cancel" | "retry" | "reconcile", reason?: string): Promise<unknown> {
-  return sendAdminApiRequest(`/admin/subscriptions/government-black/${encodeURIComponent(subscriptionId)}/${action}`, {
-    method: "POST",
+  return sendAdminApiRequest(`/admin/subscriptions/government-black/${encodeURIComponent(subscriptionId)}/${action}`, { method: "POST",
     body: reason ? { reason } : {},
   });
 }
