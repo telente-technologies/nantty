@@ -213,5 +213,33 @@ describe("BFF access rules for money paths", () => {
     assert.equal(doesApiCallRequireStepUp("POST", "/admin/coins/transactions/abc/reverse"), true);
     assert.equal(doesApiCallRequireStepUp("POST", "/admin/coins/transactions/abc/mark-reviewed"), false);
     assert.equal(doesApiCallRequireStepUp("PUT", "/admin/config/appStore.fees"), true);
+    assert.deepEqual(findApiAccessRequirement("/admin/finance/overview"), { kind: "anyOf", permissions: ["finance:reports"] });
+    assert.equal(doesApiCallRequireStepUp("POST", "/admin/finance/reports/export"), true);
+  });
+
+  it("serves finance overview, issues, lookup, and audited CSV exports", async () => {
+    const overview = await call("GET", "/admin/finance/overview", { query: "range=7d" });
+    assert.equal(overview.status, 200);
+    assert.deepEqual(validateAgainstContract(c.object({
+      generatedAt: c.string(), range: c.string(), gmvByCurrency: c.array(money), escrowHeldByCurrency: c.array(money),
+      payoutsPendingByCurrency: c.array(money), disputesOpenCount: c.number(), stuckEscrowsCount: c.number(),
+    }), overview.body), []);
+
+    const issues = await call("GET", "/admin/finance/issues");
+    assert.equal(issues.status, 200);
+    assert.ok(Array.isArray(issues.body.data));
+
+    const lookupMiss = await call("GET", "/admin/finance/lookup", { query: "ref=missing-ref" });
+    assert.equal(lookupMiss.status, 200);
+    assert.equal(lookupMiss.body.found, false);
+    assert.match(String(lookupMiss.body.message), /checked 5 stores/);
+
+    const lookupHit = await call("GET", "/admin/finance/lookup", { query: "ref=ZM-24811" });
+    assert.equal(lookupHit.status, 200);
+    assert.equal(lookupHit.body.found, true);
+
+    assert.equal((await call("POST", "/admin/finance/reports/export", { body: { reportType: "overview", reason: "ok" } })).status, 400);
+    const exported = await call("POST", "/admin/finance/reports/export", { body: { reportType: "overview", reason: "Daily close reconciliation" }, idempotencyKey: "fin-exp-1" });
+    assert.equal(exported.status, 200);
   });
 });

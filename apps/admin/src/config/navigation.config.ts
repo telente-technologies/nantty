@@ -63,6 +63,17 @@ export const navigationGroups: readonly NavigationGroup[] = [
     ],
   },
   {
+    title: "Finance",
+    items: [
+      { label: "Finance overview", href: "/finance", icon: "creditCard24", requirement: "finance:reports", goShortcutKey: "f" },
+      { label: "Issues queue", href: "/finance/issues", icon: "warning20", requirement: "finance:reports" },
+      { label: "Reference lookup", href: "/finance/lookup", icon: "magnifyingGlass16", requirement: "finance:reports" },
+      { label: "Escrow health", href: "/finance/escrow", icon: "shield24", requirement: "finance:reports" },
+      { label: "Revenue by aspect", href: "/finance/aspects", icon: "speedometer24", requirement: "finance:reports" },
+      { label: "Finance reports", href: "/finance/reports", icon: "export24", requirement: "finance:reports" },
+    ],
+  },
+  {
     title: "Money",
     items: [
       { label: "Orders", href: "/commerce/orders", icon: "shoppingCart24", requirement: ["orders:read", "disputes:resolve", "refunds:issue", "support:tickets"] },

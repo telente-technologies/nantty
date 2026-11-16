@@ -197,6 +197,17 @@ const trustRoutes: ApiRouteDefinition[] = [
   write("PUT", "/admin/ad-policies/:id", ["advertisers:manage"], reasoned),
 ];
 
+const financeRoutes: ApiRouteDefinition[] = [
+  read("/admin/finance/overview", ["finance:reports"]),
+  read("/admin/finance/money-by-aspect", ["finance:reports"]),
+  read("/admin/finance/escrow-held", ["finance:reports"]),
+  read("/admin/finance/stuck-escrows", ["finance:reports"]),
+  read("/admin/finance/issues", ["finance:reports"]),
+  read("/admin/finance/lookup", ["finance:reports"]),
+  read("/admin/finance/reports", ["finance:reports"]),
+  write("POST", "/admin/finance/reports/export", ["finance:reports"], moneyAction),
+];
+
 const moneyRoutes: ApiRouteDefinition[] = [
   read("/admin/orders", orderReaders),
   read("/admin/orders/:id", orderReaders),
@@ -324,6 +335,7 @@ export const adminApiRouteTable: readonly ApiRouteDefinition[] = [
   ...peopleRoutes,
   ...verificationRoutes,
   ...trustRoutes,
+  ...financeRoutes,
   ...moneyRoutes,
   ...catalogAndConfigRoutes,
   ...supportAndLegalRoutes,
