@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import styles from "./sandboxOverview.module.css";
 
@@ -18,6 +21,29 @@ const sandboxSteps = [
 ] as const;
 
 export function SandboxOverview() {
+  const [connectionState, setConnectionState] = useState<"checking" | "ready" | "unavailable" | "not_configured">("checking");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetch("/api/sandbox/readiness", { cache: "no-store", signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("readiness unavailable");
+        const payload: unknown = await response.json();
+        if (typeof payload === "object" && payload !== null && "state" in payload && ["ready", "unavailable", "not_configured"].includes(String(payload.state))) {
+          setConnectionState(payload.state as "ready" | "unavailable" | "not_configured");
+        } else setConnectionState("unavailable");
+      })
+      .catch(() => { if (!controller.signal.aborted) setConnectionState("unavailable"); });
+    return () => controller.abort();
+  }, []);
+
+  const connectionLabel = connectionState === "checking" ? "Checking" : connectionState === "ready" ? "Gateway ready" : connectionState === "unavailable" ? "Unavailable" : "Not configured";
+  const connectionDescription = connectionState === "ready"
+    ? "The Sandbox gateway readiness check passed. Tenant, credential, and scenario services are checked separately and remain unavailable until connected."
+    : connectionState === "unavailable"
+      ? "The configured Sandbox gateway did not return a ready response. No test data or API request was sent."
+      : "No dedicated Sandbox API gateway is configured. The portal does not contact the production API.";
+
   return (
     <section className={styles.page} aria-labelledby="sandbox-title">
       <header className={styles.header}>
@@ -36,7 +62,7 @@ export function SandboxOverview() {
         </div>
         <div>
           <dt>Service connection</dt>
-          <dd><span className={styles.statusMark} aria-hidden="true" />Not connected</dd>
+          <dd><span className={styles.statusMark} aria-hidden="true" />{connectionLabel}</dd>
         </div>
         <div>
           <dt>Test data</dt>
@@ -48,7 +74,7 @@ export function SandboxOverview() {
         <div className={styles.sectionHeading}>
           <div>
             <h2 id="services-title">Services</h2>
-            <p>No sandbox service is connected in this deployment. This page does not create credentials or test records.</p>
+            <p>{connectionDescription} This page does not create credentials or test records.</p>
           </div>
         </div>
         <div className={styles.tableScroll}>
