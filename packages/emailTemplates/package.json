@@ -18,7 +18,7 @@
     "@nantty/design-tokens": "workspace:*",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "react-email": "^6.11.1"
+    "react-email": "^6.11.12"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
