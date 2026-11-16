@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS "black_billing_events" (
 CREATE INDEX IF NOT EXISTS "black_billing_events_profile_idx" ON "black_billing_events" ("profile_id", "created_at" DESC);
 CREATE INDEX IF NOT EXISTS "black_billing_events_sub_idx" ON "black_billing_events" ("subscription_id", "created_at" DESC);
 
--- Keep the prior baseline available for a rollback and never overwrite a price
--- that already has effective-dated admin history.
+-- Back up untouched seed rows before updating so rollback restores the exact prior state.
+-- Never modify rows updated by staff or regions with effective-dated price history.
 CREATE TABLE IF NOT EXISTS "black_government_billing_price_backup" (LIKE "plan_prices" INCLUDING DEFAULTS);
 ALTER TABLE "black_government_billing_price_backup" ADD PRIMARY KEY ("plan_code", "country_code");
 INSERT INTO "black_government_billing_price_backup"
@@ -57,32 +57,4 @@ WHERE "plan_code" = 'black' AND "updated_by_staff_id" = ''
       SELECT 1 FROM "black_government_billing_price_backup" AS backup
       WHERE backup."plan_code" = "plan_prices"."plan_code"
         AND backup."country_code" = "plan_prices"."country_code"
-  );
-
--- For rows that already have only the synthetic legacy baseline, append the
--- approved price instead of mutating immutable price history. Preserve any
--- non-legacy admin-authored price version.
-INSERT INTO "plan_price_versions" (
-    "id", "created_at", "plan_code", "country_code", "currency", "monthly_amount_minor", "yearly_amount_minor",
-    "ios_monthly_amount_minor", "ios_yearly_amount_minor", "android_monthly_amount_minor", "android_yearly_amount_minor",
-    "store_product_ids", "active", "effective_from", "created_by_staff_id", "change_reason"
-)
-SELECT gen_random_uuid(), now(), price."plan_code", price."country_code", 'USD',
-       CASE WHEN price."country_code" = 'NG' THEN 30000 ELSE 50000 END, 0,
-       0, 0, 0, 0, '{}'::jsonb, price."active", now(), 'system',
-       'Owner-approved Black Government USD monthly price'
-FROM "plan_prices" AS price
-WHERE price."plan_code" = 'black'
-  AND NOT EXISTS (
-      SELECT 1 FROM "plan_price_versions" AS version
-      WHERE version."plan_code" = price."plan_code"
-        AND version."country_code" = price."country_code"
-        AND version."created_by_staff_id" <> 'legacy'
-  )
-  AND NOT EXISTS (
-      SELECT 1 FROM "plan_price_versions" AS version
-      WHERE version."plan_code" = price."plan_code"
-        AND version."country_code" = price."country_code"
-        AND version."created_by_staff_id" = 'system'
-        AND version."change_reason" = 'Owner-approved Black Government USD monthly price'
   );

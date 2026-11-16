@@ -18,20 +18,8 @@ SET "currency" = backup."currency",
 FROM "black_government_billing_price_backup" AS backup
 WHERE price."plan_code" = backup."plan_code" AND price."country_code" = backup."country_code";
 
-DELETE FROM "plan_prices" AS price
-WHERE price."plan_code" = 'black'
-  AND price."updated_by_staff_id" = ''
-  AND NOT EXISTS (
-      SELECT 1 FROM "black_government_billing_price_backup" AS backup
-      WHERE backup."plan_code" = price."plan_code" AND backup."country_code" = price."country_code"
-  )
-  AND NOT EXISTS (
-      SELECT 1 FROM "plan_price_versions" AS version
-      WHERE version."plan_code" = price."plan_code" AND version."country_code" = price."country_code"
-  );
-
 DROP TABLE IF EXISTS "black_government_billing_price_backup";
--- The immutable effective-dated system price version is retained for audit history.
+
 ALTER TABLE "subscriptions" DROP COLUMN IF EXISTS "recurring_consent_at";
 ALTER TABLE "subscriptions" DROP COLUMN IF EXISTS "terms_accepted_at";
 ALTER TABLE "subscriptions" DROP COLUMN IF EXISTS "verified_jurisdiction_country";

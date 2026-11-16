@@ -34,5 +34,14 @@ describe("black government configuration and route contracts", () => {
     ]) {
       assert.equal(routePaths.has(expected), true, `missing admin route contract: ${expected}`);
     }
+
+    for (const controlPath of [
+      "/admin/subscriptions/government-black/:id/{pause|cancel}",
+      "/admin/subscriptions/government-black/:id/{retry|reconcile}",
+    ]) {
+      const def = adminApiRouteTable.find((route) => route.method === "POST" && route.path === controlPath);
+      assert.equal(def?.stepUp, true, `${controlPath} must require stepUp`);
+      assert.equal(def?.reason, true, `${controlPath} must require reason`);
+    }
   });
 });

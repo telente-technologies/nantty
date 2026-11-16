@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -23,11 +25,53 @@ type AdminGovernmentBlackSummary struct {
 	RecentEvents  []BlackBillingEventView        `json:"recentEvents"`
 }
 
-func (billing Billing) AdminListGovernmentBlack(ctx context.Context) ([]AdminGovernmentBlackSummary, error) {
-	rows, err := billing.Container.Client(billing.Container.Resources.Database).Subscription.Query().
-		Where(subscription.PlanCodeEQ(constants.PlanBlack)).Order(ent.Desc(subscription.FieldCreatedAt)).Limit(100).All(ctx)
+type AdminGovernmentBlackPage struct {
+	Items      []AdminGovernmentBlackSummary `json:"data"`
+	NextCursor *string                       `json:"nextCursor"`
+}
+
+func parseGovernmentBlackCursor(cursor string) (time.Time, uuid.UUID, error) {
+	tsPart, idPart, ok := strings.Cut(strings.TrimSpace(cursor), "|")
+	if !ok {
+		return time.Time{}, uuid.Nil, httpserver.NewApiError(http.StatusBadRequest, "INVALID_CURSOR", "Invalid pagination cursor.")
+	}
+	createdAt, err := time.Parse(time.RFC3339Nano, tsPart)
 	if err != nil {
-		return nil, err
+		return time.Time{}, uuid.Nil, httpserver.NewApiError(http.StatusBadRequest, "INVALID_CURSOR", "Invalid pagination cursor.")
+	}
+	id, err := uuid.Parse(idPart)
+	if err != nil {
+		return time.Time{}, uuid.Nil, httpserver.NewApiError(http.StatusBadRequest, "INVALID_CURSOR", "Invalid pagination cursor.")
+	}
+	return createdAt.UTC(), id, nil
+}
+
+func (billing Billing) AdminListGovernmentBlack(ctx context.Context, limit int, cursor string) (AdminGovernmentBlackPage, error) {
+	if limit < 1 || limit > 100 {
+		limit = 50
+	}
+	client := billing.Container.Client(billing.Container.Resources.Database)
+	query := client.Subscription.Query().Where(subscription.PlanCodeEQ(constants.PlanBlack))
+	if strings.TrimSpace(cursor) != "" {
+		cursorAt, cursorId, err := parseGovernmentBlackCursor(cursor)
+		if err != nil {
+			return AdminGovernmentBlackPage{}, err
+		}
+		query = query.Where(subscription.Or(
+			subscription.CreatedAtLT(cursorAt),
+			subscription.And(subscription.CreatedAtEQ(cursorAt), subscription.IDLT(cursorId)),
+		))
+	}
+	rows, err := query.Order(ent.Desc(subscription.FieldCreatedAt), ent.Desc(subscription.FieldID)).Limit(limit + 1).All(ctx)
+	if err != nil {
+		return AdminGovernmentBlackPage{}, err
+	}
+	var nextCursor *string
+	if len(rows) > limit {
+		rows = rows[:limit]
+		last := rows[len(rows)-1]
+		encoded := last.CreatedAt.UTC().Format(time.RFC3339Nano) + "|" + last.ID.String()
+		nextCursor = &encoded
 	}
 	out := make([]AdminGovernmentBlackSummary, 0, len(rows))
 	for _, row := range rows {
@@ -35,7 +79,11 @@ func (billing Billing) AdminListGovernmentBlack(ctx context.Context) ([]AdminGov
 			Subscription:  billing.convertGovernmentSubscription(ctx, row),
 			RecentPeriods: []BillingPeriodView{}, RecentEvents: []BlackBillingEventView{},
 		}
-		if app, found, err := billing.findBlackEligibility(ctx, row.ProfileID); err == nil && found {
+		app, found, err := billing.findBlackEligibility(ctx, row.ProfileID)
+		if err != nil {
+			return AdminGovernmentBlackPage{}, err
+		}
+		if found {
 			item.Verification = &GovernmentVerificationSummary{
 				ApplicationId: app.ApplicationId, ProfileId: row.ProfileID, AgencyName: app.AgencyName, Handle: app.Handle,
 				Status: app.Status, JurisdictionCountryCode: app.JurisdictionCountryCode, InstitutionalEmail: app.InstitutionalEmail,
@@ -43,27 +91,30 @@ func (billing Billing) AdminListGovernmentBlack(ctx context.Context) ([]AdminGov
 				PrivateCheckoutExpiresAt: app.PrivateCheckoutExpiresAt, ReverificationDueAt: app.ReverificationDueAt,
 			}
 		}
-		if periods, err := billing.Container.Client(billing.Container.Resources.Database).SubscriptionPeriod.Query().
-			Where(subscriptionperiod.SubscriptionID(row.ID.String())).Order(ent.Desc(subscriptionperiod.FieldPeriodStartsAt)).Limit(10).All(ctx); err == nil {
-			for _, p := range periods {
-				item.RecentPeriods = append(item.RecentPeriods, BillingPeriodView{
-					Id: p.ID.String(), Kind: string(p.Kind), Status: string(p.Status), Amount: money(p.AmountDueMinor, p.Currency),
-					PeriodStartsAt: p.PeriodStartsAt, PeriodEndsAt: p.PeriodEndsAt, PaidAt: p.PaidAt,
-					PaymentReference: p.PaymentReference, FailureReason: p.FailureReason,
-					InvoiceNumber: "INV-" + row.ID.String()[:8] + "-" + p.PeriodStartsAt.UTC().Format("20060102"),
-				})
-			}
+		periods, err := client.SubscriptionPeriod.Query().
+			Where(subscriptionperiod.SubscriptionID(row.ID.String())).Order(ent.Desc(subscriptionperiod.FieldPeriodStartsAt)).Limit(10).All(ctx)
+		if err != nil {
+			return AdminGovernmentBlackPage{}, err
 		}
-		if events, err := billing.listBlackBillingEvents(ctx, row.ProfileID, 15); err == nil {
-			item.RecentEvents = events
+		for _, p := range periods {
+			item.RecentPeriods = append(item.RecentPeriods, BillingPeriodView{
+				Id: p.ID.String(), Kind: string(p.Kind), Status: string(p.Status), Amount: money(p.AmountDueMinor, p.Currency),
+				PeriodStartsAt: p.PeriodStartsAt, PeriodEndsAt: p.PeriodEndsAt, PaidAt: p.PaidAt,
+				PaymentReference: p.PaymentReference, FailureReason: p.FailureReason,
+				InvoiceNumber: "INV-" + row.ID.String()[:8] + "-" + p.PeriodStartsAt.UTC().Format("20060102"),
+			})
 		}
+		events, err := billing.listBlackBillingEvents(ctx, row.ProfileID, 15)
+		if err != nil {
+			return AdminGovernmentBlackPage{}, err
+		}
+		item.RecentEvents = events
 		out = append(out, item)
 	}
-	return out, nil
+	return AdminGovernmentBlackPage{Items: out, NextCursor: nextCursor}, nil
 }
 
 func (billing Billing) AdminPauseGovernmentBlack(ctx context.Context, staffId string, subscriptionId uuid.UUID, reason string) (GovernmentSubscriptionView, error) {
-	var out GovernmentSubscriptionView
 	err := databases.RunInMoneyTransaction(ctx, billing.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		locked, err := billing.Container.Client(transaction).Subscription.Query().Where(subscription.ID(subscriptionId), subscription.PlanCodeEQ(constants.PlanBlack)).ForUpdate().Only(ctx)
 		if ent.IsNotFound(err) {
@@ -88,9 +139,11 @@ func (billing Billing) AdminPauseGovernmentBlack(ctx context.Context, staffId st
 	if err != nil {
 		return GovernmentSubscriptionView{}, err
 	}
-	fresh, _ := billing.Container.Client(billing.Container.Resources.Database).Subscription.Get(ctx, subscriptionId)
-	out = billing.convertGovernmentSubscription(ctx, fresh)
-	return out, nil
+	fresh, err := billing.Container.Client(billing.Container.Resources.Database).Subscription.Get(ctx, subscriptionId)
+	if err != nil {
+		return GovernmentSubscriptionView{}, err
+	}
+	return billing.convertGovernmentSubscription(ctx, fresh), nil
 }
 
 func (billing Billing) AdminCancelGovernmentBlack(ctx context.Context, staffId string, subscriptionId uuid.UUID, reason string) (GovernmentSubscriptionView, error) {
@@ -102,7 +155,7 @@ func (billing Billing) AdminCancelGovernmentBlack(ctx context.Context, staffId s
 		if err != nil {
 			return err
 		}
-		locked, err = locked.Update().SetStatus(subscription.StatusCanceled).SetCancelAtPeriodEnd(true).SetEndedReason("admin_cancelled").ClearNextChargeAt().SetLastError(truncate(reason, 300)).AddVersion(1).Save(ctx)
+		locked, err = locked.Update().SetStatus(subscription.StatusCanceled).SetCancelAtPeriodEnd(false).SetEndedReason("admin_cancelled").ClearNextChargeAt().SetLastError(truncate(reason, 300)).AddVersion(1).Save(ctx)
 		if err != nil {
 			return err
 		}
@@ -115,11 +168,14 @@ func (billing Billing) AdminCancelGovernmentBlack(ctx context.Context, staffId s
 	if err != nil {
 		return GovernmentSubscriptionView{}, err
 	}
-	fresh, _ := billing.Container.Client(billing.Container.Resources.Database).Subscription.Get(ctx, subscriptionId)
+	fresh, err := billing.Container.Client(billing.Container.Resources.Database).Subscription.Get(ctx, subscriptionId)
+	if err != nil {
+		return GovernmentSubscriptionView{}, err
+	}
 	return billing.convertGovernmentSubscription(ctx, fresh), nil
 }
 
-func (billing Billing) AdminRetryGovernmentBlack(ctx context.Context, staffId string, subscriptionId uuid.UUID) (GovernmentSubscriptionView, error) {
+func (billing Billing) AdminRetryGovernmentBlack(ctx context.Context, staffId string, subscriptionId uuid.UUID, reason string) (GovernmentSubscriptionView, error) {
 	row, err := billing.Container.Client(billing.Container.Resources.Database).Subscription.Query().
 		Where(subscription.ID(subscriptionId), subscription.PlanCodeEQ(constants.PlanBlack)).Only(ctx)
 	if ent.IsNotFound(err) {
@@ -132,21 +188,31 @@ func (billing Billing) AdminRetryGovernmentBlack(ctx context.Context, staffId st
 		return GovernmentSubscriptionView{}, ErrBlackCardRequired
 	}
 	app, found, err := billing.findBlackEligibility(ctx, row.ProfileID)
-	if err != nil || !found || app.Status != "approved" {
+	if err != nil {
+		return GovernmentSubscriptionView{}, err
+	}
+	if !found || app.Status != "approved" {
 		return GovernmentSubscriptionView{}, ErrBlackVerificationRequired
 	}
 	if err := billing.chargeDuePeriod(ctx, row); err != nil {
 		return GovernmentSubscriptionView{}, err
 	}
+	summary := "Staff triggered manual renewal charge retry"
+	if strings.TrimSpace(reason) != "" {
+		summary += ": " + reason
+	}
 	billing.recordBlackBillingEvent(ctx, billing.Container.Resources.Database, BlackBillingEventView{
 		SubscriptionId: row.ID.String(), ProfileId: row.ProfileID, OwnerUserId: row.OwnerUserID,
-		EventKind: "admin_retry", ActorKind: "staff", ActorId: staffId, Summary: "Staff triggered manual renewal charge retry",
+		EventKind: "admin_retry", ActorKind: "staff", ActorId: staffId, Summary: summary,
 	})
-	fresh, _ := billing.Container.Client(billing.Container.Resources.Database).Subscription.Get(ctx, subscriptionId)
+	fresh, err := billing.Container.Client(billing.Container.Resources.Database).Subscription.Get(ctx, subscriptionId)
+	if err != nil {
+		return GovernmentSubscriptionView{}, err
+	}
 	return billing.convertGovernmentSubscription(ctx, fresh), nil
 }
 
-func (billing Billing) AdminReconcileGovernmentBlack(ctx context.Context, staffId string, subscriptionId uuid.UUID) (GovernmentSubscriptionView, error) {
+func (billing Billing) AdminReconcileGovernmentBlack(ctx context.Context, staffId string, subscriptionId uuid.UUID, reason string) (GovernmentSubscriptionView, error) {
 	row, err := billing.Container.Client(billing.Container.Resources.Database).Subscription.Query().
 		Where(subscription.ID(subscriptionId), subscription.PlanCodeEQ(constants.PlanBlack)).Only(ctx)
 	if ent.IsNotFound(err) {
@@ -155,17 +221,30 @@ func (billing Billing) AdminReconcileGovernmentBlack(ctx context.Context, staffI
 	if err != nil {
 		return GovernmentSubscriptionView{}, err
 	}
+	if billing.Container.Payments == nil {
+		return GovernmentSubscriptionView{}, ErrUsdRecurringUnsupported
+	}
 	period, pErr := billing.Container.Client(billing.Container.Resources.Database).SubscriptionPeriod.Query().
 		Where(subscriptionperiod.SubscriptionID(row.ID.String())).Order(ent.Desc(subscriptionperiod.FieldCreatedAt)).First(ctx)
+	if pErr != nil && !ent.IsNotFound(pErr) {
+		return GovernmentSubscriptionView{}, pErr
+	}
 	if pErr == nil && period.PaymentReference != "" && period.Status != subscriptionperiod.StatusPaid {
 		if _, err := billing.Container.Payments.VerifyAndSettlePaymentIntentByReference(ctx, period.PaymentReference); err != nil && err != paymentservices.ErrPaymentNotFound {
 			return GovernmentSubscriptionView{}, httpserver.NewApiError(http.StatusBadGateway, "RECONCILE_FAILED", err.Error())
 		}
 	}
+	summary := "Reconciled Black Government billing state with payment provider"
+	if strings.TrimSpace(reason) != "" {
+		summary += ": " + reason
+	}
 	billing.recordBlackBillingEvent(ctx, billing.Container.Resources.Database, BlackBillingEventView{
 		SubscriptionId: row.ID.String(), ProfileId: row.ProfileID, OwnerUserId: row.OwnerUserID,
-		EventKind: "reconciled", ActorKind: "staff", ActorId: staffId, Summary: "Reconciled Black Government billing state with payment provider",
+		EventKind: "reconciled", ActorKind: "staff", ActorId: staffId, Summary: summary,
 	})
-	fresh, _ := billing.Container.Client(billing.Container.Resources.Database).Subscription.Get(ctx, subscriptionId)
+	fresh, err := billing.Container.Client(billing.Container.Resources.Database).Subscription.Get(ctx, subscriptionId)
+	if err != nil {
+		return GovernmentSubscriptionView{}, err
+	}
 	return billing.convertGovernmentSubscription(ctx, fresh), nil
 }

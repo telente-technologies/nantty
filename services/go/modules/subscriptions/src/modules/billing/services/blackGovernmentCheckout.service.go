@@ -50,7 +50,7 @@ func (billing Billing) StartGovernmentBlackCheckout(ctx context.Context, userId 
 	if err != nil {
 		return CheckoutView{}, err
 	}
-	if billing.Container.Payments != nil && !billing.Container.Payments.SupportsRecurringCardCurrency(regionpricing.BlackCurrencyCode) {
+	if billing.Container.Payments == nil || !billing.Container.Payments.SupportsRecurringCardCurrency(regionpricing.BlackCurrencyCode) {
 		return CheckoutView{}, ErrUsdRecurringUnsupported
 	}
 	existing, err := billing.latestBlackSubscription(ctx, profile.ProfileId)

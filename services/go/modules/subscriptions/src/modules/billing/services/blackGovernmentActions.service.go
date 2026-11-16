@@ -42,7 +42,7 @@ func (billing Billing) StartGovernmentBlackCardReplacement(ctx context.Context, 
 	if row == nil {
 		return paymentservices.StartedSavedCardSetup{}, ErrSubscriptionMissing
 	}
-	if !billing.Container.Payments.SupportsRecurringCardCurrency(regionpricing.BlackCurrencyCode) {
+	if billing.Container.Payments == nil || !billing.Container.Payments.SupportsRecurringCardCurrency(regionpricing.BlackCurrencyCode) {
 		return paymentservices.StartedSavedCardSetup{}, ErrUsdRecurringUnsupported
 	}
 	started, err := billing.Container.Payments.StartSavedCardSetup(ctx, paymentservices.CardSetupRequest{
@@ -80,6 +80,9 @@ func (billing Billing) ReactivateGovernmentBlackSubscription(ctx context.Context
 	}
 	if row.BillingAuthorizationID == "" {
 		return GovernmentReactivationView{}, ErrBlackCardRequired
+	}
+	if billing.Container.Payments == nil {
+		return GovernmentReactivationView{}, ErrUsdRecurringUnsupported
 	}
 	card, err := billing.Container.Payments.DescribeBillingAuthorization(ctx, row.BillingAuthorizationID)
 	if err != nil || !card.Usable {
@@ -231,7 +234,7 @@ func (billing Billing) HandleBlackApplicationDecidedEvent(ctx context.Context, p
 		if err != nil {
 			return err
 		}
-		locked, err = locked.Update().SetStatus(subscription.StatusCanceled).SetEndedReason("verification_revoked").SetCancelAtPeriodEnd(true).ClearNextChargeAt().AddVersion(1).Save(ctx)
+		locked, err = locked.Update().SetStatus(subscription.StatusCanceled).SetEndedReason("verification_revoked").SetCancelAtPeriodEnd(false).ClearNextChargeAt().AddVersion(1).Save(ctx)
 		if err != nil {
 			return err
 		}

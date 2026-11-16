@@ -93,12 +93,13 @@ export function decideBlackAppeal(appealId: string, input: { decision: "reopen_r
   return sendAdminApiRequest(`/admin/black-applications/appeals/${encodeURIComponent(appealId)}/decide`, { method: "POST", body: input });
 }
 
-export function fetchAdminGovernmentBlack(signal?: AbortSignal): Promise<PagedList<AdminGovernmentBlackSummary>> {
-  return sendAdminApiRequest("/admin/subscriptions/government-black", { signal });
+export function fetchAdminGovernmentBlack(filters?: { cursor?: string; limit?: number }, signal?: AbortSignal): Promise<PagedList<AdminGovernmentBlackSummary>> {
+  return sendAdminApiRequest("/admin/subscriptions/government-black", { query: filters ? { ...filters } : undefined, signal });
 }
 
-export function controlAdminGovernmentBlack(subscriptionId: string, action: "pause" | "cancel" | "retry" | "reconcile", reason?: string): Promise<unknown> {
-  return sendAdminApiRequest(`/admin/subscriptions/government-black/${encodeURIComponent(subscriptionId)}/${action}`, { method: "POST",
-    body: reason ? { reason } : {},
+export function controlAdminGovernmentBlack(subscriptionId: string, action: "pause" | "cancel" | "retry" | "reconcile", reason: string): Promise<unknown> {
+  return sendAdminApiRequest(`/admin/subscriptions/government-black/${encodeURIComponent(subscriptionId)}/${action}`, {
+    method: "POST",
+    body: { reason },
   });
 }

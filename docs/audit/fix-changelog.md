@@ -2,6 +2,20 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-11-16 — PR #60 Audit Remediation (Admin Black Billing, Price Migration, Nil Gateway, Disclosures & Cursor Pagination)
+
+- **Admin Black Billing UI & API (`apps/admin/src/{components/people/blackBillingAdminPanel.tsx,services/safetyApi.service.ts,contracts/blackGovernmentContracts.test.ts}`):**
+  - Routed all four admin control actions (`reconcile`, `retry`, `pause`, `cancel`) through `ConfirmActionDialog` (`requiresStepUp`, audit `reason` required), made `reason` mandatory in `controlAdminGovernmentBlack`, and gated success toasts / dialog close / table reload strictly on a non-null mutation result so failed requests never display success or close the dialog.
+  - Added cursor pagination controls (`cursor` / `nextCursor`) and contract assertions verifying `stepUp: true` and `reason: true` on both control route families.
+- **Subscriptions Migration Reversibility & Staff Price Preservation (`services/go/modules/subscriptions/src/migrations/20261116120000_black_government_billing.{up,down}.sql`):**
+  - Removed the `INSERT INTO "plan_price_versions"` backfill so existing staff-updated `plan_prices` rows (`updated_by_staff_id <> ''`) and existing `plan_price_versions` are never overridden, and `.down.sql` restores `plan_prices` from `black_government_billing_price_backup` without leaving an immutable `'system'` version behind. (`atlas.sum` requires `atlas migrate hash` refresh in an environment with `atlas` installed.)
+- **Nil-Gateway Fail-Closed, Cent Disclosures, Immediate Cancel & Cursor Pagination (`services/go/modules/subscriptions/`):**
+  - `blackGovernmentCheckout.service.go`, `blackGovernmentBilling.service.go`, `blackGovernmentActions.service.go`, and `blackGovernmentAdmin.service.go` now fail closed with `ErrUsdRecurringUnsupported` and `RecurringCardEnabled: false` whenever `Container.Payments == nil`.
+  - Added `FormatUsdMonthlyDisclosure` in `blackGovernmentBilling.service.go` to preserve exact cents (`USD 300.50/month`) instead of truncating (`minor / 100`), added `SubscriptionId` / `CardLabel` JSON fields on `GovernmentSubscriptionView` to match admin/webapp contracts, and propagated `listBlackBillingEvents` errors.
+  - Cleared `SetCancelAtPeriodEnd(false)` on immediate `StatusCanceled` + `entitlement.revoked` transitions in `AdminCancelGovernmentBlack` and `HandleBlackApplicationDecidedEvent`.
+  - Updated `AdminListGovernmentBlack` (`blackGovernmentAdmin.service.go`, `blackGovernment.controller.go`) with bounded `limit` + `RFC3339Nano|uuid` cursor pagination and error propagation, and required audit `reason` validation on `AdminRetryGovernmentBlack` / `AdminReconcileGovernmentBlack`.
+  - Added unit and integration regression tests in `services/go/modules/subscriptions/tests/blackGovernmentBilling_integration_test.go`.
+
 ## 2026-11-16 — Audit Hardening (`ZM-017`, `ZM-020`, `ZM-007`) & Sandbox Quotas/Scenarios/Portal Wiring
 
 - **`ZM-017` (`services/go/modules/subscriptions/`):**

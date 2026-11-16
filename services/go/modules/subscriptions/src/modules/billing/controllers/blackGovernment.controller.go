@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/google/uuid"
 
@@ -133,12 +134,21 @@ func (controller BillingController) CancelGovernmentBlack(writer http.ResponseWr
 }
 
 func (controller BillingController) AdminListGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
-	rows, err := controller.Billing.AdminListGovernmentBlack(request.Context())
+	limit := 50
+	if raw := request.URL.Query().Get("limit"); raw != "" {
+		parsed, err := strconv.Atoi(raw)
+		if err != nil || parsed < 1 || parsed > 100 {
+			controller.fail(writer, request, httpserver.NewApiError(http.StatusBadRequest, "INVALID_LIMIT", "Limit must be between 1 and 100."))
+			return
+		}
+		limit = parsed
+	}
+	page, err := controller.Billing.AdminListGovernmentBlack(request.Context(), limit, request.URL.Query().Get("cursor"))
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
 	}
-	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"data": rows, "nextCursor": nil})
+	httpserver.WriteJsonResponse(writer, http.StatusOK, page)
 }
 
 func (controller BillingController) AdminPauseGovernmentBlack(writer http.ResponseWriter, request *http.Request) {
@@ -196,7 +206,16 @@ func (controller BillingController) AdminRetryGovernmentBlack(writer http.Respon
 		controller.fail(writer, request, services.ErrSubscriptionMissing)
 		return
 	}
-	view, err := controller.Billing.AdminRetryGovernmentBlack(request.Context(), staff.Id, id)
+	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body blackAdminReasonDto) error {
+		collector := &ledgerutils.IssueCollector{}
+		collector.RequireLength("reason", body.Reason, 4, 300)
+		return collector.Result()
+	})
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	view, err := controller.Billing.AdminRetryGovernmentBlack(request.Context(), staff.Id, id, body.Reason)
 	if err != nil {
 		controller.fail(writer, request, err)
 		return
@@ -211,7 +230,16 @@ func (controller BillingController) AdminReconcileGovernmentBlack(writer http.Re
 		controller.fail(writer, request, services.ErrSubscriptionMissing)
 		return
 	}
-	view, err := controller.Billing.AdminReconcileGovernmentBlack(request.Context(), staff.Id, id)
+	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body blackAdminReasonDto) error {
+		collector := &ledgerutils.IssueCollector{}
+		collector.RequireLength("reason", body.Reason, 4, 300)
+		return collector.Result()
+	})
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	view, err := controller.Billing.AdminReconcileGovernmentBlack(request.Context(), staff.Id, id, body.Reason)
 	if err != nil {
 		controller.fail(writer, request, err)
 		return

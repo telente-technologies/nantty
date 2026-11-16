@@ -1,5 +1,13 @@
 # Nantty implementation backlog
 
+## Latest execution record — 2026-11-16 (PR #60 Audit Remediation)
+
+- Fixed all 6 PR #60 review findings across `apps/admin` and `services/go/modules/subscriptions`:
+  - **Admin Black billing panel (`apps/admin`)**: Wired `reconcile` and `retry` through `ConfirmActionDialog` (`requiresStepUp` + audit `reason`), sent `{ reason }` in `controlAdminGovernmentBlack`, gated `showToast` / `setAction(null)` / `reload()` on truthy `controlMutation.run(...)` responses, and added cursor pagination UI.
+  - **Pricing migration (`20261116120000_black_government_billing.{up,down}.sql`)**: Removed the `plan_price_versions` `'system'` backfill so staff-updated `plan_prices` rows and `plan_price_versions` are never overridden and rollback cleanly restores backed-up `plan_prices`. (`atlas.sum` refresh via `atlas migrate hash` still needs to run in CI/equipped environment.)
+  - **Fail-closed `Payments == nil`, cent disclosures, immediate cancel & cursor pagination (`subscriptions`)**: Guarded `Container.Payments == nil` across Black checkout/overview/card-replacement/reactivation/reconciliation, formatted fractional cents via `FormatUsdMonthlyDisclosure`, exposed `subscriptionId`/`cardLabel` on `GovernmentSubscriptionView`, set `CancelAtPeriodEnd(false)` on immediate `StatusCanceled` + `entitlement.revoked`, added cursor pagination + error propagation to `AdminListGovernmentBlack`, and required `reason` on `AdminRetryGovernmentBlack` / `AdminReconcileGovernmentBlack`. Added regression tests in `blackGovernmentBilling_integration_test.go` and `blackGovernmentContracts.test.ts`.
+  - **Verification Limits**: `check-backend-file-lengths.sh`, `check-no-raw-sql-in-typescript.sh`, and `git diff --check` pass (`exit 0`); Go/Next/Vitest/Atlas execution requires CI or equipped local toolchain (`go`, `pnpm`, `atlas`, `psql` absent in sandbox).
+
 ## Latest execution record — 2026-11-16 (Audit Hardening + Sandbox Quotas/Scenarios & Developer/Sandbox Portals)
 
 - **Audit Fixes (`ZM-017`, `ZM-020`, `ZM-007`):**

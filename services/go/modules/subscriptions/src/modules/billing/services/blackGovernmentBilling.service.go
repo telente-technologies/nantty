@@ -90,6 +90,8 @@ type GovernmentBlackDisclosures struct {
 
 type GovernmentSubscriptionView struct {
 	SubscriptionView
+	SubscriptionId         string     `json:"subscriptionId"`
+	CardLabel              string     `json:"cardLabel,omitempty"`
 	PausedReason           string     `json:"pausedReason,omitempty"`
 	BillingAuthorizationId string     `json:"billingAuthorizationId,omitempty"`
 	CardUsable             bool       `json:"cardUsable"`
@@ -190,16 +192,15 @@ func (billing Billing) GetGovernmentBlackBilling(ctx context.Context, userId, pr
 		if err != nil {
 			return GovernmentBlackDashboardView{}, err
 		}
-		recurringSupported := billing.Container.Payments == nil || billing.Container.Payments.SupportsRecurringCardCurrency(regionpricing.BlackCurrencyCode)
+		recurringSupported := billing.Container.Payments != nil && billing.Container.Payments.SupportsRecurringCardCurrency(regionpricing.BlackCurrencyCode)
 		view.Pricing = &GovernmentBlackPricingView{
 			PlanCode: constants.PlanBlack, Interval: "month", Currency: regionpricing.BlackCurrencyCode,
 			Price: money(price.WebMonthlyMinor, regionpricing.BlackCurrencyCode), AnnualBillingDisabled: true,
 			DiscountsDisabled: true, RecurringCardRequired: true, RecurringCardEnabled: recurringSupported,
 			RegionBasis: "verified_legal_jurisdiction",
 		}
-		usdMajor := price.WebMonthlyMinor / 100
 		view.Disclosures = &GovernmentBlackDisclosures{
-			MonthlyAmountFormatted:  "USD " + formatInt64(usdMajor) + "/month",
+			MonthlyAmountFormatted:  FormatUsdMonthlyDisclosure(price.WebMonthlyMinor),
 			Currency:                regionpricing.BlackCurrencyCode,
 			BillingCadence:          "Monthly recurring charge billed automatically every month.",
 			AutoRenewalTerms:        "Your authorized USD payment card will be charged automatically each month until cancelled or paused.",
@@ -230,9 +231,11 @@ func (billing Billing) GetGovernmentBlackBilling(ctx context.Context, userId, pr
 			})
 		}
 	}
-	if events, err := billing.listBlackBillingEvents(ctx, profile.ProfileId, 30); err == nil {
-		view.Events = events
+	events, err := billing.listBlackBillingEvents(ctx, profile.ProfileId, 30)
+	if err != nil {
+		return GovernmentBlackDashboardView{}, err
 	}
+	view.Events = events
 	return view, nil
 }
 
@@ -247,8 +250,12 @@ func (billing Billing) latestBlackSubscription(ctx context.Context, profileId st
 }
 
 func (billing Billing) convertGovernmentSubscription(ctx context.Context, row *ent.Subscription) GovernmentSubscriptionView {
+	if row == nil {
+		return GovernmentSubscriptionView{}
+	}
 	out := GovernmentSubscriptionView{
-		SubscriptionView: ConvertSubscription(row), BillingAuthorizationId: row.BillingAuthorizationID, NextChargeAt: row.NextChargeAt,
+		SubscriptionView: ConvertSubscription(row), SubscriptionId: row.ID.String(), CardLabel: row.CardLabel,
+		BillingAuthorizationId: row.BillingAuthorizationID, NextChargeAt: row.NextChargeAt,
 	}
 	if row.BillingAuthorizationID != "" && billing.Container.Payments != nil {
 		if summary, err := billing.Container.Payments.DescribeBillingAuthorization(ctx, row.BillingAuthorizationID); err == nil {
@@ -259,6 +266,17 @@ func (billing Billing) convertGovernmentSubscription(ctx context.Context, row *e
 		`SELECT paused_reason, terms_accepted_at, recurring_consent_at FROM subscriptions WHERE id = $1`, row.ID).
 		Scan(&out.PausedReason, &out.TermsAcceptedAt, &out.RecurringConsentAt)
 	return out
+}
+
+func FormatUsdMonthlyDisclosure(amountMinor int64) string {
+	major, cents := amountMinor/100, amountMinor%100
+	if cents < 0 {
+		cents = -cents
+	}
+	if cents == 0 {
+		return "USD " + formatInt64(major) + "/month"
+	}
+	return "USD " + formatInt64(major) + "." + string([]byte{byte('0' + cents/10), byte('0' + cents%10)}) + "/month"
 }
 
 func formatInt64(v int64) string {
