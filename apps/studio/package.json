@@ -15,7 +15,7 @@
     "@tanstack/react-query": "^5.104.4",
     "@nantty/design-tokens": "workspace:*",
     "@nantty/web-kit": "workspace:*",
-    "next": "^16.4.2",
+    "next": "^16.4.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "zustand": "^5.0.15"

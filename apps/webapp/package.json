@@ -20,7 +20,7 @@
     "@nantty/design-tokens": "workspace:*",
     "@nantty/web-kit": "workspace:*",
     "livekit-client": "2.22.4",
-    "next": "^16.4.2",
+    "next": "^16.4.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "zustand": "^5.0.15"
