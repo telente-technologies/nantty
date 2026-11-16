@@ -38,6 +38,7 @@ export type RouteLimitName =
   | "messagingKeys"
   | "supportWrite"
   | "adminEmail"
+  | "financeRead"
   | "adEvent"
   | "profileRead"
   | "sitemapRead"
@@ -81,6 +82,7 @@ export const defaultRouteLimitsPerMinute: Readonly<Record<RouteLimitName, number
   messagingKeys: 60,
   supportWrite: 30,
   adminEmail: 10,
+  financeRead: 60,
   adEvent: 120,
   profileRead: 120,
   sitemapRead: 20,
@@ -133,6 +135,7 @@ const accountScopedLimits: readonly RouteLimitName[] = [
   "messagingKeys",
   "supportWrite",
   "adminEmail",
+  "financeRead",
   "adEvent",
   "profileRead",
 ];
@@ -155,12 +158,13 @@ export function classifyRequestForRateLimit(method: string, path: string): Route
   if (verb === "POST" && lowered === "/api/v1/reports") return "report";
   if (verb === "POST" && (/^\/api\/v1\/media\/uploads\/?$/.test(pathname) || lowered.includes("/upload-intents"))) return "upload";
   if (verb === "GET" && lowered.startsWith("/api/v1/search")) return "search";
+  if ((verb === "GET" || verb === "POST") && lowered.startsWith("/api/v1/admin/finance/")) return "financeRead";
   if (verb === "GET" && lowered.startsWith("/api/v1/tags/candidates")) return "tagSearch";
   if ((verb === "POST" && lowered === "/api/v1/posts") || (verb === "PUT" && /^\/api\/v1\/posts\/[^/]+\/tags$/.test(lowered)) || (verb === "DELETE" && /^\/api\/v1\/posts\/[^/]+\/tags\/me$/.test(lowered))) return "postWrite";
   if (verb === "POST" && lowered.startsWith("/api/v1/verification/")) return "verification";
   if (verb === "POST" && (/^\/api\/v1\/coins\/transfers$/.test(pathname) || /^\/api\/v1\/wallets\/[^/]+\/transfers$/.test(pathname))) return "walletTransfer";
   if (verb === "POST" && /^\/api\/v1\/posts\/[^/]+\/media\/[^/]+\/download$/.test(lowered)) return "mediaDownload";
-  if (verb === "GET" && (lowered === "/api/v1/seller/nantty-users" || lowered === "/api/v1/seller/nantty-users" || lowered === "/api/v1/seller/staff/candidates")) return "sellerPeopleSearch";
+  if (verb === "GET" && (lowered === "/api/v1/seller/nantty-users" || lowered === "/api/v1/seller/staff/candidates")) return "sellerPeopleSearch";
   if (verb !== "GET" && (lowered === "/api/v1/seller/staff" || lowered.startsWith("/api/v1/seller/staff/") || lowered.startsWith("/api/v1/stores/team-requests/"))) return "sellerTeamWrite";
   if (verb !== "GET" && (lowered.startsWith("/api/v1/seller/wallet/payouts") || lowered.startsWith("/api/v1/seller/wallet/payout-accounts"))) return "sellerMoneyWrite";
   if (verb === "POST" && (/^\/api\/v1\/seller\/conversations\/[^/]+\/messages$/.test(lowered) || /^\/api\/v1\/conversations\/stores\/[^/]+\/messages$/.test(lowered))) return "storeMessageSend";
@@ -172,7 +176,7 @@ export function classifyRequestForRateLimit(method: string, path: string): Route
   if ((verb === "POST" || verb === "DELETE") && /^\/api\/v1\/posts\/[^/]+\/(like|share|repost|impressions|profile-visits)$/.test(lowered)) return "postEngagement";
   if ((verb === "POST" || verb === "DELETE") && /^\/api\/v1\/saves(\/|$)/.test(lowered)) return "postEngagement";
   if (verb === "POST" && (/^\/api\/v1\/conversations\/[^/]+\/messages$/.test(lowered) || /^\/api\/v1\/messages\/[^/]+\/(reactions|poll-votes|live-location\/stop)$/.test(lowered) || /^\/api\/v1\/stories\/[^/]+\/replies$/.test(lowered) || lowered === "/api/v1/chat/shares")) return "messageWrite";
-  if (verb !== "GET" && /^\/api\/v1\/(conversations|channels)(\/|$)/.test(lowered)) return "conversationWrite";
+  if (verb !== "GET" && /^\/api\/v1\/(conversations|channels|group-invitations|channel-invitations)(\/|$)/.test(lowered)) return "conversationWrite";
   if (verb !== "GET" && /^\/api\/v1\/chat\/keys(\/|$)/.test(lowered)) return "messagingKeys";
   if (verb !== "GET" && (/^\/api\/v1\/support(\/|$)/.test(lowered) || /^\/api\/v1\/help\/topics\/[^/]+\/votes$/.test(lowered))) return "supportWrite";
   if (verb !== "GET" && (/^\/api\/v1\/admin\/support\/email(\/|$)/.test(lowered) || /^\/api\/v1\/admin\/legal\/.*\/(notice-draft|test-send)$/.test(lowered))) return "adminEmail";

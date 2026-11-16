@@ -3,7 +3,7 @@ import { maskWidgetAmounts, widgetEndpointFor } from "../widgetSnapshots.service
 import { hiddenAmountText, widgetAmountText, widgetCompactCount, widgetSizeFromDimensions } from "@/widgets/widgetPresentation.util";
 import { parseWidgetSession, parseWidgetSnapshot } from "@/widgets/widgetSnapshotReader.util";
 
-jest.mock("@/services/apiClient.service", () => ({ api: { get: jest.fn(), post: jest.fn(), delete: jest.fn() } }));
+jest.mock("@/services/core/apiClient.service", () => ({ api: { get: jest.fn(), post: jest.fn(), delete: jest.fn() } }));
 jest.mock("@react-native-async-storage/async-storage", () => ({ __esModule: true, default: { setItem: jest.fn(), getItem: jest.fn(), removeItem: jest.fn() } }));
 
 describe("widget token rotation", () => {

@@ -67,6 +67,19 @@ export const createPostBodySchema = schema.object({
 export const schedulePostBodySchema = schema.object({
   scheduledAt: schema.string().min(20).max(40).regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/),
 });
+export const updateScheduledPostContentBodySchema = schema.object({
+  text: schema.string().max(2200).optional(),
+  mediaIds: schema.array(schema.string().uuid()).max(10).optional(),
+  audience: schema.enum(["everyone", "followers"]).optional(),
+  visibility: schema.enum(["public", "subscribers"]).optional(),
+  replyPolicy: replyPolicySchema.optional(),
+  sensitiveLabels: schema.array(sensitiveLabelSchema).max(4).optional(),
+  mentions: mentionEntitiesSchema.optional(),
+  taggedUserIds: taggedUserIdsSchema.optional(),
+  location: schema.optional(schema.nullable(locationTagSchema)),
+  topics: topicSlugsSchema.optional(),
+  productIds: productIdsSchema.optional(),
+});
 export const scheduledPostsQuerySchema = schema.object({ cursor: schema.string().uuid().optional(), limit: schema.coerce.number().int().min(1).max(50).optional() });
 
 export const tagProductsBodySchema = schema.object({ productIds: productIdsSchema });

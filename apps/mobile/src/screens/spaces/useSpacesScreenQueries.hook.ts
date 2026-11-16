@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { liveService } from "@/services/live.service";
+import { liveService } from "@/services/live/live.service";
 import { spacesService, type SpaceJoinGrant } from "@/services/spaces.service";
 
 export interface UseSpacesScreenQueriesOptions {

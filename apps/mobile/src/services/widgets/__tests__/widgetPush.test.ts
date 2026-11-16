@@ -41,7 +41,7 @@ function load(environment: string, platform = "ios"): Harness {
     jest.doMock("expo-constants", () => ({ __esModule: true, default: { executionEnvironment: environment, expoConfig: { extra: { eas: { projectId: "project-1" } } }, easConfig: undefined }, ExecutionEnvironment: { StoreClient: "storeClient", Standalone: "standalone", Bare: "bare" } }));
     jest.doMock("expo-task-manager", () => ({ isTaskDefined: () => false, defineTask }));
     jest.doMock("expo-notifications", () => notifications);
-    jest.doMock("@/services/apiClient.service", () => ({ api }));
+    jest.doMock("@/services/core/apiClient.service", () => ({ api }));
     jest.doMock("@/services/account/users.service", () => ({ usersService: { fetchMyAccountSettings: fetchSettings } }));
     jest.doMock("@/store/auth.store", () => ({ registerSignOutHook: (hook: () => Promise<void>) => { signOutHooks.push(hook); return () => undefined; } }));
     jest.doMock("@react-native-async-storage/async-storage", () => ({ __esModule: true, default: {

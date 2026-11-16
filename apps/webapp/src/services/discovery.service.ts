@@ -13,7 +13,7 @@ export const discoveryService = {
   fetchClipsPage: (tab: "forYou" | "following", cursor: string | null) =>
     sendRequestToWebappServer<Page<Clip>>("/api/v1/clips", { query: { tab: tab === "following" ? "following" : undefined, cursor: cursor ?? undefined } }),
   fetchVideosPage: (cursor: string | null) => sendRequestToWebappServer<Page<Post>>("/api/v1/videos", { query: { cursor: cursor ?? undefined } }),
-  fetchVideoById: (videoId: string) => sendRequestToWebappServer<Post>(`/api/v1/videos/${videoId}`),
+  fetchVideoById: (videoId: string) => sendRequestToWebappServer<Post>(`/api/v1/videos/${encodeURIComponent(videoId)}`),
   likeClip: (clipId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${encodeURIComponent(clipId)}/like`, { method: "POST" }),
   unlikeClip: (clipId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${encodeURIComponent(clipId)}/like`, { method: "DELETE" }),
   followClipAuthor: (userId: string) => sendRequestToWebappServer<void>(`/api/v1/users/${encodeURIComponent(userId)}/follow`, { method: "POST" }),

@@ -240,6 +240,15 @@ describe("admin page access", () => {
     assert.ok(!visiblePages("Operations Analyst").includes("/audit"));
     assert.ok(!visiblePages("Support Agent").includes("/commerce/logistics"));
     assert.deepEqual(visiblePages("Auditor"), ["/audit"]);
+
+    const financePages = visiblePages("Finance Admin");
+    for (const page of ["/finance", "/finance/issues", "/finance/lookup", "/finance/escrow", "/finance/aspects", "/finance/reports", "/commerce/orders", "/commerce/payouts", "/commerce/ledger"]) {
+      assert.ok(financePages.includes(page), `Finance Admin cannot access ${page}`);
+    }
+    assert.ok(!financePages.includes("/users"));
+    assert.ok(!financePages.includes("/moderation/reports"));
+    assert.equal(doesApiCallRequireStepUp("POST", "/admin/finance/reports/export"), true);
+    assert.deepEqual(findAdminApiRoute("GET", "/admin/finance/overview")?.requirement, { kind: "anyOf", permissions: ["finance:reports"] });
   });
 
   it("does not route logistics-only staff into the protected order investigation page", () => {

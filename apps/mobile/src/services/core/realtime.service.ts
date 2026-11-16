@@ -1,5 +1,5 @@
 import { apiConfig, shouldUseMockForPath } from "@/config/api.config";
-import { api } from "@/services/apiClient.service";
+import { api } from "@/services/core/apiClient.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { RealtimeServerEvent } from "@/types";
 

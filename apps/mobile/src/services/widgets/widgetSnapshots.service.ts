@@ -1,7 +1,7 @@
 import { apiConfig } from "@/config/api.config";
 import { moneyWidgetKinds, widgetEndpoints, widgetKinds, widgetStorageKeys, type WidgetKind } from "@/config/widgets.config";
 import { ApiError } from "@/errors/api.error";
-import { api } from "@/services/apiClient.service";
+import { api } from "@/services/core/apiClient.service";
 import type { WidgetPayloads, WidgetSessionDescriptor, WidgetSnapshot } from "@/types/widget.type";
 
 import { writeWidgetSharedValue } from "./widgetNativeBridge.service";

@@ -1,6 +1,6 @@
 const mockPost = jest.fn();
 
-jest.mock("@/services/apiClient.service", () => ({ api: { post: (...args: unknown[]) => mockPost(...args) } }));
+jest.mock("@/services/core/apiClient.service", () => ({ api: { post: (...args: unknown[]) => mockPost(...args) } }));
 jest.mock("@/config/api.config", () => ({ apiConfig: { baseUrl: "https://api.nantty.test" }, shouldUseMockForPath: () => false }));
 jest.mock("@/store/auth.store", () => ({ useAuthStore: { getState: () => ({ accessToken: "session-access-token" }) } }));
 jest.mock("../realtimeMockEmitter.service", () => ({ startMockRealtimeEventEmitter: () => () => undefined }));

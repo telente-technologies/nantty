@@ -23,6 +23,7 @@ import (
 	auditlogservices "nantty/modules/admin/src/modules/auditLog/services"
 	eventopsroutes "nantty/modules/admin/src/modules/eventOperations/routes"
 	eventopsservices "nantty/modules/admin/src/modules/eventOperations/services"
+	financereports "nantty/modules/admin/src/modules/financeReports"
 	platformmetrics "nantty/modules/admin/src/modules/platformMetrics"
 	platformsettings "nantty/modules/admin/src/modules/platformSettings"
 	seeddefaultsettings "nantty/modules/admin/src/modules/platformSettings/commands/seedDefaultSettings"
@@ -117,6 +118,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	staffauthmodule.MountRoutes(routes, module.container)
 	staffaccount.MountRoutes(routes, module.container)
 	platformmetrics.MountRoutes(routes, module.container)
+	financereports.MountRoutes(routes, module.container)
 	staffadmins.MountRoutes(routes, module.container)
 	platformsettings.MountRoutes(routes, module.container)
 	auditlog.MountRoutes(routes, module.container)

@@ -9,7 +9,7 @@ import {
 } from "@/hooks/useCreatorStatus.hook";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { generateIdempotencyKey } from "@/services/core/apiClient.service";
-import { reportsService } from "@/services/reports.service";
+import { reportsService } from "@/services/moderation/reports.service";
 import { useShareToChat } from "@/components/chatSafety/shareToChat.hook";
 import {
   spacesService,

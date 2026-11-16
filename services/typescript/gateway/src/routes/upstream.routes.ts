@@ -103,7 +103,9 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/mentions/", upstream: "social", authentication: "optional" },
   { pathPrefix: "/api/v1/places/search", upstream: "social", authentication: "required", methods: ["GET"], exactPathOnly: true },
   { pathPrefix: "/api/v1/conversations", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/group-invitations", upstream: "social", authentication: "required" },
   { pathPrefix: "/api/v1/channels", upstream: "social", authentication: "required" },
+  { pathPrefix: "/api/v1/channel-invitations", upstream: "social", authentication: "required" },
   { pathPrefix: "/api/v1/messages/", upstream: "social", authentication: "required" },
   { pathPrefix: "/api/v1/chat/", upstream: "social", authentication: "required" },
   { pathPrefix: "/api/v1/reports", upstream: "social", authentication: "required", methods: ["POST"] },
@@ -218,7 +220,6 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/seller/staff", upstream: "commerce", authentication: "required" },
   { pathPrefix: "/api/v1/seller/audit-log", upstream: "commerce", authentication: "required", methods: ["GET"] },
   { pathPrefix: "/api/v1/seller/nantty-users", upstream: "commerce", authentication: "required", methods: ["GET"] },
-  { pathPrefix: "/api/v1/seller/nantty-users", upstream: "commerce", authentication: "required", methods: ["GET"] },
   { pathPrefix: "/api/v1/creators/earnings/convert", upstream: "money", authentication: "required", methods: ["POST"] },
   { pathPrefix: "/api/v1/admin/ledger/", upstream: "money", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/payments/", upstream: "money", authentication: "optional" },
@@ -227,6 +228,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/admin/orders/*/escrow/release", upstream: "money", authentication: "optional", methods: ["POST"] },
   { pathPrefix: "/api/v1/admin/escrows/", upstream: "money", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/admin/orders", upstream: "commerce", authentication: "optional", methods: ["GET"] },
+  { pathPrefix: "/api/v1/admin/logistics/", upstream: "commerce", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/refunds", upstream: "commerce", authentication: "optional", methods: ["GET", "POST"] },
   { pathPrefix: "/api/v1/admin/catalog/categories", upstream: "commerce", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/catalog/features", upstream: "commerce", authentication: "optional" },
@@ -257,6 +259,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/admin/ip-claims", upstream: "trust", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/live-incidents", upstream: "trust", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/security/", upstream: "trust", authentication: "optional" },
+  { pathPrefix: "/api/v1/admin/finance/", upstream: "identity", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/", upstream: "identity", authentication: "optional" },
 ];
 

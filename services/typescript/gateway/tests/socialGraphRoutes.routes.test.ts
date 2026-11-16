@@ -22,6 +22,16 @@ describe("social graph routes", () => {
     expect(resolveUpstreamRouteForRequest("GET", "/api/v1/users/me/connections")).toMatchObject({ upstream: "social", authentication: "optional" });
     expect(resolveUpstreamRouteForRequest("POST", "/api/v1/channels")).toMatchObject({ upstream: "social", authentication: "required" });
     expect(resolveUpstreamRouteForRequest("DELETE", `/api/v1/channels/${storeId}/subscribe`)).toMatchObject({ upstream: "social", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/channel-invitations")).toMatchObject({ upstream: "social", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("POST", `/api/v1/channel-invitations/${storeId}/accept`)).toMatchObject({ upstream: "social", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/group-invitations")).toMatchObject({ upstream: "social", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("POST", `/api/v1/group-invitations/${storeId}/accept`)).toMatchObject({ upstream: "social", authentication: "required" });
+    expect(classifyRequestForRateLimit("POST", `/api/v1/channel-invitations/${storeId}/accept`)).toBe("conversationWrite");
+    expect(classifyRequestForRateLimit("POST", `/api/v1/group-invitations/${storeId}/accept`)).toBe("conversationWrite");
+  });
+
+  it("routes admin logistics shipments to commerce", () => {
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/admin/logistics/shipments")).toMatchObject({ upstream: "commerce", authentication: "optional" });
   });
 
   it("serves the profile avatar story and live status to guests and members, without touching identity", () => {
@@ -46,5 +56,11 @@ describe("social graph routes", () => {
   it("never exposes social internal routes", () => {
     expect(resolveUpstreamRouteForRequest("GET", `/api/v1/internal/conversations/${storeId}/members/${storeId}`)).toBeUndefined();
     expect(resolveUpstreamRouteForRequest("GET", `/api/v1/internal/stores/${storeId}/follow-stats`)).toBeUndefined();
+  });
+
+  it("routes admin finance endpoints to identity with the financeRead rate limit", () => {
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/admin/finance/overview")).toMatchObject({ upstream: "identity" });
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/admin/finance/reports/export")).toMatchObject({ upstream: "identity" });
+    expect(classifyRequestForRateLimit("GET", "/api/v1/admin/finance/overview")).toBe("financeRead");
   });
 });
