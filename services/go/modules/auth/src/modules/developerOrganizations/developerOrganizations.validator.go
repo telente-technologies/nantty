@@ -7,7 +7,7 @@ import (
 
 var organizationSlugPattern = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
 
-func validateCreateRequest(request CreateRequest) error {
+func ValidateCreateRequest(request CreateRequest) error {
 	name := strings.TrimSpace(request.Name)
 	if len(name) < 2 || len(name) > 80 {
 		return errInvalidName

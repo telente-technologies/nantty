@@ -113,7 +113,7 @@ func (c SpacesController) SendCoinDonation(w http.ResponseWriter, r *http.Reques
 		SenderUserId: actor.UserId.String(), SpaceId: id.String(), Coins: input.Coins, IdempotencyKey: r.Header.Get("Idempotency-Key"),
 	})
 	if err != nil {
-		c.responder().Error(w, r, spaceDonationError(err))
+		c.responder().Error(w, r, SpaceDonationError(err))
 		return
 	}
 	httpserver.WriteJsonResponse(w, http.StatusCreated, map[string]any{
@@ -124,7 +124,7 @@ func (c SpacesController) SendCoinDonation(w http.ResponseWriter, r *http.Reques
 	})
 }
 
-func spaceDonationError(err error) error {
+func SpaceDonationError(err error) error {
 	var policy *interfaces.DonationAmountPolicyError
 	switch {
 	case errors.As(err, &policy):

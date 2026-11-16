@@ -53,7 +53,7 @@ func checkmarkLabel(planCode string) string {
 	return strings.ToUpper(color[:1]) + color[1:] + " checkmark"
 }
 
-func bookPeriodPrice(monthlyMinor, yearlyMinor int64, interval string, yearlyDiscountBps int64) int64 {
+func BookPeriodPrice(monthlyMinor, yearlyMinor int64, interval string, yearlyDiscountBps int64) int64 {
 	if interval != "year" {
 		return monthlyMinor
 	}
@@ -91,7 +91,7 @@ func (billing Billing) PlanNextPeriod(ctx context.Context, client *ent.Client, r
 		return NextPeriodPlan{}, ErrWebCurrencyDisabled
 	}
 	_, pricing := billing.rules(ctx)
-	book := bookPeriodPrice(price.AmountFor("web", "month"), price.AmountFor("web", "year"), interval, pricing.Pricing.YearlyDiscountBps)
+	book := BookPeriodPrice(price.AmountFor("web", "month"), price.AmountFor("web", "year"), interval, pricing.Pricing.YearlyDiscountBps)
 	plan := NextPeriodPlan{PlanCode: planCode, Interval: interval, Currency: price.Currency, BookPriceMinor: book, PeriodPriceMinor: book, BillingNote: webBillingNote(price)}
 	if planCode == row.PlanCode && interval == row.Interval.String() {
 		decision := models.DecideRenewalPrice(models.RenewalPriceInput{

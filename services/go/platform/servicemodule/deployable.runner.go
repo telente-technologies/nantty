@@ -53,7 +53,7 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 	if err := environment.CombinedConfigurationError(); err != nil {
 		return err
 	}
-	registerSharedDependencyReadiness(dependencies.Health, pingDenylist, deployableName, logger)
+	RegisterSharedDependencyReadiness(dependencies.Health, pingDenylist, deployableName, logger)
 	isProduction := appEnv == "production"
 	mux := http.NewServeMux()
 	dependencies.Health.MountLivenessAndReadinessRoutes(mux)
@@ -80,7 +80,7 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 	for _, module := range modules {
 		workers = append(workers, module.RunBackgroundWorkersUntilContextDone)
 	}
-	return runWorkersAndServerThenShutDown(ctx, orderedRun{
+	return RunWithOrderedShutdown(ctx, ShutdownPlan{
 		Workers: workers,
 		Serve: func(serveContext context.Context) error {
 			return httpserver.RunHttpServerUntilContextDone(serveContext, httpserver.ServerOptions{Address: address, Handler: handler, Logger: logger})
@@ -131,7 +131,7 @@ func registerSessionDenylistFromEnvironment(environment *config.EnvironmentReade
 	return func() { _ = denylist.Close() }, denylist.Ping, nil
 }
 
-func registerSharedDependencyReadiness(registry *health.Registry, pingDenylist health.ReadinessCheck, deployableName string, logger *slog.Logger) {
+func RegisterSharedDependencyReadiness(registry *health.Registry, pingDenylist health.ReadinessCheck, deployableName string, logger *slog.Logger) {
 	if pingDenylist != nil {
 		registry.AddReadinessCheck("valkey", pingDenylist)
 	}

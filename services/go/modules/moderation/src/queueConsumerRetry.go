@@ -8,9 +8,9 @@ import (
 	platformevents "nantty/platform/events"
 )
 
-type queueConsumerOpener func(context.Context, platformevents.MessageBusSelection) (platformevents.JobQueue, platformevents.QueueConsumer, error)
+type QueueConsumerOpener func(context.Context, platformevents.MessageBusSelection) (platformevents.JobQueue, platformevents.QueueConsumer, error)
 
-func openQueueConsumerWithRetry(ctx context.Context, logger *slog.Logger, name string, bus platformevents.MessageBusSelection, open queueConsumerOpener, initialDelay time.Duration) platformevents.QueueConsumer {
+func OpenQueueConsumerWithRetry(ctx context.Context, logger *slog.Logger, name string, bus platformevents.MessageBusSelection, open QueueConsumerOpener, initialDelay time.Duration) platformevents.QueueConsumer {
 	delay := initialDelay
 	for ctx.Err() == nil {
 		_, queues, err := open(ctx, bus)

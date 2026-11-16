@@ -14,11 +14,11 @@ const (
 	RetryExchange           = "nantty.retry"
 	DeadLetterExchange      = "nantty.dlx"
 	MaximumDeliveryAttempts = 5
-	attemptHeader           = "x-nantty-attempt"
-	lastErrorHeader         = "x-nantty-last-error"
-	subjectHeader           = "x-nantty-subject"
-	envelopeSchemaHeader    = "x-nantty-schema"
-	envelopeSchemaVersion   = "envelope.v1"
+	AttemptHeader           = "x-nantty-attempt"
+	LastErrorHeader         = "x-nantty-last-error"
+	SubjectHeader           = "x-nantty-subject"
+	EnvelopeSchemaHeader    = "x-nantty-schema"
+	EnvelopeSchemaVersion   = "envelope.v1"
 )
 
 type RetryTier struct {
@@ -58,8 +58,8 @@ func DelayTierAtMost(delay time.Duration) (RetryTier, bool) {
 	return chosen, found
 }
 
-func deliveryAttemptFromHeaders(headers amqp.Table) int {
-	switch value := headers[attemptHeader].(type) {
+func DeliveryAttemptFromHeaders(headers amqp.Table) int {
+	switch value := headers[AttemptHeader].(type) {
 	case int:
 		return value
 	case int8:
@@ -87,11 +87,11 @@ func headersForRetry(original amqp.Table, failedAttempt int, failure error) amqp
 		}
 		headers[key] = value
 	}
-	headers[attemptHeader] = int32(failedAttempt)
+	headers[AttemptHeader] = int32(failedAttempt)
 	message := failure.Error()
 	if len(message) > 256 {
 		message = message[:256]
 	}
-	headers[lastErrorHeader] = message
+	headers[LastErrorHeader] = message
 	return headers
 }

@@ -48,7 +48,7 @@ func ConvertCaseToView(row *ent.VerificationCase, includeReviewDetail bool) Case
 	view := CaseView{
 		Id: row.ID.String(), ProfileId: row.ProfileID.String(), AccountId: row.AccountID.String(), Color: string(row.Color), PlanCode: row.PlanCode,
 		PaymentChannel: row.PaymentChannel, Status: string(row.Status), RefundStatus: string(row.RefundStatus), ConsentGiven: row.ConsentAt != nil,
-		RefundMethod: RefundMethodFor(row.PaymentChannel, refundsOnRejection(row.PlanCode)), RefundScope: RefundScopeFor(row.PlanCode),
+		RefundMethod: RefundMethodFor(row.PaymentChannel, RefundsOnRejection(row.PlanCode)), RefundScope: RefundScopeFor(row.PlanCode),
 		DocumentType: row.DocumentType, DocumentCountry: row.DocumentCountry, DecisionReason: row.DecisionReason, CreatedAt: row.CreatedAt.UTC().Format(time.RFC3339),
 		DecidedAt: optionalTime(row.DecidedAt), VerifiedAt: optionalTime(row.VerifiedAt), DecisionReasons: []string{}, FraudSignals: []string{},
 		CanRetry: row.Status == "awaiting_capture" || row.Status == "awaiting_consent",

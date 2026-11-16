@@ -29,11 +29,19 @@ var statusesByBuyerFilter = map[string][]string{
 	"disputed":  {enums.StatusDisputed},
 }
 
+func StatusesForBuyerFilter(filter string) ([]string, bool) {
+	statuses, found := statusesByBuyerFilter[filter]
+	if !found {
+		return nil, false
+	}
+	return append([]string(nil), statuses...), true
+}
+
 func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.CursorPage[types.OrderView], error) {
 	empty := httpserver.CursorPage[types.OrderView]{}
 	conditions := []predicate.OrderGroup{ordergroup.BuyerAccountID(query.BuyerId)}
 	if query.Status != "" {
-		statuses, known := statusesByBuyerFilter[query.Status]
+		statuses, known := StatusesForBuyerFilter(query.Status)
 		if !known {
 			return empty, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "status", Message: "unknown status"}})
 		}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"nantty/deployables/goMoney/moneyMigrations"
 	"nantty/modules/creators"
 	"nantty/modules/escrow"
 	"nantty/modules/ledger"
@@ -15,7 +16,7 @@ import (
 
 func main() {
 	if len(os.Args) == 2 && os.Args[1] == "--migrate-money" {
-		if err := runMoneyMigrations(os.Getenv("MONEY_MIGRATION_DATABASE_URL")); err != nil {
+		if err := moneyMigrations.RunMoneyMigrations(os.Getenv("MONEY_MIGRATION_DATABASE_URL")); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}

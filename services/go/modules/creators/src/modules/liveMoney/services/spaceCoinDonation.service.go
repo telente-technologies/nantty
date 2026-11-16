@@ -39,7 +39,7 @@ type SpaceCoinDonationReceipt struct {
 	Replayed         bool
 }
 
-func validateSpaceCoinDonation(request SpaceCoinDonationRequest, minimumCoins, maximumCoins int64) error {
+func ValidateSpaceCoinDonation(request SpaceCoinDonationRequest, minimumCoins, maximumCoins int64) error {
 	if request.SenderUserID == "" || request.SpaceID == "" || len(request.SenderUserID) > 80 || len(request.SpaceID) > 80 || !ledgerutils.IsValidIdempotencyKey(request.IdempotencyKey) {
 		return invalidArgument("sender, space and a valid idempotency key are required")
 	}
@@ -49,7 +49,7 @@ func validateSpaceCoinDonation(request SpaceCoinDonationRequest, minimumCoins, m
 	return nil
 }
 
-func spaceCoinDonationSplit(coins, minimumCoins, maximumCoins, platformFeeBps int64) (models.GiftSplit, error) {
+func SpaceCoinDonationSplit(coins, minimumCoins, maximumCoins, platformFeeBps int64) (models.GiftSplit, error) {
 	if _, err := models.SplitSpaceDonationCoins(coins, 0, minimumCoins, maximumCoins); err != nil {
 		return models.GiftSplit{}, err
 	}
@@ -58,7 +58,7 @@ func spaceCoinDonationSplit(coins, minimumCoins, maximumCoins, platformFeeBps in
 
 func (live LiveMoney) DonateSpaceCoins(ctx context.Context, request SpaceCoinDonationRequest) (SpaceCoinDonationReceipt, error) {
 	minimum, maximum := live.spaceDonationBounds()
-	if err := validateSpaceCoinDonation(request, minimum, maximum); err != nil {
+	if err := ValidateSpaceCoinDonation(request, minimum, maximum); err != nil {
 		return SpaceCoinDonationReceipt{}, err
 	}
 	requestHash := ledgerutils.HashRequestFingerprint("space-coin-donation", request.SpaceID, request.Coins)
@@ -124,7 +124,7 @@ func (live LiveMoney) donateSpaceCoinsInTransaction(ctx context.Context, transac
 	}
 
 	minimum, maximum := live.spaceDonationBounds()
-	split, err := spaceCoinDonationSplit(request.Coins, minimum, maximum, live.Container.Settings.Revenue.CoinTransferFeeBps)
+	split, err := SpaceCoinDonationSplit(request.Coins, minimum, maximum, live.Container.Settings.Revenue.CoinTransferFeeBps)
 	if err != nil {
 		return SpaceCoinDonationReceipt{}, fmt.Errorf("invalid coin transfer fee configuration: %w", err)
 	}

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -14,15 +15,24 @@ import (
 )
 
 var (
-	errInvalidName                = errors.New("organization name is invalid")
-	errInvalidSlug                = errors.New("organization slug is invalid")
-	errSlugTaken                  = errors.New("organization slug is already in use")
-	errInvalidAccount             = errors.New("authenticated account is invalid")
-	errOrganizationAccessNotFound = errors.New("organization access was not found")
-	errOrganizationForbidden      = errors.New("organization capability is required")
-	errInvalidRole                = errors.New("organization role is invalid")
-	errOwnershipTransferRequired  = errors.New("organization ownership must be transferred separately")
-	errIdempotencyNeeded          = errors.New("a valid idempotency key is required")
+	errInvalidName                  = errors.New("organization name is invalid")
+	errInvalidSlug                  = errors.New("organization slug is invalid")
+	errSlugTaken                    = errors.New("organization slug is already in use")
+	errInvalidAccount               = errors.New("authenticated account is invalid")
+	errOrganizationAccessNotFound   = errors.New("organization access was not found")
+	errOrganizationForbidden        = errors.New("organization capability is required")
+	errInvalidRole                  = errors.New("organization role is invalid")
+	errOwnershipTransferRequired    = errors.New("organization ownership must be transferred separately")
+	errOwnershipTargetNotFound      = errors.New("organization ownership target was not found")
+	errOwnershipTargetInvalid       = errors.New("organization ownership target is invalid")
+	errTransferConfirmationRequired = errors.New("ownership transfer confirmation is required")
+	errIdempotencyNeeded            = errors.New("a valid idempotency key is required")
+	errInvitationTargetUnavailable  = errors.New("no eligible account matches this invitation")
+	errInvitationAlreadyExists      = errors.New("an active invitation or membership already exists")
+	errInvitationNotFound           = errors.New("the organization invitation was not found")
+	errInvitationExpired            = errors.New("the organization invitation has expired")
+	errInvitationNotPending         = errors.New("the organization invitation is no longer pending")
+	errInvalidInvitation            = errors.New("organization invitation details are invalid")
 )
 
 type Service struct{ Container *container.Container }
@@ -87,7 +97,7 @@ func (service Service) Update(ctx context.Context, accountID, organizationID str
 	if err != nil {
 		return Organization{}, errOrganizationAccessNotFound
 	}
-	if err := validateCreateRequest(CreateRequest{Name: request.Name, Slug: request.Slug}); err != nil {
+	if err := ValidateCreateRequest(CreateRequest{Name: request.Name, Slug: request.Slug}); err != nil {
 		return Organization{}, err
 	}
 	tx, err := service.Container.Database.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
@@ -126,8 +136,8 @@ func (service Service) Update(ctx context.Context, accountID, organizationID str
 		if _, err := tx.ExecContext(ctx, `
 			INSERT INTO developer_organization_audit_logs
 			(id, organization_id, actor_account_id, actor_role, action, subject_type, subject_id, before_state, after_state, created_at)
-			VALUES ($1, $2, $3, $4, 'organization.updated', 'organization', $2, $5, $6, $7)`,
-			uuid.New(), organizationIDValue, account, result.Role, before, after, service.Container.Now()); err != nil {
+			VALUES ($1, $2, $3, $4, 'organization.updated', 'organization', $8, $5, $6, $7)`,
+			uuid.New(), organizationIDValue, account, result.Role, before, after, service.Container.Now(), organizationIDValue.String()); err != nil {
 			return Organization{}, err
 		}
 	}
@@ -147,8 +157,13 @@ func (service Service) AuditLog(ctx context.Context, accountID, organizationID s
 	if err != nil {
 		return nil, errOrganizationAccessNotFound
 	}
+	tx, err := service.Container.Database.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
 	var actorRole string
-	err = service.Container.Database.QueryRowContext(ctx, `
+	err = tx.QueryRowContext(ctx, `
 		SELECT role FROM developer_organization_memberships
 		WHERE account_id = $1 AND organization_id = $2`, account, organization).Scan(&actorRole)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -163,7 +178,7 @@ func (service Service) AuditLog(ctx context.Context, accountID, organizationID s
 	if limit < 1 || limit > 100 {
 		limit = 50
 	}
-	rows, err := service.Container.Database.QueryContext(ctx, `
+	rows, err := tx.QueryContext(ctx, `
 		SELECT id, actor_account_id, actor_role, action, subject_type, subject_id, before_state, after_state, created_at
 		FROM developer_organization_audit_logs
 		WHERE organization_id = $1
@@ -184,7 +199,16 @@ func (service Service) AuditLog(ctx context.Context, accountID, organizationID s
 		entry.AfterState = append(json.RawMessage{}, after...)
 		entries = append(entries, entry)
 	}
-	return entries, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return entries, nil
 }
 
 func (service Service) Access(ctx context.Context, accountID, organizationID string) (OrganizationAccess, error) {
@@ -207,12 +231,14 @@ func (service Service) Access(ctx context.Context, accountID, organizationID str
 	if err != nil {
 		return OrganizationAccess{}, err
 	}
-	organizationCapabilities, applicationCapabilities := capabilitiesForRole(role)
+	organizationCapabilities, _ := CapabilitiesForRole(role)
+	applicationCapabilities, eligibleApplicationCapabilities := ApplicationCapabilitiesForGrant(role, nil)
 	return OrganizationAccess{
 		OrganizationID: organization.String(), Role: role,
-		OrganizationCapabilities: organizationCapabilities,
-		ApplicationCapabilities:  applicationCapabilities,
-		ApplicationGrantRequired: len(applicationCapabilities) > 0,
+		OrganizationCapabilities:        organizationCapabilities,
+		ApplicationCapabilities:         applicationCapabilities,
+		EligibleApplicationCapabilities: eligibleApplicationCapabilities,
+		ApplicationGrantRequired:        len(eligibleApplicationCapabilities) > 0,
 	}, nil
 }
 
@@ -240,7 +266,7 @@ func (service Service) Roles(ctx context.Context, accountID, organizationID stri
 	roleNames := []string{"owner", "admin", "developer", "analyst", "billing"}
 	roles := make([]OrganizationRole, 0, len(roleNames))
 	for _, name := range roleNames {
-		organizationCapabilities, applicationCapabilities := capabilitiesForRole(name)
+		organizationCapabilities, applicationCapabilities := CapabilitiesForRole(name)
 		roles = append(roles, OrganizationRole{
 			Name: name, OrganizationCapabilities: organizationCapabilities,
 			ApplicationCapabilities: applicationCapabilities,
@@ -347,7 +373,7 @@ func (service Service) Member(ctx context.Context, accountID, organizationID, me
 	if err != nil {
 		return OrganizationMemberDetail{}, err
 	}
-	organizationCapabilities, applicationCapabilities := capabilitiesForRole(detail.Role)
+	organizationCapabilities, applicationCapabilities := CapabilitiesForRole(detail.Role)
 	detail.OrganizationRole = OrganizationRole{
 		Name: detail.Role, OrganizationCapabilities: organizationCapabilities,
 		ApplicationCapabilities: applicationCapabilities,
@@ -423,6 +449,9 @@ func (service Service) UpdateMemberRole(ctx context.Context, accountID, organiza
 		if _, err := tx.ExecContext(ctx, `UPDATE developer_organization_memberships SET role = $1 WHERE id = $2 AND organization_id = $3`, request.Role, membership, organization); err != nil {
 			return OrganizationMemberDetail{}, err
 		}
+		if err := pruneApplicationGrantsForRole(ctx, tx, organization, account, membership, actorRole, request.Role, now); err != nil {
+			return OrganizationMemberDetail{}, err
+		}
 		if _, err := tx.ExecContext(ctx, `
 			INSERT INTO developer_organization_audit_logs
 			(id, organization_id, actor_account_id, actor_role, action, subject_type, subject_id, before_state, after_state, created_at)
@@ -441,7 +470,7 @@ func (service Service) UpdateMemberRole(ctx context.Context, accountID, organiza
 	if err != nil {
 		return OrganizationMemberDetail{}, err
 	}
-	organizationCapabilities, applicationCapabilities := capabilitiesForRole(detail.Role)
+	organizationCapabilities, applicationCapabilities := CapabilitiesForRole(detail.Role)
 	detail.OrganizationRole = OrganizationRole{
 		Name: detail.Role, OrganizationCapabilities: organizationCapabilities,
 		ApplicationCapabilities: applicationCapabilities,
@@ -521,6 +550,88 @@ func (service Service) RemoveMember(ctx context.Context, accountID, organization
 	return tx.Commit()
 }
 
+func (service Service) TransferOwnership(ctx context.Context, accountID, organizationID string, request TransferOwnershipRequest) (TransferOwnershipResult, error) {
+	account, err := uuid.Parse(accountID)
+	if err != nil {
+		return TransferOwnershipResult{}, errInvalidAccount
+	}
+	organization, err := uuid.Parse(organizationID)
+	if err != nil {
+		return TransferOwnershipResult{}, errOrganizationAccessNotFound
+	}
+	targetMembership, err := uuid.Parse(request.MemberID)
+	if err != nil {
+		return TransferOwnershipResult{}, errOwnershipTargetNotFound
+	}
+	if request.Confirmation != "TRANSFER OWNERSHIP" {
+		return TransferOwnershipResult{}, errTransferConfirmationRequired
+	}
+	tx, err := service.Container.Database.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return TransferOwnershipResult{}, err
+	}
+	defer tx.Rollback()
+	var lockedOrganization uuid.UUID
+	if err := tx.QueryRowContext(ctx, `SELECT id FROM developer_organizations WHERE id = $1 FOR UPDATE`, organization).Scan(&lockedOrganization); errors.Is(err, sql.ErrNoRows) {
+		return TransferOwnershipResult{}, errOrganizationAccessNotFound
+	} else if err != nil {
+		return TransferOwnershipResult{}, err
+	}
+	var actorMembership uuid.UUID
+	var actorRole string
+	err = tx.QueryRowContext(ctx, `
+		SELECT id, role FROM developer_organization_memberships
+		WHERE account_id = $1 AND organization_id = $2 FOR UPDATE`, account, organization).Scan(&actorMembership, &actorRole)
+	if errors.Is(err, sql.ErrNoRows) {
+		return TransferOwnershipResult{}, errOrganizationAccessNotFound
+	}
+	if err != nil {
+		return TransferOwnershipResult{}, err
+	}
+	if actorRole != "owner" {
+		return TransferOwnershipResult{}, errOrganizationForbidden
+	}
+	var targetAccount uuid.UUID
+	var targetRole string
+	err = tx.QueryRowContext(ctx, `
+		SELECT account_id, role FROM developer_organization_memberships
+		WHERE id = $1 AND organization_id = $2 FOR UPDATE`, targetMembership, organization).Scan(&targetAccount, &targetRole)
+	if errors.Is(err, sql.ErrNoRows) {
+		return TransferOwnershipResult{}, errOwnershipTargetNotFound
+	}
+	if err != nil {
+		return TransferOwnershipResult{}, err
+	}
+	if targetAccount == account || targetRole == "owner" {
+		return TransferOwnershipResult{}, errOwnershipTargetInvalid
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE developer_organization_memberships SET role = 'admin' WHERE id = $1`, actorMembership); err != nil {
+		return TransferOwnershipResult{}, err
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE developer_organization_memberships SET role = 'owner' WHERE id = $1`, targetMembership); err != nil {
+		return TransferOwnershipResult{}, err
+	}
+	before, err := json.Marshal(map[string]string{"previousOwnerMembershipId": actorMembership.String(), "newOwnerPreviousRole": targetRole})
+	if err != nil {
+		return TransferOwnershipResult{}, err
+	}
+	after, err := json.Marshal(map[string]string{"previousOwnerMembershipId": actorMembership.String(), "newOwnerMembershipId": targetMembership.String()})
+	if err != nil {
+		return TransferOwnershipResult{}, err
+	}
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO developer_organization_audit_logs
+		(id, organization_id, actor_account_id, actor_role, action, subject_type, subject_id, before_state, after_state, created_at)
+		VALUES ($1, $2, $3, 'owner', 'organization.ownership_transferred', 'organization_membership', $4, $5, $6, $7)`,
+		uuid.New(), organization, account, targetMembership.String(), before, after, service.Container.Now()); err != nil {
+		return TransferOwnershipResult{}, err
+	}
+	if err := tx.Commit(); err != nil {
+		return TransferOwnershipResult{}, err
+	}
+	return TransferOwnershipResult{PreviousOwnerMembershipID: actorMembership.String(), NewOwnerMembershipID: targetMembership.String()}, nil
+}
+
 func (service Service) Create(ctx context.Context, accountID, idempotencyKey string, request CreateRequest) (Organization, bool, error) {
 	account, err := uuid.Parse(accountID)
 	if err != nil {
@@ -529,7 +640,7 @@ func (service Service) Create(ctx context.Context, accountID, idempotencyKey str
 	if len(idempotencyKey) < 16 || len(idempotencyKey) > 128 || strings.TrimSpace(idempotencyKey) != idempotencyKey {
 		return Organization{}, false, errIdempotencyNeeded
 	}
-	if err := validateCreateRequest(request); err != nil {
+	if err := ValidateCreateRequest(request); err != nil {
 		return Organization{}, false, err
 	}
 	tx, err := service.Container.Database.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
@@ -539,13 +650,14 @@ func (service Service) Create(ctx context.Context, accountID, idempotencyKey str
 	defer tx.Rollback()
 	now := service.Container.Now()
 	var previousID sql.NullString
+	if _, err := tx.ExecContext(ctx, `DELETE FROM developer_organization_idempotency WHERE account_id = $1 AND idempotency_key = $2 AND expires_at <= $3`, account, idempotencyKey, now); err != nil {
+		return Organization{}, false, fmt.Errorf("remove expired idempotency record: %w", err)
+	}
 	err = tx.QueryRowContext(ctx, `
-		INSERT INTO developer_organization_idempotency (account_id, idempotency_key, expires_at)
-		VALUES ($1, $2, $3)
-		ON CONFLICT (account_id, idempotency_key) DO UPDATE
-		SET organization_id = NULL, created_at = EXCLUDED.created_at, expires_at = EXCLUDED.expires_at
-		WHERE developer_organization_idempotency.expires_at <= $4
-		RETURNING organization_id`, account, idempotencyKey, now.Add(24*time.Hour), now).Scan(&previousID)
+		INSERT INTO developer_organization_idempotency (account_id, idempotency_key, created_at, expires_at)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (account_id, idempotency_key) DO NOTHING
+		RETURNING organization_id`, account, idempotencyKey, now, now.Add(24*time.Hour)).Scan(&previousID)
 	if errors.Is(err, sql.ErrNoRows) {
 		var organizationID string
 		if err := tx.QueryRowContext(ctx, `SELECT organization_id FROM developer_organization_idempotency WHERE account_id = $1 AND idempotency_key = $2`, account, idempotencyKey).Scan(&organizationID); err != nil {
@@ -561,7 +673,7 @@ func (service Service) Create(ctx context.Context, accountID, idempotencyKey str
 		return organization, true, nil
 	}
 	if err != nil {
-		return Organization{}, false, err
+		return Organization{}, false, fmt.Errorf("reserve idempotency record: %w", err)
 	}
 	organizationID, err := uuid.NewV7()
 	if err != nil {
@@ -573,21 +685,21 @@ func (service Service) Create(ctx context.Context, accountID, idempotencyKey str
 		if isUniqueViolation(err) {
 			return Organization{}, false, errSlugTaken
 		}
-		return Organization{}, false, err
+		return Organization{}, false, fmt.Errorf("insert developer organization: %w", err)
 	}
 	if _, err := tx.ExecContext(ctx, `INSERT INTO developer_organization_memberships (id, organization_id, account_id, role, created_at) VALUES ($1, $2, $3, 'owner', $4)`, uuid.New(), organizationID, account, now); err != nil {
-		return Organization{}, false, err
+		return Organization{}, false, fmt.Errorf("insert developer organization owner: %w", err)
 	}
 	if _, err := tx.ExecContext(ctx, `UPDATE developer_organization_idempotency SET organization_id = $3 WHERE account_id = $1 AND idempotency_key = $2`, account, idempotencyKey, organizationID); err != nil {
-		return Organization{}, false, err
+		return Organization{}, false, fmt.Errorf("link organization idempotency record: %w", err)
 	}
 	after, _ := json.Marshal(map[string]string{"name": name, "slug": request.Slug})
 	if _, err := tx.ExecContext(ctx, `
 		INSERT INTO developer_organization_audit_logs
 		(id, organization_id, actor_account_id, actor_role, action, subject_type, subject_id, before_state, after_state, created_at)
-		VALUES ($1, $2, $3, 'owner', 'organization.created', 'organization', $2, '{}'::jsonb, $4, $5)`,
-		uuid.New(), organizationID, account, after, now); err != nil {
-		return Organization{}, false, err
+		VALUES ($1, $2, $3, 'owner', 'organization.created', 'organization', $6, '{}'::jsonb, $4, $5)`,
+		uuid.New(), organizationID, account, after, now, organizationID.String()); err != nil {
+		return Organization{}, false, fmt.Errorf("record organization creation audit event: %w", err)
 	}
 	if err := tx.Commit(); err != nil {
 		return Organization{}, false, err

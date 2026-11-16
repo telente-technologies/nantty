@@ -67,7 +67,7 @@ type TipReceipt struct {
 	Replayed    bool   `json:"-"`
 }
 
-func (money CreatorMoney) resolveTipCreator(ctx context.Context, request TipRequest) (string, error) {
+func (money CreatorMoney) ResolveTipCreator(ctx context.Context, request TipRequest) (string, error) {
 	if request.TargetType == "profile" {
 		if _, err := uuid.Parse(request.TargetId); err != nil {
 			return "", ErrTipTargetNotFound
@@ -100,7 +100,7 @@ func (money CreatorMoney) SendTip(ctx context.Context, request TipRequest) (TipR
 	if utf8.RuneCountInString(request.Note) > MaximumTipNoteRunes {
 		return TipReceipt{}, httpserver.NewApiError(http.StatusBadRequest, "VALIDATION_FAILED", "note must be at most 280 characters")
 	}
-	creatorId, err := money.resolveTipCreator(ctx, request)
+	creatorId, err := money.ResolveTipCreator(ctx, request)
 	if err != nil {
 		return TipReceipt{}, err
 	}
@@ -114,7 +114,7 @@ func (money CreatorMoney) SendTip(ctx context.Context, request TipRequest) (TipR
 	if blocked {
 		return TipReceipt{}, ErrTipBlocked
 	}
-	requestHash := tipRequestHash(request)
+	requestHash := TipRequestFingerprint(request)
 	var receipt TipReceipt
 	err = databases.RunInMoneyTransaction(ctx, money.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		receipt, err = money.sendTipInTransaction(ctx, transaction, request, creatorId, requestHash)
@@ -152,7 +152,7 @@ func (money CreatorMoney) sendTipInTransaction(ctx context.Context, transaction 
 	if !approved {
 		return TipReceipt{}, ErrCreatorCannotEarn
 	}
-	split, err := splitTipCoins(request.TargetType, request.Coins, share, money.Container.Settings.Revenue.CoinTransferFeeBps)
+	split, err := SplitTipCoins(request.TargetType, request.Coins, share, money.Container.Settings.Revenue.CoinTransferFeeBps)
 	if err != nil {
 		if errors.Is(err, models.ErrInvalidCoinFeeBps) {
 			return TipReceipt{}, fmt.Errorf("invalid coin transfer fee configuration: %w", err)
@@ -209,7 +209,7 @@ func NormalizeTipNote(note string) string {
 	return strings.TrimSpace(note)
 }
 
-func tipRequestHash(request TipRequest) string {
+func TipRequestFingerprint(request TipRequest) string {
 	if request.Note == "" {
 		// Preserve the established fingerprint for older clients that omit note.
 		return ledgerutils.HashRequestFingerprint(request.TargetType, request.TargetId, request.Coins)
@@ -217,7 +217,7 @@ func tipRequestHash(request TipRequest) string {
 	return ledgerutils.HashRequestFingerprint(request.TargetType, request.TargetId, request.Coins, request.Note)
 }
 
-func splitTipCoins(targetType string, coins, creatorShareBps, platformFeeBps int64) (models.GiftSplit, error) {
+func SplitTipCoins(targetType string, coins, creatorShareBps, platformFeeBps int64) (models.GiftSplit, error) {
 	if targetType == "live" {
 		return models.SplitCoinsByPlatformFeeBps(coins, platformFeeBps)
 	}

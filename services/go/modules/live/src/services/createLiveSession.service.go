@@ -18,7 +18,7 @@ import (
 
 var liveAdPlacements = []string{"beforeJoin", "naturalBreak", "betweenSegments", "overlay", "end"}
 
-func liveCoinSupportEnabled(preference *bool) bool {
+func LiveCoinSupportEnabled(preference *bool) bool {
 	return preference != nil && *preference
 }
 
@@ -117,7 +117,7 @@ func (service *LiveService) CreateLiveSession(ctx context.Context, actor types.A
 		// New ordinary Lives are opt-in. The schema default and this explicit
 		// assignment protect both ORM and direct creation paths; legacy rows remain
 		// unchanged by the accompanying default-only migration.
-		builder.SetGiftsEnabled(liveCoinSupportEnabled(input.GiftsEnabled))
+		builder.SetGiftsEnabled(LiveCoinSupportEnabled(input.GiftsEnabled))
 		if adSettings != nil {
 			builder.SetLiveAdSettings(adSettings).SetNillableAcceptedLiveAdTermsVersion(termsVersion)
 			if termsVersion != nil {

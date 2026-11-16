@@ -3,8 +3,8 @@ package getrecommendedproducts
 import (
 	"context"
 	"regexp"
-	"sort"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/google/uuid"
@@ -133,7 +133,7 @@ func (handler Handler) Execute(ctx context.Context, viewer *uuid.UUID, surface s
 		}
 		candidates = append(candidates, interfaces.ProductRankingCandidate{
 			ProductId: row.ID.String(), StoreId: row.StoreID.String(), CategoryId: categoryId,
-			Topics: recommendationTopics(row.Tags), PriceMinor: row.MinPriceMinor, Currency: row.Currency,
+			Topics: NormalizeRecommendationTopics(row.Tags), PriceMinor: row.MinPriceMinor, Currency: row.Currency,
 			Rating: rating, SalesCount: row.UnitsSold, Country: storeRow.CountryCode,
 			StoreVerified: storeRow.Verified, InStock: true,
 		})
@@ -242,7 +242,7 @@ func retainKnownUniqueProductIds(ids []string, known map[string]*ent.Product) []
 	return result
 }
 
-func recommendationTopics(tags []string) []string {
+func NormalizeRecommendationTopics(tags []string) []string {
 	result := make([]string, 0, len(tags))
 	for _, tag := range tags {
 		slug := strings.ToLower(strings.TrimSpace(tag))

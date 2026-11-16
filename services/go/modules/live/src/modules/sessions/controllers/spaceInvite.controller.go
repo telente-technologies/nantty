@@ -40,12 +40,12 @@ func (c SpacesController) Invite(w http.ResponseWriter, r *http.Request) {
 		c.responder().Error(w, r, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "accountId", Message: "must be another valid account id"}}))
 		return
 	}
-	role, validRole := normalizeSpaceInviteRole(body.Role)
+	role, validRole := NormalizeSpaceInviteRole(body.Role)
 	if !validRole {
 		c.responder().Error(w, r, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "role", Message: "must be listener, speaker, or cohost"}}))
 		return
 	}
-	title, validTitle := normalizeSpaceStageTitle(body.Title)
+	title, validTitle := NormalizeSpaceStageTitle(body.Title)
 	if !validTitle {
 		c.responder().Error(w, r, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "title", Message: "must be plain text with at most 60 characters"}}))
 		return
@@ -92,7 +92,7 @@ func (c SpacesController) Invite(w http.ResponseWriter, r *http.Request) {
 	httpserver.WriteNoContentResponse(w)
 }
 
-func normalizeSpaceInviteRole(role string) (string, bool) {
+func NormalizeSpaceInviteRole(role string) (string, bool) {
 	switch strings.ToLower(strings.TrimSpace(role)) {
 	case "", "listener":
 		return "listener", true
@@ -105,7 +105,7 @@ func normalizeSpaceInviteRole(role string) (string, bool) {
 	}
 }
 
-func normalizeSpaceStageTitle(title string) (string, bool) {
+func NormalizeSpaceStageTitle(title string) (string, bool) {
 	title = strings.TrimSpace(strings.ToValidUTF8(title, "�"))
 	if utf8.RuneCountInString(title) > 60 {
 		return "", false

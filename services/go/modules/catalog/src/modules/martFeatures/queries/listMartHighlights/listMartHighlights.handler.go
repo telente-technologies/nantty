@@ -59,7 +59,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (httpserver.Cur
 	page := highlights[start:end]
 	if offset == 0 && query.Viewer != nil {
 		request := interfaces.MartAdRequest{Viewer: *query.Viewer, Country: country}
-		page = insertSponsored(page, sponsoredHighlight(ctx, handler.Container.MartAds, request, handler.listedProductName, handler.Container.Logger))
+		page = InsertSponsoredHighlight(page, BuildSponsoredHighlight(ctx, handler.Container.MartAds, request, handler.listedProductName, handler.Container.Logger))
 	}
 	return httpserver.NewCursorPage(page, nextCursor), nil
 }

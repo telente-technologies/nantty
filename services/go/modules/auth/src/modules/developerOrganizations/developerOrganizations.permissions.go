@@ -29,12 +29,23 @@ var developerRoleCapabilities = map[string]roleCapabilities{
 
 var supportedOrganizationRoles = []string{"owner", "admin", "developer", "analyst", "billing"}
 
-func capabilitiesForRole(role string) ([]string, []string) {
+func CapabilitiesForRole(role string) ([]string, []string) {
 	capabilities, found := developerRoleCapabilities[role]
 	if !found {
 		return []string{}, []string{}
 	}
 	return append([]string{}, capabilities.organization...), append([]string{}, capabilities.application...)
+}
+
+func ApplicationCapabilitiesForGrant(role string, granted []string) ([]string, []string) {
+	_, eligible := CapabilitiesForRole(role)
+	active := make([]string, 0, len(granted))
+	for _, capability := range eligible {
+		if containsCapability(granted, capability) {
+			active = append(active, capability)
+		}
+	}
+	return active, eligible
 }
 
 func AllowsOrganizationCapability(role, capability string) bool {
@@ -45,6 +56,14 @@ func AllowsOrganizationCapability(role, capability string) bool {
 func AllowsApplicationCapability(role, capability string, hasApplicationGrant bool) bool {
 	capabilities, found := developerRoleCapabilities[role]
 	return found && hasApplicationGrant && containsCapability(capabilities.application, capability)
+}
+
+func EligibleApplicationCapabilities(role string) []string {
+	capabilities, found := developerRoleCapabilities[role]
+	if !found {
+		return []string{}
+	}
+	return append([]string{}, capabilities.application...)
 }
 
 func CanAssignOrganizationRole(actorRole, targetRole string) bool {

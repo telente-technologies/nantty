@@ -82,7 +82,7 @@ func buyerOrderViews(ctx context.Context, deployed *container.Container, groups 
 	profiles, _ := deployed.Users.PersonalProfilesByAccount(ctx, UniqueIdentifiers(groups, func(group *ent.OrderGroup) uuid.UUID { return group.BuyerAccountID }))
 	views := make([]types.OrderView, 0, len(groups))
 	for _, group := range groups {
-		views = append(views, buyerOrderView(group, items[group.ID], stores[group.StoreID], profiles[group.BuyerAccountID], successRateOf(rates, group.StoreID), eventsByGroup[group.ID]))
+		views = append(views, BuildBuyerOrderView(group, items[group.ID], stores[group.StoreID], profiles[group.BuyerAccountID], successRateOf(rates, group.StoreID), eventsByGroup[group.ID]))
 	}
 	return views, nil
 }

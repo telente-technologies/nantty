@@ -66,7 +66,7 @@ func verificationColorOf(planCode string) string {
 	return "blue"
 }
 
-func verificationPlanView(plan PlanView) VerificationPlanView {
+func BuildVerificationPlanView(plan PlanView) VerificationPlanView {
 	return VerificationPlanView{
 		Id: plan.Id, PlanCode: plan.PlanCode, Name: plan.DisplayName, Color: verificationColorOf(plan.PlanCode), Tier: plan.Tier,
 		Price: plan.Price, Interval: plan.Interval, Channel: plan.Channel, StoreProductId: plan.StoreProductId, Perks: plan.Perks,
@@ -91,7 +91,7 @@ func (billing Billing) ListVerificationPlans(ctx context.Context, userId string,
 	}
 	views := make([]VerificationPlanView, 0, len(plans))
 	for _, plan := range plans {
-		views = append(views, verificationPlanView(plan))
+		views = append(views, BuildVerificationPlanView(plan))
 	}
 	return views, nil
 }

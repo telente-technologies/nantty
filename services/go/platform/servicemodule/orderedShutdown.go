@@ -10,14 +10,14 @@ import (
 
 const shutdownHookTimeout = 20 * time.Second
 
-type orderedRun struct {
+type ShutdownPlan struct {
 	Workers     []func(context.Context) error
 	Serve       func(context.Context) error
 	Hooks       []func(context.Context) error
 	HookTimeout time.Duration
 }
 
-func runWorkersAndServerThenShutDown(ctx context.Context, run orderedRun) error {
+func RunWithOrderedShutdown(ctx context.Context, run ShutdownPlan) error {
 	group, groupContext := errgroup.WithContext(ctx)
 	for _, worker := range run.Workers {
 		group.Go(func() error { return worker(groupContext) })

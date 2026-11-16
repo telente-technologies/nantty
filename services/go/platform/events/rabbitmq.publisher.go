@@ -20,22 +20,22 @@ type outgoingMessage struct {
 }
 
 type RabbitPublisher struct {
-	connection     channelOpener
+	connection     ChannelOpener
 	ConfirmTimeout time.Duration
 	mutex          sync.Mutex
-	channel        amqpChannel
+	channel        AMQPChannel
 	confirms       chan amqp.Confirmation
 	returns        chan amqp.Return
 }
 
-func NewRabbitPublisher(connection channelOpener) *RabbitPublisher {
+func NewRabbitPublisher(connection ChannelOpener) *RabbitPublisher {
 	return &RabbitPublisher{connection: connection, ConfirmTimeout: 10 * time.Second}
 }
 
 func (publisher *RabbitPublisher) PublishDomainEvents(ctx context.Context, events []OutboxEvent) error {
 	messages := make([]outgoingMessage, 0, len(events))
 	for _, event := range events {
-		headers := amqp.Table{subjectHeader: event.Subject, envelopeSchemaHeader: envelopeSchemaVersion}
+		headers := amqp.Table{SubjectHeader: event.Subject, EnvelopeSchemaHeader: EnvelopeSchemaVersion}
 		messages = append(messages, outgoingMessage{
 			exchange:   DomainEventsExchange,
 			routingKey: event.EventType,
@@ -123,7 +123,7 @@ func (publisher *RabbitPublisher) publishBatchAndAwaitConfirms(ctx context.Conte
 	}
 }
 
-func (publisher *RabbitPublisher) ensureConfirmChannel(ctx context.Context) (amqpChannel, error) {
+func (publisher *RabbitPublisher) ensureConfirmChannel(ctx context.Context) (AMQPChannel, error) {
 	if publisher.channel != nil && !publisher.channel.IsClosed() {
 		return publisher.channel, nil
 	}

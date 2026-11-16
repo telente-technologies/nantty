@@ -18,7 +18,7 @@ const endedLiveSceneGrace = time.Hour
 
 func presentScene(row *ent.OverlayScene) types.OverlaySceneView {
 	return types.OverlaySceneView{
-		Id: row.ID, LiveId: row.LiveID.String(), Name: row.Name, Layers: layersFromStored(row.Layers), IsMain: row.IsMain,
+		Id: row.ID, LiveId: row.LiveID.String(), Name: row.Name, Layers: LayersFromStored(row.Layers), IsMain: row.IsMain,
 		Published: row.PublishedAt != nil, PublishedAt: formatOptionalTime(row.PublishedAt), Revision: row.Revision, UpdatedAt: formatTime(row.UpdatedAt),
 	}
 }
@@ -77,7 +77,7 @@ func (service *LiveService) CreateOverlayScene(ctx context.Context, actor types.
 		if total >= maximumScenesPerLive {
 			return liveerrors.SceneLimitReached
 		}
-		created, err = tx.OverlayScene.Create().SetLiveID(liveId).SetOwnerID(actor.UserId).SetName(name).SetLayers(layersToStored(layers)).SetIsMain(total == 0).Save(ctx)
+		created, err = tx.OverlayScene.Create().SetLiveID(liveId).SetOwnerID(actor.UserId).SetName(name).SetLayers(LayersToStored(layers)).SetIsMain(total == 0).Save(ctx)
 		return err
 	})
 	if err != nil {
@@ -107,7 +107,7 @@ func (service *LiveService) UpdateOverlayScene(ctx context.Context, actor types.
 	if err != nil {
 		return types.OverlaySceneView{}, err
 	}
-	name, layers := existing.Name, layersFromStored(existing.Layers)
+	name, layers := existing.Name, LayersFromStored(existing.Layers)
 	if input.Name != nil || input.Layers != nil {
 		merged := types.OverlaySceneInput{Name: input.Name, Layers: input.Layers}
 		if merged.Name == nil {
@@ -127,10 +127,10 @@ func (service *LiveService) UpdateOverlayScene(ctx context.Context, actor types.
 func (service *LiveService) saveScene(ctx context.Context, existing *ent.OverlayScene, name string, layers []types.OverlayLayer, publish bool) (types.OverlaySceneView, error) {
 	var saved *ent.OverlayScene
 	err := service.RunInTransaction(ctx, func(tx *ent.Tx) error {
-		update := tx.OverlayScene.UpdateOneID(existing.ID).SetName(name).SetLayers(layersToStored(layers)).AddRevision(1)
+		update := tx.OverlayScene.UpdateOneID(existing.ID).SetName(name).SetLayers(LayersToStored(layers)).AddRevision(1)
 		if publish {
 			now := service.Now()
-			update.SetPublishedLayers(layersToStored(layers)).SetPublishedName(name).SetPublishedAt(now)
+			update.SetPublishedLayers(LayersToStored(layers)).SetPublishedName(name).SetPublishedAt(now)
 		}
 		var err error
 		if saved, err = update.Save(ctx); err != nil || !publish {
@@ -151,7 +151,7 @@ func (service *LiveService) PublishOverlayScene(ctx context.Context, actor types
 	if err != nil {
 		return types.OverlaySceneView{}, err
 	}
-	return service.saveScene(ctx, existing, existing.Name, layersFromStored(existing.Layers), true)
+	return service.saveScene(ctx, existing, existing.Name, LayersFromStored(existing.Layers), true)
 }
 
 func (service *LiveService) UnpublishOverlayScene(ctx context.Context, actor types.Actor, liveId uuid.UUID, sceneId string) (types.OverlaySceneView, error) {
@@ -209,7 +209,7 @@ func (service *LiveService) GetPublicOverlayScene(ctx context.Context, sceneId s
 		name = *row.PublishedName
 	}
 	return types.PublicOverlaySceneView{
-		Scene: types.PublicOverlayScene{Id: row.ID, LiveId: row.LiveID.String(), Name: name, Layers: layersFromStored(row.PublishedLayers)},
+		Scene: types.PublicOverlayScene{Id: row.ID, LiveId: row.LiveID.String(), Name: name, Layers: LayersFromStored(row.PublishedLayers)},
 		Live:  types.PublicOverlayLive{Id: session.ID.String(), Title: session.Title, State: string(session.State)},
 	}, nil
 }

@@ -1,4 +1,4 @@
-package main
+package moneyMigrations
 
 import (
 	"errors"
@@ -15,7 +15,7 @@ import (
 	"nantty/platform/postgres"
 )
 
-func migrationURL(raw, schema string) (string, error) {
+func MigrationURL(raw, schema string) (string, error) {
 	if strings.TrimSpace(raw) == "" {
 		return "", errors.New("MONEY_MIGRATION_DATABASE_URL is required")
 	}
@@ -40,7 +40,7 @@ func migrationURL(raw, schema string) (string, error) {
 	return parsed.String(), nil
 }
 
-func runMoneyMigrations(rawDatabaseURL string) error {
+func RunMoneyMigrations(rawDatabaseURL string) error {
 	modules := []struct {
 		schema string
 		apply  func(string) error
@@ -65,7 +65,7 @@ func runMoneyMigrations(rawDatabaseURL string) error {
 		}},
 	}
 	for _, module := range modules {
-		databaseURL, err := migrationURL(rawDatabaseURL, module.schema)
+		databaseURL, err := MigrationURL(rawDatabaseURL, module.schema)
 		if err != nil {
 			return err
 		}

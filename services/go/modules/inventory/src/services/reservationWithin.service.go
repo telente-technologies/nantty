@@ -41,7 +41,7 @@ func (sharedTransactionDriver) Close() error    { return nil }
 func (sharedTransactionDriver) Dialect() string { return dialect.Postgres }
 
 func (service ReservationService) ReserveWithin(ctx context.Context, transaction *sql.Tx, callerSchema string, request commerceports.ReserveStockRequest) error {
-	lines, err := mergeStockLines(request.Lines)
+	lines, err := MergeStockLines(request.Lines)
 	if err != nil || request.Reference == "" || len(lines) == 0 {
 		return firstNonNil(err, fmt.Errorf("reference and lines are required"))
 	}

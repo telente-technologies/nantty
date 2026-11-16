@@ -186,7 +186,7 @@ func (module *Module) consumeAdvisorySuggestions(ctx context.Context) {
 	if module.container.Settings.AdvisoryQueueName == "" {
 		return
 	}
-	queues := openQueueConsumerWithRetry(ctx, module.container.Logger, "advisory queue consumer", module.bus, platformevents.CreateJobQueueAndConsumerFromEnvironment, time.Second)
+	queues := OpenQueueConsumerWithRetry(ctx, module.container.Logger, "advisory queue consumer", module.bus, platformevents.CreateJobQueueAndConsumerFromEnvironment, time.Second)
 	if queues == nil {
 		return
 	}
@@ -203,7 +203,7 @@ func (module *Module) consumeAdvisorySuggestions(ctx context.Context) {
 }
 
 func (module *Module) consumeContentSignals(ctx context.Context) {
-	queues := openQueueConsumerWithRetry(ctx, module.container.Logger, "content report and score consumers", module.bus, platformevents.CreateJobQueueAndConsumerFromEnvironment, time.Second)
+	queues := OpenQueueConsumerWithRetry(ctx, module.container.Logger, "content report and score consumers", module.bus, platformevents.CreateJobQueueAndConsumerFromEnvironment, time.Second)
 	if queues == nil {
 		return
 	}

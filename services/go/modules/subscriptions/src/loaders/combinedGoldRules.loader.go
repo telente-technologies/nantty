@@ -2,7 +2,7 @@ package loaders
 
 import "nantty/modules/subscriptions/src/models"
 
-type combinedGoldSettings struct {
+type CombinedGoldSettings struct {
 	MultiBusinessSingleProfilePercent *int    `json:"multiBusinessSingleProfilePercent"`
 	MultiBusinessBasePercent          *int    `json:"multiBusinessBasePercent"`
 	MultiBusinessStepPercent          *int    `json:"multiBusinessStepPercent"`
@@ -18,7 +18,7 @@ func percentToBps(value *int, fallback int64) int64 {
 	return int64(*value) * 100
 }
 
-func (settings combinedGoldSettings) applyTo(rules models.CombinedGoldRules) models.CombinedGoldRules {
+func (settings CombinedGoldSettings) ApplyTo(rules models.CombinedGoldRules) models.CombinedGoldRules {
 	rules.SingleProfileBps = percentToBps(settings.MultiBusinessSingleProfilePercent, rules.SingleProfileBps)
 	rules.BaseBps = percentToBps(settings.MultiBusinessBasePercent, rules.BaseBps)
 	rules.StepBps = percentToBps(settings.MultiBusinessStepPercent, rules.StepBps)

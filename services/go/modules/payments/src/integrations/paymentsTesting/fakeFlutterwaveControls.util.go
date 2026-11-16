@@ -1,6 +1,7 @@
 package paymentstesting
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -10,6 +11,27 @@ import (
 )
 
 var _ FakeWalletServer = (*FakeFlutterwave)(nil)
+
+func (fake *FakeFlutterwave) WalletRefByNuban(nuban string) string {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	for _, wallet := range fake.Wallets {
+		if containsString(wallet.FundingNumbers, nuban) {
+			return wallet.Ref
+		}
+	}
+	return ""
+}
+
+func (fake *FakeFlutterwave) SmokeStateJSON() []byte {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	state, _ := json.Marshal(map[string]any{
+		"transactions": len(fake.Transactions), "transfers": fake.Transfers, "refunds": fake.Refunds,
+		"mainBalance": fake.MainBalance, "requests": fake.Requests,
+	})
+	return state
+}
 
 func (fake *FakeFlutterwave) ProviderName() string { return integrations.FlutterwaveProviderName }
 

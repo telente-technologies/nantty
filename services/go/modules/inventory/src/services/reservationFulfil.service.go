@@ -79,7 +79,7 @@ func (service ReservationService) shipReservedUnitsInTransaction(ctx context.Con
 }
 
 func (service ReservationService) Restock(ctx context.Context, request commerceports.RestockRequest) error {
-	lines, err := mergeStockLines(request.Lines)
+	lines, err := MergeStockLines(request.Lines)
 	if err != nil {
 		return err
 	}

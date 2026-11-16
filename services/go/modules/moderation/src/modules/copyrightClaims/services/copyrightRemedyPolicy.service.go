@@ -36,7 +36,7 @@ func DefaultPolicySettings() PolicySettings {
 	return PolicySettings{TakedownDeadlineHours: 48, StrikeLifetimeDays: 365, WarningLifetimeDays: 365, StrikeWindowDays: 365, RestrictionThreshold: LegalRepeatInfringerThreshold, SuspensionReviewThreshold: 3, RestrictionDays: LegalMinimumSuspensionDays}
 }
 
-func withLegalFloor(settings PolicySettings) PolicySettings {
+func ApplyPolicyLegalFloor(settings PolicySettings) PolicySettings {
 	settings.RestrictionThreshold = min(settings.RestrictionThreshold, LegalRepeatInfringerThreshold)
 	settings.RestrictionDays = max(settings.RestrictionDays, LegalMinimumSuspensionDays)
 	return settings
@@ -50,7 +50,7 @@ func LoadPolicySettings(ctx context.Context, client *ent.Client) (PolicySettings
 	if err != nil {
 		return PolicySettings{}, err
 	}
-	return withLegalFloor(PolicySettings{
+	return ApplyPolicyLegalFloor(PolicySettings{
 		TakedownDeadlineHours: row.TakedownDeadlineHours, StrikeLifetimeDays: row.StrikeLifetimeDays, WarningLifetimeDays: row.WarningLifetimeDays, StrikeWindowDays: row.StrikeWindowDays,
 		RestrictionThreshold: row.RestrictionThreshold, SuspensionReviewThreshold: row.SuspensionReviewThreshold, RestrictionDays: row.RestrictionDays, UpdatedBy: row.UpdatedBy, UpdatedAt: row.UpdatedAt.UTC().Format(time.RFC3339),
 	}), nil

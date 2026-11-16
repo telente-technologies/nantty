@@ -26,7 +26,7 @@ func (billing Billing) ListPriceTable(ctx context.Context) ([]PlanPriceRow, erro
 	}
 	converted := make([]PlanPriceRow, 0, len(rows))
 	for _, row := range rows {
-		priced := applyPriceVersions(convertPlanPrice(row), byKey[row.PlanCode+":"+row.CountryCode], now)
+		priced := ApplyPlanPriceVersions(convertPlanPrice(row), byKey[row.PlanCode+":"+row.CountryCode], now)
 		priced = billing.deriveStorePrices(ctx, priced)
 		for index, history := range priced.History {
 			historyPrice := PlanPriceRow{PlanCode: priced.PlanCode, CountryCode: priced.CountryCode, Currency: history.Currency,

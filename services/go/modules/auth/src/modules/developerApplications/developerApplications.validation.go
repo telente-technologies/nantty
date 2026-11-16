@@ -1,0 +1,91 @@
+package developerapplications
+
+import (
+	"errors"
+	"net"
+	"net/url"
+	"sort"
+	"strings"
+)
+
+var (
+	errInvalidApplication              = errors.New("developer application details are invalid")
+	errApplicationNotFound             = errors.New("developer application was not found")
+	errApplicationForbidden            = errors.New("developer application capability is required")
+	errApplicationConflict             = errors.New("developer application cannot be changed in its current state")
+	errApplicationIdempotencyConflict  = errors.New("idempotency key was reused with different application details")
+	errApplicationIdempotencyRequired  = errors.New("a valid idempotency key is required")
+	errInvalidApplicationAccount       = errors.New("authenticated account is invalid")
+	errApplicationOrganizationNotFound = errors.New("organization membership was not found")
+	errInvalidApplicationGrant         = errors.New("application grant is invalid for the member role")
+)
+
+const apiProductBusinessMessaging = "business_messaging"
+
+var supportedApplicationScopes = map[string]struct{}{
+	"messages:send": {}, "messages:read": {}, "conversations:read": {}, "conversations:write": {},
+	"customers:read": {}, "media:write": {}, "media:read": {}, "webhooks:manage": {}, "analytics:read": {},
+}
+
+func NormalizeDeveloperApplicationInput(input ApplicationInput) (ApplicationInput, error) {
+	input.Name = strings.TrimSpace(input.Name)
+	input.Purpose = strings.TrimSpace(input.Purpose)
+	if len(input.Name) < 2 || len(input.Name) > 80 || len(input.Purpose) < 10 || len(input.Purpose) > 1000 {
+		return ApplicationInput{}, errInvalidApplication
+	}
+	if len(input.CallbackOrigins) > 10 || len(input.RequestedScopes) == 0 || len(input.RequestedScopes) > len(supportedApplicationScopes) {
+		return ApplicationInput{}, errInvalidApplication
+	}
+	origins := make([]string, 0, len(input.CallbackOrigins))
+	seenOrigins := make(map[string]struct{}, len(input.CallbackOrigins))
+	for _, value := range input.CallbackOrigins {
+		origin, err := normalizeCallbackOrigin(value)
+		if err != nil {
+			return ApplicationInput{}, errInvalidApplication
+		}
+		if _, exists := seenOrigins[origin]; !exists {
+			seenOrigins[origin] = struct{}{}
+			origins = append(origins, origin)
+		}
+	}
+	sort.Strings(origins)
+	scopes := make([]string, 0, len(input.RequestedScopes))
+	seenScopes := make(map[string]struct{}, len(input.RequestedScopes))
+	for _, scope := range input.RequestedScopes {
+		scope = strings.TrimSpace(scope)
+		if _, allowed := supportedApplicationScopes[scope]; !allowed {
+			return ApplicationInput{}, errInvalidApplication
+		}
+		if _, exists := seenScopes[scope]; !exists {
+			seenScopes[scope] = struct{}{}
+			scopes = append(scopes, scope)
+		}
+	}
+	sort.Strings(scopes)
+	input.CallbackOrigins, input.RequestedScopes = origins, scopes
+	return input, nil
+}
+
+func normalizeCallbackOrigin(value string) (string, error) {
+	parsed, err := url.Parse(strings.TrimSpace(value))
+	if err != nil || parsed.Opaque != "" || parsed.User != nil || parsed.Host == "" || parsed.RawQuery != "" || parsed.Fragment != "" || (parsed.Path != "" && parsed.Path != "/") {
+		return "", errInvalidApplication
+	}
+	host := strings.ToLower(parsed.Hostname())
+	if host == "" || strings.Contains(host, "..") {
+		return "", errInvalidApplication
+	}
+	if parsed.Scheme != "https" {
+		ip := net.ParseIP(host)
+		local := host == "localhost" || (ip != nil && ip.IsLoopback())
+		if parsed.Scheme != "http" || !local {
+			return "", errInvalidApplication
+		}
+	}
+	if parsed.Port() != "" {
+		if _, err := net.LookupPort("tcp", parsed.Port()); err != nil {
+			return "", errInvalidApplication
+		}
+	}
+	return parsed.Scheme + "://" + strings.ToLower(parsed.Host), nil
+}

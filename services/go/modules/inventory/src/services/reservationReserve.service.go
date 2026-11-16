@@ -20,7 +20,7 @@ type ReservationService struct {
 	Container *container.Container
 }
 
-func mergeStockLines(lines []commerceports.StockLine) ([]commerceports.StockLine, error) {
+func MergeStockLines(lines []commerceports.StockLine) ([]commerceports.StockLine, error) {
 	merged := map[uuid.UUID]commerceports.StockLine{}
 	for _, line := range lines {
 		if line.Quantity <= 0 {
@@ -41,7 +41,7 @@ func mergeStockLines(lines []commerceports.StockLine) ([]commerceports.StockLine
 }
 
 func (service ReservationService) Reserve(ctx context.Context, request commerceports.ReserveStockRequest) error {
-	lines, err := mergeStockLines(request.Lines)
+	lines, err := MergeStockLines(request.Lines)
 	if err != nil || request.Reference == "" || len(lines) == 0 {
 		return firstNonNil(err, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "reference", Message: "reference and lines are required"}}))
 	}

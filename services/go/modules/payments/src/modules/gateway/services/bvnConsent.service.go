@@ -134,7 +134,7 @@ func (gateway *PaymentGateway) decideBvnConsent(ctx context.Context, reference s
 		if err != nil {
 			return err
 		}
-		reason := bvnRejectionReason(identity, onboarding.LegalName, onboarding.ResolvedAccountName)
+		reason := BvnIdentityRejectionReason(identity, onboarding.LegalName, onboarding.ResolvedAccountName)
 		update := validation.Update().SetDecidedAt(gateway.Container.Now().UTC()).AddVersion(1)
 		decided = customervalidation.StatusVerified
 		if reason != "" {
@@ -156,7 +156,7 @@ func (gateway *PaymentGateway) decideBvnConsent(ctx context.Context, reference s
 	return string(decided), nil
 }
 
-func bvnRejectionReason(identity interfaces.BvnIdentity, legalName, bankAccountName string) string {
+func BvnIdentityRejectionReason(identity interfaces.BvnIdentity, legalName, bankAccountName string) string {
 	bvnName := strings.TrimSpace(identity.FirstName + " " + identity.MiddleName + " " + identity.LastName)
 	switch {
 	case identity.Watchlisted:

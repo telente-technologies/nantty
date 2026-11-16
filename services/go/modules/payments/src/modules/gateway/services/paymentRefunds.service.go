@@ -25,7 +25,7 @@ type RequestedRefund struct {
 	Replayed  bool
 }
 
-func sameRefundRequest(existing *ent.PaymentRefund, request models.RefundRequest) bool {
+func SameRefundRequest(existing *ent.PaymentRefund, request models.RefundRequest) bool {
 	return existing.PaymentIntentID == request.PaymentIntentId &&
 		existing.AmountMinor == request.AmountMinor &&
 		existing.Currency == request.Currency &&
@@ -36,7 +36,7 @@ func (gateway *PaymentGateway) RequestRefundInTransaction(ctx context.Context, t
 	client := gateway.Container.Client(transaction)
 	existing, err := client.PaymentRefund.Query().Where(paymentrefund.Reference(request.Reference)).Only(ctx)
 	if err == nil {
-		if !sameRefundRequest(existing, request) {
+		if !SameRefundRequest(existing, request) {
 			return RequestedRefund{}, fmt.Errorf("refund reference %s reused with different details", request.Reference)
 		}
 		return RequestedRefund{RefundId: existing.ID, Provider: existing.Provider, Reference: existing.Reference, Replayed: true}, nil
@@ -58,7 +58,7 @@ func (gateway *PaymentGateway) RequestRefundInTransaction(ctx context.Context, t
 	// unique refund-reference constraint.
 	existing, err = client.PaymentRefund.Query().Where(paymentrefund.Reference(request.Reference)).Only(ctx)
 	if err == nil {
-		if !sameRefundRequest(existing, request) {
+		if !SameRefundRequest(existing, request) {
 			return RequestedRefund{}, fmt.Errorf("refund reference %s reused with different details", request.Reference)
 		}
 		return RequestedRefund{RefundId: existing.ID, Provider: existing.Provider, Reference: existing.Reference, Replayed: true}, nil

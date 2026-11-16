@@ -18,6 +18,7 @@ import (
 	"nantty/modules/auth/src/integrations"
 	"nantty/modules/auth/src/migrations"
 	developerorganizations "nantty/modules/auth/src/modules/developerOrganizations"
+	developerapplications "nantty/modules/auth/src/modules/developerApplications"
 	emailverification "nantty/modules/auth/src/modules/emailVerification"
 	messengerauth "nantty/modules/auth/src/modules/messengerAuth"
 	onetimecodes "nantty/modules/auth/src/modules/oneTimeCodes"
@@ -116,6 +117,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	realtimetokens.Mount(mux, module.container)
 	messengerauth.Mount(mux, module.container)
 	developerorganizations.Mount(mux, module.container)
+	developerapplications.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {

@@ -71,7 +71,7 @@ func BuildCheckoutPlan(ctx context.Context, deployed *container.Container, buyer
 	if !found {
 		return plan, ordererrors.AddressNotFound
 	}
-	phone, err := normalizeCheckoutDeliveryPhone(address.Phone)
+	phone, err := NormalizeCheckoutDeliveryPhone(address.Phone)
 	if err != nil {
 		return plan, err
 	}
@@ -111,14 +111,14 @@ func planGroups(ctx context.Context, deployed *container.Container, buyerId uuid
 	if err != nil {
 		return *plan, err
 	}
-	revisionGroups := make([]shippingQuoteRevisionGroup, 0, len(groups))
+	revisionGroups := make([]ShippingQuoteRevisionGroup, 0, len(groups))
 	for _, group := range groups {
-		store := loaded.stores[group.StoreId]
+		store := loaded.Stores[group.StoreId]
 		if store.OwnerAccountId == buyerId {
 			return *plan, ordererrors.CannotBuyOwnProduct
 		}
-		result := CalculateShippingForOrderGroup(loaded.profiles[group.StoreId], DeliveryLocationOf(plan.AddressRow), group.SubtotalMinor)
-		revisionGroups = append(revisionGroups, revisionGroupFor(group, result, loaded.profiles[group.StoreId]))
+		result := CalculateShippingForOrderGroup(loaded.Profiles[group.StoreId], DeliveryLocationOf(plan.AddressRow), group.SubtotalMinor)
+		revisionGroups = append(revisionGroups, BuildShippingQuoteRevisionGroup(group, result, loaded.Profiles[group.StoreId]))
 		if result.Outcome == enums.ShippingNotDeliverable {
 			plan.Blocked = append(plan.Blocked, group.StoreId)
 			continue
@@ -139,7 +139,7 @@ func planGroups(ctx context.Context, deployed *container.Container, buyerId uuid
 		discount += campaigns.DiscountMinor
 		credit := int64(0)
 		if useCredit {
-			credit = RedeemableCreditMinor(loaded.credits[group.StoreId].BalanceMinor, group.SubtotalMinor-discount)
+			credit = RedeemableCreditMinor(loaded.Credits[group.StoreId].BalanceMinor, group.SubtotalMinor-discount)
 		}
 		planned := PlannedGroup{GroupId: uuid.Must(uuid.NewV7()), Group: group, Store: store, Shipping: result, CreditMinor: credit, DiscountMinor: discount, Promotion: chosen, PromotionIssue: issue, Campaigns: campaigns,
 			TotalMinor: group.SubtotalMinor - discount - credit + result.FeeMinor}
@@ -155,7 +155,7 @@ func planGroups(ctx context.Context, deployed *container.Container, buyerId uuid
 	if !CheckoutCurrencySupported(deployed.Settings.CheckoutCurrencies, string(plan.Currency)) {
 		return *plan, ordererrors.CheckoutCurrencyNotSupported
 	}
-	plan.ShippingQuoteRevision = shippingQuoteRevisionFor(plan.AddressRow, revisionGroups)
+	plan.ShippingQuoteRevision = ShippingQuoteRevisionFor(plan.AddressRow, revisionGroups)
 	return *plan, nil
 }
 

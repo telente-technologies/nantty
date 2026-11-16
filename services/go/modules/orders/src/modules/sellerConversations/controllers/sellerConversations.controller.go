@@ -22,7 +22,7 @@ type SellerConversationsController struct {
 	Social    integrations.SocialStoreInboxClient
 }
 
-type replyRequest struct {
+type ReplyRequest struct {
 	Body            *string         `json:"body"`
 	Text            *string         `json:"text"`
 	Location        json.RawMessage `json:"location"`
@@ -36,13 +36,13 @@ type replyRequest struct {
 	LinkPreview     *string         `json:"linkPreview"`
 }
 
-var errPlaintextNotAccepted = httpserver.NewApiError(http.StatusUnprocessableEntity, "PLAINTEXT_NOT_ACCEPTED", "Store chats are end-to-end encrypted. Update the seller dashboard to reply: messages must be encrypted on your device.")
+var ErrPlaintextNotAccepted = httpserver.NewApiError(http.StatusUnprocessableEntity, "PLAINTEXT_NOT_ACCEPTED", "Store chats are end-to-end encrypted. Update the seller dashboard to reply: messages must be encrypted on your device.")
 
 func hasRaw(value json.RawMessage) bool {
 	return len(value) > 0 && string(value) != "null"
 }
 
-func (candidate replyRequest) carriesPlaintext() bool {
+func (candidate ReplyRequest) CarriesPlaintext() bool {
 	return (candidate.Body != nil && *candidate.Body != "") || (candidate.Text != nil && *candidate.Text != "") || hasRaw(candidate.Location) || hasRaw(candidate.Poll) || hasRaw(candidate.Document) || hasRaw(candidate.SharedContent)
 }
 
@@ -114,9 +114,9 @@ func (controller SellerConversationsController) Reply(writer http.ResponseWriter
 	if !ok {
 		return
 	}
-	body, err := utils.DecodeAndValidate[replyRequest](writer, request, func(candidate replyRequest) error {
-		if candidate.carriesPlaintext() {
-			return errPlaintextNotAccepted
+	body, err := utils.DecodeAndValidate[ReplyRequest](writer, request, func(candidate ReplyRequest) error {
+		if candidate.CarriesPlaintext() {
+			return ErrPlaintextNotAccepted
 		}
 		var issues utils.Issues
 		if !hasRaw(candidate.Encryption) {

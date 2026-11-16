@@ -12,7 +12,7 @@ var (
 	deliveryPhoneSpacing = strings.NewReplacer(" ", "", "-", "", "(", "", ")", "", ".", "")
 )
 
-func normalizeCheckoutDeliveryPhone(phone string) (string, error) {
+func NormalizeCheckoutDeliveryPhone(phone string) (string, error) {
 	normalized := deliveryPhoneSpacing.Replace(strings.TrimSpace(phone))
 	if !deliveryPhonePattern.MatchString(normalized) {
 		return "", ordererrors.AddressPhoneRequired

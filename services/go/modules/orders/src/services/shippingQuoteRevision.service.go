@@ -11,7 +11,7 @@ import (
 	"nantty/platform/usersdirectory"
 )
 
-type shippingQuoteRevisionLine struct {
+type ShippingQuoteRevisionLine struct {
 	ItemId         string `json:"itemId"`
 	VariantId      string `json:"variantId"`
 	Quantity       int    `json:"quantity"`
@@ -19,7 +19,7 @@ type shippingQuoteRevisionLine struct {
 	Currency       string `json:"currency"`
 }
 
-type shippingQuoteRevisionGroup struct {
+type ShippingQuoteRevisionGroup struct {
 	StoreId               string                      `json:"storeId"`
 	SubtotalMinor         int64                       `json:"subtotalMinor"`
 	Currency              string                      `json:"currency"`
@@ -30,13 +30,13 @@ type shippingQuoteRevisionGroup struct {
 	RuleId                string                      `json:"ruleId"`
 	ThresholdAppliedMinor *int64                      `json:"thresholdAppliedMinor"`
 	FreeThresholdMinor    *int64                      `json:"freeThresholdMinor"`
-	Lines                 []shippingQuoteRevisionLine `json:"lines"`
+	Lines                 []ShippingQuoteRevisionLine `json:"lines"`
 }
 
-func revisionGroupFor(group SellerGroup, result ShippingResult, profile *ShippingProfileRules) shippingQuoteRevisionGroup {
-	revision := shippingQuoteRevisionGroup{
+func BuildShippingQuoteRevisionGroup(group SellerGroup, result ShippingResult, profile *ShippingProfileRules) ShippingQuoteRevisionGroup {
+	revision := ShippingQuoteRevisionGroup{
 		StoreId: group.StoreId.String(), SubtotalMinor: group.SubtotalMinor, Currency: string(group.Currency),
-		Outcome: result.Outcome, FeeMinor: result.FeeMinor, ThresholdAppliedMinor: result.ThresholdAppliedMinor, Lines: make([]shippingQuoteRevisionLine, 0, len(group.Lines)),
+		Outcome: result.Outcome, FeeMinor: result.FeeMinor, ThresholdAppliedMinor: result.ThresholdAppliedMinor, Lines: make([]ShippingQuoteRevisionLine, 0, len(group.Lines)),
 	}
 	if profile != nil {
 		revision.FreeThresholdMinor = profile.FreeThresholdMinor
@@ -51,7 +51,7 @@ func revisionGroupFor(group SellerGroup, result ShippingResult, profile *Shippin
 		revision.RuleId = result.RuleId.String()
 	}
 	for _, line := range group.Lines {
-		revision.Lines = append(revision.Lines, shippingQuoteRevisionLine{
+		revision.Lines = append(revision.Lines, ShippingQuoteRevisionLine{
 			ItemId: line.ItemId.String(), VariantId: line.Product.VariantId.String(), Quantity: line.Quantity,
 			UnitPriceMinor: line.Product.UnitPrice.AmountMinor, Currency: string(line.Product.UnitPrice.Currency),
 		})
@@ -60,7 +60,8 @@ func revisionGroupFor(group SellerGroup, result ShippingResult, profile *Shippin
 	return revision
 }
 
-func shippingQuoteRevisionFor(address usersdirectory.ShippingAddress, groups []shippingQuoteRevisionGroup) string {
+func ShippingQuoteRevisionFor(address usersdirectory.ShippingAddress, groups []ShippingQuoteRevisionGroup) string {
+	groups = append([]ShippingQuoteRevisionGroup(nil), groups...)
 	sort.Slice(groups, func(i, j int) bool { return groups[i].StoreId < groups[j].StoreId })
 	identifier := func(value *uuid.UUID) string {
 		if value == nil {
@@ -75,7 +76,7 @@ func shippingQuoteRevisionFor(address usersdirectory.ShippingAddress, groups []s
 		RegionId         string                       `json:"regionId"`
 		AdminAreaId      string                       `json:"adminAreaId"`
 		CityId           string                       `json:"cityId"`
-		Groups           []shippingQuoteRevisionGroup `json:"groups"`
+		Groups           []ShippingQuoteRevisionGroup `json:"groups"`
 	}{
 		AddressId: address.Id.String(), AddressUpdatedAt: address.UpdatedAt.UTC().Format(time.RFC3339Nano), CountryCode: address.CountryCode,
 		RegionId: identifier(address.RegionId), AdminAreaId: identifier(address.AdminAreaId), CityId: identifier(address.CityId), Groups: groups,

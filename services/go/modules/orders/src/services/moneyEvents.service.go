@@ -16,16 +16,16 @@ import (
 type EscrowEventData struct {
 	EscrowId    string     `json:"escrowId"`
 	OrderId     string     `json:"orderId"`
-	Amount      moneyData  `json:"amount"`
-	Refunded    moneyData  `json:"refunded"`
+	Amount      MoneyData  `json:"amount"`
+	Refunded    MoneyData  `json:"refunded"`
 	Status      string     `json:"status"`
 	BuyerUserId string     `json:"buyerUserId"`
 	DisputeId   string     `json:"disputeId"`
 	ReleaseAt   *time.Time `json:"autoReleaseAt"`
-	Pending     moneyData  `json:"pendingRefund"`
+	Pending     MoneyData  `json:"pendingRefund"`
 }
 
-type moneyData struct {
+type MoneyData struct {
 	AmountMinor int64  `json:"amountMinor"`
 	Currency    string `json:"currency"`
 }
@@ -39,14 +39,14 @@ func (handler MoneyEventHandler) Handle(ctx context.Context, body []byte) error 
 	if err := json.Unmarshal(body, &envelope); err != nil {
 		return fmt.Errorf("%w: event envelope is not JSON", platformevents.ErrPoisonMessage)
 	}
-	if err := validateMoneyEventEnvelope(body, envelope); err != nil {
+	if err := ValidateMoneyEventEnvelope(body, envelope); err != nil {
 		return err
 	}
-	data, orderId, err := decodeMoneyEventData(envelope.Data)
+	data, orderId, err := DecodeMoneyEventData(envelope.Data)
 	if err != nil {
 		return err
 	}
-	if err := validateMoneyEventData(envelope.Type, data); err != nil {
+	if err := ValidateMoneyEventData(envelope.Type, data); err != nil {
 		return err
 	}
 	seen, err := handler.Container.Client.ProcessedEvent.Query().Where(processedevent.EnvelopeID(envelope.Id)).Exist(ctx)
@@ -63,7 +63,7 @@ func (handler MoneyEventHandler) Handle(ctx context.Context, body []byte) error 
 	return nil
 }
 
-func validateMoneyEventEnvelope(body []byte, envelope platformevents.EventEnvelope) error {
+func ValidateMoneyEventEnvelope(body []byte, envelope platformevents.EventEnvelope) error {
 	var fields map[string]json.RawMessage
 	if err := json.Unmarshal(body, &fields); err != nil || fields == nil {
 		return fmt.Errorf("%w: event envelope must be a JSON object", platformevents.ErrPoisonMessage)
@@ -98,7 +98,7 @@ func validateMoneyEventEnvelope(body []byte, envelope platformevents.EventEnvelo
 	return nil
 }
 
-func decodeMoneyEventData(payload json.RawMessage) (EscrowEventData, uuid.UUID, error) {
+func DecodeMoneyEventData(payload json.RawMessage) (EscrowEventData, uuid.UUID, error) {
 	var data EscrowEventData
 	if err := json.Unmarshal(payload, &data); err != nil {
 		return EscrowEventData{}, uuid.Nil, fmt.Errorf("%w: event data is invalid", platformevents.ErrPoisonMessage)
@@ -110,20 +110,23 @@ func decodeMoneyEventData(payload json.RawMessage) (EscrowEventData, uuid.UUID, 
 	return data, orderId, nil
 }
 
-func validateMoneyEventData(eventType string, data EscrowEventData) error {
+func ValidateMoneyEventData(eventType string, data EscrowEventData) error {
 	switch eventType {
-	case "escrow.releaseScheduled", "escrow.releaseFailed":
-		if data.ReleaseAt == nil {
-			return fmt.Errorf("%w: %s data requires autoReleaseAt", platformevents.ErrPoisonMessage, eventType)
+	case "escrow.held", "directPayment.received", "escrow.released", "dispute.opened", "dispute.closed", "dispute.resolved":
+	case "escrow.refunded", "escrow.partiallyRefunded", "escrow.clawedBack":
+		if data.Refunded.AmountMinor <= 0 || !isCurrencyCode(data.Refunded.Currency) {
+			return fmt.Errorf("%w: %s data requires a positive refunded amount and currency", platformevents.ErrPoisonMessage, eventType)
 		}
 	case "escrow.refundScheduled":
 		if data.Pending.AmountMinor <= 0 || !isCurrencyCode(data.Pending.Currency) {
 			return fmt.Errorf("%w: escrow.refundScheduled data requires a positive pending refund amount and currency", platformevents.ErrPoisonMessage)
 		}
-	case "escrow.refunded", "escrow.partiallyRefunded", "escrow.clawedBack":
-		if data.Refunded.AmountMinor <= 0 || !isCurrencyCode(data.Refunded.Currency) {
-			return fmt.Errorf("%w: %s data requires a positive refunded amount and currency", platformevents.ErrPoisonMessage, eventType)
+	case "escrow.releaseScheduled", "escrow.releaseFailed":
+		if data.ReleaseAt == nil {
+			return fmt.Errorf("%w: %s data requires autoReleaseAt", platformevents.ErrPoisonMessage, eventType)
 		}
+	default:
+		return fmt.Errorf("%w: unsupported orders money event %q", platformevents.ErrPoisonMessage, eventType)
 	}
 	return nil
 }

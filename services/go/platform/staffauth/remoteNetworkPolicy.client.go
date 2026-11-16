@@ -36,10 +36,32 @@ type RemoteNetworkPolicy struct {
 	cache   map[string]cachedNetworkDecision
 }
 
+type RemoteNetworkPolicyOptions struct {
+	HTTPClient *http.Client
+	CacheTTL   time.Duration
+	Now        func() time.Time
+}
+
 func NewRemoteNetworkPolicy(baseUrl, token string) *RemoteNetworkPolicy {
+	return NewRemoteNetworkPolicyWithOptions(baseUrl, token, RemoteNetworkPolicyOptions{})
+}
+
+func NewRemoteNetworkPolicyWithOptions(baseUrl, token string, options RemoteNetworkPolicyOptions) *RemoteNetworkPolicy {
+	client := options.HTTPClient
+	if client == nil {
+		client = &http.Client{Timeout: 3 * time.Second}
+	}
+	ttl := options.CacheTTL
+	if ttl <= 0 {
+		ttl = networkPolicyCacheTtl
+	}
+	now := options.Now
+	if now == nil {
+		now = time.Now
+	}
 	return &RemoteNetworkPolicy{
-		baseUrl: strings.TrimRight(baseUrl, "/"), token: token, client: &http.Client{Timeout: 3 * time.Second},
-		ttl: networkPolicyCacheTtl, now: time.Now, cache: map[string]cachedNetworkDecision{},
+		baseUrl: strings.TrimRight(baseUrl, "/"), token: token, client: client,
+		ttl: ttl, now: now, cache: map[string]cachedNetworkDecision{},
 	}
 }
 

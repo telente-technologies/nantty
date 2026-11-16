@@ -31,7 +31,7 @@ var retryableClientStatuses = []int{
 
 var IdempotencyStoreUnavailable = httpserver.NewApiError(http.StatusServiceUnavailable, "IDEMPOTENCY_UNAVAILABLE", "This action is temporarily unavailable. Try again shortly.")
 
-type reservationStore interface {
+type ReservationStore interface {
 	ReserveKeyOrLoadEarlierOutcome(ctx context.Context, scopedKey, requestHash string, ttl time.Duration) (ReservationOutcome, *StoredResponse, string, error)
 	SaveCompletedResponse(ctx context.Context, scopedKey, requestHash, owner string, response StoredResponse, ttl time.Duration) error
 	ReleaseKeySoTheClientCanRetry(ctx context.Context, scopedKey, owner string) error
@@ -48,13 +48,20 @@ func RequireIdempotencyKeyAndReplayCompletedResponses(store *RedisStore, ttl tim
 	return requireIdempotencyKeyWithStore(store, ttl, logger)
 }
 
+func RequireIdempotencyKeyAndReplayCompletedResponsesWithStore(store ReservationStore, ttl time.Duration, logger *slog.Logger) func(http.Handler) http.Handler {
+	if store == nil {
+		return refuseWithoutStore
+	}
+	return requireIdempotencyKeyWithStore(store, ttl, logger)
+}
+
 func refuseWithoutStore(http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
 		httpserver.WriteJsonResponse(writer, http.StatusServiceUnavailable, IdempotencyStoreUnavailable)
 	})
 }
 
-func requireIdempotencyKeyWithStore(store reservationStore, ttl time.Duration, logger *slog.Logger) func(http.Handler) http.Handler {
+func requireIdempotencyKeyWithStore(store ReservationStore, ttl time.Duration, logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			key := request.Header.Get("Idempotency-Key")
@@ -108,7 +115,7 @@ func requireIdempotencyKeyWithStore(store reservationStore, ttl time.Duration, l
 	}
 }
 
-func serveReleasingOnPanic(ctx context.Context, store reservationStore, scopedKey, owner string, next http.Handler, recorder *bufferingResponseWriter, request *http.Request) {
+func serveReleasingOnPanic(ctx context.Context, store ReservationStore, scopedKey, owner string, next http.Handler, recorder *bufferingResponseWriter, request *http.Request) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
 			_ = store.ReleaseKeySoTheClientCanRetry(context.WithoutCancel(ctx), scopedKey, owner)

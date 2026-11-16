@@ -9,7 +9,7 @@ import (
 	"nantty/platform/staffauth"
 )
 
-func forwardedStepUpIsValid(registry *identityports.Registry, request *http.Request, staffId string) bool {
+func ForwardedStepUpIsValid(registry *identityports.Registry, request *http.Request, staffId string) bool {
 	token := strings.TrimSpace(request.Header.Get(staffauth.StepUpHeader))
 	if token == "" || staffId == "" {
 		return false

@@ -31,7 +31,7 @@ func RefundScopeFor(planCode string) string {
 	return RefundScopeFull
 }
 
-func refundsOnRejection(planCode string) bool {
+func RefundsOnRejection(planCode string) bool {
 	return refundablePlans[planCode] || checkmarkShareRefundPlans[planCode]
 }
 
@@ -106,7 +106,7 @@ func RejectCaseInTransaction(ctx context.Context, tx *ent.Tx, now time.Time, row
 		return nil, err
 	}
 	refund := verificationcase.RefundStatusNotApplicable
-	if refundsOnRejection(row.PlanCode) {
+	if RefundsOnRejection(row.PlanCode) {
 		refund = verificationcase.RefundStatusRequested
 	}
 	rejected, err := row.Update().SetStatus(verificationcase.StatusRejected).SetRefundStatus(refund).SetDecidedAt(now).SetDecidedByName(decidedBy).SetDecisionReason(reason).Save(ctx)

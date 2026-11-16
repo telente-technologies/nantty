@@ -15,7 +15,7 @@ import (
 
 const sponsoredSlotIndex = 1
 
-type listedProductName func(ctx context.Context, productId uuid.UUID) (string, bool)
+type ListedProductNameLookup func(ctx context.Context, productId uuid.UUID) (string, bool)
 
 func (handler Handler) listedProductName(ctx context.Context, productId uuid.UUID) (string, bool) {
 	row, err := handler.Container.Client.Product.Query().Where(product.ID(productId), product.Status(enums.ProductActive), product.PublishedOnline(true), product.Visibility(enums.VisibilityPublic),
@@ -26,7 +26,7 @@ func (handler Handler) listedProductName(ctx context.Context, productId uuid.UUI
 	return row.Name, true
 }
 
-func sponsoredHighlight(ctx context.Context, decider interfaces.MartAdDecider, request interfaces.MartAdRequest, productName listedProductName, logger *slog.Logger) *dtos.MartHighlight {
+func BuildSponsoredHighlight(ctx context.Context, decider interfaces.MartAdDecider, request interfaces.MartAdRequest, productName ListedProductNameLookup, logger *slog.Logger) *dtos.MartHighlight {
 	if decider == nil {
 		return nil
 	}
@@ -76,7 +76,7 @@ func sponsoredHighlight(ctx context.Context, decider interfaces.MartAdDecider, r
 	return highlight
 }
 
-func insertSponsored(page []dtos.MartHighlight, sponsored *dtos.MartHighlight) []dtos.MartHighlight {
+func InsertSponsoredHighlight(page []dtos.MartHighlight, sponsored *dtos.MartHighlight) []dtos.MartHighlight {
 	if sponsored == nil {
 		return page
 	}

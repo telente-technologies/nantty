@@ -204,7 +204,7 @@ func (controller SessionsController) UpdateLiveMonetization(writer http.Response
 // host/state check and row-locked update.
 func (controller SessionsController) UpdateLiveCoinSupport(writer http.ResponseWriter, request *http.Request) {
 	controller.responder().WithActorAndLive(writer, request, func(actor types.Actor, liveId uuid.UUID) error {
-		enabled, err := decodeLiveCoinSupportRequest(http.MaxBytesReader(writer, request.Body, 1024))
+		enabled, err := DecodeLiveCoinSupportRequest(http.MaxBytesReader(writer, request.Body, 1024))
 		if err != nil {
 			return err
 		}
@@ -216,7 +216,7 @@ func (controller SessionsController) UpdateLiveCoinSupport(writer http.ResponseW
 	})
 }
 
-func decodeLiveCoinSupportRequest(reader io.Reader) (bool, error) {
+func DecodeLiveCoinSupportRequest(reader io.Reader) (bool, error) {
 	decoder := json.NewDecoder(reader)
 	invalid := func() (bool, error) {
 		return false, httpserver.NewApiError(http.StatusBadRequest, "INVALID_COIN_SUPPORT_REQUEST", "Send exactly one JSON field: enabled (boolean).")

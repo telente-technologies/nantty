@@ -90,8 +90,8 @@ func BuildCartView(ctx context.Context, deployed *container.Container, accountId
 	if err != nil {
 		return view, err
 	}
-	context.available = markItemsWithoutEnoughStock(ctx, deployed, lines, unavailable)
-	return assembleCartView(groups, unavailable, context, address), nil
+	context.Available = markItemsWithoutEnoughStock(ctx, deployed, lines, unavailable)
+	return AssembleCartView(groups, unavailable, context, address), nil
 }
 
 func markItemsWithoutEnoughStock(ctx context.Context, deployed *container.Container, lines []PricedCartLine, unavailable map[uuid.UUID]bool) map[uuid.UUID]int {
@@ -117,30 +117,30 @@ func markItemsWithoutEnoughStock(ctx context.Context, deployed *container.Contai
 	return available
 }
 
-type cartContext struct {
-	stores    map[uuid.UUID]commerceports.StoreSnapshot
-	profiles  map[uuid.UUID]*ShippingProfileRules
-	credits   map[uuid.UUID]CreditState
-	rates     map[uuid.UUID]float64
-	available map[uuid.UUID]int
+type CartViewContext struct {
+	Stores    map[uuid.UUID]commerceports.StoreSnapshot
+	Profiles  map[uuid.UUID]*ShippingProfileRules
+	Credits   map[uuid.UUID]CreditState
+	Rates     map[uuid.UUID]float64
+	Available map[uuid.UUID]int
 }
 
-func loadCartContext(ctx context.Context, deployed *container.Container, accountId uuid.UUID, storeIds []uuid.UUID, address *usersdirectory.ShippingAddress) (cartContext, error) {
+func loadCartContext(ctx context.Context, deployed *container.Container, accountId uuid.UUID, storeIds []uuid.UUID, address *usersdirectory.ShippingAddress) (CartViewContext, error) {
 	catalog, err := deployed.Catalog()
 	if err != nil {
-		return cartContext{}, err
+		return CartViewContext{}, err
 	}
-	loaded := cartContext{available: map[uuid.UUID]int{}}
-	if loaded.stores, err = catalog.DescribeStores(ctx, storeIds); err != nil {
+	loaded := CartViewContext{Available: map[uuid.UUID]int{}}
+	if loaded.Stores, err = catalog.DescribeStores(ctx, storeIds); err != nil {
 		return loaded, err
 	}
-	loaded.rates, _ = StoreSuccessRates(ctx, deployed, storeIds)
+	loaded.Rates, _ = StoreSuccessRates(ctx, deployed, storeIds)
 	if address != nil {
-		if loaded.profiles, err = LoadShippingProfileRules(ctx, deployed, storeIds); err != nil {
+		if loaded.Profiles, err = LoadShippingProfileRules(ctx, deployed, storeIds); err != nil {
 			return loaded, err
 		}
 	}
-	if loaded.credits, err = LoadCreditStatesForBuyer(ctx, deployed.Client, accountId, storeIds, deployed.Now()); err != nil {
+	if loaded.Credits, err = LoadCreditStatesForBuyer(ctx, deployed.Client, accountId, storeIds, deployed.Now()); err != nil {
 		return loaded, err
 	}
 	return loaded, nil

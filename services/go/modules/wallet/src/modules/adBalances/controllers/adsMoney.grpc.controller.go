@@ -27,7 +27,7 @@ type AdsMoneyGrpcController struct {
 }
 
 func (controller AdsMoneyGrpcController) DebitWalletForBoost(ctx context.Context, request *moneyv1.DebitWalletForBoostRequest) (*moneyv1.DebitWalletForBoostResponse, error) {
-	body, err := convertBoostRequest(request.GetUserId(), request.GetAmount(), request.GetIdempotencyKey(), "", false)
+	body, err := ConvertBoostRequest(request.GetUserId(), request.GetAmount(), request.GetIdempotencyKey(), "", false)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (controller AdsMoneyGrpcController) DebitWalletForBoost(ctx context.Context
 }
 
 func (controller AdsMoneyGrpcController) RefundBoostRemainder(ctx context.Context, request *moneyv1.RefundBoostRemainderRequest) (*moneyv1.RefundBoostRemainderResponse, error) {
-	body, err := convertBoostRequest(request.GetUserId(), request.GetAmount(), request.GetIdempotencyKey(), request.GetDebitIdempotencyKey(), true)
+	body, err := ConvertBoostRequest(request.GetUserId(), request.GetAmount(), request.GetIdempotencyKey(), request.GetDebitIdempotencyKey(), true)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (controller AdsMoneyGrpcController) RefundBoostRemainder(ctx context.Contex
 	return &moneyv1.RefundBoostRemainderResponse{LedgerTransactionId: result.LedgerTransactionId, BalanceAfter: convertMoney(result.BalanceAfter), Replayed: result.Replayed}, nil
 }
 
-func convertBoostRequest(userId string, amount *commonv1.Money, idempotencyKey, debitIdempotencyKey string, refund bool) (dtos.BoostDebitRequestDto, error) {
+func ConvertBoostRequest(userId string, amount *commonv1.Money, idempotencyKey, debitIdempotencyKey string, refund bool) (dtos.BoostDebitRequestDto, error) {
 	valid := userId != "" && len(userId) <= 80 && amount != nil && amount.GetAmountMinor() > 0 && amount.GetAmountMinor() <= 10_000_000_000 &&
 		amount.GetCurrency() == "NGN" && grpcIdempotencyKeyPattern.MatchString(idempotencyKey) && (!refund || grpcIdempotencyKeyPattern.MatchString(debitIdempotencyKey))
 	if !valid {

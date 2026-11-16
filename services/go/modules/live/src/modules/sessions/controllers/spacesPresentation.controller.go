@@ -15,7 +15,7 @@ import (
 	"nantty/platform/httpserver"
 )
 
-type spaceSummaryResponse struct {
+type SpaceSummaryResponse struct {
 	ID            string      `json:"id"`
 	Title         string      `json:"title"`
 	Description   string      `json:"description,omitempty"`
@@ -27,13 +27,13 @@ type spaceSummaryResponse struct {
 	Host          spacePerson `json:"host"`
 }
 
-func (c SpacesController) presentSpaceSummaries(ctx context.Context, rows []*ent.Space, viewer *types.Actor) ([]spaceSummaryResponse, error) {
+func (c SpacesController) PresentSpaceSummaries(ctx context.Context, rows []*ent.Space, viewer *types.Actor) ([]SpaceSummaryResponse, error) {
 	accessible, err := filterAccessibleSpaceRows(ctx, rows, viewer, c.Container.Relations)
 	if err != nil {
 		return nil, err
 	}
 	if len(accessible) == 0 {
-		return []spaceSummaryResponse{}, nil
+		return []SpaceSummaryResponse{}, nil
 	}
 	profileIDs := make([]uuid.UUID, 0, len(accessible))
 	seen := make(map[uuid.UUID]struct{}, len(accessible))
@@ -50,9 +50,9 @@ func (c SpacesController) presentSpaceSummaries(ctx context.Context, rows []*ent
 			return nil, err
 		}
 	}
-	views := make([]spaceSummaryResponse, 0, len(accessible))
+	views := make([]SpaceSummaryResponse, 0, len(accessible))
 	for _, row := range accessible {
-		views = append(views, spaceSummaryResponse{
+		views = append(views, SpaceSummaryResponse{
 			ID: row.ID.String(), Title: row.Title, Description: row.Description, State: row.State,
 			ScheduledAt: row.ScheduledAt, StartedAt: row.StartedAt, ListenerCount: row.Listeners, Visibility: spaceVisibility(row),
 			Host: describeSpacePerson(row.HostID, "host", false, profiles),
@@ -61,7 +61,7 @@ func (c SpacesController) presentSpaceSummaries(ctx context.Context, rows []*ent
 	return views, nil
 }
 
-func filterAccessibleSpaceRows(ctx context.Context, rows []*ent.Space, viewer *types.Actor, relations spaceDetailRelations) ([]*ent.Space, error) {
+func filterAccessibleSpaceRows(ctx context.Context, rows []*ent.Space, viewer *types.Actor, relations SpaceDetailRelations) ([]*ent.Space, error) {
 	accessible := make([]*ent.Space, 0, len(rows))
 	if len(rows) == 0 {
 		return accessible, nil

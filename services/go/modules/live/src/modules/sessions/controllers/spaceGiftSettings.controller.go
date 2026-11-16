@@ -26,7 +26,7 @@ func (c SpacesController) UpdateCoinDonations(w http.ResponseWriter, r *http.Req
 		return
 	}
 	row, err := c.Container.Client.Space.Get(r.Context(), id)
-	if err == nil && !spaceHostAuthorized(row.HostID, actor.UserId) {
+	if err == nil && !SpaceHostAuthorized(row.HostID, actor.UserId) {
 		err = httpserver.ErrForbidden
 	}
 	if err == nil && row.State != space.StateLive && row.State != space.StateScheduled {

@@ -33,7 +33,7 @@ func (client *AccountDirectoryClient) LookupParticipants(ctx context.Context, id
 	for _, identifier := range identifiers {
 		request.AccountIds = append(request.AccountIds, identifier.String())
 	}
-	response, err := callWithRetryOnUnavailable(ctx, client.options, true, func(attempt context.Context) (*authv1.GetAccountSummariesResponse, error) {
+	response, err := CallWithRetryOnUnavailable(ctx, client.options, true, func(attempt context.Context) (*authv1.GetAccountSummariesResponse, error) {
 		return client.service.GetAccountSummaries(attempt, request)
 	})
 	if err != nil {

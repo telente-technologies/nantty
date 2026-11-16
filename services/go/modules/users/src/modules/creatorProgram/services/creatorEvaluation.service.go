@@ -77,9 +77,9 @@ func EvaluateCreatorEligibility(ctx context.Context, application *container.Cont
 	emailOk := account.EmailVerified || !auto.RequiresVerifiedEmail
 	decision := DecisionNotEligible
 	switch {
-	case allMet && emailOk && signals.FraudScore <= auto.MaximumFraudScore && meetsAdditionalAutoApproveRules(signals, auto):
+	case allMet && emailOk && signals.FraudScore <= auto.MaximumFraudScore && MeetsAdditionalAutoApproveRules(signals, auto):
 		decision = DecisionAutoApprove
-	case emailOk && qualifiesForManualReview(signals, review, ageDays, auto.MinimumAccountAgeDays):
+	case emailOk && QualifiesForManualReview(signals, review, ageDays, auto.MinimumAccountAgeDays):
 		decision = DecisionManualReview
 	}
 	return Eligibility{Eligible: decision != DecisionNotEligible, Decision: decision, DecisionNote: decisionNotes[decision], Requirements: requirements}, nil
@@ -88,11 +88,11 @@ func EvaluateCreatorEligibility(ctx context.Context, application *container.Cont
 // These rules are nested under autoApprove in the staff policy, so failing
 // them routes an otherwise review-qualified applicant to manual review rather
 // than turning the rules into new hard rejection criteria.
-func meetsAdditionalAutoApproveRules(signals *ent.ProfileSignal, rules AutoApproveRules) bool {
+func MeetsAdditionalAutoApproveRules(signals *ent.ProfileSignal, rules AutoApproveRules) bool {
 	return !rules.RequiresIdentityVerification || signals.IDVerified
 }
 
-func qualifiesForManualReview(signals *ent.ProfileSignal, review ManualReviewRules, ageDays, minimumAgeDays int) bool {
+func QualifiesForManualReview(signals *ent.ProfileSignal, review ManualReviewRules, ageDays, minimumAgeDays int) bool {
 	if signals.RealFollowers < review.MinimumRealFollowers || signals.RiskScore > review.MaximumRiskScore || ageDays < minimumAgeDays {
 		return false
 	}

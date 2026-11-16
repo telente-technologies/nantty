@@ -65,7 +65,7 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 // VerifyCredentials validates an existing Nantty password without issuing a
 // session. Messenger uses this before creating a pending device authorization.
 func (application Handler) VerifyCredentials(ctx context.Context, identifier, password string) (*ent.Account, error) {
-	throttleKey, _ := normalizeLoginIdentifier(identifier)
+	throttleKey, _ := NormalizeLoginIdentifier(identifier)
 	if passwordFailures.LockedFor(throttleKey) > 0 {
 		return nil, authErrors.ErrTooManyLoginAttempts
 	}
@@ -87,7 +87,7 @@ func (application Handler) VerifyCredentials(ctx context.Context, identifier, pa
 	return existing, nil
 }
 
-func normalizeLoginIdentifier(identifier string) (value string, isEmail bool) {
+func NormalizeLoginIdentifier(identifier string) (value string, isEmail bool) {
 	trimmed := strings.ToLower(strings.TrimSpace(identifier))
 	if strings.Contains(trimmed, "@") && !strings.HasPrefix(trimmed, "@") {
 		return trimmed, true
@@ -96,7 +96,7 @@ func normalizeLoginIdentifier(identifier string) (value string, isEmail bool) {
 }
 
 func (application Handler) findActiveAccountByEmailOrUsername(ctx context.Context, identifier string) (*ent.Account, error) {
-	value, isEmail := normalizeLoginIdentifier(identifier)
+	value, isEmail := NormalizeLoginIdentifier(identifier)
 	predicate := account.Username(value)
 	if isEmail {
 		predicate = account.Email(value)

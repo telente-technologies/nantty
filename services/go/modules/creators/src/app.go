@@ -44,7 +44,7 @@ type Module struct {
 	Affiliates affiliateservices.Affiliates
 }
 
-func validateCreatorSubscriptionPaidEvent(paid moneyservices.CreatorSubscriptionPaid) error {
+func ValidateCreatorSubscriptionPaidEvent(paid moneyservices.CreatorSubscriptionPaid) error {
 	amountCurrency, amountErr := platformmoney.ParseCurrencyCode(paid.Amount.Currency)
 	shareCurrency, shareErr := platformmoney.ParseCurrencyCode(paid.CreatorShare.Currency)
 	if paid.SubscriptionId == "" || paid.ChargeId == "" || paid.CreatorId == "" || paid.Kind == "" || paid.Reference == "" ||
@@ -56,7 +56,7 @@ func validateCreatorSubscriptionPaidEvent(paid moneyservices.CreatorSubscription
 	return nil
 }
 
-func validateCreatorSubscriptionRefundedEvent(refunded moneyservices.CreatorSubscriptionRefunded) error {
+func ValidateCreatorSubscriptionRefundedEvent(refunded moneyservices.CreatorSubscriptionRefunded) error {
 	recoveredCurrency, recoveredErr := platformmoney.ParseCurrencyCode(refunded.Recovered.Currency)
 	shortfallCurrency, shortfallErr := platformmoney.ParseCurrencyCode(refunded.Shortfall.Currency)
 	if refunded.SubscriptionId == "" || refunded.ChargeId == "" || refunded.CreatorId == "" ||
@@ -67,7 +67,7 @@ func validateCreatorSubscriptionRefundedEvent(refunded moneyservices.CreatorSubs
 	return nil
 }
 
-func validateAdCreatorEarningsPostedEvent(posted moneyservices.AdCreatorEarningsPosted) error {
+func ValidateAdCreatorEarningsPostedEvent(posted moneyservices.AdCreatorEarningsPosted) error {
 	if _, err := platformmoney.ParseCurrencyCode(posted.Currency); posted.CreatorUserId == "" || posted.BatchId == "" ||
 		posted.IdempotencyKey != "adCreator:"+posted.BatchId+":"+posted.CreatorUserId || posted.AmountMinor <= 0 || err != nil {
 		return fmt.Errorf("%w: invalid adCreatorEarnings.posted financial payload", platformevents.ErrPoisonMessage)
@@ -75,7 +75,7 @@ func validateAdCreatorEarningsPostedEvent(posted moneyservices.AdCreatorEarnings
 	return nil
 }
 
-func validateAffiliateOrderGroupEvent(orderGroupId, storeId, sellerAccountId, buyerAccountId, currency string, items []affiliateservices.AttributedItem) error {
+func ValidateAffiliateOrderGroupEvent(orderGroupId, storeId, sellerAccountId, buyerAccountId, currency string, items []affiliateservices.AttributedItem) error {
 	if orderGroupId == "" || storeId == "" || sellerAccountId == "" || buyerAccountId == "" {
 		return fmt.Errorf("%w: affiliate order event is missing required order or account identifiers", platformevents.ErrPoisonMessage)
 	}
@@ -93,8 +93,8 @@ func validateAffiliateOrderGroupEvent(orderGroupId, storeId, sellerAccountId, bu
 	return nil
 }
 
-func validateOrderGroupCompletedAffiliateEvent(completed affiliateservices.OrderGroupCompleted) error {
-	if err := validateAffiliateOrderGroupEvent(completed.OrderGroupId, completed.StoreId, completed.SellerAccountId, completed.BuyerAccountId, completed.Currency, completed.AttributedItems); err != nil {
+func ValidateOrderGroupCompletedAffiliateEvent(completed affiliateservices.OrderGroupCompleted) error {
+	if err := ValidateAffiliateOrderGroupEvent(completed.OrderGroupId, completed.StoreId, completed.SellerAccountId, completed.BuyerAccountId, completed.Currency, completed.AttributedItems); err != nil {
 		return err
 	}
 	if completed.OrderNumber == "" || completed.SubtotalMinor < 0 || completed.TotalMinor < 0 || completed.RefundedMinor < 0 || completed.RefundedMinor > completed.TotalMinor {
@@ -103,8 +103,8 @@ func validateOrderGroupCompletedAffiliateEvent(completed affiliateservices.Order
 	return nil
 }
 
-func validateOrderGroupPaidAffiliateEvent(paid affiliateservices.OrderGroupPaid) error {
-	if err := validateAffiliateOrderGroupEvent(paid.OrderGroupId, paid.StoreId, paid.SellerAccountId, paid.BuyerAccountId, paid.Currency, paid.AttributedItems); err != nil {
+func ValidateOrderGroupPaidAffiliateEvent(paid affiliateservices.OrderGroupPaid) error {
+	if err := ValidateAffiliateOrderGroupEvent(paid.OrderGroupId, paid.StoreId, paid.SellerAccountId, paid.BuyerAccountId, paid.Currency, paid.AttributedItems); err != nil {
 		return err
 	}
 	if paid.OrderNumber == "" {
@@ -113,14 +113,14 @@ func validateOrderGroupPaidAffiliateEvent(paid affiliateservices.OrderGroupPaid)
 	return nil
 }
 
-func validateOrderGroupStatusChangedAffiliateEvent(changed affiliateservices.OrderGroupStatusChanged) error {
+func ValidateOrderGroupStatusChangedAffiliateEvent(changed affiliateservices.OrderGroupStatusChanged) error {
 	if changed.OrderGroupId == "" || changed.From == "" || changed.To == "" {
 		return fmt.Errorf("%w: orderGroup.statusChanged is missing order or transition fields", platformevents.ErrPoisonMessage)
 	}
 	return nil
 }
 
-func validateEscrowAffiliateRefundEvent(refund affiliateservices.EscrowRefunded) error {
+func ValidateEscrowAffiliateRefundEvent(refund affiliateservices.EscrowRefunded) error {
 	amountCurrency, amountErr := platformmoney.ParseCurrencyCode(refund.Amount.Currency)
 	refundedCurrency, refundedErr := platformmoney.ParseCurrencyCode(refund.Refunded.Currency)
 	if refund.OrderId == "" || refund.EscrowId == "" || refund.Status == "" || refund.Amount.AmountMinor <= 0 || refund.Refunded.AmountMinor <= 0 ||
@@ -130,7 +130,7 @@ func validateEscrowAffiliateRefundEvent(refund affiliateservices.EscrowRefunded)
 	return nil
 }
 
-func validateCreatorApplicationApprovedEvent(accountId string) error {
+func ValidateCreatorApplicationApprovedEvent(accountId string) error {
 	if strings.TrimSpace(accountId) == "" {
 		return fmt.Errorf("%w: creatorApplication.approved is missing accountId", platformevents.ErrPoisonMessage)
 	}
@@ -161,7 +161,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &data); err != nil {
 			return err
 		}
-		if err := validateCreatorApplicationApprovedEvent(data.AccountId); err != nil {
+		if err := ValidateCreatorApplicationApprovedEvent(data.AccountId); err != nil {
 			return err
 		}
 		return module.Program.EnrollApprovedCreatorInDefaultTier(ctx, data.AccountId)
@@ -171,7 +171,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &paid); err != nil {
 			return err
 		}
-		if err := validateCreatorSubscriptionPaidEvent(paid); err != nil {
+		if err := ValidateCreatorSubscriptionPaidEvent(paid); err != nil {
 			return err
 		}
 		return module.Money.RecordSubscriptionEarning(ctx, paid, envelope.OccurredAt)
@@ -181,7 +181,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &refunded); err != nil {
 			return err
 		}
-		if err := validateCreatorSubscriptionRefundedEvent(refunded); err != nil {
+		if err := ValidateCreatorSubscriptionRefundedEvent(refunded); err != nil {
 			return err
 		}
 		return module.Money.ReverseSubscriptionEarning(ctx, refunded, envelope.OccurredAt)
@@ -191,7 +191,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &posted); err != nil {
 			return err
 		}
-		if err := validateAdCreatorEarningsPostedEvent(posted); err != nil {
+		if err := ValidateAdCreatorEarningsPostedEvent(posted); err != nil {
 			return err
 		}
 		return module.Money.PostAdRevenueShare(ctx, posted, envelope.OccurredAt)
@@ -201,7 +201,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &completed); err != nil {
 			return err
 		}
-		if err := validateOrderGroupCompletedAffiliateEvent(completed); err != nil {
+		if err := ValidateOrderGroupCompletedAffiliateEvent(completed); err != nil {
 			return err
 		}
 		_, err := module.Affiliates.CreditCommissionsForRelease(ctx, completed.Sale())
@@ -212,7 +212,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &paid); err != nil {
 			return err
 		}
-		if err := validateOrderGroupPaidAffiliateEvent(paid); err != nil {
+		if err := ValidateOrderGroupPaidAffiliateEvent(paid); err != nil {
 			return err
 		}
 		_, err := module.Affiliates.RecordAwaitingAttributedSales(ctx, paid.Sale())
@@ -223,7 +223,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &changed); err != nil {
 			return err
 		}
-		if err := validateOrderGroupStatusChangedAffiliateEvent(changed); err != nil {
+		if err := ValidateOrderGroupStatusChangedAffiliateEvent(changed); err != nil {
 			return err
 		}
 		if reason, voids := changed.VoidReason(); voids {
@@ -238,7 +238,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 			if err := loaders.DecodeEventData(envelope, &refund); err != nil {
 				return err
 			}
-			if err := validateEscrowAffiliateRefundEvent(refund); err != nil {
+			if err := ValidateEscrowAffiliateRefundEvent(refund); err != nil {
 				return err
 			}
 			_, err := module.Affiliates.ReverseCommissionsForRefund(ctx, refund, envelope.Type)
