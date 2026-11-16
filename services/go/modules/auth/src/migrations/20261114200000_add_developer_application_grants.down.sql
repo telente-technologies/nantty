@@ -1,0 +1,7 @@
+DROP TABLE developer_application_member_grants;
+
+ALTER TABLE developer_organization_memberships
+  DROP CONSTRAINT developer_organization_memberships_id_org_unique;
+
+ALTER TABLE developer_applications
+  DROP CONSTRAINT developer_applications_id_organization_unique;

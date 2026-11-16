@@ -32,13 +32,18 @@ describe("message push recipients", () => {
       [member("s"), member("a"), member("muted", { mutedAlways: true }), member("snoozed", { mutedUntil: new Date("2026-10-11T00:00:00Z") }), member("expired", { mutedUntil: new Date("2026-10-09T00:00:00Z") }), member("request", { inboxFolder: "requests" }), member("off"), member("private")],
       [{ accountId: "off", notifyMessages: true, notifyGroups: false, showMessagePreview: true }, { accountId: "private", notifyMessages: true, notifyGroups: true, showMessagePreview: false }],
     );
-    expect(data["pushRecipients"]).toEqual([{ userId: "a", showPreview: true }, { userId: "expired", showPreview: true }, { userId: "private", showPreview: false }]);
+    expect(data["pushRecipients"]).toEqual([
+      { userId: "a", showPreview: true, sound: true, vibration: true, bubbleAllowed: false },
+      { userId: "expired", showPreview: true, sound: true, vibration: true, bubbleAllowed: false },
+      { userId: "private", showPreview: false, sound: true, vibration: true, bubbleAllowed: false },
+    ]);
     expect(data).toMatchObject({ senderName: "Ada", conversationKind: "group", conversationTitle: null });
     expect(JSON.stringify(data)).not.toContain("Fabric lovers");
     expect(JSON.stringify(data)).not.toContain("ciphertext");
   });
 
   it("sends no push list when everyone muted the chat", async () => {
-    expect((await deliver([member("s"), member("a", { mutedAlways: true })]))["pushRecipients"]).toEqual([]);
+    const data = await deliver([member("s"), member("a", { mutedAlways: true })]);
+    expect(data["pushRecipients"]).toEqual([]);
   });
 });

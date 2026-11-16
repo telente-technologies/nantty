@@ -11,7 +11,7 @@ import (
 	platformmoney "nantty/platform/money"
 )
 
-func validateCreatorSubscriptionPaidEvent(paid moneyservices.CreatorSubscriptionPaid) error {
+func ValidateCreatorSubscriptionPaidEvent(paid moneyservices.CreatorSubscriptionPaid) error {
 	amountCurrency, amountErr := platformmoney.ParseCurrencyCode(paid.Amount.Currency)
 	shareCurrency, shareErr := platformmoney.ParseCurrencyCode(paid.CreatorShare.Currency)
 	if paid.SubscriptionId == "" || paid.ChargeId == "" || paid.CreatorId == "" || paid.Kind == "" || paid.Reference == "" ||
@@ -23,7 +23,7 @@ func validateCreatorSubscriptionPaidEvent(paid moneyservices.CreatorSubscription
 	return nil
 }
 
-func validateCreatorSubscriptionRefundedEvent(refunded moneyservices.CreatorSubscriptionRefunded) error {
+func ValidateCreatorSubscriptionRefundedEvent(refunded moneyservices.CreatorSubscriptionRefunded) error {
 	recoveredCurrency, recoveredErr := platformmoney.ParseCurrencyCode(refunded.Recovered.Currency)
 	shortfallCurrency, shortfallErr := platformmoney.ParseCurrencyCode(refunded.Shortfall.Currency)
 	if refunded.SubscriptionId == "" || refunded.ChargeId == "" || refunded.CreatorId == "" ||
@@ -34,7 +34,7 @@ func validateCreatorSubscriptionRefundedEvent(refunded moneyservices.CreatorSubs
 	return nil
 }
 
-func validateAdCreatorEarningsPostedEvent(posted moneyservices.AdCreatorEarningsPosted) error {
+func ValidateAdCreatorEarningsPostedEvent(posted moneyservices.AdCreatorEarningsPosted) error {
 	if _, err := platformmoney.ParseCurrencyCode(posted.Currency); posted.CreatorUserId == "" || posted.BatchId == "" ||
 		posted.IdempotencyKey != "adCreator:"+posted.BatchId+":"+posted.CreatorUserId || posted.AmountMinor <= 0 || err != nil {
 		return fmt.Errorf("%w: invalid adCreatorEarnings.posted financial payload", platformevents.ErrPoisonMessage)
@@ -60,7 +60,7 @@ func validateAffiliateOrderGroupEvent(orderGroupId, storeId, sellerAccountId, bu
 	return nil
 }
 
-func validateOrderGroupCompletedAffiliateEvent(completed affiliateservices.OrderGroupCompleted) error {
+func ValidateOrderGroupCompletedAffiliateEvent(completed affiliateservices.OrderGroupCompleted) error {
 	if err := validateAffiliateOrderGroupEvent(completed.OrderGroupId, completed.StoreId, completed.SellerAccountId, completed.BuyerAccountId, completed.Currency, completed.AttributedItems); err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func validateOrderGroupCompletedAffiliateEvent(completed affiliateservices.Order
 	return nil
 }
 
-func validateOrderGroupPaidAffiliateEvent(paid affiliateservices.OrderGroupPaid) error {
+func ValidateOrderGroupPaidAffiliateEvent(paid affiliateservices.OrderGroupPaid) error {
 	if err := validateAffiliateOrderGroupEvent(paid.OrderGroupId, paid.StoreId, paid.SellerAccountId, paid.BuyerAccountId, paid.Currency, paid.AttributedItems); err != nil {
 		return err
 	}
@@ -80,14 +80,14 @@ func validateOrderGroupPaidAffiliateEvent(paid affiliateservices.OrderGroupPaid)
 	return nil
 }
 
-func validateOrderGroupStatusChangedAffiliateEvent(changed affiliateservices.OrderGroupStatusChanged) error {
+func ValidateOrderGroupStatusChangedAffiliateEvent(changed affiliateservices.OrderGroupStatusChanged) error {
 	if changed.OrderGroupId == "" || changed.From == "" || changed.To == "" {
 		return fmt.Errorf("%w: orderGroup.statusChanged is missing order or transition fields", platformevents.ErrPoisonMessage)
 	}
 	return nil
 }
 
-func validateEscrowAffiliateRefundEvent(refund affiliateservices.EscrowRefunded) error {
+func ValidateEscrowAffiliateRefundEvent(refund affiliateservices.EscrowRefunded) error {
 	amountCurrency, amountErr := platformmoney.ParseCurrencyCode(refund.Amount.Currency)
 	refundedCurrency, refundedErr := platformmoney.ParseCurrencyCode(refund.Refunded.Currency)
 	if refund.OrderId == "" || refund.EscrowId == "" || refund.Status == "" || refund.Amount.AmountMinor <= 0 || refund.Refunded.AmountMinor <= 0 ||
@@ -97,7 +97,7 @@ func validateEscrowAffiliateRefundEvent(refund affiliateservices.EscrowRefunded)
 	return nil
 }
 
-func validateCreatorApplicationApprovedEvent(accountId string) error {
+func ValidateCreatorApplicationApprovedEvent(accountId string) error {
 	if strings.TrimSpace(accountId) == "" {
 		return fmt.Errorf("%w: creatorApplication.approved is missing accountId", platformevents.ErrPoisonMessage)
 	}

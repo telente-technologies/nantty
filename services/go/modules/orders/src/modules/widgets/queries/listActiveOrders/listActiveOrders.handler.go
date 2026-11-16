@@ -39,7 +39,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (dtos.OrderWidg
 	}
 	storeNames := handler.storeNames(ctx, groups)
 	for _, group := range groups {
-		payload.Orders = append(payload.Orders, orderWidgetItem(group, items[group.ID], storeNames[group.StoreID]))
+		payload.Orders = append(payload.Orders, BuildOrderWidgetItem(group, items[group.ID], storeNames[group.StoreID]))
 	}
 	return payload, nil
 }
@@ -60,7 +60,7 @@ func (handler Handler) storeNames(ctx context.Context, groups []*ent.OrderGroup)
 	return names
 }
 
-func orderWidgetItem(group *ent.OrderGroup, items []*ent.OrderItem, storeName string) dtos.OrderWidgetItem {
+func BuildOrderWidgetItem(group *ent.OrderGroup, items []*ent.OrderItem, storeName string) dtos.OrderWidgetItem {
 	status := widgetservices.OrderWidgetStatusFor(group.Status, group.DeliveryStatus, group.RiderName != nil && *group.RiderName != "")
 	item := dtos.OrderWidgetItem{
 		Id: group.ID.String(), Reference: group.Reference, Status: status.Key, StatusLabel: status.Label,

@@ -44,7 +44,7 @@ func (gateway *PaymentGateway) refundLateChargeOnClosedIntent(ctx context.Contex
 	if err != nil {
 		return unchanged, convertProviderError(err)
 	}
-	if verification.Outcome != interfaces.OutcomeSucceeded || !lateChargeMatchesIntent(intent, verification, chargeId) {
+	if verification.Outcome != interfaces.OutcomeSucceeded || !LateChargeMatchesIntent(intent, verification, chargeId) {
 		if verification.Outcome == interfaces.OutcomeSucceeded {
 			return unchanged, ErrPaymentAmountMismatch
 		}
@@ -82,7 +82,7 @@ func (gateway *PaymentGateway) recordLateChargeInTransaction(ctx context.Context
 	if isSettleable(intent.Status) || intent.ProviderTransactionID == verification.ProviderChargeId {
 		return nil, nil
 	}
-	if !lateChargeMatchesIntent(intent, verification, verification.ProviderChargeId) {
+	if !LateChargeMatchesIntent(intent, verification, verification.ProviderChargeId) {
 		return nil, ErrPaymentAmountMismatch
 	}
 	recorded, err := client.PaymentIntent.Query().Where(paymentintent.Provider(intent.Provider), paymentintent.ProviderTransactionID(verification.ProviderChargeId)).Exist(ctx)
@@ -108,10 +108,10 @@ func (gateway *PaymentGateway) recordLateChargeInTransaction(ctx context.Context
 	return &refund, err
 }
 
-func lateChargeMatchesIntent(intent *ent.PaymentIntent, verification interfaces.ChargeVerification, chargeId string) bool {
+func LateChargeMatchesIntent(intent *ent.PaymentIntent, verification interfaces.ChargeVerification, chargeId string) bool {
 	return intent != nil && chargeId != "" && verification.ProviderChargeId == chargeId &&
 		verification.AmountMinor == intent.AmountMinor && verification.Currency == intent.Currency &&
-		validProviderFeeForIntent(intent, verification.ProviderFeeMinor, verification.AmountMinor)
+		ValidProviderFeeForIntent(intent, verification.ProviderFeeMinor, verification.AmountMinor)
 }
 
 func (gateway *PaymentGateway) alertFinanceOfDuplicateSettlement(ctx context.Context, transaction *sql.Tx, duplicate *ent.PaymentIntent) error {

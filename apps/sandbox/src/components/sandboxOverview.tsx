@@ -1,30 +1,126 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import styles from "./sandboxOverview.module.css";
 
-const sandboxAreas = [
-  { title: "Test applications", detail: "Separate test credentials and tenant-scoped access.", href: "/test-apps" },
-  { title: "API explorer", detail: "Send requests only to an isolated sandbox API.", href: "/explorer" },
-  { title: "Scenarios", detail: "Generate deterministic synthetic message and delivery flows.", href: "/scenarios" },
-  { title: "Webhook events", detail: "Inspect signed test events and delivery attempts.", href: "/events" },
+const sandboxServices = [
+  { label: "Test applications and credentials", status: "Not connected", href: "/test-apps" },
+  { label: "Isolated API data plane", status: "Not connected", href: "/explorer" },
+  { label: "Messaging test environment", status: "Not connected", href: "/messaging" },
+  { label: "Scenario runner", status: "Not connected", href: "/scenarios" },
+  { label: "Request and event inspection", status: "Not connected", href: "/requests" },
+] as const;
+
+const sandboxSteps = [
+  { title: "Create a test application", detail: "Use environment-bound credentials that cannot access production resources.", href: "/test-apps" },
+  { title: "Build a documented request", detail: "Choose a versioned operation and confirm its test-only scopes.", href: "/explorer" },
+  { title: "Run a reproducible scenario", detail: "Exercise deterministic conversations and events using synthetic data.", href: "/scenarios" },
+  { title: "Inspect the result", detail: "Correlate redacted responses, webhook attempts, and request IDs.", href: "/events" },
 ] as const;
 
 export function SandboxOverview() {
+  const [connectionState, setConnectionState] = useState<"checking" | "ready" | "unavailable" | "not_configured">("checking");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetch("/api/sandbox/readiness", { cache: "no-store", signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("readiness unavailable");
+        const payload: unknown = await response.json();
+        if (typeof payload === "object" && payload !== null && "state" in payload && ["ready", "unavailable", "not_configured"].includes(String(payload.state))) {
+          setConnectionState(payload.state as "ready" | "unavailable" | "not_configured");
+        } else setConnectionState("unavailable");
+      })
+      .catch(() => { if (!controller.signal.aborted) setConnectionState("unavailable"); });
+    return () => controller.abort();
+  }, []);
+
+  const connectionLabel = connectionState === "checking" ? "Checking" : connectionState === "ready" ? "Gateway ready" : connectionState === "unavailable" ? "Unavailable" : "Not configured";
+  const connectionDescription = connectionState === "ready"
+    ? "The Sandbox gateway readiness check passed. Tenant, credential, and scenario services are checked separately and remain unavailable until connected."
+    : connectionState === "unavailable"
+      ? "The configured Sandbox gateway did not return a ready response. No test data or API request was sent."
+      : "No dedicated Sandbox API gateway is configured. The portal does not contact the production API.";
+
   return (
     <section className={styles.page} aria-labelledby="sandbox-title">
       <header className={styles.header}>
-        <p className={styles.eyebrow}>Test safely before production</p>
-        <h1 id="sandbox-title">Nantty API Sandbox</h1>
-        <p>Use synthetic businesses, customers, messages, and webhook events once the isolated test services are available.</p>
+        <div>
+          <p className={styles.eyebrow}>Sandbox environment</p>
+          <h1 id="sandbox-title">Sandbox</h1>
+          <p>Use an isolated environment to validate integrations before connecting production services.</p>
+        </div>
+        <Link href="/docs" className={styles.docsLink}>Sandbox guide</Link>
       </header>
-      <div className={styles.safetyPanel}>
-        <div className={styles.safetyHeading}><span className={styles.safetyMark} aria-hidden="true" /><h2>Sandbox services are not connected</h2></div>
-        <p>This portal has no test credentials or scenario runner yet. It cannot reach production services, and it does not claim to execute API requests.</p>
-        <p className={styles.critical}>Never paste a production credential into a test environment.</p>
-      </div>
-      <div className={styles.grid} aria-label="Sandbox tools">
-        {sandboxAreas.map((area) => <Link key={area.href} href={area.href} className={styles.area}><h2>{area.title}</h2><p>{area.detail}</p><span>View status <span aria-hidden="true">→</span></span></Link>)}
-      </div>
+
+      <dl className={styles.environmentSummary} aria-label="Sandbox availability">
+        <div>
+          <dt>Environment</dt>
+          <dd>Test only</dd>
+        </div>
+        <div>
+          <dt>Service connection</dt>
+          <dd><span className={styles.statusMark} aria-hidden="true" />{connectionLabel}</dd>
+        </div>
+        <div>
+          <dt>Test data</dt>
+          <dd>Not available</dd>
+        </div>
+      </dl>
+
+      <section className={styles.panel} aria-labelledby="services-title">
+        <div className={styles.sectionHeading}>
+          <div>
+            <h2 id="services-title">Services</h2>
+            <p>{connectionDescription} This page does not create credentials or test records.</p>
+          </div>
+        </div>
+        <div className={styles.tableScroll}>
+          <table className={styles.serviceTable}>
+            <thead><tr><th scope="col">Service</th><th scope="col">State</th><th scope="col"><span className={styles.srOnly}>Requirements</span></th></tr></thead>
+            <tbody>
+              {sandboxServices.map((service) => (
+                <tr key={service.href}>
+                  <th scope="row"><Link href={service.href}>{service.label}</Link></th>
+                  <td data-label="State"><span className={styles.availability}><span className={styles.statusMark} aria-hidden="true" />{service.status}</span></td>
+                  <td data-label="Requirements"><Link href={service.href} className={styles.rowLink}>View</Link></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className={styles.panel} aria-labelledby="lifecycle-title">
+        <div className={styles.sectionHeading}>
+          <div>
+            <h2 id="lifecycle-title">Planned test lifecycle</h2>
+            <p>These steps describe the intended workflow; execution is unavailable until the services above are connected.</p>
+          </div>
+        </div>
+        <ol className={styles.stepList}>
+          {sandboxSteps.map((step, index) => (
+            <li key={step.href}>
+              <span className={styles.stepIndex} aria-hidden="true">{index + 1}</span>
+              <div className={styles.stepCopy}>
+                <Link href={step.href}>{step.title}</Link>
+                <p>{step.detail}</p>
+              </div>
+              <span className={styles.stepStatus}>Planned</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <aside className={styles.securityNote} aria-label="Credential safety">
+        <div>
+          <h2>Credential safety</h2>
+          <p>Keep production credentials out of the sandbox.</p>
+        </div>
+        <span>Environment separation must be enforced by the service boundary. This portal does not accept or validate production credentials.</span>
+      </aside>
     </section>
   );
 }

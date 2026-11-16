@@ -23,7 +23,7 @@ import (
 type SpacesController struct{ Container *container.Container }
 
 func (c SpacesController) rateLimit(w http.ResponseWriter, r *http.Request, actorID uuid.UUID) bool {
-	if spacesMutationLimiter.allow(actorID) {
+	if spacesMutationLimiter.Allow(actorID) {
 		return true
 	}
 	w.Header().Set("Retry-After", "60")
@@ -37,10 +37,6 @@ type spaceCreateRequest struct {
 	Visibility   string     `json:"visibility"`
 	ScheduledAt  *time.Time `json:"scheduledAt"`
 	GiftsEnabled *bool      `json:"giftsEnabled"`
-}
-
-func coinContributionsEnabled(preference *bool) bool {
-	return preference != nil && *preference
 }
 
 func (c SpacesController) List(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +58,7 @@ func (c SpacesController) List(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if len(stateValues) == 0 {
-		httpserver.WriteJsonResponse(w, http.StatusOK, []spaceSummaryResponse{})
+		httpserver.WriteJsonResponse(w, http.StatusOK, []SpaceSummaryResponse{})
 		return
 	}
 	rows, err := c.Container.Client.Space.Query().Where(space.StateIn(stateValues...), space.ModerationVisibilityEQ("visible")).Order(space.ByState(), space.ByScheduledAt()).Limit(100).All(r.Context())
@@ -70,7 +66,7 @@ func (c SpacesController) List(w http.ResponseWriter, r *http.Request) {
 		c.responder().Error(w, r, err)
 		return
 	}
-	views, err := c.presentSpaceSummaries(r.Context(), rows, viewer)
+	views, err := c.PresentSpaceSummaries(r.Context(), rows, viewer)
 	if err != nil {
 		c.responder().Error(w, r, err)
 		return
@@ -99,7 +95,7 @@ func (c SpacesController) Create(w http.ResponseWriter, r *http.Request) {
 	if !c.rateLimit(w, r, actor.UserId) {
 		return
 	}
-	if err := c.ensureSpaceHostEligible(r.Context(), actor); err != nil {
+	if err := c.EnsureSpaceHostEligible(r.Context(), actor); err != nil {
 		c.responder().Error(w, r, err)
 		return
 	}
@@ -142,7 +138,7 @@ func (c SpacesController) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	// Coin support is an explicit host opt-in. Older clients that omit the
 	// preference must not silently enable money contributions.
-	giftsEnabled := coinContributionsEnabled(input.GiftsEnabled)
+	giftsEnabled := services.LiveCoinSupportEnabled(input.GiftsEnabled)
 	query := c.Container.Client.Space.Create().SetHostID(actor.UserId).SetTitle(input.Title).SetDescription(input.Description).SetVisibility(space.Visibility(databaseVisibility)).SetLivekitRoom(room).SetGiftsEnabled(giftsEnabled).SetMetadata(metadata)
 	if input.ScheduledAt != nil {
 		if !input.ScheduledAt.After(c.Container.Now()) {
@@ -162,7 +158,7 @@ func (c SpacesController) Create(w http.ResponseWriter, r *http.Request) {
 		c.responder().Error(w, r, err)
 		return
 	}
-	httpserver.WriteJsonResponse(w, http.StatusCreated, spaceSummaryResponse{ID: row.ID.String(), Title: row.Title, Description: row.Description, State: row.State, ScheduledAt: row.ScheduledAt, StartedAt: row.StartedAt, Visibility: visibility, Host: describeSpacePerson(row.HostID, "host", false, profiles)})
+	httpserver.WriteJsonResponse(w, http.StatusCreated, SpaceSummaryResponse{ID: row.ID.String(), Title: row.Title, Description: row.Description, State: row.State, ScheduledAt: row.ScheduledAt, StartedAt: row.StartedAt, Visibility: visibility, Host: describeSpacePerson(row.HostID, "host", false, profiles)})
 }
 
 func spaceVisibility(row *ent.Space) string {
@@ -180,11 +176,11 @@ func (c SpacesController) transition(w http.ResponseWriter, r *http.Request, tar
 		id, err = utils.PathIdentifier(r, "spaceId")
 		if err == nil {
 			row, err = c.Container.Client.Space.Get(r.Context(), id)
-			if err == nil && !spaceHostAuthorized(row.HostID, actor.UserId) {
+			if err == nil && !SpaceHostAuthorized(row.HostID, actor.UserId) {
 				err = httpserver.ErrForbidden
 			}
 			if err == nil && target == "live" {
-				err = c.ensureSpaceHostEligible(r.Context(), actor)
+				err = c.EnsureSpaceHostEligible(r.Context(), actor)
 				if err == nil {
 					err = services.NewLiveService(c.Container).EnsureHostCanGoLive(r.Context(), actor.UserId.String())
 				}
@@ -194,7 +190,7 @@ func (c SpacesController) transition(w http.ResponseWriter, r *http.Request, tar
 					httpserver.WriteJsonResponse(w, http.StatusOK, row)
 					return
 				}
-				if !spaceTransitionAllowed(string(row.State), target) {
+				if !SpaceTransitionAllowed(string(row.State), target) {
 					err = httpserver.NewApiError(http.StatusConflict, "SPACE_STATE_CONFLICT", "This Space cannot make that state transition.")
 				} else {
 					update := c.Container.Client.Space.UpdateOneID(id).SetState(space.State(target))
@@ -221,12 +217,10 @@ func (c SpacesController) transition(w http.ResponseWriter, r *http.Request, tar
 	httpserver.WriteJsonResponse(w, http.StatusOK, row)
 }
 
-func spaceHostAuthorized(hostID, actorID uuid.UUID) bool { return hostID == actorID }
+func SpaceHostAuthorized(hostID, actorID uuid.UUID) bool { return hostID == actorID }
 
-func spaceHostIsCreator(actor types.Actor) bool { return actor.HasRole("creator") }
-
-func (c SpacesController) ensureSpaceHostEligible(ctx context.Context, actor types.Actor) error {
-	if !spaceHostIsCreator(actor) {
+func (c SpacesController) EnsureSpaceHostEligible(ctx context.Context, actor types.Actor) error {
+	if !actor.HasRole("creator") {
 		return errors.CreatorProgramNeeded
 	}
 	if c.Container.Directory == nil {
@@ -243,7 +237,7 @@ func (c SpacesController) ensureSpaceHostEligible(ctx context.Context, actor typ
 	return nil
 }
 
-func spaceTransitionAllowed(current, target string) bool {
+func SpaceTransitionAllowed(current, target string) bool {
 	return target == "live" && current == "scheduled" || target == "ended" && current == "live" || target == "cancelled" && current == "scheduled"
 }
 

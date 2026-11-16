@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type spaceRateLimiter struct {
+type SpaceRateLimiter struct {
 	mu      sync.Mutex
 	buckets map[uuid.UUID]spaceRateBucket
 	limit   int
@@ -20,11 +20,14 @@ type spaceRateBucket struct {
 	count   int
 }
 
-func newSpaceRateLimiter(limit int, window time.Duration) *spaceRateLimiter {
-	return &spaceRateLimiter{buckets: make(map[uuid.UUID]spaceRateBucket), limit: limit, window: window, now: time.Now}
+func NewSpaceRateLimiter(limit int, window time.Duration, now func() time.Time) *SpaceRateLimiter {
+	if now == nil {
+		now = time.Now
+	}
+	return &SpaceRateLimiter{buckets: make(map[uuid.UUID]spaceRateBucket), limit: limit, window: window, now: now}
 }
 
-func (limiter *spaceRateLimiter) allow(userID uuid.UUID) bool {
+func (limiter *SpaceRateLimiter) Allow(userID uuid.UUID) bool {
 	limiter.mu.Lock()
 	defer limiter.mu.Unlock()
 	now := limiter.now()
@@ -41,4 +44,4 @@ func (limiter *spaceRateLimiter) allow(userID uuid.UUID) bool {
 	return true
 }
 
-var spacesMutationLimiter = newSpaceRateLimiter(12, time.Minute)
+var spacesMutationLimiter = NewSpaceRateLimiter(12, time.Minute, nil)

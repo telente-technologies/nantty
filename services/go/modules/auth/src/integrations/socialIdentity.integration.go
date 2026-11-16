@@ -106,13 +106,13 @@ func assertClaimsBelongToThisApplication(token jwt.Token, settings providerSetti
 		return ErrInvalidIdentityToken
 	}
 	var claimedNonce string
-	if err := token.Get("nonce", &claimedNonce); err != nil || !nonceMatches(claimedNonce, nonce) {
+	if err := token.Get("nonce", &claimedNonce); err != nil || !NonceMatches(claimedNonce, nonce) {
 		return fmt.Errorf("%w: nonce mismatch", ErrInvalidIdentityToken)
 	}
 	return nil
 }
 
-func nonceMatches(claimed, rawNonce string) bool {
+func NonceMatches(claimed, rawNonce string) bool {
 	if len(rawNonce) < 16 || claimed == "" {
 		return false
 	}

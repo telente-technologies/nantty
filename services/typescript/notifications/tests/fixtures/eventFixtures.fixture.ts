@@ -85,6 +85,7 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "session.revoked": { data: { accountId: "u1", sessionId: "s1", reason: "revoke_all", sessionCount: 3 }, templates: ["sessionsRevoked"], inAppRecipients: ["u1"] },
   "session.refreshTokenReuseDetected": { data: { accountId: "u1", sessionId: "s1" }, templates: ["sessionsRevoked"], inAppRecipients: ["u1"] },
   "signIn.newDeviceDetected": { data: { accountId: "u1", device: "iPhone 15", location: "Lagos, NG", ipAddress: "102.89.0.1" }, templates: ["newSignIn"], inAppRecipients: ["u1"] },
+  "messenger.loginApprovalRequested": { data: { accountId: "u1", authorizationId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", device: "Pixel 9", platform: "android", requestedAt: "2026-11-13T12:00:00Z", expiresAt: "2026-11-13T12:10:00Z" }, templates: [], inAppRecipients: ["u1"] },
   "twoFactor.enabled": { data: { accountId: "u1", method: "Authenticator app" }, templates: ["twoFactorEnabled"], inAppRecipients: ["u1"] },
   "account.warned": { data: caseAction, templates: [], inAppRecipients: ["u1"] },
   "account.restricted": { data: { ...caseAction, restrictions: ["Cannot post"], until: "2026-10-20T00:00:00.000Z" }, templates: ["accountRestricted"], inAppRecipients: ["u1"] },

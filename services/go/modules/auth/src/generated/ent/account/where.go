@@ -637,6 +637,52 @@ func HasSocialIdentitiesWith(preds ...predicate.SocialIdentity) predicate.Accoun
 	})
 }
 
+// HasMessengerAuthorizations applies the HasEdge predicate on the "messenger_authorizations" edge.
+func HasMessengerAuthorizations() predicate.Account {
+	return predicate.Account(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MessengerAuthorizationsTable, MessengerAuthorizationsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMessengerAuthorizationsWith applies the HasEdge predicate on the "messenger_authorizations" edge with a given conditions (other predicates).
+func HasMessengerAuthorizationsWith(preds ...predicate.MessengerAuthorization) predicate.Account {
+	return predicate.Account(func(s *sql.Selector) {
+		step := newMessengerAuthorizationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasMessengerTrustedDevices applies the HasEdge predicate on the "messenger_trusted_devices" edge.
+func HasMessengerTrustedDevices() predicate.Account {
+	return predicate.Account(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MessengerTrustedDevicesTable, MessengerTrustedDevicesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMessengerTrustedDevicesWith applies the HasEdge predicate on the "messenger_trusted_devices" edge with a given conditions (other predicates).
+func HasMessengerTrustedDevicesWith(preds ...predicate.MessengerTrustedDevice) predicate.Account {
+	return predicate.Account(func(s *sql.Selector) {
+		step := newMessengerTrustedDevicesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Account) predicate.Account {
 	return predicate.Account(sql.AndPredicates(predicates...))

@@ -81,11 +81,17 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0;
+  gap: 2px;
   min-height: var(--bottom-bar-height);
   color: var(--ink-muted);
   font-size: var(--text-2xs);
   font-weight: 700;
+}
+
+.bottomNavLabel {
+  font-size: var(--text-2xs);
+  line-height: 12px;
+  font-weight: 650;
 }
 
 .bottomNavItemActive {
@@ -109,16 +115,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 42px;
+  width: 46px;
+  height: 36px;
   border-radius: var(--radius-pill);
   background: var(--color-brand-solid);
   color: var(--color-on-brand);
 }
 
-.bottomNavCreateIcon svg {
-  width: 26px;
-  height: 26px;
+.bottomNavCreateIcon svg { width: 26px; height: 26px; }
+
+@media (max-width: 767px) {
+  .bottomNavItem { min-height: 58px; }
+  .bottomNavIcon > :global(svg) { width: 22px; height: 22px; }
+  .bottomNavCreateIcon { width: 48px; height: 34px; }
+  .bottomNavItemActive .bottomNavIcon::after { bottom: -2px; }
+  .bottomNavBadge { top: 2px; }
 }
 
 .bottomNavItemActive .bottomNavIcon::after {
@@ -178,6 +189,14 @@
 }
 
 @media (max-width: 767px) {
+  .bodyClips {
+    padding: 0 0 calc(var(--bottom-bar-height) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .bodyClips .content {
+    width: 100%;
+  }
+
   .bodyHome {
     padding: 0 0 calc(var(--bottom-bar-height) + var(--space-7) + env(safe-area-inset-bottom, 0px));
   }

@@ -1,0 +1,57 @@
+.tray {
+  display: flex;
+  gap: var(--space-3);
+  min-width: 0;
+  margin-inline: calc(var(--space-2) * -1);
+  padding: 0 var(--space-2) var(--space-1);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+
+.item {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 58px;
+  color: var(--ink-muted);
+  font-size: var(--text-2xs);
+  text-decoration: none;
+}
+
+.item:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: var(--radius-medium);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  border: 2px solid var(--divider);
+  border-radius: 50%;
+  background: var(--surface-card);
+  color: var(--color-brand);
+}
+
+.unseen {
+  border-color: var(--color-brand-solid);
+}
+
+.avatar > :global(*) {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.name {
+  width: 100%;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

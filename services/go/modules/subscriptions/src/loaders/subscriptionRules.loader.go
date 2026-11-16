@@ -57,12 +57,12 @@ func ReadCheckmarkPricing(ctx context.Context, source *ledgerloaders.PlatformSet
 		BundleDiscountPercent   *int `json:"bundleDiscountPercent"`
 		BundleMaximumBusinesses *int `json:"bundleMaximumBusinesses"`
 		BlackGraceDays          *int `json:"blackGraceDays"`
-		combinedGoldSettings
+		CombinedGoldSettings
 	}
 	if json.Unmarshal(raw, &stored) != nil {
 		return pricing
 	}
-	pricing.CombinedGold = stored.combinedGoldSettings.applyTo(pricing.CombinedGold)
+	pricing.CombinedGold = stored.CombinedGoldSettings.ApplyTo(pricing.CombinedGold)
 	if stored.BundleDiscountPercent != nil {
 		pricing.Pricing.BundleDiscountBps = int64(*stored.BundleDiscountPercent) * 100
 	}

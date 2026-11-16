@@ -195,13 +195,13 @@ func (live LiveMoney) validateLiveCoinSupportForGift(ctx context.Context, transa
 	if err != nil {
 		return fmt.Errorf("validate live coin-support preference: %w", err)
 	}
-	if err := validateLiveCoinSupportState(hostId, state, enabled, request.HostUserId); err != nil {
+	if err := ValidateLiveCoinSupportState(hostId, state, enabled, request.HostUserId); err != nil {
 		return err
 	}
 	return nil
 }
 
-func validateLiveCoinSupportState(hostId, state string, enabled bool, requestedHostId string) error {
+func ValidateLiveCoinSupportState(hostId, state string, enabled bool, requestedHostId string) error {
 	if hostId != requestedHostId {
 		return failedPrecondition("LIVE_HOST_MISMATCH", "The live host changed; refresh and try again.")
 	}

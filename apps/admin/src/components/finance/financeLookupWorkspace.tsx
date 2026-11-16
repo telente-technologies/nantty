@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/ui/statusBadge";
 import { Card } from "@/components/ui/surfaces";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { lookupFinanceReference } from "@/services/financeApi.service";
+import type { FinanceLookupResult } from "@/types/finance.type";
 import { formatDateTime, formatMoneyForDisplay, humanizeConstantName } from "@/utils/formatting.util";
 
 import styles from "./finance.module.css";
@@ -23,7 +24,7 @@ export function FinanceLookupWorkspace() {
   const [draft, setDraft] = useState(initialRef);
   const [submittedRef, setSubmittedRef] = useState(initialRef);
 
-  const { data, errorMessage, error, isLoading, reload } = useAdminQuery(
+  const { data, errorMessage, error, isLoading, reload } = useAdminQuery<FinanceLookupResult>(
     (signal) => lookupFinanceReference(submittedRef, signal),
     submittedRef,
     submittedRef.trim().length > 0,

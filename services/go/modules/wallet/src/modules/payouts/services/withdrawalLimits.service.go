@@ -58,7 +58,7 @@ func (withdrawals Withdrawals) enforceWithdrawalLimits(ctx context.Context, tran
 			usedToday += row.AmountMinor
 		}
 	}
-	cap, capped := effectiveWithdrawalDailyCap(limits, level, currency, nameMatchedOnly)
+	cap, capped := EffectiveWithdrawalDailyCap(limits, level, currency, nameMatchedOnly)
 	if !capped {
 		return ErrWithdrawalNoDailyLimit
 	}
@@ -68,7 +68,7 @@ func (withdrawals Withdrawals) enforceWithdrawalLimits(ctx context.Context, tran
 	return nil
 }
 
-func effectiveWithdrawalDailyCap(limits configs.WithdrawalLimits, level int, currency string, nameMatchedOnly bool) (int64, bool) {
+func EffectiveWithdrawalDailyCap(limits configs.WithdrawalLimits, level int, currency string, nameMatchedOnly bool) (int64, bool) {
 	cap, capped := limits.DailyCapFor(level, currency)
 	if !capped || !nameMatchedOnly || level != paymentmodels.VerificationLevelPayout {
 		return cap, capped

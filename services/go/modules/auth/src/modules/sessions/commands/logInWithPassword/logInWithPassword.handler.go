@@ -23,25 +23,10 @@ type Handler struct {
 }
 
 func (application Handler) Execute(ctx context.Context, command Command) (types.AuthenticationResult, error) {
-	throttleKey, _ := normalizeLoginIdentifier(command.Identifier)
-	if passwordFailures.LockedFor(throttleKey) > 0 {
-		return types.AuthenticationResult{}, authErrors.ErrTooManyLoginAttempts
-	}
-	existing, err := application.findActiveAccountByEmailOrUsername(ctx, command.Identifier)
+	existing, err := application.VerifyCredentials(ctx, command.Identifier, command.Password)
 	if err != nil {
 		return types.AuthenticationResult{}, err
 	}
-	if existing == nil || existing.PasswordHash == nil {
-		application.Passwords.SpendEquivalentTimeWhenAccountIsMissing(command.Password)
-		passwordFailures.RecordFailure(throttleKey)
-		return types.AuthenticationResult{}, authErrors.ErrInvalidCredentials
-	}
-	matches, err := application.Passwords.VerifyPasswordAgainstArgon2idHash(command.Password, *existing.PasswordHash)
-	if err != nil || !matches {
-		passwordFailures.RecordFailure(throttleKey)
-		return types.AuthenticationResult{}, authErrors.ErrInvalidCredentials
-	}
-	passwordFailures.RecordSuccess(throttleKey)
 	if existing.Status == account.StatusBanned {
 		return types.AuthenticationResult{}, authErrors.ErrAccountBanned
 	}
@@ -77,7 +62,32 @@ func (application Handler) Execute(ctx context.Context, command Command) (types.
 	return types.AuthenticationResult{Tokens: tokens, Account: existing, DeletionCancelled: cancelled, Reactivated: reactivating}, err
 }
 
-func normalizeLoginIdentifier(identifier string) (value string, isEmail bool) {
+// VerifyCredentials validates an existing Nantty password without issuing a
+// session. Messenger uses this before creating a pending device authorization.
+func (application Handler) VerifyCredentials(ctx context.Context, identifier, password string) (*ent.Account, error) {
+	throttleKey, _ := NormalizeLoginIdentifier(identifier)
+	if passwordFailures.LockedFor(throttleKey) > 0 {
+		return nil, authErrors.ErrTooManyLoginAttempts
+	}
+	existing, err := application.findActiveAccountByEmailOrUsername(ctx, identifier)
+	if err != nil {
+		return nil, err
+	}
+	if existing == nil || existing.PasswordHash == nil {
+		application.Passwords.SpendEquivalentTimeWhenAccountIsMissing(password)
+		passwordFailures.RecordFailure(throttleKey)
+		return nil, authErrors.ErrInvalidCredentials
+	}
+	matches, err := application.Passwords.VerifyPasswordAgainstArgon2idHash(password, *existing.PasswordHash)
+	if err != nil || !matches {
+		passwordFailures.RecordFailure(throttleKey)
+		return nil, authErrors.ErrInvalidCredentials
+	}
+	passwordFailures.RecordSuccess(throttleKey)
+	return existing, nil
+}
+
+func NormalizeLoginIdentifier(identifier string) (value string, isEmail bool) {
 	trimmed := strings.ToLower(strings.TrimSpace(identifier))
 	if strings.Contains(trimmed, "@") && !strings.HasPrefix(trimmed, "@") {
 		return trimmed, true
@@ -86,7 +96,7 @@ func normalizeLoginIdentifier(identifier string) (value string, isEmail bool) {
 }
 
 func (application Handler) findActiveAccountByEmailOrUsername(ctx context.Context, identifier string) (*ent.Account, error) {
-	value, isEmail := normalizeLoginIdentifier(identifier)
+	value, isEmail := NormalizeLoginIdentifier(identifier)
 	predicate := account.Username(value)
 	if isEmail {
 		predicate = account.Email(value)

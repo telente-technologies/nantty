@@ -41,6 +41,21 @@ describe("idempotency by event id", () => {
     expect(harness.sender.sent).toHaveLength(2);
   });
 
+  it("maps Messenger login authorization to an actionable authenticated security notification", async () => {
+    await handle("messenger.loginApprovalRequested");
+    const notification = harness.notifications.rows[0];
+    expect(notification).toMatchObject({
+      userId: "u1",
+      category: "system",
+      title: "Approve Messenger sign-in?",
+    });
+    expect(JSON.stringify(notification)).toContain("MessengerLoginAuthorization");
+    expect(JSON.stringify(notification)).toContain("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
+    expect(JSON.stringify(notification)).toContain("approve");
+    expect(JSON.stringify(notification)).toContain("deny");
+    expect(harness.sender.sent).toHaveLength(0);
+  });
+
   it("keeps order/event processing successful and schedules a bounded retry when email delivery fails", async () => {
     harness.sender.failNext = true;
     await expect(handle("account.passwordChanged")).resolves.toMatchObject({ handled: true });

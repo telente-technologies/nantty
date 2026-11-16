@@ -21,6 +21,14 @@ type StartedSession struct {
 }
 
 func StartSessionWithFirstRefreshTokenInTransaction(ctx context.Context, application *container.Container, tx *ent.Tx, accountId uuid.UUID, client types.ClientDetails) (StartedSession, error) {
+	deviceHash := ""
+	if client.DeviceId != "" {
+		deviceHash = HashBlockedIdentifier(application.Settings.OneTimeCodePepper, "device", client.DeviceId)
+	}
+	return StartSessionWithDeviceHashInTransaction(ctx, application, tx, accountId, client, deviceHash)
+}
+
+func StartSessionWithDeviceHashInTransaction(ctx context.Context, application *container.Container, tx *ent.Tx, accountId uuid.UUID, client types.ClientDetails, deviceHash string) (StartedSession, error) {
 	now := application.Now()
 	create := tx.Session.Create().
 		SetAccountID(accountId).
@@ -28,8 +36,8 @@ func StartSessionWithFirstRefreshTokenInTransaction(ctx context.Context, applica
 		SetIPAddress(utils.TruncateToLength(client.IpAddress, 64)).
 		SetLastUsedAt(now).
 		SetExpiresAt(now.Add(application.Settings.RefreshTokenTimeToLive))
-	if client.DeviceId != "" {
-		create.SetDeviceHash(HashBlockedIdentifier(application.Settings.OneTimeCodePepper, "device", client.DeviceId))
+	if deviceHash != "" {
+		create.SetDeviceHash(deviceHash)
 	}
 	session, err := create.Save(ctx)
 	if err != nil {

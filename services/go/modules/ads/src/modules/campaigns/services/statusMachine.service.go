@@ -66,7 +66,7 @@ func RecomputeParentStatusesInTransaction(ctx context.Context, tx *ent.Tx, campa
 		if err != nil {
 			return err
 		}
-		next := derivedStatus(adStatuses(ads), string(group.Status))
+		next := DeriveParentStatus(adStatuses(ads), string(group.Status))
 		if next != string(group.Status) {
 			if err := tx.AdGroup.UpdateOneID(group.ID).SetStatus(adgroup.Status(next)).Exec(ctx); err != nil {
 				return err
@@ -78,7 +78,7 @@ func RecomputeParentStatusesInTransaction(ctx context.Context, tx *ent.Tx, campa
 	if err != nil {
 		return err
 	}
-	if next := derivedStatus(groupStatuses, string(campaign.Status)); next != string(campaign.Status) {
+	if next := DeriveParentStatus(groupStatuses, string(campaign.Status)); next != string(campaign.Status) {
 		return tx.AdCampaign.UpdateOneID(campaignId).SetStatus(adcampaign.Status(next)).Exec(ctx)
 	}
 	return nil
@@ -92,7 +92,7 @@ func adStatuses(rows []*ent.Ad) []string {
 	return statuses
 }
 
-func derivedStatus(childStatuses []string, current string) string {
+func DeriveParentStatus(childStatuses []string, current string) string {
 	if current == "paused" || current == "completed" || len(childStatuses) == 0 {
 		return current
 	}

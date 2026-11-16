@@ -60,13 +60,25 @@ describe("chat message pushes", () => {
       ["ExponentPushToken[a]", "Fabric lovers", "Ada sent a message"],
       ["ExponentPushToken[b]", "Nantty", "New message"],
     ]);
-    expect(harness.pushSender.sent[0]?.content.data).toEqual({ url: "/chats/c1", conversationId: "c1" });
+    expect(harness.pushSender.sent[0]?.content.data).toEqual({ url: "/chats/c1", conversationId: "c1", recipientAccountId: "a", messageId: "m1", senderName: "Ada", conversationKind: "group", tag: "nantty-chat-1:a:2:c1", categoryId: "NANTTY_CHAT", threadIdentifier: "c1", vibrate: "true", bubbleAllowed: "false" });
+    expect(harness.pushSender.sent[1]?.content.data).not.toHaveProperty("senderName");
+    expect(harness.pushSender.sent[1]?.content.data).not.toHaveProperty("conversationKind");
+    expect(harness.pushSender.sent[0]?.content).toMatchObject({ categoryId: "NANTTY_CHAT", threadId: "c1", channelId: "nantty-chat-sound-vibrate", sound: "default" });
   });
 
   it("names the sender in a direct chat and ignores events without a push list", async () => {
     const { harness, handler } = await setup("a");
-    await handler.execute({ event: makeEvent("message.sent", { conversationId: "c2", conversationKind: "direct", senderName: "Ada", pushRecipients: [{ userId: "a", showPreview: true }] }) });
+    await handler.execute({ event: makeEvent("message.sent", { conversationId: "c2", messageId: "m2", conversationKind: "direct", senderName: "Ada", pushRecipients: [{ userId: "a", showPreview: true }] }) });
     await handler.execute({ event: makeEvent("message.sent", { conversationId: "c3", recipientIds: ["a"] }, "evt-old") });
     expect(harness.pushSender.sent.map((push) => [push.content.title, push.content.body])).toEqual([["Ada", "Sent you a message"]]);
+  });
+
+  it("uses collision-free account-and-conversation notification identities for replacement", async () => {
+    const { harness, handler } = await setup("a-b", "a");
+    await handler.execute({ event: makeEvent("message.sent", { conversationId: "c", messageId: "m-one", recipientIds: ["a-b"], pushRecipients: [{ userId: "a-b", showPreview: false }] }) });
+    await handler.execute({ event: makeEvent("message.sent", { conversationId: "b-c", messageId: "m-two", recipientIds: ["a"], pushRecipients: [{ userId: "a", showPreview: false }] }, "event-two") });
+    const tags = harness.pushSender.sent.map((push) => push.content.data?.tag);
+    expect(tags).toEqual(["nantty-chat-3:a-b:1:c", "nantty-chat-1:a:3:b-c"]);
+    expect(new Set(tags).size).toBe(2);
   });
 });

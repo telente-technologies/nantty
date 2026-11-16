@@ -12,7 +12,19 @@ export interface SenderBehaviorMetadata {
 export let chatSettingsState: ChatSettings = {
   messageRequestsFrom: "everyone",
   preventDirectGroupAdds: false,
-  notifications: { messages: true, requests: true, groups: true, streakReminders: true, showMessagePreview: true },
+  notifications: {
+    messages: true,
+    requests: true,
+    groups: true,
+    streakReminders: true,
+    showMessagePreview: true,
+    sound: true,
+    vibration: true,
+    bubbles: false,
+    bubbleMode: "selected",
+    bubbleConversationIds: [],
+    bubbleExcludedConversationIds: [],
+  },
 };
 
 export const updateChatSettingsState = (update: Partial<ChatSettings>) => {

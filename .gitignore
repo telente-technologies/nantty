@@ -42,3 +42,4 @@ services/python/intelligence/**/__pycache__/
 /services/go/deployables/goTrust/goTrust
 
 services/typescript/*/src/generated/
+NANTTY_MASTER_GOAL.md

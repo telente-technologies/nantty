@@ -94,7 +94,7 @@ func convertPlanPriceVersion(row *ent.PlanPriceVersion) PlanPriceRow {
 	}
 }
 
-func applyPriceVersions(base PlanPriceRow, versions []*ent.PlanPriceVersion, now time.Time) PlanPriceRow {
+func ApplyPlanPriceVersions(base PlanPriceRow, versions []*ent.PlanPriceVersion, now time.Time) PlanPriceRow {
 	versions = append([]*ent.PlanPriceVersion(nil), versions...)
 	sort.SliceStable(versions, func(left, right int) bool { return versions[left].EffectiveFrom.Before(versions[right].EffectiveFrom) })
 	current := base

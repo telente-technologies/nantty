@@ -64,7 +64,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &data); err != nil {
 			return err
 		}
-		if err := validateCreatorApplicationApprovedEvent(data.AccountId); err != nil {
+		if err := ValidateCreatorApplicationApprovedEvent(data.AccountId); err != nil {
 			return err
 		}
 		return module.Program.EnrollApprovedCreatorInDefaultTier(ctx, data.AccountId)
@@ -74,7 +74,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &paid); err != nil {
 			return err
 		}
-		if err := validateCreatorSubscriptionPaidEvent(paid); err != nil {
+		if err := ValidateCreatorSubscriptionPaidEvent(paid); err != nil {
 			return err
 		}
 		return module.Money.RecordSubscriptionEarning(ctx, paid, envelope.OccurredAt)
@@ -84,7 +84,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &refunded); err != nil {
 			return err
 		}
-		if err := validateCreatorSubscriptionRefundedEvent(refunded); err != nil {
+		if err := ValidateCreatorSubscriptionRefundedEvent(refunded); err != nil {
 			return err
 		}
 		return module.Money.ReverseSubscriptionEarning(ctx, refunded, envelope.OccurredAt)
@@ -94,7 +94,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &posted); err != nil {
 			return err
 		}
-		if err := validateAdCreatorEarningsPostedEvent(posted); err != nil {
+		if err := ValidateAdCreatorEarningsPostedEvent(posted); err != nil {
 			return err
 		}
 		return module.Money.PostAdRevenueShare(ctx, posted, envelope.OccurredAt)
@@ -104,7 +104,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &completed); err != nil {
 			return err
 		}
-		if err := validateOrderGroupCompletedAffiliateEvent(completed); err != nil {
+		if err := ValidateOrderGroupCompletedAffiliateEvent(completed); err != nil {
 			return err
 		}
 		_, err := module.Affiliates.CreditCommissionsForRelease(ctx, completed.Sale())
@@ -115,7 +115,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &paid); err != nil {
 			return err
 		}
-		if err := validateOrderGroupPaidAffiliateEvent(paid); err != nil {
+		if err := ValidateOrderGroupPaidAffiliateEvent(paid); err != nil {
 			return err
 		}
 		_, err := module.Affiliates.RecordAwaitingAttributedSales(ctx, paid.Sale())
@@ -126,7 +126,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &changed); err != nil {
 			return err
 		}
-		if err := validateOrderGroupStatusChangedAffiliateEvent(changed); err != nil {
+		if err := ValidateOrderGroupStatusChangedAffiliateEvent(changed); err != nil {
 			return err
 		}
 		if reason, voids := changed.VoidReason(); voids {
@@ -141,7 +141,7 @@ func NewCreatorsModule(ctx context.Context, dependencies servicemodule.Dependenc
 			if err := loaders.DecodeEventData(envelope, &refund); err != nil {
 				return err
 			}
-			if err := validateEscrowAffiliateRefundEvent(refund); err != nil {
+			if err := ValidateEscrowAffiliateRefundEvent(refund); err != nil {
 				return err
 			}
 			_, err := module.Affiliates.ReverseCommissionsForRefund(ctx, refund, envelope.Type)

@@ -34,6 +34,8 @@ Prices are in [docs/pricing.md](docs/pricing.md). Every amount in the system is 
 apps/
   mobile/      Expo app (iOS, Android), including the home-screen widgets
   webapp/      buyer and viewer web app, with the /embed and /oembed widget routes
+  developer/   public business integration console (service-backed API work pending)
+  sandbox/     isolated API testing portal shell (sandbox services pending)
   studio/      creator studio: lives, browser go-live (WHIP), replays, comments, analytics
   seller/      seller dashboard
   ads/         Ads Manager
@@ -57,7 +59,7 @@ docs/          architecture, database, integrations, legal, plans, handoff notes
 
 ## Quick start
 
-You need Node 24+, pnpm 11+ and Docker. The real backend also needs Go 1.26; Elixir 1.19 is only needed for realtime (chat and live sockets), and Python 3.14 with uv only for the intelligence service.
+You need Node 26.13+, pnpm 11+ and Docker. The real backend also needs Go 1.26; Elixir 1.19 is only needed for realtime (chat and live sockets), and Python 3.14 with uv only for the intelligence service.
 
 ```bash
 pnpm install
@@ -69,7 +71,13 @@ pnpm install
 pnpm mode:mock
 pnpm --filter @nantty/webapp dev       # http://localhost:3500
 pnpm --filter @nantty/mobile dev       # Expo
+pnpm --filter @nantty/developer dev    # http://localhost:3700
+pnpm --filter @nantty/sandbox dev      # http://localhost:3800
 ```
+
+The Developer and Sandbox workspaces are separate web applications. Their current routes are responsive, branded foundations with explicit disconnected states; they do not yet create credentials, call the public business API, or simulate successful sandbox requests. See [docs/architecture/messenger-and-business-messaging.md](docs/architecture/messenger-and-business-messaging.md) for the service/security boundary and remaining acceptance gates.
+
+The cross-product implementation status, repository boundaries, prioritized backlog and current blockers are tracked in [docs/master](docs/master/README.md). Organization management is partially connected in source; this does not mean Developer APIs, billing, webhooks or Sandbox execution are live.
 
 Each app's demo sign-ins are shown on its sign-in page in mock mode.
 
@@ -94,7 +102,8 @@ The development machine has 15 GB of RAM: run one dev server, build or test suit
 | Command | What it does |
 | --- | --- |
 | `pnpm mode:mock` / `mode:backend` / `mode:status` | Switch every app (or `-- --app <name>`) between mocks and the gateway; show the current mode |
-| `pnpm backend:up` / `backend:down` | Start or stop the local stack (`-- --full` adds OpenSearch, ClickHouse, LiveKit, Jaeger; `-- --lan` exposes it to a phone) |
+| `docker compose -f compose.yml up --build -d` | Run the full backend as containers, including service migrations; Linux host networking is used for this local-only stack ([details](docs/localDockerCompose.md)) |
+| `pnpm backend:up` / `backend:down` | Start or stop the existing mixed local stack (`-- --full` adds OpenSearch, ClickHouse; `-- --lan` exposes it to a phone) |
 | `pnpm backend:check` / `backend:seed` | Check the running stack; re-run the idempotent demo seed |
 | `pnpm backend:infra:up` / `backend:infra:down` / `backend:reset` | Infra containers only; `reset` also deletes the volumes |
 | `pnpm backend:dev:<service>` | Run one service from source: `identity`, `commerce`, `money`, `live`, `ads`, `trust`, `gateway`, `social`, `media`, `notifications`, `search`, `support` |

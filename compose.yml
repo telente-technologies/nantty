@@ -1,0 +1,447 @@
+name: nantty
+
+include:
+  - path: infra/local/docker-compose.yml
+
+# Local development stack for the complete backend. The app containers use
+# Linux host networking because the checked-in local environment files point
+# at localhost ports published by infra/local/docker-compose.yml.
+services:
+  go-identity:
+    build:
+      context: ./services
+      dockerfile: go/deployables/goIdentity/Dockerfile
+    network_mode: host
+    env_file:
+      - ./services/go/.env.example
+      - ./security/regression/sandboxSecrets.env
+    environment:
+      APP_ENV: development
+      HTTP_ADDRESS: 127.0.0.1:8101
+      AUTH_ACCOUNT_DIRECTORY_GRPC_ADDRESS: 127.0.0.1:9101
+      AUTH_SESSION_DENYLIST_URL: redis://127.0.0.1:16379
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  go-live:
+    build:
+      context: ./services
+      dockerfile: go/deployables/goLive/Dockerfile
+    network_mode: host
+    env_file:
+      - ./services/go/.env.example
+      - ./security/regression/sandboxSecrets.env
+    environment:
+      APP_ENV: development
+      HTTP_ADDRESS: 127.0.0.1:8102
+      RABBITMQ_URL: amqp://go-live:go-live-local-only@127.0.0.1:5672/nantty
+      LIVE_REDIS_URL: redis://127.0.0.1:16379
+      LIVE_MONEY_GRPC_ADDRESS: 127.0.0.1:9103
+      LIVE_ACCOUNT_DIRECTORY_GRPC_ADDRESS: 127.0.0.1:9101
+      LIVE_CATALOG_INTERNAL_URL: http://127.0.0.1:8107
+      LIVEKIT_URL: ws://127.0.0.1:7880
+      LIVEKIT_PUBLIC_URL: ws://127.0.0.1:7880
+      LIVE_RECORDING_S3_ENDPOINT: http://127.0.0.1:18333
+      LIVE_SAFETY_FRAMES_S3_ENDPOINT: http://127.0.0.1:18333
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      livekit:
+        condition: service_started
+      object-storage:
+        condition: service_started
+      go-money:
+        condition: service_started
+      go-identity:
+        condition: service_started
+      go-commerce:
+        condition: service_started
+    restart: unless-stopped
+
+  go-money:
+    image: nantty-go-money
+    build:
+      context: ./services
+      dockerfile: go/deployables/goMoney/Dockerfile
+    network_mode: host
+    env_file:
+      - ./services/go/.env.example
+      - ./security/regression/sandboxSecrets.env
+    environment:
+      APP_ENV: development
+      HTTP_ADDRESS: 127.0.0.1:8103
+      MONEY_GRPC_ADDRESS: 127.0.0.1:9103
+      RABBITMQ_URL: amqp://go-money:go-money-local-only@127.0.0.1:5672/nantty
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      go-money-migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  go-money-migrate:
+    image: nantty-go-money
+    build:
+      context: ./services
+      dockerfile: go/deployables/goMoney/Dockerfile
+    network_mode: host
+    env_file:
+      - ./services/go/.env.example
+      - ./security/regression/sandboxSecrets.env
+    environment:
+      MONEY_MIGRATION_DATABASE_URL: postgres://svc_migrator:svc_migrator_local_only@127.0.0.1:15432/nantty?sslmode=disable
+    command: ["--migrate-money"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  go-trust:
+    build:
+      context: ./services
+      dockerfile: go/deployables/goTrust/Dockerfile
+    network_mode: host
+    env_file:
+      - ./services/go/.env.example
+      - ./security/regression/sandboxSecrets.env
+    environment:
+      APP_ENV: development
+      HTTP_ADDRESS: 127.0.0.1:8106
+      RABBITMQ_URL: amqp://go-trust:go-trust-local-only@127.0.0.1:5672/nantty
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      go-identity:
+        condition: service_started
+    restart: unless-stopped
+
+  go-commerce:
+    build:
+      context: ./services
+      dockerfile: go/deployables/goCommerce/Dockerfile
+    network_mode: host
+    env_file:
+      - ./services/go/.env.example
+      - ./security/regression/sandboxSecrets.env
+    environment:
+      APP_ENV: development
+      HTTP_ADDRESS: 127.0.0.1:8107
+      RABBITMQ_URL: amqp://go-commerce:go-commerce-local-only@127.0.0.1:5672/nantty
+      ORDERS_MONEY_GRPC_ADDRESS: 127.0.0.1:9103
+      CATALOG_ADS_INTERNAL_URL: http://127.0.0.1:8110
+      ORDERS_ADS_INTERNAL_URL: http://127.0.0.1:8110
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      go-money:
+        condition: service_started
+      go-ads:
+        condition: service_started
+    restart: unless-stopped
+
+  go-ads:
+    build:
+      context: ./services
+      dockerfile: go/deployables/goAds/Dockerfile
+    network_mode: host
+    env_file:
+      - ./services/go/.env.example
+      - ./security/regression/sandboxSecrets.env
+    environment:
+      APP_ENV: development
+      HTTP_ADDRESS: 127.0.0.1:8110
+      RABBITMQ_URL: amqp://go-ads:go-ads-local-only@127.0.0.1:5672/nantty
+      ADS_MONEY_GRPC_ADDRESS: 127.0.0.1:9103
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      go-money:
+        condition: service_started
+    restart: unless-stopped
+
+  social:
+    image: nantty-social
+    build:
+      context: .
+      dockerfile: services/typescript/social/Dockerfile
+    network_mode: host
+    env_file: ./services/typescript/social/.env.example
+    environment:
+      HOST: 127.0.0.1
+      DATABASE_URL: postgres://svc_social:svc_social_local_only@127.0.0.1:15432/nantty?schema=social
+      IDENTITY_READ_DATABASE_URL: postgres://svc_social:svc_social_local_only@127.0.0.1:15432/nantty
+      RABBITMQ_URL: amqp://social:social-local-only@127.0.0.1:5672/nantty
+      COMMERCE_INTERNAL_URL: http://127.0.0.1:8107
+      LIVE_INTERNAL_URL: http://127.0.0.1:8102
+      MONEY_INTERNAL_URL: http://127.0.0.1:8103
+      MEDIA_INTERNAL_URL: http://127.0.0.1:8108
+      ADS_INTERNAL_URL: http://127.0.0.1:8110
+      INTELLIGENCE_URL: http://127.0.0.1:8090
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      ts-migrations:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      go-identity:
+        condition: service_started
+      go-commerce:
+        condition: service_started
+      go-live:
+        condition: service_started
+    restart: unless-stopped
+
+  media:
+    image: nantty-media
+    build:
+      context: .
+      dockerfile: services/typescript/media/Dockerfile
+    network_mode: host
+    env_file: ./services/typescript/media/.env.example
+    environment:
+      HOST: 127.0.0.1
+      DATABASE_URL: postgres://svc_media:svc_media_local_only@127.0.0.1:15432/nantty?schema=media
+      RABBITMQ_URL: amqp://media:media-local-only@127.0.0.1:5672/nantty
+      S3_ENDPOINT: http://127.0.0.1:18333
+      S3_PUBLIC_ENDPOINT: http://127.0.0.1:18333
+      FFMPEG_MODE: required
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      ts-migrations:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      object-storage:
+        condition: service_started
+      go-trust:
+        condition: service_started
+    restart: unless-stopped
+
+  search:
+    image: nantty-search
+    build:
+      context: .
+      dockerfile: services/typescript/search/Dockerfile
+    network_mode: host
+    env_file: ./services/typescript/search/.env.example
+    environment:
+      HOST: 127.0.0.1
+      DATABASE_URL: postgres://svc_search:svc_search_local_only@127.0.0.1:15432/nantty?schema=search
+      RABBITMQ_URL: amqp://search:search-local-only@127.0.0.1:5672/nantty
+      IDENTITY_INTERNAL_URL: http://127.0.0.1:8101
+      COMMERCE_INTERNAL_URL: http://127.0.0.1:8107
+      SOCIAL_INTERNAL_URL: http://127.0.0.1:8105
+      INTELLIGENCE_URL: http://127.0.0.1:8090
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      ts-migrations:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      go-identity:
+        condition: service_started
+      go-commerce:
+        condition: service_started
+      social:
+        condition: service_started
+    restart: unless-stopped
+
+  notifications:
+    image: nantty-notifications
+    build:
+      context: .
+      dockerfile: services/typescript/notifications/Dockerfile
+    network_mode: host
+    env_file: ./services/typescript/notifications/.env.example
+    environment:
+      HOST: 127.0.0.1
+      DATABASE_URL: postgres://svc_notifications:svc_notifications_local_only@127.0.0.1:15432/nantty?schema=notifications
+      AWS_ENDPOINT_URL: http://127.0.0.1:14566
+      RABBITMQ_URL: amqp://notifications:notifications-local-only@127.0.0.1:5672/nantty
+      IDENTITY_INTERNAL_URL: http://127.0.0.1:8101
+      SOCIAL_INTERNAL_URL: http://127.0.0.1:8105
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      ts-migrations:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+      go-identity:
+        condition: service_started
+      social:
+        condition: service_started
+    restart: unless-stopped
+
+  support:
+    image: nantty-support
+    build:
+      context: .
+      dockerfile: services/typescript/support/Dockerfile
+    network_mode: host
+    env_file: ./services/typescript/support/.env.example
+    environment:
+      HOST: 127.0.0.1
+      DATABASE_URL: postgres://svc_support:svc_support_local_only@127.0.0.1:15432/nantty?schema=support
+      RABBITMQ_URL: amqp://support:support-local-only@127.0.0.1:5672/nantty
+      IDENTITY_INTERNAL_URL: http://127.0.0.1:8101
+      MEDIA_INTERNAL_URL: http://127.0.0.1:8108
+      INTELLIGENCE_URL: http://127.0.0.1:8090
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      ts-migrations:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      go-identity:
+        condition: service_started
+      media:
+        condition: service_started
+    restart: unless-stopped
+
+  ts-migrations:
+    build:
+      context: .
+      dockerfile: services/typescript/migrations.Dockerfile
+    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: services/typescript/gateway/Dockerfile
+    network_mode: host
+    env_file: ./services/typescript/gateway/.env.example
+    environment:
+      HOST: 127.0.0.1
+      UPSTREAM_IDENTITY_URL: http://127.0.0.1:8101
+      UPSTREAM_LIVE_URL: http://127.0.0.1:8102
+      UPSTREAM_MONEY_URL: http://127.0.0.1:8103
+      UPSTREAM_NOTIFICATIONS_URL: http://127.0.0.1:8104
+      UPSTREAM_SOCIAL_URL: http://127.0.0.1:8105
+      UPSTREAM_TRUST_URL: http://127.0.0.1:8106
+      UPSTREAM_COMMERCE_URL: http://127.0.0.1:8107
+      UPSTREAM_MEDIA_URL: http://127.0.0.1:8108
+      UPSTREAM_SEARCH_URL: http://127.0.0.1:8109
+      UPSTREAM_ADS_URL: http://127.0.0.1:8110
+      UPSTREAM_SUPPORT_URL: http://127.0.0.1:8111
+      UPSTREAM_REALTIME_URL: ws://127.0.0.1:4000
+      AUTH_JWKS_URL: http://127.0.0.1:8101/.well-known/jwks.json
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      go-identity:
+        condition: service_started
+      go-live:
+        condition: service_started
+      go-money:
+        condition: service_started
+      go-trust:
+        condition: service_started
+      go-commerce:
+        condition: service_started
+      go-ads:
+        condition: service_started
+      social:
+        condition: service_started
+      media:
+        condition: service_started
+      search:
+        condition: service_started
+      notifications:
+        condition: service_started
+      support:
+        condition: service_started
+      realtime:
+        condition: service_started
+    restart: unless-stopped
+
+  intelligence:
+    build:
+      context: ./services/python/intelligence
+      dockerfile: Dockerfile
+    network_mode: host
+    env_file: ./services/python/intelligence/.env.example
+    environment:
+      INTELLIGENCE_HOST: 127.0.0.1
+      INTELLIGENCE_REDIS_URL: redis://127.0.0.1:16379
+      INTELLIGENCE_RABBITMQ_URL: amqp://intelligence:intelligence-local-only@127.0.0.1:5672/nantty
+      INTELLIGENCE_S3_ENDPOINT_URL: http://127.0.0.1:18333
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+    depends_on:
+      valkey:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      object-storage:
+        condition: service_started
+    restart: unless-stopped
+
+  realtime:
+    build:
+      context: ./services/elixir/realtime
+      dockerfile: Dockerfile
+    network_mode: host
+    env_file:
+      - ./services/typescript/social/.env.example
+      - ./security/regression/sandboxSecrets.env
+    environment:
+      MIX_ENV: prod
+      PHX_SERVER: "true"
+      REALTIME_HTTP_IP: 127.0.0.1
+      PORT: "4000"
+      AUTH_JWKS_URL: http://127.0.0.1:8101/.well-known/jwks.json
+      AUTH_TOKEN_ISSUER: http://localhost:8101
+      REALTIME_TOKEN_AUDIENCE: nantty-realtime
+      LIVE_INTERNAL_URL: http://127.0.0.1:8102
+      SOCIAL_INTERNAL_URL: http://127.0.0.1:8105
+      RABBITMQ_URL: amqp://realtime:realtime-local-only@127.0.0.1:5672/nantty
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      go-identity:
+        condition: service_started
+      go-live:
+        condition: service_started
+      social:
+        condition: service_started
+    restart: unless-stopped

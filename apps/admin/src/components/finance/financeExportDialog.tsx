@@ -43,7 +43,7 @@ export function FinanceExportDialog({
         idempotencyKey: createIdempotencyKey(),
       });
       saveBlobAsDownloadedFile(blob, `finance-${reportType}-${range}.csv`);
-      showToast("Finance export recorded and downloaded");
+      showToast("Finance export recorded and downloaded", "success");
       onExported?.();
       onClose();
     } catch (error) {

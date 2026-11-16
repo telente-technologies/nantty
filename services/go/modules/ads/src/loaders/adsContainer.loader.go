@@ -110,7 +110,7 @@ func AssembleContainer(ctx context.Context, settings configs.AdsSettings, collab
 	if err := completeStorageAndJobs(ctx, deployed, collaborators, settings); err != nil {
 		return nil, nil, err
 	}
-	if err := refuseFakeFundingInProduction(deployed.Funding, settings); err != nil {
+	if err := ValidateFundingGatewayForEnvironment(deployed.Funding, settings); err != nil {
 		return nil, nil, err
 	}
 	return deployed, closers, nil
@@ -231,7 +231,7 @@ func completeStorageAndJobs(ctx context.Context, deployed *container.Container, 
 	return nil
 }
 
-func refuseFakeFundingInProduction(funding interfaces.FundingGateway, settings configs.AdsSettings) error {
+func ValidateFundingGatewayForEnvironment(funding interfaces.FundingGateway, settings configs.AdsSettings) error {
 	if _, fake := funding.(*integrations.InMemoryFundingGateway); fake && settings.IsProduction() {
 		return errors.New("the in-memory funding gateway moves no real money and is refused in production")
 	}

@@ -98,14 +98,14 @@ func isSafeImageSource(source string) bool {
 	return err == nil && parsed.Scheme == "https" && parsed.Host != "" && parsed.User == nil
 }
 
-func layersToStored(layers []types.OverlayLayer) []map[string]any {
+func LayersToStored(layers []types.OverlayLayer) []map[string]any {
 	encoded, _ := json.Marshal(layers)
 	stored := []map[string]any{}
 	_ = json.Unmarshal(encoded, &stored)
 	return stored
 }
 
-func layersFromStored(stored []map[string]any) []types.OverlayLayer {
+func LayersFromStored(stored []map[string]any) []types.OverlayLayer {
 	layers := []types.OverlayLayer{}
 	if len(stored) == 0 {
 		return layers

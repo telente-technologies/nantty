@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Linking } from "react-native";
 
 import { InfoSheet } from "@/components/settings/infoSheet";
+import { MessengerLoginAuthorizations } from "@/components/settings/messengerLoginAuthorizations";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { DownloadSimple24Icon, Fingerprint24Icon, LockKey24Icon, Prohibit24Icon } from "@/components/icons";
@@ -28,6 +29,7 @@ export function SettingsSecurityScreen({ navigation }: MainScreenProps<"Settings
         />
         <SettingsRow label="Data" icon={<DownloadSimple24Icon />} onPress={() => setOpenSheet("data")} />
       </SettingsGroup>
+      <MessengerLoginAuthorizations />
       <InfoSheet
         visible={openSheet === "twoFactor"}
         title="Two-factor authentication"

@@ -4,6 +4,9 @@ export const blockRepository = {
   create: (db: Db, blockerId: string, blockedId: string) =>
     db.block.upsert({ where: { blockerId_blockedId: { blockerId, blockedId } }, create: { blockerId, blockedId }, update: {} }),
 
+  createIfMissing: async (db: Db, blockerId: string, blockedId: string) =>
+    (await db.block.createMany({ data: [{ blockerId, blockedId }], skipDuplicates: true })).count === 1,
+
   delete: (db: Db, blockerId: string, blockedId: string) => db.block.deleteMany({ where: { blockerId, blockedId } }),
 
   exists: async (db: Db, blockerId: string, blockedId: string) =>

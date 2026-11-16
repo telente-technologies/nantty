@@ -49,11 +49,13 @@ func LoadCreatorThresholds(ctx context.Context) CreatorThresholds {
 	if err != nil {
 		return thresholds
 	}
-	// Start from the historical defaults so older/partial stored documents that
-	// predate newer fields retain the same behavior instead of zeroing them.
-	configured := thresholds
-	if json.Unmarshal(raw, &configured) != nil {
-		return thresholds
+	return DecodeCreatorThresholds(raw)
+}
+
+func DecodeCreatorThresholds(raw []byte) CreatorThresholds {
+	thresholds := DefaultCreatorThresholds()
+	if json.Unmarshal(raw, &thresholds) != nil {
+		return DefaultCreatorThresholds()
 	}
-	return configured
+	return thresholds
 }

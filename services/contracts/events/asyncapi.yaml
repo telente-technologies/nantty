@@ -150,6 +150,8 @@ channels:
         $ref: '#/components/messages/accountRegistered'
       accountLoggedIn:
         $ref: '#/components/messages/accountLoggedIn'
+      messengerLoginApprovalRequested:
+        $ref: '#/components/messages/messengerLoginApprovalRequested'
       sessionRefreshTokenReuseDetected:
         $ref: '#/components/messages/sessionRefreshTokenReuseDetected'
       accountPasswordChanged:
@@ -586,6 +588,7 @@ operations:
     messages:
       - $ref: '#/channels/domainEvents/messages/accountRegistered'
       - $ref: '#/channels/domainEvents/messages/accountLoggedIn'
+      - $ref: '#/channels/domainEvents/messages/messengerLoginApprovalRequested'
       - $ref: '#/channels/domainEvents/messages/sessionRefreshTokenReuseDetected'
       - $ref: '#/channels/domainEvents/messages/accountPasswordChanged'
       - $ref: '#/channels/domainEvents/messages/sessionRevoked'
@@ -1015,6 +1018,13 @@ components:
         allOf:
           - $ref: './schemas/envelope.v1.json'
           - properties: { data: { $ref: './schemas/account.loggedIn.v1.json' } }
+    messengerLoginApprovalRequested:
+      name: messenger.loginApprovalRequested
+      headers: { type: object, properties: { eventType: { const: messenger.loginApprovalRequested } } }
+      payload:
+        allOf:
+          - $ref: './schemas/envelope.v1.json'
+          - properties: { data: { $ref: './schemas/messenger.loginApprovalRequested.v1.json' } }
     sessionRefreshTokenReuseDetected:
       name: session.refreshTokenReuseDetected
       headers: { type: object, properties: { eventType: { const: session.refreshTokenReuseDetected } } }

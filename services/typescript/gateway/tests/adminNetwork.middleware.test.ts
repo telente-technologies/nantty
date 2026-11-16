@@ -22,7 +22,7 @@ beforeAll(async () => {
   const upstreamUrl = `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`;
   const config: GatewayConfig = {
     host: "127.0.0.1", port: 0, corsOrigins: ["https://admin.nantty.test"], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, policyGate: null,
-    guestRateLimits: { perMinute: 1000, sensitivePerMinute: 1000 }, trustedProxyHops: 1, adminIpAllowList: ["203.0.113.0/24", "2001:db8::/32"],
+    guestRateLimits: { perMinute: 1000, sensitivePerMinute: 1000 }, trustedProxyHops: 1, adminIpAllowList: ["203.0.113.0/24", "2001:db8::/32"], blockedClientIps: ["203.0.114.0/24", "2001:db8:dead::/48"],
     accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.nantty.test", audience: "nantty-api" },
     upstreams: { identity: upstreamUrl, live: upstreamUrl, money: upstreamUrl, notifications: upstreamUrl, social: upstreamUrl, trust: upstreamUrl, commerce: upstreamUrl, media: upstreamUrl, search: upstreamUrl, ads: upstreamUrl, support: upstreamUrl },
   };
@@ -51,7 +51,13 @@ describe("admin network allow-list", () => {
   });
 
   it("leaves non-admin routes alone", async () => {
-    expect((await statusFrom("/api/v1/feed", "198.51.100.7")).status).not.toBe(403);
+    expect((await statusFrom("/api/v1/feed", "192.0.2.44")).status).not.toBe(403);
+  });
+
+  it("blocks configured IPv4 and IPv6 ranges across the gateway", async () => {
+    expect(await statusFrom("/api/v1/feed", "203.0.114.7")).toEqual({ status: 403, code: "IP_BLOCKED" });
+    expect(await statusFrom("/api/v1/feed", "2001:db8:dead::5")).toEqual({ status: 403, code: "IP_BLOCKED" });
+    expect((await statusFrom("/api/v1/feed", "203.0.113.7")).status).not.toBe(403);
   });
 
   it("validates entries", () => {

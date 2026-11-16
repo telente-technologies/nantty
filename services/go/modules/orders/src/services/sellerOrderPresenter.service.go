@@ -51,12 +51,12 @@ func SellerOrderViews(ctx context.Context, deployed *container.Container, groups
 	}
 	views := make([]types.SellerOrderView, 0, len(groups))
 	for _, group := range groups {
-		views = append(views, sellerOrderView(group, items[group.ID], timelines[group.ID], notes[group.ID]))
+		views = append(views, BuildSellerOrderView(group, items[group.ID], timelines[group.ID], notes[group.ID]))
 	}
 	return views, nil
 }
 
-func sellerOrderView(group *ent.OrderGroup, items []*ent.OrderItem, timeline []*ent.OrderEvent, notes []*ent.OrderNote) types.SellerOrderView {
+func BuildSellerOrderView(group *ent.OrderGroup, items []*ent.OrderItem, timeline []*ent.OrderEvent, notes []*ent.OrderNote) types.SellerOrderView {
 	address := group.Address
 	phone := address.Phone
 	view := types.SellerOrderView{

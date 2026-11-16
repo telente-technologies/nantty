@@ -50,9 +50,13 @@ describe("report target checks", () => {
 
   it("returns 404 for content that does not exist and accepts other people's content", async () => {
     await expect(assertReportableBy(fakeDb({ post: null }), reporterId, { targetType: "clip", targetId: postId, reportedUserId: undefined })).rejects.toMatchObject({ status: 404 });
-    await expect(assertReportableBy(fakeDb({ post: { authorId: ownerId } }), reporterId, { targetType: "post", targetId: postId, reportedUserId: ownerId })).resolves.toBeUndefined();
+    await expect(assertReportableBy(fakeDb({ post: { authorId: ownerId } }), reporterId, { targetType: "post", targetId: postId, reportedUserId: ownerId })).resolves.toBe(ownerId);
     await expect(assertReportableBy(fakeDb({}), reporterId, { targetType: "store", targetId: postId, reportedUserId: undefined })).resolves.toBeUndefined();
-    await expect(assertReportableBy(fakeDb({}), reporterId, { targetType: "space", targetId: "not-a-uuid", reportedUserId: undefined })).rejects.toMatchObject({ status: 404 });
+    await expect(assertReportableBy(fakeDb({}), reporterId, { targetType: "space", targetId: "space-key", reportedUserId: undefined })).resolves.toBeUndefined();
     await expect(assertReportableBy(fakeDb({}), reporterId, { targetType: "space", targetId: postId, reportedUserId: undefined })).resolves.toBeUndefined();
+  });
+
+  it("rejects a reported account that does not own the selected content", async () => {
+    await expect(assertReportableBy(fakeDb({ post: { authorId: ownerId } }), reporterId, { targetType: "post", targetId: postId, reportedUserId: "0192f0a0-0000-7000-8000-00000000c001" })).rejects.toMatchObject({ code: "REPORT_TARGET_MISMATCH" });
   });
 });

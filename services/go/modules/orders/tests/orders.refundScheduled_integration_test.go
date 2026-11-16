@@ -1,0 +1,76 @@
+package orders_test
+
+import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"sync"
+	"testing"
+
+	"github.com/google/uuid"
+
+	"nantty/modules/orders/src/generated/ent/orderevent"
+	"nantty/modules/orders/src/generated/ent/processedevent"
+	"nantty/modules/orders/src/generated/ent/refundrecord"
+	"nantty/modules/orders/src/services"
+	"nantty/platform/staffauth"
+)
+
+func TestARefundScheduledByEscrowIsShownAsScheduledAndCompletesOnTheRefundEvent(t *testing.T) {
+	harness := startAdminHarness(t, "held")
+	orderId := harness.seedOrder("ZM-ADM-0040", "processing")
+	access, stepUp, _ := harness.tokens.SignStaffTokensForTest(t, "admin", []string{"refunds:issue"})
+	body := map[string]any{"orderId": orderId.String(), "amount": map[string]any{"amountMinor": 120_000, "currency": "NGN"}, "reason": "Wrong size sent"}
+	if status, created, _ := harness.call("POST", "/api/v1/admin/refunds", body, bearer(access, map[string]string{"Idempotency-Key": "refund-key-0400", staffauth.StepUpHeader: stepUp})); status != http.StatusCreated {
+		t.Fatalf("issue: %d %v", status, created)
+	}
+	data, _ := json.Marshal(map[string]any{"escrowId": uuid.NewString(), "orderId": orderId.String(), "status": "held", "pendingRefund": map[string]any{"id": uuid.NewString(), "amountMinor": 120_000, "currency": "NGN", "full": false}})
+	envelope, _ := json.Marshal(map[string]any{"id": uuid.NewString(), "type": "escrow.refundScheduled", "source": "nantty.escrow", "subject": orderId.String(), "schemaVersion": 1, "occurredAt": "2026-10-12T10:00:00Z", "data": json.RawMessage(data)})
+	handler := services.MoneyEventHandler{Container: harness.module.Container}
+	ctx := context.Background()
+	var wait sync.WaitGroup
+	errors := make(chan error, 2)
+	for range 2 {
+		wait.Add(1)
+		go func() {
+			defer wait.Done()
+			errors <- handler.Handle(ctx, envelope)
+		}()
+	}
+	wait.Wait()
+	close(errors)
+	for err := range errors {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := services.RecordOrderRefundScheduled(ctx, harness.module.Container, orderId, 120_000); err != nil {
+		t.Fatal(err)
+	}
+	record := harness.module.Container.Client.RefundRecord.Query().Where(refundrecord.OrderGroupID(orderId)).OnlyX(ctx)
+	if record.Status != "scheduled" {
+		t.Fatalf("the refund record must read scheduled: %+v", record)
+	}
+	timeline := harness.module.Container.Client.OrderEvent.Query().Where(orderevent.OrderGroupID(orderId), orderevent.Kind("refundScheduled")).CountX(ctx)
+	if timeline != 1 {
+		t.Fatalf("buyer and seller timeline must show the scheduled refund once, got %d", timeline)
+	}
+	if receipts := harness.module.Container.Client.ProcessedEvent.Query().Where(processedevent.EventType("escrow.refundScheduled")).CountX(ctx); receipts != 1 {
+		t.Fatalf("concurrent delivery must commit one processed-event receipt: %d", receipts)
+	}
+	status, page, _ := harness.call("GET", "/api/v1/admin/refunds?status=scheduled", nil, bearer(access, nil))
+	if status != http.StatusOK || len(page["data"].([]any)) != 1 {
+		t.Fatalf("admin can filter scheduled refunds: %d %v", status, page)
+	}
+	other := map[string]any{"orderId": orderId.String(), "amount": map[string]any{"amountMinor": 10_000, "currency": "NGN"}, "reason": "Another refund"}
+	if status, response, _ := harness.call("POST", "/api/v1/admin/refunds", other, bearer(access, map[string]string{"Idempotency-Key": "refund-key-0401", staffauth.StepUpHeader: stepUp})); status != http.StatusConflict || response["code"] != "REFUND_IN_PROGRESS" {
+		t.Fatalf("a second refund while one is scheduled must wait: %d %v", status, response)
+	}
+	if err := services.RecordOrderRefund(ctx, harness.module.Container, orderId, 120_000, ""); err != nil {
+		t.Fatal(err)
+	}
+	records := harness.module.Container.Client.RefundRecord.Query().Where(refundrecord.OrderGroupID(orderId)).AllX(ctx)
+	if len(records) != 1 || records[0].Status != "completed" {
+		t.Fatalf("the scheduled record completes without a duplicate system record: %+v", records)
+	}
+}

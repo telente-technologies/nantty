@@ -1,4 +1,5 @@
 import { readMockMoneyStore } from "@/mocks/handlers/money/moneyStore.mock";
+import { calculateEscrowHeldMinor, calculateOrderTotalMinor } from "@/mocks/handlers/money/moneyStore.mock";
 import { requireMockPermission, requireMockSingleUseStepUp } from "@/mocks/mockGuards.mock";
 import { MockHttpError, paginateByCursor, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
@@ -6,8 +7,11 @@ import type { FinanceEscrowRecord, FinanceExportRecord, FinanceIssue } from "@/t
 
 const exportAuditLog: FinanceExportRecord[] = [];
 
-const totalOrderMinor = (order: ReturnType<typeof readMockMoneyStore>["orders"][number]) =>
-  order.items.reduce((sum, item) => sum + item.unitPriceMinor * item.quantity, 0) + order.deliveryFeeMinor;
+function groupAmounts(items: readonly { readonly currency: string; readonly amountMinor: number }[]) {
+  const totals = new Map<string, number>();
+  for (const item of items) totals.set(item.currency, (totals.get(item.currency) ?? 0) + item.amountMinor);
+  return [...totals].sort(([left], [right]) => left.localeCompare(right)).map(([currency, amountMinor]) => ({ currency, amountMinor }));
+}
 
 export function registerFinanceMockHandlers(): void {
   registerMockRoute("GET", "/admin/finance/overview", (request) => {
@@ -16,36 +20,33 @@ export function registerFinanceMockHandlers(): void {
     const currency = request.query.get("currency") || undefined;
     const range = request.query.get("range") || "7d";
     const matchesCurrency = (code: string) => !currency || code === currency;
-    const heldMinor = store.orders.filter((order) => order.escrowStatus === "HELD" && matchesCurrency(order.currency)).reduce((sum, order) => sum + totalOrderMinor(order), 0);
-    const gmvMinor = store.orders.filter((order) => matchesCurrency(order.currency)).reduce((sum, order) => sum + totalOrderMinor(order), 0);
-    const pendingWithdrawals = store.withdrawals.filter((withdrawal) => withdrawal.withdrawalStatus === "pending_review" || withdrawal.withdrawalStatus === "queued");
+    const eligibleOrders = store.orders.filter((order) => order.status !== "CANCELLED");
+    const gmv = groupAmounts(eligibleOrders.map((order) => ({ currency: order.currency, amountMinor: calculateOrderTotalMinor(order) })).filter((item) => matchesCurrency(item.currency)));
+    const held = groupAmounts(eligibleOrders.filter((order) => !["RELEASED", "REFUNDED"].includes(order.escrowStatus)).map((order) => ({ currency: order.currency, amountMinor: calculateEscrowHeldMinor(order) })).filter((item) => matchesCurrency(item.currency)));
+    const released = groupAmounts(store.orders.flatMap((order) => order.timeline.filter((event) => event.kind === "RELEASED" && event.amount).map((event) => ({ currency: event.amount!.currency, amountMinor: event.amount!.amountMinor }))).filter((item) => matchesCurrency(item.currency)));
+    const refunded = groupAmounts(store.orders.map((order) => ({ currency: order.currency, amountMinor: order.refundedMinor })).filter((item) => item.amountMinor > 0 && matchesCurrency(item.currency)));
+    const pendingWithdrawals = store.withdrawals.filter((withdrawal) => ["pending_review", "queued", "processing"].includes(withdrawal.withdrawalStatus));
     const pendingMinor = pendingWithdrawals.filter((item) => matchesCurrency(item.currency)).reduce((sum, item) => sum + item.amountMinor, 0);
-    const coinMinor = store.coinTransactions.filter((coin) => coin.kind === "purchase" && matchesCurrency(coin.currency)).reduce((sum, coin) => sum + (coin.fiatMinor ?? 0), 0);
-    const filterList = (items: readonly { amountMinor: number; currency: string }[]) => items.filter((item) => matchesCurrency(item.currency));
+    const coinSales = groupAmounts(store.coinTransactions.filter((coin) => coin.kind === "purchase" && coin.fiatMinor !== null).map((coin) => ({ currency: coin.currency, amountMinor: coin.fiatMinor ?? 0 })).filter((item) => matchesCurrency(item.currency)));
     return respondWithJson(200, {
       generatedAt: new Date().toISOString(),
       range,
       ...(currency ? { currency } : {}),
-      gmvByCurrency: filterList([{ amountMinor: gmvMinor, currency: currency ?? "NGN" }]),
-      escrowHeldByCurrency: filterList([{ amountMinor: heldMinor, currency: currency ?? "NGN" }]),
-      escrowReleasedByCurrency: filterList([{ amountMinor: 420_000_00, currency: currency ?? "NGN" }]),
-      escrowRefundedByCurrency: filterList([{ amountMinor: 85_000_00, currency: currency ?? "NGN" }]),
-      payoutsPendingByCurrency: filterList([{ amountMinor: pendingMinor, currency: currency ?? "NGN" }]),
-      coinSalesByCurrency: filterList([{ amountMinor: coinMinor, currency: currency ?? "NGN" }]),
-      adTopUpsByCurrency: filterList([{ amountMinor: 190_000_00, currency: currency ?? "NGN" }]),
-      subscriptionByCurrency: filterList([{ amountMinor: 95_000_00, currency: currency ?? "NGN" }]),
-      platformRevenueByCurrency: filterList([{ amountMinor: 315_000_00, currency: currency ?? "NGN" }]),
+      gmvByCurrency: gmv,
+      escrowHeldByCurrency: held,
+      escrowReleasedByCurrency: released,
+      escrowRefundedByCurrency: refunded,
+      payoutsPendingByCurrency: groupAmounts(pendingWithdrawals.map((item) => ({ amountMinor: item.amountMinor, currency: item.currency })).filter((item) => matchesCurrency(item.currency))),
+      coinSalesByCurrency: coinSales,
+      adTopUpsByCurrency: [],
+      subscriptionByCurrency: [],
+      platformRevenueByCurrency: [],
       disputesOpenCount: store.disputes.filter((dispute) => dispute.status !== "RESOLVED").length,
-      stuckEscrowsCount: 1,
+      stuckEscrowsCount: store.orders.filter((order) => ["FUNDED", "HELD", "DISPUTED", "PARTIALLY_REFUNDED"].includes(order.escrowStatus) && !order.autoReleaseAt).length,
       payoutsPendingCount: pendingWithdrawals.length,
-      payoutsAgedCount: 0,
+      payoutsAgedCount: pendingWithdrawals.filter((withdrawal) => withdrawal.withdrawalStatus === "processing" && Date.now() - Date.parse(withdrawal.createdAt) > 60 * 60 * 1000).length,
       sellerDebtAccountsCount: 0,
-      health: [
-        { name: "Payments", status: "OPERATIONAL", latencyMs: 12, note: null },
-        { name: "Escrow", status: "OPERATIONAL", latencyMs: 9, note: null },
-        { name: "Wallet", status: "OPERATIONAL", latencyMs: 11, note: null },
-        { name: "Ledger", status: "OPERATIONAL", latencyMs: 8, note: null },
-      ],
+      health: [],
     });
   });
 
@@ -59,7 +60,7 @@ export function registerFinanceMockHandlers(): void {
         id: `esc_${order.id}`,
         orderId: order.id,
         status: order.escrowStatus.toLowerCase(),
-        amount: { amountMinor: totalOrderMinor(order), currency: order.currency },
+        amount: { amountMinor: calculateOrderTotalMinor(order), currency: order.currency },
         autoReleaseAt: index === 0 ? null : order.placedAt,
         deliveredAt: order.placedAt,
         releasedAt: null,
@@ -73,7 +74,7 @@ export function registerFinanceMockHandlers(): void {
     requireMockPermission(request, "finance:reports");
     const firstOrder = readMockMoneyStore().orders[0];
     const rows: FinanceEscrowRecord[] = firstOrder
-      ? [{ id: `esc_${firstOrder.id}`, orderId: firstOrder.id, status: "held", amount: { amountMinor: totalOrderMinor(firstOrder), currency: firstOrder.currency }, autoReleaseAt: null, deliveredAt: firstOrder.placedAt, releasedAt: null, refundedAt: null, stuck: true }]
+      ? [{ id: `esc_${firstOrder.id}`, orderId: firstOrder.id, status: "held", amount: { amountMinor: calculateOrderTotalMinor(firstOrder), currency: firstOrder.currency }, autoReleaseAt: null, deliveredAt: firstOrder.placedAt, releasedAt: null, refundedAt: null, stuck: true }]
       : [];
     return respondWithJson(200, paginateByCursor(rows, request));
   });
@@ -83,12 +84,11 @@ export function registerFinanceMockHandlers(): void {
     const aspect = request.query.get("aspect") || "all";
     const range = request.query.get("range") || "7d";
     const currency = request.query.get("currency");
+    const store = readMockMoneyStore();
     const allRows = [
-      { group: "order_checkout", status: "succeeded", count: 48, amountMinor: 2_450_000_00, currency: "NGN" },
-      { group: "coin_purchase", status: "succeeded", count: 132, amountMinor: 610_000_00, currency: "NGN" },
-      { group: "ad_balance_top_up", status: "succeeded", count: 19, amountMinor: 190_000_00, currency: "NGN" },
-      { group: "subscription_blue", status: "succeeded", count: 84, amountMinor: 95_000_00, currency: "NGN" },
-    ].filter((row) => !currency || row.currency === currency);
+      ...groupAmounts(store.orders.map((order) => ({ currency: order.currency, amountMinor: calculateOrderTotalMinor(order) })).filter((row) => !currency || row.currency === currency)).map((row) => ({ group: "order_checkout", status: "recorded", count: store.orders.filter((order) => order.currency === row.currency).length, ...row })),
+      ...groupAmounts(store.coinTransactions.filter((coin) => coin.kind === "purchase" && coin.fiatMinor !== null).map((coin) => ({ currency: coin.currency, amountMinor: coin.fiatMinor ?? 0 })).filter((row) => !currency || row.currency === currency)).map((row) => ({ group: "coin_purchase", status: "recorded", count: store.coinTransactions.filter((coin) => coin.kind === "purchase" && coin.currency === row.currency).length, ...row })),
+    ];
     return respondWithJson(200, { aspect, range, generatedAt: new Date().toISOString(), breakdown: allRows });
   });
 
@@ -97,7 +97,7 @@ export function registerFinanceMockHandlers(): void {
     const queue = request.query.get("queue");
     const firstOrder = readMockMoneyStore().orders[0];
     const issues: FinanceIssue[] = firstOrder
-      ? [{ id: `escrow:esc_${firstOrder.id}`, queue: "stuck_escrows", entityType: "order", entityId: firstOrder.id, reference: firstOrder.orderNumber, summary: "Escrow held has no auto_release_at timestamp", amount: { amountMinor: totalOrderMinor(firstOrder), currency: firstOrder.currency }, severity: "high", slaHours: 48, detectedAt: firstOrder.placedAt, actionHref: `/commerce/orders/${firstOrder.id}` }]
+      ? [{ id: `escrow:esc_${firstOrder.id}`, queue: "stuck_escrows", entityType: "order", entityId: firstOrder.id, reference: firstOrder.orderNumber, summary: "Escrow held has no auto_release_at timestamp", amount: { amountMinor: calculateOrderTotalMinor(firstOrder), currency: firstOrder.currency }, severity: "high", slaHours: 48, detectedAt: firstOrder.placedAt, actionHref: `/commerce/orders/${firstOrder.id}` }]
       : [];
     return respondWithJson(200, {
       data: queue ? issues.filter((issue) => issue.queue === queue) : issues,
@@ -118,7 +118,7 @@ export function registerFinanceMockHandlers(): void {
       found: true,
       checkedStores: 5,
       message: "Found 1 matching record(s) across 5 checked stores",
-      hops: [{ store: "orders", entityType: "order_payable", entityId: order.id, reference: order.orderNumber, status: order.status, amount: { amountMinor: totalOrderMinor(order), currency: order.currency }, occurredAt: order.placedAt, detail: `Order ${order.orderNumber}`, actionHref: `/commerce/orders/${order.id}` }],
+      hops: [{ store: "orders", entityType: "order_payable", entityId: order.id, reference: order.orderNumber, status: order.status, amount: { amountMinor: calculateOrderTotalMinor(order), currency: order.currency }, occurredAt: order.placedAt, detail: `Order ${order.orderNumber}`, actionHref: `/commerce/orders/${order.id}` }],
     });
   });
 

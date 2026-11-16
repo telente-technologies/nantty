@@ -6,6 +6,8 @@ import (
 	"nantty/modules/auth/src/databases/schema"
 	"nantty/modules/auth/src/generated/ent/account"
 	"nantty/modules/auth/src/generated/ent/agegaterefusal"
+	"nantty/modules/auth/src/generated/ent/messengerauthorization"
+	"nantty/modules/auth/src/generated/ent/messengertrusteddevice"
 	"nantty/modules/auth/src/generated/ent/onetimecode"
 	"nantty/modules/auth/src/generated/ent/outboxevent"
 	"nantty/modules/auth/src/generated/ent/refreshtoken"
@@ -108,6 +110,158 @@ func init() {
 	agegaterefusalDescID := agegaterefusalMixinFields0[0].Descriptor()
 	// agegaterefusal.DefaultID holds the default value on creation for the id field.
 	agegaterefusal.DefaultID = agegaterefusalDescID.Default.(func() uuid.UUID)
+	messengerauthorizationMixin := schema.MessengerAuthorization{}.Mixin()
+	messengerauthorizationMixinFields0 := messengerauthorizationMixin[0].Fields()
+	_ = messengerauthorizationMixinFields0
+	messengerauthorizationFields := schema.MessengerAuthorization{}.Fields()
+	_ = messengerauthorizationFields
+	// messengerauthorizationDescCreatedAt is the schema descriptor for created_at field.
+	messengerauthorizationDescCreatedAt := messengerauthorizationMixinFields0[1].Descriptor()
+	// messengerauthorization.DefaultCreatedAt holds the default value on creation for the created_at field.
+	messengerauthorization.DefaultCreatedAt = messengerauthorizationDescCreatedAt.Default.(func() time.Time)
+	// messengerauthorizationDescProofHash is the schema descriptor for proof_hash field.
+	messengerauthorizationDescProofHash := messengerauthorizationFields[1].Descriptor()
+	// messengerauthorization.ProofHashValidator is a validator for the "proof_hash" field. It is called by the builders before save.
+	messengerauthorization.ProofHashValidator = messengerauthorizationDescProofHash.Validators[0].(func(string) error)
+	// messengerauthorizationDescInstallationHash is the schema descriptor for installation_hash field.
+	messengerauthorizationDescInstallationHash := messengerauthorizationFields[2].Descriptor()
+	// messengerauthorization.InstallationHashValidator is a validator for the "installation_hash" field. It is called by the builders before save.
+	messengerauthorization.InstallationHashValidator = func() func(string) error {
+		validators := messengerauthorizationDescInstallationHash.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(installation_hash string) error {
+			for _, fn := range fns {
+				if err := fn(installation_hash); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// messengerauthorizationDescDeviceName is the schema descriptor for device_name field.
+	messengerauthorizationDescDeviceName := messengerauthorizationFields[4].Descriptor()
+	// messengerauthorization.DeviceNameValidator is a validator for the "device_name" field. It is called by the builders before save.
+	messengerauthorization.DeviceNameValidator = func() func(string) error {
+		validators := messengerauthorizationDescDeviceName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(device_name string) error {
+			for _, fn := range fns {
+				if err := fn(device_name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// messengerauthorizationDescUserAgent is the schema descriptor for user_agent field.
+	messengerauthorizationDescUserAgent := messengerauthorizationFields[5].Descriptor()
+	// messengerauthorization.DefaultUserAgent holds the default value on creation for the user_agent field.
+	messengerauthorization.DefaultUserAgent = messengerauthorizationDescUserAgent.Default.(string)
+	// messengerauthorization.UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
+	messengerauthorization.UserAgentValidator = messengerauthorizationDescUserAgent.Validators[0].(func(string) error)
+	// messengerauthorizationDescIPAddress is the schema descriptor for ip_address field.
+	messengerauthorizationDescIPAddress := messengerauthorizationFields[6].Descriptor()
+	// messengerauthorization.DefaultIPAddress holds the default value on creation for the ip_address field.
+	messengerauthorization.DefaultIPAddress = messengerauthorizationDescIPAddress.Default.(string)
+	// messengerauthorization.IPAddressValidator is a validator for the "ip_address" field. It is called by the builders before save.
+	messengerauthorization.IPAddressValidator = messengerauthorizationDescIPAddress.Validators[0].(func(string) error)
+	// messengerauthorizationDescApprovalMethod is the schema descriptor for approval_method field.
+	messengerauthorizationDescApprovalMethod := messengerauthorizationFields[8].Descriptor()
+	// messengerauthorization.ApprovalMethodValidator is a validator for the "approval_method" field. It is called by the builders before save.
+	messengerauthorization.ApprovalMethodValidator = messengerauthorizationDescApprovalMethod.Validators[0].(func(string) error)
+	// messengerauthorizationDescCodeHash is the schema descriptor for code_hash field.
+	messengerauthorizationDescCodeHash := messengerauthorizationFields[10].Descriptor()
+	// messengerauthorization.CodeHashValidator is a validator for the "code_hash" field. It is called by the builders before save.
+	messengerauthorization.CodeHashValidator = messengerauthorizationDescCodeHash.Validators[0].(func(string) error)
+	// messengerauthorizationDescCodeAttempts is the schema descriptor for code_attempts field.
+	messengerauthorizationDescCodeAttempts := messengerauthorizationFields[13].Descriptor()
+	// messengerauthorization.DefaultCodeAttempts holds the default value on creation for the code_attempts field.
+	messengerauthorization.DefaultCodeAttempts = messengerauthorizationDescCodeAttempts.Default.(int)
+	// messengerauthorization.CodeAttemptsValidator is a validator for the "code_attempts" field. It is called by the builders before save.
+	messengerauthorization.CodeAttemptsValidator = messengerauthorizationDescCodeAttempts.Validators[0].(func(int) error)
+	// messengerauthorizationDescID is the schema descriptor for id field.
+	messengerauthorizationDescID := messengerauthorizationMixinFields0[0].Descriptor()
+	// messengerauthorization.DefaultID holds the default value on creation for the id field.
+	messengerauthorization.DefaultID = messengerauthorizationDescID.Default.(func() uuid.UUID)
+	messengertrusteddeviceMixin := schema.MessengerTrustedDevice{}.Mixin()
+	messengertrusteddeviceMixinFields0 := messengertrusteddeviceMixin[0].Fields()
+	_ = messengertrusteddeviceMixinFields0
+	messengertrusteddeviceFields := schema.MessengerTrustedDevice{}.Fields()
+	_ = messengertrusteddeviceFields
+	// messengertrusteddeviceDescCreatedAt is the schema descriptor for created_at field.
+	messengertrusteddeviceDescCreatedAt := messengertrusteddeviceMixinFields0[1].Descriptor()
+	// messengertrusteddevice.DefaultCreatedAt holds the default value on creation for the created_at field.
+	messengertrusteddevice.DefaultCreatedAt = messengertrusteddeviceDescCreatedAt.Default.(func() time.Time)
+	// messengertrusteddeviceDescTokenHash is the schema descriptor for token_hash field.
+	messengertrusteddeviceDescTokenHash := messengertrusteddeviceFields[1].Descriptor()
+	// messengertrusteddevice.TokenHashValidator is a validator for the "token_hash" field. It is called by the builders before save.
+	messengertrusteddevice.TokenHashValidator = func() func(string) error {
+		validators := messengertrusteddeviceDescTokenHash.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(token_hash string) error {
+			for _, fn := range fns {
+				if err := fn(token_hash); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// messengertrusteddeviceDescInstallationHash is the schema descriptor for installation_hash field.
+	messengertrusteddeviceDescInstallationHash := messengertrusteddeviceFields[2].Descriptor()
+	// messengertrusteddevice.InstallationHashValidator is a validator for the "installation_hash" field. It is called by the builders before save.
+	messengertrusteddevice.InstallationHashValidator = func() func(string) error {
+		validators := messengertrusteddeviceDescInstallationHash.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(installation_hash string) error {
+			for _, fn := range fns {
+				if err := fn(installation_hash); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// messengertrusteddeviceDescDeviceName is the schema descriptor for device_name field.
+	messengertrusteddeviceDescDeviceName := messengertrusteddeviceFields[4].Descriptor()
+	// messengertrusteddevice.DeviceNameValidator is a validator for the "device_name" field. It is called by the builders before save.
+	messengertrusteddevice.DeviceNameValidator = func() func(string) error {
+		validators := messengertrusteddeviceDescDeviceName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(device_name string) error {
+			for _, fn := range fns {
+				if err := fn(device_name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// messengertrusteddeviceDescUserAgent is the schema descriptor for user_agent field.
+	messengertrusteddeviceDescUserAgent := messengertrusteddeviceFields[5].Descriptor()
+	// messengertrusteddevice.DefaultUserAgent holds the default value on creation for the user_agent field.
+	messengertrusteddevice.DefaultUserAgent = messengertrusteddeviceDescUserAgent.Default.(string)
+	// messengertrusteddevice.UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
+	messengertrusteddevice.UserAgentValidator = messengertrusteddeviceDescUserAgent.Validators[0].(func(string) error)
+	// messengertrusteddeviceDescID is the schema descriptor for id field.
+	messengertrusteddeviceDescID := messengertrusteddeviceMixinFields0[0].Descriptor()
+	// messengertrusteddevice.DefaultID holds the default value on creation for the id field.
+	messengertrusteddevice.DefaultID = messengertrusteddeviceDescID.Default.(func() uuid.UUID)
 	onetimecodeMixin := schema.OneTimeCode{}.Mixin()
 	onetimecodeMixinFields0 := onetimecodeMixin[0].Fields()
 	_ = onetimecodeMixinFields0

@@ -20,7 +20,7 @@ import (
 const settlementCallTimeout = 10 * time.Second
 
 const (
-	maxBattleSettlementAttempts = 8
+	MaxBattleSettlementAttempts = 8
 	battleSettlementLease       = 30 * time.Second
 	battleSettlementRetryBase   = 250 * time.Millisecond
 	battleSettlementRetryMax    = 30 * time.Second
@@ -81,7 +81,7 @@ type battleSettlementClaim struct {
 func dueBattleSettlement(now time.Time) predicate.Battle {
 	return battlerecord.And(
 		battlerecord.StateEQ(battlerecord.StateEnded),
-		battlerecord.SettlementAttemptsLT(maxBattleSettlementAttempts),
+		battlerecord.SettlementAttemptsLT(MaxBattleSettlementAttempts),
 		battlerecord.Or(battlerecord.SettlementLeaseUntilIsNil(), battlerecord.SettlementLeaseUntilLTE(now)),
 		battlerecord.Or(battlerecord.SettlementNextAttemptAtIsNil(), battlerecord.SettlementNextAttemptAtLTE(now)),
 	)
@@ -123,8 +123,8 @@ func (service *LiveService) retryBattleSettlement(ctx context.Context, battleId 
 			return err
 		}
 		update := row.Update().ClearSettlementLeaseUntil().ClearSettlementLeaseToken()
-		if attempt < maxBattleSettlementAttempts {
-			update.SetSettlementNextAttemptAt(service.Now().Add(battleSettlementRetryDelay(attempt)))
+		if attempt < MaxBattleSettlementAttempts {
+			update.SetSettlementNextAttemptAt(service.Now().Add(BattleSettlementRetryDelay(attempt)))
 		} else {
 			update.ClearSettlementNextAttemptAt()
 			service.Logger.ErrorContext(ctx, "battle settlement retries exhausted; operator recovery required", "battle_id", battleId.String(), "attempts", attempt)
@@ -134,7 +134,7 @@ func (service *LiveService) retryBattleSettlement(ctx context.Context, battleId 
 	})
 }
 
-func battleSettlementRetryDelay(attempt int) time.Duration {
+func BattleSettlementRetryDelay(attempt int) time.Duration {
 	if attempt < 1 {
 		attempt = 1
 	}

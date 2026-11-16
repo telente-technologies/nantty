@@ -107,7 +107,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (Page, error) {
 			ShipmentID: group.ID.String(), OrderID: group.ID.String(), StoreID: group.StoreID.String(),
 			Reference: group.Reference, Provider: provider, Status: status,
 			CreatedAt: group.CreatedAt.UTC(), UpdatedAt: group.UpdatedAt.UTC(),
-			TrackingNumber: safeTrackingNumber(group.TrackingNumber), TrackingURL: safeTrackingURL(group.TrackingURL),
+			TrackingNumber: SafeTrackingNumber(group.TrackingNumber), TrackingURL: SafeTrackingURL(group.TrackingURL),
 		}
 		shipmentRow, shipmentErr := handler.Container.Client.Shipment.Query().Where(shipment.OrderGroupID(group.ID)).Select(
 			shipment.FieldID, shipment.FieldProvider, shipment.FieldStatus, shipment.FieldCreatedAt,
@@ -123,10 +123,10 @@ func (handler Handler) Execute(ctx context.Context, query Query) (Page, error) {
 			item.CreatedAt = shipmentRow.CreatedAt.UTC()
 			item.UpdatedAt = shipmentRow.UpdatedAt.UTC()
 			if shipmentRow.TrackingNumber != nil {
-				item.TrackingNumber = safeTrackingNumber(shipmentRow.TrackingNumber)
+				item.TrackingNumber = SafeTrackingNumber(shipmentRow.TrackingNumber)
 			}
 			if shipmentRow.TrackingURL != nil {
-				item.TrackingURL = safeTrackingURL(shipmentRow.TrackingURL)
+				item.TrackingURL = SafeTrackingURL(shipmentRow.TrackingURL)
 			}
 			claim, claimErr := handler.Container.Client.DeliveryClaim.Query().Where(deliveryclaim.ShipmentID(shipmentRow.ID)).
 				Select(deliveryclaim.FieldKind, deliveryclaim.FieldStatus).Order(ent.Desc(deliveryclaim.FieldOpenedAt)).First(ctx)
@@ -134,7 +134,7 @@ func (handler Handler) Execute(ctx context.Context, query Query) (Page, error) {
 				return Page{}, claimErr
 			}
 			if claimErr == nil {
-				item.Exception = &Exception{Reason: safeClaimKind(claim.Kind), Status: safeClaimStatus(claim.Status)}
+				item.Exception = &Exception{Reason: SafeClaimKind(claim.Kind), Status: SafeClaimStatus(claim.Status)}
 			}
 		}
 		if item.Exception == nil && group.DeliveryStatus == "failed" {
@@ -145,14 +145,14 @@ func (handler Handler) Execute(ctx context.Context, query Query) (Page, error) {
 	return Page{Items: items, NextCursor: nextCursor}, nil
 }
 
-func safeTrackingNumber(value *string) *string {
+func SafeTrackingNumber(value *string) *string {
 	if value == nil || !trackingNumberPattern.MatchString(*value) {
 		return nil
 	}
 	return value
 }
 
-func safeTrackingURL(value *string) *string {
+func SafeTrackingURL(value *string) *string {
 	if value == nil || len(*value) > 300 || strings.TrimSpace(*value) != *value {
 		return nil
 	}
@@ -163,7 +163,7 @@ func safeTrackingURL(value *string) *string {
 	return value
 }
 
-func safeClaimKind(kind string) string {
+func SafeClaimKind(kind string) string {
 	switch kind {
 	case "loss", "damage", "delay", "failed_delivery", "not_received", "wrong_item":
 		return kind
@@ -172,7 +172,7 @@ func safeClaimKind(kind string) string {
 	}
 }
 
-func safeClaimStatus(status string) string {
+func SafeClaimStatus(status string) string {
 	switch status {
 	case "open", "reviewing", "approved", "rejected", "resolved", "closed":
 		return status

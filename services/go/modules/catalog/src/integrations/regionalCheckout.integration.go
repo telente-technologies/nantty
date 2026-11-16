@@ -29,11 +29,11 @@ func (catalog CommerceCatalog) applyRegionToSnapshots(ctx context.Context, varia
 	if err != nil {
 		return err
 	}
-	applyRegionRules(stores, byStore, snapshots, countryCode)
+	ApplyRegionalCheckoutRules(stores, byStore, snapshots, countryCode)
 	return nil
 }
 
-func applyRegionRules(stores []*ent.Store, byStore map[uuid.UUID][]*ent.ProductVariant, snapshots map[uuid.UUID]commerceports.ProductSnapshot, countryCode string) {
+func ApplyRegionalCheckoutRules(stores []*ent.Store, byStore map[uuid.UUID][]*ent.ProductVariant, snapshots map[uuid.UUID]commerceports.ProductSnapshot, countryCode string) {
 	marketCurrency, hasMarket := services.MarketCurrencyForCountry(countryCode)
 	for _, owner := range stores {
 		group := byStore[owner.ID]

@@ -76,6 +76,27 @@ export const newSignInDetected: EventMapping = (event, data, context) => [
   }),
 ];
 
+export const messengerLoginApprovalRequested: EventMapping = (event, data, context) => {
+  const authorizationId = data.text("authorizationId");
+  const securityUrl = `${context.webBaseUrl}/settings/security?messengerAuthorizationId=${encodeURIComponent(authorizationId)}`;
+  const actionData = {
+    url: securityUrl,
+    screen: "MessengerLoginAuthorization",
+    authorizationId,
+    requestedAt: data.text("requestedAt", event.occurredAt),
+    expiresAt: data.text("expiresAt"),
+    device: data.text("device", "Unknown device"),
+    platform: data.text("platform", "unknown"),
+    approximateLocation: data.optionalText("approximateLocation") ?? null,
+    actions: ["approve", "deny"],
+  };
+  return [intentFor(event, data.text("accountId"), {
+    category: "auth",
+    inApp: { category: "system", title: "Approve Messenger sign-in?", body: `${actionData.device} is requesting access to your Nantty messages. Review the device before approving.`, data: actionData },
+    push: { title: "Approve Messenger sign-in?", body: `${actionData.device} is requesting access. Tap to review and approve or deny.`, data: actionData },
+  })];
+};
+
 export const twoFactorEnabled: EventMapping = (event, data) => [
   intentFor(event, data.text("accountId"), {
     category: "auth",

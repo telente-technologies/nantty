@@ -91,7 +91,7 @@ func (controller BillingController) ListPriceTable(writer http.ResponseWriter, r
 	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"data": rows, "regions": regionpricing.SupportedRegions(), "nextCursor": nil})
 }
 
-func validatePriceRow(region string, body dtos.PriceRowRequestDto, now time.Time) error {
+func ValidatePriceRow(region string, body dtos.PriceRowRequestDto, now time.Time) error {
 	collector := &ledgerutils.IssueCollector{}
 	expected, known := regionpricing.FindRegion(region)
 	switch {
@@ -124,7 +124,7 @@ func (controller BillingController) UpsertPrice(writer http.ResponseWriter, requ
 	staff, _ := staffauth.StaffFromContext(request.Context())
 	planCode, region := request.PathValue("planCode"), strings.ToUpper(request.PathValue("countryCode"))
 	now := controller.Billing.Container.Now().UTC()
-	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body dtos.PriceRowRequestDto) error { return validatePriceRow(region, body, now) })
+	body, err := ledgerutils.DecodeAndValidateJsonBody(writer, request, func(body dtos.PriceRowRequestDto) error { return ValidatePriceRow(region, body, now) })
 	if err != nil {
 		controller.fail(writer, request, err)
 		return

@@ -160,6 +160,10 @@
 }
 
 @media (max-width: 767px) {
+  .topBarClips {
+    display: none;
+  }
+
   .topBarHome {
     position: sticky;
     background: var(--surface-card);

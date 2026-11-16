@@ -1,6 +1,7 @@
 "use client";
 
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 
@@ -16,7 +17,7 @@ import { useSession } from "@/components/providers/sessionProvider";
 import { feedModuleCadence } from "@/config/feedModules.config";
 import { clipProductRecommendationIndexes, clipProductRecommendations } from "@/utils/clipProductRecommendations.util";
 import { requireAuthThen } from "@/components/auth/authPrompt.store";
-import { SpeakerHighIcon, SpeakerMutedIcon } from "@/components/ui/icons";
+import { SearchIcon } from "@/components/ui/icons";
 import type { Clip } from "@/types";
 
 import { ClipPlayerCard } from "./clipPlayerCard";
@@ -125,16 +126,9 @@ export default function ClipsPage() {
             { value: "following", label: "Following" },
           ]}
         />
-        <button
-          type="button"
-          className={[styles.stepButton, styles.muteToggle].join(" ")}
-          aria-pressed={isMuted}
-          aria-label={isMuted ? "Unmute clips" : "Mute clips"}
-          title={isMuted ? "Unmute (M)" : "Mute (M)"}
-          onClick={() => setIsMuted((muted) => !muted)}
-        >
-          {isMuted ? <SpeakerMutedIcon size={20} /> : <SpeakerHighIcon size={20} />}
-        </button>
+        <Link href="/explore" className={styles.searchClipsButton} aria-label="Search clips and creators" title="Search">
+          <SearchIcon size={24} />
+        </Link>
         <div className={styles.stepButtons}>
           <button type="button" className={styles.stepButton} onClick={() => scrollByOneClip(-1)} aria-label="Previous clip">
             <AppIcon name="arrowUp24" size={20} />

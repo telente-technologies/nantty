@@ -24,7 +24,7 @@ func (gateway *PaymentGateway) RegisterCheckoutPayables(ctx context.Context, pay
 	if len(payables) == 0 {
 		return fmt.Errorf("a checkout needs at least one order")
 	}
-	if err := validateCheckoutPayableMoney(payables); err != nil {
+	if err := ValidateCheckoutPayableMoney(payables); err != nil {
 		return err
 	}
 	checkoutId, buyerId, currency := payables[0].CheckoutId, payables[0].BuyerUserId, payables[0].Currency
@@ -59,7 +59,7 @@ func (gateway *PaymentGateway) RegisterCheckoutPayables(ctx context.Context, pay
 	return err
 }
 
-func validateCheckoutPayableMoney(payables []models.OrderPayable) error {
+func ValidateCheckoutPayableMoney(payables []models.OrderPayable) error {
 	if len(payables) == 0 {
 		return fmt.Errorf("a checkout needs at least one order")
 	}

@@ -110,7 +110,7 @@ func (store EntOutboxStore) recordFailedAttempt(ctx context.Context, tx *ent.Tx,
 	update := tx.OutboxEvent.UpdateOneID(row.ID).
 		SetAttemptCount(attempts).
 		SetLastError(message).
-		SetNextAttemptAt(now.Add(retryBackoffAfterAttempts(attempts)))
+		SetNextAttemptAt(now.Add(RetryBackoffAfterAttempts(attempts)))
 	if attempts >= publishAttemptsBeforeAlert && row.DeadLetteredAt == nil {
 		update.SetDeadLetteredAt(now)
 	}
@@ -135,7 +135,7 @@ func (store EntOutboxStore) logger() *slog.Logger {
 	return slog.Default()
 }
 
-func retryBackoffAfterAttempts(attempts int) time.Duration {
+func RetryBackoffAfterAttempts(attempts int) time.Duration {
 	if attempts > 20 {
 		return maximumRetryBackoff
 	}

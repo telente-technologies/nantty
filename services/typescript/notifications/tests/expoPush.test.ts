@@ -35,6 +35,16 @@ describe("ExpoPushSender", () => {
     expect(unavailable.failures).toEqual([{ token: "token-b", classification: "retryable", code: "HTTP_503" }]);
   });
 
+  it("preserves an explicit silent sound preference", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ data: [{ status: "ok" }] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await new ExpoPushSender().send(["token-a"], { title: "Message", body: "New message", sound: null });
+
+    const sent = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)) as { readonly sound?: string | null }[];
+    expect(sent[0]?.sound).toBeNull();
+  });
+
   it("classifies transient and unknown ticket-level errors as retryable", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ data: [
       { status: "error", details: { error: "MessageRateExceeded" } },

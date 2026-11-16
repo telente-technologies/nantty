@@ -172,6 +172,10 @@ func (fake *FakeFlutterwave) serve(writer http.ResponseWriter, request *http.Req
 	writeFakeJson(writer, status, envelope)
 }
 
+func (fake *FakeFlutterwave) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	fake.serve(writer, request)
+}
+
 func (fake *FakeFlutterwave) consumeLostReply(request fakeFlwRequest) bool {
 	if request.method != http.MethodPost {
 		return false

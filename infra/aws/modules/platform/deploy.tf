@@ -77,13 +77,13 @@ locals {
     elixir = { PHX_SERVER = "true", PHX_HOST = local.api_domain, DNS_CLUSTER_QUERY = "realtime.${module.cluster.namespace_name}" }
     python = { OTEL_SEMCONV_STABILITY_OPT_IN = "http", INTELLIGENCE_ENVIRONMENT = local.app_env, INTELLIGENCE_HOST = "127.0.0.1", INTELLIGENCE_EVENT_STORAGE_URI = "s3://${module.storage.media_bucket.id}/intelligence" }
     gateway_only = merge(
-      { CORS_ORIGINS = join(",", values(var.app_origins)), RATE_LIMIT_MAX_PER_MINUTE = "600", TRUSTED_PROXY_HOPS = "1" },
+      { CORS_ORIGINS = join(",", values(var.app_origins)), RATE_LIMIT_MAX_PER_MINUTE = "600", TRUSTED_PROXY_HOPS = "2" },
       { for name, url in local.internal_url : "UPSTREAM_${upper(replace(replace(name, "go-", ""), "-", "_"))}_URL" => url if contains(["go-identity", "go-live", "go-money", "go-trust", "go-commerce", "go-ads", "social", "notifications", "media", "search", "support"], name) },
     )
   }
 
   service_specific_environment = {
-    gateway = merge(local.runtime_environment.gateway_only, { PORT = "8080", AUTH_JWKS_URL = "${local.internal_url["go-identity"]}/.well-known/jwks.json", ADMIN_IP_ALLOWLIST = join(",", var.admin_ip_allow_list) })
+    gateway = merge(local.runtime_environment.gateway_only, { PORT = "8080", AUTH_JWKS_URL = "${local.internal_url["go-identity"]}/.well-known/jwks.json", ADMIN_IP_ALLOWLIST = join(",", var.admin_ip_allow_list), BLOCKED_CLIENT_IPS = join(",", var.blocked_client_ip_cidrs) })
     go-money = {
       PAYMENTS_MIGRATE_ON_START      = "false"
       WALLET_MIGRATE_ON_START        = "false"

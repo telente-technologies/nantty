@@ -26,6 +26,12 @@ export function createUpdateChatSettingsHandler(context: HandlerContext): Handle
       ...(notifications?.groups === undefined ? {} : { notifyGroups: notifications.groups }),
       ...(notifications?.streakReminders === undefined ? {} : { notifyStreakReminders: notifications.streakReminders }),
       ...(notifications?.showMessagePreview === undefined ? {} : { showMessagePreview: notifications.showMessagePreview }),
+      ...(notifications?.sound === undefined ? {} : { notifyMessageSound: notifications.sound }),
+      ...(notifications?.vibration === undefined ? {} : { notifyMessageVibration: notifications.vibration }),
+      ...(notifications?.bubbles === undefined ? {} : { notifyMessageBubbles: notifications.bubbles }),
+      ...(notifications?.bubbleMode === undefined ? {} : { messageBubbleMode: notifications.bubbleMode }),
+      ...(notifications?.bubbleConversationIds === undefined ? {} : { messageBubbleConversationIds: [...new Set(notifications.bubbleConversationIds)] }),
+      ...(notifications?.bubbleExcludedConversationIds === undefined ? {} : { messageBubbleExcludedConversationIds: [...new Set(notifications.bubbleExcludedConversationIds)] }),
       ...(timezone === undefined || timezone === (current?.timezone ?? "UTC") ? {} : { timezone, timezoneChangedAt: now }),
     });
     return toChatSettingsView(row);

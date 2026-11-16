@@ -58,6 +58,7 @@ function notificationPath(payload: unknown): string | null {
   if (explicit !== null) return explicit;
 
   if (data["screen"] === "GroupInvitations") return "/chats/invitations";
+  if (data["screen"] === "MessengerLoginAuthorization") return "/settings/security";
   if (data["screen"] === "AccountStatus") return "/settings/account-status";
   if (data["screen"] === "Verification") return "/settings/verification";
   if (data["kind"] === "followRequest") return "/me/follow-requests";

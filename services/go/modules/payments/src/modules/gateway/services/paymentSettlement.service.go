@@ -129,7 +129,7 @@ func (gateway *PaymentGateway) applyVerificationToIntent(ctx context.Context, tr
 		}
 	}
 	customerMatches := intent.CustomerEmail == "" || verification.CustomerEmail == "" || strings.EqualFold(intent.CustomerEmail, verification.CustomerEmail)
-	feeMatches := verification.Outcome != interfaces.OutcomeSucceeded || validProviderFeeForIntent(intent, verification.ProviderFeeMinor, verification.AmountMinor)
+	feeMatches := verification.Outcome != interfaces.OutcomeSucceeded || ValidProviderFeeForIntent(intent, verification.ProviderFeeMinor, verification.AmountMinor)
 	amountMatches := verification.AmountMinor == intent.AmountMinor && verification.Currency == intent.Currency && !chargeReused && customerMatches && feeMatches
 	if verification.Outcome == interfaces.OutcomeFailed || !amountMatches {
 		if !amountMatches && intent.Status == paymentintent.StatusCancelled {

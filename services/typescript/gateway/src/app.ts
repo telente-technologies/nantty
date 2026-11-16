@@ -4,6 +4,7 @@ import { createPlatform, sendLegacyResponse } from "@nantty/fastify-platform";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 
 import { createAdminNetworkMiddleware } from "./middlewares/adminNetwork.middleware.js";
+import { createClientIpDenylistMiddleware } from "./middlewares/clientIpDenylist.middleware.js";
 import { createGlobalRateLimitMiddleware } from "./middlewares/routeRateLimit.middleware.js";
 import { createRequestSizeLimitMiddleware } from "./middlewares/requestSizeLimit.middleware.js";
 import { createSecurityHeadersMiddleware } from "./middlewares/securityHeaders.middleware.js";
@@ -49,7 +50,7 @@ export interface GatewayServerOptions {
 function buildRateLimitStore(connection: ValkeyConnection | undefined, logger: Logger): RateLimitStore {
   const memory = new InMemoryRateLimitStore();
   if (connection === undefined) return memory;
-  return new ValkeyRateLimitStore(connection, memory, (error) => logger.warn("valkey rate limit unavailable; using in-memory counters", { error: error instanceof Error ? error.message : String(error) }));
+  return new ValkeyRateLimitStore(connection, (error) => logger.warn("valkey rate limit unavailable; temporarily refusing rate-limited requests", { error: error instanceof Error ? error.message : String(error) }));
 }
 
 function normalizeHeaders(request: FastifyRequest): Record<string, string> {
@@ -125,6 +126,7 @@ export function createGatewayServer(options: GatewayServerOptions): GatewayServe
   const pipeline = new HttpMiddlewarePipeline({
     middlewares: [
       createSecurityHeadersMiddleware(),
+      createClientIpDenylistMiddleware(options.config.blockedClientIps ?? []),
       createGlobalRateLimitMiddleware(rateLimitStore, options.config.rateLimitMaxPerMinute, (request) => isAnsweredByCorsAlone(request, options.config.corsOrigins)),
       createStrictCorsMiddleware({
         allowedOrigins: options.config.corsOrigins,

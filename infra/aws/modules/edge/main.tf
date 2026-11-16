@@ -12,21 +12,45 @@ resource "aws_security_group" "alb" {
   name_prefix = "${local.name}-alb-"
   description = "Public ALB"
   vpc_id      = var.vpc_id
-  ingress {
-    description      = "HTTPS from the internet"
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+  dynamic "ingress" {
+    for_each = toset(var.cloudflare_ipv4_cidrs)
+    content {
+      description = "HTTPS from Cloudflare"
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+    }
   }
-  ingress {
-    description      = "HTTP, redirected to HTTPS"
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+  dynamic "ingress" {
+    for_each = toset(var.cloudflare_ipv6_cidrs)
+    content {
+      description      = "HTTPS from Cloudflare"
+      from_port        = 443
+      to_port          = 443
+      protocol         = "tcp"
+      ipv6_cidr_blocks = [ingress.value]
+    }
+  }
+  dynamic "ingress" {
+    for_each = toset(var.cloudflare_ipv4_cidrs)
+    content {
+      description = "HTTP redirect from Cloudflare"
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+    }
+  }
+  dynamic "ingress" {
+    for_each = toset(var.cloudflare_ipv6_cidrs)
+    content {
+      description      = "HTTP redirect from Cloudflare"
+      from_port        = 80
+      to_port          = 80
+      protocol         = "tcp"
+      ipv6_cidr_blocks = [ingress.value]
+    }
   }
   egress {
     description = "To task TLS proxies inside the VPC"

@@ -30,7 +30,7 @@ func cartItemView(line PricedCartLine, unavailable map[uuid.UUID]bool) types.Car
 	return view
 }
 
-func assembleCartView(groups []SellerGroup, unavailable map[uuid.UUID]bool, loaded cartContext, address *usersdirectory.ShippingAddress) types.CartView {
+func AssembleCartView(groups []SellerGroup, unavailable map[uuid.UUID]bool, loaded CartViewContext, address *usersdirectory.ShippingAddress) types.CartView {
 	view := types.CartView{Items: []types.CartItemView{}, Groups: []types.CartSellerGroupView{}, UnavailableItems: []types.UnavailableCartItemView{}, UnavailableItemCount: unavailableCartItemCount(unavailable)}
 	if len(groups) == 0 {
 		view.UnavailableItems = unavailableCartItems(unavailable, nil)
@@ -43,13 +43,13 @@ func assembleCartView(groups []SellerGroup, unavailable map[uuid.UUID]bool, load
 	if address != nil {
 		identifier := address.Id.String()
 		view.AddressId = &identifier
-		revisionGroups := make([]shippingQuoteRevisionGroup, 0, len(groups))
+		revisionGroups := make([]ShippingQuoteRevisionGroup, 0, len(groups))
 		for _, group := range groups {
-			profile := loaded.profiles[group.StoreId]
+			profile := loaded.Profiles[group.StoreId]
 			_, result := QuoteForGroup(group, profile, address)
-			revisionGroups = append(revisionGroups, revisionGroupFor(group, result, profile))
+			revisionGroups = append(revisionGroups, BuildShippingQuoteRevisionGroup(group, result, profile))
 		}
-		revision := shippingQuoteRevisionFor(*address, revisionGroups)
+		revision := ShippingQuoteRevisionFor(*address, revisionGroups)
 		view.ShippingQuoteRevision = &revision
 	}
 	for _, group := range groups {
@@ -57,18 +57,18 @@ func assembleCartView(groups []SellerGroup, unavailable map[uuid.UUID]bool, load
 			view.MixedCurrencies = true
 			continue
 		}
-		store := loaded.stores[group.StoreId]
-		quote, _ := QuoteForGroup(group, loaded.profiles[group.StoreId], address)
-		credit := RedeemableCreditMinor(loaded.credits[group.StoreId].BalanceMinor, group.SubtotalMinor)
+		store := loaded.Stores[group.StoreId]
+		quote, _ := QuoteForGroup(group, loaded.Profiles[group.StoreId], address)
+		credit := RedeemableCreditMinor(loaded.Credits[group.StoreId].BalanceMinor, group.SubtotalMinor)
 		groupView := types.CartSellerGroupView{
-			StoreId: group.StoreId.String(), StoreName: store.Name, Store: map[string]any{"id": group.StoreId.String(), "name": store.Name, "badge": store.Verified, "verified": store.Verified, "rating": store.RatingAverage, "ratingCount": store.RatingCount, "successRate": successRateOf(loaded.rates, group.StoreId)},
+			StoreId: group.StoreId.String(), StoreName: store.Name, Store: map[string]any{"id": group.StoreId.String(), "name": store.Name, "badge": store.Verified, "verified": store.Verified, "rating": store.RatingAverage, "ratingCount": store.RatingCount, "successRate": successRateOf(loaded.Rates, group.StoreId)},
 			Items: []types.CartItemView{}, Subtotal: money.Money{AmountMinor: group.SubtotalMinor, Currency: currency}, Discounts: zero, Fees: zero, Taxes: zero,
 			StoreCredit: money.Money{AmountMinor: credit, Currency: currency}, Shipping: quote,
 		}
 		allAvailable := true
 		for _, line := range group.Lines {
 			item := cartItemView(line, unavailable)
-			if remaining, known := loaded.available[line.Product.VariantId]; known {
+			if remaining, known := loaded.Available[line.Product.VariantId]; known {
 				item.Product.Stock = remaining
 			}
 			allAvailable = allAvailable && item.Available

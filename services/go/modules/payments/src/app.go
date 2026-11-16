@@ -33,28 +33,28 @@ type Module struct {
 	Application *gateway.Application
 }
 
-func validateCreatorApplicationApprovedEvent(accountId string) error {
+func ValidateCreatorApplicationApprovedEvent(accountId string) error {
 	if strings.TrimSpace(accountId) == "" {
 		return fmt.Errorf("%w: creatorApplication.approved is missing accountId", platformevents.ErrPoisonMessage)
 	}
 	return nil
 }
 
-func validateBusinessVerificationApprovedEvent(accountId string, goldEligible, goldCheckmarkGranted *bool) error {
+func ValidateBusinessVerificationApprovedEvent(accountId string, goldEligible, goldCheckmarkGranted *bool) error {
 	if _, err := uuid.Parse(accountId); err != nil || goldEligible == nil || goldCheckmarkGranted == nil {
 		return fmt.Errorf("%w: invalid businessVerification.approved payload", platformevents.ErrPoisonMessage)
 	}
 	return nil
 }
 
-func validateBusinessVerificationRevokedEvent(accountId, documentKind, reason string) error {
+func ValidateBusinessVerificationRevokedEvent(accountId, documentKind, reason string) error {
 	if _, err := uuid.Parse(accountId); err != nil || strings.TrimSpace(documentKind) == "" || strings.TrimSpace(reason) == "" {
 		return fmt.Errorf("%w: invalid businessVerification.revoked payload", platformevents.ErrPoisonMessage)
 	}
 	return nil
 }
 
-func validateVerificationLevelRefreshEvent(accountId string) error {
+func ValidateVerificationLevelRefreshEvent(accountId string) error {
 	if strings.TrimSpace(accountId) == "" {
 		return fmt.Errorf("%w: verification level refresh event is missing accountId", platformevents.ErrPoisonMessage)
 	}
@@ -79,7 +79,7 @@ func NewPaymentsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &data); err != nil {
 			return err
 		}
-		if err := validateCreatorApplicationApprovedEvent(data.AccountId); err != nil {
+		if err := ValidateCreatorApplicationApprovedEvent(data.AccountId); err != nil {
 			return err
 		}
 		return gateway.HandleCreatorApproved(ctx, data.AccountId)
@@ -93,7 +93,7 @@ func NewPaymentsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &data); err != nil {
 			return err
 		}
-		if err := validateBusinessVerificationApprovedEvent(data.AccountId, data.GoldEligible, data.GoldCheckmarkGranted); err != nil {
+		if err := ValidateBusinessVerificationApprovedEvent(data.AccountId, data.GoldEligible, data.GoldCheckmarkGranted); err != nil {
 			return err
 		}
 		return gateway.RecordSellerVerification(ctx, data.AccountId, envelope.Id, envelope.OccurredAt)
@@ -107,7 +107,7 @@ func NewPaymentsModule(ctx context.Context, dependencies servicemodule.Dependenc
 		if err := loaders.DecodeEventData(envelope, &data); err != nil {
 			return err
 		}
-		if err := validateBusinessVerificationRevokedEvent(data.AccountId, data.DocumentKind, data.Reason); err != nil {
+		if err := ValidateBusinessVerificationRevokedEvent(data.AccountId, data.DocumentKind, data.Reason); err != nil {
 			return err
 		}
 		return gateway.RevokeSellerVerification(ctx, data.AccountId, envelope.Id, envelope.OccurredAt)
@@ -120,7 +120,7 @@ func NewPaymentsModule(ctx context.Context, dependencies servicemodule.Dependenc
 			if err := loaders.DecodeEventData(envelope, &data); err != nil {
 				return err
 			}
-			if err := validateVerificationLevelRefreshEvent(data.AccountId); err != nil {
+			if err := ValidateVerificationLevelRefreshEvent(data.AccountId); err != nil {
 				return err
 			}
 			return gateway.RefreshVerificationLevel(ctx, data.AccountId)

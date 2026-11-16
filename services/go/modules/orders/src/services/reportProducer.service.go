@@ -62,11 +62,11 @@ func produceSourcedReport(ctx context.Context, deployed *container.Container, re
 	}
 	switch request.Kind {
 	case "inventory-valuation":
-		return inventoryValuation(data, stock, locationId), nil
+		return InventoryValuationReport(data, stock, locationId), nil
 	case "low-stock":
-		return lowStock(data, stock, locationId), nil
+		return LowStockReport(data, stock, locationId), nil
 	}
-	return slowSellers(data, stock, productCategories(ctx, request.Store.StoreId)), nil
+	return SlowSellersReport(data, stock, productCategories(ctx, request.Store.StoreId)), nil
 }
 
 func productCategories(ctx context.Context, storeId uuid.UUID) map[uuid.UUID]string {

@@ -1,4 +1,5 @@
 @import "@nantty/design-tokens/tokens.css";
+@import "@nantty/design-tokens/portalTheme.css";
 
 * { box-sizing: border-box; }
 html { min-height: 100%; }
@@ -9,5 +10,5 @@ body { min-height: 100dvh; margin: 0; background: var(--color-bg); color: var(--
 a { color: inherit; }
 a:hover { text-decoration: underline; }
 button, input, select, textarea { font: inherit; }
-:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; }
-::selection { background: var(--color-brand-tint); }
+:focus-visible { outline: 2px solid var(--color-text); outline-offset: 3px; }
+::selection { background: var(--color-surface-hover); color: var(--color-text); }

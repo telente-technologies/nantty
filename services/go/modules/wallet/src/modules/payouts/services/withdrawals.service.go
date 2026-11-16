@@ -72,7 +72,7 @@ func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Contex
 	if err != nil {
 		return dtos.WithdrawalDto{}, err
 	}
-	if !withdrawalFitsAvailableBalance(providerAvailableMinor, alreadyReserved, amountMinor) {
+	if !WithdrawalFitsAvailableBalance(providerAvailableMinor, alreadyReserved, amountMinor) {
 		return dtos.WithdrawalDto{}, ErrInsufficientFunds
 	}
 	status := withdrawal.StatusQueued
@@ -109,7 +109,7 @@ func (withdrawals Withdrawals) RequestWithdrawalInTransaction(ctx context.Contex
 	return ConvertWithdrawal(created), withdrawals.Container.Outbox.EnqueueInTransaction(ctx, transaction, "withdrawal.requested", created.ID.String(), created.CreatedAt, withdrawalEventData(created))
 }
 
-func withdrawalFitsAvailableBalance(providerAvailableMinor, alreadyReserved, amountMinor int64) bool {
+func WithdrawalFitsAvailableBalance(providerAvailableMinor, alreadyReserved, amountMinor int64) bool {
 	return providerAvailableMinor >= 0 && alreadyReserved >= 0 && amountMinor > 0 &&
 		alreadyReserved <= providerAvailableMinor && amountMinor <= providerAvailableMinor-alreadyReserved
 }
@@ -229,7 +229,7 @@ func (withdrawals Withdrawals) sumWithdrawalsNotYetSentToProvider(ctx context.Co
 	var sums []struct {
 		Sum *int64 `json:"sum"`
 	}
-	notYetSent := statusesToSubtractFromProviderBalance(withdrawals.Container.Settings.WithdrawalLimits.BlockWhileProcessing)
+	notYetSent := StatusesToSubtractFromProviderBalance(withdrawals.Container.Settings.WithdrawalLimits.BlockWhileProcessing)
 	err := withdrawals.Container.Client(transaction).Withdrawal.Query().
 		Where(withdrawal.UserID(userId), withdrawal.Currency(currency), withdrawal.StatusIn(notYetSent...)).
 		Aggregate(ent.Sum(withdrawal.FieldAmountMinor)).Scan(ctx, &sums)
@@ -239,7 +239,7 @@ func (withdrawals Withdrawals) sumWithdrawalsNotYetSentToProvider(ctx context.Co
 	return *sums[0].Sum, nil
 }
 
-func statusesToSubtractFromProviderBalance(blockWhileProcessing bool) []withdrawal.Status {
+func StatusesToSubtractFromProviderBalance(blockWhileProcessing bool) []withdrawal.Status {
 	statuses := []withdrawal.Status{withdrawal.StatusPendingReview, withdrawal.StatusOnHold, withdrawal.StatusQueued}
 	if !blockWhileProcessing {
 		statuses = append(statuses, withdrawal.StatusProcessing)

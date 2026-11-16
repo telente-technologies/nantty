@@ -24,6 +24,14 @@ variable "create_zone" {
   type    = bool
   default = false
 }
+variable "cloudflare_zone_id" {
+  description = "ID of the authoritative Cloudflare zone that serves this environment's DNS names."
+  type        = string
+  validation {
+    condition     = can(regex("^[a-f0-9]{32}$", var.cloudflare_zone_id))
+    error_message = "cloudflare_zone_id must be a 32-character hexadecimal zone ID."
+  }
+}
 variable "app_domain" {
   description = "Domain for this environment, for example staging.nantty.com (api., media. and livekit. are prefixed)."
   type        = string
@@ -65,6 +73,15 @@ variable "admin_ip_allow_list" {
   validation {
     condition     = alltrue([for cidr in var.admin_ip_allow_list : can(cidrnetmask(cidr)) && !contains(["0.0.0.0/0", "::/0"], cidr)])
     error_message = "Admin access requires valid restricted IPv4 CIDRs."
+  }
+}
+variable "blocked_client_ip_cidrs" {
+  description = "Client IPv4/IPv6 addresses or CIDR ranges blocked at the API gateway. Use /32 or /128 for one address."
+  type        = list(string)
+  default     = []
+  validation {
+    condition     = alltrue([for cidr in var.blocked_client_ip_cidrs : can(cidrhost(cidr, 0)) && !endswith(cidr, "/0")])
+    error_message = "blocked_client_ip_cidrs must contain valid, non-global IPv4 or IPv6 CIDRs."
   }
 }
 variable "image_tag" {

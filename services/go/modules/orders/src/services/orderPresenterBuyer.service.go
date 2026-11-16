@@ -14,7 +14,7 @@ func groupMoney(group *ent.OrderGroup, amountMinor int64) money.Money {
 	return money.Money{AmountMinor: amountMinor, Currency: money.CurrencyCode(group.Currency)}
 }
 
-func buyerOrderView(group *ent.OrderGroup, items []*ent.OrderItem, store commerceports.StoreSnapshot, buyer usersdirectory.ProfileName, successRate *float64, events []*ent.OrderEvent) types.OrderView {
+func BuildBuyerOrderView(group *ent.OrderGroup, items []*ent.OrderItem, store commerceports.StoreSnapshot, buyer usersdirectory.ProfileName, successRate *float64, events []*ent.OrderEvent) types.OrderView {
 	view := types.OrderView{
 		Id: group.ID.String(), Reference: group.Reference, Status: BuyerStatusFor(group.Status), FulfilmentStatus: group.Status, PaymentStatus: group.PaymentStatus, PaymentMode: group.PaymentMode,
 		Items: make([]types.CartItemView, 0, len(items)), Subtotal: groupMoney(group, group.SubtotalMinor), Discount: groupMoney(group, group.DiscountMinor), StoreCredit: groupMoney(group, group.StoreCreditMinor),
@@ -36,7 +36,7 @@ func buyerOrderView(group *ent.OrderGroup, items []*ent.OrderItem, store commerc
 	if group.ShippedAt != nil && group.CourierName != nil && group.TrackingNumber != nil {
 		view.Shipment = &types.ShipmentView{CourierName: *group.CourierName, TrackingNumber: *group.TrackingNumber, ShippedAt: *group.ShippedAt, EstimatedDeliveryAt: group.EstimatedDeliveryAt}
 	}
-	view.Delivery = buyerDeliveryView(group.DeliveryStatus, group.RiderName, group.RiderPhone, group.EstimatedDeliveryAt, group.DeliveryAttempts, group.LastAttemptNote)
+	view.Delivery = BuyerDeliveryView(group.DeliveryStatus, group.RiderName, group.RiderPhone, group.EstimatedDeliveryAt, group.DeliveryAttempts, group.LastAttemptNote)
 	for _, event := range events {
 		if summary, visible := buyerTimelineSummary(event.Kind); visible {
 			view.Timeline = append(view.Timeline, types.OrderTimelineEventView{Id: event.ID.String(), Kind: event.Kind, Summary: summary, CreatedAt: event.CreatedAt})
@@ -70,7 +70,7 @@ func buyerTimelineSummary(kind string) (string, bool) {
 	return summary, visible
 }
 
-func buyerDeliveryView(status string, riderName, riderPhone *string, estimatedDeliveryAt *time.Time, attempts int, lastAttemptNote *string) *types.DeliveryView {
+func BuyerDeliveryView(status string, riderName, riderPhone *string, estimatedDeliveryAt *time.Time, attempts int, lastAttemptNote *string) *types.DeliveryView {
 	if status == "pending" && riderName == nil && riderPhone == nil && estimatedDeliveryAt == nil && attempts == 0 && lastAttemptNote == nil {
 		return nil
 	}

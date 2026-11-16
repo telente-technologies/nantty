@@ -21,6 +21,10 @@ type MoneyClient struct {
 	options    InternalGrpcOptions
 }
 
+func NewMoneyClient(service moneyv1.LiveMoneyServiceClient, options InternalGrpcOptions) *MoneyClient {
+	return &MoneyClient{service: service, options: options}
+}
+
 func DialMoneyService(options InternalGrpcOptions) (*MoneyClient, error) {
 	connection, err := dialInternalGrpcService(options)
 	if err != nil {
@@ -29,7 +33,12 @@ func DialMoneyService(options InternalGrpcOptions) (*MoneyClient, error) {
 	return &MoneyClient{connection: connection, service: moneyv1.NewLiveMoneyServiceClient(connection), options: options}, nil
 }
 
-func (client *MoneyClient) Close() error { return client.connection.Close() }
+func (client *MoneyClient) Close() error {
+	if client.connection == nil {
+		return nil
+	}
+	return client.connection.Close()
+}
 
 func (client *MoneyClient) ChargeGiftAndCreditCreator(ctx context.Context, request interfaces.ChargeGiftRequest) (interfaces.ChargedGift, error) {
 	message := &moneyv1.ChargeGiftAndCreditCreatorRequest{
@@ -42,11 +51,11 @@ func (client *MoneyClient) ChargeGiftAndCreditCreator(ctx context.Context, reque
 	if request.ComboId != "" {
 		message.ComboId = &request.ComboId
 	}
-	response, err := callWithRetryOnUnavailable(ctx, client.options, request.IdempotencyKey != "", func(attempt context.Context) (*moneyv1.ChargeGiftAndCreditCreatorResponse, error) {
+	response, err := CallWithRetryOnUnavailable(ctx, client.options, request.IdempotencyKey != "", func(attempt context.Context) (*moneyv1.ChargeGiftAndCreditCreatorResponse, error) {
 		return client.service.ChargeGiftAndCreditCreator(attempt, message)
 	})
 	if err != nil {
-		return interfaces.ChargedGift{}, translateMoneyError(err)
+		return interfaces.ChargedGift{}, TranslateMoneyError(err)
 	}
 	transaction := response.GetGiftTransaction()
 	return interfaces.ChargedGift{
@@ -65,11 +74,11 @@ func (client *MoneyClient) ChargeSpaceCoinGift(ctx context.Context, request inte
 		Quantity:       int32(request.Quantity),
 		IdempotencyKey: request.IdempotencyKey,
 	}
-	response, err := callWithRetryOnUnavailable(ctx, client.options, request.IdempotencyKey != "", func(attempt context.Context) (*moneyv1.ChargeSpaceCoinGiftResponse, error) {
+	response, err := CallWithRetryOnUnavailable(ctx, client.options, request.IdempotencyKey != "", func(attempt context.Context) (*moneyv1.ChargeSpaceCoinGiftResponse, error) {
 		return client.service.ChargeSpaceCoinGift(attempt, message)
 	})
 	if err != nil {
-		return interfaces.SpaceCoinGiftReceipt{}, translateMoneyError(err)
+		return interfaces.SpaceCoinGiftReceipt{}, TranslateMoneyError(err)
 	}
 	return interfaces.SpaceCoinGiftReceipt{
 		GiftTransactionId:   response.GetGiftTransactionId(),
@@ -90,11 +99,11 @@ func (client *MoneyClient) ChargeSpaceCoinGift(ctx context.Context, request inte
 
 func (client *MoneyClient) DonateSpaceCoins(ctx context.Context, request interfaces.DonateSpaceCoinsRequest) (interfaces.SpaceCoinDonationReceipt, error) {
 	message := &moneyv1.DonateSpaceCoinsRequest{SenderUserId: request.SenderUserId, SpaceId: request.SpaceId, Coins: request.Coins, IdempotencyKey: request.IdempotencyKey}
-	response, err := callWithRetryOnUnavailable(ctx, client.options, request.IdempotencyKey != "", func(attempt context.Context) (*moneyv1.DonateSpaceCoinsResponse, error) {
+	response, err := CallWithRetryOnUnavailable(ctx, client.options, request.IdempotencyKey != "", func(attempt context.Context) (*moneyv1.DonateSpaceCoinsResponse, error) {
 		return client.service.DonateSpaceCoins(attempt, message)
 	})
 	if err != nil {
-		return interfaces.SpaceCoinDonationReceipt{}, translateMoneyError(err)
+		return interfaces.SpaceCoinDonationReceipt{}, TranslateMoneyError(err)
 	}
 	return interfaces.SpaceCoinDonationReceipt{DonationId: response.GetDonationId(), LedgerTransactionId: response.GetLedgerTransactionId(),
 		SenderUserId: response.GetSenderUserId(), HostUserId: response.GetHostUserId(), SpaceId: response.GetSpaceId(),
@@ -105,11 +114,11 @@ func (client *MoneyClient) DonateSpaceCoins(ctx context.Context, request interfa
 func (client *MoneyClient) ContributeBattleCoins(ctx context.Context, request interfaces.BattleCoinContributionRequest) (interfaces.BattleCoinContributionReceipt, error) {
 	message := &moneyv1.ContributeBattleCoinsRequest{SenderUserId: request.SenderUserId, RecipientUserId: request.RecipientUserId,
 		BattleId: request.BattleId, Coins: request.Coins, IdempotencyKey: request.IdempotencyKey}
-	response, err := callWithRetryOnUnavailable(ctx, client.options, request.IdempotencyKey != "", func(attempt context.Context) (*moneyv1.ContributeBattleCoinsResponse, error) {
+	response, err := CallWithRetryOnUnavailable(ctx, client.options, request.IdempotencyKey != "", func(attempt context.Context) (*moneyv1.ContributeBattleCoinsResponse, error) {
 		return client.service.ContributeBattleCoins(attempt, message)
 	})
 	if err != nil {
-		return interfaces.BattleCoinContributionReceipt{}, translateMoneyError(err)
+		return interfaces.BattleCoinContributionReceipt{}, TranslateMoneyError(err)
 	}
 	return interfaces.BattleCoinContributionReceipt{ContributionId: response.GetContributionId(), LedgerTransactionId: response.GetLedgerTransactionId(),
 		SenderUserId: response.GetSenderUserId(), RecipientUserId: response.GetRecipientUserId(), BattleId: response.GetBattleId(), LiveId: response.GetLiveId(),
@@ -118,11 +127,11 @@ func (client *MoneyClient) ContributeBattleCoins(ctx context.Context, request in
 }
 
 func (client *MoneyClient) GetCoinBalance(ctx context.Context, userId string) (int64, error) {
-	response, err := callWithRetryOnUnavailable(ctx, client.options, true, func(attempt context.Context) (*moneyv1.GetCoinBalanceResponse, error) {
+	response, err := CallWithRetryOnUnavailable(ctx, client.options, true, func(attempt context.Context) (*moneyv1.GetCoinBalanceResponse, error) {
 		return client.service.GetCoinBalance(attempt, &moneyv1.GetCoinBalanceRequest{UserId: userId})
 	})
 	if err != nil {
-		return 0, translateMoneyError(err)
+		return 0, TranslateMoneyError(err)
 	}
 	return response.GetCoins(), nil
 }
@@ -138,7 +147,7 @@ func describeGiftStatus(value moneyv1.GiftTransactionStatus) string {
 	}
 }
 
-func translateMoneyError(err error) error {
+func TranslateMoneyError(err error) error {
 	grpcStatus, isStatus := status.FromError(err)
 	if !isStatus {
 		return err
@@ -217,11 +226,11 @@ func translateMoneyError(err error) error {
 }
 
 func (client *MoneyClient) GetBattleGiftTotals(ctx context.Context, battleId string) ([]interfaces.BattleGiftTotal, error) {
-	response, err := callWithRetryOnUnavailable(ctx, client.options, true, func(attempt context.Context) (*moneyv1.GetBattleGiftTotalsResponse, error) {
+	response, err := CallWithRetryOnUnavailable(ctx, client.options, true, func(attempt context.Context) (*moneyv1.GetBattleGiftTotalsResponse, error) {
 		return client.service.GetBattleGiftTotals(attempt, &moneyv1.GetBattleGiftTotalsRequest{BattleId: battleId})
 	})
 	if err != nil {
-		return nil, translateMoneyError(err)
+		return nil, TranslateMoneyError(err)
 	}
 	totals := make([]interfaces.BattleGiftTotal, 0, len(response.GetTotals()))
 	for _, total := range response.GetTotals() {

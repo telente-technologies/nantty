@@ -9,6 +9,7 @@ import (
 	"nantty/modules/auth/src/container"
 	"nantty/modules/auth/src/events"
 	"nantty/modules/auth/src/generated/ent"
+	"nantty/modules/auth/src/generated/ent/messengertrusteddevice"
 	"nantty/modules/auth/src/generated/ent/session"
 )
 
@@ -26,6 +27,11 @@ func StoreNewPasswordAndRevokeSessionsInTransaction(ctx context.Context, applica
 	}
 	now := application.Now()
 	if err := tx.Account.UpdateOneID(existing.ID).SetPasswordHash(passwordHash).SetMustChangePassword(false).Exec(ctx); err != nil {
+		return err
+	}
+	if err := tx.MessengerTrustedDevice.Update().Where(
+		messengertrusteddevice.AccountID(existing.ID), messengertrusteddevice.RevokedAtIsNil(),
+	).SetRevokedAt(now).Exec(ctx); err != nil {
 		return err
 	}
 	revoked, err := RevokeActiveSessionsExceptInTransaction(ctx, tx, existing.ID, keepSessionId, session.RevokedReasonPasswordChanged, now)

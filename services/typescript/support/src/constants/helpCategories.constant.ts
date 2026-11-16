@@ -41,6 +41,8 @@ export const helpCategorySlugByTicketCategory: Readonly<Record<TicketCategory, s
   creator: "creators-and-earnings",
   live: "live",
   ads: "ads-and-boosts",
+  developer: "troubleshooting",
+  sandbox: "troubleshooting",
   safety: "safety-and-reporting",
   other: "getting-started",
 };

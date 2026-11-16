@@ -14,6 +14,7 @@ Use **Nantty** for current product-facing prose. Legacy `nantty` strings in pack
 - [ownerActions.md](ownerActions.md): the owner-action checklist still open after the handoff.
 - [audit/frontend-backend-audit.md](audit/frontend-backend-audit.md): the living front-end/back-end audit (in progress).
 - [audit/fix-changelog.md](audit/fix-changelog.md): every code change made while fixing that audit, newest first.
+- [master/README.md](master/README.md): cross-product implementation index, evidence matrix, prioritized backlog and current blockers.
 - [database/staging-migration-runbook.md](database/staging-migration-runbook.md): staging migration orchestration across service-owned databases; preserves each service's migration history.
 - [../infra/aws/SECURITY_DEPLOYMENT.md](../infra/aws/SECURITY_DEPLOYMENT.md): production security prerequisites and deployment controls for the AWS blueprint.
 

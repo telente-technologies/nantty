@@ -7,6 +7,7 @@
   "types": "./native.ts",
   "exports": {
     "./tokens.css": "./tokens.css",
+    "./portalTheme.css": "./portalTheme.css",
     "./native": "./native.ts"
   }
 }

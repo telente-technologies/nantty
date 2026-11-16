@@ -14,7 +14,7 @@ import (
 var errDeliveriesClosed = errors.New("rabbitmq delivery channel closed")
 
 type RabbitQueueConsumer struct {
-	connection   channelOpener
+	connection   ChannelOpener
 	Prefetch     int
 	ConsumerTag  string
 	backoff      func(attempt int) time.Duration
@@ -27,7 +27,7 @@ type retrySink interface {
 	Close() error
 }
 
-func NewRabbitQueueConsumer(connection channelOpener, prefetch int, consumerTag string) *RabbitQueueConsumer {
+func NewRabbitQueueConsumer(connection ChannelOpener, prefetch int, consumerTag string) *RabbitQueueConsumer {
 	return &RabbitQueueConsumer{
 		connection:   connection,
 		Prefetch:     max(prefetch, 1),
@@ -111,7 +111,7 @@ func (consumer *RabbitQueueConsumer) settleDelivery(ctx context.Context, queueNa
 }
 
 func (consumer *RabbitQueueConsumer) retryOrDeadLetter(ctx context.Context, queueName string, delivery amqp.Delivery, failure error, retries retrySink, logger *slog.Logger, attributes []any) {
-	failedAttempt := deliveryAttemptFromHeaders(delivery.Headers) + 1
+	failedAttempt := DeliveryAttemptFromHeaders(delivery.Headers) + 1
 	tier, retryable := RetryTierAfterFailedAttempt(failedAttempt)
 	attributes = append(attributes, slog.Int("attempt", failedAttempt), slog.Any("error", failure))
 	if !retryable {

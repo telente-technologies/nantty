@@ -16,7 +16,7 @@ func validProviderFee(feeMinor, amountMinor int64) bool {
 	return feeMinor >= 0 && amountMinor > 0 && feeMinor <= amountMinor
 }
 
-func validProviderFeeForIntent(intent *ent.PaymentIntent, feeMinor, amountMinor int64) bool {
+func ValidProviderFeeForIntent(intent *ent.PaymentIntent, feeMinor, amountMinor int64) bool {
 	if intent == nil || !validProviderFee(feeMinor, amountMinor) || amountMinor != intent.AmountMinor {
 		return false
 	}

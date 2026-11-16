@@ -46,7 +46,7 @@ func applyTimeoutPerAttempt(timeout time.Duration) grpc.UnaryClientInterceptor {
 	}
 }
 
-func callWithRetryOnUnavailable[Result any](ctx context.Context, options InternalGrpcOptions, isIdempotent bool, call func(context.Context) (Result, error)) (Result, error) {
+func CallWithRetryOnUnavailable[Result any](ctx context.Context, options InternalGrpcOptions, isIdempotent bool, call func(context.Context) (Result, error)) (Result, error) {
 	attempts := 1
 	if isIdempotent && options.RetryAttempts > 1 {
 		attempts = options.RetryAttempts

@@ -14,7 +14,7 @@ infra/aws/
     network/        VPC, public/private/data subnets, NAT (single or per AZ), S3 gateway + interface endpoints, REJECT flow logs
     kms/            one rotated key per purpose: data, secrets, logs, kyc, ecr, backup, sns
     storage/        S3 media, private KYC (Object Lock, KMS, TLS only), logs; CloudFront + OAC (+ signed URLs); CRR to the DR region
-    dns/            Route 53 zone, ACM certs (regional + us-east-1), alias records, API health check
+    dns/            Cloudflare authoritative app/API records and ACM validation; Route 53 shadow zone remains for state compatibility
     edge/           public ALB + WAF (managed rules, auth/global rate rules, Flutterwave webhook hash + rate rules, /internal block), internal ALB + private zone
     ecs-cluster/    Fargate cluster, Container Insights, Cloud Map namespace
     ecs-service/    task def, roles, log group, target group + rules, autoscaling, ECS rolling or CodeDeploy blue/green
@@ -66,7 +66,8 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
 | `environment` | required | `dev`, `staging` or `prod` |
 | `region` / `dr_region` | required / `eu-central-1` | primary and DR regions |
 | `enable_dr` | `false` (true in prod) | AWS Backup cross-region copy, S3 CRR, ECR replication, secret replicas, DR KMS keys |
-| `zone_name`, `create_zone` | required, `false` | Route 53 zone; dev and staging own delegated sub-zones, prod owns `nantty.com` |
+| `zone_name`, `create_zone` | required, `false` | Legacy Route 53 zone kept for state compatibility; public app/API DNS is managed in the authoritative Cloudflare zone |
+| `cloudflare_zone_id` | required | Active Cloudflare zone ID (use the `nantty.com` zone for prod and its dev/staging subdomains) |
 | `app_domain` | required | environment domain; services get `api.`, `media.`, `livekit.` prefixes |
 | `mail_domain` | required | SES sending domain |
 | `vpc_cidr`, `az_count`, `nat_per_az` | required, `3`, `false` | network shape, one NAT per AZ in prod |
@@ -100,10 +101,9 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
    aws dynamodb create-table --table-name nantty-terraform-locks --billing-mode PAY_PER_REQUEST \
      --attribute-definitions AttributeName=LockID,AttributeType=S --key-schema AttributeName=LockID,KeyType=HASH
    ```
-2. `cd infra/aws/envs/<env>`, edit `terraform.tfvars`, then `terraform init`, `terraform plan`, review with a second
+2. Set `CLOUDFLARE_API_TOKEN` in the shell or approved pipeline secret store. The token must be limited to DNS Read/Edit on the Nantty zone; never put the token in `terraform.tfvars`. Then `cd infra/aws/envs/<env>`, edit `terraform.tfvars`, run `terraform init`, `terraform plan`, and review with a second
    person, `terraform apply`. Prod applies run from a protected machine or the approved pipeline only.
-3. Delegate DNS: copy the `name_servers` output of dev and staging into NS records in the prod zone
-   (`dev.nantty.com`, `staging.nantty.com`), and point the registrar at prod's name servers.
+3. Cloudflare is authoritative for `nantty.com`; do not delegate the domain to the legacy Route 53 zones. Terraform creates proxied API and optional LiveKit records, DNS-only CloudFront media records, and DNS-only ACM validation records in the Cloudflare zone. Verify resolution and certificate issuance after an approved apply. Route 53 records remain in the shadow zones until a separate state migration is reviewed.
 4. Verify SES: DKIM and MAIL FROM records are created automatically; request production access (out of the sandbox).
 5. Database roles: use the Aurora master secret (output `aurora_master_secret_arn`) from a bastion via SSM to create
    each `svc_*` login from its matching Secrets Manager secret. `svc_migrator` owns the `payments`, `wallet`, `ledger`,

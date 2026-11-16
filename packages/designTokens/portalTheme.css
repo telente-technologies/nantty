@@ -1,0 +1,103 @@
+/* Developer and Sandbox use the same Nantty palette as the public product. */
+.nanttyPortalTheme {
+  --surface-night: var(--blue-900);
+  --surface-night-chip: rgb(255 255 255 / 0.08);
+  --ink-on-night: #ffffff;
+  --ink-on-night-muted: var(--blue-100);
+  --ink-on-night-subtle: var(--blue-200);
+  --line-on-night: rgb(181 193 252 / 0.22);
+  --surface-brand-band: var(--blue-500);
+
+  --color-bg: #f7f8fe;
+  --color-surface: #ffffff;
+  --color-elevated: #ffffff;
+  --color-sunken: #f0f2fa;
+  --color-text: #0a0a14;
+  --color-text-muted: #5b5b6b;
+  --color-text-subtle: #68687b;
+  --color-border: #e4e6f2;
+  --color-border-strong: #cdd1e6;
+  --color-border-control: #80869f;
+  --color-surface-hover: #f4f6fd;
+  --color-skeleton: #eceef7;
+  --color-skeleton-shine: #f7f8fd;
+  --color-brand: #2043f5;
+  --color-brand-solid: #2043f5;
+  --color-brand-solid-hover: #1b39cc;
+  --color-brand-solid-pressed: #152da3;
+  --color-brand-tint: #ecefff;
+  --color-on-brand: #ffffff;
+  --color-accent: var(--color-brand);
+  --color-on-accent: var(--color-on-brand);
+  --color-focus: #2043f5;
+  --shadow-card: 0 1px 2px rgb(11 23 82 / 0.05), 0 6px 20px -14px rgb(11 23 82 / 0.28);
+  --shadow-float: 0 1px 2px rgb(11 23 82 / 0.06), 0 12px 32px -12px rgb(11 23 82 / 0.22);
+}
+
+:root[data-theme="dark"] .nanttyPortalTheme {
+  --color-bg: #15161a;
+  --color-surface: #15161a;
+  --color-elevated: #1e2024;
+  --color-sunken: #1e2024;
+  --color-text: #e8e9eb;
+  --color-text-muted: #9a9da3;
+  --color-text-subtle: #8a8d94;
+  --color-border: #2c2e33;
+  --color-border-strong: #3a3d43;
+  --color-border-control: #5a5f68;
+  --color-surface-hover: #1b1c20;
+  --color-skeleton: #1e2024;
+  --color-skeleton-shine: #26282d;
+  --color-brand: #7b90f9;
+  --color-brand-solid: #4563f7;
+  --color-brand-solid-hover: #3a57f2;
+  --color-brand-solid-pressed: #2043f5;
+  --color-brand-tint: #1a2150;
+  --color-on-brand: #ffffff;
+  --color-focus: #8fa1fa;
+  --shadow-card: 0 0 0 1px var(--color-border);
+  --shadow-float: 0 0 0 1px var(--color-border), 0 12px 32px -12px rgb(0 0 0 / 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .nanttyPortalTheme {
+    --color-bg: #15161a;
+    --color-surface: #15161a;
+    --color-elevated: #1e2024;
+    --color-sunken: #1e2024;
+    --color-text: #e8e9eb;
+    --color-text-muted: #9a9da3;
+    --color-text-subtle: #8a8d94;
+    --color-border: #2c2e33;
+    --color-border-strong: #3a3d43;
+    --color-border-control: #5a5f68;
+    --color-surface-hover: #1b1c20;
+    --color-skeleton: #1e2024;
+    --color-skeleton-shine: #26282d;
+    --color-brand: #7b90f9;
+    --color-brand-solid: #4563f7;
+    --color-brand-solid-hover: #3a57f2;
+    --color-brand-solid-pressed: #2043f5;
+    --color-brand-tint: #1a2150;
+    --color-on-brand: #ffffff;
+    --color-focus: #8fa1fa;
+    --shadow-card: 0 0 0 1px var(--color-border);
+    --shadow-float: 0 0 0 1px var(--color-border), 0 12px 32px -12px rgb(0 0 0 / 0.6);
+  }
+}
+
+/* Keep the large portal footer on the same branded surfaces as nantty.com. */
+.nanttyPortalTheme .nanttyPortalFooter {
+  --footer-background: var(--surface-night);
+  --footer-foreground: var(--ink-on-night);
+  --footer-muted: var(--ink-on-night-muted);
+  --footer-subtle: var(--ink-on-night-subtle);
+  --footer-border: var(--line-on-night);
+  border-color: var(--footer-border);
+  background: var(--footer-background);
+  color: var(--footer-muted);
+}
+
+.nanttyPortalTheme .nanttyPortalFooterWordmark {
+  color: var(--blue-500);
+}

@@ -154,7 +154,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  min-height: max(var(--control-sm), 44px);
+  min-height: var(--control-sm);
   padding-inline: var(--space-2);
   border: 0;
   border-radius: var(--radius-pill);

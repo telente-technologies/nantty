@@ -52,7 +52,7 @@ type pendingSpaceRequest struct {
 	User spacePerson `json:"user"`
 }
 
-type spaceDetailRelations interface {
+type SpaceDetailRelations interface {
 	BlockedEitherWay(ctx context.Context, userID uuid.UUID, others []uuid.UUID) (map[uuid.UUID]bool, error)
 	IsFollowing(ctx context.Context, followerID, followeeID uuid.UUID) (bool, error)
 	FollowedAmong(ctx context.Context, followerID uuid.UUID, candidates []uuid.UUID) (map[uuid.UUID]bool, error)
@@ -180,10 +180,10 @@ func (c SpacesController) Detail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c SpacesController) authorizeSpaceDetails(ctx context.Context, row *ent.Space, viewer *types.Actor) error {
-	return authorizeSpaceDetails(ctx, row, viewer, c.Container.Relations)
+	return AuthorizeSpaceDetails(ctx, row, viewer, c.Container.Relations)
 }
 
-func authorizeSpaceDetails(ctx context.Context, row *ent.Space, viewer *types.Actor, relations spaceDetailRelations) error {
+func AuthorizeSpaceDetails(ctx context.Context, row *ent.Space, viewer *types.Actor, relations SpaceDetailRelations) error {
 	if row.ModerationVisibility != "visible" {
 		return httpserver.ErrNotFound
 	}

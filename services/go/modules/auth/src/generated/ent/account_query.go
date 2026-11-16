@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"math"
 	"nantty/modules/auth/src/generated/ent/account"
+	"nantty/modules/auth/src/generated/ent/messengerauthorization"
+	"nantty/modules/auth/src/generated/ent/messengertrusteddevice"
 	"nantty/modules/auth/src/generated/ent/predicate"
 	"nantty/modules/auth/src/generated/ent/session"
 	"nantty/modules/auth/src/generated/ent/socialidentity"
@@ -23,13 +25,15 @@ import (
 // AccountQuery is the builder for querying Account entities.
 type AccountQuery struct {
 	config
-	ctx                  *QueryContext
-	order                []account.OrderOption
-	inters               []Interceptor
-	predicates           []predicate.Account
-	withSessions         *SessionQuery
-	withSocialIdentities *SocialIdentityQuery
-	modifiers            []func(*sql.Selector)
+	ctx                         *QueryContext
+	order                       []account.OrderOption
+	inters                      []Interceptor
+	predicates                  []predicate.Account
+	withSessions                *SessionQuery
+	withSocialIdentities        *SocialIdentityQuery
+	withMessengerAuthorizations *MessengerAuthorizationQuery
+	withMessengerTrustedDevices *MessengerTrustedDeviceQuery
+	modifiers                   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -103,6 +107,50 @@ func (_q *AccountQuery) QuerySocialIdentities() *SocialIdentityQuery {
 			sqlgraph.From(account.Table, account.FieldID, selector),
 			sqlgraph.To(socialidentity.Table, socialidentity.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, account.SocialIdentitiesTable, account.SocialIdentitiesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMessengerAuthorizations chains the current query on the "messenger_authorizations" edge.
+func (_q *AccountQuery) QueryMessengerAuthorizations() *MessengerAuthorizationQuery {
+	query := (&MessengerAuthorizationClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, selector),
+			sqlgraph.To(messengerauthorization.Table, messengerauthorization.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.MessengerAuthorizationsTable, account.MessengerAuthorizationsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMessengerTrustedDevices chains the current query on the "messenger_trusted_devices" edge.
+func (_q *AccountQuery) QueryMessengerTrustedDevices() *MessengerTrustedDeviceQuery {
+	query := (&MessengerTrustedDeviceClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, selector),
+			sqlgraph.To(messengertrusteddevice.Table, messengertrusteddevice.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.MessengerTrustedDevicesTable, account.MessengerTrustedDevicesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -297,13 +345,15 @@ func (_q *AccountQuery) Clone() *AccountQuery {
 		return nil
 	}
 	return &AccountQuery{
-		config:               _q.config,
-		ctx:                  _q.ctx.Clone(),
-		order:                append([]account.OrderOption{}, _q.order...),
-		inters:               append([]Interceptor{}, _q.inters...),
-		predicates:           append([]predicate.Account{}, _q.predicates...),
-		withSessions:         _q.withSessions.Clone(),
-		withSocialIdentities: _q.withSocialIdentities.Clone(),
+		config:                      _q.config,
+		ctx:                         _q.ctx.Clone(),
+		order:                       append([]account.OrderOption{}, _q.order...),
+		inters:                      append([]Interceptor{}, _q.inters...),
+		predicates:                  append([]predicate.Account{}, _q.predicates...),
+		withSessions:                _q.withSessions.Clone(),
+		withSocialIdentities:        _q.withSocialIdentities.Clone(),
+		withMessengerAuthorizations: _q.withMessengerAuthorizations.Clone(),
+		withMessengerTrustedDevices: _q.withMessengerTrustedDevices.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -329,6 +379,28 @@ func (_q *AccountQuery) WithSocialIdentities(opts ...func(*SocialIdentityQuery))
 		opt(query)
 	}
 	_q.withSocialIdentities = query
+	return _q
+}
+
+// WithMessengerAuthorizations tells the query-builder to eager-load the nodes that are connected to
+// the "messenger_authorizations" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *AccountQuery) WithMessengerAuthorizations(opts ...func(*MessengerAuthorizationQuery)) *AccountQuery {
+	query := (&MessengerAuthorizationClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withMessengerAuthorizations = query
+	return _q
+}
+
+// WithMessengerTrustedDevices tells the query-builder to eager-load the nodes that are connected to
+// the "messenger_trusted_devices" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *AccountQuery) WithMessengerTrustedDevices(opts ...func(*MessengerTrustedDeviceQuery)) *AccountQuery {
+	query := (&MessengerTrustedDeviceClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withMessengerTrustedDevices = query
 	return _q
 }
 
@@ -410,9 +482,11 @@ func (_q *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 	var (
 		nodes       = []*Account{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [4]bool{
 			_q.withSessions != nil,
 			_q.withSocialIdentities != nil,
+			_q.withMessengerAuthorizations != nil,
+			_q.withMessengerTrustedDevices != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -447,6 +521,24 @@ func (_q *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 		if err := _q.loadSocialIdentities(ctx, query, nodes,
 			func(n *Account) { n.Edges.SocialIdentities = []*SocialIdentity{} },
 			func(n *Account, e *SocialIdentity) { n.Edges.SocialIdentities = append(n.Edges.SocialIdentities, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withMessengerAuthorizations; query != nil {
+		if err := _q.loadMessengerAuthorizations(ctx, query, nodes,
+			func(n *Account) { n.Edges.MessengerAuthorizations = []*MessengerAuthorization{} },
+			func(n *Account, e *MessengerAuthorization) {
+				n.Edges.MessengerAuthorizations = append(n.Edges.MessengerAuthorizations, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withMessengerTrustedDevices; query != nil {
+		if err := _q.loadMessengerTrustedDevices(ctx, query, nodes,
+			func(n *Account) { n.Edges.MessengerTrustedDevices = []*MessengerTrustedDevice{} },
+			func(n *Account, e *MessengerTrustedDevice) {
+				n.Edges.MessengerTrustedDevices = append(n.Edges.MessengerTrustedDevices, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -498,6 +590,66 @@ func (_q *AccountQuery) loadSocialIdentities(ctx context.Context, query *SocialI
 	}
 	query.Where(predicate.SocialIdentity(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(account.SocialIdentitiesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.AccountID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "account_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *AccountQuery) loadMessengerAuthorizations(ctx context.Context, query *MessengerAuthorizationQuery, nodes []*Account, init func(*Account), assign func(*Account, *MessengerAuthorization)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Account)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(messengerauthorization.FieldAccountID)
+	}
+	query.Where(predicate.MessengerAuthorization(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(account.MessengerAuthorizationsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.AccountID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "account_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *AccountQuery) loadMessengerTrustedDevices(ctx context.Context, query *MessengerTrustedDeviceQuery, nodes []*Account, init func(*Account), assign func(*Account, *MessengerTrustedDevice)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Account)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(messengertrusteddevice.FieldAccountID)
+	}
+	query.Where(predicate.MessengerTrustedDevice(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(account.MessengerTrustedDevicesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

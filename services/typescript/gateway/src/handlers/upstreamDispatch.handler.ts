@@ -121,7 +121,8 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
         const gate = await options.policyGate.readGate(principal.accountId);
         if (gate.acceptanceRequired) return json(428, { message: "Accept the updated policies to continue.", code: "POLICY_ACCEPTANCE_REQUIRED", documentKeys: gate.documentKeys });
       } catch (error) {
-        options.logger.warn("policy gate lookup failed; letting the request through", { error: error instanceof Error ? error.message : String(error) });
+        options.logger.warn("policy gate lookup failed; refusing the request", { error: error instanceof Error ? error.message : String(error) });
+        return json(503, { message: "Policy verification is temporarily unavailable. Try again shortly.", code: "POLICY_GATE_UNAVAILABLE" });
       }
     }
     if (principal !== undefined && security.gate !== undefined) {
@@ -129,7 +130,8 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
         const gate = await security.gate.evaluate({ method: request.method, path: requestUrl.pathname, accountId: principal.accountId, sessionId: principal.sessionId });
         if (gate.challenge) return json(428, humanVerificationRequiredBody(gate.reason ?? "security_check", security.provider?.name ?? "turnstile"));
       } catch (error) {
-        options.logger.warn("human verification gate lookup failed; letting the request through", { error: error instanceof Error ? error.message : String(error) });
+        options.logger.warn("human verification gate lookup failed; refusing the request", { error: error instanceof Error ? error.message : String(error) });
+        return json(503, { message: "Security verification is temporarily unavailable. Try again shortly.", code: "SECURITY_CHECK_UNAVAILABLE" });
       }
     }
     const routeLimit = classifyRequestForRateLimit(request.method, requestUrl.pathname);

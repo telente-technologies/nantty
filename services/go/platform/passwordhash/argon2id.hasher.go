@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/argon2"
+	"nantty/platform/passwordhash/internal/timingdummy"
 )
 
 type Argon2idParameters struct {
@@ -30,7 +31,7 @@ type PasswordHasher struct {
 
 func NewPasswordHasher(parameters Argon2idParameters) *PasswordHasher {
 	hasher := &PasswordHasher{parameters: parameters}
-	hasher.dummyPasswordHash, _ = hasher.HashPasswordWithArgon2id(randomDummyPassword())
+	hasher.dummyPasswordHash = timingdummy.HashPassword(hasher.HashPasswordWithArgon2id)
 	return hasher
 }
 
@@ -76,10 +77,4 @@ func decodeArgon2idHash(encodedHash string) (Argon2idParameters, []byte, []byte,
 		return Argon2idParameters{}, nil, nil, ErrMalformedPasswordHash
 	}
 	return parameters, salt, key, nil
-}
-
-func randomDummyPassword() string {
-	random := make([]byte, 32)
-	_, _ = rand.Read(random)
-	return base64.RawStdEncoding.EncodeToString(random)
 }

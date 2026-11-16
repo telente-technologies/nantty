@@ -7,7 +7,7 @@ import type { SupportTicketCategory } from "@/types/support.type";
 
 import { readSupportMockStore } from "./contentStores.mock";
 
-const macroCategories: readonly SupportTicketCategory[] = ["ORDER", "PAYMENT", "ACCOUNT", "SELLER", "VERIFICATION", "CREATOR", "LIVE", "ADS", "SAFETY", "OTHER"];
+const macroCategories: readonly SupportTicketCategory[] = ["ORDER", "PAYMENT", "ACCOUNT", "SELLER", "VERIFICATION", "CREATOR", "LIVE", "ADS", "SAFETY", "DEVELOPER", "SANDBOX", "OTHER"];
 const allowedMacroVariables = ["user.displayName", "user.username", "ticket.id", "agent.name"];
 
 function readMacroFields(body: Record<string, unknown>) {

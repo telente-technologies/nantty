@@ -17,6 +17,8 @@ export const ticketCategoryOptions: readonly { readonly value: SupportTicketCate
   { value: "creator", label: "Creator and earnings" },
   { value: "live", label: "Live" },
   { value: "ads", label: "Ads and boosts" },
+  { value: "developer", label: "Developer integrations" },
+  { value: "sandbox", label: "API sandbox" },
   { value: "safety", label: "Safety" },
   { value: "other", label: "Something else" },
 ];

@@ -17,6 +17,7 @@ import (
 	getmoneybyaspect "nantty/modules/admin/src/modules/financeReports/queries/getMoneyByAspect"
 	listescrows "nantty/modules/admin/src/modules/financeReports/queries/listEscrows"
 	listfinanceissues "nantty/modules/admin/src/modules/financeReports/queries/listFinanceIssues"
+	metricsservices "nantty/modules/admin/src/modules/platformMetrics/services"
 	"nantty/modules/admin/src/repositories"
 	jsonencoding "nantty/modules/admin/src/utils/jsonEncoding"
 	"nantty/platform/identityports"
@@ -48,6 +49,12 @@ func (handler Handler) Execute(ctx context.Context, actor staffauth.Staff, req m
 	rangeName := req.Range
 	if rangeName == "" {
 		rangeName = "7d"
+	}
+	if _, valid := metricsservices.ResolveMetricsWindow(rangeName, handler.Container.Now()); !valid {
+		return "", nil, adminerrors.ValidationFailedFor("range", "must be 24h, 7d or 30d")
+	}
+	if currency := strings.TrimSpace(req.Currency); currency != "" && len(currency) != 3 {
+		return "", nil, adminerrors.ValidationFailedFor("currency", "must be a three-letter currency code")
 	}
 
 	var rows [][]string
@@ -114,7 +121,7 @@ func (handler Handler) Execute(ctx context.Context, actor staffauth.Staff, req m
 	if err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		return repositories.RecordAuditEventInTransaction(ctx, tx, identityports.AuditEvent{
 			ActorId: actor.Id, ActorName: actor.Name, ActorRole: actor.Role, Action: "finance.report.exported",
-			SubjectType: "finance_report", SubjectId: reportType, Reason: strings.TrimSpace(req.Reason), StepUpVerified: true,
+			SubjectType: "finance_report", SubjectId: reportType, Reason: reason, StepUpVerified: actor.SteppedUp,
 			After: jsonencoding.MustMarshalJson(map[string]any{"reportType": reportType, "range": rangeName, "currency": req.Currency, "rows": max(len(rows)-1, 0)}),
 		})
 	}); err != nil {

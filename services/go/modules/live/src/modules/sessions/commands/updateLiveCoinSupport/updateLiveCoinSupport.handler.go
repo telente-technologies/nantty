@@ -18,11 +18,11 @@ type Result struct {
 	GiftsEnabled bool   `json:"giftsEnabled"`
 }
 
-func hostMayChangeCoinSupport(hostId string, actor uuid.UUID) bool {
+func HostMayChangeCoinSupport(hostId string, actor uuid.UUID) bool {
 	return hostId == actor.String()
 }
 
-func liveStateAllowsCoinSupportChange(state string, isScheduled bool) bool {
+func LiveStateAllowsCoinSupportChange(state string, isScheduled bool) bool {
 	return state == string(livesession.StateConnecting) || state == string(livesession.StateLive) || state == string(livesession.StateIdle) && isScheduled
 }
 
@@ -53,10 +53,10 @@ func (handler Handler) Execute(ctx context.Context, actor uuid.UUID, liveId uuid
 		if err := rows.Close(); err != nil {
 			return fmt.Errorf("close locked live session query: %w", err)
 		}
-		if !hostMayChangeCoinSupport(hostId, actor) {
+		if !HostMayChangeCoinSupport(hostId, actor) {
 			return httpserver.ErrForbidden
 		}
-		if !liveStateAllowsCoinSupportChange(state, isScheduled) {
+		if !LiveStateAllowsCoinSupportChange(state, isScheduled) {
 			return httpserver.NewApiError(409, "LIVE_STATE_CONFLICT", "Coin support can only be changed for a scheduled or active live session.")
 		}
 		updated, err := tx.LiveSession.UpdateOneID(liveId).SetGiftsEnabled(enabled).Save(ctx)

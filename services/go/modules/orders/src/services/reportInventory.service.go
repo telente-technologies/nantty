@@ -10,15 +10,15 @@ import (
 	"nantty/platform/commerceports"
 )
 
-type storeStock struct {
+type StoreStock struct {
 	References []commerceports.VariantReference
 	Variants   map[uuid.UUID]commerceports.VariantDescription
 	Levels     map[uuid.UUID][]commerceports.VariantStockLevel
 	Locations  map[uuid.UUID]string
 }
 
-func loadStoreStock(ctx context.Context, deployed *container.Container, storeId uuid.UUID) (storeStock, error) {
-	stock := storeStock{Variants: map[uuid.UUID]commerceports.VariantDescription{}, Levels: map[uuid.UUID][]commerceports.VariantStockLevel{}, Locations: map[uuid.UUID]string{}}
+func loadStoreStock(ctx context.Context, deployed *container.Container, storeId uuid.UUID) (StoreStock, error) {
+	stock := StoreStock{Variants: map[uuid.UUID]commerceports.VariantDescription{}, Levels: map[uuid.UUID][]commerceports.VariantStockLevel{}, Locations: map[uuid.UUID]string{}}
 	catalog, err := deployed.Catalog()
 	if err != nil {
 		return stock, err
@@ -48,7 +48,7 @@ func loadStoreStock(ctx context.Context, deployed *container.Container, storeId 
 	return stock, nil
 }
 
-func (stock storeStock) locationName(locationId uuid.UUID) string {
+func (stock StoreStock) locationName(locationId uuid.UUID) string {
 	if name, found := stock.Locations[locationId]; found {
 		return name
 	}
@@ -60,7 +60,7 @@ type stockRow struct {
 	Level   commerceports.VariantStockLevel
 }
 
-func (stock storeStock) trackedRows(locationId *uuid.UUID, onlyActive bool) []stockRow {
+func (stock StoreStock) trackedRows(locationId *uuid.UUID, onlyActive bool) []stockRow {
 	rows := []stockRow{}
 	for _, reference := range stock.References {
 		variant, known := stock.Variants[reference.VariantId]
@@ -89,7 +89,7 @@ func unitCostMinor(variant commerceports.VariantDescription) int64 {
 	return variant.CostPrice.AmountMinor
 }
 
-func inventoryValuation(data ReportData, stock storeStock, locationId *uuid.UUID) ReportResult {
+func InventoryValuationReport(data ReportData, stock StoreStock, locationId *uuid.UUID) ReportResult {
 	result := data.base("inventory-valuation", "Inventory valuation", []ReportColumn{{"product", "Product", "text"}, {"variant", "Variant", "text"}, {"sku", "SKU", "text"},
 		{"location", "Location", "text"}, {"onHand", "On hand", "number"}, {"unitCost", "Unit cost", "money"}, {"costValue", "Cost value", "money"},
 		{"retailValue", "Retail value", "money"}, {"potentialProfit", "Potential profit", "money"}})
@@ -108,7 +108,7 @@ func inventoryValuation(data ReportData, stock storeStock, locationId *uuid.UUID
 	return result
 }
 
-func lowStock(data ReportData, stock storeStock, locationId *uuid.UUID) ReportResult {
+func LowStockReport(data ReportData, stock StoreStock, locationId *uuid.UUID) ReportResult {
 	result := data.base("low-stock", "Low and out of stock", []ReportColumn{{"product", "Product", "text"}, {"variant", "Variant", "text"}, {"sku", "SKU", "text"},
 		{"location", "Location", "text"}, {"status", "Status", "text"}, {"available", "Available", "number"}, {"reorderLevel", "Reorder level", "number"},
 		{"suggestedReorder", "Suggested reorder", "number"}, {"reorderCost", "Reorder cost", "money"}})
@@ -133,7 +133,7 @@ func lowStock(data ReportData, stock storeStock, locationId *uuid.UUID) ReportRe
 	return result
 }
 
-func slowSellers(data ReportData, stock storeStock, categories map[uuid.UUID]string) ReportResult {
+func SlowSellersReport(data ReportData, stock StoreStock, categories map[uuid.UUID]string) ReportResult {
 	result := data.base("slow-sellers", "Slow sellers", []ReportColumn{{"product", "Product", "text"}, {"category", "Category", "text"}, {"units", "Units sold", "number"},
 		{"onHand", "On hand", "number"}, {"stockValue", "Stock value", "money"}})
 	type entry struct {

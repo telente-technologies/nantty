@@ -42,7 +42,7 @@ func RelayOutboxEventsUntilContextDone(ctx context.Context, options OutboxRelayO
 			options.Logger.ErrorContext(ctx, "outbox events kept back after isolated publish failures", slog.Any("error", err))
 		case err != nil && ctx.Err() == nil:
 			consecutiveFailures++
-			delay = outboxBackoff(options.PollInterval, options.MaximumDelay, consecutiveFailures)
+			delay = OutboxBackoff(options.PollInterval, options.MaximumDelay, consecutiveFailures)
 			options.Logger.WarnContext(ctx, "outbox relay batch failed", slog.Any("error", err), slog.Int("consecutiveFailures", consecutiveFailures), slog.Duration("nextAttemptIn", delay))
 		case err == nil:
 			consecutiveFailures = 0
@@ -67,7 +67,7 @@ func publishOneBatchRecoveringPanics(ctx context.Context, options OutboxRelayOpt
 	return options.Store.PublishPendingOutboxEventsInTransaction(ctx, options.BatchSize, options.Publisher.PublishDomainEvents)
 }
 
-func outboxBackoff(base, maximum time.Duration, consecutiveFailures int) time.Duration {
+func OutboxBackoff(base, maximum time.Duration, consecutiveFailures int) time.Duration {
 	delay := base
 	for step := 1; step < consecutiveFailures && delay < maximum; step++ {
 		delay *= 2

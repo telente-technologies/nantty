@@ -80,6 +80,18 @@
           },
           "showPreview": {
             "type": "boolean"
+          },
+          "sound": {
+            "type": "boolean",
+            "description": "Whether this device should use its configured message notification sound."
+          },
+          "vibration": {
+            "type": "boolean",
+            "description": "Whether this device should vibrate for this message notification."
+          },
+          "bubbleAllowed": {
+            "type": "boolean",
+            "description": "Whether this recipient's saved conversation and device preferences permit an Android system bubble."
           }
         }
       }

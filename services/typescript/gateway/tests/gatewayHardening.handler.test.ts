@@ -159,7 +159,7 @@ describe("per-route rate limits", () => {
     for (let transfer = 0; transfer < 2; transfer += 1) expect((await store.hit("normal:transfer", 5, 60)).allowed).toBe(true);
   });
 
-  it("uses valkey counters and falls back to memory when valkey fails", async () => {
+  it("uses valkey counters and fails closed briefly when valkey is unavailable", async () => {
     const counts = new Map<string, number>();
     const store = new ValkeyRateLimitStore({
       command: async (args) => {
@@ -167,14 +167,24 @@ describe("per-route rate limits", () => {
         counts.set(key, (counts.get(key) ?? 0) + 1);
         return [counts.get(key) ?? 0, 0];
       },
-    }, new InMemoryRateLimitStore(), () => undefined, () => 1_000_000_040_000);
+    }, () => undefined, () => 1_000_000_040_000);
     expect((await store.hit("k", 1, 60)).allowed).toBe(true);
     expect(await store.hit("k", 1, 60)).toEqual({ allowed: false, retryAfterSeconds: 40 });
     let failures = 0;
-    const broken = new ValkeyRateLimitStore({ command: async () => { throw new Error("down"); } }, new InMemoryRateLimitStore(), () => { failures += 1; });
-    expect((await broken.hit("k", 1, 60)).allowed).toBe(true);
-    expect((await broken.hit("k", 1, 60)).allowed).toBe(false);
+    let now = 1_000_000;
+    let valkeyAvailable = false;
+    const recovered = new ValkeyRateLimitStore({
+      command: async () => {
+        if (!valkeyAvailable) throw new Error("down");
+        return [1, 0];
+      },
+    }, () => { failures += 1; }, () => now);
+    expect(await recovered.hit("outage", 10, 60)).toEqual({ allowed: false, retryAfterSeconds: 5 });
+    expect(await recovered.hit("outage", 10, 60)).toEqual({ allowed: false, retryAfterSeconds: 5 });
     expect(failures).toBe(1);
+    valkeyAvailable = true;
+    now += 5_001;
+    expect(await recovered.hit("outage", 10, 60)).toEqual({ allowed: true, retryAfterSeconds: 0 });
   });
 });
 

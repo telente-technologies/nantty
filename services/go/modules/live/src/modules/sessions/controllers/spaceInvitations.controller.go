@@ -17,7 +17,7 @@ import (
 
 const maxSpaceInvitationPageSize = 100
 
-type spaceInvitationCursor struct {
+type SpaceInvitationCursor struct {
 	AccountID    string    `json:"accountId"`
 	InvitedAt    time.Time `json:"invitedAt"`
 	SpaceID      string    `json:"spaceId"`
@@ -31,7 +31,7 @@ type spaceInvitationSummary struct {
 	Title        string               `json:"title,omitempty"`
 	InvitedAt    time.Time            `json:"invitedAt"`
 	InviterID    string               `json:"inviterId"`
-	Space        spaceSummaryResponse `json:"space"`
+	Space        SpaceSummaryResponse `json:"space"`
 }
 
 type pendingSpaceInvitationRow struct {
@@ -87,7 +87,7 @@ func (c SpacesController) ListMyInvitations(w http.ResponseWriter, r *http.Reque
 		c.responder().Error(w, r, err)
 		return
 	}
-	cursor, err := decodeSpaceInvitationCursor(cursorToken, actor.UserId)
+	cursor, err := DecodeSpaceInvitationCursor(cursorToken, actor.UserId)
 	if err != nil {
 		c.responder().Error(w, r, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "cursor", Message: "must be a valid cursor for this account"}}))
 		return
@@ -136,7 +136,7 @@ func (c SpacesController) ListMyInvitations(w http.ResponseWriter, r *http.Reque
 		items = append(items, spaceInvitationSummary{
 			SpaceID: row.spaceID.String(), InvitationID: row.invitationID, Role: row.role, Title: row.stageTitle,
 			InvitedAt: row.invitedAt, InviterID: row.hostID.String(),
-			Space: spaceSummaryResponse{
+			Space: SpaceSummaryResponse{
 				ID: row.spaceID.String(), Title: row.title, Description: row.description, State: space.State(row.state),
 				ScheduledAt: row.scheduledAt, StartedAt: row.startedAt, ListenerCount: row.listeners, Visibility: visibility,
 				Host: describeSpacePerson(row.hostID, "host", false, profiles),
@@ -147,7 +147,7 @@ func (c SpacesController) ListMyInvitations(w http.ResponseWriter, r *http.Reque
 	next := ""
 	if hasMore && len(rows) > 0 {
 		last := rows[len(rows)-1]
-		next, err = encodeSpaceInvitationCursor(spaceInvitationCursor{
+		next, err = EncodeSpaceInvitationCursor(SpaceInvitationCursor{
 			AccountID: actor.UserId.String(), InvitedAt: last.invitedAt, SpaceID: last.spaceID.String(), InvitationID: last.invitationID,
 		})
 		if err != nil {
@@ -158,7 +158,7 @@ func (c SpacesController) ListMyInvitations(w http.ResponseWriter, r *http.Reque
 	httpserver.WriteJsonResponse(w, http.StatusOK, httpserver.NewCursorPage(items, next))
 }
 
-func (c SpacesController) queryPendingSpaceInvitations(r *http.Request, accountID uuid.UUID, cursor *spaceInvitationCursor, limit int) ([]pendingSpaceInvitationRow, error) {
+func (c SpacesController) queryPendingSpaceInvitations(r *http.Request, accountID uuid.UUID, cursor *SpaceInvitationCursor, limit int) ([]pendingSpaceInvitationRow, error) {
 	var cursorAt any
 	var cursorSpaceID any
 	var cursorInvitationID any
@@ -192,7 +192,7 @@ func (c SpacesController) queryPendingSpaceInvitations(r *http.Request, accountI
 	return result, rows.Err()
 }
 
-func decodeSpaceInvitationCursor(token string, accountID uuid.UUID) (*spaceInvitationCursor, error) {
+func DecodeSpaceInvitationCursor(token string, accountID uuid.UUID) (*SpaceInvitationCursor, error) {
 	if token == "" {
 		return nil, nil
 	}
@@ -200,7 +200,7 @@ func decodeSpaceInvitationCursor(token string, accountID uuid.UUID) (*spaceInvit
 	if err != nil {
 		return nil, err
 	}
-	var cursor spaceInvitationCursor
+	var cursor SpaceInvitationCursor
 	if err := json.Unmarshal(payload, &cursor); err != nil {
 		return nil, err
 	}
@@ -213,7 +213,7 @@ func decodeSpaceInvitationCursor(token string, accountID uuid.UUID) (*spaceInvit
 	return &cursor, nil
 }
 
-func encodeSpaceInvitationCursor(cursor spaceInvitationCursor) (string, error) {
+func EncodeSpaceInvitationCursor(cursor SpaceInvitationCursor) (string, error) {
 	payload, err := json.Marshal(cursor)
 	if err != nil {
 		return "", err

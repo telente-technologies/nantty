@@ -11,6 +11,7 @@ import { defaultProbeThresholds } from "../src/services/security/accessProbeDete
 import { classifyRequestSensitivity } from "../src/services/security/humanVerificationGate.service.js";
 import type { HumanVerificationProvider } from "../src/services/security/humanVerificationProvider.service.js";
 import type { AccessViolationEvidence, ChallengeOutcomeReport, ChallengeState, TrustSecurityClient } from "../src/services/security/securitySignalSink.service.js";
+import { buildSecurityServices } from "../src/services/security/securityServices.service.js";
 
 const turnstileAlwaysPassToken = "XXXX.DUMMY.TOKEN.XXXX";
 const principals: Record<string, VerifiedPrincipal> = {
@@ -34,6 +35,10 @@ class FakeTrust implements TrustSecurityClient {
     if (current.requirement === "once") this.states.set(report.accountId, { requirement: "none", clearedUntil: "2026-10-05T00:00:00Z" });
     return this.readChallengeState(report.accountId);
   }
+}
+
+class UnavailableTrust extends FakeTrust {
+  public override async readChallengeState(_accountId: string): Promise<ChallengeState> { throw new Error("trust service unavailable"); }
 }
 
 const provider: HumanVerificationProvider = { name: "turnstile", verifyChallengeToken: async (token) => ({ success: token === turnstileAlwaysPassToken, errorCodes: token === turnstileAlwaysPassToken ? [] : ["invalid-input-response"] }) };
@@ -98,6 +103,24 @@ describe("human verification challenge", () => {
     expect(passed.status).toBe(200);
     expect(await passed.json()).toMatchObject({ verified: true, requirement: "none" });
     expect((await call("POST", "/api/v1/posts", "token-flagged", { text: "hi" })).status).toBe(200);
+  });
+
+  it("refuses sensitive writes when challenge state cannot be checked", async () => {
+    const unavailableTrust = new UnavailableTrust();
+    const security = buildSecurityServices(configForTest.security, configForTest.upstreams.trust, logger, undefined, { trust: unavailableTrust, provider });
+    const guardedGateway = createGatewayServer({ config: { ...configForTest, port: 0 }, verifier, logger, security });
+    await guardedGateway.start();
+    try {
+      const response = await fetch(`http://127.0.0.1:${guardedGateway.address?.port}/api/v1/posts`, {
+        method: "POST",
+        headers: { authorization: "Bearer token-clean", "content-type": "application/json" },
+        body: JSON.stringify({ text: "must not pass without a security decision" }),
+      });
+      expect(response.status).toBe(503);
+      expect(await response.json()).toMatchObject({ code: "SECURITY_CHECK_UNAVAILABLE" });
+    } finally {
+      await guardedGateway.stop();
+    }
   });
 
   it("challenges a suspected bot on every sensitive action, even after a pass", async () => {

@@ -27,6 +27,10 @@ export interface PushContent {
   readonly title: string;
   readonly body: string;
   readonly data?: Readonly<Record<string, unknown>>;
+  readonly categoryId?: string;
+  readonly threadId?: string;
+  readonly channelId?: string;
+  readonly sound?: "default" | null;
 }
 
 export interface Recipient {

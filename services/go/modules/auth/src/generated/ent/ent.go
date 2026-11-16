@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"nantty/modules/auth/src/generated/ent/account"
 	"nantty/modules/auth/src/generated/ent/agegaterefusal"
+	"nantty/modules/auth/src/generated/ent/messengerauthorization"
+	"nantty/modules/auth/src/generated/ent/messengertrusteddevice"
 	"nantty/modules/auth/src/generated/ent/onetimecode"
 	"nantty/modules/auth/src/generated/ent/outboxevent"
 	"nantty/modules/auth/src/generated/ent/refreshtoken"
@@ -81,15 +83,17 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			account.Table:           account.ValidColumn,
-			agegaterefusal.Table:    agegaterefusal.ValidColumn,
-			onetimecode.Table:       onetimecode.ValidColumn,
-			outboxevent.Table:       outboxevent.ValidColumn,
-			refreshtoken.Table:      refreshtoken.ValidColumn,
-			registrationblock.Table: registrationblock.ValidColumn,
-			session.Table:           session.ValidColumn,
-			signingkey.Table:        signingkey.ValidColumn,
-			socialidentity.Table:    socialidentity.ValidColumn,
+			account.Table:                account.ValidColumn,
+			agegaterefusal.Table:         agegaterefusal.ValidColumn,
+			messengerauthorization.Table: messengerauthorization.ValidColumn,
+			messengertrusteddevice.Table: messengertrusteddevice.ValidColumn,
+			onetimecode.Table:            onetimecode.ValidColumn,
+			outboxevent.Table:            outboxevent.ValidColumn,
+			refreshtoken.Table:           refreshtoken.ValidColumn,
+			registrationblock.Table:      registrationblock.ValidColumn,
+			session.Table:                session.ValidColumn,
+			signingkey.Table:             signingkey.ValidColumn,
+			socialidentity.Table:         socialidentity.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

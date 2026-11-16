@@ -53,9 +53,13 @@ type AccountEdges struct {
 	Sessions []*Session `json:"sessions,omitempty"`
 	// SocialIdentities holds the value of the social_identities edge.
 	SocialIdentities []*SocialIdentity `json:"social_identities,omitempty"`
+	// MessengerAuthorizations holds the value of the messenger_authorizations edge.
+	MessengerAuthorizations []*MessengerAuthorization `json:"messenger_authorizations,omitempty"`
+	// MessengerTrustedDevices holds the value of the messenger_trusted_devices edge.
+	MessengerTrustedDevices []*MessengerTrustedDevice `json:"messenger_trusted_devices,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [4]bool
 }
 
 // SessionsOrErr returns the Sessions value or an error if the edge
@@ -74,6 +78,24 @@ func (e AccountEdges) SocialIdentitiesOrErr() ([]*SocialIdentity, error) {
 		return e.SocialIdentities, nil
 	}
 	return nil, &NotLoadedError{edge: "social_identities"}
+}
+
+// MessengerAuthorizationsOrErr returns the MessengerAuthorizations value or an error if the edge
+// was not loaded in eager-loading.
+func (e AccountEdges) MessengerAuthorizationsOrErr() ([]*MessengerAuthorization, error) {
+	if e.loadedTypes[2] {
+		return e.MessengerAuthorizations, nil
+	}
+	return nil, &NotLoadedError{edge: "messenger_authorizations"}
+}
+
+// MessengerTrustedDevicesOrErr returns the MessengerTrustedDevices value or an error if the edge
+// was not loaded in eager-loading.
+func (e AccountEdges) MessengerTrustedDevicesOrErr() ([]*MessengerTrustedDevice, error) {
+	if e.loadedTypes[3] {
+		return e.MessengerTrustedDevices, nil
+	}
+	return nil, &NotLoadedError{edge: "messenger_trusted_devices"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -205,6 +227,16 @@ func (_m *Account) QuerySessions() *SessionQuery {
 // QuerySocialIdentities queries the "social_identities" edge of the Account entity.
 func (_m *Account) QuerySocialIdentities() *SocialIdentityQuery {
 	return NewAccountClient(_m.config).QuerySocialIdentities(_m)
+}
+
+// QueryMessengerAuthorizations queries the "messenger_authorizations" edge of the Account entity.
+func (_m *Account) QueryMessengerAuthorizations() *MessengerAuthorizationQuery {
+	return NewAccountClient(_m.config).QueryMessengerAuthorizations(_m)
+}
+
+// QueryMessengerTrustedDevices queries the "messenger_trusted_devices" edge of the Account entity.
+func (_m *Account) QueryMessengerTrustedDevices() *MessengerTrustedDeviceQuery {
+	return NewAccountClient(_m.config).QueryMessengerTrustedDevices(_m)
 }
 
 // Update returns a builder for updating this Account.

@@ -21,7 +21,7 @@ beforeAll(async () => {
   const upstreamUrl = `http://127.0.0.1:${(upstream.address() as AddressInfo).port}`;
   const config: GatewayConfig = {
     host: "127.0.0.1", port: 0, corsOrigins: ["https://app.nantty.test"], rateLimitMaxPerMinute: 0, upstreamTimeoutMs: 2_000, policyGate: null,
-    guestRateLimits: { perMinute: 1000, sensitivePerMinute: 1000 }, trustedProxyHops: 1,
+    guestRateLimits: { perMinute: 1000, sensitivePerMinute: 1000 }, trustedProxyHops: 2,
     accessToken: { jwksUrl: "http://unused.invalid/jwks.json", issuer: "https://auth.nantty.test", audience: "nantty-api" },
     routeRateLimitsPerMinute: { login: 2 },
     upstreams: { identity: upstreamUrl, live: upstreamUrl, money: upstreamUrl, notifications: upstreamUrl, social: upstreamUrl, trust: upstreamUrl, commerce: upstreamUrl, media: upstreamUrl, search: upstreamUrl, ads: upstreamUrl, support: upstreamUrl },
@@ -40,7 +40,7 @@ describe("client ip trust", () => {
   it("does not let a caller dodge per-ip limits by forging X-Forwarded-For", async () => {
     const statuses: number[] = [];
     for (let attempt = 0; attempt < 3; attempt += 1) {
-      const headers = { "content-type": "application/json", "x-forwarded-for": `198.51.100.${attempt + 1}, 203.0.113.9` };
+      const headers = { "content-type": "application/json", "x-forwarded-for": `198.51.100.${attempt + 1}, 203.0.113.9, 192.0.2.18` };
       statuses.push((await fetch(`${base}/api/v1/auth/login`, { method: "POST", headers, body: "{}" })).status);
     }
     expect(statuses).toEqual([200, 200, 429]);

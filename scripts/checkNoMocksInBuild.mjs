@@ -6,7 +6,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
 const repositoryRoot = resolve(import.meta.dirname, "..");
-const nextApps = ["webapp", "seller", "studio", "ads", "admin"];
+const nextApps = ["webapp", "seller", "studio", "ads", "admin", "developer", "sandbox"];
 const args = process.argv.slice(2).filter((argument) => argument !== "--");
 const requireBuild = args.includes("--require-build");
 const exportFlag = args.indexOf("--mobile-export");
