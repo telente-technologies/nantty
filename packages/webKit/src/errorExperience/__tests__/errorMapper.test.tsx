@@ -32,6 +32,7 @@ const requiredCodes: Readonly<Record<string, ErrorKind>> = {
   REALTIME_UNAVAILABLE: "maintenance", ACCOUNT_SUSPENDED_SECURITY: "accountSuspended", CORS_ORIGIN_FORBIDDEN: "forbidden", WIDGET_TOKEN_SCOPE: "forbidden",
   POLICY_ACCEPTANCE_REQUIRED: "verificationRequired", INSTITUTIONAL_EMAIL_NOT_VERIFIED: "emailNotVerified", BLACK_ANNUAL_DISABLED: "planFeatureRequired",
   BLACK_DISCOUNTS_DISABLED: "planFeatureRequired", USERNAME_TAKEN: "versionConflict", VALIDATION_FAILED: "unknown",
+  CONVERSION_RATE_CHANGED: "cartChanged", CURRENCY_NOT_ALLOWED: "regionUnavailable", SANDBOX_QUOTA_EXCEEDED: "quotaReached",
 };
 
 describe("code → screen mapper", () => {

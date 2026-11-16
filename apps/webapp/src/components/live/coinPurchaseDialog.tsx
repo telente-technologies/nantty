@@ -83,6 +83,7 @@ export function CoinPurchaseDialog({ isOpen, onClose, coinsNeeded }: { readonly 
               <span className={styles.optionText}>
                 <span className={styles.optionTitle}>{(coinPackage.coins + (coinPackage.bonusCoins ?? 0)).toLocaleString()} coins</span>
                 {coinPackage.bonusCoins ? <span className={styles.optionMeta}>Includes {coinPackage.bonusCoins} bonus</span> : null}
+                {coinPackage.billingNote ? <span className={styles.optionMeta}>{coinPackage.billingNote}</span> : null}
               </span>
               <strong>{formatMoneyForDisplay(coinPackage.price)}</strong>
             </label>

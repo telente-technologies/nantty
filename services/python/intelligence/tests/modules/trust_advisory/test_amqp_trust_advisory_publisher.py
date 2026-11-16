@@ -52,4 +52,6 @@ async def test_suggestions_are_persistent_jobs_routed_to_the_trust_advisory_queu
     assert message.delivery_mode == DeliveryMode.PERSISTENT
     body = json.loads(message.body)
     assert body["advisoryOnly"] is True
+    assert body["requiresHumanReview"] is True
+    assert body["appealPath"] == "/account/status"
     assert body["suggestionId"] == "sg-1"

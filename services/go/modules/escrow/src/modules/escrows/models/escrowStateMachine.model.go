@@ -25,6 +25,8 @@ var ErrEscrowAlreadyPartiallyRefunded = httpserver.NewApiError(http.StatusConfli
 
 var ErrEscrowFrozenByDispute = httpserver.NewApiError(http.StatusConflict, "ESCROW_DISPUTED", "This order is under dispute; its funds stay frozen until the dispute is resolved.")
 
+var ErrPartialRefundExceedsNet = httpserver.NewApiError(http.StatusUnprocessableEntity, "PARTIAL_REFUND_EXCEEDS_NET", "The remaining order amount is too small to cover fees; issue a full refund instead.")
+
 var allowedEscrowTransitions = map[EscrowStatus][]EscrowStatus{
 	EscrowHeld:              {EscrowReleased, EscrowRefunded, EscrowDisputed, EscrowPartiallyRefunded},
 	EscrowDisputed:          {EscrowReleased, EscrowRefunded, EscrowPartiallyRefunded, EscrowHeld},

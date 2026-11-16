@@ -216,7 +216,7 @@ func (controller CoinsController) ConvertEarnedCoins(writer http.ResponseWriter,
 		return
 	}
 	receipt, replayed, err := convertearnedcoins.Handler{Application: controller.Application}.Execute(request.Context(), convertearnedcoins.Command{Input: services.EarnedCoinConversionInput{
-		UserId: principal, Coins: body.Coins, Currency: currency, IdempotencyKey: key,
+		UserId: principal, Coins: body.Coins, Currency: currency, ExpectedCashMinor: body.ExpectedCashMinor, IdempotencyKey: key,
 	}})
 	if err != nil {
 		controller.fail(writer, request, err)

@@ -15,6 +15,7 @@ import (
 	"nantty/modules/wallet/src/modules/coins/dtos"
 	"nantty/modules/wallet/src/modules/coins/models"
 	"nantty/platform/httpserver"
+	"nantty/platform/money"
 )
 
 type CoinBalances struct {
@@ -56,10 +57,11 @@ func (balances CoinBalances) ListCoinActivity(ctx context.Context, userId string
 }
 
 type EarnedCoinConversionInput struct {
-	UserId         string
-	Coins          int64
-	Currency       string
-	IdempotencyKey string
+	UserId            string
+	Coins             int64
+	Currency          string
+	ExpectedCashMinor *int64
+	IdempotencyKey    string
 }
 
 func (balances CoinBalances) ConvertEarnedCoinsToCashInTransaction(ctx context.Context, transaction *sql.Tx, input EarnedCoinConversionInput) (dtos.CoinConversionReceiptDto, error) {
@@ -72,6 +74,14 @@ func (balances CoinBalances) ConvertEarnedCoinsToCashInTransaction(ctx context.C
 	cash, err := models.ConvertCoinsToCashMinor(input.Coins, valuePerCoin)
 	if err != nil {
 		return dtos.CoinConversionReceiptDto{}, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "coins", Message: "is out of range"}})
+	}
+	if input.ExpectedCashMinor != nil && *input.ExpectedCashMinor != cash {
+		payout, formatErr := money.FormatMajorUnits(cash, input.Currency)
+		if formatErr != nil {
+			return dtos.CoinConversionReceiptDto{}, formatErr
+		}
+		return dtos.CoinConversionReceiptDto{}, httpserver.NewApiError(http.StatusConflict, "CONVERSION_RATE_CHANGED",
+			fmt.Sprintf("The coin conversion payout is now %s %s. Review the updated payout and try again.", payout, input.Currency))
 	}
 	if cash < minimum {
 		return dtos.CoinConversionReceiptDto{}, httpserver.NewApiError(http.StatusUnprocessableEntity, "BELOW_MINIMUM_PAYOUT",

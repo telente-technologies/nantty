@@ -28,6 +28,16 @@ describe("identity routes", () => {
     expect(route?.authentication).toBe(authentication);
     if (authentication !== undefined) expect(route?.upstream).toBe("identity");
   });
+
+  it("normalizes one trailing slash before matching route prefixes", () => {
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/users/me/")).toMatchObject({ upstream: "identity", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/localeX/")).toBeUndefined();
+  });
+
+  it("normalizes one trailing slash before matching route prefixes", () => {
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/users/me/")).toMatchObject({ upstream: "identity", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/localeX/")).toBeUndefined();
+  });
 });
 
 describe("live routes", () => {
@@ -275,5 +285,11 @@ describe("seller order refunds", () => {
     const route = resolveUpstreamRouteForRequest("POST", "/api/v1/seller/orders/0b7c2f4e-1111-4a2b-9c3d-123456789abc/refunds");
     expect(route?.upstream).toBe("commerce");
     expect(route?.authentication).toBe("required");
+  });
+
+  it("keeps exactPathOnly required routes protected when a trailing slash is present", () => {
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/auth/step-up/")).toMatchObject({ upstream: "identity", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/users/me/")).toMatchObject({ upstream: "identity", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/tips/")).toMatchObject({ upstream: "money", authentication: "required" });
   });
 });

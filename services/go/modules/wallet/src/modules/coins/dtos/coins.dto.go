@@ -112,8 +112,9 @@ type CoinTransferReceiptDto struct {
 }
 
 type ConvertEarnedCoinsRequestDto struct {
-	Coins    int64  `json:"coins"`
-	Currency string `json:"currency,omitempty"`
+	Coins             int64  `json:"coins"`
+	Currency          string `json:"currency,omitempty"`
+	ExpectedCashMinor *int64 `json:"expectedCashMinor,omitempty"`
 }
 
 type CoinConversionReceiptDto struct {

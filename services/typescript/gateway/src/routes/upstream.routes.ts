@@ -271,25 +271,26 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
 export const sensitiveGuestPathPrefixes: readonly string[] = ["/api/v1/feeds/", "/api/v1/explore", "/api/v1/search", "/api/v1/products", "/api/v1/stores", "/api/v1/clips", "/api/v1/subscription-offers/"];
 
 export function isChatReportSubmission(method: string, path: string, body: Uint8Array | undefined): boolean {
-  if (method.toUpperCase() !== "POST" || path !== "/api/v1/reports" || body === undefined) return false;
+  const normalizedPath = path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
+  if (method.toUpperCase() !== "POST" || normalizedPath !== "/api/v1/reports" || body === undefined) return false;
   try {
     const parsed = JSON.parse(new TextDecoder().decode(body)) as { readonly conversationId?: unknown; readonly targetType?: unknown };
     return (typeof parsed.conversationId === "string" && parsed.conversationId !== "") || parsed.targetType === "conversation" || parsed.targetType === "group";
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 }
 
 function doesPathMatchRoute(path: string, routePath: string): boolean {
-  if (routePath.includes("*")) {
-    const routeSegments = routePath.split("/");
-    const pathSegments = path.split("/");
-    return routeSegments.length === pathSegments.length
-      && routeSegments.every((segment, index) => (segment === "*" ? (pathSegments[index] ?? "") !== "" : segment === pathSegments[index]));
-  }
-  return path === routePath || path.startsWith(routePath.endsWith("/") ? routePath : `${routePath}/`);
+  if (!routePath.includes("*")) return path === routePath || path.startsWith(routePath.endsWith("/") ? routePath : `${routePath}/`);
+  const routeSegments = routePath.split("/");
+  const pathSegments = path.split("/");
+  return routeSegments.length === pathSegments.length && routeSegments.every((segment, index) => (segment === "*" ? (pathSegments[index] ?? "") !== "" : segment === pathSegments[index]));
 }
 
 export function resolveUpstreamRouteForRequest(method: string, path: string, routes: readonly UpstreamRoute[] = upstreamRoutes): UpstreamRoute | undefined {
-  return routes.find((route) => (route.exactPathOnly === true ? path === route.pathPrefix || doesPathMatchRoute(path, route.pathPrefix) && route.pathPrefix.includes("*") : doesPathMatchRoute(path, route.pathPrefix)) && (route.methods === undefined || route.methods.includes(method.toUpperCase())));
+  const normalizedPath = path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
+  const verb = method.toUpperCase();
+  return routes.find((route) => {
+    const exactMatch = normalizedPath === route.pathPrefix || (route.pathPrefix.includes("*") && doesPathMatchRoute(normalizedPath, route.pathPrefix));
+    return (route.exactPathOnly === true ? exactMatch : doesPathMatchRoute(normalizedPath, route.pathPrefix)) && (route.methods === undefined || route.methods.includes(verb));
+  });
 }

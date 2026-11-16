@@ -7,11 +7,17 @@ import (
 	catalogerrors "nantty/modules/catalog/src/errors"
 	"nantty/modules/catalog/src/events"
 	"nantty/modules/catalog/src/generated/ent"
+	"nantty/modules/catalog/src/generated/ent/product"
 	"nantty/modules/catalog/src/generated/ent/review"
+	"nantty/modules/catalog/src/generated/ent/store"
 )
 
 type Handler struct {
 	Container *container.Container
+}
+
+func DecrementRatingTotals(currentSum int64, currentCount int, rating int) (int64, int) {
+	return max(currentSum-int64(rating), 0), max(currentCount-1, 0)
 }
 
 func (handler Handler) Execute(ctx context.Context, command Command) error {
@@ -27,11 +33,21 @@ func (handler Handler) Execute(ctx context.Context, command Command) error {
 			return err
 		}
 		if row.ProductID != nil {
-			if err := tx.Product.UpdateOneID(*row.ProductID).AddRatingSum(-int64(row.Rating)).AddRatingCount(-1).Exec(ctx); err != nil {
+			item, err := tx.Product.Query().Where(product.ID(*row.ProductID)).ForUpdate().Only(ctx)
+			if err != nil {
+				return err
+			}
+			nextSum, nextCount := DecrementRatingTotals(item.RatingSum, item.RatingCount, row.Rating)
+			if err := tx.Product.UpdateOneID(item.ID).SetRatingSum(nextSum).SetRatingCount(nextCount).Exec(ctx); err != nil {
 				return err
 			}
 		}
-		if err := tx.Store.UpdateOneID(row.StoreID).AddRatingSum(-int64(row.Rating)).AddRatingCount(-1).Exec(ctx); err != nil {
+		sellerStore, err := tx.Store.Query().Where(store.ID(row.StoreID)).ForUpdate().Only(ctx)
+		if err != nil {
+			return err
+		}
+		nextStoreSum, nextStoreCount := DecrementRatingTotals(sellerStore.RatingSum, sellerStore.RatingCount, row.Rating)
+		if err := tx.Store.UpdateOneID(sellerStore.ID).SetRatingSum(nextStoreSum).SetRatingCount(nextStoreCount).Exec(ctx); err != nil {
 			return err
 		}
 		return events.EnqueueOutboxEventInTransaction(ctx, tx, "review.deleted", row.ID.String(), handler.Container.Now(), map[string]any{

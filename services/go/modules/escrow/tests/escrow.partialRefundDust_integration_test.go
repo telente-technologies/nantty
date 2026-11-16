@@ -29,3 +29,16 @@ func TestAPartialRefundKeepsTheHeldCommissionProRataWithTheRoundingDustToTheSell
 	harness.RunMoneyWorkers()
 	harness.AssertLedgerHealthy()
 }
+
+func TestPartialRefundExceedingFeesFailsClosed(t *testing.T) {
+	harness := startEscrowHarness(t)
+	buyer, orderId := uuid.NewString(), uuid.NewString()
+	harness.registerCheckout(buyer, map[string]int64{orderId: 100_000})
+	harness.payAndSettle(buyer, orderId)
+	request := map[string]any{"orderGroupId": orderId, "storeId": "store-1", "buyerAccountId": buyer, "amountMinor": 99_900, "currency": "NGN", "reason": "almost full refund"}
+	response := harness.Call(http.MethodPost, "/api/v1/internal/order-groups/"+orderId+"/refunds", "", "", request, http.Header{"X-Internal-Token": {strings.Repeat("e", 32)}})
+	if response.Status != http.StatusUnprocessableEntity || response.Body["code"] != "PARTIAL_REFUND_EXCEEDS_NET" {
+		t.Fatalf("partial refund leaving less than fees must fail closed: %d %s", response.Status, response.Raw)
+	}
+	harness.AssertLedgerHealthy()
+}

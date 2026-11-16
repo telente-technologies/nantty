@@ -38,6 +38,11 @@ export function readSandboxPortalUrl(): string {
   return readOrigin(process.env.NEXT_PUBLIC_SANDBOX_PORTAL_URL, "NEXT_PUBLIC_SANDBOX_PORTAL_URL", "http://localhost:3800");
 }
 
+export function readSandboxPublicApiUrl(): string {
+  const fallback = isProduction ? "https://sandbox-api.nantty.com" : "http://localhost:8090";
+  return readOrigin(process.env.SANDBOX_PUBLIC_API_URL, "SANDBOX_PUBLIC_API_URL", fallback);
+}
+
 export function readNanttyWebUrl(): string {
   return readOrigin(process.env.NEXT_PUBLIC_NANTTY_WEB_URL, "NEXT_PUBLIC_NANTTY_WEB_URL", "http://localhost:3500");
 }

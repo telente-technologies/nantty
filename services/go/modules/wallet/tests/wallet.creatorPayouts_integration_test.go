@@ -40,7 +40,14 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 		t.Fatal("an unverified creator's earned coins must stay as coins")
 	}
 	harness.OnboardConnectedAccount(creator, false)
-	converted := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-key-1", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
+	staleQuote := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-quote-stale", map[string]any{"coins": 180, "currency": "NGN", "expectedCashMinor": 179_000}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
+	if staleQuote.Status != http.StatusConflict || staleQuote.Body["code"] != "CONVERSION_RATE_CHANGED" {
+		t.Fatalf("a mismatched expectedCashMinor quote must fail closed: %d %s", staleQuote.Status, staleQuote.Raw)
+	}
+	if message, _ := staleQuote.Body["message"].(string); message == "" || message != "The coin conversion payout is now 1800.00 NGN. Review the updated payout and try again." {
+		t.Fatalf("stale quote response must show a human-readable major-unit payout: %q", message)
+	}
+	converted := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-key-1", map[string]any{"coins": 180, "currency": "NGN", "expectedCashMinor": 180_000}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
 	if converted.Status != http.StatusCreated || converted.Body["cash"].(map[string]any)["amountMinor"].(float64) != 180_000 {
 		t.Fatalf("convert: %d %s", converted.Status, converted.Raw)
 	}
