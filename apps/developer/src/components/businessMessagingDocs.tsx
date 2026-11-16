@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { BookOpenIcon, ChatCircleTextIcon, LockIcon, WarningCircleIcon } from "@/components/ui/icons";
-import { readDeveloperDocsHref, readDeveloperSupportUrl, readSandboxPortalUrl } from "@/config/site.config";
+import { readDeveloperDocsHref, readDeveloperSupportUrl, readSandboxPortalUrl, readSandboxPublicApiUrl } from "@/config/site.config";
 
 import styles from "./businessMessagingDocs.module.css";
 
@@ -10,11 +10,12 @@ const sandboxEndpoints = [
   ["POST", "/v1/customers/{customerId}/conversations", "Open a synthetic conversation for a Sandbox customer"],
   ["POST", "/v1/conversations/{conversationId}/messages", "Send an idempotent synthetic business message (monthly quota enforced)"],
   ["GET", "/v1/conversations/{conversationId}/messages", "List up to 100 latest messages in a Sandbox conversation"],
+  ["GET", "/v1/events", "List up to 100 latest Sandbox events for this application"],
 ] as const;
 
 const sandboxErrors = [
   ["400", "IDEMPOTENCY_KEY_REQUIRED / INVALID_REQUEST", "Missing valid Idempotency-Key or invalid JSON body"],
-  ["401", "UNAUTHORIZED", "Missing, invalid, revoked, or expired ntsb_test_ bearer credential"],
+  ["401", "INVALID_SANDBOX_CREDENTIAL", "Missing, invalid, revoked, or expired ntsb_test_ bearer credential"],
   ["404", "CUSTOMER_NOT_FOUND / CONVERSATION_NOT_FOUND", "Target resource does not exist under this Sandbox application"],
   ["409", "IDEMPOTENCY_CONFLICT", "Idempotency-Key reused with a different message payload"],
   ["429", "SANDBOX_QUOTA_EXCEEDED", "Monthly Sandbox message quota exhausted; includes resetAt details"],
@@ -97,7 +98,7 @@ export function BusinessMessagingDocs() {
 
       <section className={styles.panel} aria-labelledby="sandbox-quickstart-title">
         <div className={styles.panelHeading}><div><p className={styles.eyebrow}>Sandbox quickstart</p><h2 id="sandbox-quickstart-title">Send a synthetic Sandbox message</h2></div><span className={styles.draftPill}>Sandbox · ntsb_test_</span></div>
-        <pre className={styles.code}><code>{`curl -X POST "${readSandboxPortalUrl()}/v1/conversations/<conversation-id>/messages" \\
+        <pre className={styles.code}><code>{`curl -X POST "${readSandboxPublicApiUrl()}/v1/conversations/<conversation-id>/messages" \\
   -H "Authorization: Bearer ntsb_test_<credential-secret>" \\
   -H "Content-Type: application/json" \\
   -H "Idempotency-Key: msg-2026-11-16-001" \\
@@ -117,9 +118,12 @@ export function BusinessMessagingDocs() {
         <div className={styles.panelHeading}><div><p className={styles.eyebrow}>Webhook security</p><h2 id="webhook-verify-title">Verify signed webhook deliveries</h2></div><span className={styles.draftPill}>HMAC-SHA256</span></div>
         <pre className={styles.code}><code>{`// Header: nantty-signature: t=<unix-seconds>,v1=<hex-hmac-sha256>
 // Header: nantty-event-id: <uuid> (deduplicate at-least-once deliveries)
+const timestampSeconds = Number(timestamp);
+if (!Number.isSafeInteger(timestampSeconds) || Math.abs(Date.now() / 1000 - timestampSeconds) > 300) throw new Error("Expired webhook signature");
 const signedPayload = \`\${timestamp}.\${rawRequestBody}\`;
 const expected = createHmac("sha256", webhookSecret).update(signedPayload).digest("hex");
-const valid = timingSafeEqual(Buffer.from(v1Signature, "hex"), Buffer.from(expected, "hex"));`}</code></pre>
+const provided = /^[a-f0-9]{64}$/i.test(v1Signature) ? Buffer.from(v1Signature, "hex") : Buffer.alloc(0);
+const valid = provided.length === 32 && timingSafeEqual(provided, Buffer.from(expected, "hex"));`}</code></pre>
         <p className={styles.note}>Reject deliveries whose <code>t=</code> timestamp falls outside your replay window (for example, 300 seconds) and compare digests in constant time.</p>
       </section>
 

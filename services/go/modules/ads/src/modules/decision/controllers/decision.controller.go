@@ -24,7 +24,6 @@ func (controller DecisionController) responder() utils.Responder {
 func ResolveSignedInViewer(userId, country string, hints *dtos.ViewerHints) types.Viewer {
 	viewer := types.Viewer{UserId: userId, Country: country}
 	if hints != nil {
-		// CustomAudienceIds is always derived server-side from AudienceIdsContaining; never trust caller-supplied audience IDs.
 		viewer.Region, viewer.AgeBand, viewer.Gender, viewer.Topics = hints.Region, hints.AgeBand, hints.Gender, hints.Topics
 	}
 	return viewer
@@ -70,7 +69,11 @@ func (controller DecisionController) DecideForTrustedCaller(writer http.Response
 func (controller DecisionController) decide(writer http.ResponseWriter, request *http.Request, command decideadforslot.Command) error {
 	if len(command.Viewer.CustomAudienceIds) == 0 {
 		if userId, err := uuid.Parse(command.UserId); err == nil {
-			command.Viewer.CustomAudienceIds, _ = audienceservices.AudienceIdsContaining(request.Context(), controller.Container.Client, userId)
+			ids, err := audienceservices.AudienceIdsContaining(request.Context(), controller.Container.Client, userId)
+			if err != nil {
+				return err
+			}
+			command.Viewer.CustomAudienceIds = ids
 		}
 	}
 	result, err := (decideadforslot.Handler{Container: controller.Container}).Execute(request.Context(), command)

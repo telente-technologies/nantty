@@ -1,4 +1,4 @@
-import { readDeveloperDocsUrl, readSandboxPortalUrl } from "@/config/site.config";
+import { readDeveloperDocsUrl, readSandboxPublicApiUrl } from "@/config/site.config";
 
 export interface OpenApiSpecification {
   readonly openapi: "3.1.0";
@@ -34,6 +34,7 @@ const errorEnvelopeSchema = {
           type: "string",
           enum: [
             "UNAUTHORIZED",
+            "INVALID_SANDBOX_CREDENTIAL",
             "INVALID_REQUEST",
             "INVALID_CUSTOMER",
             "INVALID_CONVERSATION",
@@ -61,7 +62,7 @@ const errorEnvelopeSchema = {
 
 export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
   const docsUrl = readDeveloperDocsUrl();
-  const sandboxUrl = readSandboxPortalUrl();
+  const sandboxUrl = readSandboxPublicApiUrl();
 
   return {
     openapi: "3.1.0",
@@ -169,6 +170,18 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
           },
         },
       },
+      "/v1/events": {
+        get: {
+          tags: ["Sandbox Messaging"],
+          summary: "List the latest Sandbox events for this application",
+          operationId: "listSandboxEvents",
+          security: [{ SandboxBearerAuth: [] }],
+          responses: {
+            "200": { description: "Up to 100 newest application-scoped Sandbox events", content: { "application/json": { schema: { type: "object", required: ["events"], properties: { events: { type: "array", items: { $ref: "#/components/schemas/SandboxEvent" } } } } } } },
+            "401": { description: "Invalid or expired Sandbox credential", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+          },
+        },
+      },
       "/v1/business/messages": {
         post: {
           tags: ["Production Draft (Disabled)"],
@@ -217,6 +230,17 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
             sender: { type: "string", enum: ["business", "customer"] },
             text: { type: "string" },
             status: { type: "string", enum: ["sent", "delivered", "read", "failed", "received"] },
+            createdAt: { type: "string", format: "date-time" },
+          },
+        },
+        SandboxEvent: {
+          type: "object",
+          required: ["id", "eventType", "aggregateId", "data", "createdAt"],
+          properties: {
+            id: { type: "string", format: "uuid" },
+            eventType: { type: "string" },
+            aggregateId: { type: "string", format: "uuid" },
+            data: { type: "object", additionalProperties: true },
             createdAt: { type: "string", format: "date-time" },
           },
         },

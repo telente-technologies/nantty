@@ -216,7 +216,6 @@ export interface CoinPackage {
   readonly coins: number;
   readonly bonusCoins?: number;
   readonly price: Money;
-  readonly billingNote?: string;
   readonly purchaseChannel?: CoinPurchaseChannel;
   readonly storeProductId?: string | null;
 }

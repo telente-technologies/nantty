@@ -28,6 +28,16 @@ describe("identity routes", () => {
     expect(route?.authentication).toBe(authentication);
     if (authentication !== undefined) expect(route?.upstream).toBe("identity");
   });
+
+  it("normalizes one trailing slash before matching route prefixes", () => {
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/users/me/")).toMatchObject({ upstream: "identity", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/localeX/")).toBeUndefined();
+  });
+
+  it("normalizes one trailing slash before matching route prefixes", () => {
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/users/me/")).toMatchObject({ upstream: "identity", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/localeX/")).toBeUndefined();
+  });
 });
 
 describe("live routes", () => {

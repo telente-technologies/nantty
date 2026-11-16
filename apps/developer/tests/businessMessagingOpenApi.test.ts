@@ -10,6 +10,9 @@ test("OpenAPI 3.1 specification covers implemented Sandbox Messaging routes and 
   assert.ok(spec.paths["/v1/customers"]);
   assert.ok(spec.paths["/v1/customers/{customerId}/conversations"]);
   assert.ok(spec.paths["/v1/conversations/{conversationId}/messages"]);
+  assert.ok(spec.paths["/v1/events"]);
+  assert.equal(spec.servers[0]?.url, process.env.SANDBOX_PUBLIC_API_URL ?? "http://localhost:8090");
+  assert.notEqual(spec.servers[0]?.url, "http://localhost:3800");
   const postMessage = (spec.paths["/v1/conversations/{conversationId}/messages"] as { post: { responses: Record<string, unknown> } }).post;
   assert.ok(postMessage.responses["200"]);
   assert.ok(postMessage.responses["201"]);
@@ -19,6 +22,7 @@ test("OpenAPI 3.1 specification covers implemented Sandbox Messaging routes and 
   assert.equal(draftRoute["x-status"], "draft");
   const errorCodes = (spec.components.schemas.ErrorEnvelope as { properties: { error: { properties: { code: { enum: readonly string[] } } } } }).properties.error.properties.code.enum;
   assert.ok(errorCodes.includes("SANDBOX_QUOTA_EXCEEDED"));
+  assert.ok(errorCodes.includes("INVALID_SANDBOX_CREDENTIAL"));
   assert.ok(errorCodes.includes("IDEMPOTENCY_CONFLICT"));
   assert.match((spec.components.schemas.WebhookEnvelope as { description: string }).description, /nantty-signature/);
   assert.match((spec.components.schemas.WebhookEnvelope as { description: string }).description, /nantty-event-id/);

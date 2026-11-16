@@ -291,6 +291,6 @@ export function resolveUpstreamRouteForRequest(method: string, path: string, rou
   const verb = method.toUpperCase();
   return routes.find((route) => {
     const exactMatch = normalizedPath === route.pathPrefix || (route.pathPrefix.includes("*") && doesPathMatchRoute(normalizedPath, route.pathPrefix));
-    return (route.exactPathOnly === true ? exactMatch : doesPathMatchRoute(path, route.pathPrefix)) && (route.methods === undefined || route.methods.includes(verb));
+    return (route.exactPathOnly === true ? exactMatch : doesPathMatchRoute(normalizedPath, route.pathPrefix)) && (route.methods === undefined || route.methods.includes(verb));
   });
 }
