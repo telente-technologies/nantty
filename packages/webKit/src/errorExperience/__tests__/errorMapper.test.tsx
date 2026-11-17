@@ -26,13 +26,13 @@ const requiredCodes: Readonly<Record<string, ErrorKind>> = {
   ORDER_NOT_FOUND: "orderNotFound", STORE_CLOSED: "storeClosed", OUT_OF_STOCK: "outOfStock", FLASH_SALE_SOLD_OUT: "outOfStock", CHECKOUT_EXPIRED: "checkoutExpired", CART_CHANGED: "cartChanged",
   ALREADY_PAID: "alreadyDone", IDEMPOTENCY_KEY_REUSED: "alreadyDone", VERSION_CONFLICT: "versionConflict", BROWSER_NOT_SUPPORTED: "unsupportedBrowser", COOKIES_DISABLED: "storageDisabled",
   CLOCK_SKEW: "clockSkew", NOT_DELIVERABLE: "deliveryUnavailable", EMAIL_NOT_VERIFIED: "emailNotVerified", VERIFY_EMAIL_REQUIRED: "emailNotVerified", TOO_MANY_LOGIN_ATTEMPTS: "tooManyAttempts",
-  ACCOUNT_LOCKED: "tooManyAttempts", HUMAN_VERIFICATION_FAILED: "securityCheckFailed", EMBED_UNAVAILABLE: "embedUnavailable", PAYMENT_FAILED: "paymentFailed", PAYMENT_PENDING: "paymentPending",
+  ACCOUNT_LOCKED: "tooManyAttempts", HUMAN_VERIFICATION_FAILED: "securityCheckFailed", HUMAN_VERIFICATION_REQUIRED: "securityCheckFailed", EMBED_UNAVAILABLE: "embedUnavailable", PAYMENT_FAILED: "paymentFailed", PAYMENT_PENDING: "paymentPending",
   CAMERA_PERMISSION_DENIED: "permissionDenied", MEDIA_UNAVAILABLE: "mediaFailed", NOT_FOUND: "notFound", PRODUCT_NOT_FOUND: "contentGone", INTERNAL: "serverError",
   PROFILE_LIMIT_STORE_OR_BUSINESS: "profileLimit", PROFILE_LIMIT_ONE_BRAND: "profileLimit", PROFILE_ON_HOLD: "profileLimit", BRAND_SELLING_OFF: "profileLimit",
   REALTIME_UNAVAILABLE: "maintenance", ACCOUNT_SUSPENDED_SECURITY: "accountSuspended", CORS_ORIGIN_FORBIDDEN: "forbidden", WIDGET_TOKEN_SCOPE: "forbidden",
   POLICY_ACCEPTANCE_REQUIRED: "verificationRequired", INSTITUTIONAL_EMAIL_NOT_VERIFIED: "emailNotVerified", BLACK_ANNUAL_DISABLED: "planFeatureRequired",
   BLACK_DISCOUNTS_DISABLED: "planFeatureRequired", USERNAME_TAKEN: "versionConflict", VALIDATION_FAILED: "unknown",
-  CONVERSION_RATE_CHANGED: "cartChanged", CURRENCY_NOT_ALLOWED: "regionUnavailable", SANDBOX_QUOTA_EXCEEDED: "quotaReached",
+  CONVERSION_RATE_CHANGED: "cartChanged", CURRENCY_NOT_ALLOWED: "regionUnavailable", SANDBOX_QUOTA_EXCEEDED: "quotaReached", STORE_LIMIT_ONE: "profileLimit", BUSINESS_PROFILE_LIMIT: "profileLimit",
 };
 
 describe("code → screen mapper", () => {
