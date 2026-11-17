@@ -24,6 +24,10 @@ const requiredCodes: Readonly<Record<string, ErrorKind>> = {
   HUMAN_VERIFICATION_FAILED: "securityCheckFailed", PAYMENT_FAILED: "paymentFailed", PAYMENT_PENDING: "paymentPending", CAMERA_PERMISSION_DENIED: "permissionDenied",
   MICROPHONE_PERMISSION_DENIED: "permissionDenied", LOCATION_PERMISSION_DENIED: "permissionDenied", MEDIA_UNAVAILABLE: "mediaFailed", NOT_FOUND: "notFound", PRODUCT_NOT_FOUND: "contentGone", INTERNAL: "serverError",
   PROFILE_LIMIT_STORE_OR_BUSINESS: "profileLimit", PROFILE_LIMIT_ONE_BRAND: "profileLimit", PROFILE_ON_HOLD: "profileLimit", BRAND_SELLING_OFF: "profileLimit",
+  CONVERSION_RATE_CHANGED: "cartChanged", CURRENCY_NOT_ALLOWED: "regionUnavailable", SANDBOX_QUOTA_EXCEEDED: "quotaReached", REALTIME_UNAVAILABLE: "maintenance",
+  CORS_ORIGIN_FORBIDDEN: "forbidden", CORS_ORIGIN_REQUIRED: "forbidden", WIDGET_TOKEN_SCOPE: "forbidden", POLICY_ACCEPTANCE_REQUIRED: "verificationRequired",
+  INSTITUTIONAL_EMAIL_NOT_VERIFIED: "emailNotVerified", ACCOUNT_SUSPENDED_SECURITY: "accountSuspended",
+  HUMAN_VERIFICATION_REQUIRED: "securityCheckFailed", BLACK_ANNUAL_DISABLED: "planFeatureRequired", BLACK_DISCOUNTS_DISABLED: "planFeatureRequired", USERNAME_TAKEN: "versionConflict",
 };
 
 describe("mobile code → screen mapper", () => {
