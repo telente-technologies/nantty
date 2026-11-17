@@ -19,12 +19,12 @@ export interface MockVerificationRecord {
 }
 
 const majorMonthlyPriceByCurrency: Record<string, Record<string, number>> = {
-  BLUE_ESSENTIAL: { NGN: 2_500, GHS: 30, KES: 350, ZAR: 45, GBP: 2.5, USD: 3 },
-  BLUE_VERIFIED: { NGN: 5_000, GHS: 60, KES: 700, ZAR: 90, GBP: 5, USD: 6 },
-  BLUE_PREMIUM: { NGN: 12_000, GHS: 140, KES: 1_600, ZAR: 210, GBP: 11, USD: 13 },
-  GOLD_ONLY: { NGN: 3_000, GHS: 35, KES: 400, ZAR: 55, GBP: 3, USD: 4 },
-  GOLD_PRO: { NGN: 45_000, GHS: 520, KES: 6_000, ZAR: 780, GBP: 40, USD: 48 },
-  GOLD_BUSINESS: { NGN: 120_000, GHS: 1_400, KES: 16_000, ZAR: 2_100, GBP: 105, USD: 125 },
+  BLUE_ESSENTIAL: { NGN: 1_000, GHS: 12, KES: 200, ZAR: 29.99, GBP: 2.49, EUR: 2.49, USD: 2.49 },
+  BLUE_VERIFIED: { NGN: 2_500, GHS: 30, KES: 500, ZAR: 59.99, GBP: 5.99, EUR: 5.99, USD: 5.99 },
+  BLUE_PREMIUM: { NGN: 20_000, GHS: 55, KES: 900, ZAR: 109.99, GBP: 9.99, EUR: 10.99, USD: 9.99 },
+  GOLD_ONLY: { NGN: 3_000, GHS: 36, KES: 600, ZAR: 89.99, GBP: 9, EUR: 10, USD: 10 },
+  GOLD_PRO: { NGN: 5_000, GHS: 60, KES: 1_000, ZAR: 149.99, GBP: 15, EUR: 17, USD: 17 },
+  GOLD_BUSINESS: { NGN: 30_000, GHS: 180, KES: 3_000, ZAR: 449.99, GBP: 45, EUR: 49, USD: 49 },
 };
 
 export function readDemoVerificationPlanPrice(color: VerificationColor, tier: VerificationTier, currency: string): { planCode: string; price: { amountMinor: number; currency: string } } | null {
