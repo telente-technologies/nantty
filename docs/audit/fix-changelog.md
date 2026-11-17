@@ -2,6 +2,14 @@
 
 Every code change made while fixing `docs/audit/frontend-backend-audit.md` is logged here with file, lines, audit ID, verification, and rollback notes. Investigations that concluded "no change needed" are logged too. Newest first.
 
+## 2026-11-16 — Checkout Verification, URL Canonicalization & Subscription Parity
+
+- **Checkout buyer verification (`services/go/modules/orders`, `services/go/platform/usersdirectory`):** Added a scoped SQL account-email verifier using `auth.accounts.email_verified_at`; new checkouts fail closed before checkout lookup/resumption and return `403 VERIFY_EMAIL_REQUIRED` for unverified accounts or `503 EMAIL_VERIFICATION_UNAVAILABLE` when the authoritative lookup is unavailable. Commerce tests assert no checkout/order/stock reservation side effects. Auth schema defaults to `auth` and remains configurable with `AUTH_DATABASE_SCHEMA`.
+- **SSRF hardening (`services/typescript/social/src/utils/ssrfGuard.util.ts`):** Inspected the unnormalized URL authority and rejected ambiguous octal, hexadecimal, leading-zero and shorthand numeric IPv4 spellings before WHATWG URL normalization. Added malicious-input regression cases.
+- **Probe and client error parity (`services/typescript/gateway`, `packages/webKit`, `apps/mobile`):** Classified additional seller, sandbox, live, space, escrow, cart, verification and invitation resource families; synchronized relevant server error codes and profile-limit errors in WebKit/mobile mappings.
+- **Legacy subscription catalogue parity (`services/go/modules/subscriptions`, `apps/admin`):** Added canonical admin-key aliases, reconciled Gold Pro/Business limits with seller-plan enforcement (5/3 and 25/10), removed the unsupported lower-escrow-fee claim, and aligned admin demo prices with `regionpricing` defaults. Defaults remain non-authoritative relative to persisted active price versions.
+- **Verification:** Social SSRF tests 64/64, Gateway probe tests 9/9, WebKit error tests 101/101, Mobile error tests 86/86, Admin price/limit contracts 2/2 passed under Node 24.19 (below repo-required Node 26.13). Social, Gateway and Admin TypeScript checks passed; Orders, Subscriptions, usersdirectory and goCommerce Go package tests passed. `check-backend-file-lengths.sh`, `check-no-raw-sql-in-typescript.sh` and `git diff --check` passed. The two new commerce integration cases compiled but skipped because localhost:15432 refused IPv6 and rejected the configured IPv4 password; stock/order side-effect assertions remain unverified against PostgreSQL.
+
 ## 2026-11-16 — PR #60 Audit Remediation (Admin Black Billing, Price Migration, Nil Gateway, Disclosures & Cursor Pagination)
 
 - **Admin Black Billing UI & API (`apps/admin/src/{components/people/blackBillingAdminPanel.tsx,services/safetyApi.service.ts,contracts/blackGovernmentContracts.test.ts}`):**

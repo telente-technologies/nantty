@@ -1,5 +1,12 @@
 # Nantty implementation backlog
 
+## Latest execution record — 2026-11-16 (Checkout Verification, SSRF Canonicalization & Subscription Parity)
+
+- Added fail-closed buyer email verification to Go Orders using `auth.accounts.email_verified_at` through the existing `nantty_readers` privilege model. New checkouts reject unverified accounts with `403 VERIFY_EMAIL_REQUIRED`; missing verifier/database errors return `503 EMAIL_VERIFICATION_UNAVAILABLE`. A no-network SQL-driver contract test covers schema qualification, account ID binding, verified/unverified state, no-row and database-error behavior. End-to-end assertions cover no checkout/order/stock reservation side effects, but both Postgres-backed commerce cases skipped because localhost:15432 is unavailable with the configured credentials.
+- Hardened Social link-preview URL checks against noncanonical numeric IPv4 spellings before URL normalization. Expanded Gateway access-probe private resource families and synchronized WebKit/Mobile mappings for error codes including human verification, CORS, account suspension, quota, currency/conversion and profile limits.
+- Reconciled Admin demo prices against `regionpricing.plans.go` defaults; aligned Gold Pro/Business catalogue caps to 5/3 and 25/10, removed the unsupported lower-escrow-fee claim, and added canonical admin plan-key aliases. These repository defaults do not supersede active database price versions.
+- Focused checks: Social SSRF 64/64; Gateway probe 9/9; WebKit mapper 101/101; Mobile mapper 86/86; Admin seed pricing/caps 2/2. Social, Gateway and Admin TypeScript checks passed. Go package sweep passed for `platform/usersdirectory`, Orders, Subscriptions and `deployables/goCommerce/tests`; new DB integration cases skipped at the Postgres connection gate. Repository file-length, no-raw-SQL-in-TypeScript and whitespace gates passed. Node 24.19 is below the repository Node >=26.13 requirement. No database migrations, deployments or commits were performed.
+
 ## Latest execution record — 2026-11-16 (Cross-Service Security, Privacy, Money & UI Parity Remediation)
 
 - **Gateway (`services/typescript/gateway`)**: Normalized trailing `/` in `isChatReportSubmission` and `resolveUpstreamRouteForRequest` (`exactPathOnly`) in `src/routes/upstream.routes.ts`, normalized `?query` and trailing `/` in `classifyRequestForRateLimit` (`src/services/routeRateLimitPolicy.service.ts`), and added regression cases in `tests/{upstreamRoutes.routes,gatewayHardening.handler}.test.ts`.
