@@ -62,7 +62,7 @@ func startCommerce(t *testing.T) *commerceHarness {
 	if err != nil {
 		t.Skipf("postgres not reachable (run pnpm backend:up): %v", err)
 	}
-	schemas := map[string]string{"catalog": schemaName("catalog"), "inventory": schemaName("inventory"), "orders": schemaName("orders"), "users": schemaName("users")}
+	schemas := map[string]string{"catalog": schemaName("catalog"), "inventory": schemaName("inventory"), "orders": schemaName("orders"), "users": schemaName("users"), "auth": schemaName("auth")}
 	for _, schema := range schemas {
 		if err := postgres.CreateSchemaIfMissingForTestsAndLocalTooling(ctx, admin, schema); err != nil {
 			t.Fatal(err)
@@ -75,6 +75,9 @@ func startCommerce(t *testing.T) *commerceHarness {
 		_ = admin.Close()
 	})
 	createMinimalUsersTables(t, admin, schemas["users"])
+	if _, err := admin.Exec("CREATE TABLE " + pgx.Identifier{schemas["auth"]}.Sanitize() + ".accounts (id uuid PRIMARY KEY, email_verified_at timestamptz NULL)"); err != nil {
+		t.Fatal(err)
+	}
 	dependencies := servicemodule.Dependencies{DeployableName: "test", Logger: slog.Default(), Environment: config.NewEnvironmentReader(), Health: health.NewRegistryForService("test")}
 	reader := config.NewEnvironmentReader()
 	catalogSettings := catalogconfigs.ReadCatalogSettingsFromEnvironment(reader)
@@ -91,7 +94,7 @@ func startCommerce(t *testing.T) *commerceHarness {
 	}
 	fakeMoney := integrations.NewInMemoryCheckoutMoney()
 	ordersSettings := ordersconfigs.ReadOrdersSettingsFromEnvironment(reader)
-	ordersSettings.DatabaseUrl, ordersSettings.DatabaseSchema, ordersSettings.Environment = databaseUrl, schemas["orders"], "test"
+	ordersSettings.DatabaseUrl, ordersSettings.DatabaseSchema, ordersSettings.AuthDatabaseSchema, ordersSettings.Environment = databaseUrl, schemas["orders"], schemas["auth"], "test"
 	ordersModule, err := orderssrc.StartOrdersModuleWithSettings(ctx, ordersSettings, orderssrc.Collaborators{Money: fakeMoney}, dependencies)
 	if err != nil {
 		t.Fatal(err)
@@ -103,7 +106,7 @@ func startCommerce(t *testing.T) *commerceHarness {
 	})
 	ordersModule.Container.Users = usersdirectory.Reader{Database: ordersModule.Container.Database, Schema: schemas["users"]}
 	harness := &commerceHarness{orders: ordersModule, inventory: inventoryModule, money: fakeMoney, buyer: uuid.New()}
-	harness.seed(t, catalogModule, admin, schemas["users"])
+	harness.seed(t, catalogModule, admin, schemas["users"], schemas["auth"])
 	return harness
 }
 
@@ -126,10 +129,14 @@ func createMinimalUsersTables(t *testing.T, admin *sql.DB, schema string) {
 	}
 }
 
-func (harness *commerceHarness) seed(t *testing.T, catalogModule *catalogsrc.Module, admin *sql.DB, usersSchema string) {
+func (harness *commerceHarness) seed(t *testing.T, catalogModule *catalogsrc.Module, admin *sql.DB, usersSchema, authSchema string) {
 	t.Helper()
 	ctx := context.Background()
 	q := pgx.Identifier{usersSchema}.Sanitize() + "."
+	authTable := pgx.Identifier{authSchema, "accounts"}.Sanitize()
+	if _, err := admin.ExecContext(ctx, "INSERT INTO "+authTable+" (id, email_verified_at) VALUES ($1, now())", harness.buyer); err != nil {
+		t.Fatal(err)
+	}
 	regionId, sellerId := uuid.New(), uuid.New()
 	harness.addressId = uuid.New()
 	for _, statement := range []struct {

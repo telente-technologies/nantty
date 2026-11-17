@@ -11,6 +11,7 @@ type OrdersSettings struct {
 	Environment             string
 	DatabaseUrl             string
 	DatabaseSchema          string
+	AuthDatabaseSchema      string
 	DatabaseOwnerRole       string
 	DomainEventsTopicArn    string
 	AccessTokenJwksUrl      string
@@ -52,6 +53,7 @@ func ReadOrdersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		Environment:             reader.ReadStringOrDefault("APP_ENV", "development"),
 		DatabaseUrl:             reader.ReadRequiredString("ORDERS_DATABASE_URL"),
 		DatabaseSchema:          reader.ReadStringOrDefault("ORDERS_DATABASE_SCHEMA", "orders"),
+		AuthDatabaseSchema:      reader.ReadStringOrDefault("AUTH_DATABASE_SCHEMA", "auth"),
 		DatabaseOwnerRole:       reader.ReadStringOrDefault("ORDERS_DATABASE_OWNER_ROLE", ""),
 		DomainEventsTopicArn:    reader.ReadStringOrDefault("DOMAIN_EVENTS_TOPIC_ARN", ""),
 		AccessTokenJwksUrl:      reader.ReadStringOrDefault("AUTH_JWKS_URL", "http://localhost:8101/.well-known/jwks.json"),

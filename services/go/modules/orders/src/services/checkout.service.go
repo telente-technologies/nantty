@@ -43,6 +43,16 @@ type CheckoutService struct {
 var checkoutClosed = httpserver.NewApiError(http.StatusConflict, "CHECKOUT_CLOSED", "That checkout is closed. Start a new checkout.")
 
 func (service CheckoutService) Checkout(ctx context.Context, request CheckoutRequest) (types.CheckoutResultView, error) {
+	if service.Container.AccountEmailVerifier == nil {
+		return types.CheckoutResultView{}, ordererrors.EmailVerificationUnavailable
+	}
+	verified, verificationError := service.Container.AccountEmailVerifier.IsEmailVerified(ctx, request.BuyerId)
+	if verificationError != nil {
+		return types.CheckoutResultView{}, ordererrors.EmailVerificationUnavailable
+	}
+	if !verified {
+		return types.CheckoutResultView{}, ordererrors.VerifyEmailRequired
+	}
 	existing, err := service.Container.Client.Checkout.Query().Where(checkout.BuyerAccountID(request.BuyerId), checkout.IdempotencyKey(request.IdempotencyKey)).Only(ctx)
 	if err == nil {
 		return service.resume(ctx, existing, request)

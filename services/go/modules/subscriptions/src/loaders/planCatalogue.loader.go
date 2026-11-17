@@ -32,7 +32,9 @@ type PlanCatalogueEntry struct {
 
 var adminPlanKeys = map[string]string{
 	"BLUE_ESSENTIAL": constants.PlanBlueEssential, "BLUE_VERIFIED": constants.PlanBlue, "BLUE_PREMIUM": constants.PlanPremium,
-	"GOLD_ONLY": constants.PlanGoldOnly, "GOLD_PRO": constants.PlanSellerPro, "GOLD_BUSINESS": constants.PlanSellerBusiness, "GOLD_PREMIUM": constants.PlanSellerBusiness,
+	"BLUE_BASIC": constants.PlanBlue,
+	"GOLD_ONLY":  constants.PlanGoldOnly, "GOLD_PRO": constants.PlanSellerPro, "GOLD_BUSINESS": constants.PlanSellerBusiness, "GOLD_PREMIUM": constants.PlanSellerBusiness,
+	"GOLD_BASIC": constants.PlanGoldOnly, "BLACK_GOVERNMENT": constants.PlanBlack,
 	"GOLD_COMBINED":  constants.PlanGoldCombined,
 	"BLACK_OFFICIAL": constants.PlanBlack,
 }
@@ -65,14 +67,14 @@ func DefaultPlanCatalogue() map[string]PlanCatalogueEntry {
 			Perks: perks("Gold business badge on every business you choose", "One bill for up to 5 businesses", "Up to 16% off monthly, plus 5% more yearly")},
 		constants.PlanGoldOnly: {DisplayName: "Gold", IsPurchasable: true, Perks: perks("Gold business badge", "Verified store label on products", "Fewer ads")},
 		constants.PlanSellerPro: {DisplayName: "Gold Pro", IsPurchasable: true, Perks: perks("Gold business badge", "Nantty Dashboard access", "Verified store label on products", "Fewer ads"),
-			DashboardEntitlements: goldEntitlements(3, 1, 2_000)},
-		constants.PlanSellerBusiness: {DisplayName: "Gold Business", IsPurchasable: true, Perks: perks("Everything in Gold Pro", "Dedicated account manager", "Lower escrow fee", "No ads anywhere"),
-			DashboardEntitlements: goldEntitlements(15, 10, 20_000)},
+			DashboardEntitlements: goldEntitlements(5, 3, 2_000)},
+		constants.PlanSellerBusiness: {DisplayName: "Gold Business", IsPurchasable: true, Perks: perks("Everything in Gold Pro", "Dedicated account manager", "No ads anywhere"),
+			DashboardEntitlements: goldEntitlements(25, 10, 20_000)},
 		constants.PlanBlack: {DisplayName: "Black Official", Perks: perks("Government and public institution badge", "Very few ads")},
 	}
 }
 
-func planCodeForKey(key string) (string, bool) {
+func ResolveAdminPlanCode(key string) (string, bool) {
 	if code, known := adminPlanKeys[strings.ToUpper(key)]; known {
 		return code, true
 	}
@@ -106,7 +108,7 @@ func ReadPlanCatalogue(ctx context.Context, source *ledgerloaders.PlatformSettin
 		return catalogue
 	}
 	for _, plan := range stored.Plans {
-		code, known := planCodeForKey(plan.PlanKey)
+		code, known := ResolveAdminPlanCode(plan.PlanKey)
 		if !known {
 			continue
 		}

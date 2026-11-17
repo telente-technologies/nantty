@@ -25,6 +25,8 @@ var (
 	NothingDeliverable               = Api(http.StatusUnprocessableEntity, "NOT_DELIVERABLE", "None of the sellers in your cart ship to that address.")
 	InsufficientStock                = Api(http.StatusConflict, "INSUFFICIENT_STOCK", "There is not enough stock for one of the items.")
 	PaymentServiceFailed             = Api(http.StatusBadGateway, "PAYMENT_SERVICE_UNAVAILABLE", "We could not prepare the payment. Try again in a moment.")
+	VerifyEmailRequired              = Api(http.StatusForbidden, "VERIFY_EMAIL_REQUIRED", "Verify your email address before placing an order.")
+	EmailVerificationUnavailable     = Api(http.StatusServiceUnavailable, "EMAIL_VERIFICATION_UNAVAILABLE", "We could not verify your account email right now. Try again in a moment.")
 	SellerVerificationRequiredToSell = Api(http.StatusForbidden, "VERIFICATION_REQUIRED", "This seller must finish identity verification before they can sell in your country. Remove their items to continue.")
 	SellerSalesCapReached            = Api(http.StatusConflict, "SELLER_SALES_CAP_REACHED", "This store has reached its sales limit while the seller's business verification is pending. Remove its items or try again later.")
 	SellerDebtLimit                  = Api(http.StatusForbidden, "SELLER_DEBT_LIMIT", "This store can't take new orders right now. Remove its items or try again later.")

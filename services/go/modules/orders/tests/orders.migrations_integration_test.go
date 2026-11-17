@@ -16,6 +16,7 @@ import (
 	"nantty/platform/health"
 	"nantty/platform/postgres"
 	"nantty/platform/servicemodule"
+	"nantty/platform/usersdirectory"
 )
 
 func startAgainstFreshSchema(t *testing.T) *src.Module {
@@ -52,6 +53,7 @@ func startAgainstFreshSchemaWith(t *testing.T, collaborators src.Collaborators) 
 	if err != nil {
 		t.Fatalf("start orders: %v", err)
 	}
+	module.Container.AccountEmailVerifier = usersdirectory.StaticAccountEmailVerifier{Verified: true}
 	t.Cleanup(func() { _ = module.Close(ctx) })
 	return module
 }

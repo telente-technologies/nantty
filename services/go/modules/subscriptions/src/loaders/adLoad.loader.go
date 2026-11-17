@@ -57,7 +57,7 @@ func ReadAdLoadTable(ctx context.Context, source *ledgerloaders.PlatformSettings
 		table.FreePercent = min(max(*stored.FreeAdLoadPercent, 0), FullAdLoadPercent)
 	}
 	for _, plan := range stored.Plans {
-		code, known := planCodeForKey(plan.PlanKey)
+		code, known := ResolveAdminPlanCode(plan.PlanKey)
 		if known && plan.AdLoadPercent != nil {
 			table.PercentByPlan[code] = clampAdLoadPercent(code, *plan.AdLoadPercent)
 		}

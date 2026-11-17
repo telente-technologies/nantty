@@ -17,18 +17,19 @@ import (
 )
 
 type Container struct {
-	Client           *ent.Client
-	Database         *sql.DB
-	Users            usersdirectory.Reader
-	Settings         configs.OrdersSettings
-	Logger           *slog.Logger
-	Now              func() time.Time
-	AccessVerifier   *jwtauth.AccessTokenVerifier
-	IdempotencyStore *idempotency.RedisStore
-	Money            interfaces.CheckoutMoney
-	Staff            StaffVerifiers
-	Audit            staffaudit.Recorder
-	Logistics        *logistics.Registry
+	Client               *ent.Client
+	Database             *sql.DB
+	Users                usersdirectory.Reader
+	AccountEmailVerifier usersdirectory.AccountEmailVerifier
+	Settings             configs.OrdersSettings
+	Logger               *slog.Logger
+	Now                  func() time.Time
+	AccessVerifier       *jwtauth.AccessTokenVerifier
+	IdempotencyStore     *idempotency.RedisStore
+	Money                interfaces.CheckoutMoney
+	Staff                StaffVerifiers
+	Audit                staffaudit.Recorder
+	Logistics            *logistics.Registry
 }
 
 type StaffVerifiers struct {

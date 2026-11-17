@@ -100,6 +100,9 @@ func NewOrdersModule(ctx context.Context, dependencies servicemodule.Dependencie
 }
 
 func StartOrdersModuleWithSettings(ctx context.Context, settings configs.OrdersSettings, collaborators Collaborators, dependencies servicemodule.Dependencies) (*Module, error) {
+	if settings.AuthDatabaseSchema == "" {
+		settings.AuthDatabaseSchema = "auth"
+	}
 	logger := dependencies.Logger.With(slog.String("module", "orders"))
 	scopedUrl, err := postgres.ScopeDatabaseUrlToSchema(settings.DatabaseUrl, settings.DatabaseSchema)
 	if err != nil {
@@ -121,7 +124,8 @@ func StartOrdersModuleWithSettings(ctx context.Context, settings configs.OrdersS
 	module.Container = &container.Container{
 		Client: ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database))), Database: database,
 		Users: usersdirectory.Reader{Database: database, Schema: "users"}, Settings: settings, Logger: logger, Now: time.Now,
-		AccessVerifier: collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger), Staff: collaborators.Staff, Audit: collaborators.Audit,
+		AccountEmailVerifier: usersdirectory.SqlAccountEmailVerifier{Database: database, Schema: settings.AuthDatabaseSchema},
+		AccessVerifier:       collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger), Staff: collaborators.Staff, Audit: collaborators.Audit,
 		Logistics: logistics.NewRegistry(settings.LogisticsEnabled),
 	}
 	if err := module.attachMoney(settings, collaborators, logger); err != nil {
