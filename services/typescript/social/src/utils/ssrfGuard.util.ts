@@ -17,6 +17,27 @@ const blockedIpv4Ranges: readonly (readonly [string, number])[] = [
   ["203.0.113.0", 24], ["224.0.0.0", 4], ["240.0.0.0", 4],
 ];
 
+function extractRawAuthorityHost(rawUrl: string): string | undefined {
+  const schemeEnd = rawUrl.indexOf("://");
+  if (schemeEnd < 1) return undefined;
+  const authorityStart = schemeEnd + 3;
+  const authorityEnd = rawUrl.slice(authorityStart).search(/[\\/?#]/);
+  const authority = rawUrl.slice(authorityStart, authorityEnd < 0 ? undefined : authorityStart + authorityEnd);
+  const hostPort = authority.slice(authority.lastIndexOf("@") + 1);
+  if (hostPort.startsWith("[")) {
+    const close = hostPort.indexOf("]");
+    return close < 0 ? undefined : hostPort.slice(1, close);
+  }
+  return hostPort.split(":", 1)[0]?.toLowerCase().replace(/\.$/, "");
+}
+
+function hasNonCanonicalNumericIpLabel(hostname: string): boolean {
+  const labels = hostname.toLowerCase().split(".");
+  if (labels.length < 2 || labels.length > 4 || !labels.every((label) => /^(?:\d+|0x[\da-f]+)$/i.test(label))) return false;
+  if (labels.length !== 4 || labels.some((label) => /^0x/i.test(label) || (label.length > 1 && label.startsWith("0")))) return true;
+  return labels.some((label) => Number(label) > 255);
+}
+
 function convertIpv4ToNumber(address: string): number {
   return address.split(".").reduce((total, octet) => total * 256 + Number(octet), 0);
 }
@@ -81,6 +102,8 @@ export function isPublicIpAddress(address: string): boolean {
 }
 
 export function assertUrlIsSafeToFetch(rawUrl: string): URL {
+  const rawHost = extractRawAuthorityHost(rawUrl);
+  if (rawHost !== undefined && hasNonCanonicalNumericIpLabel(rawHost)) throw new BlockedUrlError("non-canonical numeric address");
   let url: URL;
   try {
     url = new URL(rawUrl);

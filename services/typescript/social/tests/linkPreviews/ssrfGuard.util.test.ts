@@ -22,7 +22,7 @@ describe("assertUrlIsSafeToFetch", () => {
   it.each([
     "file:///etc/passwd", "ftp://example.com/x", "gopher://example.com", "javascript:alert(1)", "http://user:pass@example.com/", "http://example.com:8080/",
     "http://localhost/", "http://LOCALHOST./", "http://api.internal/", "http://printer.local/", "http://127.0.0.1/", "http://[::1]/", "http://[::ffff:127.0.0.1]/",
-    "http://169.254.169.254/latest/meta-data/", "http://2130706433/", "http://0x7f000001/", "http://metadata.google.internal/", "http://intranet/", "not a url",
+    "http://169.254.169.254/latest/meta-data/", "http://2130706433/", "http://0x7f000001/", "http://0177.0.0.1/", "http://0x7f.0.0.1/", "http://127.1/", "http://0135.0270.0330.042/", "http://metadata.google.internal/", "http://intranet/", "not a url",
   ])("rejects %s", (url) => {
     expect(() => assertUrlIsSafeToFetch(url)).toThrow(BlockedUrlError);
   });

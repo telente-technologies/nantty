@@ -34,6 +34,20 @@ describe("probe classification", () => {
     expect(classifyCompletedRequest({ path: `/api/v1/orders/${orderId(1)}`, status: 200, hasConsumerPrincipal: true })).toBeUndefined();
   });
 
+  it("classifies additional private business, sandbox, and platform resources", () => {
+    const paths = [
+      ["/api/v1/seller/analytics/", "sellerAnalytics"], ["/api/v1/seller/segments/", "sellerSegment"],
+      ["/api/v1/seller/marketing/", "sellerMarketing"], ["/api/v1/seller/shipping/", "sellerShipping"],
+      ["/api/v1/seller/affiliates/", "sellerAffiliate"], ["/api/v1/seller/business-documents/", "sellerBusinessDocument"],
+      ["/api/v1/sandbox/", "sandboxResource"], ["/api/v1/lives/", "live"], ["/api/v1/spaces/", "space"],
+      ["/api/v1/escrows/", "escrow"], ["/api/v1/cart/", "cart"], ["/api/v1/verification/", "verification"],
+      ["/api/v1/invitations/", "invitation"],
+    ] as const;
+    for (const [prefix, resourceType] of paths) {
+      expect(classifyCompletedRequest({ path: `${prefix}${orderId(8)}`, status: 403, hasConsumerPrincipal: true })?.resourceType).toBe(resourceType);
+    }
+  });
+
   it("flags consumer tokens on admin routes and replayed idempotency keys", () => {
     expect(classifyCompletedRequest({ path: "/api/v1/admin/users", status: 403, hasConsumerPrincipal: true })?.kind).toBe("adminRoute");
     expect(classifyCompletedRequest({ path: "/api/v1/admin/users", status: 403, hasConsumerPrincipal: false })).toBeUndefined();
