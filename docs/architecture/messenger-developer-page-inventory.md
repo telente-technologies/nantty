@@ -1,6 +1,6 @@
 # Messenger and Developer Platform page inventory
 
-This inventory records the repository state as of 2026-11-14. “Implemented” means a route/component and its real service contract exist; it does not imply production deployment or complete visual QA. Planned routes are intentionally not shown as callable APIs.
+This inventory was started on 2026-11-14; its page tables were reconciled with source on 2026-11-17. “Implemented in source” does not imply production deployment, native execution or complete visual QA. Later historical paragraphs below describe their original execution and should not override the updated tables; see the [master matrix](../master/NANTTY_REQUIREMENTS_MATRIX.md) for verification evidence.
 
 ## Nantty Messenger
 
@@ -11,7 +11,7 @@ This inventory records the repository state as of 2026-11-14. “Implemented” 
 | Forgot/reset password | App root → Forgot password | Existing Nantty account | Existing `/api/v1/auth/otp/send`, `/verify`, `/password/reset` | Email, code, password, success, error; **implemented** | TypeScript compile; live API unavailable |
 | Inbox | Signed-in app shell | Authenticated Messenger session | `GET /api/v1/conversations?filter=all` | Loading, empty, error, populated; **implemented** | Conversation contract tests pass |
 | Conversation, send, realtime | Inbox → conversation | Authenticated, active member, E2EE keys available | Existing conversation/message, recipient, read, media, and authenticated realtime endpoints | Encrypted text/image send, reactions, typing, read state, cursor history, outbox retry; **implemented in client** | Messenger typecheck and 28 unit/contract tests pass; device/server integration still outstanding |
-| Stories | App shell Stories section | Authenticated | Shared tray/list/seen endpoints plus photo publishing through existing Media/Social endpoints; encrypted replies and video playback remain missing | Data-backed tray, photo viewer and photo composer; video poster-only; **partial** | Upload orchestration tests and app TypeScript pass; native picker/upload/publish runtime not exercised |
+| Stories | App shell Stories section | Authenticated | Shared tray/list/seen, Media/Social publishing, encrypted Story replies and Expo video playback | Photo/video playback, photo publishing and encrypted replies are **implemented in source; device unverified** | See [current implementation status](../../apps/messenger/docs/CHAT_BUBBLES_IMPLEMENTATION_STATUS.md); signed-in cross-client/native workflows remain open |
 | Security requests/devices | Main Nantty Settings → Security | Existing Nantty session | `/api/v1/auth/messenger/authorizations`, `/devices` | Loading, empty, error, approve, deny, issue code, revoke; **implemented** | Main app TypeScript compile |
 
 Detailed security contract: [`messenger-auth-contract.md`](messenger-auth-contract.md).
@@ -25,11 +25,11 @@ Detailed security contract: [`messenger-auth-contract.md`](messenger-auth-contra
 | Business Messaging contract preview | `/messaging`, `/docs/business-messaging`, `/docs/messaging`; on the docs host also `/business-messaging` and `/messaging` | Public | Proposed endpoint map, scope and webhook event inventory, and explicit privacy/release gates; no API traffic is simulated | Developer production build and local host-header smoke test passed |
 | Developer overview | `/dashboard` | Public service overview | Gateway readiness is live; Developer service states remain unavailable until their owning backends are connected | Must not imply that gateway readiness means organization, credential, webhook, billing, or request-log readiness |
 | Developer applications | `/applications` | Nantty session; Owner/Admin manage metadata and grants; other members require an eligible per-app grant for reads | Connected to Go Identity org-scoped draft registry through the authenticated BFF and Gateway. Requested scopes are not grants; credentials, approval, production environment and API traffic remain disabled. | Fresh-schema Postgres lifecycle integration passes; Gateway/BFF policy and typechecks pass. Browser workflow, persistent migration and production SSO remain unverified. |
-| Developer sections | `/credentials`, `/docs`, `/messaging`, `/webhooks`, `/requests`, `/usage` | Nantty login + service-specific organization permissions | Preview shell. Credential issuance, public messaging, webhooks, request logs, usage and billing services are not connected. | Loading, empty, unauthorized, forbidden, quota, server and success states not operational |
-| Product catalog, plans, changelog, OpenAPI, status | Spec routes/endpoints | Public | **Missing or not established as published API contracts** | Contract and response tests required |
+| Developer sections | `/credentials`, `/webhooks`, `/requests`, `/usage` | Nantty login + service-specific organization permissions | Sandbox test credentials, Sandbox webhooks and request/usage BFFs and workspaces are **implemented in source**. Production credentials, public messaging and billing remain unavailable. | Signed-in browser, new quota migration and controlled receiver verification remain open |
+| Product catalog, plans, changelog, OpenAPI, status | Spec routes/endpoints | Public | Documentation and OpenAPI routes exist; production Business Messaging routes remain draft, and production plan/billing APIs are not established. | Validate published contract against implemented Sandbox routes; do not present draft production operations as live |
 | Developer onboarding/organization | `GET`/`POST /api/v1/developer/organizations`, organization detail/access/roles, member list/detail, member role update/removal, organization update, step-up ownership transfer, and owner-only audit log through the gateway to Go Identity | Verified Nantty session; creator becomes owner; members.manage for team management; organization.manage for org updates; fresh step-up for transfer; security.manage for audit log | **Backend routes and Developer organization UI connected in source; database and production SSO unverified** | Go role-policy tests and Gateway route tests pass; database integration compiled but skipped because local PostgreSQL is unavailable; Identity migrations remain unapplied |
 
-The applications page reads and mutates real draft application records. It does not simulate secrets, grants, review decisions, request logs, usage or public API traffic. Other Developer sections remain non-operational until their owning services exist.
+The applications page reads and mutates draft application records. Separate sections also implement Sandbox test credentials, webhooks and request/usage inspection; these require configured services and end-to-end verification. Production credentials, approval and public API traffic remain unavailable.
 
 `apps/developer/src/proxy.ts` maps the exact `docs.nantty.com` host to the public `/docs` route and its documentation aliases. This is a code-level route only. A read-only Cloudflare Pages inventory on 2026-11-13 found projects for the main site, Studio, Creator, and Ads, but no Developer project; the repository's existing Pages deploy workflow deploys `apps/web` to `nantty-main`. Therefore the docs hostname is not live. It needs a compatible deployment for `apps/developer` and the `docs.nantty.com` custom-domain binding before launch. No Cloudflare resources or DNS were changed.
 
@@ -37,11 +37,11 @@ The applications page reads and mutates real draft application records. It does 
 
 | Page | Route | Intended access | Current dependency/status | Required states/test coverage |
 |---|---|---|---|---|
-| Test applications | `/test-apps` | Developer organization member | Preview only; sandbox credential/tenant service **not connected** | Empty, create, validation, quota, error; no real service yet |
-| API explorer | `/explorer` | Authorized developer | Disabled preview; isolated API and test credentials **missing** | Request/response, auth failure, rate limit and isolation tests |
-| Messaging scenarios | `/messaging`, `/scenarios` | Authorized developer | Preview only; deterministic synthetic business/customer/conversation service **missing** | Scenario lifecycle and reset tests |
-| Webhook events | `/events` | Authorized developer | Preview only; signing/delivery/SSRF safeguards **missing** | Signature, retry, replay and dead-letter tests |
-| Request log and guide | `/requests`, `/docs` | Authorized developer / public docs as appropriate | Preview content; no sandbox traffic/API contract **published** | Redaction, environment separation and documentation contract tests |
+| Test applications | `/test-apps` | Developer organization member | Sandbox test-credential service and workspace **implemented in source** | Verify authorized browser flow, migration and quota behavior |
+| API explorer | `/explorer` | Authorized developer | Test-only explorer and server proxy **implemented in source** | Verify actual requests, auth failure, rate limit and production isolation |
+| Messaging scenarios | `/messaging`, `/scenarios` | Authorized developer | Synthetic conversation, messaging and scenarios **implemented in source** | Verify database migration, scenario lifecycle, reset and browser integration |
+| Webhook events | `/events` | Authorized developer | Sandbox event inspection and signed webhook delivery infrastructure **implemented in source** | Verify an actual controlled HTTPS receiver, signatures, retries and permissions |
+| Request log and guide | `/requests`, `/docs` | Authorized developer / public docs as appropriate | Request-log workspace and OpenAPI documentation exist in source | Verify traffic, redaction, environment isolation and contract parity |
 
 ## Internal administration
 

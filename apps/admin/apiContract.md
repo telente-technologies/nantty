@@ -1100,7 +1100,7 @@ Queued automatically on publish for `terms` and `privacy` and for any material c
 | GET | `/admin/legal/notices`, `/admin/legal/notices/{id}` | view | `LegalNoticeProgress { id, documentKey, documentTitle, versionId, versionNumber, subject, status: "QUEUED"|"SENDING"|"COMPLETED", recipientCount, sentCount, excludedHardBounces, excludedSuppressed, batchSize, ratePerSecond, batchesTotal, batchesDone, queuedAt, queuedByName, estimatedCompletionAt, provider }`. The console polls every 3 seconds while sending. | — |
 | POST | `/admin/legal/notices` | notices.send, **step-up** | `{ versionId, reason }` (resend a published version) → `201 LegalNoticeProgress`. `409 NOT_PUBLISHED`, `409 NOTICE_IN_PROGRESS`. | `legal_notice.queued` |
 
-Preview rendering: the console shows a placeholder frame until the `policyUpdated` template from `@nantty/email-templates` exists (`apps/admin/src/components/legal/legalNoticeEmailFrame.tsx` is the one place to wire it; props are the `LegalNoticeDraft` fields).
+Preview rendering: `LegalNoticeEmailFrame` requests a rendered `policyUpdated` preview through the email-template API; the template exists in `packages/emailTemplates/src/templates/privacy.template.tsx`. The source path is implemented; verify the authenticated admin-to-notifications preview and test-send workflows in a running environment.
 
 ### User-facing endpoints (mocked in apps/webapp and apps/mobile)
 

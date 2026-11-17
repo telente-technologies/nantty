@@ -498,7 +498,9 @@ Requirement (2 Oct): impressions counter last everywhere + owner-only analytics 
 
 ---
 
-## 13. Verification checkmarks — business (gold) vs personal (blue) **[PROPOSAL]**
+## 13. Verification checkmarks — business (gold) vs personal (blue) **[IMPLEMENTED IN PART; HISTORICAL DESIGN]**
+
+Current subscription and verification code supersedes the original proposal below; see the [master requirements matrix](master/NANTTY_REQUIREMENTS_MATRIX.md) for current pricing, entitlements and verification gates. Do not infer that all billing and production workflows are verified from this heading.
 
 Requirement (2 Oct): *"businesses and brands use gold checkmarks, while users use only blue. If a user pays for a business checkmark for their store — which appears beside the store or brand name — they must purchase their personal one separately. They can pay for only the business, or only the personal, or both; the two must never conflict."*
 
