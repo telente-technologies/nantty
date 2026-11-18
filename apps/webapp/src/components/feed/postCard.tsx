@@ -39,7 +39,6 @@ import { AppIcon } from "@/components/ui/appIcon";
 import { buildProductPath, buildProfilePath } from "@/utils/seoPaths.util";
 import { PostLinkCard } from "./postLinkCard";
 import { SensitiveContentGate } from "./sensitiveContentGate";
-import { ViewQuotesLink } from "./viewQuotesLink";
 import { usePostNotificationMute } from "./postNotificationMute.hook";
 import { canOfferPostNotificationMute } from "@/utils/postNotificationMute.util";
 import { QuotedPostCard } from "./quotedPostCard";
@@ -198,7 +197,6 @@ function OrganicPostCard({ post, priority = false, swipeable = false, showPinned
           onToggleLike={toggleLike}
           likePopSignal={likePopSignal}
         />
-        <ViewQuotesLink post={post} />
       </footer>
     </article>
     </PostSurfaceProvider>

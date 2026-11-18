@@ -1,3 +1,8 @@
+.actions {
+  display: flex;
+  flex-direction: column;
+}
+
 .row {
   --action-like: #d3135f;
   display: flex;
