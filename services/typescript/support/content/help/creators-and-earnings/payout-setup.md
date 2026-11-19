@@ -29,7 +29,7 @@ Payout verification is an identity check with a government ID, plus a payout acc
 - Ads Manager
 - Adding money to your wallet (Nigeria)
 
-The identity check (selfie and ID, level 2) raises your withdrawal limit and is needed for checkmarks.
+The approved identity check (level 2) raises your withdrawal limit and is needed for checkmarks. The method offered depends on your country and may be a photo-ID check or an ID-number check hosted securely by our identity partner.
 
 ## Before setup is finished
 

@@ -80,7 +80,7 @@ See [Upload failed](/help/troubleshooting/upload-failed) for size limits.
 | Message | What to do |
 |---|---|
 | "Verify your payout details to continue. Nothing you have earned is lost while you verify." | Finish payout verification. |
-| "Finish the identity check (selfie and ID) to continue." | Complete the selfie and ID check. |
+| "Finish the identity check to continue." | Open Verify identity and complete one of the methods currently offered for your country. |
 | "Amount is more than your available balance." | Withdraw less. |
 | "This withdrawal is too small to cover the bank transfer fee." | Withdraw a larger amount. |
 | "You have reached today's number of withdrawals." | Try again tomorrow. |

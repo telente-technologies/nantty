@@ -41,7 +41,7 @@ You must complete identity verification (L1) before you can sell. If you try ear
 
 ## Identity checks by country
 
-Accepted IDs differ by country: for example NIN in Nigeria, the Ghana Card in Ghana, a national ID in Kenya and South Africa, and a passport anywhere. See [The selfie and ID check](/help/checkmarks-and-verification/identity-check).
+Accepted identity methods and ID types differ by country and by the products enabled for Nantty. The verification screen lists the options currently available to you; no document type is guaranteed to be accepted in every country. Nigerian options may include NIN number checks when enabled. See [How identity checks work](/help/checkmarks-and-verification/identity-check).
 
 ## Good to know
 

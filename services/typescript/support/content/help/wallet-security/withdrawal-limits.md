@@ -33,4 +33,4 @@ Every withdrawal also needs a fresh [step-up check](/help/wallet-security/step-u
 
 ## Raising your limit
 
-Finish the identity check (selfie and ID) to reach level 2. See [Verification levels](/help/checkmarks-and-verification/verification-levels).
+Finish one of the identity methods offered for your country to reach level 2. See [Verification levels](/help/checkmarks-and-verification/verification-levels).

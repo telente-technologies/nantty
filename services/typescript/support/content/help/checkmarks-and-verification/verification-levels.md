@@ -1,11 +1,11 @@
 ---
 title: Verification levels (L0, L1, L2)
-summary: Nantty has three money verification levels. L0 is a verified email, L1 confirms your payout details, and L2 adds a selfie and ID check.
+summary: Nantty has three money verification levels. L0 is a verified email, L1 confirms your payout details, and L2 adds an approved identity check.
 tags: verification level, l0, l1, l2, kyc, bvn, payout verification, verify identity, get paid, why verify
 related: identity-check, payout-setup, withdrawal-limits, checkmarks-explained, payout-name-match, verification-faq
 ---
 
-Verification levels decide what you can do with money on Nantty. They're separate from checkmarks, although the selfie and ID check is shared.
+Verification levels decide what you can do with money on Nantty. They're separate from checkmarks, although the identity verification result may be used by both.
 
 ## L0: verified email
 
@@ -26,7 +26,7 @@ L1 unlocks your own wallet account (in Nigeria), deposits, withdrawals up to the
 
 ## L2: biometric
 
-You take a selfie video and a photo of your ID, and our identity partner matches your face to the ID.
+Complete the identity method shown for your country. This may be a photo-ID check that includes a selfie/liveness step, or an ID-number check completed on our identity partner's secure hosted page. The available methods are shown before you consent.
 
 L2 unlocks higher withdrawal caps, the Blue or Gold checkmark and business plans.
 
@@ -45,9 +45,9 @@ L2 unlocks higher withdrawal caps, the Blue or Gold checkmark and business plans
 ## If something goes wrong
 
 - **"Verify your payout details to continue. Nothing you have earned is lost while you verify."** You need L1. Tap **Get paid**.
-- **"Finish the identity check (selfie and ID) to continue."** You need L2. Tap **Verify identity**.
+- **"Finish the identity check to continue."** You need L2. Tap **Verify identity** and use one of the methods currently offered for your country.
 - **"We couldn't confirm your verification. Try again in a moment."** A temporary problem. Try again shortly.
 
 ## Stay safe
 
-Only enter your BVN, NIN or ID inside the Nantty app or on app.nantty.com. Nantty staff will never ask for them in chat.
+Only provide identity information in the official Nantty verification flow or on the secure identity-partner page opened from it. Some ID-number checks are hosted by Smile ID; verify that you followed the link from Nantty and never send a BVN, NIN, ID number or document to staff in chat or support messages.

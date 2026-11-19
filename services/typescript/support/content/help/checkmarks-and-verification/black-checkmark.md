@@ -27,7 +27,7 @@ Government ministries, departments, agencies, state and local governments and pu
 
 - Re-verification, renewal, cancellation and revocation requirements must be stated in the approved program and subscription terms.
 - The badge grants no staff, moderation or financial privileges.
-- The selfie and ID check used for Blue and Gold doesn't apply to Black.
+- The identity check used for Blue and Gold doesn't apply to Black; government applications follow a separate manual-vetting process.
 
 ## If something goes wrong
 

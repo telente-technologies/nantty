@@ -1,38 +1,32 @@
 ---
-title: The selfie and ID check
-summary: How the identity check works: a short selfie video and a photo of your government ID, checked by our identity partner. Nantty keeps only the result.
+title: Verify your identity
+summary: Choose an available photo-ID or ID-number check. Smile ID handles the sensitive information; Nantty keeps the verification result and required audit details.
 tags: identity check, selfie, id check, face match, liveness, nin, verify identity, kyc, smile id
 related: verification-levels, blue-checkmark, gold-checkmark, checkmark-rejected, verification-faq
 ---
 
-The identity check confirms you're a real person and that you match your photo ID. It is used for the Blue and Gold checkmarks and for level L2 payout verification.
+The identity check supports Blue and Gold checkmark applications. A photo-ID check includes a selfie and document review. Where an ID-number option is available, Smile ID checks that number through its secure page. Verification options depend on issuing country and the methods enabled for Nantty.
 
 ## Who this is for
 
-People getting a Blue or Gold checkmark, and anyone moving to L2 for higher withdrawal limits. For checkmarks you pay first, then do the check. Government bodies use a separate vetting process instead.
+People getting a Blue or Gold checkmark. For checkmarks you pay first, then do the check. Government bodies use a separate vetting process instead.
 
 ## How to do the check
 
 1. In the app open **Profile > More > Get verified**, or tap **Verify identity** on your Wallet.
-2. Choose where your ID was issued and which photo ID you'll use.
-3. Read the consent points and agree to our identity partner, Smile ID, processing your selfie and ID photo.
-4. Tap the button to start. A secure verification page opens.
-5. Record a short selfie video, then photograph your ID.
-6. You'll see **Checking your selfie and ID**. This usually takes a minute or two, and you can leave the screen. We'll notify you.
+2. Choose the country that issued your ID.
+3. Choose an available method: photo ID and selfie, or an ID-number check. The choices shown are the ones currently enabled for Nantty in your country.
+4. Read the consent points and Nantty's privacy policy. Agree only if you want to continue.
+5. Tap **Continue to identity check**. Smile ID opens its secure page to collect the information needed for the method you chose.
+6. When submitted, Nantty waits for Smile ID's verified result. You can leave the screen; we'll update the status and notify you.
 
 ## Accepted IDs
 
-- **Nigeria**: NIN slip, National ID card (NIN), international passport, driver's licence, voter's card.
-- **Ghana**: Ghana Card, passport, driver's licence, voter's card.
-- **Kenya**: National ID, passport, alien card.
-- **South Africa**: National ID, green ID book, passport.
-- **Elsewhere**: passport, national ID or driver's licence.
-
-Where available we also confirm your ID number with the government database, for example your NIN.
+Available photo IDs and ID-number types vary by country and by Nantty's provider activation. The app lists the actual options available to your account. Nigerian ID-number options may include NIN_V2, NIN_SLIP and V_NIN when enabled. NIN_V2 has an additional provider prerequisite, so it may not be available. Smile ID collects ID numbers on its secure page; Nantty does not ask you to send them in chat or to support.
 
 ## Your privacy
 
-Nantty keeps only the result, your ID type, country and the verification date. We never store your face data or keep your selfie or ID images. Biometric data is sensitive personal data; you can withdraw consent before the check by closing the screen.
+Nantty does not store your selfie, ID images or raw ID number. It keeps the result, ID type, country, verification date and a keyed fingerprint used to prevent the same ID being reused across accounts. A photo-ID selfie involves sensitive biometric data. You may decline before starting; after submitting, contact support to ask about withdrawing consent or deleting eligible data. Do not include your ID number or documents in a support request.
 
 ## Good to know
 
@@ -42,7 +36,7 @@ Nantty keeps only the result, your ID type, country and the verification date. W
 ## If something goes wrong
 
 - **"Pay for your checkmark first."** Buy the plan before starting the check.
-- **"The identity check is not available right now. Try again in a few minutes."**
-- **"This verification is no longer waiting for a selfie and ID."** It's already being checked or decided.
+- **No options appear for your country.** Nantty may not have a provider-enabled check for that country yet. Contact support if you believe an available document or ID-number method is missing.
+- **The verification screen says it is waiting for an update.** Keep the app connected. If you closed the Smile ID page, the current capture can be restarted after its one-hour retry window. Contact support if it remains pending after that; do not send ID information in a support request.
 - **"This profile already has a checkmark."** Nothing more to do.
 - Not approved? See [If your checkmark is rejected](/help/checkmarks-and-verification/checkmark-rejected).

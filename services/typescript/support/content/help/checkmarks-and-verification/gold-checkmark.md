@@ -25,7 +25,7 @@ Gold plan purchase channels depend on the specific legacy plan and configured na
 2. Go to **Profile > More > Get verified**. Under **Gold: businesses and brands** you'll see **Gold after business verification**.
 3. Tap **Manage on the web** to choose and pay for a Gold plan.
 4. Upload your [business documents](/help/checkmarks-and-verification/business-documents) if you haven't already.
-5. Tap **Verify your identity** and complete the selfie and ID check for the owner.
+5. Tap **Verify your identity** and complete one of the methods currently offered for the owner in the issuing country.
 6. When everything is approved you'll see **Your business profile is verified**.
 
 ## Multiple business profiles

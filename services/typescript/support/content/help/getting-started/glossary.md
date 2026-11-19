@@ -24,7 +24,7 @@ New words on Nantty, explained simply. Follow the links for the details.
 
 - **L0**: verified email. You can browse and buy.
 - **L1 (payout verified)**: your payout details are confirmed. You can receive money and withdraw.
-- **L2 (biometric)**: selfie and ID check done. Higher limits and checkmarks.
+- **L2 (identity verified)**: the approved identity check for the available country-specific method is complete. Higher limits and checkmarks.
 
 See [Verification levels](/help/checkmarks-and-verification/verification-levels).
 
