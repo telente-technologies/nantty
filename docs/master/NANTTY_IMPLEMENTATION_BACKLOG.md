@@ -586,3 +586,9 @@ Prioritized from the repository baseline and the requested cross-product scope. 
 
 - Extended the Mobile method-selector tests to exercise all three distinct Nigerian ID-number types (`NIN_V2`, `NIN_SLIP`, `V_NIN`) while still excluding bank-account lookups. Added coverage proving Mobile hides Enhanced Document Verification when entitlement status is absent or unavailable and shows it only when the backend returns `available`.
 - Verification: focused Mobile identity consent/component tests pass (10/10); focused Mobile ESLint passes. No live Smile catalog or account entitlement was substituted for these deterministic UI-contract tests.
+
+### 2026-11-19 — Retry Smile V3 technical callback failures safely
+
+- Provider `status: error` callbacks with a documented, product-specific retryable reason previously entered human review, where the user could not start a fresh attempt. Added a fail-closed reason/product matrix from Smile's product error tables. Eligible callbacks now atomically clear only the active Smile job/user binding, retain the provider job reference and `error` result code, reset check values to not-done, and return the same case to `awaiting_capture`. A new attempt still requires current explicit consent and receives a fresh attempt/user ID.
+- An exact duplicate retryable-error callback is acknowledged as replayed, while an old callback after a new attempt is rejected by attempt binding. Non-retryable errors, unknown reasons and `attention` remain in human review. Web and Mobile show a safe retry explanation without exposing provider text or sensitive ID values.
+- Verification: focused Users integration + service tests pass, including retry, duplicate callback idempotency, fresh attempt IDs, stale callback rejection, and the product-specific retry matrix. Full Users suite, Web/Mobile typechecks and frontend tests remain to be run in this session; Smile sandbox behavior remains an external verification gate.
