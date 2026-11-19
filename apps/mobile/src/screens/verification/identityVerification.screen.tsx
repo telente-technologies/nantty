@@ -115,6 +115,7 @@ function JourneyBody({ journey, paymentStepRequested, requesting, requestError, 
     }
     return (
       <>
+        {verification.retryableProviderError ? <StatusCard pill="Try again" tone="caution" title="That check couldn't be completed" body="Smile ID reported a temporary service or image issue. Start a new check and follow the capture instructions. If it keeps happening, contact support. This technical error did not approve or reject your identity." /> : null}
         <StatusCard pill="Payment received" tone="success" title="One last step: confirm it's you" body={`Your ${badgeName} checkmark is paid for. Choose a supported photo ID or ID-number check to finish.`} />
         <IdentityConsentStep starting={capturing} errorMessage={captureError} privacyPolicyUrl={journey.privacyPolicyUrl} onStart={onCapture} />
       </>
