@@ -116,6 +116,7 @@ const verificationRoutes: ApiRouteDefinition[] = [
   read("/admin/verification-cases", ["verification:review"]),
   read("/admin/verification-cases/:id", ["verification:review"]),
   write("POST", "/admin/verification-cases/:id/{approve|reject}", ["verification:review"], sensitive),
+  write("POST", "/admin/verification-cases/:id/replay-callback", ["verification:review"], sensitive),
   read("/admin/business-documents", ["verification:review"]),
   read("/admin/business-documents/:id/documents/:documentId/access", ["verification:documents"]),
   write("POST", "/admin/business-documents/:id/documents/:documentId/{approve|reject}", ["verification:review"], sensitive),

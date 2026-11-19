@@ -136,6 +136,7 @@ describe("admin BFF route table", () => {
       ["POST", "/admin/legal/versions/v1/publish"],
       ["POST", "/admin/legal/notices"],
       ["PUT", "/admin/config/plans"],
+      ["POST", "/admin/verification-cases/c1/replay-callback"],
     ];
     for (const [method, path] of sensitive) assert.equal(doesApiCallRequireStepUp(method, path), true, `${method} ${path}`);
     assert.equal(doesApiCallRequireStepUp("POST", "/admin/chat-reports/r1/actions", { action: "BAN_USER", reason: "abuse" }), true);

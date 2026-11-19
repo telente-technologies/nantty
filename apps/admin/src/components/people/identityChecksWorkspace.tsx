@@ -21,11 +21,17 @@ const columns: readonly DataTableColumn<IdentityCaseListItem>[] = [
   { key: "badge", header: "Badge", render: (item) => humanizeConstantName(item.color) },
   {
     key: "checks",
-    header: "Smile ID checks",
+    header: "Verification checks",
     render: (item) => (
       <span className={styles.stack}>
-        <StatusBadge tone={identityCheckTone[item.checks.liveness]} label={`Liveness ${humanizeConstantName(item.checks.liveness)}`} />
-        <StatusBadge tone={identityCheckTone[item.checks.faceMatch]} label={`Face ${humanizeConstantName(item.checks.faceMatch)}`} />
+        {item.product === "enhanced_kyc" ? (
+          <StatusBadge tone={identityCheckTone[item.checks.databaseLookup]} label={`ID-number lookup ${humanizeConstantName(item.checks.databaseLookup)}`} />
+        ) : (
+          <>
+            <StatusBadge tone={identityCheckTone[item.checks.liveness]} label={`Liveness ${humanizeConstantName(item.checks.liveness)}`} />
+            <StatusBadge tone={identityCheckTone[item.checks.faceMatch]} label={`Face ${humanizeConstantName(item.checks.faceMatch)}`} />
+          </>
+        )}
       </span>
     ),
   },
@@ -43,7 +49,7 @@ export function IdentityChecksWorkspace() {
 
   return (
     <>
-      <PageHeader area="People" title="Identity checks" description="Paid Blue and Gold checkmarks verified with Smile ID (selfie liveness, photo ID, face match and a government lookup where available). Clean results are approved automatically; everything else waits here. Rejecting refunds the payment automatically." />
+      <PageHeader area="People" title="Identity checks" description="Paid Blue and Gold checkmarks verified through the configured identity method. The checks shown for each case reflect the Smile ID product used. Clean eligible results are approved automatically; exceptions wait here." />
       <LinkTabs label="Verification views" items={verificationViewTabs} />
       <SegmentedTabs label="Identity check status" items={identityCaseStatusTabs} activeKey={status} onChange={setStatus} />
       {errorMessage ? <ErrorBlock error={queryError} message={errorMessage} onRetry={reload} /> : null}

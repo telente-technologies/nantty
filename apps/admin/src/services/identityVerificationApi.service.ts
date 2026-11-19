@@ -12,3 +12,7 @@ export function fetchIdentityCaseDetail(caseId: string, signal?: AbortSignal): P
 export function decideIdentityCase(caseId: string, decision: IdentityCaseDecision, reason: string): Promise<IdentityCaseDetail["case"]> {
   return sendAdminApiRequest(`/admin/verification-cases/${encodeURIComponent(caseId)}/${decision}`, { method: "POST", body: { reason } });
 }
+
+export function replayIdentityCaseCallback(caseId: string, jobId: string, reason: string): Promise<{ readonly accepted: boolean; readonly message: string }> {
+  return sendAdminApiRequest(`/admin/verification-cases/${encodeURIComponent(caseId)}/replay-callback`, { method: "POST", body: { jobId, reason } });
+}

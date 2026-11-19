@@ -1,6 +1,7 @@
 export type IdentityCaseStatus = "awaiting_consent" | "awaiting_capture" | "processing" | "under_review" | "approved" | "rejected";
 export type IdentityRefundStatus = "not_applicable" | "requested" | "refunded" | "not_charged" | "failed" | "manual_store_refund";
 export type IdentityCheckResult = "passed" | "failed" | "review" | "not_done" | "pending" | "matched";
+export type IdentityVerificationProduct = "document_verification" | "enhanced_document_verification" | "enhanced_kyc" | "";
 
 export interface IdentityCaseChecks {
   readonly liveness: IdentityCheckResult;
@@ -23,6 +24,7 @@ export interface IdentityCase {
   readonly refundMethod: string;
   readonly refundScope: "full" | "checkmark_share";
   readonly consentGiven: boolean;
+  readonly product: IdentityVerificationProduct;
   readonly documentType: string;
   readonly documentCountry: string;
   readonly checks: IdentityCaseChecks;

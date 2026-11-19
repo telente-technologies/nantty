@@ -9,11 +9,12 @@ import { ErrorBlock, LoadingBlock } from "@/components/ui/feedback";
 import { PageHeader } from "@/components/ui/pageHeader";
 import { StatusBadge } from "@/components/ui/statusBadge";
 import { Card, KeyValueList, TwoColumnLayout } from "@/components/ui/surfaces";
+import { TextField } from "@/components/ui/formFields";
 import { useToast } from "@/components/ui/toastProvider";
 import { identityCheckTone, identityReasonCopy, refundStatusCopy } from "@/constants/identityVerification.constant";
 import { useAdminMutation } from "@/hooks/useAdminMutation.hook";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
-import { decideIdentityCase, fetchIdentityCaseDetail } from "@/services/identityVerificationApi.service";
+import { decideIdentityCase, fetchIdentityCaseDetail, replayIdentityCaseCallback } from "@/services/identityVerificationApi.service";
 import type { IdentityCaseDecision, IdentityCaseDetail } from "@/types/identityVerification.type";
 import { formatDateTime, humanizeConstantName } from "@/utils/formatting.util";
 
@@ -44,17 +45,22 @@ export function IdentityCheckDetailWorkspace({ caseId }: { readonly caseId: stri
   const { can } = useAdminPermissions();
   const { showToast } = useToast();
   const [decision, setDecision] = useState<IdentityCaseDecision | null>(null);
+  const [replayOpen, setReplayOpen] = useState(false);
+  const [replayJobId, setReplayJobId] = useState("");
   const { data: detail, errorMessage, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchIdentityCaseDetail(caseId, signal), caseId);
   const mutation = useAdminMutation(({ choice, reason }: { choice: IdentityCaseDecision; reason: string }) => decideIdentityCase(caseId, choice, reason));
+  const replayMutation = useAdminMutation(({ jobId, reason }: { jobId: string; reason: string }) => replayIdentityCaseCallback(caseId, jobId, reason));
 
   if (errorMessage) return <ErrorBlock variant="section" message={errorMessage} onRetry={reload} />;
   if (isLoading || !detail) return <LoadingBlock lines={8} />;
   const item = detail.case;
-  const checks = [
+  const checks = item.product === "enhanced_kyc" ? [
+    { label: "ID-number authority lookup", value: item.checks.databaseLookup },
+  ] : [
     { label: "Selfie liveness", value: item.checks.liveness },
     { label: "Document valid", value: item.checks.document },
     { label: `Face match${item.checks.faceMatchConfidence > 0 ? ` (${percent(item.checks.faceMatchConfidence)})` : ""}`, value: item.checks.faceMatch },
-    { label: "Government database", value: item.checks.databaseLookup },
+    { label: item.product === "enhanced_document_verification" ? "Issuing-authority document lookup" : "Government database", value: item.checks.databaseLookup },
   ];
 
   async function confirmDecision(reason: string) {
@@ -66,13 +72,21 @@ export function IdentityCheckDetailWorkspace({ caseId }: { readonly caseId: stri
     setDecision(null);
   }
 
+  async function confirmReplay(reason: string) {
+    const result = await replayMutation.run({ jobId: replayJobId.trim(), reason });
+    if (!result?.accepted) return;
+    showToast(result.message);
+    setReplayOpen(false);
+    setReplayJobId("");
+  }
+
   return (
     <>
       <PageHeader area="People · Identity checks" title={`${humanizeConstantName(item.color)} checkmark for @${detail.profile.handle}`} meta={<><StatusBadge status={item.status.toUpperCase()} label={humanizeConstantName(item.status)} /><span className="mono">{item.id}</span></>} />
       <TwoColumnLayout
         main={
           <>
-            <Card title="Smile ID result">
+            <Card title={item.product === "enhanced_kyc" ? "Enhanced KYC ID-number result" : item.product === "enhanced_document_verification" ? "Enhanced Document Verification result" : "Smile ID photo-ID result"}>
               <ul className={styles.checkList}>
                 {checks.map((check) => (
                   <li key={check.label} className={styles.check}>
@@ -124,6 +138,9 @@ export function IdentityCheckDetailWorkspace({ caseId }: { readonly caseId: stri
                   <Button variant="quietDanger" iconName="shield24" onClick={() => { mutation.clearError(); setDecision("reject"); }}>Reject and refund</Button>
                 </div>
               ) : null}
+              {item.status === "awaiting_capture" && can("verification:review") ? <div className={styles.actionBar}>
+                <Button variant="secondary" onClick={() => { replayMutation.clearError(); setReplayJobId(""); setReplayOpen(true); }}>Replay Smile ID callback</Button>
+              </div> : null}
             </Card>
           </>
         }
@@ -141,6 +158,23 @@ export function IdentityCheckDetailWorkspace({ caseId }: { readonly caseId: stri
           onConfirm={confirmDecision}
           onClose={() => setDecision(null)}
         />
+      ) : null}
+      {replayOpen ? (
+        <ConfirmActionDialog intent="stepUp"
+          isOpen
+          title="Replay Smile ID callback"
+          description="Use this only after Smile ID shows the job as complete and its automatic callback retries have been exhausted. Replaying re-sends the provider result; it does not approve the verification."
+          consequences={["The entered job ID is sent to Smile ID with a short-lived token bound to this case’s original product and capture attempt.", "Nantty applies the result only after its normal callback signature, case, attempt, and product checks pass."]}
+          confirmLabel="Request callback replay"
+          requiresStepUp
+          isBusy={replayMutation.isRunning}
+          isConfirmDisabled={!/^job_[0-9a-z]{26}$/.test(replayJobId.trim())}
+          errorMessage={replayMutation.errorMessage}
+          onConfirm={confirmReplay}
+          onClose={() => setReplayOpen(false)}
+        >
+          <TextField label="Smile ID job ID" value={replayJobId} onChange={(event) => setReplayJobId(event.target.value)} placeholder="job_…" autoComplete="off" spellCheck={false} hint="Find the job ID in the Smile ID portal. It must match Smile’s job_ plus 26 lowercase letters or digits format." />
+        </ConfirmActionDialog>
       ) : null}
     </>
   );

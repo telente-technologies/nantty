@@ -8,9 +8,9 @@ type MockIdentityCase = { item: IdentityCaseListItem; detail: Omit<IdentityCaseD
 
 const baseCase = (overrides: Partial<IdentityCaseListItem>): IdentityCaseListItem => ({
   id: "0192f3a0-0000-7000-8000-000000000001", profileId: "p1", accountId: "a1", color: "blue", planCode: "blue", paymentChannel: "web_checkout", status: "under_review",
-  refundStatus: "not_applicable", refundMethod: "card", refundScope: "full", consentGiven: true, documentType: "NIN_SLIP", documentCountry: "NG",
-  checks: { liveness: "passed", document: "passed", faceMatch: "passed", databaseLookup: "matched", faceMatchConfidence: 0.97, nameMatchScore: 0.62 },
-  trustScore: 71, eligibleAtPayment: true, decisionReasons: ["name_does_not_match_profile"], fraudSignals: [], decisionReason: "", smileReference: "0000412233", smileResultCode: "0810",
+  refundStatus: "not_applicable", refundMethod: "card", refundScope: "full", consentGiven: true, product: "enhanced_kyc", documentType: "NIN_SLIP", documentCountry: "NG",
+  checks: { liveness: "not_done", document: "not_done", faceMatch: "not_done", databaseLookup: "matched", faceMatchConfidence: 0, nameMatchScore: 0.62 },
+  trustScore: 71, eligibleAtPayment: true, decisionReasons: ["name_does_not_match_profile"], fraudSignals: [], decisionReason: "", smileReference: "0000412233", smileResultCode: "clear",
   createdAt: readIsoTimeOffset(-180), decidedAt: null, verifiedAt: null, profileHandle: "amaka.styles", profileName: "Amaka Obi", ...overrides,
 });
 
@@ -20,7 +20,7 @@ const identityCases: MockIdentityCase[] = [
   { item: baseCase({}), detail: { profile: { handle: "amaka.styles", displayName: "Amaka Obi", profileType: "personal", accountName: "Amaka Grace Obi", accountStatus: "active", joinedAt: "2025-03-14" }, health, eligibility: { state: "eligible", tier: "buy_now", trustScore: 82, reasons: [] } } },
   {
     item: baseCase({ id: "0192f3a0-0000-7000-8000-000000000002", accountId: "a2", profileHandle: "adire.lagos", profileName: "Adire Lagos Studio", color: "gold", planCode: "gold_only", paymentChannel: "web_checkout",
-      checks: { liveness: "failed", document: "passed", faceMatch: "review", databaseLookup: "failed", faceMatchConfidence: 0.41, nameMatchScore: 0.2 }, trustScore: 44,
+      product: "document_verification", checks: { liveness: "failed", document: "passed", faceMatch: "review", databaseLookup: "not_done", faceMatchConfidence: 0.41, nameMatchScore: 0.2 }, trustScore: 44,
       decisionReasons: ["liveness_not_passed", "face_match_not_passed", "government_lookup_not_matched", "name_does_not_match_profile"], fraudSignals: ["spoof_attempt", "id_name_mismatch", "id_number_not_found"] }),
     detail: { profile: { handle: "adire.lagos", displayName: "Adire Lagos Studio", profileType: "business", accountName: "Tobi Adeyemi", accountStatus: "active", joinedAt: "2026-08-30" }, health: { ...health, realFollowers: 310, fraudScore: 46, riskScore: 38 }, eligibility: { state: "requested", tier: "request", trustScore: 44, reasons: ["account_age_below_threshold"] } },
   },
@@ -51,6 +51,21 @@ function decideCase(request: MockRequest, decision: IdentityCaseDecision) {
   return respondWithJson(200, decided satisfies IdentityCase);
 }
 
+function replayCaseCallback(request: MockRequest) {
+  requireMockPermission(request, "verification:review");
+  requireMockStepUp(request);
+  const found = findCaseOrFail(request.params.caseId);
+  if (found.item.status !== "awaiting_capture" || !["document_verification", "enhanced_document_verification", "enhanced_kyc"].includes(found.item.product)) {
+    throw new MockHttpError(409, "CALLBACK_REPLAY_NOT_ALLOWED", "This verification does not have an open Smile ID capture to replay.");
+  }
+  const body = readJsonObjectBody(request);
+  const jobId = typeof body.jobId === "string" ? body.jobId : "";
+  if (!/^job_[0-9a-z]{26}$/.test(jobId)) throw new MockHttpError(400, "SMILE_REPLAY_JOB_ID_INVALID", "Enter a valid Smile ID job ID.");
+  const reason = readRequiredReason(body);
+  recordMockAuditEntry(request, { action: "identityVerification.callbackReplayRequested", area: "verification", target: { type: "verification_case", id: found.item.id, label: `@${found.item.profileHandle}` }, before: { status: found.item.status, product: found.item.product }, after: { jobId, phase: "accepted" }, reason });
+  return respondWithJson(200, { accepted: true, message: "Smile ID accepted the callback replay. The verification updates only after Nantty receives and validates the callback." });
+}
+
 export function countIdentityCasesNeedingReview() {
   const waiting = identityCases.filter((candidate) => candidate.item.status === "under_review");
   return { count: waiting.length, oldestAt: waiting.map((candidate) => candidate.item.createdAt).sort()[0] ?? null };
@@ -69,4 +84,5 @@ export function registerPeopleIdentityCheckMockHandlers(): void {
   });
   registerMockRoute("POST", "/admin/verification-cases/:caseId/approve", (request) => decideCase(request, "approve"));
   registerMockRoute("POST", "/admin/verification-cases/:caseId/reject", (request) => decideCase(request, "reject"));
+  registerMockRoute("POST", "/admin/verification-cases/:caseId/replay-callback", replayCaseCallback);
 }
