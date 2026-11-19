@@ -10,6 +10,7 @@ import { makeThemedStyles, useTheme } from "@/theme";
 export interface GeoPickerOption {
   readonly id: string;
   readonly name: string;
+  readonly searchText?: string;
 }
 
 export interface GeoPickerFieldProps {
@@ -27,7 +28,8 @@ export function GeoPickerField({ label, options, selectedId, onSelect, disabled 
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const selected = options.find((option) => option.id === selectedId);
-  const visibleOptions = options.filter((option) => option.name.toLowerCase().includes(search.trim().toLowerCase()));
+  const query = search.trim().toLowerCase();
+  const visibleOptions = options.filter((option) => `${option.name} ${option.searchText ?? ""}`.toLowerCase().includes(query));
   const close = () => {
     setOpen(false);
     setSearch("");

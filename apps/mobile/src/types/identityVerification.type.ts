@@ -35,6 +35,7 @@ export interface IdentityJourney {
   readonly blackVetting: boolean;
   readonly planCode: string;
   readonly consentVersion: string;
+  readonly privacyPolicyUrl: string;
   readonly eligibility: IdentityEligibility | null;
   readonly case: IdentityCase | null;
   readonly checkmark: { readonly color: string; readonly status: string; readonly badgeVisible: boolean } | null;
@@ -42,8 +43,25 @@ export interface IdentityJourney {
 
 export interface IdentityDocumentTypes {
   readonly country: string;
-  readonly documentTypes: readonly string[];
-  readonly governmentLookup: boolean;
+  readonly catalogSource?: "provider" | "preview";
+  readonly documentTypes: readonly { readonly code: string; readonly name: string; readonly hasBack: boolean }[];
+  readonly enhancedDocumentTypes: readonly { readonly code: string; readonly name: string; readonly hasBack: boolean }[];
+  readonly idNumberTypes: readonly { readonly country: string; readonly type: string; readonly label: string; readonly regex: string; readonly requiredFields?: readonly string[]; readonly bankCode?: string }[];
+  readonly availability: { readonly documentVerification: boolean; readonly enhancedDocumentVerification: boolean; readonly idNumberVerification: boolean };
+  readonly enhancedDocumentEntitlementStatus?: "not_configured" | "available" | "unavailable";
+}
+
+export interface IdentityDocumentCountries {
+  readonly countries: readonly { readonly code: string; readonly name: string }[];
+  readonly catalogSource?: "provider" | "preview";
+  readonly availability: { readonly documentVerification: boolean; readonly enhancedDocumentVerification: boolean; readonly idNumberVerification: boolean };
+}
+
+export interface IdentityCaptureChoice {
+  readonly verificationMethod: "document" | "id_number";
+  readonly verificationProduct: "document_verification" | "enhanced_document_verification" | "enhanced_kyc";
+  readonly documentCountry: string;
+  readonly documentType: string;
 }
 
 export interface IdentityCaptureSession {
@@ -51,5 +69,6 @@ export interface IdentityCaptureSession {
   readonly url?: string;
   readonly token?: string;
   readonly product: string;
-  readonly jobId: string;
+  readonly caseId: string;
+  readonly captureAttemptId: string;
 }

@@ -1,3 +1,5 @@
+import type { IdentityCaptureChoice, IdentityDocumentTypes } from "@/types/identityVerification.type";
+
 const reasonCopy: Record<string, string> = {
   account_age_below_threshold: "Your account needs to be a little older.",
   real_followers_below_threshold: "Grow your real, active followers.",
@@ -11,16 +13,50 @@ const reasonCopy: Record<string, string> = {
   borderline_content: "Keep your posts within our community guidelines.",
 };
 
+export interface IdentityVerificationMethodOption {
+  readonly verificationMethod: IdentityCaptureChoice["verificationMethod"];
+  readonly verificationProduct: IdentityCaptureChoice["verificationProduct"];
+  readonly types: readonly { readonly code: string; readonly name: string }[];
+}
+
+function isPersonalIdentityNumberType(item: IdentityDocumentTypes["idNumberTypes"][number]): boolean {
+  return !item.bankCode?.trim() && item.type.trim().toUpperCase() !== "BANK_ACCOUNT" &&
+    !item.requiredFields?.some((field) => field.trim().toLowerCase() === "bank_code");
+}
+
+export function availableIdentityVerificationMethods(catalog: IdentityDocumentTypes | undefined): IdentityVerificationMethodOption[] {
+  if (!catalog) return [];
+  const options: IdentityVerificationMethodOption[] = [];
+  if (catalog.availability.documentVerification && catalog.documentTypes.length > 0) {
+    options.push({ verificationMethod: "document", verificationProduct: "document_verification", types: catalog.documentTypes });
+  }
+  if (catalog.enhancedDocumentEntitlementStatus === "available" && catalog.availability.enhancedDocumentVerification && catalog.enhancedDocumentTypes.length > 0) {
+    options.push({ verificationMethod: "document", verificationProduct: "enhanced_document_verification", types: catalog.enhancedDocumentTypes });
+  }
+  if (catalog.availability.idNumberVerification && catalog.idNumberTypes.length > 0) {
+    const matchingCountryTypes = catalog.idNumberTypes
+      .filter((item) => item.country.trim().toUpperCase() === catalog.country.trim().toUpperCase() && isPersonalIdentityNumberType(item));
+    if (matchingCountryTypes.length > 0) {
+      options.push({ verificationMethod: "id_number", verificationProduct: "enhanced_kyc", types: matchingCountryTypes.map(({ type, label }) => ({ code: type, name: label })) });
+    }
+  }
+  return options;
+}
+
 export function describeEligibilityReason(code: string): string | null {
   return reasonCopy[code] ?? null;
 }
 
-export function describeDocumentType(code: string): string {
+export function describeDocumentType(code: string, providerLabel?: string): string {
   const labels: Record<string, string> = {
-    NIN_SLIP: "NIN slip", IDENTITY_CARD: "National ID card (NIN)", PASSPORT: "International passport", DRIVERS_LICENSE: "Driver's licence", VOTER_ID: "Voter's card",
-    GHANA_CARD: "Ghana Card", NATIONAL_ID: "National ID", ALIEN_CARD: "Alien card", GREEN_BOOK: "Green ID book",
+    NIN: "National Identification Number", NIN_V2: "National ID number (NIN, 11 digits)", NIN_SLIP: "NIN slip (11-digit number)", V_NIN: "Virtual NIN (16-character code)", BVN: "Bank Verification Number (BVN)",
+    IDENTITY_CARD: "Identity card", PASSPORT: "Passport", DRIVERS_LICENSE: "Driver's licence", VOTER_ID: "Voter's ID", ALIEN_CARD: "Resident / alien ID",
   };
-  return labels[code] ?? code.replaceAll("_", " ").toLowerCase();
+  return labels[code] ?? providerLabel?.trim() ?? code.replaceAll("_", " ").toLowerCase();
+}
+
+export function sortIdentityCountries<T extends { readonly code: string; readonly name: string }>(countries: readonly T[]): T[] {
+  return [...countries].sort((left, right) => left.name.localeCompare(right.name) || left.code.localeCompare(right.code));
 }
 
 function describeCheckmarkShareRefund(refundStatus: string): string {
@@ -40,8 +76,8 @@ export function describeRefund(refundMethod: string, refundStatus: string, refun
 }
 
 export const biometricConsentPoints: readonly string[] = [
-  "Our verification partner Smile ID will capture a short selfie video to check you're a real person, and a photo of your government ID.",
-  "Smile ID compares your face with the photo on your ID and, where available, checks your ID number with the government database (for example NIN).",
-  "Nantty keeps only the result, your ID type, country and the verification date. We never store your face data or keep your selfie or ID images.",
-  "Biometric data is sensitive personal data under the Nigeria Data Protection Act. You can withdraw consent before the check by closing this screen.",
+  "Our verification partner Smile ID will use the method you choose: a selfie and photo ID, or an eligible country-specific ID-number check.",
+  "Your ID number is entered on Smile ID's secure hosted page when required; do not send it to Nantty in chat or support messages.",
+  "Nantty keeps the result, ID type, country, verification date and a one-way fingerprint to prevent the same ID being reused across accounts. We do not store your ID number, face data, selfie or ID images.",
+  "If you choose a selfie check, biometric information is sensitive personal data. You can decline before starting. After submitting, contact Nantty Support to ask about withdrawing consent or deleting eligible data.",
 ];

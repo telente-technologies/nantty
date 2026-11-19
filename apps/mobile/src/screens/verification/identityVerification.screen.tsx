@@ -1,17 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as WebBrowser from "expo-web-browser";
-import { Platform, ScrollView, StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 
 import { formatFriendlyDate } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { IdentityConsentStep, type IdentityCaptureChoice } from "@/components/verification/identityConsentStep";
-import { webAppBaseUrl } from "@/config/webAppLinks.config";
 import type { MainScreenProps } from "@/navigation/navigation.types";
 import { identityVerificationService } from "@/services/auth/identityVerification.service";
+import { webAppBaseUrl } from "@/config/webAppLinks.config";
 import { webHandoffService } from "@/services/core/webHandoff.service";
 import { PAYMENT_RETURN_URL } from "@/services/commerce/payments.service";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -22,14 +23,18 @@ const journeyKey = ["verification", "journey"] as const;
 const returnUrl = "nantty://settings/verification";
 
 function isWaitingForResult(journey: IdentityJourney | undefined): boolean {
-  return journey?.case?.status === "processing" || (journey?.case?.status === "awaiting_capture" && journey.case.consentGiven);
+  return journey?.case?.status === "processing";
 }
 
-export function IdentityVerificationScreen({ route }: MainScreenProps<"IdentityVerification">) {
+function shouldRefreshVerification(journey: IdentityJourney | undefined): boolean {
+  return isWaitingForResult(journey) || (journey?.case?.status === "awaiting_capture" && journey.case.consentGiven && !journey.case.canRetry);
+}
+
+export function IdentityVerificationScreen({ route, navigation }: MainScreenProps<"IdentityVerification">) {
   const { colors } = useTheme();
   const styles = useStyles();
   const queryClient = useQueryClient();
-  const journey = useQuery({ queryKey: journeyKey, queryFn: identityVerificationService.fetchVerificationJourney, refetchInterval: (query) => (isWaitingForResult(query.state.data) ? 5000 : false) });
+  const journey = useQuery({ queryKey: journeyKey, queryFn: identityVerificationService.fetchVerificationJourney, refetchInterval: (query) => (shouldRefreshVerification(query.state.data) ? 15000 : false) });
   const request = useMutation({ mutationFn: identityVerificationService.requestVerification, onSuccess: () => queryClient.invalidateQueries({ queryKey: journeyKey }) });
   const capture = useMutation({
     mutationFn: async (choice: IdentityCaptureChoice) => {
@@ -38,7 +43,8 @@ export function IdentityVerificationScreen({ route }: MainScreenProps<"IdentityV
       const session = await identityVerificationService.startIdentityCapture(current.case.id, {
         consentVersion: current.consentVersion, consentAccepted: true, platform: Platform.OS === "ios" ? "ios" : "android", ...choice,
       });
-      if (session.url) await WebBrowser.openAuthSessionAsync(session.url, returnUrl);
+      if (session.mode !== "hosted_link" || !session.url) throw new Error("The secure identity-check page could not be opened. Refresh your status and try again.");
+      await WebBrowser.openAuthSessionAsync(session.url, returnUrl);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: journeyKey }),
   });
@@ -51,12 +57,12 @@ export function IdentityVerificationScreen({ route }: MainScreenProps<"IdentityV
   return (
     <Screen>
       <Header title="Get verified" />
-      <ScrollView contentContainerStyle={styles.content}>
+      <KeyboardAwareForm contentContainerStyle={styles.content}>
         {journey.isLoading ? <Text color={colors.textMuted}>Checking your eligibility...</Text> : null}
-        {journey.isError ? <Text color={colors.error}>We couldn't load your verification. Pull down to try again.</Text> : null}
-        {data ? <JourneyBody journey={data} paymentStepRequested={route.params?.step === "pay"} requesting={request.isPending} requestError={request.isError ? request.error.message : null}
+        {journey.isError ? <Text color={colors.error}>We couldn&apos;t load your verification. Pull down to try again.</Text> : null}
+        {data ? <JourneyBody journey={data} paymentStepRequested={route.params?.step === "pay"} requesting={request.isPending} requestError={request.isError ? request.error.message : null} onContactSupport={() => navigation.navigate("NewSupportTicket", { category: "verification" })}
           capturing={capture.isPending} captureError={capture.isError ? capture.error.message : null} onRequest={() => request.mutate()} onPay={openPayment} onCapture={(choice) => capture.mutate(choice)} /> : null}
-      </ScrollView>
+      </KeyboardAwareForm>
     </Screen>
   );
 }
@@ -66,6 +72,7 @@ interface JourneyBodyProps {
   readonly paymentStepRequested: boolean;
   readonly requesting: boolean;
   readonly requestError: string | null;
+  readonly onContactSupport: () => void;
   readonly capturing: boolean;
   readonly captureError: string | null;
   readonly onRequest: () => void;
@@ -73,7 +80,7 @@ interface JourneyBodyProps {
   readonly onCapture: (choice: IdentityCaptureChoice) => void;
 }
 
-function JourneyBody({ journey, paymentStepRequested, requesting, requestError, capturing, captureError, onRequest, onPay, onCapture }: JourneyBodyProps) {
+function JourneyBody({ journey, paymentStepRequested, requesting, requestError, onContactSupport, capturing, captureError, onRequest, onPay, onCapture }: JourneyBodyProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const badgeName = journey.color === "gold" ? "Gold" : "Blue";
@@ -90,7 +97,7 @@ function JourneyBody({ journey, paymentStepRequested, requesting, requestError, 
     return (
       <View style={styles.card}>
         <StatusPill label="Verified" tone="success" />
-        <Text size={16} weight={600}>You're verified</Text>
+        <Text size={16} weight={600}>You&apos;re verified</Text>
         <Text size={13} lineHeight={18} color={colors.textMuted}>Your {badgeName} checkmark is on your profile{journey.case?.verifiedAt ? ` since ${formatFriendlyDate(journey.case.verifiedAt)}` : ""}.</Text>
       </View>
     );
@@ -101,12 +108,15 @@ function JourneyBody({ journey, paymentStepRequested, requesting, requestError, 
       return <StatusCard pill="Under review" tone="caution" title="A person is reviewing your verification" body="Some checks need a closer look. We'll notify you within 3 days. If we can't approve it, you get a full refund." />;
     }
     if (isWaitingForResult(journey)) {
-      return <StatusCard pill="Checking" tone="primary" title="Checking your selfie and ID" body="This usually takes a minute or two. You can leave this screen; we'll notify you." />;
+      return <StatusCard pill="Checking" tone="primary" title="Checking your identity" body="This usually takes a minute or two. You can leave this screen; we'll notify you." />;
+    }
+    if (verification.status === "awaiting_capture" && verification.consentGiven && !verification.canRetry) {
+      return <StatusCard pill="Session open" tone="caution" title="No result yet" body={`${captureError ? `${captureError} ` : ""}This capture attempt remains open because closing the browser cannot confirm whether Smile ID received a submission. Nantty will show a result only after Smile ID's signed callback. Do not start another check while this attempt is open; if no result arrives, retry after the session expires in about an hour or contact support. This screen refreshes automatically. Please do not send your ID number or documents in a support message.`} action={onContactSupport} />;
     }
     return (
       <>
-        <StatusCard pill="Payment received" tone="success" title="One last step: confirm it's you" body={`Your ${badgeName} checkmark is paid for. Take a selfie and a photo of your ID to finish.`} />
-        <IdentityConsentStep starting={capturing} errorMessage={captureError} onStart={onCapture} />
+        <StatusCard pill="Payment received" tone="success" title="One last step: confirm it's you" body={`Your ${badgeName} checkmark is paid for. Choose a supported photo ID or ID-number check to finish.`} />
+        <IdentityConsentStep starting={capturing} errorMessage={captureError} privacyPolicyUrl={journey.privacyPolicyUrl} onStart={onCapture} />
       </>
     );
   }
@@ -120,7 +130,7 @@ function JourneyBody({ journey, paymentStepRequested, requesting, requestError, 
       <View style={styles.card}>
         <Text size={16} weight={600}>The {badgeName} checkmark</Text>
         <Text size={13} lineHeight={18} color={colors.textMuted}>
-          {journey.color === "gold" ? "For businesses and brands. Shows buyers you're a verified business." : "For people, including creators. Shows everyone it's really you."} You pay first, then confirm your identity with a selfie and a government photo ID. If we can't approve you, you get a full refund.
+          {journey.color === "gold" ? "For businesses and brands. Shows buyers you're a verified business." : "For people, including creators. Shows everyone it's really you."} You pay first, then confirm your identity using a supported photo ID or ID-number check. If we can&apos;t approve you, you get a full refund.
         </Text>
         {eligibility?.canBuyNow ? (
           <>
@@ -130,10 +140,10 @@ function JourneyBody({ journey, paymentStepRequested, requesting, requestError, 
         ) : eligibility?.state === "requested" ? (
           <>
             <StatusPill label="Request received" tone="primary" />
-            <Text size={13} lineHeight={18} color={colors.textMuted}>We'll check your account again regularly and notify you as soon as you can apply.</Text>
+            <Text size={13} lineHeight={18} color={colors.textMuted}>We&apos;ll check your account again regularly and notify you as soon as you can apply.</Text>
           </>
         ) : eligibility?.tier === "blocked" ? (
-          <Text size={13} lineHeight={18} color={colors.textMuted}>Verification isn't available for this account right now. Check your account status for details.</Text>
+          <Text size={13} lineHeight={18} color={colors.textMuted}>Verification isn&apos;t available for this account right now. Check your account status for details.</Text>
         ) : (
           <Button title="Request verification" loading={requesting} onPress={onRequest} />
         )}
@@ -149,7 +159,7 @@ function JourneyBody({ journey, paymentStepRequested, requesting, requestError, 
   );
 }
 
-function StatusCard({ pill, tone, title, body }: { readonly pill: string; readonly tone: "primary" | "success" | "caution" | "error"; readonly title: string; readonly body: string }) {
+function StatusCard({ pill, tone, title, body, action }: { readonly pill: string; readonly tone: "primary" | "success" | "caution" | "error"; readonly title: string; readonly body: string; readonly action?: () => void }) {
   const { colors } = useTheme();
   const styles = useStyles();
   return (
@@ -157,6 +167,7 @@ function StatusCard({ pill, tone, title, body }: { readonly pill: string; readon
       <StatusPill label={pill} tone={tone} />
       <Text size={16} weight={600}>{title}</Text>
       <Text size={13} lineHeight={18} color={colors.textMuted}>{body}</Text>
+      {action ? <Button variant="subtle" title="Contact support" onPress={action} /> : null}
     </View>
   );
 }

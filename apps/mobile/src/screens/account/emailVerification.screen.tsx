@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
 import { TextField } from "@/components/ui/input";
@@ -50,7 +51,7 @@ export function EmailVerificationScreen({ navigation }: MainScreenProps<"EmailVe
       {status.isPending ? <ListSkeleton rows={3} /> : status.isError || !status.data ? (
         <ErrorState error={status.error} message="Couldn't load your account email." onRetry={() => void status.refetch()} retrying={status.isRefetching} />
       ) : (
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <KeyboardAwareForm contentContainerStyle={styles.content}>
           <View style={styles.card}>
             <Text size={typeScale.lg} weight={600} lineHeight={24} accessibilityRole="header">
               {status.data.emailVerified ? "Your email is verified" : "Verify your email to check out"}
@@ -103,7 +104,7 @@ export function EmailVerificationScreen({ navigation }: MainScreenProps<"EmailVe
               </>
             )}
           </View>
-        </ScrollView>
+        </KeyboardAwareForm>
       )}
     </Screen>
   );
