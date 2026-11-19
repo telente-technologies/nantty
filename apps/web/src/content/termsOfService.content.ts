@@ -30,7 +30,7 @@ export const termsOfServiceSections: readonly LegalDocumentSection[] = [
     heading: "Your account and verification",
     paragraphs: [
       "You sign in with your email address, or with Apple or Google linked to it; phone numbers are never used to log in. Keep your email account and login secure, give accurate information, and tell us at once if you think someone else has used your account. You are responsible for what happens on your account unless it was used without your permission and you were not careless.",
-      "Accounts have verification levels. Level 0 means your email is confirmed. Level 1 (payout-verified) means your identity and a payout account in your own name are verified: in Nigeria with your BVN and bank account through our payment partner, and elsewhere through our identity partner Smile ID. Level 2 adds a Smile ID biometric check and is needed for a checkmark. Some features need a particular level, and we tell you before you start.",
+      "Accounts have verification levels. Level 0 means your email is confirmed. Level 1 (payout-verified) means your identity and a payout account in your own name are verified: in Nigeria with your BVN and bank account through our payment partner, and elsewhere through our identity partner Smile ID. Level 2 requires an approved Smile ID identity check using a method available for your country; this may involve a biometric photo-ID check or a hosted ID-number check. Some features need a particular level, and we tell you before you start.",
       "Verification lowers risk but is not a promise about anyone. We may ask you to verify again, and we may limit features while a check is pending.",
     ],
   },
