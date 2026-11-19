@@ -18,9 +18,13 @@ const maximumSmileIdCatalogCacheBytes = 8 << 20
 const maximumSmileIdCatalogCacheEntries = 16
 
 func (client *SmileIdClient) SupportedDocuments(ctx context.Context, country string) ([]SmileIdDocumentCountry, error) {
+	country = strings.ToUpper(strings.TrimSpace(country))
+	if country != "" && !smileIdCountryCodePattern.MatchString(country) {
+		return nil, errors.New("smile id: country filter must be an ISO-2 country code")
+	}
 	query := url.Values{}
 	if country != "" {
-		query.Set("country_code", strings.ToUpper(country))
+		query.Set("country_code", country)
 	}
 	var response struct {
 		Documents []SmileIdDocumentCountry `json:"valid_documents"`
@@ -37,9 +41,13 @@ func (client *SmileIdClient) SupportedDocuments(ctx context.Context, country str
 }
 
 func (client *SmileIdClient) SupportedKycTypes(ctx context.Context, country string) ([]SmileIdSupportedKycType, error) {
+	country = strings.ToUpper(strings.TrimSpace(country))
+	if country != "" && !smileIdCountryCodePattern.MatchString(country) {
+		return nil, errors.New("smile id: country filter must be an ISO-2 country code")
+	}
 	query := url.Values{}
 	if country != "" {
-		query.Set("country", strings.ToUpper(country))
+		query.Set("country", country)
 	}
 	var response struct {
 		Types []SmileIdSupportedKycType `json:"id_types"`

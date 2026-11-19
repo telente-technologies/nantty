@@ -83,8 +83,10 @@ func TestFlutterwavePartialRefundValidatesAmountAndCurrencyBeforeProviderIO(t *t
 	for _, request := range []interfaces.RefundRequest{
 		{ProviderChargeId: "7001", AmountMinor: 0, Currency: "NGN"},
 		{ProviderChargeId: "7001", AmountMinor: 10_000, Currency: "EUR"},
-		{ProviderChargeId: "7001", AmountMinor: 12_345, Currency: "NGN"},
+		{ChargeReference: "charge-ref", AmountMinor: 12_345, Currency: "NGN"},
 		{ProviderChargeId: "7001", AmountMinor: 9_999, Currency: "NGN"},
+		{ProviderChargeId: "7001", AmountMinor: 9_999, Currency: "NGN", FullRefund: true},
+		{ProviderChargeId: "7001", AmountMinor: 999, Currency: "KES"},
 		{ChargeReference: "charge-ref", AmountMinor: 100, Currency: "N?N"},
 	} {
 		if _, err := adapter.RefundCharge(ctx, request); err == nil {
@@ -101,6 +103,36 @@ func TestFlutterwavePartialRefundValidatesAmountAndCurrencyBeforeProviderIO(t *t
 	}
 	if len(fake.Refunds) != 1 || fmt.Sprint(fake.Refunds[0]["amount_refunded"]) != "123.00" {
 		t.Fatalf("refund amount should preserve minor-unit value after currency normalization: %+v", fake.Refunds)
+	}
+}
+
+func TestFlutterwaveBankLookupsNormalizeAndValidateCountryAndRequiredFields(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	ctx := context.Background()
+	banks, err := adapter.ListBanks(ctx, " ng ")
+	if err != nil || len(banks) == 0 || banks[0].CountryCode != "NG" {
+		t.Fatalf("normalized ISO country should return the provider bank catalog: banks=%+v err=%v", banks, err)
+	}
+	requestsBeforeInvalid := len(fake.RequestLog())
+	for _, country := range []string{"", "N", "N1", "NGH"} {
+		if _, err := adapter.ListBanks(ctx, country); !errors.Is(err, interfaces.ErrCurrencyNotSupported) {
+			t.Errorf("invalid country %q should fail before I/O: %v", country, err)
+		}
+	}
+	if _, err := adapter.ResolveBankAccountNameInCountry(ctx, " gh ", " 044 ", " 0690000032 "); err != nil {
+		t.Fatalf("Ghana resolution should normalize the documented ISO country code: %v", err)
+	}
+	requestsAfterGhana := len(fake.RequestLog())
+	if _, err := adapter.ResolveBankAccountNameInCountry(ctx, "US", "044", "0690000032"); !errors.Is(err, interfaces.ErrCurrencyNotSupported) {
+		t.Fatalf("account resolution outside the documented NG/GH set should be rejected: %v", err)
+	}
+	for _, request := range []struct{ bank, account string }{{"", "123"}, {"044", ""}} {
+		if _, err := adapter.ResolveBankAccountNameInCountry(ctx, "NG", request.bank, request.account); err == nil {
+			t.Errorf("missing required bank/account fields should fail locally: %+v", request)
+		}
+	}
+	if len(fake.RequestLog()) != requestsAfterGhana || requestsAfterGhana != requestsBeforeInvalid+1 {
+		t.Fatalf("invalid country/bank/account data must not cause provider requests: %v", fake.RequestLog())
 	}
 }
 

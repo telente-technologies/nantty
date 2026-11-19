@@ -270,6 +270,14 @@ func (provider *FlutterwaveProvider) RefundCharge(ctx context.Context, request i
 		return interfaces.RefundResult{}, fmt.Errorf("flutterwave: refund is below the documented minimum for %s", currency)
 	}
 	request.Currency = currency
+	var partialAmount json.Number
+	if !request.FullRefund {
+		amount, err := flutterwaveRefundAmount(request.AmountMinor, currency)
+		if err != nil {
+			return interfaces.RefundResult{}, err
+		}
+		partialAmount = amount
+	}
 	if request.ProviderChargeId == "" && request.ChargeReference != "" {
 		verification, err := provider.VerifyCharge(ctx, interfaces.ChargeLookup{Reference: request.ChargeReference})
 		if err != nil {
@@ -284,11 +292,7 @@ func (provider *FlutterwaveProvider) RefundCharge(ctx context.Context, request i
 	}
 	body := map[string]any{"comments": interfaces.RefundReferenceNote(truncate(request.Reason, 200), request.RefundReference)}
 	if !request.FullRefund {
-		amount, err := flutterwaveRefundAmount(request.AmountMinor, request.Currency)
-		if err != nil {
-			return interfaces.RefundResult{}, err
-		}
-		body["amount"] = amount
+		body["amount"] = partialAmount
 	}
 	var refund flutterwaveRefund
 	if _, err := provider.http.send(ctx, flutterwaveRequest{method: http.MethodPost, path: "/transactions/" + url.PathEscape(request.ProviderChargeId) + "/refund", body: body}, &refund); err != nil {

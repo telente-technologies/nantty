@@ -34,13 +34,35 @@ func TestSupportedCountryAndKycCatalogsUseSmileIdPublicV3Services(t *testing.T) 
 	}))
 	defer server.Close()
 	client := &integrations.SmileIdClient{BaseUrl: server.URL, Http: server.Client()}
-	documents, err := client.SupportedDocuments(context.Background(), "ng")
+	documents, err := client.SupportedDocuments(context.Background(), " ng ")
 	if err != nil || len(documents) != 1 || documents[0].Country.Code != "NG" || documents[0].IDTypes[0].Code != "PASSPORT" {
 		t.Fatalf("SupportedDocuments = %+v, %v", documents, err)
 	}
-	idTypes, err := client.SupportedKycTypes(context.Background(), "ng")
+	idTypes, err := client.SupportedKycTypes(context.Background(), " ng ")
 	if err != nil || len(idTypes) != 2 || idTypes[0].Type != "NIN_V2" || len(idTypes[0].RequiredFields) != 3 || idTypes[1].BankCode != "058" {
 		t.Fatalf("SupportedKycTypes = %+v, %v", idTypes, err)
+	}
+}
+
+func TestSmileIdCatalogRejectsMalformedCountryFiltersBeforeProviderIO(t *testing.T) {
+	var requests atomic.Int32
+	server := httptest.NewTLSServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		requests.Add(1)
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(writer, "{\"valid_documents\":[],\"id_types\":[]}")
+	}))
+	defer server.Close()
+	client := &integrations.SmileIdClient{BaseUrl: server.URL, Http: server.Client()}
+	for _, country := range []string{"N", "N1", "NGH", "U$"} {
+		if _, err := client.SupportedDocuments(context.Background(), country); err == nil {
+			t.Errorf("supported-document catalog should reject malformed country %q", country)
+		}
+		if _, err := client.SupportedKycTypes(context.Background(), country); err == nil {
+			t.Errorf("supported-ID-type catalog should reject malformed country %q", country)
+		}
+	}
+	if requests.Load() != 0 {
+		t.Fatalf("malformed country filters must be rejected before provider requests; got %d", requests.Load())
 	}
 }
 

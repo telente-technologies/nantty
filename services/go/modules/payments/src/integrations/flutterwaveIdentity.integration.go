@@ -14,6 +14,7 @@ import (
 
 var (
 	bvnPattern                  = regexp.MustCompile(`^[0-9]{11}$`)
+	countryCodePattern          = regexp.MustCompile(`^[A-Z]{2}$`)
 	flutterwaveResolveCountries = map[string]bool{"NG": true, "GH": true}
 )
 
@@ -22,8 +23,14 @@ func (provider *FlutterwaveProvider) ResolveBankAccountName(ctx context.Context,
 }
 
 func (provider *FlutterwaveProvider) ResolveBankAccountNameInCountry(ctx context.Context, country, bankCode, accountNumber string) (string, error) {
+	country = strings.ToUpper(strings.TrimSpace(country))
+	bankCode = strings.TrimSpace(bankCode)
+	accountNumber = strings.TrimSpace(accountNumber)
 	if !flutterwaveResolveCountries[country] {
 		return "", interfaces.ErrCurrencyNotSupported
+	}
+	if bankCode == "" || accountNumber == "" {
+		return "", errors.New("flutterwave: account resolution needs a bank code and account number")
 	}
 	body := map[string]any{"account_number": accountNumber, "account_bank": bankCode}
 	if country != "NG" {
@@ -46,7 +53,8 @@ func (provider *FlutterwaveProvider) ResolveBankAccountNameInCountry(ctx context
 }
 
 func (provider *FlutterwaveProvider) ListBanks(ctx context.Context, countryCode string) ([]interfaces.Bank, error) {
-	if len(countryCode) != 2 {
+	countryCode = strings.ToUpper(strings.TrimSpace(countryCode))
+	if !countryCodePattern.MatchString(countryCode) {
 		return nil, interfaces.ErrCurrencyNotSupported
 	}
 	var rows []struct {
