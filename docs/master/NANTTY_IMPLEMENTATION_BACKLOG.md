@@ -558,10 +558,10 @@ Prioritized from the repository baseline and the requested cross-product scope. 
 - V3 token and Smile Link POST responses now share a bounded 1 MiB decoder that rejects oversized bodies and trailing JSON instead of accepting a valid JSON prefix. Regression tests cover malformed trailing data and oversized responses.
 - Verification: focused Smile integration tests and the full `go test -count=1 ./modules/users/...` suite pass. This is local contract verification only; live Smile partner responses and capture remain unverified.
 
-### 2026-11-19 — Honor retryable Smile Web SDK failures
+### 2026-11-19 — Correct unsafe Smile Web SDK retry interpretation
 
-- The V12 result guide says a `failure` marked `retryable: true` should be retried with a fresh token. Web previously kept every provider failure pending until expiry, preventing the documented retry path. The Web flow now calls the authenticated, exact-attempt cancellation endpoint only for provider-marked retryable failures; a fresh capture is offered only after the backend confirms cancellation. Non-retryable errors stay locked, and a callback/cancellation race or cancellation error cannot offer a duplicate. Mobile Smile Link dismissal is unchanged because browser closure is not a provider failure result.
-- Added service regressions for retryable versus non-retryable errors and failed cancellation. Verification: Smile Web SDK service tests (8/8), Webapp TypeScript, focused ESLint, and `git diff --check` pass. Live provider behavior remains unverified and must be exercised in Smile sandbox before production enablement.
+- Supersedes the earlier entry interpreting `retryable: true` as proof that the provider did not accept a submission. SDK failure metadata alone is not authoritative about whether a provider job exists. Only an explicit `cancelled` result invokes authenticated cancellation of that exact attempt; all provider failures stay pending until the backend reports closure/expiry. This prevents duplicate submissions and late callbacks from racing a newly issued token.
+- Updated the user guidance, regression test expectations and blocker/matrix records. Service tests, TypeScript, and focused lint still need to be rerun on this correction. Live provider retry behavior remains unverified and requires Smile sandbox validation.
 
 ### 2026-11-19 — Bound repeat Smile supported-catalog lookups
 
