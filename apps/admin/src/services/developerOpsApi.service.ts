@@ -24,8 +24,7 @@ export function reviewDeveloperApplication(
 
 export function updateDeveloperOrganizationQuota(
   organizationId: string,
-  planTier: "sandbox" | "starter" | "growth" | "enterprise",
   monthlyQuota: number,
-): Promise<{ readonly organizationId: string; readonly planTier: string; readonly monthlyQuota: number }> {
-  return sendAdminApiRequest(`/admin/developer/organizations/${encodeURIComponent(organizationId)}/quota`, { method: "PATCH", body: { planTier, monthlyQuota } });
+): Promise<{ readonly organizationId: string; readonly planTier: string; readonly status: string; readonly monthlyQuota: number }> {
+  return sendAdminApiRequest(`/admin/developer/organizations/${encodeURIComponent(organizationId)}/quota`, { method: "PATCH", body: { monthlyQuota } });
 }

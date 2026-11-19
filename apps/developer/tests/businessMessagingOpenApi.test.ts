@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { GET } from "../src/app/docs/openapi.json/route";
 import { buildBusinessMessagingOpenApiSpec } from "../src/lib/businessMessagingOpenApi";
 
-test("OpenAPI 3.1 distinguishes live Sandbox routes from unavailable Production previews", () => {
+test("OpenAPI 3.1 distinguishes live Sandbox routes, consent-scoped Production reads, and unavailable sends", () => {
   const spec = buildBusinessMessagingOpenApiSpec();
   assert.equal(spec.openapi, "3.1.0");
   assert.ok(spec.paths["/v1/customers"]);
@@ -22,9 +22,10 @@ test("OpenAPI 3.1 distinguishes live Sandbox routes from unavailable Production 
   assert.equal(prodRoute["x-status"], "unavailable");
   assert.ok(prodRoute.responses["503"]);
   assert.equal(prodRoute.responses["202"], undefined);
-  const prodConversations = (spec.paths["/api/v1/business/conversations"] as { get: { responses: Record<string, unknown> } }).get;
-  assert.ok(prodConversations.responses["503"]);
-  assert.equal(prodConversations.responses["200"], undefined);
+  const prodConversations = (spec.paths["/api/v1/business/conversations"] as { get: { responses: Record<string, unknown>; "x-status"?: string } }).get;
+  assert.ok(prodConversations.responses["200"]);
+  assert.equal(prodConversations.responses["503"], undefined);
+  assert.equal(prodConversations["x-status"], undefined);
   const errorCodes = (spec.components.schemas.ErrorEnvelope as { properties: { error: { properties: { code: { enum: readonly string[] } } } } }).properties.error.properties.code.enum;
   assert.ok(errorCodes.includes("SANDBOX_QUOTA_EXCEEDED"));
   assert.ok(errorCodes.includes("INVALID_SANDBOX_CREDENTIAL"));

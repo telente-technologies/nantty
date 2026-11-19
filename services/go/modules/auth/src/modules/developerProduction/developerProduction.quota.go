@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -39,9 +40,10 @@ func reserveProductionRequestTx(ctx context.Context, tx *sql.Tx, orgId, appId, c
 	var quota int64
 	var tier, status string
 	var periodEnd sql.NullTime
+	var providerReference sql.NullString
 	err := tx.QueryRowContext(ctx,
-		`SELECT plan_tier, status, monthly_quota, current_period_end FROM developer_billing_subscriptions WHERE organization_id = $1`, orgId,
-	).Scan(&tier, &status, &quota, &periodEnd)
+		`SELECT plan_tier, status, monthly_quota, current_period_end, provider_reference FROM developer_billing_subscriptions WHERE organization_id = $1`, orgId,
+	).Scan(&tier, &status, &quota, &periodEnd, &providerReference)
 	if err != nil && err != sql.ErrNoRows {
 		return uuid.Nil, err
 	}
@@ -50,6 +52,9 @@ func reserveProductionRequestTx(ctx context.Context, tx *sql.Tx, orgId, appId, c
 	}
 	if status != "active" || !periodEnd.Valid || !periodEnd.Time.After(time.Now()) {
 		return uuid.Nil, httpserver.NewApiError(http.StatusPaymentRequired, "SUBSCRIPTION_INACTIVE", "Production API subscription is inactive or expired.")
+	}
+	if !providerReference.Valid || strings.TrimSpace(providerReference.String) == "" {
+		return uuid.Nil, httpserver.NewApiError(http.StatusPaymentRequired, "PAYMENT_VERIFICATION_REQUIRED", "Production access requires a provider payment reference.")
 	}
 	var used int64
 	var resetAt time.Time

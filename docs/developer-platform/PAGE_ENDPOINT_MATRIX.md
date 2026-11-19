@@ -20,13 +20,13 @@
 
 ## Production Business Messaging & Admin & Seller APIs
 
-Correction (2026-11-19): production Business Messaging handlers are not available to API consumers; the mounted public paths return `503 BUSINESS_MESSAGING_UNAVAILABLE`. Do not treat the handler scaffolding or OpenAPI preview as a usable messaging integration.
+Correction (2026-11-20): only consent-scoped conversation listing is enabled. The send route continues to return `503 BUSINESS_MESSAGING_UNAVAILABLE`; handler scaffolding is not a usable send, history, receipt, template, media, interactive-message or handover integration.
 
 | Surface | Canonical Endpoints | Enforcement |
 | --- | --- | --- |
 | Developer SSO | `GET /api/v1/auth/sso/authorize`, `POST /api/v1/auth/sso/token` | PKCE S256, single-use code hash, redirect allowlist |
-| Production Business Messaging | `POST /api/v1/business/messages`, `GET /api/v1/business/conversations` | Mounted routes intentionally return `503 BUSINESS_MESSAGING_UNAVAILABLE`; no public production send/list behavior is enabled |
-| Admin Developer Ops | `GET /api/v1/admin/developer/applications`, `POST .../review`, `PATCH .../quota` | Privileged Admin token + step-up permission; review/quota mutations and audit writes share a transaction |
+| Production Business Messaging | `POST /api/v1/business/messages`, `GET /api/v1/business/conversations` | Send remains unavailable; conversation listing is backed by active consent and requires an approved application, `conversations:read` scope and production quota |
+| Admin Developer Ops | `GET /api/v1/admin/developer/applications`, `POST .../review`, `PATCH .../quota` | Privileged Admin token + step-up permission; quota changes only `monthly_quota` on an existing active paid subscription; review/quota mutations and audit writes share a transaction |
 | Seller Developer API | `GET/POST/DELETE /api/v1/seller/developers/{keys,webhooks}` | Store owner + Pro subscription + SSRF check |
 | Messenger (`apps/messenger`) | `/api/v1/conversations*`, `/api/v1/stories*`, realtime WS | User bearer token, E2EE `@nantty/chat-crypto` |
 

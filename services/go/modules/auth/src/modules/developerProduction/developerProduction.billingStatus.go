@@ -3,6 +3,7 @@ package developerproduction
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,12 +19,15 @@ func SetSandboxBilling(ctx context.Context, db *sql.DB, orgId uuid.UUID, quota i
 	return err
 }
 
-func EffectiveBillingStatus(tier, status string, periodEnd *time.Time, now time.Time) string {
+func EffectiveBillingStatus(tier, status string, periodEnd *time.Time, providerReference string, now time.Time) string {
 	if status != "active" || tier == "sandbox" {
 		return status
 	}
 	if periodEnd == nil || !periodEnd.After(now) {
 		return "expired"
+	}
+	if strings.TrimSpace(providerReference) == "" {
+		return "payment_unverified"
 	}
 	return status
 }

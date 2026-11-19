@@ -42,15 +42,15 @@ const docGuides: Record<Exclude<DocGuideSlug, "business-messaging" | "messaging"
   },
   "api-reference": {
     title: "API Reference",
-    summary: "Live Sandbox HTTP routes and explicitly unavailable Production Business Messaging previews.",
+    summary: "Live Sandbox HTTP routes and consent-scoped Production conversation reads.",
     sections: [
       {
         heading: "OpenAPI 3.1 Schema",
         body: "Download the machine-readable OpenAPI 3.1 specification at /docs/openapi.json or /api/openapi.json.",
       },
       {
-        heading: "Production Business Messaging is not live",
-        body: "The production preview routes currently return 503 BUSINESS_MESSAGING_UNAVAILABLE. Application approval does not enable live messaging; use synthetic Sandbox data only.",
+        heading: "Production Business Messaging is limited",
+        body: "Approved applications with an active recipient consent and the conversations:read scope can list consented conversations. Sending remains unavailable and returns 503 BUSINESS_MESSAGING_UNAVAILABLE until secure dispatch and canonical consent management are connected. Use synthetic Sandbox data to test sending.",
       },
     ],
   },

@@ -12,17 +12,18 @@ func TestEffectiveDeveloperBillingStatus(t *testing.T) {
 	future := now.Add(time.Hour)
 	past := now.Add(-time.Hour)
 	for _, tc := range []struct {
-		tier, status string
-		end          *time.Time
-		want         string
+		tier, status, reference string
+		end                     *time.Time
+		want                    string
 	}{
-		{"sandbox", "active", nil, "active"},
-		{"starter", "active", &future, "active"},
-		{"starter", "active", &past, "expired"},
-		{"growth", "active", nil, "expired"},
-		{"growth", "past_due", &future, "past_due"},
+		{"sandbox", "active", "", nil, "active"},
+		{"starter", "active", "payment-1", &future, "active"},
+		{"starter", "active", "payment-1", &past, "expired"},
+		{"growth", "active", "payment-1", nil, "expired"},
+		{"growth", "active", "", &future, "payment_unverified"},
+		{"growth", "past_due", "", &future, "past_due"},
 	} {
-		if got := developerproduction.EffectiveBillingStatus(tc.tier, tc.status, tc.end, now); got != tc.want {
+		if got := developerproduction.EffectiveBillingStatus(tc.tier, tc.status, tc.end, tc.reference, now); got != tc.want {
 			t.Errorf("%s %s: got %s, want %s", tc.tier, tc.status, got, tc.want)
 		}
 	}

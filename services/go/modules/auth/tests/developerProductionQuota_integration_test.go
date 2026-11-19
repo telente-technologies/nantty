@@ -75,6 +75,12 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 	if _, err := db.ExecContext(ctx, `UPDATE developer_billing_subscriptions SET plan_tier = 'starter', monthly_quota = 1, current_period_end = $2 WHERE organization_id = $1`, org, time.Now().Add(time.Hour)); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := production.ReserveProductionRequest(ctx, db, org, app, cred, "GET", "/api/v1/business/conversations"); !errors.Is(err, httpserver.NewApiError(http.StatusPaymentRequired, "PAYMENT_VERIFICATION_REQUIRED", "")) {
+		t.Fatalf("paid subscription without a verified provider reference must reject production request, got %v", err)
+	}
+	if _, err := db.ExecContext(ctx, `UPDATE developer_billing_subscriptions SET provider_reference = 'verified-reference' WHERE organization_id = $1`, org); err != nil {
+		t.Fatal(err)
+	}
 	var wg sync.WaitGroup
 	results := make(chan error, 16)
 	for range 16 {
