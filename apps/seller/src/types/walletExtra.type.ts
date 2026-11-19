@@ -11,6 +11,11 @@ export interface WalletBank {
   readonly name: string;
 }
 
+export interface WalletBankBranch {
+  readonly code: string;
+  readonly name: string;
+}
+
 export interface ResolvedPayoutAccount {
   readonly resolutionId: string;
   readonly bankCode: string;

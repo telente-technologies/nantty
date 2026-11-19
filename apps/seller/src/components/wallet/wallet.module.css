@@ -70,6 +70,16 @@
   font-size: var(--fs-12);
 }
 
+.inlineAction {
+  border: 0;
+  padding: 0;
+  color: var(--color-brand);
+  background: transparent;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .formGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));

@@ -138,6 +138,11 @@ export function registerWalletMockHandlers(): void {
     return respondWithJson(200, { data: banksByCountry[readMockDatabase().settings.country] ?? [], nextCursor: null });
   });
 
+  registerMockRoute("GET", "/seller/wallet/banks/:bankCode/branches", (request) => {
+    requireMockStorePrincipal(request);
+    return respondWithJson(200, { data: [], nextCursor: null });
+  });
+
   registerMockRoute("GET", "/seller/wallet/payout-accounts", (request) => {
     requireMockStorePrincipal(request);
     return respondWithJson(200, { data: readMockDatabase().wallet.payoutAccounts, nextCursor: null });
