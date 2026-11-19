@@ -2,8 +2,6 @@
 
 Verification addendum (2026-11-20): older Go-version blockers and test-execution statements below are historical snapshots. Go 1.26.11 was obtained through the toolchain manager; the full Auth package (`go test ./tests -count=1`) passed against fresh schemas in `zudomart_test` with integration services enabled. Focused admin quota, production quota, billing-status and route regressions passed. Under Node 26.13.0, Developer tests passed 28/28 with typecheck, and Admin typecheck plus contract tests passed 80/80. Paid billing and production Business Messaging remain partial as stated in the current blockers.
 
-Verification addendum (2026-11-20): older Go-version blockers and test-execution statements below are historical snapshots. Go 1.26.11 was obtained through the toolchain manager; the full Auth package (`go test ./tests -count=1`) passed against fresh schemas in `zudomart_test` with integration services enabled. Focused admin quota, production quota and billing-status regressions passed. Under Node 26.13.0, Developer tests passed 28/28 with typecheck, and Admin typecheck plus contract tests passed 80/80. Paid billing and production Business Messaging remain partial as stated in the current blockers.
-
 This is the initial master matrix. Each status is limited to checked repository evidence; product requirements not yet traced end-to-end remain `PARTIAL` or `NOT_VERIFIED`, never implicitly complete.
 
 Status vocabulary:
