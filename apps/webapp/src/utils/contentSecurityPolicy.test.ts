@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { buildContentSecurityPolicyHeaderValue, readLiveKitOrigins } from "../server/contentSecurityPolicy.service";
+import { buildIdentityPermissionsPolicyHeaderValue } from "../server/identityPermissionsPolicy.service";
 
 describe("runtime content security policy", () => {
   it("allows only the configured LiveKit host", () => {
@@ -29,6 +30,15 @@ describe("runtime content security policy", () => {
   it("adds Smile ID only on the verification page", () => {
     assert.match(buildContentSecurityPolicyHeaderValue({ isIdentityVerification: true }), /smileidentity/);
     assert.doesNotMatch(buildContentSecurityPolicyHeaderValue(), /smileidentity/);
+  });
+
+  it("delegates camera access to Smile ID capture frames, not just its script CDN", () => {
+    const policy = buildIdentityPermissionsPolicyHeaderValue();
+    assert.match(policy, /camera=\(self "https:\/\/links\.usesmileid\.com"/);
+    assert.match(policy, /"https:\/\/links\.sandbox\.usesmileid\.com"/);
+    assert.match(policy, /"https:\/\/links\.dev\.usesmileid\.com"/);
+    assert.doesNotMatch(policy, /cdn\.usesmileid\.com/);
+    assert.match(policy, /microphone=\(\), geolocation=\(\), payment=\(\)/);
   });
 
   it("allows only the configured first-party social sign-in SDK origins", () => {

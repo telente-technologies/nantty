@@ -1,10 +1,16 @@
 import type { NextConfig } from "next";
 
+import { buildIdentityPermissionsPolicyHeaderValue } from "./src/server/identityPermissionsPolicy.service";
+
 const isDevelopmentBuild = process.env.NODE_ENV === "development";
 
 // Content-Security-Policy is built per request in src/proxy.ts, so origins come from the runtime env, not the build.
 const identityVerificationHeaders = [
-  { key: "Permissions-Policy", value: 'camera=(self "https://cdn.usesmileid.com"), microphone=(), geolocation=(), payment=()' },
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: buildIdentityPermissionsPolicyHeaderValue() },
 ];
 
 const securityHeaders = [
@@ -23,7 +29,7 @@ const embedBaselineHeaders = [
 
 const backendForFrontendHeaders = [{ key: "Content-Security-Policy", value: "default-src 'none'; frame-ancestors 'none'" }];
 
-const everyPathExceptEmbeds = "/:path((?!embed(?:/|$)|oembed(?:/|$)).*)";
+const everyPathExceptEmbeds = "/:path((?!(?:embed|oembed|settings/verification)(?:/|$)).*)";
 
 const nextConfig: NextConfig = {
   experimental: { authInterrupts: true },

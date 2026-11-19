@@ -47,6 +47,7 @@ export function IdentityConsentForm({ busy, errorMessage, privacyPolicyUrl, onSt
       <label className={styles.subHeading} htmlFor="id-country">Which country is your ID from?</label>
       {countries.isLoading ? <p className={styles.muted} role="status">Loading available countries…</p> : null}
       {countries.data?.catalogSource === "preview" ? <p className={styles.muted} role="status">Preview options only. Live countries, ID types, and product availability are confirmed by Smile ID for Nantty&apos;s partner account.</p> : null}
+      {countries.data?.idNumberVerificationStatus === "unavailable" ? <p className={styles.muted} role="status">ID-number checks are temporarily unavailable. You can still use any listed photo-ID method.</p> : null}
       {countries.isError ? <div><p className={styles.errorText} role="alert">We couldn&apos;t load supported countries. Refresh and try again.</p><Button variant="secondary" onClick={() => void countries.refetch()}>Retry</Button></div> : null}
       {!countries.isLoading && !countries.isError && countries.data?.countries.length === 0 ? <p className={styles.muted} role="status">Identity checks are not enabled for this Nantty account yet. Please try again later.</p> : null}
       {countryOptions.length ? <>
@@ -85,6 +86,7 @@ export function IdentityConsentForm({ busy, errorMessage, privacyPolicyUrl, onSt
       </fieldset> : null}
       {activeProduct === "enhanced_document_verification" ? <p className={styles.muted}>This option checks the document against the issuing authority. Only ID types enabled for Nantty&apos;s Smile ID account appear here.</p> : null}
       {countryTypes?.enhancedDocumentEntitlementStatus === "unavailable" ? <p className={styles.muted} role="status">We couldn&apos;t confirm which authority-check IDs are enabled right now. You can use another available method or try again later.</p> : null}
+      {countryTypes?.idNumberVerificationStatus === "unavailable" ? <p className={styles.muted} role="status">ID-number checks are temporarily unavailable for this country. You can use another listed method or try again later.</p> : null}
       {countryTypes && anyMethodAvailable ? <fieldset className={styles.radioGroup}>
         <legend className={styles.subHeading}>{activeProduct === "enhanced_document_verification" ? "Select your authority-check ID type" : activeMethod === "document" ? "Select your photo ID type" : "Select your ID-number type"}</legend>
         <TextField label="Search available ID types" hideLabel value={typeSearch} onChange={(event) => setTypeSearch(event.target.value)} placeholder="Search ID types" autoComplete="off" />
