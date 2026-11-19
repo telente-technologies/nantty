@@ -28,7 +28,7 @@
     "backend:rabbitmq:definitions": "node infra/local/rabbitmq/generateDefinitions.mjs",
   "backend:events:contracts": "node scripts/checkEventContracts.mjs",
   "backend:test:events:contracts": "node --test scripts/checkEventContracts.test.mjs",
-    "backend:dev:identity": "cd services/go && set -a && . ./.env.example && set +a && go run ./deployables/goIdentity",
+    "backend:dev:identity": "cd services/go && set -a && . ./.env.example && set +a && HTTP_WRITE_TIMEOUT=40s go run ./deployables/goIdentity",
     "backend:dev:live": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8102 RABBITMQ_URL=amqp://go-live:go-live-local-only@localhost:5672/nantty go run ./deployables/goLive",
     "backend:dev:money": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8103 RABBITMQ_URL=amqp://go-money:go-money-local-only@localhost:5672/nantty go run ./deployables/goMoney",
     "backend:dev:trust": "cd services/go && set -a && . ./.env.example && set +a && HTTP_ADDRESS=:8106 RABBITMQ_URL=amqp://go-trust:go-trust-local-only@localhost:5672/nantty go run ./deployables/goTrust",
