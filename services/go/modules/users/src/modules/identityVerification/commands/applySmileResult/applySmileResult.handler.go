@@ -78,6 +78,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 			return Result{}, ErrCallbackSignatureInvalid
 		}
 		if awaitingResult(row.Status) && !services.CaptureAttemptCallbackMatches(row.SmileJobID, row.ID.String(), envelope.CaptureAttemptID, envelope.UserId, row.SmileUserID) {
+			if isCompletedRetryableCallback(row, envelope) {
+				return Result{Outcome: OutcomeReplayed}, handler.Container.Client.VerificationCase.UpdateOneID(row.ID).AddCallbackCount(1).Exec(ctx)
+			}
 			return Result{}, ErrCallbackSignatureInvalid
 		}
 		if !awaitingResult(row.Status) && row.SmileUserID != nil && envelope.UserId != *row.SmileUserID {
@@ -91,6 +94,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 			return Result{Outcome: OutcomeIgnored}, nil
 		}
 		return Result{Outcome: OutcomeReplayed}, handler.Container.Client.VerificationCase.UpdateOneID(row.ID).AddCallbackCount(1).Exec(ctx)
+	}
+	if envelope.IsV3 && envelope.Result.ResultCode == "error" && services.IsRetryableSmileProviderError(envelope.Product, envelope.Result.ProviderReasonCode) {
+		return handler.markCaptureRetryable(ctx, row, envelope)
 	}
 	evaluated, err := handler.evaluate(ctx, row, envelope)
 	if err != nil {
@@ -164,6 +170,49 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 		return services.SendCaseToReviewInTransaction(ctx, tx, now, updated)
 	})
 	return Result{Outcome: outcome}, err
+}
+
+func (handler Handler) markCaptureRetryable(ctx context.Context, row *ent.VerificationCase, envelope services.SmileCallbackEnvelope) (Result, error) {
+	updated := false
+	replayed := false
+	err := handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
+		locked, err := tx.VerificationCase.Query().Where(verificationcase.ID(row.ID)).ForUpdate().Only(ctx)
+		if err != nil {
+			return err
+		}
+		if !awaitingResult(locked.Status) {
+			if isCompletedRetryableCallback(locked, envelope) {
+				replayed = true
+				return locked.Update().AddCallbackCount(1).Exec(ctx)
+			}
+			return ErrCallbackSignatureInvalid
+		}
+		if !services.CaptureAttemptCallbackMatches(locked.SmileJobID, locked.ID.String(), envelope.CaptureAttemptID, envelope.UserId, locked.SmileUserID) {
+			return ErrCallbackSignatureInvalid
+		}
+		reason := "retryable_provider_error_" + envelope.Result.ProviderReasonCode
+		_, err = locked.Update().AddCallbackCount(1).SetSmileReference(envelope.Result.SmileJobId).SetSmileResultCode("error").
+			SetLivenessResult(services.CheckNotDone).SetDocumentResult(services.CheckNotDone).SetFaceMatchResult(services.CheckNotDone).SetDatabaseResult(services.CheckNotDone).
+			SetDecisionReasons([]string{reason}).SetFraudSignals([]string{}).SetStatus(verificationcase.StatusAwaitingCapture).
+			ClearSmileJobID().ClearSmileUserID().Save(ctx)
+		updated = err == nil
+		return err
+	})
+	if err != nil {
+		return Result{}, err
+	}
+	if replayed {
+		return Result{Outcome: OutcomeReplayed}, nil
+	}
+	if !updated {
+		return Result{Outcome: OutcomeIgnored}, nil
+	}
+	return Result{Outcome: OutcomeRetryable}, nil
+}
+
+func isCompletedRetryableCallback(row *ent.VerificationCase, envelope services.SmileCallbackEnvelope) bool {
+	return row.Status == verificationcase.StatusAwaitingCapture && row.SmileJobID == nil && row.SmileReference == envelope.Result.SmileJobId &&
+		envelope.Result.ResultCode == "error" && services.IsRetryableSmileProviderError(envelope.Product, envelope.Result.ProviderReasonCode)
 }
 
 func (handler Handler) evaluate(ctx context.Context, row *ent.VerificationCase, envelope services.SmileCallbackEnvelope) (evaluation, error) {

@@ -102,6 +102,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 			return ErrCaptureAlreadyStarted
 		}
 		row, err = row.Update().SetConsentVersion(command.ConsentVersion).SetConsentAt(consentAt).SetSmileJobID(attemptMarker).SetSmileUserID(smileUserID).SetSmileProduct(product).
+			SetSmileResultCode("").SetDecisionReasons([]string{}).
 			SetDocumentCountry(country).SetDocumentType(documentType).SetStatus(verificationcase.StatusAwaitingCapture).Save(ctx)
 		return err
 	})

@@ -5,6 +5,7 @@ const (
 	OutcomeUnderReview = "under_review"
 	OutcomeReplayed    = "replayed"
 	OutcomeIgnored     = "ignored"
+	OutcomeRetryable   = "retryable"
 )
 
 type Command struct {

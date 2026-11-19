@@ -1,6 +1,7 @@
 package services
 
 import (
+	"strings"
 	"time"
 
 	"nantty/modules/users/src/generated/ent"
@@ -16,33 +17,34 @@ type ChecksView struct {
 }
 
 type CaseView struct {
-	Id                string     `json:"id"`
-	ProfileId         string     `json:"profileId"`
-	AccountId         string     `json:"accountId"`
-	Color             string     `json:"color"`
-	PlanCode          string     `json:"planCode"`
-	PaymentChannel    string     `json:"paymentChannel"`
-	Status            string     `json:"status"`
-	RefundStatus      string     `json:"refundStatus"`
-	RefundMethod      string     `json:"refundMethod"`
-	RefundScope       string     `json:"refundScope"`
-	ConsentGiven      bool       `json:"consentGiven"`
-	Product           string     `json:"product"`
-	DocumentType      string     `json:"documentType"`
-	DocumentCountry   string     `json:"documentCountry"`
-	Checks            ChecksView `json:"checks"`
-	TrustScore        int        `json:"trustScore"`
-	EligibleAtPayment bool       `json:"eligibleAtPayment"`
-	DecisionReasons   []string   `json:"decisionReasons"`
-	FraudSignals      []string   `json:"fraudSignals"`
-	DecisionReason    string     `json:"decisionReason"`
-	DecidedByName     string     `json:"decidedByName,omitempty"`
-	SmileReference    string     `json:"smileReference,omitempty"`
-	SmileResultCode   string     `json:"smileResultCode,omitempty"`
-	CreatedAt         string     `json:"createdAt"`
-	DecidedAt         *string    `json:"decidedAt"`
-	VerifiedAt        *string    `json:"verifiedAt"`
-	CanRetry          bool       `json:"canRetry"`
+	Id                     string     `json:"id"`
+	ProfileId              string     `json:"profileId"`
+	AccountId              string     `json:"accountId"`
+	Color                  string     `json:"color"`
+	PlanCode               string     `json:"planCode"`
+	PaymentChannel         string     `json:"paymentChannel"`
+	Status                 string     `json:"status"`
+	RefundStatus           string     `json:"refundStatus"`
+	RefundMethod           string     `json:"refundMethod"`
+	RefundScope            string     `json:"refundScope"`
+	ConsentGiven           bool       `json:"consentGiven"`
+	Product                string     `json:"product"`
+	DocumentType           string     `json:"documentType"`
+	DocumentCountry        string     `json:"documentCountry"`
+	Checks                 ChecksView `json:"checks"`
+	TrustScore             int        `json:"trustScore"`
+	EligibleAtPayment      bool       `json:"eligibleAtPayment"`
+	DecisionReasons        []string   `json:"decisionReasons"`
+	FraudSignals           []string   `json:"fraudSignals"`
+	DecisionReason         string     `json:"decisionReason"`
+	DecidedByName          string     `json:"decidedByName,omitempty"`
+	SmileReference         string     `json:"smileReference,omitempty"`
+	SmileResultCode        string     `json:"smileResultCode,omitempty"`
+	CreatedAt              string     `json:"createdAt"`
+	DecidedAt              *string    `json:"decidedAt"`
+	VerifiedAt             *string    `json:"verifiedAt"`
+	CanRetry               bool       `json:"canRetry"`
+	RetryableProviderError bool       `json:"retryableProviderError"`
 }
 
 func ConvertCaseToView(row *ent.VerificationCase, includeReviewDetail bool) CaseView {
@@ -56,8 +58,9 @@ func ConvertCaseToViewAt(row *ent.VerificationCase, includeReviewDetail bool, no
 		RefundMethod: RefundMethodFor(row.PaymentChannel, RefundsOnRejection(row.PlanCode)), RefundScope: RefundScopeFor(row.PlanCode), Product: row.SmileProduct,
 		DocumentType: row.DocumentType, DocumentCountry: row.DocumentCountry, DecisionReason: row.DecisionReason, CreatedAt: row.CreatedAt.UTC().Format(time.RFC3339),
 		DecidedAt: optionalTime(row.DecidedAt), VerifiedAt: optionalTime(row.VerifiedAt), DecisionReasons: []string{}, FraudSignals: []string{},
-		CanRetry: CaptureMarkerCanRetry(string(row.Status), row.SmileJobID, row.ConsentAt, now),
-		Checks:   ChecksView{Liveness: row.LivenessResult, Document: row.DocumentResult, FaceMatch: row.FaceMatchResult, DatabaseLookup: row.DatabaseResult},
+		CanRetry:               CaptureMarkerCanRetry(string(row.Status), row.SmileJobID, row.ConsentAt, now),
+		RetryableProviderError: retryableProviderError(string(row.Status), row.SmileResultCode, row.DecisionReasons),
+		Checks:                 ChecksView{Liveness: row.LivenessResult, Document: row.DocumentResult, FaceMatch: row.FaceMatchResult, DatabaseLookup: row.DatabaseResult},
 	}
 	if !includeReviewDetail {
 		return view
@@ -67,6 +70,18 @@ func ConvertCaseToViewAt(row *ent.VerificationCase, includeReviewDetail bool, no
 	view.DecisionReasons, view.FraudSignals = nonNilStrings(row.DecisionReasons), nonNilStrings(row.FraudSignals)
 	view.SmileReference, view.SmileResultCode = row.SmileReference, row.SmileResultCode
 	return view
+}
+
+func retryableProviderError(status, resultCode string, reasons []string) bool {
+	if status != "awaiting_capture" || resultCode != "error" {
+		return false
+	}
+	for _, reason := range reasons {
+		if strings.HasPrefix(reason, "retryable_provider_error_") {
+			return true
+		}
+	}
+	return false
 }
 
 func optionalTime(value *time.Time) *string {

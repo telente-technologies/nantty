@@ -203,6 +203,22 @@ func recognizedSmileReasonCode(value string) string {
 	}
 }
 
+// Smile documents these product-specific error reasons as technical failures
+// for which a fresh, user-initiated capture may be attempted.
+func IsRetryableSmileProviderError(product, reason string) bool {
+	reason = strings.ToLower(strings.TrimSpace(reason))
+	switch product {
+	case "document_verification":
+		return reason == "internal_error" || reason == "image_unavailable_or_invalid" || reason == "document_unclassifiable"
+	case "enhanced_document_verification":
+		return reason == "internal_error" || reason == "service_unavailable" || reason == "image_unavailable_or_invalid" || reason == "document_unclassifiable"
+	case "enhanced_kyc":
+		return reason == "internal_error" || reason == "service_unavailable"
+	default:
+		return false
+	}
+}
+
 func ParseSmileIdCallback(raw []byte) (SmileCallbackEnvelope, error) {
 	var body smileCallbackBody
 	if err := json.Unmarshal(raw, &body); err != nil || body.PartnerParams.JobId == "" {

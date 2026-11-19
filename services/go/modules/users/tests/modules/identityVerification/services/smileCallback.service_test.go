@@ -89,6 +89,32 @@ func TestParseSmileV3RetainsOnlyDocumentedMachineReasonCodes(t *testing.T) {
 	}
 }
 
+func TestRetryableSmileProviderErrorsAreProductSpecific(t *testing.T) {
+	tests := []struct {
+		product string
+		reason  string
+		want    bool
+	}{
+		{"document_verification", "internal_error", true},
+		{"document_verification", "image_unavailable_or_invalid", true},
+		{"document_verification", "document_unclassifiable", true},
+		{"document_verification", "service_unavailable", false},
+		{"enhanced_document_verification", "service_unavailable", true},
+		{"enhanced_document_verification", "invalid_id_number", false},
+		{"enhanced_kyc", "internal_error", true},
+		{"enhanced_kyc", "service_unavailable", true},
+		{"enhanced_kyc", "image_unavailable_or_invalid", false},
+		{"unknown", "internal_error", false},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.product+"/"+testCase.reason, func(t *testing.T) {
+			if got := services.IsRetryableSmileProviderError(testCase.product, testCase.reason); got != testCase.want {
+				t.Fatalf("IsRetryableSmileProviderError() = %v, want %v", got, testCase.want)
+			}
+		})
+	}
+}
+
 func TestParseSmileV3AcceptsDocumentedMixedPartnerParamsAndNullableResults(t *testing.T) {
 	body := []byte(`{"status":"error","message":"Provider detail is not persisted","reason":"service_unavailable","product":"enhanced_document_verification","partner_params":{"job_id":"job-1","user_id":"user-1","job_type":11,"nantty_case_id":"00000000-0000-4000-8000-000000000001","capture_attempt_id":"attempt-1"},"id_fields":null,"antifraud":null}`)
 	envelope, err := services.ParseSmileIdV3Callback(body, "provider-job-1", "provider-user-1")

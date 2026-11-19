@@ -255,6 +255,43 @@ func TestSmileCallbackIdentityMismatchRequiresReviewAndPreservesCaptureSelection
 	}
 }
 
+func TestRetryableSmileTechnicalErrorReturnsCaseToFreshCapture(t *testing.T) {
+	harness := startUsersModuleAgainstFreshSchema(t)
+	eligibility := harness.enableIdentityVerification()
+	eligibility.set("buy_now", 90)
+	_, token := harness.newAccount("retry.capture", "Retry Capture")
+	profileID := harness.profileIdOf(token)
+	harness.payForBlue(profileID, "sub_retry_capture", "web_checkout")
+	container := harness.module.Container()
+	row := container.Client.VerificationCase.Query().Where(verificationcase.SubscriptionID("sub_retry_capture")).OnlyX(context.Background())
+	caseID, attemptID := harness.captureFor(token, row.ID.String())
+	callback, headers := signedSmileV3Callback(caseID, attemptID, "document_verification", "RETRY CAPTURE", "12345678901")
+	callback["status"], callback["reason"] = "error", "internal_error"
+	result := harness.expect("POST", "/api/v1/webhooks/smile-id", "", callback, http.StatusOK, headers...)
+	if result["outcome"] != "retryable" {
+		t.Fatalf("documented technical error should allow a fresh capture, got %v", result)
+	}
+	duplicate := harness.expect("POST", "/api/v1/webhooks/smile-id", "", callback, http.StatusOK, headers...)
+	if duplicate["outcome"] != "replayed" {
+		t.Fatalf("duplicate technical-error callback should be acknowledged idempotently, got %v", duplicate)
+	}
+	updated := container.Client.VerificationCase.GetX(context.Background(), row.ID)
+	if updated.Status != verificationcase.StatusAwaitingCapture || updated.SmileJobID != nil || updated.SmileUserID != nil || updated.SmileReference == "" || updated.SmileResultCode != "error" {
+		t.Fatalf("retryable error must invalidate only the active provider session and retain audit reference: %+v", updated)
+	}
+	journey := harness.expect("GET", "/api/v1/verification/journey", token, nil, http.StatusOK)
+	caseView := journey["case"].(map[string]any)
+	if caseView["retryableProviderError"] != true || caseView["canRetry"] != true {
+		t.Fatalf("user should be told a fresh attempt is available: %v", caseView)
+	}
+	newCaseID, newAttemptID := harness.captureFor(token, row.ID.String())
+	if newCaseID != caseID || newAttemptID == attemptID {
+		t.Fatalf("retry must use a fresh capture attempt: case=%q attempt=%q old=%q", newCaseID, newAttemptID, attemptID)
+	}
+	stale, staleHeaders := signedSmileV3Callback(caseID, attemptID, "document_verification", "RETRY CAPTURE", "12345678901")
+	harness.expect("POST", "/api/v1/webhooks/smile-id", "", stale, http.StatusUnauthorized, staleHeaders...)
+}
+
 func TestRejectedVerificationRequestsARefund(t *testing.T) {
 	harness := startUsersModuleAgainstFreshSchema(t)
 	eligibility := harness.enableIdentityVerification()
