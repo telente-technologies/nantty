@@ -259,7 +259,8 @@ func (provider *FlutterwaveProvider) ListFundingReversals(ctx context.Context, f
 			query.Set("page", strconv.Itoa(page))
 			var result struct {
 				PageInfo struct {
-					TotalPages int `json:"total_pages"`
+					CurrentPage int `json:"current_page"`
+					TotalPages  int `json:"total_pages"`
 				} `json:"page_info"`
 				Transfers []reversalRow `json:"transfers"`
 			}
@@ -290,6 +291,9 @@ func (provider *FlutterwaveProvider) ListFundingReversals(ctx context.Context, f
 			}
 			if result.PageInfo.TotalPages <= page {
 				break
+			}
+			if result.PageInfo.CurrentPage != page {
+				return nil, errors.Join(interfaces.ErrProviderUnavailable, errors.New("flutterwave reversal listing did not honor the requested page"))
 			}
 			if page == maxPages {
 				return nil, errors.Join(interfaces.ErrProviderUnavailable, errors.New("flutterwave reversal listing exceeded the pagination limit"))

@@ -158,6 +158,19 @@ func (fake *FakeFlutterwave) ReverseFundingAtBank(fundingReference string) bool 
 	return status == http.StatusOK
 }
 
+func (fake *FakeFlutterwave) SetFundingReversalStatus(fundingReference, status string) bool {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	fundingReference = strings.TrimPrefix(fundingReference, "PSA_")
+	for _, reversal := range fake.Reversals {
+		if strings.TrimPrefix(text(reversal["narration"]), "Refund for: ") == fundingReference {
+			reversal["status"] = status
+			return true
+		}
+	}
+	return false
+}
+
 func (fake *FakeFlutterwave) DeleteWalletAtProvider(accountRef string) {
 	fake.mutex.Lock()
 	defer fake.mutex.Unlock()

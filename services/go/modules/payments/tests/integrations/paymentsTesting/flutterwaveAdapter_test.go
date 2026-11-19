@@ -130,18 +130,26 @@ func TestFlutterwavePayoutSubaccountRefundsUseTheDocumentedEnvelopeAndReferences
 
 	fake.Reversals = []map[string]any{
 		{"id": 501, "reference": "RVSL-501", "narration": "Refund for: FUNDING-501", "status": "SUCCESSFUL", "amount": 125.50, "currency": "NGN", "account_number": "8000000001"},
+		{"id": 503, "reference": "RVSL-503", "narration": "Refund for: FUNDING-503", "status": "SUCCESSFUL", "amount": 50, "currency": "NGN", "account_number": "8000000003"},
 		{"id": 502, "reference": "RVSL-502", "narration": "Refund for: FUNDING-502", "status": "PENDING", "amount": 88, "currency": "NGN", "account_number": "8000000002"},
+		{"id": 504, "reference": "RVSL-504", "narration": "Refund for: FUNDING-504", "status": "FAILED", "amount": 25, "currency": "NGN", "account_number": "8000000004"},
 	}
 
 	reversals, err := adapter.ListFundingReversals(context.Background(), time.Now().Add(-24*time.Hour), time.Now())
-	if err != nil || len(reversals) != 2 {
+	if err != nil || len(reversals) != 4 {
 		t.Fatalf("documented data.transfers response across pages: %v %+v", err, reversals)
 	}
 	if reversals[0].FundingReference != "FUNDING-501" || reversals[0].ProviderReversalReference != "RVSL-501" || reversals[0].AmountMinor != 12_550 || reversals[0].Outcome != interfaces.OutcomeSucceeded {
 		t.Fatalf("first reversal must separate the original funding ref from the provider reversal ref: %+v", reversals[0])
 	}
-	if reversals[1].FundingReference != "FUNDING-502" || reversals[1].ProviderReversalReference != "RVSL-502" || reversals[1].Outcome != interfaces.OutcomePending {
-		t.Fatalf("pending reversal must remain pending and preserve both references: %+v", reversals[1])
+	if reversals[1].FundingReference != "FUNDING-503" || reversals[1].ProviderReversalReference != "RVSL-503" {
+		t.Fatalf("second success-page reversal: %+v", reversals[1])
+	}
+	if reversals[2].FundingReference != "FUNDING-502" || reversals[2].ProviderReversalReference != "RVSL-502" || reversals[2].Outcome != interfaces.OutcomePending {
+		t.Fatalf("pending reversal must remain pending and preserve both references: %+v", reversals[2])
+	}
+	if reversals[3].FundingReference != "FUNDING-504" || reversals[3].ProviderReversalReference != "RVSL-504" || reversals[3].Outcome != interfaces.OutcomeFailed {
+		t.Fatalf("failed reversal must be returned for hold recovery: %+v", reversals[3])
 	}
 	listCalls := 0
 	for _, request := range fake.RequestLog() {
@@ -149,8 +157,8 @@ func TestFlutterwavePayoutSubaccountRefundsUseTheDocumentedEnvelopeAndReferences
 			listCalls++
 		}
 	}
-	if listCalls != 2 {
-		t.Fatalf("two response pages should make two provider list reads, got %d", listCalls)
+	if listCalls != 4 {
+		t.Fatalf("all three documented statuses and the second success page require four list reads, got %d", listCalls)
 	}
 }
 

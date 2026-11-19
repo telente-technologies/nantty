@@ -231,7 +231,7 @@ func (fake *FakeFlutterwave) refundStatus() string {
 	if fake.RefundStatus != "" {
 		return fake.RefundStatus
 	}
-	return "completed"
+	return "completed-mpgs"
 }
 
 func (fake *FakeFlutterwave) RefundWebhookForCharge(reference, status string) ([]byte, http.Header, bool) {
