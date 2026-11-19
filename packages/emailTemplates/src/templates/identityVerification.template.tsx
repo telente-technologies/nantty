@@ -38,7 +38,7 @@ export const verificationEligible = defineEmailTemplate<MarkProps & { readonly p
     { type: "paragraph", text: `Hi ${p.firstName}, thanks for waiting. ${p.accountName} now meets the requirements for the ${p.checkmark} checkmark.` },
     { type: "steps", items: [
       { title: "Pay", text: "Choose monthly or yearly. You are only charged once.", state: "current" },
-      { title: "Confirm it's you", text: "A quick selfie and a photo of your government ID, checked by our verification partner Smile ID.", state: "todo" },
+      { title: "Confirm it's you", text: "Choose an identity check available for your country. Depending on the option, you may use a photo ID or enter an ID number securely with Smile ID.", state: "todo" },
       { title: "Get your checkmark", text: "Most people are approved in minutes. If we can't approve you, you get a full refund.", state: "todo" },
     ] },
     { type: "button", label: "Apply now", href: p.payUrl },
@@ -53,7 +53,7 @@ export const verificationUnderReview = defineEmailTemplate<MarkProps & { readonl
   reference: (p) => p.caseId,
   blocks: (p, c) => [
     { type: "hero", eyebrow: `${p.checkmark} checkmark`, title: "A person is reviewing your verification", tone: "neutral" },
-    { type: "paragraph", text: `Hi ${p.firstName}, we received your selfie and ID for ${p.accountName}. Some checks need a closer look, so a member of our trust team will review them within ${p.reviewWithinDays} days.` },
+    { type: "paragraph", text: `Hi ${p.firstName}, we received your identity check for ${p.accountName}. Some results need a closer look, so a member of our trust team will review them within ${p.reviewWithinDays} days.` },
     { type: "callout", tone: "neutral", text: "You don't need to do anything. If we can't approve the checkmark, we refund your payment in full." },
     { type: "button", label: "View status", href: hubUrl(c) },
   ],
@@ -82,7 +82,7 @@ export const verificationRejectedRefunded = defineEmailTemplate<MarkProps & { re
     { type: "paragraph", text: `Hi ${p.firstName}, our trust team reviewed the identity check for ${p.accountName} and could not approve the ${p.checkmark} checkmark.` },
     { type: "list", title: "Why", items: p.reasons },
     { type: "callout", tone: p.refundMethod === "apple_request" ? "warn" : "success", title: "Your money", text: p.refundMethod === "plan_share_card" || p.refundMethod === "plan_share_store" ? shareSentence(p.refundMethod, p.refundAmount ? c.money(p.refundAmount) : undefined) : refundSentence[p.refundMethod] },
-    { type: "paragraph", text: `You can try again from ${c.date(p.reapplyFrom)}. Use a clear, unexpired photo ID that matches the name on your profile.` },
+    { type: "paragraph", text: `You can try again from ${c.date(p.reapplyFrom)}. Choose a supported identity-check option and make sure the details match your profile.` },
     { type: "button", label: "Open verification", href: hubUrl(c) },
   ],
   sample: { firstName: "Tobi", checkmark: "Blue", accountName: "@tobi.ade", reasons: ["The name on the ID does not match the name on your profile."], refundMethod: "card", reapplyFrom: "2026-11-03T00:00:00.000Z" },

@@ -180,6 +180,23 @@ describe("verification rejection when the plan keeps running", () => {
   });
 });
 
+describe("identity verification email copy", () => {
+  it("does not promise a photo ID when ID-number verification may be used", async () => {
+    const eligible = await renderEmailSample("verificationEligible");
+    const underReview = await renderEmailSample("verificationUnderReview");
+    expect(eligible.text).toContain("photo ID or enter an ID number securely");
+    expect(underReview.text).toContain("we received your identity check");
+    expect(underReview.text).not.toContain("received your selfie and ID");
+  });
+
+  it("does not instruct rejected applicants to use only a photo ID", async () => {
+    const sample = readEmailTemplate("verificationRejectedRefunded").sample;
+    const rendered = await renderEmail("verificationRejectedRefunded", sample);
+    expect(rendered.text).toContain("Choose a supported identity-check option");
+    expect(rendered.text).not.toContain("Use a clear, unexpired photo ID");
+  });
+});
+
 describe("refund emails say where the money lands", () => {
   const sample = readEmailTemplate("refundIssued").sample;
 
