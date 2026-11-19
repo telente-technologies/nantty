@@ -167,10 +167,11 @@ const DefaultStatus = StatusHeld
 
 // Status values.
 const (
-	StatusHeld      Status = "held"
-	StatusAvailable Status = "available"
-	StatusRejected  Status = "rejected"
-	StatusReversed  Status = "reversed"
+	StatusHeld            Status = "held"
+	StatusAvailable       Status = "available"
+	StatusRejected        Status = "rejected"
+	StatusReversalPending Status = "reversal_pending"
+	StatusReversed        Status = "reversed"
 )
 
 func (s Status) String() string {
@@ -180,7 +181,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusHeld, StatusAvailable, StatusRejected, StatusReversed:
+	case StatusHeld, StatusAvailable, StatusRejected, StatusReversalPending, StatusReversed:
 		return nil
 	default:
 		return fmt.Errorf("walletfunding: invalid enum value for status field: %q", s)

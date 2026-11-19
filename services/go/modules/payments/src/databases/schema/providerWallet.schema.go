@@ -99,7 +99,7 @@ func (WalletFunding) Fields() []ent.Field {
 		field.Int64("deposit_fee_minor").Default(0).Immutable(),
 		field.Int64("hinted_minor").Default(0).Immutable(),
 		field.String("currency").NotEmpty().MaxLen(3).Immutable(),
-		field.Enum("status").Values("held", "available", "rejected", "reversed").Default("held"),
+		field.Enum("status").Values("held", "available", "rejected", "reversal_pending", "reversed").Default("held"),
 		field.Time("hold_release_at"),
 		field.Time("hold_released_at").Optional().Nillable(),
 		field.String("sweep_reference").MaxLen(80).Default(""),

@@ -974,7 +974,7 @@ var (
 		{Name: "deposit_fee_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "hinted_minor", Type: field.TypeInt64, Default: 0},
 		{Name: "currency", Type: field.TypeString, Size: 3},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"held", "available", "rejected", "reversed"}, Default: "held"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"held", "available", "rejected", "reversal_pending", "reversed"}, Default: "held"},
 		{Name: "hold_release_at", Type: field.TypeTime},
 		{Name: "hold_released_at", Type: field.TypeTime, Nullable: true},
 		{Name: "sweep_reference", Type: field.TypeString, Size: 80, Default: ""},

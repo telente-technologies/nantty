@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -86,6 +87,9 @@ func (provider *FlutterwaveProvider) FetchWallet(ctx context.Context, accountRef
 }
 
 func (provider *FlutterwaveProvider) ListFundingAccounts(ctx context.Context, accountRef, currency string) ([]interfaces.FundingAccount, error) {
+	if !strings.EqualFold(currency, "NGN") {
+		return nil, interfaces.ErrCurrencyNotSupported
+	}
 	var raw json.RawMessage
 	query := url.Values{"currency": {currency}, "verbose": {"1"}}
 	if _, err := provider.http.send(ctx, flutterwaveRequest{method: http.MethodGet, path: "/payout-subaccounts/" + url.PathEscape(accountRef) + "/static-account", query: query}, &raw); err != nil {
@@ -119,6 +123,9 @@ func (provider *FlutterwaveProvider) ListFundingAccounts(ctx context.Context, ac
 }
 
 func (provider *FlutterwaveProvider) ReadWalletBalance(ctx context.Context, accountRef, currency string) (interfaces.ProviderBalance, error) {
+	if !strings.EqualFold(currency, "NGN") {
+		return interfaces.ProviderBalance{}, interfaces.ErrCurrencyNotSupported
+	}
 	var balance struct {
 		Currency         string          `json:"currency"`
 		AvailableBalance json.RawMessage `json:"available_balance"`
@@ -200,20 +207,31 @@ func (provider *FlutterwaveProvider) MoveBetweenWallets(ctx context.Context, mov
 }
 
 func (provider *FlutterwaveProvider) ReverseFunding(ctx context.Context, fundingReference, currency string) (interfaces.RefundResult, error) {
+	if !strings.EqualFold(currency, "NGN") {
+		return interfaces.RefundResult{}, interfaces.ErrCurrencyNotSupported
+	}
 	body := map[string]any{"funding_reference": strings.TrimPrefix(fundingReference, "PSA_"), "debit_currency": currency}
 	var reversal struct {
-		Id     json.Number `json:"id"`
-		Status string      `json:"status"`
+		Id        json.Number `json:"id"`
+		Reference string      `json:"reference"`
+		Status    string      `json:"status"`
 	}
 	if _, err := provider.http.send(ctx, flutterwaveRequest{method: http.MethodPost, path: "/payout-subaccounts/refunds", body: body}, &reversal); err != nil {
 		return interfaces.RefundResult{}, err
 	}
-	return interfaces.RefundResult{ProviderRefundId: reversal.Id.String(), Outcome: convertFlutterwaveTransferLikeStatus(reversal.Status)}, nil
+	return interfaces.RefundResult{ProviderRefundId: firstNonEmptyString(reversal.Reference, flutterwaveNumericReference(reversal.Id)), Outcome: convertFlutterwaveTransferLikeStatus(reversal.Status)}, nil
+}
+
+func flutterwaveNumericReference(value json.Number) string {
+	if value == "" || value == "0" {
+		return ""
+	}
+	return value.String()
 }
 
 func convertFlutterwaveTransferLikeStatus(status string) interfaces.ProviderOutcome {
 	switch strings.ToUpper(status) {
-	case "SUCCESSFUL", "SUCCESS", "COMPLETED":
+	case "SUCCESSFUL", "SUCCESS":
 		return interfaces.OutcomeSucceeded
 	case "FAILED":
 		return interfaces.OutcomeFailed
@@ -223,30 +241,71 @@ func convertFlutterwaveTransferLikeStatus(status string) interfaces.ProviderOutc
 
 func (provider *FlutterwaveProvider) ListFundingReversals(ctx context.Context, from, to time.Time) ([]interfaces.FundingReversal, error) {
 	query := url.Values{"from": {from.UTC().Format("2006-01-02")}, "to": {to.UTC().Format("2006-01-02")}}
-	var rows []struct {
+	type reversalRow struct {
+		Id               json.Number     `json:"id"`
 		Reference        string          `json:"reference"`
 		FundingReference string          `json:"funding_reference"`
+		Narration        string          `json:"narration"`
 		Status           string          `json:"status"`
 		Amount           json.RawMessage `json:"amount"`
 		Currency         string          `json:"currency"`
 		AccountReference string          `json:"account_reference"`
 	}
-	if _, err := provider.http.send(ctx, flutterwaveRequest{method: http.MethodGet, path: "/payout-subaccounts/refunds", query: query}, &rows); err != nil {
-		return nil, err
-	}
-	reversals := make([]interfaces.FundingReversal, 0, len(rows))
-	for _, row := range rows {
-		currency := strings.ToUpper(firstNonEmptyString(row.Currency, "NGN"))
-		amount, err := flutterwaveAmountMinor(row.Amount, currency)
-		if err != nil {
-			return nil, err
+	var reversals []interfaces.FundingReversal
+	const maxPages = 100
+	for _, status := range []string{"SUCCESSFUL", "PENDING", "FAILED"} {
+		query.Set("status", status)
+		for page := 1; page <= maxPages; page++ {
+			query.Set("page", strconv.Itoa(page))
+			var result struct {
+				PageInfo struct {
+					TotalPages int `json:"total_pages"`
+				} `json:"page_info"`
+				Transfers []reversalRow `json:"transfers"`
+			}
+			if _, err := provider.http.send(ctx, flutterwaveRequest{method: http.MethodGet, path: "/payout-subaccounts/refunds", query: query}, &result); err != nil {
+				return nil, err
+			}
+			for _, row := range result.Transfers {
+				currency := strings.ToUpper(firstNonEmptyString(row.Currency, "NGN"))
+				if currency != "NGN" {
+					return nil, interfaces.ErrCurrencyNotSupported
+				}
+				amount, err := flutterwaveAmountMinor(row.Amount, currency)
+				if err != nil {
+					return nil, err
+				}
+				fundingReference := firstNonEmptyString(row.FundingReference, flutterwaveFundingReferenceFromNarration(row.Narration))
+				if fundingReference == "" {
+					return nil, errors.Join(interfaces.ErrProviderUnavailable, errors.New("flutterwave reversal omitted its original funding reference"))
+				}
+				providerReference := firstNonEmptyString(row.Reference, flutterwaveNumericReference(row.Id))
+				if providerReference == "" {
+					return nil, errors.Join(interfaces.ErrProviderUnavailable, errors.New("flutterwave reversal omitted its provider reference"))
+				}
+				reversals = append(reversals, interfaces.FundingReversal{
+					FundingReference: fundingReference, ProviderReversalReference: providerReference, AccountRef: row.AccountReference,
+					AmountMinor: amount, Currency: currency, Outcome: convertFlutterwaveTransferLikeStatus(row.Status),
+				})
+			}
+			if result.PageInfo.TotalPages <= page {
+				break
+			}
+			if page == maxPages {
+				return nil, errors.Join(interfaces.ErrProviderUnavailable, errors.New("flutterwave reversal listing exceeded the pagination limit"))
+			}
 		}
-		reversals = append(reversals, interfaces.FundingReversal{
-			FundingReference: firstNonEmptyString(row.FundingReference, row.Reference), AccountRef: row.AccountReference,
-			AmountMinor: amount, Currency: currency, Outcome: convertFlutterwaveTransferLikeStatus(row.Status),
-		})
 	}
 	return reversals, nil
+}
+
+func flutterwaveFundingReferenceFromNarration(narration string) string {
+	const prefix = "Refund for: "
+	narration = strings.TrimSpace(narration)
+	if !strings.HasPrefix(narration, prefix) {
+		return ""
+	}
+	return strings.TrimSpace(strings.TrimPrefix(narration, prefix))
 }
 
 func (provider *FlutterwaveProvider) CloseWallet(ctx context.Context, accountRef string) error {

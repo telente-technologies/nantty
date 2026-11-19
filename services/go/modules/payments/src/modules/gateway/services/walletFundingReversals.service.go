@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"net/http"
 	"time"
 
@@ -12,10 +13,14 @@ import (
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 	"nantty/modules/payments/src/generated/ent"
 	"nantty/modules/payments/src/generated/ent/walletfunding"
+	"nantty/modules/payments/src/integrations"
+	"nantty/modules/payments/src/interfaces"
 	"nantty/platform/httpserver"
 )
 
 var ErrFundingNotRejectable = httpserver.NewApiError(http.StatusConflict, "FUNDING_NOT_REJECTABLE", "This deposit can no longer be sent back.")
+var ErrFundingReversalPending = httpserver.NewApiError(http.StatusAccepted, "FUNDING_REVERSAL_PENDING", "The provider is still processing this deposit reversal.")
+var ErrFundingReversalFailed = httpserver.NewApiError(http.StatusBadGateway, "FUNDING_REVERSAL_FAILED", "The payment provider could not complete this deposit reversal.")
 
 func mustUuid(value string) uuid.UUID {
 	parsed, _ := uuid.Parse(value)
@@ -41,33 +46,91 @@ func (gateway *PaymentGateway) RecordWalletCreditHoldInTransaction(ctx context.C
 }
 
 func (gateway *PaymentGateway) RejectWalletFunding(ctx context.Context, fundingReference, reason string) error {
-	funding, err := gateway.Container.Client(gateway.Container.Resources.Database).WalletFunding.Query().
-		Where(walletfunding.Provider(gateway.walletProviderName()), walletfunding.ProviderReference(fundingReference), walletfunding.SourceEQ(walletfunding.SourceDeposit)).Only(ctx)
-	if ent.IsNotFound(err) {
-		return ErrFundingNotRejectable
-	}
+	funding, err := gateway.claimFundingReversal(ctx, fundingReference)
 	if err != nil {
 		return err
-	}
-	if funding.Status != walletfunding.StatusHeld || funding.ReversedAt != nil {
-		return ErrFundingNotRejectable
-	}
-	spendable, err := gateway.Container.Ledger.ReadAccountBalance(ctx, gateway.Container.Resources.Database, ledgermodels.WalletDepositHoldAccount(funding.UserID, funding.Currency))
-	if err != nil {
-		return err
-	}
-	if spendable < funding.GrossMinor-funding.ProviderFeeMinor-funding.DepositFeeMinor {
-		return ErrFundingNotRejectable
 	}
 	provider, err := gateway.Container.Wallets(funding.Provider)
 	if err != nil {
+		_ = gateway.ReleasePendingFundingReversal(ctx, fundingReference)
 		return err
 	}
 	result, err := provider.ReverseFunding(ctx, funding.ProviderReference, funding.Currency)
 	if err != nil {
-		return convertProviderError(err)
+		var requestError *integrations.ProviderRequestError
+		if (errors.As(err, &requestError) && requestError.IsDefinitiveRejection()) || errors.Is(err, interfaces.ErrProviderNotConfigured) || errors.Is(err, interfaces.ErrCurrencyNotSupported) {
+			_ = gateway.ReleasePendingFundingReversal(ctx, fundingReference)
+			return convertProviderError(err)
+		}
+		return ErrFundingReversalPending
 	}
-	return gateway.ApplyFundingReversal(ctx, funding.ProviderReference, result.ProviderRefundId, "rejected: "+reason)
+	switch result.Outcome {
+	case interfaces.OutcomeSucceeded:
+		return gateway.ApplyFundingReversal(ctx, funding.ProviderReference, result.ProviderRefundId, "rejected: "+reason)
+	case interfaces.OutcomeFailed:
+		if err := gateway.ReleasePendingFundingReversal(ctx, fundingReference); err != nil {
+			return err
+		}
+		return ErrFundingReversalFailed
+	default:
+		if err := gateway.RecordPendingFundingReversal(ctx, fundingReference, result.ProviderRefundId); err != nil {
+			return err
+		}
+		return ErrFundingReversalPending
+	}
+}
+
+func (gateway *PaymentGateway) claimFundingReversal(ctx context.Context, fundingReference string) (*ent.WalletFunding, error) {
+	var claimed *ent.WalletFunding
+	err := databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		client := gateway.Container.Client(transaction)
+		funding, err := client.WalletFunding.Query().Where(walletfunding.Provider(gateway.walletProviderName()), walletfunding.ProviderReference(fundingReference), walletfunding.SourceEQ(walletfunding.SourceDeposit)).ForUpdate().Only(ctx)
+		if ent.IsNotFound(err) {
+			return ErrFundingNotRejectable
+		}
+		if err != nil {
+			return err
+		}
+		if funding.Status != walletfunding.StatusHeld || funding.ReversedAt != nil {
+			return ErrFundingNotRejectable
+		}
+		spendable, err := gateway.Container.Ledger.ReadAccountBalance(ctx, transaction, ledgermodels.WalletDepositHoldAccount(funding.UserID, funding.Currency))
+		if err != nil {
+			return err
+		}
+		if spendable < funding.GrossMinor-funding.ProviderFeeMinor-funding.DepositFeeMinor {
+			return ErrFundingNotRejectable
+		}
+		if err := funding.Update().SetStatus(walletfunding.StatusReversalPending).AddVersion(1).Exec(ctx); err != nil {
+			return err
+		}
+		claimed = funding
+		return nil
+	})
+	return claimed, err
+}
+
+func (gateway *PaymentGateway) RecordPendingFundingReversal(ctx context.Context, fundingReference, providerReversalReference string) error {
+	if providerReversalReference == "" {
+		return nil
+	}
+	return gateway.Container.Client(gateway.Container.Resources.Database).WalletFunding.Update().
+		Where(walletfunding.Provider(gateway.walletProviderName()), walletfunding.ProviderReference(fundingReference), walletfunding.StatusEQ(walletfunding.StatusReversalPending), walletfunding.ReversedAtIsNil()).
+		SetReversalReference(truncate(providerReversalReference, 120)).AddVersion(1).Exec(ctx)
+}
+
+func (gateway *PaymentGateway) ReleasePendingFundingReversal(ctx context.Context, fundingReference string) error {
+	return databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		funding, err := gateway.Container.Client(transaction).WalletFunding.Query().
+			Where(walletfunding.Provider(gateway.walletProviderName()), walletfunding.ProviderReference(fundingReference), walletfunding.StatusEQ(walletfunding.StatusReversalPending), walletfunding.ReversedAtIsNil()).ForUpdate().Only(ctx)
+		if ent.IsNotFound(err) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		return funding.Update().SetStatus(walletfunding.StatusHeld).SetReversalReference("").AddVersion(1).Exec(ctx)
+	})
 }
 
 func (gateway *PaymentGateway) ApplyFundingReversal(ctx context.Context, fundingReference, reversalReference, reason string) error {

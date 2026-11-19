@@ -163,19 +163,26 @@ func (gateway *PaymentGateway) applyProviderFundingReversals(ctx context.Context
 	now := gateway.Container.Now().UTC()
 	reversals, err := provider.ListFundingReversals(ctx, now.AddDate(0, 0, -7), now.Add(24*time.Hour))
 	if err != nil {
+		report.Issues = append(report.Issues, "provider funding reversals could not be reconciled")
 		return 0
 	}
 	applied := 0
 	for _, reversal := range reversals {
+		reference := "PSA_" + strings.TrimPrefix(reversal.FundingReference, "PSA_")
+		if reversal.Outcome == interfaces.OutcomeFailed {
+			if err := gateway.ReleasePendingFundingReversal(ctx, reference); err != nil {
+				report.Issues = append(report.Issues, "failed provider reversal could not be reopened for review")
+			}
+			continue
+		}
 		if reversal.Outcome != interfaces.OutcomeSucceeded {
 			continue
 		}
-		reference := "PSA_" + strings.TrimPrefix(reversal.FundingReference, "PSA_")
 		reversed, err := gateway.Container.Client(gateway.Container.Resources.Database).WalletFunding.Query().Where(walletfunding.ProviderReference(reference), walletfunding.ReversedAtNotNil()).Exist(ctx)
 		if err != nil || reversed {
 			continue
 		}
-		if err := gateway.ApplyFundingReversal(ctx, reference, "REV_"+reference, "reversed by the sending bank"); err == nil {
+		if err := gateway.ApplyFundingReversal(ctx, reference, reversal.ProviderReversalReference, "reversed by the sending bank"); err == nil {
 			applied++
 			report.Issues = append(report.Issues, "funding reversed "+reference)
 		}

@@ -116,6 +116,61 @@ func TestFlutterwaveTransfersSkipBeneficiariesNeverRetryAndRespectPsaBalances(t 
 	}
 }
 
+func TestFlutterwavePayoutSubaccountRefundsUseTheDocumentedEnvelopeAndReferences(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	wallet, err := adapter.CreateWallet(context.Background(), interfaces.WalletOwner{AccountName: "A B", AliasEmail: "u+a@wallets.nantty.com"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fake.FundWallet(wallet.AccountRef, "NGN", 12_550, "PSA_FUNDING-501")
+	request, err := adapter.ReverseFunding(context.Background(), "PSA_FUNDING-501", "NGN")
+	if err != nil || request.Outcome != interfaces.OutcomePending || !strings.HasPrefix(request.ProviderRefundId, "REV-") {
+		t.Fatalf("initial NEW response must remain pending and return the provider reversal reference: %v %+v", err, request)
+	}
+
+	fake.Reversals = []map[string]any{
+		{"id": 501, "reference": "RVSL-501", "narration": "Refund for: FUNDING-501", "status": "SUCCESSFUL", "amount": 125.50, "currency": "NGN", "account_number": "8000000001"},
+		{"id": 502, "reference": "RVSL-502", "narration": "Refund for: FUNDING-502", "status": "PENDING", "amount": 88, "currency": "NGN", "account_number": "8000000002"},
+	}
+
+	reversals, err := adapter.ListFundingReversals(context.Background(), time.Now().Add(-24*time.Hour), time.Now())
+	if err != nil || len(reversals) != 2 {
+		t.Fatalf("documented data.transfers response across pages: %v %+v", err, reversals)
+	}
+	if reversals[0].FundingReference != "FUNDING-501" || reversals[0].ProviderReversalReference != "RVSL-501" || reversals[0].AmountMinor != 12_550 || reversals[0].Outcome != interfaces.OutcomeSucceeded {
+		t.Fatalf("first reversal must separate the original funding ref from the provider reversal ref: %+v", reversals[0])
+	}
+	if reversals[1].FundingReference != "FUNDING-502" || reversals[1].ProviderReversalReference != "RVSL-502" || reversals[1].Outcome != interfaces.OutcomePending {
+		t.Fatalf("pending reversal must remain pending and preserve both references: %+v", reversals[1])
+	}
+	listCalls := 0
+	for _, request := range fake.RequestLog() {
+		if request == "GET /v3/payout-subaccounts/refunds" {
+			listCalls++
+		}
+	}
+	if listCalls != 2 {
+		t.Fatalf("two response pages should make two provider list reads, got %d", listCalls)
+	}
+}
+
+func TestFlutterwavePayoutSubaccountOperationsRejectUnsupportedCurrencies(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	ctx := context.Background()
+	if _, err := adapter.ListFundingAccounts(ctx, "PSA-1", "GHS"); !errors.Is(err, interfaces.ErrCurrencyNotSupported) {
+		t.Fatalf("non-NGN payout subaccount virtual account should be rejected: %v", err)
+	}
+	if _, err := adapter.ReadWalletBalance(ctx, "PSA-1", "GHS"); !errors.Is(err, interfaces.ErrCurrencyNotSupported) {
+		t.Fatalf("non-NGN payout subaccount balance should be rejected: %v", err)
+	}
+	if _, err := adapter.ReverseFunding(ctx, "PSA_FUNDING-1", "GHS"); !errors.Is(err, interfaces.ErrCurrencyNotSupported) {
+		t.Fatalf("non-NGN payout subaccount reversal should be rejected: %v", err)
+	}
+	if calls := len(fake.RequestLog()); calls != 0 {
+		t.Fatalf("unsupported currency requests must fail before provider I/O, got %d requests", calls)
+	}
+}
+
 func TestFlutterwaveReadsRetry429AndParseGroupedAmounts(t *testing.T) {
 	fake, adapter := newFakeFlutterwaveAdapter(t)
 	ctx := context.Background()
@@ -150,8 +205,30 @@ func TestFlutterwaveWebhookHashIsOnlyATrigger(t *testing.T) {
 		t.Fatalf("funding webhook: %v %+v", err, funding)
 	}
 	refund, err := adapter.VerifyWebhookSignatureAndParse([]byte(`{"id":77,"AmountRefunded":10,"status":"completed","FlwRef":"F","TransactionId":9}`), headers)
-	if err != nil || refund.Kind != interfaces.WebhookKindRefund || refund.ProviderObjectId != "77" {
+	if err != nil || refund.Kind != interfaces.WebhookKindRefund || refund.ProviderObjectId != "77" || refund.Status != "pending" || refund.EventType != "refund.pending" {
 		t.Fatalf("refund webhook: %v %+v", err, refund)
+	}
+	for _, testCase := range []struct {
+		status string
+		want   string
+	}{
+		{"completed", "pending"},
+		{"completed-bank-transfer", "processed"},
+		{"completed-momo", "processed"},
+		{"completed-mpgs", "processed"},
+		{"completed-offline", "processed"},
+		{"completed-preauth", "processed"},
+		{"pending-momo", "pending"},
+		{"pending-bank-transfer", "pending"},
+		{"pending-mpgs", "pending"},
+		{"processing", "pending"},
+		{"failed", "failed"},
+	} {
+		body := []byte(`{"id":77,"AmountRefunded":10,"status":"` + testCase.status + `","FlwRef":"F","TransactionId":9}`)
+		notification, err := adapter.VerifyWebhookSignatureAndParse(body, headers)
+		if err != nil || notification.Status != testCase.want {
+			t.Errorf("refund status %q mapped to %q (%v), want %q", testCase.status, notification.Status, err, testCase.want)
+		}
 	}
 }
 

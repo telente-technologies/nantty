@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -118,6 +119,12 @@ func (controller ProviderWalletsController) RejectFunding(writer http.ResponseWr
 	}
 	reference := request.PathValue("reference")
 	if err := controller.Application.Gateway.RejectWalletFunding(request.Context(), reference, body.Reason); err != nil {
+		if errors.Is(err, services.ErrFundingReversalPending) {
+			controller.audit(request, "walletFunding.reversal_requested", "walletFunding", reference, body.Reason, map[string]any{"status": "held"}, map[string]any{"status": "reversal_pending"})
+			writer.Header().Set("Cache-Control", "no-store")
+			httpserver.WriteJsonResponse(writer, http.StatusAccepted, map[string]any{"reference": reference, "status": "reversal_pending"})
+			return
+		}
 		controller.fail(writer, request, err)
 		return
 	}

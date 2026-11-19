@@ -26,7 +26,29 @@ func (fake *FakeFlutterwave) routeWallets(request fakeFlwRequest) (int, any, any
 	case request.method == http.MethodPost && len(segments) == 2 && segments[1] == "refunds":
 		return fake.reverseFunding(request.body)
 	case request.method == http.MethodGet && len(segments) == 2 && segments[1] == "refunds":
-		return http.StatusOK, fake.Reversals, nil
+		status := request.query["status"]
+		if status == "" {
+			status = "SUCCESSFUL"
+		}
+		filtered := make([]map[string]any, 0, len(fake.Reversals))
+		for _, reversal := range fake.Reversals {
+			if strings.EqualFold(text(reversal["status"]), status) {
+				filtered = append(filtered, reversal)
+			}
+		}
+		page, err := strconv.Atoi(request.query["page"])
+		if err != nil || page < 1 {
+			page = 1
+		}
+		const pageSize = 1
+		start := (page - 1) * pageSize
+		end := min(start+pageSize, len(filtered))
+		transfers := []map[string]any{}
+		if start < len(filtered) {
+			transfers = append(transfers, filtered[start:end]...)
+		}
+		totalPages := (len(filtered) + pageSize - 1) / pageSize
+		return http.StatusOK, map[string]any{"page_info": map[string]any{"total": len(filtered), "current_page": page, "total_pages": totalPages}, "transfers": transfers}, nil
 	}
 	wallet := fake.Wallets[segments[1]]
 	if wallet == nil || wallet.Status == "DELETED" {
@@ -92,27 +114,25 @@ func (fake *FakeFlutterwave) createWallet(body map[string]any) (int, any, any) {
 }
 
 func (fake *FakeFlutterwave) reverseFunding(body map[string]any) (int, any, any) {
-	reference := "PSA_" + strings.TrimPrefix(text(body["funding_reference"]), "PSA_")
+	fundingReference := strings.TrimPrefix(text(body["funding_reference"]), "PSA_")
+	reference := "PSA_" + fundingReference
 	for _, wallet := range fake.Wallets {
 		for _, line := range wallet.Lines {
 			if line["reference"] != reference || line["type"] != "C" {
 				continue
 			}
 			amount, _ := fakeMinor(strings.ReplaceAll(text(line["amount"]), ",", ""), "NGN")
-			fake.debitForReversal(wallet, reference, amount)
-			reversal := map[string]any{"id": fake.newId(), "reference": "REV_" + reference, "funding_reference": reference, "status": "SUCCESSFUL", "amount": fakeMajor(amount, "NGN"), "currency": "NGN", "account_reference": wallet.Ref}
+			reversal := map[string]any{
+				"id": fake.newId(), "reference": fmt.Sprintf("REV-%d", fake.newId()), "narration": "Refund for: " + fundingReference,
+				"status": "PENDING", "amount": fakeMajor(amount, "NGN"), "currency": "NGN", "account_number": wallet.Nuban,
+			}
 			fake.Reversals = append(fake.Reversals, reversal)
-			return http.StatusOK, reversal, nil
+			return http.StatusOK, map[string]any{
+				"id": reversal["id"], "status": "NEW", "currency": "NGN", "debit_currency": "NGN", "amount": fakeMajor(amount, "NGN"), "reference": reversal["reference"],
+			}, nil
 		}
 	}
 	return http.StatusBadRequest, "Funding reference not found", nil
-}
-
-func (fake *FakeFlutterwave) debitForReversal(wallet *FakeFlwWallet, reference string, amount int64) {
-	fromWallet := min(amount, max(wallet.BalanceMinor, 0))
-	wallet.BalanceMinor -= fromWallet
-	fake.walletLine(wallet, "D", "REV_"+reference, fromWallet, "FUNDING REVERSAL")
-	fake.MainBalance["NGN"] -= amount - fromWallet
 }
 
 func (fake *FakeFlutterwave) routeTransfers(request fakeFlwRequest) (int, any, any) {

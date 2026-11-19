@@ -51,11 +51,12 @@ type WalletMove struct {
 }
 
 type FundingReversal struct {
-	FundingReference string
-	AccountRef       string
-	AmountMinor      int64
-	Currency         string
-	Outcome          ProviderOutcome
+	FundingReference          string
+	ProviderReversalReference string
+	AccountRef                string
+	AmountMinor               int64
+	Currency                  string
+	Outcome                   ProviderOutcome
 }
 
 type WalletProvider interface {
