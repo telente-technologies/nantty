@@ -77,6 +77,31 @@ func TestSmileIdCatalogCachesSuccessfulResponsesPerCountryAndExpires(t *testing.
 	}
 }
 
+func TestSmileIdDocumentCatalogRequiresArrayAndDoesNotCacheInvalidShape(t *testing.T) {
+	for _, invalidBody := range []string{`{}`, `{"valid_documents":null}`} {
+		t.Run(invalidBody, func(t *testing.T) {
+			var requests atomic.Int32
+			server := httptest.NewTLSServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+				writer.Header().Set("Content-Type", "application/json")
+				if requests.Add(1) == 1 {
+					_, _ = io.WriteString(writer, invalidBody)
+					return
+				}
+				_, _ = io.WriteString(writer, `{"valid_documents":[]}`)
+			}))
+			defer server.Close()
+			client := &integrations.SmileIdClient{BaseUrl: server.URL, Http: server.Client()}
+			if _, err := client.SupportedDocuments(context.Background(), "NG"); err == nil {
+				t.Fatal("a response missing the required valid_documents array must not be treated as an empty catalog")
+			}
+			documents, err := client.SupportedDocuments(context.Background(), "NG")
+			if err != nil || documents == nil || len(documents) != 0 || requests.Load() != 2 {
+				t.Fatalf("the corrected response must be fetched after the invalid shape: documents=%+v err=%v requests=%d", documents, err, requests.Load())
+			}
+		})
+	}
+}
+
 func TestSmileIdCatalogCacheHasBoundedEntries(t *testing.T) {
 	var requests atomic.Int32
 	server := httptest.NewTLSServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {

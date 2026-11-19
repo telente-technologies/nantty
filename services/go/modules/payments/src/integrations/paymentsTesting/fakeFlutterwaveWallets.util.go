@@ -40,6 +40,9 @@ func (fake *FakeFlutterwave) routeWallets(request fakeFlwRequest) (int, any, any
 		if err != nil || page < 1 {
 			page = 1
 		}
+		if fake.IgnoreReversalPage {
+			page = 1
+		}
 		const pageSize = 1
 		start := (page - 1) * pageSize
 		end := min(start+pageSize, len(filtered))
@@ -48,7 +51,11 @@ func (fake *FakeFlutterwave) routeWallets(request fakeFlwRequest) (int, any, any
 			transfers = append(transfers, filtered[start:end]...)
 		}
 		totalPages := (len(filtered) + pageSize - 1) / pageSize
-		return http.StatusOK, map[string]any{"page_info": map[string]any{"total": len(filtered), "current_page": page, "total_pages": totalPages}, "transfers": transfers}, nil
+		result := map[string]any{"transfers": transfers}
+		if !fake.OmitReversalPageInfo {
+			result["page_info"] = map[string]any{"total": len(filtered), "current_page": page, "total_pages": totalPages}
+		}
+		return http.StatusOK, result, nil
 	}
 	wallet := fake.Wallets[segments[1]]
 	if wallet == nil || wallet.Status == "DELETED" {
@@ -66,7 +73,21 @@ func (fake *FakeFlutterwave) routeWallets(request fakeFlwRequest) (int, any, any
 		if request.query["from"] == "" || request.query["to"] == "" {
 			return http.StatusBadRequest, "from and to are required", nil
 		}
-		return http.StatusOK, map[string]any{"transactions": wallet.Lines}, nil
+		page, err := strconv.Atoi(request.query["page"])
+		if err != nil || page < 1 {
+			page = 1
+		}
+		limit, err := strconv.Atoi(request.query["fetch_limit"])
+		if err != nil || limit < 1 {
+			limit = len(wallet.Lines)
+		}
+		start := (page - 1) * limit
+		end := min(start+limit, len(wallet.Lines))
+		transactions := []map[string]any{}
+		if start < len(wallet.Lines) {
+			transactions = append(transactions, wallet.Lines[start:end]...)
+		}
+		return http.StatusOK, map[string]any{"transactions": transactions}, nil
 	case request.method == http.MethodGet && segments[2] == "static-account":
 		accounts := []map[string]any{}
 		for _, number := range wallet.FundingNumbers {
@@ -148,7 +169,11 @@ func (fake *FakeFlutterwave) routeTransfers(request fakeFlwRequest) (int, any, a
 		return http.StatusOK, found, nil
 	case request.method == http.MethodGet && len(segments) == 2 && segments[1] == "fee":
 		currency := request.query["currency"]
-		return http.StatusOK, []map[string]any{{"fee_type": "value", "currency": currency, "fee": fakeMajor(fake.BankTransferFeeMinor, currency)}}, nil
+		fee := any(fakeMajor(fake.BankTransferFeeMinor, currency))
+		if fake.PayoutFeeValue != nil {
+			fee = fake.PayoutFeeValue
+		}
+		return http.StatusOK, []map[string]any{{"fee_type": "value", "currency": currency, "fee": fee}}, nil
 	case request.method == http.MethodGet && len(segments) == 2:
 		for _, transfer := range fake.Transfers {
 			if strconv.FormatInt(transfer.Id, 10) == segments[1] {

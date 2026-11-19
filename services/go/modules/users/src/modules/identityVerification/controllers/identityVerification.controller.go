@@ -111,6 +111,7 @@ func (controller IdentityVerificationController) DocumentTypes(writer http.Respo
 	enhancedDocumentEnabled := services.SmileProductEnabled(settings.SmileIdEnabledProducts, "enhanced_document_verification") && len(settings.SmileIdEnabledEnhancedDocumentTypes) > 0
 	idNumberEnabled := services.SmileProductEnabled(settings.SmileIdEnabledProducts, "enhanced_kyc") && len(settings.SmileIdEnabledIdNumberTypes) > 0
 	enhancedEntitlementsStatus := "not_configured"
+	idNumberStatus := "not_configured"
 	documentTypes := make([]integrations.SmileIdDocumentType, 0)
 	enhancedDocumentTypes := make([]integrations.SmileIdDocumentType, 0)
 	idNumberTypes := make([]integrations.SmileIdSupportedKycType, 0)
@@ -133,10 +134,9 @@ func (controller IdentityVerificationController) DocumentTypes(writer http.Respo
 	}
 	var kycTypes []integrations.SmileIdSupportedKycType
 	if idNumberEnabled {
-		kycTypes, err = controller.Container.IdentityCapture.SupportedKycTypes(request.Context(), country)
-		if err != nil {
-			controller.respond(writer, request, 0, nil, catalogError(err))
-			return
+		idNumberStatus = "unavailable"
+		if kycTypes, err = controller.Container.IdentityCapture.SupportedKycTypes(request.Context(), country); err == nil {
+			idNumberStatus = "available"
 		}
 	}
 	if documentEnabled || enhancedDocumentEnabled {
@@ -205,10 +205,10 @@ func (controller IdentityVerificationController) DocumentTypes(writer http.Respo
 		for _, idType := range idNumberTypes {
 			addCountry(idType.Country)
 		}
-		controller.respond(writer, request, http.StatusOK, map[string]any{"countries": countries, "availability": map[string]bool{"documentVerification": len(documentTypes) > 0, "enhancedDocumentVerification": len(enhancedDocumentTypes) > 0, "idNumberVerification": len(idNumberTypes) > 0}, "enhancedDocumentEntitlementStatus": enhancedEntitlementsStatus}, nil)
+		controller.respond(writer, request, http.StatusOK, map[string]any{"countries": countries, "availability": map[string]bool{"documentVerification": len(documentTypes) > 0, "enhancedDocumentVerification": len(enhancedDocumentTypes) > 0, "idNumberVerification": len(idNumberTypes) > 0}, "enhancedDocumentEntitlementStatus": enhancedEntitlementsStatus, "idNumberVerificationStatus": idNumberStatus}, nil)
 		return
 	}
-	controller.respond(writer, request, http.StatusOK, map[string]any{"country": country, "documentTypes": documentTypes, "enhancedDocumentTypes": enhancedDocumentTypes, "idNumberTypes": idNumberTypes, "availability": map[string]bool{"documentVerification": len(documentTypes) > 0, "enhancedDocumentVerification": len(enhancedDocumentTypes) > 0, "idNumberVerification": len(idNumberTypes) > 0}, "enhancedDocumentEntitlementStatus": enhancedEntitlementsStatus}, nil)
+	controller.respond(writer, request, http.StatusOK, map[string]any{"country": country, "documentTypes": documentTypes, "enhancedDocumentTypes": enhancedDocumentTypes, "idNumberTypes": idNumberTypes, "availability": map[string]bool{"documentVerification": len(documentTypes) > 0, "enhancedDocumentVerification": len(enhancedDocumentTypes) > 0, "idNumberVerification": len(idNumberTypes) > 0}, "enhancedDocumentEntitlementStatus": enhancedEntitlementsStatus, "idNumberVerificationStatus": idNumberStatus}, nil)
 }
 
 func smileIdEntitlementAllows(entitlements map[string][]string, country, idType string) bool {

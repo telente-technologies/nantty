@@ -72,7 +72,10 @@ func parseFlutterwaveWebhook(rawBody []byte) (interfaces.WebhookNotification, er
 		return interfaces.WebhookNotification{}, interfaces.ErrMalformedWebhookPayload
 	}
 	currency := strings.ToUpper(data.Currency)
-	amount, _ := flutterwaveAmountMinor(data.Amount, currency)
+	amount, amountErr := flutterwaveAmountMinor(data.Amount, currency)
+	if strings.HasPrefix(envelope.Event, "chargeback.") && (amountErr != nil || amount <= 0 || currency == "") {
+		return interfaces.WebhookNotification{}, interfaces.ErrMalformedWebhookPayload
+	}
 	notification := interfaces.WebhookNotification{EventType: envelope.Event, Kind: interfaces.WebhookKindOther, Status: strings.ToLower(data.Status), AmountMinor: amount, Currency: currency}
 	objectId := data.Id.String()
 	switch {

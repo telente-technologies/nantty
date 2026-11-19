@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"nantty/modules/payments/src/interfaces"
+	"nantty/platform/money"
 )
 
 type flutterwaveTransfer struct {
@@ -54,6 +55,11 @@ func (provider *FlutterwaveProvider) CreateTransfer(ctx context.Context, request
 	if request.BankCode == "" || request.AccountNumber == "" || request.Reference == "" || request.AmountMinor <= 0 {
 		return interfaces.TransferResult{}, errors.New("flutterwave: a payout needs a bank code, an account number, a reference and a positive amount")
 	}
+	currency := strings.ToUpper(strings.TrimSpace(request.Currency))
+	if _, err := money.ParseCurrencyCode(currency); err != nil || !provider.SupportsCurrency(currency) {
+		return interfaces.TransferResult{}, interfaces.ErrCurrencyNotSupported
+	}
+	request.Currency = currency
 	body := provider.transferBody(request.Reference, request.Currency, request.AmountMinor, firstNonEmptyString(request.Reason, "Nantty withdrawal"))
 	body["account_bank"], body["account_number"] = request.BankCode, request.AccountNumber
 	if request.BeneficiaryName != "" {
@@ -148,8 +154,15 @@ func (provider *FlutterwaveProvider) ListSettlements(ctx context.Context, subacc
 				AmountMinor: amount, Currency: currency, SettledAt: settledAt,
 			})
 		}
-		if !hasNextFlutterwavePage(envelope.Meta, page) {
+		hasNext, err := flutterwavePageHasNext(envelope.Meta, page)
+		if err != nil {
+			return nil, errors.Join(interfaces.ErrProviderUnavailable, err)
+		}
+		if !hasNext {
 			break
+		}
+		if page == 50 {
+			return nil, errors.Join(interfaces.ErrProviderUnavailable, errors.New("flutterwave settlement history exceeded the pagination limit"))
 		}
 	}
 	return settlements, nil
@@ -165,17 +178,26 @@ func convertFlutterwaveSettlementStatus(status string) string {
 	return "pending"
 }
 
-func hasNextFlutterwavePage(meta json.RawMessage, page int) bool {
+func flutterwavePageHasNext(meta json.RawMessage, page int) (bool, error) {
 	var decoded struct {
 		PageInfo struct {
 			TotalPages  int `json:"total_pages"`
 			CurrentPage int `json:"current_page"`
 		} `json:"page_info"`
 	}
-	if json.Unmarshal(meta, &decoded) != nil {
-		return false
+	if len(meta) == 0 || json.Unmarshal(meta, &decoded) != nil || decoded.PageInfo.CurrentPage == 0 || decoded.PageInfo.TotalPages < 0 {
+		return false, errors.New("flutterwave response omitted valid page information")
 	}
-	return decoded.PageInfo.TotalPages > page
+	if decoded.PageInfo.CurrentPage != page {
+		return false, errors.New("flutterwave response did not honor the requested page")
+	}
+	if decoded.PageInfo.TotalPages == 0 {
+		return false, nil
+	}
+	if decoded.PageInfo.TotalPages < page {
+		return false, errors.New("flutterwave response page count is inconsistent")
+	}
+	return decoded.PageInfo.TotalPages > page, nil
 }
 
 func (provider *FlutterwaveProvider) ListSettlementChargeReferences(ctx context.Context, providerSettlementId string) ([]string, error) {
@@ -195,7 +217,11 @@ func (provider *FlutterwaveProvider) ListSettlementChargeReferences(ctx context.
 }
 
 func (provider *FlutterwaveProvider) QuotePayoutFee(currency string, amountMinor int64) (int64, error) {
-	if !provider.SupportsCurrency(currency) {
+	currency = strings.ToUpper(strings.TrimSpace(currency))
+	if amountMinor <= 0 {
+		return 0, errors.New("flutterwave: payout fee quote needs a positive amount")
+	}
+	if _, err := money.ParseCurrencyCode(currency); err != nil || !provider.SupportsCurrency(currency) {
 		return 0, interfaces.ErrCurrencyNotSupported
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -210,7 +236,7 @@ func (provider *FlutterwaveProvider) QuotePayoutFee(currency string, amountMinor
 	}
 	for _, fee := range fees {
 		if strings.EqualFold(fee.Currency, currency) {
-			return flutterwaveFeeMinor(fee.Fee, currency), nil
+			return parseFlutterwaveFeeMinor(fee.Fee, currency)
 		}
 	}
 	return 0, interfaces.ErrCurrencyNotSupported

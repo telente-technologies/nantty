@@ -25,7 +25,12 @@ func (client *SmileIdClient) SupportedDocuments(ctx context.Context, country str
 	var response struct {
 		Documents []SmileIdDocumentCountry `json:"valid_documents"`
 	}
-	if err := client.getCatalog(ctx, "/v3/services/supported_documents", query, &response); err != nil {
+	if err := client.getCatalog(ctx, "/v3/services/supported_documents", query, &response, func() error {
+		if response.Documents == nil {
+			return errors.New("smile id: document catalog omitted required valid_documents array")
+		}
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 	return response.Documents, nil
@@ -39,13 +44,13 @@ func (client *SmileIdClient) SupportedKycTypes(ctx context.Context, country stri
 	var response struct {
 		Types []SmileIdSupportedKycType `json:"id_types"`
 	}
-	if err := client.getCatalog(ctx, "/v3/services/supported_id_types", query, &response); err != nil {
+	if err := client.getCatalog(ctx, "/v3/services/supported_id_types", query, &response, nil); err != nil {
 		return nil, err
 	}
 	return response.Types, nil
 }
 
-func (client *SmileIdClient) getCatalog(ctx context.Context, path string, query url.Values, destination any) error {
+func (client *SmileIdClient) getCatalog(ctx context.Context, path string, query url.Values, destination any, validate func() error) error {
 	if client == nil || client.Http == nil {
 		return ErrSmileIdNotConfigured
 	}
@@ -63,7 +68,13 @@ func (client *SmileIdClient) getCatalog(ctx context.Context, path string, query 
 	}
 	cacheKey := requestUrl
 	if body, ok := client.cachedSmileIdCatalog(cacheKey, now()); ok {
-		return json.Unmarshal(body, destination)
+		if err := json.Unmarshal(body, destination); err != nil {
+			return err
+		}
+		if validate != nil {
+			return validate()
+		}
+		return nil
 	}
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, requestUrl, nil)
 	if err != nil {
@@ -87,6 +98,11 @@ func (client *SmileIdClient) getCatalog(ctx context.Context, path string, query 
 	}
 	if err := json.Unmarshal(body, destination); err != nil {
 		return fmt.Errorf("smile id: invalid catalog response: %w", err)
+	}
+	if validate != nil {
+		if err := validate(); err != nil {
+			return err
+		}
 	}
 	client.cacheSmileIdCatalog(cacheKey, body, now().Add(smileIdCatalogCacheTTL))
 	return nil

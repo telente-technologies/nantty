@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"slices"
 	"strings"
 	"time"
 
@@ -86,7 +85,16 @@ func NewFlutterwaveProvider(settings FlutterwaveSettings) *FlutterwaveProvider {
 func (provider *FlutterwaveProvider) Name() string { return FlutterwaveProviderName }
 
 func (provider *FlutterwaveProvider) SupportsCurrency(currency string) bool {
-	return slices.Contains(provider.settings.SupportedCurrencies, currency)
+	currency = strings.ToUpper(strings.TrimSpace(currency))
+	if _, err := money.ParseCurrencyCode(currency); err != nil {
+		return false
+	}
+	for _, supported := range provider.settings.SupportedCurrencies {
+		if strings.EqualFold(strings.TrimSpace(supported), currency) {
+			return true
+		}
+	}
+	return false
 }
 
 func (provider *FlutterwaveProvider) MerchantId() string { return provider.settings.MerchantId }
@@ -105,13 +113,24 @@ func flutterwaveAmountMinor(raw json.RawMessage, currency string) (int64, error)
 }
 
 func flutterwaveFeeMinor(raw json.RawMessage, currency string) int64 {
+	amount, err := parseFlutterwaveFeeMinor(raw, currency)
+	if err != nil {
+		return 0
+	}
+	return amount
+}
+
+func parseFlutterwaveFeeMinor(raw json.RawMessage, currency string) (int64, error) {
+	if len(raw) == 0 || string(raw) == "null" {
+		return 0, errors.New("flutterwave omitted the fee amount")
+	}
 	amount, err := flutterwaveAmountMinor(raw, currency)
 	if err == nil {
-		return amount
+		return amount, nil
 	}
 	code, codeErr := money.ParseCurrencyCode(currency)
 	if codeErr != nil || !errors.Is(err, money.ErrTooManyFractionDigits) {
-		return 0
+		return 0, err
 	}
 	whole, fraction, _ := strings.Cut(strings.Trim(strings.TrimSpace(string(raw)), `"`), ".")
 	kept := whole
@@ -120,9 +139,9 @@ func flutterwaveFeeMinor(raw json.RawMessage, currency string) int64 {
 	}
 	rounded, parseErr := money.ParseMajorUnits(kept, currency)
 	if parseErr != nil {
-		return 0
+		return 0, parseErr
 	}
-	return rounded + 1
+	return rounded + 1, nil
 }
 
 func majorUnits(amountMinor int64, currency string) json.Number {

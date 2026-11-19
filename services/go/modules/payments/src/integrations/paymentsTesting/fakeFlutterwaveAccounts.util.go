@@ -3,6 +3,7 @@ package paymentstesting
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -27,7 +28,22 @@ func (fake *FakeFlutterwave) routeAccounts(request fakeFlwRequest) (int, any, an
 			}
 			rows = append(rows, row)
 		}
-		return http.StatusOK, rows, map[string]any{"page_info": map[string]any{"total": len(rows), "current_page": 1, "total_pages": 1}}
+		page, err := strconv.Atoi(request.query["page"])
+		if err != nil || page < 1 {
+			page = 1
+		}
+		const pageSize = 10
+		start := (page - 1) * pageSize
+		end := min(start+pageSize, len(rows))
+		pageRows := []map[string]any{}
+		if start < len(rows) {
+			pageRows = append(pageRows, rows[start:end]...)
+		}
+		totalPages := (len(rows) + pageSize - 1) / pageSize
+		if totalPages == 0 {
+			totalPages = 1
+		}
+		return http.StatusOK, pageRows, map[string]any{"page_info": map[string]any{"total": len(rows), "current_page": page, "total_pages": totalPages}}
 	case segments[0] == "settlements" && len(segments) == 2:
 		for _, settlement := range fake.Settlements {
 			if fmt.Sprint(settlement["id"]) == segments[1] {
@@ -42,7 +58,22 @@ func (fake *FakeFlutterwave) routeAccounts(request fakeFlwRequest) (int, any, an
 				rows = append(rows, chargeback)
 			}
 		}
-		return http.StatusOK, rows, nil
+		page, err := strconv.Atoi(request.query["page"])
+		if err != nil || page < 1 {
+			page = 1
+		}
+		const pageSize = 20
+		start := (page - 1) * pageSize
+		end := min(start+pageSize, len(rows))
+		pageRows := []map[string]any{}
+		if start < len(rows) {
+			pageRows = append(pageRows, rows[start:end]...)
+		}
+		totalPages := (len(rows) + pageSize - 1) / pageSize
+		if totalPages == 0 {
+			totalPages = 1
+		}
+		return http.StatusOK, pageRows, map[string]any{"page_info": map[string]any{"total": len(rows), "current_page": page, "total_pages": totalPages}}
 	case segments[0] == "chargebacks" && request.method == http.MethodPut && len(segments) == 2:
 		return fake.respondToChargeback(segments[1], request.body)
 	case segments[0] == "banks" && len(segments) == 2:

@@ -35,7 +35,21 @@ func (fake *FakeFlutterwave) routeCharges(request fakeFlwRequest) (int, any, any
 	case request.method == http.MethodPost && segments[0] == "tokenized-charges":
 		return fake.chargeToken(request.body)
 	case request.method == http.MethodGet && segments[0] == "refunds" && len(segments) == 1:
-		return http.StatusOK, fake.Refunds, nil
+		filtered := make([]map[string]any, 0, len(fake.Refunds))
+		for _, refund := range fake.Refunds {
+			if request.query["id"] != "" && fmt.Sprint(refund["transaction_id"]) != request.query["id"] {
+				continue
+			}
+			filtered = append(filtered, refund)
+		}
+		if fake.OmitRefundListMeta {
+			return http.StatusOK, filtered, nil
+		}
+		totalPages := fake.RefundListTotalPages
+		if totalPages == 0 {
+			totalPages = 1
+		}
+		return http.StatusOK, filtered, map[string]any{"page_info": map[string]any{"total": len(filtered), "current_page": 1, "total_pages": totalPages, "page_size": 20}}
 	case request.method == http.MethodGet && segments[0] == "refunds" && len(segments) == 2:
 		for _, refund := range fake.Refunds {
 			if fmt.Sprint(refund["id"]) == segments[1] {
@@ -108,7 +122,7 @@ func (fake *FakeFlutterwave) refundTransaction(transaction *FakeFlwTransaction, 
 	fake.MainBalance[transaction.Currency] -= amount
 	refund := map[string]any{
 		"id": fake.newId(), "flw_ref": transaction.FlwRef, "amount_refunded": fakeMajor(amount, transaction.Currency), "status": fake.refundStatus(),
-		"comments": text(body["comments"]), "transaction_id": transaction.Id, "destination": "payment_source", "created_at": time.Now().UTC().Format(time.RFC3339),
+		"comment": text(body["comments"]), "transaction_id": transaction.Id, "destination": "payment_source", "created_at": time.Now().UTC().Format(time.RFC3339),
 	}
 	fake.Refunds = append(fake.Refunds, refund)
 	return http.StatusOK, refund, nil

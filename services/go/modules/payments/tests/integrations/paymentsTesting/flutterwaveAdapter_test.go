@@ -3,6 +3,7 @@ package paymentstesting_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -48,6 +49,61 @@ func TestFlutterwaveCheckoutIsHashedAndVerifiedByIdWithTheExactReference(t *test
 	}
 }
 
+func TestFlutterwaveCheckoutValidatesAndNormalizesCurrencyBeforeProviderIO(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	ctx := context.Background()
+	for _, currency := range []string{"EUR", "N?N"} {
+		if _, err := adapter.InitializeCharge(ctx, interfaces.ChargeRequest{Reference: "invalid-currency-" + currency, AmountMinor: 10_000, Currency: currency, CustomerEmail: "buyer@nantty.test"}); !errors.Is(err, interfaces.ErrCurrencyNotSupported) {
+			t.Errorf("currency %q should be rejected as unsupported: %v", currency, err)
+		}
+	}
+	if calls := len(fake.RequestLog()); calls != 0 {
+		t.Fatalf("invalid checkout currencies must fail before provider I/O, got %d requests", calls)
+	}
+
+	request := interfaces.ChargeRequest{Reference: "normalized-currency-checkout", AmountMinor: 10_000, Currency: " ngn ", CustomerEmail: "buyer@nantty.test"}
+	if _, err := adapter.InitializeCharge(ctx, request); err != nil {
+		t.Fatalf("a configured lowercase currency should be normalized: %v", err)
+	}
+	fake.CompleteCheckout(request.Reference, 0, 0, "card")
+	transaction := fake.TransactionByReference(request.Reference)
+	if transaction == nil || transaction.Currency != "NGN" || transaction.AmountMinor != request.AmountMinor {
+		t.Fatalf("the provider must receive the normalized code and exact amount: %+v", transaction)
+	}
+}
+
+func TestFlutterwavePartialRefundValidatesAmountAndCurrencyBeforeProviderIO(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	ctx := context.Background()
+	if _, err := adapter.InitializeCharge(ctx, interfaces.ChargeRequest{Reference: "partial-refund-charge", AmountMinor: 20_000, Currency: "NGN", CustomerEmail: "buyer@nantty.test"}); err != nil {
+		t.Fatal(err)
+	}
+	transaction := fake.CompleteCheckout("partial-refund-charge", 0, 0, "card")
+	requestsBeforeInvalid := len(fake.RequestLog())
+	for _, request := range []interfaces.RefundRequest{
+		{ProviderChargeId: "7001", AmountMinor: 0, Currency: "NGN"},
+		{ProviderChargeId: "7001", AmountMinor: 10_000, Currency: "EUR"},
+		{ProviderChargeId: "7001", AmountMinor: 12_345, Currency: "NGN"},
+		{ProviderChargeId: "7001", AmountMinor: 9_999, Currency: "NGN"},
+		{ChargeReference: "charge-ref", AmountMinor: 100, Currency: "N?N"},
+	} {
+		if _, err := adapter.RefundCharge(ctx, request); err == nil {
+			t.Errorf("invalid refund must fail before provider I/O: %+v", request)
+		}
+	}
+	if calls := len(fake.RequestLog()); calls != requestsBeforeInvalid {
+		t.Fatalf("invalid refunds must not verify or refund through provider I/O, got %d new requests", calls-requestsBeforeInvalid)
+	}
+
+	request := interfaces.RefundRequest{ProviderChargeId: strconv.FormatInt(transaction.Id, 10), AmountMinor: 12_300, Currency: " ngn ", RefundReference: "partial-refund", Reason: "test"}
+	if _, err := adapter.RefundCharge(ctx, request); err != nil {
+		t.Fatalf("valid normalized partial refund should be accepted: %v", err)
+	}
+	if len(fake.Refunds) != 1 || fmt.Sprint(fake.Refunds[0]["amount_refunded"]) != "123.00" {
+		t.Fatalf("refund amount should preserve minor-unit value after currency normalization: %+v", fake.Refunds)
+	}
+}
+
 func TestFlutterwaveCardTokenOnlyChargesTheEmailItWasIssuedTo(t *testing.T) {
 	fake, adapter := newFakeFlutterwaveAdapter(t)
 	ctx := context.Background()
@@ -70,6 +126,31 @@ func TestFlutterwaveCardTokenOnlyChargesTheEmailItWasIssuedTo(t *testing.T) {
 	}
 	if calls := fake.Calls("POST /tokenized-charges"); calls != 3 {
 		t.Fatalf("a tokenized charge must never be retried, got %d posts", calls)
+	}
+}
+
+func TestFlutterwaveTokenizedChargeValidatesAndNormalizesCurrencyBeforeProviderIO(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	ctx := context.Background()
+	if _, err := adapter.InitializeCharge(ctx, interfaces.ChargeRequest{Reference: "token-currency-seed", AmountMinor: 100_000, Currency: "NGN", CustomerEmail: "owner@nantty.test"}); err != nil {
+		t.Fatal(err)
+	}
+	token := fake.CompleteCheckout("token-currency-seed", 0, 0, "card").CardToken
+	unsupported := interfaces.AuthorizationChargeRequest{AuthorizationCode: token, CustomerEmail: "owner@nantty.test", Reference: "token-currency-disabled", AmountMinor: 100_000, Currency: "EUR"}
+	if _, err := adapter.ChargeAuthorization(ctx, unsupported); !errors.Is(err, interfaces.ErrCurrencyNotSupported) {
+		t.Fatalf("a disabled tokenized-charge currency must be rejected: %v", err)
+	}
+	if calls := fake.Calls("POST /tokenized-charges"); calls != 0 {
+		t.Fatalf("a disabled tokenized-charge currency must fail before provider I/O, got %d posts", calls)
+	}
+
+	request := interfaces.AuthorizationChargeRequest{AuthorizationCode: token, CustomerEmail: "owner@nantty.test", Reference: "token-currency-normalized", AmountMinor: 100_000, Currency: " ngn "}
+	if _, err := adapter.ChargeAuthorization(ctx, request); err != nil {
+		t.Fatalf("a configured tokenized-charge currency should be normalized: %v", err)
+	}
+	transaction := fake.TransactionByReference(request.Reference)
+	if transaction == nil || transaction.Currency != "NGN" || transaction.AmountMinor != request.AmountMinor {
+		t.Fatalf("the provider must receive normalized currency and exact minor-unit amount: %+v", transaction)
 	}
 }
 
@@ -113,6 +194,46 @@ func TestFlutterwaveTransfersSkipBeneficiariesNeverRetryAndRespectPsaBalances(t 
 	fake.DeleteWalletAtProvider(wallet.AccountRef)
 	if _, err := adapter.ReadWalletBalance(ctx, wallet.AccountRef, "NGN"); !isRejection(err) {
 		t.Fatalf("a deleted PSA must be rejected: %v", err)
+	}
+}
+
+func TestFlutterwaveTransferCurrencyIsValidatedAndNormalizedBeforeProviderIO(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	ctx := context.Background()
+	unsupported := interfaces.TransferRequest{Reference: "wd-unsupported", AmountMinor: 100_000, Currency: "EUR", BankCode: "058", AccountNumber: "0123456789"}
+	if _, err := adapter.CreateTransfer(ctx, unsupported); !errors.Is(err, interfaces.ErrCurrencyNotSupported) {
+		t.Fatalf("a disabled payout currency must be rejected: %v", err)
+	}
+	if _, err := adapter.QuotePayoutFee(" eur ", 100_000); !errors.Is(err, interfaces.ErrCurrencyNotSupported) {
+		t.Fatalf("a disabled fee currency must be rejected: %v", err)
+	}
+	if len(fake.RequestLog()) != 0 {
+		t.Fatalf("invalid payout currencies must fail before provider I/O: %v", fake.RequestLog())
+	}
+
+	fake.FundMainBalance("NGN", 500_000)
+	request := interfaces.TransferRequest{Reference: "wd-normalized", AmountMinor: 100_000, Currency: " ngn ", BankCode: "058", AccountNumber: "0123456789"}
+	if _, err := adapter.CreateTransfer(ctx, request); err != nil {
+		t.Fatalf("a configured currency should be normalized before sending: %v", err)
+	}
+	if transfer := fake.TransferByReference(request.Reference); transfer == nil || transfer.Currency != "NGN" || transfer.AmountMinor != request.AmountMinor {
+		t.Fatalf("the provider must receive normalized currency and exact minor-unit amount: %+v", transfer)
+	}
+}
+
+func TestFlutterwavePayoutFeeQuoteNormalizesCurrencyAndRejectsNonPositiveAmount(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	fake.BankTransferFeeMinor = 1_250
+	fee, err := adapter.QuotePayoutFee(" ngn ", 100_000)
+	if err != nil || fee != 1_250 {
+		t.Fatalf("configured lower-case currency should quote using its normalized code: fee=%d err=%v", fee, err)
+	}
+	if _, err := adapter.QuotePayoutFee("NGN", 0); err == nil {
+		t.Fatal("a fee quote must reject a non-positive payout amount")
+	}
+	fake.PayoutFeeValue = "not-money"
+	if fee, err := adapter.QuotePayoutFee("NGN", 100_000); err == nil || fee != 0 {
+		t.Fatalf("a malformed provider fee must fail closed instead of returning a zero-fee quote: fee=%d err=%v", fee, err)
 	}
 }
 
@@ -162,6 +283,28 @@ func TestFlutterwavePayoutSubaccountRefundsUseTheDocumentedEnvelopeAndReferences
 	}
 }
 
+func TestFlutterwavePayoutSubaccountRefundListingFailsClosedOnInvalidPagination(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		setup func(*paymentstesting.FakeFlutterwave)
+	}{
+		{name: "missing page metadata", setup: func(fake *paymentstesting.FakeFlutterwave) { fake.OmitReversalPageInfo = true }},
+		{name: "provider ignores page query", setup: func(fake *paymentstesting.FakeFlutterwave) { fake.IgnoreReversalPage = true }},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			fake, adapter := newFakeFlutterwaveAdapter(t)
+			fake.Reversals = []map[string]any{
+				{"id": 601, "reference": "RVSL-601", "narration": "Refund for: FUNDING-601", "status": "SUCCESSFUL", "amount": 1, "currency": "NGN"},
+				{"id": 602, "reference": "RVSL-602", "narration": "Refund for: FUNDING-602", "status": "SUCCESSFUL", "amount": 2, "currency": "NGN"},
+			}
+			test.setup(fake)
+			if reversals, err := adapter.ListFundingReversals(context.Background(), time.Now().Add(-24*time.Hour), time.Now()); err == nil || reversals != nil {
+				t.Fatalf("invalid or ignored pagination must not look like complete history: %v %+v", err, reversals)
+			}
+		})
+	}
+}
+
 func TestFlutterwavePayoutSubaccountOperationsRejectUnsupportedCurrencies(t *testing.T) {
 	fake, adapter := newFakeFlutterwaveAdapter(t)
 	ctx := context.Background()
@@ -192,6 +335,56 @@ func TestFlutterwaveReadsRetry429AndParseGroupedAmounts(t *testing.T) {
 	balance, err := adapter.ReadWalletBalance(ctx, wallet.AccountRef, "NGN")
 	if err != nil || balance.AvailableMinor != 123_456_789-5_000 {
 		t.Fatalf("balance: %v %+v", err, balance)
+	}
+}
+
+func TestFlutterwaveListsEveryWalletStatementPage(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	wallet, err := adapter.CreateWallet(context.Background(), interfaces.WalletOwner{AccountName: "A B", AliasEmail: "u+pages@wallets.nantty.com"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fake.FundingFeeMinor = 0
+	for index := 0; index < 21; index++ {
+		fake.FundWallet(wallet.AccountRef, "NGN", 1_000, fmt.Sprintf("PSA_PAGE_%02d", index))
+	}
+
+	lines, err := adapter.ListWalletTransactions(context.Background(), wallet.AccountRef, time.Now().Add(-time.Hour), time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(lines) != 21 {
+		t.Fatalf("all statement rows must be read across three provider pages: got %d", len(lines))
+	}
+	for index, line := range lines {
+		if line.Reference != fmt.Sprintf("PSA_PAGE_%02d", index) {
+			t.Fatalf("statement row %d was missing or reordered: %+v", index, line)
+		}
+	}
+}
+
+func TestFlutterwaveListsEverySettlementAndChargebackPage(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	for index := 0; index < 21; index++ {
+		fake.Settlements = append(fake.Settlements, map[string]any{
+			"id": index + 1, "status": "completed", "currency": "NGN", "net_amount": 100,
+			"settlement_date": "2026-11-19T12:00:00Z",
+		})
+	}
+	settlements, err := adapter.ListSettlements(context.Background(), "", time.Now().Add(-time.Hour), time.Now())
+	if err != nil || len(settlements) != 21 {
+		t.Fatalf("settlements across provider pages: %v count=%d", err, len(settlements))
+	}
+
+	for index := 0; index < 41; index++ {
+		fake.Chargebacks = append(fake.Chargebacks, map[string]any{
+			"id": index + 1, "amount": 100, "currency": "NGN", "tx_ref": fmt.Sprintf("TX-%d", index),
+			"transaction_id": index + 1, "status": "initiated",
+		})
+	}
+	disputes, err := adapter.ListOpenDisputes(context.Background())
+	if err != nil || len(disputes) != 41 {
+		t.Fatalf("chargebacks across provider pages: %v count=%d", err, len(disputes))
 	}
 }
 
@@ -237,6 +430,84 @@ func TestFlutterwaveWebhookHashIsOnlyATrigger(t *testing.T) {
 		if err != nil || notification.Status != testCase.want {
 			t.Errorf("refund status %q mapped to %q (%v), want %q", testCase.status, notification.Status, err, testCase.want)
 		}
+	}
+}
+
+func TestFlutterwaveChargebackWebhookRequiresValidAmount(t *testing.T) {
+	_, adapter := newFakeFlutterwaveAdapter(t)
+	for _, payload := range []string{
+		`{"event":"chargeback.opened","data":{"id":9,"tx_ref":"chk-1","amount":"not-money","currency":"NGN"}}`,
+		`{"event":"chargeback.opened","data":{"id":9,"tx_ref":"chk-1","amount":0,"currency":"NGN"}}`,
+		`{"event":"chargeback.opened","data":{"id":9,"tx_ref":"chk-1","currency":"NGN"}}`,
+		`{"event":"chargeback.opened","data":{"id":9,"tx_ref":"chk-1","amount":10}}`,
+	} {
+		if _, err := adapter.ParseVerifiedWebhookPayload([]byte(payload)); !errors.Is(err, interfaces.ErrMalformedWebhookPayload) {
+			t.Errorf("invalid chargeback amount must be rejected: %s (err=%v)", payload, err)
+		}
+	}
+	valid := `{"event":"chargeback.opened","data":{"id":9,"tx_ref":"chk-1","transaction_id":8,"amount":10,"currency":"NGN"}}`
+	notification, err := adapter.ParseVerifiedWebhookPayload([]byte(valid))
+	if err != nil || notification.Dispute == nil || notification.Dispute.AmountMinor != 1000 {
+		t.Fatalf("valid chargeback amount must be parsed exactly: notification=%+v err=%v", notification, err)
+	}
+}
+
+func TestFlutterwaveRefundLookupUsesDocumentedSingularCommentField(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	const refundReference = "verification-refund:case-lost"
+	fake.Refunds = []map[string]any{{"id": 701, "transaction_id": 7001, "flw_ref": "FLW-REFUND-701", "comment": interfaces.RefundReferenceNote("checkmark refund", refundReference), "status": "completed-mpgs"}}
+	fake.Refunds = append(fake.Refunds, map[string]any{"id": 702, "transaction_id": 7002, "comment": interfaces.RefundReferenceNote("unrelated refund", refundReference), "status": "completed-mpgs"})
+	result, found, err := adapter.FindRefundByReference(context.Background(), interfaces.RefundLookup{ProviderChargeId: "7001", RefundReference: refundReference, SubmittedAfter: time.Now().Add(-time.Hour)})
+	if err != nil || !found || result.ProviderRefundId != "701" || result.Outcome != interfaces.OutcomeSucceeded {
+		t.Fatalf("a refund listed with the documented singular comment must be matched: found=%v result=%+v err=%v", found, result, err)
+	}
+	requests := fake.RequestLog()
+	queries := fake.QueryLog()
+	if len(requests) != 1 || requests[0] != "GET /v3/refunds" || len(queries) != 1 || queries[0] != "id=7001" {
+		t.Fatalf("refund recovery must use the documented charge-id filter, not scan account-wide history: %v", requests)
+	}
+}
+
+func TestFlutterwaveRefundLookupResolvesChargeReferenceToDocumentedTransactionFilter(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	ctx := context.Background()
+	if _, err := adapter.InitializeCharge(ctx, interfaces.ChargeRequest{Reference: "refund-lookup-charge", AmountMinor: 25_000, Currency: "NGN", CustomerEmail: "buyer@nantty.test", SuccessUrl: "https://nantty.test/return"}); err != nil {
+		t.Fatal(err)
+	}
+	transaction := fake.TransactionByReference("refund-lookup-charge")
+	transaction.Status = "successful"
+	fake.Refunds = []map[string]any{{"id": 711, "transaction_id": transaction.Id, "comment": interfaces.RefundReferenceNote("recovered", "refund-from-reference"), "status": "completed-mpgs"}}
+	result, found, err := adapter.FindRefundByReference(ctx, interfaces.RefundLookup{ChargeReference: "refund-lookup-charge", RefundReference: "refund-from-reference"})
+	if err != nil || !found || result.ProviderRefundId != "711" {
+		t.Fatalf("refund lookup by charge reference should verify and constrain to transaction id: found=%v result=%+v err=%v", found, result, err)
+	}
+	requests := fake.RequestLog()
+	queries := fake.QueryLog()
+	if len(requests) != 3 || requests[1] != "GET /v3/transactions/verify_by_reference" || requests[2] != "GET /v3/refunds" || len(queries) != 3 || queries[1] != "tx_ref=refund-lookup-charge" || queries[2] != fmt.Sprintf("id=%d", transaction.Id) {
+		t.Fatalf("charge-reference lookup must verify the exact charge then query its refunds: %v", requests)
+	}
+}
+
+func TestFlutterwaveRefundLookupFailsClosedWhenACompleteNegativeResultCannotBeProven(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		setup func(*paymentstesting.FakeFlutterwave)
+	}{
+		{name: "missing metadata", setup: func(fake *paymentstesting.FakeFlutterwave) { fake.OmitRefundListMeta = true }},
+		{name: "more than one page with undocumented page query", setup: func(fake *paymentstesting.FakeFlutterwave) { fake.RefundListTotalPages = 2 }},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			fake, adapter := newFakeFlutterwaveAdapter(t)
+			test.setup(fake)
+			result, found, err := adapter.FindRefundByReference(context.Background(), interfaces.RefundLookup{ProviderChargeId: "7001", RefundReference: "refund-not-on-first-page", SubmittedAfter: time.Now().Add(-time.Hour)})
+			if err == nil || found || result.ProviderRefundId != "" {
+				t.Fatalf("incomplete refund history must not authorize a resend: found=%v result=%+v err=%v", found, result, err)
+			}
+		})
+	}
+	_, adapter := newFakeFlutterwaveAdapter(t)
+	if _, found, err := adapter.FindRefundByReference(context.Background(), interfaces.RefundLookup{ProviderChargeId: "7001", RefundReference: "absent", SubmittedAfter: time.Now().Add(-time.Hour)}); err != nil || found {
+		t.Fatalf("an empty, explicitly complete one-page history can prove absence: found=%v err=%v", found, err)
 	}
 }
 

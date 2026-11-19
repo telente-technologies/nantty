@@ -62,7 +62,9 @@ type FakeFlutterwave struct {
 	MainBalance           map[string]int64
 	CallCounts            map[string]int
 	Requests              []string
+	Queries               []string
 	BankAccountNames      map[string]string
+	PayoutFeeValue        any
 	FundingFeeMinor       int64
 	BankTransferFeeMinor  int64
 	RateLimitNext         int
@@ -75,6 +77,10 @@ type FakeFlutterwave struct {
 	RefundDelay           time.Duration
 	RefundStatus          string
 	DecliningTokens       map[string]bool
+	OmitReversalPageInfo  bool
+	IgnoreReversalPage    bool
+	OmitRefundListMeta    bool
+	RefundListTotalPages  int
 }
 
 func StartFakeFlutterwave(t *testing.T) *FakeFlutterwave {
@@ -145,6 +151,7 @@ func (fake *FakeFlutterwave) serve(writer http.ResponseWriter, request *http.Req
 	}
 	fake.CallCounts[request.Method+" /"+parsed.segments[0]]++
 	fake.Requests = append(fake.Requests, request.Method+" "+request.URL.Path)
+	fake.Queries = append(fake.Queries, request.URL.Query().Encode())
 	if fake.RateLimitNext > 0 {
 		fake.RateLimitNext--
 		writer.Header().Set("Retry-After", "0")
@@ -238,6 +245,12 @@ func (fake *FakeFlutterwave) RequestLog() []string {
 	fake.mutex.Lock()
 	defer fake.mutex.Unlock()
 	return append([]string(nil), fake.Requests...)
+}
+
+func (fake *FakeFlutterwave) QueryLog() []string {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	return append([]string(nil), fake.Queries...)
 }
 
 func (fake *FakeFlutterwave) walletByBarter(barterId string) *FakeFlwWallet {

@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -50,19 +51,31 @@ func (chargeback flutterwaveChargeback) toProviderDispute() (interfaces.Provider
 }
 
 func (provider *FlutterwaveProvider) listChargebacks(ctx context.Context, query url.Values) ([]interfaces.ProviderDispute, error) {
-	var rows []flutterwaveChargeback
-	if _, err := provider.http.send(ctx, flutterwaveRequest{method: http.MethodGet, path: "/chargebacks", query: query}, &rows); err != nil {
-		return nil, err
-	}
-	disputes := make([]interfaces.ProviderDispute, 0, len(rows))
-	for _, row := range rows {
-		dispute, err := row.toProviderDispute()
+	const maxPages = 50
+	var disputes []interfaces.ProviderDispute
+	for page := 1; page <= maxPages; page++ {
+		query.Set("page", strconv.Itoa(page))
+		var rows []flutterwaveChargeback
+		envelope, err := provider.http.send(ctx, flutterwaveRequest{method: http.MethodGet, path: "/chargebacks", query: query}, &rows)
 		if err != nil {
 			return nil, err
 		}
-		disputes = append(disputes, dispute)
+		for _, row := range rows {
+			dispute, err := row.toProviderDispute()
+			if err != nil {
+				return nil, err
+			}
+			disputes = append(disputes, dispute)
+		}
+		hasNext, err := flutterwavePageHasNext(envelope.Meta, page)
+		if err != nil {
+			return nil, errors.Join(interfaces.ErrProviderUnavailable, err)
+		}
+		if !hasNext {
+			return disputes, nil
+		}
 	}
-	return disputes, nil
+	return nil, errors.Join(interfaces.ErrProviderUnavailable, errors.New("flutterwave chargeback history exceeded the pagination limit"))
 }
 
 func (provider *FlutterwaveProvider) ListOpenDisputes(ctx context.Context) ([]interfaces.ProviderDispute, error) {

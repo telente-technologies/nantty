@@ -3,6 +3,7 @@ package controllers_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -25,7 +26,10 @@ func TestSmileCallbackRejectsOversizedBodyWithPayloadTooLarge(t *testing.T) {
 	}
 }
 
-type catalogCapture struct{ documentCalls, kycCalls, entitlementCalls int }
+type catalogCapture struct {
+	documentCalls, kycCalls, entitlementCalls int
+	kycErr                                    error
+}
 
 func (fake *catalogCapture) CreateWebToken(context.Context, integrations.SmileIdCaptureRequest) (string, error) {
 	return "", nil
@@ -49,6 +53,9 @@ func (fake *catalogCapture) SupportedDocuments(_ context.Context, country string
 
 func (fake *catalogCapture) SupportedKycTypes(_ context.Context, country string) ([]integrations.SmileIdSupportedKycType, error) {
 	fake.kycCalls++
+	if fake.kycErr != nil {
+		return nil, fake.kycErr
+	}
 	if country == "" {
 		return []integrations.SmileIdSupportedKycType{
 			{Country: "NG", Type: "NIN_V2", Label: "National ID (NIN)"},
@@ -61,6 +68,32 @@ func (fake *catalogCapture) SupportedKycTypes(_ context.Context, country string)
 		{Country: country, Type: "V_NIN", Label: "Virtual NIN"},
 		{Country: country, Type: "BANK_ACCOUNT", Label: "Bank Account", RequiredFields: []string{"bank_code"}, BankCode: "058"},
 	}, nil
+}
+
+func TestDocumentTypesKeepsPhotoVerificationAvailableWhenOptionalKycCatalogFails(t *testing.T) {
+	fake := &catalogCapture{kycErr: errors.New("KYC catalog unavailable")}
+	controller := controllers.IdentityVerificationController{Container: &container.Container{
+		IdentityCapture: fake,
+		Settings: configs.UsersSettings{Verification: configs.IdentityVerificationSettings{
+			SmileIdEnabledProducts: []string{"document_verification", "enhanced_kyc"}, SmileIdEnabledIdNumberTypes: []string{"NG:NIN_V2"},
+		}},
+	}}
+	recorder := httptest.NewRecorder()
+	controller.DocumentTypes(recorder, httptest.NewRequest(http.MethodGet, "/api/v1/verification/document-types", nil))
+	var response struct {
+		Countries      []map[string]string `json:"countries"`
+		IDNumberStatus string              `json:"idNumberVerificationStatus"`
+		Availability   struct {
+			Documents bool `json:"documentVerification"`
+			IDNumbers bool `json:"idNumberVerification"`
+		} `json:"availability"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil || recorder.Code != http.StatusOK {
+		t.Fatalf("a separately unavailable optional KYC catalog must not fail the photo-document catalog: status=%d body=%s err=%v", recorder.Code, recorder.Body.String(), err)
+	}
+	if len(response.Countries) != 2 || !response.Availability.Documents || response.Availability.IDNumbers || response.IDNumberStatus != "unavailable" {
+		t.Fatalf("photo checks must remain usable and ID-number status must be explicit: %+v", response)
+	}
 }
 
 func (fake *catalogCapture) EnhancedDocumentEntitlements(context.Context) (map[string][]string, error) {
