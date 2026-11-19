@@ -163,6 +163,80 @@ resource "aws_wafv2_web_acl" "this" {
     }
   }
 
+  rule {
+    name     = "smile-id-webhook-source-allowlist"
+    priority = 6
+    action {
+      block {}
+    }
+    statement {
+      and_statement {
+        statement {
+          or_statement {
+            statement {
+              byte_match_statement {
+                search_string         = "/api/v1/webhooks/smile-id"
+                positional_constraint = "EXACTLY"
+                field_to_match {
+                  uri_path {}
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "NONE"
+                }
+              }
+            }
+            statement {
+              byte_match_statement {
+                search_string         = "/api/v1/webhooks/smile-id/web-sdk"
+                positional_constraint = "EXACTLY"
+                field_to_match {
+                  uri_path {}
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "NONE"
+                }
+              }
+            }
+            statement {
+              byte_match_statement {
+                search_string         = "/api/v1/webhooks/smile-id/hosted-link"
+                positional_constraint = "EXACTLY"
+                field_to_match {
+                  uri_path {}
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "NONE"
+                }
+              }
+            }
+          }
+        }
+        statement {
+          not_statement {
+            statement {
+              ip_set_reference_statement {
+                arn = aws_wafv2_ip_set.smile_id_callbacks.arn
+                ip_set_forwarded_ip_config {
+                  header_name       = "CF-Connecting-IP"
+                  position          = "FIRST"
+                  fallback_behavior = "NO_MATCH"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "smile-id-webhook-source-allowlist"
+      sampled_requests_enabled   = true
+    }
+  }
+
   dynamic "rule" {
     for_each = {
       ip-reputation    = { priority = 10, name = "AWSManagedRulesAmazonIpReputationList" }
@@ -204,6 +278,14 @@ resource "aws_wafv2_web_acl" "this" {
     metric_name                = local.name
     sampled_requests_enabled   = true
   }
+}
+
+resource "aws_wafv2_ip_set" "smile_id_callbacks" {
+  name               = "${local.name}-smile-id-callbacks"
+  description        = "Smile ID callback source addresses from the provider's official webhook setup documentation."
+  scope              = "REGIONAL"
+  ip_address_version = "IPV4"
+  addresses          = var.smile_id_callback_ipv4_cidrs
 }
 
 resource "aws_wafv2_web_acl_association" "alb" {

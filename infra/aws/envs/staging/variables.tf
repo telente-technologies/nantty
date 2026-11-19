@@ -62,6 +62,26 @@ variable "app_origins" {
   description = "Exact browser origins per frontend, used for gateway CORS and S3 upload CORS."
   type        = map(string)
 }
+variable "smile_id_enabled_products" {
+  description = "Smile ID products confirmed active for this partner account; leave empty until verified."
+  type        = list(string)
+  default     = []
+}
+variable "smile_id_enabled_document_types" {
+  description = "Optional country:type restriction for Standard Document Verification; empty uses Smile's global supported-document catalog when the product is enabled."
+  type        = list(string)
+  default     = []
+}
+variable "smile_id_enabled_enhanced_document_types" {
+  description = "Exact Enhanced Document Verification country:type pairs confirmed active in the partner account."
+  type        = list(string)
+  default     = []
+}
+variable "smile_id_enabled_id_number_types" {
+  description = "Exact Smile ID ID-number country:type pairs confirmed active for the partner account."
+  type        = list(string)
+  default     = []
+}
 variable "admin_ip_allow_list" {
   description = "CIDR ranges permitted to reach admin routes through the gateway. Required for staging."
   type        = list(string)

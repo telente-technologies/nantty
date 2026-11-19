@@ -92,18 +92,19 @@ module "dns" {
 data "cloudflare_ip_ranges" "edge" {}
 
 module "edge" {
-  source                = "../edge"
-  environment           = var.environment
-  vpc_id                = module.network.vpc_id
-  vpc_cidr              = var.vpc_cidr
-  public_subnet_ids     = module.network.public_subnet_ids
-  certificate_arn       = module.dns.api_certificate_arn
-  logs_bucket_id        = module.storage.logs_bucket.id
-  logs_kms_key_arn      = module.kms.key_arns["logs"]
-  cloudflare_ipv4_cidrs = data.cloudflare_ip_ranges.edge.ipv4_cidrs
-  cloudflare_ipv6_cidrs = data.cloudflare_ip_ranges.edge.ipv6_cidrs
-  deletion_protection   = var.deletion_protection
-  log_retention_days    = var.log_retention_days
+  source                       = "../edge"
+  environment                  = var.environment
+  vpc_id                       = module.network.vpc_id
+  vpc_cidr                     = var.vpc_cidr
+  public_subnet_ids            = module.network.public_subnet_ids
+  certificate_arn              = module.dns.api_certificate_arn
+  logs_bucket_id               = module.storage.logs_bucket.id
+  logs_kms_key_arn             = module.kms.key_arns["logs"]
+  cloudflare_ipv4_cidrs        = data.cloudflare_ip_ranges.edge.ipv4_cidrs
+  cloudflare_ipv6_cidrs        = data.cloudflare_ip_ranges.edge.ipv6_cidrs
+  smile_id_callback_ipv4_cidrs = var.environment == "prod" ? var.smile_id_production_callback_ipv4_cidrs : var.smile_id_sandbox_callback_ipv4_cidrs
+  deletion_protection          = var.deletion_protection
+  log_retention_days           = var.log_retention_days
 }
 
 module "ecr" {

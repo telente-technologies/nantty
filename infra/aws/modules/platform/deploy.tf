@@ -110,6 +110,7 @@ locals {
     realtime     = { PORT = "4000", ALLOWED_ORIGINS = join(",", values(var.app_origins)) }
     intelligence = { INTELLIGENCE_PORT = "8090", INTELLIGENCE_S3_REGION = var.region, INTELLIGENCE_TRUSTED_PROXY_IPS = var.vpc_cidr }
     go-identity = {
+      HTTP_WRITE_TIMEOUT          = "30s"
       USERS_DOCUMENTS_BUCKET      = module.storage.kyc_bucket.id
       AUTH_OTP_DELIVERY           = "event"
       ADMIN_INVITATION_DELIVERY   = "none"

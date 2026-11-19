@@ -10,15 +10,21 @@ locals {
       HUMAN_VERIFICATION_HOSTNAMES = join(",", [for origin in values(var.app_origins) : replace(replace(origin, "https://", ""), "http://", "")])
     }
     go-identity = {
-      AUTH_ACCOUNT_DIRECTORY_GRPC_ADDRESS = "127.0.0.1:9101"
-      USERS_MONEY_INTERNAL_URL            = local.internal_url["go-money"]
-      USERS_ENTITLEMENT_EVENTS_QUEUE      = "identity-domain-events"
-      INTELLIGENCE_URL                    = local.internal_url["intelligence"]
-      SMILE_ID_ENVIRONMENT                = var.environment == "prod" ? "production" : "sandbox"
-      SMILE_ID_CALLBACK_URL               = "https://${local.api_domain}/api/v1/webhooks/smile-id"
-      WEB_APP_BASE_URL                    = var.app_origins["webapp"]
-      USERS_SOCIAL_INTERNAL_URL           = local.internal_url["social"]
-      USERS_LIVE_INTERNAL_URL             = local.internal_url["go-live"]
+      AUTH_ACCOUNT_DIRECTORY_GRPC_ADDRESS      = "127.0.0.1:9101"
+      USERS_MONEY_INTERNAL_URL                 = local.internal_url["go-money"]
+      USERS_ENTITLEMENT_EVENTS_QUEUE           = "identity-domain-events"
+      INTELLIGENCE_URL                         = local.internal_url["intelligence"]
+      SMILE_ID_ENVIRONMENT                     = var.environment == "prod" ? "production" : "sandbox"
+      SMILE_ID_ENABLED_PRODUCTS                = join(",", var.smile_id_enabled_products)
+      SMILE_ID_ENABLED_DOCUMENT_TYPES          = join(",", var.smile_id_enabled_document_types)
+      SMILE_ID_ENABLED_ENHANCED_DOCUMENT_TYPES = join(",", var.smile_id_enabled_enhanced_document_types)
+      SMILE_ID_ENABLED_ID_NUMBER_TYPES         = join(",", var.smile_id_enabled_id_number_types)
+      SMILE_ID_CALLBACK_URL                    = "https://${local.api_domain}/api/v1/webhooks/smile-id"
+      SMILE_ID_WEB_SDK_CALLBACK_URL            = "https://${local.api_domain}/api/v1/webhooks/smile-id/web-sdk"
+      SMILE_ID_HOSTED_LINK_CALLBACK_URL        = "https://${local.api_domain}/api/v1/webhooks/smile-id/hosted-link"
+      WEB_APP_BASE_URL                         = var.app_origins["webapp"]
+      USERS_SOCIAL_INTERNAL_URL                = local.internal_url["social"]
+      USERS_LIVE_INTERNAL_URL                  = local.internal_url["go-live"]
     }
     go-money = {
       ESCROW_FEE_BPS               = "0"

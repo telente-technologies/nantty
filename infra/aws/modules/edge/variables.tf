@@ -7,6 +7,10 @@ variable "logs_bucket_id" { type = string }
 variable "logs_kms_key_arn" { type = string }
 variable "cloudflare_ipv4_cidrs" { type = list(string) }
 variable "cloudflare_ipv6_cidrs" { type = list(string) }
+variable "smile_id_callback_ipv4_cidrs" {
+  description = "Smile ID source IPv4 CIDRs allowed to call the identity webhook, checked against Cloudflare's CF-Connecting-IP header."
+  type        = list(string)
+}
 variable "deletion_protection" {
   type    = bool
   default = true

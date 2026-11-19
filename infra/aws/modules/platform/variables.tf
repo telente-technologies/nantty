@@ -66,6 +66,60 @@ variable "app_origins" {
   description = "Exact browser origins per frontend, used for gateway CORS and S3 upload CORS."
   type        = map(string)
 }
+variable "smile_id_enabled_products" {
+  description = "Smile ID products confirmed active for this partner account; empty disables identity capture options."
+  type        = list(string)
+  default     = []
+  validation {
+    condition     = alltrue([for product in var.smile_id_enabled_products : contains(["document_verification", "enhanced_document_verification", "enhanced_kyc"], product)])
+    error_message = "Smile ID products must be confirmed supported V3 identifiers."
+  }
+}
+variable "smile_id_enabled_document_types" {
+  description = "Optional country:type restriction for Standard Document Verification; empty uses Smile's global supported-document catalog when that product is enabled."
+  type        = list(string)
+  default     = []
+  validation {
+    condition     = alltrue([for value in var.smile_id_enabled_document_types : can(regex("^[A-Za-z]{2}:[A-Za-z0-9_]+$", value))])
+    error_message = "Photo document entries must use COUNTRY_CODE:ID_TYPE format, for example NG:PASSPORT."
+  }
+}
+variable "smile_id_enabled_enhanced_document_types" {
+  description = "Exact country:type pairs confirmed enabled for Enhanced Document Verification in the Smile partner account; empty disables this product."
+  type        = list(string)
+  default     = []
+  validation {
+    condition     = alltrue([for value in var.smile_id_enabled_enhanced_document_types : can(regex("^[A-Za-z]{2}:[A-Za-z0-9_]+$", value))])
+    error_message = "Enhanced Document entries must use COUNTRY_CODE:ID_TYPE format."
+  }
+}
+variable "smile_id_enabled_id_number_types" {
+  description = "Exact country:type ID-number pairs confirmed active for this partner (for example NG:NIN_V2); empty disables ID-number choices."
+  type        = list(string)
+  default     = []
+  validation {
+    condition     = alltrue([for value in var.smile_id_enabled_id_number_types : can(regex("^[A-Za-z]{2}:[A-Za-z0-9_]+$", value))])
+    error_message = "ID-number entries must use COUNTRY_CODE:ID_TYPE format, for example NG:NIN_V2."
+  }
+}
+variable "smile_id_sandbox_callback_ipv4_cidrs" {
+  description = "Smile ID's documented sandbox webhook source IPv4 addresses. Reconcile with provider docs before changes."
+  type        = list(string)
+  default     = ["13.48.228.158/32", "16.170.104.93/32", "54.246.37.255/32", "99.81.237.141/32"]
+  validation {
+    condition     = length(var.smile_id_sandbox_callback_ipv4_cidrs) > 0 && alltrue([for cidr in var.smile_id_sandbox_callback_ipv4_cidrs : can(cidrnetmask(cidr)) && endswith(cidr, "/32")])
+    error_message = "Sandbox Smile ID callback addresses must be non-empty IPv4 /32 entries from the provider's current documentation."
+  }
+}
+variable "smile_id_production_callback_ipv4_cidrs" {
+  description = "Smile ID's documented production webhook source IPv4 addresses. Reconcile with provider docs before changes."
+  type        = list(string)
+  default     = ["13.51.0.119/32", "34.240.137.52/32", "51.20.27.3/32", "52.213.46.74/32"]
+  validation {
+    condition     = length(var.smile_id_production_callback_ipv4_cidrs) > 0 && alltrue([for cidr in var.smile_id_production_callback_ipv4_cidrs : can(cidrnetmask(cidr)) && endswith(cidr, "/32")])
+    error_message = "Production Smile ID callback addresses must be non-empty IPv4 /32 entries from the provider's current documentation."
+  }
+}
 variable "admin_ip_allow_list" {
   description = "CIDR ranges permitted to reach admin routes through the gateway. Required outside dev."
   type        = list(string)
