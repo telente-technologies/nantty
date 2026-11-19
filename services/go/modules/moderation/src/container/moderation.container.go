@@ -2,6 +2,7 @@ package container
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -15,6 +16,7 @@ import (
 )
 
 type Container struct {
+	Database          *sql.DB
 	Client            *ent.Client
 	Settings          configs.ModerationSettings
 	Logger            *slog.Logger

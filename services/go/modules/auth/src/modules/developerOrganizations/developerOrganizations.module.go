@@ -29,6 +29,7 @@ func Mount(mux *http.ServeMux, app *container.Container) {
 	mux.Handle("POST "+base+"/{organizationID}/ownership-transfer", rateLimit(requireAccess(requireStepUp(http.HandlerFunc(controller.TransferOwnership)))))
 	mux.Handle("GET "+base+"/{organizationID}/invitations", rateLimit(requireAccess(http.HandlerFunc(invitations.ListForOrganization))))
 	mux.Handle("POST "+base+"/{organizationID}/invitations", rateLimit(requireAccess(http.HandlerFunc(invitations.Create))))
+	mux.Handle("POST "+base+"/{organizationID}/invitations/{invitationID}/resend", rateLimit(requireAccess(http.HandlerFunc(invitations.Resend))))
 	mux.Handle("DELETE "+base+"/{organizationID}/invitations/{invitationID}", rateLimit(requireAccess(http.HandlerFunc(invitations.Revoke))))
 	mux.Handle("GET /api/v1/developer/invitations", rateLimit(requireAccess(http.HandlerFunc(invitations.ListForAccount))))
 	mux.Handle("POST /api/v1/developer/invitations/{invitationID}", rateLimit(requireAccess(http.HandlerFunc(invitations.Respond))))

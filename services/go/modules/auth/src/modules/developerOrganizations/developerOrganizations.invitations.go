@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"nantty/modules/auth/src/container"
+	platformevents "nantty/platform/events"
 )
 
 type InvitationService struct{ Container *container.Container }
@@ -93,6 +94,23 @@ func (service InvitationService) Create(ctx context.Context, accountID, organiza
 		(id, organization_id, actor_account_id, actor_role, action, subject_type, subject_id, before_state, after_state, created_at)
 		VALUES ($1, $2, $3, $4, 'organization.invitation_created', 'organization_invitation', $5, $6, $7, $8)`,
 		uuid.New(), organization, account, actorRole, id.String(), before, after, now); err != nil {
+		return OrganizationInvitation{}, err
+	}
+	outboxEvt, err := platformevents.BuildOutboxEventWithEnvelope("developerOrganization.invitationCreated", "nantty.auth", id.String(), 1, now, map[string]any{
+		"invitationId":     id.String(),
+		"organizationId":   organization.String(),
+		"organizationName": organizationName,
+		"inviteeAccountId": invitee.String(),
+		"role":             request.Role,
+		"expiresAt":        expiresAt.UTC().Format(time.RFC3339),
+	})
+	if err != nil {
+		return OrganizationInvitation{}, err
+	}
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO outbox_events (id, created_at, event_type, subject, payload)
+		VALUES ($1, $2, $3, $4, $5::jsonb)`,
+		uuid.MustParse(outboxEvt.Id), now, outboxEvt.EventType, outboxEvt.Subject, outboxEvt.Payload); err != nil {
 		return OrganizationInvitation{}, err
 	}
 	if err := tx.Commit(); err != nil {

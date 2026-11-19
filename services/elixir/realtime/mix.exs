@@ -24,9 +24,11 @@ defmodule Realtime.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:telemetry_metrics_prometheus_core, "~> 1.2"},
       {:jason, "~> 1.4"},
-      {:jose, "~> 1.11"},
+      {:jose, github: "potatosalad/erlang-jose", tag: "1.11.13"},
       {:dns_cluster, "~> 0.2.0"},
-      {:bandit, "~> 1.5"},
+      {:bandit, github: "mtrudel/bandit", tag: "1.15.0", override: true},
+      {:plug, github: "elixir-plug/plug", tag: "v1.20.4", override: true},
+      {:plug_crypto, github: "elixir-plug/plug_crypto", tag: "v2.2.1", override: true},
       {:amqp, "~> 4.2"}
     ]
   end

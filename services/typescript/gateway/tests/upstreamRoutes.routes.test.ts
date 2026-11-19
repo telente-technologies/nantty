@@ -291,5 +291,7 @@ describe("seller order refunds", () => {
     expect(resolveUpstreamRouteForRequest("POST", "/api/v1/auth/step-up/")).toMatchObject({ upstream: "identity", authentication: "required" });
     expect(resolveUpstreamRouteForRequest("GET", "/api/v1/users/me/")).toMatchObject({ upstream: "identity", authentication: "required" });
     expect(resolveUpstreamRouteForRequest("POST", "/api/v1/tips/")).toMatchObject({ upstream: "money", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("POST", "/api/v1/developer/organizations/org-1/invitations/inv-1/resend")).toMatchObject({ upstream: "identity", authentication: "required" });
+    expect(resolveUpstreamRouteForRequest("GET", "/api/v1/developer/organizations/org-1/invitations/inv-1/resend")).toBeUndefined();
   });
 });

@@ -12,7 +12,11 @@ from src.repositories.online_feature_keyspace_repository import (
     ITEM_AFFINITY_KIND,
     format_utc_day_bucket,
 )
-from src.utils.decay_math_util import HALF_LIVES_PER_FORWARD_DECAY_GENERATION, FORWARD_DECAY_BASE_EPOCH_SECONDS, find_forward_decay_generation
+from src.utils.decay_math_util import (
+    FORWARD_DECAY_BASE_EPOCH_SECONDS,
+    HALF_LIVES_PER_FORWARD_DECAY_GENERATION,
+    find_forward_decay_generation,
+)
 from tests.modules.domain_events.helpers import domain_event, hashed, product_viewed, read_topic_affinity
 
 

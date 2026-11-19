@@ -84,13 +84,13 @@ export async function readJsonBody(request: NextRequest): Promise<{ ok: true; da
 
 export async function forwardSandboxIdentityGet(request: NextRequest, suffix: string): Promise<NextResponse> {
   const identityBase = safeBaseUrl(process.env.DEVELOPER_API_BASE_URL, false);
-  if (!identityBase) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "Identity gateway is not configured for this sandbox portal.");
+  if (!identityBase) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "Organization services are temporarily unavailable. Try again shortly.");
   const token = readPortalToken(request);
   if (!token) {
     return jsonError(
       process.env.NODE_ENV === "production" ? 503 : 401,
       process.env.NODE_ENV === "production" ? "PORTAL_SSO_NOT_CONFIGURED" : "UNAUTHENTICATED",
-      process.env.NODE_ENV === "production" ? "Centralized Nantty sign-in is not connected to this portal." : "Sign in to Nantty to load your organizations.",
+      process.env.NODE_ENV === "production" ? "Sign-in is temporarily unavailable. Try again shortly." : "Sign in to Nantty to load your organizations.",
     );
   }
   try {
@@ -121,16 +121,16 @@ export async function forwardSandboxControl(request: NextRequest, action: Sandbo
   const identityBase = safeBaseUrl(process.env.DEVELOPER_API_BASE_URL, false);
   const sandboxBase = safeBaseUrl(process.env.SANDBOX_API_BASE_URL, true);
   const controlToken = process.env.SANDBOX_CONTROL_TOKEN?.trim();
-  if (!identityBase) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "Identity gateway is not configured.");
+  if (!identityBase) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "Sandbox controls are temporarily unavailable. Try again shortly.");
   if (!sandboxBase || !controlToken || controlToken.length < 32) {
-    return jsonError(503, "SANDBOX_CONTROL_NOT_CONFIGURED", "Sandbox control plane is not connected.");
+    return jsonError(503, "SANDBOX_CONTROL_NOT_CONFIGURED", "Sandbox controls are temporarily unavailable. Try again shortly.");
   }
   const accessToken = readPortalToken(request);
   if (!accessToken) {
     return jsonError(
       process.env.NODE_ENV === "production" ? 503 : 401,
       process.env.NODE_ENV === "production" ? "PORTAL_SSO_NOT_CONFIGURED" : "UNAUTHENTICATED",
-      process.env.NODE_ENV === "production" ? "Centralized Nantty sign-in is not connected to this portal." : "Sign in to Nantty to use Sandbox controls.",
+      process.env.NODE_ENV === "production" ? "Sign-in is temporarily unavailable. Try again shortly." : "Sign in to Nantty to use Sandbox controls.",
     );
   }
 

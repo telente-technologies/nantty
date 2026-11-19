@@ -79,6 +79,9 @@ async def test_diversity_rules_hold_when_feasible(
 async def test_blocked_muted_hidden_and_seen_items_are_excluded(
     application_container: ApplicationContainer, reference_now: datetime
 ) -> None:
+    await application_container.domain_event_consumer_service.purge_service.record_personalization_choice(
+        "viewer_1", True
+    )
     await application_container.event_ingestion_service.ingest_event_batch(
         [
             build_event(
@@ -115,6 +118,9 @@ async def test_blocked_muted_hidden_and_seen_items_are_excluded(
 async def test_creator_affinity_learned_from_events_lifts_that_creator(
     application_container: ApplicationContainer, reference_now: datetime
 ) -> None:
+    await application_container.domain_event_consumer_service.purge_service.record_personalization_choice(
+        "viewer_1", True
+    )
     candidates = [
         {
             "itemId": f"post_{author}",

@@ -1,7 +1,8 @@
 import { createElement, type ReactNode } from "react";
 import { Keyboard, NativeModules, Text, TurboModuleRegistry } from "react-native";
-import { render, screen } from "@testing-library/react-native";
+import { fireEvent, render, screen } from "@testing-library/react-native";
 
+import { dismissKeyboardIfVisible, dismissKeyboardOnEmptyTap, KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { scrollOffsetRevealingInput } from "@/components/ui/keepFocusedInputVisible.hook";
 import { hasKeyboardControllerNativeModule, keyboardImplementation, resolveKeyboardImplementation } from "@/components/ui/keyboardController";
 import { fallbackLiftsLayoutItself, useFallbackKeyboardHandler } from "@/components/ui/keyboardControllerFallback";
@@ -138,6 +139,25 @@ describe("fallback path", () => {
       createElement(KeyboardAwareForm, { safeAreaHandledByParent: true, footer: createElement(Text, null, "Save") }, createElement(Text, null, "Field")),
     );
     expect(innermostWithStyle("Save", "paddingBottom")?.paddingBottom).toBe(0);
+  });
+
+  test("tapping empty space inside KeyboardAwareForm dismisses a visible keyboard and leaves drag-dismiss enabled", async () => {
+    const dismissSpy = jest.spyOn(Keyboard, "dismiss").mockImplementation(() => undefined);
+    const visibleSpy = jest.spyOn(Keyboard, "isVisible").mockReturnValue(true);
+    await render(
+      createElement(KeyboardAwareForm, { testID: "form-scroll" }, createElement(Text, null, "Outside area")),
+    );
+    const scroll = screen.getByTestId("form-scroll");
+    expect(scroll.props.keyboardDismissMode).toBe(KEYBOARD_DISMISS_ON_DRAG);
+    expect(scroll.props.keyboardShouldPersistTaps).toBe("handled");
+    await fireEvent.press(screen.getByText("Outside area"));
+    expect(dismissSpy).toHaveBeenCalledTimes(1);
+    visibleSpy.mockReturnValue(false);
+    expect(dismissKeyboardOnEmptyTap()).toBe(false);
+    expect(dismissSpy).toHaveBeenCalledTimes(1);
+    dismissKeyboardIfVisible();
+    expect(dismissSpy).toHaveBeenCalledTimes(1);
+    jest.restoreAllMocks();
   });
 });
 

@@ -42,6 +42,9 @@ func startAgainstFreshSchemaWith(t *testing.T, collaborators src.Collaborators) 
 	if err := postgres.CreateSchemaIfMissingForTestsAndLocalTooling(ctx, admin, schema); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := admin.Exec(`CREATE TABLE ` + pgx.Identifier{schema, "privacy_settings"}.Sanitize() + ` (account_id uuid PRIMARY KEY, analytics bool NOT NULL DEFAULT false, personalization bool NOT NULL DEFAULT false, personalized_ads bool NOT NULL DEFAULT false)`); err != nil {
+		t.Fatal(err)
+	}
 	t.Cleanup(func() {
 		_, _ = admin.Exec("DROP SCHEMA " + pgx.Identifier{schema}.Sanitize() + " CASCADE")
 		_ = admin.Close()
@@ -53,6 +56,7 @@ func startAgainstFreshSchemaWith(t *testing.T, collaborators src.Collaborators) 
 	if err != nil {
 		t.Fatalf("start orders: %v", err)
 	}
+	module.Container.Users.Schema = schema
 	module.Container.AccountEmailVerifier = usersdirectory.StaticAccountEmailVerifier{Verified: true}
 	t.Cleanup(func() { _ = module.Close(ctx) })
 	return module

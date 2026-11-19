@@ -4,6 +4,7 @@ import { Pressable, ScrollView, Share, StyleSheet, TextInput, View } from "react
 
 import { ArrowsOutSimple24Icon, TextIndent24Icon, VideoCamera24Icon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { dismissKeyboardOnEmptyTap } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { useCreatorStatus } from "@/hooks/useCreatorStatus.hook";
@@ -119,7 +120,7 @@ export function LiveSetupPanel(props: LiveSetupPanelProps) {
       )}
 
       {props.isEditingTitle ? (
-        <View style={styles.dim}>
+        <View style={styles.dim} onStartShouldSetResponder={dismissKeyboardOnEmptyTap}>
           <TextInput
             value={draftTitle}
             onChangeText={setDraftTitle}

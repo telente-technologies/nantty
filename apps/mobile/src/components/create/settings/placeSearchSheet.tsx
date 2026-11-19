@@ -4,6 +4,7 @@ import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import { Check16Icon, MapPin24Icon, Trash24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { BrandLoader } from "@/components/ui/brandLoader";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { Text } from "@/components/ui/text";
 import { placesService } from "@/services/geo/places.service";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -49,6 +50,7 @@ export function PlaceSearchSheet({ visible, selected, onSelect, onClose }: Place
             style={styles.list}
             data={search.debounced.length >= 2 ? (places.data ?? []) : []}
             keyExtractor={(place) => place.placeId}
+            keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG}
             keyboardShouldPersistTaps="handled"
             ListEmptyComponent={<Text size={13} lineHeight={18.2} color={colors.textMuted} align="center" style={styles.message}>{emptyMessage}</Text>}
             renderItem={({ item }) => {

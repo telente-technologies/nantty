@@ -101,7 +101,7 @@ func BuildBlackApplicationView(ctx context.Context, application *container.Conta
 		PrivateCheckoutEnabled: details.PrivateCheckoutEnabled, PrivateCheckoutAuthorizedBy: details.PrivateCheckoutAuthorizedBy,
 		PrivateCheckoutAuthorizedAt: formatOptional(details.PrivateCheckoutAuthorizedAt), PrivateCheckoutExpiresAt: formatOptional(details.PrivateCheckoutExpiresAt),
 		PrivateCheckoutRevokedAt: formatOptional(details.PrivateCheckoutRevokedAt),
-		Status: strings.ToUpper(string(row.Status)), SubmittedAt: row.CreatedAt.UTC().Format(time.RFC3339), Checklist: DecodeChecklist(row),
+		Status:                   strings.ToUpper(string(row.Status)), SubmittedAt: row.CreatedAt.UTC().Format(time.RFC3339), Checklist: DecodeChecklist(row),
 		FirstApproval: approvalOf(row.FirstApprovalBy, row.FirstApprovalByName, row.FirstApprovalAt), SecondApproval: approvalOf(row.SecondApprovalBy, row.SecondApprovalByName, row.SecondApprovalAt),
 		HandleReserved: row.HandleReserved, Appeals: appeals,
 	}

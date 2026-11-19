@@ -3,6 +3,7 @@ import { useState } from "react";
 import { FlatList, StyleSheet, TextInput, View } from "react-native";
 
 import { Check16Icon, MagnifyingGlass20Icon } from "@/components/icons";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
@@ -67,6 +68,7 @@ export function GroupMemberPicker({ selectedPeople, onToggleSelectedPerson, excl
         <FlatList
           data={selectablePeople}
           keyExtractor={(person) => person.id}
+          keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG}
           keyboardShouldPersistTaps="handled"
           ItemSeparatorComponent={() => <View style={styles.gap} />}
           renderItem={({ item }) => renderSelectablePerson(item)}

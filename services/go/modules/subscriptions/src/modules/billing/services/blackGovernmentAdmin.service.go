@@ -127,7 +127,7 @@ func (billing Billing) AdminPauseGovernmentBlack(ctx context.Context, staffId st
 		if err != nil {
 			return err
 		}
-		if _, err := transaction.ExecContext(ctx, `UPDATE subscriptions SET paused_reason = $2 WHERE id = $1`, locked.ID, truncate(reason, 120)); err != nil {
+		if _, err := transaction.ExecContext(ctx, `UPDATE `+billing.table("subscriptions")+` SET paused_reason = $2 WHERE id = $1`, locked.ID, truncate(reason, 120)); err != nil {
 			return err
 		}
 		billing.recordBlackBillingEvent(ctx, transaction, BlackBillingEventView{

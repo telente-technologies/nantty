@@ -31,6 +31,10 @@ export async function readMediaMetadataInBrowser(file: File): Promise<BrowserMed
       video.preload = "metadata";
       video.onloadedmetadata = () => resolve({ width: video.videoWidth, height: video.videoHeight, durationSeconds: Number.isFinite(video.duration) ? Math.round(video.duration * 10) / 10 : null });
       video.onerror = () => resolve(null);
+      if (!objectUrl.startsWith("blob:")) {
+        resolve(null);
+        return;
+      }
       video.src = objectUrl;
     });
   } catch {

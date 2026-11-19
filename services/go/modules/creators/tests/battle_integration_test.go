@@ -18,6 +18,7 @@ func TestBattleHoldingsSettleOnceByRuleAndTiesKeepTheirOwn(t *testing.T) {
 	harness.makeCreator(host, "top")
 	harness.makeCreator(rival, "top")
 	harness.makeCreator(removed, "top")
+	harness.seedLiveSession("live-1", host)
 	harness.issueCoins(viewer, 1_000)
 	ctx := harness.authorized()
 	for index, receiver := range []string{host, rival, rival, removed} {

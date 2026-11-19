@@ -11,11 +11,12 @@ const headers = { authorization: `Bearer ${controlToken}`, "x-nantty-actor-accou
 describe("Sandbox inspection, quotas, scenarios, and reset", () => {
   it("enforces atomic quota limits on outbound sandbox messages and rolls back on exhaustion", async () => {
     const query = vi.fn(async (sql: string) => {
+      if (sql.includes("SELECT organization_id FROM sandbox_applications WHERE id = $1")) return { rows: [{ organization_id: "org-test" }], rowCount: 1 };
       if (sql.includes("FROM sandbox_credentials c JOIN")) return { rows: [{ id: "cred-1", application_id: "app-1" }], rowCount: 1 };
       if (sql.includes("FROM sandbox_conversations WHERE id = $1")) return { rows: [{ id: "conv-1" }], rowCount: 1 };
       if (sql.includes("INSERT INTO sandbox_messages")) return { rows: [{ id: "msg-1", conversationId: "123e4567-e89b-12d3-a456-426614174000", sender: "business", text: "Hi", status: "sent" }], rowCount: 1 };
-      if (sql.includes("UPDATE sandbox_usage_periods SET messages_sent")) return { rows: [], rowCount: 0 };
-      if (sql.includes("SELECT quota_limit_messages FROM sandbox_usage_periods")) return { rows: [{ quota_limit_messages: 1000 }], rowCount: 1 };
+      if (sql.includes("UPDATE sandbox_organization_usage_periods SET messages_sent")) return { rows: [], rowCount: 0 };
+      if (sql.includes("SELECT quota_limit_messages FROM sandbox_organization_usage_periods")) return { rows: [{ quota_limit_messages: 1000 }], rowCount: 1 };
       return { rows: [], rowCount: 0 };
     });
     const database = { query, connect: vi.fn(async () => ({ query, release: vi.fn() })) } as unknown as Pool;
@@ -50,14 +51,15 @@ describe("Sandbox inspection, quotas, scenarios, and reset", () => {
       payload: { text: "Hello" },
     });
     expect(response.statusCode).toBe(200);
-    expect(query.mock.calls.some(([sql]) => String(sql).includes("UPDATE sandbox_usage_periods SET messages_sent"))).toBe(false);
+    expect(query.mock.calls.some(([sql]) => String(sql).includes("UPDATE sandbox_organization_usage_periods SET messages_sent"))).toBe(false);
     await app.close();
   });
 
   it("runs deterministic scenarios and rejects unsupported scenarios", async () => {
     const query = vi.fn(async (sql: string) => {
       if (sql.includes("SELECT id FROM sandbox_applications WHERE organization_id=$1")) return { rows: [{ id: "app-1" }], rowCount: 1 };
-      if (sql.includes("UPDATE sandbox_usage_periods SET messages_sent")) return { rows: [{ messages_sent: 1, quota_limit_messages: 1000 }], rowCount: 1 };
+      if (sql.includes("SELECT organization_id FROM sandbox_applications WHERE id = $1")) return { rows: [{ organization_id: "org-test" }], rowCount: 1 };
+      if (sql.includes("UPDATE sandbox_organization_usage_periods SET messages_sent")) return { rows: [{ messages_sent: 1, quota_limit_messages: 1000 }], rowCount: 1 };
       return { rows: [], rowCount: 1 };
     });
     const database = { query, connect: vi.fn(async () => ({ query, release: vi.fn() })) } as unknown as Pool;
@@ -84,7 +86,7 @@ describe("Sandbox inspection, quotas, scenarios, and reset", () => {
     const response = await app.inject({ method: "POST", url: `${base}/reset`, headers });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ reset: true, usagePreserved: true });
-    expect(executedSql.some((sql) => sql.includes("DELETE FROM sandbox_usage_periods"))).toBe(false);
+    expect(executedSql.some((sql) => sql.includes("DELETE FROM sandbox_organization_usage_periods"))).toBe(false);
     expect(executedSql.some((sql) => sql.includes("DELETE FROM sandbox_api_requests"))).toBe(false);
     await app.close();
   });
@@ -93,7 +95,7 @@ describe("Sandbox inspection, quotas, scenarios, and reset", () => {
     const query = vi.fn(async (sql: string) => {
       if (sql.includes("SELECT id FROM sandbox_applications")) return { rows: [{ id: "app-1" }], rowCount: 1 };
       if (sql.includes("FROM sandbox_api_requests")) return { rows: [{ requestId: "req-1", method: "POST", path: "/v1/customers", statusCode: 201, createdAt: "2026-11-16T12:00:00.000Z" }], rowCount: 1 };
-      if (sql.includes("FROM sandbox_usage_periods")) return { rows: [{ messages_sent: 12, requests_count: 34, scenarios_run: 3, quota_limit_messages: 1000 }], rowCount: 1 };
+      if (sql.includes("FROM sandbox_organization_usage_periods")) return { rows: [{ messages_sent: 12, requests_count: 34, scenarios_run: 3, quota_limit_messages: 1000 }], rowCount: 1 };
       return { rows: [], rowCount: 0 };
     });
     const database = { query, connect: vi.fn(async () => ({ query, release: vi.fn() })) } as unknown as Pool;
@@ -112,7 +114,7 @@ describe("Sandbox inspection, quotas, scenarios, and reset", () => {
       if (sql.includes("SELECT id FROM sandbox_applications")) return { rows: [{ id: "app-1" }], rowCount: 1 };
       if (sql.includes("SELECT id FROM sandbox_conversations WHERE id=$1")) return { rows: [{ id: "123e4567-e89b-12d3-a456-426614174010" }], rowCount: 1 };
       if (sql.includes("SELECT id, conversation_id AS")) return { rows: [{ id: "123e4567-e89b-12d3-a456-426614174011", conversationId: "123e4567-e89b-12d3-a456-426614174010", sender: "business", status: "sent" }], rowCount: 1 };
-      if (sql.includes("UPDATE sandbox_usage_periods SET messages_sent")) return { rows: [{ messages_sent: 1, quota_limit_messages: 1000 }], rowCount: 1 };
+      if (sql.includes("UPDATE sandbox_organization_usage_periods SET messages_sent")) return { rows: [{ messages_sent: 1, quota_limit_messages: 1000 }], rowCount: 1 };
       return { rows: [], rowCount: 1 };
     });
     const database = { query, connect: vi.fn(async () => ({ query, release: vi.fn() })) } as unknown as Pool;

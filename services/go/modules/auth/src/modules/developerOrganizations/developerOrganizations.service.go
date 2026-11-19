@@ -29,6 +29,7 @@ var (
 	errInvitationNotFound           = errors.New("the organization invitation was not found")
 	errInvitationExpired            = errors.New("the organization invitation has expired")
 	errInvitationNotPending         = errors.New("the organization invitation is no longer pending")
+	errInvitationResendCooldown     = errors.New("please wait before resending this invitation")
 	errInvalidInvitation            = errors.New("organization invitation details are invalid")
 )
 

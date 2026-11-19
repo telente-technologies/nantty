@@ -97,7 +97,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.go == 'true' || needs.changes.outputs.typescript == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     services:
       postgres:
         image: postgis/postgis:17-3.5
@@ -155,7 +155,7 @@ jobs:
           REDIS_URL: redis://localhost:16379
           RABBITMQ_URL: amqp://guest:guest@localhost:5672/nantty
         run: bash ../scripts/test-go-workspace.sh
-      - run: pnpm install --frozen-lockfile --filter @nantty/social... --filter @nantty/notifications... --filter @nantty/media...
+      - run: pnpm install --frozen-lockfile --filter @nantty/social... --filter "@nantty/chat-crypto..." --filter @nantty/notifications... --filter @nantty/media...
       - name: TypeScript service tests that use the database
         env:
           DATABASE_URL: postgres://nantty:nantty@localhost:15432/nantty_test
@@ -230,7 +230,12 @@ jobs:
         with:
           node-version-file: .node-version
           cache: pnpm
-      - run: pnpm install --frozen-lockfile --filter "${{ matrix.package }}..."
+      - run: |
+          if [ "${{ matrix.package }}" = "@nantty/social" ]; then
+            pnpm install --frozen-lockfile --filter "${{ matrix.package }}..." --filter "@nantty/chat-crypto..."
+          else
+            pnpm install --frozen-lockfile --filter "${{ matrix.package }}..."
+          fi
       - run: pnpm --filter "${{ matrix.package }}" run --if-present typecheck
       - run: pnpm --filter "${{ matrix.package }}" run --if-present test
 
@@ -277,7 +282,25 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy src
-      - run: uv run pytest
+      - run: |
+          set -o pipefail
+          uv run pytest --tb=short 2>&1 | tee /tmp/pytest.log || {
+            python3 - <<'PY'
+          import pathlib
+          log = pathlib.Path("/tmp/pytest.log").read_text()
+          emitted = False
+          for line in log.splitlines():
+              if line.startswith(("FAILED ", "E   ")) or (
+                  line.startswith("ERROR ") and not line.startswith("ERROR    intelligence.")
+              ):
+                  print(f"::error::{line[:400]}")
+                  emitted = True
+          if not emitted:
+              for line in log.splitlines()[-10:]:
+                  print(f"::error::{line[:400]}")
+          PY
+            exit 1
+          }
 
   images:
     needs: changes

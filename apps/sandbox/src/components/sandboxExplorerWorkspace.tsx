@@ -1,16 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import styles from "./sandboxWorkspace.module.css";
 import { sandboxFetch } from "./useSandboxContext";
 
 const operations = [
-  { id: "create_customer", label: "POST /v1/customers — Create synthetic customer", needsConversation: false, needsIdempotency: false, template: '{\n  "externalReference": "cust-sandbox-001",\n  "displayName": "Ada Sandbox"\n}' },
-  { id: "create_conversation", label: "POST /v1/conversations — Open synthetic conversation", needsConversation: false, needsIdempotency: false, template: '{\n  "customerId": "00000000-0000-4000-8000-000000000000"\n}' },
-  { id: "list_messages", label: "GET /v1/conversations/:id/messages — List conversation messages", needsConversation: true, needsIdempotency: false, template: "{}" },
-  { id: "send_message", label: "POST /v1/conversations/:id/messages — Send business message", needsConversation: true, needsIdempotency: true, template: '{\n  "text": "Hello from the Nantty Sandbox API Explorer"\n}' },
-  { id: "send_test_event", label: "POST /v1/webhooks/test-events — Emit synthetic test event", needsConversation: false, needsIdempotency: false, template: '{\n  "event": "message.delivered",\n  "data": { "sample": true }\n}' },
+  { id: "create_customer", method: "POST", path: "/v1/customers", label: "POST /v1/customers — Create synthetic customer", needsConversation: false, needsIdempotency: false, template: '{\n  "externalReference": "cust-sandbox-001",\n  "displayName": "Ada Sandbox"\n}' },
+  { id: "create_conversation", method: "POST", path: "/v1/conversations", label: "POST /v1/conversations — Open synthetic conversation", needsConversation: false, needsIdempotency: false, template: '{\n  "customerId": "00000000-0000-4000-8000-000000000000"\n}' },
+  { id: "list_messages", method: "GET", path: "/v1/conversations/:id/messages", label: "GET /v1/conversations/:id/messages — List conversation messages", needsConversation: true, needsIdempotency: false, template: "{}" },
+  { id: "send_message", method: "POST", path: "/v1/conversations/:id/messages", label: "POST /v1/conversations/:id/messages — Send business message", needsConversation: true, needsIdempotency: true, template: '{\n  "text": "Hello from the Nantty Sandbox API Explorer"\n}' },
+  { id: "send_test_event", method: "POST", path: "/v1/webhooks/test-events", label: "POST /v1/webhooks/test-events — Emit synthetic test event", needsConversation: false, needsIdempotency: false, template: '{\n  "event": "message.delivered",\n  "data": { "sample": true }\n}' },
 ] as const;
 
 type OperationId = (typeof operations)[number]["id"];
@@ -21,17 +22,41 @@ export function SandboxExplorerWorkspace() {
   const [conversationId, setConversationId] = useState("");
   const [idempotencyKey, setIdempotencyKey] = useState("explorer-key-001");
   const [payloadText, setPayloadText] = useState<string>(operations[0].template);
+  const [copiedCurl, setCopiedCurl] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [response, setResponse] = useState<{ readonly status: number; readonly requestId: string | null; readonly idempotentReplayed: boolean; readonly body: unknown } | null>(null);
 
   const selected = operations.find((op) => op.id === operation) ?? operations[0];
 
+  const resolvedPath = selected.needsConversation
+    ? selected.path.replace(":id", conversationId.trim() || "<conversation-id>")
+    : selected.path;
+  const curlCommand = [
+    `curl -X ${selected.method} "https://sandbox-api.nantty.com${resolvedPath}"`,
+    '  -H "Authorization: Bearer ntsb_test_..."',
+    ...(selected.needsIdempotency && idempotencyKey.trim() ? [`  -H "Idempotency-Key: ${idempotencyKey.trim()}"`] : []),
+    ...(operation !== "list_messages"
+      ? ['  -H "Content-Type: application/json"', `  -d '${payloadText.replace(/'/g, "'\\''")}'`]
+      : []),
+  ].join(" \\\n");
+
   function selectOperation(next: OperationId) {
     setOperation(next);
     const found = operations.find((op) => op.id === next);
     if (found) setPayloadText(found.template);
+    setResponse(null);
     setError("");
+  }
+
+  async function copyCurl() {
+    try {
+      await navigator.clipboard.writeText(curlCommand);
+      setCopiedCurl(true);
+      window.setTimeout(() => setCopiedCurl(false), 2000);
+    } catch {
+      setError("Clipboard access is unavailable. Select and copy the cURL snippet manually.");
+    }
   }
 
   async function executeRequest() {
@@ -90,6 +115,7 @@ export function SandboxExplorerWorkspace() {
             Sandbox bearer token (in-memory only)
             <input type="password" value={token} onChange={(e) => setToken(e.target.value)} placeholder="ntsb_test_..." autoComplete="off" />
           </label>
+          <p className={styles.hintText}>Need an isolated token? Issue one in <Link className={styles.hintLink} href="/test-apps">Test applications</Link>.</p>
           {selected.needsConversation ? (
             <label>
               Conversation ID (UUID)
@@ -118,11 +144,22 @@ export function SandboxExplorerWorkspace() {
         <section className={styles.panel} aria-label="Response inspector">
           <div className={styles.panelHeading}>
             <h2>Response</h2>
-            {response ? <span>HTTP {response.status} · Request ID: <code>{response.requestId ?? "—"}</code>{response.idempotentReplayed ? " · Idempotent replay" : ""}</span> : null}
+            {response ? (
+              <span className={styles.metaStrip}>
+                <span className={`${styles.badge} ${response.status >= 500 ? styles.badgeDanger : response.status >= 400 ? styles.badgeWarn : styles.badgeSuccess}`}>HTTP {response.status}</span>
+                <span>Request ID: <code>{response.requestId ?? "—"}</code></span>
+                {response.idempotentReplayed ? <span className={`${styles.badge} ${styles.badgeNeutral}`}>Idempotent replay</span> : null}
+              </span>
+            ) : null}
           </div>
           <pre className={styles.codeBox}>
             {response ? JSON.stringify(response.body, null, 2) : "No request has been sent yet."}
           </pre>
+          <div className={styles.panelHeading}>
+            <h2>cURL preview</h2>
+            <button type="button" className={styles.secondaryBtn} onClick={() => void copyCurl()}>{copiedCurl ? "Copied!" : "Copy cURL"}</button>
+          </div>
+          <pre className={styles.codeBox}>{curlCommand}</pre>
         </section>
       </div>
     </section>

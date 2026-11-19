@@ -131,3 +131,27 @@ export const twoFactorEnabled = defineEmailTemplate<RecipientProps & { readonly 
   ],
   sample: { firstName: "Amaka", method: "your authenticator app", occurredAt: sampleDevice.occurredAt },
 });
+
+export const developerOrgInvitation = defineEmailTemplate<RecipientProps & { readonly organizationName: string; readonly role: string; readonly expiresAt: string; readonly invitationUrl: string }>({
+  key: "developerOrgInvitation",
+  name: "Developer organization invitation",
+  category: "auth",
+  kind: "transactional",
+  audience: "Developer",
+  trigger: "developerOrganization.invitationCreated",
+  consent: consentRules.always,
+  subject: (p) => `Invitation to join ${p.organizationName} on Nantty Developers`,
+  preheader: (p, c) => `You were invited as ${p.role}. Expires ${c.dateTime(p.expiresAt)}.`,
+  blocks: (p, c) => [
+    { type: "hero", eyebrow: "Nantty Developers", title: `Join ${p.organizationName}`, tone: "brand" },
+    { type: "paragraph", text: [`Hi ${p.firstName}, you've been invited to join `, { strong: p.organizationName }, ` as `, { strong: p.role }, `. This invitation expires on ${c.dateTime(p.expiresAt)}.`] },
+    { type: "button", label: "Review invitation", href: p.invitationUrl },
+  ],
+  sample: {
+    firstName: "Amaka",
+    organizationName: "Nantty Commerce Labs",
+    role: "developer",
+    expiresAt: "2026-11-24T12:00:00.000Z",
+    invitationUrl: "https://developers.nantty.com/organization",
+  },
+});

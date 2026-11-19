@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native
 
 import { MagnifyingGlass20Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
+import { dismissKeyboardIfVisible, dismissKeyboardOnEmptyTap, KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -29,9 +30,10 @@ export function ChatSearchPanel({ onOpenConversation, onOpenPerson }: ChatSearch
     queryFn: () => messagesService.searchConversationsAndPeople(query),
   });
   return (
-    <View style={styles.root}>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
-        <View style={styles.searchBox}>
+    <View style={styles.root} onStartShouldSetResponder={dismissKeyboardOnEmptyTap}>
+      <ScrollView keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
+        <Pressable accessible={false} onPress={dismissKeyboardIfVisible}>
+          <View style={styles.searchBox}>
           <MagnifyingGlass20Icon />
           <TextInput
             value={query}
@@ -81,6 +83,7 @@ export function ChatSearchPanel({ onOpenConversation, onOpenPerson }: ChatSearch
             ))}
           </View>
         </View>
+        </Pressable>
       </ScrollView>
       <KeyboardSpacer restingHeight={0} offset={tabBarHeight} />
     </View>

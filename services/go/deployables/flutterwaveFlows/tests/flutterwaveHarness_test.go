@@ -13,6 +13,7 @@ import (
 
 	escrowsrc "nantty/modules/escrow/src"
 	escrowconfigs "nantty/modules/escrow/src/configs"
+	escrowmigrations "nantty/modules/escrow/src/migrations"
 	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
@@ -20,6 +21,7 @@ import (
 	paymentservices "nantty/modules/payments/src/modules/gateway/services"
 	walletsrc "nantty/modules/wallet/src"
 	walletconfigs "nantty/modules/wallet/src/configs"
+	walletmigrations "nantty/modules/wallet/src/migrations"
 )
 
 type flowHarness struct {
@@ -40,7 +42,7 @@ func startFlowHarness(t *testing.T) *flowHarness {
 	container := money.Payments.Application.Container
 	container.Now = func() time.Time { return harness.clock }
 	escrowSettings := escrowconfigs.EscrowSettings{
-		Money:                 moneytesting.MoneyModuleSettingsForTests("escrow", moneytesting.CreateEmptySchema(t, money.Database, "escrow"), money.LedgerSchema),
+		Money:                 moneytesting.MoneyModuleSettingsForTests("escrow", moneytesting.CreateFreshSchemaWithMigrations(t, money.Database, "escrow", escrowmigrations.Files), money.LedgerSchema),
 		PlatformCommissionBps: 150, InspectionPeriod: 72 * time.Hour, SellerResponseWindow: 48 * time.Hour, AutoReleaseSweepInterval: time.Hour,
 		SellerCreditHoldPeriod: 24 * time.Hour, InternalApiToken: strings.Repeat("e", 32),
 	}
@@ -52,7 +54,7 @@ func startFlowHarness(t *testing.T) *flowHarness {
 	escrow.Application.Container.Now = func() time.Time { return harness.clock }
 	harness.escrow = escrow
 	walletSettings := walletconfigs.WalletSettings{
-		Money:              moneytesting.MoneyModuleSettingsForTests("wallet", moneytesting.CreateEmptySchema(t, money.Database, "wallet"), money.LedgerSchema),
+		Money:              moneytesting.MoneyModuleSettingsForTests("wallet", moneytesting.CreateFreshSchemaWithMigrations(t, money.Database, "wallet", walletmigrations.Files), money.LedgerSchema),
 		CoinTransferFeeBps: 2500, CoinCashValueMinorByCurrency: walletconfigs.ParseCurrencyAmounts("NGN:1000"),
 		MinimumPayoutMinorByCurrency: walletconfigs.ParseCurrencyAmounts("NGN:1000"), MinimumWithdrawalMinor: 100, DataEncryptionKey: bytes.Repeat([]byte{9}, 32),
 		DefaultCurrency: "NGN", WithdrawalLimits: walletconfigs.WithdrawalLimits{MaximumPerDay: 3, MinimumGap: 10 * time.Minute, NewAccountCooldown: 48 * time.Hour, BlockWhileProcessing: true},

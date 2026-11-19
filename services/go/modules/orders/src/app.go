@@ -21,6 +21,7 @@ import (
 	"nantty/modules/orders/src/interfaces"
 	"nantty/modules/orders/src/jobs"
 	"nantty/modules/orders/src/logistics"
+	"nantty/modules/orders/src/logistics/kwikpik"
 	"nantty/modules/orders/src/migrations"
 	adminorders "nantty/modules/orders/src/modules/adminOrders"
 	"nantty/modules/orders/src/modules/cart"
@@ -32,10 +33,12 @@ import (
 	marketingcampaigns "nantty/modules/orders/src/modules/marketingCampaigns"
 	marketingoverview "nantty/modules/orders/src/modules/marketingOverview"
 	"nantty/modules/orders/src/modules/orders"
+	partnerlogistics "nantty/modules/orders/src/modules/partnerLogistics"
 	"nantty/modules/orders/src/modules/promotions"
 	"nantty/modules/orders/src/modules/reports"
 	"nantty/modules/orders/src/modules/returns"
 	sellerconversations "nantty/modules/orders/src/modules/sellerConversations"
+	sellerdevelopers "nantty/modules/orders/src/modules/sellerDevelopers"
 	sellerdisputes "nantty/modules/orders/src/modules/sellerDisputes"
 	sellerinsights "nantty/modules/orders/src/modules/sellerInsights"
 	sellermoneyrelay "nantty/modules/orders/src/modules/sellerMoneyRelay"
@@ -128,6 +131,30 @@ func StartOrdersModuleWithSettings(ctx context.Context, settings configs.OrdersS
 		AccessVerifier:       collaborators.Verifier, IdempotencyStore: module.openIdempotencyStore(settings, logger), Staff: collaborators.Staff, Audit: collaborators.Audit,
 		Logistics: logistics.NewRegistry(settings.LogisticsEnabled),
 	}
+	if settings.LogisticsEnabled && settings.KwikpikBaseUrl != "" && settings.KwikpikApiKey != "" {
+		provider, providerErr := kwikpik.NewProvider(kwikpik.Config{
+			BaseUrl:          settings.KwikpikBaseUrl,
+			ApiKey:           settings.KwikpikApiKey,
+			WebhookSecret:    settings.KwikpikWebhookSecret,
+			ContactEmail:     settings.LogisticsContactEmail,
+			AllowInsecureDev: !settings.IsProduction(),
+			Paths: kwikpik.Paths{
+				EstimateOrder:     settings.KwikpikEstimatePath,
+				BulkOrdersUnified: settings.KwikpikCreateOrderPath,
+				CancelOrder:       settings.KwikpikCancelPath,
+				TrackPackage:      settings.KwikpikTrackPath,
+				Locations:         settings.KwikpikLocationsPath,
+			},
+		})
+		if providerErr != nil {
+			_ = database.Close()
+			return nil, providerErr
+		}
+		if regErr := module.Container.Logistics.Register(provider); regErr != nil {
+			_ = database.Close()
+			return nil, regErr
+		}
+	}
 	if err := module.attachMoney(settings, collaborators, logger); err != nil {
 		_ = database.Close()
 		return nil, err
@@ -163,6 +190,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	orders.Mount(mux, module.Container)
 	sellerorders.Mount(mux, module.Container)
 	shipping.Mount(mux, module.Container)
+	partnerlogistics.Mount(mux, module.Container)
 	storerewards.Mount(mux, module.Container)
 	customers.Mount(mux, module.Container)
 	reports.Mount(mux, module.Container)
@@ -176,6 +204,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	sellerinsights.Mount(mux, module.Container)
 	marketingoverview.Mount(mux, module.Container)
 	sellerconversations.Mount(mux, module.Container)
+	sellerdevelopers.Mount(mux, module.Container)
 	returns.Mount(mux, module.Container)
 	adminorders.Mount(mux, module.Container)
 	orderwidgets.Mount(mux, module.Container)

@@ -75,3 +75,24 @@ func RequireVerifiedAccessTokenWithSuspendedPolicy(verifier *AccessTokenVerifier
 		})
 	}
 }
+
+func RequireAdultAccount() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			principal, found := PrincipalFromContext(request.Context())
+			if !found {
+				httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
+				return
+			}
+			if principal.AgeBracket != "adult" {
+				httpserver.WriteJsonResponse(writer, http.StatusForbidden, httpserver.NewApiError(
+					http.StatusForbidden,
+					"AGE_RESTRICTED_FEATURE",
+					"This paid or monetized feature is restricted to verified adult accounts (18+).",
+				))
+				return
+			}
+			next.ServeHTTP(writer, request)
+		})
+	}
+}

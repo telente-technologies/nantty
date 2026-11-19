@@ -5,6 +5,7 @@ import { FlatList, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { Check16Icon, MagnifyingGlass16Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { BrandLoader } from "@/components/ui/brandLoader";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
@@ -92,6 +93,7 @@ export function SoundPickerSheet({ visible, selectedSoundId, onSelectSound, onCl
             data={sounds.data ?? []}
             keyExtractor={(sound) => sound.id}
             keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG}
             ListEmptyComponent={
               <Text size={13} lineHeight={18.2} color={colors.textMuted} align="center" style={styles.loading}>
                 {tab === "saved" && !debouncedSearch ? "Sounds you save appear here." : "No sounds found."}

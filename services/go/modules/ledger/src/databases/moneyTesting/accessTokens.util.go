@@ -64,8 +64,12 @@ func (authority *TestTokenAuthority) StaffVerifiers() *middlewares.StaffTokenVer
 
 func (authority *TestTokenAuthority) sign(subject, sessionId, audience string, roles []string) string {
 	authority.t.Helper()
-	token, err := jwt.NewBuilder().Issuer(TestTokenIssuer).Subject(subject).Audience([]string{audience}).
-		IssuedAt(time.Now()).Expiration(time.Now().Add(15*time.Minute)).JwtID(uuid.NewString()).Claim("sid", sessionId).Claim("roles", roles).Build()
+	builder := jwt.NewBuilder().Issuer(TestTokenIssuer).Subject(subject).Audience([]string{audience}).
+		IssuedAt(time.Now()).Expiration(time.Now().Add(15*time.Minute)).JwtID(uuid.NewString()).Claim("sid", sessionId).Claim("roles", roles)
+	if audience == TestTokenAudience || audience == jwtauth.UserStepUpAudience {
+		builder = builder.Claim("age", "adult")
+	}
+	token, err := builder.Build()
 	if err != nil {
 		authority.t.Fatal(err)
 	}

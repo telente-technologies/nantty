@@ -52,8 +52,12 @@ func NewFakeTokenService(t testing.TB) *FakeTokenService {
 
 func (service *FakeTokenService) sign(audience string, subject, sessionId string, roles []string, timeToLive time.Duration) (string, error) {
 	now := time.Now()
-	token, err := jwt.NewBuilder().Issuer(FakeIssuer).Audience([]string{audience}).Subject(subject).JwtID(uuid.NewString()).
-		IssuedAt(now).NotBefore(now).Expiration(now.Add(timeToLive)).Claim("sid", sessionId).Claim("roles", roles).Build()
+	builder := jwt.NewBuilder().Issuer(FakeIssuer).Audience([]string{audience}).Subject(subject).JwtID(uuid.NewString()).
+		IssuedAt(now).NotBefore(now).Expiration(now.Add(timeToLive)).Claim("sid", sessionId).Claim("roles", roles)
+	if audience == FakeAccountAudience || audience == "nantty-user-step-up" {
+		builder = builder.Claim("age", "adult")
+	}
+	token, err := builder.Build()
 	if err != nil {
 		return "", err
 	}

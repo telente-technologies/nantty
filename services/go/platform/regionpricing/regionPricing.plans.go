@@ -18,10 +18,10 @@ type PlanRegionalPrice struct {
 }
 
 const (
-	UsdBillingNote                     = "Billed in USD"
-	BlackUsdMonthlyNigeriaMinor  int64 = 30_000
-	BlackUsdMonthlyIntlMinor     int64 = 50_000
-	BlackCurrencyCode                  = "USD"
+	UsdBillingNote                    = "Billed in USD"
+	BlackUsdMonthlyNigeriaMinor int64 = 30_000
+	BlackUsdMonthlyIntlMinor    int64 = 50_000
+	BlackCurrencyCode                 = "USD"
 )
 
 type monthlyPair struct{ web, app int64 }

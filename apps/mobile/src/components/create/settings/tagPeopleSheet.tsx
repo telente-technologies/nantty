@@ -5,6 +5,7 @@ import { Cancel20Icon, Check16Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { BrandLoader } from "@/components/ui/brandLoader";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { Text } from "@/components/ui/text";
 import { tagCandidatesService } from "@/services/content/tagCandidates.service";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -57,6 +58,7 @@ export function TagPeopleSheet({ visible, tagged, onChange, onClose }: TagPeople
             style={styles.list}
             data={candidates.data ?? []}
             keyExtractor={(candidate) => candidate.user.id}
+            keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG}
             keyboardShouldPersistTaps="handled"
             ListEmptyComponent={<Text size={13} lineHeight={18.2} color={colors.textMuted} align="center" style={styles.message}>{candidates.isError ? "Search isn't available right now. Try again." : "No people found."}</Text>}
             renderItem={({ item }) => {

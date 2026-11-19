@@ -8,6 +8,7 @@ import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.h
 import { makeThemedStyles, useTheme } from "@/theme";
 
 import { useAccessibilityFocusOnOpen } from "./accessibilityFocus.hook";
+import { dismissKeyboardIfVisible, KEYBOARD_DISMISS_ON_DRAG } from "./dismissKeyboardOnEmptyTap.util";
 import { FrameAwareModal } from "./frameAwareModal";
 import { useKeepFocusedInputVisible } from "./keepFocusedInputVisible.hook";
 import { KeyboardSpacer } from "./keyboardSpacer";
@@ -60,6 +61,7 @@ export function BottomSheet({
   const tallestSheetHeight = Math.min(frame.height * MAX_HEIGHT_RATIO, frame.height - insets.top - SHEET_TOP_GAP);
   const hasFooter = !!footer || (footerActions?.length ?? 0) > 0;
   const closeIfDismissible = () => {
+    dismissKeyboardIfVisible();
     if (dismissible) onClose();
   };
   const { panHandlers, dragStyle } = useSheetDragDismiss(visible, dismissible, onClose);
@@ -103,8 +105,10 @@ export function BottomSheet({
               ) : null}
             </View>
             {scrollable ? (
-              <ScrollView {...keepFocusedInputVisible.scrollProps} style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-                {children}
+              <ScrollView {...keepFocusedInputVisible.scrollProps} style={styles.scroll} contentContainerStyle={styles.grow} keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+                <Pressable accessible={false} onPress={dismissKeyboardIfVisible} style={styles.scrollContent}>
+                  {children}
+                </Pressable>
               </ScrollView>
             ) : (
               children
@@ -150,7 +154,8 @@ const useStyles = makeThemedStyles((colors, scheme) => {
     titleText: { flex: 1, gap: 2 },
     closeButton: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: palette.inset },
     scroll: { flexShrink: 1 },
-    scrollContent: { paddingHorizontal: 16, paddingBottom: 16 },
+    grow: { flexGrow: 1 },
+    scrollContent: { flexGrow: 1, paddingHorizontal: 16, paddingBottom: 16 },
     footer: { paddingHorizontal: modalSpacing.edge - 4, paddingTop: 12, gap: modalSpacing.actionGap, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.divider, backgroundColor: palette.surface },
   });
 });

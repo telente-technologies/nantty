@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { GET } from "../src/app/docs/openapi.json/route";
 import { buildBusinessMessagingOpenApiSpec } from "../src/lib/businessMessagingOpenApi";
 
-test("OpenAPI 3.1 specification covers implemented Sandbox Messaging routes and draft boundary", () => {
+test("OpenAPI 3.1 distinguishes live Sandbox routes from unavailable Production previews", () => {
   const spec = buildBusinessMessagingOpenApiSpec();
   assert.equal(spec.openapi, "3.1.0");
   assert.ok(spec.paths["/v1/customers"]);
@@ -18,12 +18,19 @@ test("OpenAPI 3.1 specification covers implemented Sandbox Messaging routes and 
   assert.ok(postMessage.responses["201"]);
   assert.ok(postMessage.responses["409"]);
   assert.ok(postMessage.responses["429"]);
-  const draftRoute = (spec.paths["/v1/business/messages"] as { post: { "x-status": string } }).post;
-  assert.equal(draftRoute["x-status"], "draft");
+  const prodRoute = (spec.paths["/api/v1/business/messages"] as { post: { "x-status": string; responses: Record<string, unknown> } }).post;
+  assert.equal(prodRoute["x-status"], "unavailable");
+  assert.ok(prodRoute.responses["503"]);
+  assert.equal(prodRoute.responses["202"], undefined);
+  const prodConversations = (spec.paths["/api/v1/business/conversations"] as { get: { responses: Record<string, unknown> } }).get;
+  assert.ok(prodConversations.responses["503"]);
+  assert.equal(prodConversations.responses["200"], undefined);
   const errorCodes = (spec.components.schemas.ErrorEnvelope as { properties: { error: { properties: { code: { enum: readonly string[] } } } } }).properties.error.properties.code.enum;
   assert.ok(errorCodes.includes("SANDBOX_QUOTA_EXCEEDED"));
   assert.ok(errorCodes.includes("INVALID_SANDBOX_CREDENTIAL"));
   assert.ok(errorCodes.includes("IDEMPOTENCY_CONFLICT"));
+  assert.ok(errorCodes.includes("APPLICATION_NOT_APPROVED"));
+  assert.ok(errorCodes.includes("MONTHLY_QUOTA_EXCEEDED"));
   assert.match((spec.components.schemas.WebhookEnvelope as { description: string }).description, /nantty-signature/);
   assert.match((spec.components.schemas.WebhookEnvelope as { description: string }).description, /nantty-event-id/);
 });

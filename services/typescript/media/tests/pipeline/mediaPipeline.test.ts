@@ -57,6 +57,20 @@ describe("image pipeline", () => {
 });
 
 describe("rejections", () => {
+  it.each(["match", "unavailable"])("retains child-safety %s assets in quarantine without publishing", async (mode) => {
+    const harness = createHarness({ config: { childSafety: { baseUrl: "https://scanner.example", internalToken: "test", requireScan: true, timeoutMs: 1000 } } });
+    const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
+    const context = { ...harness.context, childSafety: { scanMedia: async () => {
+      if (mode === "unavailable") throw new Error("scanner unavailable");
+      return { matched: true, quarantined: true };
+    } } };
+    await runMediaPipeline(context, id, { attempt: firstAttempt, moderationApproved: false });
+    expect(harness.db.assets.get(id)?.["status"]).toBe("held");
+    expect(harness.storage.keysIn(context.config.storage.quarantineBucket)).toHaveLength(1);
+    expect(harness.storage.keysIn(context.config.storage.publicBucket)).toHaveLength(0);
+    expect(harness.db.eventTypes()).toEqual(["media.held"]);
+  });
+
   it("rejects a file whose bytes do not match the declared type", async () => {
     const harness = createHarness();
     const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: minimalPdf(1) });

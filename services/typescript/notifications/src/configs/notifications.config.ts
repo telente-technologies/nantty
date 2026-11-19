@@ -19,6 +19,7 @@ export interface NotificationsConfig {
   readonly unsubscribeTokenTtlSeconds: number;
   readonly publicApiBaseUrl: string;
   readonly webBaseUrl: string;
+  readonly developerPortalUrl: string;
   readonly supportInbox?: { readonly recipients: readonly string[]; readonly adminBaseUrl: string };
   readonly otpEnvelopeKeys: Readonly<Record<string, Buffer>>;
   readonly marketingMaxPerWeek: number;
@@ -84,6 +85,7 @@ export function loadNotificationsConfigFromEnvironment(): NotificationsConfig {
     publicApiBaseUrl: readRequired("PUBLIC_API_BASE_URL", problems),
     otpEnvelopeKeys: { [readOrDefault("AUTH_OTP_EVENT_KEY_ID", "otp-1")]: Buffer.from(readOrDefault("AUTH_OTP_EVENT_KEY", ""), "base64") },
     webBaseUrl: readOrDefault("NANTTY_WEB_BASE_URL", "https://nantty.com"),
+    developerPortalUrl: readOrDefault("DEVELOPER_PORTAL_URL", "https://developers.nantty.com"),
     supportInbox: { recipients: readSupportInboxRecipients(problems), adminBaseUrl: readOrDefault("ADMIN_WEB_BASE_URL", "https://admin.nantty.com") },
     marketingMaxPerWeek: Number(readOrDefault("MARKETING_MAX_PER_WEEK", "3")),
     reengagement: {

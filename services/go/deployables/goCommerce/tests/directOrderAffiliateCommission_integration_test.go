@@ -14,6 +14,7 @@ import (
 	creatorsconfigs "nantty/modules/creators/src/configs"
 	"nantty/modules/creators/src/generated/ent/affiliatecommission"
 	"nantty/modules/creators/src/generated/ent/creatoraffiliation"
+	creatorsmigrations "nantty/modules/creators/src/migrations"
 	affiliateservices "nantty/modules/creators/src/modules/affiliates/services"
 	programservices "nantty/modules/creators/src/modules/creatorProgram/services"
 	"nantty/modules/creators/src/repositories"
@@ -31,7 +32,7 @@ func startCreatorsForOrders(t *testing.T, storeId, sellerId, creatorId, productI
 	t.Helper()
 	database := moneytesting.OpenTestDatabaseOrSkip(t)
 	ledgerSchema := moneytesting.CreateFreshSchemaWithMigrations(t, database, "ledger", ledgermigrations.Files)
-	settings := creatorsconfigs.CreatorsSettings{Money: moneytesting.MoneyModuleSettingsForTests("creators", moneytesting.CreateEmptySchema(t, database, "creators"), ledgerSchema), DefaultTierId: "starter"}
+	settings := creatorsconfigs.CreatorsSettings{Money: moneytesting.MoneyModuleSettingsForTests("creators", moneytesting.CreateFreshSchemaWithMigrations(t, database, "creators", creatorsmigrations.Files), ledgerSchema), DefaultTierId: "starter"}
 	tokens := moneytesting.NewTestTokenAuthority(t)
 	module, err := creatorssrc.StartCreatorsModuleWithSettings(context.Background(), settings, servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), Health: health.NewRegistryForService("orders-creators")},
 		loaders.MoneyModuleOverrides{Publisher: &events.RecordingPublisher{}, AccessVerifier: tokens.UserVerifier(), StaffVerifiers: tokens.StaffVerifiers()})

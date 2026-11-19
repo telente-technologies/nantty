@@ -77,7 +77,7 @@ func TestRedeliveredCheckmarkShareRefundCallsTheProviderExactlyOnce(t *testing.T
 	if calls := harness.Flutterwave.CallCounts["POST /transactions"]; calls != 1 || len(harness.Flutterwave.Refunds) != 1 {
 		t.Fatalf("exactly one provider refund: calls=%d refunds=%v", calls, harness.Flutterwave.Refunds)
 	}
-	if note, _ := harness.Flutterwave.Refunds[0]["comments"].(string); !strings.Contains(note, "[ref:verification-share:case-race]") {
+	if note, _ := harness.Flutterwave.Refunds[0]["comment"].(string); !strings.Contains(note, "[ref:verification-share:case-race]") {
 		t.Fatalf("the deterministic reference travels with the refund: %q", note)
 	}
 	balance, err := harness.Ledger.ReadAccountBalance(ctx, harness.Database, ledgermodels.RefundsPayableAccount("flutterwave", "NGN"))

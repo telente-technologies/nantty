@@ -68,6 +68,13 @@ async def test_hiding_reverses_and_unhiding_restores_the_comment_signal(
 ) -> None:
     consumer = application_container.domain_event_consumer_service
     author = consumer.identifier_hasher.hash_user_id("author_h")
+    consent = envelope(
+        "evt_comment_consent",
+        "consent.granted",
+        {"accountId": "commenter_h", "consentType": "personalization"},
+        reference_now,
+    )
+    assert (await consumer.process_message_body(consent)).status == "processed"
     assert (await consumer.process_message_body(created("c_h1", reference_now))).status == "processed"
     account_before = await affinity(application_container, ACCOUNT_AFFINITY_KIND, author)
     topic_before = await affinity(application_container, TOPIC_AFFINITY_KIND, "fashion")
@@ -110,6 +117,13 @@ async def test_unhide_before_any_hide_is_ignored(
     application_container: ApplicationContainer, reference_now: datetime
 ) -> None:
     consumer = application_container.domain_event_consumer_service
+    consent = envelope(
+        "evt_comment_consent_unhide",
+        "consent.granted",
+        {"accountId": "commenter_h", "consentType": "personalization"},
+        reference_now,
+    )
+    assert (await consumer.process_message_body(consent)).status == "processed"
     assert (await consumer.process_message_body(created("c_h2", reference_now))).status == "processed"
     early = visibility("evt_unhide_early", "comment.unhidden", "c_h2", reference_now)
     assert (await consumer.process_message_body(early)).status == "processed"

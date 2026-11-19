@@ -193,3 +193,32 @@ export const deletionExecuted: EventMapping = (event, data) => {
     }),
   ];
 };
+
+export const developerOrgInvitationCreated: EventMapping = (event, data, context) => {
+  const invitationId = data.text("invitationId");
+  const inviteeId = data.text("inviteeAccountId");
+  const organizationName = data.text("organizationName");
+  const role = data.text("role");
+  const expiresAt = data.text("expiresAt");
+  const developerPortalUrl = (context.developerPortalUrl ?? "https://developers.nantty.com").replace(/\/+$/, "");
+  const invitationUrl = `${developerPortalUrl}/invitations/${encodeURIComponent(invitationId)}`;
+  return [
+    intentFor(event, inviteeId, {
+      category: "auth",
+      inApp: {
+        category: "system",
+        title: `Invitation to ${organizationName}`,
+        body: `You were invited to join ${organizationName} as ${role}.`,
+        data: { invitationId, organizationId: data.text("organizationId"), url: invitationUrl },
+      },
+      email: (recipient) =>
+        plan("developerOrgInvitation", {
+          firstName: recipient.firstName,
+          organizationName,
+          role,
+          expiresAt,
+          invitationUrl,
+        }),
+    }),
+  ];
+};

@@ -9,6 +9,7 @@ import { createBrandedDownloadRenderer } from "./integrations/brandedDownloadRen
 import { createClamAvTcpScanner, skippedMalwareScanner } from "./integrations/clamAvTcpScanner.integration.js";
 import { createFfmpegMediaTranscoder } from "./integrations/ffmpegMediaTranscoder.integration.js";
 import { createHeicConverter } from "./integrations/heicConverter.integration.js";
+import { createHttpChildSafetyScanner } from "./integrations/httpChildSafetyScanner.integration.js";
 import { createHttpModerationClient } from "./integrations/httpModerationClient.integration.js";
 import { noopDomainEventPublisher } from "./integrations/noopDomainEventPublisher.integration.js";
 import { createRabbitMqJobQueue, startRabbitMqJobConsumer } from "./integrations/rabbitMqJobQueue.integration.js";
@@ -42,6 +43,7 @@ export async function createMediaApp(config: MediaConfig, logger: Logger = creat
     jobs: jobQueue,
     scanner: config.clamAv === undefined ? skippedMalwareScanner : createClamAvTcpScanner(config.clamAv),
     moderation: config.moderation.baseUrl === undefined ? undefined : createHttpModerationClient({ baseUrl: config.moderation.baseUrl, token: config.moderation.token, timeoutMs: config.moderation.timeoutMs }),
+    childSafety: config.childSafety?.baseUrl === undefined ? undefined : createHttpChildSafetyScanner({ baseUrl: config.childSafety.baseUrl, internalToken: config.childSafety.internalToken, timeoutMs: config.childSafety.timeoutMs }),
     images: createSharpImageProcessor({ convertHeic: createHeicConverter({ heifConvertPath: config.heifConvertPath, ffmpeg: config.ffmpeg }) }),
     transcoder: createFfmpegMediaTranscoder({ config: config.ffmpeg }),
     branding: createBrandedDownloadRenderer({ config: config.ffmpeg }),

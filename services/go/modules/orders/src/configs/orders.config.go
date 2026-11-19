@@ -33,6 +33,14 @@ type OrdersSettings struct {
 	ShippingRuleLimit       int
 	LogisticsEnabled        bool
 	LogisticsContactEmail   string
+	KwikpikBaseUrl          string
+	KwikpikApiKey           string
+	KwikpikWebhookSecret    string
+	KwikpikEstimatePath     string
+	KwikpikCreateOrderPath  string
+	KwikpikCancelPath       string
+	KwikpikTrackPath        string
+	KwikpikLocationsPath    string
 	AutoCompleteGrace       time.Duration
 	InternalApiToken        string
 	MoneyInternalUrl        string
@@ -74,6 +82,14 @@ func ReadOrdersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		ShippingRuleLimit:       50,
 		LogisticsEnabled:        strings.EqualFold(reader.ReadStringOrDefault("LOGISTICS_ENABLED", "false"), "true"),
 		LogisticsContactEmail:   reader.ReadStringOrDefault("LOGISTICS_CONTACT_EMAIL", ""),
+		KwikpikBaseUrl:          reader.ReadStringOrDefault("LOGISTICS_KWIKPIK_BASE_URL", ""),
+		KwikpikApiKey:           reader.ReadStringOrDefault("LOGISTICS_KWIKPIK_API_KEY", ""),
+		KwikpikWebhookSecret:    reader.ReadStringOrDefault("LOGISTICS_KWIKPIK_WEBHOOK_SECRET", ""),
+		KwikpikEstimatePath:     reader.ReadStringOrDefault("LOGISTICS_KWIKPIK_ESTIMATE_PATH", ""),
+		KwikpikCreateOrderPath:  reader.ReadStringOrDefault("LOGISTICS_KWIKPIK_CREATE_ORDER_PATH", ""),
+		KwikpikCancelPath:       reader.ReadStringOrDefault("LOGISTICS_KWIKPIK_CANCEL_PATH", ""),
+		KwikpikTrackPath:        reader.ReadStringOrDefault("LOGISTICS_KWIKPIK_TRACK_PATH", ""),
+		KwikpikLocationsPath:    reader.ReadStringOrDefault("LOGISTICS_KWIKPIK_LOCATIONS_PATH", ""),
 		InternalApiToken:        reader.ReadStringOrDefault("CATALOG_INTERNAL_API_TOKEN", ""),
 		MoneyInternalUrl:        reader.ReadStringOrDefault("ORDERS_MONEY_INTERNAL_URL", ""),
 		MoneyInternalToken:      reader.ReadStringOrDefault("MONEY_INTERNAL_API_TOKEN", ""),

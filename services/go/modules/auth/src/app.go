@@ -17,11 +17,15 @@ import (
 	"nantty/modules/auth/src/generated/ent"
 	"nantty/modules/auth/src/integrations"
 	"nantty/modules/auth/src/migrations"
-	developerorganizations "nantty/modules/auth/src/modules/developerOrganizations"
+	admindeveloperops "nantty/modules/auth/src/modules/adminDeveloperOps"
 	developerapplications "nantty/modules/auth/src/modules/developerApplications"
+	developerorganizations "nantty/modules/auth/src/modules/developerOrganizations"
+	developerproduction "nantty/modules/auth/src/modules/developerProduction"
+	developersso "nantty/modules/auth/src/modules/developerSso"
 	emailverification "nantty/modules/auth/src/modules/emailVerification"
 	messengerauth "nantty/modules/auth/src/modules/messengerAuth"
 	onetimecodes "nantty/modules/auth/src/modules/oneTimeCodes"
+	parentalconsent "nantty/modules/auth/src/modules/parentalConsent"
 	"nantty/modules/auth/src/modules/passwords"
 	realtimetokens "nantty/modules/auth/src/modules/realtimeTokens"
 	"nantty/modules/auth/src/modules/registration"
@@ -118,6 +122,10 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	messengerauth.Mount(mux, module.container)
 	developerorganizations.Mount(mux, module.container)
 	developerapplications.Mount(mux, module.container)
+	developerproduction.Mount(mux, module.container)
+	developersso.Mount(mux, module.container)
+	admindeveloperops.Mount(mux, module.container)
+	parentalconsent.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {
@@ -128,6 +136,7 @@ func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) 
 	go services.RunRevokedSessionSweeperUntilContextDone(ctx, module.container.Client, module.container.Now,
 		services.SessionDenylistTtl(module.container.Settings.LongestUserTokenTimeToLive()), module.container.Logger)
 	go services.RunAgeGateRefusalSweeperUntilContextDone(ctx, module.container.Client, module.container.Now, module.container.Logger)
+	go developerproduction.RunWebhookDeliveryWorkerUntilContextDone(ctx, module.container)
 	go func() {
 		settings := module.container.Settings
 		directory := services.AccountDirectoryService{Container: module.container}

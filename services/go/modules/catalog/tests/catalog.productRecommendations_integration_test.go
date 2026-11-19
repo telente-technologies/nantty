@@ -65,13 +65,9 @@ func TestProductRecommendationsExposeRankedEligibleProductsAndRespectConsent(t *
 			_, token = harness.account(viewer)
 		}
 		response := harness.expect("GET", "/api/v1/mart/recommendations/for-you", token, nil, 200)
-		data, ok := response["data"].(map[string]any)
-		if !ok {
-			t.Fatalf("recommendation response must contain data: %v", response)
-		}
-		products, ok := data["products"].([]any)
+		products, ok := response["products"].([]any)
 		if !ok || len(products) != 2 {
-			t.Fatalf("recommendation response should contain both listed products: %v", data)
+			t.Fatalf("recommendation response should contain both listed products: %v", response)
 		}
 		if products[0].(map[string]any)["id"] != second.ID.String() {
 			t.Fatalf("Go must preserve the eligible Python ranking order: %v", products)
@@ -79,8 +75,8 @@ func TestProductRecommendationsExposeRankedEligibleProductsAndRespectConsent(t *
 		if ranker.personalizationAllowed {
 			t.Fatal("guests and viewers without saved personalization consent must use contextual ranking")
 		}
-		if data["source"] != "popular" {
-			t.Fatalf("a non-consenting viewer should receive the contextual source label: %v", data["source"])
+		if response["source"] != "popular" {
+			t.Fatalf("a non-consenting viewer should receive the contextual source label: %v", response["source"])
 		}
 	}
 	if len(ranker.candidateIds) != 2 {
@@ -105,8 +101,7 @@ func TestProductRecommendationsAddConsentedInteractionRecallToEligibleCandidateP
 	}
 	harness.module.Container.ProductRecommender = ranker
 	response := harness.expect("GET", "/api/v1/mart/recommendations/for-you?surface=mart_home", token, nil, 200)
-	data := response["data"].(map[string]any)
-	products := data["products"].([]any)
+	products := response["products"].([]any)
 	if len(products) != 2 || products[0].(map[string]any)["id"] != recalled.ID.String() {
 		t.Fatalf("consented item-affinity recall should be considered ahead of popular candidates: %v", products)
 	}
@@ -127,7 +122,7 @@ func TestProductRecommendationsAcceptClipsRankingSurface(t *testing.T) {
 	harness.module.Container.ProductRecommender = ranker
 
 	response := harness.expect("GET", "/api/v1/mart/recommendations/for-you?surface=clips", "", nil, 200)
-	products := response["data"].(map[string]any)["products"].([]any)
+	products := response["products"].([]any)
 	if len(products) != 1 || ranker.surface != "clips" {
 		t.Fatalf("Clips should use its independent ranking context: products=%v surface=%q", products, ranker.surface)
 	}
@@ -136,7 +131,7 @@ func TestProductRecommendationsAcceptClipsRankingSurface(t *testing.T) {
 func TestProductRecommendationsRejectUnknownRankingSurface(t *testing.T) {
 	harness := startHttpHarness(t)
 	response := harness.expect("GET", "/api/v1/mart/recommendations/for-you?surface=untrusted", "", nil, 400)
-	if response["error"] == nil {
+	if response["code"] != "VALIDATION_FAILED" {
 		t.Fatalf("invalid recommendation surface should return a validation error: %v", response)
 	}
 }
@@ -154,8 +149,7 @@ func TestProductRecommendationsKeepVerifiedStoresFirstWhenRankerIsUnavailable(t 
 	harness.module.Container.ProductRecommender = &recordingProductRecommender{rankingError: errors.New("ranker unavailable")}
 
 	response := harness.expect("GET", "/api/v1/mart/recommendations/for-you?surface=mart_home", "", nil, 200)
-	data := response["data"].(map[string]any)
-	products := data["products"].([]any)
+	products := response["products"].([]any)
 	if len(products) != 2 || products[0].(map[string]any)["id"] != verifiedProduct.ID.String() {
 		t.Fatalf("degraded Mart ranking should put the verified store first without hiding other sellers: %v", products)
 	}

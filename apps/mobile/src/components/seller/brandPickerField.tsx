@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { CaretDown24Icon, MagnifyingGlass20Icon } from "@/components/icons";
 import { BrandRow } from "@/components/store/brandRow";
 import { BottomSheet } from "@/components/ui/bottomSheet";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -32,7 +33,7 @@ export function BrandPickerField({ selectedBrandName, onSelectBrand }: { selecte
       <BottomSheet visible={open} onClose={() => setOpen(false)} title="Choose brand">
         <View style={styles.sheet}>
           <TextField placeholder="Search brands" value={search} onChangeText={setSearch} left={<MagnifyingGlass20Icon />} accessibilityLabel="Search brands" />
-          <ScrollView style={styles.list} keyboardShouldPersistTaps="handled">
+          <ScrollView style={styles.list} keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG} keyboardShouldPersistTaps="handled">
             <Pressable accessibilityRole="button" onPress={() => choose(null)} style={styles.none}>
               <Text size={14} lineHeight={16.8}>Unbranded / my own design</Text>
             </Pressable>

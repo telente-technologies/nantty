@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { readDeveloperPortalUrl } from "@/config/site.config";
+
 import styles from "./sandboxWorkspace.module.css";
 import { formatTimestamp, sandboxFetch, type UsageSummary, useSandboxContext } from "./useSandboxContext";
 
@@ -21,6 +23,8 @@ export function SandboxTestAppsWorkspace() {
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [usage, setUsage] = useState<UsageSummary | null>(null);
   const [revealedToken, setRevealedToken] = useState("");
+  const [copiedToken, setCopiedToken] = useState(false);
+  const [confirmRevokeId, setConfirmRevokeId] = useState("");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -56,8 +60,7 @@ export function SandboxTestAppsWorkspace() {
 
   async function mutate(action: "issue" | "rotate" | "revoke", credentialId?: string) {
     if (!ctx.organizationId || !ctx.applicationId || busy) return;
-    if (action === "revoke" && !window.confirm("Revoke this sandbox test key? API calls using it will fail immediately.")) return;
-    setBusy(true); setError(""); setNotice(""); setRevealedToken("");
+    setBusy(true); setError(""); setNotice(""); setRevealedToken(""); setCopiedToken(false); setConfirmRevokeId("");
     try {
       if (action === "revoke") {
         await sandboxFetch<void>("/api/sandbox/credentials", {
@@ -79,6 +82,17 @@ export function SandboxTestAppsWorkspace() {
       setError(cause instanceof Error ? cause.message : "Credential operation failed.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function copyToken() {
+    try {
+      await navigator.clipboard.writeText(revealedToken);
+      setCopiedToken(true);
+      setNotice("Sandbox token copied to clipboard.");
+      window.setTimeout(() => setCopiedToken(false), 2000);
+    } catch {
+      setError("Clipboard access is unavailable. Select and copy the token manually.");
     }
   }
 
@@ -128,7 +142,8 @@ export function SandboxTestAppsWorkspace() {
           <strong>Sandbox test token (shown once)</strong>
           <pre className={styles.codeBox}>{revealedToken}</pre>
           <div className={styles.toolbar}>
-            <button type="button" className={styles.secondaryBtn} onClick={() => void navigator.clipboard.writeText(revealedToken)}>Copy token</button>
+            <button type="button" className={styles.primaryBtn} onClick={() => void copyToken()}>{copiedToken ? "Copied!" : "Copy token"}</button>
+            <button type="button" className={styles.secondaryBtn} onClick={() => setRevealedToken("")}>Hide token</button>
           </div>
         </section>
       ) : null}
@@ -140,12 +155,16 @@ export function SandboxTestAppsWorkspace() {
             <p>Active and revoked test credentials for the selected application.</p>
           </div>
           <div className={styles.toolbar}>
-            <button type="button" className={styles.primaryBtn} disabled={busy || !ctx.applicationId} onClick={() => void mutate("issue")}>Issue sandbox key</button>
+            <button type="button" className={styles.primaryBtn} disabled={busy || !ctx.applicationId} onClick={() => void mutate("issue")}>{busy ? "Working…" : "Issue sandbox key"}</button>
             <button type="button" className={styles.secondaryBtn} disabled={loading || !ctx.applicationId} onClick={() => void loadData()}>Refresh</button>
           </div>
         </div>
 
-        {credentials.length ? (
+        {!ctx.loadingOrgs && !ctx.organizations.length ? (
+          <p className={styles.empty}>No developer organization found. <a href={readDeveloperPortalUrl()} target="_blank" rel="noopener noreferrer">Open Developer Portal ↗</a> to create an organization and register an application.</p>
+        ) : !ctx.loadingOrgs && !ctx.applications.length ? (
+          <p className={styles.empty}>No application selected for this organization. <a href={readDeveloperPortalUrl()} target="_blank" rel="noopener noreferrer">Register an application in Developer Portal ↗</a> first.</p>
+        ) : credentials.length ? (
           <div className={styles.tableScroll}>
             <table>
               <thead>
@@ -163,11 +182,20 @@ export function SandboxTestAppsWorkspace() {
                     <td><code>{cred.prefix}…</code></td>
                     <td>{formatTimestamp(cred.createdAt)}</td>
                     <td>{formatTimestamp(cred.lastUsedAt)}</td>
-                    <td>{cred.revokedAt ? `Revoked ${formatTimestamp(cred.revokedAt)}` : "Active"}</td>
+                    <td><span className={`${styles.badge} ${cred.revokedAt ? styles.badgeNeutral : styles.badgeSuccess}`}>{cred.revokedAt ? `Revoked ${formatTimestamp(cred.revokedAt)}` : "Active"}</span></td>
                     <td>
                       <div className={styles.actions}>
-                        <button type="button" className={styles.secondaryBtn} disabled={busy || Boolean(cred.revokedAt)} onClick={() => void mutate("rotate", cred.id)}>Rotate</button>
-                        <button type="button" className={styles.secondaryBtn} disabled={busy || Boolean(cred.revokedAt)} onClick={() => void mutate("revoke", cred.id)}>Revoke</button>
+                        {confirmRevokeId === cred.id ? (
+                          <>
+                            <button type="button" className={styles.dangerBtn} disabled={busy} onClick={() => void mutate("revoke", cred.id)}>Confirm revoke</button>
+                            <button type="button" className={styles.secondaryBtn} disabled={busy} onClick={() => setConfirmRevokeId("")}>Cancel</button>
+                          </>
+                        ) : (
+                          <>
+                            <button type="button" className={styles.secondaryBtn} disabled={busy || Boolean(cred.revokedAt)} onClick={() => void mutate("rotate", cred.id)}>Rotate</button>
+                            <button type="button" className={styles.secondaryBtn} disabled={busy || Boolean(cred.revokedAt)} onClick={() => setConfirmRevokeId(cred.id)}>Revoke</button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

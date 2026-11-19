@@ -9,11 +9,11 @@ import (
 )
 
 type gatewayObservers struct {
-	mutex          sync.RWMutex
-	billing        []models.BillingSubscriptionObserver
-	savedCards     []models.SavedCardObserver
-	authRevoked    []models.BillingAuthorizationRevokedObserver
-	storeNotices   []models.StoreSubscriptionNotificationHandler
+	mutex        sync.RWMutex
+	billing      []models.BillingSubscriptionObserver
+	savedCards   []models.SavedCardObserver
+	authRevoked  []models.BillingAuthorizationRevokedObserver
+	storeNotices []models.StoreSubscriptionNotificationHandler
 }
 
 func (gateway *PaymentGateway) RegisterBillingSubscriptionObserver(observer models.BillingSubscriptionObserver) {

@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
+	applyentitlement "nantty/modules/users/src/modules/checkmarks/commands/applyEntitlement"
 	checkmarkservices "nantty/modules/users/src/modules/checkmarks/services"
 )
 
@@ -102,11 +103,16 @@ func TestEligibleCreatorCanApplyWithoutPayoutAccountAndIsHeldForManualReview(t *
 	application := harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{
 		"contentCategories": []string{"education"}, "acceptedCreatorTermsVersion": "1",
 	}, http.StatusCreated, "Idempotency-Key", "creator-payout-key-0001")
-	if application["status"] != "PENDING" || application["decision"] != "manual_review" {
-		t.Fatalf("an eligible applicant without a payout account must be manually reviewed: %v", application)
+	if application["status"] != "pending" {
+		t.Fatalf("an eligible applicant without a payout account must be held pending: %v", application)
 	}
-	if application["decisionNote"] != "Your application will be reviewed by our team. You can add a payout account later; earnings remain in your creator balance until one is available." {
-		t.Fatalf("application should explain the payout requirement is deferred: %v", application)
+	reviewer, _ := harness.staff("admin", "applications:creators")
+	detail := harness.expect("GET", "/api/v1/admin/applications/creators/"+application["id"].(string), reviewer, nil, http.StatusOK)
+	if detail["status"] != "PENDING" || detail["decision"] != "manual_review" {
+		t.Fatalf("an eligible applicant without a payout account must be manually reviewed: %v", detail)
+	}
+	if detail["decisionNote"] != "Your application will be reviewed by our team. You can add a payout account later; earnings remain in your creator balance until one is available." {
+		t.Fatalf("application should explain the payout requirement is deferred: %v", detail)
 	}
 }
 
@@ -235,15 +241,19 @@ func TestGovernmentBlackNeedsTwoDifferentAdminsAndKeepsTheHandleWhenRevoked(t *t
 		t.Fatalf("badge must remain hidden until payment activates entitlement: %v", mine)
 	}
 	// Entitlement grant activates the visible badge, and pause hides it without revoking verification.
-	harness.expect("POST", "/api/v1/internal/entitlements/events", "", map[string]any{
-		"eventId": uuid.NewString(), "eventType": "entitlement.granted", "profileId": govId, "plan": "black", "checkmark": "black",
-	}, http.StatusNoContent, internalToken...)
+	if err := (applyentitlement.Handler{Container: harness.module.Container()}).Execute(context.Background(), applyentitlement.Command{
+		EventType: "entitlement.granted", ProfileId: govId, Plan: "black", Checkmark: "black",
+	}); err != nil {
+		t.Fatalf("entitlement.granted: %v", err)
+	}
 	if active := harness.expect("GET", "/api/v1/verification/me", token, nil, http.StatusOK); active["current"].(map[string]any)["badgeVisible"] != true || active["current"].(map[string]any)["color"] != "black" {
 		t.Fatalf("entitlement.granted must show black badge for approved org: %v", active)
 	}
-	harness.expect("POST", "/api/v1/internal/entitlements/events", "", map[string]any{
-		"eventId": uuid.NewString(), "eventType": "entitlement.paused", "profileId": govId, "plan": "black", "checkmark": "black",
-	}, http.StatusNoContent, internalToken...)
+	if err := (applyentitlement.Handler{Container: harness.module.Container()}).Execute(context.Background(), applyentitlement.Command{
+		EventType: "entitlement.paused", ProfileId: govId, Plan: "black", Checkmark: "black",
+	}); err != nil {
+		t.Fatalf("entitlement.paused: %v", err)
+	}
 	if paused := harness.expect("GET", "/api/v1/verification/me", token, nil, http.StatusOK); paused["current"].(map[string]any)["badgeVisible"] != false || paused["current"].(map[string]any)["status"] != "paused" {
 		t.Fatalf("entitlement.paused must hide badge while keeping approval: %v", paused)
 	}
@@ -260,10 +270,14 @@ func TestGovernmentBlackNeedsTwoDifferentAdminsAndKeepsTheHandleWhenRevoked(t *t
 		t.Fatalf("expected appeal in admin list: %v", appeals)
 	}
 	decided := harness.expect("POST", "/api/v1/admin/black-applications/appeals/"+appeal["id"].(string)+"/decide", second, map[string]string{
-		"decision": "reopen_review", "note": "Reopened for second verification check",
+		"decision": "overturned", "note": "Reopened for second verification check",
 	}, http.StatusOK, secondStepUp...)
-	if decided["status"] != "approved" {
-		t.Fatalf("expected appeal approval to reopen application: %v", decided)
+	if decided["status"] != "overturned" {
+		t.Fatalf("expected appeal decision to be overturned: %v", decided)
+	}
+	reopened := harness.expect("GET", "/api/v1/admin/black-applications", first, nil, http.StatusOK)["data"].([]any)
+	if len(reopened) != 1 || reopened[0].(map[string]any)["status"] != "IN_REVIEW" {
+		t.Fatalf("expected overturned appeal to reopen application to IN_REVIEW: %v", reopened)
 	}
 	harness.waitForPublishedEvents("checkmark.approved", "checkmark.revoked", "blackApplication.reverificationDue")
 }

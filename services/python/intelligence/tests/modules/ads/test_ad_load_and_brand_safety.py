@@ -212,6 +212,9 @@ async def test_audience_targeting_mismatches_are_rejected_with_reasons(
 async def test_lookalike_targeting_uses_store_customer_topic_centroid_and_threshold(
     application_container: ApplicationContainer, reference_now: datetime
 ) -> None:
+    await application_container.domain_event_consumer_service.purge_service.record_personalization_choice(
+        "viewer_1", True
+    )
     likes = [
         build_event(
             f"like_{index}",

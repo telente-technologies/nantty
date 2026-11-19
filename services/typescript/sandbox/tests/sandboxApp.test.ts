@@ -9,9 +9,10 @@ const sandboxToken = "ntsb_test_abcdefghijklmnopqrstuvwxyz1234567890ABCDEFG";
 function createDatabase(): { readonly database: Pool; readonly query: ReturnType<typeof vi.fn> } {
   const query = vi.fn(async (sql: string) => {
     if (sql.includes("FROM sandbox_credentials c JOIN")) return { rows: [{ id: "credential-1", application_id: "sandbox-app-1" }], rowCount: 1 };
+    if (sql.includes("SELECT organization_id FROM sandbox_applications WHERE id = $1")) return { rows: [{ organization_id: "org-test" }], rowCount: 1 };
     if (sql.includes("INSERT INTO sandbox_customers")) return { rows: [{ id: "customer-1", externalReference: "customer-a", displayName: "Test customer" }], rowCount: 1 };
     if (sql.includes("INSERT INTO sandbox_applications")) return { rows: [{ id: "sandbox-app-1", organizationId: "org-test", applicationId: "app-test", name: "Test app", status: "active" }], rowCount: 1 };
-    if (sql.includes("UPDATE sandbox_usage_periods SET messages_sent")) return { rows: [{ messages_sent: 1, quota_limit_messages: 1000 }], rowCount: 1 };
+    if (sql.includes("UPDATE sandbox_organization_usage_periods SET messages_sent")) return { rows: [{ messages_sent: 1, quota_limit_messages: 1000 }], rowCount: 1 };
     return { rows: [], rowCount: 1 };
   });
   const client = { query, release: vi.fn() };

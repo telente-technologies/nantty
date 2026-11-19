@@ -2,14 +2,14 @@
 .header { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
 .header > div { display: grid; gap: var(--space-2); max-width: 760px; }
 .eyebrow, .sectionEyebrow { margin: 0; color: var(--color-text-subtle); font-size: var(--fs-12); font-weight: 600; }
-.header h1 { margin: 0; font-size: clamp(var(--fs-24), 3vw, var(--fs-30)); font-weight: 650; letter-spacing: -.035em; line-height: 1.12; }
+.header h1 { margin: 0; font-size: clamp(var(--fs-24), 3vw, var(--fs-32)); font-weight: 650; letter-spacing: -.035em; line-height: 1.12; }
 .header > div > p:last-child { margin: 0; color: var(--color-text-muted); font-size: var(--fs-14); }
 .docsLink { display: inline-flex; align-items: center; min-height: var(--control-md); color: var(--color-text); font-size: var(--fs-13); font-weight: 650; text-underline-offset: 3px; }
 .docsLink:focus-visible, .servicePanel a:focus-visible, .stepCopy a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 .workspaceGrid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, .8fr); align-items: start; gap: clamp(var(--space-4), 3vw, var(--space-7)); }
 .servicePanel, .stepsPanel { min-width: 0; }
 .sectionHeading { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); padding-block: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border); }
-.sectionHeading h2 { margin: 0; font-size: var(--fs-15); font-weight: 650; line-height: 1.35; }
+.sectionHeading h2 { margin: 0; font-size: var(--fs-16); font-weight: 650; line-height: 1.35; }
 .tableScroll { overflow-x: auto; border-block: 1px solid var(--color-border); scrollbar-color: var(--color-border-strong) transparent; scrollbar-width: thin; }
 .tableScroll table { width: 100%; border-collapse: collapse; text-align: left; }
 .tableScroll thead th { height: 36px; padding: var(--space-2) var(--space-3); background: var(--color-sunken); color: var(--color-text-subtle); font-size: var(--fs-12); font-weight: 650; text-align: left; white-space: nowrap; }
@@ -26,7 +26,13 @@
 .readinessDetail { color: var(--color-text-muted); font-size: var(--fs-12); line-height: 1.5; }
 .readinessActions { display: flex; align-items: center; gap: var(--space-4); flex: none; }
 .readinessState { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-text-muted); font-size: var(--fs-12); font-weight: 600; white-space: nowrap; }
-.readinessReady { color: var(--color-text); }
+.statusDot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.readinessReady { color: var(--color-success-text); }
+.readinessWarn { color: var(--color-warn-text); }
+.readinessDanger { color: var(--color-danger-text); }
+.statusBadge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: var(--radius-pill); font-size: var(--fs-12); font-weight: 600; white-space: nowrap; }
+.statusReady { background: var(--color-success-tint); color: var(--color-success-text); }
+.statusMuted { background: var(--color-sunken); color: var(--color-text-muted); }
 .loadingMark { width: 12px; height: 12px; border: 1px solid var(--color-border-strong); border-top-color: var(--color-text); border-radius: 50%; animation: readinessSpin .8s linear infinite; }
 .refreshButton { min-height: 30px; padding: 0 var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: transparent; color: var(--color-text); font: inherit; font-size: var(--fs-12); cursor: pointer; }
 .refreshButton:hover:not(:disabled) { background: var(--color-surface-hover); }
@@ -64,7 +70,7 @@
 .page { gap: var(--space-4); }
 .header { align-items: center; }
 .eyebrow { color: var(--color-brand); letter-spacing: .045em; }
-.header h1 { font-size: clamp(1.8rem, 3.4vw, 2.25rem); }
+.header h1 { font-size: clamp(var(--fs-24), 3.4vw, var(--fs-32)); }
 .docsLink { min-height: var(--control-lg); padding: 0 var(--space-4); border: 1px solid var(--color-brand-solid); border-radius: var(--radius-sm); background: var(--color-brand-solid); color: var(--color-on-brand); text-decoration: none; }
 .docsLink:hover { border-color: var(--color-brand-solid-hover); background: var(--color-brand-solid-hover); text-decoration: none; }
 .previewNotice { display: flex; align-items: center; gap: var(--space-3); min-width: 0; padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border); background: var(--color-surface); }
@@ -83,7 +89,7 @@
 .readinessReady { color: var(--color-success-text); }
 .refreshButton { border-color: var(--color-brand); color: var(--color-brand); }
 .refreshButton:hover:not(:disabled) { background: var(--color-brand-tint); }
-.workspaceDetail { --detail-ink: #ffffff; --detail-muted: rgb(255 255 255 / .76); --detail-rule: rgb(255 255 255 / .22); display: grid; align-content: start; gap: var(--space-3); min-width: 0; padding: var(--space-5); border: 1px solid #0b1752; border-radius: var(--radius-md); background: #0b1752; color: var(--detail-ink); }
+.workspaceDetail { --detail-ink: var(--ink-on-night); --detail-muted: var(--ink-on-night-muted); --detail-rule: var(--line-on-night); display: grid; align-content: start; gap: var(--space-3); min-width: 0; padding: var(--space-5); border: 1px solid var(--surface-night); border-radius: var(--radius-md); background: var(--surface-night); color: var(--detail-ink); }
 .detailTopline { display: flex; align-items: center; gap: var(--space-2); color: var(--detail-muted); font-size: var(--fs-12); font-weight: 650; letter-spacing: .02em; }
 .detailMark { width: 8px; height: 8px; border-radius: 50%; background: var(--color-brand); }
 .workspaceDetail h2 { max-width: 18ch; margin: 0; color: var(--detail-ink); font-size: clamp(var(--fs-20), 2vw, 1.45rem); letter-spacing: -.025em; line-height: 1.2; }

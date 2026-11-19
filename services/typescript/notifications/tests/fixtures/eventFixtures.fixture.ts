@@ -170,4 +170,12 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "copyrightClaim.restored": { data: { ...copyrightRemedy, remedy: "audio_muted" }, templates: ["contentRestored"], inAppRecipients: ["u1"] },
   "strike.issued": { data: { strikeId: "s1", accountId: "u1", kind: "strike", policy: "Copyright infringement", source: "copyright", expiresAt: "2027-01-02T00:00:00.000Z", activeStrikeCount: 1, isRepeatInfringer: false }, templates: ["strikeIssued"], inAppRecipients: ["u1"] },
   "strike.expired": { data: { strikeId: "s1", accountId: "u1", kind: "strike", policy: "Copyright infringement", source: "copyright", expiredAt: "2027-01-02T00:00:00.000Z", activeStrikeCount: 0 }, templates: ["strikeExpired"], inAppRecipients: ["u1"] },
+  "delivery.partnerBookingConfirmed": { data: { orderGroupId: "og1", orderNumber: "ZM-48213", buyerAccountId: "buyer1", sellerAccountId: "seller1", trackingNumber: "KP-123", estimatedDeliveryAt: "2026-10-08T10:00:00.000Z", amountMinor: 150000, currency: "NGN" }, templates: ["deliveryBooked", "deliveryBooked"], inAppRecipients: ["buyer1", "seller1"] },
+  "delivery.partnerBookingFailed": { data: { orderGroupId: "og1", orderNumber: "ZM-48213", sellerAccountId: "seller1" }, templates: ["deliveryException"], inAppRecipients: ["seller1"] },
+  "delivery.pickedUp": { data: { orderGroupId: "og1", orderNumber: "ZM-48213", buyerAccountId: "buyer1", trackingNumber: "KP-123" }, templates: ["deliveryPickedUp"], inAppRecipients: ["buyer1"] },
+  "delivery.inTransit": { data: { orderGroupId: "og1", orderNumber: "ZM-48213", buyerAccountId: "buyer1" }, templates: [], inAppRecipients: ["buyer1"] },
+  "delivery.attemptFailed": { data: { orderGroupId: "og1", orderNumber: "ZM-48213", buyerAccountId: "buyer1" }, templates: ["deliveryAttemptFailed"], inAppRecipients: ["buyer1"] },
+  "delivery.delivered": { data: { orderGroupId: "og1", orderNumber: "ZM-48213", buyerAccountId: "buyer1" }, templates: ["deliveryDelivered"], inAppRecipients: ["buyer1"] },
+  "delivery.cancelled": { data: { orderGroupId: "og1", orderNumber: "ZM-48213", buyerAccountId: "buyer1" }, templates: ["deliveryCancelled"], inAppRecipients: ["buyer1"] },
+  "developerOrganization.invitationCreated": { data: { invitationId: "inv-1", organizationId: "org-1", organizationName: "Nantty Labs", role: "developer", inviteeAccountId: "u1", expiresAt: "2026-11-20T12:00:00.000Z" }, templates: ["developerOrgInvitation"], inAppRecipients: ["u1"] },
 };

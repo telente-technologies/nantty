@@ -15,6 +15,7 @@ export function SandboxMessagingWorkspace() {
   const [customerName, setCustomerName] = useState("Synthetic Customer");
   const [sender, setSender] = useState<"customer" | "business">("customer");
   const [messageText, setMessageText] = useState("");
+  const [copiedId, setCopiedId] = useState(false);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -151,7 +152,30 @@ export function SandboxMessagingWorkspace() {
         </section>
 
         <section className={styles.panel} aria-label="Conversation transcript">
-          <div className={styles.panelHeading}><h2>Transcript {activeConversation ? `— ${activeConversation.customerName}` : ""}</h2></div>
+          <div className={styles.panelHeading}>
+            <div>
+              <h2>Transcript {activeConversation ? `— ${activeConversation.customerName}` : ""}</h2>
+              {activeConversation ? (
+                <p className={styles.metaStrip}>
+                  ID: <code>{activeConversation.id}</code>
+                </p>
+              ) : null}
+            </div>
+            {activeConversation ? (
+              <button
+                type="button"
+                className={styles.secondaryBtn}
+                onClick={() => {
+                  void navigator.clipboard.writeText(activeConversation.id).then(() => {
+                    setCopiedId(true);
+                    window.setTimeout(() => setCopiedId(false), 2000);
+                  }).catch(() => setError("Clipboard access is unavailable. Copy the conversation ID manually."));
+                }}
+              >
+                {copiedId ? "Copied!" : "Copy ID"}
+              </button>
+            ) : null}
+          </div>
           {activeConversation ? (
             <>
               <div className={styles.tableScroll}>
@@ -160,22 +184,29 @@ export function SandboxMessagingWorkspace() {
                     <tr><th scope="col">Sender</th><th scope="col">Text</th><th scope="col">State</th><th scope="col">Transitions</th></tr>
                   </thead>
                   <tbody>
-                    {(activeConversation.messages ?? []).map((msg) => (
-                      <tr key={msg.id}>
-                        <td>{msg.sender}</td>
-                        <td>{msg.text}</td>
-                        <td><code>{msg.status}</code></td>
-                        <td>
-                          {msg.sender === "business" ? (
-                            <div className={styles.actions}>
-                              <button type="button" className={styles.secondaryBtn} disabled={busy || msg.status !== "sent"} onClick={() => void transitionMessage(msg.id, "delivered")}>Deliver</button>
-                              <button type="button" className={styles.secondaryBtn} disabled={busy || msg.status !== "delivered"} onClick={() => void transitionMessage(msg.id, "read")}>Read</button>
-                              <button type="button" className={styles.secondaryBtn} disabled={busy || msg.status === "read" || msg.status === "failed"} onClick={() => void transitionMessage(msg.id, "failed")}>Fail</button>
-                            </div>
-                          ) : "—"}
-                        </td>
-                      </tr>
-                    ))}
+                    {(activeConversation.messages ?? []).map((msg) => {
+                      const statusTone = msg.status === "read" || msg.status === "delivered"
+                        ? styles.badgeSuccess
+                        : msg.status === "failed"
+                          ? styles.badgeDanger
+                          : styles.badgeWarn;
+                      return (
+                        <tr key={msg.id}>
+                          <td>{msg.sender}</td>
+                          <td>{msg.text}</td>
+                          <td><span className={`${styles.badge} ${statusTone}`}><code>{msg.status}</code></span></td>
+                          <td>
+                            {msg.sender === "business" ? (
+                              <div className={styles.actions}>
+                                <button type="button" className={styles.secondaryBtn} disabled={busy || msg.status !== "sent"} onClick={() => void transitionMessage(msg.id, "delivered")}>Deliver</button>
+                                <button type="button" className={styles.secondaryBtn} disabled={busy || msg.status !== "delivered"} onClick={() => void transitionMessage(msg.id, "read")}>Read</button>
+                                <button type="button" className={styles.secondaryBtn} disabled={busy || msg.status === "read" || msg.status === "failed"} onClick={() => void transitionMessage(msg.id, "failed")}>Fail</button>
+                              </div>
+                            ) : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

@@ -28,7 +28,20 @@ import (
 	"nantty/platform/events"
 	"nantty/platform/health"
 	"nantty/platform/servicemodule"
+	"nantty/platform/staffaudit"
 )
+
+type RecordingStaffAudit struct {
+	mutex   sync.Mutex
+	Records []staffaudit.Record
+}
+
+func (recorder *RecordingStaffAudit) Record(_ context.Context, record staffaudit.Record) error {
+	recorder.mutex.Lock()
+	defer recorder.mutex.Unlock()
+	recorder.Records = append(recorder.Records, record)
+	return nil
+}
 
 type MoneyHarness struct {
 	T            *testing.T
@@ -40,6 +53,7 @@ type MoneyHarness struct {
 	Directory    *PermissiveAccountDirectory
 	Tokens       *moneytesting.TestTokenAuthority
 	Publisher    *events.RecordingPublisher
+	Audit        *RecordingStaffAudit
 	Payments     *paymentsrc.Module
 	Mux          *http.ServeMux
 	Server       *httptest.Server
@@ -62,7 +76,7 @@ func startMoneyHarness(t *testing.T, storeVerifiers map[string]interfaces.StoreR
 	ledgerSchema := moneytesting.CreateFreshSchemaWithMigrations(t, database, "ledger", ledgermigrations.Files)
 	harness := &MoneyHarness{
 		T: t, Database: database, LedgerSchema: ledgerSchema, Ledger: ledgerservices.NewLedgerInSchema(ledgerSchema),
-		Flutterwave: StartFakeFlutterwave(t), Directory: &PermissiveAccountDirectory{Unverified: map[string]bool{}}, Tokens: moneytesting.NewTestTokenAuthority(t), Publisher: &events.RecordingPublisher{},
+		Flutterwave: StartFakeFlutterwave(t), Directory: &PermissiveAccountDirectory{Unverified: map[string]bool{}}, Tokens: moneytesting.NewTestTokenAuthority(t), Publisher: &events.RecordingPublisher{}, Audit: &RecordingStaffAudit{},
 		Mux:          http.NewServeMux(),
 		Dependencies: servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), Health: health.NewRegistryForService("money-test")},
 	}
@@ -83,7 +97,7 @@ func startMoneyHarness(t *testing.T, storeVerifiers map[string]interfaces.StoreR
 	adapter := integrations.NewFlutterwaveProvider(fakeSettings)
 	providers := map[string]interfaces.PaymentProvider{"flutterwave": adapter}
 	applyFlutterwaveHarnessSettings(&settings)
-	module, err := paymentsrc.StartPaymentsModuleWithSettings(context.Background(), settings, harness.Dependencies, harness.Overrides(), container.Overrides{Providers: providers, StoreVerifiers: storeVerifiers, Accounts: harness.Directory})
+	module, err := paymentsrc.StartPaymentsModuleWithSettings(context.Background(), settings, harness.Dependencies, harness.Overrides(), container.Overrides{Providers: providers, StoreVerifiers: storeVerifiers, Accounts: harness.Directory, Audit: harness.Audit})
 	if err != nil {
 		t.Fatal(err)
 	}

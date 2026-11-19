@@ -117,3 +117,22 @@ test("fails closed for non-HTTPS upstreams in production", async () => {
   assert.equal((await response.json()).code, "DEVELOPER_API_NOT_CONFIGURED");
   assert.equal(upstreamCalls, 0);
 });
+
+test("allows invitation resend POST route only for valid UUIDs", async () => {
+  const { isAllowedDeveloperOrganizationRoute } = await import("../src/server/developerOrganizationRoutePolicy");
+  const orgId = "6de1c79a-00fd-4bed-ae23-fbfb678c0a19";
+  const invId = "19a6e03c-d5ce-40c9-a9d2-8aa8657e5738";
+  assert.equal(isAllowedDeveloperOrganizationRoute("POST", [orgId, "invitations", invId, "resend"], "/api/v1/developer/organizations"), true);
+  assert.equal(isAllowedDeveloperOrganizationRoute("GET", [orgId, "invitations", invId, "resend"], "/api/v1/developer/organizations"), false);
+  assert.equal(isAllowedDeveloperOrganizationRoute("POST", [orgId, "invitations", "not-a-uuid", "resend"], "/api/v1/developer/organizations"), false);
+});
+
+test("hides developer configuration details from ordinary portal 503 messages", async () => {
+  setNodeEnvironment("production");
+  delete process.env.DEVELOPER_API_BASE_URL;
+  const response = await forwardDeveloperOrganizationRequest(makeRequest({ cookie: "__Host-zd_at=account-session-secret" }));
+  assert.equal(response.status, 503);
+  const body = await response.json();
+  assert.equal(body.code, "DEVELOPER_API_NOT_CONFIGURED");
+  assert.doesNotMatch(String(body.message), /gateway|not configured|not connected|environment|deployment/i);
+});

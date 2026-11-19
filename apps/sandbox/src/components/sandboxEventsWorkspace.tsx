@@ -113,16 +113,19 @@ export function SandboxEventsWorkspace() {
             <table>
               <thead><tr><th scope="col">Event</th><th scope="col">Status</th><th scope="col">Attempts</th><th scope="col">HTTP / Error</th><th scope="col">Created</th><th scope="col">Action</th></tr></thead>
               <tbody>
-                {deliveries.map((d) => (
-                  <tr key={d.id}>
-                    <td><code>{d.event}</code></td>
-                    <td><code>{d.status}</code></td>
-                    <td>{d.attempts}</td>
-                    <td>{d.lastHttpStatus ?? d.lastErrorCode ?? "—"}</td>
-                    <td>{formatTimestamp(d.createdAt)}</td>
-                    <td><button type="button" className={styles.secondaryBtn} disabled={busyId === d.id || d.status === "delivered"} onClick={() => void retryDelivery(d)}>Retry</button></td>
-                  </tr>
-                ))}
+                {deliveries.map((d) => {
+                  const statusTone = d.status === "delivered" ? styles.badgeSuccess : d.status === "failed" ? styles.badgeDanger : styles.badgeWarn;
+                  return (
+                    <tr key={d.id}>
+                      <td><code>{d.event}</code></td>
+                      <td><span className={`${styles.badge} ${statusTone}`}><code>{d.status}</code></span></td>
+                      <td>{d.attempts}</td>
+                      <td>{d.lastHttpStatus ?? d.lastErrorCode ?? "—"}</td>
+                      <td>{formatTimestamp(d.createdAt)}</td>
+                      <td><button type="button" className={styles.secondaryBtn} disabled={busyId === d.id || d.status === "delivered"} onClick={() => void retryDelivery(d)}>Retry</button></td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

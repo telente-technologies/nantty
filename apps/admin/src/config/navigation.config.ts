@@ -27,6 +27,7 @@ export const navigationGroups: readonly NavigationGroup[] = [
     items: [
       { label: "Overview", href: "/overview", icon: "speedometer24", requirement: "metrics:read", goShortcutKey: "o" },
       { label: "Audit log", href: "/audit", icon: "textIndent24", requirement: "audit:read", goShortcutKey: "l" },
+      { label: "Developer apps", href: "/developers", icon: "shield24", requirement: "applications:sellers" },
       { label: "Admins & roles", href: "/admins", icon: "shield24", requirement: "staff:manage", goShortcutKey: "a" },
     ],
   },

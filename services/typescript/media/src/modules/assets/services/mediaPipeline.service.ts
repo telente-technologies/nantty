@@ -47,6 +47,14 @@ export async function rejectAsset(context: HandlerContext, asset: MediaAssetWith
   await context.storage.deleteObject(asset.quarantineBucket, asset.quarantineKey).catch(() => undefined);
 }
 
+async function holdForChildSafety(context: HandlerContext, asset: MediaAssetWithVariants, reason: string): Promise<void> {
+  const now = context.clock.now();
+  await context.database.transaction(async (transaction) => {
+    const held = await mediaAssetRepository.update(transaction, asset.id, { status: "held", scanResult: reason, moderationDecision: "held" });
+    await mediaEvents.held(transaction, { ...asset, ...held }, null, reason, now);
+  });
+}
+
 async function inspectOriginal(asset: MediaAssetWithVariants, inputPath: string): Promise<{ readonly kind: MediaKindName; readonly sniffedMimeType: string; readonly maximumDurationSeconds: number | undefined }> {
   const purpose = asset.purpose as MediaPurposeName;
   if (asset.kind === "encrypted") return inspectEncryptedBlob(asset, inputPath);
@@ -104,6 +112,22 @@ export async function runMediaPipeline(context: HandlerContext, mediaId: string,
     const mediaNeedsContentScan = inspected.kind === "audio" || inspected.kind === "document";
     if (scan.verdict === "skipped" && (!context.config.allowUnscannedUploads || mediaNeedsContentScan)) {
       return await rejectAsset(context, asset, "MALWARE_SCAN_UNAVAILABLE", "skipped");
+    }
+    if (inspected.kind !== "encrypted") {
+      const requireChildSafety = context.config.childSafety?.requireScan === true;
+      if (context.childSafety === undefined) {
+        if (requireChildSafety) return await holdForChildSafety(context, asset, "CHILD_SAFETY_SCAN_UNAVAILABLE");
+      } else {
+        try {
+          const sha256Hex = asset.sha256?.toLowerCase() ?? (await sha256OfFile(inputPath));
+          const childSafetyVerdict = await context.childSafety.scanMedia({ mediaId: asset.id, ownerId: asset.ownerId, sha256Hex });
+          if (childSafetyVerdict.matched || childSafetyVerdict.quarantined) {
+            return await holdForChildSafety(context, asset, "CHILD_SAFETY_QUARANTINED");
+          }
+        } catch {
+          if (requireChildSafety) return await holdForChildSafety(context, asset, "CHILD_SAFETY_SCAN_UNAVAILABLE");
+        }
+      }
     }
     const processed = await produceDerivatives(context, inspected.kind, inputPath, workDirectory, purpose, inspected.maximumDurationSeconds);
     let outcome = { decision: "allow" as "allow" | "hold" | "reject", score: null as number | null, category: null as string | null };

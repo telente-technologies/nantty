@@ -26,9 +26,18 @@ export function isValidUsernameShape(candidate: string): boolean {
   return /^[a-z0-9._]{3,30}$/.test(candidate);
 }
 
+function readUnbiasedRandomIndex(maxExclusive: number): number {
+  const randomBuffer = new Uint32Array(1);
+  const unbiasedLimit = Math.floor(0x1_0000_0000 / maxExclusive) * maxExclusive;
+  do {
+    globalThis.crypto.getRandomValues(randomBuffer);
+  } while (randomBuffer[0]! >= unbiasedLimit);
+  return randomBuffer[0]! % maxExclusive;
+}
+
 export function generateReplacementUsername(): string {
   const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
   let suffix = "";
-  for (let index = 0; index < 6; index += 1) suffix += alphabet[Math.floor(Math.random() * alphabet.length)];
+  for (let index = 0; index < 6; index += 1) suffix += alphabet[readUnbiasedRandomIndex(alphabet.length)];
   return `user_${suffix}`;
 }

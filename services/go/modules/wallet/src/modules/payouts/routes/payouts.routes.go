@@ -7,6 +7,7 @@ import (
 	"nantty/modules/ledger/src/middlewares"
 	"nantty/modules/wallet/src/modules/payouts"
 	"nantty/modules/wallet/src/modules/payouts/controllers"
+	"nantty/platform/jwtauth"
 )
 
 func MountPayoutsRoutes(mux *http.ServeMux, application *payouts.Application) {
@@ -15,17 +16,20 @@ func MountPayoutsRoutes(mux *http.ServeMux, application *payouts.Application) {
 	resources := application.Container.Resources
 	requireUser := middlewares.RequireUserAccessToken(resources.AccessVerifier)
 	requireStepUp := middlewares.RequireUserAccessTokenAndSingleUseStepUp(resources.AccessVerifier, resources.StaffVerifiers.SingleUse)
+	requireAdultStepUp := func(handler http.Handler) http.Handler {
+		return requireStepUp(jwtauth.RequireAdultAccount()(handler))
+	}
 	requireStaffRead := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionReadWithdrawals, false)
 	requireStaffProcess := middlewares.RequireStaffPermissionWithSingleUseStepUp(resources.StaffVerifiers, constants.PermissionProcessWithdrawals)
 	mux.HandleFunc("GET /api/v1/internal/accounts/{accountId}/deletion-blockers", controllers.InternalAccountsController{Application: application}.DeletionBlockers)
 	mux.Handle("GET /api/v1/wallets/me", requireUser(http.HandlerFunc(wallet.GetWalletSummary)))
 	mux.Handle("GET /api/v1/wallets/me/transactions", requireUser(http.HandlerFunc(wallet.ListWalletTransactions)))
 	mux.Handle("GET /api/v1/wallets/me/payout-accounts", requireUser(http.HandlerFunc(wallet.ListPayoutAccounts)))
-	mux.Handle("POST /api/v1/wallets/me/payout-accounts", requireStepUp(http.HandlerFunc(wallet.AddPayoutAccount)))
+	mux.Handle("POST /api/v1/wallets/me/payout-accounts", requireAdultStepUp(http.HandlerFunc(wallet.AddPayoutAccount)))
 	mux.Handle("DELETE /api/v1/wallets/me/payout-accounts/{payoutAccountId}", requireStepUp(http.HandlerFunc(wallet.RemovePayoutAccount)))
 	mux.Handle("GET /api/v1/wallets/me/withdrawals/quote", requireUser(http.HandlerFunc(withdrawals.QuoteWithdrawal)))
 	mux.Handle("GET /api/v1/wallets/me/withdrawals", requireUser(http.HandlerFunc(withdrawals.ListMyWithdrawals)))
-	mux.Handle("POST /api/v1/wallets/me/withdrawals", requireStepUp(http.HandlerFunc(withdrawals.RequestWithdrawal)))
+	mux.Handle("POST /api/v1/wallets/me/withdrawals", requireAdultStepUp(http.HandlerFunc(withdrawals.RequestWithdrawal)))
 	mux.Handle("POST /api/v1/wallets/me/withdrawals/{withdrawalId}/cancel", requireUser(http.HandlerFunc(withdrawals.CancelWithdrawal)))
 	mux.Handle("GET /api/v1/admin/withdrawals", requireStaffRead(http.HandlerFunc(withdrawals.ListWithdrawalsForStaff)))
 	mux.Handle("GET /api/v1/admin/withdrawals/{withdrawalId}", requireStaffRead(http.HandlerFunc(withdrawals.GetWithdrawalForStaff)))

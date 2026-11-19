@@ -7,6 +7,7 @@ import { EventDataReader } from "../../../utils/eventDataReader.util.js";
 export interface MappingContext {
   readonly webBaseUrl: string;
   readonly sellerDashboardUrl: string;
+  readonly developerPortalUrl?: string;
   readonly otpEnvelopeKeys?: Readonly<Record<string, Buffer>>;
 }
 
@@ -53,6 +54,10 @@ export function readActor(reader: EventDataReader, key = "actor"): ActorSummary 
 
 export function orderUrl(context: MappingContext, orderId: string): string {
   return `${context.webBaseUrl}/orders/${orderId}`;
+}
+
+export function sellerOrderUrl(context: MappingContext, orderId: string): string {
+  return `${context.sellerDashboardUrl}/orders/${orderId}`;
 }
 
 export function formatBytes(bytes: number): string {

@@ -15,6 +15,7 @@ import (
 	"nantty/modules/subscriptions/src"
 	"nantty/modules/subscriptions/src/configs"
 	"nantty/modules/subscriptions/src/generated/ent/subscription"
+	subscriptionsmigrations "nantty/modules/subscriptions/src/migrations"
 	"nantty/modules/subscriptions/src/repositories"
 )
 
@@ -35,7 +36,7 @@ func startSubscriptionsHarnessWithStores(t *testing.T, identity repositories.Sta
 	}
 	money := paymentstesting.StartMoneyHarnessWithPayments(t, stores)
 	settings := configs.SubscriptionsSettings{
-		Money:            moneytesting.MoneyModuleSettingsForTests("subscriptions", moneytesting.CreateEmptySchema(t, money.Database, "subscriptions"), money.LedgerSchema),
+		Money:            moneytesting.MoneyModuleSettingsForTests("subscriptions", moneytesting.CreateFreshSchemaWithMigrations(t, money.Database, "subscriptions", subscriptionsmigrations.Files), money.LedgerSchema),
 		InternalApiToken: strings.Repeat("s", 32), DefaultCountry: "NG", FingerprintKey: "trial-key",
 	}
 	module, err := src.StartSubscriptionsModuleWithSettings(context.Background(), settings, money.Dependencies, money.Overrides(), money.Payments.Application.Gateway, identity)

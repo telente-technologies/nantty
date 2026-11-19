@@ -44,7 +44,7 @@ func TestWithholdAndReclaimAnAccountUsername(t *testing.T) {
 	harness := startUsersModuleAgainstFreshSchema(t)
 	ownerId, _ := harness.newAccount("dangote", "Squatter")
 	claimantId, _ := harness.newAccount("dangote.group", "Dangote Group")
-	staffToken, stepUp := harness.staffHeaders("users.usernames.withhold", "users.usernames.read", "verification:grant")
+	staffToken, stepUp := harness.staffHeaders("users.usernames.withhold", "users.usernames.read", "usernames:reassign", "verification:grant")
 
 	harness.expect("POST", "/api/v1/admin/users/"+ownerId+"/username/withhold", staffToken, map[string]any{"reason": "brand impersonation"}, http.StatusForbidden)
 	withheld := harness.expect("POST", "/api/v1/admin/users/"+ownerId+"/username/withhold", staffToken, map[string]any{"reason": "brand impersonation"}, http.StatusOK, stepUp...)

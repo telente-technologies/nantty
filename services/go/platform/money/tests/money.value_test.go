@@ -16,10 +16,10 @@ func TestAddRejectsMismatchedCurrenciesAndOverflow(t *testing.T) {
 		want    int64
 		wantErr error
 	}{
-		{"same currency", Money{150, "NGN"}, Money{50, "NGN"}, 200, nil},
-		{"mismatched currency", Money{150, "NGN"}, Money{50, "USD"}, 0, ErrCurrencyMismatch},
-		{"overflow", Money{math.MaxInt64, "USD"}, Money{1, "USD"}, 0, ErrAmountOverflow},
-		{"negative overflow", Money{math.MinInt64, "USD"}, Money{-1, "USD"}, 0, ErrAmountOverflow},
+		{"same currency", Money{AmountMinor: 150, Currency: "NGN"}, Money{AmountMinor: 50, Currency: "NGN"}, 200, nil},
+		{"mismatched currency", Money{AmountMinor: 150, Currency: "NGN"}, Money{AmountMinor: 50, Currency: "USD"}, 0, ErrCurrencyMismatch},
+		{"overflow", Money{AmountMinor: math.MaxInt64, Currency: "USD"}, Money{AmountMinor: 1, Currency: "USD"}, 0, ErrAmountOverflow},
+		{"negative overflow", Money{AmountMinor: math.MinInt64, Currency: "USD"}, Money{AmountMinor: -1, Currency: "USD"}, 0, ErrAmountOverflow},
 	}
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -48,7 +48,7 @@ func TestApplyBasisPointsRoundsHalfToEven(t *testing.T) {
 		{-15, 1_000, -2},
 	}
 	for _, testCase := range cases {
-		got, err := Money{testCase.amount, "GHS"}.ApplyBasisPointsRoundingHalfToEven(testCase.basisPoints)
+		got, err := (Money{AmountMinor: testCase.amount, Currency: "GHS"}).ApplyBasisPointsRoundingHalfToEven(testCase.basisPoints)
 		if err != nil || got.AmountMinor != testCase.want {
 			t.Fatalf("%d x %d bps = %d (%v), want %d", testCase.amount, testCase.basisPoints, got.AmountMinor, err, testCase.want)
 		}
@@ -110,7 +110,7 @@ func TestAllocateByWeightsKeepsEveryMinorUnit(t *testing.T) {
 		{-10, []int64{1, 2}, []int64{-4, -6}},
 	}
 	for _, testCase := range cases {
-		shares, err := Money{testCase.amount, "KES"}.AllocateByWeightsWithoutLosingMinorUnits(testCase.weights)
+		shares, err := (Money{AmountMinor: testCase.amount, Currency: "KES"}).AllocateByWeightsWithoutLosingMinorUnits(testCase.weights)
 		if err != nil {
 			t.Fatal(err)
 		}

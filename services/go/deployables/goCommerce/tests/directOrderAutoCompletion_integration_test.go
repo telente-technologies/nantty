@@ -40,7 +40,7 @@ func (harness *commerceHarness) deliveredDirectOrder(t *testing.T, deliveredAt t
 func (harness *commerceHarness) deliveredDirectOrderFromCurrentCart(t *testing.T, deliveredAt time.Time) uuid.UUID {
 	t.Helper()
 	ctx := context.Background()
-	result, err := (services.CheckoutService{Container: harness.orders.Container}).Checkout(ctx, services.CheckoutRequest{BuyerId: harness.buyer, AddressId: harness.addressId, IdempotencyKey: "direct-" + uuid.NewString()})
+	result, err := (services.CheckoutService{Container: harness.orders.Container}).Checkout(ctx, services.CheckoutRequest{BuyerId: harness.buyer, AddressId: harness.addressId, ShippingQuoteRevision: harness.quoteRevision(t), IdempotencyKey: "direct-" + uuid.NewString()})
 	if err != nil {
 		t.Fatal(err)
 	}

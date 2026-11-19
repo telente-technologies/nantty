@@ -19,7 +19,7 @@
 .scopeList { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2) var(--space-4); }
 .scopeList label { display: flex; align-items: center; gap: var(--space-2); min-height: 32px; color: var(--color-text); font-size: var(--fs-12); }
 .scopeList input { width: 16px; height: 16px; accent-color: var(--color-brand-solid); }
-.scopeList code { overflow-wrap: anywhere; font-family: var(--font-mono, monospace); font-size: var(--fs-11); }
+.scopeList code { overflow-wrap: anywhere; font-family: var(--font-mono); font-size: var(--fs-12); }
 .formActions, .actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .formActions button, .actions button { min-height: 36px; padding: 0 var(--space-3); border: 1px solid var(--color-brand-solid); border-radius: var(--radius-sm); background: var(--color-brand-solid); color: var(--color-on-brand); font: inherit; font-size: var(--fs-12); font-weight: 650; cursor: pointer; }
 .formActions .secondaryButton, .actions button + button { border-color: var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
@@ -54,8 +54,20 @@
 .grantOptions { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
 .grantOptions label { display: flex; align-items: center; gap: var(--space-2); min-height: 32px; color: var(--color-text); font-size: var(--fs-12); }
 .grantOptions input { width: 16px; height: 16px; accent-color: var(--color-brand-solid); }
-.grantOptions code { overflow-wrap: anywhere; font-family: var(--font-mono, monospace); font-size: var(--fs-11); }
+.grantOptions code { overflow-wrap: anywhere; font-family: var(--font-mono); font-size: var(--fs-12); }
 .grantMember > button { justify-self: start; border-color: var(--color-brand-solid); background: var(--color-brand-solid); color: var(--color-on-brand); }
 .grantMember > button:disabled { opacity: .55; cursor: not-allowed; }
 @media (max-width: 760px) { .header { align-items: stretch; flex-direction: column; } .organizationSelect { max-width: 360px; } .scopeList { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 500px) { .page { gap: var(--space-4); } .form { padding: var(--space-3); } .scopeList { grid-template-columns: 1fr; } .actions { min-width: 120px; } }
+@media (pointer: coarse) {
+  .organizationSelect select,
+  .fields input:not([type=checkbox]),
+  .scopeList label,
+  .formActions button,
+  .actions button,
+  .closeButton,
+  .grantOptions label,
+  .grantMember > button {
+    min-height: var(--control-lg);
+  }
+}

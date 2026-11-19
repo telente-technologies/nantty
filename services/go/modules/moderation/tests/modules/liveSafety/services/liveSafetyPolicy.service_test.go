@@ -17,12 +17,12 @@ func TestDecideLiveSafetyActionHoldsSevereHighConfidenceSignals(t *testing.T) {
 		category   string
 		priority   string
 	}{
-		{"explicit nudity at 0.97 holds", services.SignalAssessment{Categories: []services.CategoryConfidence{{"sexual_explicit", 0.97}}}, services.ActionHold, "sexual_explicit", "urgent"},
-		{"graphic violence at 0.80 warns", services.SignalAssessment{Categories: []services.CategoryConfidence{{"graphic_violence", 0.80}}}, services.ActionWarn, "graphic_violence", "urgent"},
-		{"repeat offender holds at 0.82", services.SignalAssessment{Categories: []services.CategoryConfidence{{"weapon_threat", 0.82}}, ActiveStrikes: 2}, services.ActionHold, "weapon_threat", "urgent"},
-		{"non severe at 0.95 only warns", services.SignalAssessment{Categories: []services.CategoryConfidence{{"drugs", 0.95}}}, services.ActionWarn, "drugs", "high"},
-		{"severe at 0.55 queues review", services.SignalAssessment{Categories: []services.CategoryConfidence{{"self_harm", 0.55}}}, services.ActionReview, "self_harm", "normal"},
-		{"swimwear at 0.40 does nothing", services.SignalAssessment{Categories: []services.CategoryConfidence{{"suggestive", 0.40}}}, services.ActionNone, "suggestive", "low"},
+		{"explicit nudity at 0.97 holds", services.SignalAssessment{Categories: []services.CategoryConfidence{{Category: "sexual_explicit", Confidence: 0.97}}}, services.ActionHold, "sexual_explicit", "urgent"},
+		{"graphic violence at 0.80 warns", services.SignalAssessment{Categories: []services.CategoryConfidence{{Category: "graphic_violence", Confidence: 0.80}}}, services.ActionWarn, "graphic_violence", "urgent"},
+		{"repeat offender holds at 0.82", services.SignalAssessment{Categories: []services.CategoryConfidence{{Category: "weapon_threat", Confidence: 0.82}}, ActiveStrikes: 2}, services.ActionHold, "weapon_threat", "urgent"},
+		{"non severe at 0.95 only warns", services.SignalAssessment{Categories: []services.CategoryConfidence{{Category: "drugs", Confidence: 0.95}}}, services.ActionWarn, "drugs", "high"},
+		{"severe at 0.55 queues review", services.SignalAssessment{Categories: []services.CategoryConfidence{{Category: "self_harm", Confidence: 0.55}}}, services.ActionReview, "self_harm", "normal"},
+		{"swimwear at 0.40 does nothing", services.SignalAssessment{Categories: []services.CategoryConfidence{{Category: "suggestive", Confidence: 0.40}}}, services.ActionNone, "suggestive", "low"},
 		{"hash match always holds", services.SignalAssessment{HashMatch: true}, services.ActionHold, "child_safety", "urgent"},
 		{"no signal does nothing", services.SignalAssessment{}, services.ActionNone, "", "low"},
 	}

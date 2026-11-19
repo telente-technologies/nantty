@@ -169,7 +169,7 @@ export function createContainer(config: NotificationsConfig, logger: Logger, ove
     listLegalNotices: new ListLegalNoticesHandler(campaigns, drafts),
     queueLegalNotice,
     previewEmailTemplate: new PreviewEmailTemplateHandler(brand, config.webBaseUrl),
-    handleDomainEvent: new HandleDomainEventHandler(dispatcher, policyPublished, { webBaseUrl: config.webBaseUrl, sellerDashboardUrl: brand.sellerDashboardUrl, otpEnvelopeKeys: config.otpEnvelopeKeys }, logger, supportInbox, runPostNotificationFanout ?? undefined, sendWidgetRefresh, notifications),
+    handleDomainEvent: new HandleDomainEventHandler(dispatcher, policyPublished, { webBaseUrl: config.webBaseUrl, sellerDashboardUrl: brand.sellerDashboardUrl, developerPortalUrl: config.developerPortalUrl, otpEnvelopeKeys: config.otpEnvelopeKeys }, logger, supportInbox, runPostNotificationFanout ?? undefined, sendWidgetRefresh, notifications),
     runPostNotificationFanout,
     sendWidgetRefresh,
     processBulkBatch: new ProcessBulkBatchHandler({ campaigns, identity, emailDelivery, jobQueue, jobsQueueUrl: config.queues.jobs, pause: overrides.pause ?? ((milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))) }),

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
-import { Keyboard, Platform, Pressable, ScrollView, StyleSheet, type StyleProp, type ViewStyle } from "react-native";
+import { Pressable, ScrollView, StyleSheet, type StyleProp, type ViewStyle } from "react-native";
+
+import { dismissKeyboardIfVisible, KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 
 export interface DismissKeyboardScrollViewProps {
   readonly children: ReactNode;
@@ -12,9 +14,9 @@ export function DismissKeyboardScrollView({ children, contentContainerStyle }: D
       style={styles.flex}
       contentContainerStyle={styles.grow}
       keyboardShouldPersistTaps="handled"
-      keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
+      keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG}
     >
-      <Pressable accessible={false} onPress={() => Keyboard.dismiss()} style={[styles.grow, contentContainerStyle]}>
+      <Pressable accessible={false} onPress={dismissKeyboardIfVisible} style={[styles.grow, contentContainerStyle]}>
         {children}
       </Pressable>
     </ScrollView>

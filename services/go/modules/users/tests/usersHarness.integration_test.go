@@ -40,8 +40,13 @@ type usersTestHarness struct {
 	settings     *fixedPlatformSettings
 	databaseUrl  string
 	moneyBlocked *atomic.Bool
+	nowFn        atomic.Pointer[func() time.Time]
 	module       *users.Module
 	schema       string
+}
+
+func (harness *usersTestHarness) setNow(fn func() time.Time) {
+	harness.nowFn.Store(&fn)
 }
 
 type recordingAuditRecorder struct {
@@ -72,6 +77,11 @@ func (settings *fixedPlatformSettings) ReadSettingValue(_ context.Context, key s
 }
 
 func startUsersModuleAgainstFreshSchema(t *testing.T) *usersTestHarness {
+	t.Helper()
+	return startUsersModuleAgainstFreshSchemaConfigured(t, nil)
+}
+
+func startUsersModuleAgainstFreshSchemaConfigured(t *testing.T, configure func(*usersTestHarness)) *usersTestHarness {
 	t.Helper()
 	databaseUrl := os.Getenv("USERS_TEST_DATABASE_URL")
 	if databaseUrl == "" {
@@ -125,12 +135,29 @@ func startUsersModuleAgainstFreshSchema(t *testing.T) *usersTestHarness {
 		t.Fatal(err)
 	}
 	harness.module = module
+	defaultNow := time.Now
+	harness.nowFn.Store(&defaultNow)
+	module.Container().Now = func() time.Time {
+		return (*harness.nowFn.Load())()
+	}
+	if configure != nil {
+		configure(harness)
+	}
 	workerContext, stopWorkers := context.WithCancel(ctx)
-	go func() { _ = module.RunBackgroundWorkersUntilContextDone(workerContext) }()
+	workersDone := make(chan struct{})
+	go func() {
+		defer close(workersDone)
+		_ = module.RunBackgroundWorkersUntilContextDone(workerContext)
+	}()
 	mux := http.NewServeMux()
 	module.MountRoutes(mux)
 	harness.server = httptest.NewServer(mux)
-	t.Cleanup(func() { harness.server.Close(); stopWorkers(); _ = module.Close(ctx) })
+	t.Cleanup(func() {
+		harness.server.Close()
+		stopWorkers()
+		<-workersDone
+		_ = module.Close(ctx)
+	})
 	return harness
 }
 

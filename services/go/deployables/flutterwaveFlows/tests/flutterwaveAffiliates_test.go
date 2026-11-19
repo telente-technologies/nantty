@@ -14,6 +14,7 @@ import (
 	"nantty/modules/creators/src/generated/ent"
 	"nantty/modules/creators/src/generated/ent/affiliatecommission"
 	"nantty/modules/creators/src/generated/ent/creatoraffiliation"
+	creatorsmigrations "nantty/modules/creators/src/migrations"
 	affiliateservices "nantty/modules/creators/src/modules/affiliates/services"
 	programservices "nantty/modules/creators/src/modules/creatorProgram/services"
 	"nantty/modules/creators/src/repositories"
@@ -38,7 +39,7 @@ func startAffiliateScene(t *testing.T, sellerDepositMinor int64) *affiliateScene
 		harness.deposit(scene.seller, sellerDepositMinor)
 		harness.runWorkers()
 	}
-	settings := creatorsconfigs.CreatorsSettings{Money: moneytesting.MoneyModuleSettingsForTests("creators", moneytesting.CreateEmptySchema(t, harness.Database, "creators"), harness.LedgerSchema), DefaultTierId: "starter"}
+	settings := creatorsconfigs.CreatorsSettings{Money: moneytesting.MoneyModuleSettingsForTests("creators", moneytesting.CreateFreshSchemaWithMigrations(t, harness.Database, "creators", creatorsmigrations.Files), harness.LedgerSchema), DefaultTierId: "starter"}
 	module, err := creatorssrc.StartCreatorsModuleWithSettings(context.Background(), settings, harness.Dependencies, harness.Overrides())
 	if err != nil {
 		t.Fatal(err)

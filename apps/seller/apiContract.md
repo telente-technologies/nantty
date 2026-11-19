@@ -972,7 +972,7 @@ Revokes every session of the account except the caller's. Response 200 `{ endedC
 
 ## Developers: API keys and webhooks
 
-> **Contract-only (2026-10-21).** No `/seller/developers/*` routes are mounted; the seller app serves this section from mocks. Keep `/seller/developers` out of the real API prefix list until the routes exist.
+> **Backend implemented (unverified at runtime, 2026-11-16).** Persistent endpoints are mounted under `/api/v1/seller/developers/*` in `services/go/modules/orders/src/modules/sellerDevelopers/` and `services/typescript/gateway`, gated by `developer:manage` + Pro plan (`api_webhooks`). Keep `/seller/developers` gated until DB migration `20261116180000_add_seller_developers` and integration tests run in an equipped environment.
 
 Permission: developer:manage (owner only). Plan: pro (`api_webhooks`) — every endpoint returns 402 PLAN_FEATURE_REQUIRED below Pro.
 

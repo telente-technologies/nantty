@@ -10,6 +10,7 @@ import { StatePanel } from "../ui/StatePanel";
 import { subscribeToMessengerEvents } from "../api/messengerRealtime.service";
 
 type InboxState = "loading" | "ready" | "error";
+type InboxFilter = "all" | "unread" | "business";
 
 export function InboxScreen({ onOpenConversation, onFloatConversation }: { readonly onOpenConversation?: (conversation: ConversationSummary) => void; readonly onFloatConversation?: (conversation: ConversationSummary) => void }) {
   const colors = useMessengerColors();
@@ -18,6 +19,7 @@ export function InboxScreen({ onOpenConversation, onFloatConversation }: { reado
   const [state, setState] = useState<InboxState>("loading");
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<InboxFilter>("all");
   const [refreshing, setRefreshing] = useState(false);
 
   const loadConversations = useCallback(async (pullToRefresh = false) => {
@@ -46,14 +48,16 @@ export function InboxScreen({ onOpenConversation, onFloatConversation }: { reado
 
   const filteredConversations = useMemo(() => {
     const normalizedQuery = search.trim().toLocaleLowerCase();
-    if (!normalizedQuery) return conversations;
     return conversations.filter((conversation) => {
+      if (filter === "unread" && conversation.unread <= 0) return false;
+      if (filter === "business" && conversation.kind !== "business" && !conversation.store) return false;
+      if (!normalizedQuery) return true;
       const name = conversationDisplayName(conversation).toLocaleLowerCase();
       const username = conversation.peer.username.toLocaleLowerCase();
       const lastMessage = conversation.lastMessage.toLocaleLowerCase();
       return name.includes(normalizedQuery) || username.includes(normalizedQuery) || lastMessage.includes(normalizedQuery);
     });
-  }, [conversations, search]);
+  }, [conversations, filter, search]);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -80,6 +84,23 @@ export function InboxScreen({ onOpenConversation, onFloatConversation }: { reado
           style={[styles.searchInput, { color: colors.text }]}
           value={search}
         />
+      </View>
+
+      <View style={styles.filterRow} accessibilityRole="tablist" aria-label="Filter conversations">
+        {([["all", "All"], ["unread", "Unread"], ["business", "Businesses"]] as const).map(([key, label]) => {
+          const active = filter === key;
+          return (
+            <Pressable
+              key={key}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: active }}
+              onPress={() => setFilter(key)}
+              style={[styles.filterChip, { backgroundColor: active ? colors.brand : colors.surface, borderColor: active ? colors.brand : colors.border }]}
+            >
+              <Text style={[styles.filterLabel, { color: active ? colors.onBrand : colors.muted }]}>{label}</Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       {state === "loading" ? (
@@ -156,6 +177,9 @@ const styles = StyleSheet.create({
   headerMark: { width: 42, height: 42, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   searchBox: { minHeight: 46, flexDirection: "row", alignItems: "center", gap: 9, borderWidth: StyleSheet.hairlineWidth, borderRadius: 13, paddingHorizontal: 13, marginHorizontal: 18, marginBottom: 8 },
   searchInput: { flex: 1, minHeight: 44, fontSize: 14 },
+  filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: 18, marginBottom: 8 },
+  filterChip: { minHeight: 34, paddingHorizontal: 14, borderWidth: StyleSheet.hairlineWidth, borderRadius: 999, alignItems: "center", justifyContent: "center" },
+  filterLabel: { fontSize: 12, fontWeight: "600" },
   loading: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
   loadingText: { fontSize: 14 },
   list: { paddingHorizontal: 18, paddingBottom: 12 },

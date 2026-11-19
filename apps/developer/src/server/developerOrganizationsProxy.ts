@@ -44,11 +44,11 @@ export async function forwardDeveloperOrganizationRequest(request: NextRequest):
   const { path, basePath } = target;
   if (!isAllowedDeveloperOrganizationRoute(request.method, path, basePath)) return jsonError(404, "NOT_FOUND", "This organization endpoint is not available.");
   const baseUrl = readApiBaseUrl();
-  if (!baseUrl) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "The Nantty API gateway is not configured for this portal.");
+  if (!baseUrl) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "The organization service is temporarily unavailable. Try again shortly.");
 
   const accessToken = request.cookies.get(process.env.NODE_ENV === "production" ? accountAccessCookie : localAccessCookie)?.value;
   if (!accessToken) {
-    if (process.env.NODE_ENV === "production") return jsonError(503, "PORTAL_SSO_NOT_CONFIGURED", "Centralized Nantty sign-in is not connected to this portal yet. No session token was transferred.");
+    if (process.env.NODE_ENV === "production") return jsonError(503, "PORTAL_SSO_NOT_CONFIGURED", "Sign-in is temporarily unavailable. Try again shortly.");
     return jsonError(401, "UNAUTHENTICATED", "Sign in to Nantty to manage an organization.");
   }
 
@@ -98,9 +98,9 @@ export async function forwardDeveloperOrganizationRequest(request: NextRequest):
 export async function forwardDeveloperStepUpRequest(request: NextRequest): Promise<NextResponse> {
   if (request.method !== "POST" || request.nextUrl.pathname !== "/api/developer/step-up") return jsonError(404, "NOT_FOUND", "This authentication endpoint is not available.");
   const baseUrl = readApiBaseUrl();
-  if (!baseUrl) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "The Nantty API gateway is not configured for this portal.");
+  if (!baseUrl) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "Identity confirmation is temporarily unavailable. Try again shortly.");
   const accessToken = request.cookies.get(process.env.NODE_ENV === "production" ? accountAccessCookie : localAccessCookie)?.value;
-  if (!accessToken) return jsonError(process.env.NODE_ENV === "production" ? 503 : 401, process.env.NODE_ENV === "production" ? "PORTAL_SSO_NOT_CONFIGURED" : "UNAUTHENTICATED", process.env.NODE_ENV === "production" ? "Centralized Nantty sign-in is not connected to this portal yet." : "Sign in to Nantty to confirm your identity.");
+  if (!accessToken) return jsonError(process.env.NODE_ENV === "production" ? 503 : 401, process.env.NODE_ENV === "production" ? "PORTAL_SSO_NOT_CONFIGURED" : "UNAUTHENTICATED", process.env.NODE_ENV === "production" ? "Sign-in is temporarily unavailable. Try again shortly." : "Sign in to Nantty to confirm your identity.");
   if (request.headers.get("origin") !== request.nextUrl.origin || request.headers.get("sec-fetch-site") === "cross-site") return jsonError(403, "CSRF_REJECTED", "This authentication request could not be verified.");
   const declaredBytes = Number(request.headers.get("content-length") ?? 0);
   if (declaredBytes > maxBodyBytes) return jsonError(413, "PAYLOAD_TOO_LARGE", "That request is too large.");

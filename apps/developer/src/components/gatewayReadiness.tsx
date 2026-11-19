@@ -20,7 +20,7 @@ function isReadinessResponse(value: unknown): value is ReadinessResponse {
 const stateLabels: Record<ReadinessResponse["state"], string> = {
   ready: "Operational",
   unavailable: "Unavailable",
-  not_configured: "Not configured",
+  not_configured: "Unavailable",
 };
 
 async function fetchGatewayReadiness(): Promise<ReadinessResponse> {
@@ -60,12 +60,18 @@ export function GatewayReadiness() {
 
   const label = loading ? "Checking" : result ? stateLabels[result.state] : "Unavailable";
   const detail = loading
-    ? "Checking the gateway readiness endpoint"
+    ? "Checking API status"
     : result?.state === "ready"
-      ? "Gateway is responding to readiness checks. Developer data APIs are not implied by this check."
+      ? "API service is responding normally."
+      : "Status checks are temporarily unavailable.";
+
+  const stateClass = loading
+    ? ""
+    : result?.state === "ready"
+      ? styles.readinessReady
       : result?.state === "not_configured"
-        ? "Gateway readiness is not configured for this deployment."
-        : "The configured gateway did not return a successful readiness response.";
+        ? styles.readinessWarn
+        : styles.readinessDanger;
 
   return (
     <div className={styles.readinessRow} aria-live="polite">
@@ -74,8 +80,8 @@ export function GatewayReadiness() {
         <span className={styles.readinessDetail}>{detail}</span>
       </div>
       <div className={styles.readinessActions}>
-        <span className={`${styles.readinessState} ${result?.state === "ready" ? styles.readinessReady : ""}`}>
-          {loading && <span className={styles.loadingMark} aria-hidden="true" />}{label}
+        <span className={`${styles.readinessState} ${stateClass}`}>
+          {loading ? <span className={styles.loadingMark} aria-hidden="true" /> : <span className={styles.statusDot} aria-hidden="true" />}{label}
         </span>
         <button className={styles.refreshButton} type="button" onClick={() => void refresh()} disabled={loading}>
           Refresh

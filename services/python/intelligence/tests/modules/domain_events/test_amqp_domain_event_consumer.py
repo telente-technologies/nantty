@@ -61,6 +61,11 @@ async def settle(
 async def test_processed_and_duplicate_events_are_acknowledged_once_applied(
     application_container: ApplicationContainer, feature_backend: InMemoryFeatureBackend, reference_now: datetime
 ) -> None:
+    consent = domain_event(
+        "evt_amqp_consent", "consent.granted", "user_amqp", reference_now, {"consentType": "personalization"}
+    )
+    consent_result = await settle(application_container, FakeIncomingMessage(consent), RecordingRetryPublisher())
+    assert consent_result == "acknowledged"
     body = product_viewed("evt_amqp_1", "user_amqp", reference_now)
     first, second, retries = FakeIncomingMessage(body), FakeIncomingMessage(body), RecordingRetryPublisher()
     assert await settle(application_container, first, retries) == "acknowledged"

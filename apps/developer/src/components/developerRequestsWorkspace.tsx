@@ -1,17 +1,25 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { useDeveloperContext } from "./developerContextProvider";
 import styles from "./developerCredentialsWorkspace.module.css";
 
-type Organization = { readonly id: string; readonly name: string };
-type Application = { readonly id: string; readonly name: string; readonly status: string };
-type RequestRecord = { readonly requestId: string; readonly method: string; readonly path: string; readonly statusCode: number; readonly createdAt: string };
+type RequestRecord = {
+  readonly id?: string;
+  readonly requestId?: string;
+  readonly method: string;
+  readonly path: string;
+  readonly statusCode: number;
+  readonly latencyMs?: number;
+  readonly createdAt: string;
+};
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, { ...init, credentials: "same-origin", cache: "no-store", headers: { accept: "application/json", ...init?.headers } });
   if (!response.ok) {
-    const payload = await response.json().catch(() => null) as { message?: string; error?: { message?: string } } | null;
+    const payload = (await response.json().catch(() => null)) as { message?: string; error?: { message?: string } } | null;
     throw new Error(payload?.error?.message ?? payload?.message ?? "Request logs could not be loaded.");
   }
   return response.json() as Promise<T>;
@@ -23,49 +31,33 @@ function formatDate(value: string): string {
 }
 
 export function DeveloperRequestsWorkspace() {
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [organizationId, setOrganizationId] = useState("");
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [applicationId, setApplicationId] = useState("");
+  const { environment, organizations, organizationId, setOrganizationId, applications, applicationId, setApplicationId, loading } = useDeveloperContext();
   const [requests, setRequests] = useState<RequestRecord[]>([]);
   const [methodFilter, setMethodFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [loading, setLoading] = useState(true);
+  const [queryFilter, setQueryFilter] = useState("");
   const [loadingRows, setLoadingRows] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    let active = true;
-    void request<{ organizations: Organization[] }>("/api/developer/organizations")
-      .then(({ organizations: items }) => { if (active) { setOrganizations(items); setOrganizationId(items[0]?.id ?? ""); } })
-      .catch((cause: unknown) => { if (active) setError(cause instanceof Error ? cause.message : "Sign in to load your organizations."); })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, []);
-
-  useEffect(() => {
-    if (!organizationId) { setApplications([]); setApplicationId(""); return; }
-    const controller = new AbortController();
-    setApplications([]); setApplicationId(""); setRequests([]); setError("");
-    void request<{ applications: Application[] }>(`/api/developer/organizations/${encodeURIComponent(organizationId)}/applications`, { signal: controller.signal })
-      .then(({ applications: items }) => { if (!controller.signal.aborted) { setApplications(items); setApplicationId(items[0]?.id ?? ""); } })
-      .catch((cause: unknown) => { if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : "Could not load applications."); });
-    return () => controller.abort();
-  }, [organizationId]);
-
   const loadRequests = useCallback(async (signal?: AbortSignal) => {
-    if (!organizationId || !applicationId) { setRequests([]); return; }
-    setLoadingRows(true); setError("");
+    if (!organizationId || !applicationId) {
+      setRequests([]);
+      return;
+    }
+    setLoadingRows(true);
+    setError("");
     try {
-      const query = new URLSearchParams({ organizationId, applicationId });
-      const data = await request<{ requests: RequestRecord[] }>(`/api/developer/requests?${query}`, { signal });
-      if (!signal?.aborted) setRequests(data.requests);
+      const endpoint = environment === "production"
+        ? `/api/developer/organizations/${encodeURIComponent(organizationId)}/applications/${encodeURIComponent(applicationId)}/requests`
+        : `/api/developer/requests?${new URLSearchParams({ organizationId, applicationId })}`;
+      const data = await request<{ requests: RequestRecord[] }>(endpoint, { signal });
+      if (!signal?.aborted) setRequests(data.requests ?? []);
     } catch (cause) {
-      if (!signal?.aborted) setError(cause instanceof Error ? cause.message : "Could not load sandbox request logs.");
+      if (!signal?.aborted) setError(cause instanceof Error ? cause.message : "Could not load request logs.");
     } finally {
       if (!signal?.aborted) setLoadingRows(false);
     }
-  }, [organizationId, applicationId]);
+  }, [applicationId, environment, organizationId]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -73,11 +65,14 @@ export function DeveloperRequestsWorkspace() {
     return () => controller.abort();
   }, [loadRequests]);
 
+  const normalizedQuery = queryFilter.trim().toLowerCase();
   const filtered = requests.filter((row) => {
+    const rowId = (row.requestId ?? row.id ?? "").toLowerCase();
     if (methodFilter !== "ALL" && row.method !== methodFilter) return false;
     if (statusFilter === "2XX" && (row.statusCode < 200 || row.statusCode >= 300)) return false;
     if (statusFilter === "4XX" && (row.statusCode < 400 || row.statusCode >= 500)) return false;
     if (statusFilter === "5XX" && row.statusCode < 500) return false;
+    if (normalizedQuery && !row.path.toLowerCase().includes(normalizedQuery) && !rowId.includes(normalizedQuery)) return false;
     return true;
   });
 
@@ -85,40 +80,41 @@ export function DeveloperRequestsWorkspace() {
     <section className={styles.page} aria-labelledby="requests-title">
       <header className={styles.header}>
         <div>
-          <p className={styles.eyebrow}>Developer workspace <span aria-hidden="true">/</span> Request logs</p>
+          <p className={styles.eyebrow}>Developer workspace / Operate · {environment === "production" ? "Production" : "Sandbox"}</p>
           <h1 id="requests-title">API request logs</h1>
-          <p>Inspect redacted Sandbox API request outcomes gated by your application-level <code>request_logs.read</code> grant.</p>
+          <p>Inspect redacted {environment === "production" ? "production Business Messaging" : "isolated Sandbox"} API request outcomes.</p>
         </div>
         <div className={styles.selectors}>
           <label>
             Organization
             <select value={organizationId} onChange={(e) => setOrganizationId(e.target.value)} disabled={loading || !organizations.length}>
-              {organizations.map((org) => <option key={org.id} value={org.id}>{org.name}</option>)}
+              {organizations.length ? organizations.map((org) => <option key={org.id} value={org.id}>{org.name}</option>) : <option value="">No organizations</option>}
             </select>
           </label>
           <label>
             Application
             <select value={applicationId} onChange={(e) => setApplicationId(e.target.value)} disabled={!applications.length}>
-              {applications.map((app) => <option key={app.id} value={app.id}>{app.name}</option>)}
+              {applications.length ? applications.map((app) => <option key={app.id} value={app.id}>{app.name}</option>) : <option value="">No applications</option>}
             </select>
           </label>
         </div>
       </header>
 
       <div className={styles.callout} role="status">
-        <strong>Sandbox traffic only — production API traffic remains closed</strong>
-        <span>Only requests authenticated with a sandbox credential are recorded here. Authorization headers and request bodies are never stored.</span>
+        <strong>{environment === "production" ? "Production request ledger" : "Sandbox traffic only"}</strong>
+        <span>Authorization headers, API secrets, and personal message bodies are never stored in request logs.</span>
       </div>
 
       {error ? <p className={styles.error} role="alert">{error}</p> : null}
 
-      <section className={styles.records} aria-label="Sandbox request log records">
+      <section className={styles.records} aria-label="Request log records">
         <div className={styles.recordsHeading}>
           <div>
-            <h2>Recent sandbox requests</h2>
-            <p>Newest 100 redacted records for the selected application.</p>
+            <h2>Recent {environment} requests</h2>
+            <p>Newest redacted records for the selected application.</p>
           </div>
           <div className={styles.listTools}>
+            <input type="search" aria-label="Filter by path or request ID" placeholder="Search path or ID…" value={queryFilter} onChange={(e) => setQueryFilter(e.target.value)} />
             <select aria-label="Filter by method" value={methodFilter} onChange={(e) => setMethodFilter(e.target.value)}>
               <option value="ALL">All methods</option>
               <option value="GET">GET</option>
@@ -138,7 +134,11 @@ export function DeveloperRequestsWorkspace() {
           </div>
         </div>
 
-        {filtered.length ? (
+        {loading ? <p className={styles.empty}>Loading organizations...</p> : !organizations.length ? (
+          <p className={styles.empty}>Create or join a developer organization to inspect request logs. <Link href="/organization">Manage organizations</Link></p>
+        ) : !applications.length ? (
+          <p className={styles.empty}>Register an application first. <Link href="/applications">Register application</Link></p>
+        ) : filtered.length ? (
           <div className={styles.tableScroll}>
             <table>
               <thead>
@@ -147,26 +147,30 @@ export function DeveloperRequestsWorkspace() {
                   <th scope="col">Method</th>
                   <th scope="col">Path</th>
                   <th scope="col">Status</th>
+                  {environment === "production" ? <th scope="col">Latency</th> : null}
                   <th scope="col">Recorded</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((row) => (
-                  <tr key={row.requestId}>
-                    <td><code>{row.requestId}</code></td>
-                    <td><code>{row.method}</code></td>
-                    <td><code>{row.path}</code></td>
-                    <td>{row.statusCode}</td>
-                    <td>{formatDate(row.createdAt)}</td>
-                  </tr>
-                ))}
+                {filtered.map((row) => {
+                  const id = row.requestId ?? row.id ?? "";
+                  const statusTone = row.statusCode >= 500 ? styles.badgeDanger : row.statusCode >= 400 ? styles.badgeWarn : row.statusCode >= 200 && row.statusCode < 300 ? styles.badgeSuccess : styles.badgeNeutral;
+                  return (
+                    <tr key={id}>
+                      <td><code>{id}</code></td>
+                      <td><span className={`${styles.badge} ${styles.badgeNeutral}`}><code>{row.method}</code></span></td>
+                      <td><code>{row.path}</code></td>
+                      <td><span className={`${styles.badge} ${statusTone}`}>{row.statusCode}</span></td>
+                      {environment === "production" ? <td>{row.latencyMs ?? 0} ms</td> : null}
+                      <td>{formatDate(row.createdAt)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         ) : (
-          <p className={styles.empty}>
-            {loadingRows ? "Loading sandbox request records..." : "No sandbox request records match the selected application and filters."}
-          </p>
+          <p className={styles.empty}>{loadingRows ? "Loading request records..." : `No ${environment} request records match the selected filters.`}</p>
         )}
       </section>
     </section>

@@ -98,8 +98,5 @@ export function fetchAdminGovernmentBlack(filters?: { cursor?: string; limit?: n
 }
 
 export function controlAdminGovernmentBlack(subscriptionId: string, action: "pause" | "cancel" | "retry" | "reconcile", reason: string): Promise<unknown> {
-  return sendAdminApiRequest(`/admin/subscriptions/government-black/${encodeURIComponent(subscriptionId)}/${action}`, {
-    method: "POST",
-    body: { reason },
-  });
+  return sendAdminApiRequest(`/admin/subscriptions/government-black/${encodeURIComponent(subscriptionId)}/${action}`, { method: "POST", body: { reason } });
 }

@@ -214,7 +214,13 @@ export function ConversationScreen({ conversation, compact = false, onBack, onCl
         </View>
         <View style={styles.titleCopy}>
           <Text numberOfLines={1} style={[styles.title, { color: colors.text }]}>{displayName}{conversation.peer.verified ? " ✓" : ""}</Text>
-          <Text style={[styles.subtitle, { color: colors.muted }]}>{conversation.kind === "group" || conversation.kind === "channel" ? "Encrypted group conversation" : "End-to-end encrypted"}</Text>
+          <Text style={[styles.subtitle, { color: colors.muted }]}>
+            {conversation.kind === "business" || conversation.store
+              ? "Consented business conversation"
+              : conversation.kind === "group" || conversation.kind === "channel"
+                ? "Encrypted group conversation"
+                : "End-to-end encrypted"}
+          </Text>
         </View>
         {compact && onOpenFull ? <Pressable accessibilityRole="button" accessibilityLabel="Open full conversation" onPress={onOpenFull} style={styles.headerAction}><ChatCircleDots size={21} color={colors.text} /></Pressable> : null}
         {!compact && Platform.OS === "android" ? <Pressable accessibilityRole="button" accessibilityLabel="Open Android notification settings for this conversation" onPress={() => { void openAndroidConversationNotificationSettings(user?.id ?? "", conversation.id).then((status) => { if (status !== "opened") Alert.alert("Conversation settings unavailable", status === "channel_not_created" ? "Android creates conversation notification settings after an eligible message notification has arrived." : "Android could not open notification settings for this conversation."); }); }} style={styles.headerAction}><GearSix size={19} color={colors.text} /></Pressable> : null}

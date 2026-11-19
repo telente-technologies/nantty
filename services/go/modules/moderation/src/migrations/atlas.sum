@@ -1,4 +1,4 @@
-h1:Ev5KwnzitCNLfrqcc/y3Evja6BkgSkbzDJnee50nl/g=
+h1:H0Fs/lZnVDDsYucJmW4pdjTZRQ8TSVhaEC1LGGVSGVg=
 20261003155934_create_moderation_tables.up.sql h1:jXq1wBCD1bOI24pBYQyg+TqXK2HtgFqQr5yCFFk3W6I=
 20261003225836_add_trust_enforcement_tables.up.sql h1:lkIxT3wH8naYXzAdt2z/7E/YOefTumqH2b9sVKS2PxU=
 20261004080000_add_live_safety_tables.up.sql h1:l0Xko8zKxhlEV7a3W1vI4kkiMhuG6D9h8boELivY8I4=
@@ -7,3 +7,4 @@ h1:Ev5KwnzitCNLfrqcc/y3Evja6BkgSkbzDJnee50nl/g=
 20261005160804_add_automation_and_appeals.up.sql h1:Li0oHLTt+Qh0MC0vIXYPjE9bFeXAFbZuxwjxDBLJ+bE=
 20261020083740_add_account_monetisation_state.up.sql h1:AdadtRwfSIrrg48JVQmQNzw3/+Vxya+KUd7y0hb/Jmw=
 20261103150000_add_moderation_outbox_retry_state.up.sql h1:1NXWbArhjyktWfgWMcjuZt/Suj9rMh7LjHoAizIRE+s=
+20261116210000_add_child_safety_quarantine.up.sql h1:mh2h4w01X9QYQIEqX+OzKVYcGTrRfZy/tIUE9wHInOI=
