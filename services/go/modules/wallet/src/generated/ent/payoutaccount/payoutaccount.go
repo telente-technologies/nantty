@@ -23,6 +23,8 @@ const (
 	FieldCountryCode = "country_code"
 	// FieldBankCode holds the string denoting the bank_code field in the database.
 	FieldBankCode = "bank_code"
+	// FieldBranchCode holds the string denoting the branch_code field in the database.
+	FieldBranchCode = "branch_code"
 	// FieldBankName holds the string denoting the bank_name field in the database.
 	FieldBankName = "bank_name"
 	// FieldAccountNumberCiphertext holds the string denoting the account_number_ciphertext field in the database.
@@ -50,6 +52,7 @@ var Columns = []string{
 	FieldUserID,
 	FieldCountryCode,
 	FieldBankCode,
+	FieldBranchCode,
 	FieldBankName,
 	FieldAccountNumberCiphertext,
 	FieldAccountNumberFingerprint,
@@ -79,6 +82,10 @@ var (
 	CountryCodeValidator func(string) error
 	// BankCodeValidator is a validator for the "bank_code" field. It is called by the builders before save.
 	BankCodeValidator func(string) error
+	// DefaultBranchCode holds the default value on creation for the "branch_code" field.
+	DefaultBranchCode string
+	// BranchCodeValidator is a validator for the "branch_code" field. It is called by the builders before save.
+	BranchCodeValidator func(string) error
 	// BankNameValidator is a validator for the "bank_name" field. It is called by the builders before save.
 	BankNameValidator func(string) error
 	// AccountNumberFingerprintValidator is a validator for the "account_number_fingerprint" field. It is called by the builders before save.
@@ -146,6 +153,11 @@ func ByCountryCode(opts ...sql.OrderTermOption) OrderOption {
 // ByBankCode orders the results by the bank_code field.
 func ByBankCode(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBankCode, opts...).ToFunc()
+}
+
+// ByBranchCode orders the results by the branch_code field.
+func ByBranchCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBranchCode, opts...).ToFunc()
 }
 
 // ByBankName orders the results by the bank_name field.

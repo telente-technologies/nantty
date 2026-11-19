@@ -14,6 +14,7 @@ type SellerPayoutInstruction struct {
 	FeeMinor      int64
 	Currency      string
 	BankCode      string
+	BranchCode    string
 	AccountNumber string
 }
 

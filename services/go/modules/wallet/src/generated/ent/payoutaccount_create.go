@@ -56,6 +56,20 @@ func (_c *PayoutAccountCreate) SetBankCode(v string) *PayoutAccountCreate {
 	return _c
 }
 
+// SetBranchCode sets the "branch_code" field.
+func (_c *PayoutAccountCreate) SetBranchCode(v string) *PayoutAccountCreate {
+	_c.mutation.SetBranchCode(v)
+	return _c
+}
+
+// SetNillableBranchCode sets the "branch_code" field if the given value is not nil.
+func (_c *PayoutAccountCreate) SetNillableBranchCode(v *string) *PayoutAccountCreate {
+	if v != nil {
+		_c.SetBranchCode(*v)
+	}
+	return _c
+}
+
 // SetBankName sets the "bank_name" field.
 func (_c *PayoutAccountCreate) SetBankName(v string) *PayoutAccountCreate {
 	_c.mutation.SetBankName(v)
@@ -181,6 +195,10 @@ func (_c *PayoutAccountCreate) defaults() {
 		v := payoutaccount.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
+	if _, ok := _c.mutation.BranchCode(); !ok {
+		v := payoutaccount.DefaultBranchCode
+		_c.mutation.SetBranchCode(v)
+	}
 	if _, ok := _c.mutation.NameMatchStatus(); !ok {
 		v := payoutaccount.DefaultNameMatchStatus
 		_c.mutation.SetNameMatchStatus(v)
@@ -222,6 +240,14 @@ func (_c *PayoutAccountCreate) check() error {
 	if v, ok := _c.mutation.BankCode(); ok {
 		if err := payoutaccount.BankCodeValidator(v); err != nil {
 			return &ValidationError{Name: "bank_code", err: fmt.Errorf(`ent: validator failed for field "PayoutAccount.bank_code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.BranchCode(); !ok {
+		return &ValidationError{Name: "branch_code", err: errors.New(`ent: missing required field "PayoutAccount.branch_code"`)}
+	}
+	if v, ok := _c.mutation.BranchCode(); ok {
+		if err := payoutaccount.BranchCodeValidator(v); err != nil {
+			return &ValidationError{Name: "branch_code", err: fmt.Errorf(`ent: validator failed for field "PayoutAccount.branch_code": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.BankName(); !ok {
@@ -322,6 +348,10 @@ func (_c *PayoutAccountCreate) createSpec() (*PayoutAccount, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.BankCode(); ok {
 		_spec.SetField(payoutaccount.FieldBankCode, field.TypeString, value)
 		_node.BankCode = value
+	}
+	if value, ok := _c.mutation.BranchCode(); ok {
+		_spec.SetField(payoutaccount.FieldBranchCode, field.TypeString, value)
+		_node.BranchCode = value
 	}
 	if value, ok := _c.mutation.BankName(); ok {
 		_spec.SetField(payoutaccount.FieldBankName, field.TypeString, value)
@@ -477,6 +507,9 @@ func (u *PayoutAccountUpsertOne) UpdateNewValues() *PayoutAccountUpsertOne {
 		}
 		if _, exists := u.create.mutation.BankCode(); exists {
 			s.SetIgnore(payoutaccount.FieldBankCode)
+		}
+		if _, exists := u.create.mutation.BranchCode(); exists {
+			s.SetIgnore(payoutaccount.FieldBranchCode)
 		}
 		if _, exists := u.create.mutation.BankName(); exists {
 			s.SetIgnore(payoutaccount.FieldBankName)
@@ -767,6 +800,9 @@ func (u *PayoutAccountUpsertBulk) UpdateNewValues() *PayoutAccountUpsertBulk {
 			}
 			if _, exists := b.mutation.BankCode(); exists {
 				s.SetIgnore(payoutaccount.FieldBankCode)
+			}
+			if _, exists := b.mutation.BranchCode(); exists {
+				s.SetIgnore(payoutaccount.FieldBranchCode)
 			}
 			if _, exists := b.mutation.BankName(); exists {
 				s.SetIgnore(payoutaccount.FieldBankName)

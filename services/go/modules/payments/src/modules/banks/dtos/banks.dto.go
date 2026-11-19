@@ -9,3 +9,8 @@ type ResolveBankAccountRequestDto struct {
 type ResolvedBankAccountDto struct {
 	AccountName string `json:"accountName"`
 }
+
+type BankBranchDto struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
+}

@@ -21,6 +21,15 @@ func (controller SellerMoneyController) Banks(writer http.ResponseWriter, reques
 	httpserver.WriteJsonResponse(writer, http.StatusOK, httpserver.NewCursorPage(banks, ""))
 }
 
+func (controller SellerMoneyController) BankBranches(writer http.ResponseWriter, request *http.Request, seller dtos.SellerContext) {
+	branches, err := controller.Application.Accounts.ListBranches(request.Context(), seller, request.PathValue("bankCode"))
+	if err != nil {
+		controller.respond(writer, request, http.StatusOK, nil, err)
+		return
+	}
+	controller.respond(writer, request, http.StatusOK, httpserver.NewCursorPage(branches, ""), nil)
+}
+
 func (controller SellerMoneyController) PayoutAccounts(writer http.ResponseWriter, request *http.Request, seller dtos.SellerContext) {
 	accounts, err := listsellerpayoutaccounts.Handler{Application: controller.Application}.Execute(request.Context(), listsellerpayoutaccounts.Query{Seller: seller})
 	controller.respond(writer, request, http.StatusOK, httpserver.NewCursorPage(accounts, ""), err)

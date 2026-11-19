@@ -20,7 +20,7 @@ func (settlement ProviderTransferSettlement) Name() string { return "providerTra
 func paymentInstruction(instruction interfaces.SellerPayoutInstruction) paymentmodels.SellerPayoutInstruction {
 	return paymentmodels.SellerPayoutInstruction{
 		Purpose: paymentconstants.PurposeWithdrawal, SubjectId: instruction.WithdrawalId, BeneficiaryUserId: instruction.UserId, Reference: instruction.Reference,
-		AmountMinor: instruction.AmountMinor, FeeMinor: instruction.FeeMinor, Currency: instruction.Currency, BankCode: instruction.BankCode, AccountNumber: instruction.AccountNumber,
+		AmountMinor: instruction.AmountMinor, FeeMinor: instruction.FeeMinor, Currency: instruction.Currency, BankCode: instruction.BankCode, BranchCode: instruction.BranchCode, AccountNumber: instruction.AccountNumber,
 	}
 }
 

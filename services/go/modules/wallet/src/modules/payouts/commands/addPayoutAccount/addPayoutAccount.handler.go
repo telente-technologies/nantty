@@ -12,5 +12,5 @@ type Handler struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, command Command) (dtos.PayoutAccountDto, error) {
-	return handler.Application.Accounts.AddPayoutAccount(ctx, command.UserId, command.CountryCode, command.BankCode, command.AccountNumber)
+	return handler.Application.Accounts.AddPayoutAccount(ctx, command.UserId, command.CountryCode, command.BankCode, command.AccountNumber, command.BranchCode)
 }

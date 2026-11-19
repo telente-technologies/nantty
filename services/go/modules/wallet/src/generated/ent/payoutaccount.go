@@ -26,6 +26,8 @@ type PayoutAccount struct {
 	CountryCode string `json:"country_code,omitempty"`
 	// BankCode holds the value of the "bank_code" field.
 	BankCode string `json:"bank_code,omitempty"`
+	// BranchCode holds the value of the "branch_code" field.
+	BranchCode string `json:"branch_code,omitempty"`
 	// BankName holds the value of the "bank_name" field.
 	BankName string `json:"bank_name,omitempty"`
 	// AccountNumberCiphertext holds the value of the "account_number_ciphertext" field.
@@ -54,7 +56,7 @@ func (*PayoutAccount) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case payoutaccount.FieldIsDefault:
 			values[i] = new(sql.NullBool)
-		case payoutaccount.FieldUserID, payoutaccount.FieldCountryCode, payoutaccount.FieldBankCode, payoutaccount.FieldBankName, payoutaccount.FieldAccountNumberFingerprint, payoutaccount.FieldAccountNumberLast4, payoutaccount.FieldAccountName, payoutaccount.FieldNameMatchStatus:
+		case payoutaccount.FieldUserID, payoutaccount.FieldCountryCode, payoutaccount.FieldBankCode, payoutaccount.FieldBranchCode, payoutaccount.FieldBankName, payoutaccount.FieldAccountNumberFingerprint, payoutaccount.FieldAccountNumberLast4, payoutaccount.FieldAccountName, payoutaccount.FieldNameMatchStatus:
 			values[i] = new(sql.NullString)
 		case payoutaccount.FieldCreatedAt, payoutaccount.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -104,6 +106,12 @@ func (_m *PayoutAccount) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field bank_code", values[i])
 			} else if value.Valid {
 				_m.BankCode = value.String
+			}
+		case payoutaccount.FieldBranchCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field branch_code", values[i])
+			} else if value.Valid {
+				_m.BranchCode = value.String
 			}
 		case payoutaccount.FieldBankName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -201,6 +209,9 @@ func (_m *PayoutAccount) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("bank_code=")
 	builder.WriteString(_m.BankCode)
+	builder.WriteString(", ")
+	builder.WriteString("branch_code=")
+	builder.WriteString(_m.BranchCode)
 	builder.WriteString(", ")
 	builder.WriteString("bank_name=")
 	builder.WriteString(_m.BankName)

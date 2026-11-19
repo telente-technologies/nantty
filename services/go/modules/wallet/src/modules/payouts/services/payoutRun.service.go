@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -12,8 +13,10 @@ import (
 
 	"nantty/modules/ledger/src/databases"
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	paymentinterfaces "nantty/modules/payments/src/interfaces"
 	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
 	"nantty/modules/wallet/src/generated/ent"
+	"nantty/modules/wallet/src/generated/ent/payoutaccount"
 	"nantty/modules/wallet/src/generated/ent/withdrawal"
 	"nantty/modules/wallet/src/interfaces"
 )
@@ -31,7 +34,22 @@ func (withdrawals Withdrawals) RunPayoutBatch(ctx context.Context, maximum int) 
 	report := PayoutRunReport{}
 	var skipped []uuid.UUID
 	for report.Started < maximum {
-		claimed, prepared, err := withdrawals.claimNextQueuedWithdrawal(ctx, skipped)
+		candidate, err := withdrawals.nextQueuedWithdrawalCandidate(ctx, skipped)
+		if err != nil {
+			withdrawals.Container.Resources.Logger.WarnContext(ctx, "payout run could not find a queued withdrawal", slog.Any("error", err))
+			report.Errors++
+			return report
+		}
+		if candidate == nil {
+			return report
+		}
+		if err := withdrawals.validatePayoutBranch(ctx, candidate); err != nil {
+			skipped = append(skipped, candidate.ID)
+			withdrawals.noteWithdrawalNotSent(ctx, candidate, err.Error())
+			report.Errors++
+			continue
+		}
+		claimed, prepared, err := withdrawals.claimQueuedWithdrawal(ctx, candidate.ID)
 		if claimed != nil && errors.Is(err, interfaces.ErrPayoutNotSentRetryLater) {
 			skipped = append(skipped, claimed.ID)
 			withdrawals.noteWithdrawalNotSent(ctx, claimed, err.Error())
@@ -75,13 +93,56 @@ func (withdrawals Withdrawals) RunPayoutBatch(ctx context.Context, maximum int) 
 	return report
 }
 
-func (withdrawals Withdrawals) claimNextQueuedWithdrawal(ctx context.Context, skipped []uuid.UUID) (*ent.Withdrawal, bool, error) {
+func (withdrawals Withdrawals) nextQueuedWithdrawalCandidate(ctx context.Context, skipped []uuid.UUID) (*ent.Withdrawal, error) {
+	candidate, err := withdrawals.Container.Client(withdrawals.Container.Resources.Database).Withdrawal.Query().
+		Where(withdrawal.StatusEQ(withdrawal.StatusQueued), withdrawal.IDNotIn(skipped...)).
+		Order(ent.Asc(withdrawal.FieldCreatedAt)).First(ctx)
+	if ent.IsNotFound(err) {
+		return nil, nil
+	}
+	return candidate, err
+}
+
+func (withdrawals Withdrawals) validatePayoutBranch(ctx context.Context, candidate *ent.Withdrawal) error {
+	if withdrawals.Banks == nil {
+		return nil
+	}
+	account, err := withdrawals.Container.Client(withdrawals.Container.Resources.Database).PayoutAccount.Query().
+		Where(payoutaccount.ID(candidate.PayoutAccountID), payoutaccount.DeletedAtIsNil()).Only(ctx)
+	if ent.IsNotFound(err) {
+		return fmt.Errorf("%w: the saved payout account has been removed; cancel this withdrawal or contact support", interfaces.ErrPayoutNotSentRetryLater)
+	}
+	if err != nil {
+		return err
+	}
+	branches, err := withdrawals.Banks.ListBankBranches(ctx, account.CountryCode, account.BankCode)
+	if errors.Is(err, paymentinterfaces.ErrCapabilityNotSupported) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("%w: bank branch information could not be refreshed; the payout was not sent", interfaces.ErrPayoutNotSentRetryLater)
+	}
+	if len(branches) == 0 {
+		if account.BranchCode != "" {
+			return fmt.Errorf("%w: the saved bank branch is no longer available; contact support to update this payout before retrying", interfaces.ErrPayoutNotSentRetryLater)
+		}
+		return nil
+	}
+	for _, branch := range branches {
+		if branch.Code == account.BranchCode && account.BranchCode != "" {
+			return nil
+		}
+	}
+	return fmt.Errorf("%w: this payout account needs a current bank branch; contact support before retrying", interfaces.ErrPayoutNotSentRetryLater)
+}
+
+func (withdrawals Withdrawals) claimQueuedWithdrawal(ctx context.Context, candidateID uuid.UUID) (*ent.Withdrawal, bool, error) {
 	var claimed, candidate *ent.Withdrawal
 	prepared := false
 	err := databases.RunInMoneyTransaction(ctx, withdrawals.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		claimed, candidate, prepared = nil, nil, false
-		next, err := withdrawals.Container.Client(transaction).Withdrawal.Query().Where(withdrawal.StatusEQ(withdrawal.StatusQueued), withdrawal.IDNotIn(skipped...)).
-			Order(ent.Asc(withdrawal.FieldCreatedAt)).ForUpdate(entsql.WithLockAction(entsql.SkipLocked)).First(ctx)
+		next, err := withdrawals.Container.Client(transaction).Withdrawal.Query().Where(withdrawal.ID(candidateID), withdrawal.StatusEQ(withdrawal.StatusQueued)).
+			ForUpdate(entsql.WithLockAction(entsql.SkipLocked)).First(ctx)
 		if ent.IsNotFound(err) {
 			return nil
 		}
@@ -119,7 +180,7 @@ func (withdrawals Withdrawals) payoutInstruction(ctx context.Context, executor d
 	}
 	return interfaces.SellerPayoutInstruction{
 		WithdrawalId: claimed.ID.String(), UserId: claimed.UserID, Reference: claimed.Reference, AmountMinor: claimed.NetMinor, FeeMinor: claimed.FeeMinor,
-		Currency: claimed.Currency, BankCode: account.BankCode, AccountNumber: accountNumber,
+		Currency: claimed.Currency, BankCode: account.BankCode, BranchCode: account.BranchCode, AccountNumber: accountNumber,
 	}, nil
 }
 

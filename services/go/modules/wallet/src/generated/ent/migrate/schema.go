@@ -378,6 +378,7 @@ var (
 		{Name: "user_id", Type: field.TypeString, Size: 80},
 		{Name: "country_code", Type: field.TypeString, Size: 2},
 		{Name: "bank_code", Type: field.TypeString, Size: 20},
+		{Name: "branch_code", Type: field.TypeString, Size: 40, Default: ""},
 		{Name: "bank_name", Type: field.TypeString, Size: 120},
 		{Name: "account_number_ciphertext", Type: field.TypeBytes},
 		{Name: "account_number_fingerprint", Type: field.TypeString, Size: 64},
@@ -396,12 +397,12 @@ var (
 			{
 				Name:    "payoutaccount_user_id_deleted_at",
 				Unique:  false,
-				Columns: []*schema.Column{PayoutAccountsColumns[2], PayoutAccountsColumns[12]},
+				Columns: []*schema.Column{PayoutAccountsColumns[2], PayoutAccountsColumns[13]},
 			},
 			{
 				Name:    "payoutaccount_user_id_account_number_fingerprint_bank_code",
 				Unique:  false,
-				Columns: []*schema.Column{PayoutAccountsColumns[2], PayoutAccountsColumns[7], PayoutAccountsColumns[4]},
+				Columns: []*schema.Column{PayoutAccountsColumns[2], PayoutAccountsColumns[8], PayoutAccountsColumns[4]},
 			},
 		},
 	}
@@ -412,6 +413,7 @@ var (
 		{Name: "user_id", Type: field.TypeString, Size: 80},
 		{Name: "country_code", Type: field.TypeString, Size: 2},
 		{Name: "bank_code", Type: field.TypeString, Size: 20},
+		{Name: "branch_code", Type: field.TypeString, Size: 40, Default: ""},
 		{Name: "bank_name", Type: field.TypeString, Size: 120},
 		{Name: "account_number_ciphertext", Type: field.TypeBytes},
 		{Name: "account_number_last4", Type: field.TypeString, Size: 4},
@@ -428,7 +430,7 @@ var (
 			{
 				Name:    "payoutaccountresolution_user_id_expires_at",
 				Unique:  false,
-				Columns: []*schema.Column{PayoutAccountResolutionsColumns[2], PayoutAccountResolutionsColumns[9]},
+				Columns: []*schema.Column{PayoutAccountResolutionsColumns[2], PayoutAccountResolutionsColumns[10]},
 			},
 		},
 	}

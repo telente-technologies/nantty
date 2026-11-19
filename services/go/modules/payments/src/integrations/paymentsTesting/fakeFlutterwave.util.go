@@ -41,6 +41,7 @@ type FakeFlwTransfer struct {
 	Id                                                int64
 	Reference, Status, Currency, AccountBank, Account string
 	DebitSubaccount, Narration, CompleteMessage       string
+	DestinationBranchCode                             string
 	AmountMinor, FeeMinor                             int64
 	Internal                                          bool
 	SkipBeneficiary                                   bool
@@ -80,6 +81,8 @@ type FakeFlutterwave struct {
 	OmitReversalPageInfo  bool
 	IgnoreReversalPage    bool
 	OmitRefundListMeta    bool
+	NullBankBranchCatalog bool
+	NullBankCatalog       bool
 	RefundListTotalPages  int
 }
 

@@ -22,6 +22,7 @@ func (PayoutAccountResolution) Fields() []ent.Field {
 		field.String("user_id").NotEmpty().MaxLen(80).Immutable(),
 		field.String("country_code").NotEmpty().MaxLen(2).Immutable(),
 		field.String("bank_code").NotEmpty().MaxLen(20).Immutable(),
+		field.String("branch_code").MaxLen(40).Default("").Immutable(),
 		field.String("bank_name").NotEmpty().MaxLen(120).Immutable(),
 		field.Bytes("account_number_ciphertext").Sensitive().Immutable(),
 		field.String("account_number_last4").NotEmpty().MaxLen(4).Immutable(),

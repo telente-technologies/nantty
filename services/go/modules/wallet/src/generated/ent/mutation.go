@@ -10358,6 +10358,7 @@ type PayoutAccountMutation struct {
 	user_id                    *string
 	country_code               *string
 	bank_code                  *string
+	branch_code                *string
 	bank_name                  *string
 	account_number_ciphertext  *[]byte
 	account_number_fingerprint *string
@@ -10618,6 +10619,42 @@ func (m *PayoutAccountMutation) OldBankCode(ctx context.Context) (v string, err 
 // ResetBankCode resets all changes to the "bank_code" field.
 func (m *PayoutAccountMutation) ResetBankCode() {
 	m.bank_code = nil
+}
+
+// SetBranchCode sets the "branch_code" field.
+func (m *PayoutAccountMutation) SetBranchCode(s string) {
+	m.branch_code = &s
+}
+
+// BranchCode returns the value of the "branch_code" field in the mutation.
+func (m *PayoutAccountMutation) BranchCode() (r string, exists bool) {
+	v := m.branch_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBranchCode returns the old "branch_code" field's value of the PayoutAccount entity.
+// If the PayoutAccount object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutAccountMutation) OldBranchCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBranchCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBranchCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBranchCode: %w", err)
+	}
+	return oldValue.BranchCode, nil
+}
+
+// ResetBranchCode resets all changes to the "branch_code" field.
+func (m *PayoutAccountMutation) ResetBranchCode() {
+	m.branch_code = nil
 }
 
 // SetBankName sets the "bank_name" field.
@@ -10955,7 +10992,7 @@ func (m *PayoutAccountMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PayoutAccountMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, payoutaccount.FieldCreatedAt)
 	}
@@ -10967,6 +11004,9 @@ func (m *PayoutAccountMutation) Fields() []string {
 	}
 	if m.bank_code != nil {
 		fields = append(fields, payoutaccount.FieldBankCode)
+	}
+	if m.branch_code != nil {
+		fields = append(fields, payoutaccount.FieldBranchCode)
 	}
 	if m.bank_name != nil {
 		fields = append(fields, payoutaccount.FieldBankName)
@@ -11008,6 +11048,8 @@ func (m *PayoutAccountMutation) Field(name string) (ent.Value, bool) {
 		return m.CountryCode()
 	case payoutaccount.FieldBankCode:
 		return m.BankCode()
+	case payoutaccount.FieldBranchCode:
+		return m.BranchCode()
 	case payoutaccount.FieldBankName:
 		return m.BankName()
 	case payoutaccount.FieldAccountNumberCiphertext:
@@ -11041,6 +11083,8 @@ func (m *PayoutAccountMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldCountryCode(ctx)
 	case payoutaccount.FieldBankCode:
 		return m.OldBankCode(ctx)
+	case payoutaccount.FieldBranchCode:
+		return m.OldBranchCode(ctx)
 	case payoutaccount.FieldBankName:
 		return m.OldBankName(ctx)
 	case payoutaccount.FieldAccountNumberCiphertext:
@@ -11093,6 +11137,13 @@ func (m *PayoutAccountMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBankCode(v)
+		return nil
+	case payoutaccount.FieldBranchCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBranchCode(v)
 		return nil
 	case payoutaccount.FieldBankName:
 		v, ok := value.(string)
@@ -11220,6 +11271,9 @@ func (m *PayoutAccountMutation) ResetField(name string) error {
 	case payoutaccount.FieldBankCode:
 		m.ResetBankCode()
 		return nil
+	case payoutaccount.FieldBranchCode:
+		m.ResetBranchCode()
+		return nil
 	case payoutaccount.FieldBankName:
 		m.ResetBankName()
 		return nil
@@ -11306,6 +11360,7 @@ type PayoutAccountResolutionMutation struct {
 	user_id                   *string
 	country_code              *string
 	bank_code                 *string
+	branch_code               *string
 	bank_name                 *string
 	account_number_ciphertext *[]byte
 	account_number_last4      *string
@@ -11564,6 +11619,42 @@ func (m *PayoutAccountResolutionMutation) OldBankCode(ctx context.Context) (v st
 // ResetBankCode resets all changes to the "bank_code" field.
 func (m *PayoutAccountResolutionMutation) ResetBankCode() {
 	m.bank_code = nil
+}
+
+// SetBranchCode sets the "branch_code" field.
+func (m *PayoutAccountResolutionMutation) SetBranchCode(s string) {
+	m.branch_code = &s
+}
+
+// BranchCode returns the value of the "branch_code" field in the mutation.
+func (m *PayoutAccountResolutionMutation) BranchCode() (r string, exists bool) {
+	v := m.branch_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBranchCode returns the old "branch_code" field's value of the PayoutAccountResolution entity.
+// If the PayoutAccountResolution object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PayoutAccountResolutionMutation) OldBranchCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBranchCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBranchCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBranchCode: %w", err)
+	}
+	return oldValue.BranchCode, nil
+}
+
+// ResetBranchCode resets all changes to the "branch_code" field.
+func (m *PayoutAccountResolutionMutation) ResetBranchCode() {
+	m.branch_code = nil
 }
 
 // SetBankName sets the "bank_name" field.
@@ -11829,7 +11920,7 @@ func (m *PayoutAccountResolutionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PayoutAccountResolutionMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, payoutaccountresolution.FieldCreatedAt)
 	}
@@ -11841,6 +11932,9 @@ func (m *PayoutAccountResolutionMutation) Fields() []string {
 	}
 	if m.bank_code != nil {
 		fields = append(fields, payoutaccountresolution.FieldBankCode)
+	}
+	if m.branch_code != nil {
+		fields = append(fields, payoutaccountresolution.FieldBranchCode)
 	}
 	if m.bank_name != nil {
 		fields = append(fields, payoutaccountresolution.FieldBankName)
@@ -11876,6 +11970,8 @@ func (m *PayoutAccountResolutionMutation) Field(name string) (ent.Value, bool) {
 		return m.CountryCode()
 	case payoutaccountresolution.FieldBankCode:
 		return m.BankCode()
+	case payoutaccountresolution.FieldBranchCode:
+		return m.BranchCode()
 	case payoutaccountresolution.FieldBankName:
 		return m.BankName()
 	case payoutaccountresolution.FieldAccountNumberCiphertext:
@@ -11905,6 +12001,8 @@ func (m *PayoutAccountResolutionMutation) OldField(ctx context.Context, name str
 		return m.OldCountryCode(ctx)
 	case payoutaccountresolution.FieldBankCode:
 		return m.OldBankCode(ctx)
+	case payoutaccountresolution.FieldBranchCode:
+		return m.OldBranchCode(ctx)
 	case payoutaccountresolution.FieldBankName:
 		return m.OldBankName(ctx)
 	case payoutaccountresolution.FieldAccountNumberCiphertext:
@@ -11953,6 +12051,13 @@ func (m *PayoutAccountResolutionMutation) SetField(name string, value ent.Value)
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBankCode(v)
+		return nil
+	case payoutaccountresolution.FieldBranchCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBranchCode(v)
 		return nil
 	case payoutaccountresolution.FieldBankName:
 		v, ok := value.(string)
@@ -12065,6 +12170,9 @@ func (m *PayoutAccountResolutionMutation) ResetField(name string) error {
 		return nil
 	case payoutaccountresolution.FieldBankCode:
 		m.ResetBankCode()
+		return nil
+	case payoutaccountresolution.FieldBranchCode:
+		m.ResetBranchCode()
 		return nil
 	case payoutaccountresolution.FieldBankName:
 		m.ResetBankName()

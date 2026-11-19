@@ -15,6 +15,7 @@ import (
 
 var (
 	bankCodePattern      = regexp.MustCompile(`^[A-Za-z0-9-]{2,12}$`)
+	branchCodePattern    = regexp.MustCompile(`^[A-Za-z0-9-]{1,40}$`)
 	nubanAccountNumber   = regexp.MustCompile(`^\d{10}$`)
 	genericAccountNumber = regexp.MustCompile(`^\d{6,20}$`)
 	countryCodePattern   = regexp.MustCompile(`^[A-Z]{2}$`)
@@ -36,6 +37,9 @@ func ValidateAddPayoutAccountRequest(request dtos.AddPayoutAccountRequestDto) er
 	}
 	if !bankCodePattern.MatchString(request.BankCode) {
 		collector.Add("bankCode", "has an invalid format")
+	}
+	if request.BranchCode != "" && !branchCodePattern.MatchString(request.BranchCode) {
+		collector.Add("branchCode", "has an invalid format")
 	}
 	pattern := genericAccountNumber
 	if country == "NG" {

@@ -136,6 +136,49 @@ func TestFlutterwaveBankLookupsNormalizeAndValidateCountryAndRequiredFields(t *t
 	}
 }
 
+func TestFlutterwaveBankCatalogRejectsMissingDataArray(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	fake.NullBankCatalog = true
+
+	if banks, err := adapter.ListBanks(context.Background(), "NG"); err == nil || !errors.Is(err, interfaces.ErrProviderUnavailable) || banks != nil {
+		t.Fatalf("a null provider bank catalog must fail closed, got banks=%+v err=%v", banks, err)
+	}
+}
+
+func TestFlutterwaveBankBranchesResolveByProviderBankID(t *testing.T) {
+	fake, adapter := newFakeFlutterwaveAdapter(t)
+	banks, err := adapter.ListBanks(context.Background(), "NG")
+	if err != nil || len(banks) == 0 || banks[0].ProviderID == 0 {
+		t.Fatalf("bank provider ID must be retained internally: %+v %v", banks, err)
+	}
+	branches, err := adapter.ListBankBranches(context.Background(), "NG", "BRANCH")
+	if err != nil || len(branches) != 1 || branches[0].Code != "BR-001" || branches[0].Name != "Main Branch" {
+		t.Fatalf("branch lookup should use the bank ID and return branch codes: %+v %v", branches, err)
+	}
+	withoutBranches, err := adapter.ListBankBranches(context.Background(), "NG", "044")
+	if err != nil || len(withoutBranches) != 0 {
+		t.Fatalf("banks with no branches should return an empty list: %+v %v", withoutBranches, err)
+	}
+	fake.NullBankBranchCatalog = true
+	if _, err := adapter.ListBankBranches(context.Background(), "NG", "BRANCH"); err == nil {
+		t.Fatal("a null branch catalog must fail closed rather than look like a bank without branches")
+	}
+	fake.NullBankBranchCatalog = false
+	if _, err := adapter.ListBankBranches(context.Background(), "N1", "BRANCH"); !errors.Is(err, interfaces.ErrCurrencyNotSupported) {
+		t.Fatalf("invalid country must be rejected before provider access: %v", err)
+	}
+	fake.FundMainBalance("NGN", 100_000)
+	if _, err := adapter.CreateTransfer(context.Background(), interfaces.TransferRequest{Reference: "branch-payout-missing", AmountMinor: 10_000, Currency: "NGN", BankCode: "BRANCH", AccountNumber: "0123456789"}); err == nil {
+		t.Fatal("provider must reject a branch-requiring destination if no branch is sent")
+	}
+	if _, err := adapter.CreateTransfer(context.Background(), interfaces.TransferRequest{Reference: "branch-payout-valid", AmountMinor: 10_000, Currency: "NGN", BankCode: "BRANCH", BranchCode: "BR-001", AccountNumber: "0123456789"}); err != nil {
+		t.Fatalf("selected branch code should be passed through to the transfer: %v", err)
+	}
+	if transfer := fake.TransferByReference("branch-payout-valid"); transfer == nil || transfer.DestinationBranchCode != "BR-001" {
+		t.Fatalf("recorded transfer should retain selected branch: %+v", transfer)
+	}
+}
+
 func TestFlutterwaveCardTokenOnlyChargesTheEmailItWasIssuedTo(t *testing.T) {
 	fake, adapter := newFakeFlutterwaveAdapter(t)
 	ctx := context.Background()
@@ -210,6 +253,20 @@ func TestFlutterwaveTransfersSkipBeneficiariesNeverRetryAndRespectPsaBalances(t 
 	found, err := adapter.VerifyTransfer(ctx, "wd-ok")
 	if err != nil || found.Outcome != interfaces.OutcomePending {
 		t.Fatalf("the transfer must be found by reference: %v %+v", err, found)
+	}
+	if !fake.SetPayoutOutcome("wd-ok", interfaces.OutcomeSucceeded) {
+		t.Fatal("fake transfer should transition to the documented successful state")
+	}
+	found, err = adapter.VerifyTransfer(ctx, "wd-ok")
+	if err != nil || found.Outcome != interfaces.OutcomeSucceeded {
+		t.Fatalf("a SUCCESSFUL transfer lookup should be terminal success: %v %+v", err, found)
+	}
+	if !fake.SetPayoutOutcome("wd-ok", interfaces.OutcomeFailed) {
+		t.Fatal("fake transfer should transition to the documented failed state")
+	}
+	found, err = adapter.VerifyTransfer(ctx, "wd-ok")
+	if err != nil || found.Outcome != interfaces.OutcomeFailed {
+		t.Fatalf("a FAILED transfer lookup should be terminal failure: %v %+v", err, found)
 	}
 	transfer := fake.TransferByReference("wd-ok")
 	if !transfer.SkipBeneficiary || transfer.DebitSubaccount != wallet.AccountRef || fake.Calls("POST /transfers") != 2 {
@@ -451,10 +508,14 @@ func TestFlutterwaveWebhookHashIsOnlyATrigger(t *testing.T) {
 		{"completed-mpgs", "processed"},
 		{"completed-offline", "processed"},
 		{"completed-preauth", "processed"},
+		{"successful", "processed"},
 		{"pending-momo", "pending"},
 		{"pending-bank-transfer", "pending"},
 		{"pending-mpgs", "pending"},
 		{"processing", "pending"},
+		{"succeeded", "pending"},
+		{"cancelled", "pending"},
+		{"declined", "pending"},
 		{"failed", "failed"},
 	} {
 		body := []byte(`{"id":77,"AmountRefunded":10,"status":"` + testCase.status + `","FlwRef":"F","TransactionId":9}`)

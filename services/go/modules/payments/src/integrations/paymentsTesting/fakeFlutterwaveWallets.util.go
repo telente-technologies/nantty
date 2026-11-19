@@ -202,12 +202,15 @@ func (fake *FakeFlutterwave) createTransfer(body map[string]any) (int, any, any)
 	if reference == "" || !valid || text(body["account_bank"]) == "" || text(body["account_number"]) == "" {
 		return http.StatusBadRequest, "account_bank, account_number, amount, currency and reference are required", nil
 	}
+	if text(body["account_bank"]) == "BRANCH" && text(body["destination_branch_code"]) != "BR-001" {
+		return http.StatusBadRequest, "destination_branch_code is required for this bank", nil
+	}
 	if fake.Transfers[reference] != nil {
 		return http.StatusBadRequest, "Payout with this ref already exists", nil
 	}
 	transfer := &FakeFlwTransfer{
 		Id: fake.newId(), Reference: reference, Currency: currency, AccountBank: text(body["account_bank"]), Account: text(body["account_number"]),
-		DebitSubaccount: text(body["debit_subaccount"]), Narration: text(body["narration"]), AmountMinor: amount, Status: "NEW",
+		DebitSubaccount: text(body["debit_subaccount"]), Narration: text(body["narration"]), DestinationBranchCode: text(body["destination_branch_code"]), AmountMinor: amount, Status: "NEW",
 		Internal: text(body["account_bank"]) == "flutterwave", SkipBeneficiary: text(body["skip_beneficiary_creation"]) == "1",
 	}
 	if !transfer.Internal {

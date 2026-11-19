@@ -888,8 +888,14 @@ func init() {
 			return nil
 		}
 	}()
+	// payoutaccountDescBranchCode is the schema descriptor for branch_code field.
+	payoutaccountDescBranchCode := payoutaccountFields[3].Descriptor()
+	// payoutaccount.DefaultBranchCode holds the default value on creation for the branch_code field.
+	payoutaccount.DefaultBranchCode = payoutaccountDescBranchCode.Default.(string)
+	// payoutaccount.BranchCodeValidator is a validator for the "branch_code" field. It is called by the builders before save.
+	payoutaccount.BranchCodeValidator = payoutaccountDescBranchCode.Validators[0].(func(string) error)
 	// payoutaccountDescBankName is the schema descriptor for bank_name field.
-	payoutaccountDescBankName := payoutaccountFields[3].Descriptor()
+	payoutaccountDescBankName := payoutaccountFields[4].Descriptor()
 	// payoutaccount.BankNameValidator is a validator for the "bank_name" field. It is called by the builders before save.
 	payoutaccount.BankNameValidator = func() func(string) error {
 		validators := payoutaccountDescBankName.Validators
@@ -907,7 +913,7 @@ func init() {
 		}
 	}()
 	// payoutaccountDescAccountNumberFingerprint is the schema descriptor for account_number_fingerprint field.
-	payoutaccountDescAccountNumberFingerprint := payoutaccountFields[5].Descriptor()
+	payoutaccountDescAccountNumberFingerprint := payoutaccountFields[6].Descriptor()
 	// payoutaccount.AccountNumberFingerprintValidator is a validator for the "account_number_fingerprint" field. It is called by the builders before save.
 	payoutaccount.AccountNumberFingerprintValidator = func() func(string) error {
 		validators := payoutaccountDescAccountNumberFingerprint.Validators
@@ -925,7 +931,7 @@ func init() {
 		}
 	}()
 	// payoutaccountDescAccountNumberLast4 is the schema descriptor for account_number_last4 field.
-	payoutaccountDescAccountNumberLast4 := payoutaccountFields[6].Descriptor()
+	payoutaccountDescAccountNumberLast4 := payoutaccountFields[7].Descriptor()
 	// payoutaccount.AccountNumberLast4Validator is a validator for the "account_number_last4" field. It is called by the builders before save.
 	payoutaccount.AccountNumberLast4Validator = func() func(string) error {
 		validators := payoutaccountDescAccountNumberLast4.Validators
@@ -943,7 +949,7 @@ func init() {
 		}
 	}()
 	// payoutaccountDescAccountName is the schema descriptor for account_name field.
-	payoutaccountDescAccountName := payoutaccountFields[7].Descriptor()
+	payoutaccountDescAccountName := payoutaccountFields[8].Descriptor()
 	// payoutaccount.AccountNameValidator is a validator for the "account_name" field. It is called by the builders before save.
 	payoutaccount.AccountNameValidator = func() func(string) error {
 		validators := payoutaccountDescAccountName.Validators
@@ -961,7 +967,7 @@ func init() {
 		}
 	}()
 	// payoutaccountDescIsDefault is the schema descriptor for is_default field.
-	payoutaccountDescIsDefault := payoutaccountFields[9].Descriptor()
+	payoutaccountDescIsDefault := payoutaccountFields[10].Descriptor()
 	// payoutaccount.DefaultIsDefault holds the default value on creation for the is_default field.
 	payoutaccount.DefaultIsDefault = payoutaccountDescIsDefault.Default.(bool)
 	// payoutaccountDescID is the schema descriptor for id field.
@@ -1031,8 +1037,14 @@ func init() {
 			return nil
 		}
 	}()
+	// payoutaccountresolutionDescBranchCode is the schema descriptor for branch_code field.
+	payoutaccountresolutionDescBranchCode := payoutaccountresolutionFields[3].Descriptor()
+	// payoutaccountresolution.DefaultBranchCode holds the default value on creation for the branch_code field.
+	payoutaccountresolution.DefaultBranchCode = payoutaccountresolutionDescBranchCode.Default.(string)
+	// payoutaccountresolution.BranchCodeValidator is a validator for the "branch_code" field. It is called by the builders before save.
+	payoutaccountresolution.BranchCodeValidator = payoutaccountresolutionDescBranchCode.Validators[0].(func(string) error)
 	// payoutaccountresolutionDescBankName is the schema descriptor for bank_name field.
-	payoutaccountresolutionDescBankName := payoutaccountresolutionFields[3].Descriptor()
+	payoutaccountresolutionDescBankName := payoutaccountresolutionFields[4].Descriptor()
 	// payoutaccountresolution.BankNameValidator is a validator for the "bank_name" field. It is called by the builders before save.
 	payoutaccountresolution.BankNameValidator = func() func(string) error {
 		validators := payoutaccountresolutionDescBankName.Validators
@@ -1050,7 +1062,7 @@ func init() {
 		}
 	}()
 	// payoutaccountresolutionDescAccountNumberLast4 is the schema descriptor for account_number_last4 field.
-	payoutaccountresolutionDescAccountNumberLast4 := payoutaccountresolutionFields[5].Descriptor()
+	payoutaccountresolutionDescAccountNumberLast4 := payoutaccountresolutionFields[6].Descriptor()
 	// payoutaccountresolution.AccountNumberLast4Validator is a validator for the "account_number_last4" field. It is called by the builders before save.
 	payoutaccountresolution.AccountNumberLast4Validator = func() func(string) error {
 		validators := payoutaccountresolutionDescAccountNumberLast4.Validators
@@ -1068,7 +1080,7 @@ func init() {
 		}
 	}()
 	// payoutaccountresolutionDescAccountName is the schema descriptor for account_name field.
-	payoutaccountresolutionDescAccountName := payoutaccountresolutionFields[6].Descriptor()
+	payoutaccountresolutionDescAccountName := payoutaccountresolutionFields[7].Descriptor()
 	// payoutaccountresolution.AccountNameValidator is a validator for the "account_name" field. It is called by the builders before save.
 	payoutaccountresolution.AccountNameValidator = func() func(string) error {
 		validators := payoutaccountresolutionDescAccountName.Validators

@@ -75,6 +75,11 @@ func BankCode(v string) predicate.PayoutAccountResolution {
 	return predicate.PayoutAccountResolution(sql.FieldEQ(FieldBankCode, v))
 }
 
+// BranchCode applies equality check predicate on the "branch_code" field. It's identical to BranchCodeEQ.
+func BranchCode(v string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldEQ(FieldBranchCode, v))
+}
+
 // BankName applies equality check predicate on the "bank_name" field. It's identical to BankNameEQ.
 func BankName(v string) predicate.PayoutAccountResolution {
 	return predicate.PayoutAccountResolution(sql.FieldEQ(FieldBankName, v))
@@ -338,6 +343,71 @@ func BankCodeEqualFold(v string) predicate.PayoutAccountResolution {
 // BankCodeContainsFold applies the ContainsFold predicate on the "bank_code" field.
 func BankCodeContainsFold(v string) predicate.PayoutAccountResolution {
 	return predicate.PayoutAccountResolution(sql.FieldContainsFold(FieldBankCode, v))
+}
+
+// BranchCodeEQ applies the EQ predicate on the "branch_code" field.
+func BranchCodeEQ(v string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldEQ(FieldBranchCode, v))
+}
+
+// BranchCodeNEQ applies the NEQ predicate on the "branch_code" field.
+func BranchCodeNEQ(v string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldNEQ(FieldBranchCode, v))
+}
+
+// BranchCodeIn applies the In predicate on the "branch_code" field.
+func BranchCodeIn(vs ...string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldIn(FieldBranchCode, vs...))
+}
+
+// BranchCodeNotIn applies the NotIn predicate on the "branch_code" field.
+func BranchCodeNotIn(vs ...string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldNotIn(FieldBranchCode, vs...))
+}
+
+// BranchCodeGT applies the GT predicate on the "branch_code" field.
+func BranchCodeGT(v string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldGT(FieldBranchCode, v))
+}
+
+// BranchCodeGTE applies the GTE predicate on the "branch_code" field.
+func BranchCodeGTE(v string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldGTE(FieldBranchCode, v))
+}
+
+// BranchCodeLT applies the LT predicate on the "branch_code" field.
+func BranchCodeLT(v string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldLT(FieldBranchCode, v))
+}
+
+// BranchCodeLTE applies the LTE predicate on the "branch_code" field.
+func BranchCodeLTE(v string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldLTE(FieldBranchCode, v))
+}
+
+// BranchCodeContains applies the Contains predicate on the "branch_code" field.
+func BranchCodeContains(v string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldContains(FieldBranchCode, v))
+}
+
+// BranchCodeHasPrefix applies the HasPrefix predicate on the "branch_code" field.
+func BranchCodeHasPrefix(v string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldHasPrefix(FieldBranchCode, v))
+}
+
+// BranchCodeHasSuffix applies the HasSuffix predicate on the "branch_code" field.
+func BranchCodeHasSuffix(v string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldHasSuffix(FieldBranchCode, v))
+}
+
+// BranchCodeEqualFold applies the EqualFold predicate on the "branch_code" field.
+func BranchCodeEqualFold(v string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldEqualFold(FieldBranchCode, v))
+}
+
+// BranchCodeContainsFold applies the ContainsFold predicate on the "branch_code" field.
+func BranchCodeContainsFold(v string) predicate.PayoutAccountResolution {
+	return predicate.PayoutAccountResolution(sql.FieldContainsFold(FieldBranchCode, v))
 }
 
 // BankNameEQ applies the EQ predicate on the "bank_name" field.

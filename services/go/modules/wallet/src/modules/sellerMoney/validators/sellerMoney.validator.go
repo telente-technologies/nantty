@@ -19,6 +19,7 @@ var accountNumberPatternByCountry = map[string]*regexp.Regexp{
 
 var fallbackAccountNumberPattern = regexp.MustCompile(`^[A-Za-z0-9]{6,34}$`)
 var bankCodePattern = regexp.MustCompile(`^[A-Za-z0-9_-]{1,20}$`)
+var bankBranchCodePattern = regexp.MustCompile(`^[A-Za-z0-9_-]{1,40}$`)
 
 type issues []httpserver.ValidationIssue
 
@@ -54,6 +55,9 @@ func ValidateResolvePayoutAccount(countryCode string) func(dtos.ResolvePayoutAcc
 		var collected issues
 		if !bankCodePattern.MatchString(body.BankCode) {
 			collected.add("bankCode", "must be a bank from the list")
+		}
+		if body.BranchCode != "" && !bankBranchCodePattern.MatchString(body.BranchCode) {
+			collected.add("branchCode", "has an invalid format")
 		}
 		pattern, known := accountNumberPatternByCountry[countryCode]
 		if !known {

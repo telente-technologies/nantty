@@ -15,6 +15,7 @@ import (
 	"nantty/modules/wallet/src/container"
 	"nantty/modules/wallet/src/generated/ent"
 	"nantty/modules/wallet/src/generated/ent/payoutaccount"
+	"nantty/modules/wallet/src/generated/ent/withdrawal"
 	"nantty/modules/wallet/src/modules/payouts/dtos"
 	"nantty/platform/httpserver"
 )
@@ -24,6 +25,7 @@ var (
 	ErrUnknownBank           = httpserver.NewApiError(http.StatusUnprocessableEntity, "UNKNOWN_BANK", "Choose your bank.")
 	ErrBankAccountNotFound   = httpserver.NewApiError(http.StatusUnprocessableEntity, "ACCOUNT_NOT_FOUND", "We could not find that account. Check the number and bank.")
 	ErrTooManyPayoutAccounts = httpserver.NewApiError(http.StatusConflict, "TOO_MANY_PAYOUT_ACCOUNTS", "You can save up to 5 payout accounts.")
+	ErrPayoutAccountInUse    = httpserver.NewApiError(http.StatusConflict, "PAYOUT_ACCOUNT_IN_USE", "Cancel or wait for withdrawals using this account before removing it.")
 )
 
 type PayoutAccounts struct {
@@ -31,12 +33,37 @@ type PayoutAccounts struct {
 	Banks     *bankservices.BankDirectory
 }
 
-func (accounts PayoutAccounts) AddPayoutAccount(ctx context.Context, userId, countryCode, bankCode, accountNumber string) (dtos.PayoutAccountDto, error) {
+func (accounts PayoutAccounts) AddPayoutAccount(ctx context.Context, userId, countryCode, bankCode, accountNumber string, branchCodes ...string) (dtos.PayoutAccountDto, error) {
+	branchCode := ""
+	if len(branchCodes) > 0 {
+		branchCode = branchCodes[0]
+	}
 	bank, known := bankservices.IsBankKnownInCountry(accounts.Banks.ListBanksForCountry(ctx, countryCode), bankCode)
 	if !known {
 		return dtos.PayoutAccountDto{}, ErrUnknownBank
 	}
-	accountName, err := accounts.ResolveAccountName(ctx, bankCode, accountNumber)
+	branches, branchErr := accounts.Banks.ListBankBranches(ctx, countryCode, bankCode)
+	if errors.Is(branchErr, interfaces.ErrCapabilityNotSupported) {
+		branches, branchErr = nil, nil
+	}
+	if branchErr != nil {
+		return dtos.PayoutAccountDto{}, httpserver.NewApiError(http.StatusBadGateway, "BANK_BRANCH_LOOKUP_UNAVAILABLE", "We could not confirm this bank's branch requirements. Try again shortly.")
+	}
+	if len(branches) > 0 {
+		validBranch := false
+		for _, branch := range branches {
+			if branch.Code == branchCode {
+				validBranch = true
+				break
+			}
+		}
+		if !validBranch {
+			return dtos.PayoutAccountDto{}, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "branchCode", Message: "select a branch from the current bank branch list"}})
+		}
+	} else if branchCode != "" {
+		return dtos.PayoutAccountDto{}, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "branchCode", Message: "this bank does not have selectable branches"}})
+	}
+	accountName, err := accounts.ResolveAccountNameInCountry(ctx, countryCode, bankCode, accountNumber)
 	if errors.Is(err, interfaces.ErrBankAccountNotFound) {
 		return dtos.PayoutAccountDto{}, ErrBankAccountNotFound
 	}
@@ -68,7 +95,7 @@ func (accounts PayoutAccounts) AddPayoutAccount(ctx context.Context, userId, cou
 	err = databases.RunInMoneyTransaction(ctx, accounts.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		now := accounts.Container.Now().UTC()
 		created, err = accounts.Container.Client(transaction).PayoutAccount.Create().SetID(identifier).SetUserID(userId).SetCountryCode(countryCode).SetBankCode(bankCode).
-			SetBankName(bank.Name).SetAccountNumberCiphertext(ciphertext).SetAccountNumberFingerprint(fingerprint).
+			SetBranchCode(branchCode).SetBankName(bank.Name).SetAccountNumberCiphertext(ciphertext).SetAccountNumberFingerprint(fingerprint).
 			SetAccountNumberLast4(accountNumber[len(accountNumber)-4:]).SetAccountName(accountName).SetIsDefault(count == 0).
 			SetCreatedAt(now).Save(ctx)
 		if err != nil {
@@ -97,6 +124,10 @@ func (accounts PayoutAccounts) ResolveAccountName(ctx context.Context, bankCode,
 	return accounts.Banks.ResolveAccountName(ctx, bankCode, accountNumber)
 }
 
+func (accounts PayoutAccounts) ResolveAccountNameInCountry(ctx context.Context, countryCode, bankCode, accountNumber string) (string, error) {
+	return accounts.Banks.ResolveAccountNameInCountry(ctx, countryCode, bankCode, accountNumber)
+}
+
 func (accounts PayoutAccounts) ListPayoutAccounts(ctx context.Context, userId string) ([]dtos.PayoutAccountDto, error) {
 	rows, err := accounts.Container.Client(accounts.Container.Resources.Database).PayoutAccount.Query().
 		Where(payoutaccount.UserID(userId), payoutaccount.DeletedAtIsNil()).Order(ent.Desc(payoutaccount.FieldIsDefault), ent.Asc(payoutaccount.FieldCreatedAt)).All(ctx)
@@ -111,7 +142,15 @@ func (accounts PayoutAccounts) ListPayoutAccounts(ctx context.Context, userId st
 }
 
 func (accounts PayoutAccounts) RemovePayoutAccount(ctx context.Context, userId string, accountId uuid.UUID) error {
-	updated, err := accounts.Container.Client(accounts.Container.Resources.Database).PayoutAccount.Update().
+	client := accounts.Container.Client(accounts.Container.Resources.Database)
+	inFlight, err := client.Withdrawal.Query().Where(withdrawal.PayoutAccountID(accountId), withdrawal.StatusIn(withdrawal.StatusPendingReview, withdrawal.StatusQueued, withdrawal.StatusProcessing)).Exist(ctx)
+	if err != nil {
+		return err
+	}
+	if inFlight {
+		return ErrPayoutAccountInUse
+	}
+	updated, err := client.PayoutAccount.Update().
 		Where(payoutaccount.ID(accountId), payoutaccount.UserID(userId), payoutaccount.DeletedAtIsNil()).
 		SetDeletedAt(accounts.Container.Now().UTC()).SetIsDefault(false).Save(ctx)
 	if err != nil {
@@ -125,7 +164,7 @@ func (accounts PayoutAccounts) RemovePayoutAccount(ctx context.Context, userId s
 
 func ConvertPayoutAccount(account *ent.PayoutAccount) dtos.PayoutAccountDto {
 	return dtos.PayoutAccountDto{
-		Id: account.ID.String(), BankCode: account.BankCode, BankName: account.BankName, AccountNumberMasked: "••••" + account.AccountNumberLast4,
+		Id: account.ID.String(), BankCode: account.BankCode, BranchCode: account.BranchCode, BankName: account.BankName, AccountNumberMasked: "••••" + account.AccountNumberLast4,
 		AccountName: account.AccountName, CountryCode: account.CountryCode, IsDefault: account.IsDefault, NameMatchStatus: string(account.NameMatchStatus),
 	}
 }

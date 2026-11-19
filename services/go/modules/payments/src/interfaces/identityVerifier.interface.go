@@ -20,6 +20,10 @@ type IdentityVerifier interface {
 	RequestPayoutIdentityCheck(ctx context.Context, request PayoutIdentityRequest) (string, error)
 }
 
+type CountryIdentityVerifier interface {
+	ResolveBankAccountNameInCountry(ctx context.Context, countryCode, bankCode, accountNumber string) (string, error)
+}
+
 type BvnConsentRequest struct {
 	Reference   string
 	Bvn         string

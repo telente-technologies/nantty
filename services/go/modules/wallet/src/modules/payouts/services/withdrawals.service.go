@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
+	bankservices "nantty/modules/payments/src/modules/banks/services"
 	"nantty/modules/wallet/src/container"
 	"nantty/modules/wallet/src/generated/ent"
 	"nantty/modules/wallet/src/generated/ent/payoutaccount"
@@ -30,6 +31,7 @@ var (
 
 type Withdrawals struct {
 	Container *container.Container
+	Banks     *bankservices.BankDirectory
 }
 
 func (withdrawals Withdrawals) QuoteWithdrawal(ctx context.Context, userId string, accountId uuid.UUID, amountMinor int64, currency string) (dtos.WithdrawalQuoteDto, *ent.PayoutAccount, error) {

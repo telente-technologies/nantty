@@ -81,6 +81,11 @@ type BankView struct {
 	Name string `json:"name"`
 }
 
+type BankBranchView struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
+}
+
 type PayoutScheduleView struct {
 	Mode               string      `json:"mode"`
 	Weekday            int         `json:"weekday"`
@@ -97,6 +102,7 @@ type RequestPayoutBody struct {
 
 type ResolvePayoutAccountBody struct {
 	BankCode      string `json:"bankCode"`
+	BranchCode    string `json:"branchCode,omitempty"`
 	AccountNumber string `json:"accountNumber"`
 }
 

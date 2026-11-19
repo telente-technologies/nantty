@@ -74,7 +74,7 @@ func (controller SellerMoneyRelayController) Relay(suffix string, audit *Audited
 }
 
 func expandPathValues(suffix string, request *http.Request) string {
-	for _, name := range []string{"accountId", "settlementId", "month"} {
+	for _, name := range []string{"accountId", "settlementId", "month", "bankCode"} {
 		placeholder := "{" + name + "}"
 		if strings.Contains(suffix, placeholder) {
 			suffix = strings.ReplaceAll(suffix, placeholder, url.PathEscape(request.PathValue(name)))

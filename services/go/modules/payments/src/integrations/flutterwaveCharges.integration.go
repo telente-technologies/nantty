@@ -210,9 +210,9 @@ type flutterwaveRefund struct {
 
 func convertFlutterwaveRefundStatus(status string) interfaces.ProviderOutcome {
 	switch strings.ToLower(status) {
-	case "completed-bank-transfer", "completed-momo", "completed-mpgs", "completed-offline", "completed-preauth", "successful", "succeeded":
+	case "completed-bank-transfer", "completed-momo", "completed-mpgs", "completed-offline", "completed-preauth", "successful":
 		return interfaces.OutcomeSucceeded
-	case "failed", "cancelled", "declined":
+	case "failed":
 		return interfaces.OutcomeFailed
 	}
 	return interfaces.OutcomePending

@@ -14,6 +14,7 @@ type MoneyDto struct {
 type PayoutAccountDto struct {
 	Id                  string `json:"id"`
 	BankCode            string `json:"bankCode"`
+	BranchCode          string `json:"branchCode,omitempty"`
 	BankName            string `json:"bankName"`
 	AccountNumberMasked string `json:"accountNumberMasked"`
 	AccountName         string `json:"accountName"`
@@ -24,6 +25,7 @@ type PayoutAccountDto struct {
 
 type AddPayoutAccountRequestDto struct {
 	BankCode      string `json:"bankCode"`
+	BranchCode    string `json:"branchCode,omitempty"`
 	AccountNumber string `json:"accountNumber"`
 	CountryCode   string `json:"countryCode,omitempty"`
 }

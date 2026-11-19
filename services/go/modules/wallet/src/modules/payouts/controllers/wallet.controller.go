@@ -88,7 +88,7 @@ func (controller WalletController) AddPayoutAccount(writer http.ResponseWriter, 
 		return
 	}
 	account, err := addpayoutaccount.Handler{Application: controller.Application}.Execute(request.Context(), addpayoutaccount.Command{
-		UserId: principal.UserId, CountryCode: validators.NormaliseCountryCode(body.CountryCode), BankCode: body.BankCode, AccountNumber: body.AccountNumber,
+		UserId: principal.UserId, CountryCode: validators.NormaliseCountryCode(body.CountryCode), BankCode: body.BankCode, BranchCode: body.BranchCode, AccountNumber: body.AccountNumber,
 	})
 	if err != nil {
 		controller.fail(writer, request, err)

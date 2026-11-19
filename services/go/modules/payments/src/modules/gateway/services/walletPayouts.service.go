@@ -51,7 +51,7 @@ func (gateway *PaymentGateway) prepareWalletPayoutInTransaction(ctx context.Cont
 	if err != nil {
 		return PayoutTransferStatus{}, err
 	}
-	sealed, err := gateway.sealSensitivePayload(sealedPayoutDestination{BankCode: instruction.BankCode, AccountNumber: instruction.AccountNumber, BeneficiaryName: wallet.AccountName})
+	sealed, err := gateway.sealSensitivePayload(sealedPayoutDestination{BankCode: instruction.BankCode, BranchCode: instruction.BranchCode, AccountNumber: instruction.AccountNumber, BeneficiaryName: wallet.AccountName})
 	if err != nil {
 		return PayoutTransferStatus{}, err
 	}

@@ -66,12 +66,51 @@ func (accounts SellerPayoutAccounts) ListBanks(ctx context.Context, seller dtos.
 	return views
 }
 
+func (accounts SellerPayoutAccounts) ListBranches(ctx context.Context, seller dtos.SellerContext, bankCode string) ([]dtos.BankBranchView, error) {
+	if _, known := bankservices.IsBankKnownInCountry(accounts.Payouts.Accounts.Banks.ListBanksForCountry(ctx, seller.CountryCode), bankCode); !known {
+		return nil, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "bankCode", Message: "must be a bank from the list"}})
+	}
+	branches, err := accounts.Payouts.Accounts.Banks.ListBankBranches(ctx, seller.CountryCode, bankCode)
+	if errors.Is(err, interfaces.ErrCapabilityNotSupported) {
+		return []dtos.BankBranchView{}, nil
+	}
+	if err != nil {
+		return nil, ErrBankLookupUnavailable
+	}
+	views := make([]dtos.BankBranchView, 0, len(branches))
+	for _, branch := range branches {
+		views = append(views, dtos.BankBranchView{Code: branch.Code, Name: branch.Name})
+	}
+	return views, nil
+}
+
 func (accounts SellerPayoutAccounts) Resolve(ctx context.Context, seller dtos.SellerContext, body dtos.ResolvePayoutAccountBody) (dtos.ResolvedPayoutAccountView, error) {
 	bank, known := bankservices.IsBankKnownInCountry(accounts.Payouts.Accounts.Banks.ListBanksForCountry(ctx, seller.CountryCode), body.BankCode)
 	if !known {
 		return dtos.ResolvedPayoutAccountView{}, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "bankCode", Message: "must be a bank from the list"}})
 	}
-	name, err := accounts.Payouts.Accounts.ResolveAccountName(ctx, body.BankCode, body.AccountNumber)
+	branches, err := accounts.Payouts.Accounts.Banks.ListBankBranches(ctx, seller.CountryCode, body.BankCode)
+	if errors.Is(err, interfaces.ErrCapabilityNotSupported) {
+		branches, err = nil, nil
+	}
+	if err != nil {
+		return dtos.ResolvedPayoutAccountView{}, ErrBankLookupUnavailable
+	}
+	if len(branches) > 0 {
+		validBranch := false
+		for _, branch := range branches {
+			if branch.Code == body.BranchCode {
+				validBranch = true
+				break
+			}
+		}
+		if !validBranch {
+			return dtos.ResolvedPayoutAccountView{}, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "branchCode", Message: "select a branch from the current bank branch list"}})
+		}
+	} else if body.BranchCode != "" {
+		return dtos.ResolvedPayoutAccountView{}, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "branchCode", Message: "this bank does not have selectable branches"}})
+	}
+	name, err := accounts.Payouts.Accounts.ResolveAccountNameInCountry(ctx, seller.CountryCode, body.BankCode, body.AccountNumber)
 	if errors.Is(err, interfaces.ErrBankAccountNotFound) || (err == nil && name == "") {
 		return dtos.ResolvedPayoutAccountView{}, ErrAccountNotResolved
 	}
@@ -86,7 +125,7 @@ func (accounts SellerPayoutAccounts) Resolve(ctx context.Context, seller dtos.Se
 	now := accounts.Payouts.Container.Now().UTC()
 	lastFour := body.AccountNumber[len(body.AccountNumber)-4:]
 	err = accounts.client().PayoutAccountResolution.Create().SetID(identifier).SetUserID(seller.SellerId).SetCountryCode(seller.CountryCode).SetBankCode(bank.Code).
-		SetBankName(bank.Name).SetAccountNumberCiphertext(ciphertext).SetAccountNumberLast4(lastFour).SetAccountName(name).SetCreatedAt(now).SetExpiresAt(now.Add(resolutionLifetime)).Exec(ctx)
+		SetBranchCode(body.BranchCode).SetBankName(bank.Name).SetAccountNumberCiphertext(ciphertext).SetAccountNumberLast4(lastFour).SetAccountName(name).SetCreatedAt(now).SetExpiresAt(now.Add(resolutionLifetime)).Exec(ctx)
 	if err != nil {
 		return dtos.ResolvedPayoutAccountView{}, err
 	}
@@ -119,7 +158,7 @@ func (accounts SellerPayoutAccounts) AddFromResolution(ctx context.Context, sell
 	if exists {
 		return dtos.PayoutAccountView{}, ErrAccountExists
 	}
-	added, err := accounts.Payouts.Accounts.AddPayoutAccount(ctx, seller.SellerId, resolution.CountryCode, resolution.BankCode, number)
+	added, err := accounts.Payouts.Accounts.AddPayoutAccount(ctx, seller.SellerId, resolution.CountryCode, resolution.BankCode, number, resolution.BranchCode)
 	if err != nil {
 		return dtos.PayoutAccountView{}, err
 	}

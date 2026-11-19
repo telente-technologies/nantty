@@ -36,6 +36,7 @@ func MountSellerMoneyRelayRoutes(mux *http.ServeMux, deployed *container.Contain
 	mux.Handle("GET /api/v1/seller/wallet/payouts", viewer(controller.Relay("/wallet/payouts", nil)))
 	mux.Handle("GET /api/v1/seller/wallet/payouts/schedule", viewer(controller.Relay("/wallet/payouts/schedule", nil)))
 	mux.Handle("GET /api/v1/seller/wallet/banks", viewer(controller.Relay("/wallet/banks", nil)))
+	mux.Handle("GET /api/v1/seller/wallet/banks/{bankCode}/branches", viewer(controller.Relay("/wallet/banks/{bankCode}/branches", nil)))
 	mux.Handle("GET /api/v1/seller/wallet/payout-accounts", viewer(controller.Relay("/wallet/payout-accounts", nil)))
 	mux.Handle("POST /api/v1/seller/wallet/payouts", withdrawerWithKey(steppedUp(controller.Relay("/wallet/payouts", audited("payout.requested", "payout")))))
 	mux.Handle("PUT /api/v1/seller/wallet/payouts/schedule", withdrawer(controller.Relay("/wallet/payouts/schedule", audited("payout_schedule.updated", "payout_schedule"))))

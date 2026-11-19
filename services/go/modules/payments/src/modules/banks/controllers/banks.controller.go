@@ -42,6 +42,29 @@ func (controller BanksController) ListBanks(writer http.ResponseWriter, request 
 	httpserver.WriteJsonResponse(writer, http.StatusOK, httpserver.NewCursorPage(banks, ""))
 }
 
+func (controller BanksController) ListBankBranches(writer http.ResponseWriter, request *http.Request) {
+	country := readCountryCode(request.URL.Query().Get("country"))
+	if !countryCodePattern.MatchString(country) {
+		httpserver.WriteErrorResponse(writer, request, controller.Application.Container.Resources.Logger, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "country", Message: "must be an ISO 3166 alpha-2 code"}}))
+		return
+	}
+	bankCode := strings.TrimSpace(request.PathValue("bankCode"))
+	if !bankCodePattern.MatchString(bankCode) {
+		httpserver.WriteErrorResponse(writer, request, controller.Application.Container.Resources.Logger, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "bankCode", Message: "must be a bank code"}}))
+		return
+	}
+	branches, err := controller.Application.Banks.ListBankBranches(request.Context(), country, bankCode)
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Application.Container.Resources.Logger, err)
+		return
+	}
+	views := make([]dtos.BankBranchDto, 0, len(branches))
+	for _, branch := range branches {
+		views = append(views, dtos.BankBranchDto{Code: branch.Code, Name: branch.Name})
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, httpserver.NewCursorPage(views, ""))
+}
+
 func (controller BanksController) ResolveBankAccount(writer http.ResponseWriter, request *http.Request) {
 	body, err := utils.DecodeAndValidateJsonBody(writer, request, func(body dtos.ResolveBankAccountRequestDto) error {
 		collector := &utils.IssueCollector{}

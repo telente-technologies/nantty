@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"strings"
 	"sync"
 	"time"
 
@@ -64,6 +65,25 @@ func (directory *BankDirectory) ResolveAccountName(ctx context.Context, bankCode
 		return "", interfaces.ErrCapabilityNotSupported
 	}
 	return identity.ResolveBankAccountName(ctx, bankCode, accountNumber)
+}
+
+func (directory *BankDirectory) ResolveAccountNameInCountry(ctx context.Context, countryCode, bankCode, accountNumber string) (string, error) {
+	countryCode = strings.ToUpper(strings.TrimSpace(countryCode))
+	if identity, supported := directory.Provider.(interfaces.CountryIdentityVerifier); supported {
+		return identity.ResolveBankAccountNameInCountry(ctx, countryCode, bankCode, accountNumber)
+	}
+	if countryCode != "NG" {
+		return "", interfaces.ErrCurrencyNotSupported
+	}
+	return directory.ResolveAccountName(ctx, bankCode, accountNumber)
+}
+
+func (directory *BankDirectory) ListBankBranches(ctx context.Context, countryCode, bankCode string) ([]interfaces.BankBranch, error) {
+	identity, supported := directory.Provider.(interfaces.BankBranchDirectory)
+	if !supported {
+		return nil, interfaces.ErrCapabilityNotSupported
+	}
+	return identity.ListBankBranches(ctx, countryCode, bankCode)
 }
 
 func withCountryCode(banks []interfaces.Bank, countryCode string) []interfaces.Bank {

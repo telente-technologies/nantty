@@ -96,6 +96,16 @@ type Bank struct {
 	Code        string `json:"code"`
 	Name        string `json:"name"`
 	CountryCode string `json:"countryCode"`
+	ProviderID  int64  `json:"-"`
+}
+
+type BankBranch struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
+}
+
+type BankBranchDirectory interface {
+	ListBankBranches(ctx context.Context, countryCode, bankCode string) ([]BankBranch, error)
 }
 
 type PaymentProvider interface {

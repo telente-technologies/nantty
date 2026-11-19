@@ -13,7 +13,12 @@ import (
 
 func TestCallbackSignatureIsVerifiedBeforeAnythingIsRead(t *testing.T) {
 	timestamp := "2026-10-04T10:00:00.000Z"
+	const documentedHmacVector = "5KInpepaxVpg8L5KA+3vIe9Ofn4DFUIcJIEAddHzehc="
 	valid := integrations.ComputeSmileIdSignature("api-key", "partner-1", timestamp)
+	if valid != documentedHmacVector {
+		t.Fatalf("Smile ID signature must match the documented HMAC-SHA256 input and base64 encoding: got %q", valid)
+	}
+	valid = documentedHmacVector
 	if !integrations.VerifySmileIdSignature("api-key", "partner-1", timestamp, valid) {
 		t.Fatal("a correctly signed callback verifies")
 	}

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"nantty/modules/payments/src/interfaces"
@@ -58,6 +59,7 @@ func (provider *FlutterwaveProvider) ListBanks(ctx context.Context, countryCode 
 		return nil, interfaces.ErrCurrencyNotSupported
 	}
 	var rows []struct {
+		ID   int64  `json:"id"`
 		Code string `json:"code"`
 		Name string `json:"name"`
 	}
@@ -65,13 +67,59 @@ func (provider *FlutterwaveProvider) ListBanks(ctx context.Context, countryCode 
 	if _, err := provider.http.send(ctx, flutterwaveRequest{method: http.MethodGet, path: path, query: url.Values{"include_provider_type": {"1"}}}, &rows); err != nil {
 		return nil, err
 	}
+	if rows == nil {
+		return nil, errors.Join(interfaces.ErrProviderUnavailable, errors.New("flutterwave: bank catalog response omitted the data array"))
+	}
 	banks := make([]interfaces.Bank, 0, len(rows))
 	for _, row := range rows {
 		if row.Code != "" {
-			banks = append(banks, interfaces.Bank{Code: row.Code, Name: row.Name, CountryCode: strings.ToUpper(countryCode)})
+			banks = append(banks, interfaces.Bank{Code: row.Code, Name: row.Name, CountryCode: strings.ToUpper(countryCode), ProviderID: row.ID})
 		}
 	}
 	return banks, nil
+}
+
+func (provider *FlutterwaveProvider) ListBankBranches(ctx context.Context, countryCode, bankCode string) ([]interfaces.BankBranch, error) {
+	countryCode = strings.ToUpper(strings.TrimSpace(countryCode))
+	bankCode = strings.TrimSpace(bankCode)
+	if !countryCodePattern.MatchString(countryCode) || bankCode == "" {
+		return nil, interfaces.ErrCurrencyNotSupported
+	}
+	banks, err := provider.ListBanks(ctx, countryCode)
+	if err != nil {
+		return nil, err
+	}
+	bank, found := findBankByCode(banks, bankCode)
+	if !found || bank.ProviderID <= 0 {
+		return nil, interfaces.ErrBankAccountNotFound
+	}
+	var rows []struct {
+		Code string `json:"branch_code"`
+		Name string `json:"branch_name"`
+	}
+	path := "/banks/" + strconv.FormatInt(bank.ProviderID, 10) + "/branches"
+	if _, err := provider.http.send(ctx, flutterwaveRequest{method: http.MethodGet, path: path}, &rows); err != nil {
+		return nil, err
+	}
+	if rows == nil {
+		return nil, errors.New("flutterwave: bank branches response omitted the data array")
+	}
+	branches := make([]interfaces.BankBranch, 0, len(rows))
+	for _, row := range rows {
+		if strings.TrimSpace(row.Code) != "" {
+			branches = append(branches, interfaces.BankBranch{Code: strings.TrimSpace(row.Code), Name: strings.TrimSpace(row.Name)})
+		}
+	}
+	return branches, nil
+}
+
+func findBankByCode(banks []interfaces.Bank, code string) (interfaces.Bank, bool) {
+	for _, bank := range banks {
+		if bank.Code == code {
+			return bank, true
+		}
+	}
+	return interfaces.Bank{}, false
 }
 
 func (provider *FlutterwaveProvider) RequestPayoutIdentityCheck(context.Context, interfaces.PayoutIdentityRequest) (string, error) {

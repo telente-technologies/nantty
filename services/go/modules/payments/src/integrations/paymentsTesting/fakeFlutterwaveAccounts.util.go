@@ -77,7 +77,18 @@ func (fake *FakeFlutterwave) routeAccounts(request fakeFlwRequest) (int, any, an
 	case segments[0] == "chargebacks" && request.method == http.MethodPut && len(segments) == 2:
 		return fake.respondToChargeback(segments[1], request.body)
 	case segments[0] == "banks" && len(segments) == 2:
-		return http.StatusOK, []map[string]any{{"id": 1, "code": "044", "name": "Access Bank"}, {"id": 2, "code": "058", "name": "GTBank"}, {"id": 3, "code": "MTN", "name": "MTN Mobile Money"}}, nil
+		if fake.NullBankCatalog {
+			return http.StatusOK, nil, nil
+		}
+		return http.StatusOK, []map[string]any{{"id": 1, "code": "044", "name": "Access Bank"}, {"id": 2, "code": "058", "name": "GTBank"}, {"id": 3, "code": "MTN", "name": "MTN Mobile Money"}, {"id": 4, "code": "BRANCH", "name": "Branch Bank"}}, nil
+	case segments[0] == "banks" && len(segments) == 3 && segments[2] == "branches":
+		if fake.NullBankBranchCatalog {
+			return http.StatusOK, nil, nil
+		}
+		if segments[1] == "4" {
+			return http.StatusOK, []map[string]any{{"id": 10, "branch_code": "BR-001", "branch_name": "Main Branch", "bank_id": 4}}, nil
+		}
+		return http.StatusOK, []map[string]any{}, nil
 	case segments[0] == "accounts" && len(segments) == 2 && segments[1] == "resolve":
 		number, bank := text(request.body["account_number"]), text(request.body["account_bank"])
 		if number == "" || bank == "" || strings.HasPrefix(number, "0000") {

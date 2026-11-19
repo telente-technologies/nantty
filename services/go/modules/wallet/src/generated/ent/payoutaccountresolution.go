@@ -26,6 +26,8 @@ type PayoutAccountResolution struct {
 	CountryCode string `json:"country_code,omitempty"`
 	// BankCode holds the value of the "bank_code" field.
 	BankCode string `json:"bank_code,omitempty"`
+	// BranchCode holds the value of the "branch_code" field.
+	BranchCode string `json:"branch_code,omitempty"`
 	// BankName holds the value of the "bank_name" field.
 	BankName string `json:"bank_name,omitempty"`
 	// AccountNumberCiphertext holds the value of the "account_number_ciphertext" field.
@@ -48,7 +50,7 @@ func (*PayoutAccountResolution) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case payoutaccountresolution.FieldAccountNumberCiphertext:
 			values[i] = new([]byte)
-		case payoutaccountresolution.FieldUserID, payoutaccountresolution.FieldCountryCode, payoutaccountresolution.FieldBankCode, payoutaccountresolution.FieldBankName, payoutaccountresolution.FieldAccountNumberLast4, payoutaccountresolution.FieldAccountName:
+		case payoutaccountresolution.FieldUserID, payoutaccountresolution.FieldCountryCode, payoutaccountresolution.FieldBankCode, payoutaccountresolution.FieldBranchCode, payoutaccountresolution.FieldBankName, payoutaccountresolution.FieldAccountNumberLast4, payoutaccountresolution.FieldAccountName:
 			values[i] = new(sql.NullString)
 		case payoutaccountresolution.FieldCreatedAt, payoutaccountresolution.FieldExpiresAt, payoutaccountresolution.FieldUsedAt:
 			values[i] = new(sql.NullTime)
@@ -98,6 +100,12 @@ func (_m *PayoutAccountResolution) assignValues(columns []string, values []any) 
 				return fmt.Errorf("unexpected type %T for field bank_code", values[i])
 			} else if value.Valid {
 				_m.BankCode = value.String
+			}
+		case payoutaccountresolution.FieldBranchCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field branch_code", values[i])
+			} else if value.Valid {
+				_m.BranchCode = value.String
 			}
 		case payoutaccountresolution.FieldBankName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -183,6 +191,9 @@ func (_m *PayoutAccountResolution) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("bank_code=")
 	builder.WriteString(_m.BankCode)
+	builder.WriteString(", ")
+	builder.WriteString("branch_code=")
+	builder.WriteString(_m.BranchCode)
 	builder.WriteString(", ")
 	builder.WriteString("bank_name=")
 	builder.WriteString(_m.BankName)
