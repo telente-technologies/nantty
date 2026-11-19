@@ -50,12 +50,14 @@ export interface IdentityDocumentTypes {
   readonly idNumberTypes: readonly { readonly country: string; readonly type: string; readonly label: string; readonly regex: string; readonly requiredFields?: readonly string[]; readonly bankCode?: string }[];
   readonly availability: { readonly documentVerification: boolean; readonly enhancedDocumentVerification: boolean; readonly idNumberVerification: boolean };
   readonly enhancedDocumentEntitlementStatus?: "not_configured" | "available" | "unavailable";
+  readonly idNumberVerificationStatus?: "not_configured" | "available" | "unavailable";
 }
 
 export interface IdentityDocumentCountries {
   readonly countries: readonly { readonly code: string; readonly name: string }[];
   readonly catalogSource?: "provider" | "preview";
   readonly availability: { readonly documentVerification: boolean; readonly enhancedDocumentVerification: boolean; readonly idNumberVerification: boolean };
+  readonly idNumberVerificationStatus?: "not_configured" | "available" | "unavailable";
 }
 
 export interface IdentityCaptureChoice {
