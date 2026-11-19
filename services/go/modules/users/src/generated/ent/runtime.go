@@ -1899,70 +1899,74 @@ func init() {
 	verificationcaseDescSmileJobID := verificationcaseFields[10].Descriptor()
 	// verificationcase.SmileJobIDValidator is a validator for the "smile_job_id" field. It is called by the builders before save.
 	verificationcase.SmileJobIDValidator = verificationcaseDescSmileJobID.Validators[0].(func(string) error)
+	// verificationcaseDescSmileUserID is the schema descriptor for smile_user_id field.
+	verificationcaseDescSmileUserID := verificationcaseFields[11].Descriptor()
+	// verificationcase.SmileUserIDValidator is a validator for the "smile_user_id" field. It is called by the builders before save.
+	verificationcase.SmileUserIDValidator = verificationcaseDescSmileUserID.Validators[0].(func(string) error)
 	// verificationcaseDescSmileReference is the schema descriptor for smile_reference field.
-	verificationcaseDescSmileReference := verificationcaseFields[11].Descriptor()
+	verificationcaseDescSmileReference := verificationcaseFields[12].Descriptor()
 	// verificationcase.DefaultSmileReference holds the default value on creation for the smile_reference field.
 	verificationcase.DefaultSmileReference = verificationcaseDescSmileReference.Default.(string)
 	// verificationcase.SmileReferenceValidator is a validator for the "smile_reference" field. It is called by the builders before save.
 	verificationcase.SmileReferenceValidator = verificationcaseDescSmileReference.Validators[0].(func(string) error)
 	// verificationcaseDescSmileProduct is the schema descriptor for smile_product field.
-	verificationcaseDescSmileProduct := verificationcaseFields[12].Descriptor()
+	verificationcaseDescSmileProduct := verificationcaseFields[13].Descriptor()
 	// verificationcase.DefaultSmileProduct holds the default value on creation for the smile_product field.
 	verificationcase.DefaultSmileProduct = verificationcaseDescSmileProduct.Default.(string)
 	// verificationcase.SmileProductValidator is a validator for the "smile_product" field. It is called by the builders before save.
 	verificationcase.SmileProductValidator = verificationcaseDescSmileProduct.Validators[0].(func(string) error)
 	// verificationcaseDescSmileResultCode is the schema descriptor for smile_result_code field.
-	verificationcaseDescSmileResultCode := verificationcaseFields[13].Descriptor()
+	verificationcaseDescSmileResultCode := verificationcaseFields[14].Descriptor()
 	// verificationcase.DefaultSmileResultCode holds the default value on creation for the smile_result_code field.
 	verificationcase.DefaultSmileResultCode = verificationcaseDescSmileResultCode.Default.(string)
 	// verificationcase.SmileResultCodeValidator is a validator for the "smile_result_code" field. It is called by the builders before save.
 	verificationcase.SmileResultCodeValidator = verificationcaseDescSmileResultCode.Validators[0].(func(string) error)
 	// verificationcaseDescDocumentType is the schema descriptor for document_type field.
-	verificationcaseDescDocumentType := verificationcaseFields[14].Descriptor()
+	verificationcaseDescDocumentType := verificationcaseFields[15].Descriptor()
 	// verificationcase.DefaultDocumentType holds the default value on creation for the document_type field.
 	verificationcase.DefaultDocumentType = verificationcaseDescDocumentType.Default.(string)
 	// verificationcase.DocumentTypeValidator is a validator for the "document_type" field. It is called by the builders before save.
 	verificationcase.DocumentTypeValidator = verificationcaseDescDocumentType.Validators[0].(func(string) error)
 	// verificationcaseDescDocumentCountry is the schema descriptor for document_country field.
-	verificationcaseDescDocumentCountry := verificationcaseFields[15].Descriptor()
+	verificationcaseDescDocumentCountry := verificationcaseFields[16].Descriptor()
 	// verificationcase.DefaultDocumentCountry holds the default value on creation for the document_country field.
 	verificationcase.DefaultDocumentCountry = verificationcaseDescDocumentCountry.Default.(string)
 	// verificationcase.DocumentCountryValidator is a validator for the "document_country" field. It is called by the builders before save.
 	verificationcase.DocumentCountryValidator = verificationcaseDescDocumentCountry.Validators[0].(func(string) error)
 	// verificationcaseDescLivenessResult is the schema descriptor for liveness_result field.
-	verificationcaseDescLivenessResult := verificationcaseFields[16].Descriptor()
+	verificationcaseDescLivenessResult := verificationcaseFields[17].Descriptor()
 	// verificationcase.DefaultLivenessResult holds the default value on creation for the liveness_result field.
 	verificationcase.DefaultLivenessResult = verificationcaseDescLivenessResult.Default.(string)
 	// verificationcase.LivenessResultValidator is a validator for the "liveness_result" field. It is called by the builders before save.
 	verificationcase.LivenessResultValidator = verificationcaseDescLivenessResult.Validators[0].(func(string) error)
 	// verificationcaseDescDocumentResult is the schema descriptor for document_result field.
-	verificationcaseDescDocumentResult := verificationcaseFields[17].Descriptor()
+	verificationcaseDescDocumentResult := verificationcaseFields[18].Descriptor()
 	// verificationcase.DefaultDocumentResult holds the default value on creation for the document_result field.
 	verificationcase.DefaultDocumentResult = verificationcaseDescDocumentResult.Default.(string)
 	// verificationcase.DocumentResultValidator is a validator for the "document_result" field. It is called by the builders before save.
 	verificationcase.DocumentResultValidator = verificationcaseDescDocumentResult.Validators[0].(func(string) error)
 	// verificationcaseDescFaceMatchResult is the schema descriptor for face_match_result field.
-	verificationcaseDescFaceMatchResult := verificationcaseFields[18].Descriptor()
+	verificationcaseDescFaceMatchResult := verificationcaseFields[19].Descriptor()
 	// verificationcase.DefaultFaceMatchResult holds the default value on creation for the face_match_result field.
 	verificationcase.DefaultFaceMatchResult = verificationcaseDescFaceMatchResult.Default.(string)
 	// verificationcase.FaceMatchResultValidator is a validator for the "face_match_result" field. It is called by the builders before save.
 	verificationcase.FaceMatchResultValidator = verificationcaseDescFaceMatchResult.Validators[0].(func(string) error)
 	// verificationcaseDescDatabaseResult is the schema descriptor for database_result field.
-	verificationcaseDescDatabaseResult := verificationcaseFields[19].Descriptor()
+	verificationcaseDescDatabaseResult := verificationcaseFields[20].Descriptor()
 	// verificationcase.DefaultDatabaseResult holds the default value on creation for the database_result field.
 	verificationcase.DefaultDatabaseResult = verificationcaseDescDatabaseResult.Default.(string)
 	// verificationcase.DatabaseResultValidator is a validator for the "database_result" field. It is called by the builders before save.
 	verificationcase.DatabaseResultValidator = verificationcaseDescDatabaseResult.Validators[0].(func(string) error)
 	// verificationcaseDescFaceMatchConfidence is the schema descriptor for face_match_confidence field.
-	verificationcaseDescFaceMatchConfidence := verificationcaseFields[20].Descriptor()
+	verificationcaseDescFaceMatchConfidence := verificationcaseFields[21].Descriptor()
 	// verificationcase.DefaultFaceMatchConfidence holds the default value on creation for the face_match_confidence field.
 	verificationcase.DefaultFaceMatchConfidence = verificationcaseDescFaceMatchConfidence.Default.(float64)
 	// verificationcaseDescNameMatchScore is the schema descriptor for name_match_score field.
-	verificationcaseDescNameMatchScore := verificationcaseFields[21].Descriptor()
+	verificationcaseDescNameMatchScore := verificationcaseFields[22].Descriptor()
 	// verificationcase.DefaultNameMatchScore holds the default value on creation for the name_match_score field.
 	verificationcase.DefaultNameMatchScore = verificationcaseDescNameMatchScore.Default.(float64)
 	// verificationcaseDescTrustScore is the schema descriptor for trust_score field.
-	verificationcaseDescTrustScore := verificationcaseFields[22].Descriptor()
+	verificationcaseDescTrustScore := verificationcaseFields[23].Descriptor()
 	// verificationcase.DefaultTrustScore holds the default value on creation for the trust_score field.
 	verificationcase.DefaultTrustScore = verificationcaseDescTrustScore.Default.(int)
 	// verificationcase.TrustScoreValidator is a validator for the "trust_score" field. It is called by the builders before save.
@@ -1982,43 +1986,43 @@ func init() {
 		}
 	}()
 	// verificationcaseDescEligibleAtPayment is the schema descriptor for eligible_at_payment field.
-	verificationcaseDescEligibleAtPayment := verificationcaseFields[23].Descriptor()
+	verificationcaseDescEligibleAtPayment := verificationcaseFields[24].Descriptor()
 	// verificationcase.DefaultEligibleAtPayment holds the default value on creation for the eligible_at_payment field.
 	verificationcase.DefaultEligibleAtPayment = verificationcaseDescEligibleAtPayment.Default.(bool)
 	// verificationcaseDescDocumentFingerprint is the schema descriptor for document_fingerprint field.
-	verificationcaseDescDocumentFingerprint := verificationcaseFields[24].Descriptor()
+	verificationcaseDescDocumentFingerprint := verificationcaseFields[25].Descriptor()
 	// verificationcase.DefaultDocumentFingerprint holds the default value on creation for the document_fingerprint field.
 	verificationcase.DefaultDocumentFingerprint = verificationcaseDescDocumentFingerprint.Default.(string)
 	// verificationcase.DocumentFingerprintValidator is a validator for the "document_fingerprint" field. It is called by the builders before save.
 	verificationcase.DocumentFingerprintValidator = verificationcaseDescDocumentFingerprint.Validators[0].(func(string) error)
 	// verificationcaseDescDecisionReasons is the schema descriptor for decision_reasons field.
-	verificationcaseDescDecisionReasons := verificationcaseFields[25].Descriptor()
+	verificationcaseDescDecisionReasons := verificationcaseFields[26].Descriptor()
 	// verificationcase.DefaultDecisionReasons holds the default value on creation for the decision_reasons field.
 	verificationcase.DefaultDecisionReasons = verificationcaseDescDecisionReasons.Default.([]string)
 	// verificationcaseDescFraudSignals is the schema descriptor for fraud_signals field.
-	verificationcaseDescFraudSignals := verificationcaseFields[26].Descriptor()
+	verificationcaseDescFraudSignals := verificationcaseFields[27].Descriptor()
 	// verificationcase.DefaultFraudSignals holds the default value on creation for the fraud_signals field.
 	verificationcase.DefaultFraudSignals = verificationcaseDescFraudSignals.Default.([]string)
 	// verificationcaseDescDecisionReason is the schema descriptor for decision_reason field.
-	verificationcaseDescDecisionReason := verificationcaseFields[27].Descriptor()
+	verificationcaseDescDecisionReason := verificationcaseFields[28].Descriptor()
 	// verificationcase.DefaultDecisionReason holds the default value on creation for the decision_reason field.
 	verificationcase.DefaultDecisionReason = verificationcaseDescDecisionReason.Default.(string)
 	// verificationcase.DecisionReasonValidator is a validator for the "decision_reason" field. It is called by the builders before save.
 	verificationcase.DecisionReasonValidator = verificationcaseDescDecisionReason.Validators[0].(func(string) error)
 	// verificationcaseDescDecidedByName is the schema descriptor for decided_by_name field.
-	verificationcaseDescDecidedByName := verificationcaseFields[28].Descriptor()
+	verificationcaseDescDecidedByName := verificationcaseFields[29].Descriptor()
 	// verificationcase.DefaultDecidedByName holds the default value on creation for the decided_by_name field.
 	verificationcase.DefaultDecidedByName = verificationcaseDescDecidedByName.Default.(string)
 	// verificationcase.DecidedByNameValidator is a validator for the "decided_by_name" field. It is called by the builders before save.
 	verificationcase.DecidedByNameValidator = verificationcaseDescDecidedByName.Validators[0].(func(string) error)
 	// verificationcaseDescCallbackCount is the schema descriptor for callback_count field.
-	verificationcaseDescCallbackCount := verificationcaseFields[31].Descriptor()
+	verificationcaseDescCallbackCount := verificationcaseFields[32].Descriptor()
 	// verificationcase.DefaultCallbackCount holds the default value on creation for the callback_count field.
 	verificationcase.DefaultCallbackCount = verificationcaseDescCallbackCount.Default.(int)
 	// verificationcase.CallbackCountValidator is a validator for the "callback_count" field. It is called by the builders before save.
 	verificationcase.CallbackCountValidator = verificationcaseDescCallbackCount.Validators[0].(func(int) error)
 	// verificationcaseDescUpdatedAt is the schema descriptor for updated_at field.
-	verificationcaseDescUpdatedAt := verificationcaseFields[32].Descriptor()
+	verificationcaseDescUpdatedAt := verificationcaseFields[33].Descriptor()
 	// verificationcase.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	verificationcase.DefaultUpdatedAt = verificationcaseDescUpdatedAt.Default.(func() time.Time)
 	// verificationcase.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

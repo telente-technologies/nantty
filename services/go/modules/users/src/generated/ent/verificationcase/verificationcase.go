@@ -39,6 +39,8 @@ const (
 	FieldConsentAt = "consent_at"
 	// FieldSmileJobID holds the string denoting the smile_job_id field in the database.
 	FieldSmileJobID = "smile_job_id"
+	// FieldSmileUserID holds the string denoting the smile_user_id field in the database.
+	FieldSmileUserID = "smile_user_id"
 	// FieldSmileReference holds the string denoting the smile_reference field in the database.
 	FieldSmileReference = "smile_reference"
 	// FieldSmileProduct holds the string denoting the smile_product field in the database.
@@ -102,6 +104,7 @@ var Columns = []string{
 	FieldConsentVersion,
 	FieldConsentAt,
 	FieldSmileJobID,
+	FieldSmileUserID,
 	FieldSmileReference,
 	FieldSmileProduct,
 	FieldSmileResultCode,
@@ -155,6 +158,8 @@ var (
 	ConsentVersionValidator func(string) error
 	// SmileJobIDValidator is a validator for the "smile_job_id" field. It is called by the builders before save.
 	SmileJobIDValidator func(string) error
+	// SmileUserIDValidator is a validator for the "smile_user_id" field. It is called by the builders before save.
+	SmileUserIDValidator func(string) error
 	// DefaultSmileReference holds the default value on creation for the "smile_reference" field.
 	DefaultSmileReference string
 	// SmileReferenceValidator is a validator for the "smile_reference" field. It is called by the builders before save.
@@ -378,6 +383,11 @@ func ByConsentAt(opts ...sql.OrderTermOption) OrderOption {
 // BySmileJobID orders the results by the smile_job_id field.
 func BySmileJobID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSmileJobID, opts...).ToFunc()
+}
+
+// BySmileUserID orders the results by the smile_user_id field.
+func BySmileUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSmileUserID, opts...).ToFunc()
 }
 
 // BySmileReference orders the results by the smile_reference field.

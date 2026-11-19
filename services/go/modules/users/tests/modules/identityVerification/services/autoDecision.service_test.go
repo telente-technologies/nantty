@@ -25,7 +25,7 @@ func cleanResult() SmileVerificationResult {
 }
 
 func cleanInput() AutoDecisionInput {
-	return AutoDecisionInput{Result: cleanResult(), NameMatchScore: 0.95, TrustScore: 80, EligibleAtPayment: true}
+	return AutoDecisionInput{Result: cleanResult(), Product: "document_verification", NameMatchScore: 0.95, TrustScore: 80, EligibleAtPayment: true}
 }
 
 func TestAutoDecisionMatrix(t *testing.T) {
@@ -52,6 +52,11 @@ func TestAutoDecisionMatrix(t *testing.T) {
 		{"ID reused by another account", func(input *AutoDecisionInput) { input.DocumentReusedByPeer = true }, false, "document_used_by_another_account", "id_reused_across_accounts"},
 		{"gold without approved business documents", func(input *AutoDecisionInput) { input.IsGold = true }, false, "business_documents_not_approved", ""},
 		{"gold with approved business documents", func(input *AutoDecisionInput) { input.IsGold, input.GoldBusinessApproved = true, true }, true, "", ""},
+		{"provider risk requires human review", func(input *AutoDecisionInput) { input.Result.ProviderRiskFlagged = true }, false, "provider_risk_requires_review", "provider_risk_flagged"},
+		{"provider identity mismatch requires human review", func(input *AutoDecisionInput) { input.Result.SelectedIdentityMismatch = true }, false, "provider_identity_type_mismatch", ""},
+		{"documented provider reason is recorded and requires review", func(input *AutoDecisionInput) { input.Result.ProviderReasonCode = "service_unavailable" }, false, "smile_reason_service_unavailable", ""},
+		{"unrecognized provider reason fails closed without retaining its text", func(input *AutoDecisionInput) { input.Result.ProviderReasonUnrecognized = true }, false, "provider_result_reason_unrecognized", ""},
+		{"unknown provider product fails closed", func(input *AutoDecisionInput) { input.Product = "unexpected_product" }, false, "unsupported_verification_product", ""},
 	}
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -71,5 +76,45 @@ func TestAutoDecisionMatrix(t *testing.T) {
 				t.Fatalf("unexpected fraud signals %v", decision.FraudSignals)
 			}
 		})
+	}
+}
+
+func TestEnhancedDocumentVerificationRequiresAuthorityMatch(t *testing.T) {
+	input := cleanInput()
+	input.Product = "enhanced_document_verification"
+	input.Result.DatabaseLookup = CheckNotDone
+	if decision := services.DecideVerificationCase(input); decision.Approve || !slices.Contains(decision.Reasons, "government_lookup_not_matched") {
+		t.Fatalf("Enhanced Document Verification must require its issuer check: %+v", decision)
+	}
+	input.Result.DatabaseLookup = LookupMatched
+	if decision := services.DecideVerificationCase(input); !decision.Approve {
+		t.Fatalf("a clear Enhanced Document Verification result may pass all independent Nantty checks: %+v", decision)
+	}
+}
+
+func TestEnhancedKycRequiresMatchedGovernmentRecordWithoutInventingBiometricChecks(t *testing.T) {
+	input := cleanInput()
+	input.Product = "enhanced_kyc"
+	input.Result = SmileVerificationResult{Liveness: CheckNotDone, Document: CheckNotDone, FaceMatch: CheckNotDone, DatabaseLookup: LookupMatched}
+	if decision := services.DecideVerificationCase(input); !decision.Approve {
+		t.Fatalf("clear Enhanced KYC result with independent account checks should approve: %v", decision.Reasons)
+	}
+	input.Result.DatabaseLookup = CheckReview
+	if decision := services.DecideVerificationCase(input); decision.Approve || !slices.Contains(decision.Reasons, "government_lookup_not_matched") {
+		t.Fatalf("unmatched NIN must not approve: %+v", decision)
+	}
+	input.Result.DatabaseLookup, input.Result.Deceased = LookupMatched, true
+	if decision := services.DecideVerificationCase(input); decision.Approve || !slices.Contains(decision.Reasons, "id_authority_reports_deceased") {
+		t.Fatalf("a record explicitly marked deceased must be routed to review: %+v", decision)
+	}
+}
+
+func TestEnhancedDocumentVerificationDoesNotApproveDeceasedAuthorityRecord(t *testing.T) {
+	input := cleanInput()
+	input.Product = "enhanced_document_verification"
+	input.Result.Deceased = true
+	decision := services.DecideVerificationCase(input)
+	if decision.Approve || !slices.Contains(decision.Reasons, "id_authority_reports_deceased") {
+		t.Fatalf("an Enhanced Document Verification authority record marked deceased must be routed to review: %+v", decision)
 	}
 }

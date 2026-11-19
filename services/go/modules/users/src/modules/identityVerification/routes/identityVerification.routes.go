@@ -20,10 +20,14 @@ func MountIdentityVerificationRoutes(mux *http.ServeMux, container *container.Co
 	mux.Handle("POST /api/v1/verification/eligibility/request", user(controller.Request))
 	mux.Handle("GET /api/v1/verification/document-types", user(controller.DocumentTypes))
 	mux.Handle("POST /api/v1/verification/cases/{caseId}/capture", user(controller.StartCapture))
+	mux.Handle("POST /api/v1/verification/cases/{caseId}/capture/cancel", user(controller.CancelCapture))
 	mux.HandleFunc("POST /api/v1/webhooks/smile-id", controller.SmileCallback)
+	mux.HandleFunc("POST /api/v1/webhooks/smile-id/web-sdk", controller.SmileCallback)
+	mux.HandleFunc("POST /api/v1/webhooks/smile-id/hosted-link", controller.SmileCallback)
 
 	mux.Handle("GET /api/v1/admin/verification-cases", guard.RequireStaff("verification:review", false)(http.HandlerFunc(controller.ListCases)))
 	mux.Handle("GET /api/v1/admin/verification-cases/{caseId}", guard.RequireStaff("verification:review", false)(http.HandlerFunc(controller.GetCase)))
 	mux.Handle("POST /api/v1/admin/verification-cases/{caseId}/approve", guard.RequireStaff("verification:review", true)(controller.DecisionHandler(decideverificationcase.ActionApprove)))
 	mux.Handle("POST /api/v1/admin/verification-cases/{caseId}/reject", guard.RequireStaff("verification:review", true)(controller.DecisionHandler(decideverificationcase.ActionReject)))
+	mux.Handle("POST /api/v1/admin/verification-cases/{caseId}/replay-callback", guard.RequireStaff("verification:review", true)(http.HandlerFunc(controller.ReplaySmileCallback)))
 }

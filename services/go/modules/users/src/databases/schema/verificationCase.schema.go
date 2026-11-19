@@ -30,6 +30,7 @@ func (VerificationCase) Fields() []ent.Field {
 		field.String("consent_version").Default("").MaxLen(40),
 		field.Time("consent_at").Optional().Nillable(),
 		field.String("smile_job_id").Optional().Nillable().MaxLen(80).Unique(),
+		field.String("smile_user_id").Optional().Nillable().MaxLen(120).Unique(),
 		field.String("smile_reference").Default("").MaxLen(80),
 		field.String("smile_product").Default("").MaxLen(40),
 		field.String("smile_result_code").Default("").MaxLen(10),

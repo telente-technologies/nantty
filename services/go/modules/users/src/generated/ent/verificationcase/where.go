@@ -100,6 +100,11 @@ func SmileJobID(v string) predicate.VerificationCase {
 	return predicate.VerificationCase(sql.FieldEQ(FieldSmileJobID, v))
 }
 
+// SmileUserID applies equality check predicate on the "smile_user_id" field. It's identical to SmileUserIDEQ.
+func SmileUserID(v string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldEQ(FieldSmileUserID, v))
+}
+
 // SmileReference applies equality check predicate on the "smile_reference" field. It's identical to SmileReferenceEQ.
 func SmileReference(v string) predicate.VerificationCase {
 	return predicate.VerificationCase(sql.FieldEQ(FieldSmileReference, v))
@@ -763,6 +768,81 @@ func SmileJobIDEqualFold(v string) predicate.VerificationCase {
 // SmileJobIDContainsFold applies the ContainsFold predicate on the "smile_job_id" field.
 func SmileJobIDContainsFold(v string) predicate.VerificationCase {
 	return predicate.VerificationCase(sql.FieldContainsFold(FieldSmileJobID, v))
+}
+
+// SmileUserIDEQ applies the EQ predicate on the "smile_user_id" field.
+func SmileUserIDEQ(v string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldEQ(FieldSmileUserID, v))
+}
+
+// SmileUserIDNEQ applies the NEQ predicate on the "smile_user_id" field.
+func SmileUserIDNEQ(v string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldNEQ(FieldSmileUserID, v))
+}
+
+// SmileUserIDIn applies the In predicate on the "smile_user_id" field.
+func SmileUserIDIn(vs ...string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldIn(FieldSmileUserID, vs...))
+}
+
+// SmileUserIDNotIn applies the NotIn predicate on the "smile_user_id" field.
+func SmileUserIDNotIn(vs ...string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldNotIn(FieldSmileUserID, vs...))
+}
+
+// SmileUserIDGT applies the GT predicate on the "smile_user_id" field.
+func SmileUserIDGT(v string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldGT(FieldSmileUserID, v))
+}
+
+// SmileUserIDGTE applies the GTE predicate on the "smile_user_id" field.
+func SmileUserIDGTE(v string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldGTE(FieldSmileUserID, v))
+}
+
+// SmileUserIDLT applies the LT predicate on the "smile_user_id" field.
+func SmileUserIDLT(v string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldLT(FieldSmileUserID, v))
+}
+
+// SmileUserIDLTE applies the LTE predicate on the "smile_user_id" field.
+func SmileUserIDLTE(v string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldLTE(FieldSmileUserID, v))
+}
+
+// SmileUserIDContains applies the Contains predicate on the "smile_user_id" field.
+func SmileUserIDContains(v string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldContains(FieldSmileUserID, v))
+}
+
+// SmileUserIDHasPrefix applies the HasPrefix predicate on the "smile_user_id" field.
+func SmileUserIDHasPrefix(v string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldHasPrefix(FieldSmileUserID, v))
+}
+
+// SmileUserIDHasSuffix applies the HasSuffix predicate on the "smile_user_id" field.
+func SmileUserIDHasSuffix(v string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldHasSuffix(FieldSmileUserID, v))
+}
+
+// SmileUserIDIsNil applies the IsNil predicate on the "smile_user_id" field.
+func SmileUserIDIsNil() predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldIsNull(FieldSmileUserID))
+}
+
+// SmileUserIDNotNil applies the NotNil predicate on the "smile_user_id" field.
+func SmileUserIDNotNil() predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldNotNull(FieldSmileUserID))
+}
+
+// SmileUserIDEqualFold applies the EqualFold predicate on the "smile_user_id" field.
+func SmileUserIDEqualFold(v string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldEqualFold(FieldSmileUserID, v))
+}
+
+// SmileUserIDContainsFold applies the ContainsFold predicate on the "smile_user_id" field.
+func SmileUserIDContainsFold(v string) predicate.VerificationCase {
+	return predicate.VerificationCase(sql.FieldContainsFold(FieldSmileUserID, v))
 }
 
 // SmileReferenceEQ applies the EQ predicate on the "smile_reference" field.

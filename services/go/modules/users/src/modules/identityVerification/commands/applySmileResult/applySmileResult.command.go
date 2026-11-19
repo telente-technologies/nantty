@@ -8,7 +8,11 @@ const (
 )
 
 type Command struct {
-	RawBody []byte
+	RawBody   []byte
+	Signature string
+	Timestamp string
+	JobId     string
+	UserId    string
 }
 
 type Result struct {

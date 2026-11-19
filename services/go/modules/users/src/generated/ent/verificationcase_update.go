@@ -139,6 +139,26 @@ func (_u *VerificationCaseUpdate) ClearSmileJobID() *VerificationCaseUpdate {
 	return _u
 }
 
+// SetSmileUserID sets the "smile_user_id" field.
+func (_u *VerificationCaseUpdate) SetSmileUserID(v string) *VerificationCaseUpdate {
+	_u.mutation.SetSmileUserID(v)
+	return _u
+}
+
+// SetNillableSmileUserID sets the "smile_user_id" field if the given value is not nil.
+func (_u *VerificationCaseUpdate) SetNillableSmileUserID(v *string) *VerificationCaseUpdate {
+	if v != nil {
+		_u.SetSmileUserID(*v)
+	}
+	return _u
+}
+
+// ClearSmileUserID clears the value of the "smile_user_id" field.
+func (_u *VerificationCaseUpdate) ClearSmileUserID() *VerificationCaseUpdate {
+	_u.mutation.ClearSmileUserID()
+	return _u
+}
+
 // SetSmileReference sets the "smile_reference" field.
 func (_u *VerificationCaseUpdate) SetSmileReference(v string) *VerificationCaseUpdate {
 	_u.mutation.SetSmileReference(v)
@@ -548,6 +568,11 @@ func (_u *VerificationCaseUpdate) check() error {
 			return &ValidationError{Name: "smile_job_id", err: fmt.Errorf(`ent: validator failed for field "VerificationCase.smile_job_id": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.SmileUserID(); ok {
+		if err := verificationcase.SmileUserIDValidator(v); err != nil {
+			return &ValidationError{Name: "smile_user_id", err: fmt.Errorf(`ent: validator failed for field "VerificationCase.smile_user_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.SmileReference(); ok {
 		if err := verificationcase.SmileReferenceValidator(v); err != nil {
 			return &ValidationError{Name: "smile_reference", err: fmt.Errorf(`ent: validator failed for field "VerificationCase.smile_reference": %w`, err)}
@@ -659,6 +684,12 @@ func (_u *VerificationCaseUpdate) sqlSave(ctx context.Context) (_node int, err e
 	}
 	if _u.mutation.SmileJobIDCleared() {
 		_spec.ClearField(verificationcase.FieldSmileJobID, field.TypeString)
+	}
+	if value, ok := _u.mutation.SmileUserID(); ok {
+		_spec.SetField(verificationcase.FieldSmileUserID, field.TypeString, value)
+	}
+	if _u.mutation.SmileUserIDCleared() {
+		_spec.ClearField(verificationcase.FieldSmileUserID, field.TypeString)
 	}
 	if value, ok := _u.mutation.SmileReference(); ok {
 		_spec.SetField(verificationcase.FieldSmileReference, field.TypeString, value)
@@ -881,6 +912,26 @@ func (_u *VerificationCaseUpdateOne) SetNillableSmileJobID(v *string) *Verificat
 // ClearSmileJobID clears the value of the "smile_job_id" field.
 func (_u *VerificationCaseUpdateOne) ClearSmileJobID() *VerificationCaseUpdateOne {
 	_u.mutation.ClearSmileJobID()
+	return _u
+}
+
+// SetSmileUserID sets the "smile_user_id" field.
+func (_u *VerificationCaseUpdateOne) SetSmileUserID(v string) *VerificationCaseUpdateOne {
+	_u.mutation.SetSmileUserID(v)
+	return _u
+}
+
+// SetNillableSmileUserID sets the "smile_user_id" field if the given value is not nil.
+func (_u *VerificationCaseUpdateOne) SetNillableSmileUserID(v *string) *VerificationCaseUpdateOne {
+	if v != nil {
+		_u.SetSmileUserID(*v)
+	}
+	return _u
+}
+
+// ClearSmileUserID clears the value of the "smile_user_id" field.
+func (_u *VerificationCaseUpdateOne) ClearSmileUserID() *VerificationCaseUpdateOne {
+	_u.mutation.ClearSmileUserID()
 	return _u
 }
 
@@ -1306,6 +1357,11 @@ func (_u *VerificationCaseUpdateOne) check() error {
 			return &ValidationError{Name: "smile_job_id", err: fmt.Errorf(`ent: validator failed for field "VerificationCase.smile_job_id": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.SmileUserID(); ok {
+		if err := verificationcase.SmileUserIDValidator(v); err != nil {
+			return &ValidationError{Name: "smile_user_id", err: fmt.Errorf(`ent: validator failed for field "VerificationCase.smile_user_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.SmileReference(); ok {
 		if err := verificationcase.SmileReferenceValidator(v); err != nil {
 			return &ValidationError{Name: "smile_reference", err: fmt.Errorf(`ent: validator failed for field "VerificationCase.smile_reference": %w`, err)}
@@ -1434,6 +1490,12 @@ func (_u *VerificationCaseUpdateOne) sqlSave(ctx context.Context) (_node *Verifi
 	}
 	if _u.mutation.SmileJobIDCleared() {
 		_spec.ClearField(verificationcase.FieldSmileJobID, field.TypeString)
+	}
+	if value, ok := _u.mutation.SmileUserID(); ok {
+		_spec.SetField(verificationcase.FieldSmileUserID, field.TypeString, value)
+	}
+	if _u.mutation.SmileUserIDCleared() {
+		_spec.ClearField(verificationcase.FieldSmileUserID, field.TypeString)
 	}
 	if value, ok := _u.mutation.SmileReference(); ok {
 		_spec.SetField(verificationcase.FieldSmileReference, field.TypeString, value)

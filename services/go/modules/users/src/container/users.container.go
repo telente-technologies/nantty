@@ -44,8 +44,11 @@ type OwnedStoreLookup interface {
 }
 
 type IdentityCaptureProvider interface {
-	CreateWebToken(ctx context.Context, userId, jobId, product string) (string, error)
-	CreateSmileLink(ctx context.Context, request integrations.SmileLinkRequest) (string, error)
+	CreateWebToken(ctx context.Context, capture integrations.SmileIdCaptureRequest) (string, error)
+	CreateSmileLink(ctx context.Context, capture integrations.SmileIdCaptureRequest) (string, error)
+	SupportedDocuments(ctx context.Context, country string) ([]integrations.SmileIdDocumentCountry, error)
+	SupportedKycTypes(ctx context.Context, country string) ([]integrations.SmileIdSupportedKycType, error)
+	EnhancedDocumentEntitlements(ctx context.Context) (map[string][]string, error)
 }
 
 type VerificationEligibilityAssessor interface {

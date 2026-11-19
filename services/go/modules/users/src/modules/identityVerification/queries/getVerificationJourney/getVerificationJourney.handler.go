@@ -33,15 +33,16 @@ type Checkmark struct {
 }
 
 type Result struct {
-	ProfileId      string             `json:"profileId"`
-	ProfileType    string             `json:"profileType"`
-	Color          string             `json:"color"`
-	BlackVetting   bool               `json:"blackVetting"`
-	PlanCode       string             `json:"planCode"`
-	ConsentVersion string             `json:"consentVersion"`
-	Eligibility    *Eligibility       `json:"eligibility"`
-	Case           *services.CaseView `json:"case"`
-	Checkmark      *Checkmark         `json:"checkmark"`
+	ProfileId        string             `json:"profileId"`
+	ProfileType      string             `json:"profileType"`
+	Color            string             `json:"color"`
+	BlackVetting     bool               `json:"blackVetting"`
+	PlanCode         string             `json:"planCode"`
+	ConsentVersion   string             `json:"consentVersion"`
+	PrivacyPolicyUrl string             `json:"privacyPolicyUrl"`
+	Eligibility      *Eligibility       `json:"eligibility"`
+	Case             *services.CaseView `json:"case"`
+	Checkmark        *Checkmark         `json:"checkmark"`
 }
 
 type Handler struct {
@@ -53,7 +54,10 @@ func (handler Handler) Execute(ctx context.Context, accountId string) (Result, e
 	if err != nil {
 		return Result{}, err
 	}
-	result := Result{ProfileId: acting.ID.String(), ProfileType: string(acting.ProfileType), ConsentVersion: handler.Container.Settings.Verification.ConsentVersion}
+	result := Result{
+		ProfileId: acting.ID.String(), ProfileType: string(acting.ProfileType), ConsentVersion: handler.Container.Settings.Verification.ConsentVersion,
+		PrivacyPolicyUrl: handler.Container.Settings.Verification.PrivacyPolicyUrl,
+	}
 	if mark, err := handler.Container.Client.ProfileCheckmark.Query().Where(profilecheckmark.ProfileID(acting.ID)).Only(ctx); err == nil {
 		result.Checkmark = &Checkmark{Color: string(mark.Color), Status: string(mark.Status), BadgeVisible: checkmarkservices.BadgeVisible(mark.Status)}
 	} else if !ent.IsNotFound(err) {
@@ -66,7 +70,7 @@ func (handler Handler) Execute(ctx context.Context, accountId string) (Result, e
 	}
 	result.Color, result.PlanCode = color, map[string]string{"blue": "blue", "gold": "gold_only"}[color]
 	if latest, err := handler.Container.Client.VerificationCase.Query().Where(verificationcase.ProfileID(acting.ID)).Order(ent.Desc(verificationcase.FieldCreatedAt)).First(ctx); err == nil {
-		view := services.ConvertCaseToView(latest, false)
+		view := services.ConvertCaseToViewAt(latest, false, handler.Container.Now())
 		result.Case = &view
 	} else if !ent.IsNotFound(err) {
 		return Result{}, err

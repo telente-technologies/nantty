@@ -53,3 +53,21 @@ func TestShareRefundNoticeCarriesTheAmountOnlyWhenSomethingWasRefunded(t *testin
 		}
 	}
 }
+
+func TestSmileProductsSeparatePhotoDocumentsFromIDNumbers(t *testing.T) {
+	if product, ok := services.SmileProductFor(services.VerificationMethodDocument, "US", "PASSPORT"); !ok || product != "document_verification" {
+		t.Fatalf("photo IDs must use standard document verification: %q, %t", product, ok)
+	}
+	if product, ok := services.SmileProductFor(services.VerificationMethodIdNumber, "NG", "NIN_V2"); !ok || product != "enhanced_kyc" {
+		t.Fatalf("configured ID-number checks must use Enhanced KYC: %q, %t", product, ok)
+	}
+	if product, ok := services.SmileProductFor(services.VerificationMethodIdNumber, "CI", "NATIONAL_ID"); !ok || product != "enhanced_kyc" {
+		t.Fatalf("country/type coverage must be driven by Smile's current catalog and the account allowlist: %q, %t", product, ok)
+	}
+	if !services.SmileIdTypeEnabled([]string{"NG:NIN_V2"}, "NG", "NIN_V2") || services.SmileIdTypeEnabled([]string{"NG:NIN_V2"}, "NG", "V_NIN") || services.SmileIdTypeEnabled(nil, "CI", "NATIONAL_ID") {
+		t.Fatal("an ID option must require an exact partner-enabled country/type pair")
+	}
+	if !services.SmileProductEnabled([]string{"document_verification"}, "document_verification") || services.SmileProductEnabled(nil, "enhanced_kyc") {
+		t.Fatal("product availability must require explicit partner-account configuration")
+	}
+}

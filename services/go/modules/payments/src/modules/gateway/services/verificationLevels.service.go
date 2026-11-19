@@ -18,7 +18,7 @@ import (
 
 var (
 	ErrVerificationRequired    = httpserver.NewApiError(http.StatusForbidden, "VERIFICATION_REQUIRED", "Verify your payout details to continue. Nothing you have earned is lost while you verify.")
-	ErrIdentityRequired        = httpserver.NewApiError(http.StatusForbidden, "IDENTITY_VERIFICATION_REQUIRED", "Finish the identity check (selfie and ID) to continue.")
+	ErrIdentityRequired        = httpserver.NewApiError(http.StatusForbidden, "IDENTITY_VERIFICATION_REQUIRED", "Finish the identity check to continue.")
 	ErrVerificationUnavailable = httpserver.NewApiError(http.StatusServiceUnavailable, "VERIFICATION_UNAVAILABLE", "We couldn't confirm your verification. Try again in a moment.")
 )
 

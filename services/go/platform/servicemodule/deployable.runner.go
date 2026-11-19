@@ -36,6 +36,11 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 		}
 	}
 	address := environment.ReadStringOrDefault("HTTP_ADDRESS", ":8080")
+	configuredWriteTimeout := environment.ReadDurationOrDefault("HTTP_WRITE_TIMEOUT", 0)
+	writeTimeout, err := HTTPWriteTimeoutForDeployable(deployableName, configuredWriteTimeout)
+	if err != nil {
+		return err
+	}
 	shutDownTracing, err := telemetry.StartTracingWhenCollectorIsConfigured(ctx, deployableName)
 	if err != nil {
 		return err
@@ -83,7 +88,7 @@ func RunDeployableWithModulesUntilTerminationSignal(deployableName string, facto
 	return RunWithOrderedShutdown(ctx, ShutdownPlan{
 		Workers: workers,
 		Serve: func(serveContext context.Context) error {
-			return httpserver.RunHttpServerUntilContextDone(serveContext, httpserver.ServerOptions{Address: address, Handler: handler, Logger: logger})
+			return httpserver.RunHttpServerUntilContextDone(serveContext, httpserver.ServerOptions{Address: address, Handler: handler, Logger: logger, WriteTimeout: writeTimeout})
 		},
 		Hooks: append(closersForModules(modules), events.CloseSharedRabbitConnections, shutDownTracing),
 	})

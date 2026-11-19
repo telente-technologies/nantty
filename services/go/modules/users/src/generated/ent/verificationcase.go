@@ -43,6 +43,8 @@ type VerificationCase struct {
 	ConsentAt *time.Time `json:"consent_at,omitempty"`
 	// SmileJobID holds the value of the "smile_job_id" field.
 	SmileJobID *string `json:"smile_job_id,omitempty"`
+	// SmileUserID holds the value of the "smile_user_id" field.
+	SmileUserID *string `json:"smile_user_id,omitempty"`
 	// SmileReference holds the value of the "smile_reference" field.
 	SmileReference string `json:"smile_reference,omitempty"`
 	// SmileProduct holds the value of the "smile_product" field.
@@ -103,7 +105,7 @@ func (*VerificationCase) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case verificationcase.FieldTrustScore, verificationcase.FieldCallbackCount:
 			values[i] = new(sql.NullInt64)
-		case verificationcase.FieldColor, verificationcase.FieldSubscriptionID, verificationcase.FieldPlanCode, verificationcase.FieldPaymentChannel, verificationcase.FieldStatus, verificationcase.FieldRefundStatus, verificationcase.FieldConsentVersion, verificationcase.FieldSmileJobID, verificationcase.FieldSmileReference, verificationcase.FieldSmileProduct, verificationcase.FieldSmileResultCode, verificationcase.FieldDocumentType, verificationcase.FieldDocumentCountry, verificationcase.FieldLivenessResult, verificationcase.FieldDocumentResult, verificationcase.FieldFaceMatchResult, verificationcase.FieldDatabaseResult, verificationcase.FieldDocumentFingerprint, verificationcase.FieldDecisionReason, verificationcase.FieldDecidedByName:
+		case verificationcase.FieldColor, verificationcase.FieldSubscriptionID, verificationcase.FieldPlanCode, verificationcase.FieldPaymentChannel, verificationcase.FieldStatus, verificationcase.FieldRefundStatus, verificationcase.FieldConsentVersion, verificationcase.FieldSmileJobID, verificationcase.FieldSmileUserID, verificationcase.FieldSmileReference, verificationcase.FieldSmileProduct, verificationcase.FieldSmileResultCode, verificationcase.FieldDocumentType, verificationcase.FieldDocumentCountry, verificationcase.FieldLivenessResult, verificationcase.FieldDocumentResult, verificationcase.FieldFaceMatchResult, verificationcase.FieldDatabaseResult, verificationcase.FieldDocumentFingerprint, verificationcase.FieldDecisionReason, verificationcase.FieldDecidedByName:
 			values[i] = new(sql.NullString)
 		case verificationcase.FieldCreatedAt, verificationcase.FieldConsentAt, verificationcase.FieldDecidedAt, verificationcase.FieldVerifiedAt, verificationcase.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -203,6 +205,13 @@ func (_m *VerificationCase) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.SmileJobID = new(string)
 				*_m.SmileJobID = value.String
+			}
+		case verificationcase.FieldSmileUserID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field smile_user_id", values[i])
+			} else if value.Valid {
+				_m.SmileUserID = new(string)
+				*_m.SmileUserID = value.String
 			}
 		case verificationcase.FieldSmileReference:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -415,6 +424,11 @@ func (_m *VerificationCase) String() string {
 	builder.WriteString(", ")
 	if v := _m.SmileJobID; v != nil {
 		builder.WriteString("smile_job_id=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.SmileUserID; v != nil {
+		builder.WriteString("smile_user_id=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")

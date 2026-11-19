@@ -15,6 +15,7 @@ type ServerOptions struct {
 	Handler         http.Handler
 	Logger          *slog.Logger
 	ShutdownTimeout time.Duration
+	WriteTimeout    time.Duration
 	OnShutdown      []func(context.Context) error
 }
 
@@ -28,12 +29,15 @@ func RunHttpServerUntilContextDone(ctx context.Context, options ServerOptions) e
 	if options.ShutdownTimeout == 0 {
 		options.ShutdownTimeout = 20 * time.Second
 	}
+	if options.WriteTimeout == 0 {
+		options.WriteTimeout = 30 * time.Second
+	}
 	server := &http.Server{
 		Addr:              options.Address,
 		Handler:           options.Handler,
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       30 * time.Second,
-		WriteTimeout:      30 * time.Second,
+		WriteTimeout:      options.WriteTimeout,
 		IdleTimeout:       120 * time.Second,
 		MaxHeaderBytes:    64 << 10,
 	}

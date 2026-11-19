@@ -157,6 +157,20 @@ func (_c *VerificationCaseCreate) SetNillableSmileJobID(v *string) *Verification
 	return _c
 }
 
+// SetSmileUserID sets the "smile_user_id" field.
+func (_c *VerificationCaseCreate) SetSmileUserID(v string) *VerificationCaseCreate {
+	_c.mutation.SetSmileUserID(v)
+	return _c
+}
+
+// SetNillableSmileUserID sets the "smile_user_id" field if the given value is not nil.
+func (_c *VerificationCaseCreate) SetNillableSmileUserID(v *string) *VerificationCaseCreate {
+	if v != nil {
+		_c.SetSmileUserID(*v)
+	}
+	return _c
+}
+
 // SetSmileReference sets the "smile_reference" field.
 func (_c *VerificationCaseCreate) SetSmileReference(v string) *VerificationCaseCreate {
 	_c.mutation.SetSmileReference(v)
@@ -680,6 +694,11 @@ func (_c *VerificationCaseCreate) check() error {
 			return &ValidationError{Name: "smile_job_id", err: fmt.Errorf(`ent: validator failed for field "VerificationCase.smile_job_id": %w`, err)}
 		}
 	}
+	if v, ok := _c.mutation.SmileUserID(); ok {
+		if err := verificationcase.SmileUserIDValidator(v); err != nil {
+			return &ValidationError{Name: "smile_user_id", err: fmt.Errorf(`ent: validator failed for field "VerificationCase.smile_user_id": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.SmileReference(); !ok {
 		return &ValidationError{Name: "smile_reference", err: errors.New(`ent: missing required field "VerificationCase.smile_reference"`)}
 	}
@@ -892,6 +911,10 @@ func (_c *VerificationCaseCreate) createSpec() (*VerificationCase, *sqlgraph.Cre
 	if value, ok := _c.mutation.SmileJobID(); ok {
 		_spec.SetField(verificationcase.FieldSmileJobID, field.TypeString, value)
 		_node.SmileJobID = &value
+	}
+	if value, ok := _c.mutation.SmileUserID(); ok {
+		_spec.SetField(verificationcase.FieldSmileUserID, field.TypeString, value)
+		_node.SmileUserID = &value
 	}
 	if value, ok := _c.mutation.SmileReference(); ok {
 		_spec.SetField(verificationcase.FieldSmileReference, field.TypeString, value)

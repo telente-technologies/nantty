@@ -34878,6 +34878,7 @@ type VerificationCaseMutation struct {
 	consent_version          *string
 	consent_at               *time.Time
 	smile_job_id             *string
+	smile_user_id            *string
 	smile_reference          *string
 	smile_product            *string
 	smile_result_code        *string
@@ -35472,6 +35473,55 @@ func (m *VerificationCaseMutation) SmileJobIDCleared() bool {
 func (m *VerificationCaseMutation) ResetSmileJobID() {
 	m.smile_job_id = nil
 	delete(m.clearedFields, verificationcase.FieldSmileJobID)
+}
+
+// SetSmileUserID sets the "smile_user_id" field.
+func (m *VerificationCaseMutation) SetSmileUserID(s string) {
+	m.smile_user_id = &s
+}
+
+// SmileUserID returns the value of the "smile_user_id" field in the mutation.
+func (m *VerificationCaseMutation) SmileUserID() (r string, exists bool) {
+	v := m.smile_user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSmileUserID returns the old "smile_user_id" field's value of the VerificationCase entity.
+// If the VerificationCase object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *VerificationCaseMutation) OldSmileUserID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSmileUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSmileUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSmileUserID: %w", err)
+	}
+	return oldValue.SmileUserID, nil
+}
+
+// ClearSmileUserID clears the value of the "smile_user_id" field.
+func (m *VerificationCaseMutation) ClearSmileUserID() {
+	m.smile_user_id = nil
+	m.clearedFields[verificationcase.FieldSmileUserID] = struct{}{}
+}
+
+// SmileUserIDCleared returns if the "smile_user_id" field was cleared in this mutation.
+func (m *VerificationCaseMutation) SmileUserIDCleared() bool {
+	_, ok := m.clearedFields[verificationcase.FieldSmileUserID]
+	return ok
+}
+
+// ResetSmileUserID resets all changes to the "smile_user_id" field.
+func (m *VerificationCaseMutation) ResetSmileUserID() {
+	m.smile_user_id = nil
+	delete(m.clearedFields, verificationcase.FieldSmileUserID)
 }
 
 // SetSmileReference sets the "smile_reference" field.
@@ -36436,7 +36486,7 @@ func (m *VerificationCaseMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *VerificationCaseMutation) Fields() []string {
-	fields := make([]string, 0, 34)
+	fields := make([]string, 0, 35)
 	if m.created_at != nil {
 		fields = append(fields, verificationcase.FieldCreatedAt)
 	}
@@ -36472,6 +36522,9 @@ func (m *VerificationCaseMutation) Fields() []string {
 	}
 	if m.smile_job_id != nil {
 		fields = append(fields, verificationcase.FieldSmileJobID)
+	}
+	if m.smile_user_id != nil {
+		fields = append(fields, verificationcase.FieldSmileUserID)
 	}
 	if m.smile_reference != nil {
 		fields = append(fields, verificationcase.FieldSmileReference)
@@ -36571,6 +36624,8 @@ func (m *VerificationCaseMutation) Field(name string) (ent.Value, bool) {
 		return m.ConsentAt()
 	case verificationcase.FieldSmileJobID:
 		return m.SmileJobID()
+	case verificationcase.FieldSmileUserID:
+		return m.SmileUserID()
 	case verificationcase.FieldSmileReference:
 		return m.SmileReference()
 	case verificationcase.FieldSmileProduct:
@@ -36648,6 +36703,8 @@ func (m *VerificationCaseMutation) OldField(ctx context.Context, name string) (e
 		return m.OldConsentAt(ctx)
 	case verificationcase.FieldSmileJobID:
 		return m.OldSmileJobID(ctx)
+	case verificationcase.FieldSmileUserID:
+		return m.OldSmileUserID(ctx)
 	case verificationcase.FieldSmileReference:
 		return m.OldSmileReference(ctx)
 	case verificationcase.FieldSmileProduct:
@@ -36784,6 +36841,13 @@ func (m *VerificationCaseMutation) SetField(name string, value ent.Value) error 
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSmileJobID(v)
+		return nil
+	case verificationcase.FieldSmileUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSmileUserID(v)
 		return nil
 	case verificationcase.FieldSmileReference:
 		v, ok := value.(string)
@@ -37026,6 +37090,9 @@ func (m *VerificationCaseMutation) ClearedFields() []string {
 	if m.FieldCleared(verificationcase.FieldSmileJobID) {
 		fields = append(fields, verificationcase.FieldSmileJobID)
 	}
+	if m.FieldCleared(verificationcase.FieldSmileUserID) {
+		fields = append(fields, verificationcase.FieldSmileUserID)
+	}
 	if m.FieldCleared(verificationcase.FieldDecidedAt) {
 		fields = append(fields, verificationcase.FieldDecidedAt)
 	}
@@ -37051,6 +37118,9 @@ func (m *VerificationCaseMutation) ClearField(name string) error {
 		return nil
 	case verificationcase.FieldSmileJobID:
 		m.ClearSmileJobID()
+		return nil
+	case verificationcase.FieldSmileUserID:
+		m.ClearSmileUserID()
 		return nil
 	case verificationcase.FieldDecidedAt:
 		m.ClearDecidedAt()
@@ -37101,6 +37171,9 @@ func (m *VerificationCaseMutation) ResetField(name string) error {
 		return nil
 	case verificationcase.FieldSmileJobID:
 		m.ResetSmileJobID()
+		return nil
+	case verificationcase.FieldSmileUserID:
+		m.ResetSmileUserID()
 		return nil
 	case verificationcase.FieldSmileReference:
 		m.ResetSmileReference()

@@ -206,7 +206,7 @@ var (
 		{Name: "handle", Type: field.TypeString, Size: 30},
 		{Name: "representative_name", Type: field.TypeString, Size: 120},
 		{Name: "representative_role", Type: field.TypeString, Size: 120},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"in_review", "awaiting_second_approval", "approved", "rejected", "revoked"}, Default: "in_review"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "in_review", "awaiting_second_approval", "approved", "rejected", "reverification_required", "revoked"}, Default: "in_review"},
 		{Name: "checklist", Type: field.TypeBytes, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "first_approval_by", Type: field.TypeString, Size: 64, Default: ""},
 		{Name: "first_approval_by_name", Type: field.TypeString, Size: 120, Default: ""},
@@ -1240,6 +1240,7 @@ var (
 		{Name: "consent_version", Type: field.TypeString, Size: 40, Default: ""},
 		{Name: "consent_at", Type: field.TypeTime, Nullable: true},
 		{Name: "smile_job_id", Type: field.TypeString, Unique: true, Nullable: true, Size: 80},
+		{Name: "smile_user_id", Type: field.TypeString, Unique: true, Nullable: true, Size: 120},
 		{Name: "smile_reference", Type: field.TypeString, Size: 80, Default: ""},
 		{Name: "smile_product", Type: field.TypeString, Size: 40, Default: ""},
 		{Name: "smile_result_code", Type: field.TypeString, Size: 10, Default: ""},
@@ -1282,7 +1283,7 @@ var (
 			{
 				Name:    "verificationcase_document_fingerprint",
 				Unique:  false,
-				Columns: []*schema.Column{VerificationCasesColumns[26]},
+				Columns: []*schema.Column{VerificationCasesColumns[27]},
 			},
 		},
 	}

@@ -3,6 +3,9 @@ package applysmileresult
 import (
 	"context"
 	"net/http"
+	"strings"
+
+	"github.com/google/uuid"
 
 	"nantty/modules/users/src/container"
 	usersevents "nantty/modules/users/src/events"
@@ -34,31 +37,66 @@ type evaluation struct {
 }
 
 func (handler Handler) Execute(ctx context.Context, command Command) (Result, error) {
-	envelope, err := services.ParseSmileIdCallback(command.RawBody)
+	var envelope services.SmileCallbackEnvelope
+	var err error
+	if command.Signature != "" || command.Timestamp != "" || command.JobId != "" || command.UserId != "" {
+		if handler.Verify == nil || !handler.Verify(command.Timestamp, command.Signature) || !services.SmileCallbackTimestampIsFresh(command.Timestamp, handler.Container.Now()) {
+			return Result{}, ErrCallbackSignatureInvalid
+		}
+		envelope, err = services.ParseSmileIdV3Callback(command.RawBody, command.JobId, command.UserId)
+	} else {
+		envelope, err = services.ParseSmileIdCallback(command.RawBody)
+		if err == nil && (handler.Verify == nil || !handler.Verify(envelope.Timestamp, envelope.Signature) || !envelope.IsFresh(handler.Container.Now())) {
+			return Result{}, ErrCallbackSignatureInvalid
+		}
+	}
 	if err != nil {
 		return Result{}, ErrCallbackMalformed
 	}
-	if handler.Verify == nil || !handler.Verify(envelope.Timestamp, envelope.Signature) || !envelope.IsFresh(handler.Container.Now()) {
-		return Result{}, ErrCallbackSignatureInvalid
+	var row *ent.VerificationCase
+	if envelope.IsV3 {
+		caseId, parseErr := uuid.Parse(envelope.CaseId)
+		if envelope.CaseId != "" && (parseErr != nil || caseId == uuid.Nil) {
+			return Result{}, ErrCallbackMalformed
+		}
+		if envelope.CaseId != "" {
+			row, err = handler.Container.Client.VerificationCase.Query().Where(verificationcase.ID(caseId)).Only(ctx)
+		} else {
+			row, err = handler.Container.Client.VerificationCase.Query().Where(verificationcase.SmileUserID(envelope.UserId)).Only(ctx)
+		}
+	} else {
+		row, err = handler.Container.Client.VerificationCase.Query().Where(verificationcase.SmileJobID(envelope.JobId)).Only(ctx)
 	}
-	row, err := handler.Container.Client.VerificationCase.Query().Where(verificationcase.SmileJobID(envelope.JobId)).Only(ctx)
 	if ent.IsNotFound(err) {
 		return Result{Outcome: OutcomeIgnored}, nil
 	}
 	if err != nil {
 		return Result{}, err
 	}
-	if !envelope.BelongsTo(row.AccountID.String()) {
+	if envelope.IsV3 {
+		if envelope.UserId == "" || !strings.EqualFold(envelope.Product, row.SmileProduct) || (envelope.CaseId != "" && !strings.EqualFold(envelope.CaseId, row.ID.String())) {
+			return Result{}, ErrCallbackSignatureInvalid
+		}
+		if awaitingResult(row.Status) && !services.CaptureAttemptCallbackMatches(row.SmileJobID, row.ID.String(), envelope.CaptureAttemptID, envelope.UserId, row.SmileUserID) {
+			return Result{}, ErrCallbackSignatureInvalid
+		}
+		if !awaitingResult(row.Status) && row.SmileUserID != nil && envelope.UserId != *row.SmileUserID {
+			return Result{}, ErrCallbackSignatureInvalid
+		}
+	} else if !envelope.BelongsTo(row.AccountID.String()) {
 		return Result{}, ErrCallbackSignatureInvalid
 	}
 	if !awaitingResult(row.Status) {
+		if envelope.IsV3 && (row.SmileJobID == nil || *row.SmileJobID != envelope.Result.SmileJobId) {
+			return Result{Outcome: OutcomeIgnored}, nil
+		}
 		return Result{Outcome: OutcomeReplayed}, handler.Container.Client.VerificationCase.UpdateOneID(row.ID).AddCallbackCount(1).Exec(ctx)
 	}
 	evaluated, err := handler.evaluate(ctx, row, envelope)
 	if err != nil {
 		return Result{}, err
 	}
-	fingerprint := envelope.DocumentFingerprint(handler.Container.Settings.Verification.DocumentFingerprintKey)
+	fingerprint := envelope.DocumentFingerprintFor(handler.Container.Settings.Verification.DocumentFingerprintKey, row.DocumentCountry, row.DocumentType)
 	outcome := OutcomeReplayed
 	err = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
 		locked, err := tx.VerificationCase.Query().Where(verificationcase.ID(row.ID)).ForUpdate().Only(ctx)
@@ -66,7 +104,17 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 			return err
 		}
 		if !awaitingResult(locked.Status) {
+			if envelope.IsV3 && (locked.SmileJobID == nil || *locked.SmileJobID != envelope.Result.SmileJobId) {
+				outcome = OutcomeIgnored
+				return nil
+			}
 			return locked.Update().AddCallbackCount(1).Exec(ctx)
+		}
+		if envelope.IsV3 && !strings.EqualFold(envelope.Product, locked.SmileProduct) {
+			return ErrCallbackSignatureInvalid
+		}
+		if envelope.IsV3 && !services.CaptureAttemptCallbackMatches(locked.SmileJobID, locked.ID.String(), envelope.CaptureAttemptID, envelope.UserId, locked.SmileUserID) {
+			return ErrCallbackSignatureInvalid
 		}
 		reused := false
 		if fingerprint != "" {
@@ -75,20 +123,20 @@ func (handler Handler) Execute(ctx context.Context, command Command) (Result, er
 				return err
 			}
 		}
+		result := envelope.Result
+		if !services.SmileResultMatchesSelection(result, locked.DocumentCountry, locked.DocumentType) {
+			result.SelectedIdentityMismatch = true
+		}
 		decision := services.DecideVerificationCase(services.AutoDecisionInput{
-			Result: envelope.Result, NameMatchScore: evaluated.nameScore, TrustScore: evaluated.trust, TrustBlocked: evaluated.trustBlocked || !evaluated.accountActive,
+			Result: result, Product: envelope.Product, NameMatchScore: evaluated.nameScore, TrustScore: evaluated.trust, TrustBlocked: evaluated.trustBlocked || !evaluated.accountActive,
 			EligibleAtPayment: locked.EligibleAtPayment, DocumentReusedByPeer: reused, GoldBusinessApproved: evaluated.goldApproved, IsGold: locked.Color == verificationcase.ColorGold,
 		})
-		result := envelope.Result
 		update := locked.Update().AddCallbackCount(1).SetSmileReference(result.SmileJobId).SetSmileResultCode(result.ResultCode).
 			SetLivenessResult(result.Liveness).SetDocumentResult(result.Document).SetFaceMatchResult(result.FaceMatch).SetDatabaseResult(result.DatabaseLookup).
 			SetFaceMatchConfidence(result.FaceMatchConfidence).SetNameMatchScore(evaluated.nameScore).SetTrustScore(evaluated.trust).
 			SetDocumentFingerprint(fingerprint).SetDecisionReasons(decision.Reasons).SetFraudSignals(decision.FraudSignals)
-		if result.DocumentType != "" {
-			update.SetDocumentType(result.DocumentType)
-		}
-		if result.DocumentCountry != "" {
-			update.SetDocumentCountry(result.DocumentCountry)
+		if envelope.IsV3 {
+			update.SetSmileJobID(result.SmileJobId)
 		}
 		now := handler.Container.Now()
 		if decision.Approve {

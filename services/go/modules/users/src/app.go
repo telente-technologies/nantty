@@ -198,11 +198,10 @@ func createDomainEventPublisher(ctx context.Context, settings configs.UsersSetti
 
 func attachIdentityVerificationClients(usersContainer *container.Container) {
 	settings := usersContainer.Settings.Verification
-	if settings.SmileIdConfigured() {
-		usersContainer.IdentityCapture = &integrations.SmileIdClient{
-			PartnerId: settings.SmileIdPartnerId, ApiKey: settings.SmileIdApiKey, BaseUrl: settings.SmileIdBaseUrl, CallbackUrl: settings.SmileIdCallbackUrl,
-			Http: &http.Client{Timeout: 15 * time.Second}, Now: time.Now,
-		}
+	usersContainer.IdentityCapture = &integrations.SmileIdClient{
+		PartnerId: settings.SmileIdPartnerId, ApiKey: settings.SmileIdApiKey, BaseUrl: settings.SmileIdBaseUrl, CallbackUrl: settings.SmileIdCallbackUrl,
+		WebSdkCallbackUrl: settings.SmileIdWebSdkCallbackUrl, HostedLinkCallbackUrl: settings.SmileIdHostedLinkCallbackUrl,
+		Http: &http.Client{Timeout: 15 * time.Second}, Now: time.Now,
 	}
 	if settings.IntelligenceUrl != "" && settings.IntelligenceSecret != "" {
 		usersContainer.Eligibility = &integrations.IntelligenceEligibilityClient{
