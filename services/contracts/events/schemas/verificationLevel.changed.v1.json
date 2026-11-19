@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://contracts.nantty.com/events/verificationLevel.changed.v1.json",
   "title": "VerificationLevelChanged",
-  "description": "A user's verification level changed. 0 = email only, 1 = payout-verified (withdrawals, creator cash, ads), 2 = identity-verified (Smile ID liveness and face match).",
+  "description": "A user's verification level changed. 0 = email only, 1 = payout-verified (withdrawals, creator cash, ads), 2 = identity-verified through the configured identity-verification product. Required checks vary by product and may include photo-document, liveness, face-match, or ID-number authority checks.",
   "type": "object",
   "additionalProperties": false,
   "required": [
