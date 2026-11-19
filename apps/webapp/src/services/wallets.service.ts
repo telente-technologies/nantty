@@ -13,7 +13,20 @@ export interface Withdrawal {
   readonly id: string;
   readonly amount: import("@/types/money.type").Money;
   readonly status: string;
+  readonly withdrawalStatus?: string;
+  readonly failureReason?: string | null;
   readonly createdAt: string;
+}
+
+export interface BankBranch {
+  readonly code: string;
+  readonly name: string;
+}
+
+export interface PayoutBank {
+  readonly code: string;
+  readonly name: string;
+  readonly countryCode: string;
 }
 
 export const walletsService = {
@@ -22,7 +35,9 @@ export const walletsService = {
   listMyTransactions: () => sendListRequestToWebappServer<WalletTransaction>("/api/v1/wallets/me/transactions"),
   listMyEscrowHolds: () => sendListRequestToWebappServer<EscrowHold>("/api/v1/wallets/me/escrow-holds"),
   listMyPayoutAccounts: () => sendListRequestToWebappServer<PayoutAccount>("/api/v1/wallets/me/payout-accounts"),
-  addPayoutAccount: (input: { readonly bankCode: string; readonly accountNumber: string }, stepUpToken: string) =>
+  listPayoutBanks: (countryCode: string) => sendListRequestToWebappServer<PayoutBank>("/api/v1/banks", { query: { country: countryCode } }),
+  listBankBranches: (countryCode: string, bankCode: string) => sendListRequestToWebappServer<BankBranch>(`/api/v1/banks/${encodeURIComponent(bankCode)}/branches`, { query: { country: countryCode } }),
+  addPayoutAccount: (input: { readonly bankCode: string; readonly branchCode?: string; readonly countryCode: string; readonly accountNumber: string }, stepUpToken: string) =>
     sendRequestToWebappServer<PayoutAccount>("/api/v1/wallets/me/payout-accounts", { method: "POST", body: input, stepUpToken }),
   removePayoutAccount: (payoutAccountId: string, stepUpToken: string) =>
     sendRequestToWebappServer<void>(`/api/v1/wallets/me/payout-accounts/${encodeURIComponent(payoutAccountId)}`, { method: "DELETE", stepUpToken }),

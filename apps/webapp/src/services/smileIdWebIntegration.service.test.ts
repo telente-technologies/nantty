@@ -32,7 +32,7 @@ describe("Smile ID Web SDK result handling", () => {
     assert.equal(await result, "cancelled");
   });
 
-  it("cancels explicit cancellations and provider-marked retryable failures only", async () => {
+  it("cancels only explicit SDK cancellations and leaves provider failures pending", async () => {
     let deliver: ((result: SmileResult) => void) | undefined;
     let cancelCalls = 0;
     Object.defineProperty(globalThis, "window", { configurable: true, value: { location: { origin: "https://nantty.com" }, SmileIdentity: (options: { onResult: (result: SmileResult) => void }) => { deliver = options.onResult; } } });
@@ -49,23 +49,21 @@ describe("Smile ID Web SDK result handling", () => {
     assert.equal(cancelCalls, 1);
 
     Object.defineProperty(globalThis, "window", { configurable: true, value: { location: { origin: "https://nantty.com" }, SmileIdentity: (options: { onResult: (result: SmileResult) => void }) => { deliver = options.onResult; } } });
-    const failed = runSmileIdCapture(session, "https://nantty.com/privacy", async (caseId, attemptId) => {
-      assert.equal(caseId, session.caseId);
-      assert.equal(attemptId, session.captureAttemptId);
+    const failed = runSmileIdCapture(session, "https://nantty.com/privacy", async () => {
       cancelCalls += 1;
       return { cancelled: true };
     });
     await Promise.resolve();
     deliver?.({ status: "failure", product: session.product, error: { error_code: "SUBMISSION_FAILED", message: "provider detail", status: 503, retryable: true } });
-    await assert.rejects(failed, /unsuccessful attempt was closed/i);
-    assert.equal(cancelCalls, 2);
+    await assert.rejects(failed, /only start another session after Nantty confirms this attempt is closed/i);
+    assert.equal(cancelCalls, 1);
 
     Object.defineProperty(globalThis, "window", { configurable: true, value: { location: { origin: "https://nantty.com" }, SmileIdentity: (options: { onResult: (result: SmileResult) => void }) => { deliver = options.onResult; } } });
     const terminal = runSmileIdCapture(session, "https://nantty.com/privacy", async () => { cancelCalls += 1; return { cancelled: true }; });
     await Promise.resolve();
     deliver?.({ status: "failure", product: session.product, error: { error_code: "SUBMISSION_FAILED", message: "provider detail", status: 400, retryable: false } });
     await assert.rejects(terminal, /could not confirm that your check was accepted/i);
-    assert.equal(cancelCalls, 2);
+    assert.equal(cancelCalls, 1);
   });
 
   it("reports success only as submission, never as a verification verdict", async () => {
@@ -109,13 +107,15 @@ describe("Smile ID Web SDK result handling", () => {
     assert.match(smileIdFailureMessage(terminal), /contact Nantty support/i);
   });
 
-  it("keeps the active attempt locked if Nantty cannot confirm cancellation after a retryable failure", async () => {
+  it("does not request cancellation for a retryable provider failure", async () => {
     let deliver: ((result: SmileResult) => void) | undefined;
+    let cancelCalls = 0;
     Object.defineProperty(globalThis, "window", { configurable: true, value: { location: { origin: "https://nantty.com" }, SmileIdentity: (options: { onResult: (result: SmileResult) => void }) => { deliver = options.onResult; } } });
-    const failed = runSmileIdCapture(session, "https://nantty.com/privacy", async () => ({ cancelled: false }));
+    const failed = runSmileIdCapture(session, "https://nantty.com/privacy", async () => { cancelCalls += 1; return { cancelled: false }; });
     await Promise.resolve();
     deliver?.({ status: "failure", product: session.product, error: { error_code: "SESSION_INIT_FAILED", message: "provider detail", status: 503, retryable: true } });
-    await assert.rejects(failed, /could not confirm it was closed/i);
+    await assert.rejects(failed, /only start another session after Nantty confirms this attempt is closed/i);
+    assert.equal(cancelCalls, 0);
   });
 
   it("does not recommend repeating non-retryable document or product rejections", () => {

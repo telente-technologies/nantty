@@ -17,10 +17,6 @@ type SmileIdentityResult =
   | { readonly status: "cancelled"; readonly product?: string }
   | { readonly status: "failure"; readonly error: { readonly error_code: string; readonly message: string; readonly status: number; readonly retryable: boolean }; readonly product?: string };
 
-class SmileIdentityRetryableFailure extends Error {
-  readonly retryable = true;
-}
-
 function validateSmileIdentityResult(result: SmileIdentityResult, expectedProduct: string): SmileIdentityResult {
   if (!result || typeof result !== "object" || !["success", "failure", "cancelled"].includes(result.status)) {
     throw new Error("Smile ID returned an unreadable identity-check result. Refresh your verification status before trying again.");
@@ -48,19 +44,19 @@ export function smileIdFailureMessage(result: Extract<SmileIdentityResult, { sta
       return "The identity check could not be configured. Please contact Nantty support.";
     case "SESSION_INIT_FAILED":
       return result.error.retryable
-        ? "Smile ID could not start this check. Refresh your Nantty status; if the unsuccessful attempt is closed, choose Continue to start a fresh session."
+        ? "Smile ID could not confirm this check. Refresh your Nantty status; only start another session after Nantty confirms this attempt is closed."
         : "The identity check could not start. Please contact Nantty support if this continues.";
     case "SUBMISSION_FAILED":
       return result.error.retryable
-        ? "Smile ID could not confirm this submission. Refresh your Nantty status; only start a new session if Nantty confirms this attempt was closed."
+        ? "Smile ID could not confirm this submission. Refresh your Nantty status; only start another session after Nantty confirms this attempt is closed."
         : "Smile ID could not confirm that your check was accepted. Refresh your verification status or contact Nantty support.";
     case "NOT_PERMITTED":
       return result.error.retryable
-        ? "Smile ID could not run this check right now. Refresh your Nantty status and use Continue to start a fresh session if the unsuccessful attempt was closed."
+        ? "Smile ID could not run this check right now. Refresh your Nantty status; only retry after Nantty confirms this attempt is closed."
         : "This verification method is not available for this check. Refresh your status, then choose another supported ID or contact Nantty support.";
     case "DOCUMENTS_REJECTED":
       return result.error.retryable
-        ? "Smile ID could not accept those document images. Use clear, complete images if you retry with a fresh session."
+        ? "Smile ID could not accept those document images. Refresh your Nantty status; only retry with new images after Nantty confirms this attempt is closed."
         : "Smile ID could not accept those document images. Refresh your status, then choose another supported ID or contact Nantty support.";
     default:
       return "The identity check could not be completed. Refresh your Nantty verification status before trying again or contact support.";
@@ -107,9 +103,7 @@ export async function openSmileIdCapture(session: IdentityCaptureSession, policy
           const validated = validateSmileIdentityResult(result, session.product);
           if (validated.status === "success") resolve("submitted");
           else if (validated.status === "cancelled") resolve("cancelled");
-          else reject(validated.error.retryable
-            ? new SmileIdentityRetryableFailure(smileIdFailureMessage(validated))
-            : new Error(smileIdFailureMessage(validated)));
+          else reject(new Error(smileIdFailureMessage(validated)));
         } catch (error) {
           reject(error instanceof Error ? error : new Error("The identity check could not be completed. Refresh your verification status before trying again."));
         }
@@ -123,21 +117,10 @@ export async function runSmileIdCapture(
   policyUrl: string,
   cancelAttempt: (caseId: string, captureAttemptId: string) => Promise<{ readonly cancelled: boolean }>,
 ): Promise<"submitted" | "cancelled"> {
-  try {
-    const result = await openSmileIdCapture(session, policyUrl);
-    if (result === "cancelled") {
-      const cancellation = await cancelAttempt(session.caseId, session.captureAttemptId);
-      if (!cancellation.cancelled) throw new Error("Nantty could not confirm that this attempt was closed. Refresh your verification status before trying again.");
-    }
-    return result;
-  } catch (error) {
-    if (!(error instanceof SmileIdentityRetryableFailure)) throw error;
-    try {
-      const cancellation = await cancelAttempt(session.caseId, session.captureAttemptId);
-      if (!cancellation.cancelled) throw new Error("Nantty could not confirm that this attempt was closed.", { cause: error });
-    } catch (cancellationError) {
-      throw new Error("Smile ID marked this attempt as retryable, but Nantty could not confirm it was closed. Refresh your verification status; do not start another check while the attempt remains open.", { cause: cancellationError });
-    }
-    throw new Error(`${error.message} The unsuccessful attempt was closed; you can now choose Continue to retry.`, { cause: error });
+  const result = await openSmileIdCapture(session, policyUrl);
+  if (result === "cancelled") {
+    const cancellation = await cancelAttempt(session.caseId, session.captureAttemptId);
+    if (!cancellation.cancelled) throw new Error("Nantty could not confirm that this attempt was closed. Refresh your verification status before trying again.");
   }
+  return result;
 }

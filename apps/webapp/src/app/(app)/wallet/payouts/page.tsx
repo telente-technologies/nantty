@@ -23,19 +23,24 @@ export default function WalletPayoutsPage() {
   const accounts = useQuery({ queryKey: ["wallet", "payout-accounts"], queryFn: () => walletsService.listMyPayoutAccounts() });
   const withdrawals = useQuery({ queryKey: ["wallet", "withdrawals"], queryFn: () => walletsService.listMyWithdrawals() });
   const [bankCode, setBankCode] = useState("");
+  const [branchCode, setBranchCode] = useState("");
+  const [countryCode, setCountryCode] = useState("NG");
   const [accountNumber, setAccountNumber] = useState("");
   const [amountText, setAmountText] = useState("");
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const banks = useQuery({ queryKey: ["banks", countryCode], queryFn: () => walletsService.listPayoutBanks(countryCode), enabled: countryCode === "NG" || countryCode === "GH" });
+  const branches = useQuery({ queryKey: ["banks", countryCode, bankCode, "branches"], queryFn: () => walletsService.listBankBranches(countryCode, bankCode), enabled: /^[A-Z]{2}$/.test(countryCode) && bankCode.trim().length > 0 });
   const { withStepUp, stepUpDialog } = useStepUpPrompt();
   const showMutationError = (mutationError: unknown) => {
     if (!(mutationError instanceof StepUpCancelledError)) setError(readErrorMessageForDisplay(mutationError));
   };
 
   const addAccount = useMutation({
-    mutationFn: () => withStepUp((stepUpToken) => walletsService.addPayoutAccount({ bankCode: bankCode.trim(), accountNumber: accountNumber.trim() }, stepUpToken)),
+    mutationFn: () => withStepUp((stepUpToken) => walletsService.addPayoutAccount({ bankCode: bankCode.trim(), branchCode: branchCode || undefined, countryCode, accountNumber: accountNumber.trim() }, stepUpToken)),
     onSuccess: () => {
       setBankCode("");
+      setBranchCode("");
       setAccountNumber("");
       setError(null);
       void queryClient.invalidateQueries({ queryKey: ["wallet"] });
@@ -68,6 +73,16 @@ export default function WalletPayoutsPage() {
     },
     onError: showMutationError,
   });
+  const cancelWithdrawal = useMutation({
+    mutationFn: (withdrawalId: string) => walletsService.cancelWithdrawal(withdrawalId, createIdempotencyKey("withdrawal_cancel")),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["wallet"] });
+      showToast({ text: "Withdrawal cancelled; the reserved amount has been returned to your wallet." });
+    },
+    onError: showMutationError,
+  });
+
+  const selectedBankExists = (banks.data ?? []).some((bank) => bank.code === bankCode);
 
   const verifyMessage = readVerifyToWithdrawMessage(summary.data);
   const verifyAction = verifyActionForWallet(summary.data, "#payout-accounts");
@@ -104,16 +119,48 @@ export default function WalletPayoutsPage() {
           className={styles.form}
           onSubmit={(event) => {
             event.preventDefault();
+            if ((countryCode !== "NG" && countryCode !== "GH") || banks.isLoading || banks.isError || !selectedBankExists) {
+              setError("Choose a bank from the current list for a supported payout country.");
+              return;
+            }
+            if (branches.isLoading || branches.isError || branches.data === undefined) {
+              setError("Wait for the bank branch check to finish, then try again.");
+              return;
+            }
+            if (branches.data.length > 0 && !branchCode) {
+              setError("Choose a bank branch before adding this account.");
+              return;
+            }
             addAccount.mutate();
           }}
         >
-          <label className={styles.field}>Bank code
-            <input className={styles.input} value={bankCode} onChange={(event) => setBankCode(event.target.value)} placeholder="e.g. 058" inputMode="numeric" required />
+          <label className={styles.field}>Bank country
+            <select className={styles.select} value={countryCode} onChange={(event) => { setCountryCode(event.target.value); setBankCode(""); setBranchCode(""); }} required>
+              <option value="NG">Nigeria</option>
+              <option value="GH">Ghana</option>
+            </select>
           </label>
+          <label className={styles.field}>Bank
+            <select className={styles.select} value={bankCode} onChange={(event) => { setBankCode(event.target.value); setBranchCode(""); }} disabled={banks.isLoading || banks.isError} required>
+              <option value="">{banks.isLoading ? "Loading banks…" : "Choose a bank"}</option>
+              {(banks.data ?? []).map((bank) => <option key={bank.code} value={bank.code}>{bank.name}</option>)}
+            </select>
+          </label>
+          {banks.isError ? <p className={styles.error} role="alert">We couldn’t load the bank list. <button type="button" className={styles.linkButton} onClick={() => void banks.refetch()}>Try again</button>.</p> : null}
+          {branches.isLoading ? <p className={styles.note}>Checking bank branch requirements…</p> : null}
+          {branches.isError ? <p className={styles.error} role="alert">We couldn’t load branch requirements. <button type="button" className={styles.linkButton} onClick={() => void branches.refetch()}>Try again</button> before adding this account.</p> : null}
+          {(branches.data ?? []).length > 0 ? (
+            <label className={styles.field}>Bank branch
+              <select className={styles.select} value={branchCode} onChange={(event) => setBranchCode(event.target.value)} required>
+                <option value="">Choose a branch</option>
+                {(branches.data ?? []).map((branch) => <option key={branch.code} value={branch.code}>{branch.name} · {branch.code}</option>)}
+              </select>
+            </label>
+          ) : null}
           <label className={styles.field}>Account number
             <input className={styles.input} value={accountNumber} onChange={(event) => setAccountNumber(event.target.value)} placeholder="10-digit account number" inputMode="numeric" required />
           </label>
-          <button type="submit" className={styles.primary} disabled={addAccount.isPending}>{addAccount.isPending ? "Adding…" : "Add account"}</button>
+          <button type="submit" className={styles.primary} disabled={addAccount.isPending || banks.isLoading || banks.isError || !selectedBankExists || branches.isLoading || branches.isError || branches.data === undefined || (branches.data.length > 0 && !branchCode)}>{addAccount.isPending ? "Adding…" : "Add account"}</button>
         </form>
       </section>
       <section className={styles.section} aria-label="Withdraw">
@@ -153,7 +200,9 @@ export default function WalletPayoutsPage() {
                 <span className={styles.rowMain}>
                   <span className={styles.rowTitle}>{formatMoneyForDisplay(entry.amount)}</span>
                   <span className={styles.rowMeta}>{new Date(entry.createdAt).toLocaleDateString()} · {entry.status}</span>
+                  {entry.failureReason ? <span className={styles.error} role="status">This payout needs attention and may not have been sent. Review the payout account or contact support.</span> : null}
                 </span>
+                {entry.failureReason && entry.withdrawalStatus === "queued" ? <button type="button" className={styles.linkButton} disabled={cancelWithdrawal.isPending} onClick={() => cancelWithdrawal.mutate(entry.id)}>Cancel withdrawal</button> : null}
               </li>
             ))}
           </ul>

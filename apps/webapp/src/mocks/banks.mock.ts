@@ -41,6 +41,7 @@ export const banksMocks: MockRoute[] = [
     const countryCode = (query.get("country") ?? "NG").toUpperCase();
     return SUPPORTED_BANKS.filter((candidate) => candidate.countryCode === countryCode);
   }),
+  createMockRoute("GET", "/api/v1/banks/:bankCode/branches", () => []),
   createMockRoute("POST", "/api/v1/banks/resolve-account", ({ body }) => {
     const { bankCode, accountNumber } = body as { bankCode: string; accountNumber: string };
     if (!SUPPORTED_BANKS.some((candidate) => candidate.code === bankCode)) throw new ApiError(422, "Choose your bank");
