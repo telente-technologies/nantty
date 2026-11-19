@@ -93,6 +93,7 @@ export function IdentityVerificationHub() {
   if (verification && (verification.status === "awaiting_consent" || verification.status === "awaiting_capture")) {
     return (
       <>
+        {verification.retryableProviderError ? <StatusBlock title="That check couldn't be completed" text="Smile ID reported a temporary service or image issue. Start a new check and follow the capture instructions. If it keeps happening, contact support. This technical error did not approve or reject your identity." /> : null}
         <StatusBlock title="Payment received. One last step" text={`Your ${badge} checkmark is paid for. Confirm your identity with a supported photo ID or ID-number check.`} />
         <IdentityConsentForm busy={capture.isPending} errorMessage={capture.isError ? readErrorMessageForDisplay(capture.error) : null} privacyPolicyUrl={journey.privacyPolicyUrl} onStart={(choice) => capture.mutate({ journey, ...choice })} />
       </>

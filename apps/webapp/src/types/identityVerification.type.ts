@@ -26,6 +26,7 @@ export interface IdentityCase {
   readonly decidedAt: string | null;
   readonly verifiedAt: string | null;
   readonly canRetry: boolean;
+  readonly retryableProviderError: boolean;
 }
 
 export interface IdentityJourney {
