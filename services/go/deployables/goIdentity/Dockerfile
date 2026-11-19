@@ -10,6 +10,7 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 
 FROM gcr.io/distroless/static-debian13:nonroot
 COPY --from=build /out/app /app
+ENV HTTP_WRITE_TIMEOUT=30s
 USER nonroot:nonroot
 EXPOSE 8080
 ENTRYPOINT ["/app"]
