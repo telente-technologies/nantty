@@ -2074,7 +2074,7 @@ One formatter, `utils/formatCount.util.ts` (`formatCompactCount`): 999, 1.2K, 12
 - **[NEXT]** Backend: `taggedUsers` on `PostView` and the tagged-users endpoint.
 - **[LATER]** Let tagged people remove themselves from the list sheet.
 
-## 53. Checkmark verification journey with Smile ID **[DONE (go-identity, go-money, go-trust, intelligence, notifications, email templates, gateway, contracts, infra, admin + mobile + webapp + seller)]**
+## 53. Checkmark verification journey with Smile ID **[IMPLEMENTED_UNVERIFIED (go-identity, go-money, go-trust, intelligence, notifications, email templates, gateway, contracts, infra, admin + mobile + webapp)]**
 
 Owner rules, 2026-10-04 (asked for as §50, which was already taken by username suggestions). Integration details, flows and data handling: [integrations/smileId.md](./integrations/smileId.md).
 
@@ -2089,8 +2089,9 @@ Owner rules, 2026-10-04 (asked for as §50, which was already taken by username 
 ### 53.2 Pay first, then verify
 
 - `entitlement.granted` for a Blue/Gold plan no longer switches the badge on for a profile that never passed identity verification: it opens a `verification_cases` row (idempotent on the subscription id), recording whether the profile was eligible when it paid. Renewals and profiles verified before keep the old behaviour.
-- Consent then capture: `POST /verification/cases/{id}/capture` requires the current biometric consent version and a supported photo ID, then returns a Smile ID web token (webapp hosted web integration) or a single-use Smile Link (apps, opened with `expo-web-browser`).
-- The signed Smile ID callback (`POST /api/v1/webhooks/smile-id`, through the gateway) is verified, idempotent on our job id and on the case state, and never stores images, names or ID numbers (only check results, scores, ID type, country, dates and a keyed fingerprint of the ID number).
+- Consent then capture: `POST /verification/cases/{id}/capture` requires the current consent version and an exact country/type option enabled for the corresponding Smile product. Standard photo IDs use Document Verification; ID-number lookups (including NIN_V2, NIN_SLIP and V_NIN when enabled) use Enhanced KYC. Web uses Smile's V12 Web SDK for photo IDs and a single-use Smile Link for ID numbers; the Expo apps use a Smile Link for either route. The Web SDK request includes the server-issued attempt ID in callback correlation parameters.
+- Country and type options come from Smile's live public catalogs and product gates. Standard Document Verification uses the public catalog unless operators configure an optional exact narrowing list; Enhanced Document Verification and Enhanced KYC ID-number checks require exact per-environment partner-approved types. The catalog alone is not proof of partner entitlement. NIN_V2 remains unavailable until the provider-specific NIMC enterprise ID requirement is confirmed. Capture retries are disabled during the one-hour capture window (Smile Links are issued with a one-hour expiry); each V3 callback is bound to both the case and the unique capture-attempt ID.
+- The signed Smile ID callback (`POST /api/v1/webhooks/smile-id`, through the gateway) is verified, idempotent on the provider job and case state, and never stores images, names or ID numbers (only check results, scores, ID type, country, dates and a keyed fingerprint of the ID number).
 
 ### 53.3 Decision
 
@@ -2117,7 +2118,8 @@ Owner rules, 2026-10-04 (asked for as §50, which was already taken by username 
 - **[DECIDED: no, §54.1]** ~~Renewals must not charge for the checkmark until the profile is verified.~~ Owner, 4 Oct: plans renew at the full price. Only the one-time checkmark-share refund on rejection applies. Billing has no line item for this (a web renewal charges one plan amount; store prices are fixed per product), so after a rejection the plan keeps renewing at its full price. Needs a checkmark-less price per seller plan and Premium, switched at the next renewal and restored on approval.
 - **[DONE → §54 for web card billing; Google Play partial refund still open]** Refund the latest charge rather than `billing_reference` (the first charge) when a rejection lands after a renewal; Google Play partial refund once the Play API call exists.
 - **[NEXT]** Native IAP in the app (dev build). Until then "Buy now" in the app opens the web checkout.
-- **[NEXT]** Confirm Smile ID document `id_type` codes per country and the Google Play `fullRefund` revoke context against the live APIs.
+- **[NEXT]** Confirm Nantty's partner entitlements and run real sandbox flows for representative supported countries, photo-document types, and NIN variants; public catalog data is not entitlement evidence.
+- **[NEXT]** Verify Google Play `fullRefund` revoke context against the live APIs.
 - **[LATER]** A dedicated `identity_verification` source on go-trust suspension cases (uses `python_suggestion` with model `smile_id_verification` for now, to avoid a moderation schema change).
 - **[LATER]** Name-change re-verification for identity-verified profiles.
 

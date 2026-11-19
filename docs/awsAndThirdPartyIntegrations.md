@@ -112,7 +112,7 @@ Documented in `docs/architecture` with a trigger; none is built or in Terraform.
 
 | Provider | Used for | What you need | Docs |
 | --- | --- | --- | --- |
-| **Smile ID** | Checkmark identity verification (liveness selfie, ID document, face match, NIN lookup), seller business verification (KYB), and the ID-document step for payouts (still to be wired) | Partner id, API key, the callback URL, production approval | `docs/integrations/smileId.md` |
+| **Smile ID** | Checkmark identity verification. Photo IDs and country/type-specific ID-number checks are separate provider products; the existing identity-verification result also contributes to non-Nigerian payout verification levels. No separate seller KYB capture flow is wired. | Partner id, API key, callback URL, confirmed per-environment product/type entitlements and production approval | `docs/integrations/smileId.md` |
 | **Sign in with Apple** | Social login on iOS and web | Apple Services ID, key, client ids (`AUTH_APPLE_CLIENT_IDS`) | — |
 | **Google Sign-In** | Social login | OAuth client ids for web, iOS and Android (`AUTH_GOOGLE_CLIENT_IDS`) | — |
 | **Cloudflare Turnstile** | Human verification on sign-up and other sensitive forms (web and mobile) | Site key and secret key | — |
