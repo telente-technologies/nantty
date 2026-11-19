@@ -1,6 +1,6 @@
 const isDevelopmentBuild = process.env.NODE_ENV === "development";
 
-const smileIdOrigins = ["https://cdn.smileidentity.com", "https://*.smileidentity.com", "https://*.usesmileid.com"];
+const smileIdOrigins = ["https://cdn.usesmileid.com", "https://*.smileidentity.com", "https://*.usesmileid.com"];
 
 // Read with a computed name so the value always comes from the running server, never from the build machine.
 function readRuntimeEnv(name: string): string | undefined {
@@ -48,7 +48,7 @@ export function buildContentSecurityPolicyHeaderValue(options: { readonly isIden
   const extraOrigins = options.isIdentityVerification ? smileIdOrigins : [];
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
-    "script-src": ["'self'", "'unsafe-inline'", "https://challenges.cloudflare.com", "https://accounts.google.com", "https://appleid.cdn-apple.com", ...(isDevelopmentBuild ? ["'unsafe-eval'"] : []), ...(options.isIdentityVerification ? ["https://cdn.smileidentity.com"] : [])],
+    "script-src": ["'self'", "'unsafe-inline'", "https://challenges.cloudflare.com", "https://accounts.google.com", "https://appleid.cdn-apple.com", ...(isDevelopmentBuild ? ["'unsafe-eval'"] : []), ...(options.isIdentityVerification ? ["https://cdn.usesmileid.com"] : [])],
     "frame-src": ["https://challenges.cloudflare.com", "https://accounts.google.com", "https://appleid.apple.com", ...extraOrigins],
     "style-src": ["'self'", "'unsafe-inline'"],
     "img-src": ["'self'", "data:", "blob:", "https:", ...(isDevelopmentBuild ? ["http:"] : [])],

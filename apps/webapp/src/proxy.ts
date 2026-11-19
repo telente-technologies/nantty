@@ -6,7 +6,7 @@ import { buildContentSecurityPolicyHeaderValue } from "@/server/contentSecurityP
 import { readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFromCookies } from "@/server/session.service";
 
 const publicPagePaths = new Set(["/welcome", "/login", "/signup", "/forgot-password", "/reset-password"]);
-const sessionFreePagePaths = new Set(["/security-check"]);
+const sessionFreePagePaths = new Set(["/security-check", "/verification/return"]);
 const staticAssetPattern = /\.(?:webp|png|jpe?g|gif|svg|ico|woff2?|txt|map|json|xml|webmanifest)$/i;
 
 function redirectTo(request: NextRequest, pathname: string, searchParams?: Record<string, string>): NextResponse {

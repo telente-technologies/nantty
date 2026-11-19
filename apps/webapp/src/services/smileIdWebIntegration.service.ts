@@ -1,16 +1,75 @@
 import type { IdentityCaptureSession } from "@/types/identityVerification.type";
 
-const smileIdScriptUrl = "https://cdn.smileidentity.com/inline/v10/js/script.min.js";
+const smileIdScriptUrl = "https://cdn.usesmileid.com/inline/v12/js/script.min.js";
 
 interface SmileIdentityOptions {
   readonly token: string;
   readonly product: string;
   readonly callback_url: string;
-  readonly environment: "sandbox" | "live";
-  readonly partner_details: { readonly partner_id: string; readonly name: string; readonly policy_url: string; readonly theme_color: string };
-  readonly onSuccess: () => void;
-  readonly onClose: () => void;
-  readonly onError: (error: unknown) => void;
+  readonly environment: "sandbox" | "production";
+  readonly partner_params: { readonly nantty_case_id: string; readonly capture_attempt_id: string };
+  readonly partner_details: { readonly partner_id: string; readonly name: string; readonly logo_url: string; readonly policy_url: string; readonly theme_color: string };
+  readonly onResult: (result: SmileIdentityResult) => void;
+}
+
+type SmileIdentityResult =
+  | { readonly status: "success"; readonly value?: unknown; readonly product?: string }
+  | { readonly status: "cancelled"; readonly product?: string }
+  | { readonly status: "failure"; readonly error: { readonly error_code: string; readonly message: string; readonly status: number; readonly retryable: boolean }; readonly product?: string };
+
+class SmileIdentityRetryableFailure extends Error {
+  readonly retryable = true;
+}
+
+function validateSmileIdentityResult(result: SmileIdentityResult, expectedProduct: string): SmileIdentityResult {
+  if (!result || typeof result !== "object" || !["success", "failure", "cancelled"].includes(result.status)) {
+    throw new Error("Smile ID returned an unreadable identity-check result. Refresh your verification status before trying again.");
+  }
+  if (result.status === "cancelled") {
+    if (result.product !== undefined && result.product !== expectedProduct) {
+      throw new Error("Smile ID returned a result for a different verification method. Refresh your verification status before trying again.");
+    }
+    return result;
+  }
+  if (result.product !== expectedProduct) {
+    throw new Error("Smile ID returned a result for a different verification method. Refresh your verification status before trying again.");
+  }
+  if (result.status === "failure" && (!result.error || typeof result.error.error_code !== "string" || typeof result.error.retryable !== "boolean")) {
+    throw new Error("Smile ID returned an unreadable identity-check error. Refresh your verification status before trying again.");
+  }
+  return result;
+}
+
+export function smileIdFailureMessage(result: Extract<SmileIdentityResult, { status: "failure" }>): string {
+  switch (result.error.error_code) {
+    case "CONSENT_DENIED":
+      return "Smile ID did not receive your consent. You can continue only if you agree to the identity check terms.";
+    case "CONFIG_INVALID":
+      return "The identity check could not be configured. Please contact Nantty support.";
+    case "SESSION_INIT_FAILED":
+      return result.error.retryable
+        ? "Smile ID could not start this check. Refresh your Nantty status; if the unsuccessful attempt is closed, choose Continue to start a fresh session."
+        : "The identity check could not start. Please contact Nantty support if this continues.";
+    case "SUBMISSION_FAILED":
+      return result.error.retryable
+        ? "Smile ID could not confirm this submission. Refresh your Nantty status; only start a new session if Nantty confirms this attempt was closed."
+        : "Smile ID could not confirm that your check was accepted. Refresh your verification status or contact Nantty support.";
+    case "NOT_PERMITTED":
+      return result.error.retryable
+        ? "Smile ID could not run this check right now. Refresh your Nantty status and use Continue to start a fresh session if the unsuccessful attempt was closed."
+        : "This verification method is not available for this check. Refresh your status, then choose another supported ID or contact Nantty support.";
+    case "DOCUMENTS_REJECTED":
+      return result.error.retryable
+        ? "Smile ID could not accept those document images. Use clear, complete images if you retry with a fresh session."
+        : "Smile ID could not accept those document images. Refresh your status, then choose another supported ID or contact Nantty support.";
+    default:
+      return "The identity check could not be completed. Refresh your Nantty verification status before trying again or contact support.";
+  }
+}
+
+function mapEnvironment(environment: string): "sandbox" | "production" {
+  if (environment === "sandbox" || environment === "production") return environment;
+  throw new Error("Identity verification is unavailable for this environment.");
 }
 
 declare global {
@@ -31,13 +90,54 @@ function loadSmileIdScript(): Promise<void> {
   });
 }
 
-export async function openSmileIdCapture(session: IdentityCaptureSession, policyUrl: string): Promise<"submitted" | "closed"> {
+export async function openSmileIdCapture(session: IdentityCaptureSession, policyUrl: string): Promise<"submitted" | "cancelled"> {
   await loadSmileIdScript();
+  const smileIdentity = window.SmileIdentity;
+  if (!smileIdentity) throw new Error("The identity check could not load. Refresh and try again.");
   return new Promise((resolve, reject) => {
-    window.SmileIdentity?.({
-      token: session.token ?? "", product: session.product, callback_url: session.callbackUrl, environment: session.environment === "production" ? "live" : "sandbox",
-      partner_details: { partner_id: session.partnerId, name: "Nantty", policy_url: policyUrl, theme_color: "#3B5BFD" },
-      onSuccess: () => resolve("submitted"), onClose: () => resolve("closed"), onError: (error) => reject(error instanceof Error ? error : new Error("The identity check failed to start.")),
+    smileIdentity({
+      token: session.token ?? "", product: session.product, callback_url: session.callbackUrl, environment: mapEnvironment(session.environment),
+      partner_params: { nantty_case_id: session.caseId, capture_attempt_id: session.captureAttemptId },
+      partner_details: {
+        partner_id: session.partnerId, name: "Nantty", logo_url: new URL("/brand/icon512.png", window.location.origin).toString(),
+        policy_url: policyUrl, theme_color: "#3B5BFD",
+      },
+      onResult: (result) => {
+        try {
+          const validated = validateSmileIdentityResult(result, session.product);
+          if (validated.status === "success") resolve("submitted");
+          else if (validated.status === "cancelled") resolve("cancelled");
+          else reject(validated.error.retryable
+            ? new SmileIdentityRetryableFailure(smileIdFailureMessage(validated))
+            : new Error(smileIdFailureMessage(validated)));
+        } catch (error) {
+          reject(error instanceof Error ? error : new Error("The identity check could not be completed. Refresh your verification status before trying again."));
+        }
+      },
     });
   });
+}
+
+export async function runSmileIdCapture(
+  session: IdentityCaptureSession,
+  policyUrl: string,
+  cancelAttempt: (caseId: string, captureAttemptId: string) => Promise<{ readonly cancelled: boolean }>,
+): Promise<"submitted" | "cancelled"> {
+  try {
+    const result = await openSmileIdCapture(session, policyUrl);
+    if (result === "cancelled") {
+      const cancellation = await cancelAttempt(session.caseId, session.captureAttemptId);
+      if (!cancellation.cancelled) throw new Error("Nantty could not confirm that this attempt was closed. Refresh your verification status before trying again.");
+    }
+    return result;
+  } catch (error) {
+    if (!(error instanceof SmileIdentityRetryableFailure)) throw error;
+    try {
+      const cancellation = await cancelAttempt(session.caseId, session.captureAttemptId);
+      if (!cancellation.cancelled) throw new Error("Nantty could not confirm that this attempt was closed.", { cause: error });
+    } catch (cancellationError) {
+      throw new Error("Smile ID marked this attempt as retryable, but Nantty could not confirm it was closed. Refresh your verification status; do not start another check while the attempt remains open.", { cause: cancellationError });
+    }
+    throw new Error(`${error.message} The unsuccessful attempt was closed; you can now choose Continue to retry.`, { cause: error });
+  }
 }

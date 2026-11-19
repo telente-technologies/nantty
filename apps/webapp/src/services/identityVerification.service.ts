@@ -1,4 +1,4 @@
-import type { IdentityCaptureSession, IdentityDocumentTypes, IdentityEligibility, IdentityJourney } from "@/types/identityVerification.type";
+import type { IdentityCaptureSession, IdentityDocumentCountries, IdentityDocumentTypes, IdentityEligibility, IdentityJourney } from "@/types/identityVerification.type";
 
 import { createIdempotencyKey, sendRequestToWebappServer } from "./clientApi.service";
 
@@ -11,9 +11,12 @@ export interface CheckmarkCheckout {
 export const identityVerificationService = {
   fetchVerificationJourney: () => sendRequestToWebappServer<IdentityJourney>("/api/v1/verification/journey"),
   requestVerification: () => sendRequestToWebappServer<IdentityEligibility>("/api/v1/verification/eligibility/request", { method: "POST" }),
+  listDocumentCountries: () => sendRequestToWebappServer<IdentityDocumentCountries>("/api/v1/verification/document-types"),
   listDocumentTypes: (country: string) => sendRequestToWebappServer<IdentityDocumentTypes>("/api/v1/verification/document-types", { query: { country } }),
-  startIdentityCapture: (caseId: string, input: { consentVersion: string; consentAccepted: boolean; documentCountry: string; documentType: string }) =>
+  startIdentityCapture: (caseId: string, input: { consentVersion: string; consentAccepted: boolean; verificationMethod: "document" | "id_number"; verificationProduct: "document_verification" | "enhanced_document_verification" | "enhanced_kyc"; documentCountry: string; documentType: string }) =>
     sendRequestToWebappServer<IdentityCaptureSession>(`/api/v1/verification/cases/${encodeURIComponent(caseId)}/capture`, { method: "POST", body: { ...input, platform: "web" } }),
+  cancelIdentityCapture: (caseId: string, captureAttemptId: string) =>
+    sendRequestToWebappServer<{ cancelled: boolean }>(`/api/v1/verification/cases/${encodeURIComponent(caseId)}/capture/cancel`, { method: "POST", body: { captureAttemptId } }),
   startCheckmarkCheckout: (input: { profileId: string; planCode: string; interval: "month" | "year"; returnTo: string }) =>
     sendRequestToWebappServer<CheckmarkCheckout>("/api/v1/subscriptions/checkout", { method: "POST", body: input, idempotencyKey: createIdempotencyKey("checkmark") }),
 };

@@ -4,7 +4,7 @@ const isDevelopmentBuild = process.env.NODE_ENV === "development";
 
 // Content-Security-Policy is built per request in src/proxy.ts, so origins come from the runtime env, not the build.
 const identityVerificationHeaders = [
-  { key: "Permissions-Policy", value: 'camera=(self "https://cdn.smileidentity.com"), microphone=(), geolocation=(), payment=()' },
+  { key: "Permissions-Policy", value: 'camera=(self "https://cdn.usesmileid.com"), microphone=(), geolocation=(), payment=()' },
 ];
 
 const securityHeaders = [

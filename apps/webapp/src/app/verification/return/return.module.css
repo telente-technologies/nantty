@@ -1,0 +1,81 @@
+.page {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  padding: var(--space-5);
+  background: var(--surface-app);
+  color: var(--ink-strong);
+}
+
+.content {
+  display: flex;
+  width: min(100%, 34rem);
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: clamp(var(--space-5), 6vw, var(--space-8));
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--color-brand-solid);
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.content h1 {
+  margin: 0;
+  font-size: clamp(var(--fs-20), 5vw, var(--fs-24));
+}
+
+.description {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--fs-16);
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.primaryAction,
+.secondaryAction {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.primaryAction {
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
+}
+
+.secondaryAction {
+  border: 1px solid var(--divider-strong);
+  color: var(--ink-strong);
+}
+
+.primaryAction:focus-visible,
+.secondaryAction:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
