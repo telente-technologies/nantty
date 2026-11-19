@@ -96,4 +96,9 @@ describe("guests are view-only at the gateway", () => {
     const response = await fetch(`${gatewayUrl}${path}`, { method, headers: { "content-type": "application/json" }, body: "{}" });
     expect(response.status).toBe(200);
   });
+
+  it.each(["/api/v1/webhooks/smile-id/web-sdk", "/api/v1/webhooks/smile-id/hosted-link"])("lets Smile ID callback %s reach identity", async (path) => {
+    const response = await fetch(`${gatewayUrl}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
+    expect(response.status).toBe(200);
+  });
 });

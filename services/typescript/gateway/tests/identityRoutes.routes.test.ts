@@ -21,4 +21,15 @@ describe("identity routes", () => {
     expect(resolveUpstreamRouteForRequest("GET", "/api/v1/sitemap/profiles")).toMatchObject({ upstream: "identity", authentication: "optional" });
     expect(resolveUpstreamRouteForRequest("POST", "/api/v1/topics")?.upstream).toBeUndefined();
   });
+
+  it.each([
+    "/api/v1/webhooks/smile-id",
+    "/api/v1/webhooks/smile-id/web-sdk",
+    "/api/v1/webhooks/smile-id/hosted-link",
+  ])("routes Smile ID callback %s to identity without parsing its body", (path) => {
+    expect(resolveUpstreamRouteForRequest("POST", path)).toMatchObject({
+      upstream: "identity", authentication: "optional", rawBodyPassthrough: true, exactPathOnly: true,
+    });
+    expect(resolveUpstreamRouteForRequest("POST", `${path}/unexpected`)).toBeUndefined();
+  });
 });

@@ -1,6 +1,6 @@
 ---
 title: Checkmarks and verification FAQ
-summary: Quick answers about Blue, Gold and Black checkmarks, the selfie and ID check, verification levels, prices, refunds and cancelling.
+summary: Quick answers about Blue, Gold and Black checkmarks, identity checks, verification levels, prices, refunds and cancelling.
 tags: verification faq, checkmark questions, blue tick faq, gold faq, kyc questions, get verified help
 related: checkmarks-explained, verification-levels, identity-check, checkmark-prices, checkmark-rejected, checkmark-renewals-and-cancelling
 ---
@@ -25,9 +25,9 @@ The applicable price is shown in the signed-in checkout, which reflects country,
 
 Apple and Google take a fee on in-app purchases.
 
-## Do you keep my selfie and ID?
+## What identity information does Nantty keep?
 
-No. We keep only the result, your ID type, country and the date. See [The selfie and ID check](/help/checkmarks-and-verification/identity-check).
+Nantty does not store raw ID numbers, ID images or face templates. We keep the verification result and necessary audit details, including the ID type, country and a keyed fingerprint used to prevent the same ID being reused across accounts. The method varies by country: a photo-ID flow may involve a selfie/liveness check, while an ID-number flow is completed on Smile ID's secure hosted page. See [How identity checks work](/help/checkmarks-and-verification/identity-check).
 
 ## How long does verification take?
 
@@ -39,7 +39,7 @@ You're refunded and can try again after 30 days. See [If your checkmark is rejec
 
 ## What are L0, L1 and L2?
 
-Money verification levels: verified email, verified payout details, and the selfie and ID check. See [Verification levels](/help/checkmarks-and-verification/verification-levels).
+Money verification levels: verified email, verified payout details, and an approved identity check. See [Verification levels](/help/checkmarks-and-verification/verification-levels).
 
 ## Do I need a checkmark to sell or get paid?
 

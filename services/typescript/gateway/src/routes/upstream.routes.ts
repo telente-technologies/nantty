@@ -54,6 +54,8 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/tips", upstream: "money", authentication: "required", methods: ["POST"], exactPathOnly: true },
   { pathPrefix: "/api/v1/seller/affiliates/", upstream: "money", authentication: "required" },
   { pathPrefix: "/api/v1/webhooks/smile-id", upstream: "identity", authentication: "optional", methods: ["POST"], exactPathOnly: true, rawBodyPassthrough: true },
+  { pathPrefix: "/api/v1/webhooks/smile-id/web-sdk", upstream: "identity", authentication: "optional", methods: ["POST"], exactPathOnly: true, rawBodyPassthrough: true },
+  { pathPrefix: "/api/v1/webhooks/smile-id/hosted-link", upstream: "identity", authentication: "optional", methods: ["POST"], exactPathOnly: true, rawBodyPassthrough: true },
   { pathPrefix: "/api/v1/verification/", upstream: "identity", authentication: "required" },
   { pathPrefix: "/api/v1/seller/business-documents", upstream: "identity", authentication: "required" },
   { pathPrefix: "/api/v1/seller/security", upstream: "identity", authentication: "required" },
