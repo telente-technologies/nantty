@@ -1,4 +1,4 @@
-h1:A1z0rzvdCjGGS5mAiftUuCA0WkS7f6NO4Sh5Cz6KHJM=
+h1:nVOdKFO+bf3s2meg+0bsv9K0ZsaBLmdy06kg8IQ2MuM=
 20261003111843_create_wallet_tables.up.sql h1:ZDbaLb/HtFuUB+nFSymsuQoEzAB2v8JY43s1j4KsIQg=
 20261003111943_grant_read_access_to_other_services.up.sql h1:CYO50a0vrKPIJbcjiY6n4XpwO4rkHH5xFWjIG44fUME=
 20261003142244_bachs_connect_mirror.up.sql h1:QC0AJ+qShx1kSHjdweGn7U9OyiNewdKGEOU0i2pwDV0=
@@ -9,3 +9,4 @@ h1:A1z0rzvdCjGGS5mAiftUuCA0WkS7f6NO4Sh5Cz6KHJM=
 20261005173006_flag_only_coin_reviews.up.sql h1:JQXaVOfgEquXa/Ed2jSvSe/6x8ou4tP6tvEykY7r6us=
 20261010105606_add_ad_balance_earnings_transfers.up.sql h1:tlYLcsNMtyJ8CcYGavnTZRng14IPyTbVUWRCEfdBres=
 20261028120000_coin_purchase_chargebacks.up.sql h1:1yK5os4DUCRFgCOhGzqm3OtT82WVHURgMZTKwIR3yYM=
+20261119120000_add_payout_account_branch_code.up.sql h1:eAuvUVIc+xgUdPfet2I+dffh1vF/pDcZESUJlaNup/Y=
