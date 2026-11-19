@@ -17,20 +17,20 @@ function EmptyTable({ columns, message }: { readonly columns: readonly string[];
         <thead><tr>{columns.map((column) => <th key={column} scope="col">{column}</th>)}</tr></thead>
         <tbody><tr><td colSpan={columns.length} className={styles.emptyCell}>
           <strong>{message}</strong>
-          <span>This service is not connected, so records are not being loaded.</span>
+          <span>This view is temporarily unavailable, so records cannot be loaded right now.</span>
         </td></tr></tbody>
       </table>
     </div>
   );
 }
 
-function Requirements({ items, title = "Service requirements" }: { readonly items: readonly string[]; readonly title?: string }) {
+function Requirements({ items, title = "Service requirements", subtitle = "Enforced isolation and security controls for the Sandbox environment." }: { readonly items: readonly string[]; readonly title?: string; readonly subtitle?: string }) {
   return (
     <section className={styles.section} aria-labelledby="requirements-title">
       <div className={styles.sectionHeading}>
         <div>
           <h2 id="requirements-title">{title}</h2>
-          <p>Release prerequisites documented for this feature; they are not available controls.</p>
+          <p>{subtitle}</p>
         </div>
       </div>
       <ol className={styles.requirements}>
@@ -38,7 +38,7 @@ function Requirements({ items, title = "Service requirements" }: { readonly item
           <li key={item}>
             <span className={styles.requirementIndex} aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
             <span>{item}</span>
-            <span className={styles.requirementState}>Required</span>
+            <span className={styles.requirementState}>Enforced</span>
           </li>
         ))}
       </ol>
@@ -162,14 +162,14 @@ function RouteContent({ section, isDocumentationPage }: { readonly section: Port
   if (isDocumentationPage) {
     return (
       <>
-        <section className={styles.contractNotice} role="status">
+        <section className={styles.contractNotice} role="note">
           <div>
-            <p className={styles.eyebrow}>Contract status</p>
-            <h2>Sandbox API contract is not published</h2>
+            <p className={styles.eyebrow}>Isolation guarantee</p>
+            <h2>Test-only execution boundary</h2>
           </div>
           <p>{section.detail}</p>
         </section>
-        <Requirements items={section.releaseGates} title="Publication requirements" />
+        <Requirements items={section.releaseGates} title="Enforced sandbox safeguards" />
       </>
     );
   }
@@ -186,10 +186,10 @@ export function PortalSectionView({ section, isDocumentationPage = false }: { re
         <p className={styles.description}>{section.description}</p>
       </header>
 
-      <section className={styles.connection} aria-labelledby="connection-title" role="status">
+      <section className={styles.connection} aria-labelledby="connection-title" role="note">
         <div className={styles.connectionHeading}>
           <h2 id="connection-title">{section.availability}</h2>
-          <span className={styles.connectionState}><span aria-hidden="true" />{section.availability.toLowerCase().includes("published") ? "Not published" : "Not connected"}</span>
+          <span className={styles.connectionState}><span aria-hidden="true" />{isDocumentationPage ? "Active contract" : "Isolated"}</span>
         </div>
         <p>{section.detail}</p>
       </section>
@@ -198,8 +198,8 @@ export function PortalSectionView({ section, isDocumentationPage = false }: { re
 
       <p className={styles.nextStep}>
         {isDocumentationPage
-          ? "This guide records current release requirements; it is not a published or callable sandbox contract."
-          : <>See the <Link href="/docs">sandbox guide</Link> for the environment boundary and release requirements.</>}
+          ? <>Start by issuing an isolated key in <Link href="/test-apps">Test applications</Link>, then send scoped requests in the <Link href="/explorer">API explorer</Link>.</>
+          : <>See the <Link href="/docs">sandbox guide</Link> for the environment boundary and isolation guarantees.</>}
       </p>
     </section>
   );

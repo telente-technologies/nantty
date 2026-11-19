@@ -7,6 +7,7 @@ import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.h
 import { makeThemedStyles, useTheme } from "@/theme";
 
 import { useAccessibilityFocusOnOpen } from "./accessibilityFocus.hook";
+import { dismissKeyboardIfVisible, KEYBOARD_DISMISS_ON_DRAG } from "./dismissKeyboardOnEmptyTap.util";
 import { FrameAwareModal } from "./frameAwareModal";
 import { useKeepFocusedInputVisible } from "./keepFocusedInputVisible.hook";
 import { KeyboardSpacer } from "./keyboardSpacer";
@@ -65,8 +66,10 @@ export function FullScreenModal({
           <View style={styles.accessory}>{headerAccessory}</View>
         </View>
         {scrollable ? (
-          <ScrollView {...keepFocusedInputVisible.scrollProps} style={styles.flex} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-            {children}
+          <ScrollView {...keepFocusedInputVisible.scrollProps} style={styles.flex} contentContainerStyle={styles.grow} keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG} keyboardShouldPersistTaps="handled">
+            <Pressable accessible={false} onPress={dismissKeyboardIfVisible} style={styles.content}>
+              {children}
+            </Pressable>
           </ScrollView>
         ) : (
           <View style={styles.flex}>{children}</View>
@@ -94,7 +97,8 @@ const useStyles = makeThemedStyles((colors, scheme) => {
     titleBox: { flex: 1 },
     title: { textAlign: "center" },
     accessory: { minWidth: 44, alignItems: "flex-end" },
-    content: { padding: 16, paddingBottom: 32 },
+    grow: { flexGrow: 1 },
+    content: { flexGrow: 1, padding: 16, paddingBottom: 32 },
     footer: { paddingHorizontal: modalSpacing.edge - 4, paddingTop: 12, gap: modalSpacing.actionGap, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.divider, backgroundColor: colors.background },
     keyboardArea: { backgroundColor: colors.background },
   });

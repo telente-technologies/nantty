@@ -35,7 +35,13 @@ func TestBattleSettlementPlansFollowTheRulesAndNeverRefundViewers(t *testing.T) 
 		return userId
 	}
 	holdings := func() []models.BattleHolding {
-		return []models.BattleHolding{{"host", models.OutcomeActive, 300}, {"rival", models.OutcomeActive, 500}, {"quitter", models.OutcomeForfeited, 100}, {"removed", models.OutcomeRemovedByHost, 50}, {"guest", models.OutcomeActive, 20}}
+		return []models.BattleHolding{
+			{UserId: "host", Outcome: models.OutcomeActive, HoldingCoins: 300},
+			{UserId: "rival", Outcome: models.OutcomeActive, HoldingCoins: 500},
+			{UserId: "quitter", Outcome: models.OutcomeForfeited, HoldingCoins: 100},
+			{UserId: "removed", Outcome: models.OutcomeRemovedByHost, HoldingCoins: 50},
+			{UserId: "guest", Outcome: models.OutcomeActive, HoldingCoins: 20},
+		}
 	}
 	keepOwn, err := models.PlanBattleSettlement("keepOwn", "rival", holdings(), member)
 	if err != nil || keepOwn.RuleApplied != "keepOwn" || len(keepOwn.Transfers) != 0 {

@@ -118,6 +118,7 @@ type CancelRequest struct {
 
 type TrackRequest struct {
 	ProviderReference string
+	TrackingNumber    string
 }
 
 type TrackingEvent struct {

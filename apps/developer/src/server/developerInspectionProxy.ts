@@ -39,9 +39,9 @@ export async function forwardDeveloperInspectionRequest(request: NextRequest, ki
   const identityBase = safeBaseUrl(process.env.DEVELOPER_API_BASE_URL, false);
   const sandboxBase = safeBaseUrl(process.env.SANDBOX_API_BASE_URL, true);
   const controlToken = process.env.SANDBOX_CONTROL_TOKEN?.trim();
-  if (!identityBase) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "The Nantty API gateway is not configured for this portal.");
+  if (!identityBase) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "Sandbox diagnostics are temporarily unavailable. Try again shortly.");
   if (!sandboxBase || !controlToken || controlToken.length < 32) {
-    return jsonError(503, "SANDBOX_INSPECTION_NOT_CONFIGURED", "Sandbox inspection is not connected.");
+    return jsonError(503, "SANDBOX_INSPECTION_NOT_CONFIGURED", "Sandbox diagnostics are temporarily unavailable. Try again shortly.");
   }
 
   const accessToken = request.cookies.get(process.env.NODE_ENV === "production" ? accountAccessCookie : localAccessCookie)?.value;
@@ -50,7 +50,7 @@ export async function forwardDeveloperInspectionRequest(request: NextRequest, ki
       process.env.NODE_ENV === "production" ? 503 : 401,
       process.env.NODE_ENV === "production" ? "PORTAL_SSO_NOT_CONFIGURED" : "UNAUTHENTICATED",
       process.env.NODE_ENV === "production"
-        ? "Centralized Nantty sign-in is not connected to this portal yet."
+        ? "Sign-in is temporarily unavailable. Try again shortly."
         : "Sign in to Nantty to view sandbox diagnostics.",
     );
   }

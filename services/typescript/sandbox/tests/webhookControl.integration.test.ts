@@ -25,6 +25,7 @@ it.skipIf(!databaseUrl)("persists sandbox webhook CRUD, protects the signing sec
   const schemaIdentifier = `"${schema}"`;
   const migration = await readFile(new URL("../prisma/migrations/20261115120000_sandbox_core/migration.sql", import.meta.url), "utf8");
   const quotaMigration = await readFile(new URL("../prisma/migrations/20261116130000_sandbox_quotas_and_scenarios/migration.sql", import.meta.url), "utf8");
+  const organizationUsageMigration = await readFile(new URL("../prisma/migrations/20261119160000_organization_wide_sandbox_usage/migration.sql", import.meta.url), "utf8");
   const schemaClient = await adminPool!.connect();
   let database: Pool | null = null;
   let app: ReturnType<typeof createSandboxApp> | null = null;
@@ -33,6 +34,7 @@ it.skipIf(!databaseUrl)("persists sandbox webhook CRUD, protects the signing sec
     await schemaClient.query(`SET search_path TO ${schemaIdentifier}, public`);
     await schemaClient.query(migration);
     await schemaClient.query(quotaMigration);
+    await schemaClient.query(organizationUsageMigration);
     database = new Pool({ connectionString: databaseUrl, options: `-c search_path=${schema},public` });
     const sandboxAppId = randomUUID();
     const otherSandboxAppId = randomUUID();

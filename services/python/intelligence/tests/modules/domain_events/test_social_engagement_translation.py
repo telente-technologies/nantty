@@ -73,6 +73,10 @@ async def test_post_like_feeds_hashed_affinity_and_item_statistics(
     application_container: ApplicationContainer, reference_now: datetime
 ) -> None:
     consumer = application_container.domain_event_consumer_service
+    consent = envelope(
+        "evt_consent_fan1", "consent.granted", {"accountId": "fan_1", "consentType": "personalization"}, reference_now
+    )
+    assert (await consumer.process_message_body(consent)).status == "processed"
     body = envelope(
         "evt_like_1", "post.liked", {"postId": "post_1", "authorId": "author_1", "likedBy": "fan_1"}, reference_now
     )
@@ -90,6 +94,12 @@ async def test_share_save_and_view_are_translated(
 ) -> None:
     consumer = application_container.domain_event_consumer_service
     bodies = [
+        envelope(
+            "evt_consent_fan2",
+            "consent.granted",
+            {"accountId": "fan_2", "consentType": "personalization"},
+            reference_now,
+        ),
         envelope(
             "evt_share_1",
             "post.shared",
@@ -137,6 +147,13 @@ async def test_comment_fan_out_counts_once_and_unknown_post_author_is_skipped(
     application_container: ApplicationContainer, reference_now: datetime
 ) -> None:
     consumer = application_container.domain_event_consumer_service
+    consent = envelope(
+        "evt_consent_c1",
+        "consent.granted",
+        {"accountId": "commenter_1", "consentType": "personalization"},
+        reference_now,
+    )
+    assert (await consumer.process_message_body(consent)).status == "processed"
     base = {"commentId": "comment_1", "postId": "post_3", "authorId": "commenter_1"}
     to_post_author = envelope(
         "evt_c_post", "comment.created", {**base, "recipientUserId": "author_3", "target": "post"}, reference_now

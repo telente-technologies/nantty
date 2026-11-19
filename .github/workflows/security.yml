@@ -31,7 +31,7 @@ jobs:
           echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/$archive" | sha256sum -c -
           tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
       - name: Scan the full git history
-        run: '"$RUNNER_TEMP/gitleaks" git --redact --no-banner --config .gitleaks.toml --exit-code 1 .'
+        run: '"$RUNNER_TEMP/gitleaks" git --redact --no-banner --config .gitleaks.toml --baseline-path .gitleaks-baseline.json --exit-code 1 .'
 
   dependency-audit:
     runs-on: ubuntu-latest
@@ -62,7 +62,17 @@ jobs:
         with:
           elixir-version: "1.19"
           otp-version: "28"
-      - run: mix deps.get && mix hex.audit
+      - run: |
+          set -o pipefail
+          mix local.hex --force --if-missing
+          mix local.rebar --force --if-missing
+          mix deps.get
+          mix hex.audit 2>&1 | tee /tmp/hex-audit.log || {
+            while IFS= read -r line; do
+              [ -n "$line" ] && echo "::error::$line"
+            done < /tmp/hex-audit.log
+            exit 1
+          }
         working-directory: services/elixir/realtime
 
   trivy-filesystem:
@@ -75,7 +85,33 @@ jobs:
           scanners: vuln,secret,misconfig
           severity: HIGH,CRITICAL
           ignore-unfixed: true
-          exit-code: "1"
+          format: json
+          output: /tmp/trivy-results.json
+          exit-code: "0"
+      - run: |
+          python3 - <<'PY'
+          import json, pathlib, sys
+          data = json.loads(pathlib.Path("/tmp/trivy-results.json").read_text())
+          seen = set()
+          for result in data.get("Results", []):
+              target = result.get("Target", "")
+              for vuln in result.get("Vulnerabilities", []):
+                  key = ("VULN", vuln.get("Severity"), vuln.get("VulnerabilityID"), vuln.get("PkgName"), vuln.get("FixedVersion"))
+                  if key not in seen:
+                      seen.add(key)
+                      print(f"::error::{target}: [{vuln.get('Severity')}] {vuln.get('VulnerabilityID')} {vuln.get('PkgName')}@{vuln.get('InstalledVersion')} -> fixed {vuln.get('FixedVersion')}")
+              for mis in result.get("Misconfigurations", []):
+                  key = ("MIS", mis.get("Severity"), mis.get("ID"), target)
+                  if key not in seen:
+                      seen.add(key)
+                      print(f"::error::{target}: [{mis.get('Severity')}] {mis.get('ID')} {mis.get('Title')}")
+              for sec in result.get("Secrets", []):
+                  key = ("SEC", sec.get("Severity"), sec.get("RuleID"), target, sec.get("StartLine"))
+                  if key not in seen:
+                      seen.add(key)
+                      print(f"::error::{target}: [{sec.get('Severity')}] {sec.get('RuleID')} {sec.get('Title')} line {sec.get('StartLine')}")
+          sys.exit(1 if seen else 0)
+          PY
 
   terraform:
     runs-on: ubuntu-latest

@@ -7,6 +7,7 @@ import * as identityVerification from "./identityVerification.mapping.js";
 import * as copyright from "./copyright.mapping.js";
 import * as milestones from "./milestones.mapping.js";
 import type { EventMapping } from "./mappingHelpers.js";
+import * as logistics from "./logistics.mapping.js";
 import * as orders from "./orders.mapping.js";
 import * as social from "./social.mapping.js";
 import * as storeActivity from "./storeActivity.mapping.js";
@@ -36,6 +37,13 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "order.delivered": orders.orderDelivered,
   "order.completed": orders.orderCompleted,
   "order.cancelled": orders.orderCancelled,
+  "delivery.partnerBookingConfirmed": logistics.partnerBookingConfirmed,
+  "delivery.partnerBookingFailed": logistics.partnerBookingFailed,
+  "delivery.pickedUp": logistics.partnerPickedUp,
+  "delivery.inTransit": logistics.partnerInTransit,
+  "delivery.attemptFailed": logistics.partnerAttemptFailed,
+  "delivery.delivered": logistics.partnerDelivered,
+  "delivery.cancelled": logistics.partnerCancelled,
   "escrow.held": escrowMoney.escrowHeld,
   "escrow.releaseScheduled": escrowRelease.escrowReleaseScheduled,
   "escrow.released": escrowMoney.escrowReleased,
@@ -78,6 +86,7 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "dataExport.completed": identity.dataExportCompleted,
   "account.deletionRequested": identity.deletionRequested,
   "account.deletionExecuted": identity.deletionExecuted,
+  "developerOrganization.invitationCreated": identity.developerOrgInvitationCreated,
   "mention.created": social.mentionCreated,
   "post.tagged": social.postTagged,
   "post.reshared": social.postReshared,

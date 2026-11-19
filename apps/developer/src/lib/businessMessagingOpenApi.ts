@@ -12,7 +12,7 @@ export interface OpenApiSpecification {
   readonly servers: readonly {
     readonly url: string;
     readonly description: string;
-    readonly "x-environment": "sandbox" | "production-draft";
+    readonly "x-environment": "sandbox" | "production";
   }[];
   readonly tags: readonly { readonly name: string; readonly description: string }[];
   readonly paths: Record<string, unknown>;
@@ -43,6 +43,9 @@ const errorEnvelopeSchema = {
             "IDEMPOTENCY_KEY_REQUIRED",
             "IDEMPOTENCY_CONFLICT",
             "SANDBOX_QUOTA_EXCEEDED",
+            "APPLICATION_NOT_APPROVED",
+            "INSUFFICIENT_SCOPE",
+            "MONTHLY_QUOTA_EXCEEDED",
           ],
         },
         message: { type: "string" },
@@ -69,21 +72,21 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
     info: {
       title: "Nantty Business Messaging API",
       version: "2026-11-16",
-      summary: "Implemented Sandbox Messaging contract and proposed v1 Production contract.",
+      summary: "Live Sandbox Messaging API with a clearly unavailable Production contract preview.",
       description: [
-        "Documents the live Sandbox Business Messaging HTTP API (`ntsb_test_` bearer tokens)",
-        "and the proposed v1 Production Business Messaging draft routes (not yet mounted on the production API gateway).",
+        "The Sandbox Business Messaging HTTP API (`ntsb_test_` bearer tokens) is available for synthetic data.",
+        "Production paths are preview-only: current production routes return 503 BUSINESS_MESSAGING_UNAVAILABLE and must not be used for live traffic.",
         "Webhook deliveries are signed with HMAC-SHA256 in the `nantty-signature` (`t=<unix-seconds>,v1=<hex>`) header over `${timestamp}.${rawBody}` and carry a unique `nantty-event-id` for consumer deduplication.",
       ].join(" "),
       contact: { name: "Nantty Developers", url: docsUrl },
     },
     servers: [
       { url: sandboxUrl, description: "Nantty Sandbox API (test-only credentials `ntsb_test_`)", "x-environment": "sandbox" },
-      { url: "https://api.nantty.com", description: "Proposed Production API gateway (draft contract — requests disabled)", "x-environment": "production-draft" },
+      { url: "https://api.nantty.com", description: "Production route preview only; Business Messaging currently returns 503", "x-environment": "production" },
     ],
     tags: [
-      { name: "Sandbox Messaging", description: "Implemented synthetic customer & conversation endpoints scoped to a Sandbox `ntsb_test_` credential." },
-      { name: "Production Draft (Disabled)", description: "Proposed v1 Business Messaging contract routes; not mounted in production." },
+      { name: "Sandbox Messaging", description: "Synthetic customer & conversation endpoints scoped to a Sandbox `ntsb_test_` credential." },
+      { name: "Production Business Messaging (unavailable)", description: "Preview only. These routes currently return 503 BUSINESS_MESSAGING_UNAVAILABLE; production functionality is not enabled." },
     ],
     paths: {
       "/v1/customers": {
@@ -182,15 +185,45 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
           },
         },
       },
-      "/v1/business/messages": {
+      "/api/v1/business/messages": {
         post: {
-          tags: ["Production Draft (Disabled)"],
-          summary: "Send an authorized production business message (proposed draft — not live)",
-          "x-status": "draft",
+          tags: ["Production Business Messaging"],
+          summary: "Preview only — Production Business Messaging is unavailable",
+          operationId: "sendBusinessMessage",
+          "x-status": "unavailable",
           security: [{ BusinessBearerAuth: ["messages:send"] }],
-          parameters: [{ name: "Idempotency-Key", in: "header", required: true, schema: { type: "string" } }],
+          parameters: [
+            { name: "Idempotency-Key", in: "header", required: true, schema: { type: "string", pattern: "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$" } },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["recipientId", "text"],
+                  properties: {
+                    recipientId: { type: "string", minLength: 1 },
+                    text: { type: "string", minLength: 1, maxLength: 4000 },
+                  },
+                },
+              },
+            },
+          },
           responses: {
-            "202": { description: "Message queued for asynchronous delivery (proposed contract)" },
+            "503": { description: "Production Business Messaging is not enabled; no message is sent", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+          },
+        },
+      },
+      "/api/v1/business/conversations": {
+        get: {
+          tags: ["Production Business Messaging"],
+          summary: "Preview only — Production Business Messaging is unavailable",
+          operationId: "listBusinessConversations",
+          "x-status": "unavailable",
+          security: [{ BusinessBearerAuth: ["conversations:read"] }],
+          responses: {
+            "503": { description: "Production Business Messaging is not enabled", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
           },
         },
       },
@@ -198,7 +231,7 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
     components: {
       securitySchemes: {
         SandboxBearerAuth: { type: "http", scheme: "bearer", bearerFormat: "ntsb_test_<secret>", description: "Sandbox application credential (`ntsb_test_...`). Rejected on production routes." },
-        BusinessBearerAuth: { type: "http", scheme: "bearer", description: "Proposed business-scoped production access token (not yet active)." },
+        BusinessBearerAuth: { type: "http", scheme: "bearer", bearerFormat: "ntlive_<secret>", description: "Production application credential (`ntlive_...`) issued for approved applications." },
       },
       schemas: {
         ErrorEnvelope: errorEnvelopeSchema,

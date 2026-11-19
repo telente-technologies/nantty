@@ -18,22 +18,22 @@ import (
 )
 
 type BlackApplicationExtended struct {
-	LegalIdentityName           string     `json:"legalIdentityName"`
-	LegalRegistrationRef        string     `json:"legalRegistrationRef"`
-	JurisdictionCountryCode     string     `json:"jurisdictionCountryCode"`
-	OfficialWebsite             string     `json:"officialWebsite"`
-	OfficialContactPhone        string     `json:"officialContactPhone"`
-	InstitutionalEmail          string     `json:"institutionalEmail"`
-	InstitutionalEmailVerified  bool       `json:"institutionalEmailVerified"`
+	LegalIdentityName            string     `json:"legalIdentityName"`
+	LegalRegistrationRef         string     `json:"legalRegistrationRef"`
+	JurisdictionCountryCode      string     `json:"jurisdictionCountryCode"`
+	OfficialWebsite              string     `json:"officialWebsite"`
+	OfficialContactPhone         string     `json:"officialContactPhone"`
+	InstitutionalEmail           string     `json:"institutionalEmail"`
+	InstitutionalEmailVerified   bool       `json:"institutionalEmailVerified"`
 	InstitutionalEmailVerifiedAt *time.Time `json:"institutionalEmailVerifiedAt,omitempty"`
-	RepresentativeEmail         string     `json:"representativeEmail"`
-	RepresentativeIdRef         string     `json:"representativeIdRef"`
-	EvidenceNotes               string     `json:"evidenceNotes"`
-	PrivateCheckoutEnabled      bool       `json:"privateCheckoutEnabled"`
-	PrivateCheckoutAuthorizedBy string     `json:"privateCheckoutAuthorizedBy,omitempty"`
-	PrivateCheckoutAuthorizedAt *time.Time `json:"privateCheckoutAuthorizedAt,omitempty"`
-	PrivateCheckoutExpiresAt    *time.Time `json:"privateCheckoutExpiresAt,omitempty"`
-	PrivateCheckoutRevokedAt    *time.Time `json:"privateCheckoutRevokedAt,omitempty"`
+	RepresentativeEmail          string     `json:"representativeEmail"`
+	RepresentativeIdRef          string     `json:"representativeIdRef"`
+	EvidenceNotes                string     `json:"evidenceNotes"`
+	PrivateCheckoutEnabled       bool       `json:"privateCheckoutEnabled"`
+	PrivateCheckoutAuthorizedBy  string     `json:"privateCheckoutAuthorizedBy,omitempty"`
+	PrivateCheckoutAuthorizedAt  *time.Time `json:"privateCheckoutAuthorizedAt,omitempty"`
+	PrivateCheckoutExpiresAt     *time.Time `json:"privateCheckoutExpiresAt,omitempty"`
+	PrivateCheckoutRevokedAt     *time.Time `json:"privateCheckoutRevokedAt,omitempty"`
 }
 
 type BlackAppealView struct {

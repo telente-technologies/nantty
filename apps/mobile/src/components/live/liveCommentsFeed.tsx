@@ -5,6 +5,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { VerificationBadge } from "@/components/profile/verificationBadge";
 import { Avatar } from "@/components/ui/avatar";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { Text } from "@/components/ui/text";
 import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.hook";
 import { palette } from "@/constants/colors.constant";
@@ -122,6 +123,7 @@ export function LiveCommentsFeed({ comments, isShownOverVideo, canLoadOlder = fa
       maxToRenderPerBatch={8}
       windowSize={5}
       removeClippedSubviews
+      keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG}
       keyboardShouldPersistTaps="handled"
     />
   );

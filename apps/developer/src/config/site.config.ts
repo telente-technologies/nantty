@@ -39,8 +39,9 @@ export function readSandboxPortalUrl(): string {
 }
 
 export function readSandboxPublicApiUrl(): string {
+  const configured = process.env.SANDBOX_PUBLIC_API_URL?.trim();
   const fallback = isProduction ? "https://sandbox-api.nantty.com" : "http://localhost:8090";
-  return readOrigin(process.env.SANDBOX_PUBLIC_API_URL, "SANDBOX_PUBLIC_API_URL", fallback);
+  return readOrigin(configured || fallback, "SANDBOX_PUBLIC_API_URL", fallback);
 }
 
 export function readNanttyWebUrl(): string {

@@ -24,6 +24,7 @@ import (
 	moneyv1 "nantty/contracts/gen/go/nantty/money/v1"
 	"nantty/modules/creators/src"
 	"nantty/modules/creators/src/configs"
+	creatorsmigrations "nantty/modules/creators/src/migrations"
 	programservices "nantty/modules/creators/src/modules/creatorProgram/services"
 	"nantty/modules/ledger/src/databases"
 	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
@@ -51,7 +52,7 @@ func startCreatorsHarness(t *testing.T) *creatorsHarness {
 	database := moneytesting.OpenTestDatabaseOrSkip(t)
 	ledgerSchema := moneytesting.CreateFreshSchemaWithMigrations(t, database, "ledger", ledgermigrations.Files)
 	tokens := moneytesting.NewTestTokenAuthority(t)
-	settings := configs.CreatorsSettings{Money: moneytesting.MoneyModuleSettingsForTests("creators", moneytesting.CreateEmptySchema(t, database, "creators"), ledgerSchema), DefaultTierId: "starter"}
+	settings := configs.CreatorsSettings{Money: moneytesting.MoneyModuleSettingsForTests("creators", moneytesting.CreateFreshSchemaWithMigrations(t, database, "creators", creatorsmigrations.Files), ledgerSchema), DefaultTierId: "starter"}
 	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), Health: health.NewRegistryForService("creators-test")}
 	module, err := src.StartCreatorsModuleWithSettings(context.Background(), settings, dependencies, loaders.MoneyModuleOverrides{
 		Publisher: &events.RecordingPublisher{}, AccessVerifier: tokens.UserVerifier(), StaffVerifiers: tokens.StaffVerifiers(),
@@ -112,6 +113,24 @@ func gift(sender, receiver, host, key string, quantity int32, price int64, battl
 	return request
 }
 
+func (harness *creatorsHarness) seedLiveSession(liveId, hostId string) {
+	harness.t.Helper()
+	liveSchema := harness.module.Container.Settings.LiveSchema
+	if liveSchema == "" || liveSchema == "live" {
+		liveSchema = "gift_live_test_" + uuid.NewString()[:8]
+		harness.module.Container.Settings.LiveSchema = liveSchema
+		if _, err := harness.database.Exec(`CREATE SCHEMA ` + pgx.Identifier{liveSchema}.Sanitize()); err != nil {
+			harness.t.Fatal(err)
+		}
+		if _, err := harness.database.Exec(`CREATE TABLE ` + pgx.Identifier{liveSchema, "live_sessions"}.Sanitize() + ` (id text PRIMARY KEY, host_id text NOT NULL, state text NOT NULL, gifts_enabled boolean NOT NULL)`); err != nil {
+			harness.t.Fatal(err)
+		}
+	}
+	if _, err := harness.database.Exec(`INSERT INTO `+pgx.Identifier{liveSchema, "live_sessions"}.Sanitize()+` (id, host_id, state, gifts_enabled) VALUES ($1, $2, 'live', true)`, liveId, hostId); err != nil {
+		harness.t.Fatal(err)
+	}
+}
+
 func errorReason(err error) (codes.Code, string, map[string]string) {
 	converted := status.Convert(err)
 	for _, detail := range converted.Details() {
@@ -125,8 +144,11 @@ func errorReason(err error) (codes.Code, string, map[string]string) {
 func TestGiftsSplitByTierSettleNonMembersToTheHostAndAreIdempotent(t *testing.T) {
 	harness := startCreatorsHarness(t)
 	viewer, partner, guest, host := uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
+	noCreatorHost := uuid.NewString()
 	harness.makeCreator(partner, "partner")
 	harness.makeCreator(host, "top")
+	harness.seedLiveSession("live-1", host)
+	harness.seedLiveSession("live-no-creator", noCreatorHost)
 	harness.issueCoins(viewer, 1_000)
 	ctx := harness.authorized()
 	if _, err := harness.client.ChargeGiftAndCreditCreator(context.Background(), gift(viewer, partner, host, "unauthenticated-1", 1, 1, "")); status.Code(err) != codes.Unauthenticated {
@@ -154,7 +176,9 @@ func TestGiftsSplitByTierSettleNonMembersToTheHostAndAreIdempotent(t *testing.T)
 		t.Fatalf("self gift reason %q", reason)
 	}
 	if _, reason, _ := errorReason(func() error {
-		_, err := harness.client.ChargeGiftAndCreditCreator(ctx, gift(viewer, guest, uuid.NewString(), "gift-key-0004", 1, 1, ""))
+		noCreatorGift := gift(viewer, guest, noCreatorHost, "gift-key-0004", 1, 1, "")
+		noCreatorGift.LiveId = "live-no-creator"
+		_, err := harness.client.ChargeGiftAndCreditCreator(ctx, noCreatorGift)
 		return err
 	}()); reason != "RECIPIENT_CANNOT_RECEIVE_GIFTS" {
 		t.Fatalf("no creator reason %q", reason)
@@ -178,6 +202,7 @@ func TestConcurrentGiftsFromOneWalletNeverOverdraw(t *testing.T) {
 	harness := startCreatorsHarness(t)
 	viewer, host := uuid.NewString(), uuid.NewString()
 	harness.makeCreator(host, "top")
+	harness.seedLiveSession("live-1", host+"x")
 	harness.issueCoins(viewer, 100)
 	var succeeded, refused atomic.Int64
 	var group sync.WaitGroup
@@ -227,6 +252,7 @@ func TestAdminGiftShareTiersRaiseTheShareByMonthlyVolumeAndNeverLowerAMemberTier
 	harness.makeCreator(starter, "starter")
 	harness.makeCreator(partner, "partner")
 	harness.makeCreator(host, "top")
+	harness.seedLiveSession("live-1", host)
 	harness.issueCoins(viewer, 1_000)
 	ctx := harness.authorized()
 	first, err := harness.client.ChargeGiftAndCreditCreator(ctx, gift(viewer, starter, host, "tier-key-0001", 1, 100, ""))

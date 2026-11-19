@@ -2,33 +2,35 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { BusinessMessagingDocs } from "@/components/businessMessagingDocs";
+import { DeveloperGuidePageView, docGuideSlugs, type DocGuideSlug } from "@/components/developerPublicPages";
 import { PublicDocsShell } from "@/components/publicDocsShell";
 import { readDeveloperDocsUrl } from "@/config/site.config";
 
-const documentRoutes = ["business-messaging", "messaging"] as const;
-
 export function generateStaticParams() {
-  return documentRoutes.map((slug) => ({ slug }));
+  return docGuideSlugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: { readonly params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  if (!documentRoutes.includes(slug as (typeof documentRoutes)[number])) return {};
+  if (!docGuideSlugs.includes(slug as DocGuideSlug)) return {};
   return {
-    title: "Business Messaging API",
-    description: "Review the proposed Nantty Business Messaging API contract and its security requirements.",
-    alternates: { canonical: new URL(`/${slug === "messaging" ? "messaging" : "business-messaging"}`, readDeveloperDocsUrl()).toString() },
+    title: slug === "business-messaging" || slug === "messaging" ? "Business Messaging API" : `Documentation · ${slug}`,
+    alternates: { canonical: new URL(`/${slug}`, readDeveloperDocsUrl()).toString() },
     robots: { index: true, follow: true },
   };
 }
 
-export default async function PublicDocsAliasPage({ params }: { readonly params: Promise<{ slug: string }> }) {
+export default async function PublicDocsSlugPage({ params }: { readonly params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  if (!documentRoutes.includes(slug as (typeof documentRoutes)[number])) notFound();
+  if (!docGuideSlugs.includes(slug as DocGuideSlug)) notFound();
 
   return (
     <PublicDocsShell>
-      <BusinessMessagingDocs />
+      {slug === "business-messaging" || slug === "messaging" ? (
+        <BusinessMessagingDocs />
+      ) : (
+        <DeveloperGuidePageView slug={slug as Exclude<DocGuideSlug, "business-messaging" | "messaging">} />
+      )}
     </PublicDocsShell>
   );
 }

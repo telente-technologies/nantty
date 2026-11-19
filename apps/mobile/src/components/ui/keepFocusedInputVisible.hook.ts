@@ -122,6 +122,9 @@ export function useKeepFocusedInputVisible({ bottomGap = FOCUSED_INPUT_BOTTOM_GA
       contentHeight.current = height;
       revealWhileKeyboardIsOpen();
     },
+    onTouchEnd: () => {
+      revealWhileKeyboardIsOpen();
+    },
   };
   return { scrollRef, scrollProps, revealFocusedInput };
 }

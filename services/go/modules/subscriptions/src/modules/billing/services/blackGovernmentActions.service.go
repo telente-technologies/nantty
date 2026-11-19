@@ -99,7 +99,7 @@ func (billing Billing) ReactivateGovernmentBlackSubscription(ctx context.Context
 			if err != nil {
 				return err
 			}
-			if _, err := transaction.ExecContext(ctx, `UPDATE subscriptions SET paused_reason = '' WHERE id = $1`, locked.ID); err != nil {
+			if _, err := transaction.ExecContext(ctx, `UPDATE `+billing.table("subscriptions")+` SET paused_reason = '' WHERE id = $1`, locked.ID); err != nil {
 				return err
 			}
 			billing.recordBlackBillingEvent(ctx, transaction, BlackBillingEventView{
@@ -120,7 +120,7 @@ func (billing Billing) ReactivateGovernmentBlackSubscription(ctx context.Context
 	}
 	periodId := uuid.Must(uuid.NewV7())
 	charge := models.PeriodCharge{
-		LineItems: []models.LineItem{{Kind: models.LineItemPlanBase, Label: "Black Government (Monthly)", AmountMinor: price.WebMonthlyMinor}},
+		LineItems:     []models.LineItem{{Kind: models.LineItemPlanBase, Label: "Black Government (Monthly)", AmountMinor: price.WebMonthlyMinor}},
 		SubtotalMinor: price.WebMonthlyMinor, AmountDueMinor: price.WebMonthlyMinor, CheckmarkIncluded: true,
 	}
 	err = databases.RunInMoneyTransaction(ctx, billing.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
@@ -197,13 +197,13 @@ func (billing Billing) HandleBillingAuthorizationRevoked(ctx context.Context, tr
 		if err != nil {
 			return err
 		}
-		if _, err := transaction.ExecContext(ctx, `UPDATE subscriptions SET paused_reason = $2 WHERE id = $1`, updated.ID, reason); err != nil {
+		if _, err := transaction.ExecContext(ctx, `UPDATE `+billing.table("subscriptions")+` SET paused_reason = $2 WHERE id = $1`, updated.ID, reason); err != nil {
 			return err
 		}
 		billing.recordBlackBillingEvent(ctx, transaction, BlackBillingEventView{
 			SubscriptionId: updated.ID.String(), ProfileId: updated.ProfileID, OwnerUserId: updated.OwnerUserID,
 			EventKind: "card_removed_paused", ActorKind: "user", ActorId: revoked.OwnerUserId,
-			Summary: "Paused Black subscription and entitlement because recurring card authorization was removed",
+			Summary:  "Paused Black subscription and entitlement because recurring card authorization was removed",
 			Metadata: map[string]any{"authorizationId": revoked.AuthorizationId, "reason": reason},
 		})
 		if err := billing.emit(ctx, transaction, "entitlement.paused", updated.ProfileID, entitlementData(updated, string(updated.Status))); err != nil {

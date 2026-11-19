@@ -13,22 +13,22 @@ func TestConditionsFollowTheConsoleDryRunSemantics(t *testing.T) {
 		condition services.Condition
 		want      bool
 	}{
-		{"text equality ignores case", services.Condition{"reason", "EQUALS", "scam"}, true},
-		{"numbers compare numerically", services.Condition{"recipientCount", "EQUALS", "40.0"}, true},
-		{"not equals", services.Condition{"reason", "NOT_EQUALS", "spam"}, true},
-		{"greater than", services.Condition{"recipientCount", "GREATER_THAN", "39"}, true},
-		{"greater than is strict", services.Condition{"recipientCount", "GREATER_THAN", "40"}, false},
-		{"less than", services.Condition{"accountAgeDays", "LESS_THAN", "7"}, true},
-		{"greater than needs numbers", services.Condition{"reason", "GREATER_THAN", "1"}, false},
-		{"contains ignores case", services.Condition{"reason", "CONTAINS", "CA"}, true},
-		{"in is a comma list", services.Condition{"reason", "IN", "spam, scam ,hate"}, true},
-		{"in misses", services.Condition{"reason", "IN", "spam,hate"}, false},
-		{"booleans read as text", services.Condition{"isVerified", "EQUALS", "TRUE"}, true},
-		{"missing field is not met", services.Condition{"country", "EQUALS", "NG"}, false},
-		{"missing field is not met for not equals", services.Condition{"country", "NOT_EQUALS", "NG"}, false},
-		{"null field is not met", services.Condition{"empty", "NOT_EQUALS", "x"}, false},
-		{"invalid field path is not met", services.Condition{"reason.length", "EQUALS", "4"}, false},
-		{"unknown operator is not met", services.Condition{"reason", "exists", ""}, false},
+		{"text equality ignores case", services.Condition{Field: "reason", Operator: "EQUALS", Value: "scam"}, true},
+		{"numbers compare numerically", services.Condition{Field: "recipientCount", Operator: "EQUALS", Value: "40.0"}, true},
+		{"not equals", services.Condition{Field: "reason", Operator: "NOT_EQUALS", Value: "spam"}, true},
+		{"greater than", services.Condition{Field: "recipientCount", Operator: "GREATER_THAN", Value: "39"}, true},
+		{"greater than is strict", services.Condition{Field: "recipientCount", Operator: "GREATER_THAN", Value: "40"}, false},
+		{"less than", services.Condition{Field: "accountAgeDays", Operator: "LESS_THAN", Value: "7"}, true},
+		{"greater than needs numbers", services.Condition{Field: "reason", Operator: "GREATER_THAN", Value: "1"}, false},
+		{"contains ignores case", services.Condition{Field: "reason", Operator: "CONTAINS", Value: "CA"}, true},
+		{"in is a comma list", services.Condition{Field: "reason", Operator: "IN", Value: "spam, scam ,hate"}, true},
+		{"in misses", services.Condition{Field: "reason", Operator: "IN", Value: "spam,hate"}, false},
+		{"booleans read as text", services.Condition{Field: "isVerified", Operator: "EQUALS", Value: "TRUE"}, true},
+		{"missing field is not met", services.Condition{Field: "country", Operator: "EQUALS", Value: "NG"}, false},
+		{"missing field is not met for not equals", services.Condition{Field: "country", Operator: "NOT_EQUALS", Value: "NG"}, false},
+		{"null field is not met", services.Condition{Field: "empty", Operator: "NOT_EQUALS", Value: "x"}, false},
+		{"invalid field path is not met", services.Condition{Field: "reason.length", Operator: "EQUALS", Value: "4"}, false},
+		{"unknown operator is not met", services.Condition{Field: "reason", Operator: "exists", Value: ""}, false},
 	}
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -41,7 +41,7 @@ func TestConditionsFollowTheConsoleDryRunSemantics(t *testing.T) {
 
 func TestConditionMatchAllAnyAndEmpty(t *testing.T) {
 	data := map[string]any{"reason": "scam", "recipientCount": float64(3)}
-	hit, miss := services.Condition{"reason", "EQUALS", "scam"}, services.Condition{"recipientCount", "GREATER_THAN", "10"}
+	hit, miss := services.Condition{Field: "reason", Operator: "EQUALS", Value: "scam"}, services.Condition{Field: "recipientCount", Operator: "GREATER_THAN", Value: "10"}
 	cases := []struct {
 		match      string
 		conditions []services.Condition

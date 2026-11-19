@@ -7,6 +7,7 @@ import * as creator from "./creator.template";
 import type { EmailTemplateDefinition } from "./defineTemplate";
 import * as escrow from "./escrow.template";
 import * as identityVerification from "./identityVerification.template";
+import * as logistics from "./logistics.template";
 import * as marketing from "./marketing.template";
 import * as milestones from "./milestones.template";
 import * as payments from "./payments.template";
@@ -28,6 +29,7 @@ function pickTemplates<T extends Record<string, unknown>>(module: T) {
 export const emailTemplates = {
   ...pickTemplates(auth),
   ...pickTemplates(buyerOrders),
+  ...pickTemplates(logistics),
   ...pickTemplates(escrow),
   ...pickTemplates(sellerOrders),
   ...pickTemplates(sellerAccount),

@@ -9,11 +9,22 @@ import { NanttyWordmark, ThemeSwitcher } from "@nantty/web-kit";
 import { developerNavigationGroups } from "@/config/sections.config";
 import { readDeveloperDocsHref, readDeveloperSupportUrl, readNanttyWebUrl } from "@/config/site.config";
 
+import { DeveloperContextProvider, useDeveloperContext } from "./developerContextProvider";
 import { PortalNavigation } from "./portalNavigation";
 import { PortalSwitcher } from "./portalSwitcher";
+import { SsoSignInButton } from "./ssoSignInButton";
 import styles from "./portalShell.module.css";
 
-export function PortalShell({ children, homeHref = "/" }: { readonly children: ReactNode; readonly homeHref?: string }) {
+export function PortalShell({ children, homeHref = "/dashboard" }: { readonly children: ReactNode; readonly homeHref?: string }) {
+  return (
+    <DeveloperContextProvider>
+      <PortalShellFrame homeHref={homeHref}>{children}</PortalShellFrame>
+    </DeveloperContextProvider>
+  );
+}
+
+function PortalShellFrame({ children, homeHref }: { readonly children: ReactNode; readonly homeHref: string }) {
+  const { environment, setEnvironment, organizations, organizationId, setOrganizationId, session } = useDeveloperContext();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuToggleRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -45,10 +56,42 @@ export function PortalShell({ children, homeHref = "/" }: { readonly children: R
               <NanttyWordmark height={22} />
               <span className={styles.productLabel}>Developers</span>
             </Link>
+            {organizations.length > 0 ? (
+              <label className={styles.orgSelectWrap}>
+                <span className={styles.srOnly}>Organization</span>
+                <select aria-label="Active organization" className={styles.orgSelect} value={organizationId} onChange={(e) => setOrganizationId(e.target.value)}>
+                  {organizations.map((org) => <option key={org.id} value={org.id}>{org.name}</option>)}
+                </select>
+              </label>
+            ) : null}
           </div>
           <div className={styles.topbarLeading}>
-            <span className={styles.environment}>Preview · organization rollout pending</span>
+            <div className={styles.envSwitch} role="group" aria-label="API environment">
+              <button
+                type="button"
+                className={environment === "sandbox" ? styles.envActive : styles.envButton}
+                aria-pressed={environment === "sandbox"}
+                onClick={() => setEnvironment("sandbox")}
+              >
+                Sandbox
+              </button>
+              <button
+                type="button"
+                className={environment === "production" ? styles.envActiveProd : styles.envButton}
+                aria-pressed={environment === "production"}
+                onClick={() => setEnvironment("production")}
+              >
+                Production
+              </button>
+            </div>
             <div className={styles.topbarActions}>
+              {session.authenticated ? (
+                <form action="/api/auth/logout" method="post">
+                  <button type="submit" className={styles.authAction}>Sign out</button>
+                </form>
+              ) : (
+                <SsoSignInButton className={styles.authAction}>Sign in</SsoSignInButton>
+              )}
               <a className={styles.publicSiteLink} href={readNanttyWebUrl()}>Nantty.com <span aria-hidden="true">↗</span></a>
               <ThemeSwitcher iconOnly label="Colour theme" className={styles.desktopThemeSwitcher} />
               <button ref={menuToggleRef} type="button" className={styles.menuToggleButton} aria-expanded={mobileMenuOpen} aria-controls="developer-mobile-navigation" onClick={() => setMobileMenuOpen((open) => !open)}>

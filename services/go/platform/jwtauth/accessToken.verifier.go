@@ -12,10 +12,11 @@ import (
 )
 
 type Principal struct {
-	UserId    string
-	SessionId string
-	Roles     []string
-	Scope     string
+	UserId     string
+	SessionId  string
+	Roles      []string
+	Scope      string
+	AgeBracket string
 }
 
 type KeySetProvider func(ctx context.Context) (jwk.Set, error)
@@ -108,5 +109,9 @@ func (verifier *AccessTokenVerifier) VerifyAccessTokenAndExtractPrincipal(ctx co
 			}
 		}
 	}
-	return Principal{UserId: subject, SessionId: sessionId, Roles: roles}, nil
+	var ageBracket string
+	if token.Has("age") {
+		_ = token.Get("age", &ageBracket)
+	}
+	return Principal{UserId: subject, SessionId: sessionId, Roles: roles, AgeBracket: ageBracket}, nil
 }

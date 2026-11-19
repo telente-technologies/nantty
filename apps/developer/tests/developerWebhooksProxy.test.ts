@@ -113,3 +113,18 @@ test("queues test events and retries only through scoped Sandbox routes", async 
   assert.equal(retryResult.status, 202);
   assert.match(calls[3]?.url ?? "", /\/deliveries\/f3770eb7-42a6-48ec-a606-174c03c54c50\/retry$/);
 });
+
+test("hides internal gateway and environment configuration wording from webhook 503 messages", async () => {
+  delete process.env.DEVELOPER_API_BASE_URL;
+  const noIdentity = await forwardDeveloperWebhookRequest(makeRequest("list"), "list");
+  assert.equal(noIdentity.status, 503);
+  const noIdentityBody = await noIdentity.json();
+  assert.doesNotMatch(String(noIdentityBody.message), /gateway|not configured|not connected|environment|deployment/i);
+
+  configure();
+  delete process.env.SANDBOX_CONTROL_TOKEN;
+  const noSandbox = await forwardDeveloperWebhookRequest(makeRequest("list"), "list");
+  assert.equal(noSandbox.status, 503);
+  const noSandboxBody = await noSandbox.json();
+  assert.doesNotMatch(String(noSandboxBody.message), /gateway|not configured|not connected|environment|deployment/i);
+});

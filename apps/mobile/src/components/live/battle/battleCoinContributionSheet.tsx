@@ -70,6 +70,7 @@ export function BattleCoinContributionSheet({ battle, recipient, onStageUpdated,
         onClose={onClose}
         title="Contribute coins"
         subtitle={recipient ? `Support ${recipient.user.name} in this battle` : undefined}
+        scrollable
         floating
       >
         <View style={styles.body}>

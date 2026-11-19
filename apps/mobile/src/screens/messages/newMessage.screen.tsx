@@ -3,6 +3,7 @@ import { FlatList, Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { PersonRow } from "@/components/chat/personRow";
 import { useDebouncedSearchText } from "@/components/create/settings/searchField";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { EmptyState } from "@/components/ui/emptyState";
 import { ErrorState } from "@/components/ui/errorState";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
@@ -49,6 +50,7 @@ export function NewMessageScreen({ navigation }: MainScreenProps<"NewMessage">) 
       <FlatList
         data={people.data ?? []}
         keyExtractor={(p) => p.id}
+        keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={() => <View style={styles.gap} />}

@@ -126,7 +126,7 @@ func newEngine(rules ...Rule) (*Engine, *memoryStore, *recordingActions, *time.T
 }
 
 func rule(id string, mutate func(*RuleContent)) Rule {
-	content := RuleContent{Name: id, IsEnabled: true, Event: EventReportCreated, ConditionMatch: "ALL", Conditions: []Condition{{"reason", "EQUALS", "scam"}}, Actions: []Action{{Type: ActionQueueForReview}}, MaxExecutionsPerHour: 60}
+	content := RuleContent{Name: id, IsEnabled: true, Event: EventReportCreated, ConditionMatch: "ALL", Conditions: []Condition{{Field: "reason", Operator: "EQUALS", Value: "scam"}}, Actions: []Action{{Type: ActionQueueForReview}}, MaxExecutionsPerHour: 60}
 	if mutate != nil {
 		mutate(&content)
 	}

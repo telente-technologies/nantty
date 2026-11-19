@@ -39,7 +39,7 @@ export function FrameAwareModal({ visible, onRequestClose, onDismiss, children, 
   }
   if (!visible) return null;
   return renderIntoDeviceFrameOverlay(
-    <View style={[styles.overlay, transparent ? null : { backgroundColor: colors.surface }]} accessibilityViewIsModal>
+    <View style={[styles.overlay, transparent ? null : { backgroundColor: colors.surface }]} accessibilityViewIsModal onStartShouldSetResponder={dismissKeyboardOnEmptyTap}>
       <CloseOnEscapeKey onRequestClose={onRequestClose} />
       {children}
     </View>,

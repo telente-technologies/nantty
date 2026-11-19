@@ -61,7 +61,12 @@ func TestResolveCreatorSharePrefersLatestEffectiveRowAndFallsBackToDefaults(t *t
 }
 
 func TestPremiumPoolAllocationSumsExactlyAndIgnoresNonConsumers(t *testing.T) {
-	allocations, err := services.AllocatePremiumPoolByConsumption(1_000, "NGN", []services.ConsumptionWeight{{"b", 300}, {"a", 100}, {"c", 0}, {"d", 600}})
+	allocations, err := services.AllocatePremiumPoolByConsumption(1_000, "NGN", []services.ConsumptionWeight{
+		{CreatorUserId: "b", WatchSeconds: 300},
+		{CreatorUserId: "a", WatchSeconds: 100},
+		{CreatorUserId: "c", WatchSeconds: 0},
+		{CreatorUserId: "d", WatchSeconds: 600},
+	})
 	if err != nil || len(allocations) != 3 {
 		t.Fatalf("unexpected %+v %v", allocations, err)
 	}

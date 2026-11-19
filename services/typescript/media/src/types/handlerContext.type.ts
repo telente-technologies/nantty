@@ -1,6 +1,7 @@
 import type { MediaConfig } from "../configs/media.config.js";
 import type { BrandedDownloadRenderer } from "../interfaces/brandedDownloadRenderer.interface.js";
 import type { MediaDatabase } from "../databases/prisma.database.js";
+import type { ChildSafetyScanner } from "../interfaces/childSafetyScanner.interface.js";
 import type { Clock } from "../interfaces/clock.interface.js";
 import type { JobQueue } from "../interfaces/jobQueue.interface.js";
 import type { MalwareScanner } from "../interfaces/malwareScanner.interface.js";
@@ -18,6 +19,7 @@ export interface HandlerContext {
   readonly clock: Clock;
   readonly scanner: MalwareScanner;
   readonly moderation: ModerationClient | undefined;
+  readonly childSafety?: ChildSafetyScanner | undefined;
   readonly images: ImageProcessor;
   readonly transcoder: MediaTranscoder;
   readonly branding: BrandedDownloadRenderer;

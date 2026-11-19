@@ -91,7 +91,15 @@ describe("developer organization routes", () => {
     expect(resolveUpstreamRouteForRequest("PUT", `${application}/members/6de1c79a-00fd-4bed-ae23-fbfb678c0a19/grants`)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["PUT"], exactPathOnly: true });
     expect(resolveUpstreamRouteForRequest("POST", `${application}/members/6de1c79a-00fd-4bed-ae23-fbfb678c0a19/grants`)).toBeUndefined();
     expect(resolveUpstreamRouteForRequest("POST", application)).toBeUndefined();
-    expect(resolveUpstreamRouteForRequest("GET", `${application}/credentials`)).toBeUndefined();
+    expect(resolveUpstreamRouteForRequest("GET", `${application}/credentials`)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("POST", `${application}/credentials`)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true });
+    const credential = `${application}/credentials/19a6e03c-d5ce-40c9-a9d2-8aa8657e5738`;
+    expect(resolveUpstreamRouteForRequest("POST", `${credential}/rotate`)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["POST"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("GET", `${credential}/rotate`)).toBeUndefined();
+    expect(resolveUpstreamRouteForRequest("POST", `${credential}/unknown`)).toBeUndefined();
+    expect(resolveUpstreamRouteForRequest("DELETE", `${application}/credentials/19a6e03c-d5ce-40c9-a9d2-8aa8657e5738`)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["DELETE"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("GET", `${application}/webhooks`)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("GET", `${application}/unknown`)).toBeUndefined();
   });
 
   it("routes the signed-in account invitation inbox and responses only to Identity", () => {

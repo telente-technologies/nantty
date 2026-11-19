@@ -118,7 +118,7 @@ func (billing Billing) settlePeriodInTransaction(ctx context.Context, transactio
 			if err != nil {
 				return err
 			}
-			_, _ = transaction.ExecContext(ctx, `UPDATE subscriptions SET paused_reason = 'verification_not_approved' WHERE id = $1`, row.ID)
+			_, _ = transaction.ExecContext(ctx, `UPDATE `+billing.table("subscriptions")+` SET paused_reason = 'verification_not_approved' WHERE id = $1`, row.ID)
 			return billing.emit(ctx, transaction, "entitlement.paused", row.ProfileID, entitlementData(row, string(subscription.StatusPaused)))
 		}
 		if effectiveAuth == "" {
@@ -126,7 +126,7 @@ func (billing Billing) settlePeriodInTransaction(ctx context.Context, transactio
 			if pauseErr != nil {
 				return pauseErr
 			}
-			_, _ = transaction.ExecContext(ctx, `UPDATE subscriptions SET paused_reason = 'recurring_authorization_required' WHERE id = $1`, pausedRow.ID)
+			_, _ = transaction.ExecContext(ctx, `UPDATE `+billing.table("subscriptions")+` SET paused_reason = 'recurring_authorization_required' WHERE id = $1`, pausedRow.ID)
 			billing.recordBlackBillingEvent(ctx, transaction, BlackBillingEventView{
 				SubscriptionId: pausedRow.ID.String(), ProfileId: pausedRow.ProfileID, OwnerUserId: pausedRow.OwnerUserID,
 				EventKind: "paused_missing_card", ActorKind: "system",
@@ -180,11 +180,11 @@ func (billing Billing) settlePeriodInTransaction(ctx context.Context, transactio
 		}
 	}
 	if row.PlanCode == constants.PlanBlack {
-		_, _ = transaction.ExecContext(ctx, `UPDATE subscriptions SET paused_reason = '' WHERE id = $1`, row.ID)
+		_, _ = transaction.ExecContext(ctx, `UPDATE `+billing.table("subscriptions")+` SET paused_reason = '' WHERE id = $1`, row.ID)
 		billing.recordBlackBillingEvent(ctx, transaction, BlackBillingEventView{
 			SubscriptionId: row.ID.String(), ProfileId: row.ProfileID, OwnerUserId: row.OwnerUserID,
 			EventKind: "payment_verified", ActorKind: "system",
-			Summary: "Verified USD payment and activated Black Government entitlement",
+			Summary:  "Verified USD payment and activated Black Government entitlement",
 			Metadata: map[string]any{"periodId": period.ID.String(), "paymentReference": paymentReference, "amountMinor": period.AmountDueMinor},
 		})
 	}

@@ -43,7 +43,11 @@ func TestCoinsToCashConversionIsOverflowChecked(t *testing.T) {
 func TestPackagePriceFallsBackToUsdOnlyWhenTheViewerCurrencyCannotBeCharged(t *testing.T) {
 	prices := map[string]int64{"NGN": 150_000, "USD": 99, "GBP": 79}
 	chargeable := func(currency string) bool { return currency != "GBP" }
-	cases := map[string]models.ChosenPrice{"NGN": {"NGN", 150_000}, "GBP": {"USD", 99}, "KES": {"USD", 99}}
+	cases := map[string]models.ChosenPrice{
+		"NGN": {Currency: "NGN", AmountMinor: 150_000},
+		"GBP": {Currency: "USD", AmountMinor: 99},
+		"KES": {Currency: "USD", AmountMinor: 99},
+	}
 	for preferred, want := range cases {
 		if got, err := models.ChooseCoinPackagePrice(prices, preferred, chargeable); err != nil || got != want {
 			t.Errorf("%s: got %+v %v", preferred, got, err)

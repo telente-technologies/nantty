@@ -40,7 +40,7 @@ func (billing Billing) recordBlackBillingEvent(ctx context.Context, executor int
 		meta = []byte("{}")
 	}
 	_, _ = executor.ExecContext(ctx, `
-		INSERT INTO black_billing_events (id, subscription_id, application_id, profile_id, owner_user_id, event_kind, actor_kind, actor_id, summary, metadata, created_at)
+		INSERT INTO `+billing.table("black_billing_events")+` (id, subscription_id, application_id, profile_id, owner_user_id, event_kind, actor_kind, actor_id, summary, metadata, created_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11)`,
 		event.Id, event.SubscriptionId, event.ApplicationId, event.ProfileId, event.OwnerUserId, event.EventKind, event.ActorKind, event.ActorId, event.Summary, string(meta), event.CreatedAt,
 	)
@@ -52,7 +52,7 @@ func (billing Billing) listBlackBillingEvents(ctx context.Context, profileId str
 	}
 	rows, err := billing.Container.Resources.Database.QueryContext(ctx, `
 		SELECT id::text, subscription_id, application_id, profile_id, owner_user_id, event_kind, actor_kind, actor_id, summary, metadata::text, created_at
-		FROM black_billing_events
+		FROM `+billing.table("black_billing_events")+`
 		WHERE ($1 = '' OR profile_id = $1)
 		ORDER BY created_at DESC LIMIT $2`, profileId, limit)
 	if err != nil {

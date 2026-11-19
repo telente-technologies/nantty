@@ -37,7 +37,7 @@ func TestBirthdayCelebrationIsSelfOnlyAgeOncePerDayAndRespectsPrivacy(t *testing
 	ada := mustParseUuid(adaId)
 	directory := celebrationDirectory{FakeAccountDirectory: harness.accounts, birthdays: map[uuid.UUID]time.Time{ada: time.Date(2000, 10, 4, 0, 0, 0, 0, time.UTC)}, joined: map[uuid.UUID]time.Time{ada: time.Date(2024, 3, 3, 9, 0, 0, 0, time.UTC)}}
 	identityports.Default.RegisterAccountDirectory(directory)
-	harness.module.Container().Now = func() time.Time { return time.Date(2026, 10, 3, 23, 30, 0, 0, time.UTC) }
+	harness.setNow(func() time.Time { return time.Date(2026, 10, 3, 23, 30, 0, 0, time.UTC) })
 
 	harness.expect("PATCH", "/api/v1/users/me/celebrations/settings", adaToken, map[string]any{"timezone": "Africa/Lagos"}, http.StatusOK)
 	mine := harness.expect("GET", "/api/v1/users/me/celebrations", adaToken, nil, http.StatusOK)
@@ -81,7 +81,7 @@ func TestAnniversarySchedulerEmitsTheEmailEventOncePerYear(t *testing.T) {
 	harness.expect("GET", "/api/v1/users/me", token, nil, http.StatusOK)
 	harness.expect("PATCH", "/api/v1/users/me/celebrations/settings", token, map[string]any{"timezone": "Africa/Lagos"}, http.StatusOK)
 	container := harness.module.Container()
-	container.Now = func() time.Time { return time.Date(2026, 10, 4, 8, 0, 0, 0, time.UTC) }
+	harness.setNow(func() time.Time { return time.Date(2026, 10, 4, 8, 0, 0, 0, time.UTC) })
 	scheduler := celebrationservices.AnniversaryScheduler{Container: container}
 	for run := 0; run < 3; run++ {
 		if err := scheduler.RunOnce(context.Background()); err != nil {

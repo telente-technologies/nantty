@@ -14,6 +14,7 @@ const scenarios = [
 export function SandboxScenariosWorkspace() {
   const ctx = useSandboxContext();
   const [busy, setBusy] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [lastResult, setLastResult] = useState<unknown>(null);
@@ -37,8 +38,7 @@ export function SandboxScenariosWorkspace() {
 
   async function resetSandbox() {
     if (!ctx.organizationId || !ctx.applicationId || busy) return;
-    if (!window.confirm("Reset synthetic customers, conversations, messages, and events for this application? Billing-period usage counters and request logs are preserved.")) return;
-    setBusy(true); setError(""); setNotice("");
+    setBusy(true); setError(""); setNotice(""); setConfirmReset(false);
     try {
       const result = await sandboxFetch<Record<string, unknown>>("/api/sandbox/reset", {
         method: "POST",
@@ -83,7 +83,16 @@ export function SandboxScenariosWorkspace() {
       <section className={styles.panel} aria-label="Deterministic scenarios">
         <div className={styles.panelHeading}>
           <div><h2>Available scenarios</h2><p>Each run creates synthetic records scoped strictly to this sandbox application.</p></div>
-          <button type="button" className={styles.secondaryBtn} disabled={busy || !ctx.applicationId} onClick={() => void resetSandbox()}>Reset synthetic data</button>
+          <div className={styles.toolbar}>
+            {confirmReset ? (
+              <>
+                <button type="button" className={styles.dangerBtn} disabled={busy || !ctx.applicationId} onClick={() => void resetSandbox()}>Confirm reset</button>
+                <button type="button" className={styles.secondaryBtn} disabled={busy} onClick={() => setConfirmReset(false)}>Cancel</button>
+              </>
+            ) : (
+              <button type="button" className={styles.secondaryBtn} disabled={busy || !ctx.applicationId} onClick={() => setConfirmReset(true)}>Reset synthetic data</button>
+            )}
+          </div>
         </div>
         <div className={styles.tableScroll}>
           <table>

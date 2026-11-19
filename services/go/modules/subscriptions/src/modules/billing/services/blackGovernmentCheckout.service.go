@@ -62,7 +62,7 @@ func (billing Billing) StartGovernmentBlackCheckout(ctx context.Context, userId 
 	}
 	subscriptionId, periodId := uuid.Must(uuid.NewV7()), uuid.Must(uuid.NewV7())
 	charge := models.PeriodCharge{
-		LineItems: []models.LineItem{{Kind: models.LineItemPlanBase, Label: "Black Government (Monthly)", AmountMinor: price.WebMonthlyMinor}},
+		LineItems:     []models.LineItem{{Kind: models.LineItemPlanBase, Label: "Black Government (Monthly)", AmountMinor: price.WebMonthlyMinor}},
 		SubtotalMinor: price.WebMonthlyMinor, AmountDueMinor: price.WebMonthlyMinor, CheckmarkIncluded: true,
 	}
 	var intentId uuid.UUID
@@ -81,7 +81,7 @@ func (billing Billing) StartGovernmentBlackCheckout(ctx context.Context, userId 
 			return err
 		}
 		if _, err := transaction.ExecContext(ctx, `
-			UPDATE subscriptions
+			UPDATE `+billing.table("subscriptions")+`
 			SET black_application_id = $2, verified_jurisdiction_country = $3, terms_accepted_at = $4, recurring_consent_at = $4
 			WHERE id = $1`, subscriptionId, app.ApplicationId, strings.ToUpper(app.JurisdictionCountryCode), now); err != nil {
 			return err
@@ -97,7 +97,7 @@ func (billing Billing) StartGovernmentBlackCheckout(ctx context.Context, userId 
 		billing.recordBlackBillingEvent(ctx, transaction, BlackBillingEventView{
 			SubscriptionId: subscriptionId.String(), ApplicationId: app.ApplicationId, ProfileId: profile.ProfileId, OwnerUserId: userId,
 			EventKind: "checkout_started", ActorKind: "user", ActorId: userId,
-			Summary: "Initiated private Black Government USD monthly checkout",
+			Summary:  "Initiated private Black Government USD monthly checkout",
 			Metadata: map[string]any{"amountMinor": price.WebMonthlyMinor, "currency": "USD", "jurisdiction": app.JurisdictionCountryCode},
 		})
 		return nil
@@ -111,7 +111,7 @@ func (billing Billing) StartGovernmentBlackCheckout(ctx context.Context, userId 
 	}
 	view := CheckoutView{
 		SubscriptionId: subscriptionId.String(), Provider: "flutterwave", Price: money(price.WebMonthlyMinor, regionpricing.BlackCurrencyCode),
-		Discount: models.PriceQuote{ListAmountMinor: price.WebMonthlyMinor, AmountMinor: price.WebMonthlyMinor, DiscountKind: "none"},
+		Discount:  models.PriceQuote{ListAmountMinor: price.WebMonthlyMinor, AmountMinor: price.WebMonthlyMinor, DiscountKind: "none"},
 		LineItems: charge.LineItems, Reference: opened.Reference,
 	}
 	if opened.CheckoutUrl != nil {

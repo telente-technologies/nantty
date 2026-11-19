@@ -8,7 +8,9 @@ import { useReducedMotionPreference } from "@/hooks/useReducedMotionPreference.h
 import { makeThemedStyles, useTheme } from "@/theme";
 
 import { useAccessibilityFocusOnOpen } from "./accessibilityFocus.hook";
+import { dismissKeyboardIfVisible, KEYBOARD_DISMISS_ON_DRAG } from "./dismissKeyboardOnEmptyTap.util";
 import { FrameAwareModal } from "./frameAwareModal";
+import { KeyboardSpacer } from "./keyboardSpacer";
 import { ModalActionStack, type ModalAction } from "./modalActions";
 import { buildModalElevation, buildModalPalette, buildModalToneColors, modalMaxWidth, modalMotion, modalRadius, modalSpacing, type ModalTone } from "./modalChrome.constant";
 import { ModalIntentIcon, modalIntentTone, type ModalIntent } from "./modalIntent";
@@ -49,7 +51,7 @@ function DialogCard({ title, message, intent, icon, illustration, tone, actions 
   const animatedStyle = useAnimatedStyle(() => ({ opacity: appear.value, transform: [{ scale: 0.95 + appear.value * 0.05 }] }));
   return (
     <Animated.View style={[styles.card, animatedStyle]} accessibilityViewIsModal>
-      <ScrollView style={{ maxHeight: frame.height * 0.62 }} contentContainerStyle={styles.scrollContent} bounces={false} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView style={{ maxHeight: frame.height * 0.62 }} contentContainerStyle={styles.scrollContent} bounces={false} showsVerticalScrollIndicator={false} keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG} keyboardShouldPersistTaps="handled">
         {illustration ? <View style={styles.illustration}>{illustration}</View> : null}
         {leadingIcon && !illustration ? (
           <View style={[styles.iconBadge, { backgroundColor: toneColors.tint }]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
@@ -92,6 +94,7 @@ export function Dialog({ visible, onClose, dismissible = true, showCloseButton =
   const isBusy = (cardProps.actions ?? []).some((action) => action.loading);
   const canDismiss = dismissible && !isBusy;
   const closeIfDismissible = () => {
+    dismissKeyboardIfVisible();
     if (canDismiss) onClose();
   };
   return (
@@ -105,6 +108,7 @@ export function Dialog({ visible, onClose, dismissible = true, showCloseButton =
           importantForAccessibility={canDismiss ? "auto" : "no-hide-descendants"}
         />
         {visible ? <DialogCard {...cardProps} onClose={closeIfDismissible} canClose={showCloseButton && dismissible && !isBusy} /> : null}
+        <KeyboardSpacer restingHeight={0} />
       </View>
     </FrameAwareModal>
   );

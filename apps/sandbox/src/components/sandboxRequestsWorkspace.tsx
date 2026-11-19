@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { readDeveloperPortalUrl } from "@/config/site.config";
+
 import styles from "./sandboxWorkspace.module.css";
 import { formatTimestamp, sandboxFetch, useSandboxContext } from "./useSandboxContext";
 
@@ -12,6 +14,7 @@ export function SandboxRequestsWorkspace() {
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [methodFilter, setMethodFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [queryFilter, setQueryFilter] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -35,11 +38,13 @@ export function SandboxRequestsWorkspace() {
     return () => controller.abort();
   }, [loadData]);
 
+  const normalizedQuery = queryFilter.trim().toLowerCase();
   const filtered = requests.filter((r) => {
     if (methodFilter !== "ALL" && r.method !== methodFilter) return false;
     if (statusFilter === "2XX" && (r.statusCode < 200 || r.statusCode >= 300)) return false;
     if (statusFilter === "4XX" && (r.statusCode < 400 || r.statusCode >= 500)) return false;
     if (statusFilter === "5XX" && r.statusCode < 500) return false;
+    if (normalizedQuery && !r.path.toLowerCase().includes(normalizedQuery) && !r.requestId.toLowerCase().includes(normalizedQuery)) return false;
     return true;
   });
 
@@ -73,10 +78,19 @@ export function SandboxRequestsWorkspace() {
         <div className={styles.panelHeading}>
           <div><h2>Redacted requests</h2><p>Tokens and request bodies are stripped at the Sandbox gateway.</p></div>
           <div className={styles.toolbar}>
+            <input
+              type="search"
+              aria-label="Filter by endpoint or request ID"
+              placeholder="Search endpoint or request ID…"
+              value={queryFilter}
+              onChange={(e) => setQueryFilter(e.target.value)}
+            />
             <select aria-label="Method filter" value={methodFilter} onChange={(e) => setMethodFilter(e.target.value)}>
               <option value="ALL">All methods</option>
               <option value="GET">GET</option>
               <option value="POST">POST</option>
+              <option value="PATCH">PATCH</option>
+              <option value="DELETE">DELETE</option>
             </select>
             <select aria-label="Status filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <option value="ALL">All statuses</option>
@@ -88,20 +102,33 @@ export function SandboxRequestsWorkspace() {
           </div>
         </div>
 
-        {filtered.length ? (
+        {!ctx.loadingOrgs && !ctx.organizations.length ? (
+          <p className={styles.empty}>No developer organization found. <a href={readDeveloperPortalUrl()} target="_blank" rel="noopener noreferrer">Open Developer Portal ↗</a> to create one.</p>
+        ) : !ctx.loadingOrgs && !ctx.applications.length ? (
+          <p className={styles.empty}>No application selected. <a href={readDeveloperPortalUrl()} target="_blank" rel="noopener noreferrer">Register an application in Developer Portal ↗</a> first.</p>
+        ) : filtered.length ? (
           <div className={styles.tableScroll}>
             <table>
               <thead><tr><th scope="col">Request ID</th><th scope="col">Method</th><th scope="col">Endpoint</th><th scope="col">Status</th><th scope="col">Recorded</th></tr></thead>
               <tbody>
-                {filtered.map((row) => (
-                  <tr key={row.requestId}>
-                    <td><code>{row.requestId}</code></td>
-                    <td><code>{row.method}</code></td>
-                    <td><code>{row.path}</code></td>
-                    <td>{row.statusCode}</td>
-                    <td>{formatTimestamp(row.createdAt)}</td>
-                  </tr>
-                ))}
+                {filtered.map((row) => {
+                  const statusTone = row.statusCode >= 500
+                    ? styles.badgeDanger
+                    : row.statusCode >= 400
+                      ? styles.badgeWarn
+                      : row.statusCode >= 200 && row.statusCode < 300
+                        ? styles.badgeSuccess
+                        : styles.badgeNeutral;
+                  return (
+                    <tr key={row.requestId}>
+                      <td><code>{row.requestId}</code></td>
+                      <td><span className={`${styles.badge} ${styles.badgeNeutral}`}><code>{row.method}</code></span></td>
+                      <td><code>{row.path}</code></td>
+                      <td><span className={`${styles.badge} ${statusTone}`}>{row.statusCode}</span></td>
+                      <td>{formatTimestamp(row.createdAt)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

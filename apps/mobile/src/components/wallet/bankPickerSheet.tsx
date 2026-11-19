@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "reac
 
 import { CaretDown24Icon, Check16Icon, MagnifyingGlass20Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -43,7 +44,7 @@ export function BankPickerField({ selectedBankCode, selectedBankName, onSelectBa
           <TextField placeholder="Search banks" value={search} onChangeText={setSearch} left={<MagnifyingGlass20Icon />} accessibilityLabel="Search banks" />
           {banks.isLoading ? <ActivityIndicator color={colors.primary} style={styles.loading} /> : null}
           {banks.isError ? <Text size={13} color={colors.error}>Couldn't load banks. Close and try again.</Text> : null}
-          <ScrollView style={styles.list} keyboardShouldPersistTaps="handled">
+          <ScrollView style={styles.list} keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG} keyboardShouldPersistTaps="handled">
             {visibleBanks.map((bank) => (
               <Pressable
                 key={bank.code}

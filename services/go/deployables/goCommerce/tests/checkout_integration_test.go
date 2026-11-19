@@ -120,7 +120,7 @@ func createMinimalUsersTables(t *testing.T, admin *sql.DB, schema string) {
 		"CREATE TABLE " + q + "profiles (id uuid PRIMARY KEY, account_id uuid, kind text, handle text, display_name text, avatar_url text, verified bool, country_code text, status text)",
 		"CREATE TABLE " + q + "privacy_settings (account_id uuid PRIMARY KEY, analytics bool, personalization bool)",
 		"CREATE TABLE " + q + `shipping_addresses (id uuid PRIMARY KEY, account_id uuid, recipient_name text, phone text, line1 text, line2 text, postal_code text, details text,
-			country_code text, region_id uuid, admin_area_id uuid, city_id uuid, free_text_city text, free_text_state text, phone_sealed bytea)`,
+			country_code text, region_id uuid, admin_area_id uuid, city_id uuid, free_text_city text, free_text_state text, phone_sealed bytea, updated_at timestamptz NOT NULL DEFAULT now())`,
 	}
 	for _, statement := range statements {
 		if _, err := admin.Exec(statement); err != nil {
@@ -201,6 +201,15 @@ func mustCatalog() commerceports.CatalogReader {
 	return catalog
 }
 
+func (harness *commerceHarness) quoteRevision(t *testing.T) string {
+	t.Helper()
+	plan, err := services.BuildCheckoutPlan(context.Background(), harness.orders.Container, harness.buyer, harness.addressId, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return plan.ShippingQuoteRevision
+}
+
 func (harness *commerceHarness) reservedUnits(t *testing.T) int {
 	t.Helper()
 	levels := harness.inventory.Container.Client.StockLevel.Query().Where(stocklevel.VariantID(harness.variantId)).AllX(context.Background())
@@ -215,7 +224,7 @@ func TestCheckoutReservesStockAndCreatesOrdersInOneTransaction(t *testing.T) {
 	harness := startCommerce(t)
 	ctx := context.Background()
 	harness.fillCart(t, 2)
-	result, err := (services.CheckoutService{Container: harness.orders.Container}).Checkout(ctx, services.CheckoutRequest{BuyerId: harness.buyer, AddressId: harness.addressId, IdempotencyKey: "checkout-key-0001"})
+	result, err := (services.CheckoutService{Container: harness.orders.Container}).Checkout(ctx, services.CheckoutRequest{BuyerId: harness.buyer, AddressId: harness.addressId, ShippingQuoteRevision: harness.quoteRevision(t), IdempotencyKey: "checkout-key-0001"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -231,7 +240,7 @@ func TestCheckoutShortageRollsBackOrdersAndLeavesNoReservation(t *testing.T) {
 	harness := startCommerce(t)
 	ctx := context.Background()
 	harness.fillCart(t, 9)
-	_, err := (services.CheckoutService{Container: harness.orders.Container}).Checkout(ctx, services.CheckoutRequest{BuyerId: harness.buyer, AddressId: harness.addressId, IdempotencyKey: "checkout-key-0002"})
+	_, err := (services.CheckoutService{Container: harness.orders.Container}).Checkout(ctx, services.CheckoutRequest{BuyerId: harness.buyer, AddressId: harness.addressId, ShippingQuoteRevision: harness.quoteRevision(t), IdempotencyKey: "checkout-key-0002"})
 	if err == nil {
 		t.Fatal("expected insufficient stock")
 	}
@@ -248,7 +257,7 @@ func TestPaymentRegistrationFailureCompensatesTheReservation(t *testing.T) {
 	ctx := context.Background()
 	harness.fillCart(t, 3)
 	harness.money.Fail = fmt.Errorf("money service unavailable")
-	_, err := (services.CheckoutService{Container: harness.orders.Container}).Checkout(ctx, services.CheckoutRequest{BuyerId: harness.buyer, AddressId: harness.addressId, IdempotencyKey: "checkout-key-0003"})
+	_, err := (services.CheckoutService{Container: harness.orders.Container}).Checkout(ctx, services.CheckoutRequest{BuyerId: harness.buyer, AddressId: harness.addressId, ShippingQuoteRevision: harness.quoteRevision(t), IdempotencyKey: "checkout-key-0003"})
 	if err == nil {
 		t.Fatal("expected the payment service failure to surface")
 	}

@@ -67,20 +67,44 @@ func TestDeveloperOrganizationInvitationsRequireRecipientConsent(t *testing.T) {
 	if status != 409 || closed["code"] != "ORGANIZATION_INVITATION_CLOSED" {
 		t.Fatalf("respond to declined invitation = %d %v", status, closed)
 	}
+	status, revoked := harness.call("POST", path, owner, map[string]string{"email": "invitation-other@example.com", "role": "developer"})
+	if status != 201 {
+		t.Fatalf("create resend test invitation = %d %v", status, revoked)
+	}
+	resendID := revoked["id"].(string)
+	status, cooldown := harness.call("POST", path+"/"+resendID+"/resend", owner, nil)
+	if status != 429 || cooldown["code"] != "ORGANIZATION_INVITATION_RESEND_COOLDOWN" {
+		t.Fatalf("immediate resend = %d %v, want 429", status, cooldown)
+	}
+	harness.execSql("UPDATE developer_organization_invitations SET updated_at = now() - interval '2 minutes' WHERE id = $1", resendID)
+	status, resent := harness.call("POST", path+"/"+resendID+"/resend", owner, nil)
+	if status != 200 || resent["id"] != resendID || resent["status"] != "pending" {
+		t.Fatalf("resend invitation = %d %v", status, resent)
+	}
+	status, forbiddenResend := harness.call("POST", path+"/"+resendID+"/resend", invitee, nil)
+	if status != 403 {
+		t.Fatalf("developer member resends invitation = %d %v, want 403", status, forbiddenResend)
+	}
+	var resentOutbox int
+	harness.queryRowWithArgs("SELECT count(*) FROM outbox_events WHERE event_type = 'developerOrganization.invitationCreated' AND subject = $1", []any{resendID}, &resentOutbox)
+	if resentOutbox != 2 {
+		t.Fatalf("resent invitation outbox events = %d, want 2", resentOutbox)
+	}
+	harness.expect("DELETE", path+"/"+resendID, owner, nil, 204)
+	var auditCount int
+	harness.queryRowWithArgs("SELECT count(*) FROM developer_organization_audit_logs WHERE organization_id = $1 AND action LIKE 'organization.invitation_%'", []any{organizationID}, &auditCount)
+	if auditCount != 7 {
+		t.Fatalf("invitation audit entries = %d, want 7", auditCount)
+	}
 	status, revokedInvitation := harness.call("POST", path, owner, map[string]string{"email": "invitation-other@example.com", "role": "developer"})
 	if status != 201 {
 		t.Fatalf("create revoke test invitation = %d %v", status, revokedInvitation)
 	}
 	revokedID := revokedInvitation["id"].(string)
 	harness.expect("DELETE", path+"/"+revokedID, owner, nil, 204)
-	status, revoked := harness.call("POST", "/api/v1/developer/invitations/"+revokedID, other, map[string]string{"response": "accept"})
-	if status != 409 || revoked["code"] != "ORGANIZATION_INVITATION_CLOSED" {
-		t.Fatalf("accept revoked invitation = %d %v", status, revoked)
-	}
-	var auditCount int
-	harness.queryRowWithArgs("SELECT count(*) FROM developer_organization_audit_logs WHERE organization_id = $1 AND action LIKE 'organization.invitation_%'", []any{organizationID}, &auditCount)
-	if auditCount != 6 {
-		t.Fatalf("invitation audit entries = %d, want 6", auditCount)
+	status, revokedAccept := harness.call("POST", "/api/v1/developer/invitations/"+revokedID, other, map[string]string{"response": "accept"})
+	if status != 409 || revokedAccept["code"] != "ORGANIZATION_INVITATION_CLOSED" {
+		t.Fatalf("accept revoked invitation = %d %v", status, revokedAccept)
 	}
 	status, _ = harness.call("GET", "/api/v1/developer/invitations", "", nil)
 	if status != 401 {

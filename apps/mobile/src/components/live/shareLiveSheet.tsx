@@ -6,6 +6,7 @@ import { Copy16Icon, MagnifyingGlass16Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { Text } from "@/components/ui/text";
 import { calculateDefaultLetterSpacing, fontFamily } from "@/constants/typography.constant";
 import { liveService } from "@/services/live/live.service";
@@ -62,6 +63,8 @@ export function ShareLiveSheet({ liveId, visible, onClose, onShared }: ShareLive
         keyExtractor={(p) => p.id}
         style={styles.list}
         contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG}
         renderItem={({ item }) => {
           const selected = selectedUserIds.includes(item.id);
           return (

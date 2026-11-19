@@ -48,6 +48,11 @@ async def test_opted_out_viewer_is_not_personalized(
     consumer = application_container.domain_event_consumer_service
     await consumer.process_message_body(
         domain_event(
+            "evt_consent_ctr", "consent.granted", "viewer_ctr", reference_now, {"consentType": "personalization"}
+        )
+    )
+    await consumer.process_message_body(
+        domain_event(
             "evt_pv_ctr",
             "product.viewed",
             "viewer_ctr",

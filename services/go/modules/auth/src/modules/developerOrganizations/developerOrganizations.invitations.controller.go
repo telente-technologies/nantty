@@ -96,6 +96,20 @@ func (controller InvitationController) Respond(writer http.ResponseWriter, reque
 	httpserver.WriteNoContentResponse(writer)
 }
 
+func (controller InvitationController) Resend(writer http.ResponseWriter, request *http.Request) {
+	principal, authenticated := jwtauth.PrincipalFromContext(request.Context())
+	if !authenticated {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.ErrUnauthorized)
+		return
+	}
+	invitation, err := (InvitationService{Container: controller.Container}).Resend(request.Context(), principal.UserId, request.PathValue("organizationID"), request.PathValue("invitationID"))
+	if err != nil {
+		controller.writeError(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, invitation)
+}
+
 func (controller InvitationController) Revoke(writer http.ResponseWriter, request *http.Request) {
 	principal, authenticated := jwtauth.PrincipalFromContext(request.Context())
 	if !authenticated {
@@ -125,6 +139,8 @@ func (controller InvitationController) writeError(writer http.ResponseWriter, re
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusGone, "ORGANIZATION_INVITATION_EXPIRED", "This invitation has expired."))
 	case errors.Is(err, errInvitationNotPending):
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusConflict, "ORGANIZATION_INVITATION_CLOSED", "This invitation is no longer pending."))
+	case errors.Is(err, errInvitationResendCooldown):
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusTooManyRequests, "ORGANIZATION_INVITATION_RESEND_COOLDOWN", "Wait a minute before resending this invitation."))
 	case errors.Is(err, errInvalidInvitation):
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_ORGANIZATION_INVITATION", "Check the invitation details and try again."))
 	default:

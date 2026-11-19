@@ -55,11 +55,11 @@ export async function forwardDeveloperWebhookRequest(request: NextRequest, actio
   const identityBase = safeBaseUrl(process.env.DEVELOPER_API_BASE_URL, false);
   const sandboxBase = safeBaseUrl(process.env.SANDBOX_API_BASE_URL, true);
   const controlToken = process.env.SANDBOX_CONTROL_TOKEN?.trim();
-  if (!identityBase) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "The Nantty API gateway is not configured for this portal.");
-  if (!sandboxBase || !controlToken || controlToken.length < 32) return jsonError(503, "SANDBOX_WEBHOOKS_NOT_CONFIGURED", "Sandbox webhook management is not connected.");
+  if (!identityBase) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "Webhook management is temporarily unavailable. Try again shortly.");
+  if (!sandboxBase || !controlToken || controlToken.length < 32) return jsonError(503, "SANDBOX_WEBHOOKS_NOT_CONFIGURED", "Sandbox webhook management is temporarily unavailable. Try again shortly.");
 
   const accessToken = request.cookies.get(process.env.NODE_ENV === "production" ? accountAccessCookie : localAccessCookie)?.value;
-  if (!accessToken) return jsonError(process.env.NODE_ENV === "production" ? 503 : 401, process.env.NODE_ENV === "production" ? "PORTAL_SSO_NOT_CONFIGURED" : "UNAUTHENTICATED", process.env.NODE_ENV === "production" ? "Centralized Nantty sign-in is not connected to this portal yet." : "Sign in to Nantty to manage webhooks.");
+  if (!accessToken) return jsonError(process.env.NODE_ENV === "production" ? 503 : 401, process.env.NODE_ENV === "production" ? "PORTAL_SSO_NOT_CONFIGURED" : "UNAUTHENTICATED", process.env.NODE_ENV === "production" ? "Sign-in is temporarily unavailable. Try again shortly." : "Sign in to Nantty to manage webhooks.");
   if (!isRead(action) && (request.headers.get("origin") !== request.nextUrl.origin || request.headers.get("sec-fetch-site") === "cross-site")) return jsonError(403, "CSRF_REJECTED", "This webhook request could not be verified. Reload the page and try again.");
 
   let body: Record<string, unknown>;

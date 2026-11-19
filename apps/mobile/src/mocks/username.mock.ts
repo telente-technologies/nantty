@@ -18,9 +18,31 @@ const RECENTLY_RELEASED_USERNAMES = new Set(["enyodev", "mayweda_dev"]);
 
 const usernameChangesByUserId = new Map<string, number[]>([["u_me", [Date.now() - 200 * DAY_IN_MS]]]);
 
+const readRandomThreeDigits = (): number => {
+  const buf = new Uint32Array(1);
+  const webCrypto = globalThis.crypto;
+  const builtin = (globalThis as { process?: { getBuiltinModule?: (id: string) => unknown } }).process?.getBuiltinModule?.("node:crypto") as
+    | { webcrypto?: { getRandomValues?: (view: typeof buf) => typeof buf } }
+    | undefined;
+  const fill =
+    webCrypto && typeof webCrypto.getRandomValues === "function"
+      ? (target: typeof buf) => webCrypto.getRandomValues(target)
+      : builtin?.webcrypto?.getRandomValues
+        ? (target: typeof buf) => builtin.webcrypto!.getRandomValues!(target)
+        : null;
+  if (!fill) {
+    throw new Error("Secure random number generator unavailable");
+  }
+  const limit = Math.floor(0x1_0000_0000 / 900) * 900;
+  do {
+    fill(buf);
+  } while (buf[0]! >= limit);
+  return 100 + (buf[0]! % 900);
+};
+
 export const generateAutomaticUsername = (seed: string) => {
   const letters = seed.split("@")[0]!.toLowerCase().replace(/[^a-z]/g, "").slice(0, 12) || "nantty";
-  return `${letters}${Math.floor(100 + Math.random() * 900)}`;
+  return `${letters}${readRandomThreeDigits()}`;
 };
 
 const takenUsernames = () => new Set([...directoryUsers.map((user) => user.username.toLowerCase()), "taken", signedInProfile().username.toLowerCase()]);

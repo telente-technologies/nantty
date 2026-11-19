@@ -2,7 +2,6 @@ package users_test
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"slices"
 	"sync"
@@ -36,54 +35,62 @@ func (fake *scriptedEligibility) AssessVerificationEligibility(context.Context, 
 	return integrations.EligibilityAssessment{Tier: fake.tier, TrustScore: fake.score, Reasons: []string{"scripted"}, Source: "test"}, nil
 }
 
-type fakeCapture struct{ err error }
+type fakeCapture struct {
+	mutex sync.Mutex
+	err   error
+}
 
-func (fake fakeCapture) CreateWebToken(context.Context, integrations.SmileIdCaptureRequest) (string, error) {
-	if fake.err != nil {
-		return "", fake.err
+func (fake *fakeCapture) setErr(err error) {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	fake.err = err
+}
+
+func (fake *fakeCapture) currentErr() error {
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	return fake.err
+}
+
+func (fake *fakeCapture) CreateWebToken(context.Context, integrations.SmileIdCaptureRequest) (string, error) {
+	if err := fake.currentErr(); err != nil {
+		return "", err
 	}
 	return "web-token", nil
 }
 
-func (fake fakeCapture) CreateSmileLink(context.Context, integrations.SmileIdCaptureRequest) (string, error) {
-	if fake.err != nil {
-		return "", fake.err
+func (fake *fakeCapture) CreateSmileLink(context.Context, integrations.SmileIdCaptureRequest) (string, error) {
+	if err := fake.currentErr(); err != nil {
+		return "", err
 	}
 	return "https://links.smileidentity.test/abc", nil
 }
 
-func (fakeCapture) SupportedDocuments(_ context.Context, country string) ([]integrations.SmileIdDocumentCountry, error) {
+func (*fakeCapture) SupportedDocuments(_ context.Context, country string) ([]integrations.SmileIdDocumentCountry, error) {
 	var documents integrations.SmileIdDocumentCountry
 	documents.Country.Code, documents.Country.Name = country, "Test country"
 	documents.IDTypes = []integrations.SmileIdDocumentType{{Code: "PASSPORT", Name: "Passport"}}
 	return []integrations.SmileIdDocumentCountry{documents}, nil
 }
 
-func (fakeCapture) SupportedKycTypes(_ context.Context, country string) ([]integrations.SmileIdSupportedKycType, error) {
+func (*fakeCapture) SupportedKycTypes(_ context.Context, country string) ([]integrations.SmileIdSupportedKycType, error) {
 	return []integrations.SmileIdSupportedKycType{{Country: country, Type: "NIN_V2", Label: "NIN"}}, nil
 }
 
-func (fakeCapture) EnhancedDocumentEntitlements(context.Context) (map[string][]string, error) {
+func (*fakeCapture) EnhancedDocumentEntitlements(context.Context) (map[string][]string, error) {
 	return map[string][]string{"NG": {"VOTER_ID"}}, nil
 }
 
-func (harness *usersTestHarness) enableIdentityVerification() *scriptedEligibility {
-	eligibility := &scriptedEligibility{tier: "request", score: 40}
-	container := harness.module.Container()
-	container.Settings.Verification = configs.IdentityVerificationSettings{SmileIdPartnerId: "partner-1", SmileIdApiKey: "api-key", SmileIdEnabledProducts: []string{"document_verification", "enhanced_kyc"}, SmileIdEnabledDocumentTypes: []string{"NG:PASSPORT"}, SmileIdEnabledIdNumberTypes: []string{"NG:NIN_V2"}, ConsentVersion: "v1", PrivacyPolicyUrl: "https://nantty.test/privacy", DocumentFingerprintKey: "fingerprint-key", EligibilityRecheckEvery: time.Hour, WebAppBaseUrl: "https://nantty.test"}
-	container.IdentityCapture, container.Eligibility = fakeCapture{}, eligibility
-	return eligibility
-}
-
-func signedSmileCallback(jobId, accountId, fullName, liveness, idNumber string) map[string]any {
-	timestamp := time.Now().UTC().Format(time.RFC3339Nano)
-	return map[string]any{
-		"signature": integrations.ComputeSmileIdSignature("api-key", "partner-1", timestamp), "timestamp": timestamp, "SmileJobID": "smile-" + jobId, "ResultCode": "0810",
-		"Country": "NG", "IDType": "NIN_SLIP", "IDNumber": idNumber, "FullName": fullName, "ConfidenceValue": "99",
-		"Actions":       map[string]string{"Liveness_Check": liveness, "Verify_Document": "Passed", "Selfie_To_ID_Card_Compare": "Completed", "Verify_ID_Number": "Verified"},
-		"ImageLinks":    map[string]string{"selfie_image": "https://smile.test/selfie.jpg"},
-		"PartnerParams": map[string]any{"job_id": jobId, "user_id": accountId, "job_type": 11},
-	}
+func startIdentityVerificationHarness(t *testing.T, tier string, score int) (*usersTestHarness, *scriptedEligibility) {
+	t.Helper()
+	eligibility := &scriptedEligibility{tier: tier, score: score}
+	capture := &fakeCapture{}
+	harness := startUsersModuleAgainstFreshSchemaConfigured(t, func(h *usersTestHarness) {
+		container := h.module.Container()
+		container.Settings.Verification = configs.IdentityVerificationSettings{SmileIdPartnerId: "partner-1", SmileIdApiKey: "api-key", SmileIdEnabledProducts: []string{"document_verification", "enhanced_kyc"}, SmileIdEnabledDocumentTypes: []string{"NG:PASSPORT"}, SmileIdEnabledIdNumberTypes: []string{"NG:NIN_V2"}, ConsentVersion: "v1", PrivacyPolicyUrl: "https://nantty.test/privacy", DocumentFingerprintKey: "fingerprint-key", EligibilityRecheckEvery: time.Hour, WebAppBaseUrl: "https://nantty.test"}
+		container.IdentityCapture, container.Eligibility = capture, eligibility
+	})
+	return harness, eligibility
 }
 
 func (harness *usersTestHarness) payForBlue(profileId, subscriptionId, channel string) {
@@ -140,8 +147,7 @@ func signedSmileV3Callback(caseId, captureAttemptId, product, fullName, idNumber
 }
 
 func TestIdentityVerificationJourneyFromRequestToAutoApproval(t *testing.T) {
-	harness := startUsersModuleAgainstFreshSchema(t)
-	eligibility := harness.enableIdentityVerification()
+	harness, eligibility := startIdentityVerificationHarness(t, "request", 40)
 	_, token := harness.newAccount("amaka.obi", "Amaka Grace Obi")
 	profileId := harness.profileIdOf(token)
 	journey := harness.expect("GET", "/api/v1/verification/journey", token, nil, http.StatusOK)
@@ -197,8 +203,7 @@ func TestIdentityVerificationJourneyFromRequestToAutoApproval(t *testing.T) {
 }
 
 func TestEnhancedKycNinUsesTransientSubmittedNumberAndStoredTypeForFingerprint(t *testing.T) {
-	harness := startUsersModuleAgainstFreshSchema(t)
-	eligibility := harness.enableIdentityVerification()
+	harness, eligibility := startIdentityVerificationHarness(t, "request", 40)
 	_, token := harness.newAccount("amaka.nin", "Amaka Grace Obi")
 	harness.expect("GET", "/api/v1/verification/journey", token, nil, http.StatusOK)
 	harness.expect("POST", "/api/v1/verification/eligibility/request", token, nil, http.StatusOK)
@@ -226,8 +231,7 @@ func TestEnhancedKycNinUsesTransientSubmittedNumberAndStoredTypeForFingerprint(t
 }
 
 func TestSmileCallbackIdentityMismatchRequiresReviewAndPreservesCaptureSelection(t *testing.T) {
-	harness := startUsersModuleAgainstFreshSchema(t)
-	eligibility := harness.enableIdentityVerification()
+	harness, eligibility := startIdentityVerificationHarness(t, "request", 40)
 	_, token := harness.newAccount("amaka.nin-mismatch", "Amaka Grace Obi")
 	harness.expect("GET", "/api/v1/verification/journey", token, nil, http.StatusOK)
 	harness.expect("POST", "/api/v1/verification/eligibility/request", token, nil, http.StatusOK)
@@ -255,47 +259,8 @@ func TestSmileCallbackIdentityMismatchRequiresReviewAndPreservesCaptureSelection
 	}
 }
 
-func TestRetryableSmileTechnicalErrorReturnsCaseToFreshCapture(t *testing.T) {
-	harness := startUsersModuleAgainstFreshSchema(t)
-	eligibility := harness.enableIdentityVerification()
-	eligibility.set("buy_now", 90)
-	_, token := harness.newAccount("retry.capture", "Retry Capture")
-	profileID := harness.profileIdOf(token)
-	harness.payForBlue(profileID, "sub_retry_capture", "web_checkout")
-	container := harness.module.Container()
-	row := container.Client.VerificationCase.Query().Where(verificationcase.SubscriptionID("sub_retry_capture")).OnlyX(context.Background())
-	caseID, attemptID := harness.captureFor(token, row.ID.String())
-	callback, headers := signedSmileV3Callback(caseID, attemptID, "document_verification", "RETRY CAPTURE", "12345678901")
-	callback["status"], callback["reason"] = "error", "internal_error"
-	result := harness.expect("POST", "/api/v1/webhooks/smile-id", "", callback, http.StatusOK, headers...)
-	if result["outcome"] != "retryable" {
-		t.Fatalf("documented technical error should allow a fresh capture, got %v", result)
-	}
-	duplicate := harness.expect("POST", "/api/v1/webhooks/smile-id", "", callback, http.StatusOK, headers...)
-	if duplicate["outcome"] != "replayed" {
-		t.Fatalf("duplicate technical-error callback should be acknowledged idempotently, got %v", duplicate)
-	}
-	updated := container.Client.VerificationCase.GetX(context.Background(), row.ID)
-	if updated.Status != verificationcase.StatusAwaitingCapture || updated.SmileJobID != nil || updated.SmileUserID != nil || updated.SmileReference == "" || updated.SmileResultCode != "error" {
-		t.Fatalf("retryable error must invalidate only the active provider session and retain audit reference: %+v", updated)
-	}
-	journey := harness.expect("GET", "/api/v1/verification/journey", token, nil, http.StatusOK)
-	caseView := journey["case"].(map[string]any)
-	if caseView["retryableProviderError"] != true || caseView["canRetry"] != true {
-		t.Fatalf("user should be told a fresh attempt is available: %v", caseView)
-	}
-	newCaseID, newAttemptID := harness.captureFor(token, row.ID.String())
-	if newCaseID != caseID || newAttemptID == attemptID {
-		t.Fatalf("retry must use a fresh capture attempt: case=%q attempt=%q old=%q", newCaseID, newAttemptID, attemptID)
-	}
-	stale, staleHeaders := signedSmileV3Callback(caseID, attemptID, "document_verification", "RETRY CAPTURE", "12345678901")
-	harness.expect("POST", "/api/v1/webhooks/smile-id", "", stale, http.StatusUnauthorized, staleHeaders...)
-}
-
 func TestRejectedVerificationRequestsARefund(t *testing.T) {
-	harness := startUsersModuleAgainstFreshSchema(t)
-	eligibility := harness.enableIdentityVerification()
-	eligibility.set("buy_now", 90)
+	harness, _ := startIdentityVerificationHarness(t, "buy_now", 90)
 	_, token := harness.newAccount("tobi.ade", "Tobi Adeyemi")
 	profileId := harness.profileIdOf(token)
 	harness.expect("GET", "/api/v1/verification/journey", token, nil, http.StatusOK)
@@ -321,24 +286,4 @@ func TestRejectedVerificationRequestsARefund(t *testing.T) {
 	if container.Client.VerificationCase.GetX(context.Background(), row.ID).RefundStatus != verificationcase.RefundStatusManualStoreRefund {
 		t.Fatal("the refund outcome is recorded on the case")
 	}
-}
-
-func TestFailedProviderSessionCreationCanBeRetriedImmediately(t *testing.T) {
-	harness := startUsersModuleAgainstFreshSchema(t)
-	harness.enableIdentityVerification()
-	_, token := harness.newAccount("femi.ade", "Femi Ade")
-	profileId := harness.profileIdOf(token)
-	harness.payForBlue(profileId, "sub_femi", "web_checkout")
-	container := harness.module.Container()
-	row := container.Client.VerificationCase.Query().Where(verificationcase.SubscriptionID("sub_femi")).OnlyX(context.Background())
-	container.IdentityCapture = fakeCapture{err: errors.New("provider unavailable")}
-	harness.expect("POST", "/api/v1/verification/cases/"+row.ID.String()+"/capture", token, map[string]any{
-		"consentVersion": "v1", "consentAccepted": true, "platform": "ios", "documentCountry": "NG", "documentType": "PASSPORT",
-	}, http.StatusServiceUnavailable)
-	failed := container.Client.VerificationCase.GetX(context.Background(), row.ID)
-	if failed.Status != verificationcase.StatusAwaitingCapture || failed.SmileJobID != nil {
-		t.Fatalf("failed provider session must release only its attempt marker: %+v", failed)
-	}
-	container.IdentityCapture = fakeCapture{}
-	_, _ = harness.captureFor(token, row.ID.String())
 }

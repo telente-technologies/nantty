@@ -10,6 +10,7 @@ import { SearchBar } from "@/components/search/searchBar";
 import { SearchResultSections, type SearchResultHandlers } from "@/components/search/searchResultSections";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
@@ -94,7 +95,7 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
           ))}
         </View>
       ) : null}
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG} keyboardShouldPersistTaps="handled">
         {debouncedQuery.length === 0 ? (
           <>
             <RecentSearchList entries={recents.entries} onSelect={setQuery} onRemove={recents.removeSearch} onClear={recents.clearSearches} />

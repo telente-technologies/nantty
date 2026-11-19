@@ -88,6 +88,8 @@ overrides:
   "@xmldom/xmldom@<0.8.15": "^0.8.15"
   "zod@<4.6.6": "4.6.6"
   "node-forge@<=1.4.0": "1.4.1"
+  "effect@<=3.22.0": "^3.22.1"
+  "vite@<8.3.8": "^8.3.8"
 
 # Advisories with no patched release. Both reach apps/mobile only through Expo/Metro build
 # tooling (expo>@expo/cli>node-forge for code-signing certs, micromatch>braces for globs) and

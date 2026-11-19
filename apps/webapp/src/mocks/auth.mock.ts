@@ -5,6 +5,26 @@ import { createMockRoute, type MockRoute } from "./registry.mock";
 import { buildUsernameUnavailableError, checkAvailability, generateAutomaticUsername } from "./username.mock";
 import { applyProfileEditForSignedInUser, signedInProfile } from "./users.mock";
 
+const readRandomBytes = (byteLength: number): Uint8Array => {
+  const bytes = new Uint8Array(byteLength);
+  const webCrypto = globalThis.crypto;
+  if (webCrypto && typeof webCrypto.getRandomValues === "function") {
+    return webCrypto.getRandomValues(bytes);
+  }
+  const builtin = (globalThis as { process?: { getBuiltinModule?: (id: string) => unknown } }).process?.getBuiltinModule?.("node:crypto") as
+    | { webcrypto?: { getRandomValues?: (view: typeof bytes) => typeof bytes } }
+    | undefined;
+  if (builtin?.webcrypto?.getRandomValues) {
+    return builtin.webcrypto.getRandomValues(bytes);
+  }
+  throw new Error("Secure random number generator unavailable");
+};
+
+const readMockHexToken = (byteLength = 16): string => {
+  const bytes = readRandomBytes(byteLength);
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+};
+
 const buildMockAuthSession = () => ({ accessToken: "mock-access", refreshToken: "mock-refresh", user: getSignedInMockUser() });
 
 const DEMO_FAN_IDENTIFIER_HINTS = ["fan", "buyer"];
@@ -79,7 +99,7 @@ export const authMocks: MockRoute[] = [
   createMockRoute("POST", "/api/v1/auth/step-up", ({ body }) => {
     const proof = (body ?? {}) as { password?: string; otpToken?: string };
     if (!proof.password && !proof.otpToken) throw new ApiError(400, "Enter your password or the code we emailed you.", "STEP_UP_PROOF_REQUIRED");
-    return { stepUpToken: `mock-step-up-${Date.now()}`, expiresIn: 300, method: proof.password ? "password" : "emailCode" };
+    return { stepUpToken: `mock-step-up-${readMockHexToken()}`, expiresIn: 300, method: proof.password ? "password" : "emailCode" };
   }),
   createMockRoute("GET", "/api/v1/topics", () => TOPICS.map((name, i) => ({ id: `t_${i}`, name }))),
   createMockRoute("PUT", "/api/v1/users/me/topics", () => undefined),

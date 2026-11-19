@@ -22,6 +22,7 @@ import (
 	"nantty/modules/moderation/src/modules/appeals"
 	automationrules "nantty/modules/moderation/src/modules/automationRules"
 	"nantty/modules/moderation/src/modules/chatReports"
+	childsafety "nantty/modules/moderation/src/modules/childSafety"
 	"nantty/modules/moderation/src/modules/contentReports"
 	"nantty/modules/moderation/src/modules/copyrightClaims"
 	"nantty/modules/moderation/src/modules/ipClaims"
@@ -82,7 +83,7 @@ func StartModerationModuleWithSettings(ctx context.Context, settings configs.Mod
 	if err != nil {
 		return nil, err
 	}
-	moderationContainer := &container.Container{Client: ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database))), Settings: settings, Logger: logger, Now: time.Now}
+	moderationContainer := &container.Container{Database: database, Client: ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, database))), Settings: settings, Logger: logger, Now: time.Now}
 	if err := resolveVerifiers(ctx, settings, overrides, moderationContainer); err != nil {
 		_ = database.Close()
 		return nil, err
@@ -154,6 +155,7 @@ func (module *Module) MountRoutes(mux *http.ServeMux) {
 	accounthealth.Mount(mux, module.container)
 	automationrules.Mount(mux, module.container)
 	appeals.Mount(mux, module.container)
+	childsafety.Mount(mux, module.container)
 }
 
 func (module *Module) RunBackgroundWorkersUntilContextDone(ctx context.Context) error {

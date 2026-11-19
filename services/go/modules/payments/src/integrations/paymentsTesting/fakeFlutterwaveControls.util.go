@@ -155,7 +155,11 @@ func (fake *FakeFlutterwave) ReverseFundingAtBank(fundingReference string) bool 
 	fake.mutex.Lock()
 	defer fake.mutex.Unlock()
 	status, _, _ := fake.reverseFunding(map[string]any{"funding_reference": fundingReference})
-	return status == http.StatusOK
+	if status != http.StatusOK {
+		return false
+	}
+	fake.Reversals[len(fake.Reversals)-1]["status"] = "SUCCESSFUL"
+	return true
 }
 
 func (fake *FakeFlutterwave) SetFundingReversalStatus(fundingReference, status string) bool {

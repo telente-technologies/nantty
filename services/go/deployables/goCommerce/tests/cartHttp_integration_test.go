@@ -137,7 +137,7 @@ func TestSaleAttributionIsKeptFromCartToOrderAndCompletionEvents(t *testing.T) {
 	}
 	harness.orders.Container.Now = time.Now
 	ctx := context.Background()
-	result, err := (services.CheckoutService{Container: harness.orders.Container}).Checkout(ctx, services.CheckoutRequest{BuyerId: harness.buyer, AddressId: harness.addressId, IdempotencyKey: "checkout-attribution-1"})
+	result, err := (services.CheckoutService{Container: harness.orders.Container}).Checkout(ctx, services.CheckoutRequest{BuyerId: harness.buyer, AddressId: harness.addressId, ShippingQuoteRevision: harness.quoteRevision(t), IdempotencyKey: "checkout-attribution-1"})
 	if err != nil {
 		t.Fatal(err)
 	}

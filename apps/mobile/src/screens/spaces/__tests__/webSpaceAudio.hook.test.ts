@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react-native";
-jest.mock("../../../../../webapp/node_modules/react", () => jest.requireActual("react"));
+jest.mock("../../../../../webapp/node_modules/react", () => jest.requireActual("react"), { virtual: true });
 
 class MockWebRoom {
   static created: MockWebRoom[] = [];

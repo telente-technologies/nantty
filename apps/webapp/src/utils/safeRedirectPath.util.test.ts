@@ -1,7 +1,17 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { readSafeRelativeRedirectPath } from "./safeRedirectPath.util";
+import { readDeveloperSsoContinuePath, readSafeRelativeRedirectPath } from "./safeRedirectPath.util";
+
+describe("developer SSO continuation", () => {
+  const valid = "/api/v1/auth/sso/authorize?client_id=developer&redirect_uri=https%3A%2F%2Fdevelopers.nantty.com%2Fapi%2Fauth%2Fcallback&state=abc";
+  it("resumes only the exact authorization route", () => {
+    assert.equal(readDeveloperSsoContinuePath(valid), valid);
+    assert.equal(readDeveloperSsoContinuePath("//evil.example"), null);
+    assert.equal(readDeveloperSsoContinuePath("/api/v1/auth/sso/authorize/extra?client_id=x&redirect_uri=x&state=x"), null);
+    assert.equal(readDeveloperSsoContinuePath("/api/v1/auth/sso/authorize?client_id=x&redirect_uri=x"), null);
+  });
+});
 
 describe("readSafeRelativeRedirectPath", () => {
   const fallback = "/settings";

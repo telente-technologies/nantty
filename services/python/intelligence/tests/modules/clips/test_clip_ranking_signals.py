@@ -5,7 +5,9 @@ from pathlib import Path
 from typing import Any
 
 from src.container import ApplicationContainer
+from src.interfaces.feature_backend_interface import HashFieldAssign
 from src.modules.clips.dtos.clip_ranking_dto import ClipRankingRequest, ClipRankingResponse
+from src.repositories.online_feature_keyspace_repository import PERSONALIZATION_OPT_OUT_FIELD
 from tests.conftest import SignedIntelligenceClient, build_event, build_viewer
 
 
@@ -187,6 +189,9 @@ async def test_ingested_watch_events_move_a_clip_up(
 async def test_non_personalized_ranking_ignores_viewer_history(
     signed_client: SignedIntelligenceClient, reference_now: datetime
 ) -> None:
+    await signed_client.feature_backend.apply_write_operations(
+        [HashFieldAssign(signed_client.keyspace.consent_key("viewer_1"), PERSONALIZATION_OPT_OUT_FIELD, 0.0)]
+    )
     candidates = [build_clip(reference_now, "clip_a", "creator_a"), build_clip(reference_now, "clip_b", "creator_b")]
     watched = build_watch(0, "viewer_1", "clip_a", "creator_a", reference_now)
     await signed_client.post("/v1/events", {"events": [watched]})

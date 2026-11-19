@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 
 import { CaretRight24Icon, Headset24Icon } from "@/components/icons";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { ErrorState } from "@/components/ui/errorState";
 import { Header } from "@/components/ui/header";
 import { TextField } from "@/components/ui/input";
@@ -46,6 +47,7 @@ export function HelpCenterScreen({ navigation }: MainScreenProps<"HelpCenter">) 
         data={rows}
         keyExtractor={(row) => (row.kind === "category" ? `c:${row.category.id}` : `t:${row.topic.id}`)}
         contentContainerStyle={styles.list}
+        keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG}
         keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <View style={styles.header}>

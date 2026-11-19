@@ -17,10 +17,10 @@
 .hero h1 { max-width: 14ch; margin: 0; font-size: clamp(2.2rem, 4.4vw, 3.6rem); letter-spacing: -.05em; line-height: 1.06; }
 .intro { max-width: 66ch; margin: var(--space-5) 0 0; color: var(--color-text-muted); font-size: clamp(var(--fs-16), 1.5vw, var(--fs-20)); line-height: 1.65; }
 .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
-.primaryAction, .secondaryAction { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 var(--space-4); border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); color: var(--color-text); font-size: var(--fs-13); font-weight: 700; text-decoration: none; }
-.primaryAction { border-color: var(--color-text); background: var(--color-text); color: var(--color-bg); }
-.primaryAction:hover { opacity: .88; text-decoration: none; }
-.secondaryAction:hover { background: var(--color-surface); text-decoration: none; }
+.primaryAction, .secondaryAction { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 var(--space-4); border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); color: var(--color-text); font-family: inherit; font-size: var(--fs-13); font-weight: 700; text-decoration: none; cursor: pointer; }
+.primaryAction { border-color: var(--color-brand-solid); background: var(--color-brand-solid); color: var(--color-on-brand); }
+.primaryAction:hover { background: var(--color-brand-solid-hover); border-color: var(--color-brand-solid-hover); text-decoration: none; }
+.secondaryAction:hover { background: var(--color-surface-hover); text-decoration: none; }
 .statusPanel { border-block: 1px solid var(--color-border); background: transparent; }
 .statusHeading { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-4); border-bottom: 1px solid var(--color-border); color: var(--color-text-muted); }
 .statusHeading div { display: grid; gap: var(--space-1); }
@@ -61,7 +61,21 @@
 .footerGroups a { color: #b9bbc0; }
 .footerGroups a:hover { color: #f0f1f2; }
 .footerWordmark { width: min(100%, 1440px); margin: clamp(40px, 6vw, 80px) auto -0.11em; overflow: hidden; color: #383a3f; font-size: clamp(4rem, 25vw, 17rem); font-weight: 800; letter-spacing: -.09em; line-height: .82; text-align: center; white-space: nowrap; user-select: none; }
-.header a:focus-visible, .actions a:focus-visible, .privacy a:focus-visible, .footer a:focus-visible { outline: 2px solid var(--color-text); outline-offset: 3px; }
+.header a:focus-visible, .actions a:focus-visible, .privacy a:focus-visible, .footer a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.codeGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-5); }
+.codeCard { border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); overflow: hidden; }
+.codeCardHeader { display: flex; justify-content: space-between; align-items: center; padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--color-border); background: var(--color-sunken); font-size: var(--fs-12); font-weight: 650; }
+.codeBlock { margin: 0; padding: var(--space-4); overflow-x: auto; font-family: var(--font-mono); font-size: var(--fs-12); line-height: 1.55; color: var(--color-text); }
+.faqList { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.faqItem { border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); }
+.faqItem summary { padding: var(--space-3) var(--space-4); font-size: var(--fs-14); font-weight: 650; cursor: pointer; }
+.faqItem p { margin: 0; padding: 0 var(--space-4) var(--space-4); color: var(--color-text-muted); font-size: var(--fs-13); line-height: 1.55; }
+.tierTableWrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); }
+.tierTable { width: 100%; border-collapse: collapse; font-size: var(--fs-13); text-align: left; }
+.tierTable th, .tierTable td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border); }
+.tierTable th { background: var(--color-sunken); font-size: var(--fs-12); font-weight: 650; color: var(--color-text-muted); }
+.tierTable tr:last-child td { border-bottom: 0; }
+@media (max-width: 800px) { .codeGrid { grid-template-columns: 1fr; } }
 @media (max-width: 800px) { .hero, .section { grid-template-columns: 1fr; } .hero { align-items: start; } .statusPanel { max-width: 560px; } .section { margin-top: var(--space-9); } .privacy { grid-template-columns: auto minmax(0, 1fr); } .privacy a { grid-column: 2; width: fit-content; } }
 @media (max-width: 760px) { .header { min-height: 0; flex-wrap: wrap; gap: var(--space-1) var(--space-3); padding-block: var(--space-2); } .nav { order: 3; width: 100%; justify-content: flex-start; gap: var(--space-3); overflow-x: auto; scrollbar-width: thin; } .nav a { min-height: 36px; font-size: var(--fs-12); } .hero h1 { font-size: clamp(2.2rem, 12vw, 3.25rem); } .actions { flex-direction: column; align-items: stretch; } .footerMain { grid-template-columns: 1fr; gap: var(--space-5); } .footerGroups { grid-template-columns: repeat(2, minmax(0, 1fr)); } .footerGroups div:last-child { grid-column: 1 / -1; } .footerBottom { flex-direction: column; } .footerWordmark { font-size: clamp(4rem, 26vw, 10rem); } }
 @media (max-width: 760px) {
@@ -71,8 +85,9 @@
   .mobileNav summary { display: grid; place-items: center; min-width: var(--control-lg); min-height: var(--control-lg); padding-inline: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-pill); color: var(--color-text); font-size: var(--fs-12); font-weight: 650; list-style: none; cursor: pointer; }
   .mobileNav summary::-webkit-details-marker { display: none; }
   .mobileNav nav { position: absolute; z-index: 40; top: calc(100% + var(--space-2)); right: 0; display: grid; min-width: 210px; gap: var(--space-1); padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); box-shadow: var(--shadow-float); }
-  .mobileNav nav a { min-height: var(--control-lg); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); }
-  .mobileNav nav a:hover { background: var(--color-surface-hover); text-decoration: none; }
+  .mobileNav nav a, .mobileAction { min-height: var(--control-lg); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); }
+  .mobileAction { border: 0; background: transparent; color: var(--color-text-muted); font: inherit; font-size: var(--fs-13); font-weight: 600; text-align: left; cursor: pointer; }
+  .mobileNav nav a:hover, .mobileAction:hover { background: var(--color-surface-hover); color: var(--color-text); text-decoration: none; }
 }
 
 /* Keep the developer landing header on the same floating Nantty shell. */
@@ -91,19 +106,3 @@
 }
 @media (max-width: 360px) { .header { padding-inline: var(--space-3); } .nav { gap: var(--space-2); } .main { width: calc(100% - 2 * var(--space-3)); } .footer { padding-inline: var(--space-3); } }
 @media (prefers-reduced-motion: reduce) { .skipLink { transition: none; } }
-
-.footer {
-  --footer-background: var(--color-text);
-  --footer-foreground: var(--color-bg);
-  --footer-muted: color-mix(in srgb, var(--footer-foreground) 72%, var(--footer-background));
-  --footer-subtle: color-mix(in srgb, var(--footer-foreground) 58%, var(--footer-background));
-  --footer-border: color-mix(in srgb, var(--footer-foreground) 18%, transparent);
-  border-color: var(--footer-border);
-  background: var(--footer-background);
-  color: var(--footer-muted);
-}
-.footerBrand p, .footerGroups a { color: var(--footer-muted); }
-.footerGroups h2 { color: var(--footer-foreground); }
-.footerGroups a:hover { color: var(--footer-foreground); }
-.footerBottom { border-color: var(--footer-border); color: var(--footer-subtle); }
-.footerWordmark { color: color-mix(in srgb, var(--footer-foreground) 18%, var(--footer-background)); }

@@ -39,6 +39,7 @@ export interface MediaConfig {
   readonly allowUnscannedUploads: boolean;
   readonly ffmpeg: { readonly mode: "auto" | "required" | "disabled"; readonly ffmpegPath: string; readonly ffprobePath: string; readonly fpcalcPath: string; readonly timeoutMs: number; readonly maximumHeight: number };
   readonly moderation: { readonly baseUrl: string | undefined; readonly token: string; readonly failMode: "allow" | "hold"; readonly holdThreshold: number; readonly rejectThreshold: number; readonly timeoutMs: number };
+  readonly childSafety?: { readonly baseUrl: string | undefined; readonly internalToken: string; readonly requireScan: boolean; readonly timeoutMs: number };
 }
 
 function readOrDefault(name: string, fallback: string): string {
@@ -110,6 +111,12 @@ export function loadMediaConfigFromEnvironment(): MediaConfig {
       failMode: moderationFailMode === "hold" ? "hold" : "allow",
       holdThreshold: Number(readOrDefault("MODERATION_HOLD_THRESHOLD", "0.5")),
       rejectThreshold: Number(readOrDefault("MODERATION_REJECT_THRESHOLD", "0.97")),
+      timeoutMs: Number(readOrDefault("MODERATION_TIMEOUT_MS", "5000")),
+    },
+    childSafety: {
+      baseUrl: readOptional("MODERATION_CHILD_SAFETY_URL"),
+      internalToken: readOrDefault("MODERATION_INTERNAL_API_TOKEN", ""),
+      requireScan: readOrDefault("MEDIA_REQUIRE_CHILD_SAFETY_SCAN", process.env["NODE_ENV"] === "production" ? "true" : "false") === "true",
       timeoutMs: Number(readOrDefault("MODERATION_TIMEOUT_MS", "5000")),
     },
   };

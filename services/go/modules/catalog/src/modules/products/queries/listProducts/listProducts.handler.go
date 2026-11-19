@@ -24,10 +24,10 @@ type Handler struct {
 }
 
 const (
-	collectionSalesOfTheDay = "sales_of_the_day"
+	collectionSalesOfTheDay  = "sales_of_the_day"
 	collectionFeaturedBrands = "featured_brands"
-	collectionNewArrivals = "new_arrivals"
-	newArrivalsWindow = 7 * 24 * time.Hour
+	collectionNewArrivals    = "new_arrivals"
+	newArrivalsWindow        = 7 * 24 * time.Hour
 )
 
 var supportedCollections = []string{collectionSalesOfTheDay, collectionFeaturedBrands, collectionNewArrivals}

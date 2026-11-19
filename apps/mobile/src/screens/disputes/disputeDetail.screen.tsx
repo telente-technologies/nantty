@@ -1,13 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { useRef, useState } from "react";
-import { RefreshControl, ScrollView, StyleSheet, View, type ScrollViewInstance } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View, type ScrollViewInstance } from "react-native";
 
 import { DisputeMessageBubble } from "@/components/escrow/disputeMessageBubble";
 import { DisputeStatusHistory } from "@/components/escrow/disputeStatusHistory";
 import { escrowQueryKeys, useDisputeQuery } from "@/components/escrow/escrowQueries.hook";
 import { DISPUTE_STATUS_APPEARANCE, disputeReasonLabel, formatFriendlyDateTime } from "@/components/escrow/escrowStage.util";
 import { StatusPill } from "@/components/escrow/statusPill";
+import { dismissKeyboardIfVisible, KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { Header } from "@/components/ui/header";
 import { PillComposer } from "@/components/ui/pillComposer";
 import { KeyboardSpacer } from "@/components/ui/keyboardSpacer";
@@ -67,51 +68,54 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
         <ScrollView
           ref={scrollRef}
           onLayout={keepLatestMessageVisible}
-          keyboardDismissMode="interactive"
+          keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG}
+          keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.content}
           refreshControl={<RefreshControl refreshing={disputeQuery.isRefetching} onRefresh={() => { void disputeQuery.refetch(); }} tintColor={colors.primary} colors={[colors.primary]} />}
         >
-          <View style={styles.card}>
-            <View style={styles.row}>
-              <Text size={16} weight={600} lineHeight={19.2} style={styles.flex} numberOfLines={1}>{dispute.productName}</Text>
-              <StatusPill label={appearance.label} tone={appearance.tone} />
-            </View>
-            <Text size={13} lineHeight={16.9} color={colors.textMuted}>
-              {disputeReasonLabel(dispute.reason)} · {formatMoneyForDisplay(dispute.amount)} held in escrow
-            </Text>
-            <Text size={13} lineHeight={16.9} color={colors.textMuted}>
-              {dispute.viewerRole === "buyer" ? "Seller" : "Buyer"}: {dispute.counterpartyName} · Opened {formatFriendlyDateTime(dispute.openedAt)}
-            </Text>
-            {sellerMustRespond && dispute.respondByAt ? (
-              <Text size={13} weight={500} lineHeight={16.9} color={colors.error}>
-                Respond by {formatFriendlyDateTime(dispute.respondByAt)} or support will decide without your input.
+          <Pressable accessible={false} onPress={dismissKeyboardIfVisible} style={styles.innerContent}>
+            <View style={styles.card}>
+              <View style={styles.row}>
+                <Text size={16} weight={600} lineHeight={19.2} style={styles.flex} numberOfLines={1}>{dispute.productName}</Text>
+                <StatusPill label={appearance.label} tone={appearance.tone} />
+              </View>
+              <Text size={13} lineHeight={16.9} color={colors.textMuted}>
+                {disputeReasonLabel(dispute.reason)} · {formatMoneyForDisplay(dispute.amount)} held in escrow
               </Text>
-            ) : null}
-            <Text size={14} lineHeight={19} style={styles.description}>{dispute.description}</Text>
-            {dispute.evidenceUrls.length > 0 ? (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.evidence}>
-                {dispute.evidenceUrls.map((url, index) => (
-                  <Image key={url} source={{ uri: url }} style={styles.evidencePhoto} contentFit="cover" accessibilityLabel={`Evidence ${index + 1}`} />
-                ))}
-              </ScrollView>
-            ) : null}
-            <Text size={13} weight={500} lineHeight={16.9} color={colors.primary} accessibilityRole="link" onPress={() => navigation.navigate("EscrowStatus", { orderId: dispute.orderId })}>
-              View payment status
-            </Text>
-          </View>
+              <Text size={13} lineHeight={16.9} color={colors.textMuted}>
+                {dispute.viewerRole === "buyer" ? "Seller" : "Buyer"}: {dispute.counterpartyName} · Opened {formatFriendlyDateTime(dispute.openedAt)}
+              </Text>
+              {sellerMustRespond && dispute.respondByAt ? (
+                <Text size={13} weight={500} lineHeight={16.9} color={colors.error}>
+                  Respond by {formatFriendlyDateTime(dispute.respondByAt)} or support will decide without your input.
+                </Text>
+              ) : null}
+              <Text size={14} lineHeight={19} style={styles.description}>{dispute.description}</Text>
+              {dispute.evidenceUrls.length > 0 ? (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.evidence}>
+                  {dispute.evidenceUrls.map((url, index) => (
+                    <Image key={url} source={{ uri: url }} style={styles.evidencePhoto} contentFit="cover" accessibilityLabel={`Evidence ${index + 1}`} />
+                  ))}
+                </ScrollView>
+              ) : null}
+              <Text size={13} weight={500} lineHeight={16.9} color={colors.primary} accessibilityRole="link" onPress={() => navigation.navigate("EscrowStatus", { orderId: dispute.orderId })}>
+                View payment status
+              </Text>
+            </View>
 
-          <View style={styles.card}>
-            <Text size={16} weight={600} lineHeight={19.2} accessibilityRole="header">Status</Text>
-            <DisputeStatusHistory events={dispute.statusHistory} />
-            {dispute.resolutionNote ? <Text size={13} lineHeight={17} color={colors.textMuted}>{dispute.resolutionNote}</Text> : null}
-          </View>
+            <View style={styles.card}>
+              <Text size={16} weight={600} lineHeight={19.2} accessibilityRole="header">Status</Text>
+              <DisputeStatusHistory events={dispute.statusHistory} />
+              {dispute.resolutionNote ? <Text size={13} lineHeight={17} color={colors.textMuted}>{dispute.resolutionNote}</Text> : null}
+            </View>
 
-          <Text size={16} weight={600} lineHeight={19.2} accessibilityRole="header">Messages with support</Text>
-          <View style={styles.messages}>
-            {dispute.messages.map((message) => (
-              <DisputeMessageBubble key={message.id} message={message} sentByViewer={message.authorRole === dispute.viewerRole} />
-            ))}
-          </View>
+            <Text size={16} weight={600} lineHeight={19.2} accessibilityRole="header">Messages with support</Text>
+            <View style={styles.messages}>
+              {dispute.messages.map((message) => (
+                <DisputeMessageBubble key={message.id} message={message} sentByViewer={message.authorRole === dispute.viewerRole} />
+              ))}
+            </View>
+          </Pressable>
         </ScrollView>
         {isResolved ? null : (
           <PillComposer
@@ -136,7 +140,8 @@ export function DisputeDetailScreen({ navigation, route }: MainScreenProps<"Disp
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   flex: { flex: 1 },
   keyboardArea: { backgroundColor: colors.surface },
-  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24, gap: 16 },
+  content: { flexGrow: 1, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
+  innerContent: { flexGrow: 1, gap: 16 },
   card: { backgroundColor: colors.surface, borderRadius: 12, padding: 16, gap: 8 },
   row: { flexDirection: "row", alignItems: "center", gap: 8 },
   description: { marginTop: 4 },

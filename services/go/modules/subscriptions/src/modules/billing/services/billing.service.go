@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 
 	"nantty/modules/subscriptions/src/constants"
 	"nantty/modules/subscriptions/src/container"
@@ -35,6 +36,17 @@ const WebCurrencyNotEnabledMessage = "Web checkout isn't available in your curre
 
 type Billing struct {
 	Container *container.Container
+}
+
+func (billing Billing) table(name string) string {
+	schema := ""
+	if billing.Container != nil {
+		schema = billing.Container.Settings.Money.DatabaseSchema
+	}
+	if schema == "" {
+		return name
+	}
+	return pgx.Identifier{schema, name}.Sanitize()
 }
 
 func (billing Billing) rules(ctx context.Context) (models.TrialRules, loaders.CheckmarkPricing) {

@@ -19,6 +19,7 @@ import (
 	"nantty/modules/creators/src/configs"
 	"nantty/modules/creators/src/generated/ent/outboxevent"
 	"nantty/modules/creators/src/generated/ent/tiptransaction"
+	creatorsmigrations "nantty/modules/creators/src/migrations"
 	moneyservices "nantty/modules/creators/src/modules/creatorMoney/services"
 	"nantty/modules/creators/src/repositories"
 	ledgerconstants "nantty/modules/ledger/src/constants"
@@ -44,7 +45,7 @@ func startHttpHarness(t *testing.T, directory repositories.StaticCreatorsDirecto
 	database := moneytesting.OpenTestDatabaseOrSkip(t)
 	ledgerSchema := moneytesting.CreateFreshSchemaWithMigrations(t, database, "ledger", ledgermigrations.Files)
 	tokens := moneytesting.NewTestTokenAuthority(t)
-	settings := configs.CreatorsSettings{Money: moneytesting.MoneyModuleSettingsForTests("creators", moneytesting.CreateEmptySchema(t, database, "creators"), ledgerSchema), DefaultTierId: "starter"}
+	settings := configs.CreatorsSettings{Money: moneytesting.MoneyModuleSettingsForTests("creators", moneytesting.CreateFreshSchemaWithMigrations(t, database, "creators", creatorsmigrations.Files), ledgerSchema), DefaultTierId: "starter"}
 	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), Health: health.NewRegistryForService("creators-test")}
 	module, err := src.StartCreatorsModuleWithSettings(context.Background(), settings, dependencies, loaders.MoneyModuleOverrides{
 		Publisher: &events.RecordingPublisher{}, AccessVerifier: tokens.UserVerifier(), StaffVerifiers: tokens.StaffVerifiers(),
@@ -88,7 +89,7 @@ func TestTipsPayTheCreatorOnceAndShowInEarningsAndTheDashboard(t *testing.T) {
 	fan, creator, stranger, blocked := uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
 	harness := startHttpHarness(t, repositories.StaticCreatorsDirectory{
 		Owners: map[string]string{"post:p1": creator, "clip:c1": stranger},
-		Lives:  map[string]repositories.LiveSummary{"live-1": {Id: "live-1", HostId: creator, Title: "Friday live", State: "live"}, "live-old": {Id: "live-old", HostId: creator, State: "ended"}},
+		Lives:  map[string]repositories.LiveSummary{"live-1": {Id: "live-1", HostId: creator, Title: "Friday live", State: "live"}, "live-disabled": {Id: "live-disabled", HostId: creator, State: "live"}, "live-old": {Id: "live-old", HostId: creator, State: "ended"}},
 		Blocks: map[[2]string]bool{{blocked, creator}: true}, Followers: map[string]int64{creator: 42}, Applications: map[string]string{stranger: "pending"},
 	})
 	harness.makeCreator(creator, "top")
@@ -143,7 +144,7 @@ func TestTipsPayTheCreatorOnceAndShowInEarningsAndTheDashboard(t *testing.T) {
 	if status, body := tip(fanToken, "tip-post-0001", "post", "p1", 5); status != http.StatusConflict || body["code"] != "IDEMPOTENCY_KEY_REUSED" {
 		t.Fatalf("key reuse: %d %v", status, body)
 	}
-	client := harness.module.Container.Client(nil)
+	client := harness.module.Container.Client(harness.database)
 	storedTip, err := client.TipTransaction.Query().Where(tiptransaction.IdempotencyKey("tip-post-0001")).Only(context.Background())
 	if err != nil || storedTip.Note != "Keep going!" {
 		t.Fatalf("normalized note must be durable on the tip transaction: tip=%+v err=%v", storedTip, err)
@@ -153,8 +154,12 @@ func TestTipsPayTheCreatorOnceAndShowInEarningsAndTheDashboard(t *testing.T) {
 		t.Fatalf("tip recipient event should be enqueued: %v", err)
 	}
 	var eventPayload map[string]any
-	if err := json.Unmarshal(storedEvent.Payload, &eventPayload); err != nil || eventPayload["note"] != "Keep going!" || eventPayload["creatorUserId"] != creator {
-		t.Fatalf("tip recipient event should carry the bounded note: payload=%v err=%v", eventPayload, err)
+	if err := json.Unmarshal(storedEvent.Payload, &eventPayload); err != nil {
+		t.Fatalf("tip recipient event payload must decode: %v", err)
+	}
+	eventData, _ := eventPayload["data"].(map[string]any)
+	if eventPayload["type"] != "tip.sent" || eventData["note"] != "Keep going!" || eventData["creatorUserId"] != creator {
+		t.Fatalf("tip recipient event should carry the bounded note: payload=%v", eventPayload)
 	}
 	if status, body := tipWithNote(fanToken, "tip-note-too-long", "post", "p1", 1, strings.Repeat("é", moneyservices.MaximumTipNoteRunes+1)); status != http.StatusBadRequest || body["code"] != "VALIDATION_FAILED" {
 		t.Fatalf("controller must reject notes over the character limit: %d %v", status, body)

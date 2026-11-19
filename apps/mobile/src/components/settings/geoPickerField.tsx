@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { Check16Icon, CaretRight24Icon } from "@/components/icons";
 import { BottomSheet } from "@/components/ui/bottomSheet";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { TextField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { makeThemedStyles, useTheme } from "@/theme";
@@ -55,7 +56,7 @@ export function GeoPickerField({ label, options, selectedId, onSelect, disabled 
         <View style={styles.search}>
           <TextField placeholder={`Search ${label.toLowerCase()}`} value={search} onChangeText={setSearch} autoCorrect={false} />
         </View>
-        <ScrollView style={styles.list} keyboardShouldPersistTaps="handled">
+        <ScrollView style={styles.list} keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG} keyboardShouldPersistTaps="handled">
           {visibleOptions.map((option) => (
             <Pressable
               key={option.id}

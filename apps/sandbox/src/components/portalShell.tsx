@@ -90,9 +90,9 @@ export function PortalShell({ children }: { readonly children: ReactNode }) {
       </aside>
 
       <main id="main-content" className={styles.main} tabIndex={-1}>
-        <div className={styles.notice} role="status">
-          <strong>Sandbox service not connected</strong>
-          <span>Only a separately deployed service with synthetic tenants may be connected. Production credentials and customer data are never accepted.</span>
+        <div className={styles.notice} role="note">
+          <strong>Isolated Sandbox environment</strong>
+          <span>Synthetic tenants and <code>ntsb_test_</code> credentials only. Production tokens and customer data are never accepted.</span>
         </div>
         {children}
       </main>
@@ -101,7 +101,7 @@ export function PortalShell({ children }: { readonly children: ReactNode }) {
           <div className={styles.footerTop}>
             <div className={styles.footerBrand}>
               <Link href="/" aria-label="Nantty Sandbox home"><NanttyWordmark height={24} tone="onDark" /></Link>
-              <p>Isolated integration testing for Nantty APIs. Service connections and test credentials are not available in this deployment.</p>
+              <p>Isolated integration testing for Nantty Business Messaging APIs using synthetic data and test-only credentials.</p>
               <a href={readSandboxSupportUrl()}>Contact Nantty support</a>
             </div>
             <div className={styles.footerNavigation}>

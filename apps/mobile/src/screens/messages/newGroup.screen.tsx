@@ -8,6 +8,7 @@ import { pickPhotosAndVideosFromLibrary } from "@/components/create/pickMedia.ut
 import { Cancel20Icon, CameraBolt24Icon } from "@/components/icons";
 import { UploadProgressBar } from "@/components/media/uploadProgressBar";
 import { Button } from "@/components/ui/button";
+import { KeyboardAwareForm } from "@/components/ui/keyboardAwareForm";
 import { KeyboardStickyFooter } from "@/components/ui/keyboardStickyFooter";
 import { Screen } from "@/components/ui/screen";
 import { Text } from "@/components/ui/text";
@@ -113,29 +114,29 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
           {isChannel ? "New channel" : "New group"}
         </Text>
       </View>
-      <View style={styles.body}>
-        <View style={styles.identityRow}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={isChannel ? "Add channel photo" : "Add group photo"}
-            onPress={() => pickGroupPhotoAndStartUploading().catch(() => undefined)}
-            style={styles.photo}
-          >
-            {photo ? <Image source={{ uri: photo.previewUri }} style={StyleSheet.absoluteFill} contentFit="cover" /> : <CameraBolt24Icon />}
-          </Pressable>
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            maxLength={MAXIMUM_GROUP_NAME_LENGTH}
-            placeholder={isChannel ? "Channel name" : "Group name"}
-            placeholderTextColor={colors.textSubtle}
-            accessibilityLabel={isChannel ? "Channel name" : "Group name"}
-            selectionColor={colors.primary}
-            style={styles.nameInput}
-          />
-        </View>
-        {photo?.uploadJobId ? <UploadProgressBar jobId={photo.uploadJobId} /> : null}
-        {isChannel ? (
+      {isChannel ? (
+        <KeyboardAwareForm contentContainerStyle={styles.scrollBody} showsVerticalScrollIndicator={false} safeAreaHandledByParent>
+          <View style={styles.identityRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Add channel photo"
+              onPress={() => pickGroupPhotoAndStartUploading().catch(() => undefined)}
+              style={styles.photo}
+            >
+              {photo ? <Image source={{ uri: photo.previewUri }} style={StyleSheet.absoluteFill} contentFit="cover" /> : <CameraBolt24Icon />}
+            </Pressable>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              maxLength={MAXIMUM_GROUP_NAME_LENGTH}
+              placeholder="Channel name"
+              placeholderTextColor={colors.textSubtle}
+              accessibilityLabel="Channel name"
+              selectionColor={colors.primary}
+              style={styles.nameInput}
+            />
+          </View>
+          {photo?.uploadJobId ? <UploadProgressBar jobId={photo.uploadJobId} /> : null}
           <TextInput
             value={description}
             onChangeText={setDescription}
@@ -147,10 +148,33 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
             selectionColor={colors.primary}
             style={styles.descriptionInput}
           />
-        ) : (
+        </KeyboardAwareForm>
+      ) : (
+        <View style={styles.body}>
+          <View style={styles.identityRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Add group photo"
+              onPress={() => pickGroupPhotoAndStartUploading().catch(() => undefined)}
+              style={styles.photo}
+            >
+              {photo ? <Image source={{ uri: photo.previewUri }} style={StyleSheet.absoluteFill} contentFit="cover" /> : <CameraBolt24Icon />}
+            </Pressable>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              maxLength={MAXIMUM_GROUP_NAME_LENGTH}
+              placeholder="Group name"
+              placeholderTextColor={colors.textSubtle}
+              accessibilityLabel="Group name"
+              selectionColor={colors.primary}
+              style={styles.nameInput}
+            />
+          </View>
+          {photo?.uploadJobId ? <UploadProgressBar jobId={photo.uploadJobId} /> : null}
           <GroupMemberPicker selectedPeople={selectedPeople} onToggleSelectedPerson={toggleSelectedPerson} />
-        )}
-      </View>
+        </View>
+      )}
       <KeyboardStickyFooter style={styles.footer} backgroundColor={colors.surface}>
         {invitationFallbackRequired ? (
           <Text size={13} lineHeight={18} color={colors.textMuted}>
@@ -188,6 +212,7 @@ export function NewGroupScreen({ navigation, route }: MainScreenProps<"NewGroup"
 const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   header: { height: 49, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", gap: 24 },
   body: { flex: 1, paddingHorizontal: 16, paddingTop: 16, gap: 16 },
+  scrollBody: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16, gap: 16 },
   footer: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 16, gap: 12 },
   identityRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   photo: { width: 56, height: 56, borderRadius: 28, backgroundColor: colors.skeleton, alignItems: "center", justifyContent: "center", overflow: "hidden" },

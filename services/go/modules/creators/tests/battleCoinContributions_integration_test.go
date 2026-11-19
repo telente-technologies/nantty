@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 
 	moneyv1 "nantty/contracts/gen/go/nantty/money/v1"
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
@@ -66,21 +67,21 @@ func TestBattleCoinContributionIsBoundedEligibleAtomicAndIdempotent(t *testing.T
 	if err != nil || !replay.GetReplayed() || replay.GetContributionId() != first.GetContributionId() {
 		t.Fatalf("retry must replay the original charge: receipt=%+v error=%v", replay, err)
 	}
-	changed := *request
+	changed := proto.Clone(request).(*moneyv1.ContributeBattleCoinsRequest)
 	changed.Coins = 99
-	if _, err := harness.client.ContributeBattleCoins(harness.authorized(), &changed); status.Code(err) != codes.AlreadyExists {
+	if _, err := harness.client.ContributeBattleCoins(harness.authorized(), changed); status.Code(err) != codes.AlreadyExists {
 		t.Fatalf("reusing a key with a changed amount must fail, got %v", err)
 	}
-	self := *request
+	self := proto.Clone(request).(*moneyv1.ContributeBattleCoinsRequest)
 	self.RecipientUserId = host
 	self.IdempotencyKey = "battle-coin-self-0001"
-	if _, err := harness.client.ContributeBattleCoins(harness.authorized(), &self); status.Code(err) != codes.FailedPrecondition {
+	if _, err := harness.client.ContributeBattleCoins(harness.authorized(), self); status.Code(err) != codes.FailedPrecondition {
 		t.Fatalf("sender cannot contribute to self, got %v", err)
 	}
-	inactive := *request
+	inactive := proto.Clone(request).(*moneyv1.ContributeBattleCoinsRequest)
 	inactive.RecipientUserId = ineligible
 	inactive.IdempotencyKey = "battle-coin-inactive-01"
-	if _, err := harness.client.ContributeBattleCoins(harness.authorized(), &inactive); status.Code(err) != codes.FailedPrecondition {
+	if _, err := harness.client.ContributeBattleCoins(harness.authorized(), inactive); status.Code(err) != codes.FailedPrecondition {
 		t.Fatalf("recipient outside active battle must be rejected, got %v", err)
 	}
 	if got := harness.balance(ledgermodels.UserSpendableCoinsAccount(host)); got != 100 {

@@ -21,7 +21,25 @@ export function isAllowedDeveloperOrganizationRoute(method: string, path: readon
   if (path.length === 6 && resource === "applications" && uuidPattern.test(path[2] ?? "") && path[3] === "members" && uuidPattern.test(path[4] ?? "") && path[5] === "grants") return method === "PUT";
   if (path.length === 2 && resource === "invitations") return method === "GET" || method === "POST";
   if (path.length === 3 && resource === "invitations" && uuidPattern.test(path[2] ?? "")) return method === "DELETE";
-  if (path.length === 2 && ["access", "roles", "members", "audit-log"].includes(resource ?? "")) return method === "GET";
+  if (path.length === 4 && resource === "invitations" && uuidPattern.test(path[2] ?? "") && path[3] === "resend") return method === "POST";
+  if (path.length === 2 && ["access", "roles", "members", "audit-log", "billing"].includes(resource ?? "")) return method === "GET";
+  if (path.length === 3 && resource === "billing" && path[2] === "checkout") return method === "POST";
+  if (path.length === 4 && resource === "applications" && uuidPattern.test(path[2] ?? "")) {
+    if (["credentials", "webhooks"].includes(path[3] ?? "")) return method === "GET" || method === "POST";
+    if (["requests", "usage"].includes(path[3] ?? "")) return method === "GET";
+  }
+  if (path.length === 5 && resource === "applications" && uuidPattern.test(path[2] ?? "") && path[3] === "credentials" && uuidPattern.test(path[4] ?? "")) {
+    return method === "DELETE";
+  }
+  if (path.length === 6 && resource === "applications" && uuidPattern.test(path[2] ?? "") && path[3] === "credentials" && uuidPattern.test(path[4] ?? "") && path[5] === "rotate") {
+    return method === "POST";
+  }
+  if (path.length === 5 && resource === "applications" && uuidPattern.test(path[2] ?? "") && path[3] === "webhooks" && uuidPattern.test(path[4] ?? "")) {
+    return method === "DELETE";
+  }
+  if (path.length === 6 && resource === "applications" && uuidPattern.test(path[2] ?? "") && path[3] === "webhooks" && uuidPattern.test(path[4] ?? "")) {
+    return ["verify", "rotate-secret"].includes(path[5] ?? "") && method === "POST";
+  }
   return path.length === 3 && resource === "members" && uuidPattern.test(path[2] ?? "") && ["GET", "PATCH", "DELETE"].includes(method);
 }
 

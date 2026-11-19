@@ -115,7 +115,7 @@ func (billing Billing) ensureDuePeriod(ctx context.Context, row *ent.Subscriptio
 	err = client.SubscriptionPeriod.Create().SetID(uuid.Must(uuid.NewV7())).SetSubscriptionID(row.ID.String()).SetKind(kind).SetPlanCode(plan.PlanCode).SetInterval(plan.Interval).
 		SetPeriodStartsAt(starts).SetPeriodEndsAt(models.NextPeriodEnd(starts, anchorDayOf(row), plan.Interval)).SetLineItems(plan.Charge.LineItems).SetPeriodPriceMinor(plan.PeriodPriceMinor).
 		SetSubtotalMinor(plan.Charge.SubtotalMinor).SetCreditAppliedMinor(plan.Charge.CreditAppliedMinor).SetAmountDueMinor(plan.Charge.AmountDueMinor).
-		SetCurrency(plan.Currency).SetCheckmarkIncluded(plan.Charge.CheckmarkIncluded).SetIdempotencyKey(key).SetCreatedAt(billing.Container.Now()).
+		SetCurrency(plan.Currency).SetCheckmarkIncluded(plan.Charge.CheckmarkIncluded).SetIdempotencyKey(key).SetCreatedAt(billing.Container.Now()).SetUpdatedAt(billing.Container.Now()).
 		OnConflictColumns(subscriptionperiod.FieldIdempotencyKey).DoNothing().Exec(ctx)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
@@ -141,7 +141,7 @@ func (billing Billing) chargeDuePeriod(ctx context.Context, row *ent.Subscriptio
 				if err != nil {
 					return err
 				}
-				_, _ = transaction.ExecContext(ctx, `UPDATE subscriptions SET paused_reason = 'payment_method_removed' WHERE id = $1`, paused.ID)
+				_, _ = transaction.ExecContext(ctx, `UPDATE `+billing.table("subscriptions")+` SET paused_reason = 'payment_method_removed' WHERE id = $1`, paused.ID)
 				return billing.emit(ctx, transaction, "entitlement.paused", paused.ProfileID, entitlementData(paused, string(paused.Status)))
 			})
 		}
@@ -170,6 +170,10 @@ func (billing Billing) chargeDuePeriod(ctx context.Context, row *ent.Subscriptio
 			return nil
 		case paymentservices.BillingChargePending, paymentservices.BillingChargeRequiresAction:
 			return client.Subscription.UpdateOneID(row.ID).SetNextChargeAt(billing.Container.Now().UTC().Add(15 * time.Minute)).Exec(ctx)
+		case paymentservices.BillingChargeNotStarted:
+			if billing.Container.Now().UTC().Sub(period.UpdatedAt) < 2*time.Minute {
+				return ErrRenewalClaimConflict
+			}
 		case paymentservices.BillingChargeFailed:
 			reference = ""
 		}
@@ -179,7 +183,7 @@ func (billing Billing) chargeDuePeriod(ctx context.Context, row *ent.Subscriptio
 		reference = models.RenewalChargeReference(period.IdempotencyKey, attempt)
 		claimed, err := client.SubscriptionPeriod.Update().
 			Where(subscriptionperiod.ID(period.ID), subscriptionperiod.AttemptCount(period.AttemptCount), subscriptionperiod.PaymentReference(period.PaymentReference)).
-			SetAttemptCount(attempt).SetPaymentReference(reference).Save(ctx)
+			SetAttemptCount(attempt).SetPaymentReference(reference).SetUpdatedAt(billing.Container.Now().UTC()).Save(ctx)
 		if err != nil {
 			return err
 		}

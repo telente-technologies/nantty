@@ -26,7 +26,7 @@ describe("listDigestPage weekly personalization consent", () => {
     } as unknown as HandlerContext;
 
     const handler = createListDigestPageHandler(context);
-    const page = await handler({ kind: "weekly", limit: 10, since: new Date("2026-11-09T10:00:00Z") });
+    const page = await handler({ kind: "weekly", cursor: undefined, limit: 10, since: new Date("2026-11-09T10:00:00Z") });
 
     expect(page.data.map((entry) => entry.userId)).toEqual(["user-consented"]);
     expect(page.data[0]?.props).toMatchObject({ topPosts: [{ postId: "post-1", authorHandle: "ada" }] });

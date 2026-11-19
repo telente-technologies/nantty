@@ -7,11 +7,14 @@ import (
 	"nantty/modules/ledger/src/middlewares"
 	"nantty/modules/wallet/src/modules/coins"
 	"nantty/modules/wallet/src/modules/coins/controllers"
+	"nantty/platform/jwtauth"
 )
 
 func MountCoinsRoutes(mux *http.ServeMux, application *coins.Application) {
 	controller := controllers.CoinsController{Application: application}
 	requireUser := middlewares.RequireUserAccessToken(application.Container.Resources.AccessVerifier)
+	requireAdult := jwtauth.RequireAdultAccount()
+	requireAdultUser := func(handler http.Handler) http.Handler { return requireUser(requireAdult(handler)) }
 	requirePricingRead := middlewares.RequireStaffWithAnyPermission(application.Container.Resources.StaffVerifiers, []string{constants.PermissionReadMonetization, constants.PermissionManageMonetization}, false)
 	requirePricingWrite := middlewares.RequireStaffPermission(application.Container.Resources.StaffVerifiers, constants.PermissionManageMonetization, true)
 	requireCoinReview := middlewares.RequireStaffPermission(application.Container.Resources.StaffVerifiers, constants.PermissionReviewCoins, false)
@@ -26,10 +29,10 @@ func MountCoinsRoutes(mux *http.ServeMux, application *coins.Application) {
 	mux.HandleFunc("GET /api/v1/coins/packs", controller.ListCoinPackages)
 	mux.Handle("GET /api/v1/coins/balance", requireUser(http.HandlerFunc(controller.GetCoinBalance)))
 	mux.Handle("GET /api/v1/coins/transactions", requireUser(http.HandlerFunc(controller.ListCoinActivity)))
-	mux.Handle("POST /api/v1/coins/purchases", requireUser(http.HandlerFunc(controller.StartCoinPurchase)))
-	mux.Handle("POST /api/v1/coins/purchases/{reference}/verify", requireUser(http.HandlerFunc(controller.VerifyCoinPurchase)))
-	mux.Handle("POST /api/v1/coins/iap/receipts", requireUser(http.HandlerFunc(controller.RedeemStoreReceipt)))
+	mux.Handle("POST /api/v1/coins/purchases", requireAdultUser(http.HandlerFunc(controller.StartCoinPurchase)))
+	mux.Handle("POST /api/v1/coins/purchases/{reference}/verify", requireAdultUser(http.HandlerFunc(controller.VerifyCoinPurchase)))
+	mux.Handle("POST /api/v1/coins/iap/receipts", requireAdultUser(http.HandlerFunc(controller.RedeemStoreReceipt)))
 	mux.Handle("GET /api/v1/coins/transfers/quote", requireUser(http.HandlerFunc(controller.QuoteCoinTransfer)))
-	mux.Handle("POST /api/v1/coins/transfers", requireUser(http.HandlerFunc(controller.TransferCoins)))
-	mux.Handle("POST /api/v1/creators/earnings/convert", requireUser(http.HandlerFunc(controller.ConvertEarnedCoins)))
+	mux.Handle("POST /api/v1/coins/transfers", requireAdultUser(http.HandlerFunc(controller.TransferCoins)))
+	mux.Handle("POST /api/v1/creators/earnings/convert", requireAdultUser(http.HandlerFunc(controller.ConvertEarnedCoins)))
 }

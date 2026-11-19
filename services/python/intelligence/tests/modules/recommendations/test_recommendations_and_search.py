@@ -180,16 +180,14 @@ async def test_mart_home_applies_verified_tier_before_page_limit(
 
 
 async def test_mart_home_rotates_equivalent_products_within_verified_tier(
-    application_container: ApplicationContainer, monkeypatch: Any,
+    application_container: ApplicationContainer,
+    monkeypatch: Any,
 ) -> None:
     monkeypatch.setattr(product_recommendation_service, "resolve_request_time", lambda requested: requested)
     candidates = [
         build_product(f"verified_{index:02d}", f"verified_store_{index}", storeVerified=True, salesCount=1)
         for index in range(8)
-    ] + [
-        build_product(f"other_{index:02d}", f"other_store_{index}", salesCount=1)
-        for index in range(4)
-    ]
+    ] + [build_product(f"other_{index:02d}", f"other_store_{index}", salesCount=1) for index in range(4)]
     before_rotation = await recommend(
         application_container,
         "mart_home",

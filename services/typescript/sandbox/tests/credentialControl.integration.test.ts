@@ -23,6 +23,7 @@ it.skipIf(!databaseUrl)("persists sandbox credential issue, list, rotate, expiry
   const schemaIdentifier = `"${schema}"`;
   const migration = await readFile(new URL("../prisma/migrations/20261115120000_sandbox_core/migration.sql", import.meta.url), "utf8");
   const quotaMigration = await readFile(new URL("../prisma/migrations/20261116130000_sandbox_quotas_and_scenarios/migration.sql", import.meta.url), "utf8");
+  const organizationUsageMigration = await readFile(new URL("../prisma/migrations/20261119160000_organization_wide_sandbox_usage/migration.sql", import.meta.url), "utf8");
   const schemaClient = await adminPool!.connect();
   let database: Pool | null = null;
   let app: ReturnType<typeof createSandboxApp> | null = null;
@@ -31,6 +32,26 @@ it.skipIf(!databaseUrl)("persists sandbox credential issue, list, rotate, expiry
     await schemaClient.query(`SET search_path TO ${schemaIdentifier}, public`);
     await schemaClient.query(migration);
     await schemaClient.query(quotaMigration);
+    const legacyOrg = "legacy-shared-org";
+    const legacyAppOne = randomUUID();
+    const legacyAppTwo = randomUUID();
+    await schemaClient.query(
+      "INSERT INTO sandbox_applications (id,organization_id,external_application_id,name,status) VALUES ($1,$3,'legacy-app-1','Legacy one','active'),($2,$3,'legacy-app-2','Legacy two','active')",
+      [legacyAppOne, legacyAppTwo, legacyOrg],
+    );
+    await schemaClient.query(
+      "INSERT INTO sandbox_usage_periods (application_id,billing_period,messages_sent,requests_count,scenarios_run,quota_limit_messages) VALUES ($1,'2026-11',3,5,1,1000),($2,'2026-11',4,7,2,900)",
+      [legacyAppOne, legacyAppTwo],
+    );
+    await schemaClient.query(organizationUsageMigration);
+    const migratedUsage = await schemaClient.query<{ readonly messages_sent: number; readonly requests_count: number; readonly scenarios_run: number; readonly quota_limit_messages: number }>(
+      "SELECT messages_sent,requests_count,scenarios_run,quota_limit_messages FROM sandbox_organization_usage_periods WHERE organization_id=$1 AND billing_period='2026-11'",
+      [legacyOrg],
+    );
+    expect(migratedUsage.rows[0]).toEqual({ messages_sent: 7, requests_count: 12, scenarios_run: 3, quota_limit_messages: 900 });
+    await schemaClient.query("UPDATE sandbox_usage_periods SET messages_sent=5 WHERE application_id=$1 AND billing_period='2026-11'", [legacyAppOne]);
+    const synchronizedUsage = await schemaClient.query<{ readonly messages_sent: number }>("SELECT messages_sent FROM sandbox_organization_usage_periods WHERE organization_id=$1 AND billing_period='2026-11'", [legacyOrg]);
+    expect(synchronizedUsage.rows[0]?.messages_sent).toBe(9);
     database = new Pool({ connectionString: databaseUrl, options: `-c search_path=${schema},public` });
     app = createSandboxApp({ database, controlToken });
 

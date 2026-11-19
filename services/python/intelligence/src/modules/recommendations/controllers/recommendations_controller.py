@@ -27,9 +27,7 @@ class RecommendationsController:
         )
         return response
 
-    async def recall_product_candidates(
-        self, request: ProductCandidateRecallRequest
-    ) -> ProductCandidateRecallResponse:
+    async def recall_product_candidates(self, request: ProductCandidateRecallRequest) -> ProductCandidateRecallResponse:
         item_ids = await run_within_request_deadline(
             self.query_bus.execute(RecallProductCandidatesQuery(request)), self.deadline_seconds
         )

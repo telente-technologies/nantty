@@ -6,14 +6,18 @@ import (
 	"nantty/modules/ledger/src/middlewares"
 	"nantty/modules/wallet/src/modules/adBalances/controllers"
 	"nantty/platform/httpserver"
+	"nantty/platform/jwtauth"
 )
 
 func MountAdBalancesRoutes(mux *http.ServeMux, controller controllers.AdBalancesController) {
 	requireUser := middlewares.RequireUserAccessToken(controller.Container.Resources.AccessVerifier)
+	requireAdultUser := func(handler http.Handler) http.Handler {
+		return requireUser(jwtauth.RequireAdultAccount()(handler))
+	}
 	internalToken := httpserver.RequireInternalToken(controller.Container.Settings.InternalApiToken)
-	mux.Handle("POST /api/v1/ads/balance/top-ups", requireUser(http.HandlerFunc(controller.StartTopUp)))
+	mux.Handle("POST /api/v1/ads/balance/top-ups", requireAdultUser(http.HandlerFunc(controller.StartTopUp)))
 	mux.Handle("GET /api/v1/ads/balance", requireUser(http.HandlerFunc(controller.GetBalance)))
-	mux.Handle("POST /api/v1/ads/balance/refund", requireUser(http.HandlerFunc(controller.RefundUnusedBalance)))
+	mux.Handle("POST /api/v1/ads/balance/refund", requireAdultUser(http.HandlerFunc(controller.RefundUnusedBalance)))
 	mux.Handle("POST /api/v1/internal/ads/spend-batches", internalToken(http.HandlerFunc(controller.ApplySpendBatch)))
 	mux.Handle("POST /api/v1/internal/ads/accounts/{adAccountId}/top-ups", internalToken(http.HandlerFunc(controller.StartTopUpForAdAccount)))
 	mux.Handle("GET /api/v1/internal/ads/accounts/{adAccountId}/top-ups/{reference}", internalToken(http.HandlerFunc(controller.GetTopUpForAdAccount)))

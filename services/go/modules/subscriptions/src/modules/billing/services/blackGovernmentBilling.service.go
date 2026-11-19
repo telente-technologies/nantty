@@ -263,7 +263,7 @@ func (billing Billing) convertGovernmentSubscription(ctx context.Context, row *e
 		}
 	}
 	_ = billing.Container.Resources.Database.QueryRowContext(ctx,
-		`SELECT paused_reason, terms_accepted_at, recurring_consent_at FROM subscriptions WHERE id = $1`, row.ID).
+		`SELECT paused_reason, terms_accepted_at, recurring_consent_at FROM `+billing.table("subscriptions")+` WHERE id = $1`, row.ID).
 		Scan(&out.PausedReason, &out.TermsAcceptedAt, &out.RecurringConsentAt)
 	return out
 }

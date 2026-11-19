@@ -87,7 +87,7 @@ export function BusinessMessagingDocs() {
         <div>
           <p className={styles.statusLabel}>SANDBOX AVAILABLE · PRODUCTION DRAFT DISABLED</p>
           <h2 id="contract-state-title">Production Business Messaging API is not live yet</h2>
-          <p>Production <code>/v1/business/*</code> routes describe the proposed v1 contract and are not mounted on the production API gateway. Synthetic integration testing is available in the <a href={readSandboxPortalUrl()}>Nantty Sandbox</a> using <code>ntsb_test_</code> credentials. Machine-readable <a href={readDeveloperDocsHref("openapi.json")}>OpenAPI 3.1 JSON</a> is published for both contracts.</p>
+          <p>Production <code>/v1/business/*</code> routes currently return <code>503 BUSINESS_MESSAGING_UNAVAILABLE</code>; no live message is sent or conversation returned. Synthetic integration testing is available in the <a href={readSandboxPortalUrl()}>Nantty Sandbox</a> using <code>ntsb_test_</code> credentials. The <a href={readDeveloperDocsHref("openapi.json")}>OpenAPI 3.1 JSON</a> marks production paths as unavailable previews.</p>
         </div>
       </section>
 

@@ -28,6 +28,7 @@ jest.mock("@/components/ui/button", () => {
   return { Button: ({ title, disabled, loading, onPress }: { title: string; disabled?: boolean; loading?: boolean; onPress: () => void }) =>
     React.createElement(Pressable, { accessibilityRole: "button", accessibilityLabel: title, accessibilityState: { disabled, busy: loading }, disabled: disabled || loading, onPress }, React.createElement(Text, null, title)) };
 });
+jest.mock("@/components/ui/keyboardAwareForm", () => ({ KeyboardAwareForm: ({ children }: { children: React.ReactNode }) => children }));
 jest.mock("@/components/ui/keyboardStickyFooter", () => ({ KeyboardStickyFooter: ({ children }: { children: React.ReactNode }) => children }));
 jest.mock("@/components/ui/screen", () => ({ Screen: ({ children }: { children: React.ReactNode }) => children }));
 jest.mock("@/components/ui/text", () => {

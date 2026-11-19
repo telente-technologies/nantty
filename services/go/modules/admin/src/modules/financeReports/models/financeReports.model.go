@@ -62,17 +62,17 @@ type MoneyByAspect struct {
 }
 
 type FinanceIssue struct {
-	Id          string  `json:"id"`
-	Queue       string  `json:"queue"`
-	EntityType  string  `json:"entityType"`
-	EntityId    string  `json:"entityId"`
-	Reference   string  `json:"reference"`
-	Summary     string  `json:"summary"`
-	Amount      *Money  `json:"amount"`
-	Severity    string  `json:"severity"`
-	SlaHours    int     `json:"slaHours"`
-	DetectedAt  *string `json:"detectedAt"`
-	ActionHref  string  `json:"actionHref"`
+	Id         string  `json:"id"`
+	Queue      string  `json:"queue"`
+	EntityType string  `json:"entityType"`
+	EntityId   string  `json:"entityId"`
+	Reference  string  `json:"reference"`
+	Summary    string  `json:"summary"`
+	Amount     *Money  `json:"amount"`
+	Severity   string  `json:"severity"`
+	SlaHours   int     `json:"slaHours"`
+	DetectedAt *string `json:"detectedAt"`
+	ActionHref string  `json:"actionHref"`
 }
 
 type IssuesResponse struct {
@@ -102,19 +102,19 @@ type LookupResult struct {
 }
 
 type FinanceReportSummary struct {
-	Key         string `json:"key"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	Key         string  `json:"key"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
 	LastExport  *string `json:"lastExport"`
 }
 
 type FinanceExportRecord struct {
-	Id          string `json:"id"`
-	ReportKey   string `json:"reportKey"`
-	ActorId     string `json:"actorId"`
-	ActorName   string `json:"actorName"`
-	Reason      string `json:"reason"`
-	OccurredAt  string `json:"occurredAt"`
+	Id         string `json:"id"`
+	ReportKey  string `json:"reportKey"`
+	ActorId    string `json:"actorId"`
+	ActorName  string `json:"actorName"`
+	Reason     string `json:"reason"`
+	OccurredAt string `json:"occurredAt"`
 }
 
 type ReportsCatalog struct {

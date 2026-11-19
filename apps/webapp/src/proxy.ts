@@ -4,6 +4,7 @@ import { isGuestBrowsablePage } from "@/config/guestBrowsing.config";
 import { resolveLegacyPublicPathRedirect } from "@/server/legacyRedirects.service";
 import { buildContentSecurityPolicyHeaderValue } from "@/server/contentSecurityPolicy.service";
 import { readApiTokensFromCookies, readCachedViewerFromCookies, readSessionIdFromCookies } from "@/server/session.service";
+import { readDeveloperSsoContinuePath } from "@/utils/safeRedirectPath.util";
 
 const publicPagePaths = new Set(["/welcome", "/login", "/signup", "/forgot-password", "/reset-password"]);
 const sessionFreePagePaths = new Set(["/security-check", "/verification/return"]);
@@ -32,7 +33,13 @@ async function routeRequest(request: NextRequest): Promise<NextResponse> {
   if (legacyRedirectPath) return NextResponse.redirect(new URL(`${legacyRedirectPath}${search}`, request.nextUrl.origin), 308);
 
   if (publicPagePaths.has(pathname)) {
-    if (sessionId && readCachedViewerFromCookies(request.cookies)) return redirectTo(request, "/", undefined);
+    if (sessionId && readCachedViewerFromCookies(request.cookies)) {
+      const next = pathname === "/login" ? readDeveloperSsoContinuePath(request.nextUrl.searchParams.get("next")) : null;
+      if (next) {
+        return redirectTo(request, next);
+      }
+      return redirectTo(request, "/", undefined);
+    }
     return NextResponse.next();
   }
 

@@ -25,6 +25,7 @@ import (
 
 	creatorssrc "nantty/modules/creators/src"
 	creatorsconfigs "nantty/modules/creators/src/configs"
+	creatorsmigrations "nantty/modules/creators/src/migrations"
 	creatorprogramservices "nantty/modules/creators/src/modules/creatorProgram/services"
 	"nantty/modules/ledger/src/databases"
 	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
@@ -53,7 +54,7 @@ func TestGiftSentThroughLiveChargesRealMoneyAndWritesBothOutboxRows(t *testing.T
 	ctx := context.Background()
 	moneyDatabase := moneytesting.OpenTestDatabaseOrSkip(t)
 	ledgerSchema := moneytesting.CreateFreshSchemaWithMigrations(t, moneyDatabase, "ledger", ledgermigrations.Files)
-	creatorsSchema := moneytesting.CreateEmptySchema(t, moneyDatabase, "creators")
+	creatorsSchema := moneytesting.CreateFreshSchemaWithMigrations(t, moneyDatabase, "creators", creatorsmigrations.Files)
 	tokens := moneytesting.NewTestTokenAuthority(t)
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	moneyDependencies := servicemodule.Dependencies{Logger: logger, Health: health.NewRegistryForService("money-test")}

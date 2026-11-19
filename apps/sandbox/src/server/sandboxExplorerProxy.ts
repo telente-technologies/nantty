@@ -9,13 +9,13 @@ type ExplorerOperation = "create_customer" | "create_conversation" | "list_messa
 
 export async function forwardSandboxExplorer(request: NextRequest): Promise<NextResponse> {
   const sandboxBase = safeBaseUrl(process.env.SANDBOX_API_BASE_URL, true);
-  if (!sandboxBase) return jsonError(503, "SANDBOX_NOT_CONFIGURED", "Sandbox API gateway is not configured.");
+  if (!sandboxBase) return jsonError(503, "SANDBOX_NOT_CONFIGURED", "Sandbox API explorer is temporarily unavailable. Try again shortly.");
   const accessToken = readPortalToken(request);
   if (!accessToken) {
     return jsonError(
       process.env.NODE_ENV === "production" ? 503 : 401,
       process.env.NODE_ENV === "production" ? "PORTAL_SSO_NOT_CONFIGURED" : "UNAUTHENTICATED",
-      process.env.NODE_ENV === "production" ? "Centralized Nantty sign-in is not connected to this portal." : "Sign in to Nantty to run Sandbox API requests.",
+      process.env.NODE_ENV === "production" ? "Sign-in is temporarily unavailable. Try again shortly." : "Sign in to Nantty to run Sandbox API requests.",
     );
   }
   if (!verifyCsrf(request)) return jsonError(403, "CSRF_REJECTED", "Request origin could not be verified.");

@@ -8,6 +8,7 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 
 	moneyv1 "nantty/contracts/gen/go/nantty/money/v1"
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
@@ -46,9 +47,9 @@ func TestSpaceCoinDonationPolicyLedgerAndIdempotency(t *testing.T) {
 		t.Fatalf("unauthenticated donation should be rejected, got %v", err)
 	}
 	for _, amount := range []int64{0, 4, 81, 1 << 62} {
-		invalid := *request
+		invalid := proto.Clone(request).(*moneyv1.DonateSpaceCoinsRequest)
 		invalid.Coins = amount
-		_, err := harness.client.DonateSpaceCoins(harness.authorized(), &invalid)
+		_, err := harness.client.DonateSpaceCoins(harness.authorized(), invalid)
 		if status.Code(err) != codes.InvalidArgument {
 			t.Fatalf("coins=%d must be rejected by server policy, got %v", amount, err)
 		}
@@ -76,9 +77,9 @@ func TestSpaceCoinDonationPolicyLedgerAndIdempotency(t *testing.T) {
 	if err != nil || !replay.GetReplayed() || replay.GetDonationId() != first.GetDonationId() {
 		t.Fatalf("same-key replay should return original donation, receipt=%+v error=%v", replay, err)
 	}
-	changed := *request
+	changed := proto.Clone(request).(*moneyv1.DonateSpaceCoinsRequest)
 	changed.Coins = 52
-	if _, err := harness.client.DonateSpaceCoins(harness.authorized(), &changed); status.Code(err) != codes.AlreadyExists {
+	if _, err := harness.client.DonateSpaceCoins(harness.authorized(), changed); status.Code(err) != codes.AlreadyExists {
 		t.Fatalf("same key with changed amount must be rejected, got %v", err)
 	}
 

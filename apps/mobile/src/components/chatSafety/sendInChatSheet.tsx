@@ -6,6 +6,7 @@ import { describeConversationForDisplay } from "@/components/chat/conversationDi
 import { Avatar } from "@/components/ui/avatar";
 import { BottomSheet } from "@/components/ui/bottomSheet";
 import { Button } from "@/components/ui/button";
+import { KEYBOARD_DISMISS_ON_DRAG } from "@/components/ui/dismissKeyboardOnEmptyTap.util";
 import { ErrorState } from "@/components/ui/errorState";
 import { TextField } from "@/components/ui/input";
 import { ListSkeleton } from "@/components/ui/listSkeleton";
@@ -78,6 +79,8 @@ export function SendInChatSheet({ reference, onClose }: SendInChatSheetProps) {
             style={styles.list}
             data={(chats.data ?? []).filter(canPostInConversation)}
             keyExtractor={(conversation) => conversation.id}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={KEYBOARD_DISMISS_ON_DRAG}
             ListEmptyComponent={<Text size={13} lineHeight={18} color={colors.textMuted} align="center">You have no chats yet.</Text>}
             renderItem={({ item }) => {
               const display = describeConversationForDisplay(item);

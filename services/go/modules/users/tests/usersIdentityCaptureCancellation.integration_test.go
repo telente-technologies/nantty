@@ -9,8 +9,7 @@ import (
 )
 
 func TestCancelledWebSdkCaptureCanBeRetriedWithoutWaitingForSessionExpiry(t *testing.T) {
-	harness := startUsersModuleAgainstFreshSchema(t)
-	harness.enableIdentityVerification()
+	harness, _ := startIdentityVerificationHarness(t, "request", 40)
 	_, token := harness.newAccount("sade.ade", "Sade Ade")
 	profileID := harness.profileIdOf(token)
 	harness.payForBlue(profileID, "sub_sade", "web_checkout")
