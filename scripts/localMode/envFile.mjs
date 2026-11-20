@@ -15,7 +15,7 @@ export function readEnvValues(path) {
 }
 
 function formatLine(key, value) {
-  return /[\s#"'$]/.test(value) ? `${key}="${value.replace(/"/g, '\\"')}"` : `${key}=${value}`;
+  return /[\s#"'$\\]/.test(value) ? `${key}="${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\$/g, "\\$").replace(/\n/g, "\\n").replace(/\r/g, "\\r")}"` : `${key}=${value}`;
 }
 
 function backUp(path, backupRoot, label) {

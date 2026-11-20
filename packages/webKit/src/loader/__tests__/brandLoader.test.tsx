@@ -14,7 +14,12 @@ describe("BrandLoader", () => {
     assert.match(html, /aria-live="polite"/);
     assert.match(html, /width="64"/);
     assert.match(html, /<span class="visuallyHidden">Loading…<\/span>/);
-    const renderedText = html.replace(/<[^>]*>/g, "");
+    let renderedText = html;
+    for (let previous = ""; previous !== renderedText; ) {
+      previous = renderedText;
+      renderedText = renderedText.replace(/<[^<>]*>/g, "");
+    }
+    renderedText = renderedText.replace(/[<>]/g, "");
     assert.doesNotMatch(renderedText, /nantty/i);
   });
 

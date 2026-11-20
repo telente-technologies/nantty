@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { readMockAreaStore, readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
@@ -91,7 +92,7 @@ export function registerPeopleUserActionMockHandlers(): void {
     const before = { username: user.username, status: user.status, displayName: user.displayName };
     const anonymizedRecords = { orders: user.isSeller ? 14 : 6, payments: user.isSeller ? 22 : 9, ledgerEntries: user.isSeller ? 51 : 17 };
     const mutable = asMutablePlatformUser(user);
-    mutable.username = `deleted_${user.id.slice(-4)}${Math.random().toString(36).slice(2, 5)}`;
+    mutable.username = `deleted_${user.id.slice(-4)}${randomBytes(2).toString("hex")}`;
     mutable.displayName = "Deleted account";
     mutable.avatarUrl = null;
     mutable.status = "DELETED";

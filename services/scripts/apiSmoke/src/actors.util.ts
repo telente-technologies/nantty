@@ -32,7 +32,8 @@ function decodeTokenSubject(accessToken: string): string {
 
 export async function readOneTimeCodeFromIdentityLog(email: string, purpose: string): Promise<string> {
   if (identityLogPath === "") throw new Error("SMOKE_IDENTITY_LOG must point at the go-identity log (AUTH_OTP_DELIVERY=log)");
-  const pattern = new RegExp(`one-time ${purpose} passcode for ${email.replace(/[.+]/g, "\\$&")} is (\\d{6})`, "g");
+  const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`one-time ${purpose} passcode for ${escapedEmail} is (\\d{6})`, "g");
   const code = await waitFor(async () => {
     const matches = [...readFileSync(identityLogPath, "utf8").matchAll(pattern)];
     return matches.at(-1)?.[1];

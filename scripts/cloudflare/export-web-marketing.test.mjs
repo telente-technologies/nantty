@@ -113,7 +113,10 @@ describe("static web marketing artifact", () => {
       assert.doesNotMatch(html, /<button[^>]*disabled=""[^>]*>Join the waitlist/);
       const scripts = (await collectFiles(artifactRoot)).filter((file) => file.endsWith(".js"));
       const scriptText = await Promise.all(scripts.map((file) => readFile(file, "utf8")));
-      assert.ok(scriptText.some((contents) => contents.includes("https://script.google.com/macros/s/")), "enabled export includes the public Apps Script endpoint");
+      assert.ok(
+        scriptText.some((contents) => /(?:^|["'`\s])https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+/.test(contents)),
+        "enabled export includes the public Apps Script endpoint",
+      );
     } else {
       assert.match(html, /<button[^>]*disabled=""[^>]*>Join the waitlist/);
       assert.match(html, /preparing the waitlist|check back soon/i);
