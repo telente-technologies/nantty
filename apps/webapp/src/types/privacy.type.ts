@@ -43,5 +43,8 @@ export interface DataExportRequest {
 }
 
 export interface AccountDeletionSchedule {
+  readonly id?: string;
+  readonly status?: "scheduled" | "cancelled" | "executed";
   readonly scheduledFor: string;
+  readonly cancelledAt?: string | null;
 }

@@ -33,6 +33,9 @@ type statusCapturingWriter struct {
 
 func (writer *statusCapturingWriter) WriteHeader(status int) {
 	if writer.status == 0 {
+		if status != http.StatusNoContent && status != http.StatusNotModified {
+			httpserver.EnsureSafeResponseContentType(writer.ResponseWriter)
+		}
 		writer.status = status
 	}
 	writer.ResponseWriter.WriteHeader(status)
@@ -40,6 +43,7 @@ func (writer *statusCapturingWriter) WriteHeader(status int) {
 
 func (writer *statusCapturingWriter) Write(chunk []byte) (int, error) {
 	if writer.status == 0 {
+		httpserver.EnsureSafeResponseContentType(writer.ResponseWriter)
 		writer.status = http.StatusOK
 	}
 	return writer.ResponseWriter.Write(chunk)

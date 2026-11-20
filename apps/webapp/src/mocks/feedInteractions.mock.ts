@@ -60,4 +60,11 @@ export const feedInteractionsMocks: MockRoute[] = [
     }
     return { accepted, skipped };
   }),
+  createMockRoute("POST", "/api/v1/analytics/events", ({ body }) => {
+    const events = (body as { events?: unknown } | undefined)?.events;
+    if (!Array.isArray(events) || events.length === 0 || events.length > MAXIMUM_EVENTS_PER_BATCH) {
+      throw new ApiError(400, "Provide between 1 and 50 analytics events.", "INVALID_BATCH_SIZE");
+    }
+    return { accepted: events.length, ignored: 0 };
+  }),
 ];

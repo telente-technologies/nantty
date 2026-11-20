@@ -165,4 +165,13 @@ describe("Sandbox control-plane message transitions", () => {
     expect(state.events).toHaveLength(0);
     await app.close();
   });
+
+  it("enforces request rate limiting on sandbox API routes", async () => {
+    const { database } = createDatabase();
+    const app = createSandboxApp({ database, controlToken, rateLimitMax: 2, rateLimitWindowMs: 60_000 });
+    expect((await app.inject({ method: "GET", url: "/readyz" })).statusCode).toBe(503);
+    expect((await app.inject({ method: "GET", url: "/readyz" })).statusCode).toBe(503);
+    expect((await app.inject({ method: "GET", url: "/readyz" })).statusCode).toBe(429);
+    await app.close();
+  });
 });

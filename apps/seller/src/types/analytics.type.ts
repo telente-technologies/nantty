@@ -10,6 +10,16 @@ export interface AnalyticsSeriesPoint {
   readonly storeViews: number;
 }
 
+export interface SellerFunnelSummary {
+  readonly storeId: string;
+  readonly window: string;
+  readonly productViews: number;
+  readonly addToCarts: number;
+  readonly orders: number;
+  readonly grossSalesMinor: number;
+  readonly conversionRate: number;
+}
+
 export interface AnalyticsComparableTotals {
   readonly grossSales: Money;
   readonly netSales: Money;

@@ -1,13 +1,15 @@
 import type { Page, TaggedUser, UserSummary } from "@/types";
 
+import { getSignedInMockUser } from "./fixtures.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 import { isFollowingUser } from "./socialGraph.mock";
 import { SUSPENDED_USER_IDS, findDirectoryUserById, summariseUser, type DirectoryUserId } from "./userDirectory.mock";
 
 const INLINE_TAGGED_PREVIEW = 3;
 const TAGGED_PAGE_SIZE = 10;
+let mockAllowTagging = true;
 
-const TAGGED_USER_IDS_BY_POST: Readonly<Record<string, readonly DirectoryUserId[]>> = {
+const TAGGED_USER_IDS_BY_POST: Record<string, DirectoryUserId[]> = {
   post_3: ["u_7", "u_12", "u_15", "u_10"],
   post_5: ["u_11"],
   post_6: ["u_1", "u_3", "u_5", "u_8", "u_9", "u_10", "u_11", "u_12", "u_13", "u_14", "u_15", "u_17", "u_18", "u_19", "u_20", "u_21"],
@@ -50,5 +52,16 @@ export const taggedUsersMocks: MockRoute[] = [
     const end = start + TAGGED_PAGE_SIZE;
     const page: Page<TaggedUser> = { data: tagged.slice(start, end), nextCursor: end < tagged.length ? String(end) : null };
     return page;
+  }),
+  createMockRoute("DELETE", "/api/v1/posts/:postId/tags/me", ({ params }) => {
+    const me = getSignedInMockUser().id;
+    const current = TAGGED_USER_IDS_BY_POST[params.postId!];
+    if (current) TAGGED_USER_IDS_BY_POST[params.postId!] = current.filter((id) => id !== me);
+    return undefined;
+  }),
+  createMockRoute("GET", "/api/v1/me/tagging-settings", () => ({ allowTagging: mockAllowTagging })),
+  createMockRoute("PUT", "/api/v1/me/tagging-settings", ({ body }) => {
+    mockAllowTagging = Boolean((body as { allowTagging?: boolean }).allowTagging);
+    return { allowTagging: mockAllowTagging };
   }),
 ];

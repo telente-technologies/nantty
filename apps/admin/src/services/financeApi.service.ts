@@ -10,6 +10,9 @@ import type {
   FinanceReportKey,
   FinanceReportsCatalog,
   MoneyByAspectResponse,
+  ProviderMirrorReport,
+  SellerReserveHold,
+  StuckPayoutAccount,
 } from "@/types/finance.type";
 
 export function fetchFinanceOverview(range: FinanceRange, currency?: string, signal?: AbortSignal): Promise<FinanceOverview> {
@@ -43,4 +46,32 @@ export function fetchFinanceReports(signal?: AbortSignal): Promise<FinanceReport
 export function exportFinanceReport(input: { readonly reportType: FinanceReportKey; readonly range: FinanceRange; readonly currency?: string; readonly reason: string; readonly idempotencyKey: string }): Promise<Blob> {
   const { idempotencyKey, ...body } = input;
   return sendAdminApiRequest("/admin/finance/reports/export", { method: "POST", body, idempotencyKey, expect: "blob", promptForStepUp: true });
+}
+
+export function fetchStuckPayoutAccounts(limit = 50, signal?: AbortSignal): Promise<{ data: StuckPayoutAccount[]; nextCursor: string | null }> {
+  return sendAdminApiRequest("/admin/payments/payout-accounts/stuck", { query: { limit }, signal });
+}
+
+export function retryPayoutAccountJob(jobId: string, reason: string): Promise<unknown> {
+  return sendAdminApiRequest(`/admin/payments/payout-accounts/jobs/${encodeURIComponent(jobId)}/retry`, { method: "POST", body: { reason } });
+}
+
+export function sendPayoutVerificationPrompt(userId: string, reason: string): Promise<{ sent: boolean }> {
+  return sendAdminApiRequest(`/admin/payments/payout-accounts/${encodeURIComponent(userId)}/verification-prompt`, { method: "POST", body: { reason } });
+}
+
+export function fetchSellerReserves(limit = 50, signal?: AbortSignal): Promise<{ data: SellerReserveHold[]; nextCursor: string | null }> {
+  return sendAdminApiRequest("/admin/wallet/seller-reserves", { query: { limit }, signal });
+}
+
+export function flagSellerReserve(sellerUserId: string, input: { reason: string; reserveBps: number; holdDays: number }): Promise<SellerReserveHold> {
+  return sendAdminApiRequest(`/admin/wallet/seller-reserves/${encodeURIComponent(sellerUserId)}`, { method: "PUT", body: input });
+}
+
+export function releaseSellerReserve(sellerUserId: string, reason: string): Promise<void> {
+  return sendAdminApiRequest(`/admin/wallet/seller-reserves/${encodeURIComponent(sellerUserId)}`, { method: "DELETE", body: { reason } });
+}
+
+export function runProviderBalanceReconciliation(reason: string): Promise<ProviderMirrorReport> {
+  return sendAdminApiRequest("/admin/payments/reconciliations", { method: "POST", body: { reason } });
 }

@@ -192,11 +192,29 @@ export async function checkReadiness(probes: Readonly<Record<string, () => Promi
 }
 
 export function createOpenApiDocument(options: OpenApiDocumentOptions) {
-  const paths: Record<string, Record<string, unknown>> = {};
+  const pathsMap = new Map<string, Map<string, unknown>>();
   for (const route of options.routes) {
-    const path = paths[route.path] ?? (paths[route.path] = {});
-    path[route.method.toLowerCase()] = { summary: route.summary, ...(route.tags === undefined ? {} : { tags: route.tags }), responses: { "200": { description: "Successful response" } } };
+    const methodKey = route.method.toLowerCase();
+    if (
+      route.path === "__proto__" ||
+      route.path === "constructor" ||
+      route.path === "prototype" ||
+      methodKey === "__proto__" ||
+      methodKey === "constructor" ||
+      methodKey === "prototype"
+    ) {
+      continue;
+    }
+    let methods = pathsMap.get(route.path);
+    if (!methods) {
+      methods = new Map<string, unknown>();
+      pathsMap.set(route.path, methods);
+    }
+    methods.set(methodKey, { summary: route.summary, ...(route.tags === undefined ? {} : { tags: route.tags }), responses: { "200": { description: "Successful response" } } });
   }
+  const paths: Record<string, Record<string, unknown>> = Object.fromEntries(
+    Array.from(pathsMap, ([routePath, methods]) => [routePath, Object.fromEntries(methods)]),
+  );
   return { openapi: "3.1.0", info: { title: options.title, version: options.version }, paths } as const;
 }
 

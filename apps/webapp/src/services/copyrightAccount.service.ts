@@ -1,8 +1,9 @@
-import type { AccountHealth, CopyrightClaimInput, CopyrightClaimReceipt, CounterNoticeInput, ID } from "@/types";
+import type { AccountHealth, CopyrightClaimInput, CopyrightClaimReceipt, CounterNoticeInput, ID, ModerationDecision, Page, SuspensionNotice } from "@/types";
 
 import { createIdempotencyKey, sendRequestToWebappServer } from "./clientApi.service";
 
 export const ACCOUNT_HEALTH_QUERY_KEY = ["account", "status"] as const;
+export const MODERATION_DECISIONS_QUERY_KEY = ["account", "moderationDecisions"] as const;
 export const COPYRIGHT_HELP_PATH = "/help/safety-and-reporting/copyright-and-account-status";
 
 export const copyrightAccountService = {
@@ -10,6 +11,12 @@ export const copyrightAccountService = {
     sendRequestToWebappServer<CopyrightClaimReceipt>("/api/v1/copyright/claims", { method: "POST", body: input, idempotencyKey: createIdempotencyKey("copyright-claim") }),
   fetchMyAccountHealth: () => sendRequestToWebappServer<AccountHealth>("/api/v1/account/status"),
   appealStrike: (strikeId: ID, message: string) => sendRequestToWebappServer<{ status: string }>(`/api/v1/account/status/strikes/${strikeId}/appeal`, { method: "POST", body: { message } }),
+  fetchMyModerationDecisions: (cursor?: string | null) =>
+    sendRequestToWebappServer<Page<ModerationDecision>>("/api/v1/moderation/decisions/me", { query: cursor ? { cursor } : undefined }),
+  appealModerationDecision: (reportId: ID, message: string) =>
+    sendRequestToWebappServer<{ status: string; appealId: ID }>(`/api/v1/moderation/decisions/${encodeURIComponent(reportId)}/appeal`, { method: "POST", body: { message } }),
+  fetchMySuspensionNotice: () => sendRequestToWebappServer<SuspensionNotice>("/api/v1/users/me/suspension"),
+  submitSuspensionAppeal: (message: string) => sendRequestToWebappServer<void>("/api/v1/users/me/suspension/appeal", { method: "POST", body: { message } }),
   submitCounterNotice: (claimId: ID, input: CounterNoticeInput) =>
     sendRequestToWebappServer<{ noticeId: ID; restoreEligibleAt: string }>(`/api/v1/copyright/claims/${claimId}/counter-notices`, { method: "POST", body: input }),
 };

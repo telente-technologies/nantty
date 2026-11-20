@@ -1,11 +1,13 @@
 import type { Page } from "@/types";
-import type { BrandDeal, BrandDealInput, CreatorApplication, CreatorDashboard, CreatorEarning, CreatorEligibility, CreatorStatus, DashboardPeriod, RevenueRules, WithdrawalRecord } from "@/types/creator.type";
+import type { BrandDeal, BrandDealInput, CreatorAnalyticsSummary, CreatorApplication, CreatorDashboard, CreatorEarning, CreatorEligibility, CreatorStatus, DashboardPeriod, RevenueRules, WithdrawalRecord } from "@/types/creator.type";
 
 import { createIdempotencyKey, sendRequestToStudioServer } from "./clientApi.service";
 
 export const creatorService = {
   fetchStatus: () => sendRequestToStudioServer<CreatorStatus>("/api/v1/creators/me"),
   fetchDashboard: (period: DashboardPeriod) => sendRequestToStudioServer<CreatorDashboard>("/api/v1/creators/dashboard", { query: { period } }),
+  fetchAnalyticsSummary: (window: "7d" | "30d" | "90d") =>
+    sendRequestToStudioServer<CreatorAnalyticsSummary>("/api/v1/analytics/creator/summary", { query: { window } }),
   fetchRevenueRules: () => sendRequestToStudioServer<RevenueRules>("/api/v1/creators/revenue-rules"),
   listEarnings: (cursor?: string) => sendRequestToStudioServer<Page<CreatorEarning>>("/api/v1/creators/earnings", { query: { cursor, limit: 20 } }),
   fetchEligibility: () => sendRequestToStudioServer<CreatorEligibility>("/api/v1/creators/eligibility"),

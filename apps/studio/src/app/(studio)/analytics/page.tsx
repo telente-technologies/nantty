@@ -55,6 +55,8 @@ export default function AnalyticsPage() {
   const earnings = useQuery({ queryKey: ["analytics", "earnings", sinceKey], queryFn: () => fetchUntil<CreatorEarning>((cursor) => creatorService.listEarnings(cursor), (item) => item.createdAt, since) });
   const posts = useQuery({ queryKey: ["analytics", "posts", viewer?.id, sinceKey], queryFn: () => fetchUntil<MyPost>((cursor) => contentService.listMyPosts(viewer!.id, null, cursor), (item) => item.createdAt, since), enabled: Boolean(viewer?.id) });
   const lives = useQuery({ queryKey: ["lives"], queryFn: () => livesService.listLives() });
+  const summaryWindow: "7d" | "30d" | "90d" = preset === "7d" || preset === "90d" ? preset : "30d";
+  const analyticsSummary = useQuery({ queryKey: ["analytics", "creatorSummary", summaryWindow], queryFn: () => creatorService.fetchAnalyticsSummary(summaryWindow), retry: false });
   const dashboard = useQuery({ queryKey: ["creator", "dashboard", "all"], queryFn: () => creatorService.fetchDashboard("all") });
   const currency = dashboard.data?.currency ?? earnings.data?.items[0]?.amount.currency ?? "NGN";
 
@@ -98,6 +100,9 @@ export default function AnalyticsPage() {
           { label: "Total earnings", value: dashboard.data ? formatMoneyForDisplay(dashboard.data.earnings.total, { showDecimals: false }) : "…", hint: "All time" },
           { label: "Coins from fans", value: dashboard.data ? count(dashboard.data.coins.earned) : "…", hint: "All time" },
           { label: "Peak viewers in range", value: charts ? count(charts.peakViewers) : "…" },
+          { label: `Views (${summaryWindow})`, value: analyticsSummary.data ? count(analyticsSummary.data.views) : "…" },
+          { label: `Engagements (${summaryWindow})`, value: analyticsSummary.data ? count(analyticsSummary.data.engagements) : "…" },
+          { label: `Profile visits (${summaryWindow})`, value: analyticsSummary.data ? count(analyticsSummary.data.profileVisits) : "…" },
         ]}
       />
       {dashboard.isError ? <ErrorState title="Totals didn't load" error={dashboard.error} onRetry={() => void dashboard.refetch()} /> : null}

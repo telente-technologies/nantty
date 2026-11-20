@@ -1,0 +1,307 @@
+{
+  "generatedAt": "2026-11-16",
+  "branch": "arena/341bf572-nantty",
+  "excludedDomains": ["GIFTING_EXCLUDED"],
+  "inventory": {
+    "frontendApps": {
+      "webapp": { "pages": 114, "apiRoutes": 16, "distinctApiPaths": 375 },
+      "mobile": { "tsxFiles": 139, "distinctApiPaths": 417 },
+      "messenger": { "tsxFiles": 10, "distinctApiPaths": 44 },
+      "seller": { "pages": 90, "apiRoutes": 11, "distinctApiPaths": 252 },
+      "studio": { "pages": 20, "apiRoutes": 7, "distinctApiPaths": 159 },
+      "admin": { "pages": 77, "apiRoutes": 11, "distinctApiPaths": 192 },
+      "ads": { "pages": 22, "apiRoutes": 5, "distinctApiPaths": 62 },
+      "developer": { "pages": 16, "apiRoutes": 27, "distinctApiPaths": 21 },
+      "sandbox": { "pages": 2, "apiRoutes": 13, "distinctApiPaths": 1 },
+      "web": { "pages": 16, "apiRoutes": 0, "distinctApiPaths": 1 }
+    },
+    "backendParsedRoutes": 1397,
+    "gatewayEntries": 300
+  },
+  "items": [
+    {
+      "id": "PAR-001",
+      "category": "INTEGRATION_BROKEN",
+      "severity": "critical",
+      "apps": ["webapp"],
+      "services": ["gateway", "ts/social"],
+      "frontendFiles": [
+        "apps/webapp/src/services/users.service.ts",
+        "apps/webapp/src/components/profile/profileContentTabs.tsx",
+        "apps/webapp/src/mocks/clips.mock.ts",
+        "apps/webapp/src/mocks/users.mock.ts"
+      ],
+      "backendFiles": [
+        "services/typescript/social/src/modules/posts/routes/posts.routes.ts"
+      ],
+      "brokenCall": "GET /api/v1/users/:userId/clips",
+      "targetContract": "GET /api/v1/users/:userId/posts?kind=clip",
+      "status": "fixed"
+    },
+    {
+      "id": "PAR-002",
+      "category": "INTEGRATION_BROKEN",
+      "severity": "critical",
+      "apps": ["webapp"],
+      "services": ["gateway", "ts/social"],
+      "frontendFiles": [
+        "apps/webapp/src/services/discovery.service.ts",
+        "apps/webapp/src/app/(app)/watch/[videoId]/page.tsx",
+        "apps/webapp/src/mocks/videos.mock.ts",
+        "apps/webapp/src/mocks/posts.mock.ts"
+      ],
+      "backendFiles": [
+        "services/typescript/social/src/modules/posts/routes/posts.routes.ts",
+        "services/typescript/social/src/modules/feeds/routes/feeds.routes.ts"
+      ],
+      "brokenCall": "GET /api/v1/videos & GET /api/v1/videos/:videoId",
+      "targetContract": "GET /api/v1/posts/:postId & GET /api/v1/feeds/popular",
+      "status": "fixed"
+    },
+    {
+      "id": "PAR-003",
+      "category": "AUTH_GUARD_DEADLOCK",
+      "severity": "critical",
+      "apps": ["mobile", "webapp"],
+      "services": ["gateway", "go/users"],
+      "frontendFiles": [
+        "apps/mobile/src/screens/account/suspendedAccount.screen.tsx",
+        "apps/mobile/src/services/account/accountStatus.service.ts",
+        "apps/mobile/src/components/settings/dataExportSection.tsx",
+        "apps/webapp/src/services/copyrightAccount.service.ts"
+      ],
+      "backendFiles": [
+        "services/typescript/gateway/src/services/suspendedAccountGuard.service.ts",
+        "services/go/modules/users/src/modules/accountEnforcement/routes/accountEnforcement.routes.go",
+        "services/go/modules/users/src/modules/dataExport/routes/dataExport.routes.go"
+      ],
+      "brokenCall": "POST /api/v1/support/tickets (from SuspendedAccountScreen) & /api/v1/users/me/data-exports* (blocked for suspended)",
+      "targetContract": "POST /api/v1/users/me/suspension/appeal & GET/POST /api/v1/users/me/data-exports* allowed for suspended",
+      "status": "fixed"
+    },
+    {
+      "id": "PAR-004",
+      "category": "BACKEND_ONLY",
+      "severity": "medium",
+      "apps": ["webapp", "mobile"],
+      "services": ["gateway", "ts/search"],
+      "frontendFiles": [
+        "apps/webapp/src/services/search.service.ts",
+        "apps/webapp/src/components/shell/scopedSearchBar.tsx",
+        "apps/mobile/src/services/feed/search.service.ts",
+        "apps/mobile/src/screens/explore/search.screen.tsx"
+      ],
+      "backendFiles": [
+        "services/typescript/search/src/modules/search/routes/search.routes.ts"
+      ],
+      "targetContract": "GET /api/v1/search/suggest",
+      "status": "fixed"
+    },
+    {
+      "id": "PAR-005",
+      "category": "BACKEND_ONLY",
+      "severity": "high",
+      "apps": ["webapp", "mobile"],
+      "services": ["gateway", "go/moderation"],
+      "frontendFiles": [
+        "apps/webapp/src/services/copyrightAccount.service.ts",
+        "apps/webapp/src/components/copyright/accountStatusPanel.tsx",
+        "apps/mobile/src/services/account/accountHealth.service.ts",
+        "apps/mobile/src/screens/settings/accountStatus.screen.tsx"
+      ],
+      "backendFiles": [
+        "services/go/modules/moderation/src/modules/appeals/routes/appeals.routes.go"
+      ],
+      "targetContract": "GET /api/v1/moderation/decisions/me & POST /api/v1/moderation/decisions/:reportId/appeal",
+      "status": "fixed"
+    },
+    {
+      "id": "PAR-006",
+      "category": "BACKEND_ONLY",
+      "severity": "medium",
+      "apps": ["studio", "seller", "webapp"],
+      "services": ["gateway", "go/analytics"],
+      "frontendFiles": [
+        "apps/studio/src/config/studioApiAccess.config.ts",
+        "apps/studio/src/services/creator.service.ts",
+        "apps/studio/src/app/(studio)/analytics/page.tsx",
+        "apps/seller/src/config/rolePermissions.config.ts",
+        "apps/seller/src/components/analytics/analyticsView.tsx",
+        "apps/webapp/src/services/discovery.service.ts"
+      ],
+      "backendFiles": [
+        "services/go/modules/analytics/src/routes/analytics.routes.go"
+      ],
+      "targetContract": "GET /api/v1/analytics/creator/summary, GET /api/v1/analytics/seller/summary, POST /api/v1/analytics/events",
+      "status": "fixed"
+    },
+    {
+      "id": "PAR-007",
+      "category": "BACKEND_ONLY",
+      "severity": "high",
+      "apps": ["admin"],
+      "services": ["gateway", "go/moderation", "go/payments", "ts/notifications"],
+      "frontendFiles": [
+        "apps/admin/src/config/apiRoutes.config.ts",
+        "apps/admin/src/services/copyrightPolicyApi.service.ts",
+        "apps/admin/src/components/people/userAccountHealthCard.tsx",
+        "apps/admin/src/services/financeApi.service.ts",
+        "apps/admin/src/components/finance/financeIssuesWorkspace.tsx",
+        "apps/admin/src/services/safetyApi.service.ts"
+      ],
+      "backendFiles": [
+        "services/go/modules/moderation/src/modules/accountHealth/routes/accountHealth.routes.go",
+        "services/go/modules/moderation/src/modules/childSafety/childSafety.module.go",
+        "services/go/modules/payments/src/modules/connectedAccounts/routes/connectedAccounts.routes.go",
+        "services/typescript/notifications/src/routes/index.ts"
+      ],
+      "targetContract": "PUT/DELETE /api/v1/admin/account-health/:id/monetisation-override, GET /api/v1/admin/moderation/child-safety/quarantine, GET/POST /api/v1/admin/payments/payout-accounts/stuck|jobs/:id/retry|:id/verification-prompt, GET /api/v1/admin/support/notifications/push/deliveries/failed",
+      "status": "fixed"
+    },
+    {
+      "id": "PAR-008",
+      "category": "MOCK_ONLY_DEV",
+      "severity": "info",
+      "apps": ["studio", "mobile", "webapp"],
+      "services": ["go/payments"],
+      "targetContract": "POST /api/v1/payments/payout-onboarding/me/document-link/complete (mock-gated) & POST /api/v1/payments/demo/:ref/decline (demo-only)",
+      "status": "verified_intentional"
+    },
+    {
+      "id": "PAR-009",
+      "category": "BLOCKED_EXTERNAL",
+      "severity": "info",
+      "apps": ["seller", "admin"],
+      "services": ["go/orders", "go/moderation"],
+      "targetContract": "POST /api/v1/seller/delivery/partner/* & CSAM external hash matching/reporting",
+      "status": "blocked_external"
+    },
+    {
+      "id": "PAR-010",
+      "category": "BACKEND_ONLY",
+      "severity": "medium",
+      "apps": ["webapp", "mobile"],
+      "services": ["gateway", "ts/social"],
+      "frontendFiles": [
+        "apps/webapp/src/services/scheduledPosts.service.ts",
+        "apps/webapp/src/app/(app)/scheduled/page.tsx",
+        "apps/mobile/src/services/content/scheduledPosts.service.ts",
+        "apps/mobile/src/components/create/scheduledPostsSheet.tsx"
+      ],
+      "backendFiles": [
+        "services/typescript/social/src/modules/posts/controllers/scheduledPosts.controller.ts"
+      ],
+      "targetContract": "PATCH /api/v1/posts/:postId/schedule/content",
+      "status": "fixed"
+    },
+    {
+      "id": "PAR-011",
+      "category": "BACKEND_ONLY",
+      "severity": "high",
+      "apps": ["webapp", "mobile"],
+      "services": ["gateway", "go/users"],
+      "frontendFiles": [
+        "apps/webapp/src/services/privacy.service.ts",
+        "apps/webapp/src/components/settings/deleteAccountSection.tsx",
+        "apps/mobile/src/services/account/consents.service.ts",
+        "apps/mobile/src/screens/settings/settingsPrivacyData.screen.tsx"
+      ],
+      "backendFiles": [
+        "services/go/modules/users/src/modules/accountDeletion/routes/accountDeletion.routes.go"
+      ],
+      "targetContract": "GET /api/v1/users/me/deletion-request & POST /api/v1/users/me/deletion-request/cancel",
+      "status": "fixed"
+    },
+    {
+      "id": "PAR-012",
+      "category": "BACKEND_ONLY",
+      "severity": "medium",
+      "apps": ["webapp", "mobile"],
+      "services": ["gateway", "go/catalog"],
+      "frontendFiles": [
+        "apps/webapp/src/services/linkedProfiles.service.ts",
+        "apps/webapp/src/components/settings/storeTeamRequestsSection.tsx",
+        "apps/webapp/src/app/(app)/settings/profiles/page.tsx",
+        "apps/mobile/src/services/sellers/brands.service.ts",
+        "apps/mobile/src/components/profile/storeTeamRequestsSection.tsx",
+        "apps/mobile/src/screens/brand/manageProfiles.screen.tsx"
+      ],
+      "backendFiles": [
+        "services/go/modules/catalog/src/modules/storeTeam/routes/storeTeam.routes.go"
+      ],
+      "targetContract": "GET /api/v1/stores/team-requests & POST /api/v1/stores/team-requests/:requestId/{accept,decline}",
+      "status": "fixed"
+    },
+    {
+      "id": "PAR-013",
+      "category": "BACKEND_ONLY",
+      "severity": "medium",
+      "apps": ["webapp", "mobile"],
+      "services": ["gateway", "ts/social"],
+      "frontendFiles": [
+        "apps/webapp/src/services/privacy.service.ts",
+        "apps/webapp/src/services/posts.service.ts",
+        "apps/webapp/src/components/settings/taggingPrivacySection.tsx",
+        "apps/webapp/src/components/taggedPeople/taggedPeopleList.tsx",
+        "apps/mobile/src/services/account/consents.service.ts",
+        "apps/mobile/src/services/content/posts.service.ts",
+        "apps/mobile/src/components/settings/taggingPrivacySection.tsx",
+        "apps/mobile/src/components/taggedPeople/taggedPeopleList.tsx"
+      ],
+      "backendFiles": [
+        "services/typescript/social/src/modules/posts/routes/posts.routes.ts"
+      ],
+      "targetContract": "GET/PUT /api/v1/me/tagging-settings & DELETE /api/v1/posts/:postId/tags/me",
+      "status": "fixed"
+    },
+    {
+      "id": "PAR-014",
+      "category": "BACKEND_ONLY",
+      "severity": "low",
+      "apps": ["ads"],
+      "services": ["gateway", "go/ads"],
+      "frontendFiles": [
+        "apps/ads/src/services/reportsApi.service.ts",
+        "apps/ads/src/mocks/handlers/reports.mock.ts",
+        "apps/ads/src/components/reports/reportsPage.tsx",
+        "apps/ads/src/contracts/reportsPdfExport.test.ts"
+      ],
+      "backendFiles": [
+        "services/go/modules/ads/src/modules/reporting/routes/reporting.routes.go"
+      ],
+      "targetContract": "GET /api/v1/ads/accounts/:accountId/reports/export.pdf",
+      "status": "fixed"
+    },
+    {
+      "id": "PAR-015",
+      "category": "BACKEND_ONLY",
+      "severity": "high",
+      "apps": ["admin"],
+      "services": ["gateway", "go/ads", "go/wallet", "go/users", "go/payments", "go/creators", "go/staffauth"],
+      "frontendFiles": [
+        "apps/admin/src/config/apiRoutes.config.ts",
+        "apps/admin/src/services/adsReviewApi.service.ts",
+        "apps/admin/src/services/financeApi.service.ts",
+        "apps/admin/src/services/configurationApi.service.ts",
+        "apps/admin/src/services/peopleApi.service.ts",
+        "apps/admin/src/components/trust/adReviewPanel.tsx",
+        "apps/admin/src/components/trust/adPoliciesWorkspace.tsx",
+        "apps/admin/src/components/finance/financeIssuesWorkspace.tsx",
+        "apps/admin/src/components/configuration/rules/retentionPoliciesSection.tsx",
+        "apps/admin/src/components/people/userActivityPanels.tsx",
+        "apps/admin/src/contracts/parityRoutes.test.ts"
+      ],
+      "backendFiles": [
+        "services/go/modules/ads/src/modules/adReview/routes/adReview.routes.go",
+        "services/go/modules/ads/src/modules/adPolicies/routes/adPolicies.routes.go",
+        "services/go/modules/wallet/src/modules/payouts/routes/payouts.routes.go",
+        "services/go/modules/users/src/modules/retention/routes/retention.routes.go",
+        "services/go/modules/payments/src/modules/reconciliation/routes/reconciliation.routes.go",
+        "services/go/modules/creators/src/modules/creatorProgram/routes/creatorProgram.routes.go",
+        "services/go/platform/staffauth/permissionCatalog.constant.go"
+      ],
+      "targetContract": "POST /admin/ads/:id/appeal/resolve, GET/PUT /admin/ads-policies*, GET/PUT/DELETE /admin/wallet/seller-reserves*, GET/PUT /admin/retention-policies*, POST /admin/payments/reconciliations, GET/POST /admin/creators/:userId/violations",
+      "status": "fixed"
+    }
+  ]
+}

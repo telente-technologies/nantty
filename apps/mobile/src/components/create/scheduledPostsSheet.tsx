@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Alert, Pressable, StyleSheet, TextInput, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { BottomSheet } from "@/components/ui/bottomSheet";
@@ -46,6 +46,8 @@ export function ScheduledPostsSheet({ visible, onClose }: { readonly visible: bo
   const queryClient = useQueryClient();
   const showToast = useToastStore((state) => state.showToast);
   const [rescheduleId, setRescheduleId] = useState<ID | null>(null);
+  const [editingTextId, setEditingTextId] = useState<ID | null>(null);
+  const [textDraft, setTextDraft] = useState("");
   const query = useInfiniteQuery({
     queryKey: ["scheduled-posts"],
     queryFn: ({ pageParam }) => scheduledPostsService.list(pageParam),
@@ -66,6 +68,10 @@ export function ScheduledPostsSheet({ visible, onClose }: { readonly visible: bo
   const reschedule = useMutation({
     mutationFn: ({ postId, scheduledAt }: { readonly postId: ID; readonly scheduledAt: string }) => scheduledPostsService.reschedule(postId, scheduledAt),
     onSuccess: () => { setRescheduleId(null); void refresh(); showToast("Schedule updated"); },
+  });
+  const editContent = useMutation({
+    mutationFn: ({ postId, text }: { readonly postId: ID; readonly text: string }) => scheduledPostsService.editContent(postId, { text }),
+    onSuccess: () => { setEditingTextId(null); void refresh(); showToast("Post text updated"); },
   });
   const confirmCancel = (post: ScheduledPostSummary) => Alert.alert("Cancel scheduled post?", "This keeps the post private and removes it from your scheduled list.", [
     { text: "Keep scheduled", style: "cancel" },
@@ -95,9 +101,37 @@ export function ScheduledPostsSheet({ visible, onClose }: { readonly visible: bo
                 <Text size={12} lineHeight={16} color={colors.textMuted}>{post.media.length} media item{post.media.length === 1 ? "" : "s"}</Text>
               </View>
               <View style={styles.actions}>
-                <Button title="Publish now" variant="outline" disabled={post.status === "failed" || publishNow.isPending || cancel.isPending} onPress={() => publishNow.mutate(post.id)} style={styles.action} />
-                <Button title="Reschedule" variant="subtle" disabled={(post.status === "failed" && post.failureReason !== "media_processing_timeout" && post.failureReason !== "author_unavailable") || reschedule.isPending || cancel.isPending} onPress={() => { setRescheduleId(post.id); onClose(); }} style={styles.action} />
-                <Button title="Cancel" variant="danger" disabled={cancel.isPending || publishNow.isPending} onPress={() => confirmCancel(post)} style={styles.action} />
+                {editingTextId === post.id ? (
+                  <View style={styles.editBox}>
+                    <TextInput
+                      value={textDraft}
+                      onChangeText={setTextDraft}
+                      multiline
+                      maxLength={2200}
+                      style={[styles.textInput, { color: colors.text, borderColor: colors.divider }]}
+                      placeholder="Write your scheduled post…"
+                      placeholderTextColor={colors.textMuted}
+                      accessibilityLabel="Scheduled post text"
+                    />
+                    <View style={styles.actions}>
+                      <Button
+                        title={editContent.isPending ? "Saving…" : "Save text"}
+                        variant="primary"
+                        disabled={editContent.isPending || (!textDraft.trim() && post.media.length === 0)}
+                        onPress={() => editContent.mutate({ postId: post.id, text: textDraft })}
+                        style={styles.action}
+                      />
+                      <Button title="Discard" variant="subtle" disabled={editContent.isPending} onPress={() => setEditingTextId(null)} style={styles.action} />
+                    </View>
+                  </View>
+                ) : (
+                  <>
+                    <Button title="Publish now" variant="outline" disabled={post.status === "failed" || publishNow.isPending || cancel.isPending || editContent.isPending} onPress={() => publishNow.mutate(post.id)} style={styles.action} />
+                    <Button title="Edit text" variant="subtle" disabled={publishNow.isPending || cancel.isPending || editContent.isPending} onPress={() => { setEditingTextId(post.id); setTextDraft(post.text); }} style={styles.action} />
+                    <Button title="Reschedule" variant="subtle" disabled={(post.status === "failed" && post.failureReason !== "media_processing_timeout" && post.failureReason !== "author_unavailable") || reschedule.isPending || cancel.isPending || editContent.isPending} onPress={() => { setRescheduleId(post.id); onClose(); }} style={styles.action} />
+                    <Button title="Cancel" variant="danger" disabled={cancel.isPending || publishNow.isPending || editContent.isPending} onPress={() => confirmCancel(post)} style={styles.action} />
+                  </>
+                )}
               </View>
             </View>
           ))}
@@ -121,5 +155,7 @@ const useStyles = makeThemedStyles((colors) => StyleSheet.create({
   row: { gap: 6 },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   action: { flexGrow: 1, flexBasis: "30%" },
+  editBox: { flex: 1, gap: 8 },
+  textInput: { minHeight: 80, borderWidth: 1, borderRadius: 10, padding: 10, fontSize: 14, textAlignVertical: "top" },
   error: { gap: 10, paddingVertical: 12 },
 }));

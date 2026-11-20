@@ -94,4 +94,18 @@ export function registerSupportEmailMockHandlers(): void {
     recordMockAuditEntry(request, { action: "support.email_sent", area: "support", target: { type: "emailSend", id: record.id, label: plan.audience.label }, reason, after: { kind: plan.kind, subject: plan.subject, recipientCount: record.recipientCount, skippedNoMarketingConsent: plan.skipped, unsubscribeIncluded: plan.kind === "MARKETING", provider: "AWS_SES" } });
     return respondWithJson(201, record);
   });
+
+  registerMockRoute("GET", "/admin/support/email/deliveries/failed", (request) => {
+    requireMockPermission(request, "support:email");
+    return respondWithJson(200, {
+      deliveries: [{ id: "del_email_1", templateKey: "payout_failed", eventId: "evt_email_1", attemptCount: 4, failedAt: "2026-11-15T18:10:00Z", reason: "Mailbox unavailable" }],
+    });
+  });
+
+  registerMockRoute("GET", "/admin/support/notifications/push/deliveries/failed", (request) => {
+    requireMockPermission(request, "support:email");
+    return respondWithJson(200, {
+      deliveries: [{ id: "del_push_1", templateKey: "order_shipped", eventId: "evt_push_1", attemptCount: 3, failedAt: "2026-11-15T19:45:00Z", reason: "APNs device token expired" }],
+    });
+  });
 }

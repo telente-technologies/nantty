@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 
 	usersErrors "nantty/modules/users/src/errors"
-	usersevents "nantty/modules/users/src/events"
 	"nantty/modules/users/src/generated/ent"
 	"nantty/modules/users/src/generated/ent/blackapplication"
 	transitionblackapplication "nantty/modules/users/src/modules/checkmarks/commands/transitionBlackApplication"
@@ -48,16 +47,12 @@ func (controller CheckmarksController) SendBlackInstitutionalEmailOtp(writer htt
 		controller.respond(writer, request, http.StatusOK, map[string]any{"verified": true}, nil)
 		return
 	}
-	_, expiresAt, err := services.IssueInstitutionalEmailOtp(request.Context(), controller.Container, row.ID, accountId, details.InstitutionalEmail)
+	otpCode, expiresAt, err := services.IssueInstitutionalEmailOtp(request.Context(), controller.Container, row.ID, accountId, details.InstitutionalEmail)
 	if err != nil {
 		controller.respond(writer, request, 0, nil, err)
 		return
 	}
-	_ = controller.Container.RunInTransaction(request.Context(), func(tx *ent.Tx) error {
-		return usersevents.EnqueueOutboxEventInTransaction(request.Context(), tx, "blackApplication.institutionalEmailOtpRequested", row.ID.String(), controller.Container.Now(), map[string]any{
-			"applicationId": row.ID.String(), "accountId": accountId.String(), "email": details.InstitutionalEmail, "expiresAt": expiresAt.UTC().Format("2006-01-02T15:04:05Z07:00"),
-		})
-	})
+	_ = services.EnqueueInstitutionalEmailOtpEvents(request.Context(), controller.Container, row.ID, accountId, details.InstitutionalEmail, otpCode, expiresAt)
 	controller.respond(writer, request, http.StatusOK, map[string]any{"sent": true, "expiresAt": expiresAt}, nil)
 }
 

@@ -70,6 +70,14 @@ export function createScheduledPostsController(route: RouteFactory, context: Han
     }),
     publishNow: route({ authentication: "required", params: postIdParamsSchema }, async ({ principal, params }) => {
       const now = context.clock.now();
+      const post = await context.database.client.post.findFirst({
+        where: { id: params.postId, authorId: principal.accountId, deletedAt: null, kind: "post", publicationState: { in: ["scheduled", "failed"] } },
+        select: { authorProfileId: true },
+      });
+      if (post === null) throw notFound("SCHEDULED_POST_NOT_FOUND", "Scheduled post not found.");
+      if (!(await context.premium.canSchedulePosts(principal.accountId, post.authorProfileId ?? undefined))) {
+        throw forbidden("PAID_SCHEDULING_REQUIRED", "An active Blue or Gold subscription is required to publish scheduled posts.");
+      }
       const result = await context.database.client.post.updateMany({
         where: { id: params.postId, authorId: principal.accountId, deletedAt: null, kind: "post", publicationState: { in: ["scheduled", "failed"] } },
         data: { publicationState: "scheduled", scheduledAt: now, publicationFailureReason: null },

@@ -3,7 +3,7 @@ import { requireMockPermission } from "@/mocks/mockGuards.mock";
 import { MockHttpError, createMockId, matchesSearchText, paginateItems, readEnumValue, readJsonObjectBody, readRequiredReason, readRequiredTrimmedString, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 import type { MockAdvertiserRecord } from "@/mocks/seed/trustAds.mock";
-import type { AdvertiserAccount, PolicySeverity } from "@/types/adsReview.type";
+import type { AdFrequencyPolicy, AdvertiserAccount, PolicySeverity } from "@/types/adsReview.type";
 
 import { findRecordByIdOrFail, presentModeratedUser, readTrustStore } from "./trustStore.mock";
 
@@ -74,5 +74,37 @@ export function registerAdvertiserAccountMockHandlers(): void {
     policy.isActive = body.isActive !== false;
     recordMockAuditEntry(request, { action: "ad_policy.updated", area: "ads", target: { type: "adPolicy", id: policy.id, label: policy.name }, reason: readRequiredReason(body), before, after: { ...policy } });
     return respondWithJson(200, policy);
+  });
+
+  const frequencyPolicies: AdFrequencyPolicy[] = [
+    { format: "feed", sessionCap: 3, hourCap: 6, dayCap: 18, advertiserDayCap: 3, minGapSlots: 4, cooldownSecondsAfterSkip: 120, active: true },
+    { format: "clips", sessionCap: 2, hourCap: 5, dayCap: 15, advertiserDayCap: 2, minGapSlots: 5, cooldownSecondsAfterSkip: 180, active: true },
+    { format: "stories", sessionCap: 2, hourCap: 4, dayCap: 12, advertiserDayCap: 2, minGapSlots: 4, cooldownSecondsAfterSkip: 120, active: true },
+  ];
+
+  registerMockRoute("GET", "/admin/ads-policies", (request) => {
+    requireMockPermission(request, "config:revenue", "ads:review");
+    return respondWithJson(200, { frequency: frequencyPolicies });
+  });
+
+  registerMockRoute("PUT", "/admin/ads-policies/frequency/:format", (request) => {
+    requireMockPermission(request, "config:revenue");
+    const body = readJsonObjectBody(request) as Partial<AdFrequencyPolicy>;
+    const format = request.params.format ?? "";
+    const existingIndex = frequencyPolicies.findIndex((item) => item.format === format);
+    const updated: AdFrequencyPolicy = {
+      format,
+      sessionCap: Number(body.sessionCap ?? 3),
+      hourCap: Number(body.hourCap ?? 6),
+      dayCap: Number(body.dayCap ?? 18),
+      advertiserDayCap: Number(body.advertiserDayCap ?? 3),
+      minGapSlots: Number(body.minGapSlots ?? 4),
+      cooldownSecondsAfterSkip: Number(body.cooldownSecondsAfterSkip ?? 120),
+      active: body.active !== false,
+    };
+    if (existingIndex >= 0) frequencyPolicies[existingIndex] = updated;
+    else frequencyPolicies.push(updated);
+    recordMockAuditEntry(request, { action: "ad_frequency_policy.updated", area: "ads", target: { type: "adFrequencyPolicy", id: format, label: format }, before: null, after: updated });
+    return { status: 204, body: undefined };
   });
 }

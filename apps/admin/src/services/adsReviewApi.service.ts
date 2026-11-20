@@ -1,5 +1,5 @@
 import { sendAdminApiRequest } from "@/services/adminApiClient.service";
-import type { AdForReview, AdForReviewDetail, AdPolicyCategory, AdvertiserAccount, AdvertiserAccountDetail, PolicySeverity } from "@/types/adsReview.type";
+import type { AdForReview, AdForReviewDetail, AdFrequencyPolicy, AdPoliciesDocument, AdPolicyCategory, AdvertiserAccount, AdvertiserAccountDetail, PolicySeverity } from "@/types/adsReview.type";
 import type { PagedList } from "@/types/api.type";
 
 export function fetchAdsForReview(filters: { status?: string; search?: string; advertiserId?: string; page?: number }, signal?: AbortSignal): Promise<PagedList<AdForReview>> {
@@ -16,6 +16,18 @@ export function approveAdAfterReview(adId: string, reason: string, overrideCriti
 
 export function rejectAdForPolicy(adId: string, policyCategoryId: string, reason: string): Promise<AdForReviewDetail> {
   return sendAdminApiRequest(`/admin/ads/${encodeURIComponent(adId)}/reject`, { method: "POST", body: { policyCategoryId, reason } });
+}
+
+export function resolveAdAppeal(adId: string, decision: "uphold" | "overturn", note: string): Promise<AdForReviewDetail> {
+  return sendAdminApiRequest(`/admin/ads/${encodeURIComponent(adId)}/appeal/resolve`, { method: "POST", body: { decision, note } });
+}
+
+export function fetchAdFrequencyPolicies(signal?: AbortSignal): Promise<AdPoliciesDocument> {
+  return sendAdminApiRequest("/admin/ads-policies", { signal });
+}
+
+export function updateAdFrequencyPolicy(format: string, policy: AdFrequencyPolicy): Promise<void> {
+  return sendAdminApiRequest(`/admin/ads-policies/frequency/${encodeURIComponent(format)}`, { method: "PUT", body: policy });
 }
 
 export function fetchAdvertiserAccounts(filters: { status?: string; search?: string; page?: number }, signal?: AbortSignal): Promise<PagedList<AdvertiserAccount>> {

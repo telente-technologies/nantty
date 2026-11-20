@@ -1,9 +1,10 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { privacyService } from "@/services/privacy.service";
 
 import { DeleteAccountDialog } from "./deleteAccountDialog";
@@ -24,10 +25,33 @@ function ExplanationList({ title, items }: { readonly title: string; readonly it
   );
 }
 
+const deletionQueryKey = ["privacy", "deletion-request"] as const;
+
 export function DeleteAccountSection() {
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [confirmation, setConfirmation] = useState("");
-  const requestDeletion = useMutation({ mutationFn: () => privacyService.requestAccountDeletion(confirmation.trim()) });
+  const deletionStatus = useQuery({
+    queryKey: deletionQueryKey,
+    queryFn: privacyService.fetchAccountDeletionStatus,
+    retry: false,
+  });
+  const requestDeletion = useMutation({
+    mutationFn: () => privacyService.requestAccountDeletion(confirmation.trim()),
+    onSuccess: (scheduled) => {
+      queryClient.setQueryData(deletionQueryKey, scheduled);
+      setIsOpen(false);
+      setConfirmation("");
+    },
+  });
+  const cancelDeletion = useMutation({
+    mutationFn: privacyService.cancelAccountDeletion,
+    onSuccess: () => {
+      queryClient.setQueryData(deletionQueryKey, null);
+    },
+  });
+
+  const pendingSchedule = deletionStatus.data ?? (requestDeletion.data?.status !== "cancelled" ? requestDeletion.data : null);
 
   return (
     <section className={styles.block} aria-labelledby="delete-account-heading">
@@ -36,12 +60,18 @@ export function DeleteAccountSection() {
       <ExplanationList title="What gets deleted" items={deletedItems} />
       <ExplanationList title="What gets anonymized" items={anonymizedItems} />
       <ExplanationList title="What we may keep" items={retainedItems} />
-      {requestDeletion.data ? (
-        <p role="status">Your account is scheduled for deletion on {new Date(requestDeletion.data.scheduledFor).toLocaleDateString()}.</p>
+      {pendingSchedule ? (
+        <div className={styles.block}>
+          <p role="status">Your account is scheduled for deletion on {new Date(pendingSchedule.scheduledFor).toLocaleDateString()}.</p>
+          {cancelDeletion.isError ? <p className={styles.errorText} role="alert">{readErrorMessageForDisplay(cancelDeletion.error)}</p> : null}
+          <div>
+            <Button variant="secondary" busy={cancelDeletion.isPending} onClick={() => cancelDeletion.mutate()}>Cancel scheduled deletion</Button>
+          </div>
+        </div>
       ) : (
         <div><Button variant="danger" onClick={() => setIsOpen(true)}>Delete my account</Button></div>
       )}
-      <DeleteAccountDialog isOpen={isOpen && !requestDeletion.data} onClose={() => setIsOpen(false)} confirmation={confirmation} onConfirmationChange={setConfirmation} deletion={{ isPending: requestDeletion.isPending, isSuccess: requestDeletion.isSuccess, errorMessage: requestDeletion.error?.message ?? null, confirm: () => requestDeletion.mutate() }} />
+      <DeleteAccountDialog isOpen={isOpen && !pendingSchedule} onClose={() => setIsOpen(false)} confirmation={confirmation} onConfirmationChange={setConfirmation} deletion={{ isPending: requestDeletion.isPending, isSuccess: requestDeletion.isSuccess, errorMessage: requestDeletion.error?.message ?? null, confirm: () => requestDeletion.mutate() }} />
     </section>
   );
 }

@@ -1,0 +1,30 @@
+# Nantty API Security Matrix (Phase 1.2)
+
+## 1. Edge, Gateway & BFF Surface Matrix
+
+| Surface / Route Pattern | Auth Requirement | Origin / CSRF / Network Control | Rate Limit / Abuse Control | Parser / Input Validation |
+| --- | --- | --- | --- | --- |
+| `Gateway /internal/**`, `/api/v1/**/internal/**`, encoded `%69nternal` | Blocked at edge (`404`) | `isInternalOnlyPath` (3x URI decode + segment normalization) | Emits `internalPath` probe signal to `goTrust` | Path confusion (`//`, `//host`, `..`) blocked (`404`) |
+| `Gateway /api/v1/admin/**` (except 7 public auth POSTs) | Staff JWT (`verifyStaffAccessToken`) | `adminNetwork` CIDR allowlist + `staffNetworkGate` | `adminEmail` (`10/min`), login (`5/15m` acct, `20/15m` IP) | Strict `isAdminPath`, `OPTIONS` preflight, no consumer tokens accepted |
+| `Gateway /api/v1/**` (`authentication: "required"`) | Consumer EdDSA JWT + Valkey session denylist | Strict CORS allowlist; `trustCdnCountryHeader` gated | `120/min` global + per-route buckets (`walletTransfer` `5/m`, `upload` `10/m`, etc.) | JSON/size caps (`maxRequestBodyBytes`), signed `X-Gateway-Identity-Signature` |
+| `Gateway /api/v1/**` (`authentication: "optional"`) | Optional JWT (`anonymous` if absent) | `anonymousMutationGuard` blocks unauthenticated mutations outside allowlist | Guest rate limits (`perMinute` / `sensitivePerMinute`) | Method allowlists (`GET` only on public feeds/catalog/lives) |
+| `Gateway /api/v1/ads/r/{token}` | Optional (`redirectPassthrough: true`) | Gateway `isSafeRedirectLocation` (`https:` or `nantty:` only, no credentials/whitespace) | `adEvent` (`120/min`) | Signed click + impression token verification + `IsSafeClickTarget` |
+| `Gateway /webhooks/**`, `/api/v1/live/webhooks/**`, `/api/v1/webhooks/smile-id*` | Unauthenticated (`rawBodyPassthrough: true`) | Exact raw body forwarded + allowlisted webhook signature headers only | Exempt from guest mutation block via allowlist | Provider HMAC/JWS/OIDC verification inside target Go module |
+| `Gateway /api/v1/widgets/**` | Consumer JWT or Widget Token | `acceptsWidgetToken: true` checked strictly | `widgetRead` (`30/m`), `widgetToken` (`10/m`) | Widget tokens rejected on all non-widget routes (`401 WIDGET_TOKEN_SCOPE`) |
+| `apps/{webapp,seller,studio,admin,ads} /bff/**` | `HttpOnly` session cookie | Origin/Referer/Sec-Fetch-Site CSRF guard; `CSP: default-src 'none'; frame-ancestors 'none'`; `Cache-Control: no-store` | BFF payload caps + last-hop IP forwarding | Route/method/permission/step-up allowlists; tokens stripped from JSON |
+| `apps/{developer,sandbox} /api/**` | Portal/SSO `HttpOnly` cookie (`developer`), isolated token (`sandbox`) | Origin + `Sec-Fetch-Site` CSRF guard; `/api/*` `no-store` + `default-src 'none'` (`SEC-2026-004`) | `capabilities/me` preflight before Sandbox control calls | Strict Zod/UUID checks; never forwards browser cookies to `sandbox` |
+
+---
+
+## 2. Internal Service & Async Boundary Matrix
+
+| Boundary | Auth & Integrity Control | Replay / Abuse Protection | Notable Hardening / Findings |
+| --- | --- | --- | --- |
+| **TS Services (`social`, `media`, `notifications`, `support`, `search`)** | Signed Gateway Identity (`X-Gateway-Identity-Signature`) or `requireInternalToken` | Timestamp window on Gateway signature; idempotency keys on mutations | `scheduledPosts.controller.ts` `publishNow` lacked `canSchedulePosts` check -> fixed (`SEC-2026-003`). |
+| **Go `goMoney` Webhooks (`payments`, `subscriptions`)** | Flutterwave (`Verif-Hash` SHA-256 CT / HMAC), Apple JWS (Root CA + ES256), Google Play (CT token / RS256 OIDC) | `webhook_events` + `StoreTransactionID` idempotency + `ForUpdate()` locks | Black Gov `settlePeriodInTransaction` fixed to fail closed when verification missing/unverified (`SEC-2026-001`); IAP `RedeemStoreSubscription` fixed for cross-user/cross-profile (`SEC-2026-002`). |
+| **Go `goIdentity` Smile ID & Developer SSO** | Smile ID HMAC-SHA256 + `BelongsTo(accountId)`; SSO atomic PKCE S256 + active session check | 1h callback timestamp freshness (`IsFresh`); single-use auth codes | `developerSso.code.go` binds `redirectUri`, `clientId`, and `code_challenge`. |
+| **Go `goCommerce` (`orders`, `catalog`)** | Gateway identity / JWT + seller store membership + email verified required for checkout | Idempotency fingerprint (`FingerprintOfRequest`), `ShippingQuoteRevision` lock, stock reservation TTL | Blocks buying own store (`CannotBuyOwnProduct`), server-authoritative pricing & currency grouping. |
+| **Go `goMoney` (`wallet`, `escrow`)** | JWT + payout account/level verification + staff step-up for escrow override | Idempotency hash on `requestWithdrawal`, balanced double-entry ledger TX | `WithdrawalFitsAvailableBalance` prevents over-withdrawal across pending payouts. |
+| **Elixir `realtime` (`/ws*`)** | EdDSA JWKS verification (`AccessTokenVerifier`) + `Topic.Authorizer` | ETS + PubSub `RevocationList` (session + `issued_at <= revoked_at` account revocation) | Strict `iss`, `aud`, `scope=realtime`, `exp` (+30s skew). |
+| **Python `intelligence` (`/v1/*`)** | `SignedRequestMiddleware` HMAC-SHA256 (`method + path?query + timestamp + nonce + body`) | `nonce_backend.claim_keys_if_absent` (fails `503` if store unavailable); body cap (413) | Evaluates both decoded `path` and `raw_path` safely; skips non-`/v1/` health probes. |
+| **Outbound Fetchers (`social` & `sandbox`)** | Pre-request DNS resolution, non-public IP rejection, pinned `lookup` callback | Payload (`32KB`) & response (`16KB`) caps; redirect blocking (`sandbox`) / re-validation (`social`) | `sandbox/webhookSecurity.ts` hardened to block Teredo `2001::/32` (`SEC-2026-005`). |

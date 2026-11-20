@@ -3,7 +3,11 @@ import { afterEach, test } from "node:test";
 
 import { NextRequest } from "next/server";
 
-import { forwardDeveloperOrganizationRequest } from "../src/server/developerOrganizationsProxy";
+import {
+  forwardDeveloperOrganizationRequest,
+  forwardDeveloperOtpSendRequest,
+  forwardDeveloperOtpVerifyRequest,
+} from "../src/server/developerOrganizationsProxy";
 
 const originalNodeEnv = process.env.NODE_ENV;
 const originalApiBaseUrl = process.env.DEVELOPER_API_BASE_URL;
@@ -135,4 +139,43 @@ test("hides developer configuration details from ordinary portal 503 messages", 
   const body = await response.json();
   assert.equal(body.code, "DEVELOPER_API_NOT_CONFIGURED");
   assert.doesNotMatch(String(body.message), /gateway|not configured|not connected|environment|deployment/i);
+});
+
+test("rejects cross-origin OTP send requests and validates 6-digit OTP verify codes", async () => {
+  setNodeEnvironment("development");
+  process.env.DEVELOPER_API_BASE_URL = "https://identity.nantty.test";
+  let upstreamCalls = 0;
+  globalThis.fetch = async (input, init) => {
+    upstreamCalls += 1;
+    const url = new URL(String(input));
+    if (url.pathname === "/api/v1/auth/otp/verify") {
+      return Response.json({ otpToken: "otp-verified-token-123" }, { status: 200 });
+    }
+    return Response.json({ expiresIn: 300, received: JSON.parse(String(init?.body ?? "{}")) }, { status: 200 });
+  };
+
+  const csrfBlocked = await forwardDeveloperOtpSendRequest(new NextRequest("https://developers.nantty.test/api/developer/otp/send", {
+    method: "POST",
+    headers: { origin: "https://evil.test", "content-type": "application/json" },
+    body: JSON.stringify({ destination: "dev@nantty.com", purpose: "login" }),
+  }));
+  assert.equal(csrfBlocked.status, 403);
+  assert.equal(upstreamCalls, 0);
+
+  const invalidCode = await forwardDeveloperOtpVerifyRequest(new NextRequest("https://developers.nantty.test/api/developer/otp/verify", {
+    method: "POST",
+    headers: { origin: "https://developers.nantty.test", "content-type": "application/json" },
+    body: JSON.stringify({ destination: "dev@nantty.com", code: "abc", purpose: "login" }),
+  }));
+  assert.equal(invalidCode.status, 400);
+  assert.equal(upstreamCalls, 0);
+
+  const verified = await forwardDeveloperOtpVerifyRequest(new NextRequest("https://developers.nantty.test/api/developer/otp/verify", {
+    method: "POST",
+    headers: { origin: "https://developers.nantty.test", "content-type": "application/json", cookie: "zd_webapp_at=local-secret" },
+    body: JSON.stringify({ destination: "dev@nantty.com", code: "123456", purpose: "login" }),
+  }));
+  assert.equal(verified.status, 200);
+  assert.equal((await verified.json()).otpToken, "otp-verified-token-123");
+  assert.equal(upstreamCalls, 1);
 });

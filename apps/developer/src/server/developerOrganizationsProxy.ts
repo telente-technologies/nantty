@@ -8,6 +8,8 @@ const localAccessCookie = "zd_webapp_at";
 const organizationBasePath = "/api/v1/developer/organizations";
 const invitationInboxBasePath = "/api/v1/developer/invitations";
 const stepUpTokenPattern = /^[A-Za-z0-9._-]{32,8192}$/;
+const otpCodePattern = /^\d{6}$/;
+const otpPurposes = new Set(["login", "signup", "reset"]);
 
 function readApiBaseUrl(): URL | null {
   const configured = process.env.DEVELOPER_API_BASE_URL?.trim();
@@ -117,5 +119,102 @@ export async function forwardDeveloperStepUpRequest(request: NextRequest): Promi
     return new NextResponse(await upstream.arrayBuffer(), { status: upstream.status, headers: responseHeaders });
   } catch {
     return jsonError(502, "DEVELOPER_API_UNAVAILABLE", "Identity could not confirm your session. Try again shortly.");
+  }
+}
+
+async function readValidatedOtpJson(request: NextRequest): Promise<{ ok: true; data: Record<string, unknown> } | { ok: false; response: NextResponse }> {
+  if (request.headers.get("origin") !== request.nextUrl.origin || request.headers.get("sec-fetch-site") === "cross-site") {
+    return { ok: false, response: jsonError(403, "CSRF_REJECTED", "This verification request could not be verified.") };
+  }
+  const declaredBytes = Number(request.headers.get("content-length") ?? 0);
+  if (declaredBytes > maxBodyBytes) return { ok: false, response: jsonError(413, "PAYLOAD_TOO_LARGE", "That request is too large.") };
+  const rawBody = await request.text();
+  if (new TextEncoder().encode(rawBody).byteLength > maxBodyBytes) return { ok: false, response: jsonError(413, "PAYLOAD_TOO_LARGE", "That request is too large.") };
+  if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
+    return { ok: false, response: jsonError(415, "UNSUPPORTED_MEDIA_TYPE", "Send verification payloads as JSON.") };
+  }
+  try {
+    const parsed: unknown = JSON.parse(rawBody);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      return { ok: false, response: jsonError(400, "INVALID_JSON", "The request body must be a JSON object.") };
+    }
+    return { ok: true, data: parsed as Record<string, unknown> };
+  } catch {
+    return { ok: false, response: jsonError(400, "INVALID_JSON", "The request body must be valid JSON.") };
+  }
+}
+
+export async function forwardDeveloperOtpSendRequest(request: NextRequest): Promise<NextResponse> {
+  if (request.method !== "POST" || request.nextUrl.pathname !== "/api/developer/otp/send") {
+    return jsonError(404, "NOT_FOUND", "This verification endpoint is not available.");
+  }
+  const baseUrl = readApiBaseUrl();
+  if (!baseUrl) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "One-time code delivery is temporarily unavailable. Try again shortly.");
+  const parsed = await readValidatedOtpJson(request);
+  if (!parsed.ok) return parsed.response;
+
+  const destination = typeof parsed.data.destination === "string" ? parsed.data.destination.trim() : "";
+  const purpose = typeof parsed.data.purpose === "string" ? parsed.data.purpose.trim() : "login";
+  if (destination.length < 3 || destination.length > 254 || !otpPurposes.has(purpose)) {
+    return jsonError(400, "INVALID_OTP_REQUEST", "Enter a valid account email address to receive a 6-digit code.");
+  }
+
+  const accessToken = request.cookies.get(process.env.NODE_ENV === "production" ? accountAccessCookie : localAccessCookie)?.value;
+  const headers = new Headers({ accept: "application/json", "content-type": "application/json" });
+  if (accessToken) headers.set("authorization", `Bearer ${accessToken}`);
+
+  try {
+    const upstream = await fetch(new URL("/api/v1/auth/otp/send", baseUrl), {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ destination, purpose }),
+      cache: "no-store",
+      redirect: "error",
+      signal: AbortSignal.timeout(8_000),
+    });
+    const responseHeaders = new Headers({ "Cache-Control": "no-store, max-age=0" });
+    const contentType = upstream.headers.get("content-type");
+    if (contentType) responseHeaders.set("content-type", contentType);
+    return new NextResponse(await upstream.arrayBuffer(), { status: upstream.status, headers: responseHeaders });
+  } catch {
+    return jsonError(502, "DEVELOPER_API_UNAVAILABLE", "Identity could not send a verification code right now.");
+  }
+}
+
+export async function forwardDeveloperOtpVerifyRequest(request: NextRequest): Promise<NextResponse> {
+  if (request.method !== "POST" || request.nextUrl.pathname !== "/api/developer/otp/verify") {
+    return jsonError(404, "NOT_FOUND", "This verification endpoint is not available.");
+  }
+  const baseUrl = readApiBaseUrl();
+  if (!baseUrl) return jsonError(503, "DEVELOPER_API_NOT_CONFIGURED", "One-time code verification is temporarily unavailable. Try again shortly.");
+  const parsed = await readValidatedOtpJson(request);
+  if (!parsed.ok) return parsed.response;
+
+  const destination = typeof parsed.data.destination === "string" ? parsed.data.destination.trim() : "";
+  const code = typeof parsed.data.code === "string" ? parsed.data.code.trim() : "";
+  const purpose = typeof parsed.data.purpose === "string" ? parsed.data.purpose.trim() : "login";
+  if (destination.length < 3 || destination.length > 254 || !otpCodePattern.test(code) || !otpPurposes.has(purpose)) {
+    return jsonError(400, "INVALID_OTP_CODE", "Enter your account email and the 6-digit verification code.");
+  }
+
+  const accessToken = request.cookies.get(process.env.NODE_ENV === "production" ? accountAccessCookie : localAccessCookie)?.value;
+  const headers = new Headers({ accept: "application/json", "content-type": "application/json" });
+  if (accessToken) headers.set("authorization", `Bearer ${accessToken}`);
+
+  try {
+    const upstream = await fetch(new URL("/api/v1/auth/otp/verify", baseUrl), {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ destination, code, purpose }),
+      cache: "no-store",
+      redirect: "error",
+      signal: AbortSignal.timeout(8_000),
+    });
+    const responseHeaders = new Headers({ "Cache-Control": "no-store, max-age=0" });
+    const contentType = upstream.headers.get("content-type");
+    if (contentType) responseHeaders.set("content-type", contentType);
+    return new NextResponse(await upstream.arrayBuffer(), { status: upstream.status, headers: responseHeaders });
+  } catch {
+    return jsonError(502, "DEVELOPER_API_UNAVAILABLE", "Identity could not verify that code right now.");
   }
 }

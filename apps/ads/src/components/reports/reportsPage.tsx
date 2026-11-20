@@ -34,7 +34,7 @@ export function ReportsPage() {
   const searchParams = useSearchParams();
   const state = useMemo(() => readReportViewStateFromSearchParams(new URLSearchParams(searchParams.toString())), [searchParams]);
   const query = useMemo(() => convertReportViewStateToQuery(state), [state]);
-  const [isExporting, setIsExporting] = useState(false);
+  const [exportFormat, setExportFormat] = useState<"csv" | "pdf" | null>(null);
   const reportQuery = useAdsQuery((signal) => reportsApi.fetchReport(accountId, query, signal), `${accountId}-${JSON.stringify(query)}`);
   const report = reportQuery.data;
 
@@ -42,16 +42,18 @@ export function ReportsPage() {
     router.replace(`${pathname}?${writeReportViewStateToSearchParams(next).toString()}`, { scroll: false });
   }
 
-  async function downloadReportAsCsv() {
-    setIsExporting(true);
+  async function downloadReport(format: "csv" | "pdf") {
+    setExportFormat(format);
     try {
-      const blob = await reportsApi.exportReportAsCsv(accountId, query, state.columns);
-      saveBlobAsDownloadedFile(blob, `nantty-ads-${state.breakdown}-${state.from}-to-${state.to}.csv`);
-      showToast("CSV downloaded");
+      const blob = format === "pdf"
+        ? await reportsApi.exportReportAsPdf(accountId, query, state.columns)
+        : await reportsApi.exportReportAsCsv(accountId, query, state.columns);
+      saveBlobAsDownloadedFile(blob, `nantty-ads-${state.breakdown}-${state.from}-to-${state.to}.${format}`);
+      showToast(`${format.toUpperCase()} downloaded`);
     } catch (error) {
       showToast(readErrorMessageForDisplay(error), "error");
     } finally {
-      setIsExporting(false);
+      setExportFormat(null);
     }
   }
 
@@ -69,7 +71,16 @@ export function ReportsPage() {
 
   return (
     <>
-      <PageHeader title="Reports" description={`Delivery and results for ${rangeLabel}. Sales from your Nantty store are attributed automatically.`} actions={<Button iconName="boxArrowDown24" isLoading={isExporting} onClick={downloadReportAsCsv}>Export CSV</Button>} />
+      <PageHeader
+        title="Reports"
+        description={`Delivery and results for ${rangeLabel}. Sales from your Nantty store are attributed automatically.`}
+        actions={
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <Button variant="secondary" iconName="boxArrowDown24" isLoading={exportFormat === "pdf"} disabled={exportFormat !== null} onClick={() => void downloadReport("pdf")}>Export PDF</Button>
+            <Button iconName="boxArrowDown24" isLoading={exportFormat === "csv"} disabled={exportFormat !== null} onClick={() => void downloadReport("csv")}>Export CSV</Button>
+          </div>
+        }
+      />
       <Card>
         <ReportFilters state={state} onStateChange={replaceViewState} />
       </Card>

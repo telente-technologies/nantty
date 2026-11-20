@@ -1,3 +1,4 @@
+import { createSecureRandomHex } from "@/utils/secureRandomId.util";
 import type { AdDestination, ID, SponsoredPlacement } from "@/types";
 
 import { api } from "../core/apiClient.service";
@@ -6,9 +7,9 @@ export const MART_PRODUCT_AD_SLOT = "martTile" as const;
 export const FEED_PRODUCT_AD_SLOT = "feedProduct" as const;
 export const SEARCH_PRODUCT_AD_SLOT = "searchTile" as const;
 export const FEED_PRODUCT_AD_SLOT_INDEX = 8;
-const adSessionId = `product_ads_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+const adSessionId = `product_ads_${Date.now().toString(36)}_${createSecureRandomHex(6)}`;
 
-export const createFeedProductAdSessionId = () => `feed_product_ads_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+export const createFeedProductAdSessionId = () => `feed_product_ads_${Date.now().toString(36)}_${createSecureRandomHex(6)}`;
 
 type ProductAdPlacement = "mart" | "feed" | "search";
 type ProductAdSlot = typeof MART_PRODUCT_AD_SLOT | typeof FEED_PRODUCT_AD_SLOT | typeof SEARCH_PRODUCT_AD_SLOT;

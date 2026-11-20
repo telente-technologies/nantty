@@ -3,6 +3,7 @@ package generatebarcodes
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"math/big"
 	"strconv"
 	"strings"
@@ -10,6 +11,8 @@ import (
 	"nantty/modules/catalog/src/container"
 	"nantty/modules/catalog/src/generated/ent/productvariant"
 )
+
+const maxGeneratedBarcodesPerRequest = 100
 
 type Handler struct {
 	Container *container.Container
@@ -29,9 +32,13 @@ func BuildInternalEan13(randomElevenDigits string) string {
 }
 
 func (handler Handler) Execute(ctx context.Context, query Query) ([]string, error) {
-	barcodes := make([]string, 0, query.Count)
+	count := query.Count
+	if count <= 0 || count > maxGeneratedBarcodesPerRequest {
+		return nil, errors.New("barcode count must be between 1 and 100")
+	}
+	barcodes := make([]string, 0, count)
 	seen := map[string]bool{}
-	for len(barcodes) < query.Count {
+	for len(barcodes) < count {
 		digits, err := rand.Int(rand.Reader, big.NewInt(100_000_000_000))
 		if err != nil {
 			return nil, err

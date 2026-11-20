@@ -21,6 +21,8 @@ export const postsService = {
   fetchPostQuotes: (postId: string, cursor: string | null | undefined) => sendRequestToWebappServer<Page<Post>>(`/api/v1/posts/${postId}/quotes`, { query: { cursor: cursor ?? undefined } }),
   fetchPostTaggedUsers: (postId: string, cursor: string | null) =>
     sendRequestToWebappServer<Page<TaggedUser>>(`/api/v1/posts/${encodeURIComponent(postId)}/tagged-users`, { query: { cursor: cursor ?? undefined } }),
+  removeMyPostTag: (postId: string) =>
+    sendRequestToWebappServer<void>(`/api/v1/posts/${encodeURIComponent(postId)}/tags/me`, { method: "DELETE" }),
   updateReplySettings: (postId: string, replyPolicy: ReplyPolicy) => sendRequestToWebappServer<Post>(`/api/v1/posts/${postId}/reply-settings`, { method: "PATCH", body: { replyPolicy } }),
   mutePostNotifications: (postId: string) => sendRequestToWebappServer<{ readonly postId: string; readonly muted: boolean }>(`/api/v1/posts/${postId}/notifications-mute`, { method: "PUT", idempotencyKey: createIdempotencyKey("postmute") }),
   unmutePostNotifications: (postId: string) => sendRequestToWebappServer<{ readonly postId: string; readonly muted: boolean }>(`/api/v1/posts/${postId}/notifications-mute`, { method: "DELETE", idempotencyKey: createIdempotencyKey("postunmute") }),

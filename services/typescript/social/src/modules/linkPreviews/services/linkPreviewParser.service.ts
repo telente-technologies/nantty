@@ -25,7 +25,12 @@ function readAttributes(tag: string): Map<string, string> {
 
 function cleanText(value: string | undefined | null, maximumLength: number): string | null {
   if (value === undefined || value === null) return null;
-  const cleaned = decodeHtmlEntities(value).replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+  let text = decodeHtmlEntities(value);
+  for (let previous = ""; previous !== text; ) {
+    previous = text;
+    text = text.replace(/<[^<>]*>/g, "");
+  }
+  const cleaned = text.replace(/[<>]/g, "").replace(/\s+/g, " ").trim();
   if (cleaned === "") return null;
   return cleaned.length > maximumLength ? `${cleaned.slice(0, maximumLength - 1).trimEnd()}…` : cleaned;
 }

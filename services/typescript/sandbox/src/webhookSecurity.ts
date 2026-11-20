@@ -62,7 +62,7 @@ export function isPublicAddress(address: string, family = isIP(address)): boolea
   const value = parseIPv6(address);
   if (value === null) return false;
   if (!hasPrefix(value, "2000::", 3)) return false;
-  if (hasPrefix(value, "2001:db8::", 32) || hasPrefix(value, "2001:10::", 28) || hasPrefix(value, "2001:20::", 28) || hasPrefix(value, "2001:2::", 48) || hasPrefix(value, "2002::", 16)) return false;
+  if (hasPrefix(value, "2001::", 32) || hasPrefix(value, "2001:db8::", 32) || hasPrefix(value, "2001:10::", 28) || hasPrefix(value, "2001:20::", 28) || hasPrefix(value, "2001:2::", 48) || hasPrefix(value, "2002::", 16)) return false;
   return true;
 }
 

@@ -95,7 +95,8 @@ export async function forwardBffRequestToAdsApi(request: NextRequest, pathSegmen
   }
   const stepUpToken = request.headers.get("x-step-up-token");
   if (stepUpToken && stepUpToken.length <= 4096) forwardedHeaders["X-Step-Up-Token"] = stepUpToken;
-  const clientAddress = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const forwardedParts = request.headers.get("x-forwarded-for")?.split(",").map((entry) => entry.trim()).filter(Boolean);
+  const clientAddress = forwardedParts?.at(-1) || request.headers.get("x-real-ip")?.trim();
   if (clientAddress) forwardedHeaders["X-Forwarded-For"] = clientAddress;
 
   let accessToken = renewedSession?.tokens?.accessToken ?? tokens.accessToken;

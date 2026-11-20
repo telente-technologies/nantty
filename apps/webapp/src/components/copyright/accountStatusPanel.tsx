@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import rowStyles from "@/components/settings/myReportsList.module.css";
 import settingsStyles from "@/components/settings/settings.module.css";
 import { COPYRIGHT_HELP_PATH, describeAccountStanding, describeRestriction, formatTimeRemaining } from "@/services/copyrightAccount.service";
-import type { AccountHealth, AccountStrike, CopyrightNotice } from "@/types";
+import type { AccountHealth, AccountStrike, CopyrightNotice, ModerationDecision } from "@/types";
 
-import { useMyAccountHealth } from "./accountHealth.hook";
-import { AppealStrikeDialog, CounterNoticeDialog } from "./accountStatusDialogs";
+import { useMyAccountHealth, useMyModerationDecisions } from "./accountHealth.hook";
+import { AppealDecisionDialog, AppealStrikeDialog, CounterNoticeDialog } from "./accountStatusDialogs";
 
 const standingTone = { GOOD_STANDING: "success", AT_RISK: "warning", RESTRICTED: "error" } as const;
 const formatDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }) : "Never");
@@ -24,10 +24,13 @@ const remedyLabel: Record<CopyrightNotice["state"], string> = {
 
 export function AccountStatusPanel() {
   const { data: health, isPending, isError, error, refetch } = useMyAccountHealth();
+  const decisionsQuery = useMyModerationDecisions();
   const [appealTarget, setAppealTarget] = useState<AccountStrike | null>(null);
+  const [decisionTarget, setDecisionTarget] = useState<ModerationDecision | null>(null);
   const [counterTarget, setCounterTarget] = useState<CopyrightNotice | null>(null);
   if (isPending) return <DetailSkeleton label="Loading your account status" blocks={3} />;
   if (isError || !health) return <ErrorState error={error} description="We couldn't load your account status." onRetry={() => void refetch()} />;
+  const decisions = decisionsQuery.data?.data ?? [];
   return (
     <>
       <StandingSummary health={health} />
@@ -49,8 +52,10 @@ export function AccountStatusPanel() {
       </section>
       <StrikeList title="Active strikes" empty="You have no active strikes." items={health.strikes} onAppeal={setAppealTarget} />
       <StrikeList title="Warnings on record" empty="No warnings." items={health.warnings} onAppeal={setAppealTarget} />
+      <ModerationDecisionList items={decisions} onAppeal={setDecisionTarget} />
       <p><Link href={COPYRIGHT_HELP_PATH}>Learn about copyright, strikes and counter-notices</Link></p>
       <AppealStrikeDialog strike={appealTarget} onClose={() => setAppealTarget(null)} />
+      <AppealDecisionDialog decision={decisionTarget} onClose={() => setDecisionTarget(null)} />
       <CounterNoticeDialog notice={counterTarget} onClose={() => setCounterTarget(null)} />
     </>
   );
@@ -82,6 +87,29 @@ function StrikeList({ title, empty, items, onAppeal }: { readonly title: string;
               <span className={rowStyles.meta}>{strike.reason}</span>
               <span className={rowStyles.meta}>Issued {formatDate(strike.issuedAt)} · Expires {formatDate(strike.expiresAt)}{strike.affectedContent ? ` · ${contentLabel(strike.affectedContent)}` : ""}</span>
               {strike.canAppeal ? <div><Button variant="secondary" onClick={() => onAppeal(strike)}>Appeal</Button></div> : null}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function ModerationDecisionList({ items, onAppeal }: { readonly items: readonly ModerationDecision[]; readonly onAppeal: (decision: ModerationDecision) => void }) {
+  return (
+    <section className={settingsStyles.block}>
+      <h2 className={settingsStyles.blockHeading}>Content decisions</h2>
+      {items.length === 0 ? <p className={rowStyles.meta}>No recent content moderation decisions.</p> : (
+        <ul className={rowStyles.list}>
+          {items.map((decision) => (
+            <li key={decision.reportId} className={rowStyles.row}>
+              <div className={rowStyles.top}>
+                <strong>{contentLabel(decision.target)}</strong>
+                {decision.appeal ? <span className={rowStyles.status}>Appeal {decision.appeal.status.toLowerCase()}</span> : null}
+              </div>
+              <span className={rowStyles.meta}>{decision.reason}</span>
+              <span className={rowStyles.meta}>Decided {formatDate(decision.decidedAt)}</span>
+              {decision.appealable && !decision.appeal ? <div><Button variant="secondary" onClick={() => onAppeal(decision)}>Appeal decision</Button></div> : null}
             </li>
           ))}
         </ul>

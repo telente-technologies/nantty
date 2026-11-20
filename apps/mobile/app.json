@@ -40,13 +40,12 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "apiUrl": "http://localhost:8080",
+      "apiUrl": "https://api.nantty.com",
       "eas": {
         "projectId": "47fadf5d-9059-49f9-8673-56453ca26a58"
       }
     },
     "scheme": [
-      "nantty",
       "nantty",
       "com.nantty.app"
     ],

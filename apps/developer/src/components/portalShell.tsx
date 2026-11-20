@@ -12,7 +12,6 @@ import { readDeveloperDocsHref, readDeveloperSupportUrl, readNanttyWebUrl } from
 import { DeveloperContextProvider, useDeveloperContext } from "./developerContextProvider";
 import { PortalNavigation } from "./portalNavigation";
 import { PortalSwitcher } from "./portalSwitcher";
-import { SsoSignInButton } from "./ssoSignInButton";
 import styles from "./portalShell.module.css";
 
 export function PortalShell({ children, homeHref = "/dashboard" }: { readonly children: ReactNode; readonly homeHref?: string }) {
@@ -90,7 +89,7 @@ function PortalShellFrame({ children, homeHref }: { readonly children: ReactNode
                   <button type="submit" className={styles.authAction}>Sign out</button>
                 </form>
               ) : (
-                <SsoSignInButton className={styles.authAction}>Sign in</SsoSignInButton>
+                <Link href="/login" className={styles.authAction}>Sign in / OTP</Link>
               )}
               <a className={styles.publicSiteLink} href={readNanttyWebUrl()}>Nantty.com <span aria-hidden="true">↗</span></a>
               <ThemeSwitcher iconOnly label="Colour theme" className={styles.desktopThemeSwitcher} />

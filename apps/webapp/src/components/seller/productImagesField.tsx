@@ -18,6 +18,15 @@ interface PendingPhoto {
   readonly error: string | null;
 }
 
+function toSafeBlobPreviewUrl(candidate: string): string {
+  try {
+    const parsed = new URL(candidate);
+    return parsed.protocol === "blob:" ? parsed.href : "";
+  } catch {
+    return "";
+  }
+}
+
 export interface ProductImagesFieldProps {
   readonly images: readonly CatalogProductImage[];
   readonly onChangeImages: (update: (current: readonly CatalogProductImage[]) => readonly CatalogProductImage[]) => void;
@@ -104,16 +113,19 @@ export function ProductImagesField({ images, onChangeImages, onUploadingChange, 
             <button type="button" className={styles.remove} aria-label={`Remove photo ${index + 1}`} disabled={disabled} onClick={() => onChangeImages((current) => current.filter((candidate) => candidate.mediaId !== image.mediaId))}><CloseIcon size={12} /></button>
           </li>
         ))}
-        {pending.map((photo) => (
-          <li key={photo.key} className={styles.thumb}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={photo.previewUrl} alt="New product photo" />
-            {photo.status === "uploading" ? <span className={styles.thumbOverlay} role="status">Uploading…</span> : (
-              <span className={styles.thumbOverlay}><button type="button" onClick={() => startUpload(photo)}>Retry</button></span>
-            )}
-            <button type="button" className={styles.remove} aria-label="Remove new photo" onClick={() => discardPending(photo)}><CloseIcon size={12} /></button>
-          </li>
-        ))}
+        {pending.map((photo) => {
+          const safePreviewUrl = toSafeBlobPreviewUrl(photo.previewUrl);
+          return (
+            <li key={photo.key} className={styles.thumb}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {safePreviewUrl ? <img src={safePreviewUrl} alt="New product photo" /> : null}
+              {photo.status === "uploading" ? <span className={styles.thumbOverlay} role="status">Uploading…</span> : (
+                <span className={styles.thumbOverlay}><button type="button" onClick={() => startUpload(photo)}>Retry</button></span>
+              )}
+              <button type="button" className={styles.remove} aria-label="Remove new photo" onClick={() => discardPending(photo)}><CloseIcon size={12} /></button>
+            </li>
+          );
+        })}
         {images.length + pending.length < MAXIMUM_PRODUCT_IMAGES ? (
           <li>
             <button type="button" className={styles.addPhoto} disabled={disabled} onClick={() => inputRef.current?.click()} aria-label="Add product photo">

@@ -3,7 +3,7 @@ import { THREAD_AD_SLOT_KIND, type CommentSectionFilter, type CommentThreadPage,
 
 import { sendRequestToWebappServer } from "./clientApi.service";
 
-const adSessionId = `ads_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+const adSessionId = `ads_${Date.now().toString(36)}_${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
 
 export const postThreadService = {
   fetchConversation: (postId: ID, sort: ThreadSort, cursor: string | null | undefined, filter: CommentSectionFilter = "all") =>

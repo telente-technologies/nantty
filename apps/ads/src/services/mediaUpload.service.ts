@@ -18,24 +18,28 @@ export interface BrowserMediaMetadata {
 }
 
 export async function readMediaMetadataInBrowser(file: File): Promise<BrowserMediaMetadata | null> {
-  const objectUrl = URL.createObjectURL(file);
-  try {
-    if (file.type.startsWith("image/")) {
+  if (file.type.startsWith("image/")) {
+    try {
       const bitmap = await createImageBitmap(file);
       const metadata = { width: bitmap.width, height: bitmap.height, durationSeconds: null };
       bitmap.close();
       return metadata;
+    } catch {
+      return null;
     }
+  }
+  if (!file.type.startsWith("video/")) return null;
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const parsedUrl = new URL(objectUrl);
+    if (parsedUrl.protocol !== "blob:") return null;
+    const safeBlobUrl = parsedUrl.href;
     return await new Promise<BrowserMediaMetadata | null>((resolve) => {
       const video = document.createElement("video");
       video.preload = "metadata";
       video.onloadedmetadata = () => resolve({ width: video.videoWidth, height: video.videoHeight, durationSeconds: Number.isFinite(video.duration) ? Math.round(video.duration * 10) / 10 : null });
       video.onerror = () => resolve(null);
-      if (!objectUrl.startsWith("blob:")) {
-        resolve(null);
-        return;
-      }
-      video.src = objectUrl;
+      video.src = safeBlobUrl;
     });
   } catch {
     return null;

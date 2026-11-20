@@ -121,6 +121,8 @@ describe("admin email queue", () => {
     expect(harness.sender.sent).toHaveLength(1);
     const email = harness.sender.sent[0]!;
     expect(email.to).toBe("a@example.com");
+    expect(email.html).toContain("nantty-lockup.png");
+    expect(email.html).toContain("NANTTY_COMPANY_LEGAL_NAME");
     expect(email.text).toContain("Hi A,");
     expect(email.text).toMatch(/Unsubscribe: https:\/\/api\.nantty\.test\/api\/v1\/email\/unsubscribe\?token=/);
     expect(email.headers?.["List-Unsubscribe-Post"]).toBe("List-Unsubscribe=One-Click");
@@ -140,6 +142,7 @@ describe("admin email queue", () => {
     await createAdminQueue().execute({ kind: "TRANSACTIONAL", subject: "Service notice", body: "Hello {{firstName}}, scheduled maintenance tonight.", audience: { type: "SEGMENT", segmentId: "sellers" }, reason: "Maintenance", actor });
     await runJobsToCompletion();
     expect(harness.sender.sent).toHaveLength(5);
+    expect(harness.sender.sent[0]?.html).toContain("nantty-lockup.png");
     expect(harness.sender.sent[0]?.text).not.toContain("Unsubscribe");
   });
 

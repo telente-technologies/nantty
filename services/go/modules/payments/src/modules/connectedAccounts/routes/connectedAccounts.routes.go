@@ -14,12 +14,12 @@ func MountConnectedAccountsRoutes(mux *http.ServeMux, application *gateway.Appli
 	controller := controllers.ConnectedAccountsController{Application: application}
 	resources := application.Container.Resources
 	requireUser := middlewares.RequireUserAccessToken(resources.AccessVerifier)
-	requireReconcile := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionReconcileProviders, true)
+	requireReconcile := middlewares.RequireStaffWithAnyPermission(resources.StaffVerifiers, []string{constants.PermissionReconcileProviders, "payments:wallets"}, true)
 	mux.Handle("GET /api/v1/payments/connected-accounts/me", requireUser(http.HandlerFunc(controller.GetMyConnectedAccount)))
 	mux.Handle("POST /api/v1/payments/connected-accounts/me", requireUser(http.HandlerFunc(controller.CreateMyConnectedAccount)))
 	mux.Handle("POST /api/v1/payments/connected-accounts/me/onboarding-link", requireUser(http.HandlerFunc(controller.CreateMyOnboardingLink)))
-	requireAccountsAdmin := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionReconcileProviders, false)
-	requireAccountsAdminStepUp := middlewares.RequireStaffPermission(resources.StaffVerifiers, constants.PermissionReconcileProviders, true)
+	requireAccountsAdmin := middlewares.RequireStaffWithAnyPermission(resources.StaffVerifiers, []string{constants.PermissionReconcileProviders, "payments:wallets"}, false)
+	requireAccountsAdminStepUp := middlewares.RequireStaffWithAnyPermission(resources.StaffVerifiers, []string{constants.PermissionReconcileProviders, "payments:wallets"}, true)
 	mux.Handle("GET /api/v1/admin/payments/payout-accounts/stuck", requireAccountsAdmin(http.HandlerFunc(controller.AdminListStuckPayoutAccounts)))
 	mux.Handle("POST /api/v1/admin/payments/payout-accounts/jobs/{jobId}/retry", requireAccountsAdminStepUp(http.HandlerFunc(controller.AdminRetryPayoutAccountJob)))
 	mux.Handle("POST /api/v1/admin/payments/payout-accounts/{userId}/verification-prompt", requireAccountsAdminStepUp(http.HandlerFunc(controller.AdminSendVerificationPrompt)))

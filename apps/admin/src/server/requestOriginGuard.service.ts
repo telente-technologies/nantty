@@ -29,8 +29,25 @@ export function readSafeRelativeRedirectPath(candidate: string | null | undefine
   return candidate;
 }
 
+function readTrustedProxyHops(): number {
+  const configured = Number(process.env.ADMIN_TRUSTED_PROXY_HOPS ?? "1");
+  return Number.isInteger(configured) && configured >= 1 ? configured : 1;
+}
+
+export function extractTrustedClientIpFromHeaders(headers: Pick<Headers, "get">, trustedProxyHops = readTrustedProxyHops()): string {
+  const forwardedFor = headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    const entries = forwardedFor.split(",").map((entry) => entry.trim()).filter(Boolean);
+    if (entries.length > 0) {
+      const hops = Number.isInteger(trustedProxyHops) && trustedProxyHops >= 1 ? trustedProxyHops : 1;
+      return entries[Math.max(0, entries.length - hops)] ?? "";
+    }
+  }
+  return headers.get("x-real-ip")?.trim() || "";
+}
+
 export function readClientIpAddress(request: NextRequest): string {
-  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "";
+  return extractTrustedClientIpFromHeaders(request.headers);
 }
 
 export function readClientUserAgent(request: NextRequest): string {

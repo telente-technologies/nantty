@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { appendFileSync } from "node:fs";
 import { request as httpRequest } from "node:http";
 import { request as httpsRequest } from "node:https";
@@ -69,7 +69,7 @@ export function describeResponse(response: ApiResponse): string {
 }
 
 export function uniqueSuffix(): string {
-  return `${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`;
+  return `${Date.now().toString(36)}${randomBytes(4).toString("hex")}`;
 }
 
 export async function waitFor<T>(probe: () => Promise<T | undefined>, timeoutMs = 15_000, intervalMs = 300): Promise<T | undefined> {

@@ -65,9 +65,14 @@ func (controller SellerMoneyRelayController) Relay(suffix string, audit *Audited
 		}
 		for _, name := range returnedHeaders {
 			if value := response.Headers.Get(name); value != "" {
+				if strings.EqualFold(name, "Content-Type") && strings.Contains(strings.ToLower(value), "html") {
+					writer.Header().Set("Content-Type", "application/octet-stream")
+					continue
+				}
 				writer.Header().Set(name, value)
 			}
 		}
+		httpserver.EnsureSafeResponseContentType(writer)
 		writer.WriteHeader(response.Status)
 		_, _ = writer.Write(response.Body)
 	}

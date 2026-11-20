@@ -7,11 +7,31 @@ import { ModalDialog } from "@/components/ui/modalDialog";
 import { showToast } from "@/components/ui/toast";
 import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { isValidContactEmail } from "@/services/copyrightAccount.service";
-import type { AccountStrike, CopyrightNotice } from "@/types";
+import type { AccountStrike, CopyrightNotice, ModerationDecision } from "@/types";
 
 import styles from "./copyright.module.css";
 import { useAccountHealthActions } from "./accountHealth.hook";
 import { COUNTER_NOTICE_DECLARATION } from "./copyrightLegal.constant";
+
+export function AppealDecisionDialog({ decision, onClose }: { readonly decision: ModerationDecision | null; readonly onClose: () => void }) {
+  const [message, setMessage] = useState("");
+  const { appealDecision } = useAccountHealthActions();
+  const send = () =>
+    decision &&
+    appealDecision.mutate(
+      { reportId: decision.reportId, message: message.trim() },
+      { onSuccess: () => { showToast({ text: "Appeal sent. A different reviewer will look at it." }); setMessage(""); onClose(); } },
+    );
+  return (
+    <ModalDialog isOpen={!!decision} onClose={onClose} title="Appeal moderation decision" description={decision?.reason} intent="dispute"
+      footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button onClick={send} disabled={message.trim().length < 20} busy={appealDecision.isPending}>Send appeal</Button></>}>
+      <label className={styles.field}>Why should we reverse this decision?<span className={styles.hint}>At least 20 characters.</span>
+        <textarea className={styles.input} value={message} maxLength={2000} onChange={(event) => setMessage(event.target.value)} />
+      </label>
+      {appealDecision.isError ? <p className={styles.error} role="alert">{readErrorMessageForDisplay(appealDecision.error)}</p> : null}
+    </ModalDialog>
+  );
+}
 
 export function AppealStrikeDialog({ strike, onClose }: { readonly strike: AccountStrike | null; readonly onClose: () => void }) {
   const [message, setMessage] = useState("");

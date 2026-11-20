@@ -28,9 +28,9 @@ export const usersService = {
   fetchFollowStatus: (userId: string) => sendRequestToWebappServer<FollowStatus>(`/api/v1/users/${encodeURIComponent(userId)}/follow-status`),
   fetchUserIdByUsername: (username: string) => sendRequestToWebappServer<{ id: string }>(`/api/v1/users/by-username/${encodeURIComponent(username)}`),
   fetchPostsByUserId: (userId: string, cursor?: string) =>
-    sendRequestToWebappServer<Page<Post>>(`/api/v1/users/${userId}/posts`, { query: { cursor } }),
+    sendRequestToWebappServer<Page<Post>>(`/api/v1/users/${encodeURIComponent(userId)}/posts`, { query: { cursor } }),
   fetchClipsByUserId: (userId: string, cursor?: string) =>
-    sendRequestToWebappServer<Page<Clip>>(`/api/v1/users/${userId}/clips`, { query: { cursor } }),
+    sendRequestToWebappServer<Page<Clip>>(`/api/v1/users/${encodeURIComponent(userId)}/posts`, { query: { kind: "clip", cursor } }),
   updateMyProfileDetails: (update: ProfileDetailsUpdate) => sendRequestToWebappServer<User>("/api/v1/users/me", { method: "PATCH", body: update }),
   updateMyCountryPreference: (countryCode: string) => sendRequestToWebappServer<void>("/api/v1/users/me/preferences", { method: "PATCH", body: { countryCode } }),
   listSupportedCountries: () => sendListRequestToWebappServer<CountryOption>("/api/v1/locale/countries"),

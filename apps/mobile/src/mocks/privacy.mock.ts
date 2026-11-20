@@ -18,6 +18,7 @@ let consentRecord: ConsentRecord = {
   updatedAt: new Date().toISOString(),
 };
 let exportRequestedAtMs: number | null = null;
+let mockDeletionRequest: { id: string; status: "scheduled" | "cancelled"; reason: string; requestedAt: string; scheduledFor: string; cancelledAt: string | null; executedAt: null; retentionPolicy: readonly never[] } | null = null;
 export const receivedProductInteractions: ProductInteractionRecord[] = [];
 
 const describeDataExport = (): DataExportRequest => {
@@ -56,9 +57,19 @@ export const privacyMocks: MockRoute[] = [
     exportRequestedAtMs = Date.now();
     return { id: "export_mock", ...describeDataExport() };
   }),
+  createMockRoute("GET", "/api/v1/users/me/deletion-request", () => {
+    if (!mockDeletionRequest) throw new ApiError(404, "No account deletion request found", "NOT_FOUND");
+    return mockDeletionRequest;
+  }),
   createMockRoute("POST", "/api/v1/users/me/deletion-request", ({ body }) => {
     if ((body as { confirm?: boolean }).confirm !== true) throw new ApiError(422, `Type ${DELETION_CONFIRMATION_WORD} to confirm`);
-    return { id: "deletion_mock", status: "scheduled", reason: "", requestedAt: new Date().toISOString(), scheduledFor: new Date(Date.now() + DELETION_GRACE_PERIOD_MS).toISOString(), cancelledAt: null, executedAt: null, retentionPolicy: [] };
+    mockDeletionRequest = { id: "deletion_mock", status: "scheduled", reason: "", requestedAt: new Date().toISOString(), scheduledFor: new Date(Date.now() + DELETION_GRACE_PERIOD_MS).toISOString(), cancelledAt: null, executedAt: null, retentionPolicy: [] };
+    return mockDeletionRequest;
+  }),
+  createMockRoute("POST", "/api/v1/users/me/deletion-request/cancel", () => {
+    if (!mockDeletionRequest || mockDeletionRequest.status !== "scheduled") throw new ApiError(404, "No pending deletion request found", "NOT_FOUND");
+    mockDeletionRequest = { ...mockDeletionRequest, status: "cancelled", cancelledAt: new Date().toISOString() };
+    return mockDeletionRequest;
   }),
   createMockRoute("POST", "/api/v1/analytics/product-interactions", ({ body }) => {
     receivedProductInteractions.push(...((body as { events: ProductInteractionRecord[] }).events ?? []));

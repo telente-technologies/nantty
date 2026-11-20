@@ -3,6 +3,7 @@ import type { ConnectionEntry, ConnectionTab, FollowRequest } from "@/types/acco
 import type { Page, PostNotificationLevel, User } from "@/types";
 import { sortPinnedPostsFirst } from "@/utils/profileContent.util";
 
+import { pageOfMockClipsByAuthor } from "./clips.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { SIGNED_IN_BUYER, mockOrderRecords } from "./orderFixtures.mock";
 import { listPostsByAuthor, mockPostsState, withCurrentProductPrices } from "./postCatalog.mock";
@@ -112,10 +113,13 @@ export const usersMocks: MockRoute[] = [
     if (!user) throw new ApiError(404, "This account doesn't exist");
     return { ...user, isFollowing: followedUserIds.has(user.id), followers: user.followers + (followedUserIds.has(user.id) ? 1 : 0) };
   }),
-  createMockRoute("GET", "/api/v1/users/:userId/posts", ({ params }) => ({
-    data: sortPinnedPostsFirst(listPostsByAuthor(params.userId!)).map(withCurrentProductPrices),
-    nextCursor: null,
-  })),
+  createMockRoute("GET", "/api/v1/users/:userId/posts", ({ params, query }) => {
+    if (query.get("kind") === "clip") return pageOfMockClipsByAuthor(params.userId!, query.get("cursor"));
+    return {
+      data: sortPinnedPostsFirst(listPostsByAuthor(params.userId!)).map(withCurrentProductPrices),
+      nextCursor: null,
+    };
+  }),
   createMockRoute("GET", "/api/v1/users/:userId/connections", ({ query }) => listConnections((query.get("tab") as ConnectionTab) ?? "followers")),
   createMockRoute("GET", "/api/v1/users/:userId/followers", ({ query }) => pageOfConnections(listConnections("followers"), query.get("q"), query.get("cursor"))),
   createMockRoute("GET", "/api/v1/users/:userId/following", ({ query }) => pageOfConnections(listConnections("following"), query.get("q"), query.get("cursor"))),

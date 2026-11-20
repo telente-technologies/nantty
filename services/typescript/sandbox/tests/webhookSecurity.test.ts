@@ -54,7 +54,10 @@ describe("sandbox webhook destination security", () => {
       [{ address: "fe80::1", family: 6 }],
       [{ address: "fc00::1", family: 6 }],
       [{ address: "2001:db8::1", family: 6 }],
+      [{ address: "2001::1", family: 6 }],
+      [{ address: "2002::1", family: 6 }],
       [{ address: "::ffff:7f00:1", family: 6 }],
+      [{ address: "::ffff:127.0.0.1", family: 6 }],
     ]) {
       await expect(resolvePublicWebhookTarget("https://hooks.example.org/events", async () => records)).rejects.toMatchObject({ code: "WEBHOOK_HOST_NOT_PUBLIC" });
     }

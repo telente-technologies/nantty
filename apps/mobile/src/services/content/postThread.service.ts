@@ -1,9 +1,10 @@
+import { createSecureRandomHex } from "@/utils/secureRandomId.util";
 import type { ID, Page } from "@/types";
 import { THREAD_AD_SLOT_KIND, type CommentSectionFilter, type CommentThreadPage, type QuoteThreadItem, type ThreadAdDecision, type ThreadReply, type ThreadSort } from "@/types/postThread.type";
 
 import { api } from "../core/apiClient.service";
 
-const adSessionId = `ads_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+const adSessionId = `ads_${Date.now().toString(36)}_${createSecureRandomHex(6)}`;
 
 export const postThreadService = {
   fetchConversation: (postId: ID, sort: ThreadSort, cursor?: string, filter: CommentSectionFilter = "all") =>

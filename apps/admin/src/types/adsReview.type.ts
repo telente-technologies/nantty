@@ -41,6 +41,21 @@ export interface AdForReviewDetail extends AdForReview {
   readonly history: readonly AuditLogEntry[];
 }
 
+export interface AdFrequencyPolicy {
+  readonly format: string;
+  readonly sessionCap: number;
+  readonly hourCap: number;
+  readonly dayCap: number;
+  readonly advertiserDayCap: number;
+  readonly minGapSlots: number;
+  readonly cooldownSecondsAfterSkip: number;
+  readonly active: boolean;
+}
+
+export interface AdPoliciesDocument {
+  readonly frequency: readonly AdFrequencyPolicy[];
+}
+
 export type AdvertiserStatus = "ACTIVE" | "SUSPENDED";
 
 export interface AdvertiserAccount {

@@ -107,12 +107,8 @@ func (handler Handler) Execute(ctx context.Context, command Command) (string, er
 	}); err != nil {
 		return "", err
 	}
-	if _, expiresAt, err := services.IssueInstitutionalEmailOtp(ctx, handler.Container, created.ID, owner, institutionalEmail); err == nil {
-		_ = handler.Container.RunInTransaction(ctx, func(tx *ent.Tx) error {
-			return usersevents.EnqueueOutboxEventInTransaction(ctx, tx, "blackApplication.institutionalEmailOtpRequested", created.ID.String(), handler.Container.Now(), map[string]any{
-				"applicationId": created.ID.String(), "accountId": owner.String(), "email": institutionalEmail, "expiresAt": expiresAt.UTC().Format("2006-01-02T15:04:05Z07:00"),
-			})
-		})
+	if otpCode, expiresAt, err := services.IssueInstitutionalEmailOtp(ctx, handler.Container, created.ID, owner, institutionalEmail); err == nil {
+		_ = services.EnqueueInstitutionalEmailOtpEvents(ctx, handler.Container, created.ID, owner, institutionalEmail, otpCode, expiresAt)
 	}
 	return created.ID.String(), nil
 }
