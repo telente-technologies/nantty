@@ -53,6 +53,8 @@ export function PortalShell({ children }: { readonly children: ReactNode }) {
           <div className={styles.topbarLeading}>
             <span className={styles.environment}>Test environment · isolated</span>
             <div className={styles.topbarActions}>
+              <a className={styles.publicSiteLink} href={`${readDeveloperPortalUrl()}/docs`}>API Docs <span aria-hidden="true">↗</span></a>
+              <a className={styles.publicSiteLink} href={`${readDeveloperPortalUrl()}/login`}>Sign in <span aria-hidden="true">↗</span></a>
               <a className={styles.publicSiteLink} href={readNanttyWebUrl()}>Nantty.com <span aria-hidden="true">↗</span></a>
               <ThemeSwitcher iconOnly label="Colour theme" className={styles.desktopThemeSwitcher} />
               <button

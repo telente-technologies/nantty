@@ -8,7 +8,7 @@ export class PreviewAdminEmailHandler {
   public async execute(query: PreviewAdminEmailQuery) {
     const marketing = query.kind === "MARKETING";
     const plan = await this.planner.plan(query.audience, marketing ? "marketing" : "transactional");
-    const rendered = renderAdminMessage({ subject: query.subject, body: query.body, firstName: "{{firstName}}", marketing, unsubscribeUrl: "{{unsubscribeUrl}}" });
+    const rendered = await renderAdminMessage({ subject: query.subject, body: query.body, firstName: "{{firstName}}", marketing, unsubscribeUrl: "{{unsubscribeUrl}}" });
     return {
       recipientCount: plan.eligibleCount,
       skippedNoMarketingConsent: plan.skippedNoMarketingConsent,

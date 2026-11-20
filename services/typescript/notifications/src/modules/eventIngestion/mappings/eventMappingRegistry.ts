@@ -11,6 +11,7 @@ import * as logistics from "./logistics.mapping.js";
 import * as orders from "./orders.mapping.js";
 import * as social from "./social.mapping.js";
 import * as storeActivity from "./storeActivity.mapping.js";
+import * as storeRewards from "./storeRewards.mapping.js";
 import * as subscriptionBilling from "./subscriptionBilling.mapping.js";
 import * as subscriptionOffers from "./subscriptionOffers.mapping.js";
 import * as support from "./support.mapping.js";
@@ -37,6 +38,7 @@ export const eventMappings: Readonly<Record<string, EventMapping>> = {
   "order.delivered": orders.orderDelivered,
   "order.completed": orders.orderCompleted,
   "order.cancelled": orders.orderCancelled,
+  "storeCredit.earned": storeRewards.storeCreditEarned,
   "delivery.partnerBookingConfirmed": logistics.partnerBookingConfirmed,
   "delivery.partnerBookingFailed": logistics.partnerBookingFailed,
   "delivery.pickedUp": logistics.partnerPickedUp,
