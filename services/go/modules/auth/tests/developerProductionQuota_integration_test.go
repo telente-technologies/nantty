@@ -51,7 +51,7 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 	db.SetMaxOpenConns(8)
 	for _, statement := range []string{
 		`CREATE TABLE developer_organizations (id uuid PRIMARY KEY)`,
-		`CREATE TABLE developer_billing_subscriptions (organization_id uuid PRIMARY KEY, plan_tier text, status text, monthly_quota bigint, current_period_end timestamptz, provider_reference text, updated_at timestamptz)`,
+		`CREATE TABLE developer_billing_subscriptions (organization_id uuid PRIMARY KEY, plan_tier text, status text, monthly_quota bigint, current_period_end timestamptz, provider_reference text, payment_verified_at timestamptz, updated_at timestamptz)`,
 		`CREATE TABLE developer_production_requests (id uuid PRIMARY KEY, application_id uuid, organization_id uuid, credential_id uuid, method text, path text, status_code integer, latency_ms integer, created_at timestamptz)`,
 		`CREATE TABLE developer_business_messages (id uuid PRIMARY KEY, organization_id uuid, application_id uuid, credential_id uuid, recipient_account_id uuid, body_text text, status text, idempotency_key varchar(128), request_hash varchar(64), external_message_id text, created_at timestamptz, updated_at timestamptz, UNIQUE (application_id, idempotency_key))`,
 	} {
@@ -76,9 +76,15 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := production.ReserveProductionRequest(ctx, db, org, app, cred, "GET", "/api/v1/business/conversations"); !errors.Is(err, httpserver.NewApiError(http.StatusPaymentRequired, "PAYMENT_VERIFICATION_REQUIRED", "")) {
-		t.Fatalf("paid subscription without a verified provider reference must reject production request, got %v", err)
+		t.Fatalf("paid subscription without verified settlement evidence must reject production request, got %v", err)
 	}
 	if _, err := db.ExecContext(ctx, `UPDATE developer_billing_subscriptions SET provider_reference = 'verified-reference' WHERE organization_id = $1`, org); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := production.ReserveProductionRequest(ctx, db, org, app, cred, "GET", "/api/v1/business/conversations"); !errors.Is(err, httpserver.NewApiError(http.StatusPaymentRequired, "PAYMENT_VERIFICATION_REQUIRED", "")) {
+		t.Fatalf("a reference string without verified settlement must reject production access, got %v", err)
+	}
+	if _, err := db.ExecContext(ctx, `UPDATE developer_billing_subscriptions SET payment_verified_at = now() WHERE organization_id = $1`, org); err != nil {
 		t.Fatal(err)
 	}
 	var wg sync.WaitGroup
@@ -205,7 +211,7 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 	if err != nil || !confirmed.Replay || confirmed.Status != "dispatched" || confirmed.ExternalMessageId != "external-1" {
 		t.Fatalf("confirmed replay: %+v, %v", confirmed, err)
 	}
-	if _, err := db.ExecContext(ctx, `UPDATE developer_billing_subscriptions SET provider_reference = 'paid-reference' WHERE organization_id = $1`, org); err != nil {
+	if _, err := db.ExecContext(ctx, `UPDATE developer_billing_subscriptions SET provider_reference = 'paid-reference', payment_verified_at = now() WHERE organization_id = $1`, org); err != nil {
 		t.Fatal(err)
 	}
 	if err := production.SetSandboxBilling(ctx, db, org, 10000); err != nil {

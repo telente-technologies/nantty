@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 
 	"nantty/modules/auth/src/container"
+	developerproduction "nantty/modules/auth/src/modules/developerProduction"
 	"nantty/platform/httpserver"
 	"nantty/platform/identityports"
 	"nantty/platform/jwtauth"
@@ -162,9 +163,9 @@ func (controller Controller) UpdateQuota(writer http.ResponseWriter, request *ht
 	defer tx.Rollback()
 	var planTier, status string
 	var previousQuota int64
-	var periodEnd sql.NullTime
+	var periodEnd, paymentVerifiedAt sql.NullTime
 	var providerReference sql.NullString
-	err = tx.QueryRowContext(request.Context(), `SELECT plan_tier, status, monthly_quota, current_period_end, provider_reference FROM developer_billing_subscriptions WHERE organization_id = $1 FOR UPDATE`, orgId).Scan(&planTier, &status, &previousQuota, &periodEnd, &providerReference)
+	err = tx.QueryRowContext(request.Context(), `SELECT plan_tier, status, monthly_quota, current_period_end, provider_reference, payment_verified_at FROM developer_billing_subscriptions WHERE organization_id = $1 FOR UPDATE`, orgId).Scan(&planTier, &status, &previousQuota, &periodEnd, &providerReference, &paymentVerifiedAt)
 	if err == sql.ErrNoRows {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusNotFound, "BILLING_SUBSCRIPTION_NOT_FOUND", "No existing developer subscription is available for a quota adjustment."))
 		return
@@ -173,8 +174,8 @@ func (controller Controller) UpdateQuota(writer http.ResponseWriter, request *ht
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
-	if planTier == "sandbox" || status != "active" || !periodEnd.Valid || !periodEnd.Time.After(controller.Container.Now().UTC()) || !providerReference.Valid || strings.TrimSpace(providerReference.String) == "" {
-		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusConflict, "SUBSCRIPTION_NOT_ACTIVE", "Quota adjustments require an existing active paid subscription."))
+	if !developerproduction.IsVerifiedPaidSubscription(planTier, status, periodEnd, paymentVerifiedAt, providerReference, controller.Container.Now().UTC()) {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusConflict, "SUBSCRIPTION_NOT_ACTIVE", "Quota adjustments require an existing verified active paid subscription."))
 		return
 	}
 	_, err = tx.ExecContext(request.Context(), `UPDATE developer_billing_subscriptions SET monthly_quota = $2, updated_at = now() WHERE organization_id = $1`, orgId, body.MonthlyQuota)

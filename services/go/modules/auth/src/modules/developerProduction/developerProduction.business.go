@@ -80,18 +80,18 @@ func (controller Controller) GetBilling(writer http.ResponseWriter, request *htt
 		return
 	}
 	view := BillingView{OrganizationId: orgUUID.String(), PlanTier: "sandbox", Status: "active", MonthlyQuota: 10000}
-	var periodEnd sql.NullTime
+	var periodEnd, paymentVerifiedAt sql.NullTime
 	var providerReference sql.NullString
 	if err := controller.Container.Database.QueryRowContext(request.Context(),
-		`SELECT plan_tier, status, monthly_quota, current_period_end, provider_reference FROM developer_billing_subscriptions WHERE organization_id = $1`, orgUUID,
-	).Scan(&view.PlanTier, &view.Status, &view.MonthlyQuota, &periodEnd, &providerReference); err != nil && err != sql.ErrNoRows {
+		`SELECT plan_tier, status, monthly_quota, current_period_end, provider_reference, payment_verified_at FROM developer_billing_subscriptions WHERE organization_id = $1`, orgUUID,
+	).Scan(&view.PlanTier, &view.Status, &view.MonthlyQuota, &periodEnd, &providerReference, &paymentVerifiedAt); err != nil && err != sql.ErrNoRows {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
 	if periodEnd.Valid {
 		view.CurrentPeriodEnd = &periodEnd.Time
 	}
-	view.Status = EffectiveBillingStatus(view.PlanTier, view.Status, view.CurrentPeriodEnd, providerReference.String, time.Now().UTC())
+	view.Status = EffectiveBillingStatus(view.PlanTier, view.Status, periodEnd, paymentVerifiedAt, providerReference, time.Now().UTC())
 	view.UsedThisMonth, err = ProductionUsageCount(request.Context(), controller.Container.Database, orgUUID)
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)

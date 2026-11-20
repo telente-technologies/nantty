@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"log/slog"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -39,22 +38,23 @@ func ReserveProductionRequest(ctx context.Context, db *sql.DB, orgId, appId, cre
 func reserveProductionRequestTx(ctx context.Context, tx *sql.Tx, orgId, appId, credId uuid.UUID, method, path string) (uuid.UUID, error) {
 	var quota int64
 	var tier, status string
-	var periodEnd sql.NullTime
+	var periodEnd, paymentVerifiedAt sql.NullTime
 	var providerReference sql.NullString
 	err := tx.QueryRowContext(ctx,
-		`SELECT plan_tier, status, monthly_quota, current_period_end, provider_reference FROM developer_billing_subscriptions WHERE organization_id = $1`, orgId,
-	).Scan(&tier, &status, &quota, &periodEnd, &providerReference)
+		`SELECT plan_tier, status, monthly_quota, current_period_end, provider_reference, payment_verified_at FROM developer_billing_subscriptions WHERE organization_id = $1`, orgId,
+	).Scan(&tier, &status, &quota, &periodEnd, &providerReference, &paymentVerifiedAt)
 	if err != nil && err != sql.ErrNoRows {
 		return uuid.Nil, err
 	}
 	if err == sql.ErrNoRows || tier == "sandbox" {
 		return uuid.Nil, httpserver.NewApiError(http.StatusPaymentRequired, "PRODUCTION_PLAN_REQUIRED", "An active production plan is required for live API requests.")
 	}
-	if status != "active" || !periodEnd.Valid || !periodEnd.Time.After(time.Now()) {
+	now := time.Now().UTC()
+	if status != "active" || !periodEnd.Valid || !periodEnd.Time.After(now) {
 		return uuid.Nil, httpserver.NewApiError(http.StatusPaymentRequired, "SUBSCRIPTION_INACTIVE", "Production API subscription is inactive or expired.")
 	}
-	if !providerReference.Valid || strings.TrimSpace(providerReference.String) == "" {
-		return uuid.Nil, httpserver.NewApiError(http.StatusPaymentRequired, "PAYMENT_VERIFICATION_REQUIRED", "Production access requires a provider payment reference.")
+	if !IsVerifiedPaidSubscription(tier, status, periodEnd, paymentVerifiedAt, providerReference, now) {
+		return uuid.Nil, httpserver.NewApiError(http.StatusPaymentRequired, "PAYMENT_VERIFICATION_REQUIRED", "Production access requires a verified provider settlement.")
 	}
 	var used int64
 	var resetAt time.Time

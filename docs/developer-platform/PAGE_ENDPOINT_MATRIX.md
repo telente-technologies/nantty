@@ -15,7 +15,7 @@
 | `/credentials` | Sandbox and production key lifecycle, including production rotation; secret is shown only at creation/rotation | `/api/developer/credentials*` (Sandbox) & `/api/developer/organizations/{orgId}/applications/{appId}/credentials*` (Prod) | Prod requires `status = approved`; capability and member grant enforced; rotation revokes/reissues atomically and writes an organization audit record | `IMPLEMENTED_UNVERIFIED` |
 | `/webhooks` | Sandbox & Prod webhooks (`/verify`, `/rotate-secret`) | `/api/developer/webhooks*` & `/api/developer/organizations/{orgId}/applications/{appId}/webhooks*` | Prod requires `status = approved` + challenge | `IMPLEMENTED_UNVERIFIED` |
 | `/requests`, `/usage` | Redacted request logs & monthly quota utilization | `/api/developer/{requests,usage}` & Prod `/requests`, `/usage` | Org membership + app grant | `IMPLEMENTED_UNVERIFIED` |
-| `/billing` | Org quota tier inspection & upgrade | `GET/POST /api/developer/organizations/{orgId}/billing(/checkout)` | Org membership + `developer_billing_subscriptions` | `IMPLEMENTED_UNVERIFIED` |
+| `/billing` | Organization billing status and Sandbox selection; paid checkout unavailable pending verified settlement integration | `GET/POST /api/developer/organizations/{orgId}/billing(/checkout)` | Org billing capability + `developer_billing_subscriptions`; paid production requires verified settlement evidence | `IMPLEMENTED_UNVERIFIED` |
 | `/businesses`, `/audit-logs`, `/sandbox` | App member grants, audit trail & Sandbox bridge | `/applications/{appId}/members`, `/audit-log`, `NEXT_PUBLIC_SANDBOX_PORTAL_URL` | Org membership | `IMPLEMENTED_UNVERIFIED` |
 
 ## Production Business Messaging & Admin & Seller APIs

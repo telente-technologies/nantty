@@ -19,14 +19,22 @@ func SetSandboxBilling(ctx context.Context, db *sql.DB, orgId uuid.UUID, quota i
 	return err
 }
 
-func EffectiveBillingStatus(tier, status string, periodEnd *time.Time, providerReference string, now time.Time) string {
+func IsVerifiedPaidSubscription(tier, status string, periodEnd, paymentVerifiedAt sql.NullTime, providerReference sql.NullString, now time.Time) bool {
+	return tier != "sandbox" &&
+		status == "active" &&
+		periodEnd.Valid && periodEnd.Time.After(now) &&
+		paymentVerifiedAt.Valid && !paymentVerifiedAt.Time.After(now.Add(5*time.Minute)) &&
+		providerReference.Valid && strings.TrimSpace(providerReference.String) != ""
+}
+
+func EffectiveBillingStatus(tier, status string, periodEnd, paymentVerifiedAt sql.NullTime, providerReference sql.NullString, now time.Time) string {
 	if status != "active" || tier == "sandbox" {
 		return status
 	}
-	if periodEnd == nil || !periodEnd.After(now) {
+	if !periodEnd.Valid || !periodEnd.Time.After(now) {
 		return "expired"
 	}
-	if strings.TrimSpace(providerReference) == "" {
+	if !IsVerifiedPaidSubscription(tier, status, periodEnd, paymentVerifiedAt, providerReference, now) {
 		return "payment_unverified"
 	}
 	return status
