@@ -171,4 +171,16 @@ describe("BFF enforcement (forged calls)", () => {
     const result = await callBff(session, "GET", "/admin/users");
     assert.deepEqual([result.status, result.code], [401, "SESSION_PRIVILEGES_CHANGED"]);
   });
+
+  it("enforces no-store and locked-down CSP headers on /bff/:path*", async () => {
+    const { default: nextConfig } = await import("../../next.config");
+    const rules = await nextConfig.headers?.();
+    const bffRule = rules?.find((rule) => rule.source === "/bff/:path*");
+    assert.ok(bffRule, "expected /bff/:path* header rule in apps/admin/next.config.ts");
+    assert.equal(bffRule.headers.find((header) => header.key === "Cache-Control")?.value, "no-store");
+    assert.equal(
+      bffRule.headers.find((header) => header.key === "Content-Security-Policy")?.value,
+      "default-src 'none'; frame-ancestors 'none'",
+    );
+  });
 });

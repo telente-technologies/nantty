@@ -113,7 +113,14 @@ func (billing Billing) settlePeriodInTransaction(ctx context.Context, transactio
 		if appErr != nil {
 			return appErr
 		}
-		if found && app.Status != "approved" {
+		if !found || app.Status != "approved" || !app.InstitutionalEmailVerified {
+			if found && app.Status == "revoked" {
+				row, err = row.Update().SetStatus(subscription.StatusCanceled).SetEndedReason("verification_revoked").SetCancelAtPeriodEnd(false).ClearNextChargeAt().SetLastError("Government verification was revoked.").AddVersion(1).Save(ctx)
+				if err != nil {
+					return err
+				}
+				return billing.emit(ctx, transaction, "entitlement.revoked", row.ProfileID, entitlementData(row, string(subscription.StatusCanceled)))
+			}
 			row, err = row.Update().SetStatus(subscription.StatusPaused).ClearNextChargeAt().SetLastError("Government verification is not approved.").AddVersion(1).Save(ctx)
 			if err != nil {
 				return err

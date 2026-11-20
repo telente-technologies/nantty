@@ -9,6 +9,7 @@ import { DeleteAccountSection } from "@/components/settings/deleteAccountSection
 import { DownloadPrivacySection } from "@/components/settings/downloadPrivacySection";
 import { MentionPrivacySection } from "@/components/settings/mentionPrivacySection";
 import { ProfileVisibilitySection } from "@/components/settings/profileVisibilitySection";
+import { TaggingPrivacySection } from "@/components/settings/taggingPrivacySection";
 import styles from "@/components/settings/settings.module.css";
 import { legalLinks } from "@/config/legalLinks.config";
 import { IconLabel } from "@/components/ui/appIcon";
@@ -25,6 +26,7 @@ export default function PrivacyAndDataPage() {
       <div id="privacy-controls" className={styles.page}>
         <ProfileVisibilitySection />
         <MentionPrivacySection />
+        <TaggingPrivacySection />
         <DownloadPrivacySection />
         <BirthdayBalloonsSection />
         <ContentPreferencesSection />

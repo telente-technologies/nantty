@@ -240,3 +240,32 @@ export async function forwardDeveloperUsernameAvailabilityRequest(request: NextR
     return jsonResponse(503, { code: "IDENTITY_UNAVAILABLE", message: "Username check is temporarily unavailable." });
   }
 }
+
+export async function forwardDeveloperLogoutRequest(request: NextRequest): Promise<NextResponse> {
+  const csrfFailure = verifyMutationOrigin(request);
+  if (csrfFailure) return csrfFailure;
+
+  const cookieName = accessCookieName();
+  const token = request.cookies.get(cookieName)?.value?.trim();
+  const baseUrl = readApiBaseUrl();
+  if (token && baseUrl) {
+    try {
+      await fetch(new URL("/api/v1/auth/logout", baseUrl), {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          authorization: `Bearer ${token}`,
+        },
+        cache: "no-store",
+        redirect: "error",
+        signal: AbortSignal.timeout(5_000),
+      });
+    } catch {
+      // Best-effort upstream revocation: always clear the local cookie so the browser ends the session.
+    }
+  }
+
+  const response = jsonResponse(200, { signedOut: true });
+  response.cookies.delete(cookieName);
+  return response;
+}

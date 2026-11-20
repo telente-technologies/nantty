@@ -20,6 +20,8 @@ export const reportsApi = {
     sendAdsApiRequest<ReportResponse>(buildAccountApiPath(accountId, "/reports"), { query: convertReportQueryToSearchParameters(query), signal }),
   exportReportAsCsv: (accountId: string, query: ReportQuery, columns: readonly MetricKey[]) =>
     sendAdsApiRequest<Blob>(buildAccountApiPath(accountId, "/reports/export"), { query: { ...convertReportQueryToSearchParameters(query), columns }, expect: "blob" }),
+  exportReportAsPdf: (accountId: string, query: ReportQuery, columns: readonly MetricKey[]) =>
+    sendAdsApiRequest<Blob>(buildAccountApiPath(accountId, "/reports/export.pdf"), { query: { ...convertReportQueryToSearchParameters(query), columns }, expect: "blob" }),
   listScheduledReports: (accountId: string) => sendAdsApiRequest<Page<ScheduledReport>>(buildAccountApiPath(accountId, "/reports/scheduled")),
   createScheduledReport: (accountId: string, input: ScheduledReportInput) =>
     sendAdsApiRequest<ScheduledReport>(buildAccountApiPath(accountId, "/reports/scheduled"), { method: "POST", body: input }),

@@ -128,6 +128,20 @@ export const searchMocks: MockRoute[] = [
     const start = Number(query.get("cursor") ?? 0) || 0;
     return { data: items.slice(start, start + PAGE_SIZE), nextCursor: start + PAGE_SIZE < items.length ? String(start + PAGE_SIZE) : null, scope };
   }),
+  createMockRoute("GET", "/api/v1/search/suggest", ({ query }) => {
+    const term = (query.get("q") ?? "").trim().toLowerCase();
+    if (term === "") return { data: [] };
+    const suggestKinds = new Set(["user", "store", "brand", "product", "hashtag", "category"]);
+    const data = searchMockCatalog(term, "global")
+      .filter((item) => suggestKinds.has(item.type))
+      .slice(0, 8)
+      .map((item) => ({
+        type: item.type,
+        id: item.id,
+        text: "name" in item ? item.name : "tag" in item ? `#${item.tag}` : "",
+      }));
+    return { data };
+  }),
   createMockRoute("GET", "/api/v1/search/recent", ({ query }) => {
     const scope = readScope(query.get("scope"));
     return { data: recentSearches.filter((entry) => entry.scope === scope), nextCursor: null };

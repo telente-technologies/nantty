@@ -134,9 +134,17 @@ describe("scheduled post creation and publication", () => {
 
     expect(definitions).toHaveLength(5);
     expect(definitions.every((definition) => definition.authentication === "required")).toBe(true);
-    expect(authorWhere).toHaveLength(5);
+    expect(authorWhere).toHaveLength(6);
     expect(authorWhere.every((where) => where["authorId"] === viewerId)).toBe(true);
     expect(authorWhere.slice(1).every((where) => where["id"] === targetId && where["publicationState"] !== undefined)).toBe(true);
+
+    const deniedContext = {
+      database: { client: { post } },
+      clock: { now: () => now },
+      premium: { canSchedulePosts: vi.fn(async () => false) },
+    } as never;
+    const deniedController = createScheduledPostsController(route, deniedContext);
+    await expect((deniedController.publishNow as unknown as (input: unknown) => Promise<unknown>)(request)).rejects.toMatchObject({ code: "PAID_SCHEDULING_REQUIRED" });
   });
 
   it("isolates per-post transactions and cancels posts hidden by moderation before publication", async () => {

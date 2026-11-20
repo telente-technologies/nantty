@@ -266,6 +266,7 @@ export const upstreamRoutes: readonly UpstreamRoute[] = [
   { pathPrefix: "/api/v1/admin/ip-claims", upstream: "trust", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/live-incidents", upstream: "trust", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/security/", upstream: "trust", authentication: "optional" },
+  { pathPrefix: "/api/v1/admin/analytics/", upstream: "commerce", authentication: "optional", methods: ["GET"] },
   { pathPrefix: "/api/v1/admin/finance/", upstream: "identity", authentication: "optional" },
   { pathPrefix: "/api/v1/admin/", upstream: "identity", authentication: "optional" },
 ];

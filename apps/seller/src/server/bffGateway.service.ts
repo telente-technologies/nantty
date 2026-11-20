@@ -21,7 +21,7 @@ const maximumForwardedBodyBytes = 12 * 1024 * 1024;
 const forwardedRequestHeaderNames = ["idempotency-key", "x-chunk-sha256", "if-match", "x-step-up-token"];
 const longForwardedHeaderNames = new Set(["x-step-up-token"]);
 const returnedResponseHeaderNames = ["content-type", "content-disposition", "idempotent-replayed", "retry-after", "etag", "x-request-id"];
-export const allowedApiPathPattern = /^\/(seller|media|chat\/keys)(\/[A-Za-z0-9._~:@%-]+)+$|^\/chat\/content$|^\/payments\/(payout-onboarding\/me(\/[A-Za-z0-9._~:@%-]+)*|payout-fees|wallet\/me|verification\/me)$|^\/wallets\/me$/;
+export const allowedApiPathPattern = /^\/(seller|media|chat\/keys)(\/[A-Za-z0-9._~:@%-]+)+$|^\/chat\/content$|^\/analytics\/seller\/summary$|^\/payments\/(payout-onboarding\/me(\/[A-Za-z0-9._~:@%-]+)*|payout-fees|wallet\/me|verification\/me)$|^\/wallets\/me$/;
 const readOnlyAccountApiPaths: ReadonlySet<string> = new Set(["/account/status", "/subscriptions/gold-for-businesses"]);
 const accountWriteApiCalls: ReadonlySet<string> = new Set(["PATCH /users/me/preferences", "PUT /users/me/consents", "POST /auth/step-up", "POST /auth/otp/send", "POST /auth/otp/verify"]);
 const brandSellingApiPattern = /^\/brands\/[A-Za-z0-9-]+$/;
@@ -98,7 +98,8 @@ export async function forwardBffRequestToSellerApi(request: NextRequest, pathSeg
     const headerValue = request.headers.get(headerName);
     if (headerValue && headerValue.length <= (longForwardedHeaderNames.has(headerName) ? 4096 : 256)) forwardedHeaders[headerName] = headerValue;
   }
-  const clientAddress = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const forwardedParts = request.headers.get("x-forwarded-for")?.split(",").map((entry) => entry.trim()).filter(Boolean);
+  const clientAddress = forwardedParts?.at(-1) || request.headers.get("x-real-ip")?.trim();
   if (clientAddress) forwardedHeaders["X-Forwarded-For"] = clientAddress;
 
   let accessToken = renewedSession?.tokens?.accessToken ?? tokens.accessToken;

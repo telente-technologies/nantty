@@ -114,3 +114,44 @@ export interface FinanceReportsCatalog {
   readonly reports: readonly FinanceReportSummary[];
   readonly recent: readonly FinanceExportRecord[];
 }
+
+export interface StuckPayoutAccount {
+  readonly userId: string;
+  readonly account: {
+    readonly status: string;
+    readonly verificationStatus?: string;
+    readonly provider?: string;
+    readonly updatedAt?: string;
+  };
+  readonly jobs: readonly {
+    readonly id: string;
+    readonly jobType?: string;
+    readonly status: string;
+    readonly lastError?: string | null;
+  }[];
+}
+
+export interface SellerReserveHold {
+  readonly sellerUserId: string;
+  readonly reserveBps: number;
+  readonly holdDays: number;
+  readonly reason: string;
+  readonly flaggedBy: string;
+  readonly createdAt: string;
+  readonly releasedAt: string | null;
+}
+
+export interface ProviderBalanceBreak {
+  readonly currency: string;
+  readonly providerMinor: number;
+  readonly ledgerMinor: number;
+}
+
+export interface ProviderMirrorReport {
+  readonly accountsChecked: number;
+  readonly pendingIntentsVerified: number;
+  readonly transfersConfirmed: number;
+  readonly directChargesSettled: number;
+  readonly balanceBreaks: readonly ProviderBalanceBreak[];
+  readonly failures: number;
+}

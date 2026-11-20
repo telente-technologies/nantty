@@ -4,6 +4,7 @@ import { afterEach, test } from "node:test";
 import { NextRequest } from "next/server";
 
 import {
+  forwardDeveloperLogoutRequest,
   forwardDeveloperPasswordLoginRequest,
   forwardDeveloperRegisterRequest,
   forwardDeveloperUsernameAvailabilityRequest,
@@ -134,4 +135,38 @@ test("username availability checks upstream Identity endpoint", async () => {
   assert.equal(response.status, 200);
   assert.equal(capturedQuery, "?username=ada.dev&name=Ada");
   assert.deepEqual(await response.json(), { available: true });
+});
+
+test("logout rejects cross-site mutations and revokes the upstream Identity session before clearing the cookie", async () => {
+  setNodeEnvironment("production");
+  process.env.DEVELOPER_API_BASE_URL = "https://identity.nantty.test";
+  let capturedAuth = "";
+  let capturedPath = "";
+  globalThis.fetch = async (input, init) => {
+    capturedPath = new URL(typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url).pathname;
+    capturedAuth = new Headers(init?.headers).get("authorization") ?? "";
+    return Response.json({ revoked: true });
+  };
+
+  const crossSite = new NextRequest("https://developers.nantty.test/api/auth/logout", {
+    method: "POST",
+    headers: { origin: "https://developers.nantty.test", "sec-fetch-site": "cross-site" },
+  });
+  const blocked = await forwardDeveloperLogoutRequest(crossSite);
+  assert.equal(blocked.status, 403);
+  assert.equal(capturedPath, "");
+
+  const valid = new NextRequest("https://developers.nantty.test/api/auth/logout", {
+    method: "POST",
+    headers: {
+      origin: "https://developers.nantty.test",
+      "sec-fetch-site": "same-origin",
+      cookie: "__Host-zd_at=active-jwt-token",
+    },
+  });
+  const response = await forwardDeveloperLogoutRequest(valid);
+  assert.equal(response.status, 200);
+  assert.equal(capturedPath, "/api/v1/auth/logout");
+  assert.equal(capturedAuth, "Bearer active-jwt-token");
+  assert.match(response.headers.get("set-cookie") ?? "", /__Host-zd_at=;/);
 });

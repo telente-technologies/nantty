@@ -15,9 +15,15 @@ export interface ScheduledPostsPage {
   readonly nextCursor: string | null;
 }
 
+export interface UpdateScheduledPostContentInput {
+  readonly text: string;
+}
+
 export const scheduledPostsService = {
   list: (cursor?: string) => sendRequestToWebappServer<ScheduledPostsPage>("/api/v1/posts/scheduled", { query: { cursor, limit: 20 } }),
   reschedule: (postId: string, scheduledAt: string) => sendRequestToWebappServer<{ readonly id: string; readonly scheduledAt: string; readonly status: "scheduled" }>(`/api/v1/posts/${encodeURIComponent(postId)}/schedule`, { method: "PATCH", body: { scheduledAt } }),
+  editContent: (postId: string, input: UpdateScheduledPostContentInput) =>
+    sendRequestToWebappServer<ScheduledPostSummary>(`/api/v1/posts/${encodeURIComponent(postId)}/schedule/content`, { method: "PATCH", body: input }),
   publishNow: (postId: string) => sendRequestToWebappServer<{ readonly id: string; readonly scheduledAt: string; readonly status: "publishing" }>(`/api/v1/posts/${encodeURIComponent(postId)}/schedule/publish-now`, { method: "POST", body: {} }),
   cancel: (postId: string) => sendRequestToWebappServer<void>(`/api/v1/posts/${encodeURIComponent(postId)}/schedule`, { method: "DELETE" }),
 };

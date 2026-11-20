@@ -1,12 +1,17 @@
-import type { AccountHealth, CounterNoticeInput, ID } from "@/types";
+import type { AccountHealth, CounterNoticeInput, ID, ModerationDecision, Page } from "@/types";
 
 import { api } from "../core/apiClient.service";
 
 export const ACCOUNT_HEALTH_QUERY_KEY = ["account", "status"] as const;
+export const MODERATION_DECISIONS_QUERY_KEY = ["account", "moderationDecisions"] as const;
 
 export const accountHealthService = {
   fetchMyAccountHealth: () => api.get<AccountHealth>("/api/v1/account/status"),
   appealStrike: (strikeId: ID, message: string) => api.post<{ status: string }>(`/api/v1/account/status/strikes/${strikeId}/appeal`, { message }),
+  fetchMyModerationDecisions: (cursor?: string | null) =>
+    api.get<Page<ModerationDecision>>("/api/v1/moderation/decisions/me", cursor ? { cursor } : undefined),
+  appealModerationDecision: (reportId: ID, message: string) =>
+    api.post<{ status: string; appealId: ID }>(`/api/v1/moderation/decisions/${encodeURIComponent(reportId)}/appeal`, { message }),
   submitCounterNotice: (claimId: ID, input: CounterNoticeInput) =>
     api.post<{ noticeId: ID; restoreEligibleAt: string }>(`/api/v1/copyright/claims/${claimId}/counter-notices`, input),
 };

@@ -43,6 +43,18 @@ export const creatorMocks: MockRoute[] = [
     if (!periods.includes(period)) throw new ApiError(400, "period is not an allowed value", "VALIDATION_FAILED");
     return buildDashboard(period);
   }),
+  createMockRoute("GET", "/api/v1/analytics/creator/summary", ({ query }) => {
+    const window = query.get("window") || "30d";
+    const multiplier = window === "7d" ? 0.25 : window === "90d" ? 2.4 : 1;
+    return {
+      creatorId: "u_me",
+      window,
+      views: Math.round(48_200 * multiplier),
+      engagements: Math.round(6_410 * multiplier),
+      profileVisits: Math.round(3_190 * multiplier),
+      revenueMinor: Math.round(142_000 * multiplier),
+    };
+  }),
   createMockRoute("GET", "/api/v1/creators/revenue-rules", () => ({
     giftCreatorSharePercentUpTo: 70, tipCreatorSharePercent: 90, subscriptionCreatorSharePercent: 70, subscriptionShareBasis: "net_of_store_fee", adsRevenueCreatorSharePercent: 55,
     coinTransferPlatformFeePercent: 10, affiliateCommissionReleasedAfterEscrow: true, affiliateCommissionMaximumPercent: 30, coinCashValue: ngn(100), minimumPayout: ngn(500_000), withdrawalFeeDescription: "₦50 flat per withdrawal",

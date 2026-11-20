@@ -22,3 +22,11 @@ export function decideStrikeAppeal(strikeId: string, decision: "uphold" | "overt
 export function runCopyrightAudioMatch(claimId: string): Promise<CopyrightClaimDetail> {
   return sendAdminApiRequest(`/admin/copyright-claims/${encodeURIComponent(claimId)}/audio-match`, { method: "POST", body: {} });
 }
+
+export function setMonetisationOverride(userId: string, mode: "ALLOW" | "PAUSE", reason: string): Promise<AccountHealthSummary> {
+  return sendAdminApiRequest(`/admin/account-health/${encodeURIComponent(userId)}/monetisation-override`, { method: "PUT", body: { mode, reason } });
+}
+
+export function clearMonetisationOverride(userId: string, reason: string): Promise<AccountHealthSummary> {
+  return sendAdminApiRequest(`/admin/account-health/${encodeURIComponent(userId)}/monetisation-override`, { method: "DELETE", body: { reason } });
+}

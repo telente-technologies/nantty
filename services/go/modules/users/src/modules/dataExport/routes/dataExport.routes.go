@@ -10,7 +10,7 @@ import (
 
 func MountDataExportRoutes(mux *http.ServeMux, c *container.Container) {
 	controller := controllers.DataExportController{Container: c}
-	requireAccount := jwtauth.RequireVerifiedAccessToken(c.AccessVerifier)
+	requireAccount := jwtauth.RequireVerifiedAccessTokenAllowingSuspended(c.AccessVerifier)
 	mux.Handle("POST /api/v1/users/me/data-exports", requireAccount(http.HandlerFunc(controller.Request)))
 	mux.Handle("GET /api/v1/users/me/data-exports", requireAccount(http.HandlerFunc(controller.List)))
 	mux.Handle("GET /api/v1/users/me/data-exports/{exportId}", requireAccount(http.HandlerFunc(controller.Get)))

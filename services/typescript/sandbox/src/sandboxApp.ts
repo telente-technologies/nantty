@@ -58,7 +58,9 @@ export function createSandboxApp(options: AppOptions): FastifyInstance {
     });
 
     scoped.addHook("preHandler", async (request, reply) => {
-      if (request.url.split("?", 1)[0] === "/readyz" || request.url.startsWith("/v1/control/")) return;
+      const requestPath = request.url.split("?", 1)[0] ?? "";
+      const hasTraversal = requestPath.includes("..") || requestPath.includes("\\") || /%2e/i.test(requestPath);
+      if (!hasTraversal && (requestPath === "/readyz" || requestPath.startsWith("/v1/control/"))) return;
       const token = bearer(request.headers.authorization);
       if (!token || !isSandboxCredentialFormat(token)) return reply.code(401).send(error("INVALID_SANDBOX_CREDENTIAL", "A valid sandbox credential is required"));
       const result = await options.database.query<{ readonly id: string; readonly application_id: string }>(

@@ -38,4 +38,14 @@ export interface AccountHealthSummary {
   readonly warnings: readonly AccountHealthStrike[];
   readonly strikes: readonly AccountHealthStrike[];
   readonly notices: readonly AccountHealthNotice[];
+  readonly monetisationOverride?: MonetisationOverrideInfo | null;
+}
+
+export interface MonetisationOverrideInfo {
+  readonly mode: "ALLOW" | "PAUSE";
+  readonly reason: string;
+  readonly actorId: string;
+  readonly actorName: string;
+  readonly activeStrikeCountAtOverride: number;
+  readonly setAt: string;
 }

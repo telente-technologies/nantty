@@ -11,6 +11,7 @@ import (
 	paymentconstants "nantty/modules/payments/src/constants"
 	paymentinterfaces "nantty/modules/payments/src/interfaces"
 	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
+	paymentservices "nantty/modules/payments/src/modules/gateway/services"
 	"nantty/modules/subscriptions/src/constants"
 	"nantty/modules/subscriptions/src/generated/ent"
 	"nantty/modules/subscriptions/src/generated/ent/subscription"
@@ -67,6 +68,10 @@ func (billing Billing) RedeemStoreSubscription(ctx context.Context, request Stor
 			}
 		} else if err != nil {
 			return err
+		} else if row.OwnerUserID != request.UserId {
+			return paymentservices.ErrStoreReceiptRedeemedByOther
+		} else if row.ProfileID != profile.ProfileId {
+			return ErrProfileNotEligible
 		} else if row, err = row.Update().SetStatus(subscription.StatusActive).SetCurrentPeriodEndsAt(*verified.ExpiresAt).Save(ctx); err != nil {
 			return err
 		}

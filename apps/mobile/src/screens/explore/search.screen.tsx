@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
@@ -49,6 +49,13 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
     getNextPageParam: (page) => page.nextCursor,
     enabled: debouncedQuery.length > 0,
   });
+  const suggestionsQuery = useQuery({
+    queryKey: ["search", "suggest", debouncedQuery],
+    queryFn: () => searchService.suggestSearch(debouncedQuery),
+    enabled: debouncedQuery.length >= 2,
+    staleTime: 30_000,
+  });
+  const suggestions = (suggestionsQuery.data ?? []).filter((entry) => entry.text.trim() !== "" && entry.text.toLowerCase() !== debouncedQuery.toLowerCase());
   useEffect(() => {
     if (debouncedQuery.length > 0) void trackProductInteraction("search.performed", { query: debouncedQuery, scope: context.scope, type });
   }, [debouncedQuery, context.scope, type]);
@@ -92,6 +99,13 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
         <View style={styles.scopes}>
           {tabs.map((option) => (
             <Chip key={option.type} kind="filter" label={option.label} selected={type === option.type} onPress={() => setType(option.type)} />
+          ))}
+        </View>
+      ) : null}
+      {suggestions.length > 0 ? (
+        <View style={styles.suggestions}>
+          {suggestions.slice(0, 6).map((suggestion) => (
+            <Chip key={`${suggestion.type}:${suggestion.id}`} kind="filter" label={suggestion.text} selected={false} onPress={() => { recents.recordSearch(suggestion.text); setQuery(suggestion.text); }} />
           ))}
         </View>
       ) : null}
@@ -139,6 +153,7 @@ export function SearchScreen({ navigation, route }: MainScreenProps<"Search">) {
 const styles = StyleSheet.create({
   searchRow: { paddingHorizontal: spacing[4], flexDirection: "row" },
   scopes: { paddingHorizontal: spacing[4], paddingVertical: spacing[3], flexDirection: "row", flexWrap: "wrap", gap: spacing[2] },
+  suggestions: { paddingHorizontal: spacing[4], paddingBottom: spacing[2], flexDirection: "row", flexWrap: "wrap", gap: spacing[2] },
   content: { paddingBottom: spacing[6], gap: spacing[5] },
   state: { marginTop: 64, paddingHorizontal: spacing[7] },
   empty: { marginTop: 64, paddingHorizontal: spacing[7], gap: spacing[4] },

@@ -35,6 +35,9 @@ function scheduleFailure(reason: ScheduledPostSummary["failureReason"]): string 
 export default function ScheduledPostsPage() {
   const queryClient = useQueryClient();
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  const [textValue, setTextValue] = useState("");
+  const [textError, setTextError] = useState<string | null>(null);
   const [scheduleValue, setScheduleValue] = useState("");
   const [scheduleError, setScheduleError] = useState<string | null>(null);
   const query = useInfiniteQuery({
@@ -51,12 +54,30 @@ export default function ScheduledPostsPage() {
     mutationFn: ({ id, scheduledAt }: { readonly id: string; readonly scheduledAt: string }) => scheduledPostsService.reschedule(id, scheduledAt),
     onSuccess: () => { setEditingId(null); setScheduleError(null); void refresh(); },
   });
+  const editContent = useMutation({
+    mutationFn: ({ id, text }: { readonly id: string; readonly text: string }) => scheduledPostsService.editContent(id, { text }),
+    onSuccess: () => { setEditingTextId(null); setTextError(null); void refresh(); },
+  });
 
   const saveSchedule = (postId: string) => {
     const validation = validateScheduleDate(scheduleValue);
     if (!validation.scheduledAt) { setScheduleError(validation.message); return; }
     setScheduleError(null);
     reschedule.mutate({ id: postId, scheduledAt: validation.scheduledAt });
+  };
+
+  const saveContent = (post: ScheduledPostSummary) => {
+    const trimmed = textValue.trim();
+    if (!trimmed && post.media.length === 0) {
+      setTextError("Write something before saving, or keep at least one attachment.");
+      return;
+    }
+    if (textValue.length > 2200) {
+      setTextError("Text can be up to 2,200 characters.");
+      return;
+    }
+    setTextError(null);
+    editContent.mutate({ id: post.id, text: textValue });
   };
 
   return (
@@ -75,7 +96,7 @@ export default function ScheduledPostsPage() {
 
       <ul className={styles.list} aria-label="Scheduled posts">
         {posts.map((post) => {
-          const isBusy = publish.isPending || cancel.isPending || reschedule.isPending;
+          const isBusy = publish.isPending || cancel.isPending || reschedule.isPending || editContent.isPending;
           const canRescheduleFailure = post.status !== "failed" || post.failureReason === "media_processing_timeout" || post.failureReason === "author_unavailable";
           return (
             <li key={post.id} className={styles.card}>
@@ -97,10 +118,21 @@ export default function ScheduledPostsPage() {
                     <Button size="sm" variant="secondary" disabled={reschedule.isPending} onClick={() => { setEditingId(null); setScheduleError(null); }}>Keep current time</Button>
                   </div>
                 </div>
+              ) : editingTextId === post.id ? (
+                <div className={styles.rescheduleForm}>
+                  <label className={styles.dateLabel} htmlFor={`text-${post.id}`}>Edit post text</label>
+                  <textarea id={`text-${post.id}`} className={styles.textAreaInput} maxLength={2200} value={textValue} onChange={(event) => setTextValue(event.currentTarget.value)} />
+                  {textError || editContent.isError ? <p className={styles.error} role="alert">{textError ?? readErrorMessageForDisplay(editContent.error)}</p> : null}
+                  <div className={styles.actions}>
+                    <Button size="sm" busy={editContent.isPending} onClick={() => saveContent(post)}>Save changes</Button>
+                    <Button size="sm" variant="secondary" disabled={editContent.isPending} onClick={() => { setEditingTextId(null); setTextError(null); }}>Discard</Button>
+                  </div>
+                </div>
               ) : (
                 <div className={styles.actions}>
                   <Button size="sm" variant="secondary" disabled={post.status === "failed" || isBusy} onClick={() => publish.mutate(post.id)}>Publish now</Button>
-                  <Button size="sm" variant="ghost" disabled={!canRescheduleFailure || isBusy} onClick={() => { setEditingId(post.id); setScheduleValue(localDateTimeValue(post.scheduledAt)); }}>Reschedule</Button>
+                  <Button size="sm" variant="ghost" disabled={isBusy} onClick={() => { setEditingTextId(post.id); setEditingId(null); setTextValue(post.text); setTextError(null); }}>Edit text</Button>
+                  <Button size="sm" variant="ghost" disabled={!canRescheduleFailure || isBusy} onClick={() => { setEditingId(post.id); setEditingTextId(null); setScheduleValue(localDateTimeValue(post.scheduledAt)); }}>Reschedule</Button>
                   <Button size="sm" variant="danger" disabled={isBusy} onClick={() => { if (window.confirm("Cancel this scheduled post? It will remain unpublished and be removed from this list.")) cancel.mutate(post.id); }}>Cancel</Button>
                 </div>
               )}

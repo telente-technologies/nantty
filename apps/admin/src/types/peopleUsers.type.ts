@@ -109,3 +109,12 @@ export interface HeldUsername {
   readonly availableAt: string;
   readonly isHeld: boolean;
 }
+
+export interface CreatorViolation {
+  readonly id: string;
+  readonly userId: string;
+  readonly reason: string;
+  readonly source: string;
+  readonly recordedBy: string;
+  readonly createdAt: string;
+}

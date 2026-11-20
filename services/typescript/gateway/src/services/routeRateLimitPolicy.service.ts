@@ -147,10 +147,10 @@ export function classifyRequestForRateLimit(method: string, path: string): Route
   const verb = method.toUpperCase();
   const pathname = (path.toLowerCase().split("?")[0] ?? path.toLowerCase());
   const normalizedPath = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
-  if (verb === "POST" && normalizedPath.startsWith("/api/v1/auth/login")) return "login";
+  if (verb === "POST" && (normalizedPath.startsWith("/api/v1/auth/login") || normalizedPath === "/api/v1/auth/messenger/authorizations")) return "login";
   if (verb === "POST" && preAuthAdminLoginSteps.has(normalizedPath)) return "login";
-  if (verb === "POST" && normalizedPath.startsWith("/api/v1/auth/otp/send")) return "otpSend";
-  if (verb === "POST" && (normalizedPath.startsWith("/api/v1/auth/otp/verify") || normalizedPath.startsWith("/api/v1/auth/verify") || normalizedPath.startsWith("/api/v1/auth/mfa"))) return "otp";
+  if (verb === "POST" && (normalizedPath.startsWith("/api/v1/auth/otp/send") || /^\/api\/v1\/auth\/messenger\/authorizations\/[^/]+\/recovery\/email$/.test(normalizedPath))) return "otpSend";
+  if (verb === "POST" && (normalizedPath.startsWith("/api/v1/auth/otp/verify") || normalizedPath.startsWith("/api/v1/auth/verify") || normalizedPath.startsWith("/api/v1/auth/mfa") || /^\/api\/v1\/auth\/messenger\/authorizations\/[^/]+\/(verify-code|recovery\/verify)$/.test(normalizedPath))) return "otp";
   if (verb === "POST" && preAuthAdminCodeSteps.has(normalizedPath)) return "otp";
   if (verb === "POST" && (normalizedPath.startsWith("/api/v1/auth/password/reset") || normalizedPath.startsWith("/api/v1/auth/password/forgot"))) return "reset";
   if (verb === "POST" && (normalizedPath.startsWith("/api/v1/auth/register") || normalizedPath.startsWith("/api/v1/auth/signup"))) return "signup";

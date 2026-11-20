@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { useMyProfileQuery, useSaveProfileDetailsMutation } from "@/components/profile/profileQueries.hook";
 import { DownloadPrivacySection } from "@/components/settings/downloadPrivacySection";
 import { MentionPrivacySection } from "@/components/settings/mentionPrivacySection";
+import { TaggingPrivacySection } from "@/components/settings/taggingPrivacySection";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { EyeSlash24Icon, Funnel24Icon } from "@/components/icons";
@@ -35,6 +36,7 @@ export function SettingsPrivacyScreen({ navigation }: MainScreenProps<"SettingsP
         </Text>
       </View>
       <MentionPrivacySection />
+      <TaggingPrivacySection />
       <DownloadPrivacySection />
       <SettingsGroup>
         <SettingsRow label="Content preferences" icon={<Funnel24Icon />} trailing="chevron" onPress={() => navigation.navigate("ContentPreferences")} />

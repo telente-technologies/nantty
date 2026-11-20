@@ -41,3 +41,9 @@ export interface RecentSearchEntry {
   readonly scope: SearchScopeKey;
   readonly searchedAt: string;
 }
+
+export interface SearchSuggestion {
+  readonly type: "user" | "store" | "brand" | "product" | "hashtag" | "category" | "post" | "clip";
+  readonly id: ID;
+  readonly text: string;
+}

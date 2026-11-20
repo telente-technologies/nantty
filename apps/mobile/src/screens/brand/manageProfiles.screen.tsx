@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Check16Icon } from "@/components/icons";
 import { BluePremiumProfilesUpsell } from "@/components/profile/bluePremiumProfilesUpsell";
 import { PremiumLinkedProfiles } from "@/components/profile/premiumLinkedProfiles";
+import { StoreTeamRequestsSection } from "@/components/profile/storeTeamRequestsSection";
 import { SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { useStepUpPrompt } from "@/components/wallet/stepUpSheet";
@@ -31,6 +32,7 @@ export function ManageProfilesScreen({ navigation }: MainScreenProps<"ManageProf
   if (usesPremiumProfileLayout(linked.data)) {
     return (
       <SettingsPage title="Your profiles" gap={24}>
+        <StoreTeamRequestsSection />
         <PremiumLinkedProfiles
           linked={linked.data}
           onOpenProfile={(item) => (item.storeId ? navigation.navigate("Store", { storeId: item.storeId }) : item.kind === "brand" ? navigation.navigate("BrandProfile", { brandId: item.profileId }) : undefined)}
@@ -46,6 +48,7 @@ export function ManageProfilesScreen({ navigation }: MainScreenProps<"ManageProf
   const brand = brandOf(linked.data);
   return (
     <SettingsPage title="Your profiles" gap={24}>
+      <StoreTeamRequestsSection />
       <Text size={13} lineHeight={18} color={colors.textMuted}>
         Your account can have one Store or one Business page, never both, plus one Brand.
       </Text>

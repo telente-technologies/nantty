@@ -1,5 +1,5 @@
 import { ApiError } from "@/errors/api.error";
-import type { LinkedProfileItem, LinkedProfiles } from "@/types/brand.type";
+import type { LinkedProfileItem, LinkedProfiles, StoreTeamRequest } from "@/types/brand.type";
 
 import { mockBrandRecords } from "./brandDirectory.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
@@ -29,9 +29,24 @@ export function buildMockLinkedProfiles(): LinkedProfiles {
   };
 }
 
+const mockStoreTeamRequests: StoreTeamRequest[] = [];
+
 export const linkedProfilesMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/users/me/linked-profiles", () => buildMockLinkedProfiles()),
   createMockRoute("POST", "/api/v1/users/me/linked-profiles/choose", () => {
     throw new ApiError(409, "Your profiles already follow the rule.", "NO_CHOICE_REQUIRED");
+  }),
+  createMockRoute("GET", "/api/v1/stores/team-requests", () => ({ data: mockStoreTeamRequests, nextCursor: null })),
+  createMockRoute("POST", "/api/v1/stores/team-requests/:requestId/accept", ({ params }) => {
+    const index = mockStoreTeamRequests.findIndex((item) => item.id === params.requestId);
+    if (index === -1) throw new ApiError(404, "Team request not found", "TEAM_REQUEST_NOT_FOUND");
+    mockStoreTeamRequests.splice(index, 1);
+    return undefined;
+  }),
+  createMockRoute("POST", "/api/v1/stores/team-requests/:requestId/decline", ({ params }) => {
+    const index = mockStoreTeamRequests.findIndex((item) => item.id === params.requestId);
+    if (index === -1) throw new ApiError(404, "Team request not found", "TEAM_REQUEST_NOT_FOUND");
+    mockStoreTeamRequests.splice(index, 1);
+    return undefined;
   }),
 ];

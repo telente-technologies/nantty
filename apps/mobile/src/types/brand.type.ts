@@ -94,3 +94,12 @@ export interface LinkedProfiles {
   readonly choiceRequired: boolean;
   readonly businessProfiles: BusinessProfileAllowance;
 }
+
+export interface StoreTeamRequest {
+  readonly id: ID;
+  readonly storeId: ID;
+  readonly storeName: string;
+  readonly storeLogoUrl: string | null;
+  readonly role: string;
+  readonly invitedAt: string;
+}

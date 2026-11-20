@@ -1,5 +1,5 @@
 import { ApiError } from "@/errors/api.error";
-import type { LinkedProfileItem, LinkedProfiles } from "@/types/brand.type";
+import type { LinkedProfileItem, LinkedProfiles, StoreTeamRequest } from "@/types/brand.type";
 
 import { MOCK_PREMIUM_BUSINESS_PROFILE_LIMIT, mockBluePremiumState, mockBusinessProfileLimit } from "./bluePremiumMembership.mock";
 import { isBrandSelling, mockBrandRecords } from "./brandDirectory.mock";
@@ -71,8 +71,23 @@ export function assertMockCanCreate(kind: "store" | "business" | "brand"): void 
   if (kind !== "brand" && !linked.canCreate[kind]) throw new ApiError(409, "You can have one Store or one Business page, not both.", "PROFILE_LIMIT_STORE_OR_BUSINESS");
 }
 
+const mockStoreTeamRequests: StoreTeamRequest[] = [];
+
 export const linkedProfilesMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/users/me/linked-profiles", () => buildMockLinkedProfiles()),
+  createMockRoute("GET", "/api/v1/stores/team-requests", () => ({ data: mockStoreTeamRequests, nextCursor: null })),
+  createMockRoute("POST", "/api/v1/stores/team-requests/:requestId/accept", ({ params }) => {
+    const index = mockStoreTeamRequests.findIndex((item) => item.id === params.requestId);
+    if (index === -1) throw new ApiError(404, "Team request not found", "TEAM_REQUEST_NOT_FOUND");
+    mockStoreTeamRequests.splice(index, 1);
+    return undefined;
+  }),
+  createMockRoute("POST", "/api/v1/stores/team-requests/:requestId/decline", ({ params }) => {
+    const index = mockStoreTeamRequests.findIndex((item) => item.id === params.requestId);
+    if (index === -1) throw new ApiError(404, "Team request not found", "TEAM_REQUEST_NOT_FOUND");
+    mockStoreTeamRequests.splice(index, 1);
+    return undefined;
+  }),
   createMockRoute("POST", "/api/v1/users/me/linked-profiles/choose", ({ body }) => {
     const keep = new Set((body as { keep?: readonly string[] }).keep ?? []);
     const linked = buildMockLinkedProfiles();
