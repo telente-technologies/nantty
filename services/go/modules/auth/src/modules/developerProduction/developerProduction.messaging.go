@@ -32,11 +32,14 @@ func (controller Controller) authenticateLiveCredential(request *http.Request, r
 		 JOIN developer_applications a ON a.id = c.application_id
 		 WHERE c.secret_hash = $1`, Sha256Hex(token),
 	).Scan(&credId, &appId, &orgId, &credStatus, &appStatus, &scopesRaw)
-	if err == sql.ErrNoRows || credStatus != "active" {
+	if err == sql.ErrNoRows {
 		return uuid.Nil, uuid.Nil, uuid.Nil, httpserver.ErrUnauthorized
 	}
 	if err != nil {
 		return uuid.Nil, uuid.Nil, uuid.Nil, err
+	}
+	if credStatus != "active" {
+		return uuid.Nil, uuid.Nil, uuid.Nil, httpserver.ErrUnauthorized
 	}
 	if appStatus != "approved" {
 		return uuid.Nil, uuid.Nil, uuid.Nil, httpserver.NewApiError(http.StatusForbidden, "APPLICATION_NOT_APPROVED", "Production API access is suspended or unapproved.")

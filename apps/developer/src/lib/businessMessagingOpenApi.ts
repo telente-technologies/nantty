@@ -72,21 +72,21 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
     info: {
       title: "Nantty Business Messaging API",
       version: "2026-11-16",
-      summary: "Live Sandbox Messaging API with a clearly unavailable Production contract preview.",
+      summary: "Sandbox messaging and consent-scoped production conversation reads.",
       description: [
         "The Sandbox Business Messaging HTTP API (`ntsb_test_` bearer tokens) is available for synthetic data.",
-        "Production paths are preview-only: current production routes return 503 BUSINESS_MESSAGING_UNAVAILABLE and must not be used for live traffic.",
+        "Production conversation listing is available to approved applications with active recipient consent and the conversations:read scope. Sending remains unavailable until canonical consent management and secure message dispatch are connected.",
         "Webhook deliveries are signed with HMAC-SHA256 in the `nantty-signature` (`t=<unix-seconds>,v1=<hex>`) header over `${timestamp}.${rawBody}` and carry a unique `nantty-event-id` for consumer deduplication.",
       ].join(" "),
       contact: { name: "Nantty Developers", url: docsUrl },
     },
     servers: [
       { url: sandboxUrl, description: "Nantty Sandbox API (test-only credentials `ntsb_test_`)", "x-environment": "sandbox" },
-      { url: "https://api.nantty.com", description: "Production route preview only; Business Messaging currently returns 503", "x-environment": "production" },
+      { url: "https://api.nantty.com", description: "Production Business Messaging; conversation listing only until send integration is enabled", "x-environment": "production" },
     ],
     tags: [
       { name: "Sandbox Messaging", description: "Synthetic customer & conversation endpoints scoped to a Sandbox `ntsb_test_` credential." },
-      { name: "Production Business Messaging (unavailable)", description: "Preview only. These routes currently return 503 BUSINESS_MESSAGING_UNAVAILABLE; production functionality is not enabled." },
+      { name: "Production Business Messaging", description: "Consent-scoped conversation listing is available. Message sending remains unavailable pending canonical consent and dispatch integrations." },
     ],
     paths: {
       "/v1/customers": {
@@ -188,7 +188,7 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
       "/api/v1/business/messages": {
         post: {
           tags: ["Production Business Messaging"],
-          summary: "Preview only — Production Business Messaging is unavailable",
+          summary: "Send a business message (currently unavailable)",
           operationId: "sendBusinessMessage",
           "x-status": "unavailable",
           security: [{ BusinessBearerAuth: ["messages:send"] }],
@@ -218,12 +218,16 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
       "/api/v1/business/conversations": {
         get: {
           tags: ["Production Business Messaging"],
-          summary: "Preview only — Production Business Messaging is unavailable",
+          summary: "List conversations with active recipient consent",
           operationId: "listBusinessConversations",
-          "x-status": "unavailable",
           security: [{ BusinessBearerAuth: ["conversations:read"] }],
           responses: {
-            "503": { description: "Production Business Messaging is not enabled", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "200": { description: "Up to 100 consented conversations for this approved application", content: { "application/json": { schema: { type: "object", required: ["conversations"], properties: { conversations: { type: "array", items: { type: "object", required: ["recipientId", "grantedAt", "lastStatus"], properties: { recipientId: { type: "string", format: "uuid" }, grantedAt: { type: "string", format: "date-time" }, lastStatus: { type: "string", enum: ["consented", "accepted", "dispatched", "failed"] }, lastMessageAt: { type: "string", format: "date-time" } } } } } } } } },
+            "401": { description: "Invalid production credential", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "403": { description: "Application not approved or credential lacks conversations:read", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "402": { description: "Organization has no active production entitlement", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "429": { description: "Organization production request quota exhausted", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "500": { description: "Conversation listing could not be completed", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
           },
         },
       },

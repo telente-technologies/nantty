@@ -15,18 +15,18 @@
 | `/credentials` | Sandbox and production key lifecycle, including production rotation; secret is shown only at creation/rotation | `/api/developer/credentials*` (Sandbox) & `/api/developer/organizations/{orgId}/applications/{appId}/credentials*` (Prod) | Prod requires `status = approved`; capability and member grant enforced; rotation revokes/reissues atomically and writes an organization audit record | `IMPLEMENTED_UNVERIFIED` |
 | `/webhooks` | Sandbox & Prod webhooks (`/verify`, `/rotate-secret`) | `/api/developer/webhooks*` & `/api/developer/organizations/{orgId}/applications/{appId}/webhooks*` | Prod requires `status = approved` + challenge | `IMPLEMENTED_UNVERIFIED` |
 | `/requests`, `/usage` | Redacted request logs & monthly quota utilization | `/api/developer/{requests,usage}` & Prod `/requests`, `/usage` | Org membership + app grant | `IMPLEMENTED_UNVERIFIED` |
-| `/billing` | Org quota tier inspection & upgrade | `GET/POST /api/developer/organizations/{orgId}/billing(/checkout)` | Org membership + `developer_billing_subscriptions` | `IMPLEMENTED_UNVERIFIED` |
+| `/billing` | Organization billing status and Sandbox selection; paid checkout unavailable pending verified settlement integration | `GET/POST /api/developer/organizations/{orgId}/billing(/checkout)` | Org billing capability + `developer_billing_subscriptions`; paid production requires verified settlement evidence | `IMPLEMENTED_UNVERIFIED` |
 | `/businesses`, `/audit-logs`, `/sandbox` | App member grants, audit trail & Sandbox bridge | `/applications/{appId}/members`, `/audit-log`, `NEXT_PUBLIC_SANDBOX_PORTAL_URL` | Org membership | `IMPLEMENTED_UNVERIFIED` |
 
 ## Production Business Messaging & Admin & Seller APIs
 
-Correction (2026-11-19): production Business Messaging handlers are not available to API consumers; the mounted public paths return `503 BUSINESS_MESSAGING_UNAVAILABLE`. Do not treat the handler scaffolding or OpenAPI preview as a usable messaging integration.
+Correction (2026-11-20): only consent-scoped conversation listing is enabled. The send route continues to return `503 BUSINESS_MESSAGING_UNAVAILABLE`; handler scaffolding is not a usable send, history, receipt, template, media, interactive-message or handover integration.
 
 | Surface | Canonical Endpoints | Enforcement |
 | --- | --- | --- |
 | Developer SSO | `GET /api/v1/auth/sso/authorize`, `POST /api/v1/auth/sso/token` | PKCE S256, single-use code hash, redirect allowlist |
-| Production Business Messaging | `POST /api/v1/business/messages`, `GET /api/v1/business/conversations` | Mounted routes intentionally return `503 BUSINESS_MESSAGING_UNAVAILABLE`; no public production send/list behavior is enabled |
-| Admin Developer Ops | `GET /api/v1/admin/developer/applications`, `POST .../review`, `PATCH .../quota` | Privileged Admin token + step-up permission; review/quota mutations and audit writes share a transaction |
+| Production Business Messaging | `POST /api/v1/business/messages`, `GET /api/v1/business/conversations` | Send remains unavailable; conversation listing is backed by active consent and requires an approved application, `conversations:read` scope and production quota |
+| Admin Developer Ops | `GET /api/v1/admin/developer/applications`, `POST .../review`, `PATCH .../quota` | Privileged Admin token + step-up permission; quota changes only `monthly_quota` on an existing active paid subscription; review/quota mutations and audit writes share a transaction |
 | Seller Developer API | `GET/POST/DELETE /api/v1/seller/developers/{keys,webhooks}` | Store owner + Pro subscription + SSRF check |
 | Messenger (`apps/messenger`) | `/api/v1/conversations*`, `/api/v1/stories*`, realtime WS | User bearer token, E2EE `@nantty/chat-crypto` |
 

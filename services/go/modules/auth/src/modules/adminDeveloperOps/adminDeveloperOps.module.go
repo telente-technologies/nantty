@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 
 	"nantty/modules/auth/src/container"
+	developerproduction "nantty/modules/auth/src/modules/developerProduction"
 	"nantty/platform/httpserver"
 	"nantty/platform/identityports"
 	"nantty/platform/jwtauth"
@@ -138,15 +139,14 @@ func (controller Controller) UpdateQuota(writer http.ResponseWriter, request *ht
 		return
 	}
 	var body struct {
-		PlanTier     string `json:"planTier"`
-		MonthlyQuota int64  `json:"monthlyQuota"`
+		MonthlyQuota int64 `json:"monthlyQuota"`
 	}
 	if err := httpserver.DecodeJsonBodyRejectingUnknownFields(writer, request, &body); err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
-	if body.MonthlyQuota < 100 || !slices.Contains([]string{"sandbox", "starter", "growth", "enterprise"}, body.PlanTier) {
-		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_QUOTA", "Valid planTier and monthlyQuota >= 100 required."))
+	if body.MonthlyQuota < 100 {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_QUOTA", "monthlyQuota must be at least 100."))
 		return
 	}
 	staff, ok := staffauth.StaffFromContext(request.Context())
@@ -161,28 +161,31 @@ func (controller Controller) UpdateQuota(writer http.ResponseWriter, request *ht
 		return
 	}
 	defer tx.Rollback()
-	var previousTier, previousStatus sql.NullString
-	var previousQuota sql.NullInt64
-	err = tx.QueryRowContext(request.Context(), `SELECT plan_tier, status, monthly_quota FROM developer_billing_subscriptions WHERE organization_id = $1 FOR UPDATE`, orgId).Scan(&previousTier, &previousStatus, &previousQuota)
-	if err != nil && err != sql.ErrNoRows {
-		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+	var planTier, status string
+	var previousQuota int64
+	var periodEnd, paymentVerifiedAt sql.NullTime
+	var providerReference sql.NullString
+	err = tx.QueryRowContext(request.Context(), `SELECT plan_tier, status, monthly_quota, current_period_end, provider_reference, payment_verified_at FROM developer_billing_subscriptions WHERE organization_id = $1 FOR UPDATE`, orgId).Scan(&planTier, &status, &previousQuota, &periodEnd, &providerReference, &paymentVerifiedAt)
+	if err == sql.ErrNoRows {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusNotFound, "BILLING_SUBSCRIPTION_NOT_FOUND", "No existing developer subscription is available for a quota adjustment."))
 		return
 	}
-	_, err = tx.ExecContext(request.Context(),
-		`INSERT INTO developer_billing_subscriptions (organization_id, plan_tier, status, monthly_quota, updated_at)
-		 VALUES ($1, $2, 'active', $3, now())
-		 ON CONFLICT (organization_id) DO UPDATE SET plan_tier = EXCLUDED.plan_tier, monthly_quota = EXCLUDED.monthly_quota, updated_at = now()`,
-		orgId, body.PlanTier, body.MonthlyQuota,
-	)
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
-	before := map[string]any{}
-	if previousTier.Valid {
-		before = map[string]any{"planTier": previousTier.String, "status": previousStatus.String, "monthlyQuota": previousQuota.Int64}
+	if !developerproduction.IsVerifiedPaidSubscription(planTier, status, periodEnd, paymentVerifiedAt, providerReference, controller.Container.Now().UTC()) {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusConflict, "SUBSCRIPTION_NOT_ACTIVE", "Quota adjustments require an existing verified active paid subscription."))
+		return
 	}
-	err = writeAudit(request.Context(), tx, staff, staffId, orgId, "admin.billing.quota_updated", "developer_organization", orgId.String(), before, map[string]any{"planTier": body.PlanTier, "status": "active", "monthlyQuota": body.MonthlyQuota})
+	_, err = tx.ExecContext(request.Context(), `UPDATE developer_billing_subscriptions SET monthly_quota = $2, updated_at = now() WHERE organization_id = $1`, orgId, body.MonthlyQuota)
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	before := map[string]any{"planTier": planTier, "status": status, "monthlyQuota": previousQuota}
+	after := map[string]any{"planTier": planTier, "status": status, "monthlyQuota": body.MonthlyQuota}
+	err = writeAudit(request.Context(), tx, staff, staffId, orgId, "admin.billing.quota_adjusted", "developer_organization", orgId.String(), before, after)
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
@@ -191,7 +194,7 @@ func (controller Controller) UpdateQuota(writer http.ResponseWriter, request *ht
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
-	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"organizationId": orgId.String(), "planTier": body.PlanTier, "monthlyQuota": body.MonthlyQuota})
+	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"organizationId": orgId.String(), "planTier": planTier, "status": status, "monthlyQuota": body.MonthlyQuota})
 }
 
 func writeAudit(ctx context.Context, tx *sql.Tx, staff staffauth.Staff, staffId, organizationId uuid.UUID, action, subjectType, subjectId string, before, after map[string]any) error {

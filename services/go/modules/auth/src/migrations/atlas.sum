@@ -1,4 +1,4 @@
-h1:un38+AHd+dVJJmb/TizDOSP/HGq4joQAi9J4OXcL76A=
+h1:mXg1avgz61l1kJCIG89F2FTlkw+o9wBdk/drR2IP9D0=
 20261003094035_create_auth_tables.up.sql h1:KtaB3JZqg9eMzXAQZ13OTwIzR/UCL/D/Pd6ovWwq10I=
 20261003094100_grant_read_access_to_other_services.up.sql h1:H47OiswGxjuOqv/qj+ImQCXFbCLBJ45N7XZePh87dEU=
 20261003100736_add_social_identities.up.sql h1:/ZhAX0L0xtUUkB2+guudIFRMEGeeX87tCJ3e0lLrHS4=
@@ -21,3 +21,4 @@ h1:un38+AHd+dVJJmb/TizDOSP/HGq4joQAi9J4OXcL76A=
 20261116190000_add_developer_webhook_verification_and_deliveries.up.sql h1:E4xMm30zvGgfA9aNgL1WmdHuPD9UmTevrPbAH337WIc=
 20261116200000_add_developer_business_messaging.up.sql h1:XkvqX/UH+yUyBVzqKz56rHw0kb/dfDDSIdp2R9iHsa0=
 20261116220000_add_developer_business_message_idempotency.up.sql h1:h9LTQ2rFrdttjvTEAHAE/+vbDrF0D33n/AwQkIG1zkU=
+20261120100000_add_developer_billing_payment_verification.up.sql h1:l/rbOY57+0cum+HTjurQ6uC3BksQxo7Er3tjYGWX0ec=

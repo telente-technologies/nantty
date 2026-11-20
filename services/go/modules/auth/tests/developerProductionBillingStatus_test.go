@@ -1,6 +1,7 @@
 package auth_test
 
 import (
+	"database/sql"
 	"testing"
 	"time"
 
@@ -12,17 +13,22 @@ func TestEffectiveDeveloperBillingStatus(t *testing.T) {
 	future := now.Add(time.Hour)
 	past := now.Add(-time.Hour)
 	for _, tc := range []struct {
-		tier, status string
-		end          *time.Time
-		want         string
+		tier, status, reference string
+		end, paymentVerifiedAt  sql.NullTime
+		referenceValid          bool
+		want                    string
 	}{
-		{"sandbox", "active", nil, "active"},
-		{"starter", "active", &future, "active"},
-		{"starter", "active", &past, "expired"},
-		{"growth", "active", nil, "expired"},
-		{"growth", "past_due", &future, "past_due"},
+		{"sandbox", "active", "", sql.NullTime{}, sql.NullTime{}, false, "active"},
+		{"starter", "active", "payment-1", sql.NullTime{Time: future, Valid: true}, sql.NullTime{Time: past, Valid: true}, true, "active"},
+		{"starter", "active", "payment-1", sql.NullTime{Time: past, Valid: true}, sql.NullTime{Time: future, Valid: true}, true, "expired"},
+		{"growth", "active", "payment-1", sql.NullTime{}, sql.NullTime{Time: future, Valid: true}, true, "expired"},
+		{"growth", "active", "payment-1", sql.NullTime{Time: future, Valid: true}, sql.NullTime{}, true, "payment_unverified"},
+		{"growth", "active", "", sql.NullTime{Time: future, Valid: true}, sql.NullTime{Time: future, Valid: true}, false, "payment_unverified"},
+		{"growth", "active", "payment-1", sql.NullTime{Time: future, Valid: true}, sql.NullTime{Time: now.Add(10 * time.Minute), Valid: true}, true, "payment_unverified"},
+		{"growth", "past_due", "", sql.NullTime{Time: future, Valid: true}, sql.NullTime{}, false, "past_due"},
 	} {
-		if got := developerproduction.EffectiveBillingStatus(tc.tier, tc.status, tc.end, now); got != tc.want {
+		providerReference := sql.NullString{String: tc.reference, Valid: tc.referenceValid}
+		if got := developerproduction.EffectiveBillingStatus(tc.tier, tc.status, tc.end, tc.paymentVerifiedAt, providerReference, now); got != tc.want {
 			t.Errorf("%s %s: got %s, want %s", tc.tier, tc.status, got, tc.want)
 		}
 	}

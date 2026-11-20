@@ -89,8 +89,8 @@ export const developerSectionDetails = {
   messaging: {
     title: "Business messaging API",
     description: "Review conversation, message, consent, and webhook contracts for Sandbox and Production integrations.",
-    availability: "Sandbox active · Production unavailable",
-    detail: "Sandbox accepts synthetic customer conversations via ntsb_test_ tokens. Production /api/v1/business/* routes currently return 503 and do not send or list live business messages.",
+    availability: "Sandbox active · Production read-only",
+    detail: "Sandbox accepts synthetic customer conversations via ntsb_test_ tokens. Production supports consent-scoped conversation listing; message sending remains unavailable until secure dispatch is integrated.",
     releaseGates: ["Application review & approval for production credentials", "Explicit scopes: messages:send and conversations:read", "Organization monthly quota enforcement"],
   },
   onboarding: {
@@ -103,8 +103,8 @@ export const developerSectionDetails = {
   products: {
     title: "API products",
     description: "Inspect available and planned Nantty platform APIs, required scopes, and approval rules.",
-    availability: "Sandbox available · Production unavailable",
-    detail: "Synthetic Business Messaging is available in Sandbox. Production routes currently return 503 until consent, dispatch, billing, lifecycle, and security integrations are complete. Future Commerce, Social, Identity, Trust, and Logistics APIs are staged without fake endpoints.",
+    availability: "Sandbox available · Production read-only",
+    detail: "Synthetic Business Messaging is available in Sandbox. Production currently supports consent-scoped conversation reads but not message sending; future Commerce, Social, Identity, Trust, and Logistics APIs remain staged without fake endpoints.",
     releaseGates: ["Explicit environment & scope isolation per product", "Independent approval and quota policies"],
   },
   businesses: {

@@ -2,6 +2,7 @@ package auth_test
 
 import (
 	"crypto/sha256"
+	"database/sql"
 	"encoding/base64"
 	"io"
 	"log/slog"
@@ -22,6 +23,53 @@ func TestBusinessMessagingUnavailableDoesNotAcceptMessages(t *testing.T) {
 	controller.BusinessMessagingUnavailable(recorder, httptest.NewRequest(http.MethodPost, "/api/v1/business/messages", nil))
 	if recorder.Code != http.StatusServiceUnavailable || !strings.Contains(recorder.Body.String(), "BUSINESS_MESSAGING_UNAVAILABLE") {
 		t.Fatalf("expected unavailable response, got %d: %s", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestBusinessMessagingMountKeepsSendUnavailableAndRoutesConversationRead(t *testing.T) {
+	mux := http.NewServeMux()
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	developerproduction.Mount(mux, &container.Container{Logger: logger})
+
+	_, readPattern := mux.Handler(httptest.NewRequest(http.MethodGet, "/api/v1/business/conversations", nil))
+	if readPattern != "GET /api/v1/business/conversations" {
+		t.Fatalf("conversation listing route pattern = %q", readPattern)
+	}
+	_, sendPattern := mux.Handler(httptest.NewRequest(http.MethodPost, "/api/v1/business/messages", nil))
+	if sendPattern != "POST /api/v1/business/messages" {
+		t.Fatalf("message send route pattern = %q", sendPattern)
+	}
+
+	readResponse := httptest.NewRecorder()
+	mux.ServeHTTP(readResponse, httptest.NewRequest(http.MethodGet, "/api/v1/business/conversations", nil))
+	if readResponse.Code != http.StatusUnauthorized {
+		t.Fatalf("unauthenticated conversation read returned %d, want credential rejection (401): %s", readResponse.Code, readResponse.Body.String())
+	}
+	sendResponse := httptest.NewRecorder()
+	mux.ServeHTTP(sendResponse, httptest.NewRequest(http.MethodPost, "/api/v1/business/messages", nil))
+	if sendResponse.Code != http.StatusServiceUnavailable || !strings.Contains(sendResponse.Body.String(), "BUSINESS_MESSAGING_UNAVAILABLE") {
+		t.Fatalf("message sending must remain unavailable, got %d: %s", sendResponse.Code, sendResponse.Body.String())
+	}
+}
+
+func TestBusinessConversationReadReportsDatabaseFailureInsteadOfUnauthorized(t *testing.T) {
+	db, err := sql.Open("pgx", "postgres://invalid:invalid@127.0.0.1:1/invalid")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	controller := developerproduction.Controller{Container: &container.Container{Database: db, Logger: slog.New(slog.NewTextHandler(io.Discard, nil))}}
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/business/conversations", nil)
+	request.Header.Set("Authorization", "Bearer ntlive_test")
+	response := httptest.NewRecorder()
+	controller.ListBusinessConversations(response, request)
+	if response.Code != http.StatusInternalServerError {
+		t.Fatalf("database failure returned %d, want 500: %s", response.Code, response.Body.String())
+	}
+	if strings.Contains(response.Body.String(), "database is closed") {
+		t.Fatalf("internal database error leaked to client: %s", response.Body.String())
 	}
 }
 

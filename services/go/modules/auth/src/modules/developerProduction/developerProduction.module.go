@@ -42,7 +42,7 @@ func Mount(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("POST "+orgBase+"/billing/checkout", rateLimit(requireAccess(http.HandlerFunc(controller.CheckoutBilling))))
 
 	mux.Handle("POST /api/v1/business/messages", rateLimit(http.HandlerFunc(controller.BusinessMessagingUnavailable)))
-	mux.Handle("GET /api/v1/business/conversations", rateLimit(http.HandlerFunc(controller.BusinessMessagingUnavailable)))
+	mux.Handle("GET /api/v1/business/conversations", rateLimit(http.HandlerFunc(controller.ListBusinessConversations)))
 }
 
 func (controller Controller) BusinessMessagingUnavailable(writer http.ResponseWriter, request *http.Request) {

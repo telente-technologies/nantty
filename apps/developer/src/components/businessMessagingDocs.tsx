@@ -85,9 +85,9 @@ export function BusinessMessagingDocs() {
       <section className={styles.status} role="status" aria-labelledby="contract-state-title">
         <span className={styles.statusIcon}><WarningCircleIcon size={20} /></span>
         <div>
-          <p className={styles.statusLabel}>SANDBOX AVAILABLE · PRODUCTION DRAFT DISABLED</p>
-          <h2 id="contract-state-title">Production Business Messaging API is not live yet</h2>
-          <p>Production <code>/v1/business/*</code> routes currently return <code>503 BUSINESS_MESSAGING_UNAVAILABLE</code>; no live message is sent or conversation returned. Synthetic integration testing is available in the <a href={readSandboxPortalUrl()}>Nantty Sandbox</a> using <code>ntsb_test_</code> credentials. The <a href={readDeveloperDocsHref("openapi.json")}>OpenAPI 3.1 JSON</a> marks production paths as unavailable previews.</p>
+          <p className={styles.statusLabel}>SANDBOX SEND AVAILABLE · PRODUCTION CONVERSATION READS</p>
+          <h2 id="contract-state-title">Production messaging is read-only for now</h2>
+          <p><code>GET /api/v1/business/conversations</code> lists conversations with active recipient consent for an approved application and a <code>conversations:read</code> credential. Sending at <code>POST /api/v1/business/messages</code> remains unavailable with <code>503 BUSINESS_MESSAGING_UNAVAILABLE</code> until secure dispatch and canonical consent management are connected. Synthetic send testing is available in the <a href={readSandboxPortalUrl()}>Nantty Sandbox</a> using <code>ntsb_test_</code> credentials. See the <a href={readDeveloperDocsHref("openapi.json")}>OpenAPI 3.1 JSON</a> for the exact production status.</p>
         </div>
       </section>
 
