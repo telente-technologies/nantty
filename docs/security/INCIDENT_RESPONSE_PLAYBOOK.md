@@ -12,6 +12,8 @@
 
 ## 2. Targeted Containment & Rotation Runbooks
 
+> **Rollback vs. Key Rotation:** Before rolling back compute services during an incident, verify whether secrets or signing keys rotated across the target releases (`docs/architecture/rollback-flow.md`).
+
 ### A. Compromised JWT Signing Key or Gateway HMAC Secret
 1. Publish replacement EdDSA public key to JWKS (`goIdentity`) while keeping verification overlap window minimal, or revoke compromised key ID (`kid`) immediately if active abuse is confirmed.
 2. Rotate `GATEWAY_IDENTITY_SIGNING_SECRET` / `INTERNAL_API_TOKEN` across Secrets Manager / ECS task definitions (`deploy.yml`) using dual-accept transition only if zero abuse; otherwise hard cutover + rolling restart.

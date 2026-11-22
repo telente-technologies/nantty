@@ -89,6 +89,8 @@ jobs:
     if: vars.AWS_ACCOUNT_ID_STAGING != ''
     runs-on: ubuntu-latest
     environment: staging
+    outputs:
+      revisions_json: ${{ steps.capture_staging.outputs.revisions_json }}
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: aws-actions/configure-aws-credentials@v6
@@ -110,6 +112,18 @@ jobs:
         run: bash .github/scripts/runMigrationTask.sh staging
       - id: registry
         run: echo "host=${{ vars.AWS_ACCOUNT_ID_STAGING }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com" >> "$GITHUB_OUTPUT"
+      - id: capture_staging
+        name: Capture pre-deploy staging task definition revisions
+        run: |
+          bash .github/scripts/captureServiceRevisions.sh staging pre-deploy-revisions-staging.json go-identity go-commerce go-live go-ads go-trust social notifications media search support realtime intelligence gateway go-money
+          echo "revisions_json=$(jq -c . pre-deploy-revisions-staging.json)" >> "$GITHUB_OUTPUT"
+      - name: Upload pre-deploy staging revision snapshot
+        if: steps.capture_staging.outcome == 'success'
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: pre-deploy-revisions-staging
+          path: pre-deploy-revisions-staging.json
+          retention-days: 30
       - name: Roll out services (ECS rolling with rollback)
         env:
           REGISTRY: ${{ steps.registry.outputs.host }}
@@ -128,7 +142,43 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - run: bash .github/scripts/smokeTest.sh "${{ vars.STAGING_API_URL }}"
+      - env:
+          STAGING_API_URL: ${{ vars.STAGING_API_URL }}
+        run: bash .github/scripts/smokeTest.sh "$STAGING_API_URL"
+
+  rollback-staging:
+    needs: [deploy-staging, smoke-staging]
+    if: ${{ always() && vars.AWS_ACCOUNT_ID_STAGING != '' && (needs.deploy-staging.result == 'failure' || needs.smoke-staging.result == 'failure') }}
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: aws-actions/configure-aws-credentials@v6
+        if: needs.deploy-staging.outputs.revisions_json != ''
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID_STAGING }}:role/nantty-staging-github-deploy
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Roll back staging ECS services to pre-deploy revisions
+        if: needs.deploy-staging.outputs.revisions_json != ''
+        env:
+          REVISIONS_JSON: ${{ needs.deploy-staging.outputs.revisions_json }}
+        run: |
+          printf '%s\n' "$REVISIONS_JSON" > pre-deploy-revisions-staging.json
+          bash .github/scripts/rollbackBatch.sh staging --from-file pre-deploy-revisions-staging.json --summary-file rollback-summary-staging.json
+      - name: Verify staging health after automatic rollback
+        if: needs.deploy-staging.outputs.revisions_json != ''
+        env:
+          STAGING_API_URL: ${{ vars.STAGING_API_URL }}
+        run: |
+          bash .github/scripts/smokeTest.sh "$STAGING_API_URL"
+          {
+            echo "## Automatic Staging Rollback Executed"
+            echo "Staging deploy or post-deploy smoke test failed; services were restored to pre-deploy revisions."
+            cat rollback-summary-staging.json
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Report skipped rollback before service rollout
+        if: needs.deploy-staging.outputs.revisions_json == ''
+        run: echo "Staging failed before ECS rollout started; no service task definitions were changed." >> "$GITHUB_STEP_SUMMARY"
 
   deploy-production:
     needs: smoke-staging
@@ -167,6 +217,16 @@ jobs:
           PRIVATE_SUBNETS: ${{ vars.PROD_PRIVATE_SUBNETS }}
           TASKS_SECURITY_GROUP: ${{ vars.PROD_TASKS_SECURITY_GROUP }}
         run: bash .github/scripts/runMigrationTask.sh prod
+      - id: capture_prod
+        name: Capture pre-deploy production task definition revisions
+        run: bash .github/scripts/captureServiceRevisions.sh prod pre-deploy-revisions-prod.json go-identity go-commerce go-live go-ads go-trust social notifications media search support realtime intelligence gateway go-money
+      - name: Upload pre-deploy production revision snapshot
+        if: steps.capture_prod.outcome == 'success'
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: pre-deploy-revisions-prod
+          path: pre-deploy-revisions-prod.json
+          retention-days: 30
       - name: Roll out services
         env:
           REGISTRY: ${{ steps.registries.outputs.prod }}
@@ -179,4 +239,19 @@ jobs:
           for pid in "${pids[@]}"; do wait "$pid" || failed=1; done
           [ "$failed" = 0 ]
           bash .github/scripts/deployService.sh go-money "$REGISTRY/nantty/go-money:$IMAGE_TAG" prod
-      - run: bash .github/scripts/smokeTest.sh "${{ vars.PROD_API_URL }}"
+      - name: Post-deploy production smoke check
+        env:
+          PROD_API_URL: ${{ vars.PROD_API_URL }}
+        run: bash .github/scripts/smokeTest.sh "$PROD_API_URL"
+      - name: Auto-rollback production ECS services on rollout or smoke failure
+        if: failure() && steps.capture_prod.outcome == 'success'
+        env:
+          PROD_API_URL: ${{ vars.PROD_API_URL }}
+        run: |
+          bash .github/scripts/rollbackBatch.sh prod --from-file pre-deploy-revisions-prod.json --summary-file rollback-summary-prod.json
+          bash .github/scripts/smokeTest.sh "$PROD_API_URL"
+          {
+            echo "## Automatic Production Rollback Executed"
+            echo "Production deploy or post-deploy smoke test failed; services were restored to pre-deploy revisions."
+            cat rollback-summary-prod.json
+          } >> "$GITHUB_STEP_SUMMARY"

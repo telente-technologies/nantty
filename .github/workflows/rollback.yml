@@ -1,0 +1,182 @@
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target AWS environment to roll back
+        type: choice
+        required: true
+        default: staging
+        options:
+          - staging
+          - production
+      rollback_mode:
+        description: Restore a specific stable commit SHA in ECR or the previous active ECS task definition revision
+        type: choice
+        required: true
+        default: target-sha
+        options:
+          - target-sha
+          - previous-revision
+      target_sha:
+        description: Commit SHA (or immutable ECR tag) of the previous stable release (required when rollback_mode is target-sha)
+        type: string
+        required: false
+        default: ""
+      services:
+        description: "Comma-separated services to roll back, or 'all' for all 14 ECS services"
+        type: string
+        required: false
+        default: "all"
+      reason:
+        description: Incident ticket or short reason for the rollback audit log
+        type: string
+        required: true
+      skip_smoke_test:
+        description: Skip post-rollback HTTP smoke checks (only use during upstream outage)
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - id: config
+        name: Validate rollback parameters
+        env:
+          INPUT_ENV: ${{ inputs.environment }}
+          INPUT_MODE: ${{ inputs.rollback_mode }}
+          INPUT_SHA: ${{ inputs.target_sha }}
+          INPUT_SERVICES: ${{ inputs.services }}
+          INPUT_REASON: ${{ inputs.reason }}
+          STAGING_ACCOUNT: ${{ vars.AWS_ACCOUNT_ID_STAGING }}
+          PROD_ACCOUNT: ${{ vars.AWS_ACCOUNT_ID_PROD }}
+          STAGING_API_URL: ${{ vars.STAGING_API_URL }}
+          PROD_API_URL: ${{ vars.PROD_API_URL }}
+          REGION: ${{ vars.AWS_REGION }}
+        run: |
+          if [ -z "${INPUT_REASON// }" ]; then
+            echo "::error::Rollback reason must not be blank"
+            exit 1
+          fi
+          case "$INPUT_ENV" in
+            staging)
+              aws_env="staging"
+              account_id="$STAGING_ACCOUNT"
+              api_url="$STAGING_API_URL"
+              ;;
+            production)
+              aws_env="prod"
+              account_id="$PROD_ACCOUNT"
+              api_url="$PROD_API_URL"
+              ;;
+            *)
+              echo "::error::Unsupported environment: $INPUT_ENV"
+              exit 1
+              ;;
+          esac
+          [ -n "$account_id" ] || {
+            echo "::error::Missing AWS account ID variable for $INPUT_ENV"
+            exit 1
+          }
+          if [ "$INPUT_MODE" = "target-sha" ]; then
+            if [ -z "$INPUT_SHA" ]; then
+              echo "::error::target_sha is required when rollback_mode=target-sha"
+              exit 1
+            fi
+            if ! [[ "$INPUT_SHA" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+              echo "::error::Invalid target_sha format: $INPUT_SHA"
+              exit 1
+            fi
+          fi
+          {
+            echo "aws_env=$aws_env"
+            echo "role_arn=arn:aws:iam::${account_id}:role/nantty-${aws_env}-github-deploy"
+            echo "registry=${account_id}.dkr.ecr.${REGION}.amazonaws.com"
+            echo "api_url=$api_url"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ steps.config.outputs.role_arn }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Capture current revisions before rollback
+        env:
+          AWS_ENV: ${{ steps.config.outputs.aws_env }}
+        run: bash .github/scripts/captureServiceRevisions.sh "$AWS_ENV" pre-rollback-revisions.json go-identity go-commerce go-live go-ads go-trust social notifications media search support realtime intelligence gateway go-money
+
+      - name: Execute ECS rollback
+        env:
+          AWS_ENV: ${{ steps.config.outputs.aws_env }}
+          ROLLBACK_MODE: ${{ inputs.rollback_mode }}
+          TARGET_SHA: ${{ inputs.target_sha }}
+          REGISTRY: ${{ steps.config.outputs.registry }}
+          SERVICES: ${{ inputs.services }}
+        run: |
+          if [ "$ROLLBACK_MODE" = "target-sha" ]; then
+            bash .github/scripts/rollbackBatch.sh "$AWS_ENV" --target-sha "$TARGET_SHA" "$REGISTRY" --services "$SERVICES" --summary-file rollback-summary.json
+          else
+            bash .github/scripts/rollbackBatch.sh "$AWS_ENV" --previous-revision --services "$SERVICES" --summary-file rollback-summary.json
+          fi
+
+      - name: Verify service health after rollback
+        if: ${{ !inputs.skip_smoke_test }}
+        env:
+          API_URL: ${{ steps.config.outputs.api_url }}
+        run: bash .github/scripts/smokeTest.sh "$API_URL"
+
+      - name: Upload rollback audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: rollback-audit-${{ inputs.environment }}-${{ github.run_id }}
+          path: |
+            pre-rollback-revisions.json
+            rollback-summary.json
+          retention-days: 90
+
+      - name: Write rollback summary
+        if: always()
+        env:
+          INPUT_ENV: ${{ inputs.environment }}
+          INPUT_MODE: ${{ inputs.rollback_mode }}
+          INPUT_SHA: ${{ inputs.target_sha }}
+          INPUT_SERVICES: ${{ inputs.services }}
+          INPUT_REASON: ${{ inputs.reason }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          {
+            echo "## Rollback Summary"
+            echo "- **Environment:** $INPUT_ENV"
+            echo "- **Operator:** $ACTOR"
+            echo "- **Mode:** $INPUT_MODE"
+            echo "- **Target SHA:** ${INPUT_SHA:-previous-revision}"
+            echo "- **Services:** $INPUT_SERVICES"
+            echo "- **Reason:** $INPUT_REASON"
+            echo ""
+            echo "### Pre-rollback revisions"
+            if [ -f pre-rollback-revisions.json ]; then
+              cat pre-rollback-revisions.json
+            fi
+            echo ""
+            echo "### Post-rollback follow-up"
+            echo "1. Confirm zero-5xx and circuit-breaker metrics in CloudWatch."
+            echo "2. If reverting source permanently, open a \`git revert\` PR on \`main\` so the next \`deploy.yml\` run does not re-introduce the broken commit."
+            echo "3. Database schemas remain expand-compatible; do NOT run destructive down-migrations in prod (see \`docs/architecture/rollback-flow.md\`)."
+          } >> "$GITHUB_STEP_SUMMARY"
