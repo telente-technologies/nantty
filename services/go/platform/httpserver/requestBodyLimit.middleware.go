@@ -14,9 +14,14 @@ func EnsureSafeResponseContentType(writer http.ResponseWriter) {
 	if strings.TrimSpace(headers.Get("X-Content-Type-Options")) == "" {
 		headers.Set("X-Content-Type-Options", "nosniff")
 	}
-	contentType := strings.ToLower(strings.TrimSpace(headers.Get("Content-Type")))
-	if contentType == "" || strings.Contains(contentType, "html") {
+	mediaType := strings.ToLower(strings.TrimSpace(strings.SplitN(headers.Get("Content-Type"), ";", 2)[0]))
+	switch mediaType {
+	case "application/json", "application/problem+json", "application/jwk-set+json", "application/x-ndjson", "text/plain", "text/csv", "application/pdf", "application/octet-stream":
+		return
+	case "":
 		headers.Set("Content-Type", "text/plain; charset=utf-8")
+	default:
+		headers.Set("Content-Type", "application/octet-stream")
 	}
 }
 
@@ -52,9 +57,7 @@ func (tracker *headerTrackingResponseWriter) WriteHeader(status int) {
 }
 
 func (tracker *headerTrackingResponseWriter) Write(chunk []byte) (int, error) {
-	if !tracker.wroteHeader {
-		EnsureSafeResponseContentType(tracker.ResponseWriter)
-	}
+	EnsureSafeResponseContentType(tracker.ResponseWriter)
 	tracker.wroteHeader = true
 	return tracker.ResponseWriter.Write(chunk)
 }

@@ -42,8 +42,8 @@ func (writer *statusCapturingWriter) WriteHeader(status int) {
 }
 
 func (writer *statusCapturingWriter) Write(chunk []byte) (int, error) {
+	httpserver.EnsureSafeResponseContentType(writer.ResponseWriter)
 	if writer.status == 0 {
-		httpserver.EnsureSafeResponseContentType(writer.ResponseWriter)
 		writer.status = http.StatusOK
 	}
 	return writer.ResponseWriter.Write(chunk)
