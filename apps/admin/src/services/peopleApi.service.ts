@@ -1,6 +1,6 @@
 import { sendAdminApiRequest } from "@/services/adminApiClient.service";
 import type { PagedList } from "@/types/api.type";
-import type { HeldUsername, UserDetail, UserListFilters, UserPersonalDataResponse, UsernameWithholdResult, WithheldUsername } from "@/types/peopleUsers.type";
+import type { CreatorViolation, HeldUsername, UserDetail, UserListFilters, UserPersonalDataResponse, UsernameWithholdResult, WithheldUsername } from "@/types/peopleUsers.type";
 import type { PlatformUserSummary } from "@/types/platformUser.type";
 import type { ConfusablePreview, ReservedUsernameMatchKind, ReservedUsernameRule } from "@/types/usernames.type";
 
@@ -92,4 +92,12 @@ export function fetchUsernameHold(username: string, signal?: AbortSignal): Promi
 
 export function assignHeldUsername(userId: string, input: { username: string; reason: string; bypassHold: boolean }): Promise<UserDetail> {
   return sendAdminApiRequest(userPath(userId, "/username/assign-held"), { method: "POST", body: input });
+}
+
+export function fetchCreatorViolations(userId: string, signal?: AbortSignal): Promise<{ data: CreatorViolation[]; nextCursor?: string | null }> {
+  return sendAdminApiRequest(`/admin/creators/${encodeURIComponent(userId)}/violations`, { signal });
+}
+
+export function recordCreatorViolation(userId: string, reason: string): Promise<CreatorViolation> {
+  return sendAdminApiRequest(`/admin/creators/${encodeURIComponent(userId)}/violations`, { method: "POST", body: { reason } });
 }

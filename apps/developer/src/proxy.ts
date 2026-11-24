@@ -1,16 +1,48 @@
+import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const DOCS_HOST = "docs.nantty.com";
+const isDevelopmentBuild = process.env.NODE_ENV === "development";
+
+function buildContentSecurityPolicy(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDevelopmentBuild ? " 'unsafe-eval'" : ""}`,
+    "style-src 'self' 'unsafe-inline'",
+    `img-src 'self' data: blob: https:${isDevelopmentBuild ? " http:" : ""}`,
+    "font-src 'self'",
+    `connect-src 'self'${isDevelopmentBuild ? " http://localhost:* http://127.0.0.1:*" : ""}`,
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+  ].join("; ");
+}
 
 /** Serve the public documentation from its own host without a second app deployment. */
 export function proxy(request: NextRequest) {
+  const nonce = randomBytes(16).toString("base64");
+  const contentSecurityPolicy = buildContentSecurityPolicy(nonce);
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
+
   const hostname = request.headers.get("host")?.split(":", 1)[0]?.toLowerCase();
-  if (hostname !== DOCS_HOST) return NextResponse.next();
+  let response: NextResponse;
+  if (hostname !== DOCS_HOST) {
+    response = NextResponse.next({ request: { headers: requestHeaders } });
+    response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
+    return response;
+  }
 
   const { pathname } = request.nextUrl;
   if (pathname.startsWith("/_next/") || pathname.startsWith("/brand/") || pathname === "/favicon.ico") {
-    return NextResponse.next();
+    response = NextResponse.next({ request: { headers: requestHeaders } });
+    response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
+    return response;
   }
 
   const destination = request.nextUrl.clone();
@@ -22,9 +54,20 @@ export function proxy(request: NextRequest) {
     destination.pathname = `/docs${pathname}`;
   }
 
-  return NextResponse.rewrite(destination);
+  response = NextResponse.rewrite(destination, { request: { headers: requestHeaders } });
+  response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+  response.headers.set("Cache-Control", "private, no-store, max-age=0");
+  return response;
 }
 
 export const config = {
-  matcher: "/:path*",
+  matcher: [
+    {
+      source: "/((?!api|_next/static|_next/image|favicon.ico).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
+  ],
 };

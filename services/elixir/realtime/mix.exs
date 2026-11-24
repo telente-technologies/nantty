@@ -19,7 +19,8 @@ defmodule Realtime.MixProject do
 
   defp deps do
     [
-      {:phoenix, "~> 1.8.15"},
+      {:phoenix, github: "phoenixframework/phoenix", tag: "v1.8.17", override: true},
+      {:phoenix_pubsub, github: "phoenixframework/phoenix_pubsub", tag: "v2.4.0", override: true},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:telemetry_metrics_prometheus_core, "~> 1.2"},

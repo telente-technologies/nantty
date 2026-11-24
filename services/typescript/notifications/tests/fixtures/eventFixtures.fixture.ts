@@ -55,6 +55,7 @@ export const eventFixtures: Readonly<Record<string, EventFixture>> = {
   "order.delivered": { data: { ...order, confirmBy: "2026-10-10T10:00:00.000Z" }, templates: ["orderDelivered"], inAppRecipients: ["buyer1"] },
   "order.completed": { data: order, templates: ["orderCompleted"], inAppRecipients: ["buyer1"] },
   "order.cancelled": { data: { ...order, cancelledBy: "buyer", reason: "Changed my mind" }, templates: ["orderCancelled", "sellerOrderCancelled"], inAppRecipients: ["buyer1", "seller1"] },
+  "storeCredit.earned": { data: { storeId: "s1", buyerAccountId: "buyer1", orderGroupId: "og1", amountMinor: 330000, currency: "NGN", storeName: "Glow by Zainab", orderNumber: "ZM-48213" }, templates: ["storeCreditEarned"], inAppRecipients: ["buyer1"] },
   "escrow.held": { data: { ...escrow, groups, releaseRule: "Funds release 3 days after delivery." }, templates: ["escrowFundsProtected"], inAppRecipients: ["buyer1"] },
   "escrow.releaseScheduled": { data: { ...escrow, status: "held", autoReleaseAt: "2026-11-06T12:00:00.000Z" }, templates: [], inAppRecipients: [] },
   "escrow.releaseFailed": { data: { ...escrow, status: "held", autoReleaseAt: "2026-11-03T12:00:00.000Z", reason: "provider unavailable" }, templates: [], inAppRecipients: ["seller1"] },

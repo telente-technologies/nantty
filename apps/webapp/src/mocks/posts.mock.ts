@@ -2,6 +2,7 @@ import { ApiError } from "@/errors/api.error";
 import type { Post, PostAnalytics, PostAnalyticsDaily } from "@/types";
 
 import { findMockClipsByIds } from "./clips.mock";
+import { findMockVideoById } from "./videos.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
 import { mockPostsState, sponsoredFeedPosts, withCurrentProductPrices } from "./postCatalog.mock";
 import { findSeededMockQuote } from "./postAudience.mock";
@@ -75,7 +76,7 @@ const buildPostAnalytics = (post: Post): PostAnalytics => {
 
 export const postsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/posts/:postId", ({ params }) => {
-    const post = findPostIncludingSponsored(params.postId!) ?? findMockClipsByIds([params.postId!])[0] ?? findSeededMockQuote(params.postId!);
+    const post = findPostIncludingSponsored(params.postId!) ?? findMockClipsByIds([params.postId!])[0] ?? findSeededMockQuote(params.postId!) ?? findMockVideoById(params.postId!);
     if (!post) throw new ApiError(404, "This post was removed");
     return withCurrentProductPrices(post);
   }),

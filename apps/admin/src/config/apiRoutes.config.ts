@@ -100,6 +100,8 @@ const peopleRoutes: ApiRouteDefinition[] = [
   write("POST", "/admin/usernames/reserved", ["reserved-usernames:manage"], { stepUp: true }),
   write("DELETE", "/admin/usernames/reserved/:id", ["reserved-usernames:manage"], { stepUp: true }),
   read("/admin/account-health/:id", ["users:read", "copyright:review"]),
+  write("PUT", "/admin/account-health/:id/monetisation-override", ["users:suspend", "moderation:appeals"], sensitive),
+  write("DELETE", "/admin/account-health/:id/monetisation-override", ["users:suspend", "moderation:appeals"], sensitive),
 ];
 
 const verificationRoutes: ApiRouteDefinition[] = [
@@ -135,6 +137,8 @@ const verificationRoutes: ApiRouteDefinition[] = [
   read("/admin/applications/creators", ["applications:creators"]),
   read("/admin/applications/creators/:id", ["applications:creators"]),
   write("POST", "/admin/applications/creators/:id/{approve|reject}", ["applications:creators"], sensitive),
+  read("/admin/creators/:userId/violations", ["applications:creators", "users:moderate"]),
+  write("POST", "/admin/creators/:userId/violations", ["applications:creators", "users:moderate"], sensitive),
   read("/admin/brands", brandReaders),
   read("/admin/brands/:id", brandReaders),
   read("/admin/brands/:id/documents/:documentId", ["brands:review"]),
@@ -153,6 +157,7 @@ const trustRoutes: ApiRouteDefinition[] = [
   write("POST", "/admin/reports/:id/actions", ["moderation:reports"], reasoned),
   write("POST", "/admin/reports/:id/{suspend-author|revoke-author-verification}", ["moderation:reports"], sensitive),
   read("/admin/live-incidents", ["moderation:reports"]),
+  read("/admin/moderation/child-safety/quarantine", ["moderation:reports"]),
   read("/admin/live-incidents/:id", ["moderation:reports"]),
   write("POST", "/admin/live-incidents/:id/actions", ["moderation:reports"], reasoned),
   write("POST", "/admin/live-incidents/:id/end-and-suspend", ["moderation:reports"], sensitive),
@@ -194,12 +199,15 @@ const trustRoutes: ApiRouteDefinition[] = [
   read("/admin/ads/:id", adReaders),
   write("POST", "/admin/ads/:id/approve", ["ads:review"]),
   write("POST", "/admin/ads/:id/reject", ["ads:review"], reasoned),
+  write("POST", "/admin/ads/:id/appeal/resolve", ["ads:review"]),
   read("/admin/advertisers", adReaders),
   read("/admin/advertisers/:id", adReaders),
   write("POST", "/admin/advertisers/:id/{suspend|reinstate}", ["advertisers:manage"], reasoned),
   read("/admin/ad-policies", adReaders),
   write("POST", "/admin/ad-policies", ["advertisers:manage"]),
   write("PUT", "/admin/ad-policies/:id", ["advertisers:manage"], reasoned),
+  read("/admin/ads-policies", ["config:revenue", "ads:review"]),
+  write("PUT", "/admin/ads-policies/frequency/:format", ["config:revenue"]),
 ];
 
 const financeRoutes: ApiRouteDefinition[] = [
@@ -253,6 +261,13 @@ const moneyRoutes: ApiRouteDefinition[] = [
   write("POST", "/admin/payments/webhooks/dead-letters/:id/replay", ["payments:webhooks"], moneyAction),
   write("POST", "/admin/payments/{wallet-fundings|wallets}/:id/{reject|unfreeze}", ["payments:wallets"], moneyAction),
   write("POST", "/admin/payments/wallet-reconciliation/run", ["payments:wallets"], sensitive),
+  write("POST", "/admin/payments/reconciliations", ["payments:wallets"], sensitive),
+  read("/admin/payments/payout-accounts/stuck", ["payments:wallets"]),
+  write("POST", "/admin/payments/payout-accounts/jobs/:id/retry", ["payments:wallets"], sensitive),
+  write("POST", "/admin/payments/payout-accounts/:id/verification-prompt", ["payments:wallets"], sensitive),
+  read("/admin/wallet/seller-reserves", ["payouts:approve"]),
+  write("PUT", "/admin/wallet/seller-reserves/:id", ["payouts:approve"], sensitive),
+  write("DELETE", "/admin/wallet/seller-reserves/:id", ["payouts:approve"], sensitive),
 ];
 
 const catalogAndConfigRoutes: ApiRouteDefinition[] = [
@@ -272,6 +287,8 @@ const catalogAndConfigRoutes: ApiRouteDefinition[] = [
   read("/admin/config/:key/versions", configReaders),
   write("PUT", "/admin/config/:key", configWriters, sensitive),
   write("POST", "/admin/config/:key/versions/:version/restore", configWriters, sensitive),
+  read("/admin/retention-policies", ["config:read"]),
+  write("PUT", "/admin/retention-policies/:id", ["config:rules"], sensitive),
   read("/admin/automation/catalog", ["automation:manage"]),
   read("/admin/automation/sample-events", ["automation:manage"]),
   read("/admin/automation/executions", ["automation:manage"]),
@@ -300,6 +317,7 @@ const supportAndLegalRoutes: ApiRouteDefinition[] = [
   read("/admin/support/email/segments", ["support:email", "marketing:email"]),
   read("/admin/support/email/sends", ["support:email", "marketing:email"]),
   read("/admin/support/email/deliveries/failed", ["support:email", "marketing:email"]),
+  read("/admin/support/notifications/push/deliveries/failed", ["support:email"]),
   write("POST", "/admin/support/email/preview", ["support:email", "marketing:email"]),
   write("POST", "/admin/support/email/send", ["support:email", "marketing:email"]),
   read("/admin/help/categories", helpReaders),

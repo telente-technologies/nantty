@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import type { ReactNode } from "react";
 
 import { ThemeInitScript, ThemeProvider, themeViewport } from "@nantty/web-kit";
@@ -18,10 +19,12 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { ...themeViewport, width: "device-width", initialScale: 1, viewportFit: "cover" };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html lang="en-NG" suppressHydrationWarning>
-      <head><ThemeInitScript /></head>
+      <head><ThemeInitScript nonce={nonce} /></head>
       <body><ThemeProvider initialPreference="system">{children}</ThemeProvider></body>
     </html>
   );

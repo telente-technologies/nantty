@@ -1,6 +1,6 @@
 import type { Page } from "@/types";
 import type { BusinessCategory, BusinessProfileInput } from "@/types/socialGraph.type";
-import type { ActingProfile, BrandDetail, BrandProducts, BrandSummary, LinkedProfiles, NewBrandInput } from "@/types/brand.type";
+import type { ActingProfile, BrandDetail, BrandProducts, BrandSummary, LinkedProfiles, NewBrandInput, StoreTeamRequest } from "@/types/brand.type";
 
 import { api } from "../core/apiClient.service";
 
@@ -22,4 +22,7 @@ export const brandsService = {
     api.post<LinkedProfiles>("/api/v1/users/me/linked-profiles/choose", { keep }, { headers: { "X-Step-Up-Token": stepUpToken } }),
   setBrandSelling: (brandId: string, sellingEnabled: boolean, stepUpToken: string) =>
     api.patch<BrandDetail>(`/api/v1/brands/${encodeURIComponent(brandId)}`, { sellingEnabled }, { headers: { "X-Step-Up-Token": stepUpToken } }),
+  fetchStoreTeamRequests: () => api.getList<StoreTeamRequest>("/api/v1/stores/team-requests"),
+  acceptStoreTeamRequest: (requestId: string) => api.post<void>(`/api/v1/stores/team-requests/${encodeURIComponent(requestId)}/accept`, {}),
+  declineStoreTeamRequest: (requestId: string) => api.post<void>(`/api/v1/stores/team-requests/${encodeURIComponent(requestId)}/decline`, {}),
 };

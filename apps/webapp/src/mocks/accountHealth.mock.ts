@@ -1,10 +1,12 @@
-import type { AccountHealth } from "@/types";
+import { ApiError } from "@/errors/api.error";
+import type { AccountHealth, ModerationDecision, Page } from "@/types";
 
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
 const HOUR_IN_MS = 3_600_000;
 const DAY_IN_MS = 24 * HOUR_IN_MS;
 const appealedStrikeIds = new Set<string>();
+const appealedDecisionIds = new Set<string>();
 const counterNoticeClaimIds = new Set<string>();
 
 function buildMockAccountHealth(): AccountHealth {
@@ -35,14 +37,53 @@ function buildMockAccountHealth(): AccountHealth {
   };
 }
 
+function buildMockModerationDecisions(): Page<ModerationDecision> {
+  const decidedAt = new Date(Date.now() - 4 * DAY_IN_MS).toISOString();
+  const hasAppeal = appealedDecisionIds.has("rep-mod-1");
+  return {
+    data: [
+      {
+        reportId: "rep-mod-1",
+        action: "REMOVE_CONTENT",
+        reason: "Removed under Community Guidelines: misleading product claim.",
+        decidedAt,
+        target: { type: "post", id: "post-4", label: "Post" },
+        appealable: !hasAppeal,
+        appeal: hasAppeal ? { id: "appeal-rep-mod-1", status: "PENDING" } : null,
+      },
+    ],
+    nextCursor: null,
+  };
+}
+
 export const accountHealthMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/account/status", () => buildMockAccountHealth()),
   createMockRoute("POST", "/api/v1/account/status/strikes/:strikeId/appeal", ({ params }) => {
     appealedStrikeIds.add(params.strikeId ?? "");
     return { status: "received" };
   }),
+  createMockRoute("GET", "/api/v1/moderation/decisions/me", () => buildMockModerationDecisions()),
+  createMockRoute("POST", "/api/v1/moderation/decisions/:reportId/appeal", ({ params, body }) => {
+    const message = typeof (body as { message?: unknown } | null)?.message === "string" ? (body as { message: string }).message.trim() : "";
+    if (message.length < 20) throw new ApiError(400, "Explain your appeal in 20 to 2000 characters");
+    const reportId = params.reportId ?? "";
+    if (appealedDecisionIds.has(reportId)) throw new ApiError(409, "You already appealed this decision.");
+    appealedDecisionIds.add(reportId);
+    return { status: "received", appealId: `appeal-${reportId}` };
+  }),
   createMockRoute("POST", "/api/v1/copyright/claims/:claimId/counter-notices", ({ params }) => {
     counterNoticeClaimIds.add(params.claimId ?? "");
     return { noticeId: `notice-${params.claimId}`, status: "received", restoreEligibleAt: new Date(Date.now() + 14 * DAY_IN_MS).toISOString() };
+  }),
+  createMockRoute("GET", "/api/v1/users/me/suspension", () => ({
+    reason: "Repeated copyright or policy violations.",
+    suspendedAt: new Date(Date.now() - 2 * DAY_IN_MS).toISOString(),
+    deletionScheduledFor: new Date(Date.now() + 28 * DAY_IN_MS).toISOString(),
+    retentionDays: 30,
+  })),
+  createMockRoute("POST", "/api/v1/users/me/suspension/appeal", ({ body }) => {
+    const message = typeof (body as { message?: unknown } | null)?.message === "string" ? (body as { message: string }).message.trim() : "";
+    if (message.length < 20) throw new ApiError(400, "Explain your appeal in 20 to 2000 characters");
+    return { status: "received", appealId: "susp_appeal_1" };
   }),
 ];

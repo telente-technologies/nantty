@@ -55,8 +55,8 @@ function extractServiceCalls(): ExtractedCall[] {
       const templates: string[] = [];
       const literal = /^(?:"([^"]+)"|`([^`]+)`)/.exec(argumentText);
       if (argumentText.includes("buildRecordPath(")) {
-        const suffix = /buildRecordPath\([^)]*\)\}?([^`,]*)/.exec(argumentText)?.[1] ?? "";
-        templates.push(`/admin/config/\${id}${suffix}`, `/admin/automation/rules/\${id}${suffix}`);
+        const suffix = /buildRecordPath\([^)]*\)[}]?([^`,]*)/.exec(argumentText)?.[1] ?? "";
+        templates.push("/admin/config/${id}" + suffix, "/admin/automation/rules/${id}" + suffix);
       } else if (argumentText.startsWith("endpoint.basePath")) templates.push("/admin/config", "/admin/automation/rules");
       else if (literal) templates.push(literal[1] ?? literal[2]!);
       else {

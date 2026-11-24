@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import { readNanttyWebUrl } from "@/config/site.config";
 
+import { StepUpVerificationPanel, type StepUpResult } from "./stepUpVerification";
 import styles from "./organizationWorkspace.module.css";
 
 type Organization = { id: string; name: string; slug: string; role: string; createdAt: string };
@@ -75,7 +76,6 @@ export function OrganizationWorkspace() {
   const [editingSlug, setEditingSlug] = useState("");
   const [search, setSearch] = useState("");
   const [transferTarget, setTransferTarget] = useState<OrganizationMember | null>(null);
-  const [transferPassword, setTransferPassword] = useState("");
   const [transferPhrase, setTransferPhrase] = useState("");
   const [transferError, setTransferError] = useState("");
   const [notice, setNotice] = useState("");
@@ -264,30 +264,19 @@ export function OrganizationWorkspace() {
     finally { setSaving(false); }
   }
 
-  async function transferOwnership(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function executeOwnershipTransfer(stepUp: StepUpResult) {
     if (!selectedId || !transferTarget || !activeWorkspace) return;
     if (transferPhrase !== "TRANSFER OWNERSHIP") {
-      setTransferError("Type TRANSFER OWNERSHIP exactly to confirm.");
+      setTransferError("Type TRANSFER OWNERSHIP exactly above before verifying.");
       return;
     }
     setSaving(true);
     setTransferError("");
     setError(null);
     try {
-      const stepUpResponse = await fetch("/api/developer/step-up", {
-        method: "POST", cache: "no-store", credentials: "same-origin",
-        headers: { accept: "application/json", "content-type": "application/json" },
-        body: JSON.stringify({ password: transferPassword }),
-      });
-      const stepUpPayload: unknown = await stepUpResponse.json().catch(() => null);
-      const stepUpMessage = typeof stepUpPayload === "object" && stepUpPayload !== null && "message" in stepUpPayload && typeof stepUpPayload.message === "string" ? stepUpPayload.message : "Identity confirmation failed.";
-      const stepUpToken = typeof stepUpPayload === "object" && stepUpPayload !== null && "stepUpToken" in stepUpPayload && typeof stepUpPayload.stepUpToken === "string" ? stepUpPayload.stepUpToken : "";
-      setTransferPassword("");
-      if (!stepUpResponse.ok || !stepUpToken) throw new Error(stepUpMessage);
-
       const result = await organizationRequest<{ previousOwnerMembershipId: string; newOwnerMembershipId: string }>(`/${selectedId}/ownership-transfer`, {
-        method: "POST", headers: { "X-Step-Up-Token": stepUpToken },
+        method: "POST",
+        headers: { "X-Step-Up-Token": stepUp.stepUpToken },
         body: JSON.stringify({ memberId: transferTarget.membershipId, confirmation: "TRANSFER OWNERSHIP" }),
       });
       const adminRole = activeWorkspace.roles.find((role) => role.name === "admin");
@@ -314,12 +303,13 @@ export function OrganizationWorkspace() {
       setNotice(`Ownership transferred to ${transferTarget.name || transferTarget.username}. Your role is now admin.`);
     } catch (cause) {
       setTransferError(cause instanceof Error ? cause.message : "Could not transfer organization ownership.");
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   }
 
   function cancelOwnershipTransfer() {
     setTransferTarget(null);
-    setTransferPassword("");
     setTransferPhrase("");
     setTransferError("");
   }
@@ -366,10 +356,30 @@ export function OrganizationWorkspace() {
         <section className={styles.capabilities} aria-labelledby="access-title"><div><h2 id="access-title">Access</h2><p>Active application permissions come from explicit application grants; organization roles alone do not grant access to an application.</p></div><div className={styles.capabilityLists}><div><h3>Organization capabilities</h3><ul>{activeWorkspace.access.organizationCapabilities.map((capability) => <li key={capability}>{capability}</li>)}</ul></div><div><h3>Active application grants</h3><ul>{activeWorkspace.access.applicationCapabilities.length ? activeWorkspace.access.applicationCapabilities.map((capability) => <li key={capability}>{capability}</li>) : <li>No application grants are active.</li>}</ul></div><div><h3>Eligible by your role</h3><ul>{activeWorkspace.access.eligibleApplicationCapabilities.length ? activeWorkspace.access.eligibleApplicationCapabilities.map((capability) => <li key={capability}>{capability}</li>) : <li>Your role has no application capabilities.</li>}</ul>{activeWorkspace.access.applicationGrantRequired ? <p>Eligibility is not an active grant. An organization owner must assign access after the application service is connected.</p> : null}</div></div></section>
         <section className={styles.members} aria-labelledby="members-title"><div className={styles.sectionHeading}><div><h2 id="members-title">Members</h2><p>{activeWorkspace.members.length} member{activeWorkspace.members.length === 1 ? "" : "s"} · {canManageMembers ? "Role changes and removal are available to your role." : "Your role can view organization access only."}</p></div><label className={styles.searchLabel}><span className={styles.visuallyHidden}>Search members</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search members" /></label></div>
           <div className={styles.tableScroll}><table><thead><tr><th scope="col">Member</th><th scope="col">Role</th><th scope="col">Status</th><th scope="col">Joined</th><th scope="col"><span className={styles.visuallyHidden}>Member actions</span></th></tr></thead><tbody>
-            {filteredMembers.map((member) => <tr key={member.membershipId}><th scope="row"><button type="button" className={styles.memberLink} onClick={() => void loadMember(member.membershipId)}>{member.name || member.username}<span>@{member.username}</span></button></th><td>{canManageMembers && member.role !== "owner" && (activeWorkspace.access.role === "owner" || member.role !== "billing") ? <select value={member.role} disabled={saving} aria-label={`Role for ${member.name || member.username}`} onChange={(event) => void updateMemberRole(member, event.target.value)}>{assignableRoles.map((role) => <option key={role.name} value={role.name}>{role.name}</option>)}</select> : <span className={styles.memberRole}>{member.role}</span>}</td><td>{member.status}</td><td>{formatDate(member.joinedAt)}</td><td className={styles.actions}>{activeWorkspace.access.role === "owner" && member.role !== "owner" ? <button type="button" disabled={saving} onClick={() => { setTransferTarget(member); setTransferError(""); setTransferPassword(""); setTransferPhrase(""); }}>Transfer ownership</button> : null}{canManageMembers && member.role !== "owner" && (activeWorkspace.access.role === "owner" || member.role !== "billing") ? <button type="button" disabled={saving} onClick={() => void removeMember(member)}>Remove</button> : null}</td></tr>)}
+            {filteredMembers.map((member) => <tr key={member.membershipId}><th scope="row"><button type="button" className={styles.memberLink} onClick={() => void loadMember(member.membershipId)}>{member.name || member.username}<span>@{member.username}</span></button></th><td>{canManageMembers && member.role !== "owner" && (activeWorkspace.access.role === "owner" || member.role !== "billing") ? <select value={member.role} disabled={saving} aria-label={`Role for ${member.name || member.username}`} onChange={(event) => void updateMemberRole(member, event.target.value)}>{assignableRoles.map((role) => <option key={role.name} value={role.name}>{role.name}</option>)}</select> : <span className={styles.memberRole}>{member.role}</span>}</td><td>{member.status}</td><td>{formatDate(member.joinedAt)}</td><td className={styles.actions}>{activeWorkspace.access.role === "owner" && member.role !== "owner" ? <button type="button" disabled={saving} onClick={() => { setTransferTarget(member); setTransferError(""); setTransferPhrase(""); }}>Transfer ownership</button> : null}{canManageMembers && member.role !== "owner" && (activeWorkspace.access.role === "owner" || member.role !== "billing") ? <button type="button" disabled={saving} onClick={() => void removeMember(member)}>Remove</button> : null}</td></tr>)}
             {!filteredMembers.length ? <tr><td colSpan={5} className={styles.noMembers}>No members match this search.</td></tr> : null}
           </tbody></table></div>
-          {transferTarget && activeWorkspace.access.role === "owner" ? <form className={styles.transferForm} onSubmit={transferOwnership} aria-labelledby="transfer-ownership-title"><div><h3 id="transfer-ownership-title">Transfer ownership to {transferTarget.name || transferTarget.username}</h3><p>This is a permanent role change. You will become an admin and lose owner-only security controls. Confirm with your Nantty password and the phrase below.</p></div><label>Password<input type="password" autoComplete="current-password" required value={transferPassword} onChange={(event) => setTransferPassword(event.target.value)} /></label><label>Type TRANSFER OWNERSHIP<input required value={transferPhrase} onChange={(event) => setTransferPhrase(event.target.value)} autoCapitalize="characters" /></label>{transferError ? <p className={styles.transferError} role="alert">{transferError}</p> : null}<div className={styles.transferActions}><button type="button" disabled={saving} onClick={cancelOwnershipTransfer}>Cancel</button><button type="submit" disabled={saving || transferPhrase !== "TRANSFER OWNERSHIP"}>{saving ? "Confirming…" : "Confirm transfer"}</button></div></form> : null}
+          {transferTarget && activeWorkspace.access.role === "owner" ? (
+            <section className={styles.transferForm} aria-labelledby="transfer-ownership-title">
+              <div>
+                <h3 id="transfer-ownership-title">Transfer ownership to {transferTarget.name || transferTarget.username}</h3>
+                <p>This is a permanent role change. You will become an admin and lose owner-only security controls. Type <code>TRANSFER OWNERSHIP</code> and complete 6-digit Email OTP or password step-up verification.</p>
+              </div>
+              <label>
+                Type TRANSFER OWNERSHIP
+                <input required value={transferPhrase} onChange={(event) => setTransferPhrase(event.target.value)} autoCapitalize="characters" placeholder="TRANSFER OWNERSHIP" />
+              </label>
+              {transferError ? <p className={styles.transferError} role="alert">{transferError}</p> : null}
+              <StepUpVerificationPanel
+                title="Confirm ownership transfer"
+                description="Verify with a 6-digit email OTP code or your Nantty password."
+                submitLabel="Verify & transfer ownership"
+                busyExternal={saving}
+                onCancel={cancelOwnershipTransfer}
+                onVerified={executeOwnershipTransfer}
+              />
+            </section>
+          ) : null}
           {canManageMembers ? <section className={styles.invitationPanel} aria-labelledby="organization-invitations-title"><div><h3 id="organization-invitations-title">Invite a member</h3><p>Invite an existing Nantty account using its verified email. They’ll receive an email invitation and can also accept it from their Developer portal inbox.</p></div><form className={styles.inviteForm} onSubmit={createInvitation}><label>Verified Nantty account email<input type="email" required maxLength={254} autoComplete="email" value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} /></label><label>Organization role<select value={inviteRole} onChange={(event) => setInviteRole(event.target.value)}>{assignableRoles.map((role) => <option key={role.name} value={role.name}>{role.name}</option>)}</select></label><button type="submit" disabled={saving}>{saving ? "Sending…" : "Send invitation"}</button></form><div className={styles.invitationList} aria-label="Pending organization invitations">{pendingInvitations.map((invitation) => <article className={styles.invitationRow} key={invitation.id}><div><strong>{invitation.inviteeEmail}</strong><span>{invitation.role} · Expires {formatDate(invitation.expiresAt)}</span></div><div className={styles.invitationActions}><button type="button" disabled={saving} onClick={() => void resendInvitation(invitation)}>Resend</button><button type="button" disabled={saving} onClick={() => void revokeInvitation(invitation)}>Revoke</button></div></article>)}{pendingInvitations.length === 0 ? <p className={styles.invitationsNote}>No pending invitations.</p> : null}</div></section> : null}
         </section>
         {activeWorkspace.access.organizationCapabilities.includes("security.manage") ? <section className={styles.audit} aria-labelledby="audit-title"><div><h2 id="audit-title">Organization audit log</h2><p>Recent organization and membership changes recorded by Identity.</p></div><div className={styles.tableScroll}><table><thead><tr><th scope="col">Action</th><th scope="col">Actor role</th><th scope="col">Subject</th><th scope="col">Time</th></tr></thead><tbody>{auditEntries.map((entry) => <tr key={entry.id}><td>{entry.action}</td><td>{entry.actorRole}</td><td>{entry.subjectType}</td><td>{formatDate(entry.createdAt)}</td></tr>)}{auditEntries.length === 0 ? <tr><td colSpan={4} className={styles.noMembers}>No organization events have been recorded.</td></tr> : null}</tbody></table></div></section> : null}

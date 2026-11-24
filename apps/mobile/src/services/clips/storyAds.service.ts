@@ -1,9 +1,10 @@
+import { createSecureRandomHex } from "@/utils/secureRandomId.util";
 import type { ID } from "@/types";
 import type { StoryAdDecision } from "@/types/social.type";
 
 import { api } from "../core/apiClient.service";
 
-const adSessionId = `story_ads_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+const adSessionId = `story_ads_${Date.now().toString(36)}_${createSecureRandomHex(6)}`;
 
 export const STORY_AD_SLOT_KIND = "story";
 

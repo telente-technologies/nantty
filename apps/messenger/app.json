@@ -30,7 +30,7 @@
       [
         "expo-secure-store",
         {
-          "configureAndroidBackup": true
+          "configureAndroidBackup": false
         }
       ],
       "expo-notifications",

@@ -97,9 +97,9 @@ const pageOfClips = (clips: readonly Clip[], cursor: string | null): Page<Clip> 
   return { data: clips.slice(start, end).map(withCurrentSound), nextCursor: end < clips.length ? String(end) : null };
 };
 
+export const pageOfMockClipsByAuthor = (authorId: string, cursor: string | null): Page<Clip> =>
+  pageOfClips(listMockClipsByAuthorId(authorId), cursor);
+
 export const clipsMocks: MockRoute[] = [
   createMockRoute("GET", "/api/v1/clips", ({ query }) => pageOfClips(listClipsForFeedTab(query.get("tab")), query.get("cursor"))),
-  createMockRoute("GET", "/api/v1/users/:userId/clips", ({ params, query }) =>
-    pageOfClips(listMockClipsByAuthorId(params.userId!), query.get("cursor")),
-  ),
 ];

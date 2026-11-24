@@ -23,6 +23,30 @@ const expectedAdsScreenshots = [
 ];
 const expectedCreatorScreenshots = ["screenshots/liveDashboard.webp", "screenshots/liveEscrowStatus.webp"];
 
+function extractScriptElements(html) {
+  const lower = html.toLowerCase();
+  const scripts = [];
+  let cursor = 0;
+  while (cursor < lower.length) {
+    const open = lower.indexOf("<script", cursor);
+    if (open === -1) break;
+    const afterName = lower[open + 7];
+    if (afterName !== undefined && afterName !== ">" && !/\s/.test(afterName)) {
+      cursor = open + 7;
+      continue;
+    }
+    const openEnd = lower.indexOf(">", open + 7);
+    if (openEnd === -1) break;
+    const closeStart = lower.indexOf("</script", openEnd + 1);
+    if (closeStart === -1) break;
+    const closeEnd = lower.indexOf(">", closeStart + 8);
+    if (closeEnd === -1) break;
+    scripts.push([html.slice(open, closeEnd + 1), html.slice(open + 7, openEnd), html.slice(openEnd + 1, closeStart)]);
+    cursor = closeEnd + 1;
+  }
+  return scripts;
+}
+
 test("product marketing artifact contains only the approved root routes and excludes app/API paths", async (context) => {
   const manifest = JSON.parse(await readFile(path.join(artifactRoot, "export-manifest.json"), "utf8"));
   assert.deepEqual(manifest.routes, { ads: ["/"], creator: ["/"], studio: ["/"] });
@@ -41,7 +65,7 @@ test("product marketing artifact contains only the approved root routes and excl
       assert.match(html, /name="twitter:card"/);
       assert.match(html, /name="robots" content="index, follow"/);
       assert.doesNotMatch(html, /<script\b[^>]*\bsrc\s*=|\/_next\/static\/chunks\/[^"']+\.m?js(?:[?#][^"']*)?["']/i, "prelaunch HTML must not load executable app bundles");
-      const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)];
+      const scripts = extractScriptElements(html);
       const hasServerSuspense = /<template\s+id="B:0"/.test(html);
       const themeScripts = scripts.filter(([, attributes]) => /\bdata-nantty-static-theme(?:\s|=|$)/i.test(attributes));
       const revealScripts = scripts.filter(([, attributes]) => !/\bdata-nantty-static-theme(?:\s|=|$)/i.test(attributes));

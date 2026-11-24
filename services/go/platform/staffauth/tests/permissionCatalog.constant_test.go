@@ -83,6 +83,8 @@ func TestPermissionAliasesBridgeContractKeysToServiceKeys(t *testing.T) {
 		{"usernames manage opens the withhold tools", []string{"usernames:manage"}, []string{"users.usernames.withhold"}, []string{"users.usernames.reserve"}},
 		{"plan editors manage monetization tables", []string{"config:plans"}, []string{"money.monetization.manage"}, []string{"money.ledger.read"}},
 		{"config readers only read monetization tables", []string{"config:read"}, []string{"money.monetization.read"}, []string{"money.monetization.manage"}},
+		{"payments wallets reaches provider reconciliation", []string{"payments:wallets"}, []string{"money.ledger.reconcile"}, []string{"money.ledger.reverse"}},
+		{"creator reviewers manage creator violations", []string{"applications:creators"}, []string{"money.creators.manage"}, []string{"money.ledger.reconcile"}},
 		{"nothing granted nothing aliased", nil, nil, []string{"admin.audit.read"}},
 	}
 	for _, testCase := range cases {

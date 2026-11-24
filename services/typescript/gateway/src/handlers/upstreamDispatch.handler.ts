@@ -5,6 +5,7 @@ import type { GatewayConfig } from "../configs/gateway.config.js";
 import { isChatReportSubmission, resolveUpstreamRouteForRequest, sensitiveGuestPathPrefixes, type UpstreamRoute } from "../routes/upstream.routes.js";
 import { shouldRefuseAnonymousMutation } from "../services/anonymousMutationGuard.service.js";
 import { authenticateStaffRequest, doesAdminRequestNeedStaffToken } from "../services/adminStaffGate.service.js";
+import { shouldRefuseSuspendedPrincipal } from "../services/suspendedAccountGuard.service.js";
 import type { StaffNetworkGate } from "../services/staffNetworkPolicy.service.js";
 import { doesRequestNeedPolicyGate, type PolicyGateSource } from "../services/policyAcceptanceGate.service.js";
 import { isInternalOnlyPath } from "../services/internalRouteGuard.service.js";
@@ -83,6 +84,9 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
     if (request.path === "/healthz" || request.path === "/readyz" || request.path === humanVerificationPath) markRequestRoute(request, request.path);
     if (request.path === "/healthz") return json(200, { status: "up", service: "gateway" });
     if (request.path === "/readyz") return readinessResponse(options.cacheProbe);
+    if (request.url.startsWith("//") || request.path.includes("//")) {
+      return json(404, { message: "Not found.", code: "NOT_FOUND" });
+    }
     const observed = (principal: VerifiedPrincipal | undefined): ObservedRequest => ({ requestId: request.id, path: request.path, deviceId: request.getHeader("x-device-id"), clientIp: request.remoteAddress, principal });
     if (isInternalOnlyPath(request.path)) {
       observeProbeSignalInBackground(security, options.logger, observed(undefined), internalPathSignal(request.path));
@@ -109,6 +113,9 @@ export function createUpstreamDispatchHandler(options: UpstreamDispatchOptions):
     }
     if (principal === undefined && shouldRefuseAnonymousMutation(request.method, request.path, request.getHeader("authorization"))) return json(401, unauthorizedResponseBody);
     const requestUrl = new URL(request.url, "http://gateway.internal");
+    if (shouldRefuseSuspendedPrincipal(principal, request.method, requestUrl.pathname)) {
+      return json(403, { message: "This account has been suspended.", code: "ACCOUNT_SUSPENDED" });
+    }
     if (principal !== undefined) {
       const decision = await rateLimitStore.hit(`rl:authenticated-api:a:${principal.accountId}`, options.config.authenticatedApiLimitPerMinute ?? 120, 60);
       if (!decision.allowed) {

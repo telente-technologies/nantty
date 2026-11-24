@@ -65,16 +65,54 @@ function assertSafeHtml(html, product, { requireLockedControls = true } = {}) {
   }
 }
 
+function findNextScriptElement(html, startIndex) {
+  const lower = html.toLowerCase();
+  let cursor = startIndex;
+  while (cursor < lower.length) {
+    const open = lower.indexOf("<script", cursor);
+    if (open === -1) return null;
+    const afterName = lower[open + 7];
+    if (afterName !== undefined && afterName !== ">" && !/\s/.test(afterName)) {
+      cursor = open + 7;
+      continue;
+    }
+    const openEnd = lower.indexOf(">", open + 7);
+    if (openEnd === -1) return null;
+    const closeStart = lower.indexOf("</script", openEnd + 1);
+    if (closeStart === -1) return null;
+    const closeEnd = lower.indexOf(">", closeStart + 8);
+    if (closeEnd === -1) return null;
+    return {
+      start: open,
+      end: closeEnd + 1,
+      attributes: html.slice(open + 7, openEnd),
+      body: html.slice(openEnd + 1, closeStart),
+      raw: html.slice(open, closeEnd + 1),
+    };
+  }
+  return null;
+}
+
 function removeRuntimeScripts(html) {
   let suspenseScript = "";
-  const withoutScripts = html.replace(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi, (_match, attributes, body) => {
-    if (/\bdata-nantty-static-theme(?:\s|=|$)/i.test(attributes)) {
-      suspenseScriptHashes.add(createHash("sha256").update(body).digest("base64"));
-      return _match;
+  let output = "";
+  let cursor = 0;
+  while (cursor < html.length) {
+    const script = findNextScriptElement(html, cursor);
+    if (!script) {
+      output += html.slice(cursor);
+      break;
     }
-    if (!attributes.trim() && body.includes("$RC(") && body.includes("$RV=function")) suspenseScript = body.trim();
-    return "";
-  });
+    output += html.slice(cursor, script.start);
+    if (/\bdata-nantty-static-theme(?:\s|=|$)/i.test(script.attributes)) {
+      suspenseScriptHashes.add(createHash("sha256").update(script.body).digest("base64"));
+      output += script.raw;
+    } else if (!script.attributes.trim() && script.body.includes("$RC(") && script.body.includes("$RV=function")) {
+      suspenseScript = script.body.trim();
+    }
+    cursor = script.end;
+  }
+  const withoutScripts = output.replace(/<script\b/gi, "&lt;script");
   if (!suspenseScript && /<template\s+id="B:0"/.test(html)) throw new Error("Static HTML is missing the bounded server-rendered content reveal script.");
   if (suspenseScript) {
     const hash = createHash("sha256").update(suspenseScript).digest("base64");

@@ -40,6 +40,10 @@ export function fetchFailedEmailDeliveries(signal?: AbortSignal): Promise<{ deli
   return sendAdminApiRequest("/admin/support/email/deliveries/failed", { signal });
 }
 
+export function fetchFailedPushDeliveries(signal?: AbortSignal): Promise<{ deliveries: FailedEmailDeliveryRecord[] }> {
+  return sendAdminApiRequest("/admin/support/notifications/push/deliveries/failed", { signal });
+}
+
 export function previewSupportEmail(input: EmailDraftInput): Promise<EmailPreview> {
   return sendAdminApiRequest("/admin/support/email/preview", { method: "POST", body: input });
 }

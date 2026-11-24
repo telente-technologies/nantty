@@ -31,6 +31,8 @@ type UsersSettings struct {
 	SocialInternalToken         string
 	LiveInternalUrl             string
 	LiveInternalToken           string
+	OtpEventKey                 []byte
+	OtpEventKeyId               string
 	Verification                IdentityVerificationSettings
 }
 
@@ -59,10 +61,25 @@ func ReadUsersSettingsFromEnvironment(reader *platformconfig.EnvironmentReader) 
 		SocialInternalToken:         reader.ReadStringOrDefault("SOCIAL_INTERNAL_API_TOKEN", ""),
 		LiveInternalUrl:             reader.ReadStringOrDefault("USERS_LIVE_INTERNAL_URL", ""),
 		LiveInternalToken:           reader.ReadStringOrDefault("LIVE_INTERNAL_API_TOKEN", ""),
+		OtpEventKey:                 readOptionalBase64Key(reader, "AUTH_OTP_EVENT_KEY", 32),
+		OtpEventKeyId:               reader.ReadStringOrDefault("AUTH_OTP_EVENT_KEY_ID", "otp-1"),
 		Verification:                ReadIdentityVerificationSettingsFromEnvironment(reader),
 	}
 	settings.AddressPhoneKey = readAddressPhoneKey(reader, settings.IsProduction())
 	return settings
+}
+
+func readOptionalBase64Key(reader *platformconfig.EnvironmentReader, name string, length int) []byte {
+	encoded := reader.ReadStringOrDefault(name, "")
+	if encoded == "" {
+		return nil
+	}
+	decoded, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil || len(decoded) != length {
+		reader.ReadRequiredString(name + "_AS_BASE64_OF_32_BYTES")
+		return nil
+	}
+	return decoded
 }
 
 func readSigningKey(reader *platformconfig.EnvironmentReader, name string) []byte {

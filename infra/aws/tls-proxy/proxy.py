@@ -63,8 +63,12 @@ def config_text(config):
 
 def atomic(path, value):
     pending = path.with_suffix(".new")
-    with pending.open("w") as stream:
-        os.chmod(pending, 0o600)
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    fd = os.open(pending, flags, 0o600)
+    os.fchmod(fd, 0o600)
+    with os.fdopen(fd, "w") as stream:
         stream.write(value)
     pending.replace(path)
 
@@ -90,6 +94,7 @@ def install(bundle, config):
 
 def probe(config, port, fingerprint):
     context = ssl.create_default_context(cafile=str(STATE / "ca.pem"))
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.load_cert_chain(str(STATE / "identity.pem"))
     with socket.create_connection(("127.0.0.1", port), timeout=3) as raw:
         with context.wrap_socket(raw, server_hostname=config["identity"]) as encrypted:

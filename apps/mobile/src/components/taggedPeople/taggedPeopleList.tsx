@@ -26,7 +26,7 @@ export function TaggedPeopleList({ post, visible, onClose }: TaggedPeopleListPro
   return (
     <View style={styles.list} accessibilityRole="list">
       {people.map((person) => (
-        <TaggedPersonRow key={person.id} person={person} onPress={() => openProfile(person.id)} closeContainer={onClose} />
+        <TaggedPersonRow key={person.id} postId={post.id} person={person} onPress={() => openProfile(person.id)} closeContainer={onClose} />
       ))}
       {isLoadingMore ? <BrandLoader size="sm" style={styles.more} accessibilityLabel="Loading tagged people" /> : null}
       {!isLoadingMore && hasMore ? (

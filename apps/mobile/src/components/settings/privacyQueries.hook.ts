@@ -7,6 +7,7 @@ import type { ConsentChoices, ConsentKey, ConsentRecord } from "@/types";
 export const privacyQueryKeys = {
   consents: ["privacy", "consents"] as const,
   dataExport: ["privacy", "dataExport"] as const,
+  deletionStatus: ["privacy", "deletionStatus"] as const,
 };
 
 export const useConsentsQuery = () => useQuery({ queryKey: privacyQueryKeys.consents, queryFn: consentsService.fetchMyConsents });
@@ -42,5 +43,20 @@ export function useRequestDataExportMutation() {
   return useMutation({
     mutationFn: consentsService.requestMyDataExport,
     onSuccess: (request) => queryClient.setQueryData(privacyQueryKeys.dataExport, request),
+  });
+}
+
+export const useAccountDeletionStatusQuery = () =>
+  useQuery({
+    queryKey: privacyQueryKeys.deletionStatus,
+    queryFn: consentsService.fetchAccountDeletionStatus,
+    retry: false,
+  });
+
+export function useCancelAccountDeletionMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: consentsService.cancelAccountDeletion,
+    onSuccess: () => queryClient.setQueryData(privacyQueryKeys.deletionStatus, null),
   });
 }

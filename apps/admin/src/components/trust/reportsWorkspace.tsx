@@ -8,14 +8,15 @@ import { SelectField, TextField } from "@/components/ui/formFields";
 import { PageHeader } from "@/components/ui/pageHeader";
 import { CursorPagination } from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ui/statusBadge";
-import { Toolbar } from "@/components/ui/surfaces";
+import { SectionHeading, Toolbar } from "@/components/ui/surfaces";
 import { SegmentedTabs } from "@/components/ui/tabs";
 import { UserIdentity } from "@/components/ui/userIdentity";
 import { reportPriorityOptions, reportReasonOptions, reportTargetTypeOptions } from "@/constants/trustOptions.constant";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
+import { fetchChildSafetyQuarantine, type ChildSafetyQuarantineItem } from "@/services/safetyApi.service";
 import { fetchModerationReports, type ReportQueueFilters } from "@/services/trustApi.service";
 import type { ReportSummary } from "@/types/moderation.type";
-import { humanizeConstantName } from "@/utils/formatting.util";
+import { formatDateTime, humanizeConstantName } from "@/utils/formatting.util";
 
 import { DueTimeLabel, ModeratedTargetTableCell } from "./moderatedTargetPreview";
 import { ReportDetailPanel } from "./reportDetailPanel";
@@ -40,12 +41,21 @@ const reportColumns: readonly DataTableColumn<ReportSummary>[] = [
   { key: "sla", header: "SLA", render: (report) => <DueTimeLabel dueAt={report.slaDueAt} isOpen={report.status === "OPEN" || report.status === "IN_REVIEW"} /> },
 ];
 
+const quarantineColumns: readonly DataTableColumn<ChildSafetyQuarantineItem>[] = [
+  { key: "mediaId", header: "Media ID", isMono: true, render: (item) => item.mediaId },
+  { key: "ownerId", header: "Owner ID", isMono: true, render: (item) => item.ownerId },
+  { key: "provider", header: "Detector", render: (item) => humanizeConstantName(item.provider) },
+  { key: "status", header: "Status", render: (item) => <StatusBadge status={item.status} /> },
+  { key: "detectedAt", header: "Detected", render: (item) => formatDateTime(item.detectedAt) },
+];
+
 export function ReportsWorkspace() {
   const [statusTab, setStatusTab] = useState<StatusTabKey>("OPEN");
   const [filters, setFilters] = useState<Omit<ReportQueueFilters, "status">>({});
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const queryFilters: ReportQueueFilters = { ...filters, status: statusTab };
   const { data, errorMessage, error: queryError, isLoading, reload } = useAdminQuery((signal) => fetchModerationReports(queryFilters, signal), JSON.stringify(queryFilters));
+  const quarantine = useAdminQuery((signal) => fetchChildSafetyQuarantine(signal), "child-safety-quarantine");
 
   function updateFilter(name: keyof ReportQueueFilters, value: string) {
     setFilters((current) => ({ ...current, [name]: value || undefined, cursor: undefined }));
@@ -75,6 +85,15 @@ export function ReportsWorkspace() {
         emptyMessage={statusTab === "OPEN" ? "Queue is clear. Nice work." : "No reports match these filters."}
       />
       <CursorPagination cursor={filters.cursor} nextCursor={data?.nextCursor} onCursorChange={(cursor) => setFilters((current) => ({ ...current, cursor }))} />
+      <SectionHeading>Child-safety quarantine queue</SectionHeading>
+      <DataTable
+        caption="Child-safety quarantine"
+        columns={quarantineColumns}
+        rows={quarantine.data?.items ?? []}
+        readRowKey={(item) => item.id}
+        isLoading={quarantine.isLoading}
+        emptyMessage="No quarantined media items."
+      />
       {selectedReportId ? <ReportDetailPanel key={selectedReportId} reportId={selectedReportId} onClose={() => setSelectedReportId(null)} onReportChanged={reload} /> : null}
     </>
   );

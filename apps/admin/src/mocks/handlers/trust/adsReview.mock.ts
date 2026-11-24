@@ -1,6 +1,6 @@
 import { listMockAuditEntriesForTarget, recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { requireMockPermission } from "@/mocks/mockGuards.mock";
-import { MockHttpError, failValidation, matchesSearchText, paginateItems, readJsonObjectBody, readOptionalTrimmedString, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
+import { MockHttpError, failValidation, matchesSearchText, paginateItems, readJsonObjectBody, readOptionalTrimmedString, readRequiredReason, readRequiredTrimmedString, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute, type MockRequest } from "@/mocks/mockRouter.mock";
 import type { MockAdRecord } from "@/mocks/seed/trustAds.mock";
 import type { AdForReview, AdForReviewDetail } from "@/types/adsReview.type";
@@ -77,6 +77,24 @@ export function registerAdsReviewMockHandlers(): void {
     advertiser.violationCount += 1;
     advertiser.lastViolationAt = record.decision.decidedAt;
     recordMockAuditEntry(request, { action: "ad.rejected", area: "ads", target: auditTargetForAd(record), reason, before, after: { status: record.status, policy: policy.name, advertiserViolations: advertiser.violationCount } });
+    return respondWithJson(200, presentAdForReviewDetail(record));
+  });
+
+  registerMockRoute("POST", "/admin/ads/:adId/appeal/resolve", (request) => {
+    requireMockPermission(request, "ads:review");
+    const body = readJsonObjectBody(request);
+    const decision = body.decision === "uphold" || body.decision === "overturn" ? body.decision : failValidation("decision", "Choose uphold or overturn.");
+    const note = readRequiredTrimmedString(body, "note", 1000, 5);
+    const record = findRecordByIdOrFail(readTrustStore().ads, request.params.adId, "Ad");
+    const before = { status: record.status };
+    if (decision === "overturn") record.status = "APPROVED";
+    record.decision = {
+      policyCategoryId: decision === "uphold" ? (record.decision?.policyCategoryId ?? null) : null,
+      reason: note,
+      decidedByName: request.principal?.name ?? "System",
+      decidedAt: new Date().toISOString(),
+    };
+    recordMockAuditEntry(request, { action: `ad.appeal.${decision}`, area: "ads", target: auditTargetForAd(record), reason: note, before, after: { status: record.status } });
     return respondWithJson(200, presentAdForReviewDetail(record));
   });
 }

@@ -45,6 +45,12 @@ export function PortalNavigation({ groups, homeHref = "/", onNavigate }: { reado
             <span>Overview</span>
           </Link>
         </li>
+        <li key="/login">
+          <Link href="/login" className={styles.navigationLink} aria-current={pathname === "/login" ? "page" : undefined} onClick={onNavigate}>
+            <KeyIcon size={19} weight={pathname === "/login" ? "fill" : "regular"} />
+            <span>Sign-in &amp; OTP</span>
+          </Link>
+        </li>
         {groups.map((group) => (
           <li key={group.label} className={styles.navigationGroup}>
             <h2 className={styles.navigationGroupLabel}>{group.label}</h2>

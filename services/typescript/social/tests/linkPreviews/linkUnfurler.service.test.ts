@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { SafeFetcher } from "../../src/integrations/safeHttpFetcher.integration.js";
-import { parseLinkPreviewMetadata } from "../../src/modules/linkPreviews/services/linkPreviewParser.service.js";
+import { parseLinkPreviewMetadata, parseOembedMetadata } from "../../src/modules/linkPreviews/services/linkPreviewParser.service.js";
 import { findFirstExternalUrlInText, normalizeUrlForCache } from "../../src/modules/linkPreviews/services/linkPreviewUrl.service.js";
 import { createLinkUnfurler } from "../../src/modules/linkPreviews/services/linkUnfurler.service.js";
 import type { Db } from "../../src/types/database.type.js";
@@ -42,6 +42,12 @@ describe("link preview parsing", () => {
     const parsed = parseLinkPreviewMetadata(`<meta name="twitter:title" content="T"><meta name="twitter:image" content="javascript:alert(1)">`, new URL("https://x.example/"));
     expect(parsed.title).toBe("T");
     expect(parsed.imageUrl).toBeNull();
+  });
+
+  it("removes deeply nested markup from untrusted metadata in a single pass", () => {
+    const nestedTitle = `${"<b".repeat(20_000)}>Safe title${"</b>".repeat(20_000)}`;
+    const parsed = parseOembedMetadata({ title: nestedTitle }, new URL("https://x.example/"));
+    expect(parsed.title).toBe("Safe title");
   });
 
   it("strips tracking parameters when normalising and skips internal links", () => {

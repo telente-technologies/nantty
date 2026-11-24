@@ -9,8 +9,18 @@ export function readEmbedSiteOrigin(): string {
   }
 }
 
+function serializeForInlineScript(value: string): string {
+  return JSON.stringify(value)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}
+
 export function buildEmbedLoaderScript(origin: string): string {
-  return `(function(){"use strict";var origin=${JSON.stringify(origin)};var idPattern=/^[A-Za-z0-9_.~-]{1,100}$/;
+  const normalizedOrigin = new URL(origin).origin;
+  return `(function(){"use strict";var origin=${serializeForInlineScript(normalizedOrigin)};var idPattern=/^[A-Za-z0-9_.~-]{1,100}$/;
 function frameId(){var bytes=new Uint8Array(12);crypto.getRandomValues(bytes);return Array.prototype.map.call(bytes,function(b){return("0"+b.toString(16)).slice(-2)}).join("")}
 function build(el){if(el.getAttribute("data-nantty-ready"))return;var type=el.getAttribute("data-type")||"store";var kind=type==="products"?"products":(type==="button"||type==="product")?"product":"store";
 var id=el.getAttribute(kind==="product"?"data-product":"data-store")||"";if(!idPattern.test(id))return;var query=new URLSearchParams();
@@ -22,8 +32,8 @@ iframe.setAttribute("loading","lazy");iframe.setAttribute("title",el.getAttribut
 iframe.style.cssText="border:0;width:100%;max-width:100%;display:block;height:"+(query.get("view")==="button"?"64px":"200px");
 el.setAttribute("data-nantty-ready","1");el.appendChild(iframe);
 window.addEventListener("message",function(event){if(event.source!==iframe.contentWindow)return;if(event.origin!=="null"&&event.origin!==origin)return;var data=event.data;
-if(!data||data.type!==${JSON.stringify(embedResizeMessageType)}||data.frame!==frame||typeof data.height!=="number"||!isFinite(data.height))return;
-iframe.style.height=Math.min(Math.max(Math.round(data.height),${embedMinimumHeight}),${embedMaximumHeight})+"px"})}
+if(!data||data.type!==${serializeForInlineScript(embedResizeMessageType)}||data.frame!==frame||typeof data.height!=="number"||!isFinite(data.height))return;
+iframe.style.height=Math.min(Math.max(Math.round(data.height),${Math.trunc(embedMinimumHeight)}),${Math.trunc(embedMaximumHeight)})+"px"})}
 function scan(){var nodes=document.querySelectorAll(".nantty-embed");for(var i=0;i<nodes.length;i++)build(nodes[i])}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",scan);else scan()})();`;
 }

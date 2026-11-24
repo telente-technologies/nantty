@@ -11,6 +11,7 @@ import type { Page } from "@/types";
 import { isBackgroundCallSkippedForGuests } from "@/config/guestAccess.config";
 import { readStoreBillingRequestHeaders, readStorePlatformName } from "../money/storeBilling.service";
 import { runHumanVerificationInAppBrowser } from "../auth/humanVerification.service";
+import { createSecureRandomHex } from "@/utils/secureRandomId.util";
 
 export { ApiError };
 
@@ -160,6 +161,6 @@ export const isNetworkFailureError = (error: unknown) => !(error instanceof ApiE
 export const isRetryableApiFailure = (error: unknown) =>
   isNetworkFailureError(error) || (error instanceof ApiError && (error.status === 408 || error.status === 429 || error.status >= 500));
 
-export const generateIdempotencyKey = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+export const generateIdempotencyKey = () => `idem_${createSecureRandomHex(16)}`;
 
-export const generateRequestId = () => `zm-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+export const generateRequestId = () => `zm-${createSecureRandomHex(16)}`;
