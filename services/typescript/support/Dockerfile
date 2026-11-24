@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # build context: repository root
 FROM node:26.13.0-alpine AS build
-RUN corepack enable
+RUN npm install --global pnpm@11.24.0
 WORKDIR /repo
 COPY . .
 RUN pnpm install --frozen-lockfile --filter @nantty/support... \

@@ -3,8 +3,14 @@ name: Deploy
 on:
   push:
     branches: [main]
-    paths: ["services/**", "packages/**", "infra/aws/tls-proxy/**", "infra/aws/clamav/**", "pnpm-lock.yaml", "pnpm-workspace.yaml", "package.json", ".github/workflows/deploy.yml", ".github/scripts/**"]
+    paths: ["services/**", "packages/**", "infra/aws/tls-proxy/**", "infra/aws/clamav/**", "pnpm-lock.yaml", "pnpm-workspace.yaml", "package.json", ".dockerignore", ".github/workflows/deploy.yml", ".github/scripts/**"]
   workflow_dispatch:
+    inputs:
+      deploy_production:
+        description: Explicitly promote the validated staging release to production.
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -133,6 +139,7 @@ jobs:
 
   deploy-production:
     needs: smoke-staging
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_production }}
     runs-on: ubuntu-latest
     environment: production
     steps:

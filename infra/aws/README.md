@@ -186,7 +186,9 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
    `MIGRATE_TASK_DEFINITION[_PROD]`, `*_PRIVATE_SUBNETS`, `*_TASKS_SECURITY_GROUP`, and the snapshot/restore gate
    variables. The deploy workflow runs the migration task before each rollout and stops if it does not succeed.
    The roles are the outputs `github_ecr_push_role_arn` and `github_deploy_role_arn`.
-9. Push the first images (the CI `images` job does it on merge to main), then CI deploys; autoscaling minimums start tasks.
+9. Push the first images (the CI `images` job does it on merge to main), then CI deploys to staging and runs the staging
+   smoke test. Production promotion is not automatic: it requires manually dispatching the deploy workflow with
+   `deploy_production=true` and passing the protected `production` environment approval. Autoscaling minimums start tasks.
    The staging media task includes the private ClamAV sidecar when `enable_media_malware_scanning=true`; its 4 GiB memory reservation increases staging cost. After the first successful Terraform apply and media rollout, set the repository variable `CLAMAV_REFRESH_ENABLED_STAGING=true` to enable the daily signature-refresh workflow. That workflow tests a clean payload and the EICAR test signature, scans the image, then rolls only the ClamAV container. Keep the variable unset until the staging ECS family has the sidecar and the staging ECR/deploy OIDC roles exist.
 
 ## Known caveats to confirm on the first staging apply

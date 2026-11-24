@@ -1,6 +1,6 @@
 # Media malware scanner
 
-The media task runs this pinned, official ClamAV container as a private sidecar. The scanner has no public listener: it binds TCP only to task-local loopback and accepts streams only from the media container in the same ECS task. Nantty still rejects a skipped or failed scan.
+The media task runs this pinned, official ClamAV container as a private sidecar under the `clamav` user using ClamAV's `/init-unprivileged` entrypoint. The scanner has no public listener: it binds TCP only to task-local loopback and accepts streams only from the media container in the same ECS task. Nantty still rejects a skipped or failed scan.
 
 `clamd.conf` raises the stream and file limits to 510 MiB, above the media policy's maximum 500 MiB upload, while preserving bounded archive recursion, file count, total scan size, and scan duration. Exceeded scan limits are reported as findings and rejected rather than treated as clean. Password-protected archives and documents are also rejected because their contents cannot be inspected. The image build downloads current signatures from ClamAV; the task does not need outbound internet access. A daily GitHub workflow refreshes and deploys the scanner image only after an EICAR integration test passes. The scanner reserves 4 GiB of task memory; ClamAV upstream recommends 4 GiB because its signature databases consume substantial RAM. Staging reduces the media service to one minimum task, but the added RAM has a real AWS cost. Review the spend limit and Terraform plan before applying.
 
