@@ -30,6 +30,7 @@ function cleanText(value: string | undefined | null, maximumLength: number): str
   let insideTag = false;
   for (let index = 0; index < decoded.length; index += 1) {
     const character = decoded[index];
+    if (character === undefined) continue;
     if (insideTag) {
       if (character === ">") insideTag = false;
       continue;
