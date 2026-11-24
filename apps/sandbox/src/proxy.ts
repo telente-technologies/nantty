@@ -28,6 +28,7 @@ export function proxy(request: NextRequest) {
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+  response.headers.set("Cache-Control", "private, no-store, max-age=0");
   return response;
 }
 

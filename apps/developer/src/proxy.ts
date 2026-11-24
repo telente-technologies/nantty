@@ -33,6 +33,7 @@ export function proxy(request: NextRequest) {
   if (hostname !== DOCS_HOST) {
     response = NextResponse.next({ request: { headers: requestHeaders } });
     response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
     return response;
   }
 
@@ -40,6 +41,7 @@ export function proxy(request: NextRequest) {
   if (pathname.startsWith("/_next/") || pathname.startsWith("/brand/") || pathname === "/favicon.ico") {
     response = NextResponse.next({ request: { headers: requestHeaders } });
     response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
     return response;
   }
 
@@ -54,6 +56,7 @@ export function proxy(request: NextRequest) {
 
   response = NextResponse.rewrite(destination, { request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+  response.headers.set("Cache-Control", "private, no-store, max-age=0");
   return response;
 }
 

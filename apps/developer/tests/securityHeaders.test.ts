@@ -37,4 +37,5 @@ test("developer portal uses a per-request CSP nonce without unsafe inline script
   assert.equal(policy.includes("script-src 'self' 'unsafe-inline'"), false);
   assert.ok(nonce);
   assert.ok(policy.includes(`'nonce-${nonce}'`));
+  assert.equal(response.headers.get("cache-control"), "private, no-store, max-age=0");
 });
