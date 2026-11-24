@@ -63,10 +63,13 @@ def config_text(config):
 
 def atomic(path, value):
     pending = path.with_suffix(".new")
-    fd = os.open(pending, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    fd = os.open(pending, flags, 0o600)
+    os.fchmod(fd, 0o600)
     with os.fdopen(fd, "w") as stream:
         stream.write(value)
-    os.chmod(pending, 0o600)
     pending.replace(path)
 
 
