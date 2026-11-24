@@ -5,7 +5,12 @@ service=$1
 image=$2
 environment=$3
 cluster="nantty-${environment}"
-proxy_image="${image%/nantty/*}/nantty/tls-proxy:${image##*:}"
+proxy_image="${4:-${image%/nantty/*}/nantty/tls-proxy:${image##*:}}"
+clamav_image="${5:-${image%/nantty/*}/nantty/clamav:${image##*:}}"
+require_clamav=false
+if [[ $# -ge 5 ]]; then
+  require_clamav=true
+fi
 
 # Services deploy concurrently; task-definition files must never be shared.
 deploy_tmp=$(mktemp -d)
@@ -15,9 +20,10 @@ trap 'rm -f "$deploy_tmp/current.json" "$deploy_tmp/next.json"; rmdir "$deploy_t
 # configuration after bootstrap or infrastructure changes, rather than cloning
 # the older definition still attached to the service.
 aws ecs describe-task-definition --task-definition "nantty-${environment}-${service}" --query taskDefinition > "$deploy_tmp/current.json"
-jq -e --arg image "$image" --arg proxy "$proxy_image" --arg name "$service" '
+jq -e --arg image "$image" --arg proxy "$proxy_image" --arg clamav "$clamav_image" --arg name "$service" --arg require_clamav "$require_clamav" '
   select(any(.containerDefinitions[]; .name == "tls-proxy" and .essential == true))
-  | .containerDefinitions |= map(if .name == $name then .image = $image elif .name == "tls-proxy" then .image = $proxy else . end)
+  | select($require_clamav != "true" or any(.containerDefinitions[]; .name == "clamav" and .essential == true))
+  | .containerDefinitions |= map(if .name == $name then .image = $image elif .name == "tls-proxy" then .image = $proxy elif $name == "media" and .name == "clamav" then .image = $clamav else . end)
   | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)
 ' "$deploy_tmp/current.json" > "$deploy_tmp/next.json"
 next=$(aws ecs register-task-definition --cli-input-json "file://$deploy_tmp/next.json" --query taskDefinition.taskDefinitionArn --output text)

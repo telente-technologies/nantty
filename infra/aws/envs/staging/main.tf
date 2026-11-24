@@ -30,6 +30,7 @@ module "platform" {
   admin_ip_allow_list                      = var.admin_ip_allow_list
   blocked_client_ip_cidrs                  = var.blocked_client_ip_cidrs
   image_tag                                = var.image_tag
+  enable_media_malware_scanning            = var.enable_media_malware_scanning
   min_tasks                                = var.min_tasks
   max_tasks_cap                            = var.max_tasks_cap
   service_overrides                        = var.service_overrides

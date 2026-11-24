@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches: [main]
-    paths: ["services/**", "packages/**", "infra/aws/tls-proxy/**", "pnpm-lock.yaml", "pnpm-workspace.yaml", "package.json", ".github/workflows/deploy.yml", ".github/scripts/**"]
+    paths: ["services/**", "packages/**", "infra/aws/tls-proxy/**", "infra/aws/clamav/**", "pnpm-lock.yaml", "pnpm-workspace.yaml", "package.json", ".github/workflows/deploy.yml", ".github/scripts/**"]
   workflow_dispatch:
 
 permissions:
@@ -26,6 +26,7 @@ jobs:
       matrix:
         include:
           - { service: tls-proxy, context: infra/aws/tls-proxy, file: infra/aws/tls-proxy/Dockerfile }
+          - { service: clamav, context: infra/aws/clamav, file: infra/aws/clamav/Dockerfile }
           - { service: go-identity, context: services, file: services/go/deployables/goIdentity/Dockerfile }
           - { service: go-commerce, context: services, file: services/go/deployables/goCommerce/Dockerfile }
           - { service: go-money, context: services, file: services/go/deployables/goMoney/Dockerfile }
@@ -157,7 +158,7 @@ jobs:
           echo "prod=$prod" >> "$GITHUB_OUTPUT"
       - name: Promote the exact staging images to the production registry
         run: |
-          for service in tls-proxy go-identity go-commerce go-money go-live go-ads go-trust social notifications media search support realtime intelligence gateway; do
+          for service in tls-proxy clamav go-identity go-commerce go-money go-live go-ads go-trust social notifications media search support realtime intelligence gateway; do
             docker buildx imagetools create --tag "${{ steps.registries.outputs.prod }}/nantty/$service:$IMAGE_TAG" "${{ steps.registries.outputs.staging }}/nantty/$service:$IMAGE_TAG"
           done
       - name: Run pre-deploy migration task

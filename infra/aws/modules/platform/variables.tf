@@ -143,6 +143,11 @@ variable "image_tag" {
   type        = string
   default     = "bootstrap"
 }
+variable "enable_media_malware_scanning" {
+  description = "Run the pinned ClamAV scanner sidecar in media tasks. Requires additional task memory for signature databases."
+  type        = bool
+  default     = false
+}
 variable "min_tasks" {
   type    = number
   default = 2
