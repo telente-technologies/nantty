@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { NextRequest } from "next/server";
 
+import { proxy } from "../src/proxy";
 import config from "../next.config";
 
 test("developer portal configures strict security headers and no-store API headers", async () => {
@@ -13,8 +15,7 @@ test("developer portal configures strict security headers and no-store API heade
   assert.ok(apiRule);
 
   const globalHeaders = new Map(globalRule.headers.map((header) => [header.key.toLowerCase(), header.value]));
-  assert.ok(globalHeaders.get("content-security-policy")?.includes("frame-ancestors 'none'"));
-  assert.ok(globalHeaders.get("content-security-policy")?.includes("object-src 'none'"));
+  assert.equal(globalHeaders.has("content-security-policy"), false);
   assert.equal(globalHeaders.get("strict-transport-security"), "max-age=63072000; includeSubDomains; preload");
   assert.equal(globalHeaders.get("x-frame-options"), "DENY");
   assert.equal(globalHeaders.get("x-content-type-options"), "nosniff");
@@ -24,4 +25,16 @@ test("developer portal configures strict security headers and no-store API heade
   const apiHeaders = new Map(apiRule.headers.map((header) => [header.key.toLowerCase(), header.value]));
   assert.equal(apiHeaders.get("cache-control"), "no-store");
   assert.equal(apiHeaders.get("content-security-policy"), "default-src 'none'; frame-ancestors 'none'");
+});
+
+test("developer portal uses a per-request CSP nonce without unsafe inline scripts", () => {
+  const request = new NextRequest("https://developer.nantty.com/dashboard");
+  const response = proxy(request);
+  const policy = response.headers.get("content-security-policy") ?? "";
+  const nonce = response.headers.get("x-middleware-request-x-nonce");
+
+  assert.match(policy, /script-src 'self' 'nonce-[A-Za-z0-9+/=]+' 'strict-dynamic'/);
+  assert.equal(policy.includes("script-src 'self' 'unsafe-inline'"), false);
+  assert.ok(nonce);
+  assert.ok(policy.includes(`'nonce-${nonce}'`));
 });

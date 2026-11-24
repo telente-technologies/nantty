@@ -4,6 +4,7 @@ import type { AccountDeletionRequest, ConsentKey, ConsentRecord, DataExportReque
 import type { MarketingPreferences } from "@/types/trust.type";
 
 import { api } from "../core/apiClient.service";
+import { createSecureRandomHex } from "@/utils/secureRandomId.util";
 
 interface DataExportWire {
   readonly status: "requested" | "processing" | "ready" | "failed" | "expired";
@@ -31,7 +32,7 @@ const toDataExportRequest = (wire: DataExportWire | undefined): DataExportReques
     ? { status: "none", requestedAt: null, downloadUrl: null, expiresAt: null }
     : { status: wire.status, requestedAt: wire.requestedAt, downloadUrl: wire.downloadUrl, expiresAt: wire.expiresAt };
 
-const newExportIdempotencyKey = () => `export_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+const newExportIdempotencyKey = () => `export_${createSecureRandomHex(16)}`;
 
 export const consentsService = {
   fetchMyConsents: async () => toConsentRecord(await api.get<ConsentsWire>("/api/v1/users/me/consents")),

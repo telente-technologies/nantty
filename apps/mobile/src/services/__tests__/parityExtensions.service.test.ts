@@ -20,6 +20,7 @@ jest.mock("../core/apiClient.service", () => ({
   },
   generateIdempotencyKey: jest.fn(() => "idem_test"),
 }));
+jest.mock("@/utils/secureRandomId.util", () => ({ createSecureRandomHex: () => "0123456789abcdef0123456789abcdef" }));
 
 import { ApiError } from "@/errors/api.error";
 import { api } from "../core/apiClient.service";
@@ -41,6 +42,16 @@ describe("PAR-011..013 mobile parity services", () => {
 
     await consentsService.cancelAccountDeletion();
     expect(mockedApi.post).toHaveBeenCalledWith("/api/v1/users/me/deletion-request/cancel", {});
+  });
+
+  it("uses a cryptographic idempotency key for personal data exports", async () => {
+    mockedApi.post.mockResolvedValueOnce({ status: "requested", requestedAt: "2026-11-24T00:00:00Z", downloadUrl: null, expiresAt: null });
+
+    await consentsService.requestMyDataExport();
+
+    expect(mockedApi.post).toHaveBeenCalledWith("/api/v1/users/me/data-exports", undefined, {
+      idempotencyKey: "export_0123456789abcdef0123456789abcdef",
+    });
   });
 
   it("reads/updates tagging settings and removes own post tag", async () => {
