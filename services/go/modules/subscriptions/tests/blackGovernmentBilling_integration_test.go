@@ -186,3 +186,39 @@ func TestGovernmentBlackCheckoutFailsClosedWhenPaymentsGatewayIsNil(t *testing.T
 		t.Fatalf("expected ErrUsdRecurringUnsupported when Payments gateway is nil, got %v", checkoutErr)
 	}
 }
+
+func TestGovernmentBlackLateSettlementFailsClosedWhenVerificationRevokedOrMissing(t *testing.T) {
+	ownerNg, govNg := uuid.NewString(), uuid.NewString()
+	expiresAt := time.Now().Add(7 * 24 * time.Hour)
+	identity := repositories.StaticIdentityDirectory{
+		Profiles: map[string]repositories.BillingProfile{
+			govNg: {ProfileId: govNg, OwnerUserId: ownerNg, ProfileType: "government", DisplayName: "Federal Ministry NG", CountryCode: "NG"},
+		},
+		Accounts: map[string]repositories.AccountSignals{
+			ownerNg: {CreatedAt: time.Now().Add(-90 * 24 * time.Hour), EmailVerified: true, Email: "official@agency.gov.ng"},
+		},
+		BlackApplications: map[string]repositories.BlackApplicationEligibility{
+			govNg: {
+				ApplicationId: uuid.NewString(), ProfileId: govNg, AccountId: ownerNg, AgencyName: "Federal Ministry NG",
+				Handle: "fedmin_ng", Status: "approved", JurisdictionCountryCode: "NG", InstitutionalEmail: "official@agency.gov.ng",
+				InstitutionalEmailVerified: true, PrivateCheckoutEnabled: true, PrivateCheckoutExpiresAt: &expiresAt,
+			},
+		},
+	}
+	harness := startSubscriptionsHarness(t, identity)
+	tokenNg := harness.Tokens.UserAccessToken(ownerNg)
+	checkout := harness.Call(http.MethodPost, "/api/v1/verification/black/checkout", tokenNg, "", map[string]any{
+		"profileId": govNg, "interval": "month", "termsAccepted": true, "recurringConsent": true,
+	})
+	if checkout.Status != http.StatusCreated {
+		t.Fatalf("private checkout failed: %d %s", checkout.Status, checkout.Raw)
+	}
+	// Remove verification record before payment settles; settlement must fail closed (never active).
+	delete(identity.BlackApplications, govNg)
+	harness.PayCheckout(checkout.Body["reference"].(string), 0, "card")
+
+	afterPaid := harness.Call(http.MethodGet, "/api/v1/verification/black/billing?profileId="+govNg, tokenNg, "", nil)
+	if sub, ok := afterPaid.Body["subscription"].(map[string]any); ok && sub["status"] == "active" {
+		t.Fatalf("missing verification must fail closed and never become active: %s", afterPaid.Raw)
+	}
+}

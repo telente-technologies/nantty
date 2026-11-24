@@ -82,7 +82,7 @@ export function UserDetailWorkspace({ userId }: { readonly userId: string }) {
         {activeTab === "linkedProfiles" ? <UserLinkedProfilesPanel userId={user.id} /> : null}
         {activeTab === "sessions" ? <UserSessionsPanel detail={detail} canForceLogout={can("users:moderate")} onUpdated={acceptUpdatedDetail} /> : null}
         {activeTab === "wallet" ? <UserWalletPanel detail={detail} /> : null}
-        {activeTab === "strikes" ? <UserStrikesPanel detail={detail} /> : null}
+        {activeTab === "strikes" ? <UserStrikesPanel detail={detail} canManageCreatorViolations={can("applications:creators") || can("users:moderate")} /> : null}
         {activeTab === "usernames" ? <UserUsernamePanel detail={detail} canManageUsernames={can("usernames:manage")} onUpdated={acceptUpdatedDetail} onReload={reload} /> : null}
         {activeTab === "history" ? (
           <Card title="Admin actions on this account">

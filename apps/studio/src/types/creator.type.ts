@@ -35,6 +35,15 @@ export interface CreatorStatus {
   readonly recentViolations: number;
 }
 
+export interface CreatorAnalyticsSummary {
+  readonly creatorId: string;
+  readonly window: string;
+  readonly views: number;
+  readonly engagements: number;
+  readonly profileVisits: number;
+  readonly revenueMinor: number;
+}
+
 export interface RevenueRules {
   readonly giftCreatorSharePercentUpTo: number;
   readonly tipCreatorSharePercent: number;

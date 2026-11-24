@@ -66,6 +66,15 @@ const accountStatus = c.object({
   pendingTakedownCount: c.number(), strikeLifetimeDays: c.number(), warnings: c.array(strike), strikes: c.array(strike), notices: c.array(c.object({ claimId: c.string(), state: c.string(), deadlineAt: c.nullable(c.string()) })),
 });
 
+const creatorAnalyticsSummary = c.object({
+  creatorId: c.string(),
+  window: c.string(),
+  views: c.number(),
+  engagements: c.number(),
+  profileVisits: c.number(),
+  revenueMinor: c.number(),
+});
+
 const ingressHealth = c.object({
   protocol: c.string(["rtmp", "whip"]), status: c.string(["inactive", "buffering", "publishing", "error", "complete", "unknown"]), error: c.nullable(c.string()),
   videoBitrateKbps: c.nullable(c.number()), audioBitrateKbps: c.nullable(c.number()), width: c.nullable(c.number()), height: c.nullable(c.number()), framerate: c.nullable(c.number()),
@@ -131,6 +140,7 @@ export const studioContracts: readonly EndpointContract[] = [
   { domain: "payments", method: "GET", path: "/api/v1/wallets/me/withdrawals", schema: c.page(withdrawal) },
   { domain: "creators", method: "GET", path: "/api/v1/creators/me", schema: creatorStatus },
   { domain: "creators", method: "GET", path: "/api/v1/creators/dashboard?period=week", schema: dashboard },
+  { domain: "analytics", method: "GET", path: "/api/v1/analytics/creator/summary?window=30d", schema: creatorAnalyticsSummary },
   { domain: "creators", method: "GET", path: "/api/v1/creators/revenue-rules", schema: revenueRules },
   { domain: "creators", method: "GET", path: "/api/v1/creators/earnings", schema: c.page(earning) },
   { domain: "creators", method: "GET", path: "/api/v1/creators/eligibility", schema: eligibility },

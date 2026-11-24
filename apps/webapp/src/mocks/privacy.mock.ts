@@ -29,6 +29,7 @@ const describeConsents = () => ({
   needsRenewal: false,
 });
 let exportRequestedAtMilliseconds: number | null = null;
+let mockDeletionRequest: { id: string; status: "scheduled" | "cancelled"; reason: string; requestedAt: string; scheduledFor: string; cancelledAt: string | null; executedAt: null; retentionPolicy: readonly never[] } | null = null;
 
 function describeDataExport(): DataExportRequest {
   if (exportRequestedAtMilliseconds === null) return { status: "none", requestedAt: null, downloadUrl: null, expiresAt: null };
@@ -61,9 +62,19 @@ export const privacyMocks: MockRoute[] = [
     exportRequestedAtMilliseconds = Date.now();
     return { id: "export_mock", ...describeDataExport() };
   }),
+  createMockRoute("GET", "/api/v1/users/me/deletion-request", () => {
+    if (!mockDeletionRequest) throw new ApiError(404, "No account deletion request found", "NOT_FOUND");
+    return mockDeletionRequest;
+  }),
   createMockRoute("POST", "/api/v1/users/me/deletion-request", ({ body }) => {
     if ((body as { confirm?: boolean }).confirm !== true) throw new ApiError(422, `Type ${deletionConfirmationWord} to confirm`);
-    return { id: "deletion_mock", status: "scheduled", reason: "", requestedAt: new Date().toISOString(), scheduledFor: new Date(Date.now() + deletionGracePeriodMilliseconds).toISOString(), cancelledAt: null, executedAt: null, retentionPolicy: [] };
+    mockDeletionRequest = { id: "deletion_mock", status: "scheduled", reason: "", requestedAt: new Date().toISOString(), scheduledFor: new Date(Date.now() + deletionGracePeriodMilliseconds).toISOString(), cancelledAt: null, executedAt: null, retentionPolicy: [] };
+    return mockDeletionRequest;
+  }),
+  createMockRoute("POST", "/api/v1/users/me/deletion-request/cancel", () => {
+    if (!mockDeletionRequest || mockDeletionRequest.status !== "scheduled") throw new ApiError(404, "No pending deletion request found", "NOT_FOUND");
+    mockDeletionRequest = { ...mockDeletionRequest, status: "cancelled", cancelledAt: new Date().toISOString() };
+    return mockDeletionRequest;
   }),
   createMockRoute("POST", "/api/v1/analytics/product-interactions", ({ body, headers }) => {
     const consentHeader = headers?.["x-consent-analytics"];

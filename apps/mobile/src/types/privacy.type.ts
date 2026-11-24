@@ -23,7 +23,10 @@ export interface DataExportRequest {
 }
 
 export interface AccountDeletionRequest {
+  readonly id?: string;
+  readonly status?: "scheduled" | "cancelled" | "executed";
   readonly scheduledFor: string;
+  readonly cancelledAt?: string | null;
 }
 
 export type ProductInteractionEvent =

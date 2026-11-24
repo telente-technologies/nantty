@@ -65,3 +65,31 @@ export interface CounterNoticeInput {
   readonly contactEmail: string;
   readonly goodFaith: true;
 }
+
+export interface ModerationDecisionTarget {
+  readonly type: string;
+  readonly id: ID;
+  readonly label?: string;
+}
+
+export interface ModerationDecisionAppealRef {
+  readonly id: ID;
+  readonly status: string;
+}
+
+export interface ModerationDecision {
+  readonly reportId: ID;
+  readonly action: string;
+  readonly reason: string;
+  readonly decidedAt: ISODate;
+  readonly target: ModerationDecisionTarget;
+  readonly appealable: boolean;
+  readonly appeal: ModerationDecisionAppealRef | null;
+}
+
+export interface SuspensionNotice {
+  readonly reason: string;
+  readonly suspendedAt: ISODate;
+  readonly deletionScheduledFor: ISODate;
+  readonly retentionDays: number;
+}

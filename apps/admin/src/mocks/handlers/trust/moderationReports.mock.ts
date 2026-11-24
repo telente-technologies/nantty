@@ -133,4 +133,13 @@ export function registerModerationReportMockHandlers(): void {
     recordReportDecision(request, record, "REVOKE_AUTHOR_VERIFICATION", reason, null, before);
     return respondWithJson(200, presentReportDetail(record));
   });
+
+  registerMockRoute("GET", "/admin/moderation/child-safety/quarantine", (request) => {
+    requireMockPermission(request, "moderation:reports");
+    return respondWithJson(200, {
+      items: [
+        { id: "csq_1", mediaId: "med_quarantine_01", ownerId: "usr_0091", sha256Hex: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", provider: "PHOTO_DNA", status: "QUARANTINED", detectedAt: "2026-11-15T14:20:00Z" },
+      ],
+    });
+  });
 }

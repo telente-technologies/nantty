@@ -60,6 +60,8 @@ Rule: Tier 0 is restored and verified before anything else starts.
 
 ## 4. Runbooks (to be written, none exist)
 
+For automated and manual ECS/CodeDeploy/Cloudflare compute rollbacks and pre-migration snapshot recovery, see [`docs/architecture/rollback-flow.md`](./rollback-flow.md).
+
 | # | Scenario | Key steps |
 | --- | --- | --- |
 | 1 | Aurora instance or AZ failure | verify automatic failover; check connection pool recovery; confirm outbox relay resumes; check replica lag |

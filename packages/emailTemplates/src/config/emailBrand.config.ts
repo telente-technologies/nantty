@@ -15,12 +15,18 @@ export const storeBadgeFiles = {
 
 export const emailLogoFile = "brand/nantty-lockup.png";
 
+function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) end -= 1;
+  return value.slice(0, end);
+}
+
 export function buildEmailLogoUrl(assetBaseUrl: string): string {
-  return `${assetBaseUrl.replace(/\/+$/, "")}/${emailLogoFile}`;
+  return `${trimTrailingSlashes(assetBaseUrl)}/${emailLogoFile}`;
 }
 
 export function buildStoreBadgeUrls(assetBaseUrl: string): { readonly appStoreBadgeUrl: string; readonly playStoreBadgeUrl: string } {
-  const base = assetBaseUrl.replace(/\/+$/, "");
+  const base = trimTrailingSlashes(assetBaseUrl);
   return { appStoreBadgeUrl: `${base}/${storeBadgeFiles.appStore}`, playStoreBadgeUrl: `${base}/${storeBadgeFiles.playStore}` };
 }
 

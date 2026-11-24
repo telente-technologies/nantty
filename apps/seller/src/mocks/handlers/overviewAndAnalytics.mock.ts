@@ -37,6 +37,24 @@ export function registerOverviewAndAnalyticsMockHandlers(): void {
     return respondWithJson(200, buildAnalyticsOverview(range.fromKey, fromKey, range.toKey, historyLimitedToDays));
   });
 
+  registerMockRoute("GET", "/analytics/seller/summary", (request) => {
+    const principal = requireMockStorePrincipal(request);
+    const window = request.query.get("window") || "30d";
+    const multiplier = window === "7d" ? 0.25 : window === "90d" ? 2.4 : 1;
+    const productViews = Math.round(9_400 * multiplier);
+    const addToCarts = Math.round(1_280 * multiplier);
+    const orders = Math.round(310 * multiplier);
+    return respondWithJson(200, {
+      storeId: principal.storeId,
+      window,
+      productViews,
+      addToCarts,
+      orders,
+      grossSalesMinor: Math.round(2_480_000 * multiplier),
+      conversionRate: Math.round((orders / productViews) * 10_000) / 100,
+    });
+  });
+
   registerMockRoute("GET", "/seller/analytics/breakdowns", (request) => {
     const principal = requireMockStorePrincipal(request);
     if (!isFeatureIncludedInPlan("advanced_analytics", readSellerPlanForMockStore(principal.storeId))) {

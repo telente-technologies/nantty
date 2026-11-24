@@ -7,7 +7,8 @@ import { ConsentToggleRow } from "@/components/settings/consentToggleRow";
 import { MarketingFrequencyPicker } from "@/components/settings/marketingFrequencyPicker";
 import { DataExportSection } from "@/components/settings/dataExportSection";
 import { DeleteAccountSheet } from "@/components/settings/deleteAccountSheet";
-import { useConsentsQuery, useUpdateConsentMutation } from "@/components/settings/privacyQueries.hook";
+import { useAccountDeletionStatusQuery, useCancelAccountDeletionMutation, useConsentsQuery, useUpdateConsentMutation } from "@/components/settings/privacyQueries.hook";
+import { Button } from "@/components/ui/button";
 import { SettingsCenteredAction, SettingsGroup, SettingsRow } from "@/components/settings/settingsGroup";
 import { SettingsPage } from "@/components/settings/settingsPage";
 import { Cookie24Icon, EyeSlash24Icon, FileLock24Icon, IdentificationCard24Icon, Scales24Icon, Trash24Icon } from "@/components/icons";
@@ -30,6 +31,8 @@ export function SettingsPrivacyDataScreen({ navigation }: MainScreenProps<"Setti
   const { colors } = useTheme();
   const consents = useConsentsQuery();
   const updateConsent = useUpdateConsentMutation();
+  const deletionStatus = useAccountDeletionStatusQuery();
+  const cancelDeletion = useCancelAccountDeletionMutation();
   const [deleteSheetVisible, setDeleteSheetVisible] = useState(false);
 
   return (
@@ -69,10 +72,29 @@ export function SettingsPrivacyDataScreen({ navigation }: MainScreenProps<"Setti
         <SettingsRow label="Data rights requests" icon={<FileLock24Icon />} trailing="external" onPress={() => openTrustedWebPage(legalLinks.dataRights, inAppBrowserColorsFromTheme(colors))} />
       </SettingsGroup>
 
-      <SettingsCenteredAction label="Delete my account" icon={<Trash24Icon size={20} color={colors.error} />} onPress={() => setDeleteSheetVisible(true)} />
+      {deletionStatus.data ? (
+        <View style={styles.deletionBanner}>
+          <Text size={13} lineHeight={18} color={colors.textMuted}>
+            Account scheduled for deletion on {new Date(deletionStatus.data.scheduledFor).toLocaleDateString()}.
+          </Text>
+          {cancelDeletion.isError ? (
+            <Text size={12} lineHeight={16} color={colors.error} accessibilityRole="alert">
+              Couldn&apos;t cancel deletion right now. Try again.
+            </Text>
+          ) : null}
+          <Button
+            title={cancelDeletion.isPending ? "Cancelling…" : "Cancel scheduled deletion"}
+            variant="outline"
+            disabled={cancelDeletion.isPending}
+            onPress={() => cancelDeletion.mutate()}
+          />
+        </View>
+      ) : (
+        <SettingsCenteredAction label="Delete my account" icon={<Trash24Icon size={20} color={colors.error} />} onPress={() => setDeleteSheetVisible(true)} />
+      )}
       <DeleteAccountSheet visible={deleteSheetVisible} onClose={() => setDeleteSheetVisible(false)} />
     </SettingsPage>
   );
 }
 
-const styles = StyleSheet.create({ block: { gap: 4 } });
+const styles = StyleSheet.create({ block: { gap: 4 }, deletionBanner: { gap: 10 } });

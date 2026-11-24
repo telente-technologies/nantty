@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { ACCOUNT_HEALTH_QUERY_KEY, accountHealthService } from "@/services/account/accountHealth.service";
+import { ACCOUNT_HEALTH_QUERY_KEY, MODERATION_DECISIONS_QUERY_KEY, accountHealthService } from "@/services/account/accountHealth.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { CounterNoticeInput, ID } from "@/types";
 
@@ -9,11 +9,27 @@ export function useMyAccountHealth() {
   return useQuery({ queryKey: ACCOUNT_HEALTH_QUERY_KEY, queryFn: accountHealthService.fetchMyAccountHealth, enabled: isSignedIn, staleTime: 60_000 });
 }
 
+export function useMyModerationDecisions() {
+  const isSignedIn = useAuthStore((state) => !!state.user);
+  return useQuery({ queryKey: MODERATION_DECISIONS_QUERY_KEY, queryFn: () => accountHealthService.fetchMyModerationDecisions(), enabled: isSignedIn, staleTime: 60_000 });
+}
+
 export function useAppealStrike() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ strikeId, message }: { strikeId: ID; message: string }) => accountHealthService.appealStrike(strikeId, message),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ACCOUNT_HEALTH_QUERY_KEY }),
+  });
+}
+
+export function useAppealModerationDecision() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ reportId, message }: { reportId: ID; message: string }) => accountHealthService.appealModerationDecision(reportId, message),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: MODERATION_DECISIONS_QUERY_KEY });
+      void queryClient.invalidateQueries({ queryKey: ACCOUNT_HEALTH_QUERY_KEY });
+    },
   });
 }
 

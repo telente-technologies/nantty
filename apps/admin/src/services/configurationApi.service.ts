@@ -49,3 +49,24 @@ export function fetchAutomationSampleEvents(signal?: AbortSignal): Promise<{ ite
 export function fetchAutomationExecutions(ruleId: string | null, signal?: AbortSignal): Promise<{ items: AutomationExecution[] }> {
   return sendAdminApiRequest("/admin/automation/executions", { query: { ruleId }, signal });
 }
+
+export interface RetentionPolicyRecord {
+  readonly category: string;
+  readonly action: "delete" | "anonymize" | "retain";
+  readonly retentionDays: number | null;
+  readonly needsLegalReview: boolean;
+  readonly version: number;
+  readonly updatedBy: string;
+  readonly updatedAt: string;
+}
+
+export function fetchRetentionPolicies(signal?: AbortSignal): Promise<{ data: RetentionPolicyRecord[]; nextCursor: string | null }> {
+  return sendAdminApiRequest("/admin/retention-policies", { signal });
+}
+
+export function updateRetentionPolicy(
+  category: string,
+  input: { action: "delete" | "anonymize" | "retain"; retentionDays: number | null; needsLegalReview: boolean; expectedVersion: number; reason: string },
+): Promise<RetentionPolicyRecord> {
+  return sendAdminApiRequest(`/admin/retention-policies/${encodeURIComponent(category)}`, { method: "PUT", body: input });
+}

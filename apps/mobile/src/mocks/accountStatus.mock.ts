@@ -19,4 +19,9 @@ export const accountStatusMocks: MockRoute[] = [
       retentionDays: RETENTION_DAYS,
     };
   }),
+  createMockRoute("POST", "/api/v1/users/me/suspension/appeal", ({ body }) => {
+    const message = typeof (body as { message?: unknown } | null)?.message === "string" ? (body as { message: string }).message.trim() : "";
+    if (message.length < 10) throw new ApiError(400, "Explain why you are appealing in at least 10 characters");
+    return undefined;
+  }),
 ];

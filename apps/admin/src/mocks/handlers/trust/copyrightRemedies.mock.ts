@@ -3,12 +3,12 @@ import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { MockHttpError, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 import type { MockCopyrightClaimRecord } from "@/mocks/seed/trustCopyright.mock";
-import type { AccountHealthStrike, AccountHealthSummary } from "@/types/accountHealth.type";
+import type { AccountHealthStrike, AccountHealthSummary, MonetisationOverrideInfo } from "@/types/accountHealth.type";
 import type { CopyrightPolicySettings, CopyrightRemedy } from "@/types/copyright.type";
 
 import { readEffectiveStrikeCount, readTrustStore } from "./trustStore.mock";
 
-const holder = globalThis as typeof globalThis & { __nanttyAdminCopyrightPolicy?: CopyrightPolicySettings; __nanttyAdminStrikeAppeals?: Map<string, AccountHealthStrike["appealStatus"]> };
+const holder = globalThis as typeof globalThis & { __nanttyAdminCopyrightPolicy?: CopyrightPolicySettings; __nanttyAdminStrikeAppeals?: Map<string, AccountHealthStrike["appealStatus"]>; __nanttyMonetisationOverrides?: Map<string, MonetisationOverrideInfo> };
 const defaultPolicy: CopyrightPolicySettings = { takedownDeadlineHours: 48, strikeLifetimeDays: 365, warningLifetimeDays: 365, strikeWindowDays: 365, restrictionThreshold: 2, suspensionReviewThreshold: 3, restrictionDays: 30 };
 const ranges: Record<keyof Omit<CopyrightPolicySettings, "updatedBy" | "updatedAt">, readonly [number, number]> = {
   takedownDeadlineHours: [1, 720], strikeLifetimeDays: [7, 730], warningLifetimeDays: [7, 730], strikeWindowDays: [7, 730], restrictionThreshold: [1, 2], suspensionReviewThreshold: [1, 20], restrictionDays: [30, 90],
@@ -81,7 +81,47 @@ export function registerCopyrightRemedyMockHandlers(): void {
 
   registerMockRoute("GET", "/admin/account-health/:userId", (request) => {
     requireMockPermission(request, "users:read", "copyright:review");
-    return respondWithJson(200, presentAccountHealth(request.params.userId ?? ""));
+    const userId = request.params.userId ?? "";
+    const health = presentAccountHealth(userId);
+    const override = holder.__nanttyMonetisationOverrides?.get(userId) ?? null;
+    return respondWithJson(200, {
+      ...health,
+      canMonetise: override ? override.mode === "ALLOW" : health.canMonetise,
+      monetisationOverride: override,
+    });
+  });
+
+  registerMockRoute("PUT", "/admin/account-health/:userId/monetisation-override", (request) => {
+    const principal = requireMockPermission(request, "users:suspend", "moderation:appeals");
+    requireMockStepUp(request);
+    const body = readJsonObjectBody(request);
+    const mode: "ALLOW" | "PAUSE" = body.mode === "ALLOW" ? "ALLOW" : "PAUSE";
+    const reason = readRequiredReason(body);
+    const userId = request.params.userId ?? "";
+    holder.__nanttyMonetisationOverrides ??= new Map();
+    const health = presentAccountHealth(userId);
+    const override = {
+      mode,
+      reason,
+      actorId: principal.adminId,
+      actorName: principal.name,
+      activeStrikeCountAtOverride: health.activeStrikeCount,
+      setAt: new Date().toISOString(),
+    };
+    holder.__nanttyMonetisationOverrides.set(userId, override);
+    recordMockAuditEntry(request, { action: "account_health.monetisation_override_set", area: "moderation", target: { type: "user", id: userId, label: userId }, reason, after: { monetisationOverride: override } });
+    return respondWithJson(200, { ...health, canMonetise: mode === "ALLOW", monetisationOverride: override });
+  });
+
+  registerMockRoute("DELETE", "/admin/account-health/:userId/monetisation-override", (request) => {
+    requireMockPermission(request, "users:suspend", "moderation:appeals");
+    requireMockStepUp(request);
+    const reason = readRequiredReason(readJsonObjectBody(request));
+    const userId = request.params.userId ?? "";
+    holder.__nanttyMonetisationOverrides?.delete(userId);
+    const health = presentAccountHealth(userId);
+    recordMockAuditEntry(request, { action: "account_health.monetisation_override_cleared", area: "moderation", target: { type: "user", id: userId, label: userId }, reason, after: { monetisationOverride: null } });
+    return respondWithJson(200, { ...health, monetisationOverride: null });
   });
 
   for (const decision of ["uphold", "overturn"] as const) {

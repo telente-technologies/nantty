@@ -5,7 +5,7 @@ import { createSocialRouter } from "../../src/fastifyRouter.js";
 describe("Fastify platform compatibility", () => {
   it("preserves sanitized Fastify client errors without leaking error details", async () => {
     const app = await createPlatform({ name: "error-test", host: "127.0.0.1", port: 0, logger: false, rateLimit: false });
-    app.post("/echo", async (request) => request.body);
+    app.post("/echo", async () => ({ ok: true }));
     app.get("/validated", { schema: { querystring: { type: "object", required: ["privateField"], properties: { privateField: { type: "integer" } } } } }, async () => "ok");
     app.get("/rejected", async () => { throw Object.assign(new Error("private reason"), { statusCode: 422, code: "secret token" }); });
     app.get("/broken", async () => { throw new Error("private credentials"); });

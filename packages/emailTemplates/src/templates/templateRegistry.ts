@@ -1,3 +1,4 @@
+import * as admin from "./admin.template";
 import * as ads from "./ads.template";
 import * as auth from "./auth.template";
 import * as buyerOrders from "./buyerOrders.template";
@@ -46,6 +47,7 @@ export const emailTemplates = {
   ...pickTemplates(copyright),
   ...pickTemplates(privacy),
   ...pickTemplates(support),
+  ...pickTemplates(admin),
   ...pickTemplates(marketing),
   ...pickTemplates(ads),
 };

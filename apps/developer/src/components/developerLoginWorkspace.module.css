@@ -1,0 +1,548 @@
+.page {
+  display: grid;
+  gap: var(--space-5);
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-2);
+  color: var(--color-brand);
+  font-size: var(--fs-12);
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(var(--fs-24), 3vw, var(--fs-32));
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.header p:last-child {
+  max-width: 68ch;
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-14);
+}
+
+.headerBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--fs-12);
+  font-weight: 650;
+}
+
+.pillSuccess {
+  border-color: var(--color-success);
+  background: var(--color-success-tint);
+  color: var(--color-success-text);
+}
+
+.pillNeutral {
+  background: var(--color-sunken);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(290px, 0.85fr);
+  align-items: start;
+  gap: var(--space-5);
+}
+
+.primaryCard {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.activeSessionBlock,
+.ssoBlock {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.sessionHero,
+.ssoTitleRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.successIcon {
+  flex: none;
+  color: var(--color-success-text);
+}
+
+.brandIcon {
+  flex: none;
+  color: var(--color-brand);
+}
+
+.sessionHero h2,
+.ssoTitleRow h2 {
+  margin: 0;
+  font-size: var(--fs-20);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sessionHero p,
+.ssoTitleRow p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-13);
+  line-height: 1.55;
+}
+
+.quickLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ssoForm {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.modeTabs {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-sunken);
+  justify-self: start;
+}
+
+.modeTab,
+.modeTabActive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: var(--fs-13);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.modeTab {
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.modeTab:hover {
+  color: var(--color-text);
+}
+
+.modeTabActive {
+  background: var(--color-surface);
+  color: var(--color-brand);
+  box-shadow: var(--shadow-card);
+}
+
+.authForm,
+.signupCard,
+.otpVerifyBlock {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.signupCard {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-sunken);
+}
+
+.emailVerifyRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.twoColFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.inputField {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text-subtle);
+  font-size: var(--fs-12);
+  font-weight: 650;
+}
+
+.inputField input {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-13);
+}
+
+.inputField input:disabled {
+  background: var(--color-sunken);
+  color: var(--color-text-muted);
+}
+
+.otpDigitsHeader {
+  color: var(--color-text-muted);
+  font-size: var(--fs-12);
+  font-weight: 600;
+}
+
+.otpDigitsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.otpDigitBox {
+  width: 44px;
+  height: 48px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-18);
+  font-weight: 700;
+  text-align: center;
+}
+
+.formActionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.inlineLink {
+  color: var(--color-brand);
+  font-size: var(--fs-12);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.inlineLink:hover {
+  text-decoration: underline;
+}
+
+.verifiedTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-sm);
+  background: var(--color-success-tint);
+  color: var(--color-success-text);
+  font-size: var(--fs-12);
+  font-weight: 700;
+}
+
+.hintSuccess {
+  color: var(--color-success-text);
+  font-size: var(--fs-11);
+  font-weight: 600;
+}
+
+.hintWarn {
+  color: var(--color-warn-text);
+  font-size: var(--fs-11);
+  font-weight: 600;
+}
+
+.hintMuted {
+  color: var(--color-text-muted);
+  font-size: var(--fs-11);
+}
+
+.noticeSuccess {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-sm);
+  background: var(--color-success-tint);
+  color: var(--color-success-text);
+  font-size: var(--fs-12);
+  font-weight: 600;
+}
+
+.errorBanner {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-tint);
+  color: var(--color-danger-text);
+  font-size: var(--fs-12);
+  font-weight: 600;
+}
+
+@media (max-width: 680px) {
+  .emailVerifyRow,
+  .twoColFields {
+    grid-template-columns: 1fr;
+  }
+}
+
+.selectField {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text-subtle);
+  font-size: var(--fs-12);
+  font-weight: 650;
+}
+
+.selectField select {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-13);
+}
+
+.primaryAction,
+.secondaryAction,
+.ghostAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: var(--fs-13);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.primaryAction {
+  border: 1px solid var(--color-brand-solid);
+  background: var(--color-brand-solid);
+  color: var(--color-on-brand);
+}
+
+.primaryAction:hover {
+  background: var(--color-brand-solid-hover);
+  text-decoration: none;
+}
+
+.secondaryAction {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.secondaryAction:hover {
+  background: var(--color-surface-hover);
+  text-decoration: none;
+}
+
+.ghostAction {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.ghostAction:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.noticeBox {
+  display: grid;
+  gap: 4px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-warn);
+  border-left: 3px solid var(--color-warn);
+  border-radius: var(--radius-sm);
+  background: var(--color-warn-tint);
+  color: var(--color-warn-text);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+
+.noticeBox a {
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-subtle);
+  font-size: var(--fs-12);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.guideColumn {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.nightCard {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--surface-night);
+  border-radius: var(--radius-md);
+  background: var(--surface-night);
+  color: var(--ink-on-night);
+  box-shadow: var(--shadow-float);
+}
+
+.nightHead {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink-on-night-muted);
+  font-size: var(--fs-12);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nightCard h3 {
+  margin: 0;
+  color: var(--ink-on-night);
+  font-size: var(--fs-20);
+  letter-spacing: -0.02em;
+}
+
+.flowSteps {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.flowSteps li {
+  display: grid;
+  gap: 3px;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line-on-night);
+}
+
+.flowSteps strong {
+  color: var(--ink-on-night);
+  font-size: var(--fs-13);
+}
+
+.flowSteps p {
+  margin: 0;
+  color: var(--ink-on-night-muted);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+
+.nightLinks {
+  display: grid;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line-on-night);
+}
+
+.nightLinks a {
+  color: var(--blue-100);
+  font-size: var(--fs-12);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.nightLinks a:hover {
+  color: var(--ink-on-night);
+  text-decoration: underline;
+}
+
+.infoCard {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.infoHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  font-size: var(--fs-13);
+}
+
+.infoCard p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-12);
+  line-height: 1.55;
+}
+
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

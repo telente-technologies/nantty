@@ -1,9 +1,9 @@
 import { readMockMoneyStore } from "@/mocks/handlers/money/moneyStore.mock";
 import { calculateEscrowHeldMinor, calculateOrderTotalMinor } from "@/mocks/handlers/money/moneyStore.mock";
-import { requireMockPermission, requireMockSingleUseStepUp } from "@/mocks/mockGuards.mock";
-import { MockHttpError, paginateByCursor, respondWithJson } from "@/mocks/mockResponses.mock";
+import { requireMockPermission, requireMockSingleUseStepUp, requireMockStepUp } from "@/mocks/mockGuards.mock";
+import { MockHttpError, paginateByCursor, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
-import type { FinanceEscrowRecord, FinanceExportRecord, FinanceIssue } from "@/types/finance.type";
+import type { FinanceEscrowRecord, FinanceExportRecord, FinanceIssue, SellerReserveHold, StuckPayoutAccount } from "@/types/finance.type";
 
 const exportAuditLog: FinanceExportRecord[] = [];
 
@@ -145,5 +145,93 @@ export function registerFinanceMockHandlers(): void {
     }
     exportAuditLog.unshift({ id: `fexp_${exportAuditLog.length + 1}`, reportKey: body.reportType ?? "overview", actorId: principal.adminId, actorName: principal.name, reason: body.reason.trim(), occurredAt: new Date().toISOString() });
     return { status: 200, body: "metric,currency,amountMinor,count\ngmv,NGN,245000000,\n", headers: { "content-type": "text/csv; charset=utf-8" } };
+  });
+
+  const stuckAccounts: StuckPayoutAccount[] = [
+    {
+      userId: "usr_creator_104",
+      account: { status: "PENDING_CREATION", verificationStatus: "DOCUMENTS_REQUIRED", provider: "STRIPE_CONNECT", updatedAt: "2026-11-14T10:15:00Z" },
+      jobs: [{ id: "pjob_901", jobType: "ONBOARDING_SYNC", status: "FAILED", lastError: "Missing government ID document" }],
+    },
+  ];
+
+  registerMockRoute("GET", "/admin/payments/payout-accounts/stuck", (request) => {
+    requireMockPermission(request, "payments:wallets");
+    return respondWithJson(200, { data: stuckAccounts, nextCursor: null });
+  });
+
+  registerMockRoute("POST", "/admin/payments/payout-accounts/jobs/:jobId/retry", (request) => {
+    requireMockPermission(request, "payments:wallets");
+    requireMockStepUp(request);
+    readRequiredReason(readJsonObjectBody(request));
+    return respondWithJson(200, { jobId: request.params.jobId, status: "QUEUED" });
+  });
+
+  registerMockRoute("POST", "/admin/payments/payout-accounts/:userId/verification-prompt", (request) => {
+    requireMockPermission(request, "payments:wallets");
+    requireMockStepUp(request);
+    readRequiredReason(readJsonObjectBody(request));
+    return respondWithJson(200, { sent: true });
+  });
+
+  const sellerReserves: SellerReserveHold[] = [
+    {
+      sellerUserId: "usr_seller_209",
+      reserveBps: 1500,
+      holdDays: 30,
+      reason: "Elevated return rate on electronics orders",
+      flaggedBy: "adm_finance_1",
+      createdAt: "2026-11-10T09:00:00Z",
+      releasedAt: null,
+    },
+  ];
+
+  registerMockRoute("GET", "/admin/wallet/seller-reserves", (request) => {
+    requireMockPermission(request, "payouts:approve");
+    return respondWithJson(200, { data: sellerReserves.filter((row) => row.releasedAt === null), nextCursor: null });
+  });
+
+  registerMockRoute("PUT", "/admin/wallet/seller-reserves/:sellerUserId", (request) => {
+    const principal = requireMockPermission(request, "payouts:approve");
+    requireMockStepUp(request);
+    const body = readJsonObjectBody(request) as { reason?: string; reserveBps?: number; holdDays?: number };
+    const reason = readRequiredReason(body);
+    const nextRow: SellerReserveHold = {
+      sellerUserId: request.params.sellerUserId!,
+      reserveBps: Number(body.reserveBps ?? 1000),
+      holdDays: Number(body.holdDays ?? 30),
+      reason,
+      flaggedBy: principal.adminId,
+      createdAt: new Date().toISOString(),
+      releasedAt: null,
+    };
+    const idx = sellerReserves.findIndex((row) => row.sellerUserId === nextRow.sellerUserId);
+    if (idx >= 0) sellerReserves[idx] = nextRow;
+    else sellerReserves.unshift(nextRow);
+    return respondWithJson(201, nextRow);
+  });
+
+  registerMockRoute("DELETE", "/admin/wallet/seller-reserves/:sellerUserId", (request) => {
+    requireMockPermission(request, "payouts:approve");
+    requireMockStepUp(request);
+    readRequiredReason(readJsonObjectBody(request));
+    const idx = sellerReserves.findIndex((row) => row.sellerUserId === request.params.sellerUserId && row.releasedAt === null);
+    if (idx < 0) throw new MockHttpError(404, "NOT_FOUND", "No active reserve hold for this seller.");
+    sellerReserves[idx] = { ...sellerReserves[idx]!, releasedAt: new Date().toISOString() };
+    return { status: 204, body: undefined };
+  });
+
+  registerMockRoute("POST", "/admin/payments/reconciliations", (request) => {
+    requireMockPermission(request, "payments:wallets");
+    requireMockStepUp(request);
+    readRequiredReason(readJsonObjectBody(request));
+    return respondWithJson(200, {
+      accountsChecked: 42,
+      pendingIntentsVerified: 3,
+      transfersConfirmed: 11,
+      directChargesSettled: 6,
+      balanceBreaks: [],
+      failures: 0,
+    });
   });
 }

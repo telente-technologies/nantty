@@ -57,3 +57,31 @@ func TestRecoverFromPanicsWritesInternalErrorBeforeAnyOutput(t *testing.T) {
 		t.Fatalf("status = %d body = %q", recorder.Code, recorder.Body.String())
 	}
 }
+
+func TestEnsureSafeResponseContentTypeEnforcesAllowlist(t *testing.T) {
+	cases := []struct {
+		initial string
+		want    string
+	}{
+		{"", "text/plain; charset=utf-8"},
+		{"text/html; charset=utf-8", "application/octet-stream"},
+		{"image/svg+xml", "application/octet-stream"},
+		{"application/xml", "application/octet-stream"},
+		{"application/json; charset=utf-8", "application/json; charset=utf-8"},
+		{"text/csv; charset=utf-8", "text/csv; charset=utf-8"},
+		{"application/pdf", "application/pdf"},
+	}
+	for _, tc := range cases {
+		recorder := httptest.NewRecorder()
+		if tc.initial != "" {
+			recorder.Header().Set("Content-Type", tc.initial)
+		}
+		EnsureSafeResponseContentType(recorder)
+		if got := recorder.Header().Get("Content-Type"); got != tc.want {
+			t.Fatalf("EnsureSafeResponseContentType(%q) = %q, want %q", tc.initial, got, tc.want)
+		}
+		if got := recorder.Header().Get("X-Content-Type-Options"); got != "nosniff" {
+			t.Fatalf("X-Content-Type-Options = %q, want nosniff", got)
+		}
+	}
+}

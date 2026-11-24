@@ -64,6 +64,13 @@ export function registerReportMockHandlers(): void {
     return respondWithDownload(`nantty-ads-${account.id}-${query.breakdown}-${query.from}-to-${query.to}.csv`, `\uFEFF${csv}`, "text/csv; charset=utf-8");
   });
 
+  registerMockRoute("GET", "/ads/accounts/:accountId/reports/export.pdf", (request) => {
+    const { account } = requireAccountAccess(request, "reports:view");
+    const query = readReportQuery(request);
+    const body = `%PDF-1.4\n1 0 obj << /Type /Catalog >> endobj\n%%EOF\n`;
+    return respondWithDownload(`nantty-ads-${account.id}-${query.breakdown}-${query.from}-to-${query.to}.pdf`, body, "application/pdf");
+  });
+
   registerMockRoute("GET", "/ads/accounts/:accountId/reports/scheduled", (request) => {
     const { account } = requireAccountAccess(request, "reports:view");
     const page = paginateItems(readMockDatabase().scheduledReports.filter((report) => report.accountId === account.id), request);

@@ -18,13 +18,16 @@ test("scheduled-post actions use the existing authenticated API contracts", asyn
       : requests.length === 2
         ? { id: "post/1", scheduledAt: "2026-11-03T12:00:00.000Z", status: "scheduled" }
         : requests.length === 3
-          ? { id: "post/1", scheduledAt: "2026-11-03T12:00:00.000Z", status: "publishing" }
-          : null;
-    return new Response(payload === null ? null : JSON.stringify(payload), { status: requests.length === 4 ? 204 : 200 });
+          ? { id: "post/1", text: "Updated copy", createdAt: "2026-11-01T12:00:00.000Z", scheduledAt: "2026-11-03T12:00:00.000Z", status: "scheduled", failureReason: null, media: [] }
+          : requests.length === 4
+            ? { id: "post/1", scheduledAt: "2026-11-03T12:00:00.000Z", status: "publishing" }
+            : null;
+    return new Response(payload === null ? null : JSON.stringify(payload), { status: requests.length === 5 ? 204 : 200 });
   }) as typeof fetch;
 
   const page = await scheduledPostsService.list("cursor 1");
   await scheduledPostsService.reschedule("post/1", "2026-11-03T12:00:00.000Z");
+  await scheduledPostsService.editContent("post/1", { text: "Updated copy" });
   await scheduledPostsService.publishNow("post/1");
   await scheduledPostsService.cancel("post/1");
 
@@ -32,9 +35,11 @@ test("scheduled-post actions use the existing authenticated API contracts", asyn
   assert.deepEqual(requests.map(({ url, method }) => [url, method]), [
     ["/bff/api/v1/posts/scheduled?cursor=cursor+1&limit=20", "GET"],
     ["/bff/api/v1/posts/post%2F1/schedule", "PATCH"],
+    ["/bff/api/v1/posts/post%2F1/schedule/content", "PATCH"],
     ["/bff/api/v1/posts/post%2F1/schedule/publish-now", "POST"],
     ["/bff/api/v1/posts/post%2F1/schedule", "DELETE"],
   ]);
   assert.equal(requests[1]?.body, JSON.stringify({ scheduledAt: "2026-11-03T12:00:00.000Z" }));
-  assert.equal(requests[2]?.body, "{}");
+  assert.equal(requests[2]?.body, JSON.stringify({ text: "Updated copy" }));
+  assert.equal(requests[3]?.body, "{}");
 });

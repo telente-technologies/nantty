@@ -23,7 +23,8 @@ export async function loadPublicSubscriptionPlansForVisitor(): Promise<PublicPri
   const requestHeaders = await headers();
   const forwardedHeaders: Record<string, string> = {};
   const acceptLanguage = requestHeaders.get("accept-language");
-  const clientAddress = requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const forwardedParts = requestHeaders.get("x-forwarded-for")?.split(",").map((entry) => entry.trim()).filter(Boolean);
+  const clientAddress = forwardedParts?.at(-1) || requestHeaders.get("x-real-ip")?.trim();
   if (acceptLanguage) forwardedHeaders["Accept-Language"] = acceptLanguage.slice(0, 200);
   if (clientAddress) forwardedHeaders["X-Forwarded-For"] = clientAddress;
   const result = await callSellerBackend({ method: "GET", path: "/seller/subscription/plans", forwardedHeaders });

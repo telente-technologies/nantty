@@ -17,6 +17,7 @@ export const studioApiRoutes: readonly StudioApiRoute[] = [
   route("GET", "/api/v1/account/status"),
   route("GET", "/api/v1/creators/me"),
   route("GET", "/api/v1/creators/dashboard"),
+  route("GET", "/api/v1/analytics/creator/summary"),
   route("GET", "/api/v1/creators/revenue-rules"),
   route("GET", "/api/v1/creators/earnings"),
   route("GET", "/api/v1/creators/eligibility"),

@@ -135,6 +135,7 @@ const apiPermissionRules: ApiPermissionRule[] = [
   { method: "GET", pathPattern: /^\/chat\/content$/, permission: "messages:manage" },
   { method: "ANY", pathPattern: /^\/seller\/reviews/, permission: "reviews:manage" },
   { method: "GET", pathPattern: /^\/seller\/analytics/, permission: "analytics:view" },
+  { method: "GET", pathPattern: /^\/analytics\/seller\/summary$/, permission: "analytics:view" },
   { method: "ANY", pathPattern: /^\/seller\/(promotions|marketing)/, permission: "promotions:manage" },
   { method: "GET", pathPattern: /^\/seller\/ads/, permission: "ads:view" },
   { method: "ANY", pathPattern: /^\/seller\/storefront/, permission: "storefront:manage" },

@@ -32,6 +32,8 @@ describe("support team inbox email", () => {
     await inbox.deliverEmailDeliveryFailed({ eventId: "evt-mail-1", templateKey: "orderShipped", reason: "email_provider_send_failed", address: "support@nantty.com" });
     expect(harness.sender.sent).toHaveLength(1);
     expect(harness.sender.sent[0]?.to).toBe("support@nantty.com");
+    expect(harness.sender.sent[0]?.html).toContain("nantty-lockup.png");
+    expect(harness.sender.sent[0]?.html).toContain("NANTTY_COMPANY_LEGAL_NAME");
   });
 
   it("emails every support address once per ticket with an admin link, and the requester still gets their receipt", async () => {
@@ -47,6 +49,8 @@ describe("support team inbox email", () => {
     expect(staffMail.map((mail) => mail.to)).toEqual(["support@nantty.com", "lead@nantty.com"]);
     expect(staffMail[0]?.subject).toBe("[Nantty Support] SUP-10421 Refund <b>missing</b>");
     expect(staffMail[0]?.html).toContain("https://admin.nantty.com/support/7b9e2f3a-1111-4222-8333-123456789abc");
+    expect(staffMail[0]?.html).toContain("nantty-lockup.png");
+    expect(staffMail[0]?.html).toContain("NANTTY_COMPANY_LEGAL_NAME");
     expect(staffMail[0]?.html).not.toContain("<b>missing</b>");
     expect(staffMail[0]?.text).toContain("Priority: high");
     expect(harness.sender.sent.filter((mail) => mail.to === "amaka@example.com")).toHaveLength(1);

@@ -100,3 +100,17 @@ export function fetchAdminGovernmentBlack(filters?: { cursor?: string; limit?: n
 export function controlAdminGovernmentBlack(subscriptionId: string, action: "pause" | "cancel" | "retry" | "reconcile", reason: string): Promise<unknown> {
   return sendAdminApiRequest(`/admin/subscriptions/government-black/${encodeURIComponent(subscriptionId)}/${action}`, { method: "POST", body: { reason } });
 }
+
+export interface ChildSafetyQuarantineItem {
+  readonly id: string;
+  readonly mediaId: string;
+  readonly ownerId: string;
+  readonly sha256Hex: string;
+  readonly provider: string;
+  readonly status: string;
+  readonly detectedAt: string;
+}
+
+export function fetchChildSafetyQuarantine(signal?: AbortSignal): Promise<{ items: ChildSafetyQuarantineItem[] }> {
+  return sendAdminApiRequest("/admin/moderation/child-safety/quarantine", { signal });
+}

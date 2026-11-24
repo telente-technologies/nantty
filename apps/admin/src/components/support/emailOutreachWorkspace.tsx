@@ -13,7 +13,7 @@ import { Card, SectionHeading } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
 import { useAdminMutation } from "@/hooks/useAdminMutation.hook";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
-import { fetchEmailSegments, fetchEmailSends, fetchEmailTemplates, fetchFailedEmailDeliveries, previewSupportEmail, sendSupportEmail } from "@/services/supportOutreachApi.service";
+import { fetchEmailSegments, fetchEmailSends, fetchEmailTemplates, fetchFailedEmailDeliveries, fetchFailedPushDeliveries, previewSupportEmail, sendSupportEmail } from "@/services/supportOutreachApi.service";
 import type { EmailAudience, EmailDraftInput, EmailKind, EmailPreview, EmailSendRecord, FailedEmailDeliveryRecord } from "@/types/supportOutreach.type";
 import { formatDateTime, humanizeConstantName } from "@/utils/formatting.util";
 
@@ -40,6 +40,7 @@ export function EmailOutreachWorkspace() {
   const segments = useAdminQuery((signal) => fetchEmailSegments(signal), "segments");
   const sends = useAdminQuery((signal) => fetchEmailSends(signal), "sends");
   const failedDeliveries = useAdminQuery((signal) => fetchFailedEmailDeliveries(signal), "failed-deliveries");
+  const failedPushDeliveries = useAdminQuery((signal) => fetchFailedPushDeliveries(signal), "failed-push-deliveries");
   const [audienceType, setAudienceType] = useState<"USER" | "SEGMENT">("USER");
   const [username, setUsername] = useState("");
   const [segmentId, setSegmentId] = useState("all-users");
@@ -106,6 +107,8 @@ export function EmailOutreachWorkspace() {
       <DataTable caption="Email sends" columns={sendColumns} rows={sends.data?.items ?? []} readRowKey={(item) => item.id} isLoading={sends.isLoading} emptyMessage="Nothing sent yet." />
       <SectionHeading>Failed notification emails</SectionHeading>
       <DataTable caption="Failed notification emails" columns={failedDeliveryColumns} rows={failedDeliveries.data?.deliveries ?? []} readRowKey={(item) => item.id} isLoading={failedDeliveries.isLoading} emptyMessage="No exhausted notification deliveries." />
+      <SectionHeading>Failed push notifications</SectionHeading>
+      <DataTable caption="Failed push notifications" columns={failedDeliveryColumns} rows={failedPushDeliveries.data?.deliveries ?? []} readRowKey={(item) => item.id} isLoading={failedPushDeliveries.isLoading} emptyMessage="No exhausted push notification deliveries." />
       {isConfirmOpen && preview ? <ConfirmActionDialog intent="send" isOpen title="Send this email" consequences={[`${preview.recipientCount} recipient${preview.recipientCount === 1 ? "" : "s"} through AWS SES.`, "The send, audience and counts are written to the audit log."]} confirmLabel="Send email" requiresStepUp={needsStepUp} isBusy={sendMutation.isRunning} errorMessage={sendMutation.errorMessage} onConfirm={confirmSend} onClose={() => { sendMutation.clearError(); setIsConfirmOpen(false); }} /> : null}
     </>
   );

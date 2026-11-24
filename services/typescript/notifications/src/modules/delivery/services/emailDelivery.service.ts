@@ -21,9 +21,16 @@ export interface TemplateEmailRequest extends BaseRequest {
   readonly props: unknown;
 }
 
+export interface CustomEmailResult {
+  readonly subject: string;
+  readonly html: string;
+  readonly text: string;
+  readonly sender?: { readonly from: string; readonly replyTo: string };
+}
+
 export interface CustomEmailRequest extends BaseRequest {
   readonly mailKind: MailKind;
-  readonly render: (unsubscribeUrl: string) => { readonly subject: string; readonly html: string; readonly text: string };
+  readonly render: (unsubscribeUrl: string) => CustomEmailResult | Promise<CustomEmailResult>;
 }
 
 export type EmailDeliveryOutcome = { readonly status: "sent" | "skipped" | "failed" | "duplicate"; readonly reason?: string; readonly previous?: string };

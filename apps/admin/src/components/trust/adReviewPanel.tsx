@@ -14,7 +14,7 @@ import { KeyValueList, SectionHeading } from "@/components/ui/surfaces";
 import { useToast } from "@/components/ui/toastProvider";
 import { useAdminMutation } from "@/hooks/useAdminMutation.hook";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
-import { approveAdAfterReview, fetchAdForReviewDetail, rejectAdForPolicy } from "@/services/adsReviewApi.service";
+import { approveAdAfterReview, fetchAdForReviewDetail, rejectAdForPolicy, resolveAdAppeal } from "@/services/adsReviewApi.service";
 import type { AdPolicyCategory } from "@/types/adsReview.type";
 import { formatDateOnly, formatDateTime, formatMoneyForDisplay, formatRelativeTimeFromNow, humanizeConstantName } from "@/utils/formatting.util";
 
@@ -22,11 +22,15 @@ import styles from "./adsReview.module.css";
 
 export function AdReviewPanel({ adId, policies, onClose, onAdChanged }: { readonly adId: string; readonly policies: readonly AdPolicyCategory[]; readonly onClose: () => void; readonly onAdChanged: () => void }) {
   const { data: ad, errorMessage, error: queryError, isLoading, reload, replaceData } = useAdminQuery((signal) => fetchAdForReviewDetail(adId, signal), adId);
-  const [pendingDecision, setPendingDecision] = useState<"approve" | "reject" | null>(null);
+  const [pendingDecision, setPendingDecision] = useState<"approve" | "reject" | "uphold" | "overturn" | null>(null);
   const [policyCategoryId, setPolicyCategoryId] = useState("");
   const [isCriticalOverrideConfirmed, setIsCriticalOverrideConfirmed] = useState(false);
   const { showToast } = useToast();
-  const mutation = useAdminMutation((input: { decision: "approve" | "reject"; reason: string }) => (input.decision === "approve" ? approveAdAfterReview(adId, input.reason, isCriticalOverrideConfirmed) : rejectAdForPolicy(adId, policyCategoryId, input.reason)));
+  const mutation = useAdminMutation((input: { decision: "approve" | "reject" | "uphold" | "overturn"; reason: string }) => {
+    if (input.decision === "approve") return approveAdAfterReview(adId, input.reason, isCriticalOverrideConfirmed);
+    if (input.decision === "reject") return rejectAdForPolicy(adId, policyCategoryId, input.reason);
+    return resolveAdAppeal(adId, input.decision, input.reason);
+  });
   const activePolicies = policies.filter((policy) => policy.isActive);
   const hasCriticalFlag = ad?.autoCheckFlags.some((flag) => flag.severity === "CRITICAL") ?? false;
 
@@ -40,7 +44,13 @@ export function AdReviewPanel({ adId, policies, onClose, onAdChanged }: { readon
     const updated = await mutation.run({ decision: pendingDecision, reason });
     if (!updated) return;
     replaceData((current) => (current ? { ...current, ...updated } : updated));
-    showToast(pendingDecision === "approve" ? "Ad approved. It can start delivering." : "Ad rejected. The advertiser was told which policy it breaks.");
+    const messages = {
+      approve: "Ad approved. It can start delivering.",
+      reject: "Ad rejected. The advertiser was told which policy it breaks.",
+      overturn: "Appeal overturned. Ad is now approved.",
+      uphold: "Appeal upheld. Rejection stands.",
+    } as const;
+    showToast(messages[pendingDecision]);
     setPendingDecision(null);
     onAdChanged();
   }
@@ -56,6 +66,11 @@ export function AdReviewPanel({ adId, policies, onClose, onAdChanged }: { readon
         <>
           <Button variant="quietDanger" onClick={openRejection}>Reject ad</Button>
           <Button variant="primary" onClick={() => setPendingDecision("approve")}>Approve ad</Button>
+        </>
+      ) : ad?.status === "REJECTED" ? (
+        <>
+          <Button variant="quietDanger" onClick={() => setPendingDecision("uphold")}>Uphold rejection</Button>
+          <Button variant="primary" onClick={() => setPendingDecision("overturn")}>Overturn &amp; approve</Button>
         </>
       ) : null}
     >
@@ -106,12 +121,32 @@ export function AdReviewPanel({ adId, policies, onClose, onAdChanged }: { readon
           </div>
           <ConfirmActionDialog intent="ads"
             isOpen={pendingDecision !== null}
-            title={pendingDecision === "approve" ? "Approve this ad" : "Reject this ad"}
-            consequences={pendingDecision === "approve" ? ["The ad enters the auction at its scheduled start.", "The advertiser is notified."] : ["The ad never delivers.", "The advertiser sees the policy and your reason, and a violation is added to their account."]}
-            confirmLabel={pendingDecision === "approve" ? "Approve ad" : "Reject ad"}
-            tone={pendingDecision === "reject" ? "danger" : "default"}
-            requiresReason={pendingDecision === "reject"}
-            reasonLabel="Reason shown to the advertiser (saved to the audit log)"
+            title={
+              pendingDecision === "approve"
+                ? "Approve this ad"
+                : pendingDecision === "reject"
+                  ? "Reject this ad"
+                  : pendingDecision === "overturn"
+                    ? "Overturn rejection on appeal"
+                    : "Uphold rejection on appeal"
+            }
+            consequences={
+              pendingDecision === "approve" || pendingDecision === "overturn"
+                ? ["The ad enters the auction at its scheduled start.", "The advertiser is notified."]
+                : ["The ad never delivers.", "The advertiser sees the policy and your reason."]
+            }
+            confirmLabel={
+              pendingDecision === "approve"
+                ? "Approve ad"
+                : pendingDecision === "reject"
+                  ? "Reject ad"
+                  : pendingDecision === "overturn"
+                    ? "Overturn & approve"
+                    : "Uphold rejection"
+            }
+            tone={pendingDecision === "reject" || pendingDecision === "uphold" ? "danger" : "default"}
+            requiresReason={pendingDecision === "reject" || pendingDecision === "uphold" || pendingDecision === "overturn"}
+            reasonLabel="Reason or resolution note shown to the advertiser (saved to the audit log)"
             isConfirmDisabled={(pendingDecision === "reject" && !policyCategoryId) || (pendingDecision === "approve" && hasCriticalFlag && !isCriticalOverrideConfirmed)}
             isBusy={mutation.isRunning}
             errorMessage={mutation.errorMessage}

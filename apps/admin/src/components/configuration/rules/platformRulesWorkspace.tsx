@@ -8,6 +8,7 @@ import type { CheckmarkPricingRules, CheckmarkSuggestionRules, CreatorEligibilit
 import { VersionedDocumentSection } from "../shared/versionedDocumentSection";
 import { CreatorEligibilityEditor } from "./creatorEligibilityEditor";
 import styles from "./platformRules.module.css";
+import { RetentionPoliciesSection } from "./retentionPoliciesSection";
 import { CheckmarkPricingEditor, CheckmarkSuggestionEditor, CreatorThresholdsEditor, TrialRulesEditor } from "./trustRulesEditors";
 import { UsernameRulesEditor } from "./usernameRulesEditor";
 
@@ -48,6 +49,10 @@ export function PlatformRulesWorkspace() {
         <section aria-labelledby="username-rules-heading">
           <h2 id="username-rules-heading" className={styles.sectionTitle}>Usernames</h2>
           <VersionedDocumentSection<UsernameRules> endpoint={usernameRulesEndpoint} recordId="username-rules" title="Username rules" canWrite={canWrite} renderEditor={(content, updateContent, isWritable) => <UsernameRulesEditor rules={content} canWrite={isWritable} onChange={updateContent} />} />
+        </section>
+        <section aria-labelledby="retention-policies-heading">
+          <h2 id="retention-policies-heading" className={styles.sectionTitle}>Data retention policies</h2>
+          <RetentionPoliciesSection canWrite={canWrite} />
         </section>
       </div>
     </>

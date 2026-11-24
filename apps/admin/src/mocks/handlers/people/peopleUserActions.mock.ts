@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { recordMockAuditEntry } from "@/mocks/mockAudit.mock";
 import { readMockAreaStore, readMockDatabase } from "@/mocks/mockDatabase.mock";
 import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.mock";
@@ -17,10 +18,17 @@ interface UserActionStore {
   readonly blockedSignups: { id: string; userId: string; kind: "EMAIL" | "DEVICE"; fingerprint: string; blockedAt: string }[];
   readonly heldUsernames: { username: string; releasedAt: string; availableAt: string }[];
   readonly deletions: { userId: string; deletedAt: string; deletedByName: string; anonymizedRecords: Record<string, number>; retainedUntil: string }[];
+  readonly creatorViolations: { id: string; userId: string; reason: string; source: string; recordedBy: string; createdAt: string }[];
 }
 
 function readStore(): UserActionStore {
-  return readMockAreaStore<UserActionStore>("people:userActions", () => ({ notices: [], blockedSignups: [], heldUsernames: [{ username: "mercy.styles", releasedAt: new Date(Date.now() - 20 * 86_400_000).toISOString(), availableAt: new Date(Date.now() + 100 * 86_400_000).toISOString() }, { username: "old.tunde", releasedAt: new Date(Date.now() - 130 * 86_400_000).toISOString(), availableAt: new Date(Date.now() - 10 * 86_400_000).toISOString() }], deletions: [] }));
+  return readMockAreaStore<UserActionStore>("people:userActions", () => ({
+    notices: [],
+    blockedSignups: [],
+    heldUsernames: [{ username: "mercy.styles", releasedAt: new Date(Date.now() - 20 * 86_400_000).toISOString(), availableAt: new Date(Date.now() + 100 * 86_400_000).toISOString() }, { username: "old.tunde", releasedAt: new Date(Date.now() - 130 * 86_400_000).toISOString(), availableAt: new Date(Date.now() - 10 * 86_400_000).toISOString() }],
+    deletions: [],
+    creatorViolations: [],
+  }));
 }
 
 const holdDays = 120;
@@ -91,7 +99,7 @@ export function registerPeopleUserActionMockHandlers(): void {
     const before = { username: user.username, status: user.status, displayName: user.displayName };
     const anonymizedRecords = { orders: user.isSeller ? 14 : 6, payments: user.isSeller ? 22 : 9, ledgerEntries: user.isSeller ? 51 : 17 };
     const mutable = asMutablePlatformUser(user);
-    mutable.username = `deleted_${user.id.slice(-4)}${Math.random().toString(36).slice(2, 5)}`;
+    mutable.username = `deleted_${user.id.slice(-4)}${randomBytes(2).toString("hex")}`;
     mutable.displayName = "Deleted account";
     mutable.avatarUrl = null;
     mutable.status = "DELETED";
@@ -165,5 +173,30 @@ export function registerPeopleUserActionMockHandlers(): void {
     notifyUser(user, "You received a username", `You can now use @${username}. Your earlier username @${previous} is held for ${holdDays} days.`);
     recordMockAuditEntry(request, { action: isBypass ? "username.assigned_hold_bypassed" : "username.assigned", area: "usernames", target: target(user), reason, before: { username: previous, holdReleasedAt: hold?.releasedAt ?? null, holdAvailableAt: hold?.availableAt ?? null }, after: { username, holdBypassed: isBypass, previousUsernameHeldDays: holdDays } });
     return respondWithJson(200, buildUserDetailResponse(user));
+  });
+
+  registerMockRoute("GET", "/admin/creators/:userId/violations", (request) => {
+    requireMockPermission(request, "applications:creators", "users:moderate");
+    const user = findPlatformUserForPeopleOrFail(request.params.userId);
+    const items = readStore().creatorViolations.filter((entry) => entry.userId === user.id);
+    return respondWithJson(200, { data: items, nextCursor: null });
+  });
+
+  registerMockRoute("POST", "/admin/creators/:userId/violations", (request) => {
+    const principal = requireMockPermission(request, "applications:creators", "users:moderate");
+    requireMockStepUp(request);
+    const user = findPlatformUserForPeopleOrFail(request.params.userId);
+    const reason = readRequiredReason(readJsonObjectBody(request));
+    const entry = {
+      id: createMockId("cviol"),
+      userId: user.id,
+      reason,
+      source: "staff",
+      recordedBy: principal.adminId,
+      createdAt: readIsoNow(),
+    };
+    readStore().creatorViolations.unshift(entry);
+    recordMockAuditEntry(request, { action: "creators.violation.record", area: "creators", target: target(user), reason, before: null, after: entry });
+    return respondWithJson(201, entry);
   });
 }

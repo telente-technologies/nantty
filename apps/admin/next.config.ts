@@ -24,7 +24,13 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
-      { source: "/bff/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
+      {
+        source: "/bff/:path*",
+        headers: [
+          { key: "Cache-Control", value: "no-store" },
+          { key: "Content-Security-Policy", value: "default-src 'none'; frame-ancestors 'none'" },
+        ],
+      },
     ];
   },
 };

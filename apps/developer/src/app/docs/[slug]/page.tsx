@@ -1,26 +1,32 @@
 import { notFound } from "next/navigation";
-import type { Metadata } from "next";
 
 import { BusinessMessagingDocs } from "@/components/businessMessagingDocs";
-import { DeveloperGuidePageView, docGuideSlugs, type DocGuideSlug } from "@/components/developerPublicPages";
+import { DeveloperGuideArticle } from "@/components/developerPublicPages";
 import { PublicDocsShell } from "@/components/publicDocsShell";
-import { readDeveloperDocsUrl } from "@/config/site.config";
+import { docGuideSlugs, type DocGuideSlug } from "@/config/docs.config";
 
 export function generateStaticParams() {
   return docGuideSlugs.map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({ params }: { readonly params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata({ params }: { readonly params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  if (!docGuideSlugs.includes(slug as DocGuideSlug)) return {};
-  return {
-    title: slug === "business-messaging" || slug === "messaging" ? "Business Messaging API" : `Documentation · ${slug}`,
-    alternates: { canonical: new URL(`/${slug}`, readDeveloperDocsUrl()).toString() },
-    robots: { index: true, follow: true },
+  const labels: Record<string, string> = {
+    "business-messaging": "Business Messaging API",
+    messaging: "Business Messaging API",
+    quickstart: "Quickstart",
+    "api-reference": "API Reference",
+    authentication: "Authentication & SSO",
+    webhooks: "Webhooks & Signatures",
+    sandbox: "Sandbox Guide",
+    errors: "Error Reference",
+    "rate-limits": "Rate Limits & Quotas",
+    billing: "Billing & Plans",
   };
+  return { title: labels[slug] ?? "Developer Docs" };
 }
 
-export default async function PublicDocsSlugPage({ params }: { readonly params: Promise<{ slug: string }> }) {
+export default async function PublicDocSlugPage({ params }: { readonly params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!docGuideSlugs.includes(slug as DocGuideSlug)) notFound();
 
@@ -29,7 +35,7 @@ export default async function PublicDocsSlugPage({ params }: { readonly params: 
       {slug === "business-messaging" || slug === "messaging" ? (
         <BusinessMessagingDocs />
       ) : (
-        <DeveloperGuidePageView slug={slug as Exclude<DocGuideSlug, "business-messaging" | "messaging">} />
+        <DeveloperGuideArticle slug={slug as Exclude<DocGuideSlug, "business-messaging" | "messaging">} />
       )}
     </PublicDocsShell>
   );
