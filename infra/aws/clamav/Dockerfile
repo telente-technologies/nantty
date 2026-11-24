@@ -2,3 +2,6 @@ FROM clamav/clamav:1.5.5_base-debian13-slim@sha256:523277ba4a20c7b854babe0dbe9ca
 
 RUN freshclam --stdout && chown -R clamav:clamav /var/lib/clamav
 COPY --chown=clamav:clamav clamd.conf /etc/clamav/clamd.conf
+
+USER clamav
+ENTRYPOINT ["/init-unprivileged"]
