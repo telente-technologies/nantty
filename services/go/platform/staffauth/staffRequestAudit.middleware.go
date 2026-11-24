@@ -42,11 +42,21 @@ func (writer *statusCapturingWriter) WriteHeader(status int) {
 }
 
 func (writer *statusCapturingWriter) Write(chunk []byte) (int, error) {
-	httpserver.EnsureSafeResponseContentType(writer.ResponseWriter)
+	responseWriter := writer.ResponseWriter
+	headers := responseWriter.Header()
+	if strings.TrimSpace(headers.Get("X-Content-Type-Options")) == "" {
+		headers.Set("X-Content-Type-Options", "nosniff")
+	}
+	switch httpserver.ClassifyResponseContentType(headers.Get("Content-Type")) {
+	case httpserver.ContentTypeMissing:
+		headers.Set("Content-Type", "text/plain; charset=utf-8")
+	case httpserver.ContentTypeDisallowed:
+		headers.Set("Content-Type", "application/octet-stream")
+	}
 	if writer.status == 0 {
 		writer.status = http.StatusOK
 	}
-	return writer.ResponseWriter.Write(chunk)
+	return responseWriter.Write(chunk)
 }
 
 func (writer *statusCapturingWriter) Unwrap() http.ResponseWriter { return writer.ResponseWriter }

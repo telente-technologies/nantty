@@ -9,18 +9,35 @@ const DefaultMaximumRequestBodyBytes int64 = 2 << 20
 
 var ErrRequestBodyTooLarge = NewApiError(http.StatusRequestEntityTooLarge, "BODY_TOO_LARGE", "The request body is too large.")
 
+type ResponseContentTypeDecision uint8
+
+const (
+	ContentTypeSafe ResponseContentTypeDecision = iota
+	ContentTypeMissing
+	ContentTypeDisallowed
+)
+
+func ClassifyResponseContentType(contentType string) ResponseContentTypeDecision {
+	mediaType := strings.ToLower(strings.TrimSpace(strings.SplitN(contentType, ";", 2)[0]))
+	switch mediaType {
+	case "application/json", "application/problem+json", "application/jwk-set+json", "application/x-ndjson", "text/plain", "text/csv", "application/pdf", "application/octet-stream":
+		return ContentTypeSafe
+	case "":
+		return ContentTypeMissing
+	default:
+		return ContentTypeDisallowed
+	}
+}
+
 func EnsureSafeResponseContentType(writer http.ResponseWriter) {
 	headers := writer.Header()
 	if strings.TrimSpace(headers.Get("X-Content-Type-Options")) == "" {
 		headers.Set("X-Content-Type-Options", "nosniff")
 	}
-	mediaType := strings.ToLower(strings.TrimSpace(strings.SplitN(headers.Get("Content-Type"), ";", 2)[0]))
-	switch mediaType {
-	case "application/json", "application/problem+json", "application/jwk-set+json", "application/x-ndjson", "text/plain", "text/csv", "application/pdf", "application/octet-stream":
-		return
-	case "":
+	switch ClassifyResponseContentType(headers.Get("Content-Type")) {
+	case ContentTypeMissing:
 		headers.Set("Content-Type", "text/plain; charset=utf-8")
-	default:
+	case ContentTypeDisallowed:
 		headers.Set("Content-Type", "application/octet-stream")
 	}
 }
@@ -57,9 +74,19 @@ func (tracker *headerTrackingResponseWriter) WriteHeader(status int) {
 }
 
 func (tracker *headerTrackingResponseWriter) Write(chunk []byte) (int, error) {
-	EnsureSafeResponseContentType(tracker.ResponseWriter)
+	responseWriter := tracker.ResponseWriter
+	headers := responseWriter.Header()
+	if strings.TrimSpace(headers.Get("X-Content-Type-Options")) == "" {
+		headers.Set("X-Content-Type-Options", "nosniff")
+	}
+	switch ClassifyResponseContentType(headers.Get("Content-Type")) {
+	case ContentTypeMissing:
+		headers.Set("Content-Type", "text/plain; charset=utf-8")
+	case ContentTypeDisallowed:
+		headers.Set("Content-Type", "application/octet-stream")
+	}
 	tracker.wroteHeader = true
-	return tracker.ResponseWriter.Write(chunk)
+	return responseWriter.Write(chunk)
 }
 
 func (tracker *headerTrackingResponseWriter) Unwrap() http.ResponseWriter {

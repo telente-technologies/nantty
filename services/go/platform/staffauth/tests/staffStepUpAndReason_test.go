@@ -107,3 +107,30 @@ func TestCatchAllAuditKeepsTheReasonAndTheHandlerStillReadsTheBody(t *testing.T)
 		t.Fatalf("audit entry %+v", recorder.events)
 	}
 }
+
+func TestMutationAuditWriterEnforcesSafeResponseContentTypeOnWrite(t *testing.T) {
+	guard, registry, tokens, _ := newGuard(t)
+	registry.RegisterStaffNetworkPolicy(allowListPolicy{allowed: "203.0.113.7"})
+	accessToken, stepUpToken, _ := tokens.SignStaffTokensForTest(t, staffauth.AdminRole, []string{"users:ban"})
+
+	unsafeHandler := guard.RequireStaff("users:ban", true)(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, _ = writer.Write([]byte("<script>alert(1)</script>"))
+	}))
+	unsafeResponse := serveWithStepUp(unsafeHandler, accessToken, stepUpToken, `{"reason":"test"}`)
+	if got := unsafeResponse.Header().Get("Content-Type"); got != "application/octet-stream" {
+		t.Fatalf("disallowed Content-Type = %q, want application/octet-stream", got)
+	}
+	if got := unsafeResponse.Header().Get("X-Content-Type-Options"); got != "nosniff" {
+		t.Fatalf("X-Content-Type-Options = %q, want nosniff", got)
+	}
+
+	jsonHandler := guard.RequireStaff("users:ban", true)(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_, _ = writer.Write([]byte(`{"ok":true}`))
+	}))
+	jsonResponse := serveWithStepUp(jsonHandler, accessToken, stepUpToken, `{"reason":"test"}`)
+	if got := jsonResponse.Header().Get("Content-Type"); got != "application/json; charset=utf-8" {
+		t.Fatalf("safe Content-Type = %q, want application/json; charset=utf-8", got)
+	}
+}
