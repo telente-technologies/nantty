@@ -2,10 +2,10 @@ name: Backend
 
 on:
   pull_request:
-    paths: ["services/**", "services/python/intelligence/**", "infra/local/**", "docs/architecture/microservicesPlan.json", ".github/workflows/backend.yml"]
+    paths: ["services/**", "services/python/intelligence/**", "infra/local/**", "infra/aws/tls-proxy/**", "docs/architecture/microservicesPlan.json", ".github/workflows/backend.yml"]
   push:
     branches: [main]
-    paths: ["services/**", "services/python/intelligence/**", "infra/local/**"]
+    paths: ["services/**", "services/python/intelligence/**", "infra/local/**", "infra/aws/tls-proxy/**"]
 
 permissions:
   contents: read
@@ -25,6 +25,7 @@ jobs:
       typescript: ${{ steps.filter.outputs.typescript }}
       elixir: ${{ steps.filter.outputs.elixir }}
       python: ${{ steps.filter.outputs.python }}
+      tls_proxy: ${{ steps.filter.outputs.tls_proxy }}
       migrations: ${{ steps.filter.outputs.migrations }}
     steps:
       - uses: actions/checkout@v7.0.1
@@ -45,6 +46,8 @@ jobs:
               - "services/elixir/**"
             python:
               - "services/python/intelligence/**"
+            tls_proxy:
+              - "infra/aws/tls-proxy/**"
             migrations:
               - "services/go/modules/*/src/migrations/**"
 
@@ -301,6 +304,19 @@ jobs:
           PY
             exit 1
           }
+
+  tls-proxy:
+    needs: changes
+    if: needs.changes.outputs.tls_proxy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.3.0
+      - name: Build the TLS proxy image under test
+        run: docker build --tag nantty-tls-proxy:local infra/aws/tls-proxy
+      - name: Exercise TLS, mTLS identity, gRPC forwarding and certificate rotation
+        run: uv run --python 3.12 --with boto3==1.43.110 --with cryptography==50.0.2 python infra/aws/tls-proxy/test_tls.py
 
   images:
     needs: changes
