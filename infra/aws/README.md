@@ -194,6 +194,26 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
    `deploy_production=true` and passing the protected `production` environment approval. Autoscaling minimums start tasks.
    The staging media task includes the private ClamAV sidecar when `enable_media_malware_scanning=true`; its 4 GiB memory reservation increases staging cost. After the first successful Terraform apply and media rollout, set the repository variable `CLAMAV_REFRESH_ENABLED_STAGING=true` to enable the daily signature-refresh workflow. That workflow tests a clean payload and the EICAR test signature, scans the image, then rolls only the ClamAV container. Keep the variable unset until the staging ECS family has the sidecar and the staging ECR/deploy OIDC roles exist.
 
+### GitHub-hosted Terraform staging plan
+
+`.github/workflows/terraform-staging.yml` runs formatting and backend-free Terraform validation on pull requests. To
+generate an authenticated plan without keeping the workstation online, configure the `staging` GitHub Environment:
+
+- Add `AWS_TERRAFORM_ROLE_ARN_STAGING` as an environment variable for a dedicated, least-privilege plan role. Its
+  GitHub OIDC trust must be restricted to this repository and the `staging` environment; do not reuse the ECS deploy
+  role. The role needs read access to the platform and email-staging state objects, access to the staging state lock,
+  and only the provider read permissions required to refresh this stack.
+- Set the `AWS_REGION` environment variable to `eu-north-1`.
+- Add `CLOUDFLARE_API_TOKEN` as an environment secret scoped to the `nantty.com` zone with DNS Read only. A plan
+  should not need DNS Edit permission.
+- From the `main` branch, run **Terraform staging** with `create_plan=true`. The workflow only runs `terraform plan`;
+  it never applies infrastructure or mutates DNS. Review its plan output before any separately authorized apply.
+
+The workflow is not autonomous coding: changes still need to be committed and pushed before GitHub can run them. Once
+the code is pushed, hosted validation and the existing backend deployment workflow can run without the developer's PC.
+Terraform apply, frontend hosting, desktop packaging/distribution, and end-to-end staging verification are separate
+work still to be completed.
+
 ## SES-only staging (without deploying the platform stack)
 
 Use `envs/email-staging` to verify the staging sending identity and feedback path without applying the full platform
@@ -204,11 +224,12 @@ publisher policy) and the queues use SQS-managed encryption. The key adds a fixe
 request charges; consult the current [AWS KMS pricing](https://aws.amazon.com/kms/pricing/) before applying. This root
 creates no VPC, NAT gateway, database, ECS service, or application deployment.
 
-Before applying, confirm the selected Region is `eu-north-1` and that AWS Settings has a hard spend limit appropriate to
-the project. The state bucket and DynamoDB lock table in `envs/email-staging/backend.tf` must already exist; bootstrap
+Before applying, confirm the selected Region is `eu-north-1`. The owner explicitly authorized staging without an AWS
+hard spend cap; review the estimated and realized charges carefully because there is no automatic cap protecting the
+project. The state bucket and DynamoDB lock table in `envs/email-staging/backend.tf` must already exist; bootstrap
 them using step 1 above, then provide a Cloudflare API token limited to DNS Read/Edit on the `nantty.com` zone through
-`CLOUDFLARE_API_TOKEN`. Never save the token in a tfvars file. Review the entire plan and confirm it contains only SES,
-SNS/SQS, their policies/subscription, and staging sending-subdomain DNS records before applying:
+`CLOUDFLARE_API_TOKEN`. Never save the token in a tfvars file. Inspect existing DNS first and review the entire plan;
+it should contain only SES, SNS/SQS, their policies/subscription, and the staging sending-subdomain DNS records:
 
 ```bash
 cd infra/aws/envs/email-staging
@@ -220,18 +241,25 @@ terraform apply -var-file=staging.tfvars
 After apply, verify the domain identity, DKIM, and custom MAIL FROM statuses with
 `aws sesv2 get-email-identity --region eu-north-1 --email-identity staging.nantty.com`. SES staging remains in the
 sandbox: test only with verified identities or the SES mailbox simulator until AWS grants production access. A
-simulator message verifies SES acceptance/event plumbing, not inbox rendering or delivery to ordinary recipients. The
-Nantty template renderer and notifications service are not deployed by this SES-only root; existing package and service
-tests cover rendering until the notification runtime is deployed with its application dependencies.
+simulator message verifies SES acceptance/event plumbing, not inbox rendering or delivery to ordinary recipients.
 
-Current workspace checks (2026-11-25): AWS CLI profile `oyinlola@nantty` is authenticated in `eu-north-1`; SES is
-healthy and sending-enabled but remains in the sandbox (200 messages per 24 hours, 1 message/second, zero sent), and
-no SES identity exists. The owner confirmed that no hard monthly spend limit is currently active. The staging state
-bucket and lock table are absent, and `CLOUDFLARE_API_TOKEN` is not configured in this shell. Terraform formatting,
-`init -backend=false`, and validation pass for the email-only root. No AWS or Cloudflare resources were created or
-changed. Do not provision until the owner sets the retained hard project spend limit in AWS Settings > Billing and
-the missing state/DNS prerequisites are ready. Do not use the shared `envs/staging` root for email-only verification;
-it composes the full fourteen-service platform.
+The SES-only root does not deploy the notification runtime. The full `envs/staging` root consumes the existing SES
+identity, configuration-set, and feedback-queue URL outputs from this root's remote state; it derives the queue ARN
+and DLQ name from the SES module's stable naming contract and disables its own SES module in staging, avoiding
+duplicate Terraform ownership. Dev and production continue to manage SES through the platform module. Apply the
+email-only root first, then use the full staging root. Its remote-state read requires AWS credentials with read access
+to the state object. The notification task role receives only the SES identity, configuration-set, and
+feedback-queue permissions required by the service.
+
+Current workspace checks (2026-11-25): in `eu-north-1`, the account-regional state bucket and lock table are
+provisioned and verified; S3 access logs are delivered to encrypted CloudWatch Logs with 90-day retention. The SES
+configuration set, domain identity, custom MAIL FROM, encrypted SNS/SQS feedback path, and event destination are
+applied. SES domain/DKIM/MAIL FROM verification remains pending because the six planned DNS additions have not been
+published. Cloudflare access is currently authenticated; a read-only inspection found 18 zone records and no records
+matching the staging SES names. No DNS changes have been made. The AWS project
+has no active hard spend cap; the owner explicitly authorized staging without one. SES is sandboxed, so ordinary
+recipient delivery and production sending remain unavailable. The full platform stack is not deployed. This setup
+provides transactional sending and feedback processing, not IMAP/POP inbox hosting.
 
 ## Known caveats to confirm on the first staging apply
 
@@ -242,21 +270,16 @@ it composes the full fourteen-service platform.
   `Not Found` for `Rekognition+DetectModerationLabels` in `eu-north-1` on 2026-11-24. Do not apply with the
   expectation that this API is usable from Stockholm. Keep the existing child-safety upload path fail-closed and
   resolve the moderation provider/Region dependency before claiming those scans work; do not disable the safety gate.
-- The staging Terraform backend bucket and lock table were not present in the selected project when checked on
-  2026-11-24. Remote state bootstrap remains a prerequisite; no backend resources have been created by this checkout.
-- The project plan could not be read through `GetAccountPlanState` on 2026-11-24 (`ResourceNotFoundException: Missing
-  data for account`). Confirm Free/Paid plan, spend limit, and billing status in AWS Settings before creating any
-  billable staging resources.
-- The owner has removed the USD 110/month architecture target but wants the AWS project hard spend cap retained.
-  The configured hard-cap amount has not been verified or changed. Do not interpret removal of the design target as
-  authorization for unlimited spend. AWS Price List API on-demand rates for
+- Historical checks from 2026-11-24 found no remote-state resources and could not read the project plan. On 2026-11-25
+  the state bucket/table were provisioned and the owner explicitly authorized staging with no hard spend cap. That
+  later state supersedes the old resource and cap gate; it does not imply cost limits or a known Free/Paid plan.
+- AWS Price List API on-demand rates for
   EU (Stockholm) on 2026-11-24 are USD 0.285/hour for each configured Aurora `db.r7g.large`, USD 0.046/hour
   for each NAT Gateway, USD 0.0624/hour for each Valkey `cache.t4g.medium`, and USD 0.0312/hour for Valkey
   `cache.t4g.small`. With the checked-in two Aurora instances, three NAT gateways, two medium Valkey nodes, and
   one small Valkey node, those four categories alone cost about USD 630.72 per 730-hour month. This excludes
-  Aurora storage/I/O, ECS/Fargate, MQ, load balancers, logs, and network transfer. Do not apply the full profile
-  at any previously discussed target. The project owner must verify the actual hard spend limit in AWS Settings >
-  Billing; cost and architecture require review before provisioning.
+  Aurora storage/I/O, ECS/Fargate, MQ, load balancers, logs, and network transfer. This historical partial estimate
+  is not a current full-stack estimate or spend limit. Review the current plan and cost estimate before provisioning.
 
 - Amazon MQ RabbitMQ cluster networking (one subnet, endpoint inside the VPC) and the `Broker` dimension of MQ alarms.
 - CodeDeploy rewriting the listener rule of `go-money` on the internal listener.
