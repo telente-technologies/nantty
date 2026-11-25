@@ -25,8 +25,8 @@
 ## 2026-11-25 — Add GitHub-hosted staging Terraform validation and plan
 
 - Added `.github/workflows/terraform-staging.yml`: pull requests run Terraform formatting and backend-free validation; an explicit workflow dispatch on `main` can assume a dedicated staging plan role through GitHub OIDC and create a plan in `eu-north-1`. The workflow has no apply step and uses a zone-scoped Cloudflare DNS Read secret.
-- Documented required GitHub environment configuration in `infra/aws/README.md`. Cloudflare was reauthenticated and inspected read-only: 18 zone records exist and none match staging SES names. No DNS mutations, AWS apply, commit, or push occurred.
-- Local verification: workflow YAML parsed; `terraform fmt -check -recursive infra/aws`, staging `terraform validate`, and `git diff --check` passed. Hosted workflow execution remains unverified until the code is pushed and the staging environment's dedicated role, OIDC trust, region variable, and read-only Cloudflare secret are configured. Frontend hosting and desktop distribution remain outstanding.
+- Documented required GitHub environment configuration in `infra/aws/README.md`. Cloudflare was reauthenticated and inspected read-only: 18 zone records exist and none match staging SES names. No DNS mutations or AWS apply occurred.
+- Local verification: workflow YAML parsed; `terraform fmt -check -recursive infra/aws`, staging `terraform validate`, and `git diff --check` passed. PR #71 now contains the pushed workflow and its PR Terraform validation succeeded; its explicit `main` workflow-dispatch plan was skipped as designed. The dedicated staging role, OIDC trust, region variable, and GitHub Actions Cloudflare secret are not verified, so no hosted remote plan is claimed. Frontend hosting and desktop distribution remain outstanding.
 
 ## 2026-11-25 — Add account-controlled Business Messaging consent management
 
