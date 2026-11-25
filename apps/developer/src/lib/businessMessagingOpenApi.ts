@@ -51,6 +51,9 @@ const errorEnvelopeSchema = {
             "INVALID_MESSAGE_ID",
             "INVALID_RECIPIENT_ID",
             "BUSINESS_CONSENT_REQUIRED",
+            "BUSINESS_STORE_AUTHORIZATION_REQUIRED",
+            "INSUFFICIENT_BUSINESS_STORE_PERMISSION",
+            "INVALID_STORE_ID",
             "MESSAGE_NOT_FOUND",
           ],
         },
@@ -207,8 +210,9 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
               "application/json": {
                 schema: {
                   type: "object",
-                  required: ["recipientId", "text"],
+                  required: ["storeId", "recipientId", "text"],
                   properties: {
+                    storeId: { type: "string", format: "uuid", description: "Store that has granted this application messages:send access." },
                     recipientId: { type: "string", format: "uuid" },
                     text: { type: "string", minLength: 1, maxLength: 4000 },
                   },
@@ -228,6 +232,7 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
           operationId: "listBusinessConversations",
           security: [{ BusinessBearerAuth: ["conversations:read"] }],
           parameters: [
+            { name: "storeId", in: "query", required: true, schema: { type: "string", format: "uuid", description: "Store that granted this application conversations:read access." } },
             { name: "limit", in: "query", required: false, schema: { type: "integer", minimum: 1, maximum: 100, default: 20 } },
             { name: "cursor", in: "query", required: false, schema: { type: "string", description: "Opaque cursor returned by the preceding page." } },
           ],
@@ -249,6 +254,7 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
           security: [{ BusinessBearerAuth: ["messages:read"] }],
           parameters: [
             { name: "recipientId", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+            { name: "storeId", in: "query", required: true, schema: { type: "string", format: "uuid", description: "Store that granted this application messages:read access." } },
             { name: "limit", in: "query", required: false, schema: { type: "integer", minimum: 1, maximum: 100, default: 20 } },
             { name: "cursor", in: "query", required: false, schema: { type: "string", description: "Opaque cursor returned by the preceding page." } },
           ],

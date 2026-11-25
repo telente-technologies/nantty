@@ -60,6 +60,7 @@ func (controller Controller) SendBusinessMessage(writer http.ResponseWriter, req
 		return
 	}
 	var body struct {
+		StoreId     string `json:"storeId"`
 		RecipientId string `json:"recipientId"`
 		Text        string `json:"text"`
 	}
@@ -68,9 +69,18 @@ func (controller Controller) SendBusinessMessage(writer http.ResponseWriter, req
 		return
 	}
 	recipientUUID, err := uuid.Parse(strings.TrimSpace(body.RecipientId))
+	storeUUID, storeErr := parseBusinessStoreID(body.StoreId)
 	text := strings.TrimSpace(body.Text)
-	if err != nil || text == "" || utf8.RuneCountInString(text) > 4000 {
-		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_MESSAGE", "Valid recipientId UUID and text (1-4000 chars) are required."))
+	if err != nil || storeErr != nil || text == "" || utf8.RuneCountInString(text) > 4000 {
+		if storeErr != nil {
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, storeErr)
+			return
+		}
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_MESSAGE", "Valid storeId, recipientId UUID and text (1-4000 chars) are required."))
+		return
+	}
+	if err := requireBusinessStoreCapability(request.Context(), controller.Container.Database, orgId, appId, storeUUID, "messages:send"); err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
 	var scopesRaw []byte
@@ -98,7 +108,7 @@ func (controller Controller) SendBusinessMessage(writer http.ResponseWriter, req
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusServiceUnavailable, "BUSINESS_MESSAGING_DISPATCH_UNAVAILABLE", "Business messaging delivery gateway is not configured."))
 		return
 	}
-	reservation, err := ReserveProductionMessage(request.Context(), controller.Container.Database, orgId, appId, credId, recipientUUID, request.Header.Get("Idempotency-Key"), text, controller.Container.Now().UTC())
+	reservation, err := ReserveProductionMessage(request.Context(), controller.Container.Database, orgId, appId, credId, storeUUID, recipientUUID, request.Header.Get("Idempotency-Key"), text, controller.Container.Now().UTC())
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
@@ -114,7 +124,7 @@ func (controller Controller) SendBusinessMessage(writer http.ResponseWriter, req
 		return
 	}
 	requestId := reservation.RequestId
-	extId, dispatchErr := dispatchBusinessMessage(request.Context(), dispatchUrl, dispatchToken, msgId, orgId, appId, recipientUUID, text)
+	extId, dispatchErr := dispatchBusinessMessage(request.Context(), dispatchUrl, dispatchToken, msgId, orgId, appId, storeUUID, recipientUUID, text)
 	if dispatchErr != nil {
 		completeProductionRequest(request.Context(), controller.Container.Database, controller.Container.Logger, requestId, http.StatusServiceUnavailable, started)
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger,
@@ -135,9 +145,9 @@ func (controller Controller) SendBusinessMessage(writer http.ResponseWriter, req
 	httpserver.WriteJsonResponse(writer, http.StatusAccepted, map[string]any{"messageId": msgId.String(), "externalMessageId": extId, "status": "dispatched"})
 }
 
-func dispatchBusinessMessage(ctx context.Context, baseUrl, token string, msgId, orgId, appId, recipientId uuid.UUID, text string) (string, error) {
+func dispatchBusinessMessage(ctx context.Context, baseUrl, token string, msgId, orgId, appId, storeId, recipientId uuid.UUID, text string) (string, error) {
 	encoded, _ := json.Marshal(map[string]string{
-		"messageId": msgId.String(), "organizationId": orgId.String(), "applicationId": appId.String(), "recipientId": recipientId.String(), "text": text,
+		"messageId": msgId.String(), "organizationId": orgId.String(), "applicationId": appId.String(), "storeId": storeId.String(), "recipientId": recipientId.String(), "text": text,
 	})
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, baseUrl+"/api/v1/internal/business/messages", bytes.NewReader(encoded))
 	if err != nil {

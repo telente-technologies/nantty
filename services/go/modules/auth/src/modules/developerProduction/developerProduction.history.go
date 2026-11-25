@@ -22,9 +22,12 @@ type BusinessMessageView struct {
 	UpdatedAt         time.Time `json:"updatedAt"`
 }
 
-func (controller Controller) authorizeBusinessMessageRead(request *http.Request, recipientID uuid.UUID) (uuid.UUID, uuid.UUID, uuid.UUID, error) {
+func (controller Controller) authorizeBusinessMessageRead(request *http.Request, recipientID, storeID uuid.UUID) (uuid.UUID, uuid.UUID, uuid.UUID, error) {
 	credentialID, applicationID, organizationID, err := controller.authenticateLiveCredential(request, "messages:read")
 	if err != nil {
+		return uuid.Nil, uuid.Nil, uuid.Nil, err
+	}
+	if err := requireBusinessStoreCapability(request.Context(), controller.Container.Database, organizationID, applicationID, storeID, "messages:read"); err != nil {
 		return uuid.Nil, uuid.Nil, uuid.Nil, err
 	}
 	var rawScopes []byte
@@ -61,7 +64,12 @@ func (controller Controller) ListBusinessMessages(writer http.ResponseWriter, re
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
-	credentialID, applicationID, organizationID, err := controller.authorizeBusinessMessageRead(request, recipientID)
+	storeID, err := parseBusinessStoreID(request.URL.Query().Get("storeId"))
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	credentialID, applicationID, organizationID, err := controller.authorizeBusinessMessageRead(request, recipientID, storeID)
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
@@ -92,14 +100,15 @@ func (controller Controller) ListBusinessMessages(writer http.ResponseWriter, re
 		`SELECT m.id, m.recipient_account_id, m.body_text, m.status, m.external_message_id, m.created_at, m.updated_at
 		 FROM developer_business_messages m
 		 WHERE m.organization_id = $1 AND m.application_id = $2 AND m.recipient_account_id = $3
+		   AND m.store_id = $4
 		   AND EXISTS (SELECT 1 FROM developer_business_consents c
 		               WHERE c.organization_id = m.organization_id
 		                 AND c.application_id = m.application_id
 		                 AND c.recipient_account_id = m.recipient_account_id
 		                 AND c.status = 'active' AND c.scopes ? 'messages:read')
-		   AND ($4::timestamptz IS NULL OR (m.created_at, m.id) < ($4::timestamptz, $5::uuid))
-		 ORDER BY m.created_at DESC, m.id DESC LIMIT $6`,
-		organizationID, applicationID, recipientID, cursorTime, cursorID, limit+1,
+		   AND ($5::timestamptz IS NULL OR (m.created_at, m.id) < ($5::timestamptz, $6::uuid))
+		 ORDER BY m.created_at DESC, m.id DESC LIMIT $7`,
+		organizationID, applicationID, recipientID, storeID, cursorTime, cursorID, limit+1,
 	)
 	if err != nil {
 		completeProductionRequest(request.Context(), controller.Container.Database, controller.Container.Logger, requestID, http.StatusInternalServerError, started)
@@ -168,7 +177,10 @@ func (controller Controller) GetBusinessMessageStatus(writer http.ResponseWriter
 		`SELECT m.id, m.recipient_account_id, m.body_text, m.status, m.external_message_id, m.created_at, m.updated_at
 		 FROM developer_business_messages m
 		 WHERE m.id = $1 AND m.organization_id = $2 AND m.application_id = $3
-		   AND EXISTS (SELECT 1 FROM developer_business_consents c
+			AND EXISTS (SELECT 1 FROM developer_business_authorizations a
+			            WHERE a.organization_id = m.organization_id AND a.application_id = m.application_id
+			              AND a.store_id = m.store_id AND a.status = 'active' AND a.scopes ? 'messages:read')
+			AND EXISTS (SELECT 1 FROM developer_business_consents c
 		               WHERE c.organization_id = m.organization_id AND c.application_id = m.application_id
 		                 AND c.recipient_account_id = m.recipient_account_id AND c.status = 'active'
 		                 AND c.scopes ? 'messages:read')`,
