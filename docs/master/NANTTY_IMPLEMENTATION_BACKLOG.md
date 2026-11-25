@@ -1,5 +1,11 @@
 # Nantty implementation backlog
 
+## 2026-11-25 — Patch GLib VariantStrIter unsound pointer in Linux Admin dependency graph
+
+- GitHub Dependabot alert #66 identifies GLib 0.18.5's `VariantStrIter::impl_get` passing an immutable pointer reference to a C out-parameter. The normal upgrade is blocked by the Tauri 2 GTK3 graph's `glib = ^0.18` constraints; the upstream gtk-rs fix exists in PR #1343 but is not available as a compatible patched release.
+- Vendored the exact GLib 0.18.5 crate source under `vendor/glib-0.18.5`, changed `let p` to `let mut p` and `&p` to `&mut p`, and added a scoped `[patch.crates-io]` override for the Admin Tauri manifest. The Cargo lock now resolves that dependency to the local patched source.
+- Verification: `cargo test --manifest-path vendor/glib-0.18.5/Cargo.toml --lib variant_iter::tests::test_variant_iter_array` passed (1/1); `cargo tree --manifest-path apps/admin/src-tauri/Cargo.toml -i glib --locked` confirms the patched path is used throughout the Tauri GTK3 graph. `cargo clean` removed 770.6 MiB of test build artifacts afterward. Full Admin Tauri build and GitHub Dependabot alert refresh remain unverified; alert #66 was not dismissed.
+
 ## 2026-11-24 — Current Go test-file layout recount
 
 - Recounted the current `main` tree after pulling merged PR #64: `rg --files services/go -g '*_test.go'` reports 708 Go test files, with 708 under `tests/` and zero outside. This supersedes older inventory snapshots that reported outstanding source-adjacent test files; no test code or visibility was changed in this pass.

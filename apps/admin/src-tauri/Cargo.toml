@@ -13,3 +13,6 @@ tauri = { version = "2", features = ["image-png"] }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
+
+[patch.crates-io]
+glib = { path = "../../../vendor/glib-0.18.5" }
