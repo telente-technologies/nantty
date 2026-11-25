@@ -14,11 +14,11 @@
 - Squash-merged at `2026-11-25T22:38:42Z` as `d85670af122403a7d9980beef35b8854fff7a655`; the local `main` checkout was fast-forwarded to this commit and is clean.
 - This verifies CI and merge only. The change has not been deployed to AWS staging. Production message sending remains intentionally unavailable (503); secure Social dispatch, customer trust/window, inbound synchronization and delivery/read receipts remain incomplete.
 
-## PR #73 — Isolate local PostgreSQL test stacks (2026-11-25; in progress)
+## PR #73 — Isolate local PostgreSQL test stacks (2026-11-25)
 
-- Current PR head: `4e54b8e7781f69e022812bca83bef88051fd70f6`; GitHub reports the branch mergeable, with no review comments or threads recorded at the last check.
-- Security checks and CodeQL analyses completed successfully. The Backend integration job is still running; do not merge until it completes successfully.
-- The change is scoped to local test infrastructure (`docs/runningLocally.md`, `infra/local/docker-compose.yml`). No merge has been performed.
+- PR head `4e54b8e7781f69e022812bca83bef88051fd70f6` passed Security, CodeQL, and Backend checks, including the real PostgreSQL/Valkey/RabbitMQ integration job. No review comments or threads were recorded.
+- Squash-merged at `2026-11-25T23:07:53Z` as `da202cd915c0c8c2199e1e13b2340f5b243d825a`. The squash commit message has no `Co-authored-by` trailer, and local `main` was fast-forwarded to the merge commit.
+- The change is limited to local test infrastructure (`docs/runningLocally.md`, `infra/local/docker-compose.yml`). Its isolated Compose project/volume protects existing local databases; rendering the PR commit with port override `15433` was independently verified. No AWS deployment was involved.
 
 ## PR #71 — Business Messaging merchant authorization UI and preview endpoint (2026-11-25)
 
