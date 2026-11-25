@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { BirthdayBalloonsSection } from "@/components/settings/birthdayBalloonsSection";
 import { ConsentChoicesSection } from "@/components/settings/consentChoicesSection";
+import { ConnectedBusinessAppsSection } from "@/components/settings/connectedBusinessAppsSection";
 import { ContentPreferencesSection } from "@/components/settings/contentPreferencesSection";
 import { DataExportSection } from "@/components/settings/dataExportSection";
 import { DeleteAccountSection } from "@/components/settings/deleteAccountSection";
@@ -33,6 +34,7 @@ export default function PrivacyAndDataPage() {
       </div>
       <div id="your-data" className={styles.page}>
         <ConsentChoicesSection />
+        <ConnectedBusinessAppsSection />
         <DataExportSection />
       </div>
       <section aria-labelledby="policies-heading" className={styles.block}>

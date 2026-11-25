@@ -104,14 +104,15 @@ export function BusinessMessagingDocs() {
         <div className={styles.statusBody}>
           <div className={styles.statusHeader}>
             <span className={styles.statusPill}>Sandbox Send Live</span>
-            <span className={styles.statusPillRead}>Production Consent Reads</span>
+            <span className={styles.statusPillRead}>Production Consent-Scoped Reads</span>
             <span className={styles.statusPillWarn}>Production Send 503 Preview</span>
           </div>
           <h2 id="contract-state-title">Environment availability &amp; production boundary</h2>
           <p>
             <code>POST /v1/conversations/&#123;conversationId&#125;/messages</code> and all synthetic Sandbox routes are live with <code>ntsb_test_</code> tokens.
             In Production, <code>GET /api/v1/business/conversations</code> lists conversations with active recipient consent for approved applications holding <code>conversations:read</code>,
-            while <code>POST /api/v1/business/messages</code> returns <code>503 BUSINESS_MESSAGING_UNAVAILABLE</code> until canonical consent dispatch connects.
+            and the <code>messages:read</code>-scoped history and status routes expose only messages persisted by this API while recipient consent remains active. Inbound message synchronization and delivery/read receipts are not connected yet.
+            <code>POST /api/v1/business/messages</code> remains unavailable until canonical consent management and secure dispatch are connected.
           </p>
         </div>
       </section>
