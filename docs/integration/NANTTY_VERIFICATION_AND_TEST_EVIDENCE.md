@@ -1,5 +1,12 @@
 # Nantty Verification & Test Evidence
 
+## Cloud-hosted staging readiness snapshot (2026-11-26)
+
+- AWS MCP read-only inventory in the selected Region `eu-north-1`: Terraform state bucket `nantty-tfstate-324009946456-eu-north-1-an`, DynamoDB table `nantty-terraform-locks`, SES feedback SNS topic and its two SQS queues exist. SES identity `staging.nantty.com` is `PENDING`, with sending disabled.
+- The same inventory found zero IAM OIDC providers, zero Nantty-named IAM roles, zero ECS clusters and zero ECR repositories. Current GitHub Actions therefore cannot assume the staging roles and the repository's backend deployment workflow has no cluster/registry target. The Terraform staging workflow validates pull requests and has a manual main-only plan job; it has no apply job.
+- Cloudflare `whoami` confirms the connected user is `nantty.tega@gmail.com`. This connection is not shared with GitHub Actions; a scoped `CLOUDFLARE_API_TOKEN` repository/environment secret is still required. The latest prior DNS inventory found no staging SES records, and this check made no DNS or AWS changes.
+- CI and desktop build jobs run on GitHub-hosted runners when triggered, independent of the developer PC. Local Codex coding does not continue when the local host stops; no Codex cloud work task has been started.
+
 ## PR #72 — Store-scoped Developer Business Messaging authorization (2026-11-25)
 
 - PR head `f50194cf9bf2d50f2b5d222d6420b54220a0652f` passed Frontend, Security, and Backend workflows. The Backend workflow completed the Auth Go unit/race suite and database integration suite using PostgreSQL, Valkey, and RabbitMQ.
