@@ -1,12 +1,19 @@
 # syntax=docker/dockerfile:1
 # build context: repository root
-FROM node:26.13.0-alpine AS build
+FROM --platform=$BUILDPLATFORM node:26.13.0-alpine AS build
 RUN npm install --global pnpm@11.24.0
 WORKDIR /repo
 COPY . .
 RUN pnpm install --frozen-lockfile --filter @nantty/notifications... \
-    && pnpm --filter @nantty/notifications exec prisma generate \
-    && pnpm --filter @nantty/notifications deploy --prod --legacy /out \
+    && pnpm --filter @nantty/notifications run build
+
+FROM node:26.13.0-alpine AS package
+RUN npm install --global pnpm@11.24.0
+WORKDIR /repo
+COPY . .
+RUN pnpm install --frozen-lockfile --filter @nantty/notifications...
+COPY --from=build /repo/services/typescript/notifications/src/generated /repo/services/typescript/notifications/src/generated
+RUN pnpm --filter @nantty/notifications deploy --prod --legacy /out \
     && cp -r services/typescript/notifications/src/generated /out/src/generated
 
 FROM node:26.13.0-alpine
@@ -15,7 +22,7 @@ WORKDIR /app
 # The runtime only runs node; drop the bundled package managers (their own deps carry CVEs).
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-v* \
     /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg
-COPY --from=build /out /app
+COPY --from=package /out /app
 USER node
 EXPOSE 8104
 CMD ["node", "--import", "tsx", "src/server.ts"]
