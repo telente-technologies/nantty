@@ -1,2 +1,6 @@
 paths-ignore:
-  - vendor/glib-0.18.5/**
+  - vendor/glib-0.18.5/src/collections/ptr_slice.rs
+  - vendor/glib-0.18.5/src/log.rs
+  - vendor/glib-0.18.5/src/object.rs
+  - vendor/glib-0.18.5/src/subclass/boxed.rs
+  - vendor/glib-0.18.5/src/value.rs
