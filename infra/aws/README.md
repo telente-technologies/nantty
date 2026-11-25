@@ -197,15 +197,16 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
 ### GitHub-hosted Terraform staging plan
 
 `.github/workflows/terraform-staging.yml` runs formatting and backend-free Terraform validation on pull requests. To
-generate an authenticated plan without keeping the workstation online, configure the `staging` GitHub Environment:
+generate an authenticated plan without keeping the workstation online, use the `staging` GitHub Environment (created
+2026-11-25, deployment branch restricted to `main`):
 
 - Add `AWS_TERRAFORM_ROLE_ARN_STAGING` as an environment variable for a dedicated, least-privilege plan role. Its
   GitHub OIDC trust must be restricted to this repository and the `staging` environment; do not reuse the ECS deploy
   role. The role needs read access to the platform and email-staging state objects, access to the staging state lock,
   and only the provider read permissions required to refresh this stack.
-- Set the `AWS_REGION` environment variable to `eu-north-1`.
-- Add `CLOUDFLARE_API_TOKEN` as an environment secret scoped to the `nantty.com` zone with DNS Read only. A plan
-  should not need DNS Edit permission.
+- `AWS_REGION=eu-north-1` is already set in the environment.
+- The repository-level `CLOUDFLARE_API_TOKEN` secret is present; verify it is restricted to the `nantty.com` zone
+  and DNS Read only before using it. A plan should not need DNS Edit permission.
 - From the `main` branch, run **Terraform staging** with `create_plan=true`. The workflow only runs `terraform plan`;
   it never applies infrastructure or mutates DNS. Review its plan output before any separately authorized apply.
 
@@ -262,7 +263,10 @@ published. The previous six-record plan included a child DMARC record; current s
 the existing apex policy sets `sp=reject`, which the sending subdomain inherits. The remaining expected DNS additions
 are five records: three DKIM CNAMEs and MAIL FROM MX/TXT. Fresh AWS reads show SES domain verification false, DKIM and
 MAIL FROM `PENDING`, and SES production access disabled. Cloudflare access is currently authenticated; a read-only
-inspection found no records matching the staging SES names. No DNS changes have been made. The AWS project
+inspection found no records matching the staging SES names. The GitHub `staging` environment exists, is restricted to
+`main`, and defines `AWS_REGION=eu-north-1`; the repository has a `CLOUDFLARE_API_TOKEN` secret, but its exact DNS
+permissions have not been verified. AWS still has no GitHub OIDC provider or dedicated Terraform plan role. No DNS
+changes have been made. The AWS project
 has no active hard spend cap; the owner explicitly authorized staging without one. SES is sandboxed, so ordinary
 recipient delivery and production sending remain unavailable. The full platform stack is not deployed. This setup
 provides transactional sending and feedback processing, not IMAP/POP inbox hosting.
