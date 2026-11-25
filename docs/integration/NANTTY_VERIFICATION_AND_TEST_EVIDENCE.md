@@ -1,5 +1,18 @@
 # Nantty Verification & Test Evidence
 
+## PR #72 — Store-scoped Developer Business Messaging authorization (2026-11-25)
+
+- PR head `f50194cf9bf2d50f2b5d222d6420b54220a0652f` passed Frontend, Security, and Backend workflows. The Backend workflow completed the Auth Go unit/race suite and database integration suite using PostgreSQL, Valkey, and RabbitMQ.
+- GitHub reports no review comments or unresolved review threads. The PR's source commits and explicit squash commit contain no `Co-authored-by` trailer.
+- Squash-merged at `2026-11-25T22:38:42Z` as `d85670af122403a7d9980beef35b8854fff7a655`; the local `main` checkout was fast-forwarded to this commit and is clean.
+- This verifies CI and merge only. The change has not been deployed to AWS staging. Production message sending remains intentionally unavailable (503); secure Social dispatch, customer trust/window, inbound synchronization and delivery/read receipts remain incomplete.
+
+## PR #73 — Isolate local PostgreSQL test stacks (2026-11-25; in progress)
+
+- Current PR head: `4e54b8e7781f69e022812bca83bef88051fd70f6`; GitHub reports the branch mergeable, with no review comments or threads recorded at the last check.
+- Security checks and CodeQL analyses completed successfully. The Backend integration job is still running; do not merge until it completes successfully.
+- The change is scoped to local test infrastructure (`docs/runningLocally.md`, `infra/local/docker-compose.yml`). No merge has been performed.
+
 ## PR #71 — Business Messaging merchant authorization UI and preview endpoint (2026-11-25)
 
 - PR #71 head was updated to `7e4b7fedff1f96ff48d41d6d378daa15579875db` after adding the missing Web service contract/types, authenticated Gateway preview route, and a focused integration assertion. This fixes the previous webapp CI typecheck failure, which occurred because the UI commit landed before those service methods/types.

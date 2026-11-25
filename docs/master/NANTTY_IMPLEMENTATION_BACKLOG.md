@@ -46,13 +46,13 @@
 - Added required store identity to Business Messaging send/read API documentation and handler inputs. Conversation/history reads now check both the developer credential/recipient consent and an active exact-store grant with the required capability; message status checks store authorization and recipient consent in the persisted record.
 - Message reservations now persist store ID and include it in the idempotency request hash so a key cannot be replayed against another store. Added an additive nullable migration because historical records cannot be safely mapped to a store; unscoped legacy messages are excluded from scoped results.
 - Verification: `go test ./...` passed for `services/go/modules/auth`; the history/status and quota/idempotency integration tests passed against disposable PostgreSQL 17. `pnpm --filter @nantty/developer typecheck` passed and Developer tests passed 36/36 under Node 24.19.0 (workspace requires 26.13+). Auth `atlas.sum` regenerated and `git diff --check` passed. Temporary DB container removed.
-- Not enabled: `/api/v1/business/messages` remains mounted to `503 BUSINESS_MESSAGING_UNAVAILABLE`. No canonical Social dispatch receiver, customer-initiated business-mode eligibility/window, inbound events, delivery/read receipts or live browser/staging verification exists. No PR was created or pushed.
+- Not enabled: `/api/v1/business/messages` remains mounted to `503 BUSINESS_MESSAGING_UNAVAILABLE`. No canonical Social dispatch receiver, customer-initiated business-mode eligibility/window, inbound events, delivery/read receipts or live browser/staging verification exists. The original local snapshot had no PR; the follow-up was later submitted as PR #72 and squash-merged as `d85670af122403a7d9980beef35b8854fff7a655` after Frontend, Security, and Backend checks passed. Merge did not deploy the change.
 
 ## 2026-11-25 — Re-verify Business Messaging consent database paths
 
 - Re-ran `GOMAXPROCS=4 go test -p 2 ./tests -count=1` in `services/go/modules/auth`; all Auth tests passed in 17.813s with PostgreSQL integration enabled. This supersedes the earlier skipped-integration status for account-consent persistence and audit behavior.
 - The next dependency is still business/store owner authorization. It must bind a canonical catalog-verified store to an approved developer application and requested scopes; do not accept a client-provided store ID as proof of ownership. Production send remains disabled until the grant, recipient consent, and Social's existing encrypted send path are enforced together.
-- GitHub open-PR search for `telente-technologies/nantty` returned no open pull requests during this check. The current worktree contains local, uncommitted changes; no PR was merged or remote branch changed.
+- At the time of this original snapshot, GitHub had no open PR and the local worktree had uncommitted changes. This historical state was superseded: the store-boundary follow-up became PR #72 and was squash-merged as `d85670af122403a7d9980beef35b8854fff7a655`; no deployment followed.
 
 ## 2026-11-25 — Add consent-scoped production message history and status reads
 
