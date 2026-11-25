@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS developer_business_authorization_audit_logs;
+DROP TABLE IF EXISTS developer_business_authorizations;
