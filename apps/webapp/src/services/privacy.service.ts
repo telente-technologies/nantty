@@ -19,6 +19,19 @@ export interface BusinessMessagingConsent {
   readonly revokedAt?: string;
 }
 
+export interface BusinessMessagingApplicationPreview {
+  readonly applicationId: string;
+  readonly organizationId: string;
+  readonly organizationName: string;
+  readonly applicationName: string;
+  readonly requestedScopes: readonly string[];
+}
+
+export interface BusinessMessagingStoreAuthorization extends BusinessMessagingConsent {
+  readonly storeId: string;
+  readonly storeName: string;
+}
+
 const consentTypeByKey: Readonly<Record<ConsentKey, string>> = { personalization: "personalization", personalizedAds: "advertising", analytics: "analytics", marketing: "marketing" };
 const consentKeys = Object.keys(consentTypeByKey) as ConsentKey[];
 
@@ -54,6 +67,13 @@ export const privacyService = {
   fetchBusinessMessagingConsents: async () => (await sendRequestToWebappServer<{ readonly consents: readonly BusinessMessagingConsent[] }>("/api/v1/account/business-messaging/consents")).consents,
   revokeBusinessMessagingConsent: (consentId: string) =>
     sendRequestToWebappServer<void>(`/api/v1/account/business-messaging/consents/${encodeURIComponent(consentId)}`, { method: "DELETE" }),
+  previewBusinessMessagingApplication: (applicationId: string) =>
+    sendRequestToWebappServer<BusinessMessagingApplicationPreview>(`/api/v1/account/business-messaging/applications/${encodeURIComponent(applicationId)}`),
+  fetchBusinessMessagingAuthorizations: async () => (await sendRequestToWebappServer<{ readonly authorizations: readonly BusinessMessagingStoreAuthorization[] }>("/api/v1/account/business-messaging/authorizations")).authorizations,
+  grantBusinessMessagingAuthorization: (input: Pick<BusinessMessagingStoreAuthorization, "organizationId" | "applicationId" | "storeId" | "scopes">) =>
+    sendRequestToWebappServer<BusinessMessagingStoreAuthorization>("/api/v1/account/business-messaging/authorizations", { method: "POST", body: input }),
+  revokeBusinessMessagingAuthorization: (authorizationId: string) =>
+    sendRequestToWebappServer<void>(`/api/v1/account/business-messaging/authorizations/${encodeURIComponent(authorizationId)}`, { method: "DELETE" }),
   fetchMyTaggingSettings: () => sendRequestToWebappServer<TaggingSettings>("/api/v1/me/tagging-settings"),
   updateMyTaggingSettings: (allowTagging: boolean) =>
     sendRequestToWebappServer<TaggingSettings>("/api/v1/me/tagging-settings", { method: "PUT", body: { allowTagging } }),

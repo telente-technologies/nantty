@@ -103,6 +103,36 @@ func TestBusinessAuthorizationRequiresCommercePermissionAndAuditsLifecycle(t *te
 	}
 }
 
+func TestBusinessApplicationPreviewOnlyReturnsApprovedMessagingAppDetails(t *testing.T) {
+	harness := startAuthModuleAgainstFreshSchema(t)
+	developer := registerDeveloperTestAccount(t, harness, "business-preview-app-owner@example.com")
+	merchant := registerDeveloperTestAccount(t, harness, "business-preview-merchant@example.com")
+	organization := harness.expectWithHeaders("POST", "/api/v1/developer/organizations", developer, map[string]string{"name": "Preview Organization", "slug": "preview-organization"}, map[string]string{"Idempotency-Key": uuid.NewString()}, http.StatusCreated)
+	app := harness.expectWithHeaders("POST", "/api/v1/developer/organizations/"+organization["id"].(string)+"/applications", developer, map[string]any{
+		"name": "Preview App", "purpose": "Connect a merchant-authorized business messaging client.",
+		"callbackOrigins": []string{"https://preview.example.com"}, "requestedScopes": []string{"messages:send", "messages:read"},
+	}, map[string]string{"Idempotency-Key": uuid.NewString()}, http.StatusCreated)
+	path := "/api/v1/account/business-messaging/applications/" + app["id"].(string)
+	if status, _ := harness.call("GET", path, merchant, nil); status != http.StatusNotFound {
+		t.Fatalf("pending application preview = %d, want 404", status)
+	}
+	harness.execSql("UPDATE developer_applications SET status='approved' WHERE id=$1", app["id"].(string))
+	preview := harness.expect("GET", path, merchant, nil, http.StatusOK)
+	if preview["applicationId"] != app["id"] || preview["organizationId"] != organization["id"] || preview["applicationName"] != "Preview App" {
+		t.Fatalf("unexpected application preview: %v", preview)
+	}
+	scopes := preview["requestedScopes"].([]any)
+	if len(scopes) != 2 || preview["callbackOrigins"] != nil || preview["status"] != nil {
+		t.Fatalf("preview exposed unexpected fields or omitted scopes: %v", preview)
+	}
+	if status, _ := harness.call("GET", path, "", nil); status != http.StatusUnauthorized {
+		t.Fatalf("unauthenticated application preview = %d, want 401", status)
+	}
+	if status, _ := harness.call("GET", "/api/v1/account/business-messaging/applications/not-an-id", merchant, nil); status != http.StatusNotFound {
+		t.Fatalf("invalid application preview = %d, want 404", status)
+	}
+}
+
 func TestBusinessAuthorizationFailsClosedWithoutCommerceConfiguration(t *testing.T) {
 	harness := startAuthModuleAgainstFreshSchema(t)
 	developer := registerDeveloperTestAccount(t, harness, "business-auth-missing-owner@example.com")

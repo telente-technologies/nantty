@@ -3,6 +3,12 @@ import { describe, expect, it } from "vitest";
 import { resolveUpstreamRouteForRequest } from "../src/routes/upstream.routes.js";
 
 describe("developer organization routes", () => {
+  it("routes approved Business Messaging application previews only to authenticated Identity reads", () => {
+    const path = "/api/v1/account/business-messaging/applications/19a6e03c-d5ce-40c9-a9d2-8aa8657e5738";
+    expect(resolveUpstreamRouteForRequest("GET", path)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("POST", path)).toBeUndefined();
+    expect(resolveUpstreamRouteForRequest("GET", `${path}/extra`)).toBeUndefined();
+  });
   it("routes account-controlled Business Messaging consent only to authenticated Identity operations", () => {
     const path = "/api/v1/account/business-messaging/consents";
     expect(resolveUpstreamRouteForRequest("GET", path)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true });

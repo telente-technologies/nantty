@@ -1,6 +1,7 @@
 import type { UpstreamRoute } from "./upstream.routes.js";
 
 export const developerOrganizationRoutes: readonly UpstreamRoute[] = [
+  { pathPrefix: "/api/v1/account/business-messaging/applications/*", upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true },
   { pathPrefix: "/api/v1/account/business-messaging/consents", upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true },
   { pathPrefix: "/api/v1/account/business-messaging/consents/*", upstream: "identity", authentication: "required", methods: ["DELETE"], exactPathOnly: true },
   { pathPrefix: "/api/v1/account/business-messaging/authorizations", upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true },

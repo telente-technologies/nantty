@@ -132,6 +132,21 @@
   text-align: left;
 }
 
+.businessGrantForm,
+.businessGrantPreview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 560px;
+}
+
+.businessGrantPreview {
+  padding: var(--space-4);
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
 .linkList {
   display: flex;
   flex-direction: column;
