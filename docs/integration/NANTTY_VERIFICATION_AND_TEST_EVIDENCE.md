@@ -29,10 +29,8 @@
 
 ## PR #70 — Admin GLib security patch (2026-11-25)
 
-- Live GitHub snapshot at head `32dbb93b9d2cf3efa8829c9638d8c5e7607b435c`: PR is open, mergeable, and `CLEAN`; every currently registered PR check passes except the expected path-filtered Mobile skip.
-- Rust CodeQL passed after the repository config property was set, but the config at that head ignored the entire vendored `vendor/glib-0.18.5/**` tree. This result does not prove analysis of the patched `variant_iter.rs`.
-- Dependabot alert #66 (`GHSA-wrw7-89jp-8q8g`) remains open and not dismissed.
-- Local follow-up adds narrow ignores for five source files associated with seven unrelated upstream CodeQL findings, plus a path-filtered Linux Admin Tauri workflow. It runs the focused GLib test from the vendored crate manifest, then builds the release Admin desktop binary using `apps/admin/src-tauri/Cargo.toml` and `--locked`. These local changes have not run in GitHub Actions yet.
+- PR #70 final head `ca34ac9d2885acb4b070378111b87ed004d4fa23` was squash-merged at `2026-11-25T13:43:26Z` as `2f434e7b8542d7230aa9a4cc419389872adaf5ac`. GitHub reports the final Linux Tauri build, frontend matrix, Terraform, dependency audit, Gitleaks, Trivy and CodeQL analysis jobs completed successfully; the separate CodeQL aggregate check is neutral. The merge commit message has no `Co-authored-by` trailer.
+- The patched GLib iterator is now covered by the merged vendored-source analysis configuration and Linux Admin Tauri workflow. The current Dependabot API state for alert #66 (`GHSA-wrw7-89jp-8q8g`) is `fixed`.
 - Email-template suite executed in this workspace: 274/274 passed and TypeScript typecheck passed using Node 24.19.0 (below the repository-required Node 26.13 range); these are unrelated to the GLib remediation.
 
 **Environment:** Node `v22.22.3`, `pnpm` `11.24.0` (via `corepack pnpm`), sandbox workspace `/home/user/nantty`, branch `arena/341bf572-nantty`.
