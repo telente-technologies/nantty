@@ -18,13 +18,36 @@ data "aws_iam_policy_document" "ses_feedback_key" {
   }
 
   statement {
-    sid       = "SesFeedbackTopicUse"
+    sid       = "SesEventPublisherUse"
     actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
     resources = ["*"]
 
     principals {
       type        = "Service"
-      identifiers = ["ses.amazonaws.com", "sns.amazonaws.com"]
+      identifiers = ["ses.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:SourceArn"
+      values   = ["arn:aws:ses:${var.region}:${data.aws_caller_identity.current.account_id}:configuration-set/nantty-staging"]
+    }
+  }
+
+  statement {
+    sid       = "SnsFeedbackTopicUse"
+    actions   = ["kms:Decrypt", "kms:GenerateDataKey*"]
+    resources = ["*"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["sns.amazonaws.com"]
     }
 
     condition {
@@ -34,7 +57,7 @@ data "aws_iam_policy_document" "ses_feedback_key" {
     }
 
     condition {
-      test     = "ArnLike"
+      test     = "ArnEquals"
       variable = "kms:EncryptionContext:aws:sns:topicArn"
       values   = [local.ses_feedback_topic_arn]
     }
