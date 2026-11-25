@@ -93,7 +93,7 @@ locals {
       CREATORS_MIGRATE_ON_START      = "false"
     }
     social        = { PORT = "8105" }
-    notifications = { PORT = "8104", PUSH_PROVIDER = "expo", NANTTY_WEB_BASE_URL = try(var.app_origins["web"], "https://${var.app_domain}"), SQS_SES_FEEDBACK_QUEUE_URL = module.ses.feedback_queue_url, SES_CONFIGURATION_SET = module.ses.configuration_set_name, SES_FROM_ADDRESS = "Nantty <noreply@${var.mail_domain}>", NANTTY_MAIL_SENDING_DOMAIN = var.mail_domain, IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
+    notifications = { PORT = "8104", PUSH_PROVIDER = "expo", NANTTY_WEB_BASE_URL = try(var.app_origins["web"], "https://${var.app_domain}"), NANTTY_SELLER_DASHBOARD_URL = try(var.app_origins["seller"], "https://seller.${var.app_domain}"), NANTTY_STUDIO_URL = try(var.app_origins["studio"], "https://studio.${var.app_domain}"), SQS_SES_FEEDBACK_QUEUE_URL = module.ses.feedback_queue_url, SES_CONFIGURATION_SET = module.ses.configuration_set_name, SES_FROM_ADDRESS = "Nantty <noreply@${var.mail_domain}>", NANTTY_MAIL_SENDING_DOMAIN = var.mail_domain, IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
     media = merge(
       {
         PORT                            = "8108"

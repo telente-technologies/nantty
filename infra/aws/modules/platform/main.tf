@@ -177,9 +177,14 @@ module "ses" {
   environment          = var.environment
   region               = var.region
   mail_domain          = var.mail_domain
-  zone_id              = module.dns.zone_id
+  cloudflare_zone_id   = var.cloudflare_zone_id
   sns_kms_key_id       = module.kms.key_ids["sns"]
+  sqs_kms_key_id       = module.kms.key_ids["sns"]
   dmarc_report_address = var.dmarc_report_address
+  providers = {
+    aws        = aws
+    cloudflare = cloudflare
+  }
 }
 
 module "livekit" {

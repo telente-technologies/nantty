@@ -1,7 +1,8 @@
 terraform {
   required_version = ">= 1.6.0"
   required_providers {
-    aws = { source = "hashicorp/aws", version = "~> 5.70" }
+    aws        = { source = "hashicorp/aws", version = "~> 5.70" }
+    cloudflare = { source = "cloudflare/cloudflare", version = "~> 5.28.0" }
   }
 }
 
@@ -23,37 +24,46 @@ resource "aws_sesv2_email_identity_mail_from_attributes" "domain" {
   behavior_on_mx_failure = "USE_DEFAULT_VALUE"
 }
 
-resource "aws_route53_record" "dkim" {
+resource "cloudflare_dns_record" "dkim" {
   count   = 3
-  zone_id = var.zone_id
+  zone_id = var.cloudflare_zone_id
   name    = "${aws_sesv2_email_identity.domain.dkim_signing_attributes[0].tokens[count.index]}._domainkey.${var.mail_domain}"
   type    = "CNAME"
+  content = "${aws_sesv2_email_identity.domain.dkim_signing_attributes[0].tokens[count.index]}.dkim.amazonses.com"
+  proxied = false
   ttl     = 600
-  records = ["${aws_sesv2_email_identity.domain.dkim_signing_attributes[0].tokens[count.index]}.dkim.amazonses.com"]
+  comment = "Amazon SES Easy DKIM for ${var.mail_domain}"
 }
 
-resource "aws_route53_record" "mail_from_mx" {
-  zone_id = var.zone_id
-  name    = "bounce.${var.mail_domain}"
-  type    = "MX"
-  ttl     = 600
-  records = ["10 feedback-smtp.${var.region}.amazonses.com"]
+resource "cloudflare_dns_record" "mail_from_mx" {
+  zone_id  = var.cloudflare_zone_id
+  name     = "bounce.${var.mail_domain}"
+  type     = "MX"
+  content  = "feedback-smtp.${var.region}.amazonses.com"
+  priority = 10
+  proxied  = false
+  ttl      = 600
+  comment  = "Amazon SES custom MAIL FROM for ${var.mail_domain}"
 }
 
-resource "aws_route53_record" "mail_from_spf" {
-  zone_id = var.zone_id
+resource "cloudflare_dns_record" "mail_from_spf" {
+  zone_id = var.cloudflare_zone_id
   name    = "bounce.${var.mail_domain}"
   type    = "TXT"
+  content = "v=spf1 include:amazonses.com ~all"
+  proxied = false
   ttl     = 600
-  records = ["v=spf1 include:amazonses.com ~all"]
+  comment = "Amazon SES custom MAIL FROM SPF for ${var.mail_domain}"
 }
 
-resource "aws_route53_record" "dmarc" {
-  zone_id = var.zone_id
+resource "cloudflare_dns_record" "dmarc" {
+  zone_id = var.cloudflare_zone_id
   name    = "_dmarc.${var.mail_domain}"
   type    = "TXT"
+  content = "v=DMARC1; p=${var.dmarc_policy}; rua=mailto:${var.dmarc_report_address}; adkim=r; aspf=r; fo=1"
+  proxied = false
   ttl     = 600
-  records = ["v=DMARC1; p=${var.dmarc_policy}; rua=mailto:${var.dmarc_report_address}; adkim=r; aspf=r; fo=1"]
+  comment = "DMARC policy for ${var.mail_domain}"
 }
 
 resource "aws_sesv2_configuration_set" "this" {
@@ -72,14 +82,16 @@ resource "aws_sns_topic" "feedback" {
 resource "aws_sqs_queue" "feedback_dead_letter" {
   name                      = "${local.name}-notifications-ses-feedback-dlq"
   message_retention_seconds = 1209600
-  kms_master_key_id         = var.sns_kms_key_id
+  kms_master_key_id         = var.sqs_kms_key_id
+  sqs_managed_sse_enabled   = var.sqs_managed_sse_enabled
 }
 
 resource "aws_sqs_queue" "feedback" {
   name                       = "${local.name}-notifications-ses-feedback"
   visibility_timeout_seconds = 60
   message_retention_seconds  = 345600
-  kms_master_key_id          = var.sns_kms_key_id
+  kms_master_key_id          = var.sqs_kms_key_id
+  sqs_managed_sse_enabled    = var.sqs_managed_sse_enabled
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.feedback_dead_letter.arn
     maxReceiveCount     = 5
