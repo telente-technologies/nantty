@@ -799,9 +799,16 @@ Prioritized from the repository baseline and the requested cross-product scope. 
 
 ### 2026-11-25 — Verify isolated SES staging prerequisites
 
-- Rechecked the authenticated AWS project in `eu-north-1`: SES is healthy and enabled but sandboxed (200 messages/day, 1/second, zero sent), with no email identity. The remote email Terraform state bucket and lock table are absent, and the Cloudflare DNS token is not configured in the shell.
-- The owner confirmed there is no active hard monthly project spend cap. No AWS or DNS resources were created. Local `terraform fmt -check`, `terraform init -backend=false -input=false -lockfile=readonly`, and `terraform validate` pass for `infra/aws/envs/email-staging`.
-- Apply remains blocked until the owner sets a hard project spend cap, the scoped DNS credential and remote state are available, and the exact plan is reviewed. SES-only provisioning does not deploy the notifications service; template-to-inbox runtime verification needs a separate service deployment. Sandbox acceptance must use the SES mailbox simulator or an authorized verified recipient.
+- At the time of this earlier check, the authenticated AWS project in `eu-north-1` had SES healthy but sandboxed (200 messages/day, 1/second, zero sent), no email identity, and no state bucket/table; Cloudflare credentials were unavailable. The owner then authorized uncapped staging and the subsequent backend bootstrap is recorded below; that newer decision and verification supersede the earlier spend-cap gate and resource snapshot.
+- At that time, local `terraform fmt -check`, `terraform init -backend=false -input=false -lockfile=readonly`, and `terraform validate` passed for `infra/aws/envs/email-staging`. Remote initialization and SES deployment remained unverified pending backend, DNS access, and plan review. SES-only provisioning does not deploy the notifications service; template-to-inbox runtime verification needs a separate service deployment. Sandbox acceptance must use the SES mailbox simulator or an authorized verified recipient.
+
+### 2026-11-25 — Bootstrap staging Terraform state and CloudWatch access logging
+
+- The owner superseded the prior spend-cap gate: staging may proceed without a hard monthly cap and the current selection is CloudWatch Logs for S3 server access logs. This is authorization for staging, not a production deployment or public DNS mutation.
+- Created `nantty-tfstate-324009946456-eu-north-1-an` as an account-regional bucket in `eu-north-1`; enabled versioning, SSE-S3/Bucket Keys with SSE-C blocked, retained default public-access blocking and BucketOwnerEnforced controls, tagged before enabling ABAC, and installed a DenyInsecureTransport policy.
+- Created `nantty-terraform-locks` in on-demand mode with `LockID` string hash key and deletion protection enabled. Created a dedicated single-Region KMS key with annual rotation and exact log-group encryption-context restriction; CloudWatch log group retention is 90 days. Created S3 log source/destination and delivery `b8R7RmnjHZr4l8pM`; AWS reports the source ACTIVE.
+- Updated the email and platform staging backend bucket names. Terraform offline initialization, validation, and formatting pass. Remote `terraform init -reconfigure` cannot authenticate because the local Terraform process has no credential source, despite AWS MCP authenticated API access; no state object or SES stack resources were created.
+- S3 Tables integration is absent and was left disabled pending an explicit choice. Cloudflare connector still requires reauthentication; SES identity DNS publication and a reviewed Terraform plan remain pending. Do not claim live email delivery until verified.
 
 ### 2026-11-24 — Wire fail-closed media malware scanning for staging
 

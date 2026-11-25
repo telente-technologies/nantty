@@ -8,6 +8,8 @@ Verification addendum (2026-11-20): older Go-version blockers and test-execution
 
 This is the initial master matrix. Each status is limited to checked repository evidence; product requirements not yet traced end-to-end remain `PARTIAL` or `NOT_VERIFIED`, never implicitly complete.
 
+AWS staging backend follow-up (2026-11-25; supersedes earlier no-resource statements below): the selected project authorized uncapped staging and selected CloudWatch Logs for S3 access logging. In `eu-north-1`, an account-regional versioned state bucket and deletion-protected on-demand DynamoDB lock table now exist. The bucket has default SSE-S3 with Bucket Keys and SSE-C blocked, public-access blocking, BucketOwnerEnforced, ABAC, and an HTTPS-only bucket policy. Its S3 server access logs are delivered through an ACTIVE CloudWatch vended delivery to a KMS-encrypted log group (90-day retention); the CMK rotates annually. S3 Tables integration was absent and remains disabled pending owner choice. AWS backend provisioning is implemented and verified from AWS MCP. Terraform remote `init` is not yet verified locally because Terraform's process has no local AWS credential source; offline init/validate/fmt pass. SES DNS publication and the remainder of the staging stack remain pending Cloudflare reauthentication, exact plan review, admin CIDR input, and broader cost/security validation.
+
 Status vocabulary:
 
 - `VERIFIED`: the named behavior passed the stated automated/runtime check.

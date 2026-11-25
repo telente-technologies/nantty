@@ -89,17 +89,20 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
 
 ## Bootstrap (once per account)
 
-1. Create the remote state backend by hand in the environment project’s selected Region (the bucket and table are
-   intentionally not managed by this stack). For this Nantty project, confirm the Region in AWS Settings and use
-   `eu-north-1`; never create the backend in another Region:
+1. Create the remote state backend once in the environment project's selected Region (the bucket and table are
+   intentionally not managed by this stack). The staging backend for this project is in `eu-north-1`; its
+   account-regional S3 bucket is `nantty-tfstate-324009946456-eu-north-1-an`, and its lock table is
+   `nantty-terraform-locks`. The staging backend has versioning, default SSE-S3 encryption with SSE-C blocked,
+   public access blocked, bucket-owner-enforced ownership, ABAC, HTTPS-only access, and S3 server access logs
+   delivered to a KMS-encrypted CloudWatch Logs group with 90-day retention. Do not reuse this bucket/table
+   configuration for dev or prod, which have distinct backend regions and need separately provisioned resources.
+   For a new environment, create an account-regional bucket using its actual AWS account ID and selected Region:
    ```
-   aws s3api create-bucket --bucket nantty-terraform-state-<env> --region eu-north-1 \
-     --create-bucket-configuration LocationConstraint=eu-north-1
-   aws s3api put-bucket-versioning --bucket nantty-terraform-state-<env> --versioning-configuration Status=Enabled
-   aws s3api put-bucket-encryption --bucket nantty-terraform-state-<env> \
-     --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"aws:kms"}}]}'
-   aws s3api put-public-access-block --bucket nantty-terraform-state-<env> \
-     --public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
+   aws s3api create-bucket --bucket nantty-tfstate-<account-id>-<region>-an \
+     --bucket-namespace account-regional --region <region> \
+     --create-bucket-configuration LocationConstraint=<region>
+   # Then enable versioning, default encryption, server access logging, HTTPS-only policy,
+   # and ABAC before putting any Terraform state in the bucket.
    aws dynamodb create-table --table-name nantty-terraform-locks --billing-mode PAY_PER_REQUEST \
      --attribute-definitions AttributeName=LockID,AttributeType=S --key-schema AttributeName=LockID,KeyType=HASH
    ```
