@@ -7,11 +7,12 @@ COPY . .
 RUN pnpm install --frozen-lockfile --filter @nantty/media... \
     && pnpm --filter @nantty/media build
 
-FROM node:26.13.0-alpine AS package
+FROM --platform=$BUILDPLATFORM node:26.13.0-alpine AS package
 RUN npm install --global pnpm@11.24.0
 WORKDIR /repo
 COPY . .
-RUN pnpm install --frozen-lockfile --filter @nantty/media...
+RUN printf '\nsupportedArchitectures:\n  os: [linux]\n  cpu: [current, arm64]\n  libc: [musl]\n' >> pnpm-workspace.yaml \
+    && pnpm install --prod --frozen-lockfile --filter @nantty/media...
 COPY --from=build /repo/services/typescript/media/src/generated /repo/services/typescript/media/src/generated
 COPY --from=build /repo/services/typescript/media/dist /repo/services/typescript/media/dist
 RUN pnpm --filter @nantty/media deploy --prod --legacy /out \
