@@ -58,19 +58,34 @@ These addresses only send. Mail to them must not be read by people; replies go t
 
 ## DNS setup
 
-Prod values; the Terraform module `infra/aws/modules/ses` creates the SES records for `mail_domain` (prod: `mail.nantty.com`).
+Production values; `infra/aws/modules/ses` creates SES records for `mail_domain` in the authoritative Cloudflare zone (production: `mail.nantty.com`; AWS staging: `staging.nantty.com`). Staging uses a separate SES identity and `noreply@staging.nantty.com`; do not alter the root-domain Cloudflare Email Routing records.
 
 | Record | Name | Value | Notes |
 | --- | --- | --- | --- |
 | MX | `nantty.com` | Cloudflare Email Routing (`route1/2/3.mx.cloudflare.net`) | Current inbound forwarding; do not replace without migrating routing |
 | SPF (TXT) | `nantty.com` | `v=spf1 include:_spf.mx.cloudflare.net ~all` | Current Cloudflare Email Routing record; review before adding any mailbox sender |
 | SPF (TXT) | `bounce.mail.nantty.com` | `v=spf1 include:amazonses.com ~all` | Custom MAIL FROM for SES (Terraform) |
-| MX | `bounce.mail.nantty.com` | `10 feedback-smtp.eu-west-1.amazonses.com` | Custom MAIL FROM (Terraform) |
+| MX | `bounce.mail.nantty.com` | `10 feedback-smtp.<SES Region>.amazonses.com` | Custom MAIL FROM (Terraform); staging currently targets `eu-north-1` |
 | DKIM (3 × CNAME) | `<token>._domainkey.mail.nantty.com` | `<token>.dkim.amazonses.com` | SES Easy DKIM, 2048-bit (Terraform) |
 | DKIM | `google._domainkey.nantty.com` | provider key | Sign human mail too |
 | DMARC (TXT) | `_dmarc.nantty.com` | `v=DMARC1; p=none; rua=mailto:dmarc@nantty.com; adkim=r; aspf=r; fo=1` | Organisational policy; covers subdomains unless they have their own |
 | DMARC (TXT) | `_dmarc.mail.nantty.com` | same, from Terraform `dmarc_policy` | Starts at `p=none` |
 | BIMI (TXT, optional) | `default._bimi.nantty.com` | `v=BIMI1; l=https://nantty.com/bimi/logo.svg; a=<VMC or CMC .pem>` | Only after DMARC is at quarantine/reject at 100%. Logo must be SVG Tiny PS; Gmail needs a VMC/CMC certificate |
+
+**AWS staging records.** `infra/aws/envs/email-staging` uses the separate `staging.nantty.com` SES identity in
+`eu-north-1`. Terraform creates these records in the authoritative Cloudflare `nantty.com` zone only after an approved
+apply; SES generates the three DKIM token names during identity creation.
+
+| Record | Name | Value | Notes |
+| --- | --- | --- | --- |
+| MX | `bounce.staging.nantty.com` | `10 feedback-smtp.eu-north-1.amazonses.com` | Staging custom MAIL FROM |
+| SPF (TXT) | `bounce.staging.nantty.com` | `v=spf1 include:amazonses.com ~all` | Applies only to the staging MAIL FROM subdomain |
+| DKIM (3 × CNAME) | `<token>._domainkey.staging.nantty.com` | `<token>.dkim.amazonses.com` | SES Easy DKIM, 2048-bit |
+| DMARC (TXT) | `_dmarc.staging.nantty.com` | `v=DMARC1; p=none; rua=mailto:dmarc@nantty.com; adkim=r; aspf=r; fo=1` | Staging policy begins at monitoring only |
+
+These records do not replace or modify the root `nantty.com` inbound Cloudflare Email Routing MX/SPF records. Staging
+uses `noreply@staging.nantty.com` and stays in the SES sandbox until separately reviewed and approved for production
+access.
 
 **DMARC rollout.** Start with `p=none` and read the `rua` reports for 2–4 weeks until every legitimate source passes SPF or DKIM in alignment. Then `p=quarantine; pct=25`, raise to 100, and finally `p=reject`. Change Terraform `dmarc_policy` for the sending subdomain and the root record by hand.
 
@@ -83,7 +98,7 @@ Prod values; the Terraform module `infra/aws/modules/ses` creates the SES record
 | `NEXT_PUBLIC_MAIL_DOMAIN` | web, webapp, seller, studio, ads, admin | `nantty.com` |
 | `NEXT_PUBLIC_SUPPORT_EMAIL`, `_PRIVACY_EMAIL`, `_LEGAL_EMAIL`, `_SELLERS_EMAIL`, `_CREATORS_EMAIL`, `_ADS_EMAIL`, `_BILLING_EMAIL`, `NEXT_PUBLIC_ADMIN_ACCESS_EMAIL` | per app, optional overrides | `<name>@` the domain |
 | `EXPO_PUBLIC_MAIL_DOMAIN`, `EXPO_PUBLIC_SUPPORT_EMAIL`, `EXPO_PUBLIC_PRIVACY_EMAIL` | mobile | `nantty.com` |
-| `NANTTY_MAIL_DOMAIN`, `NANTTY_MAIL_SENDING_DOMAIN`, `NANTTY_SUPPORT_EMAILS` | notifications service (email templates brand) | `nantty.com`, `mail.nantty.com`, `support@nantty.com` |
+| `NANTTY_MAIL_DOMAIN`, `NANTTY_MAIL_SENDING_DOMAIN`, `NANTTY_SUPPORT_EMAILS`, `NANTTY_SELLER_DASHBOARD_URL`, `NANTTY_STUDIO_URL` | notifications service (email templates brand) | `nantty.com`, `mail.nantty.com`, `support@nantty.com`, `https://seller.nantty.com`, `https://studio.nantty.com`; staging derives seller/studio origins from `app_origins` |
 | `SES_FROM_ADDRESS` | notifications service | `Nantty <noreply@mail.nantty.com>` (fallback; templates choose the sender) |
 | `SUPPORT_NOTIFICATION_EMAILS` | ts-notifications | `support@nantty.com` |
 | `NANTTY_EMAIL_ASSET_BASE_URL` | notifications service | `https://cdn.nantty.com/email` (hosts the 2x store badge PNGs from `packages/emailTemplates/assets/storeBadges/`) |

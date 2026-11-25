@@ -106,7 +106,7 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
 2. Set `CLOUDFLARE_API_TOKEN` in the shell or approved pipeline secret store. The token must be limited to DNS Read/Edit on the Nantty zone; never put the token in `terraform.tfvars`. Then `cd infra/aws/envs/<env>`, edit `terraform.tfvars`, run `terraform init`, `terraform plan`, and review with a second
    person, `terraform apply`. Prod applies run from a protected machine or the approved pipeline only.
 3. Cloudflare is authoritative for `nantty.com`; do not delegate the domain to the legacy Route 53 zones. Terraform creates proxied API and optional LiveKit records, DNS-only CloudFront media records, and DNS-only ACM validation records in the Cloudflare zone. Verify resolution and certificate issuance after an approved apply. Route 53 records remain in the shadow zones until a separate state migration is reviewed.
-4. Verify SES: DKIM and MAIL FROM records are created automatically; request production access (out of the sandbox).
+4. Verify SES: Terraform creates the SES identity in the selected Region and publishes its DKIM, custom MAIL FROM, and sending-subdomain DMARC records in the authoritative Cloudflare zone. Staging uses `staging.nantty.com`; these records are DNS-only and do not replace the root `nantty.com` Cloudflare Email Routing MX/SPF records. Verify the SES identity status and DNS propagation after an approved apply. SES starts in the sandbox; request production access only when the sending use case, recipient handling, and bounce/complaint operations are ready.
 5. Database roles: use the Aurora master secret (output `aurora_master_secret_arn`) from a bastion via SSM to create
    each `svc_*` login from its matching Secrets Manager secret. `svc_migrator` owns the `payments`, `wallet`, `ledger`,
    `escrow`, `subscriptions`, and `creators` schemas; create `svc_money` before applying money migrations because the
@@ -190,6 +190,42 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
    smoke test. Production promotion is not automatic: it requires manually dispatching the deploy workflow with
    `deploy_production=true` and passing the protected `production` environment approval. Autoscaling minimums start tasks.
    The staging media task includes the private ClamAV sidecar when `enable_media_malware_scanning=true`; its 4 GiB memory reservation increases staging cost. After the first successful Terraform apply and media rollout, set the repository variable `CLAMAV_REFRESH_ENABLED_STAGING=true` to enable the daily signature-refresh workflow. That workflow tests a clean payload and the EICAR test signature, scans the image, then rolls only the ClamAV container. Keep the variable unset until the staging ECS family has the sidecar and the staging ECR/deploy OIDC roles exist.
+
+## SES-only staging (without deploying the platform stack)
+
+Use `envs/email-staging` to verify the staging sending identity and feedback path without applying the full platform
+stack. It owns a separate Terraform state key and creates only the existing SES module resources: the
+`staging.nantty.com` identity, Easy DKIM/custom MAIL FROM/DMARC records in Cloudflare, an SES configuration set, and
+SNS/SQS feedback resources. The SNS topic uses a narrowly scoped customer-managed KMS key (required for the SES event
+publisher policy) and the queues use SQS-managed encryption. The key adds a fixed monthly KMS charge plus applicable
+request charges; consult the current [AWS KMS pricing](https://aws.amazon.com/kms/pricing/) before applying. This root
+creates no VPC, NAT gateway, database, ECS service, or application deployment.
+
+Before applying, confirm the selected Region is `eu-north-1` and that AWS Settings has a hard spend limit appropriate to
+the project. The state bucket and DynamoDB lock table in `envs/email-staging/backend.tf` must already exist; bootstrap
+them using step 1 above, then provide a Cloudflare API token limited to DNS Read/Edit on the `nantty.com` zone through
+`CLOUDFLARE_API_TOKEN`. Never save the token in a tfvars file. Review the entire plan and confirm it contains only SES,
+SNS/SQS, their policies/subscription, and staging sending-subdomain DNS records before applying:
+
+```bash
+cd infra/aws/envs/email-staging
+terraform init
+terraform plan -var-file=staging.tfvars
+terraform apply -var-file=staging.tfvars
+```
+
+After apply, verify the domain identity, DKIM, and custom MAIL FROM statuses with
+`aws sesv2 get-email-identity --region eu-north-1 --email-identity staging.nantty.com`. SES staging remains in the
+sandbox: test only with verified identities or the SES mailbox simulator until AWS grants production access. A
+simulator message verifies SES acceptance/event plumbing, not inbox rendering or delivery to ordinary recipients. The
+Nantty template renderer and notifications service are not deployed by this SES-only root; existing package and service
+tests cover rendering until the notification runtime is deployed with its application dependencies.
+
+Current workspace checks (2026-11-25): AWS CLI browser login succeeded; SES account reports sandbox access enabled,
+200 messages per 24 hours, 1 message/second, and zero sent in the prior 24 hours. No SES identity is listed in
+`eu-north-1`. The staging state bucket and lock table are absent, and `CLOUDFLARE_API_TOKEN` is not configured in this
+shell. No AWS or Cloudflare resources were created or changed. Do not use the shared `envs/staging` root for email-only
+verification; it composes the full fourteen-service platform.
 
 ## Known caveats to confirm on the first staging apply
 
