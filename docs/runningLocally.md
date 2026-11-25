@@ -26,6 +26,22 @@ Options (pass them after `--`, for example `pnpm mode:backend -- --app webapp`):
 - `backend:up -- --full`: start every infra container (OpenSearch, ClickHouse, LiveKit, Jaeger...). The default starts only Postgres, Valkey, RabbitMQ, LocalStack and object storage, which is what the services need. The machine has 15 GB of RAM.
 - `backend:up -- --no-seed`, `backend:down -- --keep-infra`, `backend:down -- --force` (also stops listeners that someone else started on the stack ports).
 
+### Isolated Postgres for integration tests
+
+If port `15432` or the existing Postgres volume belongs to an older project, do not reset or remove that volume. Start only Postgres under a separate Compose project name and port; the new project gets its own volume and runs the checked-in role/database initialization script on first start:
+
+```bash
+NANTTY_LOCAL_POSTGRES_PORT=15433 docker compose -p nantty-identity-tests -f infra/local/docker-compose.yml up -d --wait postgres
+```
+
+Point the test process at `127.0.0.1:15433` (for example, set its database URL to `postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable`). Stop only this isolated service with:
+
+```bash
+NANTTY_LOCAL_POSTGRES_PORT=15433 docker compose -p nantty-identity-tests -f infra/local/docker-compose.yml down
+```
+
+The `down` command preserves this test volume; do not add `-v` unless you explicitly intend to discard the isolated test database.
+
 ## What the switch writes
 
 The switch writes only the mode keys in each app's local env file. Every other line, comment and secret in that file stays as it was. A backup of the previous file goes to `.data/modeBackups/<app>/`, which keeps the last five. All of these files are gitignored.
