@@ -22,7 +22,8 @@ infra/aws/
     valkey/         ElastiCache Valkey replication group (TLS + AUTH), URL secret
     messaging/      Amazon MQ for RabbitMQ (cluster or single instance), admin + per-service user secrets
     ses/            domain identity, DKIM, MAIL FROM, DMARC, configuration set, SNS -> SQS feedback queue
-    livekit/        LiveKit credentials secret; optional self-hosted LiveKit on EC2-backed ECS
+  livekit/        LiveKit credentials secret; optional self-hosted LiveKit on EC2-backed ECS
+  clamav/         pinned official ClamAV image and media scan limits (built into ECR, run as a private media-task sidecar)
     observability/  SNS alarm topic, ALB/ECS/Aurora/Valkey/MQ/SES/ledger alarms, dashboard
     github-oidc/    GitHub OIDC provider, ECR push role (main only), deploy role (environment claim only)
   envs/{dev,staging,prod}/   backend.tf, providers.tf, main.tf (one module call), variables.tf, terraform.tfvars
@@ -33,7 +34,7 @@ infra/aws/
 Fourteen Fargate services, all private, no public IPs: `gateway`, `go-identity`, `go-commerce`, `go-money`, `go-live`,
 `go-ads`, `go-trust`, `social`, `notifications`, `media`, `search`, `support`, `realtime`, `intelligence`. ECR repositories are
 `nantty/<service>` (immutable tags, scan on push, KMS, lifecycle, replicated to the DR region in prod) plus
-`nantty/migrate` for the pre-deploy migration task.
+`nantty/migrate` for the pre-deploy migration task and `nantty/clamav` for the optional media malware-scanning sidecar.
 
 | Path | Target |
 | --- | --- |
@@ -88,11 +89,12 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
 
 ## Bootstrap (once per account)
 
-1. Create the remote state backend by hand, in the environment account (the bucket and table are intentionally not
-   managed by this stack):
+1. Create the remote state backend by hand in the environment project’s selected Region (the bucket and table are
+   intentionally not managed by this stack). For this Nantty project, confirm the Region in AWS Settings and use
+   `eu-north-1`; never create the backend in another Region:
    ```
-   aws s3api create-bucket --bucket nantty-terraform-state-<env> --region eu-west-1 \
-     --create-bucket-configuration LocationConstraint=eu-west-1
+   aws s3api create-bucket --bucket nantty-terraform-state-<env> --region eu-north-1 \
+     --create-bucket-configuration LocationConstraint=eu-north-1
    aws s3api put-bucket-versioning --bucket nantty-terraform-state-<env> --versioning-configuration Status=Enabled
    aws s3api put-bucket-encryption --bucket nantty-terraform-state-<env> \
      --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"aws:kms"}}]}'
@@ -184,9 +186,35 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
    `MIGRATE_TASK_DEFINITION[_PROD]`, `*_PRIVATE_SUBNETS`, `*_TASKS_SECURITY_GROUP`, and the snapshot/restore gate
    variables. The deploy workflow runs the migration task before each rollout and stops if it does not succeed.
    The roles are the outputs `github_ecr_push_role_arn` and `github_deploy_role_arn`.
-9. Push the first images (the CI `images` job does it on merge to main), then CI deploys; autoscaling minimums start tasks.
+9. Push the first images (the CI `images` job does it on merge to main), then CI deploys to staging and runs the staging
+   smoke test. Production promotion is not automatic: it requires manually dispatching the deploy workflow with
+   `deploy_production=true` and passing the protected `production` environment approval. Autoscaling minimums start tasks.
+   The staging media task includes the private ClamAV sidecar when `enable_media_malware_scanning=true`; its 4 GiB memory reservation increases staging cost. After the first successful Terraform apply and media rollout, set the repository variable `CLAMAV_REFRESH_ENABLED_STAGING=true` to enable the daily signature-refresh workflow. That workflow tests a clean payload and the EICAR test signature, scans the image, then rolls only the ClamAV container. Keep the variable unset until the staging ECS family has the sidecar and the staging ECR/deploy OIDC roles exist.
 
 ## Known caveats to confirm on the first staging apply
+
+- The AWS new-experience service list includes AWS WAF in its Free Tier; CloudFront is also included. The stack's
+  `CLOUDFRONT`-scope ACL must be managed through the global WAF endpoint in `us-east-1`, while regional resources
+  remain in the selected `eu-north-1` project Region. AWS WAF is not a reason to move the project to another Region.
+- Amazon Rekognition is listed as a new-experience service, but the AWS regional-availability catalog returned
+  `Not Found` for `Rekognition+DetectModerationLabels` in `eu-north-1` on 2026-11-24. Do not apply with the
+  expectation that this API is usable from Stockholm. Keep the existing child-safety upload path fail-closed and
+  resolve the moderation provider/Region dependency before claiming those scans work; do not disable the safety gate.
+- The staging Terraform backend bucket and lock table were not present in the selected project when checked on
+  2026-11-24. Remote state bootstrap remains a prerequisite; no backend resources have been created by this checkout.
+- The project plan could not be read through `GetAccountPlanState` on 2026-11-24 (`ResourceNotFoundException: Missing
+  data for account`). Confirm Free/Paid plan, spend limit, and billing status in AWS Settings before creating any
+  billable staging resources.
+- The owner has removed the USD 110/month architecture target but wants the AWS project hard spend cap retained.
+  The configured hard-cap amount has not been verified or changed. Do not interpret removal of the design target as
+  authorization for unlimited spend. AWS Price List API on-demand rates for
+  EU (Stockholm) on 2026-11-24 are USD 0.285/hour for each configured Aurora `db.r7g.large`, USD 0.046/hour
+  for each NAT Gateway, USD 0.0624/hour for each Valkey `cache.t4g.medium`, and USD 0.0312/hour for Valkey
+  `cache.t4g.small`. With the checked-in two Aurora instances, three NAT gateways, two medium Valkey nodes, and
+  one small Valkey node, those four categories alone cost about USD 630.72 per 730-hour month. This excludes
+  Aurora storage/I/O, ECS/Fargate, MQ, load balancers, logs, and network transfer. Do not apply the full profile
+  at any previously discussed target. The project owner must verify the actual hard spend limit in AWS Settings >
+  Billing; cost and architecture require review before provisioning.
 
 - Amazon MQ RabbitMQ cluster networking (one subnet, endpoint inside the VPC) and the `Broker` dimension of MQ alarms.
 - CodeDeploy rewriting the listener rule of `go-money` on the internal listener.

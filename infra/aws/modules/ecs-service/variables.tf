@@ -8,6 +8,21 @@ variable "subnet_ids" { type = list(string) }
 variable "security_group_ids" { type = list(string) }
 variable "image" { type = string }
 variable "image_tag" { type = string }
+variable "clamav_image" {
+  description = "Optional pinned ClamAV sidecar image for malware scanning."
+  type        = string
+  default     = null
+}
+variable "clamav_repository_arn" {
+  description = "ECR repository the task execution role may use to pull the ClamAV sidecar."
+  type        = string
+  default     = null
+}
+variable "clamav_memory_reservation" {
+  description = "Memory reservation in MiB for the ClamAV signature database and daemon."
+  type        = number
+  default     = 0
+}
 variable "cpu" { type = number }
 variable "memory" { type = number }
 variable "port" { type = number }

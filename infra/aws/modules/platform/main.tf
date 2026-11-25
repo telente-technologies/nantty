@@ -109,7 +109,7 @@ module "edge" {
 
 module "ecr" {
   source              = "../ecr"
-  repositories        = concat(local.service_names, ["migrate", "tls-proxy"])
+  repositories        = concat(local.service_names, ["migrate", "tls-proxy", "clamav"])
   kms_key_arn         = module.kms.key_arns["ecr"]
   replicate_to_region = var.enable_dr ? var.dr_region : null
   pull_account_ids    = var.ecr_pull_account_ids

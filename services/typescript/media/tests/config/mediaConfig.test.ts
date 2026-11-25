@@ -25,4 +25,14 @@ describe("media production configuration", () => {
     vi.stubEnv("MEDIA_INTERNAL_TOKEN", "a".repeat(48));
     expect(loadMediaConfigFromEnvironment().internalToken).toHaveLength(48);
   });
+
+  it("configures ClamAV timeout for large upload streams and rejects invalid values", () => {
+    vi.stubEnv("DATABASE_URL", "postgres://svc_media:secret@db/nantty");
+    vi.stubEnv("GATEWAY_IDENTITY_SECRET", "g".repeat(48));
+    vi.stubEnv("CLAMAV_HOST", "127.0.0.1");
+    expect(loadMediaConfigFromEnvironment().clamAv).toEqual({ host: "127.0.0.1", port: 3310, timeoutMs: 720_000 });
+
+    vi.stubEnv("CLAMAV_TIMEOUT_MS", "0");
+    expect(() => loadMediaConfigFromEnvironment()).toThrow(/CLAMAV_PORT and CLAMAV_TIMEOUT_MS/);
+  });
 });

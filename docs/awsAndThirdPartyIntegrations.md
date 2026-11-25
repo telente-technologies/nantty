@@ -73,7 +73,7 @@ Production replicates to a disaster-recovery (DR) region.
 | --- | --- | --- |
 | **Amazon Rekognition** | Live-stream moderation through frame sampling: nudity and violence. A high-confidence severe hit blurs or pauses the stream and alerts a moderator. | Wired in code (intelligence + go-live, behind flags). **Enable the IAM permissions.** |
 | **Amazon Transcribe** | Live-stream audio moderation | Wired in code behind a flag, with an output bucket. **Enable the IAM permissions.** |
-| **Malware scanning** (ClamAV container or GuardDuty Malware Protection for S3) | Scans every upload before it's processed or published | Code expects `CLAMAV_HOST`/`CLAMAV_PORT`. **Deploy ClamAV as a service, or switch to GuardDuty for S3.** |
+| **Malware scanning** (ClamAV sidecar in the media ECS task) | Scans each uploaded byte stream before processing or publication; skipped scans remain rejected | Staging Terraform enables a pinned ClamAV sidecar with stream limits covering the supported 500 MiB maximum. Deployment and EICAR verification are still required. This does not replace image/video content moderation or provide CSAM matching. |
 | **Media processing** (sharp + ffmpeg inside the `media` task) | Image variants, video variants and HLS, metadata stripping | Runs in ECS. Consider **MediaConvert** later for heavy video. |
 
 ### Observability

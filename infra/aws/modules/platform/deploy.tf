@@ -94,18 +94,28 @@ locals {
     }
     social        = { PORT = "8105" }
     notifications = { PORT = "8104", PUSH_PROVIDER = "expo", NANTTY_WEB_BASE_URL = try(var.app_origins["web"], "https://${var.app_domain}"), SQS_SES_FEEDBACK_QUEUE_URL = module.ses.feedback_queue_url, SES_CONFIGURATION_SET = module.ses.configuration_set_name, SES_FROM_ADDRESS = "Nantty <noreply@${var.mail_domain}>", NANTTY_MAIL_SENDING_DOMAIN = var.mail_domain, IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
-    media = merge({
-      PORT                     = "8108"
-      S3_REGION                = var.region
-      MEDIA_QUARANTINE_BUCKET  = module.storage.media_service_buckets["uploads"].id
-      MEDIA_PUBLIC_BUCKET      = module.storage.media_service_buckets["public"].id
-      MEDIA_PRIVATE_BUCKET     = module.storage.media_service_buckets["private"].id
-      MEDIA_PRIVATE_KMS_KEY_ID = module.storage.media_kms_key_arn
-      CDN_BASE_URL             = "https://${local.media_domain}"
-      }, var.media_signing_public_key_pem == null ? {} : {
-      CDN_PRIVATE_BASE_URL    = "https://${local.media_domain}"
-      CDN_SIGNING_KEY_PAIR_ID = module.storage.media_signing_public_key_id
-    })
+    media = merge(
+      {
+        PORT                            = "8108"
+        S3_REGION                       = var.region
+        MEDIA_QUARANTINE_BUCKET         = module.storage.media_service_buckets["uploads"].id
+        MEDIA_PUBLIC_BUCKET             = module.storage.media_service_buckets["public"].id
+        MEDIA_PRIVATE_BUCKET            = module.storage.media_service_buckets["private"].id
+        MEDIA_PRIVATE_KMS_KEY_ID        = module.storage.media_kms_key_arn
+        MEDIA_ALLOW_UNSCANNED           = "false"
+        MEDIA_REQUIRE_CHILD_SAFETY_SCAN = var.environment == "prod" ? "true" : "false"
+        CDN_BASE_URL                    = "https://${local.media_domain}"
+      },
+      var.media_signing_public_key_pem == null ? {} : {
+        CDN_PRIVATE_BASE_URL    = "https://${local.media_domain}"
+        CDN_SIGNING_KEY_PAIR_ID = module.storage.media_signing_public_key_id
+      },
+      var.enable_media_malware_scanning ? {
+        CLAMAV_HOST       = "127.0.0.1"
+        CLAMAV_PORT       = "3310"
+        CLAMAV_TIMEOUT_MS = "720000"
+      } : {},
+    )
     support      = { PORT = "8111" }
     realtime     = { PORT = "4000", ALLOWED_ORIGINS = join(",", values(var.app_origins)) }
     intelligence = { INTELLIGENCE_PORT = "8090", INTELLIGENCE_S3_REGION = var.region, INTELLIGENCE_TRUSTED_PROXY_IPS = var.vpc_cidr }
@@ -206,7 +216,7 @@ module "service" {
   image                    = module.ecr.repository_urls[each.key]
   image_tag                = var.image_tag
   cpu                      = each.value.cpu * 2
-  memory                   = max(ceil((each.value.memory + 512) / 1024) * 1024, each.value.cpu * 4)
+  memory                   = max(ceil((each.value.memory + 512 + (each.key == "media" && var.enable_media_malware_scanning ? 4096 : 0)) / 1024) * 1024, each.value.cpu * 4, each.key == "media" && var.enable_media_malware_scanning ? 8192 : 0)
   port                     = each.value.port
   extra_ports              = each.value.extra
   tls_proxy_image          = "${module.ecr.repository_urls["tls-proxy"]}:${var.image_tag}"
@@ -236,26 +246,29 @@ module "service" {
       } if contains(clients, each.key)],
     )
   })
-  health_path            = each.value.ready
-  metrics_scrape_path    = contains(["go", "elixir"], local.runtime_of[each.key]) ? "/metrics" : null
-  container_health_check = each.value.health_command
-  environment_variables  = merge(local.common_environment, local.runtime_environment[local.runtime_of[each.key]], lookup(local.service_specific_environment, each.key, {}), lookup(local.internal_wiring_environment, each.key, {}), lookup(local.database_schema_environment, each.key, {}))
-  secrets                = local.service_secrets[each.key]
-  secret_arns            = local.service_secret_arns[each.key]
-  secrets_kms_key_arn    = module.kms.key_arns["secrets"]
-  logs_kms_key_arn       = module.kms.key_arns["logs"]
-  task_policy_statements = lookup(local.task_policies, each.key, [])
-  min_count              = each.value.min
-  desired_count          = each.value.min
-  max_count              = each.value.max
-  request_count_target   = each.value.request_target
-  alb_arn_suffix         = module.edge.alb_arn_suffix
-  namespace_id           = module.cluster.namespace_id
-  enable_execute_command = var.enable_execute_command
-  log_retention_days     = var.log_retention_days
-  use_spot               = var.environment == "dev"
-  blue_green             = false
-  deployment_alarm_names = each.key == "go-money" ? [module.observability.ledger_imbalance_alarm_name, module.observability.alb_5xx_alarm_name] : []
+  health_path               = each.value.ready
+  metrics_scrape_path       = contains(["go", "elixir"], local.runtime_of[each.key]) ? "/metrics" : null
+  container_health_check    = each.value.health_command
+  clamav_image              = each.key == "media" && var.enable_media_malware_scanning ? "${module.ecr.repository_urls["clamav"]}:${var.image_tag}" : null
+  clamav_repository_arn     = each.key == "media" && var.enable_media_malware_scanning ? module.ecr.repository_arns["clamav"] : null
+  clamav_memory_reservation = each.key == "media" && var.enable_media_malware_scanning ? 4096 : 0
+  environment_variables     = merge(local.common_environment, local.runtime_environment[local.runtime_of[each.key]], lookup(local.service_specific_environment, each.key, {}), lookup(local.internal_wiring_environment, each.key, {}), lookup(local.database_schema_environment, each.key, {}))
+  secrets                   = local.service_secrets[each.key]
+  secret_arns               = local.service_secret_arns[each.key]
+  secrets_kms_key_arn       = module.kms.key_arns["secrets"]
+  logs_kms_key_arn          = module.kms.key_arns["logs"]
+  task_policy_statements    = lookup(local.task_policies, each.key, [])
+  min_count                 = each.value.min
+  desired_count             = each.value.min
+  max_count                 = each.value.max
+  request_count_target      = each.value.request_target
+  alb_arn_suffix            = module.edge.alb_arn_suffix
+  namespace_id              = module.cluster.namespace_id
+  enable_execute_command    = var.enable_execute_command
+  log_retention_days        = var.log_retention_days
+  use_spot                  = var.environment == "dev"
+  blue_green                = false
+  deployment_alarm_names    = each.key == "go-money" ? [module.observability.ledger_imbalance_alarm_name, module.observability.alb_5xx_alarm_name] : []
   listener_rules = [for rule in each.value.public_rules : {
     listener_arn  = module.edge.https_listener_arn, priority = rule.priority,
     path_patterns = rule.path_patterns, host_headers = []

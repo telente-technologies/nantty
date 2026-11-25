@@ -1,4 +1,5 @@
 import { createReadStream } from "node:fs";
+import { once } from "node:events";
 import { connect } from "node:net";
 
 import type { MalwareScanner, ScanVerdict } from "../interfaces/malwareScanner.interface.js";
@@ -29,21 +30,31 @@ export function createClamAvTcpScanner(options: { readonly host: string; readonl
             reject(error instanceof Error ? error : new Error(String(error)));
           }
         });
-        socket.on("connect", () => {
-          socket.write("zINSTREAM\0");
+        socket.on("connect", async () => {
           const source = createReadStream(path, { highWaterMark: clamAvChunkBytes });
-          source.on("data", (chunk) => {
-            const bytes = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
-            const length = Buffer.alloc(4);
-            length.writeUInt32BE(bytes.length);
-            socket.write(length);
-            socket.write(bytes);
-          });
-          source.on("end", () => socket.write(Buffer.alloc(4)));
-          source.on("error", (error) => socket.destroy(error));
+          try {
+            await writeSocketChunk(socket, Buffer.from("zINSTREAM\0"));
+            for await (const chunk of source) {
+              const bytes = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
+              const length = Buffer.alloc(4);
+              length.writeUInt32BE(bytes.length);
+              await writeSocketChunk(socket, length);
+              await writeSocketChunk(socket, bytes);
+            }
+            await writeSocketChunk(socket, Buffer.alloc(4));
+          } catch (error) {
+            source.destroy();
+            socket.destroy(error instanceof Error ? error : new Error(String(error)));
+          }
         });
       }),
   };
+}
+
+async function writeSocketChunk(socket: ReturnType<typeof connect>, bytes: Buffer): Promise<void> {
+  if (socket.destroyed) throw new Error("clamd connection closed before upload completed");
+  if (socket.write(bytes)) return;
+  await once(socket, "drain");
 }
 
 export const skippedMalwareScanner: MalwareScanner = { scanFile: async () => ({ verdict: "skipped" }) };

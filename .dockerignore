@@ -8,6 +8,10 @@ dist
 *.log
 .data
 **/src/generated
+infra/aws/envs
+services/go
+services/python
+services/elixir
 .env.*
 !.env.example
 !.env.*.example

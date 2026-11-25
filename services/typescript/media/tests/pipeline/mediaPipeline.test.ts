@@ -112,7 +112,7 @@ describe("rejections", () => {
     expect(harness.db.assets.get(id)?.["rejectionReason"]).toBe("UNDECODABLE_IMAGE");
   });
 
-  it("quarantines infected files reported by the malware scan hook", async () => {
+  it("rejects infected files reported by the malware scanner", async () => {
     const harness = createHarness({ scanner: { scanFile: async () => ({ verdict: "infected", signature: "Eicar-Test-Signature" }) } });
     const id = harness.seedUpload({ purpose: "post", mimeType: "image/jpeg", bytes: await smallJpeg() });
     await runMediaPipeline(harness.context, id, { attempt: firstAttempt, moderationApproved: false });

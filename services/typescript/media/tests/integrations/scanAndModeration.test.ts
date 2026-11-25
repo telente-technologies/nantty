@@ -1,7 +1,11 @@
 import { createHash, createHmac } from "node:crypto";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createServer } from "node:net";
 import { describe, expect, it } from "vitest";
 
-import { parseClamAvResponse } from "../../src/integrations/clamAvTcpScanner.integration.js";
+import { createClamAvTcpScanner, parseClamAvResponse } from "../../src/integrations/clamAvTcpScanner.integration.js";
 import { createHttpModerationClient } from "../../src/integrations/httpModerationClient.integration.js";
 import { decideModerationFromScore, evaluateModeration, uninspectableModerationOutcome } from "../../src/modules/assets/services/moderationPolicy.service.js";
 
@@ -9,7 +13,53 @@ describe("clamd responses", () => {
   it("maps OK and FOUND answers", () => {
     expect(parseClamAvResponse("stream: OK\0")).toEqual({ verdict: "clean" });
     expect(parseClamAvResponse("stream: Win.Test.EICAR_HDB-1 FOUND\0")).toEqual({ verdict: "infected", signature: "Win.Test.EICAR_HDB-1" });
+    expect(parseClamAvResponse("stream: Heuristics.Limits.Exceeded.MaxRecursion FOUND\0")).toEqual({ verdict: "infected", signature: "Heuristics.Limits.Exceeded.MaxRecursion" });
     expect(() => parseClamAvResponse("INSTREAM size limit exceeded. ERROR")).toThrow("unexpected clamd response");
+  });
+
+  it("streams framed file chunks to clamd and returns its verdict", async () => {
+    const server = createServer((socket) => {
+      let buffered = Buffer.alloc(0);
+      let headerReceived = false;
+      let remaining = -1;
+      socket.on("data", (chunk) => {
+        buffered = Buffer.concat([buffered, typeof chunk === "string" ? Buffer.from(chunk) : chunk]);
+        if (!headerReceived) {
+          const headerEnd = buffered.indexOf(0);
+          if (headerEnd < 0) return;
+          expect(buffered.subarray(0, headerEnd).toString()).toBe("zINSTREAM");
+          buffered = buffered.subarray(headerEnd + 1);
+          headerReceived = true;
+        }
+        while (buffered.length >= 4) {
+          if (remaining < 0) {
+            remaining = buffered.readUInt32BE(0);
+            buffered = buffered.subarray(4);
+            if (remaining === 0) {
+              socket.end("stream: Win.Test.EICAR_HDB-1 FOUND\0");
+              return;
+            }
+          }
+          const bytesToConsume = Math.min(remaining, buffered.length);
+          buffered = buffered.subarray(bytesToConsume);
+          remaining -= bytesToConsume;
+          if (remaining === 0) remaining = -1;
+        }
+      });
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address();
+    if (address === null || typeof address === "string") throw new Error("scanner test server did not bind");
+    const directory = await mkdtemp(join(tmpdir(), "nantty-clamav-test-"));
+    const path = join(directory, "payload.bin");
+    await writeFile(path, Buffer.alloc(140_000, 65));
+    try {
+      const scanner = createClamAvTcpScanner({ host: "127.0.0.1", port: address.port, timeoutMs: 5000 });
+      await expect(scanner.scanFile(path)).resolves.toEqual({ verdict: "infected", signature: "Win.Test.EICAR_HDB-1" });
+    } finally {
+      server.close();
+      await rm(directory, { recursive: true, force: true });
+    }
   });
 });
 

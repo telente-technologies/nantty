@@ -49,6 +49,43 @@ locals {
   })
   tg_pair      = var.blue_green ? ["blue", "green"] : ["blue"]
   port_mapping = [for port in concat([var.port], var.extra_ports) : { containerPort = port, hostPort = port, protocol = "tcp" }]
+  clamav_containers = var.clamav_image == null ? [] : [{
+    name                   = "clamav"
+    image                  = var.clamav_image
+    essential              = true
+    cpu                    = 512
+    memoryReservation      = var.clamav_memory_reservation
+    readonlyRootFilesystem = false
+    healthCheck = {
+      command     = ["CMD-SHELL", "clamdcheck.sh"]
+      interval    = 30
+      timeout     = 10
+      retries     = 5
+      startPeriod = 300
+    }
+    environment = [
+      { name = "CLAMAV_NO_MILTERD", value = "true" },
+      { name = "CLAMAV_NO_FRESHCLAMD", value = "true" },
+      { name = "CLAMD_STARTUP_TIMEOUT", value = "1800" },
+    ]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options   = { "awslogs-group" = aws_cloudwatch_log_group.this.name, "awslogs-region" = var.region, "awslogs-stream-prefix" = "clamav" }
+    }
+  }]
+  otel_containers = var.otel_sidecar ? [{
+    name                   = "otel-collector"
+    image                  = var.otel_collector_image
+    essential              = false
+    readonlyRootFilesystem = false
+    cpu                    = 32
+    portMappings           = [{ containerPort = 4318, hostPort = 4318, protocol = "tcp" }]
+    environment            = [{ name = "AOT_CONFIG_CONTENT", value = local.collector_config }]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options   = { "awslogs-group" = aws_cloudwatch_log_group.this.name, "awslogs-region" = var.region, "awslogs-stream-prefix" = "otel" }
+    }
+  }] : []
 }
 
 resource "aws_cloudwatch_log_group" "metrics" {
@@ -88,7 +125,7 @@ data "aws_iam_policy_document" "execution" {
   statement {
     sid       = "PullOwnImage"
     actions   = ["ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer", "ecr:BatchCheckLayerAvailability"]
-    resources = ["arn:aws:ecr:${var.region}:${data.aws_caller_identity.current.account_id}:repository/nantty/${var.name}", var.tls_proxy_repository_arn]
+    resources = concat(["arn:aws:ecr:${var.region}:${data.aws_caller_identity.current.account_id}:repository/nantty/${var.name}", var.tls_proxy_repository_arn], var.clamav_repository_arn == null ? [] : [var.clamav_repository_arn])
   }
   statement {
     sid       = "EcrAuthToken"
@@ -222,7 +259,7 @@ resource "aws_ecs_task_definition" "this" {
       name                   = var.name
       image                  = "${var.image}:${var.image_tag}"
       essential              = true
-      cpu                    = var.cpu - 256 - (var.otel_sidecar ? 32 : 0)
+      cpu                    = var.cpu - 256 - (var.otel_sidecar ? 32 : 0) - (var.clamav_image == null ? 0 : 512)
       readonlyRootFilesystem = var.readonly_root_filesystem
       stopTimeout            = 30
       portMappings           = local.port_mapping
@@ -231,13 +268,17 @@ resource "aws_ecs_task_definition" "this" {
       mountPoints            = [{ sourceVolume = "tmp", containerPath = "/tmp", readOnly = false }]
       linuxParameters        = { initProcessEnabled = true, capabilities = { drop = ["ALL"] } }
       ulimits                = [{ name = "nofile", softLimit = 65536, hardLimit = 65536 }]
-      dependsOn              = concat([{ containerName = "tls-proxy", condition = "START" }], var.otel_sidecar ? [{ containerName = "otel-collector", condition = "START" }] : [])
+      dependsOn = concat(
+        [{ containerName = "tls-proxy", condition = "START" }],
+        var.otel_sidecar ? [{ containerName = "otel-collector", condition = "START" }] : [],
+        var.clamav_image == null ? [] : [{ containerName = "clamav", condition = "HEALTHY" }],
+      )
       logConfiguration = {
         logDriver = "awslogs"
         options   = { "awslogs-group" = aws_cloudwatch_log_group.this.name, "awslogs-region" = var.region, "awslogs-stream-prefix" = var.name }
       }
-      }, var.container_health_check == null ? {} : {
-      healthCheck = { command = var.container_health_check, interval = 15, timeout = 5, retries = 3, startPeriod = 30 }
+      }, var.clamav_image == null ? {} : { memoryReservation = 2048 }, var.container_health_check == null ? {} : {
+      healthCheck                                            = { command = var.container_health_check, interval = 15, timeout = 5, retries = 3, startPeriod = 30 }
     }),
     {
       name                   = "tls-proxy"
@@ -266,19 +307,19 @@ resource "aws_ecs_task_definition" "this" {
         options   = { "awslogs-group" = aws_cloudwatch_log_group.this.name, "awslogs-region" = var.region, "awslogs-stream-prefix" = "tls" }
       }
     },
-    ], var.otel_sidecar ? [{
-      name                   = "otel-collector"
-      image                  = var.otel_collector_image
-      essential              = false
-      readonlyRootFilesystem = false
-      cpu                    = 32
-      portMappings           = [{ containerPort = 4318, hostPort = 4318, protocol = "tcp" }]
-      environment            = [{ name = "AOT_CONFIG_CONTENT", value = local.collector_config }]
-      logConfiguration = {
-        logDriver = "awslogs"
-        options   = { "awslogs-group" = aws_cloudwatch_log_group.this.name, "awslogs-region" = var.region, "awslogs-stream-prefix" = "otel" }
-      }
-  }] : []))
+  ], local.clamav_containers, local.otel_containers))
+
+  lifecycle {
+    precondition {
+      condition = var.clamav_image == null || (
+        var.clamav_repository_arn != null &&
+        var.clamav_memory_reservation >= 4096 &&
+        var.cpu >= 800 &&
+        var.memory >= var.clamav_memory_reservation + 2560
+      )
+      error_message = "ClamAV requires an authorized image repository, at least 4 GiB reserved memory, and sufficient task CPU/memory for the scanner and sidecars."
+    }
+  }
 }
 
 resource "aws_lb_target_group" "this" {

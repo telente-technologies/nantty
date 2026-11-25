@@ -9,7 +9,7 @@ variable "environment" {
 variable "region" { type = string }
 variable "dr_region" {
   type    = string
-  default = "eu-central-1"
+  default = "eu-north-1"
 }
 variable "enable_dr" {
   description = "Cross-region backups, S3 replication, ECR replication and secret replicas."
@@ -109,6 +109,11 @@ variable "service_overrides" {
   description = "Per-service overrides: cpu, memory, min, max."
   type        = map(map(number))
   default     = {}
+}
+variable "enable_media_malware_scanning" {
+  description = "Enable the private ClamAV sidecar for staging uploads."
+  type        = bool
+  default     = false
 }
 variable "aurora" {
   type = object({

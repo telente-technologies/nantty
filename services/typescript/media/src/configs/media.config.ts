@@ -33,7 +33,7 @@ export interface MediaConfig {
     readonly privateKeyPem: string | undefined;
     readonly signedUrlLifetimeSeconds: number;
   };
-  readonly clamAv: { readonly host: string; readonly port: number } | undefined;
+  readonly clamAv: { readonly host: string; readonly port: number; readonly timeoutMs: number } | undefined;
   readonly heifConvertPath: string;
   readonly allowProxiedChunks: boolean;
   readonly allowUnscannedUploads: boolean;
@@ -93,7 +93,11 @@ export function loadMediaConfigFromEnvironment(): MediaConfig {
       privateKeyPem: readOptional("CDN_SIGNING_PRIVATE_KEY")?.replaceAll("\\n", "\n"),
       signedUrlLifetimeSeconds: Number(readOrDefault("CDN_SIGNED_URL_LIFETIME_SECONDS", "3600")),
     },
-    clamAv: clamAvHost === undefined ? undefined : { host: clamAvHost, port: Number(readOrDefault("CLAMAV_PORT", "3310")) },
+    clamAv: clamAvHost === undefined ? undefined : {
+      host: clamAvHost,
+      port: Number(readOrDefault("CLAMAV_PORT", "3310")),
+      timeoutMs: Number(readOrDefault("CLAMAV_TIMEOUT_MS", String(12 * 60 * 1000))),
+    },
     heifConvertPath,
     allowProxiedChunks: readOrDefault("ALLOW_PROXIED_CHUNKS", "false") === "true",
     allowUnscannedUploads: readOrDefault("MEDIA_ALLOW_UNSCANNED", "false") === "true",
@@ -121,6 +125,7 @@ export function loadMediaConfigFromEnvironment(): MediaConfig {
     },
   };
   if (!Number.isInteger(config.port) || config.port <= 0) problems.push("PORT must be a positive integer");
+  if (config.clamAv !== undefined && (!Number.isInteger(config.clamAv.port) || config.clamAv.port <= 0 || !Number.isInteger(config.clamAv.timeoutMs) || config.clamAv.timeoutMs <= 0)) problems.push("CLAMAV_PORT and CLAMAV_TIMEOUT_MS must be positive integers");
   if (process.env["NODE_ENV"] === "production" && (config.internalToken.length < 32 || /local[-_]only|change[-_]?me/i.test(config.internalToken))) {
     problems.push("MEDIA_INTERNAL_TOKEN must be a non-placeholder secret of at least 32 characters in production");
   }

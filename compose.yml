@@ -234,6 +234,9 @@ services:
       S3_PUBLIC_ENDPOINT: http://127.0.0.1:18333
       FFMPEG_MODE: required
       OTEL_EXPORTER_OTLP_ENDPOINT: http://127.0.0.1:4317
+      CLAMAV_HOST: ${CLAMAV_HOST:-}
+      CLAMAV_PORT: ${CLAMAV_PORT:-3310}
+      CLAMAV_TIMEOUT_MS: ${CLAMAV_TIMEOUT_MS:-600000}
     depends_on:
       ts-migrations:
         condition: service_completed_successfully
@@ -245,6 +248,15 @@ services:
         condition: service_started
       go-trust:
         condition: service_started
+    restart: unless-stopped
+
+  clamav:
+    profiles: [malware-scan]
+    build:
+      context: infra/aws/clamav
+      dockerfile: Dockerfile
+    network_mode: host
+    mem_limit: 4g
     restart: unless-stopped
 
   search:

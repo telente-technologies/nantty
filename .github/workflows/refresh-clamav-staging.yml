@@ -1,0 +1,94 @@
+name: Refresh staging ClamAV signatures
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: refresh-staging-clamav
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.ref == 'refs/heads/main' && vars.CLAMAV_REFRESH_ENABLED_STAGING == 'true' && vars.AWS_ACCOUNT_ID_STAGING != ''
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 26.13.0
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install media test dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --filter @nantty/media...
+      - uses: docker/setup-buildx-action@v4
+      - name: Build scanner with current signatures
+        run: docker build --platform linux/amd64 --file infra/aws/clamav/Dockerfile --tag "scan/clamav:${GITHUB_RUN_ID}" infra/aws/clamav
+      - name: Start private scanner and wait for health
+        run: |
+          docker run --detach --name nantty-clamav-refresh --network host --memory 4g "scan/clamav:${GITHUB_RUN_ID}"
+          for attempt in $(seq 1 180); do
+            health="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}missing{{end}}' nantty-clamav-refresh)"
+            if [[ "$health" == healthy ]]; then exit 0; fi
+            if [[ "$health" == unhealthy || "$health" == missing ]]; then
+              docker logs nantty-clamav-refresh
+              exit 1
+            fi
+            sleep 10
+          done
+          docker logs nantty-clamav-refresh
+          echo "ClamAV did not become healthy within 30 minutes" >&2
+          exit 1
+      - name: Test EICAR detection through Nantty's TCP scanner
+        env:
+          CLAMAV_TEST_HOST: 127.0.0.1
+        run: pnpm --filter @nantty/media exec vitest run tests/integrations/clamAv.e2e.test.ts
+      - name: Scan the image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: "scan/clamav:${{ github.run_id }}"
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID_STAGING }}:role/nantty-staging-github-ecr-push
+          aws-region: ${{ vars.AWS_REGION }}
+      - id: registry
+        run: echo "host=${{ vars.AWS_ACCOUNT_ID_STAGING }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com" >> "$GITHUB_OUTPUT"
+      - uses: aws-actions/amazon-ecr-login@v2
+      - name: Build and push refreshed ARM64 scanner image
+        uses: docker/build-push-action@v7
+        with:
+          context: infra/aws/clamav
+          file: infra/aws/clamav/Dockerfile
+          platforms: linux/arm64
+          push: true
+          provenance: mode=max
+          sbom: true
+          tags: ${{ steps.registry.outputs.host }}/nantty/clamav:refresh-${{ github.run_id }}-${{ github.run_attempt }}
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID_STAGING }}:role/nantty-staging-github-deploy
+          aws-region: ${{ vars.AWS_REGION }}
+      - id: running-images
+        run: |
+          task_definition="$(aws ecs describe-task-definition --task-definition nantty-staging-media --output json)"
+          echo "media=$(jq -r '.taskDefinition.containerDefinitions[] | select(.name == "media") | .image' <<< "$task_definition")" >> "$GITHUB_OUTPUT"
+          echo "proxy=$(jq -r '.taskDefinition.containerDefinitions[] | select(.name == "tls-proxy") | .image' <<< "$task_definition")" >> "$GITHUB_OUTPUT"
+      - name: Roll out only the refreshed ClamAV sidecar
+        env:
+          MEDIA_IMAGE: ${{ steps.running-images.outputs.media }}
+          PROXY_IMAGE: ${{ steps.running-images.outputs.proxy }}
+          SCANNER_IMAGE: ${{ steps.registry.outputs.host }}/nantty/clamav:refresh-${{ github.run_id }}-${{ github.run_attempt }}
+        run: bash .github/scripts/deployService.sh media "$MEDIA_IMAGE" staging "$PROXY_IMAGE" "$SCANNER_IMAGE"
+      - if: always()
+        run: docker rm --force nantty-clamav-refresh || true
