@@ -221,11 +221,14 @@ simulator message verifies SES acceptance/event plumbing, not inbox rendering or
 Nantty template renderer and notifications service are not deployed by this SES-only root; existing package and service
 tests cover rendering until the notification runtime is deployed with its application dependencies.
 
-Current workspace checks (2026-11-25): AWS CLI browser login succeeded; SES account reports sandbox access enabled,
-200 messages per 24 hours, 1 message/second, and zero sent in the prior 24 hours. No SES identity is listed in
-`eu-north-1`. The staging state bucket and lock table are absent, and `CLOUDFLARE_API_TOKEN` is not configured in this
-shell. No AWS or Cloudflare resources were created or changed. Do not use the shared `envs/staging` root for email-only
-verification; it composes the full fourteen-service platform.
+Current workspace checks (2026-11-25): AWS CLI profile `oyinlola@nantty` is authenticated in `eu-north-1`; SES is
+healthy and sending-enabled but remains in the sandbox (200 messages per 24 hours, 1 message/second, zero sent), and
+no SES identity exists. The owner confirmed that no hard monthly spend limit is currently active. The staging state
+bucket and lock table are absent, and `CLOUDFLARE_API_TOKEN` is not configured in this shell. Terraform formatting,
+`init -backend=false`, and validation pass for the email-only root. No AWS or Cloudflare resources were created or
+changed. Do not provision until the owner sets the retained hard project spend limit in AWS Settings > Billing and
+the missing state/DNS prerequisites are ready. Do not use the shared `envs/staging` root for email-only verification;
+it composes the full fourteen-service platform.
 
 ## Known caveats to confirm on the first staging apply
 
