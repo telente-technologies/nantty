@@ -211,10 +211,32 @@ generate an authenticated plan without keeping the workstation online, use the `
 - From the `main` branch, run **Terraform staging** with `create_plan=true`. The workflow only runs `terraform plan`;
   it never applies infrastructure or mutates DNS. Review its plan output before any separately authorized apply.
 
+### GitHub-hosted staging apply
+
+The same workflow now has an explicit apply path for staging only. It runs on a GitHub-hosted runner, so the
+workstation may be offline. Before dispatching it, configure:
+
+- A `staging-apply` GitHub Environment restricted to `main`, with a required reviewer and admin bypass disabled.
+  This environment is configured for this repository with owner reviewer `oyinlola-tech`.
+- Environment variable `AWS_TERRAFORM_APPLY_ROLE_ARN_STAGING`, pointing to a dedicated role whose OIDC `sub` is
+  exactly `repo:telente-technologies/nantty:environment:staging-apply`. Do not reuse the read-only plan role or the
+  ECS deploy role. Scope its permissions to the staging state and resources required by this root.
+- An environment secret `CLOUDFLARE_API_TOKEN`, restricted to the `nantty.com` zone with DNS Read/Edit. The
+  Cloudflare connector login is not available to GitHub Actions and cannot substitute for this secret.
+- A reviewed, non-public `admin_ip_allow_list` in `infra/aws/envs/staging/terraform.tfvars`; never use
+  `0.0.0.0/0` or `::/0` for admin access.
+
+After reviewing a read-only plan, dispatch **Terraform staging** from `main`, set `apply_staging=true`, and type
+`APPLY STAGING` into `confirm_staging_apply`. GitHub pauses for the `staging-apply` reviewer. The approved job
+creates a fresh saved plan and applies that exact plan only if it has no delete or replacement actions; otherwise
+it stops for separate review. The saved plan stays on the ephemeral runner and is not uploaded as a public artifact.
+This path has not yet run: the AWS OIDC/apply role, DNS-edit secret and trusted admin CIDR are still outstanding.
+It applies infrastructure only; app image publication/deployment, frontend portal hosting, desktop distribution,
+email DNS verification, and end-to-end staging tests remain separate work. It never deploys production.
+
 The workflow is not autonomous coding: changes still need to be committed and pushed before GitHub can run them. Once
 the code is pushed, hosted validation and the existing backend deployment workflow can run without the developer's PC.
-Terraform apply, frontend hosting, desktop packaging/distribution, and end-to-end staging verification are separate
-work still to be completed.
+The assistant's local coding session itself does not continue when the workstation stops.
 
 ## SES-only staging (without deploying the platform stack)
 
