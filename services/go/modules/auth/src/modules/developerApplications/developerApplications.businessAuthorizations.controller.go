@@ -7,6 +7,20 @@ import (
 	"nantty/platform/httpserver"
 )
 
+func (controller Controller) GetBusinessApplicationPreview(writer http.ResponseWriter, request *http.Request) {
+	if _, ok := accountID(request); !ok {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.ErrUnauthorized)
+		return
+	}
+	preview, err := (Service{Container: controller.Container}).GetBusinessApplicationPreview(request.Context(), request.PathValue("applicationID"))
+	if err != nil {
+		controller.writeBusinessAuthorizationError(writer, request, err)
+		return
+	}
+	writer.Header().Set("Cache-Control", "no-store")
+	httpserver.WriteJsonResponse(writer, http.StatusOK, preview)
+}
+
 func (controller Controller) ListBusinessAuthorizations(writer http.ResponseWriter, request *http.Request) {
 	account, ok := accountID(request)
 	if !ok {

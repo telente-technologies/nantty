@@ -38,6 +38,32 @@ type BusinessAuthorizationInput struct {
 	Scopes         []string `json:"scopes"`
 }
 
+type BusinessApplicationPreview struct {
+	ID              string   `json:"applicationId"`
+	OrganizationID  string   `json:"organizationId"`
+	Organization    string   `json:"organizationName"`
+	Name            string   `json:"applicationName"`
+	RequestedScopes []string `json:"requestedScopes"`
+}
+
+func (service Service) GetBusinessApplicationPreview(ctx context.Context, applicationID string) (BusinessApplicationPreview, error) {
+	identifier, err := uuid.Parse(applicationID)
+	if err != nil {
+		return BusinessApplicationPreview{}, errBusinessAuthorizationNotFound
+	}
+	var preview BusinessApplicationPreview
+	err = service.Container.Database.QueryRowContext(ctx, `
+		SELECT a.id, a.organization_id, o.name, a.name, a.requested_scopes
+		FROM developer_applications a
+		JOIN developer_organizations o ON o.id = a.organization_id
+		WHERE a.id = $1 AND a.api_product = $2 AND a.status = 'approved'`, identifier, apiProductBusinessMessaging).
+		Scan(&preview.ID, &preview.OrganizationID, &preview.Organization, &preview.Name, jsonScanner{target: &preview.RequestedScopes})
+	if errors.Is(err, sql.ErrNoRows) {
+		return BusinessApplicationPreview{}, errBusinessAuthorizationNotFound
+	}
+	return preview, err
+}
+
 func (service Service) ListBusinessAuthorizations(ctx context.Context, accountID string) ([]BusinessAuthorization, error) {
 	account, err := uuid.Parse(accountID)
 	if err != nil {
