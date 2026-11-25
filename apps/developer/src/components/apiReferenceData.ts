@@ -567,14 +567,15 @@ res, err := http.DefaultClient.Do(req)`,
         status: 200,
         label: "200 OK",
         tone: "success",
-        description: "Consented business conversations returned for this approved application.",
+        description: "Consented business conversations ordered by latest activity; nextCursor is null when all results are returned.",
         headers: { "Content-Type": "application/json", "X-Request-Id": "req_prod_01JCYAG88" },
         body: {
           conversations: [
             {
-              id: "conv_prod_849102",
-              consentStatus: "active",
-              updatedAt: "2026-11-16T09:42:10Z",
+              recipientId: "3a81e70d-9c52-4a2b-8f13-0e5c8b4e1190",
+              grantedAt: "2026-11-16T09:42:10Z",
+              lastStatus: "dispatched",
+              lastMessageAt: "2026-11-16T09:42:10Z",
             },
           ],
           nextCursor: null,
@@ -607,6 +608,85 @@ res, err := http.DefaultClient.Do(req)`,
     ],
   },
   {
+    id: "list-business-messages",
+    group: "Production Business Messaging",
+    method: "GET",
+    baseUrl: "https://api.nantty.com",
+    path: "/api/v1/business/conversations/{recipientId}/messages",
+    title: "List consented business messages",
+    summary: "Returns the latest persisted messages for a recipient with active messages:read consent. Results are chronological within each page; the cursor fetches older messages.",
+    statusLabel: "Production Consent Read",
+    statusTone: "read",
+    updatedAt: "Nov 25, 2026",
+    authLabel: "Bearer ntlive_...",
+    scopes: ["messages:read"],
+    headers: [{ name: "Authorization", type: "string", required: true, description: "Approved production key prefixed with ntlive_." }],
+    pathParams: [{ name: "recipientId", type: "string (uuid)", required: true, description: "Recipient account UUID returned by the consent-scoped conversation list." }],
+    queryParams: [
+      { name: "limit", type: "integer", required: false, description: "Messages per page.", constraints: "1–100; default 20" },
+      { name: "cursor", type: "string", required: false, description: "Opaque nextCursor value returned by the preceding page." },
+    ],
+    samples: {
+      curl: `curl "https://api.nantty.com/api/v1/business/conversations/<recipient_uuid>/messages?limit=20" \\
+  -H "Authorization: Bearer <ntlive_key>"`,
+      node: `const response = await fetch(
+  "https://api.nantty.com/api/v1/business/conversations/<recipient_uuid>/messages?limit=20",
+  { headers: { Authorization: \`Bearer \${process.env.LIVE_KEY}\` } },
+);
+const { messages, nextCursor } = await response.json();`,
+      python: `resp = requests.get(
+    "https://api.nantty.com/api/v1/business/conversations/<recipient_uuid>/messages",
+    params={"limit": 20},
+    headers={"Authorization": f"Bearer {os.environ['LIVE_KEY']}"},
+    timeout=10,
+)`,
+      go: `req, _ := http.NewRequest("GET", "https://api.nantty.com/api/v1/business/conversations/<recipient_uuid>/messages?limit=20", nil)
+req.Header.Set("Authorization", "Bearer "+os.Getenv("LIVE_KEY"))
+res, err := http.DefaultClient.Do(req)`,
+    },
+    responses: [
+      { status: 200, label: "200 OK", tone: "success", description: "Persisted messages in chronological order, with a cursor for older results.", headers: { "Content-Type": "application/json" }, body: { messages: [{ messageId: "9e0d66ce-8e4a-4b88-ae73-66057c479771", recipientId: "3a81e70d-9c52-4a2b-8f13-0e5c8b4e1190", text: "Your support ticket has been updated.", status: "dispatched", externalMessageId: "message_123", createdAt: "2026-11-25T10:30:00Z", updatedAt: "2026-11-25T10:30:01Z" }], nextCursor: null } },
+      { status: 403, label: "403 Consent required", tone: "warn", description: "The credential or the recipient's active consent lacks messages:read.", headers: { "Content-Type": "application/json" }, body: { error: { code: "BUSINESS_CONSENT_REQUIRED", message: "Active messages:read consent is required." } } },
+      { status: 429, label: "429 Quota", tone: "danger", description: "Organization monthly production quota is exhausted.", headers: { "Content-Type": "application/json" }, body: { error: { code: "MONTHLY_QUOTA_EXCEEDED", message: "Monthly production API quota exceeded." } } },
+    ],
+  },
+  {
+    id: "get-business-message-status",
+    group: "Production Business Messaging",
+    method: "GET",
+    baseUrl: "https://api.nantty.com",
+    path: "/api/v1/business/messages/{messageId}",
+    title: "Get production message status",
+    summary: "Reads the current persisted status of a message owned by this approved application while recipient messages:read consent remains active.",
+    statusLabel: "Production Consent Read",
+    statusTone: "read",
+    updatedAt: "Nov 25, 2026",
+    authLabel: "Bearer ntlive_...",
+    scopes: ["messages:read"],
+    headers: [{ name: "Authorization", type: "string", required: true, description: "Approved production key prefixed with ntlive_." }],
+    pathParams: [{ name: "messageId", type: "string (uuid)", required: true, description: "Nantty message UUID returned by a production send." }],
+    samples: {
+      curl: `curl "https://api.nantty.com/api/v1/business/messages/<message_uuid>" \\
+  -H "Authorization: Bearer <ntlive_key>"`,
+      node: `const response = await fetch("https://api.nantty.com/api/v1/business/messages/<message_uuid>", {
+  headers: { Authorization: \`Bearer \${process.env.LIVE_KEY}\` },
+});
+const { message } = await response.json();`,
+      python: `resp = requests.get(
+    "https://api.nantty.com/api/v1/business/messages/<message_uuid>",
+    headers={"Authorization": f"Bearer {os.environ['LIVE_KEY']}"},
+    timeout=10,
+)`,
+      go: `req, _ := http.NewRequest("GET", "https://api.nantty.com/api/v1/business/messages/<message_uuid>", nil)
+req.Header.Set("Authorization", "Bearer "+os.Getenv("LIVE_KEY"))
+res, err := http.DefaultClient.Do(req)`,
+    },
+    responses: [
+      { status: 200, label: "200 OK", tone: "success", description: "The current persisted dispatch state. This is not a delivery or read receipt.", headers: { "Content-Type": "application/json" }, body: { message: { messageId: "9e0d66ce-8e4a-4b88-ae73-66057c479771", recipientId: "3a81e70d-9c52-4a2b-8f13-0e5c8b4e1190", text: "Your support ticket has been updated.", status: "dispatched", externalMessageId: "message_123", createdAt: "2026-11-25T10:30:00Z", updatedAt: "2026-11-25T10:30:01Z" } } },
+      { status: 404, label: "404 Not found", tone: "warn", description: "Message is not available to this application or recipient consent is no longer active.", headers: { "Content-Type": "application/json" }, body: { error: { code: "MESSAGE_NOT_FOUND", message: "Message was not found." } } },
+    ],
+  },
+  {
     id: "send-business-message",
     group: "Production Business Messaging",
     method: "POST",
@@ -624,7 +704,7 @@ res, err := http.DefaultClient.Do(req)`,
       { name: "Idempotency-Key", type: "string", required: true, description: "Durable client-generated key scoped to your application.", constraints: "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$" },
     ],
     bodyParams: [
-      { name: "conversationId", type: "string", required: true, description: "Consented business conversation identifier." },
+      { name: "recipientId", type: "string (uuid)", required: true, description: "Consented recipient account UUID." },
       { name: "text", type: "string", required: true, description: "Outbound message body.", constraints: "1–4000 chars" },
     ],
     samples: {
@@ -633,7 +713,7 @@ res, err := http.DefaultClient.Do(req)`,
   -H "Idempotency-Key: idem-002" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "conversationId": "conv_prod_849102",
+    "recipientId": "3a81e70d-9c52-4a2b-8f13-0e5c8b4e1190",
     "text": "Your support ticket has been updated."
   }'`,
       node: `const res = await fetch("https://api.nantty.com/api/v1/business/messages", {
@@ -644,7 +724,7 @@ res, err := http.DefaultClient.Do(req)`,
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    conversationId: "conv_prod_849102",
+    recipientId: "3a81e70d-9c52-4a2b-8f13-0e5c8b4e1190",
     text: "Your support ticket has been updated.",
   }),
 });`,
@@ -654,10 +734,10 @@ res, err := http.DefaultClient.Do(req)`,
         "Authorization": f"Bearer {os.environ['LIVE_KEY']}",
         "Idempotency-Key": "idem-002",
     },
-    json={"conversationId": "conv_prod_849102", "text": "Your support ticket has been updated."},
+    json={"recipientId": "3a81e70d-9c52-4a2b-8f13-0e5c8b4e1190", "text": "Your support ticket has been updated."},
     timeout=10,
 )`,
-      go: `body := strings.NewReader(\`{"conversationId":"conv_prod_849102","text":"Your support ticket has been updated."}\`)
+      go: `body := strings.NewReader(\`{"recipientId":"3a81e70d-9c52-4a2b-8f13-0e5c8b4e1190","text":"Your support ticket has been updated."}\`)
 req, _ := http.NewRequest("POST", "https://api.nantty.com/api/v1/business/messages", body)
 req.Header.Set("Authorization", "Bearer "+os.Getenv("LIVE_KEY"))
 req.Header.Set("Idempotency-Key", "idem-002")
