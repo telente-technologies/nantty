@@ -24,11 +24,11 @@ type MessageReservation struct {
 	Replay            bool
 }
 
-func ReserveProductionMessage(ctx context.Context, db *sql.DB, orgId, appId, credId, recipientId uuid.UUID, key, body string, now time.Time) (MessageReservation, error) {
+func ReserveProductionMessage(ctx context.Context, db *sql.DB, orgId, appId, credId, storeId, recipientId uuid.UUID, key, body string, now time.Time) (MessageReservation, error) {
 	if !productionIdempotencyKey.MatchString(key) {
 		return MessageReservation{}, httpserver.NewApiError(http.StatusBadRequest, "INVALID_IDEMPOTENCY_KEY", "A valid Idempotency-Key header is required.")
 	}
-	hash := sha256.Sum256([]byte(recipientId.String() + "\x00" + body))
+	hash := sha256.Sum256([]byte(storeId.String() + "\x00" + recipientId.String() + "\x00" + body))
 	requestHash := hex.EncodeToString(hash[:])
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -65,9 +65,9 @@ func ReserveProductionMessage(ctx context.Context, db *sql.DB, orgId, appId, cre
 	}
 	messageId := uuid.New()
 	if _, err := tx.ExecContext(ctx,
-		`INSERT INTO developer_business_messages (id, organization_id, application_id, credential_id, recipient_account_id, body_text, status, idempotency_key, request_hash, created_at, updated_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, 'accepted', $7, $8, $9, $9)`,
-		messageId, orgId, appId, credId, recipientId, body, key, requestHash, now,
+		`INSERT INTO developer_business_messages (id, organization_id, application_id, credential_id, store_id, recipient_account_id, body_text, status, idempotency_key, request_hash, created_at, updated_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, 'accepted', $8, $9, $10, $10)`,
+		messageId, orgId, appId, credId, storeId, recipientId, body, key, requestHash, now,
 	); err != nil {
 		return MessageReservation{}, err
 	}

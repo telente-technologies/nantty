@@ -41,6 +41,14 @@ func (controller Controller) ListBusinessConversations(writer http.ResponseWrite
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
+	storeID, err := parseBusinessStoreID(request.URL.Query().Get("storeId"))
+	if err == nil {
+		err = requireBusinessStoreCapability(request.Context(), controller.Container.Database, organizationID, applicationID, storeID, "conversations:read")
+	}
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
 	requestID, err := ReserveProductionRequest(request.Context(), controller.Container.Database, organizationID, applicationID, credentialID, http.MethodGet, "/api/v1/business/conversations")
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
@@ -58,12 +66,13 @@ func (controller Controller) ListBusinessConversations(writer http.ResponseWrite
 			       COALESCE(latest.status, 'consented') AS last_status,
 			       latest.created_at AS last_message_at
 			FROM developer_business_consents c
-			LEFT JOIN LATERAL (
+			JOIN LATERAL (
 				SELECT m.status, m.created_at
 				FROM developer_business_messages m
 				WHERE m.organization_id = c.organization_id
 				  AND m.application_id = c.application_id
 				  AND m.recipient_account_id = c.recipient_account_id
+				  AND m.store_id = $3
 				ORDER BY m.created_at DESC, m.id DESC
 				LIMIT 1
 			) latest ON true
@@ -72,10 +81,10 @@ func (controller Controller) ListBusinessConversations(writer http.ResponseWrite
 		)
 		SELECT recipient_account_id, granted_at, last_status, last_message_at, sort_at
 		FROM conversation_rows
-		WHERE $3::timestamptz IS NULL OR (sort_at, recipient_account_id) < ($3::timestamptz, $4::uuid)
+		WHERE $4::timestamptz IS NULL OR (sort_at, recipient_account_id) < ($4::timestamptz, $5::uuid)
 		ORDER BY sort_at DESC, recipient_account_id DESC
-		LIMIT $5`,
-		organizationID, applicationID, cursorTime, cursorID, limit+1,
+		LIMIT $6`,
+		organizationID, applicationID, storeID, cursorTime, cursorID, limit+1,
 	)
 	if err != nil {
 		completeProductionRequest(request.Context(), controller.Container.Database, controller.Container.Logger, requestID, http.StatusInternalServerError, started)

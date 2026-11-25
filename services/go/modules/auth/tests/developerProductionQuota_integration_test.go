@@ -53,13 +53,13 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 		`CREATE TABLE developer_organizations (id uuid PRIMARY KEY)`,
 		`CREATE TABLE developer_billing_subscriptions (organization_id uuid PRIMARY KEY, plan_tier text, status text, monthly_quota bigint, current_period_end timestamptz, provider_reference text, payment_verified_at timestamptz, updated_at timestamptz)`,
 		`CREATE TABLE developer_production_requests (id uuid PRIMARY KEY, application_id uuid, organization_id uuid, credential_id uuid, method text, path text, status_code integer, latency_ms integer, created_at timestamptz)`,
-		`CREATE TABLE developer_business_messages (id uuid PRIMARY KEY, organization_id uuid, application_id uuid, credential_id uuid, recipient_account_id uuid, body_text text, status text, idempotency_key varchar(128), request_hash varchar(64), external_message_id text, created_at timestamptz, updated_at timestamptz, UNIQUE (application_id, idempotency_key))`,
+		`CREATE TABLE developer_business_messages (id uuid PRIMARY KEY, organization_id uuid, application_id uuid, credential_id uuid, store_id uuid, recipient_account_id uuid, body_text text, status text, idempotency_key varchar(128), request_hash varchar(64), external_message_id text, created_at timestamptz, updated_at timestamptz, UNIQUE (application_id, idempotency_key))`,
 	} {
 		if _, err := db.ExecContext(ctx, statement); err != nil {
 			t.Fatal(err)
 		}
 	}
-	org, app, cred := uuid.New(), uuid.New(), uuid.New()
+	org, app, cred, store := uuid.New(), uuid.New(), uuid.New(), uuid.New()
 	if _, err := db.ExecContext(ctx, `INSERT INTO developer_organizations VALUES ($1)`, org); err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			result, err := production.ReserveProductionMessage(ctx, db, org, app, cred, recipient, "same-key", "hello", time.Now())
+			result, err := production.ReserveProductionMessage(ctx, db, org, app, cred, store, recipient, "same-key", "hello", time.Now())
 			messageResults <- result
 			messageErrors <- err
 		}()
@@ -177,6 +177,10 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 	if firstCount != 1 || replayCount != 15 {
 		t.Fatalf("first=%d replay=%d, want one message and fifteen replays", firstCount, replayCount)
 	}
+	_, err = production.ReserveProductionMessage(ctx, db, org, app, cred, uuid.New(), recipient, "same-key", "hello", time.Now())
+	if !errors.Is(err, httpserver.NewApiError(http.StatusConflict, "IDEMPOTENCY_KEY_REUSED", "")) {
+		t.Fatalf("same idempotency key for a different store must be rejected, got %v", err)
+	}
 	if err := db.QueryRowContext(ctx, `SELECT COUNT(*) FROM developer_production_requests WHERE organization_id = $1`, org).Scan(&recorded); err != nil {
 		t.Fatal(err)
 	}
@@ -194,7 +198,7 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 	if err != nil || usage != 3 {
 		t.Fatalf("organization usage must include other applications: usage=%d err=%v", usage, err)
 	}
-	_, err = production.ReserveProductionMessage(ctx, db, org, app, cred, recipient, "same-key", "different", time.Now())
+	_, err = production.ReserveProductionMessage(ctx, db, org, app, cred, store, recipient, "same-key", "different", time.Now())
 	if !errors.Is(err, httpserver.NewApiError(http.StatusConflict, "IDEMPOTENCY_KEY_REUSED", "")) {
 		t.Fatalf("changed payload must be rejected, got %v", err)
 	}
@@ -207,7 +211,7 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 	if err := production.ConfirmProductionMessageDispatch(ctx, db, firstMessage, "external-2", time.Now()); !errors.Is(err, production.ErrMessageDispatchNotConfirmed) {
 		t.Fatalf("second dispatch confirmation must not overwrite the first, got %v", err)
 	}
-	confirmed, err := production.ReserveProductionMessage(ctx, db, org, app, cred, recipient, "same-key", "hello", time.Now())
+	confirmed, err := production.ReserveProductionMessage(ctx, db, org, app, cred, store, recipient, "same-key", "hello", time.Now())
 	if err != nil || !confirmed.Replay || confirmed.Status != "dispatched" || confirmed.ExternalMessageId != "external-1" {
 		t.Fatalf("confirmed replay: %+v, %v", confirmed, err)
 	}
