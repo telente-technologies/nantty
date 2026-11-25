@@ -1,5 +1,12 @@
 # Nantty implementation backlog
 
+## 2026-11-25 — Add merchant-facing Business Messaging store authorization UI
+
+- Added an authenticated Identity preview endpoint that returns only the public name, organization, application ID, and requested scopes of an approved Business Messaging application; pending, archived, or other-product apps return not found. Added its exact authenticated Gateway route.
+- Added a Privacy & Data workflow for a merchant to review the app identity, select only scopes that the UI can grant, select a store from the signed-in account's store list, and grant/revoke store access. Commerce remains the authority on store membership and `developer:manage`; UI-supplied IDs never establish access. This is a manual app-ID consent screen, not an OAuth redirect/grant handoff.
+- Verification: webapp `tsc --noEmit` passed (Node 24.19.0, below required 26.13); webapp ESLint completed with 0 errors and 73 existing warnings; Stylelint passed. Gateway suite passed 1,949/1,949 tests across 44 files. The Auth authorization and new approved-app-preview integration tests passed against a disposable PostgreSQL 17 tmpfs database after creating the required test-only `nantty_readers` role; the container was stopped and removed. No persistent migration was applied. Signed-in browser rendering/workflow, live deployment, and downstream encrypted Social dispatch remain unverified; production send remains fail-closed.
+- Next: run the updated PR CI to completion, verify the form in an authenticated browser backed by Identity/Gateway/Commerce, add a true initiated app-to-merchant grant link only with a reviewed OAuth/state/CSRF contract, and keep dispatch disabled until Social's existing encrypted send contract and idempotency/revocation checks are connected.
+
 ## 2026-11-25 — Add verified-service-boundary for business/store messaging authorizations
 
 - Added an authenticated Identity API for a Nantty account to list, grant/update, and revoke the account's business/store authorizations for approved Business Messaging applications. Authorization scopes are limited to app-requested scopes; every mutation is transactionally audited. Granting calls Commerce through a dedicated internal token and requires an active catalog store with `developer:manage`; client-supplied store IDs are not treated as proof. The authorization is separate from each recipient's personal-message consent.
