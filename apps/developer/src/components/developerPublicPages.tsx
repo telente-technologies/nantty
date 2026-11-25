@@ -205,7 +205,7 @@ export function DeveloperGuideArticle({ slug }: { readonly slug: Exclude<DocGuid
         <header className={styles.guideHeader}>
           <p className={styles.eyebrow}>API Reference</p>
           <h1 id="guide-title">Nantty HTTP API Reference</h1>
-          <p>Explore live Sandbox routes, consent-scoped Production conversation reads, request schemas, multi-language snippets, and HTTP status samples.</p>
+          <p>Explore live Sandbox routes, consent-scoped Production conversation, message-history and status reads, request schemas, multi-language snippets, and HTTP status samples.</p>
         </header>
         <ApiReferenceExplorer />
       </article>

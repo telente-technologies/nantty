@@ -1,4 +1,10 @@
 locals {
+  ses_identity_arn                    = var.external_ses == null ? module.ses[0].identity_arn : var.external_ses.identity_arn
+  ses_configuration_set_name          = var.external_ses == null ? module.ses[0].configuration_set_name : var.external_ses.configuration_set_name
+  ses_feedback_queue_arn              = var.external_ses == null ? module.ses[0].feedback_queue_arn : "arn:aws:sqs:${var.region}:${data.aws_caller_identity.current.account_id}:nantty-${var.environment}-notifications-ses-feedback"
+  ses_feedback_queue_url              = var.external_ses == null ? module.ses[0].feedback_queue_url : var.external_ses.feedback_queue_url
+  ses_feedback_dead_letter_queue_name = var.external_ses == null ? module.ses[0].feedback_dead_letter_queue_name : "nantty-${var.environment}-notifications-ses-feedback-dlq"
+
   media_bucket_arn = module.storage.media_bucket.arn
   kyc_bucket_arn   = module.storage.kyc_bucket.arn
   s3_object_access = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:AbortMultipartUpload"]
@@ -44,11 +50,12 @@ locals {
       { sid = "LiveSafetyEvidenceKey", actions = ["kms:Encrypt", "kms:GenerateDataKey"], resources = [module.kms.key_arns["kyc"]] },
       { sid = "LiveSafetyFrameKey", actions = ["kms:Decrypt"], resources = [module.storage.media_kms_key_arn] },
     ]
-    notifications = [
-      { sid = "SendMail", actions = ["ses:SendEmail", "ses:SendRawEmail"], resources = [module.ses.identity_arn, "arn:aws:ses:${var.region}:${data.aws_caller_identity.current.account_id}:configuration-set/${module.ses.configuration_set_name}"] },
-      { sid = "SesFeedbackQueue", actions = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes", "sqs:ChangeMessageVisibility"], resources = [module.ses.feedback_queue_arn] },
+    notifications = concat([
+      { sid = "SendMail", actions = ["ses:SendEmail", "ses:SendRawEmail"], resources = [local.ses_identity_arn, "arn:aws:ses:${var.region}:${data.aws_caller_identity.current.account_id}:configuration-set/${local.ses_configuration_set_name}"] },
+      { sid = "SesFeedbackQueue", actions = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes", "sqs:ChangeMessageVisibility"], resources = [local.ses_feedback_queue_arn] },
+      ], var.external_ses == null ? [
       { sid = "SesFeedbackKey", actions = ["kms:Decrypt"], resources = [module.kms.key_arns["sns"]] },
-    ]
+    ] : [])
   }
 
   app_env = { dev = "staging", staging = "staging", prod = "production" }[var.environment]
@@ -93,7 +100,7 @@ locals {
       CREATORS_MIGRATE_ON_START      = "false"
     }
     social        = { PORT = "8105" }
-    notifications = { PORT = "8104", PUSH_PROVIDER = "expo", NANTTY_WEB_BASE_URL = try(var.app_origins["web"], "https://${var.app_domain}"), NANTTY_SELLER_DASHBOARD_URL = try(var.app_origins["seller"], "https://seller.${var.app_domain}"), NANTTY_STUDIO_URL = try(var.app_origins["studio"], "https://studio.${var.app_domain}"), SQS_SES_FEEDBACK_QUEUE_URL = module.ses.feedback_queue_url, SES_CONFIGURATION_SET = module.ses.configuration_set_name, SES_FROM_ADDRESS = "Nantty <noreply@${var.mail_domain}>", NANTTY_MAIL_SENDING_DOMAIN = var.mail_domain, IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
+    notifications = { PORT = "8104", PUSH_PROVIDER = "expo", NANTTY_WEB_BASE_URL = try(var.app_origins["web"], "https://${var.app_domain}"), NANTTY_SELLER_DASHBOARD_URL = try(var.app_origins["seller"], "https://seller.${var.app_domain}"), NANTTY_STUDIO_URL = try(var.app_origins["studio"], "https://studio.${var.app_domain}"), SQS_SES_FEEDBACK_QUEUE_URL = local.ses_feedback_queue_url, SES_CONFIGURATION_SET = local.ses_configuration_set_name, SES_FROM_ADDRESS = "Nantty <noreply@${var.mail_domain}>", NANTTY_MAIL_SENDING_DOMAIN = var.mail_domain, IDENTITY_INTERNAL_URL = local.internal_url["go-identity"] }
     media = merge(
       {
         PORT                            = "8108"
@@ -288,7 +295,7 @@ module "observability" {
   aurora_cluster_identifier   = module.aurora.cluster_identifier
   valkey_replication_group_id = module.valkey.replication_group_id
   mq_broker_name              = module.messaging.broker_name
-  ses_feedback_dlq_name       = module.ses.feedback_dead_letter_queue_name
+  ses_feedback_dlq_name       = local.ses_feedback_dead_letter_queue_name
   service_log_group_names     = { for name in local.service_names : name => module.service[name].log_group_name if local.runtime_of[name] == "go" }
   target_group_arn_suffixes = {
     for name, definition in local.services : name => {

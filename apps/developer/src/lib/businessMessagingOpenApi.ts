@@ -46,6 +46,12 @@ const errorEnvelopeSchema = {
             "APPLICATION_NOT_APPROVED",
             "INSUFFICIENT_SCOPE",
             "MONTHLY_QUOTA_EXCEEDED",
+            "INVALID_CURSOR",
+            "INVALID_LIMIT",
+            "INVALID_MESSAGE_ID",
+            "INVALID_RECIPIENT_ID",
+            "BUSINESS_CONSENT_REQUIRED",
+            "MESSAGE_NOT_FOUND",
           ],
         },
         message: { type: "string" },
@@ -72,10 +78,10 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
     info: {
       title: "Nantty Business Messaging API",
       version: "2026-11-16",
-      summary: "Sandbox messaging and consent-scoped production conversation reads.",
+      summary: "Sandbox messaging and consent-scoped production conversation/message reads.",
       description: [
         "The Sandbox Business Messaging HTTP API (`ntsb_test_` bearer tokens) is available for synthetic data.",
-        "Production conversation listing is available to approved applications with active recipient consent and the conversations:read scope. Sending remains unavailable until canonical consent management and secure message dispatch are connected.",
+        "Production conversation listing and outbound-message history/status reads are available to approved applications with the corresponding live credential scopes and active recipient consent. History currently reflects only messages persisted by this API; inbound message synchronization and delivery/read receipts are not yet connected. Sending remains unavailable until canonical consent management and secure message dispatch are connected.",
         "Webhook deliveries are signed with HMAC-SHA256 in the `nantty-signature` (`t=<unix-seconds>,v1=<hex>`) header over `${timestamp}.${rawBody}` and carry a unique `nantty-event-id` for consumer deduplication.",
       ].join(" "),
       contact: { name: "Nantty Developers", url: docsUrl },
@@ -86,7 +92,7 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
     ],
     tags: [
       { name: "Sandbox Messaging", description: "Synthetic customer & conversation endpoints scoped to a Sandbox `ntsb_test_` credential." },
-      { name: "Production Business Messaging", description: "Consent-scoped conversation listing is available. Message sending remains unavailable pending canonical consent and dispatch integrations." },
+      { name: "Production Business Messaging", description: "Consent-scoped conversation, persisted outbound-message history, and status reads. Sending and inbound message synchronization remain unavailable pending canonical integrations." },
     ],
     paths: {
       "/v1/customers": {
@@ -203,7 +209,7 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
                   type: "object",
                   required: ["recipientId", "text"],
                   properties: {
-                    recipientId: { type: "string", minLength: 1 },
+                    recipientId: { type: "string", format: "uuid" },
                     text: { type: "string", minLength: 1, maxLength: 4000 },
                   },
                 },
@@ -221,13 +227,55 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
           summary: "List conversations with active recipient consent",
           operationId: "listBusinessConversations",
           security: [{ BusinessBearerAuth: ["conversations:read"] }],
+          parameters: [
+            { name: "limit", in: "query", required: false, schema: { type: "integer", minimum: 1, maximum: 100, default: 20 } },
+            { name: "cursor", in: "query", required: false, schema: { type: "string", description: "Opaque cursor returned by the preceding page." } },
+          ],
           responses: {
-            "200": { description: "Up to 100 consented conversations for this approved application", content: { "application/json": { schema: { type: "object", required: ["conversations"], properties: { conversations: { type: "array", items: { type: "object", required: ["recipientId", "grantedAt", "lastStatus"], properties: { recipientId: { type: "string", format: "uuid" }, grantedAt: { type: "string", format: "date-time" }, lastStatus: { type: "string", enum: ["consented", "accepted", "dispatched", "failed"] }, lastMessageAt: { type: "string", format: "date-time" } } } } } } } } },
+            "200": { description: "Consented conversations ordered by most recent activity, with an optional cursor for older records", content: { "application/json": { schema: { type: "object", required: ["conversations", "nextCursor"], properties: { conversations: { type: "array", items: { type: "object", required: ["recipientId", "grantedAt", "lastStatus"], properties: { recipientId: { type: "string", format: "uuid" }, grantedAt: { type: "string", format: "date-time" }, lastStatus: { type: "string", enum: ["consented", "accepted", "dispatched", "failed"] }, lastMessageAt: { type: "string", format: "date-time" } } } }, nextCursor: { type: ["string", "null"] } } } } } },
             "401": { description: "Invalid production credential", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
             "403": { description: "Application not approved or credential lacks conversations:read", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
             "402": { description: "Organization has no active production entitlement", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
             "429": { description: "Organization production request quota exhausted", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
             "500": { description: "Conversation listing could not be completed", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+          },
+        },
+      },
+      "/api/v1/business/conversations/{recipientId}/messages": {
+        get: {
+          tags: ["Production Business Messaging"],
+          summary: "List persisted messages for an actively consented recipient",
+          operationId: "listBusinessMessages",
+          security: [{ BusinessBearerAuth: ["messages:read"] }],
+          parameters: [
+            { name: "recipientId", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+            { name: "limit", in: "query", required: false, schema: { type: "integer", minimum: 1, maximum: 100, default: 20 } },
+            { name: "cursor", in: "query", required: false, schema: { type: "string", description: "Opaque cursor returned by the preceding page." } },
+          ],
+          responses: {
+            "200": { description: "Messages in chronological order; nextCursor is null when exhausted", content: { "application/json": { schema: { type: "object", required: ["messages", "nextCursor"], properties: { messages: { type: "array", items: { $ref: "#/components/schemas/BusinessMessage" } }, nextCursor: { type: ["string", "null"] } } } } } },
+            "400": { description: "Invalid recipient, limit or cursor", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "401": { description: "Invalid production credential", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "403": { description: "Credential scope or active recipient consent is insufficient", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "402": { description: "Organization has no active verified production entitlement", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "429": { description: "Organization production request quota exhausted", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+          },
+        },
+      },
+      "/api/v1/business/messages/{messageId}": {
+        get: {
+          tags: ["Production Business Messaging"],
+          summary: "Get the current status of a persisted message",
+          operationId: "getBusinessMessageStatus",
+          security: [{ BusinessBearerAuth: ["messages:read"] }],
+          parameters: [{ name: "messageId", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+          responses: {
+            "200": { description: "Current persisted message status for the authorized application", content: { "application/json": { schema: { type: "object", required: ["message"], properties: { message: { $ref: "#/components/schemas/BusinessMessage" } } } } } },
+            "401": { description: "Invalid production credential", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "403": { description: "Credential or recipient consent lacks messages:read", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "402": { description: "Organization has no active verified production entitlement", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "404": { description: "Message does not exist for this authorized application or consent is no longer active", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "429": { description: "Organization production request quota exhausted", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
           },
         },
       },
@@ -268,6 +316,19 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
             text: { type: "string" },
             status: { type: "string", enum: ["sent", "delivered", "read", "failed", "received"] },
             createdAt: { type: "string", format: "date-time" },
+          },
+        },
+        BusinessMessage: {
+          type: "object",
+          required: ["messageId", "recipientId", "text", "status", "createdAt", "updatedAt"],
+          properties: {
+            messageId: { type: "string", format: "uuid" },
+            recipientId: { type: "string", format: "uuid" },
+            text: { type: "string" },
+            status: { type: "string", enum: ["accepted", "dispatched", "failed"] },
+            externalMessageId: { type: "string" },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
           },
         },
         SandboxEvent: {

@@ -15,4 +15,5 @@ func MountInternalSourcesRoutes(mux *http.ServeMux, deployed *container.Containe
 	mux.Handle("GET /api/v1/internal/share-cards/order/{orderId}", middlewares.RequireInternalToken(deployed)(controller.GetOrderShareCard))
 	mux.Handle("GET /internal/v1/buyers/{userId}/stores", middlewares.RequireInternalToken(deployed)(controller.ListBuyerStores))
 	mux.Handle("GET /api/v1/internal/buyers/{userId}/stores", middlewares.RequireInternalToken(deployed)(controller.ListBuyerStores))
+	mux.Handle("POST /api/v1/internal/business-messaging/store-access", middlewares.RequireBusinessMessagingAuthorizationToken(deployed)(controller.VerifyBusinessMessagingStoreAccess))
 }

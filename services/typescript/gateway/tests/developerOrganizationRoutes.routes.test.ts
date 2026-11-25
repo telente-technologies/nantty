@@ -3,6 +3,30 @@ import { describe, expect, it } from "vitest";
 import { resolveUpstreamRouteForRequest } from "../src/routes/upstream.routes.js";
 
 describe("developer organization routes", () => {
+  it("routes approved Business Messaging application previews only to authenticated Identity reads", () => {
+    const path = "/api/v1/account/business-messaging/applications/19a6e03c-d5ce-40c9-a9d2-8aa8657e5738";
+    expect(resolveUpstreamRouteForRequest("GET", path)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("POST", path)).toBeUndefined();
+    expect(resolveUpstreamRouteForRequest("GET", `${path}/extra`)).toBeUndefined();
+  });
+  it("routes account-controlled Business Messaging consent only to authenticated Identity operations", () => {
+    const path = "/api/v1/account/business-messaging/consents";
+    expect(resolveUpstreamRouteForRequest("GET", path)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("POST", path)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("DELETE", `${path}/6de1c79a-00fd-4bed-ae23-fbfb678c0a19`)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["DELETE"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("PUT", path)).toBeUndefined();
+    expect(resolveUpstreamRouteForRequest("POST", `${path}/6de1c79a-00fd-4bed-ae23-fbfb678c0a19`)).toBeUndefined();
+  });
+
+  it("routes store-level Business Messaging authorization only to authenticated Identity operations", () => {
+    const path = "/api/v1/account/business-messaging/authorizations";
+    expect(resolveUpstreamRouteForRequest("GET", path)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("POST", path)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["GET", "POST"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("DELETE", `${path}/6de1c79a-00fd-4bed-ae23-fbfb678c0a19`)).toMatchObject({ upstream: "identity", authentication: "required", methods: ["DELETE"], exactPathOnly: true });
+    expect(resolveUpstreamRouteForRequest("PUT", path)).toBeUndefined();
+    expect(resolveUpstreamRouteForRequest("POST", `${path}/6de1c79a-00fd-4bed-ae23-fbfb678c0a19`)).toBeUndefined();
+  });
+
   it.each(["GET", "POST"])("%s organization endpoint requires Nantty identity", (method) => {
     expect(resolveUpstreamRouteForRequest(method, "/api/v1/developer/organizations")).toMatchObject({
       upstream: "identity",

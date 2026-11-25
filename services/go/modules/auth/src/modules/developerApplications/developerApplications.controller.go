@@ -153,6 +153,55 @@ func (controller Controller) ReplaceMemberGrants(writer http.ResponseWriter, req
 	httpserver.WriteJsonResponse(writer, http.StatusOK, item)
 }
 
+func (controller Controller) ListBusinessConsents(writer http.ResponseWriter, request *http.Request) {
+	account, ok := accountID(request)
+	if !ok {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.ErrUnauthorized)
+		return
+	}
+	items, err := (Service{Container: controller.Container}).ListBusinessConsents(request.Context(), account)
+	if err != nil {
+		controller.writeError(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"consents": items})
+}
+
+func (controller Controller) GrantBusinessConsent(writer http.ResponseWriter, request *http.Request) {
+	account, ok := accountID(request)
+	if !ok {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.ErrUnauthorized)
+		return
+	}
+	input, err := utils.DecodeAndValidate[BusinessConsentInput](writer, request, func(value BusinessConsentInput) error {
+		_, err := NormalizeBusinessConsentScopes(value.Scopes)
+		return err
+	})
+	if err != nil {
+		controller.writeError(writer, request, err)
+		return
+	}
+	item, err := (Service{Container: controller.Container}).GrantBusinessConsent(request.Context(), account, input)
+	if err != nil {
+		controller.writeError(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusCreated, item)
+}
+
+func (controller Controller) RevokeBusinessConsent(writer http.ResponseWriter, request *http.Request) {
+	account, ok := accountID(request)
+	if !ok {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.ErrUnauthorized)
+		return
+	}
+	if err := (Service{Container: controller.Container}).RevokeBusinessConsent(request.Context(), account, request.PathValue("consentID")); err != nil {
+		controller.writeError(writer, request, err)
+		return
+	}
+	httpserver.WriteNoContentResponse(writer)
+}
+
 func accountID(request *http.Request) (string, bool) {
 	principal, ok := jwtauth.PrincipalFromContext(request.Context())
 	return principal.UserId, ok
@@ -164,6 +213,10 @@ func (controller Controller) writeError(writer http.ResponseWriter, request *htt
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.ErrUnauthorized)
 	case errors.Is(err, errApplicationOrganizationNotFound), errors.Is(err, errApplicationNotFound), errors.Is(err, errApplicationMemberNotFound):
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusNotFound, "DEVELOPER_APPLICATION_NOT_FOUND", "The application was not found in this organization."))
+	case errors.Is(err, errBusinessConsentNotFound):
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusNotFound, "BUSINESS_CONSENT_NOT_FOUND", "The authorization was not found or is no longer active."))
+	case errors.Is(err, errInvalidBusinessConsent):
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_BUSINESS_CONSENT", "Choose only the messaging permissions requested by an approved business app."))
 	case errors.Is(err, errApplicationForbidden):
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewForbiddenError("Only organization owners and admins can access the draft application registry until application-level grants are available."))
 	case errors.Is(err, errInvalidApplication), errors.Is(err, errInvalidApplicationGrant), errors.Is(err, errApplicationIdempotencyRequired):

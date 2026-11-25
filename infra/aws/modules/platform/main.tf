@@ -173,6 +173,7 @@ module "messaging" {
 }
 
 module "ses" {
+  count                = var.external_ses == null ? 1 : 0
   source               = "../ses"
   environment          = var.environment
   region               = var.region

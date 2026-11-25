@@ -43,6 +43,8 @@ func Mount(mux *http.ServeMux, deployed *container.Container) {
 
 	mux.Handle("POST /api/v1/business/messages", rateLimit(http.HandlerFunc(controller.BusinessMessagingUnavailable)))
 	mux.Handle("GET /api/v1/business/conversations", rateLimit(http.HandlerFunc(controller.ListBusinessConversations)))
+	mux.Handle("GET /api/v1/business/conversations/{recipientId}/messages", rateLimit(http.HandlerFunc(controller.ListBusinessMessages)))
+	mux.Handle("GET /api/v1/business/messages/{messageId}", rateLimit(http.HandlerFunc(controller.GetBusinessMessageStatus)))
 }
 
 func (controller Controller) BusinessMessagingUnavailable(writer http.ResponseWriter, request *http.Request) {

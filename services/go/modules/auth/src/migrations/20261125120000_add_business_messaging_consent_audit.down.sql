@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS developer_business_consent_audit_logs;
