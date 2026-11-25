@@ -40,6 +40,15 @@ variable "mail_domain" {
   description = "Verified SES sending domain."
   type        = string
 }
+variable "external_ses" {
+  description = "Existing SES resources managed by a separate Terraform state. Null creates SES resources in this stack."
+  type = object({
+    identity_arn           = string
+    configuration_set_name = string
+    feedback_queue_url     = string
+  })
+  default = null
+}
 variable "vpc_cidr" { type = string }
 variable "az_count" {
   type    = number

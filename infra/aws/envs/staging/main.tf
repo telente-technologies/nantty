@@ -1,3 +1,12 @@
+data "terraform_remote_state" "email_staging" {
+  backend = "s3"
+  config = {
+    bucket = "nantty-tfstate-324009946456-eu-north-1-an"
+    key    = "email/ses/terraform.tfstate"
+    region = var.region
+  }
+}
+
 module "platform" {
   source = "../../modules/platform"
   providers = {
@@ -7,15 +16,20 @@ module "platform" {
     cloudflare    = cloudflare
   }
 
-  environment                              = var.environment
-  region                                   = var.region
-  dr_region                                = var.dr_region
-  enable_dr                                = var.enable_dr
-  zone_name                                = var.zone_name
-  cloudflare_zone_id                       = var.cloudflare_zone_id
-  create_zone                              = var.create_zone
-  app_domain                               = var.app_domain
-  mail_domain                              = var.mail_domain
+  environment        = var.environment
+  region             = var.region
+  dr_region          = var.dr_region
+  enable_dr          = var.enable_dr
+  zone_name          = var.zone_name
+  cloudflare_zone_id = var.cloudflare_zone_id
+  create_zone        = var.create_zone
+  app_domain         = var.app_domain
+  mail_domain        = var.mail_domain
+  external_ses = {
+    identity_arn           = data.terraform_remote_state.email_staging.outputs.ses_identity_arn
+    configuration_set_name = data.terraform_remote_state.email_staging.outputs.ses_configuration_set_name
+    feedback_queue_url     = data.terraform_remote_state.email_staging.outputs.ses_feedback_queue_url
+  }
   vpc_cidr                                 = var.vpc_cidr
   nat_per_az                               = var.nat_per_az
   alarm_email                              = var.alarm_email

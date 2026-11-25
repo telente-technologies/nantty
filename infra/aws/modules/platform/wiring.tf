@@ -25,6 +25,7 @@ locals {
       WEB_APP_BASE_URL                         = var.app_origins["webapp"]
       USERS_SOCIAL_INTERNAL_URL                = local.internal_url["social"]
       USERS_LIVE_INTERNAL_URL                  = local.internal_url["go-live"]
+      BUSINESS_MESSAGING_COMMERCE_INTERNAL_URL = local.internal_url["go-commerce"]
     }
     go-money = {
       ESCROW_FEE_BPS               = "0"
