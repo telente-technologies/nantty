@@ -22,10 +22,9 @@
 
 ## PR #71 — Business Messaging merchant authorization UI and preview endpoint (2026-11-25)
 
-- PR #71 head was updated to `7e4b7fedff1f96ff48d41d6d378daa15579875db` after adding the missing Web service contract/types, authenticated Gateway preview route, and a focused integration assertion. This fixes the previous webapp CI typecheck failure, which occurred because the UI commit landed before those service methods/types.
+- PR #71 final head `794b0c5e499ce849c817d84eb1aa3d4e55f287d3` passed Backend, Frontend, Security, Terraform validation, and CodeQL checks; path-filtered Mobile, Elixir, Python, TLS proxy, and realtime jobs were skipped, and the manual Terraform plan was not requested. Squash-merged at `2026-11-25T20:21:29Z` as `498405cefc3d7b6f8565f569328f521f4dfa5fa1`. The final squash commit message contains no `Co-authored-by` trailer.
 - Local verification: webapp TypeScript check passed on Node 24.19.0 (below required 26.13); Webapp ESLint completed with 0 errors and 73 warnings; Stylelint passed. Gateway full Vitest suite passed 1,949/1,949 tests across 44 files. Two focused Auth tests (business/store grant lifecycle and approved-app preview isolation) passed against a disposable PostgreSQL 17 tmpfs container with a test-only `nantty_readers` role; container stopped/removed, no persistent migration applied.
-- GitHub on prior head had Frontend `web (webapp)` typecheck fail for missing preview/authorization methods, while Developer portal and Terraform validate passed; Backend and Security workflows were in progress. Updated-head GitHub Actions results must be refreshed before merge. The database-backed test first skipped on the persistent local Postgres because its default password is wrong; it was then rerun successfully against the isolated test container.
-- Not verified: authenticated browser workflow, deployed service-to-service secret, production Social dispatch, inbound sync/receipts, email runtime or AWS staging deployment. Production message send remains fail-closed. No squash merge performed.
+- Not verified: authenticated browser workflow, deployed service-to-service secret, production Social dispatch, inbound sync/receipts, email runtime or AWS staging deployment. Production message send remains fail-closed.
 
 ## PR #70 — Admin GLib security patch (2026-11-25)
 
