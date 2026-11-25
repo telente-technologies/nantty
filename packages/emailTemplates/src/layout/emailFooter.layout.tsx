@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { Img, Link, Text } from "react-email";
+import { brandPalette } from "@nantty/design-tokens/native";
 
 import { useEmailEnvironment } from "../blocks/emailRenderContext";
 import type { EmailKind } from "../emailTypes";
@@ -56,51 +57,60 @@ function StoreBadges() {
 }
 
 export function EmailFooter({ kind, reason }: { readonly kind: EmailKind; readonly reason?: string }) {
-  const { palette, context } = useEmailEnvironment();
+  const { context } = useEmailEnvironment();
   const { brand, links } = context;
-  const small: CSSProperties = { margin: 0, fontFamily: fontStack, fontSize: 12, lineHeight: "19px", color: palette.subtle };
-  const linkStyle: CSSProperties = { color: palette.muted, textDecoration: "underline", fontWeight: 600 };
-  const separator = <span className="zm-subtle" style={{ color: palette.subtle, padding: "0 8px" }}>·</span>;
+  const footerSurface = brandPalette[900];
+  const footerText = brandPalette[100];
+  const footerSubtle = brandPalette[200];
+  const small: CSSProperties = { margin: 0, fontFamily: fontStack, fontSize: 12, lineHeight: "19px", color: footerSubtle };
+  const linkStyle: CSSProperties = { color: footerText, textDecoration: "underline", fontWeight: 600 };
+  const separator = <span style={{ color: footerSubtle, padding: "0 8px" }}>·</span>;
   const year = new Date().getFullYear();
   return (
-    <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0}>
+    <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} border={0} style={{ backgroundColor: footerSurface }}>
       <tbody>
         <tr>
-          <td className="zm-foot" style={{ padding: "28px 40px 8px" }}>
-            <Text className="zm-text" style={{ ...small, fontSize: 14, lineHeight: "20px", fontWeight: 700, color: palette.text }}>
+          <td className="zm-foot" style={{ padding: "28px 40px 8px", backgroundColor: footerSurface }}>
+            <Text style={{ ...small, fontSize: 22, lineHeight: "28px", fontWeight: 800, letterSpacing: "-1px", color: brandPalette[500] }}>
+              Nantty
+            </Text>
+            <Text style={{ ...small, color: footerText, paddingBottom: 12 }}>
+              Social commerce, built in Nigeria.
+            </Text>
+            <Text style={{ ...small, fontSize: 14, lineHeight: "20px", fontWeight: 700, color: "#FFFFFF" }}>
               Shop, sell and go live on the Nantty app
             </Text>
             <StoreBadges />
-            <Text className="zm-muted" style={{ ...small, color: palette.muted, paddingTop: 10, paddingBottom: 14 }}>
+            <Text style={{ ...small, color: footerText, paddingTop: 10, paddingBottom: 14 }}>
               {kind === "marketing" ? (
                 <>
-                  <Link href={links.unsubscribeUrl} className="zm-muted" style={linkStyle}>Unsubscribe</Link>
+                  <Link href={links.unsubscribeUrl} style={linkStyle}>Unsubscribe</Link>
                   {separator}
-                  <Link href={links.preferencesUrl} className="zm-muted" style={linkStyle}>Email preferences</Link>
+                  <Link href={links.preferencesUrl} style={linkStyle}>Email preferences</Link>
                 </>
               ) : (
-                <Link href={links.manageNotificationsUrl} className="zm-muted" style={linkStyle}>Manage notifications</Link>
+                <Link href={links.manageNotificationsUrl} style={linkStyle}>Manage notifications</Link>
               )}
               {separator}
-              <Link href={brand.helpCenterUrl} className="zm-muted" style={linkStyle}>Help Centre</Link>
+              <Link href={brand.helpCenterUrl} style={linkStyle}>Help Centre</Link>
             </Text>
-            <Text className="zm-subtle" style={{ ...small, paddingBottom: 10 }}>{reason ?? defaultReasons[kind]}</Text>
-            <Text className="zm-subtle" style={{ ...small, paddingBottom: 10 }}>
+            <Text style={{ ...small, paddingBottom: 10 }}>{reason ?? defaultReasons[kind]}</Text>
+            <Text style={{ ...small, paddingBottom: 10 }}>
               {"Questions? Write to "}
               {brand.supportEmails.map((email, index) => (
                 <span key={email}>
                   {index > 0 ? " or " : ""}
-                  <Link href={`mailto:${email}`} className="zm-muted" style={linkStyle}>{email}</Link>
+                  <Link href={`mailto:${email}`} style={linkStyle}>{email}</Link>
                 </span>
               ))}
               . We will never ask for your password, PIN or one-time code by email.
             </Text>
-            <Text className="zm-subtle" style={{ ...small, paddingBottom: 10 }}>
+            <Text style={{ ...small, paddingBottom: 10 }}>
               {`© ${year} ${brand.companyLegalName}`}
               <br />
               {brand.companyAddress}
             </Text>
-            <Text className="zm-subtle" style={{ ...small, fontSize: 10, lineHeight: "15px" }}>{storeTrademarkLine}</Text>
+            <Text style={{ ...small, fontSize: 10, lineHeight: "15px" }}>{storeTrademarkLine}</Text>
           </td>
         </tr>
       </tbody>

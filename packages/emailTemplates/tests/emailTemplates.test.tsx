@@ -56,6 +56,14 @@ describe.each(emailTemplateKeys)("%s", (key) => {
 });
 
 describe("footer links", () => {
+  it("uses the Nantty landing footer palette and keeps the email footer dark-mode stable", async () => {
+    const rendered = await renderEmailSample("orderShipped");
+    expect(rendered.html).toContain("background-color:#0B1752");
+    expect(rendered.html).toContain("color:#2043F5");
+    expect(rendered.html).toContain("Social commerce, built in Nigeria.");
+    expect(rendered.html).toContain("We will never ask for your password, PIN or one-time code by email.");
+  });
+
   it.each(marketingKeys)("%s includes unsubscribe", async (key) => {
     const rendered = await renderEmailSample(key, { links: { unsubscribeUrl: "https://nantty.com/u/token-123" } });
     expect(rendered.html).toContain("https://nantty.com/u/token-123");
@@ -140,6 +148,22 @@ describe("senders and brand", () => {
     expect(brand.appStoreBadgeUrl).toBe("https://cdn.example.ng/e/storeBadges/app-store-badge-black@2x.png");
     expect(brand.appStoreUrl).toBe("https://apps.apple.com/app/id123456789");
     expect(readEmailBrandFromEnvironment({ NANTTY_EMAIL_PLAY_STORE_BADGE_URL: "none" }).playStoreBadgeUrl).toBeNull();
+  });
+
+  it("uses staging sender and application URLs while replies stay on Nantty's root-domain support address", async () => {
+    const brand = readEmailBrandFromEnvironment({
+      NANTTY_MAIL_DOMAIN: "nantty.com",
+      NANTTY_MAIL_SENDING_DOMAIN: "staging.nantty.com",
+      NANTTY_WEB_BASE_URL: "https://staging.nantty.com",
+      NANTTY_SELLER_DASHBOARD_URL: "https://seller.staging.nantty.com",
+      NANTTY_STUDIO_URL: "https://studio.staging.nantty.com",
+    });
+    const rendered = await renderEmailSample("emailOtp", { brand });
+    const sellerRendered = await renderEmailSample("sellerNewOrder", { brand });
+    const creatorRendered = await renderEmailSample("creatorApproved", { brand });
+    expect(rendered.sender).toEqual({ from: "Nantty <noreply@staging.nantty.com>", replyTo: "support@nantty.com" });
+    expect(sellerRendered.html).toContain('href="https://seller.staging.nantty.com/orders/');
+    expect(creatorRendered.html).toContain('href="https://studio.staging.nantty.com/');
   });
 
   it("keeps the legacy email environment variables as fallbacks during the migration", () => {
