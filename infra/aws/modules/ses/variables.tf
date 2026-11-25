@@ -12,6 +12,11 @@ variable "sqs_managed_sse_enabled" {
   default = false
 }
 variable "dmarc_report_address" { type = string }
+variable "create_dmarc_record" {
+  type        = bool
+  default     = true
+  description = "Create a DMARC record for the mail domain. Disable when an existing parent policy already governs the subdomain."
+}
 variable "dmarc_policy" {
   type        = string
   default     = "none"

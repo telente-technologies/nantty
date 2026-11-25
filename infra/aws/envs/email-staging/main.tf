@@ -84,7 +84,7 @@ module "ses" {
   mail_domain             = var.mail_domain
   cloudflare_zone_id      = var.cloudflare_zone_id
   dmarc_report_address    = var.dmarc_report_address
-  dmarc_policy            = "none"
+  create_dmarc_record     = false
   sns_kms_key_id          = aws_kms_key.ses_feedback.key_id
   sqs_kms_key_id          = null
   sqs_managed_sse_enabled = true

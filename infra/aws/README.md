@@ -243,7 +243,10 @@ After apply, verify the domain identity, DKIM, and custom MAIL FROM statuses wit
 sandbox: test only with verified identities or the SES mailbox simulator until AWS grants production access. A
 simulator message verifies SES acceptance/event plumbing, not inbox rendering or delivery to ordinary recipients.
 
-The SES-only root does not deploy the notification runtime. The full `envs/staging` root consumes the existing SES
+The SES-only root does not deploy the notification runtime. Because `nantty.com` already sets `sp=reject`, the
+staging sending subdomain inherits that strict DMARC policy; the email-staging root deliberately does not publish a
+weaker child `_dmarc.staging.nantty.com` record. Its expected DNS plan is five records (three DKIM CNAMEs and the
+custom MAIL FROM MX and SPF TXT). The full `envs/staging` root consumes the existing SES
 identity, configuration-set, and feedback-queue URL outputs from this root's remote state; it derives the queue ARN
 and DLQ name from the SES module's stable naming contract and disables its own SES module in staging, avoiding
 duplicate Terraform ownership. Dev and production continue to manage SES through the platform module. Apply the
@@ -254,9 +257,12 @@ feedback-queue permissions required by the service.
 Current workspace checks (2026-11-25): in `eu-north-1`, the account-regional state bucket and lock table are
 provisioned and verified; S3 access logs are delivered to encrypted CloudWatch Logs with 90-day retention. The SES
 configuration set, domain identity, custom MAIL FROM, encrypted SNS/SQS feedback path, and event destination are
-applied. SES domain/DKIM/MAIL FROM verification remains pending because the six planned DNS additions have not been
-published. Cloudflare access is currently authenticated; a read-only inspection found 18 zone records and no records
-matching the staging SES names. No DNS changes have been made. The AWS project
+applied. SES domain/DKIM/MAIL FROM verification remains pending because the planned DNS records have not been
+published. The previous six-record plan included a child DMARC record; current staging configuration omits it because
+the existing apex policy sets `sp=reject`, which the sending subdomain inherits. The remaining expected DNS additions
+are five records: three DKIM CNAMEs and MAIL FROM MX/TXT. Fresh AWS reads show SES domain verification false, DKIM and
+MAIL FROM `PENDING`, and SES production access disabled. Cloudflare access is currently authenticated; a read-only
+inspection found no records matching the staging SES names. No DNS changes have been made. The AWS project
 has no active hard spend cap; the owner explicitly authorized staging without one. SES is sandboxed, so ordinary
 recipient delivery and production sending remain unavailable. The full platform stack is not deployed. This setup
 provides transactional sending and feedback processing, not IMAP/POP inbox hosting.

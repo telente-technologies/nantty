@@ -57,6 +57,7 @@ resource "cloudflare_dns_record" "mail_from_spf" {
 }
 
 resource "cloudflare_dns_record" "dmarc" {
+  count   = var.create_dmarc_record ? 1 : 0
   zone_id = var.cloudflare_zone_id
   name    = "_dmarc.${var.mail_domain}"
   type    = "TXT"

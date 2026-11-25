@@ -28,6 +28,12 @@
 - Documented required GitHub environment configuration in `infra/aws/README.md`. Cloudflare was reauthenticated and inspected read-only: 18 zone records exist and none match staging SES names. No DNS mutations or AWS apply occurred.
 - Local verification: workflow YAML parsed; `terraform fmt -check -recursive infra/aws`, staging `terraform validate`, and `git diff --check` passed. PR #71 now contains the pushed workflow and its PR Terraform validation succeeded; its explicit `main` workflow-dispatch plan was skipped as designed. The dedicated staging role, OIDC trust, region variable, and GitHub Actions Cloudflare secret are not verified, so no hosted remote plan is claimed. Frontend hosting and desktop distribution remain outstanding.
 
+## 2026-11-25 — Preserve inherited DMARC policy for SES staging
+
+- Live read-only Cloudflare data confirms the parent policy at `_dmarc.nantty.com` is `p=reject` with `sp=reject`; AWS SES reads confirm the staging identity's DKIM and custom MAIL FROM are pending and sending remains in the sandbox.
+- The SES module previously planned a child `_dmarc.staging.nantty.com` with `p=none`, which would override and weaken the existing strict subdomain policy. Added `create_dmarc_record` (default true for existing consumers) and set it false for the email-staging root so staging inherits `sp=reject`. Expected SES DNS additions are now five (three DKIM CNAMEs plus MAIL FROM MX/TXT); the existing root DMARC remains unchanged.
+- Verification: `terraform fmt -check -recursive infra/aws` and `terraform validate` pass for `envs/email-staging` and `envs/staging`. Remote plan was not possible from the workstation due to absent Terraform AWS credential sources; hosted plan remains blocked until the AWS GitHub OIDC provider/plan role and GitHub staging environment are configured. No DNS or AWS infrastructure writes were made.
+
 ## 2026-11-25 — Add account-controlled Business Messaging consent management
 
 - Added verified-account Auth endpoints to list, grant/update, and revoke account-level Business Messaging consent. Only approved applications and the intersection of allowlisted, app-requested scopes can be stored; another account cannot revoke the grant. Consent changes use serializable transactions and persist a separate audit record without exposing recipient consent events as developer-organization actions.
