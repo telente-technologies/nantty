@@ -126,3 +126,38 @@ func (controller InternalSourcesController) GetOrderShareCard(writer http.Respon
 	writer.Header().Set("Cache-Control", "no-store")
 	httpserver.WriteJsonResponse(writer, http.StatusOK, getordersharecard.Present(card))
 }
+
+func (controller InternalSourcesController) VerifyBusinessMessagingStoreAccess(writer http.ResponseWriter, request *http.Request) {
+	var body struct {
+		AccountId string `json:"accountId"`
+		StoreId   string `json:"storeId"`
+	}
+	if err := httpserver.DecodeJsonBodyRejectingUnknownFields(writer, request, &body); err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	accountId, accountErr := uuid.Parse(body.AccountId)
+	storeId, storeErr := uuid.Parse(body.StoreId)
+	if accountErr != nil || storeErr != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_STORE_AUTHORIZATION", "Account and store identifiers must be valid."))
+		return
+	}
+	catalog, err := controller.Container.Catalog()
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	access, found, err := catalog.FindStoreAccessForAccount(request.Context(), accountId, &storeId)
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	if !found || access.StoreId != storeId || access.StoreStatus != "active" || !access.Allows("developer:manage") {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewForbiddenError("The account is not authorized to connect this store to a business messaging application."))
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{
+		"storeId": access.StoreId.String(), "storeName": access.StoreName,
+		"ownerAccountId": access.OwnerAccountId.String(), "role": access.Role,
+	})
+}

@@ -78,26 +78,51 @@ func (controller Controller) CreateApiKey(writer http.ResponseWriter, request *h
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "VALIDATION_FAILED", "Name (2-60 chars) and valid scopes are required."))
 		return
 	}
+	tx, err := controller.Container.Database.BeginTx(request.Context(), nil)
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	defer tx.Rollback()
+	var lockResult string
+	if err := tx.QueryRowContext(request.Context(), `SELECT pg_advisory_xact_lock(hashtextextended($1, 0))::text`, access.StoreId.String()).Scan(&lockResult); err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
 	var count int
-	_ = controller.Container.Database.QueryRowContext(request.Context(), `SELECT COUNT(*) FROM seller_api_keys WHERE store_id = $1 AND revoked_at IS NULL`, access.StoreId).Scan(&count)
+	if err := tx.QueryRowContext(request.Context(), `SELECT COUNT(*) FROM seller_api_keys WHERE store_id = $1 AND revoked_at IS NULL`, access.StoreId).Scan(&count); err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
 	if count >= 10 {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusConflict, "API_KEY_LIMIT_REACHED", "Maximum 10 active API keys reached."))
 		return
 	}
 	raw := make([]byte, 24)
-	_, _ = rand.Read(raw)
+	if _, err := rand.Read(raw); err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
 	secret := "zk_live_" + hex.EncodeToString(raw)
 	prefix := secret[:12]
 	sum := sha256.Sum256([]byte(secret))
-	scopesJSON, _ := json.Marshal(body.Scopes)
+	scopesJSON, err := json.Marshal(body.Scopes)
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
 	now := controller.Container.Now().UTC()
 	id := uuid.New()
 	actor := middlewares.AccountIdFrom(request.Context())
-	_, err := controller.Container.Database.ExecContext(request.Context(),
+	_, err = tx.ExecContext(request.Context(),
 		`INSERT INTO seller_api_keys (id, store_id, name, prefix, secret_hash, scopes, created_by, created_at) VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, $8)`,
 		id, access.StoreId, name, prefix, hex.EncodeToString(sum[:]), string(scopesJSON), actor, now,
 	)
 	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	if err := tx.Commit(); err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}

@@ -25,3 +25,17 @@ func RequireInternalToken(deployed *container.Container) func(http.HandlerFunc) 
 		})
 	}
 }
+
+func RequireBusinessMessagingAuthorizationToken(deployed *container.Container) func(http.HandlerFunc) http.Handler {
+	return func(next http.HandlerFunc) http.Handler {
+		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			presented := request.Header.Get("X-Business-Messaging-Authorization-Token")
+			expected := deployed.Settings.BusinessMessagingAuthorizationToken
+			if expected == "" || subtle.ConstantTimeCompare([]byte(presented), []byte(expected)) != 1 {
+				httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
+				return
+			}
+			next(writer, request)
+		})
+	}
+}

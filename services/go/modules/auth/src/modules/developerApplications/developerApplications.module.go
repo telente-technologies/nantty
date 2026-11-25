@@ -21,4 +21,12 @@ func Mount(mux *http.ServeMux, app *container.Container) {
 	mux.Handle("DELETE "+base+"/{applicationID}", rateLimit(requireAccess(http.HandlerFunc(controller.Archive))))
 	mux.Handle("GET "+base+"/{applicationID}/members", rateLimit(requireAccess(http.HandlerFunc(controller.ListMemberGrants))))
 	mux.Handle("PUT "+base+"/{applicationID}/members/{membershipID}/grants", rateLimit(requireAccess(http.HandlerFunc(controller.ReplaceMemberGrants))))
+	consents := "/api/v1/account/business-messaging/consents"
+	mux.Handle("GET "+consents, rateLimit(requireAccess(http.HandlerFunc(controller.ListBusinessConsents))))
+	mux.Handle("POST "+consents, rateLimit(requireAccess(http.HandlerFunc(controller.GrantBusinessConsent))))
+	mux.Handle("DELETE "+consents+"/{consentID}", rateLimit(requireAccess(http.HandlerFunc(controller.RevokeBusinessConsent))))
+	authorizations := "/api/v1/account/business-messaging/authorizations"
+	mux.Handle("GET "+authorizations, rateLimit(requireAccess(http.HandlerFunc(controller.ListBusinessAuthorizations))))
+	mux.Handle("POST "+authorizations, rateLimit(requireAccess(http.HandlerFunc(controller.GrantBusinessAuthorization))))
+	mux.Handle("DELETE "+authorizations+"/{authorizationID}", rateLimit(requireAccess(http.HandlerFunc(controller.RevokeBusinessAuthorization))))
 }

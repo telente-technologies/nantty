@@ -39,6 +39,14 @@ func TestBusinessMessagingMountKeepsSendUnavailableAndRoutesConversationRead(t *
 	if sendPattern != "POST /api/v1/business/messages" {
 		t.Fatalf("message send route pattern = %q", sendPattern)
 	}
+	_, historyPattern := mux.Handler(httptest.NewRequest(http.MethodGet, "/api/v1/business/conversations/00000000-0000-0000-0000-000000000001/messages", nil))
+	if historyPattern != "GET /api/v1/business/conversations/{recipientId}/messages" {
+		t.Fatalf("message history route pattern = %q", historyPattern)
+	}
+	_, statusPattern := mux.Handler(httptest.NewRequest(http.MethodGet, "/api/v1/business/messages/00000000-0000-0000-0000-000000000001", nil))
+	if statusPattern != "GET /api/v1/business/messages/{messageId}" {
+		t.Fatalf("message status route pattern = %q", statusPattern)
+	}
 
 	readResponse := httptest.NewRecorder()
 	mux.ServeHTTP(readResponse, httptest.NewRequest(http.MethodGet, "/api/v1/business/conversations", nil))
