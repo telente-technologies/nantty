@@ -53,14 +53,19 @@ describe.skipIf(!enabled)("messaging keys (needs Postgres with the social schema
     for (let index = 1; index < maximumClaimsPerTargetPerWindow; index++) await claim({ requesterId: alice, devices: [{ userId: bob, deviceId: "bob-device-1" }] });
     await expect(claim({ requesterId: alice, devices: [{ userId: bob, deviceId: "bob-device-1" }] })).rejects.toMatchObject({ status: 429, code: "PREKEY_CLAIMS_RATE_LIMITED" });
 
-    const conversation = await conversationRepository.create(database.client, { kind: "group", title: "Keys", createdById: alice }, [
+    const conversation = await conversationRepository.create(database.client, { kind: "group", createdById: alice, encryptedAttributes: "sealed-group-metadata" }, [
       { accountId: alice, role: "owner", inboxFolder: "chats" }, { accountId: bob, role: "member", inboxFolder: "chats" },
     ]);
     const send = createSendMessageHandler(context);
-    const message = (deviceId: string) => ({ kind: "text" as const, text: undefined, encryption: { deviceId, ciphertext: "{}", protocol: "signal-v1" }, media: undefined, linkPreview: "sealed-preview", sharedContent: undefined, location: undefined, document: undefined, poll: undefined });
+    const message = (deviceId: string, ciphertext = "{}") => ({ kind: "text" as const, text: undefined, encryption: { deviceId, ciphertext, protocol: "signal-v1" }, media: undefined, linkPreview: "sealed-preview", sharedContent: undefined, location: undefined, document: undefined, poll: undefined });
     await expect(send({ senderId: alice, conversationId: conversation.id, idempotencyKey: undefined, mentions: undefined, message: message("ghost-device") })).rejects.toMatchObject({ status: 403, code: "DEVICE_NOT_REGISTERED" });
     const sent = await send({ senderId: alice, conversationId: conversation.id, idempotencyKey: undefined, mentions: undefined, message: message("alice-device-1") });
     expect(sent.encryption?.deviceId).toBe("alice-device-1");
+    const keyedSend = { senderId: alice, conversationId: conversation.id, idempotencyKey: "stable-client-message-id", mentions: undefined, message: message("alice-device-1") };
+    const [firstRetry, concurrentRetry] = await Promise.all([send(keyedSend), send(keyedSend)]);
+    expect(firstRetry.id).toBe(concurrentRetry.id);
+    expect(await database.client.message.count({ where: { conversationId: conversation.id, senderId: alice, clientMessageId: keyedSend.idempotencyKey } })).toBe(1);
+    await expect(send({ ...keyedSend, message: message("alice-device-1", "different-ciphertext") })).rejects.toMatchObject({ status: 409, code: "IDEMPOTENCY_KEY_REUSED" });
     const event = await database.client.outboxEvent.findFirst({ where: { subject: conversation.id, eventType: "message.created" } });
     expect((event?.payload as { data?: { message?: { linkPreview?: string } } } | null)?.data?.message?.linkPreview).toBe("sealed-preview");
 
