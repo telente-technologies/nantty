@@ -131,7 +131,11 @@ func (controller Controller) SendBusinessMessage(writer http.ResponseWriter, req
 			httpserver.NewApiError(http.StatusServiceUnavailable, "MESSAGE_STATUS_UNCERTAIN", "Message delivery could not be confirmed. Do not resend until this message is reconciled.").WithDetails(map[string]any{"messageId": msgId.String()}))
 		return
 	}
-	if err := ConfirmProductionMessageDispatch(request.Context(), controller.Container.Database, msgId, extId, controller.Container.Now().UTC()); err != nil {
+	if err := ConfirmProductionMessageDispatchWithWebhookOutbox(
+		request.Context(), controller.Container.Database, msgId, appId, orgId, extId,
+		map[string]any{"messageId": msgId.String(), "recipientId": recipientUUID.String(), "status": "dispatched", "externalMessageId": extId},
+		controller.Container.Now().UTC(),
+	); err != nil {
 		completeProductionRequest(request.Context(), controller.Container.Database, controller.Container.Logger, requestId, http.StatusServiceUnavailable, started)
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger,
 			httpserver.NewApiError(http.StatusServiceUnavailable, "MESSAGE_STATUS_UNCERTAIN", "Message delivery was accepted but its status could not be saved. Do not resend until this message is reconciled.").WithDetails(map[string]any{"messageId": msgId.String()}))
@@ -139,9 +143,6 @@ func (controller Controller) SendBusinessMessage(writer http.ResponseWriter, req
 	}
 	completeProductionRequest(request.Context(), controller.Container.Database, controller.Container.Logger, requestId, http.StatusAccepted, started)
 	_, _ = controller.Container.Database.ExecContext(request.Context(), `UPDATE developer_production_credentials SET last_used_at = now() WHERE id = $1`, credId)
-	EnqueueBusinessWebhookDeliveries(request.Context(), controller.Container, appId, orgId, "business.message.dispatched", map[string]any{
-		"messageId": msgId.String(), "recipientId": recipientUUID.String(), "status": "dispatched", "externalMessageId": extId,
-	})
 	httpserver.WriteJsonResponse(writer, http.StatusAccepted, map[string]any{"messageId": msgId.String(), "externalMessageId": extId, "status": "dispatched"})
 }
 
