@@ -205,11 +205,11 @@ generate an authenticated plan without keeping the workstation online, use the `
   role. The role needs read access to the platform and email-staging state objects, access to the staging state lock,
   and only the provider read permissions required to refresh this stack.
 - `AWS_REGION=eu-north-1` is already set in the environment.
-- The `staging` GitHub Environment has a `CLOUDFLARE_API_TOKEN` secret name. Its value/scope cannot be inspected
-  through GitHub metadata; verify it is restricted to the `nantty.com` zone and DNS Read only before using it.
-  A plan should not need DNS Edit permission. The Cloudflare connector login is separate from this CI secret.
-- From the `main` branch, run **Terraform staging** with `create_plan=true`. The workflow only runs `terraform plan`;
-  it never applies infrastructure or mutates DNS. Review its plan output before any separately authorized apply.
+- Set the `staging` environment secret `STAGING_CLOUDFLARE_DNS_READ_TOKEN`, restricted to the `nantty.com` zone
+  with DNS Read only; no DNS Edit permission is needed for a plan. The workflow deliberately does not fall back to
+  the generic repository-level `CLOUDFLARE_API_TOKEN`. The Cloudflare connector login is separate from this CI secret.
+- From the `main` branch, run **Terraform staging** with `create_plan=true` to create a read-only plan. Review its
+  output before using the separate approval-gated apply path below.
 
 ### GitHub-hosted staging apply
 
@@ -221,8 +221,9 @@ workstation may be offline. Before dispatching it, configure:
 - Environment variable `AWS_TERRAFORM_APPLY_ROLE_ARN_STAGING`, pointing to a dedicated role whose OIDC `sub` is
   exactly `repo:telente-technologies/nantty:environment:staging-apply`. Do not reuse the read-only plan role or the
   ECS deploy role. Scope its permissions to the staging state and resources required by this root.
-- An environment secret `CLOUDFLARE_API_TOKEN`, restricted to the `nantty.com` zone with DNS Read/Edit. The
-  Cloudflare connector login is not available to GitHub Actions and cannot substitute for this secret.
+- An environment secret `STAGING_CLOUDFLARE_DNS_WRITE_TOKEN`, restricted to the `nantty.com` zone with DNS
+  Read/Edit. The workflow deliberately does not fall back to the generic repository-level `CLOUDFLARE_API_TOKEN`.
+  The Cloudflare connector login is not available to GitHub Actions and cannot substitute for this secret.
 - A reviewed, non-public `admin_ip_allow_list` in `infra/aws/envs/staging/terraform.tfvars`; never use
   `0.0.0.0/0` or `::/0` for admin access.
 
@@ -281,18 +282,18 @@ email-only root first, then use the full staging root. Its remote-state read req
 to the state object. The notification task role receives only the SES identity, configuration-set, and
 feedback-queue permissions required by the service.
 
-Current workspace checks (2026-11-25): in `eu-north-1`, the account-regional state bucket and lock table are
-provisioned and verified; S3 access logs are delivered to encrypted CloudWatch Logs with 90-day retention. The SES
-configuration set, domain identity, custom MAIL FROM, encrypted SNS/SQS feedback path, and event destination are
-applied. SES domain/DKIM/MAIL FROM verification remains pending because the planned DNS records have not been
-published. The previous six-record plan included a child DMARC record; current staging configuration omits it because
-the existing apex policy sets `sp=reject`, which the sending subdomain inherits. The remaining expected DNS additions
-are five records: three DKIM CNAMEs and MAIL FROM MX/TXT. Fresh AWS reads show SES domain verification false, DKIM and
-MAIL FROM `PENDING`, and SES production access disabled. Cloudflare access is currently authenticated; a read-only
-inspection found no records matching the staging SES names. The GitHub `staging` environment exists, is restricted to
-`main`, and defines `AWS_REGION=eu-north-1`; the environment has a `CLOUDFLARE_API_TOKEN` secret name, but its exact
-DNS permissions have not been verified. AWS still has no GitHub OIDC provider or dedicated Terraform plan role. No DNS
-changes have been made. The AWS project
+Current workspace checks: in `eu-north-1`, the account-regional state bucket and lock table are provisioned and
+verified; S3 access logs are delivered to encrypted CloudWatch Logs with 90-day retention. The SES configuration set,
+domain identity, custom MAIL FROM, encrypted SNS/SQS feedback path, and event destination are applied. On 2026-11-26,
+the owner approved and Cloudflare read-back confirmed the three SES DKIM CNAMEs plus `bounce.staging.nantty.com`
+MX/TXT records (TTL 600, DNS-only). The inherited parent DMARC policy remains unchanged; no child DMARC override was
+created. SES has not been re-polled after publication, so SES domain/DKIM/MAIL FROM verification remains unverified;
+the last observed state was domain verification false, DKIM and MAIL FROM `PENDING`, and production access disabled.
+The GitHub `staging` environment exists, is restricted to `main`, and defines `AWS_REGION=eu-north-1`; the environment
+still needs `STAGING_CLOUDFLARE_DNS_READ_TOKEN`, and `staging-apply` needs its separate
+`STAGING_CLOUDFLARE_DNS_WRITE_TOKEN`. AWS still has no GitHub OIDC provider or dedicated Terraform plan/apply roles.
+Because DNS was created outside Terraform, reconcile/import those five records or otherwise account for them in a
+reviewed plan before any apply. The AWS project
 has no active hard spend cap; the owner explicitly authorized staging without one. SES is sandboxed, so ordinary
 recipient delivery and production sending remain unavailable. The full platform stack is not deployed. This setup
 provides transactional sending and feedback processing, not IMAP/POP inbox hosting.
