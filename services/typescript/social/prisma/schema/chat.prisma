@@ -113,6 +113,7 @@ model Message {
   senderId         String      @db.Uuid
   kind             MessageKind
   clientMessageId  String?
+  clientPayloadHash String?    @db.Char(64)
   ciphertext       String?
   deviceId         String?
   protocol         String      @default("signal-v1")
