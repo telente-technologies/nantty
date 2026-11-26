@@ -48,6 +48,13 @@ func TestFlutterwaveCheckoutIsHashedAndVerifiedByIdWithTheExactReference(t *test
 	}
 }
 
+func TestFlutterwavePayloadHashMatchesDocumentedChecksumVector(t *testing.T) {
+	const expected = "c70ad644bafca74d1e349a89ce9c3bcb1870bfddefcbffdd41d455f15a10711e"
+	if actual := integrations.FlutterwavePayloadHash("100.00", "NGN", "buyer@example.com", "ref-123", "FLWSECK-test-X"); actual != expected {
+		t.Fatalf("Flutterwave checksum differs from the independently computed SHA-256 vector: got %s", actual)
+	}
+}
+
 func TestFlutterwaveCheckoutValidatesAndNormalizesCurrencyBeforeProviderIO(t *testing.T) {
 	fake, adapter := newFakeFlutterwaveAdapter(t)
 	ctx := context.Background()
