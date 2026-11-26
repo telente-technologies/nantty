@@ -60,8 +60,8 @@ jobs:
         working-directory: services/python/intelligence
       - uses: erlef/setup-beam@v1
         with:
-          elixir-version: "1.19"
-          otp-version: "28"
+          elixir-version: "1.20.5"
+          otp-version: "29"
       - run: |
           set -o pipefail
           mix local.hex --force --if-missing

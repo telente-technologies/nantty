@@ -46,7 +46,7 @@ func (controller Controller) authenticateLiveCredential(request *http.Request, r
 	}
 	var scopes []string
 	_ = json.Unmarshal(scopesRaw, &scopes)
-	if !slices.Contains(scopes, requiredScope) {
+	if requiredScope != "" && !slices.Contains(scopes, requiredScope) {
 		return uuid.Nil, uuid.Nil, uuid.Nil, httpserver.NewApiError(http.StatusForbidden, "INSUFFICIENT_SCOPE", "Credential lacks required scope: "+requiredScope)
 	}
 	return credId, appId, orgId, nil
@@ -85,8 +85,8 @@ func (controller Controller) SendBusinessMessage(writer http.ResponseWriter, req
 	}
 	var scopesRaw []byte
 	err = controller.Container.Database.QueryRowContext(request.Context(),
-		`SELECT scopes FROM developer_business_consents WHERE organization_id = $1 AND application_id = $2 AND recipient_account_id = $3 AND status = 'active'`,
-		orgId, appId, recipientUUID,
+		`SELECT scopes FROM developer_business_consents WHERE organization_id = $1 AND application_id = $2 AND store_id = $3 AND recipient_account_id = $4 AND status = 'active'`,
+		orgId, appId, storeUUID, recipientUUID,
 	).Scan(&scopesRaw)
 	if err == sql.ErrNoRows {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusForbidden, "BUSINESS_CONSENT_REQUIRED", "Recipient has not granted active messaging consent to this application."))

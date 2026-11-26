@@ -186,6 +186,9 @@ func (controller Controller) GrantBusinessConsent(writer http.ResponseWriter, re
 		controller.writeError(writer, request, err)
 		return
 	}
+	writer.Header().Set("Cache-Control", "no-store, max-age=0")
+	writer.Header().Set("Pragma", "no-cache")
+	writer.Header().Set("Referrer-Policy", "no-referrer")
 	httpserver.WriteJsonResponse(writer, http.StatusCreated, item)
 }
 
@@ -200,6 +203,31 @@ func (controller Controller) RevokeBusinessConsent(writer http.ResponseWriter, r
 		return
 	}
 	httpserver.WriteNoContentResponse(writer)
+}
+
+func (controller Controller) DenyBusinessConsent(writer http.ResponseWriter, request *http.Request) {
+	if _, ok := accountID(request); !ok {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.ErrUnauthorized)
+		return
+	}
+	input, err := utils.DecodeAndValidate[BusinessConsentDenialInput](writer, request, func(value BusinessConsentDenialInput) error {
+		return validateBusinessConsentAuthorizationShape(value.Authorization)
+	})
+	if err != nil {
+		controller.writeBusinessAuthorizationError(writer, request, err)
+		return
+	}
+	redirectURL, err := (Service{Container: controller.Container}).BuildBusinessConsentDenialRedirect(
+		request.Context(), request.PathValue("applicationID"), request.PathValue("storeID"), input.Authorization,
+	)
+	if err != nil {
+		controller.writeBusinessAuthorizationError(writer, request, err)
+		return
+	}
+	writer.Header().Set("Cache-Control", "no-store, max-age=0")
+	writer.Header().Set("Pragma", "no-cache")
+	writer.Header().Set("Referrer-Policy", "no-referrer")
+	httpserver.WriteJsonResponse(writer, http.StatusOK, BusinessConsentDenialResponse{AuthorizationRedirectURL: redirectURL})
 }
 
 func accountID(request *http.Request) (string, bool) {
@@ -217,6 +245,8 @@ func (controller Controller) writeError(writer http.ResponseWriter, request *htt
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusNotFound, "BUSINESS_CONSENT_NOT_FOUND", "The authorization was not found or is no longer active."))
 	case errors.Is(err, errInvalidBusinessConsent):
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_BUSINESS_CONSENT", "Choose only the messaging permissions requested by an approved business app."))
+	case errors.Is(err, errInvalidBusinessAuthorizationCode):
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_BUSINESS_AUTHORIZATION_REQUEST", "The callback, state, or PKCE parameters are invalid or not registered for this app."))
 	case errors.Is(err, errApplicationForbidden):
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewForbiddenError("Only organization owners and admins can access the draft application registry until application-level grants are available."))
 	case errors.Is(err, errInvalidApplication), errors.Is(err, errInvalidApplicationGrant), errors.Is(err, errApplicationIdempotencyRequired):

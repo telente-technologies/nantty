@@ -31,6 +31,7 @@ const activeBusinessMessageDispatchAuthorization = `
 			 JOIN developer_business_consents recipient_consent
 			   ON recipient_consent.application_id = m.application_id
 			  AND recipient_consent.organization_id = m.organization_id
+			  AND recipient_consent.store_id = m.store_id
 			  AND recipient_consent.recipient_account_id = m.recipient_account_id
 			 WHERE m.id::text = d.payload #>> '{data,messageId}'
 			   AND m.application_id = d.application_id

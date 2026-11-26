@@ -21,7 +21,6 @@ import (
 var flutterwaveChargeIdPattern = regexp.MustCompile(`^[0-9]{1,20}$`)
 
 func FlutterwavePayloadHash(amount, currency, email, reference, merchantCredential string) string {
-	// Flutterwave requires this two-stage SHA-256 checksum; it is not a password verifier.
 	secretDigest := sha256.Sum256([]byte(merchantCredential))
 	digest := sha256.Sum256([]byte(amount + currency + email + reference + hex.EncodeToString(secretDigest[:])))
 	return hex.EncodeToString(digest[:])

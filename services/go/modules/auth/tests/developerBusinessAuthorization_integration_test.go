@@ -52,6 +52,7 @@ func TestBusinessAuthorizationRequiresCommercePermissionAndAuditsLifecycle(t *te
 	developer := registerDeveloperTestAccount(t, harness, "business-auth-app-owner@example.com")
 	storeOwner := registerDeveloperTestAccount(t, harness, "business-auth-store-owner@example.com")
 	outsider := registerDeveloperTestAccount(t, harness, "business-auth-outsider@example.com")
+	customer := registerDeveloperTestAccount(t, harness, "business-auth-customer@example.com")
 	organization := harness.expectWithHeaders("POST", "/api/v1/developer/organizations", developer, map[string]string{"name": "Business Auth Org", "slug": "business-auth-org"}, map[string]string{"Idempotency-Key": uuid.NewString()}, http.StatusCreated)
 	app := harness.expectWithHeaders("POST", "/api/v1/developer/organizations/"+organization["id"].(string)+"/applications", developer, map[string]any{
 		"name": "Business Auth Client", "purpose": "Connect an approved business messaging app to a store with explicit owner authorization.",
@@ -69,9 +70,14 @@ func TestBusinessAuthorizationRequiresCommercePermissionAndAuditsLifecycle(t *te
 	}
 	var expectedAccount uuid.UUID
 	harness.queryRowWithArgs("SELECT id FROM accounts WHERE email=$1", []any{"business-auth-store-owner@example.com"}, &expectedAccount)
+	var customerAccount uuid.UUID
+	harness.queryRowWithArgs("SELECT id FROM accounts WHERE email=$1", []any{"business-auth-customer@example.com"}, &customerAccount)
 	if checkedAccount != expectedAccount.String() || checkedStore != expectedStore.String() {
 		t.Fatalf("Commerce received actor/store %q/%q, want %q/%q", checkedAccount, checkedStore, expectedAccount, expectedStore)
 	}
+	consent := harness.expect("POST", "/api/v1/account/business-messaging/consents", customer, map[string]any{
+		"organizationId": organization["id"], "applicationId": appID, "storeId": expectedStore.String(), "scopes": []string{"messages:send"},
+	}, http.StatusCreated)
 	authorizationID := created["id"].(string)
 	updated := harness.expect("POST", path, storeOwner, map[string]any{
 		"organizationId": organization["id"], "applicationId": appID, "storeId": expectedStore.String(), "scopes": []string{"messages:read"},
@@ -89,16 +95,54 @@ func TestBusinessAuthorizationRequiresCommercePermissionAndAuditsLifecycle(t *te
 	if _, body := harness.call("DELETE", path+"/"+authorizationID, outsider, nil); body["code"] != "BUSINESS_AUTHORIZATION_NOT_FOUND" {
 		t.Fatalf("foreign-account revoke response = %v", body)
 	}
+	harness.execSql(`CREATE FUNCTION reject_business_consent_audit() RETURNS trigger LANGUAGE plpgsql AS $$
+		BEGIN
+			IF NEW.action = 'revoked' THEN RAISE EXCEPTION 'audit storage unavailable'; END IF;
+			RETURN NEW;
+		END
+	$$`)
+	harness.execSql("CREATE TRIGGER reject_business_consent_audit BEFORE INSERT ON developer_business_consent_audit_logs FOR EACH ROW EXECUTE FUNCTION reject_business_consent_audit()")
+	if status, _ := harness.call("DELETE", path+"/"+authorizationID, storeOwner, nil); status != http.StatusInternalServerError {
+		t.Fatalf("merchant revoke with failed customer-consent audit = %d, want 500", status)
+	}
+	var grantStatus, consentStatus string
+	harness.queryRowWithArgs("SELECT status FROM developer_business_authorizations WHERE id=$1", []any{authorizationID}, &grantStatus)
+	harness.queryRowWithArgs("SELECT status FROM developer_business_consents WHERE id=$1", []any{consent["id"]}, &consentStatus)
+	if grantStatus != "active" || consentStatus != "active" {
+		t.Fatalf("failed audited merchant revocation left grant/consent=%s/%s, want both active", grantStatus, consentStatus)
+	}
+	harness.execSql("DROP TRIGGER reject_business_consent_audit ON developer_business_consent_audit_logs")
+	harness.execSql("DROP FUNCTION reject_business_consent_audit()")
 	if status, _ := harness.call("DELETE", path+"/"+authorizationID, storeOwner, nil); status != http.StatusNoContent {
 		t.Fatalf("owner revoke = %d, want 204", status)
 	}
+	consents := harness.expect("GET", "/api/v1/account/business-messaging/consents", customer, nil, http.StatusOK)["consents"].([]any)
+	if len(consents) != 1 || consents[0].(map[string]any)["id"] != consent["id"] || consents[0].(map[string]any)["status"] != "revoked" {
+		t.Fatalf("merchant revocation did not invalidate customer consent: %v", consents)
+	}
+	var merchantRevocationAuditCount int
+	harness.queryRowWithArgs("SELECT count(*) FROM developer_business_consent_audit_logs WHERE consent_id=$1 AND recipient_account_id=$2 AND actor_account_id=$3 AND action='revoked'", []any{consent["id"], customerAccount, expectedAccount}, &merchantRevocationAuditCount)
+	if merchantRevocationAuditCount != 1 {
+		t.Fatalf("merchant-caused consent revocation audit count = %d, want 1", merchantRevocationAuditCount)
+	}
+	denyStore = false
+	regranted := harness.expect("POST", path, storeOwner, map[string]any{
+		"organizationId": organization["id"], "applicationId": appID, "storeId": expectedStore.String(), "scopes": []string{"messages:send"},
+	}, http.StatusCreated)
+	if regranted["status"] != "active" {
+		t.Fatalf("merchant regrant failed: %v", regranted)
+	}
+	consents = harness.expect("GET", "/api/v1/account/business-messaging/consents", customer, nil, http.StatusOK)["consents"].([]any)
+	if len(consents) != 1 || consents[0].(map[string]any)["status"] != "revoked" {
+		t.Fatalf("merchant regrant revived stale customer consent: %v", consents)
+	}
 	items := harness.expect("GET", path, storeOwner, nil, http.StatusOK)["authorizations"].([]any)
-	if len(items) != 1 || items[0].(map[string]any)["status"] != "revoked" {
-		t.Fatalf("revoked authorization missing from owner's audit view: %v", items)
+	if len(items) != 1 || items[0].(map[string]any)["status"] != "active" {
+		t.Fatalf("regranted authorization missing from owner's current-state view: %v", items)
 	}
 	var grants, updates, revokes int
 	harness.queryRowWithArgs("SELECT count(*) FILTER (WHERE action='granted'), count(*) FILTER (WHERE action='updated'), count(*) FILTER (WHERE action='revoked') FROM developer_business_authorization_audit_logs WHERE actor_account_id=$1 AND store_id=$2", []any{expectedAccount, expectedStore}, &grants, &updates, &revokes)
-	if grants != 1 || updates != 1 || revokes != 1 {
+	if grants != 2 || updates != 1 || revokes != 1 {
 		t.Fatalf("grant/update/revoke audit rows = %d/%d/%d", grants, updates, revokes)
 	}
 }

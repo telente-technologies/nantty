@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 
@@ -34,16 +35,21 @@ func Mount(mux *http.ServeMux, deployed *container.Container) {
 	canReview := guard.RequireStaff("applications:sellers", false)
 	canApprove := guard.RequireStaff("applications:sellers", true)
 	canManagePlans := guard.RequireStaff("config:plans", true)
+	canReadAudit := guard.RequireStaff("audit:read", false)
 
 	mux.Handle("GET /api/v1/admin/developer/applications", requireStaff(canReview(http.HandlerFunc(controller.ListApplications))))
+	mux.Handle("GET /api/v1/admin/developer/audit", requireStaff(canReadAudit(http.HandlerFunc(controller.ListAudit))))
 	mux.Handle("POST /api/v1/admin/developer/applications/{applicationID}/review", requireStaff(canApprove(http.HandlerFunc(controller.ReviewApplication))))
 	mux.Handle("PATCH /api/v1/admin/developer/organizations/{organizationID}/quota", requireStaff(canManagePlans(http.HandlerFunc(controller.UpdateQuota))))
 }
 
 func (controller Controller) ListApplications(writer http.ResponseWriter, request *http.Request) {
 	statusFilter := strings.TrimSpace(request.URL.Query().Get("status"))
-	query := `SELECT a.id::text, a.organization_id::text, o.name, a.name, a.api_product, a.status, a.created_at
-		FROM developer_applications a JOIN developer_organizations o ON o.id = a.organization_id`
+	query := `SELECT a.id::text, a.organization_id::text, o.name, a.name, a.api_product, a.status, a.created_at,
+		COALESCE(b.plan_tier, 'none'), COALESCE(b.status, 'none'), COALESCE(b.monthly_quota, 0),
+		COALESCE(b.payment_verified_at IS NOT NULL AND b.current_period_end > now(), false)
+		FROM developer_applications a JOIN developer_organizations o ON o.id = a.organization_id
+		LEFT JOIN developer_billing_subscriptions b ON b.organization_id = a.organization_id`
 	args := []any{}
 	if statusFilter != "" {
 		query += ` WHERE a.status = $1`
@@ -57,18 +63,22 @@ func (controller Controller) ListApplications(writer http.ResponseWriter, reques
 	}
 	defer rows.Close()
 	type item struct {
-		Id               string `json:"id"`
-		OrganizationId   string `json:"organizationId"`
-		OrganizationName string `json:"organizationName"`
-		Name             string `json:"name"`
-		ApiProduct       string `json:"apiProduct"`
-		Status           string `json:"status"`
-		CreatedAt        string `json:"createdAt"`
+		Id                 string `json:"id"`
+		OrganizationId     string `json:"organizationId"`
+		OrganizationName   string `json:"organizationName"`
+		Name               string `json:"name"`
+		ApiProduct         string `json:"apiProduct"`
+		Status             string `json:"status"`
+		CreatedAt          string `json:"createdAt"`
+		PlanTier           string `json:"planTier"`
+		SubscriptionStatus string `json:"subscriptionStatus"`
+		MonthlyQuota       int64  `json:"monthlyQuota"`
+		PaymentVerified    bool   `json:"paymentVerified"`
 	}
 	items := []item{}
 	for rows.Next() {
 		var row item
-		if err := rows.Scan(&row.Id, &row.OrganizationId, &row.OrganizationName, &row.Name, &row.ApiProduct, &row.Status, &row.CreatedAt); err != nil {
+		if err := rows.Scan(&row.Id, &row.OrganizationId, &row.OrganizationName, &row.Name, &row.ApiProduct, &row.Status, &row.CreatedAt, &row.PlanTier, &row.SubscriptionStatus, &row.MonthlyQuota, &row.PaymentVerified); err != nil {
 			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 			return
 		}
@@ -91,8 +101,10 @@ func (controller Controller) ReviewApplication(writer http.ResponseWriter, reque
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
-	if !slices.Contains([]string{"approved", "rejected", "suspended"}, body.Decision) || len(strings.TrimSpace(body.Reason)) < 3 {
-		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_REVIEW", "Decision (approved|rejected|suspended) and reason are required."))
+	body.Reason = strings.TrimSpace(body.Reason)
+	reasonLength := utf8.RuneCountInString(body.Reason)
+	if !slices.Contains([]string{"approved", "rejected", "suspended"}, body.Decision) || reasonLength < 5 || reasonLength > 1000 {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_REVIEW", "Decision and a 5–1000 character review reason are required."))
 		return
 	}
 	staff, ok := staffauth.StaffFromContext(request.Context())
@@ -139,14 +151,16 @@ func (controller Controller) UpdateQuota(writer http.ResponseWriter, request *ht
 		return
 	}
 	var body struct {
-		MonthlyQuota int64 `json:"monthlyQuota"`
+		MonthlyQuota int64  `json:"monthlyQuota"`
+		Reason       string `json:"reason"`
 	}
 	if err := httpserver.DecodeJsonBodyRejectingUnknownFields(writer, request, &body); err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
-	if body.MonthlyQuota < 100 {
-		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_QUOTA", "monthlyQuota must be at least 100."))
+	body.Reason = strings.TrimSpace(body.Reason)
+	if body.MonthlyQuota < 100 || utf8.RuneCountInString(body.Reason) < 5 || utf8.RuneCountInString(body.Reason) > 1000 {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_QUOTA_ADJUSTMENT", "monthlyQuota must be at least 100 and a 5–1000 character reason is required."))
 		return
 	}
 	staff, ok := staffauth.StaffFromContext(request.Context())
@@ -184,7 +198,7 @@ func (controller Controller) UpdateQuota(writer http.ResponseWriter, request *ht
 		return
 	}
 	before := map[string]any{"planTier": planTier, "status": status, "monthlyQuota": previousQuota}
-	after := map[string]any{"planTier": planTier, "status": status, "monthlyQuota": body.MonthlyQuota}
+	after := map[string]any{"planTier": planTier, "status": status, "monthlyQuota": body.MonthlyQuota, "reason": body.Reason}
 	err = writeAudit(request.Context(), tx, staff, staffId, orgId, "admin.billing.quota_adjusted", "developer_organization", orgId.String(), before, after)
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)

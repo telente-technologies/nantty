@@ -102,8 +102,8 @@ describe("Smile ID Web SDK result handling", () => {
   it("uses retryability for session and submission failures", () => {
     const retryable = { status: "failure" as const, error: { error_code: "SESSION_INIT_FAILED", message: "raw provider error", status: 503, retryable: true } };
     const terminal = { status: "failure" as const, error: { error_code: "SESSION_INIT_FAILED", message: "raw provider error", status: 400, retryable: false } };
-    assert.match(smileIdFailureMessage(retryable), /if the unsuccessful attempt is closed/i);
-    assert.match(smileIdFailureMessage({ status: "failure", error: { error_code: "SUBMISSION_FAILED", message: "provider detail", status: 503, retryable: true } }), /only start a new session if Nantty confirms this attempt was closed/i);
+    assert.match(smileIdFailureMessage(retryable), /only start another session after Nantty confirms this attempt is closed/i);
+    assert.match(smileIdFailureMessage({ status: "failure", error: { error_code: "SUBMISSION_FAILED", message: "provider detail", status: 503, retryable: true } }), /only start another session after Nantty confirms this attempt is closed/i);
     assert.match(smileIdFailureMessage(terminal), /contact Nantty support/i);
   });
 

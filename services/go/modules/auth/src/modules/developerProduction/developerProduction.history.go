@@ -33,8 +33,8 @@ func (controller Controller) authorizeBusinessMessageRead(request *http.Request,
 	var rawScopes []byte
 	err = controller.Container.Database.QueryRowContext(request.Context(),
 		`SELECT scopes FROM developer_business_consents
-		 WHERE organization_id = $1 AND application_id = $2 AND recipient_account_id = $3 AND status = 'active'`,
-		organizationID, applicationID, recipientID,
+		 WHERE organization_id = $1 AND application_id = $2 AND store_id = $3 AND recipient_account_id = $4 AND status = 'active'`,
+		organizationID, applicationID, storeID, recipientID,
 	).Scan(&rawScopes)
 	if err == sql.ErrNoRows {
 		return uuid.Nil, uuid.Nil, uuid.Nil, httpserver.NewApiError(http.StatusForbidden, "BUSINESS_CONSENT_REQUIRED", "The recipient has not granted active messages:read consent to this application.")
@@ -103,7 +103,8 @@ func (controller Controller) ListBusinessMessages(writer http.ResponseWriter, re
 		   AND m.store_id = $4
 		   AND EXISTS (SELECT 1 FROM developer_business_consents c
 		               WHERE c.organization_id = m.organization_id
-		                 AND c.application_id = m.application_id
+			                 AND c.application_id = m.application_id
+			                 AND c.store_id = m.store_id AND c.store_id = $4
 		                 AND c.recipient_account_id = m.recipient_account_id
 		                 AND c.status = 'active' AND c.scopes ? 'messages:read')
 		   AND ($5::timestamptz IS NULL OR (m.created_at, m.id) < ($5::timestamptz, $6::uuid))
@@ -181,7 +182,8 @@ func (controller Controller) GetBusinessMessageStatus(writer http.ResponseWriter
 			            WHERE a.organization_id = m.organization_id AND a.application_id = m.application_id
 			              AND a.store_id = m.store_id AND a.status = 'active' AND a.scopes ? 'messages:read')
 			AND EXISTS (SELECT 1 FROM developer_business_consents c
-		               WHERE c.organization_id = m.organization_id AND c.application_id = m.application_id
+			               WHERE c.organization_id = m.organization_id AND c.application_id = m.application_id
+			                 AND c.store_id = m.store_id
 		                 AND c.recipient_account_id = m.recipient_account_id AND c.status = 'active'
 		                 AND c.scopes ? 'messages:read')`,
 		messageID, organizationID, applicationID,

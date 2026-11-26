@@ -21,7 +21,7 @@ func TestDeveloperApplicationsAreOrganizationScopedAndAudited(t *testing.T) {
 	harness.queryRow("SELECT id::text FROM accounts WHERE email='application-developer@example.com'", &developerID)
 	harness.execSql("INSERT INTO developer_organization_memberships (id,organization_id,account_id,role,created_at) VALUES ($1,$2,$3,'developer',now())", uuid.NewString(), organizationID, developerID)
 	path := "/api/v1/developer/organizations/" + organizationID + "/applications"
-	input := `{"name":"Nantty CRM","purpose":"Connect a customer support system to business messaging.","callbackOrigins":["https://crm.example.com"],"requestedScopes":["messages:read","messages:send"]}`
+	input := `{"name":"Nantty CRM","purpose":"Connect a customer support system to business messaging.","callbackOrigins":["https://crm.example.com"],"redirectUris":["https://crm.example.com/oauth/callback"],"requestedScopes":["messages:read","messages:send"]}`
 	post := func(token, key, body string) (int, map[string]any) {
 		request, err := http.NewRequest("POST", harness.server.URL+path, bytes.NewBufferString(body))
 		if err != nil {
@@ -46,19 +46,38 @@ func TestDeveloperApplicationsAreOrganizationScopedAndAudited(t *testing.T) {
 	if status != 201 || app["status"] != "draft" || app["apiProduct"] != "business_messaging" {
 		t.Fatalf("application create = %d %v", status, app)
 	}
+	redirectURIs, ok := app["redirectUris"].([]any)
+	if !ok || len(redirectURIs) != 1 || redirectURIs[0] != "https://crm.example.com/oauth/callback" {
+		t.Fatalf("created application redirect URIs = %v", app["redirectUris"])
+	}
 	ownerList := harness.expect("GET", path, owner, nil, 200)
 	applications, ok := ownerList["applications"].([]any)
 	if !ok || len(applications) != 1 {
 		t.Fatalf("owner application list = %v", ownerList)
 	}
+	listedApplication := applications[0].(map[string]any)
+	listedRedirectURIs, ok := listedApplication["redirectUris"].([]any)
+	if !ok || len(listedRedirectURIs) != 1 || listedRedirectURIs[0] != "https://crm.example.com/oauth/callback" {
+		t.Fatalf("listed application redirect URIs = %v", listedApplication["redirectUris"])
+	}
 	status, replay := post(owner, key, input)
 	if status != 200 || replay["id"] != app["id"] {
 		t.Fatalf("application idempotent replay = %d %v", status, replay)
 	}
-	conflictingInput := `{"name":"Another CRM","purpose":"Connect a customer support system to business messaging.","callbackOrigins":["https://crm.example.com"],"requestedScopes":["messages:read","messages:send"]}`
+	conflictingInput := `{"name":"Nantty CRM","purpose":"Connect a customer support system to business messaging.","callbackOrigins":["https://crm.example.com"],"redirectUris":["https://crm.example.com/other-callback"],"requestedScopes":["messages:read","messages:send"]}`
 	status, collision := post(owner, key, conflictingInput)
 	if status != 409 || collision["code"] != "IDEMPOTENCY_KEY_REUSED" {
 		t.Fatalf("different request reused the same key = %d %v, want 409", status, collision)
+	}
+	status, updated := harness.call("PATCH", path+"/"+app["id"].(string), owner, map[string]any{
+		"name": "Nantty CRM", "purpose": "Connect a customer support system to business messaging.",
+		"callbackOrigins": []string{"https://crm.example.com"},
+		"redirectUris":    []string{"https://crm.example.com/new-callback"},
+		"requestedScopes": []string{"messages:read", "messages:send"},
+	})
+	updatedRedirectURIs, ok := updated["redirectUris"].([]any)
+	if status != 200 || !ok || len(updatedRedirectURIs) != 1 || updatedRedirectURIs[0] != "https://crm.example.com/new-callback" {
+		t.Fatalf("update application redirect URIs = %d %v", status, updated)
 	}
 	status, list := harness.call("GET", path, developer, nil)
 	if status != 200 || len(list["applications"].([]any)) != 0 {

@@ -215,9 +215,10 @@ func (service Service) RevokeBusinessAuthorization(ctx context.Context, accountI
 	defer tx.Rollback()
 	var result BusinessAuthorization
 	var scopes []string
+	now := service.Container.Now().UTC()
 	err = tx.QueryRowContext(ctx, `UPDATE developer_business_authorizations SET status='revoked', revoked_at=$1
 		WHERE id=$2 AND granted_by_account_id=$3 AND status='active'
-		RETURNING id, organization_id, application_id, store_id, scopes`, service.Container.Now().UTC(), identifier, account).
+		RETURNING id, organization_id, application_id, store_id, scopes`, now, identifier, account).
 		Scan(&result.ID, &result.OrganizationID, &result.ApplicationID, &result.StoreID, jsonScanner{target: &scopes})
 	if errors.Is(err, sql.ErrNoRows) {
 		return errBusinessAuthorizationNotFound
@@ -225,7 +226,39 @@ func (service Service) RevokeBusinessAuthorization(ctx context.Context, accountI
 	if err != nil {
 		return err
 	}
-	if err := writeBusinessAuthorizationAudit(ctx, tx, result, account, "revoked", scopes, []string{}, service.Container.Now().UTC()); err != nil {
+	rows, err := tx.QueryContext(ctx, `UPDATE developer_business_consents
+		SET status='revoked', revoked_at=$1
+		WHERE organization_id=$2 AND application_id=$3 AND store_id=$4 AND status='active'
+		RETURNING id, organization_id, application_id, store_id, recipient_account_id, scopes`, now, result.OrganizationID, result.ApplicationID, result.StoreID)
+	if err != nil {
+		return err
+	}
+	type consentRecord struct {
+		id, organizationID, applicationID, storeID, recipientID uuid.UUID
+		scopes                                                  []string
+	}
+	consents := make([]consentRecord, 0)
+	for rows.Next() {
+		var consent consentRecord
+		if err := rows.Scan(&consent.id, &consent.organizationID, &consent.applicationID, &consent.storeID, &consent.recipientID, jsonScanner{target: &consent.scopes}); err != nil {
+			_ = rows.Close()
+			return err
+		}
+		consents = append(consents, consent)
+	}
+	if err := rows.Err(); err != nil {
+		_ = rows.Close()
+		return err
+	}
+	if err := rows.Close(); err != nil {
+		return err
+	}
+	for _, consent := range consents {
+		if err := writeMerchantRevocationConsentAudit(ctx, tx, consent.id, consent.organizationID, consent.applicationID, consent.storeID, consent.recipientID, account, consent.scopes, now); err != nil {
+			return err
+		}
+	}
+	if err := writeBusinessAuthorizationAudit(ctx, tx, result, account, "revoked", scopes, []string{}, now); err != nil {
 		return err
 	}
 	return tx.Commit()

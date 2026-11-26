@@ -110,9 +110,9 @@ export function BusinessMessagingDocs() {
           <h2 id="contract-state-title">Environment availability &amp; production boundary</h2>
           <p>
             <code>POST /v1/conversations/&#123;conversationId&#125;/messages</code> and all synthetic Sandbox routes are live with <code>ntsb_test_</code> tokens.
-            In Production, <code>GET /api/v1/business/conversations</code> lists conversations with active recipient consent for approved applications holding <code>conversations:read</code>,
-            and the <code>messages:read</code>-scoped history and status routes expose only messages persisted by this API while recipient consent remains active. Inbound message synchronization and delivery/read receipts are not connected yet.
-            <code>POST /api/v1/business/messages</code> remains unavailable until canonical consent management and secure dispatch are connected.
+            In Production, <code>GET /api/v1/business/conversations</code> lists conversations only when the app has an active grant for the requested store and the customer consented to that same store, with <code>conversations:read</code> scope,
+            and the <code>messages:read</code>-scoped history and status routes expose only messages persisted by this API while matching store consent remains active. Customers can approve store-scoped consent using a registered callback and S256 PKCE; the app redeems a short-lived code with its own <code>ntlive_</code> credential to receive the exact consent receipt. This is not a Nantty user access token. Inbound message synchronization and delivery/read receipts are not connected yet.
+            <code>POST /api/v1/business/messages</code> remains unavailable until canonical encrypted message dispatch is connected.
           </p>
         </div>
       </section>
@@ -175,6 +175,7 @@ export function BusinessMessagingDocs() {
             <ul className={styles.tagList}>
               {scopes.map((scope) => <li key={scope}><code>{scope}</code></li>)}
             </ul>
+            <p className={styles.panelCopy}>For customer consent, generate a 43–128 character PKCE verifier and S256 challenge, then direct the customer to <code>https://nantty.com/connect/business-messaging</code> with <code>applicationId</code>, <code>storeId</code>, <code>redirect_uri</code>, <code>code_challenge</code>, <code>code_challenge_method=S256</code>, and fresh <code>state</code> query parameters. Approval returns a code that expires in 60 seconds, is single-use, and must be exchanged server-to-server with the same application&apos;s live credential. If the customer declines, the callback receives <code>error=access_denied</code> and the original state, without a code. Keep the verifier server-side; the receipt does not authenticate a Nantty user.</p>
           </div>
           <div className={styles.subBlock}>
             <h3>Webhook event types</h3>

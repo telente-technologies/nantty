@@ -12,16 +12,17 @@ type DeveloperApplication = {
   purpose: string;
   apiProduct: string;
   callbackOrigins: string[];
+  redirectUris: string[];
   requestedScopes: string[];
   status: string;
   createdAt: string;
   updatedAt: string;
 };
-type Input = { name: string; purpose: string; callbackOrigins: string; requestedScopes: string[] };
+type Input = { name: string; purpose: string; callbackOrigins: string; redirectUris: string; requestedScopes: string[] };
 type ApplicationMemberGrant = { membershipId: string; accountId: string; name: string; username: string; role: string; capabilities: string[]; eligibleCapabilities: string[] };
 
 const scopes = ["messages:send", "messages:read", "conversations:read", "conversations:write", "customers:read", "media:write", "media:read", "webhooks:manage", "analytics:read"];
-const emptyInput: Input = { name: "", purpose: "", callbackOrigins: "", requestedScopes: [] };
+const emptyInput: Input = { name: "", purpose: "", callbackOrigins: "", redirectUris: "", requestedScopes: [] };
 
 class ApplicationRequestError extends Error {
   constructor(readonly status: number, message: string) { super(message); }
@@ -51,6 +52,7 @@ function inputFor(application?: DeveloperApplication): Input {
     name: application.name,
     purpose: application.purpose,
     callbackOrigins: application.callbackOrigins.join("\n"),
+    redirectUris: (application.redirectUris ?? []).join("\n"),
     requestedScopes: application.requestedScopes,
   } : emptyInput;
 }
@@ -106,6 +108,7 @@ export function OrganizationApplicationsWorkspace() {
       name: input.name.trim(),
       purpose: input.purpose.trim(),
       callbackOrigins: input.callbackOrigins.split("\n").map((origin) => origin.trim()).filter(Boolean),
+      redirectUris: input.redirectUris.split("\n").map((uri) => uri.trim()).filter(Boolean),
       requestedScopes: input.requestedScopes,
     };
     try {
@@ -198,6 +201,7 @@ export function OrganizationApplicationsWorkspace() {
           <label>Application name<input required minLength={2} maxLength={80} value={input.name} onChange={(event) => setField("name", event.target.value)} /></label>
           <label>Purpose<textarea required minLength={10} maxLength={1000} rows={3} value={input.purpose} onChange={(event) => setField("purpose", event.target.value)} /></label>
           <label>Callback origins <span>HTTPS only; localhost is allowed for development. Enter one origin per line.</span><textarea rows={3} value={input.callbackOrigins} onChange={(event) => setField("callbackOrigins", event.target.value)} placeholder="https://integration.example.com" /></label>
+          <label>OAuth redirect URIs <span>Register each complete callback URL (maximum 10). HTTPS is required except for localhost development. Query parameters are fixed; fragments and wildcards are not allowed. Authorization will require an exact registered URI.</span><textarea rows={3} value={input.redirectUris} onChange={(event) => setField("redirectUris", event.target.value)} placeholder="https://integration.example.com/oauth/callback" autoCapitalize="none" autoComplete="url" spellCheck={false} /></label>
           <fieldset><legend>Requested permissions</legend><p>Candidate Business Messaging scopes. Final availability remains subject to product review.</p><div className={styles.scopeList}>{scopes.map((scope) => <label key={scope}><input type="checkbox" checked={input.requestedScopes.includes(scope)} onChange={(event) => setField("requestedScopes", event.target.checked ? [...input.requestedScopes, scope] : input.requestedScopes.filter((value) => value !== scope))} /><code>{scope}</code></label>)}</div></fieldset>
         </div>
         <div className={styles.formActions}><button type="submit" disabled={saving || loadingOrganizations || !organizationId || input.requestedScopes.length === 0}>{saving ? "Saving…" : editingId ? "Save draft" : "Create draft"}</button>{editingId ? <button type="button" className={styles.secondaryButton} disabled={saving} onClick={() => { setEditingId(""); setInput(emptyInput); }}>Cancel edit</button> : null}</div>

@@ -39,7 +39,7 @@ export function ConnectedBusinessAppsSection() {
   return (
     <section className={styles.block} aria-labelledby="connected-business-apps-heading">
       <h2 id="connected-business-apps-heading" className={styles.blockHeading}>Connected business apps</h2>
-      <p className={styles.muted}>Review and revoke messaging access you granted to approved Nantty business integrations.</p>
+      <p className={styles.muted}>Review and revoke messaging access you granted to approved Nantty business integrations for specific stores.</p>
       {consents.isPending ? <ListRowsSkeleton label="Loading connected business apps" rows={2} withAvatar={false} /> : null}
       {consents.isError ? <ErrorState description="We couldn't load connected business apps." error={consents.error} onRetry={() => void consents.refetch()} /> : null}
       {consents.data?.length === 0 ? <p className={styles.muted}>You have not authorized any business messaging apps.</p> : null}
@@ -48,6 +48,7 @@ export function ConnectedBusinessAppsSection() {
           <div>
             <h3 className={styles.subHeading}>{consent.applicationName}</h3>
             <p className={styles.muted}>{consent.organizationName} · {consent.status === "active" ? "Access active" : "Access revoked"}</p>
+            {consent.storeId ? <p className={styles.muted}>Store: {consent.storeId}</p> : null}
             <p className={styles.muted}>Permissions: {consent.scopes.join(", ")}</p>
             <p className={styles.muted}>Granted {new Date(consent.grantedAt).toLocaleDateString()}</p>
           </div>

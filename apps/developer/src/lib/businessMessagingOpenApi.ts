@@ -55,6 +55,7 @@ const errorEnvelopeSchema = {
             "INSUFFICIENT_BUSINESS_STORE_PERMISSION",
             "INVALID_STORE_ID",
             "MESSAGE_NOT_FOUND",
+            "INVALID_AUTHORIZATION_CODE",
           ],
         },
         message: { type: "string" },
@@ -84,7 +85,7 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
       summary: "Sandbox messaging and consent-scoped production conversation/message reads.",
       description: [
         "The Sandbox Business Messaging HTTP API (`ntsb_test_` bearer tokens) is available for synthetic data.",
-        "Production conversation listing and outbound-message history/status reads are available to approved applications with the corresponding live credential scopes and active recipient consent. History currently reflects only messages persisted by this API; inbound message synchronization and delivery/read receipts are not yet connected. Sending remains unavailable until canonical consent management and secure message dispatch are connected.",
+        "Production apps can use a short-lived S256 PKCE authorization code to receive a server-verified receipt for a customer's explicit store-scoped consent. The code is redeemed using the same application's active `ntlive_` credential; it does not issue a Nantty user access token. Production conversation listing and outbound-message history/status reads require an active merchant grant and customer consent for the same store and approved application, plus the corresponding live credential scopes. History currently reflects only messages persisted by this API; inbound message synchronization and delivery/read receipts are not yet connected. Sending remains unavailable until canonical encrypted dispatch is connected.",
         "Webhook deliveries are signed with HMAC-SHA256 in the `nantty-signature` (`t=<unix-seconds>,v1=<hex>`) header over `${timestamp}.${rawBody}` and carry a unique `nantty-event-id` for consumer deduplication.",
       ].join(" "),
       contact: { name: "Nantty Developers", url: docsUrl },
@@ -228,7 +229,7 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
       "/api/v1/business/conversations": {
         get: {
           tags: ["Production Business Messaging"],
-          summary: "List conversations with active recipient consent",
+          summary: "List conversations with active consent for the authorized store",
           operationId: "listBusinessConversations",
           security: [{ BusinessBearerAuth: ["conversations:read"] }],
           parameters: [
@@ -237,12 +238,42 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
             { name: "cursor", in: "query", required: false, schema: { type: "string", description: "Opaque cursor returned by the preceding page." } },
           ],
           responses: {
-            "200": { description: "Consented conversations ordered by most recent activity, with an optional cursor for older records", content: { "application/json": { schema: { type: "object", required: ["conversations", "nextCursor"], properties: { conversations: { type: "array", items: { type: "object", required: ["recipientId", "grantedAt", "lastStatus"], properties: { recipientId: { type: "string", format: "uuid" }, grantedAt: { type: "string", format: "date-time" }, lastStatus: { type: "string", enum: ["consented", "accepted", "dispatched", "failed"] }, lastMessageAt: { type: "string", format: "date-time" } } } }, nextCursor: { type: ["string", "null"] } } } } } },
+            "200": { description: "Conversations with active customer consent for this exact store, ordered by recent activity", content: { "application/json": { schema: { type: "object", required: ["conversations", "nextCursor"], properties: { conversations: { type: "array", items: { type: "object", required: ["recipientId", "grantedAt", "lastStatus"], properties: { recipientId: { type: "string", format: "uuid" }, grantedAt: { type: "string", format: "date-time" }, lastStatus: { type: "string", enum: ["consented", "accepted", "dispatched", "failed"] }, lastMessageAt: { type: "string", format: "date-time" } } } }, nextCursor: { type: ["string", "null"] } } } } } },
             "401": { description: "Invalid production credential", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
             "403": { description: "Application not approved or credential lacks conversations:read", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
             "402": { description: "Organization has no active production entitlement", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
             "429": { description: "Organization production request quota exhausted", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
             "500": { description: "Conversation listing could not be completed", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+          },
+        },
+      },
+      "/api/v1/business/consent-codes/exchange": {
+        post: {
+          tags: ["Production Business Messaging"],
+          summary: "Exchange a customer-approved consent code for its receipt",
+          operationId: "exchangeBusinessConsentCode",
+          security: [{ BusinessBearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["code", "redirectUri", "codeVerifier"],
+                  properties: {
+                    code: { type: "string", minLength: 43, maxLength: 43, description: "One-time code returned to the exact registered application redirect URI; expires after 60 seconds." },
+                    redirectUri: { type: "string", format: "uri", maxLength: 2048, description: "The exact redirect URI used in the authorization request." },
+                    codeVerifier: { type: "string", minLength: 43, maxLength: 128, description: "The original PKCE verifier. The matching S256 challenge was bound to this code before customer approval." },
+                  },
+                  additionalProperties: false,
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Single-use receipt for the exact active customer, application, store, and approved scopes", content: { "application/json": { schema: { $ref: "#/components/schemas/BusinessConsentReceipt" } } } },
+            "401": { description: "Credential or code is invalid, expired, replayed, revoked, or bound to another redirect/application", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
+            "403": { description: "The application's active credential does not cover every customer-approved scope", content: { "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } } },
           },
         },
       },
@@ -335,6 +366,18 @@ export function buildBusinessMessagingOpenApiSpec(): OpenApiSpecification {
             externalMessageId: { type: "string" },
             createdAt: { type: "string", format: "date-time" },
             updatedAt: { type: "string", format: "date-time" },
+          },
+        },
+        BusinessConsentReceipt: {
+          type: "object",
+          required: ["consentId", "applicationId", "storeId", "recipientAccountId", "scopes", "grantedAt"],
+          properties: {
+            consentId: { type: "string", format: "uuid" },
+            applicationId: { type: "string", format: "uuid" },
+            storeId: { type: "string", format: "uuid" },
+            recipientAccountId: { type: "string", format: "uuid" },
+            scopes: { type: "array", items: { type: "string", enum: ["messages:send", "messages:read", "conversations:read"] } },
+            grantedAt: { type: "string", format: "date-time" },
           },
         },
         SandboxEvent: {

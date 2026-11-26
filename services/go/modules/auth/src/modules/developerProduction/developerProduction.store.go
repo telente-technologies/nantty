@@ -2,11 +2,9 @@ package developerproduction
 
 import (
 	"context"
-	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
-	"encoding/json"
 	"net"
 	"net/http"
 	"net/url"
@@ -140,56 +138,6 @@ func (store Store) RequireMemberAndApprovedApp(ctx context.Context, accountID, o
 		)
 	}
 	return orgUUID, appUUID, role, nil
-}
-
-func (store Store) CreateCredential(ctx context.Context, orgUUID, appUUID uuid.UUID, accountId, name string, scopes []string) (CredentialView, string, error) {
-	raw := make([]byte, 24)
-	if _, err := rand.Read(raw); err != nil {
-		return CredentialView{}, "", err
-	}
-	secret := "ntlive_" + hex.EncodeToString(raw)
-	prefix := secret[:15]
-	hash := Sha256Hex(secret)
-	scopesJSON, _ := json.Marshal(scopes)
-	now := store.Container.Now().UTC()
-	id := uuid.New()
-	_, err := store.Container.Database.ExecContext(ctx,
-		`INSERT INTO developer_production_credentials (id, application_id, organization_id, name, prefix, secret_hash, scopes, status, created_by_account_id, created_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, 'active', $8, $9)`,
-		id, appUUID, orgUUID, name, prefix, hash, string(scopesJSON), uuid.MustParse(accountId), now,
-	)
-	if err != nil {
-		return CredentialView{}, "", err
-	}
-	return CredentialView{Id: id.String(), Name: name, Prefix: prefix, Scopes: scopes, Status: "active", CreatedAt: now}, secret, nil
-}
-
-func (store Store) CreateWebhook(ctx context.Context, orgUUID, appUUID uuid.UUID, webhookUrl string, events []string) (WebhookView, string, error) {
-	if err := ValidateWebhookDNS(ctx, webhookUrl); err != nil {
-		return WebhookView{}, "", err
-	}
-	raw := make([]byte, 24)
-	if _, err := rand.Read(raw); err != nil {
-		return WebhookView{}, "", err
-	}
-	secret := "whsec_" + hex.EncodeToString(raw)
-	ciphertext, err := SealWebhookSecret(secret)
-	if err != nil {
-		return WebhookView{}, "", err
-	}
-	preview := "whsec_••••" + secret[len(secret)-4:]
-	eventsJSON, _ := json.Marshal(events)
-	now := store.Container.Now().UTC()
-	id := uuid.New()
-	_, err = store.Container.Database.ExecContext(ctx,
-		`INSERT INTO developer_production_webhooks (id, application_id, organization_id, url, events, signing_secret_preview, signing_secret_hash, signing_secret_ciphertext, active, created_at, updated_at)
-		 VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8, true, $9, $9)`,
-		id, appUUID, orgUUID, webhookUrl, string(eventsJSON), preview, Sha256Hex(secret), ciphertext, now,
-	)
-	if err != nil {
-		return WebhookView{}, "", err
-	}
-	return WebhookView{Id: id.String(), Url: webhookUrl, Events: events, Active: true, SigningSecretPreview: preview, CreatedAt: now}, secret, nil
 }
 
 func IsSafePublicHttpsUrl(raw string) bool {

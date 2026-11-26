@@ -62,7 +62,7 @@ func TestProductionWebhookWorkerReportsPersistenceFailures(t *testing.T) {
 		`CREATE TABLE developer_production_webhook_deliveries (id uuid PRIMARY KEY, webhook_id uuid NOT NULL, application_id uuid NOT NULL, organization_id uuid NOT NULL, event_id uuid NOT NULL, event_type text NOT NULL, payload jsonb NOT NULL, attempt_count integer NOT NULL, status text NOT NULL, next_attempt_at timestamptz NOT NULL, lease_expires_at timestamptz, last_status_code integer, last_error text, delivered_at timestamptz, created_at timestamptz NOT NULL)`,
 		`CREATE TABLE developer_business_messages (id uuid PRIMARY KEY, application_id uuid NOT NULL, organization_id uuid NOT NULL, store_id uuid, recipient_account_id uuid NOT NULL, status text NOT NULL)`,
 		`CREATE TABLE developer_business_authorizations (application_id uuid NOT NULL, organization_id uuid NOT NULL, store_id uuid NOT NULL, status text NOT NULL, scopes jsonb NOT NULL)`,
-		`CREATE TABLE developer_business_consents (application_id uuid NOT NULL, organization_id uuid NOT NULL, recipient_account_id uuid NOT NULL, status text NOT NULL, scopes jsonb NOT NULL)`,
+		`CREATE TABLE developer_business_consents (application_id uuid NOT NULL, organization_id uuid NOT NULL, store_id uuid, recipient_account_id uuid NOT NULL, status text NOT NULL, scopes jsonb NOT NULL)`,
 	} {
 		if _, err := db.ExecContext(ctx, statement); err != nil {
 			t.Fatal(err)

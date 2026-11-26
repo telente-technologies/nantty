@@ -18,7 +18,7 @@
     "lint": "eslint -c ../../../packages/eslintConfig/node.config.mjs src"
   },
   "dependencies": {
-    "@aws-sdk/client-sns": "3.1175.0",
+    "@aws-sdk/client-sns": "3.1177.0",
     "@nantty/fastify-platform": "workspace:*",
     "@opentelemetry/api": "1.10.0",
     "@opentelemetry/context-async-hooks": "3.1.1",
@@ -39,9 +39,9 @@
   },
   "devDependencies": {
     "@nantty/eslint-config": "workspace:*",
-    "@types/node": "^26.6.6",
+    "@types/node": "^26.6.10",
     "eslint": "^10.15.0",
     "typescript": "^7.0.2",
-    "vitest": "^5.1.1"
+    "vitest": "^5.1.2"
   }
 }

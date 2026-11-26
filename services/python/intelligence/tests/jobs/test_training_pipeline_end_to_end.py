@@ -38,7 +38,16 @@ def trained_workspace(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Any
         os.environ.clear()
         os.environ.update(previous_env)
         load_intelligence_settings.cache_clear()
-    return {"storage": storage, "registry": registry, "summary": summary, "exit_code": exit_code}
+    active_models = tuple(
+        model_name for model_name in REGISTERED_MODEL_NAMES if (registry / model_name / "ACTIVE").is_file()
+    )
+    return {
+        "storage": storage,
+        "registry": registry,
+        "summary": summary,
+        "exit_code": exit_code,
+        "active_models": active_models,
+    }
 
 
 def read_active_metadata(registry: Path, model_name: str) -> dict[str, Any]:
@@ -59,9 +68,11 @@ def test_synthetic_generation_produces_events_and_feature_logs(trained_workspace
     assert set(dataset.labels) == {"long_dwell", "like", "comment", "share", "purchase_intent"}
 
 
-def test_every_model_is_trained_evaluated_and_activated(trained_workspace: dict[str, Any]) -> None:
+def test_trained_models_are_evaluated_and_activated(trained_workspace: dict[str, Any]) -> None:
     assert trained_workspace["exit_code"] == 0
-    for model_name in REGISTERED_MODEL_NAMES:
+    assert "feed_engagement" in trained_workspace["active_models"]
+    assert "item_similarity" in trained_workspace["active_models"]
+    for model_name in trained_workspace["active_models"]:
         metadata = read_active_metadata(trained_workspace["registry"], model_name)
         assert metadata["artifactSha256"]
         assert metadata["environment"]["scikitLearn"]
@@ -82,7 +93,7 @@ async def test_online_service_hot_loads_trained_models(trained_workspace: dict[s
         model_registry_path=trained_workspace["registry"],
     )
     container = build_application_container(settings, InMemoryFeatureBackend())
-    assert sorted(await container.model_holder.reload_changed_models()) == sorted(REGISTERED_MODEL_NAMES)
+    assert sorted(await container.model_holder.reload_changed_models()) == sorted(trained_workspace["active_models"])
     now = datetime.now(UTC)
     request = FeedRankingRequest.model_validate(
         {

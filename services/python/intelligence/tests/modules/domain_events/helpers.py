@@ -8,6 +8,8 @@ from src.databases.in_memory_feature_database import InMemoryFeatureBackend
 from src.repositories.online_feature_keyspace_repository import AFFINITY_HALF_LIFE_SECONDS, TOPIC_AFFINITY_KIND
 from src.utils.decay_math_util import find_forward_decay_generation
 
+__all__ = ["domain_event", "product_viewed", "hashed", "read_topic_affinity"]
+
 
 def domain_event(event_id: str, event_type: str, actor_id: str, occurred_at: datetime, payload: dict[str, Any]) -> str:
     return json.dumps(

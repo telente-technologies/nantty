@@ -58,17 +58,15 @@ func (controller Controller) GetUsage(writer http.ResponseWriter, request *http.
 	}
 	var quota int64
 	var tier, status string
-	var periodEnd sql.NullTime
+	var periodEnd, paymentVerifiedAt sql.NullTime
 	var providerReference sql.NullString
 	if err := controller.Container.Database.QueryRowContext(request.Context(),
-		`SELECT plan_tier, status, monthly_quota, current_period_end, provider_reference FROM developer_billing_subscriptions WHERE organization_id = $1`, orgUUID,
-	).Scan(&tier, &status, &quota, &periodEnd, &providerReference); err != nil && err != sql.ErrNoRows {
+		`SELECT plan_tier, status, monthly_quota, current_period_end, provider_reference, payment_verified_at FROM developer_billing_subscriptions WHERE organization_id = $1`, orgUUID,
+	).Scan(&tier, &status, &quota, &periodEnd, &providerReference, &paymentVerifiedAt); err != nil && err != sql.ErrNoRows {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
-	if tier == "sandbox" || status != "active" || !periodEnd.Valid || !periodEnd.Time.After(time.Now().UTC()) || !providerReference.Valid || strings.TrimSpace(providerReference.String) == "" {
-		quota = 0
-	}
+	quota = EffectiveMonthlyQuota(tier, status, quota, periodEnd, paymentVerifiedAt, providerReference, time.Now().UTC())
 	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"usedThisMonth": total, "monthlyQuota": quota})
 }
 

@@ -11,6 +11,7 @@ func TestNormalizeApplicationInput(t *testing.T) {
 	input := developerapplications.ApplicationInput{
 		Name: "  Nantty CRM  ", Purpose: "Connect customer support to Nantty business messaging.",
 		CallbackOrigins: []string{"https://CRM.example.com/", "http://localhost:3000", "https://crm.example.com"},
+		RedirectURIs:    []string{"HTTPS://CRM.example.com:443/oauth/callback?tenant=acme", "http://localhost:3000/oauth/callback", "https://crm.example.com/oauth/callback?tenant=acme"},
 		RequestedScopes: []string{"messages:read", "messages:send", "messages:read"},
 	}
 	got, err := developerapplications.NormalizeDeveloperApplicationInput(input)
@@ -22,6 +23,9 @@ func TestNormalizeApplicationInput(t *testing.T) {
 	}
 	if !reflect.DeepEqual(got.RequestedScopes, []string{"messages:read", "messages:send"}) {
 		t.Fatalf("normalized scopes = %#v", got.RequestedScopes)
+	}
+	if !reflect.DeepEqual(got.RedirectURIs, []string{"http://localhost:3000/oauth/callback", "https://crm.example.com/oauth/callback?tenant=acme"}) {
+		t.Fatalf("normalized redirect URIs = %#v", got.RedirectURIs)
 	}
 }
 
@@ -39,6 +43,24 @@ func TestNormalizeApplicationInputRejectsUnsafeOrUnregisteredValues(t *testing.T
 		}},
 		{"callback with credentials", func(input *developerapplications.ApplicationInput) {
 			input.CallbackOrigins = []string{"https://user:password@crm.example.com"}
+		}},
+		{"redirect URI with fragment", func(input *developerapplications.ApplicationInput) {
+			input.RedirectURIs = []string{"https://crm.example.com/oauth/callback#token"}
+		}},
+		{"redirect URI with response parameter", func(input *developerapplications.ApplicationInput) {
+			input.RedirectURIs = []string{"https://crm.example.com/oauth/callback?state=attacker"}
+		}},
+		{"redirect URI with malformed query", func(input *developerapplications.ApplicationInput) {
+			input.RedirectURIs = []string{"https://crm.example.com/oauth/callback?tenant=%zz"}
+		}},
+		{"redirect URI with userinfo", func(input *developerapplications.ApplicationInput) {
+			input.RedirectURIs = []string{"https://attacker@crm.example.com/oauth/callback"}
+		}},
+		{"redirect URI with wildcard host", func(input *developerapplications.ApplicationInput) {
+			input.RedirectURIs = []string{"https://*.example.com/oauth/callback"}
+		}},
+		{"non-local insecure redirect URI", func(input *developerapplications.ApplicationInput) {
+			input.RedirectURIs = []string{"http://crm.example.com/oauth/callback"}
 		}},
 		{"unknown requested scope", func(input *developerapplications.ApplicationInput) { input.RequestedScopes = []string{"account:admin"} }},
 		{"short purpose", func(input *developerapplications.ApplicationInput) { input.Purpose = "CRM" }},

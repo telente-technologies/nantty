@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/url"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -33,7 +34,7 @@ func NormalizeDeveloperApplicationInput(input ApplicationInput) (ApplicationInpu
 	if len(input.Name) < 2 || len(input.Name) > 80 || len(input.Purpose) < 10 || len(input.Purpose) > 1000 {
 		return ApplicationInput{}, errInvalidApplication
 	}
-	if len(input.CallbackOrigins) > 10 || len(input.RequestedScopes) == 0 || len(input.RequestedScopes) > len(supportedApplicationScopes) {
+	if len(input.CallbackOrigins) > 10 || len(input.RedirectURIs) > 10 || len(input.RequestedScopes) == 0 || len(input.RequestedScopes) > len(supportedApplicationScopes) {
 		return ApplicationInput{}, errInvalidApplication
 	}
 	origins := make([]string, 0, len(input.CallbackOrigins))
@@ -49,6 +50,19 @@ func NormalizeDeveloperApplicationInput(input ApplicationInput) (ApplicationInpu
 		}
 	}
 	sort.Strings(origins)
+	redirectURIs := make([]string, 0, len(input.RedirectURIs))
+	seenRedirectURIs := make(map[string]struct{}, len(input.RedirectURIs))
+	for _, value := range input.RedirectURIs {
+		redirectURI, err := normalizeApplicationRedirectURI(value)
+		if err != nil {
+			return ApplicationInput{}, errInvalidApplication
+		}
+		if _, exists := seenRedirectURIs[redirectURI]; !exists {
+			seenRedirectURIs[redirectURI] = struct{}{}
+			redirectURIs = append(redirectURIs, redirectURI)
+		}
+	}
+	sort.Strings(redirectURIs)
 	scopes := make([]string, 0, len(input.RequestedScopes))
 	seenScopes := make(map[string]struct{}, len(input.RequestedScopes))
 	for _, scope := range input.RequestedScopes {
@@ -62,8 +76,86 @@ func NormalizeDeveloperApplicationInput(input ApplicationInput) (ApplicationInpu
 		}
 	}
 	sort.Strings(scopes)
-	input.CallbackOrigins, input.RequestedScopes = origins, scopes
+	input.CallbackOrigins, input.RedirectURIs, input.RequestedScopes = origins, redirectURIs, scopes
 	return input, nil
+}
+
+func normalizeApplicationRedirectURI(value string) (string, error) {
+	raw := strings.TrimSpace(value)
+	parsed, err := url.Parse(raw)
+	if err != nil || raw == "" || len(raw) > 2048 || strings.Contains(raw, "#") || parsed.Opaque != "" || parsed.User != nil || parsed.Host == "" || parsed.Fragment != "" || parsed.ForceQuery {
+		return "", errInvalidApplication
+	}
+	query, err := url.ParseQuery(parsed.RawQuery)
+	if err != nil {
+		return "", errInvalidApplication
+	}
+	for name := range query {
+		if strings.EqualFold(name, "code") || strings.EqualFold(name, "state") || strings.EqualFold(name, "error") {
+			return "", errInvalidApplication
+		}
+	}
+	scheme := strings.ToLower(parsed.Scheme)
+	host := strings.ToLower(parsed.Hostname())
+	if host == "" || strings.HasSuffix(host, ".") || strings.Contains(host, "..") || strings.ContainsAny(host, " /\\%@?#") {
+		return "", errInvalidApplication
+	}
+	ip := net.ParseIP(host)
+	if ip == nil {
+		for _, character := range host {
+			if !(character >= 'a' && character <= 'z' || character >= '0' && character <= '9' || character == '-' || character == '.') {
+				return "", errInvalidApplication
+			}
+		}
+		if len(host) > 253 {
+			return "", errInvalidApplication
+		}
+		for _, label := range strings.Split(host, ".") {
+			if label == "" || len(label) > 63 || strings.HasPrefix(label, "-") || strings.HasSuffix(label, "-") {
+				return "", errInvalidApplication
+			}
+		}
+	}
+	port := parsed.Port()
+	if port != "" {
+		portNumber, err := strconv.Atoi(port)
+		if err != nil || portNumber < 1 || portNumber > 65535 {
+			return "", errInvalidApplication
+		}
+	}
+	if scheme != "https" {
+		local := host == "localhost" || ip != nil && ip.IsLoopback()
+		if scheme != "http" || !local {
+			return "", errInvalidApplication
+		}
+	}
+	path := parsed.EscapedPath()
+	if path == "" {
+		path = "/"
+	}
+	if !strings.HasPrefix(path, "/") || strings.Contains(parsed.Path, "\\") {
+		return "", errInvalidApplication
+	}
+	for _, segment := range strings.Split(parsed.Path, "/") {
+		if segment == "." || segment == ".." {
+			return "", errInvalidApplication
+		}
+	}
+	if scheme == "https" && port == "443" || scheme == "http" && port == "80" {
+		port = ""
+	}
+	authority := host
+	if ip != nil && strings.Contains(host, ":") {
+		authority = "[" + host + "]"
+	}
+	if port != "" {
+		authority = net.JoinHostPort(host, port)
+	}
+	result := scheme + "://" + authority + path
+	if parsed.RawQuery != "" {
+		result += "?" + parsed.RawQuery
+	}
+	return result, nil
 }
 
 func normalizeCallbackOrigin(value string) (string, error) {

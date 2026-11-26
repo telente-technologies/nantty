@@ -222,11 +222,11 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 		t.Fatal(err)
 	}
 	var tier, status string
-	var periodEnd, providerRef sql.NullString
-	if err := db.QueryRowContext(ctx, `SELECT plan_tier, status, current_period_end::text, provider_reference FROM developer_billing_subscriptions WHERE organization_id = $1`, org).Scan(&tier, &status, &periodEnd, &providerRef); err != nil {
+	var periodEnd, providerRef, paymentVerifiedAt sql.NullString
+	if err := db.QueryRowContext(ctx, `SELECT plan_tier, status, current_period_end::text, provider_reference, payment_verified_at::text FROM developer_billing_subscriptions WHERE organization_id = $1`, org).Scan(&tier, &status, &periodEnd, &providerRef, &paymentVerifiedAt); err != nil {
 		t.Fatal(err)
 	}
-	if tier != "sandbox" || status != "active" || periodEnd.Valid || providerRef.Valid {
-		t.Fatalf("sandbox downgrade retained paid metadata: tier=%s status=%s period=%v reference=%v", tier, status, periodEnd, providerRef)
+	if tier != "sandbox" || status != "active" || periodEnd.Valid || providerRef.Valid || paymentVerifiedAt.Valid {
+		t.Fatalf("sandbox downgrade retained paid metadata: tier=%s status=%s period=%v reference=%v verifiedAt=%v", tier, status, periodEnd, providerRef, paymentVerifiedAt)
 	}
 }

@@ -42,6 +42,7 @@ func Mount(mux *http.ServeMux, deployed *container.Container) {
 	mux.Handle("POST "+orgBase+"/billing/checkout", rateLimit(requireAccess(http.HandlerFunc(controller.CheckoutBilling))))
 
 	mux.Handle("POST /api/v1/business/messages", rateLimit(http.HandlerFunc(controller.BusinessMessagingUnavailable)))
+	mux.Handle("POST /api/v1/business/consent-codes/exchange", rateLimit(http.HandlerFunc(controller.ExchangeBusinessConsentCode)))
 	mux.Handle("GET /api/v1/business/conversations", rateLimit(http.HandlerFunc(controller.ListBusinessConversations)))
 	mux.Handle("GET /api/v1/business/conversations/{recipientId}/messages", rateLimit(http.HandlerFunc(controller.ListBusinessMessages)))
 	mux.Handle("GET /api/v1/business/messages/{messageId}", rateLimit(http.HandlerFunc(controller.GetBusinessMessageStatus)))
@@ -127,11 +128,7 @@ func (controller Controller) RevokeCredential(writer http.ResponseWriter, reques
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_CREDENTIAL_ID", "Invalid credential ID."))
 		return
 	}
-	_, err = controller.Container.Database.ExecContext(request.Context(),
-		`UPDATE developer_production_credentials SET status = 'revoked', revoked_at = $1 WHERE id = $2 AND organization_id = $3 AND application_id = $4`,
-		controller.Container.Now().UTC(), credId, orgUUID, appUUID,
-	)
-	if err != nil {
+	if err := controller.store().RevokeCredential(request.Context(), orgUUID, appUUID, credId, principal.UserId); err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
@@ -211,7 +208,7 @@ func (controller Controller) CreateWebhook(writer http.ResponseWriter, request *
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_WEBHOOK", "At least one event is required."))
 		return
 	}
-	wh, secret, err := controller.store().CreateWebhook(request.Context(), orgUUID, appUUID, body.Url, body.Events)
+	wh, secret, err := controller.store().CreateWebhook(request.Context(), orgUUID, appUUID, principal.UserId, body.Url, body.Events)
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
@@ -231,10 +228,7 @@ func (controller Controller) DeleteWebhook(writer http.ResponseWriter, request *
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_WEBHOOK_ID", "Invalid webhook ID."))
 		return
 	}
-	_, err = controller.Container.Database.ExecContext(request.Context(),
-		`DELETE FROM developer_production_webhooks WHERE id = $1 AND organization_id = $2 AND application_id = $3`, whId, orgUUID, appUUID,
-	)
-	if err != nil {
+	if err := controller.store().DeleteWebhook(request.Context(), orgUUID, appUUID, whId, principal.UserId); err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
