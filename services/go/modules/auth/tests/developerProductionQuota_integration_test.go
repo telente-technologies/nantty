@@ -51,6 +51,11 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 	db.SetMaxOpenConns(8)
 	for _, statement := range []string{
 		`CREATE TABLE developer_organizations (id uuid PRIMARY KEY)`,
+		`CREATE TABLE developer_applications (id uuid PRIMARY KEY, organization_id uuid, api_product text, status text)`,
+		`CREATE TABLE developer_production_credentials (id uuid PRIMARY KEY, application_id uuid, organization_id uuid, status text, scopes jsonb)`,
+		`CREATE TABLE developer_business_authorizations (organization_id uuid, application_id uuid, store_id uuid, status text, scopes jsonb, PRIMARY KEY (application_id, store_id))`,
+		`CREATE TABLE accounts (id uuid PRIMARY KEY, status text)`,
+		`CREATE TABLE developer_business_consents (organization_id uuid, application_id uuid, store_id uuid, recipient_account_id uuid, status text, scopes jsonb, PRIMARY KEY (application_id, store_id, recipient_account_id))`,
 		`CREATE TABLE developer_billing_subscriptions (organization_id uuid PRIMARY KEY, plan_tier text, status text, monthly_quota bigint, current_period_end timestamptz, provider_reference text, payment_verified_at timestamptz, updated_at timestamptz)`,
 		`CREATE TABLE developer_production_requests (id uuid PRIMARY KEY, application_id uuid, organization_id uuid, credential_id uuid, method text, path text, status_code integer, latency_ms integer, created_at timestamptz)`,
 		`CREATE TABLE developer_business_messages (id uuid PRIMARY KEY, organization_id uuid, application_id uuid, credential_id uuid, store_id uuid, recipient_account_id uuid, body_text text, status text, idempotency_key varchar(128), request_hash varchar(64), external_message_id text, created_at timestamptz, updated_at timestamptz, UNIQUE (application_id, idempotency_key))`,
@@ -60,8 +65,26 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 		}
 	}
 	org, app, cred, store := uuid.New(), uuid.New(), uuid.New(), uuid.New()
+	secondStore, recipient := uuid.New(), uuid.New()
 	if _, err := db.ExecContext(ctx, `INSERT INTO developer_organizations VALUES ($1)`, org); err != nil {
 		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, `INSERT INTO developer_applications VALUES ($1,$2,'business_messaging','approved')`, app, org); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, `INSERT INTO developer_production_credentials VALUES ($1,$2,$3,'active','["messages:send"]')`, cred, app, org); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, `INSERT INTO accounts VALUES ($1,'active')`, recipient); err != nil {
+		t.Fatal(err)
+	}
+	for _, authorizedStore := range []uuid.UUID{store, secondStore} {
+		if _, err := db.ExecContext(ctx, `INSERT INTO developer_business_authorizations VALUES ($1,$2,$3,'active','["messages:send"]')`, org, app, authorizedStore); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := db.ExecContext(ctx, `INSERT INTO developer_business_consents VALUES ($1,$2,$3,$4,'active','["messages:send"]')`, org, app, authorizedStore, recipient); err != nil {
+			t.Fatal(err)
+		}
 	}
 	if _, err := production.ReserveProductionRequest(ctx, db, org, app, cred, "GET", "/api/v1/business/conversations"); !errors.Is(err, httpserver.NewApiError(http.StatusPaymentRequired, "PRODUCTION_PLAN_REQUIRED", "")) {
 		t.Fatalf("missing subscription must reject production request, got %v", err)
@@ -139,7 +162,6 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 	if _, err := db.ExecContext(ctx, `UPDATE developer_billing_subscriptions SET monthly_quota = 2, current_period_end = now() + interval '1 hour' WHERE organization_id = $1`, org); err != nil {
 		t.Fatal(err)
 	}
-	recipient := uuid.New()
 	messageResults := make(chan production.MessageReservation, 16)
 	messageErrors := make(chan error, 16)
 	for range 16 {
@@ -177,7 +199,7 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 	if firstCount != 1 || replayCount != 15 {
 		t.Fatalf("first=%d replay=%d, want one message and fifteen replays", firstCount, replayCount)
 	}
-	_, err = production.ReserveProductionMessage(ctx, db, org, app, cred, uuid.New(), recipient, "same-key", "hello", time.Now())
+	_, err = production.ReserveProductionMessage(ctx, db, org, app, cred, secondStore, recipient, "same-key", "hello", time.Now())
 	if !errors.Is(err, httpserver.NewApiError(http.StatusConflict, "IDEMPOTENCY_KEY_REUSED", "")) {
 		t.Fatalf("same idempotency key for a different store must be rejected, got %v", err)
 	}
@@ -222,11 +244,41 @@ func TestProductionQuotaReservationIsAtomicAcrossConnections(t *testing.T) {
 		t.Fatal(err)
 	}
 	var tier, status string
-	var periodEnd, providerRef sql.NullString
-	if err := db.QueryRowContext(ctx, `SELECT plan_tier, status, current_period_end::text, provider_reference FROM developer_billing_subscriptions WHERE organization_id = $1`, org).Scan(&tier, &status, &periodEnd, &providerRef); err != nil {
+	var periodEnd, providerRef, paymentVerifiedAt sql.NullString
+	if err := db.QueryRowContext(ctx, `SELECT plan_tier, status, current_period_end::text, provider_reference, payment_verified_at::text FROM developer_billing_subscriptions WHERE organization_id = $1`, org).Scan(&tier, &status, &periodEnd, &providerRef, &paymentVerifiedAt); err != nil {
 		t.Fatal(err)
 	}
-	if tier != "sandbox" || status != "active" || periodEnd.Valid || providerRef.Valid {
-		t.Fatalf("sandbox downgrade retained paid metadata: tier=%s status=%s period=%v reference=%v", tier, status, periodEnd, providerRef)
+	if tier != "sandbox" || status != "active" || periodEnd.Valid || providerRef.Valid || paymentVerifiedAt.Valid {
+		t.Fatalf("sandbox downgrade retained paid metadata: tier=%s status=%s period=%v reference=%v verifiedAt=%v", tier, status, periodEnd, providerRef, paymentVerifiedAt)
+	}
+	for _, revocation := range []struct {
+		name       string
+		revokeSQL  string
+		restoreSQL string
+		id         uuid.UUID
+	}{
+		{name: "application", revokeSQL: `UPDATE developer_applications SET status='suspended' WHERE id=$1`, restoreSQL: `UPDATE developer_applications SET status='approved' WHERE id=$1`, id: app},
+		{name: "credential", revokeSQL: `UPDATE developer_production_credentials SET status='revoked' WHERE id=$1`, restoreSQL: `UPDATE developer_production_credentials SET status='active' WHERE id=$1`, id: cred},
+		{name: "store-grant", revokeSQL: `UPDATE developer_business_authorizations SET status='revoked' WHERE application_id=$1 AND store_id=$2`, restoreSQL: `UPDATE developer_business_authorizations SET status='active' WHERE application_id=$1 AND store_id=$2`, id: app},
+		{name: "customer-consent", revokeSQL: `UPDATE developer_business_consents SET status='revoked' WHERE application_id=$1 AND store_id=$2 AND recipient_account_id=$3`, restoreSQL: `UPDATE developer_business_consents SET status='active' WHERE application_id=$1 AND store_id=$2 AND recipient_account_id=$3`, id: app},
+		{name: "recipient-account", revokeSQL: `UPDATE accounts SET status='suspended' WHERE id=$1`, restoreSQL: `UPDATE accounts SET status='active' WHERE id=$1`, id: recipient},
+	} {
+		args := []any{revocation.id}
+		if revocation.name == "store-grant" || revocation.name == "customer-consent" {
+			args = append(args, store)
+		}
+		if revocation.name == "customer-consent" {
+			args = append(args, recipient)
+		}
+		if _, err := db.ExecContext(ctx, revocation.revokeSQL, args...); err != nil {
+			t.Fatalf("revoke %s: %v", revocation.name, err)
+		}
+		_, err := production.ReserveProductionMessage(ctx, db, org, app, cred, store, recipient, "revoked-"+revocation.name, "hello", time.Now())
+		if !errors.Is(err, httpserver.NewApiError(http.StatusForbidden, "BUSINESS_MESSAGING_AUTHORIZATION_REVOKED", "")) {
+			t.Fatalf("revoked %s must block a new message before reservation, got %v", revocation.name, err)
+		}
+		if _, err := db.ExecContext(ctx, revocation.restoreSQL, args...); err != nil {
+			t.Fatalf("restore %s fixture: %v", revocation.name, err)
+		}
 	}
 }

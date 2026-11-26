@@ -18,6 +18,29 @@ func (controller Controller) GetBusinessApplicationPreview(writer http.ResponseW
 		return
 	}
 	writer.Header().Set("Cache-Control", "no-store")
+	writer.Header().Set("Referrer-Policy", "no-referrer")
+	httpserver.WriteJsonResponse(writer, http.StatusOK, preview)
+}
+
+func (controller Controller) GetBusinessConsentPreview(writer http.ResponseWriter, request *http.Request) {
+	if _, ok := accountID(request); !ok {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.ErrUnauthorized)
+		return
+	}
+	authorization, err := parseBusinessConsentAuthorizationRequest(request.URL.Query())
+	if err != nil {
+		controller.writeBusinessAuthorizationError(writer, request, err)
+		return
+	}
+	preview, err := (Service{Container: controller.Container}).GetBusinessConsentPreview(
+		request.Context(), request.PathValue("applicationID"), request.PathValue("storeID"), authorization,
+	)
+	if err != nil {
+		controller.writeBusinessAuthorizationError(writer, request, err)
+		return
+	}
+	writer.Header().Set("Cache-Control", "no-store")
+	writer.Header().Set("Referrer-Policy", "no-referrer")
 	httpserver.WriteJsonResponse(writer, http.StatusOK, preview)
 }
 
@@ -84,6 +107,8 @@ func (controller Controller) writeBusinessAuthorizationError(writer http.Respons
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusServiceUnavailable, "BUSINESS_AUTHORIZATION_UNAVAILABLE", "Business ownership could not be verified. No access was granted."))
 	case errors.Is(err, errInvalidBusinessConsent):
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_BUSINESS_AUTHORIZATION", "Choose valid identifiers and only messaging permissions requested by the approved app."))
+	case errors.Is(err, errInvalidBusinessAuthorizationCode):
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_BUSINESS_AUTHORIZATION_REQUEST", "The callback, state, or PKCE parameters are invalid or not registered for this app."))
 	default:
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 	}

@@ -336,6 +336,7 @@ const supportAndLegalRoutes: ApiRouteDefinition[] = [
   read("/admin/email-templates", emailTemplateReaders),
   read("/admin/email-templates/:key/preview", emailTemplateReaders),
   read("/admin/developer/applications", ["applications:sellers"]),
+  read("/admin/developer/audit", ["audit:read"]),
   write("POST", "/admin/developer/applications/:id/review", ["applications:sellers"], sensitive),
   write("PATCH", "/admin/developer/organizations/:id/quota", ["config:plans"], sensitive),
   write("POST", "/admin/email-templates/policy-updated/preview", legalReaders),

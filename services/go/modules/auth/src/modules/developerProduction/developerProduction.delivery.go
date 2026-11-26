@@ -8,7 +8,6 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
-	"database/sql"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -171,69 +170,102 @@ func SignWebhookHeader(secret string, ts int64, rawBody []byte) string {
 
 func (controller Controller) VerifyWebhook(writer http.ResponseWriter, request *http.Request) {
 	principal, _ := jwtauth.PrincipalFromContext(request.Context())
-	orgUUID, appUUID, _, err := controller.store().RequireMemberAndApprovedApp(request.Context(), principal.UserId, request.PathValue("organizationID"), request.PathValue("applicationID"), "webhooks.manage", true)
+	orgUUID, err := uuid.Parse(request.PathValue("organizationID"))
 	if err != nil {
-		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_ORGANIZATION_ID", "Invalid organization ID."))
 		return
 	}
-	whId, err := uuid.Parse(request.PathValue("webhookID"))
+	appUUID, err := uuid.Parse(request.PathValue("applicationID"))
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_APPLICATION_ID", "Invalid application ID."))
+		return
+	}
+	whID, err := uuid.Parse(request.PathValue("webhookID"))
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_WEBHOOK_ID", "Invalid webhook ID."))
 		return
 	}
-	var targetUrl, ciphertext string
-	err = controller.Container.Database.QueryRowContext(request.Context(),
-		`SELECT url, COALESCE(signing_secret_ciphertext, '') FROM developer_production_webhooks WHERE id = $1 AND organization_id = $2 AND application_id = $3`,
-		whId, orgUUID, appUUID,
-	).Scan(&targetUrl, &ciphertext)
-	if err == sql.ErrNoRows {
-		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusNotFound, "WEBHOOK_NOT_FOUND", "Webhook not found."))
-		return
-	}
+	targetURL, ciphertext, err := controller.store().PrepareWebhookVerification(request.Context(), orgUUID, appUUID, whID, principal.UserId)
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
-	if err := ValidateWebhookDNS(request.Context(), targetUrl); err != nil {
+	if err := ValidateWebhookDNS(request.Context(), targetURL); err != nil {
+		if recordErr := controller.store().RecordWebhookVerification(request.Context(), orgUUID, appUUID, whID, principal.UserId, "dns_validation_failed"); recordErr != nil {
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, recordErr)
+			return
+		}
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
 	secret, err := OpenWebhookSecret(ciphertext)
 	if err != nil {
+		if recordErr := controller.store().RecordWebhookVerification(request.Context(), orgUUID, appUUID, whID, principal.UserId, "secret_unavailable"); recordErr != nil {
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, recordErr)
+			return
+		}
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusConflict, "WEBHOOK_SECRET_ROTATION_REQUIRED", "Rotate this webhook's signing secret before verifying."))
 		return
 	}
 	challengeBytes := make([]byte, 16)
-	_, _ = rand.Read(challengeBytes)
+	if _, err := rand.Read(challengeBytes); err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
 	challenge := hex.EncodeToString(challengeBytes)
 	eventId := uuid.NewString()
 	now := controller.Container.Now().UTC()
-	payload, _ := json.Marshal(map[string]any{
+	payload, err := json.Marshal(map[string]any{
 		"id": eventId, "event": "webhook.verification", "createdAt": now.Format(time.RFC3339),
 		"data": map[string]any{"challenge": challenge},
 	})
-	req, _ := http.NewRequestWithContext(request.Context(), http.MethodPost, targetUrl, bytes.NewReader(payload))
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
+	req, err := http.NewRequestWithContext(request.Context(), http.MethodPost, targetURL, bytes.NewReader(payload))
+	if err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_WEBHOOK_URL", "Webhook URL is invalid."))
+		return
+	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("nantty-event-id", eventId)
 	req.Header.Set("nantty-signature", SignWebhookHeader(secret, now.Unix(), payload))
 	resp, err := NewSsrfSafeHttpClient(8 * time.Second).Do(req)
 	if err != nil {
-		_, _ = controller.Container.Database.ExecContext(request.Context(), `UPDATE developer_production_webhooks SET last_error = $1, updated_at = $2 WHERE id = $3`, err.Error(), now, whId)
+		if recordErr := controller.store().RecordWebhookVerification(request.Context(), orgUUID, appUUID, whID, principal.UserId, "delivery_failed"); recordErr != nil {
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, recordErr)
+			return
+		}
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadGateway, "WEBHOOK_VERIFICATION_FAILED", "Endpoint did not respond to verification challenge."))
 		return
 	}
 	defer resp.Body.Close()
-	bodyRaw, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
+	bodyRaw, err := io.ReadAll(io.LimitReader(resp.Body, 4096))
+	if err != nil {
+		if recordErr := controller.store().RecordWebhookVerification(request.Context(), orgUUID, appUUID, whID, principal.UserId, "delivery_failed"); recordErr != nil {
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, recordErr)
+			return
+		}
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadGateway, "WEBHOOK_VERIFICATION_FAILED", "Endpoint response could not be read."))
+		return
+	}
 	var ack struct {
 		Challenge string `json:"challenge"`
 	}
 	_ = json.Unmarshal(bodyRaw, &ack)
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 || ack.Challenge != challenge {
-		_, _ = controller.Container.Database.ExecContext(request.Context(), `UPDATE developer_production_webhooks SET last_error = $1, updated_at = $2 WHERE id = $3`, fmt.Sprintf("status=%d challenge_mismatch", resp.StatusCode), now, whId)
+		if recordErr := controller.store().RecordWebhookVerification(request.Context(), orgUUID, appUUID, whID, principal.UserId, "challenge_mismatch"); recordErr != nil {
+			httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, recordErr)
+			return
+		}
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadGateway, "WEBHOOK_CHALLENGE_MISMATCH", "Endpoint must return 2xx with JSON {\"challenge\": \"...\"}."))
 		return
 	}
-	_, _ = controller.Container.Database.ExecContext(request.Context(), `UPDATE developer_production_webhooks SET verified_at = $1, last_error = NULL, updated_at = $1 WHERE id = $2`, now, whId)
+	if err := controller.store().RecordWebhookVerification(request.Context(), orgUUID, appUUID, whID, principal.UserId, "verified"); err != nil {
+		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
+		return
+	}
 	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"verified": true, "verifiedAt": now})
 }
 
@@ -249,30 +281,9 @@ func (controller Controller) RotateWebhookSecret(writer http.ResponseWriter, req
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusBadRequest, "INVALID_WEBHOOK_ID", "Invalid webhook ID."))
 		return
 	}
-	raw := make([]byte, 24)
-	if _, err := rand.Read(raw); err != nil {
-		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
-		return
-	}
-	secret := "whsec_" + hex.EncodeToString(raw)
-	ciphertext, err := SealWebhookSecret(secret)
+	secret, preview, err := controller.store().RotateWebhookSecret(request.Context(), orgUUID, appUUID, whId, principal.UserId)
 	if err != nil {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
-		return
-	}
-	preview := "whsec_••••" + secret[len(secret)-4:]
-	now := controller.Container.Now().UTC()
-	res, err := controller.Container.Database.ExecContext(request.Context(),
-		`UPDATE developer_production_webhooks SET signing_secret_preview = $1, signing_secret_hash = $2, signing_secret_ciphertext = $3, updated_at = $4
-		 WHERE id = $5 AND organization_id = $6 AND application_id = $7`,
-		preview, Sha256Hex(secret), ciphertext, now, whId, orgUUID, appUUID,
-	)
-	if err != nil {
-		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
-		return
-	}
-	if rows, _ := res.RowsAffected(); rows == 0 {
-		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(http.StatusNotFound, "WEBHOOK_NOT_FOUND", "Webhook not found."))
 		return
 	}
 	httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{"signingSecret": secret, "signingSecretPreview": preview})

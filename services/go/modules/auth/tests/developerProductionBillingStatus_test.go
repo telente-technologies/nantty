@@ -33,3 +33,30 @@ func TestEffectiveDeveloperBillingStatus(t *testing.T) {
 		}
 	}
 }
+
+func TestEffectiveMonthlyQuotaRequiresVerifiedActivePaidSubscription(t *testing.T) {
+	now := time.Date(2026, 11, 26, 0, 0, 0, 0, time.UTC)
+	future := sql.NullTime{Time: now.Add(time.Hour), Valid: true}
+	verified := sql.NullTime{Time: now, Valid: true}
+	reference := sql.NullString{String: "settled-payment", Valid: true}
+	for _, tc := range []struct {
+		name, tier, status           string
+		periodEnd, paymentVerifiedAt sql.NullTime
+		providerReference            sql.NullString
+		want                         int64
+	}{
+		{name: "active verified paid", tier: "starter", status: "active", periodEnd: future, paymentVerifiedAt: verified, providerReference: reference, want: 100000},
+		{name: "sandbox", tier: "sandbox", status: "active", want: 0},
+		{name: "missing settlement timestamp", tier: "starter", status: "active", periodEnd: future, providerReference: reference, want: 0},
+		{name: "missing provider reference", tier: "starter", status: "active", periodEnd: future, paymentVerifiedAt: verified, want: 0},
+		{name: "expired period", tier: "starter", status: "active", periodEnd: sql.NullTime{Time: now.Add(-time.Hour), Valid: true}, paymentVerifiedAt: verified, providerReference: reference, want: 0},
+		{name: "inactive status", tier: "starter", status: "canceled", periodEnd: future, paymentVerifiedAt: verified, providerReference: reference, want: 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got := developerproduction.EffectiveMonthlyQuota(tc.tier, tc.status, 100000, tc.periodEnd, tc.paymentVerifiedAt, tc.providerReference, now)
+			if got != tc.want {
+				t.Fatalf("EffectiveMonthlyQuota() = %d, want %d", got, tc.want)
+			}
+		})
+	}
+}

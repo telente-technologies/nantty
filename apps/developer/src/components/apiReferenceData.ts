@@ -609,6 +609,58 @@ res, err := http.DefaultClient.Do(req)`,
     ],
   },
   {
+    id: "exchange-business-consent-code",
+    group: "Production Business Messaging",
+    method: "POST",
+    baseUrl: "https://api.nantty.com",
+    path: "/api/v1/business/consent-codes/exchange",
+    title: "Redeem customer consent code",
+    summary: "Exchanges a one-time S256 PKCE code for a receipt bound to the exact customer, application, store and scopes that are still authorized.",
+    statusLabel: "Production Consent",
+    statusTone: "read",
+    updatedAt: "Nov 26, 2026",
+    authLabel: "Bearer ntlive_...",
+    scopes: [],
+    headers: [
+      { name: "Authorization", type: "string", required: true, description: "Active production credential belonging to the application that requested consent." },
+      { name: "Content-Type", type: "string", required: true, description: "Must be application/json." },
+    ],
+    bodyParams: [
+      { name: "code", type: "string", required: true, description: "Short-lived, single-use authorization code returned to the exact registered callback.", constraints: "43 base64url characters; expires in 60 seconds" },
+      { name: "redirectUri", type: "string", required: true, description: "Exact registered callback URI used in the customer's approval request." },
+      { name: "codeVerifier", type: "string", required: true, description: "PKCE verifier whose S256 challenge was sent before approval; keep this on the app server.", constraints: "43–128 RFC 7636 characters" },
+    ],
+    samples: {
+      curl: `curl -X POST "https://api.nantty.com/api/v1/business/consent-codes/exchange" \\
+  -H "Authorization: Bearer <ntlive_key>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"code":"<one_time_code>","redirectUri":"https://merchant.example/callback","codeVerifier":"<server_side_pkce_verifier>"}'`,
+      node: `const response = await fetch("https://api.nantty.com/api/v1/business/consent-codes/exchange", {
+  method: "POST",
+  headers: { Authorization: "Bearer " + process.env.LIVE_KEY, "Content-Type": "application/json" },
+  body: JSON.stringify({ code, redirectUri, codeVerifier: pkceVerifier }),
+});
+const consentReceipt = await response.json();`,
+      python: `response = requests.post(
+    "https://api.nantty.com/api/v1/business/consent-codes/exchange",
+    headers={"Authorization": f"Bearer {os.environ['LIVE_KEY']}"},
+    json={"code": code, "redirectUri": redirect_uri, "codeVerifier": pkce_verifier},
+    timeout=10,
+)
+consent_receipt = response.json()`,
+      go: `payload := strings.NewReader(\`{"code":"<one_time_code>","redirectUri":"https://merchant.example/callback","codeVerifier":"<server_side_pkce_verifier>"}\`)
+req, _ := http.NewRequest("POST", "https://api.nantty.com/api/v1/business/consent-codes/exchange", payload)
+req.Header.Set("Authorization", "Bearer "+os.Getenv("LIVE_KEY"))
+req.Header.Set("Content-Type", "application/json")
+res, err := http.DefaultClient.Do(req)`,
+    },
+    responses: [
+      { status: 200, label: "200 OK", tone: "success", description: "Consent receipt; this response is not a Nantty user access token.", headers: { "Content-Type": "application/json", "Cache-Control": "no-store" }, body: { consentId: "64d88b6a-c40f-4515-883f-f83e0ccf4438", applicationId: "7f7675e7-70c4-491e-9532-14fa4085db0a", storeId: "8f7675e7-70c4-491e-9532-14fa4085db0a", recipientAccountId: "92a7db5f-38fa-44c2-9bc1-40eb6cbd910f", scopes: ["messages:send", "conversations:read"], grantedAt: "2026-11-26T10:30:00Z" } },
+      { status: 401, label: "401 Unauthorized", tone: "danger", description: "Credential is invalid, or code is expired, replayed, revoked, or bound to a different application or callback.", headers: { "Content-Type": "application/json" }, body: { error: { code: "INVALID_AUTHORIZATION_CODE", message: "The business consent code is invalid, expired, already used, or no longer authorized." } } },
+      { status: 403, label: "403 Forbidden", tone: "warn", description: "The application's active credential does not include every customer-approved scope.", headers: { "Content-Type": "application/json" }, body: { error: { code: "INSUFFICIENT_SCOPE", message: "The application credential does not include every customer-approved scope." } } },
+    ],
+  },
+  {
     id: "list-business-messages",
     group: "Production Business Messaging",
     method: "GET",

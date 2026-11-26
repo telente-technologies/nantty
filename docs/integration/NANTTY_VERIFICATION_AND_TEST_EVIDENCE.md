@@ -1,8 +1,70 @@
 # Nantty Verification & Test Evidence
 
+## SES staging DNS propagation recheck — 2026-11-26
+
+- Public `dig` currently resolves all three SES DKIM CNAMEs to their matching `*.dkim.amazonses.com` targets, `bounce.staging.nantty.com` MX priority 10 to `feedback-smtp.eu-north-1.amazonses.com`, and its SPF TXT to `v=spf1 include:amazonses.com ~all`.
+- `_dmarc.nantty.com` still publishes `p=reject; sp=reject`; `_dmarc.staging.nantty.com` has no TXT result. No DNS was modified by this check.
+- This verifies resolver-visible DNS only. SES identity/DKIM/MAIL FROM status must still be re-polled; AWS send status, Terraform state adoption, hosted plan, email runtime and actual authorized test delivery remain unverified.
+
+## Compatible dependency refresh and local capacity — 2026-11-26
+
+- Updated compatible in-range dependencies and lockfiles across pnpm, Go, Python and Elixir; retained Expo SDK-managed native package versions. `pnpm audit --audit-level=high` reported no known vulnerabilities. Relevant Node 26.13 checks passed for Webapp, Developer, Admin and Sandbox; Python suite: 393 passed, 2 skipped; mypy: no issues across 597 files; Ruff passed; Elixir compile and 110 tests passed.
+- A post-refresh full Auth Go test/vet command was started against isolated PostgreSQL but interrupted during a cold compile when a separate Gradle build was active and `/tmp` had only 2.1 GB available. It is explicitly not counted as passing. Capacity-safe Go reruns remain required after the other build releases space.
+- Removed only regenerable caches. `df -h /` initially showed 21 GB available; a concurrent unrelated Gradle build then reduced it to 17 GB. No active Gradle cache, project source, database volume, or user data was removed. `git diff --check` passed. The current checkout is `main` at the same commit as `origin/main`; GitHub reports no open PRs, and 154 paths remain locally modified/untracked.
+- Compatibility boundary: local Python is 3.14.8; `uv python install 3.14.10` reported no build for this host. Expo-managed native dependencies, major-version candidates and native-sensitive packages were not force-upgraded. Native Android/iOS builds and full Go workspace verification were not performed after these dependency changes.
+
+## Go Ads deployable subtree compilation — 2026-11-26
+
+- `GOTMPDIR=/tmp GOMAXPROCS=2 go test -p 1 ./goAds/...` from `services/go/deployables`: **passed** (`nantty/deployables/goAds` has no test files). This fills the individually unverified Ads subtree from the earlier capacity-limited aggregate run.
+- The aggregate `services/go/deployables` module remains unverified as a single run; this bounded subtree check does not claim the aggregate passed.
+
+## Business Messaging consent approval and denial callbacks (2026-11-26)
+
+- Implemented an authenticated denial endpoint in addition to the store-bound S256 PKCE approval-code flow. It revalidates that the Business Messaging app is approved, the exact store authorization remains active, and the callback URI exactly matches an allowlisted URI before returning `error=access_denied` plus the original `state`. It creates neither consent nor authorization-code data. The response is `no-store` and uses `no-referrer`.
+- Added PostgreSQL integration test `TestBusinessConsentDenialReturnsOnlyAllowlistedCallbackAndState`, covering anonymous rejection, exact callback host/path and retained fixed query parameter, denial/error/state semantics, unknown callback rejection, revoked store-grant rejection, and zero consent/code rows. The first run exposed a 500 error mapping for revoked grants; after routing through the existing Business Authorization error mapper, the test passed.
+- `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' GOTMPDIR=/tmp go test ./tests -run '^TestBusinessConsentDenialReturnsOnlyAllowlistedCallbackAndState$' -count=1 -p 1`: **passed**. Full Auth `go test ./... -count=1 -p 1`: **passed**. `GOTMPDIR=/tmp go vet ./...`: **passed**. Webapp consent utility tests under Node 26.13.0: **4/4 passed**; full Webapp suites passed contracts **175/175**, utilities **373/373**, services **33/33**, typecheck and focused ESLint **passed**. Developer portal tests **36/36**, typecheck and focused ESLint **passed**. `check-backend-file-lengths.sh` and `git diff --check`: **passed**.
+- Approval-code integration separately verifies code hash storage, expiry, exact redirect, PKCE, wrong-app credential, replay, consent revocation, same-scope regrant invalidation, and fresh code after reapproval. The Auth full suite includes it.
+- No signed-in browser, external integration callback, staging deployment or persistent database migration was exercised. Production sending remains disabled pending a distinct customer-opted-in business-managed mode, eligibility/window rules, canonical Social business-managed dispatch/storage, inbound synchronization and delivery/read receipts. Personal E2EE conversations are not eligible for this integration.
+
+## Customer Business Messaging consent review (2026-11-26)
+
+- Added authenticated Webapp route `/connect/business-messaging` for one `applicationId` and one `storeId`. The page previews the approved app and authorized store, requires the user to choose permissions, and requires a separate confirmation before calling the authenticated consent grant endpoint. Repeated/malformed resource parameters are rejected; opening the route alone does not grant permission.
+- Auth preview route is `GET /api/v1/account/business-messaging/applications/{applicationID}/stores/{storeID}/consent-preview`. PostgreSQL query only returns an approved Business Messaging app with an active grant for the exact store and supplies `availableScopes` as the intersection of the requested scopes and the merchant's grant. Focused integration test: `go test ./tests -run '^TestBusinessConsentPreviewRequiresApprovedAppAndActiveStoreGrant$' -count=1 -p 1` in `services/go/modules/auth`: **passed**.
+- Webapp scope/parameter tests: **3/3 passed** under Node 26.13.0. Webapp `pnpm typecheck` and focused ESLint over the new route/component/service and consent utility/test both exited 0. `bash services/scripts/check-backend-file-lengths.sh` reported all backend files at most 300 lines, and `git diff --check` passed.
+- After adding `/connect`, the complete Webapp suites passed under Node 26.13.0: contracts **175/175**, utilities **373/373**, and services **33/33**. The first contract run correctly failed because `connect` was not reserved from username routing; the route was added to the Webapp and Go Identity reserved-route registries, and the rerun passed.
+- Full Auth module `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./... -count=1 -p 1`: **passed**, including the new Postgres integration. The test created and cleaned a unique schema; the shared test database was not migrated or modified persistently.
+- The later consent callback section above adds local authorization-code/PKCE approval and denial callbacks; browser/staging verification is still outstanding. UI was not rendered in a browser, and no real external app was used. Production sending remains disabled.
+
+## Go workspace-wide test attempt (2026-11-26)
+
+- `go test ./...` at `services/go` failed because the workspace root is not a Go module. A sequential per-module run was then attempted.
+- Passed before the environment limit: contracts packages (no test files), `deployables/flutterwaveFlows/tests`, `deployables/goCommerce/tests`, `deployables/goMoney/tests`, and `deployables/goIdentity` packages (no test files).
+- The aggregate `deployables` module exhausted the 7.8 GB `/tmp` tmpfs while compiling `goLive`; Go reported `no space left on device` across Live and dependent Trust/Moderation packages. The run exited nonzero and did not reach all listed modules. This is an incomplete verification attempt, not a source-level test failure or a workspace pass.
+- Follow-up complete `go test ./... -count=1 -p 2` runs passed for modules Admin, Ads, Catalog, Creators, Currency, Escrow, Inventory, Ledger, Orders, Subscriptions, Users, Wallet, and Platform. Full-module Auth, Analytics and Payments checks also passed separately. Live and Moderation test packages passed `go test ./tests/... -count=1 -p 2`; this does not establish a full build of every source package in either module.
+- Post-run check after the initial failure: `/tmp` had 7.6 GB free and no surviving Go build directory; root filesystem had 2.0 GB free before follow-up cache growth. After scoped tests, the 11 GB regenerable Go compiler cache was removed with `go clean -cache` to honor the prior disk-space request; module downloads, source, Docker volumes, and user files were preserved. Root free space returned to 12 GB. Full aggregate `deployables` compilation remains unverified and needs smaller package batches or more build-temp/disk capacity.
+
+### Capacity-safe deployable follow-up (2026-11-26)
+
+- Complete module runs `GOTMPDIR=/var/tmp go test ./... -count=1 -p 1` passed for `services/go/modules/live` and `services/go/modules/moderation`.
+- Individual deployable trees passed with `GOTMPDIR=/tmp`: `goLive/...`, `goCommerce/...`, `goIdentity/...`, and `goTrust/...`. Identity and Trust currently report no test files, but their packages compiled. The earlier aggregate output also reached `goAds` (no test files) and `flutterwaveFlows/tests`; `goMoney` tests passed before the aggregate capacity failure.
+- The aggregate `services/go/deployables` run using `/var/tmp` still failed with `no space left on device`; a separate cold-cache `GOTMPDIR=/tmp go test ./goMoney/... -count=1 -p 1` subsequently passed, including `goMoney/tests`. The individual tree results provide package-level verification but are not an aggregate deployables pass.
+- `go clean -cache` removed only the regenerable Go build cache. The module download cache was retained (5.5 GB at the post-clean check); repository files and Docker data were untouched. Root free space was restored to approximately 12 GB and `/tmp` to 7.3 GB. `git diff --check` passed after documentation changes.
+
+## Supported-Node Webapp suite and Smile retry guidance regression (2026-11-26)
+
+- Ran with an isolated Node 26.13.0 runtime, matching the repository requirement. `pnpm --filter @nantty/webapp test:contracts`: **175/175 passed**; `test:units`: **373/373 passed**; `test:services`: **33/33 passed** after correcting two stale assertions in `smileIdWebIntegration.service.test.ts` to match the current close-before-retry safety copy. `pnpm --filter @nantty/webapp typecheck`, focused `connectedBusinessAppsSection.tsx` ESLint, and Business Messaging scope tests (**2/2**) passed.
+- The assertions now require that retry guidance tells users to start another capture only after Nantty confirms the prior attempt is closed. No production retry/cancellation behavior was changed.
+- This is automated local verification; authenticated browser behavior, live Smile sandbox, and deployment remain unverified.
+
+## Developer SSO authorize parameter hardening (2026-11-26)
+
+- Identity now rejects missing, blank, too-short, or over-512-byte OAuth `state`, duplicate required authorize parameters, and non-canonical/incorrect-length S256 PKCE challenges before authenticating or issuing an authorization code. The normal generated Developer state (24 random bytes, base64url) and challenge (SHA-256 of the verifier) remain compatible.
+- Route integration regression passes for each invalid-input case and confirms a valid state proceeds to the existing authentication check. Full Auth test suite passes against disposable PostgreSQL 17; `go vet ./...`, backend file-length gate, and `git diff --check` pass. This does not verify cross-domain SSO in a real browser or deployed environment.
+
 ## Flutterwave checkout payload checksum finding (2026-11-26)
 
-- Reviewed `go/weak-sensitive-data-hashing` at `services/go/modules/payments/src/integrations/flutterwaveCharges.integration.go`. Flutterwave's current Checksum documentation mandates exactly this two-stage SHA-256 `payload_hash` construction; the hash is a checkout integrity checksum, not password storage or authentication. Replacing it with a password KDF or a different MAC would break provider interoperability. Renamed the input from `secretKey` to `merchantCredential` and documented the protocol purpose. GitHub alert #75 remains open: delegated alert dismissal is enforced and the current GitHub token lacks `admin:repo_hook`; the authorized request-and-approval workflow is still required. The nonfunctional inline suppression directive was removed.
+- Reviewed `go/weak-sensitive-data-hashing` at `services/go/modules/payments/src/integrations/flutterwaveCharges.integration.go`. Flutterwave's current Checksum documentation mandates exactly this two-stage SHA-256 `payload_hash` construction; the hash is a checkout integrity checksum, not password storage or authentication. Replacing it with a password KDF or a different MAC would break provider interoperability. Renamed the input from `secretKey` to `merchantCredential`. GitHub alert #75 remains open: delegated alert dismissal is enforced and the current GitHub token lacks `admin:repo_hook`; the authorized request-and-approval workflow is still required. No inline suppression directive was retained.
+- On 2026-11-26, re-ran `go test ./tests/integrations/paymentsTesting -run '^TestFlutterwavePayloadHashMatchesDocumentedChecksumVector$' -count=1 -v` in `services/go/modules/payments`; the expected vector passed. This does not clear the remote CodeQL alert or substitute for a fresh CodeQL scan.
 - Added a fixed expected checksum test independently computed with OpenSSL; the fake-provider parity check alone was not independent.
 - `go test ./tests/integrations/paymentsTesting -run 'TestFlutterwave(PayloadHashMatchesDocumentedChecksumVector|CheckoutIsHashedAndVerifiedByIdWithTheExactReference)$' -count=1`: **passed**. `go test ./...` in `services/go/modules/payments`: **passed**.
 - The source aligns with Flutterwave's documented checksum. A fresh CodeQL analysis and delegated dismissal approval remain pending; no live Flutterwave account or charge was used. Source: https://developer.flutterwave.com/docs/checksum
@@ -25,7 +87,7 @@
 
 - Replaced best-effort webhook enqueue after message dispatch with one PostgreSQL transaction that updates the accepted message and queues matching verified endpoint deliveries. Outbox read, JSON decode, and insert errors now fail the confirmation transaction; endpoint subscriptions share one event ID/envelope and are filtered by exact event or wildcard.
 - `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./tests -run '^TestProductionMessageConfirmationAndWebhookOutboxAreAtomic$' -count=1 -v` in `services/go/modules/auth`: **passed**. Isolated-schema coverage verifies matching/wildcard filtering, exclusion of unrelated/inactive/unverified/other-application endpoints, idempotent replay without duplicate queue rows, and rollback of the message status when outbox insertion fails.
-- The public production send route remains mounted to `503 BUSINESS_MESSAGING_UNAVAILABLE`; this test validates the internal persistence contract only. It does not verify canonical encrypted Social dispatch, real webhook HTTP delivery, message reconciliation after downstream acceptance, migration rollout, or staging.
+- The public production send route remains mounted to `503 BUSINESS_MESSAGING_UNAVAILABLE`; this test validates the internal persistence contract only. It does not verify a distinct Social business-managed dispatch/storage path, real webhook HTTP delivery, message reconciliation after downstream acceptance, migration rollout, or staging. Personal E2EE messages must not be used as a fallback.
 
 ## Production webhook worker persistence failures (2026-11-26)
 
@@ -34,7 +96,7 @@
 - The same integration test now also uses a database trigger to deactivate a webhook after claim but before the just-in-time lookup; the worker skips sending and the transport confirms zero requests. The worker reads the current URL and encrypted signing secret only for a still-pending leased delivery with an active, verified endpoint and approved application. For `business.message.dispatched`, it additionally requires the persisted message/store grant and recipient consent to remain active with `messages:send`.
 - `TestProductionWebhookWorkerRevalidatesBusinessAuthorization` passed against isolated PostgreSQL 17. Triggers suspend the application or revoke the store grant after both deliveries are claimed; the worker issues zero requests. Recipient consent is also part of the required query predicate. These checks complement the endpoint-deactivation race case.
 - Auth migration upgrade/rollback/replay passed with the additive lease migration. Delivery to an actual HTTPS receiver and end-to-end event delivery remain unverified. Delivery remains at-least-once if a process stops after remote acceptance; consumers must deduplicate using `eventId`.
-- After endpoint, application, store-grant, and recipient-consent revalidation changes, `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' GOMAXPROCS=4 go test -p 2 ./...` in `services/go/modules/auth` passed, including all Auth integration packages (54.318s). The backend file-length gate and `git diff --check` passed; the worker is 299 lines and all backend files remain at or below the 300-line limit.
+- After endpoint, application, store-grant, and recipient-consent revalidation changes, full `go test ./... -count=1` in `services/go/modules/auth` passed with isolated PostgreSQL 17 integration enabled (51.475s); race-enabled worker/revocation tests passed (1.624s). The previous backend file-length gate and `git diff --check` passed; the worker remains under the repository's 300-line backend-file limit. Actual HTTPS receiver and deployed worker behavior remain unverified.
 
 ## Sandbox PostgreSQL integration and application suite (2026-11-26)
 
@@ -53,6 +115,43 @@
 - `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./tests -run '^TestAdminQuotaAdjustmentCannotGrantOrChangePaidEntitlements$' -count=1 -v` in `services/go/modules/auth`: **passed**.
 - Confirms missing/sandbox/unverified paid plans cannot be created or activated by the admin quota endpoint; after a verified active paid subscription is present, quota changes preserve plan tier, status, billing period, and provider reference.
 - The test uses temporary tables scoped to the test connection. It does not verify the live Admin browser, all admin operations, or a deployed migration.
+
+## Admin Developer quota adjustment UI and audit reason (2026-11-26)
+
+- `ListApplications` now includes tier, subscription state, monthly quota and a verified/current-period hint. Admin users with `config:plans` can open the quota adjustment confirmation only for eligible-looking active paid subscriptions; the API remains authoritative and rechecks the verified paid state under row lock.
+- The quota adjustment requires step-up and a 5–1000 Unicode-character reason. The reason is persisted in the same transaction as the quota and audit row; plan, subscription status, period and provider reference remain unchanged. The UI explicitly describes these constraints.
+- `TestAdminDeveloperApplicationListIncludesSubscriptionContext`, `TestAdminQuotaAdjustmentRequiresBoundedReason`, existing paid-entitlement tests, audit-write rollback, and metadata-only audit pagination tests passed against isolated PostgreSQL; Admin TypeScript typecheck, focused lint and 86 contract tests passed on Node 26.13.0. Full Auth `go test -p 2 ./... -count=1` and `go vet ./...` passed before adding the listing regression, then the focused affected Admin integration set passed again. Browser/deployed execution remains outstanding.
+
+## Admin Developer operations audit-failure rollback (2026-11-26)
+
+- `TestAdminDeveloperOperationsRollbackWhenAuditWriteFails` creates connection-scoped temporary tables whose constraints reject the admin audit action. It verifies both `UpdateQuota` and `ReviewApplication` return 500 and leave the prior subscription quota/application status unchanged.
+
+## Admin Developer audit read surface (2026-11-26)
+
+- Added `GET /api/v1/admin/developer/audit`, guarded by verified staff authentication and `audit:read`, with bounded keyset pagination (1–100 entries per page).
+- The endpoint returns actor, organization, action, subject and timestamp metadata only; it intentionally does not serialize arbitrary before/after JSON state.
+- `TestAdminDeveloperAuditReadIsPaginatedAndOmitsStatePayloads` passed against isolated PostgreSQL, including cursor continuation and state-payload exclusion. On the repository-supported Node 26.13.0, Admin typecheck, full ESLint (0 errors; 53 warnings), all 86 Admin contract tests, and the optimized production build passed. Browser rendering and deployed staff-permission workflow remain outstanding.
+
+## Business Messaging consent frontend current-tree verification (2026-11-26)
+
+- Using Node 26.13.0, current Webapp contract tests passed 175/175, utility tests 373/373, and service tests 33/33; Webapp typecheck and focused ESLint for the customer consent page, connected-app settings and consent-scope utilities passed.
+- These checks do not verify a signed-in browser approval/denial callback, live Identity/Gateway configuration, deployed redirect handling, or production dispatch. Production send remains gated pending the separate customer-opted-in business-managed messaging mode and durable delivery/receipt integration.
+- `TestAdminApplicationReviewRequiresBoundedReason` verifies short/oversized reasons and unsupported decisions are rejected, while a trimmed five-character reason passes validation. The Developer Operations UI uses the shared step-up confirmation dialog and submits the entered reason rather than a generic fixed string.
+- Both focused tests passed. The full Auth `go test ./... -count=1` suite then passed with `AUTH_TEST_DATABASE_URL` directed at isolated PostgreSQL 17, including database and migration integrations; `go vet ./...` passed. Admin typecheck and focused ESLint passed under Node 24.19.0, below the required Node >=26.13.0. No persistent application schema was altered.
+- This verifies transactional audit integrity for these two operations only; it does not verify all admin mutations, browser behavior, or deployed workflows.
+
+## Store-scoped customer Business Messaging consent (2026-11-26)
+
+- `AUTH_TEST_DATABASE_URL='postgres://postgres:local-only-test-password@127.0.0.1:15435/auth_test?sslmode=disable' go test ./tests -run '^(TestBusinessMessagingConsentIsAccountControlledAndAudited|TestBusinessMessagingConsentRequiresApprovedApplicationAndRequestedScopes|TestProductionMessageHistoryAndStatusAreTenantAndConsentScoped|TestProductionWebhookWorkerReportsPersistenceFailures|TestProductionWebhookWorkerRevalidatesBusinessAuthorization)$' -count=1` in `services/go/modules/auth`: **passed** against a disposable PostgreSQL 17 container. Full Auth `go test ./... -count=1` also passed with integration tests enabled; `go vet ./...` passed.
+- Coverage verifies a customer can maintain separate consent for two stores under one app; a store without an active app grant cannot receive consent; message history for one store is denied when the active consent is for another; legacy null-store consent cannot authorize scoped history; and webhook revalidation uses the message's exact store.
+- Added Auth migration `20261127100000_scope_business_messaging_consent_to_store`; migration upgrade/rollback/replay is exercised by the full Auth migration test suite. Webapp typecheck passed; runtime warns Node 24.19.0 is below its required >=26.13.0. `git diff --check` passed. The local disposable Postgres container was stopped and removed after verification; no persistent database was changed.
+- At the time of this baseline, the customer consent UI had no OAuth-initiated grant handoff. The later callback section above implements local approval/denial and PKCE redemption; production sending remains deliberately mounted to 503. No live Social dispatch, browser journey or staging behavior is claimed.
+
+### Merchant revocation propagation (2026-11-26)
+
+- Revoking an app/store authorization now revokes every active customer consent for that exact organization/application/store in the same serializable database transaction. Each customer consent audit row records the customer as recipient and the merchant as actor; failure to persist any consent audit rolls back both the merchant authorization and customer consent changes.
+- Regranting the merchant authorization does not reactivate old customer consent; the customer must grant again. The owner-facing authorization list reports current state (active after a subsequent regrant), while audit rows preserve the revocation event.
+- Verified with the focused PostgreSQL integration test, the Auth test suite (`go test ./tests/... -count=1`), migration upgrade/rollback/replay, `go vet ./...`, migration checksum regeneration, backend 300-line guard, and `git diff --check`. All passed against a disposable PostgreSQL 17 container. This does not enable production sending or verify a deployed environment.
 
 ## Auth Identity migration upgrade, rollback, and replay (2026-11-26)
 
@@ -149,3 +248,75 @@ All 10 frontend applications pass `tsc --noEmit` with 0 errors:
 - `apps/webapp/src/services/smileIdWebIntegration.service.test.ts:105` & `apps/webapp/src/contracts/errorExperience.test.ts:72`: Pre-existing copy/markup mismatches unrelated to parity work.
 - `services/typescript/{social,notifications}`: `prisma generate` fails in this sandbox because outbound access to `binaries.prisma.sh` is blocked by network egress policy.
 - Go (`go`), Elixir (`mix`), and Python (`pytest`) toolchains are not installed in this sandbox container, so `services/go`, `services/elixir`, and `services/python` suites require execution in CI/local toolchain environments.
+# Go Analytics PostgreSQL runtime verification — 2026-11-26
+
+- Added `services/go/modules/analytics/tests/analytics_postgres_integration_test.go`, gated by `ANALYTICS_TEST_DATABASE_URL`.
+- Against the dedicated local PostgreSQL 17 test container, the test created an isolated unique schema, applied the actual embedded migration, persisted internal events, checked duplicate-event replay did not overwrite the first accepted event, verified seller totals are restricted to the requested store, and purged an expired event. Cleanup dropped the isolated test schema.
+- `ANALYTICS_TEST_DATABASE_URL=... go test ./... -count=1` — passed.
+- `go vet ./...` — passed.
+- `bash services/scripts/check-backend-file-lengths.sh` — passed (all backend files <= 300 lines).
+- Scope boundary: this is local database integration evidence, not deployment or production event-pipeline evidence.
+
+# Developer OAuth redirect URI registry — 2026-11-26
+
+- Added the separate `redirect_uris` app-registration field and additive migration `20261127120000_add_developer_application_redirect_uris`; the existing `callback_origins` contract is unchanged. Up to 10 normalized URIs persist through create/list/update, are included in audit snapshots and in create-idempotency fingerprints, and are editable in the Developer application form.
+- `AUTH_TEST_DATABASE_URL=postgres://… go test ./... -count=1 -p 1` in `services/go/modules/auth` — passed with the isolated PostgreSQL 17 test DB. This includes the application create/list/update and idempotency regression, normalization/security cases and migration upgrade/rollback/replay test. `go vet ./...` passed.
+- `PATH=…/node/v26.13.0/bin:$PATH corepack pnpm --filter @nantty/developer typecheck` — passed; `… test` — 36/36 passed; `… lint` — 0 errors, 11 warnings across existing Developer source. `… build` — passed after supplying reserved `.invalid` values for the required production public-origin settings; the first unconfigured build correctly failed closed on `NEXT_PUBLIC_SITE_URL`.
+- `go run ./cmd/generateMigration -rehash`, `bash services/scripts/check-backend-file-lengths.sh`, and `git diff --check` — passed.
+- Scope boundary: the browser authorization-code/PKCE consumer, signed-in visual workflow, deployment and any external OAuth handoff are not implemented or verified. Registration alone grants no access; the Business Messaging send endpoint remains fail-closed.
+
+# Developer billing Sandbox downgrade metadata — 2026-11-26
+
+- `SetSandboxBilling` now clears `payment_verified_at` together with paid provider-reference and billing-period metadata, both on insert and conflict update.
+- `AUTH_TEST_DATABASE_URL=postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable go test ./tests -run '^TestProductionQuotaReservationIsAtomicAcrossConnections$' -count=1 -v` in `services/go/modules/auth` — passed against isolated local PostgreSQL 17. The test verifies the downgraded subscription has no paid settlement timestamp; its disposable schema is removed after the test.
+- Current-tree follow-up: `AUTH_TEST_DATABASE_URL=... go test ./... -count=1 -p 1` — passed for the full Auth module with database integration enabled; `go vet ./...`, `bash services/scripts/check-backend-file-lengths.sh`, and `git diff --check` also passed.
+- Scope boundary: this does not complete paid checkout, authoritative settlement ingestion, renewals, cancellation or invoicing.
+
+## Current-tree Auth and Business Messaging consent regression — 2026-11-26
+
+- `AUTH_TEST_DATABASE_URL=... go test ./... -count=1 -p 1` from `services/go/modules/auth` — passed for the full Auth module against the isolated PostgreSQL 17 service, including consent preview/approval/denial/PKCE/replay/expiry/revocation, migration tests and the billing downgrade regression.
+- `go vet ./...`, `bash services/scripts/check-backend-file-lengths.sh`, and `git diff --check` — passed.
+- Under Node 26.13.0, Webapp typecheck passed; `businessMessagingScopes.util.test.ts` passed 4/4; focused ESLint passed for the consent page, connected-app settings, scope parser and privacy service.
+- Consent-review navigation follow-up: the review state is keyed to the complete set of OAuth/store request query values, so changing app, store, callback, challenge, or state remounts a clean selection/mutation state instead of carrying approval state into another request. Repeated the Node 26.13.0 Webapp typecheck, 4/4 focused utility tests, focused ESLint and `git diff --check`; all passed.
+- Scope boundary: no authenticated browser journey, deployed callback, staging migration or production Business Messaging dispatch was run. No PR is currently open; local `main` is 10 commits ahead of origin and has broad uncommitted work.
+
+## Developer and Admin surface regression — 2026-11-26
+
+- Under Node 26.13.0, Developer tests passed 36/36 and Developer typecheck passed. Admin typecheck passed.
+- Focused ESLint passed for the changed Developer OpenAPI/docs/application workspace and Admin Developer Ops workspace/API client files. `git diff --check` passed.
+- Under Node 26.13.0, Webapp `test:contracts`, `test:units`, and `test:services` all completed successfully; the service suite reported 33/33 passing. Webapp typecheck and focused consent tests/lint also passed.
+- Admin contract suite passed 86/86 under Node 26.13.0 after Developer Ops changes.
+- Scope boundary: no authenticated portal/Admin browser session or deployed API workflow was run. These checks validate code contracts and typing, not complete production operations.
+
+## Developer usage quota requires settlement verification — 2026-11-26
+
+- `GetUsage` now loads `payment_verified_at` and shares the production entitlement predicate before reporting paid quota. The isolated PostgreSQL handler test returned zero for an active paid-looking subscription without settlement proof and returned the configured quota only after adding a verified settlement timestamp.
+- `AUTH_TEST_DATABASE_URL=... go test ./... -count=1 -p 1` from `services/go/modules/auth` — passed against the isolated PostgreSQL 17 test service, including the new handler test; `go vet ./...`, the backend <=300-line guard and `git diff --check` passed.
+- This keeps usage display consistent with server-side quota enforcement; it does not implement checkout, payment settlement ingestion or full billing lifecycle.
+
+## Production credential mutation authorization and audit — 2026-11-26
+
+- Create, rotate and revoke now reauthorize in their database transaction, lock membership/application rows and lock the current `credentials.manage` grant against concurrent removal. Every mutation writes a metadata-only audit row atomically; audit failure rolls back credential state. The controller no longer performs unaudited create/revoke writes directly.
+- `AUTH_TEST_DATABASE_URL=postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable go test ./modules/auth/tests -run TestProductionResourcesRequireApplicationCapabilities -count=1 -p 1` — passed, covering role/grant authorization, successful create/rotation/revocation, revoked-grant denial, audit records and trigger-injected audit-failure rollback.
+- `AUTH_TEST_DATABASE_URL=... go test ./modules/auth/... -count=1 -p 1` — passed across the full Auth module with PostgreSQL integration enabled; `go vet ./modules/auth/...`, `bash services/scripts/check-backend-file-lengths.sh` (all backend files <=300 lines), and `git diff --check` passed.
+- Scope boundary: isolated local PostgreSQL evidence only; no persistent migration, deployed runtime, or signed-in browser action was run.
+
+## Production webhook mutation authorization and audit — 2026-11-26
+
+- Webhook creation, signing-secret rotation, deletion, and challenge-verification start/result now reauthorize transactionally, lock membership/application and the current `webhooks.manage` grant, and write metadata-only audit records atomically. Audit failure rolls back each mutation/result write; webhook secrets remain encrypted at rest and are not included in audit state.
+- The expanded `TestProductionResourcesRequireApplicationCapabilities` PostgreSQL integration test passed: granted/denied verification preparation, create/rotate/delete, secret ciphertext round trip, verification success/failure states, required audit rows, and rollback when an insert trigger rejects the audit action.
+- `AUTH_TEST_DATABASE_URL=... go test ./modules/auth/... -count=1 -p 1` — passed against isolated PostgreSQL 17; `go vet ./modules/auth/...`, `bash services/scripts/check-backend-file-lengths.sh` (all backend files <=300 lines), and `git diff --check` passed.
+- Scope boundary: this covers local service and database behavior only; signed-in browser, real external challenge acknowledgement, deployed delivery and persistent migration rollout remain unverified.
+
+## Business Messaging authorization at durable send reservation — 2026-11-26
+
+- The dormant send reservation now rechecks and share-locks the approved Business Messaging app, active credential and `messages:send` scope, active store authorization and scope, store-specific recipient consent and scope, and active recipient account before idempotency lookup, message insertion, or quota recording.
+- The focused `TestProductionQuotaReservationIsAtomicAcrossConnections` regression passed against a disposable PostgreSQL 17 container. It verifies concurrent same-key idempotency and that revoked app, credential, store grant, customer consent, or recipient account blocks a new reservation. The temporary container is removed after the run.
+- `AUTH_TEST_DATABASE_URL=... go test ./... -count=1` from `services/go/modules/auth` — passed across all Auth packages and migration-backed integration tests using the disposable PostgreSQL 17 database with the required `nantty_readers` test role. The separate shared dev database was not changed.
+- `go vet ./...`, `bash services/scripts/check-backend-file-lengths.sh` (all backend files <=300 lines), and `git diff --check` — passed.
+- Scope boundary: this protects the reservation write boundary. Public send is still intentionally mounted to 503; no live dispatch, external delivery race guarantee, browser flow, persistent migration, or staging deployment is claimed.
+
+## GitHub integration job timeout correction — 2026-11-26
+
+- PR #75 Backend integration run `45844863491` ended as cancelled at 60m18s while its `Go integration tests against real Postgres, Valkey and RabbitMQ` step was still active; no test failure log was emitted. A successful main-branch integration baseline (`45819568753`) took approximately 39m38s.
+- Changed `.github/workflows/backend.yml` integration `timeout-minutes` from 60 to 120. The test workspace remains sequential to preserve the existing resource-isolation design; no tests were removed or parallelized. The new-head run must complete before this workflow change is considered verified.

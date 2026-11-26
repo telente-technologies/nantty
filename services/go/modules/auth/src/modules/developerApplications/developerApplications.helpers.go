@@ -19,7 +19,7 @@ type applicationQueryer interface {
 
 func loadApplication(ctx context.Context, query applicationQueryer, organizationID, applicationID any) (Application, error) {
 	var result Application
-	err := query.QueryRowContext(ctx, `SELECT id,organization_id,name,purpose,api_product,callback_origins,requested_scopes,status,created_at,updated_at FROM developer_applications WHERE organization_id=$1 AND id=$2`, organizationID, applicationID).Scan(&result.ID, &result.OrganizationID, &result.Name, &result.Purpose, &result.APIProduct, jsonScanner{target: &result.CallbackOrigins}, jsonScanner{target: &result.RequestedScopes}, &result.Status, &result.CreatedAt, &result.UpdatedAt)
+	err := query.QueryRowContext(ctx, `SELECT id,organization_id,name,purpose,api_product,callback_origins,redirect_uris,requested_scopes,status,created_at,updated_at FROM developer_applications WHERE organization_id=$1 AND id=$2`, organizationID, applicationID).Scan(&result.ID, &result.OrganizationID, &result.Name, &result.Purpose, &result.APIProduct, jsonScanner{target: &result.CallbackOrigins}, jsonScanner{target: &result.RedirectURIs}, jsonScanner{target: &result.RequestedScopes}, &result.Status, &result.CreatedAt, &result.UpdatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Application{}, errApplicationNotFound
 	}
@@ -28,7 +28,7 @@ func loadApplication(ctx context.Context, query applicationQueryer, organization
 
 func loadApplicationForUpdate(ctx context.Context, tx *sql.Tx, organizationID, applicationID uuid.UUID) (Application, error) {
 	var result Application
-	err := tx.QueryRowContext(ctx, `SELECT id,organization_id,name,purpose,api_product,callback_origins,requested_scopes,status,created_at,updated_at FROM developer_applications WHERE organization_id=$1 AND id=$2 FOR UPDATE`, organizationID, applicationID).Scan(&result.ID, &result.OrganizationID, &result.Name, &result.Purpose, &result.APIProduct, jsonScanner{target: &result.CallbackOrigins}, jsonScanner{target: &result.RequestedScopes}, &result.Status, &result.CreatedAt, &result.UpdatedAt)
+	err := tx.QueryRowContext(ctx, `SELECT id,organization_id,name,purpose,api_product,callback_origins,redirect_uris,requested_scopes,status,created_at,updated_at FROM developer_applications WHERE organization_id=$1 AND id=$2 FOR UPDATE`, organizationID, applicationID).Scan(&result.ID, &result.OrganizationID, &result.Name, &result.Purpose, &result.APIProduct, jsonScanner{target: &result.CallbackOrigins}, jsonScanner{target: &result.RedirectURIs}, jsonScanner{target: &result.RequestedScopes}, &result.Status, &result.CreatedAt, &result.UpdatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Application{}, errApplicationNotFound
 	}
@@ -48,7 +48,7 @@ func (scanner jsonScanner) Scan(source any) error {
 
 func scanApplication(rows applicationRows) (Application, error) {
 	var result Application
-	err := rows.Scan(&result.ID, &result.OrganizationID, &result.Name, &result.Purpose, &result.APIProduct, jsonScanner{target: &result.CallbackOrigins}, jsonScanner{target: &result.RequestedScopes}, &result.Status, &result.CreatedAt, &result.UpdatedAt)
+	err := rows.Scan(&result.ID, &result.OrganizationID, &result.Name, &result.Purpose, &result.APIProduct, jsonScanner{target: &result.CallbackOrigins}, jsonScanner{target: &result.RedirectURIs}, jsonScanner{target: &result.RequestedScopes}, &result.Status, &result.CreatedAt, &result.UpdatedAt)
 	return result, err
 }
 

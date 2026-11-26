@@ -25,7 +25,7 @@ func (service Service) List(ctx context.Context, accountID, organizationID strin
 	}
 	if !canManageApplicationRegistry(role) {
 		rows, err := service.Container.Database.QueryContext(ctx, `
-			SELECT a.id, a.organization_id, a.name, a.purpose, a.api_product, a.callback_origins, a.requested_scopes, a.status, a.created_at, a.updated_at
+			SELECT a.id, a.organization_id, a.name, a.purpose, a.api_product, a.callback_origins, a.redirect_uris, a.requested_scopes, a.status, a.created_at, a.updated_at
 			FROM developer_applications a
 			JOIN developer_application_member_grants g ON g.application_id = a.id AND g.organization_id = a.organization_id
 			JOIN developer_organization_memberships m ON m.id = g.membership_id AND m.organization_id = g.organization_id
@@ -46,7 +46,7 @@ func (service Service) List(ctx context.Context, accountID, organizationID strin
 		return applications, rows.Err()
 	}
 	rows, err := service.Container.Database.QueryContext(ctx, `
-		SELECT id, organization_id, name, purpose, api_product, callback_origins, requested_scopes, status, created_at, updated_at
+		SELECT id, organization_id, name, purpose, api_product, callback_origins, redirect_uris, requested_scopes, status, created_at, updated_at
 		FROM developer_applications WHERE organization_id = $1 AND status <> 'archived'
 		ORDER BY created_at DESC, id`, organization)
 	if err != nil {
@@ -158,8 +158,9 @@ func (service Service) Create(ctx context.Context, accountID, organizationID, id
 		return Application{}, false, err
 	}
 	origins, _ := json.Marshal(input.CallbackOrigins)
+	redirectURIs, _ := json.Marshal(input.RedirectURIs)
 	scopes, _ := json.Marshal(input.RequestedScopes)
-	if _, err := tx.ExecContext(ctx, `INSERT INTO developer_applications (id, organization_id, name, purpose, api_product, callback_origins, requested_scopes, status, created_by_account_id, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,'draft',$8,$9,$9)`, applicationID, organization, input.Name, input.Purpose, apiProductBusinessMessaging, origins, scopes, account, now); err != nil {
+	if _, err := tx.ExecContext(ctx, `INSERT INTO developer_applications (id, organization_id, name, purpose, api_product, callback_origins, redirect_uris, requested_scopes, status, created_by_account_id, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9,$10,$10)`, applicationID, organization, input.Name, input.Purpose, apiProductBusinessMessaging, origins, redirectURIs, scopes, account, now); err != nil {
 		return Application{}, false, err
 	}
 	if _, err := tx.ExecContext(ctx, `UPDATE developer_application_idempotency SET application_id=$4 WHERE organization_id=$1 AND account_id=$2 AND idempotency_key=$3`, organization, account, idempotencyKey, applicationID); err != nil {
@@ -171,7 +172,7 @@ func (service Service) Create(ctx context.Context, accountID, organizationID, id
 	if err := tx.Commit(); err != nil {
 		return Application{}, false, err
 	}
-	return Application{ID: applicationID.String(), OrganizationID: organization.String(), Name: input.Name, Purpose: input.Purpose, APIProduct: apiProductBusinessMessaging, CallbackOrigins: input.CallbackOrigins, RequestedScopes: input.RequestedScopes, Status: "draft", CreatedAt: now, UpdatedAt: now}, false, nil
+	return Application{ID: applicationID.String(), OrganizationID: organization.String(), Name: input.Name, Purpose: input.Purpose, APIProduct: apiProductBusinessMessaging, CallbackOrigins: input.CallbackOrigins, RedirectURIs: input.RedirectURIs, RequestedScopes: input.RequestedScopes, Status: "draft", CreatedAt: now, UpdatedAt: now}, false, nil
 }
 
 func (service Service) Update(ctx context.Context, accountID, organizationID, applicationID string, input ApplicationInput) (Application, error) {
@@ -203,9 +204,10 @@ func (service Service) Update(ctx context.Context, accountID, organizationID, ap
 		return Application{}, errApplicationConflict
 	}
 	origins, _ := json.Marshal(input.CallbackOrigins)
+	redirectURIs, _ := json.Marshal(input.RedirectURIs)
 	scopes, _ := json.Marshal(input.RequestedScopes)
 	now := service.Container.Now()
-	if _, err := tx.ExecContext(ctx, `UPDATE developer_applications SET name=$1,purpose=$2,callback_origins=$3,requested_scopes=$4,updated_at=$5 WHERE id=$6 AND organization_id=$7`, input.Name, input.Purpose, origins, scopes, now, application, organization); err != nil {
+	if _, err := tx.ExecContext(ctx, `UPDATE developer_applications SET name=$1,purpose=$2,callback_origins=$3,redirect_uris=$4,requested_scopes=$5,updated_at=$6 WHERE id=$7 AND organization_id=$8`, input.Name, input.Purpose, origins, redirectURIs, scopes, now, application, organization); err != nil {
 		return Application{}, err
 	}
 	if err := writeApplicationAudit(ctx, tx, organization, account, role, "application.updated", application, previous, input, now); err != nil {
@@ -214,7 +216,7 @@ func (service Service) Update(ctx context.Context, accountID, organizationID, ap
 	if err := tx.Commit(); err != nil {
 		return Application{}, err
 	}
-	return Application{ID: application.String(), OrganizationID: organization.String(), Name: input.Name, Purpose: input.Purpose, APIProduct: previous.APIProduct, CallbackOrigins: input.CallbackOrigins, RequestedScopes: input.RequestedScopes, Status: previous.Status, CreatedAt: previous.CreatedAt, UpdatedAt: now}, nil
+	return Application{ID: application.String(), OrganizationID: organization.String(), Name: input.Name, Purpose: input.Purpose, APIProduct: previous.APIProduct, CallbackOrigins: input.CallbackOrigins, RedirectURIs: input.RedirectURIs, RequestedScopes: input.RequestedScopes, Status: previous.Status, CreatedAt: previous.CreatedAt, UpdatedAt: now}, nil
 }
 
 func (service Service) Archive(ctx context.Context, accountID, organizationID, applicationID string) error {

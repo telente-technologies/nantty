@@ -188,11 +188,22 @@ LiveKit Cloud project URL, key and secret. `self_hosted` runs LiveKit on EC2-bac
    variables `AWS_ACCOUNT_ID_STAGING`, `AWS_ACCOUNT_ID_PROD`, `AWS_REGION`, `STAGING_API_URL`, `PROD_API_URL`,
    `MIGRATE_TASK_DEFINITION[_PROD]`, `*_PRIVATE_SUBNETS`, `*_TASKS_SECURITY_GROUP`, and the snapshot/restore gate
    variables. The deploy workflow runs the migration task before each rollout and stops if it does not succeed.
-   The roles are the outputs `github_ecr_push_role_arn` and `github_deploy_role_arn`.
+   The roles are the outputs `github_ecr_push_role_arn` and `github_deploy_role_arn`. A main-branch deploy now fails
+   with an explicit staging-configuration error if `AWS_ACCOUNT_ID_STAGING` or `AWS_REGION` is missing; it will not
+   report success after only scanning images and silently skipping ECR/ECS deployment.
 9. Push the first images (the CI `images` job does it on merge to main), then CI deploys to staging and runs the staging
    smoke test. Production promotion is not automatic: it requires manually dispatching the deploy workflow with
    `deploy_production=true` and passing the protected `production` environment approval. Autoscaling minimums start tasks.
    The staging media task includes the private ClamAV sidecar when `enable_media_malware_scanning=true`; its 4 GiB memory reservation increases staging cost. After the first successful Terraform apply and media rollout, set the repository variable `CLAMAV_REFRESH_ENABLED_STAGING=true` to enable the daily signature-refresh workflow. That workflow tests a clean payload and the EICAR test signature, scans the image, then rolls only the ClamAV container. Keep the variable unset until the staging ECS family has the sidecar and the staging ECR/deploy OIDC roles exist.
+
+### Staging application scope
+
+The current AWS ECS platform and `deploy.yml` cover backend services only. They do not provision or release the
+Next.js applications (`webapp`, `seller`, `studio`/creator, `admin`, `ads`, `developer`, or `sandbox`). The public
+website workflow in `pages-deploy.yml` targets Cloudflare Pages, not AWS. Do not describe the full Nantty frontend
+suite as AWS-staged until frontend hosting, per-subdomain routing/TLS, deployment automation, and smoke tests have
+been implemented and exercised. The SES staging identity is a separate, partially configured component; DNS
+propagation alone does not prove SES verification or successful message delivery.
 
 ### GitHub-hosted Terraform staging plan
 

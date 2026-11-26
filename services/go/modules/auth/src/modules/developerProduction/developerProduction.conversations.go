@@ -77,7 +77,7 @@ func (controller Controller) ListBusinessConversations(writer http.ResponseWrite
 				LIMIT 1
 			) latest ON true
 			WHERE c.organization_id = $1 AND c.application_id = $2
-			  AND c.status = 'active' AND c.scopes ? 'conversations:read'
+			  AND c.store_id = $3 AND c.status = 'active' AND c.scopes ? 'conversations:read'
 		)
 		SELECT recipient_account_id, granted_at, last_status, last_message_at, sort_at
 		FROM conversation_rows

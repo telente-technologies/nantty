@@ -64,7 +64,7 @@ func TestProductionMessageHistoryAndStatusAreTenantAndConsentScoped(t *testing.T
 		`CREATE TABLE developer_production_credentials (id uuid PRIMARY KEY, application_id uuid NOT NULL, organization_id uuid NOT NULL, status text NOT NULL, scopes jsonb NOT NULL, secret_hash text NOT NULL)`,
 		`CREATE TABLE developer_billing_subscriptions (organization_id uuid PRIMARY KEY, plan_tier text NOT NULL, status text NOT NULL, monthly_quota bigint NOT NULL, current_period_end timestamptz, provider_reference text, payment_verified_at timestamptz)`,
 		`CREATE TABLE developer_production_requests (id uuid PRIMARY KEY, application_id uuid NOT NULL, organization_id uuid NOT NULL, credential_id uuid NOT NULL, method text NOT NULL, path text NOT NULL, status_code integer NOT NULL, latency_ms integer NOT NULL, created_at timestamptz NOT NULL)`,
-		`CREATE TABLE developer_business_consents (organization_id uuid NOT NULL, application_id uuid NOT NULL, recipient_account_id uuid NOT NULL, status text NOT NULL, scopes jsonb NOT NULL, granted_at timestamptz NOT NULL)`,
+		`CREATE TABLE developer_business_consents (organization_id uuid NOT NULL, application_id uuid NOT NULL, store_id uuid, recipient_account_id uuid NOT NULL, status text NOT NULL, scopes jsonb NOT NULL, granted_at timestamptz NOT NULL)`,
 		`CREATE TABLE developer_business_authorizations (organization_id uuid NOT NULL, application_id uuid NOT NULL, store_id uuid NOT NULL, status text NOT NULL, scopes jsonb NOT NULL)`,
 		`CREATE TABLE developer_business_messages (id uuid PRIMARY KEY, organization_id uuid NOT NULL, application_id uuid NOT NULL, credential_id uuid, store_id uuid, recipient_account_id uuid NOT NULL, body_text text NOT NULL, status text NOT NULL, external_message_id text, created_at timestamptz NOT NULL, updated_at timestamptz NOT NULL)`,
 	} {
@@ -90,10 +90,14 @@ func TestProductionMessageHistoryAndStatusAreTenantAndConsentScoped(t *testing.T
 		t.Fatal(err)
 	}
 	now := time.Now().UTC().Truncate(time.Microsecond)
-	if _, err := db.ExecContext(ctx, `INSERT INTO developer_business_consents VALUES ($1,$2,$3,'active','["messages:read","conversations:read"]'::jsonb,$4)`, orgID, appID, recipientID, now); err != nil {
+	if _, err := db.ExecContext(ctx, `INSERT INTO developer_business_consents VALUES ($1,$2,$3,$4,'active','["messages:read","conversations:read"]'::jsonb,$5)`, orgID, appID, storeID, recipientID, now); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := db.ExecContext(ctx, `INSERT INTO developer_business_authorizations VALUES ($1,$2,$3,'active','["messages:read","conversations:read"]'::jsonb)`, orgID, appID, storeID); err != nil {
+		t.Fatal(err)
+	}
+	otherStoreID := uuid.New()
+	if _, err := db.ExecContext(ctx, `INSERT INTO developer_business_authorizations VALUES ($1,$2,$3,'active','["messages:read","conversations:read"]'::jsonb)`, orgID, appID, otherStoreID); err != nil {
 		t.Fatal(err)
 	}
 	newerRecipientID, newestRecipientID, noConversationScopeID := uuid.New(), uuid.New(), uuid.New()
@@ -106,7 +110,7 @@ func TestProductionMessageHistoryAndStatusAreTenantAndConsentScoped(t *testing.T
 		{id: newestRecipientID, granted: now.Add(4 * time.Second), scopes: `["conversations:read","messages:read"]`},
 		{id: noConversationScopeID, granted: now.Add(5 * time.Second), scopes: `["messages:read"]`},
 	} {
-		if _, err := db.ExecContext(ctx, `INSERT INTO developer_business_consents VALUES ($1,$2,$3,'active',$4::jsonb,$5)`, orgID, appID, row.id, row.scopes, row.granted); err != nil {
+		if _, err := db.ExecContext(ctx, `INSERT INTO developer_business_consents VALUES ($1,$2,$3,$4,'active',$5::jsonb,$6)`, orgID, appID, storeID, row.id, row.scopes, row.granted); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -132,7 +136,11 @@ func TestProductionMessageHistoryAndStatusAreTenantAndConsentScoped(t *testing.T
 		t.Fatal(err)
 	}
 	legacyUnscopedMessageID := uuid.New()
-	if _, err := db.ExecContext(ctx, `INSERT INTO developer_business_messages VALUES ($1,$2,$3,$4,NULL,$5,'legacy-unscoped','dispatched','external-legacy',now(),now())`, legacyUnscopedMessageID, orgID, appID, credentialID, recipientID); err != nil {
+	legacyRecipientID := uuid.New()
+	if _, err := db.ExecContext(ctx, `INSERT INTO developer_business_messages VALUES ($1,$2,$3,$4,NULL,$5,'legacy-unscoped','dispatched','external-legacy',now(),now())`, legacyUnscopedMessageID, orgID, appID, credentialID, legacyRecipientID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, `INSERT INTO developer_business_consents VALUES ($1,$2,NULL,$3,'active','["messages:read"]'::jsonb,$4)`, orgID, appID, legacyRecipientID, now); err != nil {
 		t.Fatal(err)
 	}
 	controller := production.Controller{Container: &container.Container{Database: db, Logger: slog.New(slog.NewTextHandler(os.Stderr, nil))}}
@@ -144,6 +152,22 @@ func TestProductionMessageHistoryAndStatusAreTenantAndConsentScoped(t *testing.T
 	controller.ListBusinessMessages(historyResponse, historyRequest)
 	if historyResponse.Code != http.StatusOK {
 		t.Fatalf("history returned %d: %s", historyResponse.Code, historyResponse.Body.String())
+	}
+	crossStoreRequest := httptest.NewRequest(http.MethodGet, "/api/v1/business/conversations/"+recipientID.String()+"/messages?storeId="+otherStoreID.String(), nil)
+	crossStoreRequest.Header.Set("Authorization", "Bearer "+token)
+	crossStoreRequest.SetPathValue("recipientId", recipientID.String())
+	crossStoreResponse := httptest.NewRecorder()
+	controller.ListBusinessMessages(crossStoreResponse, crossStoreRequest)
+	if crossStoreResponse.Code != http.StatusForbidden {
+		t.Fatalf("consent for a different store authorized message history: status=%d body=%s", crossStoreResponse.Code, crossStoreResponse.Body.String())
+	}
+	legacyConsentRequest := httptest.NewRequest(http.MethodGet, "/api/v1/business/conversations/"+legacyRecipientID.String()+"/messages?storeId="+storeID.String(), nil)
+	legacyConsentRequest.Header.Set("Authorization", "Bearer "+token)
+	legacyConsentRequest.SetPathValue("recipientId", legacyRecipientID.String())
+	legacyConsentResponse := httptest.NewRecorder()
+	controller.ListBusinessMessages(legacyConsentResponse, legacyConsentRequest)
+	if legacyConsentResponse.Code != http.StatusForbidden {
+		t.Fatalf("legacy unscoped consent authorized store history: status=%d body=%s", legacyConsentResponse.Code, legacyConsentResponse.Body.String())
 	}
 	var history struct {
 		Messages   []production.BusinessMessageView `json:"messages"`

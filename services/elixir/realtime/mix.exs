@@ -5,7 +5,7 @@ defmodule Realtime.MixProject do
     [
       app: :realtime,
       version: "0.1.0",
-      elixir: "~> 1.19",
+      elixir: "~> 1.20",
       elixirc_paths: ["lib"],
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -30,7 +30,7 @@ defmodule Realtime.MixProject do
       {:bandit, github: "mtrudel/bandit", tag: "1.15.0", override: true},
       {:plug, github: "elixir-plug/plug", tag: "v1.20.4", override: true},
       {:plug_crypto, github: "elixir-plug/plug_crypto", tag: "v2.2.1", override: true},
-      {:amqp, "~> 4.2"}
+      {:amqp, "~> 4.3"}
     ]
   end
 end

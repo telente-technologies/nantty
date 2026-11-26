@@ -86,6 +86,7 @@ func TestIdentityMigrationsUpgradeRollbackAndReplay(t *testing.T) {
 	assertBaselineAccountSurvives(t, ctx, verificationDatabase)
 	assertStoreScopeColumn(t, ctx, verificationDatabase, schema, true)
 	assertWebhookLeaseColumn(t, ctx, verificationDatabase, schema, true)
+	verifyScopedConsentDowngradeGuard(t, ctx, verificationDatabase)
 
 	if err := manager.Migrate(identityBaselineVersion); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		t.Fatalf("roll back Identity migration set: %v", err)
@@ -108,6 +109,41 @@ func TestIdentityMigrationsUpgradeRollbackAndReplay(t *testing.T) {
 	assertBaselineAccountSurvives(t, ctx, verificationDatabase)
 	assertStoreScopeColumn(t, ctx, verificationDatabase, schema, true)
 	assertWebhookLeaseColumn(t, ctx, verificationDatabase, schema, true)
+}
+
+func verifyScopedConsentDowngradeGuard(t *testing.T, ctx context.Context, database *sql.DB) {
+	t.Helper()
+	const accountID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+	const organizationID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
+	const applicationID = "cccccccc-cccc-4ccc-8ccc-cccccccccccc"
+	const consentID = "dddddddd-dddd-4ddd-8ddd-dddddddddddd"
+	const storeID = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
+	for _, statement := range []string{
+		`INSERT INTO developer_organizations (id,name,slug,created_by_account_id,created_at) VALUES ('` + organizationID + `','Migration Guard Org','migration-guard-org','` + accountID + `',now())`,
+		`INSERT INTO developer_applications (id,organization_id,name,purpose,api_product,requested_scopes,status,created_by_account_id,created_at,updated_at) VALUES ('` + applicationID + `','` + organizationID + `','Migration Guard App','Test rollback protection','business_messaging','["messages:send"]'::jsonb,'approved','` + accountID + `',now(),now())`,
+		`INSERT INTO developer_business_consents (id,organization_id,application_id,store_id,recipient_account_id,status,scopes,granted_at) VALUES ('` + consentID + `','` + organizationID + `','` + applicationID + `','` + storeID + `','` + accountID + `','active','["messages:send"]'::jsonb,now())`,
+	} {
+		if _, err := database.ExecContext(ctx, statement); err != nil {
+			t.Fatalf("prepare scoped-consent rollback guard: %v", err)
+		}
+	}
+	downgrade, err := authmigrations.Files.ReadFile("20261127100000_scope_business_messaging_consent_to_store.down.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := database.ExecContext(ctx, string(downgrade)); err == nil {
+		t.Fatal("down migration silently removed store-scoped consent semantics")
+	}
+	var actualStoreID string
+	if err := database.QueryRowContext(ctx, `SELECT store_id::text FROM developer_business_consents WHERE id=$1`, consentID).Scan(&actualStoreID); err != nil {
+		t.Fatalf("scoped consent was not preserved after refused downgrade: %v", err)
+	}
+	if actualStoreID != storeID {
+		t.Fatalf("store_id after refused downgrade = %s, want %s", actualStoreID, storeID)
+	}
+	if _, err := database.ExecContext(ctx, `DELETE FROM developer_business_consents WHERE id=$1`, consentID); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func assertBaselineAccountSurvives(t *testing.T, ctx context.Context, database *sql.DB) {

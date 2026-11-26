@@ -48,7 +48,7 @@ func TestAdminQuotaAdjustmentCannotGrantOrChangePaidEntitlements(t *testing.T) {
 		Now:      func() time.Time { return now },
 	}}
 
-	missing := callAdminQuotaAdjustment(controller, orgID, staffID, `{"monthlyQuota":500}`)
+	missing := callAdminQuotaAdjustment(controller, orgID, staffID, `{"monthlyQuota":500,"reason":"test quota request"}`)
 	if missing.Code != http.StatusNotFound {
 		t.Fatalf("missing subscription status=%d, want 404: %s", missing.Code, missing.Body.String())
 	}
@@ -60,7 +60,7 @@ func TestAdminQuotaAdjustmentCannotGrantOrChangePaidEntitlements(t *testing.T) {
 	if _, err := db.ExecContext(ctx, `INSERT INTO developer_billing_subscriptions (organization_id,plan_tier,status,monthly_quota,current_period_end,provider_reference,updated_at) VALUES ($1,'sandbox','active',10000,NULL,NULL,now())`, orgID); err != nil {
 		t.Fatal(err)
 	}
-	sandbox := callAdminQuotaAdjustment(controller, orgID, staffID, `{"monthlyQuota":500}`)
+	sandbox := callAdminQuotaAdjustment(controller, orgID, staffID, `{"monthlyQuota":500,"reason":"test quota request"}`)
 	if sandbox.Code != http.StatusConflict {
 		t.Fatalf("sandbox subscription status=%d, want 409: %s", sandbox.Code, sandbox.Body.String())
 	}
@@ -75,21 +75,21 @@ func TestAdminQuotaAdjustmentCannotGrantOrChangePaidEntitlements(t *testing.T) {
 	if _, err := db.ExecContext(ctx, `UPDATE developer_billing_subscriptions SET provider_reference = NULL WHERE organization_id = $1`, orgID); err != nil {
 		t.Fatal(err)
 	}
-	unverified := callAdminQuotaAdjustment(controller, orgID, staffID, `{"monthlyQuota":500}`)
+	unverified := callAdminQuotaAdjustment(controller, orgID, staffID, `{"monthlyQuota":500,"reason":"test quota request"}`)
 	if unverified.Code != http.StatusConflict {
 		t.Fatalf("unverified paid subscription status=%d, want 409: %s", unverified.Code, unverified.Body.String())
 	}
 	if _, err := db.ExecContext(ctx, `UPDATE developer_billing_subscriptions SET provider_reference = 'verified-reference' WHERE organization_id = $1`, orgID); err != nil {
 		t.Fatal(err)
 	}
-	stillUnverified := callAdminQuotaAdjustment(controller, orgID, staffID, `{"monthlyQuota":500}`)
+	stillUnverified := callAdminQuotaAdjustment(controller, orgID, staffID, `{"monthlyQuota":500,"reason":"test quota request"}`)
 	if stillUnverified.Code != http.StatusConflict {
 		t.Fatalf("reference-only paid subscription status=%d, want 409: %s", stillUnverified.Code, stillUnverified.Body.String())
 	}
 	if _, err := db.ExecContext(ctx, `UPDATE developer_billing_subscriptions SET payment_verified_at = $2 WHERE organization_id = $1`, orgID, now); err != nil {
 		t.Fatal(err)
 	}
-	paidChange := callAdminQuotaAdjustment(controller, orgID, staffID, `{"monthlyQuota":500}`)
+	paidChange := callAdminQuotaAdjustment(controller, orgID, staffID, `{"monthlyQuota":500,"reason":"approved monthly quota change"}`)
 	if paidChange.Code != http.StatusOK || !strings.Contains(paidChange.Body.String(), `"planTier":"starter"`) {
 		t.Fatalf("active subscription quota adjustment status=%d body=%s", paidChange.Code, paidChange.Body.String())
 	}
@@ -108,7 +108,7 @@ func TestAdminQuotaAdjustmentCannotGrantOrChangePaidEntitlements(t *testing.T) {
 		t.Fatalf("quota adjustment audit count=%d err=%v", auditCount, err)
 	}
 
-	paidTierInjection := callAdminQuotaAdjustment(controller, orgID, staffID, `{"planTier":"enterprise","monthlyQuota":5000}`)
+	paidTierInjection := callAdminQuotaAdjustment(controller, orgID, staffID, `{"planTier":"enterprise","monthlyQuota":5000,"reason":"test plan tier injection"}`)
 	if paidTierInjection.Code != http.StatusBadRequest {
 		t.Fatalf("planTier injection status=%d, want 400: %s", paidTierInjection.Code, paidTierInjection.Body.String())
 	}

@@ -28,6 +28,13 @@ test("OpenAPI 3.1 distinguishes live Sandbox routes, consent-scoped Production r
   assert.equal(prodConversations.responses["503"], undefined);
   assert.equal(prodConversations["x-status"], undefined);
   assert.deepEqual(prodConversations.parameters.map(({ name }) => name), ["storeId", "limit", "cursor"]);
+  const consentCodeExchange = (spec.paths["/api/v1/business/consent-codes/exchange"] as { post: { operationId: string; security: Array<Record<string, string[]>>; requestBody: { content: { "application/json": { schema: { required: string[] } } } }; responses: Record<string, unknown> } }).post;
+  assert.equal(consentCodeExchange.operationId, "exchangeBusinessConsentCode");
+  assert.equal(consentCodeExchange.security[0]?.BusinessBearerAuth?.length, 0);
+  assert.deepEqual(consentCodeExchange.requestBody.content["application/json"].schema.required, ["code", "redirectUri", "codeVerifier"]);
+  assert.ok(consentCodeExchange.responses["200"]);
+  assert.ok(consentCodeExchange.responses["401"]);
+  assert.ok(consentCodeExchange.responses["403"]);
   const historyPath = "/api/v1/business/conversations/{recipientId}/messages";
   const messageHistory = (spec.paths[historyPath] as { get: { security: Array<Record<string, string[]>>; responses: Record<string, unknown>; parameters: Array<{ name: string; required?: boolean }> } }).get;
   assert.equal(messageHistory.security[0]?.BusinessBearerAuth?.[0], "messages:read");
@@ -40,6 +47,7 @@ test("OpenAPI 3.1 distinguishes live Sandbox routes, consent-scoped Production r
   const businessMessage = spec.components.schemas.BusinessMessage as { properties: { status: { enum: readonly string[] } } };
   assert.deepEqual(businessMessage.properties.status.enum, ["accepted", "dispatched", "failed"]);
   assert.match(spec.info.description, /inbound message synchronization.*not yet connected/i);
+  assert.match(spec.info.description, /does not issue a Nantty user access token/i);
   const errorCodes = (spec.components.schemas.ErrorEnvelope as { properties: { error: { properties: { code: { enum: readonly string[] } } } } }).properties.error.properties.code.enum;
   assert.ok(errorCodes.includes("SANDBOX_QUOTA_EXCEEDED"));
   assert.ok(errorCodes.includes("INVALID_SANDBOX_CREDENTIAL"));

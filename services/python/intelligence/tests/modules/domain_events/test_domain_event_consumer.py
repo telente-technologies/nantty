@@ -12,6 +12,8 @@ from src.modules.domain_events.repositories.sqs_domain_event_queue_repository im
 from src.repositories.online_feature_keyspace_repository import format_utc_day_bucket
 from tests.modules.domain_events.helpers import domain_event, product_viewed, read_topic_affinity
 
+__all__ = ["domain_event", "product_viewed", "read_topic_affinity"]
+
 
 async def test_consumer_is_idempotent_by_event_id(
     application_container: ApplicationContainer, feature_backend: InMemoryFeatureBackend, reference_now: datetime

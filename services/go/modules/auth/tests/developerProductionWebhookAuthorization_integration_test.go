@@ -60,7 +60,7 @@ func TestProductionWebhookWorkerRevalidatesBusinessAuthorization(t *testing.T) {
 		`CREATE TABLE developer_production_webhook_deliveries (id uuid PRIMARY KEY, webhook_id uuid NOT NULL, application_id uuid NOT NULL, organization_id uuid NOT NULL, event_id uuid NOT NULL, event_type text NOT NULL, payload jsonb NOT NULL, attempt_count integer NOT NULL, status text NOT NULL, next_attempt_at timestamptz NOT NULL, lease_expires_at timestamptz, last_status_code integer, last_error text, delivered_at timestamptz, created_at timestamptz NOT NULL)`,
 		`CREATE TABLE developer_business_messages (id uuid PRIMARY KEY, application_id uuid NOT NULL, organization_id uuid NOT NULL, store_id uuid, recipient_account_id uuid NOT NULL, status text NOT NULL)`,
 		`CREATE TABLE developer_business_authorizations (application_id uuid NOT NULL, organization_id uuid NOT NULL, store_id uuid NOT NULL, status text NOT NULL, scopes jsonb NOT NULL)`,
-		`CREATE TABLE developer_business_consents (application_id uuid NOT NULL, organization_id uuid NOT NULL, recipient_account_id uuid NOT NULL, status text NOT NULL, scopes jsonb NOT NULL)`,
+		`CREATE TABLE developer_business_consents (application_id uuid NOT NULL, organization_id uuid NOT NULL, store_id uuid, recipient_account_id uuid NOT NULL, status text NOT NULL, scopes jsonb NOT NULL)`,
 	} {
 		if _, err := db.ExecContext(ctx, statement); err != nil {
 			t.Fatal(err)
@@ -132,7 +132,7 @@ func insertAuthorizedWebhookEvent(t *testing.T, ctx context.Context, db *sql.DB,
 	}{
 		{`INSERT INTO developer_business_messages (id,application_id,organization_id,store_id,recipient_account_id,status) VALUES ($1,$2,$3,$4,$5,'dispatched')`, []any{messageID, appID, orgID, storeID, recipientID}},
 		{`INSERT INTO developer_business_authorizations (application_id,organization_id,store_id,status,scopes) VALUES ($1,$2,$3,'active','["messages:send"]'::jsonb)`, []any{appID, orgID, storeID}},
-		{`INSERT INTO developer_business_consents (application_id,organization_id,recipient_account_id,status,scopes) VALUES ($1,$2,$3,'active','["messages:send"]'::jsonb)`, []any{appID, orgID, recipientID}},
+		{`INSERT INTO developer_business_consents (application_id,organization_id,store_id,recipient_account_id,status,scopes) VALUES ($1,$2,$3,$4,'active','["messages:send"]'::jsonb)`, []any{appID, orgID, storeID, recipientID}},
 	} {
 		if _, err := db.ExecContext(ctx, statement.query, statement.args...); err != nil {
 			t.Fatal(err)

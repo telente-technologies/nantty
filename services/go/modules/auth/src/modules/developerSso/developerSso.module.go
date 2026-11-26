@@ -63,13 +63,15 @@ func (controller Controller) Authorize(writer http.ResponseWriter, request *http
 		return
 	}
 	q := request.URL.Query()
-	clientId := strings.TrimSpace(q.Get("client_id"))
-	redirectIdx := slices.Index(controller.Config.RedirectUris, strings.TrimSpace(q.Get("redirect_uri")))
-	challenge := strings.TrimSpace(q.Get("code_challenge"))
-	method := strings.TrimSpace(q.Get("code_challenge_method"))
-	if clientId != controller.Config.ClientId || redirectIdx < 0 || method != "S256" || len(challenge) < 43 {
+	clientId, hasClientId := singleQueryValue(q, "client_id")
+	redirectUri, hasRedirectUri := singleQueryValue(q, "redirect_uri")
+	challenge, hasChallenge := singleQueryValue(q, "code_challenge")
+	method, hasMethod := singleQueryValue(q, "code_challenge_method")
+	state, hasState := singleQueryValue(q, "state")
+	redirectIdx := slices.Index(controller.Config.RedirectUris, redirectUri)
+	if !hasClientId || !hasRedirectUri || !hasChallenge || !hasMethod || !hasState || clientId != controller.Config.ClientId || redirectIdx < 0 || method != "S256" || !validS256Challenge(challenge) || !validOAuthState(state) {
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, httpserver.NewApiError(
-			http.StatusBadRequest, "INVALID_SSO_REQUEST", "Valid client_id, allowlisted redirect_uri, and S256 code_challenge are required.",
+			http.StatusBadRequest, "INVALID_SSO_REQUEST", "Valid client_id, allowlisted redirect_uri, S256 code_challenge, and bounded OAuth state are required.",
 		))
 		return
 	}
@@ -106,7 +108,6 @@ func (controller Controller) Authorize(writer http.ResponseWriter, request *http
 		httpserver.WriteErrorResponse(writer, request, controller.Container.Logger, err)
 		return
 	}
-	state := q.Get("state")
 	if wantsJsonResponse(request) {
 		httpserver.WriteJsonResponse(writer, http.StatusOK, map[string]any{
 			"code": code, "state": state, "redirectUri": allowedRedirectUri, "expiresIn": 60,
@@ -126,6 +127,23 @@ func (controller Controller) Authorize(writer http.ResponseWriter, request *http
 	target.RawQuery = params.Encode()
 	writer.Header().Set("Cache-Control", "no-store, max-age=0")
 	http.Redirect(writer, request, target.String(), http.StatusFound)
+}
+
+func singleQueryValue(query url.Values, key string) (string, bool) {
+	values, ok := query[key]
+	if !ok || len(values) != 1 {
+		return "", false
+	}
+	return values[0], true
+}
+
+func validS256Challenge(challenge string) bool {
+	decoded, err := base64.RawURLEncoding.Strict().DecodeString(challenge)
+	return err == nil && len(decoded) == sha256.Size && len(challenge) == 43
+}
+
+func validOAuthState(state string) bool {
+	return len(state) >= 16 && len(state) <= 512 && strings.TrimSpace(state) != ""
 }
 
 func (controller Controller) authenticateAuthorizeRequest(request *http.Request) (jwtauth.Principal, bool) {

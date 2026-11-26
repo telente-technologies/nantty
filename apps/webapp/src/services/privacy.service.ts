@@ -13,6 +13,7 @@ export interface BusinessMessagingConsent {
   readonly organizationName: string;
   readonly applicationId: string;
   readonly applicationName: string;
+  readonly storeId?: string;
   readonly scopes: readonly string[];
   readonly status: "active" | "revoked";
   readonly grantedAt: string;
@@ -25,6 +26,32 @@ export interface BusinessMessagingApplicationPreview {
   readonly organizationName: string;
   readonly applicationName: string;
   readonly requestedScopes: readonly string[];
+}
+
+export interface BusinessMessagingConsentPreview {
+  readonly applicationId: string;
+  readonly applicationName: string;
+  readonly organizationId: string;
+  readonly organizationName: string;
+  readonly storeId: string;
+  readonly storeName: string;
+  readonly requestedScopes: readonly string[];
+  readonly availableScopes: readonly string[];
+}
+
+export interface BusinessMessagingConsentAuthorizationRequest {
+  readonly redirectUri: string;
+  readonly codeChallenge: string;
+  readonly codeChallengeMethod: "S256";
+  readonly state: string;
+}
+
+export interface BusinessMessagingConsentGrant extends BusinessMessagingConsent {
+  readonly authorizationRedirectUrl?: string;
+}
+
+export interface BusinessMessagingConsentDenial {
+  readonly authorizationRedirectUrl: string;
 }
 
 export interface BusinessMessagingStoreAuthorization extends BusinessMessagingConsent {
@@ -69,6 +96,16 @@ export const privacyService = {
     sendRequestToWebappServer<void>(`/api/v1/account/business-messaging/consents/${encodeURIComponent(consentId)}`, { method: "DELETE" }),
   previewBusinessMessagingApplication: (applicationId: string) =>
     sendRequestToWebappServer<BusinessMessagingApplicationPreview>(`/api/v1/account/business-messaging/applications/${encodeURIComponent(applicationId)}`),
+  previewBusinessMessagingConsent: (applicationId: string, storeId: string, authorization?: BusinessMessagingConsentAuthorizationRequest | null) =>
+    sendRequestToWebappServer<BusinessMessagingConsentPreview>(`/api/v1/account/business-messaging/applications/${encodeURIComponent(applicationId)}/stores/${encodeURIComponent(storeId)}/consent-preview`, {
+      query: authorization ? { redirect_uri: authorization.redirectUri, code_challenge: authorization.codeChallenge, code_challenge_method: authorization.codeChallengeMethod, state: authorization.state } : undefined,
+    }),
+  grantBusinessMessagingConsent: (input: Pick<BusinessMessagingConsent, "organizationId" | "applicationId" | "storeId" | "scopes"> & { readonly authorization?: BusinessMessagingConsentAuthorizationRequest }) =>
+    sendRequestToWebappServer<BusinessMessagingConsentGrant>("/api/v1/account/business-messaging/consents", { method: "POST", body: input }),
+  denyBusinessMessagingConsent: (applicationId: string, storeId: string, authorization: BusinessMessagingConsentAuthorizationRequest) =>
+    sendRequestToWebappServer<BusinessMessagingConsentDenial>(`/api/v1/account/business-messaging/applications/${encodeURIComponent(applicationId)}/stores/${encodeURIComponent(storeId)}/consent-denial`, {
+      method: "POST", body: { authorization },
+    }),
   fetchBusinessMessagingAuthorizations: async () => (await sendRequestToWebappServer<{ readonly authorizations: readonly BusinessMessagingStoreAuthorization[] }>("/api/v1/account/business-messaging/authorizations")).authorizations,
   grantBusinessMessagingAuthorization: (input: Pick<BusinessMessagingStoreAuthorization, "organizationId" | "applicationId" | "storeId" | "scopes">) =>
     sendRequestToWebappServer<BusinessMessagingStoreAuthorization>("/api/v1/account/business-messaging/authorizations", { method: "POST", body: input }),

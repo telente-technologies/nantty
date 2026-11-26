@@ -1,4 +1,4 @@
-h1:3E6OX9wMcHY9gdhbyNCufz4tSnpMG/VWDAEajTgoi5s=
+h1:E4/T+nIhhvDA1JAoD+kV+pRmDNi1be1YNB+YX66TKN0=
 20261003094035_create_auth_tables.up.sql h1:KtaB3JZqg9eMzXAQZ13OTwIzR/UCL/D/Pd6ovWwq10I=
 20261003094100_grant_read_access_to_other_services.up.sql h1:H47OiswGxjuOqv/qj+ImQCXFbCLBJ45N7XZePh87dEU=
 20261003100736_add_social_identities.up.sql h1:/ZhAX0L0xtUUkB2+guudIFRMEGeeX87tCJ3e0lLrHS4=
@@ -26,3 +26,7 @@ h1:3E6OX9wMcHY9gdhbyNCufz4tSnpMG/VWDAEajTgoi5s=
 20261125130000_add_developer_business_authorizations.up.sql h1:DA8VKdptTsVNBKW0GW9lpCz730YEJRYQeRYQvs0amCA=
 20261125140000_scope_developer_business_messages_to_store.up.sql h1:XPDT+6/PeaaiR2lWt6QVmBD4DaIbggYZsoGviwu8QhU=
 20261126150000_add_developer_webhook_delivery_leases.up.sql h1:K38iEqEeEgKcrCZHJtWxpAoiHHtt5sjZcbzesOXLfVw=
+20261127100000_scope_business_messaging_consent_to_store.up.sql h1:4BANVGHpQOj+Igo4M/b1KRKwrJPSHIKoXUlg0X+slEA=
+20261127110000_audit_merchant_business_consent_revocation.up.sql h1:StO2WoUUtophpM253NDUAuzHh9R6q730zupj1c0+U68=
+20261127120000_add_developer_application_redirect_uris.up.sql h1:BJo6MnYhM7loNbu4CDhK24WuNoA/1Qxmu9MgUcBgShQ=
+20261127130000_add_business_consent_authorization_codes.up.sql h1:+2obkvBjFSpIB4hxk7jb72MvCps15qsnpK4l/HqaALU=

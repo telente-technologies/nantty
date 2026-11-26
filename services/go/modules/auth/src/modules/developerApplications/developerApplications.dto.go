@@ -9,6 +9,7 @@ type Application struct {
 	Purpose         string    `json:"purpose"`
 	APIProduct      string    `json:"apiProduct"`
 	CallbackOrigins []string  `json:"callbackOrigins"`
+	RedirectURIs    []string  `json:"redirectUris"`
 	RequestedScopes []string  `json:"requestedScopes"`
 	Status          string    `json:"status"`
 	CreatedAt       time.Time `json:"createdAt"`
@@ -19,6 +20,7 @@ type ApplicationInput struct {
 	Name            string   `json:"name"`
 	Purpose         string   `json:"purpose"`
 	CallbackOrigins []string `json:"callbackOrigins"`
+	RedirectURIs    []string `json:"redirectUris"`
 	RequestedScopes []string `json:"requestedScopes"`
 }
 
