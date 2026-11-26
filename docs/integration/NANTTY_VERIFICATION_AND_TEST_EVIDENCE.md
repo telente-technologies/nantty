@@ -307,3 +307,11 @@ All 10 frontend applications pass `tsc --noEmit` with 0 errors:
 - The expanded `TestProductionResourcesRequireApplicationCapabilities` PostgreSQL integration test passed: granted/denied verification preparation, create/rotate/delete, secret ciphertext round trip, verification success/failure states, required audit rows, and rollback when an insert trigger rejects the audit action.
 - `AUTH_TEST_DATABASE_URL=... go test ./modules/auth/... -count=1 -p 1` — passed against isolated PostgreSQL 17; `go vet ./modules/auth/...`, `bash services/scripts/check-backend-file-lengths.sh` (all backend files <=300 lines), and `git diff --check` passed.
 - Scope boundary: this covers local service and database behavior only; signed-in browser, real external challenge acknowledgement, deployed delivery and persistent migration rollout remain unverified.
+
+## Business Messaging authorization at durable send reservation — 2026-11-26
+
+- The dormant send reservation now rechecks and share-locks the approved Business Messaging app, active credential and `messages:send` scope, active store authorization and scope, store-specific recipient consent and scope, and active recipient account before idempotency lookup, message insertion, or quota recording.
+- The focused `TestProductionQuotaReservationIsAtomicAcrossConnections` regression passed against a disposable PostgreSQL 17 container. It verifies concurrent same-key idempotency and that revoked app, credential, store grant, customer consent, or recipient account blocks a new reservation. The temporary container is removed after the run.
+- `AUTH_TEST_DATABASE_URL=... go test ./... -count=1` from `services/go/modules/auth` — passed across all Auth packages and migration-backed integration tests using the disposable PostgreSQL 17 database with the required `nantty_readers` test role. The separate shared dev database was not changed.
+- `go vet ./...`, `bash services/scripts/check-backend-file-lengths.sh` (all backend files <=300 lines), and `git diff --check` — passed.
+- Scope boundary: this protects the reservation write boundary. Public send is still intentionally mounted to 503; no live dispatch, external delivery race guarantee, browser flow, persistent migration, or staging deployment is claimed.

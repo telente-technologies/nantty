@@ -1,5 +1,11 @@
 # Nantty implementation backlog
 
+## 2026-11-26 — Revalidate business authorization at send reservation
+
+- Closed a time-of-check/time-of-use gap in the dormant Developer Business Messaging sender: the durable reservation transaction now revalidates and share-locks the approved application, active credential and `messages:send` scope, active store grant and scope, store-specific recipient consent and scope, and active recipient account before idempotency lookup or quota reservation. A revocation before reservation therefore cannot create a message record or consume quota.
+- Integration regression covers each revoked authorization dimension and concurrent idempotent requests. The focused test passed against a disposable PostgreSQL 17 container. Full Auth `go test ./... -count=1` passed against disposable PostgreSQL 17 with the required test reader role; `go vet ./...`, backend <=300-line guard, and `git diff --check` passed.
+- PR #75 is at `362bf8deec9c2e30567b8ccc274c88c8c27df0d7` plus the follow-up documentation commit. GitHub CI for the current code head is running. Public send remains intentionally 503; canonical customer-opted-in business-mode dispatch, inbound sync/receipts, browser verification and deployed migration remain incomplete.
+
 ## 2026-11-26 — Refresh compatible stable dependencies and recover build space
 
 - Refreshed compatible workspace dependency ranges/lockfiles across pnpm, Go, Python and Elixir. Expo-managed native dependencies remain pinned to the installed SDK's compatibility matrix; major-version and native-sensitive upgrades remain separate review work. `pnpm audit --audit-level=high` reported no known vulnerabilities. Node 26.13.0 checks passed for the affected Webapp, Developer, Admin and Sandbox TypeScript surfaces; Python tests passed 393 with 2 skipped, mypy reported no issues across 597 files, Ruff passed, and Elixir compile/tests passed (110 tests).
