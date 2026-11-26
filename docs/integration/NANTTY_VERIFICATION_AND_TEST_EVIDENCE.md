@@ -1,10 +1,94 @@
 # Nantty Verification & Test Evidence
 
+## Flutterwave checkout payload checksum finding (2026-11-26)
+
+- Reviewed `go/weak-sensitive-data-hashing` at `services/go/modules/payments/src/integrations/flutterwaveCharges.integration.go`. Flutterwave's current Checksum documentation mandates exactly this two-stage SHA-256 `payload_hash` construction; the hash is a checkout integrity checksum, not password storage or authentication. Replacing it with a password KDF or a different MAC would break provider interoperability. Renamed the input from `secretKey` to `merchantCredential` and documented the protocol purpose. GitHub alert #75 remains open: delegated alert dismissal is enforced and the current GitHub token lacks `admin:repo_hook`; the authorized request-and-approval workflow is still required. The nonfunctional inline suppression directive was removed.
+- Added a fixed expected checksum test independently computed with OpenSSL; the fake-provider parity check alone was not independent.
+- `go test ./tests/integrations/paymentsTesting -run 'TestFlutterwave(PayloadHashMatchesDocumentedChecksumVector|CheckoutIsHashedAndVerifiedByIdWithTheExactReference)$' -count=1`: **passed**. `go test ./...` in `services/go/modules/payments`: **passed**.
+- The source aligns with Flutterwave's documented checksum. A fresh CodeQL analysis and delegated dismissal approval remain pending; no live Flutterwave account or charge was used. Source: https://developer.flutterwave.com/docs/checksum
+
+## Social encrypted-message idempotency (2026-11-26)
+
+- Added `messages.clientPayloadHash` via an additive nullable migration. Personal and store-inbox message retries compare a canonical SHA-256 digest of encrypted payload fields; pre-migration records compare the persisted encrypted fields and normalized mention data. Store-inbox idempotency replay checks active team access and registered device before returning an existing message.
+- `pnpm --filter @nantty/social exec vitest run tests/messages/messageIdempotency.service.test.ts tests/storeInbox`: **4 files, 19 tests passed**.
+- `pnpm --filter @nantty/social typecheck`: **passed** (source and test TypeScript checks); local Node v24.19.0 emitted an engine warning because package policy requires >=26.13.0 <27.
+- `DATABASE_URL='postgresql://nantty:nantty@127.0.0.1:15433/nantty_test?schema=social_cb_test_20261126' RUN_INTEGRATION=1 pnpm --filter @nantty/social exec vitest run tests/integration/messagingKeys.integration.test.ts`: **1 integration test passed** after all 33 Social migrations were applied to a uniquely named schema in disposable PostgreSQL. It verifies that concurrent identical requests return one message ID and create one row, and that same-key changed ciphertext is rejected with 409. The test schema was dropped afterward; the pre-existing shared Social schema and persistent databases were not modified.
+- This is local test evidence only. The full suite under supported Node 26, persistent migration rollout, staging, and real-device cross-client behavior remain unverified.
+
+## GitHub staging secret isolation (2026-11-26)
+
+- The Terraform staging workflow now requires separate environment-scoped Cloudflare credentials: `STAGING_CLOUDFLARE_DNS_READ_TOKEN` in `staging` for both read-only plan paths, and `STAGING_CLOUDFLARE_DNS_WRITE_TOKEN` in `staging-apply` for the gated apply. The generic repository secret is no longer referenced by this workflow, preventing fallback to a broader token.
+- GitHub API read-only checks confirm both environments are restricted to `main`; `staging` currently has only `AWS_REGION` and no secrets, while `staging-apply` currently has no variables or secrets and retains its configured reviewer gate. Values were not retrieved or modified.
+- Ruby YAML parsing, `bash -n` on every embedded workflow `run:` script, and an assertion of the exact per-job secret references passed. No authenticated Terraform plan was run.
+
+## Production Business Messaging transactional webhook outbox (2026-11-26)
+
+- Replaced best-effort webhook enqueue after message dispatch with one PostgreSQL transaction that updates the accepted message and queues matching verified endpoint deliveries. Outbox read, JSON decode, and insert errors now fail the confirmation transaction; endpoint subscriptions share one event ID/envelope and are filtered by exact event or wildcard.
+- `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./tests -run '^TestProductionMessageConfirmationAndWebhookOutboxAreAtomic$' -count=1 -v` in `services/go/modules/auth`: **passed**. Isolated-schema coverage verifies matching/wildcard filtering, exclusion of unrelated/inactive/unverified/other-application endpoints, idempotent replay without duplicate queue rows, and rollback of the message status when outbox insertion fails.
+- The public production send route remains mounted to `503 BUSINESS_MESSAGING_UNAVAILABLE`; this test validates the internal persistence contract only. It does not verify canonical encrypted Social dispatch, real webhook HTTP delivery, message reconciliation after downstream acceptance, migration rollout, or staging.
+
+## Production webhook worker persistence failures (2026-11-26)
+
+- Delivery batch scanning now returns scan, iteration, and close failures instead of silently skipping records. Delivery success and retry/failure metadata are saved in transactions; database errors are returned to the worker cycle for logging/retry rather than ignored. Persisted error strings are sanitized and do not include raw transport/DNS errors or destination URLs. A lease column plus `FOR UPDATE SKIP LOCKED` claim transaction prevent concurrent worker replicas selecting the same pending row; bounded leases are cleared after persisted outcomes and expire for crash recovery.
+- `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./tests -run '^TestProductionWebhookWorkerReportsPersistenceFailures$' -count=1 -v` in `services/go/modules/auth`: **passed**. Isolated PostgreSQL assertions cover retry metadata, sanitized error persistence, rollback/error propagation on a rejected update, and a concurrent second worker seeing zero claimable rows while the first is sending.
+- The same integration test now also uses a database trigger to deactivate a webhook after claim but before the just-in-time lookup; the worker skips sending and the transport confirms zero requests. The worker reads the current URL and encrypted signing secret only for a still-pending leased delivery with an active, verified endpoint and approved application. For `business.message.dispatched`, it additionally requires the persisted message/store grant and recipient consent to remain active with `messages:send`.
+- `TestProductionWebhookWorkerRevalidatesBusinessAuthorization` passed against isolated PostgreSQL 17. Triggers suspend the application or revoke the store grant after both deliveries are claimed; the worker issues zero requests. Recipient consent is also part of the required query predicate. These checks complement the endpoint-deactivation race case.
+- Auth migration upgrade/rollback/replay passed with the additive lease migration. Delivery to an actual HTTPS receiver and end-to-end event delivery remain unverified. Delivery remains at-least-once if a process stops after remote acceptance; consumers must deduplicate using `eventId`.
+- After endpoint, application, store-grant, and recipient-consent revalidation changes, `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' GOMAXPROCS=4 go test -p 2 ./...` in `services/go/modules/auth` passed, including all Auth integration packages (54.318s). The backend file-length gate and `git diff --check` passed; the worker is 299 lines and all backend files remain at or below the 300-line limit.
+
+## Sandbox PostgreSQL integration and application suite (2026-11-26)
+
+- `SANDBOX_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' pnpm exec vitest run` in `services/typescript/sandbox`: **57/57 passed across 9 files**, with both SQL integration tests enabled. Integration coverage includes legacy per-application quota aggregation into organization-wide usage, compatibility-trigger synchronization, credential lifecycle and isolation, synthetic inbound/outbound idempotency/status, webhook secret persistence, outbox, failure, retry, and audit.
+- `pnpm typecheck` in the Sandbox service: passed for source and tests. `pnpm lint`: passed.
+- The integration tests create isolated schemas and clean them up. The signed-in Developer/Sandbox browser path, controlled real HTTPS receiver and AWS deployment are not covered by this run.
+
+## Developer application and production-access authorization (2026-11-26)
+
+- `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./tests -run '^(TestDeveloperApplicationsAreOrganizationScopedAndAudited|TestProductionResourcesRequireApplicationCapabilities|TestProductionMessageHistoryAndStatusAreTenantAndConsentScoped)$' -count=1 -v` in `services/go/modules/auth`: **passed**.
+- Coverage includes application lifecycle/organization isolation/audit; capability outcomes for Owner, explicitly granted and ungranted Developer, Analyst, Billing role and outsider; and tenant/store/recipient-consent boundaries for production message history/status.
+- Tests use disposable schemas and did not modify persistent application data. Gateway/portal browser behavior and production deployment remain unverified.
+
+## Admin Developer quota adjustment entitlement guard (2026-11-26)
+
+- `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./tests -run '^TestAdminQuotaAdjustmentCannotGrantOrChangePaidEntitlements$' -count=1 -v` in `services/go/modules/auth`: **passed**.
+- Confirms missing/sandbox/unverified paid plans cannot be created or activated by the admin quota endpoint; after a verified active paid subscription is present, quota changes preserve plan tier, status, billing period, and provider reference.
+- The test uses temporary tables scoped to the test connection. It does not verify the live Admin browser, all admin operations, or a deployed migration.
+
+## Auth Identity migration upgrade, rollback, and replay (2026-11-26)
+
+- Added `services/go/modules/auth/tests/migrations/authMigrationsUpgrade_integration_test.go`, which uses the actual embedded migration source and `golang-migrate` runner in a uniquely named disposable schema.
+- `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./tests/migrations -run '^TestIdentityMigrationsUpgradeRollbackAndReplay$' -count=1 -v` in `services/go/modules/auth`: **passed**. It upgraded from baseline `20261116160000`, preserved a pre-existing account row, reversed the 9 subsequent migrations, and replayed the migrations with the scoped-message and webhook-lease columns restored.
+- `bash services/scripts/check-backend-file-lengths.sh`: passed; test file is 132 lines. `git diff --check`: passed.
+- The test removed its isolated schema. No persistent database migration was run; production/staging rollout remains gated on the approved migration window.
+
+## Developer organization invitation producer and email mapping (2026-11-26)
+
+- `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./tests -run '^TestDeveloperOrganizationInvitationsRequireRecipientConsent$' -count=1 -v` in `services/go/modules/auth`: **passed**. Covers recipient consent, resend cooldown, outbox emission and rejection of unauthorized resend.
+- `pnpm exec vitest run tests/developerOrgInvitationMapping.test.ts` in `services/typescript/notifications`: **1/1 passed**; confirms only the invitee receives the intent and the invitation email links to the Developer invitation route.
+- `pnpm exec vitest run tests/emailTemplates.test.tsx` in `packages/emailTemplates`: **257/257 passed**.
+- These tests do not send email. Live SES delivery and signed-in browser acceptance remain unverified; staging SES DNS and sending identity are not ready.
+
+## Merchant Business Messaging grant scope allowlist (2026-11-26)
+
+- Added regression coverage proving only explicitly supported own-property scopes are grantable; inherited object names (`constructor`, `toString`), unsupported scopes, and duplicate scope entries are rejected or normalized.
+- `pnpm exec tsx --test src/components/settings/businessMessagingScopes.util.test.ts` in `apps/webapp`: **2/2 passed**.
+- `pnpm typecheck` in `apps/webapp`: passed. Focused ESLint on the changed component/helper/tests: passed. `git diff --check`: passed.
+- This is a frontend safety hardening only. Backend enforcement remains authoritative; browser workflow and deployed grant behavior are not verified.
+
+## Identity database integration run (2026-11-26)
+
+- Started the documented isolated PostgreSQL 17 test stack with `NANTTY_LOCAL_POSTGRES_PORT=15433 docker compose -p nantty-identity-tests -f infra/local/docker-compose.yml up -d --wait postgres`. The new container became healthy and uses its own named volume; the existing legacy Postgres container on port 15432 was not changed.
+- `AUTH_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./...` in `services/go/modules/auth` passed, including the database-backed Auth integration package.
+- `USERS_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./...` in `services/go/modules/users` passed, including its fresh-schema integration and privacy suites.
+- `INVENTORY_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./tests -run '^TestInternalBusinessStoreAuthorizationChecksTokenMembershipAndPermission$' -count=1` in `services/go/modules/orders` passed (the service authorization token, store membership/owner rule, and strict payload checks).
+- No persistent application schema was migrated. The isolated test project is left running for follow-up integration tests; the legacy `15432` environment remains mismatched and is still not reconciled.
+
 ## Cloud-hosted staging readiness snapshot (2026-11-26)
 
 - AWS MCP read-only inventory in the selected Region `eu-north-1`: Terraform state bucket `nantty-tfstate-324009946456-eu-north-1-an`, DynamoDB table `nantty-terraform-locks`, SES feedback SNS topic and its two SQS queues exist. SESv2 `GetEmailIdentity` returns verification `PENDING`/`HOST_NOT_FOUND`, `VerifiedForSendingStatus=false`, DKIM `PENDING`, and MAIL FROM `bounce.staging.nantty.com` `PENDING`. Account `SendingEnabled=true` but `ProductionAccessEnabled=false` (sandbox).
-- The same inventory found zero IAM OIDC providers, zero Nantty-named IAM roles, zero ECS clusters and zero ECR repositories. Current GitHub Actions therefore cannot assume staging roles and the backend deployment workflow has no cluster/registry target. PR #74 adds a manual `main`-only apply path: a read-only staging plan and sanitized DNS/resource summary run before the protected apply-environment approval; after approval, a dedicated apply role replans, compares the complete canonical JSON-plan digest, and applies only a matching create/update plan. No plan artifact is uploaded. GitHub environment `staging-apply` is configured with `main`-only deployment policy, owner reviewer `oyinlola-tech`, and admin bypass disabled. It has not been run; the AWS roles, scoped DNS secret, and trusted admin CIDR remain absent.
-- Cloudflare `whoami` confirms the connected user is `nantty.tega@gmail.com`; the active `nantty.com` zone has no records for the three current DKIM names or `bounce.staging.nantty.com`. The apex DMARC policy is `p=reject; sp=reject`; no child override should be added. GitHub's `staging` environment has a `CLOUDFLARE_API_TOKEN` secret name, but its value and scope are not inspectable. This Cloudflare connection is separate from GitHub Actions. No AWS or DNS writes were made.
+- The same prior AWS inventory found zero IAM OIDC providers, zero Nantty-named IAM roles, zero ECS clusters and zero ECR repositories. Current GitHub Actions therefore cannot assume staging roles and the backend deployment workflow has no cluster/registry target. PR #74 adds a manual `main`-only apply path: a read-only staging plan and sanitized DNS/resource summary run before the protected apply-environment approval; after approval, a dedicated apply role replans, compares the complete canonical JSON-plan digest, and applies only a matching create/update plan. No plan artifact is uploaded. GitHub environment `staging-apply` is configured with `main`-only deployment policy, owner reviewer `oyinlola-tech`, and admin bypass disabled. A fresh GitHub settings read on 2026-11-26 found `AWS_REGION=eu-north-1` as the only staging environment variable; no plan/apply role ARN variables exist in repository or environment variables. The repository-level `CLOUDFLARE_API_TOKEN` secret name exists, but its value/scope is not visible; no environment-level secret override is set. The workflow has not run; AWS OIDC roles and a trusted admin CIDR remain missing.
+- Cloudflare was reconnected and the active `nantty.com` zone was rechecked. With the owner's record-specific approval, the three SES DKIM CNAMEs plus MAIL FROM MX/TXT records were created as DNS-only, TTL 600, and read back with matching values. No child DMARC record was added; `_dmarc.nantty.com` remains `p=reject; sp=reject`. This connector is separate from GitHub Actions. AWS SES validation has not yet been re-polled after publication. Because these DNS records were created outside Terraform, reconcile/import them into state or otherwise handle them explicitly in a reviewed plan before any apply.
+- GitHub-hosted `terraform-staging.yml` is a manual `main`-only workflow and can run independently of the developer workstation once credentials and environment configuration exist. A live GitHub API read found only `AWS_REGION=eu-north-1` in the staging environment, no `AWS_TERRAFORM_ROLE_ARN_STAGING` or `AWS_TERRAFORM_APPLY_ROLE_ARN_STAGING` variables at repository or environment scope, a repository-level `CLOUDFLARE_API_TOKEN` secret name, and no environment-level secret overrides. Secret values/scopes are not visible through GitHub's list API. The workflow has no successful Terraform plan/apply run; AWS OIDC roles and trusted ingress CIDR remain missing. No cloud deployment has occurred.
 - CI and desktop build jobs run on GitHub-hosted runners when triggered, independent of the developer PC. Local Codex coding does not continue when the local host stops; no Codex cloud work task has been started.
 
 ## PR #72 — Store-scoped Developer Business Messaging authorization (2026-11-25)
