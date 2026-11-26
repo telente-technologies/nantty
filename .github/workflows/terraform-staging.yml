@@ -51,7 +51,7 @@ jobs:
       id-token: write
     env:
       AWS_REGION: eu-north-1
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.STAGING_CLOUDFLARE_DNS_READ_TOKEN }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -64,7 +64,7 @@ jobs:
         run: |
           test -n "$AWS_TERRAFORM_ROLE_ARN" || { echo "Missing staging environment variable AWS_TERRAFORM_ROLE_ARN_STAGING." >&2; exit 1; }
           test "$CONFIGURED_REGION" = "eu-north-1" || { echo "AWS_REGION must be eu-north-1 for this project." >&2; exit 1; }
-          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing staging environment secret CLOUDFLARE_API_TOKEN with zone-scoped DNS read access." >&2; exit 1; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing staging environment secret STAGING_CLOUDFLARE_DNS_READ_TOKEN with zone-scoped DNS read access." >&2; exit 1; }
       - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_TERRAFORM_ROLE_ARN_STAGING }}
@@ -88,7 +88,7 @@ jobs:
       plan_digest: ${{ steps.review.outputs.plan_digest }}
     env:
       AWS_REGION: eu-north-1
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.STAGING_CLOUDFLARE_DNS_READ_TOKEN }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -103,7 +103,7 @@ jobs:
           test "$CONFIRMATION" = "APPLY STAGING" || { echo "Set confirm_staging_apply to APPLY STAGING to proceed." >&2; exit 1; }
           test -n "$AWS_TERRAFORM_ROLE_ARN" || { echo "Missing staging environment variable AWS_TERRAFORM_ROLE_ARN_STAGING." >&2; exit 1; }
           test "$CONFIGURED_REGION" = "eu-north-1" || { echo "AWS_REGION must be eu-north-1 for this project." >&2; exit 1; }
-          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing staging environment secret CLOUDFLARE_API_TOKEN with zone-scoped DNS read access." >&2; exit 1; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing staging environment secret STAGING_CLOUDFLARE_DNS_READ_TOKEN with zone-scoped DNS read access." >&2; exit 1; }
       - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_TERRAFORM_ROLE_ARN_STAGING }}
@@ -156,7 +156,7 @@ jobs:
       id-token: write
     env:
       AWS_REGION: eu-north-1
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.STAGING_CLOUDFLARE_DNS_WRITE_TOKEN }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -171,7 +171,7 @@ jobs:
           test "$CONFIRMATION" = "APPLY STAGING" || { echo "Set confirm_staging_apply to APPLY STAGING to proceed." >&2; exit 1; }
           test -n "$AWS_TERRAFORM_APPLY_ROLE_ARN" || { echo "Missing staging-apply environment variable AWS_TERRAFORM_APPLY_ROLE_ARN_STAGING." >&2; exit 1; }
           test "$CONFIGURED_REGION" = "eu-north-1" || { echo "AWS_REGION must be eu-north-1 for this project." >&2; exit 1; }
-          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing staging-apply environment secret CLOUDFLARE_API_TOKEN with nantty.com DNS read/edit access." >&2; exit 1; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing staging-apply environment secret STAGING_CLOUDFLARE_DNS_WRITE_TOKEN with nantty.com DNS read/edit access." >&2; exit 1; }
       - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_TERRAFORM_APPLY_ROLE_ARN_STAGING }}
