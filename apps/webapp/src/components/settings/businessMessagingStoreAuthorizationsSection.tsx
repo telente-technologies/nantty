@@ -14,15 +14,10 @@ import { readErrorMessageForDisplay } from "@/services/clientApi.service";
 import { storesService } from "@/services/stores.service";
 
 import styles from "./settings.module.css";
+import { businessMessagingScopeDescriptions, getGrantableBusinessMessagingScopes, isGrantableBusinessMessagingScope } from "./businessMessagingScopes.util";
 
 const authorizationsKey = ["privacy", "businessMessagingAuthorizations"] as const;
 const storesKey = ["businessMessaging", "authorizedStores"] as const;
-const scopeDescriptions: Readonly<Record<string, string>> = {
-  "messages:send": "Send messages to customers who have consented to this business conversation.",
-  "messages:read": "Read messages covered by the business messaging consent rules.",
-  "conversations:read": "View conversations associated with this store.",
-};
-
 export function BusinessMessagingStoreAuthorizationsSection() {
   const queryClient = useQueryClient();
   const [applicationId, setApplicationId] = useState("");
@@ -31,7 +26,7 @@ export function BusinessMessagingStoreAuthorizationsSection() {
   const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
   const authorizations = useQuery({ queryKey: authorizationsKey, queryFn: privacyService.fetchBusinessMessagingAuthorizations, retry: false });
   const stores = useQuery({ queryKey: storesKey, queryFn: storesService.fetchMyStores, enabled: Boolean(preview), retry: false });
-  const grantableScopes = (preview?.requestedScopes ?? []).filter((scope) => scope in scopeDescriptions);
+  const grantableScopes = getGrantableBusinessMessagingScopes(preview?.requestedScopes ?? []);
 
   const lookup = useMutation({
     mutationFn: privacyService.previewBusinessMessagingApplication,
@@ -98,9 +93,9 @@ export function BusinessMessagingStoreAuthorizationsSection() {
           <legend className={styles.subHeading}>Permissions to grant</legend>
           {grantableScopes.map((scope) => <label className={styles.radioRow} key={scope}>
             <input type="checkbox" checked={selectedScopes.includes(scope)} onChange={() => toggleScope(scope)} />
-            <span><strong>{scope}</strong><span className={styles.muted}>{scopeDescriptions[scope] ?? "Permission requested by this approved application."}</span></span>
+            <span><strong>{scope}</strong><span className={styles.muted}>{businessMessagingScopeDescriptions[scope]}</span></span>
           </label>)}
-          {preview.requestedScopes.filter((scope) => !(scope in scopeDescriptions)).map((scope) => <p className={styles.muted} key={scope}>{scope}: not currently available for store authorization.</p>)}
+          {preview.requestedScopes.filter((scope) => !isGrantableBusinessMessagingScope(scope)).map((scope) => <p className={styles.muted} key={scope}>{scope}: not currently available for store authorization.</p>)}
         </fieldset>}
         {stores.isPending ? <ListRowsSkeleton label="Loading stores you can manage" rows={2} withAvatar={false} /> : null}
         {stores.isError ? <ErrorState description="We couldn't load stores available to your account." error={stores.error} onRetry={() => void stores.refetch()} /> : null}
