@@ -315,3 +315,8 @@ All 10 frontend applications pass `tsc --noEmit` with 0 errors:
 - `AUTH_TEST_DATABASE_URL=... go test ./... -count=1` from `services/go/modules/auth` — passed across all Auth packages and migration-backed integration tests using the disposable PostgreSQL 17 database with the required `nantty_readers` test role. The separate shared dev database was not changed.
 - `go vet ./...`, `bash services/scripts/check-backend-file-lengths.sh` (all backend files <=300 lines), and `git diff --check` — passed.
 - Scope boundary: this protects the reservation write boundary. Public send is still intentionally mounted to 503; no live dispatch, external delivery race guarantee, browser flow, persistent migration, or staging deployment is claimed.
+
+## GitHub integration job timeout correction — 2026-11-26
+
+- PR #75 Backend integration run `45844863491` ended as cancelled at 60m18s while its `Go integration tests against real Postgres, Valkey and RabbitMQ` step was still active; no test failure log was emitted. A successful main-branch integration baseline (`45819568753`) took approximately 39m38s.
+- Changed `.github/workflows/backend.yml` integration `timeout-minutes` from 60 to 120. The test workspace remains sequential to preserve the existing resource-isolation design; no tests were removed or parallelized. The new-head run must complete before this workflow change is considered verified.
