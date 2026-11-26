@@ -226,11 +226,14 @@ workstation may be offline. Before dispatching it, configure:
 - A reviewed, non-public `admin_ip_allow_list` in `infra/aws/envs/staging/terraform.tfvars`; never use
   `0.0.0.0/0` or `::/0` for admin access.
 
-After reviewing a read-only plan, dispatch **Terraform staging** from `main`, set `apply_staging=true`, and type
-`APPLY STAGING` into `confirm_staging_apply`. GitHub pauses for the `staging-apply` reviewer. The approved job
-creates a fresh saved plan and applies that exact plan only if it has no delete or replacement actions; otherwise
-it stops for separate review. The saved plan stays on the ephemeral runner and is not uploaded as a public artifact.
-This path has not yet run: the AWS OIDC/apply role, DNS-edit secret and trusted admin CIDR are still outstanding.
+Dispatch **Terraform staging** from `main`, set `apply_staging=true`, and type `APPLY STAGING` into
+`confirm_staging_apply`. GitHub first runs a read-only plan with the separate `staging` plan role and publishes a
+sanitized resource/action and DNS-record summary. The `staging-apply` environment reviewer then sees that summary
+before approval. After approval, the workflow replans with the dedicated apply role and applies only if the complete
+canonical Terraform JSON plan digest is identical to the reviewed plan. Plan files and JSON remain on ephemeral
+runners and are not uploaded as artifacts; only the digest and sanitized summary are exposed. Plans containing any
+delete or replacement action fail closed. This path has not yet run: the AWS OIDC/plan/apply roles, DNS-edit secret
+and trusted admin CIDR are still outstanding.
 It applies infrastructure only; app image publication/deployment, frontend portal hosting, desktop distribution,
 email DNS verification, and end-to-end staging tests remain separate work. It never deploys production.
 

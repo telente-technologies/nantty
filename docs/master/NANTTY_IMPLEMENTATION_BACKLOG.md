@@ -1,5 +1,12 @@
 # Nantty implementation backlog
 
+## 2026-11-26 — Review and gate GitHub-hosted staging infrastructure apply
+
+- Extended `.github/workflows/terraform-staging.yml` with a manual, `main`-only staging flow that produces a read-only plan and sanitized DNS/resource summary before the protected apply environment requests approval. After approval, the apply role recreates the plan and compares its canonical JSON SHA-256 digest before applying; the plan files are ephemeral, no plan artifact is uploaded, and delete/replacement actions are rejected.
+- Configured `staging-apply` for `main` only with owner review and administrator bypass disabled. This does not create AWS infrastructure, publish DNS, or deploy the application.
+- Local verification: workflow YAML parses, all embedded shell scripts pass `bash -n`, Terraform formatting and staging validation pass, and `git diff --check` passes. PR #74 checks for its earlier revision had passed for Terraform validation, dependency audit, Gitleaks, Trivy and several CodeQL languages; Go and Rust CodeQL checks were still running at the last poll. Changes to the approval-order safety gate are pending a fresh PR CI run.
+- Remaining: provision the narrowly scoped AWS GitHub OIDC plan/apply trust and permissions; add a zone-scoped Cloudflare DNS Read/Edit secret to the protected GitHub environment; obtain a fixed admin ingress CIDR; inspect the full plan/costs and exact DNS changes before approval. Frontend portal/desktop publication is not implemented. GitHub Actions can run after this workstation is offline, but local coding does not continue autonomously.
+
 ## 2026-11-25 — Add merchant-facing Business Messaging store authorization UI
 
 - Added an authenticated Identity preview endpoint that returns only the public name, organization, application ID, and requested scopes of an approved Business Messaging application; pending, archived, or other-product apps return not found. Added its exact authenticated Gateway route.
