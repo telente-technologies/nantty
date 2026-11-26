@@ -1,5 +1,16 @@
 # Nantty blockers and verification gaps
 
+## Current blocker reconciliation — 2026-11-26 (post-PR #77)
+
+This status supersedes older contradictory staging snapshots below; historical notes remain for audit history.
+
+- PR #77 merged as `b5a32658210652f4a5be200a1296f46163276fd8` without a co-author trailer. Mobile tests and JavaScript CodeQL passed; GitHub subsequently marked alerts #35/#36/#44 `fixed` at 2026-11-26 19:01 UTC. Alert #91 remains open. Go CodeQL/Security and unrelated Frontend workflows were still running at the time of this recheck.
+- Staging is not deployed. Main deploy run `45874563086` completed all 16 ARM64 image builds and Trivy scans but failed closed before ECR push because `AWS_ACCOUNT_ID_STAGING` is absent. Current GitHub environment reads show `staging` has only `AWS_REGION=eu-north-1`, and `staging-apply` has no variables. AWS OIDC provider/roles, role ARN variables, ECS/ECR resources and a successful authenticated Terraform plan/apply are not evidenced.
+- Required next AWS-side prerequisites: create/review the least-privilege GitHub OIDC plan, apply, image-push and deploy roles in `eu-north-1`; configure the verified account ID and role ARN variables in the correct protected environments; run and review the hosted plan before gated apply. AWS documentation/skill lookup tools required by repository instructions were unavailable in the prior session, so no AWS API/CLI operation was attempted.
+- Current infrastructure only deploys backend ECS services. Frontend hosting/release for webapp, admin, seller, creator/studio, ads, developer and sandbox, per-app staging hostnames, and desktop distribution remain unimplemented.
+- SES DNS records now resolve, contrary to pre-publication snapshots below. Re-poll SES identity/DKIM/MAIL FROM, reconcile/import the five externally created records into Terraform state safely, deploy the email runtime/templates, and verify authorized test delivery. Sending remains unverified/sandbox-only.
+- Root SPF consolidation is already in the desired state and publicly resolves as a single policy; no DNS change remains for that item.
+
 Business Messaging consent-flow progress (2026-11-26): exact app/store authorization preview, explicit approval, short-lived one-time S256 PKCE code issuance/redemption, and a state-preserving `access_denied` callback are implemented locally. Both callback outcomes are checked against the registered redirect URI and active app/store grant; denial persists no consent or code. Full Auth PostgreSQL tests, `go vet`, Webapp typecheck/focused tests/lint pass. The remaining external verification is a signed-in browser and deployed callback run. Separate product/implementation blockers remain the customer-opted-in business-managed conversation mode and eligibility/window policy, canonical Social business-managed dispatch (not reuse of personal E2EE messages), inbound synchronization, and delivery/read receipts; the public production send endpoint remains disabled.
 
 Social send idempotency update (2026-11-26): focused unit/store-inbox tests, Social typecheck and isolated PostgreSQL concurrency/replay integration now pass for the additive payload-hash migration. No persistent database was changed. Remaining verification: full test suite on the declared Node 26 runtime, migration rollout review and staging/client workflows.

@@ -1,5 +1,12 @@
 # Nantty implementation backlog
 
+## 2026-11-26 — Merge mock live-gift CodeQL fix and reconcile staging evidence
+
+- PR #77 (`owl/codeql-deterministic-demo-viewer`) replaced `Math.random()` selection of fixture viewer identities with a deterministic cycle and added a fake-timer regression test. Squash-merged as `b5a32658210652f4a5be200a1296f46163276fd8`; the commit has no co-author trailer. Focused Jest, package ESLint, TypeScript check and `git diff --check` passed locally (Node 24.19.0; repository target is Node 26.13). Mobile CI and PR JavaScript CodeQL passed. Post-merge JavaScript CodeQL marked #35/#36/#44 fixed at 2026-11-26 19:01 UTC. Alert #91 remains open at the provider-required Flutterwave checksum; do not alter its semantics.
+- Staging evidence was reconciled: deploy run `45874563086` successfully built/scanned 16 ARM64 images but failed closed before ECR push for missing `AWS_ACCOUNT_ID_STAGING`. Current environment configuration is `staging: AWS_REGION=eu-north-1 only`; `staging-apply` has no variables. Set up and verify the approved OIDC role/variable chain before hosted plan/apply; do not claim a deployment from image-build success.
+- Cloudflare's root `nantty.com` SPF already has the single approved combined policy, confirmed by API and public DNS; no DNS edit was needed. The five SES records resolve, but SES status, Terraform reconciliation, and email delivery remain open.
+- Next dependency-ready staging work: verify current-main security scans; obtain the AWS OIDC/role configuration using the repository-required AWS guidance; execute reviewed Terraform plan/apply; then address backend deploy, frontend hosting/subdomains, SES runtime, migrations and smoke journeys in dependency order.
+
 ## 2026-11-26 — Revalidate business authorization at send reservation
 
 - Closed a time-of-check/time-of-use gap in the dormant Developer Business Messaging sender: the durable reservation transaction now revalidates and share-locks the approved application, active credential and `messages:send` scope, active store grant and scope, store-specific recipient consent and scope, and active recipient account before idempotency lookup or quota reservation. A revocation before reservation therefore cannot create a message record or consume quota.

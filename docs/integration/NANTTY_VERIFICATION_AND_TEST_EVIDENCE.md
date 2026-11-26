@@ -1,5 +1,12 @@
 # Nantty Verification & Test Evidence
 
+## PR #77 and staging recheck — 2026-11-26
+
+- PR #77 was squash-merged as `b5a32658210652f4a5be200a1296f46163276fd8`; the merge message contains no `Co-authored-by` trailer. The change replaces randomized selection of mock live-gift viewer identities with deterministic cycling and adds a fake-timer regression test.
+- Local focused test `pnpm --filter @nantty/mobile exec jest --runInBand src/services/live/__tests__/liveGiftMockEmitter.test.ts` passed (1/1). Package-local ESLint, `tsc --noEmit -p tsconfig.json`, and `git diff --check` passed on Node 24.19.0, below the repository's Node 26.13 target. PR mobile CI and JavaScript CodeQL passed. The post-merge JavaScript CodeQL analysis completed successfully and GitHub marked alerts #35/#36/#44 fixed at 2026-11-26 19:01 UTC. Alert #91 remains open. Post-merge Go CodeQL/Security and unrelated Frontend jobs were still in progress at the latest check.
+- Main Deploy run `45874563086` built and Trivy-scanned all 16 ARM64 service images on native ARM runners, but the deploy job failed closed before ECR push because `AWS_ACCOUNT_ID_STAGING` was unset. Current read-only GitHub environment inspection: `staging` has `AWS_REGION=eu-north-1` only; `staging-apply` has no variables. No AWS resources were changed and no ECR push/ECS deployment/runtime smoke occurred.
+- AWS project and DNS evidence: GitHub OIDC Terraform/apply and ECR/deploy role configuration is absent or unverified. The current Terraform/deploy path covers backend ECS only; frontend hosting and staging subdomains are not configured. Cloudflare API plus public `dig TXT nantty.com` confirm one root SPF record, `v=spf1 include:_spf.mx.cloudflare.net include:zohomail.com ~all`; no change was needed. SES DKIM and MAIL FROM DNS records resolve, but SES status has not been re-polled and sending remains unverified/sandbox-only.
+
 ## SES staging DNS propagation recheck — 2026-11-26
 
 - Public `dig` currently resolves all three SES DKIM CNAMEs to their matching `*.dkim.amazonses.com` targets, `bounce.staging.nantty.com` MX priority 10 to `feedback-smtp.eu-north-1.amazonses.com`, and its SPF TXT to `v=spf1 include:amazonses.com ~all`.
