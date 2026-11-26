@@ -248,3 +248,7 @@ func PlatformSubscriptionRevenueAccount(currency string) AccountRef {
 func UserCoinDebtAccount(userId string) AccountRef {
 	return AccountRef{Code: "user:" + userId + ":coinDebt", Currency: CoinUnit, Kind: AccountKindAsset, OwnerType: "user", OwnerId: userId, AllowNegativeBalance: false}
 }
+
+func PlatformUnrecoveredCoinClawbackAccount() AccountRef {
+	return platformAccount("expense:unrecoveredCoinClawbacks", CoinUnit, AccountKindExpense)
+}

@@ -40,6 +40,10 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 		t.Fatal("an unverified creator's earned coins must stay as coins")
 	}
 	harness.OnboardConnectedAccount(creator, false)
+	if refused := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-not-approved", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}}); refused.Status != http.StatusForbidden || refused.Body["code"] != "CREATOR_PROGRAM_REQUIRED" {
+		t.Fatalf("a payout-verified account outside the Creator Program converted coins: %d %s", refused.Status, refused.Raw)
+	}
+	harness.setCreatorProgramStatus(creator, "approved")
 	staleQuote := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-quote-stale", map[string]any{"coins": 180, "currency": "NGN", "expectedCashMinor": 179_000}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
 	if staleQuote.Status != http.StatusConflict || staleQuote.Body["code"] != "CONVERSION_RATE_CHANGED" {
 		t.Fatalf("a mismatched expectedCashMinor quote must fail closed: %d %s", staleQuote.Status, staleQuote.Raw)
@@ -54,6 +58,11 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.withdrawals.process")
 	stepUp := staff.StepUp
 	harness.Flutterwave.FundMainBalance("NGN", 1_000_000)
+	harness.setCreatorProgramStatus(creator, "suspended")
+	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp()); report.Body["creatorTransfers"].(float64) != 0 || harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")) != 180_000 {
+		t.Fatalf("suspended Creator Program member must not be paid: %v", report.Body)
+	}
+	harness.setCreatorProgramStatus(creator, "approved")
 	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp()); report.Body["creatorTransfers"].(float64) != 1 {
 		t.Fatalf("creator earnings: %v", report.Body)
 	}

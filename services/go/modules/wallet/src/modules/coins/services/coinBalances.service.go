@@ -65,6 +65,13 @@ type EarnedCoinConversionInput struct {
 }
 
 func (balances CoinBalances) ConvertEarnedCoinsToCashInTransaction(ctx context.Context, transaction *sql.Tx, input EarnedCoinConversionInput) (dtos.CoinConversionReceiptDto, error) {
+	approved, err := balances.Container.IsApprovedCreator(ctx, transaction, input.UserId)
+	if err != nil {
+		return dtos.CoinConversionReceiptDto{}, err
+	}
+	if !approved {
+		return dtos.CoinConversionReceiptDto{}, httpserver.NewApiError(http.StatusForbidden, "CREATOR_PROGRAM_REQUIRED", "Only approved creators can convert earned coins to cash.")
+	}
 	settings := balances.Container.Settings
 	valuePerCoin, supported := balances.Container.CoinCashValuesMinor(ctx)[input.Currency]
 	minimum := settings.MinimumPayoutMinorByCurrency[input.Currency]

@@ -91,16 +91,18 @@ type StoreReceiptRequestDto struct {
 }
 
 type CoinTransferRequestDto struct {
-	RecipientUserId string `json:"recipientUserId"`
-	Coins           int64  `json:"coins"`
-	Note            string `json:"note,omitempty"`
+	RecipientUserId        string `json:"recipientUserId"`
+	Coins                  int64  `json:"coins"`
+	Note                   string `json:"note,omitempty"`
+	ExpectedFeeBasisPoints *int64 `json:"expectedFeeBasisPoints,omitempty"`
 }
 
 type CoinTransferQuoteDto struct {
-	Coins      int64 `json:"coins"`
-	FeeCoins   int64 `json:"feeCoins"`
-	NetCoins   int64 `json:"netCoins"`
-	FeePercent int64 `json:"feePercent"`
+	Coins          int64   `json:"coins"`
+	FeeCoins       int64   `json:"feeCoins"`
+	NetCoins       int64   `json:"netCoins"`
+	FeePercent     float64 `json:"feePercent"`
+	FeeBasisPoints int64   `json:"feeBasisPoints"`
 }
 
 type CoinTransferReceiptDto struct {

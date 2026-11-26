@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { EmptyState, ErrorState } from "@/components/ui/feedback";
 import { ListRowsSkeleton } from "@/components/ui/pageSkeletons";
+import { CoinTransferForm } from "@/components/wallet/coinTransferForm";
 import { coinsService } from "@/services/webActions.service";
 
 import styles from "../page.module.css";
@@ -23,6 +24,7 @@ export default function WalletCoinsPage() {
         <span className={styles.value}>{(balance.data?.coins ?? 0).toLocaleString()}</span>
       </div>
       <p className={styles.note}>Use coins to send gifts and tips to creators. Top up from a live room or gift tray.</p>
+      <CoinTransferForm />
       <section className={styles.section} aria-label="Coin activity">
         <h2 className={styles.sectionTitle}>Activity</h2>
         {(activity.data ?? []).length === 0 ? (

@@ -27,8 +27,8 @@ export const coinsService = {
   verifyCoinPurchase: (reference: string) =>
     api.post<VerifiedCoinPurchase>(`/api/v1/coins/purchases/${encodeURIComponent(reference)}/verify`),
   fetchCoinTransferQuote: (coins: number) => api.get<CoinTransferQuote>("/api/v1/coins/transfers/quote", { coins }),
-  transferCoinsToUser: (recipientUserId: string, coins: number, idempotencyKey = generateIdempotencyKey()) =>
-    api.post<CoinTransferReceipt>("/api/v1/coins/transfers", { recipientUserId, coins }, { idempotencyKey }),
+  transferCoinsToUser: (recipientUserId: string, coins: number, expectedFeeBasisPoints: number, idempotencyKey = generateIdempotencyKey()) =>
+    api.post<CoinTransferReceipt>("/api/v1/coins/transfers", { recipientUserId, coins, expectedFeeBasisPoints }, { idempotencyKey }),
   sendTip: (input: SendTipInput, idempotencyKey = generateIdempotencyKey()) =>
     api.post<TipReceipt>("/api/v1/tips", input, { idempotencyKey }),
 };

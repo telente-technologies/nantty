@@ -47,7 +47,7 @@ func startAndCompleteCoinPurchase(t *testing.T, harness *walletHarness, userId, 
 	return reference
 }
 
-func TestLostCoinPurchaseChargebacksAccumulateAndRecordSpentCoinDebt(t *testing.T) {
+func TestLostCoinPurchaseChargebacksAccumulateWithoutClawingBackOtherCoinsOrCreatingDebt(t *testing.T) {
 	harness := startWalletHarness(t, true)
 	buyer, creator := "b9aa5eef-2516-49e9-a7df-2cf2b9cad8d0", "d787a983-4325-4d25-ae3d-e4de7f301e0e"
 	reference := startAndCompleteCoinPurchase(t, harness, buyer, "coin-chargeback-buy")
@@ -60,6 +60,10 @@ func TestLostCoinPurchaseChargebacksAccumulateAndRecordSpentCoinDebt(t *testing.
 	if transfer.Status != http.StatusCreated {
 		t.Fatalf("spend coins before chargeback: %d %s", transfer.Status, transfer.Raw)
 	}
+	harness.post(ledgermodels.JournalEntryRequest{Reference: "unrelated-coins-" + buyer, Kind: "test.coinsCredited", Lines: []ledgermodels.JournalLineRequest{
+		{Account: ledgermodels.CoinsInCirculationAccount(), Direction: ledgermodels.Debit, AmountMinor: 50},
+		{Account: ledgermodels.UserSpendableCoinsAccount(buyer), Direction: ledgermodels.Credit, AmountMinor: 50},
+	}})
 	creatorBalance := harness.balance(ledgermodels.UserSpendableCoinsAccount(creator))
 	if creatorBalance != 78 {
 		t.Fatalf("recipient balance after 2%% transfer fee = %d; want 78", creatorBalance)
@@ -80,26 +84,30 @@ func TestLostCoinPurchaseChargebacksAccumulateAndRecordSpentCoinDebt(t *testing.
 	// An open notice and its repeated delivery must not claw back any coins.
 	notifyCoinPurchaseDispute(t, harness, reference, "chargeback-partial-1", "open", partial)
 	notifyCoinPurchaseDispute(t, harness, reference, "chargeback-partial-1", "open", partial)
-	if got := harness.balance(ledgermodels.UserSpendableCoinsAccount(buyer)); got != 20 {
+	if got := harness.balance(ledgermodels.UserSpendableCoinsAccount(buyer)); got != 70 {
 		t.Fatalf("open dispute changed buyer coins: %d", got)
 	}
 
 	// The first loss removes the cumulative 25% share (25 coins) from what
-	// remains, recording a 5-coin debt. Re-delivery is idempotent.
+	// remains. Only 20 coins from this purchase remain unspent; a 5-coin
+	// shortfall is queued for review instead of becoming user debt.
 	notifyCoinPurchaseDispute(t, harness, reference, "chargeback-partial-1", "lost", partial)
 	notifyCoinPurchaseDispute(t, harness, reference, "chargeback-partial-1", "lost", partial)
-	if got := harness.balance(ledgermodels.UserSpendableCoinsAccount(buyer)); got != 0 {
-		t.Fatalf("buyer spendable coins after first loss = %d; want 0", got)
+	if got := harness.balance(ledgermodels.UserSpendableCoinsAccount(buyer)); got != 50 {
+		t.Fatalf("buyer spendable unrelated coins after first loss = %d; want 50", got)
 	}
-	if got := harness.balance(ledgermodels.UserCoinDebtAccount(buyer)); got != 5 {
-		t.Fatalf("buyer coin debt after first loss = %d; want 5", got)
+	if got := harness.balance(ledgermodels.UserCoinDebtAccount(buyer)); got != 0 {
+		t.Fatalf("buyer coin debt after first loss = %d; want 0", got)
 	}
 
 	// A distinct partial dispute brings the cumulative chargeback to 50% and
 	// removes only the additional 25 coins, never the original target twice.
 	notifyCoinPurchaseDispute(t, harness, reference, "chargeback-partial-2", "lost", partial)
-	if got := harness.balance(ledgermodels.UserCoinDebtAccount(buyer)); got != 30 {
-		t.Fatalf("buyer coin debt after cumulative losses = %d; want 30", got)
+	if got := harness.balance(ledgermodels.UserCoinDebtAccount(buyer)); got != 0 {
+		t.Fatalf("buyer coin debt after cumulative losses = %d; want 0", got)
+	}
+	if got := harness.balance(ledgermodels.PlatformUnrecoveredCoinClawbackAccount()); got != 30 {
+		t.Fatalf("recorded platform loss for spent purchased coins = %d; want 30", got)
 	}
 	if got := harness.balance(ledgermodels.UserSpendableCoinsAccount(creator)); got != creatorBalance {
 		t.Fatalf("chargeback changed recipient/creator balance from %d to %d", creatorBalance, got)

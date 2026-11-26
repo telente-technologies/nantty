@@ -279,13 +279,16 @@ export interface VerifiedCoinPurchase {
 }
 
 export interface CoinTransferQuote {
+  readonly coins: number;
   readonly feeCoins: number;
   readonly netCoins: number;
   readonly feePercent: number;
+  readonly feeBasisPoints: number;
 }
 
 export interface CoinTransferReceipt {
   readonly transferId: ID;
+  readonly coins: number;
   readonly feeCoins: number;
   readonly netCoins: number;
   readonly balance: number;

@@ -17,7 +17,7 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.CoinT
 	input := command.Input
 	return ledgerutils.RunIdempotentMoneyCommand(ctx, handler.Application.Container.Resources.Database, handler.Application.Container.Idempotency, ledgerutils.IdempotentCommand[dtos.CoinTransferReceiptDto]{
 		Scope: input.SenderUserId + ":coins.transfer", Key: input.IdempotencyKey,
-		RequestHash: ledgerutils.HashRequestFingerprint(input.RecipientUserId, input.Coins, input.Note),
+		RequestHash: ledgerutils.HashRequestFingerprint(input.RecipientUserId, input.Coins, input.Note, input.ExpectedFeeBps),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (dtos.CoinTransferReceiptDto, error) {
 			return handler.Application.Transfers.TransferCoinsInTransaction(ctx, transaction, input)
 		},

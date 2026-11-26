@@ -2,8 +2,10 @@ package container
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"nantty/modules/ledger/src/databases"
 	ledgerevents "nantty/modules/ledger/src/events"
 	"nantty/modules/ledger/src/loaders"
@@ -71,6 +73,13 @@ func NewWalletContainer(resources loaders.MoneyModuleResources, settings configs
 
 func (container *Container) CoinTransferFeeBps(ctx context.Context) int64 {
 	return container.Resources.Platform.CoinTransferFeeBps(ctx, container.Settings.CoinTransferFeeBps)
+}
+
+func (container *Container) IsApprovedCreator(ctx context.Context, transaction *sql.Tx, userId string) (bool, error) {
+	table := pgx.Identifier{container.Settings.CreatorProgramSchema, "creator_program_members"}.Sanitize()
+	var approved bool
+	err := transaction.QueryRowContext(ctx, `SELECT EXISTS (SELECT 1 FROM `+table+` WHERE user_id = $1 AND status = 'approved')`, userId).Scan(&approved)
+	return approved, err
 }
 
 func (container *Container) CoinCashValuesMinor(ctx context.Context) map[string]int64 {

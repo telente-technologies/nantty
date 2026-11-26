@@ -33,6 +33,10 @@ Across two remediation waves (`SEC-0001`–`SEC-0032` and `SEC-2026-001`–`SEC-
 
 ## 3. Key Findings & Remediation Summary
 
+### Coin refund provenance and shortfall accounting — partially remediated, verification open
+
+Refund/reversal clawback now replays FIFO source lots from the append-only ledger, serialized against every spendable coin account mutation. Tests prove unrelated incoming coin lots are not clawed back. The user debt account is no longer used in coin refund/reversal handlers; unrecovered amounts are posted to a named platform COIN loss account and also retained in review/risk records. Remaining risks: Apple refund-notification verification is not implemented, partial store refunds are not modeled, and external refund approval outcomes/live provider flows are not verified. See `docs/master/NANTTY_BLOCKERS.md`; do not call the refund system complete.
+
 - **Critical / High Fixed**: `SEC-2026-001` (Black Gov late settlement fail-closed on unverified/missing/revoked institutional verification), `SEC-2026-002` (IAP `OriginalTransactionId` owner/profile binding), `SEC-0025` (Gateway suspended principal blocking on TS/Python upstreams), `SEC-0026` (Messenger device auth & strict rate limits), `SEC-0027` (Black institutional email OTP delivery sealing), `SEC-0028` (Admin/Ads/Seller right-most `X-Forwarded-For` IP extraction).
 - **Medium / Low Fixed**: `SEC-2026-003` (`publishNow` `canSchedulePosts` gate), `SEC-2026-004` (`developer`/`sandbox` strict headers), `SEC-2026-005` (Teredo `2001::/32` SSRF block), `SEC-2026-006` (Gateway `//` path confusion rejection), `SEC-2026-007` (duplicate mobile scheme removal), `SEC-2026-013` (`admin` `/bff/:path*` CSP `default-src 'none'; frame-ancestors 'none'`), `SEC-2026-014` (Webapp SSO redirect `http://localhost` scheme hardening), `SEC-0029`–`SEC-0032`.
 - **Open Actions**:

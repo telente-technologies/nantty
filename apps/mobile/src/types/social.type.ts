@@ -237,6 +237,7 @@ export interface CoinTransferQuote {
   readonly feeCoins: number;
   readonly netCoins: number;
   readonly feePercent: number;
+  readonly feeBasisPoints: number;
 }
 
 export interface CoinTransferReceipt {

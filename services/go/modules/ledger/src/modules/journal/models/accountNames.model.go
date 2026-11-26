@@ -9,6 +9,7 @@ var platformAccountNames = map[string]string{
 	"platform:giftRevenue":                  "Gift revenue (coins)",
 	"platform:coinTransferFees":             "Coin transfer fees",
 	"platform:coinsInCirculation":           "Coins in circulation",
+	"expense:unrecoveredCoinClawbacks":      "Unrecovered coin clawback losses",
 	"revenue:commission":                    "Commission revenue",
 	"revenue:escrowFees":                    "Escrow fee revenue",
 	"revenue:ads":                           "Ad revenue",

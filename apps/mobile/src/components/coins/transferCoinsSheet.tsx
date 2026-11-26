@@ -41,11 +41,17 @@ export function TransferCoinsSheet({ visible, recipient, onClose }: TransferCoin
   const transfer = useMutation({
     mutationFn: () => {
       pendingTransferIdempotencyKey.current ??= generateIdempotencyKey();
-      return coinsService.transferCoinsToUser(recipient!.id, coins, pendingTransferIdempotencyKey.current);
+      if (!quote.data) throw new Error("Refresh the transfer quote before confirming.");
+      return coinsService.transferCoinsToUser(recipient!.id, coins, quote.data.feeBasisPoints, pendingTransferIdempotencyKey.current);
     },
     onSuccess: () => {
       pendingTransferIdempotencyKey.current = null;
       queryClient.invalidateQueries({ queryKey: COIN_BALANCE_QUERY_KEY });
+    },
+    onError: () => {
+      pendingTransferIdempotencyKey.current = null;
+      setIsConfirming(false);
+      void queryClient.invalidateQueries({ queryKey: ["coin-transfer-quote", coins] });
     },
   });
 

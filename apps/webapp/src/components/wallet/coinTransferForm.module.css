@@ -1,0 +1,12 @@
+.section { display: flex; flex-direction: column; gap: var(--space-3); border-top: 1px solid var(--divider); padding-top: var(--space-4); }
+.heading { margin: 0; font-size: var(--text-base); font-weight: 700; }
+.field { display: flex; flex-direction: column; gap: var(--space-1); font-size: var(--text-sm); font-weight: 600; }
+.input { width: 100%; max-width: 18rem; border: 1px solid var(--divider); border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); background: var(--surface); color: inherit; font: inherit; }
+.quote { margin: 0; display: grid; gap: var(--space-2); border: 1px solid var(--divider); border-radius: var(--radius-md); padding: var(--space-3); }
+.quote div { display: flex; justify-content: space-between; gap: var(--space-3); }
+.quote dt { color: var(--text-muted); }
+.quote dd { margin: 0; font-weight: 700; text-align: right; }
+.note { margin: 0; color: var(--text-muted); font-size: var(--text-sm); }
+.notice { margin: 0; color: var(--warning); font-size: var(--text-sm); }
+.error { margin: 0; color: var(--danger); font-size: var(--text-sm); }
+.success { margin: 0; color: var(--success); font-size: var(--text-sm); }

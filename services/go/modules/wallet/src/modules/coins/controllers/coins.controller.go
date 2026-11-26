@@ -186,7 +186,7 @@ func (controller CoinsController) TransferCoins(writer http.ResponseWriter, requ
 		return
 	}
 	receipt, replayed, err := transfercoins.Handler{Application: controller.Application}.Execute(request.Context(), transfercoins.Command{Input: services.CoinTransferInput{
-		SenderUserId: principal, RecipientUserId: body.RecipientUserId, Coins: body.Coins, Note: strings.TrimSpace(body.Note), IdempotencyKey: key,
+		SenderUserId: principal, RecipientUserId: body.RecipientUserId, Coins: body.Coins, Note: strings.TrimSpace(body.Note), IdempotencyKey: key, ExpectedFeeBps: body.ExpectedFeeBasisPoints,
 	}})
 	if err != nil {
 		controller.fail(writer, request, err)

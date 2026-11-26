@@ -14,7 +14,6 @@ import (
 	"nantty/modules/wallet/src/generated/ent/coinpackage"
 	"nantty/modules/wallet/src/generated/ent/coinpurchase"
 	"nantty/modules/wallet/src/modules/coins/dtos"
-	"nantty/modules/wallet/src/modules/coins/models"
 )
 
 var sourceByStore = map[string]coinpurchase.Source{paymentconstants.StoreAppleIap: coinpurchase.SourceApple, paymentconstants.StoreGooglePlay: coinpurchase.SourceGoogle}
@@ -85,11 +84,10 @@ func (purchases CoinPurchases) HandleStorePurchaseRefunded(ctx context.Context, 
 	if err != nil || purchase.Status != coinpurchase.StatusSucceeded {
 		return err
 	}
-	balance, err := purchases.Container.Ledger.ReadAccountBalance(ctx, transaction, ledgermodels.UserSpendableCoinsAccount(purchase.UserID))
+	clawback, err := purchases.unspentCoinsFromLedgerCredit(ctx, transaction, purchase.UserID, purchase.ID.String(), "coin-purchase:"+purchase.ID.String(), purchase.Coins)
 	if err != nil {
 		return err
 	}
-	clawback := models.SplitCoinClawback(balance, purchase.Coins)
 	now := purchases.Container.Now().UTC()
 	refundUpdate := purchase.Update().SetStatus(coinpurchase.StatusRefunded).SetRefundedAt(now).SetClawbackShortfallCoins(clawback.ShortfallCoins)
 	if clawback.ShortfallCoins > 0 && (purchase.ReviewStatus == coinpurchase.ReviewStatusNotRequired || purchase.ReviewStatus == coinpurchase.ReviewStatusReviewed) {
@@ -112,7 +110,7 @@ func (purchases CoinPurchases) HandleStorePurchaseRefunded(ctx context.Context, 
 		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.UserSpendableCoinsAccount(purchase.UserID), Direction: ledgermodels.Debit, AmountMinor: clawback.RecoveredCoins})
 	}
 	if clawback.ShortfallCoins > 0 {
-		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.UserCoinDebtAccount(purchase.UserID), Direction: ledgermodels.Debit, AmountMinor: clawback.ShortfallCoins})
+		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.PlatformUnrecoveredCoinClawbackAccount(), Direction: ledgermodels.Debit, AmountMinor: clawback.ShortfallCoins})
 	}
 	if _, err := purchases.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
 		Reference: "coin-purchase-refund:" + purchase.ID.String(), Kind: "coins.refundClawedBack", ExternalReference: refunded.StoreTransactionId,
