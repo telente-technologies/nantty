@@ -40,8 +40,10 @@ export function startMockLiveGiftEmitter(liveId: string, receiverId: string, emi
     }, delayMs);
     timers.add(timer);
   };
+  let simulatedViewerIndex = 3;
   const sendRandomViewerGiftWithPossibleCombo = () => {
-    const sender = buildMockUserSummary(Math.floor(Math.random() * SIMULATED_VIEWER_COUNT) + 3);
+    const sender = buildMockUserSummary(simulatedViewerIndex);
+    simulatedViewerIndex = 3 + ((simulatedViewerIndex - 3 + 1) % SIMULATED_VIEWER_COUNT);
     const gift = pickWeightedRandomGift();
     const comboId = `cmb_sim_${Date.now().toString(36)}`;
     const repeatCount = gift.comboable ? 1 + Math.floor(Math.random() * (gift.displayLevel === "micro" ? 12 : 4)) : 1;
