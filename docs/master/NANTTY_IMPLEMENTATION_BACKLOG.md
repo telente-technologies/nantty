@@ -1,5 +1,12 @@
 # Nantty implementation backlog
 
+## 2026-11-26 — Review and gate GitHub-hosted staging infrastructure apply
+
+- Extended `.github/workflows/terraform-staging.yml` with a manual, `main`-only staging flow that produces a read-only plan and sanitized DNS/resource summary before the protected apply environment requests approval. After approval, the apply role recreates the plan and compares its canonical JSON SHA-256 digest before applying; the plan files are ephemeral, no plan artifact is uploaded, and delete/replacement actions are rejected.
+- Configured `staging-apply` for `main` only with owner review and administrator bypass disabled. This does not create AWS infrastructure, publish DNS, or deploy the application.
+- Local verification: workflow YAML parses, all embedded shell scripts pass `bash -n`, Terraform formatting and staging validation pass, and `git diff --check` passes. PR #74 checks for its earlier revision had passed for Terraform validation, dependency audit, Gitleaks, Trivy and several CodeQL languages; Go and Rust CodeQL checks were still running at the last poll. Changes to the approval-order safety gate are pending a fresh PR CI run.
+- Remaining: provision the narrowly scoped AWS GitHub OIDC plan/apply trust and permissions; add a zone-scoped Cloudflare DNS Read/Edit secret to the protected GitHub environment; obtain a fixed admin ingress CIDR; inspect the full plan/costs and exact DNS changes before approval. Frontend portal/desktop publication is not implemented. GitHub Actions can run after this workstation is offline, but local coding does not continue autonomously.
+
 ## 2026-11-25 — Add merchant-facing Business Messaging store authorization UI
 
 - Added an authenticated Identity preview endpoint that returns only the public name, organization, application ID, and requested scopes of an approved Business Messaging application; pending, archived, or other-product apps return not found. Added its exact authenticated Gateway route.
@@ -46,13 +53,13 @@
 - Added required store identity to Business Messaging send/read API documentation and handler inputs. Conversation/history reads now check both the developer credential/recipient consent and an active exact-store grant with the required capability; message status checks store authorization and recipient consent in the persisted record.
 - Message reservations now persist store ID and include it in the idempotency request hash so a key cannot be replayed against another store. Added an additive nullable migration because historical records cannot be safely mapped to a store; unscoped legacy messages are excluded from scoped results.
 - Verification: `go test ./...` passed for `services/go/modules/auth`; the history/status and quota/idempotency integration tests passed against disposable PostgreSQL 17. `pnpm --filter @nantty/developer typecheck` passed and Developer tests passed 36/36 under Node 24.19.0 (workspace requires 26.13+). Auth `atlas.sum` regenerated and `git diff --check` passed. Temporary DB container removed.
-- Not enabled: `/api/v1/business/messages` remains mounted to `503 BUSINESS_MESSAGING_UNAVAILABLE`. No canonical Social dispatch receiver, customer-initiated business-mode eligibility/window, inbound events, delivery/read receipts or live browser/staging verification exists. No PR was created or pushed.
+- Not enabled: `/api/v1/business/messages` remains mounted to `503 BUSINESS_MESSAGING_UNAVAILABLE`. No canonical Social dispatch receiver, customer-initiated business-mode eligibility/window, inbound events, delivery/read receipts or live browser/staging verification exists. The original local snapshot had no PR; the follow-up was later submitted as PR #72 and squash-merged as `d85670af122403a7d9980beef35b8854fff7a655` after Frontend, Security, and Backend checks passed. Merge did not deploy the change.
 
 ## 2026-11-25 — Re-verify Business Messaging consent database paths
 
 - Re-ran `GOMAXPROCS=4 go test -p 2 ./tests -count=1` in `services/go/modules/auth`; all Auth tests passed in 17.813s with PostgreSQL integration enabled. This supersedes the earlier skipped-integration status for account-consent persistence and audit behavior.
 - The next dependency is still business/store owner authorization. It must bind a canonical catalog-verified store to an approved developer application and requested scopes; do not accept a client-provided store ID as proof of ownership. Production send remains disabled until the grant, recipient consent, and Social's existing encrypted send path are enforced together.
-- GitHub open-PR search for `telente-technologies/nantty` returned no open pull requests during this check. The current worktree contains local, uncommitted changes; no PR was merged or remote branch changed.
+- At the time of this original snapshot, GitHub had no open PR and the local worktree had uncommitted changes. This historical state was superseded: the store-boundary follow-up became PR #72 and was squash-merged as `d85670af122403a7d9980beef35b8854fff7a655`; no deployment followed.
 
 ## 2026-11-25 — Add consent-scoped production message history and status reads
 
@@ -73,7 +80,7 @@
 
 - GitHub Dependabot alert #66 identifies GLib 0.18.5's `VariantStrIter::impl_get` passing an immutable pointer reference to a C out-parameter. The normal upgrade is blocked by the Tauri 2 GTK3 graph's `glib = ^0.18` constraints; the upstream gtk-rs fix exists in PR #1343 but is not available as a compatible patched release.
 - Vendored the exact GLib 0.18.5 crate source under `vendor/glib-0.18.5`, changed `let p` to `let mut p` and `&p` to `&mut p`, and added a scoped `[patch.crates-io]` override for the Admin Tauri manifest. The Cargo lock now resolves that dependency to the local patched source.
-- Verification update (2026-11-25): PR #70 is closed and merged at `2f434e7b8542d7230aa9a4cc419389872adaf5ac`; CI passed the focused iterator test, Linux Admin Tauri release build, Rust and Go CodeQL analyses, frontend/mobile checks, Terraform checks, dependency audit, Gitleaks, and Trivy. The narrowed CodeQL config leaves `variant_iter.rs` scanned; no active CodeQL alerts remain under `vendor/glib-0.18.5/`. The upstream GHSA/RUSTSEC description matches the exact patched out-pointer operation. Dependabot alert #66 is still open because its version range marks every `glib <0.20.0` vulnerable, although the vendored 0.18.5 source backports the upstream fix; leave this version-based alert visible rather than claiming it closed. |
+- Verification update (2026-11-25): PR #70 is closed and merged at `2f434e7b8542d7230aa9a4cc419389872adaf5ac`; CI passed the focused iterator test, Linux Admin Tauri release build, Rust and Go CodeQL analyses, frontend/mobile checks, Terraform checks, dependency audit, Gitleaks, and Trivy. The narrowed CodeQL config leaves `variant_iter.rs` scanned; no active CodeQL alerts remain under `vendor/glib-0.18.5/`. The upstream GHSA/RUSTSEC description matches the exact patched out-pointer operation. The live Dependabot API now reports alert #66 `GHSA-wrw7-89jp-8q8g` as `fixed` (not dismissed) since the squash merge; the vendored 0.18.5 source remains patched through the Admin Tauri `[patch.crates-io]` override. |
 
 ## 2026-11-24 — Current Go test-file layout recount
 

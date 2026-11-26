@@ -1,18 +1,35 @@
 # Nantty Verification & Test Evidence
 
+## Cloud-hosted staging readiness snapshot (2026-11-26)
+
+- AWS MCP read-only inventory in the selected Region `eu-north-1`: Terraform state bucket `nantty-tfstate-324009946456-eu-north-1-an`, DynamoDB table `nantty-terraform-locks`, SES feedback SNS topic and its two SQS queues exist. SESv2 `GetEmailIdentity` returns verification `PENDING`/`HOST_NOT_FOUND`, `VerifiedForSendingStatus=false`, DKIM `PENDING`, and MAIL FROM `bounce.staging.nantty.com` `PENDING`. Account `SendingEnabled=true` but `ProductionAccessEnabled=false` (sandbox).
+- The same inventory found zero IAM OIDC providers, zero Nantty-named IAM roles, zero ECS clusters and zero ECR repositories. Current GitHub Actions therefore cannot assume staging roles and the backend deployment workflow has no cluster/registry target. PR #74 adds a manual `main`-only apply path: a read-only staging plan and sanitized DNS/resource summary run before the protected apply-environment approval; after approval, a dedicated apply role replans, compares the complete canonical JSON-plan digest, and applies only a matching create/update plan. No plan artifact is uploaded. GitHub environment `staging-apply` is configured with `main`-only deployment policy, owner reviewer `oyinlola-tech`, and admin bypass disabled. It has not been run; the AWS roles, scoped DNS secret, and trusted admin CIDR remain absent.
+- Cloudflare `whoami` confirms the connected user is `nantty.tega@gmail.com`; the active `nantty.com` zone has no records for the three current DKIM names or `bounce.staging.nantty.com`. The apex DMARC policy is `p=reject; sp=reject`; no child override should be added. GitHub's `staging` environment has a `CLOUDFLARE_API_TOKEN` secret name, but its value and scope are not inspectable. This Cloudflare connection is separate from GitHub Actions. No AWS or DNS writes were made.
+- CI and desktop build jobs run on GitHub-hosted runners when triggered, independent of the developer PC. Local Codex coding does not continue when the local host stops; no Codex cloud work task has been started.
+
+## PR #72 — Store-scoped Developer Business Messaging authorization (2026-11-25)
+
+- PR head `f50194cf9bf2d50f2b5d222d6420b54220a0652f` passed Frontend, Security, and Backend workflows. The Backend workflow completed the Auth Go unit/race suite and database integration suite using PostgreSQL, Valkey, and RabbitMQ.
+- GitHub reports no review comments or unresolved review threads. The PR's source commits and explicit squash commit contain no `Co-authored-by` trailer.
+- Squash-merged at `2026-11-25T22:38:42Z` as `d85670af122403a7d9980beef35b8854fff7a655`; the local `main` checkout was fast-forwarded to this commit and is clean.
+- This verifies CI and merge only. The change has not been deployed to AWS staging. Production message sending remains intentionally unavailable (503); secure Social dispatch, customer trust/window, inbound synchronization and delivery/read receipts remain incomplete.
+
+## PR #73 — Isolate local PostgreSQL test stacks (2026-11-25)
+
+- PR head `4e54b8e7781f69e022812bca83bef88051fd70f6` passed Security, CodeQL, and Backend checks, including the real PostgreSQL/Valkey/RabbitMQ integration job. No review comments or threads were recorded.
+- Squash-merged at `2026-11-25T23:07:53Z` as `da202cd915c0c8c2199e1e13b2340f5b243d825a`. The squash commit message has no `Co-authored-by` trailer, and local `main` was fast-forwarded to the merge commit.
+- The change is limited to local test infrastructure (`docs/runningLocally.md`, `infra/local/docker-compose.yml`). Its isolated Compose project/volume protects existing local databases; rendering the PR commit with port override `15433` was independently verified. No AWS deployment was involved.
+
 ## PR #71 — Business Messaging merchant authorization UI and preview endpoint (2026-11-25)
 
-- PR #71 head was updated to `7e4b7fedff1f96ff48d41d6d378daa15579875db` after adding the missing Web service contract/types, authenticated Gateway preview route, and a focused integration assertion. This fixes the previous webapp CI typecheck failure, which occurred because the UI commit landed before those service methods/types.
+- PR #71 final head `794b0c5e499ce849c817d84eb1aa3d4e55f287d3` passed Backend, Frontend, Security, Terraform validation, and CodeQL checks; path-filtered Mobile, Elixir, Python, TLS proxy, and realtime jobs were skipped, and the manual Terraform plan was not requested. Squash-merged at `2026-11-25T20:21:29Z` as `498405cefc3d7b6f8565f569328f521f4dfa5fa1`. The final squash commit message contains no `Co-authored-by` trailer.
 - Local verification: webapp TypeScript check passed on Node 24.19.0 (below required 26.13); Webapp ESLint completed with 0 errors and 73 warnings; Stylelint passed. Gateway full Vitest suite passed 1,949/1,949 tests across 44 files. Two focused Auth tests (business/store grant lifecycle and approved-app preview isolation) passed against a disposable PostgreSQL 17 tmpfs container with a test-only `nantty_readers` role; container stopped/removed, no persistent migration applied.
-- GitHub on prior head had Frontend `web (webapp)` typecheck fail for missing preview/authorization methods, while Developer portal and Terraform validate passed; Backend and Security workflows were in progress. Updated-head GitHub Actions results must be refreshed before merge. The database-backed test first skipped on the persistent local Postgres because its default password is wrong; it was then rerun successfully against the isolated test container.
-- Not verified: authenticated browser workflow, deployed service-to-service secret, production Social dispatch, inbound sync/receipts, email runtime or AWS staging deployment. Production message send remains fail-closed. No squash merge performed.
+- Not verified: authenticated browser workflow, deployed service-to-service secret, production Social dispatch, inbound sync/receipts, email runtime or AWS staging deployment. Production message send remains fail-closed.
 
 ## PR #70 — Admin GLib security patch (2026-11-25)
 
-- Live GitHub snapshot at head `32dbb93b9d2cf3efa8829c9638d8c5e7607b435c`: PR is open, mergeable, and `CLEAN`; every currently registered PR check passes except the expected path-filtered Mobile skip.
-- Rust CodeQL passed after the repository config property was set, but the config at that head ignored the entire vendored `vendor/glib-0.18.5/**` tree. This result does not prove analysis of the patched `variant_iter.rs`.
-- Dependabot alert #66 (`GHSA-wrw7-89jp-8q8g`) remains open and not dismissed.
-- Local follow-up adds narrow ignores for five source files associated with seven unrelated upstream CodeQL findings, plus a path-filtered Linux Admin Tauri workflow. It runs the focused GLib test from the vendored crate manifest, then builds the release Admin desktop binary using `apps/admin/src-tauri/Cargo.toml` and `--locked`. These local changes have not run in GitHub Actions yet.
+- PR #70 final head `ca34ac9d2885acb4b070378111b87ed004d4fa23` was squash-merged at `2026-11-25T13:43:26Z` as `2f434e7b8542d7230aa9a4cc419389872adaf5ac`. GitHub reports the final Linux Tauri build, frontend matrix, Terraform, dependency audit, Gitleaks, Trivy and CodeQL analysis jobs completed successfully; the separate CodeQL aggregate check is neutral. The merge commit message has no `Co-authored-by` trailer.
+- The patched GLib iterator is now covered by the merged vendored-source analysis configuration and Linux Admin Tauri workflow. The current Dependabot API state for alert #66 (`GHSA-wrw7-89jp-8q8g`) is `fixed`.
 - Email-template suite executed in this workspace: 274/274 passed and TypeScript typecheck passed using Node 24.19.0 (below the repository-required Node 26.13 range); these are unrelated to the GLib remediation.
 
 **Environment:** Node `v22.22.3`, `pnpm` `11.24.0` (via `corepack pnpm`), sandbox workspace `/home/user/nantty`, branch `arena/341bf572-nantty`.

@@ -12,6 +12,15 @@ on:
         required: true
         default: false
         type: boolean
+      apply_staging:
+        description: Apply staging infrastructure only after staging-apply environment approval.
+        required: true
+        default: false
+        type: boolean
+      confirm_staging_apply:
+        description: Type APPLY STAGING when apply_staging is true.
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -34,7 +43,7 @@ jobs:
           terraform validate -no-color
 
   plan:
-    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.create_plan }}
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.create_plan && !inputs.apply_staging }}
     runs-on: ubuntu-latest
     environment: staging
     permissions:
@@ -67,3 +76,124 @@ jobs:
       - name: Generate read-only staging plan
         working-directory: infra/aws/envs/staging
         run: terraform plan -input=false -no-color -lock-timeout=5m -var-file=terraform.tfvars
+
+  review-staging-apply:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.apply_staging }}
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      plan_digest: ${{ steps.review.outputs.plan_digest }}
+    env:
+      AWS_REGION: eu-north-1
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: main
+      - uses: hashicorp/setup-terraform@v4
+      - name: Check confirmation and read-only plan configuration
+        env:
+          CONFIRMATION: ${{ inputs.confirm_staging_apply }}
+          AWS_TERRAFORM_ROLE_ARN: ${{ vars.AWS_TERRAFORM_ROLE_ARN_STAGING }}
+          CONFIGURED_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          test "$CONFIRMATION" = "APPLY STAGING" || { echo "Set confirm_staging_apply to APPLY STAGING to proceed." >&2; exit 1; }
+          test -n "$AWS_TERRAFORM_ROLE_ARN" || { echo "Missing staging environment variable AWS_TERRAFORM_ROLE_ARN_STAGING." >&2; exit 1; }
+          test "$CONFIGURED_REGION" = "eu-north-1" || { echo "AWS_REGION must be eu-north-1 for this project." >&2; exit 1; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing staging environment secret CLOUDFLARE_API_TOKEN with zone-scoped DNS read access." >&2; exit 1; }
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_TERRAFORM_ROLE_ARN_STAGING }}
+          aws-region: eu-north-1
+          role-session-name: NanttyStagingTerraformApplyReview
+      - name: Initialize staging remote state and create review plan
+        working-directory: infra/aws/envs/staging
+        run: |
+          terraform init -input=false -reconfigure
+          terraform plan -input=false -no-color -lock-timeout=5m -var-file=terraform.tfvars -out=staging-review.tfplan
+          terraform show -json staging-review.tfplan > staging-review.json
+      - name: Summarize plan for approval without exposing sensitive values
+        id: review
+        working-directory: infra/aws/envs/staging
+        run: |
+          digest="$(jq -S -c . staging-review.json | sha256sum | cut -d' ' -f1)"
+          echo "plan_digest=$digest" >> "$GITHUB_OUTPUT"
+          jq -r '
+            def dns($value; $sensitive):
+              if $value == null then "absent" else
+                {
+                  name: (if $sensitive.name == true then "[redacted]" else $value.name end),
+                  type: (if $sensitive.type == true then "[redacted]" else $value.type end),
+                  content: (if $sensitive.content == true then "[redacted]" else $value.content end),
+                  records: (if $sensitive.records == true then "[redacted]" else $value.records end),
+                  alias: (if $sensitive.alias == true then "[redacted]" else $value.alias end),
+                  ttl: $value.ttl,
+                  proxied: $value.proxied
+                } | with_entries(select(.value != null))
+              end;
+            "## Staging Terraform plan awaiting approval\n\n" +
+            ([.resource_changes[]? | select(.change.actions != ["no-op"]) | "- `\(.address)`: `\(.change.actions | join(","))`"] | if length == 0 then "No resource changes." else join("\n") end) +
+            "\n\n### DNS records\n\n" +
+            ([.resource_changes[]? | select((.type == "cloudflare_dns_record" or .type == "aws_route53_record") and .change.actions != ["no-op"]) |
+              "- `\(.address)` `\(.change.actions | join(","))` — before: `\(dns(.change.before; .change.before_sensitive))`; after: `\(dns(.change.after; .change.after_sensitive))`"] | if length == 0 then "No DNS record changes." else join("\n") end) +
+            "\n\nOnly the reviewed plan digest may be applied. Deletes and replacements are rejected. No cost estimate is included in this Terraform plan."' staging-review.json >> "$GITHUB_STEP_SUMMARY"
+          printf '\n\nReviewed plan digest: `%s`\n' "$digest" >> "$GITHUB_STEP_SUMMARY"
+          if jq -e '[.resource_changes[]? | select(.change.actions | index("delete"))] | length > 0' staging-review.json >/dev/null; then
+            echo "Staging apply cannot proceed: the reviewed plan includes deletions or replacements." >&2
+            exit 1
+          fi
+
+  apply-staging:
+    needs: review-staging-apply
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.apply_staging }}
+    runs-on: ubuntu-latest
+    environment: staging-apply
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: eu-north-1
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: main
+      - uses: hashicorp/setup-terraform@v4
+      - name: Check explicit staging apply confirmation and credentials
+        env:
+          CONFIRMATION: ${{ inputs.confirm_staging_apply }}
+          AWS_TERRAFORM_APPLY_ROLE_ARN: ${{ vars.AWS_TERRAFORM_APPLY_ROLE_ARN_STAGING }}
+          CONFIGURED_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          test "$CONFIRMATION" = "APPLY STAGING" || { echo "Set confirm_staging_apply to APPLY STAGING to proceed." >&2; exit 1; }
+          test -n "$AWS_TERRAFORM_APPLY_ROLE_ARN" || { echo "Missing staging-apply environment variable AWS_TERRAFORM_APPLY_ROLE_ARN_STAGING." >&2; exit 1; }
+          test "$CONFIGURED_REGION" = "eu-north-1" || { echo "AWS_REGION must be eu-north-1 for this project." >&2; exit 1; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing staging-apply environment secret CLOUDFLARE_API_TOKEN with nantty.com DNS read/edit access." >&2; exit 1; }
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_TERRAFORM_APPLY_ROLE_ARN_STAGING }}
+          aws-region: eu-north-1
+          role-session-name: NanttyStagingTerraformApply
+      - name: Initialize staging remote state
+        working-directory: infra/aws/envs/staging
+        run: terraform init -input=false -reconfigure
+      - name: Create the staging plan and verify it matches the reviewed plan
+        id: plan
+        working-directory: infra/aws/envs/staging
+        run: |
+          terraform plan -input=false -no-color -lock-timeout=5m -var-file=terraform.tfvars -out=staging.tfplan
+          terraform show -json staging.tfplan > staging-apply.json
+          digest="$(jq -S -c . staging-apply.json | sha256sum | cut -d' ' -f1)"
+          test "$digest" = "$REVIEWED_PLAN_DIGEST" || { echo "The staging plan changed after review; refusing to apply. Dispatch a new reviewed plan." >&2; exit 1; }
+          if jq -e '[.resource_changes[]? | select(.change.actions | index("delete"))] | length > 0' staging-apply.json >/dev/null; then
+            echo "Staging apply stopped: plan includes deletions or replacements. Review and handle those separately; this workflow is create/update only." >&2
+            exit 1
+          fi
+        env:
+          REVIEWED_PLAN_DIGEST: ${{ needs.review-staging-apply.outputs.plan_digest }}
+      - name: Apply the create/update-only plan under staging approval
+        working-directory: infra/aws/envs/staging
+        run: terraform apply -input=false -no-color -lock-timeout=5m staging.tfplan

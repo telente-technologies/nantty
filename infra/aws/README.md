@@ -205,15 +205,41 @@ generate an authenticated plan without keeping the workstation online, use the `
   role. The role needs read access to the platform and email-staging state objects, access to the staging state lock,
   and only the provider read permissions required to refresh this stack.
 - `AWS_REGION=eu-north-1` is already set in the environment.
-- The repository-level `CLOUDFLARE_API_TOKEN` secret is present; verify it is restricted to the `nantty.com` zone
-  and DNS Read only before using it. A plan should not need DNS Edit permission.
+- The `staging` GitHub Environment has a `CLOUDFLARE_API_TOKEN` secret name. Its value/scope cannot be inspected
+  through GitHub metadata; verify it is restricted to the `nantty.com` zone and DNS Read only before using it.
+  A plan should not need DNS Edit permission. The Cloudflare connector login is separate from this CI secret.
 - From the `main` branch, run **Terraform staging** with `create_plan=true`. The workflow only runs `terraform plan`;
   it never applies infrastructure or mutates DNS. Review its plan output before any separately authorized apply.
 
+### GitHub-hosted staging apply
+
+The same workflow now has an explicit apply path for staging only. It runs on a GitHub-hosted runner, so the
+workstation may be offline. Before dispatching it, configure:
+
+- A `staging-apply` GitHub Environment restricted to `main`, with a required reviewer and admin bypass disabled.
+  This environment is configured for this repository with owner reviewer `oyinlola-tech`.
+- Environment variable `AWS_TERRAFORM_APPLY_ROLE_ARN_STAGING`, pointing to a dedicated role whose OIDC `sub` is
+  exactly `repo:telente-technologies/nantty:environment:staging-apply`. Do not reuse the read-only plan role or the
+  ECS deploy role. Scope its permissions to the staging state and resources required by this root.
+- An environment secret `CLOUDFLARE_API_TOKEN`, restricted to the `nantty.com` zone with DNS Read/Edit. The
+  Cloudflare connector login is not available to GitHub Actions and cannot substitute for this secret.
+- A reviewed, non-public `admin_ip_allow_list` in `infra/aws/envs/staging/terraform.tfvars`; never use
+  `0.0.0.0/0` or `::/0` for admin access.
+
+Dispatch **Terraform staging** from `main`, set `apply_staging=true`, and type `APPLY STAGING` into
+`confirm_staging_apply`. GitHub first runs a read-only plan with the separate `staging` plan role and publishes a
+sanitized resource/action and DNS-record summary. The `staging-apply` environment reviewer then sees that summary
+before approval. After approval, the workflow replans with the dedicated apply role and applies only if the complete
+canonical Terraform JSON plan digest is identical to the reviewed plan. Plan files and JSON remain on ephemeral
+runners and are not uploaded as artifacts; only the digest and sanitized summary are exposed. Plans containing any
+delete or replacement action fail closed. This path has not yet run: the AWS OIDC/plan/apply roles, DNS-edit secret
+and trusted admin CIDR are still outstanding.
+It applies infrastructure only; app image publication/deployment, frontend portal hosting, desktop distribution,
+email DNS verification, and end-to-end staging tests remain separate work. It never deploys production.
+
 The workflow is not autonomous coding: changes still need to be committed and pushed before GitHub can run them. Once
 the code is pushed, hosted validation and the existing backend deployment workflow can run without the developer's PC.
-Terraform apply, frontend hosting, desktop packaging/distribution, and end-to-end staging verification are separate
-work still to be completed.
+The assistant's local coding session itself does not continue when the workstation stops.
 
 ## SES-only staging (without deploying the platform stack)
 
@@ -264,8 +290,8 @@ the existing apex policy sets `sp=reject`, which the sending subdomain inherits.
 are five records: three DKIM CNAMEs and MAIL FROM MX/TXT. Fresh AWS reads show SES domain verification false, DKIM and
 MAIL FROM `PENDING`, and SES production access disabled. Cloudflare access is currently authenticated; a read-only
 inspection found no records matching the staging SES names. The GitHub `staging` environment exists, is restricted to
-`main`, and defines `AWS_REGION=eu-north-1`; the repository has a `CLOUDFLARE_API_TOKEN` secret, but its exact DNS
-permissions have not been verified. AWS still has no GitHub OIDC provider or dedicated Terraform plan role. No DNS
+`main`, and defines `AWS_REGION=eu-north-1`; the environment has a `CLOUDFLARE_API_TOKEN` secret name, but its exact
+DNS permissions have not been verified. AWS still has no GitHub OIDC provider or dedicated Terraform plan role. No DNS
 changes have been made. The AWS project
 has no active hard spend cap; the owner explicitly authorized staging without one. SES is sandboxed, so ordinary
 recipient delivery and production sending remain unavailable. The full platform stack is not deployed. This setup
