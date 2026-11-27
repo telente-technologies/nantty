@@ -188,7 +188,7 @@ Legend. **Callers**: M = mobile, W = webapp, St = studio, SD = seller dashboard,
 | GET /coins/packages (alias /coins/packs) | M W | ✅ | Drop the `/packs` alias after wiring **✅ built (go-money).** |
 | POST /coins/purchases `{packageId}` → `{reference,purchaseChannel,authorizationUrl?}`; POST /coins/purchases/:ref/verify; POST /coins/iap/receipts | M W | ✅ | Coin verify takes the reference in the **path** and creator-subscription verify takes it in the **body**. Keep both (both exist server-side); new endpoints use the body **✅ built (go-money).** |
 | GET /coins/transactions, /coins/transfers/quote, POST /coins/transfers | M W | ✅ | 25% transfer fee (config) **✅ built (go-money).** |
-| POST /creators/earnings/convert `{coins}` | M | ✅ | 422 minimum payout surfaces verbatim **✅ built (go-money).** |
+| POST /creators/earnings/convert `{coins}` | M | ✅ | 422 minimum payout surfaces verbatim. Now requires approved Creator Program membership, verified payout account/level, no monetisation hold and no open wallet risk review; only creator-earned ledger coins are convertible. Scheduled creator payouts repeat the standing/hold/risk check inside the movement transaction. Local Wallet tests pass; deployed Creators schema grants and live provider payout remain unverified. |
 | GET /creators/me, /eligibility, /applications/me, POST /applications, /dashboard?period, /earnings, /revenue-rules, /affiliations, /me/affiliated-products | M W | ✅ (affiliated-products ✗) | Dashboard `topContent[].kind` includes `live`. Studio's earnings panel needs per-live gifts/battles (§4.2) |
 | Creator subscription plans + subscriptions (11 routes, plans §4.1) | M | ✅ | Already aligned (plans §4.3) |
 

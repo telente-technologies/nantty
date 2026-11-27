@@ -29,6 +29,7 @@ type WalletSettings struct {
 	CoinNetValueMinorByCurrency  map[string]int64
 	CoinChannelFeeBps            map[string]int64
 	UsersSchema                  string
+	CreatorsSchema               string
 	EscrowSchema                 string
 	SocialSchema                 string
 	CreatorProgramSchema         string
@@ -60,6 +61,7 @@ func ReadWalletSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		SellerReserveHoldDays:        reader.ReadIntegerOrDefault("WALLET_SELLER_RESERVE_HOLD_DAYS", 90),
 		CoinChannelFeeBps:            ParseChannelFees(reader.ReadStringOrDefault("COIN_CHANNEL_FEE_BPS", "web:300,ios:3000,android:1500")),
 		UsersSchema:                  reader.ReadStringOrDefault("WALLET_USERS_SCHEMA", "users"),
+		CreatorsSchema:               reader.ReadStringOrDefault("CREATORS_DATABASE_SCHEMA", "creators"),
 		EscrowSchema:                 reader.ReadStringOrDefault("ESCROW_DATABASE_SCHEMA", "escrow"),
 		SocialSchema:                 reader.ReadStringOrDefault("WALLET_SOCIAL_SCHEMA", "social"),
 		CreatorProgramSchema:         reader.ReadStringOrDefault("WALLET_CREATOR_PROGRAM_SCHEMA", "creators"),

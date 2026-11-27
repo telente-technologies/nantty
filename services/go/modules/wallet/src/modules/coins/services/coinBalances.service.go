@@ -8,10 +8,12 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 	ledgerservices "nantty/modules/ledger/src/modules/journal/services"
 	"nantty/modules/wallet/src/container"
+	"nantty/modules/wallet/src/generated/ent/walletriskflag"
 	"nantty/modules/wallet/src/modules/coins/dtos"
 	"nantty/modules/wallet/src/modules/coins/models"
 	"nantty/platform/httpserver"
@@ -20,6 +22,43 @@ import (
 
 type CoinBalances struct {
 	Container *container.Container
+}
+
+var ErrCreatorProgramApprovalRequired = httpserver.NewApiError(http.StatusForbidden, "CREATOR_PROGRAM_APPROVAL_REQUIRED", "Only approved Creator Program members can convert creator-earned coins.")
+var ErrCreatorMonetisationPaused = httpserver.NewApiError(http.StatusForbidden, "CREATOR_MONETISATION_PAUSED", "Creator monetisation is paused for this account.")
+var ErrCreatorMonetisationReviewRequired = httpserver.NewApiError(http.StatusForbidden, "CREATOR_MONETISATION_REVIEW_REQUIRED", "Creator monetisation is unavailable while an account risk review is open.")
+
+func (balances CoinBalances) RequireCreatorCashoutEligibility(ctx context.Context, transaction *sql.Tx, userId string) error {
+	table := pgx.Identifier{balances.Container.Settings.CreatorsSchema, "creator_program_members"}.Sanitize()
+	var status string
+	err := transaction.QueryRowContext(ctx, "SELECT status FROM "+table+" WHERE user_id = $1 FOR UPDATE", userId).Scan(&status)
+	if errors.Is(err, sql.ErrNoRows) || err == nil && status != "approved" {
+		return ErrCreatorProgramApprovalRequired
+	}
+	if err != nil {
+		return err
+	}
+
+	holdTable := pgx.Identifier{balances.Container.Settings.Money.DatabaseSchema, "monetisation_holds"}.Sanitize()
+	var paused bool
+	err = transaction.QueryRowContext(ctx, "SELECT is_paused FROM "+holdTable+" WHERE id = $1 FOR UPDATE", userId).Scan(&paused)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	if paused {
+		return ErrCreatorMonetisationPaused
+	}
+
+	openRiskFlag, err := balances.Container.Client(transaction).WalletRiskFlag.Query().Where(
+		walletriskflag.UserID(userId), walletriskflag.ResolvedAtIsNil(),
+	).Exist(ctx)
+	if err != nil {
+		return err
+	}
+	if openRiskFlag {
+		return ErrCreatorMonetisationReviewRequired
+	}
+	return nil
 }
 
 func (balances CoinBalances) ReadCoinBalance(ctx context.Context, userId string) (dtos.CoinBalanceDto, error) {

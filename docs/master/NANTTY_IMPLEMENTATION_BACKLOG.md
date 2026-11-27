@@ -1070,3 +1070,10 @@ Prioritized from the repository baseline and the requested cross-product scope. 
 - Verification: `ANALYTICS_TEST_DATABASE_URL=... go test ./... -count=1` passed against local PostgreSQL 17; `go vet ./...` passed; `bash services/scripts/check-backend-file-lengths.sh` passed.
 - The test auto-drops only its uniquely named schema. No persistent schema migration or production data was changed.
 - Remaining: deployed migration/runtime, production event source integration, and staging workflow are not verified.
+# 2026-11-27 — Gate creator coin conversion and payout on program standing
+
+- Added a fail-closed `creator_program_members` approval check, protected by a row lock inside the coin-conversion transaction. Conversion additionally requires a verified payout account and payout verification level, denies active monetisation holds and unresolved wallet risk flags, and retains the existing eligible-earned-coin ledger source.
+- The scheduled creator earnings transfer worker repeats the Creator Program / hold / risk checks inside its transaction before it queues a provider-wallet movement. A previously accrued payable cannot bypass a later membership suspension or review gate.
+- Regression coverage includes seller/payout setup without creator approval, suspended-member denial, monetisation pause, unresolved risk review, successful approved conversion, payout transfer, and country-currency restriction.
+- Verification from `services/go`: focused wallet integration commands passed; `go test ./modules/wallet/... -count=1` passed; `go vet ./modules/wallet/...` passed. Repository `bash services/scripts/check-backend-file-lengths.sh` and `git diff --check` passed. These are local branch results; PR CI/review and provider sandbox payout have not been verified yet.
+- Remaining: connect this wallet gate to the production Creators schema/grants in deployment, verify actual schema permissions and migration compatibility, add current-head CI/review, and verify in staging with an authorized provider sandbox. No live payment or payout was initiated.

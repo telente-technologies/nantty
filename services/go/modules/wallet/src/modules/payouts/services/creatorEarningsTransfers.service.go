@@ -11,6 +11,7 @@ import (
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 	paymentmodels "nantty/modules/payments/src/modules/gateway/models"
 	"nantty/modules/wallet/src/container"
+	coinservices "nantty/modules/wallet/src/modules/coins/services"
 )
 
 type CreatorEarningsTransfers struct {
@@ -65,6 +66,9 @@ func (transfers CreatorEarningsTransfers) TransferCreatorEarningsToConnectedAcco
 
 func (transfers CreatorEarningsTransfers) moveEarningsToWithdrawable(ctx context.Context, userId, currency string, amountMinor int64, reference string) error {
 	return databases.RunInMoneyTransaction(ctx, transfers.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
+		if err := (coinservices.CoinBalances{Container: transfers.Container}).RequireCreatorCashoutEligibility(ctx, transaction, userId); err != nil {
+			return err
+		}
 		return transfers.payEarningsIntoProviderWallet(ctx, transaction, userId, currency, amountMinor, reference)
 	})
 }

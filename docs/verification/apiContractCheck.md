@@ -260,7 +260,7 @@ Grouped by area (the per-app tables have the full list):
 | `POST /api/v1/copyright/claims/:p/counter-notices` | matches |  |
 | `POST /api/v1/creators/applications` | matches |  |
 | `GET /api/v1/creators/applications/me` | matches |  |
-| `POST /api/v1/creators/earnings/convert` | matches | Converts into the verified country's currency; a different `currency` returns 422 `CURRENCY_NOT_ALLOWED`. |
+| `POST /api/v1/creators/earnings/convert` | matches | Requires approved Creator Program membership, verified payout setup/level, no monetisation hold and no unresolved wallet risk flag. Conversion uses only creator-earned coin ledger balance and converts into the verified country's currency; a different `currency` returns 422 `CURRENCY_NOT_ALLOWED`. These authorization rules have local Go integration coverage; deployed schema grants/provider payout remain unverified. |
 | `GET /api/v1/creators/eligibility` | matches |  |
 | `GET /api/v1/creators/me/analytics/gifts/streams/:p` | matches |  |
 | `GET /api/v1/disputes` | matches |  |

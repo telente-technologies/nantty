@@ -1,5 +1,9 @@
 # Nantty Payment, Ledger, Escrow & Subscription Security Assessment
 
+## Creator cash-out authorization update — 2026-11-27
+
+`POST /api/v1/creators/earnings/convert` now fails closed unless the account is an approved Creator Program member, has the existing verified payout account and required payout verification level, is not under a monetisation hold, and has no unresolved wallet risk flag. The approved-membership row is locked in the same database transaction as conversion. Scheduled movement from creator payable to the provider wallet repeats the program/hold/risk check in its own transaction, so an old payable cannot bypass revoked creator standing. Integration regressions cover non-member denial, hold denial, open-risk denial, approved conversion, payout, and unchanged balances on denied calls. Local Wallet suite, vet, backend-file-length and diff checks passed on 2026-11-27. This is not provider sandbox or staging verification; production Creators schema access grants and live payout behavior remain unverified. Other purchase, fee, reversal and payout-policy controls retain their statuses in the sections below.
+
 - **Scope**: `services/go/modules/{ledger,payments,wallet,subscriptions,escrow,creators}` (`goMoney`), `services/go/modules/orders` (`goCommerce`), `services/go/modules/ads` (`goAds`), `services/go/modules/users` (`checkmarks`), and client billing surfaces (`webapp`, `mobile`, `ads`, `seller`, `admin`).
 - **Verification Basis**: White-box Go/TS code review + frontend/gateway contract suites. **Go test execution, live PostgreSQL concurrency stress tests, and live PSP/Apple/Google sandboxes could not execute in this environment (`go`, PostgreSQL, and PSP credentials absent).**
 
