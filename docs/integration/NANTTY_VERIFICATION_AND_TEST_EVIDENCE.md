@@ -1,5 +1,11 @@
 # Nantty Verification & Test Evidence
 
+## PR #85 ad settlement concurrency regression — current-main integration, 2026-11-27
+
+- Current `origin/main` `e84ededcb13a70ae5e4230b6285ba6b9c9090c27` already contains a transactional per-advertiser lock plus a re-query of candidate impressions requiring `settlement_batch_id IS NULL`; that implementation serializes workers and rejects stale snapshots. The PR #85 service rewrite was functionally overlapping, so reconciliation retained the current-main implementation and the PR's new 12-worker PostgreSQL regression test.
+- The test asserts one settled impression, exactly one advertiser debit and spend batch, and one creator accrual. A current-tree attempt of `GOMODCACHE=/home/oyinlola/go/pkg/mod GOCACHE=/home/oyinlola/.cache/go-build GOTMPDIR=/tmp ADS_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./modules/ads/tests -run '^TestConcurrentSettlementWorkersChargeEachImpressionOnlyOnce$' -count=1 -p 1` was stopped before completion because compilation exhausted the root volume; it has no pass/fail result. The full Ads suite and `go vet` have not been rerun on this integrated tree; prior-head claims are not treated as current evidence.
+- PR #85 remote head remains subject to fresh current-head CI and review after integration push. Broader ad funding/refund/reserve reconciliation and deployed worker behavior remain separate incomplete requirements.
+
 ## Creator eligibility and seller/creator payout boundary — 2026-11-27
 
 - Added an additive Users migration for source-identified creator metrics/standing snapshots, freshness and replay/monotonicity handling, and adult-age enforcement for eligibility/application endpoints. Admin canonical `creator-thresholds` now carries >=10,000 real followers, >=500 verified followers, >=100,000 qualifying impressions in 30 days, >=30-day account age, >=10 original posts in 60 days, verified email and >=90 days since violation for auto-approval. The compatibility `creator-eligibility` projection now reads/writes all those fields and cannot lower floors.

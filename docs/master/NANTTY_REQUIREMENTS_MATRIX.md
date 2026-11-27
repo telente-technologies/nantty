@@ -1,5 +1,9 @@
 # Nantty requirements and evidence matrix
 
+## Ad settlement duplicate-worker protection — PR #85 current-main reconciliation, 2026-11-27
+
+- The current `main` implementation holds the advertiser account lock and re-queries only still-pending candidate impressions inside the same transaction before writing the spend batch/debit/creator accrual. PR #85 contributes a 12-worker PostgreSQL regression test to demonstrate exactly-once settlement against the integrated code. Verification is pending on this merged tree. This protects against duplicate processing only; it does not complete advertiser funding, refunds, reserves, creator payout reconciliation, or production queue verification.
+
 ## Creator Program, wallet and staging continuation — 2026-11-27
 
 | Requirement | Status | Current evidence / remaining boundary |

@@ -1,5 +1,11 @@
 # Nantty blockers and verification gaps
 
+## PR #85 integrated ad-settlement verification — 2026-11-27
+
+| Blocker | Impact | Evidence | Resolution gate |
+|---|---|---|---|
+| Concurrent regression needs validation against current-main transaction flow | The PR branch's service change overlaps current main; preserving the main implementation avoids duplicate lock strategies, but its new concurrent integration test has not yet run on the reconciled tree. | Main locks the advertiser account, then re-queries only still-pending candidate impressions within the transaction before settlement writes. PR #85 adds a 12-worker exact-once regression. | Run full Ads PostgreSQL suite and `go vet` on the integrated code, push, and require fresh current-head CI/review. |
+
 ## Creator and wallet policy gates — 2026-11-27
 
 | Blocker | Impact | Evidence | Resolution gate |
@@ -76,3 +82,6 @@ This file should be amended when evidence changes; do not remove an item until i
 # Current status update — 2026-11-26
 
 The Commerce-verified business/store authorization API and merchant grant/revoke UI now include an authenticated customer consent review plus exact-redirect S256 PKCE approval and denial callbacks. Local Auth PostgreSQL tests cover preview, issuance, redemption, denial, replay, expiry, consent revocation and regrant; the full Auth suite and `go vet` pass. The isolated PostgreSQL 17 test service on port 15433 is used for these checks; no persistent application migration has been applied. Remaining blockers are signed-in browser and deployed callback verification, a distinct customer-opted-in business-managed conversation and eligibility window, Social-owned dispatch/storage/inbound status and delivery lifecycle, staging IAM/deployment configuration, and verified developer billing settlement. Public production sending and paid activation remain fail-closed; personal E2EE conversations must not be bridged to external business apps.
+# Current implementation note — ad settlement (2026-11-27)
+
+- The duplicate-charge race from workers settling stale pending-impression snapshots is fixed locally on `owl/ad-settlement-concurrency` using transactional row claims (`FOR UPDATE SKIP LOCKED`). Focused and full Ads tests pass locally. No PR/CI evidence exists yet. Full ad economics remain blocked/incomplete: authoritative advertiser fund settlement and reconciliation, refunds/credits, creator liability reconciliation, and deployed queue behavior require separate work and verification.
