@@ -40,15 +40,15 @@ type CheckmarkSuggestionRules struct {
 
 type CreatorProgramThresholds struct {
 	AutoApprove struct {
-		MinimumAccountAgeDays            int      `json:"minimumAccountAgeDays"`
-		RequiresVerifiedEmail            bool     `json:"requiresVerifiedEmail"`
-		MinimumRealFollowers             int      `json:"minimumRealFollowers"`
-		MinimumVerifiedFollowers         int      `json:"minimumVerifiedFollowers"`
-		MinimumQualifyingImpressions30d  int      `json:"minimumQualifyingImpressionsLast30Days"`
-		MinimumOriginalPostsInLast60Days int      `json:"minimumOriginalPostsInLast60Days"`
-		NoViolationsInDays               int      `json:"noViolationsInDays"`
-		MaximumFraudScore                int      `json:"maximumFraudScore"`
-		RequiresIdentityVerification     bool     `json:"requiresIdentityVerification"`
+		MinimumAccountAgeDays            int  `json:"minimumAccountAgeDays"`
+		RequiresVerifiedEmail            bool `json:"requiresVerifiedEmail"`
+		MinimumRealFollowers             int  `json:"minimumRealFollowers"`
+		MinimumVerifiedFollowers         int  `json:"minimumVerifiedFollowers"`
+		MinimumQualifyingImpressions30d  int  `json:"minimumQualifyingImpressionsLast30Days"`
+		MinimumOriginalPostsInLast60Days int  `json:"minimumOriginalPostsInLast60Days"`
+		NoViolationsInDays               int  `json:"noViolationsInDays"`
+		MaximumFraudScore                int  `json:"maximumFraudScore"`
+		RequiresIdentityVerification     bool `json:"requiresIdentityVerification"`
 	} `json:"autoApprove"`
 	ManualReview struct {
 		AllowsPastViolation              bool `json:"allowsPastViolation"`
