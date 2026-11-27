@@ -14,14 +14,15 @@ import { CoinAmountWithIcon } from "./coinAmount";
 const describePurchaseOutcome = (outcome: CoinPurchaseOutcome) => {
   if (outcome.kind === "credited") return `${formatCoinAmount(outcome.coins)} added to your balance.`;
   if (outcome.kind === "pending") return "Your payment is still being confirmed. Your coins will appear shortly.";
-  if (outcome.kind === "availableOnWebsiteOnly") return "Coin purchases are available on nantty.com";
-  return "The payment wasn't completed. You have not been charged.";
+  if (outcome.kind === "cancelled") return "Purchase cancelled. You have not been charged.";
+  if (outcome.kind === "availableOnWebsiteOnly") return "This coin package is unavailable for purchase in this app.";
+  return "We couldn't confirm the payment. Check your coin balance before trying again.";
 };
 
 export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const { colors } = useTheme();
   const styles = useStyles();
-  const { coinPackages, buyCoinPackage, lastOutcome, countryNeededFor, clearCountryNeeded } = useBuyCoinsWithInAppBrowser();
+  const { coinPackages, storeProducts, storeBillingAvailability, buyCoinPackage, lastOutcome, countryNeededFor, clearCountryNeeded } = useBuyCoinsWithInAppBrowser();
   return (
     <BottomSheet visible={visible} onClose={onClose} title="Buy coins" floating scrollable>
       <View style={styles.body}>
@@ -40,34 +41,44 @@ export function BuyCoinsSheet({ visible, onClose }: { visible: boolean; onClose:
           />
         ) : null}
         {coinPackages.isLoading ? <ActivityIndicator color={colors.primary} /> : null}
-        {(coinPackages.data ?? []).map((coinPackage) => (
-          <Pressable
-            key={coinPackage.id}
-            accessibilityRole="button"
-            accessibilityLabel={`Buy ${formatCoinAmount(coinPackage.coins + (coinPackage.bonusCoins ?? 0))} for ${formatMoneyForDisplay(coinPackage.price)}`}
-            disabled={buyCoinPackage.isPending}
-            onPress={() => buyCoinPackage.mutate(coinPackage)}
-            style={styles.packageRow}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-              <CreditCard24Icon size={20} color={colors.textMuted} />
-              <View>
-                <CoinAmountWithIcon label={formatCoinAmount(coinPackage.coins)} />
-                {coinPackage.bonusCoins ? (
-                  <Text size={12} lineHeight={14.4} color={colors.success}>
-                    +{coinPackage.bonusCoins.toLocaleString("en-US")} bonus
-                  </Text>
-                ) : null}
+        {(coinPackages.data ?? []).map((coinPackage) => {
+          const storePurchase = coinPackage.purchaseChannel === "store_iap";
+          const storePrice = coinPackage.storeProductId ? storeProducts.data?.[coinPackage.storeProductId] : undefined;
+          const priceLabel = storePurchase
+            ? storePrice ?? (storeProducts.isLoading ? "Checking store price…" : "Unavailable in store")
+            : formatMoneyForDisplay(coinPackage.price);
+          const canPurchase = !storePurchase || (storeBillingAvailability === "ready" && Boolean(storePrice));
+          return (
+            <Pressable
+              key={coinPackage.id}
+              accessibilityRole="button"
+              accessibilityLabel={`Buy ${formatCoinAmount(coinPackage.coins + (coinPackage.bonusCoins ?? 0))} for ${priceLabel}`}
+              disabled={buyCoinPackage.isPending || !canPurchase}
+              onPress={() => buyCoinPackage.mutate(coinPackage)}
+              style={styles.packageRow}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                <CreditCard24Icon size={20} color={colors.textMuted} />
+                <View>
+                  <CoinAmountWithIcon label={formatCoinAmount(coinPackage.coins)} />
+                  {coinPackage.bonusCoins ? (
+                    <Text size={12} lineHeight={14.4} color={colors.success}>
+                      +{coinPackage.bonusCoins.toLocaleString("en-US")} bonus
+                    </Text>
+                  ) : null}
+                </View>
               </View>
-            </View>
-            <Text size={14} weight={600} lineHeight={16.8} color={colors.primary}>
-              {formatMoneyForDisplay(coinPackage.price)}
-            </Text>
-          </Pressable>
-        ))}
+              <Text size={14} weight={600} lineHeight={16.8} color={canPurchase ? colors.primary : colors.textMuted}>
+                {priceLabel}
+              </Text>
+            </Pressable>
+          );
+        })}
         {buyCoinPackage.isPending ? (
           <Text size={12} lineHeight={16.8} color={colors.textMuted}>
-            Complete the payment in the secure browser. We'll confirm it with our server when you return.
+            {buyCoinPackage.variables?.purchaseChannel === "store_iap"
+              ? "Complete the purchase in the App Store or Google Play. Nantty verifies it before adding coins."
+              : "Complete the payment in the secure browser. We'll confirm it with our server when you return."}
           </Text>
         ) : null}
         {lastOutcome ? (
