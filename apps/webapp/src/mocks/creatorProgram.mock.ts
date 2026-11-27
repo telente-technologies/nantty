@@ -29,15 +29,17 @@ const EARNINGS_PAGE_SIZE = 6;
 const creatorApplicationsByUserId = new Map<string, CreatorApplication>();
 
 function buildEligibilityForSignedInUser(): CreatorEligibility {
-  const user = getSignedInMockUser();
-  const accountAgeInDays = Math.floor((Date.now() - new Date(user.joinedAt).getTime()) / DAY_IN_MS);
+  const now = new Date().toISOString();
   const requirements = [
-    { key: "followers" as const, label: "At least 1,000 followers", currentValue: user.followers, requiredValue: 1000 },
-    { key: "account_age" as const, label: "Account at least 30 days old", currentValue: accountAgeInDays, requiredValue: 30 },
-    { key: "no_violations" as const, label: "No community guideline strikes in 90 days", currentValue: 1, requiredValue: 1 },
-    { key: "posts" as const, label: "At least 10 posts", currentValue: user.posts, requiredValue: 10 },
-  ].map((requirement) => ({ ...requirement, met: requirement.currentValue >= requirement.requiredValue }));
-  return { eligible: requirements.every((requirement) => requirement.met), requirements };
+    { key: "qualifying_impressions_30d", label: "Qualifying impressions from verified users in the last 30 days", currentValue: 0, requiredValue: 100_000, available: false, source: "" },
+    { key: "real_followers", label: "Real followers", currentValue: 0, requiredValue: 10_000, available: false, source: "" },
+    { key: "verified_followers", label: "Verified followers", currentValue: 0, requiredValue: 500, available: false, source: "" },
+    { key: "account_age", label: "Account at least 30 days old", currentValue: 0, requiredValue: 30, available: false, source: "" },
+    { key: "verified_email", label: "Verified email", currentValue: 0, requiredValue: 1, available: false, source: "" },
+    { key: "original_posts", label: "Original posts in the last 60 days", currentValue: 0, requiredValue: 10, available: false, source: "" },
+    { key: "policy_standing", label: "Days since last policy violation", currentValue: 0, requiredValue: 90, available: false, source: "" },
+  ].map((requirement) => ({ ...requirement, remaining: requirement.requiredValue, met: false, dataAsOf: requirement.source ? now : undefined }));
+  return { eligible: false, decision: "unavailable", decisionNote: "Trusted creator analytics and moderation data are not connected in this demo. Missing data cannot approve an application.", requirements, metricsAvailable: false, standingAvailable: false };
 }
 
 const approvedApplicationForDemoCreator = (): CreatorApplication => ({

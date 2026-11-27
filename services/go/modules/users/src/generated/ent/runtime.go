@@ -1262,20 +1262,66 @@ func init() {
 	profilesignal.DefaultRealFollowers = profilesignalDescRealFollowers.Default.(int)
 	// profilesignal.RealFollowersValidator is a validator for the "real_followers" field. It is called by the builders before save.
 	profilesignal.RealFollowersValidator = profilesignalDescRealFollowers.Validators[0].(func(int) error)
+	// profilesignalDescCreatorRealFollowers is the schema descriptor for creator_real_followers field.
+	profilesignalDescCreatorRealFollowers := profilesignalFields[3].Descriptor()
+	// profilesignal.DefaultCreatorRealFollowers holds the default value on creation for the creator_real_followers field.
+	profilesignal.DefaultCreatorRealFollowers = profilesignalDescCreatorRealFollowers.Default.(int)
+	// profilesignal.CreatorRealFollowersValidator is a validator for the "creator_real_followers" field. It is called by the builders before save.
+	profilesignal.CreatorRealFollowersValidator = profilesignalDescCreatorRealFollowers.Validators[0].(func(int) error)
+	// profilesignalDescCreatorOriginalPostsLast60Days is the schema descriptor for creator_original_posts_last_60_days field.
+	profilesignalDescCreatorOriginalPostsLast60Days := profilesignalFields[4].Descriptor()
+	// profilesignal.DefaultCreatorOriginalPostsLast60Days holds the default value on creation for the creator_original_posts_last_60_days field.
+	profilesignal.DefaultCreatorOriginalPostsLast60Days = profilesignalDescCreatorOriginalPostsLast60Days.Default.(int)
+	// profilesignal.CreatorOriginalPostsLast60DaysValidator is a validator for the "creator_original_posts_last_60_days" field. It is called by the builders before save.
+	profilesignal.CreatorOriginalPostsLast60DaysValidator = profilesignalDescCreatorOriginalPostsLast60Days.Validators[0].(func(int) error)
+	// profilesignalDescVerifiedFollowers is the schema descriptor for verified_followers field.
+	profilesignalDescVerifiedFollowers := profilesignalFields[5].Descriptor()
+	// profilesignal.DefaultVerifiedFollowers holds the default value on creation for the verified_followers field.
+	profilesignal.DefaultVerifiedFollowers = profilesignalDescVerifiedFollowers.Default.(int)
+	// profilesignal.VerifiedFollowersValidator is a validator for the "verified_followers" field. It is called by the builders before save.
+	profilesignal.VerifiedFollowersValidator = profilesignalDescVerifiedFollowers.Validators[0].(func(int) error)
+	// profilesignalDescQualifyingImpressionsLast30Days is the schema descriptor for qualifying_impressions_last_30_days field.
+	profilesignalDescQualifyingImpressionsLast30Days := profilesignalFields[6].Descriptor()
+	// profilesignal.DefaultQualifyingImpressionsLast30Days holds the default value on creation for the qualifying_impressions_last_30_days field.
+	profilesignal.DefaultQualifyingImpressionsLast30Days = profilesignalDescQualifyingImpressionsLast30Days.Default.(int)
+	// profilesignal.QualifyingImpressionsLast30DaysValidator is a validator for the "qualifying_impressions_last_30_days" field. It is called by the builders before save.
+	profilesignal.QualifyingImpressionsLast30DaysValidator = profilesignalDescQualifyingImpressionsLast30Days.Validators[0].(func(int) error)
+	// profilesignalDescCreatorMetricsSource is the schema descriptor for creator_metrics_source field.
+	profilesignalDescCreatorMetricsSource := profilesignalFields[7].Descriptor()
+	// profilesignal.DefaultCreatorMetricsSource holds the default value on creation for the creator_metrics_source field.
+	profilesignal.DefaultCreatorMetricsSource = profilesignalDescCreatorMetricsSource.Default.(string)
+	// profilesignal.CreatorMetricsSourceValidator is a validator for the "creator_metrics_source" field. It is called by the builders before save.
+	profilesignal.CreatorMetricsSourceValidator = profilesignalDescCreatorMetricsSource.Validators[0].(func(string) error)
 	// profilesignalDescOriginalPostsLast60Days is the schema descriptor for original_posts_last_60_days field.
-	profilesignalDescOriginalPostsLast60Days := profilesignalFields[3].Descriptor()
+	profilesignalDescOriginalPostsLast60Days := profilesignalFields[10].Descriptor()
 	// profilesignal.DefaultOriginalPostsLast60Days holds the default value on creation for the original_posts_last_60_days field.
 	profilesignal.DefaultOriginalPostsLast60Days = profilesignalDescOriginalPostsLast60Days.Default.(int)
 	// profilesignal.OriginalPostsLast60DaysValidator is a validator for the "original_posts_last_60_days" field. It is called by the builders before save.
 	profilesignal.OriginalPostsLast60DaysValidator = profilesignalDescOriginalPostsLast60Days.Validators[0].(func(int) error)
 	// profilesignalDescDaysSinceLastViolation is the schema descriptor for days_since_last_violation field.
-	profilesignalDescDaysSinceLastViolation := profilesignalFields[4].Descriptor()
+	profilesignalDescDaysSinceLastViolation := profilesignalFields[11].Descriptor()
 	// profilesignal.DefaultDaysSinceLastViolation holds the default value on creation for the days_since_last_violation field.
 	profilesignal.DefaultDaysSinceLastViolation = profilesignalDescDaysSinceLastViolation.Default.(int)
 	// profilesignal.DaysSinceLastViolationValidator is a validator for the "days_since_last_violation" field. It is called by the builders before save.
 	profilesignal.DaysSinceLastViolationValidator = profilesignalDescDaysSinceLastViolation.Validators[0].(func(int) error)
+	// profilesignalDescCreatorDaysSinceLastViolation is the schema descriptor for creator_days_since_last_violation field.
+	profilesignalDescCreatorDaysSinceLastViolation := profilesignalFields[12].Descriptor()
+	// profilesignal.DefaultCreatorDaysSinceLastViolation holds the default value on creation for the creator_days_since_last_violation field.
+	profilesignal.DefaultCreatorDaysSinceLastViolation = profilesignalDescCreatorDaysSinceLastViolation.Default.(int)
+	// profilesignal.CreatorDaysSinceLastViolationValidator is a validator for the "creator_days_since_last_violation" field. It is called by the builders before save.
+	profilesignal.CreatorDaysSinceLastViolationValidator = profilesignalDescCreatorDaysSinceLastViolation.Validators[0].(func(int) error)
+	// profilesignalDescCreatorStandingAvailable is the schema descriptor for creator_standing_available field.
+	profilesignalDescCreatorStandingAvailable := profilesignalFields[13].Descriptor()
+	// profilesignal.DefaultCreatorStandingAvailable holds the default value on creation for the creator_standing_available field.
+	profilesignal.DefaultCreatorStandingAvailable = profilesignalDescCreatorStandingAvailable.Default.(bool)
+	// profilesignalDescCreatorStandingSource is the schema descriptor for creator_standing_source field.
+	profilesignalDescCreatorStandingSource := profilesignalFields[14].Descriptor()
+	// profilesignal.DefaultCreatorStandingSource holds the default value on creation for the creator_standing_source field.
+	profilesignal.DefaultCreatorStandingSource = profilesignalDescCreatorStandingSource.Default.(string)
+	// profilesignal.CreatorStandingSourceValidator is a validator for the "creator_standing_source" field. It is called by the builders before save.
+	profilesignal.CreatorStandingSourceValidator = profilesignalDescCreatorStandingSource.Validators[0].(func(string) error)
 	// profilesignalDescFraudScore is the schema descriptor for fraud_score field.
-	profilesignalDescFraudScore := profilesignalFields[5].Descriptor()
+	profilesignalDescFraudScore := profilesignalFields[17].Descriptor()
 	// profilesignal.DefaultFraudScore holds the default value on creation for the fraud_score field.
 	profilesignal.DefaultFraudScore = profilesignalDescFraudScore.Default.(int)
 	// profilesignal.FraudScoreValidator is a validator for the "fraud_score" field. It is called by the builders before save.
@@ -1295,7 +1341,7 @@ func init() {
 		}
 	}()
 	// profilesignalDescRiskScore is the schema descriptor for risk_score field.
-	profilesignalDescRiskScore := profilesignalFields[6].Descriptor()
+	profilesignalDescRiskScore := profilesignalFields[18].Descriptor()
 	// profilesignal.DefaultRiskScore holds the default value on creation for the risk_score field.
 	profilesignal.DefaultRiskScore = profilesignalDescRiskScore.Default.(int)
 	// profilesignal.RiskScoreValidator is a validator for the "risk_score" field. It is called by the builders before save.
@@ -1315,21 +1361,21 @@ func init() {
 		}
 	}()
 	// profilesignalDescIDVerified is the schema descriptor for id_verified field.
-	profilesignalDescIDVerified := profilesignalFields[7].Descriptor()
+	profilesignalDescIDVerified := profilesignalFields[19].Descriptor()
 	// profilesignal.DefaultIDVerified holds the default value on creation for the id_verified field.
 	profilesignal.DefaultIDVerified = profilesignalDescIDVerified.Default.(bool)
 	// profilesignalDescBorderlineContent is the schema descriptor for borderline_content field.
-	profilesignalDescBorderlineContent := profilesignalFields[8].Descriptor()
+	profilesignalDescBorderlineContent := profilesignalFields[20].Descriptor()
 	// profilesignal.DefaultBorderlineContent holds the default value on creation for the borderline_content field.
 	profilesignal.DefaultBorderlineContent = profilesignalDescBorderlineContent.Default.(bool)
 	// profilesignalDescCompletedOrders is the schema descriptor for completed_orders field.
-	profilesignalDescCompletedOrders := profilesignalFields[9].Descriptor()
+	profilesignalDescCompletedOrders := profilesignalFields[21].Descriptor()
 	// profilesignal.DefaultCompletedOrders holds the default value on creation for the completed_orders field.
 	profilesignal.DefaultCompletedOrders = profilesignalDescCompletedOrders.Default.(int)
 	// profilesignal.CompletedOrdersValidator is a validator for the "completed_orders" field. It is called by the builders before save.
 	profilesignal.CompletedOrdersValidator = profilesignalDescCompletedOrders.Validators[0].(func(int) error)
 	// profilesignalDescSuccessRatePercent is the schema descriptor for success_rate_percent field.
-	profilesignalDescSuccessRatePercent := profilesignalFields[10].Descriptor()
+	profilesignalDescSuccessRatePercent := profilesignalFields[22].Descriptor()
 	// profilesignal.DefaultSuccessRatePercent holds the default value on creation for the success_rate_percent field.
 	profilesignal.DefaultSuccessRatePercent = profilesignalDescSuccessRatePercent.Default.(int)
 	// profilesignal.SuccessRatePercentValidator is a validator for the "success_rate_percent" field. It is called by the builders before save.
@@ -1349,21 +1395,21 @@ func init() {
 		}
 	}()
 	// profilesignalDescHasActiveStoreOrBrandPage is the schema descriptor for has_active_store_or_brand_page field.
-	profilesignalDescHasActiveStoreOrBrandPage := profilesignalFields[11].Descriptor()
+	profilesignalDescHasActiveStoreOrBrandPage := profilesignalFields[23].Descriptor()
 	// profilesignal.DefaultHasActiveStoreOrBrandPage holds the default value on creation for the has_active_store_or_brand_page field.
 	profilesignal.DefaultHasActiveStoreOrBrandPage = profilesignalDescHasActiveStoreOrBrandPage.Default.(bool)
 	// profilesignalDescSellerPlanTrialing is the schema descriptor for seller_plan_trialing field.
-	profilesignalDescSellerPlanTrialing := profilesignalFields[16].Descriptor()
+	profilesignalDescSellerPlanTrialing := profilesignalFields[28].Descriptor()
 	// profilesignal.DefaultSellerPlanTrialing holds the default value on creation for the seller_plan_trialing field.
 	profilesignal.DefaultSellerPlanTrialing = profilesignalDescSellerPlanTrialing.Default.(bool)
 	// profilesignalDescSource is the schema descriptor for source field.
-	profilesignalDescSource := profilesignalFields[17].Descriptor()
+	profilesignalDescSource := profilesignalFields[29].Descriptor()
 	// profilesignal.DefaultSource holds the default value on creation for the source field.
 	profilesignal.DefaultSource = profilesignalDescSource.Default.(string)
 	// profilesignal.SourceValidator is a validator for the "source" field. It is called by the builders before save.
 	profilesignal.SourceValidator = profilesignalDescSource.Validators[0].(func(string) error)
 	// profilesignalDescUpdatedAt is the schema descriptor for updated_at field.
-	profilesignalDescUpdatedAt := profilesignalFields[18].Descriptor()
+	profilesignalDescUpdatedAt := profilesignalFields[30].Descriptor()
 	// profilesignal.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	profilesignal.DefaultUpdatedAt = profilesignalDescUpdatedAt.Default.(func() time.Time)
 	// profilesignal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

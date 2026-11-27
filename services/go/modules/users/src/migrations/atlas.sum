@@ -1,4 +1,4 @@
-h1:8apHDR7aDBu0EJPSJhzhu5ci07C7aubE1Pf46UOzcZU=
+h1:ip+RfYfPw4FLmGRxdfZZ7P4A59N2LxLdrIDW8vRBfEo=
 20261003101347_create_users_core_tables.up.sql h1:dNCI103B0TCx9zazGKCl3Ln/N+7bPYPmbcR+7djUkCU=
 20261003101400_grant_read_access_to_other_services.up.sql h1:eEPXFCo3CMsKVE8S8PUToJ0SWFBhOzzSwZyhsSm/JXA=
 20261003101713_add_privacy_geo_and_address_tables.up.sql h1:sBOLU/FidxMAy6Qx/STvr6/Rz/skMIfasQJijHB80QA=
@@ -29,3 +29,5 @@ h1:8apHDR7aDBu0EJPSJhzhu5ci07C7aubE1Pf46UOzcZU=
 20261105120000_add_creator_application_idempotency.up.sql h1:7Wz3mOnazYUfmxCRee/Kgjwyn3dhRVsdQCySGGk2RxQ=
 20261116120000_black_government_verification_extensions.up.sql h1:CCX5XRr/MdgcoubJn5+2CWBMUPY4mzZkNONcHbl41qY=
 20261119123000_add_smile_user_id.up.sql h1:ZdrEEzqLVUSmfAZ/JqQTjicqtsLSPNT7jeZ+pAlnpgs=
+20261126120000_creator_eligibility_metrics.up.sql h1:BdvoJ7c34LYe4w11NWYzSx3+x7ZRo0O9iJSczCGYrWU=
+20261127120000_grant_wallet_creator_status_read.up.sql h1:bpAbu4+il47VZtSN5b44JDGnsAfKvUvhyow7i0sp2Q4=

@@ -20,10 +20,34 @@ const (
 	FieldAccountID = "account_id"
 	// FieldRealFollowers holds the string denoting the real_followers field in the database.
 	FieldRealFollowers = "real_followers"
+	// FieldCreatorRealFollowers holds the string denoting the creator_real_followers field in the database.
+	FieldCreatorRealFollowers = "creator_real_followers"
+	// FieldCreatorOriginalPostsLast60Days holds the string denoting the creator_original_posts_last_60_days field in the database.
+	FieldCreatorOriginalPostsLast60Days = "creator_original_posts_last_60_days"
+	// FieldVerifiedFollowers holds the string denoting the verified_followers field in the database.
+	FieldVerifiedFollowers = "verified_followers"
+	// FieldQualifyingImpressionsLast30Days holds the string denoting the qualifying_impressions_last_30_days field in the database.
+	FieldQualifyingImpressionsLast30Days = "qualifying_impressions_last_30_days"
+	// FieldCreatorMetricsSource holds the string denoting the creator_metrics_source field in the database.
+	FieldCreatorMetricsSource = "creator_metrics_source"
+	// FieldCreatorMetricsAsOf holds the string denoting the creator_metrics_as_of field in the database.
+	FieldCreatorMetricsAsOf = "creator_metrics_as_of"
+	// FieldCreatorMetricsSnapshotID holds the string denoting the creator_metrics_snapshot_id field in the database.
+	FieldCreatorMetricsSnapshotID = "creator_metrics_snapshot_id"
 	// FieldOriginalPostsLast60Days holds the string denoting the original_posts_last_60_days field in the database.
 	FieldOriginalPostsLast60Days = "original_posts_last_60_days"
 	// FieldDaysSinceLastViolation holds the string denoting the days_since_last_violation field in the database.
 	FieldDaysSinceLastViolation = "days_since_last_violation"
+	// FieldCreatorDaysSinceLastViolation holds the string denoting the creator_days_since_last_violation field in the database.
+	FieldCreatorDaysSinceLastViolation = "creator_days_since_last_violation"
+	// FieldCreatorStandingAvailable holds the string denoting the creator_standing_available field in the database.
+	FieldCreatorStandingAvailable = "creator_standing_available"
+	// FieldCreatorStandingSource holds the string denoting the creator_standing_source field in the database.
+	FieldCreatorStandingSource = "creator_standing_source"
+	// FieldCreatorStandingAsOf holds the string denoting the creator_standing_as_of field in the database.
+	FieldCreatorStandingAsOf = "creator_standing_as_of"
+	// FieldCreatorStandingSnapshotID holds the string denoting the creator_standing_snapshot_id field in the database.
+	FieldCreatorStandingSnapshotID = "creator_standing_snapshot_id"
 	// FieldFraudScore holds the string denoting the fraud_score field in the database.
 	FieldFraudScore = "fraud_score"
 	// FieldRiskScore holds the string denoting the risk_score field in the database.
@@ -62,8 +86,20 @@ var Columns = []string{
 	FieldProfileID,
 	FieldAccountID,
 	FieldRealFollowers,
+	FieldCreatorRealFollowers,
+	FieldCreatorOriginalPostsLast60Days,
+	FieldVerifiedFollowers,
+	FieldQualifyingImpressionsLast30Days,
+	FieldCreatorMetricsSource,
+	FieldCreatorMetricsAsOf,
+	FieldCreatorMetricsSnapshotID,
 	FieldOriginalPostsLast60Days,
 	FieldDaysSinceLastViolation,
+	FieldCreatorDaysSinceLastViolation,
+	FieldCreatorStandingAvailable,
+	FieldCreatorStandingSource,
+	FieldCreatorStandingAsOf,
+	FieldCreatorStandingSnapshotID,
 	FieldFraudScore,
 	FieldRiskScore,
 	FieldIDVerified,
@@ -95,6 +131,26 @@ var (
 	DefaultRealFollowers int
 	// RealFollowersValidator is a validator for the "real_followers" field. It is called by the builders before save.
 	RealFollowersValidator func(int) error
+	// DefaultCreatorRealFollowers holds the default value on creation for the "creator_real_followers" field.
+	DefaultCreatorRealFollowers int
+	// CreatorRealFollowersValidator is a validator for the "creator_real_followers" field. It is called by the builders before save.
+	CreatorRealFollowersValidator func(int) error
+	// DefaultCreatorOriginalPostsLast60Days holds the default value on creation for the "creator_original_posts_last_60_days" field.
+	DefaultCreatorOriginalPostsLast60Days int
+	// CreatorOriginalPostsLast60DaysValidator is a validator for the "creator_original_posts_last_60_days" field. It is called by the builders before save.
+	CreatorOriginalPostsLast60DaysValidator func(int) error
+	// DefaultVerifiedFollowers holds the default value on creation for the "verified_followers" field.
+	DefaultVerifiedFollowers int
+	// VerifiedFollowersValidator is a validator for the "verified_followers" field. It is called by the builders before save.
+	VerifiedFollowersValidator func(int) error
+	// DefaultQualifyingImpressionsLast30Days holds the default value on creation for the "qualifying_impressions_last_30_days" field.
+	DefaultQualifyingImpressionsLast30Days int
+	// QualifyingImpressionsLast30DaysValidator is a validator for the "qualifying_impressions_last_30_days" field. It is called by the builders before save.
+	QualifyingImpressionsLast30DaysValidator func(int) error
+	// DefaultCreatorMetricsSource holds the default value on creation for the "creator_metrics_source" field.
+	DefaultCreatorMetricsSource string
+	// CreatorMetricsSourceValidator is a validator for the "creator_metrics_source" field. It is called by the builders before save.
+	CreatorMetricsSourceValidator func(string) error
 	// DefaultOriginalPostsLast60Days holds the default value on creation for the "original_posts_last_60_days" field.
 	DefaultOriginalPostsLast60Days int
 	// OriginalPostsLast60DaysValidator is a validator for the "original_posts_last_60_days" field. It is called by the builders before save.
@@ -103,6 +159,16 @@ var (
 	DefaultDaysSinceLastViolation int
 	// DaysSinceLastViolationValidator is a validator for the "days_since_last_violation" field. It is called by the builders before save.
 	DaysSinceLastViolationValidator func(int) error
+	// DefaultCreatorDaysSinceLastViolation holds the default value on creation for the "creator_days_since_last_violation" field.
+	DefaultCreatorDaysSinceLastViolation int
+	// CreatorDaysSinceLastViolationValidator is a validator for the "creator_days_since_last_violation" field. It is called by the builders before save.
+	CreatorDaysSinceLastViolationValidator func(int) error
+	// DefaultCreatorStandingAvailable holds the default value on creation for the "creator_standing_available" field.
+	DefaultCreatorStandingAvailable bool
+	// DefaultCreatorStandingSource holds the default value on creation for the "creator_standing_source" field.
+	DefaultCreatorStandingSource string
+	// CreatorStandingSourceValidator is a validator for the "creator_standing_source" field. It is called by the builders before save.
+	CreatorStandingSourceValidator func(string) error
 	// DefaultFraudScore holds the default value on creation for the "fraud_score" field.
 	DefaultFraudScore int
 	// FraudScoreValidator is a validator for the "fraud_score" field. It is called by the builders before save.
@@ -187,6 +253,41 @@ func ByRealFollowers(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRealFollowers, opts...).ToFunc()
 }
 
+// ByCreatorRealFollowers orders the results by the creator_real_followers field.
+func ByCreatorRealFollowers(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatorRealFollowers, opts...).ToFunc()
+}
+
+// ByCreatorOriginalPostsLast60Days orders the results by the creator_original_posts_last_60_days field.
+func ByCreatorOriginalPostsLast60Days(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatorOriginalPostsLast60Days, opts...).ToFunc()
+}
+
+// ByVerifiedFollowers orders the results by the verified_followers field.
+func ByVerifiedFollowers(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerifiedFollowers, opts...).ToFunc()
+}
+
+// ByQualifyingImpressionsLast30Days orders the results by the qualifying_impressions_last_30_days field.
+func ByQualifyingImpressionsLast30Days(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQualifyingImpressionsLast30Days, opts...).ToFunc()
+}
+
+// ByCreatorMetricsSource orders the results by the creator_metrics_source field.
+func ByCreatorMetricsSource(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatorMetricsSource, opts...).ToFunc()
+}
+
+// ByCreatorMetricsAsOf orders the results by the creator_metrics_as_of field.
+func ByCreatorMetricsAsOf(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatorMetricsAsOf, opts...).ToFunc()
+}
+
+// ByCreatorMetricsSnapshotID orders the results by the creator_metrics_snapshot_id field.
+func ByCreatorMetricsSnapshotID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatorMetricsSnapshotID, opts...).ToFunc()
+}
+
 // ByOriginalPostsLast60Days orders the results by the original_posts_last_60_days field.
 func ByOriginalPostsLast60Days(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOriginalPostsLast60Days, opts...).ToFunc()
@@ -195,6 +296,31 @@ func ByOriginalPostsLast60Days(opts ...sql.OrderTermOption) OrderOption {
 // ByDaysSinceLastViolation orders the results by the days_since_last_violation field.
 func ByDaysSinceLastViolation(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDaysSinceLastViolation, opts...).ToFunc()
+}
+
+// ByCreatorDaysSinceLastViolation orders the results by the creator_days_since_last_violation field.
+func ByCreatorDaysSinceLastViolation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatorDaysSinceLastViolation, opts...).ToFunc()
+}
+
+// ByCreatorStandingAvailable orders the results by the creator_standing_available field.
+func ByCreatorStandingAvailable(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatorStandingAvailable, opts...).ToFunc()
+}
+
+// ByCreatorStandingSource orders the results by the creator_standing_source field.
+func ByCreatorStandingSource(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatorStandingSource, opts...).ToFunc()
+}
+
+// ByCreatorStandingAsOf orders the results by the creator_standing_as_of field.
+func ByCreatorStandingAsOf(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatorStandingAsOf, opts...).ToFunc()
+}
+
+// ByCreatorStandingSnapshotID orders the results by the creator_standing_snapshot_id field.
+func ByCreatorStandingSnapshotID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatorStandingSnapshotID, opts...).ToFunc()
 }
 
 // ByFraudScore orders the results by the fraud_score field.

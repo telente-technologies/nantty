@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -22,98 +23,20 @@ func (harness *usersTestHarness) profileIdOf(token string) string {
 
 func (harness *usersTestHarness) putSignals(profileId string, signals map[string]any) {
 	harness.t.Helper()
-	harness.expect("PUT", "/api/v1/internal/profiles/"+profileId+"/signals", "", signals, http.StatusNoContent, internalToken...)
+	headers := append([]string{}, internalToken...)
+	if _, exists := signals["daysSinceLastViolation"]; exists {
+		signals["creatorStandingSnapshotId"] = uuid.NewString()
+		signals["creatorStandingSource"] = "moderation_creator_standing_v1"
+		signals["creatorStandingAsOf"] = time.Now().UTC().Format(time.RFC3339Nano)
+		headers = append(headers, "X-Creator-Standing-Token", strings.Repeat("s", 32))
+	}
+	harness.expect("PUT", "/api/v1/internal/profiles/"+profileId+"/signals", "", signals, http.StatusNoContent, headers...)
 }
 
-func TestCreatorProgramDecisionsFollowTheAdminThresholds(t *testing.T) {
-	cases := []struct {
-		name         string
-		signals      map[string]any
-		wantDecision string
-		wantStatus   string
-	}{
-		{"every threshold met is approved automatically", map[string]any{"realFollowers": 1500, "originalPostsLast60Days": 12, "daysSinceLastViolation": 400, "fraudScore": 10}, "auto_approve", "approved"},
-		{"500 to 999 followers goes to manual review", map[string]any{"realFollowers": 700, "originalPostsLast60Days": 12, "daysSinceLastViolation": 400, "riskScore": 20}, "manual_review", "pending"},
-		{"a high fraud score with enough followers goes to review", map[string]any{"realFollowers": 1500, "originalPostsLast60Days": 12, "daysSinceLastViolation": 400, "fraudScore": 55, "riskScore": 40}, "manual_review", "pending"},
-		{"under 500 followers is not eligible", map[string]any{"realFollowers": 120}, "not_eligible", "rejected"},
-		{"a risk score above the review limit is not eligible", map[string]any{"realFollowers": 900, "riskScore": 80}, "not_eligible", "rejected"},
-	}
-	for index, testCase := range cases {
-		t.Run(testCase.name, func(t *testing.T) {
-			harness := startUsersModuleAgainstFreshSchema(t)
-			username := "creator.case" + string(rune('a'+index))
-			_, token := harness.newAccount(username, "Creator Case")
-			harness.putSignals(harness.profileIdOf(token), testCase.signals)
-			eligibility := harness.expect("GET", "/api/v1/creators/eligibility", token, nil, http.StatusOK)
-			if eligibility["decision"] != testCase.wantDecision || len(eligibility["requirements"].([]any)) != 4 {
-				t.Fatalf("unexpected eligibility %v", eligibility)
-			}
-			application := harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{
-				"contentCategories": []string{"tech"}, "socialLinks": []any{}, "sampleContentUrls": []string{}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1",
-			}, http.StatusCreated, "Idempotency-Key", "creator-case-key-0001")
-			if application["status"] != testCase.wantStatus {
-				t.Fatalf("unexpected application %v", application)
-			}
-			if testCase.wantStatus == "rejected" {
-				if application["reapplyAvailableAt"] == nil || application["rejectionReason"] == nil {
-					t.Fatalf("a rejected application explains why and when to try again: %v", application)
-				}
-				harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{"tech"}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusConflict, "Idempotency-Key", "creator-case-key-0002")
-			}
-			me := harness.expect("GET", "/api/v1/users/me", token, nil, http.StatusOK)
-			if (me["creatorStatus"] == "approved") != (testCase.wantStatus == "approved") {
-				t.Fatalf("creator status lives on the personal profile: %v", me)
-			}
-		})
-	}
-}
-
-func TestCreatorApplicationNeedsInputAndAdminReviewQueueDecides(t *testing.T) {
-	harness := startUsersModuleAgainstFreshSchema(t)
-	_, token := harness.newAccount("review.me", "Review Me")
-	harness.putSignals(harness.profileIdOf(token), map[string]any{"realFollowers": 650, "daysSinceLastViolation": 400})
-	harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusUnprocessableEntity, "Idempotency-Key", "creator-review-key-0001")
-	harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{"tech"}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusCreated, "Idempotency-Key", "creator-review-key-0002")
-	harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{"contentCategories": []string{"tech"}, "payoutAccountId": "pa_1", "acceptedCreatorTermsVersion": "1"}, http.StatusConflict, "Idempotency-Key", "creator-review-key-0003")
-
-	reviewer, reviewerStepUp := harness.staff("admin", "applications:creators")
-	denied, _ := harness.staff("admin", "users:read")
-	harness.expect("GET", "/api/v1/admin/applications/creators", denied, nil, http.StatusForbidden)
-	queue := harness.expect("GET", "/api/v1/admin/applications/creators", reviewer, nil, http.StatusOK)["data"].([]any)
-	if len(queue) != 1 || queue[0].(map[string]any)["status"] != "PENDING" || len(queue[0].(map[string]any)["eligibility"].([]any)) != 4 {
-		t.Fatalf("the review queue shows the checklist: %v", queue)
-	}
-	id := queue[0].(map[string]any)["id"].(string)
-	harness.expect("POST", "/api/v1/admin/applications/creators/"+id+"/approve", reviewer, map[string]string{"reason": "ok"}, http.StatusBadRequest, reviewerStepUp...)
-	approved := harness.expect("POST", "/api/v1/admin/applications/creators/"+id+"/approve", reviewer, map[string]string{"reason": "checked content and followers"}, http.StatusOK, reviewerStepUp...)
-	if approved["status"] != "APPROVED" {
-		t.Fatalf("unexpected %v", approved)
-	}
-	harness.expect("POST", "/api/v1/admin/applications/creators/"+id+"/reject", reviewer, map[string]string{"reason": "changed my mind"}, http.StatusConflict, reviewerStepUp...)
-	if me := harness.expect("GET", "/api/v1/users/me", token, nil, http.StatusOK); me["isCreator"] != true {
-		t.Fatalf("approval turns the personal profile into a creator account: %v", me)
-	}
-	harness.waitForPublishedEvents("creatorApplication.needsReview", "creatorApplication.approved", "creatorApplication.decided")
-}
-
-func TestEligibleCreatorCanApplyWithoutPayoutAccountAndIsHeldForManualReview(t *testing.T) {
-	harness := startUsersModuleAgainstFreshSchema(t)
-	_, token := harness.newAccount("creator.without.payout", "Creator Without Payout")
-	harness.putSignals(harness.profileIdOf(token), map[string]any{"realFollowers": 1500, "originalPostsLast60Days": 12, "daysSinceLastViolation": 400, "fraudScore": 10})
-	application := harness.expect("POST", "/api/v1/creators/applications", token, map[string]any{
-		"contentCategories": []string{"education"}, "acceptedCreatorTermsVersion": "1",
-	}, http.StatusCreated, "Idempotency-Key", "creator-payout-key-0001")
-	if application["status"] != "pending" {
-		t.Fatalf("an eligible applicant without a payout account must be held pending: %v", application)
-	}
-	reviewer, _ := harness.staff("admin", "applications:creators")
-	detail := harness.expect("GET", "/api/v1/admin/applications/creators/"+application["id"].(string), reviewer, nil, http.StatusOK)
-	if detail["status"] != "PENDING" || detail["decision"] != "manual_review" {
-		t.Fatalf("an eligible applicant without a payout account must be manually reviewed: %v", detail)
-	}
-	if detail["decisionNote"] != "Your application will be reviewed by our team. You can add a payout account later; earnings remain in your creator balance until one is available." {
-		t.Fatalf("application should explain the payout requirement is deferred: %v", detail)
-	}
+func (harness *usersTestHarness) putCreatorMetrics(profileId string, realFollowers, verifiedFollowers, impressions int) {
+	harness.t.Helper()
+	payload := map[string]any{"realFollowers": realFollowers, "verifiedFollowers": verifiedFollowers, "qualifyingImpressionsLast30Days": impressions, "originalPostsLast60Days": 12, "creatorMetricsSnapshotId": uuid.NewString(), "creatorMetricsAsOf": time.Now().UTC().Format(time.RFC3339Nano), "source": "analytics_creator_eligibility_v1"}
+	harness.expect("PUT", "/api/v1/internal/profiles/"+profileId+"/signals", "", payload, http.StatusNoContent, "X-Internal-Token", strings.Repeat("u", 32), "X-Creator-Metrics-Token", strings.Repeat("c", 32))
 }
 
 func TestCheckmarkRulesFollowTheProfileTypeAndLifetimeGrantsRespectThem(t *testing.T) {

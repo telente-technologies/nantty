@@ -19,6 +19,7 @@ func TestRestrictedCreatorEarningsStayPendingUntilMonetisationIsRestored(t *test
 	}
 	harness := startWalletHarness(t, true)
 	creator := uuid.NewString()
+	harness.approveCreator(creator)
 	token := harness.Tokens.UserAccessToken(creator)
 	harness.creditEarnedCoins(creator, 180)
 	harness.OnboardConnectedAccount(creator, false)

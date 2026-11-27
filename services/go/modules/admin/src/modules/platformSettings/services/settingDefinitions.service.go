@@ -27,9 +27,7 @@ type SettingDefinition struct {
 }
 
 var PlatformSettingDefinitions = map[string]SettingDefinition{
-	CreatorRequirementsKey: {Validate: validateCreatorRequirements, Public: true, WritePermission: "config:rules", DefaultValue: CreatorRequirements{
-		MinimumFollowers: 1000, MinimumAccountAgeDays: 30, MinimumOriginalPosts: 10, MaximumRecentStrikes: 0, StrikeLookbackDays: 90, RequireVerifiedEmail: true,
-	}},
+	CreatorRequirementsKey: {Validate: validateProjectedCreatorRequirements, DefaultValue: defaultCreatorRequirements(), Public: true, WritePermission: "config:rules", Projection: &SettingProjection{SourceKey: CreatorThresholdsKey, Project: projectCreatorRequirements, Merge: mergeCreatorRequirements}},
 	MonetizationPolicyKey: {Validate: validateMonetizationPolicy, WritePermission: "config:revenue", DefaultValue: MonetizationPolicy{Rows: []MonetizationRow{
 		{Id: "original", Label: "Original content", MultiplierBps: 10000, Active: true},
 		{Id: "ai_generated", Label: "AI-generated content", MultiplierBps: 3000, Active: true},
@@ -50,12 +48,16 @@ var PlatformSettingDefinitions = map[string]SettingDefinition{
 }
 
 type CreatorRequirements struct {
-	MinimumFollowers      int  `json:"minimumFollowers"`
-	MinimumAccountAgeDays int  `json:"minimumAccountAgeDays"`
-	MinimumOriginalPosts  int  `json:"minimumOriginalPosts"`
-	MaximumRecentStrikes  int  `json:"maximumRecentStrikes"`
-	StrikeLookbackDays    int  `json:"strikeLookbackDays"`
-	RequireVerifiedEmail  bool `json:"requireVerifiedEmail"`
+	MinimumFollowers                       int  `json:"minimumFollowers"`
+	MinimumVerifiedFollowers               int  `json:"minimumVerifiedFollowers"`
+	MinimumQualifyingImpressionsLast30Days int  `json:"minimumQualifyingImpressionsLast30Days"`
+	MinimumAccountAgeDays                  int  `json:"minimumAccountAgeDays"`
+	MinimumOriginalPosts                   int  `json:"minimumOriginalPosts"`
+	MinimumOriginalPostsInLast60Days       int  `json:"minimumOriginalPostsInLast60Days"`
+	MaximumRecentStrikes                   int  `json:"maximumRecentStrikes"`
+	StrikeLookbackDays                     int  `json:"strikeLookbackDays"`
+	RequireVerifiedEmail                   bool `json:"requireVerifiedEmail"`
+	RequiresIdentityVerification           bool `json:"requiresIdentityVerification"`
 }
 
 type MonetizationRow struct {
