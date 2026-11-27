@@ -1,5 +1,11 @@
 # Nantty Verification & Test Evidence
 
+## Concurrent ad settlement regression — 2026-11-27
+
+- `cd services/go && go test ./modules/ads/tests -run '^(TestConcurrentSettlementWorkersChargeEachImpressionOnlyOnce|TestOneAdvertisersShortfallIsRecordedAsDebtOnceAndOtherAdvertisersStillSettle|TestAdvertiserToImpressionToSettlementFlow)$' -count=1`: **passed** against the local isolated Ads integration database. Twelve simultaneous workers report one settlement; the advertiser is debited once, one batch is created, and the creator earning is accrued once.
+- `cd services/go && go test ./modules/ads/... -count=1`: **passed**. `go vet ./modules/ads/...`, `bash services/scripts/check-backend-file-lengths.sh`, and `git diff --check`: **passed**.
+- The fix and evidence are currently local on `owl/ad-settlement-concurrency`; no commit, PR, GitHub CI, production deployment, provider settlement or staging smoke test has occurred.
+
 ## PR #77 and staging recheck — 2026-11-26
 
 - PR #77 was squash-merged as `b5a32658210652f4a5be200a1296f46163276fd8`; the merge message contains no `Co-authored-by` trailer. The change replaces randomized selection of mock live-gift viewer identities with deterministic cycling and adds a fake-timer regression test.

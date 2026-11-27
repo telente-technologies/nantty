@@ -1,5 +1,9 @@
 # Nantty requirements and evidence matrix
 
+## Ad settlement concurrency correction — 2026-11-27
+
+- Ad impressions are now selected for settlement inside each advertiser transaction using PostgreSQL `FOR UPDATE SKIP LOCKED`; concurrent workers cannot act on a stale pre-transaction selection and double-debit the same impressions. A concurrent integration regression asserts exactly one advertiser debit, one spend batch, and one creator earning accrual. Focused and full Ads tests, `go vet ./modules/ads/...`, backend file-length gate, and `git diff --check` passed locally on `owl/ad-settlement-concurrency`. The change is not yet committed or CI-reviewed. This closes only the duplicate-settlement race; provider-funded advertiser billing, complete refund/credit reconciliation, production queue wiring, and end-to-end financial reconciliation remain partial/unverified.
+
 ## Current evidence correction — 2026-11-26 (post-PR #77)
 
 This current-state note supersedes conflicting older staging and CodeQL snapshots below; dated historical implementation notes are retained for audit history.

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 
 	"nantty/modules/ads/src/events"
@@ -40,13 +41,61 @@ func (settlement AdSettlement) SettlePendingCharges(ctx context.Context) (int, e
 	if err != nil || len(rows) == 0 {
 		return 0, err
 	}
-	byAccount := map[uuid.UUID]*accountSettlementTotals{}
+	accountIds := make([]uuid.UUID, 0, len(rows))
+	seenAccounts := make(map[uuid.UUID]struct{}, len(rows))
 	for _, row := range rows {
-		totals := byAccount[row.AccountID]
-		if totals == nil {
-			totals = &accountSettlementTotals{currency: row.Currency, creatorMicrosByUser: map[string]int64{}, creatorImpressionsBy: map[string]int64{}}
-			byAccount[row.AccountID] = totals
+		if _, ok := seenAccounts[row.AccountID]; !ok {
+			seenAccounts[row.AccountID] = struct{}{}
+			accountIds = append(accountIds, row.AccountID)
 		}
+	}
+	settled := 0
+	var failures []error
+	for _, accountId := range accountIds {
+		count, err := settlement.settlePendingAccount(ctx, accountId)
+		if err != nil {
+			failures = append(failures, fmt.Errorf("settle account %s: %w", accountId, err))
+			continue
+		}
+		settled += count
+	}
+	return settled, errors.Join(failures...)
+}
+
+func (settlement AdSettlement) settlePendingAccount(ctx context.Context, accountId uuid.UUID) (int, error) {
+	tx, err := settlement.Client.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+	rows, err := tx.AdImpression.Query().Where(adimpression.AccountID(accountId), adimpression.ChargeMicrosGT(0), adimpression.SettlementBatchIDIsNil()).
+		Order(ent.Asc(adimpression.FieldServedAt), ent.Asc(adimpression.FieldID)).Limit(settlementBatchLimit).
+		ForUpdate(sql.WithLockAction(sql.SkipLocked)).All(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+	if len(rows) == 0 {
+		_ = tx.Rollback()
+		return 0, nil
+	}
+	totals := totalsForImpressions(rows)
+	if err := settlement.excludePausedCreators(ctx, tx.Client(), map[uuid.UUID]*accountSettlementTotals{accountId: totals}); err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+	if err := settlement.settleAccountInTransaction(ctx, tx, accountId, totals); err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return len(totals.ids), nil
+}
+
+func totalsForImpressions(rows []*ent.AdImpression) *accountSettlementTotals {
+	totals := &accountSettlementTotals{currency: rows[0].Currency, creatorMicrosByUser: map[string]int64{}, creatorImpressionsBy: map[string]int64{}}
+	for _, row := range rows {
 		totals.ids = append(totals.ids, row.ID)
 		totals.spendMicros += row.ChargeMicros
 		totals.creatorMicros += row.CreatorShareMicros
@@ -56,31 +105,7 @@ func (settlement AdSettlement) SettlePendingCharges(ctx context.Context) (int, e
 			totals.creatorImpressionsBy[row.CreatorUserID]++
 		}
 	}
-	if err := settlement.excludePausedCreators(ctx, byAccount); err != nil {
-		return 0, err
-	}
-	settled := 0
-	var failures []error
-	for accountId, totals := range byAccount {
-		if err := settlement.settleAccount(ctx, accountId, totals); err != nil {
-			failures = append(failures, fmt.Errorf("settle account %s: %w", accountId, err))
-			continue
-		}
-		settled += len(totals.ids)
-	}
-	return settled, errors.Join(failures...)
-}
-
-func (settlement AdSettlement) settleAccount(ctx context.Context, accountId uuid.UUID, totals *accountSettlementTotals) error {
-	tx, err := settlement.Client.Tx(ctx)
-	if err != nil {
-		return err
-	}
-	if err := settlement.settleAccountInTransaction(ctx, tx, accountId, totals); err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-	return tx.Commit()
+	return totals
 }
 
 func (settlement AdSettlement) settleAccountInTransaction(ctx context.Context, tx *ent.Tx, accountId uuid.UUID, totals *accountSettlementTotals) error {
@@ -182,14 +207,14 @@ func (settlement AdSettlement) postCreatorEarnings(ctx context.Context, tx *ent.
 	return nil
 }
 
-func (settlement AdSettlement) excludePausedCreators(ctx context.Context, byAccount map[uuid.UUID]*accountSettlementTotals) error {
+func (settlement AdSettlement) excludePausedCreators(ctx context.Context, client *ent.Client, byAccount map[uuid.UUID]*accountSettlementTotals) error {
 	creatorIds := []string{}
 	for _, totals := range byAccount {
 		for creatorId := range totals.creatorMicrosByUser {
 			creatorIds = append(creatorIds, creatorId)
 		}
 	}
-	paused, err := (CreatorMonetisationHolds{Client: settlement.Client, Now: settlement.Now}).PausedCreators(ctx, creatorIds)
+	paused, err := (CreatorMonetisationHolds{Client: client, Now: settlement.Now}).PausedCreators(ctx, creatorIds)
 	if err != nil || len(paused) == 0 {
 		return err
 	}

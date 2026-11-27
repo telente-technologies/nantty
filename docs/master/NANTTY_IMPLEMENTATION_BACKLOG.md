@@ -1060,3 +1060,8 @@ Prioritized from the repository baseline and the requested cross-product scope. 
 - Verification: `ANALYTICS_TEST_DATABASE_URL=... go test ./... -count=1` passed against local PostgreSQL 17; `go vet ./...` passed; `bash services/scripts/check-backend-file-lengths.sh` passed.
 - The test auto-drops only its uniquely named schema. No persistent schema migration or production data was changed.
 - Remaining: deployed migration/runtime, production event source integration, and staging workflow are not verified.
+# Immediate follow-up — ad settlement worker concurrency (2026-11-27)
+
+- [x] Lock pending charged impressions inside each advertiser settlement transaction with `FOR UPDATE SKIP LOCKED`; keep advertiser failures isolated.
+- [x] Add Postgres integration coverage running 12 settlement workers concurrently and assert one charge, one batch, and one creator accrual.
+- [ ] Push a focused PR after final review and obtain current-head CI/review; keep the broader ad revenue reconciliation requirement open.

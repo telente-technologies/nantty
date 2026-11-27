@@ -2,6 +2,7 @@ package ads_test
 
 import (
 	"context"
+	"sync"
 	"testing"
 
 	"github.com/google/uuid"
@@ -59,5 +60,67 @@ func TestOneAdvertisersShortfallIsRecordedAsDebtOnceAndOtherAdvertisersStillSett
 	earning, err := client.AdCreatorEarning.Query().Only(ctx)
 	if err != nil || earning.AccruedMicros != 1_500_000_000+500_000_000 {
 		t.Fatalf("creators earn only on spend that was collected: %+v %v", earning, err)
+	}
+}
+
+func TestConcurrentSettlementWorkersChargeEachImpressionOnlyOnce(t *testing.T) {
+	h := startAdsAgainstFreshSchema(t)
+	ctx := context.Background()
+	client := h.module.Container.Client
+	account, err := client.AdAccount.Create().SetName("Concurrent settlement").SetKind(adaccount.KindPersonal).SetOwnerUserID(uuid.New()).
+		SetCountryCode("NG").SetCurrency("NGN").SetBalanceMinor(10_000).Save(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := client.AdImpression.Create().SetID(uuid.Must(uuid.NewV7())).SetServedAt(h.clock.Now()).SetAdID(uuid.New()).SetAdGroupID(uuid.New()).SetCampaignID(uuid.New()).
+		SetAccountID(account.ID).SetUserID("viewer").SetSessionID("settlement-race").SetPlacement("feed").SetSlotKind("feedPost").SetCurrency("NGN").SetBasis(adimpression.BasisCpm).
+		SetPriceMicros(1_000_000_000).SetPctrPpm(0).SetChargeMicros(1_000_000_000).SetCreatorUserID("creator-race").SetCreatorShareMicros(500_000_000).SetPlatformShareMicros(500_000_000).Exec(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	const workers = 12
+	start := make(chan struct{})
+	results := make(chan int, workers)
+	errorsFound := make(chan error, workers)
+	var group sync.WaitGroup
+	for index := 0; index < workers; index++ {
+		group.Add(1)
+		go func() {
+			defer group.Done()
+			<-start
+			count, err := (services.AdSettlement{Client: client, Now: h.clock.Now}).SettlePendingCharges(ctx)
+			if err != nil {
+				errorsFound <- err
+				return
+			}
+			results <- count
+		}()
+	}
+	close(start)
+	group.Wait()
+	close(results)
+	close(errorsFound)
+	for err := range errorsFound {
+		t.Fatalf("concurrent settlement failed: %v", err)
+	}
+	settled := 0
+	for count := range results {
+		settled += count
+	}
+	if settled != 1 {
+		t.Fatalf("one impression must be reported settled once, got %d", settled)
+	}
+
+	reloaded, err := client.AdAccount.Get(ctx, account.ID)
+	if err != nil || reloaded.BalanceMinor != 9_000 || reloaded.AmountSpentMicros != 1_000_000_000 {
+		t.Fatalf("advertiser spend must be charged exactly once: account=%+v err=%v", reloaded, err)
+	}
+	batches, err := client.AdSpendBatch.Query().All(ctx)
+	if err != nil || len(batches) != 1 {
+		t.Fatalf("only one settlement batch may contain the impression: count=%d err=%v", len(batches), err)
+	}
+	earning, err := client.AdCreatorEarning.Query().Only(ctx)
+	if err != nil || earning.AccruedMicros != 500_000_000 || earning.PostedMinor != 500 {
+		t.Fatalf("creator share must be accrued once: earning=%+v err=%v", earning, err)
 	}
 }
