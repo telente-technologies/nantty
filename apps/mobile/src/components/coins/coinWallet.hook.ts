@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as WebBrowser from "expo-web-browser";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { isCountryRequiredError } from "@/components/checkout/countryRequiredPicker";
 import { ApiError, generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { coinsService } from "@/services/money/coins.service";
-import { CoinStorePurchaseCancelledError, fetchCoinStorePrices, purchaseCoinStoreProduct } from "@/services/money/coinStorePurchase.service";
+import { CoinStorePurchaseCancelledError, fetchCoinStorePrices, purchaseCoinStoreProduct, restorePendingCoinStorePurchases } from "@/services/money/coinStorePurchase.service";
 import { resolveStoreBillingAvailability } from "@/services/money/nativeStoreBilling.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { CoinPackage, VerifiedCoinPurchase } from "@/types";
@@ -51,6 +51,8 @@ export type CoinPurchaseOutcome =
 
 export function useBuyCoinsWithInAppBrowser() {
   const queryClient = useQueryClient();
+  const isSignedIn = useAuthStore((state) => state.status === "signedIn");
+  const accountId = useAuthStore((state) => state.user?.id ?? null);
   const pendingPurchaseIdempotencyKey = useRef<string | null>(null);
   const [lastOutcome, setLastOutcome] = useState<CoinPurchaseOutcome | null>(null);
   const [countryNeededFor, setCountryNeededFor] = useState<CoinPackage | null>(null);
@@ -64,6 +66,19 @@ export function useBuyCoinsWithInAppBrowser() {
       : Promise.resolve({} as Readonly<Record<string, string>>),
     staleTime: 10 * 60_000,
   });
+  const pendingStorePurchaseRecovery = useQuery({
+    queryKey: ["coin-store-purchase-recovery", accountId, storeBilling.kind, coinPackages.data?.map((item) => item.storeProductId).join("|")],
+    enabled: storeBilling.kind === "ready" && isSignedIn && Boolean(accountId) && coinPackages.isSuccess,
+    queryFn: () => storeBilling.kind === "ready"
+      ? restorePendingCoinStorePurchases(storeBilling.billing, storeBilling.platform, (coinPackages.data ?? []).filter((item) => item.purchaseChannel === "store_iap"), coinsService)
+      : Promise.resolve(0),
+    retry: false,
+    staleTime: 30_000,
+  });
+
+  useEffect(() => {
+    if ((pendingStorePurchaseRecovery.data ?? 0) > 0) queryClient.invalidateQueries({ queryKey: COIN_BALANCE_QUERY_KEY });
+  }, [pendingStorePurchaseRecovery.data, queryClient]);
 
   const buyCoinPackage = useMutation({
     mutationFn: async (coinPackage: CoinPackage): Promise<CoinPurchaseOutcome> => {

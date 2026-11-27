@@ -28,6 +28,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Verif
 		Scope: command.UserId + ":coins.storeReceipt", Key: command.IdempotencyKey,
 		RequestHash: ledgerutils.HashRequestFingerprint(command.Platform, command.ProductId, command.Receipt, command.TransactionId),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (dtos.VerifiedCoinPurchaseDto, error) {
+			if err := application.StoreAccounts.VerifyTokenInTransaction(ctx, transaction, command.UserId, store, verified.AccountToken); err != nil {
+				return dtos.VerifiedCoinPurchaseDto{}, err
+			}
 			return application.Purchases.RedeemVerifiedStorePurchaseInTransaction(ctx, transaction, command.UserId, store, verified)
 		},
 	})

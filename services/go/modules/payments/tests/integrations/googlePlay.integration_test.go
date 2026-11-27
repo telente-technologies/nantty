@@ -121,6 +121,9 @@ func TestGooglePlayVerifierChecksPurchasesWithThePublisherApi(t *testing.T) {
 			if err != nil || verified.StoreTransactionId != testCase.wantTransaction || verified.OriginalTransactionId != testCase.token {
 				t.Fatalf("verified %+v err %v", verified, err)
 			}
+			if testCase.name == "purchased product" && verified.AccountToken != "0199a3f2-0000-7000-8000-000000000001" {
+				t.Fatalf("Google Play account binding missing: %+v", verified)
+			}
 			if testCase.productId == "blue.monthly" && (verified.ExpiresAt == nil || !verified.IsSubscription) {
 				t.Fatalf("subscription expiry missing: %+v", verified)
 			}

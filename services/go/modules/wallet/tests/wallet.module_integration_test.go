@@ -26,7 +26,8 @@ import (
 )
 
 type fakeStoreVerifier struct {
-	store string
+	store         string
+	accountTokens *sync.Map
 }
 
 func (verifier fakeStoreVerifier) Store() string              { return verifier.store }
@@ -36,7 +37,9 @@ func (verifier fakeStoreVerifier) VerifyPurchaseReceipt(_ context.Context, recei
 	if receipt.ReceiptData != "valid-receipt" {
 		return interfaces.VerifiedStorePurchase{}, interfaces.ErrStoreReceiptInvalid
 	}
-	return interfaces.VerifiedStorePurchase{StoreTransactionId: receipt.TransactionId, ProductId: receipt.ProductId, PriceMinor: 999, Currency: "USD", Environment: "sandbox"}, nil
+	accountToken, _ := verifier.accountTokens.Load(receipt.ReceiptData)
+	token, _ := accountToken.(string)
+	return interfaces.VerifiedStorePurchase{StoreTransactionId: receipt.TransactionId, ProductId: receipt.ProductId, PriceMinor: 999, Currency: "USD", Environment: "sandbox", AccountToken: token}, nil
 }
 
 func (verifier fakeStoreVerifier) VerifySignedRefundNotification(_ context.Context, rawBody []byte, _ http.Header) (interfaces.StoreRefundNotification, error) {
@@ -47,21 +50,23 @@ type walletHarness struct {
 	*paymentstesting.MoneyHarness
 	wallet        *src.Module
 	creatorSchema string
+	storeTokens   *sync.Map
 }
 
 func startWalletHarness(t *testing.T, requireReview bool, adjustments ...func(*configs.WalletSettings)) *walletHarness {
 	t.Helper()
-	money := paymentstesting.StartMoneyHarnessWithPayments(t, map[string]interfaces.StoreReceiptVerifier{"apple_iap": fakeStoreVerifier{store: "apple_iap"}})
+	storeTokens := &sync.Map{}
+	money := paymentstesting.StartMoneyHarnessWithPayments(t, map[string]interfaces.StoreReceiptVerifier{"apple_iap": fakeStoreVerifier{store: "apple_iap", accountTokens: storeTokens}})
 	walletSchema := moneytesting.CreateFreshSchemaWithMigrations(t, money.Database, "wallet", walletmigrations.Files)
 	creatorSchema := moneytesting.CreateEmptySchema(t, money.Database, "creators")
 	if _, err := money.Database.Exec("CREATE TABLE " + pgx.Identifier{creatorSchema, "creator_program_members"}.Sanitize() + " (user_id text PRIMARY KEY, status text NOT NULL, suspended_at timestamptz NULL)"); err != nil {
 		t.Fatal(err)
 	}
 	var walletTables string
-	if err := money.Database.QueryRow("SELECT COALESCE(string_agg(table_name, ',' ORDER BY table_name), '') FROM information_schema.tables WHERE table_schema = $1 AND table_name IN ('coin_packages', 'coin_purchases', 'coin_transfers')", walletSchema).Scan(&walletTables); err != nil {
+	if err := money.Database.QueryRow("SELECT COALESCE(string_agg(table_name, ',' ORDER BY table_name), '') FROM information_schema.tables WHERE table_schema = $1 AND table_name IN ('coin_packages', 'coin_purchases', 'coin_store_account_tokens', 'coin_transfers')", walletSchema).Scan(&walletTables); err != nil {
 		t.Fatal(err)
 	}
-	if walletTables != "coin_packages,coin_purchases,coin_transfers" {
+	if walletTables != "coin_packages,coin_purchases,coin_store_account_tokens,coin_transfers" {
 		t.Fatalf("wallet test schema is missing required migrations: %s", walletTables)
 	}
 	settings := configs.WalletSettings{
@@ -85,7 +90,7 @@ func startWalletHarness(t *testing.T, requireReview bool, adjustments ...func(*c
 		t.Fatal(err)
 	}
 	money.MountModule(module)
-	return &walletHarness{MoneyHarness: money, wallet: module, creatorSchema: creatorSchema}
+	return &walletHarness{MoneyHarness: money, wallet: module, creatorSchema: creatorSchema, storeTokens: storeTokens}
 }
 
 func (harness *walletHarness) approveCreator(userId string) {
@@ -110,7 +115,6 @@ func (harness *walletHarness) suspendCreator(userId string) {
 	if _, err := harness.Database.Exec(query, userId); err != nil {
 		harness.T.Fatal(err)
 	}
-}
 
 func (harness *walletHarness) post(entry ledgermodels.JournalEntryRequest) {
 	harness.T.Helper()
@@ -252,7 +256,18 @@ func TestInAppPurchaseBooksTheStoreFeeAndARefundClawsBackOrFlagsTheShortfall(t *
 	harness := startWalletHarness(t, true)
 	buyer := uuid.NewString()
 	token := harness.Tokens.UserAccessToken(buyer)
+	accountToken := harness.Call(http.MethodPost, "/api/v1/coins/iap/account-token", token, "", nil, http.Header{"X-Client-Platform": {"ios"}})
+	if accountToken.Status != http.StatusOK || accountToken.Body["appAccountToken"] == "" {
+		t.Fatalf("store token: %d %s", accountToken.Status, accountToken.Raw)
+	}
+	if repeated := harness.Call(http.MethodPost, "/api/v1/coins/iap/account-token", token, "", nil, http.Header{"X-Client-Platform": {"ios"}}); repeated.Body["appAccountToken"] != accountToken.Body["appAccountToken"] {
+		t.Fatalf("store account token changed: %v != %v", repeated.Body, accountToken.Body)
+	}
 	receipt := map[string]any{"platform": "ios", "productId": "com.nantty.app.coins.tier3", "receipt": "valid-receipt", "transactionId": "apple-txn-1"}
+	if missing := harness.Call(http.MethodPost, "/api/v1/coins/iap/receipts", token, "iap-key-missing-account-binding", receipt); missing.Status != http.StatusConflict {
+		t.Fatalf("receipt without provider account binding must fail closed: %d %s", missing.Status, missing.Raw)
+	}
+	harness.storeTokens.Store("valid-receipt", accountToken.Body["appAccountToken"].(string))
 	redeemed := harness.Call(http.MethodPost, "/api/v1/coins/iap/receipts", token, "iap-key-1", receipt)
 	if redeemed.Status != http.StatusCreated || redeemed.Body["balance"].(float64) != 1000 {
 		t.Fatalf("redeem: %d %s", redeemed.Status, redeemed.Raw)

@@ -12,6 +12,7 @@ import (
 	ledgerutils "nantty/modules/ledger/src/utils"
 	"nantty/modules/wallet/src/modules/coins"
 	convertearnedcoins "nantty/modules/wallet/src/modules/coins/commands/convertEarnedCoins"
+	getcoinstoreaccounttoken "nantty/modules/wallet/src/modules/coins/commands/getCoinStoreAccountToken"
 	redeemstorereceipt "nantty/modules/wallet/src/modules/coins/commands/redeemStoreReceipt"
 	startcoinpurchase "nantty/modules/wallet/src/modules/coins/commands/startCoinPurchase"
 	transfercoins "nantty/modules/wallet/src/modules/coins/commands/transferCoins"
@@ -156,6 +157,22 @@ func (controller CoinsController) RedeemStoreReceipt(writer http.ResponseWriter,
 		return
 	}
 	ledgerutils.WriteIdempotentJsonResponse(writer, http.StatusCreated, verified, replayed)
+}
+
+func (controller CoinsController) GetCoinStoreAccountToken(writer http.ResponseWriter, request *http.Request) {
+	principal, err := ledgerutils.RequirePrincipal(request)
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	token, err := getcoinstoreaccounttoken.Handler{Application: controller.Application}.Execute(request.Context(), getcoinstoreaccounttoken.Query{
+		UserId: principal.UserId, Platform: clientPlatform(request),
+	})
+	if err != nil {
+		controller.fail(writer, request, err)
+		return
+	}
+	httpserver.WriteJsonResponse(writer, http.StatusOK, token)
 }
 
 func (controller CoinsController) QuoteCoinTransfer(writer http.ResponseWriter, request *http.Request) {

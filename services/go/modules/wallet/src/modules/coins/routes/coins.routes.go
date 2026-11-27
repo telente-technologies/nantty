@@ -32,6 +32,7 @@ func MountCoinsRoutes(mux *http.ServeMux, application *coins.Application) {
 	mux.Handle("POST /api/v1/coins/purchases", requireAdultUser(http.HandlerFunc(controller.StartCoinPurchase)))
 	mux.Handle("POST /api/v1/coins/purchases/{reference}/verify", requireAdultUser(http.HandlerFunc(controller.VerifyCoinPurchase)))
 	mux.Handle("POST /api/v1/coins/iap/receipts", requireAdultUser(http.HandlerFunc(controller.RedeemStoreReceipt)))
+	mux.Handle("POST /api/v1/coins/iap/account-token", requireAdultUser(http.HandlerFunc(controller.GetCoinStoreAccountToken)))
 	mux.Handle("GET /api/v1/coins/transfers/quote", requireUser(http.HandlerFunc(controller.QuoteCoinTransfer)))
 	mux.Handle("POST /api/v1/coins/transfers", requireAdultUser(http.HandlerFunc(controller.TransferCoins)))
 	mux.Handle("POST /api/v1/creators/earnings/convert", requireAdultUser(http.HandlerFunc(controller.ConvertEarnedCoins)))

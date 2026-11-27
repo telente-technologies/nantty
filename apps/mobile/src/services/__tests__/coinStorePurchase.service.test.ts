@@ -6,6 +6,7 @@ import {
   CoinStorePurchaseCancelledError,
   fetchCoinStorePrices,
   purchaseCoinStoreProduct,
+  restorePendingCoinStorePurchases,
 } from "../money/coinStorePurchase.service";
 import type { StoreBillingModule } from "../money/nativeStoreBilling.service";
 
@@ -30,6 +31,9 @@ function fakeBilling(options: { readonly purchaseState?: Purchase["purchaseState
     transactionId: "2000000123456789",
     productId: STORE_PRODUCT,
     purchaseToken: options.hasReceipt === false ? null : "store-signed-receipt",
+    appAccountToken: "0199a3f2-0000-7000-8000-000000000001",
+    obfuscatedAccountIdAndroid: "0199a3f2-0000-7000-8000-000000000001",
+    store: "apple",
     purchaseState: options.purchaseState ?? "purchased",
   } as unknown as Purchase;
   const billing = {
@@ -44,11 +48,16 @@ function fakeBilling(options: { readonly purchaseState?: Purchase["purchaseState
       return null;
     }),
     finishTransaction: jest.fn(async () => undefined),
+    getAvailablePurchases: jest.fn(async () => []),
   };
   return { billing: billing as unknown as StoreBillingModule, mocks: billing, updated, failed, removed, purchase };
 }
 
 describe("coin store purchases", () => {
+  const storeApi = (redeemStoreReceipt = jest.fn(async () => ({ status: "succeeded", coins: 125 }))) => ({
+    getCoinStoreAccountToken: jest.fn(async () => ({ appAccountToken: "0199a3f2-0000-7000-8000-000000000001", obfuscatedAccountId: "0199a3f2-0000-7000-8000-000000000001" })),
+    redeemStoreReceipt,
+  });
   it("loads localized store prices for distinct configured coin products", async () => {
     const { billing, mocks } = fakeBilling();
     const prices = await fetchCoinStorePrices(billing, [coinPackage(STORE_PRODUCT), coinPackage(STORE_PRODUCT), coinPackage(null)]);
@@ -59,11 +68,11 @@ describe("coin store purchases", () => {
 
   it("sends the verified store receipt to Nantty before finishing the consumable purchase", async () => {
     const { billing, mocks, removed } = fakeBilling();
-    const api = { redeemStoreReceipt: jest.fn(async () => ({ status: "succeeded", coins: 125 })) };
+    const api = storeApi();
 
     await expect(purchaseCoinStoreProduct(billing, "ios", STORE_PRODUCT, api)).resolves.toEqual({ status: "succeeded", coins: 125 });
 
-    expect(mocks.requestPurchase).toHaveBeenCalledWith({ type: "in-app", request: { apple: { sku: STORE_PRODUCT }, google: { skus: [STORE_PRODUCT] } } });
+    expect(mocks.requestPurchase).toHaveBeenCalledWith({ type: "in-app", request: { apple: { sku: STORE_PRODUCT, appAccountToken: "0199a3f2-0000-7000-8000-000000000001" }, google: { skus: [STORE_PRODUCT], obfuscatedAccountId: "0199a3f2-0000-7000-8000-000000000001" } } });
     expect(api.redeemStoreReceipt).toHaveBeenCalledWith({
       platform: "ios",
       productId: STORE_PRODUCT,
@@ -76,7 +85,7 @@ describe("coin store purchases", () => {
 
   it.each(["pending", "failed"] as const)("does not finish a store transaction when server verification is %s", async (status) => {
     const { billing, mocks } = fakeBilling();
-    const api = { redeemStoreReceipt: jest.fn(async () => ({ status, coins: 0 })) };
+    const api = storeApi(jest.fn(async () => ({ status, coins: 0 })));
 
     await expect(purchaseCoinStoreProduct(billing, "android", STORE_PRODUCT, api)).resolves.toEqual({ status, coins: 0 });
 
@@ -85,7 +94,7 @@ describe("coin store purchases", () => {
 
   it("does not redeem or finish a purchase without the store receipt", async () => {
     const { billing, mocks } = fakeBilling({ hasReceipt: false });
-    const api = { redeemStoreReceipt: jest.fn() };
+    const api = storeApi(jest.fn());
 
     await expect(purchaseCoinStoreProduct(billing, "android", STORE_PRODUCT, api)).resolves.toEqual({ status: "failed", coins: 0 });
 
@@ -99,7 +108,7 @@ describe("coin store purchases", () => {
       failed.forEach((listener) => listener({ message: "cancelled", code: "user-cancelled" }));
       return null;
     });
-    const api = { redeemStoreReceipt: jest.fn() };
+    const api = storeApi(jest.fn());
 
     await expect(purchaseCoinStoreProduct(billing, "ios", STORE_PRODUCT, api)).rejects.toBeInstanceOf(CoinStorePurchaseCancelledError);
 
@@ -111,7 +120,7 @@ describe("coin store purchases", () => {
     const { billing, mocks, removed } = fakeBilling();
     mocks.requestPurchase.mockRejectedValueOnce(new Error("store unavailable"));
 
-    await expect(purchaseCoinStoreProduct(billing, "android", STORE_PRODUCT, { redeemStoreReceipt: jest.fn() })).rejects.toThrow("store unavailable");
+    await expect(purchaseCoinStoreProduct(billing, "android", STORE_PRODUCT, storeApi())).rejects.toThrow("store unavailable");
 
     expect(removed).toHaveBeenCalledTimes(2);
   });
@@ -120,12 +129,27 @@ describe("coin store purchases", () => {
     jest.useFakeTimers();
     const { billing, mocks, removed } = fakeBilling();
     mocks.requestPurchase.mockImplementationOnce(() => new Promise(() => undefined));
-    const purchase = purchaseCoinStoreProduct(billing, "android", STORE_PRODUCT, { redeemStoreReceipt: jest.fn() });
+    const purchase = purchaseCoinStoreProduct(billing, "android", STORE_PRODUCT, storeApi());
     const result = expect(purchase).rejects.toThrow("The store did not confirm this purchase in time");
 
     await jest.advanceTimersByTimeAsync(5 * 60_000);
     await result;
     expect(removed).toHaveBeenCalledTimes(2);
     jest.useRealTimers();
+  });
+
+  it("restores only unfinished purchases bound to the signed-in Nantty account", async () => {
+    const { billing, mocks, purchase } = fakeBilling();
+    const own = { ...purchase, store: "google", obfuscatedAccountIdAndroid: "0199a3f2-0000-7000-8000-000000000001" } as Purchase;
+    const other = { ...purchase, id: "other-order", store: "google", obfuscatedAccountIdAndroid: "0199a3f2-0000-7000-8000-000000000002" } as Purchase;
+    mocks.getAvailablePurchases.mockResolvedValue([own, other]);
+    const api = storeApi();
+
+    await expect(restorePendingCoinStorePurchases(billing, "android", [coinPackage(STORE_PRODUCT)], api)).resolves.toBe(125);
+
+    expect(api.redeemStoreReceipt).toHaveBeenCalledTimes(1);
+    expect(api.redeemStoreReceipt).toHaveBeenCalledWith({ platform: "android", productId: STORE_PRODUCT, receipt: "store-signed-receipt", transactionId: own.id });
+    expect(mocks.finishTransaction).toHaveBeenCalledTimes(1);
+    expect(mocks.finishTransaction).toHaveBeenCalledWith({ purchase: own, isConsumable: true });
   });
 });

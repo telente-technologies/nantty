@@ -20,6 +20,7 @@ export interface CoinStoreReceiptInput {
 }
 
 export interface CoinStorePurchaseApi {
+  readonly getCoinStoreAccountToken: () => Promise<{ readonly appAccountToken: string; readonly obfuscatedAccountId: string }>;
   readonly redeemStoreReceipt: (input: CoinStoreReceiptInput) => Promise<{ readonly status: string; readonly coins: number }>;
 }
 
@@ -64,6 +65,7 @@ export async function purchaseCoinStoreProduct(
   api: CoinStorePurchaseApi,
 ): Promise<{ readonly status: "succeeded" | "pending" | "failed"; readonly coins: number }> {
   await billing.initConnection();
+  const account = await api.getCoinStoreAccountToken();
   const pending = waitForPurchase(billing, productId);
   try {
     const purchaseResult = pending.result;
@@ -71,8 +73,8 @@ export async function purchaseCoinStoreProduct(
     const requestFailure = billing.requestPurchase({
       type: "in-app",
       request: {
-        apple: { sku: productId },
-        google: { skus: [productId] },
+        apple: { sku: productId, appAccountToken: account.appAccountToken },
+        google: { skus: [productId], obfuscatedAccountId: account.obfuscatedAccountId },
       },
     }).then(() => new Promise<Purchase>(() => undefined));
     const purchase = await Promise.race([purchaseResult, requestFailure]);
@@ -94,4 +96,34 @@ export async function purchaseCoinStoreProduct(
   } finally {
     pending.stop();
   }
+}
+
+function purchaseAccountToken(purchase: Purchase): string {
+  if (purchase.store === "apple" && "appAccountToken" in purchase) return purchase.appAccountToken ?? "";
+  if (purchase.store === "google" && "obfuscatedAccountIdAndroid" in purchase) return purchase.obfuscatedAccountIdAndroid ?? "";
+  return "";
+}
+
+export async function restorePendingCoinStorePurchases(
+  billing: StoreBillingModule,
+  platform: "ios" | "android",
+  packages: readonly CoinPackage[],
+  api: CoinStorePurchaseApi,
+): Promise<number> {
+  await billing.initConnection();
+  const account = await api.getCoinStoreAccountToken();
+  const productIds = new Set(packages.map((item) => item.storeProductId).filter((id): id is string => Boolean(id)));
+  const purchases = await billing.getAvailablePurchases();
+  let creditedCoins = 0;
+  for (const purchase of purchases) {
+    if (!productIds.has(purchase.productId) || purchaseAccountToken(purchase) !== account.appAccountToken) continue;
+    const receipt = purchase.purchaseToken ?? "";
+    const transactionId = platform === "ios" ? ("transactionId" in purchase ? purchase.transactionId : null) ?? purchase.id : purchase.id;
+    if (!receipt || !transactionId || purchase.purchaseState !== "purchased") continue;
+    const result = await api.redeemStoreReceipt({ platform, productId: purchase.productId, receipt, transactionId });
+    if (result.status !== "succeeded") continue;
+    await billing.finishTransaction({ purchase, isConsumable: true });
+    creditedCoins += result.coins;
+  }
+  return creditedCoins;
 }
