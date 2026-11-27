@@ -1,5 +1,11 @@
 # Nantty requirements and evidence matrix
 
+## GitHub staging configuration recheck — 2026-11-27
+
+- GitHub environments: `staging` has the `AWS_REGION` variable only; `staging-apply` has no variables and requires reviewer `oyinlola-tech`. Repository Actions variables are empty; the only listed repository secret name is `CLOUDFLARE_API_TOKEN` (its value was not read).
+- Latest recorded staging deployment remains failed: [run 45874563086](https://github.com/telente-technologies/nantty/actions/runs/45874563086), commit `3fce0b25b84ba6752d073e1d973301070dedd40d`; the deployment status is failure. This run did not establish an AWS deployment.
+- AWS state/roles/resources were not inspected in this session because required AWS Agent Toolkit skill-retrieval tools were unavailable. Do not infer deployed targets from GitHub configuration.
+
 ## Creator payout minimum update — 2026-11-27
 
 | Requirement | Scope | Status | Evidence and remaining work |

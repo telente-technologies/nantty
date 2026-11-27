@@ -9,6 +9,12 @@
 - Passed from repository root: `pnpm --filter @nantty/studio typecheck` and `pnpm --filter @nantty/studio test:contracts` (111/111). Local Node is 24.19.0, below Studio's declared `>=26.13.0 <27`; rerun under supported Node before release.
 - Not verified: remote PR checks, browser visual review, staging deployment, real payout provider behavior, a two-week payout cadence, or production policy/legal approval. No forfeiture is implemented or enabled. The host had approximately 1.9–2.0 GB free during verification; tests were serialized and used `/tmp` for Go temporary files.
 
+## 2026-11-27 — GitHub staging configuration read-back
+
+- Read-only GitHub API shows `staging` has `AWS_REGION` only; `staging-apply` has no variables and requires reviewer `oyinlola-tech`. Repository Actions variables are empty and the only listed repository secret name is `CLOUDFLARE_API_TOKEN`; secret values were not read.
+- The latest GitHub staging deployment remains failed: [run 45874563086](https://github.com/telente-technologies/nantty/actions/runs/45874563086), commit `3fce0b25b84ba6752d073e1d973301070dedd40d`. No later staging deployment exists in the GitHub deployment list.
+- AWS APIs were intentionally not called because the repository-required AWS skill search/retrieval tools are unavailable. AWS resource existence and role trust are therefore not verified.
+
 ## PR #77 and staging recheck — 2026-11-26
 
 - PR #77 was squash-merged as `b5a32658210652f4a5be200a1296f46163276fd8`; the merge message contains no `Co-authored-by` trailer. The change replaces randomized selection of mock live-gift viewer identities with deterministic cycling and adds a fake-timer regression test.

@@ -8,6 +8,12 @@
 - Missing or zero currency minima now return `503 PAYOUT_MINIMUM_UNCONFIGURED` before ledger posting; a PostgreSQL regression verifies earned coins remain unchanged. Local Wallet and Creators tests/vet and Studio typecheck/contracts pass; current-head GitHub PR CI has not yet run for this change.
 - The existing Creator Terms still contains a team placeholder for conversion rate/minimum. Do not publish a legal-text change without the required review; obtain approved wording consistent with ₦20,000 and the no-forfeiture language.
 
+## AWS staging automation — current GitHub-side state, 2026-11-27
+
+- Read-only GitHub API recheck: `staging` has only `AWS_REGION`; `staging-apply` has no variables and is protected by required reviewer `oyinlola-tech`. Repository Actions variables are empty. The only repository secret name listed is `CLOUDFLARE_API_TOKEN`; no secret values were accessed.
+- Latest staging deployment record is failed at [run 45874563086](https://github.com/telente-technologies/nantty/actions/runs/45874563086), commit `3fce0b25b84ba6752d073e1d973301070dedd40d`. No later staging deployment is recorded in GitHub deployments.
+- The required AWS Toolkit `agent_skills` documentation search/retrieval tools are unavailable in this environment; no AWS APIs or CLI commands were called. Resume AWS inspection only after the required skill is available, then confirm account/project region, OIDC trust, role ARNs, ECR/ECS targets, Terraform state and deployed health.
+
 ## Current blocker reconciliation — 2026-11-26 (post-PR #77)
 
 This status supersedes older contradictory staging snapshots below; historical notes remain for audit history.
