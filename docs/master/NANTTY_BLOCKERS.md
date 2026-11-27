@@ -2,7 +2,7 @@
 
 ## Coin package pricing follow-up — 2026-11-27
 
-- Country/channel pricing is open in PR #82 at `ae954c4dc14534fefbc8a990b787546abc7e1943`. The previous PR run failed because one integration test hard-coded the shared `wallet` schema instead of using its isolated test schema; this was fixed and the focused plus complete Wallet integration package pass locally. Current-head PR checks are running; see workflow runs [45932400731](https://github.com/telente-technologies/nantty/actions/runs/45932400731), [45932400791](https://github.com/telente-technologies/nantty/actions/runs/45932400791), and [45932400700](https://github.com/telente-technologies/nantty/actions/runs/45932400700). No deployed-runtime evidence exists.
+- Country/channel pricing is open in PR #82. The isolated-schema test correction and price-key canonicalization are covered by local database-backed tests. Checks on PR head `b063981` passed before the canonicalization follow-up; the new commit needs current-head CI. No deployed-runtime evidence exists.
 - Native App Store/Google Play localized price presentation and receipt/refund verification remain separate requirements. Store prices must be obtained from the native billing SDK and validated by the store service; server-configured amounts/product IDs are not proof of the customer-facing store price.
 - AWS staging remains subject to the existing 2026-11-26 blockers above; this work made no AWS calls because the required AWS Agent Toolkit skill retrieval tools are unavailable in this session.
 

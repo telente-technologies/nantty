@@ -17,7 +17,14 @@ func coinCountryPriceKey(country, currency string) string {
 func encodeCoinPrices(prices map[string]int64, countryPrices map[string]dtos.CoinCountryPriceDto) ([]byte, error) {
 	combined := make(map[string]int64, len(prices)+len(countryPrices))
 	for currency, amount := range prices {
-		combined[currency] = amount
+		code := strings.ToUpper(strings.TrimSpace(currency))
+		if amount <= 0 || !regionpricing.IsSupportedCurrency(code) {
+			return nil, fmt.Errorf("invalid coin package currency price")
+		}
+		if _, duplicate := combined[code]; duplicate {
+			return nil, fmt.Errorf("duplicate normalized coin package currency")
+		}
+		combined[code] = amount
 	}
 	for country, price := range countryPrices {
 		code := regionpricing.NormalizeCountryCode(country)
@@ -25,7 +32,11 @@ func encodeCoinPrices(prices map[string]int64, countryPrices map[string]dtos.Coi
 		if !supported || price.Currency != region.Currency || price.AmountMinor <= 0 {
 			return nil, fmt.Errorf("invalid coin package country price")
 		}
-		combined[coinCountryPriceKey(code, price.Currency)] = price.AmountMinor
+		key := coinCountryPriceKey(code, price.Currency)
+		if _, duplicate := combined[key]; duplicate {
+			return nil, fmt.Errorf("duplicate normalized coin package country")
+		}
+		combined[key] = price.AmountMinor
 	}
 	return json.Marshal(combined)
 }

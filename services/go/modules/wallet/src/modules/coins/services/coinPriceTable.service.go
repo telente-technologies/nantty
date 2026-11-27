@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"nantty/modules/wallet/src/generated/ent"
 	"nantty/modules/wallet/src/generated/ent/coinpackage"
@@ -32,6 +33,30 @@ func (catalog CoinCatalog) UpsertCoinPriceRow(ctx context.Context, row dtos.Coin
 	if coinpackage.ClientPlatformValidator(platform) != nil || len(row.Prices) == 0 || row.BonusCoins < 0 {
 		return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
 	}
+	normalizedPrices := make(map[string]int64, len(row.Prices))
+	for currency, price := range row.Prices {
+		code := strings.ToUpper(strings.TrimSpace(currency))
+		if price <= 0 || !regionpricing.IsSupportedCurrency(code) {
+			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
+		}
+		if _, duplicate := normalizedPrices[code]; duplicate {
+			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
+		}
+		normalizedPrices[code] = price
+	}
+	normalizedCountryPrices := make(map[string]dtos.CoinCountryPriceDto, len(row.CountryPrices))
+	for country, price := range row.CountryPrices {
+		code := regionpricing.NormalizeCountryCode(country)
+		region, supported := regionpricing.RegionForCountry(code)
+		if !supported || price.Currency != region.Currency || price.AmountMinor <= 0 {
+			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
+		}
+		if _, duplicate := normalizedCountryPrices[code]; duplicate {
+			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
+		}
+		normalizedCountryPrices[code] = price
+	}
+	row.Prices, row.CountryPrices = normalizedPrices, normalizedCountryPrices
 	if row.Coins == 0 {
 		pricedIn := "USD"
 		if platform == coinpackage.ClientPlatformWeb {
@@ -42,18 +67,6 @@ func (catalog CoinCatalog) UpsertCoinPriceRow(ctx context.Context, row dtos.Coin
 			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
 		}
 		row.Coins = coins
-	}
-	for currency, price := range row.Prices {
-		if price <= 0 || !regionpricing.IsSupportedCurrency(currency) {
-			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
-		}
-	}
-	for country, price := range row.CountryPrices {
-		code := regionpricing.NormalizeCountryCode(country)
-		region, supported := regionpricing.RegionForCountry(code)
-		if !supported || price.Currency != region.Currency || price.AmountMinor <= 0 {
-			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
-		}
 	}
 	if row.Coins <= 0 || (platform != coinpackage.ClientPlatformWeb && row.StoreProductId == "") {
 		return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
