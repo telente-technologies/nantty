@@ -17,6 +17,7 @@ func TestASecondCreatorEarningsRunOnTheSameDayMovesNewEarningsButNeverMovesTheSa
 	}
 	harness := startWalletHarness(t, true)
 	creator := uuid.NewString()
+	harness.approveCreator(creator)
 	token := harness.Tokens.UserAccessToken(creator)
 	harness.OnboardConnectedAccount(creator, false)
 	harness.approveCreatorProgramMember(creator)

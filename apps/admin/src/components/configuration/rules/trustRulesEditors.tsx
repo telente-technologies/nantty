@@ -47,25 +47,27 @@ export function CreatorThresholdsEditor({ rules, canWrite, onChange }: EditorPro
     <div className={styles.editor}>
       <h3 className={styles.sectionTitle}>Auto-approve when all of these are met</h3>
       <div className={styles.grid}>
-        <WholeNumberField label="Minimum account age (days)" value={rules.autoApprove.minimumAccountAgeDays} maximum={3650} isDisabled={disabled} onChange={(value) => setAuto("minimumAccountAgeDays", value)} />
-        <WholeNumberField label="Minimum real followers" value={rules.autoApprove.minimumRealFollowers} maximum={10_000_000} isDisabled={disabled} onChange={(value) => setAuto("minimumRealFollowers", value)} />
-        <WholeNumberField label="Original posts in the last 60 days" value={rules.autoApprove.minimumOriginalPostsInLast60Days} maximum={1000} isDisabled={disabled} onChange={(value) => setAuto("minimumOriginalPostsInLast60Days", value)} />
-        <WholeNumberField label="No violations in the last (days)" value={rules.autoApprove.noViolationsInDays} maximum={730} isDisabled={disabled} onChange={(value) => setAuto("noViolationsInDays", value)} />
+        <WholeNumberField label="Minimum account age (days)" value={rules.autoApprove.minimumAccountAgeDays} minimum={30} maximum={3650} isDisabled={disabled} onChange={(value) => setAuto("minimumAccountAgeDays", value)} />
+        <WholeNumberField label="Minimum real followers" hint="Cannot be set below 10,000." value={rules.autoApprove.minimumRealFollowers} maximum={100_000_000} isDisabled={disabled} onChange={(value) => setAuto("minimumRealFollowers", value)} />
+        <WholeNumberField label="Minimum verified followers" hint="Cannot be set below 500." value={rules.autoApprove.minimumVerifiedFollowers} maximum={100_000_000} isDisabled={disabled} onChange={(value) => setAuto("minimumVerifiedFollowers", value)} />
+        <WholeNumberField label="Qualifying impressions in the last 30 days" hint="Verified-user impressions after invalid-traffic filtering. Minimum 100,000." value={rules.autoApprove.minimumQualifyingImpressionsLast30Days} maximum={1_000_000_000} isDisabled={disabled} onChange={(value) => setAuto("minimumQualifyingImpressionsLast30Days", value)} />
+        <WholeNumberField label="Original posts in the last 60 days" value={rules.autoApprove.minimumOriginalPostsInLast60Days} minimum={10} maximum={100_000} isDisabled={disabled} onChange={(value) => setAuto("minimumOriginalPostsInLast60Days", value)} />
+        <WholeNumberField label="No violations in the last (days)" value={rules.autoApprove.noViolationsInDays} minimum={90} maximum={3650} isDisabled={disabled} onChange={(value) => setAuto("noViolationsInDays", value)} />
         <WholeNumberField label="Maximum fraud score (0-100, low)" value={rules.autoApprove.maximumFraudScore} maximum={100} isDisabled={disabled} onChange={(value) => setAuto("maximumFraudScore", value)} />
       </div>
       <div className={styles.checks}>
-        <CheckboxField label="Verified email" checked={rules.autoApprove.requiresVerifiedEmail} disabled={disabled} onChange={(event) => setAuto("requiresVerifiedEmail", event.target.checked)} />
+        <CheckboxField label="Verified email is mandatory" checked={true} disabled={true} onChange={() => undefined} />
+        <CheckboxField label="Identity verification required for automatic approval" description="If the identity check is unavailable or incomplete, qualifying applications go to manual review. Identity and payout verification remain mandatory before cash-out." checked={rules.autoApprove.requiresIdentityVerification ?? false} disabled={disabled} onChange={(event) => setAuto("requiresIdentityVerification", event.target.checked)} />
       </div>
       <h3 className={styles.sectionTitle}>Manual review covers</h3>
       <div className={styles.grid}>
-        <WholeNumberField label="Minimum real followers" hint="Below this is not eligible." value={rules.manualReview.minimumRealFollowers} maximum={10_000_000} isDisabled={disabled} onChange={(value) => setManual("minimumRealFollowers", value)} />
         <WholeNumberField label="Maximum risk score (medium)" value={rules.manualReview.maximumRiskScore} maximum={100} isDisabled={disabled} onChange={(value) => setManual("maximumRiskScore", value)} />
       </div>
       <div className={styles.checks}>
         <CheckboxField label="A past violation" checked={rules.manualReview.allowsPastViolation} disabled={disabled} onChange={(event) => setManual("allowsPastViolation", event.target.checked)} />
         <CheckboxField label="Borderline or AI-heavy content" checked={rules.manualReview.allowsBorderlineOrAiHeavyContent} disabled={disabled} onChange={(event) => setManual("allowsBorderlineOrAiHeavyContent", event.target.checked)} />
       </div>
-      <p className={styles.summary}>With {rules.autoApprove.minimumRealFollowers.toLocaleString("en-NG")}+ real followers and everything above met, creators are approved automatically. {rules.manualReview.minimumRealFollowers}-{rules.autoApprove.minimumRealFollowers - 1} followers, a past violation, borderline content or medium risk goes to manual review. Anyone below sees "not eligible yet" with a progress checklist.</p>
+      <p className={styles.summary}>Every applicant must meet the account, original-content, 30-day qualifying-impression, 10,000 real-follower and 500 verified-follower minimums. Applicants who meet those gates but need a standing or risk review are sent to staff; only clean cases meeting every auto-approval rule can be approved automatically. Lowering these minimums is not permitted.</p>
     </div>
   );
 }

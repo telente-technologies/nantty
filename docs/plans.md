@@ -1166,7 +1166,7 @@ Spec: owner trust/verification/admin bullets and "Decided 2026-10-03". Mobile on
 
 ### 29.3 Creator Program
 
-- `GET /creators/eligibility` now returns `decision` (`auto_approve | manual_review | not_eligible`) and `decisionNote`. Checklist: real followers (for example 720 / 1,000), account age 30 days, verified phone, 10 original posts in 60 days, no violations in 90 days. All met and ID verified with no risk flag is auto-approved (the application is stored as `approved`); all met with a risk flag or no ID goes to manual review; anything else is not eligible. Shown by `CreatorDecisionBanner` above `EligibilityChecklist`.
+- `GET /creators/eligibility` returns current progress and a decision (`auto_approve | manual_review | not_eligible | unavailable`). The active minimums are 100,000 qualifying verified-user impressions in 30 days, 10,000 real followers including 500 verified followers, account age 30 days, 10 original posts in 60 days, verified email, and server-verified age 18+. Ninety violation-free days are required for auto-approval; manual review cannot waive hard numeric, age, email, account-age or original-content gates. “Verified phone” and the former 1,000-follower/500-follower manual-review thresholds are superseded. Both analytics metrics and moderation standing require fresh trusted source snapshots; either unavailable/stale source produces the `unavailable` decision and prevents application persistence. Optional social links/samples are not requirements.
 
 ### 29.4 Business documents
 
@@ -1190,7 +1190,7 @@ Spec: owner trust/verification/admin bullets and "Decided 2026-10-03". Mobile on
 | `GET /users/me/suspension` | `{ reason, suspendedAt, deletionScheduledFor, retentionDays }` (404 when active) |
 | `GET /verification/suggestions` | `CheckmarkSuggestion[]` (`color`, `eligible`, `dismissed`, `headline`, `detail`, `rules[]`) |
 | `POST /verification/suggestions/:color/dismiss` | 204 |
-| `GET /creators/eligibility` | `{ eligible, decision, decisionNote, requirements[] }` |
+| `GET /creators/eligibility` | `{ eligible, decision, decisionNote, metricsAvailable, standingAvailable, requirements[] }`; decision may be `unavailable` until both trusted snapshots are current |
 | `GET /seller/business-documents` | `{ documents[], allApproved }` |
 | `PUT /seller/business-documents/:kind` | body `{ fileUrl }`, returns the state, document becomes `pending` |
 | `GET /help/articles?q=`, `GET /help/articles/:id` | `HelpArticle[]`, `HelpArticle` |

@@ -3,16 +3,14 @@
 import { useAdminPermissions } from "@/components/session/adminSessionProvider";
 import { PageHeader } from "@/components/ui/pageHeader";
 import { configurationDocumentEndpoint } from "@/services/configurationApi.service";
-import type { CheckmarkPricingRules, CheckmarkSuggestionRules, CreatorEligibilityRules, CreatorProgramThresholds, TrialRules, UsernameRules } from "@/types/platformConfiguration.type";
+import type { CheckmarkPricingRules, CheckmarkSuggestionRules, CreatorProgramThresholds, TrialRules, UsernameRules } from "@/types/platformConfiguration.type";
 
 import { VersionedDocumentSection } from "../shared/versionedDocumentSection";
-import { CreatorEligibilityEditor } from "./creatorEligibilityEditor";
 import styles from "./platformRules.module.css";
 import { RetentionPoliciesSection } from "./retentionPoliciesSection";
 import { CheckmarkPricingEditor, CheckmarkSuggestionEditor, CreatorThresholdsEditor, TrialRulesEditor } from "./trustRulesEditors";
 import { UsernameRulesEditor } from "./usernameRulesEditor";
 
-const creatorEligibilityEndpoint = configurationDocumentEndpoint<"creator-eligibility">();
 const usernameRulesEndpoint = configurationDocumentEndpoint<"username-rules">();
 const checkmarkEndpoint = configurationDocumentEndpoint<"checkmark-suggestions">();
 const creatorThresholdsEndpoint = configurationDocumentEndpoint<"creator-thresholds">();
@@ -26,10 +24,6 @@ export function PlatformRulesWorkspace() {
     <>
       <PageHeader area="Configuration" title="Platform rules" description="Checkmark suggestions, Creator Program thresholds, trials and usernames. Each set of rules is versioned on its own." />
       <div className={styles.sections}>
-        <section aria-labelledby="creator-eligibility-heading">
-          <h2 id="creator-eligibility-heading" className={styles.sectionTitle}>Creator Program eligibility</h2>
-          <VersionedDocumentSection<CreatorEligibilityRules> endpoint={creatorEligibilityEndpoint} recordId="creator-eligibility" title="Creator eligibility rules" canWrite={canWrite} renderEditor={(content, updateContent, isWritable) => <CreatorEligibilityEditor rules={content} canWrite={isWritable} onChange={updateContent} />} />
-        </section>
         <section aria-labelledby="checkmark-heading">
           <h2 id="checkmark-heading" className={styles.sectionTitle}>Checkmark suggestions</h2>
           <VersionedDocumentSection<CheckmarkSuggestionRules> endpoint={checkmarkEndpoint} recordId="checkmark-suggestions" title="Checkmark suggestion thresholds" canWrite={canWrite} renderEditor={(content, updateContent, isWritable) => <CheckmarkSuggestionEditor rules={content} canWrite={isWritable} onChange={updateContent} />} />

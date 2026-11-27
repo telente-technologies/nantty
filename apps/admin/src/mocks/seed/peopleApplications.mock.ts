@@ -20,7 +20,7 @@ export interface MockProgramApplicationRecord {
   creatorSignals: { postsLast30Days: number; averageViewsPerClip: number } | null;
 }
 
-export const creatorProgramThresholds = { minimumFollowers: 1_000, minimumPostsLast30Days: 8, maximumActiveStrikes: 0, minimumAccountAgeDays: 30 } as const;
+export const creatorProgramThresholds = { minimumRealFollowers: 10_000, minimumVerifiedFollowers: 500, minimumQualifyingImpressionsLast30Days: 100_000, minimumOriginalPostsInLast60Days: 10, minimumAccountAgeDays: 30, noViolationsInDays: 90 } as const;
 
 interface SellerSeed {
   readonly username: string;
@@ -112,12 +112,14 @@ export function evaluateApplicationEligibility(record: MockProgramApplicationRec
       { key: "standing", label: "Account standing", isMet: user.status === "ACTIVE", actual: user.status, required: "ACTIVE" },
     ];
   }
-  const signals = record.creatorSignals ?? { postsLast30Days: 0, averageViewsPerClip: 0 };
   const accountAgeDays = Math.floor((Date.now() - Date.parse(user.joinedAt)) / 86_400_000);
   return [
-    { key: "followers", label: "Followers", isMet: user.followerCount >= creatorProgramThresholds.minimumFollowers, actual: user.followerCount.toLocaleString("en-NG"), required: `≥ ${creatorProgramThresholds.minimumFollowers.toLocaleString("en-NG")}` },
-    { key: "posts", label: "Posts in last 30 days", isMet: signals.postsLast30Days >= creatorProgramThresholds.minimumPostsLast30Days, actual: String(signals.postsLast30Days), required: `≥ ${creatorProgramThresholds.minimumPostsLast30Days}` },
-    { key: "strikes", label: "Active strikes", isMet: user.strikeCount <= creatorProgramThresholds.maximumActiveStrikes, actual: String(user.strikeCount), required: `≤ ${creatorProgramThresholds.maximumActiveStrikes}` },
+    { key: "impressions", label: "Qualifying 30-day impressions", isMet: false, actual: "Unavailable — demo does not have trusted analytics", required: `≥ ${creatorProgramThresholds.minimumQualifyingImpressionsLast30Days.toLocaleString("en-NG")}` },
+    { key: "followers", label: "Real followers", isMet: false, actual: "Unavailable — demo does not have canonical follower attribution", required: `≥ ${creatorProgramThresholds.minimumRealFollowers.toLocaleString("en-NG")}` },
+    { key: "verified_followers", label: "Verified followers", isMet: false, actual: "Unavailable — demo does not have verified-follower attribution", required: `≥ ${creatorProgramThresholds.minimumVerifiedFollowers.toLocaleString("en-NG")}` },
+    { key: "posts", label: "Original posts in last 60 days", isMet: false, actual: "Unavailable — demo does not have trusted content metrics", required: `≥ ${creatorProgramThresholds.minimumOriginalPostsInLast60Days}` },
     { key: "age", label: "Account age", isMet: accountAgeDays >= creatorProgramThresholds.minimumAccountAgeDays, actual: `${accountAgeDays} days`, required: `≥ ${creatorProgramThresholds.minimumAccountAgeDays} days` },
+    { key: "email", label: "Verified email", isMet: false, actual: "Unavailable — demo identity state", required: "Verified" },
+    { key: "standing", label: "Policy standing", isMet: false, actual: "Unavailable — demo does not have moderation snapshot", required: `At least ${creatorProgramThresholds.noViolationsInDays} days since last violation` },
   ];
 }

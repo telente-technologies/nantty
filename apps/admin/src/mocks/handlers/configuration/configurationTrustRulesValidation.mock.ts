@@ -28,20 +28,20 @@ export function validateCreatorThresholds(rawContent: unknown): CreatorProgramTh
   const auto = readObjectAtPath(content.autoApprove, "content.autoApprove");
   const manual = readObjectAtPath(content.manualReview, "content.manualReview");
   const autoApprove = {
-    minimumAccountAgeDays: readIntegerBetween(auto, "minimumAccountAgeDays", "content.autoApprove", 0, 3650),
+    minimumAccountAgeDays: readIntegerBetween(auto, "minimumAccountAgeDays", "content.autoApprove", 30, 3650),
     requiresVerifiedEmail: readBooleanValue(auto, "requiresVerifiedEmail", "content.autoApprove"),
-    minimumRealFollowers: readIntegerBetween(auto, "minimumRealFollowers", "content.autoApprove", 0, 10_000_000),
-    minimumOriginalPostsInLast60Days: readIntegerBetween(auto, "minimumOriginalPostsInLast60Days", "content.autoApprove", 0, 1000),
-    noViolationsInDays: readIntegerBetween(auto, "noViolationsInDays", "content.autoApprove", 0, 730),
+    minimumRealFollowers: readIntegerBetween(auto, "minimumRealFollowers", "content.autoApprove", 10_000, 100_000_000),
+    minimumVerifiedFollowers: readIntegerBetween(auto, "minimumVerifiedFollowers", "content.autoApprove", 500, 100_000_000),
+    minimumQualifyingImpressionsLast30Days: readIntegerBetween(auto, "minimumQualifyingImpressionsLast30Days", "content.autoApprove", 100_000, 1_000_000_000),
+    minimumOriginalPostsInLast60Days: readIntegerBetween(auto, "minimumOriginalPostsInLast60Days", "content.autoApprove", 10, 100_000),
+    noViolationsInDays: readIntegerBetween(auto, "noViolationsInDays", "content.autoApprove", 90, 3650),
     maximumFraudScore: readIntegerBetween(auto, "maximumFraudScore", "content.autoApprove", 0, 100),
   };
   const manualReview = {
-    minimumRealFollowers: readIntegerBetween(manual, "minimumRealFollowers", "content.manualReview", 0, 10_000_000),
     allowsPastViolation: readBooleanValue(manual, "allowsPastViolation", "content.manualReview"),
     allowsBorderlineOrAiHeavyContent: readBooleanValue(manual, "allowsBorderlineOrAiHeavyContent", "content.manualReview"),
     maximumRiskScore: readIntegerBetween(manual, "maximumRiskScore", "content.manualReview", 0, 100),
   };
-  if (manualReview.minimumRealFollowers > autoApprove.minimumRealFollowers) failValidation("content.manualReview.minimumRealFollowers", "Manual review must start at or below the auto-approve follower count.");
   if (manualReview.maximumRiskScore < autoApprove.maximumFraudScore) failValidation("content.manualReview.maximumRiskScore", "Manual review must allow at least the auto-approve risk level.");
   return { autoApprove, manualReview };
 }

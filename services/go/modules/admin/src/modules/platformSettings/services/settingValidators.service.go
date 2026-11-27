@@ -32,25 +32,6 @@ func canonicalJson(value any) (json.RawMessage, error) {
 	return json.Marshal(value)
 }
 
-func validateCreatorRequirements(raw json.RawMessage) (json.RawMessage, error) {
-	var value CreatorRequirements
-	if err := decodeStrictly(raw, &value); err != nil {
-		return nil, err
-	}
-	for _, check := range []error{
-		requireWithin("minimumFollowers", value.MinimumFollowers, 0, 10_000_000),
-		requireWithin("minimumAccountAgeDays", value.MinimumAccountAgeDays, 0, 3650),
-		requireWithin("minimumOriginalPosts", value.MinimumOriginalPosts, 0, 100_000),
-		requireWithin("maximumRecentStrikes", value.MaximumRecentStrikes, 0, 100),
-		requireWithin("strikeLookbackDays", value.StrikeLookbackDays, 1, 3650),
-	} {
-		if check != nil {
-			return nil, check
-		}
-	}
-	return canonicalJson(value)
-}
-
 func validateMonetizationPolicy(raw json.RawMessage) (json.RawMessage, error) {
 	var value MonetizationPolicy
 	if err := decodeStrictly(raw, &value); err != nil {
