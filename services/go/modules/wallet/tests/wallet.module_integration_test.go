@@ -56,7 +56,10 @@ type walletHarness struct {
 func startWalletHarness(t *testing.T, requireReview bool, adjustments ...func(*configs.WalletSettings)) *walletHarness {
 	t.Helper()
 	storeTokens := &sync.Map{}
-	money := paymentstesting.StartMoneyHarnessWithPayments(t, map[string]interfaces.StoreReceiptVerifier{"apple_iap": fakeStoreVerifier{store: "apple_iap", accountTokens: storeTokens}})
+	money := paymentstesting.StartMoneyHarnessWithPayments(t, map[string]interfaces.StoreReceiptVerifier{
+		"apple_iap":  fakeStoreVerifier{store: "apple_iap", accountTokens: storeTokens},
+		"google_play": fakeStoreVerifier{store: "google_play", accountTokens: storeTokens},
+	})
 	walletSchema := moneytesting.CreateFreshSchemaWithMigrations(t, money.Database, "wallet", walletmigrations.Files)
 	creatorSchema := moneytesting.CreateEmptySchema(t, money.Database, "creators")
 	if _, err := money.Database.Exec("CREATE TABLE " + pgx.Identifier{creatorSchema, "creator_program_members"}.Sanitize() + " (user_id text PRIMARY KEY, status text NOT NULL, suspended_at timestamptz NULL)"); err != nil {
@@ -115,6 +118,7 @@ func (harness *walletHarness) suspendCreator(userId string) {
 	if _, err := harness.Database.Exec(query, userId); err != nil {
 		harness.T.Fatal(err)
 	}
+}
 
 func (harness *walletHarness) post(entry ledgermodels.JournalEntryRequest) {
 	harness.T.Helper()
@@ -262,6 +266,10 @@ func TestInAppPurchaseBooksTheStoreFeeAndARefundClawsBackOrFlagsTheShortfall(t *
 	}
 	if repeated := harness.Call(http.MethodPost, "/api/v1/coins/iap/account-token", token, "", nil, http.Header{"X-Client-Platform": {"ios"}}); repeated.Body["appAccountToken"] != accountToken.Body["appAccountToken"] {
 		t.Fatalf("store account token changed: %v != %v", repeated.Body, accountToken.Body)
+	}
+	googleAccountToken := harness.Call(http.MethodPost, "/api/v1/coins/iap/account-token", token, "", nil, http.Header{"X-Client-Platform": {"android"}})
+	if googleAccountToken.Status != http.StatusOK || googleAccountToken.Body["obfuscatedAccountId"] == accountToken.Body["appAccountToken"] {
+		t.Fatalf("store account tokens must be stable per store and distinct across stores: %d %s", googleAccountToken.Status, googleAccountToken.Raw)
 	}
 	receipt := map[string]any{"platform": "ios", "productId": "com.nantty.app.coins.tier3", "receipt": "valid-receipt", "transactionId": "apple-txn-1"}
 	if missing := harness.Call(http.MethodPost, "/api/v1/coins/iap/receipts", token, "iap-key-missing-account-binding", receipt); missing.Status != http.StatusConflict {

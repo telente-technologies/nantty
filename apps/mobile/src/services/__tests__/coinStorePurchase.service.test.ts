@@ -83,6 +83,18 @@ describe("coin store purchases", () => {
     expect(removed).toHaveBeenCalledTimes(2);
   });
 
+  it("does not open a store purchase if the server cannot issue an account binding", async () => {
+    const { billing, mocks } = fakeBilling();
+    const api = storeApi();
+    api.getCoinStoreAccountToken.mockRejectedValueOnce(new Error("account binding unavailable"));
+
+    await expect(purchaseCoinStoreProduct(billing, "ios", STORE_PRODUCT, api)).rejects.toThrow("account binding unavailable");
+
+    expect(mocks.requestPurchase).not.toHaveBeenCalled();
+    expect(api.redeemStoreReceipt).not.toHaveBeenCalled();
+    expect(mocks.finishTransaction).not.toHaveBeenCalled();
+  });
+
   it.each(["pending", "failed"] as const)("does not finish a store transaction when server verification is %s", async (status) => {
     const { billing, mocks } = fakeBilling();
     const api = storeApi(jest.fn(async () => ({ status, coins: 0 })));
