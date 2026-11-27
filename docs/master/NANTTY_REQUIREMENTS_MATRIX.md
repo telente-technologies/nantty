@@ -1,5 +1,12 @@
 # Nantty requirements and evidence matrix
 
+## Coin package country-price follow-up — 2026-11-27
+
+| Requirement | Scope | Status | Evidence / remaining |
+|---|---|---|---|
+| Country-specific coin package prices by purchase channel | Go Wallet, Admin, web checkout | IMPLEMENTED_UNVERIFIED | Admin can manage country overrides per web/iOS/Android package row. Go preserves legacy currency prices and stores country overrides in the existing JSON price map. The package list selects a country override before the existing currency/USD fallback; web checkout independently resolves trusted charging country and persists the selected amount/currency. Focused Go model + wallet integration tests and Admin typecheck/contracts/lint passed locally. PR/CI, Admin browser flow, deployed behavior and native store price presentation remain unverified. |
+| Native store localized price is authoritative | iOS / Android coin purchase | PARTIAL | Server-side country/channel price metadata is configurable, but native StoreKit/Play Billing must provide the actual localized consumer price and receipt verification remains required. No live store sandbox or native device purchase was exercised in this change. |
+
 ## Current evidence correction — 2026-11-26 (post-PR #77)
 
 This current-state note supersedes conflicting older staging and CodeQL snapshots below; dated historical implementation notes are retained for audit history.

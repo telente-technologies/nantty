@@ -52,6 +52,7 @@ export interface CoinPackPriceRow {
   readonly coins: number;
   readonly bonusCoins: number;
   readonly prices: Readonly<Record<string, number>>;
+  readonly countryPrices: Readonly<Record<string, { readonly currency: string; readonly amountMinor: number }>>;
   readonly storeProductId: string;
   readonly active: boolean;
   readonly sortOrder: number;

@@ -30,11 +30,12 @@ type CoinPurchases struct {
 }
 
 type StartWebCoinPurchaseInput struct {
-	UserId    string
-	PackageId string
-	Provider  string
-	Currency  string
-	ReturnTo  string
+	UserId      string
+	PackageId   string
+	Provider    string
+	CountryCode string
+	Currency    string
+	ReturnTo    string
 }
 
 func (purchases CoinPurchases) StartWebCoinPurchaseInTransaction(ctx context.Context, transaction *sql.Tx, input StartWebCoinPurchaseInput) (dtos.StartedCoinPurchaseDto, error) {
@@ -47,7 +48,7 @@ func (purchases CoinPurchases) StartWebCoinPurchaseInTransaction(ctx context.Con
 	if err != nil {
 		return dtos.StartedCoinPurchaseDto{}, err
 	}
-	price, err := models.ChooseCoinPackagePrice(DecodeCoinPackagePrices(pack), input.Currency, provider.SupportsCurrency)
+	price, err := models.ChooseCoinPackagePriceForCountry(DecodeCoinPackagePrices(pack), input.CountryCode, input.Currency, provider.SupportsCurrency)
 	if err != nil {
 		return dtos.StartedCoinPurchaseDto{}, err
 	}

@@ -95,7 +95,7 @@ func purchaseChannelForPlatform(platform coinpackage.ClientPlatform) coinpackage
 	return coinpackage.PurchaseChannelStoreIap
 }
 
-func (catalog CoinCatalog) ListActiveCoinPackages(ctx context.Context, platform coinpackage.ClientPlatform, currency string, canCharge func(string) bool) ([]dtos.CoinPackageDto, error) {
+func (catalog CoinCatalog) ListActiveCoinPackages(ctx context.Context, platform coinpackage.ClientPlatform, country, currency string, canCharge func(string) bool) ([]dtos.CoinPackageDto, error) {
 	packs, err := catalog.Container.Client(catalog.Container.Resources.Database).CoinPackage.Query().
 		Where(coinpackage.ClientPlatformEQ(platform), coinpackage.Active(true)).
 		Order(ent.Asc(coinpackage.FieldSortOrder), ent.Asc(coinpackage.FieldCoins)).All(ctx)
@@ -104,7 +104,7 @@ func (catalog CoinCatalog) ListActiveCoinPackages(ctx context.Context, platform 
 	}
 	converted := make([]dtos.CoinPackageDto, 0, len(packs))
 	for _, pack := range packs {
-		price, err := models.ChooseCoinPackagePrice(DecodeCoinPackagePrices(pack), currency, canCharge)
+		price, err := models.ChooseCoinPackagePriceForCountry(DecodeCoinPackagePrices(pack), country, currency, canCharge)
 		if err != nil {
 			continue
 		}

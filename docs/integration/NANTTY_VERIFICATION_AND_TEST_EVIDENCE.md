@@ -1,5 +1,14 @@
 # Nantty Verification & Test Evidence
 
+## 2026-11-27 — Country-specific coin package pricing (local verification)
+
+- Added Admin country override editing per existing channel-specific coin pack, with supported-country currency validation; unsupported countries/currencies and non-positive overrides are rejected by the mock handler and Go API validation. Incomplete override amounts are blocked in the Admin dialog.
+- Go uses a country-qualified internal key in the existing `coin_packages.prices` JSON, preferring that key only when its currency matches the resolved region, then falling back to existing currency and USD selection. The web purchase endpoint resolves charging country again server-side; country and currency are part of the idempotency fingerprint, and the persisted purchase uses the selected authoritative amount.
+- Executed from `services/go`: `go test ./modules/wallet/src/modules/coins/... ./modules/wallet/tests/coins/... ./modules/wallet/tests -run 'Test(Country|WebCoinPurchaseCreditsOnceAndAppClientsMustUseInAppPurchase)' -count=1 -p 1` — PASS. Then the complete Wallet module suite `go test ./... -count=1 -p 1` — PASS. Database-backed tests include list-price/checkout recheck and Admin override save/read round-trip plus wrong-country-currency rejection.
+- Executed from repository root: `corepack pnpm --filter @nantty/admin typecheck` — PASS; `corepack pnpm --filter @nantty/admin test:contracts` — PASS (86/86); `corepack pnpm --filter @nantty/admin lint` — exit 0, 53 warnings, no errors. Host Node is v24.19.0 while workspace expects >=26.13.0; rerun under declared Node before merge.
+- `bash services/scripts/check-backend-file-lengths.sh` — PASS; `git diff --check` — PASS. A separate focused ESLint invocation from repository root was invalid because it loaded the ESM config as legacy YAML; the supported Admin lint script above completed successfully.
+- Not run: Admin browser visual test, native StoreKit/Play Billing sandbox, live payment/store verification, PR CI, AWS plan/apply/deploy. Do not infer these from local tests.
+
 ## PR #77 and staging recheck — 2026-11-26
 
 - PR #77 was squash-merged as `b5a32658210652f4a5be200a1296f46163276fd8`; the merge message contains no `Co-authored-by` trailer. The change replaces randomized selection of mock live-gift viewer identities with deterministic cycling and adds a fake-timer regression test.

@@ -33,10 +33,10 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.Start
 	}
 	started, replayed, err := ledgerutils.RunIdempotentMoneyCommand(ctx, application.Container.Resources.Database, application.Container.Idempotency, ledgerutils.IdempotentCommand[dtos.StartedCoinPurchaseDto]{
 		Scope: command.UserId + ":coins.purchase", Key: command.IdempotencyKey,
-		RequestHash: ledgerutils.HashRequestFingerprint(command.PackageId, command.Provider, command.Currency, command.ReturnTo),
+		RequestHash: ledgerutils.HashRequestFingerprint(command.PackageId, command.Provider, command.CountryCode, command.Currency, command.ReturnTo),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (dtos.StartedCoinPurchaseDto, error) {
 			return application.Purchases.StartWebCoinPurchaseInTransaction(ctx, transaction, services.StartWebCoinPurchaseInput{
-				UserId: command.UserId, PackageId: command.PackageId, Provider: command.Provider, Currency: command.Currency, ReturnTo: command.ReturnTo,
+				UserId: command.UserId, PackageId: command.PackageId, Provider: command.Provider, CountryCode: command.CountryCode, Currency: command.Currency, ReturnTo: command.ReturnTo,
 			})
 		},
 	})

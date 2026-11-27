@@ -143,6 +143,63 @@ func TestWebCoinPurchaseCreditsOnceAndAppClientsMustUseInAppPurchase(t *testing.
 	harness.AssertLedgerHealthy()
 }
 
+func TestCountrySpecificCoinPriceIsShownAndRecheckedAtCheckout(t *testing.T) {
+	harness := startWalletHarness(t, true)
+	if _, err := harness.Database.Exec(`UPDATE wallet.coin_packages SET prices = prices || '{"@NG:NGN":125000}'::jsonb WHERE id = 'web-coins-1'`); err != nil {
+		t.Fatal(err)
+	}
+	ngHeaders := http.Header{"CloudFront-Viewer-Country": {"NG"}}
+	packages := harness.Call(http.MethodGet, "/api/v1/coins/packages", "", "", nil, ngHeaders)
+	first := packages.Body["data"].([]any)[0].(map[string]any)
+	if first["price"].(map[string]any)["amountMinor"] != float64(125_000) {
+		t.Fatalf("country override not listed: %v", first)
+	}
+	userId := uuid.NewString()
+	started := harness.Call(http.MethodPost, "/api/v1/coins/purchases", harness.Tokens.UserAccessToken(userId), "country-price-key", map[string]any{"packageId": "web-coins-1"}, ngHeaders)
+	purchase := started.Body["purchase"].(map[string]any)
+	if started.Status != http.StatusCreated || purchase["amount"].(map[string]any)["amountMinor"] != float64(125_000) {
+		t.Fatalf("checkout must re-resolve the trusted country price: %d %v", started.Status, started.Body)
+	}
+}
+
+func TestAdminCoinCountryPriceOverrideRoundTripsAndRejectsCurrencyMismatch(t *testing.T) {
+	harness := startWalletHarness(t, true)
+	staff := harness.Tokens.StaffTokens("pricing-editor", "money.monetization.manage", "money.monetization.read")
+	row := map[string]any{
+		"name": "100 coins", "clientPlatform": "web", "coins": 100, "bonusCoins": 0,
+		"prices":         map[string]int64{"NGN": 100_000, "USD": 99},
+		"countryPrices":  map[string]any{"NG": map[string]any{"currency": "NGN", "amountMinor": 125_000}},
+		"storeProductId": "", "active": true, "sortOrder": 1, "reason": "country pricing regression",
+	}
+	writeHeaders := staff.StepUp()
+	saved := harness.Call(http.MethodPut, "/api/v1/admin/coins/price-table/web-coins-1", staff.AccessToken, "", row, writeHeaders)
+	if saved.Status != http.StatusOK {
+		t.Fatalf("save country override: %d %s", saved.Status, saved.Raw)
+	}
+	listed := harness.Call(http.MethodGet, "/api/v1/admin/coins/price-table", staff.AccessToken, "", nil, nil)
+	if listed.Status != http.StatusOK {
+		t.Fatalf("list country override: %d %s", listed.Status, listed.Raw)
+	}
+	var found map[string]any
+	for _, item := range listed.Body["data"].([]any) {
+		candidate := item.(map[string]any)
+		if candidate["id"] == "web-coins-1" {
+			found = candidate
+			break
+		}
+	}
+	countryPrice := found["countryPrices"].(map[string]any)["NG"].(map[string]any)
+	if countryPrice["currency"] != "NGN" || countryPrice["amountMinor"] != float64(125_000) {
+		t.Fatalf("country price did not round-trip: %v", found)
+	}
+	row["countryPrices"] = map[string]any{"NG": map[string]any{"currency": "USD", "amountMinor": 125_000}}
+	row["reason"] = "reject mismatched country currency"
+	invalid := harness.Call(http.MethodPut, "/api/v1/admin/coins/price-table/web-coins-1", staff.AccessToken, "", row, staff.StepUp())
+	if invalid.Status != http.StatusUnprocessableEntity {
+		t.Fatalf("mismatched country currency should be rejected: %d %s", invalid.Status, invalid.Raw)
+	}
+}
+
 func lastPurchaseReference(t *testing.T, harness *walletHarness, userId string) string {
 	var reference string
 	schema := harness.wallet.Coins.Container.Settings.Money.DatabaseSchema

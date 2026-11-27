@@ -1,0 +1,16 @@
+# Nantty API inventory — focused current contracts
+
+This is a maintained inventory for the coin pricing routes touched in the 2026-11-27 country-price change. It is not a complete ecosystem API catalog.
+
+| Method and route | Owner | Auth / authorization | Request and response | Status / evidence |
+|---|---|---|---|---|
+| `GET /api/v1/coins/packages` | Go Wallet | Public catalog; country signal uses configured trusted-proxy/profile/storefront resolution. `X-Client-Region` is only a hint. | Optional channel/storefront headers; returns `{ data, nextCursor }`, each package contains authoritative display `{amountMinor,currency}`, coin count, and channel. | Country override now wins only for matching resolved country/currency; currency and USD fallbacks are preserved. Focused Wallet integration verifies listing and checkout price selection. Native store localized amounts remain store-SDK authoritative. |
+| `POST /api/v1/coins/purchases` | Go Wallet + Payments | Authenticated adult account; idempotency key required. App clients are directed to the store-IAP receipt flow. | `{packageId, returnTo?}`; response includes the persisted purchase amount/currency and web checkout authorization URL or store product reference. | Web server re-resolves trusted charge country, selects price and persists it in payment intent/purchase before provider checkout. Payment settlement remains server-authoritative. |
+| `GET /api/v1/admin/coins/price-table` | Go Wallet | Staff with monetization read/manage permission. | Returns channel-specific package rows with base `prices` and optional `countryPrices`. | Country overrides round-trip through the existing JSON price field; no migration. |
+| `PUT /api/v1/admin/coins/price-table/{packageId}` | Go Wallet | Staff with monetization manage permission and single-use step-up; production fails closed if audit logging is unavailable. | Updates package channels, amount, currency prices, country overrides, active state, and requires reason for audit. | Country code must map to supported Nantty pricing region and its currency; amount must be positive. |
+
+## Country override representation
+
+Admin's `countryPrices` maps an ISO country code to `{currency, amountMinor}`. The current supported region map covers NGN, GHS, KES, ZAR, GBP, EUR for supported eurozone countries, and USD for the US. Backend storage encodes an override as an internal `@CC:CUR` key alongside legacy currency keys in the existing `coin_packages.prices` JSON. Existing rows therefore require no schema migration. Unknown countries retain the prior currency/USD fallback; they are not advertised as separately priced until added to the supported region policy.
+
+For iOS and Android, this backend price book configures channel-specific offers and product mapping only. It is not the final localized store price; the client must display StoreKit/Play Billing's product price and the server must verify the receipt/transaction before granting coins.

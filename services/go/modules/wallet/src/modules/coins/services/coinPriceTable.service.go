@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	"nantty/modules/wallet/src/generated/ent"
@@ -49,11 +48,21 @@ func (catalog CoinCatalog) UpsertCoinPriceRow(ctx context.Context, row dtos.Coin
 			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
 		}
 	}
+	for country, price := range row.CountryPrices {
+		code := regionpricing.NormalizeCountryCode(country)
+		region, supported := regionpricing.RegionForCountry(code)
+		if !supported || price.Currency != region.Currency || price.AmountMinor <= 0 {
+			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
+		}
+	}
 	if row.Coins <= 0 || (platform != coinpackage.ClientPlatformWeb && row.StoreProductId == "") {
 		return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
 	}
-	prices, _ := json.Marshal(row.Prices)
-	err := catalog.Container.Client(catalog.Container.Resources.Database).CoinPackage.Create().
+	prices, err := encodeCoinPrices(row.Prices, row.CountryPrices)
+	if err != nil {
+		return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
+	}
+	err = catalog.Container.Client(catalog.Container.Resources.Database).CoinPackage.Create().
 		SetID(row.Id).SetName(row.Name).SetClientPlatform(platform).SetPurchaseChannel(purchaseChannelForPlatform(platform)).
 		SetCoins(row.Coins).SetBonusCoins(row.BonusCoins).SetPrices(prices).SetStoreProductID(row.StoreProductId).SetActive(row.Active).SetSortOrder(row.SortOrder).
 		OnConflictColumns(coinpackage.FieldID).UpdateName().UpdateClientPlatform().UpdatePurchaseChannel().UpdateCoins().UpdateBonusCoins().
@@ -64,6 +73,6 @@ func (catalog CoinCatalog) UpsertCoinPriceRow(ctx context.Context, row dtos.Coin
 func convertCoinPriceRow(pack *ent.CoinPackage) dtos.CoinPackagePriceRowDto {
 	return dtos.CoinPackagePriceRowDto{
 		Id: pack.ID, Name: pack.Name, ClientPlatform: string(pack.ClientPlatform), Coins: pack.Coins, BonusCoins: pack.BonusCoins,
-		Prices: DecodeCoinPackagePrices(pack), StoreProductId: pack.StoreProductID, Active: pack.Active, SortOrder: pack.SortOrder,
+		Prices: decodeCoinPackageBasePrices(pack), CountryPrices: DecodeCoinPackageCountryPrices(pack), StoreProductId: pack.StoreProductID, Active: pack.Active, SortOrder: pack.SortOrder,
 	}
 }

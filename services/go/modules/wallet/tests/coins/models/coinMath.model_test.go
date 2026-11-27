@@ -58,6 +58,20 @@ func TestPackagePriceFallsBackToUsdOnlyWhenTheViewerCurrencyCannotBeCharged(t *t
 	}
 }
 
+func TestCountryCoinPriceOverridesCurrencyPriceWithoutChangingFallbacks(t *testing.T) {
+	prices := map[string]int64{"NGN": 100_000, "USD": 99, "@NG:NGN": 125_000}
+	chargeable := func(currency string) bool { return currency == "NGN" || currency == "USD" }
+	if got, err := models.ChooseCoinPackagePriceForCountry(prices, "ng", "NGN", chargeable); err != nil || got != (models.ChosenPrice{Currency: "NGN", AmountMinor: 125_000}) {
+		t.Fatalf("country override not selected: %+v %v", got, err)
+	}
+	if got, err := models.ChooseCoinPackagePriceForCountry(prices, "GH", "NGN", chargeable); err != nil || got != (models.ChosenPrice{Currency: "NGN", AmountMinor: 100_000}) {
+		t.Fatalf("currency fallback changed: %+v %v", got, err)
+	}
+	if got, err := models.ChooseCoinPackagePriceForCountry(prices, "NG", "NGN", func(currency string) bool { return currency == "USD" }); err != nil || got != (models.ChosenPrice{Currency: "USD", AmountMinor: 99}) {
+		t.Fatalf("unchargeable country currency should use configured USD fallback: %+v %v", got, err)
+	}
+}
+
 func TestClawbackRecoversWhatIsLeftAndCountsTheShortfall(t *testing.T) {
 	cases := []struct{ balance, purchased, recovered, shortfall int64 }{{500, 100, 100, 0}, {40, 100, 40, 60}, {0, 100, 0, 100}, {-5, 100, 0, 100}}
 	for _, testCase := range cases {

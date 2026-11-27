@@ -22,5 +22,5 @@ func (handler Handler) Execute(ctx context.Context, query Query) ([]dtos.CoinPac
 		platform = coinpackage.ClientPlatform(query.ClientPlatform)
 		canCharge = func(string) bool { return true }
 	}
-	return handler.Application.Catalog.ListActiveCoinPackages(ctx, platform, query.Currency, canCharge)
+	return handler.Application.Catalog.ListActiveCoinPackages(ctx, platform, query.CountryCode, query.Currency, canCharge)
 }

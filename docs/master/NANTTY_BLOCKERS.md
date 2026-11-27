@@ -1,5 +1,11 @@
 # Nantty blockers and verification gaps
 
+## Coin package pricing follow-up — 2026-11-27
+
+- Country/channel pricing is implemented locally on `owl/coin-country-package-prices`; it has not yet been pushed or run through PR CI. The available Go test harness passed its focused database integration, but this is not deployed-runtime evidence.
+- Native App Store/Google Play localized price presentation and receipt/refund verification remain separate requirements. Store prices must be obtained from the native billing SDK and validated by the store service; server-configured amounts/product IDs are not proof of the customer-facing store price.
+- AWS staging remains subject to the existing 2026-11-26 blockers above; this work made no AWS calls because the required AWS Agent Toolkit skill retrieval tools are unavailable in this session.
+
 ## Current blocker reconciliation — 2026-11-26 (post-PR #77)
 
 This status supersedes older contradictory staging snapshots below; historical notes remain for audit history.

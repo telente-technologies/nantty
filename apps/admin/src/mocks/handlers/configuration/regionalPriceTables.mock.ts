@@ -3,6 +3,7 @@ import { requireMockPermission, requireMockStepUp } from "@/mocks/mockGuards.moc
 import { failNotFound, failValidation, readJsonObjectBody, readRequiredReason, respondWithJson } from "@/mocks/mockResponses.mock";
 import { registerMockRoute } from "@/mocks/mockRouter.mock";
 import { buildInitialCoinPackRows, buildInitialPlanPriceRows, pricingRegions } from "@/mocks/seed/regionalPricing.mock";
+import { coinCountryCurrencies } from "@/constants/coinCountryCurrencies.constant";
 import type { CoinPackPriceRow, PlanPriceRow, StoreProductKey } from "@/types/regionalPricing.type";
 
 let planPriceRows: PlanPriceRow[] | null = null;
@@ -93,7 +94,19 @@ export function registerRegionalPriceTableMockHandlers(): void {
       if (typeof amount !== "number" || !Number.isInteger(amount) || amount <= 0) failValidation(`prices.${currency}`, "Enter a whole amount above zero.");
       prices[currency] = amount;
     }
-    const after: CoinPackPriceRow = { ...before, prices, coins: readAmount(body, "coins", 1), bonusCoins: readAmount(body, "bonusCoins", 0), active: body.active !== false };
+    const rawCountryPrices = body.countryPrices;
+    if (typeof rawCountryPrices !== "object" || rawCountryPrices === null || Array.isArray(rawCountryPrices)) failValidation("countryPrices", "Give a price for each country override.");
+    const countryPrices: Record<string, { currency: string; amountMinor: number }> = {};
+    for (const [country, value] of Object.entries(rawCountryPrices as Record<string, unknown>)) {
+      if (!/^[A-Z]{2}$/.test(country) || typeof value !== "object" || value === null || Array.isArray(value)) failValidation(`countryPrices.${country}`, "Use a two-letter country code and price.");
+      const row = value as Record<string, unknown>;
+      const regionCurrency = coinCountryCurrencies[country] ?? "";
+      if (!regionCurrency || row.currency !== regionCurrency) failValidation(`countryPrices.${country}.currency`, "Use the currency assigned to this supported country.");
+      const amountMinor = row.amountMinor;
+      if (typeof amountMinor !== "number" || !Number.isInteger(amountMinor) || amountMinor <= 0) failValidation(`countryPrices.${country}.amountMinor`, "Enter a whole amount above zero.");
+      countryPrices[country] = { currency: regionCurrency, amountMinor };
+    }
+    const after: CoinPackPriceRow = { ...before, prices, countryPrices, coins: readAmount(body, "coins", 1), bonusCoins: readAmount(body, "bonusCoins", 0), active: body.active !== false };
     rows[index] = after;
     recordMockAuditEntry(request, { action: "pricing.coin_pack.update", area: "config", target: { type: "coinPack", id: after.id, label: after.name }, reason, before, after });
     return respondWithJson(200, after);

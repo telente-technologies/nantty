@@ -5,6 +5,7 @@ type Command struct {
 	ClientPlatform string
 	PackageId      string
 	Provider       string
+	CountryCode    string
 	Currency       string
 	ReturnTo       string
 	IdempotencyKey string

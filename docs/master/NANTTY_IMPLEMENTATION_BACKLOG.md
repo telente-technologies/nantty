@@ -1,5 +1,12 @@
 # Nantty implementation backlog
 
+## 2026-11-27 — Country-specific coin package price selection (local, review pending)
+
+- Added per-country overrides on each existing channel-specific coin pack row in Admin, with country/currency validation and a warning that App Store/Google Play prices must match their respective storefront products.
+- Go stores override keys alongside existing currency keys in the package JSON (no migration), returns overrides in the Admin DTO, prefers an exact country/currency match for package listing, and re-resolves the trusted country during web checkout. Existing currency and USD fallback behavior is preserved; selected amount/currency are persisted on the purchase and checkout intent.
+- Tests run: Wallet model tests and the database-backed wallet integration test for listing and checkout selection; Admin typecheck, all Admin contract tests, and Admin lint. Results are recorded in `docs/integration/NANTTY_VERIFICATION_AND_TEST_EVIDENCE.md`.
+- Status: local implementation; PR, CI and browser/deployed verification are still pending. Native store-localized amounts remain owned by StoreKit/Play Billing and are not verified here. No AWS action or deployment occurred.
+
 ## 2026-11-26 — Merge mock live-gift CodeQL fix and reconcile staging evidence
 
 - PR #77 (`owl/codeql-deterministic-demo-viewer`) replaced `Math.random()` selection of fixture viewer identities with a deterministic cycle and added a fake-timer regression test. Squash-merged as `b5a32658210652f4a5be200a1296f46163276fd8`; the commit has no co-author trailer. Focused Jest, package ESLint, TypeScript check and `git diff --check` passed locally (Node 24.19.0; repository target is Node 26.13). Mobile CI and PR JavaScript CodeQL passed. Post-merge JavaScript CodeQL marked #35/#36/#44 fixed at 2026-11-26 19:01 UTC. Alert #91 remains open at the provider-required Flutterwave checksum; do not alter its semantics.
