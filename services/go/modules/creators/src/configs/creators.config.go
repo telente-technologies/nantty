@@ -69,7 +69,7 @@ func ReadCreatorsSettingsFromEnvironment(reader *platformconfig.EnvironmentReade
 			MaximumAffiliateBps:          int64(reader.ReadIntegerOrDefault("AFFILIATE_MAX_COMMISSION_BPS", 5000)),
 			ViolationLookbackDays:        reader.ReadIntegerOrDefault("CREATOR_VIOLATION_LOOKBACK_DAYS", 90),
 			CoinCashValueMinorByCurrency: ParseCurrencyAmounts(reader.ReadStringOrDefault("COIN_CASH_VALUES", "NGN:1000,GHS:10,KES:100,ZAR:15,GBP:1,EUR:1,USD:1")),
-			MinimumPayoutMinorByCurrency: ParseCurrencyAmounts(reader.ReadStringOrDefault("CREATOR_MINIMUM_PAYOUTS", "NGN:1000,GHS:1000,KES:1000,ZAR:1000,GBP:1000,EUR:1000,USD:1000")),
+			MinimumPayoutMinorByCurrency: ParseCurrencyAmounts(reader.ReadStringOrDefault("CREATOR_MINIMUM_PAYOUTS", "NGN:2000000,GHS:1000,KES:1000,ZAR:1000,GBP:1000,EUR:1000,USD:1000")),
 		},
 		UsersSchema:         reader.ReadStringOrDefault("CREATORS_USERS_SCHEMA", "users"),
 		SocialSchema:        reader.ReadStringOrDefault("CREATORS_SOCIAL_SCHEMA", "social"),

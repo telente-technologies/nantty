@@ -74,6 +74,9 @@ func (balances CoinBalances) ConvertEarnedCoinsToCashInTransaction(ctx context.C
 	if !supported {
 		return dtos.CoinConversionReceiptDto{}, httpserver.NewApiError(http.StatusUnprocessableEntity, "CURRENCY_NOT_SUPPORTED", "Earned coins cannot be converted to this currency yet.")
 	}
+	if minimum <= 0 {
+		return dtos.CoinConversionReceiptDto{}, httpserver.NewApiError(http.StatusServiceUnavailable, "PAYOUT_MINIMUM_UNCONFIGURED", "Earned-coin conversion is temporarily unavailable for this currency.")
+	}
 	cash, err := models.ConvertCoinsToCashMinor(input.Coins, valuePerCoin)
 	if err != nil {
 		return dtos.CoinConversionReceiptDto{}, httpserver.NewValidationFailedError([]httpserver.ValidationIssue{{Path: "coins", Message: "is out of range"}})

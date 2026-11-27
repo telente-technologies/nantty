@@ -109,9 +109,16 @@ func (money CreatorMoney) RevenueRules(ctx context.Context, currency string) Rev
 		SubscriptionCreatorSharePercent: 80, SubscriptionShareBasis: "net", AdsRevenueCreatorSharePercent: platform.CreatorAdShareBps(ctx, orDefault(revenue.AdsCreatorShareBps, 4000)) / 100,
 		CoinTransferPlatformFeePercent: platform.CoinTransferFeeBps(ctx, orDefault(revenue.CoinTransferFeeBps, 200)) / 100, AffiliateCommissionReleasedAfterEscrow: true,
 		AffiliateCommissionMaximumPercent: orDefault(revenue.MaximumAffiliateBps, 5000) / 100,
-		CoinCashValue:                     Money{money.coinCashValue(ctx, currency), currency}, MinimumPayout: Money{orDefault(revenue.MinimumPayoutMinorByCurrency[currency], 1000), currency},
+		CoinCashValue:                     Money{money.coinCashValue(ctx, currency), currency}, MinimumPayout: Money{orDefault(revenue.MinimumPayoutMinorByCurrency[currency], defaultMinimumPayoutMinor(currency)), currency},
 		WithdrawalFeeDescription: "Withdrawals pass on the payment provider's bank transfer fee; the exact fee is shown before you confirm.",
 	}
+}
+
+func defaultMinimumPayoutMinor(currency string) int64 {
+	if currency == "NGN" {
+		return 2_000_000
+	}
+	return 1_000
 }
 
 func (money CreatorMoney) coinCashValue(ctx context.Context, currency string) int64 {

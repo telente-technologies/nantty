@@ -387,8 +387,8 @@ table at `GET/PUT /api/v1/admin/coins/price-table[/{packageId}]` (`money.monetiz
 purchases through payments, IAP receipts with the store fee booked as `expense:appStoreFees:{store}`, store refunds that claw
 back coins and record the spent part as `user:{id}:coinDebt` plus a `wallet_risk_flags` row. Transfers take 25%
 (`COIN_TRANSFER_FEE_BPS`, the recipient rounds down). Earned coins convert to cash (`COIN_CASH_VALUES`,
-`CREATOR_MINIMUM_PAYOUTS`) into `creator:{id}:earningsPayable` (Nantty owes it); the daily run moves it to `seller:{id}:available` once
-the creator's payout account is verified (`CREATOR_TRANSFER_MINIMUMS`); gap earnings stay payable until then. Payout accounts are AES-256-GCM encrypted (owner id as associated
+`CREATOR_MINIMUM_PAYOUTS`; the default NGN conversion minimum is ₦20,000 / 2,000,000 kobo) into `creator:{id}:earningsPayable` (Nantty owes it); below-minimum conversion is rejected before ledger posting, leaving earned coins in the creator-earned account, and an absent/zero configured currency minimum fails closed. The daily run moves payable cash to `seller:{id}:available` once
+the creator's payout account is verified (`CREATOR_TRANSFER_MINIMUMS`); payable cash gaps remain payable until then. Payout accounts are AES-256-GCM encrypted (owner id as associated
 data, `DATA_ENCRYPTION_KEY`), the name comes from the provider's resolve call. Withdrawals take only available money capped
 by the user's PSA balance (read before the transaction; the Flutterwave transfer fee quoted on top), go `pending_review → queued → processing → paid | failed`, can be cancelled before processing, and
 are paid by the daily payout run (`WALLET_PAYOUT_RUN_INTERVAL`, or `POST /api/v1/admin/payouts/run`) through the

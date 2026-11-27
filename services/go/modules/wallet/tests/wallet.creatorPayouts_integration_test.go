@@ -8,6 +8,7 @@ import (
 
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	"nantty/modules/wallet/src/configs"
 )
 
 func (harness *walletHarness) creditEarnedCoins(userId string, coins int64) {
@@ -127,4 +128,56 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 		t.Fatal("a failed transfer did not return the money to available")
 	}
 	harness.AssertLedgerHealthy()
+}
+
+func TestCreatorConversionKeepsEarnedCoinsUntilTheTwentyThousandNairaMinimumIsMet(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: needs Postgres")
+	}
+	harness := startWalletHarness(t, true, func(settings *configs.WalletSettings) {
+		settings.MinimumPayoutMinorByCurrency["NGN"] = 2_000_000
+	})
+	creator := uuid.NewString()
+	token := harness.Tokens.UserAccessToken(creator)
+	harness.approveCreator(creator)
+	harness.creditEarnedCoins(creator, 2_000)
+	harness.OnboardConnectedAccount(creator, false)
+
+	below := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-below-minimum", map[string]any{"coins": 1_999, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
+	if below.Status != http.StatusUnprocessableEntity || below.Body["code"] != "BELOW_MINIMUM_PAYOUT" {
+		t.Fatalf("₦19,990 must not pass the ₦20,000 minimum: %d %s", below.Status, below.Raw)
+	}
+	if balance := harness.balance(ledgermodels.CreatorEarnedCoinsAccount(creator)); balance != 2_000 {
+		t.Fatalf("a rejected conversion must preserve all earned coins, balance=%d", balance)
+	}
+
+	atMinimum := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-at-minimum", map[string]any{"coins": 2_000, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
+	if atMinimum.Status != http.StatusCreated || atMinimum.Body["cash"].(map[string]any)["amountMinor"].(float64) != 2_000_000 || atMinimum.Body["minimumPayout"].(map[string]any)["amountMinor"].(float64) != 2_000_000 {
+		t.Fatalf("exactly ₦20,000 must be convertible and disclosed: %d %s", atMinimum.Status, atMinimum.Raw)
+	}
+	if balance := harness.balance(ledgermodels.CreatorEarnedCoinsAccount(creator)); balance != 0 {
+		t.Fatalf("the successful exact-boundary conversion must debit earned coins once, balance=%d", balance)
+	}
+}
+
+func TestCreatorConversionFailsClosedWhenCurrencyMinimumIsUnconfigured(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: needs Postgres")
+	}
+	harness := startWalletHarness(t, true, func(settings *configs.WalletSettings) {
+		settings.MinimumPayoutMinorByCurrency = map[string]int64{"USD": 1_000}
+	})
+	creator := uuid.NewString()
+	token := harness.Tokens.UserAccessToken(creator)
+	harness.approveCreator(creator)
+	harness.creditEarnedCoins(creator, 2_000)
+	harness.OnboardConnectedAccount(creator, false)
+
+	response := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-unconfigured-minimum", map[string]any{"coins": 2_000, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
+	if response.Status != http.StatusServiceUnavailable || response.Body["code"] != "PAYOUT_MINIMUM_UNCONFIGURED" {
+		t.Fatalf("conversion without an explicit currency minimum must fail closed: %d %s", response.Status, response.Raw)
+	}
+	if balance := harness.balance(ledgermodels.CreatorEarnedCoinsAccount(creator)); balance != 2_000 {
+		t.Fatalf("unconfigured minimum must not move earned coins, balance=%d", balance)
+	}
 }

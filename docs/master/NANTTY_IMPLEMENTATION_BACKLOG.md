@@ -1,5 +1,11 @@
 # Nantty implementation backlog
 
+## Current continuation — 2026-11-27
+
+- PR #80 is already squash-merged at `e84ededcb13a70ae5e4230b6285ba6b9c9090c27`; do not repeat its implementation or treat older open/pending notes below as current.
+- PR #86 (`owl/creator-minimum-payout`) changes only the NGN earned-coin conversion floor to ₦20,000 and fails closed for an unconfigured currency. Its original remote head conflicted with current main; reconciliation commit `506cd6f1f389b4115dd6aadc2539836f43eae67d` is now pushed. The focused Wallet PostgreSQL boundary tests pass after the fixtures explicitly approve Creator Program membership. GitHub reports mergeable; current-head CI is rerunning and reviewDecision is empty. Next: monitor required CI and obtain/verify review before any squash merge.
+- Do not implement forfeiture or claim a fortnightly payout cadence. Preserve earnings; get explicit period semantics and legal/product approval before any production policy change.
+
 ## 2026-11-27 — Creator policy, wallet authorization and staging continuation
 
 - Added source-identified creator metric and standing snapshots, server-side adult-age gate, freshness-aware requirement progress, and Admin policy floors/legacy projections in PR #80 (`aa42c7cf`); added progress surfaces/mocks in Admin, Web, Mobile and Studio. Missing/stale snapshots remain unavailable; no analytics/moderation producer exists to generate verified values.

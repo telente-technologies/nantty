@@ -57,7 +57,7 @@ export const creatorMocks: MockRoute[] = [
   }),
   createMockRoute("GET", "/api/v1/creators/revenue-rules", () => ({
     giftCreatorSharePercentUpTo: 70, tipCreatorSharePercent: 90, subscriptionCreatorSharePercent: 70, subscriptionShareBasis: "net_of_store_fee", adsRevenueCreatorSharePercent: 55,
-    coinTransferPlatformFeePercent: 10, affiliateCommissionReleasedAfterEscrow: true, affiliateCommissionMaximumPercent: 30, coinCashValue: ngn(100), minimumPayout: ngn(500_000), withdrawalFeeDescription: "₦50 flat per withdrawal",
+    coinTransferPlatformFeePercent: 10, affiliateCommissionReleasedAfterEscrow: true, affiliateCommissionMaximumPercent: 30, coinCashValue: ngn(100), minimumPayout: ngn(2_000_000), withdrawalFeeDescription: "Withdrawals pass on the payment provider's bank transfer fee; the exact fee is shown before you confirm.",
   })),
   createMockRoute("GET", "/api/v1/creators/earnings", () => ({ data: earnings, nextCursor: null })),
   createMockRoute("GET", "/api/v1/creators/eligibility", () => ({

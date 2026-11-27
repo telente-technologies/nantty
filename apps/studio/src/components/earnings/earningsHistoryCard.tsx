@@ -75,7 +75,7 @@ export function RevenueRulesCard() {
           { key: "ads", label: "Ad revenue on your content and comment sections", value: `${data.adsRevenueCreatorSharePercent}%` },
           { key: "affiliate", label: "Affiliate commission", detail: data.affiliateCommissionReleasedAfterEscrow ? "Paid only when the order completes" : undefined, value: `up to ${data.affiliateCommissionMaximumPercent}%` },
           { key: "coin", label: "Value of 1 earned coin", value: formatMoneyForDisplay(data.coinCashValue) },
-          { key: "minimum", label: "Minimum withdrawal", value: formatMoneyForDisplay(data.minimumPayout) },
+          { key: "minimum", label: "Minimum earned-coin conversion", detail: "Earned coins remain in your balance until they meet this amount. Payout timing is not shown here.", value: formatMoneyForDisplay(data.minimumPayout) },
           { key: "fee", label: "Withdrawal fee", value: data.withdrawalFeeDescription },
         ]}
       />

@@ -23,7 +23,7 @@ func TestRevenueRulesFollowTheAdminRevenueSetting(t *testing.T) {
 	money := services.CreatorMoney{Container: &container.Container{Resources: loaders.MoneyModuleResources{Platform: platform}, Settings: settings}}
 	ctx := context.Background()
 
-	if rules := money.RevenueRules(ctx, "NGN"); rules.AdsRevenueCreatorSharePercent != 40 || rules.CoinTransferPlatformFeePercent != 25 || rules.CoinCashValue.AmountMinor != 1000 {
+	if rules := money.RevenueRules(ctx, "NGN"); rules.AdsRevenueCreatorSharePercent != 40 || rules.CoinTransferPlatformFeePercent != 25 || rules.CoinCashValue.AmountMinor != 1000 || rules.MinimumPayout.AmountMinor != 2_000_000 {
 		t.Fatalf("missing values must use the environment, got %+v", rules)
 	}
 	revenue = `{"creatorAdShareBasisPoints":5500,"coinTransferFeeBasisPoints":2000,"giftCreatorShareCeilingBasisPoints":6000,"coinUnitValues":[{"amountMinor":1100,"currency":"NGN"}]}`

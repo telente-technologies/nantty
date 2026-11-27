@@ -51,3 +51,17 @@ func TestBattleContributionBoundsDefaultConfigureAndRejectInvalidRanges(t *testi
 		t.Fatalf("invalid bounds must be reported and reset: settings=%+v", settings)
 	}
 }
+
+func TestCreatorMinimumPayoutDefaultsToTwentyThousandNairaAndCanBeConfigured(t *testing.T) {
+	t.Setenv("CREATOR_MINIMUM_PAYOUTS", "")
+	settings := configs.ReadCreatorsSettingsFromEnvironment(platformconfig.NewEnvironmentReader())
+	if settings.Revenue.MinimumPayoutMinorByCurrency["NGN"] != 2_000_000 {
+		t.Fatalf("NGN default minimum must be ₦20,000 in minor units, got %d", settings.Revenue.MinimumPayoutMinorByCurrency["NGN"])
+	}
+
+	t.Setenv("CREATOR_MINIMUM_PAYOUTS", "NGN:2500000,USD:10000")
+	settings = configs.ReadCreatorsSettingsFromEnvironment(platformconfig.NewEnvironmentReader())
+	if settings.Revenue.MinimumPayoutMinorByCurrency["NGN"] != 2_500_000 || settings.Revenue.MinimumPayoutMinorByCurrency["USD"] != 10_000 {
+		t.Fatalf("explicit currency overrides must be preserved: %+v", settings.Revenue.MinimumPayoutMinorByCurrency)
+	}
+}
