@@ -17,9 +17,10 @@ func TestASecondCreatorEarningsRunOnTheSameDayMovesNewEarningsButNeverMovesTheSa
 	}
 	harness := startWalletHarness(t, true)
 	creator := uuid.NewString()
+	harness.approveCreator(creator)
 	token := harness.Tokens.UserAccessToken(creator)
 	harness.OnboardConnectedAccount(creator, false)
-	harness.setCreatorProgramStatus(creator, "approved")
+	harness.setCreatorStatus(creator, "approved")
 	convert := func(key string, coins int64) {
 		harness.post(ledgermodels.JournalEntryRequest{Reference: "seed-earned-" + key, Kind: "test.giftEarnings", Lines: []ledgermodels.JournalLineRequest{
 			{Account: ledgermodels.CoinsInCirculationAccount(), Direction: ledgermodels.Debit, AmountMinor: coins},

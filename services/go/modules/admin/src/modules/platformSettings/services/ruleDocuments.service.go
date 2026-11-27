@@ -40,18 +40,17 @@ type CheckmarkSuggestionRules struct {
 
 type CreatorProgramThresholds struct {
 	AutoApprove struct {
-		MinimumAccountAgeDays            int      `json:"minimumAccountAgeDays"`
-		RequiresVerifiedEmail            bool     `json:"requiresVerifiedEmail"`
-		MinimumRealFollowers             int      `json:"minimumRealFollowers"`
-		MinimumOriginalPostsInLast60Days int      `json:"minimumOriginalPostsInLast60Days"`
-		NoViolationsInDays               int      `json:"noViolationsInDays"`
-		MaximumFraudScore                int      `json:"maximumFraudScore"`
-		MaximumActiveStrikes             int      `json:"maximumActiveStrikes"`
-		RequiresIdentityVerification     bool     `json:"requiresIdentityVerification"`
-		AllowedCountries                 []string `json:"allowedCountries"`
+		MinimumAccountAgeDays            int  `json:"minimumAccountAgeDays"`
+		RequiresVerifiedEmail            bool `json:"requiresVerifiedEmail"`
+		MinimumRealFollowers             int  `json:"minimumRealFollowers"`
+		MinimumVerifiedFollowers         int  `json:"minimumVerifiedFollowers"`
+		MinimumQualifyingImpressions30d  int  `json:"minimumQualifyingImpressionsLast30Days"`
+		MinimumOriginalPostsInLast60Days int  `json:"minimumOriginalPostsInLast60Days"`
+		NoViolationsInDays               int  `json:"noViolationsInDays"`
+		MaximumFraudScore                int  `json:"maximumFraudScore"`
+		RequiresIdentityVerification     bool `json:"requiresIdentityVerification"`
 	} `json:"autoApprove"`
 	ManualReview struct {
-		MinimumRealFollowers             int  `json:"minimumRealFollowers"`
 		AllowsPastViolation              bool `json:"allowsPastViolation"`
 		AllowsBorderlineOrAiHeavyContent bool `json:"allowsBorderlineOrAiHeavyContent"`
 		MaximumRiskScore                 int  `json:"maximumRiskScore"`
@@ -79,10 +78,13 @@ type CheckmarkPricingRules struct {
 
 func defaultCreatorThresholds() CreatorProgramThresholds {
 	thresholds := CreatorProgramThresholds{}
-	thresholds.AutoApprove.MinimumAccountAgeDays, thresholds.AutoApprove.RequiresVerifiedEmail, thresholds.AutoApprove.AllowedCountries = 30, true, []string{}
-	thresholds.AutoApprove.MinimumRealFollowers, thresholds.AutoApprove.MinimumOriginalPostsInLast60Days = 1000, 10
+	thresholds.AutoApprove.MinimumAccountAgeDays, thresholds.AutoApprove.RequiresVerifiedEmail = 30, true
+	thresholds.AutoApprove.MinimumRealFollowers = 10_000
+	thresholds.AutoApprove.MinimumVerifiedFollowers = 500
+	thresholds.AutoApprove.MinimumQualifyingImpressions30d = 100_000
+	thresholds.AutoApprove.MinimumOriginalPostsInLast60Days = 10
 	thresholds.AutoApprove.NoViolationsInDays, thresholds.AutoApprove.MaximumFraudScore = 90, 30
-	thresholds.ManualReview.MinimumRealFollowers, thresholds.ManualReview.AllowsPastViolation = 500, true
+	thresholds.ManualReview.AllowsPastViolation = true
 	thresholds.ManualReview.AllowsBorderlineOrAiHeavyContent, thresholds.ManualReview.MaximumRiskScore = true, 60
 	return thresholds
 }
@@ -143,19 +145,18 @@ func validateCreatorThresholds(raw json.RawMessage) (json.RawMessage, error) {
 	if err := decodeStrictly(raw, &value); err != nil {
 		return nil, err
 	}
-	if value.AutoApprove.AllowedCountries == nil {
-		value.AutoApprove.AllowedCountries = []string{}
-	}
 	auto, review := value.AutoApprove, value.ManualReview
+	if !auto.RequiresVerifiedEmail {
+		return nil, adminerrors.Unprocessable("Creator applications always require verified email.")
+	}
 	for _, check := range []error{
-		requireWithin("autoApprove.maximumActiveStrikes", auto.MaximumActiveStrikes, 0, 100),
-		requireCodes("autoApprove.allowedCountries", auto.AllowedCountries, isoCountryPattern, 0),
-		requireWithin("autoApprove.minimumAccountAgeDays", auto.MinimumAccountAgeDays, 0, 3650),
-		requireWithin("autoApprove.minimumRealFollowers", auto.MinimumRealFollowers, 0, 100_000_000),
-		requireWithin("autoApprove.minimumOriginalPostsInLast60Days", auto.MinimumOriginalPostsInLast60Days, 0, 100_000),
-		requireWithin("autoApprove.noViolationsInDays", auto.NoViolationsInDays, 0, 3650),
+		requireWithin("autoApprove.minimumAccountAgeDays", auto.MinimumAccountAgeDays, 30, 3650),
+		requireWithin("autoApprove.minimumRealFollowers", auto.MinimumRealFollowers, 10_000, 100_000_000),
+		requireWithin("autoApprove.minimumVerifiedFollowers", auto.MinimumVerifiedFollowers, 500, 100_000_000),
+		requireWithin("autoApprove.minimumQualifyingImpressionsLast30Days", auto.MinimumQualifyingImpressions30d, 100_000, 1_000_000_000),
+		requireWithin("autoApprove.minimumOriginalPostsInLast60Days", auto.MinimumOriginalPostsInLast60Days, 10, 100_000),
+		requireWithin("autoApprove.noViolationsInDays", auto.NoViolationsInDays, 90, 3650),
 		requireWithin("autoApprove.maximumFraudScore", auto.MaximumFraudScore, 0, 100),
-		requireWithin("manualReview.minimumRealFollowers", review.MinimumRealFollowers, 0, auto.MinimumRealFollowers),
 		requireWithin("manualReview.maximumRiskScore", review.MaximumRiskScore, 0, 100),
 	} {
 		if check != nil {

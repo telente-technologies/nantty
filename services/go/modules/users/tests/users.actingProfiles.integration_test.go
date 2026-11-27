@@ -2,7 +2,6 @@ package users_test
 
 import (
 	"net/http"
-	"strings"
 	"testing"
 )
 
@@ -50,10 +49,11 @@ func TestBusinessProfileCreatorApplicationAndActingProfileSwitching(t *testing.T
 		t.Fatalf("want personal + business, got %v", listed)
 	}
 
-	harness.expect("PUT", "/api/v1/internal/profiles/"+personalId+"/signals", "", map[string]any{"realFollowers": 600, "riskScore": 10, "daysSinceLastViolation": 400}, http.StatusNoContent, "X-Internal-Token", strings.Repeat("u", 32))
+	harness.putCreatorMetrics(personalId, 12_000, 700, 120_000)
+	harness.putSignals(personalId, map[string]any{"riskScore": 10, "daysSinceLastViolation": 400})
 	applied := harness.expect("POST", "/api/v1/users/me/creator-application", token, nil, http.StatusCreated)
 	if applied["creatorStatus"] != "pending" || applied["isCreator"] != false || applied["username"] != "ada.lovelace" {
-		t.Fatalf("a creator with 500 to 999 followers goes to manual review: %v", applied)
+		t.Fatalf("an eligible applicant without a payout account waits for review: %v", applied)
 	}
 	harness.expect("POST", "/api/v1/users/me/creator-application", token, nil, http.StatusConflict)
 	if listed := harness.expect("GET", "/api/v1/users/me/profiles", token, nil, http.StatusOK)["data"].([]any); len(listed) != 2 {

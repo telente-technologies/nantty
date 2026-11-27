@@ -42,6 +42,11 @@ func (transfers CreatorEarningsTransfers) TransferCreatorEarningsToConnectedAcco
 				continue
 			}
 			userId := strings.TrimSuffix(strings.TrimPrefix(balance.Code, "creator:"), ledgermodels.CreatorEarningsPayableAccountCodeSuffix())
+			approvedCreator, err := transfers.Container.IsApprovedCreator(ctx, database, userId)
+			if err != nil || !approvedCreator {
+				report.Skipped++
+				continue
+			}
 			if paused, err := transfers.Holds.IsMonetisationPaused(ctx, database, userId); err != nil || paused {
 				report.Skipped++
 				continue

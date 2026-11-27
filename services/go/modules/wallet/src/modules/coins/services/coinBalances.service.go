@@ -65,12 +65,8 @@ type EarnedCoinConversionInput struct {
 }
 
 func (balances CoinBalances) ConvertEarnedCoinsToCashInTransaction(ctx context.Context, transaction *sql.Tx, input EarnedCoinConversionInput) (dtos.CoinConversionReceiptDto, error) {
-	approved, err := balances.Container.IsApprovedCreator(ctx, transaction, input.UserId)
-	if err != nil {
+	if err := balances.requireApprovedCreator(ctx, transaction, input.UserId); err != nil {
 		return dtos.CoinConversionReceiptDto{}, err
-	}
-	if !approved {
-		return dtos.CoinConversionReceiptDto{}, httpserver.NewApiError(http.StatusForbidden, "CREATOR_PROGRAM_REQUIRED", "Only approved creators can convert earned coins to cash.")
 	}
 	settings := balances.Container.Settings
 	valuePerCoin, supported := balances.Container.CoinCashValuesMinor(ctx)[input.Currency]
@@ -127,4 +123,15 @@ func (balances CoinBalances) ConvertEarnedCoinsToCashInTransaction(ctx context.C
 		Coins: input.Coins, Cash: dtos.MoneyDto{AmountMinor: cash, Currency: input.Currency}, EarnedCoinsRemaining: remaining,
 		MinimumPayout: dtos.MoneyDto{AmountMinor: minimum, Currency: input.Currency},
 	}, nil
+}
+
+func (balances CoinBalances) requireApprovedCreator(ctx context.Context, transaction *sql.Tx, userId string) error {
+	approved, err := balances.Container.IsApprovedCreator(ctx, transaction, userId)
+	if err != nil {
+		return httpserver.NewApiError(http.StatusServiceUnavailable, "CREATOR_STATUS_UNAVAILABLE", "Creator eligibility could not be verified. Try again later.")
+	}
+	if !approved {
+		return httpserver.NewApiError(http.StatusForbidden, "CREATOR_PROGRAM_REQUIRED", "Only currently approved Nantty creators can convert creator-earned coins.")
+	}
+	return nil
 }

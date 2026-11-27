@@ -16,12 +16,13 @@ func MountCreatorProgramRoutes(mux *http.ServeMux, container *container.Containe
 	controller := controllers.CreatorProgramController{Container: container}
 	internalToken := httpserver.RequireInternalToken(container.Settings.Privacy.InternalApiToken)
 	requireAccessToken := jwtauth.RequireVerifiedAccessToken(container.AccessVerifier)
+	requireAdultAccount := jwtauth.RequireAdultAccount()
 	guard := staffauth.Guard{Registry: identityports.Default}
 	review := guard.RequireStaff("applications:creators", false)
 	reviewStepUp := guard.RequireStaff("applications:creators", true)
-	mux.Handle("GET /api/v1/creators/eligibility", requireAccessToken(http.HandlerFunc(controller.Eligibility)))
+	mux.Handle("GET /api/v1/creators/eligibility", requireAccessToken(requireAdultAccount(http.HandlerFunc(controller.Eligibility))))
 	mux.Handle("GET /api/v1/creators/applications/me", requireAccessToken(http.HandlerFunc(controller.MyApplication)))
-	mux.Handle("POST /api/v1/creators/applications", requireAccessToken(middlewares.RequireCreatorApplicationIdempotencyKey(http.HandlerFunc(controller.Submit))))
+	mux.Handle("POST /api/v1/creators/applications", requireAccessToken(requireAdultAccount(middlewares.RequireCreatorApplicationIdempotencyKey(http.HandlerFunc(controller.Submit)))))
 	mux.Handle("GET /api/v1/admin/applications/creators", review(http.HandlerFunc(controller.List)))
 	mux.Handle("GET /api/v1/admin/applications/creators/{applicationId}", review(http.HandlerFunc(controller.Detail)))
 	mux.Handle("POST /api/v1/admin/applications/creators/{applicationId}/approve", reviewStepUp(http.HandlerFunc(controller.Approve)))

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 
 	"nantty/modules/ledger/src/databases"
 	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
@@ -44,13 +45,18 @@ func (verifier fakeStoreVerifier) VerifySignedRefundNotification(_ context.Conte
 
 type walletHarness struct {
 	*paymentstesting.MoneyHarness
-	wallet *src.Module
+	wallet        *src.Module
+	creatorSchema string
 }
 
 func startWalletHarness(t *testing.T, requireReview bool, adjustments ...func(*configs.WalletSettings)) *walletHarness {
 	t.Helper()
 	money := paymentstesting.StartMoneyHarnessWithPayments(t, map[string]interfaces.StoreReceiptVerifier{"apple_iap": fakeStoreVerifier{store: "apple_iap"}})
 	walletSchema := moneytesting.CreateFreshSchemaWithMigrations(t, money.Database, "wallet", walletmigrations.Files)
+	creatorSchema := moneytesting.CreateEmptySchema(t, money.Database, "creators")
+	if _, err := money.Database.Exec("CREATE TABLE " + pgx.Identifier{creatorSchema, "creator_program_members"}.Sanitize() + " (user_id text PRIMARY KEY, status text NOT NULL, suspended_at timestamptz NULL)"); err != nil {
+		t.Fatal(err)
+	}
 	var walletTables string
 	if err := money.Database.QueryRow("SELECT COALESCE(string_agg(table_name, ',' ORDER BY table_name), '') FROM information_schema.tables WHERE table_schema = $1 AND table_name IN ('coin_packages', 'coin_purchases', 'coin_transfers')", walletSchema).Scan(&walletTables); err != nil {
 		t.Fatal(err)
@@ -68,16 +74,9 @@ func startWalletHarness(t *testing.T, requireReview bool, adjustments ...func(*c
 		CreatorTransferMinimum:      configs.ParseCurrencyAmounts("NGN:10000"),
 		CoinNetValueMinorByCurrency: configs.ParseCurrencyAmounts("NGN:1000,USD:1"),
 		CoinChannelFeeBps:           configs.ParseChannelFees("web:200,ios:3000,android:1500"),
+		CreatorProgramSchema:        creatorSchema,
 		InternalApiToken:            strings.Repeat("w", 32), AdPrepaidRefundsEnabled: true, SellerReserveHoldDays: 90,
 	}
-	settings.CreatorProgramSchema = "wallet_creator_program_" + strings.ReplaceAll(uuid.NewString(), "-", "")
-	if _, err := money.Database.Exec("CREATE SCHEMA " + settings.CreatorProgramSchema); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := money.Database.Exec("CREATE TABLE " + settings.CreatorProgramSchema + ".creator_program_members (user_id text PRIMARY KEY, status text NOT NULL)"); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _, _ = money.Database.Exec("DROP SCHEMA " + settings.CreatorProgramSchema + " CASCADE") })
 	for _, adjust := range adjustments {
 		adjust(&settings)
 	}
@@ -86,14 +85,29 @@ func startWalletHarness(t *testing.T, requireReview bool, adjustments ...func(*c
 		t.Fatal(err)
 	}
 	money.MountModule(module)
-	return &walletHarness{MoneyHarness: money, wallet: module}
+	return &walletHarness{MoneyHarness: money, wallet: module, creatorSchema: creatorSchema}
 }
 
-func (harness *walletHarness) setCreatorProgramStatus(userId, status string) {
+func (harness *walletHarness) approveCreator(userId string) {
 	harness.T.Helper()
-	table := harness.wallet.Coins.Container.Settings.CreatorProgramSchema + ".creator_program_members"
-	_, err := harness.Database.Exec("INSERT INTO "+table+" (user_id, status) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET status = EXCLUDED.status", userId, status)
-	if err != nil {
+	query := "INSERT INTO " + pgx.Identifier{harness.creatorSchema, "creator_program_members"}.Sanitize() + " (user_id, status) VALUES ($1, 'approved') ON CONFLICT (user_id) DO UPDATE SET status = 'approved'"
+	if _, err := harness.Database.Exec(query, userId); err != nil {
+		harness.T.Fatal(err)
+	}
+}
+
+func (harness *walletHarness) setCreatorStatus(userId, status string) {
+	harness.T.Helper()
+	query := "INSERT INTO " + pgx.Identifier{harness.creatorSchema, "creator_program_members"}.Sanitize() + " (user_id, status) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET status = EXCLUDED.status, suspended_at = CASE WHEN EXCLUDED.status = 'approved' THEN NULL ELSE creator_program_members.suspended_at END"
+	if _, err := harness.Database.Exec(query, userId, status); err != nil {
+		harness.T.Fatal(err)
+	}
+}
+
+func (harness *walletHarness) suspendCreator(userId string) {
+	harness.T.Helper()
+	query := "UPDATE " + pgx.Identifier{harness.creatorSchema, "creator_program_members"}.Sanitize() + " SET suspended_at = NOW() WHERE user_id = $1"
+	if _, err := harness.Database.Exec(query, userId); err != nil {
 		harness.T.Fatal(err)
 	}
 }

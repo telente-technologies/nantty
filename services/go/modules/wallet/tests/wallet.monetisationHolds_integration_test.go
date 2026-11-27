@@ -19,10 +19,11 @@ func TestRestrictedCreatorEarningsStayPendingUntilMonetisationIsRestored(t *test
 	}
 	harness := startWalletHarness(t, true)
 	creator := uuid.NewString()
+	harness.approveCreator(creator)
 	token := harness.Tokens.UserAccessToken(creator)
 	harness.creditEarnedCoins(creator, 180)
 	harness.OnboardConnectedAccount(creator, false)
-	harness.setCreatorProgramStatus(creator, "approved")
+	harness.setCreatorStatus(creator, "approved")
 	if converted := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-held-1", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}}); converted.Status != http.StatusCreated {
 		t.Fatalf("convert: %d %s", converted.Status, converted.Raw)
 	}

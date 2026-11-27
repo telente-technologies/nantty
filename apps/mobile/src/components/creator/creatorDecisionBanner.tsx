@@ -9,6 +9,7 @@ const DECISION_APPEARANCE: Record<CreatorProgramDecision, { label: string; tone:
   auto_approve: { label: "Instant approval", tone: "success" },
   manual_review: { label: "Manual review", tone: "caution" },
   not_eligible: { label: "Not eligible yet", tone: "neutral" },
+  unavailable: { label: "Eligibility data unavailable", tone: "caution" },
 };
 
 export function CreatorDecisionBanner({ decision, note }: { decision: CreatorProgramDecision; note: string }) {

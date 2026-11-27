@@ -3,6 +3,10 @@
 - **Scope**: `services/go/modules/{ledger,payments,wallet,subscriptions,escrow,creators}` (`goMoney`), `services/go/modules/orders` (`goCommerce`), `services/go/modules/ads` (`goAds`), `services/go/modules/users` (`checkmarks`), and client billing surfaces (`webapp`, `mobile`, `ads`, `seller`, `admin`).
 - **Verification Basis**: White-box Go/TS code review + frontend/gateway contract suites. **Go test execution, live PostgreSQL concurrency stress tests, and live PSP/Apple/Google sandboxes could not execute in this environment (`go`, PostgreSQL, and PSP credentials absent).**
 
+## Verification correction — 2026-11-27
+
+The dated environment limitation above is historical and no longer describes this checkout: Go and isolated PostgreSQL 17 are available. Full Go test suites for Users, Admin, Wallet and Ads passed against the isolated test database; the Ads suite now includes concurrent settlement exact-once assertions. Frontend Admin/Webapp/Mobile/Studio typechecks and the relevant contract/creator tests also passed. These local tests do **not** verify live Flutterwave/Apple/Google transactions, app-store revocation notifications, a production payout provider, deployed database grants, or AWS staging. Coin purchase/refund completion, creator payout cadence, and advertiser-to-creator reserve/refund reconciliation remain partial or externally blocked. Exact commands and boundaries are recorded in `docs/integration/NANTTY_VERIFICATION_AND_TEST_EVIDENCE.md`.
+
 ---
 
 ## 1. Financial Invariants & Control Review
