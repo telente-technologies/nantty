@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/jackc/pgx/v5"
+
 	"nantty/modules/ledger/src/databases"
 	ledgerevents "nantty/modules/ledger/src/events"
 	"nantty/modules/ledger/src/loaders"
@@ -75,6 +77,23 @@ func (container *Container) CoinTransferFeeBps(ctx context.Context) int64 {
 
 func (container *Container) CoinCashValuesMinor(ctx context.Context) map[string]int64 {
 	return container.Resources.Platform.CoinCashValuesMinor(ctx, container.Settings.CoinCashValueMinorByCurrency)
+}
+
+func (container *Container) IsApprovedCreator(ctx context.Context, executor databases.ExecutorQuerier, userId string) (bool, error) {
+	schema := pgx.Identifier{container.Settings.CreatorProgramSchema, "creator_program_members"}.Sanitize()
+	rows, err := executor.QueryContext(ctx, "SELECT EXISTS (SELECT 1 FROM "+schema+" WHERE user_id = $1 AND status = 'approved' AND suspended_at IS NULL)", userId)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	if !rows.Next() {
+		return false, rows.Err()
+	}
+	var approved bool
+	if err := rows.Scan(&approved); err != nil {
+		return false, err
+	}
+	return approved, rows.Err()
 }
 
 func (container *Container) Client(executor databases.ExecutorQuerier) *ent.Client {

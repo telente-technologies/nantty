@@ -56,48 +56,76 @@ func (settlement AdSettlement) SettlePendingCharges(ctx context.Context) (int, e
 			totals.creatorImpressionsBy[row.CreatorUserID]++
 		}
 	}
-	if err := settlement.excludePausedCreators(ctx, byAccount); err != nil {
-		return 0, err
-	}
 	settled := 0
 	var failures []error
 	for accountId, totals := range byAccount {
-		if err := settlement.settleAccount(ctx, accountId, totals); err != nil {
+		count, err := settlement.settleAccount(ctx, accountId, totals)
+		if err != nil {
 			failures = append(failures, fmt.Errorf("settle account %s: %w", accountId, err))
 			continue
 		}
-		settled += len(totals.ids)
+		settled += count
 	}
 	return settled, errors.Join(failures...)
 }
 
-func (settlement AdSettlement) settleAccount(ctx context.Context, accountId uuid.UUID, totals *accountSettlementTotals) error {
+func (settlement AdSettlement) settleAccount(ctx context.Context, accountId uuid.UUID, totals *accountSettlementTotals) (int, error) {
 	tx, err := settlement.Client.Tx(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	if err := settlement.settleAccountInTransaction(ctx, tx, accountId, totals); err != nil {
+	count, err := settlement.settleAccountInTransaction(ctx, tx, accountId, totals)
+	if err != nil {
 		_ = tx.Rollback()
-		return err
+		return 0, err
 	}
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
-func (settlement AdSettlement) settleAccountInTransaction(ctx context.Context, tx *ent.Tx, accountId uuid.UUID, totals *accountSettlementTotals) error {
+func (settlement AdSettlement) settleAccountInTransaction(ctx context.Context, tx *ent.Tx, accountId uuid.UUID, candidates *accountSettlementTotals) (int, error) {
 	now := settlement.Now()
 	account, err := tx.AdAccount.Query().Where(adaccount.ID(accountId)).ForUpdate().Only(ctx)
 	if err != nil {
-		return err
+		return 0, err
+	}
+	rows, err := tx.AdImpression.Query().Where(
+		adimpression.IDIn(candidates.ids...), adimpression.AccountID(accountId), adimpression.ChargeMicrosGT(0), adimpression.SettlementBatchIDIsNil(),
+	).Order(ent.Asc(adimpression.FieldServedAt)).ForUpdate().All(ctx)
+	if err != nil {
+		return 0, err
+	}
+	if len(rows) == 0 {
+		return 0, nil
+	}
+	totals := &accountSettlementTotals{currency: rows[0].Currency, creatorMicrosByUser: map[string]int64{}, creatorImpressionsBy: map[string]int64{}}
+	for _, row := range rows {
+		if row.Currency != totals.currency {
+			return 0, fmt.Errorf("pending impression currency mismatch for account %s", accountId)
+		}
+		totals.ids = append(totals.ids, row.ID)
+		totals.spendMicros += row.ChargeMicros
+		totals.creatorMicros += row.CreatorShareMicros
+		totals.platformMicros += row.PlatformShareMicros
+		if row.CreatorUserID != "" && row.CreatorShareMicros > 0 {
+			totals.creatorMicrosByUser[row.CreatorUserID] += row.CreatorShareMicros
+			totals.creatorImpressionsBy[row.CreatorUserID]++
+		}
+	}
+	if err := settlement.excludePausedCreators(ctx, map[uuid.UUID]*accountSettlementTotals{accountId: totals}); err != nil {
+		return 0, err
 	}
 	debitMinor, carry := WholeMinorUnitsAndCarry(account.SpendCarryMicros + totals.spendMicros)
 	creditUsed, err := ConsumeCreditInSpendOrder(ctx, tx, accountId, min(debitMinor, max(account.CreditMinor, 0)), now)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	balanceUsed := min(debitMinor-creditUsed, account.BalanceMinor)
 	cashbackMinor, err := CashbackForRealSpend(ctx, tx, account.OwnerUserID, balanceUsed)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	shortfallMinor := debitMinor - creditUsed - balanceUsed
 	if shortfallMinor > 0 {
@@ -106,35 +134,38 @@ func (settlement AdSettlement) settleAccountInTransaction(ctx context.Context, t
 	batch, err := tx.AdSpendBatch.Create().SetAccountID(accountId).SetCurrency(totals.currency).SetImpressionCount(len(totals.ids)).SetSpendMicros(totals.spendMicros).
 		SetDebitedMinor(creditUsed + balanceUsed).SetCreditUsedMinor(creditUsed).SetCashbackMinor(cashbackMinor).SetCreatorShareMicros(totals.creatorMicros).SetPlatformShareMicros(totals.platformMicros).Save(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	if err := tx.AdImpression.Update().Where(adimpression.IDIn(totals.ids...)).SetSettlementBatchID(batch.ID).Exec(ctx); err != nil {
-		return err
+		return 0, err
 	}
 	if err := tx.AdAccount.UpdateOneID(accountId).AddBalanceMinor(-balanceUsed).AddCreditMinor(-creditUsed).AddAmountSpentMicros(totals.spendMicros).SetSpendCarryMicros(carry).Exec(ctx); err != nil {
-		return err
+		return 0, err
 	}
 	if err := recordSpendTransactions(ctx, tx, accountId, totals.currency, batch.ID, creditUsed, balanceUsed); err != nil {
-		return err
+		return 0, err
 	}
 	if err := issueCashbackInTransaction(ctx, tx, account, batch.ID, cashbackMinor, now); err != nil {
-		return err
+		return 0, err
 	}
 	if shortfallMinor > 0 {
 		if err := recordShortfallDebt(ctx, tx, accountId, totals.currency, batch.ID, shortfallMinor); err != nil {
-			return err
+			return 0, err
 		}
 	}
 	if err := settlement.accruePools(ctx, tx, totals, now); err != nil {
-		return err
+		return 0, err
 	}
 	if err := events.EnqueueOutboxEventInTransaction(ctx, tx, events.AdSpendBatched, batch.ID.String(), now, events.AdSpendBatchedEventData{
 		BatchId: batch.ID.String(), AccountId: accountId.String(), Currency: totals.currency, DebitMinor: balanceUsed, CreditDebitMinor: creditUsed, SpendMicros: totals.spendMicros,
 		CreatorShareMicros: totals.creatorMicros, PlatformShareMicros: totals.platformMicros, ImpressionCount: len(totals.ids), IdempotencyKey: "adSpend:" + batch.ID.String(),
 	}); err != nil {
-		return err
+		return 0, err
 	}
-	return settlement.postCreatorEarnings(ctx, tx, totals, batch.ID, now)
+	if err := settlement.postCreatorEarnings(ctx, tx, totals, batch.ID, now); err != nil {
+		return 0, err
+	}
+	return len(totals.ids), nil
 }
 
 func recordSpendTransactions(ctx context.Context, tx *ent.Tx, accountId uuid.UUID, currency string, batchId uuid.UUID, creditUsed, balanceUsed int64) error {

@@ -35,14 +35,21 @@ func TestGiftShareTierValidation(t *testing.T) {
 
 func TestCreatorRequirementsAndMonetizationValidation(t *testing.T) {
 	creatorValidator := services.PlatformSettingDefinitions[services.CreatorRequirementsKey].Validate
-	if _, err := creatorValidator(json.RawMessage(`{"minimumFollowers":10,"minimumAccountAgeDays":1,"minimumOriginalPosts":1,"maximumRecentStrikes":0,"strikeLookbackDays":30,"requireVerifiedEmail":false}`)); err != nil {
+	if _, err := creatorValidator(json.RawMessage(`{"minimumFollowers":10000,"minimumVerifiedFollowers":500,"minimumQualifyingImpressionsLast30Days":100000,"minimumAccountAgeDays":30,"minimumOriginalPosts":10,"minimumOriginalPostsInLast60Days":10,"maximumRecentStrikes":0,"strikeLookbackDays":90,"requireVerifiedEmail":true,"requiresIdentityVerification":true}`)); err != nil {
 		t.Errorf("valid requirements rejected: %v", err)
 	}
 	for name, input := range map[string]string{
-		"negative followers": `{"minimumFollowers":-1,"strikeLookbackDays":30}`,
-		"zero lookback":      `{"minimumFollowers":1,"strikeLookbackDays":0}`,
-		"unknown field":      `{"minimumFollowers":1,"strikeLookbackDays":30,"vip":true}`,
-		"wrong type":         `{"minimumFollowers":"many","strikeLookbackDays":30}`,
+		"followers below policy":          `{"minimumFollowers":9999,"minimumVerifiedFollowers":500,"minimumQualifyingImpressionsLast30Days":100000,"minimumAccountAgeDays":30,"minimumOriginalPosts":10,"minimumOriginalPostsInLast60Days":10,"maximumRecentStrikes":0,"strikeLookbackDays":90,"requireVerifiedEmail":true}`,
+		"verified followers below policy": `{"minimumFollowers":10000,"minimumVerifiedFollowers":499,"minimumQualifyingImpressionsLast30Days":100000,"minimumAccountAgeDays":30,"minimumOriginalPosts":10,"minimumOriginalPostsInLast60Days":10,"maximumRecentStrikes":0,"strikeLookbackDays":90,"requireVerifiedEmail":true}`,
+		"impressions below policy":        `{"minimumFollowers":10000,"minimumVerifiedFollowers":500,"minimumQualifyingImpressionsLast30Days":99999,"minimumAccountAgeDays":30,"minimumOriginalPosts":10,"minimumOriginalPostsInLast60Days":10,"maximumRecentStrikes":0,"strikeLookbackDays":90,"requireVerifiedEmail":true}`,
+		"account age below policy":        `{"minimumFollowers":10000,"minimumVerifiedFollowers":500,"minimumQualifyingImpressionsLast30Days":100000,"minimumAccountAgeDays":29,"minimumOriginalPosts":10,"minimumOriginalPostsInLast60Days":10,"maximumRecentStrikes":0,"strikeLookbackDays":90,"requireVerifiedEmail":true}`,
+		"posts below policy":              `{"minimumFollowers":10000,"minimumVerifiedFollowers":500,"minimumQualifyingImpressionsLast30Days":100000,"minimumAccountAgeDays":30,"minimumOriginalPosts":9,"minimumOriginalPostsInLast60Days":9,"maximumRecentStrikes":0,"strikeLookbackDays":90,"requireVerifiedEmail":true}`,
+		"strikes allowed":                 `{"minimumFollowers":10000,"minimumVerifiedFollowers":500,"minimumQualifyingImpressionsLast30Days":100000,"minimumAccountAgeDays":30,"minimumOriginalPosts":10,"minimumOriginalPostsInLast60Days":10,"maximumRecentStrikes":1,"strikeLookbackDays":90,"requireVerifiedEmail":true}`,
+		"lookback below policy":           `{"minimumFollowers":10000,"minimumVerifiedFollowers":500,"minimumQualifyingImpressionsLast30Days":100000,"minimumAccountAgeDays":30,"minimumOriginalPosts":10,"minimumOriginalPostsInLast60Days":10,"maximumRecentStrikes":0,"strikeLookbackDays":89,"requireVerifiedEmail":true}`,
+		"verified email required":         `{"minimumFollowers":10000,"minimumVerifiedFollowers":500,"minimumQualifyingImpressionsLast30Days":100000,"minimumAccountAgeDays":30,"minimumOriginalPosts":10,"minimumOriginalPostsInLast60Days":10,"maximumRecentStrikes":0,"strikeLookbackDays":90,"requireVerifiedEmail":false}`,
+		"inconsistent post aliases":       `{"minimumFollowers":10000,"minimumVerifiedFollowers":500,"minimumQualifyingImpressionsLast30Days":100000,"minimumAccountAgeDays":30,"minimumOriginalPosts":10,"minimumOriginalPostsInLast60Days":11,"maximumRecentStrikes":0,"strikeLookbackDays":90,"requireVerifiedEmail":true}`,
+		"unknown field":                   `{"minimumFollowers":10000,"minimumVerifiedFollowers":500,"minimumQualifyingImpressionsLast30Days":100000,"minimumAccountAgeDays":30,"minimumOriginalPosts":10,"minimumOriginalPostsInLast60Days":10,"maximumRecentStrikes":0,"strikeLookbackDays":90,"requireVerifiedEmail":true,"vip":true}`,
+		"wrong type":                      `{"minimumFollowers":"many","minimumVerifiedFollowers":500,"minimumQualifyingImpressionsLast30Days":100000,"minimumAccountAgeDays":30,"minimumOriginalPosts":10,"minimumOriginalPostsInLast60Days":10,"maximumRecentStrikes":0,"strikeLookbackDays":90,"requireVerifiedEmail":true}`,
 	} {
 		if _, err := creatorValidator(json.RawMessage(input)); err == nil {
 			t.Errorf("%s accepted", name)

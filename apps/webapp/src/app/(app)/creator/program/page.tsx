@@ -22,6 +22,7 @@ export default function CreatorProgramPage() {
   const rules = useQuery({ queryKey: ["creator", "revenue-rules"], queryFn: () => creatorProgramService.fetchCreatorRevenueRules() });
   if (eligibility.isLoading) return <ListRowsSkeleton label="Loading creator program" rows={5} />;
   if (eligibility.isError) return <ErrorState description="We couldn't load the creator program." error={eligibility.error} onRetry={() => void eligibility.refetch()} />;
+  if (!eligibility.data) return <ErrorState description="Creator eligibility is unavailable right now." onRetry={() => void eligibility.refetch()} />;
   const status = application.data?.status;
   return (
     <div className={styles.page}>
@@ -37,16 +38,18 @@ export default function CreatorProgramPage() {
       <section className={styles.section} aria-label="Eligibility">
         <h2 className={styles.sectionTitle}>Eligibility</h2>
         <ul className={styles.list}>
-          {(eligibility.data?.requirements ?? []).map((requirement) => (
+          {eligibility.data.requirements.map((requirement) => (
             <li key={requirement.key} className={styles.row}>
               <span className={styles.rowMain}>
                 <span className={styles.rowTitle}>{requirement.label}</span>
-                <span className={styles.rowMeta}>{requirement.currentValue} / {requirement.requiredValue}</span>
+                <span className={styles.rowMeta}>{requirement.available ? `${requirement.currentValue.toLocaleString()} / ${requirement.requiredValue.toLocaleString()}${requirement.remaining > 0 ? ` · ${requirement.remaining.toLocaleString()} to go` : ""}` : "Data unavailable"}</span>
               </span>
-              <span className={styles.rowMeta}>{requirement.met ? "Met" : "Not met"}</span>
+              <span className={styles.rowMeta}>{requirement.met ? "Met" : requirement.available ? "Not met" : "Pending data"}</span>
             </li>
           ))}
         </ul>
+        <p className={styles.note}>{eligibility.data.metricsAvailable && eligibility.data.standingAvailable ? `Creator metrics last updated ${eligibility.data.metricsAsOf ?? "recently"}; source: ${eligibility.data.metricsSource ?? "trusted analytics"}.` : "Trusted analytics or moderation has not supplied a current snapshot. Missing data is not treated as zero or as approval."}</p>
+        <p className={styles.note}>{eligibility.data.decisionNote}</p>
       </section>
       {status ? (
         <p className={styles.note}>Application status: {status}{application.data?.rejectionReason ? ` — ${application.data.rejectionReason}` : ""}</p>
@@ -62,8 +65,10 @@ export default function CreatorProgramPage() {
           <Link className={styles.primary} href="/creator">Open creator dashboard</Link>
         ) : status === "pending" ? (
           <span className={styles.note}>Your application is under review.</span>
-        ) : (
+        ) : eligibility.data.eligible ? (
           <Link className={styles.primary} href="/creator/apply">Apply now</Link>
+        ) : (
+          <p className={styles.note}>{eligibility.data.decision === "unavailable" ? "Applications are paused until trusted eligibility and moderation data is available." : "You can apply once the eligibility requirements are met."}</p>
         )}
       </div>
     </div>

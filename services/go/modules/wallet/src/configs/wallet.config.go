@@ -31,6 +31,7 @@ type WalletSettings struct {
 	UsersSchema                  string
 	EscrowSchema                 string
 	SocialSchema                 string
+	CreatorProgramSchema         string
 	TrustedCountryHeader         string
 	AdminInternalUrl             string
 	AdminInternalToken           string
@@ -61,6 +62,7 @@ func ReadWalletSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		UsersSchema:                  reader.ReadStringOrDefault("WALLET_USERS_SCHEMA", "users"),
 		EscrowSchema:                 reader.ReadStringOrDefault("ESCROW_DATABASE_SCHEMA", "escrow"),
 		SocialSchema:                 reader.ReadStringOrDefault("WALLET_SOCIAL_SCHEMA", "social"),
+		CreatorProgramSchema:         reader.ReadStringOrDefault("WALLET_CREATOR_PROGRAM_SCHEMA", "creators"),
 		TrustedCountryHeader:         reader.ReadStringOrDefault("PRICING_TRUSTED_COUNTRY_HEADER", "CloudFront-Viewer-Country"),
 		AdminInternalUrl:             reader.ReadStringOrDefault("ADMIN_INTERNAL_URL", ""),
 		AdminInternalToken:           reader.ReadStringOrDefault("ADMIN_INTERNAL_API_TOKEN", ""),
