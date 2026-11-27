@@ -19,7 +19,7 @@ import {
   signedInUserIsApprovedCreator,
 } from "./creatorFixtures.mock";
 import { getSignedInMockUser } from "./fixtures.mock";
-import { accountAgeInDaysForSignedInUser, trustStatsForSignedInUser } from "./trustStats.mock";
+import { accountAgeInDaysForSignedInUser } from "./trustStats.mock";
 import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 import { findCatalogSeedByProductId } from "./productCatalog.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
@@ -36,17 +36,23 @@ const DECISION_NOTES = {
   not_eligible: "Keep going. This list updates automatically as you grow.",
 } as const;
 
+export function creatorApplicationDecision(decision: CreatorProgramDecision, hasPayoutAccount: boolean): CreatorProgramDecision {
+  if (!hasPayoutAccount && decision === "auto_approve") return "manual_review";
+  return decision;
+}
+
 function buildEligibilityForSignedInUser(): CreatorEligibility {
-  const stats = trustStatsForSignedInUser();
+  const now = new Date().toISOString();
   const requirements = [
-    { key: "followers" as const, label: "At least 1,000 real followers", currentValue: stats.realFollowers, requiredValue: 1000 },
-    { key: "account_age" as const, label: "Account at least 30 days old", currentValue: accountAgeInDaysForSignedInUser(), requiredValue: 30 },
-    { key: "original_posts" as const, label: "10 original posts in the last 60 days", currentValue: stats.originalPostsLast60Days, requiredValue: 10 },
-    { key: "no_violations" as const, label: "No violations in the last 90 days", currentValue: stats.violationsLast90Days === 0 ? 1 : 0, requiredValue: 1 },
-  ].map((requirement) => ({ ...requirement, met: requirement.currentValue >= requirement.requiredValue }));
-  const allMet = requirements.every((requirement) => requirement.met);
-  const decision: CreatorProgramDecision = !allMet ? "not_eligible" : stats.flaggedForRisk || !stats.idVerified ? "manual_review" : "auto_approve";
-  return { eligible: allMet, decision, decisionNote: DECISION_NOTES[decision], requirements };
+    { key: "qualifying_impressions_30d", label: "Qualifying impressions from verified users in the last 30 days", currentValue: 0, requiredValue: 100_000, available: false, source: "" },
+    { key: "real_followers", label: "Real followers", currentValue: 0, requiredValue: 10_000, available: false, source: "" },
+    { key: "verified_followers", label: "Verified followers", currentValue: 0, requiredValue: 500, available: false, source: "" },
+    { key: "account_age", label: "Account at least 30 days old", currentValue: accountAgeInDaysForSignedInUser(), requiredValue: 30, available: true, source: "identity" },
+    { key: "verified_email", label: "Verified email", currentValue: 0, requiredValue: 1, available: false, source: "" },
+    { key: "original_posts", label: "Original posts in the last 60 days", currentValue: 0, requiredValue: 10, available: false, source: "" },
+    { key: "policy_standing", label: "Days since last policy violation", currentValue: 0, requiredValue: 90, available: false, source: "" },
+  ].map((requirement) => ({ ...requirement, remaining: Math.max(requirement.requiredValue - requirement.currentValue, 0), met: requirement.available && requirement.currentValue >= requirement.requiredValue, dataAsOf: requirement.source ? now : undefined }));
+  return { eligible: false, decision: "unavailable" as CreatorProgramDecision, decisionNote: "Creator eligibility analytics and moderation snapshots are not connected in this demo. Missing data cannot approve an application.", requirements, metricsAvailable: false, standingAvailable: false };
 }
 
 const approvedApplicationForDemoCreator = (): CreatorApplication => ({
@@ -95,7 +101,8 @@ export const creatorProgramMocks: MockRoute[] = [
     if (input.contentCategories.length === 0) throw new ApiError(422, "Pick at least one content category");
     if (!input.acceptedCreatorTermsVersion) throw new ApiError(422, "Accept the Creator terms to continue");
     const eligibility = buildEligibilityForSignedInUser();
-    const decision = !input.payoutAccountId && eligibility.decision === "auto_approve" ? "manual_review" : eligibility.decision;
+    if (!eligibility.metricsAvailable || !eligibility.standingAvailable) throw new ApiError(503, "Trusted Creator metrics or moderation standing is temporarily unavailable. Your application was not submitted; try again after the next trusted update.", "CREATOR_ELIGIBILITY_UNAVAILABLE");
+    const decision = creatorApplicationDecision(eligibility.decision, Boolean(input.payoutAccountId));
     const application: CreatorApplication = {
       id: `ca_${Date.now()}`,
       status: decision === "auto_approve" ? "approved" : eligibility.eligible ? "pending" : "rejected",

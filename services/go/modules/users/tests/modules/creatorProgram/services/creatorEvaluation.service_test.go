@@ -15,12 +15,11 @@ func TestQualifiesForManualReviewFollowsTheAdminConfiguredRules(t *testing.T) {
 		age     int
 		want    bool
 	}{
-		{"500 followers and low risk", ent.ProfileSignal{RealFollowers: 500, RiskScore: 10, DaysSinceLastViolation: 400}, 60, true},
-		{"499 followers is below the review floor", ent.ProfileSignal{RealFollowers: 499, DaysSinceLastViolation: 400}, 60, false},
-		{"risk above the limit", ent.ProfileSignal{RealFollowers: 900, RiskScore: 61, DaysSinceLastViolation: 400}, 60, false},
-		{"account younger than the minimum age", ent.ProfileSignal{RealFollowers: 900, DaysSinceLastViolation: 400}, 5, false},
-		{"a past violation is allowed by default", ent.ProfileSignal{RealFollowers: 900, DaysSinceLastViolation: 10}, 60, true},
-		{"borderline content is allowed by default", ent.ProfileSignal{RealFollowers: 900, BorderlineContent: true, DaysSinceLastViolation: 400}, 60, true},
+		{"low risk is reviewable", ent.ProfileSignal{RiskScore: 10, DaysSinceLastViolation: 400}, 60, true},
+		{"risk above the limit", ent.ProfileSignal{RiskScore: 61, DaysSinceLastViolation: 400}, 60, false},
+		{"account younger than the minimum age", ent.ProfileSignal{DaysSinceLastViolation: 400}, 5, false},
+		{"a past violation is allowed by default", ent.ProfileSignal{DaysSinceLastViolation: 10}, 60, true},
+		{"borderline content is allowed by default", ent.ProfileSignal{BorderlineContent: true, DaysSinceLastViolation: 400}, 60, true},
 	}
 	for _, testCase := range cases {
 		signals := testCase.signals
@@ -30,10 +29,10 @@ func TestQualifiesForManualReviewFollowsTheAdminConfiguredRules(t *testing.T) {
 	}
 	strict := rules
 	strict.AllowsPastViolation, strict.AllowsBorderlineOrAiHeavyContent = false, false
-	if services.QualifiesForManualReview(&ent.ProfileSignal{RealFollowers: 900, DaysSinceLastViolation: 10}, strict, 60, 30) {
+	if services.QualifiesForManualReview(&ent.ProfileSignal{DaysSinceLastViolation: 10}, strict, 60, 30) {
 		t.Error("a recent violation must block review when the admin disallows it")
 	}
-	if services.QualifiesForManualReview(&ent.ProfileSignal{RealFollowers: 900, BorderlineContent: true, DaysSinceLastViolation: 400}, strict, 60, 30) {
+	if services.QualifiesForManualReview(&ent.ProfileSignal{BorderlineContent: true, DaysSinceLastViolation: 400}, strict, 60, 30) {
 		t.Error("borderline content must block review when the admin disallows it")
 	}
 }
@@ -60,13 +59,13 @@ func TestAdditionalAutoApproveRules(t *testing.T) {
 	}
 }
 
-func TestCreatorThresholdsMissingNewFieldsKeepHistoricalDefaults(t *testing.T) {
+func TestCreatorThresholdsEnforceOwnerMinimums(t *testing.T) {
 	thresholds := services.DecodeCreatorThresholds([]byte(`{"autoApprove":{"minimumAccountAgeDays":45},"manualReview":{}}`))
 	if thresholds.AutoApprove.MinimumAccountAgeDays != 45 {
 		t.Fatalf("configured field not applied: got %d", thresholds.AutoApprove.MinimumAccountAgeDays)
 	}
-	if !thresholds.AutoApprove.RequiresVerifiedEmail || thresholds.AutoApprove.MinimumRealFollowers != 1000 || thresholds.AutoApprove.MaximumFraudScore != 30 {
-		t.Fatalf("omitted legacy fields lost historical defaults: %+v", thresholds.AutoApprove)
+	if !thresholds.AutoApprove.RequiresVerifiedEmail || thresholds.AutoApprove.MinimumRealFollowers != 10_000 || thresholds.AutoApprove.MinimumVerifiedFollowers != 500 || thresholds.AutoApprove.MinimumQualifyingImpressions30d != 100_000 || thresholds.AutoApprove.MinimumOriginalPostsInLast60Days != 10 || thresholds.AutoApprove.MaximumFraudScore != 30 {
+		t.Fatalf("owner minimums were not enforced: %+v", thresholds.AutoApprove)
 	}
 	if thresholds.AutoApprove.RequiresIdentityVerification {
 		t.Fatalf("omitted new rules should remain disabled: %+v", thresholds.AutoApprove)

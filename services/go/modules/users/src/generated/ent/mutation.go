@@ -25501,39 +25501,56 @@ func (m *ProfileCheckmarkMutation) ResetEdge(name string) error {
 // ProfileSignalMutation represents an operation that mutates the ProfileSignal nodes in the graph.
 type ProfileSignalMutation struct {
 	config
-	op                             Op
-	typ                            string
-	id                             *int
-	profile_id                     *uuid.UUID
-	account_id                     *uuid.UUID
-	real_followers                 *int
-	addreal_followers              *int
-	original_posts_last_60_days    *int
-	addoriginal_posts_last_60_days *int
-	days_since_last_violation      *int
-	adddays_since_last_violation   *int
-	fraud_score                    *int
-	addfraud_score                 *int
-	risk_score                     *int
-	addrisk_score                  *int
-	id_verified                    *bool
-	borderline_content             *bool
-	completed_orders               *int
-	addcompleted_orders            *int
-	success_rate_percent           *int
-	addsuccess_rate_percent        *int
-	has_active_store_or_brand_page *bool
-	seller_plan                    *profilesignal.SellerPlan
-	checkmark_suggested_at         *time.Time
-	premium_until                  *time.Time
-	seller_plan_until              *time.Time
-	seller_plan_trialing           *bool
-	source                         *string
-	updated_at                     *time.Time
-	clearedFields                  map[string]struct{}
-	done                           bool
-	oldValue                       func(context.Context) (*ProfileSignal, error)
-	predicates                     []predicate.ProfileSignal
+	op                                     Op
+	typ                                    string
+	id                                     *int
+	profile_id                             *uuid.UUID
+	account_id                             *uuid.UUID
+	real_followers                         *int
+	addreal_followers                      *int
+	creator_real_followers                 *int
+	addcreator_real_followers              *int
+	creator_original_posts_last_60_days    *int
+	addcreator_original_posts_last_60_days *int
+	verified_followers                     *int
+	addverified_followers                  *int
+	qualifying_impressions_last_30_days    *int
+	addqualifying_impressions_last_30_days *int
+	creator_metrics_source                 *string
+	creator_metrics_as_of                  *time.Time
+	creator_metrics_snapshot_id            *uuid.UUID
+	original_posts_last_60_days            *int
+	addoriginal_posts_last_60_days         *int
+	days_since_last_violation              *int
+	adddays_since_last_violation           *int
+	creator_days_since_last_violation      *int
+	addcreator_days_since_last_violation   *int
+	creator_standing_available             *bool
+	creator_standing_source                *string
+	creator_standing_as_of                 *time.Time
+	creator_standing_snapshot_id           *uuid.UUID
+	fraud_score                            *int
+	addfraud_score                         *int
+	risk_score                             *int
+	addrisk_score                          *int
+	id_verified                            *bool
+	borderline_content                     *bool
+	completed_orders                       *int
+	addcompleted_orders                    *int
+	success_rate_percent                   *int
+	addsuccess_rate_percent                *int
+	has_active_store_or_brand_page         *bool
+	seller_plan                            *profilesignal.SellerPlan
+	checkmark_suggested_at                 *time.Time
+	premium_until                          *time.Time
+	seller_plan_until                      *time.Time
+	seller_plan_trialing                   *bool
+	source                                 *string
+	updated_at                             *time.Time
+	clearedFields                          map[string]struct{}
+	done                                   bool
+	oldValue                               func(context.Context) (*ProfileSignal, error)
+	predicates                             []predicate.ProfileSignal
 }
 
 var _ ent.Mutation = (*ProfileSignalMutation)(nil)
@@ -25762,6 +25779,364 @@ func (m *ProfileSignalMutation) ResetRealFollowers() {
 	m.addreal_followers = nil
 }
 
+// SetCreatorRealFollowers sets the "creator_real_followers" field.
+func (m *ProfileSignalMutation) SetCreatorRealFollowers(i int) {
+	m.creator_real_followers = &i
+	m.addcreator_real_followers = nil
+}
+
+// CreatorRealFollowers returns the value of the "creator_real_followers" field in the mutation.
+func (m *ProfileSignalMutation) CreatorRealFollowers() (r int, exists bool) {
+	v := m.creator_real_followers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorRealFollowers returns the old "creator_real_followers" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldCreatorRealFollowers(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorRealFollowers is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorRealFollowers requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorRealFollowers: %w", err)
+	}
+	return oldValue.CreatorRealFollowers, nil
+}
+
+// AddCreatorRealFollowers adds i to the "creator_real_followers" field.
+func (m *ProfileSignalMutation) AddCreatorRealFollowers(i int) {
+	if m.addcreator_real_followers != nil {
+		*m.addcreator_real_followers += i
+	} else {
+		m.addcreator_real_followers = &i
+	}
+}
+
+// AddedCreatorRealFollowers returns the value that was added to the "creator_real_followers" field in this mutation.
+func (m *ProfileSignalMutation) AddedCreatorRealFollowers() (r int, exists bool) {
+	v := m.addcreator_real_followers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreatorRealFollowers resets all changes to the "creator_real_followers" field.
+func (m *ProfileSignalMutation) ResetCreatorRealFollowers() {
+	m.creator_real_followers = nil
+	m.addcreator_real_followers = nil
+}
+
+// SetCreatorOriginalPostsLast60Days sets the "creator_original_posts_last_60_days" field.
+func (m *ProfileSignalMutation) SetCreatorOriginalPostsLast60Days(i int) {
+	m.creator_original_posts_last_60_days = &i
+	m.addcreator_original_posts_last_60_days = nil
+}
+
+// CreatorOriginalPostsLast60Days returns the value of the "creator_original_posts_last_60_days" field in the mutation.
+func (m *ProfileSignalMutation) CreatorOriginalPostsLast60Days() (r int, exists bool) {
+	v := m.creator_original_posts_last_60_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorOriginalPostsLast60Days returns the old "creator_original_posts_last_60_days" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldCreatorOriginalPostsLast60Days(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorOriginalPostsLast60Days is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorOriginalPostsLast60Days requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorOriginalPostsLast60Days: %w", err)
+	}
+	return oldValue.CreatorOriginalPostsLast60Days, nil
+}
+
+// AddCreatorOriginalPostsLast60Days adds i to the "creator_original_posts_last_60_days" field.
+func (m *ProfileSignalMutation) AddCreatorOriginalPostsLast60Days(i int) {
+	if m.addcreator_original_posts_last_60_days != nil {
+		*m.addcreator_original_posts_last_60_days += i
+	} else {
+		m.addcreator_original_posts_last_60_days = &i
+	}
+}
+
+// AddedCreatorOriginalPostsLast60Days returns the value that was added to the "creator_original_posts_last_60_days" field in this mutation.
+func (m *ProfileSignalMutation) AddedCreatorOriginalPostsLast60Days() (r int, exists bool) {
+	v := m.addcreator_original_posts_last_60_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreatorOriginalPostsLast60Days resets all changes to the "creator_original_posts_last_60_days" field.
+func (m *ProfileSignalMutation) ResetCreatorOriginalPostsLast60Days() {
+	m.creator_original_posts_last_60_days = nil
+	m.addcreator_original_posts_last_60_days = nil
+}
+
+// SetVerifiedFollowers sets the "verified_followers" field.
+func (m *ProfileSignalMutation) SetVerifiedFollowers(i int) {
+	m.verified_followers = &i
+	m.addverified_followers = nil
+}
+
+// VerifiedFollowers returns the value of the "verified_followers" field in the mutation.
+func (m *ProfileSignalMutation) VerifiedFollowers() (r int, exists bool) {
+	v := m.verified_followers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVerifiedFollowers returns the old "verified_followers" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldVerifiedFollowers(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVerifiedFollowers is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVerifiedFollowers requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVerifiedFollowers: %w", err)
+	}
+	return oldValue.VerifiedFollowers, nil
+}
+
+// AddVerifiedFollowers adds i to the "verified_followers" field.
+func (m *ProfileSignalMutation) AddVerifiedFollowers(i int) {
+	if m.addverified_followers != nil {
+		*m.addverified_followers += i
+	} else {
+		m.addverified_followers = &i
+	}
+}
+
+// AddedVerifiedFollowers returns the value that was added to the "verified_followers" field in this mutation.
+func (m *ProfileSignalMutation) AddedVerifiedFollowers() (r int, exists bool) {
+	v := m.addverified_followers
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVerifiedFollowers resets all changes to the "verified_followers" field.
+func (m *ProfileSignalMutation) ResetVerifiedFollowers() {
+	m.verified_followers = nil
+	m.addverified_followers = nil
+}
+
+// SetQualifyingImpressionsLast30Days sets the "qualifying_impressions_last_30_days" field.
+func (m *ProfileSignalMutation) SetQualifyingImpressionsLast30Days(i int) {
+	m.qualifying_impressions_last_30_days = &i
+	m.addqualifying_impressions_last_30_days = nil
+}
+
+// QualifyingImpressionsLast30Days returns the value of the "qualifying_impressions_last_30_days" field in the mutation.
+func (m *ProfileSignalMutation) QualifyingImpressionsLast30Days() (r int, exists bool) {
+	v := m.qualifying_impressions_last_30_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQualifyingImpressionsLast30Days returns the old "qualifying_impressions_last_30_days" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldQualifyingImpressionsLast30Days(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQualifyingImpressionsLast30Days is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQualifyingImpressionsLast30Days requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQualifyingImpressionsLast30Days: %w", err)
+	}
+	return oldValue.QualifyingImpressionsLast30Days, nil
+}
+
+// AddQualifyingImpressionsLast30Days adds i to the "qualifying_impressions_last_30_days" field.
+func (m *ProfileSignalMutation) AddQualifyingImpressionsLast30Days(i int) {
+	if m.addqualifying_impressions_last_30_days != nil {
+		*m.addqualifying_impressions_last_30_days += i
+	} else {
+		m.addqualifying_impressions_last_30_days = &i
+	}
+}
+
+// AddedQualifyingImpressionsLast30Days returns the value that was added to the "qualifying_impressions_last_30_days" field in this mutation.
+func (m *ProfileSignalMutation) AddedQualifyingImpressionsLast30Days() (r int, exists bool) {
+	v := m.addqualifying_impressions_last_30_days
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetQualifyingImpressionsLast30Days resets all changes to the "qualifying_impressions_last_30_days" field.
+func (m *ProfileSignalMutation) ResetQualifyingImpressionsLast30Days() {
+	m.qualifying_impressions_last_30_days = nil
+	m.addqualifying_impressions_last_30_days = nil
+}
+
+// SetCreatorMetricsSource sets the "creator_metrics_source" field.
+func (m *ProfileSignalMutation) SetCreatorMetricsSource(s string) {
+	m.creator_metrics_source = &s
+}
+
+// CreatorMetricsSource returns the value of the "creator_metrics_source" field in the mutation.
+func (m *ProfileSignalMutation) CreatorMetricsSource() (r string, exists bool) {
+	v := m.creator_metrics_source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorMetricsSource returns the old "creator_metrics_source" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldCreatorMetricsSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorMetricsSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorMetricsSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorMetricsSource: %w", err)
+	}
+	return oldValue.CreatorMetricsSource, nil
+}
+
+// ResetCreatorMetricsSource resets all changes to the "creator_metrics_source" field.
+func (m *ProfileSignalMutation) ResetCreatorMetricsSource() {
+	m.creator_metrics_source = nil
+}
+
+// SetCreatorMetricsAsOf sets the "creator_metrics_as_of" field.
+func (m *ProfileSignalMutation) SetCreatorMetricsAsOf(t time.Time) {
+	m.creator_metrics_as_of = &t
+}
+
+// CreatorMetricsAsOf returns the value of the "creator_metrics_as_of" field in the mutation.
+func (m *ProfileSignalMutation) CreatorMetricsAsOf() (r time.Time, exists bool) {
+	v := m.creator_metrics_as_of
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorMetricsAsOf returns the old "creator_metrics_as_of" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldCreatorMetricsAsOf(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorMetricsAsOf is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorMetricsAsOf requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorMetricsAsOf: %w", err)
+	}
+	return oldValue.CreatorMetricsAsOf, nil
+}
+
+// ClearCreatorMetricsAsOf clears the value of the "creator_metrics_as_of" field.
+func (m *ProfileSignalMutation) ClearCreatorMetricsAsOf() {
+	m.creator_metrics_as_of = nil
+	m.clearedFields[profilesignal.FieldCreatorMetricsAsOf] = struct{}{}
+}
+
+// CreatorMetricsAsOfCleared returns if the "creator_metrics_as_of" field was cleared in this mutation.
+func (m *ProfileSignalMutation) CreatorMetricsAsOfCleared() bool {
+	_, ok := m.clearedFields[profilesignal.FieldCreatorMetricsAsOf]
+	return ok
+}
+
+// ResetCreatorMetricsAsOf resets all changes to the "creator_metrics_as_of" field.
+func (m *ProfileSignalMutation) ResetCreatorMetricsAsOf() {
+	m.creator_metrics_as_of = nil
+	delete(m.clearedFields, profilesignal.FieldCreatorMetricsAsOf)
+}
+
+// SetCreatorMetricsSnapshotID sets the "creator_metrics_snapshot_id" field.
+func (m *ProfileSignalMutation) SetCreatorMetricsSnapshotID(u uuid.UUID) {
+	m.creator_metrics_snapshot_id = &u
+}
+
+// CreatorMetricsSnapshotID returns the value of the "creator_metrics_snapshot_id" field in the mutation.
+func (m *ProfileSignalMutation) CreatorMetricsSnapshotID() (r uuid.UUID, exists bool) {
+	v := m.creator_metrics_snapshot_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorMetricsSnapshotID returns the old "creator_metrics_snapshot_id" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldCreatorMetricsSnapshotID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorMetricsSnapshotID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorMetricsSnapshotID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorMetricsSnapshotID: %w", err)
+	}
+	return oldValue.CreatorMetricsSnapshotID, nil
+}
+
+// ClearCreatorMetricsSnapshotID clears the value of the "creator_metrics_snapshot_id" field.
+func (m *ProfileSignalMutation) ClearCreatorMetricsSnapshotID() {
+	m.creator_metrics_snapshot_id = nil
+	m.clearedFields[profilesignal.FieldCreatorMetricsSnapshotID] = struct{}{}
+}
+
+// CreatorMetricsSnapshotIDCleared returns if the "creator_metrics_snapshot_id" field was cleared in this mutation.
+func (m *ProfileSignalMutation) CreatorMetricsSnapshotIDCleared() bool {
+	_, ok := m.clearedFields[profilesignal.FieldCreatorMetricsSnapshotID]
+	return ok
+}
+
+// ResetCreatorMetricsSnapshotID resets all changes to the "creator_metrics_snapshot_id" field.
+func (m *ProfileSignalMutation) ResetCreatorMetricsSnapshotID() {
+	m.creator_metrics_snapshot_id = nil
+	delete(m.clearedFields, profilesignal.FieldCreatorMetricsSnapshotID)
+}
+
 // SetOriginalPostsLast60Days sets the "original_posts_last_60_days" field.
 func (m *ProfileSignalMutation) SetOriginalPostsLast60Days(i int) {
 	m.original_posts_last_60_days = &i
@@ -25872,6 +26247,232 @@ func (m *ProfileSignalMutation) AddedDaysSinceLastViolation() (r int, exists boo
 func (m *ProfileSignalMutation) ResetDaysSinceLastViolation() {
 	m.days_since_last_violation = nil
 	m.adddays_since_last_violation = nil
+}
+
+// SetCreatorDaysSinceLastViolation sets the "creator_days_since_last_violation" field.
+func (m *ProfileSignalMutation) SetCreatorDaysSinceLastViolation(i int) {
+	m.creator_days_since_last_violation = &i
+	m.addcreator_days_since_last_violation = nil
+}
+
+// CreatorDaysSinceLastViolation returns the value of the "creator_days_since_last_violation" field in the mutation.
+func (m *ProfileSignalMutation) CreatorDaysSinceLastViolation() (r int, exists bool) {
+	v := m.creator_days_since_last_violation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorDaysSinceLastViolation returns the old "creator_days_since_last_violation" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldCreatorDaysSinceLastViolation(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorDaysSinceLastViolation is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorDaysSinceLastViolation requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorDaysSinceLastViolation: %w", err)
+	}
+	return oldValue.CreatorDaysSinceLastViolation, nil
+}
+
+// AddCreatorDaysSinceLastViolation adds i to the "creator_days_since_last_violation" field.
+func (m *ProfileSignalMutation) AddCreatorDaysSinceLastViolation(i int) {
+	if m.addcreator_days_since_last_violation != nil {
+		*m.addcreator_days_since_last_violation += i
+	} else {
+		m.addcreator_days_since_last_violation = &i
+	}
+}
+
+// AddedCreatorDaysSinceLastViolation returns the value that was added to the "creator_days_since_last_violation" field in this mutation.
+func (m *ProfileSignalMutation) AddedCreatorDaysSinceLastViolation() (r int, exists bool) {
+	v := m.addcreator_days_since_last_violation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreatorDaysSinceLastViolation resets all changes to the "creator_days_since_last_violation" field.
+func (m *ProfileSignalMutation) ResetCreatorDaysSinceLastViolation() {
+	m.creator_days_since_last_violation = nil
+	m.addcreator_days_since_last_violation = nil
+}
+
+// SetCreatorStandingAvailable sets the "creator_standing_available" field.
+func (m *ProfileSignalMutation) SetCreatorStandingAvailable(b bool) {
+	m.creator_standing_available = &b
+}
+
+// CreatorStandingAvailable returns the value of the "creator_standing_available" field in the mutation.
+func (m *ProfileSignalMutation) CreatorStandingAvailable() (r bool, exists bool) {
+	v := m.creator_standing_available
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorStandingAvailable returns the old "creator_standing_available" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldCreatorStandingAvailable(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorStandingAvailable is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorStandingAvailable requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorStandingAvailable: %w", err)
+	}
+	return oldValue.CreatorStandingAvailable, nil
+}
+
+// ResetCreatorStandingAvailable resets all changes to the "creator_standing_available" field.
+func (m *ProfileSignalMutation) ResetCreatorStandingAvailable() {
+	m.creator_standing_available = nil
+}
+
+// SetCreatorStandingSource sets the "creator_standing_source" field.
+func (m *ProfileSignalMutation) SetCreatorStandingSource(s string) {
+	m.creator_standing_source = &s
+}
+
+// CreatorStandingSource returns the value of the "creator_standing_source" field in the mutation.
+func (m *ProfileSignalMutation) CreatorStandingSource() (r string, exists bool) {
+	v := m.creator_standing_source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorStandingSource returns the old "creator_standing_source" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldCreatorStandingSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorStandingSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorStandingSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorStandingSource: %w", err)
+	}
+	return oldValue.CreatorStandingSource, nil
+}
+
+// ResetCreatorStandingSource resets all changes to the "creator_standing_source" field.
+func (m *ProfileSignalMutation) ResetCreatorStandingSource() {
+	m.creator_standing_source = nil
+}
+
+// SetCreatorStandingAsOf sets the "creator_standing_as_of" field.
+func (m *ProfileSignalMutation) SetCreatorStandingAsOf(t time.Time) {
+	m.creator_standing_as_of = &t
+}
+
+// CreatorStandingAsOf returns the value of the "creator_standing_as_of" field in the mutation.
+func (m *ProfileSignalMutation) CreatorStandingAsOf() (r time.Time, exists bool) {
+	v := m.creator_standing_as_of
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorStandingAsOf returns the old "creator_standing_as_of" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldCreatorStandingAsOf(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorStandingAsOf is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorStandingAsOf requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorStandingAsOf: %w", err)
+	}
+	return oldValue.CreatorStandingAsOf, nil
+}
+
+// ClearCreatorStandingAsOf clears the value of the "creator_standing_as_of" field.
+func (m *ProfileSignalMutation) ClearCreatorStandingAsOf() {
+	m.creator_standing_as_of = nil
+	m.clearedFields[profilesignal.FieldCreatorStandingAsOf] = struct{}{}
+}
+
+// CreatorStandingAsOfCleared returns if the "creator_standing_as_of" field was cleared in this mutation.
+func (m *ProfileSignalMutation) CreatorStandingAsOfCleared() bool {
+	_, ok := m.clearedFields[profilesignal.FieldCreatorStandingAsOf]
+	return ok
+}
+
+// ResetCreatorStandingAsOf resets all changes to the "creator_standing_as_of" field.
+func (m *ProfileSignalMutation) ResetCreatorStandingAsOf() {
+	m.creator_standing_as_of = nil
+	delete(m.clearedFields, profilesignal.FieldCreatorStandingAsOf)
+}
+
+// SetCreatorStandingSnapshotID sets the "creator_standing_snapshot_id" field.
+func (m *ProfileSignalMutation) SetCreatorStandingSnapshotID(u uuid.UUID) {
+	m.creator_standing_snapshot_id = &u
+}
+
+// CreatorStandingSnapshotID returns the value of the "creator_standing_snapshot_id" field in the mutation.
+func (m *ProfileSignalMutation) CreatorStandingSnapshotID() (r uuid.UUID, exists bool) {
+	v := m.creator_standing_snapshot_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorStandingSnapshotID returns the old "creator_standing_snapshot_id" field's value of the ProfileSignal entity.
+// If the ProfileSignal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileSignalMutation) OldCreatorStandingSnapshotID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorStandingSnapshotID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorStandingSnapshotID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorStandingSnapshotID: %w", err)
+	}
+	return oldValue.CreatorStandingSnapshotID, nil
+}
+
+// ClearCreatorStandingSnapshotID clears the value of the "creator_standing_snapshot_id" field.
+func (m *ProfileSignalMutation) ClearCreatorStandingSnapshotID() {
+	m.creator_standing_snapshot_id = nil
+	m.clearedFields[profilesignal.FieldCreatorStandingSnapshotID] = struct{}{}
+}
+
+// CreatorStandingSnapshotIDCleared returns if the "creator_standing_snapshot_id" field was cleared in this mutation.
+func (m *ProfileSignalMutation) CreatorStandingSnapshotIDCleared() bool {
+	_, ok := m.clearedFields[profilesignal.FieldCreatorStandingSnapshotID]
+	return ok
+}
+
+// ResetCreatorStandingSnapshotID resets all changes to the "creator_standing_snapshot_id" field.
+func (m *ProfileSignalMutation) ResetCreatorStandingSnapshotID() {
+	m.creator_standing_snapshot_id = nil
+	delete(m.clearedFields, profilesignal.FieldCreatorStandingSnapshotID)
 }
 
 // SetFraudScore sets the "fraud_score" field.
@@ -26531,7 +27132,7 @@ func (m *ProfileSignalMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProfileSignalMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 31)
 	if m.profile_id != nil {
 		fields = append(fields, profilesignal.FieldProfileID)
 	}
@@ -26541,11 +27142,47 @@ func (m *ProfileSignalMutation) Fields() []string {
 	if m.real_followers != nil {
 		fields = append(fields, profilesignal.FieldRealFollowers)
 	}
+	if m.creator_real_followers != nil {
+		fields = append(fields, profilesignal.FieldCreatorRealFollowers)
+	}
+	if m.creator_original_posts_last_60_days != nil {
+		fields = append(fields, profilesignal.FieldCreatorOriginalPostsLast60Days)
+	}
+	if m.verified_followers != nil {
+		fields = append(fields, profilesignal.FieldVerifiedFollowers)
+	}
+	if m.qualifying_impressions_last_30_days != nil {
+		fields = append(fields, profilesignal.FieldQualifyingImpressionsLast30Days)
+	}
+	if m.creator_metrics_source != nil {
+		fields = append(fields, profilesignal.FieldCreatorMetricsSource)
+	}
+	if m.creator_metrics_as_of != nil {
+		fields = append(fields, profilesignal.FieldCreatorMetricsAsOf)
+	}
+	if m.creator_metrics_snapshot_id != nil {
+		fields = append(fields, profilesignal.FieldCreatorMetricsSnapshotID)
+	}
 	if m.original_posts_last_60_days != nil {
 		fields = append(fields, profilesignal.FieldOriginalPostsLast60Days)
 	}
 	if m.days_since_last_violation != nil {
 		fields = append(fields, profilesignal.FieldDaysSinceLastViolation)
+	}
+	if m.creator_days_since_last_violation != nil {
+		fields = append(fields, profilesignal.FieldCreatorDaysSinceLastViolation)
+	}
+	if m.creator_standing_available != nil {
+		fields = append(fields, profilesignal.FieldCreatorStandingAvailable)
+	}
+	if m.creator_standing_source != nil {
+		fields = append(fields, profilesignal.FieldCreatorStandingSource)
+	}
+	if m.creator_standing_as_of != nil {
+		fields = append(fields, profilesignal.FieldCreatorStandingAsOf)
+	}
+	if m.creator_standing_snapshot_id != nil {
+		fields = append(fields, profilesignal.FieldCreatorStandingSnapshotID)
 	}
 	if m.fraud_score != nil {
 		fields = append(fields, profilesignal.FieldFraudScore)
@@ -26603,10 +27240,34 @@ func (m *ProfileSignalMutation) Field(name string) (ent.Value, bool) {
 		return m.AccountID()
 	case profilesignal.FieldRealFollowers:
 		return m.RealFollowers()
+	case profilesignal.FieldCreatorRealFollowers:
+		return m.CreatorRealFollowers()
+	case profilesignal.FieldCreatorOriginalPostsLast60Days:
+		return m.CreatorOriginalPostsLast60Days()
+	case profilesignal.FieldVerifiedFollowers:
+		return m.VerifiedFollowers()
+	case profilesignal.FieldQualifyingImpressionsLast30Days:
+		return m.QualifyingImpressionsLast30Days()
+	case profilesignal.FieldCreatorMetricsSource:
+		return m.CreatorMetricsSource()
+	case profilesignal.FieldCreatorMetricsAsOf:
+		return m.CreatorMetricsAsOf()
+	case profilesignal.FieldCreatorMetricsSnapshotID:
+		return m.CreatorMetricsSnapshotID()
 	case profilesignal.FieldOriginalPostsLast60Days:
 		return m.OriginalPostsLast60Days()
 	case profilesignal.FieldDaysSinceLastViolation:
 		return m.DaysSinceLastViolation()
+	case profilesignal.FieldCreatorDaysSinceLastViolation:
+		return m.CreatorDaysSinceLastViolation()
+	case profilesignal.FieldCreatorStandingAvailable:
+		return m.CreatorStandingAvailable()
+	case profilesignal.FieldCreatorStandingSource:
+		return m.CreatorStandingSource()
+	case profilesignal.FieldCreatorStandingAsOf:
+		return m.CreatorStandingAsOf()
+	case profilesignal.FieldCreatorStandingSnapshotID:
+		return m.CreatorStandingSnapshotID()
 	case profilesignal.FieldFraudScore:
 		return m.FraudScore()
 	case profilesignal.FieldRiskScore:
@@ -26650,10 +27311,34 @@ func (m *ProfileSignalMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldAccountID(ctx)
 	case profilesignal.FieldRealFollowers:
 		return m.OldRealFollowers(ctx)
+	case profilesignal.FieldCreatorRealFollowers:
+		return m.OldCreatorRealFollowers(ctx)
+	case profilesignal.FieldCreatorOriginalPostsLast60Days:
+		return m.OldCreatorOriginalPostsLast60Days(ctx)
+	case profilesignal.FieldVerifiedFollowers:
+		return m.OldVerifiedFollowers(ctx)
+	case profilesignal.FieldQualifyingImpressionsLast30Days:
+		return m.OldQualifyingImpressionsLast30Days(ctx)
+	case profilesignal.FieldCreatorMetricsSource:
+		return m.OldCreatorMetricsSource(ctx)
+	case profilesignal.FieldCreatorMetricsAsOf:
+		return m.OldCreatorMetricsAsOf(ctx)
+	case profilesignal.FieldCreatorMetricsSnapshotID:
+		return m.OldCreatorMetricsSnapshotID(ctx)
 	case profilesignal.FieldOriginalPostsLast60Days:
 		return m.OldOriginalPostsLast60Days(ctx)
 	case profilesignal.FieldDaysSinceLastViolation:
 		return m.OldDaysSinceLastViolation(ctx)
+	case profilesignal.FieldCreatorDaysSinceLastViolation:
+		return m.OldCreatorDaysSinceLastViolation(ctx)
+	case profilesignal.FieldCreatorStandingAvailable:
+		return m.OldCreatorStandingAvailable(ctx)
+	case profilesignal.FieldCreatorStandingSource:
+		return m.OldCreatorStandingSource(ctx)
+	case profilesignal.FieldCreatorStandingAsOf:
+		return m.OldCreatorStandingAsOf(ctx)
+	case profilesignal.FieldCreatorStandingSnapshotID:
+		return m.OldCreatorStandingSnapshotID(ctx)
 	case profilesignal.FieldFraudScore:
 		return m.OldFraudScore(ctx)
 	case profilesignal.FieldRiskScore:
@@ -26712,6 +27397,55 @@ func (m *ProfileSignalMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRealFollowers(v)
 		return nil
+	case profilesignal.FieldCreatorRealFollowers:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorRealFollowers(v)
+		return nil
+	case profilesignal.FieldCreatorOriginalPostsLast60Days:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorOriginalPostsLast60Days(v)
+		return nil
+	case profilesignal.FieldVerifiedFollowers:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVerifiedFollowers(v)
+		return nil
+	case profilesignal.FieldQualifyingImpressionsLast30Days:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQualifyingImpressionsLast30Days(v)
+		return nil
+	case profilesignal.FieldCreatorMetricsSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorMetricsSource(v)
+		return nil
+	case profilesignal.FieldCreatorMetricsAsOf:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorMetricsAsOf(v)
+		return nil
+	case profilesignal.FieldCreatorMetricsSnapshotID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorMetricsSnapshotID(v)
+		return nil
 	case profilesignal.FieldOriginalPostsLast60Days:
 		v, ok := value.(int)
 		if !ok {
@@ -26725,6 +27459,41 @@ func (m *ProfileSignalMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDaysSinceLastViolation(v)
+		return nil
+	case profilesignal.FieldCreatorDaysSinceLastViolation:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorDaysSinceLastViolation(v)
+		return nil
+	case profilesignal.FieldCreatorStandingAvailable:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorStandingAvailable(v)
+		return nil
+	case profilesignal.FieldCreatorStandingSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorStandingSource(v)
+		return nil
+	case profilesignal.FieldCreatorStandingAsOf:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorStandingAsOf(v)
+		return nil
+	case profilesignal.FieldCreatorStandingSnapshotID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorStandingSnapshotID(v)
 		return nil
 	case profilesignal.FieldFraudScore:
 		v, ok := value.(int)
@@ -26835,11 +27604,26 @@ func (m *ProfileSignalMutation) AddedFields() []string {
 	if m.addreal_followers != nil {
 		fields = append(fields, profilesignal.FieldRealFollowers)
 	}
+	if m.addcreator_real_followers != nil {
+		fields = append(fields, profilesignal.FieldCreatorRealFollowers)
+	}
+	if m.addcreator_original_posts_last_60_days != nil {
+		fields = append(fields, profilesignal.FieldCreatorOriginalPostsLast60Days)
+	}
+	if m.addverified_followers != nil {
+		fields = append(fields, profilesignal.FieldVerifiedFollowers)
+	}
+	if m.addqualifying_impressions_last_30_days != nil {
+		fields = append(fields, profilesignal.FieldQualifyingImpressionsLast30Days)
+	}
 	if m.addoriginal_posts_last_60_days != nil {
 		fields = append(fields, profilesignal.FieldOriginalPostsLast60Days)
 	}
 	if m.adddays_since_last_violation != nil {
 		fields = append(fields, profilesignal.FieldDaysSinceLastViolation)
+	}
+	if m.addcreator_days_since_last_violation != nil {
+		fields = append(fields, profilesignal.FieldCreatorDaysSinceLastViolation)
 	}
 	if m.addfraud_score != nil {
 		fields = append(fields, profilesignal.FieldFraudScore)
@@ -26863,10 +27647,20 @@ func (m *ProfileSignalMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case profilesignal.FieldRealFollowers:
 		return m.AddedRealFollowers()
+	case profilesignal.FieldCreatorRealFollowers:
+		return m.AddedCreatorRealFollowers()
+	case profilesignal.FieldCreatorOriginalPostsLast60Days:
+		return m.AddedCreatorOriginalPostsLast60Days()
+	case profilesignal.FieldVerifiedFollowers:
+		return m.AddedVerifiedFollowers()
+	case profilesignal.FieldQualifyingImpressionsLast30Days:
+		return m.AddedQualifyingImpressionsLast30Days()
 	case profilesignal.FieldOriginalPostsLast60Days:
 		return m.AddedOriginalPostsLast60Days()
 	case profilesignal.FieldDaysSinceLastViolation:
 		return m.AddedDaysSinceLastViolation()
+	case profilesignal.FieldCreatorDaysSinceLastViolation:
+		return m.AddedCreatorDaysSinceLastViolation()
 	case profilesignal.FieldFraudScore:
 		return m.AddedFraudScore()
 	case profilesignal.FieldRiskScore:
@@ -26891,6 +27685,34 @@ func (m *ProfileSignalMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddRealFollowers(v)
 		return nil
+	case profilesignal.FieldCreatorRealFollowers:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatorRealFollowers(v)
+		return nil
+	case profilesignal.FieldCreatorOriginalPostsLast60Days:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatorOriginalPostsLast60Days(v)
+		return nil
+	case profilesignal.FieldVerifiedFollowers:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVerifiedFollowers(v)
+		return nil
+	case profilesignal.FieldQualifyingImpressionsLast30Days:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddQualifyingImpressionsLast30Days(v)
+		return nil
 	case profilesignal.FieldOriginalPostsLast60Days:
 		v, ok := value.(int)
 		if !ok {
@@ -26904,6 +27726,13 @@ func (m *ProfileSignalMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddDaysSinceLastViolation(v)
+		return nil
+	case profilesignal.FieldCreatorDaysSinceLastViolation:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatorDaysSinceLastViolation(v)
 		return nil
 	case profilesignal.FieldFraudScore:
 		v, ok := value.(int)
@@ -26941,6 +27770,18 @@ func (m *ProfileSignalMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *ProfileSignalMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(profilesignal.FieldCreatorMetricsAsOf) {
+		fields = append(fields, profilesignal.FieldCreatorMetricsAsOf)
+	}
+	if m.FieldCleared(profilesignal.FieldCreatorMetricsSnapshotID) {
+		fields = append(fields, profilesignal.FieldCreatorMetricsSnapshotID)
+	}
+	if m.FieldCleared(profilesignal.FieldCreatorStandingAsOf) {
+		fields = append(fields, profilesignal.FieldCreatorStandingAsOf)
+	}
+	if m.FieldCleared(profilesignal.FieldCreatorStandingSnapshotID) {
+		fields = append(fields, profilesignal.FieldCreatorStandingSnapshotID)
+	}
 	if m.FieldCleared(profilesignal.FieldCheckmarkSuggestedAt) {
 		fields = append(fields, profilesignal.FieldCheckmarkSuggestedAt)
 	}
@@ -26964,6 +27805,18 @@ func (m *ProfileSignalMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *ProfileSignalMutation) ClearField(name string) error {
 	switch name {
+	case profilesignal.FieldCreatorMetricsAsOf:
+		m.ClearCreatorMetricsAsOf()
+		return nil
+	case profilesignal.FieldCreatorMetricsSnapshotID:
+		m.ClearCreatorMetricsSnapshotID()
+		return nil
+	case profilesignal.FieldCreatorStandingAsOf:
+		m.ClearCreatorStandingAsOf()
+		return nil
+	case profilesignal.FieldCreatorStandingSnapshotID:
+		m.ClearCreatorStandingSnapshotID()
+		return nil
 	case profilesignal.FieldCheckmarkSuggestedAt:
 		m.ClearCheckmarkSuggestedAt()
 		return nil
@@ -26990,11 +27843,47 @@ func (m *ProfileSignalMutation) ResetField(name string) error {
 	case profilesignal.FieldRealFollowers:
 		m.ResetRealFollowers()
 		return nil
+	case profilesignal.FieldCreatorRealFollowers:
+		m.ResetCreatorRealFollowers()
+		return nil
+	case profilesignal.FieldCreatorOriginalPostsLast60Days:
+		m.ResetCreatorOriginalPostsLast60Days()
+		return nil
+	case profilesignal.FieldVerifiedFollowers:
+		m.ResetVerifiedFollowers()
+		return nil
+	case profilesignal.FieldQualifyingImpressionsLast30Days:
+		m.ResetQualifyingImpressionsLast30Days()
+		return nil
+	case profilesignal.FieldCreatorMetricsSource:
+		m.ResetCreatorMetricsSource()
+		return nil
+	case profilesignal.FieldCreatorMetricsAsOf:
+		m.ResetCreatorMetricsAsOf()
+		return nil
+	case profilesignal.FieldCreatorMetricsSnapshotID:
+		m.ResetCreatorMetricsSnapshotID()
+		return nil
 	case profilesignal.FieldOriginalPostsLast60Days:
 		m.ResetOriginalPostsLast60Days()
 		return nil
 	case profilesignal.FieldDaysSinceLastViolation:
 		m.ResetDaysSinceLastViolation()
+		return nil
+	case profilesignal.FieldCreatorDaysSinceLastViolation:
+		m.ResetCreatorDaysSinceLastViolation()
+		return nil
+	case profilesignal.FieldCreatorStandingAvailable:
+		m.ResetCreatorStandingAvailable()
+		return nil
+	case profilesignal.FieldCreatorStandingSource:
+		m.ResetCreatorStandingSource()
+		return nil
+	case profilesignal.FieldCreatorStandingAsOf:
+		m.ResetCreatorStandingAsOf()
+		return nil
+	case profilesignal.FieldCreatorStandingSnapshotID:
+		m.ResetCreatorStandingSnapshotID()
 		return nil
 	case profilesignal.FieldFraudScore:
 		m.ResetFraudScore()

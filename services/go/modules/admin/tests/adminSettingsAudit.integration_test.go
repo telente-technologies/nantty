@@ -125,8 +125,12 @@ func TestAuditLogIsWrittenSearchableAndExportable(t *testing.T) {
 	harness := startAdminModuleAgainstFreshSchema(t)
 	accessToken, withStepUp := harness.signedInSuperadminWithStepUp("auditor@nantty.com")
 	harness.expect("PUT", "/api/v1/admin/config/creator.requirements", map[string]any{
-		"value":           map[string]any{"minimumFollowers": 50, "minimumAccountAgeDays": 7, "minimumOriginalPosts": 1, "maximumRecentStrikes": 0, "strikeLookbackDays": 30, "requireVerifiedEmail": true},
+		"value":           map[string]any{"minimumFollowers": 50, "minimumVerifiedFollowers": 10, "minimumQualifyingImpressionsLast30Days": 500, "minimumAccountAgeDays": 7, "minimumOriginalPosts": 1, "minimumOriginalPostsInLast60Days": 1, "maximumRecentStrikes": 0, "strikeLookbackDays": 30, "requireVerifiedEmail": false},
 		"expectedVersion": 1, "reason": "lower the bar for launch",
+	}, withStepUp, http.StatusUnprocessableEntity)
+	harness.expect("PUT", "/api/v1/admin/config/creator.requirements", map[string]any{
+		"value":           map[string]any{"minimumFollowers": 12_000, "minimumVerifiedFollowers": 500, "minimumQualifyingImpressionsLast30Days": 100_000, "minimumAccountAgeDays": 30, "minimumOriginalPosts": 10, "minimumOriginalPostsInLast60Days": 10, "maximumRecentStrikes": 0, "strikeLookbackDays": 90, "requireVerifiedEmail": true, "requiresIdentityVerification": true},
+		"expectedVersion": 1, "reason": "align compatibility view",
 	}, withStepUp, http.StatusOK)
 	recorder, err := identityports.Default.AuditRecorder()
 	if err != nil {
@@ -148,7 +152,7 @@ func TestAuditLogIsWrittenSearchableAndExportable(t *testing.T) {
 	}
 	changed := harness.expect("GET", "/api/v1/admin/audit?action=platform_setting.changed", nil, bearer(accessToken), http.StatusOK)["data"].([]any)
 	entry := changed[0].(map[string]any)
-	if len(changed) != 1 || entry["before"] == nil || entry["after"] == nil || entry["subjectId"] != "creator.requirements" {
+	if len(changed) != 1 || entry["before"] == nil || entry["after"] == nil || entry["subjectId"] != "creator-thresholds" {
 		t.Fatalf("setting change must carry before and after: %v", changed)
 	}
 	harness.expect("GET", "/api/v1/admin/audit?from=yesterday", nil, bearer(accessToken), http.StatusUnprocessableEntity)

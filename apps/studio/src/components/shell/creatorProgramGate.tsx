@@ -32,8 +32,9 @@ export function CreatorProgramGate() {
         {eligibility.isLoading ? <Skeleton height={120} /> : null}
         {eligibility.data ? (
           <>
-            <DataRows rows={eligibility.data.requirements.map((requirement) => ({ key: requirement.key, label: requirement.label, detail: requirement.met ? "Met" : `${requirement.requiredValue - requirement.currentValue} to go`, value: `${requirement.currentValue} / ${requirement.requiredValue}` }))} />
+            <DataRows rows={eligibility.data.requirements.map((requirement) => ({ key: requirement.key, label: requirement.label, detail: requirement.met ? "Met" : requirement.available ? `${requirement.remaining.toLocaleString()} to go` : "Data unavailable", value: requirement.available ? `${requirement.currentValue.toLocaleString()} / ${requirement.requiredValue.toLocaleString()}` : "Pending trusted source" }))} />
             <Muted>{eligibility.data.decisionNote}</Muted>
+            <Muted>{eligibility.data.metricsAvailable && eligibility.data.standingAvailable ? `Creator metrics last updated ${shortDate(eligibility.data.metricsAsOf ?? "")}; source: ${eligibility.data.metricsSource ?? "trusted analytics"}.` : "Trusted analytics or moderation has not supplied a current snapshot. Eligibility stays unavailable until both trusted sources report."}</Muted>
             {eligibility.data.eligible ? <a href={webappLinks.creatorApply} className={pageStyles.textLink}>Apply to the Creator Program</a> : <a href={webappLinks.creatorProgram} className={pageStyles.textLink}>How to qualify</a>}
           </>
         ) : null}
