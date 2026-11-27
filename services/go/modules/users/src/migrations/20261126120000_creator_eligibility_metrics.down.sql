@@ -1,0 +1,20 @@
+ALTER TABLE "profile_signals"
+  DROP CONSTRAINT "profile_signals_creator_real_followers_non_negative",
+  DROP CONSTRAINT "profile_signals_creator_original_posts_non_negative",
+  DROP CONSTRAINT "profile_signals_creator_days_since_violation_non_negative",
+  DROP CONSTRAINT "profile_signals_qualifying_impressions_non_negative",
+  DROP CONSTRAINT "profile_signals_verified_followers_non_negative",
+  DROP COLUMN "creator_metrics_as_of",
+  DROP COLUMN "creator_metrics_snapshot_id",
+  DROP COLUMN "creator_metrics_source",
+  DROP COLUMN "qualifying_impressions_last_30_days",
+  DROP COLUMN "creator_real_followers",
+  DROP COLUMN "creator_original_posts_last_60_days",
+  DROP COLUMN "creator_days_since_last_violation",
+  DROP COLUMN "creator_standing_available",
+  DROP COLUMN "creator_standing_source",
+  DROP COLUMN "creator_standing_as_of",
+  DROP COLUMN "creator_standing_snapshot_id",
+  DROP COLUMN "verified_followers";
+DROP TABLE "creator_eligibility_metric_snapshots";
+DROP TABLE "creator_policy_standing_snapshots";

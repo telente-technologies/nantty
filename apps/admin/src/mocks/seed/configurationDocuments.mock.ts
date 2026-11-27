@@ -24,7 +24,7 @@ export function buildInitialRevenueRules(): RevenueRulesConfiguration {
 }
 
 export function buildInitialCreatorEligibilityRules(): CreatorEligibilityRules {
-  return { minimumFollowers: 1_000, minimumPostsInLast30Days: 8, maximumActiveStrikes: 0, minimumAccountAgeDays: 30, requiresIdentityVerification: true, allowedCountries: ["NG", "GH", "KE", "ZA"] };
+  return { minimumFollowers: 10_000, minimumVerifiedFollowers: 500, minimumQualifyingImpressionsLast30Days: 100_000, minimumOriginalPosts: 10, minimumOriginalPostsInLast60Days: 10, minimumAccountAgeDays: 30, noViolationsInDays: 90, requiresIdentityVerification: true };
 }
 
 export function buildInitialUsernameRules(): UsernameRules {
@@ -38,7 +38,7 @@ export function buildInitialConfigurationDocuments(): { id: keyof ConfigurationD
     { id: "creator-eligibility", content: buildInitialCreatorEligibilityRules(), changeReason: "Creator Program launch criteria." },
     { id: "username-rules", content: buildInitialUsernameRules(), changeReason: "Username policy v1." },
     { id: "checkmark-suggestions", content: buildInitialCheckmarkSuggestionRules(), changeReason: "Proposed checkmark suggestion defaults." },
-    { id: "creator-thresholds", content: buildInitialCreatorThresholds(), changeReason: "Proposed Creator Program auto-approve and review thresholds." },
+    { id: "creator-thresholds", content: buildInitialCreatorThresholds(), changeReason: "Creator Program eligibility thresholds aligned to the current product policy." },
     { id: "trial-rules", content: buildInitialTrialRules(), changeReason: "Launch trial rules." },
     { id: "checkmark-pricing", content: buildInitialCheckmarkPricing(), changeReason: "Owner pricing: bundle 15%, Gold-only NGN 3,000, Black NGN 50,000." },
     { id: "regional-pricing", content: buildInitialRegionalPricingDocument(), changeReason: "Regional ad floors and creator subscription bands from docs/pricing.md (4 Oct 2026)." },

@@ -126,7 +126,7 @@ func startUsersModuleAgainstFreshSchemaConfigured(t *testing.T, configure func(*
 		AddressPhoneKey: bytes.Repeat([]byte{4}, 32),
 		Privacy: configs.PrivacySettings{
 			ExportBucket: "users-test-exports", ExportRegion: "eu-west-1", ExportDownloadLinkTtl: time.Minute, ExportArchiveTtl: time.Hour,
-			ExportWorkerPollInterval: time.Hour, DeletionGraceDays: 14, DeletionWorkerPollInterval: 200 * time.Millisecond, AnonymousConsentPerMinute: 60, InternalApiToken: strings.Repeat("u", 32), MoneyInternalUrl: moneyServer.URL, MoneyInternalToken: strings.Repeat("m", 32), DocumentsBucket: "users-test-documents",
+			ExportWorkerPollInterval: time.Hour, DeletionGraceDays: 14, DeletionWorkerPollInterval: 200 * time.Millisecond, AnonymousConsentPerMinute: 60, InternalApiToken: strings.Repeat("u", 32), CreatorMetricsInternalToken: strings.Repeat("c", 32), CreatorStandingInternalToken: strings.Repeat("s", 32), MoneyInternalUrl: moneyServer.URL, MoneyInternalToken: strings.Repeat("m", 32), DocumentsBucket: "users-test-documents",
 		},
 	}
 	dependencies := servicemodule.Dependencies{Logger: slog.New(slog.NewTextHandler(&bytes.Buffer{}, nil)), Health: health.NewRegistryForService("users-test")}

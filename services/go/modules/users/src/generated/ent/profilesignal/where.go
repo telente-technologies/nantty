@@ -70,6 +70,41 @@ func RealFollowers(v int) predicate.ProfileSignal {
 	return predicate.ProfileSignal(sql.FieldEQ(FieldRealFollowers, v))
 }
 
+// CreatorRealFollowers applies equality check predicate on the "creator_real_followers" field. It's identical to CreatorRealFollowersEQ.
+func CreatorRealFollowers(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorRealFollowers, v))
+}
+
+// CreatorOriginalPostsLast60Days applies equality check predicate on the "creator_original_posts_last_60_days" field. It's identical to CreatorOriginalPostsLast60DaysEQ.
+func CreatorOriginalPostsLast60Days(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorOriginalPostsLast60Days, v))
+}
+
+// VerifiedFollowers applies equality check predicate on the "verified_followers" field. It's identical to VerifiedFollowersEQ.
+func VerifiedFollowers(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldVerifiedFollowers, v))
+}
+
+// QualifyingImpressionsLast30Days applies equality check predicate on the "qualifying_impressions_last_30_days" field. It's identical to QualifyingImpressionsLast30DaysEQ.
+func QualifyingImpressionsLast30Days(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldQualifyingImpressionsLast30Days, v))
+}
+
+// CreatorMetricsSource applies equality check predicate on the "creator_metrics_source" field. It's identical to CreatorMetricsSourceEQ.
+func CreatorMetricsSource(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorMetricsSource, v))
+}
+
+// CreatorMetricsAsOf applies equality check predicate on the "creator_metrics_as_of" field. It's identical to CreatorMetricsAsOfEQ.
+func CreatorMetricsAsOf(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorMetricsAsOf, v))
+}
+
+// CreatorMetricsSnapshotID applies equality check predicate on the "creator_metrics_snapshot_id" field. It's identical to CreatorMetricsSnapshotIDEQ.
+func CreatorMetricsSnapshotID(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorMetricsSnapshotID, v))
+}
+
 // OriginalPostsLast60Days applies equality check predicate on the "original_posts_last_60_days" field. It's identical to OriginalPostsLast60DaysEQ.
 func OriginalPostsLast60Days(v int) predicate.ProfileSignal {
 	return predicate.ProfileSignal(sql.FieldEQ(FieldOriginalPostsLast60Days, v))
@@ -78,6 +113,31 @@ func OriginalPostsLast60Days(v int) predicate.ProfileSignal {
 // DaysSinceLastViolation applies equality check predicate on the "days_since_last_violation" field. It's identical to DaysSinceLastViolationEQ.
 func DaysSinceLastViolation(v int) predicate.ProfileSignal {
 	return predicate.ProfileSignal(sql.FieldEQ(FieldDaysSinceLastViolation, v))
+}
+
+// CreatorDaysSinceLastViolation applies equality check predicate on the "creator_days_since_last_violation" field. It's identical to CreatorDaysSinceLastViolationEQ.
+func CreatorDaysSinceLastViolation(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorDaysSinceLastViolation, v))
+}
+
+// CreatorStandingAvailable applies equality check predicate on the "creator_standing_available" field. It's identical to CreatorStandingAvailableEQ.
+func CreatorStandingAvailable(v bool) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorStandingAvailable, v))
+}
+
+// CreatorStandingSource applies equality check predicate on the "creator_standing_source" field. It's identical to CreatorStandingSourceEQ.
+func CreatorStandingSource(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorStandingSource, v))
+}
+
+// CreatorStandingAsOf applies equality check predicate on the "creator_standing_as_of" field. It's identical to CreatorStandingAsOfEQ.
+func CreatorStandingAsOf(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorStandingAsOf, v))
+}
+
+// CreatorStandingSnapshotID applies equality check predicate on the "creator_standing_snapshot_id" field. It's identical to CreatorStandingSnapshotIDEQ.
+func CreatorStandingSnapshotID(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorStandingSnapshotID, v))
 }
 
 // FraudScore applies equality check predicate on the "fraud_score" field. It's identical to FraudScoreEQ.
@@ -265,6 +325,331 @@ func RealFollowersLTE(v int) predicate.ProfileSignal {
 	return predicate.ProfileSignal(sql.FieldLTE(FieldRealFollowers, v))
 }
 
+// CreatorRealFollowersEQ applies the EQ predicate on the "creator_real_followers" field.
+func CreatorRealFollowersEQ(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorRealFollowers, v))
+}
+
+// CreatorRealFollowersNEQ applies the NEQ predicate on the "creator_real_followers" field.
+func CreatorRealFollowersNEQ(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldCreatorRealFollowers, v))
+}
+
+// CreatorRealFollowersIn applies the In predicate on the "creator_real_followers" field.
+func CreatorRealFollowersIn(vs ...int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldCreatorRealFollowers, vs...))
+}
+
+// CreatorRealFollowersNotIn applies the NotIn predicate on the "creator_real_followers" field.
+func CreatorRealFollowersNotIn(vs ...int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldCreatorRealFollowers, vs...))
+}
+
+// CreatorRealFollowersGT applies the GT predicate on the "creator_real_followers" field.
+func CreatorRealFollowersGT(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldCreatorRealFollowers, v))
+}
+
+// CreatorRealFollowersGTE applies the GTE predicate on the "creator_real_followers" field.
+func CreatorRealFollowersGTE(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldCreatorRealFollowers, v))
+}
+
+// CreatorRealFollowersLT applies the LT predicate on the "creator_real_followers" field.
+func CreatorRealFollowersLT(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldCreatorRealFollowers, v))
+}
+
+// CreatorRealFollowersLTE applies the LTE predicate on the "creator_real_followers" field.
+func CreatorRealFollowersLTE(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldCreatorRealFollowers, v))
+}
+
+// CreatorOriginalPostsLast60DaysEQ applies the EQ predicate on the "creator_original_posts_last_60_days" field.
+func CreatorOriginalPostsLast60DaysEQ(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorOriginalPostsLast60Days, v))
+}
+
+// CreatorOriginalPostsLast60DaysNEQ applies the NEQ predicate on the "creator_original_posts_last_60_days" field.
+func CreatorOriginalPostsLast60DaysNEQ(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldCreatorOriginalPostsLast60Days, v))
+}
+
+// CreatorOriginalPostsLast60DaysIn applies the In predicate on the "creator_original_posts_last_60_days" field.
+func CreatorOriginalPostsLast60DaysIn(vs ...int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldCreatorOriginalPostsLast60Days, vs...))
+}
+
+// CreatorOriginalPostsLast60DaysNotIn applies the NotIn predicate on the "creator_original_posts_last_60_days" field.
+func CreatorOriginalPostsLast60DaysNotIn(vs ...int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldCreatorOriginalPostsLast60Days, vs...))
+}
+
+// CreatorOriginalPostsLast60DaysGT applies the GT predicate on the "creator_original_posts_last_60_days" field.
+func CreatorOriginalPostsLast60DaysGT(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldCreatorOriginalPostsLast60Days, v))
+}
+
+// CreatorOriginalPostsLast60DaysGTE applies the GTE predicate on the "creator_original_posts_last_60_days" field.
+func CreatorOriginalPostsLast60DaysGTE(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldCreatorOriginalPostsLast60Days, v))
+}
+
+// CreatorOriginalPostsLast60DaysLT applies the LT predicate on the "creator_original_posts_last_60_days" field.
+func CreatorOriginalPostsLast60DaysLT(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldCreatorOriginalPostsLast60Days, v))
+}
+
+// CreatorOriginalPostsLast60DaysLTE applies the LTE predicate on the "creator_original_posts_last_60_days" field.
+func CreatorOriginalPostsLast60DaysLTE(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldCreatorOriginalPostsLast60Days, v))
+}
+
+// VerifiedFollowersEQ applies the EQ predicate on the "verified_followers" field.
+func VerifiedFollowersEQ(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldVerifiedFollowers, v))
+}
+
+// VerifiedFollowersNEQ applies the NEQ predicate on the "verified_followers" field.
+func VerifiedFollowersNEQ(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldVerifiedFollowers, v))
+}
+
+// VerifiedFollowersIn applies the In predicate on the "verified_followers" field.
+func VerifiedFollowersIn(vs ...int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldVerifiedFollowers, vs...))
+}
+
+// VerifiedFollowersNotIn applies the NotIn predicate on the "verified_followers" field.
+func VerifiedFollowersNotIn(vs ...int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldVerifiedFollowers, vs...))
+}
+
+// VerifiedFollowersGT applies the GT predicate on the "verified_followers" field.
+func VerifiedFollowersGT(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldVerifiedFollowers, v))
+}
+
+// VerifiedFollowersGTE applies the GTE predicate on the "verified_followers" field.
+func VerifiedFollowersGTE(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldVerifiedFollowers, v))
+}
+
+// VerifiedFollowersLT applies the LT predicate on the "verified_followers" field.
+func VerifiedFollowersLT(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldVerifiedFollowers, v))
+}
+
+// VerifiedFollowersLTE applies the LTE predicate on the "verified_followers" field.
+func VerifiedFollowersLTE(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldVerifiedFollowers, v))
+}
+
+// QualifyingImpressionsLast30DaysEQ applies the EQ predicate on the "qualifying_impressions_last_30_days" field.
+func QualifyingImpressionsLast30DaysEQ(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldQualifyingImpressionsLast30Days, v))
+}
+
+// QualifyingImpressionsLast30DaysNEQ applies the NEQ predicate on the "qualifying_impressions_last_30_days" field.
+func QualifyingImpressionsLast30DaysNEQ(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldQualifyingImpressionsLast30Days, v))
+}
+
+// QualifyingImpressionsLast30DaysIn applies the In predicate on the "qualifying_impressions_last_30_days" field.
+func QualifyingImpressionsLast30DaysIn(vs ...int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldQualifyingImpressionsLast30Days, vs...))
+}
+
+// QualifyingImpressionsLast30DaysNotIn applies the NotIn predicate on the "qualifying_impressions_last_30_days" field.
+func QualifyingImpressionsLast30DaysNotIn(vs ...int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldQualifyingImpressionsLast30Days, vs...))
+}
+
+// QualifyingImpressionsLast30DaysGT applies the GT predicate on the "qualifying_impressions_last_30_days" field.
+func QualifyingImpressionsLast30DaysGT(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldQualifyingImpressionsLast30Days, v))
+}
+
+// QualifyingImpressionsLast30DaysGTE applies the GTE predicate on the "qualifying_impressions_last_30_days" field.
+func QualifyingImpressionsLast30DaysGTE(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldQualifyingImpressionsLast30Days, v))
+}
+
+// QualifyingImpressionsLast30DaysLT applies the LT predicate on the "qualifying_impressions_last_30_days" field.
+func QualifyingImpressionsLast30DaysLT(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldQualifyingImpressionsLast30Days, v))
+}
+
+// QualifyingImpressionsLast30DaysLTE applies the LTE predicate on the "qualifying_impressions_last_30_days" field.
+func QualifyingImpressionsLast30DaysLTE(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldQualifyingImpressionsLast30Days, v))
+}
+
+// CreatorMetricsSourceEQ applies the EQ predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceEQ(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorMetricsSource, v))
+}
+
+// CreatorMetricsSourceNEQ applies the NEQ predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceNEQ(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldCreatorMetricsSource, v))
+}
+
+// CreatorMetricsSourceIn applies the In predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceIn(vs ...string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldCreatorMetricsSource, vs...))
+}
+
+// CreatorMetricsSourceNotIn applies the NotIn predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceNotIn(vs ...string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldCreatorMetricsSource, vs...))
+}
+
+// CreatorMetricsSourceGT applies the GT predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceGT(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldCreatorMetricsSource, v))
+}
+
+// CreatorMetricsSourceGTE applies the GTE predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceGTE(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldCreatorMetricsSource, v))
+}
+
+// CreatorMetricsSourceLT applies the LT predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceLT(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldCreatorMetricsSource, v))
+}
+
+// CreatorMetricsSourceLTE applies the LTE predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceLTE(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldCreatorMetricsSource, v))
+}
+
+// CreatorMetricsSourceContains applies the Contains predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceContains(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldContains(FieldCreatorMetricsSource, v))
+}
+
+// CreatorMetricsSourceHasPrefix applies the HasPrefix predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceHasPrefix(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldHasPrefix(FieldCreatorMetricsSource, v))
+}
+
+// CreatorMetricsSourceHasSuffix applies the HasSuffix predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceHasSuffix(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldHasSuffix(FieldCreatorMetricsSource, v))
+}
+
+// CreatorMetricsSourceEqualFold applies the EqualFold predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceEqualFold(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEqualFold(FieldCreatorMetricsSource, v))
+}
+
+// CreatorMetricsSourceContainsFold applies the ContainsFold predicate on the "creator_metrics_source" field.
+func CreatorMetricsSourceContainsFold(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldContainsFold(FieldCreatorMetricsSource, v))
+}
+
+// CreatorMetricsAsOfEQ applies the EQ predicate on the "creator_metrics_as_of" field.
+func CreatorMetricsAsOfEQ(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorMetricsAsOf, v))
+}
+
+// CreatorMetricsAsOfNEQ applies the NEQ predicate on the "creator_metrics_as_of" field.
+func CreatorMetricsAsOfNEQ(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldCreatorMetricsAsOf, v))
+}
+
+// CreatorMetricsAsOfIn applies the In predicate on the "creator_metrics_as_of" field.
+func CreatorMetricsAsOfIn(vs ...time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldCreatorMetricsAsOf, vs...))
+}
+
+// CreatorMetricsAsOfNotIn applies the NotIn predicate on the "creator_metrics_as_of" field.
+func CreatorMetricsAsOfNotIn(vs ...time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldCreatorMetricsAsOf, vs...))
+}
+
+// CreatorMetricsAsOfGT applies the GT predicate on the "creator_metrics_as_of" field.
+func CreatorMetricsAsOfGT(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldCreatorMetricsAsOf, v))
+}
+
+// CreatorMetricsAsOfGTE applies the GTE predicate on the "creator_metrics_as_of" field.
+func CreatorMetricsAsOfGTE(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldCreatorMetricsAsOf, v))
+}
+
+// CreatorMetricsAsOfLT applies the LT predicate on the "creator_metrics_as_of" field.
+func CreatorMetricsAsOfLT(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldCreatorMetricsAsOf, v))
+}
+
+// CreatorMetricsAsOfLTE applies the LTE predicate on the "creator_metrics_as_of" field.
+func CreatorMetricsAsOfLTE(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldCreatorMetricsAsOf, v))
+}
+
+// CreatorMetricsAsOfIsNil applies the IsNil predicate on the "creator_metrics_as_of" field.
+func CreatorMetricsAsOfIsNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIsNull(FieldCreatorMetricsAsOf))
+}
+
+// CreatorMetricsAsOfNotNil applies the NotNil predicate on the "creator_metrics_as_of" field.
+func CreatorMetricsAsOfNotNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotNull(FieldCreatorMetricsAsOf))
+}
+
+// CreatorMetricsSnapshotIDEQ applies the EQ predicate on the "creator_metrics_snapshot_id" field.
+func CreatorMetricsSnapshotIDEQ(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorMetricsSnapshotID, v))
+}
+
+// CreatorMetricsSnapshotIDNEQ applies the NEQ predicate on the "creator_metrics_snapshot_id" field.
+func CreatorMetricsSnapshotIDNEQ(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldCreatorMetricsSnapshotID, v))
+}
+
+// CreatorMetricsSnapshotIDIn applies the In predicate on the "creator_metrics_snapshot_id" field.
+func CreatorMetricsSnapshotIDIn(vs ...uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldCreatorMetricsSnapshotID, vs...))
+}
+
+// CreatorMetricsSnapshotIDNotIn applies the NotIn predicate on the "creator_metrics_snapshot_id" field.
+func CreatorMetricsSnapshotIDNotIn(vs ...uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldCreatorMetricsSnapshotID, vs...))
+}
+
+// CreatorMetricsSnapshotIDGT applies the GT predicate on the "creator_metrics_snapshot_id" field.
+func CreatorMetricsSnapshotIDGT(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldCreatorMetricsSnapshotID, v))
+}
+
+// CreatorMetricsSnapshotIDGTE applies the GTE predicate on the "creator_metrics_snapshot_id" field.
+func CreatorMetricsSnapshotIDGTE(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldCreatorMetricsSnapshotID, v))
+}
+
+// CreatorMetricsSnapshotIDLT applies the LT predicate on the "creator_metrics_snapshot_id" field.
+func CreatorMetricsSnapshotIDLT(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldCreatorMetricsSnapshotID, v))
+}
+
+// CreatorMetricsSnapshotIDLTE applies the LTE predicate on the "creator_metrics_snapshot_id" field.
+func CreatorMetricsSnapshotIDLTE(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldCreatorMetricsSnapshotID, v))
+}
+
+// CreatorMetricsSnapshotIDIsNil applies the IsNil predicate on the "creator_metrics_snapshot_id" field.
+func CreatorMetricsSnapshotIDIsNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIsNull(FieldCreatorMetricsSnapshotID))
+}
+
+// CreatorMetricsSnapshotIDNotNil applies the NotNil predicate on the "creator_metrics_snapshot_id" field.
+func CreatorMetricsSnapshotIDNotNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotNull(FieldCreatorMetricsSnapshotID))
+}
+
 // OriginalPostsLast60DaysEQ applies the EQ predicate on the "original_posts_last_60_days" field.
 func OriginalPostsLast60DaysEQ(v int) predicate.ProfileSignal {
 	return predicate.ProfileSignal(sql.FieldEQ(FieldOriginalPostsLast60Days, v))
@@ -343,6 +728,221 @@ func DaysSinceLastViolationLT(v int) predicate.ProfileSignal {
 // DaysSinceLastViolationLTE applies the LTE predicate on the "days_since_last_violation" field.
 func DaysSinceLastViolationLTE(v int) predicate.ProfileSignal {
 	return predicate.ProfileSignal(sql.FieldLTE(FieldDaysSinceLastViolation, v))
+}
+
+// CreatorDaysSinceLastViolationEQ applies the EQ predicate on the "creator_days_since_last_violation" field.
+func CreatorDaysSinceLastViolationEQ(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorDaysSinceLastViolation, v))
+}
+
+// CreatorDaysSinceLastViolationNEQ applies the NEQ predicate on the "creator_days_since_last_violation" field.
+func CreatorDaysSinceLastViolationNEQ(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldCreatorDaysSinceLastViolation, v))
+}
+
+// CreatorDaysSinceLastViolationIn applies the In predicate on the "creator_days_since_last_violation" field.
+func CreatorDaysSinceLastViolationIn(vs ...int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldCreatorDaysSinceLastViolation, vs...))
+}
+
+// CreatorDaysSinceLastViolationNotIn applies the NotIn predicate on the "creator_days_since_last_violation" field.
+func CreatorDaysSinceLastViolationNotIn(vs ...int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldCreatorDaysSinceLastViolation, vs...))
+}
+
+// CreatorDaysSinceLastViolationGT applies the GT predicate on the "creator_days_since_last_violation" field.
+func CreatorDaysSinceLastViolationGT(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldCreatorDaysSinceLastViolation, v))
+}
+
+// CreatorDaysSinceLastViolationGTE applies the GTE predicate on the "creator_days_since_last_violation" field.
+func CreatorDaysSinceLastViolationGTE(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldCreatorDaysSinceLastViolation, v))
+}
+
+// CreatorDaysSinceLastViolationLT applies the LT predicate on the "creator_days_since_last_violation" field.
+func CreatorDaysSinceLastViolationLT(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldCreatorDaysSinceLastViolation, v))
+}
+
+// CreatorDaysSinceLastViolationLTE applies the LTE predicate on the "creator_days_since_last_violation" field.
+func CreatorDaysSinceLastViolationLTE(v int) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldCreatorDaysSinceLastViolation, v))
+}
+
+// CreatorStandingAvailableEQ applies the EQ predicate on the "creator_standing_available" field.
+func CreatorStandingAvailableEQ(v bool) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorStandingAvailable, v))
+}
+
+// CreatorStandingAvailableNEQ applies the NEQ predicate on the "creator_standing_available" field.
+func CreatorStandingAvailableNEQ(v bool) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldCreatorStandingAvailable, v))
+}
+
+// CreatorStandingSourceEQ applies the EQ predicate on the "creator_standing_source" field.
+func CreatorStandingSourceEQ(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorStandingSource, v))
+}
+
+// CreatorStandingSourceNEQ applies the NEQ predicate on the "creator_standing_source" field.
+func CreatorStandingSourceNEQ(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldCreatorStandingSource, v))
+}
+
+// CreatorStandingSourceIn applies the In predicate on the "creator_standing_source" field.
+func CreatorStandingSourceIn(vs ...string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldCreatorStandingSource, vs...))
+}
+
+// CreatorStandingSourceNotIn applies the NotIn predicate on the "creator_standing_source" field.
+func CreatorStandingSourceNotIn(vs ...string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldCreatorStandingSource, vs...))
+}
+
+// CreatorStandingSourceGT applies the GT predicate on the "creator_standing_source" field.
+func CreatorStandingSourceGT(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldCreatorStandingSource, v))
+}
+
+// CreatorStandingSourceGTE applies the GTE predicate on the "creator_standing_source" field.
+func CreatorStandingSourceGTE(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldCreatorStandingSource, v))
+}
+
+// CreatorStandingSourceLT applies the LT predicate on the "creator_standing_source" field.
+func CreatorStandingSourceLT(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldCreatorStandingSource, v))
+}
+
+// CreatorStandingSourceLTE applies the LTE predicate on the "creator_standing_source" field.
+func CreatorStandingSourceLTE(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldCreatorStandingSource, v))
+}
+
+// CreatorStandingSourceContains applies the Contains predicate on the "creator_standing_source" field.
+func CreatorStandingSourceContains(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldContains(FieldCreatorStandingSource, v))
+}
+
+// CreatorStandingSourceHasPrefix applies the HasPrefix predicate on the "creator_standing_source" field.
+func CreatorStandingSourceHasPrefix(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldHasPrefix(FieldCreatorStandingSource, v))
+}
+
+// CreatorStandingSourceHasSuffix applies the HasSuffix predicate on the "creator_standing_source" field.
+func CreatorStandingSourceHasSuffix(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldHasSuffix(FieldCreatorStandingSource, v))
+}
+
+// CreatorStandingSourceEqualFold applies the EqualFold predicate on the "creator_standing_source" field.
+func CreatorStandingSourceEqualFold(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEqualFold(FieldCreatorStandingSource, v))
+}
+
+// CreatorStandingSourceContainsFold applies the ContainsFold predicate on the "creator_standing_source" field.
+func CreatorStandingSourceContainsFold(v string) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldContainsFold(FieldCreatorStandingSource, v))
+}
+
+// CreatorStandingAsOfEQ applies the EQ predicate on the "creator_standing_as_of" field.
+func CreatorStandingAsOfEQ(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorStandingAsOf, v))
+}
+
+// CreatorStandingAsOfNEQ applies the NEQ predicate on the "creator_standing_as_of" field.
+func CreatorStandingAsOfNEQ(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldCreatorStandingAsOf, v))
+}
+
+// CreatorStandingAsOfIn applies the In predicate on the "creator_standing_as_of" field.
+func CreatorStandingAsOfIn(vs ...time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldCreatorStandingAsOf, vs...))
+}
+
+// CreatorStandingAsOfNotIn applies the NotIn predicate on the "creator_standing_as_of" field.
+func CreatorStandingAsOfNotIn(vs ...time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldCreatorStandingAsOf, vs...))
+}
+
+// CreatorStandingAsOfGT applies the GT predicate on the "creator_standing_as_of" field.
+func CreatorStandingAsOfGT(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldCreatorStandingAsOf, v))
+}
+
+// CreatorStandingAsOfGTE applies the GTE predicate on the "creator_standing_as_of" field.
+func CreatorStandingAsOfGTE(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldCreatorStandingAsOf, v))
+}
+
+// CreatorStandingAsOfLT applies the LT predicate on the "creator_standing_as_of" field.
+func CreatorStandingAsOfLT(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldCreatorStandingAsOf, v))
+}
+
+// CreatorStandingAsOfLTE applies the LTE predicate on the "creator_standing_as_of" field.
+func CreatorStandingAsOfLTE(v time.Time) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldCreatorStandingAsOf, v))
+}
+
+// CreatorStandingAsOfIsNil applies the IsNil predicate on the "creator_standing_as_of" field.
+func CreatorStandingAsOfIsNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIsNull(FieldCreatorStandingAsOf))
+}
+
+// CreatorStandingAsOfNotNil applies the NotNil predicate on the "creator_standing_as_of" field.
+func CreatorStandingAsOfNotNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotNull(FieldCreatorStandingAsOf))
+}
+
+// CreatorStandingSnapshotIDEQ applies the EQ predicate on the "creator_standing_snapshot_id" field.
+func CreatorStandingSnapshotIDEQ(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldEQ(FieldCreatorStandingSnapshotID, v))
+}
+
+// CreatorStandingSnapshotIDNEQ applies the NEQ predicate on the "creator_standing_snapshot_id" field.
+func CreatorStandingSnapshotIDNEQ(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNEQ(FieldCreatorStandingSnapshotID, v))
+}
+
+// CreatorStandingSnapshotIDIn applies the In predicate on the "creator_standing_snapshot_id" field.
+func CreatorStandingSnapshotIDIn(vs ...uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIn(FieldCreatorStandingSnapshotID, vs...))
+}
+
+// CreatorStandingSnapshotIDNotIn applies the NotIn predicate on the "creator_standing_snapshot_id" field.
+func CreatorStandingSnapshotIDNotIn(vs ...uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotIn(FieldCreatorStandingSnapshotID, vs...))
+}
+
+// CreatorStandingSnapshotIDGT applies the GT predicate on the "creator_standing_snapshot_id" field.
+func CreatorStandingSnapshotIDGT(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGT(FieldCreatorStandingSnapshotID, v))
+}
+
+// CreatorStandingSnapshotIDGTE applies the GTE predicate on the "creator_standing_snapshot_id" field.
+func CreatorStandingSnapshotIDGTE(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldGTE(FieldCreatorStandingSnapshotID, v))
+}
+
+// CreatorStandingSnapshotIDLT applies the LT predicate on the "creator_standing_snapshot_id" field.
+func CreatorStandingSnapshotIDLT(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLT(FieldCreatorStandingSnapshotID, v))
+}
+
+// CreatorStandingSnapshotIDLTE applies the LTE predicate on the "creator_standing_snapshot_id" field.
+func CreatorStandingSnapshotIDLTE(v uuid.UUID) predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldLTE(FieldCreatorStandingSnapshotID, v))
+}
+
+// CreatorStandingSnapshotIDIsNil applies the IsNil predicate on the "creator_standing_snapshot_id" field.
+func CreatorStandingSnapshotIDIsNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldIsNull(FieldCreatorStandingSnapshotID))
+}
+
+// CreatorStandingSnapshotIDNotNil applies the NotNil predicate on the "creator_standing_snapshot_id" field.
+func CreatorStandingSnapshotIDNotNil() predicate.ProfileSignal {
+	return predicate.ProfileSignal(sql.FieldNotNull(FieldCreatorStandingSnapshotID))
 }
 
 // FraudScoreEQ applies the EQ predicate on the "fraud_score" field.

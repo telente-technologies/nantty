@@ -10,5 +10,6 @@ import (
 
 func MountCreatorStatusRoutes(mux *http.ServeMux, container *container.Container) {
 	controller := controllers.CreatorStatusController{Container: container}
-	mux.Handle("POST /api/v1/users/me/creator-application", jwtauth.RequireVerifiedAccessToken(container.AccessVerifier)(http.HandlerFunc(controller.ApplyForCreator)))
+	requireAdult := jwtauth.RequireAdultAccount()
+	mux.Handle("POST /api/v1/users/me/creator-application", jwtauth.RequireVerifiedAccessToken(container.AccessVerifier)(requireAdult(http.HandlerFunc(controller.ApplyForCreator))))
 }

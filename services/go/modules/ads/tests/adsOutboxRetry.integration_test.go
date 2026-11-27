@@ -16,6 +16,9 @@ import (
 func TestAdsOutboxPersistsRetryAndWaitsUntilDue(t *testing.T) {
 	h := startAdsAgainstFreshSchema(t)
 	ctx := context.Background()
+	h.clock.mutex.Lock()
+	h.clock.current = h.clock.current.Truncate(time.Microsecond)
+	h.clock.mutex.Unlock()
 	now := h.clock.Now()
 	id := uuid.New()
 	if err := h.module.Container.Client.OutboxEvent.Create().

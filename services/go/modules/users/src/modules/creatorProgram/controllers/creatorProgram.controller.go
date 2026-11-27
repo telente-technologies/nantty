@@ -100,6 +100,19 @@ func (controller CreatorProgramController) PutSignals(writer http.ResponseWriter
 		return
 	}
 	body, err := utils.DecodeAndValidate(writer, request, acceptAny[dtos.ProfileSignalsRequest])
+	metricsProvided := body.VerifiedFollowers != nil || body.QualifyingImpressions30d != nil || body.CreatorMetricsAsOf != nil || body.CreatorMetricsSnapshotId != ""
+	creatorMetricsToken := controller.Container.Settings.Privacy.CreatorMetricsInternalToken
+	if err == nil && metricsProvided && (creatorMetricsToken == "" || subtle.ConstantTimeCompare([]byte(creatorMetricsToken), []byte(request.Header.Get("X-Creator-Metrics-Token"))) != 1) {
+		httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
+		return
+	}
+	if err == nil && body.DaysSinceLastViolation != nil {
+		standingToken := controller.Container.Settings.Privacy.CreatorStandingInternalToken
+		if standingToken == "" || body.CreatorStandingSource != "moderation_creator_standing_v1" || body.CreatorStandingSnapshotId == "" || body.CreatorStandingAsOf == nil || subtle.ConstantTimeCompare([]byte(standingToken), []byte(request.Header.Get("X-Creator-Standing-Token"))) != 1 {
+			httpserver.WriteJsonResponse(writer, http.StatusUnauthorized, httpserver.ErrUnauthorized)
+			return
+		}
+	}
 	if err == nil {
 		err = upsertprofilesignals.Handler{Container: controller.Container}.Execute(request.Context(), upsertprofilesignals.Command{ProfileId: profileId, Input: body})
 	}

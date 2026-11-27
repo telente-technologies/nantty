@@ -64,13 +64,18 @@ export function validateRevenueRules(rawContent: unknown, currentContent: Revenu
 
 export function validateCreatorEligibilityRules(rawContent: unknown): CreatorEligibilityRules {
   const content = readObjectAtPath(rawContent, "content");
+  const minimumOriginalPosts = readIntegerBetween(content, "minimumOriginalPosts", "content", 10, 100_000);
+  const minimumOriginalPostsInLast60Days = readIntegerBetween(content, "minimumOriginalPostsInLast60Days", "content", 10, 100_000);
+  if (minimumOriginalPosts !== minimumOriginalPostsInLast60Days) failValidation("content.minimumOriginalPostsInLast60Days", "Original-post minimums must match.");
   return {
-    minimumFollowers: readIntegerBetween(content, "minimumFollowers", "content", 0, 10_000_000),
-    minimumPostsInLast30Days: readIntegerBetween(content, "minimumPostsInLast30Days", "content", 0, 1000),
-    maximumActiveStrikes: readIntegerBetween(content, "maximumActiveStrikes", "content", 0, 10),
-    minimumAccountAgeDays: readIntegerBetween(content, "minimumAccountAgeDays", "content", 0, 3650),
+    minimumFollowers: readIntegerBetween(content, "minimumFollowers", "content", 10_000, 100_000_000),
+    minimumVerifiedFollowers: readIntegerBetween(content, "minimumVerifiedFollowers", "content", 500, 100_000_000),
+    minimumQualifyingImpressionsLast30Days: readIntegerBetween(content, "minimumQualifyingImpressionsLast30Days", "content", 100_000, 1_000_000_000),
+    minimumOriginalPosts,
+    minimumOriginalPostsInLast60Days,
+    minimumAccountAgeDays: readIntegerBetween(content, "minimumAccountAgeDays", "content", 30, 3650),
+    noViolationsInDays: readIntegerBetween(content, "noViolationsInDays", "content", 90, 3650),
     requiresIdentityVerification: readBooleanValue(content, "requiresIdentityVerification", "content"),
-    allowedCountries: readCountryCodeList(content, "allowedCountries", "content"),
   };
 }
 

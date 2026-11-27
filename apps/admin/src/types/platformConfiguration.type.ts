@@ -56,11 +56,13 @@ export interface RevenueRulesConfiguration {
 
 export interface CreatorEligibilityRules {
   readonly minimumFollowers: number;
-  readonly minimumPostsInLast30Days: number;
-  readonly maximumActiveStrikes: number;
+  readonly minimumVerifiedFollowers: number;
+  readonly minimumQualifyingImpressionsLast30Days: number;
+  readonly minimumOriginalPosts: number;
+  readonly minimumOriginalPostsInLast60Days: number;
   readonly minimumAccountAgeDays: number;
+  readonly noViolationsInDays: number;
   readonly requiresIdentityVerification: boolean;
-  readonly allowedCountries: readonly string[];
 }
 
 export type UsernameCharacterClass = "LOWERCASE_LETTERS" | "DIGITS" | "DOT" | "UNDERSCORE";
@@ -84,16 +86,15 @@ export interface CreatorAutoApproveRules {
   readonly minimumAccountAgeDays: number;
   readonly requiresVerifiedEmail: boolean;
   readonly minimumRealFollowers: number;
+  readonly minimumVerifiedFollowers: number;
+  readonly minimumQualifyingImpressionsLast30Days: number;
   readonly minimumOriginalPostsInLast60Days: number;
   readonly noViolationsInDays: number;
   readonly maximumFraudScore: number;
-  readonly maximumActiveStrikes?: number;
   readonly requiresIdentityVerification?: boolean;
-  readonly allowedCountries?: readonly string[];
 }
 
 export interface CreatorManualReviewRules {
-  readonly minimumRealFollowers: number;
   readonly allowsPastViolation: boolean;
   readonly allowsBorderlineOrAiHeavyContent: boolean;
   readonly maximumRiskScore: number;

@@ -9,8 +9,8 @@ export function buildInitialCheckmarkSuggestionRules(): CheckmarkSuggestionRules
 
 export function buildInitialCreatorThresholds(): CreatorProgramThresholds {
   return {
-    autoApprove: { minimumAccountAgeDays: 30, requiresVerifiedEmail: true, minimumRealFollowers: 1_000, minimumOriginalPostsInLast60Days: 10, noViolationsInDays: 90, maximumFraudScore: 30 },
-    manualReview: { minimumRealFollowers: 500, allowsPastViolation: true, allowsBorderlineOrAiHeavyContent: true, maximumRiskScore: 60 },
+    autoApprove: { minimumAccountAgeDays: 30, requiresVerifiedEmail: true, minimumRealFollowers: 10_000, minimumVerifiedFollowers: 500, minimumQualifyingImpressionsLast30Days: 100_000, minimumOriginalPostsInLast60Days: 10, noViolationsInDays: 90, maximumFraudScore: 30 },
+    manualReview: { allowsPastViolation: true, allowsBorderlineOrAiHeavyContent: true, maximumRiskScore: 60 },
   };
 }
 

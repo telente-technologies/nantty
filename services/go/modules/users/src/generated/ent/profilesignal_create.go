@@ -47,6 +47,104 @@ func (_c *ProfileSignalCreate) SetNillableRealFollowers(v *int) *ProfileSignalCr
 	return _c
 }
 
+// SetCreatorRealFollowers sets the "creator_real_followers" field.
+func (_c *ProfileSignalCreate) SetCreatorRealFollowers(v int) *ProfileSignalCreate {
+	_c.mutation.SetCreatorRealFollowers(v)
+	return _c
+}
+
+// SetNillableCreatorRealFollowers sets the "creator_real_followers" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableCreatorRealFollowers(v *int) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetCreatorRealFollowers(*v)
+	}
+	return _c
+}
+
+// SetCreatorOriginalPostsLast60Days sets the "creator_original_posts_last_60_days" field.
+func (_c *ProfileSignalCreate) SetCreatorOriginalPostsLast60Days(v int) *ProfileSignalCreate {
+	_c.mutation.SetCreatorOriginalPostsLast60Days(v)
+	return _c
+}
+
+// SetNillableCreatorOriginalPostsLast60Days sets the "creator_original_posts_last_60_days" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableCreatorOriginalPostsLast60Days(v *int) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetCreatorOriginalPostsLast60Days(*v)
+	}
+	return _c
+}
+
+// SetVerifiedFollowers sets the "verified_followers" field.
+func (_c *ProfileSignalCreate) SetVerifiedFollowers(v int) *ProfileSignalCreate {
+	_c.mutation.SetVerifiedFollowers(v)
+	return _c
+}
+
+// SetNillableVerifiedFollowers sets the "verified_followers" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableVerifiedFollowers(v *int) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetVerifiedFollowers(*v)
+	}
+	return _c
+}
+
+// SetQualifyingImpressionsLast30Days sets the "qualifying_impressions_last_30_days" field.
+func (_c *ProfileSignalCreate) SetQualifyingImpressionsLast30Days(v int) *ProfileSignalCreate {
+	_c.mutation.SetQualifyingImpressionsLast30Days(v)
+	return _c
+}
+
+// SetNillableQualifyingImpressionsLast30Days sets the "qualifying_impressions_last_30_days" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableQualifyingImpressionsLast30Days(v *int) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetQualifyingImpressionsLast30Days(*v)
+	}
+	return _c
+}
+
+// SetCreatorMetricsSource sets the "creator_metrics_source" field.
+func (_c *ProfileSignalCreate) SetCreatorMetricsSource(v string) *ProfileSignalCreate {
+	_c.mutation.SetCreatorMetricsSource(v)
+	return _c
+}
+
+// SetNillableCreatorMetricsSource sets the "creator_metrics_source" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableCreatorMetricsSource(v *string) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetCreatorMetricsSource(*v)
+	}
+	return _c
+}
+
+// SetCreatorMetricsAsOf sets the "creator_metrics_as_of" field.
+func (_c *ProfileSignalCreate) SetCreatorMetricsAsOf(v time.Time) *ProfileSignalCreate {
+	_c.mutation.SetCreatorMetricsAsOf(v)
+	return _c
+}
+
+// SetNillableCreatorMetricsAsOf sets the "creator_metrics_as_of" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableCreatorMetricsAsOf(v *time.Time) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetCreatorMetricsAsOf(*v)
+	}
+	return _c
+}
+
+// SetCreatorMetricsSnapshotID sets the "creator_metrics_snapshot_id" field.
+func (_c *ProfileSignalCreate) SetCreatorMetricsSnapshotID(v uuid.UUID) *ProfileSignalCreate {
+	_c.mutation.SetCreatorMetricsSnapshotID(v)
+	return _c
+}
+
+// SetNillableCreatorMetricsSnapshotID sets the "creator_metrics_snapshot_id" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableCreatorMetricsSnapshotID(v *uuid.UUID) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetCreatorMetricsSnapshotID(*v)
+	}
+	return _c
+}
+
 // SetOriginalPostsLast60Days sets the "original_posts_last_60_days" field.
 func (_c *ProfileSignalCreate) SetOriginalPostsLast60Days(v int) *ProfileSignalCreate {
 	_c.mutation.SetOriginalPostsLast60Days(v)
@@ -71,6 +169,76 @@ func (_c *ProfileSignalCreate) SetDaysSinceLastViolation(v int) *ProfileSignalCr
 func (_c *ProfileSignalCreate) SetNillableDaysSinceLastViolation(v *int) *ProfileSignalCreate {
 	if v != nil {
 		_c.SetDaysSinceLastViolation(*v)
+	}
+	return _c
+}
+
+// SetCreatorDaysSinceLastViolation sets the "creator_days_since_last_violation" field.
+func (_c *ProfileSignalCreate) SetCreatorDaysSinceLastViolation(v int) *ProfileSignalCreate {
+	_c.mutation.SetCreatorDaysSinceLastViolation(v)
+	return _c
+}
+
+// SetNillableCreatorDaysSinceLastViolation sets the "creator_days_since_last_violation" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableCreatorDaysSinceLastViolation(v *int) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetCreatorDaysSinceLastViolation(*v)
+	}
+	return _c
+}
+
+// SetCreatorStandingAvailable sets the "creator_standing_available" field.
+func (_c *ProfileSignalCreate) SetCreatorStandingAvailable(v bool) *ProfileSignalCreate {
+	_c.mutation.SetCreatorStandingAvailable(v)
+	return _c
+}
+
+// SetNillableCreatorStandingAvailable sets the "creator_standing_available" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableCreatorStandingAvailable(v *bool) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetCreatorStandingAvailable(*v)
+	}
+	return _c
+}
+
+// SetCreatorStandingSource sets the "creator_standing_source" field.
+func (_c *ProfileSignalCreate) SetCreatorStandingSource(v string) *ProfileSignalCreate {
+	_c.mutation.SetCreatorStandingSource(v)
+	return _c
+}
+
+// SetNillableCreatorStandingSource sets the "creator_standing_source" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableCreatorStandingSource(v *string) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetCreatorStandingSource(*v)
+	}
+	return _c
+}
+
+// SetCreatorStandingAsOf sets the "creator_standing_as_of" field.
+func (_c *ProfileSignalCreate) SetCreatorStandingAsOf(v time.Time) *ProfileSignalCreate {
+	_c.mutation.SetCreatorStandingAsOf(v)
+	return _c
+}
+
+// SetNillableCreatorStandingAsOf sets the "creator_standing_as_of" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableCreatorStandingAsOf(v *time.Time) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetCreatorStandingAsOf(*v)
+	}
+	return _c
+}
+
+// SetCreatorStandingSnapshotID sets the "creator_standing_snapshot_id" field.
+func (_c *ProfileSignalCreate) SetCreatorStandingSnapshotID(v uuid.UUID) *ProfileSignalCreate {
+	_c.mutation.SetCreatorStandingSnapshotID(v)
+	return _c
+}
+
+// SetNillableCreatorStandingSnapshotID sets the "creator_standing_snapshot_id" field if the given value is not nil.
+func (_c *ProfileSignalCreate) SetNillableCreatorStandingSnapshotID(v *uuid.UUID) *ProfileSignalCreate {
+	if v != nil {
+		_c.SetCreatorStandingSnapshotID(*v)
 	}
 	return _c
 }
@@ -310,6 +478,26 @@ func (_c *ProfileSignalCreate) defaults() {
 		v := profilesignal.DefaultRealFollowers
 		_c.mutation.SetRealFollowers(v)
 	}
+	if _, ok := _c.mutation.CreatorRealFollowers(); !ok {
+		v := profilesignal.DefaultCreatorRealFollowers
+		_c.mutation.SetCreatorRealFollowers(v)
+	}
+	if _, ok := _c.mutation.CreatorOriginalPostsLast60Days(); !ok {
+		v := profilesignal.DefaultCreatorOriginalPostsLast60Days
+		_c.mutation.SetCreatorOriginalPostsLast60Days(v)
+	}
+	if _, ok := _c.mutation.VerifiedFollowers(); !ok {
+		v := profilesignal.DefaultVerifiedFollowers
+		_c.mutation.SetVerifiedFollowers(v)
+	}
+	if _, ok := _c.mutation.QualifyingImpressionsLast30Days(); !ok {
+		v := profilesignal.DefaultQualifyingImpressionsLast30Days
+		_c.mutation.SetQualifyingImpressionsLast30Days(v)
+	}
+	if _, ok := _c.mutation.CreatorMetricsSource(); !ok {
+		v := profilesignal.DefaultCreatorMetricsSource
+		_c.mutation.SetCreatorMetricsSource(v)
+	}
 	if _, ok := _c.mutation.OriginalPostsLast60Days(); !ok {
 		v := profilesignal.DefaultOriginalPostsLast60Days
 		_c.mutation.SetOriginalPostsLast60Days(v)
@@ -317,6 +505,18 @@ func (_c *ProfileSignalCreate) defaults() {
 	if _, ok := _c.mutation.DaysSinceLastViolation(); !ok {
 		v := profilesignal.DefaultDaysSinceLastViolation
 		_c.mutation.SetDaysSinceLastViolation(v)
+	}
+	if _, ok := _c.mutation.CreatorDaysSinceLastViolation(); !ok {
+		v := profilesignal.DefaultCreatorDaysSinceLastViolation
+		_c.mutation.SetCreatorDaysSinceLastViolation(v)
+	}
+	if _, ok := _c.mutation.CreatorStandingAvailable(); !ok {
+		v := profilesignal.DefaultCreatorStandingAvailable
+		_c.mutation.SetCreatorStandingAvailable(v)
+	}
+	if _, ok := _c.mutation.CreatorStandingSource(); !ok {
+		v := profilesignal.DefaultCreatorStandingSource
+		_c.mutation.SetCreatorStandingSource(v)
 	}
 	if _, ok := _c.mutation.FraudScore(); !ok {
 		v := profilesignal.DefaultFraudScore
@@ -380,6 +580,46 @@ func (_c *ProfileSignalCreate) check() error {
 			return &ValidationError{Name: "real_followers", err: fmt.Errorf(`ent: validator failed for field "ProfileSignal.real_followers": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.CreatorRealFollowers(); !ok {
+		return &ValidationError{Name: "creator_real_followers", err: errors.New(`ent: missing required field "ProfileSignal.creator_real_followers"`)}
+	}
+	if v, ok := _c.mutation.CreatorRealFollowers(); ok {
+		if err := profilesignal.CreatorRealFollowersValidator(v); err != nil {
+			return &ValidationError{Name: "creator_real_followers", err: fmt.Errorf(`ent: validator failed for field "ProfileSignal.creator_real_followers": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreatorOriginalPostsLast60Days(); !ok {
+		return &ValidationError{Name: "creator_original_posts_last_60_days", err: errors.New(`ent: missing required field "ProfileSignal.creator_original_posts_last_60_days"`)}
+	}
+	if v, ok := _c.mutation.CreatorOriginalPostsLast60Days(); ok {
+		if err := profilesignal.CreatorOriginalPostsLast60DaysValidator(v); err != nil {
+			return &ValidationError{Name: "creator_original_posts_last_60_days", err: fmt.Errorf(`ent: validator failed for field "ProfileSignal.creator_original_posts_last_60_days": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.VerifiedFollowers(); !ok {
+		return &ValidationError{Name: "verified_followers", err: errors.New(`ent: missing required field "ProfileSignal.verified_followers"`)}
+	}
+	if v, ok := _c.mutation.VerifiedFollowers(); ok {
+		if err := profilesignal.VerifiedFollowersValidator(v); err != nil {
+			return &ValidationError{Name: "verified_followers", err: fmt.Errorf(`ent: validator failed for field "ProfileSignal.verified_followers": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.QualifyingImpressionsLast30Days(); !ok {
+		return &ValidationError{Name: "qualifying_impressions_last_30_days", err: errors.New(`ent: missing required field "ProfileSignal.qualifying_impressions_last_30_days"`)}
+	}
+	if v, ok := _c.mutation.QualifyingImpressionsLast30Days(); ok {
+		if err := profilesignal.QualifyingImpressionsLast30DaysValidator(v); err != nil {
+			return &ValidationError{Name: "qualifying_impressions_last_30_days", err: fmt.Errorf(`ent: validator failed for field "ProfileSignal.qualifying_impressions_last_30_days": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreatorMetricsSource(); !ok {
+		return &ValidationError{Name: "creator_metrics_source", err: errors.New(`ent: missing required field "ProfileSignal.creator_metrics_source"`)}
+	}
+	if v, ok := _c.mutation.CreatorMetricsSource(); ok {
+		if err := profilesignal.CreatorMetricsSourceValidator(v); err != nil {
+			return &ValidationError{Name: "creator_metrics_source", err: fmt.Errorf(`ent: validator failed for field "ProfileSignal.creator_metrics_source": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.OriginalPostsLast60Days(); !ok {
 		return &ValidationError{Name: "original_posts_last_60_days", err: errors.New(`ent: missing required field "ProfileSignal.original_posts_last_60_days"`)}
 	}
@@ -394,6 +634,25 @@ func (_c *ProfileSignalCreate) check() error {
 	if v, ok := _c.mutation.DaysSinceLastViolation(); ok {
 		if err := profilesignal.DaysSinceLastViolationValidator(v); err != nil {
 			return &ValidationError{Name: "days_since_last_violation", err: fmt.Errorf(`ent: validator failed for field "ProfileSignal.days_since_last_violation": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreatorDaysSinceLastViolation(); !ok {
+		return &ValidationError{Name: "creator_days_since_last_violation", err: errors.New(`ent: missing required field "ProfileSignal.creator_days_since_last_violation"`)}
+	}
+	if v, ok := _c.mutation.CreatorDaysSinceLastViolation(); ok {
+		if err := profilesignal.CreatorDaysSinceLastViolationValidator(v); err != nil {
+			return &ValidationError{Name: "creator_days_since_last_violation", err: fmt.Errorf(`ent: validator failed for field "ProfileSignal.creator_days_since_last_violation": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CreatorStandingAvailable(); !ok {
+		return &ValidationError{Name: "creator_standing_available", err: errors.New(`ent: missing required field "ProfileSignal.creator_standing_available"`)}
+	}
+	if _, ok := _c.mutation.CreatorStandingSource(); !ok {
+		return &ValidationError{Name: "creator_standing_source", err: errors.New(`ent: missing required field "ProfileSignal.creator_standing_source"`)}
+	}
+	if v, ok := _c.mutation.CreatorStandingSource(); ok {
+		if err := profilesignal.CreatorStandingSourceValidator(v); err != nil {
+			return &ValidationError{Name: "creator_standing_source", err: fmt.Errorf(`ent: validator failed for field "ProfileSignal.creator_standing_source": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.FraudScore(); !ok {
@@ -497,6 +756,34 @@ func (_c *ProfileSignalCreate) createSpec() (*ProfileSignal, *sqlgraph.CreateSpe
 		_spec.SetField(profilesignal.FieldRealFollowers, field.TypeInt, value)
 		_node.RealFollowers = value
 	}
+	if value, ok := _c.mutation.CreatorRealFollowers(); ok {
+		_spec.SetField(profilesignal.FieldCreatorRealFollowers, field.TypeInt, value)
+		_node.CreatorRealFollowers = value
+	}
+	if value, ok := _c.mutation.CreatorOriginalPostsLast60Days(); ok {
+		_spec.SetField(profilesignal.FieldCreatorOriginalPostsLast60Days, field.TypeInt, value)
+		_node.CreatorOriginalPostsLast60Days = value
+	}
+	if value, ok := _c.mutation.VerifiedFollowers(); ok {
+		_spec.SetField(profilesignal.FieldVerifiedFollowers, field.TypeInt, value)
+		_node.VerifiedFollowers = value
+	}
+	if value, ok := _c.mutation.QualifyingImpressionsLast30Days(); ok {
+		_spec.SetField(profilesignal.FieldQualifyingImpressionsLast30Days, field.TypeInt, value)
+		_node.QualifyingImpressionsLast30Days = value
+	}
+	if value, ok := _c.mutation.CreatorMetricsSource(); ok {
+		_spec.SetField(profilesignal.FieldCreatorMetricsSource, field.TypeString, value)
+		_node.CreatorMetricsSource = value
+	}
+	if value, ok := _c.mutation.CreatorMetricsAsOf(); ok {
+		_spec.SetField(profilesignal.FieldCreatorMetricsAsOf, field.TypeTime, value)
+		_node.CreatorMetricsAsOf = &value
+	}
+	if value, ok := _c.mutation.CreatorMetricsSnapshotID(); ok {
+		_spec.SetField(profilesignal.FieldCreatorMetricsSnapshotID, field.TypeUUID, value)
+		_node.CreatorMetricsSnapshotID = &value
+	}
 	if value, ok := _c.mutation.OriginalPostsLast60Days(); ok {
 		_spec.SetField(profilesignal.FieldOriginalPostsLast60Days, field.TypeInt, value)
 		_node.OriginalPostsLast60Days = value
@@ -504,6 +791,26 @@ func (_c *ProfileSignalCreate) createSpec() (*ProfileSignal, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.DaysSinceLastViolation(); ok {
 		_spec.SetField(profilesignal.FieldDaysSinceLastViolation, field.TypeInt, value)
 		_node.DaysSinceLastViolation = value
+	}
+	if value, ok := _c.mutation.CreatorDaysSinceLastViolation(); ok {
+		_spec.SetField(profilesignal.FieldCreatorDaysSinceLastViolation, field.TypeInt, value)
+		_node.CreatorDaysSinceLastViolation = value
+	}
+	if value, ok := _c.mutation.CreatorStandingAvailable(); ok {
+		_spec.SetField(profilesignal.FieldCreatorStandingAvailable, field.TypeBool, value)
+		_node.CreatorStandingAvailable = value
+	}
+	if value, ok := _c.mutation.CreatorStandingSource(); ok {
+		_spec.SetField(profilesignal.FieldCreatorStandingSource, field.TypeString, value)
+		_node.CreatorStandingSource = value
+	}
+	if value, ok := _c.mutation.CreatorStandingAsOf(); ok {
+		_spec.SetField(profilesignal.FieldCreatorStandingAsOf, field.TypeTime, value)
+		_node.CreatorStandingAsOf = &value
+	}
+	if value, ok := _c.mutation.CreatorStandingSnapshotID(); ok {
+		_spec.SetField(profilesignal.FieldCreatorStandingSnapshotID, field.TypeUUID, value)
+		_node.CreatorStandingSnapshotID = &value
 	}
 	if value, ok := _c.mutation.FraudScore(); ok {
 		_spec.SetField(profilesignal.FieldFraudScore, field.TypeInt, value)
