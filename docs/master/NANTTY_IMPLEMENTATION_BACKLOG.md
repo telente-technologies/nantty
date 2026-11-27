@@ -1,5 +1,12 @@
 # Nantty implementation backlog
 
+### 2026-11-27 — Set the creator conversion minimum to ₦20,000
+
+- Updated Wallet and Creators Go defaults for `CREATOR_MINIMUM_PAYOUTS` to NGN `2_000_000` (kobo), preserving environment override support. Studio's minimum-amount mock and label now describe earned-coin conversion accurately.
+- Added configuration tests in both modules, a Creator revenue-rules default assertion, and a Wallet PostgreSQL integration regression: ₦19,990 is rejected without debiting any earned coins, while exactly ₦20,000 converts and is disclosed in the receipt.
+- This does not implement payout periods, fortnightly scheduling, or a forfeiture rule. Rejected conversions preserve the earned-coin ledger balance. Do not enable forfeiture in production without explicit legal/product approval; clarify cadence and provide audited admin controls separately.
+- Added a fail-closed `503 PAYOUT_MINIMUM_UNCONFIGURED` response when an operator-provided map omits or zeroes a currency minimum, with an integration regression proving no earned-coin debit occurs. Wallet/Creators full Go tests, focused PostgreSQL conversion tests, Go vet, Studio typecheck/contracts, backend file-length and diff checks passed locally (exact commands in `docs/integration/NANTTY_VERIFICATION_AND_TEST_EVIDENCE.md`). Remote PR CI, browser visual review, staging and real payout provider behavior remain separate gates.
+
 ## 2026-11-26 — Merge mock live-gift CodeQL fix and reconcile staging evidence
 
 - PR #77 (`owl/codeql-deterministic-demo-viewer`) replaced `Math.random()` selection of fixture viewer identities with a deterministic cycle and added a fake-timer regression test. Squash-merged as `b5a32658210652f4a5be200a1296f46163276fd8`; the commit has no co-author trailer. Focused Jest, package ESLint, TypeScript check and `git diff --check` passed locally (Node 24.19.0; repository target is Node 26.13). Mobile CI and PR JavaScript CodeQL passed. Post-merge JavaScript CodeQL marked #35/#36/#44 fixed at 2026-11-26 19:01 UTC. Alert #91 remains open at the provider-required Flutterwave checksum; do not alter its semantics.

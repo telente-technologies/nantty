@@ -1,5 +1,14 @@
 # Nantty Verification & Test Evidence
 
+## 2026-11-27 — Creator coin conversion minimum
+
+- Wallet and Creators Go configuration defaults now set `CREATOR_MINIMUM_PAYOUTS` NGN to `2_000_000` minor units; explicit currency overrides remain supported. Studio labels this as an earned-coin conversion minimum and clarifies that earnings remain until the amount threshold is reached; payout timing is not represented as implemented.
+- Passed: from `services/go`, `go test ./modules/creators/tests/configs ./modules/creators/tests/modules/creatorMoney/services ./modules/wallet/tests/configs -count=1`.
+- Passed against the isolated local PostgreSQL 17 test DB (`127.0.0.1:15433`): from `services/go`, `MONEY_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' GOTMPDIR=/tmp go test ./modules/wallet/tests -run '^TestCreatorConversionKeepsEarnedCoinsUntilTheTwentyThousandNairaMinimumIsMet$' -count=1 -p 1 -v`.
+- Passed full serial module suites: from `services/go/modules/wallet`, `MONEY_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' GOTMPDIR=/tmp go test ./... -count=1 -p 1`; from `services/go/modules/creators`, `GOTMPDIR=/tmp go test ./... -count=1 -p 1`. Both corresponding `GOTMPDIR=/tmp go vet ./...` runs passed.
+- Passed from repository root: `pnpm --filter @nantty/studio typecheck` and `pnpm --filter @nantty/studio test:contracts` (111/111). Local Node is 24.19.0, below Studio's declared `>=26.13.0 <27`; rerun under supported Node before release.
+- Not verified: remote PR checks, browser visual review, staging deployment, real payout provider behavior, a two-week payout cadence, or production policy/legal approval. No forfeiture is implemented or enabled. The host had approximately 1.9–2.0 GB free during verification; tests were serialized and used `/tmp` for Go temporary files.
+
 ## PR #77 and staging recheck — 2026-11-26
 
 - PR #77 was squash-merged as `b5a32658210652f4a5be200a1296f46163276fd8`; the merge message contains no `Co-authored-by` trailer. The change replaces randomized selection of mock live-gift viewer identities with deterministic cycling and adds a fake-timer regression test.

@@ -1,5 +1,13 @@
 # Nantty blockers and verification gaps
 
+## Creator payout policy — 2026-11-27
+
+- The default Nigerian minimum for earned-coin conversion is being changed to ₦20,000 (`2_000_000` kobo) in Wallet and Creators. This is a configured amount threshold only; it does not create biweekly payout windows.
+- Below-minimum conversion is rejected before ledger posting, leaving earned coins intact. No earned balance is forfeited by this change.
+- Still blocked/unimplemented: product/legal approval for any forfeiture; a precise two-week schedule, timezone, period boundary, late-settlement and provider-delay policy; audited admin configuration; and deployment verification. Production forfeiture must remain disabled. Other currency minimums need an explicit product decision rather than being inferred from NGN.
+- Missing or zero currency minima now return `503 PAYOUT_MINIMUM_UNCONFIGURED` before ledger posting; a PostgreSQL regression verifies earned coins remain unchanged. Local Wallet and Creators tests/vet and Studio typecheck/contracts pass; current-head GitHub PR CI has not yet run for this change.
+- The existing Creator Terms still contains a team placeholder for conversion rate/minimum. Do not publish a legal-text change without the required review; obtain approved wording consistent with ₦20,000 and the no-forfeiture language.
+
 ## Current blocker reconciliation — 2026-11-26 (post-PR #77)
 
 This status supersedes older contradictory staging snapshots below; historical notes remain for audit history.

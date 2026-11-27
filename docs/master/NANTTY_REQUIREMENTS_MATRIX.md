@@ -1,5 +1,11 @@
 # Nantty requirements and evidence matrix
 
+## Creator payout minimum update — 2026-11-27
+
+| Requirement | Scope | Status | Evidence and remaining work |
+|---|---|---|---|
+| ₦20,000 minimum for creator earned-coin conversion | Wallet Go, Creators Go, Creator Studio | IMPLEMENTED_UNVERIFIED | NGN defaults are set to `2_000_000` minor units in both server modules and the Studio display mock; operators can override via `CREATOR_MINIMUM_PAYOUTS`. Conversion checks the configured amount before posting ledger entries, so a below-minimum rejection leaves earned coins untouched; missing/zero currency minima now fail closed with `503 PAYOUT_MINIMUM_UNCONFIGURED`. Focused config/service tests, full Wallet and Creators Go suites, PostgreSQL boundary integration, `go vet`, Studio typecheck/contracts (111/111), file-length and diff checks passed locally. This is an amount threshold, not a two-week payout period. Forfeiture is not implemented; cadence/timezone/cutoff, audited admin configuration and production/legal approval remain unresolved. Other currency defaults remain as configured and are not asserted as approved policy. PR CI and staging remain pending. |
+
 ## Current evidence correction — 2026-11-26 (post-PR #77)
 
 This current-state note supersedes conflicting older staging and CodeQL snapshots below; dated historical implementation notes are retained for audit history.

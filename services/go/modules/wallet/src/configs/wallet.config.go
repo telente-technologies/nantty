@@ -44,7 +44,7 @@ func ReadWalletSettingsFromEnvironment(reader *platformconfig.EnvironmentReader)
 		Money:                        loaders.ReadMoneyModuleSettingsFromEnvironment(reader, "wallet"),
 		CoinTransferFeeBps:           int64(reader.ReadIntegerOrDefault("COIN_TRANSFER_FEE_BPS", 200)),
 		CoinCashValueMinorByCurrency: ParseCurrencyAmounts(reader.ReadStringOrDefault("COIN_CASH_VALUES", defaultCoinCashValues)),
-		MinimumPayoutMinorByCurrency: ParseCurrencyAmounts(reader.ReadStringOrDefault("CREATOR_MINIMUM_PAYOUTS", "NGN:1000,GHS:1000,KES:1000,ZAR:1000,GBP:1000,EUR:1000,USD:1000")),
+		MinimumPayoutMinorByCurrency: ParseCurrencyAmounts(reader.ReadStringOrDefault("CREATOR_MINIMUM_PAYOUTS", "NGN:2000000,GHS:1000,KES:1000,ZAR:1000,GBP:1000,EUR:1000,USD:1000")),
 		MinimumWithdrawalMinor:       int64(reader.ReadIntegerOrDefault("WALLET_MINIMUM_WITHDRAWAL_MINOR", 100)),
 		DataEncryptionKey:            readEncryptionKey(reader),
 		DefaultCurrency:              reader.ReadStringOrDefault("WALLET_DEFAULT_CURRENCY", "USD"),

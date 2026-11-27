@@ -298,7 +298,7 @@ Errors per proto: `INSUFFICIENT_COINS`, `CANNOT_GIFT_SELF`, `BATTLE_ALREADY_SETT
 | --- | --- |
 | Coin pack bought in app, price P | Cash/store receivable +P, store fee expense -fee, revenue (deferred coins liability) +(P - fee), coins minted to buyer |
 | Gift of N coins | Buyer coins -N, creator earned coins +floor(N x share bps), platform coins +remainder |
-| Creator cash-out | Earned coins converted at the finance-set rate (minimum payout enforced). The payout run moves main → creator PSA (free wallet transfer), after which the creator withdraws. Needs the Flutterwave main balance funded first (IAP money arrives in Nantty's bank, not Flutterwave) |
+| Creator cash-out | Approved creators convert only creator-earned coins at the configured currency rate; the default NGN minimum is ₦20,000. Below-minimum conversion leaves earned coins untouched. This is not a biweekly period policy: cadence, timezone/cutoff, and any forfeiture remain disabled pending explicit product/legal approval. The payout run moves main → creator PSA (free wallet transfer), after which the creator withdraws. Needs the Flutterwave main balance funded first (IAP money arrives in Nantty's bank, not Flutterwave) |
 
 Coin purchases (web via Flutterwave, app via the stores) and gifts are Nantty revenue in Nantty's own account, so only the creator share is owed to anyone. The rate must keep payout cost below net revenue after the **worst-channel** store fee. This is a finance decision; flag it before pricing UI is built.
 
