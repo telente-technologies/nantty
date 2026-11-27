@@ -2,7 +2,7 @@
 
 ## Coin package pricing follow-up — 2026-11-27
 
-- Country/channel pricing is open in PR #82. The isolated-schema test correction and price-key canonicalization are covered by local database-backed tests. Checks on PR head `b063981` passed before the canonicalization follow-up; the new commit needs current-head CI. No deployed-runtime evidence exists.
+- Country/channel pricing is open in PR #82 at `1f0024c036173bb872dff5c1aa4a5bb946fa0d4b`. The isolated-schema test correction and price-key canonicalization are covered by local database-backed tests. Current-head CI is in progress: Backend [45961954394](https://github.com/telente-technologies/nantty/actions/runs/45961954394), Frontend [45961954309](https://github.com/telente-technologies/nantty/actions/runs/45961954309), Security [45961954352](https://github.com/telente-technologies/nantty/actions/runs/45961954352), CodeQL [45961947994](https://github.com/telente-technologies/nantty/actions/runs/45961947994) and [45961948077](https://github.com/telente-technologies/nantty/actions/runs/45961948077). ReviewDecision is unset; no deployed-runtime evidence exists.
 - Native App Store/Google Play localized price presentation and receipt/refund verification remain separate requirements. Store prices must be obtained from the native billing SDK and validated by the store service; server-configured amounts/product IDs are not proof of the customer-facing store price.
 - AWS staging remains subject to the existing 2026-11-26 blockers above; this work made no AWS calls because the required AWS Agent Toolkit skill retrieval tools are unavailable in this session.
 

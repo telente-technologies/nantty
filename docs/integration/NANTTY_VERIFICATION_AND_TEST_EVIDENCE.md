@@ -1,5 +1,12 @@
 # Nantty Verification & Test Evidence
 
+## 2026-11-27 — Normalize and reject ambiguous regional coin price keys
+
+- `MONEY_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' GOTMPDIR=/tmp GOMAXPROCS=2 go test -p 1 ./modules/wallet/tests -run '^TestAdminCoinCountryPriceOverrideRoundTripsAndRejectsCurrencyMismatch$' -count=1 -v` — PASS; validates lowercase code canonicalization, country/currency mismatch, and duplicate country alias rejection against the database-backed API harness.
+- `MONEY_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' GOTMPDIR=/tmp GOMAXPROCS=2 go test -p 1 ./modules/wallet/... -count=1` — PASS, including the country-price list/checkout recheck integration and all Wallet packages.
+- `GOTMPDIR=/tmp GOMAXPROCS=2 go vet -p 1 ./modules/wallet/...` — PASS. `bash services/scripts/check-backend-file-lengths.sh` and `git diff --check` — PASS.
+- Pushed to PR #82 as `1f0024c036173bb872dff5c1aa4a5bb946fa0d4b` (`fix(wallet): normalize regional coin price keys`, no co-author trailer). Current-head Backend, Frontend, Security and CodeQL checks are running; reviewDecision is unset. No browser, store sandbox, live PSP, AWS or deployed-runtime verification was performed.
+
 ## 2026-11-27 — Country-specific coin package pricing (local verification)
 
 - Added Admin country override editing per existing channel-specific coin pack, with supported-country currency validation; unsupported countries/currencies and non-positive overrides are rejected by the mock handler and Go API validation. Incomplete override amounts are blocked in the Admin dialog.
