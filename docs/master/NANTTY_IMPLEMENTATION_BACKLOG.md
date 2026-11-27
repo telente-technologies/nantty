@@ -1073,3 +1073,8 @@ Prioritized from the repository baseline and the requested cross-product scope. 
 - Review found the transfer reversal path acquired recipient provenance lock before sorted sender/recipient ledger locks. Fixed by acquiring both spendable account locks in sorted order before replay.
 - Official Google RTDN supports full and quantity-based partial voids. Parser now validates `refundType`; full refunds proceed, partial refund notifications fail closed before mutation pending authoritative quantity/cumulative refund reconciliation. Missing or unsupported type is rejected. This is a safe guard only; partial store refunds remain incomplete.
 - Focused regression tests were added. See `docs/integration/NANTTY_VERIFICATION_AND_TEST_EVIDENCE.md` for executed commands once run. PR #79 must not be described as complete for partial store refunds.
+
+## PR #79 follow-up — mobile transfer idempotency recovery (2026-11-27)
+
+- Review found the mobile transfer sheet discarded its idempotency key on every error. A timeout after server commit could therefore be retried as a second transfer. The client now persists the exact request in account-scoped device secure storage before sending, restores it after app restart, locks recipient/amount edits while outcome is uncertain, and replays with the same key. Secure-store read failure blocks new sends; known no-commit errors and stale-fee conflicts take an explicit reconfirmation path.
+- Focused Jest tests (6/6), mobile TypeScript check, and targeted ESLint passed locally. Installed-device process interruption/restart testing and updated GitHub PR checks remain unverified; this is not a complete wallet release.

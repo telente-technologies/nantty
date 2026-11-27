@@ -1,5 +1,9 @@
 # Nantty requirements and evidence matrix
 
+## Current PR #79 mobile transfer-recovery follow-up — 2026-11-27
+
+- The mobile transfer client now saves its account-scoped recipient, amount, quoted fee split, and idempotency key to device secure storage before sending. Ambiguous timeout/server failures and app restarts retry that exact request; known pre-commit rejections and changed-fee quotes require a new confirmation path. Focused tests, mobile typecheck, and targeted lint passed locally in a PR follow-up worktree. Device-level process-kill/restart verification and refreshed PR CI remain outstanding; see the verification evidence and blocker report.
+
 ## Current evidence correction — 2026-11-26 (post-PR #77)
 
 This current-state note supersedes conflicting older staging and CodeQL snapshots below; dated historical implementation notes are retained for audit history.
