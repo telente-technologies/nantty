@@ -1,11 +1,15 @@
 package services_test
 
 import (
+	"context"
+	"errors"
+	"net/http"
 	"testing"
 
 	"nantty/modules/payments/src/generated/ent"
 	"nantty/modules/payments/src/interfaces"
 	"nantty/modules/payments/src/modules/gateway/services"
+	"nantty/platform/httpserver"
 )
 
 func TestProviderFeeMustFitVerifiedChargeAndSellerProceeds(t *testing.T) {
@@ -34,6 +38,17 @@ func TestProviderFeeMustFitVerifiedChargeAndSellerProceeds(t *testing.T) {
 	}
 	if !services.ValidProviderFeeForIntent(connected, 9_000, connected.AmountMinor) {
 		t.Fatal("provider fee equal to gross less platform fee leaves zero seller proceeds and is valid")
+	}
+}
+
+func TestPartialGooglePlayRefundFailsClosedBeforeChangingPurchase(t *testing.T) {
+	gateway := services.NewPaymentGateway(nil)
+	err := gateway.ApplyVerifiedStoreRefund(context.Background(), "google_play", interfaces.StoreRefundNotification{
+		NotificationId: "partial-refund", StoreTransactionId: "order-1", RefundType: 2,
+	})
+	var apiError *httpserver.ApiError
+	if !errors.As(err, &apiError) || apiError.Status != http.StatusServiceUnavailable || apiError.Code != "PARTIAL_STORE_REFUND_REQUIRES_RECONCILIATION" {
+		t.Fatalf("partial refund should be explicitly deferred without mutating a full purchase: %v", err)
 	}
 }
 

@@ -98,7 +98,7 @@ func (harness *walletHarness) approveCreator(userId string) {
 
 func (harness *walletHarness) setCreatorStatus(userId, status string) {
 	harness.T.Helper()
-	query := "INSERT INTO " + pgx.Identifier{harness.creatorSchema, "creator_program_members"}.Sanitize() + " (user_id, status) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET status = EXCLUDED.status"
+	query := "INSERT INTO " + pgx.Identifier{harness.creatorSchema, "creator_program_members"}.Sanitize() + " (user_id, status) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET status = EXCLUDED.status, suspended_at = CASE WHEN EXCLUDED.status = 'approved' THEN NULL ELSE creator_program_members.suspended_at END"
 	if _, err := harness.Database.Exec(query, userId, status); err != nil {
 		harness.T.Fatal(err)
 	}
@@ -191,7 +191,18 @@ func TestCoinTransfersTakeTwoPercentAndConcurrentTransfersNeverOverdraw(t *testi
 	if quote := harness.Call(http.MethodGet, "/api/v1/coins/transfers/quote?coins=7", token, "", nil); quote.Body["feeCoins"].(float64) != 1 || quote.Body["netCoins"].(float64) != 6 {
 		t.Fatalf("quote: %v", quote.Body)
 	}
-	body := map[string]any{"recipientUserId": recipient, "coins": 40}
+	if quote := harness.Call(http.MethodGet, "/api/v1/coins/transfers/quote?coins=40", token, "", nil); quote.Body["feePercent"].(float64) != 2 || quote.Body["feeBasisPoints"].(float64) != 200 {
+		t.Fatalf("quote must expose exact configured fee: %v", quote.Body)
+	}
+	staleQuote := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-stale-quote", map[string]any{"recipientUserId": recipient, "coins": 40, "expectedFeeBasisPoints": 201})
+	if staleQuote.Status != http.StatusConflict || staleQuote.Body["code"] != "COIN_TRANSFER_FEE_CHANGED" {
+		t.Fatalf("stale transfer fee must require a new quote: %d %s", staleQuote.Status, staleQuote.Raw)
+	}
+	invalidQuote := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-invalid-quote", map[string]any{"recipientUserId": recipient, "coins": 40, "expectedFeeBasisPoints": -1})
+	if invalidQuote.Status != http.StatusBadRequest {
+		t.Fatalf("out-of-range expected fee must be rejected: %d %s", invalidQuote.Status, invalidQuote.Raw)
+	}
+	body := map[string]any{"recipientUserId": recipient, "coins": 40, "expectedFeeBasisPoints": 200}
 	first := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-key-1", body)
 	replay := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-key-1", body)
 	reused := harness.Call(http.MethodPost, "/api/v1/coins/transfers", token, "transfer-key-1", map[string]any{"recipientUserId": recipient, "coins": 41})
@@ -252,8 +263,11 @@ func TestInAppPurchaseBooksTheStoreFeeAndARefundClawsBackOrFlagsTheShortfall(t *
 	if response := harness.Call(http.MethodPost, "/webhooks/store-notifications/apple_iap", "", "", []byte("apple-txn-1")); response.Status != http.StatusOK {
 		t.Fatalf("refund notification: %d %s", response.Status, response.Raw)
 	}
-	if harness.balance(ledgermodels.UserSpendableCoinsAccount(buyer)) != 0 || harness.balance(ledgermodels.UserCoinDebtAccount(buyer)) != 500 {
-		t.Fatal("clawback did not recover the remaining coins and record the spent ones as debt")
+	if harness.balance(ledgermodels.UserSpendableCoinsAccount(buyer)) != 0 || harness.balance(ledgermodels.UserCoinDebtAccount(buyer)) != 0 {
+		t.Fatal("clawback did not recover the remaining purchased coins without creating user debt")
+	}
+	if harness.balance(ledgermodels.PlatformUnrecoveredCoinClawbackAccount()) != 500 {
+		t.Fatal("spent store coins were not recorded as platform clawback loss")
 	}
 	var flags int
 	schema := harness.wallet.Coins.Container.Settings.Money.DatabaseSchema

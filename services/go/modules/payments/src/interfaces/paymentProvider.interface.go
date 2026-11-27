@@ -160,6 +160,7 @@ type StoreRefundNotification struct {
 	StoreTransactionId    string
 	RefundedAt            time.Time
 	Kind                  StoreNotificationKind
+	RefundType            int
 	OriginalTransactionId string
 	ProductId             string
 	ExpiresAt             *time.Time

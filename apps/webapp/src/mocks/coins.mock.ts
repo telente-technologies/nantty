@@ -5,7 +5,7 @@ import { convertUsdCentsToViewerCurrency } from "./locale.mock";
 import { mockProviderWalletState } from "./providerWallet.mock";
 import { createMockRoute, type MockRoute } from "./registry.mock";
 
-const COIN_TRANSFER_FEE_PERCENT = 25;
+const COIN_TRANSFER_FEE_BASIS_POINTS = 2_500;
 const MOCK_COIN_RETURN_PATH = "/coins/return";
 
 const mockCoinWallet = { balance: 250 };
@@ -31,8 +31,8 @@ const buildCoinPackages = (): CoinPackage[] =>
 const pendingPurchasesByReference = new Map<string, { coins: number; credited: boolean }>();
 
 const quoteCoinTransfer = (coins: number) => {
-  const feeCoins = Math.ceil((coins * COIN_TRANSFER_FEE_PERCENT) / 100);
-  return { feeCoins, netCoins: coins - feeCoins, feePercent: COIN_TRANSFER_FEE_PERCENT };
+  const netCoins = Math.floor((coins * (10_000 - COIN_TRANSFER_FEE_BASIS_POINTS)) / 10_000);
+  return { coins, feeCoins: coins - netCoins, netCoins, feePercent: COIN_TRANSFER_FEE_BASIS_POINTS / 100, feeBasisPoints: COIN_TRANSFER_FEE_BASIS_POINTS };
 };
 
 const requirePositiveWholeCoins = (coins: unknown) => {
@@ -65,8 +65,9 @@ export const coinsMocks: MockRoute[] = [
   }),
   createMockRoute("GET", "/api/v1/coins/transfers/quote", ({ query }) => quoteCoinTransfer(Number(query.get("coins") ?? 0))),
   createMockRoute("POST", "/api/v1/coins/transfers", ({ body }) => {
-    const { recipientUserId, coins } = body as { recipientUserId: string; coins: number };
+    const { recipientUserId, coins, expectedFeeBasisPoints } = body as { recipientUserId: string; coins: number; expectedFeeBasisPoints: number };
     if (!recipientUserId) throw new ApiError(400, "Choose who to send coins to");
+    if (expectedFeeBasisPoints !== COIN_TRANSFER_FEE_BASIS_POINTS) throw new ApiError(409, "The transfer fee changed. Review the updated quote before confirming.", "COIN_TRANSFER_FEE_CHANGED");
     const quote = quoteCoinTransfer(requirePositiveWholeCoins(coins));
     const balance = spendMockCoinsOrThrow(coins);
     return { transferId: `ct_${Date.now().toString(36)}`, feeCoins: quote.feeCoins, netCoins: quote.netCoins, balance };

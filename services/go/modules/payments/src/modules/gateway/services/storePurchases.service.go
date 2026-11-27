@@ -12,7 +12,10 @@ import (
 	"nantty/modules/payments/src/generated/ent/webhookevent"
 	"nantty/modules/payments/src/interfaces"
 	"nantty/modules/payments/src/modules/gateway/models"
+	"nantty/platform/httpserver"
 )
+
+var ErrPartialStoreRefundNeedsReconciliation = httpserver.NewApiError(http.StatusServiceUnavailable, "PARTIAL_STORE_REFUND_REQUIRES_RECONCILIATION", "The store reported a partial refund. Coin balance changes are paused until the authoritative refunded quantity is reconciled.")
 
 func (gateway *PaymentGateway) VerifyStoreReceipt(ctx context.Context, store string, receipt interfaces.StoreReceipt) (interfaces.VerifiedStorePurchase, error) {
 	verifier, err := gateway.Container.StoreVerifier(store)
@@ -150,6 +153,9 @@ func (gateway *PaymentGateway) ApplyVerifiedStoreSubscriptionNotice(ctx context.
 }
 
 func (gateway *PaymentGateway) ApplyVerifiedStoreRefund(ctx context.Context, store string, notification interfaces.StoreRefundNotification) error {
+	if store == "google_play" && notification.RefundType != 1 {
+		return ErrPartialStoreRefundNeedsReconciliation
+	}
 	return databases.RunInMoneyTransaction(ctx, gateway.Container.Resources.Database, func(ctx context.Context, transaction *sql.Tx) error {
 		client := gateway.Container.Client(transaction)
 		claimed, err := gateway.claimWebhookEventInTransaction(ctx, client, store, "refund:"+notification.NotificationId, "refund", notification.StoreTransactionId, nil, nil)

@@ -40,6 +40,9 @@ func ValidateCoinTransferRequest(request dtos.CoinTransferRequestDto) error {
 	collector.RequireUuid("recipientUserId", request.RecipientUserId)
 	collector.RequireRange("coins", request.Coins, 1, 100_000_000)
 	collector.RequireLength("note", request.Note, 0, 140)
+	if request.ExpectedFeeBasisPoints != nil {
+		collector.RequireRange("expectedFeeBasisPoints", *request.ExpectedFeeBasisPoints, 0, 9_999)
+	}
 	return collector.Result()
 }
 

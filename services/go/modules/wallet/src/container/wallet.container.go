@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-
 	"nantty/modules/ledger/src/databases"
 	ledgerevents "nantty/modules/ledger/src/events"
 	"nantty/modules/ledger/src/loaders"

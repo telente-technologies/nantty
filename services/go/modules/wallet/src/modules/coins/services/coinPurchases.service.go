@@ -195,19 +195,48 @@ func (purchases CoinPurchases) HandleProviderDispute(ctx context.Context, transa
 	if err != nil {
 		return err
 	}
-	alreadyClawed := priorCoins
+	priorTargetCoins, err := models.ProportionalCoinChargeback(priorAmount, purchase.Coins, purchase.AmountMinor)
+	if err != nil {
+		return err
+	}
+	coinsToClaw := max(targetCoins-priorTargetCoins, 0)
 	// A separate completed refund/reversal has already removed all purchased
 	// coins. Do not claw those coins a second time when a later chargeback lands.
 	if purchase.Status == coinpurchase.StatusRefunded || purchase.ReviewStatus == coinpurchase.ReviewStatusReversed {
-		alreadyClawed = purchase.Coins
+		coinsToClaw = 0
 	}
-	coinsToClaw := max(targetCoins-alreadyClawed, 0)
-	if coinsToClaw > purchase.Coins-alreadyClawed {
+	if coinsToClaw > purchase.Coins-priorTargetCoins {
 		return fmt.Errorf("calculated coin chargeback clawback exceeds the remaining purchased coins")
 	}
 
+	clawback := models.CoinClawback{}
+	if coinsToClaw > 0 {
+		provenance, err := purchases.unspentCoinsFromLedgerCredit(ctx, transaction, purchase.UserID, purchase.ID.String(), "coin-purchase:"+purchase.ID.String(), purchase.Coins)
+		if err != nil {
+			return err
+		}
+		clawback.RecoveredCoins = min(provenance.RecoveredCoins, coinsToClaw)
+		clawback.ShortfallCoins = coinsToClaw - clawback.RecoveredCoins
+		lines := []ledgermodels.JournalLineRequest{{Account: ledgermodels.CoinsInCirculationAccount(), Direction: ledgermodels.Credit, AmountMinor: coinsToClaw}}
+		if clawback.RecoveredCoins > 0 {
+			lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.UserSpendableCoinsAccount(purchase.UserID), Direction: ledgermodels.Debit, AmountMinor: clawback.RecoveredCoins})
+		}
+		if clawback.ShortfallCoins > 0 {
+			lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.PlatformUnrecoveredCoinClawbackAccount(), Direction: ledgermodels.Debit, AmountMinor: clawback.ShortfallCoins})
+		}
+		if len(lines) > 0 {
+			if _, err := purchases.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
+				Reference: "coin-purchase-chargeback:" + providerIntent.Provider + ":" + notice.ProviderDisputeId,
+				Kind:      "coins.purchaseChargebackLost", Description: "Coins removed after a lost card or bank chargeback",
+				Metadata: map[string]any{"coinPurchaseId": purchase.ID.String(), "providerDisputeId": notice.ProviderDisputeId, "chargedBackMinor": notice.AmountMinor, "cumulativeChargedBackMinor": cumulativeAmount, "recoveredCoins": clawback.RecoveredCoins, "shortfallCoins": clawback.ShortfallCoins},
+				Lines:    lines,
+			}); err != nil {
+				return err
+			}
+		}
+	}
 	inserted, err := transaction.ExecContext(ctx, `INSERT INTO `+chargebacksTable+` (id, created_at, purchase_id, provider, provider_dispute_id, amount_minor, coins_clawed, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $2) ON CONFLICT (provider, provider_dispute_id) DO NOTHING`, uuid.Must(uuid.NewV7()), purchases.Container.Now().UTC(), purchase.ID, providerIntent.Provider, notice.ProviderDisputeId, notice.AmountMinor, coinsToClaw)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $2) ON CONFLICT (provider, provider_dispute_id) DO NOTHING`, uuid.Must(uuid.NewV7()), purchases.Container.Now().UTC(), purchase.ID, providerIntent.Provider, notice.ProviderDisputeId, notice.AmountMinor, clawback.RecoveredCoins)
 	if err != nil {
 		return err
 	}
@@ -217,31 +246,6 @@ func (purchases CoinPurchases) HandleProviderDispute(ctx context.Context, transa
 	}
 	if insertedCount == 0 {
 		return nil
-	}
-
-	clawback := models.CoinClawback{}
-	if coinsToClaw > 0 {
-		buyerCoins := ledgermodels.UserSpendableCoinsAccount(purchase.UserID)
-		balance, err := purchases.Container.Ledger.ReadAccountBalance(ctx, transaction, buyerCoins)
-		if err != nil {
-			return err
-		}
-		clawback = models.SplitCoinClawback(balance, coinsToClaw)
-		lines := []ledgermodels.JournalLineRequest{{Account: ledgermodels.CoinsInCirculationAccount(), Direction: ledgermodels.Credit, AmountMinor: coinsToClaw}}
-		if clawback.RecoveredCoins > 0 {
-			lines = append(lines, ledgermodels.JournalLineRequest{Account: buyerCoins, Direction: ledgermodels.Debit, AmountMinor: clawback.RecoveredCoins})
-		}
-		if clawback.ShortfallCoins > 0 {
-			lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.UserCoinDebtAccount(purchase.UserID), Direction: ledgermodels.Debit, AmountMinor: clawback.ShortfallCoins})
-		}
-		if _, err := purchases.Container.Ledger.PostBalancedJournalEntry(ctx, transaction, ledgermodels.JournalEntryRequest{
-			Reference: "coin-purchase-chargeback:" + providerIntent.Provider + ":" + notice.ProviderDisputeId,
-			Kind:      "coins.purchaseChargebackLost", Description: "Coins removed after a lost card or bank chargeback",
-			Metadata: map[string]any{"coinPurchaseId": purchase.ID.String(), "providerDisputeId": notice.ProviderDisputeId, "chargedBackMinor": notice.AmountMinor, "cumulativeChargedBackMinor": cumulativeAmount, "recoveredCoins": clawback.RecoveredCoins, "shortfallCoins": clawback.ShortfallCoins},
-			Lines:    lines,
-		}); err != nil {
-			return err
-		}
 	}
 
 	if providerIntent.Provider == "flutterwave" {
@@ -275,7 +279,7 @@ func (purchases CoinPurchases) HandleProviderDispute(ctx context.Context, transa
 	}
 	return purchases.Container.Outbox.EnqueueInTransaction(ctx, transaction, "coinPurchase.chargebackLost", purchase.ID.String(), now, map[string]any{
 		"coinPurchaseId": purchase.ID.String(), "userId": purchase.UserID, "provider": providerIntent.Provider, "providerDisputeId": notice.ProviderDisputeId,
-		"chargedBackMinor": notice.AmountMinor, "cumulativeChargedBackMinor": cumulativeAmount, "coinsClawed": coinsToClaw,
+		"chargedBackMinor": notice.AmountMinor, "cumulativeChargedBackMinor": cumulativeAmount, "coinsClawed": clawback.RecoveredCoins,
 		"recoveredCoins": clawback.RecoveredCoins, "shortfallCoins": clawback.ShortfallCoins,
 	})
 }

@@ -1,5 +1,11 @@
 # Nantty requirements and evidence matrix
 
+## Coin provenance and transfer safeguards — PR #79 reconciliation, 2026-11-27
+
+- PR #79 adds source-lot accounting for coin reversals, serialized sender/recipient provenance locking, and a fail-closed guard for Google Play quantity-based partial refunds. The feature branch also includes the mobile secure retry follow-up that persists the original account, quote, and idempotency key before sending.
+- The original PR head `5e9a80cc707a4ca0c4f23fb6aacb1e1a30c8faf6` conflicts with main. During local reconciliation, creator conversion authorization and test fixtures must retain main's approved-and-unsuspended membership check. The integrated branch has not yet been tested or pushed.
+- Refund status remains PARTIAL: Apple refund verification and authoritative quantity/cumulative partial-refund accounting are not implemented. Google partial refund requests are rejected before ledger mutation. Cross-device store/provider workflows remain unverified. Do not mark this requirement verified based on source inspection alone.
+
 ## Creator Program, wallet and staging continuation — 2026-11-27
 
 | Requirement | Status | Current evidence / remaining boundary |

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"nantty/modules/ledger/src/modules/journal/models"
@@ -49,6 +50,9 @@ func (ledger *Ledger) PostBalancedJournalEntry(ctx context.Context, transaction 
 }
 
 func (ledger *Ledger) postValidatedJournalEntry(ctx context.Context, transaction *sql.Tx, request models.JournalEntryRequest, reversedEntry *ent.JournalEntry) (models.PostedJournalEntry, error) {
+	if err := ledger.LockSpendableCoinAccounts(ctx, transaction, request.Lines); err != nil {
+		return models.PostedJournalEntry{}, err
+	}
 	client := ledger.clientFor(transaction)
 	if _, err := client.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", "ledger-reference:"+request.Reference); err != nil {
 		return models.PostedJournalEntry{}, fmt.Errorf("lock journal reference: %w", err)
@@ -67,6 +71,27 @@ func (ledger *Ledger) postValidatedJournalEntry(ctx context.Context, transaction
 		return models.PostedJournalEntry{}, err
 	}
 	return ledger.applyLinesAndInsertEntry(ctx, client, request, accounts, reversedEntry)
+}
+
+func (ledger *Ledger) LockSpendableCoinAccounts(ctx context.Context, transaction *sql.Tx, lines []models.JournalLineRequest) error {
+	users := map[string]struct{}{}
+	for _, line := range lines {
+		code := line.Account.Code
+		if line.Account.Currency == models.CoinUnit && line.Account.OwnerType == models.OwnerTypeUser && strings.HasPrefix(code, "user:") && strings.HasSuffix(code, ":coins") {
+			users[strings.TrimSuffix(strings.TrimPrefix(code, "user:"), ":coins")] = struct{}{}
+		}
+	}
+	ids := make([]string, 0, len(users))
+	for id := range users {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	for _, id := range ids {
+		if _, err := transaction.ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", "ledger-spendable-coins:"+id); err != nil {
+			return fmt.Errorf("lock spendable coin account: %w", err)
+		}
+	}
+	return nil
 }
 
 func (ledger *Ledger) lockAccountsCreatingMissingOnes(ctx context.Context, client *ent.Client, lines []models.JournalLineRequest) (map[models.AccountKey]*ent.LedgerAccount, error) {

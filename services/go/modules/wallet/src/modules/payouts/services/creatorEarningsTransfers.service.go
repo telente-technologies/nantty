@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -23,6 +24,8 @@ type CreatorEarningsTransferReport struct {
 	Skipped     int `json:"skipped"`
 	Failed      int `json:"failed"`
 }
+
+var errCreatorProgramMembershipRequired = errors.New("creator program membership is not approved")
 
 func (transfers CreatorEarningsTransfers) TransferCreatorEarningsToConnectedAccounts(ctx context.Context, runId string) CreatorEarningsTransferReport {
 	report := CreatorEarningsTransferReport{}
@@ -53,6 +56,10 @@ func (transfers CreatorEarningsTransfers) TransferCreatorEarningsToConnectedAcco
 				continue
 			}
 			if err := transfers.moveEarningsToWithdrawable(ctx, userId, currency, balance.BalanceMinor, CreatorEarningsMoveReference(userId, currency, balance.CreditsTotalMinor)); err != nil {
+				if errors.Is(err, errCreatorProgramMembershipRequired) {
+					report.Skipped++
+					continue
+				}
 				transfers.Container.Resources.Logger.WarnContext(ctx, "creator earnings move failed", slog.String("userId", userId), slog.Any("error", err))
 				report.Failed++
 				continue
@@ -78,6 +85,13 @@ func (transfers CreatorEarningsTransfers) HandleTransferFailed(context.Context, 
 }
 
 func (transfers CreatorEarningsTransfers) payEarningsIntoProviderWallet(ctx context.Context, transaction *sql.Tx, userId, currency string, amountMinor int64, reference string) error {
+	approved, err := transfers.Container.IsApprovedCreator(ctx, transaction, userId)
+	if err != nil {
+		return err
+	}
+	if !approved {
+		return errCreatorProgramMembershipRequired
+	}
 	inFlight, err := transfers.Container.Payments.HasOpenMovement(ctx, transaction, paymentmodels.MovementCreatorPayout, userId)
 	if err != nil || inFlight {
 		return err

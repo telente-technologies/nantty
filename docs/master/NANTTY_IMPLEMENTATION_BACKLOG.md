@@ -1,5 +1,10 @@
 # Nantty implementation backlog
 
+## PR #79 coin provenance continuation — 2026-11-27
+
+- Locally reconciled PR #79 with `origin/main` `e84ededcb13a70ae5e4230b6285ba6b9c9090c27`, preserving the newer creator approval/suspension authorization. Full Wallet tests pass on the integrated tree. The merge commit is not yet created or pushed; remote PR remains conflicting until that happens. Next: inspect the final staged diff, verify remote head unchanged, then push the reconciliation and wait for current-head checks/review. No merge yet.
+- PR #79 still does not provide Apple refund verification or cumulative quantity-based partial-refund accounting; Google Play partial-quantity refunds remain fail-closed pending authoritative implementation. The coin-provenance integration should not be described as complete store refund support.
+
 ## 2026-11-27 — Creator policy, wallet authorization and staging continuation
 
 - Added source-identified creator metric and standing snapshots, server-side adult-age gate, freshness-aware requirement progress, and Admin policy floors/legacy projections in PR #80 (`aa42c7cf`); added progress surfaces/mocks in Admin, Web, Mobile and Studio. Missing/stale snapshots remain unavailable; no analytics/moderation producer exists to generate verified values.
@@ -1070,3 +1075,21 @@ Prioritized from the repository baseline and the requested cross-product scope. 
 - Verification: `ANALYTICS_TEST_DATABASE_URL=... go test ./... -count=1` passed against local PostgreSQL 17; `go vet ./...` passed; `bash services/scripts/check-backend-file-lengths.sh` passed.
 - The test auto-drops only its uniquely named schema. No persistent schema migration or production data was changed.
 - Remaining: deployed migration/runtime, production event source integration, and staging workflow are not verified.
+# Coin provenance and refund safety (2026-11-26)
+
+- **Implemented locally:** ledger-source FIFO provenance replay for purchase/transfer credits, serialized with a transaction advisory lock shared by all spendable coin ledger mutations. Refunds, partial provider chargebacks, and staff reversals debit only remaining coins from the relevant source entry. Unrecovered amounts are accounted to the platform COIN clawback-loss account and review/risk state; user coin debt is not created.
+- **Verified:** full Wallet PostgreSQL tests and full Creator module tests passed against isolated PostgreSQL 17, including unrelated incoming coin preservation, chargeback duplicate/out-of-order behavior, store refund after spending, staff reversals, transfer concurrency, and ledger integrity. See the 2026-11-26 verification record.
+- **Client work:** Web coin-wallet page now includes a quote-first transfer flow with exact fee/net display and stale-quote reconfirmation; mobile also binds confirmation to the quote's exact basis points. Web service contract tests (36 total, 3 coin-transfer cases), Webapp typecheck/lint and Mobile TypeScript pass. Interactive signed-in browser/device behavior is still unverified.
+- **Next:** Add authoritative external payment refund approval/reconciliation and partial store refund semantics; implement and verify Apple refund-notification verification; exercise store/provider sandbox and cross-device app synchronization. Do not claim coin refunds are complete until these remain.
+- Purchases remain server-settlement/store-receipt verified and exact-once ledger credited; transfer fees are transactional/stored and confirmation binds to exact basis points; creator conversion/payout require approved Creator Program membership and verified payout controls. Browser/device/live provider tests remain outstanding.
+
+## PR #79 follow-up review — reversal lock order and Play partial refunds (2026-11-27)
+
+- Review found the transfer reversal path acquired recipient provenance lock before sorted sender/recipient ledger locks. Fixed by acquiring both spendable account locks in sorted order before replay.
+- Official Google RTDN supports full and quantity-based partial voids. Parser now validates `refundType`; full refunds proceed, partial refund notifications fail closed before mutation pending authoritative quantity/cumulative refund reconciliation. Missing or unsupported type is rejected. This is a safe guard only; partial store refunds remain incomplete.
+- Focused regression tests were added. See `docs/integration/NANTTY_VERIFICATION_AND_TEST_EVIDENCE.md` for executed commands once run. PR #79 must not be described as complete for partial store refunds.
+
+## PR #79 follow-up — mobile transfer idempotency recovery (2026-11-27)
+
+- Review found the mobile transfer sheet discarded its idempotency key on every error. A timeout after server commit could therefore be retried as a second transfer. The client now persists the exact request in account-scoped device secure storage before sending, restores it after app restart, locks recipient/amount edits while outcome is uncertain, and replays with the same key. Secure-store read failure blocks new sends; known no-commit errors and stale-fee conflicts take an explicit reconfirmation path.
+- Focused Jest tests (6/6), mobile TypeScript check, and targeted ESLint passed locally. Installed-device process interruption/restart testing and updated GitHub PR checks remain unverified; this is not a complete wallet release.

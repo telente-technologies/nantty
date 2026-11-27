@@ -44,18 +44,24 @@ func (reviews CoinReviews) reverseTransfer(ctx context.Context, transaction *sql
 	if transfer.ReviewStatus == cointransfer.ReviewStatusReversed {
 		return ErrCoinTransactionReversed
 	}
+	coinAccounts := []ledgermodels.JournalLineRequest{
+		{Account: ledgermodels.UserSpendableCoinsAccount(transfer.SenderUserID)},
+		{Account: ledgermodels.UserSpendableCoinsAccount(transfer.RecipientUserID)},
+	}
+	if err := reviews.Container.Ledger.LockSpendableCoinAccounts(ctx, transaction, coinAccounts); err != nil {
+		return err
+	}
 	recipientCoins := ledgermodels.UserSpendableCoinsAccount(transfer.RecipientUserID)
-	balance, err := reviews.Container.Ledger.ReadAccountBalance(ctx, transaction, recipientCoins)
+	clawback, err := (CoinPurchases{Container: reviews.Container}).unspentCoinsFromLedgerCredit(ctx, transaction, transfer.RecipientUserID, transfer.ID.String(), "", transfer.NetCoins)
 	if err != nil {
 		return err
 	}
-	clawback := models.SplitCoinClawback(balance, transfer.NetCoins)
 	lines := []ledgermodels.JournalLineRequest{{Account: ledgermodels.UserSpendableCoinsAccount(transfer.SenderUserID), Direction: ledgermodels.Credit, AmountMinor: transfer.Coins}}
 	if clawback.RecoveredCoins > 0 {
 		lines = append(lines, ledgermodels.JournalLineRequest{Account: recipientCoins, Direction: ledgermodels.Debit, AmountMinor: clawback.RecoveredCoins})
 	}
 	if clawback.ShortfallCoins > 0 {
-		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.UserCoinDebtAccount(transfer.RecipientUserID), Direction: ledgermodels.Debit, AmountMinor: clawback.ShortfallCoins})
+		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.PlatformUnrecoveredCoinClawbackAccount(), Direction: ledgermodels.Debit, AmountMinor: clawback.ShortfallCoins})
 	}
 	if transfer.FeeCoins > 0 {
 		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.PlatformCoinTransferFeeRevenueAccount(), Direction: ledgermodels.Debit, AmountMinor: transfer.FeeCoins})
@@ -85,11 +91,10 @@ func (reviews CoinReviews) reversePurchase(ctx context.Context, transaction *sql
 		return CoinReversal{}, ErrCoinPurchaseNotReversible
 	}
 	buyerCoins := ledgermodels.UserSpendableCoinsAccount(purchase.UserID)
-	balance, err := reviews.Container.Ledger.ReadAccountBalance(ctx, transaction, buyerCoins)
+	clawback, err := (CoinPurchases{Container: reviews.Container}).unspentCoinsFromLedgerCredit(ctx, transaction, purchase.UserID, purchase.ID.String(), "coin-purchase:"+purchase.ID.String(), purchase.Coins)
 	if err != nil {
 		return CoinReversal{}, err
 	}
-	clawback := models.SplitCoinClawback(balance, purchase.Coins)
 	lines := []ledgermodels.JournalLineRequest{
 		{Account: ledgermodels.CoinSalesRevenueAccount(purchase.Currency), Direction: ledgermodels.Debit, AmountMinor: purchase.AmountMinor},
 		{Account: ledgermodels.RefundsPayableAccount(purchase.Provider, purchase.Currency), Direction: ledgermodels.Credit, AmountMinor: purchase.AmountMinor},
@@ -99,7 +104,7 @@ func (reviews CoinReviews) reversePurchase(ctx context.Context, transaction *sql
 		lines = append(lines, ledgermodels.JournalLineRequest{Account: buyerCoins, Direction: ledgermodels.Debit, AmountMinor: clawback.RecoveredCoins})
 	}
 	if clawback.ShortfallCoins > 0 {
-		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.UserCoinDebtAccount(purchase.UserID), Direction: ledgermodels.Debit, AmountMinor: clawback.ShortfallCoins})
+		lines = append(lines, ledgermodels.JournalLineRequest{Account: ledgermodels.PlatformUnrecoveredCoinClawbackAccount(), Direction: ledgermodels.Debit, AmountMinor: clawback.ShortfallCoins})
 	}
 	reference := "coin-purchase-reversal:" + purchase.ID.String()
 	if err := reviews.postReversal(ctx, transaction, reference, "coins.purchaseReversed", "Coin purchase reversed and refunded", lines, clawback); err != nil {

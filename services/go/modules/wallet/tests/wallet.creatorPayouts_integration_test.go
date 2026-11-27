@@ -41,6 +41,11 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 		t.Fatal("an unverified creator's earned coins must stay as coins")
 	}
 	harness.OnboardConnectedAccount(creator, false)
+	harness.setCreatorStatus(creator, "pending")
+	if refused := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-not-approved", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}}); refused.Status != http.StatusForbidden || refused.Body["code"] != "CREATOR_PROGRAM_REQUIRED" {
+		t.Fatalf("a payout-verified account outside the Creator Program converted coins: %d %s", refused.Status, refused.Raw)
+	}
+	harness.setCreatorStatus(creator, "approved")
 	nonCreator := uuid.NewString()
 	harness.OnboardConnectedAccount(nonCreator, false)
 	harness.creditEarnedCoins(nonCreator, 180)
@@ -78,6 +83,11 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.withdrawals.process")
 	stepUp := staff.StepUp
 	harness.Flutterwave.FundMainBalance("NGN", 1_000_000)
+	harness.suspendCreator(creator)
+	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp()); report.Body["creatorTransfers"].(float64) != 0 || harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")) != 180_000 {
+		t.Fatalf("suspended Creator Program member must not be paid: %v", report.Body)
+	}
+	harness.setCreatorStatus(creator, "approved")
 	if report := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, stepUp()); report.Body["creatorTransfers"].(float64) != 1 {
 		t.Fatalf("creator earnings: %v", report.Body)
 	}

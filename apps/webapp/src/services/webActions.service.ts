@@ -4,6 +4,8 @@ import type {
   CoinActivityEntry,
   CoinBalance,
   CoinPackage,
+  CoinTransferQuote,
+  CoinTransferReceipt,
   ID,
   LiveComment,
   LiveGift,
@@ -96,6 +98,9 @@ export const coinsService = {
     sendRequestToWebappServer<CoinPurchaseCheckout>("/api/v1/coins/purchases", { method: "POST", body: { packageId }, idempotencyKey: createIdempotencyKey("coins") }),
   confirmCoinPurchase: (reference: string) =>
     sendRequestToWebappServer<{ status: "pending" | "succeeded" | "failed"; coins: number }>(`/api/v1/coins/purchases/${encodeURIComponent(reference)}/verify`, { method: "POST" }),
+  fetchCoinTransferQuote: (coins: number) => sendRequestToWebappServer<CoinTransferQuote>("/api/v1/coins/transfers/quote", { query: { coins } }),
+  transferCoins: (recipientUserId: ID, coins: number, expectedFeeBasisPoints: number, idempotencyKey: string) =>
+    sendRequestToWebappServer<CoinTransferReceipt>("/api/v1/coins/transfers", { method: "POST", body: { recipientUserId, coins, expectedFeeBasisPoints }, idempotencyKey }),
 };
 
 export const creatorSubscriptionsService = {

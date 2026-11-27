@@ -20,6 +20,7 @@ var (
 	ErrCoinTransferBlocked     = httpserver.NewApiError(http.StatusUnprocessableEntity, "COIN_TRANSFER_BLOCKED", "You cannot send coins to this person.")
 	ErrInsufficientCoins       = httpserver.NewApiError(http.StatusPaymentRequired, "INSUFFICIENT_COINS", "You don't have enough coins. Buy more coins and try again.")
 	ErrInsufficientEarnedCoins = httpserver.NewApiError(http.StatusUnprocessableEntity, "INSUFFICIENT_EARNED_COINS", "You do not have enough earned coins to convert.")
+	ErrCoinTransferFeeChanged  = httpserver.NewApiError(http.StatusConflict, "COIN_TRANSFER_FEE_CHANGED", "The transfer fee changed. Review the updated quote before confirming.")
 )
 
 type CoinTransfers struct {
@@ -33,7 +34,7 @@ func (transfers CoinTransfers) QuoteTransfer(ctx context.Context, coins int64) (
 	if err != nil {
 		return dtos.CoinTransferQuoteDto{}, err
 	}
-	return dtos.CoinTransferQuoteDto{Coins: coins, FeeCoins: split.FeeCoins, NetCoins: split.NetCoins, FeePercent: feeBps / 100}, nil
+	return dtos.CoinTransferQuoteDto{Coins: coins, FeeCoins: split.FeeCoins, NetCoins: split.NetCoins, FeePercent: float64(feeBps) / 100, FeeBasisPoints: feeBps}, nil
 }
 
 type CoinTransferInput struct {
@@ -42,6 +43,7 @@ type CoinTransferInput struct {
 	Coins           int64
 	Note            string
 	IdempotencyKey  string
+	ExpectedFeeBps  *int64
 }
 
 func (transfers CoinTransfers) TransferCoinsInTransaction(ctx context.Context, transaction *sql.Tx, input CoinTransferInput) (dtos.CoinTransferReceiptDto, error) {
@@ -63,6 +65,9 @@ func (transfers CoinTransfers) TransferCoinsInTransaction(ctx context.Context, t
 		return dtos.CoinTransferReceiptDto{}, ErrCoinTransferBlocked
 	}
 	feeBps := transfers.Container.CoinTransferFeeBps(ctx)
+	if input.ExpectedFeeBps != nil && *input.ExpectedFeeBps != feeBps {
+		return dtos.CoinTransferReceiptDto{}, ErrCoinTransferFeeChanged
+	}
 	split, err := models.SplitCoinTransfer(input.Coins, feeBps)
 	if err != nil {
 		return dtos.CoinTransferReceiptDto{}, err
