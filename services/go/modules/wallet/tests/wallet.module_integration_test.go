@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 
 	"nantty/modules/ledger/src/databases"
 	moneytesting "nantty/modules/ledger/src/databases/moneyTesting"
@@ -58,8 +59,13 @@ func startWalletHarness(t *testing.T, requireReview bool, adjustments ...func(*c
 	if walletTables != "coin_packages,coin_purchases,coin_transfers" {
 		t.Fatalf("wallet test schema is missing required migrations: %s", walletTables)
 	}
+	creatorMembers := pgx.Identifier{walletSchema, "creator_program_members"}.Sanitize()
+	if _, err := money.Database.Exec("CREATE TABLE " + creatorMembers + " (user_id text PRIMARY KEY, status text NOT NULL)"); err != nil {
+		t.Fatal(err)
+	}
 	settings := configs.WalletSettings{
 		Money:                        moneytesting.MoneyModuleSettingsForTests("wallet", walletSchema, money.LedgerSchema),
+		CreatorsSchema:               walletSchema,
 		CoinTransferFeeBps:           200,
 		CoinCashValueMinorByCurrency: configs.ParseCurrencyAmounts("NGN:1000,USD:1"),
 		MinimumPayoutMinorByCurrency: configs.ParseCurrencyAmounts("NGN:1000,USD:1000"),
@@ -98,6 +104,14 @@ func (harness *walletHarness) balance(account ledgermodels.AccountRef) int64 {
 		harness.T.Fatal(err)
 	}
 	return balance
+}
+
+func (harness *walletHarness) approveCreatorProgramMember(userID string) {
+	harness.T.Helper()
+	table := pgx.Identifier{harness.wallet.Coins.Container.Settings.CreatorsSchema, "creator_program_members"}.Sanitize()
+	if _, err := harness.Database.Exec("INSERT INTO "+table+" (user_id, status) VALUES ($1, 'approved') ON CONFLICT (user_id) DO UPDATE SET status = 'approved'", userID); err != nil {
+		harness.T.Fatal(err)
+	}
 }
 
 func (harness *walletHarness) buyCoinsOnTheWeb(userId, packageId string) {

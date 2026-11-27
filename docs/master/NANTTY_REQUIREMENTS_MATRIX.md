@@ -1,5 +1,9 @@
 # Nantty requirements and evidence matrix
 
+## Current creator cash-out gate — 2026-11-27
+
+Creator coin conversion and scheduled transfer to the existing payout wallet now require an approved `creator_program_members` row, verified payout account and payout verification level. The membership decision is locked in the same transaction as conversion / payout queueing. Conversion also fails closed for an active monetisation hold or unresolved wallet risk flag. Ordinary seller status does not grant Creator Program access. Focused wallet integration tests, the complete Wallet module suite, `go vet ./modules/wallet/...`, repository backend file-length gate, and `git diff --check` passed locally on branch `owl/creator-conversion-eligibility`; PR CI/review and runtime schema grants are pending. This verifies backend code and test harness behavior, not live provider payout or cross-client UI behavior. Creator eligibility thresholds, payout period/carry-forward policy, ad settlement accounting, and store/provider flows remain separate requirements.
+
 ## Current evidence correction — 2026-11-26 (post-PR #77)
 
 This current-state note supersedes conflicting older staging and CodeQL snapshots below; dated historical implementation notes are retained for audit history.

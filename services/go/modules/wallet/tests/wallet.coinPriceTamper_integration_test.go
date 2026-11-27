@@ -37,6 +37,8 @@ func TestCoinPurchasePriceComesFromTheServerNotTheRegionHeader(t *testing.T) {
 	if charged["currency"] != "NGN" || charged["amountMinor"].(float64) != 100_000 {
 		t.Fatalf("the trusted country decides the price, the header does not: %v", charged)
 	}
+	harness.OnboardConnectedAccount(nigerian, false)
+	harness.approveCreatorProgramMember(nigerian)
 	converted := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", harness.Tokens.UserAccessToken(nigerian), "convert-"+nigerian[:8], map[string]any{"coins": 100, "currency": "USD"},
 		http.Header{"CloudFront-Viewer-Country": {"NG"}, "X-Client-Region": {"US"}})
 	if converted.Status != http.StatusUnprocessableEntity || converted.Body["code"] != "CURRENCY_NOT_ALLOWED" {

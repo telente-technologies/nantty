@@ -1,13 +1,17 @@
 package wallet_test
 
 import (
+	"context"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 
 	ledgermodels "nantty/modules/ledger/src/modules/journal/models"
 	paymentstesting "nantty/modules/payments/src/integrations/paymentsTesting"
+	payoutservices "nantty/modules/wallet/src/modules/payouts/services"
 )
 
 func (harness *walletHarness) creditEarnedCoins(userId string, coins int64) {
@@ -40,6 +44,42 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 		t.Fatal("an unverified creator's earned coins must stay as coins")
 	}
 	harness.OnboardConnectedAccount(creator, false)
+	unapproved := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-unapproved", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
+	if unapproved.Status != http.StatusForbidden || unapproved.Body["code"] != "CREATOR_PROGRAM_APPROVAL_REQUIRED" {
+		t.Fatalf("account with seller/payout setup but no creator approval converted earnings: %d %s", unapproved.Status, unapproved.Raw)
+	}
+	if harness.balance(ledgermodels.CreatorEarnedCoinsAccount(creator)) != 180 {
+		t.Fatal("unapproved user's earned coin balance changed")
+	}
+	harness.approveCreatorProgramMember(creator)
+	if err := harness.wallet.Payouts.Holds.ApplyAccountHealthChange(context.Background(), payoutservices.AccountHealthChange{
+		AccountId: creator, Status: "RESTRICTED", Restrictions: []string{"MONETISATION"}, CanMonetise: false, OccurredAt: time.Now().UTC(),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	paused := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-paused", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
+	if paused.Status != http.StatusForbidden || paused.Body["code"] != "CREATOR_MONETISATION_PAUSED" {
+		t.Fatalf("restricted creator converted earnings: %d %s", paused.Status, paused.Raw)
+	}
+	if err := harness.wallet.Payouts.Holds.ApplyAccountHealthChange(context.Background(), payoutservices.AccountHealthChange{
+		AccountId: creator, Status: "GOOD_STANDING", CanMonetise: true, OccurredAt: time.Now().UTC().Add(time.Second),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	riskTable := pgx.Identifier{harness.wallet.Coins.Container.Settings.Money.DatabaseSchema, "wallet_risk_flags"}.Sanitize()
+	if _, err := harness.Database.Exec("INSERT INTO "+riskTable+" (id, created_at, user_id, reason) VALUES ($1, $2, $3, $4)", uuid.New(), time.Now().UTC(), creator, "test_review"); err != nil {
+		t.Fatal(err)
+	}
+	review := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-review", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
+	if review.Status != http.StatusForbidden || review.Body["code"] != "CREATOR_MONETISATION_REVIEW_REQUIRED" {
+		t.Fatalf("creator with open risk review converted earnings: %d %s", review.Status, review.Raw)
+	}
+	if harness.balance(ledgermodels.CreatorEarnedCoinsAccount(creator)) != 180 {
+		t.Fatal("holds and risk review must not consume earned coins")
+	}
+	if _, err := harness.Database.Exec("UPDATE "+riskTable+" SET resolved_at = $1 WHERE user_id = $2", time.Now().UTC(), creator); err != nil {
+		t.Fatal(err)
+	}
 	staleQuote := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-quote-stale", map[string]any{"coins": 180, "currency": "NGN", "expectedCashMinor": 179_000}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
 	if staleQuote.Status != http.StatusConflict || staleQuote.Body["code"] != "CONVERSION_RATE_CHANGED" {
 		t.Fatalf("a mismatched expectedCashMinor quote must fail closed: %d %s", staleQuote.Status, staleQuote.Raw)
@@ -103,4 +143,32 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 		t.Fatal("a failed transfer did not return the money to available")
 	}
 	harness.AssertLedgerHealthy()
+}
+
+func TestScheduledCreatorPayoutRechecksCurrentCreatorProgramApproval(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: needs Postgres")
+	}
+	harness := startWalletHarness(t, true)
+	creator := uuid.NewString()
+	token := harness.Tokens.UserAccessToken(creator)
+	harness.OnboardConnectedAccount(creator, false)
+	harness.approveCreatorProgramMember(creator)
+	harness.creditEarnedCoins(creator, 180)
+	converted := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-before-suspension", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
+	if converted.Status != http.StatusCreated {
+		t.Fatalf("approved member conversion: %d %s", converted.Status, converted.Raw)
+	}
+	creatorMembers := pgx.Identifier{harness.wallet.Coins.Container.Settings.CreatorsSchema, "creator_program_members"}.Sanitize()
+	if _, err := harness.Database.Exec("UPDATE "+creatorMembers+" SET status = 'suspended' WHERE user_id = $1", creator); err != nil {
+		t.Fatal(err)
+	}
+	staff := harness.Tokens.StaffTokens(uuid.NewString(), "money.withdrawals.process")
+	run := harness.Call(http.MethodPost, "/api/v1/admin/payouts/run", staff.AccessToken, "", nil, staff.StepUp())
+	if run.Status != http.StatusOK || run.Body["creatorTransfers"].(float64) != 0 {
+		t.Fatalf("suspended creator payout should not be queued: %d %s", run.Status, run.Raw)
+	}
+	if payable := harness.balance(ledgermodels.CreatorEarningsPayableAccount(creator, "NGN")); payable != 180_000 {
+		t.Fatalf("suspended creator payable changed: %d", payable)
+	}
 }

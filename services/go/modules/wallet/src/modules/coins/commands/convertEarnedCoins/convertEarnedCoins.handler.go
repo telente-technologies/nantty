@@ -19,6 +19,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.CoinC
 	if err := handler.Application.Container.Payments.RequireVerificationLevel(ctx, input.UserId, paymentmodels.VerificationLevelPayout); err != nil {
 		return dtos.CoinConversionReceiptDto{}, false, err
 	}
+	if err := handler.Application.Container.Payments.RequirePayoutAccountVerified(ctx, input.UserId); err != nil {
+		return dtos.CoinConversionReceiptDto{}, false, err
+	}
 	var expectedCash int64
 	hasExpectedCash := input.ExpectedCashMinor != nil
 	if hasExpectedCash {
@@ -28,6 +31,9 @@ func (handler Handler) Execute(ctx context.Context, command Command) (dtos.CoinC
 		Scope: input.UserId + ":coins.convert", Key: input.IdempotencyKey,
 		RequestHash: ledgerutils.HashRequestFingerprint(input.Coins, input.Currency, hasExpectedCash, expectedCash),
 		Execute: func(ctx context.Context, transaction *sql.Tx) (dtos.CoinConversionReceiptDto, error) {
+			if err := handler.Application.Balances.RequireCreatorCashoutEligibility(ctx, transaction, input.UserId); err != nil {
+				return dtos.CoinConversionReceiptDto{}, err
+			}
 			return handler.Application.Balances.ConvertEarnedCoinsToCashInTransaction(ctx, transaction, input)
 		},
 	})

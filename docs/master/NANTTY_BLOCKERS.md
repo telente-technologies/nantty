@@ -1,5 +1,12 @@
 # Nantty blockers and verification gaps
 
+## Current wallet / creator conversion gate — 2026-11-27
+
+- Creator conversion and scheduled creator payout now require an approved Creator Program member row, verified payout setup, no monetisation hold, and no open wallet risk flag. Local Wallet tests and static checks pass on `owl/creator-conversion-eligibility`; PR CI/review is pending.
+- Deployment must grant the wallet service least-privilege read access to `creator_program_members` in the configured Creators schema. The runtime schema, role grants, and behavior against the deployed database have not been verified. Until then, fail-closed errors are expected rather than allowing conversion.
+- AWS staging remains blocked by missing AWS Toolkit skill retrieval in this session and missing GitHub staging OIDC/account/role configuration previously observed. No AWS calls or deployments were made.
+- Provider/store validation, creator payout cadence and forfeiture approval, and full ad spend/revenue reconciliation are not satisfied by this authorization change.
+
 ## Current blocker reconciliation — 2026-11-26 (post-PR #77)
 
 This status supersedes older contradictory staging snapshots below; historical notes remain for audit history.
