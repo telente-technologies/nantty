@@ -52,6 +52,17 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 		t.Fatal("unapproved user's earned coin balance changed")
 	}
 	harness.approveCreatorProgramMember(creator)
+	creatorMembers := pgx.Identifier{harness.wallet.Coins.Container.Settings.CreatorsSchema, "creator_program_members"}.Sanitize()
+	if _, err := harness.Database.Exec("UPDATE "+creatorMembers+" SET status = 'suspended' WHERE user_id = $1", creator); err != nil {
+		t.Fatal(err)
+	}
+	suspended := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-suspended", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
+	if suspended.Status != http.StatusForbidden || suspended.Body["code"] != "CREATOR_PROGRAM_APPROVAL_REQUIRED" {
+		t.Fatalf("suspended Creator Program member converted earnings: %d %s", suspended.Status, suspended.Raw)
+	}
+	if _, err := harness.Database.Exec("UPDATE "+creatorMembers+" SET status = 'approved' WHERE user_id = $1", creator); err != nil {
+		t.Fatal(err)
+	}
 	if err := harness.wallet.Payouts.Holds.ApplyAccountHealthChange(context.Background(), payoutservices.AccountHealthChange{
 		AccountId: creator, Status: "RESTRICTED", Restrictions: []string{"MONETISATION"}, CanMonetise: false, OccurredAt: time.Now().UTC(),
 	}); err != nil {

@@ -2,7 +2,7 @@
 
 ## Creator conversion authorization and payout standing — 2026-11-27
 
-- Added transaction-scoped approved Creator Program membership enforcement for coin-to-cash conversion and the scheduled creator payable-to-wallet movement. The same gate rejects accounts with an active monetisation hold or unresolved wallet risk flag; conversion also requires verified payout account and payout-level verification. Denied conversions preserve the earned-coin balance.
+- Added transaction-scoped approved Creator Program membership enforcement for coin-to-cash conversion and the scheduled creator payable-to-wallet movement. The same gate rejects suspended/non-member accounts, active monetisation holds and unresolved wallet risk flags; conversion also requires verified payout account and payout-level verification. Denied conversions preserve the earned-coin balance.
 - Commands from `services/go`: `go test ./modules/wallet/tests -run '^(TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer|TestRestrictedCreatorEarningsStayPendingUntilMonetisationIsRestored|TestASecondCreatorEarningsRunOnTheSameDayMovesNewEarningsButNeverMovesTheSameBalanceTwice|TestCoinPurchasePriceComesFromTheServerNotTheRegionHeader)$' -count=1` passed; `go test ./modules/wallet/... -count=1` passed; `go vet ./modules/wallet/...` passed. From repository root, `bash services/scripts/check-backend-file-lengths.sh` and `git diff --check` passed.
 - These are local checks on `owl/creator-conversion-eligibility`. No PR CI, persistent/staging schema permission test, provider sandbox or real payout is evidenced. Production must grant narrowly scoped wallet read access to the Creators membership table, and AWS staging remains separately blocked.
 
