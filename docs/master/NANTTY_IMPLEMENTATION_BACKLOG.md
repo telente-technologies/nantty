@@ -5,7 +5,7 @@
 - Added per-country overrides on each existing channel-specific coin pack row in Admin, with country/currency validation and a warning that App Store/Google Play prices must match their respective storefront products.
 - Go stores override keys alongside existing currency keys in the package JSON (no migration), returns overrides in the Admin DTO, prefers an exact country/currency match for package listing, and re-resolves the trusted country during web checkout. Existing currency and USD fallback behavior is preserved; selected amount/currency are persisted on the purchase and checkout intent.
 - Tests run: Wallet model tests and the database-backed wallet integration test for listing and checkout selection; Admin typecheck, all Admin contract tests, and Admin lint. Results are recorded in `docs/integration/NANTTY_VERIFICATION_AND_TEST_EVIDENCE.md`.
-- Status: local implementation; PR, CI and browser/deployed verification are still pending. Native store-localized amounts remain owned by StoreKit/Play Billing and are not verified here. No AWS action or deployment occurred.
+- Status: PR #82 is open at `ae954c4dc14534fefbc8a990b787546abc7e1943`. A current-head CI failure from an integration test hard-coding the shared `wallet` schema was corrected; the focused test and complete Wallet integration package pass locally. Current PR checks are pending (runs 45932400731, 45932400791 and 45932400700); reviewDecision is unset. Admin browser/deployed verification remains outstanding. Native store-localized amounts remain owned by StoreKit/Play Billing and are not verified here. No AWS action or deployment occurred.
 
 ## 2026-11-26 — Merge mock live-gift CodeQL fix and reconcile staging evidence
 
