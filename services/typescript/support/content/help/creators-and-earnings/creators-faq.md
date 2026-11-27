@@ -11,7 +11,7 @@ Open your profile menu and tap **Switch to creator account**. If your checklist 
 
 ## What are the requirements?
 
-By default: 1,000 real followers, an account at least 30 days old, 10 original posts in the last 60 days, no violations in the last 90 days, and a verified email. You may get a manual review with fewer followers.
+You need at least 100,000 qualifying impressions from verified users in the previous 30 days, 10,000 real followers including 500 verified followers, an account at least 30 days old, 10 original posts in the last 60 days, verified email, and server-verified age 18+. Ninety violation-free days are required for automatic approval. Manual review cannot waive the numeric, age, email or original-content requirements. Trusted analytics and moderation data must both be current; if either source is unavailable, the application is paused and no rejection or reapplication cooldown is created.
 
 ## Do I need a store?
 
@@ -31,7 +31,7 @@ No. You earn from gifts, tips, fan subscriptions, affiliate commissions and a sh
 
 ## How do I turn coins into money?
 
-In Creator Studio tap **Convert earned coins**. In Nigeria each earned coin is worth ₦10 by default. See [Converting earned coins](/help/creators-and-earnings/convert-earned-coins).
+In Creator Studio tap **Convert earned coins**. Before confirming, review the current currency-specific conversion quote, fees and net amount. Only eligible creator-earned coins can be converted; purchased, transferred and gifted coins cannot. See [Converting earned coins](/help/creators-and-earnings/convert-earned-coins).
 
 ## Can I convert coins I bought?
 
@@ -47,7 +47,7 @@ Apple and Google charge a fee, which is added to the fan's price so you earn abo
 
 ## Why is my money still under Creator earnings?
 
-It moves to **Available to withdraw** once a day when you're payout verified, it's at least ₦100 and monetisation isn't paused. See [When creator earnings become available](/help/creators-and-earnings/creator-earnings-holds).
+It moves to **Available to withdraw** only when payout verification, currency eligibility, minimum, risk and monetisation-hold checks pass on a scheduled run. Amounts below the configured payout minimum remain recorded and carry forward; they are not erased. See [When creator earnings become available](/help/creators-and-earnings/creator-earnings-holds).
 
 ## How do I withdraw?
 

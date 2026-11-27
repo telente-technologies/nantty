@@ -50,12 +50,16 @@ func NewFakeTokenService(t testing.TB) *FakeTokenService {
 	return &FakeTokenService{signingKey: signingKey, publicSet: set}
 }
 
-func (service *FakeTokenService) sign(audience string, subject, sessionId string, roles []string, timeToLive time.Duration) (string, error) {
+func (service *FakeTokenService) sign(audience string, subject, sessionId string, roles []string, timeToLive time.Duration, ageBracket ...string) (string, error) {
 	now := time.Now()
 	builder := jwt.NewBuilder().Issuer(FakeIssuer).Audience([]string{audience}).Subject(subject).JwtID(uuid.NewString()).
 		IssuedAt(now).NotBefore(now).Expiration(now.Add(timeToLive)).Claim("sid", sessionId).Claim("roles", roles)
 	if audience == FakeAccountAudience || audience == "nantty-user-step-up" {
-		builder = builder.Claim("age", "adult")
+		age := "adult"
+		if len(ageBracket) > 0 {
+			age = ageBracket[0]
+		}
+		builder = builder.Claim("age", age)
 	}
 	token, err := builder.Build()
 	if err != nil {
@@ -83,6 +87,15 @@ func (service *FakeTokenService) StaffTokenIssuer() string { return FakeIssuer }
 func (service *FakeTokenService) SignAccountAccessToken(t testing.TB, accountId string) string {
 	t.Helper()
 	token, err := service.sign(FakeAccountAudience, accountId, uuid.NewString(), []string{"buyer"}, 15*time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return token
+}
+
+func (service *FakeTokenService) SignAccountAccessTokenWithAgeForTest(t testing.TB, accountId, ageBracket string) string {
+	t.Helper()
+	token, err := service.sign(FakeAccountAudience, accountId, uuid.NewString(), []string{"buyer"}, 15*time.Minute, ageBracket)
 	if err != nil {
 		t.Fatal(err)
 	}

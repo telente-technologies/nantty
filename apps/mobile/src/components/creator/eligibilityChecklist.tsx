@@ -6,8 +6,9 @@ import { makeThemedStyles, useTheme } from "@/theme";
 import type { CreatorEligibilityRequirement } from "@/types/creator.type";
 
 const describeProgress = (requirement: CreatorEligibilityRequirement) => {
+  if (!requirement.available) return "Data unavailable";
   if (requirement.requiredValue <= 1) return requirement.met ? "Done" : "Not yet";
-  return `${Math.min(requirement.currentValue, requirement.requiredValue).toLocaleString()} / ${requirement.requiredValue.toLocaleString()}`;
+  return requirement.met ? `${requirement.currentValue.toLocaleString()} / ${requirement.requiredValue.toLocaleString()}` : `${requirement.currentValue.toLocaleString()} / ${requirement.requiredValue.toLocaleString()} · ${requirement.remaining.toLocaleString()} to go`;
 };
 
 export function EligibilityChecklist({ requirements }: { requirements: readonly CreatorEligibilityRequirement[] }) {
@@ -18,7 +19,7 @@ export function EligibilityChecklist({ requirements }: { requirements: readonly 
       {requirements.map((requirement) => {
         const progress = Math.min(1, requirement.currentValue / Math.max(requirement.requiredValue, 1));
         return (
-          <View key={requirement.key} style={styles.item} accessibilityLabel={`${requirement.label}: ${describeProgress(requirement)}`}>
+            <View key={requirement.key} style={styles.item} accessibilityLabel={`${requirement.label}: ${describeProgress(requirement)}${requirement.dataAsOf ? `, data as of ${requirement.dataAsOf}` : ""}`}>
             <View style={styles.row}>
               <View style={[styles.check, requirement.met && styles.checkMet]}>{requirement.met ? <Check16Icon size={12} color={colors.white} /> : null}</View>
               <Text size={14} lineHeight={16.8} style={styles.label}>{requirement.label}</Text>

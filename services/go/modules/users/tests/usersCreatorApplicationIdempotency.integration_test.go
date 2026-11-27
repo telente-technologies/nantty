@@ -23,6 +23,10 @@ func TestCreatorApplicationSubmissionReplaysByAccountAndRejectsPayloadMismatch(t
 	harness := startUsersModuleAgainstFreshSchema(t)
 	_, token := harness.newAccount("creator.idempotency.owner", "Creator Idempotency Owner")
 	_, otherToken := harness.newAccount("creator.idempotency.other", "Creator Idempotency Other")
+	harness.putCreatorMetrics(harness.profileIdOf(token), 12_000, 700, 120_000)
+	harness.putCreatorMetrics(harness.profileIdOf(otherToken), 12_000, 700, 120_000)
+	harness.putSignals(harness.profileIdOf(token), map[string]any{"daysSinceLastViolation": 180})
+	harness.putSignals(harness.profileIdOf(otherToken), map[string]any{"daysSinceLastViolation": 180})
 	key := "creator-submit-key-0001"
 	input := map[string]any{
 		"contentCategories": []string{"tech"}, "socialLinks": []any{}, "sampleContentUrls": []string{},

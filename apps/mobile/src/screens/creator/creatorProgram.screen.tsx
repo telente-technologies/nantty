@@ -39,7 +39,7 @@ export function CreatorProgramScreen({ navigation }: MainScreenProps<"CreatorPro
     ? { title: "Open creator dashboard", onPress: () => navigation.navigate("CreatorDashboard"), disabled: false }
     : applicationStatus === "pending" || applicationStatus === "rejected"
       ? { title: "View application status", onPress: () => navigation.navigate("CreatorApplicationStatus"), disabled: false }
-      : { title: eligibility.data?.eligible ? "Apply now" : "Apply when you're eligible", onPress: () => navigation.navigate("CreatorApplication"), disabled: !eligibility.data?.eligible };
+      : { title: eligibility.data?.eligible ? "Apply now" : eligibility.data?.decision === "unavailable" ? "Eligibility data unavailable" : "Apply when you're eligible", onPress: () => navigation.navigate("CreatorApplication"), disabled: !eligibility.data?.eligible };
 
   return (
     <Screen>
@@ -71,7 +71,12 @@ export function CreatorProgramScreen({ navigation }: MainScreenProps<"CreatorPro
             <Text size={typeScale.base} weight={600} lineHeight={19.2}>Eligibility</Text>
             {eligibility.data ? <CreatorDecisionBanner decision={eligibility.data.decision} note={eligibility.data.decisionNote} /> : null}
             {eligibility.data ? (
-              <EligibilityChecklist requirements={eligibility.data.requirements} />
+              <>
+                <EligibilityChecklist requirements={eligibility.data.requirements} />
+                <Text size={12} lineHeight={16} color={eligibility.data.metricsAvailable && eligibility.data.standingAvailable ? colors.textMuted : colors.cautionStrongText}>
+                  {eligibility.data.metricsAvailable && eligibility.data.standingAvailable ? `Creator metrics updated ${eligibility.data.metricsAsOf ?? "recently"}.` : "Trusted creator metrics or policy-standing data is not available yet; an application cannot be evaluated until both snapshots are supplied."}
+                </Text>
+              </>
             ) : eligibility.isError ? (
               <ErrorState error={eligibility.error} compact message="Couldn't check your eligibility." onRetry={() => eligibility.refetch()} retrying={eligibility.isRefetching} />
             ) : (

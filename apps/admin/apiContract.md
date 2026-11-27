@@ -699,12 +699,15 @@ Every `Money[]` must list each currency at most once. Changes apply to transacti
 
 ```ts
 interface CreatorEligibilityRules {
-  minimumFollowers: number;            // 0–10,000,000
-  minimumPostsInLast30Days: number;    // 0–1000
-  maximumActiveStrikes: number;        // 0–10
-  minimumAccountAgeDays: number;       // 0–3650
+  minimumFollowers: number; // canonical minimum 10,000; cannot be lowered through this compatibility view
+  minimumVerifiedFollowers: number; // canonical minimum 500
+  minimumQualifyingImpressionsLast30Days: number; // canonical minimum 100,000
+  minimumOriginalPosts: number; // 10 in the last 60 days; mirrors minimumOriginalPostsInLast60Days
+  minimumOriginalPostsInLast60Days: number;
+  minimumAccountAgeDays: number; // canonical minimum 30
+  noViolationsInDays: number; // canonical minimum 90 for automatic approval
+  requiresVerifiedEmail: true;
   requiresIdentityVerification: boolean;
-  allowedCountries: string[];          // ISO 3166-1 alpha-2
 }
 interface UsernameRules {
   changesAllowedPerWindow: number;     // 0–10 (e.g. 1 change…)
@@ -990,7 +993,7 @@ Same versioned endpoints as the other documents (`GET /admin/config`, `PUT /admi
 | Key | Content (defaults) |
 |---|---|
 | `checkmark-suggestions` | `blue { requiresIdVerified, minimumAccountAgeDays 90, minimumRealFollowers 1000, noViolationsInDays 90 }`, `gold { requiresBusinessVerification (CAC/KYB), requiresActiveStoreOrBrandPage, minimumCompletedOrders 20, minimumSuccessRatePercent 90 }` (20 orders AND 90% success). Black is never suggested. |
-| `creator-thresholds` | `autoApprove { minimumAccountAgeDays 30, requiresVerifiedEmail, minimumRealFollowers 1000, minimumOriginalPostsInLast60Days 10, noViolationsInDays 90, maximumFraudScore 30 }`, `manualReview { minimumRealFollowers 500, allowsPastViolation, allowsBorderlineOrAiHeavyContent, maximumRiskScore 60 }`. Below manual review is not eligible. |
+| `creator-thresholds` | Canonical policy: `autoApprove { minimumAccountAgeDays >= 30, requiresVerifiedEmail true, minimumRealFollowers >= 10000, minimumVerifiedFollowers >= 500, minimumQualifyingImpressions30d >= 100000, minimumOriginalPostsInLast60Days >= 10, noViolationsInDays >= 90, maximumFraudScore <= 30 }`; manual review may assess risk/standing only after all mandatory numeric and age/email/content gates are met. Neither this document nor manual review can lower the minimums. |
 | `trial-rules` | `trialLength "DAYS_7"|"MONTH_1"`, `yearlyDiscountPercent 20` (admin-editable), `minimumAccountAgeDays 7`, `requiresVerifiedEmail`, `onePerPerson/Card/Device`, `maximumRiskScore 50`, `minimumCompletedOrders 0`. |
 | `checkmark-pricing` | `bundleDiscountPercent 15`, `bundleMaximumBusinesses 3`, `goldOnlyMonthlyPrice NGN 3,000`, `blackMonthlyPrice NGN 50,000`, `blackGraceDays 14`. The bundle never stacks with the yearly discount (the bigger wins) and never applies to Black. Optional "Gold for all your businesses" (Blue Premium combined Gold, plan `gold_combined`) fields, defaulted server-side when absent: `multiBusinessSingleProfilePercent 5` (0–90, 1 profile), `multiBusinessBasePercent 10` (0–90, 2 profiles), `multiBusinessStepPercent 2` (0–90, added per profile after the second), `multiBusinessMaximumProfiles 5` (1–5), `multiBusinessYearlyExtraPercent 5` (0–90), `multiBusinessYearlyMode "replace"|"add"` (default `replace`: the extra yearly % replaces the normal 20% yearly discount for this plan; `add` applies the normal yearly discount as well). Rejected with `400 VALIDATION_FAILED` when `multiBusinessBasePercent + multiBusinessStepPercent × (multiBusinessMaximumProfiles − 2) > 90`. |
 
