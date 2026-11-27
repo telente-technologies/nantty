@@ -57,7 +57,7 @@ func startWalletHarness(t *testing.T, requireReview bool, adjustments ...func(*c
 	t.Helper()
 	storeTokens := &sync.Map{}
 	money := paymentstesting.StartMoneyHarnessWithPayments(t, map[string]interfaces.StoreReceiptVerifier{
-		"apple_iap":  fakeStoreVerifier{store: "apple_iap", accountTokens: storeTokens},
+		"apple_iap":   fakeStoreVerifier{store: "apple_iap", accountTokens: storeTokens},
 		"google_play": fakeStoreVerifier{store: "google_play", accountTokens: storeTokens},
 	})
 	walletSchema := moneytesting.CreateFreshSchemaWithMigrations(t, money.Database, "wallet", walletmigrations.Files)
