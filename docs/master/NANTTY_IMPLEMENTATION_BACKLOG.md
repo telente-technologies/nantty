@@ -1067,3 +1067,9 @@ Prioritized from the repository baseline and the requested cross-product scope. 
 - **Client work:** Web coin-wallet page now includes a quote-first transfer flow with exact fee/net display and stale-quote reconfirmation; mobile also binds confirmation to the quote's exact basis points. Web service contract tests (36 total, 3 coin-transfer cases), Webapp typecheck/lint and Mobile TypeScript pass. Interactive signed-in browser/device behavior is still unverified.
 - **Next:** Add authoritative external payment refund approval/reconciliation and partial store refund semantics; implement and verify Apple refund-notification verification; exercise store/provider sandbox and cross-device app synchronization. Do not claim coin refunds are complete until these remain.
 - Purchases remain server-settlement/store-receipt verified and exact-once ledger credited; transfer fees are transactional/stored and confirmation binds to exact basis points; creator conversion/payout require approved Creator Program membership and verified payout controls. Browser/device/live provider tests remain outstanding.
+
+## PR #79 follow-up review — reversal lock order and Play partial refunds (2026-11-27)
+
+- Review found the transfer reversal path acquired recipient provenance lock before sorted sender/recipient ledger locks. Fixed by acquiring both spendable account locks in sorted order before replay.
+- Official Google RTDN supports full and quantity-based partial voids. Parser now validates `refundType`; full refunds proceed, partial refund notifications fail closed before mutation pending authoritative quantity/cumulative refund reconciliation. Missing or unsupported type is rejected. This is a safe guard only; partial store refunds remain incomplete.
+- Focused regression tests were added. See `docs/integration/NANTTY_VERIFICATION_AND_TEST_EVIDENCE.md` for executed commands once run. PR #79 must not be described as complete for partial store refunds.

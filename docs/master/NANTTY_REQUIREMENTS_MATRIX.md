@@ -17,6 +17,12 @@ This current-state note supersedes conflicting older staging and CodeQL snapshot
 - Wallet PostgreSQL tests prove unrelated incoming credits survive a purchase chargeback, out-of-order partial chargeback amounts accumulate without repeat clawback, store refunds and staff reversals preserve ledger balance and never create user coin debt. Full Wallet and Creator module tests passed against isolated PostgreSQL 17 after these changes. This is not live provider verification.
 - Coin refund status remains **PARTIAL / IMPLEMENTED_UNVERIFIED**: Apple's refund verifier is not implemented in the current `AppStoreReceiptVerifier`; store refund handling is whole-purchase rather than partial-refund-aware; and provider-confirmed refund outcome reconciliation, live provider/store notification tests, and cross-client balance sync remain unverified. Do not mark all coin requirements complete.
 
+## Coin reversal concurrency and Google Play partial-refund guard — 2026-11-27
+
+- Transfer reversal now acquires sender and recipient spendable-coin advisory locks together through the ledger's sorted lock routine before reading recipient provenance, preventing the recipient-first / sender-first lock inversion against concurrent transfers.
+- Google Play voided-purchase parsing now validates and retains `refundType`. Full refunds continue through the existing full-reversal path; quantity-based partial refunds are explicitly rejected with `PARTIAL_STORE_REFUND_REQUIRES_RECONCILIATION` before any purchase or ledger mutation. This prevents a partial refund being incorrectly treated as a full refund.
+- Quantity-based partial-refund accounting remains **PARTIAL / BLOCKED** until purchase quantity and cumulative refunded quantity are authoritatively persisted and reconciled. No claim of partial-refund support is made. Regression tests cover typed parsing and fail-closed service behavior; local execution is recorded in `NANTTY_VERIFICATION_AND_TEST_EVIDENCE.md`.
+
 ## Coin and wallet rule status — 2026-11-26
 
 - **Purchases:** Web purchases credit only after the server's verified payment settlement; Apple/Google receipt redemption uses the configured server verifiers and exact-once ledger references. Isolated PostgreSQL wallet tests pass. No live provider/store sandbox purchase was performed in this verification. Mobile package selection is platform-scoped through `X-Client-Platform`; mobile buys use store IAP, while web checkout remains web-only.

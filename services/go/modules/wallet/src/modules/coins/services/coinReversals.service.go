@@ -44,6 +44,13 @@ func (reviews CoinReviews) reverseTransfer(ctx context.Context, transaction *sql
 	if transfer.ReviewStatus == cointransfer.ReviewStatusReversed {
 		return ErrCoinTransactionReversed
 	}
+	coinAccounts := []ledgermodels.JournalLineRequest{
+		{Account: ledgermodels.UserSpendableCoinsAccount(transfer.SenderUserID)},
+		{Account: ledgermodels.UserSpendableCoinsAccount(transfer.RecipientUserID)},
+	}
+	if err := reviews.Container.Ledger.LockSpendableCoinAccounts(ctx, transaction, coinAccounts); err != nil {
+		return err
+	}
 	recipientCoins := ledgermodels.UserSpendableCoinsAccount(transfer.RecipientUserID)
 	clawback, err := (CoinPurchases{Container: reviews.Container}).unspentCoinsFromLedgerCredit(ctx, transaction, transfer.RecipientUserID, transfer.ID.String(), "", transfer.NetCoins)
 	if err != nil {

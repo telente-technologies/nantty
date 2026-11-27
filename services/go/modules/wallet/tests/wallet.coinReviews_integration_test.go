@@ -1,8 +1,10 @@
 package wallet_test
 
 import (
+	"context"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -36,6 +38,80 @@ func TestCoinTransfersAreRefusedBetweenBlockedUsers(t *testing.T) {
 	}
 	if harness.balance(ledgermodels.UserSpendableCoinsAccount(recipient)) != 0 {
 		t.Fatal("a blocked user received coins")
+	}
+}
+
+func TestCoinTransferReversalUsesGlobalAccountLockOrder(t *testing.T) {
+	harness := startWalletHarness(t, true)
+	sender, recipient := "00000000-0000-7000-8000-000000000001", "ffffffff-ffff-7fff-8fff-ffffffffffff"
+	harness.buyCoinsOnTheWeb(sender, "web-coins-1")
+	transfer := harness.Call(http.MethodPost, "/api/v1/coins/transfers", harness.Tokens.UserAccessToken(sender), "ordered-transfer-1", map[string]any{
+		"recipientUserId": recipient, "coins": 40, "expectedFeeBasisPoints": 200,
+	})
+	if transfer.Status != http.StatusCreated {
+		t.Fatalf("seed transfer: %d %s", transfer.Status, transfer.Raw)
+	}
+	transferId := transfer.Body["transferId"].(string)
+	reviewer := harness.Tokens.StaffTokens(uuid.NewString(), "money.coins.review")
+
+	ctx := context.Background()
+	blockingTx, err := harness.Database.BeginTx(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer blockingTx.Rollback()
+	if err := harness.wallet.Coins.Container.Ledger.LockSpendableCoinAccounts(ctx, blockingTx, []ledgermodels.JournalLineRequest{{Account: ledgermodels.UserSpendableCoinsAccount(sender)}}); err != nil {
+		t.Fatal(err)
+	}
+	type response struct {
+		status int
+		raw    []byte
+	}
+	reversal := make(chan response, 1)
+	go func() {
+		result := harness.Call(http.MethodPost, "/api/v1/admin/coins/transactions/"+transferId+"/reverse", reviewer.AccessToken, "ordered-reversal-1", map[string]any{"reason": "Lock ordering test"}, reviewer.StepUp())
+		reversal <- response{result.Status, result.Raw}
+	}()
+
+	deadline := time.Now().Add(3 * time.Second)
+	for {
+		var waiting bool
+		if err := harness.Database.QueryRow(`SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname = current_database() AND wait_event_type = 'Lock' AND query LIKE '%pg_advisory_xact_lock%' AND pid <> pg_backend_pid())`).Scan(&waiting); err != nil {
+			t.Fatal(err)
+		}
+		if waiting {
+			break
+		}
+		if time.Now().After(deadline) {
+			blockingTx.Rollback()
+			t.Fatal("reversal did not block on the pre-held sender account lock")
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	probeCtx, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
+	probeTx, err := harness.Database.BeginTx(probeCtx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := harness.wallet.Coins.Container.Ledger.LockSpendableCoinAccounts(probeCtx, probeTx, []ledgermodels.JournalLineRequest{{Account: ledgermodels.UserSpendableCoinsAccount(recipient)}}); err != nil {
+		probeTx.Rollback()
+		t.Fatalf("reversal held recipient before acquiring the blocked sender lock: %v", err)
+	}
+	if err := probeTx.Commit(); err != nil {
+		t.Fatal(err)
+	}
+	if err := blockingTx.Commit(); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case result := <-reversal:
+		if result.status != http.StatusOK {
+			t.Fatalf("reversal failed after locks were released: %d %s", result.status, result.raw)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("reversal did not complete after account locks were released")
 	}
 }
 

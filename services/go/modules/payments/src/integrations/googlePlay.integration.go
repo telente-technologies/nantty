@@ -141,6 +141,7 @@ func (verifier *GooglePlayVerifier) VerifySignedRefundNotification(ctx context.C
 		VoidedPurchaseNotification *struct {
 			PurchaseToken string `json:"purchaseToken"`
 			OrderId       string `json:"orderId"`
+			RefundType    int    `json:"refundType"`
 		} `json:"voidedPurchaseNotification"`
 	}
 	if json.Unmarshal(decoded, &developer) != nil || developer.PackageName != verifier.settings.PackageName {
@@ -151,7 +152,11 @@ func (verifier *GooglePlayVerifier) VerifySignedRefundNotification(ctx context.C
 	switch {
 	case developer.VoidedPurchaseNotification != nil:
 		voided := developer.VoidedPurchaseNotification
+		if voided.OrderId == "" || voided.PurchaseToken == "" || (voided.RefundType != 1 && voided.RefundType != 2) {
+			return interfaces.StoreRefundNotification{}, interfaces.ErrInvalidWebhookSignature
+		}
 		notification.Kind, notification.StoreTransactionId, notification.OriginalTransactionId = interfaces.StoreNotificationRefund, voided.OrderId, voided.PurchaseToken
+		notification.RefundType = voided.RefundType
 		notification.RefundedAt = time.UnixMilli(eventMillis).UTC()
 	case developer.SubscriptionNotification != nil:
 		return verifier.convertSubscriptionNotification(ctx, notification, developer.SubscriptionNotification.NotificationType, developer.SubscriptionNotification.PurchaseToken, developer.SubscriptionNotification.SubscriptionId)

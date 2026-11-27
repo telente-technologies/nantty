@@ -60,6 +60,35 @@ func googlePlayNotificationForPackage(t *testing.T, raw []byte, packageName stri
 	return raw
 }
 
+func googlePlayNotificationWithRefundType(t *testing.T, raw []byte, refundType int) []byte {
+	t.Helper()
+	var envelope map[string]any
+	if err := json.Unmarshal(raw, &envelope); err != nil {
+		t.Fatal(err)
+	}
+	message := envelope["message"].(map[string]any)
+	data, err := base64.StdEncoding.DecodeString(message["data"].(string))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var notification map[string]any
+	if err := json.Unmarshal(data, &notification); err != nil {
+		t.Fatal(err)
+	}
+	voided := notification["voidedPurchaseNotification"].(map[string]any)
+	voided["refundType"] = refundType
+	data, err = json.Marshal(notification)
+	if err != nil {
+		t.Fatal(err)
+	}
+	message["data"] = base64.StdEncoding.EncodeToString(data)
+	updated, err := json.Marshal(envelope)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return updated
+}
+
 func startGooglePlayFixtureServer(t *testing.T, productFixture string) (*storeintegrations.GooglePlayVerifier, *[]string) {
 	t.Helper()
 	var calls []string
@@ -132,8 +161,13 @@ func TestGooglePlayRealTimeNotificationsNeedThePushTokenAndPackage(t *testing.T)
 	verifier, calls := startGooglePlayFixtureServer(t, "productPurchase.response.json")
 	withToken := http.Header{storeintegrations.GooglePlayPushTokenHeader: {"push-secret"}}
 	voided, err := verifier.VerifySignedRefundNotification(context.Background(), googlePlayNotificationForPackage(t, readGooglePlayFixture(t, "rtdn.voided.json"), "com.nantty.app"), withToken)
-	if err != nil || !voided.IsRefund() || voided.StoreTransactionId != "GPA.3301-1111-2222-33333" || voided.NotificationId != "voided-message-1" {
+	if err != nil || !voided.IsRefund() || voided.RefundType != 1 || voided.StoreTransactionId != "GPA.3301-1111-2222-33333" || voided.NotificationId != "voided-message-1" {
 		t.Fatalf("voided %+v err %v", voided, err)
+	}
+	partialBody := googlePlayNotificationWithRefundType(t, readGooglePlayFixture(t, "rtdn.voided.json"), 2)
+	partial, err := verifier.VerifySignedRefundNotification(context.Background(), googlePlayNotificationForPackage(t, partialBody, "com.nantty.app"), withToken)
+	if err != nil || partial.RefundType != 2 || !partial.IsRefund() {
+		t.Fatalf("partial refund %+v err %v", partial, err)
 	}
 	renewed, err := verifier.VerifySignedRefundNotification(context.Background(), googlePlayNotificationForPackage(t, readGooglePlayFixture(t, "rtdn.renewed.json"), "com.nantty.app"), withToken)
 	if err != nil || renewed.Kind != interfaces.StoreNotificationRenewed || renewed.ExpiresAt == nil {
