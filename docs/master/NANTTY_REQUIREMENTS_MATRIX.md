@@ -2,7 +2,7 @@
 
 ## Current PR correction — 2026-11-27
 
-PR #80 is merged at `e84ededcb13a70ae5e4230b6285ba6b9c9090c27`; rows below that still label it open/pending are historical and superseded by this note. PR #86 proposes an NGN 2,000,000-kobo (₦20,000) minimum for creator earned-coin conversion, not a two-week payout schedule. Its original head `4bbb9fcb7798d7925cb0cb5419647ac72e08d849` passes its then-current checks but conflicts with the merged main; a local mainline integration is in progress and has not been pushed or re-verified. Keep the requirement `IMPLEMENTED_UNVERIFIED` on the PR only until the reconciled head passes CI and is reviewed. Forfeiture/cadence remain blocked pending policy/legal resolution.
+PR #80 is merged at `e84ededcb13a70ae5e4230b6285ba6b9c9090c27`; rows below that still label it open/pending are historical and superseded by this note. PR #86 proposes an NGN 2,000,000-kobo (₦20,000) minimum for creator earned-coin conversion, not a two-week payout schedule. Its original head `4bbb9fcb7798d7925cb0cb5419647ac72e08d849` conflicted with main; the reconciliation and test-fixture correction were pushed as `506cd6f1f389b4115dd6aadc2539836f43eae67d`. GitHub currently reports mergeable and rerunning current-head CI; review decision is empty. Keep the requirement `IMPLEMENTED_UNVERIFIED` on the PR only until all required current-head checks pass and review is clear. Forfeiture/cadence remain blocked pending policy/legal resolution.
 
 ## Creator Program, wallet and staging continuation — 2026-11-27
 

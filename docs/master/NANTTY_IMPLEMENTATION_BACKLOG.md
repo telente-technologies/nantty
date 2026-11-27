@@ -3,7 +3,7 @@
 ## Current continuation — 2026-11-27
 
 - PR #80 is already squash-merged at `e84ededcb13a70ae5e4230b6285ba6b9c9090c27`; do not repeat its implementation or treat older open/pending notes below as current.
-- PR #86 (`owl/creator-minimum-payout`) changes only the NGN earned-coin conversion floor to ₦20,000 and fails closed for an unconfigured currency. Its remote head `4bbb9fcb7798d7925cb0cb5419647ac72e08d849` conflicts with current main. A local merge/reconciliation is underway; it has not been pushed. The full Go suite was not rerun on the merged tree because `/` had only ~333 MiB free. Next: resolve docs, run low-cost format/source/diff checks, push updated branch, then require current-head CI and review before merge.
+- PR #86 (`owl/creator-minimum-payout`) changes only the NGN earned-coin conversion floor to ₦20,000 and fails closed for an unconfigured currency. Its original remote head conflicted with current main; reconciliation commit `506cd6f1f389b4115dd6aadc2539836f43eae67d` is now pushed. The focused Wallet PostgreSQL boundary tests pass after the fixtures explicitly approve Creator Program membership. GitHub reports mergeable; current-head CI is rerunning and reviewDecision is empty. Next: monitor required CI and obtain/verify review before any squash merge.
 - Do not implement forfeiture or claim a fortnightly payout cadence. Preserve earnings; get explicit period semantics and legal/product approval before any production policy change.
 
 ## 2026-11-27 — Creator policy, wallet authorization and staging continuation
