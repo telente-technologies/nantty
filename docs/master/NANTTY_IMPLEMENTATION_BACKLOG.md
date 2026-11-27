@@ -21,6 +21,7 @@
 - Completed coin purchases are sent to the existing authenticated server receipt-verification endpoint; the consumable transaction is finished only after the server reports `succeeded`. Pending or failed verification is not acknowledged, and cancellation is surfaced separately from connectivity failures. Store listener cleanup and a bounded five-minute wait are included; automatic recovery of a still-pending coin transaction after app restart remains incomplete.
 - Focused Jest tests cover localized product price retrieval, receipt/transaction submission, verification-before-finish, pending/failed verification, missing receipts, user cancellation, and native request failure cleanup. TypeScript and targeted ESLint pass. No live store or device purchase was exercised.
 - Work is on a dependent branch from PR #82 so that country/channel package configuration and mobile billing remain separately reviewable. PR #82 remains open and must merge before this follow-up can target `main`.
+- Full-suite regression discovered during verification: `apps/mobile/src/screens/spaces/__tests__/webSpaceAudio.hook.test.ts` fails because a Webapp hook is run under the mobile renderer and React reports an invalid hook call/null dispatcher; Jest also reports an open async handle after the run. This is outside the coin diff and should be fixed in its own focused change.
 
 ## 2026-11-26 — Merge mock live-gift CodeQL fix and reconcile staging evidence
 
