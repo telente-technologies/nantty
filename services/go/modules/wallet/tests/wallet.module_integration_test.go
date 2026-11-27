@@ -145,7 +145,8 @@ func TestWebCoinPurchaseCreditsOnceAndAppClientsMustUseInAppPurchase(t *testing.
 
 func TestCountrySpecificCoinPriceIsShownAndRecheckedAtCheckout(t *testing.T) {
 	harness := startWalletHarness(t, true)
-	if _, err := harness.Database.Exec(`UPDATE wallet.coin_packages SET prices = prices || '{"@NG:NGN":125000}'::jsonb WHERE id = 'web-coins-1'`); err != nil {
+	schema := harness.wallet.Coins.Container.Settings.Money.DatabaseSchema
+	if _, err := harness.Database.Exec(fmt.Sprintf(`UPDATE %q.coin_packages SET prices = prices || '{"@NG:NGN":125000}'::jsonb WHERE id = 'web-coins-1'`, schema)); err != nil {
 		t.Fatal(err)
 	}
 	ngHeaders := http.Header{"CloudFront-Viewer-Country": {"NG"}}
