@@ -115,4 +115,17 @@ describe("coin store purchases", () => {
 
     expect(removed).toHaveBeenCalledTimes(2);
   });
+
+  it("times out when the native purchase bridge never settles", async () => {
+    jest.useFakeTimers();
+    const { billing, mocks, removed } = fakeBilling();
+    mocks.requestPurchase.mockImplementationOnce(() => new Promise(() => undefined));
+    const purchase = purchaseCoinStoreProduct(billing, "android", STORE_PRODUCT, { redeemStoreReceipt: jest.fn() });
+    const result = expect(purchase).rejects.toThrow("The store did not confirm this purchase in time");
+
+    await jest.advanceTimersByTimeAsync(5 * 60_000);
+    await result;
+    expect(removed).toHaveBeenCalledTimes(2);
+    jest.useRealTimers();
+  });
 });

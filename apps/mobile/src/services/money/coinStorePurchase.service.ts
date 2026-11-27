@@ -68,14 +68,14 @@ export async function purchaseCoinStoreProduct(
   try {
     const purchaseResult = pending.result;
     void purchaseResult.catch(() => undefined);
-    await billing.requestPurchase({
+    const requestFailure = billing.requestPurchase({
       type: "in-app",
       request: {
         apple: { sku: productId },
         google: { skus: [productId] },
       },
-    });
-    const purchase = await purchaseResult;
+    }).then(() => new Promise<Purchase>(() => undefined));
+    const purchase = await Promise.race([purchaseResult, requestFailure]);
     if (purchase.productId !== productId || purchase.purchaseState !== "purchased") return { status: "failed", coins: 0 };
     const receipt = purchase.purchaseToken ?? "";
     const transactionId = platform === "ios" ? ("transactionId" in purchase ? purchase.transactionId : null) ?? purchase.id : purchase.id;
