@@ -1,5 +1,12 @@
 # Nantty implementation backlog
 
+## 2026-11-27 — Creator Studio ad revenue share breakdown
+
+- Added the current base creator share and configured `original` / `ai_generated` content multipliers to `GET /api/v1/creators/revenue-rules`, with the effective share calculated using the same basis-point multiplication and 100% cap used by Ads. Invalid/out-of-range multiplier rows are ignored by both the Ads runtime and the presentation API; defaults are 40% base, 100% original multiplier, and 30% AI-generated multiplier. Values are never described as a fixed payment per view.
+- Creator Studio now shows base, multiplier, and effective share per supported content type, plus settlement/invalid-delivery explanatory copy. Corrected the mock from 55% to the backend's 40% default. Admin setting revisions retain policy audit history; ad impression records retain the rates used for historical settlement.
+- Verification: external Ads invalid-multiplier test, Creator policy unit tests, Creator revenue-rules integration contract, full Ads and Creators Go suites, Studio typecheck and all 111 Studio contract tests passed locally. Node 24.19.0 emitted a workspace engine warning (required Node >=26.13.0); no browser render/visual QA has run. Status remains `IMPLEMENTED_UNVERIFIED` pending supported-Node/CI and visual verification.
+- This does not complete advertiser spend-to-creator earnings reconciliation, settlement/refund accounting, or real ad delivery verification; those remain open in the matrix/blockers. Staging work was not performed because the required AWS Agent Toolkit documentation retrieval tools were unavailable.
+
 ## 2026-11-26 — Merge mock live-gift CodeQL fix and reconcile staging evidence
 
 - PR #77 (`owl/codeql-deterministic-demo-viewer`) replaced `Math.random()` selection of fixture viewer identities with a deterministic cycle and added a fake-timer regression test. Squash-merged as `b5a32658210652f4a5be200a1296f46163276fd8`; the commit has no co-author trailer. Focused Jest, package ESLint, TypeScript check and `git diff --check` passed locally (Node 24.19.0; repository target is Node 26.13). Mobile CI and PR JavaScript CodeQL passed. Post-merge JavaScript CodeQL marked #35/#36/#44 fixed at 2026-11-26 19:01 UTC. Alert #91 remains open at the provider-required Flutterwave checksum; do not alter its semantics.

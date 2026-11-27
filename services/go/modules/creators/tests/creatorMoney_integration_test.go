@@ -203,8 +203,13 @@ func TestTipsPayTheCreatorOnceAndShowInEarningsAndTheDashboard(t *testing.T) {
 	if _, pending := harness.call(http.MethodGet, "/api/v1/creators/me", harness.tokens.UserAccessToken(stranger), "", nil); pending["status"] != "pending" || pending["canGoLive"] != false {
 		t.Fatalf("pending applicant: %v", pending)
 	}
-	if _, rules := harness.call(http.MethodGet, "/api/v1/creators/revenue-rules", fanToken, "", nil); rules["subscriptionCreatorSharePercent"] != float64(80) || rules["giftCreatorSharePercentUpTo"] != float64(70) || rules["adsRevenueCreatorSharePercent"] != float64(40) {
+	_, rules := harness.call(http.MethodGet, "/api/v1/creators/revenue-rules", fanToken, "", nil)
+	if rules["subscriptionCreatorSharePercent"] != float64(80) || rules["giftCreatorSharePercentUpTo"] != float64(70) || rules["adsRevenueCreatorSharePercent"] != float64(40) {
 		t.Fatalf("rules: %v", rules)
+	}
+	policy, ok := rules["adRevenuePolicy"].(map[string]any)
+	if !ok || policy["baseShareBasisPoints"] != float64(4000) || len(policy["rules"].([]any)) != 2 {
+		t.Fatalf("ad policy breakdown: %v", rules["adRevenuePolicy"])
 	}
 	assertHealthy(t, harness.creatorsHarness)
 }

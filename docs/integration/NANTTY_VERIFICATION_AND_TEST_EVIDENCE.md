@@ -1,5 +1,16 @@
 # Nantty Verification & Test Evidence
 
+## Creator Studio ad revenue share breakdown — 2026-11-27
+
+- `go test ./tests/modules/creatorMoney/services -run 'TestAdRevenuePolicy' -count=1` from `services/go/modules/creators` — passed (defaults, configured multiplier, cap, invalid values).
+- `go test ./tests/services -run 'Test(MonetizationRows|InvalidActiveMultipliers)' -count=1` from `services/go/modules/ads` — passed (invalid active multipliers are rejected and resolve to runtime defaults).
+- `go test ./... -count=1 -p 1` from `services/go/modules/ads` — passed across all Ads test packages.
+- `go test ./tests -run 'TestCreatorMoney' -count=1 -p 1` from `services/go/modules/creators` — passed (API response contract).
+- `go test ./... -count=1 -p 1` from `services/go/modules/creators` — passed.
+- `corepack pnpm --filter @nantty/studio typecheck` — passed; `corepack pnpm --filter @nantty/studio test:contracts` — 111/111 passed. Both commands emitted an engine warning because local Node is 24.19.0 and the workspace requires >=26.13.0.
+- `corepack pnpm --filter @nantty/studio lint` — exited 0 with 30 pre-existing warnings elsewhere in Studio; the changed earnings card has no lint warning.
+- `bash services/scripts/check-backend-file-lengths.sh` and `git diff --check` — passed. Browser visual QA, CI, deployed ad settings, and provider/settlement workflows were not run.
+
 ## PR #77 and staging recheck — 2026-11-26
 
 - PR #77 was squash-merged as `b5a32658210652f4a5be200a1296f46163276fd8`; the merge message contains no `Co-authored-by` trailer. The change replaces randomized selection of mock live-gift viewer identities with deterministic cycling and adds a fake-timer regression test.

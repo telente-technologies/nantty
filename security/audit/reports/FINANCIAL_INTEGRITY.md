@@ -1,5 +1,9 @@
 # Financial integrity (4–5 Oct 2026)
 
+## Creator ad-share presentation note — 2026-11-27
+
+Creator Studio now presents the current base ad-share basis points, configured original/AI-generated multipliers, and effective share using the Ads service's integer basis-point formula and 100% cap. Admin platform-setting revisions are audited, and the rates used for individual ad impressions are stored with the impression attribution used during settlement. This presentation is informational: it does not promise a fixed payment per impression, establish that advertiser spend was collected, or prove creator earnings were posted. The full advertiser spend, invalid-traffic adjustment, settlement, reserve/refund, platform share, creator liability, and payout reconciliation chain remains unverified; see the current verification record before treating ad revenue as financially complete.
+
 This covers what was verified about money safety during the audit, how it was verified, and what was not run. The ledger was never modified by any test, and no grant or trigger was weakened.
 
 ## 1. Controls in place

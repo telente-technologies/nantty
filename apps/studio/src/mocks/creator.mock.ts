@@ -56,7 +56,8 @@ export const creatorMocks: MockRoute[] = [
     };
   }),
   createMockRoute("GET", "/api/v1/creators/revenue-rules", () => ({
-    giftCreatorSharePercentUpTo: 70, tipCreatorSharePercent: 90, subscriptionCreatorSharePercent: 70, subscriptionShareBasis: "net_of_store_fee", adsRevenueCreatorSharePercent: 55,
+    giftCreatorSharePercentUpTo: 70, tipCreatorSharePercent: 90, subscriptionCreatorSharePercent: 70, subscriptionShareBasis: "net_of_store_fee", adsRevenueCreatorSharePercent: 40,
+    adRevenuePolicy: { baseShareBasisPoints: 4000, rules: [{ contentType: "original", multiplierBasisPoints: 10000, effectiveShareBasisPoints: 4000 }, { contentType: "ai_generated", multiplierBasisPoints: 3000, effectiveShareBasisPoints: 1200 }], calculationNote: "The effective share applies to eligible, actually delivered and settled ad revenue. It is not a fixed payment per view or impression; final earnings depend on valid delivery, settlement and adjustments." },
     coinTransferPlatformFeePercent: 10, affiliateCommissionReleasedAfterEscrow: true, affiliateCommissionMaximumPercent: 30, coinCashValue: ngn(100), minimumPayout: ngn(500_000), withdrawalFeeDescription: "₦50 flat per withdrawal",
   })),
   createMockRoute("GET", "/api/v1/creators/earnings", () => ({ data: earnings, nextCursor: null })),

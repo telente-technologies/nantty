@@ -1,5 +1,11 @@
 # Nantty requirements and evidence matrix
 
+## Current status update — 2026-11-27
+
+- Creator Studio ad-share breakdown (`GET /api/v1/creators/revenue-rules`) is `IMPLEMENTED_UNVERIFIED`: the response now carries the base share, active original/AI content multipliers, capped effective shares, and a non-per-view settlement explanation. Studio displays those values and its mock now matches the backend 40% default (original 40%, AI-generated 12%). Local Ads and Creators Go suites and Studio typecheck/contract tests pass; rendered browser QA and the new PR CI are still required. Applied impression rates remain the accounting source for historical settlement; this UI does not calculate or promise earnings per impression.
+- Separate review branches remain the intended boundary: coin/accounting changes in PR #79, eligibility/admin/backend policy in PR #80, and this Studio presentation/API change on `owl/studio-ad-revenue-share-breakdown`. Do not merge any branch without current checks and a clear review decision.
+- AWS staging work is blocked for this session: mandatory Agent Toolkit `agent_skills` search/retrieve tools are not available in the connected tool set. No AWS CLI/API, Terraform plan/apply, or deployment call was made.
+
 ## Current evidence correction — 2026-11-26 (post-PR #77)
 
 This current-state note supersedes conflicting older staging and CodeQL snapshots below; dated historical implementation notes are retained for audit history.

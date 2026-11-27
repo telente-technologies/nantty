@@ -115,7 +115,7 @@ func ParseMonetizationSetting(raw json.RawMessage, shareBps int64) []Monetizatio
 	}
 	rows := make([]MonetizationPolicyRow, 0, len(setting.Rows))
 	for _, row := range setting.Rows {
-		if row.Active {
+		if row.Active && row.MultiplierBps >= 0 && row.MultiplierBps <= 30_000 {
 			rows = append(rows, MonetizationPolicyRow{ContentType: row.Id, CreatorShareBps: shareBps, MultiplierBps: row.MultiplierBps})
 		}
 	}

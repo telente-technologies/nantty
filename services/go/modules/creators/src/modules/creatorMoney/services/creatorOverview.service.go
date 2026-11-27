@@ -28,17 +28,18 @@ type CreatorStatusView struct {
 }
 
 type RevenueRulesView struct {
-	GiftCreatorSharePercentUpTo            int64  `json:"giftCreatorSharePercentUpTo"`
-	TipCreatorSharePercent                 int64  `json:"tipCreatorSharePercent"`
-	SubscriptionCreatorSharePercent        int64  `json:"subscriptionCreatorSharePercent"`
-	SubscriptionShareBasis                 string `json:"subscriptionShareBasis"`
-	AdsRevenueCreatorSharePercent          int64  `json:"adsRevenueCreatorSharePercent"`
-	CoinTransferPlatformFeePercent         int64  `json:"coinTransferPlatformFeePercent"`
-	AffiliateCommissionReleasedAfterEscrow bool   `json:"affiliateCommissionReleasedAfterEscrow"`
-	AffiliateCommissionMaximumPercent      int64  `json:"affiliateCommissionMaximumPercent"`
-	CoinCashValue                          Money  `json:"coinCashValue"`
-	MinimumPayout                          Money  `json:"minimumPayout"`
-	WithdrawalFeeDescription               string `json:"withdrawalFeeDescription"`
+	GiftCreatorSharePercentUpTo            int64               `json:"giftCreatorSharePercentUpTo"`
+	TipCreatorSharePercent                 int64               `json:"tipCreatorSharePercent"`
+	SubscriptionCreatorSharePercent        int64               `json:"subscriptionCreatorSharePercent"`
+	SubscriptionShareBasis                 string              `json:"subscriptionShareBasis"`
+	AdsRevenueCreatorSharePercent          int64               `json:"adsRevenueCreatorSharePercent"`
+	AdRevenuePolicy                        AdRevenuePolicyView `json:"adRevenuePolicy"`
+	CoinTransferPlatformFeePercent         int64               `json:"coinTransferPlatformFeePercent"`
+	AffiliateCommissionReleasedAfterEscrow bool                `json:"affiliateCommissionReleasedAfterEscrow"`
+	AffiliateCommissionMaximumPercent      int64               `json:"affiliateCommissionMaximumPercent"`
+	CoinCashValue                          Money               `json:"coinCashValue"`
+	MinimumPayout                          Money               `json:"minimumPayout"`
+	WithdrawalFeeDescription               string              `json:"withdrawalFeeDescription"`
 }
 
 type EarningView struct {
@@ -104,9 +105,12 @@ func (money CreatorMoney) RevenueRules(ctx context.Context, currency string) Rev
 		return value
 	}
 	giftCeiling := platform.GiftCreatorShareCeilingBps(ctx, models.MaximumCreatorGiftShareBps) / 100
+	creatorShareBps := platform.CreatorAdShareBps(ctx, orDefault(revenue.AdsCreatorShareBps, 4000))
+	policyRaw, policyFound := platform.ReadValue(ctx, "monetization.policy")
 	return RevenueRulesView{
 		GiftCreatorSharePercentUpTo: giftCeiling, TipCreatorSharePercent: giftCeiling,
-		SubscriptionCreatorSharePercent: 80, SubscriptionShareBasis: "net", AdsRevenueCreatorSharePercent: platform.CreatorAdShareBps(ctx, orDefault(revenue.AdsCreatorShareBps, 4000)) / 100,
+		SubscriptionCreatorSharePercent: 80, SubscriptionShareBasis: "net", AdsRevenueCreatorSharePercent: creatorShareBps / 100,
+		AdRevenuePolicy:                BuildAdRevenuePolicy(policyRaw, policyFound, creatorShareBps),
 		CoinTransferPlatformFeePercent: platform.CoinTransferFeeBps(ctx, orDefault(revenue.CoinTransferFeeBps, 200)) / 100, AffiliateCommissionReleasedAfterEscrow: true,
 		AffiliateCommissionMaximumPercent: orDefault(revenue.MaximumAffiliateBps, 5000) / 100,
 		CoinCashValue:                     Money{money.coinCashValue(ctx, currency), currency}, MinimumPayout: Money{orDefault(revenue.MinimumPayoutMinorByCurrency[currency], 1000), currency},
