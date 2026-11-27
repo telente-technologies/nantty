@@ -13,8 +13,8 @@
 
 ## Current staging/PR evidence recheck — 2026-11-27
 
-- Local branch is `owl/creator-eligibility-progress-and-age-gate`, based on `f19d5f91d842cfbf212de10c2b51afdb462efba9`; it has local uncommitted creator-policy and wallet-authorization changes. No unrelated local work was observed in status at inspection.
-- GitHub PR #79 remains open at `c480c31248011b4ee86e265f6ee04bd77925e762`, mergeable/CLEAN with no review decision and all listed current-head required checks SUCCESS. Keep it separate from this creator branch. Main Code Quality run `45881572407`, Push run `45881572949`, and Security run `45881572163` succeeded at `f19d5f9`.
+- Creator-policy/ad-settlement changes were committed as `aa42c7cf4cb3e233f1e9e2e843f86a776fbde714` on `owl/creator-eligibility-progress-and-age-gate`, based on `f19d5f91d842cfbf212de10c2b51afdb462efba9`, and pushed with a clean worktree. PR #80 is open and mergeable; required checks are currently queued/in progress and no review decision is recorded. The commit message has no `Co-authored-by` trailer.
+- GitHub PR #79 remains open at `c480c31248011b4ee86e265f6ee04bd77925e762`, mergeable/CLEAN with no review decision and all listed current-head required checks SUCCESS. Keep it separate from PR #80. PR #80 current-head CI includes Backend, Frontend, Security, CodeQL and CodeQL quality runs; these were pending/in progress at this check. Main Code Quality run `45881572407`, Push run `45881572949`, and Security run `45881572163` succeeded at `f19d5f9`.
 - No AWS request was made. Existing AWS deployment record remains backend-only and blocked on missing AWS account/OIDC/ECR/deploy configuration; frontend apps and desktop release targets remain undeployed. Do not use the historical Terraform/SES status as a current live AWS read.
 
 ## PR #77 and staging recheck — 2026-11-26
