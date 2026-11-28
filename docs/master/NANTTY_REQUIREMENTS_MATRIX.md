@@ -1,5 +1,11 @@
 # Nantty requirements and evidence matrix
 
+## Creator Studio ad-share breakdown — PR #81 reconciliation, 2026-11-28
+
+| Requirement | Status | Current evidence / remaining boundary |
+|---|---|---|
+| Display configured base ad share and content multipliers in Creator Studio without promising fixed earnings per impression | IMPLEMENTED_UNVERIFIED | PR #81 adds the policy API fields and Studio calculation explanation. Current-main-reconciled full Creators and Ads Go suites plus the backend file-length/diff gates pass locally. Fresh Studio typecheck/contracts CI and browser visual verification remain outstanding. It does not implement full advertiser-to-creator financial reconciliation. |
+
 ## Creator Program, wallet and staging continuation — 2026-11-27
 
 | Requirement | Status | Current evidence / remaining boundary |

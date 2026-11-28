@@ -42,6 +42,7 @@ const dashboard = c.object({
 const creatorStatus = c.object({ status: c.string(), canGoLive: c.boolean(), tier: c.string(), giftSharePercent: c.number(), suspensionReason: c.nullable(c.string()), suspendedAt: c.nullable(c.string()), recentViolations: c.number() }, ["tier"]);
 const revenueRules = c.object({
   giftCreatorSharePercentUpTo: c.number(), tipCreatorSharePercent: c.number(), subscriptionCreatorSharePercent: c.number(), subscriptionShareBasis: c.string(), adsRevenueCreatorSharePercent: c.number(),
+  adRevenuePolicy: c.object({ baseShareBasisPoints: c.number(), rules: c.array(c.object({ contentType: c.string(["original", "ai_generated"]), multiplierBasisPoints: c.number(), effectiveShareBasisPoints: c.number() })), calculationNote: c.string() }),
   coinTransferPlatformFeePercent: c.number(), affiliateCommissionReleasedAfterEscrow: c.boolean(), affiliateCommissionMaximumPercent: c.number(), coinCashValue: money, minimumPayout: money, withdrawalFeeDescription: c.string(),
 });
 const earning = c.object({ id: c.string(), kind: c.string(["gift", "tip", "subscription", "affiliate", "ad_revenue"]), source: c.string(), description: c.string(), amount: money, grossAmount: money, status: c.string(["pending", "available", "reversed"]), availableAt: c.nullable(c.string()), createdAt: c.string(), sourceRef: c.object({ type: c.string(), id: c.string() }) });

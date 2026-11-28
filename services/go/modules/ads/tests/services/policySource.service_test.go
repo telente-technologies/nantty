@@ -58,6 +58,17 @@ func TestMalformedAdminSettingIsIgnoredRatherThanBreakingServing(t *testing.T) {
 	}
 }
 
+func TestInvalidActiveMultipliersAreIgnoredAndUseRuntimeDefaults(t *testing.T) {
+	source := &services.PolicySource{Settings: staticSettings{found: true, value: json.RawMessage(`{"rows":[{"id":"ai_generated","multiplierBps":-1,"active":true}]}`)}}
+	rows, err := source.MonetizationRows(context.Background())
+	if err != nil || len(rows) != 0 {
+		t.Fatalf("invalid policy must not be applied: %v %v", rows, err)
+	}
+	if _, multiplier := services.ResolveCreatorShare(rows, true, time.Now()); multiplier != services.DefaultAiMultiplierBps {
+		t.Fatalf("invalid active multiplier must use runtime default, got %d", multiplier)
+	}
+}
+
 type keyedSettings map[string]string
 
 func (settings keyedSettings) ReadValue(_ context.Context, key string) (json.RawMessage, bool) {

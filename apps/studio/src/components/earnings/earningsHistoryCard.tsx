@@ -11,6 +11,7 @@ import { formatMoneyForDisplay } from "@/utils/formatMoney.util";
 const kindLabels: Record<string, string> = { gift: "Gift", tip: "Tip", subscription: "Subscription", affiliate: "Affiliate", ad_revenue: "Ad share" };
 const statusLabels: Record<string, string> = { pending: "Pending", available: "Available", reversed: "Reversed (refunded or charged back)" };
 const shortDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+const percentFromBasisPoints = (value: number) => `${(value / 100).toLocaleString("en-GB", { maximumFractionDigits: 2 })}%`;
 
 export function EarningsHistoryCard() {
   const earnings = useInfiniteQuery({
@@ -72,13 +73,20 @@ export function RevenueRulesCard() {
           { key: "gift", label: "Gifts", detail: status.data?.giftSharePercent ? `Your tier: ${status.data.giftSharePercent}%` : undefined, value: `up to ${data.giftCreatorSharePercentUpTo}%` },
           { key: "tip", label: "Tips", value: `${data.tipCreatorSharePercent}%` },
           { key: "subscription", label: "Subscriptions", detail: data.subscriptionShareBasis === "net_of_store_fee" ? "After Apple or Google's fee on in-app purchases" : undefined, value: `${data.subscriptionCreatorSharePercent}%` },
-          { key: "ads", label: "Ad revenue on your content and comment sections", value: `${data.adsRevenueCreatorSharePercent}%` },
+          { key: "ads-base", label: "Base ad revenue share", detail: "Applied before content-type adjustments.", value: percentFromBasisPoints(data.adRevenuePolicy.baseShareBasisPoints) },
+          ...data.adRevenuePolicy.rules.map((rule) => ({
+            key: `ads-${rule.contentType}`,
+            label: rule.contentType === "ai_generated" ? "AI-generated content" : "Original content",
+            detail: `${percentFromBasisPoints(rule.multiplierBasisPoints)} content multiplier · ${percentFromBasisPoints(rule.effectiveShareBasisPoints)} effective share`,
+            value: percentFromBasisPoints(rule.effectiveShareBasisPoints),
+          })),
           { key: "affiliate", label: "Affiliate commission", detail: data.affiliateCommissionReleasedAfterEscrow ? "Paid only when the order completes" : undefined, value: `up to ${data.affiliateCommissionMaximumPercent}%` },
           { key: "coin", label: "Value of 1 earned coin", value: formatMoneyForDisplay(data.coinCashValue) },
           { key: "minimum", label: "Minimum withdrawal", value: formatMoneyForDisplay(data.minimumPayout) },
           { key: "fee", label: "Withdrawal fee", value: data.withdrawalFeeDescription },
         ]}
       />
+      <p className="mt-3 text-sm text-muted-foreground">{data.adRevenuePolicy.calculationNote}</p>
     </Card>
   );
 }

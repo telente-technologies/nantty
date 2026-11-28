@@ -1,5 +1,10 @@
 # Nantty implementation backlog
 
+## PR #81 reconciliation — 2026-11-28
+
+- GitHub reported PR #81 (`owl/studio-ad-revenue-share-breakdown`, head `2271f9fd`) conflicting with current main `e84ededc`. Reconciled current main into an isolated worktree; only overlapping evidence/backlog/matrix documents required manual conflict resolution. Current-main documentation was retained, with a distinct PR #81 verification note.
+- Reconciled-tree verification: full Creators and Ads Go test suites passed against the isolated local PostgreSQL test DB; backend <=300-line and diff/conflict gates passed. Studio typecheck/contracts were not run locally because node_modules are absent and only 4.7 GiB remained after Go tests; rely on fresh CI rather than a potentially large install. Next: push normally and wait for fresh current-head CI/review. Do not merge based on old-head checks.
+
 ## 2026-11-27 — Creator policy, wallet authorization and staging continuation
 
 - Added source-identified creator metric and standing snapshots, server-side adult-age gate, freshness-aware requirement progress, and Admin policy floors/legacy projections in PR #80 (`aa42c7cf`); added progress surfaces/mocks in Admin, Web, Mobile and Studio. Missing/stale snapshots remain unavailable; no analytics/moderation producer exists to generate verified values.

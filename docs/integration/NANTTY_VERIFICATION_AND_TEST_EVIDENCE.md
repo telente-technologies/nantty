@@ -1,5 +1,10 @@
 # Nantty Verification & Test Evidence
 
+## PR #81 Creator Studio ad-share reconciliation — 2026-11-28
+
+- PR #81 head `2271f9fd6f8020e8cafea37f758b3078d64f3d44` had passing Backend, Integration, Studio and Security checks on its old base, but GitHub marked it conflicting with current main `e84ededcb13a70ae5e4230b6285ba6b9c9090c27`. The branch has been reconciled in `/tmp/nantty-pr81-integration`; code files merged automatically, and the three overlapping master/evidence documents were resolved to current-main policy before adding this PR-specific record.
+- On the reconciled tree, `MONEY_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./tests/... -count=1 -p 1` from `services/go/modules/creators` passed, and `ADS_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./tests/... -count=1 -p 1` from `services/go/modules/ads` passed. `bash services/scripts/check-backend-file-lengths.sh`, staged/unstaged `git diff --check`, and the unresolved-conflict check passed. Studio typecheck/contracts were not run locally because workspace node_modules are absent; CI must verify them on the pushed head. Fresh PR CI and review are required. Creator Studio browser rendering, staging policy reads and end-to-end advertiser settlement remain unverified.
+
 ## Creator eligibility and seller/creator payout boundary — 2026-11-27
 
 - Added an additive Users migration for source-identified creator metrics/standing snapshots, freshness and replay/monotonicity handling, and adult-age enforcement for eligibility/application endpoints. Admin canonical `creator-thresholds` now carries >=10,000 real followers, >=500 verified followers, >=100,000 qualifying impressions in 30 days, >=30-day account age, >=10 original posts in 60 days, verified email and >=90 days since violation for auto-approval. The compatibility `creator-eligibility` projection now reads/writes all those fields and cannot lower floors.

@@ -50,6 +50,15 @@ export interface RevenueRules {
   readonly subscriptionCreatorSharePercent: number;
   readonly subscriptionShareBasis: string;
   readonly adsRevenueCreatorSharePercent: number;
+  readonly adRevenuePolicy: {
+    readonly baseShareBasisPoints: number;
+    readonly rules: readonly {
+      readonly contentType: "original" | "ai_generated";
+      readonly multiplierBasisPoints: number;
+      readonly effectiveShareBasisPoints: number;
+    }[];
+    readonly calculationNote: string;
+  };
   readonly coinTransferPlatformFeePercent: number;
   readonly affiliateCommissionReleasedAfterEscrow: boolean;
   readonly affiliateCommissionMaximumPercent: number;

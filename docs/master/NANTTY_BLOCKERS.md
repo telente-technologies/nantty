@@ -1,5 +1,11 @@
 # Nantty blockers and verification gaps
 
+## PR #81 current-main verification gate — 2026-11-28
+
+| Blocker | Impact | Evidence | Resolution gate |
+|---|---|---|---|
+| Creator Studio ad-share PR still needs fresh current-head CI and rendered workflow verification | Old-head CI cannot validate the merge with current creator/admin policy and shared DTOs; visual/API runtime behavior is also unverified. | PR #81 head `2271f9fd` passed its old-head checks but conflicted with main `e84ededc`. Reconciled tree now passes full Creators and Ads Go suites plus backend file-length and diff gates. Studio dependencies are absent locally, so typecheck/contracts await CI. | Push the reconciliation; require fresh checks and review before merge. Then perform authenticated browser verification when services are available. |
+
 ## Creator and wallet policy gates — 2026-11-27
 
 | Blocker | Impact | Evidence | Resolution gate |
@@ -74,5 +80,12 @@ This file should be amended when evidence changes; do not remove an item until i
 - Kwikpik booking now reserves a shipment, quote, and parcel in a single transaction before the external call; concurrent reservations of one quote accept only one. Carrier failures mark the reserved shipment `booking_unknown`, and persistence failure after a carrier success leaves the reservation in place, preventing automatic duplicate booking. The scoped Orders logistics suite and disposable Postgres concurrency test passed. A carrier reconciliation path using a verified stable merchant reference and a reviewed Kwikpik contract is still required before production booking can be considered complete.
 - Child-safety scan reporting now happens only after the quarantine row is persisted. A disposable Postgres test proved the reporting gateway is not called when quarantine persistence fails, and the existing fail-closed matcher test passes. Production still has no vetted matcher integration or reporting idempotency; the protected upload gate remains unavailable until those integrations and credentials are approved and tested.
 # Current status update — 2026-11-26
+
+## Current blockers — 2026-11-27
+
+- **AWS staging execution:** the repository requires retrieving the current AWS `agent_skills` documentation and a matching skill before AWS operations. Those AWS search/retrieve tools are unavailable in this session. No AWS calls were made. Continue code/CI preparation; do not run AWS CLI, Terraform remote plans/applies, or deployment until the required skill retrieval is available.
+- **Ad revenue realization:** Creator Studio now shows the configured share calculation, but actual advertiser charge → invalid-traffic/refund adjustment → settled creator/platform allocation → payout reconciliation still needs end-to-end accounting evidence. The UI must not be treated as proof that money has been reconciled.
+- **Creator eligibility data:** trusted Analytics/Moderation producers for fresh qualifying-impression, verified-follower, real-follower and risk snapshots remain a dependency for approving applicants; missing/stale snapshots fail closed.
+- **Payout policy:** production forfeiture remains disabled pending legal/product approval and an unambiguous cadence/cutoff/timezone decision. Staging carry-forward remains the safe behavior.
 
 The Commerce-verified business/store authorization API and merchant grant/revoke UI now include an authenticated customer consent review plus exact-redirect S256 PKCE approval and denial callbacks. Local Auth PostgreSQL tests cover preview, issuance, redemption, denial, replay, expiry, consent revocation and regrant; the full Auth suite and `go vet` pass. The isolated PostgreSQL 17 test service on port 15433 is used for these checks; no persistent application migration has been applied. Remaining blockers are signed-in browser and deployed callback verification, a distinct customer-opted-in business-managed conversation and eligibility window, Social-owned dispatch/storage/inbound status and delivery lifecycle, staging IAM/deployment configuration, and verified developer billing settlement. Public production sending and paid activation remain fail-closed; personal E2EE conversations must not be bridged to external business apps.
