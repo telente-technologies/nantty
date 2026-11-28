@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math/bits"
 	"net/http"
+	"strings"
 
 	"nantty/platform/httpserver"
 )
@@ -54,6 +55,17 @@ func ChooseCoinPackagePrice(prices map[string]int64, preferredCurrency string, c
 		}
 	}
 	return ChosenPrice{}, ErrNoPriceForCurrency
+}
+
+func ChooseCoinPackagePriceForCountry(prices map[string]int64, countryCode, preferredCurrency string, canCharge func(string) bool) (ChosenPrice, error) {
+	country := strings.ToUpper(strings.TrimSpace(countryCode))
+	currency := strings.ToUpper(strings.TrimSpace(preferredCurrency))
+	if len(country) == 2 && len(currency) == 3 {
+		if amount := prices["@"+country+":"+currency]; amount > 0 && canCharge(currency) {
+			return ChosenPrice{Currency: currency, AmountMinor: amount}, nil
+		}
+	}
+	return ChooseCoinPackagePrice(prices, currency, canCharge)
 }
 
 type CoinClawback struct {

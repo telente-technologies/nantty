@@ -1,5 +1,10 @@
 # Nantty implementation backlog
 
+## PR #82 regional coin pricing — current-main reconciliation, 2026-11-27
+
+- Integrated PR #82 with `origin/main` `e84ededcb13a70ae5e4230b6285ba6b9c9090c27` in a separate worktree. Full Wallet tests, targeted Admin backend integration tests and backend line-length/whitespace gates pass. Admin TypeScript did not run: pnpm auto-install was interrupted to avoid exhausting the nearly-full root volume; its partial generated dependencies were removed. Next: verify remote PR head unchanged, push the integration and wait for fresh checks/review. Do not merge before those gates clear.
+- PR #83 depends on this package API. Validate its store purchase request/response contract against the integrated pricing implementation and ensure native storefront prices are authoritative, not inferred from web currency tables.
+
 ## 2026-11-27 — Creator policy, wallet authorization and staging continuation
 
 - Added source-identified creator metric and standing snapshots, server-side adult-age gate, freshness-aware requirement progress, and Admin policy floors/legacy projections in PR #80 (`aa42c7cf`); added progress surfaces/mocks in Admin, Web, Mobile and Studio. Missing/stale snapshots remain unavailable; no analytics/moderation producer exists to generate verified values.

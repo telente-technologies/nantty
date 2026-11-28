@@ -21,16 +21,22 @@ type CoinPackageDto struct {
 }
 
 type CoinPackagePriceRowDto struct {
-	Id             string           `json:"id"`
-	Name           string           `json:"name"`
-	ClientPlatform string           `json:"clientPlatform"`
-	Coins          int64            `json:"coins"`
-	BonusCoins     int64            `json:"bonusCoins"`
-	Prices         map[string]int64 `json:"prices"`
-	StoreProductId string           `json:"storeProductId"`
-	Active         bool             `json:"active"`
-	SortOrder      int              `json:"sortOrder"`
-	Reason         string           `json:"reason,omitempty"`
+	Id             string                         `json:"id"`
+	Name           string                         `json:"name"`
+	ClientPlatform string                         `json:"clientPlatform"`
+	Coins          int64                          `json:"coins"`
+	BonusCoins     int64                          `json:"bonusCoins"`
+	Prices         map[string]int64               `json:"prices"`
+	CountryPrices  map[string]CoinCountryPriceDto `json:"countryPrices"`
+	StoreProductId string                         `json:"storeProductId"`
+	Active         bool                           `json:"active"`
+	SortOrder      int                            `json:"sortOrder"`
+	Reason         string                         `json:"reason,omitempty"`
+}
+
+type CoinCountryPriceDto struct {
+	Currency    string `json:"currency"`
+	AmountMinor int64  `json:"amountMinor"`
 }
 
 type CoinBalanceDto struct {

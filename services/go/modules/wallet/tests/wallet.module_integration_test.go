@@ -174,6 +174,26 @@ func TestWebCoinPurchaseCreditsOnceAndAppClientsMustUseInAppPurchase(t *testing.
 	harness.AssertLedgerHealthy()
 }
 
+func TestCountrySpecificCoinPriceIsShownAndRecheckedAtCheckout(t *testing.T) {
+	harness := startWalletHarness(t, true)
+	schema := harness.wallet.Coins.Container.Settings.Money.DatabaseSchema
+	if _, err := harness.Database.Exec(fmt.Sprintf(`UPDATE %q.coin_packages SET prices = prices || '{"@NG:NGN":125000}'::jsonb WHERE id = 'web-coins-1'`, schema)); err != nil {
+		t.Fatal(err)
+	}
+	ngHeaders := http.Header{"CloudFront-Viewer-Country": {"NG"}}
+	packages := harness.Call(http.MethodGet, "/api/v1/coins/packages", "", "", nil, ngHeaders)
+	first := packages.Body["data"].([]any)[0].(map[string]any)
+	if first["price"].(map[string]any)["amountMinor"] != float64(125_000) {
+		t.Fatalf("country override not listed: %v", first)
+	}
+	userId := uuid.NewString()
+	started := harness.Call(http.MethodPost, "/api/v1/coins/purchases", harness.Tokens.UserAccessToken(userId), "country-price-key", map[string]any{"packageId": "web-coins-1"}, ngHeaders)
+	purchase := started.Body["purchase"].(map[string]any)
+	if started.Status != http.StatusCreated || purchase["amount"].(map[string]any)["amountMinor"] != float64(125_000) {
+		t.Fatalf("checkout must re-resolve the trusted country price: %d %v", started.Status, started.Body)
+	}
+}
+
 func lastPurchaseReference(t *testing.T, harness *walletHarness, userId string) string {
 	var reference string
 	schema := harness.wallet.Coins.Container.Settings.Money.DatabaseSchema

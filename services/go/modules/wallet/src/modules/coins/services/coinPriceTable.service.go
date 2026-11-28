@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
+	"strings"
 
 	"nantty/modules/wallet/src/generated/ent"
 	"nantty/modules/wallet/src/generated/ent/coinpackage"
@@ -33,6 +33,30 @@ func (catalog CoinCatalog) UpsertCoinPriceRow(ctx context.Context, row dtos.Coin
 	if coinpackage.ClientPlatformValidator(platform) != nil || len(row.Prices) == 0 || row.BonusCoins < 0 {
 		return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
 	}
+	normalizedPrices := make(map[string]int64, len(row.Prices))
+	for currency, price := range row.Prices {
+		code := strings.ToUpper(strings.TrimSpace(currency))
+		if price <= 0 || !regionpricing.IsSupportedCurrency(code) {
+			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
+		}
+		if _, duplicate := normalizedPrices[code]; duplicate {
+			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
+		}
+		normalizedPrices[code] = price
+	}
+	normalizedCountryPrices := make(map[string]dtos.CoinCountryPriceDto, len(row.CountryPrices))
+	for country, price := range row.CountryPrices {
+		code := regionpricing.NormalizeCountryCode(country)
+		region, supported := regionpricing.RegionForCountry(code)
+		if !supported || price.Currency != region.Currency || price.AmountMinor <= 0 {
+			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
+		}
+		if _, duplicate := normalizedCountryPrices[code]; duplicate {
+			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
+		}
+		normalizedCountryPrices[code] = price
+	}
+	row.Prices, row.CountryPrices = normalizedPrices, normalizedCountryPrices
 	if row.Coins == 0 {
 		pricedIn := "USD"
 		if platform == coinpackage.ClientPlatformWeb {
@@ -44,16 +68,14 @@ func (catalog CoinCatalog) UpsertCoinPriceRow(ctx context.Context, row dtos.Coin
 		}
 		row.Coins = coins
 	}
-	for currency, price := range row.Prices {
-		if price <= 0 || !regionpricing.IsSupportedCurrency(currency) {
-			return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
-		}
-	}
 	if row.Coins <= 0 || (platform != coinpackage.ClientPlatformWeb && row.StoreProductId == "") {
 		return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
 	}
-	prices, _ := json.Marshal(row.Prices)
-	err := catalog.Container.Client(catalog.Container.Resources.Database).CoinPackage.Create().
+	prices, err := encodeCoinPrices(row.Prices, row.CountryPrices)
+	if err != nil {
+		return dtos.CoinPackagePriceRowDto{}, ErrCoinPriceRowInvalid
+	}
+	err = catalog.Container.Client(catalog.Container.Resources.Database).CoinPackage.Create().
 		SetID(row.Id).SetName(row.Name).SetClientPlatform(platform).SetPurchaseChannel(purchaseChannelForPlatform(platform)).
 		SetCoins(row.Coins).SetBonusCoins(row.BonusCoins).SetPrices(prices).SetStoreProductID(row.StoreProductId).SetActive(row.Active).SetSortOrder(row.SortOrder).
 		OnConflictColumns(coinpackage.FieldID).UpdateName().UpdateClientPlatform().UpdatePurchaseChannel().UpdateCoins().UpdateBonusCoins().
@@ -64,6 +86,6 @@ func (catalog CoinCatalog) UpsertCoinPriceRow(ctx context.Context, row dtos.Coin
 func convertCoinPriceRow(pack *ent.CoinPackage) dtos.CoinPackagePriceRowDto {
 	return dtos.CoinPackagePriceRowDto{
 		Id: pack.ID, Name: pack.Name, ClientPlatform: string(pack.ClientPlatform), Coins: pack.Coins, BonusCoins: pack.BonusCoins,
-		Prices: DecodeCoinPackagePrices(pack), StoreProductId: pack.StoreProductID, Active: pack.Active, SortOrder: pack.SortOrder,
+		Prices: decodeCoinPackageBasePrices(pack), CountryPrices: DecodeCoinPackageCountryPrices(pack), StoreProductId: pack.StoreProductID, Active: pack.Active, SortOrder: pack.SortOrder,
 	}
 }

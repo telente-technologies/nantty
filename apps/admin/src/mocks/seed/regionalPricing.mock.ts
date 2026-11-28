@@ -10,6 +10,7 @@ export const pricingRegions: readonly PricingRegion[] = [
   { region: "US", currency: "USD" },
 ];
 
+
 type WebAndApp = readonly [web: number, app: number];
 
 const monthlyPlanPrices: Record<string, Record<PricingRegionCode, WebAndApp>> = {
@@ -70,7 +71,7 @@ export function buildInitialCoinPackRows(): CoinPackPriceRow[] {
   return (["web", "ios", "android"] as const).flatMap((clientPlatform) =>
     coinTiers.map(({ tier, coins, webBonus }, index) => ({
       id: `${clientPlatform}-coins-${tier}`, name: `${coins.toLocaleString("en-US")} coins`, clientPlatform, coins, bonusCoins: clientPlatform === "web" ? webBonus : 0,
-      prices: Object.fromEntries(Object.entries(hundredCoinPrices).map(([currency, [web, app]]) => [currency, roundToPricePoint(((clientPlatform === "web" ? web : app) * coins) / 100, currency)])),
+      prices: Object.fromEntries(Object.entries(hundredCoinPrices).map(([currency, [web, app]]) => [currency, roundToPricePoint(((clientPlatform === "web" ? web : app) * coins) / 100, currency)])), countryPrices: {},
       storeProductId: clientPlatform === "web" ? "" : `com.nantty.app.coins.tier${tier}`, active: true, sortOrder: index + 1,
     })),
   );

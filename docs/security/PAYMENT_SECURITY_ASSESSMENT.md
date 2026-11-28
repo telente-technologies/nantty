@@ -1,5 +1,9 @@
 # Nantty Payment, Ledger, Escrow & Subscription Security Assessment
 
+## Coin price selection update — 2026-11-27
+
+The country-specific coin package change keeps price selection server-side. Package discovery resolves an account/profile or trusted proxy country; checkout independently resolves the charge country and records the chosen amount/currency on the payment intent and purchase. Country override keys are validated against supported country/currency pairs and cannot override a different region's currency. Admin inputs are normalized to uppercase currency/ISO country codes, and duplicate aliases are rejected before persistence so Go map iteration cannot select an arbitrary value. The existing currency and USD fallback remains available. Idempotency binds the purchase request to country and currency, preventing replay under a changed region from silently reusing a different-priced purchase. StoreKit and Play Billing remain authoritative for app-store localized prices; a server-side amount or client callback is not proof of settlement. Focused local tests do not constitute live provider or native-store verification.
+
 - **Scope**: `services/go/modules/{ledger,payments,wallet,subscriptions,escrow,creators}` (`goMoney`), `services/go/modules/orders` (`goCommerce`), `services/go/modules/ads` (`goAds`), `services/go/modules/users` (`checkmarks`), and client billing surfaces (`webapp`, `mobile`, `ads`, `seller`, `admin`).
 - **Verification Basis**: White-box Go/TS code review + frontend/gateway contract suites. **Go test execution, live PostgreSQL concurrency stress tests, and live PSP/Apple/Google sandboxes could not execute in this environment (`go`, PostgreSQL, and PSP credentials absent).**
 

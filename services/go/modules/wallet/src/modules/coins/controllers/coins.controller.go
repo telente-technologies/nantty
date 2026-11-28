@@ -39,16 +39,13 @@ func clientPlatform(request *http.Request) string {
 	return strings.ToLower(strings.TrimSpace(request.Header.Get("X-Client-Platform")))
 }
 
-func (controller CoinsController) listingCurrency(request *http.Request) string {
-	if platform := clientPlatform(request); platform == "ios" || platform == "android" {
-		return controller.Application.Container.Currency.ResolvePricingRegion(request).Currency
-	}
-	return controller.Application.Container.Currency.ResolveChargingRegion(request).Currency
-}
-
 func (controller CoinsController) ListCoinPackages(writer http.ResponseWriter, request *http.Request) {
+	pricing := controller.Application.Container.Currency.ResolvePricingRegion(request)
+	if clientPlatform(request) == "" || clientPlatform(request) == "web" {
+		pricing = controller.Application.Container.Currency.ResolveChargingRegion(request)
+	}
 	packages, err := listcoinpackages.Handler{Application: controller.Application}.Execute(request.Context(), listcoinpackages.Query{
-		ClientPlatform: clientPlatform(request), Currency: controller.listingCurrency(request),
+		ClientPlatform: clientPlatform(request), CountryCode: pricing.CountryCode, Currency: pricing.Currency,
 	})
 	if err != nil {
 		controller.fail(writer, request, err)
@@ -113,7 +110,7 @@ func (controller CoinsController) StartCoinPurchase(writer http.ResponseWriter, 
 	provider := controller.Application.Container.Payments.Container.Settings.DefaultProvider
 	started, replayed, err := startcoinpurchase.Handler{Application: controller.Application}.Execute(request.Context(), startcoinpurchase.Command{
 		UserId: principal, ClientPlatform: clientPlatform(request), PackageId: body.PackageId, Provider: provider,
-		Currency: charging.Currency, ReturnTo: body.ReturnTo, IdempotencyKey: key,
+		CountryCode: charging.CountryCode, Currency: charging.Currency, ReturnTo: body.ReturnTo, IdempotencyKey: key,
 	})
 	if err != nil {
 		controller.fail(writer, request, err)

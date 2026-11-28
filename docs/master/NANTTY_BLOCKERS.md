@@ -1,5 +1,11 @@
 # Nantty blockers and verification gaps
 
+## PR #82 regional coin pricing integration — 2026-11-27
+
+| Blocker | Impact | Evidence | Resolution gate |
+|---|---|---|---|
+| Regional coin-price merge needs current-head CI, review and frontend verification | PR #83 mobile store purchase depends on canonical package pricing; stale aliases/country selection could charge the wrong configured amount. | PR #82 Wallet suite and targeted Admin backend integration pass on the current-main integrated branch. Admin TypeScript was not run because pnpm tried to install 1,449 workspace dependencies with ~410 MiB root disk available; the install was stopped and its partial generated node_modules removed. | Push the integrated branch, require current-head CI and review, then run Admin frontend checks in an environment with supported Node >=26.13 and sufficient disk. Verify mobile against the updated API; keep localized store prices delegated to native billing APIs. |
+
 ## Creator and wallet policy gates — 2026-11-27
 
 | Blocker | Impact | Evidence | Resolution gate |

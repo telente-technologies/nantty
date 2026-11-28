@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/toastProvider";
 import { useAdminMutation } from "@/hooks/useAdminMutation.hook";
 import { useAdminQuery } from "@/hooks/useAdminQuery.hook";
 import { fetchCoinPackPriceTable, saveCoinPackPriceRow } from "@/services/pricingApi.service";
+import { coinCountryCurrencies } from "@/constants/coinCountryCurrencies.constant";
 import type { CoinPackPriceRow } from "@/types/regionalPricing.type";
 import { formatMoneyForDisplay } from "@/utils/formatting.util";
 
@@ -28,11 +29,16 @@ const platformOptions = [
 
 function CoinPackDialog({ pack, onClose, onSaved }: { readonly pack: CoinPackPriceRow; readonly onClose: () => void; readonly onSaved: (pack: CoinPackPriceRow) => void }) {
   const [prices, setPrices] = useState<Record<string, number>>({ ...pack.prices });
+  const [countryPrices, setCountryPrices] = useState<Record<string, { currency: string; amountMinor: number }>>({ ...pack.countryPrices });
   const [reason, setReason] = useState("");
   const { showToast } = useToast();
   const save = useAdminMutation((input: { readonly row: CoinPackPriceRow; readonly reason: string }) => saveCoinPackPriceRow(input.row, input.reason));
   const submit = async () => {
-    const saved = await save.run({ row: { ...pack, prices }, reason });
+    if (Object.values(countryPrices).some((price) => price.amountMinor <= 0)) {
+      showToast("Enter a positive amount for every country override before saving.");
+      return;
+    }
+    const saved = await save.run({ row: { ...pack, prices, countryPrices }, reason });
     if (!saved) return;
     showToast(`${pack.name} (${pack.clientPlatform}) saved.`);
     onSaved(saved);
@@ -69,6 +75,44 @@ function CoinPackDialog({ pack, onClose, onSaved }: { readonly pack: CoinPackPri
           />
         ))}
       </div>
+      <div>
+        <p className={styles.note}>Country overrides apply to the selected country when its currency matches. App Store and Google Play localized prices must also match the product price configured in each store; store checkout remains authoritative.</p>
+        {Object.entries(countryPrices).map(([country, value]) => (
+          <div className={styles.fieldGrid} key={country}>
+            <SelectField
+              label="Country"
+              value={country}
+              onChange={(event) => {
+                const nextCountry = event.target.value;
+                const nextCurrency = coinCountryCurrencies[nextCountry];
+                setCountryPrices((current) => {
+                  const next = { ...current };
+                  delete next[country];
+                  if (nextCurrency) next[nextCountry] = { ...value, currency: nextCurrency };
+                  return next;
+                });
+              }}
+              options={Object.entries(coinCountryCurrencies).filter(([code]) => code === country || !countryPrices[code]).map(([code, currency]) => ({ value: code, label: `${code} · ${currency}` }))}
+            />
+            <MoneyAmountField
+              label={`Country price (${value.currency})`}
+              currency={value.currency}
+              money={value.amountMinor > 0 ? { amountMinor: value.amountMinor, currency: value.currency } : null}
+              onChange={(money) => {
+                if (!money) {
+                  setCountryPrices((current) => { const next = { ...current }; delete next[country]; return next; });
+                  return;
+                }
+                setCountryPrices((current) => ({ ...current, [country]: { currency: value.currency, amountMinor: money.amountMinor } }));
+              }}
+            />
+          </div>
+        ))}
+        <Button variant="secondary" disabled={Object.keys(countryPrices).length >= Object.keys(coinCountryCurrencies).length} onClick={() => {
+          const nextCountry = Object.keys(coinCountryCurrencies).find((code) => !countryPrices[code]);
+          if (nextCountry) setCountryPrices((current) => ({ ...current, [nextCountry]: { currency: coinCountryCurrencies[nextCountry] ?? "USD", amountMinor: 0 } }));
+        }}>Add country override</Button>
+      </div>
       <TextAreaField label="Reason for the change" value={reason} onChange={(event) => setReason(event.target.value)} maxLength={300} />
       {save.errorMessage ? <InlineError message={save.errorMessage} /> : null}
     </ModalDialog>
@@ -83,8 +127,8 @@ export function CoinPackPricePanel() {
   if (table.errorMessage) return <ErrorBlock variant="section" error={table.error} message={table.errorMessage} onRetry={table.reload} />;
   const rows = (table.data?.data ?? []).filter((pack) => pack.clientPlatform === platform);
   return (
-    <Card title="Coin packs per channel and currency">
-      <p className={styles.note}>A coin pack has the same number of coins everywhere; only the price changes by currency. Web packs are cheaper and carry bonus coins because web checkout costs far less than the 15–30% store fee.</p>
+    <Card title="Coin packs by channel, currency and country">
+      <p className={styles.note}>A coin pack has a fixed coin amount for each purchase channel. Prices can vary by currency and include supported country overrides. Storefront prices still need to match App Store Connect or Play Console.</p>
       <div className={styles.toolbar}>
         <SelectField label="Channel" value={platform} onChange={(event) => setPlatform(event.target.value)} options={platformOptions} />
       </div>
@@ -98,6 +142,7 @@ export function CoinPackPricePanel() {
           columns={[
             { key: "coins", header: "Coins", render: (pack) => `${pack.coins.toLocaleString("en-US")}${pack.bonusCoins ? ` +${pack.bonusCoins}` : ""}` },
             ...currencies.map((currency) => ({ key: currency, header: currency, align: "end" as const, render: (pack: CoinPackPriceRow) => (pack.prices[currency] ? formatMoneyForDisplay({ amountMinor: pack.prices[currency], currency }) : "—") })),
+            { key: "country", header: "Country overrides", render: (pack: CoinPackPriceRow) => Object.entries(pack.countryPrices).map(([country, price]) => `${country} ${formatMoneyForDisplay(price)}`).join(" · ") || "—" },
           ]}
         />
       </div>

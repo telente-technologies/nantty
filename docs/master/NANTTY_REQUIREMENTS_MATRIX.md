@@ -1,5 +1,11 @@
 # Nantty requirements and evidence matrix
 
+## Regional coin package pricing — PR #82 integration, 2026-11-27
+
+| Requirement | Status | Current evidence / remaining boundary |
+|---|---|---|
+| Country and channel-specific coin package prices | IMPLEMENTED_UNVERIFIED | Admin country overrides and Go wallet package selection/persistence are implemented on PR #82. Currency/country aliases are canonicalized; conflicting aliases reject instead of selecting nondeterministically. Current-main integrated full Wallet tests and targeted Admin backend integration passed; current-head CI, review and Admin frontend checks remain pending. Native Apple/Google storefront prices must come from StoreKit/Play Billing and have not been live-verified. |
+
 ## Creator Program, wallet and staging continuation — 2026-11-27
 
 | Requirement | Status | Current evidence / remaining boundary |
