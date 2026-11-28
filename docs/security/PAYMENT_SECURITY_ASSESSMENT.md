@@ -4,6 +4,8 @@
 
 The country-specific coin package change keeps price selection server-side. Package discovery resolves an account/profile or trusted proxy country; checkout independently resolves the charge country and records the chosen amount/currency on the payment intent and purchase. Country override keys are validated against supported country/currency pairs and cannot override a different region's currency. Admin inputs are normalized to uppercase currency/ISO country codes, and duplicate aliases are rejected before persistence so Go map iteration cannot select an arbitrary value. The existing currency and USD fallback remains available. Idempotency binds the purchase request to country and currency, preventing replay under a changed region from silently reusing a different-priced purchase. StoreKit and Play Billing remain authoritative for app-store localized prices; a server-side amount or client callback is not proof of settlement. Focused local tests do not constitute live provider or native-store verification.
 
+Mobile coin StoreKit/Play Billing follow-up: the app now requests the store's localized product display price and submits completed purchase receipt data to the authenticated Wallet receipt endpoint. It acknowledges/finishes the consumable only after the backend reports successful authoritative verification. Client-side tests verify this ordering, but do not validate live Apple/Google credentials, storefront configuration, account-intent binding, pending-purchase restart recovery, or refund notification behavior. Do not represent the store purchase path as end-to-end verified until those are exercised and the remaining recovery/binding gaps are addressed.
+
 - **Scope**: `services/go/modules/{ledger,payments,wallet,subscriptions,escrow,creators}` (`goMoney`), `services/go/modules/orders` (`goCommerce`), `services/go/modules/ads` (`goAds`), `services/go/modules/users` (`checkmarks`), and client billing surfaces (`webapp`, `mobile`, `ads`, `seller`, `admin`).
 - **Verification Basis**: White-box Go/TS code review + frontend/gateway contract suites. **Go test execution, live PostgreSQL concurrency stress tests, and live PSP/Apple/Google sandboxes could not execute in this environment (`go`, PostgreSQL, and PSP credentials absent).**
 
@@ -38,5 +40,9 @@ Aligned with the latest approved founder policy:
 ---
 
 ## 3. Environment & Runtime Verification Limits
+
+### Native coin store account binding — PR #83, 2026-11-28
+
+Wallet issues stable opaque account tokens per authenticated user and store. The mobile client binds Apple `appAccountToken` or Google's obfuscated account identifier to that token; receipt redemption validates the provider-verified token against the current authenticated user inside the idempotent credit transaction. Unfinished native purchases are retried and only acknowledged after successful server verification. PostgreSQL and focused mobile tests exist, but this rebased PR head still requires fresh CI; no App Store/Play sandbox or device purchase was run. Provider credentials, store notification/refund handling, and live rollout remain unverified.
 
 > **Honesty Guardrail**: No payment flow is claimed "verified end-to-end against live PSPs" here. Full Go unit/integration tests (`services/go/deployables/flutterwaveFlows/tests/...`, `services/go/modules/subscriptions/...`) and PostgreSQL snapshot/race checks (`security/database/moneySnapshot*.sh`) **must** pass in CI/staging with real DB + sandbox PSP credentials before launch.

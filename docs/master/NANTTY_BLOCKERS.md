@@ -1,5 +1,13 @@
 # Nantty blockers and verification gaps
 
+## Current PR and native coin-store status — 2026-11-28
+
+- PR #82 country-specific coin pricing is squash-merged to `main` at `8ca5ecf64b9e93e2e5adbf2ce11722abd605b3c5`. Its current-head checks passed; Admin browser and deployed-runtime behavior remain unverified.
+- PR #83 was retargeted to `main` and rebased so its diff contains only native coin purchase, Google Play verification, account-token binding, and associated tests/docs. A small follow-up restores account-binding/refund integration coverage and splits the wallet harness helpers to respect file-size policy. The rewritten branch has not yet been pushed; after push, fresh CI and human review are still required. No live store purchase/device verification is available.
+- PR #81 Studio ad revenue share remains open; its latest Go/integration and CodeQL checks were pending at the most recent check. Recheck current-head CI before considering it.
+- Google/Apple production credentials and store sandbox execution remain external verification blockers. Store refunds/revocations and full/partial clawback cases are not claimed complete.
+- AWS staging was not inspected or modified in this work; repository AWS guidance requires agent-skill retrieval before any AWS task, and those tools are unavailable in this session. Existing staging blockers remain.
+
 ## PR #82 regional coin pricing integration — 2026-11-27
 
 | Blocker | Impact | Evidence | Resolution gate |

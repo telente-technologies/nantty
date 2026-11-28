@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as WebBrowser from "expo-web-browser";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { isCountryRequiredError } from "@/components/checkout/countryRequiredPicker";
 import { ApiError, generateIdempotencyKey } from "@/services/core/apiClient.service";
 import { coinsService } from "@/services/money/coins.service";
-import { finishStoreTransaction, isStoreBillingAvailable, purchaseStoreProduct, readStorePlatformName } from "@/services/money/storeBilling.service";
+import { CoinStorePurchaseCancelledError, fetchCoinStorePrices, purchaseCoinStoreProduct, restorePendingCoinStorePurchases } from "@/services/money/coinStorePurchase.service";
+import { resolveStoreBillingAvailability } from "@/services/money/nativeStoreBilling.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { CoinPackage, VerifiedCoinPurchase } from "@/types";
 
@@ -44,30 +45,54 @@ async function verifyCoinPurchaseUntilSettled(reference: string): Promise<Verifi
 export type CoinPurchaseOutcome =
   | { readonly kind: "credited"; readonly coins: number }
   | { readonly kind: "pending" }
+  | { readonly kind: "cancelled" }
   | { readonly kind: "failed" }
   | { readonly kind: "availableOnWebsiteOnly" };
 
-async function buyCoinPackageThroughStore(coinPackage: CoinPackage): Promise<CoinPurchaseOutcome> {
-  const platform = readStorePlatformName();
-  if (!platform || !coinPackage.storeProductId || !isStoreBillingAvailable()) return { kind: "availableOnWebsiteOnly" };
-  const purchase = await purchaseStoreProduct(coinPackage.storeProductId);
-  if (!purchase) return { kind: "failed" };
-  const verified = await coinsService.redeemStoreReceipt({ platform, productId: purchase.productId, receipt: purchase.receipt, transactionId: purchase.transactionId });
-  if (verified.status === "succeeded") await finishStoreTransaction(purchase.transactionId);
-  if (verified.status === "succeeded") return { kind: "credited", coins: verified.coins };
-  return verified.status === "pending" ? { kind: "pending" } : { kind: "failed" };
-}
-
 export function useBuyCoinsWithInAppBrowser() {
   const queryClient = useQueryClient();
+  const isSignedIn = useAuthStore((state) => state.status === "signedIn");
+  const accountId = useAuthStore((state) => state.user?.id ?? null);
   const pendingPurchaseIdempotencyKey = useRef<string | null>(null);
   const [lastOutcome, setLastOutcome] = useState<CoinPurchaseOutcome | null>(null);
   const [countryNeededFor, setCountryNeededFor] = useState<CoinPackage | null>(null);
+  const storeBilling = useMemo(() => resolveStoreBillingAvailability(), []);
   const coinPackages = useQuery({ queryKey: ["coin-packages"], queryFn: coinsService.fetchCoinPackages, staleTime: 10 * 60_000 });
+  const storeProducts = useQuery({
+    queryKey: ["coin-store-prices", storeBilling.kind, coinPackages.data?.map((item) => item.storeProductId).join("|")],
+    enabled: storeBilling.kind === "ready" && Boolean(coinPackages.data?.some((item) => item.purchaseChannel === "store_iap" && item.storeProductId)),
+    queryFn: () => storeBilling.kind === "ready"
+      ? fetchCoinStorePrices(storeBilling.billing, (coinPackages.data ?? []).filter((item) => item.purchaseChannel === "store_iap"))
+      : Promise.resolve({} as Readonly<Record<string, string>>),
+    staleTime: 10 * 60_000,
+  });
+  const pendingStorePurchaseRecovery = useQuery({
+    queryKey: ["coin-store-purchase-recovery", accountId, storeBilling.kind, coinPackages.data?.map((item) => item.storeProductId).join("|")],
+    enabled: storeBilling.kind === "ready" && isSignedIn && Boolean(accountId) && coinPackages.isSuccess,
+    queryFn: () => storeBilling.kind === "ready"
+      ? restorePendingCoinStorePurchases(storeBilling.billing, storeBilling.platform, (coinPackages.data ?? []).filter((item) => item.purchaseChannel === "store_iap"), coinsService)
+      : Promise.resolve(0),
+    retry: false,
+    staleTime: 30_000,
+  });
+
+  useEffect(() => {
+    if ((pendingStorePurchaseRecovery.data ?? 0) > 0) queryClient.invalidateQueries({ queryKey: COIN_BALANCE_QUERY_KEY });
+  }, [pendingStorePurchaseRecovery.data, queryClient]);
 
   const buyCoinPackage = useMutation({
     mutationFn: async (coinPackage: CoinPackage): Promise<CoinPurchaseOutcome> => {
-      if (coinPackage.purchaseChannel === "store_iap") return buyCoinPackageThroughStore(coinPackage);
+      if (coinPackage.purchaseChannel === "store_iap") {
+        if (storeBilling.kind !== "ready" || !coinPackage.storeProductId || !storeProducts.data?.[coinPackage.storeProductId]) return { kind: "availableOnWebsiteOnly" };
+        let verified: Awaited<ReturnType<typeof purchaseCoinStoreProduct>>;
+        try {
+          verified = await purchaseCoinStoreProduct(storeBilling.billing, storeBilling.platform, coinPackage.storeProductId, coinsService);
+        } catch (error) {
+          if (error instanceof CoinStorePurchaseCancelledError) return { kind: "cancelled" };
+          throw error;
+        }
+        return verified.status === "succeeded" ? { kind: "credited", coins: verified.coins } : verified.status === "pending" ? { kind: "pending" } : { kind: "failed" };
+      }
       pendingPurchaseIdempotencyKey.current ??= generateIdempotencyKey();
       const purchase = await coinsService.startCoinPurchase(coinPackage.id, pendingPurchaseIdempotencyKey.current);
       pendingPurchaseIdempotencyKey.current = null;
@@ -93,5 +118,5 @@ export function useBuyCoinsWithInAppBrowser() {
     },
   });
 
-  return { coinPackages, buyCoinPackage, lastOutcome, countryNeededFor, clearCountryNeeded: () => setCountryNeededFor(null) };
+  return { coinPackages, storeProducts, storeBillingAvailability: storeBilling.kind, buyCoinPackage, lastOutcome, countryNeededFor, clearCountryNeeded: () => setCountryNeededFor(null) };
 }

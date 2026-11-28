@@ -96,6 +96,11 @@ type StoreReceiptRequestDto struct {
 	TransactionId string `json:"transactionId,omitempty"`
 }
 
+type CoinStoreAccountTokenDto struct {
+	AppAccountToken     string `json:"appAccountToken"`
+	ObfuscatedAccountId string `json:"obfuscatedAccountId"`
+}
+
 type CoinTransferRequestDto struct {
 	RecipientUserId string `json:"recipientUserId"`
 	Coins           int64  `json:"coins"`

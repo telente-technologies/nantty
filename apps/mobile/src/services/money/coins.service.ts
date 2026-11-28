@@ -24,6 +24,7 @@ export const coinsService = {
     api.post<StartedCoinPurchase>("/api/v1/coins/purchases", { packageId }, { idempotencyKey }),
   redeemStoreReceipt: (input: { readonly platform: "ios" | "android"; readonly productId: string; readonly receipt: string; readonly transactionId: string }, idempotencyKey = generateIdempotencyKey()) =>
     api.post<VerifiedCoinPurchase>("/api/v1/coins/iap/receipts", input, { idempotencyKey }),
+  getCoinStoreAccountToken: () => api.post<{ readonly appAccountToken: string; readonly obfuscatedAccountId: string }>("/api/v1/coins/iap/account-token", {}),
   verifyCoinPurchase: (reference: string) =>
     api.post<VerifiedCoinPurchase>(`/api/v1/coins/purchases/${encodeURIComponent(reference)}/verify`),
   fetchCoinTransferQuote: (coins: number) => api.get<CoinTransferQuote>("/api/v1/coins/transfers/quote", { coins }),

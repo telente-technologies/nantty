@@ -1,5 +1,13 @@
 # Nantty implementation backlog
 
+## Current continuation — 2026-11-28
+
+- PR #82 country-specific coin prices are merged to `main` (`8ca5ecf64b9e93e2e5adbf2ce11722abd605b3c5`).
+- PR #83 native StoreKit/Play Billing purchases are rebased onto `main`; regional pricing is no longer part of its PR diff. A follow-up restores account-binding/refund integration coverage and splits wallet test helpers. Push with an expected-head lease, then wait for fresh current-head checks, review the focused diff, and verify account-token recovery behavior before merge. Do not claim live store/device verification.
+- PR #81 Creator Studio ad revenue-share explanation is still pending fresh CI on its current head; recheck before merge.
+- Continue PRs #79 and #84–#86 only after refreshing their current heads, required checks, reviews, and focused code evidence. Keep separate financial/creator scopes independently reviewable.
+- No AWS action was taken. Before resuming staging work, retrieve current AWS Agent Toolkit deployment skills, then refresh AWS/GitHub evidence and proceed only with the selected Region and protected staging gates.
+
 ## PR #82 regional coin pricing — current-main reconciliation, 2026-11-27
 
 - Integrated PR #82 with `origin/main` `e84ededcb13a70ae5e4230b6285ba6b9c9090c27` in a separate worktree. Full Wallet tests, targeted Admin backend integration tests and backend line-length/whitespace gates pass. Admin TypeScript did not run: pnpm auto-install was interrupted to avoid exhausting the nearly-full root volume; its partial generated dependencies were removed. Next: verify remote PR head unchanged, push the integration and wait for fresh checks/review. Do not merge before those gates clear.
@@ -14,6 +22,14 @@
 - Verification: full Users, Admin, Wallet and Ads Go test suites all pass against isolated PostgreSQL 17, with database-specific test URLs (exact commands in `docs/integration/NANTTY_VERIFICATION_AND_TEST_EVIDENCE.md`). Admin threshold, Wallet creator payout/suspension, and Ads concurrency targeted tests pass. Admin/Webapp/Mobile/Studio typechecks pass; Admin contracts 86/86, Webapp contracts 175/175, Studio contracts 111/111, Mobile creator tests 2/2. Backend <=300-line gate and `git diff --check` pass. Host Node 24.19 emits a workspace engine warning (required >=26.13).
 - Next: monitor PR #80 CI and request human review; do not merge until current-head required checks and review are clear. Keep PR #79 coin provenance changes separate. Do not enable ₦20,000 forfeiture or describe a two-week cadence as active until period semantics and legal approval are resolved. AWS-specific staging remains blocked because required AWS skill retrieval is unavailable in this session.
 - Staging recheck: latest main SHA is `f19d5f91d842cfbf212de10c2b51afdb462efba9`; main Code Quality, Push and Security workflows succeeded. PR #79 remains open/clean/mergeable with current-head checks green and no review decision. PR #80 is open at `aa42c7cf`, mergeable but CI is pending and no review decision is recorded. No AWS call was made because required `agent_skills` lookup/retrieval tools are unavailable; do not merge the creator-policy work into the coin PR.
+
+## 2026-11-27 — Mobile coin StoreKit / Play Billing purchase path (stacked PR)
+
+- Replaced the coin wallet's uninstalled adapter-only IAP path with the existing Expo IAP module used by Creator subscriptions. Mobile fetches actual localized prices for configured store product IDs and disables store packages whose native product/price is unavailable.
+- Completed coin purchases are sent to the existing authenticated server receipt-verification endpoint; the consumable transaction is finished only after the server reports `succeeded`. Pending or failed verification is not acknowledged, and cancellation is surfaced separately from connectivity failures. Store listener cleanup and a bounded five-minute wait are included; automatic recovery of a still-pending coin transaction after app restart remains incomplete.
+- Focused Jest tests cover localized product price retrieval, receipt/transaction submission, verification-before-finish, pending/failed verification, missing receipts, user cancellation, and native request failure cleanup. TypeScript and targeted ESLint pass. No live store or device purchase was exercised.
+- Work is on a dependent branch from PR #82 so that country/channel package configuration and mobile billing remain separately reviewable. PR #82 remains open and must merge before this follow-up can target `main`.
+- Full-suite regression discovered during verification: `apps/mobile/src/screens/spaces/__tests__/webSpaceAudio.hook.test.ts` fails because a Webapp hook is run under the mobile renderer and React reports an invalid hook call/null dispatcher; Jest also reports an open async handle after the run. This is outside the coin diff and should be fixed in its own focused change.
 
 ## 2026-11-26 — Merge mock live-gift CodeQL fix and reconcile staging evidence
 

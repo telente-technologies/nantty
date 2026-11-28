@@ -75,10 +75,11 @@ func (verifier *GooglePlayVerifier) VerifyPurchaseReceipt(ctx context.Context, r
 		return interfaces.VerifiedStorePurchase{}, interfaces.ErrStoreReceiptInvalid
 	}
 	var purchase struct {
-		PurchaseState      int    `json:"purchaseState"`
-		OrderId            string `json:"orderId"`
-		PurchaseTimeMillis string `json:"purchaseTimeMillis"`
-		PurchaseType       *int   `json:"purchaseType"`
+		PurchaseState               int    `json:"purchaseState"`
+		OrderId                     string `json:"orderId"`
+		PurchaseTimeMillis          string `json:"purchaseTimeMillis"`
+		PurchaseType                *int   `json:"purchaseType"`
+		ObfuscatedExternalAccountId string `json:"obfuscatedExternalAccountId"`
 	}
 	path := "/purchases/products/" + url.PathEscape(receipt.ProductId) + "/tokens/" + url.PathEscape(receipt.ReceiptData)
 	if err := verifier.getPublisherResource(ctx, path, &purchase); err != nil {
@@ -90,7 +91,7 @@ func (verifier *GooglePlayVerifier) VerifyPurchaseReceipt(ctx context.Context, r
 	purchasedMillis, _ := strconv.ParseInt(purchase.PurchaseTimeMillis, 10, 64)
 	return interfaces.VerifiedStorePurchase{
 		StoreTransactionId: purchase.OrderId, OriginalTransactionId: receipt.ReceiptData, ProductId: receipt.ProductId,
-		PriceMinor: price.AmountMinor, Currency: price.Currency, Environment: googleEnvironment(purchase.PurchaseType != nil && *purchase.PurchaseType == 0),
+		PriceMinor: price.AmountMinor, Currency: price.Currency, Environment: googleEnvironment(purchase.PurchaseType != nil && *purchase.PurchaseType == 0), AccountToken: purchase.ObfuscatedExternalAccountId,
 		PurchasedAt: time.UnixMilli(purchasedMillis).UTC(),
 	}, nil
 }
