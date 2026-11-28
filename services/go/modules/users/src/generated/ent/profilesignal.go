@@ -24,10 +24,34 @@ type ProfileSignal struct {
 	AccountID uuid.UUID `json:"account_id,omitempty"`
 	// RealFollowers holds the value of the "real_followers" field.
 	RealFollowers int `json:"real_followers,omitempty"`
+	// CreatorRealFollowers holds the value of the "creator_real_followers" field.
+	CreatorRealFollowers int `json:"creator_real_followers,omitempty"`
+	// CreatorOriginalPostsLast60Days holds the value of the "creator_original_posts_last_60_days" field.
+	CreatorOriginalPostsLast60Days int `json:"creator_original_posts_last_60_days,omitempty"`
+	// VerifiedFollowers holds the value of the "verified_followers" field.
+	VerifiedFollowers int `json:"verified_followers,omitempty"`
+	// QualifyingImpressionsLast30Days holds the value of the "qualifying_impressions_last_30_days" field.
+	QualifyingImpressionsLast30Days int `json:"qualifying_impressions_last_30_days,omitempty"`
+	// CreatorMetricsSource holds the value of the "creator_metrics_source" field.
+	CreatorMetricsSource string `json:"creator_metrics_source,omitempty"`
+	// CreatorMetricsAsOf holds the value of the "creator_metrics_as_of" field.
+	CreatorMetricsAsOf *time.Time `json:"creator_metrics_as_of,omitempty"`
+	// CreatorMetricsSnapshotID holds the value of the "creator_metrics_snapshot_id" field.
+	CreatorMetricsSnapshotID *uuid.UUID `json:"creator_metrics_snapshot_id,omitempty"`
 	// OriginalPostsLast60Days holds the value of the "original_posts_last_60_days" field.
 	OriginalPostsLast60Days int `json:"original_posts_last_60_days,omitempty"`
 	// DaysSinceLastViolation holds the value of the "days_since_last_violation" field.
 	DaysSinceLastViolation int `json:"days_since_last_violation,omitempty"`
+	// CreatorDaysSinceLastViolation holds the value of the "creator_days_since_last_violation" field.
+	CreatorDaysSinceLastViolation int `json:"creator_days_since_last_violation,omitempty"`
+	// CreatorStandingAvailable holds the value of the "creator_standing_available" field.
+	CreatorStandingAvailable bool `json:"creator_standing_available,omitempty"`
+	// CreatorStandingSource holds the value of the "creator_standing_source" field.
+	CreatorStandingSource string `json:"creator_standing_source,omitempty"`
+	// CreatorStandingAsOf holds the value of the "creator_standing_as_of" field.
+	CreatorStandingAsOf *time.Time `json:"creator_standing_as_of,omitempty"`
+	// CreatorStandingSnapshotID holds the value of the "creator_standing_snapshot_id" field.
+	CreatorStandingSnapshotID *uuid.UUID `json:"creator_standing_snapshot_id,omitempty"`
 	// FraudScore holds the value of the "fraud_score" field.
 	FraudScore int `json:"fraud_score,omitempty"`
 	// RiskScore holds the value of the "risk_score" field.
@@ -64,13 +88,15 @@ func (*ProfileSignal) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case profilesignal.FieldIDVerified, profilesignal.FieldBorderlineContent, profilesignal.FieldHasActiveStoreOrBrandPage, profilesignal.FieldSellerPlanTrialing:
+		case profilesignal.FieldCreatorMetricsSnapshotID, profilesignal.FieldCreatorStandingSnapshotID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case profilesignal.FieldCreatorStandingAvailable, profilesignal.FieldIDVerified, profilesignal.FieldBorderlineContent, profilesignal.FieldHasActiveStoreOrBrandPage, profilesignal.FieldSellerPlanTrialing:
 			values[i] = new(sql.NullBool)
-		case profilesignal.FieldID, profilesignal.FieldRealFollowers, profilesignal.FieldOriginalPostsLast60Days, profilesignal.FieldDaysSinceLastViolation, profilesignal.FieldFraudScore, profilesignal.FieldRiskScore, profilesignal.FieldCompletedOrders, profilesignal.FieldSuccessRatePercent:
+		case profilesignal.FieldID, profilesignal.FieldRealFollowers, profilesignal.FieldCreatorRealFollowers, profilesignal.FieldCreatorOriginalPostsLast60Days, profilesignal.FieldVerifiedFollowers, profilesignal.FieldQualifyingImpressionsLast30Days, profilesignal.FieldOriginalPostsLast60Days, profilesignal.FieldDaysSinceLastViolation, profilesignal.FieldCreatorDaysSinceLastViolation, profilesignal.FieldFraudScore, profilesignal.FieldRiskScore, profilesignal.FieldCompletedOrders, profilesignal.FieldSuccessRatePercent:
 			values[i] = new(sql.NullInt64)
-		case profilesignal.FieldSellerPlan, profilesignal.FieldSource:
+		case profilesignal.FieldCreatorMetricsSource, profilesignal.FieldCreatorStandingSource, profilesignal.FieldSellerPlan, profilesignal.FieldSource:
 			values[i] = new(sql.NullString)
-		case profilesignal.FieldCheckmarkSuggestedAt, profilesignal.FieldPremiumUntil, profilesignal.FieldSellerPlanUntil, profilesignal.FieldUpdatedAt:
+		case profilesignal.FieldCreatorMetricsAsOf, profilesignal.FieldCreatorStandingAsOf, profilesignal.FieldCheckmarkSuggestedAt, profilesignal.FieldPremiumUntil, profilesignal.FieldSellerPlanUntil, profilesignal.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case profilesignal.FieldProfileID, profilesignal.FieldAccountID:
 			values[i] = new(uuid.UUID)
@@ -113,6 +139,50 @@ func (_m *ProfileSignal) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.RealFollowers = int(value.Int64)
 			}
+		case profilesignal.FieldCreatorRealFollowers:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field creator_real_followers", values[i])
+			} else if value.Valid {
+				_m.CreatorRealFollowers = int(value.Int64)
+			}
+		case profilesignal.FieldCreatorOriginalPostsLast60Days:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field creator_original_posts_last_60_days", values[i])
+			} else if value.Valid {
+				_m.CreatorOriginalPostsLast60Days = int(value.Int64)
+			}
+		case profilesignal.FieldVerifiedFollowers:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field verified_followers", values[i])
+			} else if value.Valid {
+				_m.VerifiedFollowers = int(value.Int64)
+			}
+		case profilesignal.FieldQualifyingImpressionsLast30Days:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field qualifying_impressions_last_30_days", values[i])
+			} else if value.Valid {
+				_m.QualifyingImpressionsLast30Days = int(value.Int64)
+			}
+		case profilesignal.FieldCreatorMetricsSource:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field creator_metrics_source", values[i])
+			} else if value.Valid {
+				_m.CreatorMetricsSource = value.String
+			}
+		case profilesignal.FieldCreatorMetricsAsOf:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field creator_metrics_as_of", values[i])
+			} else if value.Valid {
+				_m.CreatorMetricsAsOf = new(time.Time)
+				*_m.CreatorMetricsAsOf = value.Time
+			}
+		case profilesignal.FieldCreatorMetricsSnapshotID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field creator_metrics_snapshot_id", values[i])
+			} else if value.Valid {
+				_m.CreatorMetricsSnapshotID = new(uuid.UUID)
+				*_m.CreatorMetricsSnapshotID = *value.S.(*uuid.UUID)
+			}
 		case profilesignal.FieldOriginalPostsLast60Days:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field original_posts_last_60_days", values[i])
@@ -124,6 +194,38 @@ func (_m *ProfileSignal) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field days_since_last_violation", values[i])
 			} else if value.Valid {
 				_m.DaysSinceLastViolation = int(value.Int64)
+			}
+		case profilesignal.FieldCreatorDaysSinceLastViolation:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field creator_days_since_last_violation", values[i])
+			} else if value.Valid {
+				_m.CreatorDaysSinceLastViolation = int(value.Int64)
+			}
+		case profilesignal.FieldCreatorStandingAvailable:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field creator_standing_available", values[i])
+			} else if value.Valid {
+				_m.CreatorStandingAvailable = value.Bool
+			}
+		case profilesignal.FieldCreatorStandingSource:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field creator_standing_source", values[i])
+			} else if value.Valid {
+				_m.CreatorStandingSource = value.String
+			}
+		case profilesignal.FieldCreatorStandingAsOf:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field creator_standing_as_of", values[i])
+			} else if value.Valid {
+				_m.CreatorStandingAsOf = new(time.Time)
+				*_m.CreatorStandingAsOf = value.Time
+			}
+		case profilesignal.FieldCreatorStandingSnapshotID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field creator_standing_snapshot_id", values[i])
+			} else if value.Valid {
+				_m.CreatorStandingSnapshotID = new(uuid.UUID)
+				*_m.CreatorStandingSnapshotID = *value.S.(*uuid.UUID)
 			}
 		case profilesignal.FieldFraudScore:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -257,11 +359,55 @@ func (_m *ProfileSignal) String() string {
 	builder.WriteString("real_followers=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RealFollowers))
 	builder.WriteString(", ")
+	builder.WriteString("creator_real_followers=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatorRealFollowers))
+	builder.WriteString(", ")
+	builder.WriteString("creator_original_posts_last_60_days=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatorOriginalPostsLast60Days))
+	builder.WriteString(", ")
+	builder.WriteString("verified_followers=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VerifiedFollowers))
+	builder.WriteString(", ")
+	builder.WriteString("qualifying_impressions_last_30_days=")
+	builder.WriteString(fmt.Sprintf("%v", _m.QualifyingImpressionsLast30Days))
+	builder.WriteString(", ")
+	builder.WriteString("creator_metrics_source=")
+	builder.WriteString(_m.CreatorMetricsSource)
+	builder.WriteString(", ")
+	if v := _m.CreatorMetricsAsOf; v != nil {
+		builder.WriteString("creator_metrics_as_of=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.CreatorMetricsSnapshotID; v != nil {
+		builder.WriteString("creator_metrics_snapshot_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("original_posts_last_60_days=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OriginalPostsLast60Days))
 	builder.WriteString(", ")
 	builder.WriteString("days_since_last_violation=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DaysSinceLastViolation))
+	builder.WriteString(", ")
+	builder.WriteString("creator_days_since_last_violation=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatorDaysSinceLastViolation))
+	builder.WriteString(", ")
+	builder.WriteString("creator_standing_available=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatorStandingAvailable))
+	builder.WriteString(", ")
+	builder.WriteString("creator_standing_source=")
+	builder.WriteString(_m.CreatorStandingSource)
+	builder.WriteString(", ")
+	if v := _m.CreatorStandingAsOf; v != nil {
+		builder.WriteString("creator_standing_as_of=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.CreatorStandingSnapshotID; v != nil {
+		builder.WriteString("creator_standing_snapshot_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("fraud_score=")
 	builder.WriteString(fmt.Sprintf("%v", _m.FraudScore))

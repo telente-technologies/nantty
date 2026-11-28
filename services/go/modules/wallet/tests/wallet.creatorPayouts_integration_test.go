@@ -32,6 +32,7 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 	harness := startWalletHarness(t, true)
 	creator := uuid.NewString()
 	token := harness.Tokens.UserAccessToken(creator)
+	harness.approveCreator(creator)
 	harness.creditEarnedCoins(creator, 180)
 	if refused := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-key-0", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}}); refused.Status != http.StatusForbidden || refused.Body["code"] != "VERIFICATION_REQUIRED" {
 		t.Fatalf("an unverified creator converted coins to cash: %d %s", refused.Status, refused.Raw)
@@ -40,6 +41,29 @@ func TestCreatorEarningsBecomeWithdrawableAfterVerificationAndArePaidByTransfer(
 		t.Fatal("an unverified creator's earned coins must stay as coins")
 	}
 	harness.OnboardConnectedAccount(creator, false)
+	nonCreator := uuid.NewString()
+	harness.OnboardConnectedAccount(nonCreator, false)
+	harness.creditEarnedCoins(nonCreator, 180)
+	denied := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", harness.Tokens.UserAccessToken(nonCreator), "convert-noncreator", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
+	if denied.Status != http.StatusForbidden || denied.Body["code"] != "CREATOR_PROGRAM_REQUIRED" || harness.balance(ledgermodels.CreatorEarnedCoinsAccount(nonCreator)) != 180 {
+		t.Fatalf("a payout-verified seller without Creator Program approval must not convert earned coins: %d %s", denied.Status, denied.Raw)
+	}
+	suspendedCreator := uuid.NewString()
+	harness.setCreatorStatus(suspendedCreator, "approved")
+	harness.suspendCreator(suspendedCreator)
+	harness.OnboardConnectedAccount(suspendedCreator, false)
+	harness.creditEarnedCoins(suspendedCreator, 180)
+	suspended := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", harness.Tokens.UserAccessToken(suspendedCreator), "convert-suspended", map[string]any{"coins": 180, "currency": "NGN"}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
+	if suspended.Status != http.StatusForbidden || suspended.Body["code"] != "CREATOR_PROGRAM_REQUIRED" || harness.balance(ledgermodels.CreatorEarnedCoinsAccount(suspendedCreator)) != 180 {
+		t.Fatalf("a payout-verified suspended creator must not convert earned coins: %d %s", suspended.Status, suspended.Raw)
+	}
+	harness.post(ledgermodels.JournalEntryRequest{Reference: "seed-noncreator-payable", Kind: "test.noncreatorPayable", Lines: []ledgermodels.JournalLineRequest{
+		{Account: ledgermodels.CreatorCoinPayoutExpenseAccount("NGN"), Direction: ledgermodels.Debit, AmountMinor: 180_000},
+		{Account: ledgermodels.CreatorEarningsPayableAccount(nonCreator, "NGN"), Direction: ledgermodels.Credit, AmountMinor: 180_000},
+	}})
+	if report := harness.wallet.Payouts.Creators.TransferCreatorEarningsToConnectedAccounts(t.Context(), "seller-without-creator-program"); report.Transferred != 0 || harness.balance(ledgermodels.CreatorEarningsPayableAccount(nonCreator, "NGN")) != 180_000 {
+		t.Fatalf("scheduled earnings sweep must keep non-creator payables untouched: %+v", report)
+	}
 	staleQuote := harness.Call(http.MethodPost, "/api/v1/creators/earnings/convert", token, "convert-quote-stale", map[string]any{"coins": 180, "currency": "NGN", "expectedCashMinor": 179_000}, http.Header{"CloudFront-Viewer-Country": {"NG"}})
 	if staleQuote.Status != http.StatusConflict || staleQuote.Body["code"] != "CONVERSION_RATE_CHANGED" {
 		t.Fatalf("a mismatched expectedCashMinor quote must fail closed: %d %s", staleQuote.Status, staleQuote.Raw)

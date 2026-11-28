@@ -1,4 +1,4 @@
-h1:tHaqLUKYRtQG0ERjMZwCUG3PBCVjE/yXc4jYJxPgaKU=
+h1:bLbV69tOsyDsGnZr22JWGoA/PDXpq6VbOlowg/hGZ7I=
 20261003112651_create_creators_tables.up.sql h1:fSXY6TTsBu3wUlYGl2nLv+TfPjF+AuhReRGg7zmEiNs=
 20261003112751_grant_read_access_to_other_services.up.sql h1:1ViofQSBgvBKAhK3i2nWx07R139auDd4j4QXnzvvl00=
 20261005165637_creator_earnings_tips_affiliates.up.sql h1:BfFHQuor5V8XcwbNc68U6pPcJGJn/7HOe7PrWXfGP9c=
@@ -13,3 +13,4 @@ h1:tHaqLUKYRtQG0ERjMZwCUG3PBCVjE/yXc4jYJxPgaKU=
 20261105140000_space_coin_donations.up.sql h1:dyBWSwXIaOLLTcLZvXKX9Qesbue+MRbDxKFfK4bt0ys=
 20261105170000_live_battle_coin_contributions.up.sql h1:6vJv8+buMhi1caxhjJmquC/8xUrDw1IjTCfUWLMTrC8=
 20261106120000_tip_transaction_notes.up.sql h1:3pBX79ltZsRuhKL/qDNDG+KJMT/2AnTf7pt/eDFbJ8w=
+20261127140000_creator_member_suspension_read.up.sql h1:akQIbicB4v+MIu5wLv3LA6861Q87UcWExZ+fuzROPWg=

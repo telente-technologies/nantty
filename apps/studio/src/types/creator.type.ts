@@ -85,7 +85,11 @@ export interface EligibilityRequirement {
   readonly label: string;
   readonly currentValue: number;
   readonly requiredValue: number;
+  readonly remaining: number;
   readonly met: boolean;
+  readonly available: boolean;
+  readonly source: string;
+  readonly dataAsOf?: ISODate;
 }
 
 export interface CreatorEligibility {
@@ -93,6 +97,10 @@ export interface CreatorEligibility {
   readonly decision: string;
   readonly decisionNote: string;
   readonly requirements: readonly EligibilityRequirement[];
+  readonly metricsAvailable: boolean;
+  readonly standingAvailable: boolean;
+  readonly metricsSource?: string;
+  readonly metricsAsOf?: ISODate;
 }
 
 export interface CreatorApplication {

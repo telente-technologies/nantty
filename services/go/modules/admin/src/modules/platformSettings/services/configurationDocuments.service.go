@@ -81,7 +81,7 @@ func init() {
 	for key, definition := range map[string]SettingDefinition{
 		PlansKey:              {Validate: validatePlansConfiguration, WritePermission: "config:plans", DefaultValue: defaultPlansConfiguration()},
 		RevenueRulesKey:       {Validate: validateRevenueRules, WritePermission: "config:revenue", DefaultValue: defaultRevenueRules()},
-		CreatorEligibilityKey: {Validate: validateCreatorEligibility, WritePermission: "config:rules", Projection: &SettingProjection{SourceKey: CreatorThresholdsKey, Project: projectCreatorEligibility, Merge: mergeCreatorEligibility}},
+		CreatorEligibilityKey: {Validate: validateCreatorEligibility, DefaultValue: defaultCreatorEligibility(), WritePermission: "config:rules", Projection: &SettingProjection{SourceKey: CreatorThresholdsKey, Project: projectCreatorEligibility, Merge: mergeCreatorEligibility}},
 		UsernameRulesKey:      {Validate: validateUsernameRules, WritePermission: "config:rules", DefaultValue: defaultUsernameRules()},
 	} {
 		PlatformSettingDefinitions[key] = definition
