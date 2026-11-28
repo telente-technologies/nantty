@@ -1,5 +1,14 @@
 # Nantty requirements and evidence matrix
 
+## Current coin/store pricing and native billing state — 2026-11-28
+
+| Requirement | Status | Current evidence / remaining boundary |
+|---|---|---|
+| Country-specific web coin package pricing | VERIFIED (PR #82 merged) | PR #82 was squash-merged to `main` as `8ca5ecf64b9e93e2e5adbf2ce11722abd605b3c5`; current-head Go, integration, Admin, security and Terraform checks passed. Local Wallet/Admin integration and package checks are recorded below. Browser QA and deployed behavior remain unverified. |
+| Native coin store purchase with Nantty account binding | IMPLEMENTED_UNVERIFIED | PR #83 has been rebased onto the merged `main` and narrowed to the mobile/store-verification/account-token changes. The local branch also restores the split Wallet account-binding/refund integration test. Current-head CI must rerun after push. It obtains localized prices through native billing and credits only after server verification/account-token matching. No live App Store/Play sandbox purchase or device QA is claimed. |
+| Pending coin purchase recovery | PARTIAL | Recovery can retry unfinished native transactions against the existing server verifier and only acknowledges successful transactions. Store-specific restart recovery, live provider credentials, and end-to-end device behavior remain unverified. |
+| Native-store refund/revocation and purchased-coin clawback | PARTIAL / IMPLEMENTED_UNVERIFIED | Existing server refund/reversal paths remain separate from this PR; Apple/Google notification/API credentials and live verified full/partial/out-of-order store refund tests are not evidenced. Do not claim store refund completion. |
+
 ## Regional coin package pricing — PR #82 integration, 2026-11-27
 
 | Requirement | Status | Current evidence / remaining boundary |

@@ -41,4 +41,8 @@ Aligned with the latest approved founder policy:
 
 ## 3. Environment & Runtime Verification Limits
 
+### Native coin store account binding — PR #83, 2026-11-28
+
+Wallet issues stable opaque account tokens per authenticated user and store. The mobile client binds Apple `appAccountToken` or Google's obfuscated account identifier to that token; receipt redemption validates the provider-verified token against the current authenticated user inside the idempotent credit transaction. Unfinished native purchases are retried and only acknowledged after successful server verification. PostgreSQL and focused mobile tests exist, but this rebased PR head still requires fresh CI; no App Store/Play sandbox or device purchase was run. Provider credentials, store notification/refund handling, and live rollout remain unverified.
+
 > **Honesty Guardrail**: No payment flow is claimed "verified end-to-end against live PSPs" here. Full Go unit/integration tests (`services/go/deployables/flutterwaveFlows/tests/...`, `services/go/modules/subscriptions/...`) and PostgreSQL snapshot/race checks (`security/database/moneySnapshot*.sh`) **must** pass in CI/staging with real DB + sandbox PSP credentials before launch.

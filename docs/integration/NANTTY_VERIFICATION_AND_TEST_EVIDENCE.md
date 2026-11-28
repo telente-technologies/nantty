@@ -1,5 +1,13 @@
 # Nantty Verification & Test Evidence
 
+## Current PR #82/#83 verification — 2026-11-28
+
+- PR #82 country-specific coin package pricing merged to `main` as `8ca5ecf64b9e93e2e5adbf2ce11722abd605b3c5`. GitHub reported current-head Go, integration, Admin, CodeQL/security and Terraform checks passing. Its previous local full Wallet/Admin test evidence is retained in the historical section below; no browser or deployed behavior is claimed.
+- PR #83 was rebased onto that merged `main`, reducing its change list to native coin purchase/account binding and related tests/docs. Rebase preserved the account-token, receipt/reversal, store-fee, and creator harness coverage; a follow-up commit restored the separate integration test files and split helpers to satisfy the 300-line rule. The rewritten branch has not yet been published or checked by GitHub CI.
+- Current-tree focused Wallet integration: `MONEY_TEST_DATABASE_URL='postgres://nantty:nantty@127.0.0.1:15433/nantty_test?sslmode=disable' go test ./tests -run 'Test(InAppPurchaseBooksTheStoreFeeAndARefundClawsBackOrFlagsTheShortfall|CountrySpecificCoinPriceIsShownAndRecheckedAtCheckout)' -count=1 -p 1` — PASS (2 tests, isolated local PostgreSQL test schema).
+- Current-tree focused Mobile suite: `corepack pnpm exec jest src/services/__tests__/coinStorePurchase.service.test.ts --runInBand` from `apps/mobile` — PASS (10 tests). `corepack pnpm exec tsc --noEmit` from `apps/mobile` — PASS. Changed-file ESLint with `-c ../../packages/eslintConfig/react.config.mjs` — PASS. Invoking ESLint without the workspace config failed because ESLint 10 does not auto-load the repository's config; the explicit repository config command passed.
+- Not run: full Wallet/Mobile suites after rebase, native Android/iOS builds, App Store/Play sandbox transaction, real receipt/refund provider verification, device/browser QA, or AWS deployment. GitHub CI must validate the published current head. Store credentials and live test transactions remain unavailable.
+
 ## PR #82 regional coin pricing integration — 2026-11-27
 
 - Reconciled country-specific package pricing PR #82 with current `origin/main` `e84ededcb13a70ae5e4230b6285ba6b9c9090c27`; documentation conflicts were resolved in favor of the current master evidence and this dated note preserves PR #82's implementation/test claims. Full Wallet tests, targeted Admin backend integration and repository backend file-length checks passed on this integrated tree.

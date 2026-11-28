@@ -1,5 +1,13 @@
 # Nantty implementation backlog
 
+## Current continuation — 2026-11-28
+
+- PR #82 country-specific coin prices are merged to `main` (`8ca5ecf64b9e93e2e5adbf2ce11722abd605b3c5`).
+- PR #83 native StoreKit/Play Billing purchases are rebased onto `main`; regional pricing is no longer part of its PR diff. A follow-up restores account-binding/refund integration coverage and splits wallet test helpers. Push with an expected-head lease, then wait for fresh current-head checks, review the focused diff, and verify account-token recovery behavior before merge. Do not claim live store/device verification.
+- PR #81 Creator Studio ad revenue-share explanation is still pending fresh CI on its current head; recheck before merge.
+- Continue PRs #79 and #84–#86 only after refreshing their current heads, required checks, reviews, and focused code evidence. Keep separate financial/creator scopes independently reviewable.
+- No AWS action was taken. Before resuming staging work, retrieve current AWS Agent Toolkit deployment skills, then refresh AWS/GitHub evidence and proceed only with the selected Region and protected staging gates.
+
 ## PR #82 regional coin pricing — current-main reconciliation, 2026-11-27
 
 - Integrated PR #82 with `origin/main` `e84ededcb13a70ae5e4230b6285ba6b9c9090c27` in a separate worktree. Full Wallet tests, targeted Admin backend integration tests and backend line-length/whitespace gates pass. Admin TypeScript did not run: pnpm auto-install was interrupted to avoid exhausting the nearly-full root volume; its partial generated dependencies were removed. Next: verify remote PR head unchanged, push the integration and wait for fresh checks/review. Do not merge before those gates clear.
